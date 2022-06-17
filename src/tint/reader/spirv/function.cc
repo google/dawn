@@ -1253,12 +1253,12 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
             auto* sample_mask_array_type = store_type->UnwrapRef()->UnwrapAlias()->As<Array>();
             TINT_ASSERT(Reader, sample_mask_array_type);
             ok = EmitPipelineInput(var_name, store_type, &param_decos, {0},
-                                   sample_mask_array_type->type, forced_param_type, &(decl.params),
+                                   sample_mask_array_type->type, forced_param_type, &decl.params,
                                    &stmts);
         } else {
             // The normal path.
             ok = EmitPipelineInput(var_name, store_type, &param_decos, {}, store_type,
-                                   forced_param_type, &(decl.params), &stmts);
+                                   forced_param_type, &decl.params, &stmts);
         }
         if (!ok) {
             return false;
@@ -1404,8 +1404,7 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
         auto* type = parser_impl_.ConvertType(param->type_id());
         if (type != nullptr) {
             auto* ast_param =
-                parser_impl_.MakeVariable(param->result_id(), ast::StorageClass::kNone, type, true,
-                                          false, nullptr, ast::AttributeList{});
+                parser_impl_.MakeParameter(param->result_id(), type, ast::AttributeList{});
             // Parameters are treated as const declarations.
             ast_params.emplace_back(ast_param);
             // The value is accessible by name.
@@ -2468,9 +2467,8 @@ bool FunctionEmitter::EmitFunctionVariables() {
                 return false;
             }
         }
-        auto* var =
-            parser_impl_.MakeVariable(inst.result_id(), ast::StorageClass::kNone, var_store_type,
-                                      false, false, constructor, ast::AttributeList{});
+        auto* var = parser_impl_.MakeVar(inst.result_id(), ast::StorageClass::kNone, var_store_type,
+                                         constructor, ast::AttributeList{});
         auto* var_decl_stmt = create<ast::VariableDeclStatement>(Source{}, var);
         AddStatement(var_decl_stmt);
         auto* var_type = ty_.Reference(var_store_type, ast::StorageClass::kNone);
@@ -3328,8 +3326,8 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
         TINT_ASSERT(Reader, def_inst);
         auto* storage_type = RemapStorageClass(parser_impl_.ConvertType(def_inst->type_id()), id);
         AddStatement(create<ast::VariableDeclStatement>(
-            Source{}, parser_impl_.MakeVariable(id, ast::StorageClass::kNone, storage_type, false,
-                                                false, nullptr, ast::AttributeList{})));
+            Source{}, parser_impl_.MakeVar(id, ast::StorageClass::kNone, storage_type, nullptr,
+                                           ast::AttributeList{})));
         auto* type = ty_.Reference(storage_type, ast::StorageClass::kNone);
         identifier_types_.emplace(id, type);
     }
@@ -3396,13 +3394,11 @@ bool FunctionEmitter::EmitConstDefinition(const spvtools::opt::Instruction& inst
     }
 
     expr = AddressOfIfNeeded(expr, &inst);
-    auto* ast_const =
-        parser_impl_.MakeVariable(inst.result_id(), ast::StorageClass::kNone, expr.type, true,
-                                  false, expr.expr, ast::AttributeList{});
-    if (!ast_const) {
+    auto* let = parser_impl_.MakeLet(inst.result_id(), expr.type, expr.expr);
+    if (!let) {
         return false;
     }
-    AddStatement(create<ast::VariableDeclStatement>(Source{}, ast_const));
+    AddStatement(create<ast::VariableDeclStatement>(Source{}, let));
     identifier_types_.emplace(inst.result_id(), expr.type);
     return success();
 }

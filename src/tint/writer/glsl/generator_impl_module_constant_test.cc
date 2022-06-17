@@ -40,7 +40,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
+    ASSERT_TRUE(gen.EmitOverride(var)) << gen.error();
     EXPECT_EQ(gen.result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
 #define WGSL_SPEC_CONSTANT_23 3.0f
 #endif
@@ -56,7 +56,7 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoConstructor) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
+    ASSERT_TRUE(gen.EmitOverride(var)) << gen.error();
     EXPECT_EQ(gen.result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
 #error spec constant required for constant id 23
 #endif
@@ -73,8 +73,8 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_SpecConstant_NoId) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.EmitProgramConstVariable(a)) << gen.error();
-    ASSERT_TRUE(gen.EmitProgramConstVariable(b)) << gen.error();
+    ASSERT_TRUE(gen.EmitOverride(a)) << gen.error();
+    ASSERT_TRUE(gen.EmitOverride(b)) << gen.error();
     EXPECT_EQ(gen.result(), R"(#ifndef WGSL_SPEC_CONSTANT_0
 #define WGSL_SPEC_CONSTANT_0 3.0f
 #endif

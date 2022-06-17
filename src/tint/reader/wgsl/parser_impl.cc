@@ -213,7 +213,11 @@ ParserImpl::FunctionHeader::FunctionHeader(Source src,
                                            ast::ParameterList p,
                                            const ast::Type* ret_ty,
                                            ast::AttributeList ret_attrs)
-    : source(src), name(n), params(p), return_type(ret_ty), return_type_attributes(ret_attrs) {}
+    : source(src),
+      name(n),
+      params(std::move(p)),
+      return_type(ret_ty),
+      return_type_attributes(std::move(ret_attrs)) {}
 
 ParserImpl::FunctionHeader::~FunctionHeader() = default;
 
@@ -542,15 +546,13 @@ Maybe<const ast::Variable*> ParserImpl::global_variable_decl(ast::AttributeList&
         constructor = expr.value;
     }
 
-    return create<ast::Variable>(decl->source,                             // source
-                                 builder_.Symbols().Register(decl->name),  // symbol
-                                 decl->storage_class,                      // storage class
-                                 decl->access,                             // access control
-                                 decl->type,                               // type
-                                 false,                                    // is_const
-                                 false,                                    // is_overridable
-                                 constructor,                              // constructor
-                                 std::move(attrs));                        // attributes
+    return create<ast::Var>(decl->source,                             // source
+                            builder_.Symbols().Register(decl->name),  // symbol
+                            decl->type,                               // type
+                            decl->storage_class,                      // storage class
+                            decl->access,                             // access control
+                            constructor,                              // constructor
+                            std::move(attrs));                        // attributes
 }
 
 // global_constant_decl :
@@ -564,7 +566,7 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(ast::AttributeList&
     if (match(Token::Type::kLet)) {
         use = "'let' declaration";
     } else if (match(Token::Type::kOverride)) {
-        use = "override declaration";
+        use = "'override' declaration";
         is_overridable = true;
     } else {
         return Failure::kNoMatch;
@@ -594,15 +596,18 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(ast::AttributeList&
         initializer = std::move(init.value);
     }
 
-    return create<ast::Variable>(decl->source,                             // source
-                                 builder_.Symbols().Register(decl->name),  // symbol
-                                 ast::StorageClass::kNone,                 // storage class
-                                 ast::Access::kUndefined,                  // access control
-                                 decl->type,                               // type
-                                 true,                                     // is_const
-                                 is_overridable,                           // is_overridable
-                                 initializer,                              // constructor
-                                 std::move(attrs));                        // attributes
+    if (is_overridable) {
+        return create<ast::Override>(decl->source,                             // source
+                                     builder_.Symbols().Register(decl->name),  // symbol
+                                     decl->type,                               // type
+                                     initializer,                              // constructor
+                                     std::move(attrs));                        // attributes
+    }
+    return create<ast::Let>(decl->source,                             // source
+                            builder_.Symbols().Register(decl->name),  // symbol
+                            decl->type,                               // type
+                            initializer,                              // constructor
+                            std::move(attrs));                        // attributes
 }
 
 // variable_decl
@@ -1478,7 +1483,7 @@ Expect<ast::ParameterList> ParserImpl::expect_param_list() {
 
 // param
 //   : attribute_list* variable_ident_decl
-Expect<ast::Variable*> ParserImpl::expect_param() {
+Expect<ast::Parameter*> ParserImpl::expect_param() {
     auto attrs = attribute_list();
 
     auto decl = expect_variable_ident_decl("parameter");
@@ -1486,21 +1491,10 @@ Expect<ast::Variable*> ParserImpl::expect_param() {
         return Failure::kErrored;
     }
 
-    auto* var = create<ast::Variable>(decl->source,                             // source
-                                      builder_.Symbols().Register(decl->name),  // symbol
-                                      ast::StorageClass::kNone,                 // storage class
-                                      ast::Access::kUndefined,                  // access control
-                                      decl->type,                               // type
-                                      true,                                     // is_const
-                                      false,                                    // is_overridable
-                                      nullptr,                                  // constructor
-                                      std::move(attrs.value));                  // attributes
-    // Formal parameters are treated like a const declaration where the
-    // initializer value is provided by the call's argument.  The key point is
-    // that it's not updatable after initially set.  This is unlike C or GLSL
-    // which treat formal parameters like local variables that can be updated.
-
-    return var;
+    return create<ast::Parameter>(decl->source,                             // source
+                                  builder_.Symbols().Register(decl->name),  // symbol
+                                  decl->type,                               // type
+                                  std::move(attrs.value));                  // attributes
 }
 
 // pipeline_stage
@@ -1794,17 +1788,13 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
             return add_error(peek(), "missing constructor for 'let' declaration");
         }
 
-        auto* var = create<ast::Variable>(decl->source,                             // source
-                                          builder_.Symbols().Register(decl->name),  // symbol
-                                          ast::StorageClass::kNone,                 // storage class
-                                          ast::Access::kUndefined,  // access control
-                                          decl->type,               // type
-                                          true,                     // is_const
-                                          false,                    // is_overridable
-                                          constructor.value,        // constructor
-                                          ast::AttributeList{});    // attributes
+        auto* let = create<ast::Let>(decl->source,                             // source
+                                     builder_.Symbols().Register(decl->name),  // symbol
+                                     decl->type,                               // type
+                                     constructor.value,                        // constructor
+                                     ast::AttributeList{});                    // attributes
 
-        return create<ast::VariableDeclStatement>(decl->source, var);
+        return create<ast::VariableDeclStatement>(decl->source, let);
     }
 
     auto decl = variable_decl(/*allow_inferred = */ true);
@@ -1828,15 +1818,13 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
         constructor = constructor_expr.value;
     }
 
-    auto* var = create<ast::Variable>(decl->source,                             // source
-                                      builder_.Symbols().Register(decl->name),  // symbol
-                                      decl->storage_class,                      // storage class
-                                      decl->access,                             // access control
-                                      decl->type,                               // type
-                                      false,                                    // is_const
-                                      false,                                    // is_overridable
-                                      constructor,                              // constructor
-                                      ast::AttributeList{});                    // attributes
+    auto* var = create<ast::Var>(decl->source,                             // source
+                                 builder_.Symbols().Register(decl->name),  // symbol
+                                 decl->type,                               // type
+                                 decl->storage_class,                      // storage class
+                                 decl->access,                             // access control
+                                 constructor,                              // constructor
+                                 ast::AttributeList{});                    // attributes
 
     return create<ast::VariableDeclStatement>(var->source, var);
 }

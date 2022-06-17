@@ -86,8 +86,8 @@ struct MultiplanarExternalTexture::State {
         // binding and create two additional bindings (one texture_2d<f32> to
         // represent the secondary plane and one uniform buffer for the
         // ExternalTextureParams struct).
-        for (auto* var : ctx.src->AST().GlobalVariables()) {
-            auto* sem_var = sem.Get(var);
+        for (auto* global : ctx.src->AST().GlobalVariables()) {
+            auto* sem_var = sem.Get(global);
             if (!sem_var->Type()->UnwrapRef()->Is<sem::ExternalTexture>()) {
                 continue;
             }
@@ -95,7 +95,7 @@ struct MultiplanarExternalTexture::State {
             // If the attributes are empty, then this must be a texture_external
             // passed as a function parameter. These variables are transformed
             // elsewhere.
-            if (var->attributes.empty()) {
+            if (global->attributes.empty()) {
                 continue;
             }
 
@@ -109,8 +109,8 @@ struct MultiplanarExternalTexture::State {
             // provided to this transform. We fetch the new binding points by
             // providing the original texture_external binding points into the
             // passed map.
-            BindingPoint bp = {var->BindingPoint().group->value,
-                               var->BindingPoint().binding->value};
+            BindingPoint bp = {global->BindingPoint().group->value,
+                               global->BindingPoint().binding->value};
 
             BindingsMap::const_iterator it = new_binding_points->bindings_map.find(bp);
             if (it == new_binding_points->bindings_map.end()) {
@@ -129,7 +129,7 @@ struct MultiplanarExternalTexture::State {
             // corresponds with the new destination bindings.
             // NewBindingSymbols new_binding_syms;
             auto& syms = new_binding_symbols[sem_var];
-            syms.plane_0 = ctx.Clone(var->symbol);
+            syms.plane_0 = ctx.Clone(global->symbol);
             syms.plane_1 = b.Symbols().New("ext_tex_plane_1");
             b.Global(syms.plane_1, b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32()),
                      b.GroupAndBinding(bps.plane_1.group, bps.plane_1.binding));
@@ -140,13 +140,13 @@ struct MultiplanarExternalTexture::State {
 
             // Replace the original texture_external binding with a texture_2d<f32>
             // binding.
-            ast::AttributeList cloned_attributes = ctx.Clone(var->attributes);
-            const ast::Expression* cloned_constructor = ctx.Clone(var->constructor);
+            ast::AttributeList cloned_attributes = ctx.Clone(global->attributes);
+            const ast::Expression* cloned_constructor = ctx.Clone(global->constructor);
 
             auto* replacement =
                 b.Var(syms.plane_0, b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32()),
                       cloned_constructor, cloned_attributes);
-            ctx.Replace(var, replacement);
+            ctx.Replace(global, replacement);
         }
 
         // We must update all the texture_external parameters for user declared

@@ -253,16 +253,13 @@ bool GeneratorImpl::Generate() {
             [&](const ast::Alias*) {
                 return true;  // folded away by the writer
             },
-            [&](const ast::Variable* var) {
-                if (var->is_const) {
-                    TINT_DEFER(line());
-                    return EmitProgramConstVariable(var);
-                }
-                // These are pushed into the entry point by sanitizer transforms.
-                TINT_ICE(Writer, diagnostics_)
-                    << "module-scope variables should have been handled by the MSL "
-                       "sanitizer";
-                return false;
+            [&](const ast::Let* let) {
+                TINT_DEFER(line());
+                return EmitProgramConstVariable(let);
+            },
+            [&](const ast::Override* override) {
+                TINT_DEFER(line());
+                return EmitOverride(override);
             },
             [&](const ast::Function* func) {
                 TINT_DEFER(line());
@@ -1866,8 +1863,8 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     // Returns the binding index of a variable, requiring that the group
     // attribute have a value of zero.
     const uint32_t kInvalidBindingIndex = std::numeric_limits<uint32_t>::max();
-    auto get_binding_index = [&](const ast::Variable* var) -> uint32_t {
-        auto bp = var->BindingPoint();
+    auto get_binding_index = [&](const ast::Parameter* param) -> uint32_t {
+        auto bp = param->BindingPoint();
         if (bp.group == nullptr || bp.binding == nullptr) {
             TINT_ICE(Writer, diagnostics_)
                 << "missing binding attributes for entry point parameter";
@@ -1890,15 +1887,15 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
 
         // Emit entry point parameters.
         bool first = true;
-        for (auto* var : func->params) {
+        for (auto* param : func->params) {
             if (!first) {
                 out << ", ";
             }
             first = false;
 
-            auto* type = program_->Sem().Get(var)->Type()->UnwrapRef();
+            auto* type = program_->Sem().Get(param)->Type()->UnwrapRef();
 
-            auto param_name = program_->Symbols().NameFor(var->symbol);
+            auto param_name = program_->Symbols().NameFor(param->symbol);
             if (!EmitType(out, type, param_name)) {
                 return false;
             }
@@ -1910,26 +1907,26 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
             if (type->Is<sem::Struct>()) {
                 out << " [[stage_in]]";
             } else if (type->is_handle()) {
-                uint32_t binding = get_binding_index(var);
+                uint32_t binding = get_binding_index(param);
                 if (binding == kInvalidBindingIndex) {
                     return false;
                 }
-                if (var->type->Is<ast::Sampler>()) {
+                if (param->type->Is<ast::Sampler>()) {
                     out << " [[sampler(" << binding << ")]]";
-                } else if (var->type->Is<ast::Texture>()) {
+                } else if (param->type->Is<ast::Texture>()) {
                     out << " [[texture(" << binding << ")]]";
                 } else {
                     TINT_ICE(Writer, diagnostics_) << "invalid handle type entry point parameter";
                     return false;
                 }
-            } else if (auto* ptr = var->type->As<ast::Pointer>()) {
+            } else if (auto* ptr = param->type->As<ast::Pointer>()) {
                 auto sc = ptr->storage_class;
                 if (sc == ast::StorageClass::kWorkgroup) {
                     auto& allocations = workgroup_allocations_[func_name];
                     out << " [[threadgroup(" << allocations.size() << ")]]";
                     allocations.push_back(program_->Sem().Get(ptr->type)->Size());
                 } else if (sc == ast::StorageClass::kStorage || sc == ast::StorageClass::kUniform) {
-                    uint32_t binding = get_binding_index(var);
+                    uint32_t binding = get_binding_index(param);
                     if (binding == kInvalidBindingIndex) {
                         return false;
                     }
@@ -1940,7 +1937,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
                     return false;
                 }
             } else {
-                auto& attrs = var->attributes;
+                auto& attrs = param->attributes;
                 bool builtin_found = false;
                 for (auto* attr : attrs) {
                     auto* builtin = attr->As<ast::BuiltinAttribute>();
@@ -2340,8 +2337,15 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
             return EmitSwitch(s);
         },
         [&](const ast::VariableDeclStatement* v) {  //
-            auto* var = program_->Sem().Get(v->variable);
-            return EmitVariable(var);
+            return Switch(
+                v->variable,  //
+                [&](const ast::Var* var) { return EmitVar(var); },
+                [&](const ast::Let* let) { return EmitLet(let); },
+                [&](Default) {  //
+                    TINT_ICE(Writer, diagnostics_)
+                        << "unknown statement type: " << stmt->TypeInfo().name;
+                    return false;
+                });
         },
         [&](Default) {
             diagnostics_.add_error(diag::System::Writer,
@@ -2918,19 +2922,13 @@ bool GeneratorImpl::EmitUnaryOp(std::ostream& out, const ast::UnaryOpExpression*
     return true;
 }
 
-bool GeneratorImpl::EmitVariable(const sem::Variable* var) {
-    auto* decl = var->Declaration();
-
-    for (auto* attr : decl->attributes) {
-        if (!attr->Is<ast::InternalAttribute>()) {
-            TINT_ICE(Writer, diagnostics_) << "unexpected variable attribute";
-            return false;
-        }
-    }
+bool GeneratorImpl::EmitVar(const ast::Var* var) {
+    auto* sem = program_->Sem().Get(var);
+    auto* type = sem->Type()->UnwrapRef();
 
     auto out = line();
 
-    switch (var->StorageClass()) {
+    switch (sem->StorageClass()) {
         case ast::StorageClass::kFunction:
         case ast::StorageClass::kHandle:
         case ast::StorageClass::kNone:
@@ -2946,12 +2944,7 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var) {
             return false;
     }
 
-    auto* type = var->Type()->UnwrapRef();
-
-    std::string name = program_->Symbols().NameFor(decl->symbol);
-    if (decl->is_const) {
-        name = "const " + name;
-    }
+    std::string name = program_->Symbols().NameFor(var->symbol);
     if (!EmitType(out, type, name)) {
         return false;
     }
@@ -2960,14 +2953,14 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var) {
         out << " " << name;
     }
 
-    if (decl->constructor != nullptr) {
+    if (var->constructor != nullptr) {
         out << " = ";
-        if (!EmitExpression(out, decl->constructor)) {
+        if (!EmitExpression(out, var->constructor)) {
             return false;
         }
-    } else if (var->StorageClass() == ast::StorageClass::kPrivate ||
-               var->StorageClass() == ast::StorageClass::kFunction ||
-               var->StorageClass() == ast::StorageClass::kNone) {
+    } else if (sem->StorageClass() == ast::StorageClass::kPrivate ||
+               sem->StorageClass() == ast::StorageClass::kFunction ||
+               sem->StorageClass() == ast::StorageClass::kNone) {
         out << " = ";
         if (!EmitZeroValue(out, type)) {
             return false;
@@ -2978,38 +2971,85 @@ bool GeneratorImpl::EmitVariable(const sem::Variable* var) {
     return true;
 }
 
-bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
-    for (auto* d : var->attributes) {
-        if (!d->Is<ast::IdAttribute>()) {
-            diagnostics_.add_error(diag::System::Writer, "Decorated const values not valid");
+bool GeneratorImpl::EmitLet(const ast::Let* let) {
+    auto* sem = program_->Sem().Get(let);
+    auto* type = sem->Type();
+
+    auto out = line();
+
+    switch (sem->StorageClass()) {
+        case ast::StorageClass::kFunction:
+        case ast::StorageClass::kHandle:
+        case ast::StorageClass::kNone:
+            break;
+        case ast::StorageClass::kPrivate:
+            out << "thread ";
+            break;
+        case ast::StorageClass::kWorkgroup:
+            out << "threadgroup ";
+            break;
+        default:
+            TINT_ICE(Writer, diagnostics_) << "unhandled variable storage class";
             return false;
-        }
     }
-    if (!var->is_const) {
-        diagnostics_.add_error(diag::System::Writer, "Expected a const value");
+
+    std::string name = "const " + program_->Symbols().NameFor(let->symbol);
+    if (!EmitType(out, type, name)) {
         return false;
     }
+
+    // Variable name is output as part of the type for arrays and pointers.
+    if (!type->Is<sem::Array>() && !type->Is<sem::Pointer>()) {
+        out << " " << name;
+    }
+
+    out << " = ";
+    if (!EmitExpression(out, let->constructor)) {
+        return false;
+    }
+    out << ";";
+
+    return true;
+}
+
+bool GeneratorImpl::EmitProgramConstVariable(const ast::Let* let) {
+    auto* global = program_->Sem().Get<sem::GlobalVariable>(let);
+    auto* type = global->Type();
 
     auto out = line();
     out << "constant ";
-    auto* type = program_->Sem().Get(var)->Type()->UnwrapRef();
-    if (!EmitType(out, type, program_->Symbols().NameFor(var->symbol))) {
+    if (!EmitType(out, type, program_->Symbols().NameFor(let->symbol))) {
         return false;
     }
     if (!type->Is<sem::Array>()) {
-        out << " " << program_->Symbols().NameFor(var->symbol);
+        out << " " << program_->Symbols().NameFor(let->symbol);
     }
 
-    auto* global = program_->Sem().Get<sem::GlobalVariable>(var);
-    if (global && global->IsOverridable()) {
-        out << " [[function_constant(" << global->ConstantId() << ")]]";
-    } else if (var->constructor != nullptr) {
+    if (let->constructor != nullptr) {
         out << " = ";
-        if (!EmitExpression(out, var->constructor)) {
+        if (!EmitExpression(out, let->constructor)) {
             return false;
         }
     }
     out << ";";
+
+    return true;
+}
+
+bool GeneratorImpl::EmitOverride(const ast::Override* override) {
+    auto* global = program_->Sem().Get<sem::GlobalVariable>(override);
+    auto* type = global->Type();
+
+    auto out = line();
+    out << "constant ";
+    if (!EmitType(out, type, program_->Symbols().NameFor(override->symbol))) {
+        return false;
+    }
+    if (!type->Is<sem::Array>()) {
+        out << " " << program_->Symbols().NameFor(override->symbol);
+    }
+
+    out << " [[function_constant(" << global->ConstantId() << ")]];";
 
     return true;
 }

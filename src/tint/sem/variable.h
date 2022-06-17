@@ -154,24 +154,14 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
     sem::BindingPoint BindingPoint() const { return binding_point_; }
 
     /// @param id the constant identifier to assign to this variable
-    void SetConstantId(uint16_t id) {
-        constant_id_ = id;
-        is_overridable_ = true;
-    }
+    void SetConstantId(uint16_t id) { constant_id_ = id; }
 
     /// @returns the pipeline constant ID associated with the variable
     uint16_t ConstantId() const { return constant_id_; }
 
-    /// @param is_overridable true if this is a pipeline overridable constant
-    void SetIsOverridable(bool is_overridable = true) { is_overridable_ = is_overridable; }
-
-    /// @returns true if this is pipeline overridable constant
-    bool IsOverridable() const { return is_overridable_; }
-
   private:
     const sem::BindingPoint binding_point_;
 
-    bool is_overridable_ = false;
     uint16_t constant_id_ = 0;
 };
 
@@ -185,7 +175,7 @@ class Parameter final : public Castable<Parameter, Variable> {
     /// @param storage_class the variable storage class
     /// @param access the variable access control type
     /// @param usage the semantic usage for the parameter
-    Parameter(const ast::Variable* declaration,
+    Parameter(const ast::Parameter* declaration,
               uint32_t index,
               const sem::Type* type,
               ast::StorageClass storage_class,

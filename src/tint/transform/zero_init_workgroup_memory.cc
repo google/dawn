@@ -416,8 +416,8 @@ ZeroInitWorkgroupMemory::ZeroInitWorkgroupMemory() = default;
 ZeroInitWorkgroupMemory::~ZeroInitWorkgroupMemory() = default;
 
 bool ZeroInitWorkgroupMemory::ShouldRun(const Program* program, const DataMap&) const {
-    for (auto* decl : program->AST().GlobalDeclarations()) {
-        if (auto* var = decl->As<ast::Variable>()) {
+    for (auto* global : program->AST().GlobalVariables()) {
+        if (auto* var = global->As<ast::Var>()) {
             if (var->declared_storage_class == ast::StorageClass::kWorkgroup) {
                 return true;
             }

@@ -31,11 +31,11 @@ const ast::VariableDeclStatement* AsTrivialLetDecl(const ast::Statement* stmt) {
     if (!var_decl) {
         return nullptr;
     }
-    auto* var = var_decl->variable;
-    if (!var->is_const) {
+    auto* let = var_decl->variable->As<ast::Let>();
+    if (!let) {
         return nullptr;
     }
-    auto* ctor = var->constructor;
+    auto* ctor = let->constructor;
     if (!IsAnyOf<ast::IdentifierExpression, ast::LiteralExpression>(ctor)) {
         return nullptr;
     }

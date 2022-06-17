@@ -533,7 +533,7 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
                     // Make the constant specializable.
                     auto* sem_const =
                         builder_.Sem().Get<sem::GlobalVariable>(wgsize[i].overridable_const);
-                    if (!sem_const->IsOverridable()) {
+                    if (!sem_const->Declaration()->Is<ast::Override>()) {
                         TINT_ICE(Writer, builder_.Diagnostics())
                             << "expected a pipeline-overridable constant";
                     }
@@ -692,19 +692,19 @@ uint32_t Builder::GenerateFunctionTypeIfNeeded(const sem::Function* func) {
     });
 }
 
-bool Builder::GenerateFunctionVariable(const ast::Variable* var) {
+bool Builder::GenerateFunctionVariable(const ast::Variable* v) {
     uint32_t init_id = 0;
-    if (var->constructor) {
-        init_id = GenerateExpressionWithLoadIfNeeded(var->constructor);
+    if (v->constructor) {
+        init_id = GenerateExpressionWithLoadIfNeeded(v->constructor);
         if (init_id == 0) {
             return false;
         }
     }
 
-    auto* sem = builder_.Sem().Get(var);
+    auto* sem = builder_.Sem().Get(v);
 
-    if (var->is_const) {
-        if (!var->constructor) {
+    if (auto* let = v->As<ast::Let>()) {
+        if (!let->constructor) {
             error_ = "missing constructor for constant";
             return false;
         }
@@ -721,8 +721,7 @@ bool Builder::GenerateFunctionVariable(const ast::Variable* var) {
         return false;
     }
 
-    push_debug(spv::Op::OpName,
-               {Operand(var_id), Operand(builder_.Symbols().NameFor(var->symbol))});
+    push_debug(spv::Op::OpName, {Operand(var_id), Operand(builder_.Symbols().NameFor(v->symbol))});
 
     // TODO(dsinclair) We could detect if the constructor is fully const and emit
     // an initializer value for the variable instead of doing the OpLoad.
@@ -733,7 +732,7 @@ bool Builder::GenerateFunctionVariable(const ast::Variable* var) {
     push_function_var(
         {Operand(type_id), result, U32Operand(ConvertStorageClass(sc)), Operand(null_id)});
 
-    if (var->constructor) {
+    if (v->constructor) {
         if (!GenerateStore(var_id, init_id)) {
             return false;
         }
@@ -748,66 +747,61 @@ bool Builder::GenerateStore(uint32_t to, uint32_t from) {
     return push_function_inst(spv::Op::OpStore, {Operand(to), Operand(from)});
 }
 
-bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
-    auto* sem = builder_.Sem().Get(var);
+bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
+    auto* sem = builder_.Sem().Get(v);
     auto* type = sem->Type()->UnwrapRef();
 
     uint32_t init_id = 0;
-    if (var->constructor) {
-        if (!var->is_overridable) {
-            auto* ctor = builder_.Sem().Get(var->constructor);
-            if (auto constant = ctor->ConstantValue()) {
+    if (auto* ctor = v->constructor) {
+        if (!v->Is<ast::Override>()) {
+            auto* ctor_sem = builder_.Sem().Get(ctor);
+            if (auto constant = ctor_sem->ConstantValue()) {
                 init_id = GenerateConstantIfNeeded(std::move(constant));
             }
         }
         if (init_id == 0) {
-            init_id = GenerateConstructorExpression(var, var->constructor);
+            init_id = GenerateConstructorExpression(v, v->constructor);
         }
         if (init_id == 0) {
             return false;
         }
     }
 
-    if (var->is_const) {
-        if (!var->constructor) {
-            // Constants must have an initializer unless they are overridable.
-            if (!var->is_overridable) {
-                error_ = "missing constructor for constant";
-                return false;
-            }
-
-            // SPIR-V requires specialization constants to have initializers.
-            init_id = Switch(
-                type,  //
-                [&](const sem::F32*) {
-                    ast::FloatLiteralExpression l(ProgramID{}, Source{}, 0,
-                                                  ast::FloatLiteralExpression::Suffix::kF);
-                    return GenerateLiteralIfNeeded(var, &l);
-                },
-                [&](const sem::U32*) {
-                    ast::IntLiteralExpression l(ProgramID{}, Source{}, 0,
-                                                ast::IntLiteralExpression::Suffix::kU);
-                    return GenerateLiteralIfNeeded(var, &l);
-                },
-                [&](const sem::I32*) {
-                    ast::IntLiteralExpression l(ProgramID{}, Source{}, 0,
-                                                ast::IntLiteralExpression::Suffix::kI);
-                    return GenerateLiteralIfNeeded(var, &l);
-                },
-                [&](const sem::Bool*) {
-                    ast::BoolLiteralExpression l(ProgramID{}, Source{}, false);
-                    return GenerateLiteralIfNeeded(var, &l);
-                },
-                [&](Default) {
-                    error_ = "invalid type for pipeline constant ID, must be scalar";
-                    return 0;
-                });
-            if (init_id == 0) {
+    if (auto* override = v->As<ast::Override>(); override && !override->constructor) {
+        // SPIR-V requires specialization constants to have initializers.
+        init_id = Switch(
+            type,  //
+            [&](const sem::F32*) {
+                ast::FloatLiteralExpression l(ProgramID{}, Source{}, 0,
+                                              ast::FloatLiteralExpression::Suffix::kF);
+                return GenerateLiteralIfNeeded(override, &l);
+            },
+            [&](const sem::U32*) {
+                ast::IntLiteralExpression l(ProgramID{}, Source{}, 0,
+                                            ast::IntLiteralExpression::Suffix::kU);
+                return GenerateLiteralIfNeeded(override, &l);
+            },
+            [&](const sem::I32*) {
+                ast::IntLiteralExpression l(ProgramID{}, Source{}, 0,
+                                            ast::IntLiteralExpression::Suffix::kI);
+                return GenerateLiteralIfNeeded(override, &l);
+            },
+            [&](const sem::Bool*) {
+                ast::BoolLiteralExpression l(ProgramID{}, Source{}, false);
+                return GenerateLiteralIfNeeded(override, &l);
+            },
+            [&](Default) {
+                error_ = "invalid type for pipeline constant ID, must be scalar";
                 return 0;
-            }
+            });
+        if (init_id == 0) {
+            return 0;
         }
+    }
+
+    if (v->IsAnyOf<ast::Let, ast::Override>()) {
         push_debug(spv::Op::OpName,
-                   {Operand(init_id), Operand(builder_.Symbols().NameFor(var->symbol))});
+                   {Operand(init_id), Operand(builder_.Symbols().NameFor(v->symbol))});
 
         RegisterVariable(sem, init_id);
         return true;
@@ -824,12 +818,11 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
         return false;
     }
 
-    push_debug(spv::Op::OpName,
-               {Operand(var_id), Operand(builder_.Symbols().NameFor(var->symbol))});
+    push_debug(spv::Op::OpName, {Operand(var_id), Operand(builder_.Symbols().NameFor(v->symbol))});
 
     OperandList ops = {Operand(type_id), result, U32Operand(ConvertStorageClass(sc))};
 
-    if (var->constructor) {
+    if (v->constructor) {
         ops.push_back(Operand(init_id));
     } else {
         auto* st = type->As<sem::StorageTexture>();
@@ -871,7 +864,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* var) {
 
     push_type(spv::Op::OpVariable, std::move(ops));
 
-    for (auto* attr : var->attributes) {
+    for (auto* attr : v->attributes) {
         bool ok = Switch(
             attr,
             [&](const ast::BuiltinAttribute* builtin) {
@@ -1332,7 +1325,7 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(const sem::Call* call,
 
     // Generate the zero initializer if there are no values provided.
     if (args.empty()) {
-        if (global_var && global_var->IsOverridable()) {
+        if (global_var && global_var->Declaration()->Is<ast::Override>()) {
             auto constant_id = global_var->ConstantId();
             if (result_type->Is<sem::I32>()) {
                 return GenerateConstantIfNeeded(ScalarConstant::I32(0).AsSpecOp(constant_id));
@@ -1637,7 +1630,7 @@ uint32_t Builder::GenerateLiteralIfNeeded(const ast::Variable* var,
     ScalarConstant constant;
 
     auto* global = builder_.Sem().Get<sem::GlobalVariable>(var);
-    if (global && global->IsOverridable()) {
+    if (global && global->Declaration()->Is<ast::Override>()) {
         constant.is_spec_op = true;
         constant.constant_id = global->ConstantId();
     }

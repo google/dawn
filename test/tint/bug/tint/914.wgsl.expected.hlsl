@@ -45,6 +45,7 @@ static const uint ColPerThread = 4u;
 static const uint TileAOuter = 64u;
 static const uint TileBOuter = 64u;
 static const uint TileInner = 64u;
+
 groupshared float mm_Asub[64][64];
 groupshared float mm_Bsub[64][64];
 

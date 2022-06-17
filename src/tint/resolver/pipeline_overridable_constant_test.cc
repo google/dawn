@@ -31,7 +31,7 @@ class ResolverPipelineOverridableConstantTest : public ResolverTest {
         auto* sem = Sem().Get<sem::GlobalVariable>(var);
         ASSERT_NE(sem, nullptr);
         EXPECT_EQ(sem->Declaration(), var);
-        EXPECT_TRUE(sem->IsOverridable());
+        EXPECT_TRUE(sem->Declaration()->Is<ast::Override>());
         EXPECT_EQ(sem->ConstantId(), id);
         EXPECT_FALSE(sem->ConstantValue());
     }
@@ -45,7 +45,7 @@ TEST_F(ResolverPipelineOverridableConstantTest, NonOverridable) {
     auto* sem_a = Sem().Get<sem::GlobalVariable>(a);
     ASSERT_NE(sem_a, nullptr);
     EXPECT_EQ(sem_a->Declaration(), a);
-    EXPECT_FALSE(sem_a->IsOverridable());
+    EXPECT_FALSE(sem_a->Declaration()->Is<ast::Override>());
     EXPECT_TRUE(sem_a->ConstantValue());
 }
 

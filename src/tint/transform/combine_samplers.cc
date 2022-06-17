@@ -147,16 +147,16 @@ struct CombineSamplers::State {
 
         // Remove all texture and sampler global variables. These will be replaced
         // by combined samplers.
-        for (auto* var : ctx.src->AST().GlobalVariables()) {
-            auto* type = sem.Get(var->type);
-            if (type && type->IsAnyOf<sem::Texture, sem::Sampler>() &&
+        for (auto* global : ctx.src->AST().GlobalVariables()) {
+            auto* type = sem.Get(global->type);
+            if (tint::IsAnyOf<sem::Texture, sem::Sampler>(type) &&
                 !type->Is<sem::StorageTexture>()) {
-                ctx.Remove(ctx.src->AST().GlobalDeclarations(), var);
-            } else if (auto binding_point = var->BindingPoint()) {
+                ctx.Remove(ctx.src->AST().GlobalDeclarations(), global);
+            } else if (auto binding_point = global->BindingPoint()) {
                 if (binding_point.group->value == 0 && binding_point.binding->value == 0) {
                     auto* attribute =
                         ctx.dst->Disable(ast::DisabledValidation::kBindingPointCollision);
-                    ctx.InsertFront(var->attributes, attribute);
+                    ctx.InsertFront(global->attributes, attribute);
                 }
             }
         }
@@ -188,9 +188,8 @@ struct CombineSamplers::State {
                     } else {
                         // Either texture or sampler (or both) is a function parameter;
                         // add a new function parameter to represent the combined sampler.
-                        const ast::Type* type = CreateCombinedASTTypeFor(texture_var, sampler_var);
-                        const ast::Variable* var =
-                            ctx.dst->Param(ctx.dst->Symbols().New(name), type);
+                        auto* type = CreateCombinedASTTypeFor(texture_var, sampler_var);
+                        auto* var = ctx.dst->Param(ctx.dst->Symbols().New(name), type);
                         params.push_back(var);
                         function_combined_texture_samplers_[func][pair] = var;
                     }

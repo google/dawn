@@ -53,11 +53,14 @@
 #include "src/tint/ast/index_accessor_expression.h"
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/invariant_attribute.h"
+#include "src/tint/ast/let.h"
 #include "src/tint/ast/loop_statement.h"
 #include "src/tint/ast/matrix.h"
 #include "src/tint/ast/member_accessor_expression.h"
 #include "src/tint/ast/module.h"
 #include "src/tint/ast/multisampled_texture.h"
+#include "src/tint/ast/override.h"
+#include "src/tint/ast/parameter.h"
 #include "src/tint/ast/phony_expression.h"
 #include "src/tint/ast/pointer.h"
 #include "src/tint/ast/return_statement.h"
@@ -73,6 +76,7 @@
 #include "src/tint/ast/type_name.h"
 #include "src/tint/ast/u32.h"
 #include "src/tint/ast/unary_op_expression.h"
+#include "src/tint/ast/var.h"
 #include "src/tint/ast/variable_decl_statement.h"
 #include "src/tint/ast/vector.h"
 #include "src/tint/ast/void.h"
@@ -1328,14 +1332,13 @@ class ProgramBuilder {
     ///   * ast::AttributeList - specifies the variable's attributes
     /// Note that repeated arguments of the same type will use the last argument's
     /// value.
-    /// @returns a `ast::Variable` with the given name, type and additional
+    /// @returns a `ast::Var` with the given name, type and additional
     /// options
     template <typename NAME, typename... OPTIONAL>
-    const ast::Variable* Var(NAME&& name, const ast::Type* type, OPTIONAL&&... optional) {
+    const ast::Var* Var(NAME&& name, const ast::Type* type, OPTIONAL&&... optional) {
         VarOptionals opts(std::forward<OPTIONAL>(optional)...);
-        return create<ast::Variable>(Sym(std::forward<NAME>(name)), opts.storage, opts.access, type,
-                                     false /* is_const */, false /* is_overridable */,
-                                     opts.constructor, std::move(opts.attributes));
+        return create<ast::Var>(Sym(std::forward<NAME>(name)), type, opts.storage, opts.access,
+                                opts.constructor, std::move(opts.attributes));
     }
 
     /// @param source the variable source
@@ -1349,32 +1352,28 @@ class ProgramBuilder {
     ///   * ast::AttributeList - specifies the variable's attributes
     /// Note that repeated arguments of the same type will use the last argument's
     /// value.
-    /// @returns a `ast::Variable` with the given name, storage and type
+    /// @returns a `ast::Var` with the given name, storage and type
     template <typename NAME, typename... OPTIONAL>
-    const ast::Variable* Var(const Source& source,
-                             NAME&& name,
-                             const ast::Type* type,
-                             OPTIONAL&&... optional) {
+    const ast::Var* Var(const Source& source,
+                        NAME&& name,
+                        const ast::Type* type,
+                        OPTIONAL&&... optional) {
         VarOptionals opts(std::forward<OPTIONAL>(optional)...);
-        return create<ast::Variable>(source, Sym(std::forward<NAME>(name)), opts.storage,
-                                     opts.access, type, false /* is_const */,
-                                     false /* is_overridable */, opts.constructor,
-                                     std::move(opts.attributes));
+        return create<ast::Var>(source, Sym(std::forward<NAME>(name)), type, opts.storage,
+                                opts.access, opts.constructor, std::move(opts.attributes));
     }
 
     /// @param name the variable name
     /// @param type the variable type
     /// @param constructor constructor expression
     /// @param attributes optional variable attributes
-    /// @returns an immutable `ast::Variable` with the given name and type
+    /// @returns an `ast::Let` with the given name and type
     template <typename NAME>
-    const ast::Variable* Let(NAME&& name,
-                             const ast::Type* type,
-                             const ast::Expression* constructor,
-                             ast::AttributeList attributes = {}) {
-        return create<ast::Variable>(Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
-                                     ast::Access::kUndefined, type, true /* is_const */,
-                                     false /* is_overridable */, constructor, attributes);
+    const ast::Let* Let(NAME&& name,
+                        const ast::Type* type,
+                        const ast::Expression* constructor,
+                        ast::AttributeList attributes = {}) {
+        return create<ast::Let>(Sym(std::forward<NAME>(name)), type, constructor, attributes);
     }
 
     /// @param source the variable source
@@ -1382,46 +1381,39 @@ class ProgramBuilder {
     /// @param type the variable type
     /// @param constructor constructor expression
     /// @param attributes optional variable attributes
-    /// @returns an immutable `ast::Variable` with the given name and type
+    /// @returns an `ast::Let` with the given name and type
     template <typename NAME>
-    const ast::Variable* Let(const Source& source,
-                             NAME&& name,
-                             const ast::Type* type,
-                             const ast::Expression* constructor,
-                             ast::AttributeList attributes = {}) {
-        return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
-                                     ast::StorageClass::kNone, ast::Access::kUndefined, type,
-                                     true /* is_const */, false /* is_overridable */, constructor,
-                                     attributes);
+    const ast::Let* Let(const Source& source,
+                        NAME&& name,
+                        const ast::Type* type,
+                        const ast::Expression* constructor,
+                        ast::AttributeList attributes = {}) {
+        return create<ast::Let>(source, Sym(std::forward<NAME>(name)), type, constructor,
+                                attributes);
     }
 
     /// @param name the parameter name
     /// @param type the parameter type
     /// @param attributes optional parameter attributes
-    /// @returns an immutable `ast::Variable` with the given name and type
+    /// @returns an `ast::Parameter` with the given name and type
     template <typename NAME>
-    const ast::Variable* Param(NAME&& name,
-                               const ast::Type* type,
-                               ast::AttributeList attributes = {}) {
-        return create<ast::Variable>(Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
-                                     ast::Access::kUndefined, type, true /* is_const */,
-                                     false /* is_overridable */, nullptr, attributes);
+    const ast::Parameter* Param(NAME&& name,
+                                const ast::Type* type,
+                                ast::AttributeList attributes = {}) {
+        return create<ast::Parameter>(Sym(std::forward<NAME>(name)), type, attributes);
     }
 
     /// @param source the parameter source
     /// @param name the parameter name
     /// @param type the parameter type
     /// @param attributes optional parameter attributes
-    /// @returns an immutable `ast::Variable` with the given name and type
+    /// @returns an `ast::Parameter` with the given name and type
     template <typename NAME>
-    const ast::Variable* Param(const Source& source,
-                               NAME&& name,
-                               const ast::Type* type,
-                               ast::AttributeList attributes = {}) {
-        return create<ast::Variable>(source, Sym(std::forward<NAME>(name)),
-                                     ast::StorageClass::kNone, ast::Access::kUndefined, type,
-                                     true /* is_const */, false /* is_overridable */, nullptr,
-                                     attributes);
+    const ast::Parameter* Param(const Source& source,
+                                NAME&& name,
+                                const ast::Type* type,
+                                ast::AttributeList attributes = {}) {
+        return create<ast::Parameter>(source, Sym(std::forward<NAME>(name)), type, attributes);
     }
 
     /// @param name the variable name
@@ -1434,10 +1426,10 @@ class ProgramBuilder {
     ///   * ast::AttributeList - specifies the variable's attributes
     /// Note that repeated arguments of the same type will use the last argument's
     /// value.
-    /// @returns a new `ast::Variable`, which is automatically registered as a
-    /// global variable with the ast::Module.
+    /// @returns a new `ast::Var`, which is automatically registered as a global variable with the
+    /// ast::Module.
     template <typename NAME, typename... OPTIONAL, typename = DisableIfSource<NAME>>
-    const ast::Variable* Global(NAME&& name, const ast::Type* type, OPTIONAL&&... optional) {
+    const ast::Var* Global(NAME&& name, const ast::Type* type, OPTIONAL&&... optional) {
         auto* var = Var(std::forward<NAME>(name), type, std::forward<OPTIONAL>(optional)...);
         AST().AddGlobalVariable(var);
         return var;
@@ -1454,13 +1446,13 @@ class ProgramBuilder {
     ///   * ast::AttributeList - specifies the variable's attributes
     /// Note that repeated arguments of the same type will use the last argument's
     /// value.
-    /// @returns a new `ast::Variable`, which is automatically registered as a
-    /// global variable with the ast::Module.
+    /// @returns a new `ast::Var`, which is automatically registered as a global variable with the
+    /// ast::Module.
     template <typename NAME, typename... OPTIONAL>
-    const ast::Variable* Global(const Source& source,
-                                NAME&& name,
-                                const ast::Type* type,
-                                OPTIONAL&&... optional) {
+    const ast::Var* Global(const Source& source,
+                           NAME&& name,
+                           const ast::Type* type,
+                           OPTIONAL&&... optional) {
         auto* var =
             Var(source, std::forward<NAME>(name), type, std::forward<OPTIONAL>(optional)...);
         AST().AddGlobalVariable(var);
@@ -1471,14 +1463,13 @@ class ProgramBuilder {
     /// @param type the variable type
     /// @param constructor constructor expression
     /// @param attributes optional variable attributes
-    /// @returns a const `ast::Variable` constructed by calling Var() with the
-    /// arguments of `args`, which is automatically registered as a global
-    /// variable with the ast::Module.
+    /// @returns an `ast::Let` constructed by calling Let() with the arguments of `args`, which is
+    /// automatically registered as a global variable with the ast::Module.
     template <typename NAME>
-    const ast::Variable* GlobalConst(NAME&& name,
-                                     const ast::Type* type,
-                                     const ast::Expression* constructor,
-                                     ast::AttributeList attributes = {}) {
+    const ast::Let* GlobalConst(NAME&& name,
+                                const ast::Type* type,
+                                const ast::Expression* constructor,
+                                ast::AttributeList attributes = {}) {
         auto* var = Let(std::forward<NAME>(name), type, constructor, std::move(attributes));
         AST().AddGlobalVariable(var);
         return var;
@@ -1489,15 +1480,15 @@ class ProgramBuilder {
     /// @param type the variable type
     /// @param constructor constructor expression
     /// @param attributes optional variable attributes
-    /// @returns a const `ast::Variable` constructed by calling Var() with the
+    /// @returns a const `ast::Let` constructed by calling Var() with the
     /// arguments of `args`, which is automatically registered as a global
     /// variable with the ast::Module.
     template <typename NAME>
-    const ast::Variable* GlobalConst(const Source& source,
-                                     NAME&& name,
-                                     const ast::Type* type,
-                                     const ast::Expression* constructor,
-                                     ast::AttributeList attributes = {}) {
+    const ast::Let* GlobalConst(const Source& source,
+                                NAME&& name,
+                                const ast::Type* type,
+                                const ast::Expression* constructor,
+                                ast::AttributeList attributes = {}) {
         auto* var = Let(source, std::forward<NAME>(name), type, constructor, std::move(attributes));
         AST().AddGlobalVariable(var);
         return var;
@@ -1507,17 +1498,15 @@ class ProgramBuilder {
     /// @param type the variable type
     /// @param constructor optional constructor expression
     /// @param attributes optional variable attributes
-    /// @returns an overridable const `ast::Variable` which is automatically
-    /// registered as a global variable with the ast::Module.
+    /// @returns an `ast::Override` which is automatically registered as a global variable with the
+    /// ast::Module.
     template <typename NAME>
-    const ast::Variable* Override(NAME&& name,
+    const ast::Override* Override(NAME&& name,
                                   const ast::Type* type,
                                   const ast::Expression* constructor,
                                   ast::AttributeList attributes = {}) {
-        auto* var =
-            create<ast::Variable>(source_, Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
-                                  ast::Access::kUndefined, type, true /* is_const */,
-                                  true /* is_overridable */, constructor, std::move(attributes));
+        auto* var = create<ast::Override>(source_, Sym(std::forward<NAME>(name)), type, constructor,
+                                          std::move(attributes));
         AST().AddGlobalVariable(var);
         return var;
     }
@@ -1527,19 +1516,16 @@ class ProgramBuilder {
     /// @param type the variable type
     /// @param constructor constructor expression
     /// @param attributes optional variable attributes
-    /// @returns a const `ast::Variable` constructed by calling Var() with the
-    /// arguments of `args`, which is automatically registered as a global
-    /// variable with the ast::Module.
+    /// @returns an `ast::Override` constructed with the arguments of `args`, which is automatically
+    /// registered as a global variable with the ast::Module.
     template <typename NAME>
-    const ast::Variable* Override(const Source& source,
+    const ast::Override* Override(const Source& source,
                                   NAME&& name,
                                   const ast::Type* type,
                                   const ast::Expression* constructor,
                                   ast::AttributeList attributes = {}) {
-        auto* var =
-            create<ast::Variable>(source, Sym(std::forward<NAME>(name)), ast::StorageClass::kNone,
-                                  ast::Access::kUndefined, type, true /* is_const */,
-                                  true /* is_overridable */, constructor, std::move(attributes));
+        auto* var = create<ast::Override>(source, Sym(std::forward<NAME>(name)), type, constructor,
+                                          std::move(attributes));
         AST().AddGlobalVariable(var);
         return var;
     }

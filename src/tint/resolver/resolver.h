@@ -109,9 +109,6 @@ class Resolver {
     const Validator* GetValidatorForTesting() const { return &validator_; }
 
   private:
-    /// Describes the context in which a variable is declared
-    enum class VariableKind { kParameter, kLocal, kGlobal };
-
     Validator::ValidTypeStorageLayouts valid_type_storage_layouts_;
 
     /// Structure holding semantic information about a block (i.e. scope), such as
@@ -298,9 +295,9 @@ class Resolver {
     /// @note this method does not resolve the attributes as these are
     /// context-dependent (global, local, parameter)
     /// @param var the variable to create or return the `VariableInfo` for
-    /// @param kind what kind of variable we are declaring
+    /// @param is_global true if this is module scope, otherwise function scope
     /// @param index the index of the parameter, if this variable is a parameter
-    sem::Variable* Variable(const ast::Variable* var, VariableKind kind, uint32_t index = 0);
+    sem::Variable* Variable(const ast::Variable* var, bool is_global, uint32_t index = 0);
 
     /// Records the storage class usage for the given type, and any transient
     /// dependencies of the type. Validates that the type can be used for the

@@ -1,0 +1,86 @@
+// Copyright 2022 The Tint Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef SRC_TINT_AST_VAR_H_
+#define SRC_TINT_AST_VAR_H_
+
+#include <utility>
+#include <vector>
+
+#include "src/tint/ast/variable.h"
+
+namespace tint::ast {
+
+/// A "var" declaration is a name for typed storage.
+///
+/// Examples:
+///
+/// ```
+///  // Declared outside a function, i.e. at module scope, requires
+///  // a storage class.
+///  var<workgroup> width : i32;     // no initializer
+///  var<private> height : i32 = 3;  // with initializer
+///
+///  // A variable declared inside a function doesn't take a storage class,
+///  // and maps to SPIR-V Function storage.
+///  var computed_depth : i32;
+///  var area : i32 = compute_area(width, height);
+/// ```
+///
+/// @see https://www.w3.org/TR/WGSL/#var-decls
+class Var final : public Castable<Var, Variable> {
+  public:
+    /// Create a 'var' variable
+    /// @param program_id the identifier of the program that owns this node
+    /// @param source the variable source
+    /// @param sym the variable symbol
+    /// @param type the declared variable type
+    /// @param declared_storage_class the declared storage class
+    /// @param declared_access the declared access control
+    /// @param constructor the constructor expression
+    /// @param attributes the variable attributes
+    Var(ProgramID program_id,
+        const Source& source,
+        const Symbol& sym,
+        const ast::Type* type,
+        StorageClass declared_storage_class,
+        Access declared_access,
+        const Expression* constructor,
+        AttributeList attributes);
+
+    /// Move constructor
+    Var(Var&&);
+
+    /// Destructor
+    ~Var() override;
+
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const Var* Clone(CloneContext* ctx) const override;
+
+    /// The declared storage class
+    const StorageClass declared_storage_class;
+
+    /// The declared access control
+    const Access declared_access;
+};
+
+/// A list of `var` declarations
+using VarList = std::vector<const Var*>;
+
+}  // namespace tint::ast
+
+#endif  // SRC_TINT_AST_VAR_H_

@@ -13,9 +13,8 @@
 // limitations under the License.
 
 #include "src/tint/ast/variable.h"
-
-#include "src/tint/program_builder.h"
-#include "src/tint/sem/variable.h"
+#include "src/tint/ast/binding_attribute.h"
+#include "src/tint/ast/group_attribute.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Variable);
 
@@ -24,24 +23,11 @@ namespace tint::ast {
 Variable::Variable(ProgramID pid,
                    const Source& src,
                    const Symbol& sym,
-                   StorageClass dsc,
-                   Access da,
                    const ast::Type* ty,
-                   bool constant,
-                   bool overridable,
                    const Expression* ctor,
                    AttributeList attrs)
-    : Base(pid, src),
-      symbol(sym),
-      type(ty),
-      is_const(constant),
-      is_overridable(overridable),
-      constructor(ctor),
-      attributes(std::move(attrs)),
-      declared_storage_class(dsc),
-      declared_access(da) {
+    : Base(pid, src), symbol(sym), type(ty), constructor(ctor), attributes(std::move(attrs)) {
     TINT_ASSERT(AST, symbol.IsValid());
-    TINT_ASSERT(AST, is_overridable ? is_const : true);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol, program_id);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, constructor, program_id);
 }
@@ -54,23 +40,12 @@ VariableBindingPoint Variable::BindingPoint() const {
     const GroupAttribute* group = nullptr;
     const BindingAttribute* binding = nullptr;
     for (auto* attr : attributes) {
-        if (auto* g = attr->As<GroupAttribute>()) {
-            group = g;
-        } else if (auto* b = attr->As<BindingAttribute>()) {
-            binding = b;
-        }
+        Switch(
+            attr,  //
+            [&](const GroupAttribute* a) { group = a; },
+            [&](const BindingAttribute* a) { binding = a; });
     }
     return VariableBindingPoint{group, binding};
-}
-
-const Variable* Variable::Clone(CloneContext* ctx) const {
-    auto src = ctx->Clone(source);
-    auto sym = ctx->Clone(symbol);
-    auto* ty = ctx->Clone(type);
-    auto* ctor = ctx->Clone(constructor);
-    auto attrs = ctx->Clone(attributes);
-    return ctx->dst->create<Variable>(src, sym, declared_storage_class, declared_access, ty,
-                                      is_const, is_overridable, ctor, attrs);
 }
 
 }  // namespace tint::ast

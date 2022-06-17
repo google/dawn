@@ -1371,8 +1371,8 @@ bool ParserImpl::EmitScalarSpecConstants() {
                     break;
                 }
             }
-            auto* ast_var = MakeVariable(inst.result_id(), ast::StorageClass::kNone, ast_type, true,
-                                         true, ast_expr, std::move(spec_id_decos));
+            auto* ast_var =
+                MakeOverride(inst.result_id(), ast_type, ast_expr, std::move(spec_id_decos));
             if (ast_var) {
                 builder_.AST().AddGlobalVariable(ast_var);
                 scalar_spec_constants_.insert(inst.result_id());
@@ -1489,8 +1489,8 @@ bool ParserImpl::EmitModuleScopeVariables() {
             // here.)
             ast_constructor = MakeConstantExpression(var.GetSingleWordInOperand(1)).expr;
         }
-        auto* ast_var = MakeVariable(var.result_id(), ast_storage_class, ast_store_type, false,
-                                     false, ast_constructor, ast::AttributeList{});
+        auto* ast_var = MakeVar(var.result_id(), ast_storage_class, ast_store_type, ast_constructor,
+                                ast::AttributeList{});
         // TODO(dneto): initializers (a.k.a. constructor expression)
         if (ast_var) {
             builder_.AST().AddGlobalVariable(ast_var);
@@ -1521,10 +1521,9 @@ bool ParserImpl::EmitModuleScopeVariables() {
             }
         }
         auto* ast_var =
-            MakeVariable(builtin_position_.per_vertex_var_id,
-                         enum_converter_.ToStorageClass(builtin_position_.storage_class),
-                         ConvertType(builtin_position_.position_member_type_id), false, false,
-                         ast_constructor, {});
+            MakeVar(builtin_position_.per_vertex_var_id,
+                    enum_converter_.ToStorageClass(builtin_position_.storage_class),
+                    ConvertType(builtin_position_.position_member_type_id), ast_constructor, {});
 
         builder_.AST().AddGlobalVariable(ast_var);
     }
@@ -1554,13 +1553,11 @@ const spvtools::opt::analysis::IntConstant* ParserImpl::GetArraySize(uint32_t va
     return size->AsIntConstant();
 }
 
-ast::Variable* ParserImpl::MakeVariable(uint32_t id,
-                                        ast::StorageClass sc,
-                                        const Type* storage_type,
-                                        bool is_const,
-                                        bool is_overridable,
-                                        const ast::Expression* constructor,
-                                        ast::AttributeList decorations) {
+ast::Var* ParserImpl::MakeVar(uint32_t id,
+                              ast::StorageClass sc,
+                              const Type* storage_type,
+                              const ast::Expression* constructor,
+                              ast::AttributeList decorations) {
     if (storage_type == nullptr) {
         Fail() << "internal error: can't make ast::Variable for null type";
         return nullptr;
@@ -1588,15 +1585,37 @@ ast::Variable* ParserImpl::MakeVariable(uint32_t id,
         return nullptr;
     }
 
-    std::string name = namer_.Name(id);
+    auto sym = builder_.Symbols().Register(namer_.Name(id));
+    return create<ast::Var>(Source{}, sym, storage_type->Build(builder_), sc, access, constructor,
+                            decorations);
+}
 
-    // Note: we're constructing the variable here with the *storage* type,
-    // regardless of whether this is a `let`, `override`, or `var` declaration.
-    // `var` declarations will have a resolved type of ref<storage>, but at the
-    // AST level all three are declared with the same type.
-    return create<ast::Variable>(Source{}, builder_.Symbols().Register(name), sc, access,
-                                 storage_type->Build(builder_), is_const, is_overridable,
-                                 constructor, decorations);
+ast::Let* ParserImpl::MakeLet(uint32_t id, const Type* type, const ast::Expression* constructor) {
+    auto sym = builder_.Symbols().Register(namer_.Name(id));
+    return create<ast::Let>(Source{}, sym, type->Build(builder_), constructor,
+                            ast::AttributeList{});
+}
+
+ast::Override* ParserImpl::MakeOverride(uint32_t id,
+                                        const Type* type,
+                                        const ast::Expression* constructor,
+                                        ast::AttributeList decorations) {
+    if (!ConvertDecorationsForVariable(id, &type, &decorations, false)) {
+        return nullptr;
+    }
+    auto sym = builder_.Symbols().Register(namer_.Name(id));
+    return create<ast::Override>(Source{}, sym, type->Build(builder_), constructor, decorations);
+}
+
+ast::Parameter* ParserImpl::MakeParameter(uint32_t id,
+                                          const Type* type,
+                                          ast::AttributeList decorations) {
+    if (!ConvertDecorationsForVariable(id, &type, &decorations, false)) {
+        return nullptr;
+    }
+
+    auto sym = builder_.Symbols().Register(namer_.Name(id));
+    return create<ast::Parameter>(Source{}, sym, type->Build(builder_), decorations);
 }
 
 bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,

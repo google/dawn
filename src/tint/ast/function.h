@@ -26,13 +26,10 @@
 #include "src/tint/ast/builtin_attribute.h"
 #include "src/tint/ast/group_attribute.h"
 #include "src/tint/ast/location_attribute.h"
+#include "src/tint/ast/parameter.h"
 #include "src/tint/ast/pipeline_stage.h"
-#include "src/tint/ast/variable.h"
 
 namespace tint::ast {
-
-/// ParameterList is a list of function parameters
-using ParameterList = std::vector<const Variable*>;
 
 /// A Function statement.
 class Function final : public Castable<Function, Node> {

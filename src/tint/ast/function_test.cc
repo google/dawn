@@ -122,18 +122,6 @@ TEST_F(FunctionTest, Assert_DifferentProgramID_ReturnAttr) {
         "internal compiler error");
 }
 
-TEST_F(FunctionTest, Assert_NonConstParam) {
-    EXPECT_FATAL_FAILURE(
-        {
-            ProgramBuilder b;
-            ParameterList params;
-            params.push_back(b.Var("var", b.ty.i32(), ast::StorageClass::kNone));
-
-            b.Func("f", params, b.ty.void_(), {});
-        },
-        "internal compiler error");
-}
-
 using FunctionListTest = TestHelper;
 
 TEST_F(FunctionListTest, FindSymbol) {

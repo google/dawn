@@ -57,7 +57,7 @@ TEST_F(ForStmtTest, InitializerStatementDecl) {
     ASSERT_TRUE(fl.matched);
     ASSERT_TRUE(Is<ast::VariableDeclStatement>(fl->initializer));
     auto* var = fl->initializer->As<ast::VariableDeclStatement>()->variable;
-    EXPECT_FALSE(var->is_const);
+    EXPECT_TRUE(var->Is<ast::Var>());
     EXPECT_EQ(var->constructor, nullptr);
     EXPECT_EQ(fl->condition, nullptr);
     EXPECT_EQ(fl->continuing, nullptr);
@@ -74,7 +74,7 @@ TEST_F(ForStmtTest, InitializerStatementDeclEqual) {
     ASSERT_TRUE(fl.matched);
     ASSERT_TRUE(Is<ast::VariableDeclStatement>(fl->initializer));
     auto* var = fl->initializer->As<ast::VariableDeclStatement>()->variable;
-    EXPECT_FALSE(var->is_const);
+    EXPECT_TRUE(var->Is<ast::Var>());
     EXPECT_NE(var->constructor, nullptr);
     EXPECT_EQ(fl->condition, nullptr);
     EXPECT_EQ(fl->continuing, nullptr);
@@ -90,7 +90,7 @@ TEST_F(ForStmtTest, InitializerStatementConstDecl) {
     ASSERT_TRUE(fl.matched);
     ASSERT_TRUE(Is<ast::VariableDeclStatement>(fl->initializer));
     auto* var = fl->initializer->As<ast::VariableDeclStatement>()->variable;
-    EXPECT_TRUE(var->is_const);
+    EXPECT_TRUE(var->Is<ast::Let>());
     EXPECT_NE(var->constructor, nullptr);
     EXPECT_EQ(fl->condition, nullptr);
     EXPECT_EQ(fl->continuing, nullptr);

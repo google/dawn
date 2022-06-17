@@ -39,7 +39,7 @@ TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
+    ASSERT_TRUE(gen.EmitOverride(var)) << gen.error();
     EXPECT_EQ(gen.result(), "constant float pos [[function_constant(23)]];\n");
 }
 
@@ -52,8 +52,8 @@ TEST_F(MslGeneratorImplTest, Emit_SpecConstant_NoId) {
 
     GeneratorImpl& gen = Build();
 
-    ASSERT_TRUE(gen.EmitProgramConstVariable(var_a)) << gen.error();
-    ASSERT_TRUE(gen.EmitProgramConstVariable(var_b)) << gen.error();
+    ASSERT_TRUE(gen.EmitOverride(var_a)) << gen.error();
+    ASSERT_TRUE(gen.EmitOverride(var_b)) << gen.error();
     EXPECT_EQ(gen.result(), R"(constant float a [[function_constant(0)]];
 constant float b [[function_constant(1)]];
 )");

@@ -44,10 +44,10 @@ std::vector<std::pair<const Variable*, const ast::LocationAttribute*>>
 Function::TransitivelyReferencedLocationVariables() const {
     std::vector<std::pair<const Variable*, const ast::LocationAttribute*>> ret;
 
-    for (auto* var : TransitivelyReferencedGlobals()) {
-        for (auto* attr : var->Declaration()->attributes) {
+    for (auto* global : TransitivelyReferencedGlobals()) {
+        for (auto* attr : global->Declaration()->attributes) {
             if (auto* location = attr->As<ast::LocationAttribute>()) {
-                ret.push_back({var, location});
+                ret.push_back({global, location});
                 break;
             }
         }
@@ -58,13 +58,13 @@ Function::TransitivelyReferencedLocationVariables() const {
 Function::VariableBindings Function::TransitivelyReferencedUniformVariables() const {
     VariableBindings ret;
 
-    for (auto* var : TransitivelyReferencedGlobals()) {
-        if (var->StorageClass() != ast::StorageClass::kUniform) {
+    for (auto* global : TransitivelyReferencedGlobals()) {
+        if (global->StorageClass() != ast::StorageClass::kUniform) {
             continue;
         }
 
-        if (auto binding_point = var->Declaration()->BindingPoint()) {
-            ret.push_back({var, binding_point});
+        if (auto binding_point = global->Declaration()->BindingPoint()) {
+            ret.push_back({global, binding_point});
         }
     }
     return ret;
@@ -73,13 +73,13 @@ Function::VariableBindings Function::TransitivelyReferencedUniformVariables() co
 Function::VariableBindings Function::TransitivelyReferencedStorageBufferVariables() const {
     VariableBindings ret;
 
-    for (auto* var : TransitivelyReferencedGlobals()) {
-        if (var->StorageClass() != ast::StorageClass::kStorage) {
+    for (auto* global : TransitivelyReferencedGlobals()) {
+        if (global->StorageClass() != ast::StorageClass::kStorage) {
             continue;
         }
 
-        if (auto binding_point = var->Declaration()->BindingPoint()) {
-            ret.push_back({var, binding_point});
+        if (auto binding_point = global->Declaration()->BindingPoint()) {
+            ret.push_back({global, binding_point});
         }
     }
     return ret;
@@ -89,10 +89,10 @@ std::vector<std::pair<const Variable*, const ast::BuiltinAttribute*>>
 Function::TransitivelyReferencedBuiltinVariables() const {
     std::vector<std::pair<const Variable*, const ast::BuiltinAttribute*>> ret;
 
-    for (auto* var : TransitivelyReferencedGlobals()) {
-        for (auto* attr : var->Declaration()->attributes) {
+    for (auto* global : TransitivelyReferencedGlobals()) {
+        for (auto* attr : global->Declaration()->attributes) {
             if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
-                ret.push_back({var, builtin});
+                ret.push_back({global, builtin});
                 break;
             }
         }
@@ -119,11 +119,11 @@ Function::VariableBindings Function::TransitivelyReferencedMultisampledTextureVa
 Function::VariableBindings Function::TransitivelyReferencedVariablesOfType(
     const tint::TypeInfo* type) const {
     VariableBindings ret;
-    for (auto* var : TransitivelyReferencedGlobals()) {
-        auto* unwrapped_type = var->Type()->UnwrapRef();
+    for (auto* global : TransitivelyReferencedGlobals()) {
+        auto* unwrapped_type = global->Type()->UnwrapRef();
         if (unwrapped_type->TypeInfo().Is(type)) {
-            if (auto binding_point = var->Declaration()->BindingPoint()) {
-                ret.push_back({var, binding_point});
+            if (auto binding_point = global->Declaration()->BindingPoint()) {
+                ret.push_back({global, binding_point});
             }
         }
     }
@@ -143,15 +143,15 @@ Function::VariableBindings Function::TransitivelyReferencedSamplerVariablesImpl(
     ast::SamplerKind kind) const {
     VariableBindings ret;
 
-    for (auto* var : TransitivelyReferencedGlobals()) {
-        auto* unwrapped_type = var->Type()->UnwrapRef();
+    for (auto* global : TransitivelyReferencedGlobals()) {
+        auto* unwrapped_type = global->Type()->UnwrapRef();
         auto* sampler = unwrapped_type->As<sem::Sampler>();
         if (sampler == nullptr || sampler->kind() != kind) {
             continue;
         }
 
-        if (auto binding_point = var->Declaration()->BindingPoint()) {
-            ret.push_back({var, binding_point});
+        if (auto binding_point = global->Declaration()->BindingPoint()) {
+            ret.push_back({global, binding_point});
         }
     }
     return ret;
@@ -161,8 +161,8 @@ Function::VariableBindings Function::TransitivelyReferencedSampledTextureVariabl
     bool multisampled) const {
     VariableBindings ret;
 
-    for (auto* var : TransitivelyReferencedGlobals()) {
-        auto* unwrapped_type = var->Type()->UnwrapRef();
+    for (auto* global : TransitivelyReferencedGlobals()) {
+        auto* unwrapped_type = global->Type()->UnwrapRef();
         auto* texture = unwrapped_type->As<sem::Texture>();
         if (texture == nullptr) {
             continue;
@@ -175,8 +175,8 @@ Function::VariableBindings Function::TransitivelyReferencedSampledTextureVariabl
             continue;
         }
 
-        if (auto binding_point = var->Declaration()->BindingPoint()) {
-            ret.push_back({var, binding_point});
+        if (auto binding_point = global->Declaration()->BindingPoint()) {
+            ret.push_back({global, binding_point});
         }
     }
 

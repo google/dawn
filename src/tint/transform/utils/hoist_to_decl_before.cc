@@ -189,18 +189,18 @@ class HoistToDeclBefore::State {
     /// before `before_expr`.
     /// @param before_expr expression to insert `expr` before
     /// @param expr expression to hoist
-    /// @param as_const hoist to `let` if true, otherwise to `var`
+    /// @param as_let hoist to `let` if true, otherwise to `var`
     /// @param decl_name optional name to use for the variable/constant name
     /// @return true on success
     bool Add(const sem::Expression* before_expr,
              const ast::Expression* expr,
-             bool as_const,
+             bool as_let,
              const char* decl_name) {
         auto name = b.Symbols().New(decl_name);
 
         // Construct the let/var that holds the hoisted expr
-        auto* v = as_const ? b.Let(name, nullptr, ctx.Clone(expr))
-                           : b.Var(name, nullptr, ctx.Clone(expr));
+        auto* v = as_let ? static_cast<const ast::Variable*>(b.Let(name, nullptr, ctx.Clone(expr)))
+                         : static_cast<const ast::Variable*>(b.Var(name, nullptr, ctx.Clone(expr)));
         auto* decl = b.Decl(v);
 
         if (!InsertBefore(before_expr->Stmt(), decl)) {
@@ -330,9 +330,9 @@ HoistToDeclBefore::~HoistToDeclBefore() {}
 
 bool HoistToDeclBefore::Add(const sem::Expression* before_expr,
                             const ast::Expression* expr,
-                            bool as_const,
+                            bool as_let,
                             const char* decl_name) {
-    return state_->Add(before_expr, expr, as_const, decl_name);
+    return state_->Add(before_expr, expr, as_let, decl_name);
 }
 
 bool HoistToDeclBefore::InsertBefore(const sem::Statement* before_stmt,

@@ -1,4 +1,5 @@
 static const uint width = 128u;
+
 Texture2D tex : register(t0, space0);
 RWByteAddressBuffer result : register(u1, space0);
 

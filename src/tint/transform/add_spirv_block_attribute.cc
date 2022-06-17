@@ -54,8 +54,8 @@ void AddSpirvBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) co
     // contains it in the destination program.
     std::unordered_map<const sem::Type*, const ast::Struct*> wrapper_structs;
 
-    // Process global variables that are buffers.
-    for (auto* var : ctx.src->AST().GlobalVariables()) {
+    // Process global 'var' declarations that are buffers.
+    for (auto* var : ctx.src->AST().Globals<ast::Var>()) {
         auto* sem_var = sem.Get<sem::GlobalVariable>(var);
         if (var->declared_storage_class != ast::StorageClass::kStorage &&
             var->declared_storage_class != ast::StorageClass::kUniform) {

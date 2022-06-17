@@ -109,8 +109,8 @@ struct SimplifyPointers::State {
             }
             if (auto* user = ctx.src->Sem().Get<sem::VariableUser>(op.expr)) {
                 auto* var = user->Variable();
-                if (var->Is<sem::LocalVariable>() &&  //
-                    var->Declaration()->is_const &&   //
+                if (var->Is<sem::LocalVariable>() &&       //
+                    var->Declaration()->Is<ast::Let>() &&  //
                     var->Type()->Is<sem::Pointer>()) {
                     op.expr = var->Declaration()->constructor;
                     continue;
@@ -161,7 +161,7 @@ struct SimplifyPointers::State {
         // permitted.
         for (auto* node : ctx.src->ASTNodes().Objects()) {
             if (auto* let = node->As<ast::VariableDeclStatement>()) {
-                if (!let->variable->is_const) {
+                if (!let->variable->Is<ast::Let>()) {
                     continue;  // Not a `let` declaration. Ignore.
                 }
 

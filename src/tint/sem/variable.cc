@@ -62,7 +62,7 @@ GlobalVariable::GlobalVariable(const ast::Variable* declaration,
 
 GlobalVariable::~GlobalVariable() = default;
 
-Parameter::Parameter(const ast::Variable* declaration,
+Parameter::Parameter(const ast::Parameter* declaration,
                      uint32_t index,
                      const sem::Type* type,
                      ast::StorageClass storage_class,

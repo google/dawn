@@ -151,6 +151,8 @@ set(TINT_LIB_SRCS
   ast/interpolate_attribute.h
   ast/invariant_attribute.cc
   ast/invariant_attribute.h
+  ast/let.cc
+  ast/let.h
   ast/literal_expression.cc
   ast/literal_expression.h
   ast/location_attribute.cc
@@ -167,6 +169,10 @@ set(TINT_LIB_SRCS
   ast/multisampled_texture.h
   ast/node.cc
   ast/node.h
+  ast/override.cc
+  ast/override.h
+  ast/parameter.cc
+  ast/parameter.h
   ast/phony_expression.cc
   ast/phony_expression.h
   ast/pipeline_stage.cc
@@ -215,6 +221,8 @@ set(TINT_LIB_SRCS
   ast/unary_op_expression.h
   ast/unary_op.cc
   ast/unary_op.h
+  ast/var.cc
+  ast/var.h
   ast/variable_decl_statement.cc
   ast/variable_decl_statement.h
   ast/variable.cc

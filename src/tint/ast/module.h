@@ -77,6 +77,19 @@ class Module final : public Castable<Module, Node> {
     /// @returns the global variables for the module
     VariableList& GlobalVariables() { return global_variables_; }
 
+    /// @returns the global variable declarations of kind 'T' for the module
+    template <typename T, typename = traits::EnableIfIsType<T, ast::Variable>>
+    std::vector<const T*> Globals() const {
+        std::vector<const T*> out;
+        out.reserve(global_variables_.size());
+        for (auto* global : global_variables_) {
+            if (auto* var = global->As<T>()) {
+                out.emplace_back(var);
+            }
+        }
+        return out;
+    }
+
     /// @returns the extension set for the module
     const EnableList& Enables() const { return enables_; }
 

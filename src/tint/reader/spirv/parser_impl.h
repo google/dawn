@@ -411,24 +411,46 @@ class ParserImpl : Reader {
     /// @returns a list of SPIR-V decorations.
     DecorationList GetMemberPipelineDecorations(const Struct& struct_type, int member_index);
 
-    /// Creates an AST Variable node for a SPIR-V ID, including any attached
-    /// decorations, unless it's an ignorable builtin variable.
+    /// Creates an AST 'var' node for a SPIR-V ID, including any attached decorations, unless it's
+    /// an ignorable builtin variable.
     /// @param id the SPIR-V result ID
     /// @param sc the storage class, which cannot be ast::StorageClass::kNone
     /// @param storage_type the storage type of the variable
-    /// @param is_const if true, the variable is const
-    /// @param is_overridable if true, the variable is pipeline-overridable
     /// @param constructor the variable constructor
     /// @param decorations the variable decorations
     /// @returns a new Variable node, or null in the ignorable variable case and
     /// in the error case
-    ast::Variable* MakeVariable(uint32_t id,
-                                ast::StorageClass sc,
-                                const Type* storage_type,
-                                bool is_const,
-                                bool is_overridable,
+    ast::Var* MakeVar(uint32_t id,
+                      ast::StorageClass sc,
+                      const Type* storage_type,
+                      const ast::Expression* constructor,
+                      ast::AttributeList decorations);
+
+    /// Creates an AST 'let' node for a SPIR-V ID, including any attached decorations,.
+    /// @param id the SPIR-V result ID
+    /// @param type the type of the variable
+    /// @param constructor the variable constructor
+    /// @returns the AST 'let' node
+    ast::Let* MakeLet(uint32_t id, const Type* type, const ast::Expression* constructor);
+
+    /// Creates an AST 'override' node for a SPIR-V ID, including any attached decorations.
+    /// @param id the SPIR-V result ID
+    /// @param type the type of the variable
+    /// @param constructor the variable constructor
+    /// @param decorations the variable decorations
+    /// @returns the AST 'override' node
+    ast::Override* MakeOverride(uint32_t id,
+                                const Type* type,
                                 const ast::Expression* constructor,
                                 ast::AttributeList decorations);
+
+    /// Creates an AST parameter node for a SPIR-V ID, including any attached decorations, unless
+    /// it's an ignorable builtin variable.
+    /// @param id the SPIR-V result ID
+    /// @param type the type of the parameter
+    /// @param decorations the parameter decorations
+    /// @returns the AST parameter node
+    ast::Parameter* MakeParameter(uint32_t id, const Type* type, ast::AttributeList decorations);
 
     /// Returns true if a constant expression can be generated.
     /// @param id the SPIR-V ID of the value

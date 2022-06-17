@@ -40,7 +40,7 @@ Function::Function(ProgramID pid,
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol, program_id);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
     for (auto* param : params) {
-        TINT_ASSERT(AST, param && param->is_const);
+        TINT_ASSERT(AST, tint::Is<Parameter>(param));
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, param, program_id);
     }
     TINT_ASSERT(AST, symbol.IsValid());

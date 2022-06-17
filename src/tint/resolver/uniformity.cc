@@ -949,7 +949,7 @@ class UniformityGraph {
                 }
                 current_function_->variables.Set(sem_.Get(decl->variable), node);
 
-                if (!decl->variable->is_const) {
+                if (decl->variable->Is<ast::Var>()) {
                     current_function_->local_var_decls.insert(
                         sem_.Get<sem::LocalVariable>(decl->variable));
                 }
@@ -1018,7 +1018,8 @@ class UniformityGraph {
             },
 
             [&](const sem::GlobalVariable* global) {
-                if (global->Declaration()->is_const || global->Access() == ast::Access::kRead) {
+                if (!global->Declaration()->Is<ast::Var>() ||
+                    global->Access() == ast::Access::kRead) {
                     node->AddEdge(cf);
                 } else {
                     node->AddEdge(current_function_->may_be_non_uniform);

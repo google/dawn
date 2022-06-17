@@ -26,18 +26,19 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
     ASSERT_FALSE(p->has_error()) << p->error();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
-    ASSERT_NE(e.value, nullptr);
+    auto* var = e.value->As<ast::Var>();
+    ASSERT_NE(var, nullptr);
 
-    EXPECT_EQ(e->symbol, p->builder().Symbols().Get("a"));
-    EXPECT_TRUE(e->type->Is<ast::F32>());
-    EXPECT_EQ(e->declared_storage_class, ast::StorageClass::kPrivate);
+    EXPECT_EQ(var->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_TRUE(var->type->Is<ast::F32>());
+    EXPECT_EQ(var->declared_storage_class, ast::StorageClass::kPrivate);
 
-    EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 14u);
-    EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 15u);
+    EXPECT_EQ(var->source.range.begin.line, 1u);
+    EXPECT_EQ(var->source.range.begin.column, 14u);
+    EXPECT_EQ(var->source.range.end.line, 1u);
+    EXPECT_EQ(var->source.range.end.column, 15u);
 
-    ASSERT_EQ(e->constructor, nullptr);
+    ASSERT_EQ(var->constructor, nullptr);
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
@@ -49,19 +50,20 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
     ASSERT_FALSE(p->has_error()) << p->error();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
-    ASSERT_NE(e.value, nullptr);
+    auto* var = e.value->As<ast::Var>();
+    ASSERT_NE(var, nullptr);
 
-    EXPECT_EQ(e->symbol, p->builder().Symbols().Get("a"));
-    EXPECT_TRUE(e->type->Is<ast::F32>());
-    EXPECT_EQ(e->declared_storage_class, ast::StorageClass::kPrivate);
+    EXPECT_EQ(var->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_TRUE(var->type->Is<ast::F32>());
+    EXPECT_EQ(var->declared_storage_class, ast::StorageClass::kPrivate);
 
-    EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 14u);
-    EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 15u);
+    EXPECT_EQ(var->source.range.begin.line, 1u);
+    EXPECT_EQ(var->source.range.begin.column, 14u);
+    EXPECT_EQ(var->source.range.end.line, 1u);
+    EXPECT_EQ(var->source.range.end.column, 15u);
 
-    ASSERT_NE(e->constructor, nullptr);
-    ASSERT_TRUE(e->constructor->Is<ast::FloatLiteralExpression>());
+    ASSERT_NE(var->constructor, nullptr);
+    ASSERT_TRUE(var->constructor->Is<ast::FloatLiteralExpression>());
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute) {
@@ -73,21 +75,22 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute) {
     ASSERT_FALSE(p->has_error()) << p->error();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
-    ASSERT_NE(e.value, nullptr);
+    auto* var = e.value->As<ast::Var>();
+    ASSERT_NE(var, nullptr);
 
-    EXPECT_EQ(e->symbol, p->builder().Symbols().Get("a"));
-    ASSERT_NE(e->type, nullptr);
-    EXPECT_TRUE(e->type->Is<ast::F32>());
-    EXPECT_EQ(e->declared_storage_class, ast::StorageClass::kUniform);
+    EXPECT_EQ(var->symbol, p->builder().Symbols().Get("a"));
+    ASSERT_NE(var->type, nullptr);
+    EXPECT_TRUE(var->type->Is<ast::F32>());
+    EXPECT_EQ(var->declared_storage_class, ast::StorageClass::kUniform);
 
-    EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 36u);
-    EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 37u);
+    EXPECT_EQ(var->source.range.begin.line, 1u);
+    EXPECT_EQ(var->source.range.begin.column, 36u);
+    EXPECT_EQ(var->source.range.end.line, 1u);
+    EXPECT_EQ(var->source.range.end.column, 37u);
 
-    ASSERT_EQ(e->constructor, nullptr);
+    ASSERT_EQ(var->constructor, nullptr);
 
-    auto& attributes = e->attributes;
+    auto& attributes = var->attributes;
     ASSERT_EQ(attributes.size(), 2u);
     ASSERT_TRUE(attributes[0]->Is<ast::BindingAttribute>());
     ASSERT_TRUE(attributes[1]->Is<ast::GroupAttribute>());
@@ -103,21 +106,22 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute_MulitpleGroups) {
     ASSERT_FALSE(p->has_error()) << p->error();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
-    ASSERT_NE(e.value, nullptr);
+    auto* var = e.value->As<ast::Var>();
+    ASSERT_NE(var, nullptr);
 
-    EXPECT_EQ(e->symbol, p->builder().Symbols().Get("a"));
-    ASSERT_NE(e->type, nullptr);
-    EXPECT_TRUE(e->type->Is<ast::F32>());
-    EXPECT_EQ(e->declared_storage_class, ast::StorageClass::kUniform);
+    EXPECT_EQ(var->symbol, p->builder().Symbols().Get("a"));
+    ASSERT_NE(var->type, nullptr);
+    EXPECT_TRUE(var->type->Is<ast::F32>());
+    EXPECT_EQ(var->declared_storage_class, ast::StorageClass::kUniform);
 
-    EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 36u);
-    EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 37u);
+    EXPECT_EQ(var->source.range.begin.line, 1u);
+    EXPECT_EQ(var->source.range.begin.column, 36u);
+    EXPECT_EQ(var->source.range.end.line, 1u);
+    EXPECT_EQ(var->source.range.end.column, 37u);
 
-    ASSERT_EQ(e->constructor, nullptr);
+    ASSERT_EQ(var->constructor, nullptr);
 
-    auto& attributes = e->attributes;
+    auto& attributes = var->attributes;
     ASSERT_EQ(attributes.size(), 2u);
     ASSERT_TRUE(attributes[0]->Is<ast::BindingAttribute>());
     ASSERT_TRUE(attributes[1]->Is<ast::GroupAttribute>());

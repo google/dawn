@@ -44,28 +44,42 @@ struct Unshadow::State {
         // Maps a variable to its new name.
         std::unordered_map<const sem::Variable*, Symbol> renamed_to;
 
-        auto rename = [&](const sem::Variable* var) -> const ast::Variable* {
-            auto* decl = var->Declaration();
+        auto rename = [&](const sem::Variable* v) -> const ast::Variable* {
+            auto* decl = v->Declaration();
             auto name = ctx.src->Symbols().NameFor(decl->symbol);
             auto symbol = ctx.dst->Symbols().New(name);
-            renamed_to.emplace(var, symbol);
+            renamed_to.emplace(v, symbol);
 
             auto source = ctx.Clone(decl->source);
             auto* type = ctx.Clone(decl->type);
             auto* constructor = ctx.Clone(decl->constructor);
             auto attributes = ctx.Clone(decl->attributes);
-            return ctx.dst->create<ast::Variable>(source, symbol, decl->declared_storage_class,
-                                                  decl->declared_access, type, decl->is_const,
-                                                  decl->is_overridable, constructor, attributes);
+            return Switch(
+                decl,  //
+                [&](const ast::Var* var) {
+                    return ctx.dst->Var(source, symbol, type, var->declared_storage_class,
+                                        var->declared_access, constructor, attributes);
+                },
+                [&](const ast::Let*) {
+                    return ctx.dst->Let(source, symbol, type, constructor, attributes);
+                },
+                [&](const ast::Parameter*) {
+                    return ctx.dst->Param(source, symbol, type, attributes);
+                },
+                [&](Default) {
+                    TINT_ICE(Transform, ctx.dst->Diagnostics())
+                        << "unexpected variable type: " << decl->TypeInfo().name;
+                    return nullptr;
+                });
         };
 
-        ctx.ReplaceAll([&](const ast::Variable* var) -> const ast::Variable* {
-            if (auto* local = sem.Get<sem::LocalVariable>(var)) {
+        ctx.ReplaceAll([&](const ast::Variable* v) -> const ast::Variable* {
+            if (auto* local = sem.Get<sem::LocalVariable>(v)) {
                 if (local->Shadows()) {
                     return rename(local);
                 }
             }
-            if (auto* param = sem.Get<sem::Parameter>(var)) {
+            if (auto* param = sem.Get<sem::Parameter>(v)) {
                 if (param->Shadows()) {
                     return rename(param);
                 }

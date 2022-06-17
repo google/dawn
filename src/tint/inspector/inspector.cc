@@ -183,7 +183,7 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
             auto name = program_->Symbols().NameFor(decl->symbol);
 
             auto* global = var->As<sem::GlobalVariable>();
-            if (global && global->IsOverridable()) {
+            if (global && global->Declaration()->Is<ast::Override>()) {
                 OverridableConstant overridable_constant;
                 overridable_constant.name = name;
                 overridable_constant.numeric_id = global->ConstantId();
@@ -219,7 +219,7 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
     std::map<uint32_t, Scalar> result;
     for (auto* var : program_->AST().GlobalVariables()) {
         auto* global = program_->Sem().Get<sem::GlobalVariable>(var);
-        if (!global || !global->IsOverridable()) {
+        if (!global || !global->Declaration()->Is<ast::Override>()) {
             continue;
         }
 
@@ -276,7 +276,7 @@ std::map<std::string, uint32_t> Inspector::GetConstantNameToIdMap() {
     std::map<std::string, uint32_t> result;
     for (auto* var : program_->AST().GlobalVariables()) {
         auto* global = program_->Sem().Get<sem::GlobalVariable>(var);
-        if (global && global->IsOverridable()) {
+        if (global && global->Declaration()->Is<ast::Override>()) {
             auto name = program_->Symbols().NameFor(var->symbol);
             result[name] = global->ConstantId();
         }
@@ -813,25 +813,24 @@ void Inspector::GenerateSamplerTargets() {
         auto* t = c->args[texture_index];
         auto* s = c->args[sampler_index];
 
-        GetOriginatingResources(std::array<const ast::Expression*, 2>{t, s},
-                                [&](std::array<const sem::GlobalVariable*, 2> globals) {
-                                    auto* texture = globals[0];
-                                    sem::BindingPoint texture_binding_point = {
-                                        texture->Declaration()->BindingPoint().group->value,
-                                        texture->Declaration()->BindingPoint().binding->value};
+        GetOriginatingResources(
+            std::array<const ast::Expression*, 2>{t, s},
+            [&](std::array<const sem::GlobalVariable*, 2> globals) {
+                auto* texture = globals[0]->Declaration()->As<ast::Var>();
+                sem::BindingPoint texture_binding_point = {texture->BindingPoint().group->value,
+                                                           texture->BindingPoint().binding->value};
 
-                                    auto* sampler = globals[1];
-                                    sem::BindingPoint sampler_binding_point = {
-                                        sampler->Declaration()->BindingPoint().group->value,
-                                        sampler->Declaration()->BindingPoint().binding->value};
+                auto* sampler = globals[1]->Declaration()->As<ast::Var>();
+                sem::BindingPoint sampler_binding_point = {sampler->BindingPoint().group->value,
+                                                           sampler->BindingPoint().binding->value};
 
-                                    for (auto* entry_point : entry_points) {
-                                        const auto& ep_name = program_->Symbols().NameFor(
-                                            entry_point->Declaration()->symbol);
-                                        (*sampler_targets_)[ep_name].add(
-                                            {sampler_binding_point, texture_binding_point});
-                                    }
-                                });
+                for (auto* entry_point : entry_points) {
+                    const auto& ep_name =
+                        program_->Symbols().NameFor(entry_point->Declaration()->symbol);
+                    (*sampler_targets_)[ep_name].add(
+                        {sampler_binding_point, texture_binding_point});
+                }
+            });
     }
 }
 

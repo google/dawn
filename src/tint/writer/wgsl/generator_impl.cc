@@ -635,46 +635,60 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
     return true;
 }
 
-bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* var) {
-    if (!var->attributes.empty()) {
-        if (!EmitAttributes(out, var->attributes)) {
+bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* v) {
+    if (!v->attributes.empty()) {
+        if (!EmitAttributes(out, v->attributes)) {
             return false;
         }
         out << " ";
     }
 
-    if (var->is_overridable) {
-        out << "override";
-    } else if (var->is_const) {
-        out << "let";
-    } else {
-        out << "var";
-        auto sc = var->declared_storage_class;
-        auto ac = var->declared_access;
-        if (sc != ast::StorageClass::kNone || ac != ast::Access::kUndefined) {
-            out << "<" << sc;
-            if (ac != ast::Access::kUndefined) {
-                out << ", ";
-                if (!EmitAccess(out, ac)) {
-                    return false;
+    bool ok = Switch(
+        v,  //
+        [&](const ast::Let* ) {
+            out << "let";
+            return true;
+        },
+        [&](const ast::Override* ) {
+            out << "override";
+            return true;
+        },
+        [&](const ast::Var* var) {
+            out << "var";
+            auto sc = var->declared_storage_class;
+            auto ac = var->declared_access;
+            if (sc != ast::StorageClass::kNone || ac != ast::Access::kUndefined) {
+                out << "<" << sc;
+                if (ac != ast::Access::kUndefined) {
+                    out << ", ";
+                    if (!EmitAccess(out, ac)) {
+                        return false;
+                    }
                 }
+                out << ">";
             }
-            out << ">";
-        }
+            return true;
+        },
+        [&](Default) {
+            TINT_ICE(Writer, diagnostics_) << "unhandled variable type " << v->TypeInfo().name;
+            return false;
+        });
+    if (!ok) {
+        return false;
     }
 
-    out << " " << program_->Symbols().NameFor(var->symbol);
+    out << " " << program_->Symbols().NameFor(v->symbol);
 
-    if (auto* ty = var->type) {
+    if (auto* ty = v->type) {
         out << " : ";
         if (!EmitType(out, ty)) {
             return false;
         }
     }
 
-    if (var->constructor != nullptr) {
+    if (v->constructor != nullptr) {
         out << " = ";
-        if (!EmitExpression(out, var->constructor)) {
+        if (!EmitExpression(out, v->constructor)) {
             return false;
         }
     }

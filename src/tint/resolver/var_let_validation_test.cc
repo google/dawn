@@ -24,22 +24,6 @@ namespace {
 
 struct ResolverVarLetValidationTest : public resolver::TestHelper, public testing::Test {};
 
-TEST_F(ResolverVarLetValidationTest, LetNoInitializer) {
-    // let a : i32;
-    WrapInFunction(Let(Source{{12, 34}}, "a", ty.i32(), nullptr));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: 'let' declaration must have an initializer");
-}
-
-TEST_F(ResolverVarLetValidationTest, GlobalLetNoInitializer) {
-    // let a : i32;
-    GlobalConst(Source{{12, 34}}, "a", ty.i32(), nullptr);
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: 'let' declaration must have an initializer");
-}
-
 TEST_F(ResolverVarLetValidationTest, VarNoInitializerNoType) {
     // var a;
     WrapInFunction(Var(Source{{12, 34}}, "a", nullptr));

@@ -27,21 +27,20 @@ TEST_F(ParserImplTest, GlobalConstantDecl) {
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
-    ASSERT_NE(e.value, nullptr);
+    auto* let = e.value->As<ast::Let>();
+    ASSERT_NE(let, nullptr);
 
-    EXPECT_TRUE(e->is_const);
-    EXPECT_FALSE(e->is_overridable);
-    EXPECT_EQ(e->symbol, p->builder().Symbols().Get("a"));
-    ASSERT_NE(e->type, nullptr);
-    EXPECT_TRUE(e->type->Is<ast::F32>());
+    EXPECT_EQ(let->symbol, p->builder().Symbols().Get("a"));
+    ASSERT_NE(let->type, nullptr);
+    EXPECT_TRUE(let->type->Is<ast::F32>());
 
-    EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 5u);
-    EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 6u);
+    EXPECT_EQ(let->source.range.begin.line, 1u);
+    EXPECT_EQ(let->source.range.begin.column, 5u);
+    EXPECT_EQ(let->source.range.end.line, 1u);
+    EXPECT_EQ(let->source.range.end.column, 6u);
 
-    ASSERT_NE(e->constructor, nullptr);
-    EXPECT_TRUE(e->constructor->Is<ast::LiteralExpression>());
+    ASSERT_NE(let->constructor, nullptr);
+    EXPECT_TRUE(let->constructor->Is<ast::LiteralExpression>());
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_Inferred) {
@@ -53,20 +52,19 @@ TEST_F(ParserImplTest, GlobalConstantDecl_Inferred) {
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
-    ASSERT_NE(e.value, nullptr);
+    auto* let = e.value->As<ast::Let>();
+    ASSERT_NE(let, nullptr);
 
-    EXPECT_TRUE(e->is_const);
-    EXPECT_FALSE(e->is_overridable);
-    EXPECT_EQ(e->symbol, p->builder().Symbols().Get("a"));
-    EXPECT_EQ(e->type, nullptr);
+    EXPECT_EQ(let->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_EQ(let->type, nullptr);
 
-    EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 5u);
-    EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 6u);
+    EXPECT_EQ(let->source.range.begin.line, 1u);
+    EXPECT_EQ(let->source.range.begin.column, 5u);
+    EXPECT_EQ(let->source.range.end.line, 1u);
+    EXPECT_EQ(let->source.range.end.column, 6u);
 
-    ASSERT_NE(e->constructor, nullptr);
-    EXPECT_TRUE(e->constructor->Is<ast::LiteralExpression>());
+    ASSERT_NE(let->constructor, nullptr);
+    EXPECT_TRUE(let->constructor->Is<ast::LiteralExpression>());
 }
 
 TEST_F(ParserImplTest, GlobalConstantDecl_InvalidExpression) {
@@ -105,23 +103,22 @@ TEST_F(ParserImplTest, GlobalConstantDec_Override_WithId) {
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
-    ASSERT_NE(e.value, nullptr);
+    auto* override = e.value->As<ast::Override>();
+    ASSERT_NE(override, nullptr);
 
-    EXPECT_TRUE(e->is_const);
-    EXPECT_TRUE(e->is_overridable);
-    EXPECT_EQ(e->symbol, p->builder().Symbols().Get("a"));
-    ASSERT_NE(e->type, nullptr);
-    EXPECT_TRUE(e->type->Is<ast::F32>());
+    EXPECT_EQ(override->symbol, p->builder().Symbols().Get("a"));
+    ASSERT_NE(override->type, nullptr);
+    EXPECT_TRUE(override->type->Is<ast::F32>());
 
-    EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 17u);
-    EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 18u);
+    EXPECT_EQ(override->source.range.begin.line, 1u);
+    EXPECT_EQ(override->source.range.begin.column, 17u);
+    EXPECT_EQ(override->source.range.end.line, 1u);
+    EXPECT_EQ(override->source.range.end.column, 18u);
 
-    ASSERT_NE(e->constructor, nullptr);
-    EXPECT_TRUE(e->constructor->Is<ast::LiteralExpression>());
+    ASSERT_NE(override->constructor, nullptr);
+    EXPECT_TRUE(override->constructor->Is<ast::LiteralExpression>());
 
-    auto* override_attr = ast::GetAttribute<ast::IdAttribute>(e.value->attributes);
+    auto* override_attr = ast::GetAttribute<ast::IdAttribute>(override->attributes);
     ASSERT_NE(override_attr, nullptr);
     EXPECT_EQ(override_attr->value, 7u);
 }
@@ -136,23 +133,22 @@ TEST_F(ParserImplTest, GlobalConstantDec_Override_WithoutId) {
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
-    ASSERT_NE(e.value, nullptr);
+    auto* override = e.value->As<ast::Override>();
+    ASSERT_NE(override, nullptr);
 
-    EXPECT_TRUE(e->is_const);
-    EXPECT_TRUE(e->is_overridable);
-    EXPECT_EQ(e->symbol, p->builder().Symbols().Get("a"));
-    ASSERT_NE(e->type, nullptr);
-    EXPECT_TRUE(e->type->Is<ast::F32>());
+    EXPECT_EQ(override->symbol, p->builder().Symbols().Get("a"));
+    ASSERT_NE(override->type, nullptr);
+    EXPECT_TRUE(override->type->Is<ast::F32>());
 
-    EXPECT_EQ(e->source.range.begin.line, 1u);
-    EXPECT_EQ(e->source.range.begin.column, 10u);
-    EXPECT_EQ(e->source.range.end.line, 1u);
-    EXPECT_EQ(e->source.range.end.column, 11u);
+    EXPECT_EQ(override->source.range.begin.line, 1u);
+    EXPECT_EQ(override->source.range.begin.column, 10u);
+    EXPECT_EQ(override->source.range.end.line, 1u);
+    EXPECT_EQ(override->source.range.end.column, 11u);
 
-    ASSERT_NE(e->constructor, nullptr);
-    EXPECT_TRUE(e->constructor->Is<ast::LiteralExpression>());
+    ASSERT_NE(override->constructor, nullptr);
+    EXPECT_TRUE(override->constructor->Is<ast::LiteralExpression>());
 
-    auto* id_attr = ast::GetAttribute<ast::IdAttribute>(e.value->attributes);
+    auto* id_attr = ast::GetAttribute<ast::IdAttribute>(override->attributes);
     ASSERT_EQ(id_attr, nullptr);
 }
 
@@ -165,7 +161,8 @@ TEST_F(ParserImplTest, GlobalConstantDec_Override_MissingId) {
     auto e = p->global_constant_decl(attrs.value);
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
-    ASSERT_NE(e.value, nullptr);
+    auto* override = e.value->As<ast::Override>();
+    ASSERT_NE(override, nullptr);
 
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), "1:5: expected signed integer literal for id attribute");
@@ -180,7 +177,8 @@ TEST_F(ParserImplTest, GlobalConstantDec_Override_InvalidId) {
     auto e = p->global_constant_decl(attrs.value);
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
-    ASSERT_NE(e.value, nullptr);
+    auto* override = e.value->As<ast::Override>();
+    ASSERT_NE(override, nullptr);
 
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), "1:5: id attribute must be positive");

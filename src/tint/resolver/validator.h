@@ -237,7 +237,7 @@ class Validator {
     /// @param atomic_composite_info atomic composite info in the module
     /// @returns true on success, false otherwise
     bool GlobalVariable(
-        const sem::Variable* var,
+        const sem::GlobalVariable* var,
         std::unordered_map<uint32_t, const sem::Variable*> constant_ids,
         std::unordered_map<const sem::Type*, const Source&> atomic_composite_info) const;
 
@@ -345,12 +345,12 @@ class Validator {
     bool Variable(const sem::Variable* var) const;
 
     /// Validates a variable constructor or cast
-    /// @param var the variable to validate
+    /// @param v the variable to validate
     /// @param storage_class the storage class of the variable
     /// @param storage_type the type of the storage
     /// @param rhs_type the right hand side of the expression
     /// @returns true on succes, false otherwise
-    bool VariableConstructorOrCast(const ast::Variable* var,
+    bool VariableConstructorOrCast(const ast::Variable* v,
                                    ast::StorageClass storage_class,
                                    const sem::Type* storage_type,
                                    const sem::Type* rhs_type) const;

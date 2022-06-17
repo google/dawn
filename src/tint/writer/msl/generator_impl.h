@@ -348,14 +348,22 @@ class GeneratorImpl : public TextGenerator {
     /// @param expr the expression to emit
     /// @returns true if the expression was emitted
     bool EmitUnaryOp(std::ostream& out, const ast::UnaryOpExpression* expr);
-    /// Handles generating a variable
+    /// Handles generating a 'var' declaration
     /// @param var the variable to generate
     /// @returns true if the variable was emitted
-    bool EmitVariable(const sem::Variable* var);
-    /// Handles generating a program scope constant variable
-    /// @param var the variable to emit
+    bool EmitVar(const ast::Var* var);
+    /// Handles generating a function-scope 'let' declaration
+    /// @param let the variable to generate
     /// @returns true if the variable was emitted
-    bool EmitProgramConstVariable(const ast::Variable* var);
+    bool EmitLet(const ast::Let* let);
+    /// Handles generating a module-scope 'let' declaration
+    /// @param let the 'let' to emit
+    /// @returns true if the variable was emitted
+    bool EmitProgramConstVariable(const ast::Let* let);
+    /// Handles generating a module-scope 'override' declaration
+    /// @param override the 'override' to emit
+    /// @returns true if the variable was emitted
+    bool EmitOverride(const ast::Override* override);
     /// Emits the zero value for the given type
     /// @param out the output of the expression stream
     /// @param type the type to emit the value for

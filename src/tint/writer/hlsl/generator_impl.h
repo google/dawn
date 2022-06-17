@@ -303,19 +303,22 @@ class GeneratorImpl : public TextGenerator {
     bool EmitGlobalVariable(const ast::Variable* global);
 
     /// Handles emitting a global variable with the uniform storage class
-    /// @param var the global variable
+    /// @param var the AST node for the 'var'
+    /// @param sem the semantic node for the 'var'
     /// @returns true on success
-    bool EmitUniformVariable(const sem::Variable* var);
+    bool EmitUniformVariable(const ast::Var* var, const sem::Variable* sem);
 
     /// Handles emitting a global variable with the storage storage class
-    /// @param var the global variable
+    /// @param var the AST node for the 'var'
+    /// @param sem the semantic node for the 'var'
     /// @returns true on success
-    bool EmitStorageVariable(const sem::Variable* var);
+    bool EmitStorageVariable(const ast::Var* var, const sem::Variable* sem);
 
     /// Handles emitting a global variable with the handle storage class
-    /// @param var the global variable
+    /// @param var the AST node for the 'var'
+    /// @param sem the semantic node for the 'var'
     /// @returns true on success
-    bool EmitHandleVariable(const sem::Variable* var);
+    bool EmitHandleVariable(const ast::Var* var, const sem::Variable* sem);
 
     /// Handles emitting a global variable with the private storage class
     /// @param var the global variable
@@ -437,14 +440,22 @@ class GeneratorImpl : public TextGenerator {
     /// @param type the type to emit the value for
     /// @returns true if the zero value was successfully emitted.
     bool EmitZeroValue(std::ostream& out, const sem::Type* type);
-    /// Handles generating a variable
+    /// Handles generating a 'var' declaration
     /// @param var the variable to generate
     /// @returns true if the variable was emitted
-    bool EmitVariable(const ast::Variable* var);
-    /// Handles generating a program scope constant variable
-    /// @param var the variable to emit
+    bool EmitVar(const ast::Var* var);
+    /// Handles generating a function-scope 'let' declaration
+    /// @param let the variable to generate
     /// @returns true if the variable was emitted
-    bool EmitProgramConstVariable(const ast::Variable* var);
+    bool EmitLet(const ast::Let* let);
+    /// Handles generating a module-scope 'let' declaration
+    /// @param let the 'let' to emit
+    /// @returns true if the variable was emitted
+    bool EmitProgramConstVariable(const ast::Let* let);
+    /// Handles generating a module-scope 'override' declaration
+    /// @param override the 'override' to emit
+    /// @returns true if the variable was emitted
+    bool EmitOverride(const ast::Override* override);
     /// Emits call to a helper vector assignment function for the input assignment
     /// statement and vector type. This is used to work around FXC issues where
     /// assignments to vectors with dynamic indices cause compilation failures.

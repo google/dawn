@@ -365,7 +365,7 @@ bool GeneratorImpl::EmitDynamicVectorAssignment(const ast::AssignmentStatement* 
                     out << "vec = (idx.xxxx == int4(0, 1, 2, 3)) ? val.xxxx : vec;";
                     break;
                 default:
-                    TINT_UNREACHABLE(Writer, builder_.Diagnostics())
+                    TINT_UNREACHABLE(Writer, diagnostics_)
                         << "invalid vector size " << vec->Width();
                     break;
             }
@@ -524,7 +524,7 @@ bool GeneratorImpl::EmitDynamicMatrixScalarAssignment(const ast::AssignmentState
                                         << vec_name << ";";
                                     break;
                                 default:
-                                    TINT_UNREACHABLE(Writer, builder_.Diagnostics())
+                                    TINT_UNREACHABLE(Writer, diagnostics_)
                                         << "invalid vector size " << vec->Width();
                                     break;
                             }
@@ -2861,41 +2861,46 @@ bool GeneratorImpl::EmitFunctionBodyWithDiscard(const ast::Function* func) {
 }
 
 bool GeneratorImpl::EmitGlobalVariable(const ast::Variable* global) {
-    if (global->is_const) {
-        return EmitProgramConstVariable(global);
-    }
-
-    auto* sem = builder_.Sem().Get(global);
-    switch (sem->StorageClass()) {
-        case ast::StorageClass::kUniform:
-            return EmitUniformVariable(sem);
-        case ast::StorageClass::kStorage:
-            return EmitStorageVariable(sem);
-        case ast::StorageClass::kHandle:
-            return EmitHandleVariable(sem);
-        case ast::StorageClass::kPrivate:
-            return EmitPrivateVariable(sem);
-        case ast::StorageClass::kWorkgroup:
-            return EmitWorkgroupVariable(sem);
-        default:
-            break;
-    }
-
-    TINT_ICE(Writer, diagnostics_) << "unhandled storage class " << sem->StorageClass();
-    return false;
+    return Switch(
+        global,  //
+        [&](const ast::Var* var) {
+            auto* sem = builder_.Sem().Get(global);
+            switch (sem->StorageClass()) {
+                case ast::StorageClass::kUniform:
+                    return EmitUniformVariable(var, sem);
+                case ast::StorageClass::kStorage:
+                    return EmitStorageVariable(var, sem);
+                case ast::StorageClass::kHandle:
+                    return EmitHandleVariable(var, sem);
+                case ast::StorageClass::kPrivate:
+                    return EmitPrivateVariable(sem);
+                case ast::StorageClass::kWorkgroup:
+                    return EmitWorkgroupVariable(sem);
+                default:
+                    TINT_ICE(Writer, diagnostics_)
+                        << "unhandled storage class " << sem->StorageClass();
+                    return false;
+            }
+        },
+        [&](const ast::Let* let) { return EmitProgramConstVariable(let); },
+        [&](const ast::Override* override) { return EmitOverride(override); },
+        [&](Default) {
+            TINT_ICE(Writer, diagnostics_)
+                << "unhandled global variable type " << global->TypeInfo().name;
+            return false;
+        });
 }
 
-bool GeneratorImpl::EmitUniformVariable(const sem::Variable* var) {
-    auto* decl = var->Declaration();
-    auto binding_point = decl->BindingPoint();
-    auto* type = var->Type()->UnwrapRef();
-    auto name = builder_.Symbols().NameFor(decl->symbol);
+bool GeneratorImpl::EmitUniformVariable(const ast::Var* var, const sem::Variable* sem) {
+    auto binding_point = var->BindingPoint();
+    auto* type = sem->Type()->UnwrapRef();
+    auto name = builder_.Symbols().NameFor(var->symbol);
     line() << "cbuffer cbuffer_" << name << RegisterAndSpace('b', binding_point) << " {";
 
     {
         ScopedIndent si(this);
         auto out = line();
-        if (!EmitTypeAndName(out, type, ast::StorageClass::kUniform, var->Access(), name)) {
+        if (!EmitTypeAndName(out, type, ast::StorageClass::kUniform, sem->Access(), name)) {
             return false;
         }
         out << ";";
@@ -2906,29 +2911,27 @@ bool GeneratorImpl::EmitUniformVariable(const sem::Variable* var) {
     return true;
 }
 
-bool GeneratorImpl::EmitStorageVariable(const sem::Variable* var) {
-    auto* decl = var->Declaration();
-    auto* type = var->Type()->UnwrapRef();
+bool GeneratorImpl::EmitStorageVariable(const ast::Var* var, const sem::Variable* sem) {
+    auto* type = sem->Type()->UnwrapRef();
     auto out = line();
-    if (!EmitTypeAndName(out, type, ast::StorageClass::kStorage, var->Access(),
-                         builder_.Symbols().NameFor(decl->symbol))) {
+    if (!EmitTypeAndName(out, type, ast::StorageClass::kStorage, sem->Access(),
+                         builder_.Symbols().NameFor(var->symbol))) {
         return false;
     }
 
-    out << RegisterAndSpace(var->Access() == ast::Access::kRead ? 't' : 'u', decl->BindingPoint())
+    out << RegisterAndSpace(sem->Access() == ast::Access::kRead ? 't' : 'u', var->BindingPoint())
         << ";";
 
     return true;
 }
 
-bool GeneratorImpl::EmitHandleVariable(const sem::Variable* var) {
-    auto* decl = var->Declaration();
-    auto* unwrapped_type = var->Type()->UnwrapRef();
+bool GeneratorImpl::EmitHandleVariable(const ast::Var* var, const sem::Variable* sem) {
+    auto* unwrapped_type = sem->Type()->UnwrapRef();
     auto out = line();
 
-    auto name = builder_.Symbols().NameFor(decl->symbol);
-    auto* type = var->Type()->UnwrapRef();
-    if (!EmitTypeAndName(out, type, var->StorageClass(), var->Access(), name)) {
+    auto name = builder_.Symbols().NameFor(var->symbol);
+    auto* type = sem->Type()->UnwrapRef();
+    if (!EmitTypeAndName(out, type, sem->StorageClass(), sem->Access(), name)) {
         return false;
     }
 
@@ -2944,7 +2947,7 @@ bool GeneratorImpl::EmitHandleVariable(const sem::Variable* var) {
     }
 
     if (register_space) {
-        auto bp = decl->BindingPoint();
+        auto bp = var->BindingPoint();
         out << " : register(" << register_space << bp.binding->value << ", space" << bp.group->value
             << ")";
     }
@@ -3078,8 +3081,8 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
                 if (wgsize[i].overridable_const) {
                     auto* global =
                         builder_.Sem().Get<sem::GlobalVariable>(wgsize[i].overridable_const);
-                    if (!global->IsOverridable()) {
-                        TINT_ICE(Writer, builder_.Diagnostics())
+                    if (!global->Declaration()->Is<ast::Override>()) {
+                        TINT_ICE(Writer, diagnostics_)
                             << "expected a pipeline-overridable constant";
                     }
                     out << kSpecConstantPrefix << global->ConstantId();
@@ -3611,7 +3614,15 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
             return EmitSwitch(s);
         },
         [&](const ast::VariableDeclStatement* v) {  //
-            return EmitVariable(v->variable);
+            return Switch(
+                v->variable,  //
+                [&](const ast::Var* var) { return EmitVar(var); },
+                [&](const ast::Let* let) { return EmitLet(let); },
+                [&](Default) {  //
+                    TINT_ICE(Writer, diagnostics_)
+                        << "unknown variable type: " << v->variable->TypeInfo().name;
+                    return false;
+                });
         },
         [&](Default) {  //
             diagnostics_.add_error(diag::System::Writer,
@@ -4018,20 +4029,11 @@ bool GeneratorImpl::EmitUnaryOp(std::ostream& out, const ast::UnaryOpExpression*
     return true;
 }
 
-bool GeneratorImpl::EmitVariable(const ast::Variable* var) {
+bool GeneratorImpl::EmitVar(const ast::Var* var) {
     auto* sem = builder_.Sem().Get(var);
     auto* type = sem->Type()->UnwrapRef();
 
-    // TODO(dsinclair): Handle variable attributes
-    if (!var->attributes.empty()) {
-        diagnostics_.add_error(diag::System::Writer, "Variable attributes are not handled yet");
-        return false;
-    }
-
     auto out = line();
-    if (var->is_const) {
-        out << "const ";
-    }
     if (!EmitTypeAndName(out, type, sem->StorageClass(), sem->Access(),
                          builder_.Symbols().NameFor(var->symbol))) {
         return false;
@@ -4053,60 +4055,71 @@ bool GeneratorImpl::EmitVariable(const ast::Variable* var) {
     return true;
 }
 
-bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
-    for (auto* d : var->attributes) {
-        if (!d->Is<ast::IdAttribute>()) {
-            diagnostics_.add_error(diag::System::Writer, "Decorated const values not valid");
-            return false;
-        }
-    }
-    if (!var->is_const) {
-        diagnostics_.add_error(diag::System::Writer, "Expected a const value");
+bool GeneratorImpl::EmitLet(const ast::Let* let) {
+    auto* sem = builder_.Sem().Get(let);
+    auto* type = sem->Type()->UnwrapRef();
+
+    auto out = line();
+    out << "const ";
+    if (!EmitTypeAndName(out, type, ast::StorageClass::kNone, ast::Access::kUndefined,
+                         builder_.Symbols().NameFor(let->symbol))) {
         return false;
     }
+    out << " = ";
+    if (!EmitExpression(out, let->constructor)) {
+        return false;
+    }
+    out << ";";
 
-    auto* sem = builder_.Sem().Get(var);
+    return true;
+}
+
+bool GeneratorImpl::EmitProgramConstVariable(const ast::Let* let) {
+    auto* sem = builder_.Sem().Get(let);
     auto* type = sem->Type();
 
-    auto* global = sem->As<sem::GlobalVariable>();
-    if (global && global->IsOverridable()) {
-        auto const_id = global->ConstantId();
+    auto out = line();
+    out << "static const ";
+    if (!EmitTypeAndName(out, type, ast::StorageClass::kNone, ast::Access::kUndefined,
+                         builder_.Symbols().NameFor(let->symbol))) {
+        return false;
+    }
+    out << " = ";
+    if (!EmitExpression(out, let->constructor)) {
+        return false;
+    }
+    out << ";";
 
-        line() << "#ifndef " << kSpecConstantPrefix << const_id;
+    return true;
+}
 
-        if (var->constructor != nullptr) {
-            auto out = line();
-            out << "#define " << kSpecConstantPrefix << const_id << " ";
-            if (!EmitExpression(out, var->constructor)) {
-                return false;
-            }
-        } else {
-            line() << "#error spec constant required for constant id " << const_id;
-        }
-        line() << "#endif";
-        {
-            auto out = line();
-            out << "static const ";
-            if (!EmitTypeAndName(out, type, sem->StorageClass(), sem->Access(),
-                                 builder_.Symbols().NameFor(var->symbol))) {
-                return false;
-            }
-            out << " = " << kSpecConstantPrefix << const_id << ";";
+bool GeneratorImpl::EmitOverride(const ast::Override* override) {
+    auto* sem = builder_.Sem().Get(override);
+    auto* type = sem->Type();
+
+    auto const_id = sem->ConstantId();
+
+    line() << "#ifndef " << kSpecConstantPrefix << const_id;
+
+    if (override->constructor != nullptr) {
+        auto out = line();
+        out << "#define " << kSpecConstantPrefix << const_id << " ";
+        if (!EmitExpression(out, override->constructor)) {
+            return false;
         }
     } else {
+        line() << "#error spec constant required for constant id " << const_id;
+    }
+    line() << "#endif";
+    {
         auto out = line();
         out << "static const ";
         if (!EmitTypeAndName(out, type, sem->StorageClass(), sem->Access(),
-                             builder_.Symbols().NameFor(var->symbol))) {
+                             builder_.Symbols().NameFor(override->symbol))) {
             return false;
         }
-        out << " = ";
-        if (!EmitExpression(out, var->constructor)) {
-            return false;
-        }
-        out << ";";
+        out << " = " << kSpecConstantPrefix << const_id << ";";
     }
-
     return true;
 }
 
