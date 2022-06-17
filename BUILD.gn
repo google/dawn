@@ -22,8 +22,8 @@ group("all") {
     "src/dawn/tests",
     "src/fuzzers/dawn:dawn_fuzzers",
     "src/tint:libtint",
+    "src/tint:tint_unittests",
     "src/tint/fuzzers",
-    "test/tint:tint_unittests",
   ]
   if (dawn_standalone) {
     deps += [
