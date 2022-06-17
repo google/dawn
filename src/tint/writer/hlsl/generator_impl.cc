@@ -3162,11 +3162,11 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant& constan
             {
                 ScopedParen sp(out);
                 bool ok = Switch(
-                    vec_ty->type(),                                  //
-                    [&](const sem::Bool*) { return emit_bool(0); },  //
-                    [&](const sem::F32*) { return emit_f32(0); },    //
-                    [&](const sem::I32*) { return emit_i32(0); },    //
-                    [&](const sem::U32*) { return emit_u32(0); }     //
+                    vec_ty->type(),                                      //
+                    [&](const sem::Bool*) { return emit_bool(start); },  //
+                    [&](const sem::F32*) { return emit_f32(start); },    //
+                    [&](const sem::I32*) { return emit_i32(start); },    //
+                    [&](const sem::U32*) { return emit_u32(start); }     //
                 );
                 if (!ok) {
                     return false;

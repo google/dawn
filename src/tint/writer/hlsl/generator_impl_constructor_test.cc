@@ -186,6 +186,33 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat) {
                 HasSubstr("float2x3(float3(1.0f, 2.0f, 3.0f), float3(3.0f, 4.0f, 5.0f))"));
 }
 
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat_Complex) {
+    // mat4x4<f32>(
+    //     vec4<f32>(2.0f, 3.0f, 4.0f, 8.0f),
+    //     vec4<f32>(),
+    //     vec4<f32>(7.0f),
+    //     vec4<f32>(vec4<f32>(42.0f, 21.0f, 6.0f, -5.0f)),
+    //   );
+    auto* vector_literal =
+        vec4<f32>(Expr(f32(2.0)), Expr(f32(3.0)), Expr(f32(4.0)), Expr(f32(8.0)));
+    auto* vector_zero_ctor = vec4<f32>();
+    auto* vector_single_scalar_ctor = vec4<f32>(Expr(f32(7.0)));
+    auto* vector_identical_ctor =
+        vec4<f32>(vec4<f32>(Expr(f32(42.0)), Expr(f32(21.0)), Expr(f32(6.0)), Expr(f32(-5.0))));
+
+    auto* constructor = mat4x4<f32>(vector_literal, vector_zero_ctor, vector_single_scalar_ctor,
+                                    vector_identical_ctor);
+
+    WrapInFunction(constructor);
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_THAT(gen.result(), HasSubstr("float4x4(float4(2.0f, 3.0f, 4.0f, 8.0f), (0.0f).xxxx, "
+                                        "(7.0f).xxxx, float4(42.0f, 21.0f, 6.0f, -5.0f))"));
+}
+
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat_Empty) {
     WrapInFunction(mat2x3<f32>());
 
