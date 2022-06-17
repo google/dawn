@@ -240,13 +240,21 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
         [&](const ast::Sampler* t) { return builder_->create<sem::Sampler>(t->kind); },
         [&](const ast::SampledTexture* t) -> sem::SampledTexture* {
             if (auto* el = Type(t->type)) {
-                return builder_->create<sem::SampledTexture>(t->dim, el);
+                auto* sem = builder_->create<sem::SampledTexture>(t->dim, el);
+                if (!validator_.SampledTexture(sem, t->source)) {
+                    return nullptr;
+                }
+                return sem;
             }
             return nullptr;
         },
         [&](const ast::MultisampledTexture* t) -> sem::MultisampledTexture* {
             if (auto* el = Type(t->type)) {
-                return builder_->create<sem::MultisampledTexture>(t->dim, el);
+                auto* sem = builder_->create<sem::MultisampledTexture>(t->dim, el);
+                if (!validator_.MultisampledTexture(sem, t->source)) {
+                    return nullptr;
+                }
+                return sem;
             }
             return nullptr;
         },

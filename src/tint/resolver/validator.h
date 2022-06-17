@@ -321,6 +321,18 @@ class Validator {
     /// @returns true on success, false otherwise
     bool StorageTexture(const ast::StorageTexture* t) const;
 
+    /// Validates a sampled texture
+    /// @param t the texture to validate
+    /// @param source the source of the texture
+    /// @returns true on success, false otherwise
+    bool SampledTexture(const sem::SampledTexture* t, const Source& source) const;
+
+    /// Validates a multisampled texture
+    /// @param t the texture to validate
+    /// @param source the source of the texture
+    /// @returns true on success, false otherwise
+    bool MultisampledTexture(const sem::MultisampledTexture* t, const Source& source) const;
+
     /// Validates a structure
     /// @param str the structure to validate
     /// @param stage the current pipeline stage

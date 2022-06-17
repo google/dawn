@@ -284,6 +284,29 @@ bool Validator::StorageTexture(const ast::StorageTexture* t) const {
     return true;
 }
 
+bool Validator::SampledTexture(const sem::SampledTexture* t, const Source& source) const {
+    if (!t->type()->UnwrapRef()->is_numeric_scalar()) {
+        AddError("texture_2d<type>: type must be f32, i32 or u32", source);
+        return false;
+    }
+
+    return true;
+}
+
+bool Validator::MultisampledTexture(const sem::MultisampledTexture* t, const Source& source) const {
+    if (t->dim() != ast::TextureDimension::k2d) {
+        AddError("only 2d multisampled textures are supported", source);
+        return false;
+    }
+
+    if (!t->type()->UnwrapRef()->is_numeric_scalar()) {
+        AddError("texture_multisampled_2d<type>: type must be f32, i32 or u32", source);
+        return false;
+    }
+
+    return true;
+}
+
 bool Validator::Materialize(const sem::Materialize* m) const {
     auto* from = m->Expr()->Type();
     auto* to = m->Type();
@@ -683,25 +706,6 @@ bool Validator::Variable(const sem::Variable* v) const {
         AddError(sem_.TypeNameOf(storage_ty) + " cannot be used as the type of a let",
                  decl->source);
         return false;
-    }
-
-    if (auto* r = storage_ty->As<sem::SampledTexture>()) {
-        if (!r->type()->UnwrapRef()->is_numeric_scalar()) {
-            AddError("texture_2d<type>: type must be f32, i32 or u32", decl->source);
-            return false;
-        }
-    }
-
-    if (auto* r = storage_ty->As<sem::MultisampledTexture>()) {
-        if (r->dim() != ast::TextureDimension::k2d) {
-            AddError("only 2d multisampled textures are supported", decl->source);
-            return false;
-        }
-
-        if (!r->type()->UnwrapRef()->is_numeric_scalar()) {
-            AddError("texture_multisampled_2d<type>: type must be f32, i32 or u32", decl->source);
-            return false;
-        }
     }
 
     if (v->Is<sem::LocalVariable>() && as_var &&
