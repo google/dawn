@@ -81,6 +81,58 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_P(VectorizeScalarMatrixConstructorsTest, SingleScalarsReference) {
+    uint32_t cols = GetParam().first;
+    uint32_t rows = GetParam().second;
+    std::string matrix_no_type = "mat" + std::to_string(cols) + "x" + std::to_string(rows);
+    std::string matrix = matrix_no_type + "<f32>";
+    std::string vector = "vec" + std::to_string(rows) + "<f32>";
+    std::string values;
+    for (uint32_t c = 0; c < cols; c++) {
+        if (c > 0) {
+            values += ", ";
+        }
+        values += vector + "(";
+        for (uint32_t r = 0; r < rows; r++) {
+            if (r > 0) {
+                values += ", ";
+            }
+            values += "value";
+        }
+        values += ")";
+    }
+
+    std::string src = R"(
+@fragment
+fn main() {
+  let v = vec4<f32>(42.0);
+  let m = ${matrix}(v[2]);
+}
+)";
+
+    std::string expect = R"(
+fn build_${matrix_no_type}(value : f32) -> ${matrix} {
+  return ${matrix}(${values});
+}
+
+@fragment
+fn main() {
+  let v = vec4<f32>(42.0);
+  let m = build_${matrix_no_type}(v[2]);
+}
+)";
+    src = utils::ReplaceAll(src, "${matrix}", matrix);
+    expect = utils::ReplaceAll(expect, "${matrix}", matrix);
+    expect = utils::ReplaceAll(expect, "${matrix_no_type}", matrix_no_type);
+    expect = utils::ReplaceAll(expect, "${values}", values);
+
+    EXPECT_TRUE(ShouldRun<VectorizeScalarMatrixConstructors>(src));
+
+    auto got = Run<VectorizeScalarMatrixConstructors>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_P(VectorizeScalarMatrixConstructorsTest, MultipleScalars) {
     uint32_t cols = GetParam().first;
     uint32_t rows = GetParam().second;
@@ -109,6 +161,49 @@ TEST_P(VectorizeScalarMatrixConstructorsTest, MultipleScalars) {
     std::string tmpl = R"(
 @fragment
 fn main() {
+  let m = ${matrix}(${values});
+}
+)";
+    tmpl = utils::ReplaceAll(tmpl, "${matrix}", mat_type);
+    auto src = utils::ReplaceAll(tmpl, "${values}", scalar_values);
+    auto expect = utils::ReplaceAll(tmpl, "${values}", vector_values);
+
+    EXPECT_TRUE(ShouldRun<VectorizeScalarMatrixConstructors>(src));
+
+    auto got = Run<VectorizeScalarMatrixConstructors>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_P(VectorizeScalarMatrixConstructorsTest, MultipleScalarsReference) {
+    uint32_t cols = GetParam().first;
+    uint32_t rows = GetParam().second;
+    std::string mat_type = "mat" + std::to_string(cols) + "x" + std::to_string(rows) + "<f32>";
+    std::string vec_type = "vec" + std::to_string(rows) + "<f32>";
+    std::string scalar_values;
+    std::string vector_values;
+    for (uint32_t c = 0; c < cols; c++) {
+        if (c > 0) {
+            vector_values += ", ";
+            scalar_values += ", ";
+        }
+        vector_values += vec_type + "(";
+        for (uint32_t r = 0; r < rows; r++) {
+            if (r > 0) {
+                scalar_values += ", ";
+                vector_values += ", ";
+            }
+            auto value = "v[" + std::to_string((c * rows + r) % 4) + "]";
+            scalar_values += value;
+            vector_values += value;
+        }
+        vector_values += ")";
+    }
+
+    std::string tmpl = R"(
+@fragment
+fn main() {
+  let v = vec4<f32>(1.0, 2.0, 3.0, 8.0);
   let m = ${matrix}(${values});
 }
 )";

@@ -36,7 +36,7 @@ bool VectorizeScalarMatrixConstructors::ShouldRun(const Program* program, const 
         if (auto* call = program->Sem().Get<sem::Call>(node)) {
             if (call->Target()->Is<sem::TypeConstructor>() && call->Type()->Is<sem::Matrix>()) {
                 auto& args = call->Arguments();
-                if (args.size() > 0 && args[0]->Type()->is_scalar()) {
+                if (args.size() > 0 && args[0]->Type()->UnwrapRef()->is_scalar()) {
                     return true;
                 }
             }
@@ -64,7 +64,7 @@ void VectorizeScalarMatrixConstructors::Run(CloneContext& ctx, const DataMap&, D
         if (args.size() == 0) {
             return nullptr;
         }
-        if (!args[0]->Type()->is_scalar()) {
+        if (!args[0]->Type()->UnwrapRef()->is_scalar()) {
             return nullptr;
         }
 
