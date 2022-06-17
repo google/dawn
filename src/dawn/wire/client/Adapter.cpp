@@ -71,7 +71,7 @@ void Adapter::RequestDevice(const WGPUDeviceDescriptor* descriptor,
         return;
     }
 
-    Device* device = client->DeviceAllocator().New(client);
+    Device* device = client->Make<Device>();
     uint64_t serial = mRequestDeviceRequests.Add({callback, device->GetWireId(), userdata});
 
     AdapterRequestDeviceCmd cmd;
@@ -110,12 +110,12 @@ bool Adapter::OnRequestDeviceCallback(uint64_t requestSerial,
     }
 
     Client* client = GetClient();
-    Device* device = client->DeviceAllocator().GetObject(request.deviceObjectId);
+    Device* device = client->Get<Device>(request.deviceObjectId);
 
     // If the return status is a failure we should give a null device to the callback and
     // free the allocation.
     if (status != WGPURequestDeviceStatus_Success) {
-        client->DeviceAllocator().Free(device);
+        client->Free(device);
         request.callback(status, nullptr, message, request.userdata);
         return true;
     }

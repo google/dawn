@@ -74,7 +74,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
     // Create the buffer and send the creation command.
     // This must happen after any potential device->CreateErrorBuffer()
     // as server expects allocating ids to be monotonically increasing
-    Buffer* buffer = wireClient->BufferAllocator().New(wireClient);
+    Buffer* buffer = wireClient->Make<Buffer>();
     buffer->mDevice = device;
     buffer->mDeviceIsAlive = device->GetAliveWeakPtr();
     buffer->mSize = descriptor->size;
@@ -127,7 +127,7 @@ WGPUBuffer Buffer::Create(Device* device, const WGPUBufferDescriptor* descriptor
 WGPUBuffer Buffer::CreateError(Device* device, const WGPUBufferDescriptor* descriptor) {
     Client* client = device->GetClient();
 
-    Buffer* buffer = client->BufferAllocator().New(client);
+    Buffer* buffer = client->Make<Buffer>();
     buffer->mDevice = device;
     buffer->mDeviceIsAlive = device->GetAliveWeakPtr();
     buffer->mSize = descriptor->size;

@@ -22,7 +22,7 @@ namespace dawn::wire::client {
 // static
 WGPUTexture Texture::Create(Device* device, const WGPUTextureDescriptor* descriptor) {
     Client* wireClient = device->GetClient();
-    Texture* texture = wireClient->TextureAllocator().New(wireClient);
+    Texture* texture = wireClient->Make<Texture>();
 
     // Copy over descriptor data for reflection.
     texture->mSize = descriptor->size;

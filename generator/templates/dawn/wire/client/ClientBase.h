@@ -18,7 +18,6 @@
 #include "dawn/wire/ChunkedCommandHandler.h"
 #include "dawn/wire/WireCmd_autogen.h"
 #include "dawn/wire/client/ApiObjects.h"
-#include "dawn/wire/client/ObjectAllocator.h"
 
 namespace dawn::wire::client {
 
@@ -26,25 +25,6 @@ namespace dawn::wire::client {
       public:
         ClientBase() = default;
         ~ClientBase() override = default;
-
-        {% for type in by_category["object"] %}
-            const ObjectAllocator<{{type.name.CamelCase()}}>& {{type.name.CamelCase()}}Allocator() const {
-                return m{{type.name.CamelCase()}}Allocator;
-            }
-            ObjectAllocator<{{type.name.CamelCase()}}>& {{type.name.CamelCase()}}Allocator() {
-                return m{{type.name.CamelCase()}}Allocator;
-            }
-        {% endfor %}
-
-        void FreeObject(ObjectType objectType, ObjectBase* obj) {
-            switch (objectType) {
-                {% for type in by_category["object"] %}
-                    case ObjectType::{{type.name.CamelCase()}}:
-                        m{{type.name.CamelCase()}}Allocator.Free(static_cast<{{type.name.CamelCase()}}*>(obj));
-                        break;
-                {% endfor %}
-            }
-        }
 
       private:
         // Implementation of the ObjectIdProvider interface
@@ -62,10 +42,6 @@ namespace dawn::wire::client {
                 *out = (object == nullptr ? 0 : reinterpret_cast<{{as_wireType(type)}}>(object)->GetWireId());
                 return WireResult::Success;
             }
-        {% endfor %}
-
-        {% for type in by_category["object"] %}
-            ObjectAllocator<{{type.name.CamelCase()}}> m{{type.name.CamelCase()}}Allocator;
         {% endfor %}
     };
 

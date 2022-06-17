@@ -58,7 +58,7 @@ namespace dawn::wire::client {
 
                     //* For object creation, store the object ID the client will use for the result.
                     {% if method.return_type.category == "object" %}
-                        auto* returnObject = self->GetClient()->{{method.return_type.name.CamelCase()}}Allocator().New(self->GetClient());
+                        auto* returnObject = self->GetClient()->Make<{{method.return_type.name.CamelCase()}}>();
                         cmd.result = returnObject->GetWireHandle();
                     {% endif %}
 
@@ -97,7 +97,7 @@ namespace dawn::wire::client {
 
             Client* client = obj->GetClient();
             client->SerializeCommand(cmd);
-            client->{{type.name.CamelCase()}}Allocator().Free(obj);
+            client->Free(obj);
         }
 
         void Client{{as_MethodSuffix(type.name, Name("reference"))}}({{cType}} cObj) {

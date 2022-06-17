@@ -61,7 +61,7 @@ void Client::DestroyAllObjects() {
         cmd.objectType = ObjectType::Device;
         cmd.objectId = object->GetWireId();
         SerializeCommand(cmd);
-        FreeObject(ObjectType::Device, object);
+        mObjectStores[ObjectType::Device].Free(object);
     }
 
     for (auto& objectList : mObjects) {
@@ -76,13 +76,13 @@ void Client::DestroyAllObjects() {
             cmd.objectType = objectType;
             cmd.objectId = object->GetWireId();
             SerializeCommand(cmd);
-            FreeObject(objectType, object);
+            mObjectStores[objectType].Free(object);
         }
     }
 }
 
 ReservedTexture Client::ReserveTexture(WGPUDevice device) {
-    Texture* texture = TextureAllocator().New(this);
+    Texture* texture = Make<Texture>();
 
     ReservedTexture result;
     result.texture = ToAPI(texture);
@@ -94,7 +94,7 @@ ReservedTexture Client::ReserveTexture(WGPUDevice device) {
 }
 
 ReservedSwapChain Client::ReserveSwapChain(WGPUDevice device) {
-    SwapChain* swapChain = SwapChainAllocator().New(this);
+    SwapChain* swapChain = Make<SwapChain>();
 
     ReservedSwapChain result;
     result.swapchain = ToAPI(swapChain);
@@ -106,7 +106,7 @@ ReservedSwapChain Client::ReserveSwapChain(WGPUDevice device) {
 }
 
 ReservedDevice Client::ReserveDevice() {
-    Device* device = DeviceAllocator().New(this);
+    Device* device = Make<Device>();
 
     ReservedDevice result;
     result.device = ToAPI(device);
@@ -116,7 +116,7 @@ ReservedDevice Client::ReserveDevice() {
 }
 
 ReservedInstance Client::ReserveInstance() {
-    Instance* instance = InstanceAllocator().New(this);
+    Instance* instance = Make<Instance>();
 
     ReservedInstance result;
     result.instance = ToAPI(instance);
@@ -126,19 +126,19 @@ ReservedInstance Client::ReserveInstance() {
 }
 
 void Client::ReclaimTextureReservation(const ReservedTexture& reservation) {
-    TextureAllocator().Free(FromAPI(reservation.texture));
+    Free(FromAPI(reservation.texture));
 }
 
 void Client::ReclaimSwapChainReservation(const ReservedSwapChain& reservation) {
-    SwapChainAllocator().Free(FromAPI(reservation.swapchain));
+    Free(FromAPI(reservation.swapchain));
 }
 
 void Client::ReclaimDeviceReservation(const ReservedDevice& reservation) {
-    DeviceAllocator().Free(FromAPI(reservation.device));
+    Free(FromAPI(reservation.device));
 }
 
 void Client::ReclaimInstanceReservation(const ReservedInstance& reservation) {
-    InstanceAllocator().Free(FromAPI(reservation.instance));
+    Free(FromAPI(reservation.instance));
 }
 
 void Client::Disconnect() {
@@ -163,6 +163,10 @@ void Client::Disconnect() {
 
 bool Client::IsDisconnected() const {
     return mDisconnected;
+}
+
+void Client::Free(ObjectBase* obj, ObjectType type) {
+    mObjectStores[type].Free(obj);
 }
 
 }  // namespace dawn::wire::client

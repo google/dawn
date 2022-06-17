@@ -41,7 +41,7 @@ void Instance::RequestAdapter(const WGPURequestAdapterOptions* options,
         return;
     }
 
-    Adapter* adapter = client->AdapterAllocator().New(client);
+    Adapter* adapter = client->Make<Adapter>();
     uint64_t serial = mRequestAdapterRequests.Add({callback, adapter->GetWireId(), userdata});
 
     InstanceRequestAdapterCmd cmd;
@@ -82,12 +82,12 @@ bool Instance::OnRequestAdapterCallback(uint64_t requestSerial,
     }
 
     Client* client = GetClient();
-    Adapter* adapter = client->AdapterAllocator().GetObject(request.adapterObjectId);
+    Adapter* adapter = client->Get<Adapter>(request.adapterObjectId);
 
     // If the return status is a failure we should give a null adapter to the callback and
     // free the allocation.
     if (status != WGPURequestAdapterStatus_Success) {
-        client->AdapterAllocator().Free(adapter);
+        client->Free(adapter);
         request.callback(status, nullptr, message, request.userdata);
         return true;
     }

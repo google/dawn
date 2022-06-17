@@ -21,7 +21,7 @@ namespace dawn::wire::client {
     {% for command in cmd_records["return command"] %}
         bool Client::Handle{{command.name.CamelCase()}}(DeserializeBuffer* deserializeBuffer) {
             Return{{command.name.CamelCase()}}Cmd cmd;
-            WireResult deserializeResult = cmd.Deserialize(deserializeBuffer, &mAllocator);
+            WireResult deserializeResult = cmd.Deserialize(deserializeBuffer, &mWireCommandAllocator);
 
             if (deserializeResult == WireResult::FatalError) {
                 return false;
@@ -32,7 +32,7 @@ namespace dawn::wire::client {
                 {% set name = as_varName(member.name) %}
 
                 {% if member.type.dict_name == "ObjectHandle" %}
-                    {{Type}}* {{name}} = {{Type}}Allocator().GetObject(cmd.{{name}}.id);
+                    {{Type}}* {{name}} = Get<{{Type}}>(cmd.{{name}}.id);
                     if ({{name}} != nullptr && {{name}}->GetWireGeneration() != cmd.{{name}}.generation) {
                         {{name}} = nullptr;
                     }
@@ -84,7 +84,7 @@ namespace dawn::wire::client {
             if (!success) {
                 return nullptr;
             }
-            mAllocator.Reset();
+            mWireCommandAllocator.Reset();
         }
 
         if (deserializeBuffer.AvailableSize() != 0) {
