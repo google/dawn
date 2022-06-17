@@ -153,13 +153,16 @@ MaybeError ValidateVertexState(DeviceBase* device,
 }
 
 MaybeError ValidatePrimitiveState(const DeviceBase* device, const PrimitiveState* descriptor) {
-    DAWN_TRY(
-        ValidateSingleSType(descriptor->nextInChain, wgpu::SType::PrimitiveDepthClampingState));
+    DAWN_TRY(ValidateSingleSType(descriptor->nextInChain, wgpu::SType::PrimitiveDepthClampingState,
+                                 wgpu::SType::PrimitiveDepthClipControl));
     const PrimitiveDepthClampingState* clampInfo = nullptr;
     FindInChain(descriptor->nextInChain, &clampInfo);
-    if (clampInfo && !device->IsFeatureEnabled(Feature::DepthClamping)) {
-        return DAWN_VALIDATION_ERROR("The depth clamping feature is not supported");
-    }
+    DAWN_INVALID_IF(clampInfo && !device->IsFeatureEnabled(Feature::DepthClamping),
+                    "%s is not supported", wgpu::FeatureName::DepthClamping);
+    const PrimitiveDepthClipControl* depthClipControl = nullptr;
+    FindInChain(descriptor->nextInChain, &depthClipControl);
+    DAWN_INVALID_IF(depthClipControl && !device->IsFeatureEnabled(Feature::DepthClipControl),
+                    "%s is not supported", wgpu::FeatureName::DepthClipControl);
     DAWN_TRY(ValidatePrimitiveTopology(descriptor->topology));
     DAWN_TRY(ValidateIndexFormat(descriptor->stripIndexFormat));
     DAWN_TRY(ValidateFrontFace(descriptor->frontFace));
