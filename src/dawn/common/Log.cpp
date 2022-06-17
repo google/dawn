@@ -70,12 +70,14 @@ LogMessage::LogMessage(LogMessage&& other) = default;
 
 LogMessage& LogMessage::operator=(LogMessage&& other) = default;
 
-LogMessage::~LogMessage() {
 #if defined(DAWN_DISABLE_LOGGING)
+LogMessage::~LogMessage() {
     // Don't print logs to make fuzzing more efficient. Implemented as
     // an early return to avoid warnings about unused member variables.
     return;
-#endif
+}
+#else  // defined(DAWN_DISABLE_LOGGING)
+LogMessage::~LogMessage() {
     std::string fullMessage = mStream.str();
 
     // If this message has been moved, its stream is empty.
@@ -99,6 +101,7 @@ LogMessage::~LogMessage() {
     fflush(outputStream);
 #endif  // DAWN_PLATFORM_IS(ANDROID)
 }
+#endif  // defined(DAWN_DISABLE_LOGGING)
 
 LogMessage DebugLog() {
     return LogMessage(LogSeverity::Debug);
