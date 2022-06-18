@@ -17,8 +17,7 @@
 
 #include <string>
 #include <string_view>
-// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
-#include <variant>  // NOLINT(build/include_order))
+#include <variant>
 
 #include "src/tint/source.h"
 

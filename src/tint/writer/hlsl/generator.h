@@ -16,7 +16,7 @@
 #define SRC_TINT_WRITER_HLSL_GENERATOR_H_
 
 #include <memory>
-#include <optional>  // NOLINT(build/include_order)
+#include <optional>
 #include <string>
 #include <unordered_set>
 #include <utility>

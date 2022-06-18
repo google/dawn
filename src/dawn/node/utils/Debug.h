@@ -16,13 +16,11 @@
 #define SRC_DAWN_NODE_UTILS_DEBUG_H_
 
 #include <iostream>
-// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
-#include <optional>  // NOLINT(build/include_order)
+#include <optional>
 #include <sstream>
 #include <unordered_map>
 #include <utility>
-// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
-#include <variant>  // NOLINT(build/include_order)
+#include <variant>
 #include <vector>
 
 #include "dawn/webgpu_cpp_print.h"

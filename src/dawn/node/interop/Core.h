@@ -20,14 +20,12 @@
 
 #include <cstdint>
 #include <limits>
-// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
-#include <optional>  // NOLINT(build/include_order)
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <unordered_map>
 #include <utility>
-// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
-#include <variant>  // NOLINT(build/include_order)
+#include <variant>
 #include <vector>
 
 #include "src/dawn/node/interop/Napi.h"

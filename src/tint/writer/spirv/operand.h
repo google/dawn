@@ -17,8 +17,7 @@
 
 #include <cstring>
 #include <string>
-// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
-#include <variant>  // NOLINT(build/include_order)
+#include <variant>
 #include <vector>
 
 #include "src/tint/utils/hash.h"

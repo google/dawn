@@ -15,8 +15,7 @@
 #include "src/tint/resolver/resolver.h"
 
 #include <cmath>
-// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
-#include <optional>  // NOLINT(build/include_order))
+#include <optional>
 
 #include "src/tint/sem/abstract_float.h"
 #include "src/tint/sem/abstract_int.h"

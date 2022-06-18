@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_TRANSFORM_NUM_WORKGROUPS_FROM_UNIFORM_H_
 #define SRC_TINT_TRANSFORM_NUM_WORKGROUPS_FROM_UNIFORM_H_
 
-#include <optional>  // NOLINT(build/include_order)
+#include <optional>
 
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/transform/transform.h"

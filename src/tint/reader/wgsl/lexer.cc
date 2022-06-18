@@ -19,7 +19,7 @@
 #include <cstring>
 #include <functional>
 #include <limits>
-#include <optional>  // NOLINT(build/include_order)
+#include <optional>
 #include <tuple>
 #include <type_traits>
 #include <utility>

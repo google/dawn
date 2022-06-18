@@ -17,10 +17,9 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <thread>
 #include <type_traits>
 #include <vector>
-
-#include <thread>  // NOLINT
 
 #include "tools/src/cmd/remote-compile/compile.h"
 #include "tools/src/cmd/remote-compile/socket.h"

@@ -15,8 +15,8 @@
 #ifndef TOOLS_SRC_CMD_REMOTE_COMPILE_RWMUTEX_H_
 #define TOOLS_SRC_CMD_REMOTE_COMPILE_RWMUTEX_H_
 
-#include <condition_variable>  // NOLINT
-#include <mutex>               // NOLINT
+#include <condition_variable>
+#include <mutex>
 
 ////////////////////////////////////////////////////////////////////////////////
 // RWMutex

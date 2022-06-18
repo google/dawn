@@ -18,9 +18,8 @@
 #include <stdint.h>
 #include <functional>
 #include <limits>
+#include <optional>
 #include <ostream>
-// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
-#include <optional>  // NOLINT(build/include_order))
 
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/result.h"

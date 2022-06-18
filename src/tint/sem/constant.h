@@ -16,9 +16,8 @@
 #define SRC_TINT_SEM_CONSTANT_H_
 
 #include <ostream>
-// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
 #include <utility>
-#include <variant>  // NOLINT(build/include_order)
+#include <variant>
 #include <vector>
 
 #include "src/tint/program_builder.h"

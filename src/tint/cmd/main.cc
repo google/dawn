@@ -17,7 +17,7 @@
 #include <iostream>
 #include <limits>
 #include <memory>
-#include <optional>  // NOLINT(build/include_order)
+#include <optional>
 #include <sstream>
 #include <string>
 #include <vector>

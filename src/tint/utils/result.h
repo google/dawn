@@ -16,8 +16,7 @@
 #define SRC_TINT_UTILS_RESULT_H_
 
 #include <ostream>
-// TODO(https://crbug.com/dawn/1379) Update cpplint and remove NOLINT
-#include <variant>  // NOLINT(build/include_order)
+#include <variant>
 
 namespace tint::utils {
 
