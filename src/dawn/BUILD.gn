@@ -77,23 +77,3 @@ dawn_json_generator("emscripten_bits_gen") {
     "emscripten-bits/library_webgpu_enum_tables.js",
   ]
 }
-
-################################################################################
-# Build target aliases
-# TODO(crbug.com/dawn/1275) - remove these
-################################################################################
-group("dawncpp") {
-  public_deps = [ ":cpp" ]
-}
-group("dawncpp_headers") {
-  public_deps = [ "${dawn_root}/include/dawn:cpp_headers" ]
-}
-group("dawn_proc") {
-  public_deps = [ ":proc" ]
-}
-group("dawn_headers") {
-  public_deps = [ "${dawn_root}/include/dawn:headers" ]
-}
-group("dawn_cpp") {
-  public_deps = [ ":cpp" ]
-}

@@ -67,18 +67,5 @@ config("public") {
   include_dirs = [
     "${target_gen_dir}/../../include",
     "${dawn_root}/include",
-
-    "${dawn_root}/src/include",  # TODO(crbug.com/dawn/1275) - remove
   ]
-}
-
-################################################################################
-# Build target aliases
-# TODO(crbug.com/dawn/1275) - remove these
-################################################################################
-group("dawncpp_headers") {
-  public_deps = [ ":cpp_headers" ]
-}
-group("dawn_headers") {
-  public_deps = [ ":headers" ]
 }
