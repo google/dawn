@@ -298,7 +298,7 @@ class Validator {
     /// @param func the function the variable is for
     /// @param var the variable to validate
     /// @returns true on success, false otherwise
-    bool FunctionParameter(const ast::Function* func, const sem::Variable* var) const;
+    bool Parameter(const ast::Function* func, const sem::Variable* var) const;
 
     /// Validates a return
     /// @param ret the return statement to validate

@@ -718,9 +718,7 @@ TEST_F(ResolverFunctionValidationTest, ParameterStoreType_NonAtomicFree) {
     Func("f", {bar}, ty.void_(), {});
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: store type of function parameter must be a "
-              "constructible type");
+    EXPECT_EQ(r()->error(), "12:34 error: type of function parameter must be constructible");
 }
 
 TEST_F(ResolverFunctionValidationTest, ParameterSotreType_AtomicFree) {

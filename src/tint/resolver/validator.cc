@@ -739,11 +739,7 @@ bool Validator::Variable(const sem::Variable* v) const {
     return true;
 }
 
-bool Validator::FunctionParameter(const ast::Function* func, const sem::Variable* var) const {
-    if (!Variable(var)) {
-        return false;
-    }
-
+bool Validator::Parameter(const ast::Function* func, const sem::Variable* var) const {
     auto* decl = var->Declaration();
 
     if (IsValidationDisabled(decl->attributes, ast::DisabledValidation::kFunctionParameter)) {
@@ -779,11 +775,11 @@ bool Validator::FunctionParameter(const ast::Function* func, const sem::Variable
 
     if (IsPlain(var->Type())) {
         if (!var->Type()->IsConstructible()) {
-            AddError("store type of function parameter must be a constructible type", decl->source);
+            AddError("type of function parameter must be constructible", decl->source);
             return false;
         }
     } else if (!var->Type()->IsAnyOf<sem::Texture, sem::Sampler, sem::Pointer>()) {
-        AddError("store type of function parameter cannot be " + sem_.TypeNameOf(var->Type()),
+        AddError("type of function parameter cannot be " + sem_.TypeNameOf(var->Type()),
                  decl->source);
         return false;
     }
@@ -946,12 +942,6 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
     if (decl->params.size() > 255) {
         AddError("functions may declare at most 255 parameters", decl->source);
         return false;
-    }
-
-    for (size_t i = 0; i < decl->params.size(); i++) {
-        if (!FunctionParameter(decl, func->Parameters()[i])) {
-            return false;
-        }
     }
 
     if (!func->ReturnType()->Is<sem::Void>()) {

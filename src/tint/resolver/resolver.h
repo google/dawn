@@ -290,14 +290,20 @@ class Resolver {
     /// raised.
     sem::Struct* Structure(const ast::Struct* str);
 
-    /// @returns the semantic info for the variable `var`. If an error is
-    /// raised, nullptr is returned.
-    /// @note this method does not resolve the attributes as these are
-    /// context-dependent (global, local, parameter)
-    /// @param var the variable to create or return the `VariableInfo` for
+    /// @returns the semantic info for the variable `v`. If an error is raised, nullptr is
+    /// returned.
+    /// @note this method does not resolve the attributes as these are context-dependent (global,
+    /// local)
+    /// @param var the variable
     /// @param is_global true if this is module scope, otherwise function scope
-    /// @param index the index of the parameter, if this variable is a parameter
-    sem::Variable* Variable(const ast::Variable* var, bool is_global, uint32_t index = 0);
+    sem::Variable* Variable(const ast::Variable* var, bool is_global);
+
+    /// @returns the semantic info for the function parameter `param`. If an error is raised,
+    /// nullptr is returned.
+    /// @note the caller is expected to validate the parameter
+    /// @param param the AST parameter
+    /// @param index the index of the parameter
+    sem::Parameter* Parameter(const ast::Parameter* param, uint32_t index);
 
     /// Records the storage class usage for the given type, and any transient
     /// dependencies of the type. Validates that the type can be used for the
