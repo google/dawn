@@ -28,6 +28,7 @@ namespace dawn {
 
 namespace {
 
+#if !defined(DAWN_DISABLE_LOGGING)
 const char* SeverityName(LogSeverity severity) {
     switch (severity) {
         case LogSeverity::Debug:
@@ -43,6 +44,7 @@ const char* SeverityName(LogSeverity severity) {
             return "";
     }
 }
+#endif
 
 #if DAWN_PLATFORM_IS(ANDROID)
 android_LogPriority AndroidLogPriority(LogSeverity severity) {
@@ -72,6 +74,7 @@ LogMessage& LogMessage::operator=(LogMessage&& other) = default;
 
 #if defined(DAWN_DISABLE_LOGGING)
 LogMessage::~LogMessage() {
+    (void)mSeverity;
     // Don't print logs to make fuzzing more efficient. Implemented as
     // an early return to avoid warnings about unused member variables.
     return;
