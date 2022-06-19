@@ -28,8 +28,9 @@ const volatile char* WireClient::HandleCommands(const volatile char* commands, s
     return mImpl->HandleCommands(commands, size);
 }
 
-ReservedTexture WireClient::ReserveTexture(WGPUDevice device) {
-    return mImpl->ReserveTexture(device);
+ReservedTexture WireClient::ReserveTexture(WGPUDevice device,
+                                           const WGPUTextureDescriptor* descriptor) {
+    return mImpl->ReserveTexture(device, descriptor);
 }
 
 ReservedSwapChain WireClient::ReserveSwapChain(WGPUDevice device) {

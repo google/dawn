@@ -31,7 +31,7 @@ class Buffer final : public ObjectBase {
     static WGPUBuffer Create(Device* device, const WGPUBufferDescriptor* descriptor);
     static WGPUBuffer CreateError(Device* device, const WGPUBufferDescriptor* descriptor);
 
-    using ObjectBase::ObjectBase;
+    Buffer(const ObjectBaseParams& params, Device* device, const WGPUBufferDescriptor* descriptor);
     ~Buffer() override;
 
     bool OnMapAsyncCallback(uint64_t requestSerial,
@@ -62,8 +62,6 @@ class Buffer final : public ObjectBase {
     bool CheckGetMappedRangeOffsetSize(size_t offset, size_t size) const;
 
     void FreeMappedData();
-
-    Device* mDevice;
 
     enum class MapRequestType { None, Read, Write };
 

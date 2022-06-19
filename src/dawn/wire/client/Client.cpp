@@ -81,8 +81,22 @@ void Client::DestroyAllObjects() {
     }
 }
 
-ReservedTexture Client::ReserveTexture(WGPUDevice device) {
-    Texture* texture = Make<Texture>();
+ReservedTexture Client::ReserveTexture(WGPUDevice device, const WGPUTextureDescriptor* descriptor) {
+    // Make a fake descriptor so that data returned by wgpu::Texture getters isn't garbage.
+    // TODO(dawn:1451): Remove this defaulting once the descriptor is required for ReserveTexture.
+    WGPUTextureDescriptor defaultDescriptor = {};
+    if (descriptor == nullptr) {
+        defaultDescriptor.size = {1, 1, 1};
+        defaultDescriptor.mipLevelCount = 1;
+        defaultDescriptor.sampleCount = 1;
+        defaultDescriptor.dimension = WGPUTextureDimension_1D;
+        defaultDescriptor.format = WGPUTextureFormat_RGBA8Unorm;
+        defaultDescriptor.usage = 0;
+
+        descriptor = &defaultDescriptor;
+    }
+
+    Texture* texture = Make<Texture>(descriptor);
 
     ReservedTexture result;
     result.texture = ToAPI(texture);

@@ -26,12 +26,16 @@ class WireInjectTextureTests : public WireTest {
   public:
     WireInjectTextureTests() {}
     ~WireInjectTextureTests() override = default;
+
+    // A placeholder texture format for ReserveTexture. The data in it doesn't matter as long as
+    // we don't call texture reflection methods.
+    WGPUTextureDescriptor placeholderDesc = {};
 };
 
 // Test that reserving and injecting a texture makes calls on the client object forward to the
 // server object correctly.
 TEST_F(WireInjectTextureTests, CallAfterReserveInject) {
-    ReservedTexture reservation = GetWireClient()->ReserveTexture(device);
+    ReservedTexture reservation = GetWireClient()->ReserveTexture(device, &placeholderDesc);
 
     WGPUTexture apiTexture = api.GetNewTexture();
     EXPECT_CALL(api, TextureReference(apiTexture));
@@ -46,8 +50,8 @@ TEST_F(WireInjectTextureTests, CallAfterReserveInject) {
 
 // Test that reserve correctly returns different IDs each time.
 TEST_F(WireInjectTextureTests, ReserveDifferentIDs) {
-    ReservedTexture reservation1 = GetWireClient()->ReserveTexture(device);
-    ReservedTexture reservation2 = GetWireClient()->ReserveTexture(device);
+    ReservedTexture reservation1 = GetWireClient()->ReserveTexture(device, &placeholderDesc);
+    ReservedTexture reservation2 = GetWireClient()->ReserveTexture(device, &placeholderDesc);
 
     ASSERT_NE(reservation1.id, reservation2.id);
     ASSERT_NE(reservation1.texture, reservation2.texture);
@@ -55,7 +59,7 @@ TEST_F(WireInjectTextureTests, ReserveDifferentIDs) {
 
 // Test that injecting the same id without a destroy first fails.
 TEST_F(WireInjectTextureTests, InjectExistingID) {
-    ReservedTexture reservation = GetWireClient()->ReserveTexture(device);
+    ReservedTexture reservation = GetWireClient()->ReserveTexture(device, &placeholderDesc);
 
     WGPUTexture apiTexture = api.GetNewTexture();
     EXPECT_CALL(api, TextureReference(apiTexture));
@@ -70,7 +74,7 @@ TEST_F(WireInjectTextureTests, InjectExistingID) {
 
 // Test that the server only borrows the texture and does a single reference-release
 TEST_F(WireInjectTextureTests, InjectedTextureLifetime) {
-    ReservedTexture reservation = GetWireClient()->ReserveTexture(device);
+    ReservedTexture reservation = GetWireClient()->ReserveTexture(device, &placeholderDesc);
 
     // Injecting the texture adds a reference
     WGPUTexture apiTexture = api.GetNewTexture();
@@ -93,17 +97,17 @@ TEST_F(WireInjectTextureTests, InjectedTextureLifetime) {
 TEST_F(WireInjectTextureTests, ReclaimTextureReservation) {
     // Test that doing a reservation and full release is an error.
     {
-        ReservedTexture reservation = GetWireClient()->ReserveTexture(device);
+        ReservedTexture reservation = GetWireClient()->ReserveTexture(device, &placeholderDesc);
         wgpuTextureRelease(reservation.texture);
         FlushClient(false);
     }
 
     // Test that doing a reservation and then reclaiming it recycles the ID.
     {
-        ReservedTexture reservation1 = GetWireClient()->ReserveTexture(device);
+        ReservedTexture reservation1 = GetWireClient()->ReserveTexture(device, &placeholderDesc);
         GetWireClient()->ReclaimTextureReservation(reservation1);
 
-        ReservedTexture reservation2 = GetWireClient()->ReserveTexture(device);
+        ReservedTexture reservation2 = GetWireClient()->ReserveTexture(device, &placeholderDesc);
 
         // The ID is the same, but the generation is still different.
         ASSERT_EQ(reservation1.id, reservation2.id);
@@ -112,6 +116,28 @@ TEST_F(WireInjectTextureTests, ReclaimTextureReservation) {
         // No errors should occur.
         FlushClient();
     }
+}
+
+// Test the reflection of texture creation parameters for reserved textures.
+TEST_F(WireInjectTextureTests, ReservedTextureReflection) {
+    WGPUTextureDescriptor desc = {};
+    desc.size = {10, 11, 12};
+    desc.format = WGPUTextureFormat_R32Float;
+    desc.dimension = WGPUTextureDimension_3D;
+    desc.mipLevelCount = 1000;
+    desc.sampleCount = 3;
+    desc.usage = WGPUTextureUsage_RenderAttachment;
+
+    ReservedTexture reservation = GetWireClient()->ReserveTexture(device, &desc);
+    WGPUTexture texture = reservation.texture;
+
+    ASSERT_EQ(desc.size.width, wgpuTextureGetWidth(texture));
+    ASSERT_EQ(desc.size.height, wgpuTextureGetHeight(texture));
+    ASSERT_EQ(desc.size.depthOrArrayLayers, wgpuTextureGetDepthOrArrayLayers(texture));
+    ASSERT_EQ(desc.format, wgpuTextureGetFormat(texture));
+    ASSERT_EQ(desc.dimension, wgpuTextureGetDimension(texture));
+    ASSERT_EQ(desc.mipLevelCount, wgpuTextureGetMipLevelCount(texture));
+    ASSERT_EQ(desc.sampleCount, wgpuTextureGetSampleCount(texture));
 }
 
 }  // namespace dawn::wire
