@@ -44,7 +44,7 @@ class Client : public ClientBase {
     //   T::T(ObjectBaseParams, arg1, arg2, arg3)
     template <typename T, typename... Args>
     T* Make(Args&&... args) {
-        constexpr ObjectType type = ObjectTypeToTypeEnum<T>::value;
+        constexpr ObjectType type = ObjectTypeToTypeEnum<T>;
 
         ObjectBaseParams params = {this, mObjectStores[type].ReserveHandle()};
         T* object = new T(params, std::forward<Args>(args)...);
@@ -56,13 +56,13 @@ class Client : public ClientBase {
 
     template <typename T>
     void Free(T* obj) {
-        Free(obj, ObjectTypeToTypeEnum<T>::value);
+        Free(obj, ObjectTypeToTypeEnum<T>);
     }
     void Free(ObjectBase* obj, ObjectType type);
 
     template <typename T>
     T* Get(ObjectId id) {
-        return static_cast<T*>(mObjectStores[ObjectTypeToTypeEnum<T>::value].Get(id));
+        return static_cast<T*>(mObjectStores[ObjectTypeToTypeEnum<T>].Get(id));
     }
 
     // ChunkedCommandHandler implementation
