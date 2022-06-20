@@ -283,10 +283,12 @@ class Validator {
     /// @returns true on success, false otherwise.
     bool LoopStatement(const sem::LoopStatement* stmt) const;
 
-    /// Validates a materialize of an abstract numeric value
-    /// @param m the materialize to validate
+    /// Validates a materialize of an abstract numeric value from the type `from` to the type `to`.
+    /// @param to the target type
+    /// @param from the abstract numeric type
+    /// @param source the source of the materialization
     /// @returns true on success, false otherwise
-    bool Materialize(const sem::Materialize* m) const;
+    bool Materialize(const sem::Type* to, const sem::Type* from, const Source& source) const;
 
     /// Validates a matrix
     /// @param ty the matrix to validate

@@ -307,14 +307,13 @@ bool Validator::MultisampledTexture(const sem::MultisampledTexture* t, const Sou
     return true;
 }
 
-bool Validator::Materialize(const sem::Materialize* m) const {
-    auto* from = m->Expr()->Type();
-    auto* to = m->Type();
-
+bool Validator::Materialize(const sem::Type* to,
+                            const sem::Type* from,
+                            const Source& source) const {
     if (sem::Type::ConversionRank(from, to) == sem::Type::kNoConversion) {
         AddError("cannot convert value of type '" + sem_.TypeNameOf(from) + "' to type '" +
                      sem_.TypeNameOf(to) + "'",
-                 m->Expr()->Declaration()->source);
+                 source);
         return false;
     }
     return true;

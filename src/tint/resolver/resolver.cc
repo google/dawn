@@ -1243,7 +1243,11 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
     // Helper for actually creating the the materialize node, performing the constant cast, updating
     // the ast -> sem binding, and performing validation.
     auto materialize = [&](const sem::Type* target_ty) -> sem::Materialize* {
+        auto* src_ty = expr->Type();
         auto* decl = expr->Declaration();
+        if (!validator_.Materialize(target_ty, src_ty, decl->source)) {
+            return nullptr;
+        }
         auto expr_val = EvaluateConstantValue(decl, expr->Type());
         if (!expr_val) {
             return nullptr;
@@ -1252,7 +1256,7 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
             TINT_ICE(Resolver, builder_->Diagnostics())
                 << decl->source
                 << "EvaluateConstantValue() returned invalid value for materialized value of type: "
-                << builder_->FriendlyName(expr->Type());
+                << builder_->FriendlyName(src_ty);
             return nullptr;
         }
         auto materialized_val = ConvertValue(expr_val.Get(), target_ty, decl->source);
@@ -1269,7 +1273,7 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
             builder_->create<sem::Materialize>(expr, current_statement_, materialized_val.Get());
         m->Behaviors() = expr->Behaviors();
         builder_->Sem().Replace(decl, m);
-        return validator_.Materialize(m) ? m : nullptr;
+        return m;
     };
 
     // Helpers for constructing semantic types

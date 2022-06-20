@@ -33,6 +33,7 @@ using f16V = builder::vec<3, f16>;
 using i32V = builder::vec<3, i32>;
 using u32V = builder::vec<3, u32>;
 using f32M = builder::mat<3, 2, f32>;
+using i32Varr = builder::array<3, i32>;
 
 constexpr double kHighestU32 = static_cast<double>(u32::kHighest);
 constexpr double kLowestU32 = static_cast<double>(u32::kLowest);
@@ -526,10 +527,14 @@ INSTANTIATE_TEST_SUITE_P(InvalidConversion,
                          testing::Combine(testing::Values(Expectation::kInvalidConversion),
                                           testing::ValuesIn(kScalarMethods),
                                           testing::ValuesIn(std::vector<Data>{
-                                              Types<i32, AFloat>(),    //
-                                              Types<u32, AFloat>(),    //
-                                              Types<i32V, AFloatV>(),  //
-                                              Types<u32V, AFloatV>(),  //
+                                              Types<i32, AFloat>(),       //
+                                              Types<u32, AFloat>(),       //
+                                              Types<i32V, AFloatV>(),     //
+                                              Types<u32V, AFloatV>(),     //
+                                              Types<i32Varr, AInt>(),     //
+                                              Types<i32Varr, AIntV>(),    //
+                                              Types<i32Varr, AFloat>(),   //
+                                              Types<i32Varr, AFloatV>(),  //
                                           })));
 
 INSTANTIATE_TEST_SUITE_P(ScalarValueCannotBeRepresented,
@@ -958,6 +963,26 @@ INSTANTIATE_TEST_SUITE_P(ArrayLengthValueCannotBeRepresented,
                                           })));
 
 }  // namespace materialize_abstract_numeric_to_default_type
+
+using MaterializeAbstractNumericToUnrelatedType = resolver::ResolverTest;
+
+TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructVarCtor) {
+    Structure("S", {Member("a", ty.i32())});
+    WrapInFunction(Decl(Var("v", ty.type_name("S"), Expr(Source{{12, 34}}, 1_a))));
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_THAT(
+        r()->error(),
+        testing::HasSubstr("error: cannot convert value of type 'abstract-int' to type 'S'"));
+}
+
+TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructLetCtor) {
+    Structure("S", {Member("a", ty.i32())});
+    WrapInFunction(Decl(Let("v", ty.type_name("S"), Expr(Source{{12, 34}}, 1_a))));
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_THAT(
+        r()->error(),
+        testing::HasSubstr("error: cannot convert value of type 'abstract-int' to type 'S'"));
+}
 
 }  // namespace
 }  // namespace tint::resolver
