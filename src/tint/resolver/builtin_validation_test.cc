@@ -90,7 +90,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalLet) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a module-scope let)");
+              R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a 'let')");
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVar) {
@@ -98,7 +98,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVar) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a module-scope var)");
+              R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a module-scope 'var')");
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAlias) {

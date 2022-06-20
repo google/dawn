@@ -29,8 +29,7 @@ TEST_F(ResolverVarLetValidationTest, VarNoInitializerNoType) {
     WrapInFunction(Var(Source{{12, 34}}, "a", nullptr));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: function-scope 'var' declaration requires a type or initializer");
+    EXPECT_EQ(r()->error(), "12:34 error: 'var' declaration requires a type or initializer");
 }
 
 TEST_F(ResolverVarLetValidationTest, GlobalVarNoInitializerNoType) {
@@ -38,8 +37,15 @@ TEST_F(ResolverVarLetValidationTest, GlobalVarNoInitializerNoType) {
     Global(Source{{12, 34}}, "a", nullptr);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: module-scope 'var' declaration requires a type or initializer");
+    EXPECT_EQ(r()->error(), "12:34 error: 'var' declaration requires a type or initializer");
+}
+
+TEST_F(ResolverVarLetValidationTest, OverrideNoInitializerNoType) {
+    // override a;
+    Override(Source{{12, 34}}, "a", nullptr, nullptr);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: 'override' declaration requires a type or initializer");
 }
 
 TEST_F(ResolverVarLetValidationTest, VarTypeNotStorable) {
@@ -65,7 +71,7 @@ TEST_F(ResolverVarLetValidationTest, LetTypeNotConstructible) {
     WrapInFunction(t2);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "56:78 error: texture_2d<f32> cannot be used as the type of a let");
+    EXPECT_EQ(r()->error(), "56:78 error: texture_2d<f32> cannot be used as the type of a 'let'");
 }
 
 TEST_F(ResolverVarLetValidationTest, LetConstructorWrongType) {
@@ -217,7 +223,7 @@ TEST_F(ResolverVarLetValidationTest, NonConstructibleType_Atomic) {
     WrapInFunction(v);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: function variable must have a constructible type");
+    EXPECT_EQ(r()->error(), "12:34 error: function-scope 'var' must have a constructible type");
 }
 
 TEST_F(ResolverVarLetValidationTest, NonConstructibleType_RuntimeArray) {
@@ -229,7 +235,7 @@ TEST_F(ResolverVarLetValidationTest, NonConstructibleType_RuntimeArray) {
     EXPECT_EQ(r()->error(),
               R"(12:34 error: runtime-sized arrays can only be used in the <storage> storage class
 56:78 note: while analysing structure member S.m
-12:34 note: while instantiating variable v)");
+12:34 note: while instantiating 'var' v)");
 }
 
 TEST_F(ResolverVarLetValidationTest, NonConstructibleType_Struct_WithAtomic) {
@@ -238,7 +244,7 @@ TEST_F(ResolverVarLetValidationTest, NonConstructibleType_Struct_WithAtomic) {
     WrapInFunction(v);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "error: function variable must have a constructible type");
+    EXPECT_EQ(r()->error(), "error: function-scope 'var' must have a constructible type");
 }
 
 TEST_F(ResolverVarLetValidationTest, NonConstructibleType_InferredType) {
@@ -251,7 +257,7 @@ TEST_F(ResolverVarLetValidationTest, NonConstructibleType_InferredType) {
     WrapInFunction(v);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: function variable must have a constructible type");
+    EXPECT_EQ(r()->error(), "12:34 error: function-scope 'var' must have a constructible type");
 }
 
 TEST_F(ResolverVarLetValidationTest, InvalidStorageClassForInitializer) {

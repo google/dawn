@@ -309,7 +309,7 @@ TEST_F(ResolverAtomicValidationTest, Local) {
     WrapInFunction(Var("a", ty.atomic(Source{{12, 34}}, ty.i32())));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: function variable must have a constructible type");
+    EXPECT_EQ(r()->error(), "12:34 error: function-scope 'var' must have a constructible type");
 }
 
 }  // namespace

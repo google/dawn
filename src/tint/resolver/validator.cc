@@ -558,7 +558,7 @@ bool Validator::GlobalVariable(
                     return false;
                 }
             }
-            return true;
+            return Variable(global);
         },
         [&](const ast::Let*) {
             if (!decl->attributes.empty()) {
@@ -566,9 +566,14 @@ bool Validator::GlobalVariable(
                          decl->attributes[0]->source);
                 return false;
             }
-            return true;
+            return Variable(global);
         },
-        [&](const ast::Var*) {
+        [&](const ast::Var* var) {
+            if (global->StorageClass() == ast::StorageClass::kNone) {
+                AddError("module-scope 'var' declaration must have a storage class", decl->source);
+                return false;
+            }
+
             for (auto* attr : decl->attributes) {
                 bool is_shader_io_attribute =
                     attr->IsAnyOf<ast::BuiltinAttribute, ast::InterpolateAttribute,
@@ -582,7 +587,22 @@ bool Validator::GlobalVariable(
                     return false;
                 }
             }
-            return true;
+
+            // https://gpuweb.github.io/gpuweb/wgsl/#variable-declaration
+            // The access mode always has a default, and except for variables in the
+            // storage storage class, must not be written.
+            if (global->StorageClass() != ast::StorageClass::kStorage &&
+                var->declared_access != ast::Access::kUndefined) {
+                AddError("only variables in <storage> storage class may declare an access mode",
+                         var->source);
+                return false;
+            }
+
+            if (!AtomicVariable(global, atomic_composite_info)) {
+                return false;
+            }
+
+            return Var(global);
         });
 
     if (!ok) {
@@ -618,23 +638,7 @@ bool Validator::GlobalVariable(
             }
     }
 
-    if (auto* var = decl->As<ast::Var>()) {
-        // https://gpuweb.github.io/gpuweb/wgsl/#variable-declaration
-        // The access mode always has a default, and except for variables in the
-        // storage storage class, must not be written.
-        if (global->StorageClass() != ast::StorageClass::kStorage &&
-            var->declared_access != ast::Access::kUndefined) {
-            AddError("only variables in <storage> storage class may declare an access mode",
-                     var->source);
-            return false;
-        }
-
-        if (!AtomicVariable(global, atomic_composite_info)) {
-            return false;
-        }
-    }
-
-    return Variable(global);
+    return true;
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#atomic-types
@@ -682,58 +686,67 @@ bool Validator::Variable(const sem::Variable* v) const {
     auto* decl = v->Declaration();
     auto* storage_ty = v->Type()->UnwrapRef();
 
-    auto* as_let = decl->As<ast::Let>();
-    auto* as_var = decl->As<ast::Var>();
+    auto* kind = decl->Is<ast::Override>() ? "'override'" : "'let'";
 
     if (v->Is<sem::GlobalVariable>()) {
         auto name = symbols_.NameFor(decl->symbol);
         if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
-            auto* kind = as_let ? "let" : "var";
-            AddError(
-                "'" + name + "' is a builtin and cannot be redeclared as a module-scope " + kind,
-                decl->source);
+            AddError("'" + name + "' is a builtin and cannot be redeclared as a " + kind,
+                     decl->source);
             return false;
         }
     }
 
-    if (as_var && !IsStorable(storage_ty)) {
-        AddError(sem_.TypeNameOf(storage_ty) + " cannot be used as the type of a var",
+    if (!(storage_ty->IsConstructible() || storage_ty->Is<sem::Pointer>())) {
+        AddError(sem_.TypeNameOf(storage_ty) + " cannot be used as the type of a " + kind,
                  decl->source);
         return false;
     }
+    return true;
+}
 
-    if (as_let && !(storage_ty->IsConstructible() || storage_ty->Is<sem::Pointer>())) {
-        AddError(sem_.TypeNameOf(storage_ty) + " cannot be used as the type of a let",
-                 decl->source);
+bool Validator::Var(const sem::Variable* v) const {
+    auto* var = v->Declaration()->As<ast::Var>();
+    auto* storage_ty = v->Type()->UnwrapRef();
+
+    if (v->Is<sem::GlobalVariable>()) {
+        auto name = symbols_.NameFor(var->symbol);
+        if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
+            AddError("'" + name + "' is a builtin and cannot be redeclared as a module-scope 'var'",
+                     var->source);
+            return false;
+        }
+    }
+
+    if (!IsStorable(storage_ty)) {
+        AddError(sem_.TypeNameOf(storage_ty) + " cannot be used as the type of a var", var->source);
         return false;
     }
 
-    if (v->Is<sem::LocalVariable>() && as_var &&
-        IsValidationEnabled(decl->attributes, ast::DisabledValidation::kIgnoreStorageClass)) {
+    if (v->Is<sem::LocalVariable>() &&
+        IsValidationEnabled(var->attributes, ast::DisabledValidation::kIgnoreStorageClass)) {
         if (!v->Type()->UnwrapRef()->IsConstructible()) {
-            AddError("function variable must have a constructible type",
-                     decl->type ? decl->type->source : decl->source);
+            AddError("function-scope 'var' must have a constructible type",
+                     var->type ? var->type->source : var->source);
             return false;
         }
     }
 
-    if (as_var && storage_ty->is_handle() &&
-        as_var->declared_storage_class != ast::StorageClass::kNone) {
+    if (storage_ty->is_handle() && var->declared_storage_class != ast::StorageClass::kNone) {
         // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
         // If the store type is a texture type or a sampler type, then the
         // variable declaration must not have a storage class attribute. The
         // storage class will always be handle.
         AddError(
             "variables of type '" + sem_.TypeNameOf(storage_ty) + "' must not have a storage class",
-            decl->source);
+            var->source);
         return false;
     }
 
-    if (IsValidationEnabled(decl->attributes, ast::DisabledValidation::kIgnoreStorageClass) &&
-        as_var &&
-        (as_var->declared_storage_class == ast::StorageClass::kInput ||
-         as_var->declared_storage_class == ast::StorageClass::kOutput)) {
-        AddError("invalid use of input/output storage class", as_var->source);
+    if (IsValidationEnabled(var->attributes, ast::DisabledValidation::kIgnoreStorageClass) &&
+        (var->declared_storage_class == ast::StorageClass::kInput ||
+         var->declared_storage_class == ast::StorageClass::kOutput)) {
+        AddError("invalid use of input/output storage class", var->source);
         return false;
     }
     return true;

@@ -38,7 +38,7 @@ TEST_F(ResolverHostShareableValidationTest, BoolMember) {
         r()->error(),
         R"(56:78 error: Type 'bool' cannot be used in storage class 'storage' as it is non-host-shareable
 12:34 note: while analysing structure member S.x
-56:78 note: while instantiating variable g)");
+56:78 note: while instantiating 'var' g)");
 }
 
 TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
@@ -56,7 +56,7 @@ TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
         r()->error(),
         R"(56:78 error: Type 'vec3<bool>' cannot be used in storage class 'storage' as it is non-host-shareable
 12:34 note: while analysing structure member S.x
-56:78 note: while instantiating variable g)");
+56:78 note: while instantiating 'var' g)");
 }
 
 TEST_F(ResolverHostShareableValidationTest, Aliases) {
@@ -75,7 +75,7 @@ TEST_F(ResolverHostShareableValidationTest, Aliases) {
         r()->error(),
         R"(56:78 error: Type 'bool' cannot be used in storage class 'storage' as it is non-host-shareable
 12:34 note: while analysing structure member S.x
-56:78 note: while instantiating variable g)");
+56:78 note: while instantiating 'var' g)");
 }
 
 TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
@@ -100,7 +100,7 @@ TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
 3:4 note: while analysing structure member I2.y
 5:6 note: while analysing structure member I3.z
 7:8 note: while analysing structure member S.m
-9:10 note: while instantiating variable g)");
+9:10 note: while instantiating 'var' g)");
 }
 
 TEST_F(ResolverHostShareableValidationTest, NoError) {

@@ -89,16 +89,18 @@ TEST_P(ResolverInferredTypeParamTest, GlobalLet_Pass) {
     EXPECT_EQ(TypeOf(var), expected_type);
 }
 
-TEST_P(ResolverInferredTypeParamTest, GlobalVar_Fail) {
+TEST_P(ResolverInferredTypeParamTest, GlobalVar_Pass) {
     auto& params = GetParam();
+
+    auto* expected_type = params.create_expected_type(*this);
 
     // var a = <type constructor>;
     auto* ctor_expr = params.create_value(*this, 0);
-    Global(Source{{12, 34}}, "a", nullptr, ast::StorageClass::kPrivate, ctor_expr);
+    auto* var = Global("a", nullptr, ast::StorageClass::kPrivate, ctor_expr);
     WrapInFunction();
 
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: module-scope 'var' declaration must specify a type");
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(TypeOf(var)->UnwrapRef(), expected_type);
 }
 
 TEST_P(ResolverInferredTypeParamTest, LocalLet_Pass) {

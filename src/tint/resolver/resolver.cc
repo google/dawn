@@ -312,17 +312,16 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
 }
 
 sem::Variable* Resolver::Variable(const ast::Variable* v, bool is_global) {
-    const sem::Type* storage_ty = nullptr;
+    const sem::Type* ty = nullptr;
 
     // If the variable has a declared type, resolve it.
-    if (auto* ty = v->type) {
-        storage_ty = Type(ty);
-        if (!storage_ty) {
+    if (v->type) {
+        ty = Type(v->type);
+        if (!ty) {
             return nullptr;
         }
     }
 
-    auto* as_var = v->As<ast::Var>();
     auto* as_let = v->As<ast::Let>();
     auto* as_override = v->As<ast::Override>();
 
@@ -330,39 +329,91 @@ sem::Variable* Resolver::Variable(const ast::Variable* v, bool is_global) {
 
     // Does the variable have a constructor?
     if (v->constructor) {
-        rhs = Materialize(Expression(v->constructor), storage_ty);
+        rhs = Materialize(Expression(v->constructor), ty);
         if (!rhs) {
             return nullptr;
         }
 
         // If the variable has no declared type, infer it from the RHS
-        if (!storage_ty) {
-            if (as_var && is_global) {
-                AddError("module-scope 'var' declaration must specify a type", v->source);
-                return nullptr;
-            }
-
-            storage_ty = rhs->Type()->UnwrapRef();  // Implicit load of RHS
+        if (!ty) {
+            ty = rhs->Type()->UnwrapRef();  // Implicit load of RHS
         }
     } else if (as_let) {
         AddError("'let' declaration must have an initializer", v->source);
         return nullptr;
-    } else if (!v->type) {
-        AddError((is_global) ? "module-scope 'var' declaration requires a type or initializer"
-                             : "function-scope 'var' declaration requires a type or initializer",
-                 v->source);
+    } else if (!ty) {
+        AddError("'override' declaration requires a type or initializer", v->source);
         return nullptr;
+    }
+
+    if (rhs &&
+        !validator_.VariableConstructorOrCast(v, ast::StorageClass::kNone, ty, rhs->Type())) {
+        return nullptr;
+    }
+
+    if (!ApplyStorageClassUsageToType(ast::StorageClass::kNone, const_cast<sem::Type*>(ty),
+                                      v->source)) {
+        AddNote("while instantiating variable " + builder_->Symbols().NameFor(v->symbol),
+                v->source);
+        return nullptr;
+    }
+
+    sem::Variable* sem = nullptr;
+    if (is_global) {
+        bool has_const_val = rhs && !as_override;
+        auto* global = builder_->create<sem::GlobalVariable>(
+            v, ty, ast::StorageClass::kNone, ast::Access::kUndefined,
+            has_const_val ? rhs->ConstantValue() : sem::Constant{}, sem::BindingPoint{});
+
+        if (as_override) {
+            if (auto* id = ast::GetAttribute<ast::IdAttribute>(v->attributes)) {
+                global->SetConstantId(static_cast<uint16_t>(id->value));
+            }
+        }
+        sem = global;
+    } else {
+        sem = builder_->create<sem::LocalVariable>(
+            v, ty, ast::StorageClass::kNone, ast::Access::kUndefined, current_statement_,
+            (rhs && as_let) ? rhs->ConstantValue() : sem::Constant{});
+    }
+
+    sem->SetConstructor(rhs);
+    builder_->Sem().Add(v, sem);
+    return sem;
+}
+
+sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
+    const sem::Type* storage_ty = nullptr;
+
+    // If the variable has a declared type, resolve it.
+    if (auto* ty = var->type) {
+        storage_ty = Type(ty);
+        if (!storage_ty) {
+            return nullptr;
+        }
+    }
+
+    const sem::Expression* rhs = nullptr;
+
+    // Does the variable have a constructor?
+    if (var->constructor) {
+        rhs = Materialize(Expression(var->constructor), storage_ty);
+        if (!rhs) {
+            return nullptr;
+        }
+        // If the variable has no declared type, infer it from the RHS
+        if (!storage_ty) {
+            storage_ty = rhs->Type()->UnwrapRef();  // Implicit load of RHS
+        }
     }
 
     if (!storage_ty) {
-        TINT_ICE(Resolver, diagnostics_) << "failed to determine storage type for variable '" +
-                                                builder_->Symbols().NameFor(v->symbol) + "'\n"
-                                         << "Source: " << v->source;
+        AddError("'var' declaration requires a type or initializer", var->source);
         return nullptr;
     }
 
-    auto storage_class = as_var ? as_var->declared_storage_class : ast::StorageClass::kNone;
-    if (storage_class == ast::StorageClass::kNone && as_var) {
+    auto storage_class = var->declared_storage_class;
+    if (storage_class == ast::StorageClass::kNone) {
         // No declared storage class. Infer from usage / type.
         if (!is_global) {
             storage_class = ast::StorageClass::kFunction;
@@ -375,65 +426,47 @@ sem::Variable* Resolver::Variable(const ast::Variable* v, bool is_global) {
         }
     }
 
-    if (!is_global && as_var && storage_class != ast::StorageClass::kFunction &&
-        validator_.IsValidationEnabled(v->attributes,
+    if (!is_global && storage_class != ast::StorageClass::kFunction &&
+        validator_.IsValidationEnabled(var->attributes,
                                        ast::DisabledValidation::kIgnoreStorageClass)) {
-        AddError("function-scope 'var' declaration must use 'function' storage class", v->source);
+        AddError("function-scope 'var' declaration must use 'function' storage class", var->source);
         return nullptr;
     }
 
-    auto access = as_var ? as_var->declared_access : ast::Access::kUndefined;
+    auto access = var->declared_access;
     if (access == ast::Access::kUndefined) {
         access = DefaultAccessForStorageClass(storage_class);
     }
 
-    auto* var_ty = storage_ty;
-    if (as_var) {
-        // Variable declaration. Unlike `let` and parameters, `var` has storage.
-        // Variables are always of a reference type to the declared storage type.
-        var_ty = builder_->create<sem::Reference>(storage_ty, storage_class, access);
-    }
-
-    if (rhs && !validator_.VariableConstructorOrCast(v, storage_class, storage_ty, rhs->Type())) {
+    if (rhs && !validator_.VariableConstructorOrCast(var, storage_class, storage_ty, rhs->Type())) {
         return nullptr;
     }
 
-    if (!ApplyStorageClassUsageToType(storage_class, const_cast<sem::Type*>(var_ty), v->source)) {
-        AddNote("while instantiating variable " + builder_->Symbols().NameFor(v->symbol),
-                v->source);
+    auto* var_ty = builder_->create<sem::Reference>(storage_ty, storage_class, access);
+
+    if (!ApplyStorageClassUsageToType(storage_class, var_ty, var->source)) {
+        AddNote("while instantiating 'var' " + builder_->Symbols().NameFor(var->symbol),
+                var->source);
         return nullptr;
     }
 
+    sem::Variable* sem = nullptr;
     if (is_global) {
         sem::BindingPoint binding_point;
-        if (as_var) {
-            if (auto bp = as_var->BindingPoint()) {
-                binding_point = {bp.group->value, bp.binding->value};
-            }
+        if (auto bp = var->BindingPoint()) {
+            binding_point = {bp.group->value, bp.binding->value};
         }
+        sem = builder_->create<sem::GlobalVariable>(var, var_ty, storage_class, access,
+                                                    sem::Constant{}, binding_point);
 
-        bool has_const_val = rhs && as_let && !as_override;
-        auto* global = builder_->create<sem::GlobalVariable>(
-            v, var_ty, storage_class, access,
-            has_const_val ? rhs->ConstantValue() : sem::Constant{}, binding_point);
-
-        if (as_override) {
-            if (auto* id = ast::GetAttribute<ast::IdAttribute>(v->attributes)) {
-                global->SetConstantId(static_cast<uint16_t>(id->value));
-            }
-        }
-
-        global->SetConstructor(rhs);
-        builder_->Sem().Add(v, global);
-        return global;
+    } else {
+        sem = builder_->create<sem::LocalVariable>(var, var_ty, storage_class, access,
+                                                   current_statement_, sem::Constant{});
     }
 
-    auto* local = builder_->create<sem::LocalVariable>(
-        v, var_ty, storage_class, access, current_statement_,
-        (rhs && as_let) ? rhs->ConstantValue() : sem::Constant{});
-    builder_->Sem().Add(v, local);
-    local->SetConstructor(rhs);
-    return local;
+    sem->SetConstructor(rhs);
+    builder_->Sem().Add(var, sem);
+    return sem;
 }
 
 sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index) {
@@ -534,16 +567,11 @@ void Resolver::SetShadows() {
 }
 
 sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
-    auto* sem = As<sem::GlobalVariable>(Variable(v, /* is_global */ true));
+    auto* as_var = v->As<ast::Var>();
+
+    auto* sem = As<sem::GlobalVariable>(as_var ? Var(as_var, /* is_global */ true)
+                                               : Variable(v, /* is_global */ true));
     if (!sem) {
-        return nullptr;
-    }
-
-    const bool is_var = v->Is<ast::Var>();
-
-    auto storage_class = sem->StorageClass();
-    if (is_var && storage_class == ast::StorageClass::kNone) {
-        AddError("module-scope 'var' declaration must have a storage class", v->source);
         return nullptr;
     }
 
@@ -570,7 +598,7 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
         return nullptr;
     }
 
-    return sem->As<sem::GlobalVariable>();
+    return sem;
 }
 
 sem::Function* Resolver::Function(const ast::Function* decl) {
@@ -2449,8 +2477,11 @@ sem::Statement* Resolver::VariableDeclStatement(const ast::VariableDeclStatement
     return StatementScope(stmt, sem, [&] {
         Mark(stmt->variable);
 
-        auto* var = Variable(stmt->variable, /* is_global */ false);
-        if (!var) {
+        auto* variable = Switch(
+            stmt->variable,  //
+            [&](const ast::Var* var) { return Var(var, /* is_global */ false); },
+            [&](Default) { return Variable(stmt->variable, /* is_global */ false); });
+        if (!variable) {
             return false;
         }
 
@@ -2466,11 +2497,14 @@ sem::Statement* Resolver::VariableDeclStatement(const ast::VariableDeclStatement
             current_block_->AddDecl(stmt->variable);
         }
 
-        if (auto* ctor = var->Constructor()) {
+        if (auto* ctor = variable->Constructor()) {
             sem->Behaviors() = ctor->Behaviors();
         }
 
-        return validator_.Variable(var);
+        return Switch(
+            stmt->variable,  //
+            [&](const ast::Var*) { return validator_.Var(variable); },
+            [&](Default) { return validator_.Variable(variable); });
     });
 }
 

@@ -49,7 +49,7 @@ TEST_F(ResolverStorageClassValidationTest, Private_RuntimeArray) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(12:34 error: runtime-sized arrays can only be used in the <storage> storage class
-12:34 note: while instantiating variable v)");
+12:34 note: while instantiating 'var' v)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, Private_RuntimeArrayInStruct) {
@@ -60,7 +60,7 @@ TEST_F(ResolverStorageClassValidationTest, Private_RuntimeArrayInStruct) {
     EXPECT_EQ(r()->error(),
               R"(12:34 error: runtime-sized arrays can only be used in the <storage> storage class
 note: while analysing structure member S.m
-12:34 note: while instantiating variable v)");
+12:34 note: while instantiating 'var' v)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, Workgroup_RuntimeArray) {
@@ -69,7 +69,7 @@ TEST_F(ResolverStorageClassValidationTest, Workgroup_RuntimeArray) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(12:34 error: runtime-sized arrays can only be used in the <storage> storage class
-12:34 note: while instantiating variable v)");
+12:34 note: while instantiating 'var' v)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, Workgroup_RuntimeArrayInStruct) {
@@ -80,7 +80,7 @@ TEST_F(ResolverStorageClassValidationTest, Workgroup_RuntimeArrayInStruct) {
     EXPECT_EQ(r()->error(),
               R"(12:34 error: runtime-sized arrays can only be used in the <storage> storage class
 note: while analysing structure member S.m
-12:34 note: while instantiating variable v)");
+12:34 note: while instantiating 'var' v)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferBool) {
@@ -96,7 +96,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferBool) {
     EXPECT_EQ(
         r()->error(),
         R"(56:78 error: Type 'bool' cannot be used in storage class 'storage' as it is non-host-shareable
-56:78 note: while instantiating variable g)");
+56:78 note: while instantiating 'var' g)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferPointer) {
@@ -113,7 +113,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferPointer) {
     EXPECT_EQ(
         r()->error(),
         R"(56:78 error: Type 'ptr<private, f32, read_write>' cannot be used in storage class 'storage' as it is non-host-shareable
-56:78 note: while instantiating variable g)");
+56:78 note: while instantiating 'var' g)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferIntScalar) {
@@ -166,7 +166,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferBoolAlias) {
     EXPECT_EQ(
         r()->error(),
         R"(56:78 error: Type 'bool' cannot be used in storage class 'storage' as it is non-host-shareable
-56:78 note: while instantiating variable g)");
+56:78 note: while instantiating 'var' g)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, NotStorage_AccessMode) {
@@ -225,7 +225,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBuffer_Struct_Runtime) {
     EXPECT_EQ(r()->error(),
               R"(56:78 error: runtime-sized arrays can only be used in the <storage> storage class
 note: while analysing structure member S.m
-56:78 note: while instantiating variable svar)");
+56:78 note: while instantiating 'var' svar)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferBool) {
@@ -241,7 +241,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferBool) {
     EXPECT_EQ(
         r()->error(),
         R"(56:78 error: Type 'bool' cannot be used in storage class 'uniform' as it is non-host-shareable
-56:78 note: while instantiating variable g)");
+56:78 note: while instantiating 'var' g)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferPointer) {
@@ -258,7 +258,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferPointer) {
     EXPECT_EQ(
         r()->error(),
         R"(56:78 error: Type 'ptr<private, f32, read_write>' cannot be used in storage class 'uniform' as it is non-host-shareable
-56:78 note: while instantiating variable g)");
+56:78 note: while instantiating 'var' g)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferIntScalar) {
@@ -314,7 +314,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferBoolAlias) {
     EXPECT_EQ(
         r()->error(),
         R"(56:78 error: Type 'bool' cannot be used in storage class 'uniform' as it is non-host-shareable
-56:78 note: while instantiating variable g)");
+56:78 note: while instantiating 'var' g)");
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferNoError_Basic) {

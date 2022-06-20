@@ -298,6 +298,14 @@ class Resolver {
     /// @param is_global true if this is module scope, otherwise function scope
     sem::Variable* Variable(const ast::Variable* var, bool is_global);
 
+    /// @returns the semantic info for the `ast::Var` `var`. If an error is raised, nullptr is
+    /// returned.
+    /// @note this method does not resolve the attributes as these are context-dependent (global,
+    /// local)
+    /// @param var the variable
+    /// @param is_global true if this is module scope, otherwise function scope
+    sem::Variable* Var(const ast::Var* var, bool is_global);
+
     /// @returns the semantic info for the function parameter `param`. If an error is raised,
     /// nullptr is returned.
     /// @note the caller is expected to validate the parameter
