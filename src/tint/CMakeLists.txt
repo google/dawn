@@ -99,6 +99,8 @@ set(TINT_LIB_SRCS
   ast/case_statement.h
   ast/compound_assignment_statement.cc
   ast/compound_assignment_statement.h
+  ast/const.cc
+  ast/const.h
   ast/continue_statement.cc
   ast/continue_statement.h
   ast/depth_multisampled_texture.cc

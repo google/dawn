@@ -1,0 +1,64 @@
+// Copyright 2022 The Tint Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef SRC_TINT_AST_CONST_H_
+#define SRC_TINT_AST_CONST_H_
+
+#include "src/tint/ast/variable.h"
+
+namespace tint::ast {
+
+/// A "const" declaration is a name for a module-scoped or function-scoped creation-time value.
+/// const must have a constructor expression.
+///
+/// Examples:
+///
+/// ```
+///   const n  = 123;                           // Abstract-integer typed constant
+///   const pi = 3.14159265359;                 // Abstract-float typed constant
+///   const max_f32 : f32 = 0x1.fffffep+127;    // f32 typed constant
+/// ```
+/// @see https://www.w3.org/TR/WGSL/#creation-time-consts
+class Const final : public Castable<Const, Variable> {
+  public:
+    /// Create a 'const' creation-time value variable.
+    /// @param program_id the identifier of the program that owns this node
+    /// @param source the variable source
+    /// @param sym the variable symbol
+    /// @param type the declared variable type
+    /// @param constructor the constructor expression. Must not be nullptr.
+    /// @param attributes the variable attributes
+    Const(ProgramID program_id,
+          const Source& source,
+          const Symbol& sym,
+          const ast::Type* type,
+          const Expression* constructor,
+          AttributeList attributes);
+
+    /// Move constructor
+    Const(Const&&);
+
+    /// Destructor
+    ~Const() override;
+
+    /// Clones this node and all transitive child nodes using the `CloneContext`
+    /// `ctx`.
+    /// @param ctx the clone context
+    /// @return the newly cloned node
+    const Const* Clone(CloneContext* ctx) const override;
+};
+
+}  // namespace tint::ast
+
+#endif  // SRC_TINT_AST_CONST_H_
