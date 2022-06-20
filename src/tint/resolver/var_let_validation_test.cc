@@ -74,6 +74,22 @@ TEST_F(ResolverVarLetValidationTest, LetTypeNotConstructible) {
     EXPECT_EQ(r()->error(), "56:78 error: texture_2d<f32> cannot be used as the type of a 'let'");
 }
 
+TEST_F(ResolverVarLetValidationTest, OverrideExplicitTypeNotScalar) {
+    // override o : vec3<f32>;
+    Override(Source{{56, 78}}, "o", ty.vec3<f32>(), nullptr);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "56:78 error: vec3<f32> cannot be used as the type of a 'override'");
+}
+
+TEST_F(ResolverVarLetValidationTest, OverrideInferedTypeNotScalar) {
+    // override o = vec3(1.0f);
+    Override(Source{{56, 78}}, "o", nullptr, vec3<f32>(1.0_f));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "56:78 error: vec3<f32> cannot be used as the type of a 'override'");
+}
+
 TEST_F(ResolverVarLetValidationTest, LetConstructorWrongType) {
     // var v : i32 = 2u
     WrapInFunction(Let(Source{{3, 3}}, "v", ty.i32(), Expr(2_u)));

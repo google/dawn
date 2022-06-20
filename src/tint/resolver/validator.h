@@ -356,6 +356,16 @@ class Validator {
     /// @returns true on success, false otherwise.
     bool Variable(const sem::Variable* v) const;
 
+    /// Validates a 'let' variable declaration
+    /// @param v the variable to validate
+    /// @returns true on success, false otherwise.
+    bool Let(const sem::Variable* v) const;
+
+    /// Validates a 'override' variable declaration
+    /// @param v the variable to validate
+    /// @returns true on success, false otherwise.
+    bool Override(const sem::Variable* v) const;
+
     /// Validates a 'var' variable declaration
     /// @param v the variable to validate
     /// @returns true on success, false otherwise.

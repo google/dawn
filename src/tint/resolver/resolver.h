@@ -298,6 +298,21 @@ class Resolver {
     /// @param is_global true if this is module scope, otherwise function scope
     sem::Variable* Variable(const ast::Variable* var, bool is_global);
 
+    /// @returns the semantic info for the `ast::Let` `v`. If an error is raised, nullptr is
+    /// returned.
+    /// @note this method does not resolve the attributes as these are context-dependent (global,
+    /// local)
+    /// @param var the variable
+    /// @param is_global true if this is module scope, otherwise function scope
+    sem::Variable* Let(const ast::Let* var, bool is_global);
+
+    /// @returns the semantic info for the module-scope `ast::Override` `v`. If an error is raised,
+    /// nullptr is returned.
+    /// @note this method does not resolve the attributes as these are context-dependent (global,
+    /// local)
+    /// @param override the variable
+    sem::Variable* Override(const ast::Override* override);
+
     /// @returns the semantic info for the `ast::Var` `var`. If an error is raised, nullptr is
     /// returned.
     /// @note this method does not resolve the attributes as these are context-dependent (global,
