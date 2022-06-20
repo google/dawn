@@ -40,8 +40,9 @@ VkVertexInputRate VulkanInputRate(wgpu::VertexStepMode stepMode) {
         case wgpu::VertexStepMode::Instance:
             return VK_VERTEX_INPUT_RATE_INSTANCE;
         case wgpu::VertexStepMode::VertexBufferNotUsed:
-            UNREACHABLE();
+            break;
     }
+    UNREACHABLE();
 }
 
 VkFormat VulkanVertexFormat(wgpu::VertexFormat format) {

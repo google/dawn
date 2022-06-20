@@ -101,6 +101,8 @@ std::string GetArchitectureName(PCIVendorID vendorId, PCIDeviceID deviceId) {
             {% endfor %}
         {% endfor %}
     }
+
+    return "";
 }
 
 }  // namespace gpu_info
