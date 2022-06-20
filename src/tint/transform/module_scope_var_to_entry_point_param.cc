@@ -23,6 +23,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
+#include "src/tint/sem/module.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
 
@@ -282,7 +283,12 @@ struct ModuleScopeVarToEntryPointParam::State {
         std::vector<const ast::Function*> functions_to_process;
 
         // Build a list of functions that transitively reference any module-scope variables.
-        for (auto* func_ast : ctx.src->AST().Functions()) {
+        for (auto* decl : ctx.src->Sem().Module()->DependencyOrderedDeclarations()) {
+            auto* func_ast = decl->As<ast::Function>();
+            if (!func_ast) {
+                continue;
+            }
+
             auto* func_sem = ctx.src->Sem().Get(func_ast);
 
             bool needs_processing = false;
