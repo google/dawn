@@ -89,7 +89,8 @@ async function runCtsTest(query, use_worker) {
         let isFinal = index == arr.length - 1;
         socket.send(JSON.stringify({'s': res.status,
                                     'l': piece,
-                                    'final': isFinal}));
+                                    'final': isFinal,
+                                    'js_duration_ms': res.timems}));
       });
     };
     await wpt_fn();
