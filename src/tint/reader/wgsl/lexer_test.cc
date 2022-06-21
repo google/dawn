@@ -930,6 +930,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TokenData{"bool", Token::Type::kBool},
                     TokenData{"break", Token::Type::kBreak},
                     TokenData{"case", Token::Type::kCase},
+                    TokenData{"const", Token::Type::kConst},
                     TokenData{"continue", Token::Type::kContinue},
                     TokenData{"continuing", Token::Type::kContinuing},
                     TokenData{"default", Token::Type::kDefault},

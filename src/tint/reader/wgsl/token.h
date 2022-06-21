@@ -151,6 +151,8 @@ class Token {
         kBreak,
         /// A 'case'
         kCase,
+        /// A 'const'
+        kConst,
         /// A 'continue'
         kContinue,
         /// A 'continuing'

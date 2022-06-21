@@ -124,10 +124,10 @@ const char kWorkgroupSizeAttribute[] = "workgroup_size";
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#reserved-keywords
 bool is_reserved(Token t) {
-    return t == "asm" || t == "bf16" || t == "const" || t == "do" || t == "enum" || t == "f64" ||
-           t == "handle" || t == "i8" || t == "i16" || t == "i64" || t == "mat" ||
-           t == "premerge" || t == "regardless" || t == "typedef" || t == "u8" || t == "u16" ||
-           t == "u64" || t == "unless" || t == "using" || t == "vec" || t == "void" || t == "while";
+    return t == "asm" || t == "bf16" || t == "do" || t == "enum" || t == "f64" || t == "handle" ||
+           t == "i8" || t == "i16" || t == "i64" || t == "mat" || t == "premerge" ||
+           t == "regardless" || t == "typedef" || t == "u8" || t == "u16" || t == "u64" ||
+           t == "unless" || t == "using" || t == "vec" || t == "void" || t == "while";
 }
 
 /// Enter-exit counters for block token types.

@@ -1088,6 +1088,9 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     if (str == "case") {
         return {Token::Type::kCase, source, "case"};
     }
+    if (str == "const") {
+        return {Token::Type::kConst, source, "const"};
+    }
     if (str == "continue") {
         return {Token::Type::kContinue, source, "continue"};
     }
