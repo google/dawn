@@ -151,19 +151,18 @@ utils::Result<sem::Constant::Elements> MaterializeElements(const sem::Constant::
 
 }  // namespace
 
-utils::Result<sem::Constant> Resolver::EvaluateConstantValue(const ast::Expression* expr,
-                                                             const sem::Type* type) {
+sem::Constant Resolver::EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type) {
     if (auto* e = expr->As<ast::LiteralExpression>()) {
         return EvaluateConstantValue(e, type);
     }
     if (auto* e = expr->As<ast::CallExpression>()) {
         return EvaluateConstantValue(e, type);
     }
-    return sem::Constant{};
+    return {};
 }
 
-utils::Result<sem::Constant> Resolver::EvaluateConstantValue(const ast::LiteralExpression* literal,
-                                                             const sem::Type* type) {
+sem::Constant Resolver::EvaluateConstantValue(const ast::LiteralExpression* literal,
+                                              const sem::Type* type) {
     return Switch(
         literal,
         [&](const ast::BoolLiteralExpression* lit) {
@@ -177,8 +176,8 @@ utils::Result<sem::Constant> Resolver::EvaluateConstantValue(const ast::LiteralE
         });
 }
 
-utils::Result<sem::Constant> Resolver::EvaluateConstantValue(const ast::CallExpression* call,
-                                                             const sem::Type* ty) {
+sem::Constant Resolver::EvaluateConstantValue(const ast::CallExpression* call,
+                                              const sem::Type* ty) {
     uint32_t result_size = 0;
     auto* el_ty = sem::Type::ElementOf(ty, &result_size);
     if (!el_ty) {
@@ -212,11 +211,11 @@ utils::Result<sem::Constant> Resolver::EvaluateConstantValue(const ast::CallExpr
     for (auto* expr : call->args) {
         auto* arg = builder_->Sem().Get(expr);
         if (!arg) {
-            return sem::Constant{};
+            return {};
         }
         auto value = arg->ConstantValue();
         if (!value) {
-            return sem::Constant{};
+            return {};
         }
 
         // Convert the elements to the desired type.

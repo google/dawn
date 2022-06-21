@@ -1249,23 +1249,13 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
             return nullptr;
         }
         auto expr_val = EvaluateConstantValue(decl, expr->Type());
-        if (!expr_val) {
-            return nullptr;
-        }
-        if (!expr_val->IsValid()) {
-            TINT_ICE(Resolver, builder_->Diagnostics())
-                << decl->source
-                << "EvaluateConstantValue() returned invalid value for materialized value of type: "
-                << builder_->FriendlyName(src_ty);
-            return nullptr;
-        }
-        auto materialized_val = ConvertValue(expr_val.Get(), target_ty, decl->source);
+        auto materialized_val = ConvertValue(std::move(expr_val), target_ty, decl->source);
         if (!materialized_val) {
             return nullptr;
         }
         if (!materialized_val->IsValid()) {
             TINT_ICE(Resolver, builder_->Diagnostics())
-                << decl->source << "ConvertValue(" << builder_->FriendlyName(expr_val->Type())
+                << decl->source << "ConvertValue(" << builder_->FriendlyName(expr_val.Type())
                 << " -> " << builder_->FriendlyName(target_ty) << ") returned invalid value";
             return nullptr;
         }
@@ -1368,11 +1358,8 @@ sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* exp
     }
 
     auto val = EvaluateConstantValue(expr, ty);
-    if (!val) {
-        return nullptr;
-    }
     bool has_side_effects = idx->HasSideEffects() || obj->HasSideEffects();
-    auto* sem = builder_->create<sem::Expression>(expr, ty, current_statement_, val.Get(),
+    auto* sem = builder_->create<sem::Expression>(expr, ty, current_statement_, std::move(val),
                                                   has_side_effects, obj->SourceVariable());
     sem->Behaviors() = idx->Behaviors() + obj->Behaviors();
     return sem;
@@ -1389,10 +1376,7 @@ sem::Expression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
     }
 
     auto val = EvaluateConstantValue(expr, ty);
-    if (!val) {
-        return nullptr;
-    }
-    auto* sem = builder_->create<sem::Expression>(expr, ty, current_statement_, val.Get(),
+    auto* sem = builder_->create<sem::Expression>(expr, ty, current_statement_, std::move(val),
                                                   inner->HasSideEffects());
 
     sem->Behaviors() = inner->Behaviors();
@@ -1440,11 +1424,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             return nullptr;
         }
         auto val = EvaluateConstantValue(expr, call_target->ReturnType());
-        if (!val) {
-            return nullptr;
-        }
         return builder_->create<sem::Call>(expr, call_target, std::move(args), current_statement_,
-                                           val.Get(), has_side_effects);
+                                           std::move(val), has_side_effects);
     };
 
     // ct_ctor_or_conv is a helper for building either a sem::TypeConstructor or sem::TypeConversion
@@ -1481,11 +1462,9 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                     return nullptr;
                 }
                 auto val = EvaluateConstantValue(expr, call_target->ReturnType());
-                if (!val) {
-                    return nullptr;
-                }
                 return builder_->create<sem::Call>(expr, call_target, std::move(args),
-                                                   current_statement_, val.Get(), has_side_effects);
+                                                   current_statement_, std::move(val),
+                                                   has_side_effects);
             },
             [&](const sem::Struct* str) -> sem::Call* {
                 auto* call_target = utils::GetOrCreate(
@@ -1506,11 +1485,9 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                     return nullptr;
                 }
                 auto val = EvaluateConstantValue(expr, call_target->ReturnType());
-                if (!val) {
-                    return nullptr;
-                }
                 return builder_->create<sem::Call>(expr, call_target, std::move(args),
-                                                   current_statement_, val.Get(), has_side_effects);
+                                                   current_statement_, std::move(val),
+                                                   has_side_effects);
             },
             [&](Default) {
                 AddError("type is not constructible", expr->source);
@@ -1812,10 +1789,7 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
     }
 
     auto val = EvaluateConstantValue(literal, ty);
-    if (!val) {
-        return nullptr;
-    }
-    return builder_->create<sem::Expression>(literal, ty, current_statement_, val.Get(),
+    return builder_->create<sem::Expression>(literal, ty, current_statement_, std::move(val),
                                              /* has_side_effects */ false);
 }
 
@@ -2027,12 +2001,9 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
     }
 
     auto val = EvaluateConstantValue(expr, op.result);
-    if (!val) {
-        return nullptr;
-    }
     bool has_side_effects = lhs->HasSideEffects() || rhs->HasSideEffects();
-    auto* sem = builder_->create<sem::Expression>(expr, op.result, current_statement_, val.Get(),
-                                                  has_side_effects);
+    auto* sem = builder_->create<sem::Expression>(expr, op.result, current_statement_,
+                                                  std::move(val), has_side_effects);
     sem->Behaviors() = lhs->Behaviors() + rhs->Behaviors();
 
     return sem;
@@ -2104,10 +2075,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
     }
 
     auto val = EvaluateConstantValue(unary, ty);
-    if (!val) {
-        return nullptr;
-    }
-    auto* sem = builder_->create<sem::Expression>(unary, ty, current_statement_, val.Get(),
+    auto* sem = builder_->create<sem::Expression>(unary, ty, current_statement_, std::move(val),
                                                   expr->HasSideEffects(), source_var);
     sem->Behaviors() = expr->Behaviors();
     return sem;

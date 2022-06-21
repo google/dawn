@@ -391,10 +391,10 @@ class Resolver {
     ConstantResult ConvertValue(const sem::Constant& value,
                                 const sem::Type* target_type,
                                 const Source& source);
-    ConstantResult EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type);
-    ConstantResult EvaluateConstantValue(const ast::LiteralExpression* literal,
-                                         const sem::Type* type);
-    ConstantResult EvaluateConstantValue(const ast::CallExpression* call, const sem::Type* type);
+    sem::Constant EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type);
+    sem::Constant EvaluateConstantValue(const ast::LiteralExpression* literal,
+                                        const sem::Type* type);
+    sem::Constant EvaluateConstantValue(const ast::CallExpression* call, const sem::Type* type);
 
     /// @returns true if the symbol is the name of a builtin function.
     bool IsBuiltin(Symbol) const;
