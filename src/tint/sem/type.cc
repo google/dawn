@@ -229,7 +229,27 @@ const Type* Type::ElementOf(const Type* ty, uint32_t* count /* = nullptr */) {
                 *count = a->Count();
             }
             return a->ElemType();
+        },
+        [&](Default) {
+            if (count) {
+                *count = 0;
+            }
+            return nullptr;
         });
+}
+
+const Type* Type::DeepestElementOf(const Type* ty, uint32_t* count /* = nullptr */) {
+    auto el_ty = ElementOf(ty, count);
+    while (el_ty && ty != el_ty) {
+        ty = el_ty;
+
+        uint32_t n = 0;
+        el_ty = ElementOf(ty, &n);
+        if (count) {
+            *count *= n;
+        }
+    }
+    return el_ty;
 }
 
 const sem::Type* Type::Common(Type const* const* types, size_t count) {
