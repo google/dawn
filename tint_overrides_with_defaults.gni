@@ -71,4 +71,9 @@ declare_args() {
   if (!defined(tint_build_glsl_writer)) {
     tint_build_glsl_writer = true
   }
+
+  # Build unittests
+  if (!defined(tint_build_unittests)) {
+    tint_build_unittests = true
+  }
 }
