@@ -95,8 +95,8 @@ BackendsBitset GetEnabledBackends() {
 }
 
 dawn::platform::CachingInterface* GetCachingInterface(dawn::platform::Platform* platform) {
-    if (platform != nullptr && dawn::kGitHash.size() > 0) {
-        return platform->GetCachingInterface(dawn::kGitHash.data(), dawn::kGitHash.size());
+    if (platform != nullptr && dawn::kDawnVersion.size() > 0) {
+        return platform->GetCachingInterface(dawn::kDawnVersion.data(), dawn::kDawnVersion.size());
     }
     return nullptr;
 }

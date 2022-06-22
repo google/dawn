@@ -185,6 +185,16 @@ dawn_generator("dawn_version_gen") {
     "--dawn-dir",
     rebase_path("${dawn_root}", root_build_dir),
   ]
+
+  # We can use the explicit version file if it is generated instead of relying
+  # on the existence of git.
+  if (dawn_version_file != "") {
+    args += [
+      "--version-file",
+      rebase_path(dawn_version_file, root_build_dir),
+    ]
+  }
+
   outputs = [ "src/dawn/common/Version_autogen.h" ]
 }
 

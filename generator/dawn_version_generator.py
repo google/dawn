@@ -26,11 +26,11 @@ def get_git():
     return git_exec
 
 
-def get_gitHash(dawnDir):
+def get_git_hash(dawn_dir):
     try:
         result = subprocess.run([get_git(), "rev-parse", "HEAD"],
                                 stdout=subprocess.PIPE,
-                                cwd=dawnDir)
+                                cwd=dawn_dir)
         if result.returncode == 0:
             return result.stdout.decode("utf-8").strip()
     except Exception:
@@ -40,15 +40,15 @@ def get_gitHash(dawnDir):
     return ""
 
 
-def get_gitHead(dawnDir):
-    return os.path.join(dawnDir, ".git", "HEAD")
+def get_git_head(dawn_dir):
+    return os.path.join(dawn_dir, ".git", "HEAD")
 
 
-def gitExists(dawnDir):
-    return os.path.exists(get_gitHead(dawnDir))
+def git_exists(dawn_dir):
+    return os.path.exists(get_git_head(dawn_dir))
 
 
-def unpackGitRef(packed, resolved):
+def unpack_git_ref(packed, resolved):
     with open(packed) as fin:
         refs = fin.read().strip().split("\n")
 
@@ -64,20 +64,20 @@ def unpackGitRef(packed, resolved):
     return False
 
 
-def get_gitResolvedHead(dawnDir):
+def get_git_resolved_head(dawn_dir):
     result = subprocess.run(
         [get_git(), "rev-parse", "--symbolic-full-name", "HEAD"],
         stdout=subprocess.PIPE,
-        cwd=dawnDir)
+        cwd=dawn_dir)
     if result.returncode != 0:
         raise Exception("Failed to execute git rev-parse to resolve git head:", result.stdout)
 
-    resolved = os.path.join(dawnDir, ".git",
+    resolved = os.path.join(dawn_dir, ".git",
                             result.stdout.decode("utf-8").strip())
 
     # Check a packed-refs file exists. If so, we need to potentially unpack and include it as a dep.
-    packed = os.path.join(dawnDir, ".git", "packed-refs")
-    if os.path.exists(packed) and unpackGitRef(packed, resolved):
+    packed = os.path.join(dawn_dir, ".git", "packed-refs")
+    if os.path.exists(packed) and unpack_git_ref(packed, resolved):
         return [packed, resolved]
 
     if not os.path.exists(resolved):
@@ -85,15 +85,25 @@ def get_gitResolvedHead(dawnDir):
     return [resolved]
 
 
+def get_version(args):
+    version_file = args.version_file
+    if version_file:
+        with open(version_file) as f:
+            return f.read()
+    return get_git_hash(os.path.abspath(args.dawn_dir))
+
+
 def compute_params(args):
     return {
-        "get_gitHash": lambda: get_gitHash(os.path.abspath(args.dawn_dir)),
+        "get_version": lambda: get_version(args),
     }
 
 
 class DawnVersionGenerator(Generator):
     def get_description(self):
-        return "Generates version dependent Dawn code. Currently regenerated dependent on git hash."
+        return (
+            "Generates version dependent Dawn code. Currently regenerated dependent on the version "
+            "header (if available), otherwise tries to use git hash.")
 
     def add_commandline_arguments(self, parser):
         parser.add_argument(
@@ -102,15 +112,28 @@ class DawnVersionGenerator(Generator):
             type=str,
             help="The Dawn root directory path to use",
         )
+        parser.add_argument(
+            "--version-file",
+            required=False,
+            type=str,
+            help=
+            ("Path to one-liner version string file used when git may not be present. "
+             "In general the version string is a git hash."))
 
     def get_dependencies(self, args):
-        dawnDir = os.path.abspath(args.dawn_dir)
-        if gitExists(dawnDir):
+        dawn_dir = os.path.abspath(args.dawn_dir)
+        version_file = args.version_file
+
+        if version_file:
+            return [version_file]
+        if git_exists(dawn_dir):
+            deps = []
             try:
-                return [get_gitHead(dawnDir)] + get_gitResolvedHead(dawnDir)
+                deps += [get_git_head(dawn_dir)
+                         ] + get_git_resolved_head(dawn_dir)
             except Exception:
-                return []
-        return []
+                return deps
+        return deps
 
     def get_file_renders(self, args):
         params = compute_params(args)
