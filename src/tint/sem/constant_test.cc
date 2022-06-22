@@ -268,6 +268,48 @@ TEST_F(ConstantTest, AllEqual) {
     EXPECT_EQ(Constant(vec3_af, {0._a, -0._a, 0._a}).AllEqual(), false);
 }
 
+TEST_F(ConstantTest, AllZeroRange) {
+    auto* vec3_ai = create<Vector>(create<AbstractInt>(), 3u);
+    EXPECT_EQ(Constant(vec3_ai, {1_a, 2_a, 3_a}).AllZero(1, 3), false);
+    EXPECT_EQ(Constant(vec3_ai, {0_a, 2_a, 3_a}).AllZero(1, 3), false);
+    EXPECT_EQ(Constant(vec3_ai, {1_a, 2_a, 3_a}).AllZero(1, 3), false);
+    EXPECT_EQ(Constant(vec3_ai, {1_a, 2_a, 0_a}).AllZero(1, 3), false);
+    EXPECT_EQ(Constant(vec3_ai, {0_a, 0_a, 3_a}).AllZero(1, 3), false);
+    EXPECT_EQ(Constant(vec3_ai, {0_a, 2_a, 0_a}).AllZero(1, 3), false);
+    EXPECT_EQ(Constant(vec3_ai, {1_a, 0_a, 0_a}).AllZero(1, 3), true);
+
+    EXPECT_EQ(Constant(vec3_ai, {1_a, 2_a, 3_a}).AllZero(0, 2), false);
+    EXPECT_EQ(Constant(vec3_ai, {0_a, 2_a, 3_a}).AllZero(0, 2), false);
+    EXPECT_EQ(Constant(vec3_ai, {1_a, 2_a, 3_a}).AllZero(0, 2), false);
+    EXPECT_EQ(Constant(vec3_ai, {1_a, 2_a, 0_a}).AllZero(0, 2), false);
+    EXPECT_EQ(Constant(vec3_ai, {0_a, 0_a, 3_a}).AllZero(0, 2), true);
+    EXPECT_EQ(Constant(vec3_ai, {0_a, 2_a, 0_a}).AllZero(0, 2), false);
+    EXPECT_EQ(Constant(vec3_ai, {1_a, 0_a, 0_a}).AllZero(0, 2), false);
+
+    auto* vec3_af = create<Vector>(create<AbstractFloat>(), 3u);
+    EXPECT_EQ(Constant(vec3_af, {1._a, 2._a, 3._a}).AllZero(1, 3), false);
+    EXPECT_EQ(Constant(vec3_af, {0._a, 2._a, 3._a}).AllZero(1, 3), false);
+    EXPECT_EQ(Constant(vec3_af, {1._a, 2._a, 3._a}).AllZero(1, 3), false);
+    EXPECT_EQ(Constant(vec3_af, {1._a, 2._a, 0._a}).AllZero(1, 3), false);
+    EXPECT_EQ(Constant(vec3_af, {0._a, 0._a, 3._a}).AllZero(1, 3), false);
+    EXPECT_EQ(Constant(vec3_af, {0._a, 2._a, 0._a}).AllZero(1, 3), false);
+    EXPECT_EQ(Constant(vec3_af, {1._a, 0._a, 0._a}).AllZero(1, 3), true);
+    EXPECT_EQ(Constant(vec3_af, {1._a, -0._a, 0._a}).AllZero(1, 3), false);
+    EXPECT_EQ(Constant(vec3_af, {1._a, 0._a, -0._a}).AllZero(1, 3), false);
+    EXPECT_EQ(Constant(vec3_af, {1._a, -0._a, -0._a}).AllZero(1, 3), false);
+
+    EXPECT_EQ(Constant(vec3_af, {1._a, 2._a, 3._a}).AllZero(0, 2), false);
+    EXPECT_EQ(Constant(vec3_af, {0._a, 2._a, 3._a}).AllZero(0, 2), false);
+    EXPECT_EQ(Constant(vec3_af, {1._a, 2._a, 3._a}).AllZero(0, 2), false);
+    EXPECT_EQ(Constant(vec3_af, {1._a, 2._a, 0._a}).AllZero(0, 2), false);
+    EXPECT_EQ(Constant(vec3_af, {0._a, 0._a, 3._a}).AllZero(0, 2), true);
+    EXPECT_EQ(Constant(vec3_af, {-0._a, 0._a, 1._a}).AllZero(0, 2), false);
+    EXPECT_EQ(Constant(vec3_af, {0._a, -0._a, 1._a}).AllZero(0, 2), false);
+    EXPECT_EQ(Constant(vec3_af, {-0._a, -0._a, 1._a}).AllZero(0, 2), false);
+    EXPECT_EQ(Constant(vec3_af, {0._a, 2._a, 0._a}).AllZero(0, 2), false);
+    EXPECT_EQ(Constant(vec3_af, {1._a, 0._a, 0._a}).AllZero(0, 2), false);
+}
+
 TEST_F(ConstantTest, AllEqualRange) {
     auto* vec3_ai = create<Vector>(create<AbstractInt>(), 3u);
     EXPECT_EQ(Constant(vec3_ai, {1_a, 2_a, 3_a}).AllEqual(1, 3), false);

@@ -67,10 +67,11 @@ bool Constant::AnyZero() const {
     });
 }
 
-bool Constant::AllZero() const {
+bool Constant::AllZero(size_t start, size_t end) const {
     return WithElements([&](auto&& vec) {
         using T = typename std::decay_t<decltype(vec)>::value_type;
-        for (auto el : vec) {
+        for (size_t i = start; i < end; i++) {
+            auto el = vec[i];
             if (el != T(0) || IsNegativeFloat(el.value)) {
                 return false;
             }

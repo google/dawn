@@ -136,10 +136,15 @@ class Constant {
     bool AnyZero() const;
 
     /// @returns true if all elements are positive zero
-    bool AllZero() const;
+    bool AllZero() const { return AllZero(0, ElementCount()); }
 
     /// @returns true if all elements are the same value, with the same sign-bit.
     bool AllEqual() const { return AllEqual(0, ElementCount()); }
+
+    /// @param start the first element index
+    /// @param end one past the last element index
+    /// @returns true if all elements between `[start, end)` are zero
+    bool AllZero(size_t start, size_t end) const;
 
     /// @param start the first element index
     /// @param end one past the last element index
