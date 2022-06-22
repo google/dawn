@@ -220,9 +220,9 @@ const Type* Type::ElementOf(const Type* ty, uint32_t* count /* = nullptr */) {
         },
         [&](const Matrix* m) {
             if (count) {
-                *count = m->columns() * m->rows();
+                *count = m->columns();
             }
-            return m->type();
+            return m->ColumnType();
         },
         [&](const Array* a) {
             if (count) {

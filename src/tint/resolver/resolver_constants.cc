@@ -152,13 +152,10 @@ utils::Result<sem::Constant::Elements> MaterializeElements(const sem::Constant::
 }  // namespace
 
 sem::Constant Resolver::EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type) {
-    if (auto* e = expr->As<ast::LiteralExpression>()) {
-        return EvaluateConstantValue(e, type);
-    }
-    if (auto* e = expr->As<ast::CallExpression>()) {
-        return EvaluateConstantValue(e, type);
-    }
-    return {};
+    return Switch(
+        expr,  //
+        [&](const ast::LiteralExpression* e) { return EvaluateConstantValue(e, type); },
+        [&](const ast::CallExpression* e) { return EvaluateConstantValue(e, type); });
 }
 
 sem::Constant Resolver::EvaluateConstantValue(const ast::LiteralExpression* literal,
@@ -178,10 +175,10 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::LiteralExpression* lite
 
 sem::Constant Resolver::EvaluateConstantValue(const ast::CallExpression* call,
                                               const sem::Type* ty) {
-    uint32_t result_size = 0;
-    auto* el_ty = sem::Type::ElementOf(ty, &result_size);
+    uint32_t num_elems = 0;
+    auto* el_ty = sem::Type::DeepestElementOf(ty, &num_elems);
     if (!el_ty) {
-        return sem::Constant{};
+        return {};
     }
 
     // ElementOf() will also return the element type of array, which we do not support.
@@ -194,16 +191,16 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::CallExpression* call,
         return Switch(
             el_ty,
             [&](const sem::AbstractInt*) {
-                return sem::Constant(ty, std::vector(result_size, AInt(0)));
+                return sem::Constant(ty, std::vector(num_elems, AInt(0)));
             },
             [&](const sem::AbstractFloat*) {
-                return sem::Constant(ty, std::vector(result_size, AFloat(0)));
+                return sem::Constant(ty, std::vector(num_elems, AFloat(0)));
             },
-            [&](const sem::I32*) { return sem::Constant(ty, std::vector(result_size, AInt(0))); },
-            [&](const sem::U32*) { return sem::Constant(ty, std::vector(result_size, AInt(0))); },
-            [&](const sem::F32*) { return sem::Constant(ty, std::vector(result_size, AFloat(0))); },
-            [&](const sem::F16*) { return sem::Constant(ty, std::vector(result_size, AFloat(0))); },
-            [&](const sem::Bool*) { return sem::Constant(ty, std::vector(result_size, AInt(0))); });
+            [&](const sem::I32*) { return sem::Constant(ty, std::vector(num_elems, AInt(0))); },
+            [&](const sem::U32*) { return sem::Constant(ty, std::vector(num_elems, AInt(0))); },
+            [&](const sem::F32*) { return sem::Constant(ty, std::vector(num_elems, AFloat(0))); },
+            [&](const sem::F16*) { return sem::Constant(ty, std::vector(num_elems, AFloat(0))); },
+            [&](const sem::Bool*) { return sem::Constant(ty, std::vector(num_elems, AInt(0))); });
     }
 
     // Build value for type_ctor from each child value by converting to type_ctor's type.
@@ -235,18 +232,27 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::CallExpression* call,
         }
     }
 
-    // Splat single-value initializers
-    std::visit(
+    if (!elements) {
+        return {};
+    }
+
+    return std::visit(
         [&](auto&& v) {
-            if (v.size() == 1) {
-                for (uint32_t i = 0; i < result_size - 1; ++i) {
-                    v.emplace_back(v[0]);
+            if (num_elems != v.size()) {
+                if (v.size() == 1) {
+                    // Splat single-value initializers
+                    for (uint32_t i = 0; i < num_elems - 1; ++i) {
+                        v.emplace_back(v[0]);
+                    }
+                } else {
+                    // Provided number of arguments does not match the required number of elements.
+                    // Validation should error here.
+                    return sem::Constant{};
                 }
             }
+            return sem::Constant(ty, std::move(elements.value()));
         },
         elements.value());
-
-    return sem::Constant(ty, std::move(elements.value()));
 }
 
 utils::Result<sem::Constant> Resolver::ConvertValue(const sem::Constant& value,
@@ -256,7 +262,7 @@ utils::Result<sem::Constant> Resolver::ConvertValue(const sem::Constant& value,
         return value;
     }
 
-    auto* el_ty = sem::Type::ElementOf(ty);
+    auto* el_ty = sem::Type::DeepestElementOf(ty);
     if (el_ty == nullptr) {
         return sem::Constant{};
     }

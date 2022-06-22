@@ -325,7 +325,7 @@ TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
         EXPECT_TYPE(expr->ConstantValue().Type(), target_sem_ty);
 
         uint32_t num_elems = 0;
-        const sem::Type* target_sem_el_ty = sem::Type::ElementOf(target_sem_ty, &num_elems);
+        const sem::Type* target_sem_el_ty = sem::Type::DeepestElementOf(target_sem_ty, &num_elems);
         EXPECT_TYPE(expr->ConstantValue().ElementType(), target_sem_el_ty);
         expr->ConstantValue().WithElements([&](auto&& vec) {
             using VEC_TY = std::decay_t<decltype(vec)>;
@@ -738,7 +738,8 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
         EXPECT_TYPE(expr->ConstantValue().Type(), expected_sem_ty);
 
         uint32_t num_elems = 0;
-        const sem::Type* expected_sem_el_ty = sem::Type::ElementOf(expected_sem_ty, &num_elems);
+        const sem::Type* expected_sem_el_ty =
+            sem::Type::DeepestElementOf(expected_sem_ty, &num_elems);
         EXPECT_TYPE(expr->ConstantValue().ElementType(), expected_sem_el_ty);
         expr->ConstantValue().WithElements([&](auto&& vec) {
             using VEC_TY = std::decay_t<decltype(vec)>;

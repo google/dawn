@@ -98,7 +98,7 @@ const Type* Constant::CheckElemType(const sem::Type* ty, size_t num_elements) {
     diag::List diag;
     if (ty->is_abstract_or_scalar() || ty->IsAnyOf<Vector, Matrix>()) {
         uint32_t count = 0;
-        auto* el_ty = Type::ElementOf(ty, &count);
+        auto* el_ty = Type::DeepestElementOf(ty, &count);
         if (num_elements != count) {
             TINT_ICE(Semantic, diag) << "sem::Constant() type <-> element mismatch. type: '"
                                      << ty->TypeInfo().name << "' element: " << num_elements;

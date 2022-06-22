@@ -104,10 +104,10 @@ class Constant {
         return std::visit([](auto&& v) { return v.size(); }, elems_);
     }
 
-    /// @returns the element type of the Constant
+    /// @returns the flattened element type of the Constant
     const sem::Type* ElementType() const { return elem_type_; }
 
-    /// @returns the constant's elements
+    /// @returns the constant's flattened elements
     const Elements& GetElements() const { return elems_; }
 
     /// WithElements calls the function `f` with the vector of elements as either AFloats or AInts
