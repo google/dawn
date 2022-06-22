@@ -14,7 +14,8 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   /* 0x0000 */ uint numPlanes;
-  /* 0x0004 */ int8_t tint_pad[12];
+  /* 0x0004 */ uint doYuvToRgbConversionOnly;
+  /* 0x0008 */ int8_t tint_pad[8];
   /* 0x0010 */ float3x4 yuvToRgbConversionMatrix;
   /* 0x0040 */ GammaTransferParams gammaDecodeParams;
   /* 0x0060 */ GammaTransferParams gammaEncodeParams;
@@ -35,9 +36,11 @@ float4 textureSampleExternal(texture2d<float, access::sample> plane0, texture2d<
   } else {
     color = (float4(plane0.sample(smp, coord, level(0.0f))[0], float4(plane1.sample(smp, coord, level(0.0f))).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return float4(color, 1.0f);
 }
 

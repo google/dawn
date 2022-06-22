@@ -13,6 +13,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   uint numPlanes;
+  uint doYuvToRgbConversionOnly;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
@@ -21,6 +22,7 @@ struct ExternalTextureParams {
 
 layout(binding = 2) uniform ExternalTextureParams_1 {
   uint numPlanes;
+  uint doYuvToRgbConversionOnly;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
@@ -61,6 +63,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   uint numPlanes;
+  uint doYuvToRgbConversionOnly;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
@@ -69,6 +72,7 @@ struct ExternalTextureParams {
 
 layout(binding = 2) uniform ExternalTextureParams_1 {
   uint numPlanes;
+  uint doYuvToRgbConversionOnly;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
@@ -103,6 +107,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   uint numPlanes;
+  uint doYuvToRgbConversionOnly;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
@@ -111,6 +116,7 @@ struct ExternalTextureParams {
 
 layout(binding = 2) uniform ExternalTextureParams_1 {
   uint numPlanes;
+  uint doYuvToRgbConversionOnly;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;

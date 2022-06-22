@@ -46,7 +46,10 @@ struct BindingPoints {
 /// textureSampleLevel that contain a texture_external parameter will be
 /// transformed into a newly generated version of the function, which can
 /// perform the desired operation on a single RGBA plane or on seperate Y and UV
-/// planes.
+/// planes, and do colorspace conversions including yuv->rgb conversion, gamma
+/// decoding, gamut conversion, and gamma encoding steps. Specifically
+// for BT.709 to SRGB conversion, it takes the fast path only doing the yuv->rgb
+// step and skipping all other steps.
 class MultiplanarExternalTexture : public Castable<MultiplanarExternalTexture, Transform> {
   public:
     /// BindingsMap is a map where the key is the binding location of a

@@ -118,6 +118,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -172,6 +173,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -225,6 +227,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -253,9 +256,11 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   } else {
     color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0f).r, textureSampleLevel(plane1, smp, coord, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -298,6 +303,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -322,9 +328,11 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   } else {
     color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0f).r, textureSampleLevel(plane1, smp, coord, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -370,6 +378,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -396,9 +405,11 @@ fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord
   } else {
     color = (vec4<f32>(textureLoad(plane0, coord, 0i).r, textureLoad(plane1, coord, 0i).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -440,6 +451,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -464,9 +476,11 @@ fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord
   } else {
     color = (vec4<f32>(textureLoad(plane0, coord, 0i).r, textureLoad(plane1, coord, 0i).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -512,6 +526,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -540,9 +555,11 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   } else {
     color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0f).r, textureSampleLevel(plane1, smp, coord, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -553,9 +570,11 @@ fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord
   } else {
     color = (vec4<f32>(textureLoad(plane0, coord, 0i).r, textureLoad(plane1, coord, 0i).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -599,6 +618,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -623,9 +643,11 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   } else {
     color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0f).r, textureSampleLevel(plane1, smp, coord, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -636,9 +658,11 @@ fn textureLoadExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coord
   } else {
     color = (vec4<f32>(textureLoad(plane0, coord, 0i).r, textureLoad(plane1, coord, 0i).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -688,6 +712,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -734,9 +759,11 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   } else {
     color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0f).r, textureSampleLevel(plane1, smp, coord, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -788,6 +815,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -812,9 +840,11 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   } else {
     color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0f).r, textureSampleLevel(plane1, smp, coord, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -870,6 +900,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -899,9 +930,11 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   } else {
     color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0f).r, textureSampleLevel(plane1, smp, coord, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -952,6 +985,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -976,9 +1010,11 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   } else {
     color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0f).r, textureSampleLevel(plane1, smp, coord, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -1036,6 +1072,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -1064,9 +1101,11 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   } else {
     color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0f).r, textureSampleLevel(plane1, smp, coord, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -1129,6 +1168,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -1162,9 +1202,11 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   } else {
     color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0f).r, textureSampleLevel(plane1, smp, coord, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -1223,6 +1265,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -1247,9 +1290,11 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   } else {
     color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0f).r, textureSampleLevel(plane1, smp, coord, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -1313,6 +1358,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -1337,9 +1383,11 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   } else {
     color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0f).r, textureSampleLevel(plane1, smp, coord, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -1391,6 +1439,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -1441,6 +1490,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -1467,9 +1517,11 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   } else {
     color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0f).r, textureSampleLevel(plane1, smp, coord, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 
@@ -1526,6 +1578,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   numPlanes : u32,
+  doYuvToRgbConversionOnly : u32,
   yuvToRgbConversionMatrix : mat3x4<f32>,
   gammaDecodeParams : GammaTransferParams,
   gammaEncodeParams : GammaTransferParams,
@@ -1555,9 +1608,11 @@ fn textureSampleExternal(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, smp
   } else {
     color = (vec4<f32>(textureSampleLevel(plane0, smp, coord, 0.0f).r, textureSampleLevel(plane1, smp, coord, 0.0f).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4<f32>(color, 1.0f);
 }
 

@@ -28,7 +28,9 @@ class TextureViewBase;
 
 struct ExternalTextureParams {
     uint32_t numPlanes;
-    std::array<uint32_t, 3> padding;
+    // TODO(crbug.com/dawn/1466): Only go as few steps as necessary.
+    uint32_t doYuvToRgbConversionOnly;
+    std::array<uint32_t, 2> padding;
     std::array<float, 12> yuvToRgbConversionMatrix;
     std::array<float, 8> gammaDecodingParams = {};
     std::array<float, 8> gammaEncodingParams = {};

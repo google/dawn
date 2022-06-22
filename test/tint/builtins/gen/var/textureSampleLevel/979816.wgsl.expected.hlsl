@@ -10,6 +10,7 @@ struct GammaTransferParams {
 };
 struct ExternalTextureParams {
   uint numPlanes;
+  uint doYuvToRgbConversionOnly;
   float3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
@@ -37,9 +38,11 @@ float4 textureSampleExternal(Texture2D<float4> plane0, Texture2D<float4> plane1,
   } else {
     color = mul(params.yuvToRgbConversionMatrix, float4(plane0.SampleLevel(smp, coord, 0.0f).r, plane1.SampleLevel(smp, coord, 0.0f).rg, 1.0f));
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = mul(color, params.gamutConversionMatrix);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = mul(color, params.gamutConversionMatrix);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return float4(color, 1.0f);
 }
 
@@ -72,7 +75,8 @@ float3x3 tint_symbol_7(uint4 buffer[11], uint offset) {
 
 ExternalTextureParams tint_symbol_1(uint4 buffer[11], uint offset) {
   const uint scalar_offset_14 = ((offset + 0u)) / 4;
-  const ExternalTextureParams tint_symbol_10 = {buffer[scalar_offset_14 / 4][scalar_offset_14 % 4], tint_symbol_3(buffer, (offset + 16u)), tint_symbol_5(buffer, (offset + 64u)), tint_symbol_5(buffer, (offset + 96u)), tint_symbol_7(buffer, (offset + 128u))};
+  const uint scalar_offset_15 = ((offset + 4u)) / 4;
+  const ExternalTextureParams tint_symbol_10 = {buffer[scalar_offset_14 / 4][scalar_offset_14 % 4], buffer[scalar_offset_15 / 4][scalar_offset_15 % 4], tint_symbol_3(buffer, (offset + 16u)), tint_symbol_5(buffer, (offset + 64u)), tint_symbol_5(buffer, (offset + 96u)), tint_symbol_7(buffer, (offset + 128u))};
   return tint_symbol_10;
 }
 
