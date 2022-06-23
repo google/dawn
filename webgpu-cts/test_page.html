@@ -17,6 +17,11 @@ limitations under the License. -->
 <meta charset=utf-8>
 <link rel=help href='https://gpuweb.github.io/gpuweb/'>
 
+<!-- Temporarily try to |setBaseResourcePath| from two paths as we migrate the base static server dir -->
+<script type=module>
+    import { setBaseResourcePath } from '/third_party/webgpu-cts/src/common/framework/resources.js';
+    setBaseResourcePath('/third_party/webgpu-cts/resources');
+</script>
 <script type=module>
     import { setBaseResourcePath } from '/gen/third_party/dawn/third_party/webgpu-cts/src/common/framework/resources.js';
     setBaseResourcePath('/gen/third_party/dawn/third_party/webgpu-cts/resources');
