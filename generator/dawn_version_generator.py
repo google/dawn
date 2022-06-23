@@ -127,13 +127,12 @@ class DawnVersionGenerator(Generator):
         if version_file:
             return [version_file]
         if git_exists(dawn_dir):
-            deps = []
             try:
-                deps += [get_git_head(dawn_dir)
-                         ] + get_git_resolved_head(dawn_dir)
+                return [get_git_head(dawn_dir)
+                        ] + get_git_resolved_head(dawn_dir)
             except Exception:
-                return deps
-        return deps
+                return []
+        return []
 
     def get_file_renders(self, args):
         params = compute_params(args)
