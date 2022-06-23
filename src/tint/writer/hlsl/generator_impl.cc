@@ -1779,8 +1779,8 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
 
             {  // T compare_value = <compare_value>;
                 auto pre = line();
-                if (!EmitTypeAndName(pre, TypeOf(compare_value), ast::StorageClass::kNone,
-                                     ast::Access::kUndefined, compare)) {
+                if (!EmitTypeAndName(pre, TypeOf(compare_value)->UnwrapRef(),
+                                     ast::StorageClass::kNone, ast::Access::kUndefined, compare)) {
                     return false;
                 }
                 pre << " = ";

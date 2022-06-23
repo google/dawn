@@ -3272,7 +3272,8 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                                                                      value,
                                                                  });
         case sem::BuiltinType::kAtomicCompareExchangeWeak: {
-            auto comparator = GenerateExpression(call->Arguments()[1]->Declaration());
+            auto comparator =
+                GenerateExpressionWithLoadIfNeeded(call->Arguments()[1]->Declaration());
             if (comparator == 0) {
                 return false;
             }
