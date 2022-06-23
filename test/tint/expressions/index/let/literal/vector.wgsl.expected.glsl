@@ -6,6 +6,6 @@ void unused_entry_point() {
 }
 float f() {
   vec3 v = vec3(1.0f, 2.0f, 3.0f);
-  return vec3(1.0f, 2.0f, 3.0f)[1];
+  return 2.0f;
 }
 

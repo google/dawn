@@ -171,17 +171,25 @@ class Resolver {
                              const ast::ExpressionList& params,
                              uint32_t* id);
 
-    //////////////////////////////////////////////////////////////////////////////
-    // AST and Type traversal methods
-    //////////////////////////////////////////////////////////////////////////////
+    /// Expression traverses the graph of expressions starting at `expr`, building a postordered
+    /// list (leaf-first) of all the expression nodes. Each of the expressions are then resolved by
+    /// dispatching to the appropriate expression handlers below.
+    /// @returns the resolved semantic node for the expression `expr`, or nullptr on failure.
+    sem::Expression* Expression(const ast::Expression* expr);
 
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     // Expression resolving methods
+    //
     // Returns the semantic node pointer on success, nullptr on failure.
+    //
+    // These methods are invoked by Expression(), in postorder (child-first). These methods should
+    // not attempt to resolve their children. This design avoids recursion, which is a common cause
+    // of stack-overflows.
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     sem::Expression* IndexAccessor(const ast::IndexAccessorExpression*);
     sem::Expression* Binary(const ast::BinaryExpression*);
     sem::Expression* Bitcast(const ast::BitcastExpression*);
     sem::Call* Call(const ast::CallExpression*);
-    sem::Expression* Expression(const ast::Expression*);
     sem::Function* Function(const ast::Function*);
     sem::Call* FunctionCall(const ast::CallExpression*,
                             sem::Function* target,
@@ -194,6 +202,29 @@ class Resolver {
     sem::Expression* Literal(const ast::LiteralExpression*);
     sem::Expression* MemberAccessor(const ast::MemberAccessorExpression*);
     sem::Expression* UnaryOp(const ast::UnaryOpExpression*);
+
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    /// Constant value evaluation methods
+    ///
+    /// These methods are called from the expression resolving methods, and so child-expression
+    /// nodes are guaranteed to have been already resolved and any constant values calculated.
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    sem::Constant EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type);
+    sem::Constant EvaluateConstantValue(const ast::LiteralExpression* literal,
+                                        const sem::Type* type);
+    sem::Constant EvaluateConstantValue(const ast::CallExpression* call, const sem::Type* type);
+    sem::Constant EvaluateConstantValue(const ast::IndexAccessorExpression* call,
+                                        const sem::Type* type);
+
+    /// The result type of a ConstantEvaluation method. Holds the constant value and a boolean,
+    /// which is true on success, false on an error.
+    using ConstantResult = utils::Result<sem::Constant>;
+
+    /// Convert the `value` to `target_type`
+    /// @return the converted value
+    ConstantResult ConvertValue(const sem::Constant& value,
+                                const sem::Type* target_type,
+                                const Source& source);
 
     /// If `expr` is not of an abstract-numeric type, then Materialize() will just return `expr`.
     /// If `expr` is of an abstract-numeric type:
@@ -378,23 +409,6 @@ class Resolver {
 
     /// Adds the given note message to the diagnostics
     void AddNote(const std::string& msg, const Source& source) const;
-
-    //////////////////////////////////////////////////////////////////////////////
-    /// Constant value evaluation methods
-    //////////////////////////////////////////////////////////////////////////////
-    /// The result type of a ConstantEvaluation method. Holds the constant value and a boolean,
-    /// which is true on success, false on an error.
-    using ConstantResult = utils::Result<sem::Constant>;
-
-    /// Convert the `value` to `target_type`
-    /// @return the converted value
-    ConstantResult ConvertValue(const sem::Constant& value,
-                                const sem::Type* target_type,
-                                const Source& source);
-    sem::Constant EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type);
-    sem::Constant EvaluateConstantValue(const ast::LiteralExpression* literal,
-                                        const sem::Type* type);
-    sem::Constant EvaluateConstantValue(const ast::CallExpression* call, const sem::Type* type);
 
     /// @returns true if the symbol is the name of a builtin function.
     bool IsBuiltin(Symbol) const;

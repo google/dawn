@@ -608,5 +608,113 @@ TEST_F(ResolverConstantsTest, Mat3x2_Construct_Columns_af) {
     EXPECT_EQ(sem->ConstantValue().Element<AFloat>(5).value, 6._a);
 }
 
+TEST_F(ResolverConstantsTest, Vec3_Index) {
+    auto* expr = IndexAccessor(vec3<i32>(1_i, 2_i, 3_i), 2_i);
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    EXPECT_NE(sem, nullptr);
+    ASSERT_TRUE(sem->Type()->Is<sem::I32>());
+    EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::I32>());
+    ASSERT_EQ(sem->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(sem->ConstantValue().Element<i32>(0).value, 3_i);
+}
+
+TEST_F(ResolverConstantsTest, Vec3_Index_OOB_High) {
+    auto* expr = IndexAccessor(vec3<i32>(1_i, 2_i, 3_i), Expr(Source{{12, 34}}, 3_i));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), "12:34 warning: index 3 out of bounds [0..2]. Clamping index to 2");
+
+    auto* sem = Sem().Get(expr);
+    EXPECT_NE(sem, nullptr);
+    ASSERT_TRUE(sem->Type()->Is<sem::I32>());
+    EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::I32>());
+    ASSERT_EQ(sem->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(sem->ConstantValue().Element<i32>(0).value, 3_i);
+}
+
+TEST_F(ResolverConstantsTest, Vec3_Index_OOB_Low) {
+    auto* expr = IndexAccessor(vec3<i32>(1_i, 2_i, 3_i), Expr(Source{{12, 34}}, -3_i));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), "12:34 warning: index -3 out of bounds [0..2]. Clamping index to 0");
+
+    auto* sem = Sem().Get(expr);
+    EXPECT_NE(sem, nullptr);
+    ASSERT_TRUE(sem->Type()->Is<sem::I32>());
+    EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::I32>());
+    ASSERT_EQ(sem->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(sem->ConstantValue().Element<i32>(0).value, 1_i);
+}
+
+TEST_F(ResolverConstantsTest, Mat3x2_Index) {
+    auto* expr = IndexAccessor(
+        mat3x2<f32>(vec2<f32>(1._a, 2._a), vec2<f32>(3._a, 4._a), vec2<f32>(5._a, 6._a)), 2_i);
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    EXPECT_NE(sem, nullptr);
+    auto* vec = sem->Type()->As<sem::Vector>();
+    ASSERT_NE(vec, nullptr);
+    EXPECT_EQ(vec->Width(), 2u);
+    EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F32>());
+    ASSERT_EQ(sem->ConstantValue().ElementCount(), 2u);
+    EXPECT_EQ(sem->ConstantValue().Element<f32>(0).value, 5._a);
+    EXPECT_EQ(sem->ConstantValue().Element<f32>(1).value, 6._a);
+}
+
+TEST_F(ResolverConstantsTest, Mat3x2_Index_OOB_High) {
+    auto* expr = IndexAccessor(
+        mat3x2<f32>(vec2<f32>(1._a, 2._a), vec2<f32>(3._a, 4._a), vec2<f32>(5._a, 6._a)),
+        Expr(Source{{12, 34}}, 3_i));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), "12:34 warning: index 3 out of bounds [0..2]. Clamping index to 2");
+
+    auto* sem = Sem().Get(expr);
+    EXPECT_NE(sem, nullptr);
+    auto* vec = sem->Type()->As<sem::Vector>();
+    ASSERT_NE(vec, nullptr);
+    EXPECT_EQ(vec->Width(), 2u);
+    EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F32>());
+    ASSERT_EQ(sem->ConstantValue().ElementCount(), 2u);
+    EXPECT_EQ(sem->ConstantValue().Element<f32>(0).value, 5._a);
+    EXPECT_EQ(sem->ConstantValue().Element<f32>(1).value, 6._a);
+}
+
+TEST_F(ResolverConstantsTest, Mat3x2_Index_OOB_Low) {
+    auto* expr = IndexAccessor(
+        mat3x2<f32>(vec2<f32>(1._a, 2._a), vec2<f32>(3._a, 4._a), vec2<f32>(5._a, 6._a)),
+        Expr(Source{{12, 34}}, -3_i));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), "12:34 warning: index -3 out of bounds [0..2]. Clamping index to 0");
+
+    auto* sem = Sem().Get(expr);
+    EXPECT_NE(sem, nullptr);
+    auto* vec = sem->Type()->As<sem::Vector>();
+    ASSERT_NE(vec, nullptr);
+    EXPECT_EQ(vec->Width(), 2u);
+    EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F32>());
+    ASSERT_EQ(sem->ConstantValue().ElementCount(), 2u);
+    EXPECT_EQ(sem->ConstantValue().Element<f32>(0).value, 1._a);
+    EXPECT_EQ(sem->ConstantValue().Element<f32>(1).value, 2._a);
+}
+
 }  // namespace
 }  // namespace tint::resolver

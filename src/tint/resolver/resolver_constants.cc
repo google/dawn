@@ -155,7 +155,8 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::Expression* expr, const
     return Switch(
         expr,  //
         [&](const ast::LiteralExpression* e) { return EvaluateConstantValue(e, type); },
-        [&](const ast::CallExpression* e) { return EvaluateConstantValue(e, type); });
+        [&](const ast::CallExpression* e) { return EvaluateConstantValue(e, type); },
+        [&](const ast::IndexAccessorExpression* e) { return EvaluateConstantValue(e, type); });
 }
 
 sem::Constant Resolver::EvaluateConstantValue(const ast::LiteralExpression* literal,
@@ -253,6 +254,54 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::CallExpression* call,
             return sem::Constant(ty, std::move(elements.value()));
         },
         elements.value());
+}
+
+sem::Constant Resolver::EvaluateConstantValue(const ast::IndexAccessorExpression* accessor,
+                                              const sem::Type* el_ty) {
+    auto* obj_sem = builder_->Sem().Get(accessor->object);
+    if (!obj_sem) {
+        return {};
+    }
+
+    auto obj_val = obj_sem->ConstantValue();
+    if (!obj_val) {
+        return {};
+    }
+
+    auto* idx_sem = builder_->Sem().Get(accessor->index);
+    if (!idx_sem) {
+        return {};
+    }
+
+    auto idx_val = idx_sem->ConstantValue();
+    if (!idx_val || idx_val.ElementCount() != 1) {
+        return {};
+    }
+
+    AInt idx = idx_val.Element<AInt>(0);
+
+    // The immediate child element count.
+    uint32_t el_count = 0;
+    sem::Type::ElementOf(obj_val.Type(), &el_count);
+
+    // The total number of most-nested elements per child element type.
+    uint32_t step = 0;
+    sem::Type::DeepestElementOf(el_ty, &step);
+
+    if (idx < 0 || idx >= el_count) {
+        auto clamped = std::min<AInt::type>(std::max<AInt::type>(idx, 0), el_count - 1);
+        AddWarning("index " + std::to_string(idx) + " out of bounds [0.." +
+                       std::to_string(el_count - 1) + "]. Clamping index to " +
+                       std::to_string(clamped),
+                   accessor->index->source);
+        idx = clamped;
+    }
+
+    return sem::Constant{el_ty, obj_val.WithElements([&](auto&& v) {
+                             using VEC = std::decay_t<decltype(v)>;
+                             return sem::Constant::Elements(
+                                 VEC(v.begin() + (idx * step), v.begin() + (idx + 1) * step));
+                         })};
 }
 
 utils::Result<sem::Constant> Resolver::ConvertValue(const sem::Constant& value,

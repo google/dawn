@@ -6,7 +6,7 @@ void unused_entry_point() {
 }
 void f() {
   mat4 m = mat4(vec4(1.0f), vec4(1.0f), vec4(1.0f), vec4(1.0f));
-  vec4 v1 = mat4(vec4(1.0f), vec4(1.0f), vec4(1.0f), vec4(1.0f))[0];
-  float a = v1[0];
+  vec4 v1 = vec4(1.0f);
+  float a = 1.0f;
 }
 
