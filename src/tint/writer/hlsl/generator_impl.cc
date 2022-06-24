@@ -1110,52 +1110,13 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
         return EmitZeroValue(out, type);
     }
 
-    if (auto* mat = call->Type()->As<sem::Matrix>()) {
-        if (ctor->Parameters().size() == 1) {
-            // Matrix constructor with single scalar.
-            auto fn = utils::GetOrCreate(matrix_scalar_ctors_, mat, [&]() -> std::string {
-                TextBuffer b;
-                TINT_DEFER(helpers_.Append(b));
-
-                auto name = UniqueIdentifier("build_mat" + std::to_string(mat->columns()) + "x" +
-                                             std::to_string(mat->rows()));
-                {
-                    auto l = line(&b);
-                    if (!EmitType(l, mat, ast::StorageClass::kNone, ast::Access::kUndefined, "")) {
-                        return "";
-                    }
-                    l << " " << name << "(";
-                    if (!EmitType(l, mat->type(), ast::StorageClass::kNone, ast::Access::kUndefined,
-                                  "")) {
-                        return "";
-                    }
-                    l << " value) {";
-                }
-                {
-                    ScopedIndent si(&b);
-                    auto l = line(&b);
-                    l << "return ";
-                    if (!EmitType(l, mat, ast::StorageClass::kNone, ast::Access::kUndefined, "")) {
-                        return "";
-                    }
-                    l << "(";
-                    for (uint32_t i = 0; i < mat->columns() * mat->rows(); i++) {
-                        l << ((i > 0) ? ", value" : "value");
-                    }
-                    l << ");";
-                }
-                line(&b) << "}";
-                return name;
-            });
-            if (fn.empty()) {
-                return false;
-            }
-            out << fn << "(";
-            if (!EmitExpression(out, call->Arguments()[0]->Declaration())) {
-                return false;
-            }
-            out << ")";
-            return true;
+    // Single parameter matrix initializers must be identity constructor.
+    // It could also be conversions between f16 and f32 matrix when f16 is properly supported.
+    if (type->Is<sem::Matrix>() && call->Arguments().size() == 1) {
+        if (!ctor->Parameters()[0]->Type()->UnwrapRef()->is_float_matrix()) {
+            TINT_UNREACHABLE(Writer, diagnostics_)
+                << "found a single-parameter matrix constructor that is not identity constructor";
+            return false;
         }
     }
 

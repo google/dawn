@@ -223,6 +223,24 @@ TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat_Empty) {
     EXPECT_THAT(gen.result(), HasSubstr("float2x3 tint_symbol = float2x3((0.0f).xxx, (0.0f).xxx)"));
 }
 
+TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Mat_Identity) {
+    // fn f() {
+    //     var m_1: mat4x4<f32> = mat4x4<f32>();
+    //     var m_2: mat4x4<f32> = mat4x4<f32>(m_1);
+    // }
+
+    auto* m_1 = Var("m_1", ty.mat4x4(ty.f32()), mat4x4<f32>());
+    auto* m_2 = Var("m_2", ty.mat4x4(ty.f32()), mat4x4<f32>(m_1));
+
+    WrapInFunction(m_1, m_2);
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_THAT(gen.result(), HasSubstr("float4x4 m_2 = float4x4(m_1);"));
+}
+
 TEST_F(HlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array) {
     WrapInFunction(Construct(ty.array(ty.vec3<f32>(), 3_u), vec3<f32>(1_f, 2_f, 3_f),
                              vec3<f32>(4_f, 5_f, 6_f), vec3<f32>(7_f, 8_f, 9_f)));
