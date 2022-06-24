@@ -2148,69 +2148,58 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
 
     uint64_t stride = explicit_stride ? explicit_stride : implicit_stride;
 
+    int64_t count = 0;  // sem::Array uses a size of 0 for a runtime-sized array.
+
     // Evaluate the constant array size expression.
-    // sem::Array uses a size of 0 for a runtime-sized array.
-    uint32_t count = 0;
     if (auto* count_expr = arr->count) {
         const auto* count_sem = Materialize(Expression(count_expr));
         if (!count_sem) {
             return nullptr;
         }
 
-        auto size_source = count_expr->source;
-
-        auto* ty = count_sem->Type()->UnwrapRef();
-        if (!ty->is_integer_scalar()) {
-            AddError("array size must be integer scalar", size_source);
-            return nullptr;
-        }
-
-        constexpr const char* kErrInvalidExpr =
-            "array size identifier must be a literal or a module-scope 'let'";
-
-        if (auto* ident = count_expr->As<ast::IdentifierExpression>()) {
-            // Make sure the identifier is a non-overridable module-scope 'let'.
-            auto* global = sem_.ResolvedSymbol<sem::GlobalVariable>(ident);
-            if (!global || !global->Declaration()->Is<ast::Let>()) {
-                AddError(kErrInvalidExpr, size_source);
-                return nullptr;
-            }
-            count_expr = global->Declaration()->constructor;
-        } else if (!count_expr->Is<ast::LiteralExpression>()) {
-            AddError(kErrInvalidExpr, size_source);
+        // TODO(crbug.com/tint/1580): Temporary seatbelt to used to ensure that a function-scope
+        // `let` cannot be used to propagate a constant expression to an array size. Once we
+        // implement `const`, this can be removed.
+        if (auto* user = count_sem->UnwrapMaterialize()->As<sem::VariableUser>();
+            user && user->Variable()->Is<sem::LocalVariable>() &&
+            user->Variable()->Declaration()->Is<ast::Let>()) {
+            AddError("array size must evaluate to a constant integer expression",
+                     count_expr->source);
             return nullptr;
         }
 
         auto count_val = count_sem->ConstantValue();
         if (!count_val) {
-            TINT_ICE(Resolver, diagnostics_) << "could not resolve array size expression";
+            AddError("array size must evaluate to a constant integer expression",
+                     count_expr->source);
             return nullptr;
         }
 
-        if (count_val.Element<AInt>(0).value < 1) {
-            AddError("array size must be at least 1", size_source);
+        if (auto* ty = count_val.Type(); !ty->is_integer_scalar()) {
+            AddError("array size must evaluate to a constant integer expression, but is type '" +
+                         builder_->FriendlyName(ty) + "'",
+                     count_expr->source);
             return nullptr;
         }
 
-        count = count_val.Element<uint32_t>(0);
+        count = count_val.Element<AInt>(0).value;
+        if (count < 1) {
+            AddError("array size (" + std::to_string(count) + ") must be greater than 0",
+                     count_expr->source);
+            return nullptr;
+        }
     }
 
-    auto size = std::max<uint64_t>(count, 1) * stride;
+    auto size = std::max<uint64_t>(count, 1u) * stride;
     if (size > std::numeric_limits<uint32_t>::max()) {
         std::stringstream msg;
-        msg << "array size in bytes must not exceed 0x" << std::hex
-            << std::numeric_limits<uint32_t>::max() << ", but is 0x" << std::hex << size;
+        msg << "array size (0x" << std::hex << size << ") must not exceed 0xffffffff bytes";
         AddError(msg.str(), arr->source);
         return nullptr;
     }
-    if (stride > std::numeric_limits<uint32_t>::max() ||
-        implicit_stride > std::numeric_limits<uint32_t>::max()) {
-        TINT_ICE(Resolver, diagnostics_) << "calculated array stride exceeds uint32";
-        return nullptr;
-    }
     auto* out = builder_->create<sem::Array>(
-        elem_type, count, el_align, static_cast<uint32_t>(size), static_cast<uint32_t>(stride),
-        static_cast<uint32_t>(implicit_stride));
+        elem_type, static_cast<uint32_t>(count), el_align, static_cast<uint32_t>(size),
+        static_cast<uint32_t>(stride), static_cast<uint32_t>(implicit_stride));
 
     if (!validator_.Array(out, source)) {
         return nullptr;
@@ -2338,8 +2327,8 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
         offset = utils::RoundUp(align, offset);
         if (offset > std::numeric_limits<uint32_t>::max()) {
             std::stringstream msg;
-            msg << "struct member has byte offset 0x" << std::hex << offset
-                << ", but must not exceed 0x" << std::hex << std::numeric_limits<uint32_t>::max();
+            msg << "struct member offset (0x" << std::hex << offset << ") must not exceed 0x"
+                << std::hex << std::numeric_limits<uint32_t>::max() << " bytes";
             AddError(msg.str(), member->source);
             return nullptr;
         }
@@ -2360,8 +2349,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
 
     if (struct_size > std::numeric_limits<uint32_t>::max()) {
         std::stringstream msg;
-        msg << "struct size in bytes must not exceed 0x" << std::hex
-            << std::numeric_limits<uint32_t>::max() << ", but is 0x" << std::hex << struct_size;
+        msg << "struct size (0x" << std::hex << struct_size << ") must not exceed 0xffffffff bytes";
         AddError(msg.str(), str->source);
         return nullptr;
     }

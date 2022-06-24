@@ -13,10 +13,10 @@
       %float = OpTypeFloat 32
     %v3float = OpTypeVector %float 3
 %mat2v3float = OpTypeMatrix %v3float 2
-    %float_0 = OpConstant %float 0
+          %4 = OpConstantNull %float
     %float_1 = OpConstant %float 1
     %float_2 = OpConstant %float 2
-          %7 = OpConstantComposite %v3float %float_0 %float_1 %float_2
+          %7 = OpConstantComposite %v3float %4 %float_1 %float_2
     %float_3 = OpConstant %float 3
     %float_4 = OpConstant %float 4
     %float_5 = OpConstant %float 5

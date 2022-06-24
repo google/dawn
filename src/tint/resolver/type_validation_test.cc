@@ -216,28 +216,28 @@ TEST_F(ResolverTypeValidationTest, ArraySize_AIntLiteral_Zero) {
     // var<private> a : array<f32, 0>;
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_a)), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size must be at least 1");
+    EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedLiteral_Zero) {
     // var<private> a : array<f32, 0u>;
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_u)), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size must be at least 1");
+    EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Zero) {
     // var<private> a : array<f32, 0i>;
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_i)), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size must be at least 1");
+    EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Negative) {
     // var<private> a : array<f32, -10i>;
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, -10_i)), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size must be at least 1");
+    EXPECT_EQ(r()->error(), "12:34 error: array size (-10) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedLet_Zero) {
@@ -246,7 +246,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedLet_Zero) {
     GlobalConst("size", nullptr, Expr(0_u));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size must be at least 1");
+    EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLet_Zero) {
@@ -255,7 +255,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedLet_Zero) {
     GlobalConst("size", nullptr, Expr(0_i));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size must be at least 1");
+    EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLet_Negative) {
@@ -264,14 +264,16 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedLet_Negative) {
     GlobalConst("size", nullptr, Expr(-10_i));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size must be at least 1");
+    EXPECT_EQ(r()->error(), "12:34 error: array size (-10) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_FloatLiteral) {
     // var<private> a : array<f32, 10.0>;
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 10_f)), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size must be integer scalar");
+    EXPECT_EQ(r()->error(),
+              "12:34 error: array size must evaluate to a constant integer expression, but is type "
+              "'f32'");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_IVecLiteral) {
@@ -279,7 +281,9 @@ TEST_F(ResolverTypeValidationTest, ArraySize_IVecLiteral) {
     Global("a", ty.array(ty.f32(), Construct(Source{{12, 34}}, ty.vec2<i32>(), 10_i, 10_i)),
            ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size must be integer scalar");
+    EXPECT_EQ(r()->error(),
+              "12:34 error: array size must evaluate to a constant integer expression, but is type "
+              "'vec2<i32>'");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_FloatLet) {
@@ -288,7 +292,9 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FloatLet) {
     GlobalConst("size", nullptr, Expr(10_f));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size must be integer scalar");
+    EXPECT_EQ(r()->error(),
+              "12:34 error: array size must evaluate to a constant integer expression, but is type "
+              "'f32'");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_IVecLet) {
@@ -297,7 +303,9 @@ TEST_F(ResolverTypeValidationTest, ArraySize_IVecLet) {
     GlobalConst("size", nullptr, Construct(ty.vec2<i32>(), 100_i, 100_i));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size must be integer scalar");
+    EXPECT_EQ(r()->error(),
+              "12:34 error: array size must evaluate to a constant integer expression, but is type "
+              "'vec2<i32>'");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
@@ -305,8 +313,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
     Global("a", ty.array(Source{{12, 34}}, ty.f32(), 0x40000000_u), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array size in bytes must not exceed 0xffffffff, but "
-              "is 0x100000000");
+              "12:34 error: array size (0x100000000) must not exceed 0xffffffff bytes");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ExplicitStride) {
@@ -314,8 +321,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ExplicitStride) {
     Global("a", ty.array(Source{{12, 34}}, ty.f32(), 0x20000000_u, 8), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array size in bytes must not exceed 0xffffffff, but "
-              "is 0x100000000");
+              "12:34 error: array size (0x100000000) must not exceed 0xffffffff bytes");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_Overridable) {
@@ -325,7 +331,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_Overridable) {
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array size identifier must be a literal or a module-scope 'let'");
+              "12:34 error: array size must evaluate to a constant integer expression");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_ModuleVar) {
@@ -335,7 +341,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_ModuleVar) {
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array size identifier must be a literal or a module-scope 'let'");
+              "12:34 error: array size must evaluate to a constant integer expression");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_FunctionLet) {
@@ -345,19 +351,17 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FunctionLet) {
     // }
     auto* size = Let("size", nullptr, Expr(10_i));
     auto* a = Var("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")));
-    WrapInFunction(Block(Decl(size), Decl(a)));
+    WrapInFunction(size, a);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array size identifier must be a literal or a module-scope 'let'");
+              "12:34 error: array size must evaluate to a constant integer expression");
 }
 
-TEST_F(ResolverTypeValidationTest, ArraySize_InvalidExpr) {
+TEST_F(ResolverTypeValidationTest, ArraySize_ComplexExpr) {
     // var a : array<f32, i32(4i)>;
     auto* a = Var("a", ty.array(ty.f32(), Construct(Source{{12, 34}}, ty.i32(), 4_i)));
-    WrapInFunction(Block(Decl(a)));
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: array size identifier must be a literal or a module-scope 'let'");
+    WrapInFunction(a);
+    EXPECT_TRUE(r()->Resolve());
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayInFunction_Fail) {
@@ -417,8 +421,7 @@ TEST_F(ResolverTypeValidationTest, Struct_TooBig) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: struct size in bytes must not exceed 0xffffffff, but "
-              "is 0x100000000");
+              "12:34 error: struct size (0x100000000) must not exceed 0xffffffff bytes");
 }
 
 TEST_F(ResolverTypeValidationTest, Struct_MemberOffset_TooBig) {
@@ -438,8 +441,7 @@ TEST_F(ResolverTypeValidationTest, Struct_MemberOffset_TooBig) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: struct member has byte offset 0x100000000, but must "
-              "not exceed 0xffffffff");
+              "12:34 error: struct member offset (0x100000000) must not exceed 0xffffffff bytes");
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLast_Pass) {
@@ -467,8 +469,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInArray) {
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
-              "12:34 error: an array element type cannot contain a runtime-sized "
-              "array");
+              "12:34 error: an array element type cannot contain a runtime-sized array");
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayInStructInArray) {
@@ -482,8 +483,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInStructInArray) {
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
-              "12:34 error: an array element type cannot contain a runtime-sized "
-              "array");
+              "12:34 error: an array element type cannot contain a runtime-sized array");
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayInStructInStruct) {
@@ -499,8 +499,8 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInStructInStruct) {
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
-              "12:34 error: a struct that contains a runtime array cannot be "
-              "nested inside another struct");
+              "12:34 error: a struct that contains a runtime array cannot be nested inside another "
+              "struct");
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayIsNotLast_Fail) {
@@ -601,8 +601,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
-              "12:34 error: runtime arrays may only appear as the last member of "
-              "a struct");
+              "12:34 error: runtime arrays may only appear as the last member of a struct");
 }
 
 TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
@@ -629,8 +628,7 @@ TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: texture_2d<f32> cannot be used as an element type of "
-              "an array");
+              "12:34 error: texture_2d<f32> cannot be used as an element type of an array");
 }
 
 TEST_F(ResolverTypeValidationTest, VariableAsType) {
@@ -980,8 +978,7 @@ TEST_F(StorageTextureAccessTest, RWAccess_Fail) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: storage textures currently only support 'write' "
-              "access control");
+              "12:34 error: storage textures currently only support 'write' access control");
 }
 
 TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Fail) {
@@ -995,8 +992,7 @@ TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Fail) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: storage textures currently only support 'write' "
-              "access control");
+              "12:34 error: storage textures currently only support 'write' access control");
 }
 
 TEST_F(StorageTextureAccessTest, WriteOnlyAccess_Pass) {
@@ -1116,8 +1112,7 @@ TEST_P(InvalidVectorElementTypes, InvalidElementType) {
            ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: vector element type must be 'bool', 'f32', 'i32' "
-              "or 'u32'");
+              "12:34 error: vector element type must be 'bool', 'f32', 'i32' or 'u32'");
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
                          InvalidVectorElementTypes,

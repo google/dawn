@@ -581,8 +581,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Array_TooFewEleme
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array constructor has too few elements: expected 4, "
-              "found 3");
+              "12:34 error: array constructor has too few elements: expected 4, found 3");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Array_TooManyElements) {

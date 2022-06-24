@@ -7,6 +7,6 @@ void unused_entry_point() {
 const mat2 m = mat2(vec2(0.0f, 1.0f), vec2(2.0f, 3.0f));
 mat2 f() {
   mat2 m_1 = mat2(vec2(0.0f, 1.0f), vec2(2.0f, 3.0f));
-  return mat2(vec2(0.0f, 1.0f), vec2(2.0f, 3.0f));
+  return m_1;
 }
 
