@@ -51,7 +51,7 @@ void main_1() {
   }
   const float4 x_34 = asfloat(x_29[0]);
   const float3 x_38 = (0.0f).xxx;
-  viewDirectionW = normalize((float3(x_34.x, x_34.y, x_34.z) - (0.0f).xxx));
+  viewDirectionW = normalize((float3(x_34.x, x_34.y, x_34.z) - x_38));
   baseColor = (1.0f).xxxx;
   const float4 x_52 = asfloat(x_49[0]);
   diffuseColor = float3(x_52.x, x_52.y, x_52.z);
@@ -59,11 +59,11 @@ void main_1() {
   alpha = x_60;
   const float3 x_62 = (0.0f).xxx;
   const float3 x_64 = (0.0f).xxx;
-  normalW = normalize(-(cross(ddx((0.0f).xxx), ddy((0.0f).xxx))));
+  normalW = normalize(-(cross(ddx(x_62), ddy(x_64))));
   uvOffset = (0.0f).xx;
   const float4 x_74 = (0.0f).xxxx;
   const float4 x_76 = baseColor;
-  const float3 x_78 = (float3(x_76.x, x_76.y, x_76.z) * float3((0.0f).xxxx.x, (0.0f).xxxx.y, (0.0f).xxxx.z));
+  const float3 x_78 = (float3(x_76.x, x_76.y, x_76.z) * float3(x_74.x, x_74.y, x_74.z));
   baseColor = float4(x_78.x, x_78.y, x_78.z, baseColor.w);
   baseAmbientColor = (1.0f).xxx;
   glossiness = 0.0f;

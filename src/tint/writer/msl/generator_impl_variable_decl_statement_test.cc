@@ -132,7 +132,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("thread float tint_symbol_1 = 0.0f;\n  float const tint_symbol = tint_symbol_1;\n  return;\n"));
+    EXPECT_THAT(gen.result(), HasSubstr("thread float tint_symbol_1 = initializer;\n  float const tint_symbol = tint_symbol_1;\n  return;\n"));
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Workgroup) {

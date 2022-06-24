@@ -7,7 +7,7 @@ void unused_entry_point() {
 const int A = 1;
 const int _A = 2;
 void f() {
-  int B = 1;
-  int _B = 2;
+  int B = A;
+  int _B = _A;
 }
 

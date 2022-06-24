@@ -79,7 +79,7 @@ void main_1() {
   }
   vec4 x_34 = x_29.vEyePosition;
   vec3 x_38 = vec3(0.0f);
-  viewDirectionW = normalize((vec3(x_34.x, x_34.y, x_34.z) - vec3(0.0f)));
+  viewDirectionW = normalize((vec3(x_34.x, x_34.y, x_34.z) - x_38));
   baseColor = vec4(1.0f);
   vec4 x_52 = x_49.vDiffuseColor;
   diffuseColor = vec3(x_52.x, x_52.y, x_52.z);
@@ -87,11 +87,11 @@ void main_1() {
   alpha = x_60;
   vec3 x_62 = vec3(0.0f);
   vec3 x_64 = vec3(0.0f);
-  normalW = normalize(-(cross(dFdx(vec3(0.0f)), dFdy(vec3(0.0f)))));
+  normalW = normalize(-(cross(dFdx(x_62), dFdy(x_64))));
   uvOffset = vec2(0.0f);
   vec4 x_74 = vec4(0.0f);
   vec4 x_76 = baseColor;
-  vec3 x_78 = (vec3(x_76.x, x_76.y, x_76.z) * vec3(vec4(0.0f).x, vec4(0.0f).y, vec4(0.0f).z));
+  vec3 x_78 = (vec3(x_76.x, x_76.y, x_76.z) * vec3(x_74.x, x_74.y, x_74.z));
   baseColor = vec4(x_78.x, x_78.y, x_78.z, baseColor.w);
   baseAmbientColor = vec3(1.0f);
   glossiness = 0.0f;
