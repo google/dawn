@@ -296,6 +296,9 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineFrontedCache) {
 // Note: This test needs to use more than 1 device since the frontend cache on each device
 //   will prevent going out to the blob cache.
 TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCache) {
+    // TODO(dawn:1471) Re-enable after debugging ASAN failures for D3D12.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsAsan());
+
     // First time should create and write out to the cache.
     {
         wgpu::Device device = CreateDevice();
@@ -324,6 +327,9 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCache) {
 // Tests that pipeline creation hits the cache when using the same pipeline but with explicit
 // layout.
 TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheExplictLayout) {
+    // TODO(dawn:1471) Re-enable after debugging ASAN failures for D3D12.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsAsan());
+
     // First time should create and write out to the cache.
     {
         wgpu::Device device = CreateDevice();
