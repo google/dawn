@@ -388,11 +388,10 @@ bool GeneratorImpl::EmitBitcast(std::ostream& out, const ast::BitcastExpression*
             return false;
         }
     }
-    out << "(";
+    ScopedParen sp(out);
     if (!EmitExpression(out, expr->expr)) {
         return false;
     }
-    out << ")";
     return true;
 }
 
@@ -432,7 +431,7 @@ bool GeneratorImpl::EmitVectorRelational(std::ostream& out, const ast::BinaryExp
         default:
             break;
     }
-    out << "(";
+    ScopedParen sp(out);
     if (!EmitExpression(out, expr->lhs)) {
         return false;
     }
@@ -440,7 +439,6 @@ bool GeneratorImpl::EmitVectorRelational(std::ostream& out, const ast::BinaryExp
     if (!EmitExpression(out, expr->rhs)) {
         return false;
     }
-    out << ")";
     return true;
 }
 
@@ -594,7 +592,7 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
         return EmitFloatModulo(out, expr);
     }
 
-    out << "(";
+    ScopedParen sp(out);
     if (!EmitExpression(out, expr->lhs)) {
         return false;
     }
@@ -670,7 +668,6 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
         return false;
     }
 
-    out << ")";
     return true;
 }
 
@@ -730,7 +727,8 @@ bool GeneratorImpl::EmitFunctionCall(std::ostream& out, const sem::Call* call) {
     auto name = builder_.Symbols().NameFor(ident->symbol);
     auto caller_sym = ident->symbol;
 
-    out << name << "(";
+    out << name;
+    ScopedParen sp(out);
 
     bool first = true;
     for (auto* arg : args) {
@@ -744,7 +742,6 @@ bool GeneratorImpl::EmitFunctionCall(std::ostream& out, const sem::Call* call) {
         }
     }
 
-    out << ")";
     return true;
 }
 
@@ -809,7 +806,8 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
         return false;
     }
 
-    out << name << "(";
+    out << name;
+    ScopedParen sp(out);
 
     bool first = true;
     for (auto* arg : call->Arguments()) {
@@ -823,7 +821,6 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
         }
     }
 
-    out << ")";
     return true;
 }
 
@@ -833,13 +830,12 @@ bool GeneratorImpl::EmitTypeConversion(std::ostream& out,
     if (!EmitType(out, conv->Target(), ast::StorageClass::kNone, ast::Access::kReadWrite, "")) {
         return false;
     }
-    out << "(";
+    ScopedParen sp(out);
 
     if (!EmitExpression(out, call->Arguments()[0]->Declaration())) {
         return false;
     }
 
-    out << ")";
     return true;
 }
 
@@ -1183,7 +1179,9 @@ bool GeneratorImpl::EmitDotCall(std::ostream& out,
         }
     }
 
-    out << fn << "(";
+    out << fn;
+    ScopedParen sp(out);
+
     if (!EmitExpression(out, expr->args[0])) {
         return false;
     }
@@ -1191,7 +1189,6 @@ bool GeneratorImpl::EmitDotCall(std::ostream& out,
     if (!EmitExpression(out, expr->args[1])) {
         return false;
     }
-    out << ")";
     return true;
 }
 
@@ -2352,7 +2349,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
             return false;
         }
         bool first = true;
-        out << "(";
+        ScopedParen sp(out);
         for (auto* member : str->Members()) {
             if (!first) {
                 out << ", ";
@@ -2361,19 +2358,17 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
             }
             EmitZeroValue(out, member->Type());
         }
-        out << ")";
     } else if (auto* array = type->As<sem::Array>()) {
         if (!EmitType(out, type, ast::StorageClass::kNone, ast::Access::kUndefined, "")) {
             return false;
         }
-        out << "(";
+        ScopedParen sp(out);
         for (uint32_t i = 0; i < array->Count(); i++) {
             if (i != 0) {
                 out << ", ";
             }
             EmitZeroValue(out, array->ElemType());
         }
-        out << ")";
     } else {
         diagnostics_.add_error(diag::System::Writer, "Invalid type for zero emission: " +
                                                          type->FriendlyName(builder_.Symbols()));
@@ -2925,13 +2920,11 @@ bool GeneratorImpl::EmitUnaryOp(std::ostream& out, const ast::UnaryOpExpression*
             out << "-";
             break;
     }
-    out << "(";
 
+    ScopedParen sp(out);
     if (!EmitExpression(out, expr->expr)) {
         return false;
     }
-
-    out << ")";
 
     return true;
 }

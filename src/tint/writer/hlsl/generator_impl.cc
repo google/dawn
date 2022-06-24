@@ -3709,9 +3709,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             while (auto* arr = base_type->As<sem::Array>()) {
                 if (arr->IsRuntimeSized()) {
                     TINT_ICE(Writer, diagnostics_)
-                        << "Runtime arrays may only exist in storage buffers, which "
-                           "should "
-                           "have been transformed into a ByteAddressBuffer";
+                        << "Runtime arrays may only exist in storage buffers, which should have "
+                           "been transformed into a ByteAddressBuffer";
                     return false;
                 }
                 sizes.push_back(arr->Count());
