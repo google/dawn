@@ -25,7 +25,10 @@ namespace {
 
 struct ResolverVariableTest : public resolver::TestHelper, public testing::Test {};
 
-TEST_F(ResolverVariableTest, VarDeclWithoutConstructor) {
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Function-scope 'var'
+////////////////////////////////////////////////////////////////////////////////////////////////////
+TEST_F(ResolverVariableTest, LocalVar_NoConstructor) {
     // struct S { i : i32; }
     // alias A = S;
     // fn F(){
@@ -82,7 +85,7 @@ TEST_F(ResolverVariableTest, VarDeclWithoutConstructor) {
     EXPECT_EQ(Sem().Get(a)->Constructor(), nullptr);
 }
 
-TEST_F(ResolverVariableTest, VarDeclWithConstructor) {
+TEST_F(ResolverVariableTest, LocalVar_WithConstructor) {
     // struct S { i : i32; }
     // alias A = S;
     // fn F(){
@@ -131,6 +134,13 @@ TEST_F(ResolverVariableTest, VarDeclWithConstructor) {
     ASSERT_TRUE(TypeOf(s)->Is<sem::Reference>());
     ASSERT_TRUE(TypeOf(a)->Is<sem::Reference>());
 
+    EXPECT_EQ(TypeOf(i)->As<sem::Reference>()->Access(), ast::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(u)->As<sem::Reference>()->Access(), ast::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(f)->As<sem::Reference>()->Access(), ast::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(b)->As<sem::Reference>()->Access(), ast::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(s)->As<sem::Reference>()->Access(), ast::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(a)->As<sem::Reference>()->Access(), ast::Access::kReadWrite);
+
     EXPECT_TRUE(TypeOf(i)->As<sem::Reference>()->StoreType()->Is<sem::I32>());
     EXPECT_TRUE(TypeOf(u)->As<sem::Reference>()->StoreType()->Is<sem::U32>());
     EXPECT_TRUE(TypeOf(f)->As<sem::Reference>()->StoreType()->Is<sem::F32>());
@@ -146,7 +156,191 @@ TEST_F(ResolverVariableTest, VarDeclWithConstructor) {
     EXPECT_EQ(Sem().Get(a)->Constructor()->Declaration(), a_c);
 }
 
-TEST_F(ResolverVariableTest, LetDecl) {
+TEST_F(ResolverVariableTest, LocalVar_ShadowsAlias) {
+    // type a = i32;
+    //
+    // fn F() {
+    //   var a = false;
+    // }
+
+    auto* t = Alias("a", ty.i32());
+    auto* v = Var("a", nullptr, Expr(false));
+    Func("F", {}, ty.void_(), {Decl(v)});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* type_t = Sem().Get(t);
+    auto* local = Sem().Get<sem::LocalVariable>(v);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), type_t);
+}
+
+TEST_F(ResolverVariableTest, LocalVar_ShadowsStruct) {
+    // struct a {
+    //   m : i32;
+    // };
+    //
+    // fn F() {
+    //   var a = true;
+    // }
+
+    auto* t = Structure("a", {Member("m", ty.i32())});
+    auto* v = Var("a", nullptr, Expr(false));
+    Func("F", {}, ty.void_(), {Decl(v)});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* type_t = Sem().Get(t);
+    auto* local = Sem().Get<sem::LocalVariable>(v);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), type_t);
+}
+
+TEST_F(ResolverVariableTest, LocalVar_ShadowsFunction) {
+    // fn a() {
+    //   var a = true;
+    // }
+
+    auto* v = Var("a", nullptr, Expr(false));
+    auto* f = Func("a", {}, ty.void_(), {Decl(v)});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* func = Sem().Get(f);
+    ASSERT_NE(func, nullptr);
+
+    auto* local = Sem().Get<sem::LocalVariable>(v);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), func);
+}
+
+TEST_F(ResolverVariableTest, LocalVar_ShadowsGlobalVar) {
+    // var<private> a : i32;
+    //
+    // fn F() {
+    //   var a = a;
+    // }
+
+    auto* g = Global("a", ty.i32(), ast::StorageClass::kPrivate);
+    auto* v = Var("a", nullptr, Expr("a"));
+    Func("F", {}, ty.void_(), {Decl(v)});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* global = Sem().Get(g);
+    auto* local = Sem().Get<sem::LocalVariable>(v);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), global);
+
+    auto* user_v = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
+    ASSERT_NE(user_v, nullptr);
+    EXPECT_EQ(user_v->Variable(), global);
+}
+
+TEST_F(ResolverVariableTest, LocalVar_ShadowsGlobalLet) {
+    // let a : i32 = 1;
+    //
+    // fn X() {
+    //   var a = (a == 123);
+    // }
+
+    auto* g = GlobalConst("a", ty.i32(), Expr(1_i));
+    auto* v = Var("a", nullptr, Expr("a"));
+    Func("F", {}, ty.void_(), {Decl(v)});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* global = Sem().Get(g);
+    auto* local = Sem().Get<sem::LocalVariable>(v);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), global);
+
+    auto* user_v = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
+    ASSERT_NE(user_v, nullptr);
+    EXPECT_EQ(user_v->Variable(), global);
+}
+
+TEST_F(ResolverVariableTest, LocalVar_ShadowsLocalVar) {
+    // fn F() {
+    //   var a : i32; // x
+    //   {
+    //     var a = a; // y
+    //   }
+    // }
+
+    auto* x = Var("a", ty.i32(), Expr(1_i));
+    auto* y = Var("a", nullptr, Expr("a"));
+    Func("F", {}, ty.void_(), {Decl(x), Block(Decl(y))});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* local_x = Sem().Get<sem::LocalVariable>(x);
+    auto* local_y = Sem().Get<sem::LocalVariable>(y);
+
+    ASSERT_NE(local_x, nullptr);
+    ASSERT_NE(local_y, nullptr);
+    EXPECT_EQ(local_y->Shadows(), local_x);
+
+    auto* user_y = Sem().Get<sem::VariableUser>(local_y->Declaration()->constructor);
+    ASSERT_NE(user_y, nullptr);
+    EXPECT_EQ(user_y->Variable(), local_x);
+}
+
+TEST_F(ResolverVariableTest, LocalVar_ShadowsLocalLet) {
+    // fn F() {
+    //   let a = 1;
+    //   {
+    //     var a = (a == 123);
+    //   }
+    // }
+
+    auto* l = Let("a", ty.i32(), Expr(1_i));
+    auto* v = Var("a", nullptr, Expr("a"));
+    Func("X", {}, ty.void_(), {Decl(l), Block(Decl(v))});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* local_l = Sem().Get<sem::LocalVariable>(l);
+    auto* local_v = Sem().Get<sem::LocalVariable>(v);
+
+    ASSERT_NE(local_l, nullptr);
+    ASSERT_NE(local_v, nullptr);
+    EXPECT_EQ(local_v->Shadows(), local_l);
+
+    auto* user_v = Sem().Get<sem::VariableUser>(local_v->Declaration()->constructor);
+    ASSERT_NE(user_v, nullptr);
+    EXPECT_EQ(user_v->Variable(), local_l);
+}
+
+TEST_F(ResolverVariableTest, LocalVar_ShadowsParam) {
+    // fn F(a : i32) {
+    //   {
+    //     var a = a;
+    //   }
+    // }
+
+    auto* p = Param("a", ty.i32());
+    auto* v = Var("a", nullptr, Expr("a"));
+    Func("X", {p}, ty.void_(), {Block(Decl(v))});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* param = Sem().Get<sem::Parameter>(p);
+    auto* local = Sem().Get<sem::LocalVariable>(v);
+
+    ASSERT_NE(param, nullptr);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), param);
+
+    auto* user_v = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
+    ASSERT_NE(user_v, nullptr);
+    EXPECT_EQ(user_v->Variable(), param);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Function-scope 'let'
+////////////////////////////////////////////////////////////////////////////////////////////////////
+TEST_F(ResolverVariableTest, LocalLet) {
     // struct S { i : i32; }
     // fn F(){
     //   var v : i32;
@@ -212,66 +406,7 @@ TEST_F(ResolverVariableTest, LetDecl) {
     EXPECT_EQ(Sem().Get(p)->Constructor()->Declaration(), p_c);
 }
 
-TEST_F(ResolverVariableTest, DefaultVarStorageClass) {
-    // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
-
-    auto* buf = Structure("S", {Member("m", ty.i32())});
-    auto* function = Var("f", ty.i32());
-    auto* private_ = Global("p", ty.i32(), ast::StorageClass::kPrivate);
-    auto* workgroup = Global("w", ty.i32(), ast::StorageClass::kWorkgroup);
-    auto* uniform = Global("ub", ty.Of(buf), ast::StorageClass::kUniform,
-                           ast::AttributeList{
-                               create<ast::BindingAttribute>(0),
-                               create<ast::GroupAttribute>(0),
-                           });
-    auto* storage = Global("sb", ty.Of(buf), ast::StorageClass::kStorage,
-                           ast::AttributeList{
-                               create<ast::BindingAttribute>(1),
-                               create<ast::GroupAttribute>(0),
-                           });
-    auto* handle = Global("h", ty.depth_texture(ast::TextureDimension::k2d),
-                          ast::AttributeList{
-                              create<ast::BindingAttribute>(2),
-                              create<ast::GroupAttribute>(0),
-                          });
-
-    WrapInFunction(function);
-
-    ASSERT_TRUE(r()->Resolve()) << r()->error();
-
-    ASSERT_TRUE(TypeOf(function)->Is<sem::Reference>());
-    ASSERT_TRUE(TypeOf(private_)->Is<sem::Reference>());
-    ASSERT_TRUE(TypeOf(workgroup)->Is<sem::Reference>());
-    ASSERT_TRUE(TypeOf(uniform)->Is<sem::Reference>());
-    ASSERT_TRUE(TypeOf(storage)->Is<sem::Reference>());
-    ASSERT_TRUE(TypeOf(handle)->Is<sem::Reference>());
-
-    EXPECT_EQ(TypeOf(function)->As<sem::Reference>()->Access(), ast::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(private_)->As<sem::Reference>()->Access(), ast::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(workgroup)->As<sem::Reference>()->Access(), ast::Access::kReadWrite);
-    EXPECT_EQ(TypeOf(uniform)->As<sem::Reference>()->Access(), ast::Access::kRead);
-    EXPECT_EQ(TypeOf(storage)->As<sem::Reference>()->Access(), ast::Access::kRead);
-    EXPECT_EQ(TypeOf(handle)->As<sem::Reference>()->Access(), ast::Access::kRead);
-}
-
-TEST_F(ResolverVariableTest, ExplicitVarStorageClass) {
-    // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
-
-    auto* buf = Structure("S", {Member("m", ty.i32())});
-    auto* storage = Global("sb", ty.Of(buf), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                           ast::AttributeList{
-                               create<ast::BindingAttribute>(1),
-                               create<ast::GroupAttribute>(0),
-                           });
-
-    ASSERT_TRUE(r()->Resolve()) << r()->error();
-
-    ASSERT_TRUE(TypeOf(storage)->Is<sem::Reference>());
-
-    EXPECT_EQ(TypeOf(storage)->As<sem::Reference>()->Access(), ast::Access::kReadWrite);
-}
-
-TEST_F(ResolverVariableTest, LetInheritsAccessFromOriginatingVariable) {
+TEST_F(ResolverVariableTest, LocalLet_InheritsAccessFromOriginatingVariable) {
     // struct Inner {
     //    arr: array<i32, 4>;
     // }
@@ -304,293 +439,248 @@ TEST_F(ResolverVariableTest, LetInheritsAccessFromOriginatingVariable) {
     EXPECT_EQ(TypeOf(ptr)->As<sem::Pointer>()->Access(), ast::Access::kReadWrite);
 }
 
-TEST_F(ResolverVariableTest, LocalShadowsAlias) {
+TEST_F(ResolverVariableTest, LocalLet_ShadowsAlias) {
     // type a = i32;
     //
-    // fn X() {
-    //   var a = false;
-    // }
-    //
-    // fn Y() {
+    // fn F() {
     //   let a = true;
     // }
 
     auto* t = Alias("a", ty.i32());
-    auto* v = Var("a", nullptr, Expr(false));
     auto* l = Let("a", nullptr, Expr(false));
-    Func("X", {}, ty.void_(), {Decl(v)});
-    Func("Y", {}, ty.void_(), {Decl(l)});
+    Func("F", {}, ty.void_(), {Decl(l)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* type_t = Sem().Get(t);
-    auto* local_v = Sem().Get<sem::LocalVariable>(v);
-    auto* local_l = Sem().Get<sem::LocalVariable>(l);
-
-    ASSERT_NE(local_v, nullptr);
-    ASSERT_NE(local_l, nullptr);
-
-    EXPECT_EQ(local_v->Shadows(), type_t);
-    EXPECT_EQ(local_l->Shadows(), type_t);
+    auto* local = Sem().Get<sem::LocalVariable>(l);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), type_t);
 }
 
-TEST_F(ResolverVariableTest, LocalShadowsStruct) {
+TEST_F(ResolverVariableTest, LocalLet_ShadowsStruct) {
     // struct a {
     //   m : i32;
     // };
     //
-    // fn X() {
-    //   var a = true;
-    // }
-    //
-    // fn Y() {
+    // fn F() {
     //   let a = false;
     // }
 
     auto* t = Structure("a", {Member("m", ty.i32())});
-    auto* v = Var("a", nullptr, Expr(false));
     auto* l = Let("a", nullptr, Expr(false));
-    Func("X", {}, ty.void_(), {Decl(v)});
-    Func("Y", {}, ty.void_(), {Decl(l)});
+    Func("F", {}, ty.void_(), {Decl(l)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* type_t = Sem().Get(t);
-    auto* local_v = Sem().Get<sem::LocalVariable>(v);
-    auto* local_l = Sem().Get<sem::LocalVariable>(l);
-
-    ASSERT_NE(local_v, nullptr);
-    ASSERT_NE(local_l, nullptr);
-
-    EXPECT_EQ(local_v->Shadows(), type_t);
-    EXPECT_EQ(local_l->Shadows(), type_t);
+    auto* local = Sem().Get<sem::LocalVariable>(l);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), type_t);
 }
 
-TEST_F(ResolverVariableTest, LocalShadowsFunction) {
+TEST_F(ResolverVariableTest, LocalLet_ShadowsFunction) {
     // fn a() {
-    //   var a = true;
-    // }
-    //
-    // fn b() {
-    //   let b = false;
+    //   let a = false;
     // }
 
-    auto* v = Var("a", nullptr, Expr(false));
-    auto* l = Let("b", nullptr, Expr(false));
-    auto* fa = Func("a", {}, ty.void_(), {Decl(v)});
-    auto* fb = Func("b", {}, ty.void_(), {Decl(l)});
+    auto* l = Let("a", nullptr, Expr(false));
+    auto* fb = Func("a", {}, ty.void_(), {Decl(l)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* local_v = Sem().Get<sem::LocalVariable>(v);
-    auto* local_l = Sem().Get<sem::LocalVariable>(l);
-    auto* func_a = Sem().Get(fa);
-    auto* func_b = Sem().Get(fb);
+    auto* func = Sem().Get(fb);
+    ASSERT_NE(func, nullptr);
 
-    ASSERT_NE(local_v, nullptr);
-    ASSERT_NE(local_l, nullptr);
-    ASSERT_NE(func_a, nullptr);
-    ASSERT_NE(func_b, nullptr);
-
-    EXPECT_EQ(local_v->Shadows(), func_a);
-    EXPECT_EQ(local_l->Shadows(), func_b);
+    auto* local = Sem().Get<sem::LocalVariable>(l);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), func);
 }
 
-TEST_F(ResolverVariableTest, LocalShadowsGlobalVar) {
+TEST_F(ResolverVariableTest, LocalLet_ShadowsGlobalVar) {
     // var<private> a : i32;
     //
-    // fn X() {
-    //   var a = a;
-    // }
-    //
-    // fn Y() {
+    // fn F() {
     //   let a = a;
     // }
 
     auto* g = Global("a", ty.i32(), ast::StorageClass::kPrivate);
-    auto* v = Var("a", nullptr, Expr("a"));
     auto* l = Let("a", nullptr, Expr("a"));
-    Func("X", {}, ty.void_(), {Decl(v)});
-    Func("Y", {}, ty.void_(), {Decl(l)});
+    Func("F", {}, ty.void_(), {Decl(l)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* global = Sem().Get(g);
-    auto* local_v = Sem().Get<sem::LocalVariable>(v);
-    auto* local_l = Sem().Get<sem::LocalVariable>(l);
+    auto* local = Sem().Get<sem::LocalVariable>(l);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), global);
 
-    ASSERT_NE(local_v, nullptr);
-    ASSERT_NE(local_l, nullptr);
-
-    EXPECT_EQ(local_v->Shadows(), global);
-    EXPECT_EQ(local_l->Shadows(), global);
-
-    auto* user_v = Sem().Get<sem::VariableUser>(local_v->Declaration()->constructor);
-    auto* user_l = Sem().Get<sem::VariableUser>(local_l->Declaration()->constructor);
-
-    ASSERT_NE(user_v, nullptr);
-    ASSERT_NE(user_l, nullptr);
-
-    EXPECT_EQ(user_v->Variable(), global);
-    EXPECT_EQ(user_l->Variable(), global);
+    auto* user = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
+    ASSERT_NE(user, nullptr);
+    EXPECT_EQ(user->Variable(), global);
 }
 
-TEST_F(ResolverVariableTest, LocalShadowsGlobalLet) {
+TEST_F(ResolverVariableTest, LocalLet_ShadowsGlobalLet) {
     // let a : i32 = 1;
     //
-    // fn X() {
-    //   var a = (a == 123);
-    // }
-    //
-    // fn Y() {
+    // fn F() {
     //   let a = (a == 321);
     // }
 
     auto* g = GlobalConst("a", ty.i32(), Expr(1_i));
-    auto* v = Var("a", nullptr, Expr("a"));
     auto* l = Let("a", nullptr, Expr("a"));
-    Func("X", {}, ty.void_(), {Decl(v)});
-    Func("Y", {}, ty.void_(), {Decl(l)});
+    Func("F", {}, ty.void_(), {Decl(l)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* global = Sem().Get(g);
-    auto* local_v = Sem().Get<sem::LocalVariable>(v);
-    auto* local_l = Sem().Get<sem::LocalVariable>(l);
+    auto* local = Sem().Get<sem::LocalVariable>(l);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), global);
 
-    ASSERT_NE(local_v, nullptr);
-    ASSERT_NE(local_l, nullptr);
-
-    EXPECT_EQ(local_v->Shadows(), global);
-    EXPECT_EQ(local_l->Shadows(), global);
-
-    auto* user_v = Sem().Get<sem::VariableUser>(local_v->Declaration()->constructor);
-    auto* user_l = Sem().Get<sem::VariableUser>(local_l->Declaration()->constructor);
-
-    ASSERT_NE(user_v, nullptr);
-    ASSERT_NE(user_l, nullptr);
-
-    EXPECT_EQ(user_v->Variable(), global);
-    EXPECT_EQ(user_l->Variable(), global);
+    auto* user = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
+    ASSERT_NE(user, nullptr);
+    EXPECT_EQ(user->Variable(), global);
 }
 
-TEST_F(ResolverVariableTest, LocalShadowsLocalVar) {
-    // fn X() {
+TEST_F(ResolverVariableTest, LocalLet_ShadowsLocalVar) {
+    // fn F() {
     //   var a : i32;
-    //   {
-    //     var a = a;
-    //   }
     //   {
     //     let a = a;
     //   }
     // }
 
-    auto* s = Var("a", ty.i32(), Expr(1_i));
-    auto* v = Var("a", nullptr, Expr("a"));
+    auto* v = Var("a", ty.i32(), Expr(1_i));
     auto* l = Let("a", nullptr, Expr("a"));
-    Func("X", {}, ty.void_(), {Decl(s), Block(Decl(v)), Block(Decl(l))});
+    Func("F", {}, ty.void_(), {Decl(v), Block(Decl(l))});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* local_s = Sem().Get<sem::LocalVariable>(s);
     auto* local_v = Sem().Get<sem::LocalVariable>(v);
     auto* local_l = Sem().Get<sem::LocalVariable>(l);
 
-    ASSERT_NE(local_s, nullptr);
     ASSERT_NE(local_v, nullptr);
     ASSERT_NE(local_l, nullptr);
+    EXPECT_EQ(local_l->Shadows(), local_v);
 
-    EXPECT_EQ(local_v->Shadows(), local_s);
-    EXPECT_EQ(local_l->Shadows(), local_s);
-
-    auto* user_v = Sem().Get<sem::VariableUser>(local_v->Declaration()->constructor);
-    auto* user_l = Sem().Get<sem::VariableUser>(local_l->Declaration()->constructor);
-
-    ASSERT_NE(user_v, nullptr);
-    ASSERT_NE(user_l, nullptr);
-
-    EXPECT_EQ(user_v->Variable(), local_s);
-    EXPECT_EQ(user_l->Variable(), local_s);
+    auto* user = Sem().Get<sem::VariableUser>(local_l->Declaration()->constructor);
+    ASSERT_NE(user, nullptr);
+    EXPECT_EQ(user->Variable(), local_v);
 }
 
-TEST_F(ResolverVariableTest, LocalShadowsLocalLet) {
+TEST_F(ResolverVariableTest, LocalLet_ShadowsLocalLet) {
     // fn X() {
-    //   let a = 1;
+    //   let a = 1; // x
     //   {
-    //     var a = (a == 123);
-    //   }
-    //   {
-    //     let a = (a == 321);
+    //     let a = (a == 321); // y
     //   }
     // }
 
-    auto* s = Let("a", ty.i32(), Expr(1_i));
-    auto* v = Var("a", nullptr, Expr("a"));
-    auto* l = Let("a", nullptr, Expr("a"));
-    Func("X", {}, ty.void_(), {Decl(s), Block(Decl(v)), Block(Decl(l))});
+    auto* x = Let("a", ty.i32(), Expr(1_i));
+    auto* y = Let("a", nullptr, Expr("a"));
+    Func("X", {}, ty.void_(), {Decl(x), Block(Decl(y))});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    auto* local_s = Sem().Get<sem::LocalVariable>(s);
-    auto* local_v = Sem().Get<sem::LocalVariable>(v);
-    auto* local_l = Sem().Get<sem::LocalVariable>(l);
+    auto* local_x = Sem().Get<sem::LocalVariable>(x);
+    auto* local_y = Sem().Get<sem::LocalVariable>(y);
 
-    ASSERT_NE(local_s, nullptr);
-    ASSERT_NE(local_v, nullptr);
-    ASSERT_NE(local_l, nullptr);
+    ASSERT_NE(local_x, nullptr);
+    ASSERT_NE(local_y, nullptr);
+    EXPECT_EQ(local_y->Shadows(), local_x);
 
-    EXPECT_EQ(local_v->Shadows(), local_s);
-    EXPECT_EQ(local_l->Shadows(), local_s);
-
-    auto* user_v = Sem().Get<sem::VariableUser>(local_v->Declaration()->constructor);
-    auto* user_l = Sem().Get<sem::VariableUser>(local_l->Declaration()->constructor);
-
-    ASSERT_NE(user_v, nullptr);
-    ASSERT_NE(user_l, nullptr);
-
-    EXPECT_EQ(user_v->Variable(), local_s);
-    EXPECT_EQ(user_l->Variable(), local_s);
+    auto* user = Sem().Get<sem::VariableUser>(local_y->Declaration()->constructor);
+    ASSERT_NE(user, nullptr);
+    EXPECT_EQ(user->Variable(), local_x);
 }
 
-TEST_F(ResolverVariableTest, LocalShadowsParam) {
+TEST_F(ResolverVariableTest, LocalLet_ShadowsParam) {
     // fn F(a : i32) {
-    //   {
-    //     var a = a;
-    //   }
     //   {
     //     let a = a;
     //   }
     // }
 
     auto* p = Param("a", ty.i32());
-    auto* v = Var("a", nullptr, Expr("a"));
     auto* l = Let("a", nullptr, Expr("a"));
-    Func("X", {p}, ty.void_(), {Block(Decl(v)), Block(Decl(l))});
+    Func("X", {p}, ty.void_(), {Block(Decl(l))});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* param = Sem().Get<sem::Parameter>(p);
-    auto* local_v = Sem().Get<sem::LocalVariable>(v);
-    auto* local_l = Sem().Get<sem::LocalVariable>(l);
+    auto* local = Sem().Get<sem::LocalVariable>(l);
 
     ASSERT_NE(param, nullptr);
-    ASSERT_NE(local_v, nullptr);
-    ASSERT_NE(local_l, nullptr);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), param);
 
-    EXPECT_EQ(local_v->Shadows(), param);
-    EXPECT_EQ(local_l->Shadows(), param);
-
-    auto* user_v = Sem().Get<sem::VariableUser>(local_v->Declaration()->constructor);
-    auto* user_l = Sem().Get<sem::VariableUser>(local_l->Declaration()->constructor);
-
-    ASSERT_NE(user_v, nullptr);
-    ASSERT_NE(user_l, nullptr);
-
-    EXPECT_EQ(user_v->Variable(), param);
-    EXPECT_EQ(user_l->Variable(), param);
+    auto* user = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
+    ASSERT_NE(user, nullptr);
+    EXPECT_EQ(user->Variable(), param);
 }
 
-TEST_F(ResolverVariableTest, ParamShadowsFunction) {
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Module-scope 'var'
+////////////////////////////////////////////////////////////////////////////////////////////////////
+TEST_F(ResolverVariableTest, GlobalVar_StorageClass) {
+    // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
+
+    auto* buf = Structure("S", {Member("m", ty.i32())});
+    auto* private_ = Global("p", ty.i32(), ast::StorageClass::kPrivate);
+    auto* workgroup = Global("w", ty.i32(), ast::StorageClass::kWorkgroup);
+    auto* uniform = Global("ub", ty.Of(buf), ast::StorageClass::kUniform,
+                           ast::AttributeList{
+                               create<ast::BindingAttribute>(0),
+                               create<ast::GroupAttribute>(0),
+                           });
+    auto* storage = Global("sb", ty.Of(buf), ast::StorageClass::kStorage,
+                           ast::AttributeList{
+                               create<ast::BindingAttribute>(1),
+                               create<ast::GroupAttribute>(0),
+                           });
+    auto* handle = Global("h", ty.depth_texture(ast::TextureDimension::k2d),
+                          ast::AttributeList{
+                              create<ast::BindingAttribute>(2),
+                              create<ast::GroupAttribute>(0),
+                          });
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_TRUE(TypeOf(private_)->Is<sem::Reference>());
+    ASSERT_TRUE(TypeOf(workgroup)->Is<sem::Reference>());
+    ASSERT_TRUE(TypeOf(uniform)->Is<sem::Reference>());
+    ASSERT_TRUE(TypeOf(storage)->Is<sem::Reference>());
+    ASSERT_TRUE(TypeOf(handle)->Is<sem::Reference>());
+
+    EXPECT_EQ(TypeOf(private_)->As<sem::Reference>()->Access(), ast::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(workgroup)->As<sem::Reference>()->Access(), ast::Access::kReadWrite);
+    EXPECT_EQ(TypeOf(uniform)->As<sem::Reference>()->Access(), ast::Access::kRead);
+    EXPECT_EQ(TypeOf(storage)->As<sem::Reference>()->Access(), ast::Access::kRead);
+    EXPECT_EQ(TypeOf(handle)->As<sem::Reference>()->Access(), ast::Access::kRead);
+}
+
+TEST_F(ResolverVariableTest, GlobalVar_ExplicitStorageClass) {
+    // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
+
+    auto* buf = Structure("S", {Member("m", ty.i32())});
+    auto* storage = Global("sb", ty.Of(buf), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+                           ast::AttributeList{
+                               create<ast::BindingAttribute>(1),
+                               create<ast::GroupAttribute>(0),
+                           });
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_TRUE(TypeOf(storage)->Is<sem::Reference>());
+
+    EXPECT_EQ(TypeOf(storage)->As<sem::Reference>()->Access(), ast::Access::kReadWrite);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Function parameter
+////////////////////////////////////////////////////////////////////////////////////////////////////
+TEST_F(ResolverVariableTest, Param_ShadowsFunction) {
     // fn a(a : bool) {
     // }
 
@@ -608,7 +698,7 @@ TEST_F(ResolverVariableTest, ParamShadowsFunction) {
     EXPECT_EQ(param->Shadows(), func);
 }
 
-TEST_F(ResolverVariableTest, ParamShadowsGlobalVar) {
+TEST_F(ResolverVariableTest, Param_ShadowsGlobalVar) {
     // var<private> a : i32;
     //
     // fn F(a : bool) {
@@ -629,7 +719,7 @@ TEST_F(ResolverVariableTest, ParamShadowsGlobalVar) {
     EXPECT_EQ(param->Shadows(), global);
 }
 
-TEST_F(ResolverVariableTest, ParamShadowsGlobalLet) {
+TEST_F(ResolverVariableTest, Param_ShadowsGlobalLet) {
     // let a : i32 = 1;
     //
     // fn F(a : bool) {
@@ -650,7 +740,7 @@ TEST_F(ResolverVariableTest, ParamShadowsGlobalLet) {
     EXPECT_EQ(param->Shadows(), global);
 }
 
-TEST_F(ResolverVariableTest, ParamShadowsAlias) {
+TEST_F(ResolverVariableTest, Param_ShadowsAlias) {
     // type a = i32;
     //
     // fn F(a : a) {
