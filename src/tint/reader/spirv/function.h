@@ -1060,13 +1060,18 @@ class FunctionEmitter {
     /// Emits a texture builtin function call for a SPIR-V instruction that
     /// accesses an image or sampled image.
     /// @param inst the SPIR-V instruction
-    /// @returns an expression
+    /// @returns true on success, false on error
     bool EmitImageAccess(const spvtools::opt::Instruction& inst);
 
     /// Emits statements to implement a SPIR-V image query.
     /// @param inst the SPIR-V instruction
     /// @returns an expression
     bool EmitImageQuery(const spvtools::opt::Instruction& inst);
+
+    /// Emits statements to implement a SPIR-V atomic op.
+    /// @param inst the SPIR-V instruction
+    /// @returns true on success, false on error
+    bool EmitAtomicOp(const spvtools::opt::Instruction& inst);
 
     /// Converts the given texel to match the type required for the storage
     /// texture with the given type. In WGSL the texel value is always provided

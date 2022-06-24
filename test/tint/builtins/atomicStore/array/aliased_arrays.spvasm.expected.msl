@@ -1,0 +1,74 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_array_wrapper {
+  uint arr[1];
+};
+
+struct tint_array_wrapper_1 {
+  tint_array_wrapper arr[2];
+};
+
+struct tint_array_wrapper_2 {
+  tint_array_wrapper_1 arr[3];
+};
+
+struct tint_array_wrapper_5 {
+  atomic_uint arr[1];
+};
+
+struct tint_array_wrapper_4 {
+  tint_array_wrapper_5 arr[2];
+};
+
+struct tint_array_wrapper_3 {
+  tint_array_wrapper_4 arr[3];
+};
+
+void compute_main_inner(uint local_invocation_index, threadgroup tint_array_wrapper_3* const tint_symbol) {
+  uint idx = 0u;
+  idx = local_invocation_index;
+  while (true) {
+    uint const x_25 = idx;
+    if (!((x_25 < 6u))) {
+      break;
+    }
+    uint const x_31 = idx;
+    uint const x_33 = idx;
+    uint const x_35 = idx;
+    atomic_store_explicit(&((*(tint_symbol)).arr[(x_31 / 2u)].arr[(x_33 % 2u)].arr[(x_35 % 1u)]), 0u, memory_order_relaxed);
+    {
+      uint const x_42 = idx;
+      idx = (x_42 + 1u);
+    }
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  atomic_store_explicit(&((*(tint_symbol)).arr[2].arr[1].arr[0]), 1u, memory_order_relaxed);
+  return;
+}
+
+void compute_main_1(thread uint* const tint_symbol_1, threadgroup tint_array_wrapper_3* const tint_symbol_2) {
+  uint const x_57 = *(tint_symbol_1);
+  compute_main_inner(x_57, tint_symbol_2);
+  return;
+}
+
+void compute_main_inner_1(uint local_invocation_index_1_param, threadgroup tint_array_wrapper_3* const tint_symbol_3, thread uint* const tint_symbol_4) {
+  for(uint idx_1 = local_invocation_index_1_param; (idx_1 < 6u); idx_1 = (idx_1 + 1u)) {
+    uint const i = (idx_1 / 2u);
+    uint const i_1 = (idx_1 % 2u);
+    uint const i_2 = (idx_1 % 1u);
+    atomic_store_explicit(&((*(tint_symbol_3)).arr[i].arr[i_1].arr[i_2]), 0u, memory_order_relaxed);
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  *(tint_symbol_4) = local_invocation_index_1_param;
+  compute_main_1(tint_symbol_4, tint_symbol_3);
+}
+
+kernel void compute_main(uint local_invocation_index_1_param [[thread_index_in_threadgroup]]) {
+  threadgroup tint_array_wrapper_3 tint_symbol_5;
+  thread uint tint_symbol_6 = 0u;
+  compute_main_inner_1(local_invocation_index_1_param, &(tint_symbol_5), &(tint_symbol_6));
+  return;
+}
+

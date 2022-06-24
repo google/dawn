@@ -22,6 +22,7 @@
 #include "src/tint/transform/manager.h"
 #include "src/tint/transform/remove_unreachable_statements.h"
 #include "src/tint/transform/simplify_pointers.h"
+#include "src/tint/transform/spirv_atomic.h"
 #include "src/tint/transform/unshadow.h"
 
 namespace tint::reader::spirv {
@@ -55,6 +56,7 @@ Program Parse(const std::vector<uint32_t>& input) {
     manager.Add<transform::DecomposeStridedMatrix>();
     manager.Add<transform::DecomposeStridedArray>();
     manager.Add<transform::RemoveUnreachableStatements>();
+    manager.Add<transform::SpirvAtomic>();
     return manager.Run(&program).program;
 }
 

@@ -450,6 +450,8 @@ set(TINT_LIB_SRCS
   transform/simplify_pointers.h
   transform/single_entry_point.cc
   transform/single_entry_point.h
+  transform/spirv_atomic.cc
+  transform/spirv_atomic.h
   transform/transform.cc
   transform/transform.h
   transform/unshadow.cc
@@ -1114,6 +1116,7 @@ if(TINT_BUILD_TESTS)
       transform/robustness_test.cc
       transform/simplify_pointers_test.cc
       transform/single_entry_point_test.cc
+      transform/spirv_atomic_test.cc
       transform/test_helper.h
       transform/unshadow_test.cc
       transform/unwind_discard_functions_test.cc

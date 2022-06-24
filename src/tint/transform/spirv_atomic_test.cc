@@ -1,0 +1,1022 @@
+// Copyright 2022 The Tint Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#include "src/tint/transform/spirv_atomic.h"
+
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "src/tint/reader/wgsl/parser_impl.h"
+#include "src/tint/transform/test_helper.h"
+
+using namespace tint::number_suffixes;  // NOLINT
+
+namespace tint::transform {
+namespace {
+
+class SpirvAtomicTest : public TransformTest {
+  public:
+    Output Run(std::string in) {
+        auto file = std::make_unique<Source::File>("test", std::move(in));
+        auto parser = reader::wgsl::ParserImpl(file.get());
+        parser.Parse();
+
+        auto& b = parser.builder();
+
+        sem::BuiltinType two_params[] = {
+            sem::BuiltinType::kAtomicExchange, sem::BuiltinType::kAtomicAdd,
+            sem::BuiltinType::kAtomicSub,      sem::BuiltinType::kAtomicMin,
+            sem::BuiltinType::kAtomicMax,      sem::BuiltinType::kAtomicAnd,
+            sem::BuiltinType::kAtomicOr,       sem::BuiltinType::kAtomicXor,
+        };
+        for (auto& a : two_params) {
+            b.Func(std::string{"stub_"} + sem::str(a) + "_u32",
+                   {
+                       b.Param("p0", b.ty.u32()),
+                       b.Param("p1", b.ty.u32()),
+                   },
+                   b.ty.u32(), {b.Return(0_u)},
+                   {b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), a)});
+            b.Func(std::string{"stub_"} + sem::str(a) + "_i32",
+                   {
+                       b.Param("p0", b.ty.i32()),
+                       b.Param("p1", b.ty.i32()),
+                   },
+                   b.ty.i32(), {b.Return(0_i)},
+                   {b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), a)});
+        }
+
+        b.Func("stub_atomicLoad_u32",
+               {
+                   b.Param("p0", b.ty.u32()),
+               },
+               b.ty.u32(), {b.Return(0_u)},
+               {
+                   b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), sem::BuiltinType::kAtomicLoad),
+               });
+        b.Func("stub_atomicLoad_i32",
+               {
+                   b.Param("p0", b.ty.i32()),
+               },
+               b.ty.i32(), {b.Return(0_i)},
+               {
+                   b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), sem::BuiltinType::kAtomicLoad),
+               });
+
+        b.Func("stub_atomicStore_u32",
+               {
+                   b.Param("p0", b.ty.u32()),
+                   b.Param("p1", b.ty.u32()),
+               },
+               b.ty.void_(), {},
+               {
+                   b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), sem::BuiltinType::kAtomicStore),
+               });
+        b.Func("stub_atomicStore_i32",
+               {
+                   b.Param("p0", b.ty.i32()),
+                   b.Param("p1", b.ty.i32()),
+               },
+               b.ty.void_(), {},
+               {
+                   b.ASTNodes().Create<SpirvAtomic::Stub>(b.ID(), sem::BuiltinType::kAtomicStore),
+               });
+
+        b.Func("stub_atomic_compare_exchange_weak_u32",
+               {
+                   b.Param("p0", b.ty.u32()),
+                   b.Param("p1", b.ty.u32()),
+                   b.Param("p2", b.ty.u32()),
+               },
+               b.ty.u32(), {b.Return(0_u)},
+               {
+                   b.ASTNodes().Create<SpirvAtomic::Stub>(
+                       b.ID(), sem::BuiltinType::kAtomicCompareExchangeWeak),
+               });
+        b.Func("stub_atomic_compare_exchange_weak_i32",
+               {b.Param("p0", b.ty.i32()), b.Param("p1", b.ty.i32()), b.Param("p2", b.ty.i32())},
+               b.ty.i32(), {b.Return(0_i)},
+               {
+                   b.ASTNodes().Create<SpirvAtomic::Stub>(
+                       b.ID(), sem::BuiltinType::kAtomicCompareExchangeWeak),
+               });
+
+        // Keep this pointer alive after Transform() returns
+        files_.emplace_back(std::move(file));
+
+        return TransformTest::Run<SpirvAtomic>(Program(std::move(b)));
+    }
+
+  private:
+    std::vector<std::unique_ptr<Source::File>> files_;
+};
+
+TEST_F(SpirvAtomicTest, ArrayOfU32) {
+    auto* src = R"(
+var<workgroup> wg : array<u32, 4>;
+
+fn f() {
+  stub_atomicStore_u32(wg[1], 1u);
+}
+)";
+
+    auto* expect = R"(
+var<workgroup> wg : array<atomic<u32>, 4u>;
+
+fn f() {
+  atomicStore(&(wg[1]), 1u);
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, ArraysOfU32) {
+    auto* src = R"(
+var<workgroup> wg : array<array<array<u32, 1>, 2>, 3>;
+
+fn f() {
+  stub_atomicStore_u32(wg[2][1][0], 1u);
+}
+)";
+
+    auto* expect = R"(
+var<workgroup> wg : array<array<array<atomic<u32>, 1u>, 2u>, 3u>;
+
+fn f() {
+  atomicStore(&(wg[2][1][0]), 1u);
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, AliasedArraysOfU32) {
+    auto* src = R"(
+type A0 = u32;
+
+type A1 = array<A0, 1>;
+
+type A2 = array<A1, 2>;
+
+type A3 = array<A2, 3>;
+
+var<workgroup> wg : A3;
+
+fn f() {
+  stub_atomicStore_u32(wg[2][1][0], 1u);
+}
+)";
+
+    auto* expect = R"(
+type A0 = u32;
+
+type A1 = array<A0, 1>;
+
+type A2 = array<A1, 2>;
+
+type A3 = array<A2, 3>;
+
+var<workgroup> wg : array<array<array<atomic<u32>, 1u>, 2u>, 3u>;
+
+fn f() {
+  atomicStore(&(wg[2][1][0]), 1u);
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, FlatStructSingleAtomic) {
+    auto* src = R"(
+struct S {
+  a : u32,
+}
+
+var<workgroup> wg : S;
+
+fn f() {
+  stub_atomicStore_u32(wg.a, 1u);
+}
+)";
+
+    auto* expect = R"(
+struct S_atomic {
+  a : atomic<u32>,
+}
+
+struct S {
+  a : u32,
+}
+
+var<workgroup> wg : S_atomic;
+
+fn f() {
+  atomicStore(&(wg.a), 1u);
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, FlatStructMultipleAtomic) {
+    auto* src = R"(
+struct S {
+  a : u32,
+  b : i32,
+}
+
+var<workgroup> wg : S;
+
+fn f1() {
+  stub_atomicStore_u32(wg.a, 1u);
+}
+
+fn f2() {
+  stub_atomicStore_i32(wg.b, 2i);
+}
+)";
+
+    auto* expect = R"(
+struct S_atomic {
+  a : atomic<u32>,
+  b : atomic<i32>,
+}
+
+struct S {
+  a : u32,
+  b : i32,
+}
+
+var<workgroup> wg : S_atomic;
+
+fn f1() {
+  atomicStore(&(wg.a), 1u);
+}
+
+fn f2() {
+  atomicStore(&(wg.b), 2i);
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, NestedStruct) {
+    auto* src = R"(
+struct S0 {
+  a : u32,
+  b : i32,
+  c : u32,
+}
+
+struct S1 {
+  a : i32,
+  b : u32,
+  c : S0,
+}
+
+struct S2 {
+  a : i32,
+  b : S1,
+  c : u32,
+}
+
+var<workgroup> wg : S2;
+
+fn f() {
+  stub_atomicStore_u32(wg.b.c.a, 1u);
+}
+)";
+
+    auto* expect = R"(
+struct S0_atomic {
+  a : atomic<u32>,
+  b : i32,
+  c : u32,
+}
+
+struct S0 {
+  a : u32,
+  b : i32,
+  c : u32,
+}
+
+struct S1_atomic {
+  a : i32,
+  b : u32,
+  c : S0_atomic,
+}
+
+struct S1 {
+  a : i32,
+  b : u32,
+  c : S0,
+}
+
+struct S2_atomic {
+  a : i32,
+  b : S1_atomic,
+  c : u32,
+}
+
+struct S2 {
+  a : i32,
+  b : S1,
+  c : u32,
+}
+
+var<workgroup> wg : S2_atomic;
+
+fn f() {
+  atomicStore(&(wg.b.c.a), 1u);
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, ArrayOfStruct) {
+    auto* src = R"(
+struct S {
+  a : u32,
+  b : i32,
+  c : u32,
+}
+
+@group(0) @binding(1) var<storage, read_write> arr : array<S>;
+
+fn f() {
+  stub_atomicStore_i32(arr[4].b, 1i);
+}
+)";
+
+    auto* expect = R"(
+struct S_atomic {
+  a : u32,
+  b : atomic<i32>,
+  c : u32,
+}
+
+struct S {
+  a : u32,
+  b : i32,
+  c : u32,
+}
+
+@group(0) @binding(1) var<storage, read_write> arr : array<S_atomic>;
+
+fn f() {
+  atomicStore(&(arr[4].b), 1i);
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, StructOfArray) {
+    auto* src = R"(
+struct S {
+  a : array<i32>,
+}
+
+@group(0) @binding(1) var<storage, read_write> s : S;
+
+fn f() {
+  stub_atomicStore_i32(s.a[4], 1i);
+}
+)";
+
+    auto* expect = R"(
+struct S_atomic {
+  a : array<atomic<i32>>,
+}
+
+struct S {
+  a : array<i32>,
+}
+
+@group(0) @binding(1) var<storage, read_write> s : S_atomic;
+
+fn f() {
+  atomicStore(&(s.a[4]), 1i);
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, ViaPtrLet) {
+    auto* src = R"(
+struct S {
+  i : i32,
+}
+
+@group(0) @binding(1) var<storage, read_write> s : S;
+
+fn f() {
+  let p0 = &(s);
+  let p1 : ptr<storage, i32, read_write> = &((*(p0)).i);
+  stub_atomicStore_i32(*p1, 1i);
+}
+)";
+
+    auto* expect =
+        R"(
+struct S_atomic {
+  i : atomic<i32>,
+}
+
+struct S {
+  i : i32,
+}
+
+@group(0) @binding(1) var<storage, read_write> s : S_atomic;
+
+fn f() {
+  let p0 = &(s);
+  let p1 : ptr<storage, atomic<i32>, read_write> = &((*(p0)).i);
+  atomicStore(&(*(p1)), 1i);
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, StructIsolatedMixedUsage) {
+    auto* src = R"(
+struct S {
+  i : i32,
+}
+
+@group(0) @binding(1) var<storage, read_write> s : S;
+
+fn f() {
+  stub_atomicStore_i32(s.i, 1i);
+}
+
+fn another_usage() {
+  var s : S;
+  let x : i32 = s.i;
+  s.i = 3i;
+}
+)";
+
+    auto* expect =
+        R"(
+struct S_atomic {
+  i : atomic<i32>,
+}
+
+struct S {
+  i : i32,
+}
+
+@group(0) @binding(1) var<storage, read_write> s : S_atomic;
+
+fn f() {
+  atomicStore(&(s.i), 1i);
+}
+
+fn another_usage() {
+  var s : S;
+  let x : i32 = s.i;
+  s.i = 3i;
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+// This sort of mixed usage isn't handled yet. Not sure if we need to just yet.
+// If we don't, then the transform should give sensible diagnostics instead of producing invalid
+// WGSL.
+// TODO(crbug.com/tint/1595)
+TEST_F(SpirvAtomicTest, DISABLED_StructComplexMixedUsage) {
+    auto* src = R"(
+struct S {
+  i : i32,
+}
+
+@group(0) @binding(1) var<storage, read_write> s : S;
+
+fn f() {
+  let x : i32 = s.i;
+  stub_atomicStore_i32(s.i, 1i);
+  s.i = 3i;
+}
+)";
+
+    auto* expect =
+        R"(
+struct S_atomic {
+  i : atomic<i32>,
+}
+
+struct S {
+  i : i32,
+}
+
+@group(0) @binding(1) var<storage, read_write> s : S_atomic;
+
+fn f() {
+  let x : i32 = atomicLoad(&s.i);
+  stub_atomicStore_i32(s.i, 1i);
+  atomicStore(&(s.i), 1i);
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, AtomicLoad) {
+    auto* src = R"(
+var<workgroup> wg_u32 : u32;
+var<workgroup> wg_i32 : i32;
+@group(0) @binding(0) var<storage, read_write> sg_u32 : u32;
+@group(0) @binding(1) var<storage, read_write> sg_i32 : i32;
+
+fn f() {
+  {let r = stub_atomicLoad_u32(wg_u32);}
+  {let r = stub_atomicLoad_i32(wg_i32);}
+  {let r = stub_atomicLoad_u32(sg_u32);}
+  {let r = stub_atomicLoad_i32(sg_i32);}
+}
+)";
+
+    auto* expect =
+        R"(
+var<workgroup> wg_u32 : atomic<u32>;
+
+var<workgroup> wg_i32 : atomic<i32>;
+
+@group(0) @binding(0) var<storage, read_write> sg_u32 : atomic<u32>;
+
+@group(0) @binding(1) var<storage, read_write> sg_i32 : atomic<i32>;
+
+fn f() {
+  {
+    let r = atomicLoad(&(wg_u32));
+  }
+  {
+    let r = atomicLoad(&(wg_i32));
+  }
+  {
+    let r = atomicLoad(&(sg_u32));
+  }
+  {
+    let r = atomicLoad(&(sg_i32));
+  }
+}
+)";
+
+    auto got = Run(src);
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, AtomicExchange) {
+    auto* src = R"(
+var<workgroup> wg_u32 : u32;
+var<workgroup> wg_i32 : i32;
+@group(0) @binding(0) var<storage, read_write> sg_u32 : u32;
+@group(0) @binding(1) var<storage, read_write> sg_i32 : i32;
+
+fn f() {
+  {let r = stub_atomicExchange_u32(wg_u32, 123u);}
+  {let r = stub_atomicExchange_i32(wg_i32, 123i);}
+  {let r = stub_atomicExchange_u32(sg_u32, 123u);}
+  {let r = stub_atomicExchange_i32(sg_i32, 123i);}
+}
+)";
+
+    auto* expect =
+        R"(
+var<workgroup> wg_u32 : atomic<u32>;
+
+var<workgroup> wg_i32 : atomic<i32>;
+
+@group(0) @binding(0) var<storage, read_write> sg_u32 : atomic<u32>;
+
+@group(0) @binding(1) var<storage, read_write> sg_i32 : atomic<i32>;
+
+fn f() {
+  {
+    let r = atomicExchange(&(wg_u32), 123u);
+  }
+  {
+    let r = atomicExchange(&(wg_i32), 123i);
+  }
+  {
+    let r = atomicExchange(&(sg_u32), 123u);
+  }
+  {
+    let r = atomicExchange(&(sg_i32), 123i);
+  }
+}
+)";
+
+    auto got = Run(src);
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, AtomicAdd) {
+    auto* src = R"(
+var<workgroup> wg_u32 : u32;
+var<workgroup> wg_i32 : i32;
+@group(0) @binding(0) var<storage, read_write> sg_u32 : u32;
+@group(0) @binding(1) var<storage, read_write> sg_i32 : i32;
+
+fn f() {
+  {let r = stub_atomicAdd_u32(wg_u32, 123u);}
+  {let r = stub_atomicAdd_i32(wg_i32, 123i);}
+  {let r = stub_atomicAdd_u32(sg_u32, 123u);}
+  {let r = stub_atomicAdd_i32(sg_i32, 123i);}
+}
+)";
+
+    auto* expect =
+        R"(
+var<workgroup> wg_u32 : atomic<u32>;
+
+var<workgroup> wg_i32 : atomic<i32>;
+
+@group(0) @binding(0) var<storage, read_write> sg_u32 : atomic<u32>;
+
+@group(0) @binding(1) var<storage, read_write> sg_i32 : atomic<i32>;
+
+fn f() {
+  {
+    let r = atomicAdd(&(wg_u32), 123u);
+  }
+  {
+    let r = atomicAdd(&(wg_i32), 123i);
+  }
+  {
+    let r = atomicAdd(&(sg_u32), 123u);
+  }
+  {
+    let r = atomicAdd(&(sg_i32), 123i);
+  }
+}
+)";
+
+    auto got = Run(src);
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, AtomicSub) {
+    auto* src = R"(
+var<workgroup> wg_u32 : u32;
+var<workgroup> wg_i32 : i32;
+@group(0) @binding(0) var<storage, read_write> sg_u32 : u32;
+@group(0) @binding(1) var<storage, read_write> sg_i32 : i32;
+
+fn f() {
+  {let r = stub_atomicSub_u32(wg_u32, 123u);}
+  {let r = stub_atomicSub_i32(wg_i32, 123i);}
+  {let r = stub_atomicSub_u32(sg_u32, 123u);}
+  {let r = stub_atomicSub_i32(sg_i32, 123i);}
+}
+)";
+
+    auto* expect =
+        R"(
+var<workgroup> wg_u32 : atomic<u32>;
+
+var<workgroup> wg_i32 : atomic<i32>;
+
+@group(0) @binding(0) var<storage, read_write> sg_u32 : atomic<u32>;
+
+@group(0) @binding(1) var<storage, read_write> sg_i32 : atomic<i32>;
+
+fn f() {
+  {
+    let r = atomicSub(&(wg_u32), 123u);
+  }
+  {
+    let r = atomicSub(&(wg_i32), 123i);
+  }
+  {
+    let r = atomicSub(&(sg_u32), 123u);
+  }
+  {
+    let r = atomicSub(&(sg_i32), 123i);
+  }
+}
+)";
+
+    auto got = Run(src);
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, AtomicMin) {
+    auto* src = R"(
+var<workgroup> wg_u32 : u32;
+var<workgroup> wg_i32 : i32;
+@group(0) @binding(0) var<storage, read_write> sg_u32 : u32;
+@group(0) @binding(1) var<storage, read_write> sg_i32 : i32;
+
+fn f() {
+  {let r = stub_atomicMin_u32(wg_u32, 123u);}
+  {let r = stub_atomicMin_i32(wg_i32, 123i);}
+  {let r = stub_atomicMin_u32(sg_u32, 123u);}
+  {let r = stub_atomicMin_i32(sg_i32, 123i);}
+}
+)";
+
+    auto* expect =
+        R"(
+var<workgroup> wg_u32 : atomic<u32>;
+
+var<workgroup> wg_i32 : atomic<i32>;
+
+@group(0) @binding(0) var<storage, read_write> sg_u32 : atomic<u32>;
+
+@group(0) @binding(1) var<storage, read_write> sg_i32 : atomic<i32>;
+
+fn f() {
+  {
+    let r = atomicMin(&(wg_u32), 123u);
+  }
+  {
+    let r = atomicMin(&(wg_i32), 123i);
+  }
+  {
+    let r = atomicMin(&(sg_u32), 123u);
+  }
+  {
+    let r = atomicMin(&(sg_i32), 123i);
+  }
+}
+)";
+
+    auto got = Run(src);
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, AtomicMax) {
+    auto* src = R"(
+var<workgroup> wg_u32 : u32;
+var<workgroup> wg_i32 : i32;
+@group(0) @binding(0) var<storage, read_write> sg_u32 : u32;
+@group(0) @binding(1) var<storage, read_write> sg_i32 : i32;
+
+fn f() {
+  {let r = stub_atomicMax_u32(wg_u32, 123u);}
+  {let r = stub_atomicMax_i32(wg_i32, 123i);}
+  {let r = stub_atomicMax_u32(sg_u32, 123u);}
+  {let r = stub_atomicMax_i32(sg_i32, 123i);}
+}
+)";
+
+    auto* expect =
+        R"(
+var<workgroup> wg_u32 : atomic<u32>;
+
+var<workgroup> wg_i32 : atomic<i32>;
+
+@group(0) @binding(0) var<storage, read_write> sg_u32 : atomic<u32>;
+
+@group(0) @binding(1) var<storage, read_write> sg_i32 : atomic<i32>;
+
+fn f() {
+  {
+    let r = atomicMax(&(wg_u32), 123u);
+  }
+  {
+    let r = atomicMax(&(wg_i32), 123i);
+  }
+  {
+    let r = atomicMax(&(sg_u32), 123u);
+  }
+  {
+    let r = atomicMax(&(sg_i32), 123i);
+  }
+}
+)";
+
+    auto got = Run(src);
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, AtomicAnd) {
+    auto* src = R"(
+var<workgroup> wg_u32 : u32;
+var<workgroup> wg_i32 : i32;
+@group(0) @binding(0) var<storage, read_write> sg_u32 : u32;
+@group(0) @binding(1) var<storage, read_write> sg_i32 : i32;
+
+fn f() {
+  {let r = stub_atomicAnd_u32(wg_u32, 123u);}
+  {let r = stub_atomicAnd_i32(wg_i32, 123i);}
+  {let r = stub_atomicAnd_u32(sg_u32, 123u);}
+  {let r = stub_atomicAnd_i32(sg_i32, 123i);}
+}
+)";
+
+    auto* expect =
+        R"(
+var<workgroup> wg_u32 : atomic<u32>;
+
+var<workgroup> wg_i32 : atomic<i32>;
+
+@group(0) @binding(0) var<storage, read_write> sg_u32 : atomic<u32>;
+
+@group(0) @binding(1) var<storage, read_write> sg_i32 : atomic<i32>;
+
+fn f() {
+  {
+    let r = atomicAnd(&(wg_u32), 123u);
+  }
+  {
+    let r = atomicAnd(&(wg_i32), 123i);
+  }
+  {
+    let r = atomicAnd(&(sg_u32), 123u);
+  }
+  {
+    let r = atomicAnd(&(sg_i32), 123i);
+  }
+}
+)";
+
+    auto got = Run(src);
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, AtomicOr) {
+    auto* src = R"(
+var<workgroup> wg_u32 : u32;
+var<workgroup> wg_i32 : i32;
+@group(0) @binding(0) var<storage, read_write> sg_u32 : u32;
+@group(0) @binding(1) var<storage, read_write> sg_i32 : i32;
+
+fn f() {
+  {let r = stub_atomicOr_u32(wg_u32, 123u);}
+  {let r = stub_atomicOr_i32(wg_i32, 123i);}
+  {let r = stub_atomicOr_u32(sg_u32, 123u);}
+  {let r = stub_atomicOr_i32(sg_i32, 123i);}
+}
+)";
+
+    auto* expect =
+        R"(
+var<workgroup> wg_u32 : atomic<u32>;
+
+var<workgroup> wg_i32 : atomic<i32>;
+
+@group(0) @binding(0) var<storage, read_write> sg_u32 : atomic<u32>;
+
+@group(0) @binding(1) var<storage, read_write> sg_i32 : atomic<i32>;
+
+fn f() {
+  {
+    let r = atomicOr(&(wg_u32), 123u);
+  }
+  {
+    let r = atomicOr(&(wg_i32), 123i);
+  }
+  {
+    let r = atomicOr(&(sg_u32), 123u);
+  }
+  {
+    let r = atomicOr(&(sg_i32), 123i);
+  }
+}
+)";
+
+    auto got = Run(src);
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, AtomicXor) {
+    auto* src = R"(
+var<workgroup> wg_u32 : u32;
+var<workgroup> wg_i32 : i32;
+@group(0) @binding(0) var<storage, read_write> sg_u32 : u32;
+@group(0) @binding(1) var<storage, read_write> sg_i32 : i32;
+
+fn f() {
+  {let r = stub_atomicXor_u32(wg_u32, 123u);}
+  {let r = stub_atomicXor_i32(wg_i32, 123i);}
+  {let r = stub_atomicXor_u32(sg_u32, 123u);}
+  {let r = stub_atomicXor_i32(sg_i32, 123i);}
+}
+)";
+
+    auto* expect =
+        R"(
+var<workgroup> wg_u32 : atomic<u32>;
+
+var<workgroup> wg_i32 : atomic<i32>;
+
+@group(0) @binding(0) var<storage, read_write> sg_u32 : atomic<u32>;
+
+@group(0) @binding(1) var<storage, read_write> sg_i32 : atomic<i32>;
+
+fn f() {
+  {
+    let r = atomicXor(&(wg_u32), 123u);
+  }
+  {
+    let r = atomicXor(&(wg_i32), 123i);
+  }
+  {
+    let r = atomicXor(&(sg_u32), 123u);
+  }
+  {
+    let r = atomicXor(&(sg_i32), 123i);
+  }
+}
+)";
+
+    auto got = Run(src);
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, AtomicCompareExchangeWeak) {
+    auto* src = R"(
+var<workgroup> wg_u32 : u32;
+var<workgroup> wg_i32 : i32;
+@group(0) @binding(0) var<storage, read_write> sg_u32 : u32;
+@group(0) @binding(1) var<storage, read_write> sg_i32 : i32;
+
+fn f() {
+  {let r = stub_atomic_compare_exchange_weak_u32(wg_u32, 123u, 456u);}
+  {let r = stub_atomic_compare_exchange_weak_i32(wg_i32, 123i, 456i);}
+  {let r = stub_atomic_compare_exchange_weak_u32(sg_u32, 123u, 456u);}
+  {let r = stub_atomic_compare_exchange_weak_i32(sg_i32, 123i, 456i);}
+}
+)";
+
+    auto* expect =
+        R"(
+var<workgroup> wg_u32 : atomic<u32>;
+
+var<workgroup> wg_i32 : atomic<i32>;
+
+@group(0) @binding(0) var<storage, read_write> sg_u32 : atomic<u32>;
+
+@group(0) @binding(1) var<storage, read_write> sg_i32 : atomic<i32>;
+
+fn f() {
+  {
+    let old_value = atomicCompareExchangeWeak(&(wg_u32), 123u, 456u).old_value;
+    let r = old_value;
+  }
+  {
+    let old_value_2 = atomicCompareExchangeWeak(&(wg_i32), 123i, 456i).old_value;
+    let r = old_value_2;
+  }
+  {
+    let old_value_1 = atomicCompareExchangeWeak(&(sg_u32), 123u, 456u).old_value;
+    let r = old_value_1;
+  }
+  {
+    let old_value_3 = atomicCompareExchangeWeak(&(sg_i32), 123i, 456i).old_value;
+    let r = old_value_3;
+  }
+}
+)";
+
+    auto got = Run(src);
+    EXPECT_EQ(expect, str(got));
+}
+
+}  // namespace
+}  // namespace tint::transform

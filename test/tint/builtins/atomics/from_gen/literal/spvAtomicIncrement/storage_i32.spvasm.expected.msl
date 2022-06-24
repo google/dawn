@@ -1,0 +1,38 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct SB_RW_atomic {
+  /* 0x0000 */ atomic_int arg_0;
+};
+
+struct SB_RW {
+  int arg_0;
+};
+
+void atomicAdd_d32fe4(device SB_RW_atomic* const tint_symbol) {
+  int res = 0;
+  int const x_9 = atomic_fetch_add_explicit(&((*(tint_symbol)).arg_0), 1, memory_order_relaxed);
+  res = x_9;
+  return;
+}
+
+void fragment_main_1(device SB_RW_atomic* const tint_symbol_1) {
+  atomicAdd_d32fe4(tint_symbol_1);
+  return;
+}
+
+fragment void fragment_main(device SB_RW_atomic* tint_symbol_2 [[buffer(0)]]) {
+  fragment_main_1(tint_symbol_2);
+  return;
+}
+
+void compute_main_1(device SB_RW_atomic* const tint_symbol_3) {
+  atomicAdd_d32fe4(tint_symbol_3);
+  return;
+}
+
+kernel void compute_main(device SB_RW_atomic* tint_symbol_4 [[buffer(0)]]) {
+  compute_main_1(tint_symbol_4);
+  return;
+}
+

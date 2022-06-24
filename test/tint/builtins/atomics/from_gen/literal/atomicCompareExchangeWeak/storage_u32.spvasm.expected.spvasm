@@ -1,0 +1,85 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 41
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpName %SB_RW_atomic "SB_RW_atomic"
+               OpMemberName %SB_RW_atomic 0 "arg_0"
+               OpName %sb_rw "sb_rw"
+               OpName %atomicCompareExchangeWeak_63d8e6 "atomicCompareExchangeWeak_63d8e6"
+               OpName %x__atomic_compare_exchange_resultu32 "x__atomic_compare_exchange_resultu32"
+               OpMemberName %x__atomic_compare_exchange_resultu32 0 "old_value"
+               OpMemberName %x__atomic_compare_exchange_resultu32 1 "exchanged"
+               OpName %res "res"
+               OpName %__atomic_compare_exchange_resultu32 "__atomic_compare_exchange_resultu32"
+               OpMemberName %__atomic_compare_exchange_resultu32 0 "old_value"
+               OpMemberName %__atomic_compare_exchange_resultu32 1 "exchanged"
+               OpName %fragment_main_1 "fragment_main_1"
+               OpName %fragment_main "fragment_main"
+               OpName %compute_main_1 "compute_main_1"
+               OpName %compute_main "compute_main"
+               OpDecorate %SB_RW_atomic Block
+               OpMemberDecorate %SB_RW_atomic 0 Offset 0
+               OpDecorate %sb_rw DescriptorSet 0
+               OpDecorate %sb_rw Binding 0
+               OpMemberDecorate %x__atomic_compare_exchange_resultu32 0 Offset 0
+               OpMemberDecorate %x__atomic_compare_exchange_resultu32 1 Offset 4
+               OpMemberDecorate %__atomic_compare_exchange_resultu32 0 Offset 0
+               OpMemberDecorate %__atomic_compare_exchange_resultu32 1 Offset 4
+       %uint = OpTypeInt 32 0
+%SB_RW_atomic = OpTypeStruct %uint
+%_ptr_StorageBuffer_SB_RW_atomic = OpTypePointer StorageBuffer %SB_RW_atomic
+      %sb_rw = OpVariable %_ptr_StorageBuffer_SB_RW_atomic StorageBuffer
+       %void = OpTypeVoid
+          %5 = OpTypeFunction %void
+       %bool = OpTypeBool
+%x__atomic_compare_exchange_resultu32 = OpTypeStruct %uint %bool
+         %11 = OpConstantNull %uint
+         %12 = OpConstantNull %bool
+         %13 = OpConstantComposite %x__atomic_compare_exchange_resultu32 %11 %12
+%_ptr_Function_x__atomic_compare_exchange_resultu32 = OpTypePointer Function %x__atomic_compare_exchange_resultu32
+         %16 = OpConstantNull %x__atomic_compare_exchange_resultu32
+%__atomic_compare_exchange_resultu32 = OpTypeStruct %uint %bool
+     %uint_1 = OpConstant %uint 1
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+%atomicCompareExchangeWeak_63d8e6 = OpFunction %void None %5
+          %8 = OpLabel
+        %res = OpVariable %_ptr_Function_x__atomic_compare_exchange_resultu32 Function %16
+               OpStore %res %13
+         %23 = OpAccessChain %_ptr_StorageBuffer_uint %sb_rw %uint_0
+         %24 = OpAtomicCompareExchange %uint %23 %uint_1 %uint_0 %uint_0 %uint_1 %uint_1
+         %25 = OpIEqual %bool %24 %uint_1
+         %17 = OpCompositeConstruct %__atomic_compare_exchange_resultu32 %24 %25
+         %26 = OpCompositeExtract %uint %17 0
+         %27 = OpIEqual %bool %26 %uint_1
+         %28 = OpCompositeConstruct %x__atomic_compare_exchange_resultu32 %26 %27
+               OpStore %res %28
+               OpReturn
+               OpFunctionEnd
+%fragment_main_1 = OpFunction %void None %5
+         %30 = OpLabel
+         %31 = OpFunctionCall %void %atomicCompareExchangeWeak_63d8e6
+               OpReturn
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %5
+         %33 = OpLabel
+         %34 = OpFunctionCall %void %fragment_main_1
+               OpReturn
+               OpFunctionEnd
+%compute_main_1 = OpFunction %void None %5
+         %36 = OpLabel
+         %37 = OpFunctionCall %void %atomicCompareExchangeWeak_63d8e6
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %5
+         %39 = OpLabel
+         %40 = OpFunctionCall %void %compute_main_1
+               OpReturn
+               OpFunctionEnd

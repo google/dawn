@@ -1,0 +1,41 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct SB_RW_atomic {
+  /* 0x0000 */ atomic_uint arg_0;
+};
+
+struct SB_RW {
+  uint arg_0;
+};
+
+void atomicMax_51b9be(device SB_RW_atomic* const tint_symbol) {
+  uint arg_1 = 0u;
+  uint res = 0u;
+  arg_1 = 1u;
+  uint const x_18 = arg_1;
+  uint const x_13 = atomic_fetch_max_explicit(&((*(tint_symbol)).arg_0), x_18, memory_order_relaxed);
+  res = x_13;
+  return;
+}
+
+void fragment_main_1(device SB_RW_atomic* const tint_symbol_1) {
+  atomicMax_51b9be(tint_symbol_1);
+  return;
+}
+
+fragment void fragment_main(device SB_RW_atomic* tint_symbol_2 [[buffer(0)]]) {
+  fragment_main_1(tint_symbol_2);
+  return;
+}
+
+void compute_main_1(device SB_RW_atomic* const tint_symbol_3) {
+  atomicMax_51b9be(tint_symbol_3);
+  return;
+}
+
+kernel void compute_main(device SB_RW_atomic* tint_symbol_4 [[buffer(0)]]) {
+  compute_main_1(tint_symbol_4);
+  return;
+}
+

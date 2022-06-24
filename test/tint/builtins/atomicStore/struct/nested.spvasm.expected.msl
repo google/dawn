@@ -1,0 +1,92 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S0_atomic {
+  int x;
+  atomic_uint a;
+  int y;
+  int z;
+};
+
+struct S0 {
+  int x;
+  uint a;
+  int y;
+  int z;
+};
+
+struct S1_atomic {
+  int x;
+  S0_atomic a;
+  int y;
+  int z;
+};
+
+struct S1 {
+  int x;
+  S0 a;
+  int y;
+  int z;
+};
+
+struct S2_atomic {
+  int x;
+  int y;
+  int z;
+  S1_atomic a;
+};
+
+struct S2 {
+  int x;
+  int y;
+  int z;
+  S1 a;
+};
+
+void compute_main_inner(uint local_invocation_index, threadgroup S2_atomic* const tint_symbol) {
+  (*(tint_symbol)).x = 0;
+  (*(tint_symbol)).y = 0;
+  (*(tint_symbol)).z = 0;
+  (*(tint_symbol)).a.x = 0;
+  (*(tint_symbol)).a.a.x = 0;
+  atomic_store_explicit(&((*(tint_symbol)).a.a.a), 0u, memory_order_relaxed);
+  (*(tint_symbol)).a.a.y = 0;
+  (*(tint_symbol)).a.a.z = 0;
+  (*(tint_symbol)).a.y = 0;
+  (*(tint_symbol)).a.z = 0;
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  atomic_store_explicit(&((*(tint_symbol)).a.a.a), 1u, memory_order_relaxed);
+  return;
+}
+
+void compute_main_1(thread uint* const tint_symbol_1, threadgroup S2_atomic* const tint_symbol_2) {
+  uint const x_44 = *(tint_symbol_1);
+  compute_main_inner(x_44, tint_symbol_2);
+  return;
+}
+
+void compute_main_inner_1(uint local_invocation_index_1_param, threadgroup S2_atomic* const tint_symbol_3, thread uint* const tint_symbol_4) {
+  {
+    (*(tint_symbol_3)).x = 0;
+    (*(tint_symbol_3)).y = 0;
+    (*(tint_symbol_3)).z = 0;
+    (*(tint_symbol_3)).a.x = 0;
+    (*(tint_symbol_3)).a.a.x = 0;
+    atomic_store_explicit(&((*(tint_symbol_3)).a.a.a), 0u, memory_order_relaxed);
+    (*(tint_symbol_3)).a.a.y = 0;
+    (*(tint_symbol_3)).a.a.z = 0;
+    (*(tint_symbol_3)).a.y = 0;
+    (*(tint_symbol_3)).a.z = 0;
+  }
+  threadgroup_barrier(mem_flags::mem_threadgroup);
+  *(tint_symbol_4) = local_invocation_index_1_param;
+  compute_main_1(tint_symbol_4, tint_symbol_3);
+}
+
+kernel void compute_main(uint local_invocation_index_1_param [[thread_index_in_threadgroup]]) {
+  threadgroup S2_atomic tint_symbol_5;
+  thread uint tint_symbol_6 = 0u;
+  compute_main_inner_1(local_invocation_index_1_param, &(tint_symbol_5), &(tint_symbol_6));
+  return;
+}
+
