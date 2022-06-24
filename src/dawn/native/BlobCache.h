@@ -48,6 +48,10 @@ class BlobCache {
     Blob LoadInternal(const CacheKey& key);
     void StoreInternal(const CacheKey& key, size_t valueSize, const void* value);
 
+    // Validates the cache key for this version of Dawn. At the moment, this is naively checking
+    // that the cache key contains the dawn version string in it.
+    bool ValidateCacheKey(const CacheKey& key);
+
     // Protects thread safety of access to mCache.
     std::mutex mMutex;
     dawn::platform::CachingInterface* mCache;

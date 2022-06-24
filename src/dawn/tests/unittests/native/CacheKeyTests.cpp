@@ -163,7 +163,17 @@ TEST(CacheKeySerializerTests, StdStrings) {
     std::string str = "string";
 
     CacheKey expected;
-    expected.Record((size_t)6);
+    expected.Record(size_t(6));
+    expected.insert(expected.end(), str.begin(), str.end());
+
+    EXPECT_THAT(CacheKey().Record(str), CacheKeyEq(expected));
+}
+
+TEST(CacheKeySerializerTests, StdStringViews) {
+    static constexpr std::string_view str("string");
+
+    CacheKey expected;
+    expected.Record(size_t(6));
     expected.insert(expected.end(), str.begin(), str.end());
 
     EXPECT_THAT(CacheKey().Record(str), CacheKeyEq(expected));

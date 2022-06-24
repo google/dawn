@@ -14,7 +14,10 @@
 
 #include "dawn/native/BlobCache.h"
 
+#include <algorithm>
+
 #include "dawn/common/Assert.h"
+#include "dawn/common/Version_autogen.h"
 #include "dawn/native/CacheKey.h"
 #include "dawn/native/Instance.h"
 #include "dawn/platform/DawnPlatform.h"
@@ -39,6 +42,7 @@ void BlobCache::Store(const CacheKey& key, const Blob& value) {
 }
 
 Blob BlobCache::LoadInternal(const CacheKey& key) {
+    ASSERT(ValidateCacheKey(key));
     if (mCache == nullptr) {
         return Blob();
     }
@@ -55,12 +59,18 @@ Blob BlobCache::LoadInternal(const CacheKey& key) {
 }
 
 void BlobCache::StoreInternal(const CacheKey& key, size_t valueSize, const void* value) {
+    ASSERT(ValidateCacheKey(key));
     ASSERT(value != nullptr);
     ASSERT(valueSize > 0);
     if (mCache == nullptr) {
         return;
     }
     mCache->StoreData(key.data(), key.size(), value, valueSize);
+}
+
+bool BlobCache::ValidateCacheKey(const CacheKey& key) {
+    return std::search(key.begin(), key.end(), kDawnVersion.begin(), kDawnVersion.end()) !=
+           key.end();
 }
 
 }  // namespace dawn::native

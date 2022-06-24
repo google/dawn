@@ -63,8 +63,8 @@ class CachingInterfaceMock : public dawn::platform::CachingInterface {
 class DawnCachingMockPlatform : public dawn::platform::Platform {
   public:
     explicit DawnCachingMockPlatform(dawn::platform::CachingInterface* cachingInterface);
-    dawn::platform::CachingInterface* GetCachingInterface(const void* fingerprint,
-                                                          size_t fingerprintSize) override;
+
+    dawn::platform::CachingInterface* GetCachingInterface() override;
 
   private:
     dawn::platform::CachingInterface* mCachingInterface = nullptr;

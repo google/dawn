@@ -20,6 +20,7 @@
 #include <unordered_set>
 
 #include "dawn/common/Log.h"
+#include "dawn/common/Version_autogen.h"
 #include "dawn/native/Adapter.h"
 #include "dawn/native/AsyncTask.h"
 #include "dawn/native/AttachmentState.h"
@@ -208,7 +209,7 @@ DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
     // Record the cache key from the properties. Note that currently, if a new extension
     // descriptor is added (and probably handled here), the cache key recording needs to be
     // updated.
-    mDeviceCacheKey.Record(adapterProperties, mEnabledFeatures.featuresBitSet,
+    mDeviceCacheKey.Record(kDawnVersion, adapterProperties, mEnabledFeatures.featuresBitSet,
                            mEnabledToggles.toggleBitset, cacheDesc);
 }
 

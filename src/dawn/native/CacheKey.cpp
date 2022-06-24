@@ -15,6 +15,8 @@
 #include "dawn/native/CacheKey.h"
 
 #include <iomanip>
+#include <string>
+#include <string_view>
 
 namespace dawn::native {
 
@@ -29,7 +31,13 @@ std::ostream& operator<<(std::ostream& os, const CacheKey& key) {
 
 template <>
 void CacheKeySerializer<std::string>::Serialize(CacheKey* key, const std::string& t) {
-    key->Record(static_cast<size_t>(t.length()));
+    key->Record(t.length());
+    key->insert(key->end(), t.begin(), t.end());
+}
+
+template <>
+void CacheKeySerializer<std::string_view>::Serialize(CacheKey* key, const std::string_view& t) {
+    key->Record(t.length());
     key->insert(key->end(), t.begin(), t.end());
 }
 

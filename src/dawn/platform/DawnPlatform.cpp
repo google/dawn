@@ -53,8 +53,7 @@ uint64_t Platform::AddTraceEvent(char phase,
     return 0;
 }
 
-dawn::platform::CachingInterface* Platform::GetCachingInterface(const void* fingerprint,
-                                                                size_t fingerprintSize) {
+dawn::platform::CachingInterface* Platform::GetCachingInterface() {
     return nullptr;
 }
 

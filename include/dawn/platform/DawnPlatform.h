@@ -93,10 +93,10 @@ class DAWN_PLATFORM_EXPORT Platform {
                                    const uint64_t* argValues,
                                    unsigned char flags);
 
-    // The |fingerprint| is provided by Dawn to inform the client to discard the Dawn caches
-    // when the fingerprint changes. The returned CachingInterface is expected to outlive the
-    // device which uses it to persistently cache objects.
-    virtual CachingInterface* GetCachingInterface(const void* fingerprint, size_t fingerprintSize);
+    // The returned CachingInterface is expected to outlive the device which uses it to persistently
+    // cache objects.
+    virtual CachingInterface* GetCachingInterface();
+
     virtual std::unique_ptr<WorkerTaskPool> CreateWorkerTaskPool();
 
   private:
