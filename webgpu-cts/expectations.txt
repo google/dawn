@@ -61,7 +61,7 @@
 # tags: [ webgpu-adapter-default webgpu-adapter-swiftshader ]
 # END TAG HEADER
 
-# Last rolled: 2022-06-08 10:23:15PM
+# Last rolled: 2022-06-22 11:00:00PM
 
 ################################################################################
 # webgpu:shader,execution,zero_init:compute,zero_init failures on intel
@@ -212,12 +212,19 @@ crbug.com/dawn/0000 [ bigsur ] webgpu:api,operation,command_buffer,copyTextureTo
 ################################################################################
 # entry_point_name_must_match failures
 ################################################################################
-crbug.com/dawn/1345 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=false;shaderModuleEntryPoint="s%C3%A9quen%C3%A7age";stageEntryPoint="s%C3%A9quen%C3%A7age" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,createComputePipeline:entry_point_name_must_match:isAsync=true;shaderModuleEntryPoint="s%C3%A9quen%C3%A7age";stageEntryPoint="s%C3%A9quen%C3%A7age" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=false;shaderModuleEntryPoint="s%C3%A9quen%C3%A7age";stageEntryPoint="s%C3%A9quen%C3%A7age" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=true;shaderModuleEntryPoint="s%C3%A9quen%C3%A7age";stageEntryPoint="s%C3%A9quen%C3%A7age" [ Failure ]
+
+crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=false;shaderModuleEntryPoint="s%C3%A9quen%C3%A7age";stageEntryPoint="s%C3%A9quen%C3%A7age" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=true;shaderModuleEntryPoint="s%C3%A9quen%C3%A7age";stageEntryPoint="s%C3%A9quen%C3%A7age" [ Failure ]
 
 ################################################################################
 # external_texture failures
@@ -330,10 +337,35 @@ crbug.com/dawn/0000 [ win ] webgpu:shader,execution,memory_model,* [ Failure ]
 # slow tests
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 webgpu:api,validation,createRenderPipeline:pipeline_output_targets,blend_min_max:isAsync=true;component="alpha" [ Slow ]
-crbug.com/dawn/0000 webgpu:api,validation,createRenderPipeline:pipeline_output_targets,blend_min_max:isAsync=true;component="color" [ Slow ]
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,binary,f32_arithmetic:* [ Slow ]
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,binary,f32_logical:* [ Slow ]
+
+################################################################################
+# Bclayton@ indicates that these timeout on Win/Intel
+################################################################################
+crbug.com/dawn/0000 [ intel win ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition:inputSource="const";* [ Skip ]
+crbug.com/dawn/0000 [ intel win ] webgpu:shader,execution,expression,binary,f32_arithmetic:division:inputSource="const";* [ Skip ]
+crbug.com/dawn/0000 [ intel win ] webgpu:shader,execution,expression,binary,f32_arithmetic:multiplication:inputSource="const";* [ Skip ]
+crbug.com/dawn/0000 [ intel win ] webgpu:shader,execution,expression,binary,f32_arithmetic:subtraction:inputSource="const";* [ Skip ]
+crbug.com/dawn/0000 [ intel win ] webgpu:shader,execution,expression,binary,f32_logical:equals:inputSource="const";* [ Skip ]
+crbug.com/dawn/0000 [ intel win ] webgpu:shader,execution,expression,binary,f32_logical:greater_equals:inputSource="const";* [ Skip ]
+crbug.com/dawn/0000 [ intel win ] webgpu:shader,execution,expression,binary,f32_logical:greater_than:inputSource="const";* [ Skip ]
+crbug.com/dawn/0000 [ intel win ] webgpu:shader,execution,expression,binary,f32_logical:less_equals:inputSource="const";* [ Skip ]
+crbug.com/dawn/0000 [ intel win ] webgpu:shader,execution,expression,binary,f32_logical:less_than:inputSource="const";* [ Skip ]
+crbug.com/dawn/0000 [ intel win ] webgpu:shader,execution,expression,binary,f32_logical:not_equals:inputSource="const";* [ Skip ]
+crbug.com/dawn/0000 [ intel win ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="const";* [ Skip ]
+crbug.com/dawn/0000 [ intel win ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="const";* [ Skip ]
+
+################################################################################
+# Fixed by https://chromium-review.googlesource.com/c/chromium/src/+/3716961
+################################################################################
+crbug.com/dawn/0000 webgpu:api,validation,capability_checks,features,texture_formats:depth_stencil_state:format="depth32float-stencil8";enable_required_feature=false [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,capability_checks,features,texture_formats:render_bundle_encoder_descriptor_depth_stencil_format:format="depth32float-stencil8";enable_required_feature=false [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,capability_checks,features,texture_formats:texture_descriptor:format="depth32float-stencil8";enable_required_feature=false [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,capability_checks,features,texture_formats:texture_descriptor_view_formats:format="depth32float-stencil8";enable_required_feature=false [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,capability_checks,features,texture_formats:texture_view_descriptor:format="depth32float-stencil8";enable_required_feature=false [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,capability_checks,features,texture_formats:canvas_configuration:format="depth32float-stencil8";canvasType="offscreen";enable_required_feature=false [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,capability_checks,features,texture_formats:canvas_configuration:format="depth32float-stencil8";canvasType="onscreen";enable_required_feature=false [ Failure ]
 
 # New failures. Please triage:
 crbug.com/dawn/0000 [ intel win10 ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="CopyB2T";checkMethod="FullCopyT2B";format="rg32sint";dimension="2d" [ Failure ]
@@ -348,9 +380,6 @@ crbug.com/dawn/0000 [ intel win10 ] webgpu:api,operation,resource_init,texture_z
 crbug.com/dawn/0000 [ intel win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rg16uint" [ Failure ]
 crbug.com/dawn/0000 [ intel win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rgba16sint" [ Failure ]
 crbug.com/dawn/0000 [ intel win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth16unorm" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,capability_checks,features,texture_formats:texture_descriptor:format="depth32float-stencil8";enable_required_feature=false [ Failure ]
-crbug.com/dawn/0000 [ bigsur dawn-backend-validation intel-0x3e9b ] webgpu:api,validation,createRenderPipeline:pipeline_output_targets:isAsync=true;writeMask=0;format="rg8unorm" [ Failure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation intel win10 ] webgpu:api,validation,createRenderPipeline:pipeline_output_targets:isAsync=true;writeMask=4;format="rg8uint" [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel win10 ] webgpu:api,validation,image_copy,texture_related:format:method="CopyB2T";depthOrArrayLayers=1;dimension="1d";format="rg32sint" [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 win10 ] webgpu:api,validation,image_copy,texture_related:format:method="CopyB2T";depthOrArrayLayers=1;dimension="1d";format="rg32uint" [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel win10 ] webgpu:api,validation,image_copy,texture_related:format:method="CopyB2T";depthOrArrayLayers=1;dimension="1d";format="rg32uint" [ Failure ]
@@ -367,3 +396,42 @@ crbug.com/dawn/0000 [ nvidia-0x2184 win10 ] webgpu:shader,execution,expression,c
 crbug.com/dawn/0000 [ amd-0x6821 dawn-no-backend-validation ] webgpu:shader,execution,zero_init:compute,zero_init:storageClass="function";workgroupSize=[1,1,1];batch__=9 [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x3e9b ] webgpu:shader,execution,zero_init:compute,zero_init:storageClass="workgroup";workgroupSize=[1,1,48];batch__=12 [ Failure ]
 crbug.com/dawn/0000 [ intel win10 ] webgpu:shader,validation,shader_io,builtins:duplicates:first="s2a";second="rb" [ Slow ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,primitive_state:unclipped_depth:* [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,shader_module,entry_point:compute:* [ Failure ]
+crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,binary,f32_arithmetic:division:* [ Failure ]
+crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,call,builtin,clamp:* [ Failure ]
+crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,call,builtin,fract:f32:inputSource="const";* [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:* [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:* [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,* [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:max_shader_variable_location:* [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition:inputSource="const";* [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,expression,binary,f32_arithmetic:division:* [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,expression,binary,f32_arithmetic:multiplication:inputSource="const";* [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,expression,binary,f32_arithmetic:subtraction:inputSource="const";* [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,expression,binary,f32_logical:equals:inputSource="const";* [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,expression,binary,f32_logical:greater_equals:inputSource="const";* [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,expression,binary,f32_logical:greater_than:inputSource="const";* [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,expression,binary,f32_logical:less_equals:inputSource="const";* [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,expression,binary,f32_logical:less_than:inputSource="const";* [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,expression,binary,f32_logical:not_equals:inputSource="const";* [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="const";* [ Failure ]
+crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="const";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_arithmetic:addition:inputSource="const";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_arithmetic:division:* [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_arithmetic:multiplication:inputSource="const";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_arithmetic:subtraction:inputSource="const";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:equals:inputSource="const";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:equals:inputSource="const";vectorize=2 [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:greater_equals:inputSource="const";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:greater_equals:inputSource="const";vectorize=2 [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:greater_equals:inputSource="const";vectorize=3 [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:greater_than:inputSource="const";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:greater_than:inputSource="const";vectorize=2 [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:less_equals:inputSource="const";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:less_equals:inputSource="const";vectorize=2 [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:less_than:inputSource="const";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:less_than:inputSource="const";vectorize=2 [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:not_equals:inputSource="const";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:not_equals:inputSource="const";vectorize=2 [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="const";* [ Failure ]
