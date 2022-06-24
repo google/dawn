@@ -46,8 +46,8 @@ class Device final : public DeviceBase {
 
     MaybeError Initialize(const DeviceDescriptor* descriptor);
 
-    // Contains all the OpenGL entry points, glDoFoo is called via device->gl.DoFoo.
-    const OpenGLFunctions gl;
+    // Contains all the OpenGL entry points, glDoFoo is called via gl.DoFoo.
+    const OpenGLFunctions& GetGL() const;
 
     const GLFormat& GetGLFormat(const Format& format);
 
@@ -120,6 +120,8 @@ class Device final : public DeviceBase {
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
     void DestroyImpl() override;
     MaybeError WaitForIdleForDestruction() override;
+
+    const OpenGLFunctions mGL;
 
     std::queue<std::pair<GLsync, ExecutionSerial>> mFencesInFlight;
 

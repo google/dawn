@@ -42,7 +42,7 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
                                   uint64_t bufferOffset,
                                   const void* data,
                                   size_t size) {
-    const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+    const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
 
     ToBackend(buffer)->EnsureDataInitializedAsDestination(bufferOffset, size);
 
@@ -70,7 +70,7 @@ MaybeError Queue::WriteTextureImpl(const ImageCopyTexture& destination,
     } else {
         ToBackend(destination.texture)->EnsureSubresourceContentInitialized(range);
     }
-    DoTexSubImage(ToBackend(GetDevice())->gl, textureCopy, data, dataLayout, writeSizePixel);
+    DoTexSubImage(ToBackend(GetDevice())->GetGL(), textureCopy, data, dataLayout, writeSizePixel);
     ToBackend(destination.texture)->Touch();
     return {};
 }

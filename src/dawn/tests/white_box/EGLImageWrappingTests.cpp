@@ -128,7 +128,7 @@ class EGLImageTestBase : public DawnTest {
                                   size_t size) {
         dawn::native::opengl::Device* openglDevice =
             dawn::native::opengl::ToBackend(dawn::native::FromAPI(device.Get()));
-        const dawn::native::opengl::OpenGLFunctions& gl = openglDevice->gl;
+        const dawn::native::opengl::OpenGLFunctions& gl = openglDevice->GetGL();
         GLuint tex;
         gl.GenTextures(1, &tex);
         gl.BindTexture(GL_TEXTURE_2D, tex);
@@ -300,7 +300,7 @@ class EGLImageUsageTests : public EGLImageTestBase {
                      size_t dataSize) {
         dawn::native::opengl::Device* openglDevice =
             dawn::native::opengl::ToBackend(dawn::native::FromAPI(device.Get()));
-        const dawn::native::opengl::OpenGLFunctions& gl = openglDevice->gl;
+        const dawn::native::opengl::OpenGLFunctions& gl = openglDevice->GetGL();
 
         // Get a texture view for the eglImage
         wgpu::TextureDescriptor textureDescriptor;

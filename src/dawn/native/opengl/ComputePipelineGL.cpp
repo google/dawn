@@ -29,16 +29,17 @@ ComputePipeline::~ComputePipeline() = default;
 
 void ComputePipeline::DestroyImpl() {
     ComputePipelineBase::DestroyImpl();
-    DeleteProgram(ToBackend(GetDevice())->gl);
+    DeleteProgram(ToBackend(GetDevice())->GetGL());
 }
 
 MaybeError ComputePipeline::Initialize() {
-    DAWN_TRY(InitializeBase(ToBackend(GetDevice())->gl, ToBackend(GetLayout()), GetAllStages()));
+    DAWN_TRY(
+        InitializeBase(ToBackend(GetDevice())->GetGL(), ToBackend(GetLayout()), GetAllStages()));
     return {};
 }
 
 void ComputePipeline::ApplyNow() {
-    PipelineGL::ApplyNow(ToBackend(GetDevice())->gl);
+    PipelineGL::ApplyNow(ToBackend(GetDevice())->GetGL());
 }
 
 }  // namespace dawn::native::opengl

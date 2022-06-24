@@ -83,12 +83,6 @@ GLenum TargetForTextureViewDimension(wgpu::TextureViewDimension dimension,
     UNREACHABLE();
 }
 
-GLuint GenTexture(const OpenGLFunctions& gl) {
-    GLuint handle = 0;
-    gl.GenTextures(1, &handle);
-    return handle;
-}
-
 bool RequiresCreatingNewTextureView(const TextureBase* texture,
                                     const TextureViewDescriptor* textureViewDescriptor) {
     constexpr wgpu::TextureUsage kShaderUsageNeedsView =
@@ -179,9 +173,10 @@ void AllocateTexture(const OpenGLFunctions& gl,
 // Texture
 
 Texture::Texture(Device* device, const TextureDescriptor* descriptor)
-    : Texture(device, descriptor, GenTexture(device->gl), TextureState::OwnedInternal) {
-    const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+    : Texture(device, descriptor, 0, TextureState::OwnedInternal) {
+    const OpenGLFunctions& gl = device->GetGL();
 
+    gl.GenTextures(1, &mHandle);
     uint32_t levels = GetNumMipLevels();
 
     const GLFormat& glFormat = GetGLFormat();
@@ -221,7 +216,8 @@ Texture::~Texture() {}
 void Texture::DestroyImpl() {
     TextureBase::DestroyImpl();
     if (GetTextureState() == TextureState::OwnedInternal) {
-        ToBackend(GetDevice())->gl.DeleteTextures(1, &mHandle);
+        const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
+        gl.DeleteTextures(1, &mHandle);
         mHandle = 0;
     }
 }
@@ -246,7 +242,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
     }
 
     Device* device = ToBackend(GetDevice());
-    const OpenGLFunctions& gl = device->gl;
+    const OpenGLFunctions& gl = device->GetGL();
 
     uint8_t clearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0 : 1;
     float fClearColor = (clearValue == TextureBase::ClearValue::Zero) ? 0.f : 1.f;
@@ -534,7 +530,7 @@ MaybeError Texture::ClearTexture(const SubresourceRange& range,
                 }
 
                 textureCopy.origin.z = layer;
-                DoTexSubImage(ToBackend(GetDevice())->gl, textureCopy, 0, dataLayout, mipSize);
+                DoTexSubImage(gl, textureCopy, 0, dataLayout, mipSize);
             }
         }
         gl.BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
@@ -571,9 +567,9 @@ TextureView::TextureView(TextureBase* texture, const TextureViewDescriptor* desc
     if (!RequiresCreatingNewTextureView(texture, descriptor)) {
         mHandle = ToBackend(texture)->GetHandle();
     } else {
-        const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+        const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
         if (gl.IsAtLeastGL(4, 3)) {
-            mHandle = GenTexture(gl);
+            gl.GenTextures(1, &mHandle);
             const Texture* textureGL = ToBackend(texture);
             gl.TextureView(mHandle, mTarget, textureGL->GetHandle(), GetInternalFormat(),
                            descriptor->baseMipLevel, descriptor->mipLevelCount,
@@ -592,7 +588,8 @@ TextureView::~TextureView() {}
 void TextureView::DestroyImpl() {
     TextureViewBase::DestroyImpl();
     if (mOwnsHandle) {
-        ToBackend(GetDevice())->gl.DeleteTextures(1, &mHandle);
+        const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
+        gl.DeleteTextures(1, &mHandle);
     }
 }
 
@@ -606,7 +603,7 @@ GLenum TextureView::GetGLTarget() const {
 }
 
 void TextureView::BindToFramebuffer(GLenum target, GLenum attachment) {
-    const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+    const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
 
     // Use the base texture where possible to minimize the amount of copying required on GLES.
     bool useOwnView = GetFormat().format != GetTexture()->GetFormat().format &&
@@ -648,7 +645,7 @@ void TextureView::CopyIfNeeded() {
     }
 
     Device* device = ToBackend(GetDevice());
-    const OpenGLFunctions& gl = device->gl;
+    const OpenGLFunctions& gl = device->GetGL();
     uint32_t srcLevel = GetBaseMipLevel();
     uint32_t numLevels = GetLevelCount();
 
@@ -657,7 +654,7 @@ void TextureView::CopyIfNeeded() {
     Extent3D size{width, height, GetLayerCount()};
 
     if (mHandle == 0) {
-        mHandle = GenTexture(gl);
+        gl.GenTextures(1, &mHandle);
         gl.BindTexture(mTarget, mHandle);
         AllocateTexture(gl, mTarget, texture->GetSampleCount(), numLevels, GetInternalFormat(),
                         size);

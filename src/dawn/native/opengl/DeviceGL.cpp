@@ -46,7 +46,7 @@ ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
 Device::Device(AdapterBase* adapter,
                const DeviceDescriptor* descriptor,
                const OpenGLFunctions& functions)
-    : DeviceBase(adapter, descriptor), gl(functions) {}
+    : DeviceBase(adapter, descriptor), mGL(functions) {}
 
 Device::~Device() {
     Destroy();
@@ -60,6 +60,7 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
 }
 
 void Device::InitTogglesFromDriver() {
+    const OpenGLFunctions& gl = GetGL();
     bool supportsBaseVertex = gl.IsAtLeastGLES(3, 2) || gl.IsAtLeastGL(3, 2);
 
     bool supportsBaseInstance = gl.IsAtLeastGLES(3, 2) || gl.IsAtLeastGL(4, 2);
@@ -124,6 +125,7 @@ const GLFormat& Device::GetGLFormat(const Format& format) {
 }
 
 GLenum Device::GetBGRAInternalFormat() const {
+    const OpenGLFunctions& gl = GetGL();
     if (gl.IsGLExtensionSupported("GL_EXT_texture_format_BGRA8888") ||
         gl.IsGLExtensionSupported("GL_APPLE_texture_format_BGRA8888")) {
         return GL_BGRA8_EXT;
@@ -195,6 +197,7 @@ ResultOrError<Ref<TextureViewBase>> Device::CreateTextureViewImpl(
 }
 
 void Device::SubmitFenceSync() {
+    const OpenGLFunctions& gl = GetGL();
     GLsync sync = gl.FenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
     IncrementLastSubmittedCommandSerial();
     mFencesInFlight.emplace(sync, GetLastSubmittedCommandSerial());
@@ -224,6 +227,7 @@ MaybeError Device::ValidateEGLImageCanBeWrapped(const TextureDescriptor* descrip
 }
 TextureBase* Device::CreateTextureWrappingEGLImage(const ExternalImageDescriptor* descriptor,
                                                    ::EGLImage image) {
+    const OpenGLFunctions& gl = GetGL();
     const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
 
     if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor))) {
@@ -264,6 +268,7 @@ MaybeError Device::TickImpl() {
 
 ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
     ExecutionSerial fenceSerial{0};
+    const OpenGLFunctions& gl = GetGL();
     while (!mFencesInFlight.empty()) {
         auto [sync, tentativeSerial] = mFencesInFlight.front();
 
@@ -314,6 +319,7 @@ void Device::DestroyImpl() {
 }
 
 MaybeError Device::WaitForIdleForDestruction() {
+    const OpenGLFunctions& gl = GetGL();
     gl.Finish();
     DAWN_TRY(CheckPassedSerials());
     ASSERT(mFencesInFlight.empty());
@@ -331,6 +337,10 @@ uint64_t Device::GetOptimalBufferToTextureCopyOffsetAlignment() const {
 
 float Device::GetTimestampPeriodInNS() const {
     return 1.0f;
+}
+
+const OpenGLFunctions& Device::GetGL() const {
+    return mGL;
 }
 
 }  // namespace dawn::native::opengl

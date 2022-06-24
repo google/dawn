@@ -95,7 +95,7 @@ ResultOrError<std::string> ShaderModule::TranslateToGLSL(const char* entryPointN
     tint::Program program;
     DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, GetTintProgram(), transformInputs,
                                            nullptr, nullptr));
-    const OpenGLVersion& version = ToBackend(GetDevice())->gl.GetVersion();
+    const OpenGLVersion& version = ToBackend(GetDevice())->GetGL().GetVersion();
 
     tint::writer::glsl::Options tintOptions;
     using Version = tint::writer::glsl::Version;

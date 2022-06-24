@@ -24,13 +24,13 @@ NativeSwapChainImpl::NativeSwapChainImpl(Device* device,
     : mPresentCallback(present), mPresentUserdata(presentUserdata), mDevice(device) {}
 
 NativeSwapChainImpl::~NativeSwapChainImpl() {
-    const OpenGLFunctions& gl = mDevice->gl;
+    const OpenGLFunctions& gl = mDevice->GetGL();
     gl.DeleteTextures(1, &mBackTexture);
     gl.DeleteFramebuffers(1, &mBackFBO);
 }
 
 void NativeSwapChainImpl::Init(DawnWSIContextGL* /*context*/) {
-    const OpenGLFunctions& gl = mDevice->gl;
+    const OpenGLFunctions& gl = mDevice->GetGL();
     gl.GenTextures(1, &mBackTexture);
     gl.BindTexture(GL_TEXTURE_2D, mBackTexture);
     gl.TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 0, 0, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
@@ -53,7 +53,7 @@ DawnSwapChainError NativeSwapChainImpl::Configure(WGPUTextureFormat format,
     mWidth = width;
     mHeight = height;
 
-    const OpenGLFunctions& gl = mDevice->gl;
+    const OpenGLFunctions& gl = mDevice->GetGL();
     gl.BindTexture(GL_TEXTURE_2D, mBackTexture);
     // Reallocate the texture
     gl.TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
@@ -67,7 +67,7 @@ DawnSwapChainError NativeSwapChainImpl::GetNextTexture(DawnSwapChainNextTexture*
 }
 
 DawnSwapChainError NativeSwapChainImpl::Present() {
-    const OpenGLFunctions& gl = mDevice->gl;
+    const OpenGLFunctions& gl = mDevice->GetGL();
     gl.BindFramebuffer(GL_READ_FRAMEBUFFER, mBackFBO);
     gl.BindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
     gl.Scissor(0, 0, mWidth, mHeight);

@@ -226,7 +226,8 @@ RenderPipeline::RenderPipeline(Device* device, const RenderPipelineDescriptor* d
       mGlPrimitiveTopology(GLPrimitiveTopology(GetPrimitiveTopology())) {}
 
 MaybeError RenderPipeline::Initialize() {
-    DAWN_TRY(InitializeBase(ToBackend(GetDevice())->gl, ToBackend(GetLayout()), GetAllStages()));
+    DAWN_TRY(
+        InitializeBase(ToBackend(GetDevice())->GetGL(), ToBackend(GetLayout()), GetAllStages()));
     CreateVAOForVertexState();
     return {};
 }
@@ -235,7 +236,7 @@ RenderPipeline::~RenderPipeline() = default;
 
 void RenderPipeline::DestroyImpl() {
     RenderPipelineBase::DestroyImpl();
-    const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+    const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
     gl.DeleteVertexArrays(1, &mVertexArrayObject);
     gl.BindVertexArray(0);
     DeleteProgram(gl);
@@ -252,7 +253,7 @@ RenderPipeline::GetAttributesUsingVertexBuffer(VertexBufferSlot slot) const {
 }
 
 void RenderPipeline::CreateVAOForVertexState() {
-    const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+    const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
 
     gl.GenVertexArrays(1, &mVertexArrayObject);
     gl.BindVertexArray(mVertexArrayObject);
@@ -284,7 +285,7 @@ void RenderPipeline::CreateVAOForVertexState() {
 }
 
 void RenderPipeline::ApplyNow(PersistentPipelineState& persistentPipelineState) {
-    const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+    const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
     PipelineGL::ApplyNow(gl);
 
     ASSERT(mVertexArrayObject);

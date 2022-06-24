@@ -39,21 +39,22 @@ ResultOrError<Ref<Buffer>> Buffer::CreateInternalBuffer(Device* device,
 
 Buffer::Buffer(Device* device, const BufferDescriptor* descriptor)
     : BufferBase(device, descriptor) {
+    const OpenGLFunctions& gl = device->GetGL();
     // Allocate at least 4 bytes so clamped accesses are always in bounds.
     mAllocatedSize = std::max(GetSize(), uint64_t(4u));
 
-    device->gl.GenBuffers(1, &mBuffer);
-    device->gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
+    gl.GenBuffers(1, &mBuffer);
+    gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
 
     // The buffers with mappedAtCreation == true will be initialized in
     // BufferBase::MapAtCreation().
     if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting) &&
         !descriptor->mappedAtCreation) {
         std::vector<uint8_t> clearValues(mAllocatedSize, 1u);
-        device->gl.BufferData(GL_ARRAY_BUFFER, mAllocatedSize, clearValues.data(), GL_STATIC_DRAW);
+        gl.BufferData(GL_ARRAY_BUFFER, mAllocatedSize, clearValues.data(), GL_STATIC_DRAW);
     } else {
         // Buffers start zeroed if you pass nullptr to glBufferData.
-        device->gl.BufferData(GL_ARRAY_BUFFER, mAllocatedSize, nullptr, GL_STATIC_DRAW);
+        gl.BufferData(GL_ARRAY_BUFFER, mAllocatedSize, nullptr, GL_STATIC_DRAW);
     }
 }
 
@@ -112,10 +113,11 @@ void Buffer::InitializeToZero() {
 
     const uint64_t size = GetAllocatedSize();
     Device* device = ToBackend(GetDevice());
+    const OpenGLFunctions& gl = device->GetGL();
 
     const std::vector<uint8_t> clearValues(size, 0u);
-    device->gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
-    device->gl.BufferSubData(GL_ARRAY_BUFFER, 0, size, clearValues.data());
+    gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
+    gl.BufferSubData(GL_ARRAY_BUFFER, 0, size, clearValues.data());
     device->IncrementLazyClearCountForTesting();
 
     SetIsDataInitialized();
@@ -128,14 +130,14 @@ bool Buffer::IsCPUWritableAtCreation() const {
 }
 
 MaybeError Buffer::MapAtCreationImpl() {
-    const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+    const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
     gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
     mMappedData = gl.MapBufferRange(GL_ARRAY_BUFFER, 0, GetSize(), GL_MAP_WRITE_BIT);
     return {};
 }
 
 MaybeError Buffer::MapAsyncImpl(wgpu::MapMode mode, size_t offset, size_t size) {
-    const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+    const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
 
     // It is an error to map an empty range in OpenGL. We always have at least a 4-byte buffer
     // so we extend the range to be 4 bytes.
@@ -171,7 +173,7 @@ void* Buffer::GetMappedPointerImpl() {
 }
 
 void Buffer::UnmapImpl() {
-    const OpenGLFunctions& gl = ToBackend(GetDevice())->gl;
+    const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
 
     gl.BindBuffer(GL_ARRAY_BUFFER, mBuffer);
     gl.UnmapBuffer(GL_ARRAY_BUFFER);
@@ -179,8 +181,10 @@ void Buffer::UnmapImpl() {
 }
 
 void Buffer::DestroyImpl() {
+    const OpenGLFunctions& gl = ToBackend(GetDevice())->GetGL();
+
     BufferBase::DestroyImpl();
-    ToBackend(GetDevice())->gl.DeleteBuffers(1, &mBuffer);
+    gl.DeleteBuffers(1, &mBuffer);
     mBuffer = 0;
 }
 
