@@ -43,6 +43,10 @@ class Blob {
     uint8_t* Data();
     size_t Size() const;
 
+    // If the blob data is not aligned to |alignment|, copy it into a new backing store which
+    // is aligned.
+    void AlignTo(size_t alignment);
+
   private:
     // The constructor should be responsible to take ownership of |data| and releases ownership by
     // calling |deleter|. The deleter function is called at ~Blob() and during std::move.
@@ -53,7 +57,7 @@ class Blob {
     std::function<void()> mDeleter;
 };
 
-Blob CreateBlob(size_t size);
+Blob CreateBlob(size_t size, size_t alignment = 1);
 
 }  // namespace dawn::native
 
