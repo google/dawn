@@ -357,6 +357,16 @@ crbug.com/dawn/0000 [ intel win ] webgpu:shader,execution,expression,call,builti
 crbug.com/dawn/0000 [ intel win ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="const";* [ Skip ]
 
 ################################################################################
+# Timeout on Win/NVIDIA/x86
+################################################################################
+crbug.com/dawn/0000 [ nvidia win release ] webgpu:shader,execution,expression,binary,f32_logical:equals:inputSource="const";* [ Skip ]
+crbug.com/dawn/0000 [ nvidia win release ] webgpu:shader,execution,expression,binary,f32_logical:greater_equals:inputSource="const";* [ Skip ]
+crbug.com/dawn/0000 [ nvidia win release ] webgpu:shader,execution,expression,binary,f32_logical:greater_than:inputSource="const";* [ Skip ]
+crbug.com/dawn/0000 [ nvidia win release ] webgpu:shader,execution,expression,binary,f32_logical:less_equals:inputSource="const";* [ Skip ]
+crbug.com/dawn/0000 [ nvidia win release ] webgpu:shader,execution,expression,binary,f32_logical:less_than:inputSource="const";* [ Skip ]
+crbug.com/dawn/0000 [ nvidia win release ] webgpu:shader,execution,expression,binary,f32_logical:not_equals:inputSource="const";* [ Skip ]
+
+################################################################################
 # Fixed by https://chromium-review.googlesource.com/c/chromium/src/+/3716961
 ################################################################################
 crbug.com/dawn/0000 webgpu:api,validation,capability_checks,features,texture_formats:depth_stencil_state:format="depth32float-stencil8";enable_required_feature=false [ Failure ]
