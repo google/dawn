@@ -194,8 +194,15 @@ class StructMember : public Castable<StructMember, Node> {
     /// @returns the AST declaration node
     const ast::StructMember* Declaration() const { return declaration_; }
 
-    /// @returns the name of the structure
+    /// @returns the name of the structure member
     Symbol Name() const { return name_; }
+
+    /// Sets the owning structure to `s`
+    /// @param s the new structure owner
+    void SetStruct(const sem::Struct* s) { struct_ = s; }
+
+    /// @returns the structure that owns this member
+    const sem::Struct* Struct() const { return struct_; }
 
     /// @returns the type of the member
     sem::Type* Type() const { return type_; }
@@ -215,6 +222,7 @@ class StructMember : public Castable<StructMember, Node> {
   private:
     const ast::StructMember* const declaration_;
     const Symbol name_;
+    const sem::Struct* struct_;
     sem::Type* const type_;
     const uint32_t index_;
     const uint32_t offset_;

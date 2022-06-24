@@ -17,6 +17,7 @@
 #include "gtest/gtest.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/expression.h"
+#include "src/tint/sem/index_accessor_expression.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 

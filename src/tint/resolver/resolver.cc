@@ -62,6 +62,7 @@
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/if_statement.h"
+#include "src/tint/sem/index_accessor_expression.h"
 #include "src/tint/sem/loop_statement.h"
 #include "src/tint/sem/materialize.h"
 #include "src/tint/sem/member_accessor_expression.h"
@@ -1359,8 +1360,9 @@ sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* exp
 
     auto val = EvaluateConstantValue(expr, ty);
     bool has_side_effects = idx->HasSideEffects() || obj->HasSideEffects();
-    auto* sem = builder_->create<sem::Expression>(expr, ty, current_statement_, std::move(val),
-                                                  has_side_effects, obj->SourceVariable());
+    auto* sem = builder_->create<sem::IndexAccessorExpression>(
+        expr, ty, obj, idx, current_statement_, std::move(val), has_side_effects,
+        obj->SourceVariable());
     sem->Behaviors() = idx->Behaviors() + obj->Behaviors();
     return sem;
 }
@@ -1872,9 +1874,9 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
     const sem::Type* ret = nullptr;
     std::vector<uint32_t> swizzle;
 
-    // Structure may be a side-effecting expression (e.g. function call).
-    auto* sem_structure = sem_.Get(expr->structure);
-    bool has_side_effects = sem_structure && sem_structure->HasSideEffects();
+    // Object may be a side-effecting expression (e.g. function call).
+    auto* object = sem_.Get(expr->structure);
+    bool has_side_effects = object && object->HasSideEffects();
 
     if (auto* str = storage_ty->As<sem::Struct>()) {
         Mark(expr->member);
@@ -1900,8 +1902,8 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
             ret = builder_->create<sem::Reference>(ret, ref->StorageClass(), ref->Access());
         }
 
-        return builder_->create<sem::StructMemberAccess>(expr, ret, current_statement_, member,
-                                                         has_side_effects, source_var);
+        return builder_->create<sem::StructMemberAccess>(expr, ret, current_statement_, object,
+                                                         member, has_side_effects, source_var);
     }
 
     if (auto* vec = storage_ty->As<sem::Vector>()) {
@@ -1967,8 +1969,8 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
             // the swizzle.
             ret = builder_->create<sem::Vector>(vec->type(), static_cast<uint32_t>(size));
         }
-        return builder_->create<sem::Swizzle>(expr, ret, current_statement_, std::move(swizzle),
-                                              has_side_effects, source_var);
+        return builder_->create<sem::Swizzle>(expr, ret, current_statement_, object,
+                                              std::move(swizzle), has_side_effects, source_var);
     }
 
     AddError("invalid member accessor expression. Expected vector or struct, got '" +
@@ -2384,6 +2386,8 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                 break;
             }
         }
+
+        const_cast<sem::StructMember*>(sem_members[i])->SetStruct(out);
     }
 
     auto stage = current_function_ ? current_function_->Declaration()->PipelineStage()

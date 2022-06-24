@@ -326,6 +326,8 @@ set(TINT_LIB_SRCS
   sem/i32.h
   sem/if_statement.cc
   sem/if_statement.h
+  sem/index_accessor_expression.cc
+  sem/index_accessor_expression.h
   sem/info.cc
   sem/info.h
   sem/loop_statement.cc

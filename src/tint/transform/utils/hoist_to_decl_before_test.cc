@@ -17,6 +17,7 @@
 #include "gtest/gtest-spi.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/if_statement.h"
+#include "src/tint/sem/index_accessor_expression.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/transform/test_helper.h"
 #include "src/tint/transform/utils/hoist_to_decl_before.h"

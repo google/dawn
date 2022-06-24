@@ -26,29 +26,33 @@ namespace tint::sem {
 MemberAccessorExpression::MemberAccessorExpression(const ast::MemberAccessorExpression* declaration,
                                                    const sem::Type* type,
                                                    const Statement* statement,
+                                                   const Expression* object,
                                                    bool has_side_effects,
                                                    const Variable* source_var /* = nullptr */)
-    : Base(declaration, type, statement, Constant{}, has_side_effects, source_var) {}
+    : Base(declaration, type, statement, Constant{}, has_side_effects, source_var),
+      object_(object) {}
 
 MemberAccessorExpression::~MemberAccessorExpression() = default;
 
 StructMemberAccess::StructMemberAccess(const ast::MemberAccessorExpression* declaration,
                                        const sem::Type* type,
                                        const Statement* statement,
+                                       const Expression* object,
                                        const StructMember* member,
                                        bool has_side_effects,
                                        const Variable* source_var /* = nullptr */)
-    : Base(declaration, type, statement, has_side_effects, source_var), member_(member) {}
+    : Base(declaration, type, statement, object, has_side_effects, source_var), member_(member) {}
 
 StructMemberAccess::~StructMemberAccess() = default;
 
 Swizzle::Swizzle(const ast::MemberAccessorExpression* declaration,
                  const sem::Type* type,
                  const Statement* statement,
+                 const Expression* object,
                  std::vector<uint32_t> indices,
                  bool has_side_effects,
                  const Variable* source_var /* = nullptr */)
-    : Base(declaration, type, statement, has_side_effects, source_var),
+    : Base(declaration, type, statement, object, has_side_effects, source_var),
       indices_(std::move(indices)) {}
 
 Swizzle::~Swizzle() = default;
