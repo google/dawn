@@ -69,105 +69,155 @@ TEST_F(ConstantTest, ConstructorInitializerList) {
 }
 
 TEST_F(ConstantTest, Element_ai) {
-    Constant c(create<AbstractInt>(), {1_a});
+    auto* ty = create<AbstractInt>();
+    Constant c(ty, {1_a});
     EXPECT_EQ(c.Element<AInt>(0), 1_a);
     EXPECT_EQ(c.ElementCount(), 1u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), ty);
 }
 
 TEST_F(ConstantTest, Element_i32) {
-    Constant c(create<I32>(), {1_a});
+    auto* ty = create<I32>();
+    Constant c(ty, {1_a});
     EXPECT_EQ(c.Element<i32>(0), 1_i);
     EXPECT_EQ(c.ElementCount(), 1u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), ty);
 }
 
 TEST_F(ConstantTest, Element_u32) {
-    Constant c(create<U32>(), {1_a});
+    auto* ty = create<U32>();
+    Constant c(ty, {1_a});
     EXPECT_EQ(c.Element<u32>(0), 1_u);
     EXPECT_EQ(c.ElementCount(), 1u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), ty);
 }
 
 TEST_F(ConstantTest, Element_bool) {
-    Constant c(create<Bool>(), {true});
+    auto* ty = create<Bool>();
+    Constant c(ty, {true});
     EXPECT_EQ(c.Element<bool>(0), true);
     EXPECT_EQ(c.ElementCount(), 1u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), ty);
 }
 
 TEST_F(ConstantTest, Element_af) {
-    Constant c(create<AbstractFloat>(), {1.0_a});
+    auto* ty = create<AbstractFloat>();
+    Constant c(ty, {1.0_a});
     EXPECT_EQ(c.Element<AFloat>(0), 1.0_a);
     EXPECT_EQ(c.ElementCount(), 1u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), ty);
 }
 
 TEST_F(ConstantTest, Element_f32) {
-    Constant c(create<F32>(), {1.0_a});
+    auto* ty = create<F32>();
+    Constant c(ty, {1.0_a});
     EXPECT_EQ(c.Element<f32>(0), 1.0_f);
     EXPECT_EQ(c.ElementCount(), 1u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), ty);
 }
 
 TEST_F(ConstantTest, Element_f16) {
-    Constant c(create<F16>(), {1.0_a});
+    auto* ty = create<F16>();
+    Constant c(ty, {1.0_a});
     EXPECT_EQ(c.Element<f16>(0), 1.0_h);
     EXPECT_EQ(c.ElementCount(), 1u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), ty);
 }
 
 TEST_F(ConstantTest, Element_vec3_ai) {
-    Constant c(create<Vector>(create<AbstractInt>(), 3u), {1_a, 2_a, 3_a});
+    auto* el_ty = create<AbstractInt>();
+    auto* ty = create<Vector>(el_ty, 3u);
+    Constant c(ty, {1_a, 2_a, 3_a});
     EXPECT_EQ(c.Element<AInt>(0), 1_a);
     EXPECT_EQ(c.Element<AInt>(1), 2_a);
     EXPECT_EQ(c.Element<AInt>(2), 3_a);
     EXPECT_EQ(c.ElementCount(), 3u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), el_ty);
 }
 
 TEST_F(ConstantTest, Element_vec3_i32) {
-    Constant c(create<Vector>(create<I32>(), 3u), {1_a, 2_a, 3_a});
+    auto* el_ty = create<I32>();
+    auto* ty = create<Vector>(el_ty, 3u);
+    Constant c(ty, {1_a, 2_a, 3_a});
     EXPECT_EQ(c.Element<i32>(0), 1_i);
     EXPECT_EQ(c.Element<i32>(1), 2_i);
     EXPECT_EQ(c.Element<i32>(2), 3_i);
     EXPECT_EQ(c.ElementCount(), 3u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), el_ty);
 }
 
 TEST_F(ConstantTest, Element_vec3_u32) {
-    Constant c(create<Vector>(create<U32>(), 3u), {1_a, 2_a, 3_a});
+    auto* el_ty = create<U32>();
+    auto* ty = create<Vector>(el_ty, 3u);
+    Constant c(ty, {1_a, 2_a, 3_a});
     EXPECT_EQ(c.Element<u32>(0), 1_u);
     EXPECT_EQ(c.Element<u32>(1), 2_u);
     EXPECT_EQ(c.Element<u32>(2), 3_u);
     EXPECT_EQ(c.ElementCount(), 3u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), el_ty);
 }
 
 TEST_F(ConstantTest, Element_vec3_bool) {
-    Constant c(create<Vector>(create<Bool>(), 2u), {true, false});
+    auto* el_ty = create<Bool>();
+    auto* ty = create<Vector>(el_ty, 2u);
+    Constant c(ty, {true, false});
     EXPECT_EQ(c.Element<bool>(0), true);
     EXPECT_EQ(c.Element<bool>(1), false);
     EXPECT_EQ(c.ElementCount(), 2u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), el_ty);
 }
 
 TEST_F(ConstantTest, Element_vec3_af) {
-    Constant c(create<Vector>(create<AbstractFloat>(), 3u), {1.0_a, 2.0_a, 3.0_a});
+    auto* el_ty = create<AbstractFloat>();
+    auto* ty = create<Vector>(el_ty, 3u);
+    Constant c(ty, {1.0_a, 2.0_a, 3.0_a});
     EXPECT_EQ(c.Element<AFloat>(0), 1.0_a);
     EXPECT_EQ(c.Element<AFloat>(1), 2.0_a);
     EXPECT_EQ(c.Element<AFloat>(2), 3.0_a);
     EXPECT_EQ(c.ElementCount(), 3u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), el_ty);
 }
 
 TEST_F(ConstantTest, Element_vec3_f32) {
-    Constant c(create<Vector>(create<F32>(), 3u), {1.0_a, 2.0_a, 3.0_a});
+    auto* el_ty = create<F32>();
+    auto* ty = create<Vector>(el_ty, 3u);
+    Constant c(ty, {1.0_a, 2.0_a, 3.0_a});
     EXPECT_EQ(c.Element<f32>(0), 1.0_f);
     EXPECT_EQ(c.Element<f32>(1), 2.0_f);
     EXPECT_EQ(c.Element<f32>(2), 3.0_f);
     EXPECT_EQ(c.ElementCount(), 3u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), el_ty);
 }
 
 TEST_F(ConstantTest, Element_vec3_f16) {
-    Constant c(create<Vector>(create<F16>(), 3u), {1.0_a, 2.0_a, 3.0_a});
+    auto* el_ty = create<F16>();
+    auto* ty = create<Vector>(el_ty, 3u);
+    Constant c(ty, {1.0_a, 2.0_a, 3.0_a});
     EXPECT_EQ(c.Element<f16>(0), 1.0_h);
     EXPECT_EQ(c.Element<f16>(1), 2.0_h);
     EXPECT_EQ(c.Element<f16>(2), 3.0_h);
     EXPECT_EQ(c.ElementCount(), 3u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), el_ty);
 }
 
 TEST_F(ConstantTest, Element_mat2x3_af) {
-    Constant c(create<Matrix>(create<Vector>(create<AbstractFloat>(), 3u), 2u),
-               {1.0_a, 2.0_a, 3.0_a, 4.0_a, 5.0_a, 6.0_a});
+    auto* el_ty = create<AbstractFloat>();
+    auto* ty = create<Matrix>(create<Vector>(el_ty, 3u), 2u);
+    Constant c(ty, {1.0_a, 2.0_a, 3.0_a, 4.0_a, 5.0_a, 6.0_a});
     EXPECT_EQ(c.Element<AFloat>(0), 1.0_a);
     EXPECT_EQ(c.Element<AFloat>(1), 2.0_a);
     EXPECT_EQ(c.Element<AFloat>(2), 3.0_a);
@@ -175,11 +225,14 @@ TEST_F(ConstantTest, Element_mat2x3_af) {
     EXPECT_EQ(c.Element<AFloat>(4), 5.0_a);
     EXPECT_EQ(c.Element<AFloat>(5), 6.0_a);
     EXPECT_EQ(c.ElementCount(), 6u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), el_ty);
 }
 
 TEST_F(ConstantTest, Element_mat2x3_f32) {
-    Constant c(create<Matrix>(create<Vector>(create<F32>(), 3u), 2u),
-               {1.0_a, 2.0_a, 3.0_a, 4.0_a, 5.0_a, 6.0_a});
+    auto* el_ty = create<F32>();
+    auto* ty = create<Matrix>(create<Vector>(el_ty, 3u), 2u);
+    Constant c(ty, {1.0_a, 2.0_a, 3.0_a, 4.0_a, 5.0_a, 6.0_a});
     EXPECT_EQ(c.Element<f32>(0), 1.0_f);
     EXPECT_EQ(c.Element<f32>(1), 2.0_f);
     EXPECT_EQ(c.Element<f32>(2), 3.0_f);
@@ -187,11 +240,14 @@ TEST_F(ConstantTest, Element_mat2x3_f32) {
     EXPECT_EQ(c.Element<f32>(4), 5.0_f);
     EXPECT_EQ(c.Element<f32>(5), 6.0_f);
     EXPECT_EQ(c.ElementCount(), 6u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), el_ty);
 }
 
 TEST_F(ConstantTest, Element_mat2x3_f16) {
-    Constant c(create<Matrix>(create<Vector>(create<F16>(), 3u), 2u),
-               {1.0_a, 2.0_a, 3.0_a, 4.0_a, 5.0_a, 6.0_a});
+    auto* el_ty = create<F16>();
+    auto* ty = create<Matrix>(create<Vector>(el_ty, 3u), 2u);
+    Constant c(ty, {1.0_a, 2.0_a, 3.0_a, 4.0_a, 5.0_a, 6.0_a});
     EXPECT_EQ(c.Element<f16>(0), 1.0_h);
     EXPECT_EQ(c.Element<f16>(1), 2.0_h);
     EXPECT_EQ(c.Element<f16>(2), 3.0_h);
@@ -199,6 +255,8 @@ TEST_F(ConstantTest, Element_mat2x3_f16) {
     EXPECT_EQ(c.Element<f16>(4), 5.0_h);
     EXPECT_EQ(c.Element<f16>(5), 6.0_h);
     EXPECT_EQ(c.ElementCount(), 6u);
+    EXPECT_TYPE(c.Type(), ty);
+    EXPECT_TYPE(c.ElementType(), el_ty);
 }
 
 TEST_F(ConstantTest, AnyZero) {
