@@ -14,7 +14,7 @@ void f() {
     }
     {
       int tint_symbol[1] = int[1](1);
-      i = (i + tint_symbol[0]);
+      i = (i + 1);
     }
   }
 }

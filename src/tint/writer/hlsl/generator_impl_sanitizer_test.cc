@@ -188,12 +188,11 @@ void a_func() {
 
 TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
     auto* array_init = array<i32, 4>(1_i, 2_i, 3_i, 4_i);
-    auto* array_index = IndexAccessor(array_init, 3_i);
-    auto* pos = Var("pos", ty.i32(), ast::StorageClass::kNone, array_index);
 
     Func("main", {}, ty.void_(),
          {
-             Decl(pos),
+             Decl(Var("idx", nullptr, Expr(3_i))),
+             Decl(Var("pos", ty.i32(), IndexAccessor(array_init, "idx"))),
          },
          {
              Stage(ast::PipelineStage::kFragment),
@@ -205,8 +204,9 @@ TEST_F(HlslSanitizerTest, PromoteArrayInitializerToConstVar) {
 
     auto got = gen.result();
     auto* expect = R"(void main() {
+  int idx = 3;
   const int tint_symbol[4] = {1, 2, 3, 4};
-  int pos = tint_symbol[3];
+  int pos = tint_symbol[idx];
   return;
 }
 )";

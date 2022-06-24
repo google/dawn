@@ -97,18 +97,19 @@ bool Constant::AllEqual(size_t start, size_t end) const {
 
 const Type* Constant::CheckElemType(const sem::Type* ty, size_t num_elements) {
     diag::List diag;
-    if (ty->is_abstract_or_scalar() || ty->IsAnyOf<Vector, Matrix>()) {
-        uint32_t count = 0;
-        auto* el_ty = Type::DeepestElementOf(ty, &count);
-        if (num_elements != count) {
-            TINT_ICE(Semantic, diag) << "sem::Constant() type <-> element mismatch. type: '"
-                                     << ty->TypeInfo().name << "' element: " << num_elements;
-        }
-        TINT_ASSERT(Semantic, el_ty->is_abstract_or_scalar());
-        return el_ty;
+    uint32_t count = 0;
+    auto* el_ty = Type::DeepestElementOf(ty, &count);
+    if (!el_ty) {
+        TINT_ICE(Semantic, diag) << "Unsupported sem::Constant type: " << ty->TypeInfo().name;
+        return nullptr;
     }
-    TINT_UNREACHABLE(Semantic, diag) << "Unsupported sem::Constant type: " << ty->TypeInfo().name;
-    return nullptr;
+    if (num_elements != count) {
+        TINT_ICE(Semantic, diag) << "sem::Constant() type <-> element mismatch. type: '"
+                                 << ty->TypeInfo().name << "' provided: " << num_elements
+                                 << " require: " << count;
+    }
+    TINT_ASSERT(Semantic, el_ty->is_abstract_or_scalar());
+    return el_ty;
 }
 
 }  // namespace tint::sem

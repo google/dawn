@@ -178,14 +178,13 @@ sem::Constant Resolver::EvaluateConstantValue(const ast::CallExpression* call,
                                               const sem::Type* ty) {
     uint32_t num_elems = 0;
     auto* el_ty = sem::Type::DeepestElementOf(ty, &num_elems);
-    if (!el_ty) {
+    if (!el_ty || num_elems == 0) {
         return {};
     }
 
-    // ElementOf() will also return the element type of array, which we do not support.
-    if (ty->Is<sem::Array>()) {
-        return sem::Constant{};
-    }
+    // Note: we are building constant values for array types. The working group as verbally agreed
+    // to support constant expression arrays, but this is not (yet) part of the spec.
+    // See: https://github.com/gpuweb/gpuweb/issues/3056
 
     // For zero value init, return 0s
     if (call->args.empty()) {

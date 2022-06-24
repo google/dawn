@@ -156,12 +156,11 @@ void main() {
 
 TEST_F(GlslSanitizerTest, PromoteArrayInitializerToConstVar) {
     auto* array_init = array<i32, 4>(1_i, 2_i, 3_i, 4_i);
-    auto* array_index = IndexAccessor(array_init, 3_i);
-    auto* pos = Var("pos", ty.i32(), ast::StorageClass::kNone, array_index);
 
     Func("main", {}, ty.void_(),
          {
-             Decl(pos),
+             Decl(Var("idx", nullptr, Expr(3_i))),
+             Decl(Var("pos", ty.i32(), IndexAccessor(array_init, "idx"))),
          },
          {
              Stage(ast::PipelineStage::kFragment),
@@ -176,8 +175,9 @@ TEST_F(GlslSanitizerTest, PromoteArrayInitializerToConstVar) {
 precision mediump float;
 
 void tint_symbol() {
+  int idx = 3;
   int tint_symbol_1[4] = int[4](1, 2, 3, 4);
-  int pos = tint_symbol_1[3];
+  int pos = tint_symbol_1[idx];
 }
 
 void main() {

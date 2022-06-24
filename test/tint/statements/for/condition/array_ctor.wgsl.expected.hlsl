@@ -7,7 +7,7 @@ void f() {
   int i = 0;
   [loop] while (true) {
     const int tint_symbol[1] = {1};
-    if (!((i < tint_symbol[0]))) {
+    if (!((i < 1))) {
       break;
     }
     {

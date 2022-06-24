@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 26
+; Bound: 21
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -10,42 +10,36 @@
                OpName %unused_entry_point "unused_entry_point"
                OpName %f "f"
                OpName %i "i"
-               OpDecorate %_arr_int_uint_1 ArrayStride 4
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
         %int = OpTypeInt 32 1
-       %uint = OpTypeInt 32 0
-     %uint_1 = OpConstant %uint 1
-%_arr_int_uint_1 = OpTypeArray %int %uint_1
       %int_1 = OpConstant %int 1
-         %12 = OpConstantComposite %_arr_int_uint_1 %int_1
-         %13 = OpConstantNull %int
 %_ptr_Function_int = OpTypePointer Function %int
+         %11 = OpConstantNull %int
        %bool = OpTypeBool
-         %23 = OpConstantNull %bool
+         %18 = OpConstantNull %bool
 %unused_entry_point = OpFunction %void None %1
           %4 = OpLabel
                OpReturn
                OpFunctionEnd
           %f = OpFunction %void None %1
           %6 = OpLabel
-          %i = OpVariable %_ptr_Function_int Function %13
-         %14 = OpCompositeExtract %int %12 0
-               OpStore %i %14
-               OpBranch %17
-         %17 = OpLabel
-               OpLoopMerge %18 %19 None
-               OpBranch %20
+          %i = OpVariable %_ptr_Function_int Function %11
+               OpStore %i %int_1
+               OpBranch %12
+         %12 = OpLabel
+               OpLoopMerge %13 %14 None
+               OpBranch %15
+         %15 = OpLabel
+         %16 = OpLogicalNot %bool %18
+               OpSelectionMerge %19 None
+               OpBranchConditional %16 %20 %19
          %20 = OpLabel
-         %21 = OpLogicalNot %bool %23
-               OpSelectionMerge %24 None
-               OpBranchConditional %21 %25 %24
-         %25 = OpLabel
-               OpBranch %18
-         %24 = OpLabel
-               OpBranch %19
+               OpBranch %13
          %19 = OpLabel
-               OpBranch %17
-         %18 = OpLabel
+               OpBranch %14
+         %14 = OpLabel
+               OpBranch %12
+         %13 = OpLabel
                OpReturn
                OpFunctionEnd

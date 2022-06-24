@@ -1691,7 +1691,12 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
 bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* expr) {
     if (auto* sem = builder_.Sem().Get(expr)) {
         if (auto constant = sem->ConstantValue()) {
-            return EmitConstant(out, constant);
+            // We do not want to inline array constants, as this will undo the work of
+            // PromoteInitializersToConstVar, which ensures that arrays are declarated in 'let's
+            // before their usage.
+            if (!constant.Type()->Is<sem::Array>()) {
+                return EmitConstant(out, constant);
+            }
         }
     }
     return Switch(

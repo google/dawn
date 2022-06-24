@@ -6,6 +6,6 @@ void unused_entry_point() {
 }
 int f() {
   int a[8] = int[8](1, 2, 3, 4, 5, 6, 7, 8);
-  return a[1];
+  return 2;
 }
 

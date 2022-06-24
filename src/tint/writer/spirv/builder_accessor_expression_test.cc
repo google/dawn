@@ -274,18 +274,13 @@ TEST_F(BuilderTest, Const_IndexAccessor_Array_MultiLevel) {
 %16 = OpConstant %7 6
 %17 = OpConstantComposite %6 %14 %15 %16
 %18 = OpConstantComposite %5 %13 %17
-%19 = OpTypeInt 32 1
-%20 = OpConstant %19 1
-%22 = OpConstant %19 2
-%25 = OpTypePointer Function %7
-%26 = OpConstantNull %7
+%20 = OpTypePointer Function %7
+%21 = OpConstantNull %7
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"(%24 = OpVariable %25 Function %26
+    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"(%19 = OpVariable %20 Function %21
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%21 = OpCompositeExtract %6 %18 1
-%23 = OpCompositeExtract %7 %21 2
-OpStore %24 %23
+              R"(OpStore %19 %16
 OpReturn
 )");
 
@@ -546,16 +541,12 @@ TEST_F(BuilderTest, Const_IndexAccessor_Nested_Array_f32) {
 %14 = OpConstantComposite %6 %13 %13
 %15 = OpConstantComposite %6 %11 %13
 %16 = OpConstantComposite %5 %12 %14 %15
-%17 = OpConstant %8 1
-%19 = OpConstantNull %8
-%22 = OpTypePointer Function %7
+%18 = OpTypePointer Function %7
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"(%21 = OpVariable %22 Function %10
+    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"(%17 = OpVariable %18 Function %10
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%18 = OpCompositeExtract %6 %16 1
-%20 = OpCompositeExtract %7 %18 0
-OpStore %21 %20
+              R"(OpStore %17 %13
 OpReturn
 )");
 
