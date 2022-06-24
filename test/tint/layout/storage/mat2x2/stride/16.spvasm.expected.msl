@@ -1,33 +1,42 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct strided_arr {
-  /* 0x0000 */ float2 el;
-  /* 0x0008 */ int8_t tint_pad[8];
+
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
 };
 
-struct tint_array_wrapper {
-  /* 0x0000 */ strided_arr arr[2];
+struct strided_arr {
+  /* 0x0000 */ float2 el;
+  /* 0x0008 */ tint_array<int8_t, 8> tint_pad;
 };
 
 struct SSBO {
-  /* 0x0000 */ tint_array_wrapper m;
+  /* 0x0000 */ tint_array<strided_arr, 2> m;
 };
 
-float2x2 arr_to_mat2x2_stride_16(tint_array_wrapper arr) {
-  return float2x2(arr.arr[0u].el, arr.arr[1u].el);
+float2x2 arr_to_mat2x2_stride_16(tint_array<strided_arr, 2> arr) {
+  return float2x2(arr[0u].el, arr[1u].el);
 }
 
-tint_array_wrapper mat2x2_stride_16_to_arr(float2x2 m) {
+tint_array<strided_arr, 2> mat2x2_stride_16_to_arr(float2x2 m) {
   strided_arr const tint_symbol_1 = {.el=m[0u]};
   strided_arr const tint_symbol_2 = {.el=m[1u]};
-  tint_array_wrapper const tint_symbol_3 = {.arr={tint_symbol_1, tint_symbol_2}};
+  tint_array<strided_arr, 2> const tint_symbol_3 = tint_array<strided_arr, 2>{tint_symbol_1, tint_symbol_2};
   return tint_symbol_3;
 }
 
 void f_1(device SSBO* const tint_symbol_4) {
   float2x2 const x_15 = arr_to_mat2x2_stride_16((*(tint_symbol_4)).m);
-  tint_array_wrapper const tint_symbol = mat2x2_stride_16_to_arr(x_15);
+  tint_array<strided_arr, 2> const tint_symbol = mat2x2_stride_16_to_arr(x_15);
   (*(tint_symbol_4)).m = tint_symbol;
   return;
 }

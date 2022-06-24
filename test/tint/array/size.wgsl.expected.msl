@@ -1,19 +1,28 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
 constant int slen = 4;
 
 constant uint ulen = 4u;
 
-struct tint_array_wrapper {
-  float arr[4];
-};
-
 fragment void tint_symbol() {
-  tint_array_wrapper signed_literal = {};
-  tint_array_wrapper unsigned_literal = {};
-  tint_array_wrapper signed_constant = {};
-  tint_array_wrapper unsigned_constant = {};
+  tint_array<float, 4> signed_literal = {};
+  tint_array<float, 4> unsigned_literal = {};
+  tint_array<float, 4> signed_constant = {};
+  tint_array<float, 4> unsigned_constant = {};
   signed_literal = unsigned_constant;
   signed_constant = unsigned_literal;
   return;

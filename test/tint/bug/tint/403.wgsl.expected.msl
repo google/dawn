@@ -1,6 +1,19 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
 struct vertexUniformBuffer1 {
   /* 0x0000 */ float2x2 transform1;
 };
@@ -13,18 +26,14 @@ struct tint_symbol_1 {
   float4 value [[position]];
 };
 
-struct tint_array_wrapper {
-  float2 arr[3];
-};
-
 float4 tint_symbol_inner(uint gl_VertexIndex, const constant vertexUniformBuffer1* const tint_symbol_3, const constant vertexUniformBuffer2* const tint_symbol_4) {
-  tint_array_wrapper indexable = {};
+  tint_array<float2, 3> indexable = {};
   float2x2 const x_23 = (*(tint_symbol_3)).transform1;
   float2x2 const x_28 = (*(tint_symbol_4)).transform2;
   uint const x_46 = gl_VertexIndex;
-  tint_array_wrapper const tint_symbol_2 = {.arr={float2(-1.0f, 1.0f), float2(1.0f), float2(-1.0f)}};
+  tint_array<float2, 3> const tint_symbol_2 = tint_array<float2, 3>{float2(-1.0f, 1.0f), float2(1.0f), float2(-1.0f)};
   indexable = tint_symbol_2;
-  float2 const x_51 = indexable.arr[x_46];
+  float2 const x_51 = indexable[x_46];
   float2 const x_52 = (float2x2((x_23[0u] + x_28[0u]), (x_23[1u] + x_28[1u])) * x_51);
   return float4(x_52[0], x_52[1], 0.0f, 1.0f);
 }

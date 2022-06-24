@@ -425,6 +425,10 @@ class GeneratorImpl : public TextGenerator {
                            const sem::Builtin* builtin,
                            F&& build);
 
+    /// @returns the name of the templated tint_array helper type, generating it if this is the
+    /// first call.
+    const std::string& ArrayType();
+
     TextBuffer helpers_;  // Helper functions emitted at the top of the output
 
     /// @returns the MSL packed type size and alignment in bytes for the given
@@ -439,12 +443,16 @@ class GeneratorImpl : public TextGenerator {
         utils::UnorderedKeyWrapper<std::tuple<ast::StorageClass, const sem::Struct*>>;
     std::unordered_map<ACEWKeyType, std::string> atomicCompareExchangeWeak_;
 
-    /// Unique name of the 'TINT_INVARIANT' preprocessor define. Non-empty only if
-    /// an invariant attribute has been generated.
+    /// Unique name of the 'TINT_INVARIANT' preprocessor define.
+    /// Non-empty only if an invariant attribute has been generated.
     std::string invariant_define_name_;
 
     /// True if matrix-packed_vector operator overloads have been generated.
     bool matrix_packed_vector_overloads_ = false;
+
+    /// Unique name of the tint_array<T, N> template.
+    /// Non-empty only if the template has been generated.
+    std::string array_template_name_;
 
     /// A map from entry point name to a list of dynamic workgroup allocations.
     /// Each entry in the vector is the size of the workgroup allocation that

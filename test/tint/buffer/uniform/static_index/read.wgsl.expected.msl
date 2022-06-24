@@ -2,6 +2,18 @@
 
 using namespace metal;
 
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
 template<typename T, int N, int M>
 inline vec<T, M> operator*(matrix<T, N, M> lhs, packed_vec<T, N> rhs) {
   return lhs * vec<T, N>(rhs);
@@ -14,11 +26,7 @@ inline vec<T, N> operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
 
 struct Inner {
   /* 0x0000 */ int x;
-  /* 0x0004 */ int8_t tint_pad[12];
-};
-
-struct tint_array_wrapper {
-  /* 0x0000 */ Inner arr[4];
+  /* 0x0004 */ tint_array<int8_t, 12> tint_pad;
 };
 
 struct S {
@@ -32,9 +40,9 @@ struct S {
   /* 0x0038 */ int2 h;
   /* 0x0040 */ float2x3 i;
   /* 0x0060 */ float3x2 j;
-  /* 0x0078 */ int8_t tint_pad_1[8];
+  /* 0x0078 */ tint_array<int8_t, 8> tint_pad_1;
   /* 0x0080 */ Inner k;
-  /* 0x0090 */ tint_array_wrapper l;
+  /* 0x0090 */ tint_array<Inner, 4> l;
 };
 
 kernel void tint_symbol(const constant S* tint_symbol_1 [[buffer(0)]]) {
@@ -49,7 +57,7 @@ kernel void tint_symbol(const constant S* tint_symbol_1 [[buffer(0)]]) {
   float2x3 const i = (*(tint_symbol_1)).i;
   float3x2 const j = (*(tint_symbol_1)).j;
   Inner const k = (*(tint_symbol_1)).k;
-  tint_array_wrapper const l = (*(tint_symbol_1)).l;
+  tint_array<Inner, 4> const l = (*(tint_symbol_1)).l;
   return;
 }
 

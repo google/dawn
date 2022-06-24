@@ -1,6 +1,19 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
 struct S1 {
   int a;
   int b;
@@ -19,16 +32,8 @@ struct S3 {
   S2 i;
 };
 
-struct tint_array_wrapper {
-  int arr[2];
-};
-
 struct T {
-  tint_array_wrapper a;
-};
-
-struct tint_array_wrapper_1 {
-  T arr[2];
+  tint_array<int, 2> a;
 };
 
 kernel void tint_symbol() {
@@ -58,15 +63,15 @@ kernel void tint_symbol() {
   S1 const tint_symbol_12 = {.a=2, .b=42, .c=as_type<int>((as_type<uint>(42) + as_type<uint>(1))), .d=nested_nonempty.i.f.d};
   S2 const tint_symbol_13 = {.e=1, .f=tint_symbol_12};
   S1 const subexpr_nested_nonempty_with_expr = tint_symbol_13.f;
-  tint_array_wrapper_1 const aosoa_empty = {.arr={}};
-  tint_array_wrapper const tint_symbol_14 = {.arr={1, 2}};
+  tint_array<T, 2> const aosoa_empty = tint_array<T, 2>{};
+  tint_array<int, 2> const tint_symbol_14 = tint_array<int, 2>{1, 2};
   T const tint_symbol_15 = {.a=tint_symbol_14};
-  tint_array_wrapper const tint_symbol_16 = {.arr={3, 4}};
+  tint_array<int, 2> const tint_symbol_16 = tint_array<int, 2>{3, 4};
   T const tint_symbol_17 = {.a=tint_symbol_16};
-  tint_array_wrapper_1 const aosoa_nonempty = {.arr={tint_symbol_15, tint_symbol_17}};
-  tint_array_wrapper const tint_symbol_18 = {.arr={1, as_type<int>((as_type<uint>(aosoa_nonempty.arr[0].a.arr[0]) + as_type<uint>(1)))}};
+  tint_array<T, 2> const aosoa_nonempty = tint_array<T, 2>{tint_symbol_15, tint_symbol_17};
+  tint_array<int, 2> const tint_symbol_18 = tint_array<int, 2>{1, as_type<int>((as_type<uint>(aosoa_nonempty[0].a[0]) + as_type<uint>(1)))};
   T const tint_symbol_19 = {.a=tint_symbol_18};
-  tint_array_wrapper_1 const aosoa_nonempty_with_expr = {.arr={tint_symbol_19, aosoa_nonempty.arr[1]}};
+  tint_array<T, 2> const aosoa_nonempty_with_expr = tint_array<T, 2>{tint_symbol_19, aosoa_nonempty[1]};
   return;
 }
 

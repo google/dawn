@@ -71,7 +71,6 @@
 #include "src/tint/transform/unshadow.h"
 #include "src/tint/transform/unwind_discard_functions.h"
 #include "src/tint/transform/vectorize_scalar_matrix_constructors.h"
-#include "src/tint/transform/wrap_arrays_in_structs.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
@@ -208,7 +207,6 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     manager.Add<transform::PromoteInitializersToConstVar>();
 
     manager.Add<transform::VectorizeScalarMatrixConstructors>();
-    manager.Add<transform::WrapArraysInStructs>();
     manager.Add<transform::RemovePhonies>();
     manager.Add<transform::SimplifyPointers>();
     // ArrayLengthFromUniform must come after SimplifyPointers, as
@@ -731,13 +729,33 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
                                         const sem::TypeConstructor* ctor) {
     auto* type = ctor->ReturnType();
 
-    if (type->IsAnyOf<sem::Array, sem::Struct>()) {
-        out << "{";
-    } else {
-        if (!EmitType(out, type, "")) {
-            return false;
-        }
-        out << "(";
+    const char* terminator = ")";
+    TINT_DEFER(out << terminator);
+
+    bool ok = Switch(
+        type,
+        [&](const sem::Array*) {
+            if (!EmitType(out, type, "")) {
+                return false;
+            }
+            out << "{";
+            terminator = "}";
+            return true;
+        },
+        [&](const sem::Struct*) {
+            out << "{";
+            terminator = "}";
+            return true;
+        },
+        [&](Default) {
+            if (!EmitType(out, type, "")) {
+                return false;
+            }
+            out << "(";
+            return true;
+        });
+    if (!ok) {
+        return false;
     }
 
     int i = 0;
@@ -760,11 +778,6 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
         i++;
     }
 
-    if (type->IsAnyOf<sem::Array, sem::Struct>()) {
-        out << "}";
-    } else {
-        out << ")";
-    }
     return true;
 }
 
@@ -1561,10 +1574,9 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
             ScopedParen sp(out);
             return EmitZeroValue(out, mat->type());
         },
-        [&](const sem::Array* arr) {
-            out << "{";
-            TINT_DEFER(out << "}");
-            return EmitZeroValue(out, arr->ElemType());
+        [&](const sem::Array*) {
+            out << "{}";
+            return true;
         },
         [&](const sem::Struct*) {
             out << "{}";
@@ -1772,8 +1784,8 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
             if (!EmitType(out, type, param_name)) {
                 return false;
             }
-            // Parameter name is output as part of the type for arrays and pointers.
-            if (!type->Is<sem::Array>() && !type->Is<sem::Pointer>()) {
+            // Parameter name is output as part of the type for pointers.
+            if (!type->Is<sem::Pointer>()) {
                 out << " " << program_->Symbols().NameFor(v->symbol);
             }
         }
@@ -1896,8 +1908,8 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
             if (!EmitType(out, type, param_name)) {
                 return false;
             }
-            // Parameter name is output as part of the type for arrays and pointers.
-            if (!type->Is<sem::Array>() && !type->Is<sem::Pointer>()) {
+            // Parameter name is output as part of the type for pointers.
+            if (!type->Is<sem::Pointer>()) {
                 out << " " << param_name;
             }
 
@@ -2412,29 +2424,12 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                 << "unhandled atomic type " << atomic->Type()->FriendlyName(builder_.Symbols());
             return false;
         },
-        [&](const sem::Array* ary) {
-            const sem::Type* base_type = ary;
-            std::vector<uint32_t> sizes;
-            while (auto* arr = base_type->As<sem::Array>()) {
-                if (arr->IsRuntimeSized()) {
-                    sizes.push_back(1);
-                } else {
-                    sizes.push_back(arr->Count());
-                }
-                base_type = arr->ElemType();
-            }
-            if (!EmitType(out, base_type, "")) {
+        [&](const sem::Array* arr) {
+            out << ArrayType() << "<";
+            if (!EmitType(out, arr->ElemType(), "")) {
                 return false;
             }
-            if (!name.empty()) {
-                out << " " << name;
-                if (name_printed) {
-                    *name_printed = true;
-                }
-            }
-            for (uint32_t size : sizes) {
-                out << "[" << size << "]";
-            }
+            out << ", " << (arr->IsRuntimeSized() ? 1u : arr->Count()) << ">";
             return true;
         },
         [&](const sem::Bool*) {
@@ -2469,22 +2464,12 @@ bool GeneratorImpl::EmitType(std::ostream& out,
                 return false;
             }
             out << " ";
-            if (ptr->StoreType()->Is<sem::Array>()) {
-                std::string inner = "(*" + name + ")";
-                if (!EmitType(out, ptr->StoreType(), inner)) {
-                    return false;
-                }
-                if (name_printed) {
-                    *name_printed = true;
-                }
-            } else {
-                if (!EmitType(out, ptr->StoreType(), "")) {
-                    return false;
-                }
-                out << "* " << name;
-                if (name_printed) {
-                    *name_printed = true;
-                }
+            if (!EmitType(out, ptr->StoreType(), "")) {
+                return false;
+            }
+            out << "* " << name;
+            if (name_printed) {
+                *name_printed = true;
             }
             return true;
         },
@@ -2700,7 +2685,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
 
         auto out = line(b);
         add_byte_offset_comment(out, msl_offset);
-        out << "int8_t " << name << "[" << size << "];";
+        out << ArrayType() << "<int8_t, " << size << "> " << name << ";";
     };
 
     b->IncrementIndent();
@@ -2738,11 +2723,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
 
         auto* ty = mem->Type();
 
-        // Array member name will be output with the type
-        if (!ty->Is<sem::Array>()) {
-            out << " " << mem_name;
-        }
-
+        out << " " << mem_name;
         // Emit attributes
         if (auto* decl = mem->Declaration()) {
             for (auto* attr : decl->attributes) {
@@ -2945,8 +2926,8 @@ bool GeneratorImpl::EmitVar(const ast::Var* var) {
     if (!EmitType(out, type, name)) {
         return false;
     }
-    // Variable name is output as part of the type for arrays and pointers.
-    if (!type->Is<sem::Array>() && !type->Is<sem::Pointer>()) {
+    // Variable name is output as part of the type for pointers.
+    if (!type->Is<sem::Pointer>()) {
         out << " " << name;
     }
 
@@ -2995,8 +2976,8 @@ bool GeneratorImpl::EmitLet(const ast::Let* let) {
         return false;
     }
 
-    // Variable name is output as part of the type for arrays and pointers.
-    if (!type->Is<sem::Array>() && !type->Is<sem::Pointer>()) {
+    // Variable name is output as part of the type for pointers.
+    if (!type->Is<sem::Pointer>()) {
         out << " " << name;
     }
 
@@ -3018,9 +2999,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Let* let) {
     if (!EmitType(out, type, program_->Symbols().NameFor(let->symbol))) {
         return false;
     }
-    if (!type->Is<sem::Array>()) {
-        out << " " << program_->Symbols().NameFor(let->symbol);
-    }
+    out << " " << program_->Symbols().NameFor(let->symbol);
 
     if (let->constructor != nullptr) {
         out << " = ";
@@ -3042,9 +3021,7 @@ bool GeneratorImpl::EmitOverride(const ast::Override* override) {
     if (!EmitType(out, type, program_->Symbols().NameFor(override->symbol))) {
         return false;
     }
-    if (!type->Is<sem::Array>()) {
-        out << " " << program_->Symbols().NameFor(override->symbol);
-    }
+    out << " " << program_->Symbols().NameFor(override->symbol);
 
     out << " [[function_constant(" << global->ConstantId() << ")]];";
 
@@ -3117,8 +3094,8 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const sem::
 
         [&](const sem::Array* arr) {
             if (!arr->IsStrideImplicit()) {
-                TINT_ICE(Writer, diagnostics_) << "arrays with explicit strides not "
-                                                  "exist past the SPIR-V reader";
+                TINT_ICE(Writer, diagnostics_)
+                    << "arrays with explicit strides should not exist past the SPIR-V reader";
                 return SizeAndAlign{};
             }
             auto num_els = std::max<uint32_t>(arr->Count(), 1);
@@ -3203,6 +3180,27 @@ bool GeneratorImpl::CallBuiltinHelper(std::ostream& out,
         }
     }
     return true;
+}
+
+const std::string& GeneratorImpl::ArrayType() {
+    if (array_template_name_.empty()) {
+        array_template_name_ = UniqueIdentifier("tint_array");
+        auto* buf = &helpers_;
+        line(buf) << "template<typename T, size_t N>";
+        line(buf) << "struct " << array_template_name_ << " {";
+        line(buf) << "    const constant T& operator[](size_t i) const constant"
+                  << " { return elements[i]; }";
+        for (auto* space : {"device", "thread", "threadgroup"}) {
+            line(buf) << "    " << space << " T& operator[](size_t i) " << space
+                      << " { return elements[i]; }";
+            line(buf) << "    const " << space << " T& operator[](size_t i) const " << space
+                      << " { return elements[i]; }";
+        }
+        line(buf) << "    T elements[N];";
+        line(buf) << "};";
+        line(buf);
+    }
+    return array_template_name_;
 }
 
 }  // namespace tint::writer::msl

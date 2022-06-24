@@ -12,12 +12,20 @@ inline vec<T, N> operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
   return vec<T, M>(lhs) * rhs;
 }
 
-struct Inner {
-  /* 0x0000 */ int x;
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
 };
 
-struct tint_array_wrapper {
-  /* 0x0000 */ Inner arr[4];
+struct Inner {
+  /* 0x0000 */ int x;
 };
 
 struct S {
@@ -30,8 +38,8 @@ struct S {
   /* 0x0030 */ float2x3 g;
   /* 0x0050 */ float3x2 h;
   /* 0x0068 */ Inner i;
-  /* 0x006c */ tint_array_wrapper j;
-  /* 0x007c */ int8_t tint_pad[4];
+  /* 0x006c */ tint_array<Inner, 4> j;
+  /* 0x007c */ tint_array<int8_t, 4> tint_pad;
 };
 
 kernel void tint_symbol(const device S* tint_symbol_1 [[buffer(0)]]) {
@@ -44,7 +52,7 @@ kernel void tint_symbol(const device S* tint_symbol_1 [[buffer(0)]]) {
   float2x3 const g = (*(tint_symbol_1)).g;
   float3x2 const h = (*(tint_symbol_1)).h;
   Inner const i = (*(tint_symbol_1)).i;
-  tint_array_wrapper const j = (*(tint_symbol_1)).j;
+  tint_array<Inner, 4> const j = (*(tint_symbol_1)).j;
   return;
 }
 

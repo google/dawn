@@ -1,12 +1,21 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct MyStruct {
-  float f1;
+
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
 };
 
-struct tint_array_wrapper {
-  float arr[10];
+struct MyStruct {
+  float f1;
 };
 
 int ret_i32() {
@@ -26,8 +35,8 @@ MyStruct ret_MyStruct() {
   return tint_symbol_2;
 }
 
-tint_array_wrapper ret_MyArray() {
-  tint_array_wrapper const tint_symbol_3 = {.arr={}};
+tint_array<float, 10> ret_MyArray() {
+  tint_array<float, 10> const tint_symbol_3 = tint_array<float, 10>{};
   return tint_symbol_3;
 }
 
@@ -40,13 +49,13 @@ void let_decls() {
   float3 const v6 = float3(1.0f);
   float3x3 const v7 = float3x3(float3(1.0f), float3(1.0f), float3(1.0f));
   MyStruct const v8 = {.f1=1.0f};
-  tint_array_wrapper const v9 = {.arr={}};
+  tint_array<float, 10> const v9 = tint_array<float, 10>{};
   int const v10 = ret_i32();
   uint const v11 = ret_u32();
   float const v12 = ret_f32();
   MyStruct const v13 = ret_MyStruct();
   MyStruct const v14 = ret_MyStruct();
-  tint_array_wrapper const v15 = ret_MyArray();
+  tint_array<float, 10> const v15 = ret_MyArray();
 }
 
 struct tint_symbol_1 {

@@ -28,7 +28,7 @@ TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
-    EXPECT_EQ(gen.result(), "constant float pos[3] = {1.0f, 2.0f, 3.0f};\n");
+    EXPECT_EQ(gen.result(), "constant tint_array<float, 3> pos = tint_array<float, 3>{1.0f, 2.0f, 3.0f};\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_SpecConstant) {

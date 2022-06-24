@@ -61,7 +61,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
     gen.increment_indent();
 
     ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-    EXPECT_EQ(gen.result(), "  float a[5] = {0.0f};\n");
+    EXPECT_EQ(gen.result(), "  tint_array<float, 5> a = {};\n");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {

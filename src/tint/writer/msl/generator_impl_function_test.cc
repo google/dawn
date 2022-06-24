@@ -591,11 +591,20 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayParams) {
     EXPECT_EQ(gen.result(), R"(  #include <metal_stdlib>
 
   using namespace metal;
-  struct tint_array_wrapper {
-    float arr[5];
-  };
 
-  void my_func(tint_array_wrapper a) {
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
+  void my_func(tint_array<float, 5> a) {
     return;
   }
 
@@ -616,12 +625,21 @@ TEST_F(MslGeneratorImplTest, Emit_Function_WithArrayReturn) {
     EXPECT_EQ(gen.result(), R"(  #include <metal_stdlib>
 
   using namespace metal;
-  struct tint_array_wrapper {
-    float arr[5];
-  };
 
-  tint_array_wrapper my_func() {
-    tint_array_wrapper const tint_symbol = {.arr={}};
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
+  tint_array<float, 5> my_func() {
+    tint_array<float, 5> const tint_symbol = tint_array<float, 5>{};
     return tint_symbol;
   }
 

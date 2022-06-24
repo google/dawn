@@ -1,6 +1,19 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
 struct S {
   float a;
 };
@@ -21,11 +34,7 @@ constant float4 v4f32_let = float4(0.0f);
 
 constant float3x4 m3x4_let = float3x4(float4(0.0f), float4(0.0f), float4(0.0f));
 
-struct tint_array_wrapper {
-  float arr[4];
-};
-
-constant tint_array_wrapper arr_let = {.arr={}};
+constant tint_array<float, 4> arr_let = tint_array<float, 4>{};
 
 constant S struct_let = {};
 

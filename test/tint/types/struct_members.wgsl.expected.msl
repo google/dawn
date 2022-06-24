@@ -1,12 +1,21 @@
 #include <metal_stdlib>
 
 using namespace metal;
-struct S_inner {
-  float a;
+
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
 };
 
-struct tint_array_wrapper {
-  float arr[4];
+struct S_inner {
+  float a;
 };
 
 struct S {
@@ -18,7 +27,7 @@ struct S {
   uint3 member_v3u32;
   float4 member_v4f32;
   float2x3 member_m2x3;
-  tint_array_wrapper member_arr;
+  tint_array<float, 4> member_arr;
   S_inner member_struct;
 };
 

@@ -466,8 +466,6 @@ set(TINT_LIB_SRCS
   transform/vertex_pulling.h
   transform/while_to_loop.cc
   transform/while_to_loop.h
-  transform/wrap_arrays_in_structs.cc
-  transform/wrap_arrays_in_structs.h
   transform/zero_init_workgroup_memory.cc
   transform/zero_init_workgroup_memory.h
   utils/bitcast.h
@@ -1121,7 +1119,6 @@ if(TINT_BUILD_TESTS)
       transform/vectorize_scalar_matrix_constructors_test.cc
       transform/vertex_pulling_test.cc
       transform/while_to_loop_test.cc
-      transform/wrap_arrays_in_structs_test.cc
       transform/zero_init_workgroup_memory_test.cc
       transform/utils/get_insertion_point_test.cc
       transform/utils/hoist_to_decl_before_test.cc

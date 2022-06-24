@@ -1,6 +1,19 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
 struct Mat4x4_ {
   /* 0x0000 */ float4 mx;
   /* 0x0010 */ float4 my;
@@ -23,21 +36,13 @@ struct ub_SceneParams {
   /* 0x0000 */ Mat4x4_ u_Projection;
 };
 
-struct tint_array_wrapper {
-  /* 0x0000 */ Mat4x2_ arr[1];
-};
-
 struct ub_MaterialParams {
-  /* 0x0000 */ tint_array_wrapper u_TexMtx;
+  /* 0x0000 */ tint_array<Mat4x2_, 1> u_TexMtx;
   /* 0x0020 */ float4 u_Misc0_;
 };
 
-struct tint_array_wrapper_1 {
-  /* 0x0000 */ Mat4x3_ arr[32];
-};
-
 struct ub_PacketParams {
-  /* 0x0000 */ tint_array_wrapper_1 u_PosMtx;
+  /* 0x0000 */ tint_array<Mat4x3_, 32> u_PosMtx;
 };
 
 struct VertexOutput {
@@ -222,7 +227,7 @@ void main1(thread float* const tint_symbol_5, const constant ub_PacketParams* co
   Mat4x3_ t_PosMtx = {};
   float2 t_TexSpaceCoord = 0.0f;
   float const x_e15 = *(tint_symbol_5);
-  Mat4x3_ const x_e18 = (*(tint_symbol_6)).u_PosMtx.arr[int(x_e15)];
+  Mat4x3_ const x_e18 = (*(tint_symbol_6)).u_PosMtx[int(x_e15)];
   t_PosMtx = x_e18;
   Mat4x3_ const x_e23 = t_PosMtx;
   Mat4x4_ const x_e24 = x_Mat4x4_1(x_e23);
@@ -247,7 +252,7 @@ void main1(thread float* const tint_symbol_5, const constant ub_PacketParams* co
   if ((x_e52[0] == 2.0f)) {
     {
       float3 const x_e59 = *(tint_symbol_13);
-      Mat4x2_ const x_e64 = (*(tint_symbol_12)).u_TexMtx.arr[0];
+      Mat4x2_ const x_e64 = (*(tint_symbol_12)).u_TexMtx[0];
       float3 const x_e65 = *(tint_symbol_13);
       float2 const x_e68 = Mul2(x_e64, float4(x_e65, 1.0f));
       *(tint_symbol_14) = float2(x_e68).xy;
@@ -256,7 +261,7 @@ void main1(thread float* const tint_symbol_5, const constant ub_PacketParams* co
   } else {
     {
       float2 const x_e73 = *(tint_symbol_15);
-      Mat4x2_ const x_e79 = (*(tint_symbol_12)).u_TexMtx.arr[0];
+      Mat4x2_ const x_e79 = (*(tint_symbol_12)).u_TexMtx[0];
       float2 const x_e80 = *(tint_symbol_15);
       float2 const x_e84 = Mul2(x_e79, float4(x_e80, 1.0f, 1.0f));
       *(tint_symbol_14) = float2(x_e84).xy;

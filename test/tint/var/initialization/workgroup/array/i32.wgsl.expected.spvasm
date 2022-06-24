@@ -1,17 +1,18 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 42
+; Bound: 46
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main" %local_invocation_index_1
                OpExecutionMode %main LocalSize 1 1 1
                OpName %local_invocation_index_1 "local_invocation_index_1"
-               OpName %v "v"
+               OpName %zero "zero"
                OpName %main_inner "main_inner"
                OpName %local_invocation_index "local_invocation_index"
                OpName %idx "idx"
+               OpName %v "v"
                OpName %main "main"
                OpDecorate %local_invocation_index_1 BuiltIn LocalInvocationIndex
                OpDecorate %_arr_int_uint_3 ArrayStride 4
@@ -22,7 +23,7 @@
      %uint_3 = OpConstant %uint 3
 %_arr_int_uint_3 = OpTypeArray %int %uint_3
 %_ptr_Workgroup__arr_int_uint_3 = OpTypePointer Workgroup %_arr_int_uint_3
-          %v = OpVariable %_ptr_Workgroup__arr_int_uint_3 Workgroup
+       %zero = OpVariable %_ptr_Workgroup__arr_int_uint_3 Workgroup
        %void = OpTypeVoid
           %9 = OpTypeFunction %void %uint
 %_ptr_Function_uint = OpTypePointer Function %uint
@@ -33,11 +34,14 @@
      %uint_1 = OpConstant %uint 1
      %uint_2 = OpConstant %uint 2
    %uint_264 = OpConstant %uint 264
-         %37 = OpTypeFunction %void
+%_ptr_Function__arr_int_uint_3 = OpTypePointer Function %_arr_int_uint_3
+         %40 = OpConstantNull %_arr_int_uint_3
+         %41 = OpTypeFunction %void
  %main_inner = OpFunction %void None %9
 %local_invocation_index = OpFunctionParameter %uint
          %13 = OpLabel
         %idx = OpVariable %_ptr_Function_uint Function %16
+          %v = OpVariable %_ptr_Function__arr_int_uint_3 Function %40
                OpStore %idx %local_invocation_index
                OpBranch %17
          %17 = OpLabel
@@ -53,7 +57,7 @@
                OpBranch %18
          %25 = OpLabel
          %27 = OpLoad %uint %idx
-         %29 = OpAccessChain %_ptr_Workgroup_int %v %27
+         %29 = OpAccessChain %_ptr_Workgroup_int %zero %27
                OpStore %29 %30
                OpBranch %19
          %19 = OpLabel
@@ -63,11 +67,13 @@
                OpBranch %17
          %18 = OpLabel
                OpControlBarrier %uint_2 %uint_2 %uint_264
+         %37 = OpLoad %_arr_int_uint_3 %zero
+               OpStore %v %37
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %37
-         %39 = OpLabel
-         %41 = OpLoad %uint %local_invocation_index_1
-         %40 = OpFunctionCall %void %main_inner %41
+       %main = OpFunction %void None %41
+         %43 = OpLabel
+         %45 = OpLoad %uint %local_invocation_index_1
+         %44 = OpFunctionCall %void %main_inner %45
                OpReturn
                OpFunctionEnd

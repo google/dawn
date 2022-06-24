@@ -188,25 +188,34 @@ TEST_F(MslGeneratorImplTest, WorkgroupMatrixInArray) {
     EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
 
 using namespace metal;
-struct tint_array_wrapper {
-  float2x2 arr[4];
+
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
 };
 
 struct tint_symbol_3 {
-  tint_array_wrapper m;
+  tint_array<float2x2, 4> m;
 };
 
-void comp_main_inner(uint local_invocation_index, threadgroup tint_array_wrapper* const tint_symbol) {
+void comp_main_inner(uint local_invocation_index, threadgroup tint_array<float2x2, 4>* const tint_symbol) {
   for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
     uint const i = idx;
-    (*(tint_symbol)).arr[i] = float2x2(float2(0.0f), float2(0.0f));
+    (*(tint_symbol))[i] = float2x2(float2(0.0f), float2(0.0f));
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  tint_array_wrapper const x = *(tint_symbol);
+  tint_array<float2x2, 4> const x = *(tint_symbol);
 }
 
 kernel void comp_main(threadgroup tint_symbol_3* tint_symbol_2 [[threadgroup(0)]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup tint_array_wrapper* const tint_symbol_1 = &((*(tint_symbol_2)).m);
+  threadgroup tint_array<float2x2, 4>* const tint_symbol_1 = &((*(tint_symbol_2)).m);
   comp_main_inner(local_invocation_index, tint_symbol_1);
   return;
 }

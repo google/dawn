@@ -1,6 +1,19 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
 struct Params {
   /* 0x0000 */ uint filterDim;
   /* 0x0004 */ uint blockDim;
@@ -10,19 +23,11 @@ struct Flip {
   /* 0x0000 */ uint value;
 };
 
-struct tint_array_wrapper_1 {
-  float3 arr[256];
-};
-
-struct tint_array_wrapper {
-  tint_array_wrapper_1 arr[4];
-};
-
-void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_invocation_index, threadgroup tint_array_wrapper* const tint_symbol_1, const constant Params* const tint_symbol_2, texture2d<float, access::sample> tint_symbol_3, const constant Flip* const tint_symbol_4, sampler tint_symbol_5, texture2d<float, access::write> tint_symbol_6) {
+void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_invocation_index, threadgroup tint_array<tint_array<float3, 256>, 4>* const tint_symbol_1, const constant Params* const tint_symbol_2, texture2d<float, access::sample> tint_symbol_3, const constant Flip* const tint_symbol_4, sampler tint_symbol_5, texture2d<float, access::write> tint_symbol_6) {
   for(uint idx = local_invocation_index; (idx < 1024u); idx = (idx + 64u)) {
     uint const i_1 = (idx / 256u);
     uint const i_2 = (idx % 256u);
-    (*(tint_symbol_1)).arr[i_1].arr[i_2] = float3(0.0f);
+    (*(tint_symbol_1))[i_1][i_2] = float3(0.0f);
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
   uint const filterOffset = (((*(tint_symbol_2)).filterDim - 1u) / 2u);
@@ -34,7 +39,7 @@ void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_in
       if (((*(tint_symbol_4)).value != 0u)) {
         loadIndex = int2(loadIndex).yx;
       }
-      (*(tint_symbol_1)).arr[r].arr[((4u * LocalInvocationID[0]) + c)] = float4(tint_symbol_3.sample(tint_symbol_5, ((float2(loadIndex) + float2(0.25f)) / float2(dims)), level(0.0f))).rgb;
+      (*(tint_symbol_1))[r][((4u * LocalInvocationID[0]) + c)] = float4(tint_symbol_3.sample(tint_symbol_5, ((float2(loadIndex) + float2(0.25f)) / float2(dims)), level(0.0f))).rgb;
     }
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
@@ -49,7 +54,7 @@ void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_in
         float3 acc = float3(0.0f);
         for(uint f = 0u; (f < (*(tint_symbol_2)).filterDim); f = (f + 1u)) {
           uint i = ((center + f) - filterOffset);
-          acc = (acc + ((1.0f / float((*(tint_symbol_2)).filterDim)) * (*(tint_symbol_1)).arr[r].arr[i]));
+          acc = (acc + ((1.0f / float((*(tint_symbol_2)).filterDim)) * (*(tint_symbol_1))[r][i]));
         }
         tint_symbol_6.write(float4(acc, 1.0f), uint2(writeIndex));
       }
@@ -58,7 +63,7 @@ void tint_symbol_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_in
 }
 
 kernel void tint_symbol(const constant Params* tint_symbol_8 [[buffer(0)]], texture2d<float, access::sample> tint_symbol_9 [[texture(0)]], const constant Flip* tint_symbol_10 [[buffer(1)]], sampler tint_symbol_11 [[sampler(0)]], texture2d<float, access::write> tint_symbol_12 [[texture(1)]], uint3 WorkGroupID [[threadgroup_position_in_grid]], uint3 LocalInvocationID [[thread_position_in_threadgroup]], uint local_invocation_index [[thread_index_in_threadgroup]]) {
-  threadgroup tint_array_wrapper tint_symbol_7;
+  threadgroup tint_array<tint_array<float3, 256>, 4> tint_symbol_7;
   tint_symbol_inner(WorkGroupID, LocalInvocationID, local_invocation_index, &(tint_symbol_7), tint_symbol_8, tint_symbol_9, tint_symbol_10, tint_symbol_11, tint_symbol_12);
   return;
 }
