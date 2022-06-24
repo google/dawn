@@ -1118,8 +1118,8 @@ if (tint_build_unittests) {
       "resolver/uniformity_test.cc",
       "resolver/validation_test.cc",
       "resolver/validator_is_storeable_test.cc",
-      "resolver/var_let_test.cc",
-      "resolver/var_let_validation_test.cc",
+      "resolver/variable_test.cc",
+      "resolver/variable_validation_test.cc",
     ]
     deps = [ ":tint_unittests_ast_src" ]
   }

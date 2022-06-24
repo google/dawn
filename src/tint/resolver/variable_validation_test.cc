@@ -22,9 +22,9 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::resolver {
 namespace {
 
-struct ResolverVarLetValidationTest : public resolver::TestHelper, public testing::Test {};
+struct ResolverVariableValidationTest : public resolver::TestHelper, public testing::Test {};
 
-TEST_F(ResolverVarLetValidationTest, VarNoInitializerNoType) {
+TEST_F(ResolverVariableValidationTest, VarNoInitializerNoType) {
     // var a;
     WrapInFunction(Var(Source{{12, 34}}, "a", nullptr));
 
@@ -32,7 +32,7 @@ TEST_F(ResolverVarLetValidationTest, VarNoInitializerNoType) {
     EXPECT_EQ(r()->error(), "12:34 error: 'var' declaration requires a type or initializer");
 }
 
-TEST_F(ResolverVarLetValidationTest, GlobalVarNoInitializerNoType) {
+TEST_F(ResolverVariableValidationTest, GlobalVarNoInitializerNoType) {
     // var a;
     Global(Source{{12, 34}}, "a", nullptr);
 
@@ -40,7 +40,7 @@ TEST_F(ResolverVarLetValidationTest, GlobalVarNoInitializerNoType) {
     EXPECT_EQ(r()->error(), "12:34 error: 'var' declaration requires a type or initializer");
 }
 
-TEST_F(ResolverVarLetValidationTest, OverrideNoInitializerNoType) {
+TEST_F(ResolverVariableValidationTest, OverrideNoInitializerNoType) {
     // override a;
     Override(Source{{12, 34}}, "a", nullptr, nullptr);
 
@@ -48,7 +48,7 @@ TEST_F(ResolverVarLetValidationTest, OverrideNoInitializerNoType) {
     EXPECT_EQ(r()->error(), "12:34 error: 'override' declaration requires a type or initializer");
 }
 
-TEST_F(ResolverVarLetValidationTest, VarTypeNotStorable) {
+TEST_F(ResolverVariableValidationTest, VarTypeNotStorable) {
     // var i : i32;
     // var p : pointer<function, i32> = &v;
     auto* i = Var("i", ty.i32(), ast::StorageClass::kNone);
@@ -62,7 +62,7 @@ TEST_F(ResolverVarLetValidationTest, VarTypeNotStorable) {
               "type of a var");
 }
 
-TEST_F(ResolverVarLetValidationTest, LetTypeNotConstructible) {
+TEST_F(ResolverVariableValidationTest, LetTypeNotConstructible) {
     // @group(0) @binding(0) var t1 : texture_2d<f32>;
     // let t2 : t1;
     auto* t1 = Global("t1", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
@@ -74,7 +74,7 @@ TEST_F(ResolverVarLetValidationTest, LetTypeNotConstructible) {
     EXPECT_EQ(r()->error(), "56:78 error: texture_2d<f32> cannot be used as the type of a 'let'");
 }
 
-TEST_F(ResolverVarLetValidationTest, OverrideExplicitTypeNotScalar) {
+TEST_F(ResolverVariableValidationTest, OverrideExplicitTypeNotScalar) {
     // override o : vec3<f32>;
     Override(Source{{56, 78}}, "o", ty.vec3<f32>(), nullptr);
 
@@ -82,7 +82,7 @@ TEST_F(ResolverVarLetValidationTest, OverrideExplicitTypeNotScalar) {
     EXPECT_EQ(r()->error(), "56:78 error: vec3<f32> cannot be used as the type of a 'override'");
 }
 
-TEST_F(ResolverVarLetValidationTest, OverrideInferedTypeNotScalar) {
+TEST_F(ResolverVariableValidationTest, OverrideInferedTypeNotScalar) {
     // override o = vec3(1.0f);
     Override(Source{{56, 78}}, "o", nullptr, vec3<f32>(1.0_f));
 
@@ -90,7 +90,7 @@ TEST_F(ResolverVarLetValidationTest, OverrideInferedTypeNotScalar) {
     EXPECT_EQ(r()->error(), "56:78 error: vec3<f32> cannot be used as the type of a 'override'");
 }
 
-TEST_F(ResolverVarLetValidationTest, LetConstructorWrongType) {
+TEST_F(ResolverVariableValidationTest, LetConstructorWrongType) {
     // var v : i32 = 2u
     WrapInFunction(Let(Source{{3, 3}}, "v", ty.i32(), Expr(2_u)));
 
@@ -99,7 +99,7 @@ TEST_F(ResolverVarLetValidationTest, LetConstructorWrongType) {
               R"(3:3 error: cannot initialize let of type 'i32' with value of type 'u32')");
 }
 
-TEST_F(ResolverVarLetValidationTest, VarConstructorWrongType) {
+TEST_F(ResolverVariableValidationTest, VarConstructorWrongType) {
     // var v : i32 = 2u
     WrapInFunction(Var(Source{{3, 3}}, "v", ty.i32(), ast::StorageClass::kNone, Expr(2_u)));
 
@@ -108,7 +108,7 @@ TEST_F(ResolverVarLetValidationTest, VarConstructorWrongType) {
               R"(3:3 error: cannot initialize var of type 'i32' with value of type 'u32')");
 }
 
-TEST_F(ResolverVarLetValidationTest, LetConstructorWrongTypeViaAlias) {
+TEST_F(ResolverVariableValidationTest, LetConstructorWrongTypeViaAlias) {
     auto* a = Alias("I32", ty.i32());
     WrapInFunction(Let(Source{{3, 3}}, "v", ty.Of(a), Expr(2_u)));
 
@@ -117,7 +117,7 @@ TEST_F(ResolverVarLetValidationTest, LetConstructorWrongTypeViaAlias) {
               R"(3:3 error: cannot initialize let of type 'i32' with value of type 'u32')");
 }
 
-TEST_F(ResolverVarLetValidationTest, VarConstructorWrongTypeViaAlias) {
+TEST_F(ResolverVariableValidationTest, VarConstructorWrongTypeViaAlias) {
     auto* a = Alias("I32", ty.i32());
     WrapInFunction(Var(Source{{3, 3}}, "v", ty.Of(a), ast::StorageClass::kNone, Expr(2_u)));
 
@@ -126,7 +126,7 @@ TEST_F(ResolverVarLetValidationTest, VarConstructorWrongTypeViaAlias) {
               R"(3:3 error: cannot initialize var of type 'i32' with value of type 'u32')");
 }
 
-TEST_F(ResolverVarLetValidationTest, LetOfPtrConstructedWithRef) {
+TEST_F(ResolverVariableValidationTest, LetOfPtrConstructedWithRef) {
     // var a : f32;
     // let b : ptr<function,f32> = a;
     const auto priv = ast::StorageClass::kFunction;
@@ -141,7 +141,7 @@ TEST_F(ResolverVarLetValidationTest, LetOfPtrConstructedWithRef) {
         R"(12:34 error: cannot initialize let of type 'ptr<function, f32, read_write>' with value of type 'f32')");
 }
 
-TEST_F(ResolverVarLetValidationTest, LocalLetRedeclared) {
+TEST_F(ResolverVariableValidationTest, LocalLetRedeclared) {
     // let l : f32 = 1.;
     // let l : i32 = 0;
     auto* l1 = Let("l", ty.f32(), Expr(1_f));
@@ -153,7 +153,7 @@ TEST_F(ResolverVarLetValidationTest, LocalLetRedeclared) {
               "12:34 error: redeclaration of 'l'\nnote: 'l' previously declared here");
 }
 
-TEST_F(ResolverVarLetValidationTest, GlobalVarRedeclaredAsLocal) {
+TEST_F(ResolverVariableValidationTest, GlobalVarRedeclaredAsLocal) {
     // var v : f32 = 2.1;
     // fn my_func() {
     //   var v : f32 = 2.0;
@@ -167,7 +167,7 @@ TEST_F(ResolverVarLetValidationTest, GlobalVarRedeclaredAsLocal) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverVarLetValidationTest, VarRedeclaredInInnerBlock) {
+TEST_F(ResolverVariableValidationTest, VarRedeclaredInInnerBlock) {
     // {
     //  var v : f32;
     //  { var v : f32; }
@@ -182,7 +182,7 @@ TEST_F(ResolverVarLetValidationTest, VarRedeclaredInInnerBlock) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverVarLetValidationTest, VarRedeclaredInIfBlock) {
+TEST_F(ResolverVariableValidationTest, VarRedeclaredInIfBlock) {
     // {
     //   var v : f32 = 3.14;
     //   if (true) { var v : f32 = 2.0; }
@@ -201,7 +201,7 @@ TEST_F(ResolverVarLetValidationTest, VarRedeclaredInIfBlock) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverVarLetValidationTest, InferredPtrStorageAccessMismatch) {
+TEST_F(ResolverVariableValidationTest, InferredPtrStorageAccessMismatch) {
     // struct Inner {
     //    arr: array<i32, 4>;
     // }
@@ -234,7 +234,7 @@ TEST_F(ResolverVarLetValidationTest, InferredPtrStorageAccessMismatch) {
               "'ptr<storage, i32, read>'");
 }
 
-TEST_F(ResolverVarLetValidationTest, NonConstructibleType_Atomic) {
+TEST_F(ResolverVariableValidationTest, NonConstructibleType_Atomic) {
     auto* v = Var("v", ty.atomic(Source{{12, 34}}, ty.i32()));
     WrapInFunction(v);
 
@@ -242,7 +242,7 @@ TEST_F(ResolverVarLetValidationTest, NonConstructibleType_Atomic) {
     EXPECT_EQ(r()->error(), "12:34 error: function-scope 'var' must have a constructible type");
 }
 
-TEST_F(ResolverVarLetValidationTest, NonConstructibleType_RuntimeArray) {
+TEST_F(ResolverVariableValidationTest, NonConstructibleType_RuntimeArray) {
     auto* s = Structure("S", {Member(Source{{56, 78}}, "m", ty.array(ty.i32()))});
     auto* v = Var(Source{{12, 34}}, "v", ty.Of(s));
     WrapInFunction(v);
@@ -254,7 +254,7 @@ TEST_F(ResolverVarLetValidationTest, NonConstructibleType_RuntimeArray) {
 12:34 note: while instantiating 'var' v)");
 }
 
-TEST_F(ResolverVarLetValidationTest, NonConstructibleType_Struct_WithAtomic) {
+TEST_F(ResolverVariableValidationTest, NonConstructibleType_Struct_WithAtomic) {
     auto* s = Structure("S", {Member("m", ty.atomic(ty.i32()))});
     auto* v = Var("v", ty.Of(s));
     WrapInFunction(v);
@@ -263,7 +263,7 @@ TEST_F(ResolverVarLetValidationTest, NonConstructibleType_Struct_WithAtomic) {
     EXPECT_EQ(r()->error(), "error: function-scope 'var' must have a constructible type");
 }
 
-TEST_F(ResolverVarLetValidationTest, NonConstructibleType_InferredType) {
+TEST_F(ResolverVariableValidationTest, NonConstructibleType_InferredType) {
     // @group(0) @binding(0) var s : sampler;
     // fn foo() {
     //   var v = s;
@@ -276,7 +276,7 @@ TEST_F(ResolverVarLetValidationTest, NonConstructibleType_InferredType) {
     EXPECT_EQ(r()->error(), "12:34 error: function-scope 'var' must have a constructible type");
 }
 
-TEST_F(ResolverVarLetValidationTest, InvalidStorageClassForInitializer) {
+TEST_F(ResolverVariableValidationTest, InvalidStorageClassForInitializer) {
     // var<workgroup> v : f32 = 1.23;
     Global(Source{{12, 34}}, "v", ty.f32(), ast::StorageClass::kWorkgroup, Expr(1.23_f));
 
@@ -287,7 +287,7 @@ TEST_F(ResolverVarLetValidationTest, InvalidStorageClassForInitializer) {
               "storage classes 'private' and 'function'");
 }
 
-TEST_F(ResolverVarLetValidationTest, VectorLetNoType) {
+TEST_F(ResolverVariableValidationTest, VectorLetNoType) {
     // let a : mat3x3 = mat3x3<f32>();
     WrapInFunction(Let("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3), vec3<f32>()));
 
@@ -295,7 +295,7 @@ TEST_F(ResolverVarLetValidationTest, VectorLetNoType) {
     EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
 }
 
-TEST_F(ResolverVarLetValidationTest, VectorVarNoType) {
+TEST_F(ResolverVariableValidationTest, VectorVarNoType) {
     // var a : mat3x3;
     WrapInFunction(Var("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3)));
 
@@ -303,7 +303,7 @@ TEST_F(ResolverVarLetValidationTest, VectorVarNoType) {
     EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
 }
 
-TEST_F(ResolverVarLetValidationTest, MatrixLetNoType) {
+TEST_F(ResolverVariableValidationTest, MatrixLetNoType) {
     // let a : mat3x3 = mat3x3<f32>();
     WrapInFunction(Let("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3, 3), mat3x3<f32>()));
 
@@ -311,7 +311,7 @@ TEST_F(ResolverVarLetValidationTest, MatrixLetNoType) {
     EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");
 }
 
-TEST_F(ResolverVarLetValidationTest, MatrixVarNoType) {
+TEST_F(ResolverVariableValidationTest, MatrixVarNoType) {
     // var a : mat3x3;
     WrapInFunction(Var("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3, 3)));
 

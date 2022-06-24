@@ -814,8 +814,8 @@ if(TINT_BUILD_TESTS)
     resolver/type_validation_test.cc
     resolver/validation_test.cc
     resolver/validator_is_storeable_test.cc
-    resolver/var_let_test.cc
-    resolver/var_let_validation_test.cc
+    resolver/variable_test.cc
+    resolver/variable_validation_test.cc
     scope_stack_test.cc
     sem/atomic.cc
     sem/bool_test.cc

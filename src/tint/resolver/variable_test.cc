@@ -23,9 +23,9 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::resolver {
 namespace {
 
-struct ResolverVarLetTest : public resolver::TestHelper, public testing::Test {};
+struct ResolverVariableTest : public resolver::TestHelper, public testing::Test {};
 
-TEST_F(ResolverVarLetTest, VarDeclWithoutConstructor) {
+TEST_F(ResolverVariableTest, VarDeclWithoutConstructor) {
     // struct S { i : i32; }
     // alias A = S;
     // fn F(){
@@ -82,7 +82,7 @@ TEST_F(ResolverVarLetTest, VarDeclWithoutConstructor) {
     EXPECT_EQ(Sem().Get(a)->Constructor(), nullptr);
 }
 
-TEST_F(ResolverVarLetTest, VarDeclWithConstructor) {
+TEST_F(ResolverVariableTest, VarDeclWithConstructor) {
     // struct S { i : i32; }
     // alias A = S;
     // fn F(){
@@ -146,7 +146,7 @@ TEST_F(ResolverVarLetTest, VarDeclWithConstructor) {
     EXPECT_EQ(Sem().Get(a)->Constructor()->Declaration(), a_c);
 }
 
-TEST_F(ResolverVarLetTest, LetDecl) {
+TEST_F(ResolverVariableTest, LetDecl) {
     // struct S { i : i32; }
     // fn F(){
     //   var v : i32;
@@ -212,7 +212,7 @@ TEST_F(ResolverVarLetTest, LetDecl) {
     EXPECT_EQ(Sem().Get(p)->Constructor()->Declaration(), p_c);
 }
 
-TEST_F(ResolverVarLetTest, DefaultVarStorageClass) {
+TEST_F(ResolverVariableTest, DefaultVarStorageClass) {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
     auto* buf = Structure("S", {Member("m", ty.i32())});
@@ -254,7 +254,7 @@ TEST_F(ResolverVarLetTest, DefaultVarStorageClass) {
     EXPECT_EQ(TypeOf(handle)->As<sem::Reference>()->Access(), ast::Access::kRead);
 }
 
-TEST_F(ResolverVarLetTest, ExplicitVarStorageClass) {
+TEST_F(ResolverVariableTest, ExplicitVarStorageClass) {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
     auto* buf = Structure("S", {Member("m", ty.i32())});
@@ -271,7 +271,7 @@ TEST_F(ResolverVarLetTest, ExplicitVarStorageClass) {
     EXPECT_EQ(TypeOf(storage)->As<sem::Reference>()->Access(), ast::Access::kReadWrite);
 }
 
-TEST_F(ResolverVarLetTest, LetInheritsAccessFromOriginatingVariable) {
+TEST_F(ResolverVariableTest, LetInheritsAccessFromOriginatingVariable) {
     // struct Inner {
     //    arr: array<i32, 4>;
     // }
@@ -304,7 +304,7 @@ TEST_F(ResolverVarLetTest, LetInheritsAccessFromOriginatingVariable) {
     EXPECT_EQ(TypeOf(ptr)->As<sem::Pointer>()->Access(), ast::Access::kReadWrite);
 }
 
-TEST_F(ResolverVarLetTest, LocalShadowsAlias) {
+TEST_F(ResolverVariableTest, LocalShadowsAlias) {
     // type a = i32;
     //
     // fn X() {
@@ -334,7 +334,7 @@ TEST_F(ResolverVarLetTest, LocalShadowsAlias) {
     EXPECT_EQ(local_l->Shadows(), type_t);
 }
 
-TEST_F(ResolverVarLetTest, LocalShadowsStruct) {
+TEST_F(ResolverVariableTest, LocalShadowsStruct) {
     // struct a {
     //   m : i32;
     // };
@@ -366,7 +366,7 @@ TEST_F(ResolverVarLetTest, LocalShadowsStruct) {
     EXPECT_EQ(local_l->Shadows(), type_t);
 }
 
-TEST_F(ResolverVarLetTest, LocalShadowsFunction) {
+TEST_F(ResolverVariableTest, LocalShadowsFunction) {
     // fn a() {
     //   var a = true;
     // }
@@ -396,7 +396,7 @@ TEST_F(ResolverVarLetTest, LocalShadowsFunction) {
     EXPECT_EQ(local_l->Shadows(), func_b);
 }
 
-TEST_F(ResolverVarLetTest, LocalShadowsGlobalVar) {
+TEST_F(ResolverVariableTest, LocalShadowsGlobalVar) {
     // var<private> a : i32;
     //
     // fn X() {
@@ -435,7 +435,7 @@ TEST_F(ResolverVarLetTest, LocalShadowsGlobalVar) {
     EXPECT_EQ(user_l->Variable(), global);
 }
 
-TEST_F(ResolverVarLetTest, LocalShadowsGlobalLet) {
+TEST_F(ResolverVariableTest, LocalShadowsGlobalLet) {
     // let a : i32 = 1;
     //
     // fn X() {
@@ -474,7 +474,7 @@ TEST_F(ResolverVarLetTest, LocalShadowsGlobalLet) {
     EXPECT_EQ(user_l->Variable(), global);
 }
 
-TEST_F(ResolverVarLetTest, LocalShadowsLocalVar) {
+TEST_F(ResolverVariableTest, LocalShadowsLocalVar) {
     // fn X() {
     //   var a : i32;
     //   {
@@ -513,7 +513,7 @@ TEST_F(ResolverVarLetTest, LocalShadowsLocalVar) {
     EXPECT_EQ(user_l->Variable(), local_s);
 }
 
-TEST_F(ResolverVarLetTest, LocalShadowsLocalLet) {
+TEST_F(ResolverVariableTest, LocalShadowsLocalLet) {
     // fn X() {
     //   let a = 1;
     //   {
@@ -552,7 +552,7 @@ TEST_F(ResolverVarLetTest, LocalShadowsLocalLet) {
     EXPECT_EQ(user_l->Variable(), local_s);
 }
 
-TEST_F(ResolverVarLetTest, LocalShadowsParam) {
+TEST_F(ResolverVariableTest, LocalShadowsParam) {
     // fn F(a : i32) {
     //   {
     //     var a = a;
@@ -590,7 +590,7 @@ TEST_F(ResolverVarLetTest, LocalShadowsParam) {
     EXPECT_EQ(user_l->Variable(), param);
 }
 
-TEST_F(ResolverVarLetTest, ParamShadowsFunction) {
+TEST_F(ResolverVariableTest, ParamShadowsFunction) {
     // fn a(a : bool) {
     // }
 
@@ -608,7 +608,7 @@ TEST_F(ResolverVarLetTest, ParamShadowsFunction) {
     EXPECT_EQ(param->Shadows(), func);
 }
 
-TEST_F(ResolverVarLetTest, ParamShadowsGlobalVar) {
+TEST_F(ResolverVariableTest, ParamShadowsGlobalVar) {
     // var<private> a : i32;
     //
     // fn F(a : bool) {
@@ -629,7 +629,7 @@ TEST_F(ResolverVarLetTest, ParamShadowsGlobalVar) {
     EXPECT_EQ(param->Shadows(), global);
 }
 
-TEST_F(ResolverVarLetTest, ParamShadowsGlobalLet) {
+TEST_F(ResolverVariableTest, ParamShadowsGlobalLet) {
     // let a : i32 = 1;
     //
     // fn F(a : bool) {
@@ -650,7 +650,7 @@ TEST_F(ResolverVarLetTest, ParamShadowsGlobalLet) {
     EXPECT_EQ(param->Shadows(), global);
 }
 
-TEST_F(ResolverVarLetTest, ParamShadowsAlias) {
+TEST_F(ResolverVariableTest, ParamShadowsAlias) {
     // type a = i32;
     //
     // fn F(a : a) {
