@@ -339,6 +339,10 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
         }
     }
 
+    // Using base limits for:
+    // TODO(crbug.com/dawn/1448):
+    // - maxInterStageShaderVariables
+
     return {};
 }
 

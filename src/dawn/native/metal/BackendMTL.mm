@@ -619,10 +619,13 @@ class Adapter : public AdapterBase {
         limits->v1.maxUniformBufferBindingSize = maxBufferSize;
         limits->v1.maxStorageBufferBindingSize = maxBufferSize;
 
-        // TODO(crbug.com/dawn/685):
         // Using base limits for:
+        // TODO(crbug.com/dawn/685):
         // - maxBindGroups
         // - maxVertexBufferArrayStride
+
+        // TODO(crbug.com/dawn/1448):
+        // - maxInterStageShaderVariables
 
         return {};
     }

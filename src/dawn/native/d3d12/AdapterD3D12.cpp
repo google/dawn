@@ -301,10 +301,13 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     // D3D12 has no documented limit on the size of a storage buffer binding.
     limits->v1.maxStorageBufferBindingSize = 4294967295;
 
+    // Using base limits for:
     // TODO(crbug.com/dawn/685):
-    // LIMITS NOT SET:
     // - maxInterStageShaderComponents
     // - maxVertexBufferArrayStride
+
+    // TODO(crbug.com/dawn/1448):
+    // - maxInterStageShaderVariables
 
     return {};
 }
