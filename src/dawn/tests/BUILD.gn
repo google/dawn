@@ -597,9 +597,9 @@ source_set("white_box_tests_sources") {
     sources += [ "white_box/MetalAutoreleasePoolTests.mm" ]
   }
 
-  if (dawn_enable_opengles && defined(dawn_angle_dir)) {
+  if (dawn_enable_opengles) {
     sources += [ "white_box/EGLImageWrappingTests.cpp" ]
-    include_dirs = [ "${dawn_angle_dir}/include" ]
+    include_dirs = [ "//third_party/khronos" ]
   }
 
   libs = []
