@@ -439,7 +439,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Bool_Const) {
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
 %1 = OpTypeVector %2 3
 %3 = OpConstantTrue %2
-%4 = OpConstantFalse %2
+%4 = OpConstantNull %2
 %5 = OpConstantComposite %1 %3 %4 %3
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");

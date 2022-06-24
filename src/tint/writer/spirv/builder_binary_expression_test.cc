@@ -287,7 +287,7 @@ TEST_P(BinaryOperatorBoolTest, Vector) {
     EXPECT_EQ(b.GenerateBinaryExpression(expr), 7u) << b.error();
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeBool
 %1 = OpTypeVector %2 3
-%3 = OpConstantFalse %2
+%3 = OpConstantNull %2
 %4 = OpConstantTrue %2
 %5 = OpConstantComposite %1 %3 %4 %3
 %6 = OpConstantComposite %1 %4 %3 %4

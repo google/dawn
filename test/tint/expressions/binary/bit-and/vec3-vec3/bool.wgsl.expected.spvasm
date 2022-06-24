@@ -13,9 +13,9 @@
        %bool = OpTypeBool
      %v3bool = OpTypeVector %bool 3
        %true = OpConstantTrue %bool
-      %false = OpConstantFalse %bool
-          %9 = OpConstantComposite %v3bool %true %true %false
-         %10 = OpConstantComposite %v3bool %true %false %true
+          %8 = OpConstantNull %bool
+          %9 = OpConstantComposite %v3bool %true %true %8
+         %10 = OpConstantComposite %v3bool %true %8 %true
           %f = OpFunction %void None %1
           %4 = OpLabel
          %11 = OpLogicalAnd %v3bool %9 %10

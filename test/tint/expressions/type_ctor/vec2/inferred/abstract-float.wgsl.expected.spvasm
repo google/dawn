@@ -11,9 +11,9 @@
                OpName %unused_entry_point "unused_entry_point"
       %float = OpTypeFloat 32
     %v2float = OpTypeVector %float 2
-    %float_0 = OpConstant %float 0
+          %3 = OpConstantNull %float
     %float_1 = OpConstant %float 1
-          %v = OpConstantComposite %v2float %float_0 %float_1
+          %v = OpConstantComposite %v2float %3 %float_1
        %void = OpTypeVoid
           %6 = OpTypeFunction %void
 %unused_entry_point = OpFunction %void None %6

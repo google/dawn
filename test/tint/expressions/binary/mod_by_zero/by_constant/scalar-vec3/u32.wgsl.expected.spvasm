@@ -13,9 +13,9 @@
        %uint = OpTypeInt 32 0
      %uint_4 = OpConstant %uint 4
      %v3uint = OpTypeVector %uint 3
-     %uint_0 = OpConstant %uint 0
+          %8 = OpConstantNull %uint
      %uint_2 = OpConstant %uint 2
-         %10 = OpConstantComposite %v3uint %uint_0 %uint_2 %uint_0
+         %10 = OpConstantComposite %v3uint %8 %uint_2 %8
 %_ptr_Function_v3uint = OpTypePointer Function %v3uint
          %14 = OpConstantNull %v3uint
           %f = OpFunction %void None %1

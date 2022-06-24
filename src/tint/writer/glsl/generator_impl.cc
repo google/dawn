@@ -2210,85 +2210,76 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
 }
 
 bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant& constant) {
-    auto emit_bool = [&](size_t element_idx) {
-        out << (constant.Element<AInt>(element_idx) ? "true" : "false");
-        return true;
-    };
-    auto emit_f32 = [&](size_t element_idx) {
-        PrintF32(out, static_cast<float>(constant.Element<AFloat>(element_idx)));
-        return true;
-    };
-    auto emit_i32 = [&](size_t element_idx) {
-        out << constant.Element<AInt>(element_idx).value;
-        return true;
-    };
-    auto emit_u32 = [&](size_t element_idx) {
-        out << constant.Element<AInt>(element_idx).value << "u";
-        return true;
-    };
-    auto emit_vector = [&](const sem::Vector* vec_ty, size_t start, size_t end) {
-        if (!EmitType(out, vec_ty, ast::StorageClass::kNone, ast::Access::kUndefined, "")) {
-            return false;
-        }
+    return EmitConstantRange(out, constant, constant.Type(), 0, constant.ElementCount());
+}
 
-        ScopedParen sp(out);
-
-        auto emit_els = [&](auto emit_el) {
-            if (constant.AllEqual(start, end)) {
-                return emit_el(start);
+bool GeneratorImpl::EmitConstantRange(std::ostream& out,
+                                      const sem::Constant& constant,
+                                      const sem::Type* range_ty,
+                                      size_t start,
+                                      size_t end) {
+    return Switch(
+        range_ty,  //
+        [&](const sem::Bool*) {
+            out << (constant.Element<AInt>(start) ? "true" : "false");
+            return true;
+        },
+        [&](const sem::F32*) {
+            PrintF32(out, static_cast<float>(constant.Element<AFloat>(start)));
+            return true;
+        },
+        [&](const sem::I32*) {
+            out << constant.Element<AInt>(start).value;
+            return true;
+        },
+        [&](const sem::U32*) {
+            out << constant.Element<AInt>(start).value << "u";
+            return true;
+        },
+        [&](const sem::Vector* v) {
+            if (!EmitType(out, v, ast::StorageClass::kNone, ast::Access::kUndefined, "")) {
+                return false;
             }
+
+            ScopedParen sp(out);
+
+            if (constant.AllEqual(start, end)) {
+                if (!EmitConstantRange(out, constant, v->type(), start, start + 1)) {
+                    return false;
+                }
+                return true;
+            }
+
             for (size_t i = start; i < end; i++) {
                 if (i > start) {
                     out << ", ";
                 }
-                if (!emit_el(i)) {
+                if (!EmitConstantRange(out, constant, v->type(), i, i + 1u)) {
                     return false;
                 }
             }
             return true;
-        };
-
-        return Switch(
-            vec_ty->type(),                                         //
-            [&](const sem::Bool*) { return emit_els(emit_bool); },  //
-            [&](const sem::F32*) { return emit_els(emit_f32); },    //
-            [&](const sem::I32*) { return emit_els(emit_i32); },    //
-            [&](const sem::U32*) { return emit_els(emit_u32); },    //
-            [&](Default) {
-                diagnostics_.add_error(diag::System::Writer,
-                                       "unhandled constant vector element type: " +
-                                           builder_.FriendlyName(vec_ty->type()));
-                return false;
-            });
-    };
-    auto emit_matrix = [&](const sem::Matrix* m) {
-        if (!EmitType(out, constant.Type(), ast::StorageClass::kNone, ast::Access::kUndefined,
-                      "")) {
-            return false;
-        }
-
-        ScopedParen sp(out);
-
-        for (size_t column_idx = 0; column_idx < m->columns(); column_idx++) {
-            if (column_idx > 0) {
-                out << ", ";
-            }
-            size_t start = m->rows() * column_idx;
-            size_t end = m->rows() * (column_idx + 1);
-            if (!emit_vector(m->ColumnType(), start, end)) {
+        },
+        [&](const sem::Matrix* m) {
+            if (!EmitType(out, constant.Type(), ast::StorageClass::kNone, ast::Access::kUndefined,
+                          "")) {
                 return false;
             }
-        }
-        return true;
-    };
-    return Switch(
-        constant.Type(),                                                                   //
-        [&](const sem::Bool*) { return emit_bool(0); },                                    //
-        [&](const sem::F32*) { return emit_f32(0); },                                      //
-        [&](const sem::I32*) { return emit_i32(0); },                                      //
-        [&](const sem::U32*) { return emit_u32(0); },                                      //
-        [&](const sem::Vector* v) { return emit_vector(v, 0, constant.ElementCount()); },  //
-        [&](const sem::Matrix* m) { return emit_matrix(m); },                              //
+
+            ScopedParen sp(out);
+
+            for (size_t column_idx = 0; column_idx < m->columns(); column_idx++) {
+                if (column_idx > 0) {
+                    out << ", ";
+                }
+                size_t col_start = m->rows() * column_idx;
+                size_t col_end = col_start + m->rows();
+                if (!EmitConstantRange(out, constant, m->ColumnType(), col_start, col_end)) {
+                    return false;
+                }
+            }
+            return true;
+        },
         [&](Default) {
             diagnostics_.add_error(
                 diag::System::Writer,

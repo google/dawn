@@ -16,9 +16,9 @@
      %uint_2 = OpConstant %uint 2
      %uint_3 = OpConstant %uint 3
          %10 = OpConstantComposite %v3uint %uint_1 %uint_2 %uint_3
-     %uint_0 = OpConstant %uint 0
+         %11 = OpConstantNull %uint
      %uint_5 = OpConstant %uint 5
-         %13 = OpConstantComposite %v3uint %uint_0 %uint_5 %uint_0
+         %13 = OpConstantComposite %v3uint %11 %uint_5 %11
           %f = OpFunction %void None %1
           %4 = OpLabel
          %14 = OpUMod %v3uint %10 %13

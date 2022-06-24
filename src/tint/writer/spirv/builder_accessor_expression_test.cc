@@ -770,7 +770,7 @@ TEST_F(BuilderTest, IndexAccessor_Of_Vec) {
 %8 = OpTypeInt 32 0
 %9 = OpConstant %8 3
 %5 = OpTypeArray %6 %9
-%10 = OpConstant %7 0
+%10 = OpConstantNull %7
 %11 = OpConstant %7 0.5
 %12 = OpConstantComposite %6 %10 %11
 %13 = OpConstant %7 -0.5
@@ -813,7 +813,7 @@ TEST_F(BuilderTest, IndexAccessor_Of_Array_Of_f32) {
 %8 = OpTypeInt 32 0
 %9 = OpConstant %8 3
 %5 = OpTypeArray %6 %9
-%10 = OpConstant %7 0
+%10 = OpConstantNull %7
 %11 = OpConstant %7 0.5
 %12 = OpConstantComposite %6 %10 %11
 %13 = OpConstant %7 -0.5
@@ -850,7 +850,7 @@ TEST_F(BuilderTest, IndexAccessor_Vec_Literal) {
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 2
-%3 = OpConstant %2 0
+%3 = OpConstantNull %2
 %4 = OpConstant %2 0.5
 %5 = OpConstantComposite %1 %3 %4
 %6 = OpTypeInt 32 0
@@ -882,7 +882,7 @@ TEST_F(BuilderTest, IndexAccessor_Vec_Dynamic) {
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 2
-%3 = OpConstant %2 0
+%3 = OpConstantNull %2
 %4 = OpConstant %2 0.5
 %5 = OpConstantComposite %1 %3 %4
 %8 = OpTypeInt 32 1

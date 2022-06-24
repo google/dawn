@@ -126,8 +126,8 @@
 %_ptr_Function_FragmentOutput = OpTypePointer Function %FragmentOutput
          %89 = OpConstantNull %FragmentOutput
      %uint_0 = OpConstant %uint 0
-    %float_0 = OpConstant %float 0
-         %93 = OpConstantComposite %v4float %float_1 %float_0 %float_0 %float_1
+         %92 = OpConstantNull %float
+         %93 = OpConstantComposite %v4float %float_1 %92 %92 %float_1
        %void = OpTypeVoid
          %96 = OpTypeFunction %void
    %getColor = OpFunction %v4float None %30

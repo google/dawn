@@ -1675,92 +1675,41 @@ uint32_t Builder::GenerateLiteralIfNeeded(const ast::Variable* var,
 }
 
 uint32_t Builder::GenerateConstantIfNeeded(const sem::Constant& constant) {
-    if (constant.AllZero()) {
-        return GenerateConstantNullIfNeeded(constant.Type());
+    return GenerateConstantRangeIfNeeded(constant, constant.Type(), 0, constant.ElementCount());
+}
+
+uint32_t Builder::GenerateConstantRangeIfNeeded(const sem::Constant& constant,
+                                                const sem::Type* range_ty,
+                                                size_t start,
+                                                size_t end) {
+    if (constant.AllZero(start, end)) {
+        return GenerateConstantNullIfNeeded(range_ty);
     }
 
-    static constexpr size_t kOpsResultIdx = 1;  // operand index of the result
-    auto& global_scope = scope_stack_[0];
-
-    auto gen_bool = [&](size_t element_idx) {
-        bool val = constant.Element<AInt>(element_idx);
-        return GenerateConstantIfNeeded(ScalarConstant::Bool(val));
-    };
-    auto gen_f32 = [&](size_t element_idx) {
-        auto val = f32(constant.Element<AFloat>(element_idx));
-        return GenerateConstantIfNeeded(ScalarConstant::F32(val.value));
-    };
-    auto gen_i32 = [&](size_t element_idx) {
-        auto val = i32(constant.Element<AInt>(element_idx));
-        return GenerateConstantIfNeeded(ScalarConstant::I32(val.value));
-    };
-    auto gen_u32 = [&](size_t element_idx) {
-        auto val = u32(constant.Element<AInt>(element_idx));
-        return GenerateConstantIfNeeded(ScalarConstant::U32(val.value));
-    };
-    auto gen_els = [&](std::vector<Operand>& ids, size_t start, size_t end, auto gen_el) {
-        for (size_t i = start; i < end; i++) {
-            auto id = gen_el(i);
-            if (!id) {
-                return false;
-            }
-            ids.emplace_back(id);
-        }
-        return true;
-    };
-    auto gen_vector = [&](const sem::Vector* ty, size_t start, size_t end) -> uint32_t {
-        auto type_id = GenerateTypeIfNeeded(ty);
+    auto composite = [&](const sem::Type* el_ty) -> uint32_t {
+        auto type_id = GenerateTypeIfNeeded(range_ty);
         if (!type_id) {
             return 0;
         }
+
+        static constexpr size_t kOpsResultIdx = 1;  // operand index of the result
 
         std::vector<Operand> ops;
         ops.reserve(end - start + 2);
         ops.emplace_back(type_id);
         ops.push_back(Operand(0u));  // Placeholder for the result ID
-        auto ok = Switch(
-            constant.ElementType(),                                                //
-            [&](const sem::Bool*) { return gen_els(ops, start, end, gen_bool); },  //
-            [&](const sem::F32*) { return gen_els(ops, start, end, gen_f32); },    //
-            [&](const sem::I32*) { return gen_els(ops, start, end, gen_i32); },    //
-            [&](const sem::U32*) { return gen_els(ops, start, end, gen_u32); },    //
-            [&](Default) {
-                error_ = "unhandled constant element type: " + builder_.FriendlyName(ty);
-                return false;
-            });
-        if (!ok) {
-            return 0;
-        }
 
-        return utils::GetOrCreate(global_scope.type_ctor_to_id_, OperandListKey{ops},
-                                  [&]() -> uint32_t {
-                                      auto result = result_op();
-                                      ops[kOpsResultIdx] = result;
-                                      push_type(spv::Op::OpConstantComposite, std::move(ops));
-                                      return std::get<uint32_t>(result);
-                                  });
-    };
-    auto gen_matrix = [&](const sem::Matrix* m) -> uint32_t {
-        auto mat_type_id = GenerateTypeIfNeeded(m);
-        if (!mat_type_id) {
-            return 0;
-        }
-
-        std::vector<Operand> ops;
-        ops.reserve(m->columns() + 2);
-        ops.emplace_back(mat_type_id);
-        ops.push_back(Operand(0u));  // Placeholder for the result ID
-
-        for (size_t column_idx = 0; column_idx < m->columns(); column_idx++) {
-            size_t start = m->rows() * column_idx;
-            size_t end = m->rows() * (column_idx + 1);
-            auto column_id = gen_vector(m->ColumnType(), start, end);
-            if (!column_id) {
+        uint32_t step = 0;
+        sem::Type::DeepestElementOf(el_ty, &step);
+        for (size_t i = start; i < end; i += step) {
+            auto id = GenerateConstantRangeIfNeeded(constant, el_ty, i, i + step);
+            if (!id) {
                 return 0;
             }
-            ops.emplace_back(column_id);
+            ops.emplace_back(id);
         }
 
+        auto& global_scope = scope_stack_[0];
         return utils::GetOrCreate(global_scope.type_ctor_to_id_, OperandListKey{ops},
                                   [&]() -> uint32_t {
                                       auto result = result_op();
@@ -1771,13 +1720,26 @@ uint32_t Builder::GenerateConstantIfNeeded(const sem::Constant& constant) {
     };
 
     return Switch(
-        constant.Type(),                                                                  //
-        [&](const sem::Bool*) { return gen_bool(0); },                                    //
-        [&](const sem::F32*) { return gen_f32(0); },                                      //
-        [&](const sem::I32*) { return gen_i32(0); },                                      //
-        [&](const sem::U32*) { return gen_u32(0); },                                      //
-        [&](const sem::Vector* v) { return gen_vector(v, 0, constant.ElementCount()); },  //
-        [&](const sem::Matrix* m) { return gen_matrix(m); },                              //
+        range_ty,  //
+        [&](const sem::Bool*) {
+            bool val = constant.Element<AInt>(start);
+            return GenerateConstantIfNeeded(ScalarConstant::Bool(val));
+        },
+        [&](const sem::F32*) {
+            auto val = f32(constant.Element<AFloat>(start));
+            return GenerateConstantIfNeeded(ScalarConstant::F32(val.value));
+        },
+        [&](const sem::I32*) {
+            auto val = i32(constant.Element<AInt>(start));
+            return GenerateConstantIfNeeded(ScalarConstant::I32(val.value));
+        },
+        [&](const sem::U32*) {
+            auto val = u32(constant.Element<AInt>(start));
+            return GenerateConstantIfNeeded(ScalarConstant::U32(val.value));
+        },
+        [&](const sem::Vector* v) { return composite(v->type()); },
+        [&](const sem::Matrix* m) { return composite(m->ColumnType()); },
+        [&](const sem::Array* a) { return composite(a->ElemType()); },
         [&](Default) {
             error_ = "unhandled constant type: " + builder_.FriendlyName(constant.Type());
             return false;

@@ -11,9 +11,9 @@
                OpName %unused_entry_point "unused_entry_point"
        %bool = OpTypeBool
      %v3bool = OpTypeVector %bool 3
-      %false = OpConstantFalse %bool
+          %3 = OpConstantNull %bool
        %true = OpConstantTrue %bool
-          %v = OpConstantComposite %v3bool %false %true %false
+          %v = OpConstantComposite %v3bool %3 %true %3
        %void = OpTypeVoid
           %6 = OpTypeFunction %void
 %unused_entry_point = OpFunction %void None %6

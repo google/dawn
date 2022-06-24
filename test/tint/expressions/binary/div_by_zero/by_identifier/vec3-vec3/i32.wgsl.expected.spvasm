@@ -20,9 +20,9 @@
          %10 = OpConstantComposite %v3int %int_1 %int_2 %int_3
 %_ptr_Function_v3int = OpTypePointer Function %v3int
          %13 = OpConstantNull %v3int
-      %int_0 = OpConstant %int 0
+         %14 = OpConstantNull %int
       %int_5 = OpConstant %int 5
-         %16 = OpConstantComposite %v3int %int_0 %int_5 %int_0
+         %16 = OpConstantComposite %v3int %14 %int_5 %14
           %f = OpFunction %void None %1
           %4 = OpLabel
           %a = OpVariable %_ptr_Function_v3int Function %13

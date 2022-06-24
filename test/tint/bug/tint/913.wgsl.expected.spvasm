@@ -81,9 +81,9 @@
       %v2int = OpTypeVector %int 2
       %int_0 = OpConstant %int 0
     %v4float = OpTypeVector %float 4
-    %float_0 = OpConstant %float 0
+         %44 = OpConstantNull %float
     %float_1 = OpConstant %float 1
-         %46 = OpConstantComposite %v4float %float_0 %float_1 %float_0 %float_1
+         %46 = OpConstantComposite %v4float %44 %float_1 %44 %float_1
        %true = OpConstantTrue %bool
 %_ptr_Function_bool = OpTypePointer Function %bool
          %50 = OpConstantNull %bool
