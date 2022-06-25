@@ -1,6 +1,19 @@
 #include <metal_stdlib>
 
 using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
 struct S_atomic {
   int x;
   atomic_uint a;
@@ -13,15 +26,7 @@ struct S {
   uint y;
 };
 
-struct tint_array_wrapper {
-  S arr[10];
-};
-
-struct tint_array_wrapper_1 {
-  S_atomic arr[10];
-};
-
-void compute_main_inner(uint local_invocation_index, threadgroup tint_array_wrapper_1* const tint_symbol) {
+void compute_main_inner(uint local_invocation_index, threadgroup tint_array<S_atomic, 10>* const tint_symbol) {
   uint idx = 0u;
   idx = local_invocation_index;
   while (true) {
@@ -30,31 +35,31 @@ void compute_main_inner(uint local_invocation_index, threadgroup tint_array_wrap
       break;
     }
     uint const x_28 = idx;
-    (*(tint_symbol)).arr[x_28].x = 0;
-    atomic_store_explicit(&((*(tint_symbol)).arr[x_28].a), 0u, memory_order_relaxed);
-    (*(tint_symbol)).arr[x_28].y = 0u;
+    (*(tint_symbol))[x_28].x = 0;
+    atomic_store_explicit(&((*(tint_symbol))[x_28].a), 0u, memory_order_relaxed);
+    (*(tint_symbol))[x_28].y = 0u;
     {
       uint const x_41 = idx;
       idx = (x_41 + 1u);
     }
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
-  atomic_store_explicit(&((*(tint_symbol)).arr[4].a), 1u, memory_order_relaxed);
+  atomic_store_explicit(&((*(tint_symbol))[4].a), 1u, memory_order_relaxed);
   return;
 }
 
-void compute_main_1(thread uint* const tint_symbol_1, threadgroup tint_array_wrapper_1* const tint_symbol_2) {
+void compute_main_1(thread uint* const tint_symbol_1, threadgroup tint_array<S_atomic, 10>* const tint_symbol_2) {
   uint const x_53 = *(tint_symbol_1);
   compute_main_inner(x_53, tint_symbol_2);
   return;
 }
 
-void compute_main_inner_1(uint local_invocation_index_1_param, threadgroup tint_array_wrapper_1* const tint_symbol_3, thread uint* const tint_symbol_4) {
+void compute_main_inner_1(uint local_invocation_index_1_param, threadgroup tint_array<S_atomic, 10>* const tint_symbol_3, thread uint* const tint_symbol_4) {
   for(uint idx_1 = local_invocation_index_1_param; (idx_1 < 10u); idx_1 = (idx_1 + 1u)) {
     uint const i = idx_1;
-    (*(tint_symbol_3)).arr[i].x = 0;
-    atomic_store_explicit(&((*(tint_symbol_3)).arr[i].a), 0u, memory_order_relaxed);
-    (*(tint_symbol_3)).arr[i].y = 0u;
+    (*(tint_symbol_3))[i].x = 0;
+    atomic_store_explicit(&((*(tint_symbol_3))[i].a), 0u, memory_order_relaxed);
+    (*(tint_symbol_3))[i].y = 0u;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);
   *(tint_symbol_4) = local_invocation_index_1_param;
@@ -62,7 +67,7 @@ void compute_main_inner_1(uint local_invocation_index_1_param, threadgroup tint_
 }
 
 kernel void compute_main(uint local_invocation_index_1_param [[thread_index_in_threadgroup]]) {
-  threadgroup tint_array_wrapper_1 tint_symbol_5;
+  threadgroup tint_array<S_atomic, 10> tint_symbol_5;
   thread uint tint_symbol_6 = 0u;
   compute_main_inner_1(local_invocation_index_1_param, &(tint_symbol_5), &(tint_symbol_6));
   return;
