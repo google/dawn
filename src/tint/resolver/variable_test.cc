@@ -244,7 +244,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsGlobalLet) {
     //   var a = (a == 123);
     // }
 
-    auto* g = GlobalConst("a", ty.i32(), Expr(1_i));
+    auto* g = GlobalLet("a", ty.i32(), Expr(1_i));
     auto* v = Var("a", nullptr, Expr("a"));
     Func("F", {}, ty.void_(), {Decl(v)});
 
@@ -527,7 +527,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsGlobalLet) {
     //   let a = (a == 321);
     // }
 
-    auto* g = GlobalConst("a", ty.i32(), Expr(1_i));
+    auto* g = GlobalLet("a", ty.i32(), Expr(1_i));
     auto* l = Let("a", nullptr, Expr("a"));
     Func("F", {}, ty.void_(), {Decl(l)});
 
@@ -725,7 +725,7 @@ TEST_F(ResolverVariableTest, Param_ShadowsGlobalLet) {
     // fn F(a : bool) {
     // }
 
-    auto* g = GlobalConst("a", ty.i32(), Expr(1_i));
+    auto* g = GlobalLet("a", ty.i32(), Expr(1_i));
     auto* p = Param("a", ty.bool_());
     Func("F", {p}, ty.void_(), {});
 

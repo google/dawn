@@ -1075,7 +1075,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec4) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_F32_With_F32) {
     auto* ctor = Construct<f32>(2_f);
-    GlobalConst("g", ty.f32(), ctor);
+    GlobalLet("g", ty.f32(), ctor);
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());
@@ -1090,7 +1090,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_F32_With_F32) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_U32_With_F32) {
     auto* ctor = Construct<u32>(1.5_f);
-    GlobalConst("g", ty.u32(), ctor);
+    GlobalLet("g", ty.u32(), ctor);
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());
@@ -1121,7 +1121,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec2_With_F32) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec2_With_Vec2) {
     auto* cast = vec2<f32>(vec2<f32>(2_f, 2_f));
-    GlobalConst("a", ty.vec2<f32>(), cast);
+    GlobalLet("a", ty.vec2<f32>(), cast);
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());
@@ -1139,7 +1139,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec2_With_Vec2) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_Vec3) {
     auto* cast = vec3<f32>(vec3<f32>(2_f, 2_f, 2_f));
-    GlobalConst("a", ty.vec3<f32>(), cast);
+    GlobalLet("a", ty.vec3<f32>(), cast);
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());
@@ -1157,7 +1157,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_Vec3) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec4) {
     auto* cast = vec4<f32>(vec4<f32>(2_f, 2_f, 2_f, 2_f));
-    GlobalConst("a", ty.vec4<f32>(), cast);
+    GlobalLet("a", ty.vec4<f32>(), cast);
 
     spirv::Builder& b = SanitizeAndBuild();
     ASSERT_TRUE(b.Build());

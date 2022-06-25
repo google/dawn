@@ -132,9 +132,9 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Literals) {
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Const) {
-    GlobalConst("width", ty.i32(), Construct(ty.i32(), 2_i));
-    GlobalConst("height", ty.i32(), Construct(ty.i32(), 3_i));
-    GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4_i));
+    GlobalLet("width", ty.i32(), Construct(ty.i32(), 2_i));
+    GlobalLet("height", ty.i32(), Construct(ty.i32(), 3_i));
+    GlobalLet("depth", ty.i32(), Construct(ty.i32(), 4_i));
     auto* func = Func("main", {}, ty.void_(), {},
                       {
                           WorkgroupSize("width", "height", "depth"),
@@ -181,7 +181,7 @@ OpDecorate %3 BuiltIn WorkgroupSize
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndConst) {
     Override("height", ty.i32(), Construct(ty.i32(), 2_i), {Id(7u)});
-    GlobalConst("depth", ty.i32(), Construct(ty.i32(), 3_i));
+    GlobalLet("depth", ty.i32(), Construct(ty.i32(), 3_i));
     auto* func = Func("main", {}, ty.void_(), {},
                       {
                           WorkgroupSize(4_i, "height", "depth"),

@@ -82,7 +82,7 @@ TEST_P(ResolverInferredTypeParamTest, GlobalLet_Pass) {
 
     // let a = <type constructor>;
     auto* ctor_expr = params.create_value(*this, 0);
-    auto* var = GlobalConst("a", nullptr, ctor_expr);
+    auto* var = GlobalLet("a", nullptr, ctor_expr);
     WrapInFunction();
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

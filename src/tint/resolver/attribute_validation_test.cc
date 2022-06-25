@@ -774,7 +774,7 @@ using ConstantAttributeTest = TestWithParams;
 TEST_P(ConstantAttributeTest, IsValid) {
     auto& params = GetParam();
 
-    GlobalConst("a", ty.f32(), Expr(1.23_f),
+    GlobalLet("a", ty.f32(), Expr(1.23_f),
                 createAttributes(Source{{12, 34}}, *this, params.kind));
 
     WrapInFunction();
@@ -805,7 +805,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                          TestParams{AttributeKind::kBindingAndGroup, false}));
 
 TEST_F(ConstantAttributeTest, DuplicateAttribute) {
-    GlobalConst("a", ty.f32(), Expr(1.23_f),
+    GlobalLet("a", ty.f32(), Expr(1.23_f),
                 ast::AttributeList{
                     create<ast::IdAttribute>(Source{{12, 34}}, 0),
                     create<ast::IdAttribute>(Source{{56, 78}}, 1),
@@ -852,7 +852,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                          TestParams{AttributeKind::kBindingAndGroup, false}));
 
 TEST_F(OverrideAttributeTest, DuplicateAttribute) {
-    GlobalConst("a", ty.f32(), Expr(1.23_f),
+    GlobalLet("a", ty.f32(), Expr(1.23_f),
                 ast::AttributeList{
                     create<ast::IdAttribute>(Source{{12, 34}}, 0),
                     create<ast::IdAttribute>(Source{{56, 78}}, 1),

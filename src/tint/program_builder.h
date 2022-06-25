@@ -1466,10 +1466,10 @@ class ProgramBuilder {
     /// @returns an `ast::Let` constructed by calling Let() with the arguments of `args`, which is
     /// automatically registered as a global variable with the ast::Module.
     template <typename NAME>
-    const ast::Let* GlobalConst(NAME&& name,
-                                const ast::Type* type,
-                                const ast::Expression* constructor,
-                                ast::AttributeList attributes = {}) {
+    const ast::Let* GlobalLet(NAME&& name,
+                              const ast::Type* type,
+                              const ast::Expression* constructor,
+                              ast::AttributeList attributes = {}) {
         auto* var = Let(std::forward<NAME>(name), type, constructor, std::move(attributes));
         AST().AddGlobalVariable(var);
         return var;
@@ -1484,11 +1484,11 @@ class ProgramBuilder {
     /// arguments of `args`, which is automatically registered as a global
     /// variable with the ast::Module.
     template <typename NAME>
-    const ast::Let* GlobalConst(const Source& source,
-                                NAME&& name,
-                                const ast::Type* type,
-                                const ast::Expression* constructor,
-                                ast::AttributeList attributes = {}) {
+    const ast::Let* GlobalLet(const Source& source,
+                              NAME&& name,
+                              const ast::Type* type,
+                              const ast::Expression* constructor,
+                              ast::AttributeList attributes = {}) {
         auto* var = Let(source, std::forward<NAME>(name), type, constructor, std::move(attributes));
         AST().AddGlobalVariable(var);
         return var;

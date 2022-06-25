@@ -64,14 +64,14 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
 TEST_F(BuilderTest, GlobalVar_Const) {
     auto* init = vec3<f32>(1_f, 1_f, 3_f);
 
-    auto* v = GlobalConst("var", ty.vec3<f32>(), init);
+    auto* v = GlobalLet("l", ty.vec3<f32>(), init);
 
     spirv::Builder& b = Build();
 
     EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
     ASSERT_FALSE(b.has_error()) << b.error();
 
-    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %5 "var"
+    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %5 "l"
 )");
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -84,7 +84,7 @@ TEST_F(BuilderTest, GlobalVar_Const) {
 TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
     auto* init = vec3<f32>(1_f, 2_f, 3_f);
 
-    auto* v = GlobalConst("var", ty.vec3<f32>(), init);
+    auto* v = GlobalLet("l", ty.vec3<f32>(), init);
 
     spirv::Builder& b = Build();
 
@@ -103,7 +103,7 @@ TEST_F(BuilderTest, GlobalVar_Complex_Constructor) {
 TEST_F(BuilderTest, GlobalVar_Complex_ConstructorNestedVector) {
     auto* init = vec3<f32>(vec2<f32>(1_f, 2_f), 3_f);
 
-    auto* v = GlobalConst("var", ty.vec3<f32>(), init);
+    auto* v = GlobalLet("l", ty.vec3<f32>(), init);
 
     spirv::Builder& b = Build();
 

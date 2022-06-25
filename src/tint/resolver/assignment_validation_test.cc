@@ -68,7 +68,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignArraysWithDifferentSizeExpression
     //   a = b;
     // }
 
-    GlobalConst("len", nullptr, Expr(4_u));
+    GlobalLet("len", nullptr, Expr(4_u));
 
     auto* a = Var("a", ty.array(ty.f32(), 4_u));
     auto* b = Var("b", ty.array(ty.f32(), "len"));
@@ -87,7 +87,7 @@ TEST_F(ResolverAssignmentValidationTest, AssignArraysWithDifferentSizeExpression
     //   a = b;
     // }
 
-    GlobalConst("len", nullptr, Expr(5_u));
+    GlobalLet("len", nullptr, Expr(5_u));
 
     auto* a = Var("a", ty.array(ty.f32(), 4_u));
     auto* b = Var("b", ty.array(ty.f32(), "len"));

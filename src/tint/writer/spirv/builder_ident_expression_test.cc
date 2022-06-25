@@ -25,7 +25,7 @@ using BuilderTest = TestHelper;
 TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
     auto* init = vec3<f32>(1_f, 1_f, 3_f);
 
-    auto* v = GlobalConst("var", ty.vec3<f32>(), init);
+    auto* v = GlobalLet("var", ty.vec3<f32>(), init);
 
     auto* expr = Expr("var");
     WrapInFunction(expr);
@@ -138,7 +138,7 @@ TEST_F(BuilderTest, IdentifierExpression_Load) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_NoLoadConst) {
-    auto* var = GlobalConst("var", ty.i32(), Expr(2_i));
+    auto* var = GlobalLet("var", ty.i32(), Expr(2_i));
 
     auto* expr = Add("var", "var");
     WrapInFunction(expr);

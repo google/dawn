@@ -92,8 +92,8 @@ TEST_F(ResolverSourceVariableTest, GlobalOverride) {
     EXPECT_EQ(Sem().Get(expr)->SourceVariable(), sem_a);
 }
 
-TEST_F(ResolverSourceVariableTest, GlobalConst) {
-    auto* a = GlobalConst("a", ty.f32(), Expr(1_f));
+TEST_F(ResolverSourceVariableTest, GlobalLet) {
+    auto* a = GlobalLet("a", ty.f32(), Expr(1_f));
     auto* expr = Expr(a);
     WrapInFunction(expr);
 

@@ -65,7 +65,7 @@ TEST_F(ResolverIndexAccessorTest, Matrix_BothDimensions_Dynamic_Ref) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic) {
-    GlobalConst("my_const", ty.mat2x3<f32>(), Construct(ty.mat2x3<f32>()));
+    GlobalLet("my_const", ty.mat2x3<f32>(), Construct(ty.mat2x3<f32>()));
     auto* idx = Var("idx", ty.i32(), Construct(ty.i32()));
     auto* acc = IndexAccessor("my_const", Expr(Source{{12, 34}}, idx));
     WrapInFunction(Decl(idx), acc);
@@ -80,7 +80,7 @@ TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Matrix_XDimension_Dynamic) {
-    GlobalConst("my_var", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
+    GlobalLet("my_var", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
     auto* idx = Var("idx", ty.u32(), Expr(3_u));
     auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, idx));
     WrapInFunction(Decl(idx), acc);
@@ -95,7 +95,7 @@ TEST_F(ResolverIndexAccessorTest, Matrix_XDimension_Dynamic) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Matrix_BothDimension_Dynamic) {
-    GlobalConst("my_var", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
+    GlobalLet("my_var", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
     auto* idx = Var("idy", ty.u32(), Expr(2_u));
     auto* acc = IndexAccessor(IndexAccessor("my_var", Expr(Source{{12, 34}}, idx)), 1_i);
     WrapInFunction(Decl(idx), acc);
@@ -174,7 +174,7 @@ TEST_F(ResolverIndexAccessorTest, Vector_Dynamic_Ref) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Vector_Dynamic) {
-    GlobalConst("my_var", ty.vec3<f32>(), Construct(ty.vec3<f32>()));
+    GlobalLet("my_var", ty.vec3<f32>(), Construct(ty.vec3<f32>()));
     auto* idx = Var("idx", ty.i32(), Expr(2_i));
     auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, idx));
     WrapInFunction(Decl(idx), acc);
@@ -278,7 +278,7 @@ TEST_F(ResolverIndexAccessorTest, Alias_Array) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Array_Constant) {
-    GlobalConst("my_var", ty.array<f32, 3>(), array<f32, 3>());
+    GlobalLet("my_var", ty.array<f32, 3>(), array<f32, 3>());
 
     auto* acc = IndexAccessor("my_var", 2_i);
     WrapInFunction(acc);

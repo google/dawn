@@ -433,8 +433,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_ConstU32) {
     // let x = 8u;
     // @compute @workgroup_size(x, y, 16u)
     // fn main() {}
-    auto* x = GlobalConst("x", ty.u32(), Expr(4_u));
-    auto* y = GlobalConst("y", ty.u32(), Expr(8_u));
+    auto* x = GlobalLet("x", ty.u32(), Expr(4_u));
+    auto* y = GlobalLet("y", ty.u32(), Expr(8_u));
     auto* func = Func("main", {}, ty.void_(), {},
                       {Stage(ast::PipelineStage::kCompute), WorkgroupSize("x", "y", 16_u)});
 
@@ -520,7 +520,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_TypeMismatch) {
     // let x = 64u;
     // @compute @workgroup_size(1i, x)
     // fn main() {}
-    GlobalConst("x", ty.u32(), Expr(64_u));
+    GlobalLet("x", ty.u32(), Expr(64_u));
     Func("main", {}, ty.void_(), {},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Source{{12, 34}}, 1_i, "x")});
 
@@ -534,8 +534,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_TypeMismatch2) {
     // let y = 32i;
     // @compute @workgroup_size(x, y)
     // fn main() {}
-    GlobalConst("x", ty.u32(), Expr(64_u));
-    GlobalConst("y", ty.i32(), Expr(32_i));
+    GlobalLet("x", ty.u32(), Expr(64_u));
+    GlobalLet("y", ty.i32(), Expr(32_i));
     Func("main", {}, ty.void_(), {},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Source{{12, 34}}, "x", "y")});
 
@@ -548,8 +548,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Mismatch_ConstU32) {
     // let x = 8u;
     // @compute @workgroup_size(x, y, 16i)
     // fn main() {}
-    GlobalConst("x", ty.u32(), Expr(4_u));
-    GlobalConst("y", ty.u32(), Expr(8_u));
+    GlobalLet("x", ty.u32(), Expr(4_u));
+    GlobalLet("y", ty.u32(), Expr(8_u));
     Func("main", {}, ty.void_(), {},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Source{{12, 34}}, "x", "y", 16_i)});
 
@@ -597,7 +597,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_BadType) {
     // let x = 64.0;
     // @compute @workgroup_size(x)
     // fn main() {}
-    GlobalConst("x", ty.f32(), Expr(64_f));
+    GlobalLet("x", ty.f32(), Expr(64_f));
     Func("main", {}, ty.void_(), {},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Expr(Source{{12, 34}}, "x"))});
 
@@ -611,7 +611,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_Negative) {
     // let x = -2i;
     // @compute @workgroup_size(x)
     // fn main() {}
-    GlobalConst("x", ty.i32(), Expr(-2_i));
+    GlobalLet("x", ty.i32(), Expr(-2_i));
     Func("main", {}, ty.void_(), {},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Expr(Source{{12, 34}}, "x"))});
 
@@ -623,7 +623,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_Zero) {
     // let x = 0i;
     // @compute @workgroup_size(x)
     // fn main() {}
-    GlobalConst("x", ty.i32(), Expr(0_i));
+    GlobalLet("x", ty.i32(), Expr(0_i));
     Func("main", {}, ty.void_(), {},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Expr(Source{{12, 34}}, "x"))});
 
@@ -635,7 +635,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_NestedZeroValueConstr
     // let x = i32(i32(i32()));
     // @compute @workgroup_size(x)
     // fn main() {}
-    GlobalConst("x", ty.i32(), Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32()))));
+    GlobalLet("x", ty.i32(), Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32()))));
     Func("main", {}, ty.void_(), {},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Expr(Source{{12, 34}}, "x"))});
 

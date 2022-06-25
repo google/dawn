@@ -78,7 +78,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize_WithIdent) {
-    GlobalConst("height", ty.i32(), Expr(2_i));
+    GlobalLet("height", ty.i32(), Expr(2_i));
     auto* func = Func("my_func", {}, ty.void_(), {Return()},
                       {
                           Stage(ast::PipelineStage::kCompute),

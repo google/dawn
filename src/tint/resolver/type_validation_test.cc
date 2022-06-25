@@ -89,7 +89,7 @@ TEST_F(ResolverTypeValidationTest, GlobalVariableWithStorageClass_Pass) {
 
 TEST_F(ResolverTypeValidationTest, GlobalConstNoStorageClass_Pass) {
     // let global_var: f32;
-    GlobalConst(Source{{12, 34}}, "global_var", ty.f32(), Construct(ty.f32()));
+    GlobalLet(Source{{12, 34}}, "global_var", ty.f32(), Construct(ty.f32()));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -199,7 +199,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Pass) {
 TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedLet_Pass) {
     // let size = 4u;
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Expr(4_u));
+    GlobalLet("size", nullptr, Expr(4_u));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -207,7 +207,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedLet_Pass) {
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLet_Pass) {
     // let size = 4i;
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Expr(4_i));
+    GlobalLet("size", nullptr, Expr(4_i));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -243,7 +243,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Negative) {
 TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedLet_Zero) {
     // let size = 0u;
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Expr(0_u));
+    GlobalLet("size", nullptr, Expr(0_u));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
@@ -252,7 +252,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedLet_Zero) {
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLet_Zero) {
     // let size = 0i;
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Expr(0_i));
+    GlobalLet("size", nullptr, Expr(0_i));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
@@ -261,7 +261,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedLet_Zero) {
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLet_Negative) {
     // let size = -10i;
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Expr(-10_i));
+    GlobalLet("size", nullptr, Expr(-10_i));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size (-10) must be greater than 0");
@@ -289,7 +289,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_IVecLiteral) {
 TEST_F(ResolverTypeValidationTest, ArraySize_FloatLet) {
     // let size = 10.0;
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Expr(10_f));
+    GlobalLet("size", nullptr, Expr(10_f));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -300,7 +300,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FloatLet) {
 TEST_F(ResolverTypeValidationTest, ArraySize_IVecLet) {
     // let size = vec2<i32>(100, 100);
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Construct(ty.vec2<i32>(), 100_i, 100_i));
+    GlobalLet("size", nullptr, Construct(ty.vec2<i32>(), 100_i, 100_i));
     Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

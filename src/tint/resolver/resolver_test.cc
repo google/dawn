@@ -451,7 +451,7 @@ TEST_F(ResolverTest, ArraySize_SignedLiteral) {
 TEST_F(ResolverTest, ArraySize_UnsignedConstant) {
     // let size = 0u;
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Expr(10_u));
+    GlobalLet("size", nullptr, Expr(10_u));
     auto* a = Global("a", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -466,7 +466,7 @@ TEST_F(ResolverTest, ArraySize_UnsignedConstant) {
 TEST_F(ResolverTest, ArraySize_SignedConstant) {
     // let size = 0;
     // var<private> a : array<f32, size>;
-    GlobalConst("size", nullptr, Expr(10_i));
+    GlobalLet("size", nullptr, Expr(10_i));
     auto* a = Global("a", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -616,7 +616,7 @@ TEST_F(ResolverTest, Expr_Identifier_GlobalVariable) {
 }
 
 TEST_F(ResolverTest, Expr_Identifier_GlobalConstant) {
-    auto* my_var = GlobalConst("my_var", ty.f32(), Construct(ty.f32()));
+    auto* my_var = GlobalLet("my_var", ty.f32(), Construct(ty.f32()));
 
     auto* ident = Expr("my_var");
     WrapInFunction(ident);
@@ -951,9 +951,9 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Consts) {
     // let depth = 2i;
     // @compute @workgroup_size(width, height, depth)
     // fn main() {}
-    GlobalConst("width", ty.i32(), Expr(16_i));
-    GlobalConst("height", ty.i32(), Expr(8_i));
-    GlobalConst("depth", ty.i32(), Expr(2_i));
+    GlobalLet("width", ty.i32(), Expr(16_i));
+    GlobalLet("height", ty.i32(), Expr(8_i));
+    GlobalLet("depth", ty.i32(), Expr(2_i));
     auto* func = Func("main", {}, ty.void_(), {},
                       {
                           Stage(ast::PipelineStage::kCompute),
@@ -978,10 +978,10 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Consts_NestedInitializer) {
     // let height = i32(i32(i32(4i)));
     // @compute @workgroup_size(width, height)
     // fn main() {}
-    GlobalConst("width", ty.i32(),
-                Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32(), 8_i))));
-    GlobalConst("height", ty.i32(),
-                Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32(), 4_i))));
+    GlobalLet("width", ty.i32(),
+              Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32(), 8_i))));
+    GlobalLet("height", ty.i32(),
+              Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32(), 4_i))));
     auto* func = Func("main", {}, ty.void_(), {},
                       {
                           Stage(ast::PipelineStage::kCompute),
@@ -1063,7 +1063,7 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Mixed) {
     // @compute @workgroup_size(8, height, depth)
     // fn main() {}
     auto* height = Override("height", ty.i32(), Expr(2_i), {Id(0)});
-    GlobalConst("depth", ty.i32(), Expr(3_i));
+    GlobalLet("depth", ty.i32(), Expr(3_i));
     auto* func = Func("main", {}, ty.void_(), {},
                       {
                           Stage(ast::PipelineStage::kCompute),

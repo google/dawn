@@ -86,7 +86,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsFunction) {
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalLet) {
-    GlobalConst(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i));
+    GlobalLet(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -97,8 +97,9 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVar) {
     Global(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a module-scope 'var')");
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a module-scope 'var')");
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAlias) {
@@ -266,7 +267,7 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, Immediate) {
     }
 }
 
-TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalConst) {
+TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalLet) {
     auto& p = GetParam();
     auto overload = std::get<0>(p);
     auto param = std::get<1>(p);
@@ -277,7 +278,7 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalConst) {
     overload.BuildSamplerVariable(this);
 
     // Build the module-scope let 'G' with the offset value
-    GlobalConst("G", nullptr, expr({}, *this));
+    GlobalLet("G", nullptr, expr({}, *this));
 
     auto args = overload.args(this);
     auto*& arg_to_replace = (param.position == Position::kFirst) ? args.front() : args.back();

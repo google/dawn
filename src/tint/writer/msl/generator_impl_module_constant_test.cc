@@ -23,7 +23,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_ModuleConstant) {
-    auto* var = GlobalConst("pos", ty.array<f32, 3>(), array<f32, 3>(1_f, 2_f, 3_f));
+    auto* var = GlobalLet("pos", ty.array<f32, 3>(), array<f32, 3>(1_f, 2_f, 3_f));
 
     GeneratorImpl& gen = Build();
 

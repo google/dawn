@@ -38,7 +38,7 @@ class ResolverPipelineOverridableConstantTest : public ResolverTest {
 };
 
 TEST_F(ResolverPipelineOverridableConstantTest, NonOverridable) {
-    auto* a = GlobalConst("a", ty.f32(), Expr(1_f));
+    auto* a = GlobalLet("a", ty.f32(), Expr(1_f));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
