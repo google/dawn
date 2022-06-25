@@ -982,7 +982,7 @@ class UniformityGraph {
         };
 
         auto name = builder_->Symbols().NameFor(ident->symbol);
-        auto* sem = sem_.Get<sem::VariableUser>(ident)->Variable();
+        auto* sem = sem_.Get(ident)->UnwrapMaterialize()->As<sem::VariableUser>()->Variable();
         auto* node = CreateNode(name + "_ident_expr", ident);
         return Switch(
             sem,

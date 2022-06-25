@@ -774,6 +774,24 @@ using ConstantAttributeTest = TestWithParams;
 TEST_P(ConstantAttributeTest, IsValid) {
     auto& params = GetParam();
 
+    GlobalConst("a", ty.f32(), Expr(1.23_f),
+                createAttributes(Source{{12, 34}}, *this, params.kind));
+
+    WrapInFunction();
+
+    if (params.should_pass) {
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        EXPECT_EQ(r()->error(),
+                  "12:34 error: attribute is not valid for module-scope 'const' declaration");
+    }
+}
+
+// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
+TEST_P(ConstantAttributeTest, IsValid_Let) {
+    auto& params = GetParam();
+
     GlobalLet("a", ty.f32(), Expr(1.23_f), createAttributes(Source{{12, 34}}, *this, params.kind));
 
     WrapInFunction();
@@ -804,6 +822,22 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                          TestParams{AttributeKind::kBindingAndGroup, false}));
 
 TEST_F(ConstantAttributeTest, DuplicateAttribute) {
+    GlobalConst("a", ty.f32(), Expr(1.23_f),
+                ast::AttributeList{
+                    create<ast::IdAttribute>(Source{{12, 34}}, 0),
+                    create<ast::IdAttribute>(Source{{56, 78}}, 1),
+                });
+
+    WrapInFunction();
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(56:78 error: duplicate id attribute
+12:34 note: first attribute declared here)");
+}
+
+// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
+TEST_F(ConstantAttributeTest, DuplicateAttribute_Let) {
     GlobalLet("a", ty.f32(), Expr(1.23_f),
               ast::AttributeList{
                   create<ast::IdAttribute>(Source{{12, 34}}, 0),
@@ -851,11 +885,11 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                          TestParams{AttributeKind::kBindingAndGroup, false}));
 
 TEST_F(OverrideAttributeTest, DuplicateAttribute) {
-    GlobalLet("a", ty.f32(), Expr(1.23_f),
-              ast::AttributeList{
-                  create<ast::IdAttribute>(Source{{12, 34}}, 0),
-                  create<ast::IdAttribute>(Source{{56, 78}}, 1),
-              });
+    Override("a", ty.f32(), Expr(1.23_f),
+             ast::AttributeList{
+                 create<ast::IdAttribute>(Source{{12, 34}}, 0),
+                 create<ast::IdAttribute>(Source{{56, 78}}, 1),
+             });
 
     WrapInFunction();
 

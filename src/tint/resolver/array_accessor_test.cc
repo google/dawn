@@ -65,7 +65,7 @@ TEST_F(ResolverIndexAccessorTest, Matrix_BothDimensions_Dynamic_Ref) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic) {
-    GlobalLet("my_const", ty.mat2x3<f32>(), Construct(ty.mat2x3<f32>()));
+    GlobalConst("my_const", ty.mat2x3<f32>(), Construct(ty.mat2x3<f32>()));
     auto* idx = Var("idx", ty.i32(), Construct(ty.i32()));
     auto* acc = IndexAccessor("my_const", Expr(Source{{12, 34}}, idx));
     WrapInFunction(Decl(idx), acc);
@@ -79,10 +79,32 @@ TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic) {
     EXPECT_EQ(idx_sem->Object()->Declaration(), acc->object);
 }
 
+// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
+TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic_Let) {
+    GlobalLet("my_let", ty.mat2x3<f32>(), Construct(ty.mat2x3<f32>()));
+    auto* idx = Var("idx", ty.i32(), Construct(ty.i32()));
+    auto* acc = IndexAccessor("my_let", Expr(Source{{12, 34}}, idx));
+    WrapInFunction(Decl(idx), acc);
+
+    EXPECT_TRUE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "");
+}
+
 TEST_F(ResolverIndexAccessorTest, Matrix_XDimension_Dynamic) {
-    GlobalLet("my_var", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
+    GlobalConst("my_const", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
     auto* idx = Var("idx", ty.u32(), Expr(3_u));
-    auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, idx));
+    auto* acc = IndexAccessor("my_const", Expr(Source{{12, 34}}, idx));
+    WrapInFunction(Decl(idx), acc);
+
+    EXPECT_TRUE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "");
+}
+
+// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
+TEST_F(ResolverIndexAccessorTest, Matrix_XDimension_Dynamic_Let) {
+    GlobalLet("my_let", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
+    auto* idx = Var("idx", ty.u32(), Expr(3_u));
+    auto* acc = IndexAccessor("my_let", Expr(Source{{12, 34}}, idx));
     WrapInFunction(Decl(idx), acc);
 
     EXPECT_TRUE(r()->Resolve());
@@ -95,9 +117,20 @@ TEST_F(ResolverIndexAccessorTest, Matrix_XDimension_Dynamic) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Matrix_BothDimension_Dynamic) {
-    GlobalLet("my_var", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
+    GlobalConst("my_const", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
     auto* idx = Var("idy", ty.u32(), Expr(2_u));
-    auto* acc = IndexAccessor(IndexAccessor("my_var", Expr(Source{{12, 34}}, idx)), 1_i);
+    auto* acc = IndexAccessor(IndexAccessor("my_const", Expr(Source{{12, 34}}, idx)), 1_i);
+    WrapInFunction(Decl(idx), acc);
+
+    EXPECT_TRUE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "");
+}
+
+// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
+TEST_F(ResolverIndexAccessorTest, Matrix_BothDimension_Dynamic_Let) {
+    GlobalLet("my_let", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
+    auto* idx = Var("idy", ty.u32(), Expr(2_u));
+    auto* acc = IndexAccessor(IndexAccessor("my_let", Expr(Source{{12, 34}}, idx)), 1_i);
     WrapInFunction(Decl(idx), acc);
 
     EXPECT_TRUE(r()->Resolve());
@@ -174,9 +207,19 @@ TEST_F(ResolverIndexAccessorTest, Vector_Dynamic_Ref) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Vector_Dynamic) {
-    GlobalLet("my_var", ty.vec3<f32>(), Construct(ty.vec3<f32>()));
+    GlobalConst("my_const", ty.vec3<f32>(), Construct(ty.vec3<f32>()));
     auto* idx = Var("idx", ty.i32(), Expr(2_i));
-    auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, idx));
+    auto* acc = IndexAccessor("my_const", Expr(Source{{12, 34}}, idx));
+    WrapInFunction(Decl(idx), acc);
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
+// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
+TEST_F(ResolverIndexAccessorTest, Vector_Dynamic_Let) {
+    GlobalLet("my_let", ty.vec3<f32>(), Construct(ty.vec3<f32>()));
+    auto* idx = Var("idx", ty.i32(), Expr(2_i));
+    auto* acc = IndexAccessor("my_let", Expr(Source{{12, 34}}, idx));
     WrapInFunction(Decl(idx), acc);
 
     EXPECT_TRUE(r()->Resolve());
@@ -278,9 +321,22 @@ TEST_F(ResolverIndexAccessorTest, Alias_Array) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Array_Constant) {
-    GlobalLet("my_var", ty.array<f32, 3>(), array<f32, 3>());
+    GlobalConst("my_const", ty.array<f32, 3>(), array<f32, 3>());
 
-    auto* acc = IndexAccessor("my_var", 2_i);
+    auto* acc = IndexAccessor("my_const", 2_i);
+    WrapInFunction(acc);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(acc), nullptr);
+    EXPECT_TRUE(TypeOf(acc)->Is<sem::F32>());
+}
+
+// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
+TEST_F(ResolverIndexAccessorTest, Array_Let) {
+    GlobalLet("my_let", ty.array<f32, 3>(), array<f32, 3>());
+
+    auto* acc = IndexAccessor("my_let", 2_i);
     WrapInFunction(acc);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

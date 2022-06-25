@@ -90,6 +90,15 @@ TEST_F(ResolverVariableValidationTest, OverrideInferedTypeNotScalar) {
     EXPECT_EQ(r()->error(), "56:78 error: vec3<f32> cannot be used as the type of a 'override'");
 }
 
+TEST_F(ResolverVariableValidationTest, ConstConstructorWrongType) {
+    // const c : i32 = 2u
+    WrapInFunction(Const(Source{{3, 3}}, "c", ty.i32(), Expr(2_u)));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(3:3 error: cannot initialize const of type 'i32' with value of type 'u32')");
+}
+
 TEST_F(ResolverVariableValidationTest, LetConstructorWrongType) {
     // var v : i32 = 2u
     WrapInFunction(Let(Source{{3, 3}}, "v", ty.i32(), Expr(2_u)));
@@ -106,6 +115,15 @@ TEST_F(ResolverVariableValidationTest, VarConstructorWrongType) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(3:3 error: cannot initialize var of type 'i32' with value of type 'u32')");
+}
+
+TEST_F(ResolverVariableValidationTest, ConstConstructorWrongTypeViaAlias) {
+    auto* a = Alias("I32", ty.i32());
+    WrapInFunction(Const(Source{{3, 3}}, "v", ty.Of(a), Expr(2_u)));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(3:3 error: cannot initialize const of type 'i32' with value of type 'u32')");
 }
 
 TEST_F(ResolverVariableValidationTest, LetConstructorWrongTypeViaAlias) {
@@ -287,6 +305,14 @@ TEST_F(ResolverVariableValidationTest, InvalidStorageClassForInitializer) {
               "storage classes 'private' and 'function'");
 }
 
+TEST_F(ResolverVariableValidationTest, VectorConstNoType) {
+    // const a : mat3x3 = mat3x3<f32>();
+    WrapInFunction(Const("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3), vec3<f32>()));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
+}
+
 TEST_F(ResolverVariableValidationTest, VectorLetNoType) {
     // let a : mat3x3 = mat3x3<f32>();
     WrapInFunction(Let("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3), vec3<f32>()));
@@ -303,6 +329,14 @@ TEST_F(ResolverVariableValidationTest, VectorVarNoType) {
     EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
 }
 
+TEST_F(ResolverVariableValidationTest, MatrixConstNoType) {
+    // const a : mat3x3 = mat3x3<f32>();
+    WrapInFunction(Const("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3, 3), mat3x3<f32>()));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");
+}
+
 TEST_F(ResolverVariableValidationTest, MatrixLetNoType) {
     // let a : mat3x3 = mat3x3<f32>();
     WrapInFunction(Let("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3, 3), mat3x3<f32>()));
@@ -317,6 +351,50 @@ TEST_F(ResolverVariableValidationTest, MatrixVarNoType) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");
+}
+
+TEST_F(ResolverVariableValidationTest, ConstStructure) {
+    auto* s = Structure("S", {Member("m", ty.i32())});
+    auto* c = Const("c", ty.Of(s), Construct(Source{{12, 34}}, ty.Of(s)));
+    WrapInFunction(c);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be constant expression)");
+}
+
+TEST_F(ResolverVariableValidationTest, GlobalConstStructure) {
+    auto* s = Structure("S", {Member("m", ty.i32())});
+    GlobalConst("c", ty.Of(s), Construct(Source{{12, 34}}, ty.Of(s)));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be constant expression)");
+}
+
+TEST_F(ResolverVariableValidationTest, ConstInitWithVar) {
+    auto* v = Var("v", nullptr, Expr(1_i));
+    auto* c = Const("c", nullptr, Expr(Source{{12, 34}}, v));
+    WrapInFunction(v, c);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be constant expression)");
+}
+
+TEST_F(ResolverVariableValidationTest, ConstInitWithOverride) {
+    auto* o = Override("v", nullptr, Expr(1_i));
+    auto* c = Const("c", nullptr, Expr(Source{{12, 34}}, o));
+    WrapInFunction(c);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be constant expression)");
+}
+
+TEST_F(ResolverVariableValidationTest, ConstInitWithLet) {
+    auto* l = Let("v", nullptr, Expr(1_i));
+    auto* c = Const("c", nullptr, Expr(Source{{12, 34}}, l));
+    WrapInFunction(l, c);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be constant expression)");
 }
 
 }  // namespace

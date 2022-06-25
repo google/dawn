@@ -318,6 +318,7 @@ sem::Variable* Resolver::Variable(const ast::Variable* v, bool is_global) {
         [&](const ast::Var* var) { return Var(var, is_global); },
         [&](const ast::Let* let) { return Let(let, is_global); },
         [&](const ast::Override* override) { return Override(override); },
+        [&](const ast::Const* const_) { return Const(const_, is_global); },
         [&](Default) {
             TINT_ICE(Resolver, diagnostics_)
                 << "Resolver::GlobalVariable() called with a unknown variable type: "
@@ -430,6 +431,74 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
 
     sem->SetConstructor(rhs);
     builder_->Sem().Add(v, sem);
+    return sem;
+}
+
+sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
+    const sem::Type* ty = nullptr;
+
+    // If the variable has a declared type, resolve it.
+    if (c->type) {
+        ty = Type(c->type);
+        if (!ty) {
+            return nullptr;
+        }
+    }
+
+    if (!c->constructor) {
+        AddError("'const' declaration must have an initializer", c->source);
+        return nullptr;
+    }
+
+    const auto* rhs = Expression(c->constructor);
+    if (!rhs) {
+        return nullptr;
+    }
+
+    if (ty) {
+        // If an explicit type was specified, materialize to that type
+        rhs = Materialize(rhs, ty);
+    } else {
+        // If no type was specified, infer it from the RHS
+        ty = rhs->Type();
+    }
+
+    const auto value = rhs->ConstantValue();
+    if (!value) {
+        AddError("'const' initializer must be constant expression", c->constructor->source);
+        return nullptr;
+    }
+
+    // TODO(crbug.com/tint/1580): Temporary seatbelt to used to ensure that a `let` cannot be used
+    // to initialize a 'const'. Once we fully implement `const`, and remove constant evaluation from
+    // 'let', this can be removed.
+    if (auto* user = rhs->UnwrapMaterialize()->As<sem::VariableUser>();
+        user && user->Variable()->Is<sem::LocalVariable>() &&
+        user->Variable()->Declaration()->Is<ast::Let>()) {
+        AddError("'const' initializer must be constant expression", c->constructor->source);
+        return nullptr;
+    }
+
+    if (rhs &&
+        !validator_.VariableConstructorOrCast(c, ast::StorageClass::kNone, ty, rhs->Type())) {
+        return nullptr;
+    }
+
+    if (!ApplyStorageClassUsageToType(ast::StorageClass::kNone, const_cast<sem::Type*>(ty),
+                                      c->source)) {
+        AddNote("while instantiating 'const' " + builder_->Symbols().NameFor(c->symbol), c->source);
+        return nullptr;
+    }
+
+    auto* sem = is_global ? static_cast<sem::Variable*>(builder_->create<sem::GlobalVariable>(
+                                c, ty, ast::StorageClass::kNone, ast::Access::kUndefined, value,
+                                sem::BindingPoint{}))
+                          : static_cast<sem::Variable*>(builder_->create<sem::LocalVariable>(
+                                c, ty, ast::StorageClass::kNone, ast::Access::kUndefined,
+                                current_statement_, value));
+
+    sem->SetConstructor(rhs);
+    builder_->Sem().Add(c, sem);
     return sem;
 }
 
@@ -865,7 +934,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
         if (auto* user = args[i]->As<sem::VariableUser>()) {
             // We have an variable of a module-scope constant.
             auto* decl = user->Variable()->Declaration();
-            if (!decl->IsAnyOf<ast::Let, ast::Override>()) {
+            if (!decl->IsAnyOf<ast::Let, ast::Const, ast::Override>()) {
                 AddError(kErrBadType, values[i]->source);
                 return false;
             }

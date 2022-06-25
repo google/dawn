@@ -344,6 +344,14 @@ class Resolver {
     /// @param override the variable
     sem::Variable* Override(const ast::Override* override);
 
+    /// @returns the semantic info for an `ast::Const` `v`. If an error is raised, nullptr is
+    /// returned.
+    /// @note this method does not resolve the attributes as these are context-dependent (global,
+    /// local)
+    /// @param const_ the variable
+    /// @param is_global true if this is module scope, otherwise function scope
+    sem::Variable* Const(const ast::Const* const_, bool is_global);
+
     /// @returns the semantic info for the `ast::Var` `var`. If an error is raised, nullptr is
     /// returned.
     /// @note this method does not resolve the attributes as these are context-dependent (global,

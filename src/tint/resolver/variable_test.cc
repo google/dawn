@@ -237,8 +237,32 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsGlobalVar) {
     EXPECT_EQ(user_v->Variable(), global);
 }
 
+TEST_F(ResolverVariableTest, LocalVar_ShadowsGlobalConst) {
+    // const a : i32 = 1i;
+    //
+    // fn X() {
+    //   var a = (a == 123);
+    // }
+
+    auto* g = GlobalConst("a", ty.i32(), Expr(1_i));
+    auto* v = Var("a", nullptr, Expr("a"));
+    Func("F", {}, ty.void_(), {Decl(v)});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* global = Sem().Get(g);
+    auto* local = Sem().Get<sem::LocalVariable>(v);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), global);
+
+    auto* user_v = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
+    ASSERT_NE(user_v, nullptr);
+    EXPECT_EQ(user_v->Variable(), global);
+}
+
+// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
 TEST_F(ResolverVariableTest, LocalVar_ShadowsGlobalLet) {
-    // let a : i32 = 1;
+    // let a : i32 = 1i;
     //
     // fn X() {
     //   var a = (a == 123);
@@ -262,7 +286,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsGlobalLet) {
 
 TEST_F(ResolverVariableTest, LocalVar_ShadowsLocalVar) {
     // fn F() {
-    //   var a : i32; // x
+    //   var a : i32 = 1i; // x
     //   {
     //     var a = a; // y
     //   }
@@ -286,9 +310,35 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsLocalVar) {
     EXPECT_EQ(user_y->Variable(), local_x);
 }
 
+TEST_F(ResolverVariableTest, LocalVar_ShadowsLocalConst) {
+    // fn F() {
+    //   const a : i32 = 1i;
+    //   {
+    //     var a = (a == 123);
+    //   }
+    // }
+
+    auto* c = Const("a", ty.i32(), Expr(1_i));
+    auto* v = Var("a", nullptr, Expr("a"));
+    Func("X", {}, ty.void_(), {Decl(c), Block(Decl(v))});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* local_c = Sem().Get<sem::LocalVariable>(c);
+    auto* local_v = Sem().Get<sem::LocalVariable>(v);
+
+    ASSERT_NE(local_c, nullptr);
+    ASSERT_NE(local_v, nullptr);
+    EXPECT_EQ(local_v->Shadows(), local_c);
+
+    auto* user_v = Sem().Get<sem::VariableUser>(local_v->Declaration()->constructor);
+    ASSERT_NE(user_v, nullptr);
+    EXPECT_EQ(user_v->Variable(), local_c);
+}
+
 TEST_F(ResolverVariableTest, LocalVar_ShadowsLocalLet) {
     // fn F() {
-    //   let a = 1;
+    //   let a : i32 = 1i;
     //   {
     //     var a = (a == 123);
     //   }
@@ -520,11 +570,35 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsGlobalVar) {
     EXPECT_EQ(user->Variable(), global);
 }
 
-TEST_F(ResolverVariableTest, LocalLet_ShadowsGlobalLet) {
-    // let a : i32 = 1;
+TEST_F(ResolverVariableTest, LocalLet_ShadowsGlobalConst) {
+    // const a : i32 = 1i;
     //
     // fn F() {
-    //   let a = (a == 321);
+    //   let a = a;
+    // }
+
+    auto* g = GlobalConst("a", ty.i32(), Expr(1_i));
+    auto* l = Let("a", nullptr, Expr("a"));
+    Func("F", {}, ty.void_(), {Decl(l)});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* global = Sem().Get(g);
+    auto* local = Sem().Get<sem::LocalVariable>(l);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), global);
+
+    auto* user = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
+    ASSERT_NE(user, nullptr);
+    EXPECT_EQ(user->Variable(), global);
+}
+
+// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
+TEST_F(ResolverVariableTest, LocalLet_ShadowsGlobalLet) {
+    // let a : i32 = 1i;
+    //
+    // fn F() {
+    //   let a = a;
     // }
 
     auto* g = GlobalLet("a", ty.i32(), Expr(1_i));
@@ -545,7 +619,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsGlobalLet) {
 
 TEST_F(ResolverVariableTest, LocalLet_ShadowsLocalVar) {
     // fn F() {
-    //   var a : i32;
+    //   var a : i32 = 1i;
     //   {
     //     let a = a;
     //   }
@@ -569,11 +643,37 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsLocalVar) {
     EXPECT_EQ(user->Variable(), local_v);
 }
 
+TEST_F(ResolverVariableTest, LocalLet_ShadowsLocalConst) {
+    // fn X() {
+    //   const a : i32 = 1i; // x
+    //   {
+    //     let a = a; // y
+    //   }
+    // }
+
+    auto* x = Const("a", ty.i32(), Expr(1_i));
+    auto* y = Let("a", nullptr, Expr("a"));
+    Func("X", {}, ty.void_(), {Decl(x), Block(Decl(y))});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* local_x = Sem().Get<sem::LocalVariable>(x);
+    auto* local_y = Sem().Get<sem::LocalVariable>(y);
+
+    ASSERT_NE(local_x, nullptr);
+    ASSERT_NE(local_y, nullptr);
+    EXPECT_EQ(local_y->Shadows(), local_x);
+
+    auto* user = Sem().Get<sem::VariableUser>(local_y->Declaration()->constructor);
+    ASSERT_NE(user, nullptr);
+    EXPECT_EQ(user->Variable(), local_x);
+}
+
 TEST_F(ResolverVariableTest, LocalLet_ShadowsLocalLet) {
     // fn X() {
-    //   let a = 1; // x
+    //   let a : i32 = 1i; // x
     //   {
-    //     let a = (a == 321); // y
+    //     let a = a; // y
     //   }
     // }
 
@@ -618,6 +718,368 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsParam) {
     auto* user = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
     ASSERT_NE(user, nullptr);
     EXPECT_EQ(user->Variable(), param);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Function-scope const
+////////////////////////////////////////////////////////////////////////////////////////////////////
+TEST_F(ResolverVariableTest, LocalConst_ShadowsAlias) {
+    // type a = i32;
+    //
+    // fn F() {
+    //   const a = true;
+    // }
+
+    auto* t = Alias("a", ty.i32());
+    auto* c = Const("a", nullptr, Expr(false));
+    Func("F", {}, ty.void_(), {Decl(c)});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* type_t = Sem().Get(t);
+    auto* local = Sem().Get<sem::LocalVariable>(c);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), type_t);
+}
+
+TEST_F(ResolverVariableTest, LocalConst_ShadowsStruct) {
+    // struct a {
+    //   m : i32;
+    // };
+    //
+    // fn F() {
+    //   const a = false;
+    // }
+
+    auto* t = Structure("a", {Member("m", ty.i32())});
+    auto* c = Const("a", nullptr, Expr(false));
+    Func("F", {}, ty.void_(), {Decl(c)});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* type_t = Sem().Get(t);
+    auto* local = Sem().Get<sem::LocalVariable>(c);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), type_t);
+}
+
+TEST_F(ResolverVariableTest, LocalConst_ShadowsFunction) {
+    // fn a() {
+    //   const a = false;
+    // }
+
+    auto* c = Const("a", nullptr, Expr(false));
+    auto* fb = Func("a", {}, ty.void_(), {Decl(c)});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* func = Sem().Get(fb);
+    ASSERT_NE(func, nullptr);
+
+    auto* local = Sem().Get<sem::LocalVariable>(c);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), func);
+}
+
+TEST_F(ResolverVariableTest, LocalConst_ShadowsGlobalVar) {
+    // var<private> a : i32;
+    //
+    // fn F() {
+    //   const a = 1i;
+    // }
+
+    auto* g = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
+    auto* c = Const("a", nullptr, Expr(1_i));
+    Func("F", {}, ty.void_(), {Decl(c)});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* global = Sem().Get(g);
+    auto* local = Sem().Get<sem::LocalVariable>(c);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), global);
+}
+
+TEST_F(ResolverVariableTest, LocalConst_ShadowsGlobalConst) {
+    // const a : i32 = 1i;
+    //
+    // fn F() {
+    //   const a = a;
+    // }
+
+    auto* g = GlobalConst("a", ty.i32(), Expr(1_i));
+    auto* c = Const("a", nullptr, Expr("a"));
+    Func("F", {}, ty.void_(), {Decl(c)});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* global = Sem().Get(g);
+    auto* local = Sem().Get<sem::LocalVariable>(c);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), global);
+
+    auto* user = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
+    ASSERT_NE(user, nullptr);
+    EXPECT_EQ(user->Variable(), global);
+}
+
+// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
+TEST_F(ResolverVariableTest, LocalConst_ShadowsGlobalLet) {
+    // let a : i32 = 1i;
+    //
+    // fn F() {
+    //   const a = 1i;
+    // }
+
+    auto* g = GlobalLet("a", ty.i32(), Expr(1_i));
+    auto* c = Const("a", nullptr, Expr("a"));
+    Func("F", {}, ty.void_(), {Decl(c)});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* global = Sem().Get(g);
+    auto* local = Sem().Get<sem::LocalVariable>(c);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), global);
+}
+
+TEST_F(ResolverVariableTest, LocalConst_ShadowsLocalVar) {
+    // fn F() {
+    //   var a = 1i;
+    //   {
+    //     const a = 1i;
+    //   }
+    // }
+
+    auto* v = Var("a", ty.i32(), Expr(1_i));
+    auto* c = Const("a", nullptr, Expr(1_i));
+    Func("F", {}, ty.void_(), {Decl(v), Block(Decl(c))});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* local_v = Sem().Get<sem::LocalVariable>(v);
+    auto* local_c = Sem().Get<sem::LocalVariable>(c);
+
+    ASSERT_NE(local_v, nullptr);
+    ASSERT_NE(local_c, nullptr);
+    EXPECT_EQ(local_c->Shadows(), local_v);
+}
+
+TEST_F(ResolverVariableTest, LocalConst_ShadowsLocalConst) {
+    // fn X() {
+    //   const a = 1i; // x
+    //   {
+    //     const a = a; // y
+    //   }
+    // }
+
+    auto* x = Const("a", ty.i32(), Expr(1_i));
+    auto* y = Const("a", nullptr, Expr("a"));
+    Func("X", {}, ty.void_(), {Decl(x), Block(Decl(y))});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* local_x = Sem().Get<sem::LocalVariable>(x);
+    auto* local_y = Sem().Get<sem::LocalVariable>(y);
+
+    ASSERT_NE(local_x, nullptr);
+    ASSERT_NE(local_y, nullptr);
+    EXPECT_EQ(local_y->Shadows(), local_x);
+
+    auto* user = Sem().Get<sem::VariableUser>(local_y->Declaration()->constructor);
+    ASSERT_NE(user, nullptr);
+    EXPECT_EQ(user->Variable(), local_x);
+}
+
+TEST_F(ResolverVariableTest, LocalConst_ShadowsLocalLet) {
+    // fn X() {
+    //   let a = 1i; // x
+    //   {
+    //     const a = 1i; // y
+    //   }
+    // }
+
+    auto* l = Let("a", ty.i32(), Expr(1_i));
+    auto* c = Const("a", nullptr, Expr(1_i));
+    Func("X", {}, ty.void_(), {Decl(l), Block(Decl(c))});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* local_l = Sem().Get<sem::LocalVariable>(l);
+    auto* local_c = Sem().Get<sem::LocalVariable>(c);
+
+    ASSERT_NE(local_l, nullptr);
+    ASSERT_NE(local_c, nullptr);
+    EXPECT_EQ(local_c->Shadows(), local_l);
+}
+
+TEST_F(ResolverVariableTest, LocalConst_ShadowsParam) {
+    // fn F(a : i32) {
+    //   {
+    //     const a = 1i;
+    //   }
+    // }
+
+    auto* p = Param("a", ty.i32());
+    auto* c = Const("a", nullptr, Expr(1_i));
+    Func("X", {p}, ty.void_(), {Block(Decl(c))});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* param = Sem().Get<sem::Parameter>(p);
+    auto* local = Sem().Get<sem::LocalVariable>(c);
+
+    ASSERT_NE(param, nullptr);
+    ASSERT_NE(local, nullptr);
+    EXPECT_EQ(local->Shadows(), param);
+}
+
+TEST_F(ResolverVariableTest, LocalConst_ExplicitType_Decls) {
+    auto* c_i32 = Const("a", ty.i32(), Expr(0_i));
+    auto* c_u32 = Const("b", ty.u32(), Expr(0_u));
+    auto* c_f32 = Const("c", ty.f32(), Expr(0_f));
+    auto* c_vi32 = Const("d", ty.vec3<i32>(), vec3<i32>());
+    auto* c_vu32 = Const("e", ty.vec3<u32>(), vec3<u32>());
+    auto* c_vf32 = Const("f", ty.vec3<f32>(), vec3<f32>());
+    auto* c_mf32 = Const("g", ty.mat3x3<f32>(), mat3x3<f32>());
+
+    WrapInFunction(c_i32, c_u32, c_f32, c_vi32, c_vu32, c_vf32, c_mf32);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    EXPECT_EQ(Sem().Get(c_i32)->Declaration(), c_i32);
+    EXPECT_EQ(Sem().Get(c_u32)->Declaration(), c_u32);
+    EXPECT_EQ(Sem().Get(c_f32)->Declaration(), c_f32);
+    EXPECT_EQ(Sem().Get(c_vi32)->Declaration(), c_vi32);
+    EXPECT_EQ(Sem().Get(c_vu32)->Declaration(), c_vu32);
+    EXPECT_EQ(Sem().Get(c_vf32)->Declaration(), c_vf32);
+    EXPECT_EQ(Sem().Get(c_mf32)->Declaration(), c_mf32);
+
+    ASSERT_TRUE(TypeOf(c_i32)->Is<sem::I32>());
+    ASSERT_TRUE(TypeOf(c_u32)->Is<sem::U32>());
+    ASSERT_TRUE(TypeOf(c_f32)->Is<sem::F32>());
+    ASSERT_TRUE(TypeOf(c_vi32)->Is<sem::Vector>());
+    ASSERT_TRUE(TypeOf(c_vu32)->Is<sem::Vector>());
+    ASSERT_TRUE(TypeOf(c_vf32)->Is<sem::Vector>());
+    ASSERT_TRUE(TypeOf(c_mf32)->Is<sem::Matrix>());
+
+    EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_f32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_vi32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_vu32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_vf32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_mf32)->ConstantValue().AllZero());
+
+    EXPECT_EQ(Sem().Get(c_i32)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c_u32)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c_f32)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c_vi32)->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(Sem().Get(c_vu32)->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(Sem().Get(c_vf32)->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(Sem().Get(c_mf32)->ConstantValue().ElementCount(), 9u);
+}
+
+TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
+    auto* c_i32 = Const("a", nullptr, Expr(0_i));
+    auto* c_u32 = Const("b", nullptr, Expr(0_u));
+    auto* c_f32 = Const("c", nullptr, Expr(0_f));
+    auto* c_ai = Const("d", nullptr, Expr(0_a));
+    auto* c_af = Const("e", nullptr, Expr(0._a));
+    auto* c_vi32 = Const("f", nullptr, vec3<i32>());
+    auto* c_vu32 = Const("g", nullptr, vec3<u32>());
+    auto* c_vf32 = Const("h", nullptr, vec3<f32>());
+    auto* c_vai = Const("i", nullptr, Construct(ty.vec(nullptr, 3), Expr(0_a)));
+    auto* c_vaf = Const("j", nullptr, Construct(ty.vec(nullptr, 3), Expr(0._a)));
+    auto* c_mf32 = Const("k", nullptr, mat3x3<f32>());
+    auto* c_maf32 = Const("l", nullptr, Construct(ty.mat(nullptr, 3, 3), Expr(0._a)));
+
+    WrapInFunction(c_i32, c_u32, c_f32, c_ai, c_af, c_vi32, c_vu32, c_vf32, c_vai, c_vaf, c_mf32,
+                   c_maf32);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    EXPECT_EQ(Sem().Get(c_i32)->Declaration(), c_i32);
+    EXPECT_EQ(Sem().Get(c_u32)->Declaration(), c_u32);
+    EXPECT_EQ(Sem().Get(c_f32)->Declaration(), c_f32);
+    EXPECT_EQ(Sem().Get(c_ai)->Declaration(), c_ai);
+    EXPECT_EQ(Sem().Get(c_af)->Declaration(), c_af);
+    EXPECT_EQ(Sem().Get(c_vi32)->Declaration(), c_vi32);
+    EXPECT_EQ(Sem().Get(c_vu32)->Declaration(), c_vu32);
+    EXPECT_EQ(Sem().Get(c_vf32)->Declaration(), c_vf32);
+    EXPECT_EQ(Sem().Get(c_vai)->Declaration(), c_vai);
+    EXPECT_EQ(Sem().Get(c_vaf)->Declaration(), c_vaf);
+    EXPECT_EQ(Sem().Get(c_mf32)->Declaration(), c_mf32);
+    EXPECT_EQ(Sem().Get(c_maf32)->Declaration(), c_maf32);
+
+    ASSERT_TRUE(TypeOf(c_i32)->Is<sem::I32>());
+    ASSERT_TRUE(TypeOf(c_u32)->Is<sem::U32>());
+    ASSERT_TRUE(TypeOf(c_f32)->Is<sem::F32>());
+    ASSERT_TRUE(TypeOf(c_ai)->Is<sem::AbstractInt>());
+    ASSERT_TRUE(TypeOf(c_af)->Is<sem::AbstractFloat>());
+    ASSERT_TRUE(TypeOf(c_vi32)->Is<sem::Vector>());
+    ASSERT_TRUE(TypeOf(c_vu32)->Is<sem::Vector>());
+    ASSERT_TRUE(TypeOf(c_vf32)->Is<sem::Vector>());
+    ASSERT_TRUE(TypeOf(c_vai)->Is<sem::Vector>());
+    ASSERT_TRUE(TypeOf(c_vaf)->Is<sem::Vector>());
+    ASSERT_TRUE(TypeOf(c_mf32)->Is<sem::Matrix>());
+    ASSERT_TRUE(TypeOf(c_maf32)->Is<sem::Matrix>());
+
+    EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_f32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_ai)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_af)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_vi32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_vu32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_vf32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_vai)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_vaf)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_mf32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_maf32)->ConstantValue().AllZero());
+
+    EXPECT_EQ(Sem().Get(c_i32)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c_u32)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c_f32)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c_ai)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c_af)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c_vi32)->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(Sem().Get(c_vu32)->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(Sem().Get(c_vf32)->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(Sem().Get(c_vai)->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(Sem().Get(c_vaf)->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(Sem().Get(c_mf32)->ConstantValue().ElementCount(), 9u);
+    EXPECT_EQ(Sem().Get(c_maf32)->ConstantValue().ElementCount(), 9u);
+}
+
+// Enable when constants propagate between 'const' variables
+TEST_F(ResolverVariableTest, DISABLED_LocalConst_PropagateConstValue) {
+    auto* a = Const("a", nullptr, Expr(42_i));
+    auto* b = Const("b", nullptr, Expr("a"));
+    auto* c = Const("c", nullptr, Expr("b"));
+
+    WrapInFunction(a, b, c);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_TRUE(TypeOf(c)->Is<sem::I32>());
+
+    ASSERT_EQ(Sem().Get(c)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c)->ConstantValue().Element<i32>(0), 42_i);
+}
+
+// Enable when we have @const operators implemented
+TEST_F(ResolverVariableTest, DISABLED_LocalConst_ConstEval) {
+    auto* c = Const("c", nullptr, Div(Mul(Add(1_i, 2_i), 3_i), 2_i));
+
+    WrapInFunction(c);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_TRUE(TypeOf(c)->Is<sem::I32>());
+
+    ASSERT_EQ(Sem().Get(c)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c)->ConstantValue().Element<i32>(0), 3_i);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -679,6 +1141,148 @@ TEST_F(ResolverVariableTest, GlobalVar_ExplicitStorageClass) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+// Module-scope const
+////////////////////////////////////////////////////////////////////////////////////////////////////
+TEST_F(ResolverVariableTest, GlobalConst_ExplicitType_Decls) {
+    auto* c_i32 = GlobalConst("a", ty.i32(), Expr(0_i));
+    auto* c_u32 = GlobalConst("b", ty.u32(), Expr(0_u));
+    auto* c_f32 = GlobalConst("c", ty.f32(), Expr(0_f));
+    auto* c_vi32 = GlobalConst("d", ty.vec3<i32>(), vec3<i32>());
+    auto* c_vu32 = GlobalConst("e", ty.vec3<u32>(), vec3<u32>());
+    auto* c_vf32 = GlobalConst("f", ty.vec3<f32>(), vec3<f32>());
+    auto* c_mf32 = GlobalConst("g", ty.mat3x3<f32>(), mat3x3<f32>());
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    EXPECT_EQ(Sem().Get(c_i32)->Declaration(), c_i32);
+    EXPECT_EQ(Sem().Get(c_u32)->Declaration(), c_u32);
+    EXPECT_EQ(Sem().Get(c_f32)->Declaration(), c_f32);
+    EXPECT_EQ(Sem().Get(c_vi32)->Declaration(), c_vi32);
+    EXPECT_EQ(Sem().Get(c_vu32)->Declaration(), c_vu32);
+    EXPECT_EQ(Sem().Get(c_vf32)->Declaration(), c_vf32);
+    EXPECT_EQ(Sem().Get(c_mf32)->Declaration(), c_mf32);
+
+    ASSERT_TRUE(TypeOf(c_i32)->Is<sem::I32>());
+    ASSERT_TRUE(TypeOf(c_u32)->Is<sem::U32>());
+    ASSERT_TRUE(TypeOf(c_f32)->Is<sem::F32>());
+    ASSERT_TRUE(TypeOf(c_vi32)->Is<sem::Vector>());
+    ASSERT_TRUE(TypeOf(c_vu32)->Is<sem::Vector>());
+    ASSERT_TRUE(TypeOf(c_vf32)->Is<sem::Vector>());
+    ASSERT_TRUE(TypeOf(c_mf32)->Is<sem::Matrix>());
+
+    EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_f32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_vi32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_vu32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_vf32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_mf32)->ConstantValue().AllZero());
+
+    EXPECT_EQ(Sem().Get(c_i32)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c_u32)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c_f32)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c_vi32)->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(Sem().Get(c_vu32)->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(Sem().Get(c_vf32)->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(Sem().Get(c_mf32)->ConstantValue().ElementCount(), 9u);
+}
+
+TEST_F(ResolverVariableTest, GlobalConst_ImplicitType_Decls) {
+    auto* c_i32 = GlobalConst("a", nullptr, Expr(0_i));
+    auto* c_u32 = GlobalConst("b", nullptr, Expr(0_u));
+    auto* c_f32 = GlobalConst("c", nullptr, Expr(0_f));
+    auto* c_ai = GlobalConst("d", nullptr, Expr(0_a));
+    auto* c_af = GlobalConst("e", nullptr, Expr(0._a));
+    auto* c_vi32 = GlobalConst("f", nullptr, vec3<i32>());
+    auto* c_vu32 = GlobalConst("g", nullptr, vec3<u32>());
+    auto* c_vf32 = GlobalConst("h", nullptr, vec3<f32>());
+    auto* c_vai = GlobalConst("i", nullptr, Construct(ty.vec(nullptr, 3), Expr(0_a)));
+    auto* c_vaf = GlobalConst("j", nullptr, Construct(ty.vec(nullptr, 3), Expr(0._a)));
+    auto* c_mf32 = GlobalConst("k", nullptr, mat3x3<f32>());
+    auto* c_maf32 = GlobalConst("l", nullptr, Construct(ty.mat(nullptr, 3, 3), Expr(0._a)));
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    EXPECT_EQ(Sem().Get(c_i32)->Declaration(), c_i32);
+    EXPECT_EQ(Sem().Get(c_u32)->Declaration(), c_u32);
+    EXPECT_EQ(Sem().Get(c_f32)->Declaration(), c_f32);
+    EXPECT_EQ(Sem().Get(c_ai)->Declaration(), c_ai);
+    EXPECT_EQ(Sem().Get(c_af)->Declaration(), c_af);
+    EXPECT_EQ(Sem().Get(c_vi32)->Declaration(), c_vi32);
+    EXPECT_EQ(Sem().Get(c_vu32)->Declaration(), c_vu32);
+    EXPECT_EQ(Sem().Get(c_vf32)->Declaration(), c_vf32);
+    EXPECT_EQ(Sem().Get(c_vai)->Declaration(), c_vai);
+    EXPECT_EQ(Sem().Get(c_vaf)->Declaration(), c_vaf);
+    EXPECT_EQ(Sem().Get(c_mf32)->Declaration(), c_mf32);
+    EXPECT_EQ(Sem().Get(c_maf32)->Declaration(), c_maf32);
+
+    ASSERT_TRUE(TypeOf(c_i32)->Is<sem::I32>());
+    ASSERT_TRUE(TypeOf(c_u32)->Is<sem::U32>());
+    ASSERT_TRUE(TypeOf(c_f32)->Is<sem::F32>());
+    ASSERT_TRUE(TypeOf(c_ai)->Is<sem::AbstractInt>());
+    ASSERT_TRUE(TypeOf(c_af)->Is<sem::AbstractFloat>());
+    ASSERT_TRUE(TypeOf(c_vi32)->Is<sem::Vector>());
+    ASSERT_TRUE(TypeOf(c_vu32)->Is<sem::Vector>());
+    ASSERT_TRUE(TypeOf(c_vf32)->Is<sem::Vector>());
+    ASSERT_TRUE(TypeOf(c_vai)->Is<sem::Vector>());
+    ASSERT_TRUE(TypeOf(c_vaf)->Is<sem::Vector>());
+    ASSERT_TRUE(TypeOf(c_mf32)->Is<sem::Matrix>());
+    ASSERT_TRUE(TypeOf(c_maf32)->Is<sem::Matrix>());
+
+    EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_f32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_ai)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_af)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_vi32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_vu32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_vf32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_vai)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_vaf)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_mf32)->ConstantValue().AllZero());
+    EXPECT_TRUE(Sem().Get(c_maf32)->ConstantValue().AllZero());
+
+    EXPECT_EQ(Sem().Get(c_i32)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c_u32)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c_f32)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c_ai)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c_af)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c_vi32)->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(Sem().Get(c_vu32)->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(Sem().Get(c_vf32)->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(Sem().Get(c_vai)->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(Sem().Get(c_vaf)->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(Sem().Get(c_mf32)->ConstantValue().ElementCount(), 9u);
+    EXPECT_EQ(Sem().Get(c_maf32)->ConstantValue().ElementCount(), 9u);
+}
+
+// Enable when constants propagate between 'const' variables
+TEST_F(ResolverVariableTest, DISABLED_GlobalConst_PropagateConstValue) {
+    GlobalConst("b", nullptr, Expr("a"));
+    auto* c = GlobalConst("c", nullptr, Expr("b"));
+    GlobalConst("a", nullptr, Expr(42_i));
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_TRUE(TypeOf(c)->Is<sem::I32>());
+
+    ASSERT_EQ(Sem().Get(c)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c)->ConstantValue().Element<i32>(0), 42_i);
+}
+
+// Enable when we have @const operators implemented
+TEST_F(ResolverVariableTest, DISABLED_GlobalConst_ConstEval) {
+    auto* c = GlobalConst("c", nullptr, Div(Mul(Add(1_i, 2_i), 3_i), 2_i));
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_TRUE(TypeOf(c)->Is<sem::I32>());
+
+    ASSERT_EQ(Sem().Get(c)->ConstantValue().ElementCount(), 1u);
+    EXPECT_EQ(Sem().Get(c)->ConstantValue().Element<i32>(0), 3_i);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
 // Function parameter
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 TEST_F(ResolverVariableTest, Param_ShadowsFunction) {
@@ -720,8 +1324,30 @@ TEST_F(ResolverVariableTest, Param_ShadowsGlobalVar) {
     EXPECT_EQ(param->Shadows(), global);
 }
 
+TEST_F(ResolverVariableTest, Param_ShadowsGlobalConst) {
+    // const a : i32 = 1i;
+    //
+    // fn F(a : bool) {
+    // }
+
+    auto* g = GlobalConst("a", ty.i32(), Expr(1_i));
+    auto* p = Param("a", ty.bool_());
+    Func("F", {p}, ty.void_(), {});
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* global = Sem().Get(g);
+    auto* param = Sem().Get<sem::Parameter>(p);
+
+    ASSERT_NE(global, nullptr);
+    ASSERT_NE(param, nullptr);
+
+    EXPECT_EQ(param->Shadows(), global);
+}
+
+// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
 TEST_F(ResolverVariableTest, Param_ShadowsGlobalLet) {
-    // let a : i32 = 1;
+    // let a : i32 = 1i;
     //
     // fn F(a : bool) {
     // }

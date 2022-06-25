@@ -327,7 +327,13 @@ bool Validator::VariableConstructorOrCast(const ast::Variable* v,
 
     // Value type has to match storage type
     if (storage_ty != value_type) {
-        std::string decl = v->Is<ast::Let>() ? "let" : "var";
+        std::string decl = Switch(
+            v,                                           //
+            [&](const ast::Var*) { return "var"; },      //
+            [&](const ast::Let*) { return "let"; },      //
+            [&](const ast::Const*) { return "const"; },  //
+            [&](Default) { return "<unknown>"; });
+
         AddError("cannot initialize " + decl + " of type '" + sem_.TypeNameOf(storage_ty) +
                      "' with value of type '" + sem_.TypeNameOf(rhs_ty) + "'",
                  v->source);
@@ -528,45 +534,8 @@ bool Validator::GlobalVariable(
     std::unordered_map<uint32_t, const sem::Variable*> constant_ids,
     std::unordered_map<const sem::Type*, const Source&> atomic_composite_info) const {
     auto* decl = global->Declaration();
-    if (!NoDuplicateAttributes(decl->attributes)) {
-        return false;
-    }
-
     bool ok = Switch(
         decl,  //
-        [&](const ast::Override*) {
-            for (auto* attr : decl->attributes) {
-                if (auto* id_attr = attr->As<ast::IdAttribute>()) {
-                    uint32_t id = id_attr->value;
-                    auto it = constant_ids.find(id);
-                    if (it != constant_ids.end() && it->second != global) {
-                        AddError("pipeline constant IDs must be unique", attr->source);
-                        AddNote("a pipeline constant with an ID of " + std::to_string(id) +
-                                    " was previously declared here:",
-                                ast::GetAttribute<ast::IdAttribute>(
-                                    it->second->Declaration()->attributes)
-                                    ->source);
-                        return false;
-                    }
-                    if (id > 65535) {
-                        AddError("pipeline constant IDs must be between 0 and 65535", attr->source);
-                        return false;
-                    }
-                } else {
-                    AddError("attribute is not valid for 'override' declaration", attr->source);
-                    return false;
-                }
-            }
-            return Override(global);
-        },
-        [&](const ast::Let*) {
-            if (!decl->attributes.empty()) {
-                AddError("attribute is not valid for module-scope 'let' declaration",
-                         decl->attributes[0]->source);
-                return false;
-            }
-            return Let(global);
-        },
         [&](const ast::Var* var) {
             if (global->StorageClass() == ast::StorageClass::kNone) {
                 AddError("module-scope 'var' declaration must have a storage class", decl->source);
@@ -602,6 +571,53 @@ bool Validator::GlobalVariable(
             }
 
             return Var(global);
+        },
+        [&](const ast::Let*) {
+            if (!decl->attributes.empty()) {
+                AddError("attribute is not valid for module-scope 'let' declaration",
+                         decl->attributes[0]->source);
+                return false;
+            }
+            return Let(global);
+        },
+        [&](const ast::Override*) {
+            for (auto* attr : decl->attributes) {
+                if (auto* id_attr = attr->As<ast::IdAttribute>()) {
+                    uint32_t id = id_attr->value;
+                    auto it = constant_ids.find(id);
+                    if (it != constant_ids.end() && it->second != global) {
+                        AddError("pipeline constant IDs must be unique", attr->source);
+                        AddNote("a pipeline constant with an ID of " + std::to_string(id) +
+                                    " was previously declared here:",
+                                ast::GetAttribute<ast::IdAttribute>(
+                                    it->second->Declaration()->attributes)
+                                    ->source);
+                        return false;
+                    }
+                    if (id > 65535) {
+                        AddError("pipeline constant IDs must be between 0 and 65535", attr->source);
+                        return false;
+                    }
+                } else {
+                    AddError("attribute is not valid for 'override' declaration", attr->source);
+                    return false;
+                }
+            }
+            return Override(global);
+        },
+        [&](const ast::Const*) {
+            if (!decl->attributes.empty()) {
+                AddError("attribute is not valid for module-scope 'const' declaration",
+                         decl->attributes[0]->source);
+                return false;
+            }
+            return Const(global);
+        },
+        [&](Default) {
+            TINT_ICE(Resolver, diagnostics_)
+                << "Validator::GlobalVariable() called with a unknown variable type: "
+                << decl->TypeInfo().name;
+            return false;
         });
 
     if (!ok) {
@@ -688,52 +704,13 @@ bool Validator::Variable(const sem::Variable* v) const {
         [&](const ast::Var*) { return Var(v); },            //
         [&](const ast::Let*) { return Let(v); },            //
         [&](const ast::Override*) { return Override(v); },  //
+        [&](const ast::Const*) { return true; },            //
         [&](Default) {
             TINT_ICE(Resolver, diagnostics_)
                 << "Validator::Variable() called with a unknown variable type: "
                 << decl->TypeInfo().name;
             return false;
         });
-}
-
-bool Validator::Let(const sem::Variable* v) const {
-    auto* decl = v->Declaration();
-    auto* storage_ty = v->Type()->UnwrapRef();
-
-    if (v->Is<sem::GlobalVariable>()) {
-        auto name = symbols_.NameFor(decl->symbol);
-        if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
-            AddError("'" + name + "' is a builtin and cannot be redeclared as a 'let'",
-                     decl->source);
-            return false;
-        }
-    }
-
-    if (!(storage_ty->IsConstructible() || storage_ty->Is<sem::Pointer>())) {
-        AddError(sem_.TypeNameOf(storage_ty) + " cannot be used as the type of a 'let'",
-                 decl->source);
-        return false;
-    }
-    return true;
-}
-
-bool Validator::Override(const sem::Variable* v) const {
-    auto* decl = v->Declaration();
-    auto* storage_ty = v->Type()->UnwrapRef();
-
-    auto name = symbols_.NameFor(decl->symbol);
-    if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
-        AddError("'" + name + "' is a builtin and cannot be redeclared as a 'override'",
-                 decl->source);
-        return false;
-    }
-
-    if (!storage_ty->is_scalar()) {
-        AddError(sem_.TypeNameOf(storage_ty) + " cannot be used as the type of a 'override'",
-                 decl->source);
-        return false;
-    }
-    return true;
 }
 
 bool Validator::Var(const sem::Variable* v) const {
@@ -780,6 +757,58 @@ bool Validator::Var(const sem::Variable* v) const {
         AddError("invalid use of input/output storage class", var->source);
         return false;
     }
+    return true;
+}
+
+bool Validator::Let(const sem::Variable* v) const {
+    auto* decl = v->Declaration();
+    auto* storage_ty = v->Type()->UnwrapRef();
+
+    if (v->Is<sem::GlobalVariable>()) {
+        auto name = symbols_.NameFor(decl->symbol);
+        if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
+            AddError("'" + name + "' is a builtin and cannot be redeclared as a 'let'",
+                     decl->source);
+            return false;
+        }
+    }
+
+    if (!(storage_ty->IsConstructible() || storage_ty->Is<sem::Pointer>())) {
+        AddError(sem_.TypeNameOf(storage_ty) + " cannot be used as the type of a 'let'",
+                 decl->source);
+        return false;
+    }
+    return true;
+}
+
+bool Validator::Override(const sem::Variable* v) const {
+    auto* decl = v->Declaration();
+    auto* storage_ty = v->Type()->UnwrapRef();
+
+    auto name = symbols_.NameFor(decl->symbol);
+    if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
+        AddError("'" + name + "' is a builtin and cannot be redeclared as a 'override'",
+                 decl->source);
+        return false;
+    }
+
+    if (!storage_ty->is_scalar()) {
+        AddError(sem_.TypeNameOf(storage_ty) + " cannot be used as the type of a 'override'",
+                 decl->source);
+        return false;
+    }
+    return true;
+}
+
+bool Validator::Const(const sem::Variable* v) const {
+    auto* decl = v->Declaration();
+
+    auto name = symbols_.NameFor(decl->symbol);
+    if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
+        AddError("'" + name + "' is a builtin and cannot be redeclared as a 'const'", decl->source);
+        return false;
+    }
+
     return true;
 }
 

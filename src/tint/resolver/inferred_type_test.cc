@@ -75,6 +75,21 @@ Params all_cases[] = {
 
 using ResolverInferredTypeParamTest = ResolverTestWithParam<Params>;
 
+TEST_P(ResolverInferredTypeParamTest, GlobalConst_Pass) {
+    auto& params = GetParam();
+
+    auto* expected_type = params.create_expected_type(*this);
+
+    // const a = <type constructor>;
+    auto* ctor_expr = params.create_value(*this, 0);
+    auto* a = GlobalConst("a", nullptr, ctor_expr);
+    WrapInFunction();
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(TypeOf(a), expected_type);
+}
+
+// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
 TEST_P(ResolverInferredTypeParamTest, GlobalLet_Pass) {
     auto& params = GetParam();
 
