@@ -28,7 +28,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
     auto* func_var = Var("a", ty.f32());
     WrapInFunction(func_var);
 
-    Global("a", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -45,7 +45,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
-    Global("a0", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("a0", ty.f32(), ast::StorageClass::kPrivate);
 
     auto* s0 = Structure("S0", {Member("a", ty.i32())});
 
@@ -55,7 +55,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
          },
          {});
 
-    Global("a1", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("a1", ty.f32(), ast::StorageClass::kPrivate);
 
     auto* s1 = Structure("S1", {Member("a", ty.i32())});
 
@@ -101,11 +101,11 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
-    Global("s", ty.sampler(ast::SamplerKind::kSampler),
-           ast::AttributeList{
-               create<ast::GroupAttribute>(0),
-               create<ast::BindingAttribute>(0),
-           });
+    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler),
+              ast::AttributeList{
+                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0),
+              });
 
     GeneratorImpl& gen = Build();
 
@@ -117,11 +117,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
 
 TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
     auto* st = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
-    Global("t", st,
-           ast::AttributeList{
-               create<ast::GroupAttribute>(0),
-               create<ast::BindingAttribute>(0),
-           });
+    GlobalVar("t", st,
+              ast::AttributeList{
+                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0),
+              });
 
     GeneratorImpl& gen = Build();
 

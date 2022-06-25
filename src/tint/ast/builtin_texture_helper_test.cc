@@ -147,25 +147,26 @@ const ast::Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b
     };
     switch (texture_kind) {
         case ast::builtin::test::TextureKind::kRegular:
-            return b->Global(
+            return b->GlobalVar(
                 "texture",
                 b->ty.sampled_texture(texture_dimension, BuildResultVectorComponentType(b)), attrs);
 
         case ast::builtin::test::TextureKind::kDepth:
-            return b->Global("texture", b->ty.depth_texture(texture_dimension), attrs);
+            return b->GlobalVar("texture", b->ty.depth_texture(texture_dimension), attrs);
 
         case ast::builtin::test::TextureKind::kDepthMultisampled:
-            return b->Global("texture", b->ty.depth_multisampled_texture(texture_dimension), attrs);
+            return b->GlobalVar("texture", b->ty.depth_multisampled_texture(texture_dimension),
+                                attrs);
 
         case ast::builtin::test::TextureKind::kMultisampled:
-            return b->Global(
+            return b->GlobalVar(
                 "texture",
                 b->ty.multisampled_texture(texture_dimension, BuildResultVectorComponentType(b)),
                 attrs);
 
         case ast::builtin::test::TextureKind::kStorage: {
             auto* st = b->ty.storage_texture(texture_dimension, texel_format, access);
-            return b->Global("texture", st, attrs);
+            return b->GlobalVar("texture", st, attrs);
         }
     }
 
@@ -178,7 +179,7 @@ const ast::Variable* TextureOverloadCase::BuildSamplerVariable(ProgramBuilder* b
         b->create<ast::GroupAttribute>(0),
         b->create<ast::BindingAttribute>(1),
     };
-    return b->Global("sampler", b->ty.sampler(sampler_kind), attrs);
+    return b->GlobalVar("sampler", b->ty.sampler(sampler_kind), attrs);
 }
 
 std::vector<TextureOverloadCase> TextureOverloadCase::ValidCases() {

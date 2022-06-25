@@ -141,7 +141,7 @@ vertex Out vert_main() {
 }
 
 TEST_F(MslGeneratorImplTest, WorkgroupMatrix) {
-    Global("m", ty.mat2x2<f32>(), ast::StorageClass::kWorkgroup);
+    GlobalVar("m", ty.mat2x2<f32>(), ast::StorageClass::kWorkgroup);
     Func("comp_main", {}, ty.void_(), {Decl(Let("x", nullptr, Expr("m")))},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
@@ -178,7 +178,7 @@ kernel void comp_main(threadgroup tint_symbol_3* tint_symbol_2 [[threadgroup(0)]
 }
 
 TEST_F(MslGeneratorImplTest, WorkgroupMatrixInArray) {
-    Global("m", ty.array(ty.mat2x2<f32>(), 4_i), ast::StorageClass::kWorkgroup);
+    GlobalVar("m", ty.array(ty.mat2x2<f32>(), 4_i), ast::StorageClass::kWorkgroup);
     Func("comp_main", {}, ty.void_(), {Decl(Let("x", nullptr, Expr("m")))},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
@@ -236,7 +236,7 @@ TEST_F(MslGeneratorImplTest, WorkgroupMatrixInStruct) {
     Structure("S2", {
                         Member("s", ty.type_name("S1")),
                     });
-    Global("s", ty.type_name("S2"), ast::StorageClass::kWorkgroup);
+    GlobalVar("s", ty.type_name("S2"), ast::StorageClass::kWorkgroup);
     Func("comp_main", {}, ty.void_(), {Decl(Let("x", nullptr, Expr("s")))},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
@@ -283,15 +283,15 @@ kernel void comp_main(threadgroup tint_symbol_4* tint_symbol_3 [[threadgroup(0)]
 }
 
 TEST_F(MslGeneratorImplTest, WorkgroupMatrix_Multiples) {
-    Global("m1", ty.mat2x2<f32>(), ast::StorageClass::kWorkgroup);
-    Global("m2", ty.mat2x3<f32>(), ast::StorageClass::kWorkgroup);
-    Global("m3", ty.mat2x4<f32>(), ast::StorageClass::kWorkgroup);
-    Global("m4", ty.mat3x2<f32>(), ast::StorageClass::kWorkgroup);
-    Global("m5", ty.mat3x3<f32>(), ast::StorageClass::kWorkgroup);
-    Global("m6", ty.mat3x4<f32>(), ast::StorageClass::kWorkgroup);
-    Global("m7", ty.mat4x2<f32>(), ast::StorageClass::kWorkgroup);
-    Global("m8", ty.mat4x3<f32>(), ast::StorageClass::kWorkgroup);
-    Global("m9", ty.mat4x4<f32>(), ast::StorageClass::kWorkgroup);
+    GlobalVar("m1", ty.mat2x2<f32>(), ast::StorageClass::kWorkgroup);
+    GlobalVar("m2", ty.mat2x3<f32>(), ast::StorageClass::kWorkgroup);
+    GlobalVar("m3", ty.mat2x4<f32>(), ast::StorageClass::kWorkgroup);
+    GlobalVar("m4", ty.mat3x2<f32>(), ast::StorageClass::kWorkgroup);
+    GlobalVar("m5", ty.mat3x3<f32>(), ast::StorageClass::kWorkgroup);
+    GlobalVar("m6", ty.mat3x4<f32>(), ast::StorageClass::kWorkgroup);
+    GlobalVar("m7", ty.mat4x2<f32>(), ast::StorageClass::kWorkgroup);
+    GlobalVar("m8", ty.mat4x3<f32>(), ast::StorageClass::kWorkgroup);
+    GlobalVar("m9", ty.mat4x4<f32>(), ast::StorageClass::kWorkgroup);
     Func("main1", {}, ty.void_(),
          {
              Decl(Let("a1", nullptr, Expr("m1"))),

@@ -22,7 +22,7 @@ namespace {
 using GlslGeneratorImplTest_Expression = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_Expression, IndexAccessor) {
-    Global("ary", ty.array<i32, 10>(), ast::StorageClass::kPrivate);
+    GlobalVar("ary", ty.array<i32, 10>(), ast::StorageClass::kPrivate);
     auto* expr = IndexAccessor("ary", 5_i);
     WrapInFunction(expr);
 

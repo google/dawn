@@ -27,7 +27,7 @@ namespace {
 using ResolverIndexAccessorTest = ResolverTest;
 
 TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic_F32) {
-    Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
     auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, 1_f));
     WrapInFunction(acc);
 
@@ -36,7 +36,7 @@ TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic_F32) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic_Ref) {
-    Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
     auto* idx = Var("idx", ty.i32(), Construct(ty.i32()));
     auto* acc = IndexAccessor("my_var", idx);
     WrapInFunction(Decl(idx), acc);
@@ -50,7 +50,7 @@ TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic_Ref) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Matrix_BothDimensions_Dynamic_Ref) {
-    Global("my_var", ty.mat4x4<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_var", ty.mat4x4<f32>(), ast::StorageClass::kPrivate);
     auto* idx = Var("idx", ty.u32(), Expr(3_u));
     auto* idy = Var("idy", ty.u32(), Expr(2_u));
     auto* acc = IndexAccessor(IndexAccessor("my_var", idx), idy);
@@ -110,7 +110,7 @@ TEST_F(ResolverIndexAccessorTest, Matrix_BothDimension_Dynamic) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Matrix) {
-    Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
 
     auto* acc = IndexAccessor("my_var", 2_i);
     WrapInFunction(acc);
@@ -131,7 +131,7 @@ TEST_F(ResolverIndexAccessorTest, Matrix) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Matrix_BothDimensions) {
-    Global("my_var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
 
     auto* acc = IndexAccessor(IndexAccessor("my_var", 2_i), 1_i);
     WrapInFunction(acc);
@@ -151,7 +151,7 @@ TEST_F(ResolverIndexAccessorTest, Matrix_BothDimensions) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Vector_F32) {
-    Global("my_var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
     auto* acc = IndexAccessor("my_var", Expr(Source{{12, 34}}, 2_f));
     WrapInFunction(acc);
 
@@ -160,7 +160,7 @@ TEST_F(ResolverIndexAccessorTest, Vector_F32) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Vector_Dynamic_Ref) {
-    Global("my_var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
     auto* idx = Var("idx", ty.i32(), Expr(2_i));
     auto* acc = IndexAccessor("my_var", idx);
     WrapInFunction(Decl(idx), acc);
@@ -188,7 +188,7 @@ TEST_F(ResolverIndexAccessorTest, Vector_Dynamic) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Vector) {
-    Global("my_var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_var", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
     auto* acc = IndexAccessor("my_var", 2_i);
     WrapInFunction(acc);
@@ -208,7 +208,7 @@ TEST_F(ResolverIndexAccessorTest, Vector) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Array_Literal_i32) {
-    Global("my_var", ty.array<f32, 3>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_var", ty.array<f32, 3>(), ast::StorageClass::kPrivate);
     auto* acc = IndexAccessor("my_var", 2_i);
     WrapInFunction(acc);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -224,7 +224,7 @@ TEST_F(ResolverIndexAccessorTest, Array_Literal_i32) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Array_Literal_u32) {
-    Global("my_var", ty.array<f32, 3>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_var", ty.array<f32, 3>(), ast::StorageClass::kPrivate);
     auto* acc = IndexAccessor("my_var", 2_u);
     WrapInFunction(acc);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -240,7 +240,7 @@ TEST_F(ResolverIndexAccessorTest, Array_Literal_u32) {
 }
 
 TEST_F(ResolverIndexAccessorTest, Array_Literal_AInt) {
-    Global("my_var", ty.array<f32, 3>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_var", ty.array<f32, 3>(), ast::StorageClass::kPrivate);
     auto* acc = IndexAccessor("my_var", 2_a);
     WrapInFunction(acc);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -258,7 +258,7 @@ TEST_F(ResolverIndexAccessorTest, Array_Literal_AInt) {
 TEST_F(ResolverIndexAccessorTest, Alias_Array) {
     auto* aary = Alias("myarrty", ty.array<f32, 3>());
 
-    Global("my_var", ty.Of(aary), ast::StorageClass::kPrivate);
+    GlobalVar("my_var", ty.Of(aary), ast::StorageClass::kPrivate);
 
     auto* acc = IndexAccessor("my_var", 2_i);
     WrapInFunction(acc);

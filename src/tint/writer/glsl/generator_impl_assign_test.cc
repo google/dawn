@@ -20,8 +20,8 @@ namespace {
 using GlslGeneratorImplTest_Assign = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_Assign, Emit_Assign) {
-    Global("lhs", ty.i32(), ast::StorageClass::kPrivate);
-    Global("rhs", ty.i32(), ast::StorageClass::kPrivate);
+    GlobalVar("lhs", ty.i32(), ast::StorageClass::kPrivate);
+    GlobalVar("rhs", ty.i32(), ast::StorageClass::kPrivate);
     auto* assign = Assign("lhs", "rhs");
     WrapInFunction(assign);
 

@@ -24,7 +24,7 @@ using SpvBuilderConstructorTest = TestHelper;
 
 TEST_F(SpvBuilderConstructorTest, Const) {
     auto* c = Expr(42.2_f);
-    auto* g = Global("g", ty.f32(), c, ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("g", ty.f32(), c, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
 
@@ -1105,7 +1105,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_U32_With_F32) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec2_With_F32) {
     auto* cast = vec2<f32>(2_f);
-    auto* g = Global("g", ty.vec2<f32>(), cast, ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("g", ty.vec2<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
 
@@ -1175,7 +1175,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec4) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_F32) {
     auto* cast = vec3<f32>(2_f);
-    auto* g = Global("g", ty.vec3<f32>(), cast, ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("g", ty.vec3<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
 
@@ -1191,7 +1191,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_F32) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_F32_Vec2) {
     auto* cast = vec3<f32>(2_f, vec2<f32>(2_f, 2_f));
-    auto* g = Global("g", ty.vec3<f32>(), cast, ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("g", ty.vec3<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
 
@@ -1214,7 +1214,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_F32_Vec2) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_Vec2_F32) {
     auto* cast = vec3<f32>(vec2<f32>(2_f, 2_f), 2_f);
-    auto* g = Global("g", ty.vec3<f32>(), cast, ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("g", ty.vec3<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
 
@@ -1237,7 +1237,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec3_With_Vec2_F32) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32) {
     auto* cast = vec4<f32>(2_f);
-    auto* g = Global("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
 
@@ -1253,7 +1253,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_F32_Vec2) {
     auto* cast = vec4<f32>(2_f, 2_f, vec2<f32>(2_f, 2_f));
-    auto* g = Global("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
 
@@ -1276,7 +1276,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_F32_Vec2) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_Vec2_F32) {
     auto* cast = vec4<f32>(2_f, vec2<f32>(2_f, 2_f), 2_f);
-    auto* g = Global("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
 
@@ -1299,7 +1299,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_Vec2_F32) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec2_F32_F32) {
     auto* cast = vec4<f32>(vec2<f32>(2_f, 2_f), 2_f, 2_f);
-    auto* g = Global("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
 
@@ -1322,7 +1322,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec2_F32_F32) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec2_Vec2) {
     auto* cast = vec4<f32>(vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f));
-    auto* g = Global("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
 
@@ -1347,7 +1347,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec2_Vec2) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_Vec3) {
     auto* cast = vec4<f32>(2_f, vec3<f32>(2_f, 2_f, 2_f));
-    auto* g = Global("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
 
@@ -1372,7 +1372,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_F32_Vec3) {
 
 TEST_F(SpvBuilderConstructorTest, Type_ModuleScope_Vec4_With_Vec3_F32) {
     auto* cast = vec4<f32>(vec3<f32>(2_f, 2_f, 2_f), 2_f);
-    auto* g = Global("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("g", ty.vec4<f32>(), cast, ast::StorageClass::kPrivate);
 
     spirv::Builder& b = Build();
 
@@ -1990,7 +1990,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_I32) {
-    auto* var = Global("i", ty.vec3<u32>(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<u32>(), ast::StorageClass::kPrivate);
 
     auto* cast = vec3<i32>("i");
     WrapInFunction(cast);
@@ -2016,7 +2016,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_I32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_I32) {
-    auto* var = Global("i", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
     auto* cast = vec3<i32>("i");
     WrapInFunction(cast);
@@ -2042,7 +2042,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_I32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_U32) {
-    auto* var = Global("i", ty.vec3<i32>(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<i32>(), ast::StorageClass::kPrivate);
 
     auto* cast = vec3<u32>("i");
     WrapInFunction(cast);
@@ -2068,7 +2068,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_U32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_U32) {
-    auto* var = Global("i", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
     auto* cast = vec3<u32>("i");
     WrapInFunction(cast);
@@ -2094,7 +2094,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_U32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F32) {
-    auto* var = Global("i", ty.vec3<i32>(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<i32>(), ast::StorageClass::kPrivate);
 
     auto* cast = vec3<f32>("i");
     WrapInFunction(cast);
@@ -2120,7 +2120,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F32) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F32) {
-    auto* var = Global("i", ty.vec3<u32>(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("i", ty.vec3<u32>(), ast::StorageClass::kPrivate);
 
     auto* cast = vec3<f32>("i");
     WrapInFunction(cast);
@@ -2208,9 +2208,9 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_VectorWithAllConstConstruct
 TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Vector_WithIdent) {
     // vec3<f32>(a, b, c)  -> false
 
-    Global("a", ty.f32(), ast::StorageClass::kPrivate);
-    Global("b", ty.f32(), ast::StorageClass::kPrivate);
-    Global("c", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("b", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("c", ty.f32(), ast::StorageClass::kPrivate);
 
     auto* t = vec3<f32>("a", "b", "c");
     WrapInFunction(t);
@@ -2280,8 +2280,8 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct_WithIdentSubExpressi
                                          Member("b", ty.vec3<f32>()),
                                      });
 
-    Global("a", ty.f32(), ast::StorageClass::kPrivate);
-    Global("b", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("b", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
     auto* t = Construct(ty.Of(s), "a", "b");
     WrapInFunction(t);

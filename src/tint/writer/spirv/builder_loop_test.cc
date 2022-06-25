@@ -54,7 +54,7 @@ TEST_F(BuilderTest, Loop_WithoutContinuing) {
     //   break;
     // }
 
-    auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
     auto* body = Block(Assign("v", 2_i),  //
                        Break());
 
@@ -96,7 +96,7 @@ TEST_F(BuilderTest, Loop_WithContinuing) {
     //   }
     // }
 
-    auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
     auto* body = Block(Assign("v", 2_i),  //
                        Break());
     auto* continuing = Block(Assign("v", 3_i));

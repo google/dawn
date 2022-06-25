@@ -519,7 +519,7 @@ struct DataType<ptr<T>> {
     /// @return a new AST expression of the alias type
     static inline const ast::Expression* Expr(ProgramBuilder& b, double /*unused*/) {
         auto sym = b.Symbols().New("global_for_ptr");
-        b.Global(sym, DataType<T>::AST(b), ast::StorageClass::kPrivate);
+        b.GlobalVar(sym, DataType<T>::AST(b), ast::StorageClass::kPrivate);
         return b.AddressOf(sym);
     }
     /// @returns the WGSL name for the type

@@ -20,7 +20,7 @@ namespace {
 using HlslGeneratorImplTest_If = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_If, Emit_If) {
-    Global("cond", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("cond", ty.bool_(), ast::StorageClass::kPrivate);
 
     auto* cond = Expr("cond");
     auto* body = Block(Return());
@@ -38,8 +38,8 @@ TEST_F(HlslGeneratorImplTest_If, Emit_If) {
 }
 
 TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElseIf) {
-    Global("cond", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("else_cond", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("cond", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("else_cond", ty.bool_(), ast::StorageClass::kPrivate);
 
     auto* else_cond = Expr("else_cond");
     auto* else_body = Block(Return());
@@ -65,7 +65,7 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElseIf) {
 }
 
 TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElse) {
-    Global("cond", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("cond", ty.bool_(), ast::StorageClass::kPrivate);
 
     auto* else_body = Block(Return());
 
@@ -88,8 +88,8 @@ TEST_F(HlslGeneratorImplTest_If, Emit_IfWithElse) {
 }
 
 TEST_F(HlslGeneratorImplTest_If, Emit_IfWithMultiple) {
-    Global("cond", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("else_cond", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("cond", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("else_cond", ty.bool_(), ast::StorageClass::kPrivate);
 
     auto* else_cond = Expr("else_cond");
 

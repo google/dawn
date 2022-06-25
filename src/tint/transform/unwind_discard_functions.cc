@@ -54,8 +54,8 @@ class State {
     Symbol ModuleDiscardVarName() {
         if (!module_discard_var_name.IsValid()) {
             module_discard_var_name = b.Symbols().New("tint_discard");
-            ctx.dst->Global(module_discard_var_name, b.ty.bool_(), b.Expr(false),
-                            ast::StorageClass::kPrivate);
+            ctx.dst->GlobalVar(module_discard_var_name, b.ty.bool_(), b.Expr(false),
+                               ast::StorageClass::kPrivate);
         }
         return module_discard_var_name;
     }

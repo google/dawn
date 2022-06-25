@@ -109,7 +109,7 @@ struct CombineSamplers::State {
         }
         const ast::Type* type = CreateCombinedASTTypeFor(texture_var, sampler_var);
         Symbol symbol = ctx.dst->Symbols().New(name);
-        return ctx.dst->Global(symbol, type, Attributes());
+        return ctx.dst->GlobalVar(symbol, type, Attributes());
     }
 
     /// Creates placeholder global sampler variables.
@@ -121,7 +121,7 @@ struct CombineSamplers::State {
                                ? "placeholder_comparison_sampler"
                                : "placeholder_sampler";
         Symbol symbol = ctx.dst->Symbols().New(name);
-        return ctx.dst->Global(symbol, type, Attributes());
+        return ctx.dst->GlobalVar(symbol, type, Attributes());
     }
 
     /// Creates ast::Type for a given texture and sampler variable pair.

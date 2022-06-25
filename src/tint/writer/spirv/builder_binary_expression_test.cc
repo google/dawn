@@ -704,8 +704,8 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
-    auto* a_var = Global("a", ty.bool_(), ast::StorageClass::kPrivate, Expr(true));
-    auto* b_var = Global("b", ty.bool_(), ast::StorageClass::kPrivate, Expr(false));
+    auto* a_var = GlobalVar("a", ty.bool_(), ast::StorageClass::kPrivate, Expr(true));
+    auto* b_var = GlobalVar("b", ty.bool_(), ast::StorageClass::kPrivate, Expr(false));
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b"));
 
@@ -857,8 +857,8 @@ OpBranch %7
 }
 
 TEST_F(BuilderTest, Binary_LogicalOr_WithLoads) {
-    auto* a_var = Global("a", ty.bool_(), ast::StorageClass::kPrivate, Expr(true));
-    auto* b_var = Global("b", ty.bool_(), ast::StorageClass::kPrivate, Expr(false));
+    auto* a_var = GlobalVar("a", ty.bool_(), ast::StorageClass::kPrivate, Expr(true));
+    auto* b_var = GlobalVar("b", ty.bool_(), ast::StorageClass::kPrivate, Expr(false));
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("a"), Expr("b"));
 

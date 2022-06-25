@@ -160,11 +160,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_Module
 
     auto* s = Structure("Data", {Member("d", ty.f32())});
 
-    Global("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(0),
-           });
+    GlobalVar("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(0),
+              });
 
     {
         auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("data", "d"));

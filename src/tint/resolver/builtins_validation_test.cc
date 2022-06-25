@@ -92,7 +92,7 @@ using ResolverBuiltinsStageTest = ResolverTestWithParam<Params>;
 TEST_P(ResolverBuiltinsStageTest, All_input) {
     const Params& params = GetParam();
 
-    auto* p = Global("p", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    auto* p = GlobalVar("p", ty.vec4<f32>(), ast::StorageClass::kPrivate);
     auto* input = Param("input", params.type(*this), {Builtin(Source{{12, 34}}, params.builtin)});
     switch (params.stage) {
         case ast::PipelineStage::kVertex:

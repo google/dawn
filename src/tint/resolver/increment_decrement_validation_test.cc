@@ -127,7 +127,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, Vector) {
 TEST_F(ResolverIncrementDecrementValidationTest, Atomic) {
     // var<workgroup> a : atomic<i32>;
     // a++;
-    Global(Source{{12, 34}}, "a", ty.atomic(ty.i32()), ast::StorageClass::kWorkgroup);
+    GlobalVar(Source{{12, 34}}, "a", ty.atomic(ty.i32()), ast::StorageClass::kWorkgroup);
     WrapInFunction(Increment(Expr(Source{{56, 78}}, "a")));
 
     EXPECT_FALSE(r()->Resolve());
@@ -187,8 +187,8 @@ TEST_F(ResolverIncrementDecrementValidationTest, ReadOnlyBuffer) {
     // {
     //   a++;
     // }
-    Global(Source{{12, 34}}, "a", ty.i32(), ast::StorageClass::kStorage, ast::Access::kRead,
-           GroupAndBinding(0, 0));
+    GlobalVar(Source{{12, 34}}, "a", ty.i32(), ast::StorageClass::kStorage, ast::Access::kRead,
+              GroupAndBinding(0, 0));
     WrapInFunction(Increment(Source{{56, 78}}, "a"));
 
     EXPECT_FALSE(r()->Resolve());

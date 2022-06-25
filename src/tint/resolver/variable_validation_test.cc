@@ -34,7 +34,7 @@ TEST_F(ResolverVariableValidationTest, VarNoInitializerNoType) {
 
 TEST_F(ResolverVariableValidationTest, GlobalVarNoInitializerNoType) {
     // var a;
-    Global(Source{{12, 34}}, "a", nullptr);
+    GlobalVar(Source{{12, 34}}, "a", nullptr);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: 'var' declaration requires a type or initializer");
@@ -65,8 +65,8 @@ TEST_F(ResolverVariableValidationTest, VarTypeNotStorable) {
 TEST_F(ResolverVariableValidationTest, LetTypeNotConstructible) {
     // @group(0) @binding(0) var t1 : texture_2d<f32>;
     // let t2 : t1;
-    auto* t1 = Global("t1", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-                      GroupAndBinding(0, 0));
+    auto* t1 = GlobalVar("t1", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+                         GroupAndBinding(0, 0));
     auto* t2 = Let(Source{{56, 78}}, "t2", nullptr, Expr(t1));
     WrapInFunction(t2);
 
@@ -160,7 +160,7 @@ TEST_F(ResolverVariableValidationTest, GlobalVarRedeclaredAsLocal) {
     //   return 0;
     // }
 
-    Global("v", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1_f));
+    GlobalVar("v", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1_f));
 
     WrapInFunction(Var(Source{{12, 34}}, "v", ty.f32(), ast::StorageClass::kNone, Expr(2_f)));
 
@@ -214,11 +214,11 @@ TEST_F(ResolverVariableValidationTest, InferredPtrStorageAccessMismatch) {
     // }
     auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
     auto* buf = Structure("S", {Member("inner", ty.Of(inner))});
-    auto* storage = Global("s", ty.Of(buf), ast::StorageClass::kStorage,
-                           ast::AttributeList{
-                               create<ast::BindingAttribute>(0),
-                               create<ast::GroupAttribute>(0),
-                           });
+    auto* storage = GlobalVar("s", ty.Of(buf), ast::StorageClass::kStorage,
+                              ast::AttributeList{
+                                  create<ast::BindingAttribute>(0),
+                                  create<ast::GroupAttribute>(0),
+                              });
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 2_i);
     auto* ptr =
@@ -268,7 +268,7 @@ TEST_F(ResolverVariableValidationTest, NonConstructibleType_InferredType) {
     // fn foo() {
     //   var v = s;
     // }
-    Global("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(0, 0));
+    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(0, 0));
     auto* v = Var(Source{{12, 34}}, "v", nullptr, Expr("s"));
     WrapInFunction(v);
 
@@ -278,7 +278,7 @@ TEST_F(ResolverVariableValidationTest, NonConstructibleType_InferredType) {
 
 TEST_F(ResolverVariableValidationTest, InvalidStorageClassForInitializer) {
     // var<workgroup> v : f32 = 1.23;
-    Global(Source{{12, 34}}, "v", ty.f32(), ast::StorageClass::kWorkgroup, Expr(1.23_f));
+    GlobalVar(Source{{12, 34}}, "v", ty.f32(), ast::StorageClass::kWorkgroup, Expr(1.23_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

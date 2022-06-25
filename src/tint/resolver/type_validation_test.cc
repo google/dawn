@@ -82,7 +82,7 @@ TEST_F(ResolverTypeValidationTest, GlobalOverrideNoConstructor_Pass) {
 
 TEST_F(ResolverTypeValidationTest, GlobalVariableWithStorageClass_Pass) {
     // var<private> global_var: f32;
-    Global(Source{{12, 34}}, "global_var", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar(Source{{12, 34}}, "global_var", ty.f32(), ast::StorageClass::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -98,9 +98,9 @@ TEST_F(ResolverTypeValidationTest, GlobalVariableUnique_Pass) {
     // var global_var0 : f32 = 0.1;
     // var global_var1 : i32 = 0;
 
-    Global("global_var0", ty.f32(), ast::StorageClass::kPrivate, Expr(0.1_f));
+    GlobalVar("global_var0", ty.f32(), ast::StorageClass::kPrivate, Expr(0.1_f));
 
-    Global(Source{{12, 34}}, "global_var1", ty.f32(), ast::StorageClass::kPrivate, Expr(1_f));
+    GlobalVar(Source{{12, 34}}, "global_var1", ty.f32(), ast::StorageClass::kPrivate, Expr(1_f));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -116,7 +116,7 @@ TEST_F(ResolverTypeValidationTest, GlobalVariableFunctionVariableNotUnique_Pass)
              Decl(Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2_f))),
          });
 
-    Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1_f));
+    GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1_f));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -180,19 +180,19 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierDifferentFunctions_Pass) 
 
 TEST_F(ResolverTypeValidationTest, ArraySize_AIntLiteral_Pass) {
     // var<private> a : array<f32, 4>;
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 4_a)), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 4_a)), ast::StorageClass::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedLiteral_Pass) {
     // var<private> a : array<f32, 4u>;
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 4_u)), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 4_u)), ast::StorageClass::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Pass) {
     // var<private> a : array<f32, 4i>;
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 4_i)), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 4_i)), ast::StorageClass::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
@@ -200,7 +200,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedLet_Pass) {
     // let size = 4u;
     // var<private> a : array<f32, size>;
     GlobalLet("size", nullptr, Expr(4_u));
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
@@ -208,34 +208,34 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedLet_Pass) {
     // let size = 4i;
     // var<private> a : array<f32, size>;
     GlobalLet("size", nullptr, Expr(4_i));
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_AIntLiteral_Zero) {
     // var<private> a : array<f32, 0>;
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_a)), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_a)), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedLiteral_Zero) {
     // var<private> a : array<f32, 0u>;
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_u)), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_u)), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Zero) {
     // var<private> a : array<f32, 0i>;
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_i)), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_i)), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Negative) {
     // var<private> a : array<f32, -10i>;
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, -10_i)), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, -10_i)), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size (-10) must be greater than 0");
 }
@@ -244,7 +244,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedLet_Zero) {
     // let size = 0u;
     // var<private> a : array<f32, size>;
     GlobalLet("size", nullptr, Expr(0_u));
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
 }
@@ -253,7 +253,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedLet_Zero) {
     // let size = 0i;
     // var<private> a : array<f32, size>;
     GlobalLet("size", nullptr, Expr(0_i));
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
 }
@@ -262,14 +262,14 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedLet_Negative) {
     // let size = -10i;
     // var<private> a : array<f32, size>;
     GlobalLet("size", nullptr, Expr(-10_i));
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: array size (-10) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_FloatLiteral) {
     // var<private> a : array<f32, 10.0>;
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 10_f)), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 10_f)), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array size must evaluate to a constant integer expression, but is type "
@@ -278,8 +278,8 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FloatLiteral) {
 
 TEST_F(ResolverTypeValidationTest, ArraySize_IVecLiteral) {
     // var<private> a : array<f32, vec2<i32>(10, 10)>;
-    Global("a", ty.array(ty.f32(), Construct(Source{{12, 34}}, ty.vec2<i32>(), 10_i, 10_i)),
-           ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Construct(Source{{12, 34}}, ty.vec2<i32>(), 10_i, 10_i)),
+              ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array size must evaluate to a constant integer expression, but is type "
@@ -290,7 +290,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FloatLet) {
     // let size = 10.0;
     // var<private> a : array<f32, size>;
     GlobalLet("size", nullptr, Expr(10_f));
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array size must evaluate to a constant integer expression, but is type "
@@ -301,7 +301,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_IVecLet) {
     // let size = vec2<i32>(100, 100);
     // var<private> a : array<f32, size>;
     GlobalLet("size", nullptr, Construct(ty.vec2<i32>(), 100_i, 100_i));
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array size must evaluate to a constant integer expression, but is type "
@@ -310,7 +310,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_IVecLet) {
 
 TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
     // var<private> a : array<f32, 0x40000000u>;
-    Global("a", ty.array(Source{{12, 34}}, ty.f32(), 0x40000000_u), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(Source{{12, 34}}, ty.f32(), 0x40000000_u), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array size (0x100000000) must not exceed 0xffffffff bytes");
@@ -318,7 +318,8 @@ TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
 
 TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ExplicitStride) {
     // var<private> a : @stride(8) array<f32, 0x20000000u>;
-    Global("a", ty.array(Source{{12, 34}}, ty.f32(), 0x20000000_u, 8), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(Source{{12, 34}}, ty.f32(), 0x20000000_u, 8),
+              ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array size (0x100000000) must not exceed 0xffffffff bytes");
@@ -328,7 +329,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_Overridable) {
     // override size = 10i;
     // var<private> a : array<f32, size>;
     Override("size", nullptr, Expr(10_i));
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array size must evaluate to a constant integer expression");
@@ -337,8 +338,8 @@ TEST_F(ResolverTypeValidationTest, ArraySize_Overridable) {
 TEST_F(ResolverTypeValidationTest, ArraySize_ModuleVar) {
     // var<private> size : i32 = 10i;
     // var<private> a : array<f32, size>;
-    Global("size", ty.i32(), Expr(10_i), ast::StorageClass::kPrivate);
-    Global("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
+    GlobalVar("size", ty.i32(), Expr(10_i), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array size must evaluate to a constant integer expression");
@@ -479,7 +480,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInStructInArray) {
     // var<private> a : array<Foo, 4>;
 
     auto* foo = Structure("Foo", {Member("rt", ty.array<f32>())});
-    Global("v", ty.array(Source{{12, 34}}, ty.Of(foo), 4_u), ast::StorageClass::kPrivate);
+    GlobalVar("v", ty.array(Source{{12, 34}}, ty.Of(foo), 4_u), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
@@ -522,7 +523,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsNotLast_Fail) {
 }
 
 TEST_F(ResolverTypeValidationTest, RuntimeArrayAsGlobalVariable) {
-    Global(Source{{56, 78}}, "g", ty.array<i32>(), ast::StorageClass::kPrivate);
+    GlobalVar(Source{{56, 78}}, "g", ty.array<i32>(), ast::StorageClass::kPrivate);
 
     ASSERT_FALSE(r()->Resolve());
 
@@ -624,7 +625,7 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
 
 TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
     auto* tex_ty = ty.sampled_texture(ast::TextureDimension::k2d, ty.f32());
-    Global("arr", ty.array(Source{{12, 34}}, tex_ty, 4_i), ast::StorageClass::kPrivate);
+    GlobalVar("arr", ty.array(Source{{12, 34}}, tex_ty, 4_i), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -634,8 +635,8 @@ TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
 TEST_F(ResolverTypeValidationTest, VariableAsType) {
     // var<private> a : i32;
     // var<private> b : a;
-    Global("a", ty.i32(), ast::StorageClass::kPrivate);
-    Global("b", ty.type_name("a"), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
+    GlobalVar("b", ty.type_name("a"), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -647,7 +648,7 @@ TEST_F(ResolverTypeValidationTest, FunctionAsType) {
     // fn f() {}
     // var<private> v : f;
     Func("f", {}, ty.void_(), {});
-    Global("v", ty.type_name("f"), ast::StorageClass::kPrivate);
+    GlobalVar("v", ty.type_name("f"), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -657,7 +658,7 @@ note: 'f' declared here)");
 
 TEST_F(ResolverTypeValidationTest, BuiltinAsType) {
     // var<private> v : max;
-    Global("v", ty.type_name("max"), ast::StorageClass::kPrivate);
+    GlobalVar("v", ty.type_name("max"), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "error: cannot use builtin 'max' as type");
@@ -668,14 +669,14 @@ TEST_F(ResolverTypeValidationTest, F16TypeUsedWithExtension) {
     // var<private> v : f16;
     Enable(ast::Extension::kF16);
 
-    Global("v", ty.f16(), ast::StorageClass::kPrivate);
+    GlobalVar("v", ty.f16(), ast::StorageClass::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTypeValidationTest, F16TypeUsedWithoutExtension) {
     // var<private> v : f16;
-    Global("v", ty.f16(), ast::StorageClass::kPrivate);
+    GlobalVar("v", ty.f16(), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "error: f16 used without 'f16' extension enabled");
@@ -747,8 +748,8 @@ struct DimensionParams {
 using SampledTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
 TEST_P(SampledTextureDimensionTest, All) {
     auto& params = GetParam();
-    Global(Source{{12, 34}}, "a", ty.sampled_texture(params.dim, ty.i32()),
-           ast::StorageClass::kNone, nullptr, ast::AttributeList{GroupAndBinding(0, 0)});
+    GlobalVar(Source{{12, 34}}, "a", ty.sampled_texture(params.dim, ty.i32()),
+              ast::StorageClass::kNone, nullptr, ast::AttributeList{GroupAndBinding(0, 0)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -765,8 +766,8 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
 using MultisampledTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
 TEST_P(MultisampledTextureDimensionTest, All) {
     auto& params = GetParam();
-    Global("a", ty.multisampled_texture(Source{{12, 34}}, params.dim, ty.i32()),
-           ast::StorageClass::kNone, nullptr, ast::AttributeList{GroupAndBinding(0, 0)});
+    GlobalVar("a", ty.multisampled_texture(Source{{12, 34}}, params.dim, ty.i32()),
+              ast::StorageClass::kNone, nullptr, ast::AttributeList{GroupAndBinding(0, 0)});
 
     if (params.is_valid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -816,7 +817,7 @@ static constexpr TypeParams type_cases[] = {
 using SampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
 TEST_P(SampledTextureTypeTest, All) {
     auto& params = GetParam();
-    Global(
+    GlobalVar(
         "a",
         ty.sampled_texture(Source{{12, 34}}, ast::TextureDimension::k2d, params.type_func(*this)),
         ast::StorageClass::kNone, nullptr, ast::AttributeList{GroupAndBinding(0, 0)});
@@ -835,10 +836,10 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
 using MultisampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
 TEST_P(MultisampledTextureTypeTest, All) {
     auto& params = GetParam();
-    Global("a",
-           ty.multisampled_texture(Source{{12, 34}}, ast::TextureDimension::k2d,
-                                   params.type_func(*this)),
-           ast::StorageClass::kNone, nullptr, ast::AttributeList{GroupAndBinding(0, 0)});
+    GlobalVar("a",
+              ty.multisampled_texture(Source{{12, 34}}, ast::TextureDimension::k2d,
+                                      params.type_func(*this)),
+              ast::StorageClass::kNone, nullptr, ast::AttributeList{GroupAndBinding(0, 0)});
 
     if (params.is_valid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -877,7 +878,7 @@ TEST_P(StorageTextureDimensionTest, All) {
     auto* st = ty.storage_texture(Source{{12, 34}}, params.dim, ast::TexelFormat::kR32Uint,
                                   ast::Access::kWrite);
 
-    Global("a", st, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 0)});
+    GlobalVar("a", st, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 0)});
 
     if (params.is_valid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -927,17 +928,17 @@ TEST_P(StorageTextureFormatTest, All) {
 
     auto* st_a = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d, params.format,
                                     ast::Access::kWrite);
-    Global("a", st_a, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 0)});
+    GlobalVar("a", st_a, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 0)});
 
     auto* st_b = ty.storage_texture(ast::TextureDimension::k2d, params.format, ast::Access::kWrite);
-    Global("b", st_b, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 1)});
+    GlobalVar("b", st_b, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 1)});
 
     auto* st_c =
         ty.storage_texture(ast::TextureDimension::k2dArray, params.format, ast::Access::kWrite);
-    Global("c", st_c, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 2)});
+    GlobalVar("c", st_c, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 2)});
 
     auto* st_d = ty.storage_texture(ast::TextureDimension::k3d, params.format, ast::Access::kWrite);
-    Global("d", st_d, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 3)});
+    GlobalVar("d", st_d, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 3)});
 
     if (params.is_valid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -961,7 +962,7 @@ TEST_F(StorageTextureAccessTest, MissingAccess_Fail) {
     auto* st = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d,
                                   ast::TexelFormat::kR32Uint, ast::Access::kUndefined);
 
-    Global("a", st, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 0)});
+    GlobalVar("a", st, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 0)});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: storage texture missing access control");
@@ -974,7 +975,8 @@ TEST_F(StorageTextureAccessTest, RWAccess_Fail) {
     auto* st = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d,
                                   ast::TexelFormat::kR32Uint, ast::Access::kReadWrite);
 
-    Global("a", st, ast::StorageClass::kNone, nullptr, ast::AttributeList{GroupAndBinding(0, 0)});
+    GlobalVar("a", st, ast::StorageClass::kNone, nullptr,
+              ast::AttributeList{GroupAndBinding(0, 0)});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -988,7 +990,8 @@ TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Fail) {
     auto* st = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d,
                                   ast::TexelFormat::kR32Uint, ast::Access::kRead);
 
-    Global("a", st, ast::StorageClass::kNone, nullptr, ast::AttributeList{GroupAndBinding(0, 0)});
+    GlobalVar("a", st, ast::StorageClass::kNone, nullptr,
+              ast::AttributeList{GroupAndBinding(0, 0)});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1002,7 +1005,8 @@ TEST_F(StorageTextureAccessTest, WriteOnlyAccess_Pass) {
     auto* st = ty.storage_texture(ast::TextureDimension::k1d, ast::TexelFormat::kR32Uint,
                                   ast::Access::kWrite);
 
-    Global("a", st, ast::StorageClass::kNone, nullptr, ast::AttributeList{GroupAndBinding(0, 0)});
+    GlobalVar("a", st, ast::StorageClass::kNone, nullptr,
+              ast::AttributeList{GroupAndBinding(0, 0)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -1025,8 +1029,8 @@ using ValidMatrixTypes = ResolverTestWithParam<Params>;
 TEST_P(ValidMatrixTypes, Okay) {
     // var a : matNxM<EL_TY>;
     auto& params = GetParam();
-    Global("a", ty.mat(params.elem_ty(*this), params.columns, params.rows),
-           ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.mat(params.elem_ty(*this), params.columns, params.rows),
+              ast::StorageClass::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
@@ -1048,8 +1052,8 @@ using InvalidMatrixElementTypes = ResolverTestWithParam<Params>;
 TEST_P(InvalidMatrixElementTypes, InvalidElementType) {
     // var a : matNxM<EL_TY>;
     auto& params = GetParam();
-    Global("a", ty.mat(Source{{12, 34}}, params.elem_ty(*this), params.columns, params.rows),
-           ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.mat(Source{{12, 34}}, params.elem_ty(*this), params.columns, params.rows),
+              ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: matrix element type must be 'f32'");
 }
@@ -1082,7 +1086,7 @@ using ValidVectorTypes = ResolverTestWithParam<Params>;
 TEST_P(ValidVectorTypes, Okay) {
     // var a : vecN<EL_TY>;
     auto& params = GetParam();
-    Global("a", ty.vec(params.elem_ty(*this), params.width), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.vec(params.elem_ty(*this), params.width), ast::StorageClass::kPrivate);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
@@ -1108,8 +1112,8 @@ using InvalidVectorElementTypes = ResolverTestWithParam<Params>;
 TEST_P(InvalidVectorElementTypes, InvalidElementType) {
     // var a : vecN<EL_TY>;
     auto& params = GetParam();
-    Global("a", ty.vec(Source{{12, 34}}, params.elem_ty(*this), params.width),
-           ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.vec(Source{{12, 34}}, params.elem_ty(*this), params.width),
+              ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: vector element type must be 'bool', 'f32', 'i32' or 'u32'");

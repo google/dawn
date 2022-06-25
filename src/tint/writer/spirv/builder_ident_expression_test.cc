@@ -46,7 +46,7 @@ TEST_F(BuilderTest, IdentifierExpression_GlobalConst) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_GlobalVar) {
-    auto* v = Global("var", ty.f32(), ast::StorageClass::kPrivate);
+    auto* v = GlobalVar("var", ty.f32(), ast::StorageClass::kPrivate);
 
     auto* expr = Expr("var");
     WrapInFunction(expr);
@@ -114,7 +114,7 @@ TEST_F(BuilderTest, IdentifierExpression_FunctionVar) {
 }
 
 TEST_F(BuilderTest, IdentifierExpression_Load) {
-    auto* var = Global("var", ty.i32(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("var", ty.i32(), ast::StorageClass::kPrivate);
 
     auto* expr = Add("var", "var");
     WrapInFunction(expr);

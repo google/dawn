@@ -33,7 +33,7 @@ using GlslGeneratorImplTest_Type = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_Array) {
     auto* arr = ty.array<bool, 4>();
-    Global("G", arr, ast::StorageClass::kPrivate);
+    GlobalVar("G", arr, ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -46,7 +46,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Array) {
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
     auto* arr = ty.array(ty.array<bool, 4>(), 5_u);
-    Global("G", arr, ast::StorageClass::kPrivate);
+    GlobalVar("G", arr, ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -59,7 +59,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
     auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5_u), 6_u);
-    Global("G", arr, ast::StorageClass::kPrivate);
+    GlobalVar("G", arr, ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -72,7 +72,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
     auto* arr = ty.array<bool, 4>();
-    Global("G", arr, ast::StorageClass::kPrivate);
+    GlobalVar("G", arr, ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -134,7 +134,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_StructDecl) {
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
-    Global("g", ty.Of(s), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(s), ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -154,7 +154,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Struct) {
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
-    Global("g", ty.Of(s), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(s), ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -170,7 +170,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
                                  Member("double", ty.i32()),
                                  Member("float", ty.f32()),
                              });
-    Global("g", ty.Of(s), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(s), ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -187,7 +187,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Struct_WithOffsetAttributes) {
                                  Member("a", ty.i32(), {MemberOffset(0)}),
                                  Member("b", ty.f32(), {MemberOffset(8)}),
                              });
-    Global("g", ty.Of(s), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(s), ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -270,11 +270,11 @@ TEST_P(GlslDepthTexturesTest, Emit) {
 
     auto* t = ty.depth_texture(params.dim);
 
-    Global("tex", t,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar("tex", t,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
 
     Func("main", {}, ty.void_(), {CallStmt(Call("textureDimensions", "tex"))},
          {Stage(ast::PipelineStage::kFragment)});
@@ -297,11 +297,11 @@ using GlslDepthMultisampledTexturesTest = TestHelper;
 TEST_F(GlslDepthMultisampledTexturesTest, Emit) {
     auto* t = ty.depth_multisampled_texture(ast::TextureDimension::k2d);
 
-    Global("tex", t,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar("tex", t,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
 
     Func("main", {}, ty.void_(), {CallStmt(Call("textureDimensions", "tex"))},
          {Stage(ast::PipelineStage::kFragment)});
@@ -340,11 +340,11 @@ TEST_P(GlslSampledTexturesTest, Emit) {
     }
     auto* t = ty.sampled_texture(params.dim, datatype);
 
-    Global("tex", t,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar("tex", t,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
 
     Func("main", {}, ty.void_(), {CallStmt(Call("textureDimensions", "tex"))},
          {Stage(ast::PipelineStage::kFragment)});
@@ -474,11 +474,11 @@ TEST_P(GlslStorageTexturesTest, Emit) {
 
     auto* t = ty.storage_texture(params.dim, params.imgfmt, ast::Access::kWrite);
 
-    Global("tex", t,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar("tex", t,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
 
     Func("main", {}, ty.void_(), {CallStmt(Call("textureDimensions", "tex"))},
          {Stage(ast::PipelineStage::kFragment)});

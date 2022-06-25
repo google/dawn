@@ -64,7 +64,7 @@ TEST_F(ResolverStorageClassUseTest, StructReachableFromReturnType) {
 TEST_F(ResolverStorageClassUseTest, StructReachableFromGlobal) {
     auto* s = Structure("S", {Member("a", ty.f32())});
 
-    Global("g", ty.Of(s), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(s), ast::StorageClass::kPrivate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -76,7 +76,7 @@ TEST_F(ResolverStorageClassUseTest, StructReachableFromGlobal) {
 TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalAlias) {
     auto* s = Structure("S", {Member("a", ty.f32())});
     auto* a = Alias("A", ty.Of(s));
-    Global("g", ty.Of(a), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(a), ast::StorageClass::kPrivate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -88,7 +88,7 @@ TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalAlias) {
 TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalStruct) {
     auto* s = Structure("S", {Member("a", ty.f32())});
     auto* o = Structure("O", {Member("a", ty.Of(s))});
-    Global("g", ty.Of(o), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(o), ast::StorageClass::kPrivate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -100,7 +100,7 @@ TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalStruct) {
 TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalArray) {
     auto* s = Structure("S", {Member("a", ty.f32())});
     auto* a = ty.array(ty.Of(s), 3_u);
-    Global("g", a, ast::StorageClass::kPrivate);
+    GlobalVar("g", a, ast::StorageClass::kPrivate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -159,16 +159,16 @@ TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalArray) {
 
 TEST_F(ResolverStorageClassUseTest, StructMultipleStorageClassUses) {
     auto* s = Structure("S", {Member("a", ty.f32())});
-    Global("x", ty.Of(s), ast::StorageClass::kUniform,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(0),
-           });
-    Global("y", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(0),
-           });
+    GlobalVar("x", ty.Of(s), ast::StorageClass::kUniform,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(0),
+              });
+    GlobalVar("y", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(0),
+              });
     WrapInFunction(Var("g", ty.Of(s)));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();

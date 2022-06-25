@@ -5327,7 +5327,7 @@ TEST_F(UniformityAnalysisTest, MaximumNumberOfPointerParameters) {
     //     workgroupBarrier();
     //   }
     // }
-    b.Global("non_uniform_global", ty.i32(), ast::StorageClass::kPrivate);
+    b.GlobalVar("non_uniform_global", ty.i32(), ast::StorageClass::kPrivate);
     ast::StatementList main_body;
     ast::ExpressionList args;
     for (int i = 0; i < 255; i++) {
@@ -6538,7 +6538,7 @@ TEST_F(UniformityAnalysisTest, StressGraphTraversalDepth) {
     //     workgroupBarrier();
     //   }
     // }
-    b.Global("v0", ty.i32(), ast::StorageClass::kPrivate, b.Expr(0_i));
+    b.GlobalVar("v0", ty.i32(), ast::StorageClass::kPrivate, b.Expr(0_i));
     ast::StatementList foo_body;
     std::string v_last = "v0";
     for (int i = 1; i < 100000; i++) {

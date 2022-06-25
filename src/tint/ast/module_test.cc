@@ -92,7 +92,7 @@ TEST_F(ModuleTest, CloneOrder) {
         ProgramBuilder b;
         b.Func("F", {}, b.ty.void_(), {});
         b.Alias("A", b.ty.u32());
-        b.Global("V", b.ty.i32(), ast::StorageClass::kPrivate);
+        b.GlobalVar("V", b.ty.i32(), ast::StorageClass::kPrivate);
         return Program(std::move(b));
     }();
 

@@ -20,7 +20,7 @@ namespace {
 using HlslUnaryOpTest = TestHelper;
 
 TEST_F(HlslUnaryOpTest, AddressOf) {
-    Global("expr", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("expr", ty.f32(), ast::StorageClass::kPrivate);
     auto* op = create<ast::UnaryOpExpression>(ast::UnaryOp::kAddressOf, Expr("expr"));
     WrapInFunction(op);
 
@@ -32,7 +32,7 @@ TEST_F(HlslUnaryOpTest, AddressOf) {
 }
 
 TEST_F(HlslUnaryOpTest, Complement) {
-    Global("expr", ty.u32(), ast::StorageClass::kPrivate);
+    GlobalVar("expr", ty.u32(), ast::StorageClass::kPrivate);
     auto* op = create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement, Expr("expr"));
     WrapInFunction(op);
 
@@ -44,7 +44,7 @@ TEST_F(HlslUnaryOpTest, Complement) {
 }
 
 TEST_F(HlslUnaryOpTest, Indirection) {
-    Global("G", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("G", ty.f32(), ast::StorageClass::kPrivate);
     auto* p =
         Let("expr", nullptr, create<ast::UnaryOpExpression>(ast::UnaryOp::kAddressOf, Expr("G")));
     auto* op = create<ast::UnaryOpExpression>(ast::UnaryOp::kIndirection, Expr("expr"));
@@ -58,7 +58,7 @@ TEST_F(HlslUnaryOpTest, Indirection) {
 }
 
 TEST_F(HlslUnaryOpTest, Not) {
-    Global("expr", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("expr", ty.bool_(), ast::StorageClass::kPrivate);
     auto* op = create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, Expr("expr"));
     WrapInFunction(op);
 
@@ -70,7 +70,7 @@ TEST_F(HlslUnaryOpTest, Not) {
 }
 
 TEST_F(HlslUnaryOpTest, Negation) {
-    Global("expr", ty.i32(), ast::StorageClass::kPrivate);
+    GlobalVar("expr", ty.i32(), ast::StorageClass::kPrivate);
     auto* op = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr("expr"));
     WrapInFunction(op);
 

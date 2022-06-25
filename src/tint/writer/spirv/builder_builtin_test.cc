@@ -41,7 +41,7 @@ inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
 using BuiltinBoolTest = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(BuiltinBoolTest, Call_Bool_Scalar) {
     auto param = GetParam();
-    auto* var = Global("v", ty.bool_(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.bool_(), ast::StorageClass::kPrivate);
     auto* expr = Call(param.name, "v");
     auto* func = Func("a_func", {}, ty.void_(),
                       {
@@ -67,7 +67,7 @@ TEST_P(BuiltinBoolTest, Call_Bool_Scalar) {
 
 TEST_P(BuiltinBoolTest, Call_Bool_Vector) {
     auto param = GetParam();
-    auto* var = Global("v", ty.vec3<bool>(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.vec3<bool>(), ast::StorageClass::kPrivate);
     auto* expr = Call(param.name, "v");
     auto* func = Func("a_func", {}, ty.void_(),
                       {
@@ -102,7 +102,7 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
 using BuiltinIntTest = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(BuiltinIntTest, Call_SInt_Scalar) {
     auto param = GetParam();
-    auto* var = Global("v", ty.i32(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
     auto* expr = Call(param.name, "v");
     auto* func = Func("a_func", {}, ty.void_(),
                       {
@@ -132,7 +132,7 @@ OpReturn
 
 TEST_P(BuiltinIntTest, Call_SInt_Vector) {
     auto param = GetParam();
-    auto* var = Global("v", ty.vec3<i32>(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.vec3<i32>(), ast::StorageClass::kPrivate);
     auto* expr = Call(param.name, "v");
     auto* func = Func("a_func", {}, ty.void_(),
                       {
@@ -163,7 +163,7 @@ OpReturn
 
 TEST_P(BuiltinIntTest, Call_UInt_Scalar) {
     auto param = GetParam();
-    auto* var = Global("v", ty.u32(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.u32(), ast::StorageClass::kPrivate);
     auto* expr = Call(param.name, "v");
     auto* func = Func("a_func", {}, ty.void_(),
                       {
@@ -193,7 +193,7 @@ OpReturn
 
 TEST_P(BuiltinIntTest, Call_UInt_Vector) {
     auto param = GetParam();
-    auto* var = Global("v", ty.vec3<u32>(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.vec3<u32>(), ast::StorageClass::kPrivate);
     auto* expr = Call(param.name, "v");
     auto* func = Func("a_func", {}, ty.void_(),
                       {
@@ -227,7 +227,7 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                                          BuiltinData{"reverseBits", "OpBitReverse"}));
 
 TEST_F(BuiltinBuilderTest, Call_Dot_F32) {
-    auto* var = Global("v", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.vec3<f32>(), ast::StorageClass::kPrivate);
     auto* expr = Call("dot", "v", "v");
     auto* func = Func("a_func", {}, ty.void_(),
                       {
@@ -256,7 +256,7 @@ OpReturn
 }
 
 TEST_F(BuiltinBuilderTest, Call_Dot_U32) {
-    auto* var = Global("v", ty.vec3<u32>(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.vec3<u32>(), ast::StorageClass::kPrivate);
     auto* expr = Call("dot", "v", "v");
     auto* func = Func("a_func", {}, ty.void_(),
                       {
@@ -295,7 +295,7 @@ OpReturn
 }
 
 TEST_F(BuiltinBuilderTest, Call_Dot_I32) {
-    auto* var = Global("v", ty.vec3<i32>(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.vec3<i32>(), ast::StorageClass::kPrivate);
     auto* expr = Call("dot", "v", "v");
     auto* func = Func("a_func", {}, ty.void_(),
                       {
@@ -336,7 +336,7 @@ OpReturn
 using BuiltinDeriveTest = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(BuiltinDeriveTest, Call_Derivative_Scalar) {
     auto param = GetParam();
-    auto* var = Global("v", ty.f32(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.f32(), ast::StorageClass::kPrivate);
     auto* expr = Call(param.name, "v");
     auto* func =
         Func("func", {}, ty.void_(), {CallStmt(expr)}, {Stage(ast::PipelineStage::kFragment)});
@@ -364,7 +364,7 @@ OpReturn
 
 TEST_P(BuiltinDeriveTest, Call_Derivative_Vector) {
     auto param = GetParam();
-    auto* var = Global("v", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.vec3<f32>(), ast::StorageClass::kPrivate);
     auto* expr = Call(param.name, "v");
     auto* func =
         Func("func", {}, ty.void_(), {CallStmt(expr)}, {Stage(ast::PipelineStage::kFragment)});
@@ -409,9 +409,9 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                                          BuiltinData{"fwidthCoarse", "OpFwidthCoarse"}));
 
 TEST_F(BuiltinBuilderTest, Call_Select) {
-    auto* v3 = Global("v3", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    auto* v3 = GlobalVar("v3", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
-    auto* bool_v3 = Global("bool_v3", ty.vec3<bool>(), ast::StorageClass::kPrivate);
+    auto* bool_v3 = GlobalVar("bool_v3", ty.vec3<bool>(), ast::StorageClass::kPrivate);
     auto* expr = Call("select", "v3", "v3", "bool_v3");
     auto* func = Func("a_func", {}, ty.void_(),
                       {
@@ -451,17 +451,17 @@ TEST_F(BuiltinBuilderTest, Call_TextureSampleCompare_Twice) {
     auto* s = ty.sampler(ast::SamplerKind::kComparisonSampler);
     auto* t = ty.depth_texture(ast::TextureDimension::k2d);
 
-    auto* tex = Global("texture", t,
-                       ast::AttributeList{
-                           create<ast::BindingAttribute>(0),
-                           create<ast::GroupAttribute>(0),
-                       });
+    auto* tex = GlobalVar("texture", t,
+                          ast::AttributeList{
+                              create<ast::BindingAttribute>(0),
+                              create<ast::GroupAttribute>(0),
+                          });
 
-    auto* sampler = Global("sampler", s,
-                           ast::AttributeList{
-                               create<ast::BindingAttribute>(1),
-                               create<ast::GroupAttribute>(0),
-                           });
+    auto* sampler = GlobalVar("sampler", s,
+                              ast::AttributeList{
+                                  create<ast::BindingAttribute>(1),
+                                  create<ast::GroupAttribute>(0),
+                              });
 
     auto* expr1 = Call("textureSampleCompare", "texture", "sampler", vec2<f32>(1_f, 2_f), 2_f);
     auto* expr2 = Call("textureSampleCompare", "texture", "sampler", vec2<f32>(1_f, 2_f), 2_f);
@@ -506,7 +506,7 @@ TEST_F(BuiltinBuilderTest, Call_TextureSampleCompare_Twice) {
 }
 
 TEST_F(BuiltinBuilderTest, Call_GLSLMethod_WithLoad) {
-    auto* var = Global("ident", ty.f32(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("ident", ty.f32(), ast::StorageClass::kPrivate);
     auto* expr = Call("round", "ident");
     auto* func = Func("a_func", {}, ty.void_(),
                       {
@@ -1513,7 +1513,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Determinant) {
-    auto* var = Global("var", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("var", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
     auto* expr = Call("determinant", "var");
     auto* func = Func("a_func", {}, ty.void_(),
                       {
@@ -1548,7 +1548,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuiltinBuilderTest, Call_Transpose) {
-    auto* var = Global("var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
     auto* expr = Call("transpose", "var");
     auto* func = Func("a_func", {}, ty.void_(),
                       {
@@ -1585,11 +1585,11 @@ OpFunctionEnd
 
 TEST_F(BuiltinBuilderTest, Call_ArrayLength) {
     auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))});
-    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
     auto* expr = Call("arrayLength", AddressOf(MemberAccessor("b", "a")));
 
     Func("a_func", {}, ty.void_(),
@@ -1632,11 +1632,11 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
                                          Member("z", ty.f32()),
                                          Member(4, "a", ty.array<f32>(4)),
                                      });
-    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
     auto* expr = Call("arrayLength", AddressOf(MemberAccessor("b", "a")));
 
     Func("a_func", {}, ty.void_(),
@@ -1676,11 +1676,11 @@ OpReturn
 
 TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets) {
     auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))});
-    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
 
     auto* p = Let("p", nullptr, AddressOf("b"));
     auto* p2 = Let("p2", nullptr, AddressOf(MemberAccessor(Deref(p), "a")));
@@ -1736,11 +1736,11 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
     //   arrayLength(&*p3);
     // }
     auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))});
-    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
 
     auto* p = Let("p", nullptr, AddressOf(Deref(AddressOf("b"))));
     auto* p2 = Let("p2", nullptr, AddressOf(Deref(p)));
@@ -1801,11 +1801,11 @@ TEST_F(BuiltinBuilderTest, Call_AtomicLoad) {
                                  Member("u", ty.atomic<u32>()),
                                  Member("i", ty.atomic<i32>()),
                              });
-    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
 
     Func("a_func", {}, ty.void_(),
          ast::StatementList{
@@ -1865,11 +1865,11 @@ TEST_F(BuiltinBuilderTest, Call_AtomicStore) {
                                  Member("u", ty.atomic<u32>()),
                                  Member("i", ty.atomic<i32>()),
                              });
-    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
 
     Func("a_func", {}, ty.void_(),
          ast::StatementList{
@@ -1937,11 +1937,11 @@ TEST_P(Builtin_Builtin_AtomicRMW_i32, Test) {
     auto* s = Structure("S", {
                                  Member("v", ty.atomic<i32>()),
                              });
-    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
 
     Func("a_func", {}, ty.void_(),
          ast::StatementList{
@@ -2010,11 +2010,11 @@ TEST_P(Builtin_Builtin_AtomicRMW_u32, Test) {
     auto* s = Structure("S", {
                                  Member("v", ty.atomic<u32>()),
                              });
-    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
 
     Func("a_func", {}, ty.void_(),
          ast::StatementList{
@@ -2085,11 +2085,11 @@ TEST_F(BuiltinBuilderTest, Call_AtomicExchange) {
                                  Member("u", ty.atomic<u32>()),
                                  Member("i", ty.atomic<i32>()),
                              });
-    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
 
     Func("a_func", {}, ty.void_(),
          ast::StatementList{
@@ -2161,11 +2161,11 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
                                  Member("u", ty.atomic<u32>()),
                                  Member("i", ty.atomic<i32>()),
                              });
-    Global("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
 
     Func("a_func", {}, ty.void_(),
          ast::StatementList{

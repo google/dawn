@@ -39,7 +39,7 @@ TEST_F(ResolverFunctionValidationTest, DuplicateParameterName) {
 TEST_F(ResolverFunctionValidationTest, ParameterMayShadowGlobal) {
     // var<private> common_name : f32;
     // fn func(common_name : f32) { }
-    Global("common_name", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("common_name", ty.f32(), ast::StorageClass::kPrivate);
     Func("func", {Param("common_name", ty.f32())}, ty.void_(), {});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -647,7 +647,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_NonConst) {
     // var<private> x = 64i;
     // @compute @workgroup_size(x)
     // fn main() {}
-    Global("x", ty.i32(), ast::StorageClass::kPrivate, Expr(64_i));
+    GlobalVar("x", ty.i32(), ast::StorageClass::kPrivate, Expr(64_i));
     Func("main", {}, ty.void_(), {},
          {Stage(ast::PipelineStage::kCompute), WorkgroupSize(Expr(Source{{12, 34}}, "x"))});
 

@@ -61,8 +61,8 @@ class FakeExpr final : public Castable<FakeExpr, ast::Expression> {
 };
 
 TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInVertexStage) {
-    Global(Source{{1, 2}}, "wg", ty.vec4<f32>(), ast::StorageClass::kWorkgroup);
-    Global("dst", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar(Source{{1, 2}}, "wg", ty.vec4<f32>(), ast::StorageClass::kWorkgroup);
+    GlobalVar("dst", ty.vec4<f32>(), ast::StorageClass::kPrivate);
     auto* stmt = Assign(Expr("dst"), Expr(Source{{3, 4}}, "wg"));
 
     Func(Source{{9, 10}}, "f0", {}, ty.vec4<f32>(),
@@ -93,8 +93,8 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInFragmentStage) {
     //  f1();
     //}
 
-    Global(Source{{1, 2}}, "wg", ty.vec4<f32>(), ast::StorageClass::kWorkgroup);
-    Global("dst", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar(Source{{1, 2}}, "wg", ty.vec4<f32>(), ast::StorageClass::kWorkgroup);
+    GlobalVar("dst", ty.vec4<f32>(), ast::StorageClass::kPrivate);
     auto* stmt = Assign(Expr("dst"), Expr(Source{{3, 4}}, "wg"));
 
     Func(Source{{5, 6}}, "f2", {}, ty.void_(), {stmt});
@@ -221,7 +221,7 @@ TEST_F(ResolverValidationTest, UsingUndefinedVariableGlobalVariable_Pass) {
     //   return;
     // }
 
-    Global("global_var", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1_f));
+    GlobalVar("global_var", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1_f));
 
     Func("my_func", {}, ty.void_(),
          {
@@ -324,11 +324,11 @@ TEST_F(ResolverValidationTest, StorageClass_FunctionVariableI32) {
 
 TEST_F(ResolverValidationTest, StorageClass_SamplerExplicitStorageClass) {
     auto* t = ty.sampler(ast::SamplerKind::kSampler);
-    Global(Source{{12, 34}}, "var", t, ast::StorageClass::kHandle,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(0),
-           });
+    GlobalVar(Source{{12, 34}}, "var", t, ast::StorageClass::kHandle,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(0),
+              });
 
     EXPECT_FALSE(r()->Resolve());
 
@@ -338,11 +338,11 @@ TEST_F(ResolverValidationTest, StorageClass_SamplerExplicitStorageClass) {
 
 TEST_F(ResolverValidationTest, StorageClass_TextureExplicitStorageClass) {
     auto* t = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
-    Global(Source{{12, 34}}, "var", t, ast::StorageClass::kHandle,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(0),
-           });
+    GlobalVar(Source{{12, 34}}, "var", t, ast::StorageClass::kHandle,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(0),
+              });
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
 
@@ -351,7 +351,7 @@ TEST_F(ResolverValidationTest, StorageClass_TextureExplicitStorageClass) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
-    Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_vec", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
     auto* ident = Expr(Source{{{3, 3}, {3, 7}}}, "xyqz");
 
@@ -363,7 +363,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadChar) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
-    Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
 
     auto* ident = Expr(Source{{{3, 3}, {3, 7}}}, "rgyw");
 
@@ -376,7 +376,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_MixedChars) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
-    Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_vec", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
     auto* ident = Expr(Source{{{3, 3}, {3, 8}}}, "zzzzz");
     auto* mem = MemberAccessor("my_vec", ident);
@@ -387,7 +387,7 @@ TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadLength) {
 }
 
 TEST_F(ResolverValidationTest, Expr_MemberAccessor_VectorSwizzle_BadIndex) {
-    Global("my_vec", ty.vec2<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_vec", ty.vec2<f32>(), ast::StorageClass::kPrivate);
 
     auto* ident = Expr(Source{{3, 3}}, "z");
     auto* mem = MemberAccessor("my_vec", ident);

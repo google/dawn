@@ -27,35 +27,35 @@ namespace {
 struct ResolverAtomicValidationTest : public resolver::TestHelper, public testing::Test {};
 
 TEST_F(ResolverAtomicValidationTest, StorageClass_WorkGroup) {
-    Global("a", ty.atomic(Source{{12, 34}}, ty.i32()), ast::StorageClass::kWorkgroup);
+    GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.i32()), ast::StorageClass::kWorkgroup);
 
     EXPECT_TRUE(r()->Resolve());
 }
 
 TEST_F(ResolverAtomicValidationTest, StorageClass_Storage) {
-    Global("g", ty.atomic(Source{{12, 34}}, ty.i32()), ast::StorageClass::kStorage,
-           ast::Access::kReadWrite, GroupAndBinding(0, 0));
+    GlobalVar("g", ty.atomic(Source{{12, 34}}, ty.i32()), ast::StorageClass::kStorage,
+              ast::Access::kReadWrite, GroupAndBinding(0, 0));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAtomicValidationTest, StorageClass_Storage_Struct) {
     auto* s = Structure("s", {Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
-    Global("g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-           GroupAndBinding(0, 0));
+    GlobalVar("g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+              GroupAndBinding(0, 0));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAtomicValidationTest, InvalidType) {
-    Global("a", ty.atomic(ty.f32(Source{{12, 34}})), ast::StorageClass::kWorkgroup);
+    GlobalVar("a", ty.atomic(ty.f32(Source{{12, 34}})), ast::StorageClass::kWorkgroup);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: atomic only supports i32 or u32 types");
 }
 
 TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_Simple) {
-    Global("a", ty.atomic(Source{{12, 34}}, ty.i32()), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.i32()), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -64,7 +64,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_Simple) {
 }
 
 TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_Array) {
-    Global("a", ty.atomic(Source{{12, 34}}, ty.i32()), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.i32()), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -74,7 +74,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_Array) {
 
 TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_Struct) {
     auto* s = Structure("s", {Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
-    Global("g", ty.Of(s), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(s), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -90,7 +90,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_StructOfStruct) {
 
     auto* Inner = Structure("Inner", {Member("m", ty.atomic(Source{{12, 34}}, ty.i32()))});
     auto* Outer = Structure("Outer", {Member("m", ty.Of(Inner))});
-    Global("g", ty.Of(Outer), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(Outer), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -106,7 +106,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_StructOfStructOfArray) 
 
     auto* Inner = Structure("Inner", {Member(Source{{12, 34}}, "m", ty.atomic(ty.i32()))});
     auto* Outer = Structure("Outer", {Member("m", ty.Of(Inner))});
-    Global("g", ty.Of(Outer), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(Outer), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -121,7 +121,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_ArrayOfArray) {
 
     auto* atomic_array =
         Alias(Source{{12, 34}}, "AtomicArray", ty.atomic(Source{{12, 34}}, ty.i32()));
-    Global(Source{{56, 78}}, "v", ty.Of(atomic_array), ast::StorageClass::kPrivate);
+    GlobalVar(Source{{56, 78}}, "v", ty.Of(atomic_array), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -136,7 +136,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_ArrayOfStruct) {
     // var<private> v: array<S, 5u>;
 
     auto* s = Structure("S", {Member("m", ty.atomic<u32>())});
-    Global(Source{{56, 78}}, "v", ty.array(ty.Of(s), 5_u), ast::StorageClass::kPrivate);
+    GlobalVar(Source{{56, 78}}, "v", ty.array(ty.Of(s), 5_u), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -155,7 +155,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_ArrayOfStructOfArray) {
     auto* atomic_array =
         Alias(Source{{12, 34}}, "AtomicArray", ty.atomic(Source{{12, 34}}, ty.i32()));
     auto* s = Structure("S", {Member("m", ty.Of(atomic_array))});
-    Global(Source{{56, 78}}, "v", ty.array(ty.Of(s), 5_u), ast::StorageClass::kPrivate);
+    GlobalVar(Source{{56, 78}}, "v", ty.array(ty.Of(s), 5_u), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -196,7 +196,7 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_Complex) {
     auto* s2 = Structure("S2", {Member("x", ty.Of(s3))});
     auto* s1 = Structure("S1", {Member("x", ty.Of(s2))});
     auto* s0 = Structure("S0", {Member("x", ty.Of(s1))});
-    Global(Source{{56, 78}}, "g", ty.Of(s0), ast::StorageClass::kPrivate);
+    GlobalVar(Source{{56, 78}}, "g", ty.Of(s0), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -207,8 +207,8 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_Complex) {
 
 TEST_F(ResolverAtomicValidationTest, Struct_AccessMode_Read) {
     auto* s = Structure("s", {Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
-    Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-           GroupAndBinding(0, 0));
+    GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+              GroupAndBinding(0, 0));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -219,8 +219,8 @@ TEST_F(ResolverAtomicValidationTest, Struct_AccessMode_Read) {
 
 TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_Struct) {
     auto* s = Structure("s", {Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
-    Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-           GroupAndBinding(0, 0));
+    GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+              GroupAndBinding(0, 0));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -236,8 +236,8 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_StructOfStruct) {
 
     auto* Inner = Structure("Inner", {Member("m", ty.atomic(Source{{12, 34}}, ty.i32()))});
     auto* Outer = Structure("Outer", {Member("m", ty.Of(Inner))});
-    Global(Source{{56, 78}}, "g", ty.Of(Outer), ast::StorageClass::kStorage, ast::Access::kRead,
-           GroupAndBinding(0, 0));
+    GlobalVar(Source{{56, 78}}, "g", ty.Of(Outer), ast::StorageClass::kStorage, ast::Access::kRead,
+              GroupAndBinding(0, 0));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -253,8 +253,8 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_StructOfStructOfArray) {
 
     auto* Inner = Structure("Inner", {Member(Source{{12, 34}}, "m", ty.atomic(ty.i32()))});
     auto* Outer = Structure("Outer", {Member("m", ty.Of(Inner))});
-    Global(Source{{56, 78}}, "g", ty.Of(Outer), ast::StorageClass::kStorage, ast::Access::kRead,
-           GroupAndBinding(0, 0));
+    GlobalVar(Source{{56, 78}}, "g", ty.Of(Outer), ast::StorageClass::kStorage, ast::Access::kRead,
+              GroupAndBinding(0, 0));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -295,8 +295,8 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_Complex) {
     auto* s2 = Structure("S2", {Member("x", ty.Of(s3))});
     auto* s1 = Structure("S1", {Member("x", ty.Of(s2))});
     auto* s0 = Structure("S0", {Member("x", ty.Of(s1))});
-    Global(Source{{56, 78}}, "g", ty.Of(s0), ast::StorageClass::kStorage, ast::Access::kRead,
-           GroupAndBinding(0, 0));
+    GlobalVar(Source{{56, 78}}, "g", ty.Of(s0), ast::StorageClass::kStorage, ast::Access::kRead,
+              GroupAndBinding(0, 0));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

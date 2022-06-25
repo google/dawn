@@ -221,7 +221,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsGlobalVar) {
     //   var a = a;
     // }
 
-    auto* g = Global("a", ty.i32(), ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
     auto* v = Var("a", nullptr, Expr("a"));
     Func("F", {}, ty.void_(), {Decl(v)});
 
@@ -419,11 +419,11 @@ TEST_F(ResolverVariableTest, LocalLet_InheritsAccessFromOriginatingVariable) {
     // }
     auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
     auto* buf = Structure("S", {Member("inner", ty.Of(inner))});
-    auto* storage = Global("s", ty.Of(buf), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                           ast::AttributeList{
-                               create<ast::BindingAttribute>(0),
-                               create<ast::GroupAttribute>(0),
-                           });
+    auto* storage = GlobalVar("s", ty.Of(buf), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+                              ast::AttributeList{
+                                  create<ast::BindingAttribute>(0),
+                                  create<ast::GroupAttribute>(0),
+                              });
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4_i);
     auto* ptr = Let("p", nullptr, AddressOf(expr));
@@ -504,7 +504,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsGlobalVar) {
     //   let a = a;
     // }
 
-    auto* g = Global("a", ty.i32(), ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
     auto* l = Let("a", nullptr, Expr("a"));
     Func("F", {}, ty.void_(), {Decl(l)});
 
@@ -627,23 +627,23 @@ TEST_F(ResolverVariableTest, GlobalVar_StorageClass) {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
     auto* buf = Structure("S", {Member("m", ty.i32())});
-    auto* private_ = Global("p", ty.i32(), ast::StorageClass::kPrivate);
-    auto* workgroup = Global("w", ty.i32(), ast::StorageClass::kWorkgroup);
-    auto* uniform = Global("ub", ty.Of(buf), ast::StorageClass::kUniform,
-                           ast::AttributeList{
-                               create<ast::BindingAttribute>(0),
-                               create<ast::GroupAttribute>(0),
-                           });
-    auto* storage = Global("sb", ty.Of(buf), ast::StorageClass::kStorage,
-                           ast::AttributeList{
-                               create<ast::BindingAttribute>(1),
-                               create<ast::GroupAttribute>(0),
-                           });
-    auto* handle = Global("h", ty.depth_texture(ast::TextureDimension::k2d),
-                          ast::AttributeList{
-                              create<ast::BindingAttribute>(2),
-                              create<ast::GroupAttribute>(0),
-                          });
+    auto* private_ = GlobalVar("p", ty.i32(), ast::StorageClass::kPrivate);
+    auto* workgroup = GlobalVar("w", ty.i32(), ast::StorageClass::kWorkgroup);
+    auto* uniform = GlobalVar("ub", ty.Of(buf), ast::StorageClass::kUniform,
+                              ast::AttributeList{
+                                  create<ast::BindingAttribute>(0),
+                                  create<ast::GroupAttribute>(0),
+                              });
+    auto* storage = GlobalVar("sb", ty.Of(buf), ast::StorageClass::kStorage,
+                              ast::AttributeList{
+                                  create<ast::BindingAttribute>(1),
+                                  create<ast::GroupAttribute>(0),
+                              });
+    auto* handle = GlobalVar("h", ty.depth_texture(ast::TextureDimension::k2d),
+                             ast::AttributeList{
+                                 create<ast::BindingAttribute>(2),
+                                 create<ast::GroupAttribute>(0),
+                             });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -664,11 +664,12 @@ TEST_F(ResolverVariableTest, GlobalVar_ExplicitStorageClass) {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
     auto* buf = Structure("S", {Member("m", ty.i32())});
-    auto* storage = Global("sb", ty.Of(buf), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                           ast::AttributeList{
-                               create<ast::BindingAttribute>(1),
-                               create<ast::GroupAttribute>(0),
-                           });
+    auto* storage =
+        GlobalVar("sb", ty.Of(buf), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+                  ast::AttributeList{
+                      create<ast::BindingAttribute>(1),
+                      create<ast::GroupAttribute>(0),
+                  });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -704,7 +705,7 @@ TEST_F(ResolverVariableTest, Param_ShadowsGlobalVar) {
     // fn F(a : bool) {
     // }
 
-    auto* g = Global("a", ty.i32(), ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
     auto* p = Param("a", ty.bool_());
     Func("F", {p}, ty.void_(), {});
 

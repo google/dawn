@@ -707,11 +707,11 @@ TEST_P(VariableAttributeTest, IsValid) {
     auto& params = GetParam();
 
     if (IsBindingAttribute(params.kind)) {
-        Global("a", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone, nullptr,
-               createAttributes(Source{{12, 34}}, *this, params.kind));
+        GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone, nullptr,
+                  createAttributes(Source{{12, 34}}, *this, params.kind));
     } else {
-        Global("a", ty.f32(), ast::StorageClass::kPrivate, nullptr,
-               createAttributes(Source{{12, 34}}, *this, params.kind));
+        GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate, nullptr,
+                  createAttributes(Source{{12, 34}}, *this, params.kind));
     }
 
     WrapInFunction();
@@ -743,12 +743,12 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                          TestParams{AttributeKind::kBindingAndGroup, true}));
 
 TEST_F(VariableAttributeTest, DuplicateAttribute) {
-    Global("a", ty.sampler(ast::SamplerKind::kSampler),
-           ast::AttributeList{
-               create<ast::BindingAttribute>(Source{{12, 34}}, 2),
-               create<ast::GroupAttribute>(2),
-               create<ast::BindingAttribute>(Source{{56, 78}}, 3),
-           });
+    GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler),
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(Source{{12, 34}}, 2),
+                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(Source{{56, 78}}, 3),
+              });
 
     WrapInFunction();
 
@@ -774,8 +774,7 @@ using ConstantAttributeTest = TestWithParams;
 TEST_P(ConstantAttributeTest, IsValid) {
     auto& params = GetParam();
 
-    GlobalLet("a", ty.f32(), Expr(1.23_f),
-                createAttributes(Source{{12, 34}}, *this, params.kind));
+    GlobalLet("a", ty.f32(), Expr(1.23_f), createAttributes(Source{{12, 34}}, *this, params.kind));
 
     WrapInFunction();
 
@@ -806,10 +805,10 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 
 TEST_F(ConstantAttributeTest, DuplicateAttribute) {
     GlobalLet("a", ty.f32(), Expr(1.23_f),
-                ast::AttributeList{
-                    create<ast::IdAttribute>(Source{{12, 34}}, 0),
-                    create<ast::IdAttribute>(Source{{56, 78}}, 1),
-                });
+              ast::AttributeList{
+                  create<ast::IdAttribute>(Source{{12, 34}}, 0),
+                  create<ast::IdAttribute>(Source{{56, 78}}, 1),
+              });
 
     WrapInFunction();
 
@@ -853,10 +852,10 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 
 TEST_F(OverrideAttributeTest, DuplicateAttribute) {
     GlobalLet("a", ty.f32(), Expr(1.23_f),
-                ast::AttributeList{
-                    create<ast::IdAttribute>(Source{{12, 34}}, 0),
-                    create<ast::IdAttribute>(Source{{56, 78}}, 1),
-                });
+              ast::AttributeList{
+                  create<ast::IdAttribute>(Source{{12, 34}}, 0),
+                  create<ast::IdAttribute>(Source{{56, 78}}, 1),
+              });
 
     WrapInFunction();
 
@@ -897,7 +896,7 @@ TEST_P(ArrayStrideTest, All) {
 
     auto* arr = ty.array(Source{{12, 34}}, el_ty, 4_u, params.stride);
 
-    Global("myarray", arr, ast::StorageClass::kPrivate);
+    GlobalVar("myarray", arr, ast::StorageClass::kPrivate);
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -980,7 +979,7 @@ TEST_F(ArrayStrideTest, DuplicateAttribute) {
                              create<ast::StrideAttribute>(Source{{56, 78}}, 4_i),
                          });
 
-    Global("myarray", arr, ast::StorageClass::kPrivate);
+    GlobalVar("myarray", arr, ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -997,7 +996,7 @@ namespace {
 using ResourceAttributeTest = ResolverTest;
 TEST_F(ResourceAttributeTest, UniformBufferMissingBinding) {
     auto* s = Structure("S", {Member("x", ty.i32())});
-    Global(Source{{12, 34}}, "G", ty.Of(s), ast::StorageClass::kUniform);
+    GlobalVar(Source{{12, 34}}, "G", ty.Of(s), ast::StorageClass::kUniform);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1006,7 +1005,7 @@ TEST_F(ResourceAttributeTest, UniformBufferMissingBinding) {
 
 TEST_F(ResourceAttributeTest, StorageBufferMissingBinding) {
     auto* s = Structure("S", {Member("x", ty.i32())});
-    Global(Source{{12, 34}}, "G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead);
+    GlobalVar(Source{{12, 34}}, "G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1014,8 +1013,8 @@ TEST_F(ResourceAttributeTest, StorageBufferMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, TextureMissingBinding) {
-    Global(Source{{12, 34}}, "G", ty.depth_texture(ast::TextureDimension::k2d),
-           ast::StorageClass::kNone);
+    GlobalVar(Source{{12, 34}}, "G", ty.depth_texture(ast::TextureDimension::k2d),
+              ast::StorageClass::kNone);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1023,7 +1022,8 @@ TEST_F(ResourceAttributeTest, TextureMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, SamplerMissingBinding) {
-    Global(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone);
+    GlobalVar(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler),
+              ast::StorageClass::kNone);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1031,10 +1031,11 @@ TEST_F(ResourceAttributeTest, SamplerMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPairMissingBinding) {
-    Global(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone,
-           ast::AttributeList{
-               create<ast::GroupAttribute>(1),
-           });
+    GlobalVar(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler),
+              ast::StorageClass::kNone,
+              ast::AttributeList{
+                  create<ast::GroupAttribute>(1),
+              });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1042,10 +1043,11 @@ TEST_F(ResourceAttributeTest, BindingPairMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPairMissingGroup) {
-    Global(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-           });
+    GlobalVar(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler),
+              ast::StorageClass::kNone,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+              });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1053,18 +1055,18 @@ TEST_F(ResourceAttributeTest, BindingPairMissingGroup) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByEntryPoint) {
-    Global(Source{{12, 34}}, "A", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-           ast::StorageClass::kNone,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
-    Global(Source{{56, 78}}, "B", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-           ast::StorageClass::kNone,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar(Source{{12, 34}}, "A", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+              ast::StorageClass::kNone,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
+    GlobalVar(Source{{56, 78}}, "B", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+              ast::StorageClass::kNone,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
 
     Func("F", {}, ty.void_(),
          {
@@ -1085,18 +1087,18 @@ TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByEntryPoint) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByDifferentEntryPoints) {
-    Global(Source{{12, 34}}, "A", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-           ast::StorageClass::kNone,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
-    Global(Source{{56, 78}}, "B", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-           ast::StorageClass::kNone,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar(Source{{12, 34}}, "A", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+              ast::StorageClass::kNone,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
+    GlobalVar(Source{{56, 78}}, "B", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+              ast::StorageClass::kNone,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
 
     Func("F_A", {}, ty.void_(),
          {
@@ -1119,11 +1121,11 @@ TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByDifferentEntryPoints) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPointOnNonResource) {
-    Global(Source{{12, 34}}, "G", ty.f32(), ast::StorageClass::kPrivate,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar(Source{{12, 34}}, "G", ty.f32(), ast::StorageClass::kPrivate,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

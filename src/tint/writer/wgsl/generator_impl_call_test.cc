@@ -42,8 +42,8 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
              Param(Sym(), ty.f32()),
          },
          ty.f32(), {Return(1.23_f)});
-    Global("param1", ty.f32(), ast::StorageClass::kPrivate);
-    Global("param2", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("param1", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("param2", ty.f32(), ast::StorageClass::kPrivate);
 
     auto* call = Call("my_func", "param1", "param2");
     WrapInFunction(call);
@@ -62,8 +62,8 @@ TEST_F(WgslGeneratorImplTest, EmitStatement_Call) {
              Param(Sym(), ty.f32()),
          },
          ty.void_(), ast::StatementList{}, ast::AttributeList{});
-    Global("param1", ty.f32(), ast::StorageClass::kPrivate);
-    Global("param2", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("param1", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("param2", ty.f32(), ast::StorageClass::kPrivate);
 
     auto* call = Call("my_func", "param1", "param2");
     auto* stmt = CallStmt(call);

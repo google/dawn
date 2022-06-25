@@ -20,8 +20,8 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Assign) {
-    auto* lhs = Global("lhs", ty.i32(), ast::StorageClass::kPrivate);
-    auto* rhs = Global("rhs", ty.i32(), ast::StorageClass::kPrivate);
+    auto* lhs = GlobalVar("lhs", ty.i32(), ast::StorageClass::kPrivate);
+    auto* rhs = GlobalVar("rhs", ty.i32(), ast::StorageClass::kPrivate);
     auto* assign = Assign(lhs, rhs);
     WrapInFunction(assign);
 

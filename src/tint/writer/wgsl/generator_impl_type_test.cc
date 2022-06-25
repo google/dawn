@@ -420,11 +420,11 @@ TEST_P(WgslGenerator_StorageTextureTest, EmitType_StorageTexture) {
     auto param = GetParam();
 
     auto* t = ty.storage_texture(param.dim, param.fmt, param.access);
-    Global("g", t,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(1),
-               create<ast::GroupAttribute>(2),
-           });
+    GlobalVar("g", t,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(1),
+                  create<ast::GroupAttribute>(2),
+              });
 
     GeneratorImpl& gen = Build();
 

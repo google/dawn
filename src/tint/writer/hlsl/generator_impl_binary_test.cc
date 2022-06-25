@@ -50,8 +50,8 @@ TEST_P(HlslBinaryTest, Emit_f32) {
         return;
     }
 
-    Global("left", ty.f32(), ast::StorageClass::kPrivate);
-    Global("right", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("left", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("right", ty.f32(), ast::StorageClass::kPrivate);
 
     auto* left = Expr("left");
     auto* right = Expr("right");
@@ -73,8 +73,8 @@ TEST_P(HlslBinaryTest, Emit_u32) {
         return;
     }
 
-    Global("left", ty.u32(), ast::StorageClass::kPrivate);
-    Global("right", ty.u32(), ast::StorageClass::kPrivate);
+    GlobalVar("left", ty.u32(), ast::StorageClass::kPrivate);
+    GlobalVar("right", ty.u32(), ast::StorageClass::kPrivate);
 
     auto* left = Expr("left");
     auto* right = Expr("right");
@@ -101,8 +101,8 @@ TEST_P(HlslBinaryTest, Emit_i32) {
         return;
     }
 
-    Global("left", ty.i32(), ast::StorageClass::kPrivate);
-    Global("right", ty.i32(), ast::StorageClass::kPrivate);
+    GlobalVar("left", ty.i32(), ast::StorageClass::kPrivate);
+    GlobalVar("right", ty.i32(), ast::StorageClass::kPrivate);
 
     auto* left = Expr("left");
     auto* right = Expr("right");
@@ -171,7 +171,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
-    Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
     auto* lhs = Expr("mat");
     auto* rhs = Expr(1_f);
 
@@ -186,7 +186,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
-    Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
     auto* lhs = Expr(1_f);
     auto* rhs = Expr("mat");
 
@@ -201,7 +201,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
-    Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
     auto* lhs = Expr("mat");
     auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
 
@@ -216,7 +216,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
-    Global("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
     auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
     auto* rhs = Expr("mat");
 
@@ -231,8 +231,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {
-    Global("lhs", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
-    Global("rhs", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("lhs", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("rhs", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("lhs"), Expr("rhs"));
     WrapInFunction(expr);
@@ -245,8 +245,8 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Logical_And) {
-    Global("a", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("b", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("b", ty.bool_(), ast::StorageClass::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b"));
     WrapInFunction(expr);
@@ -265,10 +265,10 @@ if (tint_tmp) {
 
 TEST_F(HlslGeneratorImplTest_Binary, Logical_Multi) {
     // (a && b) || (c || d)
-    Global("a", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("b", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("c", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("d", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("b", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("c", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("d", ty.bool_(), ast::StorageClass::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(
         ast::BinaryOp::kLogicalOr,
@@ -297,8 +297,8 @@ if (!tint_tmp) {
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Logical_Or) {
-    Global("a", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("b", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("b", ty.bool_(), ast::StorageClass::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("a"), Expr("b"));
     WrapInFunction(expr);
@@ -324,9 +324,9 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
     //   return 3i;
     // }
 
-    Global("a", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("b", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("c", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("b", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("c", ty.bool_(), ast::StorageClass::kPrivate);
 
     auto* expr =
         If(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
@@ -361,9 +361,9 @@ if ((tint_tmp)) {
 TEST_F(HlslGeneratorImplTest_Binary, Return_WithLogical) {
     // return (a && b) || c;
 
-    Global("a", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("b", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("c", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("b", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("c", ty.bool_(), ast::StorageClass::kPrivate);
 
     auto* expr = Return(create<ast::BinaryExpression>(
         ast::BinaryOp::kLogicalOr,
@@ -389,10 +389,10 @@ return (tint_tmp);
 TEST_F(HlslGeneratorImplTest_Binary, Assign_WithLogical) {
     // a = (b || c) && d;
 
-    Global("a", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("b", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("c", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("d", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("b", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("c", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("d", ty.bool_(), ast::StorageClass::kPrivate);
 
     auto* expr =
         Assign(Expr("a"),
@@ -420,9 +420,9 @@ a = (tint_tmp);
 TEST_F(HlslGeneratorImplTest_Binary, Decl_WithLogical) {
     // var a : bool = (b && c) || d;
 
-    Global("b", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("c", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("d", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("b", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("c", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("d", ty.bool_(), ast::StorageClass::kPrivate);
 
     auto* var =
         Var("a", ty.bool_(), ast::StorageClass::kNone,
@@ -459,10 +459,10 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
              Param(Sym(), ty.bool_()),
          },
          ty.void_(), ast::StatementList{}, ast::AttributeList{});
-    Global("a", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("b", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("c", ty.bool_(), ast::StorageClass::kPrivate);
-    Global("d", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("b", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("c", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("d", ty.bool_(), ast::StorageClass::kPrivate);
 
     ast::ExpressionList params;
     params.push_back(

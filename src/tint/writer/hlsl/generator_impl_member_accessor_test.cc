@@ -91,11 +91,11 @@ class HlslGeneratorImplTest_MemberAccessorBase : public BASE {
 
         auto* s = b.Structure("Data", members);
 
-        b.Global("data", b.ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                 ast::AttributeList{
-                     b.create<ast::BindingAttribute>(0),
-                     b.create<ast::GroupAttribute>(1),
-                 });
+        b.GlobalVar("data", b.ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+                    ast::AttributeList{
+                        b.create<ast::BindingAttribute>(0),
+                        b.create<ast::GroupAttribute>(1),
+                    });
     }
 
     void SetupFunction(ast::StatementList statements) {
@@ -115,7 +115,7 @@ using HlslGeneratorImplTest_MemberAccessorWithParam =
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
     auto* s = Structure("Data", {Member("mem", ty.f32())});
-    Global("str", ty.Of(s), ast::StorageClass::kPrivate);
+    GlobalVar("str", ty.Of(s), ast::StorageClass::kPrivate);
 
     auto* expr = MemberAccessor("str", "mem");
     WrapInFunction(Var("expr", ty.f32(), ast::StorageClass::kNone, expr));

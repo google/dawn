@@ -128,7 +128,7 @@ class ProgramBuilder {
         traits::EnableIfIsNotType<traits::Decay<traits::NthTypeOf<0, TYPES..., void>>, Source>;
 
     /// VarOptionals is a helper for accepting a number of optional, extra
-    /// arguments for Var() and Global().
+    /// arguments for Var() and GlobalVar().
     struct VarOptionals {
         template <typename... ARGS>
         explicit VarOptionals(ARGS&&... args) {
@@ -1429,7 +1429,7 @@ class ProgramBuilder {
     /// @returns a new `ast::Var`, which is automatically registered as a global variable with the
     /// ast::Module.
     template <typename NAME, typename... OPTIONAL, typename = DisableIfSource<NAME>>
-    const ast::Var* Global(NAME&& name, const ast::Type* type, OPTIONAL&&... optional) {
+    const ast::Var* GlobalVar(NAME&& name, const ast::Type* type, OPTIONAL&&... optional) {
         auto* var = Var(std::forward<NAME>(name), type, std::forward<OPTIONAL>(optional)...);
         AST().AddGlobalVariable(var);
         return var;
@@ -1449,10 +1449,10 @@ class ProgramBuilder {
     /// @returns a new `ast::Var`, which is automatically registered as a global variable with the
     /// ast::Module.
     template <typename NAME, typename... OPTIONAL>
-    const ast::Var* Global(const Source& source,
-                           NAME&& name,
-                           const ast::Type* type,
-                           OPTIONAL&&... optional) {
+    const ast::Var* GlobalVar(const Source& source,
+                              NAME&& name,
+                              const ast::Type* type,
+                              OPTIONAL&&... optional) {
         auto* var =
             Var(source, std::forward<NAME>(name), type, std::forward<OPTIONAL>(optional)...);
         AST().AddGlobalVariable(var);

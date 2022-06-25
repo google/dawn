@@ -316,7 +316,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_Alias) {
 
 TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScope) {
     auto* init = Expr(2_i);
-    Global("my_var", ty.i32(), ast::StorageClass::kPrivate, init);
+    GlobalVar("my_var", ty.i32(), ast::StorageClass::kPrivate, init);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -424,7 +424,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
 
 TEST_F(ResolverTest, ArraySize_UnsignedLiteral) {
     // var<private> a : array<f32, 10u>;
-    auto* a = Global("a", ty.array(ty.f32(), Expr(10_u)), ast::StorageClass::kPrivate);
+    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr(10_u)), ast::StorageClass::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -437,7 +437,7 @@ TEST_F(ResolverTest, ArraySize_UnsignedLiteral) {
 
 TEST_F(ResolverTest, ArraySize_SignedLiteral) {
     // var<private> a : array<f32, 10i>;
-    auto* a = Global("a", ty.array(ty.f32(), Expr(10_i)), ast::StorageClass::kPrivate);
+    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr(10_i)), ast::StorageClass::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -452,7 +452,7 @@ TEST_F(ResolverTest, ArraySize_UnsignedConstant) {
     // let size = 0u;
     // var<private> a : array<f32, size>;
     GlobalLet("size", nullptr, Expr(10_u));
-    auto* a = Global("a", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kPrivate);
+    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -467,7 +467,7 @@ TEST_F(ResolverTest, ArraySize_SignedConstant) {
     // let size = 0;
     // var<private> a : array<f32, size>;
     GlobalLet("size", nullptr, Expr(10_i));
-    auto* a = Global("a", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kPrivate);
+    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -479,7 +479,7 @@ TEST_F(ResolverTest, ArraySize_SignedConstant) {
 }
 
 TEST_F(ResolverTest, Expr_Bitcast) {
-    Global("name", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("name", ty.f32(), ast::StorageClass::kPrivate);
 
     auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr("name"));
     WrapInFunction(bitcast);
@@ -542,7 +542,7 @@ TEST_F(ResolverTest, Expr_Call_Builtin) {
 }
 
 TEST_F(ResolverTest, Expr_Cast) {
-    Global("name", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("name", ty.f32(), ast::StorageClass::kPrivate);
 
     auto* cast = Construct(ty.f32(), "name");
     WrapInFunction(cast);
@@ -600,7 +600,7 @@ TEST_F(ResolverTest, Expr_Constructor_Type_Vec4) {
 }
 
 TEST_F(ResolverTest, Expr_Identifier_GlobalVariable) {
-    auto* my_var = Global("my_var", ty.f32(), ast::StorageClass::kPrivate);
+    auto* my_var = GlobalVar("my_var", ty.f32(), ast::StorageClass::kPrivate);
 
     auto* ident = Expr("my_var");
     WrapInFunction(ident);
@@ -776,13 +776,14 @@ TEST_F(ResolverTest, Function_Parameters) {
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
     auto* s = Structure("S", {Member("m", ty.u32())});
 
-    auto* sb_var = Global("sb_var", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                          ast::AttributeList{
-                              create<ast::BindingAttribute>(0),
-                              create<ast::GroupAttribute>(0),
-                          });
-    auto* wg_var = Global("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
-    auto* priv_var = Global("priv_var", ty.f32(), ast::StorageClass::kPrivate);
+    auto* sb_var =
+        GlobalVar("sb_var", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+                  ast::AttributeList{
+                      create<ast::BindingAttribute>(0),
+                      create<ast::GroupAttribute>(0),
+                  });
+    auto* wg_var = GlobalVar("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
+    auto* priv_var = GlobalVar("priv_var", ty.f32(), ast::StorageClass::kPrivate);
 
     auto* func = Func("my_func", {}, ty.void_(),
                       {
@@ -808,13 +809,14 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
     auto* s = Structure("S", {Member("m", ty.u32())});
 
-    auto* sb_var = Global("sb_var", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                          ast::AttributeList{
-                              create<ast::BindingAttribute>(0),
-                              create<ast::GroupAttribute>(0),
-                          });
-    auto* wg_var = Global("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
-    auto* priv_var = Global("priv_var", ty.f32(), ast::StorageClass::kPrivate);
+    auto* sb_var =
+        GlobalVar("sb_var", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+                  ast::AttributeList{
+                      create<ast::BindingAttribute>(0),
+                      create<ast::GroupAttribute>(0),
+                  });
+    auto* wg_var = GlobalVar("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
+    auto* priv_var = GlobalVar("priv_var", ty.f32(), ast::StorageClass::kPrivate);
 
     Func("my_func", {}, ty.f32(),
          {Assign("wg_var", "wg_var"), Assign("sb_var", "sb_var"), Assign("priv_var", "priv_var"),
@@ -1086,7 +1088,7 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Mixed) {
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
     auto* st =
         Structure("S", {Member("first_member", ty.i32()), Member("second_member", ty.f32())});
-    Global("my_struct", ty.Of(st), ast::StorageClass::kPrivate);
+    GlobalVar("my_struct", ty.Of(st), ast::StorageClass::kPrivate);
 
     auto* mem = MemberAccessor("my_struct", "second_member");
     WrapInFunction(mem);
@@ -1110,7 +1112,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
     auto* st =
         Structure("S", {Member("first_member", ty.i32()), Member("second_member", ty.f32())});
     auto* alias = Alias("alias", ty.Of(st));
-    Global("my_struct", ty.Of(alias), ast::StorageClass::kPrivate);
+    GlobalVar("my_struct", ty.Of(alias), ast::StorageClass::kPrivate);
 
     auto* mem = MemberAccessor("my_struct", "second_member");
     WrapInFunction(mem);
@@ -1130,7 +1132,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
-    Global("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
 
     auto* mem = MemberAccessor("my_vec", "xzyw");
     WrapInFunction(mem);
@@ -1148,7 +1150,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
-    Global("my_vec", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_vec", ty.vec3<f32>(), ast::StorageClass::kPrivate);
 
     auto* mem = MemberAccessor("my_vec", "b");
     WrapInFunction(mem);
@@ -1184,7 +1186,7 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
 
     auto* stB = Structure("B", {Member("foo", ty.vec4<f32>())});
     auto* stA = Structure("A", {Member("mem", ty.array(ty.Of(stB), 3_i))});
-    Global("c", ty.Of(stA), ast::StorageClass::kPrivate);
+    GlobalVar("c", ty.Of(stA), ast::StorageClass::kPrivate);
 
     auto* mem =
         MemberAccessor(MemberAccessor(IndexAccessor(MemberAccessor("c", "mem"), 0_i), "foo"), "yx");
@@ -1202,7 +1204,7 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
 TEST_F(ResolverTest, Expr_MemberAccessor_InBinaryOp) {
     auto* st =
         Structure("S", {Member("first_member", ty.f32()), Member("second_member", ty.f32())});
-    Global("my_struct", ty.Of(st), ast::StorageClass::kPrivate);
+    GlobalVar("my_struct", ty.Of(st), ast::StorageClass::kPrivate);
 
     auto* expr = Add(MemberAccessor("my_struct", "first_member"),
                      MemberAccessor("my_struct", "second_member"));
@@ -1505,8 +1507,8 @@ TEST_P(Expr_Binary_Test_Valid, All) {
     ss << FriendlyName(lhs_type) << " " << params.op << " " << FriendlyName(rhs_type);
     SCOPED_TRACE(ss.str());
 
-    Global("lhs", lhs_type, ast::StorageClass::kPrivate);
-    Global("rhs", rhs_type, ast::StorageClass::kPrivate);
+    GlobalVar("lhs", lhs_type, ast::StorageClass::kPrivate);
+    GlobalVar("rhs", rhs_type, ast::StorageClass::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(params.op, Expr("lhs"), Expr("rhs"));
     WrapInFunction(expr);
@@ -1540,8 +1542,8 @@ TEST_P(Expr_Binary_Test_WithAlias_Valid, All) {
        << FriendlyName(rhs_type);
     SCOPED_TRACE(ss.str());
 
-    Global("lhs", lhs_type, ast::StorageClass::kPrivate);
-    Global("rhs", rhs_type, ast::StorageClass::kPrivate);
+    GlobalVar("lhs", lhs_type, ast::StorageClass::kPrivate);
+    GlobalVar("rhs", rhs_type, ast::StorageClass::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(params.op, Expr("lhs"), Expr("rhs"));
     WrapInFunction(expr);
@@ -1586,8 +1588,8 @@ TEST_P(Expr_Binary_Test_Invalid, All) {
     ss << FriendlyName(lhs_type) << " " << op << " " << FriendlyName(rhs_type);
     SCOPED_TRACE(ss.str());
 
-    Global("lhs", lhs_type, ast::StorageClass::kPrivate);
-    Global("rhs", rhs_type, ast::StorageClass::kPrivate);
+    GlobalVar("lhs", lhs_type, ast::StorageClass::kPrivate);
+    GlobalVar("rhs", rhs_type, ast::StorageClass::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(Source{{12, 34}}, op, Expr("lhs"), Expr("rhs"));
     WrapInFunction(expr);
@@ -1626,8 +1628,8 @@ TEST_P(Expr_Binary_Test_Invalid_VectorMatrixMultiply, All) {
         is_valid_expr = vec_size == mat_cols;
     }
 
-    Global("lhs", lhs_type, ast::StorageClass::kPrivate);
-    Global("rhs", rhs_type, ast::StorageClass::kPrivate);
+    GlobalVar("lhs", lhs_type, ast::StorageClass::kPrivate);
+    GlobalVar("rhs", rhs_type, ast::StorageClass::kPrivate);
 
     auto* expr = Mul(Source{{12, 34}}, Expr("lhs"), Expr("rhs"));
     WrapInFunction(expr);
@@ -1663,8 +1665,8 @@ TEST_P(Expr_Binary_Test_Invalid_MatrixMatrixMultiply, All) {
     auto* col = create<sem::Vector>(f32, lhs_mat_rows);
     auto* result_type = create<sem::Matrix>(col, rhs_mat_cols);
 
-    Global("lhs", lhs_type, ast::StorageClass::kPrivate);
-    Global("rhs", rhs_type, ast::StorageClass::kPrivate);
+    GlobalVar("lhs", lhs_type, ast::StorageClass::kPrivate);
+    GlobalVar("rhs", rhs_type, ast::StorageClass::kPrivate);
 
     auto* expr = Mul(Source{{12, 34}}, Expr("lhs"), Expr("rhs"));
     WrapInFunction(expr);
@@ -1692,11 +1694,11 @@ TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
     auto op = GetParam();
 
     if (op == ast::UnaryOp::kNot) {
-        Global("ident", ty.vec4<bool>(), ast::StorageClass::kPrivate);
+        GlobalVar("ident", ty.vec4<bool>(), ast::StorageClass::kPrivate);
     } else if (op == ast::UnaryOp::kNegation || op == ast::UnaryOp::kComplement) {
-        Global("ident", ty.vec4<i32>(), ast::StorageClass::kPrivate);
+        GlobalVar("ident", ty.vec4<i32>(), ast::StorageClass::kPrivate);
     } else {
-        Global("ident", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+        GlobalVar("ident", ty.vec4<f32>(), ast::StorageClass::kPrivate);
     }
     auto* der = create<ast::UnaryOpExpression>(op, Expr("ident"));
     WrapInFunction(der);
@@ -1733,11 +1735,11 @@ TEST_F(ResolverTest, StorageClass_SetsIfMissing) {
 
 TEST_F(ResolverTest, StorageClass_SetForSampler) {
     auto* t = ty.sampler(ast::SamplerKind::kSampler);
-    auto* var = Global("var", t,
-                       ast::AttributeList{
-                           create<ast::BindingAttribute>(0),
-                           create<ast::GroupAttribute>(0),
-                       });
+    auto* var = GlobalVar("var", t,
+                          ast::AttributeList{
+                              create<ast::BindingAttribute>(0),
+                              create<ast::GroupAttribute>(0),
+                          });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1746,11 +1748,11 @@ TEST_F(ResolverTest, StorageClass_SetForSampler) {
 
 TEST_F(ResolverTest, StorageClass_SetForTexture) {
     auto* t = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
-    auto* var = Global("var", t,
-                       ast::AttributeList{
-                           create<ast::BindingAttribute>(0),
-                           create<ast::GroupAttribute>(0),
-                       });
+    auto* var = GlobalVar("var", t,
+                          ast::AttributeList{
+                              create<ast::BindingAttribute>(0),
+                              create<ast::GroupAttribute>(0),
+                          });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1771,11 +1773,11 @@ TEST_F(ResolverTest, Access_SetForStorageBuffer) {
     // struct S { x : i32 };
     // var<storage> g : S;
     auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.i32())});
-    auto* var = Global(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage,
-                       ast::AttributeList{
-                           create<ast::BindingAttribute>(0),
-                           create<ast::GroupAttribute>(0),
-                       });
+    auto* var = GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage,
+                          ast::AttributeList{
+                              create<ast::BindingAttribute>(0),
+                              create<ast::GroupAttribute>(0),
+                          });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1785,10 +1787,10 @@ TEST_F(ResolverTest, Access_SetForStorageBuffer) {
 TEST_F(ResolverTest, BindingPoint_SetForResources) {
     // @group(1) @binding(2) var s1 : sampler;
     // @group(3) @binding(4) var s2 : sampler;
-    auto* s1 = Global(
+    auto* s1 = GlobalVar(
         Sym(), ty.sampler(ast::SamplerKind::kSampler),
         ast::AttributeList{create<ast::GroupAttribute>(1), create<ast::BindingAttribute>(2)});
-    auto* s2 = Global(
+    auto* s2 = GlobalVar(
         Sym(), ty.sampler(ast::SamplerKind::kSampler),
         ast::AttributeList{create<ast::GroupAttribute>(3), create<ast::BindingAttribute>(4)});
 
@@ -1811,11 +1813,11 @@ TEST_F(ResolverTest, Function_EntryPoints_StageAttribute) {
     // ep_1 -> {}
     // ep_2 -> {}
 
-    Global("first", ty.f32(), ast::StorageClass::kPrivate);
-    Global("second", ty.f32(), ast::StorageClass::kPrivate);
-    Global("call_a", ty.f32(), ast::StorageClass::kPrivate);
-    Global("call_b", ty.f32(), ast::StorageClass::kPrivate);
-    Global("call_c", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("first", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("second", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("call_a", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("call_b", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("call_c", ty.f32(), ast::StorageClass::kPrivate);
 
     auto* func_b = Func("b", {}, ty.f32(),
                         {
@@ -1955,8 +1957,8 @@ TEST_F(ResolverTest, ASTNodeReachedTwice) {
         {
             ProgramBuilder b;
             auto* expr = b.Expr(1_i);
-            b.Global("a", b.ty.i32(), ast::StorageClass::kPrivate, expr);
-            b.Global("b", b.ty.i32(), ast::StorageClass::kPrivate, expr);
+            b.GlobalVar("a", b.ty.i32(), ast::StorageClass::kPrivate, expr);
+            b.GlobalVar("b", b.ty.i32(), ast::StorageClass::kPrivate, expr);
             Resolver(&b).Resolve();
         },
         "internal compiler error: AST node 'tint::ast::IntLiteralExpression' was encountered twice "
@@ -1964,7 +1966,7 @@ TEST_F(ResolverTest, ASTNodeReachedTwice) {
 }
 
 TEST_F(ResolverTest, UnaryOp_Not) {
-    Global("ident", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("ident", ty.vec4<f32>(), ast::StorageClass::kPrivate);
     auto* der = create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, Expr(Source{{12, 34}}, "ident"));
     WrapInFunction(der);
 
@@ -1973,7 +1975,7 @@ TEST_F(ResolverTest, UnaryOp_Not) {
 }
 
 TEST_F(ResolverTest, UnaryOp_Complement) {
-    Global("ident", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("ident", ty.vec4<f32>(), ast::StorageClass::kPrivate);
     auto* der =
         create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement, Expr(Source{{12, 34}}, "ident"));
     WrapInFunction(der);
@@ -1983,7 +1985,7 @@ TEST_F(ResolverTest, UnaryOp_Complement) {
 }
 
 TEST_F(ResolverTest, UnaryOp_Negation) {
-    Global("ident", ty.u32(), ast::StorageClass::kPrivate);
+    GlobalVar("ident", ty.u32(), ast::StorageClass::kPrivate);
     auto* der =
         create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(Source{{12, 34}}, "ident"));
     WrapInFunction(der);
@@ -1993,8 +1995,8 @@ TEST_F(ResolverTest, UnaryOp_Negation) {
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureSample) {
-    Global("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), GroupAndBinding(1, 1));
-    Global("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(1, 2));
+    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), GroupAndBinding(1, 1));
+    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(1, 2));
 
     auto* call = CallStmt(Call("textureSample", "t", "s", vec2<f32>(1_f, 2_f)));
     const ast::Function* f =
@@ -2010,8 +2012,8 @@ TEST_F(ResolverTest, TextureSampler_TextureSample) {
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureSampleInFunction) {
-    Global("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), GroupAndBinding(1, 1));
-    Global("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(1, 2));
+    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), GroupAndBinding(1, 1));
+    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(1, 2));
 
     auto* inner_call = CallStmt(Call("textureSample", "t", "s", vec2<f32>(1_f, 2_f)));
     const ast::Function* inner_func = Func("inner_func", {}, ty.void_(), {inner_call});
@@ -2033,8 +2035,8 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleInFunction) {
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondSameVariables) {
-    Global("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), GroupAndBinding(1, 1));
-    Global("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(1, 2));
+    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), GroupAndBinding(1, 1));
+    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(1, 2));
 
     auto* inner_call_1 = CallStmt(Call("textureSample", "t", "s", vec2<f32>(1_f, 2_f)));
     const ast::Function* inner_func_1 = Func("inner_func_1", {}, ty.void_(), {inner_call_1});
@@ -2065,9 +2067,11 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondSameVariables) {
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondDifferentVariables) {
-    Global("t1", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), GroupAndBinding(1, 1));
-    Global("t2", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), GroupAndBinding(1, 2));
-    Global("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(1, 3));
+    GlobalVar("t1", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+              GroupAndBinding(1, 1));
+    GlobalVar("t2", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+              GroupAndBinding(1, 2));
+    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(1, 3));
 
     auto* inner_call_1 = CallStmt(Call("textureSample", "t1", "s", vec2<f32>(1_f, 2_f)));
     const ast::Function* inner_func_1 = Func("inner_func_1", {}, ty.void_(), {inner_call_1});
@@ -2100,7 +2104,7 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondDifferentVariabl
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureDimensions) {
-    Global("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), GroupAndBinding(1, 2));
+    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), GroupAndBinding(1, 2));
 
     auto* call = Call("textureDimensions", "t");
     const ast::Function* f = WrapInFunction(call);
@@ -2116,15 +2120,15 @@ TEST_F(ResolverTest, TextureSampler_TextureDimensions) {
 
 TEST_F(ResolverTest, ModuleDependencyOrderedDeclarations) {
     auto* f0 = Func("f0", {}, ty.void_(), {});
-    auto* v0 = Global("v0", ty.i32(), ast::StorageClass::kPrivate);
+    auto* v0 = GlobalVar("v0", ty.i32(), ast::StorageClass::kPrivate);
     auto* a0 = Alias("a0", ty.i32());
     auto* s0 = Structure("s0", {Member("m", ty.i32())});
     auto* f1 = Func("f1", {}, ty.void_(), {});
-    auto* v1 = Global("v1", ty.i32(), ast::StorageClass::kPrivate);
+    auto* v1 = GlobalVar("v1", ty.i32(), ast::StorageClass::kPrivate);
     auto* a1 = Alias("a1", ty.i32());
     auto* s1 = Structure("s1", {Member("m", ty.i32())});
     auto* f2 = Func("f2", {}, ty.void_(), {});
-    auto* v2 = Global("v2", ty.i32(), ast::StorageClass::kPrivate);
+    auto* v2 = GlobalVar("v2", ty.i32(), ast::StorageClass::kPrivate);
     auto* a2 = Alias("a2", ty.i32());
     auto* s2 = Structure("s2", {Member("m", ty.i32())});
 

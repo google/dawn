@@ -29,7 +29,7 @@ struct SideEffectsTest : ResolverTest {
     template <typename T>
     void MakeSideEffectFunc(const char* name) {
         auto global = Sym();
-        Global(global, ty.Of<T>(), ast::StorageClass::kPrivate);
+        GlobalVar(global, ty.Of<T>(), ast::StorageClass::kPrivate);
         auto local = Sym();
         Func(name, {}, ty.Of<T>(),
              {
@@ -42,7 +42,7 @@ struct SideEffectsTest : ResolverTest {
     template <typename MAKE_TYPE_FUNC>
     void MakeSideEffectFunc(const char* name, MAKE_TYPE_FUNC make_type) {
         auto global = Sym();
-        Global(global, make_type(), ast::StorageClass::kPrivate);
+        GlobalVar(global, make_type(), ast::StorageClass::kPrivate);
         auto local = Sym();
         Func(name, {}, make_type(),
              {
@@ -87,7 +87,7 @@ TEST_F(SideEffectsTest, VariableUser) {
 }
 
 TEST_F(SideEffectsTest, Call_Builtin_NoSE) {
-    Global("a", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate);
     auto* expr = Call("dpdx", "a");
     Func("f", {}, ty.void_(), {Ignore(expr)},
          {create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
@@ -113,7 +113,7 @@ TEST_F(SideEffectsTest, Call_Builtin_NoSE_WithSEArg) {
 }
 
 TEST_F(SideEffectsTest, Call_Builtin_SE) {
-    Global("a", ty.atomic(ty.i32()), ast::StorageClass::kWorkgroup);
+    GlobalVar("a", ty.atomic(ty.i32()), ast::StorageClass::kWorkgroup);
     auto* expr = Call("atomicAdd", AddressOf("a"), 1_i);
     WrapInFunction(expr);
 

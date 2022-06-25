@@ -25,7 +25,7 @@ namespace {
 struct ResolverAtomicTest : public resolver::TestHelper, public testing::Test {};
 
 TEST_F(ResolverAtomicTest, GlobalWorkgroupI32) {
-    auto* g = Global("a", ty.atomic(Source{{12, 34}}, ty.i32()), ast::StorageClass::kWorkgroup);
+    auto* g = GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.i32()), ast::StorageClass::kWorkgroup);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ASSERT_TRUE(TypeOf(g)->Is<sem::Reference>());
@@ -35,7 +35,7 @@ TEST_F(ResolverAtomicTest, GlobalWorkgroupI32) {
 }
 
 TEST_F(ResolverAtomicTest, GlobalWorkgroupU32) {
-    auto* g = Global("a", ty.atomic(Source{{12, 34}}, ty.u32()), ast::StorageClass::kWorkgroup);
+    auto* g = GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.u32()), ast::StorageClass::kWorkgroup);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ASSERT_TRUE(TypeOf(g)->Is<sem::Reference>());
@@ -46,11 +46,11 @@ TEST_F(ResolverAtomicTest, GlobalWorkgroupU32) {
 
 TEST_F(ResolverAtomicTest, GlobalStorageStruct) {
     auto* s = Structure("s", {Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
-    auto* g = Global("g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                     ast::AttributeList{
-                         create<ast::BindingAttribute>(0),
-                         create<ast::GroupAttribute>(0),
-                     });
+    auto* g = GlobalVar("g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+                        ast::AttributeList{
+                            create<ast::BindingAttribute>(0),
+                            create<ast::GroupAttribute>(0),
+                        });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ASSERT_TRUE(TypeOf(g)->Is<sem::Reference>());

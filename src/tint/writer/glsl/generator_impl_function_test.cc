@@ -349,11 +349,11 @@ tint_symbol_2 vert_main2() {
 
 TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_Uniform) {
     auto* ubo_ty = Structure("UBO", {Member("coord", ty.vec4<f32>())});
-    auto* ubo = Global("ubo", ty.Of(ubo_ty), ast::StorageClass::kUniform,
-                       ast::AttributeList{
-                           create<ast::BindingAttribute>(0),
-                           create<ast::GroupAttribute>(1),
-                       });
+    auto* ubo = GlobalVar("ubo", ty.Of(ubo_ty), ast::StorageClass::kUniform,
+                          ast::AttributeList{
+                              create<ast::BindingAttribute>(0),
+                              create<ast::GroupAttribute>(1),
+                          });
 
     Func("sub_func",
          {
@@ -403,11 +403,11 @@ void frag_main() {
 TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_UniformStruct) {
     auto* s = Structure("Uniforms", {Member("coord", ty.vec4<f32>())});
 
-    Global("uniforms", ty.Of(s), ast::StorageClass::kUniform,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(1),
-           });
+    GlobalVar("uniforms", ty.Of(s), ast::StorageClass::kUniform,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(1),
+              });
 
     auto* var = Var("v", ty.f32(), ast::StorageClass::kNone,
                     MemberAccessor(MemberAccessor("uniforms", "coord"), "x"));
@@ -448,11 +448,11 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_RW_Storage
                                     Member("b", ty.f32()),
                                 });
 
-    Global("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(1),
-           });
+    GlobalVar("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(1),
+              });
 
     auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("coord", "b"));
 
@@ -498,11 +498,11 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_RO_Storage
                                     Member("b", ty.f32()),
                                 });
 
-    Global("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(1),
-           });
+    GlobalVar("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(1),
+              });
 
     auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("coord", "b"));
 
@@ -549,11 +549,11 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_WO_Storage
                                     Member("b", ty.f32()),
                                 });
 
-    Global("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kWrite,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(1),
-           });
+    GlobalVar("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kWrite,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(1),
+              });
 
     Func("frag_main", {}, ty.void_(),
          {
@@ -597,11 +597,11 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_StorageBuf
                                     Member("b", ty.f32()),
                                 });
 
-    Global("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(1),
-           });
+    GlobalVar("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(1),
+              });
 
     Func("frag_main", {}, ty.void_(),
          {
@@ -641,11 +641,11 @@ void main() {
 
 TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_Called_By_EntryPoint_With_Uniform) {
     auto* s = Structure("S", {Member("x", ty.f32())});
-    Global("coord", ty.Of(s), ast::StorageClass::kUniform,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(1),
-           });
+    GlobalVar("coord", ty.Of(s), ast::StorageClass::kUniform,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(1),
+              });
 
     Func("sub_func", {Param("param", ty.f32())}, ty.f32(),
          {
@@ -690,11 +690,11 @@ void frag_main() {
 
 TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_Called_By_EntryPoint_With_StorageBuffer) {
     auto* s = Structure("S", {Member("x", ty.f32())});
-    Global("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(1),
-           });
+    GlobalVar("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(1),
+              });
 
     Func("sub_func", {Param("param", ty.f32())}, ty.f32(),
          {
@@ -922,11 +922,11 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Multiple_EntryPoint_With_Same_Module
 
     auto* s = Structure("Data", {Member("d", ty.f32())});
 
-    Global("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(0),
-           });
+    GlobalVar("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(0),
+              });
 
     {
         auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("data", "d"));

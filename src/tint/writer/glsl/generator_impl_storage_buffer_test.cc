@@ -35,11 +35,11 @@ void TestAlign(ProgramBuilder* ctx) {
                                       ctx->Member("dewey", ctx->ty.f32(), {ctx->MemberAlign(256)}),
                                       ctx->Member("louie", ctx->ty.f32(), {ctx->MemberAlign(256)}),
                                   });
-    ctx->Global("nephews", ctx->ty.Of(nephews), ast::StorageClass::kStorage,
-                ast::AttributeList{
-                    ctx->create<ast::BindingAttribute>(0),
-                    ctx->create<ast::GroupAttribute>(0),
-                });
+    ctx->GlobalVar("nephews", ctx->ty.Of(nephews), ast::StorageClass::kStorage,
+                   ast::AttributeList{
+                       ctx->create<ast::BindingAttribute>(0),
+                       ctx->create<ast::GroupAttribute>(0),
+                   });
 }
 
 TEST_F(GlslGeneratorImplTest_StorageBuffer, Align) {

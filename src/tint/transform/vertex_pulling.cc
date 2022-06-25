@@ -259,12 +259,12 @@ struct State {
                                });
         for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
             // The decorated variable with struct type
-            ctx.dst->Global(GetVertexBufferName(i), ctx.dst->ty.Of(struct_type),
-                            ast::StorageClass::kStorage, ast::Access::kRead,
-                            ast::AttributeList{
-                                ctx.dst->create<ast::BindingAttribute>(i),
-                                ctx.dst->create<ast::GroupAttribute>(cfg.pulling_group),
-                            });
+            ctx.dst->GlobalVar(GetVertexBufferName(i), ctx.dst->ty.Of(struct_type),
+                               ast::StorageClass::kStorage, ast::Access::kRead,
+                               ast::AttributeList{
+                                   ctx.dst->create<ast::BindingAttribute>(i),
+                                   ctx.dst->create<ast::GroupAttribute>(cfg.pulling_group),
+                               });
         }
     }
 

@@ -27,7 +27,7 @@ namespace {
 using HlslGeneratorImplTest_WorkgroupVar = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_WorkgroupVar, Basic) {
-    Global("wg", ty.f32(), ast::StorageClass::kWorkgroup);
+    GlobalVar("wg", ty.f32(), ast::StorageClass::kWorkgroup);
 
     Func("main", {}, ty.void_(), {Assign("wg", 1.2_f)},
          {
@@ -43,7 +43,7 @@ TEST_F(HlslGeneratorImplTest_WorkgroupVar, Basic) {
 TEST_F(HlslGeneratorImplTest_WorkgroupVar, Aliased) {
     auto* alias = Alias("F32", ty.f32());
 
-    Global("wg", ty.Of(alias), ast::StorageClass::kWorkgroup);
+    GlobalVar("wg", ty.Of(alias), ast::StorageClass::kWorkgroup);
 
     Func("main", {}, ty.void_(), {Assign("wg", 1.2_f)},
          {

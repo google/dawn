@@ -1591,7 +1591,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_NestedVectorConst
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vector_Alias_Argument_Error) {
     auto* alias = Alias("UnsignedInt", ty.u32());
-    Global("uint_var", ty.Of(alias), ast::StorageClass::kPrivate);
+    GlobalVar("uint_var", ty.Of(alias), ast::StorageClass::kPrivate);
 
     auto* tc = Construct(Source{{12, 34}}, ty.vec2<f32>(), "uint_var");
     WrapInFunction(tc);
@@ -1603,8 +1603,8 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vector_Alias_Argu
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Vector_Alias_Argument_Success) {
     auto* f32_alias = Alias("Float32", ty.f32());
     auto* vec2_alias = Alias("VectorFloat2", ty.vec2<f32>());
-    Global("my_f32", ty.Of(f32_alias), ast::StorageClass::kPrivate);
-    Global("my_vec2", ty.Of(vec2_alias), ast::StorageClass::kPrivate);
+    GlobalVar("my_f32", ty.Of(f32_alias), ast::StorageClass::kPrivate);
+    GlobalVar("my_vec2", ty.Of(vec2_alias), ast::StorageClass::kPrivate);
 
     auto* tc = vec3<f32>("my_vec2", "my_f32");
     WrapInFunction(tc);

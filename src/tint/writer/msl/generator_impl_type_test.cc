@@ -77,7 +77,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitType_Array) {
     auto* arr = ty.array<bool, 4>();
-    Global("G", arr, ast::StorageClass::kPrivate);
+    GlobalVar("G", arr, ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -89,7 +89,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Array) {
 TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArray) {
     auto* a = ty.array<bool, 4>();
     auto* b = ty.array(a, 5_u);
-    Global("G", b, ast::StorageClass::kPrivate);
+    GlobalVar("G", b, ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -102,7 +102,7 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
     auto* a = ty.array<bool, 4>();
     auto* b = ty.array(a, 5_u);
     auto* c = ty.array(b, 6_u);
-    Global("G", c, ast::StorageClass::kPrivate);
+    GlobalVar("G", c, ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -113,7 +113,7 @@ TEST_F(MslGeneratorImplTest, EmitType_ArrayOfArrayOfArray) {
 
 TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
     auto* arr = ty.array<bool, 4>();
-    Global("G", arr, ast::StorageClass::kPrivate);
+    GlobalVar("G", arr, ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -124,7 +124,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Array_WithoutName) {
 
 TEST_F(MslGeneratorImplTest, EmitType_RuntimeArray) {
     auto* arr = ty.array<bool, 1>();
-    Global("G", arr, ast::StorageClass::kPrivate);
+    GlobalVar("G", arr, ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -247,11 +247,11 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
                                  Member("z", ty.f32()),
                              });
 
-    Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(0),
-           });
+    GlobalVar("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(0),
+              });
 
     GeneratorImpl& gen = Build();
 
@@ -356,11 +356,11 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
                                  Member("e", ty.f32()),
                              });
 
-    Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(0),
-           });
+    GlobalVar("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(0),
+              });
 
     GeneratorImpl& gen = Build();
 
@@ -450,11 +450,11 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
                                  Member("f", array_z),
                              });
 
-    Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(0),
-           });
+    GlobalVar("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(0),
+              });
 
     GeneratorImpl& gen = Build();
 
@@ -536,11 +536,11 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
                                  Member("c", ty.i32()),
                              });
 
-    Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(0),
-           });
+    GlobalVar("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(0),
+              });
 
     GeneratorImpl& gen = Build();
 
@@ -600,11 +600,11 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
                            Member("tint_pad_21", ty.f32()),
                        });
 
-    Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(0),
-           });
+    GlobalVar("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(0),
+              });
 
     GeneratorImpl& gen = Build();
 
@@ -661,11 +661,11 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_WithAttribute) {
                                  Member("b", ty.f32()),
                              });
 
-    Global("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(0),
-           });
+    GlobalVar("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(0),
+              });
 
     GeneratorImpl& gen = Build();
 
@@ -828,11 +828,11 @@ TEST_P(MslStorageTexturesTest, Emit) {
     auto params = GetParam();
 
     auto* s = ty.storage_texture(params.dim, ast::TexelFormat::kR32Float, ast::Access::kWrite);
-    Global("test_var", s,
-           ast::AttributeList{
-               create<ast::BindingAttribute>(0),
-               create<ast::GroupAttribute>(0),
-           });
+    GlobalVar("test_var", s,
+              ast::AttributeList{
+                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(0),
+              });
 
     GeneratorImpl& gen = Build();
 

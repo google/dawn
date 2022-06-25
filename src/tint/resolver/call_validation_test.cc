@@ -219,7 +219,7 @@ TEST_F(ResolverCallValidationTest, LetPointerPrivate) {
     //   var c: i32 = foo(p);
     // }
     Func("foo", {Param("p", ty.pointer<i32>(ast::StorageClass::kPrivate))}, ty.void_(), {});
-    auto* v = Global("v", ty.i32(), ast::StorageClass::kPrivate);
+    auto* v = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
     auto* p = Let("p", ty.pointer(ty.i32(), ast::StorageClass::kPrivate), AddressOf(v));
     auto* c = Var("c", ty.i32(), ast::StorageClass::kNone, Call("foo", Expr(Source{{12, 34}}, p)));
     Func("main", {}, ty.void_(),
@@ -241,7 +241,7 @@ TEST_F(ResolverCallValidationTest, CallVariable) {
     // fn f() {
     //   v();
     // }
-    Global("v", ty.i32(), ast::StorageClass::kPrivate);
+    GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
     Func("f", {}, ty.void_(), {CallStmt(Call(Source{{12, 34}}, "v"))});
 
     EXPECT_FALSE(r()->Resolve());

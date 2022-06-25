@@ -233,8 +233,8 @@ TEST_F(ResolverCompoundAssignmentValidationTest, ReadOnlyBuffer) {
     // {
     //   a += 1i;
     // }
-    Global(Source{{12, 34}}, "a", ty.i32(), ast::StorageClass::kStorage, ast::Access::kRead,
-           GroupAndBinding(0, 0));
+    GlobalVar(Source{{12, 34}}, "a", ty.i32(), ast::StorageClass::kStorage, ast::Access::kRead,
+              GroupAndBinding(0, 0));
     WrapInFunction(CompoundAssign(Source{{56, 78}}, "a", 1_i, ast::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());
@@ -264,7 +264,7 @@ TEST_F(ResolverCompoundAssignmentValidationTest, LhsLiteral) {
 TEST_F(ResolverCompoundAssignmentValidationTest, LhsAtomic) {
     // var<workgroup> a : atomic<i32>;
     // a += a;
-    Global(Source{{12, 34}}, "a", ty.atomic(ty.i32()), ast::StorageClass::kWorkgroup);
+    GlobalVar(Source{{12, 34}}, "a", ty.atomic(ty.i32()), ast::StorageClass::kWorkgroup);
     WrapInFunction(CompoundAssign(Source{{56, 78}}, "a", "a", ast::BinaryOp::kAdd));
 
     EXPECT_FALSE(r()->Resolve());

@@ -37,7 +37,7 @@ TEST_F(GenerateExternalTextureBindingsTest, None) {
 
 TEST_F(GenerateExternalTextureBindingsTest, One) {
     ProgramBuilder b;
-    b.Global("v0", b.ty.external_texture(), b.GroupAndBinding(0, 0));
+    b.GlobalVar("v0", b.ty.external_texture(), b.GroupAndBinding(0, 0));
     b.WrapInFunction();
 
     tint::Program program(std::move(b));
@@ -54,8 +54,8 @@ TEST_F(GenerateExternalTextureBindingsTest, One) {
 
 TEST_F(GenerateExternalTextureBindingsTest, Two_SameGroup) {
     ProgramBuilder b;
-    b.Global("v0", b.ty.external_texture(), b.GroupAndBinding(0, 0));
-    b.Global("v1", b.ty.external_texture(), b.GroupAndBinding(0, 1));
+    b.GlobalVar("v0", b.ty.external_texture(), b.GroupAndBinding(0, 0));
+    b.GlobalVar("v1", b.ty.external_texture(), b.GroupAndBinding(0, 1));
     b.WrapInFunction();
 
     tint::Program program(std::move(b));
@@ -78,8 +78,8 @@ TEST_F(GenerateExternalTextureBindingsTest, Two_SameGroup) {
 
 TEST_F(GenerateExternalTextureBindingsTest, Two_DifferentGroup) {
     ProgramBuilder b;
-    b.Global("v0", b.ty.external_texture(), b.GroupAndBinding(0, 0));
-    b.Global("v1", b.ty.external_texture(), b.GroupAndBinding(1, 0));
+    b.GlobalVar("v0", b.ty.external_texture(), b.GroupAndBinding(0, 0));
+    b.GlobalVar("v1", b.ty.external_texture(), b.GroupAndBinding(1, 0));
     b.WrapInFunction();
 
     tint::Program program(std::move(b));
@@ -102,11 +102,11 @@ TEST_F(GenerateExternalTextureBindingsTest, Two_DifferentGroup) {
 
 TEST_F(GenerateExternalTextureBindingsTest, Two_WithOtherBindingsInSameGroup) {
     ProgramBuilder b;
-    b.Global("v0", b.ty.i32(), b.GroupAndBinding(0, 0), kUniform);
-    b.Global("v1", b.ty.external_texture(), b.GroupAndBinding(0, 1));
-    b.Global("v2", b.ty.i32(), b.GroupAndBinding(0, 2), kUniform);
-    b.Global("v3", b.ty.external_texture(), b.GroupAndBinding(0, 3));
-    b.Global("v4", b.ty.i32(), b.GroupAndBinding(0, 4), kUniform);
+    b.GlobalVar("v0", b.ty.i32(), b.GroupAndBinding(0, 0), kUniform);
+    b.GlobalVar("v1", b.ty.external_texture(), b.GroupAndBinding(0, 1));
+    b.GlobalVar("v2", b.ty.i32(), b.GroupAndBinding(0, 2), kUniform);
+    b.GlobalVar("v3", b.ty.external_texture(), b.GroupAndBinding(0, 3));
+    b.GlobalVar("v4", b.ty.i32(), b.GroupAndBinding(0, 4), kUniform);
     b.WrapInFunction();
 
     tint::Program program(std::move(b));

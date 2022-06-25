@@ -20,7 +20,7 @@ namespace {
 using GlslGeneratorImplTest_Identifier = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_Identifier, EmitIdentifierExpression) {
-    Global("foo", ty.i32(), ast::StorageClass::kPrivate);
+    GlobalVar("foo", ty.i32(), ast::StorageClass::kPrivate);
 
     auto* i = Expr("foo");
     WrapInFunction(i);

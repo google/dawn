@@ -22,7 +22,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitVariable) {
-    auto* v = Global("a", ty.f32(), ast::StorageClass::kPrivate);
+    auto* v = GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -32,7 +32,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
-    auto* v = Global("a", ty.f32(), ast::StorageClass::kPrivate);
+    auto* v = GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -43,11 +43,11 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
     auto* s = Structure("S", {Member("a", ty.i32())});
-    auto* v = Global("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-                     ast::AttributeList{
-                         create<ast::BindingAttribute>(0),
-                         create<ast::GroupAttribute>(0),
-                     });
+    auto* v = GlobalVar("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+                        ast::AttributeList{
+                            create<ast::BindingAttribute>(0),
+                            create<ast::GroupAttribute>(0),
+                        });
 
     GeneratorImpl& gen = Build();
 
@@ -58,11 +58,11 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Write) {
     auto* s = Structure("S", {Member("a", ty.i32())});
-    auto* v = Global("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kWrite,
-                     ast::AttributeList{
-                         create<ast::BindingAttribute>(0),
-                         create<ast::GroupAttribute>(0),
-                     });
+    auto* v = GlobalVar("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kWrite,
+                        ast::AttributeList{
+                            create<ast::BindingAttribute>(0),
+                            create<ast::GroupAttribute>(0),
+                        });
 
     GeneratorImpl& gen = Build();
 
@@ -73,11 +73,11 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Write) {
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
     auto* s = Structure("S", {Member("a", ty.i32())});
-    auto* v = Global("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                     ast::AttributeList{
-                         create<ast::BindingAttribute>(0),
-                         create<ast::GroupAttribute>(0),
-                     });
+    auto* v = GlobalVar("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+                        ast::AttributeList{
+                            create<ast::BindingAttribute>(0),
+                            create<ast::GroupAttribute>(0),
+                        });
 
     GeneratorImpl& gen = Build();
 
@@ -87,11 +87,12 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
-    auto* v = Global("a", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone, nullptr,
-                     ast::AttributeList{
-                         create<ast::GroupAttribute>(1),
-                         create<ast::BindingAttribute>(2),
-                     });
+    auto* v =
+        GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone, nullptr,
+                  ast::AttributeList{
+                      create<ast::GroupAttribute>(1),
+                      create<ast::BindingAttribute>(2),
+                  });
 
     GeneratorImpl& gen = Build();
 
@@ -101,7 +102,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
-    auto* v = Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr(1_f));
+    auto* v = GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate, Expr(1_f));
 
     GeneratorImpl& gen = Build();
 

@@ -22,7 +22,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Switch) {
-    Global("cond", ty.i32(), ast::StorageClass::kPrivate);
+    GlobalVar("cond", ty.i32(), ast::StorageClass::kPrivate);
 
     auto* def_body = Block(create<ast::BreakStatement>());
     auto* def = create<ast::CaseStatement>(ast::CaseSelectorList{}, def_body);

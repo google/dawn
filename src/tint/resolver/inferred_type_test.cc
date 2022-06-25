@@ -96,7 +96,7 @@ TEST_P(ResolverInferredTypeParamTest, GlobalVar_Pass) {
 
     // var a = <type constructor>;
     auto* ctor_expr = params.create_value(*this, 0);
-    auto* var = Global("a", nullptr, ast::StorageClass::kPrivate, ctor_expr);
+    auto* var = GlobalVar("a", nullptr, ast::StorageClass::kPrivate, ctor_expr);
     WrapInFunction();
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

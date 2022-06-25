@@ -196,7 +196,7 @@ struct CanonicalizeEntryPointIO::State {
                     value = ctx.dst->IndexAccessor(value, 0_i);
                 }
             }
-            ctx.dst->Global(symbol, ast_type, ast::StorageClass::kInput, std::move(attributes));
+            ctx.dst->GlobalVar(symbol, ast_type, ast::StorageClass::kInput, std::move(attributes));
             return value;
         } else if (cfg.shader_style == ShaderStyle::kMsl &&
                    ast::HasAttribute<ast::BuiltinAttribute>(attributes)) {
@@ -463,7 +463,7 @@ struct CanonicalizeEntryPointIO::State {
                 type = ctx.dst->ty.array(type, 1_u);
                 lhs = ctx.dst->IndexAccessor(lhs, 0_i);
             }
-            ctx.dst->Global(name, type, ast::StorageClass::kOutput, std::move(attributes));
+            ctx.dst->GlobalVar(name, type, ast::StorageClass::kOutput, std::move(attributes));
             wrapper_body.push_back(ctx.dst->Assign(lhs, outval.value));
         }
     }

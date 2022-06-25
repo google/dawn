@@ -22,7 +22,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, IndexAccessor) {
-    Global("ary", ty.array<i32, 10>(), ast::StorageClass::kPrivate);
+    GlobalVar("ary", ty.array<i32, 10>(), ast::StorageClass::kPrivate);
     auto* expr = IndexAccessor("ary", 5_i);
     WrapInFunction(expr);
 
@@ -34,7 +34,7 @@ TEST_F(WgslGeneratorImplTest, IndexAccessor) {
 }
 
 TEST_F(WgslGeneratorImplTest, IndexAccessor_OfDref) {
-    Global("ary", ty.array<i32, 10>(), ast::StorageClass::kPrivate);
+    GlobalVar("ary", ty.array<i32, 10>(), ast::StorageClass::kPrivate);
 
     auto* p = Let("p", nullptr, AddressOf("ary"));
     auto* expr = IndexAccessor(Deref("p"), 5_i);

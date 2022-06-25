@@ -63,7 +63,7 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Array) {
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
-    Global("a", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate);
 
     WrapInFunction(Expr("a"));
 
@@ -76,8 +76,8 @@ TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
 }
 
 TEST_F(HlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Initializer_Private) {
-    Global("initializer", ty.f32(), ast::StorageClass::kPrivate);
-    Global("a", ty.f32(), ast::StorageClass::kPrivate, Expr("initializer"));
+    GlobalVar("initializer", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate, Expr("initializer"));
 
     WrapInFunction(Expr("a"));
 
