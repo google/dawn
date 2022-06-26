@@ -63,6 +63,9 @@ struct Unshadow::State {
                 [&](const ast::Let*) {
                     return ctx.dst->Let(source, symbol, type, constructor, attributes);
                 },
+                [&](const ast::Const*) {
+                    return ctx.dst->Const(source, symbol, type, constructor, attributes);
+                },
                 [&](const ast::Parameter*) {
                     return ctx.dst->Param(source, symbol, type, attributes);
                 },
