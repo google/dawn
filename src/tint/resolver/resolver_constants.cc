@@ -154,9 +154,18 @@ utils::Result<sem::Constant::Elements> MaterializeElements(const sem::Constant::
 sem::Constant Resolver::EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type) {
     return Switch(
         expr,  //
+        [&](const ast::IdentifierExpression* e) { return EvaluateConstantValue(e, type); },
         [&](const ast::LiteralExpression* e) { return EvaluateConstantValue(e, type); },
         [&](const ast::CallExpression* e) { return EvaluateConstantValue(e, type); },
         [&](const ast::IndexAccessorExpression* e) { return EvaluateConstantValue(e, type); });
+}
+
+sem::Constant Resolver::EvaluateConstantValue(const ast::IdentifierExpression* ident,
+                                              const sem::Type*) {
+    if (auto* sem = builder_->Sem().Get(ident)) {
+        return sem->ConstantValue();
+    }
+    return {};
 }
 
 sem::Constant Resolver::EvaluateConstantValue(const ast::LiteralExpression* literal,

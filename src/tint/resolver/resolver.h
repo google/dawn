@@ -210,6 +210,8 @@ class Resolver {
     /// nodes are guaranteed to have been already resolved and any constant values calculated.
     ////////////////////////////////////////////////////////////////////////////////////////////////
     sem::Constant EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type);
+    sem::Constant EvaluateConstantValue(const ast::IdentifierExpression* ident,
+                                        const sem::Type* type);
     sem::Constant EvaluateConstantValue(const ast::LiteralExpression* literal,
                                         const sem::Type* type);
     sem::Constant EvaluateConstantValue(const ast::CallExpression* call, const sem::Type* type);

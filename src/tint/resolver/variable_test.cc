@@ -1052,8 +1052,7 @@ TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
     EXPECT_EQ(Sem().Get(c_maf32)->ConstantValue().ElementCount(), 9u);
 }
 
-// Enable when constants propagate between 'const' variables
-TEST_F(ResolverVariableTest, DISABLED_LocalConst_PropagateConstValue) {
+TEST_F(ResolverVariableTest, LocalConst_PropagateConstValue) {
     auto* a = Const("a", nullptr, Expr(42_i));
     auto* b = Const("b", nullptr, Expr("a"));
     auto* c = Const("c", nullptr, Expr("b"));
@@ -1256,8 +1255,7 @@ TEST_F(ResolverVariableTest, GlobalConst_ImplicitType_Decls) {
     EXPECT_EQ(Sem().Get(c_maf32)->ConstantValue().ElementCount(), 9u);
 }
 
-// Enable when constants propagate between 'const' variables
-TEST_F(ResolverVariableTest, DISABLED_GlobalConst_PropagateConstValue) {
+TEST_F(ResolverVariableTest, GlobalConst_PropagateConstValue) {
     GlobalConst("b", nullptr, Expr("a"));
     auto* c = GlobalConst("c", nullptr, Expr("b"));
     GlobalConst("a", nullptr, Expr(42_i));
