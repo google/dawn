@@ -131,6 +131,36 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
     EXPECT_EQ(gen.result(), "  @group(0) @binding(0) var t : texture_1d<f32>;\n");
 }
 
+TEST_F(WgslGeneratorImplTest, Emit_GlobalLet) {
+    GlobalLet("explicit", ty.f32(), Expr(1_f));
+    GlobalLet("inferred", nullptr, Expr(1_f));
+
+    GeneratorImpl& gen = Build();
+
+    gen.increment_indent();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  let explicit : f32 = 1.0f;
+
+  let inferred = 1.0f;
+)");
+}
+
+TEST_F(WgslGeneratorImplTest, Emit_GlobalConst) {
+    GlobalConst("explicit", ty.f32(), Expr(1_f));
+    GlobalConst("inferred", nullptr, Expr(1_f));
+
+    GeneratorImpl& gen = Build();
+
+    gen.increment_indent();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  const explicit : f32 = 1.0f;
+
+  const inferred = 1.0f;
+)");
+}
+
 TEST_F(WgslGeneratorImplTest, Emit_OverridableConstants) {
     Override("a", ty.f32(), nullptr);
     Override("b", ty.f32(), nullptr, {Id(7u)});

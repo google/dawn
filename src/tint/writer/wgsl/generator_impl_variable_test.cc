@@ -111,15 +111,48 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
     EXPECT_EQ(out.str(), R"(var<private> a : f32 = 1.0f;)");
 }
 
-TEST_F(WgslGeneratorImplTest, EmitVariable_Const) {
+TEST_F(WgslGeneratorImplTest, EmitVariable_Let_Explicit) {
     auto* v = Let("a", ty.f32(), Expr(1_f));
-    WrapInFunction(Decl(v));
+    WrapInFunction(v);
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
     EXPECT_EQ(out.str(), R"(let a : f32 = 1.0f;)");
+}
+
+TEST_F(WgslGeneratorImplTest, EmitVariable_Let_Inferred) {
+    auto* v = Let("a", nullptr, Expr(1_f));
+    WrapInFunction(v);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
+    EXPECT_EQ(out.str(), R"(let a = 1.0f;)");
+}
+
+TEST_F(WgslGeneratorImplTest, EmitVariable_Const_Explicit) {
+    auto* v = Const("a", ty.f32(), Expr(1_f));
+    WrapInFunction(v);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
+    EXPECT_EQ(out.str(), R"(const a : f32 = 1.0f;)");
+}
+
+TEST_F(WgslGeneratorImplTest, EmitVariable_Const_Inferred) {
+    auto* v = Const("a", nullptr, Expr(1_f));
+    WrapInFunction(v);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
+    EXPECT_EQ(out.str(), R"(const a = 1.0f;)");
 }
 
 }  // namespace
