@@ -549,13 +549,16 @@ Maybe<const ast::Variable*> ParserImpl::global_variable_decl(ast::AttributeList&
         return Failure::kNoMatch;
     }
 
-    const ast::Expression* constructor = nullptr;
+    const ast::Expression* initalizer = nullptr;
     if (match(Token::Type::kEqual)) {
-        auto expr = expect_const_expr();
+        auto expr = logical_or_expression();
         if (expr.errored) {
             return Failure::kErrored;
         }
-        constructor = expr.value;
+        if (!expr.matched) {
+            return add_error(peek(), "missing initalizer for 'var' declaration");
+        }
+        initalizer = expr.value;
     }
 
     return create<ast::Var>(decl->source,                             // source
@@ -563,7 +566,7 @@ Maybe<const ast::Variable*> ParserImpl::global_variable_decl(ast::AttributeList&
                             decl->type,                               // type
                             decl->storage_class,                      // storage class
                             decl->access,                             // access control
-                            constructor,                              // constructor
+                            initalizer,                               // constructor
                             std::move(attrs));                        // attributes
 }
 
@@ -605,11 +608,14 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(ast::AttributeList&
 
     const ast::Expression* initializer = nullptr;
     if (has_initializer) {
-        auto init = expect_const_expr();
-        if (init.errored) {
+        auto expr = logical_or_expression();
+        if (expr.errored) {
             return Failure::kErrored;
         }
-        initializer = std::move(init.value);
+        if (!expr.matched) {
+            return add_error(peek(), "missing initializer for " + std::string(use));
+        }
+        initializer = std::move(expr.value);
     }
 
     if (is_const) {
@@ -3114,58 +3120,6 @@ Maybe<const ast::LiteralExpression*> ParserImpl::const_literal() {
         return Failure::kErrored;
     }
     return Failure::kNoMatch;
-}
-
-// const_expr
-//   : type_decl PAREN_LEFT ((const_expr COMMA)? const_expr COMMA?)? PAREN_RIGHT
-//   | const_literal
-Expect<const ast::Expression*> ParserImpl::expect_const_expr() {
-    auto t = peek();
-    auto source = t.source();
-    if (t.IsLiteral()) {
-        auto lit = const_literal();
-        if (lit.errored) {
-            return Failure::kErrored;
-        }
-        if (!lit.matched) {
-            return add_error(peek(), "unable to parse constant literal");
-        }
-        return lit.value;
-    }
-
-    if (peek_is(Token::Type::kParenLeft, 1) || peek_is(Token::Type::kLessThan, 1)) {
-        auto type = expect_type("const_expr");
-        if (type.errored) {
-            return Failure::kErrored;
-        }
-
-        auto params = expect_paren_block("type constructor", [&]() -> Expect<ast::ExpressionList> {
-            ast::ExpressionList list;
-            while (continue_parsing()) {
-                if (peek_is(Token::Type::kParenRight)) {
-                    break;
-                }
-
-                auto arg = expect_const_expr();
-                if (arg.errored) {
-                    return Failure::kErrored;
-                }
-                list.emplace_back(arg.value);
-
-                if (!match(Token::Type::kComma)) {
-                    break;
-                }
-            }
-            return list;
-        });
-
-        if (params.errored) {
-            return Failure::kErrored;
-        }
-
-        return builder_.Construct(source, type.value, params.value);
-    }
-    return add_error(peek(), "unable to parse const_expr");
 }
 
 Maybe<ast::AttributeList> ParserImpl::attribute_list() {

@@ -319,17 +319,18 @@ bool Validator::Materialize(const sem::Type* to,
     return true;
 }
 
-bool Validator::VariableConstructorOrCast(const ast::Variable* v,
-                                          ast::StorageClass storage_class,
-                                          const sem::Type* storage_ty,
-                                          const sem::Type* rhs_ty) const {
-    auto* value_type = rhs_ty->UnwrapRef();  // Implicit load of RHS
+bool Validator::VariableInitializer(const ast::Variable* v,
+                                    ast::StorageClass storage_class,
+                                    const sem::Type* storage_ty,
+                                    const sem::Expression* initializer) const {
+    auto* initializer_ty = initializer->Type();
+    auto* value_type = initializer_ty->UnwrapRef();  // Implicit load of RHS
 
     // Value type has to match storage type
     if (storage_ty != value_type) {
         std::stringstream s;
         s << "cannot initialize " << v->Kind() << " of type '" << sem_.TypeNameOf(storage_ty)
-          << "' with value of type '" << sem_.TypeNameOf(rhs_ty) << "'";
+          << "' with value of type '" << sem_.TypeNameOf(initializer_ty) << "'";
         AddError(s.str(), v->source);
         return false;
     }

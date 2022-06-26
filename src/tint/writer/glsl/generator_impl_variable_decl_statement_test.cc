@@ -76,19 +76,6 @@ TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Private) {
     EXPECT_THAT(gen.result(), HasSubstr("  float a = 0.0f;\n"));
 }
 
-TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Initializer_Private) {
-    GlobalVar("initializer", ty.f32(), ast::StorageClass::kPrivate);
-    GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate, Expr("initializer"));
-
-    WrapInFunction(Expr("a"));
-
-    GeneratorImpl& gen = Build();
-
-    ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr(R"(float a = initializer;
-)"));
-}
-
 TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Initializer_ZeroVec) {
     auto* var = Var("a", ty.vec3<f32>(), ast::StorageClass::kNone, vec3<f32>());
 

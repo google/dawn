@@ -77,7 +77,7 @@ TEST_F(ParserImplTest, GlobalLetDecl_InvalidExpression) {
     EXPECT_TRUE(e.errored);
     EXPECT_FALSE(e.matched);
     EXPECT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:15: invalid type for const_expr");
+    EXPECT_EQ(p->error(), "1:15: missing initializer for 'let' declaration");
 }
 
 TEST_F(ParserImplTest, GlobalLetDecl_MissingExpression) {
@@ -90,7 +90,7 @@ TEST_F(ParserImplTest, GlobalLetDecl_MissingExpression) {
     EXPECT_TRUE(e.errored);
     EXPECT_FALSE(e.matched);
     EXPECT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:14: unable to parse const_expr");
+    EXPECT_EQ(p->error(), "1:14: missing initializer for 'let' declaration");
 }
 
 TEST_F(ParserImplTest, GlobalConstDecl) {
@@ -152,7 +152,7 @@ TEST_F(ParserImplTest, GlobalConstDecl_InvalidExpression) {
     EXPECT_TRUE(e.errored);
     EXPECT_FALSE(e.matched);
     EXPECT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:17: invalid type for const_expr");
+    EXPECT_EQ(p->error(), "1:17: missing initializer for 'const' declaration");
 }
 
 TEST_F(ParserImplTest, GlobalConstDecl_MissingExpression) {
@@ -165,7 +165,7 @@ TEST_F(ParserImplTest, GlobalConstDecl_MissingExpression) {
     EXPECT_TRUE(e.errored);
     EXPECT_FALSE(e.matched);
     EXPECT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:16: unable to parse const_expr");
+    EXPECT_EQ(p->error(), "1:16: missing initializer for 'const' declaration");
 }
 
 TEST_F(ParserImplTest, GlobalOverrideDecl_WithId) {

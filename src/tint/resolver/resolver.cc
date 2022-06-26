@@ -353,8 +353,7 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
         ty = rhs->Type()->UnwrapRef();  // Implicit load of RHS
     }
 
-    if (rhs &&
-        !validator_.VariableConstructorOrCast(v, ast::StorageClass::kNone, ty, rhs->Type())) {
+    if (rhs && !validator_.VariableInitializer(v, ast::StorageClass::kNone, ty, rhs)) {
         return nullptr;
     }
 
@@ -405,12 +404,11 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
             ty = rhs->Type()->UnwrapRef();  // Implicit load of RHS
         }
     } else if (!ty) {
-        AddError("'override' declaration requires a type or initializer", v->source);
+        AddError("override declaration requires a type or initializer", v->source);
         return nullptr;
     }
 
-    if (rhs &&
-        !validator_.VariableConstructorOrCast(v, ast::StorageClass::kNone, ty, rhs->Type())) {
+    if (rhs && !validator_.VariableInitializer(v, ast::StorageClass::kNone, ty, rhs)) {
         return nullptr;
     }
 
@@ -479,8 +477,7 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
         return nullptr;
     }
 
-    if (rhs &&
-        !validator_.VariableConstructorOrCast(c, ast::StorageClass::kNone, ty, rhs->Type())) {
+    if (!validator_.VariableInitializer(c, ast::StorageClass::kNone, ty, rhs)) {
         return nullptr;
     }
 
@@ -528,7 +525,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
     }
 
     if (!storage_ty) {
-        AddError("'var' declaration requires a type or initializer", var->source);
+        AddError("var declaration requires a type or initializer", var->source);
         return nullptr;
     }
 
@@ -558,7 +555,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         access = DefaultAccessForStorageClass(storage_class);
     }
 
-    if (rhs && !validator_.VariableConstructorOrCast(var, storage_class, storage_ty, rhs->Type())) {
+    if (rhs && !validator_.VariableInitializer(var, storage_class, storage_ty, rhs)) {
         return nullptr;
     }
 
@@ -1864,8 +1861,8 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
 sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
     auto symbol = expr->symbol;
     auto* resolved = sem_.ResolvedSymbol(expr);
-    if (auto* var = As<sem::Variable>(resolved)) {
-        auto* user = builder_->create<sem::VariableUser>(expr, current_statement_, var);
+    if (auto* variable = As<sem::Variable>(resolved)) {
+        auto* user = builder_->create<sem::VariableUser>(expr, current_statement_, variable);
 
         if (current_statement_) {
             // If identifier is part of a loop continuing block, make sure it
@@ -1901,12 +1898,20 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
         }
 
         if (current_function_) {
-            if (auto* global = var->As<sem::GlobalVariable>()) {
+            if (auto* global = variable->As<sem::GlobalVariable>()) {
                 current_function_->AddDirectlyReferencedGlobal(global);
             }
+        } else if (variable->Declaration()->Is<ast::Var>()) {
+            // Use of a module-scope 'var' outside of a function.
+            // Note: The spec is currently vague around the rules here. See
+            // https://github.com/gpuweb/gpuweb/issues/3081. Remove this comment when resolved.
+            std::string desc = "var '" + builder_->Symbols().NameFor(symbol) + "' ";
+            AddError(desc + "cannot not be referenced at module-scope", expr->source);
+            AddNote(desc + "declared here", variable->Declaration()->source);
+            return nullptr;
         }
 
-        var->AddUser(user);
+        variable->AddUser(user);
         return user;
     }
 

@@ -541,9 +541,6 @@ class ParserImpl {
     /// Parses a `const_literal` grammar element
     /// @returns the const literal parsed or nullptr if none found
     Maybe<const ast::LiteralExpression*> const_literal();
-    /// Parses a `const_expr` grammar element, erroring on parse failure.
-    /// @returns the parsed constructor expression or nullptr on error
-    Expect<const ast::Expression*> expect_const_expr();
     /// Parses a `primary_expression` grammar element
     /// @returns the parsed expression or nullptr
     Maybe<const ast::Expression*> primary_expression();

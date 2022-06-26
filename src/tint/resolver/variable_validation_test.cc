@@ -29,7 +29,7 @@ TEST_F(ResolverVariableValidationTest, VarNoInitializerNoType) {
     WrapInFunction(Var(Source{{12, 34}}, "a", nullptr));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: 'var' declaration requires a type or initializer");
+    EXPECT_EQ(r()->error(), "12:34 error: var declaration requires a type or initializer");
 }
 
 TEST_F(ResolverVariableValidationTest, GlobalVarNoInitializerNoType) {
@@ -37,7 +37,18 @@ TEST_F(ResolverVariableValidationTest, GlobalVarNoInitializerNoType) {
     GlobalVar(Source{{12, 34}}, "a", nullptr);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: 'var' declaration requires a type or initializer");
+    EXPECT_EQ(r()->error(), "12:34 error: var declaration requires a type or initializer");
+}
+
+TEST_F(ResolverVariableValidationTest, GlobalVarUsedAtModuleScope) {
+    // var<private> a : i32;
+    // var<private> b : i32 = a;
+    GlobalVar(Source{{12, 34}}, "a", ty.i32(), ast::StorageClass::kPrivate, nullptr);
+    GlobalVar("b", ty.i32(), ast::StorageClass::kPrivate, Expr(Source{{56, 78}}, "a"));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(56:78 error: var 'a' cannot not be referenced at module-scope
+12:34 note: var 'a' declared here)");
 }
 
 TEST_F(ResolverVariableValidationTest, OverrideNoInitializerNoType) {
@@ -45,7 +56,7 @@ TEST_F(ResolverVariableValidationTest, OverrideNoInitializerNoType) {
     Override(Source{{12, 34}}, "a", nullptr, nullptr);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: 'override' declaration requires a type or initializer");
+    EXPECT_EQ(r()->error(), "12:34 error: override declaration requires a type or initializer");
 }
 
 TEST_F(ResolverVariableValidationTest, VarTypeNotStorable) {

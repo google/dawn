@@ -378,16 +378,16 @@ class Validator {
     /// @returns true on success, false otherwise.
     bool Const(const sem::Variable* v) const;
 
-    /// Validates a variable constructor or cast
+    /// Validates a variable initializer
     /// @param v the variable to validate
     /// @param storage_class the storage class of the variable
     /// @param storage_type the type of the storage
-    /// @param rhs_type the right hand side of the expression
+    /// @param initializer the RHS initializer expression
     /// @returns true on succes, false otherwise
-    bool VariableConstructorOrCast(const ast::Variable* v,
-                                   ast::StorageClass storage_class,
-                                   const sem::Type* storage_type,
-                                   const sem::Type* rhs_type) const;
+    bool VariableInitializer(const ast::Variable* v,
+                             ast::StorageClass storage_class,
+                             const sem::Type* storage_type,
+                             const sem::Expression* initializer) const;
 
     /// Validates a vector
     /// @param ty the vector to validate

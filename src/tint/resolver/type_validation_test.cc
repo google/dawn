@@ -421,7 +421,8 @@ TEST_F(ResolverTypeValidationTest, ArraySize_ModuleVar) {
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array size must evaluate to a constant integer expression");
+              R"(12:34 error: var 'size' cannot not be referenced at module-scope
+note: var 'size' declared here)");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_FunctionConst) {

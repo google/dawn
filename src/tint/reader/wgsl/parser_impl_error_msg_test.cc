@@ -460,11 +460,7 @@ TEST_F(ParserImplErrorTest, FunctionMissingOpenLine) {
   var a : f32 = bar[0];
   return;
 })",
-           R"(test.wgsl:2:17 error: unable to parse const_expr
-  var a : f32 = bar[0];
-                ^^^
-
-test.wgsl:3:3 error: statement found outside of function body
+           R"(test.wgsl:3:3 error: statement found outside of function body
   return;
   ^^^^^^
 )");
@@ -504,27 +500,9 @@ const i : vec2<i32> = vec2<i32>(1., 2.;
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstBadConstLiteral) {
     EXPECT("const i : vec2<i32> = vec2<i32>(!);",
-           R"(test.wgsl:1:33 error: unable to parse const_expr
+           R"(test.wgsl:1:34 error: unable to parse right side of ! expression
 const i : vec2<i32> = vec2<i32>(!);
-                                ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclConstBadConstLiteralSpaceLessThan) {
-    EXPECT("const i = 1 < 2;",
-           R"(test.wgsl:1:13 error: expected ';' for 'const' declaration
-const i = 1 < 2;
-            ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclConstNotConstExpr) {
-    EXPECT(
-        "const a = 1;\n"
-        "const b = a;",
-        R"(test.wgsl:2:11 error: unable to parse const_expr
-const b = a;
-          ^
+                                 ^
 )");
 }
 
@@ -605,27 +583,9 @@ let i : vec2<i32> = vec2<i32>(1., 2.;
 
 TEST_F(ParserImplErrorTest, GlobalDeclLetBadConstLiteral) {
     EXPECT("let i : vec2<i32> = vec2<i32>(!);",
-           R"(test.wgsl:1:31 error: unable to parse const_expr
+           R"(test.wgsl:1:32 error: unable to parse right side of ! expression
 let i : vec2<i32> = vec2<i32>(!);
-                              ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclLetBadConstLiteralSpaceLessThan) {
-    EXPECT("let i = 1 < 2;",
-           R"(test.wgsl:1:11 error: expected ';' for 'let' declaration
-let i = 1 < 2;
-          ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclLetNotConstExpr) {
-    EXPECT(
-        "let a = 1;\n"
-        "let b = a;",
-        R"(test.wgsl:2:9 error: unable to parse const_expr
-let b = a;
-        ^
+                               ^
 )");
 }
 

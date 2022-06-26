@@ -123,22 +123,6 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
     EXPECT_THAT(gen.result(), HasSubstr("thread float tint_symbol_1 = 0.0f;\n"));
 }
 
-TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_Private) {
-    GlobalLet("initializer", ty.f32(), Expr(0_f));
-    GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate, Expr("initializer"));
-
-    WrapInFunction(Expr("a"));
-
-    GeneratorImpl& gen = SanitizeAndBuild();
-
-    ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr(R"(
-  thread float tint_symbol_1 = initializer;
-  float const tint_symbol = tint_symbol_1;
-  return;
-)"));
-}
-
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Workgroup) {
     GlobalVar("a", ty.f32(), ast::StorageClass::kWorkgroup);
 
