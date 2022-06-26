@@ -36,6 +36,10 @@ Var::Var(Var&&) = default;
 
 Var::~Var() = default;
 
+const char* Var::Kind() const {
+    return "var";
+}
+
 const Var* Var::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
     auto sym = ctx->Clone(symbol);

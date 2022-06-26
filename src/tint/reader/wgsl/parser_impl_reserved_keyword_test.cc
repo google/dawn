@@ -32,6 +32,13 @@ TEST_P(ParserImplReservedKeywordTest, ModuleLet) {
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), "1:5: '" + name + "' is a reserved keyword");
 }
+TEST_P(ParserImplReservedKeywordTest, ModuleConst) {
+    auto name = GetParam();
+    auto p = parser("const " + name + " : i32 = 1;");
+    EXPECT_FALSE(p->Parse());
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:7: '" + name + "' is a reserved keyword");
+}
 TEST_P(ParserImplReservedKeywordTest, ModuleVar) {
     auto name = GetParam();
     auto p = parser("var " + name + " : i32 = 1;");

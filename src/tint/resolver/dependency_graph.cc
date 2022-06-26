@@ -487,14 +487,11 @@ struct DependencyAnalysis {
     /// declaration
     std::string KindOf(const ast::Node* node) {
         return Switch(
-            node,                                              //
-            [&](const ast::Struct*) { return "struct"; },      //
-            [&](const ast::Alias*) { return "alias"; },        //
-            [&](const ast::Function*) { return "function"; },  //
-            [&](const ast::Var*) { return "var"; },            //
-            [&](const ast::Let*) { return "let"; },            //
-            [&](const ast::Override*) { return "override"; },  //
-            [&](const ast::Const*) { return "const"; },        //
+            node,                                               //
+            [&](const ast::Struct*) { return "struct"; },       //
+            [&](const ast::Alias*) { return "alias"; },         //
+            [&](const ast::Function*) { return "function"; },   //
+            [&](const ast::Variable* v) { return v->Kind(); },  //
             [&](Default) {
                 UnhandledNode(diagnostics_, node);
                 return "<error>";

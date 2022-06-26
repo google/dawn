@@ -34,6 +34,10 @@ Const::Const(Const&&) = default;
 
 Const::~Const() = default;
 
+const char* Const::Kind() const {
+    return "const";
+}
+
 const Const* Const::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
     auto sym = ctx->Clone(symbol);

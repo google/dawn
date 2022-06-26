@@ -77,6 +77,10 @@ class Variable : public Castable<Variable, Node> {
     /// @note binding points should only be applied to Var and Parameter types.
     VariableBindingPoint BindingPoint() const;
 
+    /// @returns the kind of the variable, which can be used in diagnostics
+    ///          e.g. "var", "let", "const", etc
+    virtual const char* Kind() const = 0;
+
     /// The variable symbol
     const Symbol symbol;
 

@@ -327,16 +327,10 @@ bool Validator::VariableConstructorOrCast(const ast::Variable* v,
 
     // Value type has to match storage type
     if (storage_ty != value_type) {
-        std::string decl = Switch(
-            v,                                           //
-            [&](const ast::Var*) { return "var"; },      //
-            [&](const ast::Let*) { return "let"; },      //
-            [&](const ast::Const*) { return "const"; },  //
-            [&](Default) { return "<unknown>"; });
-
-        AddError("cannot initialize " + decl + " of type '" + sem_.TypeNameOf(storage_ty) +
-                     "' with value of type '" + sem_.TypeNameOf(rhs_ty) + "'",
-                 v->source);
+        std::stringstream s;
+        s << "cannot initialize " << v->Kind() << " of type '" << sem_.TypeNameOf(storage_ty)
+          << "' with value of type '" << sem_.TypeNameOf(rhs_ty) << "'";
+        AddError(s.str(), v->source);
         return false;
     }
 

@@ -47,6 +47,9 @@
 namespace tint::reader::wgsl {
 namespace {
 
+// TODO(crbug.com/tint/1580): Remove when 'const' is fully implemented.
+bool const_enabled = false;
+
 template <typename T>
 using Expect = ParserImpl::Expect<T>;
 
@@ -245,6 +248,11 @@ ParserImpl::ParserImpl(Source::File const* file) : lexer_(std::make_unique<Lexer
 
 ParserImpl::~ParserImpl() = default;
 
+// TODO(crbug.com/tint/1580): Remove when 'const' is fully implemented.
+void ParserImpl::EnableConst() {
+    const_enabled = true;
+}
+
 ParserImpl::Failure::Errored ParserImpl::add_error(const Source& source,
                                                    std::string_view err,
                                                    std::string_view use) {
@@ -437,8 +445,12 @@ Maybe<bool> ParserImpl::global_decl() {
         }
 
         if (gc.matched) {
-            if (!expect("'let' declaration", Token::Type::kSemicolon)) {
-                return Failure::kErrored;
+            // Avoid the cost of the string allocation for the common no-error case
+            if (!peek().Is(Token::Type::kSemicolon)) {
+                std::string kind = gc->Kind();
+                if (!expect("'" + kind + "' declaration", Token::Type::kSemicolon)) {
+                    return Failure::kErrored;
+                }
             }
 
             builder_.AST().AddGlobalVariable(gc.value);
@@ -561,10 +573,14 @@ Maybe<const ast::Variable*> ParserImpl::global_variable_decl(ast::AttributeList&
 // global_const_initializer
 //  : EQUAL const_expr
 Maybe<const ast::Variable*> ParserImpl::global_constant_decl(ast::AttributeList& attrs) {
+    bool is_const = false;
     bool is_overridable = false;
     const char* use = nullptr;
     if (match(Token::Type::kLet)) {
         use = "'let' declaration";
+    } else if (const_enabled && match(Token::Type::kConst)) {
+        use = "'const' declaration";
+        is_const = true;
     } else if (match(Token::Type::kOverride)) {
         use = "'override' declaration";
         is_overridable = true;
@@ -596,6 +612,13 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(ast::AttributeList&
         initializer = std::move(init.value);
     }
 
+    if (is_const) {
+        return create<ast::Const>(decl->source,                             // source
+                                  builder_.Symbols().Register(decl->name),  // symbol
+                                  decl->type,                               // type
+                                  initializer,                              // constructor
+                                  std::move(attrs));                        // attributes
+    }
     if (is_overridable) {
         return create<ast::Override>(decl->source,                             // source
                                      builder_.Symbols().Register(decl->name),  // symbol
@@ -1769,6 +1792,34 @@ Maybe<const ast::ReturnStatement*> ParserImpl::return_stmt() {
 //   | variable_decl EQUAL logical_or_expression
 //   | CONST variable_ident_decl EQUAL logical_or_expression
 Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
+    if (const_enabled && match(Token::Type::kConst)) {
+        auto decl = expect_variable_ident_decl("'const' declaration",
+                                               /*allow_inferred = */ true);
+        if (decl.errored) {
+            return Failure::kErrored;
+        }
+
+        if (!expect("'const' declaration", Token::Type::kEqual)) {
+            return Failure::kErrored;
+        }
+
+        auto constructor = logical_or_expression();
+        if (constructor.errored) {
+            return Failure::kErrored;
+        }
+        if (!constructor.matched) {
+            return add_error(peek(), "missing constructor for 'const' declaration");
+        }
+
+        auto* const_ = create<ast::Const>(decl->source,                             // source
+                                          builder_.Symbols().Register(decl->name),  // symbol
+                                          decl->type,                               // type
+                                          constructor.value,                        // constructor
+                                          ast::AttributeList{});                    // attributes
+
+        return create<ast::VariableDeclStatement>(decl->source, const_);
+    }
+
     if (match(Token::Type::kLet)) {
         auto decl = expect_variable_ident_decl("'let' declaration",
                                                /*allow_inferred = */ true);

@@ -52,6 +52,9 @@ class Const final : public Castable<Const, Variable> {
     /// Destructor
     ~Const() override;
 
+    /// @returns "const"
+    const char* Kind() const override;
+
     /// Clones this node and all transitive child nodes using the `CloneContext`
     /// `ctx`.
     /// @param ctx the clone context

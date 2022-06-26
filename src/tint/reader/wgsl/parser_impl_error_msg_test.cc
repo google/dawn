@@ -471,6 +471,107 @@ test.wgsl:3:3 error: statement found outside of function body
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstInvalidIdentifier) {
+    EXPECT("const ^ : i32 = 1;",
+           R"(test.wgsl:1:7 error: expected identifier for 'const' declaration
+const ^ : i32 = 1;
+      ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclConstMissingSemicolon) {
+    EXPECT("const i : i32 = 1",
+           R"(test.wgsl:1:18 error: expected ';' for 'const' declaration
+const i : i32 = 1
+                 ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclConstMissingLParen) {
+    EXPECT("const i : vec2<i32> = vec2<i32>;",
+           R"(test.wgsl:1:32 error: expected '(' for type constructor
+const i : vec2<i32> = vec2<i32>;
+                               ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclConstMissingRParen) {
+    EXPECT("const i : vec2<i32> = vec2<i32>(1., 2.;",
+           R"(test.wgsl:1:39 error: expected ')' for type constructor
+const i : vec2<i32> = vec2<i32>(1., 2.;
+                                      ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclConstBadConstLiteral) {
+    EXPECT("const i : vec2<i32> = vec2<i32>(!);",
+           R"(test.wgsl:1:33 error: unable to parse const_expr
+const i : vec2<i32> = vec2<i32>(!);
+                                ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclConstBadConstLiteralSpaceLessThan) {
+    EXPECT("const i = 1 < 2;",
+           R"(test.wgsl:1:13 error: expected ';' for 'const' declaration
+const i = 1 < 2;
+            ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclConstNotConstExpr) {
+    EXPECT(
+        "const a = 1;\n"
+        "const b = a;",
+        R"(test.wgsl:2:11 error: unable to parse const_expr
+const b = a;
+          ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclConstExprMaxDepth) {
+    uint32_t kMaxDepth = 128;
+
+    std::stringstream src;
+    std::stringstream mkr;
+    src << "const i : i32 = ";
+    mkr << "                ";
+    for (size_t i = 0; i < kMaxDepth + 8; i++) {
+        src << "f32(";
+        if (i < kMaxDepth) {
+            mkr << "    ";
+        } else if (i == kMaxDepth) {
+            mkr << "^^^";
+        }
+    }
+    src << "1.0";
+    for (size_t i = 0; i < 200; i++) {
+        src << ")";
+    }
+    src << ";";
+    std::stringstream err;
+    err << "test.wgsl:1:529 error: maximum parser recursive depth reached\n"
+        << src.str() << "\n"
+        << mkr.str() << "\n";
+    EXPECT(src.str().c_str(), err.str().c_str());
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclConstExprMissingLParen) {
+    EXPECT("const i : vec2<i32> = vec2<i32> 1, 2);",
+           R"(test.wgsl:1:33 error: expected '(' for type constructor
+const i : vec2<i32> = vec2<i32> 1, 2);
+                                ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclConstExprMissingRParen) {
+    EXPECT("const i : vec2<i32> = vec2<i32>(1, 2;",
+           R"(test.wgsl:1:37 error: expected ')' for type constructor
+const i : vec2<i32> = vec2<i32>(1, 2;
+                                    ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclLetInvalidIdentifier) {
     EXPECT("let ^ : i32 = 1;",
            R"(test.wgsl:1:5 error: expected identifier for 'let' declaration
 let ^ : i32 = 1;
@@ -478,7 +579,7 @@ let ^ : i32 = 1;
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclConstMissingSemicolon) {
+TEST_F(ParserImplErrorTest, GlobalDeclLetMissingSemicolon) {
     EXPECT("let i : i32 = 1",
            R"(test.wgsl:1:16 error: expected ';' for 'let' declaration
 let i : i32 = 1
@@ -486,7 +587,7 @@ let i : i32 = 1
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclConstMissingLParen) {
+TEST_F(ParserImplErrorTest, GlobalDeclLetMissingLParen) {
     EXPECT("let i : vec2<i32> = vec2<i32>;",
            R"(test.wgsl:1:30 error: expected '(' for type constructor
 let i : vec2<i32> = vec2<i32>;
@@ -494,7 +595,7 @@ let i : vec2<i32> = vec2<i32>;
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclConstMissingRParen) {
+TEST_F(ParserImplErrorTest, GlobalDeclLetMissingRParen) {
     EXPECT("let i : vec2<i32> = vec2<i32>(1., 2.;",
            R"(test.wgsl:1:37 error: expected ')' for type constructor
 let i : vec2<i32> = vec2<i32>(1., 2.;
@@ -502,7 +603,7 @@ let i : vec2<i32> = vec2<i32>(1., 2.;
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclConstBadConstLiteral) {
+TEST_F(ParserImplErrorTest, GlobalDeclLetBadConstLiteral) {
     EXPECT("let i : vec2<i32> = vec2<i32>(!);",
            R"(test.wgsl:1:31 error: unable to parse const_expr
 let i : vec2<i32> = vec2<i32>(!);
@@ -510,7 +611,7 @@ let i : vec2<i32> = vec2<i32>(!);
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclConstBadConstLiteralSpaceLessThan) {
+TEST_F(ParserImplErrorTest, GlobalDeclLetBadConstLiteralSpaceLessThan) {
     EXPECT("let i = 1 < 2;",
            R"(test.wgsl:1:11 error: expected ';' for 'let' declaration
 let i = 1 < 2;
@@ -518,7 +619,7 @@ let i = 1 < 2;
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclConstNotConstExpr) {
+TEST_F(ParserImplErrorTest, GlobalDeclLetNotConstExpr) {
     EXPECT(
         "let a = 1;\n"
         "let b = a;",
@@ -528,7 +629,7 @@ let b = a;
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclConstExprMaxDepth) {
+TEST_F(ParserImplErrorTest, GlobalDeclLetExprMaxDepth) {
     uint32_t kMaxDepth = 128;
 
     std::stringstream src;
@@ -555,7 +656,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclConstExprMaxDepth) {
     EXPECT(src.str().c_str(), err.str().c_str());
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclConstExprMissingLParen) {
+TEST_F(ParserImplErrorTest, GlobalDeclLetExprMissingLParen) {
     EXPECT("let i : vec2<i32> = vec2<i32> 1, 2);",
            R"(test.wgsl:1:31 error: expected '(' for type constructor
 let i : vec2<i32> = vec2<i32> 1, 2);
@@ -563,7 +664,7 @@ let i : vec2<i32> = vec2<i32> 1, 2);
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclConstExprMissingRParen) {
+TEST_F(ParserImplErrorTest, GlobalDeclLetExprMissingRParen) {
     EXPECT("let i : vec2<i32> = vec2<i32>(1, 2;",
            R"(test.wgsl:1:35 error: expected ')' for type constructor
 let i : vec2<i32> = vec2<i32>(1, 2;

@@ -51,6 +51,9 @@ class Parameter final : public Castable<Parameter, Variable> {
     /// Destructor
     ~Parameter() override;
 
+    /// @returns "parameter"
+    const char* Kind() const override;
+
     /// Clones this node and all transitive child nodes using the `CloneContext`
     /// `ctx`.
     /// @param ctx the clone context

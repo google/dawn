@@ -144,18 +144,18 @@ TEST_P(LineCommentTerminatorTest, Terminators) {
     // Test that line comments are ended by blankspace characters other than
     // space, horizontal tab, left-to-right mark, and right-to-left mark.
     auto* c = GetParam();
-    std::string src = "let// This is a comment";
+    std::string src = "const// This is a comment";
     src += c;
     src += "ident";
     Source::File file("", src);
     Lexer l(&file);
 
     auto t = l.next();
-    EXPECT_TRUE(t.Is(Token::Type::kLet));
+    EXPECT_TRUE(t.Is(Token::Type::kConst));
     EXPECT_EQ(t.source().range.begin.line, 1u);
     EXPECT_EQ(t.source().range.begin.column, 1u);
     EXPECT_EQ(t.source().range.end.line, 1u);
-    EXPECT_EQ(t.source().range.end.column, 4u);
+    EXPECT_EQ(t.source().range.end.column, 6u);
 
     auto is_same_line = [](std::string_view v) {
         return v == kSpace || v == kHTab || v == kL2R || v == kR2L;

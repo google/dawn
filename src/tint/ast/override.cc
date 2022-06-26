@@ -32,6 +32,10 @@ Override::Override(Override&&) = default;
 
 Override::~Override() = default;
 
+const char* Override::Kind() const {
+    return "override";
+}
+
 const Override* Override::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
     auto sym = ctx->Clone(symbol);

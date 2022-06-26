@@ -31,6 +31,10 @@ Parameter::Parameter(Parameter&&) = default;
 
 Parameter::~Parameter() = default;
 
+const char* Parameter::Kind() const {
+    return "parameter";
+}
+
 const Parameter* Parameter::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
     auto sym = ctx->Clone(symbol);

@@ -34,6 +34,10 @@ Let::Let(Let&&) = default;
 
 Let::~Let() = default;
 
+const char* Let::Kind() const {
+    return "let";
+}
+
 const Let* Let::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
     auto sym = ctx->Clone(symbol);

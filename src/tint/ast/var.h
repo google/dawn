@@ -65,6 +65,9 @@ class Var final : public Castable<Var, Variable> {
     /// Destructor
     ~Var() override;
 
+    /// @returns "var"
+    const char* Kind() const override;
+
     /// Clones this node and all transitive child nodes using the `CloneContext`
     /// `ctx`.
     /// @param ctx the clone context

@@ -15,6 +15,11 @@
 #include "gmock/gmock.h"
 #include "src/tint/program.h"
 
+// TODO(crbug.com/tint/1580): Remove when 'const' is fully implemented.
+#if TINT_BUILD_WGSL_READER
+#include "src/tint/reader/wgsl/parser_impl.h"
+#endif
+
 #if TINT_BUILD_SPV_READER
 #include "src/tint/reader/spirv/parser_impl_test_helper.h"
 #endif
@@ -53,6 +58,11 @@ struct Flags {
 // Entry point for tint unit tests
 int main(int argc, char** argv) {
     testing::InitGoogleMock(&argc, argv);
+
+// TODO(crbug.com/tint/1580): Remove when 'const' is fully implemented.
+#if TINT_BUILD_WGSL_READER
+    tint::reader::wgsl::ParserImpl::EnableConst();
+#endif
 
 #if TINT_BUILD_WGSL_WRITER
     tint::Program::printer = [](const tint::Program* program) {

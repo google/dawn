@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_MissingSemicolon) {
     EXPECT_EQ(p->error(), "1:27: expected ';' for variable declaration");
 }
 
-TEST_F(ParserImplTest, GlobalDecl_GlobalConstant) {
+TEST_F(ParserImplTest, GlobalDecl_GlobalLet) {
     auto p = parser("let a : i32 = 2;");
     p->global_decl();
     ASSERT_FALSE(p->has_error()) << p->error();
@@ -61,25 +61,58 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalConstant) {
     EXPECT_EQ(v->symbol, program.Symbols().Get("a"));
 }
 
-TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_MissingInitializer) {
+TEST_F(ParserImplTest, GlobalDecl_GlobalLet_MissingInitializer) {
     auto p = parser("let a : vec2<i32>;");
     p->global_decl();
     ASSERT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), "1:18: expected '=' for 'let' declaration");
 }
 
-TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_Invalid) {
+TEST_F(ParserImplTest, GlobalDecl_GlobalLet_Invalid) {
     auto p = parser("let a : vec2<i32> 1.0;");
     p->global_decl();
     ASSERT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), "1:19: expected '=' for 'let' declaration");
 }
 
-TEST_F(ParserImplTest, GlobalDecl_GlobalConstant_MissingSemicolon) {
+TEST_F(ParserImplTest, GlobalDecl_GlobalLet_MissingSemicolon) {
     auto p = parser("let a : vec2<i32> = vec2<i32>(1, 2)");
     p->global_decl();
     ASSERT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), "1:36: expected ';' for 'let' declaration");
+}
+
+TEST_F(ParserImplTest, GlobalDecl_GlobalConst) {
+    auto p = parser("const a : i32 = 2;");
+    p->global_decl();
+    ASSERT_FALSE(p->has_error()) << p->error();
+
+    auto program = p->program();
+    ASSERT_EQ(program.AST().GlobalVariables().size(), 1u);
+
+    auto* v = program.AST().GlobalVariables()[0];
+    EXPECT_EQ(v->symbol, program.Symbols().Get("a"));
+}
+
+TEST_F(ParserImplTest, GlobalDecl_GlobalConst_MissingInitializer) {
+    auto p = parser("const a : vec2<i32>;");
+    p->global_decl();
+    ASSERT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:20: expected '=' for 'const' declaration");
+}
+
+TEST_F(ParserImplTest, GlobalDecl_GlobalConst_Invalid) {
+    auto p = parser("const a : vec2<i32> 1.0;");
+    p->global_decl();
+    ASSERT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:21: expected '=' for 'const' declaration");
+}
+
+TEST_F(ParserImplTest, GlobalDecl_GlobalConst_MissingSemicolon) {
+    auto p = parser("const a : vec2<i32> = vec2<i32>(1, 2)");
+    p->global_decl();
+    ASSERT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:38: expected ';' for 'const' declaration");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
