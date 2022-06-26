@@ -885,9 +885,9 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
     std::array<const sem::Type*, 3> arg_tys = {};
     size_t arg_count = 0;
 
-    constexpr const char* kErrBadType =
-        "workgroup_size argument must be either literal or module-scope constant of type i32 "
-        "or u32";
+    constexpr const char* kErrBadExpr =
+        "workgroup_size argument must be either a literal, constant, or overridable of type "
+        "abstract-integer, i32 or u32";
 
     for (int i = 0; i < 3; i++) {
         // Each argument to this attribute can either be a literal, an identifier for a module-scope
@@ -902,7 +902,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
         }
         auto* ty = expr->Type();
         if (!ty->IsAnyOf<sem::I32, sem::U32, sem::AbstractInt>()) {
-            AddError(kErrBadType, value->source);
+            AddError(kErrBadExpr, value->source);
             return false;
         }
 
@@ -935,7 +935,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
             // We have an variable of a module-scope constant.
             auto* decl = user->Variable()->Declaration();
             if (!decl->IsAnyOf<ast::Let, ast::Const, ast::Override>()) {
-                AddError(kErrBadType, values[i]->source);
+                AddError(kErrBadExpr, values[i]->source);
                 return false;
             }
             // Capture the constant if it is pipeline-overridable.
@@ -953,10 +953,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
         } else if (values[i]->Is<ast::LiteralExpression>()) {
             value = materialized->ConstantValue();
         } else {
-            AddError(
-                "workgroup_size argument must be either a literal or a "
-                "module-scope constant",
-                values[i]->source);
+            AddError(kErrBadExpr, values[i]->source);
             return false;
         }
 

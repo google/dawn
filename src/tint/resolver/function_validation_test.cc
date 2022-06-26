@@ -241,8 +241,8 @@ TEST_F(ResolverFunctionValidationTest, VoidFunctionReturnsAInt) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: return statement type must match its function return "
-              "type, returned 'abstract-int', expected 'void'");
+              "12:34 error: return statement type must match its function return type, returned "
+              "'abstract-int', expected 'void'");
 }
 
 TEST_F(ResolverFunctionValidationTest, VoidFunctionReturnsAFloat) {
@@ -251,8 +251,8 @@ TEST_F(ResolverFunctionValidationTest, VoidFunctionReturnsAFloat) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: return statement type must match its function return "
-              "type, returned 'abstract-float', expected 'void'");
+              "12:34 error: return statement type must match its function return type, returned "
+              "'abstract-float', expected 'void'");
 }
 
 TEST_F(ResolverFunctionValidationTest, VoidFunctionReturnsI32) {
@@ -261,8 +261,8 @@ TEST_F(ResolverFunctionValidationTest, VoidFunctionReturnsI32) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: return statement type must match its function return "
-              "type, returned 'i32', expected 'void'");
+              "12:34 error: return statement type must match its function return type, returned "
+              "'i32', expected 'void'");
 }
 
 TEST_F(ResolverFunctionValidationTest, FunctionTypeMustMatchReturnStatementType_void_fail) {
@@ -287,8 +287,8 @@ TEST_F(ResolverFunctionValidationTest, FunctionTypeMustMatchReturnStatementTypeM
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: return statement type must match its function return "
-              "type, returned 'void', expected 'f32'");
+              "12:34 error: return statement type must match its function return type, returned "
+              "'void', expected 'f32'");
 }
 
 TEST_F(ResolverFunctionValidationTest, FunctionTypeMustMatchReturnStatementTypeF32_pass) {
@@ -310,8 +310,8 @@ TEST_F(ResolverFunctionValidationTest, FunctionTypeMustMatchReturnStatementTypeF
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: return statement type must match its function return "
-              "type, returned 'i32', expected 'f32'");
+              "12:34 error: return statement type must match its function return type, returned "
+              "'i32', expected 'f32'");
 }
 
 TEST_F(ResolverFunctionValidationTest, FunctionTypeMustMatchReturnStatementTypeF32Alias_pass) {
@@ -337,8 +337,8 @@ TEST_F(ResolverFunctionValidationTest, FunctionTypeMustMatchReturnStatementTypeF
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: return statement type must match its function return "
-              "type, returned 'u32', expected 'f32'");
+              "12:34 error: return statement type must match its function return type, returned "
+              "'u32', expected 'f32'");
 }
 
 TEST_F(ResolverFunctionValidationTest, CannotCallEntryPoint) {
@@ -638,8 +638,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_BadType) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size argument must be either literal or "
-              "module-scope constant of type i32 or u32");
+              "12:34 error: workgroup_size argument must be either a literal, constant, or "
+              "overridable of type abstract-integer, i32 or u32");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_Negative) {
@@ -674,8 +674,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_BadType) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size argument must be either literal or "
-              "module-scope constant of type i32 or u32");
+              "12:34 error: workgroup_size argument must be either a literal, constant, or "
+              "overridable of type abstract-integer, i32 or u32");
 }
 
 // TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
@@ -689,8 +689,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Let_BadType) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size argument must be either literal or "
-              "module-scope constant of type i32 or u32");
+              "12:34 error: workgroup_size argument must be either a literal, constant, or "
+              "overridable of type abstract-integer, i32 or u32");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_Negative) {
@@ -778,8 +778,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_NonConst) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size argument must be either literal or "
-              "module-scope constant of type i32 or u32");
+              "12:34 error: workgroup_size argument must be either a literal, constant, or "
+              "overridable of type abstract-integer, i32 or u32");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr) {
@@ -791,8 +791,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size argument must be either a literal or "
-              "a module-scope constant");
+              "12:34 error: workgroup_size argument must be either a literal, constant, or "
+              "overridable of type abstract-integer, i32 or u32");
 }
 
 TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_NonPlain) {
