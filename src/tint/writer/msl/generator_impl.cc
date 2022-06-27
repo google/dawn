@@ -64,7 +64,7 @@
 #include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/transform/module_scope_var_to_entry_point_param.h"
-#include "src/tint/transform/promote_initializers_to_const_var.h"
+#include "src/tint/transform/promote_initializers_to_let.h"
 #include "src/tint/transform/promote_side_effects_to_decl.h"
 #include "src/tint/transform/remove_phonies.h"
 #include "src/tint/transform/simplify_pointers.h"
@@ -204,7 +204,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     manager.Add<transform::ExpandCompoundAssignment>();
     manager.Add<transform::PromoteSideEffectsToDecl>();
     manager.Add<transform::UnwindDiscardFunctions>();
-    manager.Add<transform::PromoteInitializersToConstVar>();
+    manager.Add<transform::PromoteInitializersToLet>();
 
     manager.Add<transform::VectorizeScalarMatrixConstructors>();
     manager.Add<transform::RemovePhonies>();
@@ -1709,7 +1709,7 @@ bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* exp
             // to a shader-creation time constant value, and this can be removed.
             if (auto constant = sem->ConstantValue()) {
                 // We do not want to inline array constants, as this will undo the work of
-                // PromoteInitializersToConstVar, which ensures that arrays are declarated in 'let's
+                // PromoteInitializersToLet, which ensures that arrays are declarated in 'let's
                 // before their usage.
                 if (!constant.Type()->Is<sem::Array>()) {
                     return EmitConstant(out, constant);

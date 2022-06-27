@@ -12,23 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_TRANSFORM_PROMOTE_INITIALIZERS_TO_CONST_VAR_H_
-#define SRC_TINT_TRANSFORM_PROMOTE_INITIALIZERS_TO_CONST_VAR_H_
+#ifndef SRC_TINT_TRANSFORM_PROMOTE_INITIALIZERS_TO_LET_H_
+#define SRC_TINT_TRANSFORM_PROMOTE_INITIALIZERS_TO_LET_H_
 
 #include "src/tint/transform/transform.h"
 
 namespace tint::transform {
 
-/// A transform that hoists the array and structure initializers to a constant
-/// variable, declared just before the statement of usage.
+/// A transform that hoists array and structure constructors, and identifiers resolving to a
+/// 'const' array to a 'let' variable, declared just before the statement of usage.
+/// This transform is used by backends that do not support expressions that operate on an immediate
+/// array or structure. For example, the following is not immediately expressable for HLSL:
+///   `array<i32, 2>(1, 2)[0]`
 /// @see crbug.com/tint/406
-class PromoteInitializersToConstVar : public Castable<PromoteInitializersToConstVar, Transform> {
+class PromoteInitializersToLet : public Castable<PromoteInitializersToLet, Transform> {
   public:
     /// Constructor
-    PromoteInitializersToConstVar();
+    PromoteInitializersToLet();
 
     /// Destructor
-    ~PromoteInitializersToConstVar() override;
+    ~PromoteInitializersToLet() override;
 
   protected:
     /// Runs the transform using the CloneContext built for transforming a
@@ -42,4 +45,4 @@ class PromoteInitializersToConstVar : public Castable<PromoteInitializersToConst
 
 }  // namespace tint::transform
 
-#endif  // SRC_TINT_TRANSFORM_PROMOTE_INITIALIZERS_TO_CONST_VAR_H_
+#endif  // SRC_TINT_TRANSFORM_PROMOTE_INITIALIZERS_TO_LET_H_

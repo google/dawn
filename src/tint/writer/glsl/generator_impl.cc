@@ -58,7 +58,7 @@
 #include "src/tint/transform/fold_trivial_single_use_lets.h"
 #include "src/tint/transform/loop_to_for_loop.h"
 #include "src/tint/transform/manager.h"
-#include "src/tint/transform/promote_initializers_to_const_var.h"
+#include "src/tint/transform/promote_initializers_to_let.h"
 #include "src/tint/transform/promote_side_effects_to_decl.h"
 #include "src/tint/transform/remove_phonies.h"
 #include "src/tint/transform/renamer.h"
@@ -226,7 +226,7 @@ SanitizedResult Sanitize(const Program* in,
         options.binding_points, options.access_controls, options.allow_collisions);
     manager.Add<transform::BindingRemapper>();
 
-    manager.Add<transform::PromoteInitializersToConstVar>();
+    manager.Add<transform::PromoteInitializersToLet>();
     manager.Add<transform::AddEmptyEntryPoint>();
     manager.Add<transform::AddSpirvBlockAttribute>();
     data.Add<transform::CanonicalizeEntryPointIO::Config>(
@@ -1773,7 +1773,7 @@ bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* exp
             // to a shader-creation time constant value, and this can be removed.
             if (auto constant = sem->ConstantValue()) {
                 // We do not want to inline array constants, as this will undo the work of
-                // PromoteInitializersToConstVar, which ensures that arrays are declarated in 'let's
+                // PromoteInitializersToLet, which ensures that arrays are declarated in 'let's
                 // before their usage.
                 if (!constant.Type()->Is<sem::Array>()) {
                     return EmitConstant(out, constant);

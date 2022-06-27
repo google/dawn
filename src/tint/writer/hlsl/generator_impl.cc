@@ -60,7 +60,7 @@
 #include "src/tint/transform/loop_to_for_loop.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/transform/num_workgroups_from_uniform.h"
-#include "src/tint/transform/promote_initializers_to_const_var.h"
+#include "src/tint/transform/promote_initializers_to_let.h"
 #include "src/tint/transform/promote_side_effects_to_decl.h"
 #include "src/tint/transform/remove_continue_in_switch.h"
 #include "src/tint/transform/remove_phonies.h"
@@ -231,7 +231,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     // DecomposeMemoryAccess special-cases the arrayLength() intrinsic, which
     // will be transformed by CalculateArrayLength
     manager.Add<transform::CalculateArrayLength>();
-    manager.Add<transform::PromoteInitializersToConstVar>();
+    manager.Add<transform::PromoteInitializersToLet>();
 
     manager.Add<transform::RemoveContinueInSwitch>();
 
@@ -2618,7 +2618,7 @@ bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* exp
             // to a shader-creation time constant value, and this can be removed.
             if (auto constant = sem->ConstantValue()) {
                 // We do not want to inline array constants, as this will undo the work of
-                // PromoteInitializersToConstVar, which ensures that arrays are declarated in 'let's
+                // PromoteInitializersToLet, which ensures that arrays are declarated in 'let's
                 // before their usage.
                 if (!constant.Type()->Is<sem::Array>()) {
                     return EmitConstant(out, constant);
