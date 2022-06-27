@@ -1023,6 +1023,11 @@
                 ]
             },
             {
+                "name": "create error external texture",
+                "returns": "external texture",
+                "tags": ["dawn"]
+            },
+            {
                 "name": "create pipeline layout",
                 "returns": "pipeline layout",
                 "args": [

@@ -541,4 +541,28 @@ TEST_F(ExternalTextureTest, BindGroupDoesNotMatchLayout) {
     }
 }
 
+// Ensure that bind group validation catches error external textures.
+TEST_F(ExternalTextureTest, UseErrorExternalTextureInBindGroup) {
+    // Control case should succeed.
+    {
+        wgpu::TextureDescriptor textureDescriptor = CreateTextureDescriptor();
+        wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
+
+        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
+        externalDesc.plane0 = texture.CreateView();
+        wgpu::ExternalTexture externalTexture = device.CreateExternalTexture(&externalDesc);
+        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout}});
+        utils::MakeBindGroup(device, bgl, {{0, externalTexture}});
+    }
+
+    // Bind group creation should fail when an error external texture is present.
+    {
+        wgpu::ExternalTexture errorExternalTexture = device.CreateErrorExternalTexture();
+        wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Fragment, &utils::kExternalTextureBindingLayout}});
+        ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl, {{0, errorExternalTexture}}));
+    }
+}
+
 }  // namespace

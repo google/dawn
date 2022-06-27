@@ -123,8 +123,9 @@ ExternalTextureBase::ExternalTextureBase(DeviceBase* device)
     TrackInDevice();
 }
 
+// Error external texture cannot be used in bind group.
 ExternalTextureBase::ExternalTextureBase(DeviceBase* device, ObjectBase::ErrorTag tag)
-    : ApiObjectBase(device, tag) {}
+    : ApiObjectBase(device, tag), mState(ExternalTextureState::Destroyed) {}
 
 ExternalTextureBase::~ExternalTextureBase() = default;
 

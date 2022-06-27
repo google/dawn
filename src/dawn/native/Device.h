@@ -264,6 +264,8 @@ class DeviceBase : public RefCountedWithExternalCount {
     // For Dawn Wire
     BufferBase* APICreateErrorBuffer();
 
+    ExternalTextureBase* APICreateErrorExternalTexture();
+
     QueueBase* APIGetQueue();
 
     bool APIGetLimits(SupportedLimits* limits) const;
