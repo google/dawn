@@ -1,0 +1,8 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void f() {
+  float4x4 m = float4x4(float4(0.0f), float4(0.0f), float4(0.0f), float4(0.0f));
+  float4x4 const m_1 = float4x4(m);
+}
+

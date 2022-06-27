@@ -1362,6 +1362,15 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(const sem::Call* call,
         }
     }
 
+    if (auto* res_mat = result_type->As<sem::Matrix>()) {
+        auto* value_type = args[0]->Type()->UnwrapRef();
+        if (auto* val_mat = value_type->As<sem::Matrix>()) {
+            // Generate passthrough for matrices of the same type
+            can_cast_or_copy =
+                (res_mat->columns() == val_mat->columns()) && (res_mat->rows() == val_mat->rows());
+        }
+    }
+
     if (can_cast_or_copy) {
         return GenerateCastOrCopyOrPassthrough(result_type, args[0]->Declaration(), global_var);
     }
@@ -1607,6 +1616,8 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
         }
 
         return result_id;
+    } else if (from_type->Is<sem::Matrix>()) {
+        return val_id;
     } else {
         TINT_ICE(Writer, builder_.Diagnostics()) << "Invalid from_type";
     }
