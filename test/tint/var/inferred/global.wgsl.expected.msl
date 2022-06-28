@@ -1,0 +1,56 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
+struct MyStruct {
+  float f1;
+};
+
+kernel void f() {
+  thread int tint_symbol = 1;
+  thread uint tint_symbol_1 = 1u;
+  thread float tint_symbol_2 = 1.0f;
+  thread int3 tint_symbol_3 = int3(1);
+  thread uint3 tint_symbol_4 = uint3(1u, 2u, 3u);
+  thread float3 tint_symbol_5 = float3(1.0f, 2.0f, 3.0f);
+  thread MyStruct tint_symbol_6 = {.f1=1.0f};
+  thread tint_array<float, 10> tint_symbol_7 = tint_array<float, 10>{};
+  thread int tint_symbol_8 = 0;
+  thread uint tint_symbol_9 = 0u;
+  thread float tint_symbol_10 = 0.0f;
+  thread MyStruct tint_symbol_11 = {};
+  thread MyStruct tint_symbol_12 = {};
+  thread tint_array<float, 10> tint_symbol_13 = tint_array<float, 10>{};
+  thread int3 tint_symbol_14 = int3(1, 2, 3);
+  thread float3 tint_symbol_15 = float3(1.0f, 2.0f, 3.0f);
+  int const l1 = tint_symbol;
+  uint const l2 = tint_symbol_1;
+  float const l3 = tint_symbol_2;
+  int3 const l4 = tint_symbol_3;
+  uint3 const l5 = tint_symbol_4;
+  float3 const l6 = tint_symbol_5;
+  MyStruct const l7 = tint_symbol_6;
+  tint_array<float, 10> const l8 = tint_symbol_7;
+  int const l9 = tint_symbol_8;
+  uint const l10 = tint_symbol_9;
+  float const l11 = tint_symbol_10;
+  MyStruct const l12 = tint_symbol_11;
+  MyStruct const l13 = tint_symbol_12;
+  tint_array<float, 10> const l14 = tint_symbol_13;
+  int3 const l15 = tint_symbol_14;
+  float3 const l16 = tint_symbol_15;
+  return;
+}
+

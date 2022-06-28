@@ -51,7 +51,7 @@ TEST_F(ParserImplTest, VariableDecl_Unicode_Parses) {
 
 TEST_F(ParserImplTest, VariableDecl_Inferred_Parses) {
     auto p = parser("var my_var = 1.0");
-    auto v = p->variable_decl(/*allow_inferred = */ true);
+    auto v = p->variable_decl();
     EXPECT_FALSE(p->has_error());
     EXPECT_TRUE(v.matched);
     EXPECT_FALSE(v.errored);
@@ -70,15 +70,6 @@ TEST_F(ParserImplTest, VariableDecl_MissingVar) {
 
     auto t = p->next();
     ASSERT_TRUE(t.IsIdentifier());
-}
-
-TEST_F(ParserImplTest, VariableDecl_InvalidIdentDecl) {
-    auto p = parser("var my_var f32");
-    auto v = p->variable_decl();
-    EXPECT_FALSE(v.matched);
-    EXPECT_TRUE(v.errored);
-    EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:12: expected ':' for variable declaration");
 }
 
 TEST_F(ParserImplTest, VariableDecl_WithStorageClass) {

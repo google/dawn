@@ -393,18 +393,15 @@ class ParserImpl {
     /// @param attrs the list of attributes for the constant declaration.
     Maybe<const ast::Variable*> global_constant_decl(ast::AttributeList& attrs);
     /// Parses a `variable_decl` grammar element
-    /// @param allow_inferred if true, do not fail if variable decl does not
-    /// specify type
     /// @returns the parsed variable declaration info
-    Maybe<VarDeclInfo> variable_decl(bool allow_inferred = false);
+    Maybe<VarDeclInfo> variable_decl();
     /// Parses a `variable_ident_decl` grammar element, erroring on parse
     /// failure.
     /// @param use a description of what was being parsed if an error was raised.
     /// @param allow_inferred if true, do not fail if variable decl does not
     /// specify type
     /// @returns the identifier and type parsed or empty otherwise
-    Expect<TypedIdentifier> expect_variable_ident_decl(std::string_view use,
-                                                       bool allow_inferred = false);
+    Expect<TypedIdentifier> expect_variable_ident_decl(std::string_view use, bool allow_inferred);
     /// Parses a `variable_qualifier` grammar element
     /// @returns the variable qualifier information
     Maybe<VariableQualifier> variable_qualifier();

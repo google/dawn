@@ -641,7 +641,7 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(ast::AttributeList&
 
 // variable_decl
 //   : VAR variable_qualifier? variable_ident_decl
-Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl(bool allow_inferred) {
+Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
     Source source;
     if (!match(Token::Type::kVar, &source)) {
         return Failure::kNoMatch;
@@ -656,7 +656,8 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl(bool allow_inferred) {
         vq = explicit_vq.value;
     }
 
-    auto decl = expect_variable_ident_decl("variable declaration", allow_inferred);
+    auto decl = expect_variable_ident_decl("variable declaration",
+                                           /*allow_inferred = */ true);
     if (decl.errored) {
         return Failure::kErrored;
     }
@@ -1379,7 +1380,8 @@ Expect<ast::StructMember*> ParserImpl::expect_struct_member() {
         return Failure::kErrored;
     }
 
-    auto decl = expect_variable_ident_decl("struct member");
+    auto decl = expect_variable_ident_decl("struct member",
+                                           /*allow_inferred = */ false);
     if (decl.errored) {
         return Failure::kErrored;
     }
@@ -1515,7 +1517,8 @@ Expect<ast::ParameterList> ParserImpl::expect_param_list() {
 Expect<ast::Parameter*> ParserImpl::expect_param() {
     auto attrs = attribute_list();
 
-    auto decl = expect_variable_ident_decl("parameter");
+    auto decl = expect_variable_ident_decl("parameter",
+                                           /*allow_inferred = */ false);
     if (decl.errored) {
         return Failure::kErrored;
     }
@@ -1798,7 +1801,7 @@ Maybe<const ast::ReturnStatement*> ParserImpl::return_stmt() {
 //   | variable_decl EQUAL logical_or_expression
 //   | CONST variable_ident_decl EQUAL logical_or_expression
 Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
-    if (const_enabled && match(Token::Type::kConst)) {
+    if (match(Token::Type::kConst)) {
         auto decl = expect_variable_ident_decl("'const' declaration",
                                                /*allow_inferred = */ true);
         if (decl.errored) {
@@ -1854,7 +1857,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
         return create<ast::VariableDeclStatement>(decl->source, let);
     }
 
-    auto decl = variable_decl(/*allow_inferred = */ true);
+    auto decl = variable_decl();
     if (decl.errored) {
         return Failure::kErrored;
     }

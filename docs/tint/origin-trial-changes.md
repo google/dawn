@@ -2,6 +2,10 @@
 
 ## Changes for M105
 
+### New features
+
+* Module-scope `var<private>` can now infer the storage type, like function-scope `var`. [tint:1584](crbug.com/tint/1584)
+
 ### Breaking changes
 
 * The `smoothStep()` builtin has been removed (use `smoothstep` instead). [tint:1483](crbug.com/tint/1483)

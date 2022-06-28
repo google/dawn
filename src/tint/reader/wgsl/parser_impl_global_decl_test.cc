@@ -33,13 +33,20 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
 
     auto* v = program.AST().GlobalVariables()[0];
     EXPECT_EQ(v->symbol, program.Symbols().Get("a"));
+    EXPECT_TRUE(Is<ast::Vector>(v->type));
 }
 
-TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Inferred_Invalid) {
+TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Inferred) {
     auto p = parser("var<private> a = vec2<i32>(1, 2);");
     p->global_decl();
-    ASSERT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:16: expected ':' for variable declaration");
+    ASSERT_FALSE(p->has_error()) << p->error();
+
+    auto program = p->program();
+    ASSERT_EQ(program.AST().GlobalVariables().size(), 1u);
+
+    auto* v = program.AST().GlobalVariables()[0];
+    EXPECT_EQ(v->symbol, program.Symbols().Get("a"));
+    EXPECT_EQ(v->type, nullptr);
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_MissingSemicolon) {

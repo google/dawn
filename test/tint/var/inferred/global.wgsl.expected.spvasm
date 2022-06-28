@@ -1,0 +1,104 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 73
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpName %v1 "v1"
+               OpName %v2 "v2"
+               OpName %v3 "v3"
+               OpName %v4 "v4"
+               OpName %v5 "v5"
+               OpName %v6 "v6"
+               OpName %MyStruct "MyStruct"
+               OpMemberName %MyStruct 0 "f1"
+               OpName %v7 "v7"
+               OpName %v8 "v8"
+               OpName %v9 "v9"
+               OpName %v10 "v10"
+               OpName %v11 "v11"
+               OpName %v12 "v12"
+               OpName %v13 "v13"
+               OpName %v14 "v14"
+               OpName %v15 "v15"
+               OpName %v16 "v16"
+               OpName %f "f"
+               OpMemberDecorate %MyStruct 0 Offset 0
+               OpDecorate %_arr_float_uint_10 ArrayStride 4
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+%_ptr_Private_int = OpTypePointer Private %int
+         %v1 = OpVariable %_ptr_Private_int Private %int_1
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+%_ptr_Private_uint = OpTypePointer Private %uint
+         %v2 = OpVariable %_ptr_Private_uint Private %uint_1
+      %float = OpTypeFloat 32
+    %float_1 = OpConstant %float 1
+%_ptr_Private_float = OpTypePointer Private %float
+         %v3 = OpVariable %_ptr_Private_float Private %float_1
+      %v3int = OpTypeVector %int 3
+         %14 = OpConstantComposite %v3int %int_1 %int_1 %int_1
+%_ptr_Private_v3int = OpTypePointer Private %v3int
+         %v4 = OpVariable %_ptr_Private_v3int Private %14
+     %v3uint = OpTypeVector %uint 3
+     %uint_2 = OpConstant %uint 2
+     %uint_3 = OpConstant %uint 3
+         %20 = OpConstantComposite %v3uint %uint_1 %uint_2 %uint_3
+%_ptr_Private_v3uint = OpTypePointer Private %v3uint
+         %v5 = OpVariable %_ptr_Private_v3uint Private %20
+    %v3float = OpTypeVector %float 3
+    %float_2 = OpConstant %float 2
+    %float_3 = OpConstant %float 3
+         %26 = OpConstantComposite %v3float %float_1 %float_2 %float_3
+%_ptr_Private_v3float = OpTypePointer Private %v3float
+         %v6 = OpVariable %_ptr_Private_v3float Private %26
+   %MyStruct = OpTypeStruct %float
+         %30 = OpConstantComposite %MyStruct %float_1
+%_ptr_Private_MyStruct = OpTypePointer Private %MyStruct
+         %v7 = OpVariable %_ptr_Private_MyStruct Private %30
+    %uint_10 = OpConstant %uint 10
+%_arr_float_uint_10 = OpTypeArray %float %uint_10
+         %35 = OpConstantNull %_arr_float_uint_10
+%_ptr_Private__arr_float_uint_10 = OpTypePointer Private %_arr_float_uint_10
+         %v8 = OpVariable %_ptr_Private__arr_float_uint_10 Private %35
+         %38 = OpConstantNull %int
+         %v9 = OpVariable %_ptr_Private_int Private %38
+         %40 = OpConstantNull %uint
+        %v10 = OpVariable %_ptr_Private_uint Private %40
+         %42 = OpConstantNull %float
+        %v11 = OpVariable %_ptr_Private_float Private %42
+         %44 = OpConstantNull %MyStruct
+        %v12 = OpVariable %_ptr_Private_MyStruct Private %44
+        %v13 = OpVariable %_ptr_Private_MyStruct Private %44
+        %v14 = OpVariable %_ptr_Private__arr_float_uint_10 Private %35
+      %int_2 = OpConstant %int 2
+      %int_3 = OpConstant %int 3
+         %50 = OpConstantComposite %v3int %int_1 %int_2 %int_3
+        %v15 = OpVariable %_ptr_Private_v3int Private %50
+        %v16 = OpVariable %_ptr_Private_v3float Private %26
+       %void = OpTypeVoid
+         %53 = OpTypeFunction %void
+          %f = OpFunction %void None %53
+         %56 = OpLabel
+         %57 = OpLoad %int %v1
+         %58 = OpLoad %uint %v2
+         %59 = OpLoad %float %v3
+         %60 = OpLoad %v3int %v4
+         %61 = OpLoad %v3uint %v5
+         %62 = OpLoad %v3float %v6
+         %63 = OpLoad %MyStruct %v7
+         %64 = OpLoad %_arr_float_uint_10 %v8
+         %65 = OpLoad %int %v9
+         %66 = OpLoad %uint %v10
+         %67 = OpLoad %float %v11
+         %68 = OpLoad %MyStruct %v12
+         %69 = OpLoad %MyStruct %v13
+         %70 = OpLoad %_arr_float_uint_10 %v14
+         %71 = OpLoad %v3int %v15
+         %72 = OpLoad %v3float %v16
+               OpReturn
+               OpFunctionEnd
