@@ -151,6 +151,8 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
 
     {  // Builtin polyfills
         transform::BuiltinPolyfill::Builtins polyfills;
+        polyfills.acosh = transform::BuiltinPolyfill::Level::kRangeCheck;
+        polyfills.atanh = transform::BuiltinPolyfill::Level::kRangeCheck;
         polyfills.extract_bits = transform::BuiltinPolyfill::Level::kClampParameters;
         polyfills.first_leading_bit = true;
         polyfills.first_trailing_bit = true;
@@ -1351,9 +1353,12 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
     std::string out = "";
     switch (builtin->Type()) {
         case sem::BuiltinType::kAcos:
+        case sem::BuiltinType::kAcosh:
         case sem::BuiltinType::kAll:
         case sem::BuiltinType::kAny:
         case sem::BuiltinType::kAsin:
+        case sem::BuiltinType::kAsinh:
+        case sem::BuiltinType::kAtanh:
         case sem::BuiltinType::kAtan:
         case sem::BuiltinType::kAtan2:
         case sem::BuiltinType::kCeil:

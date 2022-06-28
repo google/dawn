@@ -44,6 +44,100 @@ struct BuiltinPolyfill::State {
     /// The source clone context
     const sem::Info& sem = ctx.src->Sem();
 
+    /// Builds the polyfill function for the `acosh` builtin
+    /// @param ty the parameter and return type for the function
+    /// @return the polyfill function name
+    Symbol acosh(const sem::Type* ty) {
+        auto name = b.Symbols().New("tint_acosh");
+        uint32_t width = WidthOf(ty);
+
+        auto V = [&](AFloat value) -> const ast::Expression* {
+            const ast::Expression* expr = b.Expr(value);
+            if (width == 1) {
+                return expr;
+            }
+            return b.Construct(T(ty), expr);
+        };
+
+        ast::StatementList body;
+        switch (polyfill.acosh) {
+            case Level::kFull:
+                // return log(x + sqrt(x*x - 1));
+                body.emplace_back(b.Return(
+                    b.Call("log", b.Add("x", b.Call("sqrt", b.Sub(b.Mul("x", "x"), 1_a))))));
+                break;
+            case Level::kRangeCheck: {
+                // return select(acosh(x), 0, x < 1);
+                body.emplace_back(b.Return(
+                    b.Call("select", b.Call("acosh", "x"), V(0.0_a), b.LessThan("x", V(1.0_a)))));
+                break;
+            }
+            default:
+                TINT_ICE(Transform, b.Diagnostics())
+                    << "unhandled polyfill level: " << static_cast<int>(polyfill.acosh);
+                return {};
+        }
+
+        b.Func(name, {b.Param("x", T(ty))}, T(ty), body);
+
+        return name;
+    }
+
+    /// Builds the polyfill function for the `asinh` builtin
+    /// @param ty the parameter and return type for the function
+    /// @return the polyfill function name
+    Symbol asinh(const sem::Type* ty) {
+        auto name = b.Symbols().New("tint_sinh");
+
+        ast::StatementList body;
+
+        // return log(x + sqrt(x*x + 1));
+        body.emplace_back(
+            b.Return(b.Call("log", b.Add("x", b.Call("sqrt", b.Add(b.Mul("x", "x"), 1_a))))));
+
+        b.Func(name, {b.Param("x", T(ty))}, T(ty), body);
+
+        return name;
+    }
+
+    /// Builds the polyfill function for the `atanh` builtin
+    /// @param ty the parameter and return type for the function
+    /// @return the polyfill function name
+    Symbol atanh(const sem::Type* ty) {
+        auto name = b.Symbols().New("tint_atanh");
+        uint32_t width = WidthOf(ty);
+
+        auto V = [&](AFloat value) -> const ast::Expression* {
+            const ast::Expression* expr = b.Expr(value);
+            if (width == 1) {
+                return expr;
+            }
+            return b.Construct(T(ty), expr);
+        };
+
+        ast::StatementList body;
+        switch (polyfill.atanh) {
+            case Level::kFull:
+                // return log((1+x) / (1-x)) * 0.5
+                body.emplace_back(
+                    b.Return(b.Mul(b.Call("log", b.Div(b.Add(1_a, "x"), b.Sub(1_a, "x"))), 0.5_a)));
+                break;
+            case Level::kRangeCheck:
+                // return select(atanh(x), 0, x >= 1);
+                body.emplace_back(b.Return(b.Call("select", b.Call("atanh", "x"), V(0.0_a),
+                                                  b.GreaterThanEqual("x", V(1.0_a)))));
+                break;
+            default:
+                TINT_ICE(Transform, b.Diagnostics())
+                    << "unhandled polyfill level: " << static_cast<int>(polyfill.acosh);
+                return {};
+        }
+
+        b.Func(name, {b.Param("x", T(ty))}, T(ty), body);
+
+        return name;
+    }
+
     /// Builds the polyfill function for the `countLeadingZeros` builtin
     /// @param ty the parameter and return type for the function
     /// @return the polyfill function name
@@ -440,6 +534,21 @@ bool BuiltinPolyfill::ShouldRun(const Program* program, const DataMap& data) con
             if (auto* call = sem.Get<sem::Call>(node)) {
                 if (auto* builtin = call->Target()->As<sem::Builtin>()) {
                     switch (builtin->Type()) {
+                        case sem::BuiltinType::kAcosh:
+                            if (builtins.acosh != Level::kNone) {
+                                return true;
+                            }
+                            break;
+                        case sem::BuiltinType::kAsinh:
+                            if (builtins.asinh) {
+                                return true;
+                            }
+                            break;
+                        case sem::BuiltinType::kAtanh:
+                            if (builtins.atanh != Level::kNone) {
+                                return true;
+                            }
+                            break;
                         case sem::BuiltinType::kCountLeadingZeros:
                             if (builtins.count_leading_zeros) {
                                 return true;
@@ -496,6 +605,24 @@ void BuiltinPolyfill::Run(CloneContext& ctx, const DataMap& data, DataMap&) cons
             if (auto* builtin = call->Target()->As<sem::Builtin>()) {
                 Symbol polyfill;
                 switch (builtin->Type()) {
+                    case sem::BuiltinType::kAcosh:
+                        if (builtins.acosh != Level::kNone) {
+                            polyfill = utils::GetOrCreate(
+                                polyfills, builtin, [&] { return s.acosh(builtin->ReturnType()); });
+                        }
+                        break;
+                    case sem::BuiltinType::kAsinh:
+                        if (builtins.asinh) {
+                            polyfill = utils::GetOrCreate(
+                                polyfills, builtin, [&] { return s.asinh(builtin->ReturnType()); });
+                        }
+                        break;
+                    case sem::BuiltinType::kAtanh:
+                        if (builtins.atanh != Level::kNone) {
+                            polyfill = utils::GetOrCreate(
+                                polyfills, builtin, [&] { return s.atanh(builtin->ReturnType()); });
+                        }
+                        break;
                     case sem::BuiltinType::kCountLeadingZeros:
                         if (builtins.count_leading_zeros) {
                             polyfill = utils::GetOrCreate(polyfills, builtin, [&] {

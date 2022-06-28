@@ -33,12 +33,20 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
         kNone,
         /// Clamp the parameters to the inner implementation.
         kClampParameters,
+        /// Range check the input.
+        kRangeCheck,
         /// Polyfill the entire function
         kFull,
     };
 
     /// Specifies the builtins that should be polyfilled by the transform.
     struct Builtins {
+        /// What level should `acosh` be polyfilled?
+        Level acosh = Level::kNone;
+        /// Should `asinh` be polyfilled?
+        bool asinh = false;
+        /// What level should `atanh` be polyfilled?
+        Level atanh = Level::kNone;
         /// Should `countLeadingZeros()` be polyfilled?
         bool count_leading_zeros = false;
         /// Should `countTrailingZeros()` be polyfilled?

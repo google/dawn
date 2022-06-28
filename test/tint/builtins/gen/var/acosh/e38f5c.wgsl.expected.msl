@@ -1,0 +1,38 @@
+#include <metal_stdlib>
+
+using namespace metal;
+float3 tint_acosh(float3 x) {
+  return select(acosh(x), float3(0.0f), (x < float3(1.0f)));
+}
+
+void acosh_e38f5c() {
+  float3 arg_0 = float3(0.0f);
+  float3 res = tint_acosh(arg_0);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  acosh_e38f5c();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  acosh_e38f5c();
+  return;
+}
+
+kernel void compute_main() {
+  acosh_e38f5c();
+  return;
+}
+

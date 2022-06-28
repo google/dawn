@@ -5,6 +5,7 @@
 ### New features
 
 * Module-scope `var<private>` can now infer the storage type, like function-scope `var`. [tint:1584](crbug.com/tint/1584)
+* The `acosh`, `asinh`, and `atanh` builtin functions are now supported [tint:1465](crbug.com/tint/1465)
 
 ### Breaking changes
 

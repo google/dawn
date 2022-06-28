@@ -42,6 +42,292 @@ TEST_F(BuiltinPolyfillTest, EmptyModule) {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// acosh
+////////////////////////////////////////////////////////////////////////////////
+DataMap polyfillAcosh(Level level) {
+    BuiltinPolyfill::Builtins builtins;
+    builtins.acosh = level;
+    DataMap data;
+    data.Add<BuiltinPolyfill::Config>(builtins);
+    return data;
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunAcosh) {
+    auto* src = R"(
+fn f() {
+  acosh(1.0);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillAcosh(Level::kNone)));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillAcosh(Level::kClampParameters)));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillAcosh(Level::kFull)));
+}
+
+TEST_F(BuiltinPolyfillTest, Acosh_Full_f32) {
+    auto* src = R"(
+fn f() {
+  let r : f32 = acosh(1234);
+}
+)";
+
+    auto* expect = R"(
+fn tint_acosh(x : f32) -> f32 {
+  return log((x + sqrt(((x * x) - 1))));
+}
+
+fn f() {
+  let r : f32 = tint_acosh(1234);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillAcosh(Level::kFull));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, Acosh_Full_vec3_f32) {
+    auto* src = R"(
+fn f() {
+  let r : vec3<f32> = acosh(vec3<f32>(1234));
+}
+)";
+
+    auto* expect = R"(
+fn tint_acosh(x : vec3<f32>) -> vec3<f32> {
+  return log((x + sqrt(((x * x) - 1))));
+}
+
+fn f() {
+  let r : vec3<f32> = tint_acosh(vec3<f32>(1234));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillAcosh(Level::kFull));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, Acosh_Range_f32) {
+    auto* src = R"(
+fn f() {
+  let r : f32 = acosh(1234);
+}
+)";
+
+    auto* expect = R"(
+fn tint_acosh(x : f32) -> f32 {
+  return select(acosh(x), 0.0, (x < 1.0));
+}
+
+fn f() {
+  let r : f32 = tint_acosh(1234);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillAcosh(Level::kRangeCheck));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, Acosh_Range_vec3_f32) {
+    auto* src = R"(
+fn f() {
+  let r : vec3<f32> = acosh(vec3<f32>(1234));
+}
+)";
+
+    auto* expect = R"(
+fn tint_acosh(x : vec3<f32>) -> vec3<f32> {
+  return select(acosh(x), vec3<f32>(0.0), (x < vec3<f32>(1.0)));
+}
+
+fn f() {
+  let r : vec3<f32> = tint_acosh(vec3<f32>(1234));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillAcosh(Level::kRangeCheck));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// asinh
+////////////////////////////////////////////////////////////////////////////////
+DataMap polyfillSinh() {
+    BuiltinPolyfill::Builtins builtins;
+    builtins.asinh = true;
+    DataMap data;
+    data.Add<BuiltinPolyfill::Config>(builtins);
+    return data;
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunAsinh) {
+    auto* src = R"(
+fn f() {
+  asinh(1.0);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillSinh()));
+}
+
+TEST_F(BuiltinPolyfillTest, Asinh_f32) {
+    auto* src = R"(
+fn f() {
+  let r : f32 = asinh(1234);
+}
+)";
+
+    auto* expect = R"(
+fn tint_sinh(x : f32) -> f32 {
+  return log((x + sqrt(((x * x) + 1))));
+}
+
+fn f() {
+  let r : f32 = tint_sinh(1234);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillSinh());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, Asinh_vec3_f32) {
+    auto* src = R"(
+fn f() {
+  let r : vec3<f32> = asinh(vec3<f32>(1234));
+}
+)";
+
+    auto* expect = R"(
+fn tint_sinh(x : vec3<f32>) -> vec3<f32> {
+  return log((x + sqrt(((x * x) + 1))));
+}
+
+fn f() {
+  let r : vec3<f32> = tint_sinh(vec3<f32>(1234));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillSinh());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// atanh
+////////////////////////////////////////////////////////////////////////////////
+DataMap polyfillAtanh(Level level) {
+    BuiltinPolyfill::Builtins builtins;
+    builtins.atanh = level;
+    DataMap data;
+    data.Add<BuiltinPolyfill::Config>(builtins);
+    return data;
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunAtanh) {
+    auto* src = R"(
+fn f() {
+  atanh(1.0);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillAtanh(Level::kNone)));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillAtanh(Level::kClampParameters)));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillAtanh(Level::kFull)));
+}
+
+TEST_F(BuiltinPolyfillTest, Atanh_Full_f32) {
+    auto* src = R"(
+fn f() {
+  let r : f32 = atanh(1234);
+}
+)";
+
+    auto* expect = R"(
+fn tint_atanh(x : f32) -> f32 {
+  return (log(((1 + x) / (1 - x))) * 0.5);
+}
+
+fn f() {
+  let r : f32 = tint_atanh(1234);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillAtanh(Level::kFull));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, Atanh_Full_vec3_f32) {
+    auto* src = R"(
+fn f() {
+  let r : vec3<f32> = atanh(vec3<f32>(1234));
+}
+)";
+
+    auto* expect = R"(
+fn tint_atanh(x : vec3<f32>) -> vec3<f32> {
+  return (log(((1 + x) / (1 - x))) * 0.5);
+}
+
+fn f() {
+  let r : vec3<f32> = tint_atanh(vec3<f32>(1234));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillAtanh(Level::kFull));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, Atanh_Range_f32) {
+    auto* src = R"(
+fn f() {
+  let r : f32 = atanh(1234);
+}
+)";
+
+    auto* expect = R"(
+fn tint_atanh(x : f32) -> f32 {
+  return select(atanh(x), 0.0, (x >= 1.0));
+}
+
+fn f() {
+  let r : f32 = tint_atanh(1234);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillAtanh(Level::kRangeCheck));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, Atanh_Range_vec3_f32) {
+    auto* src = R"(
+fn f() {
+  let r : vec3<f32> = atanh(vec3<f32>(1234));
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  let r : vec3<f32> = atanh(vec3<f32>(1234));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillAcosh(Level::kRangeCheck));
+
+    EXPECT_EQ(expect, str(got));
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // countLeadingZeros
 ////////////////////////////////////////////////////////////////////////////////
 DataMap polyfillCountLeadingZeros() {

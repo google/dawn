@@ -103,12 +103,18 @@ uint32_t builtin_to_glsl_method(const sem::Builtin* builtin) {
     switch (builtin->Type()) {
         case BuiltinType::kAcos:
             return GLSLstd450Acos;
+        case BuiltinType::kAcosh:
+            return GLSLstd450Acosh;
         case BuiltinType::kAsin:
             return GLSLstd450Asin;
+        case BuiltinType::kAsinh:
+            return GLSLstd450Asinh;
         case BuiltinType::kAtan:
             return GLSLstd450Atan;
         case BuiltinType::kAtan2:
             return GLSLstd450Atan2;
+        case BuiltinType::kAtanh:
+            return GLSLstd450Atanh;
         case BuiltinType::kCeil:
             return GLSLstd450Ceil;
         case BuiltinType::kClamp:

@@ -35,6 +35,9 @@ BuiltinType ParseBuiltinType(const std::string& name) {
     if (name == "acos") {
         return BuiltinType::kAcos;
     }
+    if (name == "acosh") {
+        return BuiltinType::kAcosh;
+    }
     if (name == "all") {
         return BuiltinType::kAll;
     }
@@ -47,11 +50,17 @@ BuiltinType ParseBuiltinType(const std::string& name) {
     if (name == "asin") {
         return BuiltinType::kAsin;
     }
+    if (name == "asinh") {
+        return BuiltinType::kAsinh;
+    }
     if (name == "atan") {
         return BuiltinType::kAtan;
     }
     if (name == "atan2") {
         return BuiltinType::kAtan2;
+    }
+    if (name == "atanh") {
+        return BuiltinType::kAtanh;
     }
     if (name == "ceil") {
         return BuiltinType::kCeil;
@@ -358,6 +367,8 @@ const char* str(BuiltinType i) {
             return "abs";
         case BuiltinType::kAcos:
             return "acos";
+        case BuiltinType::kAcosh:
+            return "acosh";
         case BuiltinType::kAll:
             return "all";
         case BuiltinType::kAny:
@@ -366,10 +377,14 @@ const char* str(BuiltinType i) {
             return "arrayLength";
         case BuiltinType::kAsin:
             return "asin";
+        case BuiltinType::kAsinh:
+            return "asinh";
         case BuiltinType::kAtan:
             return "atan";
         case BuiltinType::kAtan2:
             return "atan2";
+        case BuiltinType::kAtanh:
+            return "atanh";
         case BuiltinType::kCeil:
             return "ceil";
         case BuiltinType::kClamp:
