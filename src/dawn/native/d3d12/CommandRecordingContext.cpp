@@ -130,6 +130,7 @@ MaybeError CommandRecordingContext::ExecuteCommandList(Device* device) {
         mIsOpen = false;
         mSharedTextures.clear();
         mHeapsPendingUsage.clear();
+        mTempBuffers.clear();
     }
     return {};
 }
