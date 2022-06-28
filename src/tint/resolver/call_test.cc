@@ -71,6 +71,7 @@ static constexpr Params all_param_types[] = {
     ParamsFor<u32>(),          //
     ParamsFor<i32>(),          //
     ParamsFor<f32>(),          //
+    ParamsFor<f16>(),          //
     ParamsFor<vec3<bool>>(),   //
     ParamsFor<vec3<i32>>(),    //
     ParamsFor<vec3<u32>>(),    //
@@ -81,6 +82,8 @@ static constexpr Params all_param_types[] = {
 };
 
 TEST_F(ResolverCallTest, Valid) {
+    Enable(ast::Extension::kF16);
+
     ast::ParameterList params;
     ast::ExpressionList args;
     for (auto& p : all_param_types) {

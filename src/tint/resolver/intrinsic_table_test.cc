@@ -709,18 +709,19 @@ TEST_F(IntrinsicTableTest, MismatchTypeConstructorImplicit) {
     EXPECT_EQ(Diagnostics().str(), R"(12:34 error: no matching constructor for vec3(i32, f32, i32)
 
 6 candidate constructors:
-  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
-  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
-  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
-  vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
-  vec3(vec3<T>) -> vec3<T>  where: T is f32, i32, u32 or bool
-  vec3() -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec3(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
+  vec3() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
 
-4 candidate conversions:
-  vec3(vec3<U>) -> vec3<f32>  where: T is f32, U is i32, u32 or bool
-  vec3(vec3<U>) -> vec3<i32>  where: T is i32, U is f32, u32 or bool
-  vec3(vec3<U>) -> vec3<u32>  where: T is u32, U is f32, i32 or bool
-  vec3(vec3<U>) -> vec3<bool>  where: T is bool, U is f32, i32 or u32
+5 candidate conversions:
+  vec3(vec3<U>) -> vec3<f32>  where: T is f32, U is i32, f16, u32 or bool
+  vec3(vec3<U>) -> vec3<f16>  where: T is f16, U is f32, i32, u32 or bool
+  vec3(vec3<U>) -> vec3<i32>  where: T is i32, U is f32, f16, u32 or bool
+  vec3(vec3<U>) -> vec3<u32>  where: T is u32, U is f32, f16, i32 or bool
+  vec3(vec3<U>) -> vec3<bool>  where: T is bool, U is f32, f16, i32 or u32
 )");
 }
 
@@ -733,18 +734,19 @@ TEST_F(IntrinsicTableTest, MismatchTypeConstructorExplicit) {
               R"(12:34 error: no matching constructor for vec3<i32>(i32, f32, i32)
 
 6 candidate constructors:
-  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
-  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
-  vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
-  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
-  vec3(vec3<T>) -> vec3<T>  where: T is f32, i32, u32 or bool
-  vec3() -> vec3<T>  where: T is f32, i32, u32 or bool
+  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec3(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
+  vec3() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
 
-4 candidate conversions:
-  vec3(vec3<U>) -> vec3<f32>  where: T is f32, U is i32, u32 or bool
-  vec3(vec3<U>) -> vec3<i32>  where: T is i32, U is f32, u32 or bool
-  vec3(vec3<U>) -> vec3<u32>  where: T is u32, U is f32, i32 or bool
-  vec3(vec3<U>) -> vec3<bool>  where: T is bool, U is f32, i32 or u32
+5 candidate conversions:
+  vec3(vec3<U>) -> vec3<f32>  where: T is f32, U is i32, f16, u32 or bool
+  vec3(vec3<U>) -> vec3<f16>  where: T is f16, U is f32, i32, u32 or bool
+  vec3(vec3<U>) -> vec3<i32>  where: T is i32, U is f32, f16, u32 or bool
+  vec3(vec3<U>) -> vec3<u32>  where: T is u32, U is f32, f16, i32 or bool
+  vec3(vec3<U>) -> vec3<bool>  where: T is bool, U is f32, f16, i32 or u32
 )");
 }
 
@@ -770,18 +772,19 @@ TEST_F(IntrinsicTableTest, MismatchTypeConversion) {
               R"(12:34 error: no matching constructor for vec3<f32>(array<u32>)
 
 6 candidate constructors:
-  vec3(vec3<T>) -> vec3<T>  where: T is f32, i32, u32 or bool
-  vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
-  vec3() -> vec3<T>  where: T is f32, i32, u32 or bool
-  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
-  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
-  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, i32, u32 or bool
+  vec3(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
+  vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec3() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
+  vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
+  vec3(x: T, y: T, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
 
-4 candidate conversions:
-  vec3(vec3<U>) -> vec3<f32>  where: T is f32, U is i32, u32 or bool
-  vec3(vec3<U>) -> vec3<i32>  where: T is i32, U is f32, u32 or bool
-  vec3(vec3<U>) -> vec3<u32>  where: T is u32, U is f32, i32 or bool
-  vec3(vec3<U>) -> vec3<bool>  where: T is bool, U is f32, i32 or u32
+5 candidate conversions:
+  vec3(vec3<U>) -> vec3<f32>  where: T is f32, U is i32, f16, u32 or bool
+  vec3(vec3<U>) -> vec3<f16>  where: T is f16, U is f32, i32, u32 or bool
+  vec3(vec3<U>) -> vec3<i32>  where: T is i32, U is f32, f16, u32 or bool
+  vec3(vec3<U>) -> vec3<u32>  where: T is u32, U is f32, f16, i32 or bool
+  vec3(vec3<U>) -> vec3<bool>  where: T is bool, U is f32, f16, i32 or u32
 )");
 }
 

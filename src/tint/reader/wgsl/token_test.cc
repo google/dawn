@@ -85,6 +85,8 @@ TEST_F(TokenTest, ToStr) {
     EXPECT_THAT(Token(Token::Type::kFloatLiteral, Source{}, d).to_str(), Not(EndsWith("f")));
     EXPECT_THAT(Token(Token::Type::kFloatLiteral_F, Source{}, d).to_str(), StartsWith("123"));
     EXPECT_THAT(Token(Token::Type::kFloatLiteral_F, Source{}, d).to_str(), EndsWith("f"));
+    EXPECT_THAT(Token(Token::Type::kFloatLiteral_H, Source{}, d).to_str(), StartsWith("123"));
+    EXPECT_THAT(Token(Token::Type::kFloatLiteral_H, Source{}, d).to_str(), EndsWith("h"));
     EXPECT_EQ(Token(Token::Type::kIntLiteral, Source{}, i).to_str(), "123");
     EXPECT_EQ(Token(Token::Type::kIntLiteral_I, Source{}, i).to_str(), "123i");
     EXPECT_EQ(Token(Token::Type::kIntLiteral_U, Source{}, i).to_str(), "123u");

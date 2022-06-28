@@ -54,6 +54,57 @@ TEST_F(ResolverStructLayoutTest, Scalars) {
     }
 }
 
+TEST_F(ResolverStructLayoutTest, ScalarsWithF16) {
+    Enable(ast::Extension::kF16);
+
+    auto* s = Structure("S", {
+                                 Member("a", ty.f32()),
+                                 Member("b", ty.f16()),
+                                 Member("c", ty.u32()),
+                                 Member("d", ty.f16()),
+                                 Member("e", ty.f16()),
+                                 Member("f", ty.i32()),
+                                 Member("g", ty.f16()),
+                             });
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = TypeOf(s)->As<sem::Struct>();
+    ASSERT_NE(sem, nullptr);
+    EXPECT_EQ(sem->Size(), 24u);
+    EXPECT_EQ(sem->SizeNoPadding(), 22u);
+    EXPECT_EQ(sem->Align(), 4u);
+    ASSERT_EQ(sem->Members().size(), 7u);
+    // f32
+    EXPECT_EQ(sem->Members()[0]->Offset(), 0u);
+    EXPECT_EQ(sem->Members()[0]->Align(), 4u);
+    EXPECT_EQ(sem->Members()[0]->Size(), 4u);
+    // f16
+    EXPECT_EQ(sem->Members()[1]->Offset(), 4u);
+    EXPECT_EQ(sem->Members()[1]->Align(), 2u);
+    EXPECT_EQ(sem->Members()[1]->Size(), 2u);
+    // u32
+    EXPECT_EQ(sem->Members()[2]->Offset(), 8u);
+    EXPECT_EQ(sem->Members()[2]->Align(), 4u);
+    EXPECT_EQ(sem->Members()[2]->Size(), 4u);
+    // f16
+    EXPECT_EQ(sem->Members()[3]->Offset(), 12u);
+    EXPECT_EQ(sem->Members()[3]->Align(), 2u);
+    EXPECT_EQ(sem->Members()[3]->Size(), 2u);
+    // f16
+    EXPECT_EQ(sem->Members()[4]->Offset(), 14u);
+    EXPECT_EQ(sem->Members()[4]->Align(), 2u);
+    EXPECT_EQ(sem->Members()[4]->Size(), 2u);
+    // i32
+    EXPECT_EQ(sem->Members()[5]->Offset(), 16u);
+    EXPECT_EQ(sem->Members()[5]->Align(), 4u);
+    EXPECT_EQ(sem->Members()[5]->Size(), 4u);
+    // f16
+    EXPECT_EQ(sem->Members()[6]->Offset(), 20u);
+    EXPECT_EQ(sem->Members()[6]->Align(), 2u);
+    EXPECT_EQ(sem->Members()[6]->Size(), 2u);
+}
+
 TEST_F(ResolverStructLayoutTest, Alias) {
     auto* alias_a = Alias("a", ty.f32());
     auto* alias_b = Alias("b", ty.f32());
@@ -83,58 +134,80 @@ TEST_F(ResolverStructLayoutTest, Alias) {
 }
 
 TEST_F(ResolverStructLayoutTest, ImplicitStrideArrayStaticSize) {
+    Enable(ast::Extension::kF16);
+
     auto* s = Structure("S", {
                                  Member("a", ty.array<i32, 3>()),
                                  Member("b", ty.array<f32, 5>()),
-                                 Member("c", ty.array<f32, 1>()),
+                                 Member("c", ty.array<f16, 7>()),
+                                 Member("d", ty.array<f32, 1>()),
                              });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_EQ(sem->Size(), 36u);
-    EXPECT_EQ(sem->SizeNoPadding(), 36u);
+    EXPECT_EQ(sem->Size(), 52u);
+    EXPECT_EQ(sem->SizeNoPadding(), 52u);
     EXPECT_EQ(sem->Align(), 4u);
-    ASSERT_EQ(sem->Members().size(), 3u);
+    ASSERT_EQ(sem->Members().size(), 4u);
+    // array<i32, 3>
     EXPECT_EQ(sem->Members()[0]->Offset(), 0u);
     EXPECT_EQ(sem->Members()[0]->Align(), 4u);
     EXPECT_EQ(sem->Members()[0]->Size(), 12u);
+    // array<f32, 5>
     EXPECT_EQ(sem->Members()[1]->Offset(), 12u);
     EXPECT_EQ(sem->Members()[1]->Align(), 4u);
     EXPECT_EQ(sem->Members()[1]->Size(), 20u);
+    // array<f16, 7>
     EXPECT_EQ(sem->Members()[2]->Offset(), 32u);
-    EXPECT_EQ(sem->Members()[2]->Align(), 4u);
-    EXPECT_EQ(sem->Members()[2]->Size(), 4u);
+    EXPECT_EQ(sem->Members()[2]->Align(), 2u);
+    EXPECT_EQ(sem->Members()[2]->Size(), 14u);
+    // array<f32, 1>
+    EXPECT_EQ(sem->Members()[3]->Offset(), 48u);
+    EXPECT_EQ(sem->Members()[3]->Align(), 4u);
+    EXPECT_EQ(sem->Members()[3]->Size(), 4u);
+
     for (auto& m : sem->Members()) {
         EXPECT_EQ(m->Struct()->Declaration(), s);
     }
 }
 
 TEST_F(ResolverStructLayoutTest, ExplicitStrideArrayStaticSize) {
+    Enable(ast::Extension::kF16);
+
     auto* s = Structure("S", {
                                  Member("a", ty.array<i32, 3>(/*stride*/ 8)),
                                  Member("b", ty.array<f32, 5>(/*stride*/ 16)),
-                                 Member("c", ty.array<f32, 1>(/*stride*/ 32)),
+                                 Member("c", ty.array<f16, 7>(/*stride*/ 4)),
+                                 Member("d", ty.array<f32, 1>(/*stride*/ 32)),
                              });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_EQ(sem->Size(), 136u);
-    EXPECT_EQ(sem->SizeNoPadding(), 136u);
+    EXPECT_EQ(sem->Size(), 164u);
+    EXPECT_EQ(sem->SizeNoPadding(), 164u);
     EXPECT_EQ(sem->Align(), 4u);
-    ASSERT_EQ(sem->Members().size(), 3u);
+    ASSERT_EQ(sem->Members().size(), 4u);
+    // array<i32, 3>, stride = 8
     EXPECT_EQ(sem->Members()[0]->Offset(), 0u);
     EXPECT_EQ(sem->Members()[0]->Align(), 4u);
     EXPECT_EQ(sem->Members()[0]->Size(), 24u);
+    // array<f32, 5>, stride = 16
     EXPECT_EQ(sem->Members()[1]->Offset(), 24u);
     EXPECT_EQ(sem->Members()[1]->Align(), 4u);
     EXPECT_EQ(sem->Members()[1]->Size(), 80u);
+    // array<f16, 7>, stride = 4
     EXPECT_EQ(sem->Members()[2]->Offset(), 104u);
-    EXPECT_EQ(sem->Members()[2]->Align(), 4u);
-    EXPECT_EQ(sem->Members()[2]->Size(), 32u);
+    EXPECT_EQ(sem->Members()[2]->Align(), 2u);
+    EXPECT_EQ(sem->Members()[2]->Size(), 28u);
+    // array<f32, 1>, stride = 32
+    EXPECT_EQ(sem->Members()[3]->Offset(), 132u);
+    EXPECT_EQ(sem->Members()[3]->Align(), 4u);
+    EXPECT_EQ(sem->Members()[3]->Size(), 32u);
+
     for (auto& m : sem->Members()) {
         EXPECT_EQ(m->Struct()->Declaration(), s);
     }
@@ -262,53 +335,92 @@ TEST_F(ResolverStructLayoutTest, Vector) {
 }
 
 TEST_F(ResolverStructLayoutTest, Matrix) {
+    Enable(ast::Extension::kF16);
+
     auto* s = Structure("S", {
-                                 Member("a", ty.mat2x2<f32>()),
-                                 Member("b", ty.mat2x3<f32>()),
-                                 Member("c", ty.mat2x4<f32>()),
-                                 Member("d", ty.mat3x2<f32>()),
-                                 Member("e", ty.mat3x3<f32>()),
-                                 Member("f", ty.mat3x4<f32>()),
-                                 Member("g", ty.mat4x2<f32>()),
-                                 Member("h", ty.mat4x3<f32>()),
-                                 Member("i", ty.mat4x4<f32>()),
+                                 Member("a_1", ty.mat2x2<f32>()),
+                                 Member("a_2", ty.mat2x2<f16>()),
+                                 Member("b_1", ty.mat2x3<f32>()),
+                                 Member("b_2", ty.mat2x3<f16>()),
+                                 Member("c_1", ty.mat2x4<f32>()),
+                                 Member("c_2", ty.mat2x4<f16>()),
+                                 Member("d_1", ty.mat3x2<f32>()),
+                                 Member("d_2", ty.mat3x2<f16>()),
+                                 Member("e_1", ty.mat3x3<f32>()),
+                                 Member("e_2", ty.mat3x3<f16>()),
+                                 Member("f_1", ty.mat3x4<f32>()),
+                                 Member("f_2", ty.mat3x4<f16>()),
+                                 Member("g_1", ty.mat4x2<f32>()),
+                                 Member("g_2", ty.mat4x2<f16>()),
+                                 Member("h_1", ty.mat4x3<f32>()),
+                                 Member("h_2", ty.mat4x3<f16>()),
+                                 Member("i_1", ty.mat4x4<f32>()),
+                                 Member("i_2", ty.mat4x4<f16>()),
                              });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_EQ(sem->Size(), 368u);
-    EXPECT_EQ(sem->SizeNoPadding(), 368u);
+    EXPECT_EQ(sem->Size(), 576u);
+    EXPECT_EQ(sem->SizeNoPadding(), 576u);
     EXPECT_EQ(sem->Align(), 16u);
-    ASSERT_EQ(sem->Members().size(), 9u);
-    EXPECT_EQ(sem->Members()[0]->Offset(), 0u);  // mat2x2
+    ASSERT_EQ(sem->Members().size(), 18u);
+    EXPECT_EQ(sem->Members()[0]->Offset(), 0u);  // mat2x2<f32>
     EXPECT_EQ(sem->Members()[0]->Align(), 8u);
     EXPECT_EQ(sem->Members()[0]->Size(), 16u);
-    EXPECT_EQ(sem->Members()[1]->Offset(), 16u);  // mat2x3
-    EXPECT_EQ(sem->Members()[1]->Align(), 16u);
-    EXPECT_EQ(sem->Members()[1]->Size(), 32u);
-    EXPECT_EQ(sem->Members()[2]->Offset(), 48u);  // mat2x4
+    EXPECT_EQ(sem->Members()[1]->Offset(), 16u);  // mat2x2<f16>
+    EXPECT_EQ(sem->Members()[1]->Align(), 4u);
+    EXPECT_EQ(sem->Members()[1]->Size(), 8u);
+    EXPECT_EQ(sem->Members()[2]->Offset(), 32u);  // mat2x3<f32>
     EXPECT_EQ(sem->Members()[2]->Align(), 16u);
     EXPECT_EQ(sem->Members()[2]->Size(), 32u);
-    EXPECT_EQ(sem->Members()[3]->Offset(), 80u);  // mat3x2
+    EXPECT_EQ(sem->Members()[3]->Offset(), 64u);  // mat2x3<f16>
     EXPECT_EQ(sem->Members()[3]->Align(), 8u);
-    EXPECT_EQ(sem->Members()[3]->Size(), 24u);
-    EXPECT_EQ(sem->Members()[4]->Offset(), 112u);  // mat3x3
+    EXPECT_EQ(sem->Members()[3]->Size(), 16u);
+    EXPECT_EQ(sem->Members()[4]->Offset(), 80u);  // mat2x4<f32>
     EXPECT_EQ(sem->Members()[4]->Align(), 16u);
-    EXPECT_EQ(sem->Members()[4]->Size(), 48u);
-    EXPECT_EQ(sem->Members()[5]->Offset(), 160u);  // mat3x4
-    EXPECT_EQ(sem->Members()[5]->Align(), 16u);
-    EXPECT_EQ(sem->Members()[5]->Size(), 48u);
-    EXPECT_EQ(sem->Members()[6]->Offset(), 208u);  // mat4x2
+    EXPECT_EQ(sem->Members()[4]->Size(), 32u);
+    EXPECT_EQ(sem->Members()[5]->Offset(), 112u);  // mat2x4<f16>
+    EXPECT_EQ(sem->Members()[5]->Align(), 8u);
+    EXPECT_EQ(sem->Members()[5]->Size(), 16u);
+    EXPECT_EQ(sem->Members()[6]->Offset(), 128u);  // mat3x2<f32>
     EXPECT_EQ(sem->Members()[6]->Align(), 8u);
-    EXPECT_EQ(sem->Members()[6]->Size(), 32u);
-    EXPECT_EQ(sem->Members()[7]->Offset(), 240u);  // mat4x3
-    EXPECT_EQ(sem->Members()[7]->Align(), 16u);
-    EXPECT_EQ(sem->Members()[7]->Size(), 64u);
-    EXPECT_EQ(sem->Members()[8]->Offset(), 304u);  // mat4x4
+    EXPECT_EQ(sem->Members()[6]->Size(), 24u);
+    EXPECT_EQ(sem->Members()[7]->Offset(), 152u);  // mat3x2<f16>
+    EXPECT_EQ(sem->Members()[7]->Align(), 4u);
+    EXPECT_EQ(sem->Members()[7]->Size(), 12u);
+    EXPECT_EQ(sem->Members()[8]->Offset(), 176u);  // mat3x3<f32>
     EXPECT_EQ(sem->Members()[8]->Align(), 16u);
-    EXPECT_EQ(sem->Members()[8]->Size(), 64u);
+    EXPECT_EQ(sem->Members()[8]->Size(), 48u);
+    EXPECT_EQ(sem->Members()[9]->Offset(), 224u);  // mat3x3<f16>
+    EXPECT_EQ(sem->Members()[9]->Align(), 8u);
+    EXPECT_EQ(sem->Members()[9]->Size(), 24u);
+    EXPECT_EQ(sem->Members()[10]->Offset(), 256u);  // mat3x4<f32>
+    EXPECT_EQ(sem->Members()[10]->Align(), 16u);
+    EXPECT_EQ(sem->Members()[10]->Size(), 48u);
+    EXPECT_EQ(sem->Members()[11]->Offset(), 304u);  // mat3x4<f16>
+    EXPECT_EQ(sem->Members()[11]->Align(), 8u);
+    EXPECT_EQ(sem->Members()[11]->Size(), 24u);
+    EXPECT_EQ(sem->Members()[12]->Offset(), 328u);  // mat4x2<f32>
+    EXPECT_EQ(sem->Members()[12]->Align(), 8u);
+    EXPECT_EQ(sem->Members()[12]->Size(), 32u);
+    EXPECT_EQ(sem->Members()[13]->Offset(), 360u);  // mat4x2<f16>
+    EXPECT_EQ(sem->Members()[13]->Align(), 4u);
+    EXPECT_EQ(sem->Members()[13]->Size(), 16u);
+    EXPECT_EQ(sem->Members()[14]->Offset(), 384u);  // mat4x3<f32>
+    EXPECT_EQ(sem->Members()[14]->Align(), 16u);
+    EXPECT_EQ(sem->Members()[14]->Size(), 64u);
+    EXPECT_EQ(sem->Members()[15]->Offset(), 448u);  // mat4x3<f16>
+    EXPECT_EQ(sem->Members()[15]->Align(), 8u);
+    EXPECT_EQ(sem->Members()[15]->Size(), 32u);
+    EXPECT_EQ(sem->Members()[16]->Offset(), 480u);  // mat4x4<f32>
+    EXPECT_EQ(sem->Members()[16]->Align(), 16u);
+    EXPECT_EQ(sem->Members()[16]->Size(), 64u);
+    EXPECT_EQ(sem->Members()[17]->Offset(), 544u);  // mat4x4<f16>
+    EXPECT_EQ(sem->Members()[17]->Align(), 8u);
+    EXPECT_EQ(sem->Members()[17]->Size(), 32u);
+
     for (auto& m : sem->Members()) {
         EXPECT_EQ(m->Struct()->Declaration(), s);
     }

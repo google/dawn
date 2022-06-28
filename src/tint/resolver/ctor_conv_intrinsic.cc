@@ -36,6 +36,8 @@ const char* str(CtorConvIntrinsic i) {
             return "u32";
         case CtorConvIntrinsic::kF32:
             return "f32";
+        case CtorConvIntrinsic::kF16:
+            return "f16";
         case CtorConvIntrinsic::kBool:
             return "bool";
         case CtorConvIntrinsic::kVec2:

@@ -35,10 +35,13 @@ TEST_F(ResolverVariableTest, LocalVar_NoConstructor) {
     //   var i : i32;
     //   var u : u32;
     //   var f : f32;
+    //   var h : f16;
     //   var b : bool;
     //   var s : S;
     //   var a : A;
     // }
+
+    Enable(ast::Extension::kF16);
 
     auto* S = Structure("S", {Member("i", ty.i32())});
     auto* A = Alias("A", ty.Of(S));
@@ -46,6 +49,7 @@ TEST_F(ResolverVariableTest, LocalVar_NoConstructor) {
     auto* i = Var("i", ty.i32(), ast::StorageClass::kNone);
     auto* u = Var("u", ty.u32(), ast::StorageClass::kNone);
     auto* f = Var("f", ty.f32(), ast::StorageClass::kNone);
+    auto* h = Var("h", ty.f16(), ast::StorageClass::kNone);
     auto* b = Var("b", ty.bool_(), ast::StorageClass::kNone);
     auto* s = Var("s", ty.Of(S), ast::StorageClass::kNone);
     auto* a = Var("a", ty.Of(A), ast::StorageClass::kNone);
@@ -55,6 +59,7 @@ TEST_F(ResolverVariableTest, LocalVar_NoConstructor) {
              Decl(i),
              Decl(u),
              Decl(f),
+             Decl(h),
              Decl(b),
              Decl(s),
              Decl(a),
@@ -66,6 +71,7 @@ TEST_F(ResolverVariableTest, LocalVar_NoConstructor) {
     ASSERT_TRUE(TypeOf(i)->Is<sem::Reference>());
     ASSERT_TRUE(TypeOf(u)->Is<sem::Reference>());
     ASSERT_TRUE(TypeOf(f)->Is<sem::Reference>());
+    ASSERT_TRUE(TypeOf(h)->Is<sem::Reference>());
     ASSERT_TRUE(TypeOf(b)->Is<sem::Reference>());
     ASSERT_TRUE(TypeOf(s)->Is<sem::Reference>());
     ASSERT_TRUE(TypeOf(a)->Is<sem::Reference>());
@@ -73,6 +79,7 @@ TEST_F(ResolverVariableTest, LocalVar_NoConstructor) {
     EXPECT_TRUE(TypeOf(i)->As<sem::Reference>()->StoreType()->Is<sem::I32>());
     EXPECT_TRUE(TypeOf(u)->As<sem::Reference>()->StoreType()->Is<sem::U32>());
     EXPECT_TRUE(TypeOf(f)->As<sem::Reference>()->StoreType()->Is<sem::F32>());
+    EXPECT_TRUE(TypeOf(h)->As<sem::Reference>()->StoreType()->Is<sem::F16>());
     EXPECT_TRUE(TypeOf(b)->As<sem::Reference>()->StoreType()->Is<sem::Bool>());
     EXPECT_TRUE(TypeOf(s)->As<sem::Reference>()->StoreType()->Is<sem::Struct>());
     EXPECT_TRUE(TypeOf(a)->As<sem::Reference>()->StoreType()->Is<sem::Struct>());
@@ -80,6 +87,7 @@ TEST_F(ResolverVariableTest, LocalVar_NoConstructor) {
     EXPECT_EQ(Sem().Get(i)->Constructor(), nullptr);
     EXPECT_EQ(Sem().Get(u)->Constructor(), nullptr);
     EXPECT_EQ(Sem().Get(f)->Constructor(), nullptr);
+    EXPECT_EQ(Sem().Get(h)->Constructor(), nullptr);
     EXPECT_EQ(Sem().Get(b)->Constructor(), nullptr);
     EXPECT_EQ(Sem().Get(s)->Constructor(), nullptr);
     EXPECT_EQ(Sem().Get(a)->Constructor(), nullptr);
@@ -92,10 +100,13 @@ TEST_F(ResolverVariableTest, LocalVar_WithConstructor) {
     //   var i : i32 = 1i;
     //   var u : u32 = 1u;
     //   var f : f32 = 1.f;
+    //   var h : f16 = 1.h;
     //   var b : bool = true;
     //   var s : S = S(1);
     //   var a : A = A(1);
     // }
+
+    Enable(ast::Extension::kF16);
 
     auto* S = Structure("S", {Member("i", ty.i32())});
     auto* A = Alias("A", ty.Of(S));
@@ -103,6 +114,7 @@ TEST_F(ResolverVariableTest, LocalVar_WithConstructor) {
     auto* i_c = Expr(1_i);
     auto* u_c = Expr(1_u);
     auto* f_c = Expr(1_f);
+    auto* h_c = Expr(1_h);
     auto* b_c = Expr(true);
     auto* s_c = Construct(ty.Of(S), Expr(1_i));
     auto* a_c = Construct(ty.Of(A), Expr(1_i));
@@ -110,6 +122,7 @@ TEST_F(ResolverVariableTest, LocalVar_WithConstructor) {
     auto* i = Var("i", ty.i32(), ast::StorageClass::kNone, i_c);
     auto* u = Var("u", ty.u32(), ast::StorageClass::kNone, u_c);
     auto* f = Var("f", ty.f32(), ast::StorageClass::kNone, f_c);
+    auto* h = Var("h", ty.f16(), ast::StorageClass::kNone, h_c);
     auto* b = Var("b", ty.bool_(), ast::StorageClass::kNone, b_c);
     auto* s = Var("s", ty.Of(S), ast::StorageClass::kNone, s_c);
     auto* a = Var("a", ty.Of(A), ast::StorageClass::kNone, a_c);
@@ -119,6 +132,7 @@ TEST_F(ResolverVariableTest, LocalVar_WithConstructor) {
              Decl(i),
              Decl(u),
              Decl(f),
+             Decl(h),
              Decl(b),
              Decl(s),
              Decl(a),
@@ -130,6 +144,7 @@ TEST_F(ResolverVariableTest, LocalVar_WithConstructor) {
     ASSERT_TRUE(TypeOf(i)->Is<sem::Reference>());
     ASSERT_TRUE(TypeOf(u)->Is<sem::Reference>());
     ASSERT_TRUE(TypeOf(f)->Is<sem::Reference>());
+    ASSERT_TRUE(TypeOf(h)->Is<sem::Reference>());
     ASSERT_TRUE(TypeOf(b)->Is<sem::Reference>());
     ASSERT_TRUE(TypeOf(s)->Is<sem::Reference>());
     ASSERT_TRUE(TypeOf(a)->Is<sem::Reference>());
@@ -144,6 +159,7 @@ TEST_F(ResolverVariableTest, LocalVar_WithConstructor) {
     EXPECT_TRUE(TypeOf(i)->As<sem::Reference>()->StoreType()->Is<sem::I32>());
     EXPECT_TRUE(TypeOf(u)->As<sem::Reference>()->StoreType()->Is<sem::U32>());
     EXPECT_TRUE(TypeOf(f)->As<sem::Reference>()->StoreType()->Is<sem::F32>());
+    EXPECT_TRUE(TypeOf(h)->As<sem::Reference>()->StoreType()->Is<sem::F16>());
     EXPECT_TRUE(TypeOf(b)->As<sem::Reference>()->StoreType()->Is<sem::Bool>());
     EXPECT_TRUE(TypeOf(s)->As<sem::Reference>()->StoreType()->Is<sem::Struct>());
     EXPECT_TRUE(TypeOf(a)->As<sem::Reference>()->StoreType()->Is<sem::Struct>());
@@ -151,6 +167,7 @@ TEST_F(ResolverVariableTest, LocalVar_WithConstructor) {
     EXPECT_EQ(Sem().Get(i)->Constructor()->Declaration(), i_c);
     EXPECT_EQ(Sem().Get(u)->Constructor()->Declaration(), u_c);
     EXPECT_EQ(Sem().Get(f)->Constructor()->Declaration(), f_c);
+    EXPECT_EQ(Sem().Get(h)->Constructor()->Declaration(), h_c);
     EXPECT_EQ(Sem().Get(b)->Constructor()->Declaration(), b_c);
     EXPECT_EQ(Sem().Get(s)->Constructor()->Declaration(), s_c);
     EXPECT_EQ(Sem().Get(a)->Constructor()->Declaration(), a_c);
@@ -396,12 +413,15 @@ TEST_F(ResolverVariableTest, LocalLet) {
     //   var v : i32;
     //   let i : i32 = 1i;
     //   let u : u32 = 1u;
-    //   let f : f32 = 1.;
+    //   let f : f32 = 1.f;
+    //   let h : h32 = 1.h;
     //   let b : bool = true;
     //   let s : S = S(1);
     //   let a : A = A(1);
     //   let p : pointer<function, i32> = &v;
     // }
+
+    Enable(ast::Extension::kF16);
 
     auto* S = Structure("S", {Member("i", ty.i32())});
     auto* A = Alias("A", ty.Of(S));
@@ -410,6 +430,7 @@ TEST_F(ResolverVariableTest, LocalLet) {
     auto* i_c = Expr(1_i);
     auto* u_c = Expr(1_u);
     auto* f_c = Expr(1_f);
+    auto* h_c = Expr(1_h);
     auto* b_c = Expr(true);
     auto* s_c = Construct(ty.Of(S), Expr(1_i));
     auto* a_c = Construct(ty.Of(A), Expr(1_i));
@@ -418,6 +439,7 @@ TEST_F(ResolverVariableTest, LocalLet) {
     auto* i = Let("i", ty.i32(), i_c);
     auto* u = Let("u", ty.u32(), u_c);
     auto* f = Let("f", ty.f32(), f_c);
+    auto* h = Let("h", ty.f16(), h_c);
     auto* b = Let("b", ty.bool_(), b_c);
     auto* s = Let("s", ty.Of(S), s_c);
     auto* a = Let("a", ty.Of(A), a_c);
@@ -429,6 +451,7 @@ TEST_F(ResolverVariableTest, LocalLet) {
              Decl(i),
              Decl(u),
              Decl(f),
+             Decl(h),
              Decl(b),
              Decl(s),
              Decl(a),
@@ -441,6 +464,7 @@ TEST_F(ResolverVariableTest, LocalLet) {
     ASSERT_TRUE(TypeOf(i)->Is<sem::I32>());
     ASSERT_TRUE(TypeOf(u)->Is<sem::U32>());
     ASSERT_TRUE(TypeOf(f)->Is<sem::F32>());
+    ASSERT_TRUE(TypeOf(h)->Is<sem::F16>());
     ASSERT_TRUE(TypeOf(b)->Is<sem::Bool>());
     ASSERT_TRUE(TypeOf(s)->Is<sem::Struct>());
     ASSERT_TRUE(TypeOf(a)->Is<sem::Struct>());
@@ -450,6 +474,7 @@ TEST_F(ResolverVariableTest, LocalLet) {
     EXPECT_EQ(Sem().Get(i)->Constructor()->Declaration(), i_c);
     EXPECT_EQ(Sem().Get(u)->Constructor()->Declaration(), u_c);
     EXPECT_EQ(Sem().Get(f)->Constructor()->Declaration(), f_c);
+    EXPECT_EQ(Sem().Get(h)->Constructor()->Declaration(), h_c);
     EXPECT_EQ(Sem().Get(b)->Constructor()->Declaration(), b_c);
     EXPECT_EQ(Sem().Get(s)->Constructor()->Declaration(), s_c);
     EXPECT_EQ(Sem().Get(a)->Constructor()->Declaration(), a_c);

@@ -75,6 +75,23 @@ TEST_F(ResolverConstantsTest, Scalar_f32) {
     EXPECT_EQ(sem->ConstantValue().Element<AFloat>(0).value, 9.9f);
 }
 
+TEST_F(ResolverConstantsTest, Scalar_f16) {
+    Enable(ast::Extension::kF16);
+    auto* expr = Expr(9.9_h);
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    EXPECT_NE(sem, nullptr);
+    EXPECT_TRUE(sem->Type()->Is<sem::F16>());
+    EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
+    EXPECT_EQ(sem->ConstantValue().ElementType(), sem->Type());
+    ASSERT_EQ(sem->ConstantValue().ElementCount(), 1u);
+    // 9.9 is not exactly representable by f16, and should be quantized to 9.8984375
+    EXPECT_EQ(sem->ConstantValue().Element<AFloat>(0).value, 9.8984375f);
+}
+
 TEST_F(ResolverConstantsTest, Scalar_bool) {
     auto* expr = Expr(true);
     WrapInFunction(expr);
@@ -144,6 +161,27 @@ TEST_F(ResolverConstantsTest, Vec3_ZeroInit_f32) {
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F32>());
+    ASSERT_EQ(sem->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(sem->ConstantValue().Element<AFloat>(0).value, 0.0);
+    EXPECT_EQ(sem->ConstantValue().Element<AFloat>(1).value, 0.0);
+    EXPECT_EQ(sem->ConstantValue().Element<AFloat>(2).value, 0.0);
+}
+
+TEST_F(ResolverConstantsTest, Vec3_ZeroInit_f16) {
+    Enable(ast::Extension::kF16);
+    auto* expr = vec3<f16>();
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    EXPECT_NE(sem, nullptr);
+    auto* vec = sem->Type()->As<sem::Vector>();
+    ASSERT_NE(vec, nullptr);
+    EXPECT_TRUE(vec->type()->Is<sem::F16>());
+    EXPECT_EQ(vec->Width(), 3u);
+    EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F16>());
     ASSERT_EQ(sem->ConstantValue().ElementCount(), 3u);
     EXPECT_EQ(sem->ConstantValue().Element<AFloat>(0).value, 0.0);
     EXPECT_EQ(sem->ConstantValue().Element<AFloat>(1).value, 0.0);
@@ -230,6 +268,28 @@ TEST_F(ResolverConstantsTest, Vec3_Splat_f32) {
     EXPECT_EQ(sem->ConstantValue().Element<AFloat>(2).value, 9.9f);
 }
 
+TEST_F(ResolverConstantsTest, Vec3_Splat_f16) {
+    Enable(ast::Extension::kF16);
+    auto* expr = vec3<f16>(9.9_h);
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    EXPECT_NE(sem, nullptr);
+    auto* vec = sem->Type()->As<sem::Vector>();
+    ASSERT_NE(vec, nullptr);
+    EXPECT_TRUE(vec->type()->Is<sem::F16>());
+    EXPECT_EQ(vec->Width(), 3u);
+    EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F16>());
+    ASSERT_EQ(sem->ConstantValue().ElementCount(), 3u);
+    // 9.9 is not exactly representable by f16, and should be quantized to 9.8984375
+    EXPECT_EQ(sem->ConstantValue().Element<AFloat>(0).value, 9.8984375f);
+    EXPECT_EQ(sem->ConstantValue().Element<AFloat>(1).value, 9.8984375f);
+    EXPECT_EQ(sem->ConstantValue().Element<AFloat>(2).value, 9.8984375f);
+}
+
 TEST_F(ResolverConstantsTest, Vec3_Splat_bool) {
     auto* expr = vec3<bool>(true);
     WrapInFunction(expr);
@@ -304,6 +364,27 @@ TEST_F(ResolverConstantsTest, Vec3_FullConstruct_f32) {
     EXPECT_EQ(vec->Width(), 3u);
     EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F32>());
+    ASSERT_EQ(sem->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(sem->ConstantValue().Element<AFloat>(0).value, 1.f);
+    EXPECT_EQ(sem->ConstantValue().Element<AFloat>(1).value, 2.f);
+    EXPECT_EQ(sem->ConstantValue().Element<AFloat>(2).value, 3.f);
+}
+
+TEST_F(ResolverConstantsTest, Vec3_FullConstruct_f16) {
+    Enable(ast::Extension::kF16);
+    auto* expr = vec3<f16>(1_h, 2_h, 3_h);
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    EXPECT_NE(sem, nullptr);
+    auto* vec = sem->Type()->As<sem::Vector>();
+    ASSERT_NE(vec, nullptr);
+    EXPECT_TRUE(vec->type()->Is<sem::F16>());
+    EXPECT_EQ(vec->Width(), 3u);
+    EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F16>());
     ASSERT_EQ(sem->ConstantValue().ElementCount(), 3u);
     EXPECT_EQ(sem->ConstantValue().Element<AFloat>(0).value, 1.f);
     EXPECT_EQ(sem->ConstantValue().Element<AFloat>(1).value, 2.f);
@@ -390,6 +471,27 @@ TEST_F(ResolverConstantsTest, Vec3_MixConstruct_f32) {
     EXPECT_EQ(sem->ConstantValue().Element<AFloat>(2).value, 3.f);
 }
 
+TEST_F(ResolverConstantsTest, Vec3_MixConstruct_f16) {
+    Enable(ast::Extension::kF16);
+    auto* expr = vec3<f16>(1_h, vec2<f16>(2_h, 3_h));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    EXPECT_NE(sem, nullptr);
+    auto* vec = sem->Type()->As<sem::Vector>();
+    ASSERT_NE(vec, nullptr);
+    EXPECT_TRUE(vec->type()->Is<sem::F16>());
+    EXPECT_EQ(vec->Width(), 3u);
+    EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F16>());
+    ASSERT_EQ(sem->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(sem->ConstantValue().Element<AFloat>(0).value, 1.f);
+    EXPECT_EQ(sem->ConstantValue().Element<AFloat>(1).value, 2.f);
+    EXPECT_EQ(sem->ConstantValue().Element<AFloat>(2).value, 3.f);
+}
+
 TEST_F(ResolverConstantsTest, Vec3_MixConstruct_bool) {
     auto* expr = vec3<bool>(vec2<bool>(true, false), true);
     WrapInFunction(expr);
@@ -450,6 +552,48 @@ TEST_F(ResolverConstantsTest, Vec3_Convert_u32_to_f32) {
     EXPECT_EQ(sem->ConstantValue().Element<AFloat>(2).value, 30.f);
 }
 
+TEST_F(ResolverConstantsTest, Vec3_Convert_f16_to_i32) {
+    Enable(ast::Extension::kF16);
+    auto* expr = vec3<i32>(vec3<f16>(1.1_h, 2.2_h, 3.3_h));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    EXPECT_NE(sem, nullptr);
+    auto* vec = sem->Type()->As<sem::Vector>();
+    ASSERT_NE(vec, nullptr);
+    EXPECT_TRUE(vec->type()->Is<sem::I32>());
+    EXPECT_EQ(vec->Width(), 3u);
+    EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::I32>());
+    ASSERT_EQ(sem->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(sem->ConstantValue().Element<AInt>(0).value, 1);
+    EXPECT_EQ(sem->ConstantValue().Element<AInt>(1).value, 2);
+    EXPECT_EQ(sem->ConstantValue().Element<AInt>(2).value, 3);
+}
+
+TEST_F(ResolverConstantsTest, Vec3_Convert_u32_to_f16) {
+    Enable(ast::Extension::kF16);
+    auto* expr = vec3<f16>(vec3<u32>(10_u, 20_u, 30_u));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    EXPECT_NE(sem, nullptr);
+    auto* vec = sem->Type()->As<sem::Vector>();
+    ASSERT_NE(vec, nullptr);
+    EXPECT_TRUE(vec->type()->Is<sem::F16>());
+    EXPECT_EQ(vec->Width(), 3u);
+    EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F16>());
+    ASSERT_EQ(sem->ConstantValue().ElementCount(), 3u);
+    EXPECT_EQ(sem->ConstantValue().Element<AFloat>(0).value, 10.f);
+    EXPECT_EQ(sem->ConstantValue().Element<AFloat>(1).value, 20.f);
+    EXPECT_EQ(sem->ConstantValue().Element<AFloat>(2).value, 30.f);
+}
+
 TEST_F(ResolverConstantsTest, Vec3_Convert_Large_f32_to_i32) {
     auto* expr = vec3<i32>(vec3<f32>(1e10_f, -1e20_f, 1e30_f));
     WrapInFunction(expr);
@@ -490,11 +634,10 @@ TEST_F(ResolverConstantsTest, Vec3_Convert_Large_f32_to_u32) {
     EXPECT_EQ(sem->ConstantValue().Element<AInt>(2).value, u32::kHighest);
 }
 
-// TODO(crbug.com/tint/1502): Enable when f16 overloads are implemented
-TEST_F(ResolverConstantsTest, DISABLED_Vec3_Convert_Large_f32_to_f16) {
+TEST_F(ResolverConstantsTest, Vec3_Convert_Large_f32_to_f16) {
     Enable(ast::Extension::kF16);
 
-    auto* expr = vec3<f16>(vec3<f32>(0.00001_f, -0.00002_f, 0.00003_f));
+    auto* expr = vec3<f16>(vec3<f32>(1e10_f, -1e20_f, 1e30_f));
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -515,11 +658,10 @@ TEST_F(ResolverConstantsTest, DISABLED_Vec3_Convert_Large_f32_to_f16) {
     EXPECT_EQ(sem->ConstantValue().Element<AFloat>(2).value, kInf);
 }
 
-// TODO(crbug.com/tint/1502): Enable when f16 overloads are implemented
-TEST_F(ResolverConstantsTest, DISABLED_Vec3_Convert_Small_f32_to_f16) {
+TEST_F(ResolverConstantsTest, Vec3_Convert_Small_f32_to_f16) {
     Enable(ast::Extension::kF16);
 
-    auto* expr = vec3<f16>(vec3<f32>(1e-10_f, -1e20_f, 1e30_f));
+    auto* expr = vec3<f16>(vec3<f32>(1e-20_f, -2e-30_f, 3e-40_f));
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -560,6 +702,32 @@ TEST_F(ResolverConstantsTest, Mat2x3_ZeroInit_f32) {
     EXPECT_EQ(sem->ConstantValue().Element<f32>(3).value, 0._f);
     EXPECT_EQ(sem->ConstantValue().Element<f32>(4).value, 0._f);
     EXPECT_EQ(sem->ConstantValue().Element<f32>(5).value, 0._f);
+}
+
+TEST_F(ResolverConstantsTest, Mat2x3_ZeroInit_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* expr = mat2x3<f16>();
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    EXPECT_NE(sem, nullptr);
+    auto* mat = sem->Type()->As<sem::Matrix>();
+    ASSERT_NE(mat, nullptr);
+    EXPECT_TRUE(mat->type()->Is<sem::F16>());
+    EXPECT_EQ(mat->columns(), 2u);
+    EXPECT_EQ(mat->rows(), 3u);
+    EXPECT_EQ(sem->ConstantValue().Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue().ElementType()->Is<sem::F16>());
+    ASSERT_EQ(sem->ConstantValue().ElementCount(), 6u);
+    EXPECT_EQ(sem->ConstantValue().Element<f16>(0).value, 0._h);
+    EXPECT_EQ(sem->ConstantValue().Element<f16>(1).value, 0._h);
+    EXPECT_EQ(sem->ConstantValue().Element<f16>(2).value, 0._h);
+    EXPECT_EQ(sem->ConstantValue().Element<f16>(3).value, 0._h);
+    EXPECT_EQ(sem->ConstantValue().Element<f16>(4).value, 0._h);
+    EXPECT_EQ(sem->ConstantValue().Element<f16>(5).value, 0._h);
 }
 
 TEST_F(ResolverConstantsTest, Mat3x2_Construct_Scalars_af) {

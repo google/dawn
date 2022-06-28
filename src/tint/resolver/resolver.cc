@@ -1506,6 +1506,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             },
             [&](const sem::I32*) { return ct_ctor_or_conv(CtorConvIntrinsic::kI32, nullptr); },
             [&](const sem::U32*) { return ct_ctor_or_conv(CtorConvIntrinsic::kU32, nullptr); },
+            [&](const sem::F16*) { return ct_ctor_or_conv(CtorConvIntrinsic::kF16, nullptr); },
             [&](const sem::F32*) { return ct_ctor_or_conv(CtorConvIntrinsic::kF32, nullptr); },
             [&](const sem::Bool*) { return ct_ctor_or_conv(CtorConvIntrinsic::kBool, nullptr); },
             [&](const sem::Array* arr) -> sem::Call* {

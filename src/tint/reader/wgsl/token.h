@@ -351,7 +351,8 @@ class Token {
     bool IsLiteral() const {
         return type_ == Type::kIntLiteral || type_ == Type::kIntLiteral_I ||
                type_ == Type::kIntLiteral_U || type_ == Type::kFalse || type_ == Type::kTrue ||
-               type_ == Type::kFloatLiteral || type_ == Type::kFloatLiteral_F;
+               type_ == Type::kFloatLiteral || type_ == Type::kFloatLiteral_F ||
+               type_ == Type::kFloatLiteral_H;
     }
     /// @returns true if token is a 'matNxM'
     bool IsMatrix() const {

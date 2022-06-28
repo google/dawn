@@ -36,6 +36,7 @@ enum class CtorConvIntrinsic {
     kI32,
     kU32,
     kF32,
+    kF16,
     kBool,
     kVec2,
     kVec3,

@@ -1865,7 +1865,7 @@ bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
 
 bool Validator::Vector(const sem::Vector* ty, const Source& source) const {
     if (!ty->type()->is_scalar()) {
-        AddError("vector element type must be 'bool', 'f32', 'i32' or 'u32'", source);
+        AddError("vector element type must be 'bool', 'f32', 'f16', 'i32' or 'u32'", source);
         return false;
     }
     return true;
@@ -1873,7 +1873,7 @@ bool Validator::Vector(const sem::Vector* ty, const Source& source) const {
 
 bool Validator::Matrix(const sem::Matrix* ty, const Source& source) const {
     if (!ty->is_float_matrix()) {
-        AddError("matrix element type must be 'f32'", source);
+        AddError("matrix element type must be 'f32' or 'f16'", source);
         return false;
     }
     return true;
