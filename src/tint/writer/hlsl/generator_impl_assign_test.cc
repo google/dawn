@@ -41,7 +41,7 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Assign, Emit_Vector_Assign_ConstantIndex) {
+TEST_F(HlslGeneratorImplTest_Assign, Emit_Vector_Assign_LetIndex) {
     Func("fn", {}, ty.void_(),
          {
              Decl(Var("lhs", ty.vec3<f32>())),
@@ -59,6 +59,27 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Vector_Assign_ConstantIndex) {
   float rhs = 0.0f;
   const uint index = 0u;
   lhs[index] = rhs;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Assign, Emit_Vector_Assign_ConstIndex) {
+    Func("fn", {}, ty.void_(),
+         {
+             Decl(Var("lhs", ty.vec3<f32>())),
+             Decl(Var("rhs", ty.f32())),
+             Decl(Const("index", ty.u32(), Expr(0_u))),
+             Assign(IndexAccessor("lhs", "index"), "rhs"),
+         });
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate());
+    EXPECT_EQ(gen.result(),
+              R"(void fn() {
+  float3 lhs = float3(0.0f, 0.0f, 0.0f);
+  float rhs = 0.0f;
+  lhs[0u] = rhs;
 }
 )");
 }
@@ -89,7 +110,7 @@ void fn() {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Vector_ConstantIndex) {
+TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Vector_LetIndex) {
     Func("fn", {}, ty.void_(),
          {
              Decl(Var("lhs", ty.mat4x2<f32>())),
@@ -107,6 +128,27 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Vector_ConstantIndex) {
   float2 rhs = float2(0.0f, 0.0f);
   const uint index = 0u;
   lhs[index] = rhs;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Vector_ConstIndex) {
+    Func("fn", {}, ty.void_(),
+         {
+             Decl(Var("lhs", ty.mat4x2<f32>())),
+             Decl(Var("rhs", ty.vec2<f32>())),
+             Decl(Const("index", ty.u32(), Expr(0_u))),
+             Assign(IndexAccessor("lhs", "index"), "rhs"),
+         });
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate());
+    EXPECT_EQ(gen.result(),
+              R"(void fn() {
+  float4x2 lhs = float4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+  float2 rhs = float2(0.0f, 0.0f);
+  lhs[0u] = rhs;
 }
 )");
 }
@@ -142,7 +184,7 @@ void fn() {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_ConstantIndex) {
+TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_LetIndex) {
     Func("fn", {}, ty.void_(),
          {
              Decl(Var("lhs", ty.mat4x2<f32>())),
@@ -160,6 +202,27 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_ConstantIndex) {
   float rhs = 0.0f;
   const uint index = 0u;
   lhs[index][index] = rhs;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_ConstIndex) {
+    Func("fn", {}, ty.void_(),
+         {
+             Decl(Var("lhs", ty.mat4x2<f32>())),
+             Decl(Var("rhs", ty.f32())),
+             Decl(Const("index", ty.u32(), Expr(0_u))),
+             Assign(IndexAccessor(IndexAccessor("lhs", "index"), "index"), "rhs"),
+         });
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate());
+    EXPECT_EQ(gen.result(),
+              R"(void fn() {
+  float4x2 lhs = float4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+  float rhs = 0.0f;
+  lhs[0u][0u] = rhs;
 }
 )");
 }

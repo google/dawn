@@ -22,7 +22,7 @@ namespace {
 
 using BuilderTest = TestHelper;
 
-TEST_F(BuilderTest, Const_IndexAccessor_Vector) {
+TEST_F(BuilderTest, Let_IndexAccessor_Vector) {
     // let ary = vec3<i32>(1, 2, 3);
     // var x = ary[1i];
 
@@ -48,6 +48,35 @@ TEST_F(BuilderTest, Const_IndexAccessor_Vector) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"(%11 = OpVariable %12 Function %13
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %11 %8
+OpReturn
+)");
+
+    Validate(b);
+}
+
+TEST_F(BuilderTest, Const_IndexAccessor_Vector) {
+    // const ary = vec3<i32>(1, 2, 3);
+    // var x = ary[1i];
+
+    auto* ary = Const("ary", nullptr, vec3<i32>(1_i, 2_i, 3_i));
+    auto* x = Var("x", nullptr, IndexAccessor(ary, 1_i));
+    WrapInFunction(ary, x);
+
+    spirv::Builder& b = SanitizeAndBuild();
+
+    ASSERT_TRUE(b.Build()) << b.error();
+
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%5 = OpTypeInt 32 1
+%6 = OpConstant %5 2
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"(%7 = OpVariable %8 Function %9
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpStore %7 %6
 OpReturn
 )");
 
@@ -244,7 +273,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(BuilderTest, Const_IndexAccessor_Array_MultiLevel) {
+TEST_F(BuilderTest, Let_IndexAccessor_Array_MultiLevel) {
     // let ary = array<vec3<f32>, 2u>(vec3<f32>(1.0f, 2.0f, 3.0f), vec3<f32>(4.0f, 5.0f, 6.0f));
     // var x = ary[1i][2i];
 
@@ -281,6 +310,37 @@ TEST_F(BuilderTest, Const_IndexAccessor_Array_MultiLevel) {
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
               R"(OpStore %19 %16
+OpReturn
+)");
+
+    Validate(b);
+}
+
+TEST_F(BuilderTest, Const_IndexAccessor_Array_MultiLevel) {
+    // const ary = array<vec3<f32>, 2u>(vec3<f32>(1.0f, 2.0f, 3.0f), vec3<f32>(4.0f, 5.0f, 6.0f));
+    // var x = ary[1i][2i];
+
+    auto* ary =
+        Const("ary", nullptr,
+              array(ty.vec3<f32>(), 2_u, vec3<f32>(1._f, 2._f, 3._f), vec3<f32>(4._f, 5._f, 6._f)));
+    auto* x = Var("x", nullptr, IndexAccessor(IndexAccessor(ary, 1_i), 2_i));
+    WrapInFunction(ary, x);
+
+    spirv::Builder& b = SanitizeAndBuild();
+
+    ASSERT_TRUE(b.Build()) << b.error();
+
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%5 = OpTypeFloat 32
+%6 = OpConstant %5 6
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"(%7 = OpVariable %8 Function %9
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpStore %7 %6
 OpReturn
 )");
 
@@ -510,7 +570,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(BuilderTest, Const_IndexAccessor_Nested_Array_f32) {
+TEST_F(BuilderTest, Let_IndexAccessor_Nested_Array_f32) {
     // let pos : array<array<f32, 2>, 3u> = array<vec2<f32, 2>, 3u>(
     //   array<f32, 2>(0.0, 0.5),
     //   array<f32, 2>(-0.5, -0.5),
@@ -547,6 +607,40 @@ TEST_F(BuilderTest, Const_IndexAccessor_Nested_Array_f32) {
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
               R"(OpStore %17 %13
+OpReturn
+)");
+
+    Validate(b);
+}
+
+TEST_F(BuilderTest, Const_IndexAccessor_Nested_Array_f32) {
+    // const pos : array<array<f32, 2>, 3u> = array<vec2<f32, 2>, 3u>(
+    //   array<f32, 2>(0.0, 0.5),
+    //   array<f32, 2>(-0.5, -0.5),
+    //   array<f32, 2>(0.5, -0.5));
+    // var x = pos[1u][0u];
+
+    auto* pos = Const("pos", ty.array(ty.vec2<f32>(), 3_u),
+                      Construct(ty.array(ty.vec2<f32>(), 3_u), vec2<f32>(0_f, 0.5_f),
+                                vec2<f32>(-0.5_f, -0.5_f), vec2<f32>(0.5_f, -0.5_f)));
+    auto* x = Var("x", nullptr, IndexAccessor(IndexAccessor(pos, 1_u), 0_u));
+    WrapInFunction(pos, x);
+
+    spirv::Builder& b = SanitizeAndBuild();
+
+    ASSERT_TRUE(b.Build()) << b.error();
+
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%5 = OpTypeFloat 32
+%6 = OpConstant %5 -0.5
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"(%7 = OpVariable %8 Function %9
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpStore %7 %6
 OpReturn
 )");
 
@@ -636,7 +730,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(BuilderTest, Const_IndexAccessor_Matrix) {
+TEST_F(BuilderTest, Let_IndexAccessor_Matrix) {
     // let a : mat2x2<f32>(vec2<f32>(1., 2.), vec2<f32>(3., 4.));
     // var x = a[1i]
 
@@ -668,6 +762,40 @@ TEST_F(BuilderTest, Const_IndexAccessor_Matrix) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"(%15 = OpVariable %16 Function %17
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %15 %13
+OpReturn
+)");
+
+    Validate(b);
+}
+
+TEST_F(BuilderTest, Const_IndexAccessor_Matrix) {
+    // const a : mat2x2<f32>(vec2<f32>(1., 2.), vec2<f32>(3., 4.));
+    // var x = a[1i]
+
+    auto* a = Const("a", ty.mat2x2<f32>(),
+                    Construct(ty.mat2x2<f32>(), Construct(ty.vec2<f32>(), 1_f, 2_f),
+                              Construct(ty.vec2<f32>(), 3_f, 4_f)));
+    auto* x = Var("x", nullptr, IndexAccessor("a", 1_i));
+    WrapInFunction(a, x);
+
+    spirv::Builder& b = SanitizeAndBuild();
+
+    ASSERT_TRUE(b.Build()) << b.error();
+
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 32
+%5 = OpTypeVector %6 2
+%7 = OpConstant %6 3
+%8 = OpConstant %6 4
+%9 = OpConstantComposite %5 %7 %8
+%11 = OpTypePointer Function %5
+%12 = OpConstantNull %5
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"(%10 = OpVariable %11 Function %12
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpStore %10 %9
 OpReturn
 )");
 

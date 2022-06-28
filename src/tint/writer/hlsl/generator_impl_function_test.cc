@@ -705,7 +705,7 @@ void main() {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute_WithWorkgroup_Const) {
+TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute_WithWorkgroup_Let) {
     GlobalLet("width", ty.i32(), Construct(ty.i32(), 2_i));
     GlobalLet("height", ty.i32(), Construct(ty.i32(), 3_i));
     GlobalLet("depth", ty.i32(), Construct(ty.i32(), 4_i));
@@ -723,6 +723,26 @@ static const int height = 3;
 static const int depth = 4;
 
 [numthreads(2, 3, 4)]
+void main() {
+  return;
+}
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_Compute_WithWorkgroup_Const) {
+    GlobalConst("width", ty.i32(), Construct(ty.i32(), 2_i));
+    GlobalConst("height", ty.i32(), Construct(ty.i32(), 3_i));
+    GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4_i));
+    Func("main", {}, ty.void_(), {},
+         {
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize("width", "height", "depth"),
+         });
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"([numthreads(2, 3, 4)]
 void main() {
   return;
 }

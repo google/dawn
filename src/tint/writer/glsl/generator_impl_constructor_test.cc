@@ -189,8 +189,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array_Empty) {
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("vec3[3](vec3(0.0f, 0.0f, 0.0f), vec3(0.0f, 0.0f, 0.0f),"
-                                        " vec3(0.0f, 0.0f, 0.0f))"));
+    EXPECT_THAT(gen.result(), HasSubstr("vec3[3](vec3(0.0f), vec3(0.0f), vec3(0.0f))"));
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct) {

@@ -138,7 +138,7 @@ OpStore %7 %6
 )");
 }
 
-TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
+TEST_F(BuilderTest, FunctionVar_LetWithVarInitializer) {
     // var v : f32 = 1.0;
     // let v2 : f32 = v; // Should generate the load
 
@@ -173,7 +173,38 @@ OpStore %7 %6
 )");
 }
 
-TEST_F(BuilderTest, FunctionVar_Const) {
+TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
+    // const v : f32 = 1.0;
+    // let v2 : f32 = v;
+
+    auto* v = Const("v", ty.f32(), Expr(1_f));
+
+    auto* v2 = Var("v2", ty.f32(), ast::StorageClass::kNone, Expr("v"));
+    WrapInFunction(v, v2);
+
+    spirv::Builder& b = Build();
+
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v2)) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.error();
+
+    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "v2"
+)");
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
+%2 = OpConstant %1 1
+%4 = OpTypePointer Function %1
+%5 = OpConstantNull %1
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
+              R"(%3 = OpVariable %4 Function %5
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpStore %3 %2
+)");
+}
+
+TEST_F(BuilderTest, FunctionVar_Let) {
     auto* init = vec3<f32>(1_f, 1_f, 3_f);
 
     auto* v = Let("var", ty.vec3<f32>(), init);
@@ -191,6 +222,21 @@ TEST_F(BuilderTest, FunctionVar_Const) {
 %4 = OpConstant %2 3
 %5 = OpConstantComposite %1 %3 %3 %4
 )");
+}
+
+TEST_F(BuilderTest, FunctionVar_Const) {
+    auto* init = vec3<f32>(1_f, 1_f, 3_f);
+
+    auto* v = Const("var", ty.vec3<f32>(), init);
+
+    WrapInFunction(v);
+
+    spirv::Builder& b = Build();
+
+    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
+    ASSERT_FALSE(b.has_error()) << b.error();
+
+    EXPECT_EQ(DumpInstructions(b.types()), "");  // Not a mistake - 'const' is inlined
 }
 
 }  // namespace

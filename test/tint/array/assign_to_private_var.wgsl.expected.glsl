@@ -20,7 +20,7 @@ layout(binding = 1, std430) buffer S_2 {
 ivec4 dst[4] = ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
 int dst_nested[4][3][2] = int[4][3][2](int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)));
 ivec4[4] ret_arr() {
-  ivec4 tint_symbol_1[4] = ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
+  ivec4 tint_symbol_1[4] = ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0));
   return tint_symbol_1;
 }
 
@@ -35,7 +35,7 @@ void foo(ivec4 src_param[4]) {
   dst = tint_symbol_3;
   dst = src_param;
   dst = ret_arr();
-  ivec4 src_let[4] = ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
+  ivec4 src_let[4] = ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0));
   dst = src_let;
   dst = src_function;
   dst = src_private;

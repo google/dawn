@@ -1772,12 +1772,7 @@ bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* exp
             // TODO(crbug.com/tint/1580): Once 'const' is implemented, 'let' will no longer resolve
             // to a shader-creation time constant value, and this can be removed.
             if (auto constant = sem->ConstantValue()) {
-                // We do not want to inline array constants, as this will undo the work of
-                // PromoteInitializersToLet, which ensures that arrays are declarated in 'let's
-                // before their usage.
-                if (!constant.Type()->Is<sem::Array>()) {
-                    return EmitConstant(out, constant);
-                }
+                return EmitConstant(out, constant);
             }
         }
     }
@@ -1938,6 +1933,9 @@ bool GeneratorImpl::EmitGlobalVariable(const ast::Variable* global) {
         },
         [&](const ast::Let* let) { return EmitProgramConstVariable(let); },
         [&](const ast::Override* override) { return EmitOverride(override); },
+        [&](const ast::Const*) {
+            return true;  // Constants are embedded at their use
+        },
         [&](Default) {
             TINT_ICE(Writer, diagnostics_)
                 << "unhandled global variable type " << global->TypeInfo().name;
@@ -2252,10 +2250,7 @@ bool GeneratorImpl::EmitConstantRange(std::ostream& out,
             ScopedParen sp(out);
 
             if (constant.AllEqual(start, end)) {
-                if (!EmitConstantRange(out, constant, v->type(), start, start + 1)) {
-                    return false;
-                }
-                return true;
+                return EmitConstantRange(out, constant, v->type(), start, start + 1);
             }
 
             for (size_t i = start; i < end; i++) {
@@ -2285,6 +2280,28 @@ bool GeneratorImpl::EmitConstantRange(std::ostream& out,
                     return false;
                 }
             }
+            return true;
+        },
+        [&](const sem::Array* a) {
+            if (!EmitType(out, a, ast::StorageClass::kNone, ast::Access::kUndefined, "")) {
+                return false;
+            }
+
+            ScopedParen sp(out);
+
+            auto* el_ty = a->ElemType();
+
+            uint32_t step = 0;
+            sem::Type::DeepestElementOf(el_ty, &step);
+            for (size_t i = start; i < end; i += step) {
+                if (i > start) {
+                    out << ", ";
+                }
+                if (!EmitConstantRange(out, constant, el_ty, i, i + step)) {
+                    return false;
+                }
+            }
+
             return true;
         },
         [&](Default) {
@@ -2655,6 +2672,9 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
             v->variable,  //
             [&](const ast::Var* var) { return EmitVar(var); },
             [&](const ast::Let* let) { return EmitLet(let); },
+            [&](const ast::Const*) {
+                return true;  // Constants are embedded at their use
+            },
             [&](Default) {  //
                 TINT_ICE(Writer, diagnostics_)
                     << "unknown variable type: " << v->variable->TypeInfo().name;

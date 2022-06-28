@@ -255,6 +255,9 @@ bool GeneratorImpl::Generate() {
                 TINT_DEFER(line());
                 return EmitProgramConstVariable(let);
             },
+            [&](const ast::Const*) {
+                return true;  // Constants are embedded at their use
+            },
             [&](const ast::Override* override) {
                 TINT_DEFER(line());
                 return EmitOverride(override);
@@ -1660,6 +1663,34 @@ bool GeneratorImpl::EmitConstantRange(std::ostream& out,
             }
             return true;
         },
+        [&](const sem::Array* a) {
+            if (!EmitType(out, a, "")) {
+                return false;
+            }
+
+            if (constant.AllZero(start, end)) {
+                out << "{}";
+                return true;
+            }
+
+            out << "{";
+            TINT_DEFER(out << "}");
+
+            auto* el_ty = a->ElemType();
+
+            uint32_t step = 0;
+            sem::Type::DeepestElementOf(el_ty, &step);
+            for (size_t i = start; i < end; i += step) {
+                if (i > start) {
+                    out << ", ";
+                }
+                if (!EmitConstantRange(out, constant, el_ty, i, i + step)) {
+                    return false;
+                }
+            }
+
+            return true;
+        },
         [&](Default) {
             diagnostics_.add_error(
                 diag::System::Writer,
@@ -1708,12 +1739,7 @@ bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* exp
             // TODO(crbug.com/tint/1580): Once 'const' is implemented, 'let' will no longer resolve
             // to a shader-creation time constant value, and this can be removed.
             if (auto constant = sem->ConstantValue()) {
-                // We do not want to inline array constants, as this will undo the work of
-                // PromoteInitializersToLet, which ensures that arrays are declarated in 'let's
-                // before their usage.
-                if (!constant.Type()->Is<sem::Array>()) {
-                    return EmitConstant(out, constant);
-                }
+                return EmitConstant(out, constant);
             }
         }
     }
@@ -2356,6 +2382,9 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
                 v->variable,  //
                 [&](const ast::Var* var) { return EmitVar(var); },
                 [&](const ast::Let* let) { return EmitLet(let); },
+                [&](const ast::Const*) {
+                    return true;  // Constants are embedded at their use
+                },
                 [&](Default) {  //
                     TINT_ICE(Writer, diagnostics_)
                         << "unknown statement type: " << stmt->TypeInfo().name;

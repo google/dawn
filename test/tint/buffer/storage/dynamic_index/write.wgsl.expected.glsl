@@ -24,7 +24,7 @@ void tint_symbol(uint idx) {
   s.arr[idx].f = 0.0f;
   s.arr[idx].g = mat2x3(vec3(0.0f), vec3(0.0f));
   s.arr[idx].h = mat3x2(vec2(0.0f), vec2(0.0f), vec2(0.0f));
-  ivec4 tint_symbol_1[4] = ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
+  ivec4 tint_symbol_1[4] = ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0));
   s.arr[idx].i = tint_symbol_1;
 }
 
