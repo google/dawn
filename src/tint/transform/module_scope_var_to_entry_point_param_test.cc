@@ -95,9 +95,14 @@ var<workgroup> w : f32;
 fn no_uses() {
 }
 
+fn zoo() {
+  p = p * 2.0;
+}
+
 fn bar(a : f32, b : f32) {
   p = a;
   w = b;
+  zoo();
 }
 
 fn foo(a : f32) {
@@ -116,22 +121,27 @@ fn main() {
 fn no_uses() {
 }
 
-fn bar(a : f32, b : f32, @internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol : ptr<private, f32>, @internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_1 : ptr<workgroup, f32>) {
-  *(tint_symbol) = a;
-  *(tint_symbol_1) = b;
+fn zoo(@internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol : ptr<private, f32>) {
+  *(tint_symbol) = (*(tint_symbol) * 2.0);
 }
 
-fn foo(a : f32, @internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_2 : ptr<private, f32>, @internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_3 : ptr<workgroup, f32>) {
+fn bar(a : f32, b : f32, @internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_1 : ptr<private, f32>, @internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_2 : ptr<workgroup, f32>) {
+  *(tint_symbol_1) = a;
+  *(tint_symbol_2) = b;
+  zoo(tint_symbol_1);
+}
+
+fn foo(a : f32, @internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_3 : ptr<private, f32>, @internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_4 : ptr<workgroup, f32>) {
   let b : f32 = 2.0;
-  bar(a, b, tint_symbol_2, tint_symbol_3);
+  bar(a, b, tint_symbol_3, tint_symbol_4);
   no_uses();
 }
 
 @compute @workgroup_size(1)
 fn main() {
-  @internal(disable_validation__ignore_storage_class) var<private> tint_symbol_4 : f32;
-  @internal(disable_validation__ignore_storage_class) var<workgroup> tint_symbol_5 : f32;
-  foo(1.0, &(tint_symbol_4), &(tint_symbol_5));
+  @internal(disable_validation__ignore_storage_class) var<private> tint_symbol_5 : f32;
+  @internal(disable_validation__ignore_storage_class) var<workgroup> tint_symbol_6 : f32;
+  foo(1.0, &(tint_symbol_5), &(tint_symbol_6));
 }
 )";
 
@@ -159,6 +169,11 @@ fn no_uses() {
 fn bar(a : f32, b : f32) {
   p = a;
   w = b;
+  zoo();
+}
+
+fn zoo() {
+  p = p * 2.0;
 }
 
 var<private> p : f32;
@@ -168,23 +183,28 @@ var<workgroup> w : f32;
     auto* expect = R"(
 @compute @workgroup_size(1)
 fn main() {
-  @internal(disable_validation__ignore_storage_class) var<private> tint_symbol_4 : f32;
-  @internal(disable_validation__ignore_storage_class) var<workgroup> tint_symbol_5 : f32;
-  foo(1.0, &(tint_symbol_4), &(tint_symbol_5));
+  @internal(disable_validation__ignore_storage_class) var<private> tint_symbol_5 : f32;
+  @internal(disable_validation__ignore_storage_class) var<workgroup> tint_symbol_6 : f32;
+  foo(1.0, &(tint_symbol_5), &(tint_symbol_6));
 }
 
-fn foo(a : f32, @internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_2 : ptr<private, f32>, @internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_3 : ptr<workgroup, f32>) {
+fn foo(a : f32, @internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_3 : ptr<private, f32>, @internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_4 : ptr<workgroup, f32>) {
   let b : f32 = 2.0;
-  bar(a, b, tint_symbol_2, tint_symbol_3);
+  bar(a, b, tint_symbol_3, tint_symbol_4);
   no_uses();
 }
 
 fn no_uses() {
 }
 
-fn bar(a : f32, b : f32, @internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol : ptr<private, f32>, @internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_1 : ptr<workgroup, f32>) {
-  *(tint_symbol) = a;
-  *(tint_symbol_1) = b;
+fn bar(a : f32, b : f32, @internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_1 : ptr<private, f32>, @internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol_2 : ptr<workgroup, f32>) {
+  *(tint_symbol_1) = a;
+  *(tint_symbol_2) = b;
+  zoo(tint_symbol_1);
+}
+
+fn zoo(@internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol : ptr<private, f32>) {
+  *(tint_symbol) = (*(tint_symbol) * 2.0);
 }
 )";
 
@@ -307,9 +327,9 @@ fn main() {
 
 TEST_F(ModuleScopeVarToEntryPointParamTest, FoldAddressOfDeref) {
     auto* src = R"(
-var<private> v : f32;
+var<workgroup> v : f32;
 
-fn bar(p : ptr<private, f32>) {
+fn bar(p : ptr<workgroup, f32>) {
   (*p) = 0.0;
 }
 
@@ -324,17 +344,17 @@ fn main() {
 )";
 
     auto* expect = R"(
-fn bar(p : ptr<private, f32>) {
+fn bar(p : ptr<workgroup, f32>) {
   *(p) = 0.0;
 }
 
-fn foo(@internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol : ptr<private, f32>) {
+fn foo(@internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol : ptr<workgroup, f32>) {
   bar(tint_symbol);
 }
 
 @compute @workgroup_size(1)
 fn main() {
-  @internal(disable_validation__ignore_storage_class) var<private> tint_symbol_1 : f32;
+  @internal(disable_validation__ignore_storage_class) var<workgroup> tint_symbol_1 : f32;
   foo(&(tint_symbol_1));
 }
 )";
@@ -355,25 +375,25 @@ fn foo() {
   bar(&v);
 }
 
-fn bar(p : ptr<private, f32>) {
+fn bar(p : ptr<workgroup, f32>) {
   (*p) = 0.0;
 }
 
-var<private> v : f32;
+var<workgroup> v : f32;
 )";
 
     auto* expect = R"(
 @compute @workgroup_size(1)
 fn main() {
-  @internal(disable_validation__ignore_storage_class) var<private> tint_symbol_1 : f32;
+  @internal(disable_validation__ignore_storage_class) var<workgroup> tint_symbol_1 : f32;
   foo(&(tint_symbol_1));
 }
 
-fn foo(@internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol : ptr<private, f32>) {
+fn foo(@internal(disable_validation__ignore_storage_class) @internal(disable_validation__ignore_invalid_pointer_argument) tint_symbol : ptr<workgroup, f32>) {
   bar(tint_symbol);
 }
 
-fn bar(p : ptr<private, f32>) {
+fn bar(p : ptr<workgroup, f32>) {
   *(p) = 0.0;
 }
 )";
@@ -1144,6 +1164,81 @@ struct S {
 
 @compute @workgroup_size(1)
 fn main() {
+}
+)";
+
+    auto got = Run<ModuleScopeVarToEntryPointParam>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+// Test that a private variable that is only referenced by a single user-defined function is
+// promoted to a function scope variable, rather than passed as a parameter.
+TEST_F(ModuleScopeVarToEntryPointParamTest, PromotePrivateToFunctionScope) {
+    auto* src = R"(
+var<private> p : f32;
+
+fn foo(a : f32) -> f32 {
+  let x = p;
+  p = x * a;
+  return p;
+}
+
+@compute @workgroup_size(1)
+fn main() {
+  _ = foo(1.0);
+}
+)";
+
+    auto* expect = R"(
+fn foo(a : f32) -> f32 {
+  @internal(disable_validation__ignore_storage_class) var<private> tint_symbol : f32;
+  let x = tint_symbol;
+  tint_symbol = (x * a);
+  return tint_symbol;
+}
+
+@compute @workgroup_size(1)
+fn main() {
+  _ = foo(1.0);
+}
+)";
+
+    auto got = Run<ModuleScopeVarToEntryPointParam>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+// Test that a private variable that is only referenced by a single user-defined function is
+// promoted to a function scope variable, rather than passed as a parameter.
+TEST_F(ModuleScopeVarToEntryPointParamTest, PromotePrivateToFunctionScope_OutOfOrder) {
+    auto* src = R"(
+var<private> p : f32;
+
+@compute @workgroup_size(1)
+fn main() {
+  _ = foo(1.0);
+}
+
+fn foo(a : f32) -> f32 {
+  let x = p;
+  p = x * a;
+  return p;
+}
+
+)";
+
+    auto* expect = R"(
+@compute @workgroup_size(1)
+fn main() {
+  _ = foo(1.0);
+}
+
+fn foo(a : f32) -> f32 {
+  @internal(disable_validation__ignore_storage_class) var<private> tint_symbol : f32;
+  let x = tint_symbol;
+  tint_symbol = (x * a);
+  return tint_symbol;
 }
 )";
 

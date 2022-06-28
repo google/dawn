@@ -28,7 +28,8 @@ S ret_struct_arr() {
   return tint_symbol_2;
 }
 
-void foo(tint_array<int4, 4> src_param, thread tint_array<int4, 4>* const tint_symbol_4, threadgroup tint_array<int4, 4>* const tint_symbol_5, const constant S* const tint_symbol_6, device S* const tint_symbol_7) {
+void foo(tint_array<int4, 4> src_param, threadgroup tint_array<int4, 4>* const tint_symbol_5, const constant S* const tint_symbol_6, device S* const tint_symbol_7) {
+  thread tint_array<int4, 4> tint_symbol_4 = {};
   tint_array<int4, 4> src_function = {};
   tint_array<int4, 4> dst = {};
   tint_array<int4, 4> const tint_symbol_3 = tint_array<int4, 4>{int4(1), int4(2), int4(3), int4(3)};
@@ -38,7 +39,7 @@ void foo(tint_array<int4, 4> src_param, thread tint_array<int4, 4>* const tint_s
   tint_array<int4, 4> const src_let = tint_array<int4, 4>{};
   dst = src_let;
   dst = src_function;
-  dst = *(tint_symbol_4);
+  dst = tint_symbol_4;
   dst = *(tint_symbol_5);
   S const tint_symbol = ret_struct_arr();
   dst = tint_symbol.arr;

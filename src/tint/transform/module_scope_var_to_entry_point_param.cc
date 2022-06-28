@@ -352,6 +352,9 @@ struct ModuleScopeVarToEntryPointParam::State {
                 if (var->StorageClass() == ast::StorageClass::kNone) {
                     continue;
                 }
+                if (local_private_vars_.count(var)) {
+                    continue;
+                }
 
                 // This is the symbol for the variable that replaces the module-scope var.
                 auto new_var_symbol = ctx.dst->Sym();
@@ -362,20 +365,46 @@ struct ModuleScopeVarToEntryPointParam::State {
                 // Track whether the new variable was wrapped in a struct or not.
                 bool is_wrapped = false;
 
-                // Process the variable to redeclare it as a function parameter or local variable.
-                if (is_entry_point) {
-                    ProcessVariableInEntryPoint(func_ast, var, new_var_symbol, workgroup_param,
-                                                workgroup_parameter_members, is_pointer,
-                                                is_wrapped);
+                // Check if this is a private variable that is only referenced by this function.
+                bool local_private = false;
+                if (var->StorageClass() == ast::StorageClass::kPrivate) {
+                    local_private = true;
+                    for (auto* user : var->Users()) {
+                        auto* stmt = user->Stmt();
+                        if (!stmt || stmt->Function() != func_sem) {
+                            local_private = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (local_private) {
+                    // Redeclare the variable at function scope.
+                    auto* disable_validation =
+                        ctx.dst->Disable(ast::DisabledValidation::kIgnoreStorageClass);
+                    auto* constructor = ctx.Clone(var->Declaration()->constructor);
+                    auto* local_var = ctx.dst->Var(new_var_symbol,
+                                                   CreateASTTypeFor(ctx, var->Type()->UnwrapRef()),
+                                                   ast::StorageClass::kPrivate, constructor,
+                                                   ast::AttributeList{disable_validation});
+                    ctx.InsertFront(func_ast->body->statements, ctx.dst->Decl(local_var));
+                    local_private_vars_.insert(var);
                 } else {
-                    ProcessVariableInUserFunction(func_ast, var, new_var_symbol, is_pointer);
+                    // Process the variable to redeclare it as a parameter or local variable.
+                    if (is_entry_point) {
+                        ProcessVariableInEntryPoint(func_ast, var, new_var_symbol, workgroup_param,
+                                                    workgroup_parameter_members, is_pointer,
+                                                    is_wrapped);
+                    } else {
+                        ProcessVariableInUserFunction(func_ast, var, new_var_symbol, is_pointer);
+                    }
+
+                    // Record the replacement symbol.
+                    var_to_newvar[var] = {new_var_symbol, is_pointer, is_wrapped};
                 }
 
                 // Replace all uses of the module-scope variable.
                 ReplaceUsesInFunction(func_ast, var, new_var_symbol, is_pointer, is_wrapped);
-
-                // Record the replacement symbol.
-                var_to_newvar[var] = {new_var_symbol, is_pointer, is_wrapped};
             }
 
             if (!workgroup_parameter_members.empty()) {
@@ -404,7 +433,13 @@ struct ModuleScopeVarToEntryPointParam::State {
                         continue;
                     }
 
-                    auto new_var = var_to_newvar[target_var];
+                    auto it = var_to_newvar.find(target_var);
+                    if (it == var_to_newvar.end()) {
+                        // No replacement was created for this function.
+                        continue;
+                    }
+
+                    auto new_var = it->second;
                     bool is_handle = target_var->Type()->UnwrapRef()->is_handle();
                     const ast::Expression* arg = ctx.dst->Expr(new_var.symbol);
                     if (new_var.is_wrapped) {
@@ -434,6 +469,9 @@ struct ModuleScopeVarToEntryPointParam::State {
   private:
     // The structures that have already been cloned by this transform.
     std::unordered_set<const sem::Struct*> cloned_structs_;
+
+    // Set of a private variables that are local to a single function.
+    std::unordered_set<const sem::Variable*> local_private_vars_;
 
     // Map from identifier expression to the address-of expression that uses it.
     std::unordered_map<const ast::IdentifierExpression*, const ast::UnaryOpExpression*>

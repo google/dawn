@@ -5,14 +5,14 @@ struct S {
   int i;
 };
 
-void main_1(thread S* const tint_symbol_1) {
-  (*(tint_symbol_1)).i = 5;
+void main_1() {
+  thread S tint_symbol_1 = {};
+  tint_symbol_1.i = 5;
   return;
 }
 
 kernel void tint_symbol() {
-  thread S tint_symbol_2 = {};
-  main_1(&(tint_symbol_2));
+  main_1();
   return;
 }
 
