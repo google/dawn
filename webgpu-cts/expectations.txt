@@ -433,4 +433,5 @@ crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logi
 crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:less_than:inputSource="const";vectorize=2 [ Failure ]
 crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:not_equals:inputSource="const";vectorize="_undef_" [ Failure ]
 crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:not_equals:inputSource="const";vectorize=2 [ Failure ]
+crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,binary,f32_logical:not_equals:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,expression,call,builtin,atan2:f32:inputSource="const";* [ Failure ]
