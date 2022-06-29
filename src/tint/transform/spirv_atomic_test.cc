@@ -1018,5 +1018,366 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(SpirvAtomicTest, ReplaceAssignsAndDecls_Scaler) {
+    auto* src = R"(
+var<workgroup> wg : u32;
+
+fn f() {
+  stub_atomicAdd_u32(wg, 1u);
+
+  wg = 0u;
+  let a = wg;
+  var b : u32;
+  b = wg;
+}
+)";
+
+    auto* expect = R"(
+var<workgroup> wg : atomic<u32>;
+
+fn f() {
+  atomicAdd(&(wg), 1u);
+  atomicStore(&(wg), 0u);
+  let a = atomicLoad(&(wg));
+  var b : u32;
+  b = atomicLoad(&(wg));
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, ReplaceAssignsAndDecls_Struct) {
+    auto* src = R"(
+struct S {
+  a : u32,
+}
+
+var<workgroup> wg : S;
+
+fn f() {
+  stub_atomicAdd_u32(wg.a, 1u);
+
+  wg.a = 0u;
+  let a = wg.a;
+  var b : u32;
+  b = wg.a;
+}
+)";
+
+    auto* expect = R"(
+struct S_atomic {
+  a : atomic<u32>,
+}
+
+struct S {
+  a : u32,
+}
+
+var<workgroup> wg : S_atomic;
+
+fn f() {
+  atomicAdd(&(wg.a), 1u);
+  atomicStore(&(wg.a), 0u);
+  let a = atomicLoad(&(wg.a));
+  var b : u32;
+  b = atomicLoad(&(wg.a));
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, ReplaceAssignsAndDecls_NestedStruct) {
+    auto* src = R"(
+struct S0 {
+  a : u32,
+}
+
+struct S1 {
+  s0 : S0
+}
+
+var<workgroup> wg : S1;
+
+fn f() {
+  stub_atomicAdd_u32(wg.s0.a, 1u);
+
+  wg.s0.a = 0u;
+  let a = wg.s0.a;
+  var b : u32;
+  b = wg.s0.a;
+}
+)";
+
+    auto* expect = R"(
+struct S0_atomic {
+  a : atomic<u32>,
+}
+
+struct S0 {
+  a : u32,
+}
+
+struct S1_atomic {
+  s0 : S0_atomic,
+}
+
+struct S1 {
+  s0 : S0,
+}
+
+var<workgroup> wg : S1_atomic;
+
+fn f() {
+  atomicAdd(&(wg.s0.a), 1u);
+  atomicStore(&(wg.s0.a), 0u);
+  let a = atomicLoad(&(wg.s0.a));
+  var b : u32;
+  b = atomicLoad(&(wg.s0.a));
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, ReplaceAssignsAndDecls_StructMultipleAtomics) {
+    auto* src = R"(
+struct S {
+  a : u32,
+  b : u32,
+  c : u32,
+}
+
+var<workgroup> wg : S;
+
+fn f() {
+  stub_atomicAdd_u32(wg.a, 1u);
+  stub_atomicAdd_u32(wg.b, 1u);
+
+  wg.a = 0u;
+  let a = wg.a;
+  var b : u32;
+  b = wg.a;
+
+  wg.b = 0u;
+  let c = wg.b;
+  var d : u32;
+  d = wg.b;
+
+  wg.c = 0u;
+  let e = wg.c;
+  var f : u32;
+  f = wg.c;
+}
+)";
+
+    auto* expect = R"(
+struct S_atomic {
+  a : atomic<u32>,
+  b : atomic<u32>,
+  c : u32,
+}
+
+struct S {
+  a : u32,
+  b : u32,
+  c : u32,
+}
+
+var<workgroup> wg : S_atomic;
+
+fn f() {
+  atomicAdd(&(wg.a), 1u);
+  atomicAdd(&(wg.b), 1u);
+  atomicStore(&(wg.a), 0u);
+  let a = atomicLoad(&(wg.a));
+  var b : u32;
+  b = atomicLoad(&(wg.a));
+  atomicStore(&(wg.b), 0u);
+  let c = atomicLoad(&(wg.b));
+  var d : u32;
+  d = atomicLoad(&(wg.b));
+  wg.c = 0u;
+  let e = wg.c;
+  var f : u32;
+  f = wg.c;
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, ReplaceAssignsAndDecls_ArrayOfScalar) {
+    auto* src = R"(
+var<workgroup> wg : array<u32, 4>;
+
+fn f() {
+  stub_atomicAdd_u32(wg[1], 1u);
+
+  wg[1] = 0u;
+  let a = wg[1];
+  var b : u32;
+  b = wg[1];
+}
+)";
+
+    auto* expect = R"(
+var<workgroup> wg : array<atomic<u32>, 4u>;
+
+fn f() {
+  atomicAdd(&(wg[1]), 1u);
+  atomicStore(&(wg[1]), 0u);
+  let a = atomicLoad(&(wg[1]));
+  var b : u32;
+  b = atomicLoad(&(wg[1]));
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, ReplaceAssignsAndDecls_ArrayOfStruct) {
+    auto* src = R"(
+struct S {
+  a : u32,
+}
+
+var<workgroup> wg : array<S, 4>;
+
+fn f() {
+  stub_atomicAdd_u32(wg[1].a, 1u);
+
+  wg[1].a = 0u;
+  let a = wg[1].a;
+  var b : u32;
+  b = wg[1].a;
+}
+)";
+
+    auto* expect = R"(
+struct S_atomic {
+  a : atomic<u32>,
+}
+
+struct S {
+  a : u32,
+}
+
+var<workgroup> wg : array<S_atomic, 4u>;
+
+fn f() {
+  atomicAdd(&(wg[1].a), 1u);
+  atomicStore(&(wg[1].a), 0u);
+  let a = atomicLoad(&(wg[1].a));
+  var b : u32;
+  b = atomicLoad(&(wg[1].a));
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, ReplaceAssignsAndDecls_StructOfArray) {
+    auto* src = R"(
+struct S {
+  a : array<u32>,
+}
+
+@group(0) @binding(1) var<storage, read_write> s : S;
+
+fn f() {
+  stub_atomicAdd_u32(s.a[4], 1u);
+
+  s.a[4] = 0u;
+  let a = s.a[4];
+  var b : u32;
+  b = s.a[4];
+}
+)";
+
+    auto* expect = R"(
+struct S_atomic {
+  a : array<atomic<u32>>,
+}
+
+struct S {
+  a : array<u32>,
+}
+
+@group(0) @binding(1) var<storage, read_write> s : S_atomic;
+
+fn f() {
+  atomicAdd(&(s.a[4]), 1u);
+  atomicStore(&(s.a[4]), 0u);
+  let a = atomicLoad(&(s.a[4]));
+  var b : u32;
+  b = atomicLoad(&(s.a[4]));
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SpirvAtomicTest, ReplaceAssignsAndDecls_ViaPtrLet) {
+    auto* src = R"(
+struct S {
+  i : u32,
+}
+
+@group(0) @binding(1) var<storage, read_write> s : S;
+
+fn f() {
+  let p0 = &(s);
+  let p1 : ptr<storage, u32, read_write> = &((*(p0)).i);
+  stub_atomicAdd_u32(*p1, 1u);
+
+  *p1 = 0u;
+  let a = *p1;
+  var b : u32;
+  b = *p1;
+}
+)";
+
+    auto* expect = R"(
+struct S_atomic {
+  i : atomic<u32>,
+}
+
+struct S {
+  i : u32,
+}
+
+@group(0) @binding(1) var<storage, read_write> s : S_atomic;
+
+fn f() {
+  let p0 = &(s);
+  let p1 : ptr<storage, atomic<u32>, read_write> = &((*(p0)).i);
+  atomicAdd(&(*(p1)), 1u);
+  atomicStore(&(*(p1)), 0u);
+  let a = atomicLoad(&(*(p1)));
+  var b : u32;
+  b = atomicLoad(&(*(p1)));
+}
+)";
+
+    auto got = Run(src);
+
+    EXPECT_EQ(expect, str(got));
+}
 }  // namespace
 }  // namespace tint::transform
