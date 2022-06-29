@@ -84,6 +84,7 @@ TEST(NumberTest, CheckedConvertIdentity) {
 TEST(NumberTest, CheckedConvertLargestValue) {
     EXPECT_EQ(CheckedConvert<i32>(AInt(kHighestI32)), i32(kHighestI32));
     EXPECT_EQ(CheckedConvert<u32>(AInt(kHighestU32)), u32(kHighestU32));
+    EXPECT_EQ(CheckedConvert<u32>(i32(kHighestI32)), u32(kHighestI32));
     EXPECT_EQ(CheckedConvert<f32>(AFloat(kHighestF32)), f32(kHighestF32));
     EXPECT_EQ(CheckedConvert<f16>(AFloat(kHighestF16)), f16(kHighestF16));
 }
@@ -105,6 +106,14 @@ TEST(NumberTest, CheckedConvertSmallestValue) {
 TEST(NumberTest, CheckedConvertExceedsPositiveLimit) {
     EXPECT_EQ(CheckedConvert<i32>(AInt(kHighestI32 + 1)), ConversionFailure::kExceedsPositiveLimit);
     EXPECT_EQ(CheckedConvert<u32>(AInt(kHighestU32 + 1)), ConversionFailure::kExceedsPositiveLimit);
+    EXPECT_EQ(CheckedConvert<i32>(u32(kHighestU32)), ConversionFailure::kExceedsPositiveLimit);
+    EXPECT_EQ(CheckedConvert<i32>(u32(0x80000000)), ConversionFailure::kExceedsPositiveLimit);
+    EXPECT_EQ(CheckedConvert<u32>(f32(f32::kHighest)), ConversionFailure::kExceedsPositiveLimit);
+    EXPECT_EQ(CheckedConvert<i32>(f32(f32::kHighest)), ConversionFailure::kExceedsPositiveLimit);
+    EXPECT_EQ(CheckedConvert<u32>(AFloat(AFloat::kHighest)),
+              ConversionFailure::kExceedsPositiveLimit);
+    EXPECT_EQ(CheckedConvert<i32>(AFloat(AFloat::kHighest)),
+              ConversionFailure::kExceedsPositiveLimit);
     EXPECT_EQ(CheckedConvert<f32>(AFloat(kHighestF32NextULP)),
               ConversionFailure::kExceedsPositiveLimit);
     EXPECT_EQ(CheckedConvert<f16>(AFloat(kHighestF16NextULP)),
@@ -114,6 +123,14 @@ TEST(NumberTest, CheckedConvertExceedsPositiveLimit) {
 TEST(NumberTest, CheckedConvertExceedsNegativeLimit) {
     EXPECT_EQ(CheckedConvert<i32>(AInt(kLowestI32 - 1)), ConversionFailure::kExceedsNegativeLimit);
     EXPECT_EQ(CheckedConvert<u32>(AInt(kLowestU32 - 1)), ConversionFailure::kExceedsNegativeLimit);
+    EXPECT_EQ(CheckedConvert<u32>(i32(-1)), ConversionFailure::kExceedsNegativeLimit);
+    EXPECT_EQ(CheckedConvert<u32>(i32(kLowestI32)), ConversionFailure::kExceedsNegativeLimit);
+    EXPECT_EQ(CheckedConvert<u32>(f32(f32::kLowest)), ConversionFailure::kExceedsNegativeLimit);
+    EXPECT_EQ(CheckedConvert<i32>(f32(f32::kLowest)), ConversionFailure::kExceedsNegativeLimit);
+    EXPECT_EQ(CheckedConvert<u32>(AFloat(AFloat::kLowest)),
+              ConversionFailure::kExceedsNegativeLimit);
+    EXPECT_EQ(CheckedConvert<i32>(AFloat(AFloat::kLowest)),
+              ConversionFailure::kExceedsNegativeLimit);
     EXPECT_EQ(CheckedConvert<f32>(AFloat(kLowestF32NextULP)),
               ConversionFailure::kExceedsNegativeLimit);
     EXPECT_EQ(CheckedConvert<f16>(AFloat(kLowestF16NextULP)),

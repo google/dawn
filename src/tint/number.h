@@ -282,7 +282,9 @@ std::ostream& operator<<(std::ostream& out, ConversionFailure failure);
 /// @returns the resulting value of the conversion, or a failure reason.
 template <typename TO, typename FROM>
 utils::Result<TO, ConversionFailure> CheckedConvert(Number<FROM> num) {
-    using T = decltype(UnwrapNumber<TO>() + num.value);
+    // Use the highest-precision integer or floating-point type to perform the comparisons.
+    using T = std::conditional_t<IsFloatingPoint<UnwrapNumber<TO>> || IsFloatingPoint<FROM>,
+                                 AFloat::type, AInt::type>;
     const auto value = static_cast<T>(num.value);
     if (value > static_cast<T>(TO::kHighest)) {
         return ConversionFailure::kExceedsPositiveLimit;
