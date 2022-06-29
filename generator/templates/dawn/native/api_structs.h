@@ -64,8 +64,9 @@ namespace {{native_namespace}} {
             {% for member in type.members %}
                 {% set member_declaration = as_annotated_frontendType(member) + render_cpp_default_value(member) %}
                 {% if type.chained and loop.first %}
-                    //* Align the first member to ChainedStruct to match the C struct layout.
-                    alignas(ChainedStruct) {{member_declaration}};
+                    //* Align the first member after ChainedStruct to match the C struct layout.
+                    //* It has to be aligned both to its natural and ChainedStruct's alignment.
+                    alignas({{namespace}}::{{as_cppType(type.name)}}::kFirstMemberAlignment) {{member_declaration}};
                 {% else %}
                     {{member_declaration}};
                 {% endif %}
