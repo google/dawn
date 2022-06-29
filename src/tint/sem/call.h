@@ -17,6 +17,7 @@
 
 #include <vector>
 
+#include "src/tint/ast/call_expression.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/expression.h"
 

@@ -19,6 +19,7 @@
 #include <unordered_map>
 #include <utility>
 
+#include "src/tint/ast/binary_expression.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/abstract_float.h"
 #include "src/tint/sem/abstract_int.h"

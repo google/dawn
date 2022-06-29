@@ -20,8 +20,12 @@
 #include <variant>
 #include <vector>
 
-#include "src/tint/program_builder.h"
-#include "src/tint/sem/type.h"
+#include "src/tint/number.h"
+
+// Forward declarations
+namespace tint::sem {
+class Type;
+}
 
 namespace tint::sem {
 

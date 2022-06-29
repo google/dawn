@@ -19,6 +19,8 @@
 #include <string>
 #include <vector>
 
+#include "src/tint/ast/binary_expression.h"
+#include "src/tint/ast/unary_op.h"
 #include "src/tint/resolver/const_eval.h"
 #include "src/tint/resolver/ctor_conv_intrinsic.h"
 #include "src/tint/sem/builtin.h"

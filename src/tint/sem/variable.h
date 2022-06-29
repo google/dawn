@@ -27,6 +27,7 @@
 // Forward declarations
 namespace tint::ast {
 class IdentifierExpression;
+class Parameter;
 class Variable;
 }  // namespace tint::ast
 namespace tint::sem {

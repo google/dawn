@@ -19,6 +19,7 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/program_builder.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/statement.h"
 

@@ -16,6 +16,7 @@
 
 #include <memory>
 
+#include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/mutations/change_unary_operator.h"
 #include "src/tint/fuzzers/tint_ast_fuzzer/util.h"
 #include "src/tint/sem/reference.h"

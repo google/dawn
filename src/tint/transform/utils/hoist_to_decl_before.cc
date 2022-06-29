@@ -16,7 +16,7 @@
 
 #include <unordered_map>
 
-#include "src/tint/ast/variable_decl_statement.h"
+#include "src/tint/program_builder.h"
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/sem/if_statement.h"
