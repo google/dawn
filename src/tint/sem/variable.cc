@@ -91,4 +91,6 @@ VariableUser::VariableUser(const ast::IdentifierExpression* declaration,
     }
 }
 
+VariableUser::~VariableUser() = default;
+
 }  // namespace tint::sem

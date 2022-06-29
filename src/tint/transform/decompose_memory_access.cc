@@ -377,10 +377,10 @@ struct DecomposeMemoryAccess::State {
         auto* lhs_lit = tint::As<OffsetLiteral>(lhs);
         auto* rhs_lit = tint::As<OffsetLiteral>(rhs);
         if (lhs_lit && lhs_lit->literal == 0) {
-            return offsets_.Create<OffsetLiteral>(0);
+            return offsets_.Create<OffsetLiteral>(0u);
         }
         if (rhs_lit && rhs_lit->literal == 0) {
-            return offsets_.Create<OffsetLiteral>(0);
+            return offsets_.Create<OffsetLiteral>(0u);
         }
         if (lhs_lit && lhs_lit->literal == 1) {
             return rhs;
@@ -831,7 +831,7 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) con
                 if (swizzle->Indices().size() == 1) {
                     if (auto access = state.TakeAccess(accessor->structure)) {
                         auto* vec_ty = access.type->As<sem::Vector>();
-                        auto* offset = state.Mul(vec_ty->type()->Size(), swizzle->Indices()[0]);
+                        auto* offset = state.Mul(vec_ty->type()->Size(), swizzle->Indices()[0u]);
                         state.AddAccess(accessor, {
                                                       access.var,
                                                       state.Add(access.offset, offset),

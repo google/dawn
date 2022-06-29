@@ -48,8 +48,8 @@ TEST_F(ResolverAtomicTest, GlobalStorageStruct) {
     auto* s = Structure("s", {Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
     auto* g = GlobalVar("g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
                         ast::AttributeList{
-                            create<ast::BindingAttribute>(0),
-                            create<ast::GroupAttribute>(0),
+                            create<ast::BindingAttribute>(0u),
+                            create<ast::GroupAttribute>(0u),
                         });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

@@ -20,7 +20,7 @@ namespace {
 using BindingAttributeTest = TestHelper;
 
 TEST_F(BindingAttributeTest, Creation) {
-    auto* d = create<BindingAttribute>(2);
+    auto* d = create<BindingAttribute>(2u);
     EXPECT_EQ(2u, d->value);
 }
 

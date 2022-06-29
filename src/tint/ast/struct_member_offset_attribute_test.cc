@@ -20,7 +20,7 @@ namespace {
 using StructMemberOffsetAttributeTest = TestHelper;
 
 TEST_F(StructMemberOffsetAttributeTest, Creation) {
-    auto* d = create<StructMemberOffsetAttribute>(2);
+    auto* d = create<StructMemberOffsetAttribute>(2u);
     EXPECT_EQ(2u, d->offset);
 }
 

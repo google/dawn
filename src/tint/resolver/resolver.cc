@@ -857,7 +857,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
 bool Resolver::WorkgroupSize(const ast::Function* func) {
     // Set work-group size defaults.
     sem::WorkgroupSize ws;
-    for (int i = 0; i < 3; i++) {
+    for (size_t i = 0; i < 3; i++) {
         ws[i].value = 1;
         ws[i].overridable_const = nullptr;
     }
@@ -876,7 +876,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
         "workgroup_size argument must be either a literal, constant, or overridable of type "
         "abstract-integer, i32 or u32";
 
-    for (int i = 0; i < 3; i++) {
+    for (size_t i = 0; i < 3; i++) {
         // Each argument to this attribute can either be a literal, an identifier for a module-scope
         // constants, or nullptr if not specified.
         auto* value = values[i];
@@ -1731,12 +1731,13 @@ void Resolver::CollectTextureSamplerPairs(const sem::Builtin* builtin,
     if (texture_index == -1) {
         TINT_ICE(Resolver, diagnostics_) << "texture builtin without texture parameter";
     }
-    auto* texture = args[texture_index]->As<sem::VariableUser>()->Variable();
+    auto* texture = args[static_cast<size_t>(texture_index)]->As<sem::VariableUser>()->Variable();
     if (!texture->Type()->UnwrapRef()->Is<sem::StorageTexture>()) {
         int sampler_index = signature.IndexOf(sem::ParameterUsage::kSampler);
         const sem::Variable* sampler =
-            sampler_index != -1 ? args[sampler_index]->As<sem::VariableUser>()->Variable()
-                                : nullptr;
+            sampler_index != -1
+                ? args[static_cast<size_t>(sampler_index)]->As<sem::VariableUser>()->Variable()
+                : nullptr;
         current_function_->AddTextureSamplerPair(texture, sampler);
     }
 }
@@ -2247,7 +2248,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
         }
     }
 
-    auto size = std::max<uint64_t>(count, 1u) * stride;
+    auto size = std::max<uint64_t>(static_cast<uint32_t>(count), 1u) * stride;
     if (size > std::numeric_limits<uint32_t>::max()) {
         std::stringstream msg;
         msg << "array size (0x" << std::hex << size << ") must not exceed 0xffffffff bytes";

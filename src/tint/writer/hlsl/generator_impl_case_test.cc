@@ -99,7 +99,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_Default) {
 
     gen.increment_indent();
 
-    ASSERT_TRUE(gen.EmitCase(s, 0_i)) << gen.error();
+    ASSERT_TRUE(gen.EmitCase(s, 0u)) << gen.error();
     EXPECT_EQ(gen.result(), R"(  default: {
     break;
   }

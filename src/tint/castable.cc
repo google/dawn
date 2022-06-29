@@ -26,4 +26,8 @@ const TypeInfo detail::TypeInfoOf<CastableBase>::info{
     tint::TypeInfo::FullHashCodeOf<CastableBase>(),
 };
 
+CastableBase::CastableBase(const CastableBase&) = default;
+
+CastableBase::~CastableBase() = default;
+
 }  // namespace tint

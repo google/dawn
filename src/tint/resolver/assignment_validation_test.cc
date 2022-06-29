@@ -32,8 +32,8 @@ TEST_F(ResolverAssignmentValidationTest, ReadOnlyBuffer) {
     auto* s = Structure("S", {Member("m", ty.i32())});
     GlobalVar(Source{{12, 34}}, "a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     WrapInFunction(Assign(Source{{56, 78}}, MemberAccessor("a", "m"), 1_i));
@@ -237,13 +237,13 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Handle) {
 
     GlobalVar("a", make_type(), ast::StorageClass::kNone,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
     GlobalVar("b", make_type(), ast::StorageClass::kNone,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     WrapInFunction(Assign(Source{{56, 78}}, "a", "b"));
@@ -260,8 +260,8 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Atomic) {
     auto* s = Structure("S", {Member("a", ty.atomic(ty.i32()))});
     GlobalVar(Source{{12, 34}}, "v", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     WrapInFunction(Assign(Source{{56, 78}}, MemberAccessor("v", "a"), MemberAccessor("v", "a")));
@@ -278,8 +278,8 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_RuntimeArray) {
     auto* s = Structure("S", {Member("a", ty.array(ty.f32()))});
     GlobalVar(Source{{12, 34}}, "v", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     WrapInFunction(Assign(Source{{56, 78}}, MemberAccessor("v", "a"), MemberAccessor("v", "a")));

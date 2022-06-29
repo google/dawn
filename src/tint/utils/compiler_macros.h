@@ -25,7 +25,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 #define TINT_DISABLE_WARNING_CONSTANT_OVERFLOW __pragma(warning(disable : 4756))
 #define TINT_DISABLE_WARNING_MAYBE_UNINITIALIZED /* currently no-op */
+#define TINT_DISABLE_WARNING_NEWLINE_EOF         /* currently no-op */
+#define TINT_DISABLE_WARNING_OLD_STYLE_CAST      /* currently no-op */
+#define TINT_DISABLE_WARNING_SIGN_CONVERSION     /* currently no-op */
 #define TINT_DISABLE_WARNING_UNREACHABLE_CODE __pragma(warning(disable : 4702))
+#define TINT_DISABLE_WARNING_WEAK_VTABLES /* currently no-op */
 
 // clang-format off
 #define TINT_BEGIN_DISABLE_WARNING(name)     \
@@ -42,7 +46,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 #define TINT_DISABLE_WARNING_CONSTANT_OVERFLOW   /* currently no-op */
 #define TINT_DISABLE_WARNING_MAYBE_UNINITIALIZED /* currently no-op */
+#define TINT_DISABLE_WARNING_NEWLINE_EOF _Pragma("clang diagnostic ignored \"-Wnewline-eof\"")
+#define TINT_DISABLE_WARNING_OLD_STYLE_CAST _Pragma("clang diagnostic ignored \"-Wold-style-cast\"")
+#define TINT_DISABLE_WARNING_SIGN_CONVERSION \
+    _Pragma("clang diagnostic ignored \"-Wsign-conversion\"")
 #define TINT_DISABLE_WARNING_UNREACHABLE_CODE    /* currently no-op */
+#define TINT_DISABLE_WARNING_WEAK_VTABLES _Pragma("clang diagnostic ignored \"-Wweak-vtables\"")
 
 // clang-format off
 #define TINT_BEGIN_DISABLE_WARNING(name)     \
@@ -60,7 +69,11 @@
 #define TINT_DISABLE_WARNING_CONSTANT_OVERFLOW /* currently no-op */
 #define TINT_DISABLE_WARNING_MAYBE_UNINITIALIZED \
     _Pragma("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
+#define TINT_DISABLE_WARNING_NEWLINE_EOF      /* currently no-op */
+#define TINT_DISABLE_WARNING_OLD_STYLE_CAST   /* currently no-op */
+#define TINT_DISABLE_WARNING_SIGN_CONVERSION  /* currently no-op */
 #define TINT_DISABLE_WARNING_UNREACHABLE_CODE /* currently no-op */
+#define TINT_DISABLE_WARNING_WEAK_VTABLES     /* currently no-op */
 
 // clang-format off
 #define TINT_BEGIN_DISABLE_WARNING(name)     \

@@ -206,8 +206,8 @@ TEST_F(BuilderTest, GlobalVar_WithBindingAndGroup) {
     auto* v =
         GlobalVar("var", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone, nullptr,
                   ast::AttributeList{
-                      create<ast::BindingAttribute>(2),
-                      create<ast::GroupAttribute>(3),
+                      create<ast::BindingAttribute>(2u),
+                      create<ast::GroupAttribute>(3u),
                   });
 
     spirv::Builder& b = Build();
@@ -450,8 +450,8 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
 
     GlobalVar("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -491,8 +491,8 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
     auto* B = Alias("B", ty.Of(A));
     GlobalVar("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -530,8 +530,8 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
     auto* B = Alias("B", ty.Of(A));
     GlobalVar("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -568,13 +568,13 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
     auto* A = Structure("A", {Member("a", ty.i32())});
     GlobalVar("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::GroupAttribute>(0),
-                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(0u),
+                  create<ast::BindingAttribute>(0u),
               });
     GlobalVar("c", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kReadWrite,
               ast::AttributeList{
-                  create<ast::GroupAttribute>(1),
-                  create<ast::BindingAttribute>(0),
+                  create<ast::GroupAttribute>(1u),
+                  create<ast::BindingAttribute>(0u),
               });
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -614,8 +614,8 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
 
     auto* var_a = GlobalVar("a", type,
                             ast::AttributeList{
-                                create<ast::BindingAttribute>(0),
-                                create<ast::GroupAttribute>(0),
+                                create<ast::BindingAttribute>(0u),
+                                create<ast::GroupAttribute>(0u),
                             });
 
     spirv::Builder& b = Build();
@@ -645,16 +645,16 @@ TEST_F(BuilderTest, DISABLED_GlobalVar_TextureStorageWithDifferentAccess) {
                                       ast::Access::kReadWrite);
     auto* var_a = GlobalVar("a", type_a, ast::StorageClass::kNone,
                             ast::AttributeList{
-                                create<ast::BindingAttribute>(0),
-                                create<ast::GroupAttribute>(0),
+                                create<ast::BindingAttribute>(0u),
+                                create<ast::GroupAttribute>(0u),
                             });
 
     auto* type_b = ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
                                       ast::Access::kWrite);
     auto* var_b = GlobalVar("b", type_b, ast::StorageClass::kNone,
                             ast::AttributeList{
-                                create<ast::BindingAttribute>(1),
-                                create<ast::GroupAttribute>(0),
+                                create<ast::BindingAttribute>(1u),
+                                create<ast::GroupAttribute>(0u),
                             });
 
     spirv::Builder& b = Build();

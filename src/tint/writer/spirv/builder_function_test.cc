@@ -200,8 +200,8 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
     GlobalVar("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     {

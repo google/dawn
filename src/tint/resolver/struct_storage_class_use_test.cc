@@ -161,13 +161,13 @@ TEST_F(ResolverStorageClassUseTest, StructMultipleStorageClassUses) {
     auto* s = Structure("S", {Member("a", ty.f32())});
     GlobalVar("x", ty.Of(s), ast::StorageClass::kUniform,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
     GlobalVar("y", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(0u),
               });
     WrapInFunction(Var("g", ty.Of(s)));
 

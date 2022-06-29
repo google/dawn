@@ -145,8 +145,8 @@ TEST_F(ResolverPtrRefValidationTest, InferredPtrAccessMismatch) {
     auto* buf = Structure("S", {Member("inner", ty.Of(inner))});
     auto* storage = GlobalVar("s", ty.Of(buf), ast::StorageClass::kStorage, ast::Access::kReadWrite,
                               ast::AttributeList{
-                                  create<ast::BindingAttribute>(0),
-                                  create<ast::GroupAttribute>(0),
+                                  create<ast::BindingAttribute>(0u),
+                                  create<ast::GroupAttribute>(0u),
                               });
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 2_i);

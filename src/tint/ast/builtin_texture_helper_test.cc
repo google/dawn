@@ -142,8 +142,8 @@ const ast::Type* TextureOverloadCase::BuildResultVectorComponentType(ProgramBuil
 
 const ast::Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b) const {
     AttributeList attrs = {
-        b->create<ast::GroupAttribute>(0),
-        b->create<ast::BindingAttribute>(0),
+        b->create<ast::GroupAttribute>(0u),
+        b->create<ast::BindingAttribute>(0u),
     };
     switch (texture_kind) {
         case ast::builtin::test::TextureKind::kRegular:
@@ -176,8 +176,8 @@ const ast::Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b
 
 const ast::Variable* TextureOverloadCase::BuildSamplerVariable(ProgramBuilder* b) const {
     AttributeList attrs = {
-        b->create<ast::GroupAttribute>(0),
-        b->create<ast::BindingAttribute>(1),
+        b->create<ast::GroupAttribute>(0u),
+        b->create<ast::BindingAttribute>(1u),
     };
     return b->GlobalVar("sampler", b->ty.sampler(sampler_kind), attrs);
 }

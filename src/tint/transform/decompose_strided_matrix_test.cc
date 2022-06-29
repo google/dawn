@@ -71,8 +71,8 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix) {
         "S", {
                  b.Member("m", b.ty.mat2x2<f32>(),
                           {
-                              b.create<ast::StructMemberOffsetAttribute>(16),
-                              b.create<ast::StrideAttribute>(32),
+                              b.create<ast::StructMemberOffsetAttribute>(16u),
+                              b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
              });
@@ -127,8 +127,8 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformColumn) {
         "S", {
                  b.Member("m", b.ty.mat2x2<f32>(),
                           {
-                              b.create<ast::StructMemberOffsetAttribute>(16),
-                              b.create<ast::StrideAttribute>(32),
+                              b.create<ast::StructMemberOffsetAttribute>(16u),
+                              b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
              });
@@ -180,8 +180,8 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix_DefaultStride) {
         "S", {
                  b.Member("m", b.ty.mat2x2<f32>(),
                           {
-                              b.create<ast::StructMemberOffsetAttribute>(16),
-                              b.create<ast::StrideAttribute>(8),
+                              b.create<ast::StructMemberOffsetAttribute>(16u),
+                              b.create<ast::StrideAttribute>(8u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
              });
@@ -233,8 +233,8 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageMatrix) {
         "S", {
                  b.Member("m", b.ty.mat2x2<f32>(),
                           {
-                              b.create<ast::StructMemberOffsetAttribute>(8),
-                              b.create<ast::StrideAttribute>(32),
+                              b.create<ast::StructMemberOffsetAttribute>(8u),
+                              b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
              });
@@ -290,8 +290,8 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageColumn) {
         "S", {
                  b.Member("m", b.ty.mat2x2<f32>(),
                           {
-                              b.create<ast::StructMemberOffsetAttribute>(16),
-                              b.create<ast::StrideAttribute>(32),
+                              b.create<ast::StructMemberOffsetAttribute>(16u),
+                              b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
              });
@@ -344,8 +344,8 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageMatrix) {
         "S", {
                  b.Member("m", b.ty.mat2x2<f32>(),
                           {
-                              b.create<ast::StructMemberOffsetAttribute>(8),
-                              b.create<ast::StrideAttribute>(32),
+                              b.create<ast::StructMemberOffsetAttribute>(8u),
+                              b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
              });
@@ -402,8 +402,8 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageColumn) {
         "S", {
                  b.Member("m", b.ty.mat2x2<f32>(),
                           {
-                              b.create<ast::StructMemberOffsetAttribute>(8),
-                              b.create<ast::StrideAttribute>(32),
+                              b.create<ast::StructMemberOffsetAttribute>(8u),
+                              b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
              });
@@ -461,8 +461,8 @@ TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
         "S", {
                  b.Member("m", b.ty.mat2x2<f32>(),
                           {
-                              b.create<ast::StructMemberOffsetAttribute>(8),
-                              b.create<ast::StrideAttribute>(32),
+                              b.create<ast::StructMemberOffsetAttribute>(8u),
+                              b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
              });
@@ -532,8 +532,8 @@ TEST_F(DecomposeStridedMatrixTest, ReadPrivateMatrix) {
         "S", {
                  b.Member("m", b.ty.mat2x2<f32>(),
                           {
-                              b.create<ast::StructMemberOffsetAttribute>(8),
-                              b.create<ast::StrideAttribute>(32),
+                              b.create<ast::StructMemberOffsetAttribute>(8u),
+                              b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
              });
@@ -585,8 +585,8 @@ TEST_F(DecomposeStridedMatrixTest, WritePrivateMatrix) {
         "S", {
                  b.Member("m", b.ty.mat2x2<f32>(),
                           {
-                              b.create<ast::StructMemberOffsetAttribute>(8),
-                              b.create<ast::StrideAttribute>(32),
+                              b.create<ast::StructMemberOffsetAttribute>(8u),
+                              b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
              });

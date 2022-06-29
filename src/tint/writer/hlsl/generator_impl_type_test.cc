@@ -155,8 +155,8 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
                              });
     GlobalVar("g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     GeneratorImpl& gen = Build();
@@ -289,8 +289,8 @@ TEST_P(HlslDepthTexturesTest, Emit) {
 
     GlobalVar("tex", t,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     Func("main", {}, ty.void_(), {CallStmt(Call("textureDimensions", "tex"))},
@@ -319,8 +319,8 @@ TEST_F(HlslDepthMultisampledTexturesTest, Emit) {
 
     GlobalVar("tex", t,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     Func("main", {}, ty.void_(), {CallStmt(Call("textureDimensions", "tex"))},
@@ -362,8 +362,8 @@ TEST_P(HlslSampledTexturesTest, Emit) {
 
     GlobalVar("tex", t,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     Func("main", {}, ty.void_(), {CallStmt(Call("textureDimensions", "tex"))},

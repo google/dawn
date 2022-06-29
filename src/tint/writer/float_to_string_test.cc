@@ -27,7 +27,7 @@ namespace {
 // - 0 sign if sign is 0, 1 otherwise
 // - 'exponent_bits' is placed in the exponent space.
 //   So, the exponent bias must already be included.
-float MakeFloat(int sign, int biased_exponent, int mantissa) {
+float MakeFloat(uint32_t sign, uint32_t biased_exponent, uint32_t mantissa) {
     const uint32_t sign_bit = sign ? 0x80000000u : 0u;
     // The binary32 exponent is 8 bits, just below the sign.
     const uint32_t exponent_bits = (biased_exponent & 0xffu) << 23;

@@ -285,11 +285,11 @@ const ast::Type* InspectorBuilder::GetCoordsType(ast::TextureDimension dim,
             return scalar;
         case ast::TextureDimension::k2d:
         case ast::TextureDimension::k2dArray:
-            return create<ast::Vector>(scalar, 2);
+            return create<ast::Vector>(scalar, 2u);
         case ast::TextureDimension::k3d:
         case ast::TextureDimension::kCube:
         case ast::TextureDimension::kCubeArray:
-            return create<ast::Vector>(scalar, 3);
+            return create<ast::Vector>(scalar, 3u);
         default:
             [=]() { FAIL() << "Unsupported texture dimension: " << dim; }();
     }

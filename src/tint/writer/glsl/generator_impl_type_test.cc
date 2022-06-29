@@ -272,8 +272,8 @@ TEST_P(GlslDepthTexturesTest, Emit) {
 
     GlobalVar("tex", t,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     Func("main", {}, ty.void_(), {CallStmt(Call("textureDimensions", "tex"))},
@@ -299,8 +299,8 @@ TEST_F(GlslDepthMultisampledTexturesTest, Emit) {
 
     GlobalVar("tex", t,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     Func("main", {}, ty.void_(), {CallStmt(Call("textureDimensions", "tex"))},
@@ -342,8 +342,8 @@ TEST_P(GlslSampledTexturesTest, Emit) {
 
     GlobalVar("tex", t,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     Func("main", {}, ty.void_(), {CallStmt(Call("textureDimensions", "tex"))},
@@ -476,8 +476,8 @@ TEST_P(GlslStorageTexturesTest, Emit) {
 
     GlobalVar("tex", t,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     Func("main", {}, ty.void_(), {CallStmt(Call("textureDimensions", "tex"))},

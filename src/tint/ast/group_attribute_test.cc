@@ -20,7 +20,7 @@ namespace {
 using GroupAttributeTest = TestHelper;
 
 TEST_F(GroupAttributeTest, Creation) {
-    auto* d = create<GroupAttribute>(2);
+    auto* d = create<GroupAttribute>(2u);
     EXPECT_EQ(2u, d->value);
 }
 

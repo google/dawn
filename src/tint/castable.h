@@ -320,10 +320,10 @@ inline const TO* As(const FROM* obj) {
 class CastableBase {
   public:
     /// Copy constructor
-    CastableBase(const CastableBase&) = default;
+    CastableBase(const CastableBase&);
 
     /// Destructor
-    virtual ~CastableBase() = default;
+    virtual ~CastableBase();
 
     /// Copy assignment
     /// @param other the CastableBase to copy
@@ -626,7 +626,7 @@ inline void SwitchCases(T* object, RETURN_TYPE* result, std::tuple<CASES...>&& c
 
     // Static assertions
     static constexpr bool kDefaultIsOK =
-        kDefaultIndex == -1 || kDefaultIndex == std::tuple_size_v<Cases> - 1;
+        kDefaultIndex == -1 || kDefaultIndex == static_cast<int>(std::tuple_size_v<Cases> - 1);
     static constexpr bool kReturnIsOK =
         kHasDefaultCase || !kHasReturnType || std::is_constructible_v<RETURN_TYPE>;
     static_assert(kDefaultIsOK, "Default case must be last in Switch()");

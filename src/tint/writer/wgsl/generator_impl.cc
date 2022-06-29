@@ -714,7 +714,7 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out, const ast::AttributeList& 
             [&](const ast::WorkgroupAttribute* workgroup) {
                 auto values = workgroup->Values();
                 out << "workgroup_size(";
-                for (int i = 0; i < 3; i++) {
+                for (size_t i = 0; i < 3; i++) {
                     if (values[i]) {
                         if (i > 0) {
                             out << ", ";

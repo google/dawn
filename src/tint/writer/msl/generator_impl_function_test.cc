@@ -337,8 +337,8 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_EntryPoint_With_RW_StorageBu
 
     GlobalVar("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("coord", "b"));
@@ -379,8 +379,8 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_EntryPoint_With_RO_StorageBu
 
     GlobalVar("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("coord", "b"));
@@ -417,8 +417,8 @@ TEST_F(MslGeneratorImplTest, Emit_Attribute_Called_By_EntryPoint_With_Uniform) {
     auto* ubo_ty = Structure("UBO", {Member("coord", ty.vec4<f32>())});
     auto* ubo = GlobalVar("ubo", ty.Of(ubo_ty), ast::StorageClass::kUniform,
                           ast::AttributeList{
-                              create<ast::BindingAttribute>(0),
-                              create<ast::GroupAttribute>(0),
+                              create<ast::BindingAttribute>(0u),
+                              create<ast::GroupAttribute>(0u),
                           });
 
     Func("sub_func",
@@ -471,8 +471,8 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_Called_By_EntryPoint_With_RW
 
     GlobalVar("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     Func("sub_func",
@@ -526,8 +526,8 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_Called_By_EntryPoint_With_RO
 
     GlobalVar("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     Func("sub_func",
@@ -667,8 +667,8 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_ModuleV
 
     GlobalVar("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     {

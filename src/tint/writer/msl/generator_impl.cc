@@ -759,7 +759,7 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
         return false;
     }
 
-    int i = 0;
+    size_t i = 0;
     for (auto* arg : call->Arguments()) {
         if (i > 0) {
             out << ", ";
@@ -920,7 +920,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     // Returns the argument with the given usage
     auto arg = [&](Usage usage) {
         int idx = signature.IndexOf(usage);
-        return (idx >= 0) ? arguments[idx] : nullptr;
+        return (idx >= 0) ? arguments[static_cast<size_t>(idx)] : nullptr;
     };
 
     auto* texture = arg(Usage::kTexture)->Declaration();

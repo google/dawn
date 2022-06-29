@@ -30,8 +30,8 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
     auto* str = Structure("S", {Member("x", ary)});
     GlobalVar("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     spirv::Builder& b = Build();
@@ -50,8 +50,8 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
     auto* str = Structure("S", {Member("x", ary)});
     GlobalVar("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     spirv::Builder& b = Build();
@@ -783,8 +783,8 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d) {
 
     GlobalVar("test_var", s,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     spirv::Builder& b = Build();
@@ -802,8 +802,8 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2d) {
 
     GlobalVar("test_var", s,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     spirv::Builder& b = Build();
@@ -821,8 +821,8 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2dArray) {
 
     GlobalVar("test_var", s,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     spirv::Builder& b = Build();
@@ -840,8 +840,8 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_3d) {
 
     GlobalVar("test_var", s,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     spirv::Builder& b = Build();
@@ -859,8 +859,8 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_SampledTypeFloat_Format_r32floa
 
     GlobalVar("test_var", s,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     spirv::Builder& b = Build();
@@ -878,8 +878,8 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_SampledTypeSint_Format_r32sint)
 
     GlobalVar("test_var", s,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     spirv::Builder& b = Build();
@@ -897,8 +897,8 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_SampledTypeUint_Format_r32uint)
 
     GlobalVar("test_var", s,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     spirv::Builder& b = Build();

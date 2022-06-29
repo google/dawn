@@ -49,7 +49,7 @@ std::string Demangler::Demangle(const SymbolTable& symbols, const std::string& s
         auto len = end_idx - start_idx;
 
         auto id = str.substr(start_idx, len);
-        Symbol sym(std::stoi(id), symbols.ProgramID());
+        Symbol sym(static_cast<uint32_t>(std::stoi(id)), symbols.ProgramID());
         out << symbols.NameFor(sym);
 
         pos = end_idx;

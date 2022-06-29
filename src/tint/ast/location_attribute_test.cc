@@ -20,7 +20,7 @@ namespace {
 using LocationAttributeTest = TestHelper;
 
 TEST_F(LocationAttributeTest, Creation) {
-    auto* d = create<LocationAttribute>(2);
+    auto* d = create<LocationAttribute>(2u);
     EXPECT_EQ(2u, d->value);
 }
 

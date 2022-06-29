@@ -187,8 +187,8 @@ class ResolverBuiltinTest_TextureOperation : public ResolverTestWithParam<Textur
         if (type->IsAnyOf<ast::Texture, ast::Sampler>()) {
             GlobalVar(name, type,
                       ast::AttributeList{
-                          create<ast::BindingAttribute>(0),
-                          create<ast::GroupAttribute>(0),
+                          create<ast::BindingAttribute>(0u),
+                          create<ast::GroupAttribute>(0u),
                       });
 
         } else {
@@ -618,8 +618,8 @@ TEST_F(ResolverBuiltinDataTest, ArrayLength_Vector) {
     auto* str = Structure("S", {Member("x", ary)});
     GlobalVar("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     auto* call = Call("arrayLength", AddressOf(MemberAccessor("a", "x")));

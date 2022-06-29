@@ -754,7 +754,7 @@ TEST_F(ResolverFunctionValidationTest, ParametersOverLimit) {
 TEST_F(ResolverFunctionValidationTest, ParameterVectorNoType) {
     // fn f(p : vec3) {}
 
-    Func(Source{{12, 34}}, "f", {Param("p", create<ast::Vector>(Source{{12, 34}}, nullptr, 3))},
+    Func(Source{{12, 34}}, "f", {Param("p", create<ast::Vector>(Source{{12, 34}}, nullptr, 3u))},
          ty.void_(), {});
 
     EXPECT_FALSE(r()->Resolve());
@@ -764,8 +764,8 @@ TEST_F(ResolverFunctionValidationTest, ParameterVectorNoType) {
 TEST_F(ResolverFunctionValidationTest, ParameterMatrixNoType) {
     // fn f(p : vec3) {}
 
-    Func(Source{{12, 34}}, "f", {Param("p", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3, 3))},
-         ty.void_(), {});
+    Func(Source{{12, 34}}, "f",
+         {Param("p", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3u, 3u))}, ty.void_(), {});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");

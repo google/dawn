@@ -40,6 +40,13 @@ namespace tint::reader::spirv {
 /// Type is the base class for all types
 class Type : public Castable<Type> {
   public:
+    /// Constructor
+    Type();
+    /// Copy constructor
+    Type(const Type&);
+    /// Destructor
+    ~Type() override;
+
     /// @param b the ProgramBuilder used to construct the AST types
     /// @returns the constructed ast::Type node for the given type
     virtual const ast::Type* Build(ProgramBuilder& b) const = 0;
@@ -314,6 +321,8 @@ struct Sampler final : public Castable<Sampler, Type> {
 
 /// Base class for texture types
 struct Texture : public Castable<Texture, Type> {
+    ~Texture() override;
+
     /// Constructor
     /// @param d the texture dimensions
     explicit Texture(ast::TextureDimension d);

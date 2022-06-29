@@ -245,8 +245,8 @@ TEST_F(ResolverVariableValidationTest, InferredPtrStorageAccessMismatch) {
     auto* buf = Structure("S", {Member("inner", ty.Of(inner))});
     auto* storage = GlobalVar("s", ty.Of(buf), ast::StorageClass::kStorage,
                               ast::AttributeList{
-                                  create<ast::BindingAttribute>(0),
-                                  create<ast::GroupAttribute>(0),
+                                  create<ast::BindingAttribute>(0u),
+                                  create<ast::GroupAttribute>(0u),
                               });
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 2_i);
@@ -318,7 +318,7 @@ TEST_F(ResolverVariableValidationTest, InvalidStorageClassForInitializer) {
 
 TEST_F(ResolverVariableValidationTest, VectorConstNoType) {
     // const a : mat3x3 = mat3x3<f32>();
-    WrapInFunction(Const("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3), vec3<f32>()));
+    WrapInFunction(Const("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3u), vec3<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
@@ -326,7 +326,7 @@ TEST_F(ResolverVariableValidationTest, VectorConstNoType) {
 
 TEST_F(ResolverVariableValidationTest, VectorLetNoType) {
     // let a : mat3x3 = mat3x3<f32>();
-    WrapInFunction(Let("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3), vec3<f32>()));
+    WrapInFunction(Let("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3u), vec3<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
@@ -334,7 +334,7 @@ TEST_F(ResolverVariableValidationTest, VectorLetNoType) {
 
 TEST_F(ResolverVariableValidationTest, VectorVarNoType) {
     // var a : mat3x3;
-    WrapInFunction(Var("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3)));
+    WrapInFunction(Var("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3u)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
@@ -342,7 +342,8 @@ TEST_F(ResolverVariableValidationTest, VectorVarNoType) {
 
 TEST_F(ResolverVariableValidationTest, MatrixConstNoType) {
     // const a : mat3x3 = mat3x3<f32>();
-    WrapInFunction(Const("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3, 3), mat3x3<f32>()));
+    WrapInFunction(
+        Const("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3u, 3u), mat3x3<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");
@@ -350,7 +351,7 @@ TEST_F(ResolverVariableValidationTest, MatrixConstNoType) {
 
 TEST_F(ResolverVariableValidationTest, MatrixLetNoType) {
     // let a : mat3x3 = mat3x3<f32>();
-    WrapInFunction(Let("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3, 3), mat3x3<f32>()));
+    WrapInFunction(Let("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3u, 3u), mat3x3<f32>()));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");
@@ -358,7 +359,7 @@ TEST_F(ResolverVariableValidationTest, MatrixLetNoType) {
 
 TEST_F(ResolverVariableValidationTest, MatrixVarNoType) {
     // var a : mat3x3;
-    WrapInFunction(Var("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3, 3)));
+    WrapInFunction(Var("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3u, 3u)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");

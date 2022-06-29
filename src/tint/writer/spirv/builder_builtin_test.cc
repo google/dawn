@@ -453,14 +453,14 @@ TEST_F(BuiltinBuilderTest, Call_TextureSampleCompare_Twice) {
 
     auto* tex = GlobalVar("texture", t,
                           ast::AttributeList{
-                              create<ast::BindingAttribute>(0),
-                              create<ast::GroupAttribute>(0),
+                              create<ast::BindingAttribute>(0u),
+                              create<ast::GroupAttribute>(0u),
                           });
 
     auto* sampler = GlobalVar("sampler", s,
                               ast::AttributeList{
-                                  create<ast::BindingAttribute>(1),
-                                  create<ast::GroupAttribute>(0),
+                                  create<ast::BindingAttribute>(1u),
+                                  create<ast::GroupAttribute>(0u),
                               });
 
     auto* expr1 = Call("textureSampleCompare", "texture", "sampler", vec2<f32>(1_f, 2_f), 2_f);
@@ -1587,8 +1587,8 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength) {
     auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))});
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
     auto* expr = Call("arrayLength", AddressOf(MemberAccessor("b", "a")));
 
@@ -1634,8 +1634,8 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
                                      });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
     auto* expr = Call("arrayLength", AddressOf(MemberAccessor("b", "a")));
 
@@ -1678,8 +1678,8 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets) {
     auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))});
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     auto* p = Let("p", nullptr, AddressOf("b"));
@@ -1738,8 +1738,8 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
     auto* s = Structure("my_struct", {Member("a", ty.array<f32>(4))});
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     auto* p = Let("p", nullptr, AddressOf(Deref(AddressOf("b"))));
@@ -1803,8 +1803,8 @@ TEST_F(BuiltinBuilderTest, Call_AtomicLoad) {
                              });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     Func("a_func", {}, ty.void_(),
@@ -1867,8 +1867,8 @@ TEST_F(BuiltinBuilderTest, Call_AtomicStore) {
                              });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     Func("a_func", {}, ty.void_(),
@@ -1939,8 +1939,8 @@ TEST_P(Builtin_Builtin_AtomicRMW_i32, Test) {
                              });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     Func("a_func", {}, ty.void_(),
@@ -2012,8 +2012,8 @@ TEST_P(Builtin_Builtin_AtomicRMW_u32, Test) {
                              });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     Func("a_func", {}, ty.void_(),
@@ -2087,8 +2087,8 @@ TEST_F(BuiltinBuilderTest, Call_AtomicExchange) {
                              });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     Func("a_func", {}, ty.void_(),
@@ -2163,8 +2163,8 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
                              });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     Func("a_func", {}, ty.void_(),

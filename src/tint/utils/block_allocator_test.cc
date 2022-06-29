@@ -67,7 +67,7 @@ TEST_F(BlockAllocatorTest, ObjectLifetime) {
 TEST_F(BlockAllocatorTest, MoveConstruct) {
     using Allocator = BlockAllocator<LifetimeCounter>;
 
-    for (size_t n : {0, 1, 10, 16, 20, 32, 50, 64, 100, 256, 300, 512, 500, 512}) {
+    for (size_t n : {0u, 1u, 10u, 16u, 20u, 32u, 50u, 64u, 100u, 256u, 300u, 512u, 500u, 512u}) {
         size_t count = 0;
         {
             Allocator allocator_a;
@@ -87,7 +87,7 @@ TEST_F(BlockAllocatorTest, MoveConstruct) {
 TEST_F(BlockAllocatorTest, MoveAssign) {
     using Allocator = BlockAllocator<LifetimeCounter>;
 
-    for (size_t n : {0, 1, 10, 16, 20, 32, 50, 64, 100, 256, 300, 512, 500, 512}) {
+    for (size_t n : {0u, 1u, 10u, 16u, 20u, 32u, 50u, 64u, 100u, 256u, 300u, 512u, 500u, 512u}) {
         size_t count_a = 0;
         size_t count_b = 0;
 

@@ -2107,7 +2107,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     // Returns the argument with the given usage
     auto arg = [&](Usage usage) {
         int idx = signature.IndexOf(usage);
-        return (idx >= 0) ? arguments[idx] : nullptr;
+        return (idx >= 0) ? arguments[static_cast<size_t>(idx)] : nullptr;
     };
 
     auto* texture = arg(Usage::kTexture);
@@ -3039,7 +3039,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
             // Emit the workgroup_size attribute.
             auto wgsize = func_sem->WorkgroupSize();
             out << "[numthreads(";
-            for (int i = 0; i < 3; i++) {
+            for (size_t i = 0; i < 3; i++) {
                 if (i > 0) {
                     out << ", ";
                 }

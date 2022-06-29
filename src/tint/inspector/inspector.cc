@@ -815,8 +815,8 @@ void Inspector::GenerateSamplerTargets() {
             continue;
         }
 
-        auto* t = c->args[texture_index];
-        auto* s = c->args[sampler_index];
+        auto* t = c->args[static_cast<size_t>(texture_index)];
+        auto* s = c->args[static_cast<size_t>(sampler_index)];
 
         GetOriginatingResources(
             std::array<const ast::Expression*, 2>{t, s},

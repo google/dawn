@@ -48,6 +48,13 @@ ProgramID ProgramIDOf(const ProgramBuilder*);
 /// Cloneable is the base class for all objects that can be cloned
 class Cloneable : public Castable<Cloneable> {
   public:
+    /// Constructor
+    Cloneable();
+    /// Move constructor
+    Cloneable(Cloneable&&);
+    /// Destructor
+    ~Cloneable() override;
+
     /// Performs a deep clone of this object using the CloneContext `ctx`.
     /// @param ctx the clone context
     /// @return the newly cloned object

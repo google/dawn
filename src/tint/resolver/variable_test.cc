@@ -472,8 +472,8 @@ TEST_F(ResolverVariableTest, LocalLet_InheritsAccessFromOriginatingVariable) {
     auto* buf = Structure("S", {Member("inner", ty.Of(inner))});
     auto* storage = GlobalVar("s", ty.Of(buf), ast::StorageClass::kStorage, ast::Access::kReadWrite,
                               ast::AttributeList{
-                                  create<ast::BindingAttribute>(0),
-                                  create<ast::GroupAttribute>(0),
+                                  create<ast::BindingAttribute>(0u),
+                                  create<ast::GroupAttribute>(0u),
                               });
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4_i);
@@ -1049,18 +1049,18 @@ TEST_F(ResolverVariableTest, GlobalVar_StorageClass) {
     auto* workgroup = GlobalVar("w", ty.i32(), ast::StorageClass::kWorkgroup);
     auto* uniform = GlobalVar("ub", ty.Of(buf), ast::StorageClass::kUniform,
                               ast::AttributeList{
-                                  create<ast::BindingAttribute>(0),
-                                  create<ast::GroupAttribute>(0),
+                                  create<ast::BindingAttribute>(0u),
+                                  create<ast::GroupAttribute>(0u),
                               });
     auto* storage = GlobalVar("sb", ty.Of(buf), ast::StorageClass::kStorage,
                               ast::AttributeList{
-                                  create<ast::BindingAttribute>(1),
-                                  create<ast::GroupAttribute>(0),
+                                  create<ast::BindingAttribute>(1u),
+                                  create<ast::GroupAttribute>(0u),
                               });
     auto* handle = GlobalVar("h", ty.depth_texture(ast::TextureDimension::k2d),
                              ast::AttributeList{
-                                 create<ast::BindingAttribute>(2),
-                                 create<ast::GroupAttribute>(0),
+                                 create<ast::BindingAttribute>(2u),
+                                 create<ast::GroupAttribute>(0u),
                              });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1085,8 +1085,8 @@ TEST_F(ResolverVariableTest, GlobalVar_ExplicitStorageClass) {
     auto* storage =
         GlobalVar("sb", ty.Of(buf), ast::StorageClass::kStorage, ast::Access::kReadWrite,
                   ast::AttributeList{
-                      create<ast::BindingAttribute>(1),
-                      create<ast::GroupAttribute>(0),
+                      create<ast::BindingAttribute>(1u),
+                      create<ast::GroupAttribute>(0u),
                   });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();

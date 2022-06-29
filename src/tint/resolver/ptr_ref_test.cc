@@ -63,13 +63,13 @@ TEST_F(ResolverPtrRefTest, DefaultPtrStorageClass) {
     auto* workgroup = GlobalVar("w", ty.i32(), ast::StorageClass::kWorkgroup);
     auto* uniform = GlobalVar("ub", ty.Of(buf), ast::StorageClass::kUniform,
                               ast::AttributeList{
-                                  create<ast::BindingAttribute>(0),
-                                  create<ast::GroupAttribute>(0),
+                                  create<ast::BindingAttribute>(0u),
+                                  create<ast::GroupAttribute>(0u),
                               });
     auto* storage = GlobalVar("sb", ty.Of(buf), ast::StorageClass::kStorage,
                               ast::AttributeList{
-                                  create<ast::BindingAttribute>(1),
-                                  create<ast::GroupAttribute>(0),
+                                  create<ast::BindingAttribute>(1u),
+                                  create<ast::GroupAttribute>(0u),
                               });
 
     auto* function_ptr =

@@ -1856,11 +1856,11 @@ TEST_F(ResolverTypeConstructorValidationTest,
 TEST_F(ResolverTypeConstructorValidationTest, InferVec2ElementTypeFromScalars) {
     Enable(ast::Extension::kF16);
 
-    auto* vec2_bool = Construct(create<ast::Vector>(nullptr, 2), Expr(true), Expr(false));
-    auto* vec2_i32 = Construct(create<ast::Vector>(nullptr, 2), Expr(1_i), Expr(2_i));
-    auto* vec2_u32 = Construct(create<ast::Vector>(nullptr, 2), Expr(1_u), Expr(2_u));
-    auto* vec2_f32 = Construct(create<ast::Vector>(nullptr, 2), Expr(1_f), Expr(2_f));
-    auto* vec2_f16 = Construct(create<ast::Vector>(nullptr, 2), Expr(1_h), Expr(2_h));
+    auto* vec2_bool = Construct(create<ast::Vector>(nullptr, 2u), Expr(true), Expr(false));
+    auto* vec2_i32 = Construct(create<ast::Vector>(nullptr, 2u), Expr(1_i), Expr(2_i));
+    auto* vec2_u32 = Construct(create<ast::Vector>(nullptr, 2u), Expr(1_u), Expr(2_u));
+    auto* vec2_f32 = Construct(create<ast::Vector>(nullptr, 2u), Expr(1_f), Expr(2_f));
+    auto* vec2_f16 = Construct(create<ast::Vector>(nullptr, 2u), Expr(1_h), Expr(2_h));
     WrapInFunction(vec2_bool, vec2_i32, vec2_u32, vec2_f32, vec2_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1890,11 +1890,11 @@ TEST_F(ResolverTypeConstructorValidationTest, InferVec2ElementTypeFromScalars) {
 TEST_F(ResolverTypeConstructorValidationTest, InferVec2ElementTypeFromVec2) {
     Enable(ast::Extension::kF16);
 
-    auto* vec2_bool = Construct(create<ast::Vector>(nullptr, 2), vec2<bool>(true, false));
-    auto* vec2_i32 = Construct(create<ast::Vector>(nullptr, 2), vec2<i32>(1_i, 2_i));
-    auto* vec2_u32 = Construct(create<ast::Vector>(nullptr, 2), vec2<u32>(1_u, 2_u));
-    auto* vec2_f32 = Construct(create<ast::Vector>(nullptr, 2), vec2<f32>(1_f, 2_f));
-    auto* vec2_f16 = Construct(create<ast::Vector>(nullptr, 2), vec2<f16>(1_h, 2_h));
+    auto* vec2_bool = Construct(create<ast::Vector>(nullptr, 2u), vec2<bool>(true, false));
+    auto* vec2_i32 = Construct(create<ast::Vector>(nullptr, 2u), vec2<i32>(1_i, 2_i));
+    auto* vec2_u32 = Construct(create<ast::Vector>(nullptr, 2u), vec2<u32>(1_u, 2_u));
+    auto* vec2_f32 = Construct(create<ast::Vector>(nullptr, 2u), vec2<f32>(1_f, 2_f));
+    auto* vec2_f16 = Construct(create<ast::Vector>(nullptr, 2u), vec2<f16>(1_h, 2_h));
     WrapInFunction(vec2_bool, vec2_i32, vec2_u32, vec2_f32, vec2_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1925,11 +1925,11 @@ TEST_F(ResolverTypeConstructorValidationTest, InferVec3ElementTypeFromScalars) {
     Enable(ast::Extension::kF16);
 
     auto* vec3_bool =
-        Construct(create<ast::Vector>(nullptr, 3), Expr(true), Expr(false), Expr(true));
-    auto* vec3_i32 = Construct(create<ast::Vector>(nullptr, 3), Expr(1_i), Expr(2_i), Expr(3_i));
-    auto* vec3_u32 = Construct(create<ast::Vector>(nullptr, 3), Expr(1_u), Expr(2_u), Expr(3_u));
-    auto* vec3_f32 = Construct(create<ast::Vector>(nullptr, 3), Expr(1_f), Expr(2_f), Expr(3_f));
-    auto* vec3_f16 = Construct(create<ast::Vector>(nullptr, 3), Expr(1_h), Expr(2_h), Expr(3_h));
+        Construct(create<ast::Vector>(nullptr, 3u), Expr(true), Expr(false), Expr(true));
+    auto* vec3_i32 = Construct(create<ast::Vector>(nullptr, 3u), Expr(1_i), Expr(2_i), Expr(3_i));
+    auto* vec3_u32 = Construct(create<ast::Vector>(nullptr, 3u), Expr(1_u), Expr(2_u), Expr(3_u));
+    auto* vec3_f32 = Construct(create<ast::Vector>(nullptr, 3u), Expr(1_f), Expr(2_f), Expr(3_f));
+    auto* vec3_f16 = Construct(create<ast::Vector>(nullptr, 3u), Expr(1_h), Expr(2_h), Expr(3_h));
     WrapInFunction(vec3_bool, vec3_i32, vec3_u32, vec3_f32, vec3_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1959,11 +1959,11 @@ TEST_F(ResolverTypeConstructorValidationTest, InferVec3ElementTypeFromScalars) {
 TEST_F(ResolverTypeConstructorValidationTest, InferVec3ElementTypeFromVec3) {
     Enable(ast::Extension::kF16);
 
-    auto* vec3_bool = Construct(create<ast::Vector>(nullptr, 3), vec3<bool>(true, false, true));
-    auto* vec3_i32 = Construct(create<ast::Vector>(nullptr, 3), vec3<i32>(1_i, 2_i, 3_i));
-    auto* vec3_u32 = Construct(create<ast::Vector>(nullptr, 3), vec3<u32>(1_u, 2_u, 3_u));
-    auto* vec3_f32 = Construct(create<ast::Vector>(nullptr, 3), vec3<f32>(1_f, 2_f, 3_f));
-    auto* vec3_f16 = Construct(create<ast::Vector>(nullptr, 3), vec3<f16>(1_h, 2_h, 3_h));
+    auto* vec3_bool = Construct(create<ast::Vector>(nullptr, 3u), vec3<bool>(true, false, true));
+    auto* vec3_i32 = Construct(create<ast::Vector>(nullptr, 3u), vec3<i32>(1_i, 2_i, 3_i));
+    auto* vec3_u32 = Construct(create<ast::Vector>(nullptr, 3u), vec3<u32>(1_u, 2_u, 3_u));
+    auto* vec3_f32 = Construct(create<ast::Vector>(nullptr, 3u), vec3<f32>(1_f, 2_f, 3_f));
+    auto* vec3_f16 = Construct(create<ast::Vector>(nullptr, 3u), vec3<f16>(1_h, 2_h, 3_h));
     WrapInFunction(vec3_bool, vec3_i32, vec3_u32, vec3_f32, vec3_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1994,11 +1994,11 @@ TEST_F(ResolverTypeConstructorValidationTest, InferVec3ElementTypeFromScalarAndV
     Enable(ast::Extension::kF16);
 
     auto* vec3_bool =
-        Construct(create<ast::Vector>(nullptr, 3), Expr(true), vec2<bool>(false, true));
-    auto* vec3_i32 = Construct(create<ast::Vector>(nullptr, 3), Expr(1_i), vec2<i32>(2_i, 3_i));
-    auto* vec3_u32 = Construct(create<ast::Vector>(nullptr, 3), Expr(1_u), vec2<u32>(2_u, 3_u));
-    auto* vec3_f32 = Construct(create<ast::Vector>(nullptr, 3), Expr(1_f), vec2<f32>(2_f, 3_f));
-    auto* vec3_f16 = Construct(create<ast::Vector>(nullptr, 3), Expr(1_h), vec2<f16>(2_h, 3_h));
+        Construct(create<ast::Vector>(nullptr, 3u), Expr(true), vec2<bool>(false, true));
+    auto* vec3_i32 = Construct(create<ast::Vector>(nullptr, 3u), Expr(1_i), vec2<i32>(2_i, 3_i));
+    auto* vec3_u32 = Construct(create<ast::Vector>(nullptr, 3u), Expr(1_u), vec2<u32>(2_u, 3_u));
+    auto* vec3_f32 = Construct(create<ast::Vector>(nullptr, 3u), Expr(1_f), vec2<f32>(2_f, 3_f));
+    auto* vec3_f16 = Construct(create<ast::Vector>(nullptr, 3u), Expr(1_h), vec2<f16>(2_h, 3_h));
     WrapInFunction(vec3_bool, vec3_i32, vec3_u32, vec3_f32, vec3_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2028,16 +2028,16 @@ TEST_F(ResolverTypeConstructorValidationTest, InferVec3ElementTypeFromScalarAndV
 TEST_F(ResolverTypeConstructorValidationTest, InferVec4ElementTypeFromScalars) {
     Enable(ast::Extension::kF16);
 
-    auto* vec4_bool = Construct(create<ast::Vector>(nullptr, 4), Expr(true), Expr(false),
+    auto* vec4_bool = Construct(create<ast::Vector>(nullptr, 4u), Expr(true), Expr(false),
                                 Expr(true), Expr(false));
     auto* vec4_i32 =
-        Construct(create<ast::Vector>(nullptr, 4), Expr(1_i), Expr(2_i), Expr(3_i), Expr(4_i));
+        Construct(create<ast::Vector>(nullptr, 4u), Expr(1_i), Expr(2_i), Expr(3_i), Expr(4_i));
     auto* vec4_u32 =
-        Construct(create<ast::Vector>(nullptr, 4), Expr(1_u), Expr(2_u), Expr(3_u), Expr(4_u));
+        Construct(create<ast::Vector>(nullptr, 4u), Expr(1_u), Expr(2_u), Expr(3_u), Expr(4_u));
     auto* vec4_f32 =
-        Construct(create<ast::Vector>(nullptr, 4), Expr(1_f), Expr(2_f), Expr(3_f), Expr(4_f));
+        Construct(create<ast::Vector>(nullptr, 4u), Expr(1_f), Expr(2_f), Expr(3_f), Expr(4_f));
     auto* vec4_f16 =
-        Construct(create<ast::Vector>(nullptr, 4), Expr(1_h), Expr(2_h), Expr(3_h), Expr(4_h));
+        Construct(create<ast::Vector>(nullptr, 4u), Expr(1_h), Expr(2_h), Expr(3_h), Expr(4_h));
     WrapInFunction(vec4_bool, vec4_i32, vec4_u32, vec4_f32, vec4_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2068,11 +2068,11 @@ TEST_F(ResolverTypeConstructorValidationTest, InferVec4ElementTypeFromVec4) {
     Enable(ast::Extension::kF16);
 
     auto* vec4_bool =
-        Construct(create<ast::Vector>(nullptr, 4), vec4<bool>(true, false, true, false));
-    auto* vec4_i32 = Construct(create<ast::Vector>(nullptr, 4), vec4<i32>(1_i, 2_i, 3_i, 4_i));
-    auto* vec4_u32 = Construct(create<ast::Vector>(nullptr, 4), vec4<u32>(1_u, 2_u, 3_u, 4_u));
-    auto* vec4_f32 = Construct(create<ast::Vector>(nullptr, 4), vec4<f32>(1_f, 2_f, 3_f, 4_f));
-    auto* vec4_f16 = Construct(create<ast::Vector>(nullptr, 4), vec4<f16>(1_h, 2_h, 3_h, 4_h));
+        Construct(create<ast::Vector>(nullptr, 4u), vec4<bool>(true, false, true, false));
+    auto* vec4_i32 = Construct(create<ast::Vector>(nullptr, 4u), vec4<i32>(1_i, 2_i, 3_i, 4_i));
+    auto* vec4_u32 = Construct(create<ast::Vector>(nullptr, 4u), vec4<u32>(1_u, 2_u, 3_u, 4_u));
+    auto* vec4_f32 = Construct(create<ast::Vector>(nullptr, 4u), vec4<f32>(1_f, 2_f, 3_f, 4_f));
+    auto* vec4_f16 = Construct(create<ast::Vector>(nullptr, 4u), vec4<f16>(1_h, 2_h, 3_h, 4_h));
     WrapInFunction(vec4_bool, vec4_i32, vec4_u32, vec4_f32, vec4_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2103,15 +2103,15 @@ TEST_F(ResolverTypeConstructorValidationTest, InferVec4ElementTypeFromScalarAndV
     Enable(ast::Extension::kF16);
 
     auto* vec4_bool =
-        Construct(create<ast::Vector>(nullptr, 4), Expr(true), vec3<bool>(false, true, false));
+        Construct(create<ast::Vector>(nullptr, 4u), Expr(true), vec3<bool>(false, true, false));
     auto* vec4_i32 =
-        Construct(create<ast::Vector>(nullptr, 4), Expr(1_i), vec3<i32>(2_i, 3_i, 4_i));
+        Construct(create<ast::Vector>(nullptr, 4u), Expr(1_i), vec3<i32>(2_i, 3_i, 4_i));
     auto* vec4_u32 =
-        Construct(create<ast::Vector>(nullptr, 4), Expr(1_u), vec3<u32>(2_u, 3_u, 4_u));
+        Construct(create<ast::Vector>(nullptr, 4u), Expr(1_u), vec3<u32>(2_u, 3_u, 4_u));
     auto* vec4_f32 =
-        Construct(create<ast::Vector>(nullptr, 4), Expr(1_f), vec3<f32>(2_f, 3_f, 4_f));
+        Construct(create<ast::Vector>(nullptr, 4u), Expr(1_f), vec3<f32>(2_f, 3_f, 4_f));
     auto* vec4_f16 =
-        Construct(create<ast::Vector>(nullptr, 4), Expr(1_h), vec3<f16>(2_h, 3_h, 4_h));
+        Construct(create<ast::Vector>(nullptr, 4u), Expr(1_h), vec3<f16>(2_h, 3_h, 4_h));
     WrapInFunction(vec4_bool, vec4_i32, vec4_u32, vec4_f32, vec4_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2141,16 +2141,16 @@ TEST_F(ResolverTypeConstructorValidationTest, InferVec4ElementTypeFromScalarAndV
 TEST_F(ResolverTypeConstructorValidationTest, InferVec4ElementTypeFromVec2AndVec2) {
     Enable(ast::Extension::kF16);
 
-    auto* vec4_bool = Construct(create<ast::Vector>(nullptr, 4), vec2<bool>(true, false),
+    auto* vec4_bool = Construct(create<ast::Vector>(nullptr, 4u), vec2<bool>(true, false),
                                 vec2<bool>(true, false));
     auto* vec4_i32 =
-        Construct(create<ast::Vector>(nullptr, 4), vec2<i32>(1_i, 2_i), vec2<i32>(3_i, 4_i));
+        Construct(create<ast::Vector>(nullptr, 4u), vec2<i32>(1_i, 2_i), vec2<i32>(3_i, 4_i));
     auto* vec4_u32 =
-        Construct(create<ast::Vector>(nullptr, 4), vec2<u32>(1_u, 2_u), vec2<u32>(3_u, 4_u));
+        Construct(create<ast::Vector>(nullptr, 4u), vec2<u32>(1_u, 2_u), vec2<u32>(3_u, 4_u));
     auto* vec4_f32 =
-        Construct(create<ast::Vector>(nullptr, 4), vec2<f32>(1_f, 2_f), vec2<f32>(3_f, 4_f));
+        Construct(create<ast::Vector>(nullptr, 4u), vec2<f32>(1_f, 2_f), vec2<f32>(3_f, 4_f));
     auto* vec4_f16 =
-        Construct(create<ast::Vector>(nullptr, 4), vec2<f16>(1_h, 2_h), vec2<f16>(3_h, 4_h));
+        Construct(create<ast::Vector>(nullptr, 4u), vec2<f16>(1_h, 2_h), vec2<f16>(3_h, 4_h));
     WrapInFunction(vec4_bool, vec4_i32, vec4_u32, vec4_f32, vec4_f16);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -2178,14 +2178,14 @@ TEST_F(ResolverTypeConstructorValidationTest, InferVec4ElementTypeFromVec2AndVec
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, CannotInferVectorElementTypeWithoutArgs) {
-    WrapInFunction(Construct(Source{{12, 34}}, create<ast::Vector>(nullptr, 3)));
+    WrapInFunction(Construct(Source{{12, 34}}, create<ast::Vector>(nullptr, 3u)));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(r()->error(), HasSubstr("12:34 error: no matching constructor for vec3()"));
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec2ElementTypeFromScalarsMismatch) {
-    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 2),
+    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 2u),
                              Expr(Source{{1, 2}}, 1_i),  //
                              Expr(Source{{1, 3}}, 2_u)));
 
@@ -2194,7 +2194,7 @@ TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec2ElementTypeFromScal
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec3ElementTypeFromScalarsMismatch) {
-    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 3),
+    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 3u),
                              Expr(Source{{1, 2}}, 1_i),  //
                              Expr(Source{{1, 3}}, 2_u),  //
                              Expr(Source{{1, 4}}, 3_i)));
@@ -2205,7 +2205,7 @@ TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec3ElementTypeFromScal
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec3ElementTypeFromScalarAndVec2Mismatch) {
-    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 3),
+    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 3u),
                              Expr(Source{{1, 2}}, 1_i),  //
                              Construct(Source{{1, 3}}, ty.vec2<f32>(), 2_f, 3_f)));
 
@@ -2215,7 +2215,7 @@ TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec3ElementTypeFromScal
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec4ElementTypeFromScalarsMismatch) {
-    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 4),
+    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 4u),
                              Expr(Source{{1, 2}}, 1_i),  //
                              Expr(Source{{1, 3}}, 2_i),  //
                              Expr(Source{{1, 4}}, 3_f),  //
@@ -2227,7 +2227,7 @@ TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec4ElementTypeFromScal
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec4ElementTypeFromScalarAndVec3Mismatch) {
-    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 4),
+    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 4u),
                              Expr(Source{{1, 2}}, 1_i),  //
                              Construct(Source{{1, 3}}, ty.vec3<u32>(), 2_u, 3_u, 4_u)));
 
@@ -2237,7 +2237,7 @@ TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec4ElementTypeFromScal
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, CannotInferVec4ElementTypeFromVec2AndVec2Mismatch) {
-    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 4),
+    WrapInFunction(Construct(Source{{1, 1}}, create<ast::Vector>(nullptr, 4u),
                              Construct(Source{{1, 2}}, ty.vec2<i32>(), 3_i, 4_i),  //
                              Construct(Source{{1, 3}}, ty.vec2<u32>(), 3_u, 4_u)));
 

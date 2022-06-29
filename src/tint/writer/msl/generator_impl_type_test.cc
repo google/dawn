@@ -249,8 +249,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
 
     GlobalVar("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     GeneratorImpl& gen = Build();
@@ -358,8 +358,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
 
     GlobalVar("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     GeneratorImpl& gen = Build();
@@ -452,8 +452,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
 
     GlobalVar("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     GeneratorImpl& gen = Build();
@@ -538,8 +538,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
 
     GlobalVar("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     GeneratorImpl& gen = Build();
@@ -602,8 +602,8 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
 
     GlobalVar("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     GeneratorImpl& gen = Build();
@@ -663,8 +663,8 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_WithAttribute) {
 
     GlobalVar("G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     GeneratorImpl& gen = Build();
@@ -830,8 +830,8 @@ TEST_P(MslStorageTexturesTest, Emit) {
     auto* s = ty.storage_texture(params.dim, ast::TexelFormat::kR32Float, ast::Access::kWrite);
     GlobalVar("test_var", s,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     GeneratorImpl& gen = Build();

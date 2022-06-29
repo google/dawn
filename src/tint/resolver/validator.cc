@@ -1609,7 +1609,7 @@ bool Validator::TextureBuiltinFunction(const sem::Call* call) const {
             return true;
         }
         std::string name = sem::str(usage);
-        auto* arg = call->Arguments()[index];
+        auto* arg = call->Arguments()[static_cast<size_t>(index)];
         if (auto values = arg->ConstantValue()) {
             // Assert that the constant values are of the expected type.
             if (!values.Type()->IsAnyOf<sem::I32, sem::Vector>() ||
@@ -1631,7 +1631,8 @@ bool Validator::TextureBuiltinFunction(const sem::Call* call) const {
                     return ast::TraverseAction::Stop;
                 });
             if (is_const_expr) {
-                auto vector = builtin->Parameters()[index]->Type()->Is<sem::Vector>();
+                auto vector =
+                    builtin->Parameters()[static_cast<size_t>(index)]->Type()->Is<sem::Vector>();
                 for (size_t i = 0, n = values.ElementCount(); i < n; i++) {
                     auto value = values.Element<AInt>(i).value;
                     if (value < min || value > max) {

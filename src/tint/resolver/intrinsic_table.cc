@@ -1300,8 +1300,8 @@ const sem::CallTarget* Impl::Lookup(CtorConvIntrinsic type,
     // Conversion.
     return utils::GetOrCreate(converters, match, [&]() {
         auto param = builder.create<sem::Parameter>(
-            nullptr, 0, match.parameters[0].type, ast::StorageClass::kNone, ast::Access::kUndefined,
-            match.parameters[0].usage);
+            nullptr, 0u, match.parameters[0].type, ast::StorageClass::kNone,
+            ast::Access::kUndefined, match.parameters[0].usage);
         return builder.create<sem::TypeConversion>(match.return_type, param);
     });
 }

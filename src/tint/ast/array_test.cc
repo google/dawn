@@ -62,7 +62,7 @@ TEST_F(AstArrayTest, FriendlyName_ConstantSized) {
 
 TEST_F(AstArrayTest, FriendlyName_WithStride) {
     auto* i32 = create<I32>();
-    auto* arr = create<Array>(i32, Expr(5_u), AttributeList{create<StrideAttribute>(32)});
+    auto* arr = create<Array>(i32, Expr(5_u), AttributeList{create<StrideAttribute>(32u)});
     EXPECT_EQ(arr->FriendlyName(Symbols()), "@stride(32) array<i32, 5>");
 }
 

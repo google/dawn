@@ -225,19 +225,21 @@ struct CombineSamplers::State {
                 // Replace all texture builtin calls.
                 if (auto* builtin = call->Target()->As<sem::Builtin>()) {
                     const auto& signature = builtin->Signature();
-                    int sampler_index = signature.IndexOf(sem::ParameterUsage::kSampler);
-                    int texture_index = signature.IndexOf(sem::ParameterUsage::kTexture);
+                    auto sampler_index = signature.IndexOf(sem::ParameterUsage::kSampler);
+                    auto texture_index = signature.IndexOf(sem::ParameterUsage::kTexture);
                     if (texture_index == -1) {
                         return nullptr;
                     }
-                    const sem::Expression* texture = call->Arguments()[texture_index];
+                    const sem::Expression* texture =
+                        call->Arguments()[static_cast<size_t>(texture_index)];
                     // We don't want to combine storage textures with anything, since
                     // they never have associated samplers in GLSL.
                     if (texture->Type()->UnwrapRef()->Is<sem::StorageTexture>()) {
                         return nullptr;
                     }
                     const sem::Expression* sampler =
-                        sampler_index != -1 ? call->Arguments()[sampler_index] : nullptr;
+                        sampler_index != -1 ? call->Arguments()[static_cast<size_t>(sampler_index)]
+                                            : nullptr;
                     auto* texture_var = texture->As<sem::VariableUser>()->Variable();
                     auto* sampler_var =
                         sampler ? sampler->As<sem::VariableUser>()->Variable() : nullptr;

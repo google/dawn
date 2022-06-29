@@ -22,7 +22,7 @@ namespace {
 using IdAttributeTest = TestHelper;
 
 TEST_F(IdAttributeTest, Creation) {
-    auto* d = create<IdAttribute>(12);
+    auto* d = create<IdAttribute>(12u);
     EXPECT_EQ(12u, d->value);
 }
 

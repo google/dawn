@@ -3048,7 +3048,7 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, StructAlignment) {
     // here the struct is expected to occupy 1024 bytes of workgroup storage.
     const auto* wg_struct_type = MakeStructTypeFromMembers(
         "WgStruct",
-        {MakeStructMember(0, ty.f32(), {create<ast::StructMemberAlignAttribute>(1024)})});
+        {MakeStructMember(0, ty.f32(), {create<ast::StructMemberAlignAttribute>(1024u)})});
 
     AddWorkgroupStorage("wg_struct_var", ty.Of(wg_struct_type));
     MakeStructVariableReferenceBodyFunction("wg_struct_func", "wg_struct_var", {{0, ty.f32()}});

@@ -163,6 +163,12 @@ const ast::Type* I32::Build(ProgramBuilder& b) const {
     return b.ty.i32();
 }
 
+Type::Type() = default;
+Type::Type(const Type&) = default;
+Type::~Type() = default;
+
+Texture::~Texture() = default;
+
 Pointer::Pointer(const Type* t, ast::StorageClass s) : type(t), storage_class(s) {}
 Pointer::Pointer(const Pointer&) = default;
 

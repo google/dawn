@@ -1024,11 +1024,13 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
         [&](const Struct* struct_type) -> bool {
             const auto& members = struct_type->members;
             index_prefix.push_back(0);
-            for (int i = 0; i < static_cast<int>(members.size()); ++i) {
-                index_prefix.back() = i;
+            for (size_t i = 0; i < members.size(); ++i) {
+                index_prefix.back() = static_cast<int>(i);
                 ast::AttributeList member_attrs(*attrs);
                 if (!parser_impl_.ConvertPipelineDecorations(
-                        struct_type, parser_impl_.GetMemberPipelineDecorations(*struct_type, i),
+                        struct_type,
+                        parser_impl_.GetMemberPipelineDecorations(*struct_type,
+                                                                  static_cast<int>(i)),
                         &member_attrs)) {
                     return false;
                 }
@@ -1078,7 +1080,7 @@ bool FunctionEmitter::EmitPipelineInput(std::string var_name,
                         store_dest = builder_.MemberAccessor(
                             store_dest,
                             builder_.Expr(parser_impl_.GetMemberName(*struct_type, index)));
-                        current_type = struct_type->members[index];
+                        current_type = struct_type->members[static_cast<size_t>(index)];
                     });
             }
 
@@ -1174,8 +1176,9 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
                         &member_attrs)) {
                     return false;
                 }
-                if (!EmitPipelineOutput(var_name, var_type, &member_attrs, index_prefix, members[i],
-                                        forced_member_type, return_members, return_exprs)) {
+                if (!EmitPipelineOutput(var_name, var_type, &member_attrs, index_prefix,
+                                        members[static_cast<size_t>(i)], forced_member_type,
+                                        return_members, return_exprs)) {
                     return false;
                 }
                 // Copy the location as updated by nested expansion of the member.
@@ -1223,7 +1226,7 @@ bool FunctionEmitter::EmitPipelineOutput(std::string var_name,
                         load_source = builder_.MemberAccessor(
                             load_source,
                             builder_.Expr(parser_impl_.GetMemberName(*struct_type, index)));
-                        current_type = struct_type->members[index];
+                        current_type = struct_type->members[static_cast<size_t>(index)];
                     });
             }
 
@@ -1825,7 +1828,7 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
             // The current block is a header.
             const auto header = block_id;
             const auto* header_info = block_info;
-            const auto depth = 1 + top->depth;
+            const auto depth = static_cast<size_t>(1 + top->depth);
             const auto ct = header_info->continue_for_header;
             if (ct != 0) {
                 // The current block is a loop header.
@@ -4310,7 +4313,7 @@ TypedExpression FunctionEmitter::MakeCompositeExtract(const spvtools::opt::Instr
     // This is structurally similar to creating an access chain, but
     // the SPIR-V instruction has literal indices instead of IDs for indices.
 
-    auto composite_index = 0;
+    auto composite_index = 0u;
     auto first_index_position = 1;
     TypedExpression current_expr(MakeOperand(inst, composite_index));
     if (!current_expr) {
@@ -4354,13 +4357,14 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
     // hierarchy, maintaining |current_type_id| as the SPIR-V ID of the type of
     // the object pointed to after processing the previous indices.
     const auto num_in_operands = inst.NumInOperands();
-    for (uint32_t index = index_start; index < num_in_operands; ++index) {
+    for (uint32_t index = static_cast<uint32_t>(index_start); index < num_in_operands; ++index) {
         const uint32_t index_val = inst.GetSingleWordInOperand(index);
 
         const auto* current_type_inst = def_use_mgr_->GetDef(current_type_id);
         if (!current_type_inst) {
             Fail() << "composite type %" << current_type_id << " is invalid after following "
-                   << (index - index_start) << " indices: " << inst.PrettyPrint();
+                   << (index - static_cast<uint32_t>(index_start))
+                   << " indices: " << inst.PrettyPrint();
             return {};
         }
         const char* operation_name = nullptr;
@@ -4650,7 +4654,7 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
     // but only if they are defined in this function as well.
     auto require_named_const_def = [&](const spvtools::opt::Instruction& inst,
                                        int in_operand_index) {
-        const auto id = inst.GetSingleWordInOperand(in_operand_index);
+        const auto id = inst.GetSingleWordInOperand(static_cast<uint32_t>(in_operand_index));
         auto* const operand_def = GetDefInfo(id);
         if (operand_def) {
             operand_def->requires_named_const_def = true;
@@ -4918,7 +4922,7 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
 
 bool FunctionEmitter::EmitControlBarrier(const spvtools::opt::Instruction& inst) {
     uint32_t operands[3];
-    for (int i = 0; i < 3; i++) {
+    for (uint32_t i = 0; i < 3; i++) {
         auto id = inst.GetSingleWordInOperand(i);
         if (auto* constant = constant_mgr_->FindDeclaredConstant(id)) {
             operands[i] = constant->GetU32();
@@ -4936,7 +4940,7 @@ bool FunctionEmitter::EmitControlBarrier(const spvtools::opt::Instruction& inst)
                       << "expected Workgroup (2), got: " << execution;
     }
     if (semantics & SpvMemorySemanticsAcquireReleaseMask) {
-        semantics &= ~SpvMemorySemanticsAcquireReleaseMask;
+        semantics &= ~static_cast<uint32_t>(SpvMemorySemanticsAcquireReleaseMask);
     } else {
         return Fail() << "control barrier semantics requires acquire and release";
     }
@@ -4945,14 +4949,14 @@ bool FunctionEmitter::EmitControlBarrier(const spvtools::opt::Instruction& inst)
             return Fail() << "workgroupBarrier requires workgroup memory scope";
         }
         AddStatement(create<ast::CallStatement>(builder_.Call("workgroupBarrier")));
-        semantics &= ~SpvMemorySemanticsWorkgroupMemoryMask;
+        semantics &= ~static_cast<uint32_t>(SpvMemorySemanticsWorkgroupMemoryMask);
     }
     if (semantics & SpvMemorySemanticsUniformMemoryMask) {
         if (memory != SpvScopeDevice) {
             return Fail() << "storageBarrier requires device memory scope";
         }
         AddStatement(create<ast::CallStatement>(builder_.Call("storageBarrier")));
-        semantics &= ~SpvMemorySemanticsUniformMemoryMask;
+        semantics &= ~static_cast<uint32_t>(SpvMemorySemanticsUniformMemoryMask);
     }
     if (semantics) {
         return Fail() << "unsupported control barrier semantics: " << semantics;
@@ -5600,7 +5604,7 @@ ast::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageAccess(
     }
     ast::TextureDimension dim = texture_type->dims;
     // Number of regular coordinates.
-    uint32_t num_axes = ast::NumCoordinateAxes(dim);
+    uint32_t num_axes = static_cast<uint32_t>(ast::NumCoordinateAxes(dim));
     bool is_arrayed = ast::IsTextureArray(dim);
     if ((num_axes == 0) || (num_axes > 3)) {
         Fail() << "unsupported image dimensionality for " << texture_type->TypeInfo().name

@@ -45,7 +45,7 @@ TEST_F(SpvParserTest, Usage_Trivial_Output) {
 }
 
 TEST_F(SpvParserTest, Usage_Equality_OneDifference) {
-    const int num_usages = 9;
+    const size_t num_usages = 9u;
     std::vector<Usage> usages(num_usages);
     usages[1].AddSampler();
     usages[2].AddComparisonSampler();
@@ -55,8 +55,8 @@ TEST_F(SpvParserTest, Usage_Equality_OneDifference) {
     usages[6].AddDepthTexture();
     usages[7].AddStorageReadTexture();
     usages[8].AddStorageWriteTexture();
-    for (int i = 0; i < num_usages; ++i) {
-        for (int j = 0; j < num_usages; ++j) {
+    for (size_t i = 0; i < num_usages; ++i) {
+        for (size_t j = 0; j < num_usages; ++j) {
             const auto& lhs = usages[i];
             const auto& rhs = usages[j];
             if (i == j) {

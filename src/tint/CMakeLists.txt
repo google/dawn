@@ -22,18 +22,6 @@ function(tint_spvtools_compile_options TARGET)
     ${spirv-tools_SOURCE_DIR}
     ${spirv-tools_BINARY_DIR}
   )
-
-  if (${CMAKE_CXX_COMPILER_ID} MATCHES Clang)
-    # The SPIRV-Tools code is conditioned against C++ and an older version of Clang.
-    # Suppress warnings triggered in our current compilation environment.
-    # TODO(dneto): Fix the issues upstream.
-    target_compile_options(${TARGET} PRIVATE
-      -Wno-newline-eof
-      -Wno-sign-conversion
-      -Wno-old-style-cast
-      -Wno-weak-vtables
-    )
-  endif()
 endfunction()
 
 ## Tint diagnostic utilities. Used by libtint and tint_utils_io.

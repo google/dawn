@@ -533,7 +533,7 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
             wgsize_ops.push_back(wgsize_result);
 
             // Generate OpConstant instructions for each dimension.
-            for (int i = 0; i < 3; i++) {
+            for (size_t i = 0; i < 3; i++) {
                 auto constant = ScalarConstant::U32(wgsize[i].value);
                 if (wgsize[i].overridable_const) {
                     // Make the constant specializable.
@@ -2688,7 +2688,7 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
     // Returns the argument with the given usage
     auto arg = [&](Usage usage) {
         int idx = signature.IndexOf(usage);
-        return (idx >= 0) ? arguments[idx] : nullptr;
+        return (idx >= 0) ? arguments[static_cast<size_t>(idx)] : nullptr;
     };
 
     // Generates the argument with the given usage, returning the operand ID

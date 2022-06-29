@@ -93,8 +93,8 @@ class HlslGeneratorImplTest_MemberAccessorBase : public BASE {
 
         b.GlobalVar("data", b.ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
                     ast::AttributeList{
-                        b.create<ast::BindingAttribute>(0),
-                        b.create<ast::GroupAttribute>(1),
+                        b.create<ast::BindingAttribute>(0u),
+                        b.create<ast::GroupAttribute>(1u),
                     });
     }
 

@@ -28,8 +28,8 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength) {
     auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))});
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     Func("a_func", {}, ty.void_(),
@@ -66,8 +66,8 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
                                      });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     Func("a_func", {}, ty.void_(),
@@ -102,8 +102,8 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_ViaLets) {
     auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))});
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     auto* p = Let("p", nullptr, AddressOf("b"));
@@ -142,13 +142,13 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
     auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))});
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(1),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(1u),
+                  create<ast::GroupAttribute>(2u),
               });
     GlobalVar("c", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(2),
-                  create<ast::GroupAttribute>(2),
+                  create<ast::BindingAttribute>(2u),
+                  create<ast::GroupAttribute>(2u),
               });
 
     Func("a_func", {}, ty.void_(),

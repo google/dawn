@@ -37,8 +37,8 @@ void TestAlign(ProgramBuilder* ctx) {
                                   });
     ctx->GlobalVar("nephews", ctx->ty.Of(nephews), ast::StorageClass::kStorage,
                    ast::AttributeList{
-                       ctx->create<ast::BindingAttribute>(0),
-                       ctx->create<ast::GroupAttribute>(0),
+                       ctx->create<ast::BindingAttribute>(0u),
+                       ctx->create<ast::GroupAttribute>(0u),
                    });
 }
 

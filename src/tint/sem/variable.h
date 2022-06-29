@@ -226,6 +226,7 @@ class VariableUser final : public Castable<VariableUser, Expression> {
     VariableUser(const ast::IdentifierExpression* declaration,
                  Statement* statement,
                  sem::Variable* variable);
+    ~VariableUser() override;
 
     /// @returns the variable that this expression refers to
     const sem::Variable* Variable() const { return variable_; }

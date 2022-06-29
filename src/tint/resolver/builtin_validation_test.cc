@@ -257,11 +257,11 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, Immediate) {
             err << "12:34 error: each component of the " << param.name
                 << " argument must be at least " << param.min << " and at most " << param.max
                 << ". " << param.name << " component " << expr.invalid_index << " is "
-                << std::to_string(expr.values[expr.invalid_index]);
+                << std::to_string(expr.values[static_cast<size_t>(expr.invalid_index)]);
         } else {
             err << "12:34 error: the " << param.name << " argument must be at least " << param.min
                 << " and at most " << param.max << ". " << param.name << " is "
-                << std::to_string(expr.values[expr.invalid_index]);
+                << std::to_string(expr.values[static_cast<size_t>(expr.invalid_index)]);
         }
         EXPECT_EQ(r()->error(), err.str());
     }

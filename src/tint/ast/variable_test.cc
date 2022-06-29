@@ -94,9 +94,9 @@ TEST_F(VariableTest, Assert_DifferentProgramID_Constructor) {
 TEST_F(VariableTest, WithAttributes) {
     auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
                     AttributeList{
-                        create<LocationAttribute>(1),
+                        create<LocationAttribute>(1u),
                         create<BuiltinAttribute>(Builtin::kPosition),
-                        create<IdAttribute>(1200),
+                        create<IdAttribute>(1200u),
                     });
 
     auto& attributes = var->attributes;
@@ -112,8 +112,8 @@ TEST_F(VariableTest, WithAttributes) {
 TEST_F(VariableTest, BindingPoint) {
     auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
                     AttributeList{
-                        create<BindingAttribute>(2),
-                        create<GroupAttribute>(1),
+                        create<BindingAttribute>(2u),
+                        create<GroupAttribute>(1u),
                     });
     EXPECT_TRUE(var->BindingPoint());
     ASSERT_NE(var->BindingPoint().binding, nullptr);
@@ -132,7 +132,7 @@ TEST_F(VariableTest, BindingPointAttributes) {
 TEST_F(VariableTest, BindingPointMissingGroupAttribute) {
     auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
                     AttributeList{
-                        create<BindingAttribute>(2),
+                        create<BindingAttribute>(2u),
                     });
     EXPECT_FALSE(var->BindingPoint());
     ASSERT_NE(var->BindingPoint().binding, nullptr);
@@ -142,7 +142,7 @@ TEST_F(VariableTest, BindingPointMissingGroupAttribute) {
 
 TEST_F(VariableTest, BindingPointMissingBindingAttribute) {
     auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
-                    AttributeList{create<GroupAttribute>(1)});
+                    AttributeList{create<GroupAttribute>(1u)});
     EXPECT_FALSE(var->BindingPoint());
     ASSERT_NE(var->BindingPoint().group, nullptr);
     EXPECT_EQ(var->BindingPoint().group->value, 1u);

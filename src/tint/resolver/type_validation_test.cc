@@ -402,7 +402,7 @@ TEST_F(ResolverTypeValidationTest, Struct_Member_VectorNoType) {
     //   a: vec3;
     // };
 
-    Structure("S", {Member("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3))});
+    Structure("S", {Member("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3u))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
@@ -412,7 +412,7 @@ TEST_F(ResolverTypeValidationTest, Struct_Member_MatrixNoType) {
     // struct S {
     //   a: mat3x3;
     // };
-    Structure("S", {Member("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3, 3))});
+    Structure("S", {Member("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3u, 3u))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");

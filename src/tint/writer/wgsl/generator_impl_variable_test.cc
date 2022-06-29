@@ -45,8 +45,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
     auto* s = Structure("S", {Member("a", ty.i32())});
     auto* v = GlobalVar("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
                         ast::AttributeList{
-                            create<ast::BindingAttribute>(0),
-                            create<ast::GroupAttribute>(0),
+                            create<ast::BindingAttribute>(0u),
+                            create<ast::GroupAttribute>(0u),
                         });
 
     GeneratorImpl& gen = Build();
@@ -60,8 +60,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Write) {
     auto* s = Structure("S", {Member("a", ty.i32())});
     auto* v = GlobalVar("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kWrite,
                         ast::AttributeList{
-                            create<ast::BindingAttribute>(0),
-                            create<ast::GroupAttribute>(0),
+                            create<ast::BindingAttribute>(0u),
+                            create<ast::GroupAttribute>(0u),
                         });
 
     GeneratorImpl& gen = Build();
@@ -75,8 +75,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
     auto* s = Structure("S", {Member("a", ty.i32())});
     auto* v = GlobalVar("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
                         ast::AttributeList{
-                            create<ast::BindingAttribute>(0),
-                            create<ast::GroupAttribute>(0),
+                            create<ast::BindingAttribute>(0u),
+                            create<ast::GroupAttribute>(0u),
                         });
 
     GeneratorImpl& gen = Build();
@@ -90,8 +90,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
     auto* v =
         GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone, nullptr,
                   ast::AttributeList{
-                      create<ast::GroupAttribute>(1),
-                      create<ast::BindingAttribute>(2),
+                      create<ast::GroupAttribute>(1u),
+                      create<ast::BindingAttribute>(2u),
                   });
 
     GeneratorImpl& gen = Build();

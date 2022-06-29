@@ -28,8 +28,8 @@ TEST_F(ResolverHostShareableValidationTest, BoolMember) {
 
     GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     ASSERT_FALSE(r()->Resolve());
@@ -46,8 +46,8 @@ TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
 
     GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     ASSERT_FALSE(r()->Resolve());
@@ -65,8 +65,8 @@ TEST_F(ResolverHostShareableValidationTest, Aliases) {
     auto* a2 = Alias("a2", ty.Of(s));
     GlobalVar(Source{{56, 78}}, "g", ty.Of(a2), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     ASSERT_FALSE(r()->Resolve());
@@ -87,8 +87,8 @@ TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
 
     GlobalVar(Source{{9, 10}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
 
     ASSERT_FALSE(r()->Resolve());
@@ -129,8 +129,8 @@ TEST_F(ResolverHostShareableValidationTest, NoError) {
 
     GlobalVar(Source{{9, 10}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
               ast::AttributeList{
-                  create<ast::BindingAttribute>(0),
-                  create<ast::GroupAttribute>(0),
+                  create<ast::BindingAttribute>(0u),
+                  create<ast::GroupAttribute>(0u),
               });
     WrapInFunction();
 

@@ -816,7 +816,7 @@ bool ParserImpl::RegisterWorkgroupSizeBuiltin() {
     /// Returns false and emits a diagnostic on error.
     auto set_param = [this, composite_def](uint32_t* id_ptr, uint32_t* value_ptr,
                                            int index) -> bool {
-        const auto id = composite_def->GetSingleWordInOperand(index);
+        const auto id = composite_def->GetSingleWordInOperand(static_cast<uint32_t>(index));
         const auto* def = def_use_mgr_->GetDef(id);
         if (!def || (def->opcode() != SpvOpSpecConstant && def->opcode() != SpvOpConstant) ||
             (def->NumInOperands() != 1)) {
@@ -1336,7 +1336,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
                     },
                     [&](const U32*) {
                         return create<ast::IntLiteralExpression>(
-                            Source{}, static_cast<uint64_t>(literal_value),
+                            Source{}, static_cast<int64_t>(literal_value),
                             ast::IntLiteralExpression::Suffix::kU);
                     },
                     [&](const F32*) {
@@ -1715,8 +1715,8 @@ DecorationList ParserImpl::GetMemberPipelineDecorations(const Struct& struct_typ
                                                         int member_index) {
     // Yes, I could have used std::copy_if or std::copy_if.
     DecorationList result;
-    for (const auto& deco :
-         GetDecorationsForMember(struct_id_for_symbol_[struct_type.name], member_index)) {
+    for (const auto& deco : GetDecorationsForMember(struct_id_for_symbol_[struct_type.name],
+                                                    static_cast<uint32_t>(member_index))) {
         if (IsPipelineDecoration(deco)) {
             result.emplace_back(deco);
         }
@@ -2721,7 +2721,7 @@ std::string ParserImpl::GetMemberName(const Struct& struct_type, int member_inde
         Fail() << "no structure type registered for symbol";
         return "";
     }
-    return namer_.GetMemberName(where->second, member_index);
+    return namer_.GetMemberName(where->second, static_cast<uint32_t>(member_index));
 }
 
 WorkgroupSizeInfo::WorkgroupSizeInfo() = default;
