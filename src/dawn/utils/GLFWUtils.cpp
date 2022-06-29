@@ -32,26 +32,6 @@
 
 namespace utils {
 
-void SetupGLFWWindowHintsForBackend(wgpu::BackendType type) {
-    if (type == wgpu::BackendType::OpenGL) {
-        // Ask for OpenGL 4.4 which is what the GL backend requires for compute shaders and
-        // texture views.
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 4);
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    } else if (type == wgpu::BackendType::OpenGLES) {
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-        glfwWindowHint(GLFW_CONTEXT_CREATION_API, GLFW_EGL_CONTEXT_API);
-    } else {
-        // Without this GLFW will initialize a GL context on the window, which prevents using
-        // the window with other APIs (by crashing in weird ways).
-        glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-    }
-}
-
 wgpu::Surface CreateSurfaceForWindow(const wgpu::Instance& instance, GLFWwindow* window) {
     std::unique_ptr<wgpu::ChainedStruct> chainedDescriptor =
         SetupWindowAndGetSurfaceDescriptor(window);

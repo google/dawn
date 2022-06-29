@@ -16,12 +16,6 @@
 
 #include "dawn/common/Compiler.h"
 
-#include "GLFW/glfw3.h"
-
-#if defined(DAWN_ENABLE_BACKEND_OPENGL)
-#include "dawn/native/OpenGLBackend.h"
-#endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
-
 namespace utils {
 
 #if defined(DAWN_ENABLE_BACKEND_D3D12)
@@ -42,29 +36,6 @@ BackendBinding* CreateVulkanBinding(GLFWwindow* window, WGPUDevice device);
 
 BackendBinding::BackendBinding(GLFWwindow* window, WGPUDevice device)
     : mWindow(window), mDevice(device) {}
-
-void DiscoverAdapter(dawn::native::Instance* instance, GLFWwindow* window, wgpu::BackendType type) {
-    DAWN_UNUSED(type);
-    DAWN_UNUSED(window);
-
-    if (type == wgpu::BackendType::OpenGL || type == wgpu::BackendType::OpenGLES) {
-#if defined(DAWN_ENABLE_BACKEND_OPENGL)
-        glfwMakeContextCurrent(window);
-        auto getProc = reinterpret_cast<void* (*)(const char*)>(glfwGetProcAddress);
-        if (type == wgpu::BackendType::OpenGL) {
-            dawn::native::opengl::AdapterDiscoveryOptions adapterOptions;
-            adapterOptions.getProc = getProc;
-            instance->DiscoverAdapters(&adapterOptions);
-        } else {
-            dawn::native::opengl::AdapterDiscoveryOptionsES adapterOptions;
-            adapterOptions.getProc = getProc;
-            instance->DiscoverAdapters(&adapterOptions);
-        }
-#endif  // defined(DAWN_ENABLE_BACKEND_OPENGL)
-    } else {
-        instance->DiscoverDefaultAdapters();
-    }
-}
 
 BackendBinding* CreateBinding(wgpu::BackendType type, GLFWwindow* window, WGPUDevice device) {
     switch (type) {

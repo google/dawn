@@ -16,6 +16,7 @@
 #define SRC_DAWN_NATIVE_OPENGL_ADAPTERGL_H_
 
 #include "dawn/native/Adapter.h"
+#include "dawn/native/opengl/EGLFunctions.h"
 #include "dawn/native/opengl/OpenGLFunctions.h"
 
 namespace dawn::native::opengl {
@@ -38,6 +39,7 @@ class Adapter : public AdapterBase {
     ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(const DeviceDescriptor* descriptor) override;
 
     OpenGLFunctions mFunctions;
+    EGLFunctions mEGLFunctions;
 };
 
 }  // namespace dawn::native::opengl

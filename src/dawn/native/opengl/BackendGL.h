@@ -17,6 +17,7 @@
 
 #include <vector>
 
+#include "dawn/common/DynamicLib.h"
 #include "dawn/native/BackendConnection.h"
 
 namespace dawn::native::opengl {
@@ -31,6 +32,7 @@ class Backend : public BackendConnection {
 
   private:
     bool mCreatedAdapter = false;
+    DynamicLib mLibEGL;
 };
 
 }  // namespace dawn::native::opengl

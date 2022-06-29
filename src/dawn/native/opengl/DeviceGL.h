@@ -39,14 +39,17 @@ namespace dawn::native::opengl {
 
 class Device final : public DeviceBase {
   public:
+    class Context;
     static ResultOrError<Ref<Device>> Create(AdapterBase* adapter,
                                              const DeviceDescriptor* descriptor,
-                                             const OpenGLFunctions& functions);
+                                             const OpenGLFunctions& functions,
+                                             std::unique_ptr<Context> context);
     ~Device() override;
 
     MaybeError Initialize(const DeviceDescriptor* descriptor);
 
-    // Contains all the OpenGL entry points, glDoFoo is called via gl.DoFoo.
+    // Returns all the OpenGL entry points and ensures that the associated
+    // Context is current.
     const OpenGLFunctions& GetGL() const;
 
     const GLFormat& GetGLFormat(const Format& format);
@@ -80,10 +83,17 @@ class Device final : public DeviceBase {
 
     float GetTimestampPeriodInNS() const override;
 
+    class Context {
+      public:
+        virtual ~Context() {}
+        virtual void MakeCurrent() = 0;
+    };
+
   private:
     Device(AdapterBase* adapter,
            const DeviceDescriptor* descriptor,
-           const OpenGLFunctions& functions);
+           const OpenGLFunctions& functions,
+           std::unique_ptr<Context> context);
 
     ResultOrError<Ref<BindGroupBase>> CreateBindGroupImpl(
         const BindGroupDescriptor* descriptor) override;
@@ -126,6 +136,7 @@ class Device final : public DeviceBase {
     std::queue<std::pair<GLsync, ExecutionSerial>> mFencesInFlight;
 
     GLFormatTable mFormatTable;
+    std::unique_ptr<Context> mContext = nullptr;
 };
 
 }  // namespace dawn::native::opengl

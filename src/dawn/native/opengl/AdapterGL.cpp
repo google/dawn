@@ -14,11 +14,13 @@
 
 #include "dawn/native/opengl/AdapterGL.h"
 
+#include <memory>
 #include <string>
+#include <utility>
 
 #include "dawn/common/GPUInfo.h"
-#include "dawn/common/Log.h"
 #include "dawn/native/Instance.h"
+#include "dawn/native/opengl/ContextEGL.h"
 #include "dawn/native/opengl/DeviceGL.h"
 
 namespace dawn::native::opengl {
@@ -49,69 +51,6 @@ uint32_t GetVendorIdFromVendors(const char* vendor) {
     return vendorId;
 }
 
-void KHRONOS_APIENTRY OnGLDebugMessage(GLenum source,
-                                       GLenum type,
-                                       GLuint id,
-                                       GLenum severity,
-                                       GLsizei length,
-                                       const GLchar* message,
-                                       const void* userParam) {
-    const char* sourceText;
-    switch (source) {
-        case GL_DEBUG_SOURCE_API:
-            sourceText = "OpenGL";
-            break;
-        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
-            sourceText = "Window System";
-            break;
-        case GL_DEBUG_SOURCE_SHADER_COMPILER:
-            sourceText = "Shader Compiler";
-            break;
-        case GL_DEBUG_SOURCE_THIRD_PARTY:
-            sourceText = "Third Party";
-            break;
-        case GL_DEBUG_SOURCE_APPLICATION:
-            sourceText = "Application";
-            break;
-        case GL_DEBUG_SOURCE_OTHER:
-            sourceText = "Other";
-            break;
-        default:
-            sourceText = "UNKNOWN";
-            break;
-    }
-
-    const char* severityText;
-    switch (severity) {
-        case GL_DEBUG_SEVERITY_HIGH:
-            severityText = "High";
-            break;
-        case GL_DEBUG_SEVERITY_MEDIUM:
-            severityText = "Medium";
-            break;
-        case GL_DEBUG_SEVERITY_LOW:
-            severityText = "Low";
-            break;
-        case GL_DEBUG_SEVERITY_NOTIFICATION:
-            severityText = "Notification";
-            break;
-        default:
-            severityText = "UNKNOWN";
-            break;
-    }
-
-    if (type == GL_DEBUG_TYPE_ERROR) {
-        dawn::WarningLog() << "OpenGL error:"
-                           << "\n    Source: " << sourceText      //
-                           << "\n    ID: " << id                  //
-                           << "\n    Severity: " << severityText  //
-                           << "\n    Message: " << message;
-
-        // Abort on an error when in Debug mode.
-        UNREACHABLE();
-    }
-}
-
 }  // anonymous namespace
 
 Adapter::Adapter(InstanceBase* instance, wgpu::BackendType backendType)
@@ -119,6 +58,7 @@ Adapter::Adapter(InstanceBase* instance, wgpu::BackendType backendType)
 
 MaybeError Adapter::InitializeGLFunctions(void* (*getProc)(const char*)) {
     // Use getProc to populate the dispatch table
+    mEGLFunctions.Init(getProc);
     return mFunctions.Initialize(getProc);
 }
 
@@ -133,47 +73,6 @@ MaybeError Adapter::InitializeImpl() {
     } else {
         ASSERT(GetBackendType() == wgpu::BackendType::OpenGL);
     }
-
-    // Use the debug output functionality to get notified about GL errors
-    // TODO(cwallez@chromium.org): add support for the KHR_debug and ARB_debug_output
-    // extensions
-    bool hasDebugOutput = mFunctions.IsAtLeastGL(4, 3) || mFunctions.IsAtLeastGLES(3, 2);
-
-    if (GetInstance()->IsBackendValidationEnabled() && hasDebugOutput) {
-        mFunctions.Enable(GL_DEBUG_OUTPUT);
-        mFunctions.Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-
-        // Any GL error; dangerous undefined behavior; any shader compiler and linker errors
-        mFunctions.DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0,
-                                       nullptr, GL_TRUE);
-
-        // Severe performance warnings; GLSL or other shader compiler and linker warnings;
-        // use of currently deprecated behavior
-        mFunctions.DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0,
-                                       nullptr, GL_TRUE);
-
-        // Performance warnings from redundant state changes; trivial undefined behavior
-        // This is disabled because we do an incredible amount of redundant state changes.
-        mFunctions.DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0,
-                                       nullptr, GL_FALSE);
-
-        // Any message which is not an error or performance concern
-        mFunctions.DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION,
-                                       0, nullptr, GL_FALSE);
-        mFunctions.DebugMessageCallback(&OnGLDebugMessage, nullptr);
-    }
-
-    // Set state that never changes between devices.
-    mFunctions.Enable(GL_DEPTH_TEST);
-    mFunctions.Enable(GL_SCISSOR_TEST);
-    mFunctions.Enable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
-    if (mFunctions.GetVersion().IsDesktop()) {
-        // These are not necessary on GLES. The functionality is enabled by default, and
-        // works by specifying sample counts and SRGB textures, respectively.
-        mFunctions.Enable(GL_MULTISAMPLE);
-        mFunctions.Enable(GL_FRAMEBUFFER_SRGB);
-    }
-    mFunctions.Enable(GL_SAMPLE_MASK);
 
     mName = reinterpret_cast<const char*>(mFunctions.GetString(GL_RENDERER));
 
@@ -251,9 +150,12 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
 }
 
 ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {
-    // There is no limit on the number of devices created from this adapter because they can
-    // all share the same backing OpenGL context.
-    return Device::Create(this, descriptor, mFunctions);
+    EGLenum api =
+        GetBackendType() == wgpu::BackendType::OpenGL ? EGL_OPENGL_API : EGL_OPENGL_ES_API;
+
+    std::unique_ptr<Device::Context> context = ContextEGL::Create(mEGLFunctions, api);
+
+    return Device::Create(this, descriptor, mFunctions, std::move(context));
 }
 
 }  // namespace dawn::native::opengl

@@ -68,9 +68,7 @@ class WindowSurfaceInstanceTests : public testing::Test {
     }
 
     GLFWwindow* CreateWindow() {
-        // The WindowSurfaceInstance tests don't create devices so we don't need to call
-        // SetupGLFWWindowHintsForBackend. Set GLFW_NO_API anyway to avoid GLFW bringing up a GL
-        // context that we won't use.
+        // Set GLFW_NO_API to avoid GLFW bringing up a GL context that we won't use.
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         mWindow = glfwCreateWindow(400, 400, "WindowSurfaceInstanceTests window", nullptr, nullptr);
         return mWindow;

@@ -418,8 +418,12 @@ if (DAWN_ENABLE_OPENGL)
         "opengl/CommandBufferGL.h"
         "opengl/ComputePipelineGL.cpp"
         "opengl/ComputePipelineGL.h"
+        "opengl/ContextEGL.cpp"
+        "opengl/ContextEGL.h"
         "opengl/DeviceGL.cpp"
         "opengl/DeviceGL.h"
+        "opengl/EGLFunctions.cpp"
+        "opengl/EGLFunctions.h"
         "opengl/Forward.h"
         "opengl/GLFormat.cpp"
         "opengl/GLFormat.h"
@@ -454,6 +458,7 @@ if (DAWN_ENABLE_OPENGL)
         "opengl/opengl_platform.h"
     )
 
+    target_include_directories(dawn_native PRIVATE ${DAWN_KHRONOS_DIR})
     target_link_libraries(dawn_native PRIVATE dawn_khronos_platform)
 endif()
 

@@ -540,8 +540,12 @@ source_set("sources") {
       "opengl/CommandBufferGL.h",
       "opengl/ComputePipelineGL.cpp",
       "opengl/ComputePipelineGL.h",
+      "opengl/ContextEGL.cpp",
+      "opengl/ContextEGL.h",
       "opengl/DeviceGL.cpp",
       "opengl/DeviceGL.h",
+      "opengl/EGLFunctions.cpp",
+      "opengl/EGLFunctions.h",
       "opengl/Forward.h",
       "opengl/GLFormat.cpp",
       "opengl/GLFormat.h",
@@ -575,6 +579,7 @@ source_set("sources") {
       "opengl/UtilsGL.h",
       "opengl/opengl_platform.h",
     ]
+    include_dirs = [ "//third_party/khronos" ]
   }
 
   if (dawn_enable_vulkan) {

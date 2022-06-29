@@ -23,10 +23,6 @@ struct GLFWwindow;
 
 namespace utils {
 
-// Adds all the necessary glfwWindowHint calls for the next GLFWwindow created to be used with
-// the specified backend.
-void SetupGLFWWindowHintsForBackend(wgpu::BackendType type);
-
 // Does the necessary setup on the GLFWwindow to allow creating a wgpu::Surface with it and
 // calls `instance.CreateSurface` with the correct descriptor for this window.
 // Returns a null wgpu::Surface on failure.

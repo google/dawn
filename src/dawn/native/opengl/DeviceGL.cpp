@@ -14,9 +14,12 @@
 
 #include "dawn/native/opengl/DeviceGL.h"
 
+#include "dawn/common/Log.h"
+
 #include "dawn/native/BackendConnection.h"
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/ErrorData.h"
+#include "dawn/native/Instance.h"
 #include "dawn/native/StagingBuffer.h"
 #include "dawn/native/opengl/BindGroupGL.h"
 #include "dawn/native/opengl/BindGroupLayoutGL.h"
@@ -32,29 +35,140 @@
 #include "dawn/native/opengl/SwapChainGL.h"
 #include "dawn/native/opengl/TextureGL.h"
 
+namespace {
+
+void KHRONOS_APIENTRY OnGLDebugMessage(GLenum source,
+                                       GLenum type,
+                                       GLuint id,
+                                       GLenum severity,
+                                       GLsizei length,
+                                       const GLchar* message,
+                                       const void* userParam) {
+    const char* sourceText;
+    switch (source) {
+        case GL_DEBUG_SOURCE_API:
+            sourceText = "OpenGL";
+            break;
+        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:
+            sourceText = "Window System";
+            break;
+        case GL_DEBUG_SOURCE_SHADER_COMPILER:
+            sourceText = "Shader Compiler";
+            break;
+        case GL_DEBUG_SOURCE_THIRD_PARTY:
+            sourceText = "Third Party";
+            break;
+        case GL_DEBUG_SOURCE_APPLICATION:
+            sourceText = "Application";
+            break;
+        case GL_DEBUG_SOURCE_OTHER:
+            sourceText = "Other";
+            break;
+        default:
+            sourceText = "UNKNOWN";
+            break;
+    }
+
+    const char* severityText;
+    switch (severity) {
+        case GL_DEBUG_SEVERITY_HIGH:
+            severityText = "High";
+            break;
+        case GL_DEBUG_SEVERITY_MEDIUM:
+            severityText = "Medium";
+            break;
+        case GL_DEBUG_SEVERITY_LOW:
+            severityText = "Low";
+            break;
+        case GL_DEBUG_SEVERITY_NOTIFICATION:
+            severityText = "Notification";
+            break;
+        default:
+            severityText = "UNKNOWN";
+            break;
+    }
+
+    if (type == GL_DEBUG_TYPE_ERROR) {
+        dawn::WarningLog() << "OpenGL error:"
+                           << "\n    Source: " << sourceText      //
+                           << "\n    ID: " << id                  //
+                           << "\n    Severity: " << severityText  //
+                           << "\n    Message: " << message;
+
+        // Abort on an error when in Debug mode.
+        UNREACHABLE();
+    }
+}
+
+}  // anonymous namespace
+
 namespace dawn::native::opengl {
 
 // static
 ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
                                           const DeviceDescriptor* descriptor,
-                                          const OpenGLFunctions& functions) {
-    Ref<Device> device = AcquireRef(new Device(adapter, descriptor, functions));
+                                          const OpenGLFunctions& functions,
+                                          std::unique_ptr<Context> context) {
+    Ref<Device> device = AcquireRef(new Device(adapter, descriptor, functions, std::move(context)));
     DAWN_TRY(device->Initialize(descriptor));
     return device;
 }
 
 Device::Device(AdapterBase* adapter,
                const DeviceDescriptor* descriptor,
-               const OpenGLFunctions& functions)
-    : DeviceBase(adapter, descriptor), mGL(functions) {}
+               const OpenGLFunctions& functions,
+               std::unique_ptr<Context> context)
+    : DeviceBase(adapter, descriptor), mGL(functions), mContext(std::move(context)) {}
 
 Device::~Device() {
     Destroy();
 }
 
 MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
+    const OpenGLFunctions& gl = GetGL();
     InitTogglesFromDriver();
     mFormatTable = BuildGLFormatTable(GetBGRAInternalFormat());
+
+    // Use the debug output functionality to get notified about GL errors
+    // TODO(crbug.com/dawn/1475): add support for the KHR_debug and ARB_debug_output
+    // extensions
+    bool hasDebugOutput = gl.IsAtLeastGL(4, 3) || gl.IsAtLeastGLES(3, 2);
+
+    if (GetAdapter()->GetInstance()->IsBackendValidationEnabled() && hasDebugOutput) {
+        gl.Enable(GL_DEBUG_OUTPUT);
+        gl.Enable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
+        // Any GL error; dangerous undefined behavior; any shader compiler and linker errors
+        gl.DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr,
+                               GL_TRUE);
+
+        // Severe performance warnings; GLSL or other shader compiler and linker warnings;
+        // use of currently deprecated behavior
+        gl.DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_MEDIUM, 0, nullptr,
+                               GL_TRUE);
+
+        // Performance warnings from redundant state changes; trivial undefined behavior
+        // This is disabled because we do an incredible amount of redundant state changes.
+        gl.DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_LOW, 0, nullptr,
+                               GL_FALSE);
+
+        // Any message which is not an error or performance concern
+        gl.DebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0,
+                               nullptr, GL_FALSE);
+        gl.DebugMessageCallback(&OnGLDebugMessage, nullptr);
+    }
+
+    // Set initial state.
+    gl.Enable(GL_DEPTH_TEST);
+    gl.Enable(GL_SCISSOR_TEST);
+    gl.Enable(GL_PRIMITIVE_RESTART_FIXED_INDEX);
+    if (gl.GetVersion().IsDesktop()) {
+        // These are not necessary on GLES. The functionality is enabled by default, and
+        // works by specifying sample counts and SRGB textures, respectively.
+        gl.Enable(GL_MULTISAMPLE);
+        gl.Enable(GL_FRAMEBUFFER_SRGB);
+    }
+    gl.Enable(GL_SAMPLE_MASK);
 
     return DeviceBase::Initialize(AcquireRef(new Queue(this, &descriptor->defaultQueue)));
 }
@@ -340,6 +454,9 @@ float Device::GetTimestampPeriodInNS() const {
 }
 
 const OpenGLFunctions& Device::GetGL() const {
+    if (mContext) {
+        mContext->MakeCurrent();
+    }
     return mGL;
 }
 

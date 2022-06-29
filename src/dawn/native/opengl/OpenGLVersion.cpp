@@ -26,9 +26,9 @@ MaybeError OpenGLVersion::Initialize(GetProcAddress getProc) {
         return DAWN_INTERNAL_ERROR("Couldn't load glGetString");
     }
 
-    std::string version = reinterpret_cast<const char*>(getString(GL_VERSION));
+    const char* version = reinterpret_cast<const char*>(getString(GL_VERSION));
 
-    if (version.find("OpenGL ES") != std::string::npos) {
+    if (strstr(version, "OpenGL ES") != nullptr) {
         // ES spec states that the GL_VERSION string will be in the following format:
         // "OpenGL ES N.M vendor-specific information"
         mStandard = Standard::ES;
@@ -36,7 +36,7 @@ MaybeError OpenGLVersion::Initialize(GetProcAddress getProc) {
         mMinorVersion = version[12] - '0';
 
         // The minor version shouldn't get to two digits.
-        ASSERT(version.size() <= 13 || !isdigit(version[13]));
+        ASSERT(strlen(version) <= 13 || !isdigit(version[13]));
     } else {
         // OpenGL spec states the GL_VERSION string will be in the following format:
         // <version number><space><vendor-specific information>
@@ -48,7 +48,7 @@ MaybeError OpenGLVersion::Initialize(GetProcAddress getProc) {
         mMinorVersion = version[2] - '0';
 
         // The minor version shouldn't get to two digits.
-        ASSERT(version.size() <= 3 || !isdigit(version[3]));
+        ASSERT(strlen(version) <= 3 || !isdigit(version[3]));
     }
 
     return {};

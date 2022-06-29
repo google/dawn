@@ -37,10 +37,7 @@ class SwapChainTests : public DawnTest {
             GTEST_SKIP();
         }
 
-        // The SwapChainTests don't create OpenGL contexts so we don't need to call
-        // SetupGLFWWindowHintsForBackend. Set GLFW_NO_API anyway to avoid GLFW bringing up a GL
-        // context that we won't use.
-        ASSERT_TRUE(!IsOpenGL());
+        // Set GLFW_NO_API to avoid GLFW bringing up a GL context that we won't use.
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         window = glfwCreateWindow(400, 400, "SwapChainValidationTests window", nullptr, nullptr);
 

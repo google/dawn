@@ -14,10 +14,17 @@
 
 #include "dawn/native/opengl/BackendGL.h"
 
+#include <EGL/egl.h>
+
+#include <memory>
 #include <utility>
 
+#include "dawn/common/SystemUtils.h"
+#include "dawn/native/Instance.h"
 #include "dawn/native/OpenGLBackend.h"
 #include "dawn/native/opengl/AdapterGL.h"
+#include "dawn/native/opengl/ContextEGL.h"
+#include "dawn/native/opengl/EGLFunctions.h"
 
 namespace dawn::native::opengl {
 
@@ -27,8 +34,53 @@ Backend::Backend(InstanceBase* instance, wgpu::BackendType backendType)
     : BackendConnection(instance, backendType) {}
 
 std::vector<Ref<AdapterBase>> Backend::DiscoverDefaultAdapters() {
-    // The OpenGL backend needs at least "getProcAddress" to discover an adapter.
-    return {};
+    std::vector<Ref<AdapterBase>> adapters;
+#if DAWN_PLATFORM_IS(WINDOWS)
+    const char* eglLib = "libEGL.dll";
+#elif DAWN_PLATFORM_IS(MACOS)
+    const char* eglLib = "libEGL.dylib";
+#else
+    const char* eglLib = "libEGL.so";
+#endif
+    if (!mLibEGL.Valid() && !mLibEGL.Open(eglLib)) {
+        return {};
+    }
+
+    AdapterDiscoveryOptions options(ToAPI(GetType()));
+    options.getProc =
+        reinterpret_cast<void* (*)(const char*)>(mLibEGL.GetProc("eglGetProcAddress"));
+    if (!options.getProc) {
+        return {};
+    }
+
+    EGLFunctions egl;
+    egl.Init(options.getProc);
+
+    EGLenum api = GetType() == wgpu::BackendType::OpenGLES ? EGL_OPENGL_ES_API : EGL_OPENGL_API;
+    std::unique_ptr<Device::Context> context = ContextEGL::Create(egl, api);
+    if (!context) {
+        return {};
+    }
+
+    EGLDisplay prevDisplay = egl.GetCurrentDisplay();
+    EGLContext prevDrawSurface = egl.GetCurrentSurface(EGL_DRAW);
+    EGLContext prevReadSurface = egl.GetCurrentSurface(EGL_READ);
+    EGLContext prevContext = egl.GetCurrentContext();
+
+    context->MakeCurrent();
+
+    auto result = DiscoverAdapters(&options);
+
+    if (result.IsError()) {
+        GetInstance()->ConsumedError(result.AcquireError());
+    } else {
+        auto value = result.AcquireSuccess();
+        adapters.insert(adapters.end(), value.begin(), value.end());
+    }
+
+    egl.MakeCurrent(prevDisplay, prevDrawSurface, prevReadSurface, prevContext);
+
+    return adapters;
 }
 
 ResultOrError<std::vector<Ref<AdapterBase>>> Backend::DiscoverAdapters(
