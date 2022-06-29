@@ -354,8 +354,17 @@ TEST_F(ResolverFunctionValidationTest, CannotCallEntryPoint) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-
               R"(12:34 error: entry point functions cannot be the target of a function call)");
+}
+
+TEST_F(ResolverFunctionValidationTest, CannotCallFunctionAtModuleScope) {
+    // fn F() -> i32 { return 1; }
+    // var x = F();
+    Func("F", {}, ty.i32(), {Return(1_i)});
+    GlobalVar("x", nullptr, Call(Source{{12, 34}}, "F"), ast::StorageClass::kPrivate);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: functions cannot be called at module-scope)");
 }
 
 TEST_F(ResolverFunctionValidationTest, PipelineStage_MustBeUnique_Fail) {

@@ -1695,6 +1695,11 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
     auto sym = decl->target.name->symbol;
     auto name = symbols_.NameFor(sym);
 
+    if (!current_statement) {  // Function call at module-scope.
+        AddError("functions cannot be called at module-scope", decl->source);
+        return false;
+    }
+
     if (target->Declaration()->IsEntryPoint()) {
         // https://www.w3.org/TR/WGSL/#function-restriction
         // An entry point must never be the target of a function call.
