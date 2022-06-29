@@ -1,1 +1,1 @@
-let v = vec4(0, 1, 2, 3);
+var<private> v = vec4(0, 1, 2, 3);

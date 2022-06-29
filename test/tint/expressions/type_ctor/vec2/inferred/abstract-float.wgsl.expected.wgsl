@@ -1,1 +1,1 @@
-let v = vec2(0.0, 1.0);
+var<private> v = vec2(0.0, 1.0);

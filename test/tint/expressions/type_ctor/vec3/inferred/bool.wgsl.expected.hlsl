@@ -3,4 +3,4 @@ void unused_entry_point() {
   return;
 }
 
-static const bool3 v = bool3(false, true, false);
+static bool3 v = bool3(false, true, false);

@@ -3,4 +3,4 @@ void unused_entry_point() {
   return;
 }
 
-static const int4 v = int4(0, 1, 2, 3);
+static int4 v = int4(0, 1, 2, 3);

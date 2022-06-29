@@ -1,1 +1,1 @@
-let v = vec3(0, 1, 2);
+var<private> v = vec3(0, 1, 2);

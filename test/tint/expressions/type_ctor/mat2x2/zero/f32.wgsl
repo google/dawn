@@ -1,1 +1,1 @@
-let m = mat2x2<f32>();
+var<private> m = mat2x2<f32>();

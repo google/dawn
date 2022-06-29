@@ -1,5 +1,3 @@
 #include <metal_stdlib>
 
 using namespace metal;
-constant int3 v = int3(0, 1, 2);
-

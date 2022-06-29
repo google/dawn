@@ -1,1 +1,1 @@
-let v = vec2<f32>(0.0f, 1.0f);
+var<private> v = vec2<f32>(0.0f, 1.0f);

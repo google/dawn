@@ -3,4 +3,4 @@ void unused_entry_point() {
   return;
 }
 
-static const uint2 v = uint2(0u, 1u);
+static uint2 v = uint2(0u, 1u);

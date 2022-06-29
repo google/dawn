@@ -1,1 +1,1 @@
-let v = vec2<bool>(false, true);
+var<private> v = vec2<bool>(false, true);

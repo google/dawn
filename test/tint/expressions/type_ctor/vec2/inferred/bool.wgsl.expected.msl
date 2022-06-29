@@ -1,5 +1,3 @@
 #include <metal_stdlib>
 
 using namespace metal;
-constant bool2 v = bool2(false, true);
-
