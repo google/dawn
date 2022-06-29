@@ -365,13 +365,13 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
 
     sem::Variable* sem = nullptr;
     if (is_global) {
-        sem = builder_->create<sem::GlobalVariable>(v, ty, ast::StorageClass::kNone,
-                                                    ast::Access::kUndefined, sem::Constant{},
-                                                    sem::BindingPoint{});
+        sem = builder_->create<sem::GlobalVariable>(
+            v, ty, ast::StorageClass::kNone, ast::Access::kUndefined, /* constant_value */ nullptr,
+            sem::BindingPoint{});
     } else {
         sem = builder_->create<sem::LocalVariable>(v, ty, ast::StorageClass::kNone,
                                                    ast::Access::kUndefined, current_statement_,
-                                                   sem::Constant{});
+                                                   /* constant_value */ nullptr);
     }
 
     sem->SetConstructor(rhs);
@@ -419,9 +419,9 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
         return nullptr;
     }
 
-    auto* sem = builder_->create<sem::GlobalVariable>(v, ty, ast::StorageClass::kNone,
-                                                      ast::Access::kUndefined, sem::Constant{},
-                                                      sem::BindingPoint{});
+    auto* sem = builder_->create<sem::GlobalVariable>(
+        v, ty, ast::StorageClass::kNone, ast::Access::kUndefined, /* constant_value */ nullptr,
+        sem::BindingPoint{});
 
     if (auto* id = ast::GetAttribute<ast::IdAttribute>(v->attributes)) {
         sem->SetConstantId(static_cast<uint16_t>(id->value));
@@ -564,11 +564,11 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
             binding_point = {bp.group->value, bp.binding->value};
         }
         sem = builder_->create<sem::GlobalVariable>(var, var_ty, storage_class, access,
-                                                    sem::Constant{}, binding_point);
+                                                    /* constant_value */ nullptr, binding_point);
 
     } else {
-        sem = builder_->create<sem::LocalVariable>(var, var_ty, storage_class, access,
-                                                   current_statement_, sem::Constant{});
+        sem = builder_->create<sem::LocalVariable>(
+            var, var_ty, storage_class, access, current_statement_, /* constant_value */ nullptr);
     }
 
     sem->SetConstructor(rhs);
@@ -916,7 +916,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
             return false;
         }
 
-        sem::Constant value;
+        const sem::Constant* value = nullptr;
 
         if (auto* user = args[i]->As<sem::VariableUser>()) {
             // We have an variable of a module-scope constant.
@@ -950,12 +950,12 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
             continue;
         }
         // validator_.Validate and set the default value for this dimension.
-        if (value.Element<AInt>(0).value < 1) {
+        if (value->As<AInt>() < 1) {
             AddError("workgroup_size argument must be at least 1", values[i]->source);
             return false;
         }
 
-        ws[i].value = value.Element<uint32_t>(0);
+        ws[i].value = value->As<uint32_t>();
     }
 
     current_function_->SetWorkgroupSize(std::move(ws));
@@ -1266,7 +1266,8 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
             [&](const ast::UnaryOpExpression* unary) -> sem::Expression* { return UnaryOp(unary); },
             [&](const ast::PhonyExpression*) -> sem::Expression* {
                 return builder_->create<sem::Expression>(expr, builder_->create<sem::Void>(),
-                                                         current_statement_, sem::Constant{},
+                                                         current_statement_,
+                                                         /* constant_value */ nullptr,
                                                          /* has_side_effects */ false);
             },
             [&](Default) {
@@ -1309,13 +1310,14 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
                 << ") returned invalid value";
             return nullptr;
         }
-        auto materialized_val = ConvertValue(std::move(expr_val), target_ty, decl->source);
+        auto materialized_val = ConvertValue(expr_val, target_ty, decl->source);
         if (!materialized_val) {
+            // ConvertValue() has already failed and raised an diagnostic error.
             return nullptr;
         }
-        if (!materialized_val->IsValid()) {
+        if (!materialized_val.Get()) {
             TINT_ICE(Resolver, builder_->Diagnostics())
-                << decl->source << "ConvertValue(" << builder_->FriendlyName(expr_val.Type())
+                << decl->source << "ConvertValue(" << builder_->FriendlyName(expr_val->Type())
                 << " -> " << builder_->FriendlyName(target_ty) << ") returned invalid value";
             return nullptr;
         }
@@ -1678,9 +1680,9 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     }
 
     // If the builtin is @const, and all arguments have constant values, evaluate the builtin now.
-    sem::Constant constant;
+    const sem::Constant* constant = nullptr;
     if (builtin.const_eval_fn) {
-        std::vector<sem::Constant> values(args.size());
+        std::vector<const sem::Constant*> values(args.size());
         bool is_const = true;  // all arguments have constant values
         for (size_t i = 0; i < values.size(); i++) {
             if (auto v = args[i]->ConstantValue()) {
@@ -1757,7 +1759,7 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
     // effects.
     bool has_side_effects = true;
     auto* call = builder_->create<sem::Call>(expr, target, std::move(args), current_statement_,
-                                             sem::Constant{}, has_side_effects);
+                                             /* constant_value */ nullptr, has_side_effects);
 
     target->AddCallSite(call);
 
@@ -2226,21 +2228,21 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
             return nullptr;
         }
 
-        auto count_val = count_sem->ConstantValue();
+        auto* count_val = count_sem->ConstantValue();
         if (!count_val) {
             AddError("array size must evaluate to a constant integer expression",
                      count_expr->source);
             return nullptr;
         }
 
-        if (auto* ty = count_val.Type(); !ty->is_integer_scalar()) {
+        if (auto* ty = count_val->Type(); !ty->is_integer_scalar()) {
             AddError("array size must evaluate to a constant integer expression, but is type '" +
                          builder_->FriendlyName(ty) + "'",
                      count_expr->source);
             return nullptr;
         }
 
-        count = count_val.Element<AInt>(0).value;
+        count = count_val->As<AInt>();
         if (count < 1) {
             AddError("array size (" + std::to_string(count) + ") must be greater than 0",
                      count_expr->source);

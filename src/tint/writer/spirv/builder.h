@@ -554,18 +554,7 @@ class Builder {
     /// Generates a constant value if needed
     /// @param constant the constant to generate.
     /// @returns the ID on success or 0 on failure
-    uint32_t GenerateConstantIfNeeded(const sem::Constant& constant);
-
-    /// Handles emitting a sub-range of a constant value
-    /// @param constant the constant value to emit
-    /// @param range_ty the sub-range type
-    /// @param start the element index for the first element
-    /// @param end the element index for one past the last element
-    /// @returns true if the constant value was successfully emitted
-    uint32_t GenerateConstantRangeIfNeeded(const sem::Constant& constant,
-                                           const sem::Type* range_ty,
-                                           size_t start,
-                                           size_t end);
+    uint32_t GenerateConstantIfNeeded(const sem::Constant* constant);
 
     /// Generates a scalar constant if needed
     /// @param constant the constant to generate.

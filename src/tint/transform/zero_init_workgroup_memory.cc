@@ -358,8 +358,8 @@ struct ZeroInitWorkgroupMemory::State {
                 continue;
             }
             auto* sem = ctx.src->Sem().Get(expr);
-            if (auto c = sem->ConstantValue()) {
-                workgroup_size_const *= c.Element<AInt>(0).value;
+            if (auto* c = sem->ConstantValue()) {
+                workgroup_size_const *= c->As<AInt>();
                 continue;
             }
             // Constant value could not be found. Build expression instead.

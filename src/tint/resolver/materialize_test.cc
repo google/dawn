@@ -73,12 +73,61 @@ static std::ostream& operator<<(std::ostream& o, Expectation m) {
     return o << "<unknown>";
 }
 
+template <typename CASE>
+class MaterializeTest : public resolver::ResolverTestWithParam<CASE> {
+  protected:
+    using ProgramBuilder::FriendlyName;
+
+    void CheckTypesAndValues(const sem::Expression* expr,
+                             const tint::sem::Type* expected_sem_ty,
+                             const std::variant<AInt, AFloat>& expected_value) {
+        std::visit([&](auto v) { CheckTypesAndValuesImpl(expr, expected_sem_ty, v); },
+                   expected_value);
+    }
+
+  private:
+    template <typename T>
+    void CheckTypesAndValuesImpl(const sem::Expression* expr,
+                                 const tint::sem::Type* expected_sem_ty,
+                                 T expected_value) {
+        EXPECT_TYPE(expr->Type(), expected_sem_ty);
+
+        auto* value = expr->ConstantValue();
+        ASSERT_NE(value, nullptr);
+        EXPECT_TYPE(expr->Type(), value->Type());
+
+        tint::Switch(
+            expected_sem_ty,  //
+            [&](const sem::Vector* v) {
+                for (uint32_t i = 0; i < v->Width(); i++) {
+                    auto* el = value->Index(i);
+                    ASSERT_NE(el, nullptr);
+                    EXPECT_TYPE(el->Type(), v->type());
+                    EXPECT_EQ(std::get<T>(el->Value()), expected_value);
+                }
+            },
+            [&](const sem::Matrix* m) {
+                for (uint32_t c = 0; c < m->columns(); c++) {
+                    auto* column = value->Index(c);
+                    ASSERT_NE(column, nullptr);
+                    EXPECT_TYPE(column->Type(), m->ColumnType());
+                    for (uint32_t r = 0; r < m->rows(); r++) {
+                        auto* el = column->Index(r);
+                        ASSERT_NE(el, nullptr);
+                        EXPECT_TYPE(el->Type(), m->type());
+                        EXPECT_EQ(std::get<T>(el->Value()), expected_value);
+                    }
+                }
+            },
+            [&](Default) { EXPECT_EQ(std::get<T>(value->Value()), expected_value); });
+    }
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // MaterializeAbstractNumericToConcreteType
 // Tests that an abstract-numeric will materialize to the expected concrete type
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 namespace materialize_abstract_numeric_to_concrete_type {
-
 // How should the materialization occur?
 enum class Method {
     // var a : target_type = abstract_expr;
@@ -247,7 +296,7 @@ static std::ostream& operator<<(std::ostream& o, const Data& c) {
 }
 
 using MaterializeAbstractNumericToConcreteType =
-    resolver::ResolverTestWithParam<std::tuple<Expectation, Method, Data>>;
+    MaterializeTest<std::tuple<Expectation, Method, Data>>;
 
 TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
     // Once built-in and ops using f16 is properly supported, we'll need to enable this:
@@ -323,30 +372,12 @@ TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
             break;
     }
 
-    auto check_types_and_values = [&](const sem::Expression* expr) {
-        auto* target_sem_ty = data.target_sem_ty(*this);
-
-        EXPECT_TYPE(expr->Type(), target_sem_ty);
-        EXPECT_TYPE(expr->ConstantValue().Type(), target_sem_ty);
-
-        uint32_t num_elems = 0;
-        const sem::Type* target_sem_el_ty = sem::Type::DeepestElementOf(target_sem_ty, &num_elems);
-        EXPECT_TYPE(expr->ConstantValue().ElementType(), target_sem_el_ty);
-        expr->ConstantValue().WithElements([&](auto&& vec) {
-            using VEC_TY = std::decay_t<decltype(vec)>;
-            using EL_TY = typename VEC_TY::value_type;
-            ASSERT_TRUE(std::holds_alternative<EL_TY>(data.materialized_value));
-            VEC_TY expected(num_elems, std::get<EL_TY>(data.materialized_value));
-            EXPECT_EQ(vec, expected);
-        });
-    };
-
     switch (expectation) {
         case Expectation::kMaterialize: {
             ASSERT_TRUE(r()->Resolve()) << r()->error();
             auto* materialize = Sem().Get<sem::Materialize>(abstract_expr);
             ASSERT_NE(materialize, nullptr);
-            check_types_and_values(materialize);
+            CheckTypesAndValues(materialize, data.target_sem_ty(*this), data.materialized_value);
             break;
         }
         case Expectation::kNoMaterialize: {
@@ -354,7 +385,7 @@ TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
             auto* sem = Sem().Get(abstract_expr);
             ASSERT_NE(sem, nullptr);
             EXPECT_FALSE(sem->Is<sem::Materialize>());
-            check_types_and_values(sem);
+            CheckTypesAndValues(sem, data.target_sem_ty(*this), data.materialized_value);
             break;
         }
         case Expectation::kInvalidConversion: {
@@ -414,8 +445,8 @@ constexpr Method kSwitchMethods[] = {
 /// Methods that do not materialize
 constexpr Method kNoMaterializeMethods[] = {
     Method::kPhonyAssign,
-    // TODO(crbug.com/tint/1504): Enable once we have abstract overloads of builtins / binary ops:
-    // Method::kBuiltinArg, Method::kBinaryOp,
+    // TODO(crbug.com/tint/1504): Enable once we have abstract overloads of builtins / binary
+    // ops: Method::kBuiltinArg, Method::kBinaryOp,
 };
 INSTANTIATE_TEST_SUITE_P(
     MaterializeScalar,
@@ -703,7 +734,7 @@ static std::ostream& operator<<(std::ostream& o, const Data& c) {
 }
 
 using MaterializeAbstractNumericToDefaultType =
-    resolver::ResolverTestWithParam<std::tuple<Expectation, Method, Data>>;
+    MaterializeTest<std::tuple<Expectation, Method, Data>>;
 
 TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
     const auto& param = GetParam();
@@ -751,32 +782,14 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
             break;
     }
 
-    auto check_types_and_values = [&](const sem::Expression* expr) {
-        auto* expected_sem_ty = data.expected_sem_ty(*this);
-
-        EXPECT_TYPE(expr->Type(), expected_sem_ty);
-        EXPECT_TYPE(expr->ConstantValue().Type(), expected_sem_ty);
-
-        uint32_t num_elems = 0;
-        const sem::Type* expected_sem_el_ty =
-            sem::Type::DeepestElementOf(expected_sem_ty, &num_elems);
-        EXPECT_TYPE(expr->ConstantValue().ElementType(), expected_sem_el_ty);
-        expr->ConstantValue().WithElements([&](auto&& vec) {
-            using VEC_TY = std::decay_t<decltype(vec)>;
-            using EL_TY = typename VEC_TY::value_type;
-            ASSERT_TRUE(std::holds_alternative<EL_TY>(data.materialized_value));
-            VEC_TY expected(num_elems, std::get<EL_TY>(data.materialized_value));
-            EXPECT_EQ(vec, expected);
-        });
-    };
-
     switch (expectation) {
         case Expectation::kMaterialize: {
             ASSERT_TRUE(r()->Resolve()) << r()->error();
             for (auto* expr : abstract_exprs) {
                 auto* materialize = Sem().Get<sem::Materialize>(expr);
                 ASSERT_NE(materialize, nullptr);
-                check_types_and_values(materialize);
+                CheckTypesAndValues(materialize, data.expected_sem_ty(*this),
+                                    data.materialized_value);
             }
             break;
         }

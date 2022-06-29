@@ -31,7 +31,7 @@ class Materialize final : public Castable<Materialize, Expression> {
     /// @param expr the inner expression, being materialized
     /// @param statement the statement that owns this expression
     /// @param constant the constant value of this expression
-    Materialize(const Expression* expr, const Statement* statement, Constant constant);
+    Materialize(const Expression* expr, const Statement* statement, const Constant* constant);
 
     /// Destructor
     ~Materialize() override;

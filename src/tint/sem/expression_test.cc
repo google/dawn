@@ -23,13 +23,30 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::sem {
 namespace {
 
+class MockConstant : public sem::Constant {
+  public:
+    explicit MockConstant(const sem::Type* ty) : type(ty) {}
+    ~MockConstant() override {}
+    const sem::Type* Type() const override { return type; }
+    std::variant<std::monostate, AInt, AFloat> Value() const override { return {}; }
+    const Constant* Index(size_t) const override { return {}; }
+    bool AllZero() const override { return {}; }
+    bool AnyZero() const override { return {}; }
+    bool AllEqual() const override { return {}; }
+    size_t Hash() const override { return 0; }
+
+  private:
+    const sem::Type* type;
+};
+
 using ExpressionTest = TestHelper;
 
 TEST_F(ExpressionTest, UnwrapMaterialize) {
+    MockConstant c(create<I32>());
     auto* a = create<Expression>(/* declaration */ nullptr, create<I32>(), /* statement */ nullptr,
-                                 Constant{},
+                                 /* constant_value */ nullptr,
                                  /* has_side_effects */ false, /* source_var */ nullptr);
-    auto* b = create<Materialize>(a, /* statement */ nullptr, Constant{create<I32>(), {1_a}});
+    auto* b = create<Materialize>(a, /* statement */ nullptr, &c);
 
     EXPECT_EQ(a, a->UnwrapMaterialize());
     EXPECT_EQ(a, b->UnwrapMaterialize());

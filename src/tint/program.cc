@@ -38,6 +38,7 @@ Program::Program(Program&& program)
       types_(std::move(program.types_)),
       ast_nodes_(std::move(program.ast_nodes_)),
       sem_nodes_(std::move(program.sem_nodes_)),
+      constant_nodes_(std::move(program.constant_nodes_)),
       ast_(std::move(program.ast_)),
       sem_(std::move(program.sem_)),
       symbols_(std::move(program.symbols_)),
@@ -62,6 +63,7 @@ Program::Program(ProgramBuilder&& builder) {
     types_ = std::move(builder.Types());
     ast_nodes_ = std::move(builder.ASTNodes());
     sem_nodes_ = std::move(builder.SemNodes());
+    constant_nodes_ = std::move(builder.ConstantNodes());
     ast_ = &builder.AST();  // ast::Module is actually a heap allocation.
     sem_ = std::move(builder.Sem());
     symbols_ = std::move(builder.Symbols());
@@ -86,6 +88,7 @@ Program& Program::operator=(Program&& program) {
     types_ = std::move(program.types_);
     ast_nodes_ = std::move(program.ast_nodes_);
     sem_nodes_ = std::move(program.sem_nodes_);
+    constant_nodes_ = std::move(program.constant_nodes_);
     ast_ = std::move(program.ast_);
     sem_ = std::move(program.sem_);
     symbols_ = std::move(program.symbols_);

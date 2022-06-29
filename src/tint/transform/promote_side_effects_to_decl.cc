@@ -275,7 +275,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
                 if (auto* sem_e = sem.Get(e)) {
                     if (auto* var_user = sem_e->As<sem::VariableUser>()) {
                         // Don't hoist constants.
-                        if (var_user->ConstantValue().IsValid()) {
+                        if (var_user->ConstantValue()) {
                             return false;
                         }
                         // Don't hoist read-only variables as they cannot receive

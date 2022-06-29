@@ -25,7 +25,7 @@ namespace tint::sem {
 Expression::Expression(const ast::Expression* declaration,
                        const sem::Type* type,
                        const Statement* statement,
-                       Constant constant,
+                       const Constant* constant,
                        bool has_side_effects,
                        const Variable* source_var /* = nullptr */)
     : declaration_(declaration),

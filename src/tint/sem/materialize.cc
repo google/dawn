@@ -17,19 +17,16 @@
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Materialize);
 
 namespace tint::sem {
-
-Materialize::Materialize(const Expression* expr, const Statement* statement, Constant constant)
+Materialize::Materialize(const Expression* expr,
+                         const Statement* statement,
+                         const Constant* constant)
     : Base(/* declaration */ expr->Declaration(),
-           /* type */ constant.Type(),
+           /* type */ constant->Type(),
            /* statement */ statement,
            /* constant */ constant,
            /* has_side_effects */ false,
            /* source_var */ expr->SourceVariable()),
-      expr_(expr) {
-    // Materialize nodes only wrap compile-time expressions, and so the Materialize expression must
-    // have a constant value.
-    TINT_ASSERT(Semantic, constant.IsValid());
-}
+      expr_(expr) {}
 
 Materialize::~Materialize() = default;
 

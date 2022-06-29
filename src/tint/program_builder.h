@@ -88,6 +88,7 @@
 #include "src/tint/program_id.h"
 #include "src/tint/sem/array.h"
 #include "src/tint/sem/bool.h"
+#include "src/tint/sem/constant.h"
 #include "src/tint/sem/depth_texture.h"
 #include "src/tint/sem/external_texture.h"
 #include "src/tint/sem/f16.h"
@@ -163,6 +164,9 @@ class ProgramBuilder {
     /// SemNodeAllocator is an alias to BlockAllocator<sem::Node>
     using SemNodeAllocator = utils::BlockAllocator<sem::Node>;
 
+    /// ConstantAllocator is an alias to BlockAllocator<sem::Constant>
+    using ConstantAllocator = utils::BlockAllocator<sem::Constant>;
+
     /// Constructor
     ProgramBuilder();
 
@@ -227,6 +231,12 @@ class ProgramBuilder {
     const SemNodeAllocator& SemNodes() const {
         AssertNotMoved();
         return sem_nodes_;
+    }
+
+    /// @returns a reference to the program's semantic constant storage
+    ConstantAllocator& ConstantNodes() {
+        AssertNotMoved();
+        return constant_nodes_;
     }
 
     /// @returns a reference to the program's AST root Module
@@ -332,9 +342,8 @@ class ProgramBuilder {
     }
 
     /// Creates a new sem::Node owned by the ProgramBuilder.
-    /// When the ProgramBuilder is destructed, the sem::Node will also be
-    /// destructed.
-    /// @param args the arguments to pass to the type constructor
+    /// When the ProgramBuilder is destructed, the sem::Node will also be destructed.
+    /// @param args the arguments to pass to the constructor
     /// @returns the node pointer
     template <typename T, typename... ARGS>
     traits::EnableIf<traits::IsTypeOrDerived<T, sem::Node> &&
@@ -343,6 +352,16 @@ class ProgramBuilder {
     create(ARGS&&... args) {
         AssertNotMoved();
         return sem_nodes_.Create<T>(std::forward<ARGS>(args)...);
+    }
+
+    /// Creates a new sem::Constant owned by the ProgramBuilder.
+    /// When the ProgramBuilder is destructed, the sem::Node will also be destructed.
+    /// @param args the arguments to pass to the constructor
+    /// @returns the node pointer
+    template <typename T, typename... ARGS>
+    traits::EnableIf<traits::IsTypeOrDerived<T, sem::Constant>, T>* create(ARGS&&... args) {
+        AssertNotMoved();
+        return constant_nodes_.Create<T>(std::forward<ARGS>(args)...);
     }
 
     /// Creates a new sem::Type owned by the ProgramBuilder.
@@ -2747,6 +2766,7 @@ class ProgramBuilder {
     sem::Manager types_;
     ASTNodeAllocator ast_nodes_;
     SemNodeAllocator sem_nodes_;
+    ConstantAllocator constant_nodes_;
     ast::Module* ast_;
     sem::Info sem_;
     SymbolTable symbols_{id_};

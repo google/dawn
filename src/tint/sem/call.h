@@ -38,7 +38,7 @@ class Call final : public Castable<Call, Expression> {
          const CallTarget* target,
          std::vector<const sem::Expression*> arguments,
          const Statement* statement,
-         Constant constant,
+         const Constant* constant,
          bool has_side_effects);
 
     /// Destructor

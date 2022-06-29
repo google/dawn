@@ -959,7 +959,7 @@ bool Builder::GenerateIndexAccessor(const ast::IndexAccessorExpression* expr, Ac
                                     Operand(result_type_id),
                                     extract,
                                     Operand(info->source_id),
-                                    Operand(idx_constval.Element<uint32_t>(0)),
+                                    Operand(idx_constval->As<uint32_t>()),
                                 })) {
             return false;
         }
@@ -1703,20 +1703,14 @@ uint32_t Builder::GenerateLiteralIfNeeded(const ast::Variable* var,
     return GenerateConstantIfNeeded(constant);
 }
 
-uint32_t Builder::GenerateConstantIfNeeded(const sem::Constant& constant) {
-    return GenerateConstantRangeIfNeeded(constant, constant.Type(), 0, constant.ElementCount());
-}
-
-uint32_t Builder::GenerateConstantRangeIfNeeded(const sem::Constant& constant,
-                                                const sem::Type* range_ty,
-                                                size_t start,
-                                                size_t end) {
-    if (constant.AllZero(start, end)) {
-        return GenerateConstantNullIfNeeded(range_ty);
+uint32_t Builder::GenerateConstantIfNeeded(const sem::Constant* constant) {
+    if (constant->AllZero()) {
+        return GenerateConstantNullIfNeeded(constant->Type());
     }
+    auto* ty = constant->Type();
 
-    auto composite = [&](const sem::Type* el_ty) -> uint32_t {
-        auto type_id = GenerateTypeIfNeeded(range_ty);
+    auto composite = [&](size_t el_count) -> uint32_t {
+        auto type_id = GenerateTypeIfNeeded(ty);
         if (!type_id) {
             return 0;
         }
@@ -1724,14 +1718,12 @@ uint32_t Builder::GenerateConstantRangeIfNeeded(const sem::Constant& constant,
         static constexpr size_t kOpsResultIdx = 1;  // operand index of the result
 
         std::vector<Operand> ops;
-        ops.reserve(end - start + 2);
+        ops.reserve(el_count + 2);
         ops.emplace_back(type_id);
         ops.push_back(Operand(0u));  // Placeholder for the result ID
 
-        uint32_t step = 0;
-        sem::Type::DeepestElementOf(el_ty, &step);
-        for (size_t i = start; i < end; i += step) {
-            auto id = GenerateConstantRangeIfNeeded(constant, el_ty, i, i + step);
+        for (size_t i = 0; i < el_count; i++) {
+            auto id = GenerateConstantIfNeeded(constant->Index(i));
             if (!id) {
                 return 0;
             }
@@ -1749,28 +1741,28 @@ uint32_t Builder::GenerateConstantRangeIfNeeded(const sem::Constant& constant,
     };
 
     return Switch(
-        range_ty,  //
+        ty,  //
         [&](const sem::Bool*) {
-            bool val = constant.Element<AInt>(start);
+            bool val = constant->As<bool>();
             return GenerateConstantIfNeeded(ScalarConstant::Bool(val));
         },
         [&](const sem::F32*) {
-            auto val = f32(constant.Element<AFloat>(start));
+            auto val = constant->As<f32>();
             return GenerateConstantIfNeeded(ScalarConstant::F32(val.value));
         },
         [&](const sem::I32*) {
-            auto val = i32(constant.Element<AInt>(start));
+            auto val = constant->As<i32>();
             return GenerateConstantIfNeeded(ScalarConstant::I32(val.value));
         },
         [&](const sem::U32*) {
-            auto val = u32(constant.Element<AInt>(start));
+            auto val = constant->As<u32>();
             return GenerateConstantIfNeeded(ScalarConstant::U32(val.value));
         },
-        [&](const sem::Vector* v) { return composite(v->type()); },
-        [&](const sem::Matrix* m) { return composite(m->ColumnType()); },
-        [&](const sem::Array* a) { return composite(a->ElemType()); },
+        [&](const sem::Vector* v) { return composite(v->Width()); },
+        [&](const sem::Matrix* m) { return composite(m->columns()); },
+        [&](const sem::Array* a) { return composite(a->Count()); },
         [&](Default) {
-            error_ = "unhandled constant type: " + builder_.FriendlyName(constant.Type());
+            error_ = "unhandled constant type: " + builder_.FriendlyName(ty);
             return false;
         });
 }

@@ -209,22 +209,30 @@ class Resolver {
     /// These methods are called from the expression resolving methods, and so child-expression
     /// nodes are guaranteed to have been already resolved and any constant values calculated.
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    sem::Constant EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type);
-    sem::Constant EvaluateConstantValue(const ast::IdentifierExpression* ident,
-                                        const sem::Type* type);
-    sem::Constant EvaluateConstantValue(const ast::LiteralExpression* literal,
-                                        const sem::Type* type);
-    sem::Constant EvaluateConstantValue(const ast::CallExpression* call, const sem::Type* type);
-    sem::Constant EvaluateConstantValue(const ast::IndexAccessorExpression* call,
-                                        const sem::Type* type);
+    const sem::Constant* EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type);
+    const sem::Constant* EvaluateConstantValue(const ast::IdentifierExpression* ident,
+                                               const sem::Type* type);
+    const sem::Constant* EvaluateConstantValue(const ast::LiteralExpression* literal,
+                                               const sem::Type* type);
+    const sem::Constant* EvaluateConstantValue(const ast::CallExpression* call,
+                                               const sem::Type* type);
+    const sem::Constant* EvaluateConstantValue(const ast::IndexAccessorExpression* call,
+                                               const sem::Type* type);
 
-    /// The result type of a ConstantEvaluation method. Holds the constant value and a boolean,
-    /// which is true on success, false on an error.
-    using ConstantResult = utils::Result<sem::Constant>;
+    /// The result type of a ConstantEvaluation method.
+    /// Can be one of three distinct values:
+    /// * A non-null sem::Constant pointer. Returned when a expression resolves to a creation time
+    ///   value.
+    /// * A null sem::Constant pointer. Returned when a expression cannot resolve to a creation time
+    ///   value, but is otherwise legal.
+    /// * `utils::Failure`. Returned when there was a resolver error. In this situation the method
+    ///   will have already reported a diagnostic error message, and the caller should abort
+    ///   resolving.
+    using ConstantResult = utils::Result<const sem::Constant*>;
 
     /// Convert the `value` to `target_type`
     /// @return the converted value
-    ConstantResult ConvertValue(const sem::Constant& value,
+    ConstantResult ConvertValue(const sem::Constant* value,
                                 const sem::Type* target_type,
                                 const Source& source);
 

@@ -1332,7 +1332,7 @@ bool GeneratorImpl::EmitBarrierCall(std::ostream& out, const sem::Builtin* built
 const ast::Expression* GeneratorImpl::CreateF32Zero(const sem::Statement* stmt) {
     auto* zero = builder_.Expr(0_f);
     auto* f32 = builder_.create<sem::F32>();
-    auto* sem_zero = builder_.create<sem::Expression>(zero, f32, stmt, sem::Constant{},
+    auto* sem_zero = builder_.create<sem::Expression>(zero, f32, stmt, /* constant_value */ nullptr,
                                                       /* has_side_effects */ false);
     builder_.Sem().Add(zero, sem_zero);
     return zero;
@@ -1771,7 +1771,7 @@ bool GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
 
 bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* expr) {
     if (auto* sem = builder_.Sem().Get(expr)) {
-        if (auto constant = sem->ConstantValue()) {
+        if (auto* constant = sem->ConstantValue()) {
             return EmitConstant(out, constant);
         }
     }
@@ -2214,31 +2214,23 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     return true;
 }
 
-bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant& constant) {
-    return EmitConstantRange(out, constant, constant.Type(), 0, constant.ElementCount());
-}
-
-bool GeneratorImpl::EmitConstantRange(std::ostream& out,
-                                      const sem::Constant& constant,
-                                      const sem::Type* range_ty,
-                                      size_t start,
-                                      size_t end) {
+bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constant) {
     return Switch(
-        range_ty,  //
+        constant->Type(),  //
         [&](const sem::Bool*) {
-            out << (constant.Element<AInt>(start) ? "true" : "false");
+            out << (constant->As<AInt>() ? "true" : "false");
             return true;
         },
         [&](const sem::F32*) {
-            PrintF32(out, static_cast<float>(constant.Element<AFloat>(start)));
+            PrintF32(out, constant->As<float>());
             return true;
         },
         [&](const sem::I32*) {
-            out << constant.Element<AInt>(start).value;
+            out << constant->As<AInt>();
             return true;
         },
         [&](const sem::U32*) {
-            out << constant.Element<AInt>(start).value << "u";
+            out << constant->As<AInt>() << "u";
             return true;
         },
         [&](const sem::Vector* v) {
@@ -2248,15 +2240,15 @@ bool GeneratorImpl::EmitConstantRange(std::ostream& out,
 
             ScopedParen sp(out);
 
-            if (constant.AllEqual(start, end)) {
-                return EmitConstantRange(out, constant, v->type(), start, start + 1);
+            if (constant->AllEqual()) {
+                return EmitConstant(out, constant->Index(0));
             }
 
-            for (size_t i = start; i < end; i++) {
-                if (i > start) {
+            for (size_t i = 0; i < v->Width(); i++) {
+                if (i > 0) {
                     out << ", ";
                 }
-                if (!EmitConstantRange(out, constant, v->type(), i, i + 1u)) {
+                if (!EmitConstant(out, constant->Index(i))) {
                     return false;
                 }
             }
@@ -2273,9 +2265,7 @@ bool GeneratorImpl::EmitConstantRange(std::ostream& out,
                 if (column_idx > 0) {
                     out << ", ";
                 }
-                size_t col_start = m->rows() * column_idx;
-                size_t col_end = col_start + m->rows();
-                if (!EmitConstantRange(out, constant, m->ColumnType(), col_start, col_end)) {
+                if (!EmitConstant(out, constant->Index(column_idx))) {
                     return false;
                 }
             }
@@ -2288,15 +2278,11 @@ bool GeneratorImpl::EmitConstantRange(std::ostream& out,
 
             ScopedParen sp(out);
 
-            auto* el_ty = a->ElemType();
-
-            uint32_t step = 0;
-            sem::Type::DeepestElementOf(el_ty, &step);
-            for (size_t i = start; i < end; i += step) {
-                if (i > start) {
+            for (size_t i = 0; i < a->Count(); i++) {
+                if (i > 0) {
                     out << ", ";
                 }
-                if (!EmitConstantRange(out, constant, el_ty, i, i + step)) {
+                if (!EmitConstant(out, constant->Index(i))) {
                     return false;
                 }
             }
@@ -2306,7 +2292,7 @@ bool GeneratorImpl::EmitConstantRange(std::ostream& out,
         [&](Default) {
             diagnostics_.add_error(
                 diag::System::Writer,
-                "unhandled constant type: " + builder_.FriendlyName(constant.Type()));
+                "unhandled constant type: " + builder_.FriendlyName(constant->Type()));
             return false;
         });
 }

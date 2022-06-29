@@ -93,7 +93,8 @@ class GeneratorImpl : public TextGenerator {
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted successfully
     bool EmitAssign(const ast::AssignmentStatement* stmt);
-    /// Emits code such that if `expr` is zero, it emits one, else `expr`
+    /// Emits code such that if `expr` is zero, it emits one, else `expr`.
+    /// Used to avoid divide-by-zeros by substituting constant zeros with ones.
     /// @param out the output of the expression stream
     /// @param expr the expression
     /// @returns true if the expression was emitted, false otherwise
@@ -342,19 +343,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output stream
     /// @param constant the constant value to emit
     /// @returns true if the constant value was successfully emitted
-    bool EmitConstant(std::ostream& out, const sem::Constant& constant);
-    /// Handles emitting a sub-range of a constant value
-    /// @param out the output stream
-    /// @param constant the constant value to emit
-    /// @param range_ty the sub-range type
-    /// @param start the element index for the first element
-    /// @param end the element index for one past the last element
-    /// @returns true if the constant value was successfully emitted
-    bool EmitConstantRange(std::ostream& out,
-                           const sem::Constant& constant,
-                           const sem::Type* range_ty,
-                           size_t start,
-                           size_t end);
+    bool EmitConstant(std::ostream& out, const sem::Constant* constant);
     /// Handles a literal
     /// @param out the output stream
     /// @param lit the literal to emit

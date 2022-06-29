@@ -120,17 +120,18 @@ struct Robustness::State {
             return nullptr;
         }
 
-        if (auto idx_constant = idx_sem->ConstantValue()) {
+        if (auto* idx_constant = idx_sem->ConstantValue()) {
             // Constant value index
-            if (idx_constant.Type()->Is<sem::I32>()) {
-                idx.i32 = static_cast<int32_t>(idx_constant.Element<AInt>(0).value);
+            auto val = std::get<AInt>(idx_constant->Value());
+            if (idx_constant->Type()->Is<sem::I32>()) {
+                idx.i32 = static_cast<int32_t>(val);
                 idx.is_signed = true;
-            } else if (idx_constant.Type()->Is<sem::U32>()) {
-                idx.u32 = static_cast<uint32_t>(idx_constant.Element<AInt>(0).value);
+            } else if (idx_constant->Type()->Is<sem::U32>()) {
+                idx.u32 = static_cast<uint32_t>(val);
                 idx.is_signed = false;
             } else {
                 TINT_ICE(Transform, b.Diagnostics()) << "unsupported constant value for accessor "
-                                                     << idx_constant.Type()->TypeInfo().name;
+                                                     << idx_constant->Type()->TypeInfo().name;
                 return nullptr;
             }
         } else {

@@ -615,8 +615,7 @@ bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
             if (auto* mat = TypeOf(lhs_sub_access->object)->UnwrapRef()->As<sem::Matrix>()) {
                 auto* rhs_col_idx_sem = builder_.Sem().Get(lhs_access->index);
                 auto* rhs_row_idx_sem = builder_.Sem().Get(lhs_sub_access->index);
-                if (!rhs_col_idx_sem->ConstantValue().IsValid() ||
-                    !rhs_row_idx_sem->ConstantValue().IsValid()) {
+                if (!rhs_col_idx_sem->ConstantValue() || !rhs_row_idx_sem->ConstantValue()) {
                     return EmitDynamicMatrixScalarAssignment(stmt, mat);
                 }
             }
@@ -626,7 +625,7 @@ bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
         const auto* lhs_access_type = TypeOf(lhs_access->object)->UnwrapRef();
         if (auto* mat = lhs_access_type->As<sem::Matrix>()) {
             auto* lhs_index_sem = builder_.Sem().Get(lhs_access->index);
-            if (!lhs_index_sem->ConstantValue().IsValid()) {
+            if (!lhs_index_sem->ConstantValue()) {
                 return EmitDynamicMatrixVectorAssignment(stmt, mat);
             }
         }
@@ -634,7 +633,7 @@ bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
         // indices
         if (auto* vec = lhs_access_type->As<sem::Vector>()) {
             auto* rhs_sem = builder_.Sem().Get(lhs_access->index);
-            if (!rhs_sem->ConstantValue().IsValid()) {
+            if (!rhs_sem->ConstantValue()) {
                 return EmitDynamicVectorAssignment(stmt, vec);
             }
         }
@@ -654,28 +653,30 @@ bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
 
 bool GeneratorImpl::EmitExpressionOrOneIfZero(std::ostream& out, const ast::Expression* expr) {
     // For constants, replace literal 0 with 1.
-    if (const auto& val = builder_.Sem().Get(expr)->ConstantValue()) {
-        if (!val.AnyZero()) {
+    if (const auto* val = builder_.Sem().Get(expr)->ConstantValue()) {
+        if (!val->AnyZero()) {
             return EmitExpression(out, expr);
         }
 
-        if (val.Type()->IsAnyOf<sem::I32, sem::U32>()) {
-            return EmitValue(out, val.Type(), 1);
+        auto* ty = val->Type();
+
+        if (ty->IsAnyOf<sem::I32, sem::U32>()) {
+            return EmitValue(out, ty, 1);
         }
 
-        if (auto* vec = val.Type()->As<sem::Vector>()) {
+        if (auto* vec = ty->As<sem::Vector>()) {
             auto* elem_ty = vec->type();
 
-            if (!EmitType(out, val.Type(), ast::StorageClass::kNone, ast::Access::kUndefined, "")) {
+            if (!EmitType(out, ty, ast::StorageClass::kNone, ast::Access::kUndefined, "")) {
                 return false;
             }
 
             out << "(";
-            for (size_t i = 0; i < val.ElementCount(); ++i) {
+            for (size_t i = 0; i < vec->Width(); ++i) {
                 if (i != 0) {
                     out << ", ";
                 }
-                auto s = val.Element<AInt>(i).value;
+                auto s = val->Index(i)->As<AInt>();
                 if (!EmitValue(out, elem_ty, (s == 0) ? 1 : static_cast<int>(s))) {
                     return false;
                 }
@@ -1181,9 +1182,9 @@ bool GeneratorImpl::EmitUniformBufferAccess(
     // If true, use scalar_offset_value, otherwise use scalar_offset_expr
     bool scalar_offset_constant = false;
 
-    if (auto val = offset_arg->ConstantValue()) {
-        TINT_ASSERT(Writer, val.Type()->Is<sem::U32>());
-        scalar_offset_value = static_cast<uint32_t>(val.Element<AInt>(0).value);
+    if (auto* val = offset_arg->ConstantValue()) {
+        TINT_ASSERT(Writer, val->Type()->Is<sem::U32>());
+        scalar_offset_value = static_cast<uint32_t>(std::get<AInt>(val->Value()));
         scalar_offset_value /= 4;  // bytes -> scalar index
         scalar_offset_constant = true;
     }
@@ -2337,7 +2338,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
         case sem::BuiltinType::kTextureGather:
             out << ".Gather";
             if (builtin->Parameters()[0]->Usage() == sem::ParameterUsage::kComponent) {
-                switch (call->Arguments()[0]->ConstantValue().Element<AInt>(0).value) {
+                switch (call->Arguments()[0]->ConstantValue()->As<AInt>()) {
                     case 0:
                         out << "Red";
                         break;
@@ -2384,8 +2385,9 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
         auto* i32 = builder_.create<sem::I32>();
         auto* zero = builder_.Expr(0_i);
         auto* stmt = builder_.Sem().Get(vector)->Stmt();
-        builder_.Sem().Add(zero, builder_.create<sem::Expression>(zero, i32, stmt, sem::Constant{},
-                                                                  /* has_side_effects */ false));
+        builder_.Sem().Add(
+            zero, builder_.create<sem::Expression>(zero, i32, stmt, /* constant_value */ nullptr,
+                                                   /* has_side_effects */ false));
         auto* packed = AppendVector(&builder_, vector, zero);
         return EmitExpression(out, packed->Declaration());
     };
@@ -2614,7 +2616,7 @@ bool GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
 
 bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* expr) {
     if (auto* sem = builder_.Sem().Get(expr)) {
-        if (auto constant = sem->ConstantValue()) {
+        if (auto* constant = sem->ConstantValue()) {
             return EmitConstant(out, constant);
         }
     }
@@ -3109,43 +3111,35 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     return true;
 }
 
-bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant& constant) {
-    return EmitConstantRange(out, constant, constant.Type(), 0, constant.ElementCount());
-}
-
-bool GeneratorImpl::EmitConstantRange(std::ostream& out,
-                                      const sem::Constant& constant,
-                                      const sem::Type* range_ty,
-                                      size_t start,
-                                      size_t end) {
+bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constant) {
     return Switch(
-        range_ty,  //
+        constant->Type(),  //
         [&](const sem::Bool*) {
-            out << (constant.Element<AInt>(start) ? "true" : "false");
+            out << (constant->As<AInt>() ? "true" : "false");
             return true;
         },
         [&](const sem::F32*) {
-            PrintF32(out, static_cast<float>(constant.Element<AFloat>(start)));
+            PrintF32(out, constant->As<float>());
             return true;
         },
         [&](const sem::I32*) {
-            out << constant.Element<AInt>(start).value;
+            out << constant->As<AInt>();
             return true;
         },
         [&](const sem::U32*) {
-            out << constant.Element<AInt>(start).value << "u";
+            out << constant->As<AInt>() << "u";
             return true;
         },
         [&](const sem::Vector* v) {
-            if (constant.AllEqual(start, end)) {
+            if (constant->AllEqual()) {
                 {
                     ScopedParen sp(out);
-                    if (!EmitConstantRange(out, constant, v->type(), start, start + 1)) {
+                    if (!EmitConstant(out, constant->Index(0))) {
                         return false;
                     }
                 }
                 out << ".";
-                for (size_t i = start; i < end; i++) {
+                for (size_t i = 0; i < v->Width(); i++) {
                     out << "x";
                 }
                 return true;
@@ -3157,11 +3151,11 @@ bool GeneratorImpl::EmitConstantRange(std::ostream& out,
 
             ScopedParen sp(out);
 
-            for (size_t i = start; i < end; i++) {
-                if (i > start) {
+            for (size_t i = 0; i < v->Width(); i++) {
+                if (i > 0) {
                     out << ", ";
                 }
-                if (!EmitConstantRange(out, constant, v->type(), i, i + 1u)) {
+                if (!EmitConstant(out, constant->Index(i))) {
                     return false;
                 }
             }
@@ -3174,20 +3168,18 @@ bool GeneratorImpl::EmitConstantRange(std::ostream& out,
 
             ScopedParen sp(out);
 
-            for (size_t column_idx = 0; column_idx < m->columns(); column_idx++) {
-                if (column_idx > 0) {
+            for (size_t i = 0; i < m->columns(); i++) {
+                if (i > 0) {
                     out << ", ";
                 }
-                size_t col_start = m->rows() * column_idx;
-                size_t col_end = col_start + m->rows();
-                if (!EmitConstantRange(out, constant, m->ColumnType(), col_start, col_end)) {
+                if (!EmitConstant(out, constant->Index(i))) {
                     return false;
                 }
             }
             return true;
         },
         [&](const sem::Array* a) {
-            if (constant.AllZero(start, end)) {
+            if (constant->AllZero()) {
                 out << "(";
                 if (!EmitType(out, a, ast::StorageClass::kNone, ast::Access::kUndefined, "")) {
                     return false;
@@ -3199,15 +3191,11 @@ bool GeneratorImpl::EmitConstantRange(std::ostream& out,
             out << "{";
             TINT_DEFER(out << "}");
 
-            auto* el_ty = a->ElemType();
-
-            uint32_t step = 0;
-            sem::Type::DeepestElementOf(el_ty, &step);
-            for (size_t i = start; i < end; i += step) {
-                if (i > start) {
+            for (size_t i = 0; i < a->Count(); i++) {
+                if (i > 0) {
                     out << ", ";
                 }
-                if (!EmitConstantRange(out, constant, el_ty, i, i + step)) {
+                if (!EmitConstant(out, constant->Index(i))) {
                     return false;
                 }
             }
@@ -3217,7 +3205,7 @@ bool GeneratorImpl::EmitConstantRange(std::ostream& out,
         [&](Default) {
             diagnostics_.add_error(
                 diag::System::Writer,
-                "unhandled constant type: " + builder_.FriendlyName(constant.Type()));
+                "unhandled constant type: " + builder_.FriendlyName(constant->Type()));
             return false;
         });
 }

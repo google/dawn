@@ -33,7 +33,7 @@ Variable::Variable(const ast::Variable* declaration,
                    const sem::Type* type,
                    ast::StorageClass storage_class,
                    ast::Access access,
-                   Constant constant_value)
+                   const Constant* constant_value)
     : declaration_(declaration),
       type_(type),
       storage_class_(storage_class),
@@ -47,9 +47,8 @@ LocalVariable::LocalVariable(const ast::Variable* declaration,
                              ast::StorageClass storage_class,
                              ast::Access access,
                              const sem::Statement* statement,
-                             Constant constant_value)
-    : Base(declaration, type, storage_class, access, std::move(constant_value)),
-      statement_(statement) {}
+                             const Constant* constant_value)
+    : Base(declaration, type, storage_class, access, constant_value), statement_(statement) {}
 
 LocalVariable::~LocalVariable() = default;
 
@@ -57,9 +56,9 @@ GlobalVariable::GlobalVariable(const ast::Variable* declaration,
                                const sem::Type* type,
                                ast::StorageClass storage_class,
                                ast::Access access,
-                               Constant constant_value,
+                               const Constant* constant_value,
                                sem::BindingPoint binding_point)
-    : Base(declaration, type, storage_class, access, std::move(constant_value)),
+    : Base(declaration, type, storage_class, access, constant_value),
       binding_point_(binding_point) {}
 
 GlobalVariable::~GlobalVariable() = default;
@@ -70,7 +69,7 @@ Parameter::Parameter(const ast::Parameter* declaration,
                      ast::StorageClass storage_class,
                      ast::Access access,
                      const ParameterUsage usage /* = ParameterUsage::kNone */)
-    : Base(declaration, type, storage_class, access, Constant{}), index_(index), usage_(usage) {}
+    : Base(declaration, type, storage_class, access, nullptr), index_(index), usage_(usage) {}
 
 Parameter::~Parameter() = default;
 

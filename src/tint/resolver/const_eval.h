@@ -30,7 +30,9 @@ class Constant;
 namespace tint::resolver::const_eval {
 
 /// Typedef for a constant evaluation function
-using Function = sem::Constant(ProgramBuilder& builder, const sem::Constant* args, size_t num_args);
+using Function = const sem::Constant*(ProgramBuilder& builder,
+                                      sem::Constant const* const* args,
+                                      size_t num_args);
 
 }  // namespace tint::resolver::const_eval
 

@@ -25,9 +25,9 @@ Call::Call(const ast::CallExpression* declaration,
            const CallTarget* target,
            std::vector<const sem::Expression*> arguments,
            const Statement* statement,
-           Constant constant,
+           const Constant* constant,
            bool has_side_effects)
-    : Base(declaration, target->ReturnType(), statement, std::move(constant), has_side_effects),
+    : Base(declaration, target->ReturnType(), statement, constant, has_side_effects),
       target_(target),
       arguments_(std::move(arguments)) {}
 

@@ -920,21 +920,13 @@ TEST_F(ResolverVariableTest, LocalConst_ExplicitType_Decls) {
     ASSERT_TRUE(TypeOf(c_vf32)->Is<sem::Vector>());
     ASSERT_TRUE(TypeOf(c_mf32)->Is<sem::Matrix>());
 
-    EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_f32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_vi32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_vu32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_vf32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_mf32)->ConstantValue().AllZero());
-
-    EXPECT_EQ(Sem().Get(c_i32)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c_u32)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c_f32)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c_vi32)->ConstantValue().ElementCount(), 3u);
-    EXPECT_EQ(Sem().Get(c_vu32)->ConstantValue().ElementCount(), 3u);
-    EXPECT_EQ(Sem().Get(c_vf32)->ConstantValue().ElementCount(), 3u);
-    EXPECT_EQ(Sem().Get(c_mf32)->ConstantValue().ElementCount(), 9u);
+    EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_f32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_vi32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_vu32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_vf32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_mf32)->ConstantValue()->AllZero());
 }
 
 TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
@@ -949,7 +941,11 @@ TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
     auto* c_vai = Const("i", nullptr, Construct(ty.vec(nullptr, 3), Expr(0_a)));
     auto* c_vaf = Const("j", nullptr, Construct(ty.vec(nullptr, 3), Expr(0._a)));
     auto* c_mf32 = Const("k", nullptr, mat3x3<f32>());
-    auto* c_maf32 = Const("l", nullptr, Construct(ty.mat(nullptr, 3, 3), Expr(0._a)));
+    auto* c_maf32 = Const("l", nullptr,
+                          Construct(ty.mat(nullptr, 3, 3),  //
+                                    Construct(ty.vec(nullptr, 3), Expr(0._a)),
+                                    Construct(ty.vec(nullptr, 3), Expr(0._a)),
+                                    Construct(ty.vec(nullptr, 3), Expr(0._a))));
 
     WrapInFunction(c_i32, c_u32, c_f32, c_ai, c_af, c_vi32, c_vu32, c_vf32, c_vai, c_vaf, c_mf32,
                    c_maf32);
@@ -982,31 +978,18 @@ TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
     ASSERT_TRUE(TypeOf(c_mf32)->Is<sem::Matrix>());
     ASSERT_TRUE(TypeOf(c_maf32)->Is<sem::Matrix>());
 
-    EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_f32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_ai)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_af)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_vi32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_vu32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_vf32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_vai)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_vaf)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_mf32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_maf32)->ConstantValue().AllZero());
-
-    EXPECT_EQ(Sem().Get(c_i32)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c_u32)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c_f32)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c_ai)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c_af)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c_vi32)->ConstantValue().ElementCount(), 3u);
-    EXPECT_EQ(Sem().Get(c_vu32)->ConstantValue().ElementCount(), 3u);
-    EXPECT_EQ(Sem().Get(c_vf32)->ConstantValue().ElementCount(), 3u);
-    EXPECT_EQ(Sem().Get(c_vai)->ConstantValue().ElementCount(), 3u);
-    EXPECT_EQ(Sem().Get(c_vaf)->ConstantValue().ElementCount(), 3u);
-    EXPECT_EQ(Sem().Get(c_mf32)->ConstantValue().ElementCount(), 9u);
-    EXPECT_EQ(Sem().Get(c_maf32)->ConstantValue().ElementCount(), 9u);
+    EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_f32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_ai)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_af)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_vi32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_vu32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_vf32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_vai)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_vaf)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_mf32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_maf32)->ConstantValue()->AllZero());
 }
 
 TEST_F(ResolverVariableTest, LocalConst_PropagateConstValue) {
@@ -1020,8 +1003,7 @@ TEST_F(ResolverVariableTest, LocalConst_PropagateConstValue) {
 
     ASSERT_TRUE(TypeOf(c)->Is<sem::I32>());
 
-    ASSERT_EQ(Sem().Get(c)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c)->ConstantValue().Element<i32>(0), 42_i);
+    EXPECT_EQ(Sem().Get(c)->ConstantValue()->As<i32>(), 42_i);
 }
 
 // Enable when we have @const operators implemented
@@ -1034,8 +1016,7 @@ TEST_F(ResolverVariableTest, DISABLED_LocalConst_ConstEval) {
 
     ASSERT_TRUE(TypeOf(c)->Is<sem::I32>());
 
-    ASSERT_EQ(Sem().Get(c)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c)->ConstantValue().Element<i32>(0), 3_i);
+    EXPECT_EQ(Sem().Get(c)->ConstantValue()->As<i32>(), 3_i);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1126,21 +1107,13 @@ TEST_F(ResolverVariableTest, GlobalConst_ExplicitType_Decls) {
     ASSERT_TRUE(TypeOf(c_vf32)->Is<sem::Vector>());
     ASSERT_TRUE(TypeOf(c_mf32)->Is<sem::Matrix>());
 
-    EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_f32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_vi32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_vu32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_vf32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_mf32)->ConstantValue().AllZero());
-
-    EXPECT_EQ(Sem().Get(c_i32)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c_u32)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c_f32)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c_vi32)->ConstantValue().ElementCount(), 3u);
-    EXPECT_EQ(Sem().Get(c_vu32)->ConstantValue().ElementCount(), 3u);
-    EXPECT_EQ(Sem().Get(c_vf32)->ConstantValue().ElementCount(), 3u);
-    EXPECT_EQ(Sem().Get(c_mf32)->ConstantValue().ElementCount(), 9u);
+    EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_f32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_vi32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_vu32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_vf32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_mf32)->ConstantValue()->AllZero());
 }
 
 TEST_F(ResolverVariableTest, GlobalConst_ImplicitType_Decls) {
@@ -1155,7 +1128,11 @@ TEST_F(ResolverVariableTest, GlobalConst_ImplicitType_Decls) {
     auto* c_vai = GlobalConst("i", nullptr, Construct(ty.vec(nullptr, 3), Expr(0_a)));
     auto* c_vaf = GlobalConst("j", nullptr, Construct(ty.vec(nullptr, 3), Expr(0._a)));
     auto* c_mf32 = GlobalConst("k", nullptr, mat3x3<f32>());
-    auto* c_maf32 = GlobalConst("l", nullptr, Construct(ty.mat(nullptr, 3, 3), Expr(0._a)));
+    auto* c_maf32 = GlobalConst("l", nullptr,
+                                Construct(ty.mat(nullptr, 3, 3),  //
+                                          Construct(ty.vec(nullptr, 3), Expr(0._a)),
+                                          Construct(ty.vec(nullptr, 3), Expr(0._a)),
+                                          Construct(ty.vec(nullptr, 3), Expr(0._a))));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1185,31 +1162,18 @@ TEST_F(ResolverVariableTest, GlobalConst_ImplicitType_Decls) {
     ASSERT_TRUE(TypeOf(c_mf32)->Is<sem::Matrix>());
     ASSERT_TRUE(TypeOf(c_maf32)->Is<sem::Matrix>());
 
-    EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_f32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_ai)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_af)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_vi32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_vu32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_vf32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_vai)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_vaf)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_mf32)->ConstantValue().AllZero());
-    EXPECT_TRUE(Sem().Get(c_maf32)->ConstantValue().AllZero());
-
-    EXPECT_EQ(Sem().Get(c_i32)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c_u32)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c_f32)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c_ai)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c_af)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c_vi32)->ConstantValue().ElementCount(), 3u);
-    EXPECT_EQ(Sem().Get(c_vu32)->ConstantValue().ElementCount(), 3u);
-    EXPECT_EQ(Sem().Get(c_vf32)->ConstantValue().ElementCount(), 3u);
-    EXPECT_EQ(Sem().Get(c_vai)->ConstantValue().ElementCount(), 3u);
-    EXPECT_EQ(Sem().Get(c_vaf)->ConstantValue().ElementCount(), 3u);
-    EXPECT_EQ(Sem().Get(c_mf32)->ConstantValue().ElementCount(), 9u);
-    EXPECT_EQ(Sem().Get(c_maf32)->ConstantValue().ElementCount(), 9u);
+    EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_f32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_ai)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_af)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_vi32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_vu32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_vf32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_vai)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_vaf)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_mf32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_maf32)->ConstantValue()->AllZero());
 }
 
 TEST_F(ResolverVariableTest, GlobalConst_PropagateConstValue) {
@@ -1221,8 +1185,7 @@ TEST_F(ResolverVariableTest, GlobalConst_PropagateConstValue) {
 
     ASSERT_TRUE(TypeOf(c)->Is<sem::I32>());
 
-    ASSERT_EQ(Sem().Get(c)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c)->ConstantValue().Element<i32>(0), 42_i);
+    EXPECT_EQ(Sem().Get(c)->ConstantValue()->As<i32>(), 42_i);
 }
 
 // Enable when we have @const operators implemented
@@ -1233,8 +1196,7 @@ TEST_F(ResolverVariableTest, DISABLED_GlobalConst_ConstEval) {
 
     ASSERT_TRUE(TypeOf(c)->Is<sem::I32>());
 
-    ASSERT_EQ(Sem().Get(c)->ConstantValue().ElementCount(), 1u);
-    EXPECT_EQ(Sem().Get(c)->ConstantValue().Element<i32>(0), 3_i);
+    EXPECT_EQ(Sem().Get(c)->ConstantValue()->As<i32>(), 3_i);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

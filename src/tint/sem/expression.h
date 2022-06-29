@@ -41,7 +41,7 @@ class Expression : public Castable<Expression, Node> {
     Expression(const ast::Expression* declaration,
                const sem::Type* type,
                const Statement* statement,
-               Constant constant,
+               const Constant* constant,
                bool has_side_effects,
                const Variable* source_var = nullptr);
 
@@ -58,7 +58,7 @@ class Expression : public Castable<Expression, Node> {
     const Statement* Stmt() const { return statement_; }
 
     /// @return the constant value of this expression
-    const Constant& ConstantValue() const { return constant_; }
+    const Constant* ConstantValue() const { return constant_; }
 
     /// Returns the variable or parameter that this expression derives from.
     /// For reference and pointer expressions, this will either be the originating
@@ -88,7 +88,7 @@ class Expression : public Castable<Expression, Node> {
   private:
     const sem::Type* const type_;
     const Statement* const statement_;
-    const Constant constant_;
+    const Constant* const constant_;
     sem::Behaviors behaviors_{sem::Behavior::kNext};
     const bool has_side_effects_;
 };

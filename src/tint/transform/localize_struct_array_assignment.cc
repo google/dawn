@@ -46,7 +46,7 @@ class LocalizeStructArrayAssignment::State {
             expr, b.Diagnostics(), [&](const ast::IndexAccessorExpression* ia) {
                 // Indexing using a runtime value?
                 auto* idx_sem = ctx.src->Sem().Get(ia->index);
-                if (!idx_sem->ConstantValue().IsValid()) {
+                if (!idx_sem->ConstantValue()) {
                     // Indexing a member access expr?
                     if (auto* ma = ia->object->As<ast::MemberAccessorExpression>()) {
                         // That accesses an array?
