@@ -54,7 +54,6 @@ using ResolverDependencyGraphTest = ResolverDependencyGraphTestWithParam<::testi
 /// kinds of symbol declarations.
 enum class SymbolDeclKind {
     GlobalVar,
-    GlobalLet,
     GlobalConst,
     Alias,
     Struct,
@@ -67,10 +66,10 @@ enum class SymbolDeclKind {
 };
 
 static constexpr SymbolDeclKind kAllSymbolDeclKinds[] = {
-    SymbolDeclKind::GlobalVar,      SymbolDeclKind::GlobalLet,      SymbolDeclKind::GlobalConst,
-    SymbolDeclKind::Alias,          SymbolDeclKind::Struct,         SymbolDeclKind::Function,
-    SymbolDeclKind::Parameter,      SymbolDeclKind::LocalVar,       SymbolDeclKind::LocalLet,
-    SymbolDeclKind::NestedLocalVar, SymbolDeclKind::NestedLocalLet,
+    SymbolDeclKind::GlobalVar,      SymbolDeclKind::GlobalConst, SymbolDeclKind::Alias,
+    SymbolDeclKind::Struct,         SymbolDeclKind::Function,    SymbolDeclKind::Parameter,
+    SymbolDeclKind::LocalVar,       SymbolDeclKind::LocalLet,    SymbolDeclKind::NestedLocalVar,
+    SymbolDeclKind::NestedLocalLet,
 };
 
 static constexpr SymbolDeclKind kTypeDeclKinds[] = {
@@ -79,14 +78,14 @@ static constexpr SymbolDeclKind kTypeDeclKinds[] = {
 };
 
 static constexpr SymbolDeclKind kValueDeclKinds[] = {
-    SymbolDeclKind::GlobalVar,      SymbolDeclKind::GlobalLet,      SymbolDeclKind::GlobalConst,
-    SymbolDeclKind::Parameter,      SymbolDeclKind::LocalVar,       SymbolDeclKind::LocalLet,
-    SymbolDeclKind::NestedLocalVar, SymbolDeclKind::NestedLocalLet,
+    SymbolDeclKind::GlobalVar,      SymbolDeclKind::GlobalConst, SymbolDeclKind::Parameter,
+    SymbolDeclKind::LocalVar,       SymbolDeclKind::LocalLet,    SymbolDeclKind::NestedLocalVar,
+    SymbolDeclKind::NestedLocalLet,
 };
 
 static constexpr SymbolDeclKind kGlobalDeclKinds[] = {
-    SymbolDeclKind::GlobalVar, SymbolDeclKind::GlobalLet, SymbolDeclKind::GlobalConst,
-    SymbolDeclKind::Alias,     SymbolDeclKind::Struct,    SymbolDeclKind::Function,
+    SymbolDeclKind::GlobalVar, SymbolDeclKind::GlobalConst, SymbolDeclKind::Alias,
+    SymbolDeclKind::Struct,    SymbolDeclKind::Function,
 };
 
 static constexpr SymbolDeclKind kLocalDeclKinds[] = {
@@ -96,7 +95,6 @@ static constexpr SymbolDeclKind kLocalDeclKinds[] = {
 
 static constexpr SymbolDeclKind kGlobalValueDeclKinds[] = {
     SymbolDeclKind::GlobalVar,
-    SymbolDeclKind::GlobalLet,
     SymbolDeclKind::GlobalConst,
 };
 
@@ -115,12 +113,6 @@ enum class SymbolUseKind {
     GlobalVarSampledTexElemType,
     GlobalVarMultisampledTexElemType,
     GlobalVarValue,
-    GlobalLetType,
-    GlobalLetArrayElemType,
-    GlobalLetArraySizeValue,
-    GlobalLetVectorElemType,
-    GlobalLetMatrixElemType,
-    GlobalLetValue,
     GlobalConstType,
     GlobalConstArrayElemType,
     GlobalConstArraySizeValue,
@@ -154,11 +146,6 @@ static constexpr SymbolUseKind kTypeUseKinds[] = {
     SymbolUseKind::GlobalVarMatrixElemType,
     SymbolUseKind::GlobalVarSampledTexElemType,
     SymbolUseKind::GlobalVarMultisampledTexElemType,
-    SymbolUseKind::GlobalLetType,
-    SymbolUseKind::GlobalLetArrayElemType,
-    SymbolUseKind::GlobalLetArraySizeValue,
-    SymbolUseKind::GlobalLetVectorElemType,
-    SymbolUseKind::GlobalLetMatrixElemType,
     SymbolUseKind::GlobalConstType,
     SymbolUseKind::GlobalConstArrayElemType,
     SymbolUseKind::GlobalConstArraySizeValue,
@@ -178,10 +165,10 @@ static constexpr SymbolUseKind kTypeUseKinds[] = {
 };
 
 static constexpr SymbolUseKind kValueUseKinds[] = {
-    SymbolUseKind::GlobalVarValue,      SymbolUseKind::GlobalLetValue,
-    SymbolUseKind::GlobalConstValue,    SymbolUseKind::LocalVarValue,
-    SymbolUseKind::LocalLetValue,       SymbolUseKind::NestedLocalVarValue,
-    SymbolUseKind::NestedLocalLetValue, SymbolUseKind::WorkgroupSizeValue,
+    SymbolUseKind::GlobalVarValue,      SymbolUseKind::GlobalConstValue,
+    SymbolUseKind::LocalVarValue,       SymbolUseKind::LocalLetValue,
+    SymbolUseKind::NestedLocalVarValue, SymbolUseKind::NestedLocalLetValue,
+    SymbolUseKind::WorkgroupSizeValue,
 };
 
 static constexpr SymbolUseKind kFuncUseKinds[] = {
@@ -194,8 +181,6 @@ std::ostream& operator<<(std::ostream& out, SymbolDeclKind kind) {
     switch (kind) {
         case SymbolDeclKind::GlobalVar:
             return out << "global var";
-        case SymbolDeclKind::GlobalLet:
-            return out << "global let";
         case SymbolDeclKind::GlobalConst:
             return out << "global const";
         case SymbolDeclKind::Alias:
@@ -238,18 +223,6 @@ std::ostream& operator<<(std::ostream& out, SymbolUseKind kind) {
             return out << "global var sampled_texture element type";
         case SymbolUseKind::GlobalVarMultisampledTexElemType:
             return out << "global var multisampled_texture element type";
-        case SymbolUseKind::GlobalLetType:
-            return out << "global let type";
-        case SymbolUseKind::GlobalLetValue:
-            return out << "global let value";
-        case SymbolUseKind::GlobalLetArrayElemType:
-            return out << "global let array element type";
-        case SymbolUseKind::GlobalLetArraySizeValue:
-            return out << "global let array size value";
-        case SymbolUseKind::GlobalLetVectorElemType:
-            return out << "global let vector element type";
-        case SymbolUseKind::GlobalLetMatrixElemType:
-            return out << "global let matrix element type";
         case SymbolUseKind::GlobalConstType:
             return out << "global const type";
         case SymbolUseKind::GlobalConstValue:
@@ -309,10 +282,6 @@ std::string DiagString(SymbolUseKind kind) {
         case SymbolUseKind::GlobalVarMatrixElemType:
         case SymbolUseKind::GlobalVarSampledTexElemType:
         case SymbolUseKind::GlobalVarMultisampledTexElemType:
-        case SymbolUseKind::GlobalLetType:
-        case SymbolUseKind::GlobalLetArrayElemType:
-        case SymbolUseKind::GlobalLetVectorElemType:
-        case SymbolUseKind::GlobalLetMatrixElemType:
         case SymbolUseKind::GlobalConstType:
         case SymbolUseKind::GlobalConstArrayElemType:
         case SymbolUseKind::GlobalConstVectorElemType:
@@ -330,8 +299,6 @@ std::string DiagString(SymbolUseKind kind) {
             return "type";
         case SymbolUseKind::GlobalVarValue:
         case SymbolUseKind::GlobalVarArraySizeValue:
-        case SymbolUseKind::GlobalLetValue:
-        case SymbolUseKind::GlobalLetArraySizeValue:
         case SymbolUseKind::GlobalConstValue:
         case SymbolUseKind::GlobalConstArraySizeValue:
         case SymbolUseKind::LocalVarValue:
@@ -353,7 +320,6 @@ std::string DiagString(SymbolUseKind kind) {
 int ScopeDepth(SymbolDeclKind kind) {
     switch (kind) {
         case SymbolDeclKind::GlobalVar:
-        case SymbolDeclKind::GlobalLet:
         case SymbolDeclKind::GlobalConst:
         case SymbolDeclKind::Alias:
         case SymbolDeclKind::Struct:
@@ -383,12 +349,6 @@ int ScopeDepth(SymbolUseKind kind) {
         case SymbolUseKind::GlobalVarMatrixElemType:
         case SymbolUseKind::GlobalVarSampledTexElemType:
         case SymbolUseKind::GlobalVarMultisampledTexElemType:
-        case SymbolUseKind::GlobalLetType:
-        case SymbolUseKind::GlobalLetValue:
-        case SymbolUseKind::GlobalLetArrayElemType:
-        case SymbolUseKind::GlobalLetArraySizeValue:
-        case SymbolUseKind::GlobalLetVectorElemType:
-        case SymbolUseKind::GlobalLetMatrixElemType:
         case SymbolUseKind::GlobalConstType:
         case SymbolUseKind::GlobalConstValue:
         case SymbolUseKind::GlobalConstArrayElemType:
@@ -466,8 +426,6 @@ const ast::Node* SymbolTestHelper::Add(SymbolDeclKind kind, Symbol symbol, Sourc
     switch (kind) {
         case SymbolDeclKind::GlobalVar:
             return b.GlobalVar(source, symbol, b.ty.i32(), ast::StorageClass::kPrivate);
-        case SymbolDeclKind::GlobalLet:
-            return b.GlobalLet(source, symbol, b.ty.i32(), b.Expr(1_i));
         case SymbolDeclKind::GlobalConst:
             return b.GlobalConst(source, symbol, b.ty.i32(), b.Expr(1_i));
         case SymbolDeclKind::Alias:
@@ -546,36 +504,6 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
         case SymbolUseKind::GlobalVarValue: {
             auto* node = b.Expr(source, symbol);
             b.GlobalVar(b.Sym(), b.ty.i32(), ast::StorageClass::kPrivate, node);
-            return node;
-        }
-        case SymbolUseKind::GlobalLetType: {
-            auto* node = b.ty.type_name(source, symbol);
-            b.GlobalLet(b.Sym(), node, b.Expr(1_i));
-            return node;
-        }
-        case SymbolUseKind::GlobalLetArrayElemType: {
-            auto* node = b.ty.type_name(source, symbol);
-            b.GlobalLet(b.Sym(), b.ty.array(node, 4_i), b.Expr(1_i));
-            return node;
-        }
-        case SymbolUseKind::GlobalLetArraySizeValue: {
-            auto* node = b.Expr(source, symbol);
-            b.GlobalLet(b.Sym(), b.ty.array(b.ty.i32(), node), b.Expr(1_i));
-            return node;
-        }
-        case SymbolUseKind::GlobalLetVectorElemType: {
-            auto* node = b.ty.type_name(source, symbol);
-            b.GlobalLet(b.Sym(), b.ty.vec3(node), b.Expr(1_i));
-            return node;
-        }
-        case SymbolUseKind::GlobalLetMatrixElemType: {
-            auto* node = b.ty.type_name(source, symbol);
-            b.GlobalLet(b.Sym(), b.ty.mat3x4(node), b.Expr(1_i));
-            return node;
-        }
-        case SymbolUseKind::GlobalLetValue: {
-            auto* node = b.Expr(source, symbol);
-            b.GlobalLet(b.Sym(), b.ty.i32(), node);
             return node;
         }
         case SymbolUseKind::GlobalConstType: {
@@ -849,14 +777,6 @@ TEST_F(ResolverDependencyGraphDeclSelfUse, GlobalVar) {
 12:34 note: var 'SYMBOL' references var 'SYMBOL' here)");
 }
 
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverDependencyGraphDeclSelfUse, GlobalLet) {
-    const Symbol symbol = Sym("SYMBOL");
-    GlobalLet(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123_i));
-    Build(R"(error: cyclic dependency found: 'SYMBOL' -> 'SYMBOL'
-12:34 note: let 'SYMBOL' references let 'SYMBOL' here)");
-}
-
 TEST_F(ResolverDependencyGraphDeclSelfUse, GlobalConst) {
     const Symbol symbol = Sym("SYMBOL");
     GlobalConst(symbol, ty.i32(), Mul(Expr(Source{{12, 34}}, symbol), 123_i));
@@ -998,18 +918,6 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, GlobalConst_Direct) {
 56:78 note: const 'V' references const 'V' here)");
 }
 
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverDependencyGraphCyclicRefTest, GlobalLet_Direct) {
-    // let V : i32 = V;
-
-    GlobalLet(Source{{12, 34}}, "V", ty.i32(), Expr(Source{{56, 78}}, "V"));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: cyclic dependency found: 'V' -> 'V'
-56:78 note: let 'V' references let 'V' here)");
-}
-
 TEST_F(ResolverDependencyGraphCyclicRefTest, GlobalVar_Indirect) {
     // 1: var<private> Y : i32 = Z;
     // 2: var<private> X : i32 = Y;
@@ -1044,32 +952,13 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, GlobalConst_Indirect) {
 2:10 note: const 'X' references const 'Y' here)");
 }
 
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverDependencyGraphCyclicRefTest, GlobalLet_Indirect) {
-    // 1: let Y : i32 = Z;
-    // 2: let X : i32 = Y;
-    // 3: let Z : i32 = X;
-
-    GlobalLet(Source{{1, 1}}, "Y", ty.i32(), Expr(Source{{1, 10}}, "Z"));
-    GlobalLet(Source{{2, 1}}, "X", ty.i32(), Expr(Source{{2, 10}}, "Y"));
-    GlobalLet(Source{{3, 1}}, "Z", ty.i32(), Expr(Source{{3, 10}}, "X"));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(1:1 error: cyclic dependency found: 'Y' -> 'Z' -> 'X' -> 'Y'
-1:10 note: let 'Y' references let 'Z' here
-3:10 note: let 'Z' references let 'X' here
-2:10 note: let 'X' references let 'Y' here)");
-}
-
 TEST_F(ResolverDependencyGraphCyclicRefTest, Mixed_RecursiveDependencies) {
     // 1: fn F() -> R { return Z; }
     // 2: type A = S;
     // 3: struct S { a : A };
     // 4: var Z = L;
     // 5: type R = A;
-    // 6: const C : S = Z;
-    // 7: let L : S = C;
+    // 6: const L : S = Z;
 
     Func(Source{{1, 1}}, "F", {}, ty.type_name(Source{{1, 5}}, "R"),
          {Return(Expr(Source{{1, 10}}, "Z"))});
@@ -1077,18 +966,16 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, Mixed_RecursiveDependencies) {
     Structure(Source{{3, 1}}, "S", {Member("a", ty.type_name(Source{{3, 10}}, "A"))});
     GlobalVar(Source{{4, 1}}, "Z", nullptr, Expr(Source{{4, 10}}, "L"));
     Alias(Source{{5, 1}}, "R", ty.type_name(Source{{5, 10}}, "A"));
-    GlobalConst(Source{{6, 1}}, "C", ty.type_name(Source{{5, 5}}, "S"), Expr(Source{{5, 10}}, "Z"));
-    GlobalLet(Source{{7, 1}}, "L", ty.type_name(Source{{5, 5}}, "S"), Expr(Source{{5, 10}}, "C"));
+    GlobalConst(Source{{6, 1}}, "L", ty.type_name(Source{{5, 5}}, "S"), Expr(Source{{5, 10}}, "Z"));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(2:1 error: cyclic dependency found: 'A' -> 'S' -> 'A'
 2:10 note: alias 'A' references struct 'S' here
 3:10 note: struct 'S' references alias 'A' here
-4:1 error: cyclic dependency found: 'Z' -> 'L' -> 'C' -> 'Z'
-4:10 note: var 'Z' references let 'L' here
-5:10 note: let 'L' references const 'C' here
-5:10 note: const 'C' references var 'Z' here)");
+4:1 error: cyclic dependency found: 'Z' -> 'L' -> 'Z'
+4:10 note: var 'Z' references const 'L' here
+5:10 note: const 'L' references var 'Z' here)");
 }
 
 }  // namespace recursive_tests
@@ -1339,7 +1226,6 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
     Structure(Sym(), {Member(Sym(), T)});
     GlobalVar(Sym(), T, V);
     GlobalConst(Sym(), T, V);
-    GlobalLet(Sym(), T, V);
     Func(Sym(),              //
          {Param(Sym(), T)},  //
          T,                  // Return type
@@ -1408,9 +1294,8 @@ TEST_F(ResolverDependencyGraphTraversalTest, InferredType) {
     // Check that the nullptr of the var / const / let type doesn't make things explode
     GlobalVar("a", nullptr, Expr(1_i));
     GlobalConst("b", nullptr, Expr(1_i));
-    GlobalLet("c", nullptr, Expr(1_i));
-    WrapInFunction(Var("d", nullptr, Expr(1_i)),  //
-                   Let("e", nullptr, Expr(1_i)));
+    WrapInFunction(Var("c", nullptr, Expr(1_i)),  //
+                   Let("d", nullptr, Expr(1_i)));
     Build();
 }
 

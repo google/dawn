@@ -50,7 +50,6 @@
     %v3float = OpTypeVector %float 3
          %40 = OpConstantComposite %v3float %float_1 %float_1 %float_1
 %mat3v3float = OpTypeMatrix %v3float 3
-         %42 = OpConstantComposite %mat3v3float %40 %40 %40
          %43 = OpConstantComposite %MyStruct %float_1
          %50 = OpTypeFunction %v4float
     %ret_i32 = OpFunction %int None %6
@@ -75,6 +74,7 @@
                OpFunctionEnd
   %let_decls = OpFunction %void None %31
          %34 = OpLabel
+         %42 = OpCompositeConstruct %mat3v3float %40 %40 %40
          %44 = OpFunctionCall %int %ret_i32
          %45 = OpFunctionCall %uint %ret_u32
          %46 = OpFunctionCall %float %ret_f32

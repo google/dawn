@@ -24,7 +24,7 @@ void f() {
     }
     {
       tint_array<int, 1> const tint_symbol = tint_array<int, 1>{1};
-      i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+      i = as_type<int>((as_type<uint>(i) + as_type<uint>(tint_symbol[0])));
     }
   }
 }

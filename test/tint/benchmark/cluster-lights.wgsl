@@ -53,7 +53,7 @@ struct GlobalLights {
 
 @group(0) @binding(3) var<storage, read> globalLights : GlobalLights;
 
-let tileCount = vec3(32u, 18u, 48u);
+const tileCount = vec3(32u, 18u, 48u);
 
 fn linearDepth(depthSample : f32) -> f32 {
   return ((camera.zFar * camera.zNear) / fma(depthSample, (camera.zNear - camera.zFar), camera.zFar));

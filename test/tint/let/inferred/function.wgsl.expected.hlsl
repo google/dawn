@@ -32,7 +32,7 @@ void let_decls() {
   const int3 v4 = (1).xxx;
   const uint3 v5 = (1u).xxx;
   const float3 v6 = (1.0f).xxx;
-  const float3x3 v7 = float3x3((1.0f).xxx, (1.0f).xxx, (1.0f).xxx);
+  const float3x3 v7 = float3x3(v6, v6, v6);
   const MyStruct v8 = {1.0f};
   const float v9[10] = (float[10])0;
   const int v10 = ret_i32();

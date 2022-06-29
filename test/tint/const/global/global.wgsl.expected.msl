@@ -14,31 +14,26 @@ struct tint_array {
     T elements[N];
 };
 
-struct S {
-  float a;
+struct tint_symbol_1 {
+  float4 value [[color(0)]];
 };
 
-constant bool bool_let = false;
+float4 tint_symbol_inner() {
+  int v1 = 1;
+  uint v2 = 1u;
+  float v3 = 1.0f;
+  int3 v4 = int3(1);
+  uint3 v5 = uint3(1u);
+  float3 v6 = float3(1.0f);
+  float3x3 v7 = float3x3(float3(1.0f), float3(1.0f), float3(1.0f));
+  tint_array<float, 10> v9 = tint_array<float, 10>{};
+  return float4(0.0f);
+}
 
-constant int i32_let = 0;
-
-constant uint u32_let = 0u;
-
-constant float f32_let = 0.0f;
-
-constant int2 v2i32_let = int2(0);
-
-constant uint3 v3u32_let = uint3(0u);
-
-constant float4 v4f32_let = float4(0.0f);
-
-constant float3x4 m3x4_let = float3x4(float4(0.0f), float4(0.0f), float4(0.0f));
-
-constant tint_array<float, 4> arr_let = tint_array<float, 4>{};
-
-constant S struct_let = {};
-
-kernel void tint_symbol() {
-  return;
+fragment tint_symbol_1 tint_symbol() {
+  float4 const inner_result = tint_symbol_inner();
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 

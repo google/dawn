@@ -1,5 +1,3 @@
-static const float2 pos[3] = {float2(0.0f, 0.5f), (-0.5f).xx, float2(0.5f, -0.5f)};
-
 struct tint_symbol_1 {
   uint VertexIndex : SV_VertexID;
 };
@@ -8,7 +6,8 @@ struct tint_symbol_2 {
 };
 
 float4 vtx_main_inner(uint VertexIndex) {
-  return float4(pos[VertexIndex], 0.0f, 1.0f);
+  const float2 tint_symbol_4[3] = {float2(0.0f, 0.5f), (-0.5f).xx, float2(0.5f, -0.5f)};
+  return float4(tint_symbol_4[VertexIndex], 0.0f, 1.0f);
 }
 
 tint_symbol_2 vtx_main(tint_symbol_1 tint_symbol) {

@@ -27,20 +27,20 @@ TEST_F(ParserImplTest, GlobalLetDecl) {
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
-    auto* let = e.value->As<ast::Let>();
-    ASSERT_NE(let, nullptr);
+    auto* const_ = e.value->As<ast::Const>();
+    ASSERT_NE(const_, nullptr);
 
-    EXPECT_EQ(let->symbol, p->builder().Symbols().Get("a"));
-    ASSERT_NE(let->type, nullptr);
-    EXPECT_TRUE(let->type->Is<ast::F32>());
+    EXPECT_EQ(const_->symbol, p->builder().Symbols().Get("a"));
+    ASSERT_NE(const_->type, nullptr);
+    EXPECT_TRUE(const_->type->Is<ast::F32>());
 
-    EXPECT_EQ(let->source.range.begin.line, 1u);
-    EXPECT_EQ(let->source.range.begin.column, 5u);
-    EXPECT_EQ(let->source.range.end.line, 1u);
-    EXPECT_EQ(let->source.range.end.column, 6u);
+    EXPECT_EQ(const_->source.range.begin.line, 1u);
+    EXPECT_EQ(const_->source.range.begin.column, 5u);
+    EXPECT_EQ(const_->source.range.end.line, 1u);
+    EXPECT_EQ(const_->source.range.end.column, 6u);
 
-    ASSERT_NE(let->constructor, nullptr);
-    EXPECT_TRUE(let->constructor->Is<ast::LiteralExpression>());
+    ASSERT_NE(const_->constructor, nullptr);
+    EXPECT_TRUE(const_->constructor->Is<ast::LiteralExpression>());
 }
 
 TEST_F(ParserImplTest, GlobalLetDecl_Inferred) {
@@ -52,19 +52,19 @@ TEST_F(ParserImplTest, GlobalLetDecl_Inferred) {
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
-    auto* let = e.value->As<ast::Let>();
-    ASSERT_NE(let, nullptr);
+    auto* const_ = e.value->As<ast::Const>();
+    ASSERT_NE(const_, nullptr);
 
-    EXPECT_EQ(let->symbol, p->builder().Symbols().Get("a"));
-    EXPECT_EQ(let->type, nullptr);
+    EXPECT_EQ(const_->symbol, p->builder().Symbols().Get("a"));
+    EXPECT_EQ(const_->type, nullptr);
 
-    EXPECT_EQ(let->source.range.begin.line, 1u);
-    EXPECT_EQ(let->source.range.begin.column, 5u);
-    EXPECT_EQ(let->source.range.end.line, 1u);
-    EXPECT_EQ(let->source.range.end.column, 6u);
+    EXPECT_EQ(const_->source.range.begin.line, 1u);
+    EXPECT_EQ(const_->source.range.begin.column, 5u);
+    EXPECT_EQ(const_->source.range.end.line, 1u);
+    EXPECT_EQ(const_->source.range.end.column, 6u);
 
-    ASSERT_NE(let->constructor, nullptr);
-    EXPECT_TRUE(let->constructor->Is<ast::LiteralExpression>());
+    ASSERT_NE(const_->constructor, nullptr);
+    EXPECT_TRUE(const_->constructor->Is<ast::LiteralExpression>());
 }
 
 TEST_F(ParserImplTest, GlobalLetDecl_InvalidExpression) {
@@ -77,7 +77,10 @@ TEST_F(ParserImplTest, GlobalLetDecl_InvalidExpression) {
     EXPECT_TRUE(e.errored);
     EXPECT_FALSE(e.matched);
     EXPECT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:15: missing initializer for 'let' declaration");
+    EXPECT_EQ(
+        p->error(),
+        R"(1:1: use of deprecated language feature: module-scope 'let' has been replaced with 'const'
+1:15: missing initializer for 'let' declaration)");
 }
 
 TEST_F(ParserImplTest, GlobalLetDecl_MissingExpression) {
@@ -90,7 +93,10 @@ TEST_F(ParserImplTest, GlobalLetDecl_MissingExpression) {
     EXPECT_TRUE(e.errored);
     EXPECT_FALSE(e.matched);
     EXPECT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:14: missing initializer for 'let' declaration");
+    EXPECT_EQ(
+        p->error(),
+        R"(1:1: use of deprecated language feature: module-scope 'let' has been replaced with 'const'
+1:14: missing initializer for 'let' declaration)");
 }
 
 TEST_F(ParserImplTest, GlobalConstDecl) {

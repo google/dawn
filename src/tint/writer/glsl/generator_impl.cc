@@ -1771,14 +1771,8 @@ bool GeneratorImpl::EmitDiscard(const ast::DiscardStatement*) {
 
 bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* expr) {
     if (auto* sem = builder_.Sem().Get(expr)) {
-        if (auto* user = sem->As<sem::VariableUser>();
-            !user || !user->Variable()->Declaration()->Is<ast::Let>()) {
-            // Disable constant inlining if the constant expression is from a 'let' declaration.
-            // TODO(crbug.com/tint/1580): Once 'const' is implemented, 'let' will no longer resolve
-            // to a shader-creation time constant value, and this can be removed.
-            if (auto constant = sem->ConstantValue()) {
-                return EmitConstant(out, constant);
-            }
+        if (auto constant = sem->ConstantValue()) {
+            return EmitConstant(out, constant);
         }
     }
     return Switch(

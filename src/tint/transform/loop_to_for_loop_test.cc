@@ -151,7 +151,7 @@ fn f() {
 )";
 
     auto* expect = R"(
-let N = 16u;
+const N = 16u;
 
 fn f() {
   var i : u32 = 0u;

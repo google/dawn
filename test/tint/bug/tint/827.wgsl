@@ -2,7 +2,7 @@
     values : array<f32>,
 };
 
-let width : u32 = 128u;
+const width : u32 = 128u;
 
 @group(0) @binding(0) var tex : texture_depth_2d;
 @group(0) @binding(1) var<storage, read_write> result : Result;

@@ -1,4 +1,4 @@
-let bloomDir = vec2(0.0, 1.0);
+const bloomDir = vec2(0.0, 1.0);
 
 var<private> offsets : array<f32, 3> = array<f32, 3>(0.0, 1.384615421, 3.230769157);
 

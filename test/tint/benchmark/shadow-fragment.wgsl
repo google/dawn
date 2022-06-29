@@ -21,9 +21,9 @@ struct FragmentInput {
   fragNorm : vec3<f32>,
 }
 
-let albedo : vec3<f32> = vec3<f32>(0.899999976, 0.899999976, 0.899999976);
+const albedo : vec3<f32> = vec3<f32>(0.899999976, 0.899999976, 0.899999976);
 
-let ambientFactor : f32 = 0.200000003;
+const ambientFactor : f32 = 0.200000003;
 
 @fragment
 fn main(input : FragmentInput) -> @location(0) vec4<f32> {

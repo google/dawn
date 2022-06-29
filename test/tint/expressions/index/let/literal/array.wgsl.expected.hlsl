@@ -5,5 +5,5 @@ void unused_entry_point() {
 
 int f() {
   const int a[8] = {1, 2, 3, 4, 5, 6, 7, 8};
-  return 2;
+  return a[1];
 }

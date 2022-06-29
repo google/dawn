@@ -79,26 +79,6 @@ TEST_F(ResolverAssignmentValidationTest, AssignArraysWithDifferentSizeExpression
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverAssignmentValidationTest, AssignArraysWithDifferentSizeExpressions_Let_Pass) {
-    // let len = 4u;
-    // {
-    //   var a : array<f32, 4u>;
-    //   var b : array<f32, len>;
-    //   a = b;
-    // }
-
-    GlobalLet("len", nullptr, Expr(4_u));
-
-    auto* a = Var("a", ty.array(ty.f32(), 4_u));
-    auto* b = Var("b", ty.array(ty.f32(), "len"));
-
-    auto* assign = Assign(Source{{12, 34}}, "a", "b");
-    WrapInFunction(a, b, assign);
-
-    ASSERT_TRUE(r()->Resolve()) << r()->error();
-}
-
 TEST_F(ResolverAssignmentValidationTest, AssignArraysWithDifferentSizeExpressions_Fail) {
     // const len = 5u;
     // {
@@ -108,28 +88,6 @@ TEST_F(ResolverAssignmentValidationTest, AssignArraysWithDifferentSizeExpression
     // }
 
     GlobalConst("len", nullptr, Expr(5_u));
-
-    auto* a = Var("a", ty.array(ty.f32(), 4_u));
-    auto* b = Var("b", ty.array(ty.f32(), "len"));
-
-    auto* assign = Assign(Source{{12, 34}}, "a", "b");
-    WrapInFunction(a, b, assign);
-
-    ASSERT_FALSE(r()->Resolve());
-
-    EXPECT_EQ(r()->error(), "12:34 error: cannot assign 'array<f32, 5>' to 'array<f32, 4>'");
-}
-
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverAssignmentValidationTest, AssignArraysWithDifferentSizeExpressions_Let_Fail) {
-    // let len = 5u;
-    // {
-    //   var a : array<f32, 4u>;
-    //   var b : array<f32, len>;
-    //   a = b;
-    // }
-
-    GlobalLet("len", nullptr, Expr(5_u));
 
     auto* a = Var("a", ty.array(ty.f32(), 4_u));
     auto* b = Var("b", ty.array(ty.f32(), "len"));

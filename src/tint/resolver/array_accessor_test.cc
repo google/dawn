@@ -79,17 +79,6 @@ TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic) {
     EXPECT_EQ(idx_sem->Object()->Declaration(), acc->object);
 }
 
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverIndexAccessorTest, Matrix_Dynamic_Let) {
-    GlobalLet("my_let", ty.mat2x3<f32>(), Construct(ty.mat2x3<f32>()));
-    auto* idx = Var("idx", ty.i32(), Construct(ty.i32()));
-    auto* acc = IndexAccessor("my_let", Expr(Source{{12, 34}}, idx));
-    WrapInFunction(Decl(idx), acc);
-
-    EXPECT_TRUE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "");
-}
-
 TEST_F(ResolverIndexAccessorTest, Matrix_XDimension_Dynamic) {
     GlobalConst("my_const", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
     auto* idx = Var("idx", ty.u32(), Expr(3_u));
@@ -100,22 +89,6 @@ TEST_F(ResolverIndexAccessorTest, Matrix_XDimension_Dynamic) {
     EXPECT_EQ(r()->error(), "");
 }
 
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverIndexAccessorTest, Matrix_XDimension_Dynamic_Let) {
-    GlobalLet("my_let", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
-    auto* idx = Var("idx", ty.u32(), Expr(3_u));
-    auto* acc = IndexAccessor("my_let", Expr(Source{{12, 34}}, idx));
-    WrapInFunction(Decl(idx), acc);
-
-    EXPECT_TRUE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "");
-
-    auto idx_sem = Sem().Get(acc);
-    ASSERT_NE(idx_sem, nullptr);
-    EXPECT_EQ(idx_sem->Index()->Declaration(), acc->index);
-    EXPECT_EQ(idx_sem->Object()->Declaration(), acc->object);
-}
-
 TEST_F(ResolverIndexAccessorTest, Matrix_BothDimension_Dynamic) {
     GlobalConst("my_const", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
     auto* idx = Var("idy", ty.u32(), Expr(2_u));
@@ -124,22 +97,6 @@ TEST_F(ResolverIndexAccessorTest, Matrix_BothDimension_Dynamic) {
 
     EXPECT_TRUE(r()->Resolve());
     EXPECT_EQ(r()->error(), "");
-}
-
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverIndexAccessorTest, Matrix_BothDimension_Dynamic_Let) {
-    GlobalLet("my_let", ty.mat4x4<f32>(), Construct(ty.mat4x4<f32>()));
-    auto* idx = Var("idy", ty.u32(), Expr(2_u));
-    auto* acc = IndexAccessor(IndexAccessor("my_let", Expr(Source{{12, 34}}, idx)), 1_i);
-    WrapInFunction(Decl(idx), acc);
-
-    EXPECT_TRUE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "");
-
-    auto idx_sem = Sem().Get(acc);
-    ASSERT_NE(idx_sem, nullptr);
-    EXPECT_EQ(idx_sem->Index()->Declaration(), acc->index);
-    EXPECT_EQ(idx_sem->Object()->Declaration(), acc->object);
 }
 
 TEST_F(ResolverIndexAccessorTest, Matrix) {
@@ -213,21 +170,6 @@ TEST_F(ResolverIndexAccessorTest, Vector_Dynamic) {
     WrapInFunction(Decl(idx), acc);
 
     EXPECT_TRUE(r()->Resolve());
-}
-
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverIndexAccessorTest, Vector_Dynamic_Let) {
-    GlobalLet("my_let", ty.vec3<f32>(), Construct(ty.vec3<f32>()));
-    auto* idx = Var("idx", ty.i32(), Expr(2_i));
-    auto* acc = IndexAccessor("my_let", Expr(Source{{12, 34}}, idx));
-    WrapInFunction(Decl(idx), acc);
-
-    EXPECT_TRUE(r()->Resolve());
-
-    auto idx_sem = Sem().Get(acc);
-    ASSERT_NE(idx_sem, nullptr);
-    EXPECT_EQ(idx_sem->Index()->Declaration(), acc->index);
-    EXPECT_EQ(idx_sem->Object()->Declaration(), acc->object);
 }
 
 TEST_F(ResolverIndexAccessorTest, Vector) {
@@ -330,24 +272,6 @@ TEST_F(ResolverIndexAccessorTest, Array_Constant) {
 
     ASSERT_NE(TypeOf(acc), nullptr);
     EXPECT_TRUE(TypeOf(acc)->Is<sem::F32>());
-}
-
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverIndexAccessorTest, Array_Let) {
-    GlobalLet("my_let", ty.array<f32, 3>(), array<f32, 3>());
-
-    auto* acc = IndexAccessor("my_let", 2_i);
-    WrapInFunction(acc);
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-
-    ASSERT_NE(TypeOf(acc), nullptr);
-    EXPECT_TRUE(TypeOf(acc)->Is<sem::F32>());
-
-    auto idx_sem = Sem().Get(acc);
-    ASSERT_NE(idx_sem, nullptr);
-    EXPECT_EQ(idx_sem->Index()->Declaration(), acc->index);
-    EXPECT_EQ(idx_sem->Object()->Declaration(), acc->object);
 }
 
 TEST_F(ResolverIndexAccessorTest, Array_Dynamic_I32) {

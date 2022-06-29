@@ -365,13 +365,13 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
 
     sem::Variable* sem = nullptr;
     if (is_global) {
-        sem = builder_->create<sem::GlobalVariable>(
-            v, ty, ast::StorageClass::kNone, ast::Access::kUndefined,
-            rhs ? rhs->ConstantValue() : sem::Constant{}, sem::BindingPoint{});
+        sem = builder_->create<sem::GlobalVariable>(v, ty, ast::StorageClass::kNone,
+                                                    ast::Access::kUndefined, sem::Constant{},
+                                                    sem::BindingPoint{});
     } else {
         sem = builder_->create<sem::LocalVariable>(v, ty, ast::StorageClass::kNone,
                                                    ast::Access::kUndefined, current_statement_,
-                                                   rhs ? rhs->ConstantValue() : sem::Constant{});
+                                                   sem::Constant{});
     }
 
     sem->SetConstructor(rhs);
@@ -463,16 +463,6 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
 
     const auto value = rhs->ConstantValue();
     if (!value) {
-        AddError("'const' initializer must be constant expression", c->constructor->source);
-        return nullptr;
-    }
-
-    // TODO(crbug.com/tint/1580): Temporary seatbelt to used to ensure that a `let` cannot be used
-    // to initialize a 'const'. Once we fully implement `const`, and remove constant evaluation from
-    // 'let', this can be removed.
-    if (auto* user = rhs->UnwrapMaterialize()->As<sem::VariableUser>();
-        user && user->Variable()->Is<sem::LocalVariable>() &&
-        user->Variable()->Declaration()->Is<ast::Let>()) {
         AddError("'const' initializer must be constant expression", c->constructor->source);
         return nullptr;
     }
@@ -931,7 +921,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
         if (auto* user = args[i]->As<sem::VariableUser>()) {
             // We have an variable of a module-scope constant.
             auto* decl = user->Variable()->Declaration();
-            if (!decl->IsAnyOf<ast::Let, ast::Const, ast::Override>()) {
+            if (!decl->IsAnyOf<ast::Const, ast::Override>()) {
                 AddError(kErrBadExpr, values[i]->source);
                 return false;
             }
@@ -1313,6 +1303,12 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
             return nullptr;
         }
         auto expr_val = EvaluateConstantValue(decl, expr->Type());
+        if (!expr_val) {
+            TINT_ICE(Resolver, builder_->Diagnostics())
+                << decl->source << "EvaluateConstantValue(" << decl->TypeInfo().name
+                << ") returned invalid value";
+            return nullptr;
+        }
         auto materialized_val = ConvertValue(std::move(expr_val), target_ty, decl->source);
         if (!materialized_val) {
             return nullptr;
@@ -2226,17 +2222,6 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
     if (auto* count_expr = arr->count) {
         const auto* count_sem = Materialize(Expression(count_expr));
         if (!count_sem) {
-            return nullptr;
-        }
-
-        // TODO(crbug.com/tint/1580): Temporary seatbelt to used to ensure that a function-scope
-        // `let` cannot be used to propagate a constant expression to an array size. Once we
-        // implement `const`, this can be removed.
-        if (auto* user = count_sem->UnwrapMaterialize()->As<sem::VariableUser>();
-            user && user->Variable()->Is<sem::LocalVariable>() &&
-            user->Variable()->Declaration()->Is<ast::Let>()) {
-            AddError("array size must evaluate to a constant integer expression",
-                     count_expr->source);
             return nullptr;
         }
 

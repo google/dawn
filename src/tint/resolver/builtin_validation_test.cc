@@ -93,15 +93,6 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConst) {
               R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a 'const')");
 }
 
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalLet) {
-    GlobalLet(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a 'let')");
-}
-
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVar) {
     GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), ast::StorageClass::kPrivate);
 
@@ -307,40 +298,6 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalConst) {
     err << "12:34 error: the " << param.name << " argument must be a const_expression";
     EXPECT_EQ(r()->error(), err.str());
 }
-
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalLet) {
-    auto& p = GetParam();
-    auto overload = std::get<0>(p);
-    auto param = std::get<1>(p);
-    auto expr = std::get<2>(p);
-
-    // Build the global texture and sampler variables
-    overload.BuildTextureVariable(this);
-    overload.BuildSamplerVariable(this);
-
-    // Build the module-scope let 'G' with the offset value
-    GlobalLet("G", nullptr, expr({}, *this));
-
-    auto args = overload.args(this);
-    auto*& arg_to_replace = (param.position == Position::kFirst) ? args.front() : args.back();
-
-    // Make the expression to be replaced, reachable. This keeps the resolver
-    // happy.
-    WrapInFunction(arg_to_replace);
-
-    arg_to_replace = Expr(Source{{12, 34}}, "G");
-
-    // Call the builtin with the constexpr argument replaced
-    Func("func", {}, ty.void_(), {CallStmt(Call(overload.function, args))},
-         {Stage(ast::PipelineStage::kFragment)});
-
-    EXPECT_FALSE(r()->Resolve());
-    std::stringstream err;
-    err << "12:34 error: the " << param.name << " argument must be a const_expression";
-    EXPECT_EQ(r()->error(), err.str());
-}
-
 INSTANTIATE_TEST_SUITE_P(
     Offset2D,
     BuiltinTextureConstExprArgValidationTest,

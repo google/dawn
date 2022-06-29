@@ -103,18 +103,6 @@ TEST_F(ResolverSourceVariableTest, GlobalConst) {
     EXPECT_EQ(Sem().Get(expr)->SourceVariable(), sem_a);
 }
 
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverSourceVariableTest, GlobalLet) {
-    auto* a = GlobalLet("a", ty.f32(), Expr(1_f));
-    auto* expr = Expr(a);
-    WrapInFunction(expr);
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-
-    auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), sem_a);
-}
-
 TEST_F(ResolverSourceVariableTest, FunctionVar) {
     auto* a = Var("a", ty.f32(), ast::StorageClass::kNone);
     auto* expr = Expr(a);

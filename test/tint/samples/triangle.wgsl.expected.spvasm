@@ -12,7 +12,6 @@
                OpName %value "value"
                OpName %vertex_point_size "vertex_point_size"
                OpName %value_1 "value_1"
-               OpName %pos "pos"
                OpName %vtx_main_inner "vtx_main_inner"
                OpName %VertexIndex "VertexIndex"
                OpName %var_for_index "var_for_index"
@@ -36,16 +35,16 @@
          %11 = OpConstantNull %float
 %vertex_point_size = OpVariable %_ptr_Output_float Output %11
     %value_1 = OpVariable %_ptr_Output_v4float Output %8
+         %13 = OpTypeFunction %v4float %uint
     %v2float = OpTypeVector %float 2
      %uint_3 = OpConstant %uint 3
 %_arr_v2float_uint_3 = OpTypeArray %v2float %uint_3
   %float_0_5 = OpConstant %float 0.5
-         %17 = OpConstantComposite %v2float %11 %float_0_5
+         %21 = OpConstantComposite %v2float %11 %float_0_5
  %float_n0_5 = OpConstant %float -0.5
-         %19 = OpConstantComposite %v2float %float_n0_5 %float_n0_5
-         %20 = OpConstantComposite %v2float %float_0_5 %float_n0_5
-        %pos = OpConstantComposite %_arr_v2float_uint_3 %17 %19 %20
-         %22 = OpTypeFunction %v4float %uint
+         %23 = OpConstantComposite %v2float %float_n0_5 %float_n0_5
+         %24 = OpConstantComposite %v2float %float_0_5 %float_n0_5
+         %25 = OpConstantComposite %_arr_v2float_uint_3 %21 %23 %24
 %_ptr_Function__arr_v2float_uint_3 = OpTypePointer Function %_arr_v2float_uint_3
          %28 = OpConstantNull %_arr_v2float_uint_3
 %_ptr_Function_v2float = OpTypePointer Function %v2float
@@ -54,11 +53,11 @@
          %36 = OpTypeFunction %void
          %42 = OpTypeFunction %v4float
          %45 = OpConstantComposite %v4float %float_1 %11 %11 %float_1
-%vtx_main_inner = OpFunction %v4float None %22
+%vtx_main_inner = OpFunction %v4float None %13
 %VertexIndex = OpFunctionParameter %uint
-         %25 = OpLabel
+         %16 = OpLabel
 %var_for_index = OpVariable %_ptr_Function__arr_v2float_uint_3 Function %28
-               OpStore %var_for_index %pos
+               OpStore %var_for_index %25
          %30 = OpAccessChain %_ptr_Function_v2float %var_for_index %VertexIndex
          %31 = OpLoad %v2float %30
          %32 = OpCompositeExtract %float %31 0

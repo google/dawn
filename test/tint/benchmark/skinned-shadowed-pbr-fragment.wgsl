@@ -1,4 +1,4 @@
-let GAMMA = 2.200000048;
+const GAMMA = 2.200000048;
 
 fn linearTosRGB(linear : vec3<f32>) -> vec3<f32> {
   let INV_GAMMA = (1.0 / GAMMA);
@@ -53,7 +53,7 @@ struct GlobalLights {
 
 @binding(2) @group(0) var<storage, read> globalLights : GlobalLights;
 
-let tileCount = vec3(32u, 18u, 48u);
+const tileCount = vec3(32u, 18u, 48u);
 
 fn linearDepth(depthSample : f32) -> f32 {
   return ((camera.zFar * camera.zNear) / fma(depthSample, (camera.zNear - camera.zFar), camera.zFar));
@@ -85,7 +85,7 @@ struct LightShadowTable {
 
 var<private> shadowSampleOffsets : array<vec2<f32>, 16> = array<vec2<f32>, 16>(vec2(-1.5, -1.5), vec2(-1.5, -0.5), vec2(-1.5, 0.5), vec2(-1.5, 1.5), vec2(-0.5, -1.5), vec2(-0.5, -0.5), vec2(-0.5, 0.5), vec2(-0.5, 1.5), vec2(0.5, -1.5), vec2(0.5, -0.5), vec2(0.5, 0.5), vec2(0.5, 1.5), vec2(1.5, -1.5), vec2(1.5, -0.5), vec2(1.5, 0.5), vec2(1.5, 1.5));
 
-let shadowSampleCount = 16u;
+const shadowSampleCount = 16u;
 
 struct ShadowProperties {
   viewport : vec4<f32>,
@@ -249,13 +249,13 @@ fn GetSurfaceInfo(input : VertexOutput) -> SurfaceInfo {
   return surface;
 }
 
-let PI = 3.141592741;
+const PI = 3.141592741;
 
-let LightType_Point = 0u;
+const LightType_Point = 0u;
 
-let LightType_Spot = 1u;
+const LightType_Spot = 1u;
 
-let LightType_Directional = 2u;
+const LightType_Directional = 2u;
 
 struct PuctualLight {
   lightType : u32,

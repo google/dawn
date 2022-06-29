@@ -175,7 +175,6 @@
         %207 = OpConstantComposite %v2float %float_1 %float_1
 %_ptr_Function_v2float = OpTypePointer Function %v2float
         %211 = OpConstantNull %v2float
-        %214 = OpConstantComposite %v2int %int_16 %int_16
       %int_1 = OpConstant %int 1
 %_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
 %_ptr_StorageBuffer_uint_0 = OpTypePointer StorageBuffer %uint
@@ -358,6 +357,7 @@
         %208 = OpFSub %v2float %206 %207
                OpStore %floorCoord %208
         %213 = OpLoad %v2int %tilePixel0Idx
+        %214 = OpCompositeConstruct %v2int %int_16 %int_16
         %215 = OpIAdd %v2int %213 %214
         %212 = OpConvertSToF %v2float %215
         %216 = OpVectorTimesScalar %v2float %212 %float_2

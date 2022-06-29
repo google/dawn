@@ -2,10 +2,6 @@
 precision mediump float;
 
 layout(location = 0) out vec4 value;
-struct MyStruct {
-  float f1;
-};
-
 vec4 tint_symbol() {
   return vec4(0.0f);
 }

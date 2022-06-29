@@ -13,10 +13,9 @@
 // limitations under the License.
 
 // Vertex shader
-let pos : array<vec2<f32>, 3> = array<vec2<f32>, 3>(
-    vec2<f32>(0.0, 0.5),
-    vec2<f32>(-0.5, -0.5),
-    vec2<f32>(0.5, -0.5));
+const pos = array<vec2<f32>, 3>(vec2(0.0, 0.5),
+                                vec2(-0.5, -0.5),
+                                vec2(0.5, -0.5));
 
 @vertex
 fn vtx_main(@builtin(vertex_index) VertexIndex : u32)

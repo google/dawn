@@ -22,16 +22,6 @@ namespace {
 
 using MslGeneratorImplTest = TestHelper;
 
-TEST_F(MslGeneratorImplTest, Emit_GlobalLet) {
-    auto* var = GlobalLet("pos", ty.array<f32, 3>(), array<f32, 3>(1_f, 2_f, 3_f));
-
-    GeneratorImpl& gen = Build();
-
-    ASSERT_TRUE(gen.EmitProgramConstVariable(var)) << gen.error();
-    EXPECT_EQ(gen.result(),
-              "constant tint_array<float, 3> pos = tint_array<float, 3>{1.0f, 2.0f, 3.0f};\n");
-}
-
 TEST_F(MslGeneratorImplTest, Emit_GlobalConst_AInt) {
     auto* var = GlobalConst("G", nullptr, Expr(1_a));
     Func("f", {}, ty.void_(), {Decl(Let("l", nullptr, Expr(var)))});

@@ -3,10 +3,8 @@ void unused_entry_point() {
   return;
 }
 
-static const int a = 1;
-static const int _a = 2;
-
 void f() {
+  const int a = 1;
   const int b = a;
-  const int _b = _a;
+  const int _b = a;
 }

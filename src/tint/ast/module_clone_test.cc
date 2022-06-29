@@ -37,8 +37,8 @@ struct S1 {
   m1 : array<u32, 6>,
 };
 
-let c0 : i32 = 10;
-let c1 : bool = true;
+const c0 : i32 = 10;
+const c1 : bool = true;
 
 type t0 = array<vec4<f32>>;
 type t1 = array<vec4<f32>>;
@@ -71,6 +71,8 @@ fn f1(p0 : f32, p1 : i32) -> f32 {
   var l4 : S1;
   var l5 : u32 = l4.m1[5];
   let l6 : ptr<private, u32> = &g0;
+  const l7 = 123;
+  const l8 : i32 = 123;
   loop {
     l0 = (p1 + 2);
     if (((l0 % 4) == 0)) {
@@ -104,7 +106,7 @@ fn main() {
   f1(1.0, 2);
 }
 
-let declaration_order_check_0 : i32 = 1;
+const declaration_order_check_0 : i32 = 1;
 
 type declaration_order_check_1 = f32;
 
@@ -112,7 +114,7 @@ fn declaration_order_check_2() {}
 
 type declaration_order_check_3 = f32;
 
-let declaration_order_check_4 : i32 = 1;
+const declaration_order_check_4 : i32 = 1;
 
 )");
 

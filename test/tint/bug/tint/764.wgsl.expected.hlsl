@@ -5,6 +5,6 @@ void unused_entry_point() {
 
 void f() {
   const float4x4 m = float4x4((1.0f).xxxx, (1.0f).xxxx, (1.0f).xxxx, (1.0f).xxxx);
-  const float4 v1 = (1.0f).xxxx;
-  const float a = 1.0f;
+  const float4 v1 = m[0];
+  const float a = v1[0];
 }

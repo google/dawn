@@ -1073,21 +1073,6 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec4) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalLet_F32_With_F32) {
-    auto* ctor = Construct<f32>(2_f);
-    GlobalLet("g", ty.f32(), ctor);
-
-    spirv::Builder& b = SanitizeAndBuild();
-    ASSERT_TRUE(b.Build());
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
-%2 = OpConstant %1 2
-%4 = OpTypeVoid
-%3 = OpTypeFunction %4
-)");
-    Validate(b);
-}
-
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_F32_With_F32) {
     auto* ctor = Construct<f32>(2_f);
     GlobalConst("g", ty.f32(), ctor);
@@ -1122,21 +1107,6 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_F32_With_F32) {
 %3 = OpVariable %4 Private %2
 %6 = OpTypeVoid
 %5 = OpTypeFunction %6
-)");
-    Validate(b);
-}
-
-TEST_F(SpvBuilderConstructorTest, Type_GlobalLet_U32_With_F32) {
-    auto* ctor = Construct<u32>(1.5_f);
-    GlobalLet("g", ty.u32(), ctor);
-
-    spirv::Builder& b = SanitizeAndBuild();
-    ASSERT_TRUE(b.Build());
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 0
-%2 = OpConstant %1 1
-%4 = OpTypeVoid
-%3 = OpTypeFunction %4
 )");
     Validate(b);
 }
@@ -1179,22 +1149,6 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_U32_With_F32) {
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalLet_Vec2_With_F32) {
-    auto* cast = vec2<f32>(2_f);
-    auto* g = GlobalLet("g", ty.vec2<f32>(), cast);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 2
-%3 = OpConstant %2 2
-%4 = OpConstantComposite %1 %3 %3
-)");
-}
-
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec2_With_F32) {
     auto* cast = vec2<f32>(2_f);
     GlobalConst("g", ty.vec2<f32>(), cast);
@@ -1232,24 +1186,6 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec2_With_F32) {
 %3 = OpConstant %2 2
 %4 = OpConstantComposite %1 %3 %3
 )");
-}
-
-TEST_F(SpvBuilderConstructorTest, Type_GlobalLet_Vec2_With_Vec2) {
-    auto* cast = vec2<f32>(vec2<f32>(2_f, 2_f));
-    GlobalLet("a", ty.vec2<f32>(), cast);
-
-    spirv::Builder& b = SanitizeAndBuild();
-    ASSERT_TRUE(b.Build());
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 2
-%3 = OpConstant %2 2
-%4 = OpConstantComposite %1 %3 %3
-%6 = OpTypeVoid
-%5 = OpTypeFunction %6
-)");
-
-    Validate(b);
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec2_With_Vec2) {
@@ -1290,24 +1226,6 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec2_With_Vec2) {
 %5 = OpVariable %6 Private %4
 %8 = OpTypeVoid
 %7 = OpTypeFunction %8
-)");
-
-    Validate(b);
-}
-
-TEST_F(SpvBuilderConstructorTest, Type_GlobalLet_Vec3_With_Vec3) {
-    auto* cast = vec3<f32>(vec3<f32>(2_f, 2_f, 2_f));
-    GlobalLet("a", ty.vec3<f32>(), cast);
-
-    spirv::Builder& b = SanitizeAndBuild();
-    ASSERT_TRUE(b.Build());
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 3
-%3 = OpConstant %2 2
-%4 = OpConstantComposite %1 %3 %3 %3
-%6 = OpTypeVoid
-%5 = OpTypeFunction %6
 )");
 
     Validate(b);
@@ -1356,24 +1274,6 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_Vec3) {
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalLet_Vec4_With_Vec4) {
-    auto* cast = vec4<f32>(vec4<f32>(2_f, 2_f, 2_f, 2_f));
-    GlobalLet("a", ty.vec4<f32>(), cast);
-
-    spirv::Builder& b = SanitizeAndBuild();
-    ASSERT_TRUE(b.Build());
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 4
-%3 = OpConstant %2 2
-%4 = OpConstantComposite %1 %3 %3 %3 %3
-%6 = OpTypeVoid
-%5 = OpTypeFunction %6
-)");
-
-    Validate(b);
-}
-
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_Vec4) {
     auto* cast = vec4<f32>(vec4<f32>(2_f, 2_f, 2_f, 2_f));
     GlobalConst("g", ty.vec4<f32>(), cast);
@@ -1416,22 +1316,6 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec4) {
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalLet_Vec3_With_F32) {
-    auto* cast = vec3<f32>(2_f);
-    auto* g = GlobalLet("g", ty.vec3<f32>(), cast);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 3
-%3 = OpConstant %2 2
-%4 = OpConstantComposite %1 %3 %3 %3
-)");
-}
-
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec3_With_F32) {
     auto* cast = vec3<f32>(2_f);
     GlobalConst("g", ty.vec3<f32>(), cast);
@@ -1458,22 +1342,6 @@ OpReturn
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_F32) {
     auto* cast = vec3<f32>(2_f);
     auto* g = GlobalVar("g", ty.vec3<f32>(), ast::StorageClass::kPrivate, cast);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 3
-%3 = OpConstant %2 2
-%4 = OpConstantComposite %1 %3 %3 %3
-)");
-}
-
-TEST_F(SpvBuilderConstructorTest, Type_GlobalLet_Vec3_With_F32_Vec2) {
-    auto* cast = vec3<f32>(2_f, vec2<f32>(2_f, 2_f));
-    auto* g = GlobalLet("g", ty.vec3<f32>(), cast);
 
     spirv::Builder& b = Build();
 
@@ -1526,22 +1394,6 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_F32_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalLet_Vec3_With_Vec2_F32) {
-    auto* cast = vec3<f32>(vec2<f32>(2_f, 2_f), 2_f);
-    auto* g = GlobalLet("g", ty.vec3<f32>(), cast);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 3
-%3 = OpConstant %2 2
-%4 = OpConstantComposite %1 %3 %3 %3
-)");
-}
-
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec3_With_Vec2_F32) {
     auto* cast = vec3<f32>(vec2<f32>(2_f, 2_f), 2_f);
     GlobalConst("g", ty.vec3<f32>(), cast);
@@ -1581,22 +1433,6 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_Vec2_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalLet_Vec4_With_F32) {
-    auto* cast = vec4<f32>(2_f);
-    auto* g = GlobalLet("g", ty.vec4<f32>(), cast);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 4
-%3 = OpConstant %2 2
-%4 = OpConstantComposite %1 %3 %3 %3 %3
-)");
-}
-
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_F32) {
     auto* cast = vec4<f32>(2_f);
     GlobalConst("g", ty.vec4<f32>(), cast);
@@ -1623,22 +1459,6 @@ OpReturn
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F32) {
     auto* cast = vec4<f32>(2_f);
     auto* g = GlobalVar("g", ty.vec4<f32>(), ast::StorageClass::kPrivate, cast);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 4
-%3 = OpConstant %2 2
-%4 = OpConstantComposite %1 %3 %3 %3 %3
-)");
-}
-
-TEST_F(SpvBuilderConstructorTest, Type_GlobalLet_Vec4_With_F32_F32_Vec2) {
-    auto* cast = vec4<f32>(2_f, 2_f, vec2<f32>(2_f, 2_f));
-    auto* g = GlobalLet("g", ty.vec4<f32>(), cast);
 
     spirv::Builder& b = Build();
 
@@ -1691,22 +1511,6 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F32_F32_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalLet_Vec4_With_F32_Vec2_F32) {
-    auto* cast = vec4<f32>(2_f, vec2<f32>(2_f, 2_f), 2_f);
-    auto* g = GlobalLet("g", ty.vec4<f32>(), cast);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 4
-%3 = OpConstant %2 2
-%4 = OpConstantComposite %1 %3 %3 %3 %3
-)");
-}
-
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_F32_Vec2_F32) {
     auto* cast = vec4<f32>(2_f, vec2<f32>(2_f, 2_f), 2_f);
     GlobalConst("g", ty.vec4<f32>(), cast);
@@ -1733,22 +1537,6 @@ OpReturn
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F32_Vec2_F32) {
     auto* cast = vec4<f32>(2_f, vec2<f32>(2_f, 2_f), 2_f);
     auto* g = GlobalVar("g", ty.vec4<f32>(), ast::StorageClass::kPrivate, cast);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 4
-%3 = OpConstant %2 2
-%4 = OpConstantComposite %1 %3 %3 %3 %3
-)");
-}
-
-TEST_F(SpvBuilderConstructorTest, Type_GlobalLet_Vec4_With_Vec2_F32_F32) {
-    auto* cast = vec4<f32>(vec2<f32>(2_f, 2_f), 2_f, 2_f);
-    auto* g = GlobalLet("g", ty.vec4<f32>(), cast);
 
     spirv::Builder& b = Build();
 
@@ -1801,22 +1589,6 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec2_F32_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalLet_Vec4_With_Vec2_Vec2) {
-    auto* cast = vec4<f32>(vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f));
-    auto* g = GlobalLet("g", ty.vec4<f32>(), cast);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 4
-%3 = OpConstant %2 2
-%4 = OpConstantComposite %1 %3 %3 %3 %3
-)");
-}
-
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_Vec2_Vec2) {
     auto* cast = vec4<f32>(vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f));
     GlobalConst("g", ty.vec4<f32>(), cast);
@@ -1856,22 +1628,6 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec2_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalLet_Vec4_With_F32_Vec3) {
-    auto* cast = vec4<f32>(2_f, vec3<f32>(2_f, 2_f, 2_f));
-    auto* g = GlobalLet("g", ty.vec4<f32>(), cast);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 4
-%3 = OpConstant %2 2
-%4 = OpConstantComposite %1 %3 %3 %3 %3
-)");
-}
-
 TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_F32_Vec3) {
     auto* cast = vec4<f32>(2_f, vec3<f32>(2_f, 2_f, 2_f));
     GlobalConst("g", ty.vec4<f32>(), cast);
@@ -1898,22 +1654,6 @@ OpReturn
 TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F32_Vec3) {
     auto* cast = vec4<f32>(2_f, vec3<f32>(2_f, 2_f, 2_f));
     auto* g = GlobalVar("g", ty.vec4<f32>(), ast::StorageClass::kPrivate, cast);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 4
-%3 = OpConstant %2 2
-%4 = OpConstantComposite %1 %3 %3 %3 %3
-)");
-}
-
-TEST_F(SpvBuilderConstructorTest, Type_GlobalLet_Vec4_With_Vec3_F32) {
-    auto* cast = vec4<f32>(vec3<f32>(2_f, 2_f, 2_f), 2_f);
-    auto* g = GlobalLet("g", ty.vec4<f32>(), cast);
 
     spirv::Builder& b = Build();
 

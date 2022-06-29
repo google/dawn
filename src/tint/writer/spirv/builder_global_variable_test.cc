@@ -61,26 +61,6 @@ TEST_F(BuilderTest, GlobalVar_WithConstructor) {
 )");
 }
 
-TEST_F(BuilderTest, GlobalLet) {
-    auto* init = vec3<f32>(1_f, 1_f, 3_f);
-
-    auto* v = GlobalLet("l", ty.vec3<f32>(), init);
-
-    spirv::Builder& b = Build();
-
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
-
-    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %5 "l"
-)");
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 3
-%3 = OpConstant %2 1
-%4 = OpConstant %2 3
-%5 = OpConstantComposite %1 %3 %3 %4
-)");
-}
-
 TEST_F(BuilderTest, GlobalConst) {
     // const c = 42;
     // var v = c;
@@ -104,25 +84,6 @@ TEST_F(BuilderTest, GlobalConst) {
 )");
 
     Validate(b);
-}
-
-TEST_F(BuilderTest, GlobalLet_Vec_Constructor) {
-    auto* init = vec3<f32>(1_f, 2_f, 3_f);
-
-    auto* v = GlobalLet("l", ty.vec3<f32>(), init);
-
-    spirv::Builder& b = Build();
-
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 3
-%3 = OpConstant %2 1
-%4 = OpConstant %2 2
-%5 = OpConstant %2 3
-%6 = OpConstantComposite %1 %3 %4 %5
-)");
 }
 
 TEST_F(BuilderTest, GlobalConst_Vec_Constructor) {
@@ -210,25 +171,6 @@ TEST_F(BuilderTest, GlobalConst_Vec_AFloat_Constructor) {
 )");
 
     Validate(b);
-}
-
-TEST_F(BuilderTest, GlobalLet_Nested_Vec_Constructor) {
-    auto* init = vec3<f32>(vec2<f32>(1_f, 2_f), 3_f);
-
-    auto* v = GlobalLet("l", ty.vec3<f32>(), init);
-
-    spirv::Builder& b = Build();
-
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-    ASSERT_FALSE(b.has_error()) << b.error();
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 3
-%3 = OpConstant %2 1
-%4 = OpConstant %2 2
-%5 = OpConstant %2 3
-%6 = OpConstantComposite %1 %3 %4 %5
-)");
 }
 
 TEST_F(BuilderTest, GlobalConst_Nested_Vec_Constructor) {

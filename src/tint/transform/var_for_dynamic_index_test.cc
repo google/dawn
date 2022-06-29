@@ -484,7 +484,8 @@ TEST_F(VarForDynamicIndexTest, ArrayIndexConstantLet) {
 fn f() {
   let p = array<i32, 4>(1, 2, 3, 4);
   let c = 1;
-  let x = p[c];
+  var var_for_index = p;
+  let x = var_for_index[c];
 }
 )";
 
@@ -501,7 +502,8 @@ TEST_F(VarForDynamicIndexTest, MatrixIndexConstantLet) {
 fn f() {
   let p = mat2x2(1.0, 2.0, 3.0, 4.0);
   let c = 1;
-  let x = p[c];
+  var var_for_index = p;
+  let x = var_for_index[c];
 }
 )";
 

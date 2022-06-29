@@ -463,42 +463,10 @@ TEST_F(ResolverTest, ArraySize_UnsignedConst) {
     EXPECT_EQ(ary->Count(), 10u);
 }
 
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverTest, ArraySize_UnsignedLet) {
-    // let size = 10u;
-    // var<private> a : array<f32, size>;
-    GlobalLet("size", nullptr, Expr(10_u));
-    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kPrivate);
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-
-    ASSERT_NE(TypeOf(a), nullptr);
-    auto* ref = TypeOf(a)->As<sem::Reference>();
-    ASSERT_NE(ref, nullptr);
-    auto* ary = ref->StoreType()->As<sem::Array>();
-    EXPECT_EQ(ary->Count(), 10u);
-}
-
 TEST_F(ResolverTest, ArraySize_SignedConst) {
     // const size = 0;
     // var<private> a : array<f32, size>;
     GlobalConst("size", nullptr, Expr(10_i));
-    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kPrivate);
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-
-    ASSERT_NE(TypeOf(a), nullptr);
-    auto* ref = TypeOf(a)->As<sem::Reference>();
-    ASSERT_NE(ref, nullptr);
-    auto* ary = ref->StoreType()->As<sem::Array>();
-    EXPECT_EQ(ary->Count(), 10u);
-}
-
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverTest, ArraySize_SignedLet) {
-    // let size = 0;
-    // var<private> a : array<f32, size>;
-    GlobalLet("size", nullptr, Expr(10_i));
     auto* a = GlobalVar("a", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -649,22 +617,6 @@ TEST_F(ResolverTest, Expr_Identifier_GlobalVariable) {
 
 TEST_F(ResolverTest, Expr_Identifier_GlobalConst) {
     auto* my_var = GlobalConst("my_var", ty.f32(), Construct(ty.f32()));
-
-    auto* ident = Expr("my_var");
-    WrapInFunction(ident);
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-
-    ASSERT_NE(TypeOf(ident), nullptr);
-    EXPECT_TRUE(TypeOf(ident)->Is<sem::F32>());
-    EXPECT_TRUE(CheckVarUsers(my_var, {ident}));
-    ASSERT_NE(VarOf(ident), nullptr);
-    EXPECT_EQ(VarOf(ident)->Declaration(), my_var);
-}
-
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverTest, Expr_Identifier_GlobalLet) {
-    auto* my_var = GlobalLet("my_var", ty.f32(), Construct(ty.f32()));
 
     auto* ident = Expr("my_var");
     WrapInFunction(ident);
@@ -1023,35 +975,6 @@ TEST_F(ResolverTest, Function_WorkgroupSize_ViaConst) {
     EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, nullptr);
 }
 
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverTest, Function_WorkgroupSize_ViaLet) {
-    // let width = 16i;
-    // let height = 8i;
-    // let depth = 2i;
-    // @compute @workgroup_size(width, height, depth)
-    // fn main() {}
-    GlobalLet("width", ty.i32(), Expr(16_i));
-    GlobalLet("height", ty.i32(), Expr(8_i));
-    GlobalLet("depth", ty.i32(), Expr(2_i));
-    auto* func = Func("main", {}, ty.void_(), {},
-                      {
-                          Stage(ast::PipelineStage::kCompute),
-                          WorkgroupSize("width", "height", "depth"),
-                      });
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-
-    auto* func_sem = Sem().Get(func);
-    ASSERT_NE(func_sem, nullptr);
-
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 16u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 8u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 2u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, nullptr);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, nullptr);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, nullptr);
-}
-
 TEST_F(ResolverTest, Function_WorkgroupSize_ViaConst_NestedInitializer) {
     // const width = i32(i32(i32(8i)));
     // const height = i32(i32(i32(4i)));
@@ -1061,35 +984,6 @@ TEST_F(ResolverTest, Function_WorkgroupSize_ViaConst_NestedInitializer) {
                 Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32(), 8_i))));
     GlobalConst("height", ty.i32(),
                 Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32(), 4_i))));
-    auto* func = Func("main", {}, ty.void_(), {},
-                      {
-                          Stage(ast::PipelineStage::kCompute),
-                          WorkgroupSize("width", "height"),
-                      });
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-
-    auto* func_sem = Sem().Get(func);
-    ASSERT_NE(func_sem, nullptr);
-
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 8u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 4u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 1u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, nullptr);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, nullptr);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, nullptr);
-}
-
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverTest, Function_WorkgroupSize_ViaLet_NestedInitializer) {
-    // let width = i32(i32(i32(8i)));
-    // let height = i32(i32(i32(4i)));
-    // @compute @workgroup_size(width, height)
-    // fn main() {}
-    GlobalLet("width", ty.i32(),
-              Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32(), 8_i))));
-    GlobalLet("height", ty.i32(),
-              Construct(ty.i32(), Construct(ty.i32(), Construct(ty.i32(), 4_i))));
     auto* func = Func("main", {}, ty.void_(), {},
                       {
                           Stage(ast::PipelineStage::kCompute),
@@ -1168,33 +1062,6 @@ TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts_NoInit) {
 TEST_F(ResolverTest, Function_WorkgroupSize_Mixed) {
     // @id(1) override height = 2i;
     // const depth = 3i;
-    // @compute @workgroup_size(8, height, depth)
-    // fn main() {}
-    auto* height = Override("height", ty.i32(), Expr(2_i), {Id(0)});
-    GlobalConst("depth", ty.i32(), Expr(3_i));
-    auto* func = Func("main", {}, ty.void_(), {},
-                      {
-                          Stage(ast::PipelineStage::kCompute),
-                          WorkgroupSize(8_i, "height", "depth"),
-                      });
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-
-    auto* func_sem = Sem().Get(func);
-    ASSERT_NE(func_sem, nullptr);
-
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 8u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 2u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 3u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, nullptr);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, height);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, nullptr);
-}
-
-// TODO(crbug.com/tint/1580): Remove when module-scope 'let' is removed
-TEST_F(ResolverTest, Function_WorkgroupSize_Mixed_Let) {
-    // @id(1) override height = 2i;
-    // let depth = 3i;
     // @compute @workgroup_size(8, height, depth)
     // fn main() {}
     auto* height = Override("height", ty.i32(), Expr(2_i), {Id(0)});

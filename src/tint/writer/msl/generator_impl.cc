@@ -253,10 +253,6 @@ bool GeneratorImpl::Generate() {
             [&](const ast::Alias*) {
                 return true;  // folded away by the writer
             },
-            [&](const ast::Let* let) {
-                TINT_DEFER(line());
-                return EmitProgramConstVariable(let);
-            },
             [&](const ast::Const*) {
                 return true;  // Constants are embedded at their use
             },
@@ -3024,28 +3020,6 @@ bool GeneratorImpl::EmitLet(const ast::Let* let) {
     out << " = ";
     if (!EmitExpression(out, let->constructor)) {
         return false;
-    }
-    out << ";";
-
-    return true;
-}
-
-bool GeneratorImpl::EmitProgramConstVariable(const ast::Let* let) {
-    auto* global = program_->Sem().Get<sem::GlobalVariable>(let);
-    auto* type = global->Type();
-
-    auto out = line();
-    out << "constant ";
-    if (!EmitType(out, type, program_->Symbols().NameFor(let->symbol))) {
-        return false;
-    }
-    out << " " << program_->Symbols().NameFor(let->symbol);
-
-    if (let->constructor != nullptr) {
-        out << " = ";
-        if (!EmitExpression(out, let->constructor)) {
-            return false;
-        }
     }
     out << ";";
 

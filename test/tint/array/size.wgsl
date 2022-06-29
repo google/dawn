@@ -1,5 +1,5 @@
-let slen = 4;
-let ulen = 4u;
+const slen = 4;
+const ulen = 4u;
 
 @fragment
 fn main() {

@@ -84,7 +84,7 @@ class BasicTest : public UniformityAnalysisTestBase,
         kTrue,
         kFalse,
         kLiteral,
-        kModuleLet,
+        kModuleConst,
         kPipelineOverridable,
         kFuncLetUniformRhs,
         kFuncVarUniform,
@@ -137,8 +137,8 @@ class BasicTest : public UniformityAnalysisTestBase,
                 return "false";
             case kLiteral:
                 return "7 == 7";
-            case kModuleLet:
-                return "module_let == 0";
+            case kModuleConst:
+                return "module_const == 0";
             case kPipelineOverridable:
                 return "pipeline_overridable == 0";
             case kFuncLetUniformRhs:
@@ -231,7 +231,7 @@ class BasicTest : public UniformityAnalysisTestBase,
             CASE(kTrue);
             CASE(kFalse);
             CASE(kLiteral);
-            CASE(kModuleLet);
+            CASE(kModuleConst);
             CASE(kPipelineOverridable);
             CASE(kFuncLetUniformRhs);
             CASE(kFuncVarUniform);
@@ -290,7 +290,7 @@ var<workgroup> w : i32;
 @group(1) @binding(2) var s : sampler;
 @group(1) @binding(3) var sc : sampler_comparison;
 
-let module_let : i32 = 42;
+const module_const : i32 = 42;
 @id(42) override pipeline_overridable : i32;
 
 fn user_no_restriction() {}

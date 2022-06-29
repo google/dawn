@@ -7,7 +7,7 @@ void unused_entry_point() {
 void f() {
   int tint_symbol[1] = int[1](1);
   {
-    for(int i = 1; false; ) {
+    for(int i = tint_symbol[0]; false; ) {
     }
   }
 }

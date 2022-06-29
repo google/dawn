@@ -21,7 +21,7 @@ namespace {
 
 using RobustnessTest = TransformTest;
 
-TEST_F(RobustnessTest, Array_Idx_Clamp) {
+TEST_F(RobustnessTest, Array_Let_Idx_Clamp) {
     auto* src = R"(
 var<private> a : array<f32, 3>;
 
@@ -35,7 +35,7 @@ fn f() {
     auto* expect = R"(
 var<private> a : array<f32, 3>;
 
-let c : u32 = 1u;
+const c : u32 = 1u;
 
 fn f() {
   let b : f32 = a[1u];
@@ -47,7 +47,33 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(RobustnessTest, Array_Idx_Clamp_OutOfOrder) {
+TEST_F(RobustnessTest, Array_Const_Idx_Clamp) {
+    auto* src = R"(
+var<private> a : array<f32, 3>;
+
+const c : u32 = 1u;
+
+fn f() {
+  let b : f32 = a[c];
+}
+)";
+
+    auto* expect = R"(
+var<private> a : array<f32, 3>;
+
+const c : u32 = 1u;
+
+fn f() {
+  let b : f32 = a[1u];
+}
+)";
+
+    auto got = Run<Robustness>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(RobustnessTest, Array_Let_Idx_Clamp_OutOfOrder) {
     auto* src = R"(
 fn f() {
   let b : f32 = a[c];
@@ -63,7 +89,33 @@ fn f() {
   let b : f32 = a[1u];
 }
 
-let c : u32 = 1u;
+const c : u32 = 1u;
+
+var<private> a : array<f32, 3>;
+)";
+
+    auto got = Run<Robustness>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(RobustnessTest, Array_Const_Idx_Clamp_OutOfOrder) {
+    auto* src = R"(
+fn f() {
+  let b : f32 = a[c];
+}
+
+const c : u32 = 1u;
+
+var<private> a : array<f32, 3>;
+)";
+
+    auto* expect = R"(
+fn f() {
+  let b : f32 = a[1u];
+}
+
+const c : u32 = 1u;
 
 var<private> a : array<f32, 3>;
 )";
@@ -1392,7 +1444,7 @@ struct S {
 
 @group(0) @binding(0) var<storage, read> s : S;
 
-let c : u32 = 1u;
+const c : u32 = 1u;
 
 fn f() {
   let b : f32 = s.b[c];
@@ -1409,7 +1461,7 @@ struct S {
 
 @group(0) @binding(0) var<storage, read> s : S;
 
-let c : u32 = 1u;
+const c : u32 = 1u;
 
 fn f() {
   let b : f32 = s.b[min(1u, (arrayLength(&(s.b)) - 1u))];

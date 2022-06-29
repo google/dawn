@@ -771,15 +771,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
 
     uint32_t init_id = 0;
     if (auto* ctor = v->constructor) {
-        if (!v->Is<ast::Override>()) {
-            auto* ctor_sem = builder_.Sem().Get(ctor);
-            if (auto constant = ctor_sem->ConstantValue()) {
-                init_id = GenerateConstantIfNeeded(std::move(constant));
-            }
-        }
-        if (init_id == 0) {
-            init_id = GenerateConstructorExpression(v, v->constructor);
-        }
+        init_id = GenerateConstructorExpression(v, ctor);
         if (init_id == 0) {
             return false;
         }
@@ -817,7 +809,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
         }
     }
 
-    if (v->IsAnyOf<ast::Let, ast::Override>()) {
+    if (v->Is<ast::Override>()) {
         push_debug(spv::Op::OpName,
                    {Operand(init_id), Operand(builder_.Symbols().NameFor(v->symbol))});
 

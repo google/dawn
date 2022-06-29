@@ -72,11 +72,6 @@ class ParserImpl {
     };
 
   public:
-    /// A temporary bodge to enable unit-testing of 'const' variable types while still under active
-    /// development.
-    // TODO(crbug.com/tint/1580): Remove when 'const' is fully implemented.
-    static void EnableConst();
-
     /// Expect is the return type of the parser methods that are expected to
     /// return a parsed value of type T, unless there was an parse error.
     /// In the case of a parse error the called method will have called

@@ -2,6 +2,6 @@
 void f() {
   const int3 a = int3(1, 2, 3);
   const int3 b = int3(4, 5, 6);
-  const int3 r = (a / b);
+  const int3 r = (a / (b == int3(0, 0, 0) ? int3(1, 1, 1) : b));
   return;
 }

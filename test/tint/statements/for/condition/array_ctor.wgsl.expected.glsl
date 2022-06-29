@@ -8,7 +8,7 @@ void f() {
   int i = 0;
   while (true) {
     int tint_symbol[1] = int[1](1);
-    if (!((i < 1))) {
+    if (!((i < tint_symbol[0]))) {
       break;
     }
     {

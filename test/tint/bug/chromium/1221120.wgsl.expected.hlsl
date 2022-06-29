@@ -3,4 +3,3 @@ void unused_entry_point() {
   return;
 }
 
-static const int H = 1;

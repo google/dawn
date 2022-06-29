@@ -58,7 +58,7 @@ void main_inner(uint3 GlobalInvocationID) {
         [loop] for(int x_1 = 0; (x_1 < TILE_COUNT_X); x_1 = (x_1 + 1)) {
           int2 tilePixel0Idx = int2((x_1 * TILE_SIZE), (y_1 * TILE_SIZE));
           float2 floorCoord = (((2.0f * float2(tilePixel0Idx)) / asfloat(uniforms[10]).xy) - (1.0f).xx);
-          float2 ceilCoord = (((2.0f * float2((tilePixel0Idx + (16).xx))) / asfloat(uniforms[10]).xy) - (1.0f).xx);
+          float2 ceilCoord = (((2.0f * float2((tilePixel0Idx + int2((TILE_SIZE).xx)))) / asfloat(uniforms[10]).xy) - (1.0f).xx);
           float2 viewFloorCoord = float2((((-(viewNear) * floorCoord.x) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * floorCoord.y) - (M[2][1] * viewNear)) / M[1][1]));
           float2 viewCeilCoord = float2((((-(viewNear) * ceilCoord.x) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * ceilCoord.y) - (M[2][1] * viewNear)) / M[1][1]));
           frustumPlanes[0] = float4(1.0f, 0.0f, (-(viewFloorCoord.x) / viewNear), 0.0f);

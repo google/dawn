@@ -131,24 +131,6 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Literals) {
 )");
 }
 
-TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Let) {
-    GlobalLet("width", ty.i32(), Construct(ty.i32(), 2_i));
-    GlobalLet("height", ty.i32(), Construct(ty.i32(), 3_i));
-    GlobalLet("depth", ty.i32(), Construct(ty.i32(), 4_i));
-    auto* func = Func("main", {}, ty.void_(), {},
-                      {
-                          WorkgroupSize("width", "height", "depth"),
-                          Stage(ast::PipelineStage::kCompute),
-                      });
-
-    spirv::Builder& b = Build();
-
-    ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.execution_modes()),
-              R"(OpExecutionMode %3 LocalSize 2 3 4
-)");
-}
-
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Const) {
     GlobalConst("width", ty.i32(), Construct(ty.i32(), 2_i));
     GlobalConst("height", ty.i32(), Construct(ty.i32(), 3_i));
@@ -193,33 +175,6 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_OverridableConst) {
               R"(OpDecorate %4 SpecId 7
 OpDecorate %5 SpecId 8
 OpDecorate %6 SpecId 9
-OpDecorate %3 BuiltIn WorkgroupSize
-)");
-}
-
-TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndLet) {
-    Override("height", ty.i32(), Construct(ty.i32(), 2_i), {Id(7u)});
-    GlobalLet("depth", ty.i32(), Construct(ty.i32(), 3_i));
-    auto* func = Func("main", {}, ty.void_(), {},
-                      {
-                          WorkgroupSize(4_i, "height", "depth"),
-                          Stage(ast::PipelineStage::kCompute),
-                      });
-
-    spirv::Builder& b = Build();
-
-    ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.execution_modes()), "");
-    EXPECT_EQ(DumpInstructions(b.types()),
-              R"(%2 = OpTypeInt 32 0
-%1 = OpTypeVector %2 3
-%4 = OpConstant %2 4
-%5 = OpSpecConstant %2 2
-%6 = OpConstant %2 3
-%3 = OpSpecConstantComposite %1 %4 %5 %6
-)");
-    EXPECT_EQ(DumpInstructions(b.annots()),
-              R"(OpDecorate %5 SpecId 7
 OpDecorate %3 BuiltIn WorkgroupSize
 )");
 }

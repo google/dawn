@@ -54,11 +54,15 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Vector_Assign_LetIndex) {
 
     ASSERT_TRUE(gen.Generate());
     EXPECT_EQ(gen.result(),
-              R"(void fn() {
+              R"(void set_float3(inout float3 vec, int idx, float val) {
+  vec = (idx.xxx == int3(0, 1, 2)) ? val.xxx : vec;
+}
+
+void fn() {
   float3 lhs = float3(0.0f, 0.0f, 0.0f);
   float rhs = 0.0f;
   const uint index = 0u;
-  lhs[index] = rhs;
+  set_float3(lhs, index, rhs);
 }
 )");
 }
@@ -123,11 +127,20 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Vector_LetIndex) {
 
     ASSERT_TRUE(gen.Generate());
     EXPECT_EQ(gen.result(),
-              R"(void fn() {
+              R"(void set_vector_float4x2(inout float4x2 mat, int col, float2 val) {
+  switch (col) {
+    case 0: mat[0] = val; break;
+    case 1: mat[1] = val; break;
+    case 2: mat[2] = val; break;
+    case 3: mat[3] = val; break;
+  }
+}
+
+void fn() {
   float4x2 lhs = float4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float2 rhs = float2(0.0f, 0.0f);
   const uint index = 0u;
-  lhs[index] = rhs;
+  set_vector_float4x2(lhs, index, rhs);
 }
 )");
 }
@@ -197,11 +210,28 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_LetIndex) {
 
     ASSERT_TRUE(gen.Generate());
     EXPECT_EQ(gen.result(),
-              R"(void fn() {
+              R"(void set_scalar_float4x2(inout float4x2 mat, int col, int row, float val) {
+  switch (col) {
+    case 0:
+      mat[0] = (row.xx == int2(0, 1)) ? val.xx : mat[0];
+      break;
+    case 1:
+      mat[1] = (row.xx == int2(0, 1)) ? val.xx : mat[1];
+      break;
+    case 2:
+      mat[2] = (row.xx == int2(0, 1)) ? val.xx : mat[2];
+      break;
+    case 3:
+      mat[3] = (row.xx == int2(0, 1)) ? val.xx : mat[3];
+      break;
+  }
+}
+
+void fn() {
   float4x2 lhs = float4x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float rhs = 0.0f;
   const uint index = 0u;
-  lhs[index][index] = rhs;
+  set_scalar_float4x2(lhs, index, index, rhs);
 }
 )");
 }

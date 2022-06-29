@@ -1,6 +1,3 @@
-static const int slen = 4;
-static const uint ulen = 4u;
-
 void main() {
   float signed_literal[4] = (float[4])0;
   float unsigned_literal[4] = (float[4])0;

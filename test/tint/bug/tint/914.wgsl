@@ -38,11 +38,11 @@ fn mm_write(row : u32, col : u32, value : f32) {
     }
 }
 
-let RowPerThread : u32 = 4u;
-let ColPerThread : u32 = 4u;
-let TileAOuter : u32 = 64u;
-let TileBOuter : u32 = 64u;
-let TileInner : u32 = 64u;
+const RowPerThread : u32 = 4u;
+const ColPerThread : u32 = 4u;
+const TileAOuter : u32 = 64u;
+const TileBOuter : u32 = 64u;
+const TileInner : u32 = 64u;
 var<workgroup> mm_Asub : array<array<f32, 64>, 64>;
 var<workgroup> mm_Bsub : array<array<f32, 64>, 64>;
 @compute @workgroup_size(16, 16, 1)

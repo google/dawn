@@ -14,10 +14,6 @@ struct tint_array {
     T elements[N];
 };
 
-constant int slen = 4;
-
-constant uint ulen = 4u;
-
 fragment void tint_symbol() {
   tint_array<float, 4> signed_literal = {};
   tint_array<float, 4> unsigned_literal = {};
