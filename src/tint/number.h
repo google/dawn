@@ -16,6 +16,7 @@
 #define SRC_TINT_NUMBER_H_
 
 #include <stdint.h>
+#include <cmath>
 #include <functional>
 #include <limits>
 #include <optional>
@@ -135,61 +136,6 @@ inline std::ostream& operator<<(std::ostream& out, Number<T> num) {
     return out << num.value;
 }
 
-/// Equality operator.
-/// @param a the LHS number
-/// @param b the RHS number
-/// @returns true if the numbers `a` and `b` are exactly equal.
-template <typename A, typename B>
-bool operator==(Number<A> a, Number<B> b) {
-    using T = decltype(a.value + b.value);
-    return std::equal_to<T>()(static_cast<T>(a.value), static_cast<T>(b.value));
-}
-
-/// Inequality operator.
-/// @param a the LHS number
-/// @param b the RHS number
-/// @returns true if the numbers `a` and `b` are exactly unequal.
-template <typename A, typename B>
-bool operator!=(Number<A> a, Number<B> b) {
-    return !(a == b);
-}
-
-/// Equality operator.
-/// @param a the LHS number
-/// @param b the RHS number
-/// @returns true if the numbers `a` and `b` are exactly equal.
-template <typename A, typename B>
-std::enable_if_t<IsNumeric<B>, bool> operator==(Number<A> a, B b) {
-    return a == Number<B>(b);
-}
-
-/// Inequality operator.
-/// @param a the LHS number
-/// @param b the RHS number
-/// @returns true if the numbers `a` and `b` are exactly unequal.
-template <typename A, typename B>
-std::enable_if_t<IsNumeric<B>, bool> operator!=(Number<A> a, B b) {
-    return !(a == b);
-}
-
-/// Equality operator.
-/// @param a the LHS number
-/// @param b the RHS number
-/// @returns true if the numbers `a` and `b` are exactly equal.
-template <typename A, typename B>
-std::enable_if_t<IsNumeric<A>, bool> operator==(A a, Number<B> b) {
-    return Number<A>(a) == b;
-}
-
-/// Inequality operator.
-/// @param a the LHS number
-/// @param b the RHS number
-/// @returns true if the numbers `a` and `b` are exactly unequal.
-template <typename A, typename B>
-std::enable_if_t<IsNumeric<A>, bool> operator!=(A a, Number<B> b) {
-    return !(a == b);
-}
-
 /// The partial specification of Number for f16 type, storing the f16 value as float,
 /// and enforcing proper explicit casting.
 template <>
@@ -293,6 +239,70 @@ utils::Result<TO, ConversionFailure> CheckedConvert(Number<FROM> num) {
         return ConversionFailure::kExceedsNegativeLimit;
     }
     return TO(value);  // Success
+}
+
+/// Equality operator.
+/// @param a the LHS number
+/// @param b the RHS number
+/// @returns true if the numbers `a` and `b` are exactly equal. Also considers sign bit.
+template <typename A, typename B>
+bool operator==(Number<A> a, Number<B> b) {
+    // Use the highest-precision integer or floating-point type to perform the comparisons.
+    using T =
+        std::conditional_t<IsFloatingPoint<A> || IsFloatingPoint<B>, AFloat::type, AInt::type>;
+    auto va = static_cast<T>(a.value);
+    auto vb = static_cast<T>(b.value);
+    if constexpr (IsFloatingPoint<T>) {
+        if (std::signbit(va) != std::signbit(vb)) {
+            return false;
+        }
+    }
+    return std::equal_to<T>()(va, vb);
+}
+
+/// Inequality operator.
+/// @param a the LHS number
+/// @param b the RHS number
+/// @returns true if the numbers `a` and `b` are exactly unequal. Also considers sign bit.
+template <typename A, typename B>
+bool operator!=(Number<A> a, Number<B> b) {
+    return !(a == b);
+}
+
+/// Equality operator.
+/// @param a the LHS number
+/// @param b the RHS number
+/// @returns true if the numbers `a` and `b` are exactly equal.
+template <typename A, typename B>
+std::enable_if_t<IsNumeric<B>, bool> operator==(Number<A> a, B b) {
+    return a == Number<B>(b);
+}
+
+/// Inequality operator.
+/// @param a the LHS number
+/// @param b the RHS number
+/// @returns true if the numbers `a` and `b` are exactly unequal.
+template <typename A, typename B>
+std::enable_if_t<IsNumeric<B>, bool> operator!=(Number<A> a, B b) {
+    return !(a == b);
+}
+
+/// Equality operator.
+/// @param a the LHS number
+/// @param b the RHS number
+/// @returns true if the numbers `a` and `b` are exactly equal.
+template <typename A, typename B>
+std::enable_if_t<IsNumeric<A>, bool> operator==(A a, Number<B> b) {
+    return Number<A>(a) == b;
+}
+
+/// Inequality operator.
+/// @param a the LHS number
+/// @param b the RHS number
+/// @returns true if the numbers `a` and `b` are exactly unequal.
+template <typename A, typename B>
+std::enable_if_t<IsNumeric<A>, bool> operator!=(A a, Number<B> b) {
+    return !(a == b);
 }
 
 /// Define 'TINT_HAS_OVERFLOW_BUILTINS' if the compiler provide overflow checking builtins.
