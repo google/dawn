@@ -61,6 +61,16 @@ class InstanceBase final : public RefCounted {
     // Used to handle error that happen up to device creation.
     bool ConsumedError(MaybeError maybeError);
 
+    template <typename T>
+    bool ConsumedError(ResultOrError<T> resultOrError, T* result) {
+        if (resultOrError.IsError()) {
+            ConsumeError(resultOrError.AcquireError());
+            return true;
+        }
+        *result = resultOrError.AcquireSuccess();
+        return false;
+    }
+
     // Used to query the details of a toggle. Return nullptr if toggleName is not a valid name
     // of a toggle supported in Dawn.
     const ToggleInfo* GetToggleInfo(const char* toggleName);
@@ -111,6 +121,8 @@ class InstanceBase final : public RefCounted {
     MaybeError DiscoverAdaptersInternal(const AdapterDiscoveryOptionsBase* options);
 
     ResultOrError<Ref<AdapterBase>> RequestAdapterInternal(const RequestAdapterOptions* options);
+
+    void ConsumeError(std::unique_ptr<ErrorData> error);
 
     std::vector<std::string> mRuntimeSearchPaths;
 

@@ -386,10 +386,7 @@ MaybeError InstanceBase::DiscoverAdaptersInternal(const AdapterDiscoveryOptionsB
 
 bool InstanceBase::ConsumedError(MaybeError maybeError) {
     if (maybeError.IsError()) {
-        std::unique_ptr<ErrorData> error = maybeError.AcquireError();
-
-        ASSERT(error != nullptr);
-        dawn::ErrorLog() << error->GetFormattedMessage();
+        ConsumeError(maybeError.AcquireError());
         return true;
     }
     return false;
@@ -450,6 +447,11 @@ void InstanceBase::DecrementDeviceCountForTesting() {
 
 const std::vector<std::string>& InstanceBase::GetRuntimeSearchPaths() const {
     return mRuntimeSearchPaths;
+}
+
+void InstanceBase::ConsumeError(std::unique_ptr<ErrorData> error) {
+    ASSERT(error != nullptr);
+    dawn::ErrorLog() << error->GetFormattedMessage();
 }
 
 const XlibXcbFunctions* InstanceBase::GetOrCreateXlibXcbFunctions() {
