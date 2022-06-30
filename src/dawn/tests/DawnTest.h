@@ -343,6 +343,10 @@ class DawnTestBase {
         std::string mTest;
     };
 
+    // Resolve all the deferred expectations in mDeferredExpectations now to avoid letting
+    // mDeferredExpectations get too big.
+    void ResolveDeferredExpectationsNow();
+
   protected:
     wgpu::Device device;
     wgpu::Queue queue;
