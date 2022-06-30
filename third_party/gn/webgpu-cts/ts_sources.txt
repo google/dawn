@@ -121,6 +121,7 @@ src/webgpu/examples.spec.ts
 src/webgpu/listing.ts
 src/webgpu/api/operation/labels.spec.ts
 src/webgpu/api/operation/onSubmittedWorkDone.spec.ts
+src/webgpu/api/operation/reflection.spec.ts
 src/webgpu/api/operation/uncapturederror.spec.ts
 src/webgpu/api/operation/adapter/requestAdapterInfo.spec.ts
 src/webgpu/api/operation/adapter/requestDevice.spec.ts
@@ -206,7 +207,6 @@ src/webgpu/api/validation/encoding/beginRenderPass.spec.ts
 src/webgpu/api/validation/encoding/createRenderBundleEncoder.spec.ts
 src/webgpu/api/validation/encoding/encoder_state.spec.ts
 src/webgpu/api/validation/encoding/render_bundle.spec.ts
-src/webgpu/api/validation/encoding/cmds/buffer_texture_copies.spec.ts
 src/webgpu/api/validation/encoding/cmds/clearBuffer.spec.ts
 src/webgpu/api/validation/encoding/cmds/compute_pass.spec.ts
 src/webgpu/api/validation/encoding/cmds/copyBufferToBuffer.spec.ts
@@ -231,6 +231,7 @@ src/webgpu/api/validation/encoding/queries/pipeline_statistics.spec.ts
 src/webgpu/api/validation/encoding/queries/resolveQuerySet.spec.ts
 src/webgpu/api/validation/image_copy/image_copy.ts
 src/webgpu/api/validation/image_copy/buffer_related.spec.ts
+src/webgpu/api/validation/image_copy/buffer_texture_copies.spec.ts
 src/webgpu/api/validation/image_copy/layout_related.spec.ts
 src/webgpu/api/validation/image_copy/texture_related.spec.ts
 src/webgpu/api/validation/initialization/requestDevice.spec.ts
