@@ -35,6 +35,7 @@ void EGLFunctions::Init(void* (*getProc)(const char*)) {
     GetCurrentSurface =
         reinterpret_cast<PFNEGLGETCURRENTSURFACEPROC>(GetProcAddress("eglGetCurrentSurface"));
     GetDisplay = reinterpret_cast<PFNEGLGETDISPLAYPROC>(GetProcAddress("eglGetDisplay"));
+    GetError = reinterpret_cast<PFNEGLGETERRORPROC>(GetProcAddress("eglGetError"));
     Initialize = reinterpret_cast<PFNEGLINITIALIZEPROC>(GetProcAddress("eglInitialize"));
     MakeCurrent = reinterpret_cast<PFNEGLMAKECURRENTPROC>(GetProcAddress("eglMakeCurrent"));
 }

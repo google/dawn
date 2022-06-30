@@ -26,7 +26,8 @@ namespace dawn::native::opengl {
 
 class ContextEGL : public Device::Context {
   public:
-    static std::unique_ptr<ContextEGL> Create(const EGLFunctions& functions, EGLenum api);
+    static ResultOrError<std::unique_ptr<ContextEGL>> Create(const EGLFunctions& functions,
+                                                             EGLenum api);
     void MakeCurrent() override;
     ~ContextEGL() override;
 

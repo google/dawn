@@ -453,6 +453,8 @@ if (DAWN_ENABLE_OPENGL)
         "opengl/SwapChainGL.h"
         "opengl/TextureGL.cpp"
         "opengl/TextureGL.h"
+        "opengl/UtilsEGL.cpp"
+        "opengl/UtilsEGL.h"
         "opengl/UtilsGL.cpp"
         "opengl/UtilsGL.h"
         "opengl/opengl_platform.h"

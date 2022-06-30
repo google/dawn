@@ -152,9 +152,8 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
 ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {
     EGLenum api =
         GetBackendType() == wgpu::BackendType::OpenGL ? EGL_OPENGL_API : EGL_OPENGL_ES_API;
-
-    std::unique_ptr<Device::Context> context = ContextEGL::Create(mEGLFunctions, api);
-
+    std::unique_ptr<Device::Context> context;
+    DAWN_TRY_ASSIGN(context, ContextEGL::Create(mEGLFunctions, api));
     return Device::Create(this, descriptor, mFunctions, std::move(context));
 }
 
