@@ -444,6 +444,9 @@ MaybeError ValidateRenderPassDescriptor(DeviceBase* device,
                                         uint32_t* height,
                                         uint32_t* sampleCount,
                                         UsageValidationMode usageValidationMode) {
+    DAWN_TRY(ValidateSingleSType(descriptor->nextInChain,
+                                 wgpu::SType::RenderPassDescriptorMaxDrawCount));
+
     uint32_t maxColorAttachments = device->GetLimits().v1.maxColorAttachments;
     DAWN_INVALID_IF(
         descriptor->colorAttachmentCount > maxColorAttachments,

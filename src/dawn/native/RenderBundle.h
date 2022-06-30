@@ -52,6 +52,7 @@ class RenderBundleBase final : public ApiObjectBase {
     const AttachmentState* GetAttachmentState() const;
     bool IsDepthReadOnly() const;
     bool IsStencilReadOnly() const;
+    uint64_t GetDrawCount() const;
     const RenderPassResourceUsage& GetResourceUsage() const;
     const IndirectDrawMetadata& GetIndirectDrawMetadata();
 
@@ -65,6 +66,7 @@ class RenderBundleBase final : public ApiObjectBase {
     Ref<AttachmentState> mAttachmentState;
     bool mDepthReadOnly;
     bool mStencilReadOnly;
+    uint64_t mDrawCount;
     RenderPassResourceUsage mResourceUsage;
 };
 

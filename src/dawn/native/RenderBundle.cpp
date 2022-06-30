@@ -37,6 +37,7 @@ RenderBundleBase::RenderBundleBase(RenderBundleEncoder* encoder,
       mAttachmentState(std::move(attachmentState)),
       mDepthReadOnly(depthReadOnly),
       mStencilReadOnly(stencilReadOnly),
+      mDrawCount(encoder->GetDrawCount()),
       mResourceUsage(std::move(resourceUsage)) {
     TrackInDevice();
 }
@@ -78,6 +79,11 @@ bool RenderBundleBase::IsDepthReadOnly() const {
 bool RenderBundleBase::IsStencilReadOnly() const {
     ASSERT(!IsError());
     return mStencilReadOnly;
+}
+
+uint64_t RenderBundleBase::GetDrawCount() const {
+    ASSERT(!IsError());
+    return mDrawCount;
 }
 
 const RenderPassResourceUsage& RenderBundleBase::GetResourceUsage() const {

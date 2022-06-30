@@ -75,6 +75,11 @@ bool RenderEncoderBase::IsStencilReadOnly() const {
     return mStencilReadOnly;
 }
 
+uint64_t RenderEncoderBase::GetDrawCount() const {
+    ASSERT(!IsError());
+    return mDrawCount;
+}
+
 Ref<AttachmentState> RenderEncoderBase::AcquireAttachmentState() {
     return std::move(mAttachmentState);
 }
@@ -103,6 +108,8 @@ void RenderEncoderBase::APIDraw(uint32_t vertexCount,
             draw->instanceCount = instanceCount;
             draw->firstVertex = firstVertex;
             draw->firstInstance = firstInstance;
+
+            mDrawCount++;
 
             return {};
         },
@@ -140,6 +147,8 @@ void RenderEncoderBase::APIDrawIndexed(uint32_t indexCount,
             draw->firstIndex = firstIndex;
             draw->baseVertex = baseVertex;
             draw->firstInstance = firstInstance;
+
+            mDrawCount++;
 
             return {};
         },
@@ -190,6 +199,8 @@ void RenderEncoderBase::APIDrawIndirect(BufferBase* indirectBuffer, uint64_t ind
             // validation, but it will unnecessarily transition to indirectBuffer usage in the
             // backend.
             mUsageTracker.BufferUsedAs(indirectBuffer, wgpu::BufferUsage::Indirect);
+
+            mDrawCount++;
 
             return {};
         },
@@ -242,6 +253,8 @@ void RenderEncoderBase::APIDrawIndexedIndirect(BufferBase* indirectBuffer,
             // validation, but it will unecessarily transition to indirectBuffer usage in the
             // backend.
             mUsageTracker.BufferUsedAs(indirectBuffer, wgpu::BufferUsage::Indirect);
+
+            mDrawCount++;
 
             return {};
         },

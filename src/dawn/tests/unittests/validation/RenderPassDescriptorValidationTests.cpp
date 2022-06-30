@@ -18,6 +18,8 @@
 
 #include "dawn/common/Constants.h"
 
+#include "dawn/utils/ComboRenderBundleEncoderDescriptor.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace {
@@ -542,6 +544,211 @@ TEST_F(RenderPassDescriptorValidationTest, NonMultisampledColorWithResolveTarget
     utils::ComboRenderPassDescriptor renderPass({colorTextureView});
     renderPass.cColorAttachments[0].resolveTarget = resolveTargetTextureView;
     AssertBeginRenderPassError(&renderPass);
+}
+
+// drawCount must not exceed maxDrawCount
+TEST_F(RenderPassDescriptorValidationTest, MaxDrawCount) {
+    constexpr wgpu::TextureFormat kColorFormat = wgpu::TextureFormat::RGBA8Unorm;
+    constexpr uint64_t kMaxDrawCount = 16;
+
+    wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
+        @vertex fn main() -> @builtin(position) vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 1.0);
+        })");
+
+    wgpu::ShaderModule fsModule = utils::CreateShaderModule(device, R"(
+        @fragment fn main() -> @location(0) vec4<f32> {
+            return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        })");
+
+    utils::ComboRenderPipelineDescriptor pipelineDescriptor;
+    pipelineDescriptor.vertex.module = vsModule;
+    pipelineDescriptor.cFragment.module = fsModule;
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDescriptor);
+
+    wgpu::TextureDescriptor colorTextureDescriptor;
+    colorTextureDescriptor.size = {1, 1};
+    colorTextureDescriptor.format = kColorFormat;
+    colorTextureDescriptor.usage = wgpu::TextureUsage::RenderAttachment;
+    wgpu::Texture colorTexture = device.CreateTexture(&colorTextureDescriptor);
+
+    utils::ComboRenderBundleEncoderDescriptor bundleEncoderDescriptor;
+    bundleEncoderDescriptor.colorFormatsCount = 1;
+    bundleEncoderDescriptor.cColorFormats[0] = kColorFormat;
+
+    wgpu::Buffer indexBuffer =
+        utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index, {0, 1, 2});
+    wgpu::Buffer indirectBuffer =
+        utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, {3, 1, 0, 0});
+    wgpu::Buffer indexedIndirectBuffer =
+        utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, {3, 1, 0, 0, 0});
+
+    wgpu::RenderPassDescriptorMaxDrawCount maxDrawCount;
+    maxDrawCount.maxDrawCount = kMaxDrawCount;
+
+    // Valid. drawCount is less than the default maxDrawCount.
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateView()});
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.SetPipeline(pipeline);
+
+        for (uint64_t i = 0; i <= kMaxDrawCount; i++) {
+            renderPass.Draw(3);
+        }
+
+        renderPass.End();
+        encoder.Finish();
+    }
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateView()});
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.SetPipeline(pipeline);
+        renderPass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+
+        for (uint64_t i = 0; i <= kMaxDrawCount; i++) {
+            renderPass.DrawIndexed(3);
+        }
+
+        renderPass.End();
+        encoder.Finish();
+    }
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateView()});
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.SetPipeline(pipeline);
+
+        for (uint64_t i = 0; i <= kMaxDrawCount; i++) {
+            renderPass.DrawIndirect(indirectBuffer, 0);
+        }
+
+        renderPass.End();
+        encoder.Finish();
+    }
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateView()});
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.SetPipeline(pipeline);
+        renderPass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+
+        for (uint64_t i = 0; i <= kMaxDrawCount; i++) {
+            renderPass.DrawIndexedIndirect(indexedIndirectBuffer, 0);
+        }
+
+        renderPass.End();
+        encoder.Finish();
+    }
+
+    {
+        wgpu::RenderBundleEncoder renderBundleEncoder =
+            device.CreateRenderBundleEncoder(&bundleEncoderDescriptor);
+        renderBundleEncoder.SetPipeline(pipeline);
+
+        for (uint64_t i = 0; i <= kMaxDrawCount; i++) {
+            renderBundleEncoder.Draw(3);
+        }
+
+        wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish();
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateView()});
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.ExecuteBundles(1, &renderBundle);
+        renderPass.End();
+        encoder.Finish();
+    }
+
+    // Invalid. drawCount counts up with draw calls and
+    // it is greater than maxDrawCount.
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateView()});
+        renderPassDescriptor.nextInChain = &maxDrawCount;
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.SetPipeline(pipeline);
+
+        for (uint64_t i = 0; i <= kMaxDrawCount; i++) {
+            renderPass.Draw(3);
+        }
+
+        renderPass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateView()});
+        renderPassDescriptor.nextInChain = &maxDrawCount;
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.SetPipeline(pipeline);
+        renderPass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+
+        for (uint64_t i = 0; i <= kMaxDrawCount; i++) {
+            renderPass.DrawIndexed(3);
+        }
+
+        renderPass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateView()});
+        renderPassDescriptor.nextInChain = &maxDrawCount;
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.SetPipeline(pipeline);
+
+        for (uint64_t i = 0; i <= kMaxDrawCount; i++) {
+            renderPass.DrawIndirect(indirectBuffer, 0);
+        }
+
+        renderPass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateView()});
+        renderPassDescriptor.nextInChain = &maxDrawCount;
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.SetPipeline(pipeline);
+        renderPass.SetIndexBuffer(indexBuffer, wgpu::IndexFormat::Uint32);
+
+        for (uint64_t i = 0; i <= kMaxDrawCount; i++) {
+            renderPass.DrawIndexedIndirect(indexedIndirectBuffer, 0);
+        }
+
+        renderPass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+
+    {
+        wgpu::RenderBundleEncoder renderBundleEncoder =
+            device.CreateRenderBundleEncoder(&bundleEncoderDescriptor);
+        renderBundleEncoder.SetPipeline(pipeline);
+
+        for (uint64_t i = 0; i <= kMaxDrawCount; i++) {
+            renderBundleEncoder.Draw(3);
+        }
+
+        wgpu::RenderBundle renderBundle = renderBundleEncoder.Finish();
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPassDescriptor({colorTexture.CreateView()});
+        renderPassDescriptor.nextInChain = &maxDrawCount;
+        wgpu::RenderPassEncoder renderPass = encoder.BeginRenderPass(&renderPassDescriptor);
+        renderPass.ExecuteBundles(1, &renderBundle);
+        renderPass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
 }
 
 class MultisampledRenderPassDescriptorValidationTest : public RenderPassDescriptorValidationTest {

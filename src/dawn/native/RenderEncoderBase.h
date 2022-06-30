@@ -62,6 +62,7 @@ class RenderEncoderBase : public ProgrammableEncoder {
     const AttachmentState* GetAttachmentState() const;
     bool IsDepthReadOnly() const;
     bool IsStencilReadOnly() const;
+    uint64_t GetDrawCount() const;
     Ref<AttachmentState> AcquireAttachmentState();
 
   protected:
@@ -73,6 +74,8 @@ class RenderEncoderBase : public ProgrammableEncoder {
     CommandBufferStateTracker mCommandBufferState;
     RenderPassResourceUsageTracker mUsageTracker;
     IndirectDrawMetadata mIndirectDrawMetadata;
+
+    uint64_t mDrawCount = 0;
 
   private:
     Ref<AttachmentState> mAttachmentState;
