@@ -214,17 +214,13 @@ crbug.com/dawn/0000 [ bigsur ] webgpu:api,operation,command_buffer,copyTextureTo
 ################################################################################
 crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
 crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=false;shaderModuleEntryPoint="s%C3%A9quen%C3%A7age";stageEntryPoint="s%C3%A9quen%C3%A7age" [ Failure ]
 crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
 crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=true;shaderModuleEntryPoint="s%C3%A9quen%C3%A7age";stageEntryPoint="s%C3%A9quen%C3%A7age" [ Failure ]
 
 crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
 crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=false;shaderModuleEntryPoint="s%C3%A9quen%C3%A7age";stageEntryPoint="s%C3%A9quen%C3%A7age" [ Failure ]
 crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
 crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
-crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=true;shaderModuleEntryPoint="s%C3%A9quen%C3%A7age";stageEntryPoint="s%C3%A9quen%C3%A7age" [ Failure ]
 
 ################################################################################
 # external_texture failures
