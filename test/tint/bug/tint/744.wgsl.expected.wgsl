@@ -12,7 +12,7 @@ struct Matrix {
 
 @group(0) @binding(1) var<storage, read> secondMatrix : Matrix;
 
-@group(0) @binding(2) var<storage, write> resultMatrix : Matrix;
+@group(0) @binding(2) var<storage, read_write> resultMatrix : Matrix;
 
 @group(0) @binding(3) var<uniform> uniforms : Uniforms;
 

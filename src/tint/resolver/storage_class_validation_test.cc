@@ -180,6 +180,33 @@ TEST_F(ResolverStorageClassValidationTest, NotStorage_AccessMode) {
         R"(56:78 error: only variables in <storage> storage class may declare an access mode)");
 }
 
+TEST_F(ResolverStorageClassValidationTest, Storage_ReadAccessMode) {
+    // @group(0) @binding(0) var<storage, read> a : i32;
+    GlobalVar(Source{{56, 78}}, "a", ty.i32(), ast::StorageClass::kStorage, ast::Access::kRead,
+              GroupAndBinding(0, 0));
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverStorageClassValidationTest, Storage_ReadWriteAccessMode) {
+    // @group(0) @binding(0) var<storage, read_write> a : i32;
+    GlobalVar(Source{{56, 78}}, "a", ty.i32(), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+              GroupAndBinding(0, 0));
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverStorageClassValidationTest, Storage_WriteAccessMode) {
+    // @group(0) @binding(0) var<storage, read_write> a : i32;
+    GlobalVar(Source{{56, 78}}, "a", ty.i32(), ast::StorageClass::kStorage, ast::Access::kWrite,
+              GroupAndBinding(0, 0));
+
+    ASSERT_FALSE(r()->Resolve());
+
+    EXPECT_EQ(r()->error(),
+              R"(56:78 error: access mode 'write' is not valid for the 'storage' address space)");
+}
+
 TEST_F(ResolverStorageClassValidationTest, StorageBufferNoError_Basic) {
     // struct S { x : i32 };
     // var<storage, read> g : S;

@@ -56,21 +56,6 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
     EXPECT_EQ(out.str(), R"(@binding(0) @group(0) var<storage, read> a : S;)");
 }
 
-TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Write) {
-    auto* s = Structure("S", {Member("a", ty.i32())});
-    auto* v = GlobalVar("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kWrite,
-                        ast::AttributeList{
-                            create<ast::BindingAttribute>(0u),
-                            create<ast::GroupAttribute>(0u),
-                        });
-
-    GeneratorImpl& gen = Build();
-
-    std::stringstream out;
-    ASSERT_TRUE(gen.EmitVariable(out, v)) << gen.error();
-    EXPECT_EQ(out.str(), R"(@binding(0) @group(0) var<storage, write> a : S;)");
-}
-
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
     auto* s = Structure("S", {Member("a", ty.i32())});
     auto* v = GlobalVar("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,

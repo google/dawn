@@ -33,7 +33,6 @@
                OpDecorate %secondMatrix NonWritable
                OpDecorate %secondMatrix DescriptorSet 0
                OpDecorate %secondMatrix Binding 1
-               OpDecorate %resultMatrix NonReadable
                OpDecorate %resultMatrix DescriptorSet 0
                OpDecorate %resultMatrix Binding 2
                OpDecorate %Uniforms Block

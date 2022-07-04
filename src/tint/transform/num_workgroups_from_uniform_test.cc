@@ -568,7 +568,7 @@ struct S1 {
 @group(3) @binding(0) var g5 : texture_depth_cube_array;
 @group(4) @binding(0) var g6 : texture_external;
 
-@group(0) @binding(1) var<storage, write> g8 : S0;
+@group(0) @binding(1) var<storage, read_write> g8 : S0;
 @group(1) @binding(3) var<storage, read> g9 : S0;
 @group(3) @binding(2) var<storage, read_write> g10 : S0;
 
@@ -634,7 +634,7 @@ struct S1 {
 
 @group(4) @binding(0) var g6 : texture_external;
 
-@group(0) @binding(1) var<storage, write> g8 : S0;
+@group(0) @binding(1) var<storage, read_write> g8 : S0;
 
 @group(1) @binding(3) var<storage, read> g9 : S0;
 

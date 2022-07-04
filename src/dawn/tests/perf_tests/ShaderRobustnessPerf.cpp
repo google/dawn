@@ -33,7 +33,7 @@ const std::string& kMatMulFloatHeader = R"(
 
         @group(0) @binding(0) var<storage, read> firstMatrix : Matrix;
         @group(0) @binding(1) var<storage, read> secondMatrix : Matrix;
-        @group(0) @binding(2) var<storage, write> resultMatrix : Matrix;
+        @group(0) @binding(2) var<storage, read_write> resultMatrix : Matrix;
         @group(0) @binding(3) var<uniform> uniforms : Uniforms;
 
         fn mm_readA(row : u32, col : u32) -> f32  {
@@ -200,7 +200,7 @@ const std::string& kMatMulVec4Header = R"(
 
         @group(0) @binding(0) var<storage, read> firstMatrix : Matrix;
         @group(0) @binding(1) var<storage, read> secondMatrix : Matrix;
-        @group(0) @binding(2) var<storage, write> resultMatrix : Matrix;
+        @group(0) @binding(2) var<storage, read_write> resultMatrix : Matrix;
         @group(0) @binding(3) var<uniform> uniforms : Uniforms;
 
         fn mm_readA(row : u32, col : u32) -> vec4<f32>  {

@@ -26,7 +26,6 @@
                OpMemberDecorate %S 0 Offset 0
                OpMemberDecorate %S 1 Offset 4
                OpMemberDecorate %S 2 Offset 128
-               OpDecorate %output NonReadable
                OpDecorate %output DescriptorSet 0
                OpDecorate %output Binding 0
       %float = OpTypeFloat 32

@@ -14,25 +14,25 @@ struct IsosurfaceVolume {
   values : array<f32>,
 }
 
-@group(0) @binding(1) var<storage, write> volume : IsosurfaceVolume;
+@group(0) @binding(1) var<storage, read_write> volume : IsosurfaceVolume;
 
 struct PositionBuffer {
   values : array<f32>,
 }
 
-@group(0) @binding(2) var<storage, write> positionsOut : PositionBuffer;
+@group(0) @binding(2) var<storage, read_write> positionsOut : PositionBuffer;
 
 struct NormalBuffer {
   values : array<f32>,
 }
 
-@group(0) @binding(3) var<storage, write> normalsOut : NormalBuffer;
+@group(0) @binding(3) var<storage, read_write> normalsOut : NormalBuffer;
 
 struct IndexBuffer {
   tris : array<u32>,
 }
 
-@group(0) @binding(4) var<storage, write> indicesOut : IndexBuffer;
+@group(0) @binding(4) var<storage, read_write> indicesOut : IndexBuffer;
 
 struct DrawIndirectArgs {
   vc : u32,

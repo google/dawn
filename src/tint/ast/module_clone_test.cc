@@ -52,7 +52,7 @@ var<private> g1 : f32 = 123.0;
 @group(4) @binding(0) var g6 : texture_external;
 
 var<private> g7 : vec3<f32>;
-@group(0) @binding(1) var<storage, write> g8 : S0;
+@group(0) @binding(1) var<storage, read_write> g8 : S0;
 @group(1) @binding(1) var<storage, read> g9 : S0;
 @group(2) @binding(1) var<storage, read_write> g10 : S0;
 

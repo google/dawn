@@ -81,7 +81,7 @@ static const char sRenderValidationShaderSource[] = R"(
 
             @group(0) @binding(0) var<storage, read> batch: BatchInfo;
             @group(0) @binding(1) var<storage, read_write> inputParams: IndirectParams;
-            @group(0) @binding(2) var<storage, write> outputParams: IndirectParams;
+            @group(0) @binding(2) var<storage, read_write> outputParams: IndirectParams;
 
             fn numIndirectParamsPerDrawCallInput() -> u32 {
                 var numParams = kNumDrawIndirectParams;

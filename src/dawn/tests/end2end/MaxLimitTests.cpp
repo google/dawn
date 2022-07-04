@@ -41,7 +41,7 @@ TEST_P(MaxLimitTests, MaxComputeWorkgroupStorageSize) {
             value1 : u32,
         }
 
-        @group(0) @binding(0) var<storage, write> dst : Dst;
+        @group(0) @binding(0) var<storage, read_write> dst : Dst;
 
         struct WGData {
           value0 : u32,
@@ -142,7 +142,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                   }
 
                   @group(0) @binding(0) var<storage, read> buf : Buf;
-                  @group(0) @binding(1) var<storage, write> result : Result;
+                  @group(0) @binding(1) var<storage, read_write> result : Result;
 
                   @compute @workgroup_size(1,1,1)
                   fn main() {
@@ -173,7 +173,7 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
                   }
 
                   @group(0) @binding(0) var<uniform> buf : Buf;
-                  @group(0) @binding(1) var<storage, write> result : Result;
+                  @group(0) @binding(1) var<storage, read_write> result : Result;
 
                   @compute @workgroup_size(1,1,1)
                   fn main() {

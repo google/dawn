@@ -15,7 +15,7 @@ struct S {
     j : array<Inner, 4>,
 };
 
-@binding(0) @group(0) var<storage, write> s : S;
+@binding(0) @group(0) var<storage, read_write> s : S;
 
 @compute @workgroup_size(1)
 fn main() {

@@ -78,7 +78,7 @@ TEST_P(ComputeSharedMemoryTests, Basic) {
             x : u32
         }
 
-        @group(0) @binding(0) var<storage, write> dst : Dst;
+        @group(0) @binding(0) var<storage, read_write> dst : Dst;
         var<workgroup> tmp : u32;
 
         @compute @workgroup_size(4,4,1)
@@ -117,7 +117,7 @@ TEST_P(ComputeSharedMemoryTests, AssortedTypes) {
             d_vector : vec4<f32>,
         }
 
-        @group(0) @binding(0) var<storage, write> dst : Dst;
+        @group(0) @binding(0) var<storage, read_write> dst : Dst;
 
         var<workgroup> wg_struct : StructValues;
         var<workgroup> wg_matrix : mat2x2<f32>;

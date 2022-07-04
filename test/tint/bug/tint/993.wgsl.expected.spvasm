@@ -25,7 +25,6 @@
                OpDecorate %constants Binding 0
                OpDecorate %Result Block
                OpMemberDecorate %Result 0 Offset 0
-               OpDecorate %result NonReadable
                OpDecorate %result DescriptorSet 1
                OpDecorate %result Binding 1
                OpDecorate %TestData Block

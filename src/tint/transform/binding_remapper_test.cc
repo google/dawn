@@ -137,9 +137,9 @@ struct S {
   a : f32,
 };
 
-@group(2) @binding(1) var<storage, read> a : S;
+@group(2) @binding(1) var<storage, read_write> a : S;
 
-@group(3) @binding(2) var<storage, write> b : S;
+@group(3) @binding(2) var<storage, read_write> b : S;
 
 @group(4) @binding(3) var<storage, read> c : S;
 
@@ -153,9 +153,9 @@ struct S {
   a : f32,
 }
 
-@group(2) @binding(1) var<storage, write> a : S;
+@group(2) @binding(1) var<storage, read_write> a : S;
 
-@group(3) @binding(2) var<storage, write> b : S;
+@group(3) @binding(2) var<storage, read_write> b : S;
 
 @group(4) @binding(3) var<storage, read> c : S;
 
@@ -168,7 +168,7 @@ fn f() {
     data.Add<BindingRemapper::Remappings>(
         BindingRemapper::BindingPoints{},
         BindingRemapper::AccessControls{
-            {{2, 1}, ast::Access::kWrite},  // Modify access control
+            {{2, 1}, ast::Access::kReadWrite},  // Modify access control
             // Keep @group(3) @binding(2) as is
             {{4, 3}, ast::Access::kRead},  // Add access control
         });
@@ -197,9 +197,9 @@ struct S {
   a : f32,
 }
 
-@group(4) @binding(5) var<storage, write> a : S;
+@group(4) @binding(5) var<storage, read_write> a : S;
 
-@group(6) @binding(7) var<storage, write> b : S;
+@group(6) @binding(7) var<storage, read_write> b : S;
 
 @compute @workgroup_size(1)
 fn f() {
@@ -213,8 +213,8 @@ fn f() {
             {{3, 2}, {6, 7}},
         },
         BindingRemapper::AccessControls{
-            {{2, 1}, ast::Access::kWrite},
-            {{3, 2}, ast::Access::kWrite},
+            {{2, 1}, ast::Access::kReadWrite},
+            {{3, 2}, ast::Access::kReadWrite},
         });
     auto got = Run<BindingRemapper>(src, data);
 

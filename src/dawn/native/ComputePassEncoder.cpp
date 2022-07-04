@@ -62,7 +62,7 @@ ResultOrError<ComputePipelineBase*> GetOrCreateIndirectDispatchValidationPipelin
 
                 @group(0) @binding(0) var<uniform> uniformParams: UniformParams;
                 @group(0) @binding(1) var<storage, read_write> clientParams: IndirectParams;
-                @group(0) @binding(2) var<storage, write> validatedParams: ValidatedParams;
+                @group(0) @binding(2) var<storage, read_write> validatedParams: ValidatedParams;
 
                 @compute @workgroup_size(1, 1, 1)
                 fn main() {

@@ -351,7 +351,7 @@ struct S {
 
 var<private> a: S;
 @group(1) @binding(1) var<uniform> b: S;
-@group(1) @binding(2) var<storage, write> c: S;
+@group(1) @binding(2) var<storage, read_write> c: S;
 fn f() {
   let ptr_b = &b;
   *&a = *ptr_b;
@@ -422,7 +422,7 @@ struct S {
 };
 
 var<private> a: S;
-@group(0) @binding(0) var<storage, write> e: S;
+@group(0) @binding(0) var<storage, read_write> e: S;
 @group(1) @binding(1) var<uniform> b: S;
 fn f() {
   *&a = *&b;

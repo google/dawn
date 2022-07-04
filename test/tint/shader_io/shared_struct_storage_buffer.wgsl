@@ -5,7 +5,7 @@ struct S {
 };
 
 @group(0) @binding(0)
-var<storage, write> output : S;
+var<storage, read_write> output : S;
 
 @fragment
 fn frag_main(input : S) {

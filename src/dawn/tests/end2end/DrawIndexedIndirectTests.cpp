@@ -663,7 +663,7 @@ TEST_P(DrawIndexedIndirectTest, ValidateReusedBundleWithChangingParams) {
                 firstIndex: u32,
             }
             @group(0) @binding(0) var<uniform> input: Input;
-            @group(0) @binding(1) var<storage, write> params: Params;
+            @group(0) @binding(1) var<storage, read_write> params: Params;
             @compute @workgroup_size(1) fn main() {
                 params.indexCount = 3u;
                 params.instanceCount = 1u;

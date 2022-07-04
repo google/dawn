@@ -503,7 +503,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_WO_Storage
                                     Member("b", ty.f32()),
                                 });
 
-    GlobalVar("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kWrite,
+    GlobalVar("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
               ast::AttributeList{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(1u),

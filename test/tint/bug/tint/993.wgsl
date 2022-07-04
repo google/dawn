@@ -7,7 +7,7 @@
  struct Result {
   value: u32,
 };
-@group(1) @binding(1) var<storage, write> result: Result;
+@group(1) @binding(1) var<storage, read_write> result: Result;
 
  struct TestData {
   data: array<atomic<i32>,3>,

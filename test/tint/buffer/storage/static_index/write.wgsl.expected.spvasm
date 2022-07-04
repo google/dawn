@@ -39,7 +39,6 @@
                OpMemberDecorate %Inner 0 Offset 0
                OpMemberDecorate %S 9 Offset 108
                OpDecorate %_arr_Inner_uint_4 ArrayStride 4
-               OpDecorate %s NonReadable
                OpDecorate %s Binding 0
                OpDecorate %s DescriptorSet 0
         %int = OpTypeInt 32 1
