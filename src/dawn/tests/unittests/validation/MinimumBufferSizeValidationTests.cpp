@@ -541,7 +541,7 @@ TEST_F(MinBufferSizeDefaultLayoutTests, DefaultLayoutVariousWGSLTypes) {
     CheckShaderBindingSizeReflection({{{0, 0, "a : f32,", "f32", "a", 4},
                                        {0, 1, "b : array<f32>,", "f32", "b[0]", 4},
                                        {0, 2, "c : mat2x2<f32>,", "mat2x2<f32>", "c", 16}}});
-    CheckShaderBindingSizeReflection({{{0, 3, "d : u32; e : array<f32>,", "u32", "d", 8},
+    CheckShaderBindingSizeReflection({{{0, 3, "d : u32, e : array<f32>,", "u32", "d", 8},
                                        {0, 4, "f : ThreeFloats,", "f32", "f.f1", 12},
                                        {0, 5, "g : array<ThreeFloats>,", "f32", "g[0].f1", 12}}});
 }

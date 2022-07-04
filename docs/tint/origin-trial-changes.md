@@ -12,6 +12,7 @@
 * The `smoothStep()` builtin has been removed (use `smoothstep` instead). [tint:1483](crbug.com/tint/1483)
 * Module-scope `let` has been replaced with module-scope `const`. [tint:1580](crbug.com/tint/1584)
   * Note: Module-scope `const` does not support structure types. Use `var<private>` if you need a module-scope structure type.
+* Struct members can no longer be separated with semicolons (use commas instead). [tint:1475](crbug.com/tint/1475)
 
 ### Deprecated Features
 

@@ -46,19 +46,19 @@ ResultOrError<ComputePipelineBase*> GetOrCreateIndirectDispatchValidationPipelin
     Ref<ShaderModuleBase> shaderModule;
     DAWN_TRY_ASSIGN(shaderModule, utils::CreateShaderModule(device, R"(
                 struct UniformParams {
-                    maxComputeWorkgroupsPerDimension: u32;
-                    clientOffsetInU32: u32;
-                    enableValidation: u32;
-                    duplicateNumWorkgroups: u32;
-                };
+                    maxComputeWorkgroupsPerDimension: u32,
+                    clientOffsetInU32: u32,
+                    enableValidation: u32,
+                    duplicateNumWorkgroups: u32,
+                }
 
                 struct IndirectParams {
-                    data: array<u32>;
-                };
+                    data: array<u32>
+                }
 
                 struct ValidatedParams {
-                    data: array<u32>;
-                };
+                    data: array<u32>
+                }
 
                 @group(0) @binding(0) var<uniform> uniformParams: UniformParams;
                 @group(0) @binding(1) var<storage, read_write> clientParams: IndirectParams;

@@ -1348,12 +1348,6 @@ Expect<ast::StructMemberList> ParserImpl::expect_struct_body_decl() {
                 members.push_back(member.value);
             }
 
-            // TODO(crbug.com/tint/1475): Remove support for semicolons.
-            if (auto sc = peek(); sc.Is(Token::Type::kSemicolon)) {
-                deprecated(sc.source(), "struct members should be separated with commas");
-                next();
-                continue;
-            }
             if (!match(Token::Type::kComma)) {
                 break;
             }

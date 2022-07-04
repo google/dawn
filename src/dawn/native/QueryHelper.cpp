@@ -40,25 +40,25 @@ static_assert(offsetof(dawn::native::TimestampParams, rightShift) == 16);
 
 static const char sConvertTimestampsToNanoseconds[] = R"(
             struct Timestamp {
-                low  : u32;
-                high : u32;
-            };
+                low  : u32,
+                high : u32,
+            }
 
             struct TimestampArr {
-                t : array<Timestamp>;
-            };
+                t : array<Timestamp>
+            }
 
             struct AvailabilityArr {
-                v : array<u32>;
-            };
+                v : array<u32>
+            }
 
             struct TimestampParams {
-                first  : u32;
-                count  : u32;
-                offset : u32;
-                multiplier : u32;
-                right_shift  : u32;
-            };
+                first  : u32,
+                count  : u32,
+                offset : u32,
+                multiplier : u32,
+                right_shift  : u32,
+            }
 
             @group(0) @binding(0) var<storage, read_write> timestamps : TimestampArr;
             @group(0) @binding(1) var<storage, read> availability : AvailabilityArr;
