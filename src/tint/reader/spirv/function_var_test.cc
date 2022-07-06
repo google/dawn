@@ -1418,65 +1418,6 @@ return;
     EXPECT_EQ(expect, got);
 }
 
-TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_ValueFromBlockNotInBlockOrderIgnored) {
-    // From crbug.com/tint/804
-    const auto assembly = Preamble() + R"(
-     %float_42 = OpConstant %float 42.0
-     %cond = OpUndef %bool
-
-     %100 = OpFunction %void None %voidfn
-     %10 = OpLabel
-     OpBranch %30
-
-     ; unreachable
-     %20 = OpLabel
-     %499 = OpFAdd %float %float_42 %float_42
-     %500 = OpFAdd %float %499 %float_42
-     OpBranch %25
-
-     %25 = OpLabel
-     OpBranch %80
-
-
-     %30 = OpLabel
-     OpLoopMerge %90 %80 None
-     OpBranchConditional %cond %90 %40
-
-     %40 = OpLabel
-     OpBranch %90
-
-     %80 = OpLabel ; unreachable continue target
-                ; but "dominated" by %20 and %25
-     %81 = OpPhi %float %500 %25
-     OpBranch %30 ; backedge
-
-     %90 = OpLabel
-     OpReturn
-     OpFunctionEnd
-)";
-    auto p = parser(test::Assemble(assembly));
-    ASSERT_TRUE(p->BuildAndParseInternalModule()) << p->error() << assembly;
-    auto fe = p->function_emitter(100);
-    EXPECT_TRUE(fe.EmitBody()) << p->error();
-
-    const auto* expected = R"(loop {
-  if (false) {
-    break;
-  }
-  break;
-
-  continuing {
-    var x_81_phi_1 : f32;
-    let x_81 : f32 = x_81_phi_1;
-  }
-}
-return;
-)";
-    auto ast_body = fe.ast_body();
-    const auto got = test::ToString(p->program(), ast_body);
-    EXPECT_EQ(got, expected);
-}
-
 TEST_F(SpvParserFunctionVarTest, EmitStatement_Hoist_CompositeInsert) {
     // From crbug.com/tint/804
     const auto assembly = Preamble() + R"(

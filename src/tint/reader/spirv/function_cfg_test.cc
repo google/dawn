@@ -3188,6 +3188,9 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_MultiBlockLoop_HeaderIsConti
     EXPECT_EQ(fe.GetBlockInfo(40)->construct, constructs[1].get());
     EXPECT_EQ(fe.GetBlockInfo(50)->construct, constructs[1].get());
     EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
+    
+    // SPIR-V 1.6 Rev 2 made this invalid SPIR-V.
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_MergeBlockIsAlsoSingleBlockLoop) {
@@ -4726,6 +4729,12 @@ TEST_F(
     ASSERT_NE(bi50, nullptr);
     EXPECT_EQ(bi50->succ_edge.count(20), 1u);
     EXPECT_EQ(bi50->succ_edge[20], EdgeKind::kBack);
+
+    // SPIR-V 1.6 Rev 2 made this invalid SPIR-V.
+    // The continue target also has the LoopMerge in it, but the continue
+    // target 20 is not structurally post-dominated by the back-edge block 50.
+    // Don't dump this as an end-to-end test.
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserCFGTest, ClassifyCFGEdges_PrematureExitFromContinueConstruct) {
@@ -8640,6 +8649,9 @@ var_1 = 3u;
 return;
 )";
     ASSERT_EQ(expect, got);
+
+    // Continue target does not structurally dominate the backedge block.
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserCFGTest, EmitBody_Loop_Never) {
@@ -12608,6 +12620,11 @@ TEST_F(SpvParserCFGTest, SiblingLoopConstruct_ContinueIsWholeMultiBlockLoop) {
     const Construct* c = fe.GetBlockInfo(20)->construct;
     EXPECT_EQ(c->kind, Construct::kContinue);
     EXPECT_EQ(fe.SiblingLoopConstruct(c), nullptr);
+
+    // SPIR-V 1.6 Rev 2 made this invalid SPIR-V.
+    // Continue target is not structurally post dominated by the backedge block.
+    // Don't dump this as an end-to-end test.
+    p->DeliberatelyInvalidSpirv();
 }
 
 TEST_F(SpvParserCFGTest, SiblingLoopConstruct_HasSiblingLoop) {
