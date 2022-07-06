@@ -17,7 +17,7 @@ Dawn uses the Chromium build system and dependency management so you need to [in
 
 ### Fetch dependencies
 
-First, the steps are similar to [`doc/building.md`](../../docs/dawn/building.md), but instead of the `Get the code` step, run:
+First, the steps are similar to [`docs/building.md`](../../../docs/building.md), but instead of the `Get the code` step, run:
 
 ```sh
 # Clone the repo as "dawn"
