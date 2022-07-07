@@ -1706,7 +1706,10 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     auto* call = builder_->create<sem::Call>(expr, builtin.sem, std::move(args), current_statement_,
                                              constant, has_side_effects);
 
-    current_function_->AddDirectlyCalledBuiltin(builtin.sem);
+    if (current_function_) {
+        current_function_->AddDirectlyCalledBuiltin(builtin.sem);
+        current_function_->AddDirectCall(call);
+    }
 
     if (!validator_.RequiredExtensionForBuiltinFunction(call, enabled_extensions_)) {
         return nullptr;
@@ -1722,8 +1725,6 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     if (!validator_.BuiltinCall(call)) {
         return nullptr;
     }
-
-    current_function_->AddDirectCall(call);
 
     return call;
 }
