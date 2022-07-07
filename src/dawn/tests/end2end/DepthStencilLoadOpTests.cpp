@@ -178,11 +178,6 @@ class DepthStencilLoadOpTests : public DawnTestWithParams<DepthStencilLoadOpTest
 
 // Check that clearing a mip level works at all.
 TEST_P(DepthStencilLoadOpTests, ClearMip0) {
-    // TODO(https://issuetracker.google.com/issues/204919030): SwiftShader does not clear
-    // Depth16Unorm correctly with some values.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsSwiftshader() &&
-                          GetParam().mFormat == wgpu::TextureFormat::Depth16Unorm);
-
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.BeginRenderPass(&renderPassDescriptors[0]).End();
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
@@ -214,11 +209,6 @@ TEST_P(DepthStencilLoadOpTests, ClearBothMip0Then1) {
     // TODO(crbug.com/dawn/838): Sampling from the non-zero mip does not work.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && GetParam().mCheck == Check::SampleDepth);
 
-    // TODO(https://issuetracker.google.com/issues/204919030): SwiftShader does not clear
-    // Depth16Unorm correctly with some values.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsSwiftshader() &&
-                          GetParam().mFormat == wgpu::TextureFormat::Depth16Unorm);
-
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.BeginRenderPass(&renderPassDescriptors[0]).End();
     encoder.BeginRenderPass(&renderPassDescriptors[1]).End();
@@ -233,11 +223,6 @@ TEST_P(DepthStencilLoadOpTests, ClearBothMip0Then1) {
 TEST_P(DepthStencilLoadOpTests, ClearBothMip1Then0) {
     // TODO(crbug.com/dawn/838): Sampling from the non-zero mip does not work.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && GetParam().mCheck == Check::SampleDepth);
-
-    // TODO(https://issuetracker.google.com/issues/204919030): SwiftShader does not clear
-    // Depth16Unorm correctly with some values.
-    DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsSwiftshader() &&
-                          GetParam().mFormat == wgpu::TextureFormat::Depth16Unorm);
 
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.BeginRenderPass(&renderPassDescriptors[1]).End();
