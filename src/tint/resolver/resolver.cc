@@ -456,6 +456,9 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
     if (ty) {
         // If an explicit type was specified, materialize to that type
         rhs = Materialize(rhs, ty);
+        if (!rhs) {
+            return nullptr;
+        }
     } else {
         // If no type was specified, infer it from the RHS
         ty = rhs->Type();
