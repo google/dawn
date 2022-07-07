@@ -17,11 +17,14 @@
 
 #include "src/tint/program_builder.h"
 
-// Forward Declarations
+// Forward declarations
 namespace tint::ast {
 class CallExpression;
 class Expression;
 }  // namespace tint::ast
+namespace tint::sem {
+class Call;
+}  // namespace tint::sem
 
 namespace tint::writer {
 

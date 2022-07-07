@@ -20,13 +20,10 @@
 // Forward declarations
 namespace tint::ast {
 class Array;
-class CallExpression;
 class Expression;
 class ForLoopStatement;
 class Function;
 class IfStatement;
-class IndexAccessorExpression;
-class MemberAccessorExpression;
 class Node;
 class Override;
 class Statement;
@@ -40,13 +37,10 @@ class WhileStatement;
 }  // namespace tint::ast
 namespace tint::sem {
 class Array;
-class Call;
 class Expression;
 class ForLoopStatement;
 class Function;
 class IfStatement;
-class IndexAccessorExpression;
-class MemberAccessorExpression;
 class Node;
 class GlobalVariable;
 class Statement;
@@ -71,8 +65,6 @@ struct TypeMappings {
     ForLoopStatement* operator()(ast::ForLoopStatement*);
     Function* operator()(ast::Function*);
     IfStatement* operator()(ast::IfStatement*);
-    IndexAccessorExpression* operator()(ast::IndexAccessorExpression*);
-    MemberAccessorExpression* operator()(ast::MemberAccessorExpression*);
     Node* operator()(ast::Node*);
     GlobalVariable* operator()(ast::Override*);
     Statement* operator()(ast::Statement*);

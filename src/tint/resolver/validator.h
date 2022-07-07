@@ -51,6 +51,7 @@ class Array;
 class Atomic;
 class BlockStatement;
 class Builtin;
+class Call;
 class CaseStatement;
 class ForLoopStatement;
 class IfStatement;
