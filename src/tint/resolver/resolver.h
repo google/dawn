@@ -209,15 +209,17 @@ class Resolver {
     /// These methods are called from the expression resolving methods, and so child-expression
     /// nodes are guaranteed to have been already resolved and any constant values calculated.
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    const sem::Constant* EvaluateConstantValue(const ast::Expression* expr, const sem::Type* type);
-    const sem::Constant* EvaluateConstantValue(const ast::IdentifierExpression* ident,
-                                               const sem::Type* type);
-    const sem::Constant* EvaluateConstantValue(const ast::LiteralExpression* literal,
-                                               const sem::Type* type);
-    const sem::Constant* EvaluateConstantValue(const ast::CallExpression* call,
-                                               const sem::Type* type);
-    const sem::Constant* EvaluateConstantValue(const ast::IndexAccessorExpression* call,
-                                               const sem::Type* type);
+    const sem::Constant* EvaluateBinaryValue(const sem::Expression* lhs,
+                                             const sem::Expression* rhs,
+                                             const IntrinsicTable::BinaryOperator&);
+    const sem::Constant* EvaluateBitcastValue(const sem::Expression*, const sem::Type*);
+    const sem::Constant* EvaluateCtorOrConvValue(
+        const std::vector<const sem::Expression*>& args,
+        const sem::Type* ty);  // Note: ty is not an array or structure
+    const sem::Constant* EvaluateIndexValue(const sem::Expression* obj, const sem::Expression* idx);
+    const sem::Constant* EvaluateLiteralValue(const ast::LiteralExpression*, const sem::Type*);
+    const sem::Constant* EvaluateUnaryValue(const sem::Expression*,
+                                            const IntrinsicTable::UnaryOperator&);
 
     /// The result type of a ConstantEvaluation method.
     /// Can be one of three distinct values:

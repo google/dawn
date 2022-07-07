@@ -21,6 +21,7 @@
 #include "src/tint/sem/constant.h"
 #include "src/tint/sem/type_constructor.h"
 #include "src/tint/utils/compiler_macros.h"
+#include "src/tint/utils/transform.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -354,26 +355,8 @@ const Constant* CreateComposite(ProgramBuilder& builder,
 
 }  // namespace
 
-const sem::Constant* Resolver::EvaluateConstantValue(const ast::Expression* expr,
-                                                     const sem::Type* type) {
-    return Switch(
-        expr,  //
-        [&](const ast::IdentifierExpression* e) { return EvaluateConstantValue(e, type); },
-        [&](const ast::LiteralExpression* e) { return EvaluateConstantValue(e, type); },
-        [&](const ast::CallExpression* e) { return EvaluateConstantValue(e, type); },
-        [&](const ast::IndexAccessorExpression* e) { return EvaluateConstantValue(e, type); });
-}
-
-const sem::Constant* Resolver::EvaluateConstantValue(const ast::IdentifierExpression* ident,
-                                                     const sem::Type*) {
-    if (auto* sem = builder_->Sem().Get(ident)) {
-        return sem->ConstantValue();
-    }
-    return {};
-}
-
-const sem::Constant* Resolver::EvaluateConstantValue(const ast::LiteralExpression* literal,
-                                                     const sem::Type* type) {
+const sem::Constant* Resolver::EvaluateLiteralValue(const ast::LiteralExpression* literal,
+                                                    const sem::Type* type) {
     return Switch(
         literal,
         [&](const ast::BoolLiteralExpression* lit) {
@@ -403,14 +386,11 @@ const sem::Constant* Resolver::EvaluateConstantValue(const ast::LiteralExpressio
         });
 }
 
-const sem::Constant* Resolver::EvaluateConstantValue(const ast::CallExpression* call,
-                                                     const sem::Type* ty) {
-    // Note: we are building constant values for array types. The working group as verbally agreed
-    // to support constant expression arrays, but this is not (yet) part of the spec.
-    // See: https://github.com/gpuweb/gpuweb/issues/3056
-
+const sem::Constant* Resolver::EvaluateCtorOrConvValue(
+    const std::vector<const sem::Expression*>& args,
+    const sem::Type* ty) {
     // For zero value init, return 0s
-    if (call->args.empty()) {
+    if (args.empty()) {
         return ZeroValue(*builder_, ty);
     }
 
@@ -420,16 +400,10 @@ const sem::Constant* Resolver::EvaluateConstantValue(const ast::CallExpression* 
         return nullptr;  // Target type does not support constant values
     }
 
-    // value_of returns a `const Constant*` for the expression `expr`, or nullptr if the expression
-    // does not have a constant value.
-    auto value_of = [&](const ast::Expression* expr) {
-        return static_cast<const Constant*>(builder_->Sem().Get(expr)->ConstantValue());
-    };
-
-    if (call->args.size() == 1) {
+    if (args.size() == 1) {
         // Type constructor or conversion that takes a single argument.
-        auto& src = call->args[0]->source;
-        auto* arg = value_of(call->args[0]);
+        auto& src = args[0]->Declaration()->source;
+        auto* arg = static_cast<const Constant*>(args[0]->ConstantValue());
         if (!arg) {
             return nullptr;  // Single argument is not constant.
         }
@@ -463,8 +437,8 @@ const sem::Constant* Resolver::EvaluateConstantValue(const ast::CallExpression* 
 
     // Helper for pushing all the argument constants to `els`.
     auto push_all_args = [&] {
-        for (auto* expr : call->args) {
-            auto* arg = value_of(expr);
+        for (auto* expr : args) {
+            auto* arg = static_cast<const Constant*>(expr->ConstantValue());
             if (!arg) {
                 return;
             }
@@ -472,13 +446,15 @@ const sem::Constant* Resolver::EvaluateConstantValue(const ast::CallExpression* 
         }
     };
 
+    // TODO(crbug.com/tint/1611): Add structure support.
+
     Switch(
         ty,  // What's the target type being constructed?
         [&](const sem::Vector*) {
             // Vector can be constructed with a mix of scalars / abstract numerics and smaller
             // vectors.
-            for (auto* expr : call->args) {
-                auto* arg = value_of(expr);
+            for (auto* expr : args) {
+                auto* arg = static_cast<const Constant*>(expr->ConstantValue());
                 if (!arg) {
                     return;
                 }
@@ -500,13 +476,14 @@ const sem::Constant* Resolver::EvaluateConstantValue(const ast::CallExpression* 
         [&](const sem::Matrix* m) {
             // Matrix can be constructed with a set of scalars / abstract numerics, or column
             // vectors.
-            if (call->args.size() == m->columns() * m->rows()) {
+            if (args.size() == m->columns() * m->rows()) {
                 // Matrix built from scalars / abstract numerics
                 for (uint32_t c = 0; c < m->columns(); c++) {
                     std::vector<const Constant*> column;
                     column.reserve(m->rows());
                     for (uint32_t r = 0; r < m->rows(); r++) {
-                        auto* arg = value_of(call->args[r + c * m->rows()]);
+                        auto* arg =
+                            static_cast<const Constant*>(args[r + c * m->rows()]->ConstantValue());
                         if (!arg) {
                             return;
                         }
@@ -514,7 +491,7 @@ const sem::Constant* Resolver::EvaluateConstantValue(const ast::CallExpression* 
                     }
                     els.push_back(CreateComposite(*builder_, m->ColumnType(), std::move(column)));
                 }
-            } else if (call->args.size() == m->columns()) {
+            } else if (args.size() == m->columns()) {
                 // Matrix built from column vectors
                 push_all_args();
             }
@@ -532,24 +509,14 @@ const sem::Constant* Resolver::EvaluateConstantValue(const ast::CallExpression* 
     return CreateComposite(*builder_, ty, std::move(els));
 }
 
-const sem::Constant* Resolver::EvaluateConstantValue(const ast::IndexAccessorExpression* accessor,
-                                                     const sem::Type*) {
-    auto* obj_sem = builder_->Sem().Get(accessor->object);
-    if (!obj_sem) {
-        return {};
-    }
-
-    auto obj_val = obj_sem->ConstantValue();
+const sem::Constant* Resolver::EvaluateIndexValue(const sem::Expression* obj_expr,
+                                                  const sem::Expression* idx_expr) {
+    auto obj_val = obj_expr->ConstantValue();
     if (!obj_val) {
         return {};
     }
 
-    auto* idx_sem = builder_->Sem().Get(accessor->index);
-    if (!idx_sem) {
-        return {};
-    }
-
-    auto idx_val = idx_sem->ConstantValue();
+    auto idx_val = idx_expr->ConstantValue();
     if (!idx_val) {
         return {};
     }
@@ -563,11 +530,29 @@ const sem::Constant* Resolver::EvaluateConstantValue(const ast::IndexAccessorExp
         AddWarning("index " + std::to_string(idx) + " out of bounds [0.." +
                        std::to_string(el_count - 1) + "]. Clamping index to " +
                        std::to_string(clamped),
-                   accessor->index->source);
+                   idx_expr->Declaration()->source);
         idx = clamped;
     }
 
     return obj_val->Index(static_cast<size_t>(idx));
+}
+
+const sem::Constant* Resolver::EvaluateBitcastValue(const sem::Expression*, const sem::Type*) {
+    // TODO(crbug.com/tint/1581): Implement @const intrinsics
+    return nullptr;
+}
+
+const sem::Constant* Resolver::EvaluateBinaryValue(const sem::Expression*,
+                                                   const sem::Expression*,
+                                                   const IntrinsicTable::BinaryOperator&) {
+    // TODO(crbug.com/tint/1581): Implement @const intrinsics
+    return nullptr;
+}
+
+const sem::Constant* Resolver::EvaluateUnaryValue(const sem::Expression*,
+                                                  const IntrinsicTable::UnaryOperator&) {
+    // TODO(crbug.com/tint/1581): Implement @const intrinsics
+    return nullptr;
 }
 
 utils::Result<const sem::Constant*> Resolver::ConvertValue(const sem::Constant* value,
