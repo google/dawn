@@ -47,7 +47,7 @@ class Variable : public Castable<Variable, Node> {
     /// @param type the variable type
     /// @param storage_class the variable storage class
     /// @param access the variable access control type
-    /// @param constant_value the constant value for the variable. May be invalid
+    /// @param constant_value the constant value for the variable. May be null
     Variable(const ast::Variable* declaration,
              const sem::Type* type,
              ast::StorageClass storage_class,
@@ -105,7 +105,7 @@ class LocalVariable final : public Castable<LocalVariable, Variable> {
     /// @param storage_class the variable storage class
     /// @param access the variable access control type
     /// @param statement the statement that declared this local variable
-    /// @param constant_value the constant value for the variable. May be invalid
+    /// @param constant_value the constant value for the variable. May be null
     LocalVariable(const ast::Variable* declaration,
                   const sem::Type* type,
                   ast::StorageClass storage_class,
@@ -139,7 +139,7 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
     /// @param type the variable type
     /// @param storage_class the variable storage class
     /// @param access the variable access control type
-    /// @param constant_value the constant value for the variable. May be invalid
+    /// @param constant_value the constant value for the variable. May be null
     /// @param binding_point the optional resource binding point of the variable
     GlobalVariable(const ast::Variable* declaration,
                    const sem::Type* type,

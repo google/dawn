@@ -39,7 +39,7 @@ float4x4 getFrameData_f1_(inout float frameID) {
   const float4 x_40 = frameMapTexture.SampleBias(frameMapSampler, float2(fX, 0.0f), 0.0f);
   const float4 x_47 = frameMapTexture.SampleBias(frameMapSampler, float2(fX, 0.25f), 0.0f);
   const float4 x_54 = frameMapTexture.SampleBias(frameMapSampler, float2(fX, 0.5f), 0.0f);
-  return float4x4(float4(x_40.x, x_40.y, x_40.z, x_40.w), float4(x_47.x, x_47.y, x_47.z, x_47.w), float4(x_54.x, x_54.y, x_54.z, x_54.w), float4((0.0f).xxxx.x, (0.0f).xxxx.y, (0.0f).xxxx.z, (0.0f).xxxx.w));
+  return float4x4(float4(x_40.x, x_40.y, x_40.z, x_40.w), float4(x_47.x, x_47.y, x_47.z, x_47.w), float4(x_54.x, x_54.y, x_54.z, x_54.w), (0.0f).xxxx);
 }
 
 void main_1() {

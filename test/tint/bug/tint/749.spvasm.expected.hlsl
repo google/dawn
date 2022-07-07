@@ -14,7 +14,7 @@ void swap_i1_i1_(inout int i, inout int j) {
   const int x_932 = temp;
   temp = 0;
   temp = x_932;
-  const float3 x_523 = float3(float3(1.0f, 2.0f, 3.0f).z, float3(1.0f, 2.0f, 3.0f).y, float3(1.0f, 2.0f, 3.0f).z);
+  const float3 x_523 = float3(3.0f, 2.0f, 3.0f);
   const int x_933 = i;
   i = 0;
   i = x_933;
@@ -46,7 +46,7 @@ void swap_i1_i1_(inout int i, inout int j) {
   const int x_938 = j;
   j = 0;
   j = x_938;
-  const float3 x_525 = float3(x_523.z, float3(1.0f, 2.0f, 3.0f).x, x_523.y);
+  const float3 x_525 = float3(x_523.z, 1.0f, x_523.y);
   const int x_939 = i;
   i = 0;
   i = x_939;
@@ -192,7 +192,7 @@ int performPartition_i1_i1_(inout int l, inout int h) {
   const int x_955 = param_3;
   param_3 = 0;
   param_3 = x_955;
-  const float3 x_534 = float3(float3(1.0f, 2.0f, 3.0f).z, float3(1.0f, 2.0f, 3.0f).x, float3(1.0f, 2.0f, 3.0f).z);
+  const float3 x_534 = float3(3.0f, 1.0f, 3.0f);
   const int x_956 = param_1;
   param_1 = 0;
   param_1 = x_956;
@@ -228,7 +228,7 @@ int performPartition_i1_i1_(inout int l, inout int h) {
     const int x_963 = pivot;
     pivot = 0;
     pivot = x_963;
-    x_537 = float2(float3(1.0f, 2.0f, 3.0f).y, float3(1.0f, 2.0f, 3.0f).z);
+    x_537 = float2(2.0f, 3.0f);
     const QuicksortObject x_964 = obj;
     const int tint_symbol_60[10] = (int[10])0;
     const QuicksortObject tint_symbol_61 = {tint_symbol_60};
@@ -279,7 +279,7 @@ int performPartition_i1_i1_(inout int l, inout int h) {
     obj = tint_symbol_63;
     obj = x_972;
     const int x_63 = pivot;
-    const float2 x_540 = float2(float3(1.0f, 2.0f, 3.0f).y, x_534.z);
+    const float2 x_540 = float2(2.0f, x_534.z);
     const int x_973 = i_1;
     i_1 = 0;
     i_1 = x_973;
@@ -310,7 +310,7 @@ int performPartition_i1_i1_(inout int l, inout int h) {
       const int x_980 = l;
       l = 0;
       l = x_980;
-      const float3 x_544 = float3(float3(1.0f, 2.0f, 3.0f).z, float3(1.0f, 2.0f, 3.0f).y, x_540.x);
+      const float3 x_544 = float3(3.0f, 2.0f, x_540.x);
       const int x_70 = i_1;
       const float2 x_545 = float2(x_537.y, x_538.x);
       const int x_981 = param;
@@ -434,7 +434,7 @@ int performPartition_i1_i1_(inout int l, inout int h) {
   const int x_1003 = l;
   l = 0;
   l = x_1003;
-  const float2 x_554 = float2(x_536.z, float3(1.0f, 2.0f, 3.0f).y);
+  const float2 x_554 = float2(x_536.z, 2.0f);
   const int x_1004 = param_1;
   param_1 = 0;
   param_1 = x_1004;
@@ -466,7 +466,7 @@ void quicksort_() {
   const int tint_symbol_68[10] = (int[10])0;
   stack = tint_symbol_68;
   stack = x_1008;
-  const float2 x_556 = float2(float3(1.0f, 2.0f, 3.0f).y, float3(1.0f, 2.0f, 3.0f).y);
+  const float2 x_556 = (2.0f).xx;
   const int x_1009 = param_5;
   param_5 = 0;
   param_5 = x_1009;
@@ -475,7 +475,7 @@ void quicksort_() {
   p = 0;
   p = x_1010;
   const int x_93 = top;
-  const float2 x_557 = float2(float3(1.0f, 2.0f, 3.0f).x, float3(1.0f, 2.0f, 3.0f).x);
+  const float2 x_557 = (1.0f).xx;
   const int x_1011 = p;
   p = 0;
   p = x_1011;
@@ -519,7 +519,7 @@ void quicksort_() {
   const int x_1020 = param_4;
   param_4 = 0;
   param_4 = x_1020;
-  const float3 x_562 = float3(float3(1.0f, 2.0f, 3.0f).z, x_558.y, float3(1.0f, 2.0f, 3.0f).y);
+  const float3 x_562 = float3(3.0f, x_558.y, 2.0f);
   const int x_1021 = stack[x_96_save];
   stack[x_96_save] = 0;
   stack[x_96_save] = x_1021;
@@ -622,7 +622,7 @@ void quicksort_() {
     const int x_1043 = stack[x_100_save];
     stack[x_100_save] = 0;
     stack[x_100_save] = x_1043;
-    const float2 x_573 = float2(float3(1.0f, 2.0f, 3.0f).y, float3(1.0f, 2.0f, 3.0f).z);
+    const float2 x_573 = float2(2.0f, 3.0f);
     top = (x_112 - 1);
     const int x_1044 = param_5;
     param_5 = 0;
@@ -654,7 +654,7 @@ void quicksort_() {
     stack[x_110_save] = x_1050;
     const float2 x_577 = float2(x_569.y, x_569.z);
     const int x_120 = h_1;
-    const float2 x_578 = float2(x_558.x, float3(1.0f, 2.0f, 3.0f).y);
+    const float2 x_578 = float2(x_558.x, 2.0f);
     param_5 = x_120;
     const int x_1051 = stack[x_100_save];
     stack[x_100_save] = 0;
@@ -764,7 +764,7 @@ void quicksort_() {
     const int x_1076 = stack[x_96_save];
     stack[x_96_save] = 0;
     stack[x_96_save] = x_1076;
-    const float2 x_592 = float2(float3(1.0f, 2.0f, 3.0f).x, float3(1.0f, 2.0f, 3.0f).y);
+    const float2 x_592 = float2(1.0f, 2.0f);
     const QuicksortObject x_1077 = obj;
     const int tint_symbol_80[10] = (int[10])0;
     const QuicksortObject tint_symbol_81 = {tint_symbol_80};
@@ -909,7 +909,7 @@ void main_1() {
     const QuicksortObject tint_symbol_89 = {tint_symbol_88};
     obj = tint_symbol_89;
     obj = x_722;
-    const float2 x_431 = float2(float3(1.0f, 2.0f, 3.0f).x, float3(1.0f, 2.0f, 3.0f).x);
+    const float2 x_431 = (1.0f).xx;
     const int x_158 = i_2;
     const float2 x_723 = uv;
     uv = (0.0f).xx;
@@ -929,7 +929,7 @@ void main_1() {
   const QuicksortObject tint_symbol_93 = {tint_symbol_92};
   obj = tint_symbol_93;
   obj = x_756;
-  const float2 x_446 = float2((0.0f).xx.x, (0.0f).xx.x);
+  const float2 x_446 = (0.0f).xx;
   const int x_757 = i_2;
   i_2 = 0;
   i_2 = x_757;
@@ -943,7 +943,7 @@ void main_1() {
   const float2 x_759 = uv;
   uv = (0.0f).xx;
   uv = x_759;
-  const float2 x_447 = float2((0.0f).xx.y, (0.0f).xx.y);
+  const float2 x_447 = (0.0f).xx;
   const float2 x_760 = uv;
   uv = (0.0f).xx;
   uv = x_760;
@@ -963,7 +963,7 @@ void main_1() {
   const QuicksortObject tint_symbol_99 = {tint_symbol_98};
   obj = tint_symbol_99;
   obj = x_763;
-  const float3 x_449 = float3(x_184.y, float3(1.0f, 2.0f, 3.0f).z, x_184.w);
+  const float3 x_449 = float3(x_184.y, 3.0f, x_184.w);
   const float3 x_764 = color;
   color = (0.0f).xxx;
   color = x_764;
@@ -1007,7 +1007,7 @@ void main_1() {
   const float x_773 = color.x;
   color.x = 0.0f;
   color.x = x_773;
-  const float2 x_452 = float2(float3(1.0f, 2.0f, 3.0f).z, float3(1.0f, 2.0f, 3.0f).y);
+  const float2 x_452 = float2(3.0f, 2.0f);
   const int x_774 = i_2;
   i_2 = 0;
   i_2 = x_774;
@@ -1042,7 +1042,7 @@ void main_1() {
     const int x_781 = obj.numbers[0u];
     obj.numbers[0u] = 0;
     obj.numbers[0u] = x_781;
-    const float3 x_456 = float3((0.0f).xx.y, x_448.y, x_448.y);
+    const float3 x_456 = float3(0.0f, x_448.y, x_448.y);
     const float x_782 = uv.x;
     uv.x = 0.0f;
     uv.x = x_782;
@@ -1061,7 +1061,7 @@ void main_1() {
     const QuicksortObject tint_symbol_113 = {tint_symbol_112};
     obj = tint_symbol_113;
     obj = x_785;
-    const float2 x_458 = float2(float3(1.0f, 2.0f, 3.0f).z, (0.0f).xx.y);
+    const float2 x_458 = float2(3.0f, 0.0f);
     const int x_786 = i_2;
     i_2 = 0;
     i_2 = x_786;
@@ -1101,7 +1101,7 @@ void main_1() {
   const float x_796 = uv.x;
   uv.x = 0.0f;
   uv.x = x_796;
-  const float2 x_461 = float2((0.0f).xx.y, (0.0f).xx.y);
+  const float2 x_461 = (0.0f).xx;
   const float x_797 = uv.x;
   uv.x = 0.0f;
   uv.x = x_797;
@@ -1145,7 +1145,7 @@ void main_1() {
     const int x_808 = i_2;
     i_2 = 0;
     i_2 = x_808;
-    const float2 x_466 = float2(x_455.y, (0.0f).xx.y);
+    const float2 x_466 = float2(x_455.y, 0.0f);
     const int x_809 = i_2;
     i_2 = 0;
     i_2 = x_809;
@@ -1199,7 +1199,7 @@ void main_1() {
     const int x_822 = obj.numbers[0u];
     obj.numbers[0u] = 0;
     obj.numbers[0u] = x_822;
-    const float2 x_470 = float2((0.0f).xx.x, (0.0f).xx.y);
+    const float2 x_470 = (0.0f).xx;
     const float x_823 = color.z;
     color.z = 0.0f;
     color.z = x_823;
@@ -1241,7 +1241,7 @@ void main_1() {
   color.x = x_832;
   const float2 x_476 = float2(x_451.z, x_460.y);
   color.y = (x_257 + float(x_254));
-  const float3 x_477 = float3((0.0f).xx.x, x_472.x, (0.0f).xx.y);
+  const float3 x_477 = float3(0.0f, x_472.x, 0.0f);
   const float x_833 = uv.x;
   uv.x = 0.0f;
   uv.x = x_833;
@@ -1256,14 +1256,14 @@ void main_1() {
   const int x_836 = i_2;
   i_2 = 0;
   i_2 = x_836;
-  const float3 x_479 = float3((0.0f).xx.y, x_454.y, (0.0f).xx.x);
+  const float3 x_479 = float3(0.0f, x_454.y, 0.0f);
   const int x_837 = obj.numbers[0u];
   obj.numbers[0u] = 0;
   obj.numbers[0u] = x_837;
   const float x_838 = color.y;
   color.y = 0.0f;
   color.y = x_838;
-  const float3 x_480 = float3(x_446.x, x_446.x, (0.0f).xx.y);
+  const float3 x_480 = float3(x_446.x, x_446.x, 0.0f);
   const float x_839 = uv.x;
   uv.x = 0.0f;
   uv.x = x_839;
@@ -1369,7 +1369,7 @@ void main_1() {
     const float x_865 = color.x;
     color.x = 0.0f;
     color.x = x_865;
-    const float2 x_491 = float2(float3(1.0f, 2.0f, 3.0f).y, x_454.x);
+    const float2 x_491 = float2(2.0f, x_454.x);
     const float x_866 = color.y;
     color.y = 0.0f;
     color.y = x_866;
@@ -1470,7 +1470,7 @@ void main_1() {
   const float x_891 = color.y;
   color.y = 0.0f;
   color.y = x_891;
-  const float2 x_504 = float2(x_453.y, (0.0f).xx.x);
+  const float2 x_504 = float2(x_453.y, 0.0f);
   const float x_892 = color.x;
   color.x = 0.0f;
   color.x = x_892;
@@ -1519,7 +1519,7 @@ void main_1() {
   const float x_904 = color.z;
   color.z = 0.0f;
   color.z = x_904;
-  const float3 x_510 = float3(float3(1.0f, 2.0f, 3.0f).y, x_485.y, x_485.z);
+  const float3 x_510 = float3(2.0f, x_485.y, x_485.z);
   const float x_905 = color.z;
   color.z = 0.0f;
   color.z = x_905;
@@ -1573,7 +1573,7 @@ void main_1() {
     const float x_918 = uv.x;
     uv.x = 0.0f;
     uv.x = x_918;
-    const float3 x_517 = float3((0.0f).xx.x, (0.0f).xx.x, (0.0f).xx.y);
+    const float3 x_517 = (0.0f).xxx;
     color.x = (float(x_317) + x_320);
     const float x_919 = color.x;
     color.x = 0.0f;
@@ -1616,7 +1616,7 @@ void main_1() {
   const float x_928 = uv.y;
   uv.y = 0.0f;
   uv.y = x_928;
-  const float3 x_521 = float3(float3(1.0f, 2.0f, 3.0f).y, float3(1.0f, 2.0f, 3.0f).y, x_520.y);
+  const float3 x_521 = float3(2.0f, 2.0f, x_520.y);
   const float x_929 = uv.x;
   uv.x = 0.0f;
   uv.x = x_929;

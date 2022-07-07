@@ -1,9 +1,9 @@
 #version 310 es
 
 void main_1() {
-  float x_11 = vec3(1.0f, 2.0f, 3.0f).y;
-  vec2 x_13 = vec2(vec3(1.0f, 2.0f, 3.0f).x, vec3(1.0f, 2.0f, 3.0f).z);
-  vec3 x_14 = vec3(vec3(1.0f, 2.0f, 3.0f).x, vec3(1.0f, 2.0f, 3.0f).z, vec3(1.0f, 2.0f, 3.0f).y);
+  float x_11 = 2.0f;
+  vec2 x_13 = vec2(1.0f, 3.0f);
+  vec3 x_14 = vec3(1.0f, 3.0f, 2.0f);
   return;
 }
 

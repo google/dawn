@@ -67,7 +67,7 @@ mat4 getFrameData_f1_(inout float frameID) {
   vec4 x_40 = texture(frameMapTexture_frameMapSampler, vec2(fX, 0.0f), 0.0f);
   vec4 x_47 = texture(frameMapTexture_frameMapSampler, vec2(fX, 0.25f), 0.0f);
   vec4 x_54 = texture(frameMapTexture_frameMapSampler, vec2(fX, 0.5f), 0.0f);
-  return mat4(vec4(x_40.x, x_40.y, x_40.z, x_40.w), vec4(x_47.x, x_47.y, x_47.z, x_47.w), vec4(x_54.x, x_54.y, x_54.z, x_54.w), vec4(vec4(0.0f).x, vec4(0.0f).y, vec4(0.0f).z, vec4(0.0f).w));
+  return mat4(vec4(x_40.x, x_40.y, x_40.z, x_40.w), vec4(x_47.x, x_47.y, x_47.z, x_47.w), vec4(x_54.x, x_54.y, x_54.z, x_54.w), vec4(0.0f));
 }
 
 uniform highp sampler2D tileMapsTexture1_tileMapsSampler;

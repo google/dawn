@@ -1976,7 +1976,8 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
             ret = builder_->create<sem::Reference>(ret, ref->StorageClass(), ref->Access());
         }
 
-        return builder_->create<sem::StructMemberAccess>(expr, ret, current_statement_, object,
+        sem::Constant* val = nullptr;  // TODO(crbug.com/tint/1611): Add structure support.
+        return builder_->create<sem::StructMemberAccess>(expr, ret, current_statement_, val, object,
                                                          member, has_side_effects, source_var);
     }
 
@@ -2043,7 +2044,8 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
             // the swizzle.
             ret = builder_->create<sem::Vector>(vec->type(), static_cast<uint32_t>(size));
         }
-        return builder_->create<sem::Swizzle>(expr, ret, current_statement_, object,
+        auto* val = EvaluateSwizzleValue(object, ret, swizzle);
+        return builder_->create<sem::Swizzle>(expr, ret, current_statement_, val, object,
                                               std::move(swizzle), has_side_effects, source_var);
     }
 

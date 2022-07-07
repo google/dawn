@@ -35,7 +35,7 @@ class IndexAccessorExpression final : public Castable<IndexAccessorExpression, E
     /// @param object the object expression that is being indexed
     /// @param index the index expression
     /// @param statement the statement that owns this expression
-    /// @param constant the constant value of the expression. May be invalid
+    /// @param constant the constant value of the expression. May be null
     /// @param has_side_effects whether this expression may have side effects
     /// @param source_var the (optional) source variable for this expression
     IndexAccessorExpression(const ast::IndexAccessorExpression* declaration,

@@ -19,6 +19,7 @@
 #include "src/tint/sem/abstract_float.h"
 #include "src/tint/sem/abstract_int.h"
 #include "src/tint/sem/constant.h"
+#include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/type_constructor.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/transform.h"
@@ -535,6 +536,22 @@ const sem::Constant* Resolver::EvaluateIndexValue(const sem::Expression* obj_exp
     }
 
     return obj_val->Index(static_cast<size_t>(idx));
+}
+
+const sem::Constant* Resolver::EvaluateSwizzleValue(const sem::Expression* vec_expr,
+                                                    const sem::Type* type,
+                                                    const std::vector<uint32_t>& indices) {
+    auto* vec_val = vec_expr->ConstantValue();
+    if (!vec_val) {
+        return nullptr;
+    }
+    if (indices.size() == 1) {
+        return static_cast<const Constant*>(vec_val->Index(indices[0]));
+    } else {
+        auto values = utils::Transform(
+            indices, [&](uint32_t i) { return static_cast<const Constant*>(vec_val->Index(i)); });
+        return CreateComposite(*builder_, type, std::move(values));
+    }
 }
 
 const sem::Constant* Resolver::EvaluateBitcastValue(const sem::Expression*, const sem::Type*) {

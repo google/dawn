@@ -5,8 +5,8 @@ void unused_entry_point() {
   return;
 }
 void f() {
-  float a = vec2(1.0f).y;
-  float b = vec3(1.0f).z;
-  float c = vec4(1.0f).w;
+  float a = 1.0f;
+  float b = 1.0f;
+  float c = 1.0f;
 }
 

@@ -22,7 +22,7 @@ void swap_i1_i1_(inout int i, inout int j) {
   int x_932 = temp;
   temp = 0;
   temp = x_932;
-  vec3 x_523 = vec3(vec3(1.0f, 2.0f, 3.0f).z, vec3(1.0f, 2.0f, 3.0f).y, vec3(1.0f, 2.0f, 3.0f).z);
+  vec3 x_523 = vec3(3.0f, 2.0f, 3.0f);
   int x_933 = i;
   i = 0;
   i = x_933;
@@ -46,7 +46,7 @@ void swap_i1_i1_(inout int i, inout int j) {
   int x_938 = j;
   j = 0;
   j = x_938;
-  vec3 x_525 = vec3(x_523.z, vec3(1.0f, 2.0f, 3.0f).x, x_523.y);
+  vec3 x_525 = vec3(x_523.z, 1.0f, x_523.y);
   int x_939 = i;
   i = 0;
   i = x_939;
@@ -136,7 +136,7 @@ int performPartition_i1_i1_(inout int l, inout int h) {
   int x_955 = param_3;
   param_3 = 0;
   param_3 = x_955;
-  vec3 x_534 = vec3(vec3(1.0f, 2.0f, 3.0f).z, vec3(1.0f, 2.0f, 3.0f).x, vec3(1.0f, 2.0f, 3.0f).z);
+  vec3 x_534 = vec3(3.0f, 1.0f, 3.0f);
   int x_956 = param_1;
   param_1 = 0;
   param_1 = x_956;
@@ -172,7 +172,7 @@ int performPartition_i1_i1_(inout int l, inout int h) {
     int x_963 = pivot;
     pivot = 0;
     pivot = x_963;
-    x_537 = vec2(vec3(1.0f, 2.0f, 3.0f).y, vec3(1.0f, 2.0f, 3.0f).z);
+    x_537 = vec2(2.0f, 3.0f);
     QuicksortObject x_964 = obj;
     int tint_symbol_11[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     QuicksortObject tint_symbol_12 = QuicksortObject(tint_symbol_11);
@@ -215,7 +215,7 @@ int performPartition_i1_i1_(inout int l, inout int h) {
     obj = tint_symbol_14;
     obj = x_972;
     int x_63 = pivot;
-    vec2 x_540 = vec2(vec3(1.0f, 2.0f, 3.0f).y, x_534.z);
+    vec2 x_540 = vec2(2.0f, x_534.z);
     int x_973 = i_1;
     i_1 = 0;
     i_1 = x_973;
@@ -246,7 +246,7 @@ int performPartition_i1_i1_(inout int l, inout int h) {
       int x_980 = l;
       l = 0;
       l = x_980;
-      vec3 x_544 = vec3(vec3(1.0f, 2.0f, 3.0f).z, vec3(1.0f, 2.0f, 3.0f).y, x_540.x);
+      vec3 x_544 = vec3(3.0f, 2.0f, x_540.x);
       int x_70 = i_1;
       vec2 x_545 = vec2(x_537.y, x_538.x);
       int x_981 = param;
@@ -346,7 +346,7 @@ int performPartition_i1_i1_(inout int l, inout int h) {
   int x_1003 = l;
   l = 0;
   l = x_1003;
-  vec2 x_554 = vec2(x_536.z, vec3(1.0f, 2.0f, 3.0f).y);
+  vec2 x_554 = vec2(x_536.z, 2.0f);
   int x_1004 = param_1;
   param_1 = 0;
   param_1 = x_1004;
@@ -378,7 +378,7 @@ void quicksort_() {
   int tint_symbol_19[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   stack = tint_symbol_19;
   stack = x_1008;
-  vec2 x_556 = vec2(vec3(1.0f, 2.0f, 3.0f).y, vec3(1.0f, 2.0f, 3.0f).y);
+  vec2 x_556 = vec2(2.0f);
   int x_1009 = param_5;
   param_5 = 0;
   param_5 = x_1009;
@@ -387,7 +387,7 @@ void quicksort_() {
   p = 0;
   p = x_1010;
   int x_93 = top;
-  vec2 x_557 = vec2(vec3(1.0f, 2.0f, 3.0f).x, vec3(1.0f, 2.0f, 3.0f).x);
+  vec2 x_557 = vec2(1.0f);
   int x_1011 = p;
   p = 0;
   p = x_1011;
@@ -431,7 +431,7 @@ void quicksort_() {
   int x_1020 = param_4;
   param_4 = 0;
   param_4 = x_1020;
-  vec3 x_562 = vec3(vec3(1.0f, 2.0f, 3.0f).z, x_558.y, vec3(1.0f, 2.0f, 3.0f).y);
+  vec3 x_562 = vec3(3.0f, x_558.y, 2.0f);
   int x_1021 = stack[x_96_save];
   stack[x_96_save] = 0;
   stack[x_96_save] = x_1021;
@@ -534,7 +534,7 @@ void quicksort_() {
     int x_1043 = stack[x_100_save];
     stack[x_100_save] = 0;
     stack[x_100_save] = x_1043;
-    vec2 x_573 = vec2(vec3(1.0f, 2.0f, 3.0f).y, vec3(1.0f, 2.0f, 3.0f).z);
+    vec2 x_573 = vec2(2.0f, 3.0f);
     top = (x_112 - 1);
     int x_1044 = param_5;
     param_5 = 0;
@@ -566,7 +566,7 @@ void quicksort_() {
     stack[x_110_save] = x_1050;
     vec2 x_577 = vec2(x_569.y, x_569.z);
     int x_120 = h_1;
-    vec2 x_578 = vec2(x_558.x, vec3(1.0f, 2.0f, 3.0f).y);
+    vec2 x_578 = vec2(x_558.x, 2.0f);
     param_5 = x_120;
     int x_1051 = stack[x_100_save];
     stack[x_100_save] = 0;
@@ -676,7 +676,7 @@ void quicksort_() {
     int x_1076 = stack[x_96_save];
     stack[x_96_save] = 0;
     stack[x_96_save] = x_1076;
-    vec2 x_592 = vec2(vec3(1.0f, 2.0f, 3.0f).x, vec3(1.0f, 2.0f, 3.0f).y);
+    vec2 x_592 = vec2(1.0f, 2.0f);
     QuicksortObject x_1077 = obj;
     int tint_symbol_31[10] = int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
     QuicksortObject tint_symbol_32 = QuicksortObject(tint_symbol_31);
@@ -821,7 +821,7 @@ void main_1() {
     QuicksortObject tint_symbol_40 = QuicksortObject(tint_symbol_39);
     obj = tint_symbol_40;
     obj = x_722;
-    vec2 x_431 = vec2(vec3(1.0f, 2.0f, 3.0f).x, vec3(1.0f, 2.0f, 3.0f).x);
+    vec2 x_431 = vec2(1.0f);
     int x_158 = i_2;
     vec2 x_723 = uv;
     uv = vec2(0.0f);
@@ -841,7 +841,7 @@ void main_1() {
   QuicksortObject tint_symbol_44 = QuicksortObject(tint_symbol_43);
   obj = tint_symbol_44;
   obj = x_756;
-  vec2 x_446 = vec2(vec2(0.0f).x, vec2(0.0f).x);
+  vec2 x_446 = vec2(0.0f);
   int x_757 = i_2;
   i_2 = 0;
   i_2 = x_757;
@@ -855,7 +855,7 @@ void main_1() {
   vec2 x_759 = uv;
   uv = vec2(0.0f);
   uv = x_759;
-  vec2 x_447 = vec2(vec2(0.0f).y, vec2(0.0f).y);
+  vec2 x_447 = vec2(0.0f);
   vec2 x_760 = uv;
   uv = vec2(0.0f);
   uv = x_760;
@@ -875,7 +875,7 @@ void main_1() {
   QuicksortObject tint_symbol_50 = QuicksortObject(tint_symbol_49);
   obj = tint_symbol_50;
   obj = x_763;
-  vec3 x_449 = vec3(x_184.y, vec3(1.0f, 2.0f, 3.0f).z, x_184.w);
+  vec3 x_449 = vec3(x_184.y, 3.0f, x_184.w);
   vec3 x_764 = color;
   color = vec3(0.0f);
   color = x_764;
@@ -919,7 +919,7 @@ void main_1() {
   float x_773 = color.x;
   color.x = 0.0f;
   color.x = x_773;
-  vec2 x_452 = vec2(vec3(1.0f, 2.0f, 3.0f).z, vec3(1.0f, 2.0f, 3.0f).y);
+  vec2 x_452 = vec2(3.0f, 2.0f);
   int x_774 = i_2;
   i_2 = 0;
   i_2 = x_774;
@@ -954,7 +954,7 @@ void main_1() {
     int x_781 = obj.numbers[0u];
     obj.numbers[0u] = 0;
     obj.numbers[0u] = x_781;
-    vec3 x_456 = vec3(vec2(0.0f).y, x_448.y, x_448.y);
+    vec3 x_456 = vec3(0.0f, x_448.y, x_448.y);
     float x_782 = uv.x;
     uv.x = 0.0f;
     uv.x = x_782;
@@ -973,7 +973,7 @@ void main_1() {
     QuicksortObject tint_symbol_64 = QuicksortObject(tint_symbol_63);
     obj = tint_symbol_64;
     obj = x_785;
-    vec2 x_458 = vec2(vec3(1.0f, 2.0f, 3.0f).z, vec2(0.0f).y);
+    vec2 x_458 = vec2(3.0f, 0.0f);
     int x_786 = i_2;
     i_2 = 0;
     i_2 = x_786;
@@ -1013,7 +1013,7 @@ void main_1() {
   float x_796 = uv.x;
   uv.x = 0.0f;
   uv.x = x_796;
-  vec2 x_461 = vec2(vec2(0.0f).y, vec2(0.0f).y);
+  vec2 x_461 = vec2(0.0f);
   float x_797 = uv.x;
   uv.x = 0.0f;
   uv.x = x_797;
@@ -1057,7 +1057,7 @@ void main_1() {
     int x_808 = i_2;
     i_2 = 0;
     i_2 = x_808;
-    vec2 x_466 = vec2(x_455.y, vec2(0.0f).y);
+    vec2 x_466 = vec2(x_455.y, 0.0f);
     int x_809 = i_2;
     i_2 = 0;
     i_2 = x_809;
@@ -1111,7 +1111,7 @@ void main_1() {
     int x_822 = obj.numbers[0u];
     obj.numbers[0u] = 0;
     obj.numbers[0u] = x_822;
-    vec2 x_470 = vec2(vec2(0.0f).x, vec2(0.0f).y);
+    vec2 x_470 = vec2(0.0f);
     float x_823 = color.z;
     color.z = 0.0f;
     color.z = x_823;
@@ -1153,7 +1153,7 @@ void main_1() {
   color.x = x_832;
   vec2 x_476 = vec2(x_451.z, x_460.y);
   color.y = (x_257 + float(x_254));
-  vec3 x_477 = vec3(vec2(0.0f).x, x_472.x, vec2(0.0f).y);
+  vec3 x_477 = vec3(0.0f, x_472.x, 0.0f);
   float x_833 = uv.x;
   uv.x = 0.0f;
   uv.x = x_833;
@@ -1168,14 +1168,14 @@ void main_1() {
   int x_836 = i_2;
   i_2 = 0;
   i_2 = x_836;
-  vec3 x_479 = vec3(vec2(0.0f).y, x_454.y, vec2(0.0f).x);
+  vec3 x_479 = vec3(0.0f, x_454.y, 0.0f);
   int x_837 = obj.numbers[0u];
   obj.numbers[0u] = 0;
   obj.numbers[0u] = x_837;
   float x_838 = color.y;
   color.y = 0.0f;
   color.y = x_838;
-  vec3 x_480 = vec3(x_446.x, x_446.x, vec2(0.0f).y);
+  vec3 x_480 = vec3(x_446.x, x_446.x, 0.0f);
   float x_839 = uv.x;
   uv.x = 0.0f;
   uv.x = x_839;
@@ -1281,7 +1281,7 @@ void main_1() {
     float x_865 = color.x;
     color.x = 0.0f;
     color.x = x_865;
-    vec2 x_491 = vec2(vec3(1.0f, 2.0f, 3.0f).y, x_454.x);
+    vec2 x_491 = vec2(2.0f, x_454.x);
     float x_866 = color.y;
     color.y = 0.0f;
     color.y = x_866;
@@ -1382,7 +1382,7 @@ void main_1() {
   float x_891 = color.y;
   color.y = 0.0f;
   color.y = x_891;
-  vec2 x_504 = vec2(x_453.y, vec2(0.0f).x);
+  vec2 x_504 = vec2(x_453.y, 0.0f);
   float x_892 = color.x;
   color.x = 0.0f;
   color.x = x_892;
@@ -1431,7 +1431,7 @@ void main_1() {
   float x_904 = color.z;
   color.z = 0.0f;
   color.z = x_904;
-  vec3 x_510 = vec3(vec3(1.0f, 2.0f, 3.0f).y, x_485.y, x_485.z);
+  vec3 x_510 = vec3(2.0f, x_485.y, x_485.z);
   float x_905 = color.z;
   color.z = 0.0f;
   color.z = x_905;
@@ -1485,7 +1485,7 @@ void main_1() {
     float x_918 = uv.x;
     uv.x = 0.0f;
     uv.x = x_918;
-    vec3 x_517 = vec3(vec2(0.0f).x, vec2(0.0f).x, vec2(0.0f).y);
+    vec3 x_517 = vec3(0.0f);
     color.x = (float(x_317) + x_320);
     float x_919 = color.x;
     color.x = 0.0f;
@@ -1528,7 +1528,7 @@ void main_1() {
   float x_928 = uv.y;
   uv.y = 0.0f;
   uv.y = x_928;
-  vec3 x_521 = vec3(vec3(1.0f, 2.0f, 3.0f).y, vec3(1.0f, 2.0f, 3.0f).y, x_520.y);
+  vec3 x_521 = vec3(2.0f, 2.0f, x_520.y);
   float x_929 = uv.x;
   uv.x = 0.0f;
   uv.x = x_929;

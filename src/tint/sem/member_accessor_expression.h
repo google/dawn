@@ -38,12 +38,14 @@ class MemberAccessorExpression : public Castable<MemberAccessorExpression, Expre
     /// @param declaration the AST node
     /// @param type the resolved type of the expression
     /// @param statement the statement that owns this expression
+    /// @param constant the constant value of the expression. May be null.
     /// @param object the object that holds the member being accessed
     /// @param has_side_effects whether this expression may have side effects
     /// @param source_var the (optional) source variable for this expression
     MemberAccessorExpression(const ast::MemberAccessorExpression* declaration,
                              const sem::Type* type,
                              const Statement* statement,
+                             const Constant* constant,
                              const Expression* object,
                              bool has_side_effects,
                              const Variable* source_var = nullptr);
@@ -67,6 +69,7 @@ class StructMemberAccess final : public Castable<StructMemberAccess, MemberAcces
     /// @param declaration the AST node
     /// @param type the resolved type of the expression
     /// @param statement the statement that owns this expression
+    /// @param constant the constant value of the expression. May be null
     /// @param object the object that holds the member being accessed
     /// @param member the structure member
     /// @param has_side_effects whether this expression may have side effects
@@ -74,6 +77,7 @@ class StructMemberAccess final : public Castable<StructMemberAccess, MemberAcces
     StructMemberAccess(const ast::MemberAccessorExpression* declaration,
                        const sem::Type* type,
                        const Statement* statement,
+                       const Constant* constant,
                        const Expression* object,
                        const StructMember* member,
                        bool has_side_effects,
@@ -97,6 +101,7 @@ class Swizzle final : public Castable<Swizzle, MemberAccessorExpression> {
     /// @param declaration the AST node
     /// @param type the resolved type of the expression
     /// @param statement the statement that owns this expression
+    /// @param constant the constant value of the expression. May be null
     /// @param object the object that holds the member being accessed
     /// @param indices the swizzle indices
     /// @param has_side_effects whether this expression may have side effects
@@ -104,6 +109,7 @@ class Swizzle final : public Castable<Swizzle, MemberAccessorExpression> {
     Swizzle(const ast::MemberAccessorExpression* declaration,
             const sem::Type* type,
             const Statement* statement,
+            const Constant* constant,
             const Expression* object,
             std::vector<uint32_t> indices,
             bool has_side_effects,

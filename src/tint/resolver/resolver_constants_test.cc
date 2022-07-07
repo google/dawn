@@ -20,6 +20,7 @@
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/index_accessor_expression.h"
+#include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/test_helper.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -1867,6 +1868,63 @@ TEST_F(ResolverConstantsTest, Vec3_Index_OOB_Low) {
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->AllZero());
     EXPECT_EQ(sem->ConstantValue()->As<i32>(), 1_i);
+}
+
+TEST_F(ResolverConstantsTest, Vec3_Swizzle_Scalar) {
+    auto* expr = MemberAccessor(vec3<i32>(1_i, 2_i, 3_i), "y");
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    ASSERT_TRUE(sem->Type()->Is<sem::I32>());
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue()->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->As<i32>(), 2_i);
+}
+
+TEST_F(ResolverConstantsTest, Vec3_Swizzle_Vector) {
+    auto* expr = MemberAccessor(vec3<i32>(1_i, 2_i, 3_i), "zx");
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* vec = sem->Type()->As<sem::Vector>();
+    ASSERT_NE(vec, nullptr);
+    EXPECT_EQ(vec->Width(), 2u);
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<f32>(), 3._a);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<f32>(), 1._a);
+}
+
+TEST_F(ResolverConstantsTest, Vec3_Swizzle_Chain) {
+    auto* expr =  // (1, 2, 3) -> (2, 3, 1) -> (3, 2) -> 2
+        MemberAccessor(MemberAccessor(MemberAccessor(vec3<i32>(1_i, 2_i, 3_i), "gbr"), "yx"), "y");
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    ASSERT_TRUE(sem->Type()->Is<sem::I32>());
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue()->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->As<i32>(), 2_i);
 }
 
 TEST_F(ResolverConstantsTest, Mat3x2_Index) {

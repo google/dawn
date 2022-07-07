@@ -35,7 +35,7 @@ class Expression : public Castable<Expression, Node> {
     /// @param declaration the AST node
     /// @param type the resolved type of the expression
     /// @param statement the statement that owns this expression
-    /// @param constant the constant value of the expression. May be invalid
+    /// @param constant the constant value of the expression. May be null
     /// @param has_side_effects true if this expression may have side-effects
     /// @param source_var the (optional) source variable for this expression
     Expression(const ast::Expression* declaration,

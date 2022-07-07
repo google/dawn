@@ -218,6 +218,9 @@ class Resolver {
         const sem::Type* ty);  // Note: ty is not an array or structure
     const sem::Constant* EvaluateIndexValue(const sem::Expression* obj, const sem::Expression* idx);
     const sem::Constant* EvaluateLiteralValue(const ast::LiteralExpression*, const sem::Type*);
+    const sem::Constant* EvaluateSwizzleValue(const sem::Expression* vector,
+                                              const sem::Type* type,
+                                              const std::vector<uint32_t>& indices);
     const sem::Constant* EvaluateUnaryValue(const sem::Expression*,
                                             const IntrinsicTable::UnaryOperator&);
 
