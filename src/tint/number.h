@@ -186,6 +186,13 @@ struct Number<detail::NumberKindF16> {
         return *this;
     }
 
+    /// Get the binary16 bit pattern in type uint16_t of this value.
+    /// @returns the binary16 bit pattern, in type uint16_t, of the stored quantized f16 value. If
+    /// the value is NaN, the returned value will be 0x7e00u. If the value is positive infinity, the
+    /// returned value will be 0x7c00u. If the input value is negative infinity, the returned value
+    /// will be 0xfc00u.
+    uint16_t BitsRepresentation() const;
+
     /// @param value the input float32 value
     /// @returns the float32 value quantized to the smaller float16 value, through truncation of the
     /// mantissa bits (no rounding). If the float32 value is too large (positive or negative) to be

@@ -204,4 +204,108 @@ f16::type f16::Quantize(f16::type value) {
     return value;
 }
 
+uint16_t f16::BitsRepresentation() const {
+    constexpr uint16_t f16_nan = 0x7e00u;
+    constexpr uint16_t f16_pos_inf = 0x7c00u;
+    constexpr uint16_t f16_neg_inf = 0xfc00u;
+
+    // Assert we use binary32 (i.e. float) as underlying type, which has 4 bytes.
+    static_assert(std::is_same<f16::type, float>());
+
+    // The stored value in f16 object must be already quantized, so it should be either NaN, +/-
+    // Inf, or exactly representable by normal or subnormal f16.
+
+    if (std::isnan(value)) {
+        return f16_nan;
+    }
+
+    if (std::isinf(value)) {
+        return value > 0 ? f16_pos_inf : f16_neg_inf;
+    }
+
+    // Now quantized_value must be a finite f16 exactly-representable value.
+    // The following table shows exponent cases for all finite f16 exactly-representable value.
+    // ---------------------------------------------------------------------------
+    // |  Value category  |  Unbiased exp  |  F16 biased exp  |  F32 biased exp  |
+    // |------------------|----------------|------------------|------------------|
+    // |     +/- zero     |        \       |         0        |         0        |
+    // |  Subnormal f16   |   [-24, -15]   |         0        |    [103, 112]    |
+    // |    Normal f16    |   [-14, 15]    |      [1, 30]     |    [113, 142]    |
+    // ---------------------------------------------------------------------------
+
+    constexpr uint32_t max_f32_biased_exp_for_f16_normal_number = 142;
+    constexpr uint32_t min_f32_biased_exp_for_f16_normal_number = 113;
+    constexpr uint32_t max_f32_biased_exp_for_f16_subnormal_number = 112;
+    constexpr uint32_t min_f32_biased_exp_for_f16_subnormal_number = 103;
+
+    constexpr uint32_t f32_sign_mask = 0x80000000u;
+    constexpr uint32_t f32_exp_mask = 0x7f800000u;
+    constexpr uint32_t f32_mantissa_mask = 0x007fffffu;
+    constexpr uint32_t f32_mantissa_bis_number = 23;
+    constexpr uint32_t f32_exp_bias = 127;
+
+    constexpr uint16_t f16_sign_mask = 0x8000u;
+    constexpr uint16_t f16_exp_mask = 0x7c00u;
+    constexpr uint16_t f16_mantissa_mask = 0x03ffu;
+    constexpr uint32_t f16_mantissa_bis_number = 10;
+    constexpr uint32_t f16_exp_bias = 15;
+
+    uint32_t f32_bit_pattern;
+    memcpy(&f32_bit_pattern, &value, 4);
+    uint32_t f32_biased_exponent = (f32_bit_pattern & f32_exp_mask) >> f32_mantissa_bis_number;
+    uint32_t f32_mantissa = f32_bit_pattern & f32_mantissa_mask;
+
+    uint16_t f16_sign_part = static_cast<uint16_t>((f32_bit_pattern & f32_sign_mask) >> 16);
+    TINT_ASSERT(Semantic, (f16_sign_part & ~f16_sign_mask) == 0);
+
+    if ((f32_bit_pattern & ~f32_sign_mask) == 0) {
+        // +/- zero
+        return f16_sign_part;
+    }
+
+    if ((min_f32_biased_exp_for_f16_normal_number <= f32_biased_exponent) &&
+        (f32_biased_exponent <= max_f32_biased_exp_for_f16_normal_number)) {
+        // Normal f16
+        uint32_t f16_biased_exponent = f32_biased_exponent - f32_exp_bias + f16_exp_bias;
+        uint16_t f16_exp_part =
+            static_cast<uint16_t>(f16_biased_exponent << f16_mantissa_bis_number);
+        uint16_t f16_mantissa_part = static_cast<uint16_t>(
+            f32_mantissa >> (f32_mantissa_bis_number - f16_mantissa_bis_number));
+
+        TINT_ASSERT(Semantic, (f16_exp_part & ~f16_exp_mask) == 0);
+        TINT_ASSERT(Semantic, (f16_mantissa_part & ~f16_mantissa_mask) == 0);
+
+        return f16_sign_part | f16_exp_part | f16_mantissa_part;
+    }
+
+    if ((min_f32_biased_exp_for_f16_subnormal_number <= f32_biased_exponent) &&
+        (f32_biased_exponent <= max_f32_biased_exp_for_f16_subnormal_number)) {
+        // Subnormal f16
+        // The resulting exp bits are always 0, and the mantissa bits should be handled specially.
+        uint16_t f16_exp_part = 0;
+        // The resulting subnormal f16 will have only 1 valid mantissa bit if the unbiased exponent
+        // of value is of the minimum, i.e. -24; and have all 10 mantissa bits valid if the unbiased
+        // exponent of value is of the maximum, i.e. -15.
+        uint32_t f16_valid_mantissa_bits =
+            f32_biased_exponent - min_f32_biased_exp_for_f16_subnormal_number + 1;
+        // The resulting f16 mantissa part comes from right-shifting the f32 mantissa bits with
+        // leading 1 added.
+        uint16_t f16_mantissa_part =
+            static_cast<uint16_t>((f32_mantissa | (f32_mantissa_mask + 1)) >>
+                                  (f32_mantissa_bis_number + 1 - f16_valid_mantissa_bits));
+
+        TINT_ASSERT(Semantic, (1 <= f16_valid_mantissa_bits) &&
+                                  (f16_valid_mantissa_bits <= f16_mantissa_bis_number));
+        TINT_ASSERT(Semantic, (f16_mantissa_part & ~((1u << f16_valid_mantissa_bits) - 1)) == 0);
+        TINT_ASSERT(Semantic, (f16_mantissa_part != 0));
+
+        return f16_sign_part | f16_exp_part | f16_mantissa_part;
+    }
+
+    // Neither zero, subnormal f16 or normal f16, shall never hit.
+    tint::diag::List diag;
+    TINT_UNREACHABLE(Semantic, diag);
+    return f16_nan;
+}
+
 }  // namespace tint
