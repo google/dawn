@@ -334,12 +334,26 @@ static constexpr Params cases[] = {
     ParamsFor<alias<i32>>(true),    //
     ParamsFor<alias<u32>>(true),    //
     ParamsFor<alias<bool>>(false),  //
+    // Currently entry point IO of f16 types are not implemented yet.
+    // TODO(tint:1473, tint:1502): Change f16 and vecN<f16> cases to valid after f16 is supported in
+    // entry point IO.
+    ParamsFor<f16>(false),          //
+    ParamsFor<vec2<f16>>(false),    //
+    ParamsFor<vec3<f16>>(false),    //
+    ParamsFor<vec4<f16>>(false),    //
+    ParamsFor<mat2x2<f16>>(false),  //
+    ParamsFor<mat3x3<f16>>(false),  //
+    ParamsFor<mat4x4<f16>>(false),  //
+    ParamsFor<alias<f16>>(false),   //
 };
 
 TEST_P(TypeValidationTest, BareInputs) {
     // @fragment
     // fn main(@location(0) @interpolate(flat) a : *) {}
     auto params = GetParam();
+
+    Enable(ast::Extension::kF16);
+
     auto* a = Param("a", params.create_ast_type(*this), {Location(0), Flat()});
     Func(Source{{12, 34}}, "main", {a}, ty.void_(), {}, {Stage(ast::PipelineStage::kFragment)});
 
@@ -357,6 +371,9 @@ TEST_P(TypeValidationTest, StructInputs) {
     // @fragment
     // fn main(a : Input) {}
     auto params = GetParam();
+
+    Enable(ast::Extension::kF16);
+
     auto* input =
         Structure("Input", {Member("a", params.create_ast_type(*this), {Location(0), Flat()})});
     auto* a = Param("a", ty.Of(input), {});
@@ -375,6 +392,9 @@ TEST_P(TypeValidationTest, BareOutputs) {
     //   return *();
     // }
     auto params = GetParam();
+
+    Enable(ast::Extension::kF16);
+
     Func(Source{{12, 34}}, "main", {}, params.create_ast_type(*this),
          {Return(Construct(params.create_ast_type(*this)))}, {Stage(ast::PipelineStage::kFragment)},
          {Location(0)});
@@ -395,6 +415,9 @@ TEST_P(TypeValidationTest, StructOutputs) {
     //   return Output();
     // }
     auto params = GetParam();
+
+    Enable(ast::Extension::kF16);
+
     auto* output = Structure("Output", {Member("a", params.create_ast_type(*this), {Location(0)})});
     Func(Source{{12, 34}}, "main", {}, ty.Of(output), {Return(Construct(ty.Of(output)))},
          {Stage(ast::PipelineStage::kFragment)});

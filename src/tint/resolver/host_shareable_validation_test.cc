@@ -107,7 +107,7 @@ TEST_F(ResolverHostShareableValidationTest, NoError) {
     Enable(ast::Extension::kF16);
 
     auto* i1 = Structure("I1", {
-                                   Member(Source{{1, 1}}, "w1", ty.f16()),
+                                   Member(Source{{1, 1}}, "w1", ty.f32()),
                                    Member(Source{{2, 1}}, "x1", ty.f32()),
                                    Member(Source{{3, 1}}, "y1", ty.vec3<f32>()),
                                    Member(Source{{4, 1}}, "z1", ty.array<i32, 4>()),
@@ -115,7 +115,7 @@ TEST_F(ResolverHostShareableValidationTest, NoError) {
     auto* a1 = Alias("a1", ty.Of(i1));
     auto* i2 = Structure("I2", {
                                    Member(Source{{5, 1}}, "x2", ty.mat2x2<f32>()),
-                                   Member(Source{{6, 1}}, "w2", ty.mat3x4<f16>()),
+                                   Member(Source{{6, 1}}, "w2", ty.mat3x4<f32>()),
                                    Member(Source{{7, 1}}, "z2", ty.Of(i1)),
                                });
     auto* a2 = Alias("a2", ty.Of(i2));
