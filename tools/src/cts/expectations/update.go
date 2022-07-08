@@ -78,13 +78,17 @@ type updater struct {
 	tagSets []result.Tags // reverse-ordered tag-sets of 'in'
 }
 
-// simplifyStatuses replaces all result statuses that are not 'Pass',
-// 'RetryOnFailure', 'Slow', 'Skip' with 'Failure'.
+// simplifyStatuses replaces all result statuses that are not one of
+// 'Pass', 'RetryOnFailure', 'Slow', 'Skip' with 'Failure', and also replaces
+// 'Skip' results with 'Pass'.
 func simplifyStatuses(results result.List) {
 	for i, r := range results {
 		switch r.Status {
-		case result.Pass, result.RetryOnFailure, result.Slow, result.Skip:
+		case result.Pass, result.RetryOnFailure, result.Slow:
 			// keep
+		case result.Skip:
+			// Typically represents a .unimplemented() test
+			results[i].Status = result.Pass
 		default:
 			results[i].Status = result.Failure
 		}
