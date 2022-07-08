@@ -483,6 +483,7 @@ source_set("end2end_tests_sources") {
     "end2end/StorageTextureTests.cpp",
     "end2end/SubresourceRenderAttachmentTests.cpp",
     "end2end/Texture3DTests.cpp",
+    "end2end/TextureCorruptionTests.cpp",
     "end2end/TextureFormatTests.cpp",
     "end2end/TextureSubresourceTests.cpp",
     "end2end/TextureViewTests.cpp",
