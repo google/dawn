@@ -84,12 +84,13 @@ void TextGenerator::TextBuffer::Insert(const std::string& line, size_t before, u
                             << "  lines.size(): " << lines.size();
         return;
     }
-    lines.insert(lines.begin() + static_cast<int64_t>(before), Line{indent, line});
+    using DT = decltype(lines)::difference_type;
+    lines.insert(lines.begin() + static_cast<DT>(before), Line{indent, line});
 }
 
 void TextGenerator::TextBuffer::Append(const TextBuffer& tb) {
     for (auto& line : tb.lines) {
-        // TODO(bclayton): inefficent, consider optimizing
+        // TODO(bclayton): inefficient, consider optimizing
         lines.emplace_back(Line{current_indent + line.indent, line.content});
     }
 }
@@ -104,8 +105,9 @@ void TextGenerator::TextBuffer::Insert(const TextBuffer& tb, size_t before, uint
     }
     size_t idx = 0;
     for (auto& line : tb.lines) {
-        // TODO(bclayton): inefficent, consider optimizing
-        lines.insert(lines.begin() + static_cast<int64_t>(before + idx),
+        // TODO(bclayton): inefficient, consider optimizing
+        using DT = decltype(lines)::difference_type;
+        lines.insert(lines.begin() + static_cast<DT>(before + idx),
                      Line{indent + line.indent, line.content});
         idx++;
     }
