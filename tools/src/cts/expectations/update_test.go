@@ -409,7 +409,7 @@ crbug.com/a/123 a:b,c:d:* [ Failure ]
 				result.Result{
 					Query:  Q("suite:dir_a,dir_b:test_b:*"),
 					Tags:   result.NewTags("os-a", "gpu-a"),
-					Status: result.Skip,
+					Status: result.Slow,
 				},
 				result.Result{
 					Query:  Q("suite:dir_a,dir_b:test_b:*"),
@@ -431,7 +431,7 @@ crbug.com/dawn/0000 [ gpu-b os-b ] suite:dir_a,dir_b:test_c:case=5;* [ RetryOnFa
 # New failures. Please triage:
 crbug.com/dawn/0000 [ gpu-b os-a ] suite:* [ Failure ]
 crbug.com/dawn/0000 [ gpu-a os-a ] suite:dir_a,dir_b:test_a:* [ Failure ]
-crbug.com/dawn/0000 [ gpu-a os-a ] suite:dir_a,dir_b:test_b:* [ Skip ]
+crbug.com/dawn/0000 [ gpu-a os-a ] suite:dir_a,dir_b:test_b:* [ Slow ]
 crbug.com/dawn/0000 [ gpu-b os-b ] suite:dir_a,dir_b:test_c:case=4;* [ Failure ]
 `,
 		},
