@@ -55,7 +55,7 @@ class InlineMemoryTransferService : public MemoryTransferService {
                 deserializePointer == nullptr) {
                 return false;
             }
-            if ((offset >= mDataLength && offset > 0) || size > mDataLength - offset) {
+            if (offset > mDataLength || size > mDataLength - offset) {
                 return false;
             }
             memcpy(static_cast<uint8_t*>(mTargetData) + offset, deserializePointer, size);
