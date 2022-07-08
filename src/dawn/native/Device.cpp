@@ -623,9 +623,14 @@ bool DeviceBase::APIPopErrorScope(wgpu::ErrorCallback callback, void* userdata) 
 }
 
 BlobCache* DeviceBase::GetBlobCache() {
+#if TINT_BUILD_WGSL_WRITER
+    // TODO(crbug.com/dawn/1481): Shader caching currently has a dependency on the WGSL writer to
+    // generate cache keys. We can lift the dependency once we also cache frontend parsing,
+    // transformations, and reflection.
     if (IsToggleEnabled(Toggle::EnableBlobCache)) {
         return mInstance->GetBlobCache();
     }
+#endif
     return nullptr;
 }
 

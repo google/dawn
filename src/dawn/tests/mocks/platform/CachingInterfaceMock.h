@@ -22,6 +22,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "dawn/common/TypedInteger.h"
+
 #define EXPECT_CACHE_HIT(cache, N, statement) \
     do {                                      \
         FlushWire();                          \
@@ -30,6 +32,26 @@
         FlushWire();                          \
         size_t after = cache.GetHitCount();   \
         EXPECT_EQ(N, after - before);         \
+    } while (0)
+
+// Check that |HitN| cache hits occured, and |AddN| entries were added.
+// Usage: EXPECT_CACHE_STATS(myMockCache, Hit(42), Add(3), ...)
+// Hit / Add help readability, and enforce the args are passed correctly in the expected order.
+#define EXPECT_CACHE_STATS(cache, HitN, AddN, statement)                    \
+    do {                                                                    \
+        using Hit = TypedInteger<struct HitT, size_t>;                      \
+        using Add = TypedInteger<struct AddT, size_t>;                      \
+        static_assert(std::is_same_v<decltype(HitN), Hit>);                 \
+        static_assert(std::is_same_v<decltype(AddN), Add>);                 \
+        FlushWire();                                                        \
+        size_t hitBefore = cache.GetHitCount();                             \
+        size_t entriesBefore = cache.GetNumEntries();                       \
+        statement;                                                          \
+        FlushWire();                                                        \
+        size_t hitAfter = cache.GetHitCount();                              \
+        size_t entriesAfter = cache.GetNumEntries();                        \
+        EXPECT_EQ(static_cast<size_t>(HitN), hitAfter - hitBefore);         \
+        EXPECT_EQ(static_cast<size_t>(AddN), entriesAfter - entriesBefore); \
     } while (0)
 
 // A mock caching interface class that also supplies an in memory cache for testing.

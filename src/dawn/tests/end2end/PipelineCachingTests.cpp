@@ -71,12 +71,46 @@ static constexpr std::string_view kFragmentShaderMultipleOutput = R"(
         }
     )";
 
+static constexpr std::string_view kFragmentShaderBindGroup00Uniform = R"(
+        struct S {
+            value : f32
+        };
+
+        @group(0) @binding(0) var<uniform> uBuffer : S;
+
+        @fragment fn main() -> @location(0) vec4<f32> {
+            return vec4<f32>(uBuffer.value, 0.2, 0.3, 0.4);
+        }
+    )";
+
+static constexpr std::string_view kFragmentShaderBindGroup01Uniform = R"(
+        struct S {
+            value : f32
+        };
+
+        @group(0) @binding(1) var<uniform> uBuffer : S;
+
+        @fragment fn main() -> @location(0) vec4<f32> {
+            return vec4<f32>(uBuffer.value, 0.2, 0.3, 0.4);
+        }
+    )";
+
 class PipelineCachingTests : public DawnTest {
   protected:
     std::unique_ptr<dawn::platform::Platform> CreateTestPlatform() override {
         return std::make_unique<DawnCachingMockPlatform>(&mMockCache);
     }
 
+    struct EntryCounts {
+        unsigned pipeline;
+        unsigned shaderModule;
+    };
+    const EntryCounts counts = {
+        // pipeline caching is only implemented on D3D12/Vulkan
+        IsD3D12() || IsVulkan() ? 1u : 0u,
+        // shader module caching is only implemented on Vulkan
+        IsVulkan() ? 1u : 0u,
+    };
     NiceMock<CachingInterfaceMock> mMockCache;
 };
 
@@ -95,9 +129,8 @@ TEST_P(SinglePipelineCachingTests, ComputePipelineNoCache) {
         wgpu::ComputePipelineDescriptor desc;
         desc.compute.module = utils::CreateShaderModule(device, kComputeShaderDefault.data());
         desc.compute.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateComputePipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(0), device.CreateComputePipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 0u);
 
     // Second time should create fine with no cache hits since cache is disabled.
     {
@@ -105,9 +138,8 @@ TEST_P(SinglePipelineCachingTests, ComputePipelineNoCache) {
         wgpu::ComputePipelineDescriptor desc;
         desc.compute.module = utils::CreateShaderModule(device, kComputeShaderDefault.data());
         desc.compute.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateComputePipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(0), device.CreateComputePipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 0u);
 }
 
 // Tests that pipeline creation on the same device uses frontend cache when possible.
@@ -118,14 +150,15 @@ TEST_P(SinglePipelineCachingTests, ComputePipelineFrontedCache) {
 
     // First creation should create a cache entry.
     wgpu::ComputePipeline pipeline;
-    EXPECT_CACHE_HIT(mMockCache, 0u, pipeline = device.CreateComputePipeline(&desc));
-    EXPECT_EQ(mMockCache.GetNumEntries(), 1u);
+    EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(counts.shaderModule + counts.pipeline),
+                       pipeline = device.CreateComputePipeline(&desc));
 
     // Second creation on the same device should just return from frontend cache and should not
     // call out to the blob cache.
     EXPECT_CALL(mMockCache, LoadData).Times(0);
     wgpu::ComputePipeline samePipeline;
-    EXPECT_CACHE_HIT(mMockCache, 0u, samePipeline = device.CreateComputePipeline(&desc));
+    EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(0),
+                       samePipeline = device.CreateComputePipeline(&desc));
     EXPECT_EQ(pipeline.Get() == samePipeline.Get(), !UsesWire());
 }
 
@@ -139,9 +172,9 @@ TEST_P(SinglePipelineCachingTests, ComputePipelineBlobCache) {
         wgpu::ComputePipelineDescriptor desc;
         desc.compute.module = utils::CreateShaderModule(device, kComputeShaderDefault.data());
         desc.compute.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateComputePipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(counts.shaderModule + counts.pipeline),
+                           device.CreateComputePipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 1u);
 
     // Second time should create using the cache.
     {
@@ -149,9 +182,9 @@ TEST_P(SinglePipelineCachingTests, ComputePipelineBlobCache) {
         wgpu::ComputePipelineDescriptor desc;
         desc.compute.module = utils::CreateShaderModule(device, kComputeShaderDefault.data());
         desc.compute.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 1u, device.CreateComputePipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(counts.shaderModule + counts.pipeline), Add(0),
+                           device.CreateComputePipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 1u);
 }
 
 // Tests that pipeline creation hits the cache when using the same pipeline but with explicit
@@ -163,9 +196,9 @@ TEST_P(SinglePipelineCachingTests, ComputePipelineBlobCacheExplictLayout) {
         wgpu::ComputePipelineDescriptor desc;
         desc.compute.module = utils::CreateShaderModule(device, kComputeShaderDefault.data());
         desc.compute.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateComputePipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(counts.shaderModule + counts.pipeline),
+                           device.CreateComputePipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 1u);
 
     // Cache should hit: use the same pipeline but with explicit pipeline layout.
     {
@@ -174,23 +207,22 @@ TEST_P(SinglePipelineCachingTests, ComputePipelineBlobCacheExplictLayout) {
         desc.compute.module = utils::CreateShaderModule(device, kComputeShaderDefault.data());
         desc.compute.entryPoint = "main";
         desc.layout = utils::MakeBasicPipelineLayout(device, {});
-        EXPECT_CACHE_HIT(mMockCache, 1u, device.CreateComputePipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(counts.shaderModule + counts.pipeline), Add(0),
+                           device.CreateComputePipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 1u);
 }
 
 // Tests that pipeline creation wouldn't hit the cache if the pipelines are not exactly the same.
 TEST_P(SinglePipelineCachingTests, ComputePipelineBlobCacheShaderNegativeCases) {
-    size_t numCacheEntries = 0u;
     // First time should create and write out to the cache.
     {
         wgpu::Device device = CreateDevice();
         wgpu::ComputePipelineDescriptor desc;
         desc.compute.module = utils::CreateShaderModule(device, kComputeShaderDefault.data());
         desc.compute.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateComputePipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(counts.shaderModule + counts.pipeline),
+                           device.CreateComputePipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), ++numCacheEntries);
 
     // Cache should not hit: different shader module.
     {
@@ -199,9 +231,9 @@ TEST_P(SinglePipelineCachingTests, ComputePipelineBlobCacheShaderNegativeCases) 
         desc.compute.module =
             utils::CreateShaderModule(device, kComputeShaderMultipleEntryPoints.data());
         desc.compute.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateComputePipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(counts.shaderModule + counts.pipeline),
+                           device.CreateComputePipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), ++numCacheEntries);
 
     // Cache should not hit: same shader module but different shader entry point.
     {
@@ -210,9 +242,9 @@ TEST_P(SinglePipelineCachingTests, ComputePipelineBlobCacheShaderNegativeCases) 
         desc.compute.module =
             utils::CreateShaderModule(device, kComputeShaderMultipleEntryPoints.data());
         desc.compute.entryPoint = "main2";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateComputePipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(counts.shaderModule + counts.pipeline),
+                           device.CreateComputePipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), ++numCacheEntries);
 }
 
 // Tests that pipeline creation does not hits the cache when it is enabled but we use different
@@ -224,9 +256,9 @@ TEST_P(SinglePipelineCachingTests, ComputePipelineBlobCacheIsolationKey) {
         wgpu::ComputePipelineDescriptor desc;
         desc.compute.module = utils::CreateShaderModule(device, kComputeShaderDefault.data());
         desc.compute.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateComputePipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(counts.shaderModule + counts.pipeline),
+                           device.CreateComputePipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 1u);
 
     // Second time should also create and write out to the cache.
     {
@@ -234,9 +266,9 @@ TEST_P(SinglePipelineCachingTests, ComputePipelineBlobCacheIsolationKey) {
         wgpu::ComputePipelineDescriptor desc;
         desc.compute.module = utils::CreateShaderModule(device, kComputeShaderDefault.data());
         desc.compute.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateComputePipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(counts.shaderModule + counts.pipeline),
+                           device.CreateComputePipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 2u);
 }
 
 // Tests that pipeline creation works fine even if the cache is disabled.
@@ -254,9 +286,8 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineNoCache) {
         desc.vertex.entryPoint = "main";
         desc.cFragment.module = utils::CreateShaderModule(device, kFragmentShaderDefault.data());
         desc.cFragment.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(0), device.CreateRenderPipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 0u);
 
     // Second time should create fine with no cache hits since cache is disabled.
     {
@@ -266,9 +297,8 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineNoCache) {
         desc.vertex.entryPoint = "main";
         desc.cFragment.module = utils::CreateShaderModule(device, kFragmentShaderDefault.data());
         desc.cFragment.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(0), device.CreateRenderPipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 0u);
 }
 
 // Tests that pipeline creation on the same device uses frontend cache when possible.
@@ -281,14 +311,15 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineFrontedCache) {
 
     // First creation should create a cache entry.
     wgpu::RenderPipeline pipeline;
-    EXPECT_CACHE_HIT(mMockCache, 0u, pipeline = device.CreateRenderPipeline(&desc));
-    EXPECT_EQ(mMockCache.GetNumEntries(), 1u);
+    EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(2 * counts.shaderModule + counts.pipeline),
+                       pipeline = device.CreateRenderPipeline(&desc));
 
     // Second creation on the same device should just return from frontend cache and should not
     // call out to the blob cache.
     EXPECT_CALL(mMockCache, LoadData).Times(0);
     wgpu::RenderPipeline samePipeline;
-    EXPECT_CACHE_HIT(mMockCache, 0u, samePipeline = device.CreateRenderPipeline(&desc));
+    EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(0),
+                       samePipeline = device.CreateRenderPipeline(&desc));
     EXPECT_EQ(pipeline.Get() == samePipeline.Get(), !UsesWire());
 }
 
@@ -307,9 +338,9 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCache) {
         desc.vertex.entryPoint = "main";
         desc.cFragment.module = utils::CreateShaderModule(device, kFragmentShaderDefault.data());
         desc.cFragment.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(2 * counts.shaderModule + counts.pipeline),
+                           device.CreateRenderPipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 1u);
 
     // Second time should create using the cache.
     {
@@ -319,9 +350,9 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCache) {
         desc.vertex.entryPoint = "main";
         desc.cFragment.module = utils::CreateShaderModule(device, kFragmentShaderDefault.data());
         desc.cFragment.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 1u, device.CreateRenderPipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(2 * counts.shaderModule + counts.pipeline), Add(0),
+                           device.CreateRenderPipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 1u);
 }
 
 // Tests that pipeline creation hits the cache when using the same pipeline but with explicit
@@ -338,9 +369,9 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheExplictLayout) {
         desc.vertex.entryPoint = "main";
         desc.cFragment.module = utils::CreateShaderModule(device, kFragmentShaderDefault.data());
         desc.cFragment.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(2 * counts.shaderModule + counts.pipeline),
+                           device.CreateRenderPipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 1u);
 
     // Cache should hit: use the same pipeline but with explicit pipeline layout.
     {
@@ -351,9 +382,9 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheExplictLayout) {
         desc.cFragment.module = utils::CreateShaderModule(device, kFragmentShaderDefault.data());
         desc.cFragment.entryPoint = "main";
         desc.layout = utils::MakeBasicPipelineLayout(device, {});
-        EXPECT_CACHE_HIT(mMockCache, 1u, device.CreateRenderPipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(2 * counts.shaderModule + counts.pipeline), Add(0),
+                           device.CreateRenderPipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 1u);
 }
 
 // Tests that pipeline creation wouldn't hit the cache if the pipelines have different state set in
@@ -367,11 +398,11 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheDescriptorNegativeCase
         desc.vertex.entryPoint = "main";
         desc.cFragment.module = utils::CreateShaderModule(device, kFragmentShaderDefault.data());
         desc.cFragment.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(2 * counts.shaderModule + counts.pipeline),
+                           device.CreateRenderPipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 1u);
 
-    // Cache should not hit: different pipeline descriptor state.
+    // Cache should hit for shaders, but not pipeline: different pipeline descriptor state.
     {
         wgpu::Device device = CreateDevice();
         utils::ComboRenderPipelineDescriptor desc;
@@ -380,15 +411,14 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheDescriptorNegativeCase
         desc.vertex.entryPoint = "main";
         desc.cFragment.module = utils::CreateShaderModule(device, kFragmentShaderDefault.data());
         desc.cFragment.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(2 * counts.shaderModule), Add(counts.pipeline),
+                           device.CreateRenderPipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 2u);
 }
 
 // Tests that pipeline creation wouldn't hit the cache if the pipelines are not exactly the same in
 // terms of shader.
 TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheShaderNegativeCases) {
-    size_t numCacheEntries = 0u;
     // First time should create and write out to the cache.
     {
         wgpu::Device device = CreateDevice();
@@ -397,11 +427,12 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheShaderNegativeCases) {
         desc.vertex.entryPoint = "main";
         desc.cFragment.module = utils::CreateShaderModule(device, kFragmentShaderDefault.data());
         desc.cFragment.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(2 * counts.shaderModule + counts.pipeline),
+                           device.CreateRenderPipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), ++numCacheEntries);
 
-    // Cache should not hit: different shader module.
+    // Cache should not hit for different vertex shader module,
+    // Cache should still hit for the same fragment shader module.
     {
         wgpu::Device device = CreateDevice();
         utils::ComboRenderPipelineDescriptor desc;
@@ -410,11 +441,13 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheShaderNegativeCases) {
         desc.vertex.entryPoint = "main";
         desc.cFragment.module = utils::CreateShaderModule(device, kFragmentShaderDefault.data());
         desc.cFragment.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(counts.shaderModule),
+                           Add(counts.shaderModule + counts.pipeline),
+                           device.CreateRenderPipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), ++numCacheEntries);
 
     // Cache should not hit: same shader module but different shader entry point.
+    // Cache should still hit for the same shader module.
     {
         wgpu::Device device = CreateDevice();
         utils::ComboRenderPipelineDescriptor desc;
@@ -423,15 +456,15 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheShaderNegativeCases) {
         desc.vertex.entryPoint = "main2";
         desc.cFragment.module = utils::CreateShaderModule(device, kFragmentShaderDefault.data());
         desc.cFragment.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(counts.shaderModule),
+                           Add(counts.shaderModule + counts.pipeline),
+                           device.CreateRenderPipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), ++numCacheEntries);
 }
 
 // Tests that pipeline creation wouldn't hit the cache if the pipelines are not exactly the same
 // (fragment color targets differences).
 TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheNegativeCasesFragmentColorTargets) {
-    size_t numCacheEntries = 0u;
     // First time should create and write out to the cache.
     {
         wgpu::Device device = CreateDevice();
@@ -445,11 +478,11 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheNegativeCasesFragmentC
         desc.cFragment.module =
             utils::CreateShaderModule(device, kFragmentShaderMultipleOutput.data());
         desc.cFragment.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(2 * counts.shaderModule + counts.pipeline),
+                           device.CreateRenderPipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), ++numCacheEntries);
 
-    // Cache should not hit: different fragment color target state (sparse).
+    // Cache should not hit for the pipeline: different fragment color target state (sparse).
     {
         wgpu::Device device = CreateDevice();
         utils::ComboRenderPipelineDescriptor desc;
@@ -462,9 +495,9 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheNegativeCasesFragmentC
         desc.cFragment.module =
             utils::CreateShaderModule(device, kFragmentShaderMultipleOutput.data());
         desc.cFragment.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(2 * counts.shaderModule), Add(counts.pipeline),
+                           device.CreateRenderPipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), ++numCacheEntries);
 
     // Cache should not hit: different fragment color target state (trailing empty).
     {
@@ -479,9 +512,101 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheNegativeCasesFragmentC
         desc.cFragment.module =
             utils::CreateShaderModule(device, kFragmentShaderMultipleOutput.data());
         desc.cFragment.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(2 * counts.shaderModule), Add(counts.pipeline),
+                           device.CreateRenderPipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), ++numCacheEntries);
+}
+
+// Tests that pipeline creation hits the cache for shaders, but not the pipeline if the
+// shaders aren't impacted by the layout. This test is a bit change detecting - but all
+// cached backends currently remap shader bindings based on the layout. It can be split
+// per-backend as needed.
+TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheLayout) {
+    // First time should create and write out to the cache.
+    {
+        wgpu::Device device = CreateDevice();
+        utils::ComboRenderPipelineDescriptor desc;
+        desc.vertex.module = utils::CreateShaderModule(device, kVertexShaderDefault.data());
+        desc.vertex.entryPoint = "main";
+        desc.cFragment.module =
+            utils::CreateShaderModule(device, kFragmentShaderBindGroup00Uniform.data());
+        desc.cFragment.entryPoint = "main";
+        desc.layout = utils::MakePipelineLayout(
+            device, {
+                        utils::MakeBindGroupLayout(
+                            device,
+                            {
+                                {0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform},
+                            }),
+                    });
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(2 * counts.shaderModule + counts.pipeline),
+                           device.CreateRenderPipeline(&desc));
+    }
+
+    // Cache should hit for the shaders, but not for the pipeline: different layout.
+    {
+        wgpu::Device device = CreateDevice();
+        utils::ComboRenderPipelineDescriptor desc;
+        desc.vertex.module = utils::CreateShaderModule(device, kVertexShaderDefault.data());
+        desc.vertex.entryPoint = "main";
+        desc.cFragment.module =
+            utils::CreateShaderModule(device, kFragmentShaderBindGroup00Uniform.data());
+        desc.cFragment.entryPoint = "main";
+        desc.layout = utils::MakePipelineLayout(
+            device, {
+                        utils::MakeBindGroupLayout(
+                            device,
+                            {
+                                {0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform},
+                                {1, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform},
+                            }),
+                    });
+        EXPECT_CACHE_STATS(mMockCache, Hit(2 * counts.shaderModule), Add(counts.pipeline),
+                           device.CreateRenderPipeline(&desc));
+    }
+
+    // Cache should hit for the shaders, but not for the pipeline: different layout (dynamic).
+    {
+        wgpu::Device device = CreateDevice();
+        utils::ComboRenderPipelineDescriptor desc;
+        desc.vertex.module = utils::CreateShaderModule(device, kVertexShaderDefault.data());
+        desc.vertex.entryPoint = "main";
+        desc.cFragment.module =
+            utils::CreateShaderModule(device, kFragmentShaderBindGroup00Uniform.data());
+        desc.cFragment.entryPoint = "main";
+        desc.layout = utils::MakePipelineLayout(
+            device, {
+                        utils::MakeBindGroupLayout(device,
+                                                   {
+                                                       {0, wgpu::ShaderStage::Fragment,
+                                                        wgpu::BufferBindingType::Uniform, true},
+                                                   }),
+                    });
+        EXPECT_CACHE_STATS(mMockCache, Hit(2 * counts.shaderModule), Add(counts.pipeline),
+                           device.CreateRenderPipeline(&desc));
+    }
+
+    // Cache should hit for the shaders, but not for the pipeline.
+    // The shader is different but compiles to the same due to binding number remapping.
+    {
+        wgpu::Device device = CreateDevice();
+        utils::ComboRenderPipelineDescriptor desc;
+        desc.vertex.module = utils::CreateShaderModule(device, kVertexShaderDefault.data());
+        desc.vertex.entryPoint = "main";
+        desc.cFragment.module =
+            utils::CreateShaderModule(device, kFragmentShaderBindGroup01Uniform.data());
+        desc.cFragment.entryPoint = "main";
+        desc.layout = utils::MakePipelineLayout(
+            device, {
+                        utils::MakeBindGroupLayout(
+                            device,
+                            {
+                                {1, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Uniform},
+                            }),
+                    });
+        EXPECT_CACHE_STATS(mMockCache, Hit(2 * counts.shaderModule), Add(counts.pipeline),
+                           device.CreateRenderPipeline(&desc));
+    }
 }
 
 // Tests that pipeline creation does not hits the cache when it is enabled but we use different
@@ -495,9 +620,9 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheIsolationKey) {
         desc.vertex.entryPoint = "main";
         desc.cFragment.module = utils::CreateShaderModule(device, kFragmentShaderDefault.data());
         desc.cFragment.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(2 * counts.shaderModule + counts.pipeline),
+                           device.CreateRenderPipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 1u);
 
     // Second time should also create and write out to the cache.
     {
@@ -507,13 +632,16 @@ TEST_P(SinglePipelineCachingTests, RenderPipelineBlobCacheIsolationKey) {
         desc.vertex.entryPoint = "main";
         desc.cFragment.module = utils::CreateShaderModule(device, kFragmentShaderDefault.data());
         desc.cFragment.entryPoint = "main";
-        EXPECT_CACHE_HIT(mMockCache, 0u, device.CreateRenderPipeline(&desc));
+        EXPECT_CACHE_STATS(mMockCache, Hit(0), Add(2 * counts.shaderModule + counts.pipeline),
+                           device.CreateRenderPipeline(&desc));
     }
-    EXPECT_EQ(mMockCache.GetNumEntries(), 2u);
 }
 
 DAWN_INSTANTIATE_TEST(SinglePipelineCachingTests,
-                      VulkanBackend({"enable_blob_cache"}),
-                      D3D12Backend({"enable_blob_cache"}));
+                      D3D12Backend({"enable_blob_cache"}),
+                      MetalBackend({"enable_blob_cache"}),
+                      OpenGLBackend({"enable_blob_cache"}),
+                      OpenGLESBackend({"enable_blob_cache"}),
+                      VulkanBackend({"enable_blob_cache"}));
 
 }  // namespace

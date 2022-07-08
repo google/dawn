@@ -54,3 +54,8 @@ ScopedTintICEHandler::~ScopedTintICEHandler() {
 }
 
 }  // namespace dawn::native
+
+bool std::less<tint::sem::BindingPoint>::operator()(const tint::sem::BindingPoint& a,
+                                                    const tint::sem::BindingPoint& b) const {
+    return std::tie(a.group, a.binding) < std::tie(b.group, b.binding);
+}

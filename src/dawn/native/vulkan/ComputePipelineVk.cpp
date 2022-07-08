@@ -58,10 +58,12 @@ MaybeError ComputePipeline::Initialize() {
     // Generate a new VkShaderModule with BindingRemapper tint transform for each pipeline
     const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
     ShaderModule* module = ToBackend(computeStage.module.Get());
-    const ShaderModule::Spirv* spirv;
-    DAWN_TRY_ASSIGN((std::tie(createInfo.stage.module, spirv)),
+
+    ShaderModule::ModuleAndSpirv moduleAndSpirv;
+    DAWN_TRY_ASSIGN(moduleAndSpirv,
                     module->GetHandleAndSpirv(computeStage.entryPoint.c_str(), layout));
 
+    createInfo.stage.module = moduleAndSpirv.module;
     createInfo.stage.pName = computeStage.entryPoint.c_str();
 
     std::vector<OverridableConstantScalar> specializationDataEntries;
@@ -83,7 +85,8 @@ MaybeError ComputePipeline::Initialize() {
     }
 
     // Record cache key information now since the createInfo is not stored.
-    mCacheKey.Record(createInfo, layout).RecordIterable(*spirv);
+    mCacheKey.Record(createInfo, layout)
+        .RecordIterable(moduleAndSpirv.spirv, moduleAndSpirv.wordCount);
 
     // Try to see if we have anything in the blob cache.
     Ref<PipelineCache> cache = ToBackend(GetDevice()->GetOrCreatePipelineCache(GetCacheKey()));

@@ -23,7 +23,10 @@
 
 namespace dawn::native {
 
-MaybeError ValidateSpirv(DeviceBase* device, const std::vector<uint32_t>& spirv, bool dumpSpirv) {
+MaybeError ValidateSpirv(DeviceBase* device,
+                         const uint32_t* spirv,
+                         size_t wordCount,
+                         bool dumpSpirv) {
     spvtools::SpirvTools spirvTools(SPV_ENV_VULKAN_1_1);
     spirvTools.SetMessageConsumer([device](spv_message_level_t level, const char*,
                                            const spv_position_t& position, const char* message) {
@@ -50,12 +53,12 @@ MaybeError ValidateSpirv(DeviceBase* device, const std::vector<uint32_t>& spirv,
         device->EmitLog(wgpuLogLevel, ss.str().c_str());
     });
 
-    const bool valid = spirvTools.Validate(spirv);
+    const bool valid = spirvTools.Validate(spirv, wordCount);
     if (dumpSpirv || !valid) {
         std::ostringstream dumpedMsg;
         std::string disassembly;
         if (spirvTools.Disassemble(
-                spirv, &disassembly,
+                spirv, wordCount, &disassembly,
                 SPV_BINARY_TO_TEXT_OPTION_FRIENDLY_NAMES | SPV_BINARY_TO_TEXT_OPTION_INDENT)) {
             dumpedMsg << "/* Dumped generated SPIRV disassembly */" << std::endl << disassembly;
         } else {

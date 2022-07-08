@@ -59,6 +59,7 @@ target_sources(dawn_native PRIVATE
     "CachedObject.h"
     "CacheKey.cpp"
     "CacheKey.h"
+    "CacheKeyImplTint.cpp"
     "CacheRequest.cpp"
     "CacheRequest.h"
     "CacheResult.h"

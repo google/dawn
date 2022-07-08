@@ -19,6 +19,7 @@
 
 #include "dawn/common/Platform.h"
 #include "dawn/native/Blob.h"
+#include "dawn/native/CacheResult.h"
 
 namespace dawn::platform {
 class CachingInterface;
@@ -41,6 +42,19 @@ class BlobCache {
     // Value to store must be non-empty/non-null.
     void Store(const CacheKey& key, size_t valueSize, const void* value);
     void Store(const CacheKey& key, const Blob& value);
+
+    // Other types may specialize BlobCache::Store<T> to define how T is serialized into the cache.
+    template <typename T>
+    void Store(const CacheKey& key, const T& value);
+
+    // Store a CacheResult into the cache if it isn't cached yet.
+    // Calls Store<T> which should be defined elsewhere.
+    template <typename T>
+    void EnsureStored(const CacheResult<T>& cacheResult) {
+        if (!cacheResult.IsCached()) {
+            Store(cacheResult.GetCacheKey(), *cacheResult);
+        }
+    }
 
   private:
     // Non-thread safe internal implementations of load and store. Exposed callers that use

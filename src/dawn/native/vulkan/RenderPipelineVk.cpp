@@ -351,10 +351,12 @@ MaybeError RenderPipeline::Initialize() {
 
         const ProgrammableStage& programmableStage = GetStage(stage);
         ShaderModule* module = ToBackend(programmableStage.module.Get());
-        const ShaderModule::Spirv* spirv;
-        DAWN_TRY_ASSIGN(std::tie(shaderStage.module, spirv),
+
+        ShaderModule::ModuleAndSpirv moduleAndSpirv;
+        DAWN_TRY_ASSIGN(moduleAndSpirv,
                         module->GetHandleAndSpirv(programmableStage.entryPoint.c_str(), layout));
 
+        shaderStage.module = moduleAndSpirv.module;
         shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         shaderStage.pNext = nullptr;
         shaderStage.flags = 0;
@@ -387,7 +389,7 @@ MaybeError RenderPipeline::Initialize() {
         stageCount++;
 
         // Record cache key for each shader since it will become inaccessible later on.
-        mCacheKey.Record(stage).RecordIterable(*spirv);
+        mCacheKey.Record(stage).RecordIterable(moduleAndSpirv.spirv, moduleAndSpirv.wordCount);
     }
 
     PipelineVertexInputStateCreateInfoTemporaryAllocations tempAllocations;

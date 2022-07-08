@@ -200,6 +200,7 @@ source_set("sources") {
     "Buffer.h",
     "CacheKey.cpp",
     "CacheKey.h",
+    "CacheKeyImplTint.cpp",
     "CacheRequest.cpp",
     "CacheRequest.h",
     "CacheResult.h",

@@ -389,6 +389,7 @@ source_set("platform_mocks_sources") {
 
   deps = [
     ":gmock_and_gtest",
+    "${dawn_root}/src/dawn/common",
     "${dawn_root}/src/dawn/platform",
   ]
 

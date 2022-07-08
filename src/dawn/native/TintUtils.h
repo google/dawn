@@ -15,7 +15,13 @@
 #ifndef SRC_DAWN_NATIVE_TINTUTILS_H_
 #define SRC_DAWN_NATIVE_TINTUTILS_H_
 
+#include <functional>
+
 #include "dawn/common/NonCopyable.h"
+
+namespace tint::sem {
+struct BindingPoint;
+}
 
 namespace dawn::native {
 
@@ -33,5 +39,11 @@ class ScopedTintICEHandler : public NonCopyable {
 };
 
 }  // namespace dawn::native
+
+// std::less operator for std::map containing BindingPoint
+template <>
+struct std::less<tint::sem::BindingPoint> {
+    bool operator()(const tint::sem::BindingPoint& a, const tint::sem::BindingPoint& b) const;
+};
 
 #endif  // SRC_DAWN_NATIVE_TINTUTILS_H_

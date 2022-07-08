@@ -19,6 +19,7 @@
 #include <utility>
 
 #include "dawn/common/Assert.h"
+#include "dawn/native/CacheKey.h"
 
 namespace dawn::native {
 
@@ -39,7 +40,7 @@ class CacheResult {
         ASSERT(mIsValid);
         return mIsCached;
     }
-    const CacheKey& GetCacheKey() {
+    const CacheKey& GetCacheKey() const {
         ASSERT(mIsValid);
         return mKey;
     }

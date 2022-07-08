@@ -151,6 +151,8 @@ class CacheRequestImpl {
     }
 };
 
+}  // namespace dawn::native
+
 // Helper for X macro to declare a struct member.
 #define DAWN_INTERNAL_CACHE_REQUEST_DECL_STRUCT_MEMBER(type, name) type name{};
 
@@ -166,21 +168,23 @@ class CacheRequestImpl {
 //       X(Bar, bar)
 //   DAWN_MAKE_CACHE_REQUEST(MyCacheRequest, REQUEST_MEMBERS)
 //   #undef REQUEST_MEMBERS
-#define DAWN_MAKE_CACHE_REQUEST(Request, MEMBERS)                     \
-    class Request : public CacheRequestImpl<Request> {                \
-      public:                                                         \
-        Request() = default;                                          \
-        MEMBERS(DAWN_INTERNAL_CACHE_REQUEST_DECL_STRUCT_MEMBER)       \
-                                                                      \
-        /* Create a CacheKey from the request type and all members */ \
-        CacheKey CreateCacheKey(const DeviceBase* device) const {     \
-            CacheKey key = device->GetCacheKey();                     \
-            key.Record(#Request);                                     \
-            MEMBERS(DAWN_INTERNAL_CACHE_REQUEST_RECORD_KEY)           \
-            return key;                                               \
-        }                                                             \
+#define DAWN_MAKE_CACHE_REQUEST(Request, MEMBERS)                                                 \
+    class Request : public ::dawn::native::CacheRequestImpl<Request> {                            \
+      public:                                                                                     \
+        Request() = default;                                                                      \
+        MEMBERS(DAWN_INTERNAL_CACHE_REQUEST_DECL_STRUCT_MEMBER)                                   \
+                                                                                                  \
+        /* Create a CacheKey from the request type and all members */                             \
+        ::dawn::native::CacheKey CreateCacheKey(const ::dawn::native::DeviceBase* device) const { \
+            ::dawn::native::CacheKey key = device->GetCacheKey();                                 \
+            key.Record(#Request);                                                                 \
+            MEMBERS(DAWN_INTERNAL_CACHE_REQUEST_RECORD_KEY)                                       \
+            return key;                                                                           \
+        }                                                                                         \
     };
 
-}  // namespace dawn::native
+// Helper macro for the common pattern of DAWN_TRY_ASSIGN around LoadOrRun.
+// Requires an #include of dawn/native/Error.h
+#define DAWN_TRY_LOAD_OR_RUN(var, ...) DAWN_TRY_ASSIGN(var, LoadOrRun(__VA_ARGS__))
 
 #endif  // SRC_DAWN_NATIVE_CACHEREQUEST_H_
