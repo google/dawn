@@ -168,7 +168,7 @@ TEST_F(InspectorGetEntryPointTest, OneEntryPoint) {
     ASSERT_EQ(1u, result.size());
     EXPECT_EQ("foo", result[0].name);
     EXPECT_EQ("foo", result[0].remapped_name);
-    EXPECT_EQ(ast::PipelineStage::kFragment, result[0].stage);
+    EXPECT_EQ(PipelineStage::kFragment, result[0].stage);
 }
 
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
@@ -191,10 +191,10 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
     ASSERT_EQ(2u, result.size());
     EXPECT_EQ("foo", result[0].name);
     EXPECT_EQ("foo", result[0].remapped_name);
-    EXPECT_EQ(ast::PipelineStage::kFragment, result[0].stage);
+    EXPECT_EQ(PipelineStage::kFragment, result[0].stage);
     EXPECT_EQ("bar", result[1].name);
     EXPECT_EQ("bar", result[1].remapped_name);
-    EXPECT_EQ(ast::PipelineStage::kCompute, result[1].stage);
+    EXPECT_EQ(PipelineStage::kCompute, result[1].stage);
 }
 
 TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
@@ -221,10 +221,10 @@ TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
     ASSERT_EQ(2u, result.size());
     EXPECT_EQ("foo", result[0].name);
     EXPECT_EQ("foo", result[0].remapped_name);
-    EXPECT_EQ(ast::PipelineStage::kCompute, result[0].stage);
+    EXPECT_EQ(PipelineStage::kCompute, result[0].stage);
     EXPECT_EQ("bar", result[1].name);
     EXPECT_EQ("bar", result[1].remapped_name);
-    EXPECT_EQ(ast::PipelineStage::kFragment, result[1].stage);
+    EXPECT_EQ(PipelineStage::kFragment, result[1].stage);
 }
 
 TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {

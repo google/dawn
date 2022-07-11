@@ -145,7 +145,22 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
         EntryPoint entry_point;
         entry_point.name = program_->Symbols().NameFor(func->symbol);
         entry_point.remapped_name = program_->Symbols().NameFor(func->symbol);
-        entry_point.stage = func->PipelineStage();
+
+        switch (func->PipelineStage()) {
+            case ast::PipelineStage::kCompute:
+                entry_point.stage = PipelineStage::kCompute;
+                break;
+            case ast::PipelineStage::kFragment:
+                entry_point.stage = PipelineStage::kFragment;
+                break;
+            case ast::PipelineStage::kVertex:
+                entry_point.stage = PipelineStage::kVertex;
+                break;
+            default:
+                TINT_UNREACHABLE(Inspector, diagnostics_)
+                    << "invalid pipeline stage for entry point '" << entry_point.name << "'";
+                break;
+        }
 
         auto wgsize = sem->WorkgroupSize();
         entry_point.workgroup_size_x = wgsize[0].value;

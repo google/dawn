@@ -118,16 +118,15 @@ tint::transform::VertexStepMode ToTintVertexStepMode(wgpu::VertexStepMode mode) 
     UNREACHABLE();
 }
 
-ResultOrError<SingleShaderStage> TintPipelineStageToShaderStage(tint::ast::PipelineStage stage) {
+ResultOrError<SingleShaderStage> TintPipelineStageToShaderStage(
+    tint::inspector::PipelineStage stage) {
     switch (stage) {
-        case tint::ast::PipelineStage::kVertex:
+        case tint::inspector::PipelineStage::kVertex:
             return SingleShaderStage::Vertex;
-        case tint::ast::PipelineStage::kFragment:
+        case tint::inspector::PipelineStage::kFragment:
             return SingleShaderStage::Fragment;
-        case tint::ast::PipelineStage::kCompute:
+        case tint::inspector::PipelineStage::kCompute:
             return SingleShaderStage::Compute;
-        case tint::ast::PipelineStage::kNone:
-            break;
     }
     UNREACHABLE();
 }

@@ -120,6 +120,9 @@ struct OverridableConstant {
     bool is_numeric_id_specified = false;
 };
 
+/// The pipeline stage
+enum class PipelineStage { kVertex, kFragment, kCompute };
+
 /// Reflection data for an entry point in the shader.
 struct EntryPoint {
     /// Constructors
@@ -135,7 +138,7 @@ struct EntryPoint {
     /// Remapped entry point name in the backend
     std::string remapped_name;
     /// The entry point stage
-    ast::PipelineStage stage = ast::PipelineStage::kNone;
+    PipelineStage stage;
     /// The workgroup x size
     uint32_t workgroup_size_x = 0;
     /// The workgroup y size
