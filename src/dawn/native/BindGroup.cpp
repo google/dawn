@@ -301,6 +301,12 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device, const BindGroupDescri
                 device, entry, externalTextureBindingEntry,
                 descriptor->layout->GetExternalTextureBindingExpansionMap()));
             continue;
+        } else {
+            DAWN_INVALID_IF(descriptor->layout->GetExternalTextureBindingExpansionMap().count(
+                                BindingNumber(entry.binding)),
+                            "entries[%u] is not an ExternalTexture when the layout contains an "
+                            "ExternalTexture entry.",
+                            i);
         }
 
         const BindingInfo& bindingInfo = descriptor->layout->GetBindingInfo(bindingIndex);
