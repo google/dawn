@@ -824,7 +824,7 @@ void Texture::TransitionSubresourceRange(std::vector<D3D12_RESOURCE_BARRIER>* ba
     // non-simultaneous-access texture: NON_PIXEL_SHADER_RESOURCE,
     // PIXEL_SHADER_RESOURCE, COPY_SRC, COPY_DEST.
     {
-        static constexpr D3D12_RESOURCE_STATES kD3D12PromotableReadOnlyStates =
+        const D3D12_RESOURCE_STATES kD3D12PromotableReadOnlyStates =
             D3D12_RESOURCE_STATE_COPY_SOURCE | D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE |
             D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
 
