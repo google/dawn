@@ -154,6 +154,26 @@ void f() {
 )");
 }
 
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* C = Const("C", nullptr, Expr(1_h));
+    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+void f() {
+  half const l = 1.0h;
+}
+
+)");
+}
+
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_AInt) {
     auto* C = Const("C", nullptr, Construct(ty.vec3(nullptr), 1_a, 2_a, 3_a));
     Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
@@ -208,6 +228,26 @@ void f() {
 )");
 }
 
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* C = Const("C", nullptr, vec3<f16>(1_h, 2_h, 3_h));
+    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+void f() {
+  half3 const l = half3(1.0h, 2.0h, 3.0h);
+}
+
+)");
+}
+
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_mat2x3_AFloat) {
     auto* C =
         Const("C", nullptr, Construct(ty.mat(nullptr, 2, 3), 1._a, 2._a, 3._a, 4._a, 5._a, 6._a));
@@ -240,6 +280,26 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_mat2x3_f32) {
 using namespace metal;
 void f() {
   float2x3 const l = float2x3(float3(1.0f, 2.0f, 3.0f), float3(4.0f, 5.0f, 6.0f));
+}
+
+)");
+}
+
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_mat2x3_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* C = Const("C", nullptr, mat2x3<f16>(1_h, 2_h, 3_h, 4_h, 5_h, 6_h));
+    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+void f() {
+  half2x3 const l = half2x3(half3(1.0h, 2.0h, 3.0h), half3(4.0h, 5.0h, 6.0h));
 }
 
 )");
@@ -343,7 +403,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
 )");
 }
 
-TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector_f32) {
     auto* var = Var("a", ty.vec2<f32>());
     auto* stmt = Decl(var);
     WrapInFunction(stmt);
@@ -356,7 +416,22 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector) {
     EXPECT_EQ(gen.result(), "  float2 a = 0.0f;\n");
 }
 
-TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Vector_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = Var("a", ty.vec2<f16>());
+    auto* stmt = Decl(var);
+    WrapInFunction(stmt);
+
+    GeneratorImpl& gen = Build();
+
+    gen.increment_indent();
+
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    EXPECT_EQ(gen.result(), "  half2 a = 0.0h;\n");
+}
+
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix_f32) {
     auto* var = Var("a", ty.mat3x2<f32>());
 
     auto* stmt = Decl(var);
@@ -368,6 +443,80 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix) {
 
     ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
     EXPECT_EQ(gen.result(), "  float3x2 a = float3x2(0.0f);\n");
+}
+
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Matrix_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = Var("a", ty.mat3x2<f16>());
+
+    auto* stmt = Decl(var);
+    WrapInFunction(stmt);
+
+    GeneratorImpl& gen = Build();
+
+    gen.increment_indent();
+
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    EXPECT_EQ(gen.result(), "  half3x2 a = half3x2(0.0h);\n");
+}
+
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec_f32) {
+    auto* var = Var("a", ty.vec3<f32>(), ast::StorageClass::kNone, vec3<f32>());
+
+    auto* stmt = Decl(var);
+    WrapInFunction(stmt);
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(float3 a = float3(0.0f);
+)");
+}
+
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = Var("a", ty.vec3<f16>(), ast::StorageClass::kNone, vec3<f16>());
+
+    auto* stmt = Decl(var);
+    WrapInFunction(stmt);
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(half3 a = half3(0.0h);
+)");
+}
+
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroMat_f32) {
+    auto* var = Var("a", ty.mat2x3<f32>(), ast::StorageClass::kNone, mat2x3<f32>());
+
+    auto* stmt = Decl(var);
+    WrapInFunction(stmt);
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    EXPECT_EQ(gen.result(),
+              R"(float2x3 a = float2x3(float3(0.0f), float3(0.0f));
+)");
+}
+
+TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroMat_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = Var("a", ty.mat2x3<f16>(), ast::StorageClass::kNone, mat2x3<f16>());
+
+    auto* stmt = Decl(var);
+    WrapInFunction(stmt);
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
+    EXPECT_EQ(gen.result(),
+              R"(half2x3 a = half2x3(half3(0.0h), half3(0.0h));
+)");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Private) {
@@ -394,20 +543,6 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Workgroup) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_THAT(gen.result(), HasSubstr("threadgroup float tint_symbol_2;\n"));
-}
-
-TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Initializer_ZeroVec) {
-    auto* zero_vec = vec3<f32>();
-
-    auto* var = Var("a", ty.vec3<f32>(), ast::StorageClass::kNone, zero_vec);
-    auto* stmt = Decl(var);
-    WrapInFunction(stmt);
-
-    GeneratorImpl& gen = Build();
-
-    ASSERT_TRUE(gen.EmitStatement(stmt)) << gen.error();
-    EXPECT_EQ(gen.result(), R"(float3 a = float3(0.0f);
-)");
 }
 
 }  // namespace

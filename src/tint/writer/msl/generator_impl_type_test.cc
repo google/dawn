@@ -71,6 +71,18 @@ DECLARE_TYPE(float3x4, 48, 16);
 DECLARE_TYPE(float4x2, 32, 8);
 DECLARE_TYPE(float4x3, 64, 16);
 DECLARE_TYPE(float4x4, 64, 16);
+DECLARE_TYPE(half2, 4, 4);
+DECLARE_TYPE(packed_half3, 6, 2);
+DECLARE_TYPE(half4, 8, 8);
+DECLARE_TYPE(half2x2, 8, 4);
+DECLARE_TYPE(half2x3, 16, 8);
+DECLARE_TYPE(half2x4, 16, 8);
+DECLARE_TYPE(half3x2, 12, 4);
+DECLARE_TYPE(half3x3, 24, 8);
+DECLARE_TYPE(half3x4, 24, 8);
+DECLARE_TYPE(half4x2, 16, 4);
+DECLARE_TYPE(half4x3, 32, 8);
+DECLARE_TYPE(half4x4, 32, 8);
 using uint = unsigned int;
 
 using MslGeneratorImplTest = TestHelper;
@@ -153,6 +165,16 @@ TEST_F(MslGeneratorImplTest, EmitType_F32) {
     EXPECT_EQ(out.str(), "float");
 }
 
+TEST_F(MslGeneratorImplTest, EmitType_F16) {
+    auto* f16 = create<sem::F16>();
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitType(out, f16, "")) << gen.error();
+    EXPECT_EQ(out.str(), "half");
+}
+
 TEST_F(MslGeneratorImplTest, EmitType_I32) {
     auto* i32 = create<sem::I32>();
 
@@ -163,7 +185,7 @@ TEST_F(MslGeneratorImplTest, EmitType_I32) {
     EXPECT_EQ(out.str(), "int");
 }
 
-TEST_F(MslGeneratorImplTest, EmitType_Matrix) {
+TEST_F(MslGeneratorImplTest, EmitType_Matrix_F32) {
     auto* f32 = create<sem::F32>();
     auto* vec3 = create<sem::Vector>(f32, 3u);
     auto* mat2x3 = create<sem::Matrix>(vec3, 2u);
@@ -173,6 +195,18 @@ TEST_F(MslGeneratorImplTest, EmitType_Matrix) {
     std::stringstream out;
     ASSERT_TRUE(gen.EmitType(out, mat2x3, "")) << gen.error();
     EXPECT_EQ(out.str(), "float2x3");
+}
+
+TEST_F(MslGeneratorImplTest, EmitType_Matrix_F16) {
+    auto* f16 = create<sem::F16>();
+    auto* vec3 = create<sem::Vector>(f16, 3u);
+    auto* mat2x3 = create<sem::Matrix>(vec3, 2u);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitType(out, mat2x3, "")) << gen.error();
+    EXPECT_EQ(out.str(), "half2x3");
 }
 
 TEST_F(MslGeneratorImplTest, EmitType_Pointer) {

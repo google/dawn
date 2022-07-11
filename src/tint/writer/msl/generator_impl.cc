@@ -39,6 +39,7 @@
 #include "src/tint/sem/constant.h"
 #include "src/tint/sem/depth_multisampled_texture.h"
 #include "src/tint/sem/depth_texture.h"
+#include "src/tint/sem/f16.h"
 #include "src/tint/sem/f32.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/i32.h"
@@ -94,6 +95,20 @@ void PrintF32(std::ostream& out, float value) {
         out << "NAN";
     } else {
         out << FloatToString(value) << "f";
+    }
+}
+
+void PrintF16(std::ostream& out, float value) {
+    // Note: Currently inf and nan should not be constructable, but this is implemented for the day
+    // we support them.
+    if (std::isinf(value)) {
+        // HUGE_VALH evaluates to +infinity.
+        out << (value >= 0 ? "HUGE_VALH" : "-HUGE_VALH");
+    } else if (std::isnan(value)) {
+        // There is no NaN expr for half in MSL, "NAN" is of float type.
+        out << "NAN";
+    } else {
+        out << FloatToString(value) << "h";
     }
 }
 
@@ -1551,10 +1566,8 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
             return true;
         },
         [&](const sem::F16*) {
-            // Placeholder for emitting f16 zero value
-            diagnostics_.add_error(diag::System::Writer,
-                                   "Type f16 is not completely implemented yet");
-            return false;
+            out << "0.0h";
+            return true;
         },
         [&](const sem::F32*) {
             out << "0.0f";
@@ -1603,6 +1616,10 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
         },
         [&](const sem::F32*) {
             PrintF32(out, constant->As<float>());
+            return true;
+        },
+        [&](const sem::F16*) {
+            PrintF16(out, constant->As<float>());
             return true;
         },
         [&](const sem::I32*) {
@@ -1694,7 +1711,11 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
             return true;
         },
         [&](const ast::FloatLiteralExpression* l) {
-            PrintF32(out, static_cast<float>(l->value));
+            if (l->suffix == ast::FloatLiteralExpression::Suffix::kH) {
+                PrintF16(out, static_cast<float>(l->value));
+            } else {
+                PrintF32(out, static_cast<float>(l->value));
+            }
             return true;
         },
         [&](const ast::IntLiteralExpression* i) {
@@ -2459,9 +2480,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             return true;
         },
         [&](const sem::F16*) {
-            diagnostics_.add_error(diag::System::Writer,
-                                   "Type f16 is not completely implemented yet");
-            return false;
+            out << "half";
+            return true;
         },
         [&](const sem::F32*) {
             out << "float";
@@ -3043,20 +3063,25 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const sem::
         [&](const sem::F32*) {
             return SizeAndAlign{4, 4};
         },
+        [&](const sem::F16*) {
+            return SizeAndAlign{2, 2};
+        },
 
         [&](const sem::Vector* vec) {
             auto num_els = vec->Width();
             auto* el_ty = vec->type();
-            if (el_ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
+            SizeAndAlign el_size_align = MslPackedTypeSizeAndAlign(el_ty);
+            if (el_ty->IsAnyOf<sem::U32, sem::I32, sem::F32, sem::F16>()) {
                 // Use a packed_vec type for 3-element vectors only.
                 if (num_els == 3) {
                     // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
                     // 2.2.3 Packed Vector Types
-                    return SizeAndAlign{num_els * 4, 4};
+                    return SizeAndAlign{num_els * el_size_align.size, el_size_align.align};
                 } else {
                     // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
                     // 2.2 Vector Data Types
-                    return SizeAndAlign{num_els * 4, num_els * 4};
+                    // Vector data types are aligned to their size.
+                    return SizeAndAlign{num_els * el_size_align.size, num_els * el_size_align.size};
                 }
             }
             TINT_UNREACHABLE(Writer, diagnostics_)
@@ -3070,8 +3095,9 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const sem::
             auto cols = mat->columns();
             auto rows = mat->rows();
             auto* el_ty = mat->type();
-            if (el_ty->IsAnyOf<sem::U32, sem::I32, sem::F32>()) {
-                static constexpr SizeAndAlign table[] = {
+            // Metal only support half and float matrix.
+            if (el_ty->IsAnyOf<sem::F32, sem::F16>()) {
+                static constexpr SizeAndAlign table_f32[] = {
                     /* float2x2 */ {16, 8},
                     /* float2x3 */ {32, 16},
                     /* float2x4 */ {32, 16},
@@ -3082,8 +3108,23 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const sem::
                     /* float4x3 */ {64, 16},
                     /* float4x4 */ {64, 16},
                 };
+                static constexpr SizeAndAlign table_f16[] = {
+                    /* half2x2 */ {8, 4},
+                    /* half2x3 */ {16, 8},
+                    /* half2x4 */ {16, 8},
+                    /* half3x2 */ {12, 4},
+                    /* half3x3 */ {24, 8},
+                    /* half3x4 */ {24, 8},
+                    /* half4x2 */ {16, 4},
+                    /* half4x3 */ {32, 8},
+                    /* half4x4 */ {32, 8},
+                };
                 if (cols >= 2 && cols <= 4 && rows >= 2 && rows <= 4) {
-                    return table[(3 * (cols - 2)) + (rows - 2)];
+                    if (el_ty->Is<sem::F32>()) {
+                        return table_f32[(3 * (cols - 2)) + (rows - 2)];
+                    } else {
+                        return table_f16[(3 * (cols - 2)) + (rows - 2)];
+                    }
                 }
             }
 

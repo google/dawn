@@ -61,6 +61,18 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Float) {
     EXPECT_THAT(gen.result(), HasSubstr("1073741824.0f"));
 }
 
+TEST_F(MslGeneratorImplTest, EmitConstructor_F16) {
+    Enable(ast::Extension::kF16);
+
+    // Use a number close to 1<<16 but whose decimal representation ends in 0.
+    WrapInFunction(Expr(f16((1 << 15) - 8)));
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("32752.0h"));
+}
+
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Float) {
     WrapInFunction(Construct<f32>(-1.2e-5_f));
 
@@ -68,6 +80,17 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Float) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_THAT(gen.result(), HasSubstr("-0.000012f"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_F16) {
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(Construct<f16>(-1.2e-3_h));
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("-0.00119972229h"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Bool) {
@@ -97,7 +120,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Uint) {
     EXPECT_THAT(gen.result(), HasSubstr("12345u"));
 }
 
-TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec) {
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_F32) {
     WrapInFunction(vec3<f32>(1_f, 2_f, 3_f));
 
     GeneratorImpl& gen = Build();
@@ -106,7 +129,18 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec) {
     EXPECT_THAT(gen.result(), HasSubstr("float3(1.0f, 2.0f, 3.0f)"));
 }
 
-TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_Empty) {
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_F16) {
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(vec3<f16>(1_h, 2_h, 3_h));
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("half3(1.0h, 2.0h, 3.0h)"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_Empty_F32) {
     WrapInFunction(vec3<f32>());
 
     GeneratorImpl& gen = Build();
@@ -115,26 +149,230 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_Empty) {
     EXPECT_THAT(gen.result(), HasSubstr("float3(0.0f)"));
 }
 
-TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat) {
-    WrapInFunction(Construct(ty.mat2x3<f32>(), vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(3_f, 4_f, 5_f)));
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_Empty_F16) {
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(vec3<f16>());
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("half3(0.0h)"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_SingleScalar_F32_Literal) {
+    WrapInFunction(vec3<f32>(2_f));
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("float3(2.0f)"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_SingleScalar_F16_Literal) {
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(vec3<f16>(2_h));
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("half3(2.0h)"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_SingleScalar_F32_Var) {
+    auto* var = Var("v", nullptr, Expr(2_f));
+    auto* cast = vec3<f32>(var);
+    WrapInFunction(var, cast);
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr(R"(float v = 2.0f;
+  float3 const tint_symbol = float3(v);)"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_SingleScalar_F16_Var) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = Var("v", nullptr, Expr(2_h));
+    auto* cast = vec3<f16>(var);
+    WrapInFunction(var, cast);
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr(R"(half v = 2.0h;
+  half3 const tint_symbol = half3(v);)"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_SingleScalar_Bool) {
+    WrapInFunction(vec3<bool>(true));
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("bool3(true)"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_SingleScalar_Int) {
+    WrapInFunction(vec3<i32>(2_i));
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("int3(2)"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_SingleScalar_UInt) {
+    WrapInFunction(vec3<u32>(2_u));
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("uint3(2u)"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat_F32) {
+    WrapInFunction(mat2x3<f32>(vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(3_f, 4_f, 5_f)));
 
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
 
-    // A matrix of type T with n columns and m rows can also be constructed from
-    // n vectors of type T with m components.
     EXPECT_THAT(gen.result(),
                 HasSubstr("float2x3(float3(1.0f, 2.0f, 3.0f), float3(3.0f, 4.0f, 5.0f))"));
 }
 
-TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat_Empty) {
-    WrapInFunction(mat4x4<f32>());
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat_F16) {
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(mat2x3<f16>(vec3<f16>(1_h, 2_h, 3_h), vec3<f16>(3_h, 4_h, 5_h)));
 
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr("float4x4(float4(0.0f), float4(0.0f)"));
+
+    EXPECT_THAT(gen.result(),
+                HasSubstr("half2x3(half3(1.0h, 2.0h, 3.0h), half3(3.0h, 4.0h, 5.0h))"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat_Complex_F32) {
+    // mat4x4<f32>(
+    //     vec4<f32>(2.0f, 3.0f, 4.0f, 8.0f),
+    //     vec4<f32>(),
+    //     vec4<f32>(7.0f),
+    //     vec4<f32>(vec4<f32>(42.0f, 21.0f, 6.0f, -5.0f)),
+    //   );
+    auto* vector_literal =
+        vec4<f32>(Expr(f32(2.0)), Expr(f32(3.0)), Expr(f32(4.0)), Expr(f32(8.0)));
+    auto* vector_zero_ctor = vec4<f32>();
+    auto* vector_single_scalar_ctor = vec4<f32>(Expr(f32(7.0)));
+    auto* vector_identical_ctor =
+        vec4<f32>(vec4<f32>(Expr(f32(42.0)), Expr(f32(21.0)), Expr(f32(6.0)), Expr(f32(-5.0))));
+
+    auto* constructor = mat4x4<f32>(vector_literal, vector_zero_ctor, vector_single_scalar_ctor,
+                                    vector_identical_ctor);
+
+    WrapInFunction(constructor);
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_THAT(gen.result(), HasSubstr("float4x4(float4(2.0f, 3.0f, 4.0f, 8.0f), float4(0.0f), "
+                                        "float4(7.0f), float4(42.0f, 21.0f, 6.0f, -5.0f))"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat_Complex_F16) {
+    // mat4x4<f16>(
+    //     vec4<f16>(2.0h, 3.0h, 4.0h, 8.0h),
+    //     vec4<f16>(),
+    //     vec4<f16>(7.0h),
+    //     vec4<f16>(vec4<f16>(42.0h, 21.0h, 6.0h, -5.0h)),
+    //   );
+    Enable(ast::Extension::kF16);
+
+    auto* vector_literal =
+        vec4<f16>(Expr(f16(2.0)), Expr(f16(3.0)), Expr(f16(4.0)), Expr(f16(8.0)));
+    auto* vector_zero_ctor = vec4<f16>();
+    auto* vector_single_scalar_ctor = vec4<f16>(Expr(f16(7.0)));
+    auto* vector_identical_ctor =
+        vec4<f16>(vec4<f16>(Expr(f16(42.0)), Expr(f16(21.0)), Expr(f16(6.0)), Expr(f16(-5.0))));
+
+    auto* constructor = mat4x4<f16>(vector_literal, vector_zero_ctor, vector_single_scalar_ctor,
+                                    vector_identical_ctor);
+
+    WrapInFunction(constructor);
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_THAT(gen.result(), HasSubstr("half4x4(half4(2.0h, 3.0h, 4.0h, 8.0h), half4(0.0h), "
+                                        "half4(7.0h), half4(42.0h, 21.0h, 6.0h, -5.0h))"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat_Empty_F32) {
+    WrapInFunction(mat2x3<f32>());
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_THAT(gen.result(),
+                HasSubstr("float2x3 const tint_symbol = float2x3(float3(0.0f), float3(0.0f))"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat_Empty_F16) {
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(mat2x3<f16>());
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_THAT(gen.result(),
+                HasSubstr("half2x3 const tint_symbol = half2x3(half3(0.0h), half3(0.0h))"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat_Identity_F32) {
+    // fn f() {
+    //     var m_1: mat4x4<f32> = mat4x4<f32>();
+    //     var m_2: mat4x4<f32> = mat4x4<f32>(m_1);
+    // }
+
+    auto* m_1 = Var("m_1", ty.mat4x4(ty.f32()), mat4x4<f32>());
+    auto* m_2 = Var("m_2", ty.mat4x4(ty.f32()), mat4x4<f32>(m_1));
+
+    WrapInFunction(m_1, m_2);
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_THAT(gen.result(), HasSubstr("float4x4 m_2 = float4x4(m_1);"));
+}
+
+TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Mat_Identity_F16) {
+    // fn f() {
+    //     var m_1: mat4x4<f16> = mat4x4<f16>();
+    //     var m_2: mat4x4<f16> = mat4x4<f16>(m_1);
+    // }
+
+    Enable(ast::Extension::kF16);
+
+    auto* m_1 = Var("m_1", ty.mat4x4(ty.f16()), mat4x4<f16>());
+    auto* m_2 = Var("m_2", ty.mat4x4(ty.f16()), mat4x4<f16>(m_1));
+
+    WrapInFunction(m_1, m_2);
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_THAT(gen.result(), HasSubstr("half4x4 m_2 = half4x4(m_1);"));
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
