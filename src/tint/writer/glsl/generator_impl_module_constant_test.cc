@@ -117,6 +117,26 @@ void f() {
 )");
 }
 
+TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = GlobalConst("G", nullptr, Expr(1_h));
+    Func("f", {}, ty.void_(), {Decl(Let("l", nullptr, Expr(var)))});
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+#extension GL_AMD_gpu_shader_half_float : require
+
+void f() {
+  float16_t l = 1.0hf;
+}
+
+)");
+}
+
 TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_vec3_AInt) {
     auto* var = GlobalConst("G", nullptr, Construct(ty.vec3(nullptr), 1_a, 2_a, 3_a));
     Func("f", {}, ty.void_(), {Decl(Let("l", nullptr, Expr(var)))});
@@ -168,6 +188,26 @@ void f() {
 )");
 }
 
+TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_vec3_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = GlobalConst("G", nullptr, vec3<f16>(1_h, 2_h, 3_h));
+    Func("f", {}, ty.void_(), {Decl(Let("l", nullptr, Expr(var)))});
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+#extension GL_AMD_gpu_shader_half_float : require
+
+void f() {
+  f16vec3 l = f16vec3(1.0hf, 2.0hf, 3.0hf);
+}
+
+)");
+}
+
 TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_mat2x3_AFloat) {
     auto* var = GlobalConst("G", nullptr,
                             Construct(ty.mat(nullptr, 2, 3), 1._a, 2._a, 3._a, 4._a, 5._a, 6._a));
@@ -198,6 +238,26 @@ TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_mat2x3_f32) {
 
 void f() {
   mat2x3 l = mat2x3(vec3(1.0f, 2.0f, 3.0f), vec3(4.0f, 5.0f, 6.0f));
+}
+
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_mat2x3_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = GlobalConst("G", nullptr, mat2x3<f16>(1_h, 2_h, 3_h, 4_h, 5_h, 6_h));
+    Func("f", {}, ty.void_(), {Decl(Let("l", nullptr, Expr(var)))});
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+#extension GL_AMD_gpu_shader_half_float : require
+
+void f() {
+  f16mat2x3 l = f16mat2x3(f16vec3(1.0hf, 2.0hf, 3.0hf), f16vec3(4.0hf, 5.0hf, 6.0hf));
 }
 
 )");

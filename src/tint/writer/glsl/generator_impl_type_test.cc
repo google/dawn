@@ -105,6 +105,19 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_F32) {
     EXPECT_EQ(out.str(), "float");
 }
 
+TEST_F(GlslGeneratorImplTest_Type, EmitType_F16) {
+    Enable(ast::Extension::kF16);
+
+    auto* f16 = create<sem::F16>();
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitType(out, f16, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+        << gen.error();
+    EXPECT_EQ(out.str(), "float16_t");
+}
+
 TEST_F(GlslGeneratorImplTest_Type, EmitType_I32) {
     auto* i32 = create<sem::I32>();
 
@@ -116,7 +129,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_I32) {
     EXPECT_EQ(out.str(), "int");
 }
 
-TEST_F(GlslGeneratorImplTest_Type, EmitType_Matrix) {
+TEST_F(GlslGeneratorImplTest_Type, EmitType_Matrix_F32) {
     auto* f32 = create<sem::F32>();
     auto* vec3 = create<sem::Vector>(f32, 3u);
     auto* mat2x3 = create<sem::Matrix>(vec3, 2u);
@@ -127,6 +140,21 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Matrix) {
     ASSERT_TRUE(gen.EmitType(out, mat2x3, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "mat2x3");
+}
+
+TEST_F(GlslGeneratorImplTest_Type, EmitType_Matrix_F16) {
+    Enable(ast::Extension::kF16);
+
+    auto* f16 = create<sem::F16>();
+    auto* vec3 = create<sem::Vector>(f16, 3u);
+    auto* mat2x3 = create<sem::Matrix>(vec3, 2u);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitType(out, mat2x3, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+        << gen.error();
+    EXPECT_EQ(out.str(), "f16mat2x3");
 }
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_StructDecl) {
@@ -213,7 +241,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_U32) {
     EXPECT_EQ(out.str(), "uint");
 }
 
-TEST_F(GlslGeneratorImplTest_Type, EmitType_Vector) {
+TEST_F(GlslGeneratorImplTest_Type, EmitType_Vector_F32) {
     auto* f32 = create<sem::F32>();
     auto* vec3 = create<sem::Vector>(f32, 3u);
 
@@ -223,6 +251,20 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Vector) {
     ASSERT_TRUE(gen.EmitType(out, vec3, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "vec3");
+}
+
+TEST_F(GlslGeneratorImplTest_Type, EmitType_Vector_F16) {
+    Enable(ast::Extension::kF16);
+
+    auto* f16 = create<sem::F16>();
+    auto* vec3 = create<sem::Vector>(f16, 3u);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitType(out, vec3, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+        << gen.error();
+    EXPECT_EQ(out.str(), "f16vec3");
 }
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_Void) {

@@ -159,6 +159,17 @@ void PrintF32(std::ostream& out, float value) {
     }
 }
 
+bool PrintF16(std::ostream& out, float value) {
+    // Note: Currently inf and nan should not be constructable, and there is no solid way to
+    // generate constant/literal f16 Inf or NaN.
+    if (std::isinf(value) || std::isnan(value)) {
+        return false;
+    } else {
+        out << FloatToString(value) << "hf";
+        return true;
+    }
+}
+
 }  // namespace
 
 SanitizedResult::SanitizedResult() = default;
@@ -313,6 +324,10 @@ bool GeneratorImpl::Generate() {
         extensions.Append("#extension GL_OES_sample_variables : require");
     }
 
+    if (requires_f16_extension_) {
+        extensions.Append("#extension GL_AMD_gpu_shader_half_float : require");
+    }
+
     auto indent = current_buffer_->current_indent;
 
     if (!extensions.lines.empty()) {
@@ -333,17 +348,12 @@ bool GeneratorImpl::Generate() {
     return true;
 }
 
-bool GeneratorImpl::RecordExtension(const ast::Enable*) {
-    /*
-    Deal with extension node here, recording it within the generator for
-    later emition.
-    For example:
-    ```
-      if (ext->kind == ast::Enable::ExtensionKind::kF16) {
-      require_fp16_ = true;
-      }
-    ```
-    */
+bool GeneratorImpl::RecordExtension(const ast::Enable* ext) {
+    // Deal with extension node here, recording it within the generator for later emition.
+
+    if (ext->extension == ast::Extension::kF16) {
+        requires_f16_extension_ = true;
+    }
 
     return true;
 }
@@ -2225,6 +2235,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
             PrintF32(out, constant->As<float>());
             return true;
         },
+        [&](const sem::F16*) { return PrintF16(out, constant->As<float>()); },
         [&](const sem::I32*) {
             out << constant->As<AInt>();
             return true;
@@ -2305,6 +2316,9 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
             return true;
         },
         [&](const ast::FloatLiteralExpression* l) {
+            if (l->suffix == ast::FloatLiteralExpression::Suffix::kH) {
+                return PrintF16(out, static_cast<float>(l->value));
+            }
             PrintF32(out, static_cast<float>(l->value));
             return true;
         },
@@ -2326,6 +2340,8 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
         out << "false";
     } else if (type->Is<sem::F32>()) {
         out << "0.0f";
+    } else if (type->Is<sem::F16>()) {
+        out << "0.0hf";
     } else if (type->Is<sem::I32>()) {
         out << "0";
     } else if (type->Is<sem::U32>()) {
@@ -2751,12 +2767,14 @@ bool GeneratorImpl::EmitType(std::ostream& out,
     } else if (type->Is<sem::F32>()) {
         out << "float";
     } else if (type->Is<sem::F16>()) {
-        diagnostics_.add_error(diag::System::Writer, "Type f16 is not completely implemented yet.");
-        return false;
+        out << "float16_t";
     } else if (type->Is<sem::I32>()) {
         out << "int";
     } else if (auto* mat = type->As<sem::Matrix>()) {
-        TINT_ASSERT(Writer, mat->type()->Is<sem::F32>());
+        TINT_ASSERT(Writer, (mat->type()->IsAnyOf<sem::F32, sem::F16>()));
+        if (mat->type()->Is<sem::F16>()) {
+            out << "f16";
+        }
         out << "mat" << mat->columns();
         if (mat->rows() != mat->columns()) {
             out << "x" << mat->rows();
@@ -2835,6 +2853,8 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         auto width = vec->Width();
         if (vec->type()->Is<sem::F32>() && width >= 1 && width <= 4) {
             out << "vec" << width;
+        } else if (vec->type()->Is<sem::F16>() && width >= 1 && width <= 4) {
+            out << "f16vec" << width;
         } else if (vec->type()->Is<sem::I32>() && width >= 1 && width <= 4) {
             out << "ivec" << width;
         } else if (vec->type()->Is<sem::U32>() && width >= 1 && width <= 4) {

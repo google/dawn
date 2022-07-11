@@ -527,6 +527,7 @@ class GeneratorImpl : public TextGenerator {
     std::unordered_set<const sem::Struct*> emitted_structs_;
     bool requires_oes_sample_variables_ = false;
     bool requires_default_precision_qualifier_ = false;
+    bool requires_f16_extension_ = false;
     Version version_;
 };
 
