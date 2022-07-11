@@ -167,7 +167,15 @@ GPUDevice::GPUDevice(Napi::Env env, wgpu::Device device)
         this);
 }
 
-GPUDevice::~GPUDevice() {}
+GPUDevice::~GPUDevice() {
+    // A bit of a fudge to work around the fact that the CTS doesn't destroy GPU devices.
+    // Without this, we'll get a 'Promise not resolved or rejected' fatal message as the
+    // lost_promise_ is left hanging. We'll also not clean up any GPU objects before terminating the
+    // process, which is not a good idea.
+    if (device_) {
+        destroy(env_);
+    }
+}
 
 interop::Interface<interop::GPUSupportedFeatures> GPUDevice::getFeatures(Napi::Env env) {
     class Features : public interop::GPUSupportedFeatures {
@@ -196,6 +204,7 @@ void GPUDevice::destroy(Napi::Env env) {
             env_, interop::GPUDeviceLostReason::kDestroyed, "device was destroyed"));
     }
     device_.Destroy();
+    device_ = nullptr;
 }
 
 interop::Interface<interop::GPUBuffer> GPUDevice::createBuffer(
