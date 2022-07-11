@@ -1407,12 +1407,12 @@ QueueBase* DeviceBase::GetQueue() const {
 
 // Implementation details of object creation
 
-ResultOrError<Ref<BindGroupBase>> DeviceBase::CreateBindGroup(
-    const BindGroupDescriptor* descriptor) {
+ResultOrError<Ref<BindGroupBase>> DeviceBase::CreateBindGroup(const BindGroupDescriptor* descriptor,
+                                                              UsageValidationMode mode) {
     DAWN_TRY(ValidateIsAlive());
     if (IsValidationEnabled()) {
-        DAWN_TRY_CONTEXT(ValidateBindGroupDescriptor(this, descriptor), "validating %s against %s",
-                         descriptor, descriptor->layout);
+        DAWN_TRY_CONTEXT(ValidateBindGroupDescriptor(this, descriptor, mode),
+                         "validating %s against %s", descriptor, descriptor->layout);
     }
     return CreateBindGroupImpl(descriptor);
 }

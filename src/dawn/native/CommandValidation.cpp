@@ -471,7 +471,6 @@ MaybeError ValidateCanUseAs(const TextureBase* texture,
                             texture->GetInternalUsage(), usage);
             break;
     }
-
     return {};
 }
 

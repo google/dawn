@@ -199,7 +199,8 @@ MaybeError EncodeConvertTimestampsToNanoseconds(CommandEncoder* encoder,
     Ref<BindGroupBase> bindGroup;
     DAWN_TRY_ASSIGN(
         bindGroup,
-        utils::MakeBindGroup(device, layout, {{0, timestamps}, {1, availability}, {2, params}}));
+        utils::MakeBindGroup(device, layout, {{0, timestamps}, {1, availability}, {2, params}},
+                             UsageValidationMode::Internal));
 
     // Create compute encoder and issue dispatch.
     Ref<ComputePassEncoder> pass = encoder->BeginComputePass();

@@ -21,6 +21,7 @@
 
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/UsageValidationMode.h"
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native::utils {
@@ -110,10 +111,12 @@ struct BindingInitializationHelper {
     uint64_t size = 0;
 };
 
+// This helper is only used inside dawn native.
 ResultOrError<Ref<BindGroupBase>> MakeBindGroup(
     DeviceBase* device,
     const Ref<BindGroupLayoutBase>& layout,
-    std::initializer_list<BindingInitializationHelper> entriesInitializer);
+    std::initializer_list<BindingInitializationHelper> entriesInitializer,
+    UsageValidationMode mode);
 
 const char* GetLabelForTrace(const char* label);
 

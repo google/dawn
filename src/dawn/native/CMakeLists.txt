@@ -187,6 +187,7 @@ target_sources(dawn_native PRIVATE
     "ToBackend.h"
     "Toggles.cpp"
     "Toggles.h"
+    "UsageValidationMode.h"
     "VertexFormat.cpp"
     "VertexFormat.h"
     "dawn_platform.h"

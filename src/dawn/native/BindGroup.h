@@ -24,6 +24,7 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/ObjectBase.h"
+#include "dawn/native/UsageValidationMode.h"
 
 #include "dawn/native/dawn_platform.h"
 
@@ -31,7 +32,9 @@ namespace dawn::native {
 
 class DeviceBase;
 
-MaybeError ValidateBindGroupDescriptor(DeviceBase* device, const BindGroupDescriptor* descriptor);
+MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
+                                       const BindGroupDescriptor* descriptor,
+                                       UsageValidationMode mode);
 
 struct BufferBinding {
     BufferBase* buffer;

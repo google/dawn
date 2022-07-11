@@ -165,7 +165,8 @@ BindGroupEntry BindingInitializationHelper::GetAsBinding() const {
 ResultOrError<Ref<BindGroupBase>> MakeBindGroup(
     DeviceBase* device,
     const Ref<BindGroupLayoutBase>& layout,
-    std::initializer_list<BindingInitializationHelper> entriesInitializer) {
+    std::initializer_list<BindingInitializationHelper> entriesInitializer,
+    UsageValidationMode mode) {
     std::vector<BindGroupEntry> entries;
     for (const BindingInitializationHelper& helper : entriesInitializer) {
         entries.push_back(helper.GetAsBinding());
@@ -176,7 +177,7 @@ ResultOrError<Ref<BindGroupBase>> MakeBindGroup(
     descriptor.entryCount = entries.size();
     descriptor.entries = entries.data();
 
-    return device->CreateBindGroup(&descriptor);
+    return device->CreateBindGroup(&descriptor, mode);
 }
 
 const char* GetLabelForTrace(const char* label) {

@@ -35,6 +35,7 @@
 #include "dawn/native/RefCountedWithExternalCount.h"
 #include "dawn/native/StagingBuffer.h"
 #include "dawn/native/Toggles.h"
+#include "dawn/native/UsageValidationMode.h"
 
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/dawn_platform.h"
@@ -203,7 +204,9 @@ class DeviceBase : public RefCountedWithExternalCount {
     Ref<PipelineCacheBase> GetOrCreatePipelineCache(const CacheKey& key);
 
     // Object creation methods that be used in a reentrant manner.
-    ResultOrError<Ref<BindGroupBase>> CreateBindGroup(const BindGroupDescriptor* descriptor);
+    ResultOrError<Ref<BindGroupBase>> CreateBindGroup(
+        const BindGroupDescriptor* descriptor,
+        UsageValidationMode mode = UsageValidationMode::Default);
     ResultOrError<Ref<BindGroupLayoutBase>> CreateBindGroupLayout(
         const BindGroupLayoutDescriptor* descriptor,
         bool allowInternalBinding = false);

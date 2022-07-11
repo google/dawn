@@ -922,7 +922,8 @@
                      "length": 9, "optional": true},
             {"name": "dst transfer function parameters", "type": "float", "annotation": "const*",
                      "length": 7, "optional": true},
-            {"name": "dst alpha mode", "type": "alpha mode", "default": "unpremultiplied"}
+            {"name": "dst alpha mode", "type": "alpha mode", "default": "unpremultiplied"},
+            {"name": "internal usage", "type": "bool", "default": "false"}
         ]
     },
     "create compute pipeline async callback": {

@@ -306,7 +306,8 @@ ComputePassEncoder::TransformIndirectDispatchBuffer(Ref<BufferBase> indirectBuff
                                              {1, indirectBuffer, clientIndirectBindingOffset,
                                               clientIndirectBindingSize},
                                              {2, validatedIndirectBuffer, 0, scratchBufferSize},
-                                         }));
+                                         },
+                                         UsageValidationMode::Internal));
 
     // Issue commands to validate the indirect buffer.
     APISetPipeline(validationPipeline.Get());

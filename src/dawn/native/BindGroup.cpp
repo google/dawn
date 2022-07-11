@@ -20,12 +20,14 @@
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/ChainUtils_autogen.h"
+#include "dawn/native/CommandValidation.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/ExternalTexture.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ObjectType_autogen.h"
 #include "dawn/native/Sampler.h"
 #include "dawn/native/Texture.h"
+#include "dawn/native/utils/WGPUHelpers.h"
 
 namespace dawn::native {
 
@@ -114,7 +116,8 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
 
 MaybeError ValidateTextureBinding(DeviceBase* device,
                                   const BindGroupEntry& entry,
-                                  const BindingInfo& bindingInfo) {
+                                  const BindingInfo& bindingInfo,
+                                  UsageValidationMode mode) {
     DAWN_INVALID_IF(entry.textureView == nullptr, "Binding entry textureView not set.");
 
     DAWN_INVALID_IF(entry.sampler != nullptr || entry.buffer != nullptr,
@@ -136,9 +139,7 @@ MaybeError ValidateTextureBinding(DeviceBase* device,
                 texture->GetFormat().GetAspectInfo(aspect).supportedSampleTypes;
             SampleTypeBit requiredType = SampleTypeToSampleTypeBit(bindingInfo.texture.sampleType);
 
-            DAWN_INVALID_IF(!(texture->GetUsage() & wgpu::TextureUsage::TextureBinding),
-                            "Usage (%s) of %s doesn't include TextureUsage::TextureBinding.",
-                            texture->GetUsage(), texture);
+            DAWN_TRY(ValidateCanUseAs(texture, wgpu::TextureUsage::TextureBinding, mode));
 
             DAWN_INVALID_IF(texture->IsMultisampledTexture() != bindingInfo.texture.multisampled,
                             "Sample count (%u) of %s doesn't match expectation (multisampled: %d).",
@@ -157,9 +158,7 @@ MaybeError ValidateTextureBinding(DeviceBase* device,
             break;
         }
         case BindingInfoType::StorageTexture: {
-            DAWN_INVALID_IF(!(texture->GetUsage() & wgpu::TextureUsage::StorageBinding),
-                            "Usage (%s) of %s doesn't include TextureUsage::StorageBinding.",
-                            texture->GetUsage(), texture);
+            DAWN_TRY(ValidateCanUseAs(texture, wgpu::TextureUsage::StorageBinding, mode));
 
             ASSERT(!texture->IsMultisampledTexture());
 
@@ -253,7 +252,9 @@ MaybeError ValidateExternalTextureBinding(
 
 }  // anonymous namespace
 
-MaybeError ValidateBindGroupDescriptor(DeviceBase* device, const BindGroupDescriptor* descriptor) {
+MaybeError ValidateBindGroupDescriptor(DeviceBase* device,
+                                       const BindGroupDescriptor* descriptor,
+                                       UsageValidationMode mode) {
     DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain must be nullptr.");
 
     DAWN_TRY(device->ValidateObject(descriptor->layout));
@@ -314,6 +315,7 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device, const BindGroupDescri
         // Perform binding-type specific validation.
         switch (bindingInfo.bindingType) {
             case BindingInfoType::Buffer:
+                // TODO(dawn:1485): Validate buffer binding with usage validation mode.
                 DAWN_TRY_CONTEXT(ValidateBufferBinding(device, entry, bindingInfo),
                                  "validating entries[%u] as a Buffer."
                                  "\nExpected entry layout: %s",
@@ -321,7 +323,7 @@ MaybeError ValidateBindGroupDescriptor(DeviceBase* device, const BindGroupDescri
                 break;
             case BindingInfoType::Texture:
             case BindingInfoType::StorageTexture:
-                DAWN_TRY_CONTEXT(ValidateTextureBinding(device, entry, bindingInfo),
+                DAWN_TRY_CONTEXT(ValidateTextureBinding(device, entry, bindingInfo, mode),
                                  "validating entries[%u] as a Texture."
                                  "\nExpected entry layout: %s",
                                  i, bindingInfo);

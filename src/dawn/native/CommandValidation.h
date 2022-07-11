@@ -20,6 +20,7 @@
 #include "dawn/native/CommandAllocator.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Texture.h"
+#include "dawn/native/UsageValidationMode.h"
 
 namespace dawn::native {
 
@@ -81,11 +82,6 @@ MaybeError ValidateTextureToTextureCopyCommonRestrictions(const ImageCopyTexture
 MaybeError ValidateTextureToTextureCopyRestrictions(const ImageCopyTexture& src,
                                                     const ImageCopyTexture& dst,
                                                     const Extent3D& copySize);
-
-enum class UsageValidationMode {
-    Default,
-    Internal,
-};
 
 MaybeError ValidateCanUseAs(const TextureBase* texture,
                             wgpu::TextureUsage usage,
