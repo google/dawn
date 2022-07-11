@@ -904,7 +904,8 @@
         "tags": ["dawn"],
         "values": [
             {"value": 0, "name": "premultiplied"},
-            {"value": 1, "name": "unpremultiplied"}
+            {"value": 1, "name": "unpremultiplied"},
+            {"value": 2, "name": "opaque"}
         ]
     },
     "copy texture for browser options": {

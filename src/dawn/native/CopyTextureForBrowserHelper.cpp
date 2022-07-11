@@ -145,9 +145,11 @@ static const char sCopyTextureForBrowserShader[] = R"(
                 let kEncodeToGammaStep = 0x08u;
                 let kPremultiplyStep = 0x10u;
                 let kDecodeForSrgbDstFormat = 0x20u;
+                let kClearSrcAlphaToOne = 0x40u;
 
                 // Unpremultiply step. Appling color space conversion op on premultiplied source texture
                 // also needs to unpremultiply first.
+                // This step is exclusive with clear src alpha to one step.
                 if (bool(uniforms.steps_mask & kUnpremultiplyStep)) {
                     if (color.a != 0.0) {
                         color = vec4<f32>(color.rgb / color.a, color.a);
@@ -180,6 +182,7 @@ static const char sCopyTextureForBrowserShader[] = R"(
                 }
 
                 // Premultiply step.
+                // This step is exclusive with clear src alpha to one step.
                 if (bool(uniforms.steps_mask & kPremultiplyStep)) {
                     color = vec4<f32>(color.rgb * color.a, color.a);
                 }
@@ -190,6 +193,12 @@ static const char sCopyTextureForBrowserShader[] = R"(
                                       gamma_conversion(color.g, uniforms.gamma_decoding_for_dst_srgb_params),
                                       gamma_conversion(color.b, uniforms.gamma_decoding_for_dst_srgb_params),
                                       color.a);
+                }
+
+                // Clear alpha to one step.
+                // This step is exclusive with premultiply/unpremultiply step.
+                if (bool(uniforms.steps_mask & kClearSrcAlphaToOne)) {
+                    color.a = 1.0;
                 }
 
                 return color;
@@ -456,11 +465,16 @@ MaybeError DoCopyTextureForBrowser(DeviceBase* device,
     constexpr uint32_t kEncodeToGammaStep = 0x08;
     constexpr uint32_t kPremultiplyStep = 0x10;
     constexpr uint32_t kDecodeForSrgbDstFormat = 0x20;
+    constexpr uint32_t kClearSrcAlphaToOne = 0x40;
 
     if (options->srcAlphaMode == wgpu::AlphaMode::Premultiplied) {
-        if (options->needsColorSpaceConversion || options->srcAlphaMode != options->dstAlphaMode) {
+        if (options->needsColorSpaceConversion ||
+            options->dstAlphaMode == wgpu::AlphaMode::Unpremultiplied) {
             stepsMask |= kUnpremultiplyStep;
         }
+    } else if (options->srcAlphaMode == wgpu::AlphaMode::Opaque) {
+        // Simply clear src alpha channel to 1.0
+        stepsMask |= kClearSrcAlphaToOne;
     }
 
     if (options->needsColorSpaceConversion) {
@@ -497,7 +511,8 @@ MaybeError DoCopyTextureForBrowser(DeviceBase* device,
     }
 
     if (options->dstAlphaMode == wgpu::AlphaMode::Premultiplied) {
-        if (options->needsColorSpaceConversion || options->srcAlphaMode != options->dstAlphaMode) {
+        if (options->needsColorSpaceConversion ||
+            options->srcAlphaMode == wgpu::AlphaMode::Unpremultiplied) {
             stepsMask |= kPremultiplyStep;
         }
     }
@@ -587,7 +602,7 @@ MaybeError DoCopyTextureForBrowser(DeviceBase* device,
     renderPassDesc.colorAttachments = &colorAttachmentDesc;
     Ref<RenderPassEncoder> passEncoder = encoder->BeginRenderPass(&renderPassDesc);
 
-    // Start pipeline  and encode commands to complete
+    // Start pipeline and encode commands to complete
     // the copy from src texture to dst texture with transformation.
     passEncoder->APISetPipeline(pipeline);
     passEncoder->APISetBindGroup(0, bindGroup.Get());

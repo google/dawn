@@ -181,25 +181,22 @@ class CopyTextureForBrowserTests : public Parent {
                     // Source textures will have variable pixel data to cover cases like
                     // flipY.
                     if (textureRole == TextureCopyRole::SOURCE) {
-                        if (srcAlphaMode != dstAlphaMode) {
-                            if (dstAlphaMode == wgpu::AlphaMode::Premultiplied) {
-                                // For premultiply alpha test cases, we expect each channel in dst
-                                // texture will equal to the alpha channel value.
-                                ASSERT(srcAlphaMode == wgpu::AlphaMode::Unpremultiplied);
-                                textureData[sliceOffset + rowOffset + x] = RGBA8(
-                                    static_cast<uint8_t>(255), static_cast<uint8_t>(255),
-                                    static_cast<uint8_t>(255), static_cast<uint8_t>(alpha[x % 4]));
-                            } else {
-                                // For unpremultiply alpha test cases, we expect each channel in dst
-                                // texture will equal to 1.0.
-                                ASSERT(srcAlphaMode == wgpu::AlphaMode::Premultiplied);
-                                textureData[sliceOffset + rowOffset + x] =
-                                    RGBA8(static_cast<uint8_t>(alpha[x % 4]),
-                                          static_cast<uint8_t>(alpha[x % 4]),
-                                          static_cast<uint8_t>(alpha[x % 4]),
-                                          static_cast<uint8_t>(alpha[x % 4]));
-                            }
-
+                        if (srcAlphaMode == wgpu::AlphaMode::Unpremultiplied &&
+                            dstAlphaMode == wgpu::AlphaMode::Premultiplied) {
+                            // We expect each channel in dst
+                            // texture will equal to the alpha channel value.
+                            textureData[sliceOffset + rowOffset + x] = RGBA8(
+                                static_cast<uint8_t>(255), static_cast<uint8_t>(255),
+                                static_cast<uint8_t>(255), static_cast<uint8_t>(alpha[x % 4]));
+                        } else if (srcAlphaMode == wgpu::AlphaMode::Premultiplied &&
+                                   dstAlphaMode == wgpu::AlphaMode::Unpremultiplied) {
+                            // We expect each channel in dst
+                            // texture will equal to 1.0.
+                            textureData[sliceOffset + rowOffset + x] =
+                                RGBA8(static_cast<uint8_t>(alpha[x % 4]),
+                                      static_cast<uint8_t>(alpha[x % 4]),
+                                      static_cast<uint8_t>(alpha[x % 4]),
+                                      static_cast<uint8_t>(alpha[x % 4]));
                         } else {
                             textureData[sliceOffset + rowOffset + x] =
                                 RGBA8(static_cast<uint8_t>((x + layer * x) % 256),
@@ -300,17 +297,18 @@ class CopyTextureForBrowserTests : public Parent {
                     // after premultiply.
                     let premultiplied = 0u;
                     let unpremultiplied = 1u;
-                    if (uniforms.srcAlphaMode != uniforms.dstAlphaMode) {
-                        if (uniforms.dstAlphaMode == premultiplied) {
-                            // srcAlphaMode == unpremultiplied
-                            srcColor = vec4<f32>(srcColor.rgb * srcColor.a, srcColor.a);
-                        }
+                    let opaque = 2u;
+                    if (uniforms.srcAlphaMode == opaque) {
+                        srcColor.a = 1.0;
+                    }
 
-                        if (uniforms.dstAlphaMode == unpremultiplied) {
-                            // srcAlphaMode == premultiplied
-                            if (srcColor.a != 0.0) {
-                                srcColor = vec4<f32>(srcColor.rgb / srcColor.a, srcColor.a);
-                            }
+                    if (uniforms.srcAlphaMode == unpremultiplied && uniforms.dstAlphaMode == premultiplied) {
+                        srcColor = vec4<f32>(srcColor.rgb * srcColor.a, srcColor.a);
+                    }
+
+                    if (uniforms.srcAlphaMode == premultiplied && uniforms.dstAlphaMode == unpremultiplied) {
+                        if (srcColor.a != 0.0) {
+                            srcColor = vec4<f32>(srcColor.rgb / srcColor.a, srcColor.a);
                         }
                     }
 
@@ -1134,13 +1132,13 @@ TEST_P(CopyTextureForBrowser_AlphaMode, alphaMode) {
     DoAlphaModeTest();
 }
 
-DAWN_INSTANTIATE_TEST_P(CopyTextureForBrowser_AlphaMode,
-                        {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
-                         VulkanBackend()},
-                        std::vector<wgpu::AlphaMode>({wgpu::AlphaMode::Premultiplied,
-                                                      wgpu::AlphaMode::Unpremultiplied}),
-                        std::vector<wgpu::AlphaMode>({wgpu::AlphaMode::Premultiplied,
-                                                      wgpu::AlphaMode::Unpremultiplied}));
+DAWN_INSTANTIATE_TEST_P(
+    CopyTextureForBrowser_AlphaMode,
+    {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
+    std::vector<wgpu::AlphaMode>({wgpu::AlphaMode::Premultiplied, wgpu::AlphaMode::Unpremultiplied,
+                                  wgpu::AlphaMode::Opaque}),
+    std::vector<wgpu::AlphaMode>({wgpu::AlphaMode::Premultiplied, wgpu::AlphaMode::Unpremultiplied,
+                                  wgpu::AlphaMode::Opaque}));
 
 // Verify |CopyTextureForBrowser| doing color space conversion.
 TEST_P(CopyTextureForBrowser_ColorSpace, colorSpaceConversion) {
