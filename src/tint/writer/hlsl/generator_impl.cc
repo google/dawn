@@ -122,6 +122,16 @@ void PrintF32(std::ostream& out, float value) {
     }
 }
 
+bool PrintF16(std::ostream& out, float value) {
+    // Note: Currently inf and nan should not be constructable, don't emit them.
+    if (std::isinf(value) || std::isnan(value)) {
+        return false;
+    } else {
+        out << FloatToString(value) << "h";
+        return true;
+    }
+}
+
 // Helper for writing " : register(RX, spaceY)", where R is the register, X is
 // the binding point binding value, and Y is the binding point group value.
 struct RegisterAndSpace {
@@ -3122,6 +3132,13 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
             PrintF32(out, constant->As<float>());
             return true;
         },
+        [&](const sem::F16*) {
+            // emit a f16 scalar with explicit float16_t type declaration.
+            out << "float16_t(";
+            bool valid = PrintF16(out, constant->As<float>());
+            out << ")";
+            return valid;
+        },
         [&](const sem::I32*) {
             out << constant->As<AInt>();
             return true;
@@ -3218,6 +3235,13 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
             return true;
         },
         [&](const ast::FloatLiteralExpression* l) {
+            if (l->suffix == ast::FloatLiteralExpression::Suffix::kH) {
+                // Emit f16 literal with explicit float16_t type declaration.
+                out << "float16_t(";
+                bool valid = PrintF16(out, static_cast<float>(l->value));
+                out << ")";
+                return valid;
+            }
             PrintF32(out, static_cast<float>(l->value));
             return true;
         },
@@ -3249,6 +3273,10 @@ bool GeneratorImpl::EmitValue(std::ostream& out, const sem::Type* type, int valu
         },
         [&](const sem::F32*) {
             out << value << ".0f";
+            return true;
+        },
+        [&](const sem::F16*) {
+            out << "float16_t(" << value << ".0h)";
             return true;
         },
         [&](const sem::I32*) {
@@ -3723,15 +3751,23 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             return true;
         },
         [&](const sem::F16*) {
-            diagnostics_.add_error(diag::System::Writer,
-                                   "Type f16 is not completely implemented yet.");
-            return false;
+            out << "float16_t";
+            return true;
         },
         [&](const sem::I32*) {
             out << "int";
             return true;
         },
         [&](const sem::Matrix* mat) {
+            if (mat->type()->Is<sem::F16>()) {
+                // Use matrix<type, N, M> for f16 matrix
+                out << "matrix<";
+                if (!EmitType(out, mat->type(), storage_class, access, "")) {
+                    return false;
+                }
+                out << ", " << mat->columns() << ", " << mat->rows() << ">";
+                return true;
+            }
             if (!EmitType(out, mat->type(), storage_class, access, "")) {
                 return false;
             }
@@ -3847,6 +3883,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             } else if (vec->type()->Is<sem::Bool>() && width >= 1 && width <= 4) {
                 out << "bool" << width;
             } else {
+                // For example, use "vector<float16_t, N>" for f16 vector.
                 out << "vector<";
                 if (!EmitType(out, vec->type(), storage_class, access, "")) {
                     return false;

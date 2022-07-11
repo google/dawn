@@ -94,6 +94,17 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_Bool) {
     EXPECT_EQ(out.str(), "bool");
 }
 
+TEST_F(HlslGeneratorImplTest_Type, EmitType_F16) {
+    auto* f16 = create<sem::F16>();
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitType(out, f16, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+        << gen.error();
+    EXPECT_EQ(out.str(), "float16_t");
+}
+
 TEST_F(HlslGeneratorImplTest_Type, EmitType_F32) {
     auto* f32 = create<sem::F32>();
 
@@ -116,7 +127,20 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_I32) {
     EXPECT_EQ(out.str(), "int");
 }
 
-TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix) {
+TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix_F16) {
+    auto* f16 = create<sem::F16>();
+    auto* vec3 = create<sem::Vector>(f16, 3u);
+    auto* mat2x3 = create<sem::Matrix>(vec3, 2u);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitType(out, mat2x3, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+        << gen.error();
+    EXPECT_EQ(out.str(), "matrix<float16_t, 2, 3>");
+}
+
+TEST_F(HlslGeneratorImplTest_Type, EmitType_Matrix_F32) {
     auto* f32 = create<sem::F32>();
     auto* vec3 = create<sem::Vector>(f32, 3u);
     auto* mat2x3 = create<sem::Matrix>(vec3, 2u);
