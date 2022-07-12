@@ -10,6 +10,7 @@ OpMemoryModel Logical Simple
 OpEntryPoint Fragment %3 "main" %gl_SampleID
 OpExecutionMode %3 OriginUpperLeft
 OpDecorate %gl_SampleID BuiltIn SampleId
+OpDecorate %gl_SampleID Flat
 %void = OpTypeVoid
 %5 = OpTypeFunction %void
 %float = OpTypeFloat 32

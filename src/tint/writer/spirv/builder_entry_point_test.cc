@@ -311,9 +311,12 @@ TEST_F(BuilderTest, SampleIndex_SampleRateShadingCapability) {
 
     // Make sure we generate the SampleRateShading capability.
     EXPECT_EQ(DumpInstructions(b.capabilities()),
-              "OpCapability Shader\n"
-              "OpCapability SampleRateShading\n");
-    EXPECT_EQ(DumpInstructions(b.annots()), "OpDecorate %1 BuiltIn SampleId\n");
+              R"(OpCapability Shader
+OpCapability SampleRateShading
+)");
+    EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 BuiltIn SampleId
+OpDecorate %1 Flat
+)");
 }
 
 }  // namespace

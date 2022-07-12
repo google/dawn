@@ -10,8 +10,10 @@ OpMemoryModel Logical Simple
 OpEntryPoint Fragment %5 "main" %1 %2 %3 %4
 OpExecutionMode %5 OriginUpperLeft
 OpDecorate %1 Location 0
+OpDecorate %1 Flat
 OpDecorate %2 Location 0
 OpDecorate %3 Location 30
+OpDecorate %3 Flat
 OpDecorate %4 Location 6
 %void = OpTypeVoid
 %7 = OpTypeFunction %void

@@ -1978,13 +1978,13 @@ fn frag_main(inputs : FragmentInterface) -> FragmentInterface {
 
 @location(3) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> vu_3 : vec4<u32>;
 
-@location(0) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> i_4 : i32;
+@location(0) @internal(disable_validation__ignore_storage_class) var<out> i_4 : i32;
 
-@location(1) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> u_4 : u32;
+@location(1) @internal(disable_validation__ignore_storage_class) var<out> u_4 : u32;
 
-@location(2) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> vi_4 : vec4<i32>;
+@location(2) @internal(disable_validation__ignore_storage_class) var<out> vi_4 : vec4<i32>;
 
-@location(3) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> vu_4 : vec4<u32>;
+@location(3) @internal(disable_validation__ignore_storage_class) var<out> vu_4 : vec4<u32>;
 
 struct VertexIn {
   i : i32,
@@ -2108,13 +2108,13 @@ struct FragmentInterface {
 
 @location(3) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> vu_3 : vec4<u32>;
 
-@location(0) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> i_4 : i32;
+@location(0) @internal(disable_validation__ignore_storage_class) var<out> i_4 : i32;
 
-@location(1) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> u_4 : u32;
+@location(1) @internal(disable_validation__ignore_storage_class) var<out> u_4 : u32;
 
-@location(2) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> vi_4 : vec4<i32>;
+@location(2) @internal(disable_validation__ignore_storage_class) var<out> vi_4 : vec4<i32>;
 
-@location(3) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> vu_4 : vec4<u32>;
+@location(3) @internal(disable_validation__ignore_storage_class) var<out> vu_4 : vec4<u32>;
 
 fn vert_main_inner(in : VertexIn) -> VertexOut {
   return VertexOut(in.i, in.u, in.vi, in.vu, vec4<f32>());
@@ -2344,7 +2344,7 @@ struct tint_symbol_1 {
 }
 
 struct tint_symbol_2 {
-  @location(1) @interpolate(flat)
+  @location(1)
   value : f32,
 }
 
@@ -2397,7 +2397,7 @@ struct tint_symbol_1 {
 }
 
 struct tint_symbol_2 {
-  @location(1) @interpolate(flat)
+  @location(1)
   value : f32,
 }
 
@@ -3868,9 +3868,9 @@ fn main(@builtin(sample_index) sample_index : u32,
 )";
 
     auto* expect = R"(
-@builtin(sample_index) @internal(disable_validation__ignore_storage_class) var<in> sample_index_1 : u32;
+@builtin(sample_index) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> sample_index_1 : u32;
 
-@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<in> mask_in_1 : array<u32, 1u>;
+@builtin(sample_mask) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> mask_in_1 : array<u32, 1u>;
 
 @builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> value : array<u32, 1u>;
 

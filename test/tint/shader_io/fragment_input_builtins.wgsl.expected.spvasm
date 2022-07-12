@@ -21,8 +21,10 @@
                OpDecorate %position_1 BuiltIn FragCoord
                OpDecorate %front_facing_1 BuiltIn FrontFacing
                OpDecorate %sample_index_1 BuiltIn SampleId
+               OpDecorate %sample_index_1 Flat
                OpDecorate %_arr_uint_uint_1 ArrayStride 4
                OpDecorate %sample_mask_1 BuiltIn SampleMask
+               OpDecorate %sample_mask_1 Flat
       %float = OpTypeFloat 32
     %v4float = OpTypeVector %float 4
 %_ptr_Input_v4float = OpTypePointer Input %v4float

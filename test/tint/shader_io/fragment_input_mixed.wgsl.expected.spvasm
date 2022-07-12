@@ -37,9 +37,11 @@
                OpDecorate %loc1_1 Location 1
                OpDecorate %loc1_1 Flat
                OpDecorate %sample_index_1 BuiltIn SampleId
+               OpDecorate %sample_index_1 Flat
                OpDecorate %loc3_1 Location 3
                OpDecorate %_arr_uint_uint_1 ArrayStride 4
                OpDecorate %sample_mask_1 BuiltIn SampleMask
+               OpDecorate %sample_mask_1 Flat
                OpDecorate %loc2_1 Location 2
                OpMemberDecorate %FragmentInputs0 0 Offset 0
                OpMemberDecorate %FragmentInputs0 1 Offset 16

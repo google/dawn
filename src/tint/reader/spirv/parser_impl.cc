@@ -1795,6 +1795,14 @@ bool ParserImpl::ConvertPipelineDecorations(const Type* store_type,
         }
     }
 
+    if (type == ast::InterpolationType::kFlat &&
+        !ast::HasAttribute<ast::LocationAttribute>(*attributes)) {
+        // WGSL requires that '@interpolate(flat)' needs to be paired with '@location', however
+        // SPIR-V requires all fragment shader integer Inputs are 'flat'. If the decorations do not
+        // contain a SpvDecorationLocation, then make this perspective.
+        type = ast::InterpolationType::kPerspective;
+    }
+
     // Apply interpolation.
     if (type == ast::InterpolationType::kPerspective &&
         sampling == ast::InterpolationSampling::kNone) {

@@ -159,14 +159,16 @@ struct CanonicalizeEntryPointIO::State {
                                     ast::AttributeList attributes) {
         auto* ast_type = CreateASTTypeFor(ctx, type);
         if (cfg.shader_style == ShaderStyle::kSpirv || cfg.shader_style == ShaderStyle::kGlsl) {
-            // Vulkan requires that integer user-defined fragment inputs are
-            // always decorated with `Flat`.
-            // TODO(crbug.com/tint/1224): Remove this once a flat interpolation
-            // attribute is required for integers.
-            if (type->is_integer_scalar_or_vector() &&
-                ast::HasAttribute<ast::LocationAttribute>(attributes) &&
+            // Vulkan requires that integer user-defined fragment inputs are always decorated with
+            // `Flat`. See:
+            // https://www.khronos.org/registry/vulkan/specs/1.3-extensions/man/html/StandaloneSpirv.html#VUID-StandaloneSpirv-Flat-04744
+            // TODO(crbug.com/tint/1224): Remove this once a flat interpolation attribute is
+            // required for integers.
+            if (func_ast->PipelineStage() == ast::PipelineStage::kFragment &&
+                type->is_integer_scalar_or_vector() &&
                 !ast::HasAttribute<ast::InterpolateAttribute>(attributes) &&
-                func_ast->PipelineStage() == ast::PipelineStage::kFragment) {
+                (ast::HasAttribute<ast::LocationAttribute>(attributes) ||
+                 cfg.shader_style == ShaderStyle::kSpirv)) {
                 attributes.push_back(ctx.dst->Interpolate(ast::InterpolationType::kFlat,
                                                           ast::InterpolationSampling::kNone));
             }
@@ -226,14 +228,15 @@ struct CanonicalizeEntryPointIO::State {
                    const sem::Type* type,
                    ast::AttributeList attributes,
                    const ast::Expression* value) {
-        // Vulkan requires that integer user-defined vertex outputs are
-        // always decorated with `Flat`.
-        // TODO(crbug.com/tint/1224): Remove this once a flat interpolation
-        // attribute is required for integers.
-        if (cfg.shader_style == ShaderStyle::kSpirv && type->is_integer_scalar_or_vector() &&
+        // Vulkan requires that integer user-defined vertex outputs are always decorated with
+        // `Flat`.
+        // TODO(crbug.com/tint/1224): Remove this once a flat interpolation attribute is required
+        // for integers.
+        if (cfg.shader_style == ShaderStyle::kSpirv &&
+            func_ast->PipelineStage() == ast::PipelineStage::kVertex &&
+            type->is_integer_scalar_or_vector() &&
             ast::HasAttribute<ast::LocationAttribute>(attributes) &&
-            !ast::HasAttribute<ast::InterpolateAttribute>(attributes) &&
-            func_ast->PipelineStage() == ast::PipelineStage::kVertex) {
+            !ast::HasAttribute<ast::InterpolateAttribute>(attributes)) {
             attributes.push_back(ctx.dst->Interpolate(ast::InterpolationType::kFlat,
                                                       ast::InterpolationSampling::kNone));
         }
@@ -262,13 +265,17 @@ struct CanonicalizeEntryPointIO::State {
     /// that will be passed to the original function.
     /// @param param the original function parameter
     void ProcessNonStructParameter(const sem::Parameter* param) {
+        // Do not add interpolation attributes on vertex input
+        bool do_interpolate = func_ast->PipelineStage() != ast::PipelineStage::kVertex;
         // Remove the shader IO attributes from the inner function parameter, and
         // attach them to the new object instead.
         ast::AttributeList attributes;
         for (auto* attr : param->Declaration()->attributes) {
             if (IsShaderIOAttribute(attr)) {
                 ctx.Remove(param->Declaration()->attributes, attr);
-                attributes.push_back(ctx.Clone(attr));
+                if ((do_interpolate || !attr->Is<ast::InterpolateAttribute>())) {
+                    attributes.push_back(ctx.Clone(attr));
+                }
             }
         }
 
@@ -283,6 +290,9 @@ struct CanonicalizeEntryPointIO::State {
     /// the original function.
     /// @param param the original function parameter
     void ProcessStructParameter(const sem::Parameter* param) {
+        // Do not add interpolation attributes on vertex input
+        bool do_interpolate = func_ast->PipelineStage() != ast::PipelineStage::kVertex;
+
         auto* str = param->Type()->As<sem::Struct>();
 
         // Recreate struct members in the outer entry point and build an initializer
@@ -297,12 +307,6 @@ struct CanonicalizeEntryPointIO::State {
             auto* member_ast = member->Declaration();
             auto name = ctx.src->Symbols().NameFor(member_ast->symbol);
 
-            // In GLSL, do not add interpolation attributes on vertex input
-            bool do_interpolate = true;
-            if (cfg.shader_style == ShaderStyle::kGlsl &&
-                func_ast->PipelineStage() == ast::PipelineStage::kVertex) {
-                do_interpolate = false;
-            }
             auto attributes = CloneShaderIOAttributes(member_ast->attributes, do_interpolate);
             auto* input_expr = AddInput(name, member->Type(), std::move(attributes));
             inner_struct_values.push_back(input_expr);
@@ -319,12 +323,8 @@ struct CanonicalizeEntryPointIO::State {
     /// @param inner_ret_type the original function return type
     /// @param original_result the result object produced by the original function
     void ProcessReturnType(const sem::Type* inner_ret_type, Symbol original_result) {
-        bool do_interpolate = true;
-        // In GLSL, do not add interpolation attributes on fragment output
-        if (cfg.shader_style == ShaderStyle::kGlsl &&
-            func_ast->PipelineStage() == ast::PipelineStage::kFragment) {
-            do_interpolate = false;
-        }
+        // Do not add interpolation attributes on fragment output
+        bool do_interpolate = func_ast->PipelineStage() != ast::PipelineStage::kFragment;
         if (auto* str = inner_ret_type->As<sem::Struct>()) {
             for (auto* member : str->Members()) {
                 if (member->Type()->Is<sem::Struct>()) {
