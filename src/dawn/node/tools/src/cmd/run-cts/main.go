@@ -972,7 +972,9 @@ func (r *runner) runTestcase(query string) result {
 	msg := buf.String()
 	switch {
 	case errors.Is(err, context.DeadlineExceeded):
-		return result{testcase: query, status: timeout, message: msg}
+		return result{testcase: query, status: timeout, message: msg, error: err}
+	case err != nil:
+		break
 	case strings.Contains(msg, "[fail]"):
 		return result{testcase: query, status: fail, message: msg}
 	case strings.Contains(msg, "[warn]"):
