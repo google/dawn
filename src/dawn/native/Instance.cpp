@@ -103,7 +103,7 @@ dawn::platform::CachingInterface* GetCachingInterface(dawn::platform::Platform* 
 }  // anonymous namespace
 
 InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor) {
-    return InstanceBase::Create().Detach();
+    return InstanceBase::Create(descriptor).Detach();
 }
 
 // InstanceBase
