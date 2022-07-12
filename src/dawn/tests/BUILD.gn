@@ -205,6 +205,13 @@ dawn_test("dawn_unittests") {
   # Add internal dawn native config for internal unittests.
   configs = [ "${dawn_root}/src/dawn/native:internal" ]
 
+  # Add Tint public+common configs so <tint/tint.h> can be included to test
+  # the Dawn/Tint boundary.
+  configs += [
+    "${dawn_root}/src/tint:tint_public_config",
+    "${dawn_root}/src/tint:tint_common_config",
+  ]
+
   sources = get_target_outputs(":mock_webgpu_gen")
   sources += [
     "${dawn_root}/src/dawn/wire/client/ClientMemoryTransferService_mock.cpp",
