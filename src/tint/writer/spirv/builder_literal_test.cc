@@ -163,4 +163,39 @@ TEST_F(BuilderTest, Literal_F32_Dedup) {
 )");
 }
 
+TEST_F(BuilderTest, Literal_F16) {
+    Enable(ast::Extension::kF16);
+
+    auto* i = create<ast::FloatLiteralExpression>(23.245, ast::FloatLiteralExpression::Suffix::kH);
+    WrapInFunction(i);
+
+    spirv::Builder& b = Build();
+
+    auto id = b.GenerateLiteralIfNeeded(nullptr, i);
+    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_EQ(2u, id);
+
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 16
+%2 = OpConstant %1 0x1.73cp+4
+)");
+}
+
+TEST_F(BuilderTest, Literal_F16_Dedup) {
+    Enable(ast::Extension::kF16);
+
+    auto* i1 = create<ast::FloatLiteralExpression>(23.245, ast::FloatLiteralExpression::Suffix::kH);
+    auto* i2 = create<ast::FloatLiteralExpression>(23.245, ast::FloatLiteralExpression::Suffix::kH);
+    WrapInFunction(i1, i2);
+
+    spirv::Builder& b = Build();
+
+    ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, i1), 0u);
+    ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, i2), 0u);
+    ASSERT_FALSE(b.has_error()) << b.error();
+
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 16
+%2 = OpConstant %1 0x1.73cp+4
+)");
+}
+
 }  // namespace tint::writer::spirv

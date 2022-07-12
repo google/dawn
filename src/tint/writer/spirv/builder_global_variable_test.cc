@@ -115,6 +115,36 @@ TEST_F(BuilderTest, GlobalConst_Vec_Constructor) {
     Validate(b);
 }
 
+TEST_F(BuilderTest, GlobalConst_Vec_F16_Constructor) {
+    // const c = vec3<f16>(1h, 2h, 3h);
+    // var v = c;
+    Enable(ast::Extension::kF16);
+
+    auto* c = GlobalConst("c", nullptr, vec3<f16>(1_h, 2_h, 3_h));
+    GlobalVar("v", nullptr, ast::StorageClass::kPrivate, Expr(c));
+
+    spirv::Builder& b = SanitizeAndBuild();
+
+    ASSERT_TRUE(b.Build()) << b.error();
+
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 16
+%1 = OpTypeVector %2 3
+%3 = OpConstant %2 0x1p+0
+%4 = OpConstant %2 0x1p+1
+%5 = OpConstant %2 0x1.8p+1
+%6 = OpConstantComposite %1 %3 %4 %5
+%8 = OpTypePointer Private %1
+%7 = OpVariable %8 Private %6
+%10 = OpTypeVoid
+%9 = OpTypeFunction %10
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"()");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpReturn
+)");
+
+    Validate(b);
+}
+
 TEST_F(BuilderTest, GlobalConst_Vec_AInt_Constructor) {
     // const c = vec3(1, 2, 3);
     // var v = c;

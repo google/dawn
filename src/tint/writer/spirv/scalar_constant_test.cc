@@ -52,5 +52,12 @@ TEST_F(SpirvScalarConstantTest, U32) {
     EXPECT_EQ(c.kind, ScalarConstant::Kind::kU32);
 }
 
+TEST_F(SpirvScalarConstantTest, F16) {
+    auto c = ScalarConstant::F16(123.456f);
+    // 123.456f will be quantized to f16 123.4375h, bit pattern 0x57b7
+    EXPECT_EQ(c.value.f16.bits_representation, 0x57b7u);
+    EXPECT_EQ(c.kind, ScalarConstant::Kind::kF16);
+}
+
 }  // namespace
 }  // namespace tint::writer::spirv

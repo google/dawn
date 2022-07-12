@@ -379,21 +379,17 @@ void Builder::push_extension(const char* extension) {
 }
 
 bool Builder::GenerateExtension(ast::Extension extension) {
-    /*
-    For each supported extension, push corresponding capability into the builder.
-    For example:
-      if (kind == ast::Extension::Kind::kF16) {
-        push_capability(SpvCapabilityFloat16);
-        push_capability(SpvCapabilityUniformAndStorageBuffer16BitAccess);
-        push_capability(SpvCapabilityStorageBuffer16BitAccess);
-        push_capability(SpvCapabilityStorageInputOutput16);
-      }
-    */
     switch (extension) {
         case ast::Extension::kChromiumExperimentalDP4a:
             push_extension("SPV_KHR_integer_dot_product");
             push_capability(SpvCapabilityDotProductKHR);
             push_capability(SpvCapabilityDotProductInput4x8BitPackedKHR);
+            break;
+        case ast::Extension::kF16:
+            push_capability(SpvCapabilityFloat16);
+            push_capability(SpvCapabilityUniformAndStorageBuffer16BitAccess);
+            push_capability(SpvCapabilityStorageBuffer16BitAccess);
+            push_capability(SpvCapabilityStorageInputOutput16);
             break;
         default:
             return false;
@@ -1354,6 +1350,9 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(const sem::Call* call,
             if (result_type->Is<sem::F32>()) {
                 return GenerateConstantIfNeeded(ScalarConstant::F32(0).AsSpecOp(constant_id));
             }
+            if (result_type->Is<sem::F16>()) {
+                return GenerateConstantIfNeeded(ScalarConstant::F16(0).AsSpecOp(constant_id));
+            }
             if (result_type->Is<sem::Bool>()) {
                 return GenerateConstantIfNeeded(ScalarConstant::Bool(false).AsSpecOp(constant_id));
             }
@@ -1560,22 +1559,23 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
     auto* from_type = TypeOf(from_expr)->UnwrapRef();
 
     spv::Op op = spv::Op::OpNop;
-    if ((from_type->Is<sem::I32>() && to_type->Is<sem::F32>()) ||
+    if ((from_type->Is<sem::I32>() && to_type->is_float_scalar()) ||
         (from_type->is_signed_integer_vector() && to_type->is_float_vector())) {
         op = spv::Op::OpConvertSToF;
-    } else if ((from_type->Is<sem::U32>() && to_type->Is<sem::F32>()) ||
+    } else if ((from_type->Is<sem::U32>() && to_type->is_float_scalar()) ||
                (from_type->is_unsigned_integer_vector() && to_type->is_float_vector())) {
         op = spv::Op::OpConvertUToF;
-    } else if ((from_type->Is<sem::F32>() && to_type->Is<sem::I32>()) ||
+    } else if ((from_type->is_float_scalar() && to_type->Is<sem::I32>()) ||
                (from_type->is_float_vector() && to_type->is_signed_integer_vector())) {
         op = spv::Op::OpConvertFToS;
-    } else if ((from_type->Is<sem::F32>() && to_type->Is<sem::U32>()) ||
+    } else if ((from_type->is_float_scalar() && to_type->Is<sem::U32>()) ||
                (from_type->is_float_vector() && to_type->is_unsigned_integer_vector())) {
         op = spv::Op::OpConvertFToU;
     } else if ((from_type->Is<sem::Bool>() && to_type->Is<sem::Bool>()) ||
                (from_type->Is<sem::U32>() && to_type->Is<sem::U32>()) ||
                (from_type->Is<sem::I32>() && to_type->Is<sem::I32>()) ||
                (from_type->Is<sem::F32>() && to_type->Is<sem::F32>()) ||
+               (from_type->Is<sem::F16>() && to_type->Is<sem::F16>()) ||
                (from_type->Is<sem::Vector>() && (from_type == to_type))) {
         return val_id;
     } else if ((from_type->Is<sem::I32>() && to_type->Is<sem::U32>()) ||
@@ -1608,6 +1608,9 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
         if (to_elem_type->Is<sem::F32>()) {
             zero_id = GenerateConstantIfNeeded(ScalarConstant::F32(0));
             one_id = GenerateConstantIfNeeded(ScalarConstant::F32(1));
+        } else if (to_elem_type->Is<sem::F16>()) {
+            zero_id = GenerateConstantIfNeeded(ScalarConstant::F16(0));
+            one_id = GenerateConstantIfNeeded(ScalarConstant::F16(1));
         } else if (to_elem_type->Is<sem::U32>()) {
             zero_id = GenerateConstantIfNeeded(ScalarConstant::U32(0));
             one_id = GenerateConstantIfNeeded(ScalarConstant::U32(1));
@@ -1691,7 +1694,9 @@ uint32_t Builder::GenerateLiteralIfNeeded(const ast::Variable* var,
                     constant.value.f32 = static_cast<float>(f->value);
                     return;
                 case ast::FloatLiteralExpression::Suffix::kH:
-                    error_ = "Type f16 is not completely implemented yet";
+                    constant.kind = ScalarConstant::Kind::kF16;
+                    constant.value.f16 = {f16(static_cast<float>(f->value)).BitsRepresentation()};
+                    return;
             }
         },
         [&](Default) { error_ = "unknown literal type"; });
@@ -1750,6 +1755,10 @@ uint32_t Builder::GenerateConstantIfNeeded(const sem::Constant* constant) {
             auto val = constant->As<f32>();
             return GenerateConstantIfNeeded(ScalarConstant::F32(val.value));
         },
+        [&](const sem::F16*) {
+            auto val = constant->As<f16>();
+            return GenerateConstantIfNeeded(ScalarConstant::F16(val.value));
+        },
         [&](const sem::I32*) {
             auto val = constant->As<i32>();
             return GenerateConstantIfNeeded(ScalarConstant::I32(val.value));
@@ -1788,6 +1797,10 @@ uint32_t Builder::GenerateConstantIfNeeded(const ScalarConstant& constant) {
             type_id = GenerateTypeIfNeeded(builder_.create<sem::F32>());
             break;
         }
+        case ScalarConstant::Kind::kF16: {
+            type_id = GenerateTypeIfNeeded(builder_.create<sem::F16>());
+            break;
+        }
         case ScalarConstant::Kind::kBool: {
             type_id = GenerateTypeIfNeeded(builder_.create<sem::Bool>());
             break;
@@ -1820,6 +1833,12 @@ uint32_t Builder::GenerateConstantIfNeeded(const ScalarConstant& constant) {
         case ScalarConstant::Kind::kF32: {
             push_type(constant.is_spec_op ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
                       {Operand(type_id), result, Operand(constant.value.f32)});
+            break;
+        }
+        case ScalarConstant::Kind::kF16: {
+            push_type(
+                constant.is_spec_op ? spv::Op::OpSpecConstant : spv::Op::OpConstant,
+                {Operand(type_id), result, U32Operand(constant.value.f16.bits_representation)});
             break;
         }
         case ScalarConstant::Kind::kBool: {
@@ -3795,9 +3814,8 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
                 return true;
             },
             [&](const sem::F16*) {
-                // Should be `push_type(spv::Op::OpTypeFloat, {result, Operand(16u)});`
-                error_ = "Type f16 is not completely implemented yet.";
-                return false;
+                push_type(spv::Op::OpTypeFloat, {result, Operand(16u)});
+                return true;
             },
             [&](const sem::I32*) {
                 push_type(spv::Op::OpTypeInt, {result, Operand(32u), Operand(1u)});

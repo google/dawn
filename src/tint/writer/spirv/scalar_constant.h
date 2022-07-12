@@ -20,6 +20,7 @@
 #include <cstring>
 #include <functional>
 
+#include "src/tint/number.h"
 #include "src/tint/utils/hash.h"
 
 // Forward declarations
@@ -31,6 +32,12 @@ namespace tint::writer::spirv {
 
 /// ScalarConstant represents a scalar constant value
 struct ScalarConstant {
+    /// The struct type to hold the bits representation of f16 in the Value union
+    struct F16 {
+        /// The 16 bits representation of the f16, stored as uint16_t
+        uint16_t bits_representation;
+    };
+
     /// The constant value
     union Value {
         /// The value as a bool
@@ -41,6 +48,8 @@ struct ScalarConstant {
         int32_t i32;
         /// The value as a float
         float f32;
+        /// The value as bits representation of a f16
+        F16 f16;
 
         /// The value that is wide enough to encompass all other types (including
         /// future 64-bit data types).
@@ -48,7 +57,7 @@ struct ScalarConstant {
     };
 
     /// The kind of constant
-    enum class Kind { kBool, kU32, kI32, kF32 };
+    enum class Kind { kBool, kU32, kI32, kF32, kF16 };
 
     /// Constructor
     inline ScalarConstant() { value.u64 = 0; }
@@ -72,11 +81,20 @@ struct ScalarConstant {
     }
 
     /// @param value the value of the constant
-    /// @returns a new ScalarConstant with the provided value and kind Kind::kI32
+    /// @returns a new ScalarConstant with the provided value and kind Kind::kF32
     static inline ScalarConstant F32(float value) {
         ScalarConstant c;
         c.value.f32 = value;
         c.kind = Kind::kF32;
+        return c;
+    }
+
+    /// @param value the value of the constant
+    /// @returns a new ScalarConstant with the provided value and kind Kind::kF16
+    static inline ScalarConstant F16(f16::type value) {
+        ScalarConstant c;
+        c.value.f16 = {f16(value).BitsRepresentation()};
+        c.kind = Kind::kF16;
         return c;
     }
 

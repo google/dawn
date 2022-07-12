@@ -175,6 +175,34 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedF32) {
     ASSERT_FALSE(b.has_error()) << b.error();
 }
 
+TEST_F(BuilderTest_Type, GenerateF16) {
+    auto* f16 = create<sem::F16>();
+
+    spirv::Builder& b = Build();
+
+    auto id = b.GenerateTypeIfNeeded(f16);
+    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_EQ(id, 1u);
+
+    ASSERT_EQ(b.types().size(), 1u);
+    EXPECT_EQ(DumpInstruction(b.types()[0]), R"(%1 = OpTypeFloat 16
+)");
+}
+
+TEST_F(BuilderTest_Type, ReturnsGeneratedF16) {
+    auto* f16 = create<sem::F16>();
+    auto* i32 = create<sem::I32>();
+
+    spirv::Builder& b = Build();
+
+    EXPECT_EQ(b.GenerateTypeIfNeeded(f16), 1u);
+    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_EQ(b.GenerateTypeIfNeeded(i32), 2u);
+    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_EQ(b.GenerateTypeIfNeeded(f16), 1u);
+    ASSERT_FALSE(b.has_error()) << b.error();
+}
+
 TEST_F(BuilderTest_Type, GenerateI32) {
     auto* i32 = create<sem::I32>();
 
@@ -231,6 +259,39 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedMatrix) {
     EXPECT_EQ(b.GenerateTypeIfNeeded(mat), 1u);
     ASSERT_FALSE(b.has_error()) << b.error();
     EXPECT_EQ(b.GenerateTypeIfNeeded(i32), 3u);
+    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_EQ(b.GenerateTypeIfNeeded(mat), 1u);
+    ASSERT_FALSE(b.has_error()) << b.error();
+}
+
+TEST_F(BuilderTest_Type, GenerateF16Matrix) {
+    auto* f16 = create<sem::F16>();
+    auto* vec3 = create<sem::Vector>(f16, 3u);
+    auto* mat2x3 = create<sem::Matrix>(vec3, 2u);
+
+    spirv::Builder& b = Build();
+
+    auto id = b.GenerateTypeIfNeeded(mat2x3);
+    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_EQ(id, 1u);
+
+    EXPECT_EQ(b.types().size(), 3u);
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%3 = OpTypeFloat 16
+%2 = OpTypeVector %3 3
+%1 = OpTypeMatrix %2 2
+)");
+}
+
+TEST_F(BuilderTest_Type, ReturnsGeneratedF16Matrix) {
+    auto* f16 = create<sem::F16>();
+    auto* col = create<sem::Vector>(f16, 4u);
+    auto* mat = create<sem::Matrix>(col, 3u);
+
+    spirv::Builder& b = Build();
+
+    EXPECT_EQ(b.GenerateTypeIfNeeded(mat), 1u);
+    ASSERT_FALSE(b.has_error()) << b.error();
+    EXPECT_EQ(b.GenerateTypeIfNeeded(f16), 3u);
     ASSERT_FALSE(b.has_error()) << b.error();
     EXPECT_EQ(b.GenerateTypeIfNeeded(mat), 1u);
     ASSERT_FALSE(b.has_error()) << b.error();
