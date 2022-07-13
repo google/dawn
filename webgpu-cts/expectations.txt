@@ -27,7 +27,7 @@
 #         arm
 #         google google-0xffff
 #         intel intel-0xa2e intel-0xd26 intel-0xa011 intel-0x3e92 intel-0x3e9b
-#               intel-0x5912
+#               intel-0x5912 intel-0x9bc5
 #         nvidia nvidia-0xfe9 nvidia-0x1cb3 nvidia-0x2184
 #         qualcomm ]
 # Decoder
@@ -407,6 +407,13 @@ crbug.com/tint/1525 webgpu:shader,validation,parse,literal:u32:val="-2147483648"
 crbug.com/dawn/1461 [ intel monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth16unorm" [ Failure ]
 crbug.com/dawn/1461 [ intel monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth24plus" [ Failure ]
 crbug.com/dawn/1461 [ intel monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth24plus-stencil8" [ Failure ]
+
+################################################################################
+# Failures on Intel UHD630 Linux Mesa 20.0.8
+################################################################################
+crbug.com/tint/1612 [ linux intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,abs:f32:inputSource="const";* [ Failure ]
+crbug.com/tint/1612 [ linux intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,atan:f32:inputSource="const";* [ Failure ]
+crbug.com/tint/1612 [ linux intel-0x9bc5 ] webgpu:shader,execution,expression,call,builtin,clamp:f32:inputSource="const";* [ Failure ]
 
 ################################################################################
 # untriaged failures
