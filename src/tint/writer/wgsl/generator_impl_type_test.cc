@@ -91,6 +91,19 @@ TEST_F(WgslGeneratorImplTest, EmitType_F32) {
     EXPECT_EQ(out.str(), "f32");
 }
 
+TEST_F(WgslGeneratorImplTest, EmitType_F16) {
+    Enable(ast::Extension::kF16);
+
+    auto* f16 = ty.f16();
+    Alias("make_type_reachable", f16);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitType(out, f16)) << gen.error();
+    EXPECT_EQ(out.str(), "f16");
+}
+
 TEST_F(WgslGeneratorImplTest, EmitType_I32) {
     auto* i32 = ty.i32();
     Alias("make_type_reachable", i32);
@@ -102,7 +115,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_I32) {
     EXPECT_EQ(out.str(), "i32");
 }
 
-TEST_F(WgslGeneratorImplTest, EmitType_Matrix) {
+TEST_F(WgslGeneratorImplTest, EmitType_Matrix_F32) {
     auto* mat2x3 = ty.mat2x3<f32>();
     Alias("make_type_reachable", mat2x3);
 
@@ -111,6 +124,19 @@ TEST_F(WgslGeneratorImplTest, EmitType_Matrix) {
     std::stringstream out;
     ASSERT_TRUE(gen.EmitType(out, mat2x3)) << gen.error();
     EXPECT_EQ(out.str(), "mat2x3<f32>");
+}
+
+TEST_F(WgslGeneratorImplTest, EmitType_Matrix_F16) {
+    Enable(ast::Extension::kF16);
+
+    auto* mat2x3 = ty.mat2x3<f16>();
+    Alias("make_type_reachable", mat2x3);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitType(out, mat2x3)) << gen.error();
+    EXPECT_EQ(out.str(), "mat2x3<f16>");
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Pointer) {
@@ -271,7 +297,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_U32) {
     EXPECT_EQ(out.str(), "u32");
 }
 
-TEST_F(WgslGeneratorImplTest, EmitType_Vector) {
+TEST_F(WgslGeneratorImplTest, EmitType_Vector_F32) {
     auto* vec3 = ty.vec3<f32>();
     Alias("make_type_reachable", vec3);
 
@@ -280,6 +306,19 @@ TEST_F(WgslGeneratorImplTest, EmitType_Vector) {
     std::stringstream out;
     ASSERT_TRUE(gen.EmitType(out, vec3)) << gen.error();
     EXPECT_EQ(out.str(), "vec3<f32>");
+}
+
+TEST_F(WgslGeneratorImplTest, EmitType_Vector_F16) {
+    Enable(ast::Extension::kF16);
+
+    auto* vec3 = ty.vec3<f16>();
+    Alias("make_type_reachable", vec3);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitType(out, vec3)) << gen.error();
+    EXPECT_EQ(out.str(), "vec3<f16>");
 }
 
 struct TextureData {

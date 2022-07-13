@@ -125,6 +125,25 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_f32) {
 )");
 }
 
+TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* C = Const("C", nullptr, Expr(1_h));
+    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_EQ(gen.result(), R"(enable f16;
+
+fn f() {
+  const C = 1.0h;
+  let l = C;
+}
+)");
+}
+
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_AInt) {
     auto* C = Const("C", nullptr, Construct(ty.vec3(nullptr), 1_a, 2_a, 3_a));
     Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
@@ -170,6 +189,25 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_f32) {
 )");
 }
 
+TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* C = Const("C", nullptr, vec3<f16>(1_h, 2_h, 3_h));
+    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_EQ(gen.result(), R"(enable f16;
+
+fn f() {
+  const C = vec3<f16>(1.0h, 2.0h, 3.0h);
+  let l = C;
+}
+)");
+}
+
 TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_mat2x3_AFloat) {
     auto* C =
         Const("C", nullptr, Construct(ty.mat(nullptr, 2, 3), 1._a, 2._a, 3._a, 4._a, 5._a, 6._a));
@@ -196,6 +234,25 @@ TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_mat2x3_f32) {
 
     EXPECT_EQ(gen.result(), R"(fn f() {
   const C = mat2x3<f32>(1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f);
+  let l = C;
+}
+)");
+}
+
+TEST_F(WgslGeneratorImplTest, Emit_VariableDeclStatement_Const_mat2x3_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* C = Const("C", nullptr, mat2x3<f16>(1_h, 2_h, 3_h, 4_h, 5_h, 6_h));
+    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_EQ(gen.result(), R"(enable f16;
+
+fn f() {
+  const C = mat2x3<f16>(1.0h, 2.0h, 3.0h, 4.0h, 5.0h, 6.0h);
   let l = C;
 }
 )");

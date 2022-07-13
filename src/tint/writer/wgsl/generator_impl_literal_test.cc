@@ -25,7 +25,7 @@ namespace {
 // - 0 sign if sign is 0, 1 otherwise
 // - 'exponent_bits' is placed in the exponent space.
 //   So, the exponent bias must already be included.
-f32 MakeFloat(uint32_t sign, uint32_t biased_exponent, uint32_t mantissa) {
+f32 MakeF32(uint32_t sign, uint32_t biased_exponent, uint32_t mantissa) {
     const uint32_t sign_bit = sign ? 0x80000000u : 0u;
     // The binary32 exponent is 8 bits, just below the sign.
     const uint32_t exponent_bits = (biased_exponent & 0xffu) << 23;
@@ -40,18 +40,75 @@ f32 MakeFloat(uint32_t sign, uint32_t biased_exponent, uint32_t mantissa) {
     return f32(result);
 }
 
-struct FloatData {
+// Get the representation of an IEEE 754 binary16 floating point number with
+// - 0 sign if sign is 0, 1 otherwise
+// - 'exponent_bits' is placed in the exponent space.
+// - the exponent bias (15) already be included.
+f16 MakeF16(uint32_t sign, uint32_t f16_biased_exponent, uint16_t f16_mantissa) {
+    assert((f16_biased_exponent & 0xffffffe0u) == 0);
+    assert((f16_mantissa & 0xfc00u) == 0);
+
+    const uint32_t sign_bit = sign ? 0x80000000u : 0u;
+
+    // F16 has a exponent bias of 15, and f32 bias 127. Adding 127-15=112 to the f16-biased exponent
+    // to get f32-biased exponent.
+    uint32_t f32_biased_exponent = (f16_biased_exponent & 0x1fu) + 112;
+    assert((f32_biased_exponent & 0xffffff00u) == 0);
+
+    if (f16_biased_exponent == 0) {
+        // +/- zero, or subnormal
+        if (f16_mantissa == 0) {
+            // +/- zero
+            return sign ? f16(-0.0f) : f16(0.0f);
+        }
+        // Subnormal f16, calc the corresponding exponent and mantissa of normal f32.
+        f32_biased_exponent += 1;
+        // There must be at least one of the 10 mantissa bits being 1, left-shift the mantissa bits
+        // until the most significant 1 bit is left-shifted to 10th bit (count from zero), which
+        // will be omitted in the resulting f32 mantissa part.
+        assert(f16_mantissa & 0x03ffu);
+        while ((f16_mantissa & 0x0400u) == 0) {
+            f16_mantissa = static_cast<uint16_t>(f16_mantissa << 1);
+            f32_biased_exponent--;
+        }
+    }
+
+    // The binary32 exponent is 8 bits, just below the sign.
+    const uint32_t f32_exponent_bits = (f32_biased_exponent & 0xffu) << 23;
+    // The mantissa is the bottom 23 bits.
+    const uint32_t f32_mantissa_bits = (f16_mantissa & 0x03ffu) << 13;
+
+    uint32_t bits = sign_bit | f32_exponent_bits | f32_mantissa_bits;
+    float result = 0.0f;
+    static_assert(sizeof(result) == sizeof(bits),
+                  "expected float and uint32_t to be the same size");
+    std::memcpy(&result, &bits, sizeof(bits));
+    return f16(result);
+}
+
+struct F32Data {
     f32 value;
     std::string expected;
 };
-inline std::ostream& operator<<(std::ostream& out, FloatData data) {
+
+struct F16Data {
+    f16 value;
+    std::string expected;
+};
+
+inline std::ostream& operator<<(std::ostream& out, F32Data data) {
     out << "{" << data.value << "," << data.expected << "}";
     return out;
 }
 
-using WgslGenerator_FloatLiteralTest = TestParamHelper<FloatData>;
+inline std::ostream& operator<<(std::ostream& out, F16Data data) {
+    out << "{" << data.value << "," << data.expected << "}";
+    return out;
+}
 
-TEST_P(WgslGenerator_FloatLiteralTest, Emit) {
+using WgslGenerator_F32LiteralTest = TestParamHelper<F32Data>;
+
+TEST_P(WgslGenerator_F32LiteralTest, Emit) {
     auto* v = Expr(GetParam().value);
 
     SetResolveOnBuild(false);
@@ -63,38 +120,37 @@ TEST_P(WgslGenerator_FloatLiteralTest, Emit) {
 }
 
 INSTANTIATE_TEST_SUITE_P(Zero,
-                         WgslGenerator_FloatLiteralTest,
-                         ::testing::ValuesIn(std::vector<FloatData>{
-                             {0_f, "0.0f"},
-                             {MakeFloat(0, 0, 0), "0.0f"},
-                             {MakeFloat(1, 0, 0), "-0.0f"}}));
+                         WgslGenerator_F32LiteralTest,
+                         ::testing::ValuesIn(std::vector<F32Data>{{0_f, "0.0f"},
+                                                                  {MakeF32(0, 0, 0), "0.0f"},
+                                                                  {MakeF32(1, 0, 0), "-0.0f"}}));
 
 INSTANTIATE_TEST_SUITE_P(Normal,
-                         WgslGenerator_FloatLiteralTest,
-                         ::testing::ValuesIn(std::vector<FloatData>{{1_f, "1.0f"},
-                                                                    {-1_f, "-1.0f"},
-                                                                    {101.375_f, "101.375f"}}));
+                         WgslGenerator_F32LiteralTest,
+                         ::testing::ValuesIn(std::vector<F32Data>{{1_f, "1.0f"},
+                                                                  {-1_f, "-1.0f"},
+                                                                  {101.375_f, "101.375f"}}));
 
 INSTANTIATE_TEST_SUITE_P(Subnormal,
-                         WgslGenerator_FloatLiteralTest,
-                         ::testing::ValuesIn(std::vector<FloatData>{
-                             {MakeFloat(0, 0, 1), "0x1p-149f"},  // Smallest
-                             {MakeFloat(1, 0, 1), "-0x1p-149f"},
-                             {MakeFloat(0, 0, 2), "0x1p-148f"},
-                             {MakeFloat(1, 0, 2), "-0x1p-148f"},
-                             {MakeFloat(0, 0, 0x7fffff), "0x1.fffffcp-127f"},   // Largest
-                             {MakeFloat(1, 0, 0x7fffff), "-0x1.fffffcp-127f"},  // Largest
-                             {MakeFloat(0, 0, 0xcafebe), "0x1.2bfaf8p-127f"},   // Scattered bits
-                             {MakeFloat(1, 0, 0xcafebe), "-0x1.2bfaf8p-127f"},  // Scattered bits
-                             {MakeFloat(0, 0, 0xaaaaa), "0x1.55554p-130f"},     // Scattered bits
-                             {MakeFloat(1, 0, 0xaaaaa), "-0x1.55554p-130f"},    // Scattered bits
+                         WgslGenerator_F32LiteralTest,
+                         ::testing::ValuesIn(std::vector<F32Data>{
+                             {MakeF32(0, 0, 1), "0x1p-149f"},  // Smallest
+                             {MakeF32(1, 0, 1), "-0x1p-149f"},
+                             {MakeF32(0, 0, 2), "0x1p-148f"},
+                             {MakeF32(1, 0, 2), "-0x1p-148f"},
+                             {MakeF32(0, 0, 0x7fffff), "0x1.fffffcp-127f"},   // Largest
+                             {MakeF32(1, 0, 0x7fffff), "-0x1.fffffcp-127f"},  // Largest
+                             {MakeF32(0, 0, 0xcafebe), "0x1.2bfaf8p-127f"},   // Scattered bits
+                             {MakeF32(1, 0, 0xcafebe), "-0x1.2bfaf8p-127f"},  // Scattered bits
+                             {MakeF32(0, 0, 0xaaaaa), "0x1.55554p-130f"},     // Scattered bits
+                             {MakeF32(1, 0, 0xaaaaa), "-0x1.55554p-130f"},    // Scattered bits
                          }));
 
 INSTANTIATE_TEST_SUITE_P(Infinity,
-                         WgslGenerator_FloatLiteralTest,
-                         ::testing::ValuesIn(std::vector<FloatData>{
-                             {MakeFloat(0, 255, 0), "0x1p+128f"},
-                             {MakeFloat(1, 255, 0), "-0x1p+128f"}}));
+                         WgslGenerator_F32LiteralTest,
+                         ::testing::ValuesIn(std::vector<F32Data>{
+                             {MakeF32(0, 255, 0), "0x1p+128f"},
+                             {MakeF32(1, 255, 0), "-0x1p+128f"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     // TODO(dneto): It's unclear how Infinity and NaN should be handled.
@@ -106,23 +162,95 @@ INSTANTIATE_TEST_SUITE_P(
     // whether the NaN is signalling or quiet, but no agreement between
     // different machine architectures on whether 1 means signalling or
     // if 1 means quiet.
-    WgslGenerator_FloatLiteralTest,
-    ::testing::ValuesIn(std::vector<FloatData>{
+    WgslGenerator_F32LiteralTest,
+    ::testing::ValuesIn(std::vector<F32Data>{
         // LSB only.  Smallest mantissa.
-        {MakeFloat(0, 255, 1), "0x1.000002p+128f"},  // Smallest mantissa
-        {MakeFloat(1, 255, 1), "-0x1.000002p+128f"},
+        {MakeF32(0, 255, 1), "0x1.000002p+128f"},  // Smallest mantissa
+        {MakeF32(1, 255, 1), "-0x1.000002p+128f"},
         // MSB only.
-        {MakeFloat(0, 255, 0x400000), "0x1.8p+128f"},
-        {MakeFloat(1, 255, 0x400000), "-0x1.8p+128f"},
+        {MakeF32(0, 255, 0x400000), "0x1.8p+128f"},
+        {MakeF32(1, 255, 0x400000), "-0x1.8p+128f"},
         // All 1s in the mantissa.
-        {MakeFloat(0, 255, 0x7fffff), "0x1.fffffep+128f"},
-        {MakeFloat(1, 255, 0x7fffff), "-0x1.fffffep+128f"},
+        {MakeF32(0, 255, 0x7fffff), "0x1.fffffep+128f"},
+        {MakeF32(1, 255, 0x7fffff), "-0x1.fffffep+128f"},
         // Scattered bits, with 0 in top mantissa bit.
-        {MakeFloat(0, 255, 0x20101f), "0x1.40203ep+128f"},
-        {MakeFloat(1, 255, 0x20101f), "-0x1.40203ep+128f"},
+        {MakeF32(0, 255, 0x20101f), "0x1.40203ep+128f"},
+        {MakeF32(1, 255, 0x20101f), "-0x1.40203ep+128f"},
         // Scattered bits, with 1 in top mantissa bit.
-        {MakeFloat(0, 255, 0x40101f), "0x1.80203ep+128f"},
-        {MakeFloat(1, 255, 0x40101f), "-0x1.80203ep+128f"}}));
+        {MakeF32(0, 255, 0x40101f), "0x1.80203ep+128f"},
+        {MakeF32(1, 255, 0x40101f), "-0x1.80203ep+128f"}}));
+
+using WgslGenerator_F16LiteralTest = TestParamHelper<F16Data>;
+
+TEST_P(WgslGenerator_F16LiteralTest, Emit) {
+    Enable(ast::Extension::kF16);
+
+    auto* v = Expr(GetParam().value);
+
+    SetResolveOnBuild(false);
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitLiteral(out, v)) << gen.error();
+    EXPECT_EQ(out.str(), GetParam().expected);
+}
+
+INSTANTIATE_TEST_SUITE_P(Zero,
+                         WgslGenerator_F16LiteralTest,
+                         ::testing::ValuesIn(std::vector<F16Data>{{0_h, "0.0h"},
+                                                                  {MakeF16(0, 0, 0), "0.0h"},
+                                                                  {MakeF16(1, 0, 0), "-0.0h"}}));
+
+INSTANTIATE_TEST_SUITE_P(Normal,
+                         WgslGenerator_F16LiteralTest,
+                         ::testing::ValuesIn(std::vector<F16Data>{{1_h, "1.0h"},
+                                                                  {-1_h, "-1.0h"},
+                                                                  {101.375_h, "101.375h"}}));
+
+INSTANTIATE_TEST_SUITE_P(Subnormal,
+                         WgslGenerator_F16LiteralTest,
+                         ::testing::ValuesIn(std::vector<F16Data>{
+                             {MakeF16(0, 0, 1), "5.96046448e-08h"},  // Smallest
+                             {MakeF16(1, 0, 1), "-5.96046448e-08h"},
+                             {MakeF16(0, 0, 2), "1.1920929e-07h"},
+                             {MakeF16(1, 0, 2), "-1.1920929e-07h"},
+                             {MakeF16(0, 0, 0x3ffu), "6.09755516e-05h"},   // Largest
+                             {MakeF16(1, 0, 0x3ffu), "-6.09755516e-05h"},  // Largest
+                             {MakeF16(0, 0, 0x3afu), "5.620718e-05h"},     // Scattered bits
+                             {MakeF16(1, 0, 0x3afu), "-5.620718e-05h"},    // Scattered bits
+                             {MakeF16(0, 0, 0x2c7u), "4.23789024e-05h"},   // Scattered bits
+                             {MakeF16(1, 0, 0x2c7u), "-4.23789024e-05h"},  // Scattered bits
+                         }));
+
+INSTANTIATE_TEST_SUITE_P(
+    // Currently Inf is impossible to be spelled out in literal.
+    // https://github.com/gpuweb/gpuweb/issues/1769
+    DISABLED_Infinity,
+    WgslGenerator_F16LiteralTest,
+    ::testing::ValuesIn(std::vector<F16Data>{{MakeF16(0, 31, 0), "0x1p+128h"},
+                                             {MakeF16(1, 31, 0), "-0x1p+128h"}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    // Currently NaN is impossible to be spelled out in literal.
+    // https://github.com/gpuweb/gpuweb/issues/1769
+    DISABLED_NaN,
+    WgslGenerator_F16LiteralTest,
+    ::testing::ValuesIn(std::vector<F16Data>{
+        // LSB only.  Smallest mantissa.
+        {MakeF16(0, 31, 1), "0x1.004p+128h"},  // Smallest mantissa
+        {MakeF16(1, 31, 1), "-0x1.004p+128h"},
+        // MSB only.
+        {MakeF16(0, 31, 0x200u), "0x1.8p+128h"},
+        {MakeF16(1, 31, 0x200u), "-0x1.8p+128h"},
+        // All 1s in the mantissa.
+        {MakeF16(0, 31, 0x3ffu), "0x1.ffcp+128h"},
+        {MakeF16(1, 31, 0x3ffu), "-0x1.ffcp+128h"},
+        // Scattered bits, with 0 in top mantissa bit.
+        {MakeF16(0, 31, 0x11fu), "0x1.47cp+128h"},
+        {MakeF16(1, 31, 0x11fu), "-0x1.47cp+128h"},
+        // Scattered bits, with 1 in top mantissa bit.
+        {MakeF16(0, 31, 0x23fu), "0x1.8fcp+128h"},
+        {MakeF16(1, 31, 0x23fu), "-0x1.8fcp+128h"}}));
 
 }  // namespace
 }  // namespace tint::writer::wgsl

@@ -21,7 +21,7 @@ namespace {
 
 using WgslGeneratorImplTest = TestHelper;
 
-TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Scalar) {
+TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Scalar_F32_From_I32) {
     auto* cast = Construct<f32>(1_i);
     WrapInFunction(cast);
 
@@ -32,7 +32,20 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Scalar) {
     EXPECT_EQ(out.str(), "f32(1i)");
 }
 
-TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Vector) {
+TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Scalar_F16_From_I32) {
+    Enable(ast::Extension::kF16);
+
+    auto* cast = Construct<f16>(1_i);
+    WrapInFunction(cast);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
+    EXPECT_EQ(out.str(), "f16(1i)");
+}
+
+TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Vector_F32_From_I32) {
     auto* cast = vec3<f32>(vec3<i32>(1_i, 2_i, 3_i));
     WrapInFunction(cast);
 
@@ -41,6 +54,19 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Vector) {
     std::stringstream out;
     ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
     EXPECT_EQ(out.str(), "vec3<f32>(vec3<i32>(1i, 2i, 3i))");
+}
+
+TEST_F(WgslGeneratorImplTest, EmitExpression_Cast_Vector_F16_From_I32) {
+    Enable(ast::Extension::kF16);
+
+    auto* cast = vec3<f16>(vec3<i32>(1_i, 2_i, 3_i));
+    WrapInFunction(cast);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
+    EXPECT_EQ(out.str(), "vec3<f16>(vec3<i32>(1i, 2i, 3i))");
 }
 
 }  // namespace

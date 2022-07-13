@@ -258,6 +258,10 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
             return true;
         },
         [&](const ast::FloatLiteralExpression* l) {  //
+            // f16 literals are also emitted as float value with suffix "h".
+            // Note that all normal and subnormal f16 values are normal f32 values, and since NaN
+            // and Inf are not allowed to be spelled in literal, it should be fine to emit f16
+            // literals in this way.
             out << FloatToBitPreservingString(static_cast<float>(l->value)) << l->suffix;
             return true;
         },
@@ -402,9 +406,8 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
             return true;
         },
         [&](const ast::F16*) {
-            diagnostics_.add_error(diag::System::Writer,
-                                   "Type f16 is not completely implemented yet.");
-            return false;
+            out << "f16";
+            return true;
         },
         [&](const ast::I32*) {
             out << "i32";

@@ -51,7 +51,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_UInt) {
     EXPECT_THAT(gen.result(), HasSubstr("56779u"));
 }
 
-TEST_F(WgslGeneratorImplTest, EmitConstructor_Float) {
+TEST_F(WgslGeneratorImplTest, EmitConstructor_F32) {
     // Use a number close to 1<<30 but whose decimal representation ends in 0.
     WrapInFunction(Expr(f32((1 << 30) - 4)));
 
@@ -61,13 +61,36 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Float) {
     EXPECT_THAT(gen.result(), HasSubstr("1073741824.0f"));
 }
 
-TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Float) {
+TEST_F(WgslGeneratorImplTest, EmitConstructor_F16) {
+    Enable(ast::Extension::kF16);
+
+    // Use a number close to 1<<16 but whose decimal representation ends in 0.
+    WrapInFunction(Expr(f16((1 << 15) - 8)));
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("32752.0h"));
+}
+
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_F32) {
     WrapInFunction(Construct<f32>(Expr(-1.2e-5_f)));
 
     GeneratorImpl& gen = Build();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_THAT(gen.result(), HasSubstr("f32(-0.000012f)"));
+}
+
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_F16) {
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(Construct<f16>(Expr(-1.2e-5_h)));
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("f16(-1.19805336e-05h)"));
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Bool) {
@@ -97,7 +120,7 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Uint) {
     EXPECT_THAT(gen.result(), HasSubstr("u32(12345u)"));
 }
 
-TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Vec) {
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Vec_F32) {
     WrapInFunction(vec3<f32>(1_f, 2_f, 3_f));
 
     GeneratorImpl& gen = Build();
@@ -106,7 +129,18 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Vec) {
     EXPECT_THAT(gen.result(), HasSubstr("vec3<f32>(1.0f, 2.0f, 3.0f)"));
 }
 
-TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Mat) {
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Vec_F16) {
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(vec3<f16>(1_h, 2_h, 3_h));
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("vec3<f16>(1.0h, 2.0h, 3.0h)"));
+}
+
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Mat_F32) {
     WrapInFunction(mat2x3<f32>(vec3<f32>(1_f, 2_f, 3_f), vec3<f32>(3_f, 4_f, 5_f)));
 
     GeneratorImpl& gen = Build();
@@ -114,6 +148,18 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Mat) {
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_THAT(gen.result(), HasSubstr("mat2x3<f32>(vec3<f32>(1.0f, 2.0f, 3.0f), "
                                         "vec3<f32>(3.0f, 4.0f, 5.0f))"));
+}
+
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Mat_F16) {
+    Enable(ast::Extension::kF16);
+
+    WrapInFunction(mat2x3<f16>(vec3<f16>(1_h, 2_h, 3_h), vec3<f16>(3_h, 4_h, 5_h)));
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(), HasSubstr("mat2x3<f16>(vec3<f16>(1.0h, 2.0h, 3.0h), "
+                                        "vec3<f16>(3.0h, 4.0h, 5.0h))"));
 }
 
 TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Array) {
