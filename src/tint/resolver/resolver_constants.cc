@@ -434,7 +434,7 @@ const sem::Constant* Resolver::EvaluateCtorOrConvValue(
     // Multiple arguments. Must be a type constructor.
 
     std::vector<const Constant*> els;  // The constant elements for the composite constant.
-    els.reserve(el_count);
+    els.reserve(std::min<uint32_t>(el_count, 256u));  // min() as el_count is unbounded input
 
     // Helper for pushing all the argument constants to `els`.
     auto push_all_args = [&] {
