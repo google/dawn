@@ -25,6 +25,7 @@
 #include "dawn/common/SwapChainUtils.h"
 #include "dawn/native/d3d12/D3D11on12Util.h"
 #include "dawn/native/d3d12/DeviceD3D12.h"
+#include "dawn/native/d3d12/ExternalImageDXGIImpl.h"
 #include "dawn/native/d3d12/NativeSwapChainImplD3D12.h"
 #include "dawn/native/d3d12/ResidencyManagerD3D12.h"
 #include "dawn/native/d3d12/TextureD3D12.h"
@@ -53,71 +54,30 @@ WGPUTextureFormat GetNativeSwapChainPreferredFormat(const DawnSwapChainImplement
 ExternalImageDescriptorDXGISharedHandle::ExternalImageDescriptorDXGISharedHandle()
     : ExternalImageDescriptor(ExternalImageType::DXGISharedHandle) {}
 
-ExternalImageDXGI::ExternalImageDXGI(ComPtr<ID3D12Resource> d3d12Resource,
-                                     ComPtr<ID3D12Fence> d3d12Fence,
-                                     const WGPUTextureDescriptor* descriptor)
-    : mD3D12Resource(std::move(d3d12Resource)),
-      mD3D12Fence(std::move(d3d12Fence)),
-      mUsage(descriptor->usage),
-      mDimension(descriptor->dimension),
-      mSize(descriptor->size),
-      mFormat(descriptor->format),
-      mMipLevelCount(descriptor->mipLevelCount),
-      mSampleCount(descriptor->sampleCount) {
-    ASSERT(!descriptor->nextInChain ||
-           descriptor->nextInChain->sType == WGPUSType_DawnTextureInternalUsageDescriptor);
-    if (descriptor->nextInChain) {
-        mUsageInternal =
-            reinterpret_cast<const WGPUDawnTextureInternalUsageDescriptor*>(descriptor->nextInChain)
-                ->internalUsage;
-    }
-    mD3D11on12ResourceCache = std::make_unique<D3D11on12ResourceCache>();
+ExternalImageDXGI::ExternalImageDXGI(std::unique_ptr<ExternalImageDXGIImpl> impl)
+    : mImpl(std::move(impl)) {
+    ASSERT(mImpl != nullptr);
 }
 
 ExternalImageDXGI::~ExternalImageDXGI() = default;
 
+bool ExternalImageDXGI::IsValid() const {
+    return mImpl->IsValid();
+}
+
 WGPUTexture ExternalImageDXGI::ProduceTexture(
     WGPUDevice device,
     const ExternalImageAccessDescriptorDXGISharedHandle* descriptor) {
-    Device* backendDevice = ToBackend(FromAPI(device));
+    return ProduceTexture(descriptor);
+}
 
-    // Ensure the texture usage is allowed
-    if (!IsSubset(descriptor->usage, mUsage)) {
-        dawn::ErrorLog() << "Texture usage is not valid for external image";
+WGPUTexture ExternalImageDXGI::ProduceTexture(
+    const ExternalImageAccessDescriptorDXGISharedHandle* descriptor) {
+    if (!IsValid()) {
+        dawn::ErrorLog() << "Cannot produce texture from external image after device destruction";
         return nullptr;
     }
-
-    TextureDescriptor textureDescriptor = {};
-    textureDescriptor.usage = static_cast<wgpu::TextureUsage>(descriptor->usage);
-    textureDescriptor.dimension = static_cast<wgpu::TextureDimension>(mDimension);
-    textureDescriptor.size = {mSize.width, mSize.height, mSize.depthOrArrayLayers};
-    textureDescriptor.format = static_cast<wgpu::TextureFormat>(mFormat);
-    textureDescriptor.mipLevelCount = mMipLevelCount;
-    textureDescriptor.sampleCount = mSampleCount;
-
-    DawnTextureInternalUsageDescriptor internalDesc = {};
-    if (mUsageInternal) {
-        textureDescriptor.nextInChain = &internalDesc;
-        internalDesc.internalUsage = static_cast<wgpu::TextureUsage>(mUsageInternal);
-        internalDesc.sType = wgpu::SType::DawnTextureInternalUsageDescriptor;
-    }
-
-    Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource;
-    if (!mD3D12Fence) {
-        d3d11on12Resource =
-            mD3D11on12ResourceCache->GetOrCreateD3D11on12Resource(device, mD3D12Resource.Get());
-        if (d3d11on12Resource == nullptr) {
-            dawn::ErrorLog() << "Unable to create 11on12 resource for external image";
-            return nullptr;
-        }
-    }
-
-    Ref<TextureBase> texture = backendDevice->CreateD3D12ExternalTexture(
-        &textureDescriptor, mD3D12Resource, mD3D12Fence, std::move(d3d11on12Resource),
-        descriptor->fenceWaitValue, descriptor->fenceSignalValue, descriptor->isSwapChainTexture,
-        descriptor->isInitialized);
-
-    return ToAPI(texture.Detach());
+    return mImpl->ProduceTexture(descriptor);
 }
 
 // static
@@ -125,57 +85,13 @@ std::unique_ptr<ExternalImageDXGI> ExternalImageDXGI::Create(
     WGPUDevice device,
     const ExternalImageDescriptorDXGISharedHandle* descriptor) {
     Device* backendDevice = ToBackend(FromAPI(device));
-
-    // Use sharedHandle as a fallback until Chromium code is changed to set textureSharedHandle.
-    HANDLE textureSharedHandle = descriptor->textureSharedHandle;
-    if (!textureSharedHandle) {
-        textureSharedHandle = descriptor->sharedHandle;
-    }
-
-    Microsoft::WRL::ComPtr<ID3D12Resource> d3d12Resource;
-    if (FAILED(backendDevice->GetD3D12Device()->OpenSharedHandle(textureSharedHandle,
-                                                                 IID_PPV_ARGS(&d3d12Resource)))) {
+    std::unique_ptr<ExternalImageDXGIImpl> impl =
+        backendDevice->CreateExternalImageDXGIImpl(descriptor);
+    if (!impl) {
+        dawn::ErrorLog() << "Failed to create DXGI external image";
         return nullptr;
     }
-
-    Microsoft::WRL::ComPtr<ID3D12Fence> d3d12Fence;
-    if (descriptor->fenceSharedHandle &&
-        FAILED(backendDevice->GetD3D12Device()->OpenSharedHandle(descriptor->fenceSharedHandle,
-                                                                 IID_PPV_ARGS(&d3d12Fence)))) {
-        return nullptr;
-    }
-
-    const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
-
-    if (backendDevice->ConsumedError(ValidateTextureDescriptor(backendDevice, textureDescriptor))) {
-        return nullptr;
-    }
-
-    if (backendDevice->ConsumedError(
-            ValidateTextureDescriptorCanBeWrapped(textureDescriptor),
-            "validating that a D3D12 external image can be wrapped with %s", textureDescriptor)) {
-        return nullptr;
-    }
-
-    if (backendDevice->ConsumedError(
-            ValidateD3D12TextureCanBeWrapped(d3d12Resource.Get(), textureDescriptor))) {
-        return nullptr;
-    }
-
-    // Shared handle is assumed to support resource sharing capability. The resource
-    // shared capability tier must agree to share resources between D3D devices.
-    const Format* format =
-        backendDevice->GetInternalFormat(textureDescriptor->format).AcquireSuccess();
-    if (format->IsMultiPlanar()) {
-        if (backendDevice->ConsumedError(ValidateD3D12VideoTextureCanBeShared(
-                backendDevice, D3D12TextureFormat(textureDescriptor->format)))) {
-            return nullptr;
-        }
-    }
-
-    std::unique_ptr<ExternalImageDXGI> result(new ExternalImageDXGI(
-        std::move(d3d12Resource), std::move(d3d12Fence), descriptor->cTextureDescriptor));
-    return result;
+    return std::unique_ptr<ExternalImageDXGI>(new ExternalImageDXGI(std::move(impl)));
 }
 
 uint64_t SetExternalMemoryReservation(WGPUDevice device,

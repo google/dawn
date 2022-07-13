@@ -128,9 +128,8 @@ D3D11on12ResourceCache::D3D11on12ResourceCache() = default;
 D3D11on12ResourceCache::~D3D11on12ResourceCache() = default;
 
 Ref<D3D11on12ResourceCacheEntry> D3D11on12ResourceCache::GetOrCreateD3D11on12Resource(
-    WGPUDevice device,
+    Device* backendDevice,
     ID3D12Resource* d3d12Resource) {
-    Device* backendDevice = reinterpret_cast<Device*>(device);
     // The Dawn and 11on12 device share the same D3D12 command queue whereas this external image
     // could be accessed/produced with multiple Dawn devices. To avoid cross-queue sharing
     // restrictions, the 11 wrapped resource is forbidden to be shared between Dawn devices by

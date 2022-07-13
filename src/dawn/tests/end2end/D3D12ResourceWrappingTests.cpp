@@ -181,8 +181,7 @@ class D3D12ResourceTestBase : public DawnTestWithParams<D3D12ResourceTestParams>
             externalAccessDesc.fenceSignalValue = fenceSignalValue;
         }
 
-        *dawnTexture = wgpu::Texture::Acquire(
-            externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
+        *dawnTexture = wgpu::Texture::Acquire(externalImage->ProduceTexture(&externalAccessDesc));
         *d3d11TextureOut = d3d11Texture.Detach();
 
         if (externalImageOut != nullptr) {
@@ -473,8 +472,8 @@ class D3D12SharedHandleUsageTests : public D3D12ResourceTestBase {
         std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage =
             dawn::native::d3d12::ExternalImageDXGI::Create(device.Get(), &externalImageDesc);
 
-        *dawnTextureOut = wgpu::Texture::Acquire(
-            externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
+        *dawnTextureOut =
+            wgpu::Texture::Acquire(externalImage->ProduceTexture(&externalAccessDesc));
         *d3d11TextureOut = d3d11Texture.Detach();
 
         if (dxgiKeyedMutexOut != nullptr) {
@@ -725,8 +724,7 @@ TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImage) {
     externalAccessDesc.fenceWaitValue = 1;
     externalAccessDesc.fenceSignalValue = 2;
 
-    texture =
-        wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
+    texture = wgpu::Texture::Acquire(externalImage->ProduceTexture(&externalAccessDesc));
 
     // Check again that the new texture is still red
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0xFF, 0, 0, 0xFF), texture.Get(), 0, 0);
@@ -770,10 +768,10 @@ TEST_P(D3D12SharedHandleUsageTests, ConcurrentExternalImageReadAccess) {
     externalAccessDesc.fenceSignalValue = 2;
 
     wgpu::Texture texture1 =
-        wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
+        wgpu::Texture::Acquire(externalImage->ProduceTexture(&externalAccessDesc));
 
     wgpu::Texture texture2 =
-        wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
+        wgpu::Texture::Acquire(externalImage->ProduceTexture(&externalAccessDesc));
 
     // Check again that the new textures are also red.
     EXPECT_PIXEL_RGBA8_EQ(RGBA8(0xFF, 0, 0, 0xFF), texture1.Get(), 0, 0);
@@ -799,64 +797,39 @@ TEST_P(D3D12SharedHandleUsageTests, ExternalImageUsage) {
     externalAccessDesc.usage = WGPUTextureUsage_StorageBinding;
     externalAccessDesc.fenceWaitValue = 1;
     externalAccessDesc.fenceSignalValue = 0;  // No need to signal
-    texture =
-        wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
+    texture = wgpu::Texture::Acquire(externalImage->ProduceTexture(&externalAccessDesc));
     ASSERT_EQ(texture.Get(), nullptr);
 
     externalAccessDesc.usage = WGPUTextureUsage_TextureBinding;
-    texture =
-        wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
+    texture = wgpu::Texture::Acquire(externalImage->ProduceTexture(&externalAccessDesc));
     ASSERT_NE(texture.Get(), nullptr);
 }
 
-// Verify two Dawn devices can reuse the same external image.
-TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImageWithMultipleDevices) {
+// Verify external image cannot be used after its creating device is destroyed.
+TEST_P(D3D12SharedHandleUsageTests, InvalidateExternalImageOnDestroyDevice) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
     wgpu::Texture texture;
     ComPtr<ID3D11Texture2D> d3d11Texture;
     std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage;
 
-    // Create the Dawn texture then clear it to red using the first (default) device.
+    // Create the Dawn texture then clear it to red.
     WrapSharedHandle(&baseDawnDescriptor, &baseD3dDescriptor, &texture, &d3d11Texture,
                      &externalImage, /*fenceSignalValue=*/1);
     const wgpu::Color solidRed{1.0f, 0.0f, 0.0f, 1.0f};
     ASSERT_NE(texture.Get(), nullptr);
     ClearImage(texture.Get(), solidRed, device);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0xFF, 0, 0, 0xFF), texture.Get(), 0, 0);
+    // Do not readback pixels since that requires device to be alive during DawnTest::TearDown().
+    DestroyDevice();
 
-    // Release the texture so we can re-acquire another one from the same external image.
-    texture.Destroy();
-
-    // Create the Dawn texture then clear it to blue using the second device.
     dawn::native::d3d12::ExternalImageAccessDescriptorDXGISharedHandle externalAccessDesc;
+    externalAccessDesc.isInitialized = true;
     externalAccessDesc.usage = static_cast<WGPUTextureUsageFlags>(baseDawnDescriptor.usage);
     externalAccessDesc.fenceWaitValue = 1;
     externalAccessDesc.fenceSignalValue = 2;
 
-    wgpu::Device otherDevice = wgpu::Device::Acquire(GetAdapter().CreateDevice());
-
-    wgpu::Texture otherTexture = wgpu::Texture::Acquire(
-        externalImage->ProduceTexture(otherDevice.Get(), &externalAccessDesc));
-
-    ASSERT_NE(otherTexture.Get(), nullptr);
-    const wgpu::Color solidBlue{0.0f, 0.0f, 1.0f, 1.0f};
-    ClearImage(otherTexture.Get(), solidBlue, otherDevice);
-
-    otherTexture.Destroy();
-
-    // Re-create the Dawn texture using the first (default) device.
-    externalAccessDesc.isInitialized = true;
-    externalAccessDesc.fenceWaitValue = 2;
-    externalAccessDesc.fenceSignalValue = 3;
-    texture =
-        wgpu::Texture::Acquire(externalImage->ProduceTexture(device.Get(), &externalAccessDesc));
-    ASSERT_NE(texture.Get(), nullptr);
-
-    // Ensure the texture is still blue.
-
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0xFF, 0xFF), texture.Get(), 0, 0);
+    EXPECT_EQ(wgpu::Texture::Acquire(externalImage->ProduceTexture(&externalAccessDesc)), nullptr);
 }
 
 DAWN_INSTANTIATE_TEST_P(D3D12SharedHandleValidation,

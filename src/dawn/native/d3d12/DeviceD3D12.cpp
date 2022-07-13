@@ -20,6 +20,7 @@
 #include <utility>
 
 #include "dawn/common/GPUInfo.h"
+#include "dawn/native/D3D12Backend.h"
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/d3d12/AdapterD3D12.h"
@@ -31,6 +32,7 @@
 #include "dawn/native/d3d12/ComputePipelineD3D12.h"
 #include "dawn/native/d3d12/D3D11on12Util.h"
 #include "dawn/native/d3d12/D3D12Error.h"
+#include "dawn/native/d3d12/ExternalImageDXGIImpl.h"
 #include "dawn/native/d3d12/PipelineLayoutD3D12.h"
 #include "dawn/native/d3d12/PlatformFunctions.h"
 #include "dawn/native/d3d12/QuerySetD3D12.h"
@@ -532,6 +534,59 @@ ResultOrError<ResourceHeapAllocation> Device::AllocateMemory(
     return mResourceAllocatorManager->AllocateMemory(heapType, resourceDescriptor, initialUsage);
 }
 
+std::unique_ptr<ExternalImageDXGIImpl> Device::CreateExternalImageDXGIImpl(
+    const ExternalImageDescriptorDXGISharedHandle* descriptor) {
+    // Use sharedHandle as a fallback until Chromium code is changed to set textureSharedHandle.
+    HANDLE textureSharedHandle = descriptor->textureSharedHandle;
+    if (!textureSharedHandle) {
+        textureSharedHandle = descriptor->sharedHandle;
+    }
+
+    Microsoft::WRL::ComPtr<ID3D12Resource> d3d12Resource;
+    if (FAILED(GetD3D12Device()->OpenSharedHandle(textureSharedHandle,
+                                                  IID_PPV_ARGS(&d3d12Resource)))) {
+        return nullptr;
+    }
+
+    Microsoft::WRL::ComPtr<ID3D12Fence> d3d12Fence;
+    if (descriptor->fenceSharedHandle &&
+        FAILED(GetD3D12Device()->OpenSharedHandle(descriptor->fenceSharedHandle,
+                                                  IID_PPV_ARGS(&d3d12Fence)))) {
+        return nullptr;
+    }
+
+    const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
+
+    if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor))) {
+        return nullptr;
+    }
+
+    if (ConsumedError(ValidateTextureDescriptorCanBeWrapped(textureDescriptor),
+                      "validating that a D3D12 external image can be wrapped with %s",
+                      textureDescriptor)) {
+        return nullptr;
+    }
+
+    if (ConsumedError(ValidateD3D12TextureCanBeWrapped(d3d12Resource.Get(), textureDescriptor))) {
+        return nullptr;
+    }
+
+    // Shared handle is assumed to support resource sharing capability. The resource
+    // shared capability tier must agree to share resources between D3D devices.
+    const Format* format = GetInternalFormat(textureDescriptor->format).AcquireSuccess();
+    if (format->IsMultiPlanar()) {
+        if (ConsumedError(ValidateD3D12VideoTextureCanBeShared(
+                this, D3D12TextureFormat(textureDescriptor->format)))) {
+            return nullptr;
+        }
+    }
+
+    auto impl = std::make_unique<ExternalImageDXGIImpl>(
+        this, std::move(d3d12Resource), std::move(d3d12Fence), descriptor->cTextureDescriptor);
+    mExternalImageList.Append(impl.get());
+    return impl;
+}
+
 Ref<TextureBase> Device::CreateD3D12ExternalTexture(
     const TextureDescriptor* descriptor,
     ComPtr<ID3D12Resource> d3d12Texture,
@@ -700,6 +755,12 @@ void Device::AppendDebugLayerMessages(ErrorData* error) {
 
 void Device::DestroyImpl() {
     ASSERT(GetState() == State::Disconnected);
+
+    while (!mExternalImageList.empty()) {
+        ExternalImageDXGIImpl* externalImage = mExternalImageList.head()->value();
+        // ExternalImageDXGIImpl::Destroy() calls RemoveFromList().
+        externalImage->Destroy();
+    }
 
     mZeroBuffer = nullptr;
 
