@@ -66,6 +66,7 @@ class ForLoopStatement;
 class IfStatement;
 class LoopStatement;
 class Statement;
+class StructMember;
 class SwitchStatement;
 class TypeConstructor;
 class WhileStatement;
@@ -218,6 +219,8 @@ class Resolver {
         const sem::Type* ty);  // Note: ty is not an array or structure
     const sem::Constant* EvaluateIndexValue(const sem::Expression* obj, const sem::Expression* idx);
     const sem::Constant* EvaluateLiteralValue(const ast::LiteralExpression*, const sem::Type*);
+    const sem::Constant* EvaluateMemberAccessValue(const sem::Expression* obj,
+                                                   const sem::StructMember* member);
     const sem::Constant* EvaluateSwizzleValue(const sem::Expression* vector,
                                               const sem::Type* type,
                                               const std::vector<uint32_t>& indices);

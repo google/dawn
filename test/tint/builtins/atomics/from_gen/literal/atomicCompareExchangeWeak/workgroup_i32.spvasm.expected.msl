@@ -18,7 +18,7 @@ struct x__atomic_compare_exchange_resulti32 {
 };
 
 void atomicCompareExchangeWeak_e88938(threadgroup atomic_int* const tint_symbol_2) {
-  x__atomic_compare_exchange_resulti32 res = {.old_value=0, .exchanged=false};
+  x__atomic_compare_exchange_resulti32 res = {};
   atomic_compare_exchange_resulti32 const tint_symbol = atomicCompareExchangeWeak_1(tint_symbol_2, 1, 1);
   int const old_value_1 = tint_symbol.old_value;
   int const x_18 = old_value_1;

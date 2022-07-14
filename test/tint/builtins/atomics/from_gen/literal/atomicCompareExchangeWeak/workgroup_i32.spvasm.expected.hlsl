@@ -11,7 +11,7 @@ static uint local_invocation_index_1 = 0u;
 groupshared int arg_0;
 
 void atomicCompareExchangeWeak_e88938() {
-  x__atomic_compare_exchange_resulti32 res = {0, false};
+  x__atomic_compare_exchange_resulti32 res = (x__atomic_compare_exchange_resulti32)0;
   atomic_compare_exchange_resulti32 atomic_result = (atomic_compare_exchange_resulti32)0;
   int atomic_compare_value = 1;
   InterlockedCompareExchange(arg_0, atomic_compare_value, 1, atomic_result.old_value);

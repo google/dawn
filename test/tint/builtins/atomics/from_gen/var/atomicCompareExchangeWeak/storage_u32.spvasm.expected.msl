@@ -28,7 +28,7 @@ struct x__atomic_compare_exchange_resultu32 {
 void atomicCompareExchangeWeak_63d8e6(device SB_RW_atomic* const tint_symbol_2) {
   uint arg_1 = 0u;
   uint arg_2 = 0u;
-  x__atomic_compare_exchange_resultu32 res = {.old_value=0u, .exchanged=false};
+  x__atomic_compare_exchange_resultu32 res = {};
   arg_1 = 1u;
   arg_2 = 1u;
   uint const x_21 = arg_2;

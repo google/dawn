@@ -84,6 +84,7 @@ TEST_F(ResolverConstantsTest, Scalar_f32) {
 
 TEST_F(ResolverConstantsTest, Scalar_f16) {
     Enable(ast::Extension::kF16);
+
     auto* expr = Expr(9.9_h);
     WrapInFunction(expr);
 
@@ -217,6 +218,7 @@ TEST_F(ResolverConstantsTest, Vec3_ZeroInit_f32) {
 
 TEST_F(ResolverConstantsTest, Vec3_ZeroInit_f16) {
     Enable(ast::Extension::kF16);
+
     auto* expr = vec3<f16>();
     WrapInFunction(expr);
 
@@ -383,6 +385,7 @@ TEST_F(ResolverConstantsTest, Vec3_Splat_f32) {
 
 TEST_F(ResolverConstantsTest, Vec3_Splat_f16) {
     Enable(ast::Extension::kF16);
+
     auto* expr = vec3<f16>(9.9_h);
     WrapInFunction(expr);
 
@@ -550,6 +553,7 @@ TEST_F(ResolverConstantsTest, Vec3_FullConstruct_f32) {
 
 TEST_F(ResolverConstantsTest, Vec3_FullConstruct_f16) {
     Enable(ast::Extension::kF16);
+
     auto* expr = vec3<f16>(1_h, 2_h, 3_h);
     WrapInFunction(expr);
 
@@ -848,6 +852,7 @@ TEST_F(ResolverConstantsTest, Vec3_MixConstruct_f32_mixed_sign_0) {
 
 TEST_F(ResolverConstantsTest, Vec3_MixConstruct_f16) {
     Enable(ast::Extension::kF16);
+
     auto* expr = vec3<f16>(1_h, vec2<f16>(2_h, 3_h));
     WrapInFunction(expr);
 
@@ -882,6 +887,7 @@ TEST_F(ResolverConstantsTest, Vec3_MixConstruct_f16) {
 
 TEST_F(ResolverConstantsTest, Vec3_MixConstruct_f16_all_10) {
     Enable(ast::Extension::kF16);
+
     auto* expr = vec3<f16>(10_h, vec2<f16>(10_h, 10_h));
     WrapInFunction(expr);
 
@@ -916,6 +922,7 @@ TEST_F(ResolverConstantsTest, Vec3_MixConstruct_f16_all_10) {
 
 TEST_F(ResolverConstantsTest, Vec3_MixConstruct_f16_all_positive_0) {
     Enable(ast::Extension::kF16);
+
     auto* expr = vec3<f16>(0_h, vec2<f16>(0_h, 0_h));
     WrapInFunction(expr);
 
@@ -950,6 +957,7 @@ TEST_F(ResolverConstantsTest, Vec3_MixConstruct_f16_all_positive_0) {
 
 TEST_F(ResolverConstantsTest, Vec3_MixConstruct_f16_all_negative_0) {
     Enable(ast::Extension::kF16);
+
     auto* expr = vec3<f16>(vec2<f16>(-0_h, -0_h), -0_h);
     WrapInFunction(expr);
 
@@ -984,6 +992,7 @@ TEST_F(ResolverConstantsTest, Vec3_MixConstruct_f16_all_negative_0) {
 
 TEST_F(ResolverConstantsTest, Vec3_MixConstruct_f16_mixed_sign_0) {
     Enable(ast::Extension::kF16);
+
     auto* expr = vec3<f16>(0_h, vec2<f16>(-0_h, 0_h));
     WrapInFunction(expr);
 
@@ -1183,6 +1192,7 @@ TEST_F(ResolverConstantsTest, Vec3_Convert_u32_to_f32) {
 
 TEST_F(ResolverConstantsTest, Vec3_Convert_f16_to_i32) {
     Enable(ast::Extension::kF16);
+
     auto* expr = vec3<i32>(vec3<f16>(1.1_h, 2.2_h, 3.3_h));
     WrapInFunction(expr);
 
@@ -1217,6 +1227,7 @@ TEST_F(ResolverConstantsTest, Vec3_Convert_f16_to_i32) {
 
 TEST_F(ResolverConstantsTest, Vec3_Convert_u32_to_f16) {
     Enable(ast::Extension::kF16);
+
     auto* expr = vec3<f16>(vec3<u32>(10_u, 20_u, 30_u));
     WrapInFunction(expr);
 
@@ -1715,6 +1726,48 @@ TEST_F(ResolverConstantsTest, Array_vec3_f32_Zero) {
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->As<f32>(), 0_f);
 }
 
+TEST_F(ResolverConstantsTest, Array_Struct_f32_Zero) {
+    Structure("S", {
+                       Member("m1", ty.f32()),
+                       Member("m2", ty.f32()),
+                   });
+    auto* expr = Construct(ty.array(ty.type_name("S"), 2_u));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* arr = sem->Type()->As<sem::Array>();
+    ASSERT_NE(arr, nullptr);
+    EXPECT_TRUE(arr->ElemType()->Is<sem::Struct>());
+    EXPECT_EQ(arr->Count(), 2u);
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue()->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->AllZero());
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Index(0)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Index(0)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Index(0)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->As<f32>(), 0_f);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Index(1)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Index(1)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Index(1)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->As<f32>(), 0_f);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Index(0)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Index(0)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Index(0)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->As<f32>(), 0_f);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Index(1)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Index(1)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Index(1)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->As<f32>(), 0_f);
+}
+
 TEST_F(ResolverConstantsTest, Array_i32_Elements) {
     auto* expr = Construct(ty.array<i32, 4>(), 10_i, 20_i, 30_i, 40_i);
     WrapInFunction(expr);
@@ -1814,6 +1867,523 @@ TEST_F(ResolverConstantsTest, Array_vec3_f32_Elements) {
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->As<f32>(), 4_f);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->As<f32>(), 5_f);
     EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->As<f32>(), 6_f);
+}
+
+TEST_F(ResolverConstantsTest, Array_Struct_f32_Elements) {
+    Structure("S", {
+                       Member("m1", ty.f32()),
+                       Member("m2", ty.f32()),
+                   });
+    auto* expr = Construct(ty.array(ty.type_name("S"), 2_u),        //
+                           Construct(ty.type_name("S"), 1_f, 2_f),  //
+                           Construct(ty.type_name("S"), 3_f, 4_f));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* arr = sem->Type()->As<sem::Array>();
+    ASSERT_NE(arr, nullptr);
+    EXPECT_TRUE(arr->ElemType()->Is<sem::Struct>());
+    EXPECT_EQ(arr->Count(), 2u);
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_FALSE(sem->ConstantValue()->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Index(0)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->Index(0)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->Index(0)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->As<f32>(), 1_f);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Index(1)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->Index(1)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->Index(1)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->As<f32>(), 2_f);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Index(0)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->Index(0)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->Index(0)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->As<f32>(), 3_f);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Index(1)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->Index(1)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->Index(1)->AllZero());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->As<f32>(), 4_f);
+}
+
+TEST_F(ResolverConstantsTest, Struct_I32s_ZeroInit) {
+    Structure("S", {Member("m1", ty.i32()), Member("m2", ty.i32()), Member("m3", ty.i32())});
+    auto* expr = Construct(ty.type_name("S"));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* str = sem->Type()->As<sem::Struct>();
+    ASSERT_NE(str, nullptr);
+    EXPECT_EQ(str->Members().size(), 3u);
+    ASSERT_NE(sem->ConstantValue(), nullptr);
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue()->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->AllZero());
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<sem::I32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<i32>(), 0_i);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<sem::I32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<i32>(), 0_i);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<sem::I32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<i32>(), 0_i);
+}
+
+TEST_F(ResolverConstantsTest, Struct_MixedScalars_ZeroInit) {
+    Enable(ast::Extension::kF16);
+
+    Structure("S", {
+                       Member("m1", ty.i32()),
+                       Member("m2", ty.u32()),
+                       Member("m3", ty.f32()),
+                       Member("m4", ty.f16()),
+                       Member("m5", ty.bool_()),
+                   });
+    auto* expr = Construct(ty.type_name("S"));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* str = sem->Type()->As<sem::Struct>();
+    ASSERT_NE(str, nullptr);
+    EXPECT_EQ(str->Members().size(), 5u);
+    ASSERT_NE(sem->ConstantValue(), nullptr);
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_FALSE(sem->ConstantValue()->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->AllZero());
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<sem::I32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<i32>(), 0_i);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<sem::U32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<u32>(), 0_u);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<sem::F32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<f32>(), 0._f);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->Is<sem::F16>());
+    EXPECT_EQ(sem->ConstantValue()->Index(3)->As<f16>(), 0._h);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->Is<sem::Bool>());
+    EXPECT_EQ(sem->ConstantValue()->Index(4)->As<bool>(), false);
+}
+
+TEST_F(ResolverConstantsTest, Struct_VectorF32s_ZeroInit) {
+    Structure("S", {
+                       Member("m1", ty.vec3<f32>()),
+                       Member("m2", ty.vec3<f32>()),
+                       Member("m3", ty.vec3<f32>()),
+                   });
+    auto* expr = Construct(ty.type_name("S"));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* str = sem->Type()->As<sem::Struct>();
+    ASSERT_NE(str, nullptr);
+    EXPECT_EQ(str->Members().size(), 3u);
+    ASSERT_NE(sem->ConstantValue(), nullptr);
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue()->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->AllZero());
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->As<f32>(), 0._f);
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->As<f32>(), 0._f);
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(2)->As<f32>(), 0._f);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->As<f32>(), 0._f);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->As<f32>(), 0._f);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->As<f32>(), 0._f);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(0)->As<f32>(), 0._f);
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(1)->As<f32>(), 0._f);
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(2)->As<f32>(), 0._f);
+}
+
+TEST_F(ResolverConstantsTest, Struct_MixedVectors_ZeroInit) {
+    Enable(ast::Extension::kF16);
+
+    Structure("S", {
+                       Member("m1", ty.vec2<i32>()),
+                       Member("m2", ty.vec3<u32>()),
+                       Member("m3", ty.vec4<f32>()),
+                       Member("m4", ty.vec3<f16>()),
+                       Member("m5", ty.vec2<bool>()),
+                   });
+    auto* expr = Construct(ty.type_name("S"));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* str = sem->Type()->As<sem::Struct>();
+    ASSERT_NE(str, nullptr);
+    EXPECT_EQ(str->Members().size(), 5u);
+    ASSERT_NE(sem->ConstantValue(), nullptr);
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_FALSE(sem->ConstantValue()->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->AllZero());
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->As<sem::Vector>()->type()->Is<sem::I32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->As<i32>(), 0_i);
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->As<i32>(), 0_i);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->As<sem::Vector>()->type()->Is<sem::U32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->As<u32>(), 0_u);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->As<u32>(), 0_u);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->As<u32>(), 0_u);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(0)->As<f32>(), 0._f);
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(1)->As<f32>(), 0._f);
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(2)->As<f32>(), 0._f);
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(3)->As<f32>(), 0._f);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->As<sem::Vector>()->type()->Is<sem::F16>());
+    EXPECT_EQ(sem->ConstantValue()->Index(3)->Index(0)->As<f16>(), 0._h);
+    EXPECT_EQ(sem->ConstantValue()->Index(3)->Index(1)->As<f16>(), 0._h);
+    EXPECT_EQ(sem->ConstantValue()->Index(3)->Index(2)->As<f16>(), 0._h);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->As<sem::Vector>()->type()->Is<sem::Bool>());
+    EXPECT_EQ(sem->ConstantValue()->Index(4)->Index(0)->As<bool>(), false);
+    EXPECT_EQ(sem->ConstantValue()->Index(4)->Index(1)->As<bool>(), false);
+}
+
+TEST_F(ResolverConstantsTest, Struct_Struct_ZeroInit) {
+    Structure("Inner", {
+                           Member("m1", ty.i32()),
+                           Member("m2", ty.u32()),
+                           Member("m3", ty.f32()),
+                       });
+
+    Structure("Outer", {
+                           Member("m1", ty.type_name("Inner")),
+                           Member("m2", ty.type_name("Inner")),
+                       });
+    auto* expr = Construct(ty.type_name("Outer"));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* str = sem->Type()->As<sem::Struct>();
+    ASSERT_NE(str, nullptr);
+    EXPECT_EQ(str->Members().size(), 2u);
+    ASSERT_NE(sem->ConstantValue(), nullptr);
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_TRUE(sem->ConstantValue()->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->AllZero());
+
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<sem::Struct>());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->As<i32>(), 0_i);
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->As<u32>(), 0_u);
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(2)->As<f32>(), 0_f);
+
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<sem::Struct>());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->As<i32>(), 0_i);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->As<u32>(), 0_u);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->As<f32>(), 0_f);
+}
+
+TEST_F(ResolverConstantsTest, Struct_MixedScalars_Construct) {
+    Enable(ast::Extension::kF16);
+
+    Structure("S", {
+                       Member("m1", ty.i32()),
+                       Member("m2", ty.u32()),
+                       Member("m3", ty.f32()),
+                       Member("m4", ty.f16()),
+                       Member("m5", ty.bool_()),
+                   });
+    auto* expr = Construct(ty.type_name("S"), 1_i, 2_u, 3_f, 4_h, false);
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* str = sem->Type()->As<sem::Struct>();
+    ASSERT_NE(str, nullptr);
+    EXPECT_EQ(str->Members().size(), 5u);
+    ASSERT_NE(sem->ConstantValue(), nullptr);
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_FALSE(sem->ConstantValue()->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<sem::I32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<i32>(), 1_i);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<sem::U32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<u32>(), 2_u);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<sem::F32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<f32>(), 3._f);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(3)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(3)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->Is<sem::F16>());
+    EXPECT_EQ(sem->ConstantValue()->Index(3)->As<f16>(), 4._h);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->Is<sem::Bool>());
+    EXPECT_EQ(sem->ConstantValue()->Index(4)->As<bool>(), false);
+}
+
+TEST_F(ResolverConstantsTest, Struct_MixedVectors_Construct) {
+    Enable(ast::Extension::kF16);
+
+    Structure("S", {
+                       Member("m1", ty.vec2<i32>()),
+                       Member("m2", ty.vec3<u32>()),
+                       Member("m3", ty.vec4<f32>()),
+                       Member("m4", ty.vec3<f16>()),
+                       Member("m5", ty.vec2<bool>()),
+                   });
+    auto* expr = Construct(ty.type_name("S"), vec2<i32>(1_i), vec3<u32>(2_u), vec4<f32>(3_f),
+                           vec3<f16>(4_h), vec2<bool>(false));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* str = sem->Type()->As<sem::Struct>();
+    ASSERT_NE(str, nullptr);
+    EXPECT_EQ(str->Members().size(), 5u);
+    ASSERT_NE(sem->ConstantValue(), nullptr);
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_FALSE(sem->ConstantValue()->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->As<sem::Vector>()->type()->Is<sem::I32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->As<i32>(), 1_i);
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->As<i32>(), 1_i);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->As<sem::Vector>()->type()->Is<sem::U32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->As<u32>(), 2_u);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->As<u32>(), 2_u);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->As<u32>(), 2_u);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(2)->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(0)->As<f32>(), 3._f);
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(1)->As<f32>(), 3._f);
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(2)->As<f32>(), 3._f);
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->Index(3)->As<f32>(), 3._f);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(3)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(3)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(3)->Type()->As<sem::Vector>()->type()->Is<sem::F16>());
+    EXPECT_EQ(sem->ConstantValue()->Index(3)->Index(0)->As<f16>(), 4._h);
+    EXPECT_EQ(sem->ConstantValue()->Index(3)->Index(1)->As<f16>(), 4._h);
+    EXPECT_EQ(sem->ConstantValue()->Index(3)->Index(2)->As<f16>(), 4._h);
+
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->AnyZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(sem->ConstantValue()->Index(4)->Type()->As<sem::Vector>()->type()->Is<sem::Bool>());
+    EXPECT_EQ(sem->ConstantValue()->Index(4)->Index(0)->As<bool>(), false);
+    EXPECT_EQ(sem->ConstantValue()->Index(4)->Index(1)->As<bool>(), false);
+}
+
+TEST_F(ResolverConstantsTest, Struct_Struct_Construct) {
+    Structure("Inner", {
+                           Member("m1", ty.i32()),
+                           Member("m2", ty.u32()),
+                           Member("m3", ty.f32()),
+                       });
+
+    Structure("Outer", {
+                           Member("m1", ty.type_name("Inner")),
+                           Member("m2", ty.type_name("Inner")),
+                       });
+    auto* expr = Construct(ty.type_name("Outer"),  //
+                           Construct(ty.type_name("Inner"), 1_i, 2_u, 3_f),
+                           Construct(ty.type_name("Inner"), 4_i, 0_u, 6_f));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* str = sem->Type()->As<sem::Struct>();
+    ASSERT_NE(str, nullptr);
+    EXPECT_EQ(str->Members().size(), 2u);
+    ASSERT_NE(sem->ConstantValue(), nullptr);
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_FALSE(sem->ConstantValue()->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<sem::Struct>());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->As<i32>(), 1_i);
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->As<u32>(), 2_u);
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(2)->As<f32>(), 3_f);
+
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllEqual());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<sem::Struct>());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->As<i32>(), 4_i);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->As<u32>(), 0_u);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->As<f32>(), 6_f);
+}
+
+TEST_F(ResolverConstantsTest, Struct_Array_Construct) {
+    Structure("S", {
+                       Member("m1", ty.array<i32, 2>()),
+                       Member("m2", ty.array<f32, 3>()),
+                   });
+    auto* expr = Construct(ty.type_name("S"),  //
+                           Construct(ty.array<i32, 2>(), 1_i, 2_i),
+                           Construct(ty.array<f32, 3>(), 1_f, 2_f, 3_f));
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
+    auto* str = sem->Type()->As<sem::Struct>();
+    ASSERT_NE(str, nullptr);
+    EXPECT_EQ(str->Members().size(), 2u);
+    ASSERT_NE(sem->ConstantValue(), nullptr);
+    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
+    EXPECT_FALSE(sem->ConstantValue()->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(0)->Type()->Is<sem::Array>());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(0)->As<i32>(), 1_i);
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->Index(1)->As<u32>(), 2_i);
+
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllEqual());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
+    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
+    EXPECT_TRUE(sem->ConstantValue()->Index(1)->Type()->Is<sem::Array>());
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(0)->As<i32>(), 1_f);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(1)->As<u32>(), 2_f);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->Index(2)->As<f32>(), 3_f);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2300,6 +2870,60 @@ TEST_F(ResolverConstantsTest, ChainedIndex_OOB) {
         EXPECT_FALSE(f->ConstantValue()->AllZero());
         EXPECT_EQ(f->ConstantValue()->As<f32>(), 3_f);
     }
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Member accessing
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+TEST_F(ResolverConstantsTest, MemberAccess) {
+    Structure("Inner", {
+                           Member("i1", ty.i32()),
+                           Member("i2", ty.u32()),
+                           Member("i3", ty.f32()),
+                       });
+
+    Structure("Outer", {
+                           Member("o1", ty.type_name("Inner")),
+                           Member("o2", ty.type_name("Inner")),
+                       });
+    auto* outer_expr = Construct(ty.type_name("Outer"),  //
+                                 Construct(ty.type_name("Inner"), 1_i, 2_u, 3_f),
+                                 Construct(ty.type_name("Inner")));
+    auto* o1_expr = MemberAccessor(outer_expr, "o1");
+    auto* i2_expr = MemberAccessor(o1_expr, "i2");
+    WrapInFunction(i2_expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* outer = Sem().Get(outer_expr);
+    ASSERT_NE(outer, nullptr);
+    auto* str = outer->Type()->As<sem::Struct>();
+    ASSERT_NE(str, nullptr);
+    EXPECT_EQ(str->Members().size(), 2u);
+    ASSERT_NE(outer->ConstantValue(), nullptr);
+    EXPECT_TYPE(outer->ConstantValue()->Type(), outer->Type());
+    EXPECT_FALSE(outer->ConstantValue()->AllEqual());
+    EXPECT_TRUE(outer->ConstantValue()->AnyZero());
+    EXPECT_FALSE(outer->ConstantValue()->AllZero());
+
+    auto* o1 = Sem().Get(o1_expr);
+    ASSERT_NE(o1->ConstantValue(), nullptr);
+    EXPECT_FALSE(o1->ConstantValue()->AllEqual());
+    EXPECT_FALSE(o1->ConstantValue()->AnyZero());
+    EXPECT_FALSE(o1->ConstantValue()->AllZero());
+    EXPECT_TRUE(o1->ConstantValue()->Type()->Is<sem::Struct>());
+    EXPECT_EQ(o1->ConstantValue()->Index(0)->As<i32>(), 1_i);
+    EXPECT_EQ(o1->ConstantValue()->Index(1)->As<u32>(), 2_u);
+    EXPECT_EQ(o1->ConstantValue()->Index(2)->As<f32>(), 3_f);
+
+    auto* i2 = Sem().Get(i2_expr);
+    ASSERT_NE(i2->ConstantValue(), nullptr);
+    EXPECT_TRUE(i2->ConstantValue()->AllEqual());
+    EXPECT_FALSE(i2->ConstantValue()->AnyZero());
+    EXPECT_FALSE(i2->ConstantValue()->AllZero());
+    EXPECT_TRUE(i2->ConstantValue()->Type()->Is<sem::U32>());
+    EXPECT_EQ(i2->ConstantValue()->As<u32>(), 2_u);
 }
 
 }  // namespace

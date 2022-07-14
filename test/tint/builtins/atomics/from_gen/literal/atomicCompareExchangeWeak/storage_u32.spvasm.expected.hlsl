@@ -19,7 +19,7 @@ atomic_compare_exchange_weak_ret_type tint_atomicCompareExchangeWeak(RWByteAddre
 
 
 void atomicCompareExchangeWeak_63d8e6() {
-  x__atomic_compare_exchange_resultu32 res = {0u, false};
+  x__atomic_compare_exchange_resultu32 res = (x__atomic_compare_exchange_resultu32)0;
   const atomic_compare_exchange_weak_ret_type tint_symbol = tint_atomicCompareExchangeWeak(sb_rw, 0u, 1u, 1u);
   const uint old_value_1 = tint_symbol.old_value;
   const uint x_17 = old_value_1;

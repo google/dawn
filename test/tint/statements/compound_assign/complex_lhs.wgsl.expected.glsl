@@ -20,7 +20,7 @@ int bar() {
 }
 
 void tint_symbol() {
-  S x = S(ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0)));
+  S x = S(ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0)));
   int tint_symbol_3 = foo();
   int tint_symbol_1_save = tint_symbol_3;
   int tint_symbol_2 = bar();

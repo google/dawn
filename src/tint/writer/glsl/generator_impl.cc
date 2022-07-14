@@ -862,15 +862,10 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
         return EmitZeroValue(out, type);
     }
 
-    auto it = structure_builders_.find(As<sem::Struct>(type));
-    if (it != structure_builders_.end()) {
-        out << it->second << "(";
-    } else {
-        if (!EmitType(out, type, ast::StorageClass::kNone, ast::Access::kReadWrite, "")) {
-            return false;
-        }
-        out << "(";
+    if (!EmitType(out, type, ast::StorageClass::kNone, ast::Access::kReadWrite, "")) {
+        return false;
     }
+    ScopedParen sp(out);
 
     bool first = true;
     for (auto* arg : call->Arguments()) {
@@ -884,7 +879,6 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
         }
     }
 
-    out << ")";
     return true;
 }
 
@@ -2290,6 +2284,24 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
             ScopedParen sp(out);
 
             for (size_t i = 0; i < a->Count(); i++) {
+                if (i > 0) {
+                    out << ", ";
+                }
+                if (!EmitConstant(out, constant->Index(i))) {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+        [&](const sem::Struct* s) {
+            if (!EmitType(out, s, ast::StorageClass::kNone, ast::Access::kUndefined, "")) {
+                return false;
+            }
+
+            ScopedParen sp(out);
+
+            for (size_t i = 0; i < s->Members().size(); i++) {
                 if (i > 0) {
                     out << ", ";
                 }

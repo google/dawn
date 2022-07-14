@@ -21,7 +21,7 @@ struct Out {
 };
 
 Out tint_symbol_1() {
-  Out tint_symbol_3 = Out(vec4(0.0f, 0.0f, 0.0f, 0.0f), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+  Out tint_symbol_3 = Out(vec4(0.0f), 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   return tint_symbol_3;
 }
 

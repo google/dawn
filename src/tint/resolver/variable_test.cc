@@ -892,6 +892,8 @@ TEST_F(ResolverVariableTest, LocalConst_ShadowsParam) {
 }
 
 TEST_F(ResolverVariableTest, LocalConst_ExplicitType_Decls) {
+    Structure("S", {Member("m", ty.u32())});
+
     auto* c_i32 = Const("a", ty.i32(), Expr(0_i));
     auto* c_u32 = Const("b", ty.u32(), Expr(0_u));
     auto* c_f32 = Const("c", ty.f32(), Expr(0_f));
@@ -899,8 +901,9 @@ TEST_F(ResolverVariableTest, LocalConst_ExplicitType_Decls) {
     auto* c_vu32 = Const("e", ty.vec3<u32>(), vec3<u32>());
     auto* c_vf32 = Const("f", ty.vec3<f32>(), vec3<f32>());
     auto* c_mf32 = Const("g", ty.mat3x3<f32>(), mat3x3<f32>());
+    auto* c_s = Const("h", ty.type_name("S"), Construct(ty.type_name("S")));
 
-    WrapInFunction(c_i32, c_u32, c_f32, c_vi32, c_vu32, c_vf32, c_mf32);
+    WrapInFunction(c_i32, c_u32, c_f32, c_vi32, c_vu32, c_vf32, c_mf32, c_s);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -911,6 +914,7 @@ TEST_F(ResolverVariableTest, LocalConst_ExplicitType_Decls) {
     EXPECT_EQ(Sem().Get(c_vu32)->Declaration(), c_vu32);
     EXPECT_EQ(Sem().Get(c_vf32)->Declaration(), c_vf32);
     EXPECT_EQ(Sem().Get(c_mf32)->Declaration(), c_mf32);
+    EXPECT_EQ(Sem().Get(c_s)->Declaration(), c_s);
 
     ASSERT_TRUE(TypeOf(c_i32)->Is<sem::I32>());
     ASSERT_TRUE(TypeOf(c_u32)->Is<sem::U32>());
@@ -919,6 +923,7 @@ TEST_F(ResolverVariableTest, LocalConst_ExplicitType_Decls) {
     ASSERT_TRUE(TypeOf(c_vu32)->Is<sem::Vector>());
     ASSERT_TRUE(TypeOf(c_vf32)->Is<sem::Vector>());
     ASSERT_TRUE(TypeOf(c_mf32)->Is<sem::Matrix>());
+    ASSERT_TRUE(TypeOf(c_s)->Is<sem::Struct>());
 
     EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue()->AllZero());
     EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue()->AllZero());
@@ -927,9 +932,12 @@ TEST_F(ResolverVariableTest, LocalConst_ExplicitType_Decls) {
     EXPECT_TRUE(Sem().Get(c_vu32)->ConstantValue()->AllZero());
     EXPECT_TRUE(Sem().Get(c_vf32)->ConstantValue()->AllZero());
     EXPECT_TRUE(Sem().Get(c_mf32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_s)->ConstantValue()->AllZero());
 }
 
 TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
+    Structure("S", {Member("m", ty.u32())});
+
     auto* c_i32 = Const("a", nullptr, Expr(0_i));
     auto* c_u32 = Const("b", nullptr, Expr(0_u));
     auto* c_f32 = Const("c", nullptr, Expr(0_f));
@@ -946,9 +954,10 @@ TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
                                     Construct(ty.vec(nullptr, 3), Expr(0._a)),
                                     Construct(ty.vec(nullptr, 3), Expr(0._a)),
                                     Construct(ty.vec(nullptr, 3), Expr(0._a))));
+    auto* c_s = Const("m", nullptr, Construct(ty.type_name("S")));
 
     WrapInFunction(c_i32, c_u32, c_f32, c_ai, c_af, c_vi32, c_vu32, c_vf32, c_vai, c_vaf, c_mf32,
-                   c_maf32);
+                   c_maf32, c_s);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -964,6 +973,7 @@ TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
     EXPECT_EQ(Sem().Get(c_vaf)->Declaration(), c_vaf);
     EXPECT_EQ(Sem().Get(c_mf32)->Declaration(), c_mf32);
     EXPECT_EQ(Sem().Get(c_maf32)->Declaration(), c_maf32);
+    EXPECT_EQ(Sem().Get(c_s)->Declaration(), c_s);
 
     ASSERT_TRUE(TypeOf(c_i32)->Is<sem::I32>());
     ASSERT_TRUE(TypeOf(c_u32)->Is<sem::U32>());
@@ -977,6 +987,7 @@ TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
     ASSERT_TRUE(TypeOf(c_vaf)->Is<sem::Vector>());
     ASSERT_TRUE(TypeOf(c_mf32)->Is<sem::Matrix>());
     ASSERT_TRUE(TypeOf(c_maf32)->Is<sem::Matrix>());
+    ASSERT_TRUE(TypeOf(c_s)->Is<sem::Struct>());
 
     EXPECT_TRUE(Sem().Get(c_i32)->ConstantValue()->AllZero());
     EXPECT_TRUE(Sem().Get(c_u32)->ConstantValue()->AllZero());
@@ -990,6 +1001,7 @@ TEST_F(ResolverVariableTest, LocalConst_ImplicitType_Decls) {
     EXPECT_TRUE(Sem().Get(c_vaf)->ConstantValue()->AllZero());
     EXPECT_TRUE(Sem().Get(c_mf32)->ConstantValue()->AllZero());
     EXPECT_TRUE(Sem().Get(c_maf32)->ConstantValue()->AllZero());
+    EXPECT_TRUE(Sem().Get(c_s)->ConstantValue()->AllZero());
 }
 
 TEST_F(ResolverVariableTest, LocalConst_PropagateConstValue) {

@@ -1943,13 +1943,13 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
 sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* expr) {
     auto* structure = sem_.TypeOf(expr->structure);
     auto* storage_ty = structure->UnwrapRef();
-    auto* source_var = sem_.Get(expr->structure)->SourceVariable();
+    auto* object = sem_.Get(expr->structure);
+    auto* source_var = object->SourceVariable();
 
     const sem::Type* ret = nullptr;
     std::vector<uint32_t> swizzle;
 
     // Object may be a side-effecting expression (e.g. function call).
-    auto* object = sem_.Get(expr->structure);
     bool has_side_effects = object && object->HasSideEffects();
 
     if (auto* str = storage_ty->As<sem::Struct>()) {
@@ -1976,7 +1976,7 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
             ret = builder_->create<sem::Reference>(ret, ref->StorageClass(), ref->Access());
         }
 
-        sem::Constant* val = nullptr;  // TODO(crbug.com/tint/1611): Add structure support.
+        auto* val = EvaluateMemberAccessValue(object, member);
         return builder_->create<sem::StructMemberAccess>(expr, ret, current_statement_, val, object,
                                                          member, has_side_effects, source_var);
     }

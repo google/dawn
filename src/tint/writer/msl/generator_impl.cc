@@ -1676,18 +1676,38 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
                 return false;
             }
 
-            if (constant->AllZero()) {
-                out << "{}";
-                return true;
-            }
-
             out << "{";
             TINT_DEFER(out << "}");
+
+            if (constant->AllZero()) {
+                return true;
+            }
 
             for (size_t i = 0; i < a->Count(); i++) {
                 if (i > 0) {
                     out << ", ";
                 }
+                if (!EmitConstant(out, constant->Index(i))) {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+        [&](const sem::Struct* s) {
+            out << "{";
+            TINT_DEFER(out << "}");
+
+            if (constant->AllZero()) {
+                return true;
+            }
+
+            auto& members = s->Members();
+            for (size_t i = 0; i < members.size(); i++) {
+                if (i > 0) {
+                    out << ", ";
+                }
+                out << "." << program_->Symbols().NameFor(members[i]->Name()) << "=";
                 if (!EmitConstant(out, constant->Index(i))) {
                     return false;
                 }

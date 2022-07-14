@@ -131,7 +131,7 @@ main_out tint_symbol(float fClipDistance3_param, float fClipDistance4_param) {
   fClipDistance4 = fClipDistance4_param;
   main_1();
   if (tint_discard) {
-    main_out tint_symbol_1 = main_out(vec4(0.0f, 0.0f, 0.0f, 0.0f));
+    main_out tint_symbol_1 = main_out(vec4(0.0f));
     return tint_symbol_1;
   }
   main_out tint_symbol_2 = main_out(glFragColor);

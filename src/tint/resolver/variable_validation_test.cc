@@ -365,23 +365,6 @@ TEST_F(ResolverVariableValidationTest, MatrixVarNoType) {
     EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");
 }
 
-TEST_F(ResolverVariableValidationTest, ConstStructure) {
-    auto* s = Structure("S", {Member("m", ty.i32())});
-    auto* c = Const("c", ty.Of(s), Construct(Source{{12, 34}}, ty.Of(s)));
-    WrapInFunction(c);
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be constant expression)");
-}
-
-TEST_F(ResolverVariableValidationTest, GlobalConstStructure) {
-    auto* s = Structure("S", {Member("m", ty.i32())});
-    GlobalConst("c", ty.Of(s), Construct(Source{{12, 34}}, ty.Of(s)));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be constant expression)");
-}
-
 TEST_F(ResolverVariableValidationTest, ConstInitWithVar) {
     auto* v = Var("v", nullptr, Expr(1_i));
     auto* c = Const("c", nullptr, Expr(Source{{12, 34}}, v));

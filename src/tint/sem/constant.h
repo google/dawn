@@ -39,11 +39,15 @@ class Constant {
     virtual const sem::Type* Type() const = 0;
 
     /// @returns the value of this Constant, if this constant is of a scalar value or abstract
-    /// numeric, otherwsie std::monostate.
+    /// numeric, otherwise std::monostate.
     virtual std::variant<std::monostate, AInt, AFloat> Value() const = 0;
 
     /// @returns the child constant element with the given index, or nullptr if the constant has no
     /// children, or the index is out of bounds.
+    /// For arrays, this returns the i'th element of the array.
+    /// For vectors, this returns the i'th element of the vector.
+    /// For matrices, this returns the i'th column vector of the matrix.
+    /// For structures, this returns the i'th member field of the structure.
     virtual const Constant* Index(size_t) const = 0;
 
     /// @returns true if child elements of this constant are positive-zero valued.

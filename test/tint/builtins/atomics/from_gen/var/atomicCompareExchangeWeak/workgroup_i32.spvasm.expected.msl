@@ -20,7 +20,7 @@ struct x__atomic_compare_exchange_resulti32 {
 void atomicCompareExchangeWeak_e88938(threadgroup atomic_int* const tint_symbol_2) {
   int arg_1 = 0;
   int arg_2 = 0;
-  x__atomic_compare_exchange_resulti32 res = {.old_value=0, .exchanged=false};
+  x__atomic_compare_exchange_resulti32 res = {};
   arg_1 = 1;
   arg_2 = 1;
   int const x_22 = arg_2;

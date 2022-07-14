@@ -1142,11 +1142,7 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
                                              call->Arguments().size() == 1 &&
                                              ctor->Parameters()[0]->Type()->is_scalar();
 
-    auto it = structure_builders_.find(As<sem::Struct>(type));
-    if (it != structure_builders_.end()) {
-        out << it->second << "(";
-        brackets = false;
-    } else if (brackets) {
+    if (brackets) {
         out << "{";
     } else {
         if (!EmitType(out, type, ast::StorageClass::kNone, ast::Access::kReadWrite, "")) {
@@ -3209,6 +3205,30 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
             TINT_DEFER(out << "}");
 
             for (size_t i = 0; i < a->Count(); i++) {
+                if (i > 0) {
+                    out << ", ";
+                }
+                if (!EmitConstant(out, constant->Index(i))) {
+                    return false;
+                }
+            }
+
+            return true;
+        },
+        [&](const sem::Struct* s) {
+            if (constant->AllZero()) {
+                out << "(";
+                if (!EmitType(out, s, ast::StorageClass::kNone, ast::Access::kUndefined, "")) {
+                    return false;
+                }
+                out << ")0";
+                return true;
+            }
+
+            out << "{";
+            TINT_DEFER(out << "}");
+
+            for (size_t i = 0; i < s->Members().size(); i++) {
                 if (i > 0) {
                     out << ", ";
                 }

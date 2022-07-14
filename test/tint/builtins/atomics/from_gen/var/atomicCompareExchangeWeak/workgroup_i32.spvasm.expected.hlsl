@@ -13,7 +13,7 @@ groupshared int arg_0;
 void atomicCompareExchangeWeak_e88938() {
   int arg_1 = 0;
   int arg_2 = 0;
-  x__atomic_compare_exchange_resulti32 res = {0, false};
+  x__atomic_compare_exchange_resulti32 res = (x__atomic_compare_exchange_resulti32)0;
   arg_1 = 1;
   arg_2 = 1;
   const int x_22 = arg_2;

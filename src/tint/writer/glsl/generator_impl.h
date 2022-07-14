@@ -520,7 +520,6 @@ class GeneratorImpl : public TextGenerator {
     std::function<bool()> emit_continuing_;
     std::unordered_map<DMAIntrinsic, std::string, DMAIntrinsic::Hasher> dma_intrinsics_;
     std::unordered_map<const sem::Builtin*, std::string> builtins_;
-    std::unordered_map<const sem::Struct*, std::string> structure_builders_;
     std::unordered_map<const sem::Vector*, std::string> dynamic_vector_write_;
     std::unordered_map<const sem::Vector*, std::string> int_dot_funcs_;
     std::unordered_map<const sem::Type*, std::string> float_modulo_funcs_;

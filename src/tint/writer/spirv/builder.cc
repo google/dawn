@@ -1770,6 +1770,7 @@ uint32_t Builder::GenerateConstantIfNeeded(const sem::Constant* constant) {
         [&](const sem::Vector* v) { return composite(v->Width()); },
         [&](const sem::Matrix* m) { return composite(m->columns()); },
         [&](const sem::Array* a) { return composite(a->Count()); },
+        [&](const sem::Struct* s) { return composite(s->Members().size()); },
         [&](Default) {
             error_ = "unhandled constant type: " + builder_.FriendlyName(ty);
             return false;

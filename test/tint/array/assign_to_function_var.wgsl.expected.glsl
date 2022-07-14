@@ -23,7 +23,7 @@ ivec4[4] ret_arr() {
 }
 
 S ret_struct_arr() {
-  S tint_symbol_2 = S(ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0)));
+  S tint_symbol_2 = S(ivec4[4](ivec4(0), ivec4(0), ivec4(0), ivec4(0)));
   return tint_symbol_2;
 }
 

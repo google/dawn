@@ -13,7 +13,7 @@ struct Interface {
 };
 
 Interface vert_main() {
-  Interface tint_symbol = Interface(0, 0u, ivec4(0, 0, 0, 0), uvec4(0u, 0u, 0u, 0u), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  Interface tint_symbol = Interface(0, 0u, ivec4(0), uvec4(0u), vec4(0.0f));
   return tint_symbol;
 }
 

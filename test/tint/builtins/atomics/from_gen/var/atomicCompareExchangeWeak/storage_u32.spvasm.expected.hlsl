@@ -21,7 +21,7 @@ atomic_compare_exchange_weak_ret_type tint_atomicCompareExchangeWeak(RWByteAddre
 void atomicCompareExchangeWeak_63d8e6() {
   uint arg_1 = 0u;
   uint arg_2 = 0u;
-  x__atomic_compare_exchange_resultu32 res = {0u, false};
+  x__atomic_compare_exchange_resultu32 res = (x__atomic_compare_exchange_resultu32)0;
   arg_1 = 1u;
   arg_2 = 1u;
   const uint x_21 = arg_2;
