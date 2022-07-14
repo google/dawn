@@ -162,6 +162,7 @@
         "tags": ["dawn", "native"],
         "category": "structure",
         "chained": "in",
+        "chain roots": ["device descriptor"],
         "members": [
             {"name": "force enabled toggles count", "type": "uint32_t", "default": 0},
             {"name": "force enabled toggles", "type": "char", "annotation": "const*const*", "length": "force enabled toggles count"},
@@ -173,6 +174,7 @@
         "tags": ["dawn", "native"],
         "category": "structure",
         "chained": "in",
+        "chain roots": ["device descriptor"],
         "members": [
             {"name": "isolation key", "type": "char", "annotation": "const*", "length": "strlen", "default": "\"\""}
         ]
@@ -306,6 +308,7 @@
     "external texture binding entry": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["bind group entry"],
         "tags": ["dawn"],
         "members": [
             {"name": "external texture", "type": "external texture"}
@@ -315,6 +318,7 @@
     "external texture binding layout": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["bind group layout entry"],
         "tags": ["dawn"],
         "members": []
     },
@@ -1445,6 +1449,7 @@
         "tags": ["dawn", "native"],
         "category": "structure",
         "chained": "in",
+        "chain roots": ["instance descriptor"],
         "members": [
             {"name": "additional runtime search paths count", "type": "uint32_t", "default": 0},
             {"name": "additional runtime search paths", "type": "char", "annotation": "const*const*", "length": "additional runtime search paths count"}
@@ -1891,6 +1896,7 @@
     "render pass descriptor max draw count": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["render pass descriptor"],
         "members": [
             {"name": "max draw count", "type": "uint64_t", "default": 50000000}
         ]
@@ -2147,6 +2153,7 @@
     "primitive depth clamping state": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["primitive state"],
         "tags": ["dawn", "emscripten"],
         "members": [
             {"name": "clamp depth", "type": "bool", "default": "false"}
@@ -2156,6 +2163,7 @@
     "primitive depth clip control": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["primitive state"],
         "members": [
             {"name": "unclipped depth", "type": "bool", "default": "false"}
         ]
@@ -2302,6 +2310,7 @@
     "shader module SPIRV descriptor": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["shader module descriptor"],
         "members": [
             {"name": "code size", "type": "uint32_t"},
             {"name": "code", "type": "uint32_t", "annotation": "const*", "length": "code size"}
@@ -2310,6 +2319,7 @@
     "shader module WGSL descriptor": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["shader module descriptor"],
         "members": [
             {"name": "source", "type": "char", "annotation": "const*", "length": "strlen", "tags": ["dawn", "emscripten"]},
             {"name": "code", "type": "char", "annotation": "const*", "length": "strlen", "tags": ["upstream"]}
@@ -2370,6 +2380,7 @@
     "surface descriptor from android native window": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["surface descriptor"],
         "tags": ["native"],
         "members": [
             {"name": "window", "type": "void", "annotation": "*"}
@@ -2378,6 +2389,7 @@
     "surface descriptor from canvas HTML selector": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["surface descriptor"],
         "members": [
             {"name": "selector", "type": "char", "annotation": "const*", "length": "strlen"}
         ]
@@ -2385,6 +2397,7 @@
     "surface descriptor from metal layer": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["surface descriptor"],
         "tags": ["native"],
         "members": [
             {"name": "layer", "type": "void", "annotation": "*"}
@@ -2393,6 +2406,7 @@
     "surface descriptor from windows HWND": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["surface descriptor"],
         "tags": ["native"],
         "members": [
             {"name": "hinstance", "type": "void", "annotation": "*"},
@@ -2402,6 +2416,7 @@
     "surface descriptor from xcb window": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["surface descriptor"],
         "tags": ["upstream"],
         "members": [
             {"name": "connection", "type": "void", "annotation": "*"},
@@ -2411,6 +2426,7 @@
     "surface descriptor from xlib window": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["surface descriptor"],
         "tags": ["native"],
         "members": [
             {"name": "display", "type": "void", "annotation": "*"},
@@ -2420,6 +2436,7 @@
     "surface descriptor from wayland surface": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["surface descriptor"],
         "tags": ["native"],
         "members": [
             {"name": "display", "type": "void", "annotation": "*"},
@@ -2429,6 +2446,7 @@
     "surface descriptor from windows core window": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["surface descriptor"],
         "tags": ["dawn"],
         "members": [
             {"name": "core window", "type": "void", "annotation": "*"}
@@ -2437,6 +2455,7 @@
     "surface descriptor from windows swap chain panel": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["surface descriptor"],
         "tags": ["dawn"],
         "members": [
             {"name": "swap chain panel", "type": "void", "annotation": "*"}
@@ -2886,6 +2905,7 @@
     "dawn texture internal usage descriptor": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["texture descriptor"],
         "tags": ["dawn"],
         "members": [
             {"name": "internal usage", "type": "texture usage", "default": "none"}
@@ -2894,6 +2914,7 @@
     "dawn encoder internal usage descriptor": {
         "category": "structure",
         "chained": "in",
+        "chain roots": ["command encoder descriptor"],
         "tags": ["dawn"],
         "members": [
             {"name": "use internal usages", "type": "bool", "default": "false"}

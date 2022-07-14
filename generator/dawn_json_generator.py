@@ -237,12 +237,13 @@ class StructureType(Record, Type):
                 m for m in json_data['members'] if is_enabled(m)
             ]
         Type.__init__(self, name, dict(json_data, **json_data_override))
-        self.chained = json_data.get("chained", None)
-        self.extensible = json_data.get("extensible", None)
+        self.chained = json_data.get('chained', None)
+        self.extensible = json_data.get('extensible', None)
         if self.chained:
-            assert (self.chained == "in" or self.chained == "out")
+            assert self.chained == 'in' or self.chained == 'out'
+            assert 'chain roots' in json_data
         if self.extensible:
-            assert (self.extensible == "in" or self.extensible == "out")
+            assert self.extensible == 'in' or self.extensible == 'out'
         # Chained structs inherit from wgpu::ChainedStruct, which has
         # nextInChain, so setting both extensible and chained would result in
         # two nextInChain members.
@@ -348,6 +349,8 @@ def link_object(obj, types):
 
 def link_structure(struct, types):
     struct.members = linked_record_members(struct.json_data['members'], types)
+    struct.chain_roots = [types[root] for root in struct.json_data.get('chain roots', [])]
+    assert all((root.category == 'structure' for root in struct.chain_roots))
 
 
 def link_function_pointer(function_pointer, types):

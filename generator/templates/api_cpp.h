@@ -225,6 +225,9 @@ namespace {{metadata.namespace}} {
         {% set Out = "Out" if type.output else "" %}
         {% set const = "const" if not type.output else "" %}
         {% if type.chained %}
+            {% for root in type.chain_roots %}
+                // Can be chained in {{as_cppType(root.name)}}
+            {% endfor %}
             struct {{as_cppType(type.name)}} : ChainedStruct{{Out}} {
                 {{as_cppType(type.name)}}() {
                     sType = SType::{{type.name.CamelCase()}};

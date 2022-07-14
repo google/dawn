@@ -68,7 +68,8 @@ A **record** is a list of **record members**, each of which is a dictionary with
 **`"structure"`**
  - `"members"` a **record**, so an array of **record members**
  - `"extensible"` (defaults to false) a boolean defining if this is an "extensible" WebGPU structure (i.e. has `nextInChain`). "descriptor" structures should usually have this set to true.
- - `"chained"` (defaults to false) a boolean defining if this is a structure that can be "chained" in a WebGPU structure (i.e. has `nextInChain` and `sType`)
+ - `"chained"` (defaults to None) a string defining if this is a structure that can be "chained" in a WebGPU structure (i.e. has `nextInChain` and `sType`) and in which direction ('in' for inputs to WebGPU, 'out' for outputs)
+ - `"chain roots"` (defaults to []) a list of strings that are the canonical names of structures that can be extended by this structure.
 
 **`"object"`**
  - `**methods**` an array of methods for this object. Note that "release" and "reference" don't need to be specified. Each method is a dictionary containing:
