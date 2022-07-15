@@ -690,16 +690,6 @@ ctor vec4<T: abstract_or_scalar>(xyz: vec3<T>, w: T) -> vec4<T>
 ctor vec4<T: abstract_or_scalar>(x: T, zyw: vec3<T>) -> vec4<T>
 
 // Matrix constructors
-ctor mat2x2<T: af_f32>(T) -> mat2x2<T>
-ctor mat2x3<T: af_f32>(T) -> mat2x3<T>
-ctor mat2x4<T: af_f32>(T) -> mat2x4<T>
-ctor mat3x2<T: af_f32>(T) -> mat3x2<T>
-ctor mat3x3<T: af_f32>(T) -> mat3x3<T>
-ctor mat3x4<T: af_f32>(T) -> mat3x4<T>
-ctor mat4x2<T: af_f32>(T) -> mat4x2<T>
-ctor mat4x3<T: af_f32>(T) -> mat4x3<T>
-ctor mat4x4<T: af_f32>(T) -> mat4x4<T>
-
 ctor mat2x2<T: af_f32f16>(T, T,
                           T, T) -> mat2x2<T>
 ctor mat2x2<T: af_f32f16>(vec2<T>, vec2<T>) -> mat2x2<T>

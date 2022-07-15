@@ -13,6 +13,7 @@
 * Module-scope `let` has been replaced with module-scope `const`. [tint:1580](crbug.com/tint/1584)
   * Note: Module-scope `const` does not support structure types. Use `var<private>` if you need a module-scope structure type.
 * Struct members can no longer be separated with semicolons (use commas instead). [tint:1475](crbug.com/tint/1475)
+* Single scalar matrix constructors have been removed. These were never part of the WGSL spec. [tint:1597](crbug.com/tint/1597)
 
 ### Deprecated Features
 

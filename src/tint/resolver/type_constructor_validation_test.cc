@@ -276,10 +276,6 @@ static constexpr Params valid_cases[] = {
     ParamsFor<vec3<f32>, f32>(Kind::Construct),    //
     ParamsFor<vec3<f16>, f16>(Kind::Construct),    //
 
-    ParamsFor<mat3x3<f32>, f32>(Kind::Construct),  //
-    ParamsFor<mat2x3<f32>, f32>(Kind::Construct),  //
-    ParamsFor<mat3x2<f32>, f32>(Kind::Construct),  //
-
     // Conversion
     ParamsFor<bool, u32>(Kind::Conversion),  //
     ParamsFor<bool, i32>(Kind::Conversion),  //
