@@ -780,6 +780,17 @@ class ProgramBuilder {
         }
 
         /// @param source the Source of the node
+        /// @param storage_class the storage class of the pointer
+        /// @param access the optional access control of the pointer
+        /// @return the pointer to type `T` with the given ast::StorageClass.
+        template <typename T>
+        const ast::Pointer* pointer(const Source& source,
+                                    ast::StorageClass storage_class,
+                                    ast::Access access = ast::Access::kUndefined) const {
+            return pointer(source, Of<T>(), storage_class, access);
+        }
+
+        /// @param source the Source of the node
         /// @param type the type of the atomic
         /// @return the atomic to `type`
         const ast::Atomic* atomic(const Source& source, const ast::Type* type) const {

@@ -533,6 +533,32 @@ bool Validator::StorageClassLayout(const sem::Variable* var,
     return true;
 }
 
+bool Validator::LocalVariable(const sem::Variable* v) const {
+    auto* decl = v->Declaration();
+    return Switch(
+        decl,  //
+        [&](const ast::Var* var) {
+            if (IsValidationEnabled(var->attributes,
+                                    ast::DisabledValidation::kIgnoreStorageClass)) {
+                if (!v->Type()->UnwrapRef()->IsConstructible()) {
+                    AddError("function-scope 'var' must have a constructible type",
+                             var->type ? var->type->source : var->source);
+                    return false;
+                }
+            }
+            return Var(v);
+        },                                                  //
+        [&](const ast::Let*) { return Let(v); },            //
+        [&](const ast::Override*) { return Override(v); },  //
+        [&](const ast::Const*) { return true; },            //
+        [&](Default) {
+            TINT_ICE(Resolver, diagnostics_)
+                << "Validator::Variable() called with a unknown variable type: "
+                << decl->TypeInfo().name;
+            return false;
+        });
+}
+
 bool Validator::GlobalVariable(
     const sem::GlobalVariable* global,
     std::unordered_map<uint32_t, const sem::Variable*> constant_ids,
@@ -580,6 +606,14 @@ bool Validator::GlobalVariable(
             }
 
             if (!AtomicVariable(global, atomic_composite_info)) {
+                return false;
+            }
+
+            auto name = symbols_.NameFor(var->symbol);
+            if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
+                AddError(
+                    "'" + name + "' is a builtin and cannot be redeclared as a module-scope 'var'",
+                    var->source);
                 return false;
             }
 
@@ -702,47 +736,13 @@ bool Validator::AtomicVariable(
     return true;
 }
 
-bool Validator::Variable(const sem::Variable* v) const {
-    auto* decl = v->Declaration();
-    return Switch(
-        decl,                                               //
-        [&](const ast::Var*) { return Var(v); },            //
-        [&](const ast::Let*) { return Let(v); },            //
-        [&](const ast::Override*) { return Override(v); },  //
-        [&](const ast::Const*) { return true; },            //
-        [&](Default) {
-            TINT_ICE(Resolver, diagnostics_)
-                << "Validator::Variable() called with a unknown variable type: "
-                << decl->TypeInfo().name;
-            return false;
-        });
-}
-
 bool Validator::Var(const sem::Variable* v) const {
     auto* var = v->Declaration()->As<ast::Var>();
     auto* storage_ty = v->Type()->UnwrapRef();
 
-    if (v->Is<sem::GlobalVariable>()) {
-        auto name = symbols_.NameFor(var->symbol);
-        if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
-            AddError("'" + name + "' is a builtin and cannot be redeclared as a module-scope 'var'",
-                     var->source);
-            return false;
-        }
-    }
-
     if (!IsStorable(storage_ty)) {
         AddError(sem_.TypeNameOf(storage_ty) + " cannot be used as the type of a var", var->source);
         return false;
-    }
-
-    if (v->Is<sem::LocalVariable>() &&
-        IsValidationEnabled(var->attributes, ast::DisabledValidation::kIgnoreStorageClass)) {
-        if (!v->Type()->UnwrapRef()->IsConstructible()) {
-            AddError("function-scope 'var' must have a constructible type",
-                     var->type ? var->type->source : var->source);
-            return false;
-        }
     }
 
     if (storage_ty->is_handle() && var->declared_storage_class != ast::StorageClass::kNone) {

@@ -264,6 +264,11 @@ class Validator {
     /// @returns true on success, false otherwise.
     bool BuiltinCall(const sem::Call* call) const;
 
+    /// Validates a local variable
+    /// @param v the variable to validate
+    /// @returns true on success, false otherwise.
+    bool LocalVariable(const sem::Variable* v) const;
+
     /// Validates a location attribute
     /// @param location the location attribute to validate
     /// @param type the variable type
@@ -353,11 +358,6 @@ class Validator {
     /// @param s the switch to validate
     /// @returns true on success, false otherwise
     bool SwitchStatement(const ast::SwitchStatement* s);
-
-    /// Validates a variable
-    /// @param v the variable to validate
-    /// @returns true on success, false otherwise.
-    bool Variable(const sem::Variable* v) const;
 
     /// Validates a 'var' variable declaration
     /// @param v the variable to validate

@@ -59,18 +59,16 @@ TEST_F(ResolverVariableValidationTest, OverrideNoInitializerNoType) {
     EXPECT_EQ(r()->error(), "12:34 error: override declaration requires a type or initializer");
 }
 
-TEST_F(ResolverVariableValidationTest, VarTypeNotStorable) {
+TEST_F(ResolverVariableValidationTest, VarTypeNotConstructible) {
     // var i : i32;
     // var p : pointer<function, i32> = &v;
     auto* i = Var("i", ty.i32(), ast::StorageClass::kNone);
-    auto* p = Var(Source{{56, 78}}, "a", ty.pointer<i32>(ast::StorageClass::kFunction),
+    auto* p = Var("a", ty.pointer<i32>(Source{{56, 78}}, ast::StorageClass::kFunction),
                   ast::StorageClass::kNone, AddressOf(Source{{12, 34}}, "i"));
     WrapInFunction(i, p);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "56:78 error: ptr<function, i32, read_write> cannot be used as the "
-              "type of a var");
+    EXPECT_EQ(r()->error(), "56:78 error: function-scope 'var' must have a constructible type");
 }
 
 TEST_F(ResolverVariableValidationTest, LetTypeNotConstructible) {

@@ -2575,7 +2575,7 @@ sem::Statement* Resolver::VariableDeclStatement(const ast::VariableDeclStatement
             sem->Behaviors() = ctor->Behaviors();
         }
 
-        return validator_.Variable(variable);
+        return validator_.LocalVariable(variable);
     });
 }
 
