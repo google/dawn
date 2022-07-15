@@ -988,13 +988,15 @@ func (e env) benchmarkGerritChange(change gerrit.ChangeInfo) error {
 	}
 
 	msg := &strings.Builder{}
-	fmt.Fprintf(msg, "Perfmon analysis:\n")
-	fmt.Fprintf(msg, "  \n")
-	fmt.Fprintf(msg, "  A: parent change (%v) -> B: patchset %v\n", parent[:7], current.Number)
-	fmt.Fprintf(msg, "  \n")
+	fmt.Fprintln(msg, "Perfmon analysis:")
+	fmt.Fprintln(msg)
+	fmt.Fprintln(msg, "```")
+	fmt.Fprintf(msg, "A: parent change (%v) -> B: patchset %v\n", parent[:7], current.Number)
+	fmt.Fprintln(msg)
 	for _, line := range strings.Split(diff.Format(diffFmt), "\n") {
 		fmt.Fprintf(msg, "  %v\n", line)
 	}
+	fmt.Fprintln(msg, "```")
 
 	notify := "OWNER"
 	if len(diff) > 0 {
