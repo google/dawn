@@ -606,6 +606,14 @@ MaybeError Texture::InitializeAsInternalTexture() {
 
     Device* device = ToBackend(GetDevice());
 
+    if (device->IsToggleEnabled(
+            Toggle::D3D12ForceInitializeCopyableDepthStencilTextureOnCreation) &&
+        GetFormat().HasDepthOrStencil() && (GetInternalUsage() & wgpu::TextureUsage::CopyDst)) {
+        CommandRecordingContext* commandContext;
+        DAWN_TRY_ASSIGN(commandContext, device->GetPendingCommandContext());
+        DAWN_TRY(ClearTexture(commandContext, GetAllSubresources(), TextureBase::ClearValue::Zero));
+    }
+
     if (device->IsToggleEnabled(Toggle::NonzeroClearResourcesOnCreationForTesting)) {
         CommandRecordingContext* commandContext;
         DAWN_TRY_ASSIGN(commandContext, device->GetPendingCommandContext());
