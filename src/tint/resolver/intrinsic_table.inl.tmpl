@@ -103,7 +103,7 @@ constexpr OverloadInfo kOverloads[] = {
 {{-   end }}
 {{-   if $o.IsDeprecated}}, OverloadFlag::kIsDeprecated{{end }}),
     /* const eval */
-{{-   if $o.ConstEvalFunction }} &ConstEval::{{$o.ConstEvalFunction}},
+{{-   if $o.ConstEvalFunction }} {{template "ConstEvalFn" $o}},
 {{-   else                    }} nullptr,
 {{-   end }}
   },
@@ -137,7 +137,7 @@ constexpr IntrinsicInfo kUnaryOperators[] = {
 };
 
 {{- range $i, $o := .UnaryOperators }}
-constexpr uint8_t kUnaryOperator{{template "OperatorName" $o.Name}} = {{$i}};
+constexpr uint8_t kUnaryOperator{{ template "ExpandName" $o.Name}} = {{$i}};
 {{- end }}
 
 constexpr IntrinsicInfo kBinaryOperators[] = {
@@ -154,7 +154,7 @@ constexpr IntrinsicInfo kBinaryOperators[] = {
 };
 
 {{- range $i, $o := .BinaryOperators }}
-constexpr uint8_t kBinaryOperator{{template "OperatorName" $o.Name}} = {{$i}};
+constexpr uint8_t kBinaryOperator{{ template "ExpandName" $o.Name}} = {{$i}};
 {{- end }}
 
 constexpr IntrinsicInfo kConstructorsAndConverters[] = {
@@ -455,7 +455,7 @@ Matchers::~Matchers() = default;
 {{- end -}}
 
 {{- /* ------------------------------------------------------------------ */ -}}
-{{-                          define "OperatorName"                           -}}
+{{-                           define "ExpandName"                            -}}
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-        if eq . "<<" -}}ShiftLeft
 {{-   else if eq . "&"  -}}And
@@ -478,6 +478,16 @@ Matchers::~Matchers() = default;
 {{-   else if eq . "*"  -}}Star
 {{-   else if eq . "/"  -}}Divide
 {{-   else if eq . "%"  -}}Modulo
-{{-   else -}}<unknown-{{.}}>
+{{-   else              -}}{{.}}
 {{-   end -}}
 {{- end -}}
+
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                           define "ConstEvalFn"                           -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+  &ConstEval::
+{{-   if eq .Kind "operator" -}}Op{{end -}}
+  {{template "ExpandName" .ConstEvalFunction}}
+{{- end -}}
+

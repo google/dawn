@@ -560,8 +560,8 @@ bool Validator::LocalVariable(const sem::Variable* v) const {
 
 bool Validator::GlobalVariable(
     const sem::GlobalVariable* global,
-    std::unordered_map<uint32_t, const sem::Variable*> constant_ids,
-    std::unordered_map<const sem::Type*, const Source&> atomic_composite_info) const {
+    const std::unordered_map<uint32_t, const sem::Variable*>& constant_ids,
+    const std::unordered_map<const sem::Type*, const Source&>& atomic_composite_info) const {
     auto* decl = global->Declaration();
     bool ok = Switch(
         decl,  //
@@ -759,8 +759,9 @@ bool Validator::Let(const sem::Variable* v) const {
     return true;
 }
 
-bool Validator::Override(const sem::Variable* v,
-                         std::unordered_map<uint32_t, const sem::Variable*> constant_ids) const {
+bool Validator::Override(
+    const sem::Variable* v,
+    const std::unordered_map<uint32_t, const sem::Variable*>& constant_ids) const {
     auto* decl = v->Declaration();
     auto* storage_ty = v->Type()->UnwrapRef();
 

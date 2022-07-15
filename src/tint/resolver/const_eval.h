@@ -174,6 +174,19 @@ class ConstEval {
     /// @return the constructed value, or null if the value cannot be calculated
     const sem::Constant* MatCtorV(const sem::Type* ty, ArgumentList args, size_t num_args);
 
+    ////////////////////////////////////////////////////////////////////////////
+    // Operators
+    ////////////////////////////////////////////////////////////////////////////
+
+    /// Complement operator '~'
+    /// @param ty the integer type
+    /// @param args the input arguments
+    /// @param num_args the number of input arguments (must be 1)
+    /// @return the result value, or null if the value cannot be calculated
+    const sem::Constant* OpComplement(const sem::Type* ty,
+                                      sem::Expression const* const* args,
+                                      size_t num_args);
+
   private:
     /// Adds the given error message to the diagnostics
     void AddError(const std::string& msg, const Source& source) const;

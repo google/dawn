@@ -1164,7 +1164,11 @@ IntrinsicTable::UnaryOperator Impl::Lookup(ast::UnaryOp op,
         return {};
     }
 
-    return UnaryOperator{match.return_type, match.parameters[0].type};
+    return UnaryOperator{
+        match.return_type,
+        match.parameters[0].type,
+        match.overload->const_eval_fn,
+    };
 }
 
 IntrinsicTable::BinaryOperator Impl::Lookup(ast::BinaryOp op,
@@ -1235,7 +1239,12 @@ IntrinsicTable::BinaryOperator Impl::Lookup(ast::BinaryOp op,
         return {};
     }
 
-    return BinaryOperator{match.return_type, match.parameters[0].type, match.parameters[1].type};
+    return BinaryOperator{
+        match.return_type,
+        match.parameters[0].type,
+        match.parameters[1].type,
+        match.overload->const_eval_fn,
+    };
 }
 
 IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,

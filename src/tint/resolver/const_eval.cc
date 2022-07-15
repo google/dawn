@@ -64,6 +64,20 @@ auto TypeDispatch(const sem::Type* type, F&& f) {
         [&](const sem::Bool*) { return f(static_cast<bool>(0)); });
 }
 
+/// IntegerDispatch is a helper for calling the function `f`, passing the integer value of the
+/// constant c.
+/// @returns the value returned by calling `f`.
+/// @note `c` must be of an integer type. Other types will not call `f`, and will return the
+/// zero-initialized value of the return type for `f`
+template <typename F>
+auto IntegerDispatch(const sem::Constant* c, F&& f) {
+    return Switch(
+        c->Type(),                                                  //
+        [&](const sem::AbstractInt*) { return f(c->As<AInt>()); },  //
+        [&](const sem::I32*) { return f(c->As<i32>()); },           //
+        [&](const sem::U32*) { return f(c->As<u32>()); });
+}
+
 /// @returns `value` if `T` is not a Number, otherwise ValueOf returns the inner value of the
 /// Number.
 template <typename T>
@@ -100,6 +114,9 @@ const Constant* CreateComposite(ProgramBuilder& builder,
 /// Element implements the Constant interface.
 template <typename T>
 struct Element : Constant {
+    static_assert(!std::is_same_v<UnwrapNumber<T>, T> || std::is_same_v<T, bool>,
+                  "T must be a Number or bool");
+
     Element(const sem::Type* t, T v) : type(t), value(v) {}
     ~Element() override = default;
     const sem::Type* Type() const override { return type; }
@@ -395,6 +412,23 @@ const Constant* CreateComposite(ProgramBuilder& builder,
     }
 }
 
+/// TransformElements constructs a new constant by applying the transformation function 'f' on each
+/// of the most deeply nested elements of 'c'.
+template <typename F>
+const Constant* TransformElements(ProgramBuilder& builder, const sem::Constant* c, F&& f) {
+    uint32_t n = 0;
+    auto* ty = c->Type();
+    auto* el_ty = sem::Type::ElementOf(ty, &n);
+    if (el_ty == ty) {
+        return f(c);
+    }
+    std::vector<const sem::Constant*> els(n);
+    for (uint32_t i = 0; i < n; i++) {
+        els[i] = TransformElements(builder, c->Index(i), f);
+    }
+    return CreateComposite(builder, c->Type(), std::move(els));
+}
+
 }  // namespace
 
 ConstEval::ConstEval(ProgramBuilder& b) : builder(b) {}
@@ -478,7 +512,9 @@ const sem::Constant* ConstEval::Identity(const sem::Type*, ArgumentList args, si
     return args[0]->ConstantValue();
 }
 
-const sem::Constant* ConstEval::VecSplat(const sem::Type* ty, ArgumentList args, size_t) {
+const sem::Constant* ConstEval::VecSplat(const sem::Type* ty,
+                                         sem::Expression const* const* args,
+                                         size_t) {
     if (auto* arg = args[0]->ConstantValue()) {
         return builder.create<Splat>(ty, arg, static_cast<const sem::Vector*>(ty)->Width());
     }
@@ -601,6 +637,16 @@ const sem::Constant* ConstEval::Swizzle(const sem::Type* ty,
 const sem::Constant* ConstEval::Bitcast(const sem::Type*, const sem::Expression*) {
     // TODO(crbug.com/tint/1581): Implement @const intrinsics
     return nullptr;
+}
+
+const sem::Constant* ConstEval::OpComplement(const sem::Type*,
+                                             sem::Expression const* const* args,
+                                             size_t) {
+    return TransformElements(builder, args[0]->ConstantValue(), [&](const sem::Constant* c) {
+        return IntegerDispatch(c, [&](auto i) {  //
+            return CreateElement(builder, c->Type(), decltype(i)(~i.value));
+        });
+    });
 }
 
 utils::Result<const sem::Constant*> ConstEval::Convert(const sem::Type* target_ty,

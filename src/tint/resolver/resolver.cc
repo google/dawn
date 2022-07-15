@@ -1508,7 +1508,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                                            current_statement_, value, has_side_effects);
     };
 
-    // ct_ctor_or_conv is a helper for building a sem::TypeConstructor for an array or structure
+    // arr_or_str_ctor is a helper for building a sem::TypeConstructor for an array or structure
     // constructor call target.
     auto arr_or_str_ctor = [&](const sem::Type* ty,
                                const sem::CallTarget* call_target) -> sem::Call* {
@@ -1523,15 +1523,18 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             if (!value) {
                 // Constant evaluation failed.
                 // Can happen for expressions that will fail validation (later).
+                // Use the kRuntime EvaluationStage, as kConstant will trigger an assertion in the
+                // sem::Expression constructor, which checks that kConstant is paired with a
+                // constant value.
                 stage = sem::EvaluationStage::kRuntime;
             }
         }
 
         return builder_->create<sem::Call>(expr, call_target, stage, std::move(args),
-                                           current_statement_, std::move(value), has_side_effects);
+                                           current_statement_, value, has_side_effects);
     };
 
-    // ct_ctor_or_conv is a helper for building either a sem::TypeConstructor or sem::TypeConversion
+    // ty_ctor_or_conv is a helper for building either a sem::TypeConstructor or sem::TypeConversion
     // call for the given semantic type.
     auto ty_ctor_or_conv = [&](const sem::Type* ty) {
         return Switch(
@@ -1710,7 +1713,12 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     }
 
     auto stage = builtin.sem->Stage();
-    if (stage == sem::EvaluationStage::kConstant) {
+    if (stage == sem::EvaluationStage::kConstant) {  // <-- Optimization
+        // If the builtin is not annotated with @const, then it can only be evaluated
+        // at runtime, in which case there's no point checking the evaluation stage of the
+        // arguments.
+
+        // The builtin is @const annotated. Check all arguments are also constant.
         for (auto* arg : args) {
             stage = sem::EarliestStage(stage, arg->Stage());
         }
@@ -1718,7 +1726,7 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
 
     // If the builtin is @const, and all arguments have constant values, evaluate the builtin now.
     const sem::Constant* value = nullptr;
-    if (stage == sem::EvaluationStage::kConstant && builtin.const_eval_fn) {
+    if (stage == sem::EvaluationStage::kConstant) {
         value = (const_eval_.*builtin.const_eval_fn)(builtin.sem->ReturnType(), args.data(),
                                                      args.size());
     }
@@ -2129,7 +2137,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
     const sem::Type* ty = nullptr;
     const sem::Variable* source_var = nullptr;
     const sem::Constant* value = nullptr;
-    auto stage = sem::EvaluationStage::kRuntime;  // TODO(crbug.com/tint/1581)
+    auto stage = sem::EvaluationStage::kRuntime;
 
     switch (unary->op) {
         case ast::UnaryOp::kAddressOf:
@@ -2181,10 +2189,15 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
                     return nullptr;
                 }
             }
-            ty = op.result;
-            if (op.const_eval_fn) {
-                value = (const_eval_.*op.const_eval_fn)(ty, &expr, 1u);
+            stage = expr->Stage();
+            if (stage == sem::EvaluationStage::kConstant) {
+                if (op.const_eval_fn) {
+                    value = (const_eval_.*op.const_eval_fn)(ty, &expr, 1u);
+                } else {
+                    stage = sem::EvaluationStage::kRuntime;
+                }
             }
+            ty = op.result;
             break;
         }
     }

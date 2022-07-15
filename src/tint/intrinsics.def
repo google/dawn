@@ -131,6 +131,7 @@ match f32f16: f32 | f16
 match fiu32: f32 | i32 | u32
 match fi32: f32 | i32
 match iu32: i32 | u32
+match aiu32: ai | i32 | u32
 match scalar: f32 | f16 | i32 | u32 | bool
 match abstract_or_scalar: ai | af | f32 | f16 | i32 | u32 | bool
 match af_f32: af | f32
@@ -816,8 +817,8 @@ ctor mat4x4<T: af_f32f16>(vec4<T>, vec4<T>, vec4<T>, vec4<T>) -> mat4x4<T>
 op ! (bool) -> bool
 op ! <N: num> (vec<N, bool>) -> vec<N, bool>
 
-op ~ <T: iu32>(T) -> T
-op ~ <T: iu32, N: num> (vec<N, T>) -> vec<N, T>
+@const op ~ <T: aiu32>(T) -> T
+@const op ~ <T: aiu32, N: num> (vec<N, T>) -> vec<N, T>
 
 op - <T: fi32>(T) -> T
 op - <T: fi32, N: num> (vec<N, T>) -> vec<N, T>
