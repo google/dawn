@@ -33,6 +33,7 @@ TEST_F(BlockAllocatorTest, Empty) {
 
     Allocator allocator;
 
+    EXPECT_EQ(allocator.Count(), 0u);
     for (int* i : allocator.Objects()) {
         (void)i;
         if ((true)) {  // Workaround for "error: loop will run at most once"
@@ -44,6 +45,19 @@ TEST_F(BlockAllocatorTest, Empty) {
         if ((true)) {  // Workaround for "error: loop will run at most once"
             FAIL() << "BlockAllocator should be empty";
         }
+    }
+}
+
+TEST_F(BlockAllocatorTest, Count) {
+    using Allocator = BlockAllocator<int>;
+
+    for (size_t n : {0u, 1u, 10u, 16u, 20u, 32u, 50u, 64u, 100u, 256u, 300u, 512u, 500u, 512u}) {
+        Allocator allocator;
+        EXPECT_EQ(allocator.Count(), 0u);
+        for (size_t i = 0; i < n; i++) {
+            allocator.Create(123);
+        }
+        EXPECT_EQ(allocator.Count(), n);
     }
 }
 
@@ -75,9 +89,11 @@ TEST_F(BlockAllocatorTest, MoveConstruct) {
                 allocator_a.Create(&count);
             }
             EXPECT_EQ(count, n);
+            EXPECT_EQ(allocator_a.Count(), n);
 
             Allocator allocator_b{std::move(allocator_a)};
             EXPECT_EQ(count, n);
+            EXPECT_EQ(allocator_b.Count(), n);
         }
 
         EXPECT_EQ(count, 0u);
@@ -97,16 +113,19 @@ TEST_F(BlockAllocatorTest, MoveAssign) {
                 allocator_a.Create(&count_a);
             }
             EXPECT_EQ(count_a, n);
+            EXPECT_EQ(allocator_a.Count(), n);
 
             Allocator allocator_b;
             for (size_t i = 0; i < n; i++) {
                 allocator_b.Create(&count_b);
             }
             EXPECT_EQ(count_b, n);
+            EXPECT_EQ(allocator_b.Count(), n);
 
             allocator_b = std::move(allocator_a);
             EXPECT_EQ(count_a, n);
             EXPECT_EQ(count_b, 0u);
+            EXPECT_EQ(allocator_b.Count(), n);
         }
 
         EXPECT_EQ(count_a, 0u);

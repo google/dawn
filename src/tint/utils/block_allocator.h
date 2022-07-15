@@ -24,10 +24,10 @@
 
 namespace tint::utils {
 
-/// A container and allocator of objects of (or deriving from) the template
-/// type `T`. Objects are allocated by calling Create(), and are owned by the
-/// BlockAllocator. When the BlockAllocator is destructed, all constructed
-/// objects are automatically destructed and freed.
+/// A container and allocator of objects of (or deriving from) the template type `T`.
+/// Objects are allocated by calling Create(), and are owned by the BlockAllocator.
+/// When the BlockAllocator is destructed, all constructed objects are automatically destructed and
+/// freed.
 ///
 /// Objects held by the BlockAllocator can be iterated over using a View.
 template <typename T, size_t BLOCK_SIZE = 64 * 1024, size_t BLOCK_ALIGNMENT = 16>
@@ -44,8 +44,7 @@ class BlockAllocator {
     /// Block is linked list of memory blocks.
     /// Blocks are allocated out of heap memory.
     ///
-    /// Note: We're not using std::aligned_storage here as this warns / errors
-    /// on MSVC.
+    /// Note: We're not using std::aligned_storage here as this warns / errors on MSVC.
     struct alignas(BLOCK_ALIGNMENT) Block {
         uint8_t data[BLOCK_SIZE];
         Block* next;
@@ -97,22 +96,22 @@ class BlockAllocator {
         size_t idx;
     };
 
-    /// View provides begin() and end() methods for looping over the objects
-    /// owned by the BlockAllocator.
+    /// View provides begin() and end() methods for looping over the objects owned by the
+    /// BlockAllocator.
     template <bool IS_CONST>
     class TView {
       public:
         /// @returns an iterator to the beginning of the view
         TIterator<IS_CONST> begin() const {
-            return TIterator<IS_CONST>{allocator_->pointers_.root, 0};
+            return TIterator<IS_CONST>{allocator_->data.pointers.root, 0};
         }
 
         /// @returns an iterator to the end of the view
         TIterator<IS_CONST> end() const {
-            return allocator_->pointers_.current_index >= Pointers::kMax
+            return allocator_->data.pointers.current_index >= Pointers::kMax
                        ? TIterator<IS_CONST>(nullptr, 0)
-                       : TIterator<IS_CONST>(allocator_->pointers_.current,
-                                             allocator_->pointers_.current_index);
+                       : TIterator<IS_CONST>(allocator_->data.pointers.current,
+                                             allocator_->data.pointers.current_index);
         }
 
       private:
@@ -128,12 +127,12 @@ class BlockAllocator {
     /// An immutable iterator type over the objects of the BlockAllocator
     using ConstIterator = TIterator<true>;
 
-    /// View provides begin() and end() methods for looping over the objects
-    /// owned by the BlockAllocator.
+    /// View provides begin() and end() methods for looping over the objects owned by the
+    /// BlockAllocator.
     using View = TView<false>;
 
-    /// ConstView provides begin() and end() methods for looping over the objects
-    /// owned by the BlockAllocator.
+    /// ConstView provides begin() and end() methods for looping over the objects owned by the
+    /// BlockAllocator.
     using ConstView = TView<true>;
 
     /// Constructor
@@ -141,10 +140,7 @@ class BlockAllocator {
 
     /// Move constructor
     /// @param rhs the BlockAllocator to move
-    BlockAllocator(BlockAllocator&& rhs) {
-        std::swap(block_, rhs.block_);
-        std::swap(pointers_, rhs.pointers_);
-    }
+    BlockAllocator(BlockAllocator&& rhs) { std::swap(data, rhs.data); }
 
     /// Move assignment operator
     /// @param rhs the BlockAllocator to move
@@ -152,8 +148,7 @@ class BlockAllocator {
     BlockAllocator& operator=(BlockAllocator&& rhs) {
         if (this != &rhs) {
             Reset();
-            std::swap(block_, rhs.block_);
-            std::swap(pointers_, rhs.pointers_);
+            std::swap(data, rhs.data);
         }
         return *this;
     }
@@ -168,8 +163,7 @@ class BlockAllocator {
     ConstView Objects() const { return ConstView(this); }
 
     /// Creates a new `TYPE` owned by the BlockAllocator.
-    /// When the BlockAllocator is destructed the object will be destructed and
-    /// freed.
+    /// When the BlockAllocator is destructed the object will be destructed and freed.
     /// @param args the arguments to pass to the type constructor
     /// @returns the pointer to the constructed object
     template <typename TYPE = T, typename... ARGS>
@@ -183,6 +177,7 @@ class BlockAllocator {
         auto* ptr = Allocate<TYPE>();
         new (ptr) TYPE(std::forward<ARGS>(args)...);
         AddObjectPointer(ptr);
+        data.count++;
 
         return ptr;
     }
@@ -192,97 +187,106 @@ class BlockAllocator {
         for (auto ptr : Objects()) {
             ptr->~T();
         }
-        auto* block = block_.root;
+        auto* block = data.block.root;
         while (block != nullptr) {
             auto* next = block->next;
             delete block;
             block = next;
         }
-        block_ = {};
-        pointers_ = {};
+        data = {};
     }
+
+    /// @returns the total number of allocated objects.
+    size_t Count() const { return data.count; }
 
   private:
     BlockAllocator(const BlockAllocator&) = delete;
     BlockAllocator& operator=(const BlockAllocator&) = delete;
 
-    /// Allocates an instance of TYPE from the current block, or from a newly
-    /// allocated block if the current block is full.
+    /// Allocates an instance of TYPE from the current block, or from a newly allocated block if the
+    /// current block is full.
     template <typename TYPE>
     TYPE* Allocate() {
         static_assert(sizeof(TYPE) <= BLOCK_SIZE,
                       "Cannot construct TYPE with size greater than BLOCK_SIZE");
         static_assert(alignof(TYPE) <= BLOCK_ALIGNMENT, "alignof(TYPE) is greater than ALIGNMENT");
 
-        block_.current_offset = utils::RoundUp(alignof(TYPE), block_.current_offset);
-        if (block_.current_offset + sizeof(TYPE) > BLOCK_SIZE) {
+        auto& block = data.block;
+
+        block.current_offset = utils::RoundUp(alignof(TYPE), block.current_offset);
+        if (block.current_offset + sizeof(TYPE) > BLOCK_SIZE) {
             // Allocate a new block from the heap
-            auto* prev_block = block_.current;
-            block_.current = new Block;
-            if (!block_.current) {
+            auto* prev_block = block.current;
+            block.current = new Block;
+            if (!block.current) {
                 return nullptr;  // out of memory
             }
-            block_.current->next = nullptr;
-            block_.current_offset = 0;
+            block.current->next = nullptr;
+            block.current_offset = 0;
             if (prev_block) {
-                prev_block->next = block_.current;
+                prev_block->next = block.current;
             } else {
-                block_.root = block_.current;
+                block.root = block.current;
             }
         }
 
-        auto* base = &block_.current->data[0];
-        auto* ptr = utils::Bitcast<TYPE*>(base + block_.current_offset);
-        block_.current_offset += sizeof(TYPE);
+        auto* base = &block.current->data[0];
+        auto* ptr = utils::Bitcast<TYPE*>(base + block.current_offset);
+        block.current_offset += sizeof(TYPE);
         return ptr;
     }
 
     /// Adds `ptr` to the linked list of objects owned by this BlockAllocator.
-    /// Once added, `ptr` will be tracked for destruction when the BlockAllocator
-    /// is destructed.
+    /// Once added, `ptr` will be tracked for destruction when the BlockAllocator is destructed.
     void AddObjectPointer(T* ptr) {
-        if (pointers_.current_index >= Pointers::kMax) {
-            auto* prev_pointers = pointers_.current;
-            pointers_.current = Allocate<Pointers>();
-            if (!pointers_.current) {
+        auto& pointers = data.pointers;
+
+        if (pointers.current_index >= Pointers::kMax) {
+            auto* prev_pointers = pointers.current;
+            pointers.current = Allocate<Pointers>();
+            if (!pointers.current) {
                 return;  // out of memory
             }
-            pointers_.current->next = nullptr;
-            pointers_.current_index = 0;
+            pointers.current->next = nullptr;
+            pointers.current_index = 0;
 
             if (prev_pointers) {
-                prev_pointers->next = pointers_.current;
+                prev_pointers->next = pointers.current;
             } else {
-                pointers_.root = pointers_.current;
+                pointers.root = pointers.current;
             }
         }
 
-        pointers_.current->ptrs[pointers_.current_index++] = ptr;
+        pointers.current->ptrs[pointers.current_index++] = ptr;
     }
 
     struct {
-        /// The root block of the block linked list
-        Block* root = nullptr;
-        /// The current (end) block of the blocked linked list.
-        /// New allocations come from this block
-        Block* current = nullptr;
-        /// The byte offset in #current for the next allocation.
-        /// Initialized with BLOCK_SIZE so that the first allocation triggers a
-        /// block allocation.
-        size_t current_offset = BLOCK_SIZE;
-    } block_;
+        struct {
+            /// The root block of the block linked list
+            Block* root = nullptr;
+            /// The current (end) block of the blocked linked list.
+            /// New allocations come from this block
+            Block* current = nullptr;
+            /// The byte offset in #current for the next allocation.
+            /// Initialized with BLOCK_SIZE so that the first allocation triggers a block
+            /// allocation.
+            size_t current_offset = BLOCK_SIZE;
+        } block;
 
-    struct {
-        /// The root Pointers structure of the pointers linked list
-        Pointers* root = nullptr;
-        /// The current (end) Pointers structure of the pointers linked list.
-        /// AddObjectPointer() adds to this structure.
-        Pointers* current = nullptr;
-        /// The array index in #current for the next append.
-        /// Initialized with Pointers::kMax so that the first append triggers a
-        /// allocation of the Pointers structure.
-        size_t current_index = Pointers::kMax;
-    } pointers_;
+        struct {
+            /// The root Pointers structure of the pointers linked list
+            Pointers* root = nullptr;
+            /// The current (end) Pointers structure of the pointers linked list.
+            /// AddObjectPointer() adds to this structure.
+            Pointers* current = nullptr;
+            /// The array index in #current for the next append.
+            /// Initialized with Pointers::kMax so that the first append triggers a allocation of
+            /// the Pointers structure.
+            size_t current_index = Pointers::kMax;
+        } pointers;
+
+        size_t count = 0;
+    } data;
 };
 
 }  // namespace tint::utils
