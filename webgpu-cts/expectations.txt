@@ -115,6 +115,18 @@ crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_conten
 crbug.com/1309194 [ linux ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Skip ]
 
 ################################################################################
+# web_platform crashes on SwiftShader
+# Skipped instead of just Crash because of the number of failures
+# KEEP
+################################################################################
+crbug.com/1344876 [ webgpu-adapter-swiftshader mac ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Skip ]
+crbug.com/1344876 [ webgpu-adapter-swiftshader mac ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ]
+crbug.com/1344876 [ webgpu-adapter-swiftshader mac ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ Skip ]
+crbug.com/1344876 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Skip ]
+crbug.com/1344876 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ]
+crbug.com/1344876 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ Skip ]
+
+################################################################################
 # copyToTexture failures. Needs investigation
 # KEEP
 ################################################################################
@@ -152,14 +164,14 @@ crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextur
 ################################################################################
 crbug.com/dawn/1398 [ amd mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,* [ Slow ]
 crbug.com/dawn/1398 webgpu:web_platform,copyToTexture,ImageBitmap:* [ Slow ]
-crbug.com/dawn/1398 [ mac ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Slow ]
-crbug.com/dawn/1398 [ win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Slow ]
-crbug.com/dawn/1398 [ mac ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Slow ]
-crbug.com/dawn/1398 [ win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Slow ]
-crbug.com/dawn/1398 [ mac ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Slow ]
-crbug.com/dawn/1398 [ win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Slow ]
-crbug.com/dawn/1398 [ mac ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Slow ]
-crbug.com/dawn/1398 [ win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Slow ]
+crbug.com/dawn/1398 [ mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Slow ]
+crbug.com/dawn/1398 [ win webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Slow ]
+crbug.com/dawn/1398 [ mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Slow ]
+crbug.com/dawn/1398 [ win webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Slow ]
+crbug.com/dawn/1398 [ mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Slow ]
+crbug.com/dawn/1398 [ win webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Slow ]
+crbug.com/dawn/1398 [ mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Slow ]
+crbug.com/dawn/1398 [ win webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Slow ]
 
 ################################################################################
 # webgpu:shader,execution,robust_access
