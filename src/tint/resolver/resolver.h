@@ -24,6 +24,7 @@
 #include <vector>
 
 #include "src/tint/program_builder.h"
+#include "src/tint/resolver/const_eval.h"
 #include "src/tint/resolver/dependency_graph.h"
 #include "src/tint/resolver/intrinsic_table.h"
 #include "src/tint/resolver/sem_helper.h"
@@ -34,7 +35,6 @@
 #include "src/tint/sem/constant.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/struct.h"
-#include "src/tint/utils/result.h"
 #include "src/tint/utils/unique_vector.h"
 
 // Forward declarations
@@ -203,46 +203,6 @@ class Resolver {
     sem::Expression* Literal(const ast::LiteralExpression*);
     sem::Expression* MemberAccessor(const ast::MemberAccessorExpression*);
     sem::Expression* UnaryOp(const ast::UnaryOpExpression*);
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    /// Constant value evaluation methods
-    ///
-    /// These methods are called from the expression resolving methods, and so child-expression
-    /// nodes are guaranteed to have been already resolved and any constant values calculated.
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    const sem::Constant* EvaluateBinaryValue(const sem::Expression* lhs,
-                                             const sem::Expression* rhs,
-                                             const IntrinsicTable::BinaryOperator&);
-    const sem::Constant* EvaluateBitcastValue(const sem::Expression*, const sem::Type*);
-    const sem::Constant* EvaluateCtorOrConvValue(
-        const std::vector<const sem::Expression*>& args,
-        const sem::Type* ty);  // Note: ty is not an array or structure
-    const sem::Constant* EvaluateIndexValue(const sem::Expression* obj, const sem::Expression* idx);
-    const sem::Constant* EvaluateLiteralValue(const ast::LiteralExpression*, const sem::Type*);
-    const sem::Constant* EvaluateMemberAccessValue(const sem::Expression* obj,
-                                                   const sem::StructMember* member);
-    const sem::Constant* EvaluateSwizzleValue(const sem::Expression* vector,
-                                              const sem::Type* type,
-                                              const std::vector<uint32_t>& indices);
-    const sem::Constant* EvaluateUnaryValue(const sem::Expression*,
-                                            const IntrinsicTable::UnaryOperator&);
-
-    /// The result type of a ConstantEvaluation method.
-    /// Can be one of three distinct values:
-    /// * A non-null sem::Constant pointer. Returned when a expression resolves to a creation time
-    ///   value.
-    /// * A null sem::Constant pointer. Returned when a expression cannot resolve to a creation time
-    ///   value, but is otherwise legal.
-    /// * `utils::Failure`. Returned when there was a resolver error. In this situation the method
-    ///   will have already reported a diagnostic error message, and the caller should abort
-    ///   resolving.
-    using ConstantResult = utils::Result<const sem::Constant*>;
-
-    /// Convert the `value` to `target_type`
-    /// @return the converted value
-    ConstantResult ConvertValue(const sem::Constant* value,
-                                const sem::Type* target_type,
-                                const Source& source);
 
     /// If `expr` is not of an abstract-numeric type, then Materialize() will just return `expr`.
     /// If `expr` is of an abstract-numeric type:
@@ -449,6 +409,7 @@ class Resolver {
 
     ProgramBuilder* const builder_;
     diag::List& diagnostics_;
+    ConstEval const_eval_;
     std::unique_ptr<IntrinsicTable> const intrinsic_table_;
     DependencyGraph dependencies_;
     SemHelper sem_;

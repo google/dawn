@@ -91,6 +91,7 @@ namespace tint::resolver {
 Resolver::Resolver(ProgramBuilder* builder)
     : builder_(builder),
       diagnostics_(builder->Diagnostics()),
+      const_eval_(*builder),
       intrinsic_table_(IntrinsicTable::Create(*builder)),
       sem_(builder, dependencies_),
       validator_(builder, sem_) {}
@@ -1313,7 +1314,7 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
                 << ") called on expression with no constant value";
             return nullptr;
         }
-        auto materialized_val = ConvertValue(expr_val, target_ty, decl->source);
+        auto materialized_val = const_eval_.Convert(target_ty, expr_val, decl->source);
         if (!materialized_val) {
             // ConvertValue() has already failed and raised an diagnostic error.
             return nullptr;
@@ -1422,7 +1423,7 @@ sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* exp
         ty = builder_->create<sem::Reference>(ty, ref->StorageClass(), ref->Access());
     }
 
-    auto val = EvaluateIndexValue(obj, idx);
+    auto val = const_eval_.Index(obj, idx);
     bool has_side_effects = idx->HasSideEffects() || obj->HasSideEffects();
     auto* sem = builder_->create<sem::IndexAccessorExpression>(
         expr, ty, obj, idx, current_statement_, std::move(val), has_side_effects,
@@ -1441,7 +1442,7 @@ sem::Expression* Resolver::Bitcast(const ast::BitcastExpression* expr) {
         return nullptr;
     }
 
-    auto val = EvaluateBitcastValue(inner, ty);
+    auto val = const_eval_.Bitcast(ty, inner);
     auto* sem = builder_->create<sem::Expression>(expr, ty, current_statement_, std::move(val),
                                                   inner->HasSideEffects());
 
@@ -1489,7 +1490,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         if (!MaterializeArguments(args, call_target)) {
             return nullptr;
         }
-        auto val = EvaluateCtorOrConvValue(args, call_target->ReturnType());
+        auto val = const_eval_.CtorOrConv(call_target->ReturnType(), args);
         return builder_->create<sem::Call>(expr, call_target, std::move(args), current_statement_,
                                            val, has_side_effects);
     };
@@ -1528,7 +1529,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 if (!MaterializeArguments(args, call_target)) {
                     return nullptr;
                 }
-                auto val = EvaluateCtorOrConvValue(args, arr);
+                auto val = const_eval_.CtorOrConv(arr, args);
                 return builder_->create<sem::Call>(expr, call_target, std::move(args),
                                                    current_statement_, val, has_side_effects);
             },
@@ -1550,7 +1551,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 if (!MaterializeArguments(args, call_target)) {
                     return nullptr;
                 }
-                auto val = EvaluateCtorOrConvValue(args, str);
+                auto val = const_eval_.CtorOrConv(str, args);
                 return builder_->create<sem::Call>(expr, call_target, std::move(args),
                                                    current_statement_, std::move(val),
                                                    has_side_effects);
@@ -1682,28 +1683,17 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     }
 
     // If the builtin is @const, and all arguments have constant values, evaluate the builtin now.
-    const sem::Constant* constant = nullptr;
+    const sem::Constant* value = nullptr;
     if (builtin.const_eval_fn) {
-        std::vector<const sem::Constant*> values(args.size());
-        bool is_const = true;  // all arguments have constant values
-        for (size_t i = 0; i < values.size(); i++) {
-            if (auto v = args[i]->ConstantValue()) {
-                values[i] = std::move(v);
-            } else {
-                is_const = false;
-                break;
-            }
-        }
-        if (is_const) {
-            constant = builtin.const_eval_fn(*builder_, values.data(), args.size());
-        }
+        value = (const_eval_.*builtin.const_eval_fn)(builtin.sem->ReturnType(), args.data(),
+                                                     args.size());
     }
 
     bool has_side_effects =
         builtin.sem->HasSideEffects() ||
         std::any_of(args.begin(), args.end(), [](auto* e) { return e->HasSideEffects(); });
     auto* call = builder_->create<sem::Call>(expr, builtin.sem, std::move(args), current_statement_,
-                                             constant, has_side_effects);
+                                             value, has_side_effects);
 
     if (current_function_) {
         current_function_->AddDirectlyCalledBuiltin(builtin.sem);
@@ -1856,7 +1846,7 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
         return nullptr;
     }
 
-    auto val = EvaluateLiteralValue(literal, ty);
+    auto val = const_eval_.Literal(ty, literal);
     return builder_->create<sem::Expression>(literal, ty, current_statement_, std::move(val),
                                              /* has_side_effects */ false);
 }
@@ -1976,7 +1966,7 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
             ret = builder_->create<sem::Reference>(ret, ref->StorageClass(), ref->Access());
         }
 
-        auto* val = EvaluateMemberAccessValue(object, member);
+        auto* val = const_eval_.MemberAccess(object, member);
         return builder_->create<sem::StructMemberAccess>(expr, ret, current_statement_, val, object,
                                                          member, has_side_effects, source_var);
     }
@@ -2044,7 +2034,7 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
             // the swizzle.
             ret = builder_->create<sem::Vector>(vec->type(), static_cast<uint32_t>(size));
         }
-        auto* val = EvaluateSwizzleValue(object, ret, swizzle);
+        auto* val = const_eval_.Swizzle(ret, object, swizzle);
         return builder_->create<sem::Swizzle>(expr, ret, current_statement_, val, object,
                                               std::move(swizzle), has_side_effects, source_var);
     }
@@ -2078,9 +2068,14 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
         }
     }
 
-    auto* val = EvaluateBinaryValue(lhs, rhs, op);
+    const sem::Constant* value = nullptr;
+    if (op.const_eval_fn) {
+        const sem::Expression* args[] = {lhs, rhs};
+        value = (const_eval_.*op.const_eval_fn)(op.result, args, 2u);
+    }
+
     bool has_side_effects = lhs->HasSideEffects() || rhs->HasSideEffects();
-    auto* sem = builder_->create<sem::Expression>(expr, op.result, current_statement_, val,
+    auto* sem = builder_->create<sem::Expression>(expr, op.result, current_statement_, value,
                                                   has_side_effects);
     sem->Behaviors() = lhs->Behaviors() + rhs->Behaviors();
 
@@ -2096,7 +2091,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
     const sem::Type* ty = nullptr;
     const sem::Variable* source_var = nullptr;
-    const sem::Constant* val = nullptr;
+    const sem::Constant* value = nullptr;
 
     switch (unary->op) {
         case ast::UnaryOp::kAddressOf:
@@ -2149,12 +2144,14 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
                 }
             }
             ty = op.result;
-            val = EvaluateUnaryValue(expr, op);
+            if (op.const_eval_fn) {
+                value = (const_eval_.*op.const_eval_fn)(ty, &expr, 1u);
+            }
             break;
         }
     }
 
-    auto* sem = builder_->create<sem::Expression>(unary, ty, current_statement_, val,
+    auto* sem = builder_->create<sem::Expression>(unary, ty, current_statement_, value,
                                                   expr->HasSideEffects(), source_var);
     sem->Behaviors() = expr->Behaviors();
     return sem;

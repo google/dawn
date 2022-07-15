@@ -47,7 +47,7 @@ class IntrinsicTable {
         /// The semantic info for the builtin
         const sem::Builtin* sem = nullptr;
         /// The constant evaluation function
-        const_eval::Function* const_eval_fn = nullptr;
+        ConstEval::Function const_eval_fn = nullptr;
     };
 
     /// UnaryOperator describes a resolved unary operator
@@ -56,6 +56,8 @@ class IntrinsicTable {
         const sem::Type* result = nullptr;
         /// The type of the parameter of the unary operator
         const sem::Type* parameter = nullptr;
+        /// The constant evaluation function
+        ConstEval::Function const_eval_fn = nullptr;
     };
 
     /// BinaryOperator describes a resolved binary operator
@@ -66,6 +68,8 @@ class IntrinsicTable {
         const sem::Type* lhs = nullptr;
         /// The type of RHS parameter of the binary operator
         const sem::Type* rhs = nullptr;
+        /// The constant evaluation function
+        ConstEval::Function const_eval_fn = nullptr;
     };
 
     /// Lookup looks for the builtin overload with the given signature, raising an error diagnostic

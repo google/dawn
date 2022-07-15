@@ -103,7 +103,7 @@ constexpr OverloadInfo kOverloads[] = {
 {{-   end }}
 {{-   if $o.IsDeprecated}}, OverloadFlag::kIsDeprecated{{end }}),
     /* const eval */
-{{-   if $o.ConstEvalFunction }} const_eval::{{$o.ConstEvalFunction}},
+{{-   if $o.ConstEvalFunction }} &ConstEval::{{$o.ConstEvalFunction}},
 {{-   else                    }} nullptr,
 {{-   end }}
   },
