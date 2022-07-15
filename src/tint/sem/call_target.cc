@@ -21,8 +21,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::CallTarget);
 
 namespace tint::sem {
 
-CallTarget::CallTarget(const sem::Type* return_type, const ParameterList& parameters)
-    : signature_{return_type, parameters} {
+CallTarget::CallTarget(const sem::Type* return_type,
+                       const ParameterList& parameters,
+                       EvaluationStage stage)
+    : signature_{return_type, parameters}, stage_(stage) {
     TINT_ASSERT(Semantic, return_type);
 }
 

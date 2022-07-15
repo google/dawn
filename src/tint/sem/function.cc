@@ -30,7 +30,7 @@ namespace tint::sem {
 Function::Function(const ast::Function* declaration,
                    Type* return_type,
                    std::vector<Parameter*> parameters)
-    : Base(return_type, utils::ToConstPtrVec(parameters)),
+    : Base(return_type, utils::ToConstPtrVec(parameters), EvaluationStage::kRuntime),
       declaration_(declaration),
       workgroup_size_{WorkgroupDimension{1}, WorkgroupDimension{1}, WorkgroupDimension{1}} {
     for (auto* parameter : parameters) {

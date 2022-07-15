@@ -28,14 +28,15 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Parameter);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::VariableUser);
 
 namespace tint::sem {
-
 Variable::Variable(const ast::Variable* declaration,
                    const sem::Type* type,
+                   EvaluationStage stage,
                    ast::StorageClass storage_class,
                    ast::Access access,
                    const Constant* constant_value)
     : declaration_(declaration),
       type_(type),
+      stage_(stage),
       storage_class_(storage_class),
       access_(access),
       constant_value_(constant_value) {}
@@ -44,21 +45,24 @@ Variable::~Variable() = default;
 
 LocalVariable::LocalVariable(const ast::Variable* declaration,
                              const sem::Type* type,
+                             EvaluationStage stage,
                              ast::StorageClass storage_class,
                              ast::Access access,
                              const sem::Statement* statement,
                              const Constant* constant_value)
-    : Base(declaration, type, storage_class, access, constant_value), statement_(statement) {}
+    : Base(declaration, type, stage, storage_class, access, constant_value),
+      statement_(statement) {}
 
 LocalVariable::~LocalVariable() = default;
 
 GlobalVariable::GlobalVariable(const ast::Variable* declaration,
                                const sem::Type* type,
+                               EvaluationStage stage,
                                ast::StorageClass storage_class,
                                ast::Access access,
                                const Constant* constant_value,
                                sem::BindingPoint binding_point)
-    : Base(declaration, type, storage_class, access, constant_value),
+    : Base(declaration, type, stage, storage_class, access, constant_value),
       binding_point_(binding_point) {}
 
 GlobalVariable::~GlobalVariable() = default;
@@ -69,7 +73,9 @@ Parameter::Parameter(const ast::Parameter* declaration,
                      ast::StorageClass storage_class,
                      ast::Access access,
                      const ParameterUsage usage /* = ParameterUsage::kNone */)
-    : Base(declaration, type, storage_class, access, nullptr), index_(index), usage_(usage) {}
+    : Base(declaration, type, EvaluationStage::kRuntime, storage_class, access, nullptr),
+      index_(index),
+      usage_(usage) {}
 
 Parameter::~Parameter() = default;
 
@@ -78,6 +84,7 @@ VariableUser::VariableUser(const ast::IdentifierExpression* declaration,
                            sem::Variable* variable)
     : Base(declaration,
            variable->Type(),
+           variable->Stage(),
            statement,
            variable->ConstantValue(),
            /* has_side_effects */ false),

@@ -25,7 +25,8 @@ class TypeConstructor final : public Castable<TypeConstructor, CallTarget> {
     /// Constructor
     /// @param type the type that's being constructed
     /// @param parameters the type constructor parameters
-    TypeConstructor(const sem::Type* type, const ParameterList& parameters);
+    /// @param stage the earliest evaluation stage for the expression
+    TypeConstructor(const sem::Type* type, const ParameterList& parameters, EvaluationStage stage);
 
     /// Destructor
     ~TypeConstructor() override;

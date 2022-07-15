@@ -400,12 +400,15 @@ class Resolver {
     bool IsBuiltin(Symbol) const;
 
     // ArrayConstructorSig represents a unique array constructor signature.
-    // It is a tuple of the array type and number of arguments provided.
-    using ArrayConstructorSig = utils::UnorderedKeyWrapper<std::tuple<const sem::Array*, size_t>>;
+    // It is a tuple of the array type, number of arguments provided and earliest evaluation stage.
+    using ArrayConstructorSig =
+        utils::UnorderedKeyWrapper<std::tuple<const sem::Array*, size_t, sem::EvaluationStage>>;
 
     // StructConstructorSig represents a unique structure constructor signature.
-    // It is a tuple of the structure type and number of arguments provided.
-    using StructConstructorSig = utils::UnorderedKeyWrapper<std::tuple<const sem::Struct*, size_t>>;
+    // It is a tuple of the structure type, number of arguments provided and earliest evaluation
+    // stage.
+    using StructConstructorSig =
+        utils::UnorderedKeyWrapper<std::tuple<const sem::Struct*, size_t, sem::EvaluationStage>>;
 
     ProgramBuilder* const builder_;
     diag::List& diagnostics_;

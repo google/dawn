@@ -32,6 +32,7 @@ class IndexAccessorExpression final : public Castable<IndexAccessorExpression, E
     /// Constructor
     /// @param declaration the AST node
     /// @param type the resolved type of the expression
+    /// @param stage the earliest evaluation stage for the expression
     /// @param object the object expression that is being indexed
     /// @param index the index expression
     /// @param statement the statement that owns this expression
@@ -40,6 +41,7 @@ class IndexAccessorExpression final : public Castable<IndexAccessorExpression, E
     /// @param source_var the (optional) source variable for this expression
     IndexAccessorExpression(const ast::IndexAccessorExpression* declaration,
                             const sem::Type* type,
+                            EvaluationStage stage,
                             const Expression* object,
                             const Expression* index,
                             const Statement* statement,

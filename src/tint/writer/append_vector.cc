@@ -59,7 +59,8 @@ const sem::Expression* Zero(ProgramBuilder& b, const sem::Type* ty, const sem::S
             << "unsupported vector element type: " << ty->TypeInfo().name;
         return nullptr;
     }
-    auto* sem = b.create<sem::Expression>(expr, ty, stmt, /* constant_value */ nullptr,
+    auto* sem = b.create<sem::Expression>(expr, ty, sem::EvaluationStage::kRuntime, stmt,
+                                          /* constant_value */ nullptr,
                                           /* has_side_effects */ false);
     b.Sem().Add(expr, sem);
     return sem;
@@ -136,10 +137,12 @@ const sem::Call* AppendVector(ProgramBuilder* b,
         auto* scalar_cast_target = b->create<sem::TypeConversion>(
             packed_el_sem_ty,
             b->create<sem::Parameter>(nullptr, 0u, scalar_sem->Type()->UnwrapRef(),
-                                      ast::StorageClass::kNone, ast::Access::kUndefined));
+                                      ast::StorageClass::kNone, ast::Access::kUndefined),
+            sem::EvaluationStage::kRuntime);
         auto* scalar_cast_sem = b->create<sem::Call>(
-            scalar_cast_ast, scalar_cast_target, std::vector<const sem::Expression*>{scalar_sem},
-            statement, /* constant_value */ nullptr, /* has_side_effects */ false);
+            scalar_cast_ast, scalar_cast_target, sem::EvaluationStage::kRuntime,
+            std::vector<const sem::Expression*>{scalar_sem}, statement,
+            /* constant_value */ nullptr, /* has_side_effects */ false);
         b->Sem().Add(scalar_cast_ast, scalar_cast_sem);
         packed.emplace_back(scalar_cast_sem);
     } else {
@@ -151,15 +154,17 @@ const sem::Call* AppendVector(ProgramBuilder* b,
         utils::Transform(packed, [&](const sem::Expression* expr) { return expr->Declaration(); }));
     auto* constructor_target = b->create<sem::TypeConstructor>(
         packed_sem_ty,
-        utils::Transform(
-            packed, [&](const tint::sem::Expression* arg, size_t i) -> const sem::Parameter* {
-                return b->create<sem::Parameter>(nullptr, static_cast<uint32_t>(i),
-                                                 arg->Type()->UnwrapRef(), ast::StorageClass::kNone,
-                                                 ast::Access::kUndefined);
-            }));
-    auto* constructor_sem = b->create<sem::Call>(constructor_ast, constructor_target, packed,
-                                                 statement, /* constant_value */ nullptr,
-                                                 /* has_side_effects */ false);
+        utils::Transform(packed,
+                         [&](const tint::sem::Expression* arg, size_t i) -> const sem::Parameter* {
+                             return b->create<sem::Parameter>(
+                                 nullptr, static_cast<uint32_t>(i), arg->Type()->UnwrapRef(),
+                                 ast::StorageClass::kNone, ast::Access::kUndefined);
+                         }),
+        sem::EvaluationStage::kRuntime);
+    auto* constructor_sem =
+        b->create<sem::Call>(constructor_ast, constructor_target, sem::EvaluationStage::kRuntime,
+                             packed, statement, /* constant_value */ nullptr,
+                             /* has_side_effects */ false);
     b->Sem().Add(constructor_ast, constructor_sem);
     return constructor_sem;
 }

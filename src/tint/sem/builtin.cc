@@ -90,9 +90,10 @@ bool IsDP4aBuiltin(BuiltinType i) {
 Builtin::Builtin(BuiltinType type,
                  const sem::Type* return_type,
                  std::vector<Parameter*> parameters,
+                 EvaluationStage eval_stage,
                  PipelineStageSet supported_stages,
                  bool is_deprecated)
-    : Base(return_type, utils::ToConstPtrVec(parameters)),
+    : Base(return_type, utils::ToConstPtrVec(parameters), eval_stage),
       type_(type),
       supported_stages_(supported_stages),
       is_deprecated_(is_deprecated) {

@@ -22,6 +22,7 @@ Materialize::Materialize(const Expression* expr,
                          const Constant* constant)
     : Base(/* declaration */ expr->Declaration(),
            /* type */ constant->Type(),
+           /* stage */ EvaluationStage::kConstant,  // Abstract can only be const-expr
            /* statement */ statement,
            /* constant */ constant,
            /* has_side_effects */ false,

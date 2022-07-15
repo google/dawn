@@ -25,7 +25,8 @@ class TypeConversion final : public Castable<TypeConversion, CallTarget> {
     /// Constructor
     /// @param type the target type of the cast
     /// @param parameter the type cast parameter
-    TypeConversion(const sem::Type* type, const sem::Parameter* parameter);
+    /// @param stage the earliest evaluation stage for the expression
+    TypeConversion(const sem::Type* type, const sem::Parameter* parameter, EvaluationStage stage);
 
     /// Destructor
     ~TypeConversion() override;

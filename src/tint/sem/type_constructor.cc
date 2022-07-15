@@ -18,8 +18,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::TypeConstructor);
 
 namespace tint::sem {
 
-TypeConstructor::TypeConstructor(const sem::Type* type, const ParameterList& parameters)
-    : Base(type, parameters) {}
+TypeConstructor::TypeConstructor(const sem::Type* type,
+                                 const ParameterList& parameters,
+                                 EvaluationStage stage)
+    : Base(type, parameters, stage) {}
 
 TypeConstructor::~TypeConstructor() = default;
 

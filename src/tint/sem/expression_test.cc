@@ -43,7 +43,8 @@ using ExpressionTest = TestHelper;
 
 TEST_F(ExpressionTest, UnwrapMaterialize) {
     MockConstant c(create<I32>());
-    auto* a = create<Expression>(/* declaration */ nullptr, create<I32>(), /* statement */ nullptr,
+    auto* a = create<Expression>(/* declaration */ nullptr, create<I32>(),
+                                 sem::EvaluationStage::kRuntime, /* statement */ nullptr,
                                  /* constant_value */ nullptr,
                                  /* has_side_effects */ false, /* source_var */ nullptr);
     auto* b = create<Materialize>(a, /* statement */ nullptr, &c);

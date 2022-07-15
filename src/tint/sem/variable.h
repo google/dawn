@@ -45,11 +45,13 @@ class Variable : public Castable<Variable, Node> {
     /// Constructor
     /// @param declaration the AST declaration node
     /// @param type the variable type
+    /// @param stage the evaluation stage for an expression of this variable type
     /// @param storage_class the variable storage class
     /// @param access the variable access control type
     /// @param constant_value the constant value for the variable. May be null
     Variable(const ast::Variable* declaration,
              const sem::Type* type,
+             EvaluationStage stage,
              ast::StorageClass storage_class,
              ast::Access access,
              const Constant* constant_value);
@@ -62,6 +64,9 @@ class Variable : public Castable<Variable, Node> {
 
     /// @returns the canonical type for the variable
     const sem::Type* Type() const { return type_; }
+
+    /// @returns the evaluation stage for an expression of this variable type
+    EvaluationStage Stage() const { return stage_; }
 
     /// @returns the storage class for the variable
     ast::StorageClass StorageClass() const { return storage_class_; }
@@ -89,6 +94,7 @@ class Variable : public Castable<Variable, Node> {
   private:
     const ast::Variable* const declaration_;
     const sem::Type* const type_;
+    const EvaluationStage stage_;
     const ast::StorageClass storage_class_;
     const ast::Access access_;
     const Constant* constant_value_;
@@ -102,12 +108,14 @@ class LocalVariable final : public Castable<LocalVariable, Variable> {
     /// Constructor
     /// @param declaration the AST declaration node
     /// @param type the variable type
+    /// @param stage the evaluation stage for an expression of this variable type
     /// @param storage_class the variable storage class
     /// @param access the variable access control type
     /// @param statement the statement that declared this local variable
     /// @param constant_value the constant value for the variable. May be null
     LocalVariable(const ast::Variable* declaration,
                   const sem::Type* type,
+                  EvaluationStage stage,
                   ast::StorageClass storage_class,
                   ast::Access access,
                   const sem::Statement* statement,
@@ -137,12 +145,14 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
     /// Constructor
     /// @param declaration the AST declaration node
     /// @param type the variable type
+    /// @param stage the evaluation stage for an expression of this variable type
     /// @param storage_class the variable storage class
     /// @param access the variable access control type
     /// @param constant_value the constant value for the variable. May be null
     /// @param binding_point the optional resource binding point of the variable
     GlobalVariable(const ast::Variable* declaration,
                    const sem::Type* type,
+                   EvaluationStage stage,
                    ast::StorageClass storage_class,
                    ast::Access access,
                    const Constant* constant_value,

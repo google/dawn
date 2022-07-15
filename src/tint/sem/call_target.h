@@ -63,9 +63,12 @@ struct CallTargetSignature {
 class CallTarget : public Castable<CallTarget, Node> {
   public:
     /// Constructor
+    /// @param stage the earliest evaluation stage for a call to this target
     /// @param return_type the return type of the call target
     /// @param parameters the parameters for the call target
-    CallTarget(const sem::Type* return_type, const ParameterList& parameters);
+    CallTarget(const sem::Type* return_type,
+               const ParameterList& parameters,
+               EvaluationStage stage);
 
     /// Copy constructor
     CallTarget(const CallTarget&);
@@ -82,8 +85,12 @@ class CallTarget : public Castable<CallTarget, Node> {
     /// @return the signature of the call target
     const CallTargetSignature& Signature() const { return signature_; }
 
+    /// @return the earliest evaluation stage for a call to this target
+    EvaluationStage Stage() const { return stage_; }
+
   private:
     CallTargetSignature signature_;
+    EvaluationStage stage_;
 };
 
 }  // namespace tint::sem

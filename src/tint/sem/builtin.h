@@ -83,6 +83,7 @@ class Builtin final : public Castable<Builtin, CallTarget> {
     /// @param type the builtin type
     /// @param return_type the return type for the builtin call
     /// @param parameters the parameters for the builtin overload
+    /// @param eval_stage the earliest evaluation stage for a call to the builtin
     /// @param supported_stages the pipeline stages that this builtin can be
     /// used in
     /// @param is_deprecated true if the particular overload is considered
@@ -90,6 +91,7 @@ class Builtin final : public Castable<Builtin, CallTarget> {
     Builtin(BuiltinType type,
             const sem::Type* return_type,
             std::vector<Parameter*> parameters,
+            EvaluationStage eval_stage,
             PipelineStageSet supported_stages,
             bool is_deprecated);
 

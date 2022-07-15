@@ -2392,7 +2392,8 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
         auto* zero = builder_.Expr(0_i);
         auto* stmt = builder_.Sem().Get(vector)->Stmt();
         builder_.Sem().Add(
-            zero, builder_.create<sem::Expression>(zero, i32, stmt, /* constant_value */ nullptr,
+            zero, builder_.create<sem::Expression>(zero, i32, sem::EvaluationStage::kRuntime, stmt,
+                                                   /* constant_value */ nullptr,
                                                    /* has_side_effects */ false));
         auto* packed = AppendVector(&builder_, vector, zero);
         return EmitExpression(out, packed->Declaration());

@@ -371,8 +371,10 @@ class Validator {
 
     /// Validates a 'override' variable declaration
     /// @param v the variable to validate
+    /// @param constant_ids the set of constant ids in the module
     /// @returns true on success, false otherwise.
-    bool Override(const sem::Variable* v) const;
+    bool Override(const sem::Variable* v,
+                  std::unordered_map<uint32_t, const sem::Variable*> constant_ids) const;
 
     /// Validates a 'const' variable declaration
     /// @param v the variable to validate

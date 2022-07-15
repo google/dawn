@@ -298,6 +298,7 @@ set(TINT_LIB_SRCS
   sem/depth_multisampled_texture.h
   sem/depth_texture.cc
   sem/depth_texture.h
+  sem/evaluation_stage.h
   sem/expression.cc
   sem/expression.h
   sem/external_texture.cc
@@ -777,6 +778,7 @@ if(TINT_BUILD_TESTS)
     resolver/control_block_validation_test.cc
     resolver/dependency_graph_test.cc
     resolver/entry_point_validation_test.cc
+    resolver/evaluation_stage_test.cc
     resolver/function_validation_test.cc
     resolver/host_shareable_validation_test.cc
     resolver/increment_decrement_validation_test.cc

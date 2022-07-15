@@ -37,6 +37,7 @@ class MemberAccessorExpression : public Castable<MemberAccessorExpression, Expre
     /// Constructor
     /// @param declaration the AST node
     /// @param type the resolved type of the expression
+    /// @param stage the earliest evaluation stage for the expression
     /// @param statement the statement that owns this expression
     /// @param constant the constant value of the expression. May be null.
     /// @param object the object that holds the member being accessed
@@ -44,6 +45,7 @@ class MemberAccessorExpression : public Castable<MemberAccessorExpression, Expre
     /// @param source_var the (optional) source variable for this expression
     MemberAccessorExpression(const ast::MemberAccessorExpression* declaration,
                              const sem::Type* type,
+                             EvaluationStage stage,
                              const Statement* statement,
                              const Constant* constant,
                              const Expression* object,

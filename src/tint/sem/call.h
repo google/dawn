@@ -30,12 +30,14 @@ class Call final : public Castable<Call, Expression> {
     /// Constructor
     /// @param declaration the AST node
     /// @param target the call target
+    /// @param stage the earliest evaluation stage for the expression
     /// @param arguments the call arguments
     /// @param statement the statement that owns this expression
     /// @param constant the constant value of this expression
     /// @param has_side_effects whether this expression may have side effects
     Call(const ast::CallExpression* declaration,
          const CallTarget* target,
+         EvaluationStage stage,
          std::vector<const sem::Expression*> arguments,
          const Statement* statement,
          const Constant* constant,

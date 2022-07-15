@@ -18,6 +18,7 @@
 #include "src/tint/ast/expression.h"
 #include "src/tint/sem/behavior.h"
 #include "src/tint/sem/constant.h"
+#include "src/tint/sem/evaluation_stage.h"
 #include "src/tint/sem/node.h"
 
 // Forward declarations
@@ -28,18 +29,21 @@ class Variable;
 }  // namespace tint::sem
 
 namespace tint::sem {
+
 /// Expression holds the semantic information for expression nodes.
 class Expression : public Castable<Expression, Node> {
   public:
     /// Constructor
     /// @param declaration the AST node
     /// @param type the resolved type of the expression
+    /// @param stage the earliest evaluation stage for the expression
     /// @param statement the statement that owns this expression
     /// @param constant the constant value of the expression. May be null
     /// @param has_side_effects true if this expression may have side-effects
     /// @param source_var the (optional) source variable for this expression
     Expression(const ast::Expression* declaration,
                const sem::Type* type,
+               EvaluationStage stage,
                const Statement* statement,
                const Constant* constant,
                bool has_side_effects,
@@ -53,6 +57,9 @@ class Expression : public Castable<Expression, Node> {
 
     /// @return the resolved type of the expression
     const sem::Type* Type() const { return type_; }
+
+    /// @return the earliest evaluation stage for the expression
+    EvaluationStage Stage() const { return stage_; }
 
     /// @return the statement that owns this expression
     const Statement* Stmt() const { return statement_; }
@@ -87,6 +94,7 @@ class Expression : public Castable<Expression, Node> {
 
   private:
     const sem::Type* const type_;
+    const EvaluationStage stage_;
     const Statement* const statement_;
     const Constant* const constant_;
     sem::Behaviors behaviors_{sem::Behavior::kNext};
