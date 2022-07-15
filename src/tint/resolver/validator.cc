@@ -585,14 +585,6 @@ bool Validator::GlobalVariable(
 
             return Var(global);
         },
-        [&](const ast::Let*) {
-            if (!decl->attributes.empty()) {
-                AddError("attribute is not valid for module-scope 'let' declaration",
-                         decl->attributes[0]->source);
-                return false;
-            }
-            return Let(global);
-        },
         [&](const ast::Override*) {
             for (auto* attr : decl->attributes) {
                 if (auto* id_attr = attr->As<ast::IdAttribute>()) {
@@ -776,15 +768,6 @@ bool Validator::Var(const sem::Variable* v) const {
 bool Validator::Let(const sem::Variable* v) const {
     auto* decl = v->Declaration();
     auto* storage_ty = v->Type()->UnwrapRef();
-
-    if (v->Is<sem::GlobalVariable>()) {
-        auto name = symbols_.NameFor(decl->symbol);
-        if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
-            AddError("'" + name + "' is a builtin and cannot be redeclared as a 'let'",
-                     decl->source);
-            return false;
-        }
-    }
 
     if (!(storage_ty->IsConstructible() || storage_ty->Is<sem::Pointer>())) {
         AddError(sem_.TypeNameOf(storage_ty) + " cannot be used as the type of a 'let'",
