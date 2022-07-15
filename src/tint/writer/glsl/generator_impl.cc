@@ -500,7 +500,9 @@ bool GeneratorImpl::EmitBitwiseBoolOp(std::ostream& out, const ast::BinaryExpres
 bool GeneratorImpl::EmitFloatModulo(std::ostream& out, const ast::BinaryExpression* expr) {
     std::string fn;
     auto* ret_ty = TypeOf(expr)->UnwrapRef();
-    fn = utils::GetOrCreate(float_modulo_funcs_, ret_ty, [&]() -> std::string {
+    auto* lhs_ty = TypeOf(expr->lhs)->UnwrapRef();
+    auto* rhs_ty = TypeOf(expr->rhs)->UnwrapRef();
+    fn = utils::GetOrCreate(float_modulo_funcs_, {lhs_ty, rhs_ty}, [&]() -> std::string {
         TextBuffer b;
         TINT_DEFER(helpers_.Append(b));
 

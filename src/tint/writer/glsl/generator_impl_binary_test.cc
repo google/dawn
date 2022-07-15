@@ -273,6 +273,76 @@ TEST_F(GlslGeneratorImplTest_Binary, ModVec3F32) {
     EXPECT_EQ(out.str(), "tint_float_modulo(a, b)");
 }
 
+TEST_F(GlslGeneratorImplTest_Binary, ModVec3F32ScalarF32) {
+    GlobalVar("a", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("b", ty.f32(), ast::StorageClass::kPrivate);
+
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr("a"), Expr("b"));
+    WrapInFunction(expr);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "tint_float_modulo(a, b)");
+}
+
+TEST_F(GlslGeneratorImplTest_Binary, ModScalarF32Vec3F32) {
+    GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("b", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr("a"), Expr("b"));
+    WrapInFunction(expr);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "tint_float_modulo(a, b)");
+}
+
+TEST_F(GlslGeneratorImplTest_Binary, ModMixedVec3ScalarF32) {
+    GlobalVar("a", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("b", ty.f32(), ast::StorageClass::kPrivate);
+
+    auto* expr_vec_mod_vec =
+        create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr("a"), Expr("a"));
+    auto* expr_vec_mod_scalar =
+        create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr("a"), Expr("b"));
+    auto* expr_scalar_mod_vec =
+        create<ast::BinaryExpression>(ast::BinaryOp::kModulo, Expr("b"), Expr("a"));
+    WrapInFunction(expr_vec_mod_vec, expr_vec_mod_scalar, expr_scalar_mod_vec);
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+
+vec3 tint_float_modulo(vec3 lhs, vec3 rhs) {
+  return (lhs - rhs * trunc(lhs / rhs));
+}
+
+vec3 tint_float_modulo_1(vec3 lhs, float rhs) {
+  return (lhs - rhs * trunc(lhs / rhs));
+}
+
+vec3 tint_float_modulo_2(float lhs, vec3 rhs) {
+  return (lhs - rhs * trunc(lhs / rhs));
+}
+
+
+vec3 a = vec3(0.0f, 0.0f, 0.0f);
+float b = 0.0f;
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void test_function() {
+  vec3 tint_symbol = tint_float_modulo(a, a);
+  vec3 tint_symbol_1 = tint_float_modulo_1(a, b);
+  vec3 tint_symbol_2 = tint_float_modulo_2(b, a);
+  return;
+}
+)");
+}
+
 TEST_F(GlslGeneratorImplTest_Binary, Logical_Multi) {
     // (a && b) || (c || d)
     GlobalVar("a", ty.bool_(), ast::StorageClass::kPrivate);

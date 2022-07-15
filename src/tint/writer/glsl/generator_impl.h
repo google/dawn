@@ -492,6 +492,23 @@ class GeneratorImpl : public TextGenerator {
         };
     };
 
+    /// The structure holding both type of two operands for a binary operator.
+    struct BinaryOperandType {
+        const sem::Type* lhs_type;
+        const sem::Type* rhs_type;
+        bool operator==(const BinaryOperandType& rhs) const {
+            return lhs_type == rhs.lhs_type && rhs_type == rhs.rhs_type;
+        }
+        /// Hasher is a std::hash function for BinaryOperandType
+        struct Hasher {
+            /// @param i the BinaryOperandType to hash
+            /// @returns the hash of `i`
+            inline std::size_t operator()(const BinaryOperandType& i) const {
+                return utils::Hash(i.lhs_type, i.rhs_type);
+            }
+        };
+    };
+
     /// CallBuiltinHelper will call the builtin helper function, creating it
     /// if it hasn't been built already. If the builtin needs to be built then
     /// CallBuiltinHelper will generate the function signature and will call
@@ -522,7 +539,8 @@ class GeneratorImpl : public TextGenerator {
     std::unordered_map<const sem::Builtin*, std::string> builtins_;
     std::unordered_map<const sem::Vector*, std::string> dynamic_vector_write_;
     std::unordered_map<const sem::Vector*, std::string> int_dot_funcs_;
-    std::unordered_map<const sem::Type*, std::string> float_modulo_funcs_;
+    std::unordered_map<BinaryOperandType, std::string, BinaryOperandType::Hasher>
+        float_modulo_funcs_;
     std::unordered_set<const sem::Struct*> emitted_structs_;
     bool requires_oes_sample_variables_ = false;
     bool requires_default_precision_qualifier_ = false;
