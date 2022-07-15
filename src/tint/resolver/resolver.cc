@@ -1483,16 +1483,20 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     // call for a CtorConvIntrinsic with an optional template argument type.
     auto ct_ctor_or_conv = [&](CtorConvIntrinsic ty, const sem::Type* template_arg) -> sem::Call* {
         auto arg_tys = utils::Transform(args, [](auto* arg) { return arg->Type(); });
-        auto* call_target = intrinsic_table_->Lookup(ty, template_arg, arg_tys, expr->source);
-        if (!call_target) {
+        auto ctor_or_conv = intrinsic_table_->Lookup(ty, template_arg, arg_tys, expr->source);
+        if (!ctor_or_conv.target) {
             return nullptr;
         }
-        if (!MaterializeArguments(args, call_target)) {
+        if (!MaterializeArguments(args, ctor_or_conv.target)) {
             return nullptr;
         }
-        auto val = const_eval_.CtorOrConv(call_target->ReturnType(), args);
-        return builder_->create<sem::Call>(expr, call_target, std::move(args), current_statement_,
-                                           val, has_side_effects);
+        const sem::Constant* value = nullptr;
+        if (ctor_or_conv.const_eval_fn) {
+            value = (const_eval_.*ctor_or_conv.const_eval_fn)(ctor_or_conv.target->ReturnType(),
+                                                              args.data(), args.size());
+        }
+        return builder_->create<sem::Call>(expr, ctor_or_conv.target, std::move(args),
+                                           current_statement_, value, has_side_effects);
     };
 
     // ct_ctor_or_conv is a helper for building either a sem::TypeConstructor or sem::TypeConversion
@@ -1529,7 +1533,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 if (!MaterializeArguments(args, call_target)) {
                     return nullptr;
                 }
-                auto val = const_eval_.CtorOrConv(arr, args);
+                auto val = const_eval_.ArrayOrStructCtor(arr, args);
                 return builder_->create<sem::Call>(expr, call_target, std::move(args),
                                                    current_statement_, val, has_side_effects);
             },
@@ -1551,7 +1555,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 if (!MaterializeArguments(args, call_target)) {
                     return nullptr;
                 }
-                auto val = const_eval_.CtorOrConv(str, args);
+                auto val = const_eval_.ArrayOrStructCtor(str, args);
                 return builder_->create<sem::Call>(expr, call_target, std::move(args),
                                                    current_statement_, std::move(val),
                                                    has_side_effects);

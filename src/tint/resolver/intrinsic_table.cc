@@ -928,10 +928,10 @@ class Impl : public IntrinsicTable {
                           const Source& source,
                           bool is_compound) override;
 
-    const sem::CallTarget* Lookup(CtorConvIntrinsic type,
-                                  const sem::Type* template_arg,
-                                  const std::vector<const sem::Type*>& args,
-                                  const Source& source) override;
+    CtorOrConv Lookup(CtorConvIntrinsic type,
+                      const sem::Type* template_arg,
+                      const std::vector<const sem::Type*>& args,
+                      const Source& source) override;
 
   private:
     /// Candidate holds information about an overload evaluated for resolution.
@@ -1236,10 +1236,10 @@ IntrinsicTable::BinaryOperator Impl::Lookup(ast::BinaryOp op,
     return BinaryOperator{match.return_type, match.parameters[0].type, match.parameters[1].type};
 }
 
-const sem::CallTarget* Impl::Lookup(CtorConvIntrinsic type,
-                                    const sem::Type* template_arg,
-                                    const std::vector<const sem::Type*>& args,
-                                    const Source& source) {
+IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
+                                        const sem::Type* template_arg,
+                                        const std::vector<const sem::Type*>& args,
+                                        const Source& source) {
     auto name = str(type);
 
     // Generates an error when no overloads match the provided arguments
@@ -1292,18 +1292,20 @@ const sem::CallTarget* Impl::Lookup(CtorConvIntrinsic type,
                 nullptr, static_cast<uint32_t>(params.size()), p.type, ast::StorageClass::kNone,
                 ast::Access::kUndefined, p.usage));
         }
-        return utils::GetOrCreate(constructors, match, [&]() {
+        auto* target = utils::GetOrCreate(constructors, match, [&]() {
             return builder.create<sem::TypeConstructor>(match.return_type, std::move(params));
         });
+        return CtorOrConv{target, match.overload->const_eval_fn};
     }
 
     // Conversion.
-    return utils::GetOrCreate(converters, match, [&]() {
+    auto* target = utils::GetOrCreate(converters, match, [&]() {
         auto param = builder.create<sem::Parameter>(
             nullptr, 0u, match.parameters[0].type, ast::StorageClass::kNone,
             ast::Access::kUndefined, match.parameters[0].usage);
         return builder.create<sem::TypeConversion>(match.return_type, param);
     });
+    return CtorOrConv{target, match.overload->const_eval_fn};
 }
 
 IntrinsicPrototype Impl::MatchIntrinsic(const IntrinsicInfo& intrinsic,

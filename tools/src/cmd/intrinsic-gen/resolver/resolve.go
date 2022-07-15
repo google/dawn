@@ -329,7 +329,14 @@ func (r *resolver) intrinsic(
 	if constEvalFn := a.Attributes.Take("const"); constEvalFn != nil {
 		switch len(constEvalFn.Values) {
 		case 0:
-			overload.ConstEvalFunction = overload.Decl.Name
+			switch overload.Decl.Kind {
+			case ast.Builtin, ast.Operator:
+				overload.ConstEvalFunction = overload.Decl.Name
+			case ast.Constructor:
+				overload.ConstEvalFunction = "Ctor"
+			case ast.Converter:
+				overload.ConstEvalFunction = "Conv"
+			}
 		case 1:
 			overload.ConstEvalFunction = constEvalFn.Values[0]
 		default:

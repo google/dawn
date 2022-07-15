@@ -72,6 +72,14 @@ class IntrinsicTable {
         ConstEval::Function const_eval_fn = nullptr;
     };
 
+    /// CtorOrConv describes a resolved type constructor or type conversion
+    struct CtorOrConv {
+        /// The result type of the type constructor or type conversion
+        const sem::CallTarget* target = nullptr;
+        /// The constant evaluation function
+        ConstEval::Function const_eval_fn = nullptr;
+    };
+
     /// Lookup looks for the builtin overload with the given signature, raising an error diagnostic
     /// if the builtin was not found.
     /// @param type the builtin type
@@ -113,10 +121,10 @@ class IntrinsicTable {
     /// @param args the argument types passed to the constructor / conversion call
     /// @param source the source of the call
     /// @return a sem::TypeConstructor, sem::TypeConversion or nullptr if nothing matched
-    virtual const sem::CallTarget* Lookup(CtorConvIntrinsic type,
-                                          const sem::Type* template_arg,
-                                          const std::vector<const sem::Type*>& args,
-                                          const Source& source) = 0;
+    virtual CtorOrConv Lookup(CtorConvIntrinsic type,
+                              const sem::Type* template_arg,
+                              const std::vector<const sem::Type*>& args,
+                              const Source& source) = 0;
 };
 
 }  // namespace tint::resolver

@@ -676,36 +676,38 @@ TEST_F(IntrinsicTableTest, MismatchCompoundOp) {
 TEST_F(IntrinsicTableTest, MatchTypeConstructorImplicit) {
     auto* i32 = create<sem::I32>();
     auto* vec3_i32 = create<sem::Vector>(i32, 3u);
-    auto* result =
+    auto result =
         table->Lookup(CtorConvIntrinsic::kVec3, nullptr, {i32, i32, i32}, Source{{12, 34}});
-    ASSERT_NE(result, nullptr);
-    EXPECT_EQ(result->ReturnType(), vec3_i32);
-    EXPECT_TRUE(result->Is<sem::TypeConstructor>());
-    ASSERT_EQ(result->Parameters().size(), 3u);
-    EXPECT_EQ(result->Parameters()[0]->Type(), i32);
-    EXPECT_EQ(result->Parameters()[1]->Type(), i32);
-    EXPECT_EQ(result->Parameters()[2]->Type(), i32);
+    ASSERT_NE(result.target, nullptr);
+    EXPECT_EQ(result.target->ReturnType(), vec3_i32);
+    EXPECT_TRUE(result.target->Is<sem::TypeConstructor>());
+    ASSERT_EQ(result.target->Parameters().size(), 3u);
+    EXPECT_EQ(result.target->Parameters()[0]->Type(), i32);
+    EXPECT_EQ(result.target->Parameters()[1]->Type(), i32);
+    EXPECT_EQ(result.target->Parameters()[2]->Type(), i32);
+    EXPECT_NE(result.const_eval_fn, nullptr);
 }
 
 TEST_F(IntrinsicTableTest, MatchTypeConstructorExplicit) {
     auto* i32 = create<sem::I32>();
     auto* vec3_i32 = create<sem::Vector>(i32, 3u);
-    auto* result = table->Lookup(CtorConvIntrinsic::kVec3, i32, {i32, i32, i32}, Source{{12, 34}});
-    ASSERT_NE(result, nullptr);
-    EXPECT_EQ(result->ReturnType(), vec3_i32);
-    EXPECT_TRUE(result->Is<sem::TypeConstructor>());
-    ASSERT_EQ(result->Parameters().size(), 3u);
-    EXPECT_EQ(result->Parameters()[0]->Type(), i32);
-    EXPECT_EQ(result->Parameters()[1]->Type(), i32);
-    EXPECT_EQ(result->Parameters()[2]->Type(), i32);
+    auto result = table->Lookup(CtorConvIntrinsic::kVec3, i32, {i32, i32, i32}, Source{{12, 34}});
+    ASSERT_NE(result.target, nullptr);
+    EXPECT_EQ(result.target->ReturnType(), vec3_i32);
+    EXPECT_TRUE(result.target->Is<sem::TypeConstructor>());
+    ASSERT_EQ(result.target->Parameters().size(), 3u);
+    EXPECT_EQ(result.target->Parameters()[0]->Type(), i32);
+    EXPECT_EQ(result.target->Parameters()[1]->Type(), i32);
+    EXPECT_EQ(result.target->Parameters()[2]->Type(), i32);
+    EXPECT_NE(result.const_eval_fn, nullptr);
 }
 
 TEST_F(IntrinsicTableTest, MismatchTypeConstructorImplicit) {
     auto* i32 = create<sem::I32>();
     auto* f32 = create<sem::F32>();
-    auto* result =
+    auto result =
         table->Lookup(CtorConvIntrinsic::kVec3, nullptr, {i32, f32, i32}, Source{{12, 34}});
-    ASSERT_EQ(result, nullptr);
+    ASSERT_EQ(result.target, nullptr);
     EXPECT_EQ(Diagnostics().str(), R"(12:34 error: no matching constructor for vec3(i32, f32, i32)
 
 6 candidate constructors:
@@ -728,8 +730,8 @@ TEST_F(IntrinsicTableTest, MismatchTypeConstructorImplicit) {
 TEST_F(IntrinsicTableTest, MismatchTypeConstructorExplicit) {
     auto* i32 = create<sem::I32>();
     auto* f32 = create<sem::F32>();
-    auto* result = table->Lookup(CtorConvIntrinsic::kVec3, i32, {i32, f32, i32}, Source{{12, 34}});
-    ASSERT_EQ(result, nullptr);
+    auto result = table->Lookup(CtorConvIntrinsic::kVec3, i32, {i32, f32, i32}, Source{{12, 34}});
+    ASSERT_EQ(result.target, nullptr);
     EXPECT_EQ(Diagnostics().str(),
               R"(12:34 error: no matching constructor for vec3<i32>(i32, f32, i32)
 
@@ -755,19 +757,19 @@ TEST_F(IntrinsicTableTest, MatchTypeConversion) {
     auto* vec3_i32 = create<sem::Vector>(i32, 3u);
     auto* f32 = create<sem::F32>();
     auto* vec3_f32 = create<sem::Vector>(f32, 3u);
-    auto* result = table->Lookup(CtorConvIntrinsic::kVec3, i32, {vec3_f32}, Source{{12, 34}});
-    ASSERT_NE(result, nullptr);
-    EXPECT_EQ(result->ReturnType(), vec3_i32);
-    EXPECT_TRUE(result->Is<sem::TypeConversion>());
-    ASSERT_EQ(result->Parameters().size(), 1u);
-    EXPECT_EQ(result->Parameters()[0]->Type(), vec3_f32);
+    auto result = table->Lookup(CtorConvIntrinsic::kVec3, i32, {vec3_f32}, Source{{12, 34}});
+    ASSERT_NE(result.target, nullptr);
+    EXPECT_EQ(result.target->ReturnType(), vec3_i32);
+    EXPECT_TRUE(result.target->Is<sem::TypeConversion>());
+    ASSERT_EQ(result.target->Parameters().size(), 1u);
+    EXPECT_EQ(result.target->Parameters()[0]->Type(), vec3_f32);
 }
 
 TEST_F(IntrinsicTableTest, MismatchTypeConversion) {
     auto* arr = create<sem::Array>(create<sem::U32>(), 0u, 4u, 4u, 4u, 4u);
     auto* f32 = create<sem::F32>();
-    auto* result = table->Lookup(CtorConvIntrinsic::kVec3, f32, {arr}, Source{{12, 34}});
-    ASSERT_EQ(result, nullptr);
+    auto result = table->Lookup(CtorConvIntrinsic::kVec3, f32, {arr}, Source{{12, 34}});
+    ASSERT_EQ(result.target, nullptr);
     EXPECT_EQ(Diagnostics().str(),
               R"(12:34 error: no matching constructor for vec3<f32>(array<u32>)
 
@@ -804,10 +806,10 @@ TEST_F(IntrinsicTableTest, OverloadResolution) {
     auto* ai = create<sem::AbstractInt>();
     auto* i32 = create<sem::I32>();
     auto result = table->Lookup(CtorConvIntrinsic::kI32, nullptr, {ai}, Source{});
-    ASSERT_NE(result, nullptr);
-    EXPECT_EQ(result->ReturnType(), i32);
-    EXPECT_EQ(result->Parameters().size(), 1u);
-    EXPECT_EQ(result->Parameters()[0]->Type(), i32);
+    ASSERT_NE(result.target, nullptr);
+    EXPECT_EQ(result.target->ReturnType(), i32);
+    EXPECT_EQ(result.target->Parameters().size(), 1u);
+    EXPECT_EQ(result.target->Parameters()[0]->Type(), i32);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

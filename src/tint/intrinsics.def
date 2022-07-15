@@ -636,150 +636,166 @@ fn textureLoad(texture: texture_external, coords: vec2<i32>) -> vec4<f32>
 ////////////////////////////////////////////////////////////////////////////////
 
 // Zero value constructors
-ctor i32() -> i32
-ctor u32() -> u32
-ctor f32() -> f32
-ctor f16() -> f16
-ctor bool() -> bool
-ctor vec2<T: scalar>() -> vec2<T>
-ctor vec3<T: scalar>() -> vec3<T>
-ctor vec4<T: scalar>() -> vec4<T>
-ctor mat2x2<T: f32f16>() -> mat2x2<T>
-ctor mat2x3<T: f32f16>() -> mat2x3<T>
-ctor mat2x4<T: f32f16>() -> mat2x4<T>
-ctor mat3x2<T: f32f16>() -> mat3x2<T>
-ctor mat3x3<T: f32f16>() -> mat3x3<T>
-ctor mat3x4<T: f32f16>() -> mat3x4<T>
-ctor mat4x2<T: f32f16>() -> mat4x2<T>
-ctor mat4x3<T: f32f16>() -> mat4x3<T>
-ctor mat4x4<T: f32f16>() -> mat4x4<T>
+@const("Zero") ctor i32() -> i32
+@const("Zero") ctor u32() -> u32
+@const("Zero") ctor f32() -> f32
+@const("Zero") ctor f16() -> f16
+@const("Zero") ctor bool() -> bool
+@const("Zero") ctor vec2<T: scalar>() -> vec2<T>
+@const("Zero") ctor vec3<T: scalar>() -> vec3<T>
+@const("Zero") ctor vec4<T: scalar>() -> vec4<T>
+@const("Zero") ctor mat2x2<T: f32f16>() -> mat2x2<T>
+@const("Zero") ctor mat2x3<T: f32f16>() -> mat2x3<T>
+@const("Zero") ctor mat2x4<T: f32f16>() -> mat2x4<T>
+@const("Zero") ctor mat3x2<T: f32f16>() -> mat3x2<T>
+@const("Zero") ctor mat3x3<T: f32f16>() -> mat3x3<T>
+@const("Zero") ctor mat3x4<T: f32f16>() -> mat3x4<T>
+@const("Zero") ctor mat4x2<T: f32f16>() -> mat4x2<T>
+@const("Zero") ctor mat4x3<T: f32f16>() -> mat4x3<T>
+@const("Zero") ctor mat4x4<T: f32f16>() -> mat4x4<T>
 
 // Identity constructors
-ctor i32(i32) -> i32
-ctor u32(u32) -> u32
-ctor f32(f32) -> f32
-ctor f16(f16) -> f16
-ctor bool(bool) -> bool
-ctor vec2<T: scalar>(vec2<T>) -> vec2<T>
-ctor vec3<T: scalar>(vec3<T>) -> vec3<T>
-ctor vec4<T: scalar>(vec4<T>) -> vec4<T>
-ctor mat2x2<T: f32f16>(mat2x2<T>) -> mat2x2<T>
-ctor mat2x3<T: f32f16>(mat2x3<T>) -> mat2x3<T>
-ctor mat2x4<T: f32f16>(mat2x4<T>) -> mat2x4<T>
-ctor mat3x2<T: f32f16>(mat3x2<T>) -> mat3x2<T>
-ctor mat3x3<T: f32f16>(mat3x3<T>) -> mat3x3<T>
-ctor mat3x4<T: f32f16>(mat3x4<T>) -> mat3x4<T>
-ctor mat4x2<T: f32f16>(mat4x2<T>) -> mat4x2<T>
-ctor mat4x3<T: f32f16>(mat4x3<T>) -> mat4x3<T>
-ctor mat4x4<T: f32f16>(mat4x4<T>) -> mat4x4<T>
+@const("Identity") ctor i32(i32) -> i32
+@const("Identity") ctor u32(u32) -> u32
+@const("Identity") ctor f32(f32) -> f32
+@const("Identity") ctor f16(f16) -> f16
+@const("Identity") ctor bool(bool) -> bool
+@const("Identity") ctor vec2<T: scalar>(vec2<T>) -> vec2<T>
+@const("Identity") ctor vec3<T: scalar>(vec3<T>) -> vec3<T>
+@const("Identity") ctor vec4<T: scalar>(vec4<T>) -> vec4<T>
+@const("Identity") ctor mat2x2<T: f32f16>(mat2x2<T>) -> mat2x2<T>
+@const("Identity") ctor mat2x3<T: f32f16>(mat2x3<T>) -> mat2x3<T>
+@const("Identity") ctor mat2x4<T: f32f16>(mat2x4<T>) -> mat2x4<T>
+@const("Identity") ctor mat3x2<T: f32f16>(mat3x2<T>) -> mat3x2<T>
+@const("Identity") ctor mat3x3<T: f32f16>(mat3x3<T>) -> mat3x3<T>
+@const("Identity") ctor mat3x4<T: f32f16>(mat3x4<T>) -> mat3x4<T>
+@const("Identity") ctor mat4x2<T: f32f16>(mat4x2<T>) -> mat4x2<T>
+@const("Identity") ctor mat4x3<T: f32f16>(mat4x3<T>) -> mat4x3<T>
+@const("Identity") ctor mat4x4<T: f32f16>(mat4x4<T>) -> mat4x4<T>
 
-// Vector constructors
-ctor vec2<T: abstract_or_scalar>(T) -> vec2<T>
-ctor vec2<T: abstract_or_scalar>(x: T, y: T) -> vec2<T>
-ctor vec3<T: abstract_or_scalar>(T) -> vec3<T>
-ctor vec3<T: abstract_or_scalar>(x: T, y: T, z: T) -> vec3<T>
-ctor vec3<T: abstract_or_scalar>(xy: vec2<T>, z: T) -> vec3<T>
-ctor vec3<T: abstract_or_scalar>(x: T, yz: vec2<T>) -> vec3<T>
-ctor vec4<T: abstract_or_scalar>(T) -> vec4<T>
-ctor vec4<T: abstract_or_scalar>(x: T, y: T, z: T, w: T) -> vec4<T>
-ctor vec4<T: abstract_or_scalar>(xy: vec2<T>, z: T, w: T) -> vec4<T>
-ctor vec4<T: abstract_or_scalar>(x: T, yz: vec2<T>, w: T) -> vec4<T>
-ctor vec4<T: abstract_or_scalar>(x: T, y: T, zw: vec2<T>) -> vec4<T>
-ctor vec4<T: abstract_or_scalar>(xy: vec2<T>, zw: vec2<T>) -> vec4<T>
-ctor vec4<T: abstract_or_scalar>(xyz: vec3<T>, w: T) -> vec4<T>
-ctor vec4<T: abstract_or_scalar>(x: T, zyw: vec3<T>) -> vec4<T>
+// Vector constructors (splat)
+@const("VecSplat") ctor vec2<T: abstract_or_scalar>(T) -> vec2<T>
+@const("VecSplat") ctor vec3<T: abstract_or_scalar>(T) -> vec3<T>
+@const("VecSplat") ctor vec4<T: abstract_or_scalar>(T) -> vec4<T>
 
-// Matrix constructors
+// Vector constructors (scalar)
+@const("VecCtorS") ctor vec2<T: abstract_or_scalar>(x: T, y: T) -> vec2<T>
+@const("VecCtorS") ctor vec3<T: abstract_or_scalar>(x: T, y: T, z: T) -> vec3<T>
+@const("VecCtorS") ctor vec4<T: abstract_or_scalar>(x: T, y: T, z: T, w: T) -> vec4<T>
+
+// Vector constructors (mixed)
+@const("VecCtorM") ctor vec3<T: abstract_or_scalar>(xy: vec2<T>, z: T) -> vec3<T>
+@const("VecCtorM") ctor vec3<T: abstract_or_scalar>(x: T, yz: vec2<T>) -> vec3<T>
+@const("VecCtorM") ctor vec4<T: abstract_or_scalar>(xy: vec2<T>, z: T, w: T) -> vec4<T>
+@const("VecCtorM") ctor vec4<T: abstract_or_scalar>(x: T, yz: vec2<T>, w: T) -> vec4<T>
+@const("VecCtorM") ctor vec4<T: abstract_or_scalar>(x: T, y: T, zw: vec2<T>) -> vec4<T>
+@const("VecCtorM") ctor vec4<T: abstract_or_scalar>(xy: vec2<T>, zw: vec2<T>) -> vec4<T>
+@const("VecCtorM") ctor vec4<T: abstract_or_scalar>(xyz: vec3<T>, w: T) -> vec4<T>
+@const("VecCtorM") ctor vec4<T: abstract_or_scalar>(x: T, zyw: vec3<T>) -> vec4<T>
+
+// Matrix constructors (scalar)
+@const("MatCtorS")
 ctor mat2x2<T: af_f32f16>(T, T,
                           T, T) -> mat2x2<T>
-ctor mat2x2<T: af_f32f16>(vec2<T>, vec2<T>) -> mat2x2<T>
-
+@const("MatCtorS")
 ctor mat2x3<T: af_f32f16>(T, T, T,
                           T, T, T) -> mat2x3<T>
-ctor mat2x3<T: af_f32f16>(vec3<T>, vec3<T>) -> mat2x3<T>
-
+@const("MatCtorS")
 ctor mat2x4<T: af_f32f16>(T, T, T, T,
                           T, T, T, T) -> mat2x4<T>
-ctor mat2x4<T: af_f32f16>(vec4<T>, vec4<T>) -> mat2x4<T>
-
+@const("MatCtorS")
 ctor mat3x2<T: af_f32f16>(T, T,
                           T, T,
                           T, T) -> mat3x2<T>
-ctor mat3x2<T: af_f32f16>(vec2<T>, vec2<T>, vec2<T>) -> mat3x2<T>
-
+@const("MatCtorS")
 ctor mat3x3<T: af_f32f16>(T, T, T,
                           T, T, T,
                           T, T, T) -> mat3x3<T>
-ctor mat3x3<T: af_f32f16>(vec3<T>, vec3<T>, vec3<T>) -> mat3x3<T>
-
+@const("MatCtorS")
 ctor mat3x4<T: af_f32f16>(T, T, T, T,
                           T, T, T, T,
                           T, T, T, T) -> mat3x4<T>
-ctor mat3x4<T: af_f32f16>(vec4<T>, vec4<T>, vec4<T>) -> mat3x4<T>
-
+@const("MatCtorS")
 ctor mat4x2<T: af_f32f16>(T, T,
                           T, T,
                           T, T,
                           T, T) -> mat4x2<T>
-ctor mat4x2<T: af_f32f16>(vec2<T>, vec2<T>, vec2<T>, vec2<T>) -> mat4x2<T>
-
+@const("MatCtorS")
 ctor mat4x3<T: af_f32f16>(T, T, T,
                           T, T, T,
                           T, T, T,
                           T, T, T) -> mat4x3<T>
-ctor mat4x3<T: af_f32f16>(vec3<T>, vec3<T>, vec3<T>, vec3<T>) -> mat4x3<T>
-
+@const("MatCtorS")
 ctor mat4x4<T: af_f32f16>(T, T, T, T,
                           T, T, T, T,
                           T, T, T, T,
                           T, T, T, T) -> mat4x4<T>
+
+// Matrix constructors (column vectors)
+@const("MatCtorV")
+ctor mat2x2<T: af_f32f16>(vec2<T>, vec2<T>) -> mat2x2<T>
+@const("MatCtorV")
+ctor mat2x3<T: af_f32f16>(vec3<T>, vec3<T>) -> mat2x3<T>
+@const("MatCtorV")
+ctor mat2x4<T: af_f32f16>(vec4<T>, vec4<T>) -> mat2x4<T>
+@const("MatCtorV")
+ctor mat3x2<T: af_f32f16>(vec2<T>, vec2<T>, vec2<T>) -> mat3x2<T>
+@const("MatCtorV")
+ctor mat3x3<T: af_f32f16>(vec3<T>, vec3<T>, vec3<T>) -> mat3x3<T>
+@const("MatCtorV")
+ctor mat3x4<T: af_f32f16>(vec4<T>, vec4<T>, vec4<T>) -> mat3x4<T>
+@const("MatCtorV")
+ctor mat4x2<T: af_f32f16>(vec2<T>, vec2<T>, vec2<T>, vec2<T>) -> mat4x2<T>
+@const("MatCtorV")
+ctor mat4x3<T: af_f32f16>(vec3<T>, vec3<T>, vec3<T>, vec3<T>) -> mat4x3<T>
+@const("MatCtorV")
 ctor mat4x4<T: af_f32f16>(vec4<T>, vec4<T>, vec4<T>, vec4<T>) -> mat4x4<T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Type conversions                                                           //
 ////////////////////////////////////////////////////////////////////////////////
-conv f32<T: scalar_no_f32>(T) -> f32
-conv f16<T: scalar_no_f16>(T) -> f16
-conv i32<T: scalar_no_i32>(T) -> i32
-conv u32<T: scalar_no_u32>(T) -> u32
-conv bool<T: scalar_no_bool>(T) -> bool
+@const conv f32<T: scalar_no_f32>(T) -> f32
+@const conv f16<T: scalar_no_f16>(T) -> f16
+@const conv i32<T: scalar_no_i32>(T) -> i32
+@const conv u32<T: scalar_no_u32>(T) -> u32
+@const conv bool<T: scalar_no_bool>(T) -> bool
 
-conv vec2<T: f32, U: scalar_no_f32>(vec2<U>) -> vec2<f32>
-conv vec2<T: f16, U: scalar_no_f16>(vec2<U>) -> vec2<f16>
-conv vec2<T: i32, U: scalar_no_i32>(vec2<U>) -> vec2<i32>
-conv vec2<T: u32, U: scalar_no_u32>(vec2<U>) -> vec2<u32>
-conv vec2<T: bool, U: scalar_no_bool>(vec2<U>) -> vec2<bool>
+@const conv vec2<T: f32, U: scalar_no_f32>(vec2<U>) -> vec2<f32>
+@const conv vec2<T: f16, U: scalar_no_f16>(vec2<U>) -> vec2<f16>
+@const conv vec2<T: i32, U: scalar_no_i32>(vec2<U>) -> vec2<i32>
+@const conv vec2<T: u32, U: scalar_no_u32>(vec2<U>) -> vec2<u32>
+@const conv vec2<T: bool, U: scalar_no_bool>(vec2<U>) -> vec2<bool>
 
-conv vec3<T: f32, U: scalar_no_f32>(vec3<U>) -> vec3<f32>
-conv vec3<T: f16, U: scalar_no_f16>(vec3<U>) -> vec3<f16>
-conv vec3<T: i32, U: scalar_no_i32>(vec3<U>) -> vec3<i32>
-conv vec3<T: u32, U: scalar_no_u32>(vec3<U>) -> vec3<u32>
-conv vec3<T: bool, U: scalar_no_bool>(vec3<U>) -> vec3<bool>
+@const conv vec3<T: f32, U: scalar_no_f32>(vec3<U>) -> vec3<f32>
+@const conv vec3<T: f16, U: scalar_no_f16>(vec3<U>) -> vec3<f16>
+@const conv vec3<T: i32, U: scalar_no_i32>(vec3<U>) -> vec3<i32>
+@const conv vec3<T: u32, U: scalar_no_u32>(vec3<U>) -> vec3<u32>
+@const conv vec3<T: bool, U: scalar_no_bool>(vec3<U>) -> vec3<bool>
 
-conv vec4<T: f32, U: scalar_no_f32>(vec4<U>) -> vec4<f32>
-conv vec4<T: f16, U: scalar_no_f16>(vec4<U>) -> vec4<f16>
-conv vec4<T: i32, U: scalar_no_i32>(vec4<U>) -> vec4<i32>
-conv vec4<T: u32, U: scalar_no_u32>(vec4<U>) -> vec4<u32>
-conv vec4<T: bool, U: scalar_no_bool>(vec4<U>) -> vec4<bool>
+@const conv vec4<T: f32, U: scalar_no_f32>(vec4<U>) -> vec4<f32>
+@const conv vec4<T: f16, U: scalar_no_f16>(vec4<U>) -> vec4<f16>
+@const conv vec4<T: i32, U: scalar_no_i32>(vec4<U>) -> vec4<i32>
+@const conv vec4<T: u32, U: scalar_no_u32>(vec4<U>) -> vec4<u32>
+@const conv vec4<T: bool, U: scalar_no_bool>(vec4<U>) -> vec4<bool>
 
-conv mat2x2<T: f16>(mat2x2<f32>) -> mat2x2<f16>
-conv mat2x2<T: f32>(mat2x2<f16>) -> mat2x2<f32>
-conv mat2x3<T: f16>(mat2x3<f32>) -> mat2x3<f16>
-conv mat2x3<T: f32>(mat2x3<f16>) -> mat2x3<f32>
-conv mat2x4<T: f16>(mat2x4<f32>) -> mat2x4<f16>
-conv mat2x4<T: f32>(mat2x4<f16>) -> mat2x4<f32>
-conv mat3x2<T: f16>(mat3x2<f32>) -> mat3x2<f16>
-conv mat3x2<T: f32>(mat3x2<f16>) -> mat3x2<f32>
-conv mat3x3<T: f16>(mat3x3<f32>) -> mat3x3<f16>
-conv mat3x3<T: f32>(mat3x3<f16>) -> mat3x3<f32>
-conv mat3x4<T: f16>(mat3x4<f32>) -> mat3x4<f16>
-conv mat3x4<T: f32>(mat3x4<f16>) -> mat3x4<f32>
-conv mat4x2<T: f16>(mat4x2<f32>) -> mat4x2<f16>
-conv mat4x2<T: f32>(mat4x2<f16>) -> mat4x2<f32>
-conv mat4x3<T: f16>(mat4x3<f32>) -> mat4x3<f16>
-conv mat4x3<T: f32>(mat4x3<f16>) -> mat4x3<f32>
-conv mat4x4<T: f16>(mat4x4<f32>) -> mat4x4<f16>
-conv mat4x4<T: f32>(mat4x4<f16>) -> mat4x4<f32>
+@const conv mat2x2<T: f16>(mat2x2<f32>) -> mat2x2<f16>
+@const conv mat2x2<T: f32>(mat2x2<f16>) -> mat2x2<f32>
+@const conv mat2x3<T: f16>(mat2x3<f32>) -> mat2x3<f16>
+@const conv mat2x3<T: f32>(mat2x3<f16>) -> mat2x3<f32>
+@const conv mat2x4<T: f16>(mat2x4<f32>) -> mat2x4<f16>
+@const conv mat2x4<T: f32>(mat2x4<f16>) -> mat2x4<f32>
+@const conv mat3x2<T: f16>(mat3x2<f32>) -> mat3x2<f16>
+@const conv mat3x2<T: f32>(mat3x2<f16>) -> mat3x2<f32>
+@const conv mat3x3<T: f16>(mat3x3<f32>) -> mat3x3<f16>
+@const conv mat3x3<T: f32>(mat3x3<f16>) -> mat3x3<f32>
+@const conv mat3x4<T: f16>(mat3x4<f32>) -> mat3x4<f16>
+@const conv mat3x4<T: f32>(mat3x4<f16>) -> mat3x4<f32>
+@const conv mat4x2<T: f16>(mat4x2<f32>) -> mat4x2<f16>
+@const conv mat4x2<T: f32>(mat4x2<f16>) -> mat4x2<f32>
+@const conv mat4x3<T: f16>(mat4x3<f32>) -> mat4x3<f16>
+@const conv mat4x3<T: f32>(mat4x3<f16>) -> mat4x3<f32>
+@const conv mat4x4<T: f16>(mat4x4<f32>) -> mat4x4<f16>
+@const conv mat4x4<T: f32>(mat4x4<f16>) -> mat4x4<f32>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Operators                                                                  //
