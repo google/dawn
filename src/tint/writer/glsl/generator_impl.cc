@@ -502,42 +502,43 @@ bool GeneratorImpl::EmitFloatModulo(std::ostream& out, const ast::BinaryExpressi
     auto* ret_ty = TypeOf(expr)->UnwrapRef();
     auto* lhs_ty = TypeOf(expr->lhs)->UnwrapRef();
     auto* rhs_ty = TypeOf(expr->rhs)->UnwrapRef();
-    fn = utils::GetOrCreate(float_modulo_funcs_, {lhs_ty, rhs_ty}, [&]() -> std::string {
-        TextBuffer b;
-        TINT_DEFER(helpers_.Append(b));
+    fn = utils::GetOrCreate(float_modulo_funcs_, BinaryOperandType{{lhs_ty, rhs_ty}},
+                            [&]() -> std::string {
+                                TextBuffer b;
+                                TINT_DEFER(helpers_.Append(b));
 
-        auto fn_name = UniqueIdentifier("tint_float_modulo");
-        std::vector<std::string> parameter_names;
-        {
-            auto decl = line(&b);
-            if (!EmitTypeAndName(decl, ret_ty, ast::StorageClass::kNone, ast::Access::kUndefined,
-                                 fn_name)) {
-                return "";
-            }
-            {
-                ScopedParen sp(decl);
-                const auto* ty = TypeOf(expr->lhs)->UnwrapRef();
-                if (!EmitTypeAndName(decl, ty, ast::StorageClass::kNone, ast::Access::kUndefined,
-                                     "lhs")) {
-                    return "";
-                }
-                decl << ", ";
-                ty = TypeOf(expr->rhs)->UnwrapRef();
-                if (!EmitTypeAndName(decl, ty, ast::StorageClass::kNone, ast::Access::kUndefined,
-                                     "rhs")) {
-                    return "";
-                }
-            }
-            decl << " {";
-        }
-        {
-            ScopedIndent si(&b);
-            line(&b) << "return (lhs - rhs * trunc(lhs / rhs));";
-        }
-        line(&b) << "}";
-        line(&b);
-        return fn_name;
-    });
+                                auto fn_name = UniqueIdentifier("tint_float_modulo");
+                                std::vector<std::string> parameter_names;
+                                {
+                                    auto decl = line(&b);
+                                    if (!EmitTypeAndName(decl, ret_ty, ast::StorageClass::kNone,
+                                                         ast::Access::kUndefined, fn_name)) {
+                                        return "";
+                                    }
+                                    {
+                                        ScopedParen sp(decl);
+                                        const auto* ty = TypeOf(expr->lhs)->UnwrapRef();
+                                        if (!EmitTypeAndName(decl, ty, ast::StorageClass::kNone,
+                                                             ast::Access::kUndefined, "lhs")) {
+                                            return "";
+                                        }
+                                        decl << ", ";
+                                        ty = TypeOf(expr->rhs)->UnwrapRef();
+                                        if (!EmitTypeAndName(decl, ty, ast::StorageClass::kNone,
+                                                             ast::Access::kUndefined, "rhs")) {
+                                            return "";
+                                        }
+                                    }
+                                    decl << " {";
+                                }
+                                {
+                                    ScopedIndent si(&b);
+                                    line(&b) << "return (lhs - rhs * trunc(lhs / rhs));";
+                                }
+                                line(&b) << "}";
+                                line(&b);
+                                return fn_name;
+                            });
 
     if (fn.empty()) {
         return false;

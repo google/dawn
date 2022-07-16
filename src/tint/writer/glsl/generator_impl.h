@@ -16,6 +16,7 @@
 #define SRC_TINT_WRITER_GLSL_GENERATOR_IMPL_H_
 
 #include <string>
+#include <tuple>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -478,36 +479,9 @@ class GeneratorImpl : public TextGenerator {
         std::string var_name;
     };
 
-    struct DMAIntrinsic {
-        transform::DecomposeMemoryAccess::Intrinsic::Op op;
-        transform::DecomposeMemoryAccess::Intrinsic::DataType type;
-        bool operator==(const DMAIntrinsic& rhs) const { return op == rhs.op && type == rhs.type; }
-        /// Hasher is a std::hash function for DMAIntrinsic
-        struct Hasher {
-            /// @param i the DMAIntrinsic to hash
-            /// @returns the hash of `i`
-            inline std::size_t operator()(const DMAIntrinsic& i) const {
-                return utils::Hash(i.op, i.type);
-            }
-        };
-    };
-
-    /// The structure holding both type of two operands for a binary operator.
-    struct BinaryOperandType {
-        const sem::Type* lhs_type;
-        const sem::Type* rhs_type;
-        bool operator==(const BinaryOperandType& rhs) const {
-            return lhs_type == rhs.lhs_type && rhs_type == rhs.rhs_type;
-        }
-        /// Hasher is a std::hash function for BinaryOperandType
-        struct Hasher {
-            /// @param i the BinaryOperandType to hash
-            /// @returns the hash of `i`
-            inline std::size_t operator()(const BinaryOperandType& i) const {
-                return utils::Hash(i.lhs_type, i.rhs_type);
-            }
-        };
-    };
+    /// The map key for two semantic types.
+    using BinaryOperandType =
+        utils::UnorderedKeyWrapper<std::tuple<const sem::Type*, const sem::Type*>>;
 
     /// CallBuiltinHelper will call the builtin helper function, creating it
     /// if it hasn't been built already. If the builtin needs to be built then
@@ -535,12 +509,10 @@ class GeneratorImpl : public TextGenerator {
 
     TextBuffer helpers_;  // Helper functions emitted at the top of the output
     std::function<bool()> emit_continuing_;
-    std::unordered_map<DMAIntrinsic, std::string, DMAIntrinsic::Hasher> dma_intrinsics_;
     std::unordered_map<const sem::Builtin*, std::string> builtins_;
     std::unordered_map<const sem::Vector*, std::string> dynamic_vector_write_;
     std::unordered_map<const sem::Vector*, std::string> int_dot_funcs_;
-    std::unordered_map<BinaryOperandType, std::string, BinaryOperandType::Hasher>
-        float_modulo_funcs_;
+    std::unordered_map<BinaryOperandType, std::string> float_modulo_funcs_;
     std::unordered_set<const sem::Struct*> emitted_structs_;
     bool requires_oes_sample_variables_ = false;
     bool requires_default_precision_qualifier_ = false;
