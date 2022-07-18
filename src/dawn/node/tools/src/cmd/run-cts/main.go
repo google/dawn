@@ -129,7 +129,7 @@ func run() error {
 	}
 
 	var dawnNode, cts, node, npx, resultsPath, expectationsPath, logFilename, backend string
-	var printStdout, verbose, isolated, build bool
+	var printStdout, verbose, isolated, build, dumpShaders bool
 	var numRunners int
 	var flags dawnNodeFlags
 	flag.StringVar(&dawnNode, "dawn-node", "", "path to dawn.node module")
@@ -148,6 +148,7 @@ func run() error {
 	flag.Var(&flags, "flag", "flag to pass to dawn-node as flag=value. multiple flags must be passed in individually")
 	flag.StringVar(&backend, "backend", backendDefault, "backend to use: default|null|webgpu|d3d11|d3d12|metal|vulkan|opengl|opengles."+
 		" set to 'vulkan' if VK_ICD_FILENAMES environment variable is set, 'default' otherwise")
+	flag.BoolVar(&dumpShaders, "dump-shaders", false, "dump WGSL shaders. Enables --verbose")
 	flag.Parse()
 
 	// Create a thread-safe, color supporting stdout wrapper.
@@ -218,6 +219,10 @@ func run() error {
 	}
 	if !disableDawnFeaturesFound {
 		flags = append(flags, "disable-dawn-features=disallow_unsafe_apis")
+	}
+	if dumpShaders {
+		flags = append(flags, "enable-dawn-features=dump_shaders")
+		verbose = true
 	}
 
 	r := runner{
