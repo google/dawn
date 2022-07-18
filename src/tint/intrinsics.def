@@ -129,7 +129,9 @@ type __atomic_compare_exchange_result<T>
 
 match f32f16: f32 | f16
 match fiu32: f32 | i32 | u32
+match fiu32f16: f32 | f16 | i32 | u32
 match fi32: f32 | i32
+match fi32f16: f32 | f16 | i32
 match iu32: i32 | u32
 match aiu32: ai | i32 | u32
 match scalar: f32 | f16 | i32 | u32 | bool
@@ -820,43 +822,43 @@ op ! <N: num> (vec<N, bool>) -> vec<N, bool>
 @const op ~ <T: aiu32>(T) -> T
 @const op ~ <T: aiu32, N: num> (vec<N, T>) -> vec<N, T>
 
-op - <T: fi32>(T) -> T
-op - <T: fi32, N: num> (vec<N, T>) -> vec<N, T>
+op - <T: fi32f16>(T) -> T
+op - <T: fi32f16, N: num> (vec<N, T>) -> vec<N, T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Binary Operators                                                           //
 ////////////////////////////////////////////////////////////////////////////////
-op + <T: fiu32>(T, T) -> T
-op + <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
-op + <T: fiu32, N: num> (vec<N, T>, T) -> vec<N, T>
-op + <T: fiu32, N: num> (T, vec<N, T>) -> vec<N, T>
-op + <N: num, M: num> (mat<N, M, f32>, mat<N, M, f32>) -> mat<N, M, f32>
+op + <T: fiu32f16>(T, T) -> T
+op + <T: fiu32f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+op + <T: fiu32f16, N: num> (vec<N, T>, T) -> vec<N, T>
+op + <T: fiu32f16, N: num> (T, vec<N, T>) -> vec<N, T>
+op + <T: f32f16, N: num, M: num> (mat<N, M, T>, mat<N, M, T>) -> mat<N, M, T>
 
-op - <T: fiu32>(T, T) -> T
-op - <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
-op - <T: fiu32, N: num> (vec<N, T>, T) -> vec<N, T>
-op - <T: fiu32, N: num> (T, vec<N, T>) -> vec<N, T>
-op - <N: num, M: num> (mat<N, M, f32>, mat<N, M, f32>) -> mat<N, M, f32>
+op - <T: fiu32f16>(T, T) -> T
+op - <T: fiu32f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+op - <T: fiu32f16, N: num> (vec<N, T>, T) -> vec<N, T>
+op - <T: fiu32f16, N: num> (T, vec<N, T>) -> vec<N, T>
+op - <T: f32f16, N: num, M: num> (mat<N, M, T>, mat<N, M, T>) -> mat<N, M, T>
 
-op * <T: fiu32>(T, T) -> T
-op * <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
-op * <T: fiu32, N: num> (vec<N, T>, T) -> vec<N, T>
-op * <T: fiu32, N: num> (T, vec<N, T>) -> vec<N, T>
-op * <N: num, M: num> (f32, mat<N, M, f32>) -> mat<N, M, f32>
-op * <N: num, M: num> (mat<N, M, f32>, f32) -> mat<N, M, f32>
-op * <C: num, R: num> (mat<C, R, f32>, vec<C, f32>) -> vec<R, f32>
-op * <C: num, R: num> (vec<R, f32>, mat<C, R, f32>) -> vec<C, f32>
-op * <K: num, C: num, R: num> (mat<K, R, f32>, mat<C, K, f32>) -> mat<C, R, f32>
+op * <T: fiu32f16>(T, T) -> T
+op * <T: fiu32f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+op * <T: fiu32f16, N: num> (vec<N, T>, T) -> vec<N, T>
+op * <T: fiu32f16, N: num> (T, vec<N, T>) -> vec<N, T>
+op * <T: f32f16, N: num, M: num> (T, mat<N, M, T>) -> mat<N, M, T>
+op * <T: f32f16, N: num, M: num> (mat<N, M, T>, T) -> mat<N, M, T>
+op * <T: f32f16, C: num, R: num> (mat<C, R, T>, vec<C, T>) -> vec<R, T>
+op * <T: f32f16, C: num, R: num> (vec<R, T>, mat<C, R, T>) -> vec<C, T>
+op * <T: f32f16, K: num, C: num, R: num> (mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T>
 
-op / <T: fiu32>(T, T) -> T
-op / <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
-op / <T: fiu32, N: num> (vec<N, T>, T) -> vec<N, T>
-op / <T: fiu32, N: num> (T, vec<N, T>) -> vec<N, T>
+op / <T: fiu32f16>(T, T) -> T
+op / <T: fiu32f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+op / <T: fiu32f16, N: num> (vec<N, T>, T) -> vec<N, T>
+op / <T: fiu32f16, N: num> (T, vec<N, T>) -> vec<N, T>
 
-op % <T: fiu32>(T, T) -> T
-op % <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
-op % <T: fiu32, N: num> (vec<N, T>, T) -> vec<N, T>
-op % <T: fiu32, N: num> (T, vec<N, T>) -> vec<N, T>
+op % <T: fiu32f16>(T, T) -> T
+op % <T: fiu32f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+op % <T: fiu32f16, N: num> (vec<N, T>, T) -> vec<N, T>
+op % <T: fiu32f16, N: num> (T, vec<N, T>) -> vec<N, T>
 
 op ^ <T: iu32>(T, T) -> T
 op ^ <T: iu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
@@ -880,17 +882,17 @@ op == <T: scalar, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
 op != <T: scalar>(T, T) -> bool
 op != <T: scalar, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
 
-op < <T: fiu32>(T, T) -> bool
-op < <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+op < <T: fiu32f16>(T, T) -> bool
+op < <T: fiu32f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
 
-op > <T: fiu32>(T, T) -> bool
-op > <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+op > <T: fiu32f16>(T, T) -> bool
+op > <T: fiu32f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
 
-op <= <T: fiu32>(T, T) -> bool
-op <= <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+op <= <T: fiu32f16>(T, T) -> bool
+op <= <T: fiu32f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
 
-op >= <T: fiu32>(T, T) -> bool
-op >= <T: fiu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+op >= <T: fiu32f16>(T, T) -> bool
+op >= <T: fiu32f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
 
 op << <T: iu32>(T, u32) -> T
 op << <T: iu32, N: num> (vec<N, T>, vec<N, u32>) -> vec<N, T>

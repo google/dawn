@@ -66,6 +66,38 @@ TEST_P(HlslBinaryTest, Emit_f32) {
     ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
     EXPECT_EQ(out.str(), params.result);
 }
+TEST_P(HlslBinaryTest, Emit_f16) {
+    auto params = GetParam();
+
+    if ((params.valid_for & BinaryData::Types::Float) == 0) {
+        return;
+    }
+
+    // Skip ops that are illegal for this type
+    if (params.op == ast::BinaryOp::kAnd || params.op == ast::BinaryOp::kOr ||
+        params.op == ast::BinaryOp::kXor || params.op == ast::BinaryOp::kShiftLeft ||
+        params.op == ast::BinaryOp::kShiftRight) {
+        return;
+    }
+
+    Enable(ast::Extension::kF16);
+
+    GlobalVar("left", ty.f16(), ast::StorageClass::kPrivate);
+    GlobalVar("right", ty.f16(), ast::StorageClass::kPrivate);
+
+    auto* left = Expr("left");
+    auto* right = Expr("right");
+
+    auto* expr = create<ast::BinaryExpression>(params.op, left, right);
+
+    WrapInFunction(expr);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), params.result);
+}
 TEST_P(HlslBinaryTest, Emit_u32) {
     auto params = GetParam();
 
@@ -140,7 +172,7 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryData{"(left % right)", ast::BinaryOp::kModulo,
                                BinaryData::Types::Float}));
 
-TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar) {
+TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar_f32) {
     auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
     auto* rhs = Expr(1_f);
 
@@ -155,7 +187,24 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar) {
     EXPECT_EQ(out.str(), "((1.0f).xxx * 1.0f)");
 }
 
-TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
+TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* lhs = vec3<f16>(1_h, 1_h, 1_h);
+    auto* rhs = Expr(1_h);
+
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+
+    WrapInFunction(expr);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "((float16_t(1.0h)).xxx * float16_t(1.0h))");
+}
+
+TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector_f32) {
     auto* lhs = Expr(1_f);
     auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
 
@@ -170,7 +219,24 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector) {
     EXPECT_EQ(out.str(), "(1.0f * (1.0f).xxx)");
 }
 
-TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
+TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* lhs = Expr(1_h);
+    auto* rhs = vec3<f16>(1_h, 1_h, 1_h);
+
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+
+    WrapInFunction(expr);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "(float16_t(1.0h) * (float16_t(1.0h)).xxx)");
+}
+
+TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar_f32) {
     GlobalVar("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
     auto* lhs = Expr("mat");
     auto* rhs = Expr(1_f);
@@ -185,7 +251,24 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar) {
     EXPECT_EQ(out.str(), "(mat * 1.0f)");
 }
 
-TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
+TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar_f16) {
+    Enable(ast::Extension::kF16);
+
+    GlobalVar("mat", ty.mat3x3<f16>(), ast::StorageClass::kPrivate);
+    auto* lhs = Expr("mat");
+    auto* rhs = Expr(1_h);
+
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+    WrapInFunction(expr);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "(mat * float16_t(1.0h))");
+}
+
+TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix_f32) {
     GlobalVar("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
     auto* lhs = Expr(1_f);
     auto* rhs = Expr("mat");
@@ -200,7 +283,24 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix) {
     EXPECT_EQ(out.str(), "(1.0f * mat)");
 }
 
-TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
+TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarMatrix_f16) {
+    Enable(ast::Extension::kF16);
+
+    GlobalVar("mat", ty.mat3x3<f16>(), ast::StorageClass::kPrivate);
+    auto* lhs = Expr(1_h);
+    auto* rhs = Expr("mat");
+
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+    WrapInFunction(expr);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "(float16_t(1.0h) * mat)");
+}
+
+TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector_f32) {
     GlobalVar("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
     auto* lhs = Expr("mat");
     auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
@@ -215,7 +315,24 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector) {
     EXPECT_EQ(out.str(), "mul((1.0f).xxx, mat)");
 }
 
-TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
+TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixVector_f16) {
+    Enable(ast::Extension::kF16);
+
+    GlobalVar("mat", ty.mat3x3<f16>(), ast::StorageClass::kPrivate);
+    auto* lhs = Expr("mat");
+    auto* rhs = vec3<f16>(1_h, 1_h, 1_h);
+
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+    WrapInFunction(expr);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "mul((float16_t(1.0h)).xxx, mat)");
+}
+
+TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix_f32) {
     GlobalVar("mat", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
     auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
     auto* rhs = Expr("mat");
@@ -230,9 +347,42 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix) {
     EXPECT_EQ(out.str(), "mul(mat, (1.0f).xxx)");
 }
 
-TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix) {
+TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorMatrix_f16) {
+    Enable(ast::Extension::kF16);
+
+    GlobalVar("mat", ty.mat3x3<f16>(), ast::StorageClass::kPrivate);
+    auto* lhs = vec3<f16>(1_h, 1_h, 1_h);
+    auto* rhs = Expr("mat");
+
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
+    WrapInFunction(expr);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "mul(mat, (float16_t(1.0h)).xxx)");
+}
+
+TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix_f32) {
     GlobalVar("lhs", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
     GlobalVar("rhs", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
+
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("lhs"), Expr("rhs"));
+    WrapInFunction(expr);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "mul(rhs, lhs)");
+}
+
+TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixMatrix_f16) {
+    Enable(ast::Extension::kF16);
+
+    GlobalVar("lhs", ty.mat3x3<f16>(), ast::StorageClass::kPrivate);
+    GlobalVar("rhs", ty.mat3x3<f16>(), ast::StorageClass::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("lhs"), Expr("rhs"));
     WrapInFunction(expr);
@@ -559,7 +709,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_u32) {
                                 R"( 1u);
 }
 )");
-}  // namespace HlslGeneratorDivMod
+}
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_vec_i32) {
     Func("fn", {}, ty.void_(),
@@ -577,7 +727,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_vec_i32) {
                                 R"( int4(50, 1, 25, 1));
 }
 )");
-}  // namespace
+}
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_scalar_i32) {
     Func("fn", {}, ty.void_(),
@@ -595,7 +745,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_scalar_i32) {
                                 R"( 1);
 }
 )");
-}  // namespace hlsl
+}
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_i32) {
     Func("fn", {Param("b", ty.i32())}, ty.void_(),
@@ -613,7 +763,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_i32) {
                                 R"( (b == 0 ? 1 : b));
 }
 )");
-}  // namespace writer
+}
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_u32) {
     Func("fn", {Param("b", ty.u32())}, ty.void_(),
@@ -631,7 +781,7 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_u32) {
                                 R"( (b == 0u ? 1u : b));
 }
 )");
-}  // namespace tint
+}
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_vec_by_vec_i32) {
     Func("fn", {Param("b", ty.vec3<i32>())}, ty.void_(),
