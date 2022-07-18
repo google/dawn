@@ -675,7 +675,15 @@ void Texture::DestroyImpl() {
 
     // Signal the fence on destroy after all uses of the texture.
     if (mD3D12Fence != nullptr && mFenceSignalValue != 0) {
-        device->GetCommandQueue()->Signal(mD3D12Fence.Get(), mFenceSignalValue);
+        // Enqueue a fence wait if we haven't already; otherwise the fence signal will be racy.
+        if (mFenceWaitValue != UINT64_MAX) {
+            device->ConsumedError(
+                CheckHRESULT(device->GetCommandQueue()->Wait(mD3D12Fence.Get(), mFenceWaitValue),
+                             "D3D12 fence wait"));
+        }
+        device->ConsumedError(
+            CheckHRESULT(device->GetCommandQueue()->Signal(mD3D12Fence.Get(), mFenceSignalValue),
+                         "D3D12 fence signal"));
     }
 
     // Now that the texture has been destroyed. It should release the refptr of the d3d11on12

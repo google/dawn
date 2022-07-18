@@ -62,7 +62,12 @@ bool ExternalImageDXGIImpl::IsValid() const {
 void ExternalImageDXGIImpl::Destroy() {
     if (IsInList()) {
         RemoveFromList();
+
+        // Keep fence alive until any pending signal calls are done on the GPU.
+        mBackendDevice->ConsumedError(mBackendDevice->NextSerial());
+        mBackendDevice->ReferenceUntilUnused(mD3D12Fence.Get());
         mBackendDevice = nullptr;
+
         mD3D12Resource.Reset();
         mD3D12Fence.Reset();
         mD3D11on12ResourceCache.reset();
