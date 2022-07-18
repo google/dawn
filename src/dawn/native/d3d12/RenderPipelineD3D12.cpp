@@ -389,7 +389,7 @@ MaybeError RenderPipeline::Initialize() {
     descriptorD3D12.RasterizerState.DepthBias = GetDepthBias();
     descriptorD3D12.RasterizerState.DepthBiasClamp = GetDepthBiasClamp();
     descriptorD3D12.RasterizerState.SlopeScaledDepthBias = GetDepthBiasSlopeScale();
-    descriptorD3D12.RasterizerState.DepthClipEnable = TRUE;
+    descriptorD3D12.RasterizerState.DepthClipEnable = !HasUnclippedDepth();
     descriptorD3D12.RasterizerState.MultisampleEnable = (GetSampleCount() > 1) ? TRUE : FALSE;
     descriptorD3D12.RasterizerState.AntialiasedLineEnable = FALSE;
     descriptorD3D12.RasterizerState.ForcedSampleCount = 0;

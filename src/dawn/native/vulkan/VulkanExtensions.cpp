@@ -162,6 +162,7 @@ static constexpr std::array<DeviceExtInfo, kDeviceExtCount> sDeviceExtInfos{{
     {DeviceExt::ExternalSemaphoreFD, "VK_KHR_external_semaphore_fd", NeverPromoted},
     {DeviceExt::ExternalSemaphoreZirconHandle, "VK_FUCHSIA_external_semaphore", NeverPromoted},
 
+    {DeviceExt::DepthClipEnable, "VK_EXT_depth_clip_enable", NeverPromoted},
     {DeviceExt::ImageDrmFormatModifier, "VK_EXT_image_drm_format_modifier", NeverPromoted},
     {DeviceExt::Swapchain, "VK_KHR_swapchain", NeverPromoted},
     {DeviceExt::SubgroupSizeControl, "VK_EXT_subgroup_size_control", NeverPromoted},
@@ -283,6 +284,7 @@ DeviceExtSet EnsureDependencies(const DeviceExtSet& advertisedExts,
                 hasDependencies = icdVersion >= VulkanVersion_1_1;
                 break;
 
+            case DeviceExt::DepthClipEnable:
             case DeviceExt::ShaderIntegerDotProduct:
             case DeviceExt::ZeroInitializeWorkgroupMemory:
                 hasDependencies = HasDep(DeviceExt::GetPhysicalDeviceProperties2);

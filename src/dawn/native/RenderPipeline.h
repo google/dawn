@@ -90,7 +90,7 @@ class RenderPipelineBase : public PipelineBase {
     int32_t GetDepthBias() const;
     float GetDepthBiasSlopeScale() const;
     float GetDepthBiasClamp() const;
-    bool ShouldClampDepth() const;
+    bool HasUnclippedDepth() const;
 
     ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments> GetColorAttachmentsMask() const;
     bool HasDepthStencilAttachment() const;
@@ -137,7 +137,7 @@ class RenderPipelineBase : public PipelineBase {
     PrimitiveState mPrimitive;
     DepthStencilState mDepthStencil;
     MultisampleState mMultisample;
-    bool mClampDepth = false;
+    bool mUnclippedDepth = false;
     bool mWritesDepth = false;
     bool mWritesStencil = false;
 };

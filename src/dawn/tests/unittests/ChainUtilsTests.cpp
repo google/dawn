@@ -19,7 +19,7 @@
 
 // Checks that we cannot find any structs in an empty chain
 TEST(ChainUtilsTests, FindEmptyChain) {
-    const dawn::native::PrimitiveDepthClampingState* info = nullptr;
+    const dawn::native::PrimitiveDepthClipControl* info = nullptr;
     dawn::native::FindInChain(nullptr, &info);
 
     ASSERT_EQ(nullptr, info);
@@ -27,10 +27,10 @@ TEST(ChainUtilsTests, FindEmptyChain) {
 
 // Checks that searching a chain for a present struct returns that struct
 TEST(ChainUtilsTests, FindPresentInChain) {
-    dawn::native::PrimitiveDepthClampingState chain1;
+    dawn::native::PrimitiveDepthClipControl chain1;
     dawn::native::ShaderModuleSPIRVDescriptor chain2;
     chain1.nextInChain = &chain2;
-    const dawn::native::PrimitiveDepthClampingState* info1 = nullptr;
+    const dawn::native::PrimitiveDepthClipControl* info1 = nullptr;
     const dawn::native::ShaderModuleSPIRVDescriptor* info2 = nullptr;
     dawn::native::FindInChain(&chain1, &info1);
     dawn::native::FindInChain(&chain1, &info2);
@@ -41,7 +41,7 @@ TEST(ChainUtilsTests, FindPresentInChain) {
 
 // Checks that searching a chain for a struct that doesn't exist returns a nullptr
 TEST(ChainUtilsTests, FindMissingInChain) {
-    dawn::native::PrimitiveDepthClampingState chain1;
+    dawn::native::PrimitiveDepthClipControl chain1;
     dawn::native::ShaderModuleSPIRVDescriptor chain2;
     chain1.nextInChain = &chain2;
     const dawn::native::SurfaceDescriptorFromMetalLayer* info = nullptr;
@@ -52,9 +52,9 @@ TEST(ChainUtilsTests, FindMissingInChain) {
 
 // Checks that validation rejects chains with duplicate STypes
 TEST(ChainUtilsTests, ValidateDuplicateSTypes) {
-    dawn::native::PrimitiveDepthClampingState chain1;
+    dawn::native::PrimitiveDepthClipControl chain1;
     dawn::native::ShaderModuleSPIRVDescriptor chain2;
-    dawn::native::PrimitiveDepthClampingState chain3;
+    dawn::native::PrimitiveDepthClipControl chain3;
     chain1.nextInChain = &chain2;
     chain2.nextInChain = &chain3;
 
@@ -65,7 +65,7 @@ TEST(ChainUtilsTests, ValidateDuplicateSTypes) {
 
 // Checks that validation rejects chains that contain unspecified STypes
 TEST(ChainUtilsTests, ValidateUnspecifiedSTypes) {
-    dawn::native::PrimitiveDepthClampingState chain1;
+    dawn::native::PrimitiveDepthClipControl chain1;
     dawn::native::ShaderModuleSPIRVDescriptor chain2;
     dawn::native::ShaderModuleWGSLDescriptor chain3;
     chain1.nextInChain = &chain2;
@@ -73,7 +73,7 @@ TEST(ChainUtilsTests, ValidateUnspecifiedSTypes) {
 
     dawn::native::MaybeError result =
         dawn::native::ValidateSTypes(&chain1, {
-                                                  {wgpu::SType::PrimitiveDepthClampingState},
+                                                  {wgpu::SType::PrimitiveDepthClipControl},
                                                   {wgpu::SType::ShaderModuleSPIRVDescriptor},
                                               });
     ASSERT_TRUE(result.IsError());
@@ -83,7 +83,7 @@ TEST(ChainUtilsTests, ValidateUnspecifiedSTypes) {
 // Checks that validation rejects chains that contain multiple STypes from the same oneof
 // constraint.
 TEST(ChainUtilsTests, ValidateOneOfFailure) {
-    dawn::native::PrimitiveDepthClampingState chain1;
+    dawn::native::PrimitiveDepthClipControl chain1;
     dawn::native::ShaderModuleSPIRVDescriptor chain2;
     dawn::native::ShaderModuleWGSLDescriptor chain3;
     chain1.nextInChain = &chain2;
@@ -98,7 +98,7 @@ TEST(ChainUtilsTests, ValidateOneOfFailure) {
 
 // Checks that validation accepts chains that match the constraints.
 TEST(ChainUtilsTests, ValidateSuccess) {
-    dawn::native::PrimitiveDepthClampingState chain1;
+    dawn::native::PrimitiveDepthClipControl chain1;
     dawn::native::ShaderModuleSPIRVDescriptor chain2;
     chain1.nextInChain = &chain2;
 
@@ -106,7 +106,7 @@ TEST(ChainUtilsTests, ValidateSuccess) {
         &chain1,
         {
             {wgpu::SType::ShaderModuleSPIRVDescriptor, wgpu::SType::ShaderModuleWGSLDescriptor},
-            {wgpu::SType::PrimitiveDepthClampingState},
+            {wgpu::SType::PrimitiveDepthClipControl},
             {wgpu::SType::SurfaceDescriptorFromMetalLayer},
         });
     ASSERT_TRUE(result.IsSuccess());
@@ -117,7 +117,7 @@ TEST(ChainUtilsTests, ValidateEmptyChain) {
     dawn::native::MaybeError result =
         dawn::native::ValidateSTypes(nullptr, {
                                                   {wgpu::SType::ShaderModuleSPIRVDescriptor},
-                                                  {wgpu::SType::PrimitiveDepthClampingState},
+                                                  {wgpu::SType::PrimitiveDepthClipControl},
                                               });
     ASSERT_TRUE(result.IsSuccess());
 
@@ -132,22 +132,22 @@ TEST(ChainUtilsTests, ValidateSingleEmptyChain) {
     ASSERT_TRUE(result.IsSuccess());
 
     result = dawn::native::ValidateSingleSType(nullptr, wgpu::SType::ShaderModuleSPIRVDescriptor,
-                                               wgpu::SType::PrimitiveDepthClampingState);
+                                               wgpu::SType::PrimitiveDepthClipControl);
     ASSERT_TRUE(result.IsSuccess());
 }
 
 // Checks that singleton validation always fails on chains with multiple children.
 TEST(ChainUtilsTests, ValidateSingleMultiChain) {
-    dawn::native::PrimitiveDepthClampingState chain1;
+    dawn::native::PrimitiveDepthClipControl chain1;
     dawn::native::ShaderModuleSPIRVDescriptor chain2;
     chain1.nextInChain = &chain2;
 
     dawn::native::MaybeError result =
-        dawn::native::ValidateSingleSType(&chain1, wgpu::SType::PrimitiveDepthClampingState);
+        dawn::native::ValidateSingleSType(&chain1, wgpu::SType::PrimitiveDepthClipControl);
     ASSERT_TRUE(result.IsError());
     result.AcquireError();
 
-    result = dawn::native::ValidateSingleSType(&chain1, wgpu::SType::PrimitiveDepthClampingState,
+    result = dawn::native::ValidateSingleSType(&chain1, wgpu::SType::PrimitiveDepthClipControl,
                                                wgpu::SType::ShaderModuleSPIRVDescriptor);
     ASSERT_TRUE(result.IsError());
     result.AcquireError();
@@ -172,7 +172,7 @@ TEST(ChainUtilsTests, ValidateSingleSatisfied) {
 
 // Checks that singleton validation passes when the oneof constraint is not met.
 TEST(ChainUtilsTests, ValidateSingleUnsatisfied) {
-    dawn::native::PrimitiveDepthClampingState chain1;
+    dawn::native::PrimitiveDepthClipControl chain1;
 
     dawn::native::MaybeError result =
         dawn::native::ValidateSingleSType(&chain1, wgpu::SType::ShaderModuleWGSLDescriptor);

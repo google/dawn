@@ -34,7 +34,6 @@ enum class Feature {
     PipelineStatisticsQuery,
     TimestampQuery,
     DepthClipControl,
-    DepthClamping,
     Depth32FloatStencil8,
     ChromiumExperimentalDp4a,
     IndirectFirstInstance,

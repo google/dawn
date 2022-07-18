@@ -36,10 +36,10 @@ TEST_F(WireExtensionTests, ChainedStruct) {
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiShaderModule));
     FlushClient();
 
-    WGPUPrimitiveDepthClampingState clientExt = {};
-    clientExt.chain.sType = WGPUSType_PrimitiveDepthClampingState;
+    WGPUPrimitiveDepthClipControl clientExt = {};
+    clientExt.chain.sType = WGPUSType_PrimitiveDepthClipControl;
     clientExt.chain.next = nullptr;
-    clientExt.clampDepth = true;
+    clientExt.unclippedDepth = true;
 
     WGPURenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.vertex.module = shaderModule;
@@ -50,10 +50,10 @@ TEST_F(WireExtensionTests, ChainedStruct) {
     EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke(
             [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
-                const auto* ext = reinterpret_cast<const WGPUPrimitiveDepthClampingState*>(
+                const auto* ext = reinterpret_cast<const WGPUPrimitiveDepthClipControl*>(
                     serverDesc->primitive.nextInChain);
                 EXPECT_EQ(ext->chain.sType, clientExt.chain.sType);
-                EXPECT_EQ(ext->clampDepth, true);
+                EXPECT_EQ(ext->unclippedDepth, true);
                 EXPECT_EQ(ext->chain.next, nullptr);
 
                 return api.GetNewRenderPipeline();
@@ -69,15 +69,15 @@ TEST_F(WireExtensionTests, MutlipleChainedStructs) {
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiShaderModule));
     FlushClient();
 
-    WGPUPrimitiveDepthClampingState clientExt2 = {};
-    clientExt2.chain.sType = WGPUSType_PrimitiveDepthClampingState;
+    WGPUPrimitiveDepthClipControl clientExt2 = {};
+    clientExt2.chain.sType = WGPUSType_PrimitiveDepthClipControl;
     clientExt2.chain.next = nullptr;
-    clientExt2.clampDepth = false;
+    clientExt2.unclippedDepth = false;
 
-    WGPUPrimitiveDepthClampingState clientExt1 = {};
-    clientExt1.chain.sType = WGPUSType_PrimitiveDepthClampingState;
+    WGPUPrimitiveDepthClipControl clientExt1 = {};
+    clientExt1.chain.sType = WGPUSType_PrimitiveDepthClipControl;
     clientExt1.chain.next = &clientExt2.chain;
-    clientExt1.clampDepth = true;
+    clientExt1.unclippedDepth = true;
 
     WGPURenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.vertex.module = shaderModule;
@@ -88,15 +88,15 @@ TEST_F(WireExtensionTests, MutlipleChainedStructs) {
     EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke(
             [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
-                const auto* ext1 = reinterpret_cast<const WGPUPrimitiveDepthClampingState*>(
+                const auto* ext1 = reinterpret_cast<const WGPUPrimitiveDepthClipControl*>(
                     serverDesc->primitive.nextInChain);
                 EXPECT_EQ(ext1->chain.sType, clientExt1.chain.sType);
-                EXPECT_EQ(ext1->clampDepth, true);
+                EXPECT_EQ(ext1->unclippedDepth, true);
 
                 const auto* ext2 =
-                    reinterpret_cast<const WGPUPrimitiveDepthClampingState*>(ext1->chain.next);
+                    reinterpret_cast<const WGPUPrimitiveDepthClipControl*>(ext1->chain.next);
                 EXPECT_EQ(ext2->chain.sType, clientExt2.chain.sType);
-                EXPECT_EQ(ext2->clampDepth, false);
+                EXPECT_EQ(ext2->unclippedDepth, false);
                 EXPECT_EQ(ext2->chain.next, nullptr);
 
                 return api.GetNewRenderPipeline();
@@ -112,15 +112,15 @@ TEST_F(WireExtensionTests, MutlipleChainedStructs) {
     EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke(
             [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
-                const auto* ext2 = reinterpret_cast<const WGPUPrimitiveDepthClampingState*>(
+                const auto* ext2 = reinterpret_cast<const WGPUPrimitiveDepthClipControl*>(
                     serverDesc->primitive.nextInChain);
                 EXPECT_EQ(ext2->chain.sType, clientExt2.chain.sType);
-                EXPECT_EQ(ext2->clampDepth, false);
+                EXPECT_EQ(ext2->unclippedDepth, false);
 
                 const auto* ext1 =
-                    reinterpret_cast<const WGPUPrimitiveDepthClampingState*>(ext2->chain.next);
+                    reinterpret_cast<const WGPUPrimitiveDepthClipControl*>(ext2->chain.next);
                 EXPECT_EQ(ext1->chain.sType, clientExt1.chain.sType);
-                EXPECT_EQ(ext1->clampDepth, true);
+                EXPECT_EQ(ext1->unclippedDepth, true);
                 EXPECT_EQ(ext1->chain.next, nullptr);
 
                 return api.GetNewRenderPipeline();
@@ -136,7 +136,7 @@ TEST_F(WireExtensionTests, InvalidSType) {
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiShaderModule));
     FlushClient();
 
-    WGPUPrimitiveDepthClampingState clientExt = {};
+    WGPUPrimitiveDepthClipControl clientExt = {};
     clientExt.chain.sType = WGPUSType_Invalid;
     clientExt.chain.next = nullptr;
 
@@ -164,7 +164,7 @@ TEST_F(WireExtensionTests, UnknownSType) {
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiShaderModule));
     FlushClient();
 
-    WGPUPrimitiveDepthClampingState clientExt = {};
+    WGPUPrimitiveDepthClipControl clientExt = {};
     clientExt.chain.sType = static_cast<WGPUSType>(-1);
     clientExt.chain.next = nullptr;
 
@@ -193,14 +193,14 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
     EXPECT_CALL(api, DeviceCreateShaderModule(apiDevice, _)).WillOnce(Return(apiShaderModule));
     FlushClient();
 
-    WGPUPrimitiveDepthClampingState clientExt2 = {};
+    WGPUPrimitiveDepthClipControl clientExt2 = {};
     clientExt2.chain.sType = WGPUSType_Invalid;
     clientExt2.chain.next = nullptr;
 
-    WGPUPrimitiveDepthClampingState clientExt1 = {};
-    clientExt1.chain.sType = WGPUSType_PrimitiveDepthClampingState;
+    WGPUPrimitiveDepthClipControl clientExt1 = {};
+    clientExt1.chain.sType = WGPUSType_PrimitiveDepthClipControl;
     clientExt1.chain.next = &clientExt2.chain;
-    clientExt1.clampDepth = true;
+    clientExt1.unclippedDepth = true;
 
     WGPURenderPipelineDescriptor renderPipelineDesc = {};
     renderPipelineDesc.vertex.module = shaderModule;
@@ -211,10 +211,10 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
     EXPECT_CALL(api, DeviceCreateRenderPipeline(apiDevice, NotNull()))
         .WillOnce(Invoke(
             [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
-                const auto* ext = reinterpret_cast<const WGPUPrimitiveDepthClampingState*>(
+                const auto* ext = reinterpret_cast<const WGPUPrimitiveDepthClipControl*>(
                     serverDesc->primitive.nextInChain);
                 EXPECT_EQ(ext->chain.sType, clientExt1.chain.sType);
-                EXPECT_EQ(ext->clampDepth, true);
+                EXPECT_EQ(ext->unclippedDepth, true);
 
                 EXPECT_EQ(ext->chain.next->sType, WGPUSType_Invalid);
                 EXPECT_EQ(ext->chain.next->next, nullptr);
@@ -233,10 +233,10 @@ TEST_F(WireExtensionTests, ValidAndInvalidSTypeInChain) {
             [&](Unused, const WGPURenderPipelineDescriptor* serverDesc) -> WGPURenderPipeline {
                 EXPECT_EQ(serverDesc->primitive.nextInChain->sType, WGPUSType_Invalid);
 
-                const auto* ext = reinterpret_cast<const WGPUPrimitiveDepthClampingState*>(
+                const auto* ext = reinterpret_cast<const WGPUPrimitiveDepthClipControl*>(
                     serverDesc->primitive.nextInChain->next);
                 EXPECT_EQ(ext->chain.sType, clientExt1.chain.sType);
-                EXPECT_EQ(ext->clampDepth, true);
+                EXPECT_EQ(ext->unclippedDepth, true);
                 EXPECT_EQ(ext->chain.next, nullptr);
 
                 return api.GetNewRenderPipeline();

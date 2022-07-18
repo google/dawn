@@ -21,11 +21,11 @@
 
 constexpr static unsigned int kRTSize = 1;
 
-class DepthClampingTest : public DawnTest {
+class DepthClippingTest : public DawnTest {
   protected:
     void SetUp() override {
         DawnTest::SetUp();
-        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::DepthClamping}));
+        DAWN_TEST_UNSUPPORTED_IF(!SupportsFeatures({wgpu::FeatureName::DepthClipControl}));
 
         wgpu::TextureDescriptor renderTargetDescriptor;
         renderTargetDescriptor.size = {kRTSize, kRTSize};
@@ -70,17 +70,16 @@ class DepthClampingTest : public DawnTest {
 
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         std::vector<wgpu::FeatureName> requiredFeatures = {};
-        if (SupportsFeatures({wgpu::FeatureName::DepthClamping})) {
-            requiredFeatures.push_back(wgpu::FeatureName::DepthClamping);
+        if (SupportsFeatures({wgpu::FeatureName::DepthClipControl})) {
+            requiredFeatures.push_back(wgpu::FeatureName::DepthClipControl);
         }
         return requiredFeatures;
     }
 
     struct TestSpec {
-        wgpu::PrimitiveDepthClampingState* depthClampingState;
+        wgpu::PrimitiveDepthClipControl* depthClipControl;
         RGBA8 color;
         float depth;
-        wgpu::CompareFunction depthCompareFunction;
     };
 
     // Each test param represents a pair of triangles with a color, depth, stencil value, and
@@ -111,13 +110,12 @@ class DepthClampingTest : public DawnTest {
 
             // Create a pipeline for the triangles with the test spec's params.
             utils::ComboRenderPipelineDescriptor descriptor;
-            descriptor.primitive.nextInChain = test.depthClampingState;
+            descriptor.primitive.nextInChain = test.depthClipControl;
             descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
             descriptor.vertex.module = vsModule;
             descriptor.cFragment.module = fsModule;
             wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
             depthStencil->depthWriteEnabled = true;
-            depthStencil->depthCompare = test.depthCompareFunction;
             depthStencil->format = wgpu::TextureFormat::Depth24PlusStencil8;
 
             wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
@@ -146,150 +144,218 @@ class DepthClampingTest : public DawnTest {
     wgpu::ShaderModule fsModule;
 };
 
-// Test that fragments beyond the far plane are clamped to 1.0 if depth clamping is enabled.
-TEST_P(DepthClampingTest, ClampOnBeyondFarPlane) {
-    wgpu::PrimitiveDepthClampingState clampingState;
-    clampingState.clampDepth = true;
+// Test that fragments beyond the far plane are not clipped if unclippedDepth is true
+TEST_P(DepthClippingTest, UnclippedBeyondFarPlane) {
+    wgpu::PrimitiveDepthClipControl depthClipControl;
+    depthClipControl.unclippedDepth = true;
 
     DoTest(
         {
             // Draw a red triangle at depth 1.
             {
-                nullptr,               /* depthClampingState */
+                nullptr,               /* depthClipControl */
                 RGBA8(255, 0, 0, 255), /* color */
                 1.f,                   /* depth */
-                wgpu::CompareFunction::Always,
             },
-            // Draw a green triangle at depth 2 which should get clamped to 1.
+            // Draw a green triangle at depth 2 which should not be clipped.
             {
-                &clampingState,
+                &depthClipControl,     /* depthClipControl */
                 RGBA8(0, 255, 0, 255), /* color */
                 2.f,                   /* depth */
-                wgpu::CompareFunction::Equal,
             },
         },
-        // Since we draw the green triangle with an "equal" depth compare function, the resulting
-        // fragment should be green.
+        // The resulting fragment should be green even though the green triangle is
+        // outside the clip volume.
         RGBA8(0, 255, 0, 255));
 }
 
-// Test that fragments beyond the near plane are clamped to 0.0 if depth clamping is enabled.
-TEST_P(DepthClampingTest, ClampOnBeyondNearPlane) {
-    wgpu::PrimitiveDepthClampingState clampingState;
-    clampingState.clampDepth = true;
+// Test that fragments beyond the far plane are clipped if unclippedDepth is false
+TEST_P(DepthClippingTest, ClippedBeyondFarPlane) {
+    wgpu::PrimitiveDepthClipControl depthClipControl;
+    depthClipControl.unclippedDepth = false;
+
+    DoTest(
+        {
+            // Draw a red triangle at depth 1.
+            {
+                nullptr,               /* depthClipControl */
+                RGBA8(255, 0, 0, 255), /* color */
+                1.f,                   /* depth */
+            },
+            // Draw a green triangle at depth 2 which should be clipped.
+            {
+                &depthClipControl,     /* depthClipControl */
+                RGBA8(0, 255, 0, 255), /* color */
+                2.f,                   /* depth */
+            },
+        },
+        // The resulting fragment should be red since the green triangle is
+        // outside the clip volume.
+        RGBA8(255, 0, 0, 255));
+}
+
+// Test that fragments beyond the far plane are clipped if unclippedDepth is not specified
+TEST_P(DepthClippingTest, ClippedBeyondFarPlaneFeatureUnused) {
+    DoTest(
+        {
+            // Draw a red triangle at depth 1.
+            {
+                nullptr,               /* depthClipControl */
+                RGBA8(255, 0, 0, 255), /* color */
+                1.f,                   /* depth */
+            },
+            // Draw a green triangle at depth 2 which should be clipped.
+            {
+                nullptr,               /* depthClipControl */
+                RGBA8(0, 255, 0, 255), /* color */
+                2.f,                   /* depth */
+            },
+        },
+        // The resulting fragment should be red since the green triangle is
+        // outside the clip volume.
+        RGBA8(255, 0, 0, 255));
+}
+
+// Test that fragments beyond the near plane are not clipped if unclippedDepth is true
+TEST_P(DepthClippingTest, UnclippedBeyondNearPlane) {
+    wgpu::PrimitiveDepthClipControl depthClipControl;
+    depthClipControl.unclippedDepth = true;
 
     DoTest(
         {
             // Draw a red triangle at depth 0.
             {
-                nullptr,               /* depthClampingState */
+                nullptr,               /* depthClipControl */
                 RGBA8(255, 0, 0, 255), /* color */
                 0.f,                   /* depth */
-                wgpu::CompareFunction::Always,
             },
-            // Draw a green triangle at depth -1 which should get clamped to 0.
+            // Draw a green triangle at depth -1 which should not be clipped.
             {
-                &clampingState,
+                &depthClipControl,     /* depthClipControl */
                 RGBA8(0, 255, 0, 255), /* color */
                 -1.f,                  /* depth */
-                wgpu::CompareFunction::Equal,
             },
         },
-        // Since we draw the green triangle with an "equal" depth compare function, the resulting
-        // fragment should be green.
+        // The resulting fragment should be green even though the green triangle is
+        // outside the clip volume.
         RGBA8(0, 255, 0, 255));
 }
 
-// Test that fragments inside the view frustum are unaffected by depth clamping.
-TEST_P(DepthClampingTest, ClampOnInsideViewFrustum) {
-    wgpu::PrimitiveDepthClampingState clampingState;
-    clampingState.clampDepth = true;
+// Test that fragments beyond the near plane are clipped if unclippedDepth is false
+TEST_P(DepthClippingTest, ClippedBeyondNearPlane) {
+    wgpu::PrimitiveDepthClipControl depthClipControl;
+    depthClipControl.unclippedDepth = false;
 
     DoTest(
         {
+            // Draw a red triangle at depth 0.
             {
-                &clampingState,
-                RGBA8(0, 255, 0, 255), /* color */
-                0.5f,                  /* depth */
-                wgpu::CompareFunction::Always,
+                nullptr,               /* depthClipControl */
+                RGBA8(255, 0, 0, 255), /* color */
+                0.f,                   /* depth */
             },
-        },
-        RGBA8(0, 255, 0, 255));
-}
-
-// Test that fragments outside the view frustum are clipped if depth clamping is disabled.
-TEST_P(DepthClampingTest, ClampOffOutsideViewFrustum) {
-    wgpu::PrimitiveDepthClampingState clampingState;
-    clampingState.clampDepth = false;
-
-    DoTest(
-        {
+            // Draw a green triangle at depth -1 which should be clipped.
             {
-                &clampingState,
-                RGBA8(0, 255, 0, 255), /* color */
-                2.f,                   /* depth */
-                wgpu::CompareFunction::Always,
-            },
-            {
-                &clampingState,
+                &depthClipControl,     /* depthClipControl */
                 RGBA8(0, 255, 0, 255), /* color */
                 -1.f,                  /* depth */
-                wgpu::CompareFunction::Always,
             },
         },
-        RGBA8(0, 0, 0, 0));
+        // The resulting fragment should be red because the green triangle is
+        // outside the clip volume.
+        RGBA8(255, 0, 0, 255));
 }
 
-// Test that fragments outside the view frustum are clipped if clampDepth is left unspecified.
-TEST_P(DepthClampingTest, ClampUnspecifiedOutsideViewFrustum) {
+// Test that fragments beyond the near plane are clipped if unclippedDepth is not specified
+TEST_P(DepthClippingTest, ClippedBeyondNearPlaneFeatureUnused) {
     DoTest(
         {
+            // Draw a red triangle at depth 0.
             {
-                nullptr,               /* depthClampingState */
+                nullptr,               /* depthClipControl */
+                RGBA8(255, 0, 0, 255), /* color */
+                0.f,                   /* depth */
+            },
+            // Draw a green triangle at depth -1 which should be clipped.
+            {
+                nullptr,               /* depthClipControl */
                 RGBA8(0, 255, 0, 255), /* color */
                 -1.f,                  /* depth */
-                wgpu::CompareFunction::Always,
-            },
-            {
-                nullptr,               /* depthClampingState */
-                RGBA8(0, 255, 0, 255), /* color */
-                2.f,                   /* depth */
-                wgpu::CompareFunction::Always,
             },
         },
-        RGBA8(0, 0, 0, 0));
+        // The resulting fragment should be red because the green triangle is
+        // outside the clip volume.
+        RGBA8(255, 0, 0, 255));
 }
 
 // Test that fragments are properly clipped or clamped if multiple render pipelines are used
-// within the same render pass with differing clampDepth values.
-TEST_P(DepthClampingTest, MultipleRenderPipelines) {
-    wgpu::PrimitiveDepthClampingState clampingState;
-    clampingState.clampDepth = true;
+// within the same render pass with differing unclippedDepth values.
+TEST_P(DepthClippingTest, MultipleRenderPipelines) {
+    wgpu::PrimitiveDepthClipControl depthClipControl1;
+    depthClipControl1.unclippedDepth = true;
 
-    wgpu::PrimitiveDepthClampingState clippingState;
-    clippingState.clampDepth = false;
+    wgpu::PrimitiveDepthClipControl depthClipControl2;
+    depthClipControl2.unclippedDepth = false;
 
     DoTest(
         {
-            // Draw green with clamping
+            // Draw green with no clipping
             {
-                &clampingState,
-                RGBA8(0, 255, 0, 255), /* color */
-                2.f,                   /* depth */
-                wgpu::CompareFunction::Always,
+                &depthClipControl1, RGBA8(0, 255, 0, 255), /* color */
+                2.f,                                       /* depth */
             },
             // Draw red with clipping
             {
-                &clippingState,
-                RGBA8(255, 0, 0, 255), /* color */
-                2.f,                   /* depth */
-                wgpu::CompareFunction::Always,
+                &depthClipControl2, RGBA8(255, 0, 0, 255), /* color */
+                2.f,                                       /* depth */
             },
         },
         RGBA8(0, 255, 0, 255));  // Result should be green
 }
 
-DAWN_INSTANTIATE_TEST(DepthClampingTest,
+// Test that fragments are not clipped if unclippedDepth is true and that their
+// depths are not being clamped instead. In the fragment shader, we should see
+// depth values outside the viewport.
+TEST_P(DepthClippingTest, UnclippedNotClamped) {
+    wgpu::PrimitiveDepthClipControl depthClipControl;
+    depthClipControl.unclippedDepth = true;
+
+    // Create a pipeline to render a point.
+    utils::ComboRenderPipelineDescriptor descriptor;
+    descriptor.primitive.nextInChain = &depthClipControl;
+    descriptor.primitive.topology = wgpu::PrimitiveTopology::PointList;
+    // Draw the point at (0, 0) with depth 2.0.
+    descriptor.vertex.module = utils::CreateShaderModule(device, R"(
+        @vertex fn main() -> @builtin(position) vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 2.0, 1.0);
+        })");
+    // Write frag_pos.z / 4.0 which should be about 0.5 to the red channel.
+    // This is the depth output from the vertex shader which is not clamped to the viewport.
+    descriptor.cFragment.module = utils::CreateShaderModule(device, R"(
+        @fragment fn main(@builtin(position) frag_pos: vec4<f32>) -> @location(0) vec4<f32> {
+            return vec4<f32>(frag_pos.z / 4.0, 0.0, 0.0, 1.0);
+        })");
+    wgpu::DepthStencilState* depthStencil = descriptor.EnableDepthStencil();
+    depthStencil->depthWriteEnabled = true;
+    depthStencil->format = wgpu::TextureFormat::Depth24PlusStencil8;
+
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&descriptor);
+
+    // Draw the point.
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    utils::ComboRenderPassDescriptor renderPass({renderTargetView}, depthTextureView);
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass);
+    pass.SetPipeline(pipeline);
+    pass.Draw(1);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    EXPECT_PIXEL_RGBA8_BETWEEN(RGBA8(127, 0, 0, 255), RGBA8(128, 0, 0, 255), renderTarget, 0, 0)
+        << "Pixel check failed";
+}
+
+DAWN_INSTANTIATE_TEST(DepthClippingTest,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

@@ -1365,7 +1365,6 @@
             {"value": 6, "name": "texture compression ETC2"},
             {"value": 7, "name": "texture compression ASTC"},
             {"value": 8, "name": "indirect first instance"},
-            {"value": 1000, "name": "depth clamping", "tags": ["emscripten", "dawn"]},
             {"value": 1001, "name": "dawn shader float 16", "tags": ["dawn"]},
             {"value": 1002, "name": "dawn internal usages", "tags": ["dawn"]},
             {"value": 1003, "name": "dawn multi planar formats", "tags": ["dawn"]},
@@ -2150,16 +2149,6 @@
         ]
     },
 
-    "primitive depth clamping state": {
-        "category": "structure",
-        "chained": "in",
-        "chain roots": ["primitive state"],
-        "tags": ["dawn", "emscripten"],
-        "members": [
-            {"name": "clamp depth", "type": "bool", "default": "false"}
-        ]
-    },
-
     "primitive depth clip control": {
         "category": "structure",
         "chained": "in",
@@ -2512,7 +2501,6 @@
             {"value": 14, "name": "surface descriptor from windows swap chain panel", "tags": ["dawn"]},
             {"value": 15, "name": "render pass descriptor max draw count"},
             {"value": 1000, "name": "dawn texture internal usage descriptor", "tags": ["dawn"]},
-            {"value": 1001, "name": "primitive depth clamping state", "tags": ["dawn", "emscripten"]},
             {"value": 1002, "name": "dawn toggles device descriptor", "tags": ["dawn", "native"]},
             {"value": 1003, "name": "dawn encoder internal usage descriptor", "tags": ["dawn"]},
             {"value": 1004, "name": "dawn instance descriptor", "tags": ["dawn", "native"]},

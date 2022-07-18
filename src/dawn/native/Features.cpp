@@ -58,9 +58,6 @@ static constexpr FeatureEnumAndInfoList kFeatureNameAndInfoList = {{
     {Feature::DepthClipControl,
      {"depth-clip-control", "Disable depth clipping of primitives to the clip volume",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=1178"}},
-    {Feature::DepthClamping,
-     {"depth-clamping", "Clamp depth to [0, 1] in NDC space instead of clipping",
-      "https://bugs.chromium.org/p/dawn/issues/detail?id=716"}},
     {Feature::Depth32FloatStencil8,
      {"depth32float-stencil8", "Support depth32float-stencil8 texture format",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=690"}},
@@ -102,8 +99,6 @@ Feature FromAPIFeature(wgpu::FeatureName feature) {
             return Feature::TextureCompressionASTC;
         case wgpu::FeatureName::DepthClipControl:
             return Feature::DepthClipControl;
-        case wgpu::FeatureName::DepthClamping:
-            return Feature::DepthClamping;
         case wgpu::FeatureName::Depth32FloatStencil8:
             return Feature::Depth32FloatStencil8;
         case wgpu::FeatureName::IndirectFirstInstance:
@@ -136,8 +131,6 @@ wgpu::FeatureName ToAPIFeature(Feature feature) {
             return wgpu::FeatureName::TimestampQuery;
         case Feature::DepthClipControl:
             return wgpu::FeatureName::DepthClipControl;
-        case Feature::DepthClamping:
-            return wgpu::FeatureName::DepthClamping;
         case Feature::Depth32FloatStencil8:
             return wgpu::FeatureName::Depth32FloatStencil8;
         case Feature::IndirectFirstInstance:

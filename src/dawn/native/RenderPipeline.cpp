@@ -153,12 +153,7 @@ MaybeError ValidateVertexState(DeviceBase* device,
 }
 
 MaybeError ValidatePrimitiveState(const DeviceBase* device, const PrimitiveState* descriptor) {
-    DAWN_TRY(ValidateSingleSType(descriptor->nextInChain, wgpu::SType::PrimitiveDepthClampingState,
-                                 wgpu::SType::PrimitiveDepthClipControl));
-    const PrimitiveDepthClampingState* clampInfo = nullptr;
-    FindInChain(descriptor->nextInChain, &clampInfo);
-    DAWN_INVALID_IF(clampInfo && !device->IsFeatureEnabled(Feature::DepthClamping),
-                    "%s is not supported", wgpu::FeatureName::DepthClamping);
+    DAWN_TRY(ValidateSingleSType(descriptor->nextInChain, wgpu::SType::PrimitiveDepthClipControl));
     const PrimitiveDepthClipControl* depthClipControl = nullptr;
     FindInChain(descriptor->nextInChain, &depthClipControl);
     DAWN_INVALID_IF(depthClipControl && !device->IsFeatureEnabled(Feature::DepthClipControl),
@@ -564,11 +559,12 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
     }
 
     mPrimitive = descriptor->primitive;
-    const PrimitiveDepthClampingState* clampInfo = nullptr;
-    FindInChain(mPrimitive.nextInChain, &clampInfo);
-    if (clampInfo) {
-        mClampDepth = clampInfo->clampDepth;
+    const PrimitiveDepthClipControl* depthClipControl = nullptr;
+    FindInChain(mPrimitive.nextInChain, &depthClipControl);
+    if (depthClipControl) {
+        mUnclippedDepth = depthClipControl->unclippedDepth;
     }
+
     mMultisample = descriptor->multisample;
 
     if (mAttachmentState->HasDepthStencilAttachment()) {
@@ -763,9 +759,9 @@ float RenderPipelineBase::GetDepthBiasClamp() const {
     return mDepthStencil.depthBiasClamp;
 }
 
-bool RenderPipelineBase::ShouldClampDepth() const {
+bool RenderPipelineBase::HasUnclippedDepth() const {
     ASSERT(!IsError());
-    return mClampDepth;
+    return mUnclippedDepth;
 }
 
 ityp::bitset<ColorAttachmentIndex, kMaxColorAttachments>
@@ -872,7 +868,7 @@ size_t RenderPipelineBase::ComputeContentHash() {
 
     // Record primitive state
     recorder.Record(mPrimitive.topology, mPrimitive.stripIndexFormat, mPrimitive.frontFace,
-                    mPrimitive.cullMode, mClampDepth);
+                    mPrimitive.cullMode, mUnclippedDepth);
 
     // Record multisample state
     // Sample count hashed as part of the attachment state
@@ -989,7 +985,7 @@ bool RenderPipelineBase::EqualityFunc::operator()(const RenderPipelineBase* a,
         if (stateA.topology != stateB.topology ||
             stateA.stripIndexFormat != stateB.stripIndexFormat ||
             stateA.frontFace != stateB.frontFace || stateA.cullMode != stateB.cullMode ||
-            a->mClampDepth != b->mClampDepth) {
+            a->mUnclippedDepth != b->mUnclippedDepth) {
             return false;
         }
     }

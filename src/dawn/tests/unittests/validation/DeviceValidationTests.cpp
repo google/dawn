@@ -201,9 +201,9 @@ TEST_F(RequestDeviceValidationTest, LowerIsBetter) {
 
 // Test that it is an error to request limits with an invalid chained struct
 TEST_F(RequestDeviceValidationTest, InvalidChainedStruct) {
-    wgpu::PrimitiveDepthClampingState depthClamp = {};
+    wgpu::PrimitiveDepthClipControl depthClipControl = {};
     wgpu::RequiredLimits limits = {};
-    limits.nextInChain = &depthClamp;
+    limits.nextInChain = &depthClipControl;
 
     wgpu::DeviceDescriptor descriptor;
     descriptor.requiredLimits = &limits;

@@ -103,6 +103,7 @@ enum class DeviceExt {
     ExternalSemaphoreZirconHandle,
 
     // Others
+    DepthClipEnable,
     ImageDrmFormatModifier,
     Swapchain,
     SubgroupSizeControl,

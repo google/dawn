@@ -430,7 +430,7 @@ MaybeError RenderPipeline::Initialize() {
     rasterization.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterization.pNext = nullptr;
     rasterization.flags = 0;
-    rasterization.depthClampEnable = ShouldClampDepth() ? VK_TRUE : VK_FALSE;
+    rasterization.depthClampEnable = VK_FALSE;
     rasterization.rasterizerDiscardEnable = VK_FALSE;
     rasterization.polygonMode = VK_POLYGON_MODE_FILL;
     rasterization.cullMode = VulkanCullMode(GetCullMode());
@@ -440,6 +440,18 @@ MaybeError RenderPipeline::Initialize() {
     rasterization.depthBiasClamp = GetDepthBiasClamp();
     rasterization.depthBiasSlopeFactor = GetDepthBiasSlopeScale();
     rasterization.lineWidth = 1.0f;
+
+    PNextChainBuilder rasterizationChain(&rasterization);
+    VkPipelineRasterizationDepthClipStateCreateInfoEXT depthClipState;
+    if (HasUnclippedDepth()) {
+        ASSERT(device->IsFeatureEnabled(Feature::DepthClipControl));
+        depthClipState.pNext = nullptr;
+        depthClipState.depthClipEnable = VK_FALSE;
+        depthClipState.flags = 0;
+        rasterizationChain.Add(
+            &depthClipState,
+            VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_DEPTH_CLIP_STATE_CREATE_INFO_EXT);
+    }
 
     VkPipelineMultisampleStateCreateInfo multisample;
     multisample.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;

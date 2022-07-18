@@ -1242,7 +1242,7 @@ MaybeError CommandBuffer::EncodeRenderPass(id<MTLRenderCommandEncoder> encoder) 
                            slopeScale:newPipeline->GetDepthBiasSlopeScale()
                                 clamp:newPipeline->GetDepthBiasClamp()];
                 if (@available(macOS 10.11, iOS 11.0, *)) {
-                    MTLDepthClipMode clipMode = newPipeline->ShouldClampDepth()
+                    MTLDepthClipMode clipMode = newPipeline->HasUnclippedDepth()
                                                     ? MTLDepthClipModeClamp
                                                     : MTLDepthClipModeClip;
                     [encoder setDepthClipMode:clipMode];

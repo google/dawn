@@ -409,6 +409,16 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice physicalD
         usedKnobs.features.pipelineStatisticsQuery = VK_TRUE;
     }
 
+    if (IsFeatureEnabled(Feature::DepthClipControl)) {
+        const VulkanDeviceInfo& deviceInfo = ToBackend(GetAdapter())->GetDeviceInfo();
+        ASSERT(deviceInfo.HasExt(DeviceExt::DepthClipEnable) &&
+               deviceInfo.depthClipEnableFeatures.depthClipEnable == VK_TRUE);
+
+        usedKnobs.depthClipEnableFeatures.depthClipEnable = VK_TRUE;
+        featuresChain.Add(&usedKnobs.depthClipEnableFeatures,
+                          VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_CLIP_ENABLE_FEATURES_EXT);
+    }
+
     if (IsFeatureEnabled(Feature::ShaderFloat16)) {
         const VulkanDeviceInfo& deviceInfo = ToBackend(GetAdapter())->GetDeviceInfo();
         ASSERT(deviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
@@ -425,11 +435,6 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice physicalD
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_FLOAT16_INT8_FEATURES_KHR);
         featuresChain.Add(&usedKnobs._16BitStorageFeatures,
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_16BIT_STORAGE_FEATURES);
-    }
-
-    if (IsFeatureEnabled(Feature::DepthClamping)) {
-        ASSERT(ToBackend(GetAdapter())->GetDeviceInfo().features.depthClamp == VK_TRUE);
-        usedKnobs.features.depthClamp = VK_TRUE;
     }
 
     // Find a universal queue family

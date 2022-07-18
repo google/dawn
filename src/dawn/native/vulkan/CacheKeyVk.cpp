@@ -58,6 +58,13 @@ void CacheKeySerializer<VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT>:
 }
 
 template <>
+void CacheKeySerializer<VkPipelineRasterizationDepthClipStateCreateInfoEXT>::Serialize(
+    CacheKey* key,
+    const VkPipelineRasterizationDepthClipStateCreateInfoEXT& t) {
+    key->Record(t.depthClipEnable, t.flags);
+}
+
+template <>
 void CacheKeySerializer<VkSpecializationMapEntry>::Serialize(CacheKey* key,
                                                              const VkSpecializationMapEntry& t) {
     key->Record(t.constantID, t.offset, t.size);
@@ -170,7 +177,7 @@ void CacheKeySerializer<VkPipelineRasterizationStateCreateInfo>::Serialize(
     key->Record(t.flags, t.depthClampEnable, t.rasterizerDiscardEnable, t.polygonMode, t.cullMode,
                 t.frontFace, t.depthBiasEnable, t.depthBiasConstantFactor, t.depthBiasClamp,
                 t.depthBiasSlopeFactor, t.lineWidth);
-    vulkan::SerializePnext<>(key, &t);
+    vulkan::SerializePnext<VkPipelineRasterizationDepthClipStateCreateInfoEXT>(key, &t);
 }
 
 template <>

@@ -147,10 +147,6 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
         mSupportedFeatures.EnableFeature(Feature::PipelineStatisticsQuery);
     }
 
-    if (mDeviceInfo.features.depthClamp == VK_TRUE) {
-        mSupportedFeatures.EnableFeature(Feature::DepthClamping);
-    }
-
     if (mDeviceInfo.properties.limits.timestampComputeAndGraphics == VK_TRUE) {
         mSupportedFeatures.EnableFeature(Feature::TimestampQuery);
     }
@@ -169,6 +165,11 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
         mDeviceInfo.shaderIntegerDotProductProperties
                 .integerDotProduct4x8BitPackedUnsignedAccelerated == VK_TRUE) {
         mSupportedFeatures.EnableFeature(Feature::ChromiumExperimentalDp4a);
+    }
+
+    if (mDeviceInfo.HasExt(DeviceExt::DepthClipEnable) &&
+        mDeviceInfo.depthClipEnableFeatures.depthClipEnable == VK_TRUE) {
+        mSupportedFeatures.EnableFeature(Feature::DepthClipControl);
     }
 
 #if defined(DAWN_USE_SYNC_FDS)

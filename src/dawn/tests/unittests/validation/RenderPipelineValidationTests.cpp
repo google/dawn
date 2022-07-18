@@ -975,15 +975,15 @@ TEST_F(RenderPipelineValidationTest, StripIndexFormatAllowed) {
     }
 }
 
-// Test that specifying a clampDepth value is an error if the feature is not enabled.
-TEST_F(RenderPipelineValidationTest, ClampDepthWithoutFeature) {
+// Test that specifying a unclippedDepth value is an error if the feature is not enabled.
+TEST_F(RenderPipelineValidationTest, UnclippedDepthWithoutFeature) {
     {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
-        wgpu::PrimitiveDepthClampingState clampingState;
-        clampingState.clampDepth = true;
-        descriptor.primitive.nextInChain = &clampingState;
+        wgpu::PrimitiveDepthClipControl depthClipControl;
+        depthClipControl.unclippedDepth = true;
+        descriptor.primitive.nextInChain = &depthClipControl;
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
                             testing::HasSubstr("not supported"));
     }
@@ -991,9 +991,9 @@ TEST_F(RenderPipelineValidationTest, ClampDepthWithoutFeature) {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
-        wgpu::PrimitiveDepthClampingState clampingState;
-        clampingState.clampDepth = false;
-        descriptor.primitive.nextInChain = &clampingState;
+        wgpu::PrimitiveDepthClipControl depthClipControl;
+        depthClipControl.unclippedDepth = false;
+        descriptor.primitive.nextInChain = &depthClipControl;
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
                             testing::HasSubstr("not supported"));
     }
@@ -1021,24 +1021,6 @@ TEST_F(RenderPipelineValidationTest, DepthClipControlWithoutFeature) {
         ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
                             testing::HasSubstr("not supported"));
     }
-}
-
-// Test that using both DepthClipControl and DepthClamp features is invalid.
-TEST_F(RenderPipelineValidationTest, DepthClipControlAndDepthClampInvalid) {
-    utils::ComboRenderPipelineDescriptor descriptor;
-    descriptor.vertex.module = vsModule;
-    descriptor.cFragment.module = fsModule;
-
-    wgpu::PrimitiveDepthClipControl depthClipControl;
-    depthClipControl.unclippedDepth = false;
-    descriptor.primitive.nextInChain = &depthClipControl;
-
-    wgpu::PrimitiveDepthClampingState clampingState;
-    clampingState.clampDepth = false;
-    depthClipControl.nextInChain = &clampingState;
-
-    ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor),
-                        testing::HasSubstr("only contain a single chained struct"));
 }
 
 // Test that depthStencil.depthCompare must not be undefiend.
@@ -1359,35 +1341,35 @@ TEST_F(RenderPipelineValidationTest, BindingsFromCorrectEntryPoint) {
     ASSERT_DEVICE_ERROR(device.CreateRenderPipeline(&descriptor));
 }
 
-class DepthClampingValidationTest : public RenderPipelineValidationTest {
+class DepthClipControlValidationTest : public RenderPipelineValidationTest {
   protected:
     WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
         wgpu::DeviceDescriptor descriptor;
-        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::DepthClamping};
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::DepthClipControl};
         descriptor.requiredFeatures = requiredFeatures;
         descriptor.requiredFeaturesCount = 1;
         return dawnAdapter.CreateDevice(&descriptor);
     }
 };
 
-// Tests that specifying a clampDepth value succeeds if the feature is enabled.
-TEST_F(DepthClampingValidationTest, Success) {
+// Tests that specifying a unclippedDepth value succeeds if the feature is enabled.
+TEST_F(DepthClipControlValidationTest, Success) {
     {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
-        wgpu::PrimitiveDepthClampingState clampingState;
-        clampingState.clampDepth = true;
-        descriptor.primitive.nextInChain = &clampingState;
+        wgpu::PrimitiveDepthClipControl depthClipControl;
+        depthClipControl.unclippedDepth = true;
+        descriptor.primitive.nextInChain = &depthClipControl;
         device.CreateRenderPipeline(&descriptor);
     }
     {
         utils::ComboRenderPipelineDescriptor descriptor;
         descriptor.vertex.module = vsModule;
         descriptor.cFragment.module = fsModule;
-        wgpu::PrimitiveDepthClampingState clampingState;
-        clampingState.clampDepth = false;
-        descriptor.primitive.nextInChain = &clampingState;
+        wgpu::PrimitiveDepthClipControl depthClipControl;
+        depthClipControl.unclippedDepth = false;
+        descriptor.primitive.nextInChain = &depthClipControl;
         device.CreateRenderPipeline(&descriptor);
     }
 }
