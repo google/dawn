@@ -21,10 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::WhileStatement);
 namespace tint::ast {
 
 WhileStatement::WhileStatement(ProgramID pid,
+                               NodeID nid,
                                const Source& src,
                                const Expression* cond,
                                const BlockStatement* b)
-    : Base(pid, src), condition(cond), body(b) {
+    : Base(pid, nid, src), condition(cond), body(b) {
     TINT_ASSERT(AST, cond);
     TINT_ASSERT(AST, body);
 

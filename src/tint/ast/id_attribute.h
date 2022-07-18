@@ -26,9 +26,10 @@ class IdAttribute final : public Castable<IdAttribute, Attribute> {
   public:
     /// Create an id attribute.
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param val the numeric id value
-    IdAttribute(ProgramID pid, const Source& src, uint32_t val);
+    IdAttribute(ProgramID pid, NodeID nid, const Source& src, uint32_t val);
     ~IdAttribute() override;
 
     /// @returns the WGSL name for the attribute

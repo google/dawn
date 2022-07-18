@@ -32,8 +32,9 @@ class Statement : public Castable<Statement, Node> {
   protected:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of the expression
-    Statement(ProgramID pid, const Source& src);
+    Statement(ProgramID pid, NodeID nid, const Source& src);
     /// Move constructor
     Statement(Statement&&);
 };

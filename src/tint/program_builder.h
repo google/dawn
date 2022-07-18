@@ -299,6 +299,16 @@ class ProgramBuilder {
     /// information
     bool IsValid() const;
 
+    /// @returns the last allocated (numerically highest) AST node identifier.
+    ast::NodeID LastAllocatedNodeID() const { return last_ast_node_id_; }
+
+    /// @returns the next sequentially unique node identifier.
+    ast::NodeID AllocateNodeID() {
+        auto out = ast::NodeID{last_ast_node_id_.value + 1};
+        last_ast_node_id_ = out;
+        return out;
+    }
+
     /// Creates a new ast::Node owned by the ProgramBuilder. When the
     /// ProgramBuilder is destructed, the ast::Node will also be destructed.
     /// @param source the Source of the node
@@ -307,7 +317,7 @@ class ProgramBuilder {
     template <typename T, typename... ARGS>
     traits::EnableIfIsType<T, ast::Node>* create(const Source& source, ARGS&&... args) {
         AssertNotMoved();
-        return ast_nodes_.Create<T>(id_, source, std::forward<ARGS>(args)...);
+        return ast_nodes_.Create<T>(id_, AllocateNodeID(), source, std::forward<ARGS>(args)...);
     }
 
     /// Creates a new ast::Node owned by the ProgramBuilder, injecting the current
@@ -319,7 +329,7 @@ class ProgramBuilder {
     template <typename T>
     traits::EnableIfIsType<T, ast::Node>* create() {
         AssertNotMoved();
-        return ast_nodes_.Create<T>(id_, source_);
+        return ast_nodes_.Create<T>(id_, AllocateNodeID(), source_);
     }
 
     /// Creates a new ast::Node owned by the ProgramBuilder, injecting the current
@@ -337,7 +347,7 @@ class ProgramBuilder {
                      T>*
     create(ARG0&& arg0, ARGS&&... args) {
         AssertNotMoved();
-        return ast_nodes_.Create<T>(id_, source_, std::forward<ARG0>(arg0),
+        return ast_nodes_.Create<T>(id_, AllocateNodeID(), source_, std::forward<ARG0>(arg0),
                                     std::forward<ARGS>(args)...);
     }
 
@@ -2665,7 +2675,8 @@ class ProgramBuilder {
     /// @param validation the validation to disable
     /// @returns the disable validation attribute pointer
     const ast::DisableValidationAttribute* Disable(ast::DisabledValidation validation) {
-        return ASTNodes().Create<ast::DisableValidationAttribute>(ID(), validation);
+        return ASTNodes().Create<ast::DisableValidationAttribute>(ID(), AllocateNodeID(),
+                                                                  validation);
     }
 
     /// Sets the current builder source to `src`
@@ -2774,6 +2785,7 @@ class ProgramBuilder {
 
   private:
     ProgramID id_;
+    ast::NodeID last_ast_node_id_ = ast::NodeID{static_cast<decltype(ast::NodeID::value)>(0) - 1};
     sem::Manager types_;
     ASTNodeAllocator ast_nodes_;
     SemNodeAllocator sem_nodes_;

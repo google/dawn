@@ -83,12 +83,13 @@ std::ostream& operator<<(std::ostream& out, TexelFormat format) {
 }
 
 StorageTexture::StorageTexture(ProgramID pid,
+                               NodeID nid,
                                const Source& src,
                                TextureDimension d,
                                TexelFormat fmt,
                                const Type* subtype,
                                Access ac)
-    : Base(pid, src, d), format(fmt), type(subtype), access(ac) {}
+    : Base(pid, nid, src, d), format(fmt), type(subtype), access(ac) {}
 
 StorageTexture::StorageTexture(StorageTexture&&) = default;
 

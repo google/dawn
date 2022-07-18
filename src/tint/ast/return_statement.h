@@ -25,14 +25,16 @@ class ReturnStatement final : public Castable<ReturnStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
-    ReturnStatement(ProgramID pid, const Source& src);
+    ReturnStatement(ProgramID pid, NodeID nid, const Source& src);
 
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param value the return value
-    ReturnStatement(ProgramID pid, const Source& src, const Expression* value);
+    ReturnStatement(ProgramID pid, NodeID nid, const Source& src, const Expression* value);
     /// Move constructor
     ReturnStatement(ReturnStatement&&);
     ~ReturnStatement() override;

@@ -31,13 +31,15 @@ namespace tint::ast {
 class Override final : public Castable<Override, Variable> {
   public:
     /// Create an 'override' pipeline-overridable constant.
-    /// @param program_id the identifier of the program that owns this node
+    /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param source the variable source
     /// @param sym the variable symbol
     /// @param type the declared variable type
     /// @param constructor the constructor expression
     /// @param attributes the variable attributes
-    Override(ProgramID program_id,
+    Override(ProgramID pid,
+             NodeID nid,
              const Source& source,
              const Symbol& sym,
              const ast::Type* type,

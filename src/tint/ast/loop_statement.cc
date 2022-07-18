@@ -21,10 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::LoopStatement);
 namespace tint::ast {
 
 LoopStatement::LoopStatement(ProgramID pid,
+                             NodeID nid,
                              const Source& src,
                              const BlockStatement* b,
                              const BlockStatement* cont)
-    : Base(pid, src), body(b), continuing(cont) {
+    : Base(pid, nid, src), body(b), continuing(cont) {
     TINT_ASSERT(AST, body);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, continuing, program_id);

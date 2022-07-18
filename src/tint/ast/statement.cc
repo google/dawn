@@ -30,7 +30,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Statement);
 
 namespace tint::ast {
 
-Statement::Statement(ProgramID pid, const Source& src) : Base(pid, src) {}
+Statement::Statement(ProgramID pid, NodeID nid, const Source& src) : Base(pid, nid, src) {}
 
 Statement::Statement(Statement&&) = default;
 

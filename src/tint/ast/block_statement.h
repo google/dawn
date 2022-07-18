@@ -25,10 +25,14 @@ namespace tint::ast {
 class BlockStatement final : public Castable<BlockStatement, Statement> {
   public:
     /// Constructor
-    /// @param program_id the identifier of the program that owns this node
+    /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param source the block statement source
     /// @param statements the statements
-    BlockStatement(ProgramID program_id, const Source& source, const StatementList& statements);
+    BlockStatement(ProgramID pid,
+                   NodeID nid,
+                   const Source& source,
+                   const StatementList& statements);
     /// Move constructor
     BlockStatement(BlockStatement&&);
     ~BlockStatement() override;

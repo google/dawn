@@ -33,21 +33,25 @@ namespace tint::ast {
 class CallExpression final : public Castable<CallExpression, Expression> {
   public:
     /// Constructor
-    /// @param program_id the identifier of the program that owns this node
+    /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param source the call expression source
     /// @param name the function or type name
     /// @param args the arguments
-    CallExpression(ProgramID program_id,
+    CallExpression(ProgramID pid,
+                   NodeID nid,
                    const Source& source,
                    const IdentifierExpression* name,
                    ExpressionList args);
 
     /// Constructor
-    /// @param program_id the identifier of the program that owns this node
+    /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param source the call expression source
     /// @param type the type
     /// @param args the arguments
-    CallExpression(ProgramID program_id,
+    CallExpression(ProgramID pid,
+                   NodeID nid,
                    const Source& source,
                    const Type* type,
                    ExpressionList args);

@@ -32,12 +32,14 @@ class Array final : public Castable<Array, Type> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param subtype the type of the array elements
     /// @param count the number of elements in the array. nullptr represents a
     /// runtime-sized array.
     /// @param attributes the array attributes
     Array(ProgramID pid,
+          NodeID nid,
           const Source& src,
           const Type* subtype,
           const Expression* count,

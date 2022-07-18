@@ -21,7 +21,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Enable);
 
 namespace tint::ast {
 
-Enable::Enable(ProgramID pid, const Source& src, Extension ext) : Base(pid, src), extension(ext) {}
+Enable::Enable(ProgramID pid, NodeID nid, const Source& src, Extension ext)
+    : Base(pid, nid, src), extension(ext) {}
 
 Enable::Enable(Enable&&) = default;
 

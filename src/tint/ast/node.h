@@ -17,6 +17,7 @@
 
 #include <string>
 
+#include "src/tint/ast/node_id.h"
 #include "src/tint/clone_context.h"
 
 namespace tint::ast {
@@ -29,14 +30,18 @@ class Node : public Castable<Node, Cloneable> {
     /// The identifier of the program that owns this node
     const ProgramID program_id;
 
+    /// The node identifier, unique for the program.
+    const NodeID node_id;
+
     /// The node source data
     const Source source;
 
   protected:
     /// Create a new node
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the input source for the node
-    Node(ProgramID pid, const Source& src);
+    Node(ProgramID pid, NodeID nid, const Source& src);
     /// Move constructor
     Node(Node&&);
 

@@ -35,7 +35,8 @@ class AddSpirvBlockAttribute final : public Castable<AddSpirvBlockAttribute, Tra
       public:
         /// Constructor
         /// @param program_id the identifier of the program that owns this node
-        explicit SpirvBlockAttribute(ProgramID program_id);
+        /// @param nid the unique node identifier
+        SpirvBlockAttribute(ProgramID program_id, ast::NodeID nid);
         /// Destructor
         ~SpirvBlockAttribute() override;
 

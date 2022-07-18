@@ -23,6 +23,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Function);
 namespace tint::ast {
 
 Function::Function(ProgramID pid,
+                   NodeID nid,
                    const Source& src,
                    Symbol sym,
                    ParameterList parameters,
@@ -30,7 +31,7 @@ Function::Function(ProgramID pid,
                    const BlockStatement* b,
                    AttributeList attrs,
                    AttributeList return_type_attrs)
-    : Base(pid, src),
+    : Base(pid, nid, src),
       symbol(sym),
       params(std::move(parameters)),
       return_type(return_ty),

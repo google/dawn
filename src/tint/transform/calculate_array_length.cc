@@ -57,7 +57,8 @@ struct ArrayUsage {
 
 }  // namespace
 
-CalculateArrayLength::BufferSizeIntrinsic::BufferSizeIntrinsic(ProgramID pid) : Base(pid) {}
+CalculateArrayLength::BufferSizeIntrinsic::BufferSizeIntrinsic(ProgramID pid, ast::NodeID nid)
+    : Base(pid, nid) {}
 CalculateArrayLength::BufferSizeIntrinsic::~BufferSizeIntrinsic() = default;
 std::string CalculateArrayLength::BufferSizeIntrinsic::InternalName() const {
     return "intrinsic_buffer_size";
@@ -65,7 +66,8 @@ std::string CalculateArrayLength::BufferSizeIntrinsic::InternalName() const {
 
 const CalculateArrayLength::BufferSizeIntrinsic* CalculateArrayLength::BufferSizeIntrinsic::Clone(
     CloneContext* ctx) const {
-    return ctx->dst->ASTNodes().Create<CalculateArrayLength::BufferSizeIntrinsic>(ctx->dst->ID());
+    return ctx->dst->ASTNodes().Create<CalculateArrayLength::BufferSizeIntrinsic>(
+        ctx->dst->ID(), ctx->dst->AllocateNodeID());
 }
 
 CalculateArrayLength::CalculateArrayLength() = default;
@@ -109,7 +111,8 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) cons
                 },
                 ctx.dst->ty.void_(), nullptr,
                 ast::AttributeList{
-                    ctx.dst->ASTNodes().Create<BufferSizeIntrinsic>(ctx.dst->ID()),
+                    ctx.dst->ASTNodes().Create<BufferSizeIntrinsic>(ctx.dst->ID(),
+                                                                    ctx.dst->AllocateNodeID()),
                 },
                 ast::AttributeList{}));
 

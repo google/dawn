@@ -22,8 +22,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BindingAttribute);
 
 namespace tint::ast {
 
-BindingAttribute::BindingAttribute(ProgramID pid, const Source& src, uint32_t val)
-    : Base(pid, src), value(val) {}
+BindingAttribute::BindingAttribute(ProgramID pid, NodeID nid, const Source& src, uint32_t val)
+    : Base(pid, nid, src), value(val) {}
 
 BindingAttribute::~BindingAttribute() = default;
 

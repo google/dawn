@@ -20,7 +20,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::InvariantAttribute);
 
 namespace tint::ast {
 
-InvariantAttribute::InvariantAttribute(ProgramID pid, const Source& src) : Base(pid, src) {}
+InvariantAttribute::InvariantAttribute(ProgramID pid, NodeID nid, const Source& src)
+    : Base(pid, nid, src) {}
 
 InvariantAttribute::~InvariantAttribute() = default;
 

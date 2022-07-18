@@ -30,10 +30,12 @@ class CaseStatement final : public Castable<CaseStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param selectors the case selectors
     /// @param body the case body
     CaseStatement(ProgramID pid,
+                  NodeID nid,
                   const Source& src,
                   CaseSelectorList selectors,
                   const BlockStatement* body);

@@ -27,9 +27,10 @@ class StructMemberAlignAttribute final : public Castable<StructMemberAlignAttrib
   public:
     /// constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param align the align value
-    StructMemberAlignAttribute(ProgramID pid, const Source& src, uint32_t align);
+    StructMemberAlignAttribute(ProgramID pid, NodeID nid, const Source& src, uint32_t align);
     ~StructMemberAlignAttribute() override;
 
     /// @returns the WGSL name for the attribute

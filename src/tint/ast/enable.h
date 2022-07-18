@@ -33,9 +33,10 @@ class Enable final : public Castable<Enable, Node> {
   public:
     /// Create a extension
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param ext the extension
-    Enable(ProgramID pid, const Source& src, Extension ext);
+    Enable(ProgramID pid, NodeID nid, const Source& src, Extension ext);
     /// Move constructor
     Enable(Enable&&);
 

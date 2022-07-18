@@ -20,8 +20,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Vector);
 
 namespace tint::ast {
 
-Vector::Vector(ProgramID pid, Source const& src, const Type* subtype, uint32_t w)
-    : Base(pid, src), type(subtype), width(w) {
+Vector::Vector(ProgramID pid, NodeID nid, Source const& src, const Type* subtype, uint32_t w)
+    : Base(pid, nid, src), type(subtype), width(w) {
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, subtype, program_id);
     TINT_ASSERT(AST, width > 1);
     TINT_ASSERT(AST, width < 5);

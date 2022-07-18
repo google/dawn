@@ -26,9 +26,10 @@ class TypeName final : public Castable<TypeName, Type> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param name the type name
-    TypeName(ProgramID pid, const Source& src, Symbol name);
+    TypeName(ProgramID pid, NodeID nid, const Source& src, Symbol name);
     /// Move constructor
     TypeName(TypeName&&);
     /// Destructor

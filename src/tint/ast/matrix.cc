@@ -20,8 +20,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Matrix);
 
 namespace tint::ast {
 
-Matrix::Matrix(ProgramID pid, const Source& src, const Type* subtype, uint32_t r, uint32_t c)
-    : Base(pid, src), type(subtype), rows(r), columns(c) {
+Matrix::Matrix(ProgramID pid,
+               NodeID nid,
+               const Source& src,
+               const Type* subtype,
+               uint32_t r,
+               uint32_t c)
+    : Base(pid, nid, src), type(subtype), rows(r), columns(c) {
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, subtype, program_id);
     TINT_ASSERT(AST, rows > 1);
     TINT_ASSERT(AST, rows < 5);

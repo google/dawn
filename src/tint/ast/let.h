@@ -30,13 +30,15 @@ namespace tint::ast {
 class Let final : public Castable<Let, Variable> {
   public:
     /// Create a 'let' variable
-    /// @param program_id the identifier of the program that owns this node
+    /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param source the variable source
     /// @param sym the variable symbol
     /// @param type the declared variable type
     /// @param constructor the constructor expression
     /// @param attributes the variable attributes
-    Let(ProgramID program_id,
+    Let(ProgramID pid,
+        NodeID nid,
         const Source& source,
         const Symbol& sym,
         const ast::Type* type,

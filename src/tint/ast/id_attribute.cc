@@ -22,8 +22,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IdAttribute);
 
 namespace tint::ast {
 
-IdAttribute::IdAttribute(ProgramID pid, const Source& src, uint32_t val)
-    : Base(pid, src), value(val) {}
+IdAttribute::IdAttribute(ProgramID pid, NodeID nid, const Source& src, uint32_t val)
+    : Base(pid, nid, src), value(val) {}
 
 IdAttribute::~IdAttribute() = default;
 

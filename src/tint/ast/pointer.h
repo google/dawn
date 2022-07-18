@@ -28,11 +28,13 @@ class Pointer final : public Castable<Pointer, Type> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param subtype the pointee type
     /// @param storage_class the storage class of the pointer
     /// @param access the access control of the pointer
     Pointer(ProgramID pid,
+            NodeID nid,
             const Source& src,
             const Type* const subtype,
             ast::StorageClass storage_class,

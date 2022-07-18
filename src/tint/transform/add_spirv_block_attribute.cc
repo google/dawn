@@ -70,7 +70,8 @@ void AddSpirvBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) co
             // This is a non-struct or a struct that is nested somewhere else, so we
             // need to wrap it first.
             auto* wrapper = utils::GetOrCreate(wrapper_structs, ty, [&]() {
-                auto* block = ctx.dst->ASTNodes().Create<SpirvBlockAttribute>(ctx.dst->ID());
+                auto* block = ctx.dst->ASTNodes().Create<SpirvBlockAttribute>(
+                    ctx.dst->ID(), ctx.dst->AllocateNodeID());
                 auto wrapper_name = ctx.src->Symbols().NameFor(var->symbol) + "_block";
                 auto* ret = ctx.dst->create<ast::Struct>(
                     ctx.dst->Symbols().New(wrapper_name),
@@ -89,7 +90,8 @@ void AddSpirvBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) co
             }
         } else {
             // Add a block attribute to this struct directly.
-            auto* block = ctx.dst->ASTNodes().Create<SpirvBlockAttribute>(ctx.dst->ID());
+            auto* block = ctx.dst->ASTNodes().Create<SpirvBlockAttribute>(
+                ctx.dst->ID(), ctx.dst->AllocateNodeID());
             ctx.InsertFront(str->Declaration()->attributes, block);
         }
     }
@@ -97,7 +99,8 @@ void AddSpirvBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) co
     ctx.Clone();
 }
 
-AddSpirvBlockAttribute::SpirvBlockAttribute::SpirvBlockAttribute(ProgramID pid) : Base(pid) {}
+AddSpirvBlockAttribute::SpirvBlockAttribute::SpirvBlockAttribute(ProgramID pid, ast::NodeID nid)
+    : Base(pid, nid) {}
 AddSpirvBlockAttribute::SpirvBlockAttribute::~SpirvBlockAttribute() = default;
 std::string AddSpirvBlockAttribute::SpirvBlockAttribute::InternalName() const {
     return "spirv_block";
@@ -105,7 +108,8 @@ std::string AddSpirvBlockAttribute::SpirvBlockAttribute::InternalName() const {
 
 const AddSpirvBlockAttribute::SpirvBlockAttribute*
 AddSpirvBlockAttribute::SpirvBlockAttribute::Clone(CloneContext* ctx) const {
-    return ctx->dst->ASTNodes().Create<AddSpirvBlockAttribute::SpirvBlockAttribute>(ctx->dst->ID());
+    return ctx->dst->ASTNodes().Create<AddSpirvBlockAttribute::SpirvBlockAttribute>(
+        ctx->dst->ID(), ctx->dst->AllocateNodeID());
 }
 
 }  // namespace tint::transform

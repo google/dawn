@@ -20,8 +20,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Atomic);
 
 namespace tint::ast {
 
-Atomic::Atomic(ProgramID pid, const Source& src, const Type* const subtype)
-    : Base(pid, src), type(subtype) {}
+Atomic::Atomic(ProgramID pid, NodeID nid, const Source& src, const Type* const subtype)
+    : Base(pid, nid, src), type(subtype) {}
 
 std::string Atomic::FriendlyName(const SymbolTable& symbols) const {
     std::ostringstream out;

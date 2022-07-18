@@ -69,6 +69,9 @@ class Program {
     /// @returns the unique identifier for this program
     ProgramID ID() const { return id_; }
 
+    /// @returns the last allocated (numerically highest) AST node identifier.
+    ast::NodeID HighestASTNodeID() const { return highest_node_id_; }
+
     /// @returns a reference to the program's types
     const sem::Manager& Types() const {
         AssertNotMoved();
@@ -161,6 +164,7 @@ class Program {
     void AssertNotMoved() const;
 
     ProgramID id_;
+    ast::NodeID highest_node_id_;
     sem::Manager types_;
     ASTNodeAllocator ast_nodes_;
     SemNodeAllocator sem_nodes_;

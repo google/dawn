@@ -21,10 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::MemberAccessorExpression);
 namespace tint::ast {
 
 MemberAccessorExpression::MemberAccessorExpression(ProgramID pid,
+                                                   NodeID nid,
                                                    const Source& src,
                                                    const Expression* str,
                                                    const IdentifierExpression* mem)
-    : Base(pid, src), structure(str), member(mem) {
+    : Base(pid, nid, src), structure(str), member(mem) {
     TINT_ASSERT(AST, structure);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, structure, program_id);
     TINT_ASSERT(AST, member);

@@ -21,8 +21,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::ExternalTexture);
 namespace tint::ast {
 
 // ExternalTexture::ExternalTexture() : Base(ast::TextureDimension::k2d) {}
-ExternalTexture::ExternalTexture(ProgramID pid, const Source& src)
-    : Base(pid, src, ast::TextureDimension::k2d) {}
+ExternalTexture::ExternalTexture(ProgramID pid, NodeID nid, const Source& src)
+    : Base(pid, nid, src, ast::TextureDimension::k2d) {}
 
 ExternalTexture::ExternalTexture(ExternalTexture&&) = default;
 

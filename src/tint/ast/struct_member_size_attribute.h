@@ -27,9 +27,10 @@ class StructMemberSizeAttribute final : public Castable<StructMemberSizeAttribut
   public:
     /// constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param size the size value
-    StructMemberSizeAttribute(ProgramID pid, const Source& src, uint32_t size);
+    StructMemberSizeAttribute(ProgramID pid, NodeID nid, const Source& src, uint32_t size);
     ~StructMemberSizeAttribute() override;
 
     /// @returns the WGSL name for the attribute

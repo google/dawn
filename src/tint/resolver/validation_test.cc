@@ -50,13 +50,13 @@ using ResolverValidationTest = ResolverTest;
 
 class FakeStmt final : public Castable<FakeStmt, ast::Statement> {
   public:
-    FakeStmt(ProgramID pid, Source src) : Base(pid, src) {}
+    FakeStmt(ProgramID pid, ast::NodeID nid, Source src) : Base(pid, nid, src) {}
     FakeStmt* Clone(CloneContext*) const override { return nullptr; }
 };
 
 class FakeExpr final : public Castable<FakeExpr, ast::Expression> {
   public:
-    FakeExpr(ProgramID pid, Source src) : Base(pid, src) {}
+    FakeExpr(ProgramID pid, ast::NodeID nid, Source src) : Base(pid, nid, src) {}
     FakeExpr* Clone(CloneContext*) const override { return nullptr; }
 };
 

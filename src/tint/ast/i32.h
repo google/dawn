@@ -26,8 +26,9 @@ class I32 final : public Castable<I32, Type> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
-    I32(ProgramID pid, const Source& src);
+    I32(ProgramID pid, NodeID nid, const Source& src);
     /// Move constructor
     I32(I32&&);
     ~I32() override;

@@ -778,22 +778,22 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
         init_id = Switch(
             type,  //
             [&](const sem::F32*) {
-                ast::FloatLiteralExpression l(ProgramID{}, Source{}, 0,
+                ast::FloatLiteralExpression l(ProgramID{}, ast::NodeID{}, Source{}, 0,
                                               ast::FloatLiteralExpression::Suffix::kF);
                 return GenerateLiteralIfNeeded(override, &l);
             },
             [&](const sem::U32*) {
-                ast::IntLiteralExpression l(ProgramID{}, Source{}, 0,
+                ast::IntLiteralExpression l(ProgramID{}, ast::NodeID{}, Source{}, 0,
                                             ast::IntLiteralExpression::Suffix::kU);
                 return GenerateLiteralIfNeeded(override, &l);
             },
             [&](const sem::I32*) {
-                ast::IntLiteralExpression l(ProgramID{}, Source{}, 0,
+                ast::IntLiteralExpression l(ProgramID{}, ast::NodeID{}, Source{}, 0,
                                             ast::IntLiteralExpression::Suffix::kI);
                 return GenerateLiteralIfNeeded(override, &l);
             },
             [&](const sem::Bool*) {
-                ast::BoolLiteralExpression l(ProgramID{}, Source{}, false);
+                ast::BoolLiteralExpression l(ProgramID{}, ast::NodeID{}, Source{}, false);
                 return GenerateLiteralIfNeeded(override, &l);
             },
             [&](Default) {

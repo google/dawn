@@ -273,14 +273,16 @@ struct SpirvAtomic::State {
 SpirvAtomic::SpirvAtomic() = default;
 SpirvAtomic::~SpirvAtomic() = default;
 
-SpirvAtomic::Stub::Stub(ProgramID pid, sem::BuiltinType b) : Base(pid), builtin(b) {}
+SpirvAtomic::Stub::Stub(ProgramID pid, ast::NodeID nid, sem::BuiltinType b)
+    : Base(pid, nid), builtin(b) {}
 SpirvAtomic::Stub::~Stub() = default;
 std::string SpirvAtomic::Stub::InternalName() const {
     return "@internal(spirv-atomic " + std::string(sem::str(builtin)) + ")";
 }
 
 const SpirvAtomic::Stub* SpirvAtomic::Stub::Clone(CloneContext* ctx) const {
-    return ctx->dst->ASTNodes().Create<SpirvAtomic::Stub>(ctx->dst->ID(), builtin);
+    return ctx->dst->ASTNodes().Create<SpirvAtomic::Stub>(ctx->dst->ID(),
+                                                          ctx->dst->AllocateNodeID(), builtin);
 }
 
 bool SpirvAtomic::ShouldRun(const Program* program, const DataMap&) const {

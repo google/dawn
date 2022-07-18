@@ -65,9 +65,10 @@ class Texture : public Castable<Texture, Type> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param dim the dimensionality of the texture
-    Texture(ProgramID pid, const Source& src, TextureDimension dim);
+    Texture(ProgramID pid, NodeID nid, const Source& src, TextureDimension dim);
     /// Move constructor
     Texture(Texture&&);
     ~Texture() override;

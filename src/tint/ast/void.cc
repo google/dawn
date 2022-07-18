@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Void);
 
 namespace tint::ast {
 
-Void::Void(ProgramID pid, const Source& src) : Base(pid, src) {}
+Void::Void(ProgramID pid, NodeID nid, const Source& src) : Base(pid, nid, src) {}
 
 Void::Void(Void&&) = default;
 

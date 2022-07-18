@@ -26,8 +26,9 @@ class Void final : public Castable<Void, Type> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
-    Void(ProgramID pid, const Source& src);
+    Void(ProgramID pid, NodeID nid, const Source& src);
     /// Move constructor
     Void(Void&&);
     ~Void() override;

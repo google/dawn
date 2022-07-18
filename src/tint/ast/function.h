@@ -35,7 +35,8 @@ namespace tint::ast {
 class Function final : public Castable<Function, Node> {
   public:
     /// Create a function
-    /// @param program_id the identifier of the program that owns this node
+    /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param source the variable source
     /// @param symbol the function symbol
     /// @param params the function parameters
@@ -43,7 +44,8 @@ class Function final : public Castable<Function, Node> {
     /// @param body the function body
     /// @param attributes the function attributes
     /// @param return_type_attributes the return type attributes
-    Function(ProgramID program_id,
+    Function(ProgramID pid,
+             NodeID nid,
              const Source& source,
              Symbol symbol,
              ParameterList params,

@@ -51,9 +51,10 @@ class DisableValidationAttribute final
     : public Castable<DisableValidationAttribute, InternalAttribute> {
   public:
     /// Constructor
-    /// @param program_id the identifier of the program that owns this node
+    /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param validation the validation to disable
-    explicit DisableValidationAttribute(ProgramID program_id, DisabledValidation validation);
+    explicit DisableValidationAttribute(ProgramID pid, NodeID nid, DisabledValidation validation);
 
     /// Destructor
     ~DisableValidationAttribute() override;

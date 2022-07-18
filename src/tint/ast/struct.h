@@ -29,11 +29,13 @@ class Struct final : public Castable<Struct, TypeDecl> {
   public:
     /// Create a new struct statement
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node for the import statement
     /// @param name The name of the structure
     /// @param members The struct members
     /// @param attributes The struct attributes
     Struct(ProgramID pid,
+           NodeID nid,
            const Source& src,
            Symbol name,
            StructMemberList members,

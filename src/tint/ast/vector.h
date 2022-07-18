@@ -26,12 +26,13 @@ class Vector final : public Castable<Vector, Type> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param subtype the declared type of the vector components. May be null
     ///        for vector constructors, where the element type will be inferred
     ///        from the constructor arguments
     /// @param width the number of elements in the vector
-    Vector(ProgramID pid, Source const& src, const Type* subtype, uint32_t width);
+    Vector(ProgramID pid, NodeID nid, Source const& src, const Type* subtype, uint32_t width);
     /// Move constructor
     Vector(Vector&&);
     ~Vector() override;

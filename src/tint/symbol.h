@@ -43,7 +43,7 @@ class Symbol {
     /// @param val the symbol value
     /// @param program_id the identifier of the program that owns this Symbol
     /// @param debug_name name of symbols used only for debugging
-    Symbol(uint32_t val, tint::ProgramID program_id, std::string debug_name);
+    Symbol(uint32_t val, tint::ProgramID pid, NodeID nid, std::string debug_name);
 #endif
     /// Copy constructor
     /// @param o the symbol to copy

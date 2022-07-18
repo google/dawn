@@ -26,8 +26,9 @@ class ExternalTexture final : public Castable<ExternalTexture, Texture> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
-    ExternalTexture(ProgramID pid, const Source& src);
+    ExternalTexture(ProgramID pid, NodeID nid, const Source& src);
 
     /// Move constructor
     ExternalTexture(ExternalTexture&&);

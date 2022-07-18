@@ -21,11 +21,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::CompoundAssignmentStatement);
 namespace tint::ast {
 
 CompoundAssignmentStatement::CompoundAssignmentStatement(ProgramID pid,
+                                                         NodeID nid,
                                                          const Source& src,
                                                          const Expression* l,
                                                          const Expression* r,
                                                          BinaryOp o)
-    : Base(pid, src), lhs(l), rhs(r), op(o) {
+    : Base(pid, nid, src), lhs(l), rhs(r), op(o) {
     TINT_ASSERT(AST, lhs);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, lhs, program_id);
     TINT_ASSERT(AST, rhs);

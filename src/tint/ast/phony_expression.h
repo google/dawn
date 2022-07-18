@@ -25,8 +25,9 @@ class PhonyExpression final : public Castable<PhonyExpression, Expression> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
-    PhonyExpression(ProgramID pid, const Source& src);
+    PhonyExpression(ProgramID pid, NodeID nid, const Source& src);
     /// Move constructor
     PhonyExpression(PhonyExpression&&);
     ~PhonyExpression() override;

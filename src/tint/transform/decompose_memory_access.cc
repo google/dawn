@@ -202,7 +202,8 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicLoadFor(ProgramBuilder* builder,
         return nullptr;
     }
     return builder->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
-        builder->ID(), DecomposeMemoryAccess::Intrinsic::Op::kLoad, storage_class, type);
+        builder->ID(), builder->AllocateNodeID(), DecomposeMemoryAccess::Intrinsic::Op::kLoad,
+        storage_class, type);
 }
 
 /// @returns a DecomposeMemoryAccess::Intrinsic attribute that can be applied
@@ -215,7 +216,8 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicStoreFor(ProgramBuilder* builder,
         return nullptr;
     }
     return builder->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
-        builder->ID(), DecomposeMemoryAccess::Intrinsic::Op::kStore, storage_class, type);
+        builder->ID(), builder->AllocateNodeID(), DecomposeMemoryAccess::Intrinsic::Op::kStore,
+        storage_class, type);
 }
 
 /// @returns a DecomposeMemoryAccess::Intrinsic attribute that can be applied
@@ -270,7 +272,7 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ProgramBuilder* builder,
         return nullptr;
     }
     return builder->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
-        builder->ID(), op, ast::StorageClass::kStorage, type);
+        builder->ID(), builder->AllocateNodeID(), op, ast::StorageClass::kStorage, type);
 }
 
 /// BufferAccess describes a single storage or uniform buffer access
@@ -681,8 +683,12 @@ struct DecomposeMemoryAccess::State {
     }
 };
 
-DecomposeMemoryAccess::Intrinsic::Intrinsic(ProgramID pid, Op o, ast::StorageClass sc, DataType ty)
-    : Base(pid), op(o), storage_class(sc), type(ty) {}
+DecomposeMemoryAccess::Intrinsic::Intrinsic(ProgramID pid,
+                                            ast::NodeID nid,
+                                            Op o,
+                                            ast::StorageClass sc,
+                                            DataType ty)
+    : Base(pid, nid), op(o), storage_class(sc), type(ty) {}
 DecomposeMemoryAccess::Intrinsic::~Intrinsic() = default;
 std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
     std::stringstream ss;
@@ -771,8 +777,8 @@ std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
 
 const DecomposeMemoryAccess::Intrinsic* DecomposeMemoryAccess::Intrinsic::Clone(
     CloneContext* ctx) const {
-    return ctx->dst->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(ctx->dst->ID(), op,
-                                                                         storage_class, type);
+    return ctx->dst->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
+        ctx->dst->ID(), ctx->dst->AllocateNodeID(), op, storage_class, type);
 }
 
 bool DecomposeMemoryAccess::Intrinsic::IsAtomic() const {

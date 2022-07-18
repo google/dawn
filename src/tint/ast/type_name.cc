@@ -20,7 +20,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::TypeName);
 
 namespace tint::ast {
 
-TypeName::TypeName(ProgramID pid, const Source& src, Symbol n) : Base(pid, src), name(n) {}
+TypeName::TypeName(ProgramID pid, NodeID nid, const Source& src, Symbol n)
+    : Base(pid, nid, src), name(n) {}
 
 TypeName::~TypeName() = default;
 

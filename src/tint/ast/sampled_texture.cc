@@ -20,8 +20,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::SampledTexture);
 
 namespace tint::ast {
 
-SampledTexture::SampledTexture(ProgramID pid, const Source& src, TextureDimension d, const Type* ty)
-    : Base(pid, src, d), type(ty) {
+SampledTexture::SampledTexture(ProgramID pid,
+                               NodeID nid,
+                               const Source& src,
+                               TextureDimension d,
+                               const Type* ty)
+    : Base(pid, nid, src, d), type(ty) {
     TINT_ASSERT(AST, type);
 }
 

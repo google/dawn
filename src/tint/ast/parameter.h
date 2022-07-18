@@ -34,12 +34,14 @@ namespace tint::ast {
 class Parameter final : public Castable<Parameter, Variable> {
   public:
     /// Create a 'parameter' creation-time value variable.
-    /// @param program_id the identifier of the program that owns this node
+    /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param source the variable source
     /// @param sym the variable symbol
     /// @param type the declared variable type
     /// @param attributes the variable attributes
-    Parameter(ProgramID program_id,
+    Parameter(ProgramID pid,
+              NodeID nid,
               const Source& source,
               const Symbol& sym,
               const ast::Type* type,

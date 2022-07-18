@@ -20,11 +20,14 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::ReturnStatement);
 
 namespace tint::ast {
 
-ReturnStatement::ReturnStatement(ProgramID pid, const Source& src)
-    : Base(pid, src), value(nullptr) {}
+ReturnStatement::ReturnStatement(ProgramID pid, NodeID nid, const Source& src)
+    : Base(pid, nid, src), value(nullptr) {}
 
-ReturnStatement::ReturnStatement(ProgramID pid, const Source& src, const Expression* val)
-    : Base(pid, src), value(val) {
+ReturnStatement::ReturnStatement(ProgramID pid,
+                                 NodeID nid,
+                                 const Source& src,
+                                 const Expression* val)
+    : Base(pid, nid, src), value(val) {
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, value, program_id);
 }
 

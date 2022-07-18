@@ -26,10 +26,11 @@ class Alias final : public Castable<Alias, TypeDecl> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param name the symbol for the alias
     /// @param subtype the alias'd type
-    Alias(ProgramID pid, const Source& src, const Symbol& name, const Type* subtype);
+    Alias(ProgramID pid, NodeID nid, const Source& src, const Symbol& name, const Type* subtype);
     /// Move constructor
     Alias(Alias&&);
     /// Destructor

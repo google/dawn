@@ -26,8 +26,9 @@ class F16 : public Castable<F16, Type> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
-    F16(ProgramID pid, const Source& src);
+    F16(ProgramID pid, NodeID nid, const Source& src);
     /// Move constructor
     F16(F16&&);
     ~F16() override;

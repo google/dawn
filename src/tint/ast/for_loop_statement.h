@@ -25,14 +25,16 @@ class Expression;
 class ForLoopStatement final : public Castable<ForLoopStatement, Statement> {
   public:
     /// Constructor
-    /// @param program_id the identifier of the program that owns this node
+    /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param source the for loop statement source
     /// @param initializer the optional loop initializer statement
     /// @param condition the optional loop condition expression
     /// @param continuing the optional continuing statement
     /// @param body the loop body
-    ForLoopStatement(ProgramID program_id,
-                     Source const& source,
+    ForLoopStatement(ProgramID pid,
+                     NodeID nid,
+                     const Source& source,
                      const Statement* initializer,
                      const Expression* condition,
                      const Statement* continuing,

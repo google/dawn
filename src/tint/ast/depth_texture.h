@@ -26,9 +26,10 @@ class DepthTexture final : public Castable<DepthTexture, Texture> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param dim the dimensionality of the texture
-    DepthTexture(ProgramID pid, const Source& src, TextureDimension dim);
+    DepthTexture(ProgramID pid, NodeID nid, const Source& src, TextureDimension dim);
     /// Move constructor
     DepthTexture(DepthTexture&&);
     ~DepthTexture() override;

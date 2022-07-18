@@ -35,9 +35,10 @@ class StructMemberOffsetAttribute final : public Castable<StructMemberOffsetAttr
   public:
     /// constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param offset the offset value
-    StructMemberOffsetAttribute(ProgramID pid, const Source& src, uint32_t offset);
+    StructMemberOffsetAttribute(ProgramID pid, NodeID nid, const Source& src, uint32_t offset);
     ~StructMemberOffsetAttribute() override;
 
     /// @returns the WGSL name for the attribute

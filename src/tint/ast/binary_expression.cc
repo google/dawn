@@ -21,11 +21,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BinaryExpression);
 namespace tint::ast {
 
 BinaryExpression::BinaryExpression(ProgramID pid,
+                                   NodeID nid,
                                    const Source& src,
                                    BinaryOp o,
                                    const Expression* l,
                                    const Expression* r)
-    : Base(pid, src), op(o), lhs(l), rhs(r) {
+    : Base(pid, nid, src), op(o), lhs(l), rhs(r) {
     TINT_ASSERT(AST, lhs);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, lhs, program_id);
     TINT_ASSERT(AST, rhs);

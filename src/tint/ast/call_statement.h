@@ -25,9 +25,10 @@ class CallStatement final : public Castable<CallStatement, Statement> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node for the statement
     /// @param call the function
-    CallStatement(ProgramID pid, const Source& src, const CallExpression* call);
+    CallStatement(ProgramID pid, NodeID nid, const Source& src, const CallExpression* call);
     /// Move constructor
     CallStatement(CallStatement&&);
     ~CallStatement() override;

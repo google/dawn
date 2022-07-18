@@ -21,11 +21,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::StructMember);
 namespace tint::ast {
 
 StructMember::StructMember(ProgramID pid,
+                           NodeID nid,
                            const Source& src,
                            const Symbol& sym,
                            const ast::Type* ty,
                            AttributeList attrs)
-    : Base(pid, src), symbol(sym), type(ty), attributes(std::move(attrs)) {
+    : Base(pid, nid, src), symbol(sym), type(ty), attributes(std::move(attrs)) {
     TINT_ASSERT(AST, type);
     TINT_ASSERT(AST, symbol.IsValid());
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol, program_id);

@@ -21,11 +21,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IfStatement);
 namespace tint::ast {
 
 IfStatement::IfStatement(ProgramID pid,
+                         NodeID nid,
                          const Source& src,
                          const Expression* cond,
                          const BlockStatement* b,
                          const Statement* else_stmt)
-    : Base(pid, src), condition(cond), body(b), else_statement(else_stmt) {
+    : Base(pid, nid, src), condition(cond), body(b), else_statement(else_stmt) {
     TINT_ASSERT(AST, condition);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, condition, program_id);
     TINT_ASSERT(AST, body);

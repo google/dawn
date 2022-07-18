@@ -34,10 +34,11 @@ CallExpression::Target ToTarget(const Type* type) {
 }  // namespace
 
 CallExpression::CallExpression(ProgramID pid,
+                               NodeID nid,
                                const Source& src,
                                const IdentifierExpression* name,
                                ExpressionList a)
-    : Base(pid, src), target(ToTarget(name)), args(a) {
+    : Base(pid, nid, src), target(ToTarget(name)), args(a) {
     TINT_ASSERT(AST, name);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, name, program_id);
     for (auto* arg : args) {
@@ -46,8 +47,12 @@ CallExpression::CallExpression(ProgramID pid,
     }
 }
 
-CallExpression::CallExpression(ProgramID pid, const Source& src, const Type* type, ExpressionList a)
-    : Base(pid, src), target(ToTarget(type)), args(a) {
+CallExpression::CallExpression(ProgramID pid,
+                               NodeID nid,
+                               const Source& src,
+                               const Type* type,
+                               ExpressionList a)
+    : Base(pid, nid, src), target(ToTarget(type)), args(a) {
     TINT_ASSERT(AST, type);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id);
     for (auto* arg : args) {

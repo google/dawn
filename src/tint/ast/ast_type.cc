@@ -30,7 +30,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::Type);
 
 namespace tint::ast {
 
-Type::Type(ProgramID pid, const Source& src) : Base(pid, src) {}
+Type::Type(ProgramID pid, NodeID nid, const Source& src) : Base(pid, nid, src) {}
 
 Type::Type(Type&&) = default;
 

@@ -23,11 +23,13 @@ namespace tint::ast {
 class MemberAccessorExpression final : public Castable<MemberAccessorExpression, Expression> {
   public:
     /// Constructor
-    /// @param program_id the identifier of the program that owns this node
+    /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param source the member accessor expression source
     /// @param structure the structure
     /// @param member the member
-    MemberAccessorExpression(ProgramID program_id,
+    MemberAccessorExpression(ProgramID pid,
+                             NodeID nid,
                              const Source& source,
                              const Expression* structure,
                              const IdentifierExpression* member);

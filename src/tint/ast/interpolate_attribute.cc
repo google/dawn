@@ -23,10 +23,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::InterpolateAttribute);
 namespace tint::ast {
 
 InterpolateAttribute::InterpolateAttribute(ProgramID pid,
+                                           NodeID nid,
                                            const Source& src,
                                            InterpolationType ty,
                                            InterpolationSampling smpl)
-    : Base(pid, src), type(ty), sampling(smpl) {}
+    : Base(pid, nid, src), type(ty), sampling(smpl) {}
 
 InterpolateAttribute::~InterpolateAttribute() = default;
 

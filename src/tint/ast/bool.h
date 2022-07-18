@@ -32,8 +32,9 @@ class Bool final : public Castable<Bool, Type> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
-    Bool(ProgramID pid, const Source& src);
+    Bool(ProgramID pid, NodeID nid, const Source& src);
     /// Move constructor
     Bool(Bool&&);
     ~Bool() override;

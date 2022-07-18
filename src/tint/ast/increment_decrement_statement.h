@@ -25,10 +25,15 @@ class IncrementDecrementStatement final : public Castable<IncrementDecrementStat
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param lhs the LHS expression
     /// @param inc `true` for increment, `false` for decrement
-    IncrementDecrementStatement(ProgramID pid, const Source& src, const Expression* lhs, bool inc);
+    IncrementDecrementStatement(ProgramID pid,
+                                NodeID nid,
+                                const Source& src,
+                                const Expression* lhs,
+                                bool inc);
     /// Move constructor
     IncrementDecrementStatement(IncrementDecrementStatement&&);
     ~IncrementDecrementStatement() override;

@@ -21,10 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::MultisampledTexture);
 namespace tint::ast {
 
 MultisampledTexture::MultisampledTexture(ProgramID pid,
+                                         NodeID nid,
                                          const Source& src,
                                          TextureDimension d,
                                          const Type* ty)
-    : Base(pid, src, d), type(ty) {
+    : Base(pid, nid, src, d), type(ty) {
     TINT_ASSERT(AST, type);
 }
 

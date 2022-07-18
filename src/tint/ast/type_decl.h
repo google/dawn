@@ -26,9 +26,10 @@ class TypeDecl : public Castable<TypeDecl, Node> {
   public:
     /// Create a new struct statement
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node for the import statement
     /// @param name The name of the structure
-    TypeDecl(ProgramID pid, const Source& src, Symbol name);
+    TypeDecl(ProgramID pid, NodeID nid, const Source& src, Symbol name);
     /// Move constructor
     TypeDecl(TypeDecl&&);
 

@@ -103,8 +103,7 @@ bool Resolver::Resolve() {
         return false;
     }
 
-    // Pre-allocate the ast -> sem map with the total number of AST nodes.
-    builder_->Sem().Reserve(builder_->ASTNodes().Count());
+    builder_->Sem().Reserve(builder_->LastAllocatedNodeID());
 
     if (!DependencyGraph::Build(builder_->AST(), builder_->Symbols(), builder_->Diagnostics(),
                                 dependencies_)) {

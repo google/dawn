@@ -157,6 +157,7 @@ set(TINT_LIB_SRCS
   ast/module.h
   ast/multisampled_texture.cc
   ast/multisampled_texture.h
+  ast/node_id.h
   ast/node.cc
   ast/node.h
   ast/override.cc

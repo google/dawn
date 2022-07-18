@@ -25,12 +25,14 @@ class Expression;
 class WhileStatement final : public Castable<WhileStatement, Statement> {
   public:
     /// Constructor
-    /// @param program_id the identifier of the program that owns this node
+    /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param source the for loop statement source
     /// @param condition the optional loop condition expression
     /// @param body the loop body
-    WhileStatement(ProgramID program_id,
-                   Source const& source,
+    WhileStatement(ProgramID pid,
+                   NodeID nid,
+                   const Source& source,
                    const Expression* condition,
                    const BlockStatement* body);
     /// Move constructor

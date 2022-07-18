@@ -49,7 +49,7 @@ TEST_F(AstStructTest, Creation) {
 TEST_F(AstStructTest, Creation_WithAttributes) {
     auto name = Sym("s");
     AttributeList attrs;
-    attrs.push_back(ASTNodes().Create<SpirvBlockAttribute>(ID()));
+    attrs.push_back(ASTNodes().Create<SpirvBlockAttribute>(ID(), AllocateNodeID()));
 
     auto* s = create<Struct>(name, StructMemberList{Member("a", ty.i32())}, attrs);
     EXPECT_EQ(s->name, name);
@@ -64,10 +64,10 @@ TEST_F(AstStructTest, Creation_WithAttributes) {
 
 TEST_F(AstStructTest, CreationWithSourceAndAttributes) {
     auto name = Sym("s");
-    auto* s =
-        create<Struct>(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}},
-                       name, StructMemberList{Member("a", ty.i32())},
-                       AttributeList{ASTNodes().Create<SpirvBlockAttribute>(ID())});
+    auto* s = create<Struct>(
+        Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 8}}}, name,
+        StructMemberList{Member("a", ty.i32())},
+        AttributeList{ASTNodes().Create<SpirvBlockAttribute>(ID(), AllocateNodeID())});
     EXPECT_EQ(s->name, name);
     EXPECT_EQ(s->members.size(), 1u);
     ASSERT_EQ(s->attributes.size(), 1u);
@@ -115,7 +115,8 @@ TEST_F(AstStructTest, Assert_DifferentProgramID_Attribute) {
             ProgramBuilder b1;
             ProgramBuilder b2;
             b1.create<Struct>(b1.Sym("S"), StructMemberList{b1.Member("a", b1.ty.i32())},
-                              AttributeList{b2.ASTNodes().Create<SpirvBlockAttribute>(b2.ID())});
+                              AttributeList{b2.ASTNodes().Create<SpirvBlockAttribute>(
+                                  b2.ID(), b2.AllocateNodeID())});
         },
         "internal compiler error");
 }

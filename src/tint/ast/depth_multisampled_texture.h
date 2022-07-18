@@ -26,9 +26,10 @@ class DepthMultisampledTexture final : public Castable<DepthMultisampledTexture,
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param dim the dimensionality of the texture
-    DepthMultisampledTexture(ProgramID pid, const Source& src, TextureDimension dim);
+    DepthMultisampledTexture(ProgramID pid, NodeID nid, const Source& src, TextureDimension dim);
     /// Move constructor
     DepthMultisampledTexture(DepthMultisampledTexture&&);
     ~DepthMultisampledTexture() override;

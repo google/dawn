@@ -43,9 +43,10 @@ class SpirvAtomic final : public Castable<SpirvAtomic, Transform> {
     /// translated to an atomic builtin.
     class Stub final : public Castable<Stub, ast::InternalAttribute> {
       public:
-        /// @param program_id the identifier of the program that owns this node
+        /// @param pid the identifier of the program that owns this node
+        /// @param nid the unique node identifier
         /// @param builtin the atomic builtin this stub represents
-        Stub(ProgramID program_id, sem::BuiltinType builtin);
+        Stub(ProgramID pid, ast::NodeID nid, sem::BuiltinType builtin);
         /// Destructor
         ~Stub() override;
 

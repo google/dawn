@@ -24,8 +24,9 @@ class FallthroughStatement final : public Castable<FallthroughStatement, Stateme
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
-    FallthroughStatement(ProgramID pid, const Source& src);
+    FallthroughStatement(ProgramID pid, NodeID nid, const Source& src);
     /// Move constructor
     FallthroughStatement(FallthroughStatement&&);
     ~FallthroughStatement() override;

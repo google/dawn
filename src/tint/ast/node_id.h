@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/f32.h"
+#ifndef SRC_TINT_AST_NODE_ID_H_
+#define SRC_TINT_AST_NODE_ID_H_
 
-#include "src/tint/program_builder.h"
-
-TINT_INSTANTIATE_TYPEINFO(tint::ast::F32);
+#include <stddef.h>
 
 namespace tint::ast {
 
-F32::F32(ProgramID pid, NodeID nid, const Source& src) : Base(pid, nid, src) {}
+/// NodeID is a unique node identifier for a given Program.
+/// NodeIDs are sequentially allocated, starting at 0.
+struct NodeID {
+    /// Equality operator
+    /// @param other the other NodeID
+    /// @returns true if the NodeIDs are the same
+    bool operator==(const NodeID& other) const { return value == other.value; }
 
-F32::F32(F32&&) = default;
-
-F32::~F32() = default;
-
-std::string F32::FriendlyName(const SymbolTable&) const {
-    return "f32";
-}
-
-const F32* F32::Clone(CloneContext* ctx) const {
-    auto src = ctx->Clone(source);
-    return ctx->dst->create<F32>(src);
-}
+    /// The numerical value for the node identifier
+    size_t value = 0;
+};
 
 }  // namespace tint::ast
+
+#endif  // SRC_TINT_AST_NODE_ID_H_

@@ -29,14 +29,16 @@ namespace tint {
 ProgramBuilder::VarOptionals::~VarOptionals() = default;
 
 ProgramBuilder::ProgramBuilder()
-    : id_(ProgramID::New()), ast_(ast_nodes_.Create<ast::Module>(id_, Source{})) {}
+    : id_(ProgramID::New()),
+      ast_(ast_nodes_.Create<ast::Module>(id_, AllocateNodeID(), Source{})) {}
 
 ProgramBuilder::ProgramBuilder(ProgramBuilder&& rhs)
     : id_(std::move(rhs.id_)),
+      last_ast_node_id_(std::move(rhs.last_ast_node_id_)),
       types_(std::move(rhs.types_)),
       ast_nodes_(std::move(rhs.ast_nodes_)),
       sem_nodes_(std::move(rhs.sem_nodes_)),
-      ast_(rhs.ast_),
+      ast_(std::move(rhs.ast_)),
       sem_(std::move(rhs.sem_)),
       symbols_(std::move(rhs.symbols_)),
       diagnostics_(std::move(rhs.diagnostics_)) {
@@ -49,10 +51,11 @@ ProgramBuilder& ProgramBuilder::operator=(ProgramBuilder&& rhs) {
     rhs.MarkAsMoved();
     AssertNotMoved();
     id_ = std::move(rhs.id_);
+    last_ast_node_id_ = std::move(rhs.last_ast_node_id_);
     types_ = std::move(rhs.types_);
     ast_nodes_ = std::move(rhs.ast_nodes_);
     sem_nodes_ = std::move(rhs.sem_nodes_);
-    ast_ = rhs.ast_;
+    ast_ = std::move(rhs.ast_);
     sem_ = std::move(rhs.sem_);
     symbols_ = std::move(rhs.symbols_);
     diagnostics_ = std::move(rhs.diagnostics_);
@@ -63,6 +66,7 @@ ProgramBuilder& ProgramBuilder::operator=(ProgramBuilder&& rhs) {
 ProgramBuilder ProgramBuilder::Wrap(const Program* program) {
     ProgramBuilder builder;
     builder.id_ = program->ID();
+    builder.last_ast_node_id_ = program->HighestASTNodeID();
     builder.types_ = sem::Manager::Wrap(program->Types());
     builder.ast_ =
         builder.create<ast::Module>(program->AST().source, program->AST().GlobalDeclarations());

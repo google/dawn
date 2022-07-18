@@ -376,7 +376,7 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
 class StatementBuilder : public Castable<StatementBuilder, ast::Statement> {
   public:
     /// Constructor
-    StatementBuilder() : Base(ProgramID(), Source{}) {}
+    StatementBuilder() : Base(ProgramID(), ast::NodeID(), Source{}) {}
 
     /// @param builder the program builder
     /// @returns the build AST node

@@ -33,13 +33,15 @@ namespace tint::ast {
 class Const final : public Castable<Const, Variable> {
   public:
     /// Create a 'const' creation-time value variable.
-    /// @param program_id the identifier of the program that owns this node
+    /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param source the variable source
     /// @param sym the variable symbol
     /// @param type the declared variable type
     /// @param constructor the constructor expression. Must not be nullptr.
     /// @param attributes the variable attributes
-    Const(ProgramID program_id,
+    Const(ProgramID pid,
+          NodeID nid,
           const Source& source,
           const Symbol& sym,
           const ast::Type* type,

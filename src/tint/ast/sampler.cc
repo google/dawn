@@ -32,7 +32,8 @@ std::ostream& operator<<(std::ostream& out, SamplerKind kind) {
     return out;
 }
 
-Sampler::Sampler(ProgramID pid, const Source& src, SamplerKind k) : Base(pid, src), kind(k) {}
+Sampler::Sampler(ProgramID pid, NodeID nid, const Source& src, SamplerKind k)
+    : Base(pid, nid, src), kind(k) {}
 
 Sampler::Sampler(Sampler&&) = default;
 

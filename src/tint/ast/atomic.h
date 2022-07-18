@@ -26,9 +26,10 @@ class Atomic final : public Castable<Atomic, Type> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param subtype the pointee type
-    Atomic(ProgramID pid, const Source& src, const Type* const subtype);
+    Atomic(ProgramID pid, NodeID nid, const Source& src, const Type* const subtype);
     /// Move constructor
     Atomic(Atomic&&);
     ~Atomic() override;

@@ -32,11 +32,13 @@ class StructMember final : public Castable<StructMember, Node> {
   public:
     /// Create a new struct member statement
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node for the struct member statement
     /// @param sym The struct member symbol
     /// @param type The struct member type
     /// @param attributes The struct member attributes
     StructMember(ProgramID pid,
+                 NodeID nid,
                  const Source& src,
                  const Symbol& sym,
                  const ast::Type* type,

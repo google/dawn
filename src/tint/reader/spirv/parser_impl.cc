@@ -513,7 +513,8 @@ ast::AttributeList ParserImpl::ConvertMemberDecoration(uint32_t struct_type_id,
             return {
                 create<ast::StrideAttribute>(Source{}, decoration[1]),
                 builder_.ASTNodes().Create<ast::DisableValidationAttribute>(
-                    builder_.ID(), ast::DisabledValidation::kIgnoreStrideAttribute),
+                    builder_.ID(), builder_.AllocateNodeID(),
+                    ast::DisabledValidation::kIgnoreStrideAttribute),
             };
         }
         default:

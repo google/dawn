@@ -26,13 +26,19 @@ class Matrix final : public Castable<Matrix, Type> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param subtype the declared type of the matrix components. May be null for
     ///        matrix constructors, where the element type will be inferred from
     ///        the constructor arguments
     /// @param rows the number of rows in the matrix
     /// @param columns the number of columns in the matrix
-    Matrix(ProgramID pid, const Source& src, const Type* subtype, uint32_t rows, uint32_t columns);
+    Matrix(ProgramID pid,
+           NodeID nid,
+           const Source& src,
+           const Type* subtype,
+           uint32_t rows,
+           uint32_t columns);
     /// Move constructor
     Matrix(Matrix&&);
     ~Matrix() override;

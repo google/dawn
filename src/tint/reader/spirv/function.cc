@@ -5481,8 +5481,8 @@ bool FunctionEmitter::EmitAtomicOp(const spvtools::opt::Instruction& inst) {
 
         // Emit stub, will be removed by transform::SpirvAtomic
         auto sym = builder_.Symbols().New(std::string("stub_") + sem::str(builtin));
-        auto* stub_deco =
-            builder_.ASTNodes().Create<transform::SpirvAtomic::Stub>(builder_.ID(), builtin);
+        auto* stub_deco = builder_.ASTNodes().Create<transform::SpirvAtomic::Stub>(
+            builder_.ID(), builder_.AllocateNodeID(), builtin);
         auto* stub =
             create<ast::Function>(Source{}, sym, std::move(params), ret_type,
                                   /* body */ nullptr,

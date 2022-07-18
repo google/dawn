@@ -26,9 +26,10 @@ class BoolLiteralExpression final : public Castable<BoolLiteralExpression, Liter
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param value the bool literals value
-    BoolLiteralExpression(ProgramID pid, const Source& src, bool value);
+    BoolLiteralExpression(ProgramID pid, NodeID nid, const Source& src, bool value);
     ~BoolLiteralExpression() override;
 
     /// Clones this node and all transitive child nodes using the `CloneContext`

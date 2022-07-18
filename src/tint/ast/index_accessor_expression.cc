@@ -21,10 +21,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::IndexAccessorExpression);
 namespace tint::ast {
 
 IndexAccessorExpression::IndexAccessorExpression(ProgramID pid,
+                                                 NodeID nid,
                                                  const Source& src,
                                                  const Expression* obj,
                                                  const Expression* idx)
-    : Base(pid, src), object(obj), index(idx) {
+    : Base(pid, nid, src), object(obj), index(idx) {
     TINT_ASSERT(AST, object);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, object, program_id);
     TINT_ASSERT(AST, idx);

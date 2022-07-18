@@ -26,10 +26,15 @@ class MultisampledTexture final : public Castable<MultisampledTexture, Texture> 
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param dim the dimensionality of the texture
     /// @param type the data type of the multisampled texture
-    MultisampledTexture(ProgramID pid, const Source& src, TextureDimension dim, const Type* type);
+    MultisampledTexture(ProgramID pid,
+                        NodeID nid,
+                        const Source& src,
+                        TextureDimension dim,
+                        const Type* type);
     /// Move constructor
     MultisampledTexture(MultisampledTexture&&);
     ~MultisampledTexture() override;

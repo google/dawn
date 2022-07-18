@@ -24,10 +24,14 @@ namespace tint::ast {
 class VariableDeclStatement final : public Castable<VariableDeclStatement, Statement> {
   public:
     /// Constructor
-    /// @param program_id the identifier of the program that owns this node
+    /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param source the variable statement source
     /// @param variable the variable
-    VariableDeclStatement(ProgramID program_id, const Source& source, const Variable* variable);
+    VariableDeclStatement(ProgramID pid,
+                          NodeID nid,
+                          const Source& source,
+                          const Variable* variable);
     /// Move constructor
     VariableDeclStatement(VariableDeclStatement&&);
     ~VariableDeclStatement() override;

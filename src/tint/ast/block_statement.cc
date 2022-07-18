@@ -20,8 +20,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::BlockStatement);
 
 namespace tint::ast {
 
-BlockStatement::BlockStatement(ProgramID pid, const Source& src, const StatementList& stmts)
-    : Base(pid, src), statements(std::move(stmts)) {
+BlockStatement::BlockStatement(ProgramID pid,
+                               NodeID nid,
+                               const Source& src,
+                               const StatementList& stmts)
+    : Base(pid, nid, src), statements(std::move(stmts)) {
     for (auto* stmt : statements) {
         TINT_ASSERT(AST, stmt);
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, stmt, program_id);

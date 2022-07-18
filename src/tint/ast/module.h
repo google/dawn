@@ -32,15 +32,17 @@ class Module final : public Castable<Module, Node> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
-    Module(ProgramID pid, const Source& src);
+    Module(ProgramID pid, NodeID nid, const Source& src);
 
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param global_decls the list of global types, functions, and variables, in
     /// the order they were declared in the source program
-    Module(ProgramID pid, const Source& src, std::vector<const Node*> global_decls);
+    Module(ProgramID pid, NodeID nid, const Source& src, std::vector<const Node*> global_decls);
 
     /// Destructor
     ~Module() override;

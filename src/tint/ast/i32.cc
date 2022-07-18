@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::I32);
 
 namespace tint::ast {
 
-I32::I32(ProgramID pid, const Source& src) : Base(pid, src) {}
+I32::I32(ProgramID pid, NodeID nid, const Source& src) : Base(pid, nid, src) {}
 
 I32::I32(I32&&) = default;
 

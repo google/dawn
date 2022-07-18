@@ -28,7 +28,8 @@ class InternalAttribute : public Castable<InternalAttribute, Attribute> {
   public:
     /// Constructor
     /// @param program_id the identifier of the program that owns this node
-    explicit InternalAttribute(ProgramID program_id);
+    /// @param nid the unique node identifier
+    explicit InternalAttribute(ProgramID program_id, NodeID nid);
 
     /// Destructor
     ~InternalAttribute() override;

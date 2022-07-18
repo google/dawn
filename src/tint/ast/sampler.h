@@ -39,9 +39,10 @@ class Sampler final : public Castable<Sampler, Type> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node
+    /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param kind the kind of sampler
-    Sampler(ProgramID pid, const Source& src, SamplerKind kind);
+    Sampler(ProgramID pid, NodeID nid, const Source& src, SamplerKind kind);
     /// Move constructor
     Sampler(Sampler&&);
     ~Sampler() override;

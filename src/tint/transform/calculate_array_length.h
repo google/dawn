@@ -40,7 +40,8 @@ class CalculateArrayLength final : public Castable<CalculateArrayLength, Transfo
       public:
         /// Constructor
         /// @param program_id the identifier of the program that owns this node
-        explicit BufferSizeIntrinsic(ProgramID program_id);
+        /// @param nid the unique node identifier
+        BufferSizeIntrinsic(ProgramID program_id, ast::NodeID nid);
         /// Destructor
         ~BufferSizeIntrinsic() override;
 
