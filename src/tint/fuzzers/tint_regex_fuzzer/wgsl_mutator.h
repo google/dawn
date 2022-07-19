@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_FUZZERS_TINT_REGEX_FUZZER_WGSL_MUTATOR_H_
 #define SRC_TINT_FUZZERS_TINT_REGEX_FUZZER_WGSL_MUTATOR_H_
 
+#include <optional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -71,6 +72,12 @@ class WgslMutator {
     /// @param wgsl_code - WGSL-like string that will be mutated.
     /// @return true if the mutation was succesful or false otherwise.
     bool InsertReturnStatement(std::string& wgsl_code);
+
+    /// A function that, given WGSL-like string, generates a new WGSL-like string by replacing one
+    /// randomly-chosen operator in the original string with another operator.
+    /// @param wgsl_code - the initial WGSL-like string that will be mutated.
+    /// @return true if an operator replacement happened or false otherwise.
+    bool ReplaceRandomOperator(std::string& wgsl_code);
 
   protected:
     /// Given index idx1 it delets the region of length interval_len
@@ -147,6 +154,22 @@ class WgslMutator {
                        size_t reg2_len,
                        std::string& wgsl_code);
 
+    /// Finds the next occurrence of an operator in a WGSL-like string from a given starting
+    /// position, wrapping around to the start of the string if no operator is found before reaching
+    /// the end, and returning empty of no operator is found at all. There is no guarantee that the
+    /// result will correspond to a WGSL operator token, e.g. the identified characters could be
+    /// part of a comment, or e.g. the file might contain >>=, in which case the operator
+    /// >= will be identified should it happen that the starting index corresponds to the second >
+    /// character of this operator. Given that the regex mutator does not aim to guarantee
+    /// well-formed programs, these issues are acceptable.
+    /// @param wgsl_code - the WGSL-like string in which operator occurrences will be found.
+    /// @param start_index - the index at which search should start
+    /// @return empty if no operator is found, otherwise a pair comprising the index at which the
+    /// operator starts and the character length of the operator.
+    std::optional<std::pair<uint32_t, uint32_t>> FindOperatorOccurrence(
+        const std::string& wgsl_code,
+        uint32_t start_index);
+
   private:
     /// A function that given a delimiter, returns a vector that contains
     /// all the positions of the delimiter in the WGSL code.
@@ -166,6 +189,13 @@ class WgslMutator {
                          size_t length,
                          std::string replacement_text,
                          std::string& wgsl_code);
+
+    /// Given a string representing a WGSL operator, randomly returns a different WGSL operator in
+    /// the same category as the original, where the three categories are assignment operators (such
+    /// as = and +=), expression operators (such as + and ^) and increment operators (++ and --).
+    /// @param existing_operator - the characters comprising some WGSL operator
+    /// @return another WGSL operator falling into the same category.
+    std::string ChooseRandomReplacementForOperator(const std::string& existing_operator);
 
     RandomGenerator& generator_;
 };

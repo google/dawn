@@ -318,4 +318,119 @@ bool WgslMutator::ReplaceRandomIntLiteral(std::string& wgsl_code) {
     return true;
 }
 
+std::string WgslMutator::ChooseRandomReplacementForOperator(const std::string& existing_operator) {
+    // Operators are partitioned into three classes: assignment, expression and increment. The regex
+    // mutator will swap operators in the same class. The hypothesis is that this should exercise a
+    // number of type-safe swaps (e.g. changing += to *=), as well as some badly-typed yet
+    // interesting swaps (e.g. changing + to ^ when the operators are matrices), while avoiding
+    // making totally nonsensical replacements (such as changing ++ too /).
+    std::vector<std::string> assignment_operators{
+        "=", "+=", "-=", "*=", "/=", "%=", "&=", "|=", "^=", "<<=", ">>="};
+    std::vector<std::string> expression_operators{"+",  "-",  "*", "/",  "%",  "&&", "||",
+                                                  "&",  "|",  "^", "<<", ">>", "<",  ">",
+                                                  "<=", ">=", "!", "!=", "~"};
+    std::vector<std::string> increment_operators{"++", "--"};
+    for (auto operators : {assignment_operators, expression_operators, increment_operators}) {
+        auto it = std::find(operators.begin(), operators.end(), existing_operator);
+        if (it != operators.end()) {
+            // The operator falls into this category, so select another operator from the category.
+            operators.erase(it);
+            return generator_.GetRandomElement(operators);
+        }
+    }
+    assert(false && "Unknown operator");
+    return "";
+}
+
+bool WgslMutator::ReplaceRandomOperator(std::string& wgsl_code) {
+    // Choose an index into the code at random.
+    const uint32_t start_index = generator_.GetUInt32(static_cast<uint32_t>(wgsl_code.size()));
+    // Find the first operator occurrence from the chosen point, wrapping back to the start of the
+    // file if needed.
+    auto maybe_operator_occurrence = FindOperatorOccurrence(wgsl_code, start_index);
+    if (!maybe_operator_occurrence.has_value()) {
+        // It is unlikely that there will be *no* operators in the file, but if this is the case
+        // then this mutation cannot be applied.
+        return false;
+    }
+    std::string existing_operator =
+        wgsl_code.substr(maybe_operator_occurrence->first, maybe_operator_occurrence->second);
+    // Replace the identified operator with a randomly-chosen alternative.
+    wgsl_code.replace(maybe_operator_occurrence->first, maybe_operator_occurrence->second,
+                      ChooseRandomReplacementForOperator(existing_operator));
+    return true;
+}
+
+std::optional<std::pair<uint32_t, uint32_t>> WgslMutator::FindOperatorOccurrence(
+    const std::string& wgsl_code,
+    uint32_t start_index) {
+    // Loops through the characters of the code in a wrap-around fashion, looking for the first
+    // encountered token that is a WGSL operator.
+
+    for (size_t i = 0; i < wgsl_code.size(); i++) {
+        uint32_t current_index = static_cast<uint32_t>((start_index + i) % wgsl_code.size());
+
+        // To cater for multi-character operator tokens, get the three consecutive characters from
+        // the code string starting at the current index. Use null characters to account for the
+        // case where search has reached the end of the code string.
+        char first_character = wgsl_code[current_index];
+        char second_character =
+            current_index == wgsl_code.size() - 1 ? '\0' : wgsl_code[current_index + 1];
+        char third_character =
+            current_index >= wgsl_code.size() - 2 ? '\0' : wgsl_code[current_index + 2];
+
+        // This uses the extracted characters to match for the various WGSL operators.
+        switch (first_character) {
+            case '!':
+            case '^':
+                switch (second_character) {
+                    case '=':
+                        return {{current_index, 2}};
+                    default:
+                        return {{current_index, 1}};
+                }
+            case '|':
+            case '&':
+            case '+':
+            case '-':
+                if (second_character == first_character || second_character == '=') {
+                    return {{current_index, 2}};
+                }
+                return {{current_index, 1}};
+            case '*':
+            case '/':
+            case '%':
+                switch (second_character) {
+                    case '=':
+                        return {{current_index, 2}};
+                    default:
+                        return {{current_index, 1}};
+                }
+            case '=':
+                if (second_character == '=') {
+                    return {{current_index, 2}};
+                }
+                return {{current_index, 1}};
+            case '<':
+            case '>':
+                if (second_character == '=') {
+                    return {{current_index, 2}};
+                }
+                if (second_character == first_character) {
+                    if (third_character == '=') {
+                        return {{current_index, 3}};
+                    }
+                    return {{current_index, 2}};
+                }
+                return {{current_index, 1}};
+            case '~':
+                return {{current_index, 1}};
+            default:
+                break;
+        }
+    }
+    // No operator was found, so empty is returned.
+    return {};
+}
+
 }  // namespace tint::fuzzers::regex_fuzzer

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <optional>
 #include <string>
 
 #include "gtest/gtest.h"
@@ -28,6 +29,7 @@ class WgslMutatorTest : public WgslMutator {
     using WgslMutator::DeleteInterval;
     using WgslMutator::DuplicateInterval;
     using WgslMutator::FindClosingBrace;
+    using WgslMutator::FindOperatorOccurrence;
     using WgslMutator::GetFunctionBodyPositions;
     using WgslMutator::GetIdentifiers;
     using WgslMutator::GetIntLiterals;
@@ -541,6 +543,47 @@ TEST(TestInsertReturn, TestMissingSemicolon) {
         foo_1 = 5 + 7;
         var foo_3 : i32 = -20;)";
     ASSERT_EQ(expected_wgsl_code, wgsl_code);
+}
+
+TEST(TestReplaceOperator, TestIdentifyOperators) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
+    std::string code =
+        R"(
+x += 2;
+y = a + b;
+z = -a;
+x *= b / c;
+t = t && t | t || t;
+b = b > c ^ c <= d;
+a >>= b;
+b <<= a;
+a = a << 2;
+b = b >> 3;
+c = a % 3;
+d %= e;
+)";
+    // These are the operator occurrences that will be observed by going through the file character
+    // by character. This includes, for example, identifying the ">" operator if search starts after
+    // the first character of ">>".
+    std::vector<std::pair<uint32_t, uint32_t>> operator_occurrences = {
+        {3, 2},   {4, 1},   {11, 1},  {15, 1},  {22, 1},  {24, 1},  {30, 2},  {31, 1},
+        {35, 1},  {42, 1},  {46, 2},  {47, 1},  {51, 1},  {55, 2},  {56, 1},  {63, 1},
+        {67, 1},  {71, 1},  {75, 2},  {76, 1},  {83, 3},  {84, 2},  {85, 1},  {92, 3},
+        {93, 2},  {94, 1},  {101, 1}, {105, 2}, {106, 1}, {113, 1}, {117, 2}, {118, 1},
+        {125, 1}, {129, 1}, {136, 2}, {137, 1}, {3, 2}};
+    uint32_t operator_occurrence_index = 0;
+    for (size_t i = 0; i < code.length(); i++) {
+        // Move on to the next operator occurrence if the current index into the code string exceeds
+        // the index associated with that operator occurrence. Exception: stay with the last
+        // operator occurrence if search has already passed the last operator in the file.
+        if (i < code.length() - 2 && i > operator_occurrences[operator_occurrence_index].first) {
+            operator_occurrence_index =
+                (operator_occurrence_index + 1) % operator_occurrences.size();
+        }
+        ASSERT_EQ(operator_occurrences[operator_occurrence_index],
+                  mutator.FindOperatorOccurrence(code, static_cast<uint32_t>(i)).value());
+    }
 }
 
 }  // namespace
