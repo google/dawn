@@ -277,6 +277,9 @@ if (is_win || is_linux || is_chromeos || is_mac || is_fuchsia || is_android) {
       sources += [ "SystemUtils_mac.mm" ]
     }
 
+    # Note that while this doesn't make `internal_config` a public config of
+    # Dawn libraries because `:common` is only used as a private deps of Dawn
+    # targets, so `internal_config` doesn't leak out of Dawn.
     public_configs = [ ":internal_config" ]
     deps = [
       "${dawn_root}/include/dawn:cpp_headers",
