@@ -239,6 +239,9 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencil) {
     // T2TBothAspectsThenCopyNonRenderableStencil does not use RenderAttachment and works correctly.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
+    // TODO(crbug.com/dawn/1497): glReadPixels: GL error: HIGH: Invalid format and type combination.
+    DAWN_SUPPRESS_TEST_IF(IsANGLE());
+
     // TODO(crbug.com/dawn/667): Work around some platforms' inability to read back stencil.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
 
@@ -263,6 +266,9 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyStencil) {
 // Test that part of a non-renderable stencil aspect can be copied. Notably,
 // this test has different behavior on some platforms than T2TBothAspectsThenCopyStencil.
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonRenderableStencil) {
+    // TODO(crbug.com/dawn/1497): glReadPixels: GL error: HIGH: Invalid format and type combination.
+    DAWN_SUPPRESS_TEST_IF(IsANGLE());
+
     // TODO(crbug.com/dawn/667): Work around some platforms' inability to read back stencil.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
 
@@ -291,6 +297,9 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonRenderableNonZeroMipStenc
     // Maybe has to do with the non-zero mip. Notably, a previous test
     // T2TBothAspectsThenCopyNonRenderableStencil works correctly.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
+
+    // TODO(crbug.com/dawn/1497): glReadPixels: GL error: HIGH: Invalid format and type combination.
+    DAWN_SUPPRESS_TEST_IF(IsANGLE());
 
     // TODO(crbug.com/dawn/667): Work around some platforms' inability to read back stencil.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
@@ -577,6 +586,9 @@ class StencilCopyTests : public DepthStencilCopyTests {};
 
 // Test copying the stencil-only aspect into a buffer.
 TEST_P(StencilCopyTests, FromStencilAspect) {
+    // TODO(crbug.com/dawn/1497): glReadPixels: GL error: HIGH: Invalid format and type combination.
+    DAWN_SUPPRESS_TEST_IF(IsANGLE());
+
     // TODO(crbug.com/dawn/667): Work around the fact that some platforms are unable to read
     // stencil.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));
@@ -605,6 +617,9 @@ TEST_P(StencilCopyTests, FromNonZeroMipStencilAspect) {
     // TODO(crbug.com/dawn/704): Readback after clear via stencil copy does not work
     // on some Intel drivers.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
+
+    // TODO(crbug.com/dawn/1497): glReadPixels: GL error: HIGH: Invalid format and type combination.
+    DAWN_SUPPRESS_TEST_IF(IsANGLE());
 
     // TODO(crbug.com/dawn/667): Work around some platforms' inability to read back stencil.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_stencil_read"));

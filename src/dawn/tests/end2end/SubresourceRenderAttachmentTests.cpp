@@ -168,6 +168,9 @@ TEST_P(SubresourceRenderAttachmentTest, StencilTexture) {
     // on some Intel drivers.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
+    // TODO(crbug.com/dawn/1497): glReadPixels: GL error: HIGH: Invalid format and type combination.
+    DAWN_SUPPRESS_TEST_IF(IsANGLE());
+
     DoTest(Type::Stencil);
 }
 
