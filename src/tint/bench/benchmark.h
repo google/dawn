@@ -58,6 +58,7 @@ std::variant<ProgramAndFile, Error> LoadProgram(std::string name);
 /// files in `<tint>/test/benchmark`.
 #define TINT_BENCHMARK_WGSL_PROGRAMS(FUNC)                                   \
     TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "animometer.wgsl");                    \
+    TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "atan2-const-eval.wgsl");              \
     TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "bloom-vertical-blur.wgsl");           \
     TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "cluster-lights.wgsl");                \
     TINT_BENCHMARK_WGSL_PROGRAM(FUNC, "empty.wgsl");                         \
