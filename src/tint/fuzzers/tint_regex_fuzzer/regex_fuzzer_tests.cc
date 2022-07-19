@@ -21,26 +21,44 @@
 namespace tint::fuzzers::regex_fuzzer {
 namespace {
 
+class WgslMutatorTest : public WgslMutator {
+  public:
+    explicit WgslMutatorTest(RandomGenerator& generator) : WgslMutator(generator) {}
+
+    using WgslMutator::DeleteInterval;
+    using WgslMutator::DuplicateInterval;
+    using WgslMutator::FindClosingBrace;
+    using WgslMutator::GetFunctionBodyPositions;
+    using WgslMutator::GetIdentifiers;
+    using WgslMutator::GetIntLiterals;
+    using WgslMutator::ReplaceRegion;
+    using WgslMutator::SwapIntervals;
+};
+
 // Swaps two non-consecutive regions in the edge
 TEST(SwapRegionsTest, SwapIntervalsEdgeNonConsecutive) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string R1 = ";region1;", R2 = ";regionregion2;", R3 = ";regionregionregion3;";
     std::string all_regions = R1 + R2 + R3;
 
     // this call should swap R1 with R3.
-    SwapIntervals(0, R1.length(), R1.length() + R2.length(), R3.length(), all_regions);
+    mutator.SwapIntervals(0, R1.length(), R1.length() + R2.length(), R3.length(), all_regions);
 
     ASSERT_EQ(R3 + R2 + R1, all_regions);
 }
 
 // Swaps two non-consecutive regions not in the edge
 TEST(SwapRegionsTest, SwapIntervalsNonConsecutiveNonEdge) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string R1 = ";region1;", R2 = ";regionregion2;", R3 = ";regionregionregion3;",
                 R4 = ";regionregionregionregion4;", R5 = ";regionregionregionregionregion5;";
     std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
     // this call should swap R2 with R4.
-    SwapIntervals(R1.length(), R2.length(), R1.length() + R2.length() + R3.length(), R4.length(),
-                  all_regions);
+    mutator.SwapIntervals(R1.length(), R2.length(), R1.length() + R2.length() + R3.length(),
+                          R4.length(), all_regions);
 
     ASSERT_EQ(R1 + R4 + R3 + R2 + R5, all_regions);
 }
@@ -48,12 +66,15 @@ TEST(SwapRegionsTest, SwapIntervalsNonConsecutiveNonEdge) {
 // Swaps two consecutive regions not in the edge (sorrounded by other
 // regions)
 TEST(SwapRegionsTest, SwapIntervalsConsecutiveEdge) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string R1 = ";region1;", R2 = ";regionregion2;", R3 = ";regionregionregion3;",
                 R4 = ";regionregionregionregion4;", R5 = ";regionregionregionregionregion5;";
     std::string all_regions = R1 + R2 + R3 + R4;
 
     // this call should swap R2 with R3.
-    SwapIntervals(R1.length(), R2.length(), R1.length() + R2.length(), R3.length(), all_regions);
+    mutator.SwapIntervals(R1.length(), R2.length(), R1.length() + R2.length(), R3.length(),
+                          all_regions);
 
     ASSERT_EQ(R1 + R3 + R2 + R4, all_regions);
 }
@@ -61,113 +82,137 @@ TEST(SwapRegionsTest, SwapIntervalsConsecutiveEdge) {
 // Swaps two consecutive regions not in the edge (not sorrounded by other
 // regions)
 TEST(SwapRegionsTest, SwapIntervalsConsecutiveNonEdge) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string R1 = ";region1;", R2 = ";regionregion2;", R3 = ";regionregionregion3;",
                 R4 = ";regionregionregionregion4;", R5 = ";regionregionregionregionregion5;";
     std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
     // this call should swap R4 with R5.
-    SwapIntervals(R1.length() + R2.length() + R3.length(), R4.length(),
-                  R1.length() + R2.length() + R3.length() + R4.length(), R5.length(), all_regions);
+    mutator.SwapIntervals(R1.length() + R2.length() + R3.length(), R4.length(),
+                          R1.length() + R2.length() + R3.length() + R4.length(), R5.length(),
+                          all_regions);
 
     ASSERT_EQ(R1 + R2 + R3 + R5 + R4, all_regions);
 }
 
 // Deletes the first region.
 TEST(DeleteRegionTest, DeleteFirstRegion) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string R1 = ";region1;", R2 = ";regionregion2;", R3 = ";regionregionregion3;",
                 R4 = ";regionregionregionregion4;", R5 = ";regionregionregionregionregion5;";
     std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
     // This call should delete R1.
-    DeleteInterval(0, R1.length(), all_regions);
+    mutator.DeleteInterval(0, R1.length(), all_regions);
 
     ASSERT_EQ(";" + R2 + R3 + R4 + R5, all_regions);
 }
 
 // Deletes the last region.
 TEST(DeleteRegionTest, DeleteLastRegion) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string R1 = ";region1;", R2 = ";regionregion2;", R3 = ";regionregionregion3;",
                 R4 = ";regionregionregionregion4;", R5 = ";regionregionregionregionregion5;";
     std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
     // This call should delete R5.
-    DeleteInterval(R1.length() + R2.length() + R3.length() + R4.length(), R5.length(), all_regions);
+    mutator.DeleteInterval(R1.length() + R2.length() + R3.length() + R4.length(), R5.length(),
+                           all_regions);
 
     ASSERT_EQ(R1 + R2 + R3 + R4 + ";", all_regions);
 }
 
 // Deletes the middle region.
 TEST(DeleteRegionTest, DeleteMiddleRegion) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string R1 = ";region1;", R2 = ";regionregion2;", R3 = ";regionregionregion3;",
                 R4 = ";regionregionregionregion4;", R5 = ";regionregionregionregionregion5;";
     std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
     // This call should delete R3.
-    DeleteInterval(R1.length() + R2.length(), R3.length(), all_regions);
+    mutator.DeleteInterval(R1.length() + R2.length(), R3.length(), all_regions);
 
     ASSERT_EQ(R1 + R2 + ";" + R4 + R5, all_regions);
 }
 
 TEST(InsertRegionTest, InsertRegionTest1) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string R1 = ";region1;", R2 = ";regionregion2;", R3 = ";regionregionregion3;",
                 R4 = ";regionregionregionregion4;", R5 = ";regionregionregionregionregion5;";
     std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
     // This call should insert R2 after R4.
-    DuplicateInterval(R1.length(), R2.length(),
-                      R1.length() + R2.length() + R3.length() + R4.length() - 1, all_regions);
+    mutator.DuplicateInterval(R1.length(), R2.length(),
+                              R1.length() + R2.length() + R3.length() + R4.length() - 1,
+                              all_regions);
 
     ASSERT_EQ(R1 + R2 + R3 + R4 + R2.substr(1, R2.size() - 1) + R5, all_regions);
 }
 
 TEST(InsertRegionTest, InsertRegionTest2) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string R1 = ";region1;", R2 = ";regionregion2;", R3 = ";regionregionregion3;",
                 R4 = ";regionregionregionregion4;", R5 = ";regionregionregionregionregion5;";
 
     std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
     // This call should insert R3 after R1.
-    DuplicateInterval(R1.length() + R2.length(), R3.length(), R1.length() - 1, all_regions);
+    mutator.DuplicateInterval(R1.length() + R2.length(), R3.length(), R1.length() - 1, all_regions);
 
     ASSERT_EQ(R1 + R3.substr(1, R3.length() - 1) + R2 + R3 + R4 + R5, all_regions);
 }
 
 TEST(InsertRegionTest, InsertRegionTest3) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string R1 = ";region1;", R2 = ";regionregion2;", R3 = ";regionregionregion3;",
                 R4 = ";regionregionregionregion4;", R5 = ";regionregionregionregionregion5;";
 
     std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
     // This call should insert R2 after R5.
-    DuplicateInterval(R1.length(), R2.length(), all_regions.length() - 1, all_regions);
+    mutator.DuplicateInterval(R1.length(), R2.length(), all_regions.length() - 1, all_regions);
 
     ASSERT_EQ(R1 + R2 + R3 + R4 + R5 + R2.substr(1, R2.length() - 1), all_regions);
 }
 
 TEST(ReplaceIdentifierTest, ReplaceIdentifierTest1) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string R1 = "|region1|", R2 = "; region2;", R3 = "---------region3---------",
                 R4 = "++region4++", R5 = "***region5***";
     std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
     // Replaces R3 with R1.
-    ReplaceRegion(0, R1.length(), R1.length() + R2.length(), R3.length(), all_regions);
+    mutator.ReplaceRegion(0, R1.length(), R1.length() + R2.length(), R3.length(), all_regions);
 
     ASSERT_EQ(R1 + R2 + R1 + R4 + R5, all_regions);
 }
 
 TEST(ReplaceIdentifierTest, ReplaceIdentifierTest2) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string R1 = "|region1|", R2 = "; region2;", R3 = "---------region3---------",
                 R4 = "++region4++", R5 = "***region5***";
     std::string all_regions = R1 + R2 + R3 + R4 + R5;
 
     // Replaces R5 with R3.
-    ReplaceRegion(R1.length() + R2.length(), R3.length(),
-                  R1.length() + R2.length() + R3.length() + R4.length(), R5.length(), all_regions);
+    mutator.ReplaceRegion(R1.length() + R2.length(), R3.length(),
+                          R1.length() + R2.length() + R3.length() + R4.length(), R5.length(),
+                          all_regions);
 
     ASSERT_EQ(R1 + R2 + R3 + R4 + R3, all_regions);
 }
 
 TEST(GetIdentifierTest, GetIdentifierTest1) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string wgsl_code =
         R"(fn clamp_0acf8f() {
         var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());
@@ -187,7 +232,7 @@ TEST(GetIdentifierTest, GetIdentifierTest1) {
         clamp_0acf8f();
       })";
 
-    std::vector<std::pair<size_t, size_t>> identifiers_pos = GetIdentifiers(wgsl_code);
+    std::vector<std::pair<size_t, size_t>> identifiers_pos = mutator.GetIdentifiers(wgsl_code);
 
     std::vector<std::pair<size_t, size_t>> ground_truth = {
         std::make_pair(3, 12),   std::make_pair(28, 3),  std::make_pair(37, 4),
@@ -204,6 +249,8 @@ TEST(GetIdentifierTest, GetIdentifierTest1) {
 }
 
 TEST(TestGetLiteralsValues, TestGetLiteralsValues1) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string wgsl_code =
         R"(fn clamp_0acf8f() {
         var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());
@@ -227,7 +274,7 @@ TEST(TestGetLiteralsValues, TestGetLiteralsValues1) {
       foo_1 = 5 + 7;
       var foo_3 : i32 = -20;)";
 
-    std::vector<std::pair<size_t, size_t>> literals_pos = GetIntLiterals(wgsl_code);
+    std::vector<std::pair<size_t, size_t>> literals_pos = mutator.GetIntLiterals(wgsl_code);
 
     std::vector<std::string> ground_truth = {"3", "10", "5", "7", "-20"};
 
@@ -241,6 +288,8 @@ TEST(TestGetLiteralsValues, TestGetLiteralsValues1) {
 }
 
 TEST(InsertReturnTest, FindClosingBrace) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string wgsl_code =
         R"(fn clamp_0acf8f() {
         if(false){
@@ -269,7 +318,7 @@ TEST(InsertReturnTest, FindClosingBrace) {
         var foo_3 : i32 = -20;
       )";
     size_t opening_bracket_pos = 18;
-    size_t closing_bracket_pos = FindClosingBrace(opening_bracket_pos, wgsl_code);
+    size_t closing_bracket_pos = mutator.FindClosingBrace(opening_bracket_pos, wgsl_code);
 
     // The -1 is needed since the function body starts after the left bracket.
     std::string function_body =
@@ -286,6 +335,8 @@ TEST(InsertReturnTest, FindClosingBrace) {
 }
 
 TEST(InsertReturnTest, FindClosingBraceFailing) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string wgsl_code =
         R"(fn clamp_0acf8f() {
       // This comment } causes the test to fail.
@@ -314,7 +365,7 @@ TEST(InsertReturnTest, FindClosingBraceFailing) {
       foo_1 = 5 + 7;
       var foo_3 : i32 = -20;)";
     size_t opening_bracket_pos = 18;
-    size_t closing_bracket_pos = FindClosingBrace(opening_bracket_pos, wgsl_code);
+    size_t closing_bracket_pos = mutator.FindClosingBrace(opening_bracket_pos, wgsl_code);
 
     // The -1 is needed since the function body starts after the left bracket.
     std::string function_body =
@@ -330,6 +381,8 @@ TEST(InsertReturnTest, FindClosingBraceFailing) {
 }
 
 TEST(TestInsertReturn, TestInsertReturn1) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string wgsl_code =
         R"(fn clamp_0acf8f() {
         var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());
@@ -390,6 +443,8 @@ TEST(TestInsertReturn, TestInsertReturn1) {
 }
 
 TEST(TestInsertReturn, TestFunctionPositions) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string wgsl_code =
         R"(fn clamp_0acf8f() {
           var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());
@@ -418,12 +473,14 @@ TEST(TestInsertReturn, TestFunctionPositions) {
         foo_1 = 5 + 7;
         var foo_3 : i32 = -20;)";
 
-    std::vector<size_t> function_positions = GetFunctionBodyPositions(wgsl_code);
+    std::vector<size_t> function_positions = mutator.GetFunctionBodyPositions(wgsl_code);
     std::vector<size_t> expected_positions = {180, 586};
     ASSERT_EQ(expected_positions, function_positions);
 }
 
 TEST(TestInsertReturn, TestMissingSemicolon) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
     std::string wgsl_code =
         R"(fn clamp_0acf8f() {
           var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>())
@@ -452,8 +509,7 @@ TEST(TestInsertReturn, TestMissingSemicolon) {
         foo_1 = 5 + 7;
         var foo_3 : i32 = -20;)";
 
-    RandomGenerator generator(0);
-    InsertReturnStatement(wgsl_code, generator);
+    mutator.InsertReturnStatement(wgsl_code);
 
     // No semicolons found in the function's body, so wgsl_code
     // should remain unchanged.
