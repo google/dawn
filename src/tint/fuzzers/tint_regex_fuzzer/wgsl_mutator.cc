@@ -99,33 +99,98 @@ size_t WgslMutator::FindClosingBrace(size_t opening_bracket_pos, const std::stri
     return (pos == wgsl_code.size() && open_bracket_count >= 1) ? 0 : pos - 1;
 }
 
-std::vector<size_t> WgslMutator::GetFunctionBodyPositions(const std::string& wgsl_code) {
+std::vector<std::pair<size_t, bool>> WgslMutator::GetFunctionBodyPositions(
+    const std::string& wgsl_code) {
     // Finds all the functions with a non-void return value.
-    std::regex function_regex("fn.*?->.*?\\{");
-    std::smatch match;
+    std::regex function_regex("fn[^a-zA-Z_0-9][^\\{]*\\{");
+    std::vector<std::pair<size_t, bool>> result;
+
+    auto functions_begin = std::sregex_iterator(wgsl_code.begin(), wgsl_code.end(), function_regex);
+    auto functions_end = std::sregex_iterator();
+
+    for (std::sregex_iterator i = functions_begin; i != functions_end; ++i) {
+        bool returns_value = i->str().find("->") != std::string::npos;
+        result.push_back(
+            {static_cast<size_t>(i->suffix().first - wgsl_code.cbegin() - 1), returns_value});
+    }
+    return result;
+}
+
+std::vector<size_t> WgslMutator::GetLoopBodyPositions(const std::string& wgsl_code) {
+    // Finds all loops.
+    std::regex loop_regex("[^a-zA-Z_0-9](for|while|loop)[^\\{]*\\{");
     std::vector<size_t> result;
 
-    auto search_start(wgsl_code.cbegin());
-    std::string prefix = "";
+    auto loops_begin = std::sregex_iterator(wgsl_code.begin(), wgsl_code.end(), loop_regex);
+    auto loops_end = std::sregex_iterator();
 
-    while (std::regex_search(search_start, wgsl_code.cend(), match, function_regex)) {
-        result.push_back(static_cast<size_t>(match.suffix().first - wgsl_code.cbegin() - 1L));
-        search_start = match.suffix().first;
+    for (std::sregex_iterator i = loops_begin; i != loops_end; ++i) {
+        result.push_back(static_cast<size_t>(i->suffix().first - wgsl_code.cbegin() - 1));
     }
     return result;
 }
 
 bool WgslMutator::InsertReturnStatement(std::string& wgsl_code) {
-    std::vector<size_t> function_body_positions = GetFunctionBodyPositions(wgsl_code);
+    std::vector<std::pair<size_t, bool>> function_body_positions =
+        GetFunctionBodyPositions(wgsl_code);
 
     // No function was found in wgsl_code.
     if (function_body_positions.empty()) {
         return false;
     }
 
-    // Pick a random function's opening bracket, find the corresponding closing
-    // bracket, and find a semi-colon within the function body.
-    size_t left_bracket_pos = generator_.GetRandomElement(function_body_positions);
+    // Pick a random function
+    auto function = generator_.GetRandomElement(function_body_positions);
+
+    // Find the corresponding closing bracket for the function, and find a semi-colon within the
+    // function body.
+    size_t left_bracket_pos = function.first;
+
+    size_t right_bracket_pos = FindClosingBrace(left_bracket_pos, wgsl_code);
+
+    if (right_bracket_pos == 0) {
+        return false;
+    }
+
+    std::vector<size_t> semicolon_positions;
+    for (size_t pos = wgsl_code.find(";", left_bracket_pos + 1); pos < right_bracket_pos;
+         pos = wgsl_code.find(";", pos + 1)) {
+        semicolon_positions.push_back(pos);
+    }
+
+    if (semicolon_positions.empty()) {
+        return false;
+    }
+
+    std::string return_statement = "return";
+    if (function.second) {
+        // The function returns a value. Get all identifiers and integer literals to use as
+        // potential return values.
+        std::vector<std::pair<size_t, size_t>> identifiers = GetIdentifiers(wgsl_code);
+        auto return_values = identifiers;
+        std::vector<std::pair<size_t, size_t>> int_literals = GetIntLiterals(wgsl_code);
+        return_values.insert(return_values.end(), int_literals.begin(), int_literals.end());
+        std::pair<size_t, size_t> return_value = generator_.GetRandomElement(return_values);
+        return_statement += " " + wgsl_code.substr(return_value.first, return_value.second);
+    }
+    return_statement += ";";
+
+    // Insert the return statement immediately after the semicolon.
+    wgsl_code.insert(generator_.GetRandomElement(semicolon_positions) + 1, return_statement);
+    return true;
+}
+
+bool WgslMutator::InsertBreakOrContinue(std::string& wgsl_code) {
+    std::vector<size_t> loop_body_positions = GetLoopBodyPositions(wgsl_code);
+
+    // No loop was found in wgsl_code.
+    if (loop_body_positions.empty()) {
+        return false;
+    }
+
+    // Pick a random loop's opening bracket, find the corresponding closing
+    // bracket, and find a semi-colon within the loop body.
+    size_t left_bracket_pos = generator_.GetRandomElement(loop_body_positions);
 
     size_t right_bracket_pos = FindClosingBrace(left_bracket_pos, wgsl_code);
 
@@ -145,17 +210,8 @@ bool WgslMutator::InsertReturnStatement(std::string& wgsl_code) {
 
     size_t semicolon_position = generator_.GetRandomElement(semicolon_positions);
 
-    // Get all identifiers and integer literals to use as potential return values.
-    std::vector<std::pair<size_t, size_t>> identifiers = GetIdentifiers(wgsl_code);
-    auto return_values = identifiers;
-    std::vector<std::pair<size_t, size_t>> int_literals = GetIntLiterals(wgsl_code);
-    return_values.insert(return_values.end(), int_literals.begin(), int_literals.end());
-    std::pair<size_t, size_t> return_value = generator_.GetRandomElement(return_values);
-    std::string return_statement =
-        "return " + wgsl_code.substr(return_value.first, return_value.second) + ";";
-
-    // Insert the return statement immediately after the semicolon.
-    wgsl_code.insert(semicolon_position + 1, return_statement);
+    // Insert a break or continue immediately after the semicolon.
+    wgsl_code.insert(semicolon_position + 1, generator_.GetBool() ? "break;" : "continue;");
     return true;
 }
 

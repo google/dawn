@@ -73,6 +73,11 @@ class WgslMutator {
     /// @return true if the mutation was succesful or false otherwise.
     bool InsertReturnStatement(std::string& wgsl_code);
 
+    /// Inserts a break or continue statement in a randomly chosen loop of a WGSL-like string.
+    /// @param wgsl_code - WGSL-like string that will be mutated.
+    /// @return true if the mutation was succesful or false otherwise.
+    bool InsertBreakOrContinue(std::string& wgsl_code);
+
     /// A function that, given WGSL-like string, generates a new WGSL-like string by replacing one
     /// randomly-chosen operator in the original string with another operator.
     /// @param wgsl_code - the initial WGSL-like string that will be mutated.
@@ -103,14 +108,19 @@ class WgslMutator {
     /// brace.
     size_t FindClosingBrace(size_t opening_bracket_pos, const std::string& wgsl_code);
 
-    /// Returns the starting_position of the bodies of the functions
-    /// that follow the regular expression: fn.*?->.*?\\{, which searches for the
-    /// keyword fn followed by the function name, its return type and opening brace.
+    /// Returns the starting position of the bodies of the functions identified by an appropriate
+    /// function, together with a boolean indicating whether the function returns a value or not.
     /// @param wgsl_code - the WGSL-like string where the functions will be
     /// searched.
-    /// @return a vector with the starting position of the function bodies in
-    /// wgsl_code.
-    std::vector<size_t> GetFunctionBodyPositions(const std::string& wgsl_code);
+    /// @return a vector of pairs, where each pair provides the starting position of the function
+    /// body, and the value true if and only if the function returns a value.
+    std::vector<std::pair<size_t, bool>> GetFunctionBodyPositions(const std::string& wgsl_code);
+
+    /// Returns the starting position of the bodies of the loops identified by an appropriate
+    /// regular expressions.
+    /// @param wgsl_code - the WGSL-like string in which loops will be searched for.
+    /// @return a vector with the starting position of the loop bodies in wgsl_code.
+    std::vector<size_t> GetLoopBodyPositions(const std::string& wgsl_code);
 
     /// A function that finds all the identifiers in a WGSL-like string.
     /// @param wgsl_code - the WGSL-like string where the identifiers will be found.

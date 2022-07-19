@@ -33,6 +33,7 @@ class WgslMutatorTest : public WgslMutator {
     using WgslMutator::GetFunctionBodyPositions;
     using WgslMutator::GetIdentifiers;
     using WgslMutator::GetIntLiterals;
+    using WgslMutator::GetLoopBodyPositions;
     using WgslMutator::ReplaceRegion;
     using WgslMutator::SwapIntervals;
 };
@@ -382,69 +383,7 @@ TEST(InsertReturnTest, FindClosingBraceFailing) {
     ASSERT_NE(expected, function_body);
 }
 
-TEST(TestInsertReturn, TestInsertReturn1) {
-    RandomGenerator generator(0);
-    WgslMutatorTest mutator(generator);
-    std::string wgsl_code =
-        R"(fn clamp_0acf8f() {
-        var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());
-      }
-      @vertex
-      fn vertex_main() -> @builtin(position) vec4<f32> {
-        clamp_0acf8f();
-        var foo_1: i32 = 3;
-        return vec4<f32>();
-      }
-      @fragment
-      fn fragment_main() {
-        clamp_0acf8f();
-      }
-      @compute @workgroup_size(1)
-      fn compute_main() {
-        var<private> foo: f32 = 0.0;
-        var foo_2: i32 = 10;
-        clamp_0acf8f();
-      }
-      foo_1 = 5 + 7;
-      var foo_3 : i32 = -20;)";
-
-    std::vector<size_t> semicolon_pos;
-    for (size_t pos = wgsl_code.find(";", 0); pos != std::string::npos;
-         pos = wgsl_code.find(";", pos + 1)) {
-        semicolon_pos.push_back(pos);
-    }
-
-    // should insert a return true statement after the first semicolon of the
-    // first function the the WGSL-like string above.
-    wgsl_code.insert(semicolon_pos[0] + 1, "return true;");
-
-    std::string expected_wgsl_code =
-        R"(fn clamp_0acf8f() {
-        var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());return true;
-      }
-      @vertex
-      fn vertex_main() -> @builtin(position) vec4<f32> {
-        clamp_0acf8f();
-        var foo_1: i32 = 3;
-        return vec4<f32>();
-      }
-      @fragment
-      fn fragment_main() {
-        clamp_0acf8f();
-      }
-      @compute @workgroup_size(1)
-      fn compute_main() {
-        var<private> foo: f32 = 0.0;
-        var foo_2: i32 = 10;
-        clamp_0acf8f();
-      }
-      foo_1 = 5 + 7;
-      var foo_3 : i32 = -20;)";
-
-    ASSERT_EQ(expected_wgsl_code, wgsl_code);
-}
-
-TEST(TestInsertReturn, TestFunctionPositions) {
+TEST(TestInsertReturn, TestFunctionPositions1) {
     RandomGenerator generator(0);
     WgslMutatorTest mutator(generator);
     std::string wgsl_code =
@@ -475,8 +414,32 @@ TEST(TestInsertReturn, TestFunctionPositions) {
         foo_1 = 5 + 7;
         var foo_3 : i32 = -20;)";
 
-    std::vector<size_t> function_positions = mutator.GetFunctionBodyPositions(wgsl_code);
-    std::vector<size_t> expected_positions = {180, 586};
+    std::vector<std::pair<size_t, bool>> function_positions =
+        mutator.GetFunctionBodyPositions(wgsl_code);
+    std::vector<std::pair<size_t, bool>> expected_positions = {
+        {18, false}, {180, true}, {323, false}, {423, false}, {586, true}};
+    ASSERT_EQ(expected_positions, function_positions);
+}
+
+TEST(TestInsertReturn, TestFunctionPositions2) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
+    std::string wgsl_code =
+        R"(fn some_loop_body() {
+}
+
+fn f() {
+  var j : i32; i = (i + 1)) {
+    some_loop_body(); ((i < 5) && (j < 10));
+  for(var i : i32 = 0;
+    j = (i * 30);
+  }
+}
+)";
+
+    std::vector<std::pair<size_t, bool>> function_positions =
+        mutator.GetFunctionBodyPositions(wgsl_code);
+    std::vector<std::pair<size_t, bool>> expected_positions = {{20, false}, {32, false}};
     ASSERT_EQ(expected_positions, function_positions);
 }
 
@@ -584,6 +547,68 @@ d %= e;
         ASSERT_EQ(operator_occurrences[operator_occurrence_index],
                   mutator.FindOperatorOccurrence(code, static_cast<uint32_t>(i)).value());
     }
+}
+
+TEST(TestInsertBreakOrContinue, TestLoopPositions1) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
+    std::string wgsl_code = " loop { } loop { } loop { }";
+    std::vector<size_t> loop_positions = mutator.GetLoopBodyPositions(wgsl_code);
+    std::vector<size_t> expected_positions = {6, 15, 24};
+    ASSERT_EQ(expected_positions, loop_positions);
+}
+
+TEST(TestInsertBreakOrContinue, TestLoopPositions2) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
+    std::string wgsl_code = R"( loop { } loop
+{ } loop { })";
+    std::vector<size_t> loop_positions = mutator.GetLoopBodyPositions(wgsl_code);
+    std::vector<size_t> expected_positions = {6, 15, 24};
+    ASSERT_EQ(expected_positions, loop_positions);
+}
+
+TEST(TestInsertBreakOrContinue, TestLoopPositions3) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
+    // This WGSL-like code is not valid, but it suffices to test regex-based matching (which is
+    // intended to work well on semi-valid code).
+    std::string wgsl_code =
+        R"(fn compute_main() {
+  loop {
+    var twice: i32 = 2 * i;
+    i++;
+    if i == 5 { break; }
+      loop
+      {
+      var twice: i32 = 2 * i;
+      i++;
+      while (i < 100) { i++; }
+      if i == 5 { break; }
+    }
+  }
+  for (a = 0; a < 100; a++)   {
+    if (a > 50) {
+      break;
+    }
+      while (i < 100) { i++; }
+  }
+})";
+
+    std::vector<size_t> loop_positions = mutator.GetLoopBodyPositions(wgsl_code);
+    std::vector<size_t> expected_positions = {27, 108, 173, 249, 310};
+    ASSERT_EQ(expected_positions, loop_positions);
+}
+
+TEST(TestInsertBreakOrContinue, TestLoopPositions4) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
+    // This WGSL-like code is not valid, but it suffices to test regex-based matching (which is
+    // intended to work well on semi-valid code).
+    std::string wgsl_code = R"(unifor { } uniform { } sloop { } _loop { } _while { } awhile { } )";
+
+    std::vector<size_t> loop_positions = mutator.GetLoopBodyPositions(wgsl_code);
+    ASSERT_TRUE(loop_positions.empty());
 }
 
 }  // namespace
