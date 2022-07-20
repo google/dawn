@@ -223,6 +223,7 @@
             "DeviceCreateErrorBuffer",
             "DeviceCreateQuerySet",
             "DeviceCreateTexture",
+            "DeviceCreateErrorTexture",
             "DeviceGetQueue",
             "DeviceInjectError"
         ],

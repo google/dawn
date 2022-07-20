@@ -212,6 +212,10 @@ WGPUTexture Device::CreateTexture(const WGPUTextureDescriptor* descriptor) {
     return Texture::Create(this, descriptor);
 }
 
+WGPUTexture Device::CreateErrorTexture(const WGPUTextureDescriptor* descriptor) {
+    return Texture::CreateError(this, descriptor);
+}
+
 WGPUQueue Device::GetQueue() {
     // The queue is lazily created because if a Device is created by
     // Reserve/Inject, we cannot send the GetQueue message until

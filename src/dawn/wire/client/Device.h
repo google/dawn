@@ -52,6 +52,7 @@ class Device final : public ObjectBase {
                                    void* userdata);
     WGPUQuerySet CreateQuerySet(const WGPUQuerySetDescriptor* descriptor);
     WGPUTexture CreateTexture(const WGPUTextureDescriptor* descriptor);
+    WGPUTexture CreateErrorTexture(const WGPUTextureDescriptor* descriptor);
 
     void HandleError(WGPUErrorType errorType, const char* message);
     void HandleLogging(WGPULoggingType loggingType, const char* message);

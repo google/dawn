@@ -1231,6 +1231,10 @@ ExternalTextureBase* DeviceBase::APICreateErrorExternalTexture() {
     return ExternalTextureBase::MakeError(this);
 }
 
+TextureBase* DeviceBase::APICreateErrorTexture(const TextureDescriptor* desc) {
+    return TextureBase::MakeError(this, desc);
+}
+
 // Other Device API methods
 
 // Returns true if future ticking is needed.

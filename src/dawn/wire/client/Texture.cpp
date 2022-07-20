@@ -35,6 +35,22 @@ WGPUTexture Texture::Create(Device* device, const WGPUTextureDescriptor* descrip
     return ToAPI(texture);
 }
 
+// static
+WGPUTexture Texture::CreateError(Device* device, const WGPUTextureDescriptor* descriptor) {
+    Client* wireClient = device->GetClient();
+    Texture* texture = wireClient->Make<Texture>(descriptor);
+
+    // Send the Device::CreateErrorTexture command without modifications.
+    DeviceCreateErrorTextureCmd cmd;
+    cmd.self = ToAPI(device);
+    cmd.selfId = device->GetWireId();
+    cmd.descriptor = descriptor;
+    cmd.result = texture->GetWireHandle();
+    wireClient->SerializeCommand(cmd);
+
+    return ToAPI(texture);
+}
+
 Texture::Texture(const ObjectBaseParams& params, const WGPUTextureDescriptor* descriptor)
     : ObjectBase(params),
       mSize(descriptor->size),

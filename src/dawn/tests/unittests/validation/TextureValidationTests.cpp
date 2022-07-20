@@ -945,4 +945,33 @@ TEST_F(TextureValidationTest, CreationParameterReflectionForErrorTextures) {
     CheckTextureMatchesDescriptor(tex, desc);
 }
 
+// Test that CreateErrorTexture creates an invalid texture but doesn't produce an error.
+TEST_F(TextureValidationTest, CreateErrorTexture) {
+    wgpu::TextureDescriptor desc;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.size = {1, 1, 1};
+    desc.usage = wgpu::TextureUsage::RenderAttachment;
+
+    // Check that the descriptor is valid.
+    device.CreateTexture(&desc);
+
+    // Creating the error texture doesn't produce a validation error.
+    wgpu::Texture tex = device.CreateErrorTexture(&desc);
+
+    // Using the texture, for example to create a view, is an error.
+    ASSERT_DEVICE_ERROR(tex.CreateView());
+}
+
+// Test that the texture creation parameters are correctly reflected for textures created via
+// CreateErrorTexture
+TEST_F(TextureValidationTest, CreationParameterReflectionForCreateErrorTexture) {
+    wgpu::TextureDescriptor desc;
+    desc.format = wgpu::TextureFormat::RGBA8Unorm;
+    desc.size = {1, 1, 1};
+    desc.usage = wgpu::TextureUsage::RenderAttachment;
+
+    wgpu::Texture tex = device.CreateErrorTexture(&desc);
+    CheckTextureMatchesDescriptor(tex, desc);
+}
+
 }  // namespace

@@ -1110,6 +1110,14 @@
                 ]
             },
             {
+                "name": "create error texture",
+                "returns": "texture",
+                "tags": ["dawn"],
+                "args": [
+                    {"name": "descriptor", "type": "texture descriptor", "annotation": "const*"}
+                ]
+            },
+            {
                 "name": "destroy"
             },
             {
