@@ -47,18 +47,32 @@ std::vector<std::pair<size_t, size_t>> WgslMutator::GetIdentifiers(const std::st
     // by a character which cannot be part of a WGSL identifer. The regex
     // for the WGSL identifier is obtained from:
     // https://www.w3.org/TR/WGSL/#identifiers.
-    std::regex wgsl_identifier_regex("[^a-zA-Z]([a-zA-Z][0-9a-zA-Z_]*)[^0-9a-zA-Z_]");
+    std::regex identifier_regex("[_a-zA-Z][0-9a-zA-Z_]*");
 
-    std::smatch match;
+    auto identifiers_begin =
+        std::sregex_iterator(wgsl_code.begin(), wgsl_code.end(), identifier_regex);
+    auto identifiers_end = std::sregex_iterator();
 
-    std::string::const_iterator search_start(wgsl_code.cbegin());
-    std::string prefix;
+    for (std::sregex_iterator i = identifiers_begin; i != identifiers_end; ++i) {
+        result.push_back(
+            {static_cast<size_t>(i->prefix().second - wgsl_code.cbegin()), i->str().size()});
+    }
+    return result;
+}
 
-    while (regex_search(search_start, wgsl_code.cend(), match, wgsl_identifier_regex) == true) {
-        prefix += match.prefix();
-        result.push_back(std::make_pair(prefix.size() + 1, match.str(1).size()));
-        prefix += match.str(0);
-        search_start = match.suffix().first;
+std::vector<std::pair<size_t, size_t>> WgslMutator::GetFunctionCallIdentifiers(
+    const std::string& wgsl_code) {
+    std::vector<std::pair<size_t, size_t>> result;
+
+    std::regex call_regex("([_a-zA-Z][0-9a-zA-Z_]*)[ \\n]*\\(");
+
+    auto identifiers_begin = std::sregex_iterator(wgsl_code.begin(), wgsl_code.end(), call_regex);
+    auto identifiers_end = std::sregex_iterator();
+
+    for (std::sregex_iterator i = identifiers_begin; i != identifiers_end; ++i) {
+        auto submatch = (*i)[1];
+        result.push_back(
+            {static_cast<size_t>(submatch.first - wgsl_code.cbegin()), submatch.str().size()});
     }
     return result;
 }
@@ -487,6 +501,155 @@ std::optional<std::pair<uint32_t, uint32_t>> WgslMutator::FindOperatorOccurrence
     }
     // No operator was found, so empty is returned.
     return {};
+}
+
+bool WgslMutator::ReplaceFunctionCallWithBuiltin(std::string& wgsl_code) {
+    std::vector<std::pair<size_t, bool>> function_body_positions =
+        GetFunctionBodyPositions(wgsl_code);
+
+    // No function was found in wgsl_code.
+    if (function_body_positions.empty()) {
+        return false;
+    }
+
+    // Pick a random function
+    auto function = generator_.GetRandomElement(function_body_positions);
+
+    // Find the corresponding closing bracket for the function, and find a semi-colon within the
+    // function body.
+    size_t left_bracket_pos = function.first;
+
+    size_t right_bracket_pos = FindClosingBrace(left_bracket_pos, wgsl_code);
+
+    if (right_bracket_pos == 0) {
+        return false;
+    }
+
+    std::string function_body(
+        wgsl_code.substr(left_bracket_pos, right_bracket_pos - left_bracket_pos));
+
+    std::vector<std::pair<size_t, size_t>> function_call_identifiers =
+        GetFunctionCallIdentifiers(function_body);
+    if (function_call_identifiers.empty()) {
+        return false;
+    }
+    auto function_call_identifier = generator_.GetRandomElement(function_call_identifiers);
+
+    std::vector<std::string> builtin_functions{"all",
+                                               "any",
+                                               "select",
+                                               "arrayLength",
+                                               "abs",
+                                               "acos",
+                                               "acosh",
+                                               "asin",
+                                               "asinh",
+                                               "atan",
+                                               "atanh",
+                                               "atan2",
+                                               "ceil",
+                                               "clamp",
+                                               "cos",
+                                               "cosh",
+                                               "cross",
+                                               "degrees",
+                                               "distance",
+                                               "exp",
+                                               "exp2",
+                                               "faceForward",
+                                               "floor",
+                                               "fma",
+                                               "fract",
+                                               "frexp",
+                                               "inverseSqrt",
+                                               "ldexp",
+                                               "length",
+                                               "log",
+                                               "log2",
+                                               "max",
+                                               "min",
+                                               "mix",
+                                               "modf",
+                                               "normalize",
+                                               "pow",
+                                               "quantizeToF16",
+                                               "radians",
+                                               "reflect",
+                                               "refract",
+                                               "round",
+                                               "saturate",
+                                               "sign",
+                                               "sin",
+                                               "sinh",
+                                               "smoothstep",
+                                               "sqrt",
+                                               "step",
+                                               "tan",
+                                               "tanh",
+                                               "trunc",
+                                               "abs",
+                                               "clamp",
+                                               "countLeadingZeros",
+                                               "countOneBits",
+                                               "countTrailingZeros",
+                                               "extractBits",
+                                               "firstLeadingBit",
+                                               "firstTrailingBit",
+                                               "insertBits",
+                                               "max",
+                                               "min",
+                                               "reverseBits",
+                                               "determinant",
+                                               "transpose",
+                                               "dot",
+                                               "dpdx",
+                                               "dpdxCoarse",
+                                               "dpdxFine",
+                                               "dpdy",
+                                               "dpdyCoarse",
+                                               "dpdyFine",
+                                               "fwidth",
+                                               "fwidthCoarse",
+                                               "fwidthFine",
+                                               "textureDimensions",
+                                               "textureGather",
+                                               "textureGatherCompare",
+                                               "textureLoad",
+                                               "textureNumLayers",
+                                               "textureNumLevels",
+                                               "textureNumSamples",
+                                               "textureSample",
+                                               "textureSampleBias",
+                                               "textureSampleCompare",
+                                               "textureSampleCompareLevel",
+                                               "textureSampleGrad",
+                                               "textureSampleLevel",
+                                               "textureStore",
+                                               "atomicLoad",
+                                               "atomicStore",
+                                               "atomicAdd",
+                                               "atomicSub",
+                                               "atomicMax",
+                                               "atomicMin",
+                                               "atomicAnd",
+                                               "atomicOr",
+                                               "atomicXor",
+                                               "pack4x8snorm",
+                                               "pack4x8unorm",
+                                               "pack2x16snorm",
+                                               "pack2x16unorm",
+                                               "pack2x16float",
+                                               "unpack4x8snorm",
+                                               "unpack4x8unorm",
+                                               "unpack2x16snorm",
+                                               "unpack2x16unorm",
+                                               "unpack2x16float",
+                                               "storageBarrier",
+                                               "workgroupBarrier"};
+    wgsl_code.replace(left_bracket_pos + function_call_identifier.first,
+                      function_call_identifier.second,
+                      generator_.GetRandomElement(builtin_functions));
+    return true;
 }
 
 }  // namespace tint::fuzzers::regex_fuzzer

@@ -84,6 +84,14 @@ class WgslMutator {
     /// @return true if an operator replacement happened or false otherwise.
     bool ReplaceRandomOperator(std::string& wgsl_code);
 
+    /// Given a WGSL-like string, replaces a random identifier that appears to be a function call
+    /// with the name of a built-in function. This will often lead to an invalid module, as the
+    /// mutation does not aim to check whether the original and replacement function have the same
+    /// number or types of arguments.
+    /// @param wgsl_code - the initial WGSL-like string that will be mutated.
+    /// @return true if a function call replacement happened or false otherwise.
+    bool ReplaceFunctionCallWithBuiltin(std::string& wgsl_code);
+
   protected:
     /// Given index idx1 it delets the region of length interval_len
     /// starting at index idx1;
@@ -127,6 +135,13 @@ class WgslMutator {
     /// @return a vector with the positions and the length of all the
     /// identifiers in wgsl_code.
     std::vector<std::pair<size_t, size_t>> GetIdentifiers(const std::string& wgsl_code);
+
+    /// A function that finds the identifiers in a WGSL-like string that appear to be used as
+    /// function names in function call expressions.
+    /// @param wgsl_code - the WGSL-like string where the identifiers will be found.
+    /// @return a vector with the positions and the length of all the
+    /// identifiers in wgsl_code.
+    std::vector<std::pair<size_t, size_t>> GetFunctionCallIdentifiers(const std::string& wgsl_code);
 
     /// A function that returns returns the starting position
     /// and the length of all the integer literals in a WGSL-like string.

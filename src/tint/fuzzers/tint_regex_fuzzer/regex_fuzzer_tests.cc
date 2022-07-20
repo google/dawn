@@ -31,6 +31,7 @@ class WgslMutatorTest : public WgslMutator {
     using WgslMutator::FindClosingBrace;
     using WgslMutator::FindOperatorOccurrence;
     using WgslMutator::GetFunctionBodyPositions;
+    using WgslMutator::GetFunctionCallIdentifiers;
     using WgslMutator::GetIdentifiers;
     using WgslMutator::GetIntLiterals;
     using WgslMutator::GetLoopBodyPositions;
@@ -236,18 +237,12 @@ TEST(GetIdentifierTest, GetIdentifierTest1) {
       })";
 
     std::vector<std::pair<size_t, size_t>> identifiers_pos = mutator.GetIdentifiers(wgsl_code);
-
     std::vector<std::pair<size_t, size_t>> ground_truth = {
-        std::make_pair(3, 12),   std::make_pair(28, 3),  std::make_pair(37, 4),
-        std::make_pair(49, 5),   std::make_pair(60, 3),  std::make_pair(68, 4),
-        std::make_pair(81, 4),   std::make_pair(110, 6), std::make_pair(123, 2),
-        std::make_pair(133, 4),  std::make_pair(144, 7), std::make_pair(162, 4),
-        std::make_pair(183, 12), std::make_pair(209, 6), std::make_pair(221, 3),
-        std::make_pair(244, 8),  std::make_pair(259, 2), std::make_pair(271, 4),
-        std::make_pair(288, 12), std::make_pair(319, 7), std::make_pair(328, 14),
-        std::make_pair(352, 2),  std::make_pair(363, 4), std::make_pair(381, 3),
-        std::make_pair(394, 3),  std::make_pair(399, 3), std::make_pair(418, 12)};
-
+        {0, 2},   {3, 12},  {28, 3},   {32, 3},   {37, 4},   {42, 3},   {49, 5},  {55, 4},
+        {60, 3},  {68, 4},  {73, 3},   {81, 4},   {86, 3},   {110, 6},  {123, 2}, {126, 11},
+        {144, 7}, {152, 8}, {162, 4},  {167, 3},  {183, 12}, {209, 6},  {216, 4}, {221, 3},
+        {244, 8}, {259, 2}, {262, 13}, {288, 12}, {319, 7},  {328, 14}, {352, 2}, {355, 12},
+        {381, 3}, {385, 7}, {394, 3},  {399, 3},  {418, 12}};
     ASSERT_EQ(ground_truth, identifiers_pos);
 }
 
@@ -603,12 +598,45 @@ TEST(TestInsertBreakOrContinue, TestLoopPositions3) {
 TEST(TestInsertBreakOrContinue, TestLoopPositions4) {
     RandomGenerator generator(0);
     WgslMutatorTest mutator(generator);
-    // This WGSL-like code is not valid, but it suffices to test regex-based matching (which is
-    // intended to work well on semi-valid code).
-    std::string wgsl_code = R"(unifor { } uniform { } sloop { } _loop { } _while { } awhile { } )";
+    std::string wgsl_code =
+        R"(fn clamp_0acf8f() {
+        var res: vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());
+      }
+      @vertex
+      fn vertex_main() -> @builtin(position) vec4<f32> {
+         clamp_0acf8f();"
+         return vec4<f32>();
+      }
+      @fragment
+      fn fragment_main() {
+        clamp_0acf8f();
+      }
+      @compute @workgroup_size(1)
+      fn compute_main() {"
+        var<private> foo: f32 = 0.0;
+        clamp_0acf8f    ();
+      })";
 
     std::vector<size_t> loop_positions = mutator.GetLoopBodyPositions(wgsl_code);
     ASSERT_TRUE(loop_positions.empty());
+}
+
+TEST(TestReplaceFunctionCallWithBuiltin, FindFunctionCalls) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
+    std::string function_body = R"({
+          var<private> foo: f32 = 0.0;
+          var foo_2: i32 = 10;
+          clamp_0acf8f  ();
+          _0acf8f();
+          f
+();
+          j = (i * 30);
+        })";
+    std::vector<std::pair<size_t, size_t>> call_identifiers =
+        mutator.GetFunctionCallIdentifiers(function_body);
+    std::vector<std::pair<size_t, size_t>> ground_truth{{82, 12}, {110, 7}, {131, 1}};
+    ASSERT_EQ(ground_truth, call_identifiers);
 }
 
 }  // namespace
