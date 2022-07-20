@@ -134,7 +134,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferF16_TemporallyBan) {
     ASSERT_FALSE(r()->Resolve());
 
     EXPECT_EQ(r()->error(),
-              "56:78 error: using f16 types in 'uniform' or 'storage' storage class is not "
+              "56:78 error: using f16 types in 'storage' storage class is not "
               "implemented yet");
 }
 
@@ -153,7 +153,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferF16Alias_TemporallyBan) 
     ASSERT_FALSE(r()->Resolve());
 
     EXPECT_EQ(r()->error(),
-              "56:78 error: using f16 types in 'uniform' or 'storage' storage class is not "
+              "56:78 error: using f16 types in 'storage' storage class is not "
               "implemented yet");
 }
 
@@ -169,7 +169,7 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferVectorF16_TemporallyBan)
     ASSERT_FALSE(r()->Resolve());
 
     EXPECT_EQ(r()->error(),
-              "56:78 error: using f16 types in 'uniform' or 'storage' storage class is not "
+              "56:78 error: using f16 types in 'storage' storage class is not "
               "implemented yet");
 }
 
@@ -188,9 +188,8 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferArrayF16_TemporallyBan) 
 
     ASSERT_FALSE(r()->Resolve());
 
-    EXPECT_THAT(r()->error(),
-                HasSubstr("56:78 error: using f16 types in 'uniform' or 'storage' storage "
-                          "class is not implemented yet"));
+    EXPECT_THAT(r()->error(), HasSubstr("56:78 error: using f16 types in 'storage' storage "
+                                        "class is not implemented yet"));
 }
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferStructF16_TemporallyBan) {
@@ -207,9 +206,8 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferStructF16_TemporallyBan)
 
     ASSERT_FALSE(r()->Resolve());
 
-    EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: using f16 types in 'uniform' or 'storage' storage "
-                          "class is not implemented yet"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: using f16 types in 'storage' storage "
+                                        "class is not implemented yet"));
 }
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferNoErrorStructF16Aliases_TemporallyBan) {
@@ -229,9 +227,8 @@ TEST_F(ResolverStorageClassValidationTest, StorageBufferNoErrorStructF16Aliases_
 
     ASSERT_FALSE(r()->Resolve());
 
-    EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: using f16 types in 'uniform' or 'storage' storage "
-                          "class is not implemented yet"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: using f16 types in 'storage' storage "
+                                        "class is not implemented yet"));
 }
 
 TEST_F(ResolverStorageClassValidationTest, StorageBufferPointer) {
@@ -421,7 +418,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferF16_TemporallyBan) {
     ASSERT_FALSE(r()->Resolve());
 
     EXPECT_EQ(r()->error(),
-              "56:78 error: using f16 types in 'uniform' or 'storage' storage class is not "
+              "56:78 error: using f16 types in 'uniform' storage class is not "
               "implemented yet");
 }
 
@@ -440,7 +437,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferF16Alias_TemporallyBan) 
     ASSERT_FALSE(r()->Resolve());
 
     EXPECT_EQ(r()->error(),
-              "56:78 error: using f16 types in 'uniform' or 'storage' storage class is not "
+              "56:78 error: using f16 types in 'uniform' storage class is not "
               "implemented yet");
 }
 
@@ -455,9 +452,8 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferVectorF16_TemporallyBan)
 
     ASSERT_FALSE(r()->Resolve());
 
-    EXPECT_THAT(r()->error(),
-                HasSubstr("56:78 error: using f16 types in 'uniform' or 'storage' storage "
-                          "class is not implemented yet"));
+    EXPECT_THAT(r()->error(), HasSubstr("56:78 error: using f16 types in 'uniform' storage "
+                                        "class is not implemented yet"));
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferArrayF16_TemporallyBan) {
@@ -477,9 +473,8 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferArrayF16_TemporallyBan) 
 
     ASSERT_FALSE(r()->Resolve());
 
-    EXPECT_THAT(r()->error(),
-                HasSubstr("56:78 error: using f16 types in 'uniform' or 'storage' storage "
-                          "class is not implemented yet"));
+    EXPECT_THAT(r()->error(), HasSubstr("56:78 error: using f16 types in 'uniform' storage "
+                                        "class is not implemented yet"));
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferStructF16_TemporallyBan) {
@@ -496,9 +491,8 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferStructF16_TemporallyBan)
 
     ASSERT_FALSE(r()->Resolve());
 
-    EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: using f16 types in 'uniform' or 'storage' storage "
-                          "class is not implemented yet"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: using f16 types in 'uniform' storage "
+                                        "class is not implemented yet"));
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferStructF16Aliases_TemporallyBan) {
@@ -517,9 +511,8 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferStructF16Aliases_Tempora
 
     ASSERT_FALSE(r()->Resolve());
 
-    EXPECT_THAT(r()->error(),
-                HasSubstr("12:34 error: using f16 types in 'uniform' or 'storage' storage "
-                          "class is not implemented yet"));
+    EXPECT_THAT(r()->error(), HasSubstr("12:34 error: using f16 types in 'uniform' storage "
+                                        "class is not implemented yet"));
 }
 
 TEST_F(ResolverStorageClassValidationTest, UniformBufferPointer) {
