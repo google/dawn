@@ -1057,7 +1057,7 @@ TEST_F(RenderPassDescriptorValidationTest, UseNaNOrINFINITYAsColorOrDepthClearVa
         AssertBeginRenderPassError(&renderPass);
     }
 
-    // Tests that INFINITY can be used in depthClearValue.
+    // Tests that INFINITY cannot be used in depthClearValue.
     {
         wgpu::TextureView depth =
             Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24Plus);
@@ -1065,11 +1065,64 @@ TEST_F(RenderPassDescriptorValidationTest, UseNaNOrINFINITYAsColorOrDepthClearVa
         renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
         renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
         renderPass.cDepthStencilAttachmentInfo.depthClearValue = INFINITY;
-        AssertBeginRenderPassSuccess(&renderPass);
+        AssertBeginRenderPassError(&renderPass);
     }
 
     // TODO(https://crbug.com/dawn/666): Add a test case for clearStencil for stencilOnly
     // once stencil8 is supported.
+}
+
+// Tests that depth clear values mut be between 0 and 1, inclusive.
+TEST_F(RenderPassDescriptorValidationTest, ValidateDepthClearValueRange) {
+    wgpu::TextureView depth = Create2DAttachment(device, 1, 1, wgpu::TextureFormat::Depth24Plus);
+
+    utils::ComboRenderPassDescriptor renderPass({}, depth);
+    renderPass.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+    renderPass.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
+
+    // 0, 1, and any value in between are be valid.
+    renderPass.cDepthStencilAttachmentInfo.depthClearValue = 0;
+    AssertBeginRenderPassSuccess(&renderPass);
+
+    renderPass.cDepthStencilAttachmentInfo.depthClearValue = 0.1;
+    AssertBeginRenderPassSuccess(&renderPass);
+
+    renderPass.cDepthStencilAttachmentInfo.depthClearValue = 0.5;
+    AssertBeginRenderPassSuccess(&renderPass);
+
+    renderPass.cDepthStencilAttachmentInfo.depthClearValue = 0.82;
+    AssertBeginRenderPassSuccess(&renderPass);
+
+    renderPass.cDepthStencilAttachmentInfo.depthClearValue = 1;
+    AssertBeginRenderPassSuccess(&renderPass);
+
+    // Values less than 0 or greater than 1 are invalid.
+    renderPass.cDepthStencilAttachmentInfo.depthClearValue = -1;
+    AssertBeginRenderPassError(&renderPass);
+
+    renderPass.cDepthStencilAttachmentInfo.depthClearValue = 2;
+    AssertBeginRenderPassError(&renderPass);
+
+    renderPass.cDepthStencilAttachmentInfo.depthClearValue = -0.001;
+    AssertBeginRenderPassError(&renderPass);
+
+    renderPass.cDepthStencilAttachmentInfo.depthClearValue = 1.001;
+    AssertBeginRenderPassError(&renderPass);
+
+    // Clear values are not validated if the depthLoadOp is Load.
+    renderPass.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Load;
+
+    renderPass.cDepthStencilAttachmentInfo.depthClearValue = -1;
+    AssertBeginRenderPassSuccess(&renderPass);
+
+    renderPass.cDepthStencilAttachmentInfo.depthClearValue = 2;
+    AssertBeginRenderPassSuccess(&renderPass);
+
+    renderPass.cDepthStencilAttachmentInfo.depthClearValue = -0.001;
+    AssertBeginRenderPassSuccess(&renderPass);
+
+    renderPass.cDepthStencilAttachmentInfo.depthClearValue = 1.001;
+    AssertBeginRenderPassSuccess(&renderPass);
 }
 
 TEST_F(RenderPassDescriptorValidationTest, ValidateDepthStencilReadOnly) {

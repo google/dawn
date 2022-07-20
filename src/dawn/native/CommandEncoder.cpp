@@ -382,10 +382,16 @@ MaybeError ValidateRenderPassDepthStencilAttachment(
     if (!std::isnan(depthStencilAttachment->clearDepth)) {
         // TODO(dawn:1269): Remove this branch after the deprecation period.
         device->EmitDeprecationWarning("clearDepth is deprecated, prefer depthClearValue instead.");
-    } else {
-        DAWN_INVALID_IF(depthStencilAttachment->depthLoadOp == wgpu::LoadOp::Clear &&
-                            std::isnan(depthStencilAttachment->depthClearValue),
+        DAWN_INVALID_IF(
+            depthStencilAttachment->clearDepth < 0.0f || depthStencilAttachment->clearDepth > 1.0f,
+            "clearDepth is not between 0.0 and 1.0");
+
+    } else if (depthStencilAttachment->depthLoadOp == wgpu::LoadOp::Clear) {
+        DAWN_INVALID_IF(std::isnan(depthStencilAttachment->depthClearValue),
                         "depthClearValue is NaN.");
+        DAWN_INVALID_IF(depthStencilAttachment->depthClearValue < 0.0f ||
+                            depthStencilAttachment->depthClearValue > 1.0f,
+                        "depthClearValue is not between 0.0 and 1.0");
     }
 
     // TODO(dawn:1269): Remove after the deprecation period.
