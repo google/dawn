@@ -239,6 +239,7 @@ MaybeError ValidateCopyTextureFormatConversion(const wgpu::TextureFormat srcForm
     switch (srcFormat) {
         case wgpu::TextureFormat::BGRA8Unorm:
         case wgpu::TextureFormat::RGBA8Unorm:
+        case wgpu::TextureFormat::RGBA16Float:
             break;
         default:
             return DAWN_FORMAT_VALIDATION_ERROR("Source texture format (%s) is not supported.",

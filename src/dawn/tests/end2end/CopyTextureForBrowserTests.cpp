@@ -581,20 +581,14 @@ class CopyTextureForBrowser_Formats
         }
     }
 
-    void DoColorConversionTest() {
-        TextureSpec srcTextureSpec;
-        srcTextureSpec.format = GetParam().mSrcFormat;
-
-        TextureSpec dstTextureSpec;
-        dstTextureSpec.format = GetParam().mDstFormat;
-
-        wgpu::Extent3D copySize = {kDefaultTextureWidth, kDefaultTextureHeight};
-        wgpu::CopyTextureForBrowserOptions options = {};
-
+    wgpu::Texture CreateAndInitSourceTextureForColorFormatConversion(
+        const TextureSpec& srcSpec,
+        wgpu::TextureUsage srcUsage,
+        utils::TextureDataCopyLayout srcCopyLayout) {
         // Create and init source texture.
         // This fixed source texture data is for color conversion tests.
         // The source data can fill a texture in default width and height.
-        std::vector<RGBA8> srcTextureArrayCopyData{
+        std::vector<RGBA8> srcRGBA8UnormTextureArrayCopyData{
             // Take RGBA8Unorm as example:
             // R channel has different values
             RGBA8(0, 255, 255, 255),    // r = 0.0
@@ -615,18 +609,87 @@ class CopyTextureForBrowser_Formats
             RGBA8(255, 255, 255, 0)  // a = 0
         };
 
+        std::vector<uint16_t> srcRGBA16FloatTextureArrayCopyData{
+            // R channel has different values
+            // r = 0.0
+            Float32ToFloat16(0.0), Float32ToFloat16(1.0), Float32ToFloat16(1.0),
+            Float32ToFloat16(1.0),
+
+            // r = 0.4
+            Float32ToFloat16(0.4), Float32ToFloat16(1.0), Float32ToFloat16(1.0),
+            Float32ToFloat16(1.0),
+
+            // r = 0.6
+            Float32ToFloat16(0.6), Float32ToFloat16(1.0), Float32ToFloat16(1.0),
+            Float32ToFloat16(1.0),
+
+            // G channel has different values
+            // g = 0.0
+            Float32ToFloat16(1.0), Float32ToFloat16(0.0), Float32ToFloat16(1.0),
+            Float32ToFloat16(1.0),
+
+            // g = 0.4
+            Float32ToFloat16(1.0), Float32ToFloat16(0.4), Float32ToFloat16(1.0),
+            Float32ToFloat16(1.0),
+
+            // g = 0.6
+            Float32ToFloat16(1.0), Float32ToFloat16(0.6), Float32ToFloat16(1.0),
+            Float32ToFloat16(1.0),
+
+            // B channel has different values
+            // b = 0.0
+            Float32ToFloat16(1.0), Float32ToFloat16(1.0), Float32ToFloat16(0.0),
+            Float32ToFloat16(1.0),
+
+            // b = 0.4
+            Float32ToFloat16(1.0), Float32ToFloat16(1.0), Float32ToFloat16(0.4),
+            Float32ToFloat16(1.0),
+
+            // b = 0.6
+            Float32ToFloat16(1.0), Float32ToFloat16(1.0), Float32ToFloat16(0.6),
+            Float32ToFloat16(1.0),
+
+            // A channel set to 0
+            // a = 0
+            Float32ToFloat16(1.0), Float32ToFloat16(1.0), Float32ToFloat16(1.0),
+            Float32ToFloat16(0.0)};
+
+        switch (srcSpec.format) {
+            case wgpu::TextureFormat::RGBA8Unorm:
+            case wgpu::TextureFormat::BGRA8Unorm:
+                return CreateAndInitTexture(
+                    srcSpec, srcUsage, srcCopyLayout, srcRGBA8UnormTextureArrayCopyData.data(),
+                    srcRGBA8UnormTextureArrayCopyData.size() * sizeof(RGBA8));
+            case wgpu::TextureFormat::RGBA16Float:
+                return CreateAndInitTexture(
+                    srcSpec, srcUsage, srcCopyLayout, srcRGBA16FloatTextureArrayCopyData.data(),
+                    srcRGBA16FloatTextureArrayCopyData.size() * sizeof(uint16_t));
+            default:
+                UNREACHABLE();
+        }
+    }
+
+    void DoColorConversionTest() {
+        TextureSpec srcTextureSpec;
+        srcTextureSpec.format = GetParam().mSrcFormat;
+
+        TextureSpec dstTextureSpec;
+        dstTextureSpec.format = GetParam().mDstFormat;
+
+        wgpu::Extent3D copySize = {kDefaultTextureWidth, kDefaultTextureHeight};
+        wgpu::CopyTextureForBrowserOptions options = {};
+
         const utils::TextureDataCopyLayout srcCopyLayout =
             utils::GetTextureDataCopyLayoutForTextureAtLevel(
-                kTextureFormat,
+                srcTextureSpec.format,
                 {srcTextureSpec.textureSize.width, srcTextureSpec.textureSize.height,
                  copySize.depthOrArrayLayers},
                 srcTextureSpec.level);
 
         wgpu::TextureUsage srcUsage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
                                       wgpu::TextureUsage::TextureBinding;
-        wgpu::Texture srcTexture = CreateAndInitTexture(
-            srcTextureSpec, srcUsage, srcCopyLayout, srcTextureArrayCopyData.data(),
-            srcTextureArrayCopyData.size() * sizeof(RGBA8));
+        wgpu::Texture srcTexture = CreateAndInitSourceTextureForColorFormatConversion(
+            srcTextureSpec, srcUsage, srcCopyLayout);
 
         // Create dst texture.
         wgpu::Texture dstTexture = CreateTexture(
@@ -1082,7 +1145,8 @@ DAWN_INSTANTIATE_TEST_P(
     CopyTextureForBrowser_Formats,
     {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
     std::vector<wgpu::TextureFormat>({wgpu::TextureFormat::RGBA8Unorm,
-                                      wgpu::TextureFormat::BGRA8Unorm}),
+                                      wgpu::TextureFormat::BGRA8Unorm,
+                                      wgpu::TextureFormat::RGBA16Float}),
     std::vector<wgpu::TextureFormat>(
         {wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::R16Float, wgpu::TextureFormat::R32Float,
          wgpu::TextureFormat::RG8Unorm, wgpu::TextureFormat::RG16Float,
