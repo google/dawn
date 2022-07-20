@@ -661,6 +661,12 @@ void Device::InitTogglesFromDriver() {
         SetToggle(Toggle::D3D12ForceInitializeCopyableDepthStencilTextureOnCreation, true);
     }
 
+    // Currently this workaround is only needed on Intel Gen12 GPUs.
+    // See http://crbug.com/dawn/1487 for more information.
+    if (gpu_info::IsIntelXe(vendorId, deviceId)) {
+        SetToggle(Toggle::D3D12DontSetClearValueOnDepthTextureCreation, true);
+    }
+
     // Currently this workaround is needed on any D3D12 backend for some particular situations.
     // But we may need to limit it if D3D12 runtime fixes the bug on its new release. See
     // https://crbug.com/dawn/1289 for more information.

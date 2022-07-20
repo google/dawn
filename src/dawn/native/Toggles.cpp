@@ -274,6 +274,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "the initialization when the entire subresource is the copy destination as a workaround on "
       "Intel D3D12 drivers.",
       "https://crbug.com/dawn/1487"}},
+    {Toggle::D3D12DontSetClearValueOnDepthTextureCreation,
+     {"d3d12_dont_set_clear_value_on_depth_texture_creation",
+      "Don't set D3D12_CLEAR_VALUE when creating depth textures with CreatePlacedResource() or "
+      "CreateCommittedResource() as a workaround on Intel Gen12 D3D12 drivers.",
+      "https://crbug.com/dawn/1487"}},
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
 }  // anonymous namespace

@@ -73,6 +73,7 @@ enum class Toggle {
     MetalRenderR8RG8UnormSmallMipToTempTexture,
     EnableBlobCache,
     D3D12ForceInitializeCopyableDepthStencilTextureOnCreation,
+    D3D12DontSetClearValueOnDepthTextureCreation,
 
     EnumCount,
     InvalidEnum = EnumCount,

@@ -152,7 +152,19 @@ uint64_t GetResourcePlacementAlignment(ResourceHeapKind resourceHeapKind,
     }
 }
 
-bool IsClearValueOptimizable(const D3D12_RESOURCE_DESC& resourceDescriptor) {
+bool IsClearValueOptimizable(DeviceBase* device, const D3D12_RESOURCE_DESC& resourceDescriptor) {
+    if (device->IsToggleEnabled(Toggle::D3D12DontSetClearValueOnDepthTextureCreation)) {
+        switch (resourceDescriptor.Format) {
+            case DXGI_FORMAT_D16_UNORM:
+            case DXGI_FORMAT_D32_FLOAT:
+            case DXGI_FORMAT_D24_UNORM_S8_UINT:
+            case DXGI_FORMAT_D32_FLOAT_S8X24_UINT:
+                return false;
+            default:
+                break;
+        }
+    }
+
     // Optimized clear color cannot be set on buffers, non-render-target/depth-stencil
     // textures, or typeless resources
     // https://docs.microsoft.com/en-us/windows/win32/api/d3d12/nf-d3d12-id3d12device-createcommittedresource
@@ -192,7 +204,7 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
     // some architectures.
     D3D12_CLEAR_VALUE zero{};
     D3D12_CLEAR_VALUE* optimizedClearValue = nullptr;
-    if (IsClearValueOptimizable(resourceDescriptor)) {
+    if (IsClearValueOptimizable(mDevice, resourceDescriptor)) {
         zero.Format = resourceDescriptor.Format;
         optimizedClearValue = &zero;
     }
