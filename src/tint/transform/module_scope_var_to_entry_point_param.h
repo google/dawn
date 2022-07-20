@@ -61,7 +61,7 @@ namespace tint::transform {
 ///   foo(&p, sptr);
 /// }
 /// ```
-class ModuleScopeVarToEntryPointParam
+class ModuleScopeVarToEntryPointParam final
     : public Castable<ModuleScopeVarToEntryPointParam, Transform> {
   public:
     /// Constructor

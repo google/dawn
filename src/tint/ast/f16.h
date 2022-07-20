@@ -22,7 +22,7 @@
 namespace tint::ast {
 
 /// A float 16 type
-class F16 : public Castable<F16, Type> {
+class F16 final : public Castable<F16, Type> {
   public:
     /// Constructor
     /// @param pid the identifier of the program that owns this node

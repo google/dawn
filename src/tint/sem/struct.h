@@ -170,7 +170,7 @@ class Struct final : public Castable<Struct, Type> {
 };
 
 /// StructMember holds the semantic information for structure members.
-class StructMember : public Castable<StructMember, Node> {
+class StructMember final : public Castable<StructMember, Node> {
   public:
     /// Constructor
     /// @param declaration the AST declaration node

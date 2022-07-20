@@ -20,7 +20,7 @@
 namespace tint::transform {
 
 /// A transform that converts scalar matrix constructors to the vector form.
-class VectorizeScalarMatrixConstructors
+class VectorizeScalarMatrixConstructors final
     : public Castable<VectorizeScalarMatrixConstructors, Transform> {
   public:
     /// Constructor

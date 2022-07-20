@@ -31,7 +31,7 @@ namespace tint::transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * Unshadow
-class SimplifyPointers : public Castable<SimplifyPointers, Transform> {
+class SimplifyPointers final : public Castable<SimplifyPointers, Transform> {
   public:
     /// Constructor
     SimplifyPointers();

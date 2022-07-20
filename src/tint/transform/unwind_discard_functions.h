@@ -36,7 +36,7 @@ namespace tint::transform {
 ///
 /// @note Depends on the following transforms to have been run first:
 /// * PromoteSideEffectsToDecl
-class UnwindDiscardFunctions : public Castable<UnwindDiscardFunctions, Transform> {
+class UnwindDiscardFunctions final : public Castable<UnwindDiscardFunctions, Transform> {
   public:
     /// Constructor
     UnwindDiscardFunctions();

@@ -128,10 +128,10 @@ using VertexStateDescriptor = std::vector<VertexBufferLayoutDescriptor>;
 /// code, but these are types that the data may arrive as. We need to convert
 /// these smaller types into the base types such as `f32` and `u32` for the
 /// shader to use.
-class VertexPulling : public Castable<VertexPulling, Transform> {
+class VertexPulling final : public Castable<VertexPulling, Transform> {
   public:
     /// Configuration options for the transform
-    struct Config : public Castable<Config, Data> {
+    struct Config final : public Castable<Config, Data> {
         /// Constructor
         Config();
 

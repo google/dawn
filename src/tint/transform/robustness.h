@@ -31,7 +31,7 @@ namespace tint::transform {
 /// the bounds of the array. Any access before the start of the array will clamp
 /// to zero and any access past the end of the array will clamp to
 /// (array length - 1).
-class Robustness : public Castable<Robustness, Transform> {
+class Robustness final : public Castable<Robustness, Transform> {
   public:
     /// Storage class to be skipped in the transform
     enum class StorageClass {
@@ -40,7 +40,7 @@ class Robustness : public Castable<Robustness, Transform> {
     };
 
     /// Configuration options for the transform
-    struct Config : public Castable<Config, Data> {
+    struct Config final : public Castable<Config, Data> {
         /// Constructor
         Config();
 

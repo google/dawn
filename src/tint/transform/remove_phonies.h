@@ -25,7 +25,7 @@ namespace tint::transform {
 /// RemovePhonies is a Transform that removes all phony-assignment statements,
 /// while preserving function call expressions in the RHS of the assignment that
 /// may have side-effects.
-class RemovePhonies : public Castable<RemovePhonies, Transform> {
+class RemovePhonies final : public Castable<RemovePhonies, Transform> {
   public:
     /// Constructor
     RemovePhonies();

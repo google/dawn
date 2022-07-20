@@ -101,6 +101,36 @@ struct TypeInfo {
     /// The type hash code bitwise-or'd with all ancestor's hashcodes.
     const HashCode full_hashcode;
 
+    /// @returns true if `type` derives from the class `TO`
+    /// @param object the object type to test from, which must be, or derive from
+    /// type `FROM`.
+    /// @see CastFlags
+    template <typename TO, typename FROM, int FLAGS = 0>
+    static inline bool Is(const tint::TypeInfo* object) {
+        constexpr const bool downcast = std::is_base_of<FROM, TO>::value;
+        constexpr const bool upcast = std::is_base_of<TO, FROM>::value;
+        constexpr const bool nocast = std::is_same<FROM, TO>::value;
+        constexpr const bool assert_is_castable = (FLAGS & kDontErrorOnImpossibleCast) == 0;
+
+        static_assert(upcast || downcast || nocast || !assert_is_castable, "impossible cast");
+
+        return upcast || nocast || object->Is<TO>();
+    }
+
+    /// @returns true if this type derives from the class `T`
+    template <typename T>
+    inline bool Is() const {
+        auto* type = &Of<std::remove_cv_t<T>>();
+
+        if constexpr (std::is_final_v<T>) {
+            // T is final, so nothing can derive from T.
+            // We do not need to check ancestors, only whether this type is equal to the type T.
+            return type == this;
+        } else {
+            return Is(type);
+        }
+    }
+
     /// @param type the test type info
     /// @returns true if the class with this TypeInfo is of, or derives from the
     /// class with the given TypeInfo.
@@ -112,34 +142,14 @@ struct TypeInfo {
             return false;
         }
 
-        // Walk the base types, starting with this TypeInfo, to see if any of the
-        // pointers match `type`.
+        // Walk the base types, starting with this TypeInfo, to see if any of the pointers match
+        // `type`.
         for (auto* ti = this; ti != nullptr; ti = ti->base) {
             if (ti == type) {
                 return true;
             }
         }
         return false;
-    }
-
-    /// @returns true if `type` derives from the class `TO`
-    /// @param type the object type to test from, which must be, or derive from
-    /// type `FROM`.
-    /// @see CastFlags
-    template <typename TO, typename FROM, int FLAGS = 0>
-    static inline bool Is(const tint::TypeInfo* type) {
-        constexpr const bool downcast = std::is_base_of<FROM, TO>::value;
-        constexpr const bool upcast = std::is_base_of<TO, FROM>::value;
-        constexpr const bool nocast = std::is_same<FROM, TO>::value;
-        constexpr const bool assert_is_castable = (FLAGS & kDontErrorOnImpossibleCast) == 0;
-
-        static_assert(upcast || downcast || nocast || !assert_is_castable, "impossible cast");
-
-        if (upcast || nocast) {
-            return true;
-        }
-
-        return type->Is(&Of<std::remove_cv_t<TO>>());
     }
 
     /// @returns the static TypeInfo for the type T
@@ -211,14 +221,12 @@ struct TypeInfo {
         if constexpr (kCount == 0) {
             return false;
         } else if constexpr (kCount == 1) {
-            return Is(&Of<std::tuple_element_t<0, TUPLE>>());
+            return Is<std::tuple_element_t<0, TUPLE>>();
         } else if constexpr (kCount == 2) {
-            return Is(&Of<std::tuple_element_t<0, TUPLE>>()) ||
-                   Is(&Of<std::tuple_element_t<1, TUPLE>>());
+            return Is<std::tuple_element_t<0, TUPLE>>() || Is<std::tuple_element_t<1, TUPLE>>();
         } else if constexpr (kCount == 3) {
-            return Is(&Of<std::tuple_element_t<0, TUPLE>>()) ||
-                   Is(&Of<std::tuple_element_t<1, TUPLE>>()) ||
-                   Is(&Of<std::tuple_element_t<2, TUPLE>>());
+            return Is<std::tuple_element_t<0, TUPLE>>() || Is<std::tuple_element_t<1, TUPLE>>() ||
+                   Is<std::tuple_element_t<2, TUPLE>>();
         } else {
             // Optimization: Compare the object's hashcode to the bitwise-or of all
             // the tested type's hashcodes. If there's no intersection of bits in
@@ -587,7 +595,7 @@ inline bool NonDefaultCases(T* object,
         // Attempt to dynamically cast the object to the handler type. If that
         // succeeds, call the case handler with the cast object.
         using CaseType = SwitchCaseType<CaseFunc>;
-        if (type->Is(&TypeInfo::Of<CaseType>())) {
+        if (type->Is<CaseType>()) {
             auto* ptr = static_cast<CaseType*>(object);
             if constexpr (kHasReturnType) {
                 new (result) RETURN_TYPE(static_cast<RETURN_TYPE>(std::get<0>(cases)(ptr)));

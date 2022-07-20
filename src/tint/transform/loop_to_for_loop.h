@@ -21,7 +21,7 @@ namespace tint::transform {
 
 /// LoopToForLoop is a Transform that attempts to convert WGSL `loop {}`
 /// statements into a for-loop statement.
-class LoopToForLoop : public Castable<LoopToForLoop, Transform> {
+class LoopToForLoop final : public Castable<LoopToForLoop, Transform> {
   public:
     /// Constructor
     LoopToForLoop();

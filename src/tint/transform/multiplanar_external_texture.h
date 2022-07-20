@@ -50,7 +50,7 @@ struct BindingPoints {
 /// decoding, gamut conversion, and gamma encoding steps. Specifically
 // for BT.709 to SRGB conversion, it takes the fast path only doing the yuv->rgb
 // step and skipping all other steps.
-class MultiplanarExternalTexture : public Castable<MultiplanarExternalTexture, Transform> {
+class MultiplanarExternalTexture final : public Castable<MultiplanarExternalTexture, Transform> {
   public:
     /// BindingsMap is a map where the key is the binding location of a
     /// texture_external and the value is a struct containing the desired
@@ -60,7 +60,7 @@ class MultiplanarExternalTexture : public Castable<MultiplanarExternalTexture, T
     /// NewBindingPoints is consumed by the MultiplanarExternalTexture transform.
     /// Data holds information about location of each texture_external binding and
     /// which binding slots it should expand into.
-    struct NewBindingPoints : public Castable<Data, transform::Data> {
+    struct NewBindingPoints final : public Castable<Data, transform::Data> {
         /// Constructor
         /// @param bm a map to the new binding slots to use.
         explicit NewBindingPoints(BindingsMap bm);

@@ -73,7 +73,7 @@ struct OffsetExpr : Offset {
 
 /// OffsetLiteral is an implementation of Offset that constructs a u32 literal
 /// value.
-struct OffsetLiteral : Castable<OffsetLiteral, Offset> {
+struct OffsetLiteral final : Castable<OffsetLiteral, Offset> {
     uint32_t const literal = 0;
 
     explicit OffsetLiteral(uint32_t lit) : literal(lit) {}
