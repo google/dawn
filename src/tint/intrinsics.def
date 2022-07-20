@@ -134,6 +134,7 @@ match fi32: f32 | i32
 match fi32f16: f32 | f16 | i32
 match iu32: i32 | u32
 match aiu32: ai | i32 | u32
+match afi32f16: ai | af | f32 | i32 | f16
 match scalar: f32 | f16 | i32 | u32 | bool
 match abstract_or_scalar: ai | af | f32 | f16 | i32 | u32 | bool
 match af_f32: af | f32
@@ -822,8 +823,8 @@ op ! <N: num> (vec<N, bool>) -> vec<N, bool>
 @const op ~ <T: aiu32>(T) -> T
 @const op ~ <T: aiu32, N: num> (vec<N, T>) -> vec<N, T>
 
-op - <T: fi32f16>(T) -> T
-op - <T: fi32f16, N: num> (vec<N, T>) -> vec<N, T>
+@const op - <T: afi32f16>(T) -> T
+@const op - <T: afi32f16, N: num> (vec<N, T>) -> vec<N, T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Binary Operators                                                           //

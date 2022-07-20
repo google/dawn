@@ -604,8 +604,8 @@ TEST_F(IntrinsicTableTest, MismatchUnaryOp) {
     EXPECT_EQ(Diagnostics().str(), R"(12:34 error: no matching overload for operator - (bool)
 
 2 candidate operators:
-  operator - (T) -> T  where: T is f32, f16 or i32
-  operator - (vecN<T>) -> vecN<T>  where: T is f32, f16 or i32
+  operator - (T) -> T  where: T is abstract-int, abstract-float, f32, i32 or f16
+  operator - (vecN<T>) -> vecN<T>  where: T is abstract-int, abstract-float, f32, i32 or f16
 )");
 }
 

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <cmath>
+#include <type_traits>
 
 #include "gtest/gtest.h"
 #include "src/tint/resolver/resolver_test_helper.h"
@@ -2930,13 +2931,36 @@ TEST_F(ResolverConstEvalTest, MemberAccess) {
 namespace unary_op {
 
 template <typename T>
+auto Highest() {
+    return T(T::kHighest);
+}
+
+template <typename T>
+auto Lowest() {
+    return T(T::kLowest);
+}
+
+template <typename T>
+constexpr auto Negate(const Number<T>& v) {
+    // For signed integrals, avoid C++ UB by not negating the smallest negative number. In
+    // WGSL, this operation is well defined to return the same value, see:
+    // https://gpuweb.github.io/gpuweb/wgsl/#arithmetic-expr.
+    if constexpr (std::is_integral_v<T> && std::is_signed_v<T>) {
+        if (v == std::numeric_limits<T>::min()) {
+            return v;
+        }
+    }
+    return -v;
+}
+
+template <typename T>
 struct Values {
     T input;
     T expect;
 };
 
 struct Case {
-    std::variant<Values<AInt>, Values<u32>, Values<i32>> values;
+    std::variant<Values<AInt>, Values<AFloat>, Values<u32>, Values<i32>, Values<f32>> values;
 };
 
 static std::ostream& operator<<(std::ostream& o, const Case& c) {
@@ -2952,6 +2976,8 @@ Case C(T input, T expect) {
 using ResolverConstEvalUnaryOpTest = ResolverTestWithParam<std::tuple<ast::UnaryOp, Case>>;
 
 TEST_P(ResolverConstEvalUnaryOpTest, Test) {
+    Enable(ast::Extension::kF16);
+
     auto op = std::get<0>(GetParam());
     auto c = std::get<1>(GetParam());
     std::visit(
@@ -3000,6 +3026,60 @@ INSTANTIATE_TEST_SUITE_P(Complement,
                                               C(2_i, -3_i),
                                               C(-3_i, 2_i),
                                           })));
+
+INSTANTIATE_TEST_SUITE_P(Negation,
+                         ResolverConstEvalUnaryOpTest,
+                         testing::Combine(testing::Values(ast::UnaryOp::kNegation),
+                                          testing::ValuesIn({
+                                              // AInt
+                                              C(0_a, -0_a),
+                                              C(-0_a, 0_a),
+                                              C(1_a, -1_a),
+                                              C(-1_a, 1_a),
+                                              C(Highest<AInt>(), -Highest<AInt>()),
+                                              C(-Highest<AInt>(), Highest<AInt>()),
+                                              C(Lowest<AInt>(), Negate(Lowest<AInt>())),
+                                              C(Negate(Lowest<AInt>()), Lowest<AInt>()),
+                                              // i32
+                                              C(0_i, -0_i),
+                                              C(-0_i, 0_i),
+                                              C(1_i, -1_i),
+                                              C(-1_i, 1_i),
+                                              C(Highest<i32>(), -Highest<i32>()),
+                                              C(-Highest<i32>(), Highest<i32>()),
+                                              C(Lowest<i32>(), Negate(Lowest<i32>())),
+                                              C(Negate(Lowest<i32>()), Lowest<i32>()),
+                                              // AFloat
+                                              C(0.0_a, -0.0_a),
+                                              C(-0.0_a, 0.0_a),
+                                              C(1.0_a, -1.0_a),
+                                              C(-1.0_a, 1.0_a),
+                                              C(Highest<AFloat>(), -Highest<AFloat>()),
+                                              C(-Highest<AFloat>(), Highest<AFloat>()),
+                                              C(Lowest<AFloat>(), Negate(Lowest<AFloat>())),
+                                              C(Negate(Lowest<AFloat>()), Lowest<AFloat>()),
+                                              // f32
+                                              C(0.0_f, -0.0_f),
+                                              C(-0.0_f, 0.0_f),
+                                              C(1.0_f, -1.0_f),
+                                              C(-1.0_f, 1.0_f),
+                                              C(Highest<f32>(), -Highest<f32>()),
+                                              C(-Highest<f32>(), Highest<f32>()),
+                                              C(Lowest<f32>(), Negate(Lowest<f32>())),
+                                              C(Negate(Lowest<f32>()), Lowest<f32>()),
+                                          })));
+
+// Make sure UBSan doesn't trip on C++'s undefined behaviour of negating the smallest negative
+// number.
+TEST_F(ResolverConstEvalTest, UnaryNegateLowestAbstract) {
+    // const break_me = -(-9223372036854775808);
+    auto* c = GlobalConst("break_me", nullptr, Negation(Negation(Expr(9223372036854775808_a))));
+    (void)c;
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    auto* sem = Sem().Get(c);
+    EXPECT_EQ(sem->ConstantValue()->As<AInt>(), 9223372036854775808_a);
+}
+
 }  // namespace unary_op
 
 }  // namespace

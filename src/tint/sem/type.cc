@@ -136,6 +136,30 @@ bool Type::is_integer_scalar_or_vector() const {
     return is_unsigned_scalar_or_vector() || is_signed_scalar_or_vector();
 }
 
+bool Type::is_abstract_scalar_vector() const {
+    return Is([](const Vector* v) { return v->type()->Is<sem::AbstractNumeric>(); });
+}
+
+bool Type::is_abstract_integer_vector() const {
+    return Is([](const Vector* v) { return v->type()->Is<sem::AbstractInt>(); });
+}
+
+bool Type::is_abstract_float_vector() const {
+    return Is([](const Vector* v) { return v->type()->Is<sem::AbstractFloat>(); });
+}
+
+bool Type::is_abstract_scalar_or_vector() const {
+    return Is<sem::AbstractNumeric>() || is_abstract_scalar_vector();
+}
+
+bool Type::is_abstract_integer_scalar_or_vector() const {
+    return Is<sem::AbstractInt>() || is_abstract_integer_vector();
+}
+
+bool Type::is_abstract_float_scalar_or_vector() const {
+    return Is<sem::AbstractFloat>() || is_abstract_float_vector();
+}
+
 bool Type::is_bool_vector() const {
     return Is([](const Vector* v) { return v->type()->Is<Bool>(); });
 }

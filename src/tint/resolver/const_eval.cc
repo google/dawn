@@ -18,6 +18,7 @@
 #include <limits>
 #include <optional>
 #include <string>
+#include <type_traits>
 #include <unordered_map>
 #include <utility>
 
@@ -45,14 +46,38 @@ namespace tint::resolver {
 
 namespace {
 
-/// TypeDispatch is a helper for calling the function `f`, passing a single zero-value argument of
-/// the C++ type that corresponds to the sem::Type `type`. For example, calling `TypeDispatch()`
-/// with a type of `sem::I32*` will call the function f with a single argument of `i32(0)`.
+/// Helper that calls 'f' passing in `c`'s value
+template <typename F>
+auto aiu32Dispatch(const sem::Constant* c, F&& f) {
+    return Switch(
+        c->Type(), [&](const sem::AbstractInt*) { return f(c->As<AInt>()); },
+        [&](const sem::I32*) { return f(c->As<i32>()); },
+        [&](const sem::U32*) { return f(c->As<u32>()); });
+}
+
+/// Helper that calls 'f' passing in `c`'s value
+template <typename F>
+auto afi32f16Dispatch(const sem::Constant* c, F&& f) {
+    return Switch(
+        c->Type(), [&](const sem::AbstractInt*) { return f(c->As<AInt>()); },
+        [&](const sem::AbstractFloat*) { return f(c->As<AFloat>()); },
+        [&](const sem::F32*) { return f(c->As<f32>()); },
+        [&](const sem::I32*) { return f(c->As<i32>()); },
+        [&](const sem::F16*) {
+            // TODO(crbug.com/tint/1502): Support const eval for f16
+            return nullptr;
+        });
+}
+
+/// ZeroTypeDispatch is a helper for calling the function `f`, passing a single zero-value argument
+/// of the C++ type that corresponds to the sem::Type `type`. For example, calling
+/// `ZeroTypeDispatch()` with a type of `sem::I32*` will call the function f with a single argument
+/// of `i32(0)`.
 /// @returns the value returned by calling `f`.
 /// @note `type` must be a scalar or abstract numeric type. Other types will not call `f`, and will
 /// return the zero-initialized value of the return type for `f`.
 template <typename F>
-auto TypeDispatch(const sem::Type* type, F&& f) {
+auto ZeroTypeDispatch(const sem::Type* type, F&& f) {
     return Switch(
         type,                                                     //
         [&](const sem::AbstractInt*) { return f(AInt(0)); },      //
@@ -62,20 +87,6 @@ auto TypeDispatch(const sem::Type* type, F&& f) {
         [&](const sem::F32*) { return f(f32(0)); },               //
         [&](const sem::F16*) { return f(f16(0)); },               //
         [&](const sem::Bool*) { return f(static_cast<bool>(0)); });
-}
-
-/// IntegerDispatch is a helper for calling the function `f`, passing the integer value of the
-/// constant c.
-/// @returns the value returned by calling `f`.
-/// @note `c` must be of an integer type. Other types will not call `f`, and will return the
-/// zero-initialized value of the return type for `f`
-template <typename F>
-auto IntegerDispatch(const sem::Constant* c, F&& f) {
-    return Switch(
-        c->Type(),                                                  //
-        [&](const sem::AbstractInt*) { return f(c->As<AInt>()); },  //
-        [&](const sem::I32*) { return f(c->As<i32>()); },           //
-        [&](const sem::U32*) { return f(c->As<u32>()); });
 }
 
 /// @returns `value` if `T` is not a Number, otherwise ValueOf returns the inner value of the
@@ -142,7 +153,7 @@ struct Element : Constant {
             return this;
         }
         bool failed = false;
-        auto* res = TypeDispatch(target_ty, [&](auto zero_to) -> const Constant* {
+        auto* res = ZeroTypeDispatch(target_ty, [&](auto zero_to) -> const Constant* {
             // `T` is the source type, `value` is the source value.
             // `TO` is the target type.
             using TO = std::decay_t<decltype(zero_to)>;
@@ -333,7 +344,7 @@ const Constant* ZeroValue(ProgramBuilder& builder, const sem::Type* type) {
             return CreateComposite(builder, s, std::move(zeros));
         },
         [&](Default) -> const Constant* {
-            return TypeDispatch(type, [&](auto zero) -> const Constant* {
+            return ZeroTypeDispatch(type, [&](auto zero) -> const Constant* {
                 return CreateElement(builder, type, zero);
             });
         });
@@ -643,8 +654,30 @@ const sem::Constant* ConstEval::OpComplement(const sem::Type*,
                                              sem::Expression const* const* args,
                                              size_t) {
     return TransformElements(builder, args[0]->ConstantValue(), [&](const sem::Constant* c) {
-        return IntegerDispatch(c, [&](auto i) {  //
+        return aiu32Dispatch(c, [&](auto i) {  //
             return CreateElement(builder, c->Type(), decltype(i)(~i.value));
+        });
+    });
+}
+
+const sem::Constant* ConstEval::OpMinus(const sem::Type*,
+                                        sem::Expression const* const* args,
+                                        size_t) {
+    return TransformElements(builder, args[0]->ConstantValue(), [&](const sem::Constant* c) {
+        return afi32f16Dispatch(c, [&](auto i) {  //
+            // For signed integrals, avoid C++ UB by not negating the smallest negative number. In
+            // WGSL, this operation is well defined to return the same value, see:
+            // https://gpuweb.github.io/gpuweb/wgsl/#arithmetic-expr.
+            using T = UnwrapNumber<decltype(i)>;
+            if constexpr (std::is_integral_v<T>) {
+                auto v = i.value;
+                if (v != std::numeric_limits<T>::min()) {
+                    v = -v;
+                }
+                return CreateElement(builder, c->Type(), decltype(i)(v));
+            } else {
+                return CreateElement(builder, c->Type(), decltype(i)(-i.value));
+            }
         });
     });
 }

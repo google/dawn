@@ -18,6 +18,8 @@
 #include <vector>
 
 #include "src/tint/program_builder.h"
+#include "src/tint/sem/abstract_float.h"
+#include "src/tint/sem/abstract_int.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 
@@ -98,7 +100,8 @@ std::vector<ast::UnaryOp> MutationWrapUnaryOperator::GetValidUnaryWrapper(
         return {ast::UnaryOp::kNot};
     }
 
-    if (expr_type->is_signed_scalar_or_vector()) {
+    if (expr_type->is_signed_scalar_or_vector() ||
+        expr_type->is_abstract_integer_scalar_or_vector()) {
         return {ast::UnaryOp::kNegation, ast::UnaryOp::kComplement};
     }
 
@@ -106,7 +109,7 @@ std::vector<ast::UnaryOp> MutationWrapUnaryOperator::GetValidUnaryWrapper(
         return {ast::UnaryOp::kComplement};
     }
 
-    if (expr_type->is_float_scalar_or_vector()) {
+    if (expr_type->is_float_scalar_or_vector() || expr_type->is_abstract_float_scalar_or_vector()) {
         return {ast::UnaryOp::kNegation};
     }
 

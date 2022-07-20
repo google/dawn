@@ -1832,8 +1832,52 @@ std::string Aiu32::String(MatchState*) const {
   return ss.str();
 }
 
-/// TypeMatcher for 'match scalar'
+/// TypeMatcher for 'match afi32f16'
 /// @see src/tint/intrinsics.def:137:7
+class Afi32F16 : public TypeMatcher {
+ public:
+  /// Checks whether the given type matches the matcher rules, and returns the
+  /// expected, canonicalized type on success.
+  /// Match may define and refine the template types and numbers in state.
+  /// @param state the MatchState
+  /// @param type the type to match
+  /// @returns the canonicalized type on match, otherwise nullptr
+  const sem::Type* Match(MatchState& state,
+                         const sem::Type* type) const override;
+  /// @param state the MatchState
+  /// @return a string representation of the matcher.
+  std::string String(MatchState* state) const override;
+};
+
+const sem::Type* Afi32F16::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_af(ty)) {
+    return build_af(state);
+  }
+  if (match_ai(ty)) {
+    return build_ai(state);
+  }
+  if (match_i32(ty)) {
+    return build_i32(state);
+  }
+  if (match_f32(ty)) {
+    return build_f32(state);
+  }
+  if (match_f16(ty)) {
+    return build_f16(state);
+  }
+  return nullptr;
+}
+
+std::string Afi32F16::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << Ai().String(nullptr) << ", " << Af().String(nullptr) << ", " << F32().String(nullptr) << ", " << I32().String(nullptr) << " or " << F16().String(nullptr);
+  return ss.str();
+}
+
+/// TypeMatcher for 'match scalar'
+/// @see src/tint/intrinsics.def:138:7
 class Scalar : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -1877,7 +1921,7 @@ std::string Scalar::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match abstract_or_scalar'
-/// @see src/tint/intrinsics.def:138:7
+/// @see src/tint/intrinsics.def:139:7
 class AbstractOrScalar : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -1927,7 +1971,7 @@ std::string AbstractOrScalar::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match af_f32'
-/// @see src/tint/intrinsics.def:139:7
+/// @see src/tint/intrinsics.def:140:7
 class AfF32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -1962,7 +2006,7 @@ std::string AfF32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match af_f32f16'
-/// @see src/tint/intrinsics.def:140:7
+/// @see src/tint/intrinsics.def:141:7
 class AfF32F16 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2000,7 +2044,7 @@ std::string AfF32F16::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match scalar_no_f32'
-/// @see src/tint/intrinsics.def:141:7
+/// @see src/tint/intrinsics.def:142:7
 class ScalarNoF32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2041,7 +2085,7 @@ std::string ScalarNoF32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match scalar_no_f16'
-/// @see src/tint/intrinsics.def:142:7
+/// @see src/tint/intrinsics.def:143:7
 class ScalarNoF16 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2082,7 +2126,7 @@ std::string ScalarNoF16::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match scalar_no_i32'
-/// @see src/tint/intrinsics.def:143:7
+/// @see src/tint/intrinsics.def:144:7
 class ScalarNoI32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2123,7 +2167,7 @@ std::string ScalarNoI32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match scalar_no_u32'
-/// @see src/tint/intrinsics.def:144:7
+/// @see src/tint/intrinsics.def:145:7
 class ScalarNoU32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2164,7 +2208,7 @@ std::string ScalarNoU32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match scalar_no_bool'
-/// @see src/tint/intrinsics.def:145:7
+/// @see src/tint/intrinsics.def:146:7
 class ScalarNoBool : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2205,7 +2249,7 @@ std::string ScalarNoBool::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match f32_texel_format'
-/// @see src/tint/intrinsics.def:156:7
+/// @see src/tint/intrinsics.def:157:7
 class F32TexelFormat : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2238,7 +2282,7 @@ std::string F32TexelFormat::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match i32_texel_format'
-/// @see src/tint/intrinsics.def:158:7
+/// @see src/tint/intrinsics.def:159:7
 class I32TexelFormat : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2270,7 +2314,7 @@ std::string I32TexelFormat::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match u32_texel_format'
-/// @see src/tint/intrinsics.def:160:7
+/// @see src/tint/intrinsics.def:161:7
 class U32TexelFormat : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2302,7 +2346,7 @@ std::string U32TexelFormat::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match write_only'
-/// @see src/tint/intrinsics.def:163:7
+/// @see src/tint/intrinsics.def:164:7
 class WriteOnly : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2328,7 +2372,7 @@ std::string WriteOnly::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match function_private_workgroup'
-/// @see src/tint/intrinsics.def:165:7
+/// @see src/tint/intrinsics.def:166:7
 class FunctionPrivateWorkgroup : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2358,7 +2402,7 @@ std::string FunctionPrivateWorkgroup::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match workgroup_or_storage'
-/// @see src/tint/intrinsics.def:166:7
+/// @see src/tint/intrinsics.def:167:7
 class WorkgroupOrStorage : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2524,6 +2568,7 @@ class Matchers {
   Fi32F16 Fi32F16_;
   Iu32 Iu32_;
   Aiu32 Aiu32_;
+  Afi32F16 Afi32F16_;
   Scalar Scalar_;
   AbstractOrScalar AbstractOrScalar_;
   AfF32 AfF32_;
@@ -2550,7 +2595,7 @@ class Matchers {
   ~Matchers();
 
   /// The template types, types, and type matchers
-  TypeMatcher const* const type[66] = {
+  TypeMatcher const* const type[67] = {
     /* [0] */ &template_type_0_,
     /* [1] */ &template_type_1_,
     /* [2] */ &Bool_,
@@ -2608,15 +2653,16 @@ class Matchers {
     /* [54] */ &Fi32F16_,
     /* [55] */ &Iu32_,
     /* [56] */ &Aiu32_,
-    /* [57] */ &Scalar_,
-    /* [58] */ &AbstractOrScalar_,
-    /* [59] */ &AfF32_,
-    /* [60] */ &AfF32F16_,
-    /* [61] */ &ScalarNoF32_,
-    /* [62] */ &ScalarNoF16_,
-    /* [63] */ &ScalarNoI32_,
-    /* [64] */ &ScalarNoU32_,
-    /* [65] */ &ScalarNoBool_,
+    /* [57] */ &Afi32F16_,
+    /* [58] */ &Scalar_,
+    /* [59] */ &AbstractOrScalar_,
+    /* [60] */ &AfF32_,
+    /* [61] */ &AfF32F16_,
+    /* [62] */ &ScalarNoF32_,
+    /* [63] */ &ScalarNoF16_,
+    /* [64] */ &ScalarNoI32_,
+    /* [65] */ &ScalarNoU32_,
+    /* [66] */ &ScalarNoBool_,
   };
 
   /// The template numbers, and number matchers
@@ -7914,7 +7960,7 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [1] */
     /* name */ "U",
-    /* matcher index */ 65,
+    /* matcher index */ 66,
   },
   {
     /* [2] */
@@ -7924,7 +7970,7 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [3] */
     /* name */ "U",
-    /* matcher index */ 61,
+    /* matcher index */ 62,
   },
   {
     /* [4] */
@@ -7934,7 +7980,7 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [5] */
     /* name */ "U",
-    /* matcher index */ 62,
+    /* matcher index */ 63,
   },
   {
     /* [6] */
@@ -7944,7 +7990,7 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [7] */
     /* name */ "U",
-    /* matcher index */ 63,
+    /* matcher index */ 64,
   },
   {
     /* [8] */
@@ -7954,7 +8000,7 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [9] */
     /* name */ "U",
-    /* matcher index */ 64,
+    /* matcher index */ 65,
   },
   {
     /* [10] */
@@ -7964,7 +8010,7 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [11] */
     /* name */ "T",
-    /* matcher index */ 60,
+    /* matcher index */ 61,
   },
   {
     /* [12] */
@@ -7979,12 +8025,12 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [14] */
     /* name */ "T",
-    /* matcher index */ 58,
+    /* matcher index */ 59,
   },
   {
     /* [15] */
     /* name */ "T",
-    /* matcher index */ 57,
+    /* matcher index */ 58,
   },
   {
     /* [16] */
@@ -7994,27 +8040,27 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [17] */
     /* name */ "T",
-    /* matcher index */ 65,
+    /* matcher index */ 66,
   },
   {
     /* [18] */
     /* name */ "T",
-    /* matcher index */ 62,
+    /* matcher index */ 63,
   },
   {
     /* [19] */
     /* name */ "T",
-    /* matcher index */ 61,
+    /* matcher index */ 62,
   },
   {
     /* [20] */
     /* name */ "T",
-    /* matcher index */ 64,
+    /* matcher index */ 65,
   },
   {
     /* [21] */
     /* name */ "T",
-    /* matcher index */ 63,
+    /* matcher index */ 64,
   },
   {
     /* [22] */
@@ -8024,7 +8070,7 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [23] */
     /* name */ "T",
-    /* matcher index */ 54,
+    /* matcher index */ 57,
   },
   {
     /* [24] */
@@ -13161,7 +13207,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[862],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::OpMinus,
   },
   {
     /* [423] */
@@ -13173,7 +13219,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[863],
     /* return matcher indices */ &kMatcherIndices[39],
     /* flags */ OverloadFlags(OverloadFlag::kIsOperator, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::OpMinus,
   },
   {
     /* [424] */
@@ -14521,8 +14567,8 @@ constexpr IntrinsicInfo kUnaryOperators[] = {
   },
   {
     /* [2] */
-    /* op -<T : fi32f16>(T) -> T */
-    /* op -<T : fi32f16, N : num>(vec<N, T>) -> vec<N, T> */
+    /* op -<T : afi32f16>(T) -> T */
+    /* op -<T : afi32f16, N : num>(vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[422],
   },
