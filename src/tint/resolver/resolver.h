@@ -35,6 +35,7 @@
 #include "src/tint/sem/constant.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/struct.h"
+#include "src/tint/utils/bitset.h"
 #include "src/tint/utils/unique_vector.h"
 
 // Forward declarations
@@ -420,7 +421,7 @@ class Resolver {
     ast::Extensions enabled_extensions_;
     std::vector<sem::Function*> entry_points_;
     std::unordered_map<const sem::Type*, const Source&> atomic_composite_info_;
-    std::unordered_set<const ast::Node*> marked_;
+    utils::Bitset<0> marked_;
     std::unordered_map<uint32_t, const sem::Variable*> constant_ids_;
     std::unordered_map<ArrayConstructorSig, sem::CallTarget*> array_ctors_;
     std::unordered_map<StructConstructorSig, sem::CallTarget*> struct_ctors_;
