@@ -200,7 +200,10 @@ enum class Method {
     // @workgroup_size(target_expr, abstract_expr, 123)
     // @compute
     // fn f() {}
-    kWorkgroupSize
+    kWorkgroupSize,
+
+    // abstract_expr[runtime-index]
+    kRuntimeIndex,
 };
 
 static std::ostream& operator<<(std::ostream& o, Method m) {
@@ -235,6 +238,8 @@ static std::ostream& operator<<(std::ostream& o, Method m) {
             return o << "switch-case-with-abstract";
         case Method::kWorkgroupSize:
             return o << "workgroup-size";
+        case Method::kRuntimeIndex:
+            return o << "dynamic-index";
     }
     return o << "<unknown>";
 }
@@ -369,6 +374,10 @@ TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
             Func("f", {}, ty.void_(), {},
                  {WorkgroupSize(target_expr(), abstract_expr, Expr(123_a)),
                   Stage(ast::PipelineStage::kCompute)});
+            break;
+        case Method::kRuntimeIndex:
+            auto* runtime_index = Var("runtime_index", nullptr, Expr(1_i));
+            WrapInFunction(runtime_index, IndexAccessor(abstract_expr, runtime_index));
             break;
     }
 
@@ -512,6 +521,27 @@ INSTANTIATE_TEST_SUITE_P(
                      })));
 
 INSTANTIATE_TEST_SUITE_P(
+    MaterializeVectorRuntimeIndex,
+    MaterializeAbstractNumericToConcreteType,
+    testing::Combine(testing::Values(Expectation::kMaterialize),
+                     testing::Values(Method::kRuntimeIndex),
+                     testing::ValuesIn(std::vector<Data>{
+                         Types<i32V, AIntV>(0_a, 0.0),                                  //
+                         Types<i32V, AIntV>(1_a, 1.0),                                  //
+                         Types<i32V, AIntV>(-1_a, -1.0),                                //
+                         Types<i32V, AIntV>(AInt(kHighestI32), kHighestI32),            //
+                         Types<i32V, AIntV>(AInt(kLowestI32), kLowestI32),              //
+                         Types<f32V, AFloatV>(0.0_a, 0.0),                              //
+                         Types<f32V, AFloatV>(1.0_a, 1.0),                              //
+                         Types<f32V, AFloatV>(-1.0_a, -1.0),                            //
+                         Types<f32V, AFloatV>(AFloat(kHighestF32), kHighestF32),        //
+                         Types<f32V, AFloatV>(AFloat(kLowestF32), kLowestF32),          //
+                         Types<f32V, AFloatV>(AFloat(kPiF32), kPiF64),                  //
+                         Types<f32V, AFloatV>(AFloat(kSubnormalF32), kSubnormalF32),    //
+                         Types<f32V, AFloatV>(AFloat(-kSubnormalF32), -kSubnormalF32),  //
+                     })));
+
+INSTANTIATE_TEST_SUITE_P(
     MaterializeMatrix,
     MaterializeAbstractNumericToConcreteType,
     testing::Combine(testing::Values(Expectation::kMaterialize),
@@ -533,6 +563,22 @@ INSTANTIATE_TEST_SUITE_P(
                          /* Types<f16M, AFloatM>(AFloat(kPiF16), kPiF64),                 */  //
                          /* Types<f16M, AFloatM>(AFloat(kSubnormalF16), kSubnormalF16),   */  //
                          /* Types<f16M, AFloatM>(AFloat(-kSubnormalF16), -kSubnormalF16), */  //
+                     })));
+
+INSTANTIATE_TEST_SUITE_P(
+    MaterializeMatrixRuntimeIndex,
+    MaterializeAbstractNumericToConcreteType,
+    testing::Combine(testing::Values(Expectation::kMaterialize),
+                     testing::Values(Method::kRuntimeIndex),
+                     testing::ValuesIn(std::vector<Data>{
+                         Types<f32M, AFloatM>(0.0_a, 0.0),                              //
+                         Types<f32M, AFloatM>(1.0_a, 1.0),                              //
+                         Types<f32M, AFloatM>(-1.0_a, -1.0),                            //
+                         Types<f32M, AFloatM>(AFloat(kHighestF32), kHighestF32),        //
+                         Types<f32M, AFloatM>(AFloat(kLowestF32), kLowestF32),          //
+                         Types<f32M, AFloatM>(AFloat(kPiF32), kPiF64),                  //
+                         Types<f32M, AFloatM>(AFloat(kSubnormalF32), kSubnormalF32),    //
+                         Types<f32M, AFloatM>(AFloat(-kSubnormalF32), -kSubnormalF32),  //
                      })));
 
 INSTANTIATE_TEST_SUITE_P(MaterializeSwitch,
@@ -998,12 +1044,14 @@ INSTANTIATE_TEST_SUITE_P(ArrayLengthValueCannotBeRepresented,
 
 }  // namespace materialize_abstract_numeric_to_default_type
 
+namespace materialize_abstract_numeric_to_unrelated_type {
+
 using MaterializeAbstractNumericToUnrelatedType = resolver::ResolverTest;
 
 TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructVarCtor) {
     Structure("S", {Member("a", ty.i32())});
     WrapInFunction(Decl(Var("v", ty.type_name("S"), Expr(Source{{12, 34}}, 1_a))));
-    ASSERT_FALSE(r()->Resolve());
+    EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
         testing::HasSubstr("error: cannot convert value of type 'abstract-int' to type 'S'"));
@@ -1012,11 +1060,13 @@ TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructVarCtor) {
 TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructLetCtor) {
     Structure("S", {Member("a", ty.i32())});
     WrapInFunction(Decl(Let("v", ty.type_name("S"), Expr(Source{{12, 34}}, 1_a))));
-    ASSERT_FALSE(r()->Resolve());
+    EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
         r()->error(),
         testing::HasSubstr("error: cannot convert value of type 'abstract-int' to type 'S'"));
 }
+
+}  // namespace materialize_abstract_numeric_to_unrelated_type
 
 }  // namespace
 }  // namespace tint::resolver

@@ -1399,7 +1399,13 @@ sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* exp
     if (!idx) {
         return nullptr;
     }
-    auto* obj = sem_.Get(expr->object);
+    const auto* obj = sem_.Get(expr->object);
+    if (idx->Stage() != sem::EvaluationStage::kConstant) {
+        // If the index is non-constant, then the resulting expression is non-constant, so we'll
+        // have to materialize the object. For example, consider:
+        //     vec2(1, 2)[runtime-index]
+        obj = Materialize(obj);
+    }
     auto* obj_raw_ty = obj->Type();
     auto* obj_ty = obj_raw_ty->UnwrapRef();
     auto* ty = Switch(
