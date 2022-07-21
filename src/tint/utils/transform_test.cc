@@ -26,7 +26,7 @@
 namespace tint::utils {
 namespace {
 
-TEST(TransformTest, Empty) {
+TEST(TransformTest, StdVectorEmpty) {
     const std::vector<int> empty{};
     {
         auto transformed = Transform(empty, [](int) -> int {
@@ -46,21 +46,21 @@ TEST(TransformTest, Empty) {
     }
 }
 
-TEST(TransformTest, Identity) {
+TEST(TransformTest, StdVectorIdentity) {
     const std::vector<int> input{1, 2, 3, 4};
     auto transformed = Transform(input, [](int i) { return i; });
     CHECK_ELEMENT_TYPE(transformed, int);
     EXPECT_THAT(transformed, testing::ElementsAre(1, 2, 3, 4));
 }
 
-TEST(TransformTest, IdentityWithIndex) {
+TEST(TransformTest, StdVectorIdentityWithIndex) {
     const std::vector<int> input{1, 2, 3, 4};
     auto transformed = Transform(input, [](int i, size_t) { return i; });
     CHECK_ELEMENT_TYPE(transformed, int);
     EXPECT_THAT(transformed, testing::ElementsAre(1, 2, 3, 4));
 }
 
-TEST(TransformTest, Index) {
+TEST(TransformTest, StdVectorIndex) {
     const std::vector<int> input{10, 20, 30, 40};
     {
         auto transformed = Transform(input, [](int, size_t idx) { return idx; });
@@ -69,7 +69,7 @@ TEST(TransformTest, Index) {
     }
 }
 
-TEST(TransformTest, TransformSameType) {
+TEST(TransformTest, TransformStdVectorSameType) {
     const std::vector<int> input{1, 2, 3, 4};
     {
         auto transformed = Transform(input, [](int i) { return i * 10; });
@@ -78,7 +78,7 @@ TEST(TransformTest, TransformSameType) {
     }
 }
 
-TEST(TransformTest, TransformDifferentType) {
+TEST(TransformTest, TransformStdVectorDifferentType) {
     const std::vector<int> input{1, 2, 3, 4};
     {
         auto transformed = Transform(input, [](int i) { return std::to_string(i); });
@@ -87,7 +87,7 @@ TEST(TransformTest, TransformDifferentType) {
     }
 }
 
-TEST(TransformNTest, Empty) {
+TEST(TransformNTest, StdVectorEmpty) {
     const std::vector<int> empty{};
     {
         auto transformed = TransformN(empty, 4u, [](int) -> int {
@@ -107,7 +107,7 @@ TEST(TransformNTest, Empty) {
     }
 }
 
-TEST(TransformNTest, Identity) {
+TEST(TransformNTest, StdVectorIdentity) {
     const std::vector<int> input{1, 2, 3, 4};
     {
         auto transformed = TransformN(input, 0u, [](int) {
@@ -129,7 +129,7 @@ TEST(TransformNTest, Identity) {
     }
 }
 
-TEST(TransformNTest, IdentityWithIndex) {
+TEST(TransformNTest, StdVectorIdentityWithIndex) {
     const std::vector<int> input{1, 2, 3, 4};
     {
         auto transformed = TransformN(input, 0u, [](int, size_t) {
@@ -151,7 +151,7 @@ TEST(TransformNTest, IdentityWithIndex) {
     }
 }
 
-TEST(TransformNTest, Index) {
+TEST(TransformNTest, StdVectorIndex) {
     const std::vector<int> input{10, 20, 30, 40};
     {
         auto transformed = TransformN(input, 0u, [](int, size_t) {
@@ -173,7 +173,7 @@ TEST(TransformNTest, Index) {
     }
 }
 
-TEST(TransformNTest, TransformSameType) {
+TEST(TransformNTest, StdVectorTransformSameType) {
     const std::vector<int> input{1, 2, 3, 4};
     {
         auto transformed = TransformN(input, 0u, [](int, size_t) {
@@ -195,7 +195,7 @@ TEST(TransformNTest, TransformSameType) {
     }
 }
 
-TEST(TransformNTest, TransformDifferentType) {
+TEST(TransformNTest, StdVectorTransformDifferentType) {
     const std::vector<int> input{1, 2, 3, 4};
     {
         auto transformed = TransformN(input, 0u, [](int) {
@@ -212,6 +212,201 @@ TEST(TransformNTest, TransformDifferentType) {
     }
     {
         auto transformed = TransformN(input, 9u, [](int i) { return std::to_string(i); });
+        CHECK_ELEMENT_TYPE(transformed, std::string);
+        EXPECT_THAT(transformed, testing::ElementsAre("1", "2", "3", "4"));
+    }
+}
+
+TEST(TransformTest, TintVectorEmpty) {
+    const Vector<int, 4> empty{};
+    {
+        auto transformed = Transform(empty, [](int) -> int {
+            [] { FAIL() << "Callback should not be called for empty vector"; }();
+            return 0;
+        });
+        CHECK_ELEMENT_TYPE(transformed, int);
+        EXPECT_EQ(transformed.Length(), 0u);
+    }
+    {
+        auto transformed = Transform(empty, [](int, size_t) -> int {
+            [] { FAIL() << "Callback should not be called for empty vector"; }();
+            return 0;
+        });
+        CHECK_ELEMENT_TYPE(transformed, int);
+        EXPECT_EQ(transformed.Length(), 0u);
+    }
+}
+
+TEST(TransformTest, TintVectorIdentity) {
+    const Vector<int, 4> input{1, 2, 3, 4};
+    auto transformed = Transform(input, [](int i) { return i; });
+    CHECK_ELEMENT_TYPE(transformed, int);
+    EXPECT_THAT(transformed, testing::ElementsAre(1, 2, 3, 4));
+}
+
+TEST(TransformTest, TintVectorIdentityWithIndex) {
+    const Vector<int, 4> input{1, 2, 3, 4};
+    auto transformed = Transform(input, [](int i, size_t) { return i; });
+    CHECK_ELEMENT_TYPE(transformed, int);
+    EXPECT_THAT(transformed, testing::ElementsAre(1, 2, 3, 4));
+}
+
+TEST(TransformTest, TintVectorIndex) {
+    const Vector<int, 4> input{10, 20, 30, 40};
+    {
+        auto transformed = Transform(input, [](int, size_t idx) { return idx; });
+        CHECK_ELEMENT_TYPE(transformed, size_t);
+        EXPECT_THAT(transformed, testing::ElementsAre(0u, 1u, 2u, 3u));
+    }
+}
+
+TEST(TransformTest, TransformTintVectorSameType) {
+    const Vector<int, 4> input{1, 2, 3, 4};
+    {
+        auto transformed = Transform(input, [](int i) { return i * 10; });
+        CHECK_ELEMENT_TYPE(transformed, int);
+        EXPECT_THAT(transformed, testing::ElementsAre(10, 20, 30, 40));
+    }
+}
+
+TEST(TransformTest, TransformTintVectorDifferentType) {
+    const Vector<int, 4> input{1, 2, 3, 4};
+    {
+        auto transformed = Transform(input, [](int i) { return std::to_string(i); });
+        CHECK_ELEMENT_TYPE(transformed, std::string);
+        EXPECT_THAT(transformed, testing::ElementsAre("1", "2", "3", "4"));
+    }
+}
+
+TEST(TransformTest, VectorRefEmpty) {
+    Vector<int, 4> empty{};
+    VectorRef<int> ref(empty);
+    {
+        auto transformed = Transform<4>(ref, [](int) -> int {
+            [] { FAIL() << "Callback should not be called for empty vector"; }();
+            return 0;
+        });
+        CHECK_ELEMENT_TYPE(transformed, int);
+        EXPECT_EQ(transformed.Length(), 0u);
+    }
+    {
+        auto transformed = Transform<4>(ref, [](int, size_t) -> int {
+            [] { FAIL() << "Callback should not be called for empty vector"; }();
+            return 0;
+        });
+        CHECK_ELEMENT_TYPE(transformed, int);
+        EXPECT_EQ(transformed.Length(), 0u);
+    }
+}
+
+TEST(TransformTest, VectorRefIdentity) {
+    Vector<int, 4> input{1, 2, 3, 4};
+    VectorRef<int> ref(input);
+    auto transformed = Transform<8>(ref, [](int i) { return i; });
+    CHECK_ELEMENT_TYPE(transformed, int);
+    EXPECT_THAT(transformed, testing::ElementsAre(1, 2, 3, 4));
+}
+
+TEST(TransformTest, VectorRefIdentityWithIndex) {
+    Vector<int, 4> input{1, 2, 3, 4};
+    VectorRef<int> ref(input);
+    auto transformed = Transform<2>(ref, [](int i, size_t) { return i; });
+    CHECK_ELEMENT_TYPE(transformed, int);
+    EXPECT_THAT(transformed, testing::ElementsAre(1, 2, 3, 4));
+}
+
+TEST(TransformTest, VectorRefIndex) {
+    Vector<int, 4> input{10, 20, 30, 40};
+    VectorRef<int> ref(input);
+    {
+        auto transformed = Transform<4>(ref, [](int, size_t idx) { return idx; });
+        CHECK_ELEMENT_TYPE(transformed, size_t);
+        EXPECT_THAT(transformed, testing::ElementsAre(0u, 1u, 2u, 3u));
+    }
+}
+
+TEST(TransformTest, TransformVectorRefSameType) {
+    Vector<int, 4> input{1, 2, 3, 4};
+    VectorRef<int> ref(input);
+    {
+        auto transformed = Transform<4>(ref, [](int i) { return i * 10; });
+        CHECK_ELEMENT_TYPE(transformed, int);
+        EXPECT_THAT(transformed, testing::ElementsAre(10, 20, 30, 40));
+    }
+}
+
+TEST(TransformTest, TransformVectorRefDifferentType) {
+    Vector<int, 4> input{1, 2, 3, 4};
+    VectorRef<int> ref(input);
+    {
+        auto transformed = Transform<4>(ref, [](int i) { return std::to_string(i); });
+        CHECK_ELEMENT_TYPE(transformed, std::string);
+        EXPECT_THAT(transformed, testing::ElementsAre("1", "2", "3", "4"));
+    }
+}
+
+TEST(TransformTest, ConstVectorRefEmpty) {
+    const Vector<int, 4> empty{};
+    ConstVectorRef<int> ref(empty);
+    {
+        auto transformed = Transform<4>(ref, [](int) -> int {
+            [] { FAIL() << "Callback should not be called for empty vector"; }();
+            return 0;
+        });
+        CHECK_ELEMENT_TYPE(transformed, int);
+        EXPECT_EQ(transformed.Length(), 0u);
+    }
+    {
+        auto transformed = Transform<4>(ref, [](int, size_t) -> int {
+            [] { FAIL() << "Callback should not be called for empty vector"; }();
+            return 0;
+        });
+        CHECK_ELEMENT_TYPE(transformed, int);
+        EXPECT_EQ(transformed.Length(), 0u);
+    }
+}
+
+TEST(TransformTest, ConstVectorRefIdentity) {
+    const Vector<int, 4> input{1, 2, 3, 4};
+    ConstVectorRef<int> ref(input);
+    auto transformed = Transform<8>(ref, [](int i) { return i; });
+    CHECK_ELEMENT_TYPE(transformed, int);
+    EXPECT_THAT(transformed, testing::ElementsAre(1, 2, 3, 4));
+}
+
+TEST(TransformTest, ConstVectorRefIdentityWithIndex) {
+    const Vector<int, 4> input{1, 2, 3, 4};
+    ConstVectorRef<int> ref(input);
+    auto transformed = Transform<2>(ref, [](int i, size_t) { return i; });
+    CHECK_ELEMENT_TYPE(transformed, int);
+    EXPECT_THAT(transformed, testing::ElementsAre(1, 2, 3, 4));
+}
+
+TEST(TransformTest, ConstVectorRefIndex) {
+    const Vector<int, 4> input{10, 20, 30, 40};
+    ConstVectorRef<int> ref(input);
+    {
+        auto transformed = Transform<4>(ref, [](int, size_t idx) { return idx; });
+        CHECK_ELEMENT_TYPE(transformed, size_t);
+        EXPECT_THAT(transformed, testing::ElementsAre(0u, 1u, 2u, 3u));
+    }
+}
+
+TEST(TransformTest, TransformConstVectorRefSameType) {
+    const Vector<int, 4> input{1, 2, 3, 4};
+    ConstVectorRef<int> ref(input);
+    {
+        auto transformed = Transform<4>(ref, [](int i) { return i * 10; });
+        CHECK_ELEMENT_TYPE(transformed, int);
+        EXPECT_THAT(transformed, testing::ElementsAre(10, 20, 30, 40));
+    }
+}
+
+TEST(TransformTest, TransformConstVectorRefDifferentType) {
+    const Vector<int, 4> input{1, 2, 3, 4};
+    ConstVectorRef<int> ref(input);
+    {
+        auto transformed = Transform<4>(ref, [](int i) { return std::to_string(i); });
         CHECK_ELEMENT_TYPE(transformed, std::string);
         EXPECT_THAT(transformed, testing::ElementsAre("1", "2", "3", "4"));
     }

@@ -21,6 +21,7 @@
 #include <vector>
 
 #include "src/tint/traits.h"
+#include "src/tint/utils/vector.h"
 
 namespace tint::utils {
 
@@ -47,6 +48,94 @@ auto Transform(const std::vector<IN>& in, TRANSFORMER&& transform)
     -> std::vector<decltype(transform(in[0], 1u))> {
     std::vector<decltype(transform(in[0], 1u))> result(in.size());
     for (size_t i = 0; i < result.size(); ++i) {
+        result[i] = transform(in[i], i);
+    }
+    return result;
+}
+
+/// Transform performs an element-wise transformation of a vector.
+/// @param in the input vector.
+/// @param transform the transformation function with signature: `OUT(IN)`
+/// @returns a new vector with each element of the source vector transformed by `transform`.
+template <typename IN, size_t N, typename TRANSFORMER>
+auto Transform(const Vector<IN, N>& in, TRANSFORMER&& transform)
+    -> Vector<decltype(transform(in[0]))> {
+    Vector<decltype(transform(in[0])), N> result(in.Length());
+    for (size_t i = 0; i < result.Length(); ++i) {
+        result[i] = transform(in[i]);
+    }
+    return result;
+}
+
+/// Transform performs an element-wise transformation of a vector.
+/// @param in the input vector.
+/// @param transform the transformation function with signature: `OUT(IN, size_t)`
+/// @returns a new vector with each element of the source vector transformed by `transform`.
+template <typename IN, size_t N, typename TRANSFORMER>
+auto Transform(const Vector<IN, N>& in, TRANSFORMER&& transform)
+    -> Vector<decltype(transform(in[0], 1u)), N> {
+    Vector<decltype(transform(in[0], 1u)), N> result(in.Length());
+    for (size_t i = 0; i < result.Length(); ++i) {
+        result[i] = transform(in[i], i);
+    }
+    return result;
+}
+
+/// Transform performs an element-wise transformation of a vector reference.
+/// @param in the input vector.
+/// @param transform the transformation function with signature: `OUT(IN)`
+/// @tparam N the small-array size of the returned Vector
+/// @returns a new vector with each element of the source vector transformed by `transform`.
+template <size_t N, typename IN, typename TRANSFORMER>
+auto Transform(const VectorRef<IN>& in, TRANSFORMER&& transform)
+    -> Vector<decltype(transform(in[0])), N> {
+    Vector<decltype(transform(in[0])), N> result(in.Length());
+    for (size_t i = 0; i < result.Length(); ++i) {
+        result[i] = transform(in[i]);
+    }
+    return result;
+}
+
+/// Transform performs an element-wise transformation of a vector reference.
+/// @param in the input vector.
+/// @param transform the transformation function with signature: `OUT(IN, size_t)`
+/// @tparam N the small-array size of the returned Vector
+/// @returns a new vector with each element of the source vector transformed by `transform`.
+template <size_t N, typename IN, typename TRANSFORMER>
+auto Transform(const VectorRef<IN>& in, TRANSFORMER&& transform)
+    -> Vector<decltype(transform(in[0], 1u)), N> {
+    Vector<decltype(transform(in[0], 1u)), N> result(in.Length());
+    for (size_t i = 0; i < result.Length(); ++i) {
+        result[i] = transform(in[i], i);
+    }
+    return result;
+}
+
+/// Transform performs an element-wise transformation of a vector reference.
+/// @param in the input vector.
+/// @param transform the transformation function with signature: `OUT(IN)`
+/// @tparam N the small-array size of the returned Vector
+/// @returns a new vector with each element of the source vector transformed by `transform`.
+template <size_t N, typename IN, typename TRANSFORMER>
+auto Transform(ConstVectorRef<IN> in, TRANSFORMER&& transform)
+    -> Vector<decltype(transform(in[0])), N> {
+    Vector<decltype(transform(in[0])), N> result(in.Length());
+    for (size_t i = 0; i < result.Length(); ++i) {
+        result[i] = transform(in[i]);
+    }
+    return result;
+}
+
+/// Transform performs an element-wise transformation of a vector reference.
+/// @param in the input vector.
+/// @param transform the transformation function with signature: `OUT(IN, size_t)`
+/// @tparam N the small-array size of the returned Vector
+/// @returns a new vector with each element of the source vector transformed by `transform`.
+template <size_t N, typename IN, typename TRANSFORMER>
+auto Transform(ConstVectorRef<IN> in, TRANSFORMER&& transform)
+    -> Vector<decltype(transform(in[0], 1u)), N> {
+    Vector<decltype(transform(in[0], 1u)), N> result(in.Length());
+    for (size_t i = 0; i < result.Length(); ++i) {
         result[i] = transform(in[i], i);
     }
     return result;

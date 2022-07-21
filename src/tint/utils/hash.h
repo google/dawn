@@ -22,6 +22,8 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/utils/vector.h"
+
 namespace tint::utils {
 namespace detail {
 
@@ -62,6 +64,15 @@ template <typename T>
 void HashCombine(size_t* hash, const std::vector<T>& vector) {
     HashCombine(hash, vector.size());
     for (auto& el : vector) {
+        HashCombine(hash, el);
+    }
+}
+
+/// HashCombine "hashes" together an existing hash and hashable values.
+template <typename T, size_t N>
+void HashCombine(size_t* hash, const utils::Vector<T, N>& list) {
+    HashCombine(hash, list.Length());
+    for (auto& el : list) {
         HashCombine(hash, el);
     }
 }

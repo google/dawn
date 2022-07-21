@@ -474,6 +474,7 @@ set(TINT_LIB_SRCS
   utils/string.h
   utils/unique_allocator.h
   utils/unique_vector.h
+  utils/vector.h
   writer/append_vector.cc
   writer/append_vector.h
   writer/array_length_from_uniform_options.cc
@@ -857,6 +858,7 @@ if(TINT_BUILD_TESTS)
     utils/transform_test.cc
     utils/unique_allocator_test.cc
     utils/unique_vector_test.cc
+    utils/vector_test.cc
     writer/append_vector_test.cc
     writer/flatten_bindings_test.cc
     writer/float_to_string_test.cc
