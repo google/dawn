@@ -332,7 +332,7 @@ func validate(fqn sem.FullyQualifiedName, uses *sem.StageUses) bool {
 			strings.Contains(elTyName, "sampler"),
 			strings.Contains(elTyName, "texture"):
 			return false // Not storable
-		case elTyName == "af" || elTyName == "ai":
+		case elTyName == "fa" || elTyName == "ia":
 			return false // Abstract types are not typeable nor supported by arrays
 		}
 	case "ptr":

@@ -51,9 +51,9 @@ std::string Bool::String(MatchState*) const {
   return "bool";
 }
 
-/// TypeMatcher for 'type af'
+/// TypeMatcher for 'type fa'
 /// @see src/tint/intrinsics.def:74:48
-class Af : public TypeMatcher {
+class Fa : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
   /// Match may define and refine the template types and numbers in state.
@@ -67,22 +67,22 @@ class Af : public TypeMatcher {
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Af::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_af(ty)) {
+const sem::Type* Fa::Match(MatchState& state, const sem::Type* ty) const {
+  if (!match_fa(ty)) {
     return nullptr;
   }
-  return build_af(state);
+  return build_fa(state);
 }
 
-std::string Af::String(MatchState*) const {
+std::string Fa::String(MatchState*) const {
   std::stringstream ss;
   ss << "abstract-float";
   return ss.str();
 }
 
-/// TypeMatcher for 'type ai'
+/// TypeMatcher for 'type ia'
 /// @see src/tint/intrinsics.def:75:48
-class Ai : public TypeMatcher {
+class Ia : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
   /// Match may define and refine the template types and numbers in state.
@@ -96,14 +96,14 @@ class Ai : public TypeMatcher {
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Ai::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_ai(ty)) {
+const sem::Type* Ia::Match(MatchState& state, const sem::Type* ty) const {
+  if (!match_ia(ty)) {
     return nullptr;
   }
-  return build_ai(state);
+  return build_ia(state);
 }
 
-std::string Ai::String(MatchState*) const {
+std::string Ia::String(MatchState*) const {
   std::stringstream ss;
   ss << "abstract-int";
   return ss.str();
@@ -1572,9 +1572,9 @@ std::string AtomicCompareExchangeResult::String(MatchState* state) const {
   return "__atomic_compare_exchange_result<" + T + ">";
 }
 
-/// TypeMatcher for 'match f32f16'
+/// TypeMatcher for 'match abstract_or_scalar'
 /// @see src/tint/intrinsics.def:130:7
-class F32F16 : public TypeMatcher {
+class AbstractOrScalar : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
   /// expected, canonicalized type on success.
@@ -1589,80 +1589,13 @@ class F32F16 : public TypeMatcher {
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* F32F16::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_f32(ty)) {
-    return build_f32(state);
+const sem::Type* AbstractOrScalar::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_fa(ty)) {
+    return build_fa(state);
   }
-  if (match_f16(ty)) {
-    return build_f16(state);
+  if (match_ia(ty)) {
+    return build_ia(state);
   }
-  return nullptr;
-}
-
-std::string F32F16::String(MatchState*) const {
-  std::stringstream ss;
-  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
-  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss << F32().String(nullptr) << " or " << F16().String(nullptr);
-  return ss.str();
-}
-
-/// TypeMatcher for 'match fiu32'
-/// @see src/tint/intrinsics.def:131:7
-class Fiu32 : public TypeMatcher {
- public:
-  /// Checks whether the given type matches the matcher rules, and returns the
-  /// expected, canonicalized type on success.
-  /// Match may define and refine the template types and numbers in state.
-  /// @param state the MatchState
-  /// @param type the type to match
-  /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
-  /// @param state the MatchState
-  /// @return a string representation of the matcher.
-  std::string String(MatchState* state) const override;
-};
-
-const sem::Type* Fiu32::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_i32(ty)) {
-    return build_i32(state);
-  }
-  if (match_u32(ty)) {
-    return build_u32(state);
-  }
-  if (match_f32(ty)) {
-    return build_f32(state);
-  }
-  return nullptr;
-}
-
-std::string Fiu32::String(MatchState*) const {
-  std::stringstream ss;
-  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
-  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss << F32().String(nullptr) << ", " << I32().String(nullptr) << " or " << U32().String(nullptr);
-  return ss.str();
-}
-
-/// TypeMatcher for 'match fiu32f16'
-/// @see src/tint/intrinsics.def:132:7
-class Fiu32F16 : public TypeMatcher {
- public:
-  /// Checks whether the given type matches the matcher rules, and returns the
-  /// expected, canonicalized type on success.
-  /// Match may define and refine the template types and numbers in state.
-  /// @param state the MatchState
-  /// @param type the type to match
-  /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
-  /// @param state the MatchState
-  /// @return a string representation of the matcher.
-  std::string String(MatchState* state) const override;
-};
-
-const sem::Type* Fiu32F16::Match(MatchState& state, const sem::Type* ty) const {
   if (match_i32(ty)) {
     return build_i32(state);
   }
@@ -1675,209 +1608,22 @@ const sem::Type* Fiu32F16::Match(MatchState& state, const sem::Type* ty) const {
   if (match_f16(ty)) {
     return build_f16(state);
   }
-  return nullptr;
-}
-
-std::string Fiu32F16::String(MatchState*) const {
-  std::stringstream ss;
-  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
-  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss << F32().String(nullptr) << ", " << F16().String(nullptr) << ", " << I32().String(nullptr) << " or " << U32().String(nullptr);
-  return ss.str();
-}
-
-/// TypeMatcher for 'match fi32'
-/// @see src/tint/intrinsics.def:133:7
-class Fi32 : public TypeMatcher {
- public:
-  /// Checks whether the given type matches the matcher rules, and returns the
-  /// expected, canonicalized type on success.
-  /// Match may define and refine the template types and numbers in state.
-  /// @param state the MatchState
-  /// @param type the type to match
-  /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
-  /// @param state the MatchState
-  /// @return a string representation of the matcher.
-  std::string String(MatchState* state) const override;
-};
-
-const sem::Type* Fi32::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_i32(ty)) {
-    return build_i32(state);
-  }
-  if (match_f32(ty)) {
-    return build_f32(state);
+  if (match_bool(ty)) {
+    return build_bool(state);
   }
   return nullptr;
 }
 
-std::string Fi32::String(MatchState*) const {
+std::string AbstractOrScalar::String(MatchState*) const {
   std::stringstream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss << F32().String(nullptr) << " or " << I32().String(nullptr);
-  return ss.str();
-}
-
-/// TypeMatcher for 'match fi32f16'
-/// @see src/tint/intrinsics.def:134:7
-class Fi32F16 : public TypeMatcher {
- public:
-  /// Checks whether the given type matches the matcher rules, and returns the
-  /// expected, canonicalized type on success.
-  /// Match may define and refine the template types and numbers in state.
-  /// @param state the MatchState
-  /// @param type the type to match
-  /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
-  /// @param state the MatchState
-  /// @return a string representation of the matcher.
-  std::string String(MatchState* state) const override;
-};
-
-const sem::Type* Fi32F16::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_i32(ty)) {
-    return build_i32(state);
-  }
-  if (match_f32(ty)) {
-    return build_f32(state);
-  }
-  if (match_f16(ty)) {
-    return build_f16(state);
-  }
-  return nullptr;
-}
-
-std::string Fi32F16::String(MatchState*) const {
-  std::stringstream ss;
-  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
-  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss << F32().String(nullptr) << ", " << F16().String(nullptr) << " or " << I32().String(nullptr);
-  return ss.str();
-}
-
-/// TypeMatcher for 'match iu32'
-/// @see src/tint/intrinsics.def:135:7
-class Iu32 : public TypeMatcher {
- public:
-  /// Checks whether the given type matches the matcher rules, and returns the
-  /// expected, canonicalized type on success.
-  /// Match may define and refine the template types and numbers in state.
-  /// @param state the MatchState
-  /// @param type the type to match
-  /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
-  /// @param state the MatchState
-  /// @return a string representation of the matcher.
-  std::string String(MatchState* state) const override;
-};
-
-const sem::Type* Iu32::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_i32(ty)) {
-    return build_i32(state);
-  }
-  if (match_u32(ty)) {
-    return build_u32(state);
-  }
-  return nullptr;
-}
-
-std::string Iu32::String(MatchState*) const {
-  std::stringstream ss;
-  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
-  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss << I32().String(nullptr) << " or " << U32().String(nullptr);
-  return ss.str();
-}
-
-/// TypeMatcher for 'match aiu32'
-/// @see src/tint/intrinsics.def:136:7
-class Aiu32 : public TypeMatcher {
- public:
-  /// Checks whether the given type matches the matcher rules, and returns the
-  /// expected, canonicalized type on success.
-  /// Match may define and refine the template types and numbers in state.
-  /// @param state the MatchState
-  /// @param type the type to match
-  /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
-  /// @param state the MatchState
-  /// @return a string representation of the matcher.
-  std::string String(MatchState* state) const override;
-};
-
-const sem::Type* Aiu32::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_ai(ty)) {
-    return build_ai(state);
-  }
-  if (match_i32(ty)) {
-    return build_i32(state);
-  }
-  if (match_u32(ty)) {
-    return build_u32(state);
-  }
-  return nullptr;
-}
-
-std::string Aiu32::String(MatchState*) const {
-  std::stringstream ss;
-  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
-  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss << Ai().String(nullptr) << ", " << I32().String(nullptr) << " or " << U32().String(nullptr);
-  return ss.str();
-}
-
-/// TypeMatcher for 'match afi32f16'
-/// @see src/tint/intrinsics.def:137:7
-class Afi32F16 : public TypeMatcher {
- public:
-  /// Checks whether the given type matches the matcher rules, and returns the
-  /// expected, canonicalized type on success.
-  /// Match may define and refine the template types and numbers in state.
-  /// @param state the MatchState
-  /// @param type the type to match
-  /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
-  /// @param state the MatchState
-  /// @return a string representation of the matcher.
-  std::string String(MatchState* state) const override;
-};
-
-const sem::Type* Afi32F16::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_af(ty)) {
-    return build_af(state);
-  }
-  if (match_ai(ty)) {
-    return build_ai(state);
-  }
-  if (match_i32(ty)) {
-    return build_i32(state);
-  }
-  if (match_f32(ty)) {
-    return build_f32(state);
-  }
-  if (match_f16(ty)) {
-    return build_f16(state);
-  }
-  return nullptr;
-}
-
-std::string Afi32F16::String(MatchState*) const {
-  std::stringstream ss;
-  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
-  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss << Ai().String(nullptr) << ", " << Af().String(nullptr) << ", " << F32().String(nullptr) << ", " << I32().String(nullptr) << " or " << F16().String(nullptr);
+  ss << Ia().String(nullptr) << ", " << Fa().String(nullptr) << ", " << F32().String(nullptr) << ", " << F16().String(nullptr) << ", " << I32().String(nullptr) << ", " << U32().String(nullptr) << " or " << Bool().String(nullptr);
   return ss.str();
 }
 
 /// TypeMatcher for 'match scalar'
-/// @see src/tint/intrinsics.def:138:7
+/// @see src/tint/intrinsics.def:131:7
 class Scalar : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -1920,131 +1666,8 @@ std::string Scalar::String(MatchState*) const {
   return ss.str();
 }
 
-/// TypeMatcher for 'match abstract_or_scalar'
-/// @see src/tint/intrinsics.def:139:7
-class AbstractOrScalar : public TypeMatcher {
- public:
-  /// Checks whether the given type matches the matcher rules, and returns the
-  /// expected, canonicalized type on success.
-  /// Match may define and refine the template types and numbers in state.
-  /// @param state the MatchState
-  /// @param type the type to match
-  /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
-  /// @param state the MatchState
-  /// @return a string representation of the matcher.
-  std::string String(MatchState* state) const override;
-};
-
-const sem::Type* AbstractOrScalar::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_af(ty)) {
-    return build_af(state);
-  }
-  if (match_ai(ty)) {
-    return build_ai(state);
-  }
-  if (match_i32(ty)) {
-    return build_i32(state);
-  }
-  if (match_u32(ty)) {
-    return build_u32(state);
-  }
-  if (match_f32(ty)) {
-    return build_f32(state);
-  }
-  if (match_f16(ty)) {
-    return build_f16(state);
-  }
-  if (match_bool(ty)) {
-    return build_bool(state);
-  }
-  return nullptr;
-}
-
-std::string AbstractOrScalar::String(MatchState*) const {
-  std::stringstream ss;
-  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
-  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss << Ai().String(nullptr) << ", " << Af().String(nullptr) << ", " << F32().String(nullptr) << ", " << F16().String(nullptr) << ", " << I32().String(nullptr) << ", " << U32().String(nullptr) << " or " << Bool().String(nullptr);
-  return ss.str();
-}
-
-/// TypeMatcher for 'match af_f32'
-/// @see src/tint/intrinsics.def:140:7
-class AfF32 : public TypeMatcher {
- public:
-  /// Checks whether the given type matches the matcher rules, and returns the
-  /// expected, canonicalized type on success.
-  /// Match may define and refine the template types and numbers in state.
-  /// @param state the MatchState
-  /// @param type the type to match
-  /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
-  /// @param state the MatchState
-  /// @return a string representation of the matcher.
-  std::string String(MatchState* state) const override;
-};
-
-const sem::Type* AfF32::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_af(ty)) {
-    return build_af(state);
-  }
-  if (match_f32(ty)) {
-    return build_f32(state);
-  }
-  return nullptr;
-}
-
-std::string AfF32::String(MatchState*) const {
-  std::stringstream ss;
-  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
-  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss << Af().String(nullptr) << " or " << F32().String(nullptr);
-  return ss.str();
-}
-
-/// TypeMatcher for 'match af_f32f16'
-/// @see src/tint/intrinsics.def:141:7
-class AfF32F16 : public TypeMatcher {
- public:
-  /// Checks whether the given type matches the matcher rules, and returns the
-  /// expected, canonicalized type on success.
-  /// Match may define and refine the template types and numbers in state.
-  /// @param state the MatchState
-  /// @param type the type to match
-  /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
-  /// @param state the MatchState
-  /// @return a string representation of the matcher.
-  std::string String(MatchState* state) const override;
-};
-
-const sem::Type* AfF32F16::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_af(ty)) {
-    return build_af(state);
-  }
-  if (match_f32(ty)) {
-    return build_f32(state);
-  }
-  if (match_f16(ty)) {
-    return build_f16(state);
-  }
-  return nullptr;
-}
-
-std::string AfF32F16::String(MatchState*) const {
-  std::stringstream ss;
-  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
-  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss << Af().String(nullptr) << ", " << F32().String(nullptr) << " or " << F16().String(nullptr);
-  return ss.str();
-}
-
 /// TypeMatcher for 'match scalar_no_f32'
-/// @see src/tint/intrinsics.def:142:7
+/// @see src/tint/intrinsics.def:132:7
 class ScalarNoF32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2085,7 +1708,7 @@ std::string ScalarNoF32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match scalar_no_f16'
-/// @see src/tint/intrinsics.def:143:7
+/// @see src/tint/intrinsics.def:133:7
 class ScalarNoF16 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2126,7 +1749,7 @@ std::string ScalarNoF16::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match scalar_no_i32'
-/// @see src/tint/intrinsics.def:144:7
+/// @see src/tint/intrinsics.def:134:7
 class ScalarNoI32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2167,7 +1790,7 @@ std::string ScalarNoI32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match scalar_no_u32'
-/// @see src/tint/intrinsics.def:145:7
+/// @see src/tint/intrinsics.def:135:7
 class ScalarNoU32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2208,7 +1831,7 @@ std::string ScalarNoU32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match scalar_no_bool'
-/// @see src/tint/intrinsics.def:146:7
+/// @see src/tint/intrinsics.def:136:7
 class ScalarNoBool : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2248,8 +1871,350 @@ std::string ScalarNoBool::String(MatchState*) const {
   return ss.str();
 }
 
+/// TypeMatcher for 'match fia_fi32_f16'
+/// @see src/tint/intrinsics.def:137:7
+class FiaFi32F16 : public TypeMatcher {
+ public:
+  /// Checks whether the given type matches the matcher rules, and returns the
+  /// expected, canonicalized type on success.
+  /// Match may define and refine the template types and numbers in state.
+  /// @param state the MatchState
+  /// @param type the type to match
+  /// @returns the canonicalized type on match, otherwise nullptr
+  const sem::Type* Match(MatchState& state,
+                         const sem::Type* type) const override;
+  /// @param state the MatchState
+  /// @return a string representation of the matcher.
+  std::string String(MatchState* state) const override;
+};
+
+const sem::Type* FiaFi32F16::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_fa(ty)) {
+    return build_fa(state);
+  }
+  if (match_ia(ty)) {
+    return build_ia(state);
+  }
+  if (match_i32(ty)) {
+    return build_i32(state);
+  }
+  if (match_f32(ty)) {
+    return build_f32(state);
+  }
+  if (match_f16(ty)) {
+    return build_f16(state);
+  }
+  return nullptr;
+}
+
+std::string FiaFi32F16::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << Fa().String(nullptr) << ", " << Ia().String(nullptr) << ", " << F32().String(nullptr) << ", " << I32().String(nullptr) << " or " << F16().String(nullptr);
+  return ss.str();
+}
+
+/// TypeMatcher for 'match fa_f32_f16'
+/// @see src/tint/intrinsics.def:138:7
+class FaF32F16 : public TypeMatcher {
+ public:
+  /// Checks whether the given type matches the matcher rules, and returns the
+  /// expected, canonicalized type on success.
+  /// Match may define and refine the template types and numbers in state.
+  /// @param state the MatchState
+  /// @param type the type to match
+  /// @returns the canonicalized type on match, otherwise nullptr
+  const sem::Type* Match(MatchState& state,
+                         const sem::Type* type) const override;
+  /// @param state the MatchState
+  /// @return a string representation of the matcher.
+  std::string String(MatchState* state) const override;
+};
+
+const sem::Type* FaF32F16::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_fa(ty)) {
+    return build_fa(state);
+  }
+  if (match_f32(ty)) {
+    return build_f32(state);
+  }
+  if (match_f16(ty)) {
+    return build_f16(state);
+  }
+  return nullptr;
+}
+
+std::string FaF32F16::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << Fa().String(nullptr) << ", " << F32().String(nullptr) << " or " << F16().String(nullptr);
+  return ss.str();
+}
+
+/// TypeMatcher for 'match ia_iu32'
+/// @see src/tint/intrinsics.def:139:7
+class IaIu32 : public TypeMatcher {
+ public:
+  /// Checks whether the given type matches the matcher rules, and returns the
+  /// expected, canonicalized type on success.
+  /// Match may define and refine the template types and numbers in state.
+  /// @param state the MatchState
+  /// @param type the type to match
+  /// @returns the canonicalized type on match, otherwise nullptr
+  const sem::Type* Match(MatchState& state,
+                         const sem::Type* type) const override;
+  /// @param state the MatchState
+  /// @return a string representation of the matcher.
+  std::string String(MatchState* state) const override;
+};
+
+const sem::Type* IaIu32::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_ia(ty)) {
+    return build_ia(state);
+  }
+  if (match_i32(ty)) {
+    return build_i32(state);
+  }
+  if (match_u32(ty)) {
+    return build_u32(state);
+  }
+  return nullptr;
+}
+
+std::string IaIu32::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << Ia().String(nullptr) << ", " << I32().String(nullptr) << " or " << U32().String(nullptr);
+  return ss.str();
+}
+
+/// TypeMatcher for 'match fiu32_f16'
+/// @see src/tint/intrinsics.def:140:7
+class Fiu32F16 : public TypeMatcher {
+ public:
+  /// Checks whether the given type matches the matcher rules, and returns the
+  /// expected, canonicalized type on success.
+  /// Match may define and refine the template types and numbers in state.
+  /// @param state the MatchState
+  /// @param type the type to match
+  /// @returns the canonicalized type on match, otherwise nullptr
+  const sem::Type* Match(MatchState& state,
+                         const sem::Type* type) const override;
+  /// @param state the MatchState
+  /// @return a string representation of the matcher.
+  std::string String(MatchState* state) const override;
+};
+
+const sem::Type* Fiu32F16::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_i32(ty)) {
+    return build_i32(state);
+  }
+  if (match_u32(ty)) {
+    return build_u32(state);
+  }
+  if (match_f32(ty)) {
+    return build_f32(state);
+  }
+  if (match_f16(ty)) {
+    return build_f16(state);
+  }
+  return nullptr;
+}
+
+std::string Fiu32F16::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << F32().String(nullptr) << ", " << I32().String(nullptr) << ", " << U32().String(nullptr) << " or " << F16().String(nullptr);
+  return ss.str();
+}
+
+/// TypeMatcher for 'match fiu32'
+/// @see src/tint/intrinsics.def:141:7
+class Fiu32 : public TypeMatcher {
+ public:
+  /// Checks whether the given type matches the matcher rules, and returns the
+  /// expected, canonicalized type on success.
+  /// Match may define and refine the template types and numbers in state.
+  /// @param state the MatchState
+  /// @param type the type to match
+  /// @returns the canonicalized type on match, otherwise nullptr
+  const sem::Type* Match(MatchState& state,
+                         const sem::Type* type) const override;
+  /// @param state the MatchState
+  /// @return a string representation of the matcher.
+  std::string String(MatchState* state) const override;
+};
+
+const sem::Type* Fiu32::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_i32(ty)) {
+    return build_i32(state);
+  }
+  if (match_u32(ty)) {
+    return build_u32(state);
+  }
+  if (match_f32(ty)) {
+    return build_f32(state);
+  }
+  return nullptr;
+}
+
+std::string Fiu32::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << F32().String(nullptr) << ", " << I32().String(nullptr) << " or " << U32().String(nullptr);
+  return ss.str();
+}
+
+/// TypeMatcher for 'match fi32_f16'
+/// @see src/tint/intrinsics.def:142:7
+class Fi32F16 : public TypeMatcher {
+ public:
+  /// Checks whether the given type matches the matcher rules, and returns the
+  /// expected, canonicalized type on success.
+  /// Match may define and refine the template types and numbers in state.
+  /// @param state the MatchState
+  /// @param type the type to match
+  /// @returns the canonicalized type on match, otherwise nullptr
+  const sem::Type* Match(MatchState& state,
+                         const sem::Type* type) const override;
+  /// @param state the MatchState
+  /// @return a string representation of the matcher.
+  std::string String(MatchState* state) const override;
+};
+
+const sem::Type* Fi32F16::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_i32(ty)) {
+    return build_i32(state);
+  }
+  if (match_f32(ty)) {
+    return build_f32(state);
+  }
+  if (match_f16(ty)) {
+    return build_f16(state);
+  }
+  return nullptr;
+}
+
+std::string Fi32F16::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << F32().String(nullptr) << ", " << I32().String(nullptr) << " or " << F16().String(nullptr);
+  return ss.str();
+}
+
+/// TypeMatcher for 'match fi32'
+/// @see src/tint/intrinsics.def:143:7
+class Fi32 : public TypeMatcher {
+ public:
+  /// Checks whether the given type matches the matcher rules, and returns the
+  /// expected, canonicalized type on success.
+  /// Match may define and refine the template types and numbers in state.
+  /// @param state the MatchState
+  /// @param type the type to match
+  /// @returns the canonicalized type on match, otherwise nullptr
+  const sem::Type* Match(MatchState& state,
+                         const sem::Type* type) const override;
+  /// @param state the MatchState
+  /// @return a string representation of the matcher.
+  std::string String(MatchState* state) const override;
+};
+
+const sem::Type* Fi32::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_i32(ty)) {
+    return build_i32(state);
+  }
+  if (match_f32(ty)) {
+    return build_f32(state);
+  }
+  return nullptr;
+}
+
+std::string Fi32::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << F32().String(nullptr) << " or " << I32().String(nullptr);
+  return ss.str();
+}
+
+/// TypeMatcher for 'match f32_f16'
+/// @see src/tint/intrinsics.def:144:7
+class F32F16 : public TypeMatcher {
+ public:
+  /// Checks whether the given type matches the matcher rules, and returns the
+  /// expected, canonicalized type on success.
+  /// Match may define and refine the template types and numbers in state.
+  /// @param state the MatchState
+  /// @param type the type to match
+  /// @returns the canonicalized type on match, otherwise nullptr
+  const sem::Type* Match(MatchState& state,
+                         const sem::Type* type) const override;
+  /// @param state the MatchState
+  /// @return a string representation of the matcher.
+  std::string String(MatchState* state) const override;
+};
+
+const sem::Type* F32F16::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_f32(ty)) {
+    return build_f32(state);
+  }
+  if (match_f16(ty)) {
+    return build_f16(state);
+  }
+  return nullptr;
+}
+
+std::string F32F16::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << F32().String(nullptr) << " or " << F16().String(nullptr);
+  return ss.str();
+}
+
+/// TypeMatcher for 'match iu32'
+/// @see src/tint/intrinsics.def:145:7
+class Iu32 : public TypeMatcher {
+ public:
+  /// Checks whether the given type matches the matcher rules, and returns the
+  /// expected, canonicalized type on success.
+  /// Match may define and refine the template types and numbers in state.
+  /// @param state the MatchState
+  /// @param type the type to match
+  /// @returns the canonicalized type on match, otherwise nullptr
+  const sem::Type* Match(MatchState& state,
+                         const sem::Type* type) const override;
+  /// @param state the MatchState
+  /// @return a string representation of the matcher.
+  std::string String(MatchState* state) const override;
+};
+
+const sem::Type* Iu32::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_i32(ty)) {
+    return build_i32(state);
+  }
+  if (match_u32(ty)) {
+    return build_u32(state);
+  }
+  return nullptr;
+}
+
+std::string Iu32::String(MatchState*) const {
+  std::stringstream ss;
+  // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
+  // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
+  ss << I32().String(nullptr) << " or " << U32().String(nullptr);
+  return ss.str();
+}
+
 /// EnumMatcher for 'match f32_texel_format'
-/// @see src/tint/intrinsics.def:157:7
+/// @see src/tint/intrinsics.def:156:7
 class F32TexelFormat : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2282,7 +2247,7 @@ std::string F32TexelFormat::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match i32_texel_format'
-/// @see src/tint/intrinsics.def:159:7
+/// @see src/tint/intrinsics.def:158:7
 class I32TexelFormat : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2314,7 +2279,7 @@ std::string I32TexelFormat::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match u32_texel_format'
-/// @see src/tint/intrinsics.def:161:7
+/// @see src/tint/intrinsics.def:160:7
 class U32TexelFormat : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2346,7 +2311,7 @@ std::string U32TexelFormat::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match write_only'
-/// @see src/tint/intrinsics.def:164:7
+/// @see src/tint/intrinsics.def:163:7
 class WriteOnly : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2372,7 +2337,7 @@ std::string WriteOnly::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match function_private_workgroup'
-/// @see src/tint/intrinsics.def:166:7
+/// @see src/tint/intrinsics.def:165:7
 class FunctionPrivateWorkgroup : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2402,7 +2367,7 @@ std::string FunctionPrivateWorkgroup::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match workgroup_or_storage'
-/// @see src/tint/intrinsics.def:167:7
+/// @see src/tint/intrinsics.def:166:7
 class WorkgroupOrStorage : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2514,8 +2479,8 @@ class Matchers {
   TemplateNumberMatcher template_number_1_{1};
   TemplateNumberMatcher template_number_2_{2};
   Bool Bool_;
-  Af Af_;
-  Ai Ai_;
+  Fa Fa_;
+  Ia Ia_;
   I32 I32_;
   U32 U32_;
   F32 F32_;
@@ -2561,23 +2526,22 @@ class Matchers {
   FrexpResult FrexpResult_;
   FrexpResultVec FrexpResultVec_;
   AtomicCompareExchangeResult AtomicCompareExchangeResult_;
-  F32F16 F32F16_;
-  Fiu32 Fiu32_;
-  Fiu32F16 Fiu32F16_;
-  Fi32 Fi32_;
-  Fi32F16 Fi32F16_;
-  Iu32 Iu32_;
-  Aiu32 Aiu32_;
-  Afi32F16 Afi32F16_;
-  Scalar Scalar_;
   AbstractOrScalar AbstractOrScalar_;
-  AfF32 AfF32_;
-  AfF32F16 AfF32F16_;
+  Scalar Scalar_;
   ScalarNoF32 ScalarNoF32_;
   ScalarNoF16 ScalarNoF16_;
   ScalarNoI32 ScalarNoI32_;
   ScalarNoU32 ScalarNoU32_;
   ScalarNoBool ScalarNoBool_;
+  FiaFi32F16 FiaFi32F16_;
+  FaF32F16 FaF32F16_;
+  IaIu32 IaIu32_;
+  Fiu32F16 Fiu32F16_;
+  Fiu32 Fiu32_;
+  Fi32F16 Fi32F16_;
+  Fi32 Fi32_;
+  F32F16 F32F16_;
+  Iu32 Iu32_;
   F32TexelFormat F32TexelFormat_;
   I32TexelFormat I32TexelFormat_;
   U32TexelFormat U32TexelFormat_;
@@ -2595,12 +2559,12 @@ class Matchers {
   ~Matchers();
 
   /// The template types, types, and type matchers
-  TypeMatcher const* const type[67] = {
+  TypeMatcher const* const type[66] = {
     /* [0] */ &template_type_0_,
     /* [1] */ &template_type_1_,
     /* [2] */ &Bool_,
-    /* [3] */ &Af_,
-    /* [4] */ &Ai_,
+    /* [3] */ &Fa_,
+    /* [4] */ &Ia_,
     /* [5] */ &I32_,
     /* [6] */ &U32_,
     /* [7] */ &F32_,
@@ -2646,23 +2610,22 @@ class Matchers {
     /* [47] */ &FrexpResult_,
     /* [48] */ &FrexpResultVec_,
     /* [49] */ &AtomicCompareExchangeResult_,
-    /* [50] */ &F32F16_,
-    /* [51] */ &Fiu32_,
-    /* [52] */ &Fiu32F16_,
-    /* [53] */ &Fi32_,
-    /* [54] */ &Fi32F16_,
-    /* [55] */ &Iu32_,
-    /* [56] */ &Aiu32_,
-    /* [57] */ &Afi32F16_,
-    /* [58] */ &Scalar_,
-    /* [59] */ &AbstractOrScalar_,
-    /* [60] */ &AfF32_,
-    /* [61] */ &AfF32F16_,
-    /* [62] */ &ScalarNoF32_,
-    /* [63] */ &ScalarNoF16_,
-    /* [64] */ &ScalarNoI32_,
-    /* [65] */ &ScalarNoU32_,
-    /* [66] */ &ScalarNoBool_,
+    /* [50] */ &AbstractOrScalar_,
+    /* [51] */ &Scalar_,
+    /* [52] */ &ScalarNoF32_,
+    /* [53] */ &ScalarNoF16_,
+    /* [54] */ &ScalarNoI32_,
+    /* [55] */ &ScalarNoU32_,
+    /* [56] */ &ScalarNoBool_,
+    /* [57] */ &FiaFi32F16_,
+    /* [58] */ &FaF32F16_,
+    /* [59] */ &IaIu32_,
+    /* [60] */ &Fiu32F16_,
+    /* [61] */ &Fiu32_,
+    /* [62] */ &Fi32F16_,
+    /* [63] */ &Fi32_,
+    /* [64] */ &F32F16_,
+    /* [65] */ &Iu32_,
   };
 
   /// The template numbers, and number matchers
@@ -7960,7 +7923,7 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [1] */
     /* name */ "U",
-    /* matcher index */ 66,
+    /* matcher index */ 56,
   },
   {
     /* [2] */
@@ -7970,7 +7933,7 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [3] */
     /* name */ "U",
-    /* matcher index */ 62,
+    /* matcher index */ 52,
   },
   {
     /* [4] */
@@ -7980,7 +7943,7 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [5] */
     /* name */ "U",
-    /* matcher index */ 63,
+    /* matcher index */ 53,
   },
   {
     /* [6] */
@@ -7990,7 +7953,7 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [7] */
     /* name */ "U",
-    /* matcher index */ 64,
+    /* matcher index */ 54,
   },
   {
     /* [8] */
@@ -8000,37 +7963,37 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [9] */
     /* name */ "U",
-    /* matcher index */ 65,
+    /* matcher index */ 55,
   },
   {
     /* [10] */
     /* name */ "T",
-    /* matcher index */ 55,
+    /* matcher index */ 65,
   },
   {
     /* [11] */
     /* name */ "T",
-    /* matcher index */ 61,
+    /* matcher index */ 58,
   },
   {
     /* [12] */
     /* name */ "T",
-    /* matcher index */ 50,
+    /* matcher index */ 64,
   },
   {
     /* [13] */
     /* name */ "T",
-    /* matcher index */ 51,
+    /* matcher index */ 61,
   },
   {
     /* [14] */
     /* name */ "T",
-    /* matcher index */ 59,
+    /* matcher index */ 50,
   },
   {
     /* [15] */
     /* name */ "T",
-    /* matcher index */ 58,
+    /* matcher index */ 51,
   },
   {
     /* [16] */
@@ -8040,32 +8003,32 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [17] */
     /* name */ "T",
-    /* matcher index */ 66,
+    /* matcher index */ 56,
   },
   {
     /* [18] */
     /* name */ "T",
-    /* matcher index */ 63,
+    /* matcher index */ 53,
   },
   {
     /* [19] */
     /* name */ "T",
-    /* matcher index */ 62,
+    /* matcher index */ 52,
   },
   {
     /* [20] */
     /* name */ "T",
-    /* matcher index */ 65,
+    /* matcher index */ 55,
   },
   {
     /* [21] */
     /* name */ "T",
-    /* matcher index */ 64,
+    /* matcher index */ 54,
   },
   {
     /* [22] */
     /* name */ "T",
-    /* matcher index */ 52,
+    /* matcher index */ 60,
   },
   {
     /* [23] */
@@ -8075,7 +8038,7 @@ constexpr TemplateTypeInfo kTemplateTypes[] = {
   {
     /* [24] */
     /* name */ "T",
-    /* matcher index */ 56,
+    /* matcher index */ 59,
   },
 };
 
@@ -14560,15 +14523,15 @@ constexpr IntrinsicInfo kUnaryOperators[] = {
   },
   {
     /* [1] */
-    /* op ~<T : aiu32>(T) -> T */
-    /* op ~<T : aiu32, N : num>(vec<N, T>) -> vec<N, T> */
+    /* op ~<T : ia_iu32>(T) -> T */
+    /* op ~<T : ia_iu32, N : num>(vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[284],
   },
   {
     /* [2] */
-    /* op -<T : afi32f16>(T) -> T */
-    /* op -<T : afi32f16, N : num>(vec<N, T>) -> vec<N, T> */
+    /* op -<T : fia_fi32_f16>(T) -> T */
+    /* op -<T : fia_fi32_f16, N : num>(vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[422],
   },
@@ -14580,53 +14543,53 @@ constexpr uint8_t kUnaryOperatorMinus = 2;
 constexpr IntrinsicInfo kBinaryOperators[] = {
   {
     /* [0] */
-    /* op +<T : fiu32f16>(T, T) -> T */
-    /* op +<T : fiu32f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
-    /* op +<T : fiu32f16, N : num>(vec<N, T>, T) -> vec<N, T> */
-    /* op +<T : fiu32f16, N : num>(T, vec<N, T>) -> vec<N, T> */
-    /* op +<T : f32f16, N : num, M : num>(mat<N, M, T>, mat<N, M, T>) -> mat<N, M, T> */
+    /* op +<T : fiu32_f16>(T, T) -> T */
+    /* op +<T : fiu32_f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
+    /* op +<T : fiu32_f16, N : num>(vec<N, T>, T) -> vec<N, T> */
+    /* op +<T : fiu32_f16, N : num>(T, vec<N, T>) -> vec<N, T> */
+    /* op +<T : f32_f16, N : num, M : num>(mat<N, M, T>, mat<N, M, T>) -> mat<N, M, T> */
     /* num overloads */ 5,
     /* overloads */ &kOverloads[242],
   },
   {
     /* [1] */
-    /* op -<T : fiu32f16>(T, T) -> T */
-    /* op -<T : fiu32f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
-    /* op -<T : fiu32f16, N : num>(vec<N, T>, T) -> vec<N, T> */
-    /* op -<T : fiu32f16, N : num>(T, vec<N, T>) -> vec<N, T> */
-    /* op -<T : f32f16, N : num, M : num>(mat<N, M, T>, mat<N, M, T>) -> mat<N, M, T> */
+    /* op -<T : fiu32_f16>(T, T) -> T */
+    /* op -<T : fiu32_f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
+    /* op -<T : fiu32_f16, N : num>(vec<N, T>, T) -> vec<N, T> */
+    /* op -<T : fiu32_f16, N : num>(T, vec<N, T>) -> vec<N, T> */
+    /* op -<T : f32_f16, N : num, M : num>(mat<N, M, T>, mat<N, M, T>) -> mat<N, M, T> */
     /* num overloads */ 5,
     /* overloads */ &kOverloads[232],
   },
   {
     /* [2] */
-    /* op *<T : fiu32f16>(T, T) -> T */
-    /* op *<T : fiu32f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
-    /* op *<T : fiu32f16, N : num>(vec<N, T>, T) -> vec<N, T> */
-    /* op *<T : fiu32f16, N : num>(T, vec<N, T>) -> vec<N, T> */
-    /* op *<T : f32f16, N : num, M : num>(T, mat<N, M, T>) -> mat<N, M, T> */
-    /* op *<T : f32f16, N : num, M : num>(mat<N, M, T>, T) -> mat<N, M, T> */
-    /* op *<T : f32f16, C : num, R : num>(mat<C, R, T>, vec<C, T>) -> vec<R, T> */
-    /* op *<T : f32f16, C : num, R : num>(vec<R, T>, mat<C, R, T>) -> vec<C, T> */
-    /* op *<T : f32f16, K : num, C : num, R : num>(mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T> */
+    /* op *<T : fiu32_f16>(T, T) -> T */
+    /* op *<T : fiu32_f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
+    /* op *<T : fiu32_f16, N : num>(vec<N, T>, T) -> vec<N, T> */
+    /* op *<T : fiu32_f16, N : num>(T, vec<N, T>) -> vec<N, T> */
+    /* op *<T : f32_f16, N : num, M : num>(T, mat<N, M, T>) -> mat<N, M, T> */
+    /* op *<T : f32_f16, N : num, M : num>(mat<N, M, T>, T) -> mat<N, M, T> */
+    /* op *<T : f32_f16, C : num, R : num>(mat<C, R, T>, vec<C, T>) -> vec<R, T> */
+    /* op *<T : f32_f16, C : num, R : num>(vec<R, T>, mat<C, R, T>) -> vec<C, T> */
+    /* op *<T : f32_f16, K : num, C : num, R : num>(mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T> */
     /* num overloads */ 9,
     /* overloads */ &kOverloads[117],
   },
   {
     /* [3] */
-    /* op /<T : fiu32f16>(T, T) -> T */
-    /* op /<T : fiu32f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
-    /* op /<T : fiu32f16, N : num>(vec<N, T>, T) -> vec<N, T> */
-    /* op /<T : fiu32f16, N : num>(T, vec<N, T>) -> vec<N, T> */
+    /* op /<T : fiu32_f16>(T, T) -> T */
+    /* op /<T : fiu32_f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
+    /* op /<T : fiu32_f16, N : num>(vec<N, T>, T) -> vec<N, T> */
+    /* op /<T : fiu32_f16, N : num>(T, vec<N, T>) -> vec<N, T> */
     /* num overloads */ 4,
     /* overloads */ &kOverloads[259],
   },
   {
     /* [4] */
-    /* op %<T : fiu32f16>(T, T) -> T */
-    /* op %<T : fiu32f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
-    /* op %<T : fiu32f16, N : num>(vec<N, T>, T) -> vec<N, T> */
-    /* op %<T : fiu32f16, N : num>(T, vec<N, T>) -> vec<N, T> */
+    /* op %<T : fiu32_f16>(T, T) -> T */
+    /* op %<T : fiu32_f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, T> */
+    /* op %<T : fiu32_f16, N : num>(vec<N, T>, T) -> vec<N, T> */
+    /* op %<T : fiu32_f16, N : num>(T, vec<N, T>) -> vec<N, T> */
     /* num overloads */ 4,
     /* overloads */ &kOverloads[247],
   },
@@ -14683,29 +14646,29 @@ constexpr IntrinsicInfo kBinaryOperators[] = {
   },
   {
     /* [12] */
-    /* op <<T : fiu32f16>(T, T) -> bool */
-    /* op <<T : fiu32f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
+    /* op <<T : fiu32_f16>(T, T) -> bool */
+    /* op <<T : fiu32_f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[388],
   },
   {
     /* [13] */
-    /* op ><T : fiu32f16>(T, T) -> bool */
-    /* op ><T : fiu32f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
+    /* op ><T : fiu32_f16>(T, T) -> bool */
+    /* op ><T : fiu32_f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[372],
   },
   {
     /* [14] */
-    /* op <=<T : fiu32f16>(T, T) -> bool */
-    /* op <=<T : fiu32f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
+    /* op <=<T : fiu32_f16>(T, T) -> bool */
+    /* op <=<T : fiu32_f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[370],
   },
   {
     /* [15] */
-    /* op >=<T : fiu32f16>(T, T) -> bool */
-    /* op >=<T : fiu32f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
+    /* op >=<T : fiu32_f16>(T, T) -> bool */
+    /* op >=<T : fiu32_f16, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[368],
   },
@@ -14836,10 +14799,10 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
   },
   {
     /* [8] */
-    /* ctor mat2x2<T : f32f16>() -> mat2x2<T> */
-    /* ctor mat2x2<T : f32f16>(mat2x2<T>) -> mat2x2<T> */
-    /* ctor mat2x2<T : af_f32f16>(T, T, T, T) -> mat2x2<T> */
-    /* ctor mat2x2<T : af_f32f16>(vec2<T>, vec2<T>) -> mat2x2<T> */
+    /* ctor mat2x2<T : f32_f16>() -> mat2x2<T> */
+    /* ctor mat2x2<T : f32_f16>(mat2x2<T>) -> mat2x2<T> */
+    /* ctor mat2x2<T : fa_f32_f16>(T, T, T, T) -> mat2x2<T> */
+    /* ctor mat2x2<T : fa_f32_f16>(vec2<T>, vec2<T>) -> mat2x2<T> */
     /* conv mat2x2<T : f16>(mat2x2<f32>) -> mat2x2<f16> */
     /* conv mat2x2<T : f32>(mat2x2<f16>) -> mat2x2<f32> */
     /* num overloads */ 6,
@@ -14847,10 +14810,10 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
   },
   {
     /* [9] */
-    /* ctor mat2x3<T : f32f16>() -> mat2x3<T> */
-    /* ctor mat2x3<T : f32f16>(mat2x3<T>) -> mat2x3<T> */
-    /* ctor mat2x3<T : af_f32f16>(T, T, T, T, T, T) -> mat2x3<T> */
-    /* ctor mat2x3<T : af_f32f16>(vec3<T>, vec3<T>) -> mat2x3<T> */
+    /* ctor mat2x3<T : f32_f16>() -> mat2x3<T> */
+    /* ctor mat2x3<T : f32_f16>(mat2x3<T>) -> mat2x3<T> */
+    /* ctor mat2x3<T : fa_f32_f16>(T, T, T, T, T, T) -> mat2x3<T> */
+    /* ctor mat2x3<T : fa_f32_f16>(vec3<T>, vec3<T>) -> mat2x3<T> */
     /* conv mat2x3<T : f16>(mat2x3<f32>) -> mat2x3<f16> */
     /* conv mat2x3<T : f32>(mat2x3<f16>) -> mat2x3<f32> */
     /* num overloads */ 6,
@@ -14858,10 +14821,10 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
   },
   {
     /* [10] */
-    /* ctor mat2x4<T : f32f16>() -> mat2x4<T> */
-    /* ctor mat2x4<T : f32f16>(mat2x4<T>) -> mat2x4<T> */
-    /* ctor mat2x4<T : af_f32f16>(T, T, T, T, T, T, T, T) -> mat2x4<T> */
-    /* ctor mat2x4<T : af_f32f16>(vec4<T>, vec4<T>) -> mat2x4<T> */
+    /* ctor mat2x4<T : f32_f16>() -> mat2x4<T> */
+    /* ctor mat2x4<T : f32_f16>(mat2x4<T>) -> mat2x4<T> */
+    /* ctor mat2x4<T : fa_f32_f16>(T, T, T, T, T, T, T, T) -> mat2x4<T> */
+    /* ctor mat2x4<T : fa_f32_f16>(vec4<T>, vec4<T>) -> mat2x4<T> */
     /* conv mat2x4<T : f16>(mat2x4<f32>) -> mat2x4<f16> */
     /* conv mat2x4<T : f32>(mat2x4<f16>) -> mat2x4<f32> */
     /* num overloads */ 6,
@@ -14869,10 +14832,10 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
   },
   {
     /* [11] */
-    /* ctor mat3x2<T : f32f16>() -> mat3x2<T> */
-    /* ctor mat3x2<T : f32f16>(mat3x2<T>) -> mat3x2<T> */
-    /* ctor mat3x2<T : af_f32f16>(T, T, T, T, T, T) -> mat3x2<T> */
-    /* ctor mat3x2<T : af_f32f16>(vec2<T>, vec2<T>, vec2<T>) -> mat3x2<T> */
+    /* ctor mat3x2<T : f32_f16>() -> mat3x2<T> */
+    /* ctor mat3x2<T : f32_f16>(mat3x2<T>) -> mat3x2<T> */
+    /* ctor mat3x2<T : fa_f32_f16>(T, T, T, T, T, T) -> mat3x2<T> */
+    /* ctor mat3x2<T : fa_f32_f16>(vec2<T>, vec2<T>, vec2<T>) -> mat3x2<T> */
     /* conv mat3x2<T : f16>(mat3x2<f32>) -> mat3x2<f16> */
     /* conv mat3x2<T : f32>(mat3x2<f16>) -> mat3x2<f32> */
     /* num overloads */ 6,
@@ -14880,10 +14843,10 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
   },
   {
     /* [12] */
-    /* ctor mat3x3<T : f32f16>() -> mat3x3<T> */
-    /* ctor mat3x3<T : f32f16>(mat3x3<T>) -> mat3x3<T> */
-    /* ctor mat3x3<T : af_f32f16>(T, T, T, T, T, T, T, T, T) -> mat3x3<T> */
-    /* ctor mat3x3<T : af_f32f16>(vec3<T>, vec3<T>, vec3<T>) -> mat3x3<T> */
+    /* ctor mat3x3<T : f32_f16>() -> mat3x3<T> */
+    /* ctor mat3x3<T : f32_f16>(mat3x3<T>) -> mat3x3<T> */
+    /* ctor mat3x3<T : fa_f32_f16>(T, T, T, T, T, T, T, T, T) -> mat3x3<T> */
+    /* ctor mat3x3<T : fa_f32_f16>(vec3<T>, vec3<T>, vec3<T>) -> mat3x3<T> */
     /* conv mat3x3<T : f16>(mat3x3<f32>) -> mat3x3<f16> */
     /* conv mat3x3<T : f32>(mat3x3<f16>) -> mat3x3<f32> */
     /* num overloads */ 6,
@@ -14891,10 +14854,10 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
   },
   {
     /* [13] */
-    /* ctor mat3x4<T : f32f16>() -> mat3x4<T> */
-    /* ctor mat3x4<T : f32f16>(mat3x4<T>) -> mat3x4<T> */
-    /* ctor mat3x4<T : af_f32f16>(T, T, T, T, T, T, T, T, T, T, T, T) -> mat3x4<T> */
-    /* ctor mat3x4<T : af_f32f16>(vec4<T>, vec4<T>, vec4<T>) -> mat3x4<T> */
+    /* ctor mat3x4<T : f32_f16>() -> mat3x4<T> */
+    /* ctor mat3x4<T : f32_f16>(mat3x4<T>) -> mat3x4<T> */
+    /* ctor mat3x4<T : fa_f32_f16>(T, T, T, T, T, T, T, T, T, T, T, T) -> mat3x4<T> */
+    /* ctor mat3x4<T : fa_f32_f16>(vec4<T>, vec4<T>, vec4<T>) -> mat3x4<T> */
     /* conv mat3x4<T : f16>(mat3x4<f32>) -> mat3x4<f16> */
     /* conv mat3x4<T : f32>(mat3x4<f16>) -> mat3x4<f32> */
     /* num overloads */ 6,
@@ -14902,10 +14865,10 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
   },
   {
     /* [14] */
-    /* ctor mat4x2<T : f32f16>() -> mat4x2<T> */
-    /* ctor mat4x2<T : f32f16>(mat4x2<T>) -> mat4x2<T> */
-    /* ctor mat4x2<T : af_f32f16>(T, T, T, T, T, T, T, T) -> mat4x2<T> */
-    /* ctor mat4x2<T : af_f32f16>(vec2<T>, vec2<T>, vec2<T>, vec2<T>) -> mat4x2<T> */
+    /* ctor mat4x2<T : f32_f16>() -> mat4x2<T> */
+    /* ctor mat4x2<T : f32_f16>(mat4x2<T>) -> mat4x2<T> */
+    /* ctor mat4x2<T : fa_f32_f16>(T, T, T, T, T, T, T, T) -> mat4x2<T> */
+    /* ctor mat4x2<T : fa_f32_f16>(vec2<T>, vec2<T>, vec2<T>, vec2<T>) -> mat4x2<T> */
     /* conv mat4x2<T : f16>(mat4x2<f32>) -> mat4x2<f16> */
     /* conv mat4x2<T : f32>(mat4x2<f16>) -> mat4x2<f32> */
     /* num overloads */ 6,
@@ -14913,10 +14876,10 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
   },
   {
     /* [15] */
-    /* ctor mat4x3<T : f32f16>() -> mat4x3<T> */
-    /* ctor mat4x3<T : f32f16>(mat4x3<T>) -> mat4x3<T> */
-    /* ctor mat4x3<T : af_f32f16>(T, T, T, T, T, T, T, T, T, T, T, T) -> mat4x3<T> */
-    /* ctor mat4x3<T : af_f32f16>(vec3<T>, vec3<T>, vec3<T>, vec3<T>) -> mat4x3<T> */
+    /* ctor mat4x3<T : f32_f16>() -> mat4x3<T> */
+    /* ctor mat4x3<T : f32_f16>(mat4x3<T>) -> mat4x3<T> */
+    /* ctor mat4x3<T : fa_f32_f16>(T, T, T, T, T, T, T, T, T, T, T, T) -> mat4x3<T> */
+    /* ctor mat4x3<T : fa_f32_f16>(vec3<T>, vec3<T>, vec3<T>, vec3<T>) -> mat4x3<T> */
     /* conv mat4x3<T : f16>(mat4x3<f32>) -> mat4x3<f16> */
     /* conv mat4x3<T : f32>(mat4x3<f16>) -> mat4x3<f32> */
     /* num overloads */ 6,
@@ -14924,10 +14887,10 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
   },
   {
     /* [16] */
-    /* ctor mat4x4<T : f32f16>() -> mat4x4<T> */
-    /* ctor mat4x4<T : f32f16>(mat4x4<T>) -> mat4x4<T> */
-    /* ctor mat4x4<T : af_f32f16>(T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T) -> mat4x4<T> */
-    /* ctor mat4x4<T : af_f32f16>(vec4<T>, vec4<T>, vec4<T>, vec4<T>) -> mat4x4<T> */
+    /* ctor mat4x4<T : f32_f16>() -> mat4x4<T> */
+    /* ctor mat4x4<T : f32_f16>(mat4x4<T>) -> mat4x4<T> */
+    /* ctor mat4x4<T : fa_f32_f16>(T, T, T, T, T, T, T, T, T, T, T, T, T, T, T, T) -> mat4x4<T> */
+    /* ctor mat4x4<T : fa_f32_f16>(vec4<T>, vec4<T>, vec4<T>, vec4<T>) -> mat4x4<T> */
     /* conv mat4x4<T : f16>(mat4x4<f32>) -> mat4x4<f16> */
     /* conv mat4x4<T : f32>(mat4x4<f16>) -> mat4x4<f32> */
     /* num overloads */ 6,

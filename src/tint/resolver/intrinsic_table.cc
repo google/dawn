@@ -322,19 +322,19 @@ bool match_bool(const sem::Type* ty) {
     return ty->IsAnyOf<Any, sem::Bool>();
 }
 
-const sem::AbstractFloat* build_af(MatchState& state) {
+const sem::AbstractFloat* build_fa(MatchState& state) {
     return state.builder.create<sem::AbstractFloat>();
 }
 
-bool match_af(const sem::Type* ty) {
+bool match_fa(const sem::Type* ty) {
     return ty->IsAnyOf<Any, sem::AbstractFloat>();
 }
 
-const sem::AbstractInt* build_ai(MatchState& state) {
+const sem::AbstractInt* build_ia(MatchState& state) {
     return state.builder.create<sem::AbstractInt>();
 }
 
-bool match_ai(const sem::Type* ty) {
+bool match_ia(const sem::Type* ty) {
     return ty->IsAnyOf<Any, sem::AbstractInt>();
 }
 
