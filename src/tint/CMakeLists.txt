@@ -462,6 +462,7 @@ set(TINT_LIB_SRCS
   transform/zero_init_workgroup_memory.cc
   transform/zero_init_workgroup_memory.h
   utils/bitcast.h
+  utils/bitset.h
   utils/block_allocator.h
   utils/compiler_macros.h
   utils/concat.h
@@ -842,6 +843,7 @@ if(TINT_BUILD_TESTS)
     traits_test.cc
     transform/transform_test.cc
     utils/bitcast_test.cc
+    utils/bitset_test.cc
     utils/block_allocator_test.cc
     utils/crc32_test.cc
     utils/defer_test.cc

@@ -550,6 +550,7 @@ libtint_source_set("libtint_core_all_src") {
     "transform/zero_init_workgroup_memory.cc",
     "transform/zero_init_workgroup_memory.h",
     "utils/bitcast.h",
+    "utils/bitset.h",
     "utils/block_allocator.h",
     "utils/compiler_macros.h",
     "utils/concat.h",
@@ -1213,6 +1214,7 @@ if (tint_build_unittests) {
   tint_unittests_source_set("tint_unittests_utils_src") {
     sources = [
       "utils/bitcast_test.cc",
+      "utils/bitset_test.cc",
       "utils/crc32_test.cc",
       "utils/defer_test.cc",
       "utils/enum_set_test.cc",
