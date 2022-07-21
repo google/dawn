@@ -23,8 +23,8 @@ Symbol::Symbol() = default;
 Symbol::Symbol(uint32_t val, tint::ProgramID program_id) : val_(val), program_id_(program_id) {}
 
 #if TINT_SYMBOL_STORE_DEBUG_NAME
-Symbol::Symbol(uint32_t val, tint::ProgramID pid, NodeID nid, std::string debug_name)
-    : val_(val), program_id_(program_id), debug_name_(std::move(debug_name)) {}
+Symbol::Symbol(uint32_t val, tint::ProgramID pid, std::string debug_name)
+    : val_(val), program_id_(pid), debug_name_(std::move(debug_name)) {}
 #endif
 
 Symbol::Symbol(const Symbol& o) = default;
