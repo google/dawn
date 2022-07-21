@@ -80,6 +80,18 @@ TEST_F(EnableDirectiveTest, MissingEndingSemicolon) {
     EXPECT_EQ(ast.GlobalDeclarations().size(), 0u);
 }
 
+// Test the special error message when enable are used with parenthesis.
+TEST_F(EnableDirectiveTest, ParenthesisSpecialCase) {
+    auto p = parser("enable(f16);");
+    p->translation_unit();
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:7: enable directives don't take parenthesis");
+    auto program = p->program();
+    auto& ast = program.AST();
+    EXPECT_EQ(ast.Enables().size(), 0u);
+    EXPECT_EQ(ast.GlobalDeclarations().size(), 0u);
+}
+
 // Test using invalid tokens in an enable directive.
 TEST_F(EnableDirectiveTest, InvalidTokens) {
     {
