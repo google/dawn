@@ -562,7 +562,7 @@ Maybe<const ast::Variable*> ParserImpl::global_variable_decl(ast::AttributeList&
                             decl->type,                               // type
                             decl->storage_class,                      // storage class
                             decl->access,                             // access control
-                            initalizer,                               // constructor
+                            initalizer,                               // initializer
                             std::move(attrs));                        // attributes
 }
 
@@ -619,20 +619,20 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(ast::AttributeList&
         return create<ast::Const>(decl->source,                             // source
                                   builder_.Symbols().Register(decl->name),  // symbol
                                   decl->type,                               // type
-                                  initializer,                              // constructor
+                                  initializer,                              // initializer
                                   std::move(attrs));                        // attributes
     }
     if (is_overridable) {
         return create<ast::Override>(decl->source,                             // source
                                      builder_.Symbols().Register(decl->name),  // symbol
                                      decl->type,                               // type
-                                     initializer,                              // constructor
+                                     initializer,                              // initializer
                                      std::move(attrs));                        // attributes
     }
     return create<ast::Const>(decl->source,                             // source
                               builder_.Symbols().Register(decl->name),  // symbol
                               decl->type,                               // type
-                              initializer,                              // constructor
+                              initializer,                              // initializer
                               std::move(attrs));                        // attributes
 }
 
@@ -1803,18 +1803,18 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
             return Failure::kErrored;
         }
 
-        auto constructor = logical_or_expression();
-        if (constructor.errored) {
+        auto initializer = logical_or_expression();
+        if (initializer.errored) {
             return Failure::kErrored;
         }
-        if (!constructor.matched) {
-            return add_error(peek(), "missing constructor for 'const' declaration");
+        if (!initializer.matched) {
+            return add_error(peek(), "missing initializer for 'const' declaration");
         }
 
         auto* const_ = create<ast::Const>(decl->source,                             // source
                                           builder_.Symbols().Register(decl->name),  // symbol
                                           decl->type,                               // type
-                                          constructor.value,                        // constructor
+                                          initializer.value,                        // initializer
                                           ast::AttributeList{});                    // attributes
 
         return create<ast::VariableDeclStatement>(decl->source, const_);
@@ -1831,18 +1831,18 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
             return Failure::kErrored;
         }
 
-        auto constructor = logical_or_expression();
-        if (constructor.errored) {
+        auto initializer = logical_or_expression();
+        if (initializer.errored) {
             return Failure::kErrored;
         }
-        if (!constructor.matched) {
-            return add_error(peek(), "missing constructor for 'let' declaration");
+        if (!initializer.matched) {
+            return add_error(peek(), "missing initializer for 'let' declaration");
         }
 
         auto* let = create<ast::Let>(decl->source,                             // source
                                      builder_.Symbols().Register(decl->name),  // symbol
                                      decl->type,                               // type
-                                     constructor.value,                        // constructor
+                                     initializer.value,                        // initializer
                                      ast::AttributeList{});                    // attributes
 
         return create<ast::VariableDeclStatement>(decl->source, let);
@@ -1856,17 +1856,17 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
         return Failure::kNoMatch;
     }
 
-    const ast::Expression* constructor = nullptr;
+    const ast::Expression* initializer = nullptr;
     if (match(Token::Type::kEqual)) {
-        auto constructor_expr = logical_or_expression();
-        if (constructor_expr.errored) {
+        auto initializer_expr = logical_or_expression();
+        if (initializer_expr.errored) {
             return Failure::kErrored;
         }
-        if (!constructor_expr.matched) {
-            return add_error(peek(), "missing constructor for 'var' declaration");
+        if (!initializer_expr.matched) {
+            return add_error(peek(), "missing initializer for 'var' declaration");
         }
 
-        constructor = constructor_expr.value;
+        initializer = initializer_expr.value;
     }
 
     auto* var = create<ast::Var>(decl->source,                             // source
@@ -1874,7 +1874,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
                                  decl->type,                               // type
                                  decl->storage_class,                      // storage class
                                  decl->access,                             // access control
-                                 constructor,                              // constructor
+                                 initializer,                              // initializer
                                  ast::AttributeList{});                    // attributes
 
     return create<ast::VariableDeclStatement>(var->source, var);

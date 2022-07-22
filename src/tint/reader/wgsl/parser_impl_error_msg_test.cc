@@ -220,7 +220,7 @@ fn f() { let a : i32; }
 
 TEST_F(ParserImplErrorTest, ConstVarStmtMissingConstructor) {
     EXPECT("fn f() { let a : i32 = >; }",
-           R"(test.wgsl:1:24 error: missing constructor for 'let' declaration
+           R"(test.wgsl:1:24 error: missing initializer for 'let' declaration
 fn f() { let a : i32 = >; }
                        ^
 )");
@@ -1284,7 +1284,7 @@ fn f() { var a : u32 }
 
 TEST_F(ParserImplErrorTest, VarStmtInvalidAssignment) {
     EXPECT("fn f() { var a : u32 = >; }",
-           R"(test.wgsl:1:24 error: missing constructor for 'var' declaration
+           R"(test.wgsl:1:24 error: missing initializer for 'var' declaration
 fn f() { var a : u32 = >; }
                        ^
 )");

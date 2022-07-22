@@ -63,7 +63,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ConstructorInvalid) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:15: missing constructor for 'var' declaration");
+    EXPECT_EQ(p->error(), "1:15: missing initializer for 'var' declaration");
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit) {
@@ -170,7 +170,7 @@ TEST_F(ParserImplTest, VariableStmt_Let_MissingConstructor) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:14: missing constructor for 'let' declaration");
+    EXPECT_EQ(p->error(), "1:14: missing initializer for 'let' declaration");
 }
 
 TEST_F(ParserImplTest, VariableStmt_Let_InvalidConstructor) {
@@ -180,7 +180,7 @@ TEST_F(ParserImplTest, VariableStmt_Let_InvalidConstructor) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:15: missing constructor for 'let' declaration");
+    EXPECT_EQ(p->error(), "1:15: missing initializer for 'let' declaration");
 }
 
 }  // namespace
