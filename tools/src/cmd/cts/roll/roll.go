@@ -15,6 +15,7 @@
 package roll
 
 import (
+	"bytes"
 	"context"
 	"flag"
 	"fmt"
@@ -25,6 +26,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"sync"
 	"text/tabwriter"
 	"time"
 
@@ -33,6 +35,7 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/cts/expectations"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/gerrit"
 	"dawn.googlesource.com/dawn/tools/src/git"
 	"dawn.googlesource.com/dawn/tools/src/gitiles"
@@ -50,6 +53,7 @@ func init() {
 const (
 	depsRelPath          = "DEPS"
 	tsSourcesRelPath     = "third_party/gn/webgpu-cts/ts_sources.txt"
+	testListRelPath      = "third_party/gn/webgpu-cts/test_list.txt"
 	resourceFilesRelPath = "third_party/gn/webgpu-cts/resource_files.txt"
 	webTestsPath         = "webgpu-cts/webtests"
 	refMain              = "refs/heads/main"
@@ -58,7 +62,8 @@ const (
 
 type rollerFlags struct {
 	gitPath  string
-	tscPath  string
+	npmPath  string
+	nodePath string
 	auth     authcli.Flags
 	cacheDir string
 	force    bool // Create a new roll, even if CTS is up to date
@@ -80,10 +85,12 @@ func (cmd) Desc() string {
 
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
 	gitPath, _ := exec.LookPath("git")
-	tscPath, _ := exec.LookPath("tsc")
+	npmPath, _ := exec.LookPath("npm")
+	nodePath, _ := exec.LookPath("node")
 	c.flags.auth.Register(flag.CommandLine, common.DefaultAuthOptions())
 	flag.StringVar(&c.flags.gitPath, "git", gitPath, "path to git")
-	flag.StringVar(&c.flags.tscPath, "tsc", tscPath, "path to tsc")
+	flag.StringVar(&c.flags.npmPath, "npm", npmPath, "path to npm")
+	flag.StringVar(&c.flags.nodePath, "node", nodePath, "path to node")
 	flag.StringVar(&c.flags.cacheDir, "cache", common.DefaultCacheDir, "path to the results cache")
 	flag.BoolVar(&c.flags.force, "force", false, "create a new roll, even if CTS is up to date")
 	flag.BoolVar(&c.flags.rebuild, "rebuild", false, "rebuild the expectation file from scratch")
@@ -104,7 +111,8 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		name, path, hint string
 	}{
 		{name: "git", path: c.flags.gitPath},
-		{name: "tsc", path: c.flags.tscPath, hint: "Try using '-tsc third_party/webgpu-cts/node_modules/.bin/tsc' after an 'npm ci'."},
+		{name: "npm", path: c.flags.npmPath},
+		{name: "node", path: c.flags.nodePath},
 	} {
 		if _, err := os.Stat(tool.path); err != nil {
 			return fmt.Errorf("failed to find path to %v: %v. %v", tool.name, err, tool.hint)
@@ -233,24 +241,9 @@ func (r *roller) roll(ctx context.Context) error {
 		ex = rebuilt
 	}
 
-	// Map of relative file path to content of generated files
-	generatedFiles := map[string]string{}
-
-	// Regenerate the typescript dependency list
-	tsSources, err := r.genTSDepList(ctx)
+	generatedFiles, err := r.generateFiles(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to generate ts_sources.txt: %v", err)
-	}
-
-	// Regenerate the resource files list
-	resources, err := r.genResourceFilesList(ctx)
-	if err != nil {
-		return fmt.Errorf("failed to generate resource_files.txt: %v", err)
-	}
-
-	// Regenerate web tests HTML files
-	if err := r.genWebTestSources(ctx, generatedFiles); err != nil {
-		return fmt.Errorf("failed to generate web tests: %v", err)
+		return err
 	}
 
 	deletedFiles := []string{}
@@ -299,20 +292,16 @@ func (r *roller) roll(ctx context.Context) error {
 			return err
 		}
 		changeID = change.ID
-		log.Printf("created gerrit change %v...", change.Number)
+		log.Printf("created gerrit change %v (%v)...", change.Number, change.URL)
 	} else {
 		changeID = existingRolls[0].ID
-		log.Printf("reusing existing gerrit change %v...", existingRolls[0].Number)
+		log.Printf("reusing existing gerrit change %v (%v)...", existingRolls[0].Number, existingRolls[0].URL)
 	}
 
-	// Update the DEPS, and ts-sources file.
-	// Update the expectations with the re-formatted content, and updated
-	// timestamp.
+	// Update the DEPS, expectations, and other generated files.
 	updateExpectationUpdateTimestamp(&ex)
 	generatedFiles[depsRelPath] = updatedDEPS
 	generatedFiles[common.RelativeExpectationsPath] = ex.String()
-	generatedFiles[tsSourcesRelPath] = tsSources
-	generatedFiles[resourceFilesRelPath] = resources
 
 	msg := r.rollCommitMessage(oldCTSHash, newCTSHash, ctsLog, changeID)
 	ps, err := r.gerrit.EditFiles(changeID, msg, generatedFiles, deletedFiles)
@@ -601,6 +590,80 @@ func (r *roller) checkout(project, dir, host, hash string) (*git.Repository, err
 	return repo, nil
 }
 
+// Call 'npm ci' in the CTS directory, and generates a map of project-relative
+// file path to file content for the CTS roll's change. This includes:
+// * type-script source files
+// * CTS test list
+// * resource file list
+// * webtest file sources
+func (r *roller) generateFiles(ctx context.Context) (map[string]string, error) {
+	// Run 'npm ci' to fetch modules and tsc
+	{
+		log.Printf("fetching npm modules with 'npm ci'...")
+		cmd := exec.CommandContext(ctx, r.flags.npmPath, "ci")
+		cmd.Dir = r.ctsDir
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			return nil, fmt.Errorf("failed to run 'npm ci': %w\n%v", err, string(out))
+		}
+	}
+
+	log.Printf("generating files for changelist...")
+
+	// Run the below concurrently
+	mutex := sync.Mutex{}
+	files := map[string]string{} // guarded by mutex
+	wg := sync.WaitGroup{}
+
+	errs := make(chan error, 8)
+
+	// Generate web tests HTML files
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		if out, err := r.genWebTestSources(ctx); err == nil {
+			mutex.Lock()
+			defer mutex.Unlock()
+			for file, content := range out {
+				files[file] = content
+			}
+		} else {
+			errs <- fmt.Errorf("failed to generate web tests: %v", err)
+		}
+	}()
+
+	// Generate typescript sources list, test list, resources file list.
+	for relPath, generator := range map[string]func(context.Context) (string, error){
+		tsSourcesRelPath:     r.genTSDepList,
+		testListRelPath:      r.genTestList,
+		resourceFilesRelPath: r.genResourceFilesList,
+	} {
+		relPath, generator := relPath, generator // Capture values, not iterators
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if out, err := generator(ctx); err == nil {
+				mutex.Lock()
+				defer mutex.Unlock()
+				files[relPath] = out
+			} else {
+				errs <- fmt.Errorf("failed to generate %v: %v", relPath, err)
+			}
+		}()
+	}
+
+	// Wait for all the above to complete
+	wg.Wait()
+	close(errs)
+
+	// Check for errors
+	for err := range errs {
+		return nil, err
+	}
+
+	return files, nil
+}
+
 // updateDEPS fetches and updates the Dawn DEPS file at 'dawnRef' so that all
 // CTS hashes are changed to the latest CTS hash.
 func (r *roller) updateDEPS(ctx context.Context, dawnRef string) (newDEPS, newCTSHash, oldCTSHash string, err error) {
@@ -622,12 +685,21 @@ func (r *roller) updateDEPS(ctx context.Context, dawnRef string) (newDEPS, newCT
 
 // genTSDepList returns a list of source files, for the CTS checkout at r.ctsDir
 // This list can be used to populate the ts_sources.txt file.
+// Requires tsc to be found at './node_modules/.bin/tsc' in the CTS directory
+// (e.g. must be called post 'npm ci')
 func (r *roller) genTSDepList(ctx context.Context) (string, error) {
-	cmd := exec.CommandContext(ctx, r.flags.tscPath, "--project",
+	tscPath := filepath.Join(r.ctsDir, "node_modules/.bin/tsc")
+	if !fileutils.IsExe(tscPath) {
+		return "", fmt.Errorf("tsc not found at '%v'", tscPath)
+	}
+
+	cmd := exec.CommandContext(ctx, tscPath, "--project",
 		filepath.Join(r.ctsDir, "tsconfig.json"),
 		"--listFiles",
 		"--declaration", "false",
 		"--sourceMap", "false")
+
+	// Note: we're ignoring the error for this as tsc typically returns status 2.
 	out, _ := cmd.Output()
 
 	prefix := filepath.ToSlash(r.ctsDir) + "/"
@@ -643,6 +715,39 @@ func (r *roller) genTSDepList(ctx context.Context) (string, error) {
 	}
 
 	return strings.Join(deps, "\n") + "\n", nil
+}
+
+// genTestList returns the newline delimited list of test names, for the CTS checkout at r.ctsDir
+func (r *roller) genTestList(ctx context.Context) (string, error) {
+	// Run 'src/common/runtime/cmdline.ts' to obtain the full test list
+	cmd := exec.CommandContext(ctx, r.flags.nodePath,
+		"-e", "require('./src/common/tools/setup-ts-in-node.js');require('./src/common/runtime/cmdline.ts');",
+		"--", // Start of arguments
+		// src/common/runtime/helper/sys.ts expects 'node file.js <args>'
+		// and slices away the first two arguments. When running with '-e', args
+		// start at 1, so just inject a placeholder argument.
+		"placeholder-arg",
+		"--list",
+		"webgpu:*",
+	)
+	cmd.Dir = r.ctsDir
+
+	stderr := bytes.Buffer{}
+	cmd.Stderr = &stderr
+
+	out, err := cmd.Output()
+	if err != nil {
+		return "", fmt.Errorf("failed to generate test list: %w\n%v", err, stderr.String())
+	}
+
+	tests := []string{}
+	for _, test := range strings.Split(string(out), "\n") {
+		if test != "" {
+			tests = append(tests, test)
+		}
+	}
+
+	return strings.Join(tests, "\n"), nil
 }
 
 // genResourceFilesList returns a list of resource files, for the CTS checkout at r.ctsDir
@@ -663,10 +768,11 @@ func (r *roller) genResourceFilesList(ctx context.Context) (string, error) {
 	return strings.Join(files, "\n") + "\n", nil
 }
 
-// genWebTestSources populates a map of generated webtest file names to contents, for the CTS checkout at r.ctsDir
-func (r *roller) genWebTestSources(ctx context.Context, generatedFiles map[string]string) error {
+// genWebTestSources returns a map of generated webtest file names to contents, for the CTS checkout at r.ctsDir
+func (r *roller) genWebTestSources(ctx context.Context) (map[string]string, error) {
+	generatedFiles := map[string]string{}
 	htmlSearchDir := filepath.Join(r.ctsDir, "src", "webgpu")
-	return filepath.Walk(htmlSearchDir,
+	err := filepath.Walk(htmlSearchDir,
 		func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
@@ -696,4 +802,8 @@ func (r *roller) genWebTestSources(ctx context.Context, generatedFiles map[strin
 			generatedFiles[filepath.Join(webTestsPath, relPath)] = contents
 			return nil
 		})
+	if err != nil {
+		return nil, err
+	}
+	return generatedFiles, nil
 }
