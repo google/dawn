@@ -1,9 +1,9 @@
 #include <metal_stdlib>
 
 using namespace metal;
-constant int o [[function_constant(0)]];
-
 kernel void tint_symbol() {
+  if ((0 == 2)) {
+  }
   return;
 }
 

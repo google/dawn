@@ -1,6 +1,8 @@
-@id(1234) override o : bool = bool();
+const o : bool = false;
 
 @compute @workgroup_size(1)
 fn main() {
-  _ = o;
+  if (o) {
+    _ = o;
+  }
 }

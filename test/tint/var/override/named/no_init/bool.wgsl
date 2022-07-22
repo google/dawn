@@ -1,7 +1,10 @@
-// flags: --overrides WGSL_SPEC_CONSTANT_0=0
+// flags: --overrides o=0,j=1
 override o : bool;
+override j : bool;
 
 @compute @workgroup_size(1)
 fn main() {
-    _ = o;
+    if o && j {
+        _ = 1;
+    }
 }

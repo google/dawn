@@ -1,10 +1,8 @@
 #version 310 es
 
-#ifndef WGSL_SPEC_CONSTANT_0
-#define WGSL_SPEC_CONSTANT_0 0
-#endif
-const int o = WGSL_SPEC_CONSTANT_0;
 void tint_symbol() {
+  if ((0 == 2)) {
+  }
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

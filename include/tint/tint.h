@@ -31,6 +31,7 @@
 #include "src/tint/transform/renamer.h"
 #include "src/tint/transform/robustness.h"
 #include "src/tint/transform/single_entry_point.h"
+#include "src/tint/transform/substitute_override.h"
 #include "src/tint/transform/vertex_pulling.h"
 #include "src/tint/writer/flatten_bindings.h"
 #include "src/tint/writer/writer.h"
