@@ -67,6 +67,7 @@ enum class Format {
 
 struct Options {
     bool show_help = false;
+    bool verbose = false;
 
     std::string input_filename;
     std::string output_file = "-";  // Default to stdout
@@ -84,7 +85,7 @@ struct Options {
 
     std::vector<std::string> transforms;
 
-    bool use_fxc = false;
+    std::string fxc_path;
     std::string dxc_path;
     std::string xcrun_path;
     std::unordered_map<std::string, double> overrides;
@@ -120,13 +121,13 @@ ${transforms}
                                used for num_workgroups in HLSL. If not specified, then
                                default to binding 0 of the largest used group plus 1,
                                or group 0 if no resource bound.
-  --validate                -- Validates the generated shader
-  --fxc                     -- Ask to validate HLSL output using FXC instead of DXC.
-                               When specified, automatically enables --validate
+  --validate                -- Validates the generated shader with all available validators
+  --fxc                     -- Path to FXC dll, used to validate HLSL output.
+                               When specified, automatically enables HLSL validation with FXC
   --dxc                     -- Path to DXC executable, used to validate HLSL output.
-                               When specified, automatically enables --validate
+                               When specified, automatically enables HLSL validation with DXC
   --xcrun                   -- Path to xcrun executable, used to validate MSL output.
-                               When specified, automatically enables --validate
+                               When specified, automatically enables MSL validation
   --overrides               -- Override values as IDENTIFIER=VALUE, comma-separated.
 )";
 
@@ -397,6 +398,8 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
 
         } else if (arg == "-h" || arg == "--help") {
             opts->show_help = true;
+        } else if (arg == "-v" || arg == "--verbose") {
+            opts->verbose = true;
         } else if (arg == "--transform") {
             ++i;
             if (i >= args.size()) {
@@ -415,8 +418,12 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
         } else if (arg == "--validate") {
             opts->validate = true;
         } else if (arg == "--fxc") {
-            opts->validate = true;
-            opts->use_fxc = true;
+            ++i;
+            if (i >= args.size()) {
+                std::cerr << "Missing value for " << arg << std::endl;
+                return false;
+            }
+            opts->fxc_path = args[i];
         } else if (arg == "--dxc") {
             ++i;
             if (i >= args.size()) {
@@ -424,7 +431,6 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
                 return false;
             }
             opts->dxc_path = args[i];
-            opts->validate = true;
         } else if (arg == "--xcrun") {
             ++i;
             if (i >= args.size()) {
@@ -801,28 +807,70 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
         return false;
     }
 
-    if (options.validate) {
-        tint::val::Result res;
-        if (options.use_fxc) {
-#ifdef _WIN32
-            res = tint::val::HlslUsingFXC(result.hlsl, result.entry_points);
-#else
-            res.failed = true;
-            res.output = "FXC can only be used on Windows. Sorry :X";
-#endif  // _WIN32
-        } else {
+    // If --fxc or --dxc was passed, then we must explicitly find and validate with that respective
+    // compiler.
+    const bool must_validate_dxc = !options.dxc_path.empty();
+    const bool must_validate_fxc = !options.fxc_path.empty();
+    if (options.validate || must_validate_dxc || must_validate_fxc) {
+        tint::val::Result dxc_res;
+        bool dxc_found = false;
+        if (options.validate || must_validate_dxc) {
             auto dxc =
                 tint::utils::Command::LookPath(options.dxc_path.empty() ? "dxc" : options.dxc_path);
             if (dxc.Found()) {
-                res = tint::val::HlslUsingDXC(dxc.Path(), result.hlsl, result.entry_points);
-            } else {
-                res.failed = true;
-                res.output = "DXC executable not found. Cannot validate";
+                dxc_found = true;
+                dxc_res = tint::val::HlslUsingDXC(dxc.Path(), result.hlsl, result.entry_points);
+            } else if (must_validate_dxc) {
+                // DXC was explicitly requested. Error if it could not be found.
+                dxc_res.failed = true;
+                dxc_res.output =
+                    "DXC executable '" + options.dxc_path + "' not found. Cannot validate";
             }
         }
-        if (res.failed) {
-            std::cerr << res.output << std::endl;
+
+        tint::val::Result fxc_res;
+        bool fxc_found = false;
+        if (options.validate || must_validate_fxc) {
+            auto fxc = tint::utils::Command::LookPath(
+                options.fxc_path.empty() ? tint::val::kFxcDLLName : options.fxc_path);
+
+#ifdef _WIN32
+            if (fxc.Found()) {
+                fxc_found = true;
+                fxc_res = tint::val::HlslUsingFXC(fxc.Path(), result.hlsl, result.entry_points);
+            } else if (must_validate_fxc) {
+                // FXC was explicitly requested. Error if it could not be found.
+                fxc_res.failed = true;
+                fxc_res.output = "FXC DLL '" + options.fxc_path + "' not found. Cannot validate";
+            }
+#else
+            if (must_validate_dxc) {
+                fxc_res.failed = true;
+                fxc_res.output = "FXC can only be used on Windows.";
+            }
+#endif  // _WIN32
+        }
+
+        if (fxc_res.failed) {
+            std::cerr << "FXC validation failure:" << std::endl << fxc_res.output << std::endl;
+        }
+        if (dxc_res.failed) {
+            std::cerr << "DXC validation failure:" << std::endl << dxc_res.output << std::endl;
+        }
+        if (fxc_res.failed || dxc_res.failed) {
             return false;
+        }
+        if (!fxc_found && !dxc_found) {
+            std::cerr << "Couldn't find FXC or DXC. Cannot validate" << std::endl;
+            return false;
+        }
+        if (options.verbose) {
+            if (fxc_found && !fxc_res.failed) {
+                std::cout << "Passed FXC validation" << std::endl;
+            }
+            if (dxc_found && !dxc_res.failed) {
+                std::cout << "Passed DXC validation" << std::endl;
+            }
         }
     }
 

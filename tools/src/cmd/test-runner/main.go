@@ -41,20 +41,22 @@ type outputFormat string
 const (
 	testTimeout = 2 * time.Minute
 
-	glsl   = outputFormat("glsl")
-	hlsl   = outputFormat("hlsl")
-	msl    = outputFormat("msl")
-	spvasm = outputFormat("spvasm")
-	wgsl   = outputFormat("wgsl")
+	glsl    = outputFormat("glsl")
+	hlslFXC = outputFormat("hlsl-fxc")
+	hlslDXC = outputFormat("hlsl-dxc")
+	msl     = outputFormat("msl")
+	spvasm  = outputFormat("spvasm")
+	wgsl    = outputFormat("wgsl")
 )
 
 // Directories we don't generate expected PASS result files for.
 // These directories contain large corpora of tests for which the generated code
 // is uninteresting.
+// These paths use unix-style slashes and do not contain the '/test/tint' prefix.
 var dirsWithNoPassExpectations = []string{
-	"/test/tint/benchmark/",
-	"/test/tint/unittest/",
-	"/test/tint/vk-gl-cts/",
+	"benchmark/",
+	"unittest/",
+	"vk-gl-cts/",
 }
 
 func main() {
@@ -81,16 +83,15 @@ optional flags:`)
 }
 
 func run() error {
-	var formatList, filter, dxcPath, xcrunPath string
+	var formatList, filter, dxcPath, fxcPath, xcrunPath string
 	var maxFilenameColumnWidth int
 	numCPU := runtime.NumCPU()
-	fxc, fxcAndDxc, verbose, generateExpected, generateSkip := false, false, false, false, false
-	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl, glsl")
+	verbose, generateExpected, generateSkip := false, false, false
+	flag.StringVar(&formatList, "format", "all", "comma separated list of formats to emit. Possible values are: all, wgsl, spvasm, msl, hlsl, hlsl-dxc, hlsl-fxc, glsl")
 	flag.StringVar(&filter, "filter", "**.wgsl, **.spvasm, **.spv", "comma separated list of glob patterns for test files")
 	flag.StringVar(&dxcPath, "dxc", "", "path to DXC executable for validating HLSL output")
+	flag.StringVar(&fxcPath, "fxc", "", "path to FXC DLL for validating HLSL output")
 	flag.StringVar(&xcrunPath, "xcrun", "", "path to xcrun executable for validating MSL output")
-	flag.BoolVar(&fxc, "fxc", false, "validate with FXC instead of DXC")
-	flag.BoolVar(&fxcAndDxc, "fxc-and-dxc", false, "validate with both FXC and DXC")
 	flag.BoolVar(&verbose, "verbose", false, "print all run tests, including rows that all pass")
 	flag.BoolVar(&generateExpected, "generate-expected", false, "create or update all expected outputs")
 	flag.BoolVar(&generateSkip, "generate-skip", false, "create or update all expected outputs that fail with SKIP")
@@ -102,10 +103,6 @@ func run() error {
 	args := flag.Args()
 	if len(args) == 0 {
 		showUsage()
-	}
-
-	if fxcAndDxc {
-		fxc = true
 	}
 
 	// executable path is the first argument
@@ -163,7 +160,7 @@ func run() error {
 	// Parse --format into a list of outputFormat
 	formats := []outputFormat{}
 	if formatList == "all" {
-		formats = []outputFormat{wgsl, spvasm, msl, hlsl, glsl}
+		formats = []outputFormat{wgsl, spvasm, msl, hlslDXC, hlslFXC, glsl}
 	} else {
 		for _, f := range strings.Split(formatList, ",") {
 			switch strings.TrimSpace(f) {
@@ -174,7 +171,11 @@ func run() error {
 			case "msl":
 				formats = append(formats, msl)
 			case "hlsl":
-				formats = append(formats, hlsl)
+				formats = append(formats, hlslDXC, hlslFXC)
+			case "hlsl-dxc":
+				formats = append(formats, hlslDXC)
+			case "hlsl-fxc":
+				formats = append(formats, hlslFXC)
 			case "glsl":
 				formats = append(formats, glsl)
 			default:
@@ -195,7 +196,8 @@ func run() error {
 		lang string
 		path *string
 	}{
-		{"dxc", "hlsl", &dxcPath},
+		{"dxc", "hlsl-dxc", &dxcPath},
+		{"d3dcompiler_47.dll", "hlsl-fxc", &fxcPath},
 		{defaultMSLExe, "msl", &xcrunPath},
 	} {
 		if *tool.path == "" {
@@ -208,20 +210,11 @@ func run() error {
 		}
 
 		color.Set(color.FgCyan)
-		fmt.Printf("%-4s", tool.lang)
+		fmt.Printf("%-8s", tool.lang)
 		color.Unset()
 		fmt.Printf(" validation ")
-		if *tool.path != "" || (fxc && tool.lang == "hlsl") {
-			color.Set(color.FgGreen)
-			tool_path := *tool.path
-			if fxc && tool.lang == "hlsl" {
-				if fxcAndDxc {
-					tool_path += " AND Tint will use FXC dll in PATH"
-				} else {
-					tool_path = "Tint will use FXC dll in PATH"
-				}
-			}
-			fmt.Printf("ENABLED (" + tool_path + ")")
+		if *tool.path != "" {
+			fmt.Printf("ENABLED (" + *tool.path + ")")
 		} else {
 			color.Set(color.FgRed)
 			fmt.Printf("DISABLED")
@@ -245,10 +238,19 @@ func run() error {
 	pendingJobs := make(chan job, 256)
 
 	// Spawn numCPU job runners...
+	runCfg := runConfig{
+		wd:               dir,
+		exe:              exe,
+		dxcPath:          dxcPath,
+		fxcPath:          fxcPath,
+		xcrunPath:        xcrunPath,
+		generateExpected: generateExpected,
+		generateSkip:     generateSkip,
+	}
 	for cpu := 0; cpu < numCPU; cpu++ {
 		go func() {
 			for job := range pendingJobs {
-				job.run(dir, exe, fxc, fxcAndDxc, dxcPath, xcrunPath, generateExpected, generateSkip)
+				job.run(runCfg)
 			}
 		}()
 	}
@@ -506,10 +508,28 @@ type job struct {
 	result chan status
 }
 
-func (j job) run(wd, exe string, fxc, fxcAndDxc bool, dxcPath, xcrunPath string, generateExpected, generateSkip bool) {
+type runConfig struct {
+	wd               string
+	exe              string
+	dxcPath          string
+	fxcPath          string
+	xcrunPath        string
+	generateExpected bool
+	generateSkip     bool
+}
+
+func (j job) run(cfg runConfig) {
 	j.result <- func() status {
 		// expectedFilePath is the path to the expected output file for the given test
-		expectedFilePath := j.file + ".expected." + string(j.format)
+		expectedFilePath := j.file + ".expected."
+		switch j.format {
+		case hlslDXC:
+			expectedFilePath += "dxc.hlsl"
+		case hlslFXC:
+			expectedFilePath += "fxc.hlsl"
+		default:
+			expectedFilePath += string(j.format)
+		}
 
 		// Is there an expected output file? If so, load it.
 		expected, expectedFileExists := "", false
@@ -525,7 +545,7 @@ func (j job) run(wd, exe string, fxc, fxcAndDxc bool, dxcPath, xcrunPath string,
 
 		expected = strings.ReplaceAll(expected, "\r\n", "\n")
 
-		file, err := filepath.Rel(wd, j.file)
+		file, err := filepath.Rel(cfg.wd, j.file)
 		if err != nil {
 			file = j.file
 		}
@@ -536,7 +556,7 @@ func (j job) run(wd, exe string, fxc, fxcAndDxc bool, dxcPath, xcrunPath string,
 
 		args := []string{
 			file,
-			"--format", string(j.format),
+			"--format", strings.Split(string(j.format), "-")[0], // 'hlsl-fxc' -> 'hlsl', etc.
 		}
 
 		// Can we validate?
@@ -547,52 +567,40 @@ func (j job) run(wd, exe string, fxc, fxcAndDxc bool, dxcPath, xcrunPath string,
 		case spvasm, glsl:
 			args = append(args, "--validate") // spirv-val and glslang are statically linked, always available
 			validate = true
-		case hlsl:
-			// Handled below
-		case msl:
-			if xcrunPath != "" {
-				args = append(args, "--xcrun", xcrunPath)
+		case hlslDXC:
+			if cfg.dxcPath != "" {
+				args = append(args, "--dxc", cfg.dxcPath)
 				validate = true
 			}
+		case hlslFXC:
+			if cfg.fxcPath != "" {
+				args = append(args, "--fxc", cfg.fxcPath)
+				validate = true
+			}
+		case msl:
+			if cfg.xcrunPath != "" {
+				args = append(args, "--xcrun", cfg.xcrunPath)
+				validate = true
+			}
+		default:
+			panic("unknown format: " + j.format)
 		}
 
 		// Invoke the compiler...
 		ok := false
 		var out string
+		args = append(args, j.flags...)
+
 		start := time.Now()
-		if j.format == hlsl {
-			// If fxcAndDxc is set, run FXC first as it's more likely to fail, then DXC iff FXC succeeded.
-			if fxc || fxcAndDxc {
-				validate = true
-				args_fxc := append(args, "--fxc")
-				args_fxc = append(args_fxc, j.flags...)
-				ok, out = invoke(wd, exe, args_fxc...)
-			}
-
-			if dxcPath != "" && (!fxc || (fxcAndDxc && ok)) {
-				validate = true
-				args_dxc := append(args, "--dxc", dxcPath)
-				args_dxc = append(args_dxc, j.flags...)
-				ok, out = invoke(wd, exe, args_dxc...)
-			}
-
-			// If we didn't run either fxc or dxc validation, run as usual
-			if !validate {
-				args = append(args, j.flags...)
-				ok, out = invoke(wd, exe, args...)
-			}
-
-		} else {
-			args = append(args, j.flags...)
-			ok, out = invoke(wd, exe, args...)
-		}
+		ok, out = invoke(cfg.wd, cfg.exe, args...)
 		timeTaken := time.Since(start)
+
 		out = strings.ReplaceAll(out, "\r\n", "\n")
 		matched := expected == "" || expected == out
 
 		canEmitPassExpectationFile := true
 		for _, noPass := range dirsWithNoPassExpectations {
-			if strings.Contains(j.file, filepath.FromSlash(noPass)) {
+			if strings.HasPrefix(file, noPass) {
 				canEmitPassExpectationFile = false
 				break
 			}
@@ -602,7 +610,7 @@ func (j job) run(wd, exe string, fxc, fxcAndDxc bool, dxcPath, xcrunPath string,
 			return ioutil.WriteFile(path, []byte(content), 0666)
 		}
 
-		if ok && generateExpected && (validate || !skipped) {
+		if ok && cfg.generateExpected && (validate || !skipped) {
 			// User requested to update PASS expectations, and test passed.
 			if canEmitPassExpectationFile {
 				saveExpectedFile(expectedFilePath, out)
@@ -623,14 +631,14 @@ func (j job) run(wd, exe string, fxc, fxcAndDxc bool, dxcPath, xcrunPath string,
 			//       --- Below this point the test has failed ---
 
 		case skipped:
-			if generateSkip {
+			if cfg.generateSkip {
 				saveExpectedFile(expectedFilePath, "SKIP: FAILED\n\n"+out)
 			}
 			return status{code: skip, timeTaken: timeTaken}
 
 		case !ok:
 			// Compiler returned non-zero exit code
-			if generateSkip {
+			if cfg.generateSkip {
 				saveExpectedFile(expectedFilePath, "SKIP: FAILED\n\n"+out)
 			}
 			err := fmt.Errorf("%s", out)
@@ -638,7 +646,7 @@ func (j job) run(wd, exe string, fxc, fxcAndDxc bool, dxcPath, xcrunPath string,
 
 		default:
 			// Compiler returned zero exit code, or output was not as expected
-			if generateSkip {
+			if cfg.generateSkip {
 				saveExpectedFile(expectedFilePath, "SKIP: FAILED\n\n"+out)
 			}
 

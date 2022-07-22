@@ -16,8 +16,11 @@
 
 #define WIN32_LEAN_AND_MEAN 1
 #include <Windows.h>
+#include <dbghelp.h>
 #include <sstream>
 #include <string>
+
+#include "src/tint/utils/defer.h"
 
 namespace tint::utils {
 
@@ -97,9 +100,34 @@ class Pipe {
     Handle write;
 };
 
+/// Queries whether the file at the given path is an executable or DLL.
 bool ExecutableExists(const std::string& path) {
-    DWORD type = 0;
-    return GetBinaryTypeA(path.c_str(), &type);
+    auto file = Handle(CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
+                                   FILE_ATTRIBUTE_READONLY, NULL));
+    if (!file) {
+        return false;
+    }
+
+    auto map = Handle(CreateFileMappingA(file, NULL, PAGE_READONLY, 0, 0, NULL));
+    if (map == INVALID_HANDLE_VALUE) {
+        return false;
+    }
+
+    void* addr_header = MapViewOfFileEx(map, FILE_MAP_READ, 0, 0, 0, NULL);
+
+    // Dynamically obtain the address of, and call ImageNtHeader. This is done to avoid tint.exe
+    // needing to statically link Dbghelp.lib.
+    static auto* dbg_help = LoadLibraryA("Dbghelp.dll");  // Leaks, but who cares?
+    if (dbg_help) {
+        if (FARPROC proc = GetProcAddress(dbg_help, "ImageNtHeader")) {
+            using ImageNtHeaderPtr = decltype(&ImageNtHeader);
+            auto* image_nt_header = reinterpret_cast<ImageNtHeaderPtr>(proc)(addr_header);
+            return image_nt_header != nullptr;
+        }
+    }
+
+    // Couldn't call ImageNtHeader, assume it is executable
+    return false;
 }
 
 std::string FindExecutable(const std::string& name) {
@@ -187,7 +215,8 @@ Command::Output Command::Exec(std::initializer_list<std::string> arguments) cons
                         &si,                                    // Pointer to STARTUPINFO structure
                         &pi)) {  // Pointer to PROCESS_INFORMATION structure
         Output out;
-        out.err = "Command::Exec() CreateProcess() failed";
+        out.err = "Command::Exec() CreateProcess('" + args.str() + "') failed";
+        out.error_code = 1;
         return out;
     }
 

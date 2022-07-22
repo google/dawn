@@ -95,13 +95,15 @@ Result HlslUsingDXC(const std::string& dxc_path,
 }
 
 #ifdef _WIN32
-Result HlslUsingFXC(const std::string& source, const EntryPointList& entry_points) {
+Result HlslUsingFXC(const std::string& fxc_path,
+                    const std::string& source,
+                    const EntryPointList& entry_points) {
     Result result;
 
     // This library leaks if an error happens in this function, but it is ok
     // because it is loaded at most once, and the executables using HlslUsingFXC
     // are short-lived.
-    HMODULE fxcLib = LoadLibraryA("d3dcompiler_47.dll");
+    HMODULE fxcLib = LoadLibraryA(fxc_path.c_str());
     if (fxcLib == nullptr) {
         result.output = "Couldn't load FXC";
         result.failed = true;
