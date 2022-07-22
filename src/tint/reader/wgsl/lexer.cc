@@ -1127,9 +1127,6 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     if (str == "for") {
         return {Token::Type::kFor, source, "for"};
     }
-    if (str == "function") {
-        return {Token::Type::kFunction, source, "function"};
-    }
     if (str == "i32") {
         return {Token::Type::kI32, source, "i32"};
     }
@@ -1175,9 +1172,6 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     if (str == "override") {
         return {Token::Type::kOverride, source, "override"};
     }
-    if (str == "private") {
-        return {Token::Type::kPrivate, source, "private"};
-    }
     if (str == "ptr") {
         return {Token::Type::kPtr, source, "ptr"};
     }
@@ -1189,9 +1183,6 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     }
     if (str == "sampler_comparison") {
         return {Token::Type::kComparisonSampler, source, "sampler_comparison"};
-    }
-    if (str == "storage_buffer" || str == "storage") {
-        return {Token::Type::kStorage, source, "storage"};
     }
     if (str == "struct") {
         return {Token::Type::kStruct, source, "struct"};
@@ -1259,9 +1250,6 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     if (str == "u32") {
         return {Token::Type::kU32, source, "u32"};
     }
-    if (str == "uniform") {
-        return {Token::Type::kUniform, source, "uniform"};
-    }
     if (str == "var") {
         return {Token::Type::kVar, source, "var"};
     }
@@ -1276,9 +1264,6 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     }
     if (str == "while") {
         return {Token::Type::kWhile, source, "while"};
-    }
-    if (str == "workgroup") {
-        return {Token::Type::kWorkgroup, source, "workgroup"};
     }
     return {};
 }

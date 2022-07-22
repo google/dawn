@@ -167,8 +167,6 @@ std::string_view Token::TypeToName(Type type) {
             return "fn";
         case Token::Type::kFor:
             return "for";
-        case Token::Type::kFunction:
-            return "function";
         case Token::Type::kI32:
             return "i32";
         case Token::Type::kIf:
@@ -199,8 +197,6 @@ std::string_view Token::TypeToName(Type type) {
             return "mat4x4";
         case Token::Type::kOverride:
             return "override";
-        case Token::Type::kPrivate:
-            return "private";
         case Token::Type::kPtr:
             return "ptr";
         case Token::Type::kReturn:
@@ -209,8 +205,6 @@ std::string_view Token::TypeToName(Type type) {
             return "sampler";
         case Token::Type::kComparisonSampler:
             return "sampler_comparison";
-        case Token::Type::kStorage:
-            return "storage";
         case Token::Type::kStruct:
             return "struct";
         case Token::Type::kSwitch:
@@ -255,8 +249,6 @@ std::string_view Token::TypeToName(Type type) {
             return "type";
         case Token::Type::kU32:
             return "u32";
-        case Token::Type::kUniform:
-            return "uniform";
         case Token::Type::kVar:
             return "var";
         case Token::Type::kVec2:
@@ -267,8 +259,6 @@ std::string_view Token::TypeToName(Type type) {
             return "vec4";
         case Token::Type::kWhile:
             return "while";
-        case Token::Type::kWorkgroup:
-            return "workgroup";
     }
 
     return "<unknown>";

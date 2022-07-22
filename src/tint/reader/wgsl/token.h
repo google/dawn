@@ -177,8 +177,6 @@ class Token {
         kFn,
         // A 'for'
         kFor,
-        /// A 'function'
-        kFunction,
         /// A 'i32'
         kI32,
         /// A 'if'
@@ -209,8 +207,6 @@ class Token {
         kMat4x4,
         /// A 'override'
         kOverride,
-        /// A 'private'
-        kPrivate,
         /// A 'ptr'
         kPtr,
         /// A 'return'
@@ -219,8 +215,6 @@ class Token {
         kSampler,
         /// A 'sampler_comparison'
         kComparisonSampler,
-        /// A 'storage'
-        kStorage,
         /// A 'struct'
         kStruct,
         /// A 'switch'
@@ -265,8 +259,6 @@ class Token {
         kType,
         /// A 'u32'
         kU32,
-        /// A 'uniform'
-        kUniform,
         /// A 'var'
         kVar,
         /// A 'vec2'
@@ -277,8 +269,6 @@ class Token {
         kVec4,
         /// A 'while'
         kWhile,
-        /// A 'workgroup'
-        kWorkgroup,
     };
 
     /// Converts a token type to a name

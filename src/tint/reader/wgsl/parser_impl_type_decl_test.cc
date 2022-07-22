@@ -272,7 +272,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingStorageClass) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:5: invalid storage class for ptr declaration");
+    ASSERT_EQ(p->error(), "1:5: expected identifier for storage class");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingType) {
@@ -302,7 +302,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingParams) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:5: invalid storage class for ptr declaration");
+    ASSERT_EQ(p->error(), "1:5: expected identifier for storage class");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_BadStorageClass) {

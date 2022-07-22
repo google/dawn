@@ -941,7 +941,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TokenData{"false", Token::Type::kFalse},
                     TokenData{"fn", Token::Type::kFn},
                     TokenData{"for", Token::Type::kFor},
-                    TokenData{"function", Token::Type::kFunction},
                     TokenData{"i32", Token::Type::kI32},
                     TokenData{"if", Token::Type::kIf},
                     TokenData{"import", Token::Type::kImport},
@@ -957,13 +956,10 @@ INSTANTIATE_TEST_SUITE_P(
                     TokenData{"mat4x3", Token::Type::kMat4x3},
                     TokenData{"mat4x4", Token::Type::kMat4x4},
                     TokenData{"override", Token::Type::kOverride},
-                    TokenData{"private", Token::Type::kPrivate},
                     TokenData{"ptr", Token::Type::kPtr},
                     TokenData{"return", Token::Type::kReturn},
                     TokenData{"sampler", Token::Type::kSampler},
                     TokenData{"sampler_comparison", Token::Type::kComparisonSampler},
-                    TokenData{"storage", Token::Type::kStorage},
-                    TokenData{"storage_buffer", Token::Type::kStorage},
                     TokenData{"struct", Token::Type::kStruct},
                     TokenData{"switch", Token::Type::kSwitch},
                     TokenData{"texture_1d", Token::Type::kTextureSampled1d},
@@ -986,13 +982,11 @@ INSTANTIATE_TEST_SUITE_P(
                     TokenData{"true", Token::Type::kTrue},
                     TokenData{"type", Token::Type::kType},
                     TokenData{"u32", Token::Type::kU32},
-                    TokenData{"uniform", Token::Type::kUniform},
                     TokenData{"var", Token::Type::kVar},
                     TokenData{"vec2", Token::Type::kVec2},
                     TokenData{"vec3", Token::Type::kVec3},
                     TokenData{"vec4", Token::Type::kVec4},
-                    TokenData{"while", Token::Type::kWhile},
-                    TokenData{"workgroup", Token::Type::kWorkgroup}));
+                    TokenData{"while", Token::Type::kWhile}));
 
 }  // namespace
 }  // namespace tint::reader::wgsl

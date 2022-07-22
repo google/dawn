@@ -56,10 +56,6 @@ TEST_F(ParserImplTest, StorageClass_NoMatch) {
     EXPECT_EQ(sc.errored, true);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), "1:1: invalid storage class for test");
-
-    auto t = p->next();
-    EXPECT_TRUE(t.IsIdentifier());
-    EXPECT_EQ(t.to_str(), "not");
 }
 
 }  // namespace

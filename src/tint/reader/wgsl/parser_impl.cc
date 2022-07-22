@@ -1271,34 +1271,31 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_matrix(Token t) {
     return builder_.ty.mat(make_source_range_from(t.source()), subtype, columns, rows);
 }
 
-// storage_class
-//  : INPUT
-//  | OUTPUT
-//  | UNIFORM
-//  | WORKGROUP
-//  | STORAGE
-//  | PRIVATE
-//  | FUNCTION
 Expect<ast::StorageClass> ParserImpl::expect_storage_class(std::string_view use) {
     auto source = peek().source();
+    auto ident = expect_ident("storage class");
+    if (ident.errored) {
+        return Failure::kErrored;
+    }
 
-    if (match(Token::Type::kUniform)) {
+    auto name = ident.value;
+    if (name == "uniform") {
         return {ast::StorageClass::kUniform, source};
     }
 
-    if (match(Token::Type::kWorkgroup)) {
+    if (name == "workgroup") {
         return {ast::StorageClass::kWorkgroup, source};
     }
 
-    if (match(Token::Type::kStorage)) {
+    if (name == "storage" || name == "storage_buffer") {
         return {ast::StorageClass::kStorage, source};
     }
 
-    if (match(Token::Type::kPrivate)) {
+    if (name == "private") {
         return {ast::StorageClass::kPrivate, source};
     }
 
-    if (match(Token::Type::kFunction)) {
+    if (name == "function") {
         return {ast::StorageClass::kFunction, source};
     }
 

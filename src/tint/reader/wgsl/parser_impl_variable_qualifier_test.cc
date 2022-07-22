@@ -73,7 +73,7 @@ TEST_F(ParserImplTest, VariableQualifier_Empty) {
     EXPECT_TRUE(p->has_error());
     EXPECT_TRUE(sc.errored);
     EXPECT_FALSE(sc.matched);
-    EXPECT_EQ(p->error(), "1:2: invalid storage class for variable declaration");
+    EXPECT_EQ(p->error(), "1:2: expected identifier for storage class");
 }
 
 TEST_F(ParserImplTest, VariableQualifier_MissingLessThan) {
@@ -84,7 +84,7 @@ TEST_F(ParserImplTest, VariableQualifier_MissingLessThan) {
     EXPECT_FALSE(sc.matched);
 
     auto t = p->next();
-    ASSERT_TRUE(t.Is(Token::Type::kPrivate));
+    ASSERT_TRUE(t.Is(Token::Type::kIdentifier));
 }
 
 TEST_F(ParserImplTest, VariableQualifier_MissingLessThan_AfterSC) {
@@ -95,7 +95,7 @@ TEST_F(ParserImplTest, VariableQualifier_MissingLessThan_AfterSC) {
     EXPECT_FALSE(sc.matched);
 
     auto t = p->next();
-    ASSERT_TRUE(t.Is(Token::Type::kPrivate));
+    ASSERT_TRUE(t.Is(Token::Type::kIdentifier));
 }
 
 TEST_F(ParserImplTest, VariableQualifier_MissingGreaterThan) {
