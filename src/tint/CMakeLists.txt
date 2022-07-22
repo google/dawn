@@ -966,7 +966,7 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_loop_stmt_test.cc
       reader/wgsl/parser_impl_multiplicative_expression_test.cc
       reader/wgsl/parser_impl_param_list_test.cc
-      reader/wgsl/parser_impl_paren_rhs_stmt_test.cc
+      reader/wgsl/parser_impl_paren_expression_test.cc
       reader/wgsl/parser_impl_pipeline_stage_test.cc
       reader/wgsl/parser_impl_primary_expression_test.cc
       reader/wgsl/parser_impl_relational_expression_test.cc

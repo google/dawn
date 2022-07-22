@@ -1567,9 +1567,9 @@ Expect<ast::BlockStatement*> ParserImpl::expect_body_stmt() {
     });
 }
 
-// paren_rhs_stmt
+// paren_expression
 //   : PAREN_LEFT logical_or_expression PAREN_RIGHT
-Expect<const ast::Expression*> ParserImpl::expect_paren_rhs_stmt() {
+Expect<const ast::Expression*> ParserImpl::expect_paren_expression() {
     return expect_paren_block("", [&]() -> Expect<const ast::Expression*> {
         auto expr = logical_or_expression();
         if (expr.errored) {
@@ -1963,7 +1963,7 @@ Maybe<const ast::IfStatement*> ParserImpl::if_stmt() {
 }
 
 // switch_stmt
-//   : SWITCH paren_rhs_stmt BRACKET_LEFT switch_body+ BRACKET_RIGHT
+//   : SWITCH paren_expression BRACKET_LEFT switch_body+ BRACKET_RIGHT
 Maybe<const ast::SwitchStatement*> ParserImpl::switch_stmt() {
     Source source;
     if (!match(Token::Type::kSwitch, &source)) {
@@ -2325,8 +2325,8 @@ Maybe<const ast::BlockStatement*> ParserImpl::continuing_stmt() {
 //   : IDENT argument_expression_list?
 //   | type_decl argument_expression_list
 //   | const_literal
-//   | paren_rhs_stmt
-//   | BITCAST LESS_THAN type_decl GREATER_THAN paren_rhs_stmt
+//   | paren_expression
+//   | BITCAST LESS_THAN type_decl GREATER_THAN paren_expression
 Maybe<const ast::Expression*> ParserImpl::primary_expression() {
     auto t = peek();
     auto source = t.source();
@@ -2340,7 +2340,7 @@ Maybe<const ast::Expression*> ParserImpl::primary_expression() {
     }
 
     if (t.Is(Token::Type::kParenLeft)) {
-        auto paren = expect_paren_rhs_stmt();
+        auto paren = expect_paren_expression();
         if (paren.errored) {
             return Failure::kErrored;
         }
@@ -2356,7 +2356,7 @@ Maybe<const ast::Expression*> ParserImpl::primary_expression() {
             return Failure::kErrored;
         }
 
-        auto params = expect_paren_rhs_stmt();
+        auto params = expect_paren_expression();
         if (params.errored) {
             return Failure::kErrored;
         }

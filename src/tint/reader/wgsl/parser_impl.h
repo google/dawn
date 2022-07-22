@@ -476,9 +476,9 @@ class ParserImpl {
     /// Parses a `body_stmt` grammar element, erroring on parse failure.
     /// @returns the parsed statements
     Expect<ast::BlockStatement*> expect_body_stmt();
-    /// Parses a `paren_rhs_stmt` grammar element, erroring on parse failure.
+    /// Parses a `paren_expression` grammar element, erroring on parse failure.
     /// @returns the parsed element or nullptr
-    Expect<const ast::Expression*> expect_paren_rhs_stmt();
+    Expect<const ast::Expression*> expect_paren_expression();
     /// Parses a `statements` grammar element
     /// @returns the statements parsed
     Expect<ast::StatementList> expect_statements();
