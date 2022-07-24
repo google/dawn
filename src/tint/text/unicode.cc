@@ -306,6 +306,11 @@ constexpr size_t kNumXIDContinueRanges = sizeof(kXIDContinueRanges) / sizeof(kXI
 }  // namespace
 
 bool CodePoint::IsXIDStart() const {
+    // Short circuit ascii. It will end up being at the end of the binary search
+    // but is our, currently, common case.
+    if ((value >= 'a' && value <= 'z') || (value >= 'A' && value <= 'Z')) {
+        return true;
+    }
     return std::binary_search(kXIDStartRanges, kXIDStartRanges + kNumXIDStartRanges, *this);
 }
 
