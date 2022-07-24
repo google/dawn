@@ -357,9 +357,6 @@ Token Lexer::try_float() {
         return {};
     }
 
-    // Save the error string, for use by diagnostics.
-    const auto str = std::string{substr(start, end - start)};
-
     advance(end - start);
     end_source(source);
 
