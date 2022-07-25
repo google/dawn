@@ -357,18 +357,18 @@ TEST_F(ParserImplErrorTest, FunctionDeclWorkgroupSizeXInvalid) {
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclWorkgroupSizeYInvalid) {
-    EXPECT("@workgroup_size(1, ) fn f() {}",
+    EXPECT("@workgroup_size(1, fn) fn f() {}",
            R"(test.wgsl:1:20 error: expected workgroup_size y parameter
-@workgroup_size(1, ) fn f() {}
-                   ^
+@workgroup_size(1, fn) fn f() {}
+                   ^^
 )");
 }
 
 TEST_F(ParserImplErrorTest, FunctionDeclWorkgroupSizeZInvalid) {
-    EXPECT("@workgroup_size(1, 2, ) fn f() {}",
+    EXPECT("@workgroup_size(1, 2, fn) fn f() {}",
            R"(test.wgsl:1:23 error: expected workgroup_size z parameter
-@workgroup_size(1, 2, ) fn f() {}
-                      ^
+@workgroup_size(1, 2, fn) fn f() {}
+                      ^^
 )");
 }
 

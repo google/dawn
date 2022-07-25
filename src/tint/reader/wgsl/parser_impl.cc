@@ -3167,6 +3167,7 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
             if (val.errored) {
                 return Failure::kErrored;
             }
+            match(Token::Type::kComma);
 
             return create<ast::LocationAttribute>(t.source(), val.value);
         });
@@ -3179,6 +3180,7 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
             if (val.errored) {
                 return Failure::kErrored;
             }
+            match(Token::Type::kComma);
 
             return create<ast::BindingAttribute>(t.source(), val.value);
         });
@@ -3191,6 +3193,7 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
             if (val.errored) {
                 return Failure::kErrored;
             }
+            match(Token::Type::kComma);
 
             return create<ast::GroupAttribute>(t.source(), val.value);
         });
@@ -3213,15 +3216,19 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
             }
 
             if (match(Token::Type::kComma)) {
-                auto sampling_tok = next();
-                if (sampling_tok == "center") {
-                    sampling = ast::InterpolationSampling::kCenter;
-                } else if (sampling_tok == "centroid") {
-                    sampling = ast::InterpolationSampling::kCentroid;
-                } else if (sampling_tok == "sample") {
-                    sampling = ast::InterpolationSampling::kSample;
-                } else {
-                    return add_error(sampling_tok, "invalid interpolation sampling");
+                if (!peek_is(Token::Type::kParenRight)) {
+                    auto sampling_tok = next();
+                    if (sampling_tok == "center") {
+                        sampling = ast::InterpolationSampling::kCenter;
+                    } else if (sampling_tok == "centroid") {
+                        sampling = ast::InterpolationSampling::kCentroid;
+                    } else if (sampling_tok == "sample") {
+                        sampling = ast::InterpolationSampling::kSample;
+                    } else {
+                        return add_error(sampling_tok, "invalid interpolation sampling");
+                    }
+
+                    match(Token::Type::kComma);
                 }
             }
 
@@ -3240,6 +3247,7 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
                 return Failure::kErrored;
             }
 
+            match(Token::Type::kComma);
             return create<ast::BuiltinAttribute>(t.source(), builtin.value);
         });
     }
@@ -3259,22 +3267,28 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
             x = std::move(expr.value);
 
             if (match(Token::Type::kComma)) {
-                expr = primary_expression();
-                if (expr.errored) {
-                    return Failure::kErrored;
-                } else if (!expr.matched) {
-                    return add_error(peek(), "expected workgroup_size y parameter");
-                }
-                y = std::move(expr.value);
-
-                if (match(Token::Type::kComma)) {
+                if (!peek_is(Token::Type::kParenRight)) {
                     expr = primary_expression();
                     if (expr.errored) {
                         return Failure::kErrored;
                     } else if (!expr.matched) {
-                        return add_error(peek(), "expected workgroup_size z parameter");
+                        return add_error(peek(), "expected workgroup_size y parameter");
                     }
-                    z = std::move(expr.value);
+                    y = std::move(expr.value);
+
+                    if (match(Token::Type::kComma)) {
+                        if (!peek_is(Token::Type::kParenRight)) {
+                            expr = primary_expression();
+                            if (expr.errored) {
+                                return Failure::kErrored;
+                            } else if (!expr.matched) {
+                                return add_error(peek(), "expected workgroup_size z parameter");
+                            }
+                            z = std::move(expr.value);
+
+                            match(Token::Type::kComma);
+                        }
+                    }
                 }
             }
 
@@ -3326,6 +3340,7 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
             if (val.errored) {
                 return Failure::kErrored;
             }
+            match(Token::Type::kComma);
 
             return create<ast::StructMemberSizeAttribute>(t.source(), val.value);
         });
@@ -3338,6 +3353,7 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
             if (val.errored) {
                 return Failure::kErrored;
             }
+            match(Token::Type::kComma);
 
             return create<ast::StructMemberAlignAttribute>(t.source(), val.value);
         });
@@ -3350,6 +3366,7 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
             if (val.errored) {
                 return Failure::kErrored;
             }
+            match(Token::Type::kComma);
 
             return create<ast::IdAttribute>(t.source(), val.value);
         });

@@ -33,6 +33,22 @@ TEST_F(ParserImplTest, Attribute_Size) {
     EXPECT_EQ(o->size, 4u);
 }
 
+TEST_F(ParserImplTest, Attribute_Size_TrailingComma) {
+    auto p = parser("size(4,)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    ASSERT_FALSE(p->has_error());
+
+    auto* member_attr = attr.value->As<ast::Attribute>();
+    ASSERT_NE(member_attr, nullptr);
+    ASSERT_TRUE(member_attr->Is<ast::StructMemberSizeAttribute>());
+
+    auto* o = member_attr->As<ast::StructMemberSizeAttribute>();
+    EXPECT_EQ(o->size, 4u);
+}
+
 TEST_F(ParserImplTest, Attribute_Size_MissingLeftParen) {
     auto p = parser("size 4)");
     auto attr = p->attribute();
@@ -75,6 +91,22 @@ TEST_F(ParserImplTest, Attribute_Size_MissingInvalid) {
 
 TEST_F(ParserImplTest, Attribute_Align) {
     auto p = parser("align(4)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    ASSERT_FALSE(p->has_error());
+
+    auto* member_attr = attr.value->As<ast::Attribute>();
+    ASSERT_NE(member_attr, nullptr);
+    ASSERT_TRUE(member_attr->Is<ast::StructMemberAlignAttribute>());
+
+    auto* o = member_attr->As<ast::StructMemberAlignAttribute>();
+    EXPECT_EQ(o->align, 4u);
+}
+
+TEST_F(ParserImplTest, Attribute_Align_TrailingComma) {
+    auto p = parser("align(4,)");
     auto attr = p->attribute();
     EXPECT_TRUE(attr.matched);
     EXPECT_FALSE(attr.errored);

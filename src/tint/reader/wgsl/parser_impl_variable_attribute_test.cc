@@ -32,6 +32,21 @@ TEST_F(ParserImplTest, Attribute_Location) {
     EXPECT_EQ(loc->value, 4u);
 }
 
+TEST_F(ParserImplTest, Attribute_Location_TrailingComma) {
+    auto p = parser("location(4,)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    auto* var_attr = attr.value->As<ast::Attribute>();
+    ASSERT_NE(var_attr, nullptr);
+    ASSERT_FALSE(p->has_error());
+    ASSERT_TRUE(var_attr->Is<ast::LocationAttribute>());
+
+    auto* loc = var_attr->As<ast::LocationAttribute>();
+    EXPECT_EQ(loc->value, 4u);
+}
+
 TEST_F(ParserImplTest, Attribute_Location_MissingLeftParen) {
     auto p = parser("location 4)");
     auto attr = p->attribute();
@@ -86,6 +101,22 @@ class BuiltinTest : public ParserImplTestWithParam<BuiltinData> {};
 TEST_P(BuiltinTest, Attribute_Builtin) {
     auto params = GetParam();
     auto p = parser(std::string("builtin(") + params.input + ")");
+
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    auto* var_attr = attr.value->As<ast::Attribute>();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(var_attr, nullptr);
+    ASSERT_TRUE(var_attr->Is<ast::BuiltinAttribute>());
+
+    auto* builtin = var_attr->As<ast::BuiltinAttribute>();
+    EXPECT_EQ(builtin->builtin, params.result);
+}
+TEST_P(BuiltinTest, Attribute_Builtin_TrailingComma) {
+    auto params = GetParam();
+    auto p = parser(std::string("builtin(") + params.input + ",)");
 
     auto attr = p->attribute();
     EXPECT_TRUE(attr.matched);
@@ -182,8 +213,50 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Flat) {
     EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kNone);
 }
 
+TEST_F(ParserImplTest, Attribute_Interpolate_Single_TrailingComma) {
+    auto p = parser("interpolate(flat,)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    auto* var_attr = attr.value->As<ast::Attribute>();
+    ASSERT_NE(var_attr, nullptr);
+    ASSERT_FALSE(p->has_error());
+    ASSERT_TRUE(var_attr->Is<ast::InterpolateAttribute>());
+
+    auto* interp = var_attr->As<ast::InterpolateAttribute>();
+    EXPECT_EQ(interp->type, ast::InterpolationType::kFlat);
+    EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kNone);
+}
+
+TEST_F(ParserImplTest, Attribute_Interpolate_Single_DoubleTrailingComma) {
+    auto p = parser("interpolate(flat,,)");
+    auto attr = p->attribute();
+    EXPECT_FALSE(attr.matched);
+    EXPECT_TRUE(attr.errored);
+    EXPECT_EQ(attr.value, nullptr);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:18: invalid interpolation sampling");
+}
+
 TEST_F(ParserImplTest, Attribute_Interpolate_Perspective_Center) {
     auto p = parser("interpolate(perspective, center)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    auto* var_attr = attr.value->As<ast::Attribute>();
+    ASSERT_NE(var_attr, nullptr);
+    ASSERT_FALSE(p->has_error());
+    ASSERT_TRUE(var_attr->Is<ast::InterpolateAttribute>());
+
+    auto* interp = var_attr->As<ast::InterpolateAttribute>();
+    EXPECT_EQ(interp->type, ast::InterpolationType::kPerspective);
+    EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kCenter);
+}
+
+TEST_F(ParserImplTest, Attribute_Interpolate_Double_TrailingComma) {
+    auto p = parser("interpolate(perspective, center,)");
     auto attr = p->attribute();
     EXPECT_TRUE(attr.matched);
     EXPECT_FALSE(attr.errored);
@@ -270,16 +343,6 @@ TEST_F(ParserImplTest, Attribute_Interpolate_InvalidFirstValue) {
     EXPECT_EQ(p->error(), "1:13: invalid interpolation type");
 }
 
-TEST_F(ParserImplTest, Attribute_Interpolate_MissingSecondValue) {
-    auto p = parser("interpolate(perspective,)");
-    auto attr = p->attribute();
-    EXPECT_FALSE(attr.matched);
-    EXPECT_TRUE(attr.errored);
-    EXPECT_EQ(attr.value, nullptr);
-    EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:25: invalid interpolation sampling");
-}
-
 TEST_F(ParserImplTest, Attribute_Interpolate_InvalidSecondValue) {
     auto p = parser("interpolate(perspective, nope)");
     auto attr = p->attribute();
@@ -292,6 +355,21 @@ TEST_F(ParserImplTest, Attribute_Interpolate_InvalidSecondValue) {
 
 TEST_F(ParserImplTest, Attribute_Binding) {
     auto p = parser("binding(4)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    auto* var_attr = attr.value->As<ast::Attribute>();
+    ASSERT_NE(var_attr, nullptr);
+    ASSERT_FALSE(p->has_error());
+    ASSERT_TRUE(var_attr->Is<ast::BindingAttribute>());
+
+    auto* binding = var_attr->As<ast::BindingAttribute>();
+    EXPECT_EQ(binding->value, 4u);
+}
+
+TEST_F(ParserImplTest, Attribute_Binding_TrailingComma) {
+    auto p = parser("binding(4,)");
     auto attr = p->attribute();
     EXPECT_TRUE(attr.matched);
     EXPECT_FALSE(attr.errored);
@@ -347,6 +425,21 @@ TEST_F(ParserImplTest, Attribute_Binding_MissingInvalid) {
 
 TEST_F(ParserImplTest, Attribute_group) {
     auto p = parser("group(4)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    auto* var_attr = attr.value->As<ast::Attribute>();
+    ASSERT_FALSE(p->has_error());
+    ASSERT_NE(var_attr, nullptr);
+    ASSERT_TRUE(var_attr->Is<ast::GroupAttribute>());
+
+    auto* group = var_attr->As<ast::GroupAttribute>();
+    EXPECT_EQ(group->value, 4u);
+}
+
+TEST_F(ParserImplTest, Attribute_group_TrailingComma) {
+    auto p = parser("group(4,)");
     auto attr = p->attribute();
     EXPECT_TRUE(attr.matched);
     EXPECT_FALSE(attr.errored);
