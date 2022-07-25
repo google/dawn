@@ -59,10 +59,12 @@ auto Transform(const std::vector<IN>& in, TRANSFORMER&& transform)
 /// @returns a new vector with each element of the source vector transformed by `transform`.
 template <typename IN, size_t N, typename TRANSFORMER>
 auto Transform(const Vector<IN, N>& in, TRANSFORMER&& transform)
-    -> Vector<decltype(transform(in[0]))> {
-    Vector<decltype(transform(in[0])), N> result(in.Length());
-    for (size_t i = 0; i < result.Length(); ++i) {
-        result[i] = transform(in[i]);
+    -> Vector<decltype(transform(in[0])), N> {
+    const auto count = in.Length();
+    Vector<decltype(transform(in[0])), N> result;
+    result.Reserve(count);
+    for (size_t i = 0; i < count; ++i) {
+        result.Push(transform(in[i]));
     }
     return result;
 }
@@ -74,9 +76,11 @@ auto Transform(const Vector<IN, N>& in, TRANSFORMER&& transform)
 template <typename IN, size_t N, typename TRANSFORMER>
 auto Transform(const Vector<IN, N>& in, TRANSFORMER&& transform)
     -> Vector<decltype(transform(in[0], 1u)), N> {
-    Vector<decltype(transform(in[0], 1u)), N> result(in.Length());
-    for (size_t i = 0; i < result.Length(); ++i) {
-        result[i] = transform(in[i], i);
+    const auto count = in.Length();
+    Vector<decltype(transform(in[0], 1u)), N> result;
+    result.Reserve(count);
+    for (size_t i = 0; i < count; ++i) {
+        result.Push(transform(in[i], i));
     }
     return result;
 }
@@ -89,9 +93,11 @@ auto Transform(const Vector<IN, N>& in, TRANSFORMER&& transform)
 template <size_t N, typename IN, typename TRANSFORMER>
 auto Transform(const VectorRef<IN>& in, TRANSFORMER&& transform)
     -> Vector<decltype(transform(in[0])), N> {
-    Vector<decltype(transform(in[0])), N> result(in.Length());
-    for (size_t i = 0; i < result.Length(); ++i) {
-        result[i] = transform(in[i]);
+    const auto count = in.Length();
+    Vector<decltype(transform(in[0])), N> result;
+    result.Reserve(count);
+    for (size_t i = 0; i < count; ++i) {
+        result.Push(transform(in[i]));
     }
     return result;
 }
@@ -104,9 +110,11 @@ auto Transform(const VectorRef<IN>& in, TRANSFORMER&& transform)
 template <size_t N, typename IN, typename TRANSFORMER>
 auto Transform(const VectorRef<IN>& in, TRANSFORMER&& transform)
     -> Vector<decltype(transform(in[0], 1u)), N> {
-    Vector<decltype(transform(in[0], 1u)), N> result(in.Length());
-    for (size_t i = 0; i < result.Length(); ++i) {
-        result[i] = transform(in[i], i);
+    const auto count = in.Length();
+    Vector<decltype(transform(in[0], 1u)), N> result;
+    result.Reserve(count);
+    for (size_t i = 0; i < count; ++i) {
+        result.Push(transform(in[i], i));
     }
     return result;
 }
@@ -119,9 +127,11 @@ auto Transform(const VectorRef<IN>& in, TRANSFORMER&& transform)
 template <size_t N, typename IN, typename TRANSFORMER>
 auto Transform(ConstVectorRef<IN> in, TRANSFORMER&& transform)
     -> Vector<decltype(transform(in[0])), N> {
-    Vector<decltype(transform(in[0])), N> result(in.Length());
-    for (size_t i = 0; i < result.Length(); ++i) {
-        result[i] = transform(in[i]);
+    const auto count = in.Length();
+    Vector<decltype(transform(in[0])), N> result;
+    result.Reserve(count);
+    for (size_t i = 0; i < count; ++i) {
+        result.Push(transform(in[i]));
     }
     return result;
 }
@@ -134,9 +144,11 @@ auto Transform(ConstVectorRef<IN> in, TRANSFORMER&& transform)
 template <size_t N, typename IN, typename TRANSFORMER>
 auto Transform(ConstVectorRef<IN> in, TRANSFORMER&& transform)
     -> Vector<decltype(transform(in[0], 1u)), N> {
-    Vector<decltype(transform(in[0], 1u)), N> result(in.Length());
-    for (size_t i = 0; i < result.Length(); ++i) {
-        result[i] = transform(in[i], i);
+    const auto count = in.Length();
+    Vector<decltype(transform(in[0], 1u)), N> result;
+    result.Reserve(count);
+    for (size_t i = 0; i < count; ++i) {
+        result.Push(transform(in[i], i));
     }
     return result;
 }

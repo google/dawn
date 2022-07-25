@@ -44,10 +44,10 @@ TEST(HashTests, StdVector) {
 }
 
 TEST(HashTests, TintVector) {
-    EXPECT_EQ(Hash(Vector<int>({})), Hash(Vector<int>({})));
-    EXPECT_EQ(Hash(Vector<int>({1, 2, 3})), Hash(Vector<int>({1, 2, 3})));
-    EXPECT_NE(Hash(Vector<int>({1, 2, 3})), Hash(Vector<int>({1, 2, 4})));
-    EXPECT_NE(Hash(Vector<int>({1, 2, 3})), Hash(Vector<int>({1, 2, 3, 4})));
+    EXPECT_EQ(Hash(Vector<int, 0>({})), Hash(Vector<int, 0>({})));
+    EXPECT_EQ(Hash(Vector<int, 0>({1, 2, 3})), Hash(Vector<int, 0>({1, 2, 3})));
+    EXPECT_NE(Hash(Vector<int, 0>({1, 2, 3})), Hash(Vector<int, 0>({1, 2, 4})));
+    EXPECT_NE(Hash(Vector<int, 0>({1, 2, 3})), Hash(Vector<int, 0>({1, 2, 3, 4})));
     EXPECT_EQ(Hash(Vector<int, 3>({1, 2, 3})), Hash(Vector<int, 4>({1, 2, 3})));
     EXPECT_EQ(Hash(Vector<int, 3>({1, 2, 3})), Hash(Vector<int, 2>({1, 2, 3})));
 }
