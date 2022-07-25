@@ -306,15 +306,26 @@ constexpr size_t kNumXIDContinueRanges = sizeof(kXIDContinueRanges) / sizeof(kXI
 }  // namespace
 
 bool CodePoint::IsXIDStart() const {
-    // Short circuit ascii. It will end up being at the end of the binary search
-    // but is our, currently, common case.
+    // Short circuit ASCII. The binary search will find these last, but most
+    // of our current source is ASCII, so handle them quicker.
     if ((value >= 'a' && value <= 'z') || (value >= 'A' && value <= 'Z')) {
         return true;
+    }
+    // With [a-zA-Z] handled, nothing less then the next sequence start can be
+    // XIDStart, so filter them all out. This catches most of the common symbols
+    // that are used in ASCII.
+    if (value < 0x000aa) {
+        return false;
     }
     return std::binary_search(kXIDStartRanges, kXIDStartRanges + kNumXIDStartRanges, *this);
 }
 
 bool CodePoint::IsXIDContinue() const {
+    // Short circuit ASCII. The binary search will find these last, but most
+    // of our current source is ASCII, so handle them quicker.
+    if ((value >= '0' && value <= '9') || value == '_') {
+        return true;
+    }
     return IsXIDStart() || std::binary_search(kXIDContinueRanges,
                                               kXIDContinueRanges + kNumXIDContinueRanges, *this);
 }
