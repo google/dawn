@@ -64,20 +64,6 @@
 # Last rolled: 2022-07-22 06:28:34PM
 
 ################################################################################
-# webgpu:shader,execution,zero_init:compute,zero_init failures on intel
-# KEEP
-################################################################################
-crbug.com/dawn/1111 [ intel ] webgpu:shader,execution,zero_init:compute,zero_init:storageClass="workgroup";workgroupSize=[1,1,1];batch__=1 [ Failure ]
-crbug.com/dawn/1111 [ intel ] webgpu:shader,execution,zero_init:compute,zero_init:storageClass="workgroup";workgroupSize=[1,1,48];batch__=1 [ Failure ]
-crbug.com/dawn/1111 [ intel ] webgpu:shader,execution,zero_init:compute,zero_init:storageClass="workgroup";workgroupSize=[1,1,63];batch__=1 [ Failure ]
-crbug.com/dawn/1111 [ intel ] webgpu:shader,execution,zero_init:compute,zero_init:storageClass="workgroup";workgroupSize=[1,32,1];batch__=1 [ Failure ]
-crbug.com/dawn/1111 [ intel ] webgpu:shader,execution,zero_init:compute,zero_init:storageClass="workgroup";workgroupSize=[1,47,1];batch__=1 [ Failure ]
-crbug.com/dawn/1111 [ intel ] webgpu:shader,execution,zero_init:compute,zero_init:storageClass="workgroup";workgroupSize=[33,1,1];batch__=1 [ Failure ]
-crbug.com/dawn/1111 [ intel ] webgpu:shader,execution,zero_init:compute,zero_init:storageClass="workgroup";workgroupSize=[64,1,1];batch__=1 [ Failure ]
-crbug.com/dawn/1111 [ intel ] webgpu:shader,execution,zero_init:compute,zero_init:storageClass="workgroup";workgroupSize=[7,7,3];batch__=1 [ Failure ]
-crbug.com/dawn/1111 [ intel ] webgpu:shader,execution,zero_init:compute,zero_init:storageClass="workgroup";workgroupSize=[8,8,2];batch__=1 [ Failure ]
-
-################################################################################
 # webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero
 # Unexpected failures on mac.
 # KEEP
@@ -197,8 +183,6 @@ crbug.com/dawn/0000 [ amd-0x6821 ] webgpu:shader,execution,robust_access:linear_
 crbug.com/dawn/0000 [ amd-0x6821 ] webgpu:shader,execution,robust_access:linear_memory:storageClass="function";access="write";containerType="matrix";isAtomic=false [ Failure ]
 crbug.com/dawn/0000 [ amd-0x6821 ] webgpu:shader,execution,robust_access:linear_memory:storageClass="private";access="write";containerType="array";isAtomic=false [ Failure ]
 crbug.com/dawn/0000 [ amd-0x6821 ] webgpu:shader,execution,robust_access:linear_memory:storageClass="private";access="write";containerType="matrix";isAtomic=false [ Failure ]
-crbug.com/dawn/0000 [ intel-hd-630-family ubuntu ] webgpu:shader,execution,robust_access:linear_memory:storageClass="workgroup";access="read";containerType="vector";isAtomic=false [ Failure ]
-crbug.com/dawn/0000 [ intel-hd-630-family ubuntu ] webgpu:shader,execution,robust_access:linear_memory:storageClass="workgroup";access="write";containerType="vector";isAtomic=false [ Failure ]
 
 ################################################################################
 # stencil8 failures
