@@ -38,6 +38,7 @@ class ParserImplTest : public testing::Test, public ProgramBuilder {
     std::unique_ptr<ParserImpl> parser(const std::string& str) {
         auto file = std::make_unique<Source::File>("test.wgsl", str);
         auto impl = std::make_unique<ParserImpl>(file.get());
+        impl->InitializeLex();
         files_.emplace_back(std::move(file));
         return impl;
     }
@@ -60,6 +61,7 @@ class ParserImplTestWithParam : public testing::TestWithParam<T>, public Program
     std::unique_ptr<ParserImpl> parser(const std::string& str) {
         auto file = std::make_unique<Source::File>("test.wgsl", str);
         auto impl = std::make_unique<ParserImpl>(file.get());
+        impl->InitializeLex();
         files_.emplace_back(std::move(file));
         return impl;
     }

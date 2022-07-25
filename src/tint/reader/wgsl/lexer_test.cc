@@ -46,24 +46,33 @@ using LexerTest = testing::Test;
 TEST_F(LexerTest, Empty) {
     Source::File file("", "");
     Lexer l(&file);
-    auto t = l.next();
-    EXPECT_TRUE(t.IsEof());
+
+    auto list = l.Lex();
+    ASSERT_EQ(1u, list.size());
+    EXPECT_TRUE(list[0].IsEof());
 }
 
 TEST_F(LexerTest, Skips_Blankspace_Basic) {
     Source::File file("", "\t\r\n\t    ident\t\n\t  \r ");
     Lexer l(&file);
 
-    auto t = l.next();
-    EXPECT_TRUE(t.IsIdentifier());
-    EXPECT_EQ(t.source().range.begin.line, 2u);
-    EXPECT_EQ(t.source().range.begin.column, 6u);
-    EXPECT_EQ(t.source().range.end.line, 2u);
-    EXPECT_EQ(t.source().range.end.column, 11u);
-    EXPECT_EQ(t.to_str(), "ident");
+    auto list = l.Lex();
+    ASSERT_EQ(2u, list.size());
 
-    t = l.next();
-    EXPECT_TRUE(t.IsEof());
+    {
+        auto& t = list[0];
+        EXPECT_TRUE(t.IsIdentifier());
+        EXPECT_EQ(t.source().range.begin.line, 2u);
+        EXPECT_EQ(t.source().range.begin.column, 6u);
+        EXPECT_EQ(t.source().range.end.line, 2u);
+        EXPECT_EQ(t.source().range.end.column, 11u);
+        EXPECT_EQ(t.to_str(), "ident");
+    }
+
+    {
+        auto& t = list[1];
+        EXPECT_TRUE(t.IsEof());
+    }
 }
 
 TEST_F(LexerTest, Skips_Blankspace_Exotic) {
@@ -73,16 +82,23 @@ TEST_F(LexerTest, Skips_Blankspace_Exotic) {
                       kVTab kFF kNL kLS kPS kL2R kR2L);
     Lexer l(&file);
 
-    auto t = l.next();
-    EXPECT_TRUE(t.IsIdentifier());
-    EXPECT_EQ(t.source().range.begin.line, 6u);
-    EXPECT_EQ(t.source().range.begin.column, 7u);
-    EXPECT_EQ(t.source().range.end.line, 6u);
-    EXPECT_EQ(t.source().range.end.column, 12u);
-    EXPECT_EQ(t.to_str(), "ident");
+    auto list = l.Lex();
+    ASSERT_EQ(2u, list.size());
 
-    t = l.next();
-    EXPECT_TRUE(t.IsEof());
+    {
+        auto& t = list[0];
+        EXPECT_TRUE(t.IsIdentifier());
+        EXPECT_EQ(t.source().range.begin.line, 6u);
+        EXPECT_EQ(t.source().range.begin.column, 7u);
+        EXPECT_EQ(t.source().range.end.line, 6u);
+        EXPECT_EQ(t.source().range.end.column, 12u);
+        EXPECT_EQ(t.to_str(), "ident");
+    }
+
+    {
+        auto& t = list[1];
+        EXPECT_TRUE(t.IsEof());
+    }
 }
 
 TEST_F(LexerTest, Skips_Comments_Line) {
@@ -92,24 +108,33 @@ ident1 //ends with comment
  ident2)");
     Lexer l(&file);
 
-    auto t = l.next();
-    EXPECT_TRUE(t.IsIdentifier());
-    EXPECT_EQ(t.source().range.begin.line, 2u);
-    EXPECT_EQ(t.source().range.begin.column, 1u);
-    EXPECT_EQ(t.source().range.end.line, 2u);
-    EXPECT_EQ(t.source().range.end.column, 7u);
-    EXPECT_EQ(t.to_str(), "ident1");
+    auto list = l.Lex();
+    ASSERT_EQ(3u, list.size());
 
-    t = l.next();
-    EXPECT_TRUE(t.IsIdentifier());
-    EXPECT_EQ(t.source().range.begin.line, 4u);
-    EXPECT_EQ(t.source().range.begin.column, 2u);
-    EXPECT_EQ(t.source().range.end.line, 4u);
-    EXPECT_EQ(t.source().range.end.column, 8u);
-    EXPECT_EQ(t.to_str(), "ident2");
+    {
+        auto& t = list[0];
+        EXPECT_TRUE(t.IsIdentifier());
+        EXPECT_EQ(t.source().range.begin.line, 2u);
+        EXPECT_EQ(t.source().range.begin.column, 1u);
+        EXPECT_EQ(t.source().range.end.line, 2u);
+        EXPECT_EQ(t.source().range.end.column, 7u);
+        EXPECT_EQ(t.to_str(), "ident1");
+    }
 
-    t = l.next();
-    EXPECT_TRUE(t.IsEof());
+    {
+        auto& t = list[1];
+        EXPECT_TRUE(t.IsIdentifier());
+        EXPECT_EQ(t.source().range.begin.line, 4u);
+        EXPECT_EQ(t.source().range.begin.column, 2u);
+        EXPECT_EQ(t.source().range.end.line, 4u);
+        EXPECT_EQ(t.source().range.end.column, 8u);
+        EXPECT_EQ(t.to_str(), "ident2");
+    }
+
+    {
+        auto& t = list[2];
+        EXPECT_TRUE(t.IsEof());
+    }
 }
 
 TEST_F(LexerTest, Skips_Comments_Unicode) {
@@ -119,24 +144,33 @@ ident1 //ends with 🙂🙂🙂
  ident2)");
     Lexer l(&file);
 
-    auto t = l.next();
-    EXPECT_TRUE(t.IsIdentifier());
-    EXPECT_EQ(t.source().range.begin.line, 2u);
-    EXPECT_EQ(t.source().range.begin.column, 1u);
-    EXPECT_EQ(t.source().range.end.line, 2u);
-    EXPECT_EQ(t.source().range.end.column, 7u);
-    EXPECT_EQ(t.to_str(), "ident1");
+    auto list = l.Lex();
+    ASSERT_EQ(3u, list.size());
 
-    t = l.next();
-    EXPECT_TRUE(t.IsIdentifier());
-    EXPECT_EQ(t.source().range.begin.line, 4u);
-    EXPECT_EQ(t.source().range.begin.column, 2u);
-    EXPECT_EQ(t.source().range.end.line, 4u);
-    EXPECT_EQ(t.source().range.end.column, 8u);
-    EXPECT_EQ(t.to_str(), "ident2");
+    {
+        auto& t = list[0];
+        EXPECT_TRUE(t.IsIdentifier());
+        EXPECT_EQ(t.source().range.begin.line, 2u);
+        EXPECT_EQ(t.source().range.begin.column, 1u);
+        EXPECT_EQ(t.source().range.end.line, 2u);
+        EXPECT_EQ(t.source().range.end.column, 7u);
+        EXPECT_EQ(t.to_str(), "ident1");
+    }
 
-    t = l.next();
-    EXPECT_TRUE(t.IsEof());
+    {
+        auto& t = list[1];
+        EXPECT_TRUE(t.IsIdentifier());
+        EXPECT_EQ(t.source().range.begin.line, 4u);
+        EXPECT_EQ(t.source().range.begin.column, 2u);
+        EXPECT_EQ(t.source().range.end.line, 4u);
+        EXPECT_EQ(t.source().range.end.column, 8u);
+        EXPECT_EQ(t.to_str(), "ident2");
+    }
+
+    {
+        auto& t = list[2];
+        EXPECT_TRUE(t.IsEof());
+    }
 }
 
 using LineCommentTerminatorTest = testing::TestWithParam<const char*>;
@@ -150,21 +184,29 @@ TEST_P(LineCommentTerminatorTest, Terminators) {
     Source::File file("", src);
     Lexer l(&file);
 
-    auto t = l.next();
-    EXPECT_TRUE(t.Is(Token::Type::kConst));
-    EXPECT_EQ(t.source().range.begin.line, 1u);
-    EXPECT_EQ(t.source().range.begin.column, 1u);
-    EXPECT_EQ(t.source().range.end.line, 1u);
-    EXPECT_EQ(t.source().range.end.column, 6u);
-
     auto is_same_line = [](std::string_view v) {
         return v == kSpace || v == kHTab || v == kL2R || v == kR2L;
     };
 
+    auto list = l.Lex();
+    ASSERT_EQ(is_same_line(c) ? 2u : 3u, list.size());
+
+    size_t idx = 0;
+
+    {
+        auto& t = list[idx++];
+        EXPECT_TRUE(t.Is(Token::Type::kConst));
+        EXPECT_EQ(t.source().range.begin.line, 1u);
+        EXPECT_EQ(t.source().range.begin.column, 1u);
+        EXPECT_EQ(t.source().range.end.line, 1u);
+        EXPECT_EQ(t.source().range.end.column, 6u);
+    }
+
     if (!is_same_line(c)) {
         size_t line = is_same_line(c) ? 1u : 2u;
         size_t col = is_same_line(c) ? 25u : 1u;
-        t = l.next();
+
+        auto& t = list[idx++];
         EXPECT_TRUE(t.IsIdentifier());
         EXPECT_EQ(t.source().range.begin.line, line);
         EXPECT_EQ(t.source().range.begin.column, col);
@@ -173,8 +215,10 @@ TEST_P(LineCommentTerminatorTest, Terminators) {
         EXPECT_EQ(t.to_str(), "ident");
     }
 
-    t = l.next();
-    EXPECT_TRUE(t.IsEof());
+    {
+        auto& t = list[idx];
+        EXPECT_TRUE(t.IsEof());
+    }
 }
 INSTANTIATE_TEST_SUITE_P(LexerTest,
                          LineCommentTerminatorTest,
@@ -198,16 +242,23 @@ TEST_F(LexerTest, Skips_Comments_Block) {
 text */ident)");
     Lexer l(&file);
 
-    auto t = l.next();
-    EXPECT_TRUE(t.IsIdentifier());
-    EXPECT_EQ(t.source().range.begin.line, 2u);
-    EXPECT_EQ(t.source().range.begin.column, 8u);
-    EXPECT_EQ(t.source().range.end.line, 2u);
-    EXPECT_EQ(t.source().range.end.column, 13u);
-    EXPECT_EQ(t.to_str(), "ident");
+    auto list = l.Lex();
+    ASSERT_EQ(2u, list.size());
 
-    t = l.next();
-    EXPECT_TRUE(t.IsEof());
+    {
+        auto& t = list[0];
+        EXPECT_TRUE(t.IsIdentifier());
+        EXPECT_EQ(t.source().range.begin.line, 2u);
+        EXPECT_EQ(t.source().range.begin.column, 8u);
+        EXPECT_EQ(t.source().range.end.line, 2u);
+        EXPECT_EQ(t.source().range.end.column, 13u);
+        EXPECT_EQ(t.to_str(), "ident");
+    }
+
+    {
+        auto& t = list[1];
+        EXPECT_TRUE(t.IsEof());
+    }
 }
 
 TEST_F(LexerTest, Skips_Comments_Block_Nested) {
@@ -216,16 +267,23 @@ text // nested line comments are ignored /* more text
 /////**/ */*/ident)");
     Lexer l(&file);
 
-    auto t = l.next();
-    EXPECT_TRUE(t.IsIdentifier());
-    EXPECT_EQ(t.source().range.begin.line, 3u);
-    EXPECT_EQ(t.source().range.begin.column, 14u);
-    EXPECT_EQ(t.source().range.end.line, 3u);
-    EXPECT_EQ(t.source().range.end.column, 19u);
-    EXPECT_EQ(t.to_str(), "ident");
+    auto list = l.Lex();
+    ASSERT_EQ(2u, list.size());
 
-    t = l.next();
-    EXPECT_TRUE(t.IsEof());
+    {
+        auto& t = list[0];
+        EXPECT_TRUE(t.IsIdentifier());
+        EXPECT_EQ(t.source().range.begin.line, 3u);
+        EXPECT_EQ(t.source().range.begin.column, 14u);
+        EXPECT_EQ(t.source().range.end.line, 3u);
+        EXPECT_EQ(t.source().range.end.column, 19u);
+        EXPECT_EQ(t.to_str(), "ident");
+    }
+
+    {
+        auto& t = list[1];
+        EXPECT_TRUE(t.IsEof());
+    }
 }
 
 TEST_F(LexerTest, Skips_Comments_Block_Unterminated) {
@@ -237,7 +295,10 @@ TEST_F(LexerTest, Skips_Comments_Block_Unterminated) {
 abcd)");
     Lexer l(&file);
 
-    auto t = l.next();
+    auto list = l.Lex();
+    ASSERT_EQ(1u, list.size());
+
+    auto& t = list[0];
     ASSERT_TRUE(t.Is(Token::Type::kError));
     EXPECT_EQ(t.to_str(), "unterminated block comment");
     EXPECT_EQ(t.source().range.begin.line, 2u);
@@ -250,7 +311,10 @@ TEST_F(LexerTest, Null_InBlankspace_IsError) {
     Source::File file("", std::string{' ', 0, ' '});
     Lexer l(&file);
 
-    auto t = l.next();
+    auto list = l.Lex();
+    ASSERT_EQ(1u, list.size());
+
+    auto& t = list[0];
     EXPECT_TRUE(t.IsError());
     EXPECT_EQ(t.source().range.begin.line, 1u);
     EXPECT_EQ(t.source().range.begin.column, 2u);
@@ -263,7 +327,10 @@ TEST_F(LexerTest, Null_InLineComment_IsError) {
     Source::File file("", std::string{'/', '/', ' ', 0, ' '});
     Lexer l(&file);
 
-    auto t = l.next();
+    auto list = l.Lex();
+    ASSERT_EQ(1u, list.size());
+
+    auto& t = list[0];
     EXPECT_TRUE(t.IsError());
     EXPECT_EQ(t.source().range.begin.line, 1u);
     EXPECT_EQ(t.source().range.begin.column, 4u);
@@ -276,7 +343,10 @@ TEST_F(LexerTest, Null_InBlockComment_IsError) {
     Source::File file("", std::string{'/', '*', ' ', 0, '*', '/'});
     Lexer l(&file);
 
-    auto t = l.next();
+    auto list = l.Lex();
+    ASSERT_EQ(1u, list.size());
+
+    auto& t = list[0];
     EXPECT_TRUE(t.IsError());
     EXPECT_EQ(t.source().range.begin.line, 1u);
     EXPECT_EQ(t.source().range.begin.column, 4u);
@@ -292,16 +362,24 @@ TEST_F(LexerTest, Null_InIdentifier_IsError) {
     Source::File file("", std::string{'a', 0, 'c'});
     Lexer l(&file);
 
-    auto t = l.next();
-    EXPECT_TRUE(t.IsIdentifier());
-    EXPECT_EQ(t.to_str(), "a");
-    t = l.next();
-    EXPECT_TRUE(t.IsError());
-    EXPECT_EQ(t.source().range.begin.line, 1u);
-    EXPECT_EQ(t.source().range.begin.column, 2u);
-    EXPECT_EQ(t.source().range.end.line, 1u);
-    EXPECT_EQ(t.source().range.end.column, 2u);
-    EXPECT_EQ(t.to_str(), "null character found");
+    auto list = l.Lex();
+    ASSERT_EQ(2u, list.size());
+
+    {
+        auto& t = list[0];
+        EXPECT_TRUE(t.IsIdentifier());
+        EXPECT_EQ(t.to_str(), "a");
+    }
+
+    {
+        auto& t = list[1];
+        EXPECT_TRUE(t.IsError());
+        EXPECT_EQ(t.source().range.begin.line, 1u);
+        EXPECT_EQ(t.source().range.begin.column, 2u);
+        EXPECT_EQ(t.source().range.end.line, 1u);
+        EXPECT_EQ(t.source().range.end.column, 2u);
+        EXPECT_EQ(t.to_str(), "null character found");
+    }
 }
 
 struct FloatData {
@@ -318,22 +396,29 @@ TEST_P(FloatTest, Parse) {
     Source::File file("", params.input);
     Lexer l(&file);
 
-    auto t = l.next();
-    if (std::string(params.input).back() == 'f') {
-        EXPECT_TRUE(t.Is(Token::Type::kFloatLiteral_F));
-    } else if (std::string(params.input).back() == 'h') {
-        EXPECT_TRUE(t.Is(Token::Type::kFloatLiteral_H));
-    } else {
-        EXPECT_TRUE(t.Is(Token::Type::kFloatLiteral));
-    }
-    EXPECT_EQ(t.to_f64(), params.result);
-    EXPECT_EQ(t.source().range.begin.line, 1u);
-    EXPECT_EQ(t.source().range.begin.column, 1u);
-    EXPECT_EQ(t.source().range.end.line, 1u);
-    EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
+    auto list = l.Lex();
+    ASSERT_EQ(2u, list.size());
 
-    t = l.next();
-    EXPECT_TRUE(t.IsEof());
+    {
+        auto& t = list[0];
+        if (std::string(params.input).back() == 'f') {
+            EXPECT_TRUE(t.Is(Token::Type::kFloatLiteral_F));
+        } else if (std::string(params.input).back() == 'h') {
+            EXPECT_TRUE(t.Is(Token::Type::kFloatLiteral_H));
+        } else {
+            EXPECT_TRUE(t.Is(Token::Type::kFloatLiteral));
+        }
+        EXPECT_EQ(t.to_f64(), params.result);
+        EXPECT_EQ(t.source().range.begin.line, 1u);
+        EXPECT_EQ(t.source().range.begin.column, 1u);
+        EXPECT_EQ(t.source().range.end.line, 1u);
+        EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
+    }
+
+    {
+        auto& t = list[1];
+        EXPECT_TRUE(t.IsEof());
+    }
 }
 INSTANTIATE_TEST_SUITE_P(LexerTest,
                          FloatTest,
@@ -437,7 +522,10 @@ TEST_P(FloatTest_Invalid, Handles) {
     Source::File file("", GetParam());
     Lexer l(&file);
 
-    auto t = l.next();
+    auto list = l.Lex();
+    ASSERT_FALSE(list.empty());
+
+    auto& t = list[0];
     EXPECT_FALSE(t.Is(Token::Type::kFloatLiteral) || t.Is(Token::Type::kFloatLiteral_F) ||
                  t.Is(Token::Type::kFloatLiteral_H));
 }
@@ -478,13 +566,23 @@ TEST_P(AsciiIdentifierTest, Parse) {
     Source::File file("", GetParam());
     Lexer l(&file);
 
-    auto t = l.next();
-    EXPECT_TRUE(t.IsIdentifier());
-    EXPECT_EQ(t.source().range.begin.line, 1u);
-    EXPECT_EQ(t.source().range.begin.column, 1u);
-    EXPECT_EQ(t.source().range.end.line, 1u);
-    EXPECT_EQ(t.source().range.end.column, 1u + strlen(GetParam()));
-    EXPECT_EQ(t.to_str(), GetParam());
+    auto list = l.Lex();
+    ASSERT_EQ(2u, list.size());
+
+    {
+        auto& t = list[0];
+        EXPECT_TRUE(t.IsIdentifier());
+        EXPECT_EQ(t.source().range.begin.line, 1u);
+        EXPECT_EQ(t.source().range.begin.column, 1u);
+        EXPECT_EQ(t.source().range.end.line, 1u);
+        EXPECT_EQ(t.source().range.end.column, 1u + strlen(GetParam()));
+        EXPECT_EQ(t.to_str(), GetParam());
+    }
+
+    {
+        auto& t = list[1];
+        EXPECT_TRUE(t.IsEof());
+    }
 }
 INSTANTIATE_TEST_SUITE_P(LexerTest,
                          AsciiIdentifierTest,
@@ -510,13 +608,23 @@ TEST_P(ValidUnicodeIdentifierTest, Parse) {
     Source::File file("", GetParam().utf8);
     Lexer l(&file);
 
-    auto t = l.next();
-    EXPECT_TRUE(t.IsIdentifier());
-    EXPECT_EQ(t.source().range.begin.line, 1u);
-    EXPECT_EQ(t.source().range.begin.column, 1u);
-    EXPECT_EQ(t.source().range.end.line, 1u);
-    EXPECT_EQ(t.source().range.end.column, 1u + GetParam().count);
-    EXPECT_EQ(t.to_str(), GetParam().utf8);
+    auto list = l.Lex();
+    ASSERT_EQ(2u, list.size());
+
+    {
+        auto& t = list[0];
+        EXPECT_TRUE(t.IsIdentifier());
+        EXPECT_EQ(t.source().range.begin.line, 1u);
+        EXPECT_EQ(t.source().range.begin.column, 1u);
+        EXPECT_EQ(t.source().range.end.line, 1u);
+        EXPECT_EQ(t.source().range.end.column, 1u + GetParam().count);
+        EXPECT_EQ(t.to_str(), GetParam().utf8);
+    }
+
+    {
+        auto& t = list[1];
+        EXPECT_TRUE(t.IsEof());
+    }
 }
 INSTANTIATE_TEST_SUITE_P(
     LexerTest,
@@ -554,7 +662,10 @@ TEST_P(InvalidUnicodeIdentifierTest, Parse) {
     Source::File file("", GetParam());
     Lexer l(&file);
 
-    auto t = l.next();
+    auto list = l.Lex();
+    ASSERT_FALSE(list.empty());
+
+    auto& t = list[0];
     EXPECT_TRUE(t.IsError());
     EXPECT_EQ(t.source().range.begin.line, 1u);
     EXPECT_EQ(t.source().range.begin.column, 1u);
@@ -602,7 +713,10 @@ TEST_F(LexerTest, IdentifierTest_SingleUnderscoreDoesNotMatch) {
     Source::File file("", "_");
     Lexer l(&file);
 
-    auto t = l.next();
+    auto list = l.Lex();
+    ASSERT_FALSE(list.empty());
+
+    auto& t = list[0];
     EXPECT_FALSE(t.IsIdentifier());
 }
 
@@ -610,7 +724,10 @@ TEST_F(LexerTest, IdentifierTest_DoesNotStartWithDoubleUnderscore) {
     Source::File file("", "__test");
     Lexer l(&file);
 
-    auto t = l.next();
+    auto list = l.Lex();
+    ASSERT_FALSE(list.empty());
+
+    auto& t = list[0];
     EXPECT_FALSE(t.IsIdentifier());
 }
 
@@ -618,7 +735,10 @@ TEST_F(LexerTest, IdentifierTest_DoesNotStartWithNumber) {
     Source::File file("", "01test");
     Lexer l(&file);
 
-    auto t = l.next();
+    auto list = l.Lex();
+    EXPECT_FALSE(list.empty());
+
+    auto& t = list[0];
     EXPECT_FALSE(t.IsIdentifier());
 }
 
@@ -641,7 +761,12 @@ TEST_P(ParseIntegerTest, Parse) {
     auto params = std::get<1>(GetParam());
     Source::File file("", params.input);
 
-    auto t = Lexer(&file).next();
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_FALSE(list.empty());
+
+    auto& t = list[0];
     switch (suffix) {
         case 'i':
             EXPECT_TRUE(t.Is(Token::Type::kIntLiteral_I));
@@ -770,7 +895,12 @@ TEST_P(ParseIntegerTest_CannotBeRepresented, Parse) {
     auto type = std::get<0>(GetParam());
     auto source = std::get<1>(GetParam());
     Source::File file("", source);
-    auto t = Lexer(&file).next();
+
+    Lexer l(&file);
+    auto list = l.Lex();
+    ASSERT_FALSE(list.empty());
+
+    auto& t = list[0];
     EXPECT_TRUE(t.Is(Token::Type::kError));
     auto expect = "value cannot be represented as '" + std::string(type) + "'";
     EXPECT_EQ(t.to_str(), expect);
@@ -800,7 +930,12 @@ INSTANTIATE_TEST_SUITE_P(u32,
 using ParseIntegerTest_LeadingZeros = testing::TestWithParam<const char*>;
 TEST_P(ParseIntegerTest_LeadingZeros, Parse) {
     Source::File file("", GetParam());
-    auto t = Lexer(&file).next();
+
+    Lexer l(&file);
+    auto list = l.Lex();
+    ASSERT_FALSE(list.empty());
+
+    auto& t = list[0];
     EXPECT_TRUE(t.Is(Token::Type::kError));
     EXPECT_EQ(t.to_str(), "integer literal cannot have leading 0s");
 }
@@ -815,7 +950,12 @@ INSTANTIATE_TEST_SUITE_P(LeadingZero,
 using ParseIntegerTest_NoSignificantDigits = testing::TestWithParam<const char*>;
 TEST_P(ParseIntegerTest_NoSignificantDigits, Parse) {
     Source::File file("", GetParam());
-    auto t = Lexer(&file).next();
+
+    Lexer l(&file);
+    auto list = l.Lex();
+    ASSERT_FALSE(list.empty());
+
+    auto& t = list[0];
     EXPECT_TRUE(t.Is(Token::Type::kError));
     EXPECT_EQ(t.to_str(), "integer or float hex literal has no significant digits");
 }
@@ -849,15 +989,22 @@ TEST_P(PunctuationTest, Parses) {
     Source::File file("", params.input);
     Lexer l(&file);
 
-    auto t = l.next();
-    EXPECT_TRUE(t.Is(params.type));
-    EXPECT_EQ(t.source().range.begin.line, 1u);
-    EXPECT_EQ(t.source().range.begin.column, 1u);
-    EXPECT_EQ(t.source().range.end.line, 1u);
-    EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
+    auto list = l.Lex();
+    ASSERT_GE(list.size(), 2u);
 
-    t = l.next();
-    EXPECT_EQ(t.source().range.begin.column, 1 + std::string(params.input).size());
+    {
+        auto& t = list[0];
+        EXPECT_TRUE(t.Is(params.type));
+        EXPECT_EQ(t.source().range.begin.line, 1u);
+        EXPECT_EQ(t.source().range.begin.column, 1u);
+        EXPECT_EQ(t.source().range.end.line, 1u);
+        EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
+    }
+
+    {
+        auto& t = list[1];
+        EXPECT_EQ(t.source().range.begin.column, 1 + std::string(params.input).size());
+    }
 }
 INSTANTIATE_TEST_SUITE_P(LexerTest,
                          PunctuationTest,
@@ -876,8 +1023,6 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          TokenData{"=", Token::Type::kEqual},
                                          TokenData{"==", Token::Type::kEqualEqual},
                                          TokenData{">", Token::Type::kGreaterThan},
-                                         TokenData{">=", Token::Type::kGreaterThanEqual},
-                                         TokenData{">>", Token::Type::kShiftRight},
                                          TokenData{"<", Token::Type::kLessThan},
                                          TokenData{"<=", Token::Type::kLessThanEqual},
                                          TokenData{"<<", Token::Type::kShiftLeft},
@@ -906,21 +1051,60 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          TokenData{"|=", Token::Type::kOrEqual},
                                          TokenData{"^=", Token::Type::kXorEqual}));
 
+using SplittablePunctuationTest = testing::TestWithParam<TokenData>;
+TEST_P(SplittablePunctuationTest, Parses) {
+    auto params = GetParam();
+    Source::File file("", params.input);
+    Lexer l(&file);
+
+    auto list = l.Lex();
+    ASSERT_GE(list.size(), 3u);
+
+    {
+        auto& t = list[0];
+        EXPECT_TRUE(t.Is(params.type));
+        EXPECT_EQ(t.source().range.begin.line, 1u);
+        EXPECT_EQ(t.source().range.begin.column, 1u);
+        EXPECT_EQ(t.source().range.end.line, 1u);
+        EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
+    }
+
+    {
+        auto& t = list[1];
+        EXPECT_TRUE(t.Is(Token::Type::kPlaceholder));
+        EXPECT_EQ(t.source().range.begin.line, 1u);
+        EXPECT_EQ(t.source().range.begin.column, 2u);
+        EXPECT_EQ(t.source().range.end.line, 1u);
+        EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
+    }
+
+    {
+        auto& t = list[2];
+        EXPECT_EQ(t.source().range.begin.column, 1 + std::string(params.input).size());
+    }
+}
+INSTANTIATE_TEST_SUITE_P(LexerTest,
+                         SplittablePunctuationTest,
+                         testing::Values(TokenData{">=", Token::Type::kGreaterThanEqual},
+                                         TokenData{">>", Token::Type::kShiftRight}));
+
 using KeywordTest = testing::TestWithParam<TokenData>;
 TEST_P(KeywordTest, Parses) {
     auto params = GetParam();
     Source::File file("", params.input);
     Lexer l(&file);
 
-    auto t = l.next();
+    auto list = l.Lex();
+    ASSERT_GE(list.size(), 2u);
+
+    auto& t = list[0];
     EXPECT_TRUE(t.Is(params.type)) << params.input;
     EXPECT_EQ(t.source().range.begin.line, 1u);
     EXPECT_EQ(t.source().range.begin.column, 1u);
     EXPECT_EQ(t.source().range.end.line, 1u);
     EXPECT_EQ(t.source().range.end.column, 1u + strlen(params.input));
 
-    t = l.next();
-    EXPECT_EQ(t.source().range.begin.column, 1 + std::string(params.input).size());
+    EXPECT_EQ(list[1].source().range.begin.column, 1 + std::string(params.input).size());
 }
 INSTANTIATE_TEST_SUITE_P(
     LexerTest,

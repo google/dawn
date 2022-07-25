@@ -16,6 +16,7 @@
 #define SRC_TINT_READER_WGSL_LEXER_H_
 
 #include <string>
+#include <vector>
 
 #include "src/tint/reader/wgsl/token.h"
 
@@ -29,11 +30,14 @@ class Lexer {
     explicit Lexer(const Source::File* file);
     ~Lexer();
 
+    /// @return the token list.
+    std::vector<Token> Lex();
+
+  private:
     /// Returns the next token in the input stream.
     /// @return Token
     Token next();
 
-  private:
     /// Advances past blankspace and comments, if present at the current position.
     /// @returns error token, EOF, or uninitialized
     Token skip_blankspace_and_comments();

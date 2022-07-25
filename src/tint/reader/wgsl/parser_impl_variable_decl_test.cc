@@ -68,7 +68,7 @@ TEST_F(ParserImplTest, VariableDecl_MissingVar) {
     EXPECT_FALSE(v.errored);
     EXPECT_FALSE(p->has_error());
 
-    auto t = p->next();
+    auto& t = p->next();
     ASSERT_TRUE(t.IsIdentifier());
 }
 

@@ -37,7 +37,7 @@ TEST_P(StorageClassTest, Parses) {
     EXPECT_FALSE(p->has_error());
     EXPECT_EQ(sc.value, params.result);
 
-    auto t = p->next();
+    auto& t = p->next();
     EXPECT_TRUE(t.IsEof());
 }
 INSTANTIATE_TEST_SUITE_P(

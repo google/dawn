@@ -37,6 +37,8 @@ std::string_view Token::TypeToName(Type type) {
             return "'i'-suffixed integer literal";
         case Token::Type::kIntLiteral_U:
             return "'u'-suffixed integer literal";
+        case Token::Type::kPlaceholder:
+            return "placeholder";
         case Token::Type::kUninitialized:
             return "uninitialized";
 
@@ -285,13 +287,9 @@ Token::Token(Type type, const Source& source) : type_(type), source_(source) {}
 
 Token::Token(Token&&) = default;
 
-Token::Token(const Token&) = default;
-
 Token::~Token() = default;
 
-Token& Token::operator=(const Token& rhs) = default;
-
-bool Token::operator==(std::string_view ident) {
+bool Token::operator==(std::string_view ident) const {
     if (type_ != Type::kIdentifier) {
         return false;
     }

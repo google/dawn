@@ -15,7 +15,6 @@
 #ifndef SRC_TINT_READER_WGSL_PARSER_IMPL_H_
 #define SRC_TINT_READER_WGSL_PARSER_IMPL_H_
 
-#include <deque>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -300,6 +299,10 @@ class ParserImpl {
     explicit ParserImpl(Source::File const* file);
     ~ParserImpl();
 
+    /// Reads tokens from the source file. This will be called automatically
+    /// by |parse|.
+    void InitializeLex();
+
     /// Run the parser
     /// @returns true if the parse was successful, false otherwise.
     bool Parse();
@@ -330,19 +333,19 @@ class ParserImpl {
     ProgramBuilder& builder() { return builder_; }
 
     /// @returns the next token
-    Token next();
+    const Token& next();
     /// Peeks ahead and returns the token at `idx` ahead of the current position
     /// @param idx the index of the token to return
     /// @returns the token `idx` positions ahead without advancing
-    Token peek(size_t idx = 0);
+    const Token& peek(size_t idx = 0);
     /// Peeks ahead and returns true if the token at `idx` ahead of the current
     /// position is |tok|
     /// @param idx the index of the token to return
     /// @param tok the token to look for
     /// @returns true if the token `idx` positions ahead is |tok|
     bool peek_is(Token::Type tok, size_t idx = 0);
-    /// @returns the last token that was returned by `next()`
-    Token last_token() const;
+    /// @returns the last source location that was returned by `next()`
+    Source last_source() const;
     /// Appends an error at `t` with the message `msg`
     /// @param t the token to associate the error with
     /// @param msg the error message
@@ -812,17 +815,19 @@ class ParserImpl {
     /// Used to ensure that all attributes are consumed.
     bool expect_attributes_consumed(ast::AttributeList& list);
 
-    Expect<const ast::Type*> expect_type_decl_pointer(Token t);
-    Expect<const ast::Type*> expect_type_decl_atomic(Token t);
-    Expect<const ast::Type*> expect_type_decl_vector(Token t);
-    Expect<const ast::Type*> expect_type_decl_array(Token t);
-    Expect<const ast::Type*> expect_type_decl_matrix(Token t);
+    Expect<const ast::Type*> expect_type_decl_pointer(const Token& t);
+    Expect<const ast::Type*> expect_type_decl_atomic(const Token& t);
+    Expect<const ast::Type*> expect_type_decl_vector(const Token& t);
+    Expect<const ast::Type*> expect_type_decl_array(const Token& t);
+    Expect<const ast::Type*> expect_type_decl_matrix(const Token& t);
 
     Expect<const ast::Type*> expect_type(std::string_view use);
 
     Maybe<const ast::Statement*> non_block_statement();
     Maybe<const ast::Statement*> for_header_initializer();
     Maybe<const ast::Statement*> for_header_continuing();
+
+    void split_token(Token::Type lhs, Token::Type rhs);
 
     class MultiTokenSource;
     MultiTokenSource make_source_range();
@@ -837,9 +842,10 @@ class ParserImpl {
         return builder_.create<T>(std::forward<ARGS>(args)...);
     }
 
-    std::unique_ptr<Lexer> lexer_;
-    std::deque<Token> token_queue_;
-    Token last_token_;
+    Source::File const* const file_;
+    std::vector<Token> tokens_;
+    size_t next_token_idx_ = 0;
+    Source last_source_;
     bool synchronized_ = true;
     uint32_t parse_depth_ = 0;
     std::vector<Token::Type> sync_tokens_;

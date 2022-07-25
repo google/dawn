@@ -40,7 +40,7 @@ TEST_P(PipelineStageTest, Parses) {
     EXPECT_EQ(stage.source.range.end.line, 1u);
     EXPECT_EQ(stage.source.range.end.column, 1u + params.input.size());
 
-    auto t = p->next();
+    auto& t = p->next();
     EXPECT_TRUE(t.IsEof());
 }
 INSTANTIATE_TEST_SUITE_P(

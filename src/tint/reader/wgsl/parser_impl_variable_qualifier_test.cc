@@ -40,7 +40,7 @@ TEST_P(VariableQualifierTest, ParsesStorageClass) {
     EXPECT_EQ(sc->storage_class, params.storage_class);
     EXPECT_EQ(sc->access, params.access);
 
-    auto t = p->next();
+    auto& t = p->next();
     EXPECT_TRUE(t.IsEof());
 }
 INSTANTIATE_TEST_SUITE_P(
@@ -83,7 +83,7 @@ TEST_F(ParserImplTest, VariableQualifier_MissingLessThan) {
     EXPECT_FALSE(sc.errored);
     EXPECT_FALSE(sc.matched);
 
-    auto t = p->next();
+    auto& t = p->next();
     ASSERT_TRUE(t.Is(Token::Type::kIdentifier));
 }
 
@@ -94,7 +94,7 @@ TEST_F(ParserImplTest, VariableQualifier_MissingLessThan_AfterSC) {
     EXPECT_FALSE(sc.errored);
     EXPECT_FALSE(sc.matched);
 
-    auto t = p->next();
+    auto& t = p->next();
     ASSERT_TRUE(t.Is(Token::Type::kIdentifier));
 }
 

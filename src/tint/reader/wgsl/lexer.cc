@@ -37,6 +37,8 @@ static_assert(sizeof(decltype(tint::Source::FileContent::data[0])) == sizeof(uin
               "tint::reader::wgsl requires the size of a std::string element "
               "to be a single byte");
 
+static constexpr size_t kDefaultListSize = 512;
+
 bool read_blankspace(std::string_view str, size_t i, bool* is_blankspace, size_t* blankspace_size) {
     // See https://www.w3.org/TR/WGSL/#blankspace
 
@@ -87,6 +89,27 @@ uint32_t hex_value(char c) {
 Lexer::Lexer(const Source::File* file) : file_(file), location_{1, 1} {}
 
 Lexer::~Lexer() = default;
+
+std::vector<Token> Lexer::Lex() {
+    std::vector<Token> tokens;
+    tokens.reserve(kDefaultListSize);
+    while (true) {
+        tokens.emplace_back(next());
+
+        // If the token can be split, we insert a placeholder element into
+        // the stream to hold the split character.
+        if (tokens.back().IsSplittable()) {
+            auto src = tokens.back().source();
+            src.range.begin.column++;
+            tokens.emplace_back(Token(Token::Type::kPlaceholder, src));
+        }
+
+        if (tokens.back().IsEof() || tokens.back().IsError()) {
+            break;
+        }
+    }
+    return tokens;
+}
 
 const std::string_view Lexer::line() const {
     if (file_->content.lines.size() == 0) {
