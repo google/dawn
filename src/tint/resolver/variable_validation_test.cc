@@ -40,6 +40,24 @@ TEST_F(ResolverVariableValidationTest, GlobalVarNoInitializerNoType) {
     EXPECT_EQ(r()->error(), "12:34 error: var declaration requires a type or initializer");
 }
 
+TEST_F(ResolverVariableValidationTest, VarInitializerNoReturnValueBuiltin) {
+    // fn f() { var a = storageBarrier(); }
+    auto* NoReturnValueBuiltin = Call(Source{{12, 34}}, "storageBarrier");
+    WrapInFunction(Var("a", nullptr, ast::StorageClass::kNone, NoReturnValueBuiltin));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: builtin 'storageBarrier' does not return a value");
+}
+
+TEST_F(ResolverVariableValidationTest, GlobalVarInitializerNoReturnValueBuiltin) {
+    // var a = storageBarrier();
+    auto* NoReturnValueBuiltin = Call(Source{{12, 34}}, "storageBarrier");
+    GlobalVar("a", nullptr, ast::StorageClass::kNone, NoReturnValueBuiltin);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: builtin 'storageBarrier' does not return a value");
+}
+
 TEST_F(ResolverVariableValidationTest, GlobalVarUsedAtModuleScope) {
     // var<private> a : i32;
     // var<private> b : i32 = a;

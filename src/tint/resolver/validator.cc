@@ -1602,9 +1602,14 @@ bool Validator::IfStatement(const sem::IfStatement* stmt) const {
 bool Validator::BuiltinCall(const sem::Call* call) const {
     if (call->Type()->Is<sem::Void>()) {
         bool is_call_statement = false;
-        if (auto* call_stmt = As<ast::CallStatement>(call->Stmt()->Declaration())) {
-            if (call_stmt->expr == call->Declaration()) {
-                is_call_statement = true;
+        // Some built-in call are not owned by a statement, e.g. a built-in called in global
+        // variable declaration. Calling no-return-value built-in in these context is invalid as
+        // well.
+        if (auto* call_stmt = call->Stmt()) {
+            if (auto* call_stmt_ast = As<ast::CallStatement>(call_stmt->Declaration())) {
+                if (call_stmt_ast->expr == call->Declaration()) {
+                    is_call_statement = true;
+                }
             }
         }
         if (!is_call_statement) {
