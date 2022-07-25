@@ -204,6 +204,13 @@ bool Lexer::matches(size_t pos, std::string_view sub_string) {
     return substr(pos, sub_string.size()) == sub_string;
 }
 
+bool Lexer::matches(size_t pos, char ch) {
+    if (pos >= length()) {
+        return false;
+    }
+    return line()[pos] == ch;
+}
+
 Token Lexer::skip_blankspace_and_comments() {
     for (;;) {
         auto loc = location_;
@@ -298,7 +305,7 @@ Token Lexer::try_float() {
     auto source = begin_source();
     bool has_mantissa_digits = false;
 
-    if (matches(end, "-")) {
+    if (matches(end, '-')) {
         end++;
     }
     while (end < length() && is_digit(at(end))) {
@@ -307,7 +314,7 @@ Token Lexer::try_float() {
     }
 
     bool has_point = false;
-    if (end < length() && matches(end, ".")) {
+    if (end < length() && matches(end, '.')) {
         has_point = true;
         end++;
     }
@@ -323,9 +330,9 @@ Token Lexer::try_float() {
 
     // Parse the exponent if one exists
     bool has_exponent = false;
-    if (end < length() && (matches(end, "e") || matches(end, "E"))) {
+    if (end < length() && (matches(end, 'e') || matches(end, 'E'))) {
         end++;
-        if (end < length() && (matches(end, "+") || matches(end, "-"))) {
+        if (end < length() && (matches(end, '+') || matches(end, '-'))) {
             end++;
         }
 
@@ -344,10 +351,10 @@ Token Lexer::try_float() {
 
     bool has_f_suffix = false;
     bool has_h_suffix = false;
-    if (end < length() && matches(end, "f")) {
+    if (end < length() && matches(end, 'f')) {
         end++;
         has_f_suffix = true;
-    } else if (end < length() && matches(end, "h")) {
+    } else if (end < length() && matches(end, 'h')) {
         end++;
         has_h_suffix = true;
     }
@@ -410,12 +417,12 @@ Token Lexer::try_hex_float() {
 
     // -?
     uint64_t sign_bit = 0;
-    if (matches(end, "-")) {
+    if (matches(end, '-')) {
         sign_bit = 1;
         end++;
     }
     // 0[xX]
-    if (matches(end, "0x") || matches(end, "0X")) {
+    if (matches(end, '0') && (matches(end + 1, 'x') || matches(end + 1, 'X'))) {
         end += 2;
     } else {
         return {};
@@ -461,7 +468,7 @@ Token Lexer::try_hex_float() {
 
     // .?
     bool hex_point = false;
-    if (matches(end, ".")) {
+    if (matches(end, '.')) {
         hex_point = true;
         end++;
     }
@@ -479,7 +486,7 @@ Token Lexer::try_hex_float() {
     }
 
     // Is the binary exponent present?  It's optional.
-    const bool has_exponent = (matches(end, "p") || matches(end, "P"));
+    const bool has_exponent = (matches(end, 'p') || matches(end, 'P'));
     if (has_exponent) {
         end++;
     }
@@ -560,9 +567,9 @@ Token Lexer::try_hex_float() {
     if (has_exponent) {
         // Parse the rest of the exponent.
         // (+|-)?
-        if (matches(end, "+")) {
+        if (matches(end, '+')) {
             end++;
-        } else if (matches(end, "-")) {
+        } else if (matches(end, '-')) {
             exponent_sign = -1;
             end++;
         }
@@ -587,10 +594,10 @@ Token Lexer::try_hex_float() {
         // Parse optional 'f' or 'h' suffix.  For a hex float, it can only exist
         // when the exponent is present. Otherwise it will look like
         // one of the mantissa digits.
-        if (end < length() && matches(end, "f")) {
+        if (end < length() && matches(end, 'f')) {
             has_f_suffix = true;
             end++;
-        } else if (end < length() && matches(end, "h")) {
+        } else if (end < length() && matches(end, 'h')) {
             has_h_suffix = true;
             end++;
         }
@@ -794,7 +801,7 @@ Token Lexer::build_token_from_int_if_possible(Source source, size_t start, int32
         advance(static_cast<size_t>(end_ptr - start_ptr));
     }
 
-    if (matches(pos(), "u")) {
+    if (matches(pos(), 'u')) {
         if (!overflow && CheckedConvert<u32>(AInt(res))) {
             advance(1);
             end_source(source);
@@ -803,7 +810,7 @@ Token Lexer::build_token_from_int_if_possible(Source source, size_t start, int32
         return {Token::Type::kError, source, "value cannot be represented as 'u32'"};
     }
 
-    if (matches(pos(), "i")) {
+    if (matches(pos(), 'i')) {
         if (!overflow && CheckedConvert<i32>(AInt(res))) {
             advance(1);
             end_source(source);
@@ -825,11 +832,11 @@ Token Lexer::try_hex_integer() {
 
     auto source = begin_source();
 
-    if (matches(curr, "-")) {
+    if (matches(curr, '-')) {
         curr++;
     }
 
-    if (matches(curr, "0x") || matches(curr, "0X")) {
+    if (matches(curr, '0') && (matches(curr + 1, 'x') || matches(curr + 1, 'X'))) {
         curr += 2;
     } else {
         return {};
@@ -849,7 +856,7 @@ Token Lexer::try_integer() {
 
     auto source = begin_source();
 
-    if (matches(curr, "-")) {
+    if (matches(curr, '-')) {
         curr++;
     }
 
@@ -927,138 +934,162 @@ Token Lexer::try_punctuation() {
     auto source = begin_source();
     auto type = Token::Type::kUninitialized;
 
-    if (matches(pos(), "@")) {
+    if (matches(pos(), '@')) {
         type = Token::Type::kAttr;
         advance(1);
-    } else if (matches(pos(), "(")) {
+    } else if (matches(pos(), '(')) {
         type = Token::Type::kParenLeft;
         advance(1);
-    } else if (matches(pos(), ")")) {
+    } else if (matches(pos(), ')')) {
         type = Token::Type::kParenRight;
         advance(1);
-    } else if (matches(pos(), "[")) {
+    } else if (matches(pos(), '[')) {
         type = Token::Type::kBracketLeft;
         advance(1);
-    } else if (matches(pos(), "]")) {
+    } else if (matches(pos(), ']')) {
         type = Token::Type::kBracketRight;
         advance(1);
-    } else if (matches(pos(), "{")) {
+    } else if (matches(pos(), '{')) {
         type = Token::Type::kBraceLeft;
         advance(1);
-    } else if (matches(pos(), "}")) {
+    } else if (matches(pos(), '}')) {
         type = Token::Type::kBraceRight;
         advance(1);
-    } else if (matches(pos(), "&&")) {
-        type = Token::Type::kAndAnd;
-        advance(2);
-    } else if (matches(pos(), "&=")) {
-        type = Token::Type::kAndEqual;
-        advance(2);
-    } else if (matches(pos(), "&")) {
-        type = Token::Type::kAnd;
-        advance(1);
-    } else if (matches(pos(), "/=")) {
-        type = Token::Type::kDivisionEqual;
-        advance(2);
-    } else if (matches(pos(), "/")) {
-        type = Token::Type::kForwardSlash;
-        advance(1);
-    } else if (matches(pos(), "!=")) {
-        type = Token::Type::kNotEqual;
-        advance(2);
-    } else if (matches(pos(), "!")) {
-        type = Token::Type::kBang;
-        advance(1);
-    } else if (matches(pos(), ":")) {
+    } else if (matches(pos(), '&')) {
+        if (matches(pos() + 1, '&')) {
+            type = Token::Type::kAndAnd;
+            advance(2);
+        } else if (matches(pos() + 1, '=')) {
+            type = Token::Type::kAndEqual;
+            advance(2);
+        } else {
+            type = Token::Type::kAnd;
+            advance(1);
+        }
+    } else if (matches(pos(), '/')) {
+        if (matches(pos() + 1, '=')) {
+            type = Token::Type::kDivisionEqual;
+            advance(2);
+        } else {
+            type = Token::Type::kForwardSlash;
+            advance(1);
+        }
+    } else if (matches(pos(), '!')) {
+        if (matches(pos() + 1, '=')) {
+            type = Token::Type::kNotEqual;
+            advance(2);
+        } else {
+            type = Token::Type::kBang;
+            advance(1);
+        }
+    } else if (matches(pos(), ':')) {
         type = Token::Type::kColon;
         advance(1);
-    } else if (matches(pos(), ",")) {
+    } else if (matches(pos(), ',')) {
         type = Token::Type::kComma;
         advance(1);
-    } else if (matches(pos(), "==")) {
-        type = Token::Type::kEqualEqual;
-        advance(2);
-    } else if (matches(pos(), "=")) {
-        type = Token::Type::kEqual;
-        advance(1);
-    } else if (matches(pos(), ">=")) {
-        type = Token::Type::kGreaterThanEqual;
-        advance(2);
-    } else if (matches(pos(), ">>")) {
-        type = Token::Type::kShiftRight;
-        advance(2);
-    } else if (matches(pos(), ">")) {
-        type = Token::Type::kGreaterThan;
-        advance(1);
-    } else if (matches(pos(), "<=")) {
-        type = Token::Type::kLessThanEqual;
-        advance(2);
-    } else if (matches(pos(), "<<")) {
-        type = Token::Type::kShiftLeft;
-        advance(2);
-    } else if (matches(pos(), "<")) {
-        type = Token::Type::kLessThan;
-        advance(1);
-    } else if (matches(pos(), "%=")) {
-        type = Token::Type::kModuloEqual;
-        advance(2);
-    } else if (matches(pos(), "%")) {
-        type = Token::Type::kMod;
-        advance(1);
-    } else if (matches(pos(), "->")) {
-        type = Token::Type::kArrow;
-        advance(2);
-    } else if (matches(pos(), "--")) {
-        type = Token::Type::kMinusMinus;
-        advance(2);
-    } else if (matches(pos(), "-=")) {
-        type = Token::Type::kMinusEqual;
-        advance(2);
-    } else if (matches(pos(), "-")) {
-        type = Token::Type::kMinus;
-        advance(1);
-    } else if (matches(pos(), ".")) {
+    } else if (matches(pos(), '=')) {
+        if (matches(pos() + 1, '=')) {
+            type = Token::Type::kEqualEqual;
+            advance(2);
+        } else {
+            type = Token::Type::kEqual;
+            advance(1);
+        }
+    } else if (matches(pos(), '>')) {
+        if (matches(pos() + 1, '=')) {
+            type = Token::Type::kGreaterThanEqual;
+            advance(2);
+        } else if (matches(pos() + 1, '>')) {
+            type = Token::Type::kShiftRight;
+            advance(2);
+        } else {
+            type = Token::Type::kGreaterThan;
+            advance(1);
+        }
+    } else if (matches(pos(), '<')) {
+        if (matches(pos() + 1, '=')) {
+            type = Token::Type::kLessThanEqual;
+            advance(2);
+        } else if (matches(pos() + 1, '<')) {
+            type = Token::Type::kShiftLeft;
+            advance(2);
+        } else {
+            type = Token::Type::kLessThan;
+            advance(1);
+        }
+    } else if (matches(pos(), '%')) {
+        if (matches(pos() + 1, '=')) {
+            type = Token::Type::kModuloEqual;
+            advance(2);
+        } else {
+            type = Token::Type::kMod;
+            advance(1);
+        }
+    } else if (matches(pos(), '-')) {
+        if (matches(pos() + 1, '>')) {
+            type = Token::Type::kArrow;
+            advance(2);
+        } else if (matches(pos() + 1, '-')) {
+            type = Token::Type::kMinusMinus;
+            advance(2);
+        } else if (matches(pos() + 1, '=')) {
+            type = Token::Type::kMinusEqual;
+            advance(2);
+        } else {
+            type = Token::Type::kMinus;
+            advance(1);
+        }
+    } else if (matches(pos(), '.')) {
         type = Token::Type::kPeriod;
         advance(1);
-    } else if (matches(pos(), "++")) {
-        type = Token::Type::kPlusPlus;
-        advance(2);
-    } else if (matches(pos(), "+=")) {
-        type = Token::Type::kPlusEqual;
-        advance(2);
-    } else if (matches(pos(), "+")) {
-        type = Token::Type::kPlus;
-        advance(1);
-    } else if (matches(pos(), "||")) {
-        type = Token::Type::kOrOr;
-        advance(2);
-    } else if (matches(pos(), "|=")) {
-        type = Token::Type::kOrEqual;
-        advance(2);
-    } else if (matches(pos(), "|")) {
-        type = Token::Type::kOr;
-        advance(1);
-    } else if (matches(pos(), ";")) {
+    } else if (matches(pos(), '+')) {
+        if (matches(pos() + 1, '+')) {
+            type = Token::Type::kPlusPlus;
+            advance(2);
+        } else if (matches(pos() + 1, '=')) {
+            type = Token::Type::kPlusEqual;
+            advance(2);
+        } else {
+            type = Token::Type::kPlus;
+            advance(1);
+        }
+    } else if (matches(pos(), '|')) {
+        if (matches(pos() + 1, '|')) {
+            type = Token::Type::kOrOr;
+            advance(2);
+        } else if (matches(pos() + 1, '=')) {
+            type = Token::Type::kOrEqual;
+            advance(2);
+        } else {
+            type = Token::Type::kOr;
+            advance(1);
+        }
+    } else if (matches(pos(), ';')) {
         type = Token::Type::kSemicolon;
         advance(1);
-    } else if (matches(pos(), "*=")) {
-        type = Token::Type::kTimesEqual;
-        advance(2);
-    } else if (matches(pos(), "*")) {
-        type = Token::Type::kStar;
-        advance(1);
-    } else if (matches(pos(), "~")) {
+    } else if (matches(pos(), '*')) {
+        if (matches(pos() + 1, '=')) {
+            type = Token::Type::kTimesEqual;
+            advance(2);
+        } else {
+            type = Token::Type::kStar;
+            advance(1);
+        }
+    } else if (matches(pos(), '~')) {
         type = Token::Type::kTilde;
         advance(1);
-    } else if (matches(pos(), "_")) {
+    } else if (matches(pos(), '_')) {
         type = Token::Type::kUnderscore;
         advance(1);
-    } else if (matches(pos(), "^=")) {
-        type = Token::Type::kXorEqual;
-        advance(2);
-    } else if (matches(pos(), "^")) {
-        type = Token::Type::kXor;
-        advance(1);
+    } else if (matches(pos(), '^')) {
+        if (matches(pos() + 1, '=')) {
+            type = Token::Type::kXorEqual;
+            advance(2);
+        } else {
+            type = Token::Type::kXor;
+            advance(1);
+        }
     }
 
     end_source(source);

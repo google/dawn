@@ -96,7 +96,8 @@ class Lexer {
     bool is_hex(char ch) const;
     /// @returns true if string at `pos` matches `substr`
     bool matches(size_t pos, std::string_view substr);
-
+    /// @returns true if char at `pos` matches `ch`
+    bool matches(size_t pos, char ch);
     /// The source file content
     Source::File const* const file_;
     /// The current location within the input
