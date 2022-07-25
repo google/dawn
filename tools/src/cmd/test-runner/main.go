@@ -144,7 +144,8 @@ func run() error {
 					"**.expected.wgsl",
 					"**.expected.spvasm",
 					"**.expected.msl",
-					"**.expected.hlsl",
+					"**.expected.fxc.hlsl",
+					"**.expected.dxc.hlsl",
 					"**.expected.glsl"
 				]
 			}
