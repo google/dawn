@@ -19,8 +19,8 @@ import (
 	"strings"
 	"testing"
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/parser"
-	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/resolver"
+	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/parser"
+	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/resolver"
 )
 
 func TestResolver(t *testing.T) {

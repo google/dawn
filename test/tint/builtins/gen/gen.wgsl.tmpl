@@ -1,16 +1,16 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/builtin-gen to generate the wgsl files in the
+Template file for use with tools/src/cmd/gen to generate the wgsl files in the
 ./literal/...  and ./var/... subdirectories
 
 See:
-* tools/cmd/intrinsic-gen/gen for structures used by this template
+* tools/src/cmd/gen for structures used by this template
 * https://golang.org/pkg/text/template/ for documentation on the template syntax
 --------------------------------------------------------------------------------
 */ -}}
 
 {{- /* For each permutation of each overload of each function... */ -}}
-{{- range .Sem.Builtins -}}
+{{- range Sem.Builtins -}}
 {{- /* TODO(crbug.com/tint/1536): Remove the bodge below after we support [[extension("extension_name")]] in intrinsics.def */}}
 {{- if not (or (eq .Name "dot4I8Packed") (eq .Name "dot4U8Packed"))}}
 {{-   range .Overloads  -}}

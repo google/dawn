@@ -18,7 +18,7 @@ import (
 	"fmt"
 	"sort"
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/ast"
+	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/ast"
 )
 
 // Sem is the root of the semantic tree

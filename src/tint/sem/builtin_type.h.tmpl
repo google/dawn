@@ -1,9 +1,9 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/builtin-gen to generate builtin_type.h
+Template file for use with tools/src/cmd/gen to generate builtin_type.h
 
 See:
-* tools/cmd/intrinsic-gen/gen for structures used by this template
+* tools/src/cmd/gen for structures used by this template
 * https://golang.org/pkg/text/template/ for documentation on the template syntax
 --------------------------------------------------------------------------------
 */ -}}
@@ -19,7 +19,7 @@ namespace tint::sem {
 /// Enumerator of all builtin functions
 enum class BuiltinType {
     kNone = -1,
-{{- range .Sem.Builtins }}
+{{- range Sem.Builtins }}
     k{{Title .Name}},
 {{- end }}
 };

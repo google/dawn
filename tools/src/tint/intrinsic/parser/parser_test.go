@@ -17,8 +17,8 @@ package parser_test
 import (
 	"testing"
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/ast"
-	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/parser"
+	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/ast"
+	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/parser"
 	"dawn.googlesource.com/dawn/tools/src/utils"
 	"github.com/google/go-cmp/cmp"
 )

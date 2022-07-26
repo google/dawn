@@ -1,9 +1,9 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/builtin-gen to generate ctor_conv_intrinsic.cc
+Template file for use with tools/src/cmd/gen to generate ctor_conv_intrinsic.cc
 
 See:
-* tools/cmd/intrinsic-gen/gen for structures used by this template
+* tools/src/cmd/gen for structures used by this template
 * https://golang.org/pkg/text/template/ for documentation on the template syntax
 --------------------------------------------------------------------------------
 */ -}}
@@ -16,7 +16,7 @@ const char* str(CtorConvIntrinsic i) {
     switch (i) {
         case CtorConvIntrinsic::kNone:
             return "<none>";
-{{- range .Sem.ConstructorsAndConverters  }}
+{{- range Sem.ConstructorsAndConverters  }}
         case CtorConvIntrinsic::k{{Title .Name}}:
             return "{{.Name}}";
 {{- end  }}

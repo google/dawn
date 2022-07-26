@@ -1,17 +1,17 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/builtin-gen to generate builtin_table.inl
+Template file for use with tools/src/cmd/gen to generate builtin_table.inl
 Used by BuiltinTable.cc for builtin overload resolution.
 
 See:
-* tools/cmd/intrinsic-gen/gen for structures used by this template
+* tools/src/cmd/gen for structures used by this template
 * https://golang.org/pkg/text/template/ for documentation on the template syntax
 --------------------------------------------------------------------------------
 */ -}}
 
 // clang-format off
 
-{{  with .Sem -}}
+{{  with Sem -}}
 {{    range .Types -}}
 {{      template "Type" . }}
 {{    end -}}
@@ -339,27 +339,27 @@ class Matchers {
  private:
 {{- $t_names := Map -}}
 {{- $n_names := Map -}}
-{{- range Iterate .Sem.MaxTemplateTypes -}}
+{{- range Iterate Sem.MaxTemplateTypes -}}
 {{-   $name := printf "template_type_%v" . -}}
 {{-   $t_names.Put . $name }}
   TemplateTypeMatcher {{$name}}_{ {{- . -}} };
 {{- end }}
-{{- range Iterate .Sem.MaxTemplateNumbers -}}
+{{- range Iterate Sem.MaxTemplateNumbers -}}
 {{-   $name := printf "template_number_%v" . -}}
 {{-   $n_names.Put . $name }}
   TemplateNumberMatcher {{$name}}_{ {{- . -}} };
 {{- end }}
-{{- range .Sem.Types -}}
+{{- range Sem.Types -}}
 {{-   $name := PascalCase .Name -}}
 {{-   $t_names.Put . $name }}
   {{$name}} {{$name}}_;
 {{- end }}
-{{- range .Sem.TypeMatchers -}}
+{{- range Sem.TypeMatchers -}}
 {{-   $name := PascalCase .Name -}}
 {{-   $t_names.Put . $name }}
   {{$name}} {{$name}}_;
 {{- end }}
-{{- range .Sem.EnumMatchers -}}
+{{- range Sem.EnumMatchers -}}
 {{-   $name := PascalCase .Name -}}
 {{-   $n_names.Put . $name }}
   {{$name}} {{$name}}_;

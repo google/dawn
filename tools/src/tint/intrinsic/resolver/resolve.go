@@ -19,9 +19,9 @@ import (
 	"sort"
 	"strconv"
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/ast"
-	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/sem"
-	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/tok"
+	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/ast"
+	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/sem"
+	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/tok"
 )
 
 type resolver struct {

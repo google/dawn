@@ -12,14 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// Package gen holds types and helpers for generating templated code from the
+/// intrinsic.def file.
+///
+/// Used by tools/src/cmd/gen/main.go
 package gen
 
 import (
 	"fmt"
+	"strings"
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/sem"
 	"dawn.googlesource.com/dawn/tools/src/list"
 	"dawn.googlesource.com/dawn/tools/src/lut"
+	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/sem"
 )
 
 // IntrinsicTable holds data specific to the intrinsic_table.inl.tmpl template
@@ -352,8 +357,8 @@ func (b *overloadBuilder) collectMatcherIndices(fqn sem.FullyQualifiedName) ([]i
 	return out, nil
 }
 
-// buildIntrinsicTable builds the IntrinsicTable from the semantic info
-func buildIntrinsicTable(s *sem.Sem) (*IntrinsicTable, error) {
+// BuildIntrinsicTable builds the IntrinsicTable from the semantic info
+func BuildIntrinsicTable(s *sem.Sem) (*IntrinsicTable, error) {
 	b := IntrinsicTableBuilder{
 		IntrinsicTable: IntrinsicTable{
 			Sem:           s,
@@ -406,4 +411,55 @@ func buildIntrinsicTable(s *sem.Sem) (*IntrinsicTable, error) {
 	b.lut.overloads.Compact()
 
 	return &b.IntrinsicTable, nil
+}
+
+// SplitDisplayName splits displayName into parts, where text wrapped in {}
+// braces are not quoted and the rest is quoted. This is used to help process
+// the string value of the [[display()]] decoration. For example:
+//   SplitDisplayName("vec{N}<{T}>")
+// would return the strings:
+//   [`"vec"`, `N`, `"<"`, `T`, `">"`]
+func SplitDisplayName(displayName string) []string {
+	parts := []string{}
+	pending := strings.Builder{}
+	for _, r := range displayName {
+		switch r {
+		case '{':
+			if pending.Len() > 0 {
+				parts = append(parts, fmt.Sprintf(`"%v"`, pending.String()))
+				pending.Reset()
+			}
+		case '}':
+			if pending.Len() > 0 {
+				parts = append(parts, pending.String())
+				pending.Reset()
+			}
+		default:
+			pending.WriteRune(r)
+		}
+	}
+	if pending.Len() > 0 {
+		parts = append(parts, fmt.Sprintf(`"%v"`, pending.String()))
+	}
+	return parts
+}
+
+// IsAbstract returns true if the FullyQualifiedName refers to an abstract
+// numeric type
+func IsAbstract(fqn sem.FullyQualifiedName) bool {
+	switch fqn.Target.GetName() {
+	case "ia", "fa":
+		return true
+	case "vec":
+		return IsAbstract(fqn.TemplateArguments[1].(sem.FullyQualifiedName))
+	case "mat":
+		return IsAbstract(fqn.TemplateArguments[2].(sem.FullyQualifiedName))
+	}
+	return false
+}
+
+// IsDeclarable returns false if the FullyQualifiedName refers to an abstract
+// numeric type, or if it starts with a leading underscore.
+func IsDeclarable(fqn sem.FullyQualifiedName) bool {
+	return !IsAbstract(fqn) && !strings.HasPrefix(fqn.Target.GetName(), "_")
 }

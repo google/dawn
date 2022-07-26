@@ -1,9 +1,9 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/builtin-gen to generate builtin_type.cc
+Template file for use with tools/src/cmd/gen to generate builtin_type.cc
 
 See:
-* tools/cmd/intrinsic-gen/gen for structures used by this template
+* tools/src/cmd/gen for structures used by this template
 * https://golang.org/pkg/text/template/ for documentation on the template syntax
 --------------------------------------------------------------------------------
 */ -}}
@@ -15,7 +15,7 @@ See:
 namespace tint::sem {
 
 BuiltinType ParseBuiltinType(const std::string& name) {
-{{- range .Sem.Builtins  }}
+{{- range Sem.Builtins  }}
     if (name == "{{.Name}}") {
         return BuiltinType::k{{Title .Name}};
     }
@@ -27,7 +27,7 @@ const char* str(BuiltinType i) {
     switch (i) {
         case BuiltinType::kNone:
             return "<none>";
-{{- range .Sem.Builtins  }}
+{{- range Sem.Builtins  }}
         case BuiltinType::k{{Title .Name}}:
             return "{{.Name}}";
 {{- end  }}

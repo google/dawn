@@ -20,8 +20,8 @@ import (
 	"fmt"
 	"strings"
 
-	"dawn.googlesource.com/dawn/tools/src/cmd/intrinsic-gen/sem"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
+	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/sem"
 )
 
 // Permuter generates permutations of intrinsic overloads
@@ -30,8 +30,8 @@ type Permuter struct {
 	allTypes []sem.FullyQualifiedName
 }
 
-// buildPermuter returns a new initialized Permuter
-func buildPermuter(s *sem.Sem) (*Permuter, error) {
+// NewPermuter returns a new initialized Permuter
+func NewPermuter(s *sem.Sem) (*Permuter, error) {
 	// allTypes are the list of FQNs that are used for unconstrained types
 	allTypes := []sem.FullyQualifiedName{}
 	for _, ty := range s.Types {
@@ -323,6 +323,10 @@ func (s *permutationState) permutateFQN(in sem.FullyQualifiedName) ([]sem.FullyQ
 }
 
 func validate(fqn sem.FullyQualifiedName, uses *sem.StageUses) bool {
+	if strings.HasPrefix(fqn.Target.GetName(), "_") {
+		return false // Builtin, untypeable return type
+	}
+
 	switch fqn.Target.GetName() {
 	case "array":
 		elTy := fqn.TemplateArguments[0].(sem.FullyQualifiedName)
@@ -332,7 +336,7 @@ func validate(fqn sem.FullyQualifiedName, uses *sem.StageUses) bool {
 			strings.Contains(elTyName, "sampler"),
 			strings.Contains(elTyName, "texture"):
 			return false // Not storable
-		case isAbstract(elTy):
+		case IsAbstract(elTy):
 			return false // Abstract types are not typeable nor supported by arrays
 		}
 	case "ptr":
@@ -365,10 +369,6 @@ func validate(fqn sem.FullyQualifiedName, uses *sem.StageUses) bool {
 		default:
 			return false
 		}
-	}
-
-	if strings.HasPrefix(fqn.Target.GetName(), "_") {
-		return false // Core, undeclarable WGSL type
 	}
 
 	for _, arg := range fqn.TemplateArguments {
