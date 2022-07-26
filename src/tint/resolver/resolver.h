@@ -195,12 +195,12 @@ class Resolver {
     sem::Function* Function(const ast::Function*);
     sem::Call* FunctionCall(const ast::CallExpression*,
                             sem::Function* target,
-                            std::vector<const sem::Expression*> args,
+                            utils::VectorRef<const sem::Expression*> args,
                             sem::Behaviors arg_behaviors);
     sem::Expression* Identifier(const ast::IdentifierExpression*);
     sem::Call* BuiltinCall(const ast::CallExpression*,
                            sem::BuiltinType,
-                           std::vector<const sem::Expression*> args);
+                           utils::VectorRef<const sem::Expression*> args);
     sem::Expression* Literal(const ast::LiteralExpression*);
     sem::Expression* MemberAccessor(const ast::MemberAccessorExpression*);
     sem::Expression* UnaryOp(const ast::UnaryOpExpression*);
@@ -223,7 +223,7 @@ class Resolver {
 
     /// Materializes all the arguments in `args` to the parameter types of `target`.
     /// @returns true on success, false on failure.
-    bool MaterializeArguments(std::vector<const sem::Expression*>& args,
+    bool MaterializeArguments(utils::VectorRef<const sem::Expression*> args,
                               const sem::CallTarget* target);
 
     /// @returns true if an argument of an abstract numeric type, passed to a parameter of type
@@ -257,9 +257,9 @@ class Resolver {
     // CollectTextureSamplerPairs() collects all the texture/sampler pairs from the target function
     // / builtin, and records these on the current function by calling AddTextureSamplerPair().
     void CollectTextureSamplerPairs(sem::Function* func,
-                                    const std::vector<const sem::Expression*>& args) const;
+                                    utils::ConstVectorRef<const sem::Expression*> args) const;
     void CollectTextureSamplerPairs(const sem::Builtin* builtin,
-                                    const std::vector<const sem::Expression*>& args) const;
+                                    utils::ConstVectorRef<const sem::Expression*> args) const;
 
     /// Resolves the WorkgroupSize for the given function, assigning it to
     /// current_function_

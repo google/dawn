@@ -20,6 +20,7 @@
 #include "src/tint/ast/call_expression.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/sem/expression.h"
+#include "src/tint/utils/vector.h"
 
 namespace tint::sem {
 
@@ -38,7 +39,7 @@ class Call final : public Castable<Call, Expression> {
     Call(const ast::CallExpression* declaration,
          const CallTarget* target,
          EvaluationStage stage,
-         std::vector<const sem::Expression*> arguments,
+         utils::VectorRef<const sem::Expression*> arguments,
          const Statement* statement,
          const Constant* constant,
          bool has_side_effects);
@@ -50,7 +51,7 @@ class Call final : public Castable<Call, Expression> {
     const CallTarget* Target() const { return target_; }
 
     /// @return the call arguments
-    const std::vector<const sem::Expression*>& Arguments() const { return arguments_; }
+    const auto& Arguments() const { return arguments_; }
 
     /// @returns the AST node
     const ast::CallExpression* Declaration() const {
@@ -59,7 +60,7 @@ class Call final : public Castable<Call, Expression> {
 
   private:
     CallTarget const* const target_;
-    std::vector<const sem::Expression*> arguments_;
+    utils::Vector<const sem::Expression*, 8> arguments_;
 };
 
 }  // namespace tint::sem

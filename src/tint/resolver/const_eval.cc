@@ -119,7 +119,7 @@ struct Constant : public sem::Constant {
 // Forward declaration
 const Constant* CreateComposite(ProgramBuilder& builder,
                                 const sem::Type* type,
-                                std::vector<const sem::Constant*> elements);
+                                utils::VectorRef<const sem::Constant*> elements);
 
 /// Element holds a single scalar or abstract-numeric value.
 /// Element implements the Constant interface.
@@ -251,13 +251,16 @@ struct Splat : Constant {
 /// implementation. Use CreateComposite() to create the appropriate Constant type.
 /// Composite implements the Constant interface.
 struct Composite : Constant {
-    Composite(const sem::Type* t, std::vector<const sem::Constant*> els, bool all_0, bool any_0)
+    Composite(const sem::Type* t,
+              utils::VectorRef<const sem::Constant*> els,
+              bool all_0,
+              bool any_0)
         : type(t), elements(std::move(els)), all_zero(all_0), any_zero(any_0), hash(CalcHash()) {}
     ~Composite() override = default;
     const sem::Type* Type() const override { return type; }
     std::variant<std::monostate, AInt, AFloat> Value() const override { return {}; }
     const sem::Constant* Index(size_t i) const override {
-        return i < elements.size() ? elements[i] : nullptr;
+        return i < elements.Length() ? elements[i] : nullptr;
     }
     bool AllZero() const override { return all_zero; }
     bool AnyZero() const override { return any_zero; }
@@ -269,8 +272,8 @@ struct Composite : Constant {
                                            const Source& source) const override {
         // Convert each of the composite element types.
         auto* el_ty = sem::Type::ElementOf(target_ty);
-        std::vector<const sem::Constant*> conv_els;
-        conv_els.reserve(elements.size());
+        utils::Vector<const sem::Constant*, 4> conv_els;
+        conv_els.Reserve(elements.Length());
         for (auto* el : elements) {
             // Note: This file is the only place where `sem::Constant`s are created, so this
             // static_cast is safe.
@@ -281,7 +284,7 @@ struct Composite : Constant {
             if (!conv_el.Get()) {
                 return nullptr;
             }
-            conv_els.emplace_back(conv_el.Get());
+            conv_els.Push(conv_el.Get());
         }
         return CreateComposite(builder, target_ty, std::move(conv_els));
     }
@@ -295,7 +298,7 @@ struct Composite : Constant {
     }
 
     sem::Type const* const type;
-    const std::vector<const sem::Constant*> elements;
+    const utils::Vector<const sem::Constant*, 8> elements;
     const bool all_zero;
     const bool any_zero;
     const size_t hash;
@@ -327,15 +330,15 @@ const Constant* ZeroValue(ProgramBuilder& builder, const sem::Type* type) {
         },
         [&](const sem::Struct* s) -> const Constant* {
             std::unordered_map<sem::Type*, const Constant*> zero_by_type;
-            std::vector<const sem::Constant*> zeros;
-            zeros.reserve(s->Members().size());
+            utils::Vector<const sem::Constant*, 4> zeros;
+            zeros.Reserve(s->Members().size());
             for (auto* member : s->Members()) {
                 auto* zero = utils::GetOrCreate(zero_by_type, member->Type(),
                                                 [&] { return ZeroValue(builder, member->Type()); });
                 if (!zero) {
                     return nullptr;
                 }
-                zeros.emplace_back(zero);
+                zeros.Push(zero);
             }
             if (zero_by_type.size() == 1) {
                 // All members were of the same type, so the zero value is the same for all members.
@@ -392,14 +395,14 @@ bool Equal(const sem::Constant* a, const sem::Constant* b) {
 /// depending on the element types and values.
 const Constant* CreateComposite(ProgramBuilder& builder,
                                 const sem::Type* type,
-                                std::vector<const sem::Constant*> elements) {
-    if (elements.size() == 0) {
+                                utils::VectorRef<const sem::Constant*> elements) {
+    if (elements.IsEmpty()) {
         return nullptr;
     }
     bool any_zero = false;
     bool all_zero = true;
     bool all_equal = true;
-    auto* first = elements.front();
+    auto* first = elements.Front();
     for (auto* el : elements) {
         if (!el) {
             return nullptr;
@@ -417,7 +420,7 @@ const Constant* CreateComposite(ProgramBuilder& builder,
         }
     }
     if (all_equal) {
-        return builder.create<Splat>(type, elements[0], elements.size());
+        return builder.create<Splat>(type, elements[0], elements.Length());
     } else {
         return builder.create<Composite>(type, std::move(elements), all_zero, any_zero);
     }
@@ -433,9 +436,10 @@ const Constant* TransformElements(ProgramBuilder& builder, const sem::Constant* 
     if (el_ty == ty) {
         return f(c);
     }
-    std::vector<const sem::Constant*> els(n);
+    utils::Vector<const sem::Constant*, 8> els;
+    els.Reserve(n);
     for (uint32_t i = 0; i < n; i++) {
-        els[i] = TransformElements(builder, c->Index(i), f);
+        els.Push(TransformElements(builder, c->Index(i), f));
     }
     return CreateComposite(builder, c->Type(), std::move(els));
 }
@@ -475,27 +479,29 @@ const sem::Constant* ConstEval::Literal(const sem::Type* ty,
         });
 }
 
-const sem::Constant* ConstEval::ArrayOrStructCtor(const sem::Type* ty,
-                                                  const std::vector<const sem::Expression*>& args) {
-    if (args.empty()) {
+const sem::Constant* ConstEval::ArrayOrStructCtor(
+    const sem::Type* ty,
+    utils::ConstVectorRef<const sem::Expression*> args) {
+    if (args.IsEmpty()) {
         return ZeroValue(builder, ty);
     }
 
-    if (args.size() == 1 && args[0]->Type() == ty) {
+    if (args.Length() == 1 && args[0]->Type() == ty) {
         // Identity constructor.
         return args[0]->ConstantValue();
     }
 
     // Multiple arguments. Must be a type constructor.
-    std::vector<const sem::Constant*> els;
-    els.reserve(args.size());
+    utils::Vector<const sem::Constant*, 4> els;
+    els.Reserve(args.Length());
     for (auto* arg : args) {
-        els.emplace_back(arg->ConstantValue());
+        els.Push(arg->ConstantValue());
     }
     return CreateComposite(builder, ty, std::move(els));
 }
 
-const sem::Constant* ConstEval::Conv(const sem::Type* ty, ArgumentList args, size_t) {
+const sem::Constant* ConstEval::Conv(const sem::Type* ty,
+                                     utils::ConstVectorRef<const sem::Expression*> args) {
     uint32_t el_count = 0;
     auto* el_ty = sem::Type::ElementOf(ty, &el_count);
     if (!el_ty) {
@@ -515,79 +521,79 @@ const sem::Constant* ConstEval::Conv(const sem::Type* ty, ArgumentList args, siz
     return nullptr;
 }
 
-const sem::Constant* ConstEval::Zero(const sem::Type* ty, ArgumentList, size_t) {
+const sem::Constant* ConstEval::Zero(const sem::Type* ty,
+                                     utils::ConstVectorRef<const sem::Expression*>) {
     return ZeroValue(builder, ty);
 }
 
-const sem::Constant* ConstEval::Identity(const sem::Type*, ArgumentList args, size_t) {
+const sem::Constant* ConstEval::Identity(const sem::Type*,
+                                         utils::ConstVectorRef<const sem::Expression*> args) {
     return args[0]->ConstantValue();
 }
 
 const sem::Constant* ConstEval::VecSplat(const sem::Type* ty,
-                                         sem::Expression const* const* args,
-                                         size_t) {
+                                         utils::ConstVectorRef<const sem::Expression*> args) {
     if (auto* arg = args[0]->ConstantValue()) {
         return builder.create<Splat>(ty, arg, static_cast<const sem::Vector*>(ty)->Width());
     }
     return nullptr;
 }
 
-const sem::Constant* ConstEval::VecCtorS(const sem::Type* ty, ArgumentList args, size_t num_args) {
-    std::vector<const sem::Constant*> els;
-    els.reserve(num_args);
-    for (size_t i = 0; i < num_args; i++) {
-        els.emplace_back(args[i]->ConstantValue());
+const sem::Constant* ConstEval::VecCtorS(const sem::Type* ty,
+                                         utils::ConstVectorRef<const sem::Expression*> args) {
+    utils::Vector<const sem::Constant*, 4> els;
+    for (auto* arg : args) {
+        els.Push(arg->ConstantValue());
     }
     return CreateComposite(builder, ty, std::move(els));
 }
 
-const sem::Constant* ConstEval::VecCtorM(const sem::Type* ty, ArgumentList args, size_t num_args) {
-    std::vector<const sem::Constant*> els;
-    els.reserve(num_args);
-    for (size_t i = 0; i < num_args; i++) {
-        auto* arg = args[i]->ConstantValue();
-        if (!arg) {
+const sem::Constant* ConstEval::VecCtorM(const sem::Type* ty,
+                                         utils::ConstVectorRef<const sem::Expression*> args) {
+    utils::Vector<const sem::Constant*, 4> els;
+    for (auto* arg : args) {
+        auto* val = arg->ConstantValue();
+        if (!val) {
             return nullptr;
         }
         auto* arg_ty = arg->Type();
         if (auto* arg_vec = arg_ty->As<sem::Vector>()) {
             // Extract out vector elements.
             for (uint32_t j = 0; j < arg_vec->Width(); j++) {
-                auto* el = arg->Index(j);
+                auto* el = val->Index(j);
                 if (!el) {
                     return nullptr;
                 }
-                els.emplace_back(el);
+                els.Push(el);
             }
         } else {
-            els.emplace_back(arg);
+            els.Push(val);
         }
     }
     return CreateComposite(builder, ty, std::move(els));
 }
 
-const sem::Constant* ConstEval::MatCtorS(const sem::Type* ty, ArgumentList args, size_t num_args) {
+const sem::Constant* ConstEval::MatCtorS(const sem::Type* ty,
+                                         utils::ConstVectorRef<const sem::Expression*> args) {
     auto* m = static_cast<const sem::Matrix*>(ty);
 
-    std::vector<const sem::Constant*> els;
-    els.reserve(num_args);
+    utils::Vector<const sem::Constant*, 4> els;
     for (uint32_t c = 0; c < m->columns(); c++) {
-        std::vector<const sem::Constant*> column;
-        column.reserve(m->rows());
+        utils::Vector<const sem::Constant*, 4> column;
         for (uint32_t r = 0; r < m->rows(); r++) {
             auto i = r + c * m->rows();
-            column.emplace_back(args[i]->ConstantValue());
+            column.Push(args[i]->ConstantValue());
         }
-        els.push_back(CreateComposite(builder, m->ColumnType(), std::move(column)));
+        els.Push(CreateComposite(builder, m->ColumnType(), std::move(column)));
     }
     return CreateComposite(builder, ty, std::move(els));
 }
 
-const sem::Constant* ConstEval::MatCtorV(const sem::Type* ty, ArgumentList args, size_t num_args) {
-    std::vector<const sem::Constant*> els;
-    els.reserve(num_args);
-    for (size_t i = 0; i < num_args; i++) {
-        els.emplace_back(args[i]->ConstantValue());
+const sem::Constant* ConstEval::MatCtorV(const sem::Type* ty,
+                                         utils::ConstVectorRef<const sem::Expression*> args) {
+    utils::Vector<const sem::Constant*, 4> els;
+    for (auto* arg : args) {
+        els.Push(arg->ConstantValue());
     }
     return CreateComposite(builder, ty, std::move(els));
 }
@@ -631,15 +637,15 @@ const sem::Constant* ConstEval::MemberAccess(const sem::Expression* obj_expr,
 
 const sem::Constant* ConstEval::Swizzle(const sem::Type* ty,
                                         const sem::Expression* vec_expr,
-                                        const std::vector<uint32_t>& indices) {
+                                        utils::ConstVectorRef<uint32_t> indices) {
     auto* vec_val = vec_expr->ConstantValue();
     if (!vec_val) {
         return nullptr;
     }
-    if (indices.size() == 1) {
+    if (indices.Length() == 1) {
         return vec_val->Index(static_cast<size_t>(indices[0]));
     } else {
-        auto values = utils::Transform(
+        auto values = utils::Transform<4>(
             indices, [&](uint32_t i) { return vec_val->Index(static_cast<size_t>(i)); });
         return CreateComposite(builder, ty, std::move(values));
     }
@@ -651,8 +657,7 @@ const sem::Constant* ConstEval::Bitcast(const sem::Type*, const sem::Expression*
 }
 
 const sem::Constant* ConstEval::OpComplement(const sem::Type*,
-                                             sem::Expression const* const* args,
-                                             size_t) {
+                                             utils::ConstVectorRef<const sem::Expression*> args) {
     return TransformElements(builder, args[0]->ConstantValue(), [&](const sem::Constant* c) {
         return Dispatch_ia_iu32(c, [&](auto i) {  //
             return CreateElement(builder, c->Type(), decltype(i)(~i.value));
@@ -661,8 +666,7 @@ const sem::Constant* ConstEval::OpComplement(const sem::Type*,
 }
 
 const sem::Constant* ConstEval::OpMinus(const sem::Type*,
-                                        sem::Expression const* const* args,
-                                        size_t) {
+                                        utils::ConstVectorRef<const sem::Expression*> args) {
     return TransformElements(builder, args[0]->ConstantValue(), [&](const sem::Constant* c) {
         return Dispatch_fia_fi32_f16(c, [&](auto i) {  //
             // For signed integrals, avoid C++ UB by not negating the smallest negative number. In

@@ -509,7 +509,7 @@ struct CanonicalizeEntryPointIO::State {
         }
 
         // Exit early if there is no shader IO to handle.
-        if (func_sem->Parameters().size() == 0 && func_sem->ReturnType()->Is<sem::Void>() &&
+        if (func_sem->Parameters().Length() == 0 && func_sem->ReturnType()->Is<sem::Void>() &&
             !needs_fixed_sample_mask && !needs_vertex_point_size &&
             cfg.shader_style != ShaderStyle::kGlsl) {
             return;
@@ -517,7 +517,7 @@ struct CanonicalizeEntryPointIO::State {
 
         // Process the entry point parameters, collecting those that need to be
         // aggregated into a single structure.
-        if (!func_sem->Parameters().empty()) {
+        if (!func_sem->Parameters().IsEmpty()) {
             for (auto* param : func_sem->Parameters()) {
                 if (param->Type()->Is<sem::Struct>()) {
                     ProcessStructParameter(param);

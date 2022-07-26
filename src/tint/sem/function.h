@@ -22,6 +22,7 @@
 #include "src/tint/ast/variable.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/utils/unique_vector.h"
+#include "src/tint/utils/vector.h"
 
 // Forward declarations
 namespace tint::ast {
@@ -62,7 +63,7 @@ class Function final : public Castable<Function, CallTarget> {
     /// @param parameters the parameters to the function
     Function(const ast::Function* declaration,
              Type* return_type,
-             std::vector<Parameter*> parameters);
+             utils::VectorRef<Parameter*> parameters);
 
     /// Destructor
     ~Function() override;

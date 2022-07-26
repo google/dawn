@@ -222,9 +222,6 @@ class Parameter final : public Castable<Parameter, Variable> {
     const sem::Node* shadows_ = nullptr;
 };
 
-/// ParameterList is a list of Parameter
-using ParameterList = std::vector<const Parameter*>;
-
 /// VariableUser holds the semantic information for an identifier expression
 /// node that resolves to a variable.
 class VariableUser final : public Castable<VariableUser, Expression> {

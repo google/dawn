@@ -1120,13 +1120,13 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
 
     // If the type constructor is empty then we need to construct with the zero
     // value for all components.
-    if (call->Arguments().empty()) {
+    if (call->Arguments().IsEmpty()) {
         return EmitZeroValue(out, type);
     }
 
     // Single parameter matrix initializers must be identity constructor.
     // It could also be conversions between f16 and f32 matrix when f16 is properly supported.
-    if (type->Is<sem::Matrix>() && call->Arguments().size() == 1) {
+    if (type->Is<sem::Matrix>() && call->Arguments().Length() == 1) {
         if (!ctor->Parameters()[0]->Type()->UnwrapRef()->is_float_matrix()) {
             TINT_UNREACHABLE(Writer, diagnostics_)
                 << "found a single-parameter matrix constructor that is not identity constructor";
@@ -1139,7 +1139,7 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
     // For single-value vector initializers, swizzle the scalar to the right
     // vector dimension using .x
     const bool is_single_value_vector_init = type->is_scalar_vector() &&
-                                             call->Arguments().size() == 1 &&
+                                             call->Arguments().Length() == 1 &&
                                              ctor->Parameters()[0]->Type()->is_scalar();
 
     if (brackets) {

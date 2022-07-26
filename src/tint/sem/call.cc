@@ -24,7 +24,7 @@ namespace tint::sem {
 Call::Call(const ast::CallExpression* declaration,
            const CallTarget* target,
            EvaluationStage stage,
-           std::vector<const sem::Expression*> arguments,
+           utils::VectorRef<const sem::Expression*> arguments,
            const Statement* statement,
            const Constant* constant,
            bool has_side_effects)

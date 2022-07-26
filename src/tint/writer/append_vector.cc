@@ -112,23 +112,23 @@ const sem::Call* AppendVector(ProgramBuilder* b,
     // to convert a vector of a different type, e.g. vec2<i32>(vec2<u32>()).
     // In that case, preserve the original argument, or you'll get a type error.
 
-    std::vector<const sem::Expression*> packed;
+    utils::Vector<const sem::Expression*, 4> packed;
     if (auto vc = AsVectorConstructor(vector_sem)) {
-        const auto num_supplied = vc.call->Arguments().size();
+        const auto num_supplied = vc.call->Arguments().Length();
         if (num_supplied == 0) {
             // Zero-value vector constructor. Populate with zeros
             for (uint32_t i = 0; i < packed_size - 1; i++) {
                 auto* zero = Zero(*b, packed_el_sem_ty, statement);
-                packed.emplace_back(zero);
+                packed.Push(zero);
             }
         } else if (num_supplied + 1 == packed_size) {
             // All vector components were supplied as scalars.  Pass them through.
             packed = vc.call->Arguments();
         }
     }
-    if (packed.empty()) {
+    if (packed.IsEmpty()) {
         // The special cases didn't occur. Use the vector argument as-is.
-        packed.emplace_back(vector_sem);
+        packed.Push(vector_sem);
     }
 
     if (packed_el_sem_ty != scalar_sem->Type()->UnwrapRef()) {
@@ -141,17 +141,18 @@ const sem::Call* AppendVector(ProgramBuilder* b,
             sem::EvaluationStage::kRuntime);
         auto* scalar_cast_sem = b->create<sem::Call>(
             scalar_cast_ast, scalar_cast_target, sem::EvaluationStage::kRuntime,
-            std::vector<const sem::Expression*>{scalar_sem}, statement,
+            utils::Vector<const sem::Expression*, 1>{scalar_sem}, statement,
             /* constant_value */ nullptr, /* has_side_effects */ false);
         b->Sem().Add(scalar_cast_ast, scalar_cast_sem);
-        packed.emplace_back(scalar_cast_sem);
+        packed.Push(scalar_cast_sem);
     } else {
-        packed.emplace_back(scalar_sem);
+        packed.Push(scalar_sem);
     }
 
     auto* constructor_ast = b->Construct(
-        packed_ast_ty,
-        utils::Transform(packed, [&](const sem::Expression* expr) { return expr->Declaration(); }));
+        packed_ast_ty, utils::ToStdVector(utils::Transform(packed, [&](const sem::Expression* expr) {
+            return expr->Declaration();
+        })));
     auto* constructor_target = b->create<sem::TypeConstructor>(
         packed_sem_ty,
         utils::Transform(packed,
@@ -163,7 +164,8 @@ const sem::Call* AppendVector(ProgramBuilder* b,
         sem::EvaluationStage::kRuntime);
     auto* constructor_sem =
         b->create<sem::Call>(constructor_ast, constructor_target, sem::EvaluationStage::kRuntime,
-                             packed, statement, /* constant_value */ nullptr,
+                             std::move(packed), statement,
+                             /* constant_value */ nullptr,
                              /* has_side_effects */ false);
     b->Sem().Add(constructor_ast, constructor_sem);
     return constructor_sem;

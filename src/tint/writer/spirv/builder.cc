@@ -1023,7 +1023,7 @@ bool Builder::GenerateMemberAccessor(const ast::MemberAccessorExpression* expr,
     if (auto* swizzle = expr_sem->As<sem::Swizzle>()) {
         // Single element swizzle is either an access chain or a composite extract
         auto& indices = swizzle->Indices();
-        if (indices.size() == 1) {
+        if (indices.Length() == 1) {
             if (info->source_type->Is<sem::Reference>()) {
                 auto idx_id = GenerateConstantIfNeeded(ScalarConstant::U32(indices[0]));
                 if (idx_id == 0) {
@@ -1338,7 +1338,7 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(const sem::Call* call,
     auto* result_type = call->Type();
 
     // Generate the zero initializer if there are no values provided.
-    if (args.empty()) {
+    if (args.IsEmpty()) {
         if (global_var && global_var->Declaration()->Is<ast::Override>()) {
             auto constant_id = global_var->ConstantId();
             if (result_type->Is<sem::I32>()) {
@@ -1491,7 +1491,7 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(const sem::Call* call,
 
     // For a single-value vector initializer, splat the initializer value.
     auto* const init_result_type = call->Type()->UnwrapRef();
-    if (args.size() == 1 && init_result_type->is_scalar_vector() &&
+    if (args.Length() == 1 && init_result_type->is_scalar_vector() &&
         args[0]->Type()->UnwrapRef()->is_scalar()) {
         size_t vec_size = init_result_type->As<sem::Vector>()->Width();
         for (size_t i = 0; i < (vec_size - 1); ++i) {
@@ -2667,7 +2667,7 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
         return 0;
     }
 
-    for (size_t i = 0; i < call->Arguments().size(); i++) {
+    for (size_t i = 0; i < call->Arguments().Length(); i++) {
         if (auto val_id = get_arg_as_value_id(i)) {
             params.emplace_back(Operand(val_id));
         } else {
@@ -3172,8 +3172,8 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
     }
 
     uint32_t value_id = 0;
-    if (call->Arguments().size() > 1) {
-        value_id = GenerateExpressionWithLoadIfNeeded(call->Arguments().back());
+    if (call->Arguments().Length() > 1) {
+        value_id = GenerateExpressionWithLoadIfNeeded(call->Arguments().Back());
         if (value_id == 0) {
             return false;
         }

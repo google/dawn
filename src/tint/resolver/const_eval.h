@@ -17,9 +17,9 @@
 
 #include <stddef.h>
 #include <string>
-#include <vector>
 
 #include "src/tint/utils/result.h"
+#include "src/tint/utils/vector.h"
 
 // Forward declarations
 namespace tint {
@@ -44,14 +44,9 @@ namespace tint::resolver {
 /// before calling a method to evaluate an expression's value.
 class ConstEval {
   public:
-    /// Typedef for a pointer to an array of `const sem::Expression*`, where each expression is an
-    /// argument to the function.
-    using ArgumentList = sem::Expression const* const*;
-
     /// Typedef for a constant evaluation function
-    using Function = const sem::Constant* (ConstEval::*)(const sem::Type* result_ty,
-                                                         ArgumentList args,
-                                                         size_t num_args);
+    using Function = const sem::Constant* (
+        ConstEval::*)(const sem::Type* result_ty, utils::ConstVectorRef<const sem::Expression*>);
 
     /// The result type of a method that may raise a diagnostic error and the caller should abort
     /// resolving. Can be one of three distinct values:
@@ -76,7 +71,7 @@ class ConstEval {
     /// @param args the input arguments
     /// @return the constructed value, or null if the value cannot be calculated
     const sem::Constant* ArrayOrStructCtor(const sem::Type* ty,
-                                           const std::vector<const sem::Expression*>& args);
+                                           utils::ConstVectorRef<const sem::Expression*> args);
 
     /// @param ty the target type
     /// @param expr the input expression
@@ -105,7 +100,7 @@ class ConstEval {
     /// @return the result of the swizzle, or null if the value cannot be calculated
     const sem::Constant* Swizzle(const sem::Type* ty,
                                  const sem::Expression* vector,
-                                 const std::vector<uint32_t>& indices);
+                                 utils::ConstVectorRef<uint32_t> indices);
 
     /// Convert the `value` to `target_type`
     /// @param ty the result type
@@ -121,58 +116,58 @@ class ConstEval {
     /// Type conversion
     /// @param ty the result type
     /// @param args the input arguments
-    /// @param num_args the number of input arguments
     /// @return the converted value, or null if the value cannot be calculated
-    const sem::Constant* Conv(const sem::Type* ty, ArgumentList args, size_t num_args);
+    const sem::Constant* Conv(const sem::Type* ty,
+                              utils::ConstVectorRef<const sem::Expression*> args);
 
     /// Zero value type constructor
     /// @param ty the result type
     /// @param args the input arguments (no arguments provided)
-    /// @param num_args the number of input arguments (no arguments provided)
     /// @return the constructed value, or null if the value cannot be calculated
-    const sem::Constant* Zero(const sem::Type* ty, ArgumentList args, size_t num_args);
+    const sem::Constant* Zero(const sem::Type* ty,
+                              utils::ConstVectorRef<const sem::Expression*> args);
 
     /// Identity value type constructor
     /// @param ty the result type
     /// @param args the input arguments
-    /// @param num_args the number of input arguments (must be 1)
     /// @return the constructed value, or null if the value cannot be calculated
-    const sem::Constant* Identity(const sem::Type* ty, ArgumentList args, size_t num_args);
+    const sem::Constant* Identity(const sem::Type* ty,
+                                  utils::ConstVectorRef<const sem::Expression*> args);
 
     /// Vector splat constructor
     /// @param ty the vector type
     /// @param args the input arguments
-    /// @param num_args the number of input arguments (must be 1)
     /// @return the constructed value, or null if the value cannot be calculated
-    const sem::Constant* VecSplat(const sem::Type* ty, ArgumentList args, size_t num_args);
+    const sem::Constant* VecSplat(const sem::Type* ty,
+                                  utils::ConstVectorRef<const sem::Expression*> args);
 
     /// Vector constructor using scalars
     /// @param ty the vector type
     /// @param args the input arguments
-    /// @param num_args the number of input arguments (must be equal to vector width)
     /// @return the constructed value, or null if the value cannot be calculated
-    const sem::Constant* VecCtorS(const sem::Type* ty, ArgumentList args, size_t num_args);
+    const sem::Constant* VecCtorS(const sem::Type* ty,
+                                  utils::ConstVectorRef<const sem::Expression*> args);
 
     /// Vector constructor using a mix of scalars and smaller vectors
     /// @param ty the vector type
     /// @param args the input arguments
-    /// @param num_args the number of input arguments
     /// @return the constructed value, or null if the value cannot be calculated
-    const sem::Constant* VecCtorM(const sem::Type* ty, ArgumentList args, size_t num_args);
+    const sem::Constant* VecCtorM(const sem::Type* ty,
+                                  utils::ConstVectorRef<const sem::Expression*> args);
 
     /// Matrix constructor using scalar values
     /// @param ty the matrix type
     /// @param args the input arguments
-    /// @param num_args the number of input arguments (must equal num-columns * num-rows)
     /// @return the constructed value, or null if the value cannot be calculated
-    const sem::Constant* MatCtorS(const sem::Type* ty, ArgumentList args, size_t num_args);
+    const sem::Constant* MatCtorS(const sem::Type* ty,
+                                  utils::ConstVectorRef<const sem::Expression*> args);
 
     /// Matrix constructor using column vectors
     /// @param ty the matrix type
     /// @param args the input arguments
-    /// @param num_args the number of input arguments (must equal num-columns)
     /// @return the constructed value, or null if the value cannot be calculated
-    const sem::Constant* MatCtorV(const sem::Type* ty, ArgumentList args, size_t num_args);
+    const sem::Constant* MatCtorV(const sem::Type* ty,
+                                  utils::ConstVectorRef<const sem::Expression*> args);
 
     ////////////////////////////////////////////////////////////////////////////
     // Operators
@@ -181,20 +176,16 @@ class ConstEval {
     /// Complement operator '~'
     /// @param ty the integer type
     /// @param args the input arguments
-    /// @param num_args the number of input arguments (must be 1)
     /// @return the result value, or null if the value cannot be calculated
     const sem::Constant* OpComplement(const sem::Type* ty,
-                                      sem::Expression const* const* args,
-                                      size_t num_args);
+                                      utils::ConstVectorRef<const sem::Expression*> args);
 
     /// Minus operator '-'
     /// @param ty the expression type
     /// @param args the input arguments
-    /// @param num_args the number of input arguments (must be 1)
     /// @return the result value, or null if the value cannot be calculated
     const sem::Constant* OpMinus(const sem::Type* ty,
-                                 sem::Expression const* const* args,
-                                 size_t num_args);
+                                 utils::ConstVectorRef<const sem::Expression*> args);
 
   private:
     /// Adds the given error message to the diagnostics

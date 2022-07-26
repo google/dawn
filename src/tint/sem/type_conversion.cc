@@ -21,7 +21,7 @@ namespace tint::sem {
 TypeConversion::TypeConversion(const sem::Type* type,
                                const sem::Parameter* parameter,
                                EvaluationStage stage)
-    : Base(type, ParameterList{parameter}, stage) {}
+    : Base(type, utils::Vector<const sem::Parameter*, 1>{parameter}, stage) {}
 
 TypeConversion::~TypeConversion() = default;
 

@@ -26,6 +26,7 @@
 #include "src/tint/ast/phony_expression.h"
 #include "src/tint/ast/unary_op_expression.h"
 #include "src/tint/utils/reverse.h"
+#include "src/tint/utils/vector.h"
 
 namespace tint::ast {
 
@@ -67,35 +68,34 @@ bool TraverseExpressions(const ast::Expression* root, diag::List& diags, CALLBAC
         size_t depth;
     };
 
-    std::vector<Pending> to_visit{{root, 0}};
+    utils::Vector<Pending, 64> to_visit{{root, 0}};
 
     auto push_single = [&](const ast::Expression* expr, size_t depth) {
-        to_visit.push_back({expr, depth});
+        to_visit.Push({expr, depth});
     };
     auto push_pair = [&](const ast::Expression* left, const ast::Expression* right, size_t depth) {
         if (ORDER == TraverseOrder::LeftToRight) {
-            to_visit.push_back({right, depth});
-            to_visit.push_back({left, depth});
+            to_visit.Push({right, depth});
+            to_visit.Push({left, depth});
         } else {
-            to_visit.push_back({left, depth});
-            to_visit.push_back({right, depth});
+            to_visit.Push({left, depth});
+            to_visit.Push({right, depth});
         }
     };
     auto push_list = [&](const std::vector<const ast::Expression*>& exprs, size_t depth) {
         if (ORDER == TraverseOrder::LeftToRight) {
             for (auto* expr : utils::Reverse(exprs)) {
-                to_visit.push_back({expr, depth});
+                to_visit.Push({expr, depth});
             }
         } else {
             for (auto* expr : exprs) {
-                to_visit.push_back({expr, depth});
+                to_visit.Push({expr, depth});
             }
         }
     };
 
-    while (!to_visit.empty()) {
-        auto p = to_visit.back();
-        to_visit.pop_back();
+    while (!to_visit.IsEmpty()) {
+        auto p = to_visit.Pop();
         const ast::Expression* expr = p.expr;
 
         if (auto* filtered = expr->template As<EXPR_TYPE>()) {

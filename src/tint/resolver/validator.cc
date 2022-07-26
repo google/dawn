@@ -1739,17 +1739,17 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
         return false;
     }
 
-    if (decl->args.size() != target->Parameters().size()) {
-        bool more = decl->args.size() > target->Parameters().size();
+    if (decl->args.size() != target->Parameters().Length()) {
+        bool more = decl->args.size() > target->Parameters().Length();
         AddError("too " + (more ? std::string("many") : std::string("few")) +
                      " arguments in call to '" + name + "', expected " +
-                     std::to_string(target->Parameters().size()) + ", got " +
-                     std::to_string(call->Arguments().size()),
+                     std::to_string(target->Parameters().Length()) + ", got " +
+                     std::to_string(call->Arguments().Length()),
                  decl->source);
         return false;
     }
 
-    for (size_t i = 0; i < call->Arguments().size(); ++i) {
+    for (size_t i = 0; i < call->Arguments().Length(); ++i) {
         const sem::Variable* param = target->Parameters()[i];
         const ast::Expression* arg_expr = decl->args[i];
         auto* param_type = param->Type();

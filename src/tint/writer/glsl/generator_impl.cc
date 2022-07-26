@@ -861,7 +861,7 @@ bool GeneratorImpl::EmitTypeConstructor(std::ostream& out,
 
     // If the type constructor is empty then we need to construct with the zero
     // value for all components.
-    if (call->Arguments().empty()) {
+    if (call->Arguments().IsEmpty()) {
         return EmitZeroValue(out, type);
     }
 

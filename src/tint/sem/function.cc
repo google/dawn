@@ -21,22 +21,29 @@
 #include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/storage_texture.h"
 #include "src/tint/sem/variable.h"
-#include "src/tint/utils/to_const_ptr_vec.h"
+#include "src/tint/utils/transform.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Function);
 
 namespace tint::sem {
+namespace {
+
+utils::VectorRef<const Parameter*> SetOwner(utils::VectorRef<Parameter*> parameters,
+                                            const tint::sem::CallTarget* owner) {
+    for (auto* parameter : parameters) {
+        parameter->SetOwner(owner);
+    }
+    return parameters;
+}
+
+}  // namespace
 
 Function::Function(const ast::Function* declaration,
                    Type* return_type,
-                   std::vector<Parameter*> parameters)
-    : Base(return_type, utils::ToConstPtrVec(parameters), EvaluationStage::kRuntime),
+                   utils::VectorRef<Parameter*> parameters)
+    : Base(return_type, SetOwner(std::move(parameters), this), EvaluationStage::kRuntime),
       declaration_(declaration),
-      workgroup_size_{WorkgroupDimension{1}, WorkgroupDimension{1}, WorkgroupDimension{1}} {
-    for (auto* parameter : parameters) {
-        parameter->SetOwner(this);
-    }
-}
+      workgroup_size_{WorkgroupDimension{1}, WorkgroupDimension{1}, WorkgroupDimension{1}} {}
 
 Function::~Function() = default;
 

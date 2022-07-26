@@ -21,6 +21,7 @@
 #include "src/tint/sem/sampler.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/utils/hash.h"
+#include "src/tint/utils/vector.h"
 
 // Forward declarations
 namespace tint::sem {
@@ -34,7 +35,7 @@ struct CallTargetSignature {
     /// Constructor
     /// @param ret_ty the call target return type
     /// @param params the call target parameters
-    CallTargetSignature(const sem::Type* ret_ty, const ParameterList& params);
+    CallTargetSignature(const sem::Type* ret_ty, utils::VectorRef<const Parameter*> params);
 
     /// Copy constructor
     CallTargetSignature(const CallTargetSignature&);
@@ -45,7 +46,7 @@ struct CallTargetSignature {
     /// The type of the call target return value
     const sem::Type* const return_type = nullptr;
     /// The parameters of the call target
-    const ParameterList parameters;
+    const utils::Vector<const sem::Parameter*, 8> parameters;
 
     /// Equality operator
     /// @param other the signature to compare this to
@@ -67,7 +68,7 @@ class CallTarget : public Castable<CallTarget, Node> {
     /// @param return_type the return type of the call target
     /// @param parameters the parameters for the call target
     CallTarget(const sem::Type* return_type,
-               const ParameterList& parameters,
+               utils::VectorRef<const Parameter*> parameters,
                EvaluationStage stage);
 
     /// Copy constructor
@@ -80,7 +81,7 @@ class CallTarget : public Castable<CallTarget, Node> {
     const sem::Type* ReturnType() const { return signature_.return_type; }
 
     /// @return the parameters of the call target
-    const ParameterList& Parameters() const { return signature_.parameters; }
+    auto& Parameters() const { return signature_.parameters; }
 
     /// @return the signature of the call target
     const CallTargetSignature& Signature() const { return signature_; }

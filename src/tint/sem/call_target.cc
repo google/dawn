@@ -14,6 +14,8 @@
 
 #include "src/tint/sem/call_target.h"
 
+#include <utility>
+
 #include "src/tint/symbol_table.h"
 #include "src/tint/utils/hash.h"
 
@@ -22,22 +24,23 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::CallTarget);
 namespace tint::sem {
 
 CallTarget::CallTarget(const sem::Type* return_type,
-                       const ParameterList& parameters,
+                       utils::VectorRef<const Parameter*> parameters,
                        EvaluationStage stage)
-    : signature_{return_type, parameters}, stage_(stage) {
+    : signature_{return_type, std::move(parameters)}, stage_(stage) {
     TINT_ASSERT(Semantic, return_type);
 }
 
 CallTarget::CallTarget(const CallTarget&) = default;
 CallTarget::~CallTarget() = default;
 
-CallTargetSignature::CallTargetSignature(const sem::Type* ret_ty, const ParameterList& params)
-    : return_type(ret_ty), parameters(params) {}
+CallTargetSignature::CallTargetSignature(const sem::Type* ret_ty,
+                                         utils::VectorRef<const Parameter*> params)
+    : return_type(ret_ty), parameters(std::move(params)) {}
 CallTargetSignature::CallTargetSignature(const CallTargetSignature&) = default;
 CallTargetSignature::~CallTargetSignature() = default;
 
 int CallTargetSignature::IndexOf(ParameterUsage usage) const {
-    for (size_t i = 0; i < parameters.size(); i++) {
+    for (size_t i = 0; i < parameters.Length(); i++) {
         if (parameters[i]->Usage() == usage) {
             return static_cast<int>(i);
         }
@@ -46,10 +49,10 @@ int CallTargetSignature::IndexOf(ParameterUsage usage) const {
 }
 
 bool CallTargetSignature::operator==(const CallTargetSignature& other) const {
-    if (return_type != other.return_type || parameters.size() != other.parameters.size()) {
+    if (return_type != other.return_type || parameters.Length() != other.parameters.Length()) {
         return false;
     }
-    for (size_t i = 0; i < parameters.size(); i++) {
+    for (size_t i = 0; i < parameters.Length(); i++) {
         auto* a = parameters[i];
         auto* b = other.parameters[i];
         if (a->Type() != b->Type() || a->Usage() != b->Usage()) {
@@ -65,7 +68,7 @@ namespace std {
 
 std::size_t hash<tint::sem::CallTargetSignature>::operator()(
     const tint::sem::CallTargetSignature& sig) const {
-    size_t hash = tint::utils::Hash(sig.parameters.size());
+    size_t hash = tint::utils::Hash(sig.parameters.Length());
     for (auto* p : sig.parameters) {
         tint::utils::HashCombine(&hash, p->Type(), p->Usage());
     }

@@ -187,7 +187,7 @@ struct MultiplanarExternalTexture::State {
             auto* call = sem.Get(expr)->UnwrapMaterialize()->As<sem::Call>();
             auto* builtin = call->Target()->As<sem::Builtin>();
 
-            if (builtin && !builtin->Parameters().empty() &&
+            if (builtin && !builtin->Parameters().IsEmpty() &&
                 builtin->Parameters()[0]->Type()->Is<sem::ExternalTexture>() &&
                 builtin->Type() != sem::BuiltinType::kTextureDimensions) {
                 if (auto* var_user = sem.Get<sem::VariableUser>(expr->args[0])) {

@@ -16,6 +16,7 @@
 #define SRC_TINT_SEM_TYPE_CONSTRUCTOR_H_
 
 #include "src/tint/sem/call_target.h"
+#include "src/tint/utils/vector.h"
 
 namespace tint::sem {
 
@@ -26,7 +27,9 @@ class TypeConstructor final : public Castable<TypeConstructor, CallTarget> {
     /// @param type the type that's being constructed
     /// @param parameters the type constructor parameters
     /// @param stage the earliest evaluation stage for the expression
-    TypeConstructor(const sem::Type* type, const ParameterList& parameters, EvaluationStage stage);
+    TypeConstructor(const sem::Type* type,
+                    utils::VectorRef<const Parameter*> parameters,
+                    EvaluationStage stage);
 
     /// Destructor
     ~TypeConstructor() override;

@@ -635,7 +635,7 @@ struct DecomposeMemoryAccess::State {
             };
 
             // Other parameters are copied as-is:
-            for (size_t i = 1; i < intrinsic->Parameters().size(); i++) {
+            for (size_t i = 1; i < intrinsic->Parameters().Length(); i++) {
                 auto* param = intrinsic->Parameters()[i];
                 auto* ty = CreateASTTypeFor(ctx, param->Type());
                 params.emplace_back(b.Param("param_" + std::to_string(i), ty));
@@ -834,7 +834,7 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) con
             // X.Y
             auto* accessor_sem = sem.Get(accessor);
             if (auto* swizzle = accessor_sem->As<sem::Swizzle>()) {
-                if (swizzle->Indices().size() == 1) {
+                if (swizzle->Indices().Length() == 1) {
                     if (auto access = state.TakeAccess(accessor->structure)) {
                         auto* vec_ty = access.type->As<sem::Vector>();
                         auto* offset = state.Mul(vec_ty->type()->Size(), swizzle->Indices()[0u]);

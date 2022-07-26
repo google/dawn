@@ -36,7 +36,7 @@ bool VectorizeScalarMatrixConstructors::ShouldRun(const Program* program, const 
         if (auto* call = program->Sem().Get<sem::Call>(node)) {
             if (call->Target()->Is<sem::TypeConstructor>() && call->Type()->Is<sem::Matrix>()) {
                 auto& args = call->Arguments();
-                if (args.size() > 0 && args[0]->Type()->UnwrapRef()->is_scalar()) {
+                if (!args.IsEmpty() && args[0]->Type()->UnwrapRef()->is_scalar()) {
                     return true;
                 }
             }
@@ -61,7 +61,7 @@ void VectorizeScalarMatrixConstructors::Run(CloneContext& ctx, const DataMap&, D
         }
 
         auto& args = call->Arguments();
-        if (args.size() == 0) {
+        if (args.IsEmpty()) {
             return nullptr;
         }
         if (!args[0]->Type()->UnwrapRef()->is_scalar()) {
@@ -85,7 +85,7 @@ void VectorizeScalarMatrixConstructors::Run(CloneContext& ctx, const DataMap&, D
             return ctx.dst->Construct(CreateASTTypeFor(ctx, mat_type), columns);
         };
 
-        if (args.size() == 1) {
+        if (args.Length() == 1) {
             // Generate a helper function for constructing the matrix.
             // This is done to ensure that the single argument value is only evaluated once, and
             // with the correct expression evaluation order.
@@ -109,7 +109,7 @@ void VectorizeScalarMatrixConstructors::Run(CloneContext& ctx, const DataMap&, D
             return ctx.dst->Call(fn, ctx.Clone(args[0]->Declaration()));
         }
 
-        if (args.size() == mat_type->columns() * mat_type->rows()) {
+        if (args.Length() == mat_type->columns() * mat_type->rows()) {
             return build_mat([&](uint32_t c, uint32_t r) {
                 return ctx.Clone(args[c * mat_type->rows() + r]->Declaration());
             });

@@ -2304,7 +2304,7 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
         // For multi-element swizzles, we need to cast to a regular vector type
         // first. Note that we do not currently allow assignments to swizzles, so
         // the casting which will convert the l-value to r-value is fine.
-        if (swizzle->Indices().size() == 1) {
+        if (swizzle->Indices().Length() == 1) {
             if (!write_lhs()) {
                 return false;
             }

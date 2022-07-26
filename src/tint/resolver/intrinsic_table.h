@@ -17,13 +17,13 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/ast/unary_op.h"
 #include "src/tint/resolver/const_eval.h"
 #include "src/tint/resolver/ctor_conv_intrinsic.h"
 #include "src/tint/sem/builtin.h"
+#include "src/tint/utils/vector.h"
 
 // Forward declarations
 namespace tint {
@@ -87,7 +87,7 @@ class IntrinsicTable {
     /// @param source the source of the builtin call
     /// @return the semantic builtin if found, otherwise nullptr
     virtual Builtin Lookup(sem::BuiltinType type,
-                           const std::vector<const sem::Type*>& args,
+                           utils::VectorRef<const sem::Type*> args,
                            const Source& source) = 0;
 
     /// Lookup looks for the unary op overload with the given signature, raising an error
@@ -123,7 +123,7 @@ class IntrinsicTable {
     /// @return a sem::TypeConstructor, sem::TypeConversion or nullptr if nothing matched
     virtual CtorOrConv Lookup(CtorConvIntrinsic type,
                               const sem::Type* template_arg,
-                              const std::vector<const sem::Type*>& args,
+                              utils::VectorRef<const sem::Type*> args,
                               const Source& source) = 0;
 };
 
