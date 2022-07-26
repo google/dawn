@@ -153,17 +153,38 @@ match iu32: i32 | u32
 ////////////////////////////////////////////////////////////////////////////////
 
 // https://gpuweb.github.io/gpuweb/wgsl/#texel-formats
-match f32_texel_format:
-  rgba8unorm | rgba8snorm | rgba16float | r32float | rg32float | rgba32float
-match i32_texel_format:
-  rgba8sint | rgba16sint | r32sint | rg32sint | rgba32sint
-match u32_texel_format:
-  rgba8uint | rgba16uint | r32uint | rg32uint | rgba32uint
+match f32_texel_format
+  : texel_format.rgba8unorm
+  | texel_format.rgba8snorm
+  | texel_format.rgba16float
+  | texel_format.r32float
+  | texel_format.rg32float
+  | texel_format.rgba32float
+match i32_texel_format
+  : texel_format.rgba8sint
+  | texel_format.rgba16sint
+  | texel_format.r32sint
+  | texel_format.rg32sint
+  | texel_format.rgba32sint
+match u32_texel_format
+  : texel_format.rgba8uint
+  | texel_format.rgba16uint
+  | texel_format.r32uint
+  | texel_format.rg32uint
+  | texel_format.rgba32uint
 
-match write_only: write
+match write: access.write
+match read_write: access.read_write
 
-match function_private_workgroup: function | private | workgroup
-match workgroup_or_storage: workgroup | storage
+match function_private_workgroup
+  : storage_class.function
+  | storage_class.private
+  | storage_class.workgroup
+match workgroup_or_storage
+  : storage_class.workgroup
+  | storage_class.storage
+match storage
+  : storage_class.storage
 
 ////////////////////////////////////////////////////////////////////////////////
 // Builtin Functions                                                          //
@@ -502,10 +523,10 @@ fn textureDimensions(texture: texture_depth_cube, level: i32) -> vec2<i32>
 fn textureDimensions(texture: texture_depth_cube_array) -> vec2<i32>
 fn textureDimensions(texture: texture_depth_cube_array, level: i32) -> vec2<i32>
 fn textureDimensions(texture: texture_depth_multisampled_2d) -> vec2<i32>
-fn textureDimensions<F: texel_format, A: write_only>(texture: texture_storage_1d<F, A>) -> i32
-fn textureDimensions<F: texel_format, A: write_only>(texture: texture_storage_2d<F, A>) -> vec2<i32>
-fn textureDimensions<F: texel_format, A: write_only>(texture: texture_storage_2d_array<F, A>) -> vec2<i32>
-fn textureDimensions<F: texel_format, A: write_only>(texture: texture_storage_3d<F, A>) -> vec3<i32>
+fn textureDimensions<F: texel_format, A: write>(texture: texture_storage_1d<F, A>) -> i32
+fn textureDimensions<F: texel_format, A: write>(texture: texture_storage_2d<F, A>) -> vec2<i32>
+fn textureDimensions<F: texel_format, A: write>(texture: texture_storage_2d_array<F, A>) -> vec2<i32>
+fn textureDimensions<F: texel_format, A: write>(texture: texture_storage_3d<F, A>) -> vec3<i32>
 fn textureDimensions(texture: texture_external) -> vec2<i32>
 fn textureGather<T: fiu32>(@const component: i32, texture: texture_2d<T>, sampler: sampler, coords: vec2<f32>) -> vec4<T>
 fn textureGather<T: fiu32>(@const component: i32, texture: texture_2d<T>, sampler: sampler, coords: vec2<f32>, @const offset: vec2<i32>) -> vec4<T>
@@ -529,7 +550,7 @@ fn textureNumLayers<T: fiu32>(texture: texture_2d_array<T>) -> i32
 fn textureNumLayers<T: fiu32>(texture: texture_cube_array<T>) -> i32
 fn textureNumLayers(texture: texture_depth_2d_array) -> i32
 fn textureNumLayers(texture: texture_depth_cube_array) -> i32
-fn textureNumLayers<F: texel_format, A: write_only>(texture: texture_storage_2d_array<F, A>) -> i32
+fn textureNumLayers<F: texel_format, A: write>(texture: texture_storage_2d_array<F, A>) -> i32
 fn textureNumLevels<T: fiu32>(texture: texture_1d<T>) -> i32
 fn textureNumLevels<T: fiu32>(texture: texture_2d<T>) -> i32
 fn textureNumLevels<T: fiu32>(texture: texture_2d_array<T>) -> i32

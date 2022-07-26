@@ -109,10 +109,19 @@ func (p *parser) matcherDecl() ast.MatcherDecl {
 	name := p.expect(tok.Identifier, "matcher name")
 	m := ast.MatcherDecl{Source: name.Source, Name: string(name.Runes)}
 	p.expect(tok.Colon, "matcher declaration")
-	for p.err == nil {
-		m.Options = append(m.Options, p.templatedName())
-		if p.match(tok.Or) == nil {
-			break
+	if p.peekIs(1, tok.Dot) { // enum list
+		for p.err == nil {
+			m.Options.Enums = append(m.Options.Enums, p.memberName())
+			if p.match(tok.Or) == nil {
+				break
+			}
+		}
+	} else { // type list
+		for p.err == nil {
+			m.Options.Types = append(m.Options.Types, p.templatedName())
+			if p.match(tok.Or) == nil {
+				break
+			}
 		}
 	}
 	return m
@@ -275,6 +284,17 @@ func (p *parser) parameter() ast.Parameter {
 func (p *parser) string() string {
 	s := p.expect(tok.String, "string")
 	return string(s.Runes)
+}
+
+func (p *parser) memberName() ast.MemberName {
+	owner := p.expect(tok.Identifier, "member name")
+	p.expect(tok.Dot, "member name")
+	member := p.expect(tok.Identifier, "member name")
+	return ast.MemberName{
+		Source: member.Source,
+		Owner:  string(owner.Runes),
+		Member: string(member.Runes),
+	}
 }
 
 func (p *parser) templatedName() ast.TemplatedName {

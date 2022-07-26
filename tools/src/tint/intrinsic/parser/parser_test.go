@@ -129,7 +129,9 @@ func TestParser(t *testing.T) {
 				Matchers: []ast.MatcherDecl{{
 					Name: "M",
 					Options: ast.MatcherOptions{
-						ast.TemplatedName{Name: "A"},
+						Types: ast.TemplatedNames{
+							{Name: "A"},
+						},
 					},
 				}},
 			},
@@ -140,8 +142,37 @@ func TestParser(t *testing.T) {
 				Matchers: []ast.MatcherDecl{{
 					Name: "M",
 					Options: ast.MatcherOptions{
-						ast.TemplatedName{Name: "A"},
-						ast.TemplatedName{Name: "B"},
+						Types: ast.TemplatedNames{
+							{Name: "A"},
+							{Name: "B"},
+						},
+					},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"match M : A.B",
+			ast.AST{
+				Matchers: []ast.MatcherDecl{{
+					Name: "M",
+					Options: ast.MatcherOptions{
+						Enums: ast.MemberNames{
+							{Owner: "A", Member: "B"},
+						},
+					},
+				}},
+			},
+		}, { ///////////////////////////////////////////////////////////////////
+			utils.ThisLine(),
+			"match M : A.B | B.C",
+			ast.AST{
+				Matchers: []ast.MatcherDecl{{
+					Name: "M",
+					Options: ast.MatcherOptions{
+						Enums: ast.MemberNames{
+							{Owner: "A", Member: "B"},
+							{Owner: "B", Member: "C"},
+						},
 					},
 				}},
 			},

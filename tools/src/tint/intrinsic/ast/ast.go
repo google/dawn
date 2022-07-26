@@ -195,12 +195,21 @@ func (p Parameter) Format(w fmt.State, verb rune) {
 	p.Type.Format(w, verb)
 }
 
-// MatcherOptions is a list of TemplatedName
-type MatcherOptions TemplatedNames
+// MatcherOptions is a list of TemplatedNames or MemberNames
+type MatcherOptions struct {
+	Types TemplatedNames
+	Enums MemberNames
+}
 
 // Format implements the fmt.Formatter interface
 func (o MatcherOptions) Format(w fmt.State, verb rune) {
-	for i, mo := range o {
+	for i, mo := range o.Types {
+		if i > 0 {
+			fmt.Fprintf(w, " | ")
+		}
+		mo.Format(w, verb)
+	}
+	for i, mo := range o.Enums {
 		if i > 0 {
 			fmt.Fprintf(w, " | ")
 		}
@@ -240,6 +249,33 @@ func (t TemplatedName) Format(w fmt.State, verb rune) {
 		t.TemplateArgs.Format(w, verb)
 		fmt.Fprintf(w, ">")
 	}
+}
+
+// MemberNames is a list of MemberName
+// Example:
+//   a.b, c.d
+type MemberNames []MemberName
+
+// Format implements the fmt.Formatter interface
+func (l MemberNames) Format(w fmt.State, verb rune) {
+	for i, n := range l {
+		if i > 0 {
+			fmt.Fprintf(w, ", ")
+		}
+		n.Format(w, verb)
+	}
+}
+
+// MemberName is two identifiers separated by a dot (Owner.Member)
+type MemberName struct {
+	Source tok.Source
+	Owner  string
+	Member string
+}
+
+// Format implements the fmt.Formatter interface
+func (t MemberName) Format(w fmt.State, verb rune) {
+	fmt.Fprintf(w, "%v.%v", t.Owner, t.Member)
 }
 
 // TypeDecl describes a type declaration

@@ -91,6 +91,7 @@ func (l *lexer) lex() error {
 				l.skip(l.count(toFirst('\n')))
 				l.next() // Consume newline
 			case l.match("/", tok.Divide):
+			case l.match(".", tok.Dot):
 			case l.match("->", tok.Arrow):
 			case l.match("-", tok.Minus):
 			case l.match("fn", tok.Function):

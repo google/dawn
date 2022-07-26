@@ -43,6 +43,7 @@ const (
 	Comma        Kind = ","
 	Complement   Kind = "~"
 	Divide       Kind = "/"
+	Dot          Kind = "."
 	Equal        Kind = "=="
 	Ge           Kind = ">="
 	Gt           Kind = ">"

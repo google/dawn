@@ -54,7 +54,7 @@ match y: x`,
 		}, {
 			`
 enum e {a b c}
-match y: c | a | b`,
+match y: e.c | e.a | e.b`,
 			success,
 		}, {
 			`fn f()`,
@@ -94,26 +94,35 @@ fn f(P<m>)`,
 		}, {
 			`
 enum e { a }
-fn f(a)`,
+match m: e.a
+fn f(m)`,
 			success,
 		}, {
 			`
 enum e { a b }
 type T<E: e>
-match m: a
+match m: e.a
 fn f<E: m>(T<E>)`,
 			success,
 		}, {
 			`
 enum e { a b }
 type T<E: e>
-match m: a
+match m: e.a
 fn f(T<m>)`,
 			success,
 		}, {
 			`
 enum e { a }
 type T<E: e>
+match m : e.a
+fn f(T<m>)`,
+			success,
+		}, {
+			`
+enum e { a }
+type T<E: e>
+match a : e.a
 fn f(T<a>)`,
 			success,
 		}, {
@@ -132,7 +141,7 @@ fn f<E: e>()`,
 		}, {
 			`
 enum e { a b }
-match m: a | b
+match m: e.a | e.b
 fn f<E: m>()`,
 			success,
 		}, {
@@ -178,8 +187,7 @@ conv f32(T<f32>)`,
 		}, {
 			`enum E {A A}`,
 			`
-file.txt:1:6 'A' already declared
-First declared here: file.txt:1:6
+file.txt:1:11 duplicate enum entry 'A'
 `,
 		},
 		{
@@ -230,14 +238,6 @@ file.txt:2:14 cannot resolve 'b'
 		}, {
 			`
 type a
-enum e { b }
-match x: a | b`,
-			`
-file.txt:3:14 'b' resolves to enum entry 'e.b' but type is expected
-`,
-		}, {
-			`
-type a
 type b
 match x: a | b | a`,
 			`
@@ -247,15 +247,15 @@ First declared here: file.txt:3:10
 		}, {
 			`
 enum e { a c }
-match x: a | b | c`,
+match x: e.a | e.b | e.c`,
 			`
-file.txt:2:14 enum 'e' does not contain 'b'
+file.txt:2:18 enum 'e' does not contain 'b'
 `,
 		}, {
 			`
 enum e { a }
-match x: a
-match x: a`,
+match x: e.a
+match x: e.a`,
 			`
 file.txt:3:7 'x' already declared
 First declared here: file.txt:2:7
@@ -266,7 +266,7 @@ type t
 match x: t
 match y: x`,
 			`
-'y' cannot be used for matcher
+file.txt:3:10 'x' resolves to type matcher 'x' but type is expected
 `,
 		}, {
 			`fn f(u)`,
@@ -300,12 +300,6 @@ fn f(A<B>)`,
 			`file.txt:3:8 cannot use type 'B' as template number`,
 		}, {
 			`
-type A<N>
-enum E { b }
-fn f(A<b>)`,
-			`file.txt:3:8 cannot use enum entry 'E.b' as template type`,
-		}, {
-			`
 type T
 type P<N: num>
 match m: T
@@ -321,14 +315,14 @@ fn f(P<E>)`,
 			`
 type P<N: num>
 enum E { a b }
-match m: a | b
+match m: E.a | E.b
 fn f(P<m>)`,
 			`file.txt:4:8 cannot use enum matcher 'm' as template number`,
 		}, {
 			`
 type P<N: num>
 enum E { a b }
-match m: a | b
+match m: E.a | E.b
 fn f<M: m>(P<M>)`,
 			`file.txt:4:14 cannot use template enum 'E' as template number`,
 		}, {
@@ -366,8 +360,9 @@ op << (A<B>)`,
 			`
 type A<N>
 enum E { b }
-op << (A<b>)`,
-			`file.txt:3:10 cannot use enum entry 'E.b' as template type`,
+match M: E.b
+op << (A<M>)`,
+			`file.txt:4:10 cannot use enum matcher 'M' as template type`,
 		}, {
 			`
 type T
@@ -385,14 +380,14 @@ op << (P<E>)`,
 			`
 type P<N: num>
 enum E { a b }
-match m: a | b
+match m: E.a | E.b
 op << (P<m>)`,
 			`file.txt:4:10 cannot use enum matcher 'm' as template number`,
 		}, {
 			`
 type P<N: num>
 enum E { a b }
-match m: a | b
+match m: E.a | E.b
 op << <M: m>(P<M>)`,
 			`file.txt:4:16 cannot use template enum 'E' as template number`,
 		}, {
@@ -421,8 +416,9 @@ ctor F(A<B>)`,
 			`
 type A<N>
 enum E { b }
-ctor F(A<b>)`,
-			`file.txt:3:10 cannot use enum entry 'E.b' as template type`,
+match M: E.b
+ctor F(A<M>)`,
+			`file.txt:4:10 cannot use enum matcher 'M' as template type`,
 		}, {
 			`
 type T
@@ -440,14 +436,14 @@ ctor F(P<E>)`,
 			`
 type P<N: num>
 enum E { a b }
-match m: a | b
+match m: E.a | E.b
 ctor F(P<m>)`,
 			`file.txt:4:10 cannot use enum matcher 'm' as template number`,
 		}, {
 			`
 type P<N: num>
 enum E { a b }
-match m: a | b
+match m: E.a | E.b
 ctor F<M: m>(P<M>)`,
 			`file.txt:4:16 cannot use template enum 'E' as template number`,
 		}, {
@@ -485,8 +481,9 @@ conv F(A<B>)`,
 			`
 type A<N>
 enum E { b }
-conv F(A<b>)`,
-			`file.txt:3:10 cannot use enum entry 'E.b' as template type`,
+match M: E.b
+conv F(A<M>)`,
+			`file.txt:4:10 cannot use enum matcher 'M' as template type`,
 		}, {
 			`
 type T
@@ -504,32 +501,22 @@ conv F(P<E>)`,
 			`
 type P<N: num>
 enum E { a b }
-match m: a | b
+match m: E.a | E.b
 conv F(P<m>)`,
 			`file.txt:4:10 cannot use enum matcher 'm' as template number`,
 		}, {
 			`
 type P<N: num>
 enum E { a b }
-match m: a | b
+match m: E.a | E.b
 conv F<M: m>(P<M>)`,
 			`file.txt:4:16 cannot use template enum 'E' as template number`,
-		}, {
-			`
-enum E { a }
-type T<X: a>`,
-			`file.txt:2:8 invalid template parameter type 'a'`,
-		}, {
-			`
-enum E { a }
-fn f<M: a>()`,
-			`file.txt:2:6 invalid template parameter type 'a'`,
 		},
 	} {
 
 		ast, err := parser.Parse(strings.TrimSpace(string(test.src)), "file.txt")
 		if err != nil {
-			t.Errorf("Unexpected parser error: %v", err)
+			t.Errorf("While parsing:\n%s\nUnexpected parser error: %v", test.src, err)
 			continue
 		}
 

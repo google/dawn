@@ -19,6 +19,7 @@ import (
 	"sort"
 	"strconv"
 
+	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/ast"
 	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/sem"
 	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/tok"
@@ -125,6 +126,7 @@ func (r *resolver) enum(e ast.EnumDecl) error {
 	}
 
 	// Register each of the enum entries
+	names := container.NewSet[string]()
 	for _, ast := range e.Entries {
 		entry := &sem.EnumEntry{
 			Name: ast.Name,
@@ -139,10 +141,11 @@ func (r *resolver) enum(e ast.EnumDecl) error {
 		if len(ast.Attributes) != 0 {
 			return fmt.Errorf("%v unknown attribute", ast.Attributes[0].Source)
 		}
-		if err := r.globals.declare(entry, e.Source); err != nil {
-			return err
-		}
 		s.Entries = append(s.Entries, entry)
+		if names.Contains(ast.Name) {
+			return fmt.Errorf("%v duplicate enum entry '%v'", ast.Source, ast.Name)
+		}
+		names.Add(ast.Name)
 	}
 
 	return nil
@@ -203,16 +206,13 @@ func (r *resolver) ty(a ast.TypeDecl) error {
 // The resulting matcher is appended to either Sem.TypeMatchers or
 // Sem.EnumMatchers, and is registered with the global scope.
 func (r *resolver) matcher(a ast.MatcherDecl) error {
-	// Determine whether this is a type matcher or enum matcher by resolving the
-	// first option
-	firstOption, err := r.lookupNamed(&r.globals, a.Options[0])
-	if err != nil {
-		return err
+	isTypeMatcher := len(a.Options.Types) != 0
+	isEnumMatcher := len(a.Options.Enums) != 0
+	if isTypeMatcher && isEnumMatcher {
+		return fmt.Errorf("%v matchers cannot mix enums and types", a.Source)
 	}
 
-	// Resolve to a sem.TypeMatcher or a sem.EnumMatcher
-	switch firstOption := firstOption.(type) {
-	case *sem.Type:
+	if isTypeMatcher {
 		options := map[sem.Named]tok.Source{}
 		m := &sem.TypeMatcher{
 			Decl: a,
@@ -226,7 +226,7 @@ func (r *resolver) matcher(a ast.MatcherDecl) error {
 		}
 
 		// Resolve each of the types in the options list
-		for _, ast := range m.Decl.Options {
+		for _, ast := range m.Decl.Options.Types {
 			ty, err := r.lookupType(&r.globals, ast)
 			if err != nil {
 				return err
@@ -239,9 +239,25 @@ func (r *resolver) matcher(a ast.MatcherDecl) error {
 		}
 
 		return nil
+	}
+	if isEnumMatcher {
+		owners := container.NewSet[string]()
+		for _, enum := range a.Options.Enums {
+			owners.Add(enum.Owner)
+		}
+		if len(owners) > 1 {
+			return fmt.Errorf("%v cannot mix enums (%v) in type matcher", a.Source, owners)
+		}
+		enumName := owners.One()
+		lookup := r.globals.lookup(enumName)
+		if lookup == nil {
+			return fmt.Errorf("%v cannot resolve enum '%v'", a.Source, enumName)
+		}
+		enum, _ := lookup.object.(*sem.Enum)
+		if enum == nil {
+			return fmt.Errorf("%v cannot resolve enum '%v'", a.Source, enumName)
+		}
 
-	case *sem.EnumEntry:
-		enum := firstOption.Enum
 		m := &sem.EnumMatcher{
 			Decl: a,
 			Name: a.Name,
@@ -255,17 +271,18 @@ func (r *resolver) matcher(a ast.MatcherDecl) error {
 		}
 
 		// Resolve each of the enums in the options list
-		for _, ast := range m.Decl.Options {
-			entry := enum.FindEntry(ast.Name)
+		for _, ast := range m.Decl.Options.Enums {
+			entry := enum.FindEntry(ast.Member)
 			if entry == nil {
-				return fmt.Errorf("%v enum '%v' does not contain '%v'", ast.Source, enum.Name, ast.Name)
+				return fmt.Errorf("%v enum '%v' does not contain '%v'", ast.Source, enum.Name, ast.Member)
 			}
 			m.Options = append(m.Options, entry)
 		}
 
 		return nil
 	}
-	return fmt.Errorf("'%v' cannot be used for matcher", a.Name)
+
+	return fmt.Errorf("%v matcher cannot be empty", a.Source)
 }
 
 // intrinsic() resolves a intrinsic overload declaration.
@@ -417,33 +434,6 @@ func (r *resolver) fullyQualifiedName(s *scope, arg ast.TemplatedName) (sem.Full
 	target, err := r.lookupNamed(s, arg)
 	if err != nil {
 		return sem.FullyQualifiedName{}, err
-	}
-
-	if entry, ok := target.(*sem.EnumEntry); ok {
-		// The target resolved to an enum entry.
-		// Automagically transform this into a synthetic matcher with a single
-		// option. i.e.
-		// This:
-		//   enum E{ a b c }
-		//   fn F(b)
-		// Becomes:
-		//   enum E{ a b c }
-		//   matcher b
-		//   fn F(b)
-		// We don't really care right now that we have a symbol collision
-		// between E.b and b, as the generators return different names for
-		// these.
-		matcher, ok := r.enumEntryMatchers[entry]
-		if !ok {
-			matcher = &sem.EnumMatcher{
-				Name:    entry.Name,
-				Enum:    entry.Enum,
-				Options: []*sem.EnumEntry{entry},
-			}
-			r.enumEntryMatchers[entry] = matcher
-			r.s.EnumMatchers = append(r.s.EnumMatchers, matcher)
-		}
-		target = matcher
 	}
 
 	fqn := sem.FullyQualifiedName{
