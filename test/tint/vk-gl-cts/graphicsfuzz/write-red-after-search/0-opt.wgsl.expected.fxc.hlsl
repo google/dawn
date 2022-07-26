@@ -1,4 +1,4 @@
-SKIP: FAILED https://crbug.com/tint/1522
+SKIP: FAILED
 
 struct BST {
   int data;
@@ -78,11 +78,7 @@ void insert_i1_i1_(inout int treeIndex, inout int data_1) {
         return;
       } else {
         GLF_live8i = 1;
-        bool tint_tmp = (GLF_live8i >= 0);
-        if (tint_tmp) {
-          tint_tmp = (GLF_live8i < 50);
-        }
-        const int x_369 = ((tint_tmp) ? GLF_live8i : 0);
+        const int x_369 = (((GLF_live8i >= 0) & (GLF_live8i < 50)) ? GLF_live8i : 0);
         const float x_371 = GLF_live8A[0];
         const float x_373 = GLF_live8A[x_369];
         GLF_live8A[x_369] = (x_373 + x_371);
@@ -171,7 +167,7 @@ float3 hueColor_f1_(inout float angle) {
   const int x_109 = search_i1_(param_4);
   nodeData = float(x_109);
   const float x_409 = angle;
-  return ((float3(30.0f, 30.0f, 30.0f) + (float3(1.0f, 5.0f, nodeData) * x_409)) / float3(50.0f, 50.0f, 50.0f));
+  return (((30.0f).xxx + (float3(1.0f, 5.0f, nodeData) * x_409)) / (50.0f).xxx);
 }
 
 void main_1() {
@@ -274,11 +270,7 @@ void main_1() {
       const float x_269 = GLF_live4obj.even_numbers[1];
       {
         float tint_symbol_1[10] = GLF_live4obj.even_numbers;
-        bool tint_tmp_1 = (x_144 >= 0);
-        if (tint_tmp_1) {
-          tint_tmp_1 = (x_145 < 10);
-        }
-        tint_symbol_1[((tint_tmp_1) ? x_146 : 0)] = x_269;
+        tint_symbol_1[(((x_144 >= 0) & (x_145 < 10)) ? x_146 : 0)] = x_269;
         GLF_live4obj.even_numbers = tint_symbol_1;
       }
       const int x_147 = GLF_live4i;
@@ -286,11 +278,7 @@ void main_1() {
       const int x_149 = GLF_live4i;
       {
         float tint_symbol_3[10] = GLF_live4obj.even_numbers;
-        bool tint_tmp_2 = (x_147 >= 0);
-        if (tint_tmp_2) {
-          tint_tmp_2 = (x_148 < 10);
-        }
-        tint_symbol_3[((tint_tmp_2) ? x_149 : 0)] = 1.0f;
+        tint_symbol_3[(((x_147 >= 0) & (x_148 < 10)) ? x_149 : 0)] = 1.0f;
         GLF_live4obj.even_numbers = tint_symbol_3;
       }
     }
@@ -308,7 +296,7 @@ void main_1() {
   param_27 = 13;
   insert_i1_i1_(param_26, param_27);
   const float4 x_285 = gl_FragCoord;
-  z = (float2(x_285.y, x_285.x) / float2(256.0f, 256.0f));
+  z = (float2(x_285.y, x_285.x) / (256.0f).xx);
   const float x_289 = z.x;
   param_28 = x_289;
   const float x_290 = makeFrame_f1_(param_28);
@@ -380,7 +368,3 @@ tint_symbol_6 main(tint_symbol_5 tint_symbol_4) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x000001C9889DF080(35,10-21): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
-C:\src\tint\test\Shader@0x000001C9889DF080(149,3): warning X4000: use of potentially uninitialized variable (makeFrame_f1_)
-internal error: compilation aborted unexpectedly
-

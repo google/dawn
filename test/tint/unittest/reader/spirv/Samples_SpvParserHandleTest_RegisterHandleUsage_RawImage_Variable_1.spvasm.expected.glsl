@@ -5,7 +5,7 @@ precision mediump float;
 
 layout(rg32f) uniform highp writeonly image1D x_20;
 void main_1() {
-  imageStore(x_20, int(1u), vec4(0.0f, 0.0f, 0.0f, 0.0f));
+  imageStore(x_20, 1, vec4(0.0f));
   return;
 }
 

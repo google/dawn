@@ -17,7 +17,7 @@ float fx_() {
     } else {
       break;
     }
-    x_GLF_color = float4(1.0f, 1.0f, 1.0f, 1.0f);
+    x_GLF_color = (1.0f).xxxx;
   }
   return 0.0f;
 }
@@ -67,8 +67,11 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+DXC validation failure:
+warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
+
 error: validation errors
-C:\src\temp\u17p0.0:62: error: Loop must have break.
+shader.hlsl:62: error: Loop must have break.
 Validation failed.
 
 

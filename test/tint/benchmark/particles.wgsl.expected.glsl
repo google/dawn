@@ -181,7 +181,7 @@ void simulate(uvec3 GlobalInvocationID) {
   particle.lifetime = (particle.lifetime - sim_params.deltaTime);
   particle.color.a = smoothstep(0.0f, 0.5f, particle.lifetime);
   if ((particle.lifetime < 0.0f)) {
-    ivec2 coord = ivec2(0, 0);
+    ivec2 coord = ivec2(0);
     {
       for(int level = (textureQueryLevels(tint_symbol_6) - 1); (level > 0); level = (level - 1)) {
         vec4 probabilites = texelFetch(tint_symbol_6, coord, level);

@@ -1,16 +1,4 @@
-SKIP: FAILED https://crbug.com/tint/1522
-
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-with-loop-read-write-global/1.wgsl:70:7 warning: code is unreachable
-      return;
-      ^^^^^^
-
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-with-loop-read-write-global/1.wgsl:93:7 warning: code is unreachable
-      return;
-      ^^^^^^
-
-vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-with-loop-read-write-global/1.wgsl:95:5 warning: code is unreachable
-    return;
-    ^^^^^^
+SKIP: FAILED
 
 struct BST {
   int data;
@@ -71,7 +59,6 @@ void insert_i1_i1_(inout int treeIndex, inout int data_1) {
         baseIndex = x_248;
         continue;
       }
-      return;
     } else {
       const int x_251 = tree[baseIndex].rightIndex;
       if ((x_251 == -1)) {
@@ -91,9 +78,7 @@ void insert_i1_i1_(inout int treeIndex, inout int data_1) {
         baseIndex = x_268;
         continue;
       }
-      return;
     }
-    return;
   }
   return;
 }
@@ -293,6 +278,3 @@ tint_symbol_2 main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x0000016D6EA06C40(32,10-21): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
-internal error: compilation aborted unexpectedly
-

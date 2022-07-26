@@ -1,6 +1,5 @@
 SKIP: FAILED
 
-warning: code is unreachable
 static uint x_1 = 0u;
 static bool x_7 = false;
 static bool x_8 = false;
@@ -26,7 +25,6 @@ void main_1() {
       }
       continue;
     }
-    x_2_phi = 0u;
     {
       x_1 = x_2_phi;
     }
@@ -38,11 +36,3 @@ void main() {
   main_1();
   return;
 }
-warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
-
-error: validation errors
-/tmp/tint_l2mEof:34: error: Loop must have break.
-Validation failed.
-
-
-

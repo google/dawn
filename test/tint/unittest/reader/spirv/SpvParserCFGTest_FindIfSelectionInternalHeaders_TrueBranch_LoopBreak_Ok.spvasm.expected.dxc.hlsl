@@ -15,10 +15,11 @@ void main() {
   main_1();
   return;
 }
+DXC validation failure:
 warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
 
 error: validation errors
-/tmp/tint_ABIRu4:12: error: Loop must have break.
+shader.hlsl:12: error: Loop must have break.
 Validation failed.
 
 

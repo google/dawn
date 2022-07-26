@@ -1,32 +1,5 @@
-SKIP: FAILED https://crbug.com/tint/1522
+SKIP: FAILED
 
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
 struct BST {
   int data;
   int leftIndex;
@@ -78,7 +51,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_70_save = x_58;
         const int x_71 = tree[x_70_save].rightIndex;
@@ -97,9 +69,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_59 = x_59_phi;
         x_58_phi = x_59;
@@ -144,7 +114,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_103_save = x_91;
         const int x_104 = tree[x_103_save].rightIndex;
@@ -163,9 +132,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_92 = x_92_phi;
         x_91_phi = x_92;
@@ -210,7 +177,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_136_save = x_124;
         const int x_137 = tree[x_136_save].rightIndex;
@@ -229,9 +195,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_125 = x_125_phi;
         x_124_phi = x_125;
@@ -276,7 +240,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_169_save = x_157;
         const int x_170 = tree[x_169_save].rightIndex;
@@ -295,9 +258,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_158 = x_158_phi;
         x_157_phi = x_158;
@@ -342,7 +303,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_202_save = x_190;
         const int x_203 = tree[x_202_save].rightIndex;
@@ -361,9 +321,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_191 = x_191_phi;
         x_190_phi = x_191;
@@ -408,7 +366,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_235_save = x_223;
         const int x_236 = tree[x_235_save].rightIndex;
@@ -427,9 +384,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_224 = x_224_phi;
         x_223_phi = x_224;
@@ -474,7 +429,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_268_save = x_256;
         const int x_269 = tree[x_268_save].rightIndex;
@@ -493,9 +447,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_257 = x_257_phi;
         x_256_phi = x_257;
@@ -540,7 +492,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_301_save = x_289;
         const int x_302 = tree[x_301_save].rightIndex;
@@ -559,9 +510,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_290 = x_290_phi;
         x_289_phi = x_290;
@@ -606,7 +555,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_334_save = x_322;
         const int x_335 = tree[x_334_save].rightIndex;
@@ -625,9 +573,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_323 = x_323_phi;
         x_322_phi = x_323;
@@ -761,16 +707,3 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x0000022EDBF08060(82,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000022EDBF08060(22,12-23): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
-C:\src\tint\test\Shader@0x0000022EDBF08060(148,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000022EDBF08060(214,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000022EDBF08060(280,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000022EDBF08060(346,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000022EDBF08060(412,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000022EDBF08060(478,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000022EDBF08060(544,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000022EDBF08060(610,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000022EDBF08060(662,7-19): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-internal error: compilation aborted unexpectedly
-

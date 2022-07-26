@@ -16,6 +16,7 @@
 
 #include "src/tint/utils/io/command.h"
 #include "src/tint/utils/io/tmpfile.h"
+#include "src/tint/utils/string.h"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -83,6 +84,9 @@ Result HlslUsingDXC(const std::string& dxc_path,
             result.output += res.err;
         }
         result.failed = (res.error_code != 0);
+
+        // Remove the temporary file name from the output to keep output deterministic
+        result.output = utils::ReplaceAll(result.output, file.Path(), "shader.hlsl");
     }
 
     if (entry_points.empty()) {

@@ -13,11 +13,11 @@ cbuffer cbuffer_x_10 : register(b0, space0) {
 
 void main_1() {
   int i = 0;
-  const uint scalar_offset = ((16u * uint(0))) / 4;
+  const uint scalar_offset = ((16u * 0u)) / 4;
   const float x_38 = asfloat(x_5[scalar_offset / 4][scalar_offset % 4]);
   x_GLF_color = float4(x_38, x_38, x_38, x_38);
   const float x_41 = asfloat(x_7[0].x);
-  const uint scalar_offset_1 = ((16u * uint(0))) / 4;
+  const uint scalar_offset_1 = ((16u * 0u)) / 4;
   const float x_43 = asfloat(x_5[scalar_offset_1 / 4][scalar_offset_1 % 4]);
   if ((x_41 > x_43)) {
     [loop] while (true) {
@@ -41,16 +41,16 @@ void main_1() {
         i = x_13;
         [loop] while (true) {
           const int x_14 = i;
-          const uint scalar_offset_2 = ((16u * uint(0))) / 4;
+          const uint scalar_offset_2 = ((16u * 0u)) / 4;
           const int x_15 = asint(x_10[scalar_offset_2 / 4][scalar_offset_2 % 4]);
           if ((x_14 < x_15)) {
           } else {
             break;
           }
           const float x_73 = asfloat(x_5[1].x);
-          const uint scalar_offset_3 = ((16u * uint(0))) / 4;
+          const uint scalar_offset_3 = ((16u * 0u)) / 4;
           const float x_75 = asfloat(x_5[scalar_offset_3 / 4][scalar_offset_3 % 4]);
-          const uint scalar_offset_4 = ((16u * uint(0))) / 4;
+          const uint scalar_offset_4 = ((16u * 0u)) / 4;
           const float x_77 = asfloat(x_5[scalar_offset_4 / 4][scalar_offset_4 % 4]);
           const float x_79 = asfloat(x_5[1].x);
           x_GLF_color = float4(x_73, x_75, x_77, x_79);
@@ -62,7 +62,7 @@ void main_1() {
       }
       {
         const float x_82 = asfloat(x_7[0].x);
-        const uint scalar_offset_5 = ((16u * uint(0))) / 4;
+        const uint scalar_offset_5 = ((16u * 0u)) / 4;
         const float x_84 = asfloat(x_5[scalar_offset_5 / 4][scalar_offset_5 % 4]);
         if ((x_82 > x_84)) {
         } else {
@@ -93,9 +93,3 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-error: validation errors
-C:\src\temp\usgc.0:88: error: Loop must have break.
-Validation failed.
-
-
-

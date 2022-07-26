@@ -82,8 +82,11 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+DXC validation failure:
+warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
+
 error: validation errors
-C:\src\temp\u1v1c.0:77: error: Loop must have break.
+shader.hlsl:77: error: Loop must have break.
 Validation failed.
 
 

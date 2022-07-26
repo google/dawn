@@ -30,11 +30,3 @@ void main() {
   main_1();
   return;
 }
-warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
-
-error: validation errors
-/tmp/tint_Rz6lq4:27: error: Loop must have break.
-Validation failed.
-
-
-

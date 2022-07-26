@@ -15,6 +15,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   uint numPlanes;
+  uint doYuvToRgbConversionOnly;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
@@ -23,6 +24,7 @@ struct ExternalTextureParams {
 
 layout(binding = 2) uniform ExternalTextureParams_1 {
   uint numPlanes;
+  uint doYuvToRgbConversionOnly;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
@@ -43,9 +45,11 @@ vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, ive
   } else {
     color = (vec4(texelFetch(plane0_1, coord, 0).r, texelFetch(plane1_1, coord, 0).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4(color, 1.0f);
 }
 
@@ -70,9 +74,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:54: 'textureLoadExternal' : no matching overloaded function found 
-ERROR: 0:54: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of float'
-ERROR: 0:54: '' : compilation terminated 
+ERROR: 0:58: 'textureLoadExternal' : no matching overloaded function found 
+ERROR: 0:58: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of float'
+ERROR: 0:58: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 
@@ -93,6 +97,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   uint numPlanes;
+  uint doYuvToRgbConversionOnly;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
@@ -101,6 +106,7 @@ struct ExternalTextureParams {
 
 layout(binding = 2) uniform ExternalTextureParams_1 {
   uint numPlanes;
+  uint doYuvToRgbConversionOnly;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
@@ -121,9 +127,11 @@ vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, ive
   } else {
     color = (vec4(texelFetch(plane0_1, coord, 0).r, texelFetch(plane1_1, coord, 0).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4(color, 1.0f);
 }
 
@@ -143,9 +151,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:55: 'textureLoadExternal' : no matching overloaded function found 
-ERROR: 0:55: '=' :  cannot convert from ' const float' to ' temp mediump 4-component vector of float'
-ERROR: 0:55: '' : compilation terminated 
+ERROR: 0:59: 'textureLoadExternal' : no matching overloaded function found 
+ERROR: 0:59: '=' :  cannot convert from ' const float' to ' temp mediump 4-component vector of float'
+ERROR: 0:59: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 
@@ -165,6 +173,7 @@ struct GammaTransferParams {
 
 struct ExternalTextureParams {
   uint numPlanes;
+  uint doYuvToRgbConversionOnly;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
@@ -173,6 +182,7 @@ struct ExternalTextureParams {
 
 layout(binding = 2) uniform ExternalTextureParams_1 {
   uint numPlanes;
+  uint doYuvToRgbConversionOnly;
   mat3x4 yuvToRgbConversionMatrix;
   GammaTransferParams gammaDecodeParams;
   GammaTransferParams gammaEncodeParams;
@@ -193,9 +203,11 @@ vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, ive
   } else {
     color = (vec4(texelFetch(plane0_1, coord, 0).r, texelFetch(plane1_1, coord, 0).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
-  color = gammaCorrection(color, params.gammaDecodeParams);
-  color = (params.gamutConversionMatrix * color);
-  color = gammaCorrection(color, params.gammaEncodeParams);
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
   return vec4(color, 1.0f);
 }
 
@@ -216,9 +228,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:54: 'textureLoadExternal' : no matching overloaded function found 
-ERROR: 0:54: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of float'
-ERROR: 0:54: '' : compilation terminated 
+ERROR: 0:58: 'textureLoadExternal' : no matching overloaded function found 
+ERROR: 0:58: '=' :  cannot convert from ' const float' to ' temp highp 4-component vector of float'
+ERROR: 0:58: '' : compilation terminated 
 ERROR: 3 compilation errors.  No code generated.
 
 

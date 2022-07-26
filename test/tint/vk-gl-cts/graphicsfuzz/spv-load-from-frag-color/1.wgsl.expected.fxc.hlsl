@@ -1,112 +1,4 @@
-SKIP: FAILED https://crbug.com/tint/1522
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:46:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:60:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:62:9 warning: code is unreachable
-        return;
-        ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:105:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:119:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:121:9 warning: code is unreachable
-        return;
-        ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:164:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:178:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:180:9 warning: code is unreachable
-        return;
-        ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:223:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:237:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:239:9 warning: code is unreachable
-        return;
-        ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:282:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:296:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:298:9 warning: code is unreachable
-        return;
-        ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:341:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:355:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:357:9 warning: code is unreachable
-        return;
-        ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:400:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:414:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:416:9 warning: code is unreachable
-        return;
-        ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:459:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:473:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:475:9 warning: code is unreachable
-        return;
-        ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:518:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:532:11 warning: code is unreachable
-          return;
-          ^^^^^^
-
-vk-gl-cts/graphicsfuzz/spv-load-from-frag-color/1.wgsl:534:9 warning: code is unreachable
-        return;
-        ^^^^^^
+SKIP: FAILED
 
 struct BST {
   int data;
@@ -159,7 +51,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_74_save = x_62;
         const int x_75 = tree[x_74_save].rightIndex;
@@ -178,9 +69,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_63 = x_63_phi;
         x_62_phi = x_63;
@@ -225,7 +114,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_107_save = x_95;
         const int x_108 = tree[x_107_save].rightIndex;
@@ -244,9 +132,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_96 = x_96_phi;
         x_95_phi = x_96;
@@ -291,7 +177,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_140_save = x_128;
         const int x_141 = tree[x_140_save].rightIndex;
@@ -310,9 +195,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_129 = x_129_phi;
         x_128_phi = x_129;
@@ -357,7 +240,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_173_save = x_161;
         const int x_174 = tree[x_173_save].rightIndex;
@@ -376,9 +258,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_162 = x_162_phi;
         x_161_phi = x_162;
@@ -423,7 +303,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_206_save = x_194;
         const int x_207 = tree[x_206_save].rightIndex;
@@ -442,9 +321,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_195 = x_195_phi;
         x_194_phi = x_195;
@@ -489,7 +366,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_239_save = x_227;
         const int x_240 = tree[x_239_save].rightIndex;
@@ -508,9 +384,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_228 = x_228_phi;
         x_227_phi = x_228;
@@ -555,7 +429,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_272_save = x_260;
         const int x_273 = tree[x_272_save].rightIndex;
@@ -574,9 +447,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_261 = x_261_phi;
         x_260_phi = x_261;
@@ -621,7 +492,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_305_save = x_293;
         const int x_306 = tree[x_305_save].rightIndex;
@@ -640,9 +510,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_294 = x_294_phi;
         x_293_phi = x_294;
@@ -687,7 +555,6 @@ void main_1() {
           }
           continue;
         }
-        return;
       } else {
         const int x_338_save = x_326;
         const int x_339 = tree[x_338_save].rightIndex;
@@ -706,9 +573,7 @@ void main_1() {
           }
           continue;
         }
-        return;
       }
-      return;
       {
         x_327 = x_327_phi;
         x_326_phi = x_327;
@@ -844,16 +709,3 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x0000018520DAA240(82,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000018520DAA240(22,12-23): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
-C:\src\tint\test\Shader@0x0000018520DAA240(148,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000018520DAA240(214,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000018520DAA240(280,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000018520DAA240(346,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000018520DAA240(412,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000018520DAA240(478,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000018520DAA240(544,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000018520DAA240(610,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-C:\src\tint\test\Shader@0x0000018520DAA240(664,7-19): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
-internal error: compilation aborted unexpectedly
-

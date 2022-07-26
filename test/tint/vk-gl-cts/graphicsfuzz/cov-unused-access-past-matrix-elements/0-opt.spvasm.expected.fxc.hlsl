@@ -17,7 +17,7 @@ void set_scalar_float4x3(inout float4x3 mat, int col, int row, float val) {
   }
 }
 
-struct tint_padded_array_element {
+struct strided_arr {
   float el;
 };
 
@@ -31,29 +31,32 @@ static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 void main_1() {
   float4x3 m43 = float4x3(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-  tint_padded_array_element sums[3] = (tint_padded_array_element[3])0;
+  strided_arr sums[3] = (strided_arr[3])0;
   int i = 0;
   int a = 0;
   int x_67_phi = 0;
   const float x_44 = asfloat(x_6[1].x);
-  const float3 x_48 = float3(0.0f, 0.0f, 0.0f);
-  m43 = float4x3(float3(x_44, 0.0f, 0.0f), float3(0.0f, x_44, 0.0f), float3(0.0f, 0.0f, x_44), float3(0.0f, 0.0f, 0.0f));
-  const uint scalar_offset = ((16u * uint(0))) / 4;
+  const float3 x_48 = (0.0f).xxx;
+  m43 = float4x3(float3(x_44, 0.0f, 0.0f), float3(0.0f, x_44, 0.0f), float3(0.0f, 0.0f, x_44), (0.0f).xxx);
+  const uint scalar_offset = ((16u * 0u)) / 4;
   const int x_51 = asint(x_8[scalar_offset / 4][scalar_offset % 4]);
-  const uint scalar_offset_1 = ((16u * uint(0))) / 4;
+  const uint scalar_offset_1 = ((16u * 0u)) / 4;
   const int x_53 = asint(x_8[scalar_offset_1 / 4][scalar_offset_1 % 4]);
-  const uint scalar_offset_2 = ((16u * uint(0))) / 4;
+  const uint scalar_offset_2 = ((16u * 0u)) / 4;
   const float x_55 = asfloat(x_6[scalar_offset_2 / 4][scalar_offset_2 % 4]);
   set_scalar_float4x3(m43, x_53, x_51, x_55);
-  const uint scalar_offset_3 = ((16u * uint(0))) / 4;
+  const uint scalar_offset_3 = ((16u * 0u)) / 4;
   const float x_58 = asfloat(x_6[scalar_offset_3 / 4][scalar_offset_3 % 4]);
-  const uint scalar_offset_4 = ((16u * uint(0))) / 4;
+  const uint scalar_offset_4 = ((16u * 0u)) / 4;
   const float x_60 = asfloat(x_6[scalar_offset_4 / 4][scalar_offset_4 % 4]);
-  const uint scalar_offset_5 = ((16u * uint(0))) / 4;
+  const uint scalar_offset_5 = ((16u * 0u)) / 4;
   const float x_62 = asfloat(x_6[scalar_offset_5 / 4][scalar_offset_5 % 4]);
-  const tint_padded_array_element tint_symbol_3[3] = {{x_58}, {x_60}, {x_62}};
-  sums = tint_symbol_3;
-  const uint scalar_offset_6 = ((16u * uint(0))) / 4;
+  const strided_arr tint_symbol_3 = {x_58};
+  const strided_arr tint_symbol_4 = {x_60};
+  const strided_arr tint_symbol_5 = {x_62};
+  const strided_arr tint_symbol_6[3] = {tint_symbol_3, tint_symbol_4, tint_symbol_5};
+  sums = tint_symbol_6;
+  const uint scalar_offset_6 = ((16u * 0u)) / 4;
   const int x_65 = asint(x_8[scalar_offset_6 / 4][scalar_offset_6 % 4]);
   i = x_65;
   x_67_phi = x_65;
@@ -64,9 +67,9 @@ void main_1() {
     } else {
       break;
     }
-    const uint scalar_offset_7 = ((16u * uint(0))) / 4;
+    const uint scalar_offset_7 = ((16u * 0u)) / 4;
     const int x_77 = asint(x_8[scalar_offset_7 / 4][scalar_offset_7 % 4]);
-    const uint scalar_offset_8 = ((16u * uint(0))) / 4;
+    const uint scalar_offset_8 = ((16u * 0u)) / 4;
     const int x_79 = asint(x_8[scalar_offset_8 / 4][scalar_offset_8 % 4]);
     const float x_81 = m43[x_67][x_79];
     const float x_83 = sums[x_77].el;
@@ -81,7 +84,7 @@ void main_1() {
   if ((x_87 == 1)) {
     a = 4;
     const int x_92 = asint(x_8[2].x);
-    const uint scalar_offset_9 = ((16u * uint(0))) / 4;
+    const uint scalar_offset_9 = ((16u * 0u)) / 4;
     const int x_94 = asint(x_8[scalar_offset_9 / 4][scalar_offset_9 % 4]);
     const float x_96 = m43[4][x_94];
     const float x_98 = sums[x_92].el;
@@ -89,16 +92,16 @@ void main_1() {
   }
   const int x_102 = asint(x_8[1].x);
   const float x_104 = sums[x_102].el;
-  const uint scalar_offset_10 = ((16u * uint(0))) / 4;
+  const uint scalar_offset_10 = ((16u * 0u)) / 4;
   const int x_106 = asint(x_8[scalar_offset_10 / 4][scalar_offset_10 % 4]);
   const float x_108 = sums[x_106].el;
   const float x_111 = asfloat(x_6[2].x);
   if (((x_104 + x_108) == x_111)) {
-    const uint scalar_offset_11 = ((16u * uint(0))) / 4;
+    const uint scalar_offset_11 = ((16u * 0u)) / 4;
     const int x_117 = asint(x_8[scalar_offset_11 / 4][scalar_offset_11 % 4]);
     const int x_120 = asint(x_8[1].x);
     const int x_123 = asint(x_8[1].x);
-    const uint scalar_offset_12 = ((16u * uint(0))) / 4;
+    const uint scalar_offset_12 = ((16u * 0u)) / 4;
     const int x_126 = asint(x_8[scalar_offset_12 / 4][scalar_offset_12 % 4]);
     x_GLF_color = float4(float(x_117), float(x_120), float(x_123), float(x_126));
   } else {
@@ -118,8 +121,8 @@ struct tint_symbol {
 
 main_out main_inner() {
   main_1();
-  const main_out tint_symbol_4 = {x_GLF_color};
-  return tint_symbol_4;
+  const main_out tint_symbol_7 = {x_GLF_color};
+  return tint_symbol_7;
 }
 
 tint_symbol main() {
@@ -128,5 +131,3 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x00000111C3C21900(84,24-29): error X3504: array index out of bounds
-

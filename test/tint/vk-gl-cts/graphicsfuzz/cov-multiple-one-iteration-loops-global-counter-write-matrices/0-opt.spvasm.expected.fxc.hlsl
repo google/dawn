@@ -1,4 +1,4 @@
-SKIP: test times out after 30s with FXC
+SKIP: FAILED
 
 void set_scalar_float2x3(inout float2x3 mat, int col, int row, float val) {
   switch (col) {
@@ -168,14 +168,14 @@ void main_1() {
   float sum = 0.0f;
   int r = 0;
   x_GLF_global_loop_count = 0;
-  m23 = float2x3(float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f));
-  m24 = float2x4(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f));
-  m32 = float3x2(float2(0.0f, 0.0f), float2(0.0f, 0.0f), float2(0.0f, 0.0f));
-  m33 = float3x3(float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f));
-  m34 = float3x4(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f));
-  m42 = float4x2(float2(0.0f, 0.0f), float2(0.0f, 0.0f), float2(0.0f, 0.0f), float2(0.0f, 0.0f));
-  m43 = float4x3(float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f));
-  m44 = float4x4(float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f), float4(0.0f, 0.0f, 0.0f, 0.0f));
+  m23 = float2x3((0.0f).xxx, (0.0f).xxx);
+  m24 = float2x4((0.0f).xxxx, (0.0f).xxxx);
+  m32 = float3x2((0.0f).xx, (0.0f).xx, (0.0f).xx);
+  m33 = float3x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
+  m34 = float3x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx);
+  m42 = float4x2((0.0f).xx, (0.0f).xx, (0.0f).xx, (0.0f).xx);
+  m43 = float4x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
+  m44 = float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx);
   i = 0;
   {
     [loop] for(; (i < 1); i = (i + 1)) {
@@ -409,7 +409,7 @@ void main_1() {
   if ((sum == 8.0f)) {
     x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {
-    x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    x_GLF_color = (0.0f).xxxx;
   }
   return;
 }

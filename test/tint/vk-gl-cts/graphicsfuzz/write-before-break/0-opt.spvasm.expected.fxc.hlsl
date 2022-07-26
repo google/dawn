@@ -36,7 +36,7 @@ void main_1() {
   int d = 0;
   float GLF_live6sums[9] = (float[9])0;
   idx = 0;
-  m43 = float4x3(float3(1.0f, 0.0f, 0.0f), float3(0.0f, 1.0f, 0.0f), float3(0.0f, 0.0f, 1.0f), float3(0.0f, 0.0f, 0.0f));
+  m43 = float4x3(float3(1.0f, 0.0f, 0.0f), float3(0.0f, 1.0f, 0.0f), float3(0.0f, 0.0f, 1.0f), (0.0f).xxx);
   ll_1 = 0;
   GLF_live6rows = 2;
   [loop] while (true) {
@@ -98,9 +98,3 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-error: validation errors
-C:\src\temp\umdw.0:93: error: Loop must have break.
-Validation failed.
-
-
-

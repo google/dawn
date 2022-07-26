@@ -36,8 +36,8 @@ void main_1() {
   int a = 0;
   int x_67_phi = 0;
   float x_44 = x_6.x_GLF_uniform_float_values[1].el;
-  vec3 x_48 = vec3(0.0f, 0.0f, 0.0f);
-  m43 = mat4x3(vec3(x_44, 0.0f, 0.0f), vec3(0.0f, x_44, 0.0f), vec3(0.0f, 0.0f, x_44), vec3(0.0f, 0.0f, 0.0f));
+  vec3 x_48 = vec3(0.0f);
+  m43 = mat4x3(vec3(x_44, 0.0f, 0.0f), vec3(0.0f, x_44, 0.0f), vec3(0.0f, 0.0f, x_44), vec3(0.0f));
   int x_51 = x_8.x_GLF_uniform_int_values[0].el;
   int x_53 = x_8.x_GLF_uniform_int_values[0].el;
   float x_55 = x_6.x_GLF_uniform_float_values[0].el;

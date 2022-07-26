@@ -1,8 +1,5 @@
-SKIP: FAILED https://crbug.com/tint/1522
+SKIP: FAILED
 
-warning: code is unreachable
-warning: code is unreachable
-warning: code is unreachable
 struct BST {
   int data;
   int leftIndex;
@@ -55,7 +52,6 @@ void insert_i1_i1_(inout int treeIndex, inout int data_1) {
         baseIndex = x_198;
         continue;
       }
-      return;
     } else {
       const int x_201 = tree[baseIndex].rightIndex;
       if ((x_201 == -1)) {
@@ -75,9 +71,7 @@ void insert_i1_i1_(inout int treeIndex, inout int data_1) {
         baseIndex = x_218;
         continue;
       }
-      return;
     }
-    return;
   }
   return;
 }
@@ -241,6 +235,3 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x0000025CD445EF60(25,10-21): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
-internal error: compilation aborted unexpectedly
-

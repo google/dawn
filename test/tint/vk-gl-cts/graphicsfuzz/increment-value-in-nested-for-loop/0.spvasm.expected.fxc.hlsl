@@ -251,7 +251,7 @@ void main_1() {
     if ((x_161_phi == 4)) {
       x_GLF_color = float4(1.0f, 0.0f, 0.0f, 1.0f);
     } else {
-      x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
+      x_GLF_color = (0.0f).xxxx;
     }
     break;
   }
@@ -281,8 +281,3 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
-C:\src\tint\test\Shader@0x000002215620C140(8,10-21): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
-C:\src\tint\test\Shader@0x000002215620C140(71,16-27): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
-C:\src\tint\test\Shader@0x000002215620C140(186,14-25): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
-C:\src\tint\test\Shader@0x000002215620C140(123,18-29): error X4029: infinite loop detected - loop never exits
-

@@ -34,7 +34,7 @@ void main_1() {
   float sums[3] = float[3](0.0f, 0.0f, 0.0f);
   int x_52_phi = 0;
   float x_40 = x_6.x_GLF_uniform_float_values[0].el;
-  m32 = mat3x2(vec2(x_40, 0.0f), vec2(0.0f, x_40), vec2(0.0f, 0.0f));
+  m32 = mat3x2(vec2(x_40, 0.0f), vec2(0.0f, x_40), vec2(0.0f));
   int x_45 = x_8.x_GLF_uniform_int_values[0].el;
   if ((x_45 == 1)) {
     m32[3][x_45] = x_40;

@@ -5,7 +5,7 @@ precision mediump float;
 
 uniform highp sampler1D x_20_1;
 void main_1() {
-  vec4 x_125 = texelFetch(x_20_1, int(1u), 0);
+  vec4 x_125 = texelFetch(x_20_1, 1, 0);
   return;
 }
 
