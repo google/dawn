@@ -43,10 +43,10 @@ using AttributeList = std::vector<const Attribute*>;
 
 /// @param attributes the list of attributes to search
 /// @returns true if `attributes` includes a attribute of type `T`
-template <typename T>
+template <typename... Ts>
 bool HasAttribute(const AttributeList& attributes) {
     for (auto* attr : attributes) {
-        if (attr->Is<T>()) {
+        if (attr->IsAnyOf<Ts...>()) {
             return true;
         }
     }
