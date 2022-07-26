@@ -845,7 +845,7 @@ class ParserImpl {
     Source::File const* const file_;
     std::vector<Token> tokens_;
     size_t next_token_idx_ = 0;
-    Source last_source_;
+    size_t last_source_idx_ = 0;
     bool synchronized_ = true;
     uint32_t parse_depth_ = 0;
     std::vector<Token::Type> sync_tokens_;
