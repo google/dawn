@@ -27,7 +27,7 @@
 
 // fn textureSampleLevel(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, level: f32, @const offset: vec3<i32>) -> vec4<f32>
 fn textureSampleLevel_dcbecb() {
-  var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, vec3<f32>(), 1.0, vec3<i32>());
+  var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, vec3<f32>(), 1.f, vec3<i32>());
 }
 
 @vertex

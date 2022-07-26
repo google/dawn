@@ -25,7 +25,7 @@
 
 // fn log(f32) -> f32
 fn log_7114a6() {
-  var res: f32 = log(1.0);
+  var res: f32 = log(1.f);
 }
 
 @vertex

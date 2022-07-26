@@ -1,5 +1,5 @@
 void dpdxCoarse_f64d7b() {
-  float3 arg_0 = (0.0f).xxx;
+  float3 arg_0 = (1.0f).xxx;
   float3 res = ddx_coarse(arg_0);
 }
 

@@ -1,5 +1,5 @@
 fn transpose_d8f8ba() {
-  var res : mat4x3<f32> = transpose(mat3x4<f32>());
+  var res : mat4x3<f32> = transpose(mat3x4<f32>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f));
 }
 
 @vertex

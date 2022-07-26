@@ -1,6 +1,6 @@
 void max_320815() {
-  uint2 arg_0 = (0u).xx;
-  uint2 arg_1 = (0u).xx;
+  uint2 arg_0 = (1u).xx;
+  uint2 arg_1 = (1u).xx;
   uint2 res = max(arg_0, arg_1);
 }
 

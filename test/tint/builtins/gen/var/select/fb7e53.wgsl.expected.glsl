@@ -1,9 +1,9 @@
 #version 310 es
 
 void select_fb7e53() {
-  bvec2 arg_0 = bvec2(false);
-  bvec2 arg_1 = bvec2(false);
-  bool arg_2 = false;
+  bvec2 arg_0 = bvec2(true);
+  bvec2 arg_1 = bvec2(true);
+  bool arg_2 = true;
   bvec2 res = (arg_2 ? arg_1 : arg_0);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void select_fb7e53() {
-  bvec2 arg_0 = bvec2(false);
-  bvec2 arg_1 = bvec2(false);
-  bool arg_2 = false;
+  bvec2 arg_0 = bvec2(true);
+  bvec2 arg_1 = bvec2(true);
+  bool arg_2 = true;
   bvec2 res = (arg_2 ? arg_1 : arg_0);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void select_fb7e53() {
-  bvec2 arg_0 = bvec2(false);
-  bvec2 arg_1 = bvec2(false);
-  bool arg_2 = false;
+  bvec2 arg_0 = bvec2(true);
+  bvec2 arg_1 = bvec2(true);
+  bool arg_2 = true;
   bvec2 res = (arg_2 ? arg_1 : arg_0);
 }
 

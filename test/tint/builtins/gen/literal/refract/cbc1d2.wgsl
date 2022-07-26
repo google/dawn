@@ -25,7 +25,7 @@
 
 // fn refract(vec<3, f32>, vec<3, f32>, f32) -> vec<3, f32>
 fn refract_cbc1d2() {
-  var res: vec3<f32> = refract(vec3<f32>(), vec3<f32>(), 1.0);
+  var res: vec3<f32> = refract(vec3<f32>(1.f), vec3<f32>(1.f), 1.f);
 }
 
 @vertex

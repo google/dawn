@@ -25,7 +25,7 @@
 
 // fn fwidthFine(vec<3, f32>) -> vec<3, f32>
 fn fwidthFine_523fdc() {
-  var res: vec3<f32> = fwidthFine(vec3<f32>());
+  var res: vec3<f32> = fwidthFine(vec3<f32>(1.f));
 }
 
 @fragment

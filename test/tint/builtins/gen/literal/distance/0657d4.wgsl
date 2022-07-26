@@ -25,7 +25,7 @@
 
 // fn distance(vec<3, f32>, vec<3, f32>) -> f32
 fn distance_0657d4() {
-  var res: f32 = distance(vec3<f32>(), vec3<f32>());
+  var res: f32 = distance(vec3<f32>(1.f), vec3<f32>(1.f));
 }
 
 @vertex

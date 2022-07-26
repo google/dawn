@@ -53,7 +53,7 @@
 %atanh_440cca = OpFunction %void None %23
          %26 = OpLabel
         %res = OpVariable %_ptr_Function_v3float Function %20
-         %27 = OpFunctionCall %v3float %tint_atanh %20
+         %27 = OpFunctionCall %v3float %tint_atanh %16
                OpStore %res %27
                OpReturn
                OpFunctionEnd

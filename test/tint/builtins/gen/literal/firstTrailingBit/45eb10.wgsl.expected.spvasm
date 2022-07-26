@@ -112,7 +112,7 @@
 %firstTrailingBit_45eb10 = OpFunction %void None %78
          %81 = OpLabel
         %res = OpVariable %_ptr_Function_v2uint Function %18
-         %82 = OpFunctionCall %v2uint %tint_first_trailing_bit %18
+         %82 = OpFunctionCall %v2uint %tint_first_trailing_bit %65
                OpStore %res %82
                OpReturn
                OpFunctionEnd

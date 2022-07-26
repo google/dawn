@@ -25,7 +25,7 @@
 
 // fn ldexp(vec<3, f32>, vec<3, i32>) -> vec<3, f32>
 fn ldexp_a31cdc() {
-  var res: vec3<f32> = ldexp(vec3<f32>(), vec3<i32>());
+  var res: vec3<f32> = ldexp(vec3<f32>(1.f), vec3<i32>(1));
 }
 
 @vertex

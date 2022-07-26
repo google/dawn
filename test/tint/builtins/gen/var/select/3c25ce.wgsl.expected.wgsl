@@ -1,7 +1,7 @@
 fn select_3c25ce() {
-  var arg_0 = vec3<bool>();
-  var arg_1 = vec3<bool>();
-  var arg_2 = bool();
+  var arg_0 = vec3<bool>(true);
+  var arg_1 = vec3<bool>(true);
+  var arg_2 = true;
   var res : vec3<bool> = select(arg_0, arg_1, arg_2);
 }
 

@@ -1,5 +1,5 @@
 void select_99f883() {
-  uint res = (false ? 1u : 1u);
+  uint res = (true ? 1u : 1u);
 }
 
 struct tint_symbol {

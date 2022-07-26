@@ -115,14 +115,18 @@ struct UB {
 fn {{$permutation}}() {
 {{/* Build the parameters either as 'var' or inline values */ -}}
 {{-   range $i, $p := $overload.Parameters -}}
-{{-     $class := Eval "StorageClass" $p.Type -}}
+{{-     $class       := Eval "StorageClass" $p.Type -}}
+{{-     $is_abstract := IsAbstract $p.Type -}}
 {{-     if eq "function" $class -}}
 {{-       if eq "ptr" $p.Type.Target.Name -}}
+{{template "Type" index $p.Type.TemplateArguments 1}};
 {{- /*indent*/}}  var arg_{{$i}}: {{template "Type" index $p.Type.TemplateArguments 1}};
 {{          $args.Put $i (printf "&arg_%v" $i) -}}
 {{-       else if and (not $p.IsConst) (eq "var" $mode) -}}
-{{- /*indent*/}}  var arg_{{$i}} = {{Eval "ArgumentValue" $p}};
-{{          $args.Put $i (printf "arg_%v" $i) -}}
+{{-         if $is_abstract }}  const arg_{{$i}} = {{Eval "ArgumentValue" $p}};
+{{          else            }}  var arg_{{$i}} = {{Eval "ArgumentValue" $p}};
+{{          end             }}
+{{-         $args.Put $i (printf "arg_%v" $i) -}}
 {{-       else -}}
 {{-         $args.Put $i (Eval "ArgumentValue" $p) -}}
 {{-       end -}}
@@ -198,6 +202,7 @@ fn compute_main() {
 {{-   end -}}
 {{ end -}}
 
+
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                           define "StorageClass"                          -}}
 {{- /* Returns the storage class for the given Fully Qualified Name       */ -}}
@@ -222,12 +227,12 @@ fn compute_main() {
 {{- /*  Emit the default for the storage class */ -}}
 {{- /*  https://gpuweb.github.io/gpuweb/wgsl/#storage-class */ -}}
 {{-     $storage := Eval "StorageClass" . -}}
-{{-          if eq $storage "function" -}}read_write
-{{-     else if eq $storage "private" -}}read_write
+{{-          if eq $storage "function"  -}}read_write
+{{-     else if eq $storage "private"   -}}read_write
 {{-     else if eq $storage "workgroup" -}}read_write
-{{-     else if eq $storage "uniform" -}}read
-{{-     else if eq $storage "storage" -}}read
-{{-     else if eq $storage "handle" -}}read
+{{-     else if eq $storage "uniform"   -}}read
+{{-     else if eq $storage "storage"   -}}read
+{{-     else if eq $storage "handle"    -}}read
 {{-     end -}}
 {{-   end -}}
 {{- end -}}
@@ -245,10 +250,23 @@ fn compute_main() {
 {{-     if   eq .Name "level"            -}}0
 {{-     else                             -}}1
 {{-     end                              -}}
-{{-   else if eq $ty.Target.Name "u32" -}}1u
-{{-   else if eq $ty.Target.Name "f32" -}}1.0
-{{-   else                             -}}{{template "Type" $ty}}()
-{{-   end                              -}}
+{{-   else if eq $ty.Target.Name "u32"   -}}1u
+{{-   else if eq $ty.Target.Name "f32"   -}}1.f
+{{-   else if eq $ty.Target.Name "fa"    -}}1
+{{-   else if eq $ty.Target.Name "ia"    -}}1.0
+{{-   else if eq $ty.Target.Name "bool"  -}}true
+{{-   else if eq $ty.Target.Name "vec"   -}}
+{{-     $el := Eval "ArgumentValue" "Type" (index $ty.TemplateArguments 1) "Name" ""}}
+{{-     template "Type" $ty}}({{$el}})
+{{-   else if eq $ty.Target.Name "mat"   -}}{{template "Type" $ty}}(
+{{-     $el := Eval "ArgumentValue" "Type" (index $ty.TemplateArguments 2) "Name" ""}}
+{{-     range $col := Iterate (index $ty.TemplateArguments 0)     }}
+{{-       range $row := Iterate (index $ty.TemplateArguments 1)   }}
+{{-         if or $col $row -}}, {{end}}{{$el}}
+{{-       end -}}
+{{-     end -}})
+{{-   else -}}{{template "Type" $ty}}()
+{{-   end  -}}
 {{- end -}}
 
 
@@ -257,7 +275,12 @@ fn compute_main() {
 {{- /* Emits the WGSL for the Fully Qualified Name argument               */ -}}
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-   if IsType .Target -}}
-{{-     if      eq .Target.Name "vec" -}}vec{{index .TemplateArguments 0}}<{{template "Type" index .TemplateArguments 1}}>
+{{-     if IsAbstract . -}}
+{{-              if eq .Target.Name "vec" -}}vec{{index .TemplateArguments 0}}
+{{-         else if eq .Target.Name "mat" -}}mat{{index .TemplateArguments 0}}x{{index .TemplateArguments 1}}
+{{-         else                          -}}
+{{-         end                           -}}
+{{-     else if eq .Target.Name "vec" -}}vec{{index .TemplateArguments 0}}<{{template "Type" index .TemplateArguments 1}}>
 {{-     else if eq .Target.Name "mat" -}}mat{{index .TemplateArguments 0}}x{{index .TemplateArguments 1}}<{{template "Type" index .TemplateArguments 2}}>
 {{-     else                          -}}{{.Target.Name}}{{template "TemplateArguments" .TemplateArguments}}
 {{-     end                           -}}

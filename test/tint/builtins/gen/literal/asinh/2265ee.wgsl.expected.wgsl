@@ -1,5 +1,5 @@
 fn asinh_2265ee() {
-  var res : vec3<f32> = asinh(vec3<f32>());
+  var res : vec3<f32> = asinh(vec3<f32>(1.0f));
 }
 
 @vertex

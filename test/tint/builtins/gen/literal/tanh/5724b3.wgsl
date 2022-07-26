@@ -25,7 +25,7 @@
 
 // fn tanh(vec<2, f32>) -> vec<2, f32>
 fn tanh_5724b3() {
-  var res: vec2<f32> = tanh(vec2<f32>());
+  var res: vec2<f32> = tanh(vec2<f32>(1.f));
 }
 
 @vertex

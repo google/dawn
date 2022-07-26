@@ -3,7 +3,7 @@ float2 tint_atanh(float2 x) {
 }
 
 void atanh_c0e634() {
-  float2 res = tint_atanh((0.0f).xx);
+  float2 res = tint_atanh((1.0f).xx);
 }
 
 struct tint_symbol {

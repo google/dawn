@@ -2,8 +2,8 @@
 
 using namespace metal;
 void max_462050() {
-  float2 arg_0 = float2(0.0f);
-  float2 arg_1 = float2(0.0f);
+  float2 arg_0 = float2(1.0f);
+  float2 arg_1 = float2(1.0f);
   float2 res = fmax(arg_0, arg_1);
 }
 

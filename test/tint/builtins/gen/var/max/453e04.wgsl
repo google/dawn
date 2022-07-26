@@ -25,8 +25,8 @@
 
 // fn max(vec<4, u32>, vec<4, u32>) -> vec<4, u32>
 fn max_453e04() {
-  var arg_0 = vec4<u32>();
-  var arg_1 = vec4<u32>();
+  var arg_0 = vec4<u32>(1u);
+  var arg_1 = vec4<u32>(1u);
   var res: vec4<u32> = max(arg_0, arg_1);
 }
 

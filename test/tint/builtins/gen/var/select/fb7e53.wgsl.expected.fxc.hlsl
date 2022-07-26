@@ -1,7 +1,7 @@
 void select_fb7e53() {
-  bool2 arg_0 = (false).xx;
-  bool2 arg_1 = (false).xx;
-  bool arg_2 = false;
+  bool2 arg_0 = (true).xx;
+  bool2 arg_1 = (true).xx;
+  bool arg_2 = true;
   bool2 res = (arg_2 ? arg_1 : arg_0);
 }
 

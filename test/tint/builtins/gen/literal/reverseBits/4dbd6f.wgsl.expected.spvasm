@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 33
+; Bound: 35
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -32,36 +32,38 @@
           %9 = OpTypeFunction %void
         %int = OpTypeInt 32 1
       %v4int = OpTypeVector %int 4
-         %16 = OpConstantNull %v4int
+      %int_1 = OpConstant %int 1
+         %17 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
 %_ptr_Function_v4int = OpTypePointer Function %v4int
-         %19 = OpTypeFunction %v4float
+         %20 = OpConstantNull %v4int
+         %21 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %reverseBits_4dbd6f = OpFunction %void None %9
          %12 = OpLabel
-        %res = OpVariable %_ptr_Function_v4int Function %16
-         %13 = OpBitReverse %v4int %16
+        %res = OpVariable %_ptr_Function_v4int Function %20
+         %13 = OpBitReverse %v4int %17
                OpStore %res %13
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %19
-         %21 = OpLabel
-         %22 = OpFunctionCall %void %reverseBits_4dbd6f
+%vertex_main_inner = OpFunction %v4float None %21
+         %23 = OpLabel
+         %24 = OpFunctionCall %void %reverseBits_4dbd6f
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %24 = OpLabel
-         %25 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %25
+         %26 = OpLabel
+         %27 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %27
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
-         %28 = OpLabel
-         %29 = OpFunctionCall %void %reverseBits_4dbd6f
+         %30 = OpLabel
+         %31 = OpFunctionCall %void %reverseBits_4dbd6f
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
-         %31 = OpLabel
-         %32 = OpFunctionCall %void %reverseBits_4dbd6f
+         %33 = OpLabel
+         %34 = OpFunctionCall %void %reverseBits_4dbd6f
                OpReturn
                OpFunctionEnd

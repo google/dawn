@@ -25,7 +25,7 @@
 
 // fn step(f32, f32) -> f32
 fn step_0b073b() {
-  var res: f32 = step(1.0, 1.0);
+  var res: f32 = step(1.f, 1.f);
 }
 
 @vertex

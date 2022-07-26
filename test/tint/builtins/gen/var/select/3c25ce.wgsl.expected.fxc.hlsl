@@ -1,7 +1,7 @@
 void select_3c25ce() {
-  bool3 arg_0 = (false).xxx;
-  bool3 arg_1 = (false).xxx;
-  bool arg_2 = false;
+  bool3 arg_0 = (true).xxx;
+  bool3 arg_1 = (true).xxx;
+  bool arg_2 = true;
   bool3 res = (arg_2 ? arg_1 : arg_0);
 }
 

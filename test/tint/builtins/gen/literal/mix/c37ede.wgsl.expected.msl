@@ -2,7 +2,7 @@
 
 using namespace metal;
 void mix_c37ede() {
-  float4 res = mix(float4(0.0f), float4(0.0f), float4(0.0f));
+  float4 res = mix(float4(1.0f), float4(1.0f), float4(1.0f));
 }
 
 struct tint_symbol {

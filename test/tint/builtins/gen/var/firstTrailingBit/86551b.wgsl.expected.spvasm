@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 104
+; Bound: 106
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -63,9 +63,11 @@
          %73 = OpConstantComposite %v4uint %uint_4294967295 %uint_4294967295 %uint_4294967295 %uint_4294967295
        %void = OpTypeVoid
          %80 = OpTypeFunction %void
-         %84 = OpConstantNull %v4int
+      %int_1 = OpConstant %int 1
+         %85 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
 %_ptr_Function_v4int = OpTypePointer Function %v4int
-         %90 = OpTypeFunction %v4float
+         %88 = OpConstantNull %v4int
+         %92 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %tint_first_trailing_bit = OpFunction %v4int None %9
           %v = OpFunctionParameter %v4int
@@ -118,33 +120,33 @@
                OpFunctionEnd
 %firstTrailingBit_86551b = OpFunction %void None %80
          %83 = OpLabel
-      %arg_0 = OpVariable %_ptr_Function_v4int Function %84
-        %res = OpVariable %_ptr_Function_v4int Function %84
-               OpStore %arg_0 %84
-         %88 = OpLoad %v4int %arg_0
-         %87 = OpFunctionCall %v4int %tint_first_trailing_bit %88
-               OpStore %res %87
+      %arg_0 = OpVariable %_ptr_Function_v4int Function %88
+        %res = OpVariable %_ptr_Function_v4int Function %88
+               OpStore %arg_0 %85
+         %90 = OpLoad %v4int %arg_0
+         %89 = OpFunctionCall %v4int %tint_first_trailing_bit %90
+               OpStore %res %89
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %90
-         %92 = OpLabel
-         %93 = OpFunctionCall %void %firstTrailingBit_86551b
+%vertex_main_inner = OpFunction %v4float None %92
+         %94 = OpLabel
+         %95 = OpFunctionCall %void %firstTrailingBit_86551b
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %80
-         %95 = OpLabel
-         %96 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %96
+         %97 = OpLabel
+         %98 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %98
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %80
-         %99 = OpLabel
-        %100 = OpFunctionCall %void %firstTrailingBit_86551b
+        %101 = OpLabel
+        %102 = OpFunctionCall %void %firstTrailingBit_86551b
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %80
-        %102 = OpLabel
-        %103 = OpFunctionCall %void %firstTrailingBit_86551b
+        %104 = OpLabel
+        %105 = OpFunctionCall %void %firstTrailingBit_86551b
                OpReturn
                OpFunctionEnd

@@ -1,7 +1,7 @@
 #version 310 es
 
 void select_c41bd1() {
-  bvec4 res = (false ? bvec4(false) : bvec4(false));
+  bvec4 res = (true ? bvec4(true) : bvec4(true));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void select_c41bd1() {
-  bvec4 res = (false ? bvec4(false) : bvec4(false));
+  bvec4 res = (true ? bvec4(true) : bvec4(true));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void select_c41bd1() {
-  bvec4 res = (false ? bvec4(false) : bvec4(false));
+  bvec4 res = (true ? bvec4(true) : bvec4(true));
 }
 
 void compute_main() {

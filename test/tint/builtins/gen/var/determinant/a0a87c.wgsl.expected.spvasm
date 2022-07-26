@@ -1,10 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 36
+; Bound: 38
 ; Schema: 0
                OpCapability Shader
-         %18 = OpExtInstImport "GLSL.std.450"
+         %21 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Vertex %vertex_main "vertex_main" %value %vertex_point_size
                OpEntryPoint Fragment %fragment_main "fragment_main"
@@ -33,40 +33,42 @@
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
 %mat4v4float = OpTypeMatrix %v4float 4
-         %14 = OpConstantNull %mat4v4float
-%_ptr_Function_mat4v4float = OpTypePointer Function %mat4v4float
-%_ptr_Function_float = OpTypePointer Function %float
-         %22 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
+         %15 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+         %16 = OpConstantComposite %mat4v4float %15 %15 %15 %15
+%_ptr_Function_mat4v4float = OpTypePointer Function %mat4v4float
+         %19 = OpConstantNull %mat4v4float
+%_ptr_Function_float = OpTypePointer Function %float
+         %25 = OpTypeFunction %v4float
 %determinant_a0a87c = OpFunction %void None %9
          %12 = OpLabel
-      %arg_0 = OpVariable %_ptr_Function_mat4v4float Function %14
+      %arg_0 = OpVariable %_ptr_Function_mat4v4float Function %19
         %res = OpVariable %_ptr_Function_float Function %8
-               OpStore %arg_0 %14
-         %19 = OpLoad %mat4v4float %arg_0
-         %17 = OpExtInst %float %18 Determinant %19
-               OpStore %res %17
+               OpStore %arg_0 %16
+         %22 = OpLoad %mat4v4float %arg_0
+         %20 = OpExtInst %float %21 Determinant %22
+               OpStore %res %20
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %22
-         %24 = OpLabel
-         %25 = OpFunctionCall %void %determinant_a0a87c
+%vertex_main_inner = OpFunction %v4float None %25
+         %27 = OpLabel
+         %28 = OpFunctionCall %void %determinant_a0a87c
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %27 = OpLabel
-         %28 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %28
+         %30 = OpLabel
+         %31 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %31
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
-         %31 = OpLabel
-         %32 = OpFunctionCall %void %determinant_a0a87c
+         %33 = OpLabel
+         %34 = OpFunctionCall %void %determinant_a0a87c
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
-         %34 = OpLabel
-         %35 = OpFunctionCall %void %determinant_a0a87c
+         %36 = OpLabel
+         %37 = OpFunctionCall %void %determinant_a0a87c
                OpReturn
                OpFunctionEnd

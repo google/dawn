@@ -1,5 +1,5 @@
 fn reverseBits_222177() {
-  var res : vec2<i32> = reverseBits(vec2<i32>());
+  var res : vec2<i32> = reverseBits(vec2<i32>(1));
 }
 
 @vertex

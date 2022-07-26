@@ -25,7 +25,7 @@
 
 // fn degrees(vec<3, f32>) -> vec<3, f32>
 fn degrees_2af623() {
-  var res: vec3<f32> = degrees(vec3<f32>());
+  var res: vec3<f32> = degrees(vec3<f32>(1.f));
 }
 
 @vertex

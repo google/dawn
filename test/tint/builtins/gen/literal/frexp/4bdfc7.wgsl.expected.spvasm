@@ -40,27 +40,27 @@
         %int = OpTypeInt 32 1
       %v2int = OpTypeVector %int 2
 %__frexp_result_vec2 = OpTypeStruct %v2float %v2int
-         %19 = OpConstantNull %v2float
-%_ptr_Function___frexp_result_vec2 = OpTypePointer Function %__frexp_result_vec2
-         %22 = OpConstantNull %__frexp_result_vec2
-         %23 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
+         %20 = OpConstantComposite %v2float %float_1 %float_1
+%_ptr_Function___frexp_result_vec2 = OpTypePointer Function %__frexp_result_vec2
+         %23 = OpConstantNull %__frexp_result_vec2
+         %24 = OpTypeFunction %v4float
 %frexp_4bdfc7 = OpFunction %void None %9
          %12 = OpLabel
-        %res = OpVariable %_ptr_Function___frexp_result_vec2 Function %22
-         %13 = OpExtInst %__frexp_result_vec2 %18 FrexpStruct %19
+        %res = OpVariable %_ptr_Function___frexp_result_vec2 Function %23
+         %13 = OpExtInst %__frexp_result_vec2 %18 FrexpStruct %20
                OpStore %res %13
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %23
-         %25 = OpLabel
-         %26 = OpFunctionCall %void %frexp_4bdfc7
+%vertex_main_inner = OpFunction %v4float None %24
+         %26 = OpLabel
+         %27 = OpFunctionCall %void %frexp_4bdfc7
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %28 = OpLabel
-         %29 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %29
+         %29 = OpLabel
+         %30 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %30
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd

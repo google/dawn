@@ -1,5 +1,5 @@
 fn mix_0c8c33() {
-  var res : vec3<f32> = mix(vec3<f32>(), vec3<f32>(), vec3<f32>());
+  var res : vec3<f32> = mix(vec3<f32>(1.0f), vec3<f32>(1.0f), vec3<f32>(1.0f));
 }
 
 @vertex

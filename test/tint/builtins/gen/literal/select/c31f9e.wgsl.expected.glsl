@@ -1,7 +1,7 @@
 #version 310 es
 
 void select_c31f9e() {
-  bool res = (false ? false : false);
+  bool res = (true ? true : true);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void select_c31f9e() {
-  bool res = (false ? false : false);
+  bool res = (true ? true : true);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void select_c31f9e() {
-  bool res = (false ? false : false);
+  bool res = (true ? true : true);
 }
 
 void compute_main() {

@@ -25,7 +25,7 @@
 
 // fn abs(vec<2, u32>) -> vec<2, u32>
 fn abs_7f28e6() {
-  var arg_0 = vec2<u32>();
+  var arg_0 = vec2<u32>(1u);
   var res: vec2<u32> = abs(arg_0);
 }
 

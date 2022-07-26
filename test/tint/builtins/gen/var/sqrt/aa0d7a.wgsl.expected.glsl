@@ -1,7 +1,7 @@
 #version 310 es
 
 void sqrt_aa0d7a() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = sqrt(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void sqrt_aa0d7a() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = sqrt(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void sqrt_aa0d7a() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = sqrt(arg_0);
 }
 

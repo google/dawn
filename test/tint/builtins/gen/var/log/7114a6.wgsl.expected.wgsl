@@ -1,5 +1,5 @@
 fn log_7114a6() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.0f;
   var res : f32 = log(arg_0);
 }
 

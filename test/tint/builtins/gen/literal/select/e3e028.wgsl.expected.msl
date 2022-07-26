@@ -2,7 +2,7 @@
 
 using namespace metal;
 void select_e3e028() {
-  bool4 res = select(bool4(false), bool4(false), bool4(false));
+  bool4 res = select(bool4(true), bool4(true), bool4(true));
 }
 
 struct tint_symbol {

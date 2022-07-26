@@ -1,8 +1,8 @@
 #version 310 es
 
 void atan2_57fb13() {
-  vec2 arg_0 = vec2(0.0f);
-  vec2 arg_1 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
+  vec2 arg_1 = vec2(1.0f);
   vec2 res = atan(arg_0, arg_1);
 }
 
@@ -23,8 +23,8 @@ void main() {
 precision mediump float;
 
 void atan2_57fb13() {
-  vec2 arg_0 = vec2(0.0f);
-  vec2 arg_1 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
+  vec2 arg_1 = vec2(1.0f);
   vec2 res = atan(arg_0, arg_1);
 }
 
@@ -39,8 +39,8 @@ void main() {
 #version 310 es
 
 void atan2_57fb13() {
-  vec2 arg_0 = vec2(0.0f);
-  vec2 arg_1 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
+  vec2 arg_1 = vec2(1.0f);
   vec2 res = atan(arg_0, arg_1);
 }
 

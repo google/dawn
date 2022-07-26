@@ -1,7 +1,7 @@
 void fma_e17c5c() {
-  float3 arg_0 = (0.0f).xxx;
-  float3 arg_1 = (0.0f).xxx;
-  float3 arg_2 = (0.0f).xxx;
+  float3 arg_0 = (1.0f).xxx;
+  float3 arg_1 = (1.0f).xxx;
+  float3 arg_2 = (1.0f).xxx;
   float3 res = mad(arg_0, arg_1, arg_2);
 }
 

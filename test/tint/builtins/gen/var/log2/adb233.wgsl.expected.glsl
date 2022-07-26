@@ -1,7 +1,7 @@
 #version 310 es
 
 void log2_adb233() {
-  vec3 arg_0 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
   vec3 res = log2(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void log2_adb233() {
-  vec3 arg_0 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
   vec3 res = log2(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void log2_adb233() {
-  vec3 arg_0 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
   vec3 res = log2(arg_0);
 }
 

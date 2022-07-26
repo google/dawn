@@ -3,7 +3,7 @@ float2 tint_acosh(float2 x) {
 }
 
 void acosh_640883() {
-  float2 res = tint_acosh((0.0f).xx);
+  float2 res = tint_acosh((1.0f).xx);
 }
 
 struct tint_symbol {

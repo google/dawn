@@ -25,7 +25,7 @@
 
 // fn cosh(vec<4, f32>) -> vec<4, f32>
 fn cosh_e0c1de() {
-  var arg_0 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.f);
   var res: vec4<f32> = cosh(arg_0);
 }
 

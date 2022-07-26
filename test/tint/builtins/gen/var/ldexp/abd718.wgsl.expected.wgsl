@@ -1,6 +1,6 @@
 fn ldexp_abd718() {
-  var arg_0 = vec2<f32>();
-  var arg_1 = vec2<i32>();
+  var arg_0 = vec2<f32>(1.0f);
+  var arg_1 = vec2<i32>(1);
   var res : vec2<f32> = ldexp(arg_0, arg_1);
 }
 

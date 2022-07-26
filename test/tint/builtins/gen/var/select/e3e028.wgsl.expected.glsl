@@ -1,9 +1,9 @@
 #version 310 es
 
 void select_e3e028() {
-  bvec4 arg_0 = bvec4(false);
-  bvec4 arg_1 = bvec4(false);
-  bvec4 arg_2 = bvec4(false);
+  bvec4 arg_0 = bvec4(true);
+  bvec4 arg_1 = bvec4(true);
+  bvec4 arg_2 = bvec4(true);
   bvec4 res = mix(arg_0, arg_1, arg_2);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void select_e3e028() {
-  bvec4 arg_0 = bvec4(false);
-  bvec4 arg_1 = bvec4(false);
-  bvec4 arg_2 = bvec4(false);
+  bvec4 arg_0 = bvec4(true);
+  bvec4 arg_1 = bvec4(true);
+  bvec4 arg_2 = bvec4(true);
   bvec4 res = mix(arg_0, arg_1, arg_2);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void select_e3e028() {
-  bvec4 arg_0 = bvec4(false);
-  bvec4 arg_1 = bvec4(false);
-  bvec4 arg_2 = bvec4(false);
+  bvec4 arg_0 = bvec4(true);
+  bvec4 arg_1 = bvec4(true);
+  bvec4 arg_2 = bvec4(true);
   bvec4 res = mix(arg_0, arg_1, arg_2);
 }
 

@@ -13,7 +13,7 @@ frexp_result_vec3 tint_frexp(vec3 param_0) {
 
 
 void frexp_368997() {
-  vec3 arg_0 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
   frexp_result_vec3 res = tint_frexp(arg_0);
 }
 
@@ -46,7 +46,7 @@ frexp_result_vec3 tint_frexp(vec3 param_0) {
 
 
 void frexp_368997() {
-  vec3 arg_0 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
   frexp_result_vec3 res = tint_frexp(arg_0);
 }
 
@@ -73,7 +73,7 @@ frexp_result_vec3 tint_frexp(vec3 param_0) {
 
 
 void frexp_368997() {
-  vec3 arg_0 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
   frexp_result_vec3 res = tint_frexp(arg_0);
 }
 

@@ -25,7 +25,7 @@
 
 // fn acosh(vec<2, f32>) -> vec<2, f32>
 fn acosh_640883() {
-  var res: vec2<f32> = acosh(vec2<f32>());
+  var res: vec2<f32> = acosh(vec2<f32>(1.f));
 }
 
 @vertex

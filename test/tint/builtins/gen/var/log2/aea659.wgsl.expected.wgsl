@@ -1,5 +1,5 @@
 fn log2_aea659() {
-  var arg_0 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.0f);
   var res : vec2<f32> = log2(arg_0);
 }
 

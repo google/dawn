@@ -1,5 +1,5 @@
 fn countLeadingZeros_eab32b() {
-  var arg_0 = vec4<i32>();
+  var arg_0 = vec4<i32>(1);
   var res : vec4<i32> = countLeadingZeros(arg_0);
 }
 

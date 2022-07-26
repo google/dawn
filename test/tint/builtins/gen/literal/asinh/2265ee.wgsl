@@ -25,7 +25,7 @@
 
 // fn asinh(vec<3, f32>) -> vec<3, f32>
 fn asinh_2265ee() {
-  var res: vec3<f32> = asinh(vec3<f32>());
+  var res: vec3<f32> = asinh(vec3<f32>(1.f));
 }
 
 @vertex

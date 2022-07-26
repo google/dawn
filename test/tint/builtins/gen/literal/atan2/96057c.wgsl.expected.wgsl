@@ -1,5 +1,5 @@
 fn atan2_96057c() {
-  var res : f32 = atan2(1.0, 1.0);
+  var res : f32 = atan2(1.0f, 1.0f);
 }
 
 @vertex

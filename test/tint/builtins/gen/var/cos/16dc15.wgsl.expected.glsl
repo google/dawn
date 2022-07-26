@@ -1,7 +1,7 @@
 #version 310 es
 
 void cos_16dc15() {
-  vec3 arg_0 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
   vec3 res = cos(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void cos_16dc15() {
-  vec3 arg_0 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
   vec3 res = cos(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void cos_16dc15() {
-  vec3 arg_0 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
   vec3 res = cos(arg_0);
 }
 

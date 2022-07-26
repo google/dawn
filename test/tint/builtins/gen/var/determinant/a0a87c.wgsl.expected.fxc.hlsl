@@ -1,5 +1,5 @@
 void determinant_a0a87c() {
-  float4x4 arg_0 = float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx);
+  float4x4 arg_0 = float4x4((1.0f).xxxx, (1.0f).xxxx, (1.0f).xxxx, (1.0f).xxxx);
   float res = determinant(arg_0);
 }
 

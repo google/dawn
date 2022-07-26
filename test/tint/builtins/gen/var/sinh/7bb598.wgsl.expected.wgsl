@@ -1,5 +1,5 @@
 fn sinh_7bb598() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.0f;
   var res : f32 = sinh(arg_0);
 }
 

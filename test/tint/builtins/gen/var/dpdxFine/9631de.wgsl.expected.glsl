@@ -2,7 +2,7 @@
 precision mediump float;
 
 void dpdxFine_9631de() {
-  vec2 arg_0 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
   vec2 res = dFdx(arg_0);
 }
 

@@ -1,5 +1,5 @@
 fn exp_d98450() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.0f);
   var res : vec3<f32> = exp(arg_0);
 }
 

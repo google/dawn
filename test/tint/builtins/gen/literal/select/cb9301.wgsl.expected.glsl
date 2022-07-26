@@ -1,7 +1,7 @@
 #version 310 es
 
 void select_cb9301() {
-  bvec2 res = mix(bvec2(false), bvec2(false), bvec2(false));
+  bvec2 res = mix(bvec2(true), bvec2(true), bvec2(true));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void select_cb9301() {
-  bvec2 res = mix(bvec2(false), bvec2(false), bvec2(false));
+  bvec2 res = mix(bvec2(true), bvec2(true), bvec2(true));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void select_cb9301() {
-  bvec2 res = mix(bvec2(false), bvec2(false), bvec2(false));
+  bvec2 res = mix(bvec2(true), bvec2(true), bvec2(true));
 }
 
 void compute_main() {

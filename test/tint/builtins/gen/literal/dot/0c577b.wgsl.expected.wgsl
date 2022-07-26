@@ -1,5 +1,5 @@
 fn dot_0c577b() {
-  var res : f32 = dot(vec4<f32>(), vec4<f32>());
+  var res : f32 = dot(vec4<f32>(1.0f), vec4<f32>(1.0f));
 }
 
 @vertex

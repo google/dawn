@@ -1,5 +1,5 @@
 void any_e755c1() {
-  bool3 arg_0 = (false).xxx;
+  bool3 arg_0 = (true).xxx;
   bool res = any(arg_0);
 }
 

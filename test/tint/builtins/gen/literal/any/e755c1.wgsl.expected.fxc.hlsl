@@ -1,5 +1,5 @@
 void any_e755c1() {
-  bool res = any((false).xxx);
+  bool res = any((true).xxx);
 }
 
 struct tint_symbol {

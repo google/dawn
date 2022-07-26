@@ -1,7 +1,7 @@
 #version 310 es
 
 void sinh_b9860e() {
-  vec2 arg_0 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
   vec2 res = sinh(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void sinh_b9860e() {
-  vec2 arg_0 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
   vec2 res = sinh(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void sinh_b9860e() {
-  vec2 arg_0 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
   vec2 res = sinh(arg_0);
 }
 

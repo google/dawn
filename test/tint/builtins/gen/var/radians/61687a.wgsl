@@ -25,7 +25,7 @@
 
 // fn radians(vec<2, f32>) -> vec<2, f32>
 fn radians_61687a() {
-  var arg_0 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.f);
   var res: vec2<f32> = radians(arg_0);
 }
 

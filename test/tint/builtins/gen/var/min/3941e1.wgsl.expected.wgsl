@@ -1,6 +1,6 @@
 fn min_3941e1() {
-  var arg_0 = vec4<i32>();
-  var arg_1 = vec4<i32>();
+  var arg_0 = vec4<i32>(1);
+  var arg_1 = vec4<i32>(1);
   var res : vec4<i32> = min(arg_0, arg_1);
 }
 

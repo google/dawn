@@ -1,5 +1,5 @@
 fn ldexp_db8b49() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.0f;
   var arg_1 = 1;
   var res : f32 = ldexp(arg_0, arg_1);
 }

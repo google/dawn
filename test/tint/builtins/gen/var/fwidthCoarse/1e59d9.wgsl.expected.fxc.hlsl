@@ -1,5 +1,5 @@
 void fwidthCoarse_1e59d9() {
-  float3 arg_0 = (0.0f).xxx;
+  float3 arg_0 = (1.0f).xxx;
   float3 res = fwidth(arg_0);
 }
 

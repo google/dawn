@@ -2,8 +2,8 @@
 
 using namespace metal;
 void mix_2fadab() {
-  float2 arg_0 = float2(0.0f);
-  float2 arg_1 = float2(0.0f);
+  float2 arg_0 = float2(1.0f);
+  float2 arg_1 = float2(1.0f);
   float arg_2 = 1.0f;
   float2 res = mix(arg_0, arg_1, arg_2);
 }

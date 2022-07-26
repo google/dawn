@@ -1,5 +1,5 @@
 fn determinant_a0a87c() {
-  var res : f32 = determinant(mat4x4<f32>());
+  var res : f32 = determinant(mat4x4<f32>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f));
 }
 
 @vertex

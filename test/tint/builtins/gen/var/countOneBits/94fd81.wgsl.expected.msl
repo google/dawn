@@ -2,7 +2,7 @@
 
 using namespace metal;
 void countOneBits_94fd81() {
-  uint2 arg_0 = uint2(0u);
+  uint2 arg_0 = uint2(1u);
   uint2 res = popcount(arg_0);
 }
 

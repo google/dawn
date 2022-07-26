@@ -1,7 +1,7 @@
 void select_c41bd1() {
-  bool4 arg_0 = (false).xxxx;
-  bool4 arg_1 = (false).xxxx;
-  bool arg_2 = false;
+  bool4 arg_0 = (true).xxxx;
+  bool4 arg_1 = (true).xxxx;
+  bool arg_2 = true;
   bool4 res = (arg_2 ? arg_1 : arg_0);
 }
 

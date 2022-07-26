@@ -25,7 +25,7 @@
 
 // fn modf(vec<3, f32>) -> __modf_result_vec<3>
 fn modf_9b75f7() {
-  var res = modf(vec3<f32>());
+  var res = modf(vec3<f32>(1.f));
 }
 
 @vertex

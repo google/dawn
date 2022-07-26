@@ -1,8 +1,8 @@
 #version 310 es
 
 void refract_cd905f() {
-  vec2 arg_0 = vec2(0.0f);
-  vec2 arg_1 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
+  vec2 arg_1 = vec2(1.0f);
   float arg_2 = 1.0f;
   vec2 res = refract(arg_0, arg_1, arg_2);
 }
@@ -24,8 +24,8 @@ void main() {
 precision mediump float;
 
 void refract_cd905f() {
-  vec2 arg_0 = vec2(0.0f);
-  vec2 arg_1 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
+  vec2 arg_1 = vec2(1.0f);
   float arg_2 = 1.0f;
   vec2 res = refract(arg_0, arg_1, arg_2);
 }
@@ -41,8 +41,8 @@ void main() {
 #version 310 es
 
 void refract_cd905f() {
-  vec2 arg_0 = vec2(0.0f);
-  vec2 arg_1 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
+  vec2 arg_1 = vec2(1.0f);
   float arg_2 = 1.0f;
   vec2 res = refract(arg_0, arg_1, arg_2);
 }

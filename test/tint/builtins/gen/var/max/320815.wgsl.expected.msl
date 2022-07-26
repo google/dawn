@@ -2,8 +2,8 @@
 
 using namespace metal;
 void max_320815() {
-  uint2 arg_0 = uint2(0u);
-  uint2 arg_1 = uint2(0u);
+  uint2 arg_0 = uint2(1u);
+  uint2 arg_1 = uint2(1u);
   uint2 res = max(arg_0, arg_1);
 }
 

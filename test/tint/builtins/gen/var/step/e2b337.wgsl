@@ -25,8 +25,8 @@
 
 // fn step(vec<4, f32>, vec<4, f32>) -> vec<4, f32>
 fn step_e2b337() {
-  var arg_0 = vec4<f32>();
-  var arg_1 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.f);
+  var arg_1 = vec4<f32>(1.f);
   var res: vec4<f32> = step(arg_0, arg_1);
 }
 

@@ -1,5 +1,5 @@
 void select_c4a4ef() {
-  uint4 res = ((false).xxxx ? (0u).xxxx : (0u).xxxx);
+  uint4 res = ((true).xxxx ? (1u).xxxx : (1u).xxxx);
 }
 
 struct tint_symbol {

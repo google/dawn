@@ -25,7 +25,7 @@
 
 // fn insertBits(vec<2, i32>, vec<2, i32>, u32, u32) -> vec<2, i32>
 fn insertBits_fe6ba6() {
-  var res: vec2<i32> = insertBits(vec2<i32>(), vec2<i32>(), 1u, 1u);
+  var res: vec2<i32> = insertBits(vec2<i32>(1), vec2<i32>(1), 1u, 1u);
 }
 
 @vertex

@@ -1,5 +1,5 @@
 void abs_7f28e6() {
-  uint2 res = abs((0u).xx);
+  uint2 res = abs((1u).xx);
 }
 
 struct tint_symbol {

@@ -25,7 +25,7 @@
 
 // fn frexp(vec<2, f32>) -> __frexp_result_vec<2>
 fn frexp_4bdfc7() {
-  var res = frexp(vec2<f32>());
+  var res = frexp(vec2<f32>(1.f));
 }
 
 @vertex

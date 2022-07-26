@@ -1,5 +1,5 @@
 fn fwidthFine_f1742d() {
-  var res : f32 = fwidthFine(1.0);
+  var res : f32 = fwidthFine(1.0f);
 }
 
 @fragment

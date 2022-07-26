@@ -25,7 +25,7 @@
 
 // fn extractBits(vec<4, u32>, u32, u32) -> vec<4, u32>
 fn extractBits_631377() {
-  var arg_0 = vec4<u32>();
+  var arg_0 = vec4<u32>(1u);
   var arg_1 = 1u;
   var arg_2 = 1u;
   var res: vec4<u32> = extractBits(arg_0, arg_1, arg_2);

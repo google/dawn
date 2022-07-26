@@ -13,7 +13,7 @@ modf_result_vec3 tint_modf(vec3 param_0) {
 
 
 void modf_9b75f7() {
-  vec3 arg_0 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
   modf_result_vec3 res = tint_modf(arg_0);
 }
 
@@ -46,7 +46,7 @@ modf_result_vec3 tint_modf(vec3 param_0) {
 
 
 void modf_9b75f7() {
-  vec3 arg_0 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
   modf_result_vec3 res = tint_modf(arg_0);
 }
 
@@ -73,7 +73,7 @@ modf_result_vec3 tint_modf(vec3 param_0) {
 
 
 void modf_9b75f7() {
-  vec3 arg_0 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
   modf_result_vec3 res = tint_modf(arg_0);
 }
 

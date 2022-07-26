@@ -1,5 +1,5 @@
 fn select_ebfea2() {
-  var res : vec3<f32> = select(vec3<f32>(), vec3<f32>(), vec3<bool>());
+  var res : vec3<f32> = select(vec3<f32>(1.0f), vec3<f32>(1.0f), vec3<bool>(true));
 }
 
 @vertex

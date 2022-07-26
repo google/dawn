@@ -1,5 +1,5 @@
 void abs_1ce782() {
-  uint4 arg_0 = (0u).xxxx;
+  uint4 arg_0 = (1u).xxxx;
   uint4 res = abs(arg_0);
 }
 

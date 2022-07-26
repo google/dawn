@@ -1,5 +1,5 @@
 fn reflect_b61e10() {
-  var res : vec2<f32> = reflect(vec2<f32>(), vec2<f32>());
+  var res : vec2<f32> = reflect(vec2<f32>(1.0f), vec2<f32>(1.0f));
 }
 
 @vertex

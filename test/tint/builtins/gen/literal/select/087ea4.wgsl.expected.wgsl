@@ -1,5 +1,5 @@
 fn select_087ea4() {
-  var res : vec4<u32> = select(vec4<u32>(), vec4<u32>(), bool());
+  var res : vec4<u32> = select(vec4<u32>(1u), vec4<u32>(1u), true);
 }
 
 @vertex

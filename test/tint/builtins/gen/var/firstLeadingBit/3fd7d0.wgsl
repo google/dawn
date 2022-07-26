@@ -25,7 +25,7 @@
 
 // fn firstLeadingBit(vec<3, u32>) -> vec<3, u32>
 fn firstLeadingBit_3fd7d0() {
-  var arg_0 = vec3<u32>();
+  var arg_0 = vec3<u32>(1u);
   var res: vec3<u32> = firstLeadingBit(arg_0);
 }
 

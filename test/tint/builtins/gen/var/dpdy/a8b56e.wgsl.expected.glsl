@@ -2,7 +2,7 @@
 precision mediump float;
 
 void dpdy_a8b56e() {
-  vec2 arg_0 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
   vec2 res = dFdy(arg_0);
 }
 

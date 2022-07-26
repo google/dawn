@@ -1,8 +1,8 @@
 #version 310 es
 
 void max_e8192f() {
-  ivec2 arg_0 = ivec2(0);
-  ivec2 arg_1 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
+  ivec2 arg_1 = ivec2(1);
   ivec2 res = max(arg_0, arg_1);
 }
 
@@ -23,8 +23,8 @@ void main() {
 precision mediump float;
 
 void max_e8192f() {
-  ivec2 arg_0 = ivec2(0);
-  ivec2 arg_1 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
+  ivec2 arg_1 = ivec2(1);
   ivec2 res = max(arg_0, arg_1);
 }
 
@@ -39,8 +39,8 @@ void main() {
 #version 310 es
 
 void max_e8192f() {
-  ivec2 arg_0 = ivec2(0);
-  ivec2 arg_1 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
+  ivec2 arg_1 = ivec2(1);
   ivec2 res = max(arg_0, arg_1);
 }
 

@@ -1,5 +1,5 @@
 fn log_3da25a() {
-  var res : vec4<f32> = log(vec4<f32>());
+  var res : vec4<f32> = log(vec4<f32>(1.0f));
 }
 
 @vertex

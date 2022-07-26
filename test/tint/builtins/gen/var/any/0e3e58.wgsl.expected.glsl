@@ -1,7 +1,7 @@
 #version 310 es
 
 void any_0e3e58() {
-  bvec2 arg_0 = bvec2(false);
+  bvec2 arg_0 = bvec2(true);
   bool res = any(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void any_0e3e58() {
-  bvec2 arg_0 = bvec2(false);
+  bvec2 arg_0 = bvec2(true);
   bool res = any(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void any_0e3e58() {
-  bvec2 arg_0 = bvec2(false);
+  bvec2 arg_0 = bvec2(true);
   bool res = any(arg_0);
 }
 

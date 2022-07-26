@@ -25,7 +25,7 @@
 
 // fn min(vec<3, f32>, vec<3, f32>) -> vec<3, f32>
 fn min_93cfc4() {
-  var res: vec3<f32> = min(vec3<f32>(), vec3<f32>());
+  var res: vec3<f32> = min(vec3<f32>(1.f), vec3<f32>(1.f));
 }
 
 @vertex

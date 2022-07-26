@@ -25,7 +25,7 @@
 
 // fn pow(f32, f32) -> f32
 fn pow_46e029() {
-  var res: f32 = pow(1.0, 1.0);
+  var res: f32 = pow(1.f, 1.f);
 }
 
 @vertex

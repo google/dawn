@@ -2,8 +2,8 @@
 
 using namespace metal;
 void distance_aa4055() {
-  float2 arg_0 = float2(0.0f);
-  float2 arg_1 = float2(0.0f);
+  float2 arg_0 = float2(1.0f);
+  float2 arg_1 = float2(1.0f);
   float res = distance(arg_0, arg_1);
 }
 

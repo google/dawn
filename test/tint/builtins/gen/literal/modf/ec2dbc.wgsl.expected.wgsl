@@ -1,5 +1,5 @@
 fn modf_ec2dbc() {
-  var res = modf(vec4<f32>());
+  var res = modf(vec4<f32>(1.0f));
 }
 
 @vertex

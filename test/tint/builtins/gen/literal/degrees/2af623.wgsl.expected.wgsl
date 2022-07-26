@@ -1,5 +1,5 @@
 fn degrees_2af623() {
-  var res : vec3<f32> = degrees(vec3<f32>());
+  var res : vec3<f32> = degrees(vec3<f32>(1.0f));
 }
 
 @vertex

@@ -1,6 +1,6 @@
 void max_85e6bc() {
-  int4 arg_0 = (0).xxxx;
-  int4 arg_1 = (0).xxxx;
+  int4 arg_0 = (1).xxxx;
+  int4 arg_1 = (1).xxxx;
   int4 res = max(arg_0, arg_1);
 }
 

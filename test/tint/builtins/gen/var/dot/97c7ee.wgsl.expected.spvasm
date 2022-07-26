@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 45
+; Bound: 47
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -34,50 +34,52 @@
           %9 = OpTypeFunction %void
        %uint = OpTypeInt 32 0
      %v2uint = OpTypeVector %uint 2
-         %15 = OpConstantNull %v2uint
+     %uint_1 = OpConstant %uint 1
+         %16 = OpConstantComposite %v2uint %uint_1 %uint_1
 %_ptr_Function_v2uint = OpTypePointer Function %v2uint
+         %19 = OpConstantNull %v2uint
 %_ptr_Function_uint = OpTypePointer Function %uint
-         %30 = OpConstantNull %uint
-         %31 = OpTypeFunction %v4float
+         %32 = OpConstantNull %uint
+         %33 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
  %dot_97c7ee = OpFunction %void None %9
          %12 = OpLabel
-      %arg_0 = OpVariable %_ptr_Function_v2uint Function %15
-      %arg_1 = OpVariable %_ptr_Function_v2uint Function %15
-        %res = OpVariable %_ptr_Function_uint Function %30
-               OpStore %arg_0 %15
-               OpStore %arg_1 %15
-         %20 = OpLoad %v2uint %arg_0
-         %21 = OpLoad %v2uint %arg_1
-         %22 = OpCompositeExtract %uint %20 0
-         %23 = OpCompositeExtract %uint %21 0
-         %24 = OpIMul %uint %22 %23
-         %25 = OpCompositeExtract %uint %20 1
-         %26 = OpCompositeExtract %uint %21 1
-         %27 = OpIMul %uint %25 %26
-         %19 = OpIAdd %uint %24 %27
-               OpStore %res %19
+      %arg_0 = OpVariable %_ptr_Function_v2uint Function %19
+      %arg_1 = OpVariable %_ptr_Function_v2uint Function %19
+        %res = OpVariable %_ptr_Function_uint Function %32
+               OpStore %arg_0 %16
+               OpStore %arg_1 %16
+         %22 = OpLoad %v2uint %arg_0
+         %23 = OpLoad %v2uint %arg_1
+         %24 = OpCompositeExtract %uint %22 0
+         %25 = OpCompositeExtract %uint %23 0
+         %26 = OpIMul %uint %24 %25
+         %27 = OpCompositeExtract %uint %22 1
+         %28 = OpCompositeExtract %uint %23 1
+         %29 = OpIMul %uint %27 %28
+         %21 = OpIAdd %uint %26 %29
+               OpStore %res %21
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %31
-         %33 = OpLabel
-         %34 = OpFunctionCall %void %dot_97c7ee
+%vertex_main_inner = OpFunction %v4float None %33
+         %35 = OpLabel
+         %36 = OpFunctionCall %void %dot_97c7ee
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %36 = OpLabel
-         %37 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %37
+         %38 = OpLabel
+         %39 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %39
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
-         %40 = OpLabel
-         %41 = OpFunctionCall %void %dot_97c7ee
+         %42 = OpLabel
+         %43 = OpFunctionCall %void %dot_97c7ee
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
-         %43 = OpLabel
-         %44 = OpFunctionCall %void %dot_97c7ee
+         %45 = OpLabel
+         %46 = OpFunctionCall %void %dot_97c7ee
                OpReturn
                OpFunctionEnd

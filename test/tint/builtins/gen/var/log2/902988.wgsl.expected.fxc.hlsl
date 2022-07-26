@@ -1,5 +1,5 @@
 void log2_902988() {
-  float4 arg_0 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
   float4 res = log2(arg_0);
 }
 

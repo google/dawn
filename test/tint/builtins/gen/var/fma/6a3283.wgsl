@@ -25,9 +25,9 @@
 
 // fn fma(vec<4, f32>, vec<4, f32>, vec<4, f32>) -> vec<4, f32>
 fn fma_6a3283() {
-  var arg_0 = vec4<f32>();
-  var arg_1 = vec4<f32>();
-  var arg_2 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.f);
+  var arg_1 = vec4<f32>(1.f);
+  var arg_2 = vec4<f32>(1.f);
   var res: vec4<f32> = fma(arg_0, arg_1, arg_2);
 }
 

@@ -3,7 +3,7 @@ float2 tint_degrees(float2 param_0) {
 }
 
 void degrees_1ad5df() {
-  float2 arg_0 = (0.0f).xx;
+  float2 arg_0 = (1.0f).xx;
   float2 res = tint_degrees(arg_0);
 }
 

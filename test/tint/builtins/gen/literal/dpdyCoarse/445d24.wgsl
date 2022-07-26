@@ -25,7 +25,7 @@
 
 // fn dpdyCoarse(vec<4, f32>) -> vec<4, f32>
 fn dpdyCoarse_445d24() {
-  var res: vec4<f32> = dpdyCoarse(vec4<f32>());
+  var res: vec4<f32> = dpdyCoarse(vec4<f32>(1.f));
 }
 
 @fragment

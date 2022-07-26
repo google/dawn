@@ -7,7 +7,7 @@ ivec4 tint_insert_bits(ivec4 v, ivec4 n, uint offset, uint count) {
 }
 
 void insertBits_d86978() {
-  ivec4 res = tint_insert_bits(ivec4(0), ivec4(0), 1u, 1u);
+  ivec4 res = tint_insert_bits(ivec4(1), ivec4(1), 1u, 1u);
 }
 
 vec4 vertex_main() {
@@ -33,7 +33,7 @@ ivec4 tint_insert_bits(ivec4 v, ivec4 n, uint offset, uint count) {
 }
 
 void insertBits_d86978() {
-  ivec4 res = tint_insert_bits(ivec4(0), ivec4(0), 1u, 1u);
+  ivec4 res = tint_insert_bits(ivec4(1), ivec4(1), 1u, 1u);
 }
 
 void fragment_main() {
@@ -53,7 +53,7 @@ ivec4 tint_insert_bits(ivec4 v, ivec4 n, uint offset, uint count) {
 }
 
 void insertBits_d86978() {
-  ivec4 res = tint_insert_bits(ivec4(0), ivec4(0), 1u, 1u);
+  ivec4 res = tint_insert_bits(ivec4(1), ivec4(1), 1u, 1u);
 }
 
 void compute_main() {

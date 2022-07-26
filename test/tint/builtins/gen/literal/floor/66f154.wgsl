@@ -25,7 +25,7 @@
 
 // fn floor(f32) -> f32
 fn floor_66f154() {
-  var res: f32 = floor(1.0);
+  var res: f32 = floor(1.f);
 }
 
 @vertex

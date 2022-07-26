@@ -25,8 +25,8 @@
 
 // fn reflect(vec<4, f32>, vec<4, f32>) -> vec<4, f32>
 fn reflect_05357e() {
-  var arg_0 = vec4<f32>();
-  var arg_1 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.f);
+  var arg_1 = vec4<f32>(1.f);
   var res: vec4<f32> = reflect(arg_0, arg_1);
 }
 

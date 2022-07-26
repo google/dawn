@@ -25,8 +25,8 @@
 
 // fn insertBits(vec<3, u32>, vec<3, u32>, u32, u32) -> vec<3, u32>
 fn insertBits_87826b() {
-  var arg_0 = vec3<u32>();
-  var arg_1 = vec3<u32>();
+  var arg_0 = vec3<u32>(1u);
+  var arg_1 = vec3<u32>(1u);
   var arg_2 = 1u;
   var arg_3 = 1u;
   var res: vec3<u32> = insertBits(arg_0, arg_1, arg_2, arg_3);

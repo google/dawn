@@ -1,5 +1,5 @@
 fn atan_ad96e4() {
-  var res : vec2<f32> = atan(vec2<f32>());
+  var res : vec2<f32> = atan(vec2<f32>(1.0f));
 }
 
 @vertex

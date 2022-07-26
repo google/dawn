@@ -25,7 +25,7 @@
 
 // fn sinh(vec<2, f32>) -> vec<2, f32>
 fn sinh_b9860e() {
-  var res: vec2<f32> = sinh(vec2<f32>());
+  var res: vec2<f32> = sinh(vec2<f32>(1.f));
 }
 
 @vertex

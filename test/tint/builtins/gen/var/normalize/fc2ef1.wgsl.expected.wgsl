@@ -1,5 +1,5 @@
 fn normalize_fc2ef1() {
-  var arg_0 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.0f);
   var res : vec2<f32> = normalize(arg_0);
 }
 

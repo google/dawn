@@ -2,7 +2,7 @@
 
 using namespace metal;
 void cosh_c13756() {
-  float2 arg_0 = float2(0.0f);
+  float2 arg_0 = float2(1.0f);
   float2 res = cosh(arg_0);
 }
 

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 108
+; Bound: 110
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -64,8 +64,10 @@
          %78 = OpConstantComposite %v4uint %uint_4294967295 %uint_4294967295 %uint_4294967295 %uint_4294967295
        %void = OpTypeVoid
          %85 = OpTypeFunction %void
+      %int_1 = OpConstant %int 1
+         %90 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
 %_ptr_Function_v4int = OpTypePointer Function %v4int
-         %94 = OpTypeFunction %v4float
+         %96 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %tint_first_leading_bit = OpFunction %v4int None %9
           %v = OpFunctionParameter %v4int
@@ -124,31 +126,31 @@
          %88 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_v4int Function %18
         %res = OpVariable %_ptr_Function_v4int Function %18
-               OpStore %arg_0 %18
-         %92 = OpLoad %v4int %arg_0
-         %91 = OpFunctionCall %v4int %tint_first_leading_bit %92
-               OpStore %res %91
+               OpStore %arg_0 %90
+         %94 = OpLoad %v4int %arg_0
+         %93 = OpFunctionCall %v4int %tint_first_leading_bit %94
+               OpStore %res %93
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %94
-         %96 = OpLabel
-         %97 = OpFunctionCall %void %firstLeadingBit_c1f940
+%vertex_main_inner = OpFunction %v4float None %96
+         %98 = OpLabel
+         %99 = OpFunctionCall %void %firstLeadingBit_c1f940
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %85
-         %99 = OpLabel
-        %100 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %100
+        %101 = OpLabel
+        %102 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %102
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %85
-        %103 = OpLabel
-        %104 = OpFunctionCall %void %firstLeadingBit_c1f940
+        %105 = OpLabel
+        %106 = OpFunctionCall %void %firstLeadingBit_c1f940
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %85
-        %106 = OpLabel
-        %107 = OpFunctionCall %void %firstLeadingBit_c1f940
+        %108 = OpLabel
+        %109 = OpFunctionCall %void %firstLeadingBit_c1f940
                OpReturn
                OpFunctionEnd

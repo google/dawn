@@ -1,5 +1,5 @@
 fn extractBits_631377() {
-  var res : vec4<u32> = extractBits(vec4<u32>(), 1u, 1u);
+  var res : vec4<u32> = extractBits(vec4<u32>(1u), 1u, 1u);
 }
 
 @vertex

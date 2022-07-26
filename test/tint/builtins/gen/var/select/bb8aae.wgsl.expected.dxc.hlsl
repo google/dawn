@@ -1,7 +1,7 @@
 void select_bb8aae() {
-  float4 arg_0 = (0.0f).xxxx;
-  float4 arg_1 = (0.0f).xxxx;
-  bool4 arg_2 = (false).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
+  float4 arg_1 = (1.0f).xxxx;
+  bool4 arg_2 = (true).xxxx;
   float4 res = (arg_2 ? arg_1 : arg_0);
 }
 

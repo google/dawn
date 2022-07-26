@@ -1,7 +1,7 @@
 #version 310 es
 
 void ldexp_abd718() {
-  vec2 res = ldexp(vec2(0.0f), ivec2(0));
+  vec2 res = ldexp(vec2(1.0f), ivec2(1));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void ldexp_abd718() {
-  vec2 res = ldexp(vec2(0.0f), ivec2(0));
+  vec2 res = ldexp(vec2(1.0f), ivec2(1));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void ldexp_abd718() {
-  vec2 res = ldexp(vec2(0.0f), ivec2(0));
+  vec2 res = ldexp(vec2(1.0f), ivec2(1));
 }
 
 void compute_main() {

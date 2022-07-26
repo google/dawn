@@ -5,7 +5,7 @@ vec3 tint_acosh(vec3 x) {
 }
 
 void acosh_e38f5c() {
-  vec3 res = tint_acosh(vec3(0.0f));
+  vec3 res = tint_acosh(vec3(1.0f));
 }
 
 vec4 vertex_main() {
@@ -29,7 +29,7 @@ vec3 tint_acosh(vec3 x) {
 }
 
 void acosh_e38f5c() {
-  vec3 res = tint_acosh(vec3(0.0f));
+  vec3 res = tint_acosh(vec3(1.0f));
 }
 
 void fragment_main() {
@@ -47,7 +47,7 @@ vec3 tint_acosh(vec3 x) {
 }
 
 void acosh_e38f5c() {
-  vec3 res = tint_acosh(vec3(0.0f));
+  vec3 res = tint_acosh(vec3(1.0f));
 }
 
 void compute_main() {

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void acos_a610c4() {
-  float3 res = acos(float3(0.0f));
+  float3 res = acos(float3(1.0f));
 }
 
 struct tint_symbol {

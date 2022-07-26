@@ -25,7 +25,7 @@
 
 // fn countLeadingZeros(vec<4, u32>) -> vec<4, u32>
 fn countLeadingZeros_f70103() {
-  var arg_0 = vec4<u32>();
+  var arg_0 = vec4<u32>(1u);
   var res: vec4<u32> = countLeadingZeros(arg_0);
 }
 

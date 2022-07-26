@@ -1,6 +1,6 @@
 fn dot_0c577b() {
-  var arg_0 = vec4<f32>();
-  var arg_1 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.0f);
+  var arg_1 = vec4<f32>(1.0f);
   var res : f32 = dot(arg_0, arg_1);
 }
 

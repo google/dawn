@@ -1,5 +1,5 @@
 fn exp_771fd2() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.0f;
   var res : f32 = exp(arg_0);
 }
 

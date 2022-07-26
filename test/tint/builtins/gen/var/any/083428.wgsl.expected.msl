@@ -2,7 +2,7 @@
 
 using namespace metal;
 void any_083428() {
-  bool4 arg_0 = bool4(false);
+  bool4 arg_0 = bool4(true);
   bool res = any(arg_0);
 }
 

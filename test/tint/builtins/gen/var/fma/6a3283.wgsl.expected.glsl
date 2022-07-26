@@ -1,9 +1,9 @@
 #version 310 es
 
 void fma_6a3283() {
-  vec4 arg_0 = vec4(0.0f);
-  vec4 arg_1 = vec4(0.0f);
-  vec4 arg_2 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
+  vec4 arg_1 = vec4(1.0f);
+  vec4 arg_2 = vec4(1.0f);
   vec4 res = ((arg_0) * (arg_1) + (arg_2));
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void fma_6a3283() {
-  vec4 arg_0 = vec4(0.0f);
-  vec4 arg_1 = vec4(0.0f);
-  vec4 arg_2 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
+  vec4 arg_1 = vec4(1.0f);
+  vec4 arg_2 = vec4(1.0f);
   vec4 res = ((arg_0) * (arg_1) + (arg_2));
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void fma_6a3283() {
-  vec4 arg_0 = vec4(0.0f);
-  vec4 arg_1 = vec4(0.0f);
-  vec4 arg_2 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
+  vec4 arg_1 = vec4(1.0f);
+  vec4 arg_2 = vec4(1.0f);
   vec4 res = ((arg_0) * (arg_1) + (arg_2));
 }
 

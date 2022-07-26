@@ -1,7 +1,7 @@
 void clamp_bd43ce() {
-  uint4 arg_0 = (0u).xxxx;
-  uint4 arg_1 = (0u).xxxx;
-  uint4 arg_2 = (0u).xxxx;
+  uint4 arg_0 = (1u).xxxx;
+  uint4 arg_1 = (1u).xxxx;
+  uint4 arg_2 = (1u).xxxx;
   uint4 res = clamp(arg_0, arg_1, arg_2);
 }
 

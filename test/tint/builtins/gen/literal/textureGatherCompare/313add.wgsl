@@ -27,7 +27,7 @@
 
 // fn textureGatherCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, @const offset: vec2<i32>) -> vec4<f32>
 fn textureGatherCompare_313add() {
-  var res: vec4<f32> = textureGatherCompare(arg_0, arg_1, vec2<f32>(), 1.0, vec2<i32>());
+  var res: vec4<f32> = textureGatherCompare(arg_0, arg_1, vec2<f32>(), 1.f, vec2<i32>());
 }
 
 @vertex

@@ -1,5 +1,5 @@
 void all_986c7b() {
-  bool4 arg_0 = (false).xxxx;
+  bool4 arg_0 = (true).xxxx;
   bool res = all(arg_0);
 }
 

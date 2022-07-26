@@ -25,7 +25,7 @@
 
 // fn extractBits(vec<4, u32>, u32, u32) -> vec<4, u32>
 fn extractBits_631377() {
-  var res: vec4<u32> = extractBits(vec4<u32>(), 1u, 1u);
+  var res: vec4<u32> = extractBits(vec4<u32>(1u), 1u, 1u);
 }
 
 @vertex

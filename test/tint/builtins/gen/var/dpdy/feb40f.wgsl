@@ -25,7 +25,7 @@
 
 // fn dpdy(vec<3, f32>) -> vec<3, f32>
 fn dpdy_feb40f() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.f);
   var res: vec3<f32> = dpdy(arg_0);
 }
 

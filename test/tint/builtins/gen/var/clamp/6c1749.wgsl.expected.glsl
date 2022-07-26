@@ -1,9 +1,9 @@
 #version 310 es
 
 void clamp_6c1749() {
-  ivec2 arg_0 = ivec2(0);
-  ivec2 arg_1 = ivec2(0);
-  ivec2 arg_2 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
+  ivec2 arg_1 = ivec2(1);
+  ivec2 arg_2 = ivec2(1);
   ivec2 res = clamp(arg_0, arg_1, arg_2);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void clamp_6c1749() {
-  ivec2 arg_0 = ivec2(0);
-  ivec2 arg_1 = ivec2(0);
-  ivec2 arg_2 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
+  ivec2 arg_1 = ivec2(1);
+  ivec2 arg_2 = ivec2(1);
   ivec2 res = clamp(arg_0, arg_1, arg_2);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void clamp_6c1749() {
-  ivec2 arg_0 = ivec2(0);
-  ivec2 arg_1 = ivec2(0);
-  ivec2 arg_2 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
+  ivec2 arg_1 = ivec2(1);
+  ivec2 arg_2 = ivec2(1);
   ivec2 res = clamp(arg_0, arg_1, arg_2);
 }
 

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void mix_0c8c33() {
-  float3 res = mix(float3(0.0f), float3(0.0f), float3(0.0f));
+  float3 res = mix(float3(1.0f), float3(1.0f), float3(1.0f));
 }
 
 struct tint_symbol {

@@ -1,7 +1,7 @@
 #version 310 es
 
 void abs_5ad50a() {
-  ivec3 arg_0 = ivec3(0);
+  ivec3 arg_0 = ivec3(1);
   ivec3 res = abs(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void abs_5ad50a() {
-  ivec3 arg_0 = ivec3(0);
+  ivec3 arg_0 = ivec3(1);
   ivec3 res = abs(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void abs_5ad50a() {
-  ivec3 arg_0 = ivec3(0);
+  ivec3 arg_0 = ivec3(1);
   ivec3 res = abs(arg_0);
 }
 

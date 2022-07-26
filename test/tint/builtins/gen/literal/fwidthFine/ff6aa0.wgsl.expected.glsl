@@ -2,7 +2,7 @@
 precision mediump float;
 
 void fwidthFine_ff6aa0() {
-  vec2 res = fwidth(vec2(0.0f));
+  vec2 res = fwidth(vec2(1.0f));
 }
 
 void fragment_main() {

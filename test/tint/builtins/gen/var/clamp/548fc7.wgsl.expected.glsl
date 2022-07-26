@@ -1,9 +1,9 @@
 #version 310 es
 
 void clamp_548fc7() {
-  uvec3 arg_0 = uvec3(0u);
-  uvec3 arg_1 = uvec3(0u);
-  uvec3 arg_2 = uvec3(0u);
+  uvec3 arg_0 = uvec3(1u);
+  uvec3 arg_1 = uvec3(1u);
+  uvec3 arg_2 = uvec3(1u);
   uvec3 res = clamp(arg_0, arg_1, arg_2);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void clamp_548fc7() {
-  uvec3 arg_0 = uvec3(0u);
-  uvec3 arg_1 = uvec3(0u);
-  uvec3 arg_2 = uvec3(0u);
+  uvec3 arg_0 = uvec3(1u);
+  uvec3 arg_1 = uvec3(1u);
+  uvec3 arg_2 = uvec3(1u);
   uvec3 res = clamp(arg_0, arg_1, arg_2);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void clamp_548fc7() {
-  uvec3 arg_0 = uvec3(0u);
-  uvec3 arg_1 = uvec3(0u);
-  uvec3 arg_2 = uvec3(0u);
+  uvec3 arg_0 = uvec3(1u);
+  uvec3 arg_1 = uvec3(1u);
+  uvec3 arg_2 = uvec3(1u);
   uvec3 res = clamp(arg_0, arg_1, arg_2);
 }
 

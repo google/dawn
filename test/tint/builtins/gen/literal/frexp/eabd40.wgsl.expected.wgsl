@@ -1,5 +1,5 @@
 fn frexp_eabd40() {
-  var res = frexp(1.0);
+  var res = frexp(1.0f);
 }
 
 @vertex

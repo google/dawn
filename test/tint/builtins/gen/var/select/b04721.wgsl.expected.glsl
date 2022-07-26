@@ -1,9 +1,9 @@
 #version 310 es
 
 void select_b04721() {
-  uvec3 arg_0 = uvec3(0u);
-  uvec3 arg_1 = uvec3(0u);
-  bool arg_2 = false;
+  uvec3 arg_0 = uvec3(1u);
+  uvec3 arg_1 = uvec3(1u);
+  bool arg_2 = true;
   uvec3 res = (arg_2 ? arg_1 : arg_0);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void select_b04721() {
-  uvec3 arg_0 = uvec3(0u);
-  uvec3 arg_1 = uvec3(0u);
-  bool arg_2 = false;
+  uvec3 arg_0 = uvec3(1u);
+  uvec3 arg_1 = uvec3(1u);
+  bool arg_2 = true;
   uvec3 res = (arg_2 ? arg_1 : arg_0);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void select_b04721() {
-  uvec3 arg_0 = uvec3(0u);
-  uvec3 arg_1 = uvec3(0u);
-  bool arg_2 = false;
+  uvec3 arg_0 = uvec3(1u);
+  uvec3 arg_1 = uvec3(1u);
+  bool arg_2 = true;
   uvec3 res = (arg_2 ? arg_1 : arg_0);
 }
 

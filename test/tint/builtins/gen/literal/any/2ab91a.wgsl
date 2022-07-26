@@ -25,7 +25,7 @@
 
 // fn any(bool) -> bool
 fn any_2ab91a() {
-  var res: bool = any(bool());
+  var res: bool = any(true);
 }
 
 @vertex

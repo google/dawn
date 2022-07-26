@@ -25,8 +25,8 @@
 
 // fn ldexp(vec<4, f32>, vec<4, i32>) -> vec<4, f32>
 fn ldexp_cc9cde() {
-  var arg_0 = vec4<f32>();
-  var arg_1 = vec4<i32>();
+  var arg_0 = vec4<f32>(1.f);
+  var arg_1 = vec4<i32>(1);
   var res: vec4<f32> = ldexp(arg_0, arg_1);
 }
 

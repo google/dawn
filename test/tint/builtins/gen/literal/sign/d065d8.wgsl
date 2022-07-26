@@ -25,7 +25,7 @@
 
 // fn sign(vec<2, f32>) -> vec<2, f32>
 fn sign_d065d8() {
-  var res: vec2<f32> = sign(vec2<f32>());
+  var res: vec2<f32> = sign(vec2<f32>(1.f));
 }
 
 @vertex

@@ -1,7 +1,7 @@
 void select_cb9301() {
-  bool2 arg_0 = (false).xx;
-  bool2 arg_1 = (false).xx;
-  bool2 arg_2 = (false).xx;
+  bool2 arg_0 = (true).xx;
+  bool2 arg_1 = (true).xx;
+  bool2 arg_2 = (true).xx;
   bool2 res = (arg_2 ? arg_1 : arg_0);
 }
 

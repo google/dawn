@@ -25,9 +25,9 @@
 
 // fn fma(f32, f32, f32) -> f32
 fn fma_c10ba3() {
-  var arg_0 = 1.0;
-  var arg_1 = 1.0;
-  var arg_2 = 1.0;
+  var arg_0 = 1.f;
+  var arg_1 = 1.f;
+  var arg_2 = 1.f;
   var res: f32 = fma(arg_0, arg_1, arg_2);
 }
 

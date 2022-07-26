@@ -13,7 +13,7 @@ modf_result_vec4 tint_modf(float4 param_0) {
 }
 
 void modf_ec2dbc() {
-  modf_result_vec4 res = tint_modf(float4(0.0f));
+  modf_result_vec4 res = tint_modf(float4(1.0f));
 }
 
 struct tint_symbol {

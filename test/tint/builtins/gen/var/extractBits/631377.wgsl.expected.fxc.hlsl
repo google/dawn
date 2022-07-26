@@ -7,7 +7,7 @@ uint4 tint_extract_bits(uint4 v, uint offset, uint count) {
 }
 
 void extractBits_631377() {
-  uint4 arg_0 = (0u).xxxx;
+  uint4 arg_0 = (1u).xxxx;
   uint arg_1 = 1u;
   uint arg_2 = 1u;
   uint4 res = tint_extract_bits(arg_0, arg_1, arg_2);

@@ -1,7 +1,7 @@
 #version 310 es
 
 void atan_a8b696() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = atan(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void atan_a8b696() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = atan(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void atan_a8b696() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = atan(arg_0);
 }
 

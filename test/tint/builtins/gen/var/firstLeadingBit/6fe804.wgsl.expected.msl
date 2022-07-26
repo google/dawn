@@ -17,7 +17,7 @@ uint2 tint_first_leading_bit(uint2 v) {
 }
 
 void firstLeadingBit_6fe804() {
-  uint2 arg_0 = uint2(0u);
+  uint2 arg_0 = uint2(1u);
   uint2 res = tint_first_leading_bit(arg_0);
 }
 

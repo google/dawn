@@ -25,7 +25,7 @@
 
 // fn round(f32) -> f32
 fn round_9edc38() {
-  var res: f32 = round(1.0);
+  var res: f32 = round(1.f);
 }
 
 @vertex

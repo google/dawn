@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 35
+; Bound: 37
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -33,39 +33,41 @@
           %9 = OpTypeFunction %void
     %v2float = OpTypeVector %float 2
 %mat2v2float = OpTypeMatrix %v2float 2
-         %15 = OpConstantNull %mat2v2float
-%_ptr_Function_mat2v2float = OpTypePointer Function %mat2v2float
-         %21 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
+         %16 = OpConstantComposite %v2float %float_1 %float_1
+         %17 = OpConstantComposite %mat2v2float %16 %16
+%_ptr_Function_mat2v2float = OpTypePointer Function %mat2v2float
+         %20 = OpConstantNull %mat2v2float
+         %24 = OpTypeFunction %v4float
 %transpose_31d679 = OpFunction %void None %9
          %12 = OpLabel
-      %arg_0 = OpVariable %_ptr_Function_mat2v2float Function %15
-        %res = OpVariable %_ptr_Function_mat2v2float Function %15
-               OpStore %arg_0 %15
-         %19 = OpLoad %mat2v2float %arg_0
-         %18 = OpTranspose %mat2v2float %19
-               OpStore %res %18
+      %arg_0 = OpVariable %_ptr_Function_mat2v2float Function %20
+        %res = OpVariable %_ptr_Function_mat2v2float Function %20
+               OpStore %arg_0 %17
+         %22 = OpLoad %mat2v2float %arg_0
+         %21 = OpTranspose %mat2v2float %22
+               OpStore %res %21
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %21
-         %23 = OpLabel
-         %24 = OpFunctionCall %void %transpose_31d679
+%vertex_main_inner = OpFunction %v4float None %24
+         %26 = OpLabel
+         %27 = OpFunctionCall %void %transpose_31d679
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %26 = OpLabel
-         %27 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %27
+         %29 = OpLabel
+         %30 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %30
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
-         %30 = OpLabel
-         %31 = OpFunctionCall %void %transpose_31d679
+         %32 = OpLabel
+         %33 = OpFunctionCall %void %transpose_31d679
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
-         %33 = OpLabel
-         %34 = OpFunctionCall %void %transpose_31d679
+         %35 = OpLabel
+         %36 = OpFunctionCall %void %transpose_31d679
                OpReturn
                OpFunctionEnd

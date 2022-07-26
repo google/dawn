@@ -1,5 +1,5 @@
 fn any_2ab91a() {
-  var arg_0 = bool();
+  var arg_0 = true;
   var res : bool = any(arg_0);
 }
 

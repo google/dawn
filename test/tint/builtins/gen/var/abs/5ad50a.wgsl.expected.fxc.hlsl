@@ -1,5 +1,5 @@
 void abs_5ad50a() {
-  int3 arg_0 = (0).xxx;
+  int3 arg_0 = (1).xxx;
   int3 res = abs(arg_0);
 }
 

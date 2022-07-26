@@ -1,7 +1,7 @@
 fn select_78be5f() {
-  var arg_0 = vec3<f32>();
-  var arg_1 = vec3<f32>();
-  var arg_2 = bool();
+  var arg_0 = vec3<f32>(1.0f);
+  var arg_1 = vec3<f32>(1.0f);
+  var arg_2 = true;
   var res : vec3<f32> = select(arg_0, arg_1, arg_2);
 }
 

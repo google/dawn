@@ -1,5 +1,5 @@
 fn sinh_b9860e() {
-  var res : vec2<f32> = sinh(vec2<f32>());
+  var res : vec2<f32> = sinh(vec2<f32>(1.0f));
 }
 
 @vertex

@@ -1,7 +1,7 @@
 #version 310 es
 
 void transpose_ed4bdc() {
-  mat3x2 arg_0 = mat3x2(vec2(0.0f), vec2(0.0f), vec2(0.0f));
+  mat3x2 arg_0 = mat3x2(vec2(1.0f), vec2(1.0f), vec2(1.0f));
   mat2x3 res = transpose(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void transpose_ed4bdc() {
-  mat3x2 arg_0 = mat3x2(vec2(0.0f), vec2(0.0f), vec2(0.0f));
+  mat3x2 arg_0 = mat3x2(vec2(1.0f), vec2(1.0f), vec2(1.0f));
   mat2x3 res = transpose(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void transpose_ed4bdc() {
-  mat3x2 arg_0 = mat3x2(vec2(0.0f), vec2(0.0f), vec2(0.0f));
+  mat3x2 arg_0 = mat3x2(vec2(1.0f), vec2(1.0f), vec2(1.0f));
   mat2x3 res = transpose(arg_0);
 }
 

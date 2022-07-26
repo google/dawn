@@ -6,7 +6,7 @@ vec4 tint_radians(vec4 param_0) {
 
 
 void radians_09b7fc() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_radians(arg_0);
 }
 
@@ -32,7 +32,7 @@ vec4 tint_radians(vec4 param_0) {
 
 
 void radians_09b7fc() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_radians(arg_0);
 }
 
@@ -52,7 +52,7 @@ vec4 tint_radians(vec4 param_0) {
 
 
 void radians_09b7fc() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_radians(arg_0);
 }
 

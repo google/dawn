@@ -25,7 +25,7 @@
 
 // fn clamp(vec<4, u32>, vec<4, u32>, vec<4, u32>) -> vec<4, u32>
 fn clamp_bd43ce() {
-  var res: vec4<u32> = clamp(vec4<u32>(), vec4<u32>(), vec4<u32>());
+  var res: vec4<u32> = clamp(vec4<u32>(1u), vec4<u32>(1u), vec4<u32>(1u));
 }
 
 @vertex

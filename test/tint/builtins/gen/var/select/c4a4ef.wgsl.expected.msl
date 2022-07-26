@@ -2,9 +2,9 @@
 
 using namespace metal;
 void select_c4a4ef() {
-  uint4 arg_0 = uint4(0u);
-  uint4 arg_1 = uint4(0u);
-  bool4 arg_2 = bool4(false);
+  uint4 arg_0 = uint4(1u);
+  uint4 arg_1 = uint4(1u);
+  bool4 arg_2 = bool4(true);
   uint4 res = select(arg_0, arg_1, arg_2);
 }
 

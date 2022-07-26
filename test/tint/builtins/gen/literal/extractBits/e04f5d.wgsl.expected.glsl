@@ -7,7 +7,7 @@ ivec3 tint_extract_bits(ivec3 v, uint offset, uint count) {
 }
 
 void extractBits_e04f5d() {
-  ivec3 res = tint_extract_bits(ivec3(0), 1u, 1u);
+  ivec3 res = tint_extract_bits(ivec3(1), 1u, 1u);
 }
 
 vec4 vertex_main() {
@@ -33,7 +33,7 @@ ivec3 tint_extract_bits(ivec3 v, uint offset, uint count) {
 }
 
 void extractBits_e04f5d() {
-  ivec3 res = tint_extract_bits(ivec3(0), 1u, 1u);
+  ivec3 res = tint_extract_bits(ivec3(1), 1u, 1u);
 }
 
 void fragment_main() {
@@ -53,7 +53,7 @@ ivec3 tint_extract_bits(ivec3 v, uint offset, uint count) {
 }
 
 void extractBits_e04f5d() {
-  ivec3 res = tint_extract_bits(ivec3(0), 1u, 1u);
+  ivec3 res = tint_extract_bits(ivec3(1), 1u, 1u);
 }
 
 void compute_main() {

@@ -1,7 +1,7 @@
 #version 310 es
 
 void refract_cbc1d2() {
-  vec3 res = refract(vec3(0.0f), vec3(0.0f), 1.0f);
+  vec3 res = refract(vec3(1.0f), vec3(1.0f), 1.0f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void refract_cbc1d2() {
-  vec3 res = refract(vec3(0.0f), vec3(0.0f), 1.0f);
+  vec3 res = refract(vec3(1.0f), vec3(1.0f), 1.0f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void refract_cbc1d2() {
-  vec3 res = refract(vec3(0.0f), vec3(0.0f), 1.0f);
+  vec3 res = refract(vec3(1.0f), vec3(1.0f), 1.0f);
 }
 
 void compute_main() {

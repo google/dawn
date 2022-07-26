@@ -1,5 +1,5 @@
 fn floor_66f154() {
-  var res : f32 = floor(1.0);
+  var res : f32 = floor(1.0f);
 }
 
 @vertex

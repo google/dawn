@@ -1,5 +1,5 @@
 fn transpose_4ce359() {
-  var arg_0 = mat2x4<f32>();
+  var arg_0 = mat2x4<f32>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
   var res : mat4x2<f32> = transpose(arg_0);
 }
 

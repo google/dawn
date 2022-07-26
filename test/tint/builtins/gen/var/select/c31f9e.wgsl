@@ -25,9 +25,9 @@
 
 // fn select(bool, bool, bool) -> bool
 fn select_c31f9e() {
-  var arg_0 = bool();
-  var arg_1 = bool();
-  var arg_2 = bool();
+  var arg_0 = true;
+  var arg_1 = true;
+  var arg_2 = true;
   var res: bool = select(arg_0, arg_1, arg_2);
 }
 

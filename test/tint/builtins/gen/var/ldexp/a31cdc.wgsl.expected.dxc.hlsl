@@ -1,6 +1,6 @@
 void ldexp_a31cdc() {
-  float3 arg_0 = (0.0f).xxx;
-  int3 arg_1 = (0).xxx;
+  float3 arg_0 = (1.0f).xxx;
+  int3 arg_1 = (1).xxx;
   float3 res = ldexp(arg_0, arg_1);
 }
 

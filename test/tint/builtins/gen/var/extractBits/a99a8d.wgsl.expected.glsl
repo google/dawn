@@ -7,7 +7,7 @@ ivec2 tint_extract_bits(ivec2 v, uint offset, uint count) {
 }
 
 void extractBits_a99a8d() {
-  ivec2 arg_0 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
   uint arg_1 = 1u;
   uint arg_2 = 1u;
   ivec2 res = tint_extract_bits(arg_0, arg_1, arg_2);
@@ -36,7 +36,7 @@ ivec2 tint_extract_bits(ivec2 v, uint offset, uint count) {
 }
 
 void extractBits_a99a8d() {
-  ivec2 arg_0 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
   uint arg_1 = 1u;
   uint arg_2 = 1u;
   ivec2 res = tint_extract_bits(arg_0, arg_1, arg_2);
@@ -59,7 +59,7 @@ ivec2 tint_extract_bits(ivec2 v, uint offset, uint count) {
 }
 
 void extractBits_a99a8d() {
-  ivec2 arg_0 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
   uint arg_1 = 1u;
   uint arg_2 = 1u;
   ivec2 res = tint_extract_bits(arg_0, arg_1, arg_2);

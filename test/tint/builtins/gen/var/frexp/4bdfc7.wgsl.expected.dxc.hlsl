@@ -10,7 +10,7 @@ frexp_result_vec2 tint_frexp(float2 param_0) {
 }
 
 void frexp_4bdfc7() {
-  float2 arg_0 = (0.0f).xx;
+  float2 arg_0 = (1.0f).xx;
   frexp_result_vec2 res = tint_frexp(arg_0);
 }
 

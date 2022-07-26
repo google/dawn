@@ -1,5 +1,5 @@
 fn radians_61687a() {
-  var res : vec2<f32> = radians(vec2<f32>());
+  var res : vec2<f32> = radians(vec2<f32>(1.0f));
 }
 
 @vertex

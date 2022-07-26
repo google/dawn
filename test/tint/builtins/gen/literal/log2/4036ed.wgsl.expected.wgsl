@@ -1,5 +1,5 @@
 fn log2_4036ed() {
-  var res : f32 = log2(1.0);
+  var res : f32 = log2(1.0f);
 }
 
 @vertex

@@ -25,7 +25,7 @@
 
 // fn fwidth(f32) -> f32
 fn fwidth_df38ef() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = fwidth(arg_0);
 }
 

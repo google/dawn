@@ -1,5 +1,5 @@
 fn asin_8cd9c9() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.0f);
   var res : vec3<f32> = asin(arg_0);
 }
 

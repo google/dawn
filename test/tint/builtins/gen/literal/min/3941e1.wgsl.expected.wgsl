@@ -1,5 +1,5 @@
 fn min_3941e1() {
-  var res : vec4<i32> = min(vec4<i32>(), vec4<i32>());
+  var res : vec4<i32> = min(vec4<i32>(1), vec4<i32>(1));
 }
 
 @vertex

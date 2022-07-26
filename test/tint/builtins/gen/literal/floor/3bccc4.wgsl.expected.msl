@@ -2,7 +2,7 @@
 
 using namespace metal;
 void floor_3bccc4() {
-  float4 res = floor(float4(0.0f));
+  float4 res = floor(float4(1.0f));
 }
 
 struct tint_symbol {

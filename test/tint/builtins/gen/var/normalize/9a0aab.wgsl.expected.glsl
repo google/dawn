@@ -1,7 +1,7 @@
 #version 310 es
 
 void normalize_9a0aab() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = normalize(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void normalize_9a0aab() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = normalize(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void normalize_9a0aab() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = normalize(arg_0);
 }
 

@@ -7,7 +7,7 @@ int2 tint_extract_bits(int2 v, uint offset, uint count) {
 }
 
 void extractBits_a99a8d() {
-  int2 arg_0 = (0).xx;
+  int2 arg_0 = (1).xx;
   uint arg_1 = 1u;
   uint arg_2 = 1u;
   int2 res = tint_extract_bits(arg_0, arg_1, arg_2);

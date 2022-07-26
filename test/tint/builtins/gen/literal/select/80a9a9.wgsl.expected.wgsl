@@ -1,5 +1,5 @@
 fn select_80a9a9() {
-  var res : vec3<bool> = select(vec3<bool>(), vec3<bool>(), vec3<bool>());
+  var res : vec3<bool> = select(vec3<bool>(true), vec3<bool>(true), vec3<bool>(true));
 }
 
 @vertex

@@ -2,9 +2,9 @@
 
 using namespace metal;
 void select_266aff() {
-  float2 arg_0 = float2(0.0f);
-  float2 arg_1 = float2(0.0f);
-  bool2 arg_2 = bool2(false);
+  float2 arg_0 = float2(1.0f);
+  float2 arg_1 = float2(1.0f);
+  bool2 arg_2 = bool2(true);
   float2 res = select(arg_0, arg_1, arg_2);
 }
 

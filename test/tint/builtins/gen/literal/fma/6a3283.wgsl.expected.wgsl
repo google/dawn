@@ -1,5 +1,5 @@
 fn fma_6a3283() {
-  var res : vec4<f32> = fma(vec4<f32>(), vec4<f32>(), vec4<f32>());
+  var res : vec4<f32> = fma(vec4<f32>(1.0f), vec4<f32>(1.0f), vec4<f32>(1.0f));
 }
 
 @vertex

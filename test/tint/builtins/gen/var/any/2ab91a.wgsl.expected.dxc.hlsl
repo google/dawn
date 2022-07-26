@@ -1,5 +1,5 @@
 void any_2ab91a() {
-  bool arg_0 = false;
+  bool arg_0 = true;
   bool res = any(arg_0);
 }
 

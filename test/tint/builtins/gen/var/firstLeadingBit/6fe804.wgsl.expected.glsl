@@ -16,7 +16,7 @@ uvec2 tint_first_leading_bit(uvec2 v) {
 }
 
 void firstLeadingBit_6fe804() {
-  uvec2 arg_0 = uvec2(0u);
+  uvec2 arg_0 = uvec2(1u);
   uvec2 res = tint_first_leading_bit(arg_0);
 }
 
@@ -52,7 +52,7 @@ uvec2 tint_first_leading_bit(uvec2 v) {
 }
 
 void firstLeadingBit_6fe804() {
-  uvec2 arg_0 = uvec2(0u);
+  uvec2 arg_0 = uvec2(1u);
   uvec2 res = tint_first_leading_bit(arg_0);
 }
 
@@ -82,7 +82,7 @@ uvec2 tint_first_leading_bit(uvec2 v) {
 }
 
 void firstLeadingBit_6fe804() {
-  uvec2 arg_0 = uvec2(0u);
+  uvec2 arg_0 = uvec2(1u);
   uvec2 res = tint_first_leading_bit(arg_0);
 }
 

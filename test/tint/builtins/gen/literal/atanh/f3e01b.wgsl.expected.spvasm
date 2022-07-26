@@ -51,7 +51,7 @@
 %atanh_f3e01b = OpFunction %void None %21
          %24 = OpLabel
         %res = OpVariable %_ptr_Function_v4float Function %5
-         %25 = OpFunctionCall %v4float %tint_atanh %5
+         %25 = OpFunctionCall %v4float %tint_atanh %15
                OpStore %res %25
                OpReturn
                OpFunctionEnd

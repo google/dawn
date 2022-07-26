@@ -1,5 +1,5 @@
 void normalize_9a0aab() {
-  float4 arg_0 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
   float4 res = normalize(arg_0);
 }
 

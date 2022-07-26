@@ -1,5 +1,5 @@
 fn firstLeadingBit_000ff3() {
-  var arg_0 = vec4<u32>();
+  var arg_0 = vec4<u32>(1u);
   var res : vec4<u32> = firstLeadingBit(arg_0);
 }
 

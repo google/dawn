@@ -25,7 +25,7 @@
 
 // fn clamp(f32, f32, f32) -> f32
 fn clamp_2bd567() {
-  var res: f32 = clamp(1.0, 1.0, 1.0);
+  var res: f32 = clamp(1.f, 1.f, 1.f);
 }
 
 @vertex

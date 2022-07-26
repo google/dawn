@@ -2,7 +2,7 @@
 
 using namespace metal;
 void countOneBits_94fd81() {
-  uint2 res = popcount(uint2(0u));
+  uint2 res = popcount(uint2(1u));
 }
 
 struct tint_symbol {

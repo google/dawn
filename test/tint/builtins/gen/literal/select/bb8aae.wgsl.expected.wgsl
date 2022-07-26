@@ -1,5 +1,5 @@
 fn select_bb8aae() {
-  var res : vec4<f32> = select(vec4<f32>(), vec4<f32>(), vec4<bool>());
+  var res : vec4<f32> = select(vec4<f32>(1.0f), vec4<f32>(1.0f), vec4<bool>(true));
 }
 
 @vertex

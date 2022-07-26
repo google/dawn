@@ -1,5 +1,5 @@
 void asin_8cd9c9() {
-  float3 res = asin((0.0f).xxx);
+  float3 res = asin((1.0f).xxx);
 }
 
 struct tint_symbol {

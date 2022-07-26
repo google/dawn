@@ -1,10 +1,10 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 36
+; Bound: 37
 ; Schema: 0
                OpCapability Shader
-         %17 = OpExtInstImport "GLSL.std.450"
+         %19 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Vertex %vertex_main "vertex_main" %value %vertex_point_size
                OpEntryPoint Fragment %fragment_main "fragment_main"
@@ -37,41 +37,42 @@
 %vertex_point_size = OpVariable %_ptr_Output_float Output %8
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
+    %float_1 = OpConstant %float 1
+         %14 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
 %__modf_result_vec4 = OpTypeStruct %v4float %v4float
 %_ptr_Function___modf_result_vec4 = OpTypePointer Function %__modf_result_vec4
-         %21 = OpConstantNull %__modf_result_vec4
-         %22 = OpTypeFunction %v4float
-    %float_1 = OpConstant %float 1
+         %23 = OpConstantNull %__modf_result_vec4
+         %24 = OpTypeFunction %v4float
 %modf_ec2dbc = OpFunction %void None %9
          %12 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_v4float Function %5
-        %res = OpVariable %_ptr_Function___modf_result_vec4 Function %21
-               OpStore %arg_0 %5
-         %18 = OpLoad %v4float %arg_0
-         %15 = OpExtInst %__modf_result_vec4 %17 ModfStruct %18
-               OpStore %res %15
+        %res = OpVariable %_ptr_Function___modf_result_vec4 Function %23
+               OpStore %arg_0 %14
+         %20 = OpLoad %v4float %arg_0
+         %17 = OpExtInst %__modf_result_vec4 %19 ModfStruct %20
+               OpStore %res %17
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %22
-         %24 = OpLabel
-         %25 = OpFunctionCall %void %modf_ec2dbc
+%vertex_main_inner = OpFunction %v4float None %24
+         %26 = OpLabel
+         %27 = OpFunctionCall %void %modf_ec2dbc
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %27 = OpLabel
-         %28 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %28
+         %29 = OpLabel
+         %30 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %30
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
-         %31 = OpLabel
-         %32 = OpFunctionCall %void %modf_ec2dbc
+         %32 = OpLabel
+         %33 = OpFunctionCall %void %modf_ec2dbc
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
-         %34 = OpLabel
-         %35 = OpFunctionCall %void %modf_ec2dbc
+         %35 = OpLabel
+         %36 = OpFunctionCall %void %modf_ec2dbc
                OpReturn
                OpFunctionEnd

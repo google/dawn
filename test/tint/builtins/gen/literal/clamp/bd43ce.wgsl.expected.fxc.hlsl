@@ -1,5 +1,5 @@
 void clamp_bd43ce() {
-  uint4 res = clamp((0u).xxxx, (0u).xxxx, (0u).xxxx);
+  uint4 res = clamp((1u).xxxx, (1u).xxxx, (1u).xxxx);
 }
 
 struct tint_symbol {

@@ -7,8 +7,8 @@ T tint_dot4(vec<T,4> a, vec<T,4> b) {
   return a[0]*b[0] + a[1]*b[1] + a[2]*b[2] + a[3]*b[3];
 }
 void dot_ef6b1d() {
-  int4 arg_0 = int4(0);
-  int4 arg_1 = int4(0);
+  int4 arg_0 = int4(1);
+  int4 arg_1 = int4(1);
   int res = tint_dot4(arg_0, arg_1);
 }
 

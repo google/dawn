@@ -1,5 +1,5 @@
 fn dot_97c7ee() {
-  var res : u32 = dot(vec2<u32>(), vec2<u32>());
+  var res : u32 = dot(vec2<u32>(1u), vec2<u32>(1u));
 }
 
 @vertex

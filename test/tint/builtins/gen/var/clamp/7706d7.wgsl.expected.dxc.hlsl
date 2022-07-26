@@ -1,7 +1,7 @@
 void clamp_7706d7() {
-  uint2 arg_0 = (0u).xx;
-  uint2 arg_1 = (0u).xx;
-  uint2 arg_2 = (0u).xx;
+  uint2 arg_0 = (1u).xx;
+  uint2 arg_1 = (1u).xx;
+  uint2 arg_2 = (1u).xx;
   uint2 res = clamp(arg_0, arg_1, arg_2);
 }
 

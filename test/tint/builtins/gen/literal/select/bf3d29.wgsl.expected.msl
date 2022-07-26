@@ -2,7 +2,7 @@
 
 using namespace metal;
 void select_bf3d29() {
-  float2 res = select(float2(0.0f), float2(0.0f), false);
+  float2 res = select(float2(1.0f), float2(1.0f), true);
 }
 
 struct tint_symbol {

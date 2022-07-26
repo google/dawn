@@ -1,5 +1,5 @@
 fn modf_ec2dbc() {
-  var arg_0 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.0f);
   var res = modf(arg_0);
 }
 

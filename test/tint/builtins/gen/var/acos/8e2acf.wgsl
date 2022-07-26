@@ -25,7 +25,7 @@
 
 // fn acos(vec<4, f32>) -> vec<4, f32>
 fn acos_8e2acf() {
-  var arg_0 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.f);
   var res: vec4<f32> = acos(arg_0);
 }
 

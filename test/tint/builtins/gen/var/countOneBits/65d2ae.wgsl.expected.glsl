@@ -1,7 +1,7 @@
 #version 310 es
 
 void countOneBits_65d2ae() {
-  ivec3 arg_0 = ivec3(0);
+  ivec3 arg_0 = ivec3(1);
   ivec3 res = ivec3(bitCount(arg_0));
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void countOneBits_65d2ae() {
-  ivec3 arg_0 = ivec3(0);
+  ivec3 arg_0 = ivec3(1);
   ivec3 res = ivec3(bitCount(arg_0));
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void countOneBits_65d2ae() {
-  ivec3 arg_0 = ivec3(0);
+  ivec3 arg_0 = ivec3(1);
   ivec3 res = ivec3(bitCount(arg_0));
 }
 

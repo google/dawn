@@ -1,7 +1,7 @@
 #version 310 es
 
 void transpose_854336() {
-  mat3 arg_0 = mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f));
+  mat3 arg_0 = mat3(vec3(1.0f), vec3(1.0f), vec3(1.0f));
   mat3 res = transpose(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void transpose_854336() {
-  mat3 arg_0 = mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f));
+  mat3 arg_0 = mat3(vec3(1.0f), vec3(1.0f), vec3(1.0f));
   mat3 res = transpose(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void transpose_854336() {
-  mat3 arg_0 = mat3(vec3(0.0f), vec3(0.0f), vec3(0.0f));
+  mat3 arg_0 = mat3(vec3(1.0f), vec3(1.0f), vec3(1.0f));
   mat3 res = transpose(arg_0);
 }
 

@@ -25,8 +25,8 @@
 
 // fn min(vec<4, f32>, vec<4, f32>) -> vec<4, f32>
 fn min_c76fa6() {
-  var arg_0 = vec4<f32>();
-  var arg_1 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.f);
+  var arg_1 = vec4<f32>(1.f);
   var res: vec4<f32> = min(arg_0, arg_1);
 }
 

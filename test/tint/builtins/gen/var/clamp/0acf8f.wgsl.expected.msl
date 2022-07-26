@@ -2,9 +2,9 @@
 
 using namespace metal;
 void clamp_0acf8f() {
-  float2 arg_0 = float2(0.0f);
-  float2 arg_1 = float2(0.0f);
-  float2 arg_2 = float2(0.0f);
+  float2 arg_0 = float2(1.0f);
+  float2 arg_1 = float2(1.0f);
+  float2 arg_2 = float2(1.0f);
   float2 res = clamp(arg_0, arg_1, arg_2);
 }
 

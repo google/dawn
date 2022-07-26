@@ -1,5 +1,5 @@
 void dpdyFine_1fb7ab() {
-  float3 arg_0 = (0.0f).xxx;
+  float3 arg_0 = (1.0f).xxx;
   float3 res = ddy_fine(arg_0);
 }
 

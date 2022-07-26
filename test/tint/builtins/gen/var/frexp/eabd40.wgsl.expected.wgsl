@@ -1,5 +1,5 @@
 fn frexp_eabd40() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.0f;
   var res = frexp(arg_0);
 }
 

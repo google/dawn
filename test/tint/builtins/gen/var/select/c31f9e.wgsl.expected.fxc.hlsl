@@ -1,7 +1,7 @@
 void select_c31f9e() {
-  bool arg_0 = false;
-  bool arg_1 = false;
-  bool arg_2 = false;
+  bool arg_0 = true;
+  bool arg_1 = true;
+  bool arg_2 = true;
   bool res = (arg_2 ? arg_1 : arg_0);
 }
 

@@ -1,5 +1,5 @@
 fn asinh_157447() {
-  var res : f32 = asinh(1.0);
+  var res : f32 = asinh(1.0f);
 }
 
 @vertex

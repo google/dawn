@@ -25,7 +25,7 @@
 
 // fn exp2(vec<3, f32>) -> vec<3, f32>
 fn exp2_1f8680() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.f);
   var res: vec3<f32> = exp2(arg_0);
 }
 

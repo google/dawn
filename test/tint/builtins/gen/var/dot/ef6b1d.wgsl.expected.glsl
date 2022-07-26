@@ -5,8 +5,8 @@ int tint_int_dot(ivec4 a, ivec4 b) {
 }
 
 void dot_ef6b1d() {
-  ivec4 arg_0 = ivec4(0);
-  ivec4 arg_1 = ivec4(0);
+  ivec4 arg_0 = ivec4(1);
+  ivec4 arg_1 = ivec4(1);
   int res = tint_int_dot(arg_0, arg_1);
 }
 
@@ -31,8 +31,8 @@ int tint_int_dot(ivec4 a, ivec4 b) {
 }
 
 void dot_ef6b1d() {
-  ivec4 arg_0 = ivec4(0);
-  ivec4 arg_1 = ivec4(0);
+  ivec4 arg_0 = ivec4(1);
+  ivec4 arg_1 = ivec4(1);
   int res = tint_int_dot(arg_0, arg_1);
 }
 
@@ -51,8 +51,8 @@ int tint_int_dot(ivec4 a, ivec4 b) {
 }
 
 void dot_ef6b1d() {
-  ivec4 arg_0 = ivec4(0);
-  ivec4 arg_1 = ivec4(0);
+  ivec4 arg_0 = ivec4(1);
+  ivec4 arg_1 = ivec4(1);
   int res = tint_int_dot(arg_0, arg_1);
 }
 

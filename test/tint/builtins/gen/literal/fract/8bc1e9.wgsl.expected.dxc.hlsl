@@ -1,5 +1,5 @@
 void fract_8bc1e9() {
-  float4 res = frac((0.0f).xxxx);
+  float4 res = frac((1.0f).xxxx);
 }
 
 struct tint_symbol {

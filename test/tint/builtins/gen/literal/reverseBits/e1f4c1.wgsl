@@ -25,7 +25,7 @@
 
 // fn reverseBits(vec<2, u32>) -> vec<2, u32>
 fn reverseBits_e1f4c1() {
-  var res: vec2<u32> = reverseBits(vec2<u32>());
+  var res: vec2<u32> = reverseBits(vec2<u32>(1u));
 }
 
 @vertex

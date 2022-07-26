@@ -14,7 +14,7 @@ uint2 tint_first_trailing_bit(uint2 v) {
 }
 
 void firstTrailingBit_45eb10() {
-  uint2 arg_0 = (0u).xx;
+  uint2 arg_0 = (1u).xx;
   uint2 res = tint_first_trailing_bit(arg_0);
 }
 

@@ -25,7 +25,7 @@
 
 // fn inverseSqrt(vec<2, f32>) -> vec<2, f32>
 fn inverseSqrt_8f2bd2() {
-  var res: vec2<f32> = inverseSqrt(vec2<f32>());
+  var res: vec2<f32> = inverseSqrt(vec2<f32>(1.f));
 }
 
 @vertex

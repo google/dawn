@@ -1,7 +1,7 @@
 #version 310 es
 
 void distance_9646ea() {
-  float res = distance(vec4(0.0f), vec4(0.0f));
+  float res = distance(vec4(1.0f), vec4(1.0f));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void distance_9646ea() {
-  float res = distance(vec4(0.0f), vec4(0.0f));
+  float res = distance(vec4(1.0f), vec4(1.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void distance_9646ea() {
-  float res = distance(vec4(0.0f), vec4(0.0f));
+  float res = distance(vec4(1.0f), vec4(1.0f));
 }
 
 void compute_main() {

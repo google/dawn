@@ -25,7 +25,7 @@
 
 // fn sqrt(f32) -> f32
 fn sqrt_20c74e() {
-  var res: f32 = sqrt(1.0);
+  var res: f32 = sqrt(1.f);
 }
 
 @vertex

@@ -1,5 +1,5 @@
 fn modf_f5f20d() {
-  var res = modf(vec2<f32>());
+  var res = modf(vec2<f32>(1.0f));
 }
 
 @vertex

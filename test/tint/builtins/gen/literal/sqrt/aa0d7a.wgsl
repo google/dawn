@@ -25,7 +25,7 @@
 
 // fn sqrt(vec<4, f32>) -> vec<4, f32>
 fn sqrt_aa0d7a() {
-  var res: vec4<f32> = sqrt(vec4<f32>());
+  var res: vec4<f32> = sqrt(vec4<f32>(1.f));
 }
 
 @vertex

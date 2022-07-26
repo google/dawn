@@ -25,7 +25,7 @@
 
 // fn log(vec<3, f32>) -> vec<3, f32>
 fn log_f4c570() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.f);
   var res: vec3<f32> = log(arg_0);
 }
 

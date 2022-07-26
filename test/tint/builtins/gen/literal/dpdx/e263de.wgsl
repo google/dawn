@@ -25,7 +25,7 @@
 
 // fn dpdx(f32) -> f32
 fn dpdx_e263de() {
-  var res: f32 = dpdx(1.0);
+  var res: f32 = dpdx(1.f);
 }
 
 @fragment

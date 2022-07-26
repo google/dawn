@@ -1,5 +1,5 @@
 fn exp_0f70eb() {
-  var res : vec4<f32> = exp(vec4<f32>());
+  var res : vec4<f32> = exp(vec4<f32>(1.0f));
 }
 
 @vertex

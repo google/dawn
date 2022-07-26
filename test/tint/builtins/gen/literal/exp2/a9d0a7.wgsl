@@ -25,7 +25,7 @@
 
 // fn exp2(vec<4, f32>) -> vec<4, f32>
 fn exp2_a9d0a7() {
-  var res: vec4<f32> = exp2(vec4<f32>());
+  var res: vec4<f32> = exp2(vec4<f32>(1.f));
 }
 
 @vertex

@@ -1,5 +1,5 @@
 void select_ebfea2() {
-  float3 res = ((false).xxx ? (0.0f).xxx : (0.0f).xxx);
+  float3 res = ((true).xxx ? (1.0f).xxx : (1.0f).xxx);
 }
 
 struct tint_symbol {

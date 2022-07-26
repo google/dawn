@@ -1,7 +1,7 @@
 void faceForward_b316e5() {
-  float4 arg_0 = (0.0f).xxxx;
-  float4 arg_1 = (0.0f).xxxx;
-  float4 arg_2 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
+  float4 arg_1 = (1.0f).xxxx;
+  float4 arg_2 = (1.0f).xxxx;
   float4 res = faceforward(arg_0, arg_1, arg_2);
 }
 

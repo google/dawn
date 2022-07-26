@@ -1,8 +1,8 @@
 #version 310 es
 
 void reflect_05357e() {
-  vec4 arg_0 = vec4(0.0f);
-  vec4 arg_1 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
+  vec4 arg_1 = vec4(1.0f);
   vec4 res = reflect(arg_0, arg_1);
 }
 
@@ -23,8 +23,8 @@ void main() {
 precision mediump float;
 
 void reflect_05357e() {
-  vec4 arg_0 = vec4(0.0f);
-  vec4 arg_1 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
+  vec4 arg_1 = vec4(1.0f);
   vec4 res = reflect(arg_0, arg_1);
 }
 
@@ -39,8 +39,8 @@ void main() {
 #version 310 es
 
 void reflect_05357e() {
-  vec4 arg_0 = vec4(0.0f);
-  vec4 arg_1 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
+  vec4 arg_1 = vec4(1.0f);
   vec4 res = reflect(arg_0, arg_1);
 }
 

@@ -1,5 +1,5 @@
 void determinant_a0a87c() {
-  float res = determinant(float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx));
+  float res = determinant(float4x4((1.0f).xxxx, (1.0f).xxxx, (1.0f).xxxx, (1.0f).xxxx));
 }
 
 struct tint_symbol {

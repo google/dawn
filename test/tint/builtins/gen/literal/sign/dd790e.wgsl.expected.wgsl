@@ -1,5 +1,5 @@
 fn sign_dd790e() {
-  var res : f32 = sign(1.0);
+  var res : f32 = sign(1.0f);
 }
 
 @vertex

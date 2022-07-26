@@ -25,7 +25,7 @@
 
 // fn tan(vec<2, f32>) -> vec<2, f32>
 fn tan_8ce3e9() {
-  var arg_0 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.f);
   var res: vec2<f32> = tan(arg_0);
 }
 

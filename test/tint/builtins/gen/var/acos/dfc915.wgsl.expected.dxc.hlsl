@@ -1,5 +1,5 @@
 void acos_dfc915() {
-  float2 arg_0 = (0.0f).xx;
+  float2 arg_0 = (1.0f).xx;
   float2 res = acos(arg_0);
 }
 

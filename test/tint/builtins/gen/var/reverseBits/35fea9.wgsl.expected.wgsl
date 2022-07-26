@@ -1,5 +1,5 @@
 fn reverseBits_35fea9() {
-  var arg_0 = vec4<u32>();
+  var arg_0 = vec4<u32>(1u);
   var res : vec4<u32> = reverseBits(arg_0);
 }
 

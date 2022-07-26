@@ -25,7 +25,7 @@
 
 // fn dpdxFine(f32) -> f32
 fn dpdxFine_f401a2() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = dpdxFine(arg_0);
 }
 

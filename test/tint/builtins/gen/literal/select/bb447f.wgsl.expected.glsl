@@ -1,7 +1,7 @@
 #version 310 es
 
 void select_bb447f() {
-  ivec2 res = (false ? ivec2(0) : ivec2(0));
+  ivec2 res = (true ? ivec2(1) : ivec2(1));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void select_bb447f() {
-  ivec2 res = (false ? ivec2(0) : ivec2(0));
+  ivec2 res = (true ? ivec2(1) : ivec2(1));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void select_bb447f() {
-  ivec2 res = (false ? ivec2(0) : ivec2(0));
+  ivec2 res = (true ? ivec2(1) : ivec2(1));
 }
 
 void compute_main() {

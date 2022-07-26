@@ -1,5 +1,5 @@
 void abs_7326de() {
-  uint3 arg_0 = (0u).xxx;
+  uint3 arg_0 = (1u).xxx;
   uint3 res = abs(arg_0);
 }
 

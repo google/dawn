@@ -1,5 +1,5 @@
 fn exp_771fd2() {
-  var res : f32 = exp(1.0);
+  var res : f32 = exp(1.0f);
 }
 
 @vertex

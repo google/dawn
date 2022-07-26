@@ -1,5 +1,5 @@
 void fwidthFine_68f4ef() {
-  float4 arg_0 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
   float4 res = fwidth(arg_0);
 }
 

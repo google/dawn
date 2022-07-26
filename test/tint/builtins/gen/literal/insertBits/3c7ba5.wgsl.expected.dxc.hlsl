@@ -6,7 +6,7 @@ uint2 tint_insert_bits(uint2 v, uint2 n, uint offset, uint count) {
 }
 
 void insertBits_3c7ba5() {
-  uint2 res = tint_insert_bits((0u).xx, (0u).xx, 1u, 1u);
+  uint2 res = tint_insert_bits((1u).xx, (1u).xx, 1u, 1u);
 }
 
 struct tint_symbol {

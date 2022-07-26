@@ -1,5 +1,5 @@
 fn tanh_5724b3() {
-  var arg_0 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.0f);
   var res : vec2<f32> = tanh(arg_0);
 }
 

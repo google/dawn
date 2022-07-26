@@ -332,7 +332,7 @@ func validate(fqn sem.FullyQualifiedName, uses *sem.StageUses) bool {
 			strings.Contains(elTyName, "sampler"),
 			strings.Contains(elTyName, "texture"):
 			return false // Not storable
-		case elTyName == "fa" || elTyName == "ia":
+		case isAbstract(elTy):
 			return false // Abstract types are not typeable nor supported by arrays
 		}
 	case "ptr":
@@ -367,8 +367,8 @@ func validate(fqn sem.FullyQualifiedName, uses *sem.StageUses) bool {
 		}
 	}
 
-	if !isDeclarable(fqn) {
-		return false
+	if strings.HasPrefix(fqn.Target.GetName(), "_") {
+		return false // Core, undeclarable WGSL type
 	}
 
 	for _, arg := range fqn.TemplateArguments {

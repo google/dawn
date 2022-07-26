@@ -1,5 +1,5 @@
 fn mix_4f0b5e() {
-  var res : f32 = mix(1.0, 1.0, 1.0);
+  var res : f32 = mix(1.0f, 1.0f, 1.0f);
 }
 
 @vertex

@@ -25,7 +25,7 @@
 
 // fn dpdyCoarse(vec<3, f32>) -> vec<3, f32>
 fn dpdyCoarse_ae1873() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.f);
   var res: vec3<f32> = dpdyCoarse(arg_0);
 }
 

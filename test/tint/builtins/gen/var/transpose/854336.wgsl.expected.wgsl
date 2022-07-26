@@ -1,5 +1,5 @@
 fn transpose_854336() {
-  var arg_0 = mat3x3<f32>();
+  var arg_0 = mat3x3<f32>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
   var res : mat3x3<f32> = transpose(arg_0);
 }
 

@@ -1,5 +1,5 @@
 void select_1e960b() {
-  uint2 res = ((false).xx ? (0u).xx : (0u).xx);
+  uint2 res = ((true).xx ? (1u).xx : (1u).xx);
 }
 
 struct tint_symbol {

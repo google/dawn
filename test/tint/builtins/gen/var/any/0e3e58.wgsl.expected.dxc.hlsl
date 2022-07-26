@@ -1,5 +1,5 @@
 void any_0e3e58() {
-  bool2 arg_0 = (false).xx;
+  bool2 arg_0 = (true).xx;
   bool res = any(arg_0);
 }
 

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void all_bd2dba() {
-  bool3 arg_0 = bool3(false);
+  bool3 arg_0 = bool3(true);
   bool res = all(arg_0);
 }
 

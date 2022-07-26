@@ -1,5 +1,5 @@
 fn sqrt_f8c59a() {
-  var res : vec3<f32> = sqrt(vec3<f32>());
+  var res : vec3<f32> = sqrt(vec3<f32>(1.0f));
 }
 
 @vertex

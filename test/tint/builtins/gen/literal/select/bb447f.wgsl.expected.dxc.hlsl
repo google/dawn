@@ -1,5 +1,5 @@
 void select_bb447f() {
-  int2 res = (false ? (0).xx : (0).xx);
+  int2 res = (true ? (1).xx : (1).xx);
 }
 
 struct tint_symbol {

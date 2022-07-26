@@ -2,8 +2,8 @@
 
 using namespace metal;
 void pow_e60ea5() {
-  float2 arg_0 = float2(0.0f);
-  float2 arg_1 = float2(0.0f);
+  float2 arg_0 = float2(1.0f);
+  float2 arg_1 = float2(1.0f);
   float2 res = pow(arg_0, arg_1);
 }
 

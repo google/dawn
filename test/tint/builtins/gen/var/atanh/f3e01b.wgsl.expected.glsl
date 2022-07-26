@@ -5,7 +5,7 @@ vec4 tint_atanh(vec4 x) {
 }
 
 void atanh_f3e01b() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_atanh(arg_0);
 }
 
@@ -30,7 +30,7 @@ vec4 tint_atanh(vec4 x) {
 }
 
 void atanh_f3e01b() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_atanh(arg_0);
 }
 
@@ -49,7 +49,7 @@ vec4 tint_atanh(vec4 x) {
 }
 
 void atanh_f3e01b() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_atanh(arg_0);
 }
 

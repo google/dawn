@@ -25,7 +25,7 @@
 
 // fn length(vec<2, f32>) -> f32
 fn length_afde8b() {
-  var arg_0 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.f);
   var res: f32 = length(arg_0);
 }
 

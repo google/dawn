@@ -2,7 +2,7 @@
 precision mediump float;
 
 void fwidthCoarse_4e4fc4() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = fwidth(arg_0);
 }
 

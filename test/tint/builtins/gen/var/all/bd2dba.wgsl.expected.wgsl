@@ -1,5 +1,5 @@
 fn all_bd2dba() {
-  var arg_0 = vec3<bool>();
+  var arg_0 = vec3<bool>(true);
   var res : bool = all(arg_0);
 }
 

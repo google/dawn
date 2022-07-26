@@ -1,6 +1,6 @@
 void max_453e04() {
-  uint4 arg_0 = (0u).xxxx;
-  uint4 arg_1 = (0u).xxxx;
+  uint4 arg_0 = (1u).xxxx;
+  uint4 arg_1 = (1u).xxxx;
   uint4 res = max(arg_0, arg_1);
 }
 

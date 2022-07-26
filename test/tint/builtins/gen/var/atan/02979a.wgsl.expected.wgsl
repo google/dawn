@@ -1,5 +1,5 @@
 fn atan_02979a() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.0f;
   var res : f32 = atan(arg_0);
 }
 

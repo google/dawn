@@ -1,9 +1,9 @@
 #version 310 es
 
 void select_cb9301() {
-  bvec2 arg_0 = bvec2(false);
-  bvec2 arg_1 = bvec2(false);
-  bvec2 arg_2 = bvec2(false);
+  bvec2 arg_0 = bvec2(true);
+  bvec2 arg_1 = bvec2(true);
+  bvec2 arg_2 = bvec2(true);
   bvec2 res = mix(arg_0, arg_1, arg_2);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void select_cb9301() {
-  bvec2 arg_0 = bvec2(false);
-  bvec2 arg_1 = bvec2(false);
-  bvec2 arg_2 = bvec2(false);
+  bvec2 arg_0 = bvec2(true);
+  bvec2 arg_1 = bvec2(true);
+  bvec2 arg_2 = bvec2(true);
   bvec2 res = mix(arg_0, arg_1, arg_2);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void select_cb9301() {
-  bvec2 arg_0 = bvec2(false);
-  bvec2 arg_1 = bvec2(false);
-  bvec2 arg_2 = bvec2(false);
+  bvec2 arg_0 = bvec2(true);
+  bvec2 arg_1 = bvec2(true);
+  bvec2 arg_2 = bvec2(true);
   bvec2 res = mix(arg_0, arg_1, arg_2);
 }
 

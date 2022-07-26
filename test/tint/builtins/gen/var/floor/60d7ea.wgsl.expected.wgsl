@@ -1,5 +1,5 @@
 fn floor_60d7ea() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.0f);
   var res : vec3<f32> = floor(arg_0);
 }
 

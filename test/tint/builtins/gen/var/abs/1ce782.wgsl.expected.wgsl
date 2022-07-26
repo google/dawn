@@ -1,5 +1,5 @@
 fn abs_1ce782() {
-  var arg_0 = vec4<u32>();
+  var arg_0 = vec4<u32>(1u);
   var res : vec4<u32> = abs(arg_0);
 }
 

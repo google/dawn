@@ -14,7 +14,7 @@ uint4 tint_first_leading_bit(uint4 v) {
 }
 
 void firstLeadingBit_000ff3() {
-  uint4 arg_0 = (0u).xxxx;
+  uint4 arg_0 = (1u).xxxx;
   uint4 res = tint_first_leading_bit(arg_0);
 }
 

@@ -1,5 +1,5 @@
 fn select_99f883() {
-  var res : u32 = select(1u, 1u, bool());
+  var res : u32 = select(1u, 1u, true);
 }
 
 @vertex

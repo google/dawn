@@ -25,7 +25,7 @@
 
 // fn min(f32, f32) -> f32
 fn min_af326d() {
-  var res: f32 = min(1.0, 1.0);
+  var res: f32 = min(1.f, 1.f);
 }
 
 @vertex

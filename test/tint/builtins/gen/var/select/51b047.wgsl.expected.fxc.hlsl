@@ -1,7 +1,7 @@
 void select_51b047() {
-  uint2 arg_0 = (0u).xx;
-  uint2 arg_1 = (0u).xx;
-  bool arg_2 = false;
+  uint2 arg_0 = (1u).xx;
+  uint2 arg_1 = (1u).xx;
+  bool arg_2 = true;
   uint2 res = (arg_2 ? arg_1 : arg_0);
 }
 

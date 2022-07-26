@@ -1,5 +1,5 @@
 void exp2_1f8680() {
-  float3 arg_0 = (0.0f).xxx;
+  float3 arg_0 = (1.0f).xxx;
   float3 res = exp2(arg_0);
 }
 

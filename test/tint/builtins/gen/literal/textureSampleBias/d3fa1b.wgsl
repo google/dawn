@@ -27,7 +27,7 @@
 
 // fn textureSampleBias(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, bias: f32) -> vec4<f32>
 fn textureSampleBias_d3fa1b() {
-  var res: vec4<f32> = textureSampleBias(arg_0, arg_1, vec3<f32>(), 1.0);
+  var res: vec4<f32> = textureSampleBias(arg_0, arg_1, vec3<f32>(), 1.f);
 }
 
 @fragment

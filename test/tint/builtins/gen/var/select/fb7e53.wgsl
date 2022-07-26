@@ -25,9 +25,9 @@
 
 // fn select(vec<2, bool>, vec<2, bool>, bool) -> vec<2, bool>
 fn select_fb7e53() {
-  var arg_0 = vec2<bool>();
-  var arg_1 = vec2<bool>();
-  var arg_2 = bool();
+  var arg_0 = vec2<bool>(true);
+  var arg_1 = vec2<bool>(true);
+  var arg_2 = true;
   var res: vec2<bool> = select(arg_0, arg_1, arg_2);
 }
 

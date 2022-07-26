@@ -1,6 +1,6 @@
 void min_c76fa6() {
-  float4 arg_0 = (0.0f).xxxx;
-  float4 arg_1 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
+  float4 arg_1 = (1.0f).xxxx;
   float4 res = min(arg_0, arg_1);
 }
 

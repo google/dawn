@@ -2,7 +2,7 @@
 
 using namespace metal;
 void countLeadingZeros_f70103() {
-  uint4 arg_0 = uint4(0u);
+  uint4 arg_0 = uint4(1u);
   uint4 res = clz(arg_0);
 }
 

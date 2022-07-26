@@ -2,7 +2,7 @@
 
 using namespace metal;
 void dpdxFine_9631de() {
-  float2 arg_0 = float2(0.0f);
+  float2 arg_0 = float2(1.0f);
   float2 res = dfdx(arg_0);
 }
 

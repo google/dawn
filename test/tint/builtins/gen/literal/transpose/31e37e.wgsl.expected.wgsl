@@ -1,5 +1,5 @@
 fn transpose_31e37e() {
-  var res : mat2x4<f32> = transpose(mat4x2<f32>());
+  var res : mat2x4<f32> = transpose(mat4x2<f32>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f));
 }
 
 @vertex

@@ -110,7 +110,7 @@
 %countTrailingZeros_8ed26f = OpFunction %void None %76
          %79 = OpLabel
         %res = OpVariable %_ptr_Function_v3uint Function %18
-         %80 = OpFunctionCall %v3uint %tint_count_trailing_zeros %18
+         %80 = OpFunctionCall %v3uint %tint_count_trailing_zeros %65
                OpStore %res %80
                OpReturn
                OpFunctionEnd

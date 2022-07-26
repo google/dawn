@@ -1,5 +1,5 @@
 void ceil_34064b() {
-  float3 arg_0 = (0.0f).xxx;
+  float3 arg_0 = (1.0f).xxx;
   float3 res = ceil(arg_0);
 }
 

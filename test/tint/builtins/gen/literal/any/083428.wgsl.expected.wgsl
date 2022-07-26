@@ -1,5 +1,5 @@
 fn any_083428() {
-  var res : bool = any(vec4<bool>());
+  var res : bool = any(vec4<bool>(true));
 }
 
 @vertex

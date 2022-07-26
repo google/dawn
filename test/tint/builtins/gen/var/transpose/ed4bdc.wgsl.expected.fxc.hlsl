@@ -1,5 +1,5 @@
 void transpose_ed4bdc() {
-  float3x2 arg_0 = float3x2((0.0f).xx, (0.0f).xx, (0.0f).xx);
+  float3x2 arg_0 = float3x2((1.0f).xx, (1.0f).xx, (1.0f).xx);
   float2x3 res = transpose(arg_0);
 }
 

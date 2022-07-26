@@ -1,5 +1,5 @@
 void reverseBits_35fea9() {
-  uint4 arg_0 = (0u).xxxx;
+  uint4 arg_0 = (1u).xxxx;
   uint4 res = reversebits(arg_0);
 }
 

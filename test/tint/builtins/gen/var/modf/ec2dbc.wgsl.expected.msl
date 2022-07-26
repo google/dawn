@@ -13,7 +13,7 @@ modf_result_vec4 tint_modf(float4 param_0) {
 }
 
 void modf_ec2dbc() {
-  float4 arg_0 = float4(0.0f);
+  float4 arg_0 = float4(1.0f);
   modf_result_vec4 res = tint_modf(arg_0);
 }
 

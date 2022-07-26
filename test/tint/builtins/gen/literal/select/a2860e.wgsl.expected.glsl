@@ -1,7 +1,7 @@
 #version 310 es
 
 void select_a2860e() {
-  ivec4 res = mix(ivec4(0), ivec4(0), bvec4(false));
+  ivec4 res = mix(ivec4(1), ivec4(1), bvec4(true));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void select_a2860e() {
-  ivec4 res = mix(ivec4(0), ivec4(0), bvec4(false));
+  ivec4 res = mix(ivec4(1), ivec4(1), bvec4(true));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void select_a2860e() {
-  ivec4 res = mix(ivec4(0), ivec4(0), bvec4(false));
+  ivec4 res = mix(ivec4(1), ivec4(1), bvec4(true));
 }
 
 void compute_main() {

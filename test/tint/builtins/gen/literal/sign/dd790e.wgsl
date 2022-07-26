@@ -25,7 +25,7 @@
 
 // fn sign(f32) -> f32
 fn sign_dd790e() {
-  var res: f32 = sign(1.0);
+  var res: f32 = sign(1.f);
 }
 
 @vertex

@@ -1,6 +1,6 @@
 void refract_7e02e6() {
-  float4 arg_0 = (0.0f).xxxx;
-  float4 arg_1 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
+  float4 arg_1 = (1.0f).xxxx;
   float arg_2 = 1.0f;
   float4 res = refract(arg_0, arg_1, arg_2);
 }

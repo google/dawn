@@ -1,5 +1,5 @@
 void all_353d6a() {
-  bool arg_0 = false;
+  bool arg_0 = true;
   bool res = all(arg_0);
 }
 

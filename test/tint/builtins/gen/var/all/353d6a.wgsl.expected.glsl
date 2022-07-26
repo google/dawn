@@ -1,7 +1,7 @@
 #version 310 es
 
 void all_353d6a() {
-  bool arg_0 = false;
+  bool arg_0 = true;
   bool res = arg_0;
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void all_353d6a() {
-  bool arg_0 = false;
+  bool arg_0 = true;
   bool res = arg_0;
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void all_353d6a() {
-  bool arg_0 = false;
+  bool arg_0 = true;
   bool res = arg_0;
 }
 

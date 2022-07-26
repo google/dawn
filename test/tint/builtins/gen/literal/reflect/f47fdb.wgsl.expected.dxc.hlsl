@@ -1,5 +1,5 @@
 void reflect_f47fdb() {
-  float3 res = reflect((0.0f).xxx, (0.0f).xxx);
+  float3 res = reflect((1.0f).xxx, (1.0f).xxx);
 }
 
 struct tint_symbol {

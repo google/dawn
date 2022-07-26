@@ -1,7 +1,7 @@
 #version 310 es
 
 void select_1e960b() {
-  uvec2 res = mix(uvec2(0u), uvec2(0u), bvec2(false));
+  uvec2 res = mix(uvec2(1u), uvec2(1u), bvec2(true));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void select_1e960b() {
-  uvec2 res = mix(uvec2(0u), uvec2(0u), bvec2(false));
+  uvec2 res = mix(uvec2(1u), uvec2(1u), bvec2(true));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void select_1e960b() {
-  uvec2 res = mix(uvec2(0u), uvec2(0u), bvec2(false));
+  uvec2 res = mix(uvec2(1u), uvec2(1u), bvec2(true));
 }
 
 void compute_main() {

@@ -1,5 +1,5 @@
 void tanh_5663c5() {
-  float4 arg_0 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
   float4 res = tanh(arg_0);
 }
 

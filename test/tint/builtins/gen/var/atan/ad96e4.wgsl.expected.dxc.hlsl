@@ -1,5 +1,5 @@
 void atan_ad96e4() {
-  float2 arg_0 = (0.0f).xx;
+  float2 arg_0 = (1.0f).xx;
   float2 res = atan(arg_0);
 }
 

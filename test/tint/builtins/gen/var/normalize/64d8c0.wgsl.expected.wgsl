@@ -1,5 +1,5 @@
 fn normalize_64d8c0() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.0f);
   var res : vec3<f32> = normalize(arg_0);
 }
 

@@ -1,5 +1,5 @@
 fn extractBits_fb850f() {
-  var res : vec4<i32> = extractBits(vec4<i32>(), 1u, 1u);
+  var res : vec4<i32> = extractBits(vec4<i32>(1), 1u, 1u);
 }
 
 @vertex

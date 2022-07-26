@@ -1,5 +1,5 @@
 fn transpose_31d679() {
-  var arg_0 = mat2x2<f32>();
+  var arg_0 = mat2x2<f32>(1.0f, 1.0f, 1.0f, 1.0f);
   var res : mat2x2<f32> = transpose(arg_0);
 }
 

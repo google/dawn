@@ -2,7 +2,7 @@
 
 using namespace metal;
 void determinant_e19305() {
-  float2x2 arg_0 = float2x2(float2(0.0f), float2(0.0f));
+  float2x2 arg_0 = float2x2(float2(1.0f), float2(1.0f));
   float res = determinant(arg_0);
 }
 

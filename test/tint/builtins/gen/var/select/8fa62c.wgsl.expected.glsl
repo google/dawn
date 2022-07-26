@@ -1,9 +1,9 @@
 #version 310 es
 
 void select_8fa62c() {
-  ivec3 arg_0 = ivec3(0);
-  ivec3 arg_1 = ivec3(0);
-  bool arg_2 = false;
+  ivec3 arg_0 = ivec3(1);
+  ivec3 arg_1 = ivec3(1);
+  bool arg_2 = true;
   ivec3 res = (arg_2 ? arg_1 : arg_0);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void select_8fa62c() {
-  ivec3 arg_0 = ivec3(0);
-  ivec3 arg_1 = ivec3(0);
-  bool arg_2 = false;
+  ivec3 arg_0 = ivec3(1);
+  ivec3 arg_1 = ivec3(1);
+  bool arg_2 = true;
   ivec3 res = (arg_2 ? arg_1 : arg_0);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void select_8fa62c() {
-  ivec3 arg_0 = ivec3(0);
-  ivec3 arg_1 = ivec3(0);
-  bool arg_2 = false;
+  ivec3 arg_0 = ivec3(1);
+  ivec3 arg_1 = ivec3(1);
+  bool arg_2 = true;
   ivec3 res = (arg_2 ? arg_1 : arg_0);
 }
 

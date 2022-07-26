@@ -1,5 +1,5 @@
 void countOneBits_af90e2() {
-  int2 arg_0 = (0).xx;
+  int2 arg_0 = (1).xx;
   int2 res = asint(countbits(asuint(arg_0)));
 }
 

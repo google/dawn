@@ -25,7 +25,7 @@
 
 // fn any(vec<3, bool>) -> bool
 fn any_e755c1() {
-  var res: bool = any(vec3<bool>());
+  var res: bool = any(vec3<bool>(true));
 }
 
 @vertex

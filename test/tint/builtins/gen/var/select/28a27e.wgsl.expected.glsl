@@ -1,9 +1,9 @@
 #version 310 es
 
 void select_28a27e() {
-  uvec3 arg_0 = uvec3(0u);
-  uvec3 arg_1 = uvec3(0u);
-  bvec3 arg_2 = bvec3(false);
+  uvec3 arg_0 = uvec3(1u);
+  uvec3 arg_1 = uvec3(1u);
+  bvec3 arg_2 = bvec3(true);
   uvec3 res = mix(arg_0, arg_1, arg_2);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void select_28a27e() {
-  uvec3 arg_0 = uvec3(0u);
-  uvec3 arg_1 = uvec3(0u);
-  bvec3 arg_2 = bvec3(false);
+  uvec3 arg_0 = uvec3(1u);
+  uvec3 arg_1 = uvec3(1u);
+  bvec3 arg_2 = bvec3(true);
   uvec3 res = mix(arg_0, arg_1, arg_2);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void select_28a27e() {
-  uvec3 arg_0 = uvec3(0u);
-  uvec3 arg_1 = uvec3(0u);
-  bvec3 arg_2 = bvec3(false);
+  uvec3 arg_0 = uvec3(1u);
+  uvec3 arg_1 = uvec3(1u);
+  bvec3 arg_2 = bvec3(true);
   uvec3 res = mix(arg_0, arg_1, arg_2);
 }
 

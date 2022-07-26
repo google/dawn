@@ -1,5 +1,5 @@
 void cosh_c13756() {
-  float2 res = cosh((0.0f).xx);
+  float2 res = cosh((1.0f).xx);
 }
 
 struct tint_symbol {

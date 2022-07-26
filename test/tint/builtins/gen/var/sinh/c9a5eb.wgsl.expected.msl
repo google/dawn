@@ -2,7 +2,7 @@
 
 using namespace metal;
 void sinh_c9a5eb() {
-  float3 arg_0 = float3(0.0f);
+  float3 arg_0 = float3(1.0f);
   float3 res = sinh(arg_0);
 }
 

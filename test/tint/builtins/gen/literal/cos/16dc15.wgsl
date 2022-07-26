@@ -25,7 +25,7 @@
 
 // fn cos(vec<3, f32>) -> vec<3, f32>
 fn cos_16dc15() {
-  var res: vec3<f32> = cos(vec3<f32>());
+  var res: vec3<f32> = cos(vec3<f32>(1.f));
 }
 
 @vertex

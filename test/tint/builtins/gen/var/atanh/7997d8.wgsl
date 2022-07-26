@@ -25,7 +25,7 @@
 
 // fn atanh(f32) -> f32
 fn atanh_7997d8() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = atanh(arg_0);
 }
 

@@ -6,7 +6,7 @@ float4 tint_acosh(float4 x) {
 }
 
 void acosh_d51ccb() {
-  float4 arg_0 = float4(0.0f);
+  float4 arg_0 = float4(1.0f);
   float4 res = tint_acosh(arg_0);
 }
 

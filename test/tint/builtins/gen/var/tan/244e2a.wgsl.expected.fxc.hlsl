@@ -1,5 +1,5 @@
 void tan_244e2a() {
-  float4 arg_0 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
   float4 res = tan(arg_0);
 }
 

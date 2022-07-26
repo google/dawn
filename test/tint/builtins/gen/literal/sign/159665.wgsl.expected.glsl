@@ -1,7 +1,7 @@
 #version 310 es
 
 void sign_159665() {
-  vec3 res = sign(vec3(0.0f));
+  vec3 res = sign(vec3(1.0f));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void sign_159665() {
-  vec3 res = sign(vec3(0.0f));
+  vec3 res = sign(vec3(1.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void sign_159665() {
-  vec3 res = sign(vec3(0.0f));
+  vec3 res = sign(vec3(1.0f));
 }
 
 void compute_main() {

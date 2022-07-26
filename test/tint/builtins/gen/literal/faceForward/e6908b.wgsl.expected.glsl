@@ -1,7 +1,7 @@
 #version 310 es
 
 void faceForward_e6908b() {
-  vec2 res = faceforward(vec2(0.0f), vec2(0.0f), vec2(0.0f));
+  vec2 res = faceforward(vec2(1.0f), vec2(1.0f), vec2(1.0f));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void faceForward_e6908b() {
-  vec2 res = faceforward(vec2(0.0f), vec2(0.0f), vec2(0.0f));
+  vec2 res = faceforward(vec2(1.0f), vec2(1.0f), vec2(1.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void faceForward_e6908b() {
-  vec2 res = faceforward(vec2(0.0f), vec2(0.0f), vec2(0.0f));
+  vec2 res = faceforward(vec2(1.0f), vec2(1.0f), vec2(1.0f));
 }
 
 void compute_main() {

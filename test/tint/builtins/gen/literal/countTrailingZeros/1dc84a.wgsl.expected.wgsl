@@ -1,5 +1,5 @@
 fn countTrailingZeros_1dc84a() {
-  var res : vec4<i32> = countTrailingZeros(vec4<i32>());
+  var res : vec4<i32> = countTrailingZeros(vec4<i32>(1));
 }
 
 @vertex

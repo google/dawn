@@ -25,7 +25,7 @@
 
 // fn faceForward(vec<2, f32>, vec<2, f32>, vec<2, f32>) -> vec<2, f32>
 fn faceForward_e6908b() {
-  var res: vec2<f32> = faceForward(vec2<f32>(), vec2<f32>(), vec2<f32>());
+  var res: vec2<f32> = faceForward(vec2<f32>(1.f), vec2<f32>(1.f), vec2<f32>(1.f));
 }
 
 @vertex

@@ -1,8 +1,8 @@
 #version 310 es
 
 void ldexp_a31cdc() {
-  vec3 arg_0 = vec3(0.0f);
-  ivec3 arg_1 = ivec3(0);
+  vec3 arg_0 = vec3(1.0f);
+  ivec3 arg_1 = ivec3(1);
   vec3 res = ldexp(arg_0, arg_1);
 }
 
@@ -23,8 +23,8 @@ void main() {
 precision mediump float;
 
 void ldexp_a31cdc() {
-  vec3 arg_0 = vec3(0.0f);
-  ivec3 arg_1 = ivec3(0);
+  vec3 arg_0 = vec3(1.0f);
+  ivec3 arg_1 = ivec3(1);
   vec3 res = ldexp(arg_0, arg_1);
 }
 
@@ -39,8 +39,8 @@ void main() {
 #version 310 es
 
 void ldexp_a31cdc() {
-  vec3 arg_0 = vec3(0.0f);
-  ivec3 arg_1 = ivec3(0);
+  vec3 arg_0 = vec3(1.0f);
+  ivec3 arg_1 = ivec3(1);
   vec3 res = ldexp(arg_0, arg_1);
 }
 

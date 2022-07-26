@@ -1,5 +1,5 @@
 fn sqrt_aa0d7a() {
-  var res : vec4<f32> = sqrt(vec4<f32>());
+  var res : vec4<f32> = sqrt(vec4<f32>(1.0f));
 }
 
 @vertex

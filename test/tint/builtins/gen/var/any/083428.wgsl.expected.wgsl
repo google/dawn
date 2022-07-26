@@ -1,5 +1,5 @@
 fn any_083428() {
-  var arg_0 = vec4<bool>();
+  var arg_0 = vec4<bool>(true);
   var res : bool = any(arg_0);
 }
 

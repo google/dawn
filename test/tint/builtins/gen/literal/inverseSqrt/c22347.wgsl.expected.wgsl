@@ -1,5 +1,5 @@
 fn inverseSqrt_c22347() {
-  var res : vec4<f32> = inverseSqrt(vec4<f32>());
+  var res : vec4<f32> = inverseSqrt(vec4<f32>(1.0f));
 }
 
 @vertex

@@ -1,5 +1,5 @@
 fn min_c76fa6() {
-  var res : vec4<f32> = min(vec4<f32>(), vec4<f32>());
+  var res : vec4<f32> = min(vec4<f32>(1.0f), vec4<f32>(1.0f));
 }
 
 @vertex

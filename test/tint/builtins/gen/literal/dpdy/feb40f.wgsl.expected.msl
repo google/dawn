@@ -2,7 +2,7 @@
 
 using namespace metal;
 void dpdy_feb40f() {
-  float3 res = dfdy(float3(0.0f));
+  float3 res = dfdy(float3(1.0f));
 }
 
 fragment void fragment_main() {

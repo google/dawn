@@ -1,5 +1,5 @@
 void transpose_4dc9a1() {
-  float2x3 arg_0 = float2x3((0.0f).xxx, (0.0f).xxx);
+  float2x3 arg_0 = float2x3((1.0f).xxx, (1.0f).xxx);
   float3x2 res = transpose(arg_0);
 }
 

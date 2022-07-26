@@ -25,7 +25,7 @@
 
 // fn tanh(f32) -> f32
 fn tanh_c15fdb() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = tanh(arg_0);
 }
 

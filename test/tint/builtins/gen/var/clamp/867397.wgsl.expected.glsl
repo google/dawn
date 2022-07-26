@@ -1,9 +1,9 @@
 #version 310 es
 
 void clamp_867397() {
-  vec3 arg_0 = vec3(0.0f);
-  vec3 arg_1 = vec3(0.0f);
-  vec3 arg_2 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
+  vec3 arg_1 = vec3(1.0f);
+  vec3 arg_2 = vec3(1.0f);
   vec3 res = clamp(arg_0, arg_1, arg_2);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void clamp_867397() {
-  vec3 arg_0 = vec3(0.0f);
-  vec3 arg_1 = vec3(0.0f);
-  vec3 arg_2 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
+  vec3 arg_1 = vec3(1.0f);
+  vec3 arg_2 = vec3(1.0f);
   vec3 res = clamp(arg_0, arg_1, arg_2);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void clamp_867397() {
-  vec3 arg_0 = vec3(0.0f);
-  vec3 arg_1 = vec3(0.0f);
-  vec3 arg_2 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
+  vec3 arg_1 = vec3(1.0f);
+  vec3 arg_2 = vec3(1.0f);
   vec3 res = clamp(arg_0, arg_1, arg_2);
 }
 

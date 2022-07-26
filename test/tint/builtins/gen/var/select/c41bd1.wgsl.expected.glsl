@@ -1,9 +1,9 @@
 #version 310 es
 
 void select_c41bd1() {
-  bvec4 arg_0 = bvec4(false);
-  bvec4 arg_1 = bvec4(false);
-  bool arg_2 = false;
+  bvec4 arg_0 = bvec4(true);
+  bvec4 arg_1 = bvec4(true);
+  bool arg_2 = true;
   bvec4 res = (arg_2 ? arg_1 : arg_0);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void select_c41bd1() {
-  bvec4 arg_0 = bvec4(false);
-  bvec4 arg_1 = bvec4(false);
-  bool arg_2 = false;
+  bvec4 arg_0 = bvec4(true);
+  bvec4 arg_1 = bvec4(true);
+  bool arg_2 = true;
   bvec4 res = (arg_2 ? arg_1 : arg_0);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void select_c41bd1() {
-  bvec4 arg_0 = bvec4(false);
-  bvec4 arg_1 = bvec4(false);
-  bool arg_2 = false;
+  bvec4 arg_0 = bvec4(true);
+  bvec4 arg_1 = bvec4(true);
+  bool arg_2 = true;
   bvec4 res = (arg_2 ? arg_1 : arg_0);
 }
 

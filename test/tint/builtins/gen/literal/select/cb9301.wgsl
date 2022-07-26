@@ -25,7 +25,7 @@
 
 // fn select(vec<2, bool>, vec<2, bool>, vec<2, bool>) -> vec<2, bool>
 fn select_cb9301() {
-  var res: vec2<bool> = select(vec2<bool>(), vec2<bool>(), vec2<bool>());
+  var res: vec2<bool> = select(vec2<bool>(true), vec2<bool>(true), vec2<bool>(true));
 }
 
 @vertex

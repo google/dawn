@@ -10,7 +10,7 @@ frexp_result_vec4 tint_frexp(float4 param_0) {
 }
 
 void frexp_3c4f48() {
-  float4 arg_0 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
   frexp_result_vec4 res = tint_frexp(arg_0);
 }
 

@@ -25,7 +25,7 @@
 
 // fn determinant(mat<2, 2, f32>) -> f32
 fn determinant_e19305() {
-  var arg_0 = mat2x2<f32>();
+  var arg_0 = mat2x2<f32>(1.f, 1.f, 1.f, 1.f);
   var res: f32 = determinant(arg_0);
 }
 

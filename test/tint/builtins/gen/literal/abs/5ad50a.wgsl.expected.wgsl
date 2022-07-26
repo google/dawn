@@ -1,5 +1,5 @@
 fn abs_5ad50a() {
-  var res : vec3<i32> = abs(vec3<i32>());
+  var res : vec3<i32> = abs(vec3<i32>(1));
 }
 
 @vertex

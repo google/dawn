@@ -3,7 +3,7 @@ float4 tint_atanh(float4 x) {
 }
 
 void atanh_f3e01b() {
-  float4 arg_0 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
   float4 res = tint_atanh(arg_0);
 }
 

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void log2_aea659() {
-  float2 arg_0 = float2(0.0f);
+  float2 arg_0 = float2(1.0f);
   float2 res = log2(arg_0);
 }
 

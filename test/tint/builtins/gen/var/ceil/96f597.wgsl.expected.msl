@@ -2,7 +2,7 @@
 
 using namespace metal;
 void ceil_96f597() {
-  float2 arg_0 = float2(0.0f);
+  float2 arg_0 = float2(1.0f);
   float2 res = ceil(arg_0);
 }
 

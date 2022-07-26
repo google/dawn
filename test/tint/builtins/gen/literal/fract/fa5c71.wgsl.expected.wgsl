@@ -1,5 +1,5 @@
 fn fract_fa5c71() {
-  var res : f32 = fract(1.0);
+  var res : f32 = fract(1.0f);
 }
 
 @vertex

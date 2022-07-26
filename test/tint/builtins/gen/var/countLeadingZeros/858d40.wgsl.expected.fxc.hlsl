@@ -14,7 +14,7 @@ int2 tint_count_leading_zeros(int2 v) {
 }
 
 void countLeadingZeros_858d40() {
-  int2 arg_0 = (0).xx;
+  int2 arg_0 = (1).xx;
   int2 res = tint_count_leading_zeros(arg_0);
 }
 

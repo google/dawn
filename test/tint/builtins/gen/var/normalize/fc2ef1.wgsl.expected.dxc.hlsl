@@ -1,5 +1,5 @@
 void normalize_fc2ef1() {
-  float2 arg_0 = (0.0f).xx;
+  float2 arg_0 = (1.0f).xx;
   float2 res = normalize(arg_0);
 }
 

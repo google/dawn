@@ -25,7 +25,7 @@
 
 // fn log2(vec<3, f32>) -> vec<3, f32>
 fn log2_adb233() {
-  var res: vec3<f32> = log2(vec3<f32>());
+  var res: vec3<f32> = log2(vec3<f32>(1.f));
 }
 
 @vertex

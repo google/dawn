@@ -1,7 +1,7 @@
 #version 310 es
 
 void countOneBits_690cfc() {
-  uvec3 arg_0 = uvec3(0u);
+  uvec3 arg_0 = uvec3(1u);
   uvec3 res = uvec3(bitCount(arg_0));
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void countOneBits_690cfc() {
-  uvec3 arg_0 = uvec3(0u);
+  uvec3 arg_0 = uvec3(1u);
   uvec3 res = uvec3(bitCount(arg_0));
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void countOneBits_690cfc() {
-  uvec3 arg_0 = uvec3(0u);
+  uvec3 arg_0 = uvec3(1u);
   uvec3 res = uvec3(bitCount(arg_0));
 }
 

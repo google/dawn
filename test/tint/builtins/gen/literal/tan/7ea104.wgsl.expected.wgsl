@@ -1,5 +1,5 @@
 fn tan_7ea104() {
-  var res : vec3<f32> = tan(vec3<f32>());
+  var res : vec3<f32> = tan(vec3<f32>(1.0f));
 }
 
 @vertex

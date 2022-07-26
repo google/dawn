@@ -2,7 +2,7 @@
 
 using namespace metal;
 void dpdy_feb40f() {
-  float3 arg_0 = float3(0.0f);
+  float3 arg_0 = float3(1.0f);
   float3 res = dfdy(arg_0);
 }
 

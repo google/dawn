@@ -16,7 +16,7 @@ uvec3 tint_count_leading_zeros(uvec3 v) {
 }
 
 void countLeadingZeros_ab6345() {
-  uvec3 arg_0 = uvec3(0u);
+  uvec3 arg_0 = uvec3(1u);
   uvec3 res = tint_count_leading_zeros(arg_0);
 }
 
@@ -52,7 +52,7 @@ uvec3 tint_count_leading_zeros(uvec3 v) {
 }
 
 void countLeadingZeros_ab6345() {
-  uvec3 arg_0 = uvec3(0u);
+  uvec3 arg_0 = uvec3(1u);
   uvec3 res = tint_count_leading_zeros(arg_0);
 }
 
@@ -82,7 +82,7 @@ uvec3 tint_count_leading_zeros(uvec3 v) {
 }
 
 void countLeadingZeros_ab6345() {
-  uvec3 arg_0 = uvec3(0u);
+  uvec3 arg_0 = uvec3(1u);
   uvec3 res = tint_count_leading_zeros(arg_0);
 }
 

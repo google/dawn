@@ -1,5 +1,5 @@
 fn frexp_368997() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.0f);
   var res = frexp(arg_0);
 }
 

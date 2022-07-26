@@ -25,7 +25,7 @@
 
 // fn floor(vec<4, f32>) -> vec<4, f32>
 fn floor_3bccc4() {
-  var arg_0 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.f);
   var res: vec4<f32> = floor(arg_0);
 }
 

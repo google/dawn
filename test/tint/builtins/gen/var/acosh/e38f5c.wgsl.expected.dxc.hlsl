@@ -3,7 +3,7 @@ float3 tint_acosh(float3 x) {
 }
 
 void acosh_e38f5c() {
-  float3 arg_0 = (0.0f).xxx;
+  float3 arg_0 = (1.0f).xxx;
   float3 res = tint_acosh(arg_0);
 }
 

@@ -1,5 +1,5 @@
 fn determinant_a0a87c() {
-  var arg_0 = mat4x4<f32>();
+  var arg_0 = mat4x4<f32>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
   var res : f32 = determinant(arg_0);
 }
 

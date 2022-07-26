@@ -5,8 +5,8 @@ uint tint_int_dot(uvec4 a, uvec4 b) {
 }
 
 void dot_e994c7() {
-  uvec4 arg_0 = uvec4(0u);
-  uvec4 arg_1 = uvec4(0u);
+  uvec4 arg_0 = uvec4(1u);
+  uvec4 arg_1 = uvec4(1u);
   uint res = tint_int_dot(arg_0, arg_1);
 }
 
@@ -31,8 +31,8 @@ uint tint_int_dot(uvec4 a, uvec4 b) {
 }
 
 void dot_e994c7() {
-  uvec4 arg_0 = uvec4(0u);
-  uvec4 arg_1 = uvec4(0u);
+  uvec4 arg_0 = uvec4(1u);
+  uvec4 arg_1 = uvec4(1u);
   uint res = tint_int_dot(arg_0, arg_1);
 }
 
@@ -51,8 +51,8 @@ uint tint_int_dot(uvec4 a, uvec4 b) {
 }
 
 void dot_e994c7() {
-  uvec4 arg_0 = uvec4(0u);
-  uvec4 arg_1 = uvec4(0u);
+  uvec4 arg_0 = uvec4(1u);
+  uvec4 arg_1 = uvec4(1u);
   uint res = tint_int_dot(arg_0, arg_1);
 }
 

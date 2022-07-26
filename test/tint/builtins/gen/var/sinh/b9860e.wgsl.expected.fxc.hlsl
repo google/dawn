@@ -1,5 +1,5 @@
 void sinh_b9860e() {
-  float2 arg_0 = (0.0f).xx;
+  float2 arg_0 = (1.0f).xx;
   float2 res = sinh(arg_0);
 }
 

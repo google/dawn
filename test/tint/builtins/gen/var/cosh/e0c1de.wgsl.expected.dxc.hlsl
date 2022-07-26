@@ -1,5 +1,5 @@
 void cosh_e0c1de() {
-  float4 arg_0 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
   float4 res = cosh(arg_0);
 }
 

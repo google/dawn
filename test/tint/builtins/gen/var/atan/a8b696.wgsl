@@ -25,7 +25,7 @@
 
 // fn atan(vec<4, f32>) -> vec<4, f32>
 fn atan_a8b696() {
-  var arg_0 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.f);
   var res: vec4<f32> = atan(arg_0);
 }
 

@@ -1,5 +1,5 @@
 fn log_b2ce28() {
-  var res : vec2<f32> = log(vec2<f32>());
+  var res : vec2<f32> = log(vec2<f32>(1.0f));
 }
 
 @vertex

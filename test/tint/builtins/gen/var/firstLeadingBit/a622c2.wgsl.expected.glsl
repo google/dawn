@@ -16,7 +16,7 @@ ivec2 tint_first_leading_bit(ivec2 v) {
 }
 
 void firstLeadingBit_a622c2() {
-  ivec2 arg_0 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
   ivec2 res = tint_first_leading_bit(arg_0);
 }
 
@@ -52,7 +52,7 @@ ivec2 tint_first_leading_bit(ivec2 v) {
 }
 
 void firstLeadingBit_a622c2() {
-  ivec2 arg_0 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
   ivec2 res = tint_first_leading_bit(arg_0);
 }
 
@@ -82,7 +82,7 @@ ivec2 tint_first_leading_bit(ivec2 v) {
 }
 
 void firstLeadingBit_a622c2() {
-  ivec2 arg_0 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
   ivec2 res = tint_first_leading_bit(arg_0);
 }
 

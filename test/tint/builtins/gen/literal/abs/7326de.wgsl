@@ -25,7 +25,7 @@
 
 // fn abs(vec<3, u32>) -> vec<3, u32>
 fn abs_7326de() {
-  var res: vec3<u32> = abs(vec3<u32>());
+  var res: vec3<u32> = abs(vec3<u32>(1u));
 }
 
 @vertex

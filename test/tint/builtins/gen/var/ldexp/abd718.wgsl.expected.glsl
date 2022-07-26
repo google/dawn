@@ -1,8 +1,8 @@
 #version 310 es
 
 void ldexp_abd718() {
-  vec2 arg_0 = vec2(0.0f);
-  ivec2 arg_1 = ivec2(0);
+  vec2 arg_0 = vec2(1.0f);
+  ivec2 arg_1 = ivec2(1);
   vec2 res = ldexp(arg_0, arg_1);
 }
 
@@ -23,8 +23,8 @@ void main() {
 precision mediump float;
 
 void ldexp_abd718() {
-  vec2 arg_0 = vec2(0.0f);
-  ivec2 arg_1 = ivec2(0);
+  vec2 arg_0 = vec2(1.0f);
+  ivec2 arg_1 = ivec2(1);
   vec2 res = ldexp(arg_0, arg_1);
 }
 
@@ -39,8 +39,8 @@ void main() {
 #version 310 es
 
 void ldexp_abd718() {
-  vec2 arg_0 = vec2(0.0f);
-  ivec2 arg_1 = ivec2(0);
+  vec2 arg_0 = vec2(1.0f);
+  ivec2 arg_1 = ivec2(1);
   vec2 res = ldexp(arg_0, arg_1);
 }
 

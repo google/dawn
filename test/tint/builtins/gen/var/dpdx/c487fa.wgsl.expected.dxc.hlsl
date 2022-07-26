@@ -1,5 +1,5 @@
 void dpdx_c487fa() {
-  float4 arg_0 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
   float4 res = ddx(arg_0);
 }
 

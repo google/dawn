@@ -1,7 +1,7 @@
 fn select_99f883() {
   var arg_0 = 1u;
   var arg_1 = 1u;
-  var arg_2 = bool();
+  var arg_2 = true;
   var res : u32 = select(arg_0, arg_1, arg_2);
 }
 

@@ -1,5 +1,5 @@
 fn distance_9646ea() {
-  var res : f32 = distance(vec4<f32>(), vec4<f32>());
+  var res : f32 = distance(vec4<f32>(1.0f), vec4<f32>(1.0f));
 }
 
 @vertex

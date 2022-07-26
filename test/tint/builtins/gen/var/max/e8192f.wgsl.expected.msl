@@ -2,8 +2,8 @@
 
 using namespace metal;
 void max_e8192f() {
-  int2 arg_0 = int2(0);
-  int2 arg_1 = int2(0);
+  int2 arg_0 = int2(1);
+  int2 arg_1 = int2(1);
   int2 res = max(arg_0, arg_1);
 }
 

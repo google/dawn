@@ -2,9 +2,9 @@
 
 using namespace metal;
 void select_80a9a9() {
-  bool3 arg_0 = bool3(false);
-  bool3 arg_1 = bool3(false);
-  bool3 arg_2 = bool3(false);
+  bool3 arg_0 = bool3(true);
+  bool3 arg_1 = bool3(true);
+  bool3 arg_2 = bool3(true);
   bool3 res = select(arg_0, arg_1, arg_2);
 }
 

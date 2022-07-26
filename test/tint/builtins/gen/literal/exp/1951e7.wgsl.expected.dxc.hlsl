@@ -1,5 +1,5 @@
 void exp_1951e7() {
-  float2 res = exp((0.0f).xx);
+  float2 res = exp((1.0f).xx);
 }
 
 struct tint_symbol {

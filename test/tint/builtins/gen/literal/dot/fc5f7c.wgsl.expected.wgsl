@@ -1,5 +1,5 @@
 fn dot_fc5f7c() {
-  var res : i32 = dot(vec2<i32>(), vec2<i32>());
+  var res : i32 = dot(vec2<i32>(1), vec2<i32>(1));
 }
 
 @vertex

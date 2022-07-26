@@ -1,5 +1,5 @@
 void log2_aea659() {
-  float2 arg_0 = (0.0f).xx;
+  float2 arg_0 = (1.0f).xx;
   float2 res = log2(arg_0);
 }
 

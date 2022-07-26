@@ -1,7 +1,7 @@
 void clamp_6c1749() {
-  int2 arg_0 = (0).xx;
-  int2 arg_1 = (0).xx;
-  int2 arg_2 = (0).xx;
+  int2 arg_0 = (1).xx;
+  int2 arg_1 = (1).xx;
+  int2 arg_2 = (1).xx;
   int2 res = clamp(arg_0, arg_1, arg_2);
 }
 

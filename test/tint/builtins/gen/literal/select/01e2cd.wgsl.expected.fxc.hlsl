@@ -1,5 +1,5 @@
 void select_01e2cd() {
-  int3 res = ((false).xxx ? (0).xxx : (0).xxx);
+  int3 res = ((true).xxx ? (1).xxx : (1).xxx);
 }
 
 struct tint_symbol {

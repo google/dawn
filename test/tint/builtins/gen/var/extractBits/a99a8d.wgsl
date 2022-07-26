@@ -25,7 +25,7 @@
 
 // fn extractBits(vec<2, i32>, u32, u32) -> vec<2, i32>
 fn extractBits_a99a8d() {
-  var arg_0 = vec2<i32>();
+  var arg_0 = vec2<i32>(1);
   var arg_1 = 1u;
   var arg_2 = 1u;
   var res: vec2<i32> = extractBits(arg_0, arg_1, arg_2);

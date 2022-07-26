@@ -1,5 +1,5 @@
 fn countLeadingZeros_eab32b() {
-  var res : vec4<i32> = countLeadingZeros(vec4<i32>());
+  var res : vec4<i32> = countLeadingZeros(vec4<i32>(1));
 }
 
 @vertex

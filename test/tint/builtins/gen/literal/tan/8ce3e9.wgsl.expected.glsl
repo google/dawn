@@ -1,7 +1,7 @@
 #version 310 es
 
 void tan_8ce3e9() {
-  vec2 res = tan(vec2(0.0f));
+  vec2 res = tan(vec2(1.0f));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void tan_8ce3e9() {
-  vec2 res = tan(vec2(0.0f));
+  vec2 res = tan(vec2(1.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void tan_8ce3e9() {
-  vec2 res = tan(vec2(0.0f));
+  vec2 res = tan(vec2(1.0f));
 }
 
 void compute_main() {

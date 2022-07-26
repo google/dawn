@@ -1,7 +1,7 @@
 #version 310 es
 
 void abs_1ce782() {
-  uvec4 arg_0 = uvec4(0u);
+  uvec4 arg_0 = uvec4(1u);
   uvec4 res = arg_0;
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void abs_1ce782() {
-  uvec4 arg_0 = uvec4(0u);
+  uvec4 arg_0 = uvec4(1u);
   uvec4 res = arg_0;
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void abs_1ce782() {
-  uvec4 arg_0 = uvec4(0u);
+  uvec4 arg_0 = uvec4(1u);
   uvec4 res = arg_0;
 }
 

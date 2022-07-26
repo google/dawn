@@ -1,5 +1,5 @@
 void clamp_0acf8f() {
-  float2 res = clamp((0.0f).xx, (0.0f).xx, (0.0f).xx);
+  float2 res = clamp((1.0f).xx, (1.0f).xx, (1.0f).xx);
 }
 
 struct tint_symbol {

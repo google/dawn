@@ -25,9 +25,9 @@
 
 // fn select(vec<4, u32>, vec<4, u32>, bool) -> vec<4, u32>
 fn select_087ea4() {
-  var arg_0 = vec4<u32>();
-  var arg_1 = vec4<u32>();
-  var arg_2 = bool();
+  var arg_0 = vec4<u32>(1u);
+  var arg_1 = vec4<u32>(1u);
+  var arg_2 = true;
   var res: vec4<u32> = select(arg_0, arg_1, arg_2);
 }
 

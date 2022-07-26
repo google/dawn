@@ -4,7 +4,7 @@ using namespace metal;
 void select_ed8a15() {
   int arg_0 = 1;
   int arg_1 = 1;
-  bool arg_2 = false;
+  bool arg_2 = true;
   int res = select(arg_0, arg_1, arg_2);
 }
 

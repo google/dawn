@@ -1,5 +1,5 @@
 fn determinant_2b62ba() {
-  var res : f32 = determinant(mat3x3<f32>());
+  var res : f32 = determinant(mat3x3<f32>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f));
 }
 
 @vertex

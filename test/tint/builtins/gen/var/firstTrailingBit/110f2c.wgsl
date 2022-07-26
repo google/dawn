@@ -25,7 +25,7 @@
 
 // fn firstTrailingBit(vec<4, u32>) -> vec<4, u32>
 fn firstTrailingBit_110f2c() {
-  var arg_0 = vec4<u32>();
+  var arg_0 = vec4<u32>(1u);
   var res: vec4<u32> = firstTrailingBit(arg_0);
 }
 

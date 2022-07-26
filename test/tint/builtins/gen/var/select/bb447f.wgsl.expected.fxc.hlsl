@@ -1,7 +1,7 @@
 void select_bb447f() {
-  int2 arg_0 = (0).xx;
-  int2 arg_1 = (0).xx;
-  bool arg_2 = false;
+  int2 arg_0 = (1).xx;
+  int2 arg_1 = (1).xx;
+  bool arg_2 = true;
   int2 res = (arg_2 ? arg_1 : arg_0);
 }
 

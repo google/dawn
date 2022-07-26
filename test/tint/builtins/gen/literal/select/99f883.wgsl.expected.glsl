@@ -1,7 +1,7 @@
 #version 310 es
 
 void select_99f883() {
-  uint res = (false ? 1u : 1u);
+  uint res = (true ? 1u : 1u);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void select_99f883() {
-  uint res = (false ? 1u : 1u);
+  uint res = (true ? 1u : 1u);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void select_99f883() {
-  uint res = (false ? 1u : 1u);
+  uint res = (true ? 1u : 1u);
 }
 
 void compute_main() {

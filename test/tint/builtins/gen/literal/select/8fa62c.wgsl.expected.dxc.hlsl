@@ -1,5 +1,5 @@
 void select_8fa62c() {
-  int3 res = (false ? (0).xxx : (0).xxx);
+  int3 res = (true ? (1).xxx : (1).xxx);
 }
 
 struct tint_symbol {

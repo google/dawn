@@ -1,5 +1,5 @@
 void cos_29d66d() {
-  float4 arg_0 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
   float4 res = cos(arg_0);
 }
 

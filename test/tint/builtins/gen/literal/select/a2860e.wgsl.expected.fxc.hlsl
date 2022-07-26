@@ -1,5 +1,5 @@
 void select_a2860e() {
-  int4 res = ((false).xxxx ? (0).xxxx : (0).xxxx);
+  int4 res = ((true).xxxx ? (1).xxxx : (1).xxxx);
 }
 
 struct tint_symbol {

@@ -25,7 +25,7 @@
 
 // fn dpdyFine(vec<3, f32>) -> vec<3, f32>
 fn dpdyFine_1fb7ab() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.f);
   var res: vec3<f32> = dpdyFine(arg_0);
 }
 

@@ -1,5 +1,5 @@
 fn refract_cd905f() {
-  var res : vec2<f32> = refract(vec2<f32>(), vec2<f32>(), 1.0);
+  var res : vec2<f32> = refract(vec2<f32>(1.0f), vec2<f32>(1.0f), 1.0f);
 }
 
 @vertex

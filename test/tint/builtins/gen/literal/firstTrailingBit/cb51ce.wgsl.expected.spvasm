@@ -112,7 +112,7 @@
 %firstTrailingBit_cb51ce = OpFunction %void None %78
          %81 = OpLabel
         %res = OpVariable %_ptr_Function_v3uint Function %18
-         %82 = OpFunctionCall %v3uint %tint_first_trailing_bit %18
+         %82 = OpFunctionCall %v3uint %tint_first_trailing_bit %65
                OpStore %res %82
                OpReturn
                OpFunctionEnd

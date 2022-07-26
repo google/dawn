@@ -1,5 +1,5 @@
 fn pow_46e029() {
-  var res : f32 = pow(1.0, 1.0);
+  var res : f32 = pow(1.0f, 1.0f);
 }
 
 @vertex

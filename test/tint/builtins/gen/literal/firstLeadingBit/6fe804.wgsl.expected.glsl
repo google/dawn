@@ -16,7 +16,7 @@ uvec2 tint_first_leading_bit(uvec2 v) {
 }
 
 void firstLeadingBit_6fe804() {
-  uvec2 res = tint_first_leading_bit(uvec2(0u));
+  uvec2 res = tint_first_leading_bit(uvec2(1u));
 }
 
 vec4 vertex_main() {
@@ -51,7 +51,7 @@ uvec2 tint_first_leading_bit(uvec2 v) {
 }
 
 void firstLeadingBit_6fe804() {
-  uvec2 res = tint_first_leading_bit(uvec2(0u));
+  uvec2 res = tint_first_leading_bit(uvec2(1u));
 }
 
 void fragment_main() {
@@ -80,7 +80,7 @@ uvec2 tint_first_leading_bit(uvec2 v) {
 }
 
 void firstLeadingBit_6fe804() {
-  uvec2 res = tint_first_leading_bit(uvec2(0u));
+  uvec2 res = tint_first_leading_bit(uvec2(1u));
 }
 
 void compute_main() {

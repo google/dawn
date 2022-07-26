@@ -1,7 +1,7 @@
 #version 310 es
 
 void abs_7f28e6() {
-  uvec2 res = uvec2(0u);
+  uvec2 res = uvec2(1u);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void abs_7f28e6() {
-  uvec2 res = uvec2(0u);
+  uvec2 res = uvec2(1u);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void abs_7f28e6() {
-  uvec2 res = uvec2(0u);
+  uvec2 res = uvec2(1u);
 }
 
 void compute_main() {

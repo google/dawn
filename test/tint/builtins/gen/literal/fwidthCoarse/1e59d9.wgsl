@@ -25,7 +25,7 @@
 
 // fn fwidthCoarse(vec<3, f32>) -> vec<3, f32>
 fn fwidthCoarse_1e59d9() {
-  var res: vec3<f32> = fwidthCoarse(vec3<f32>());
+  var res: vec3<f32> = fwidthCoarse(vec3<f32>(1.f));
 }
 
 @fragment

@@ -1,5 +1,5 @@
 void inverseSqrt_c22347() {
-  float4 arg_0 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
   float4 res = rsqrt(arg_0);
 }
 

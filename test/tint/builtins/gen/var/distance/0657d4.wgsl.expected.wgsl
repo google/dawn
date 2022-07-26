@@ -1,6 +1,6 @@
 fn distance_0657d4() {
-  var arg_0 = vec3<f32>();
-  var arg_1 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.0f);
+  var arg_1 = vec3<f32>(1.0f);
   var res : f32 = distance(arg_0, arg_1);
 }
 

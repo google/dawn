@@ -25,7 +25,7 @@
 
 // fn countTrailingZeros(vec<3, u32>) -> vec<3, u32>
 fn countTrailingZeros_8ed26f() {
-  var arg_0 = vec3<u32>();
+  var arg_0 = vec3<u32>(1u);
   var res: vec3<u32> = countTrailingZeros(arg_0);
 }
 

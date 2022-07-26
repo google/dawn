@@ -25,7 +25,7 @@
 
 // fn dpdy(vec<4, f32>) -> vec<4, f32>
 fn dpdy_699a05() {
-  var res: vec4<f32> = dpdy(vec4<f32>());
+  var res: vec4<f32> = dpdy(vec4<f32>(1.f));
 }
 
 @fragment

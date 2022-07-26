@@ -25,7 +25,7 @@
 
 // fn exp(vec<3, f32>) -> vec<3, f32>
 fn exp_d98450() {
-  var res: vec3<f32> = exp(vec3<f32>());
+  var res: vec3<f32> = exp(vec3<f32>(1.f));
 }
 
 @vertex

@@ -25,7 +25,7 @@
 
 // fn reverseBits(vec<3, i32>) -> vec<3, i32>
 fn reverseBits_c21bc1() {
-  var arg_0 = vec3<i32>();
+  var arg_0 = vec3<i32>(1);
   var res: vec3<i32> = reverseBits(arg_0);
 }
 

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void abs_1ce782() {
-  uint4 res = abs(uint4(0u));
+  uint4 res = abs(uint4(1u));
 }
 
 struct tint_symbol {

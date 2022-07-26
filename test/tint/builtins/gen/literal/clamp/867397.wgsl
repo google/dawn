@@ -25,7 +25,7 @@
 
 // fn clamp(vec<3, f32>, vec<3, f32>, vec<3, f32>) -> vec<3, f32>
 fn clamp_867397() {
-  var res: vec3<f32> = clamp(vec3<f32>(), vec3<f32>(), vec3<f32>());
+  var res: vec3<f32> = clamp(vec3<f32>(1.f), vec3<f32>(1.f), vec3<f32>(1.f));
 }
 
 @vertex

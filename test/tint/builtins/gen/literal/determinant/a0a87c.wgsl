@@ -25,7 +25,7 @@
 
 // fn determinant(mat<4, 4, f32>) -> f32
 fn determinant_a0a87c() {
-  var res: f32 = determinant(mat4x4<f32>());
+  var res: f32 = determinant(mat4x4<f32>(1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f));
 }
 
 @vertex

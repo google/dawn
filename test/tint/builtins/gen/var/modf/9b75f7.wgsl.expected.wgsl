@@ -1,5 +1,5 @@
 fn modf_9b75f7() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.0f);
   var res = modf(arg_0);
 }
 

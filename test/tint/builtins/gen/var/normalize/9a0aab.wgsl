@@ -25,7 +25,7 @@
 
 // fn normalize(vec<4, f32>) -> vec<4, f32>
 fn normalize_9a0aab() {
-  var arg_0 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.f);
   var res: vec4<f32> = normalize(arg_0);
 }
 

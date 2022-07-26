@@ -2,9 +2,9 @@
 
 using namespace metal;
 void clamp_1a32e3() {
-  int4 arg_0 = int4(0);
-  int4 arg_1 = int4(0);
-  int4 arg_2 = int4(0);
+  int4 arg_0 = int4(1);
+  int4 arg_1 = int4(1);
+  int4 arg_2 = int4(1);
   int4 res = clamp(arg_0, arg_1, arg_2);
 }
 

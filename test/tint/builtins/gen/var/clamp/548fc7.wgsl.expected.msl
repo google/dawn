@@ -2,9 +2,9 @@
 
 using namespace metal;
 void clamp_548fc7() {
-  uint3 arg_0 = uint3(0u);
-  uint3 arg_1 = uint3(0u);
-  uint3 arg_2 = uint3(0u);
+  uint3 arg_0 = uint3(1u);
+  uint3 arg_1 = uint3(1u);
+  uint3 arg_2 = uint3(1u);
   uint3 res = clamp(arg_0, arg_1, arg_2);
 }
 

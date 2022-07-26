@@ -25,7 +25,7 @@
 
 // fn max(vec<2, u32>, vec<2, u32>) -> vec<2, u32>
 fn max_320815() {
-  var res: vec2<u32> = max(vec2<u32>(), vec2<u32>());
+  var res: vec2<u32> = max(vec2<u32>(1u), vec2<u32>(1u));
 }
 
 @vertex

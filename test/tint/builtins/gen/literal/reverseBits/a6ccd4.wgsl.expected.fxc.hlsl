@@ -1,5 +1,5 @@
 void reverseBits_a6ccd4() {
-  uint3 res = reversebits((0u).xxx);
+  uint3 res = reversebits((1u).xxx);
 }
 
 struct tint_symbol {

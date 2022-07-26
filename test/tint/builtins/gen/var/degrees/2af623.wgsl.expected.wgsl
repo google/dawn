@@ -1,5 +1,5 @@
 fn degrees_2af623() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.0f);
   var res : vec3<f32> = degrees(arg_0);
 }
 

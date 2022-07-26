@@ -25,7 +25,7 @@
 
 // fn asinh(f32) -> f32
 fn asinh_157447() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = asinh(arg_0);
 }
 

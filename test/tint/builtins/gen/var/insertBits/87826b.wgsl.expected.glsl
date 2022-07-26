@@ -7,8 +7,8 @@ uvec3 tint_insert_bits(uvec3 v, uvec3 n, uint offset, uint count) {
 }
 
 void insertBits_87826b() {
-  uvec3 arg_0 = uvec3(0u);
-  uvec3 arg_1 = uvec3(0u);
+  uvec3 arg_0 = uvec3(1u);
+  uvec3 arg_1 = uvec3(1u);
   uint arg_2 = 1u;
   uint arg_3 = 1u;
   uvec3 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
@@ -37,8 +37,8 @@ uvec3 tint_insert_bits(uvec3 v, uvec3 n, uint offset, uint count) {
 }
 
 void insertBits_87826b() {
-  uvec3 arg_0 = uvec3(0u);
-  uvec3 arg_1 = uvec3(0u);
+  uvec3 arg_0 = uvec3(1u);
+  uvec3 arg_1 = uvec3(1u);
   uint arg_2 = 1u;
   uint arg_3 = 1u;
   uvec3 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
@@ -61,8 +61,8 @@ uvec3 tint_insert_bits(uvec3 v, uvec3 n, uint offset, uint count) {
 }
 
 void insertBits_87826b() {
-  uvec3 arg_0 = uvec3(0u);
-  uvec3 arg_1 = uvec3(0u);
+  uvec3 arg_0 = uvec3(1u);
+  uvec3 arg_1 = uvec3(1u);
   uint arg_2 = 1u;
   uint arg_3 = 1u;
   uvec3 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);

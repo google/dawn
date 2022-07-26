@@ -2,7 +2,7 @@
 
 using namespace metal;
 void select_c4a4ef() {
-  uint4 res = select(uint4(0u), uint4(0u), bool4(false));
+  uint4 res = select(uint4(1u), uint4(1u), bool4(true));
 }
 
 struct tint_symbol {

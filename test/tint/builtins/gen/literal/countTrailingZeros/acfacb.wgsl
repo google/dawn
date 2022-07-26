@@ -25,7 +25,7 @@
 
 // fn countTrailingZeros(vec<3, i32>) -> vec<3, i32>
 fn countTrailingZeros_acfacb() {
-  var res: vec3<i32> = countTrailingZeros(vec3<i32>());
+  var res: vec3<i32> = countTrailingZeros(vec3<i32>(1));
 }
 
 @vertex

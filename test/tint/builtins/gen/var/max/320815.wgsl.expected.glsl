@@ -1,8 +1,8 @@
 #version 310 es
 
 void max_320815() {
-  uvec2 arg_0 = uvec2(0u);
-  uvec2 arg_1 = uvec2(0u);
+  uvec2 arg_0 = uvec2(1u);
+  uvec2 arg_1 = uvec2(1u);
   uvec2 res = max(arg_0, arg_1);
 }
 
@@ -23,8 +23,8 @@ void main() {
 precision mediump float;
 
 void max_320815() {
-  uvec2 arg_0 = uvec2(0u);
-  uvec2 arg_1 = uvec2(0u);
+  uvec2 arg_0 = uvec2(1u);
+  uvec2 arg_1 = uvec2(1u);
   uvec2 res = max(arg_0, arg_1);
 }
 
@@ -39,8 +39,8 @@ void main() {
 #version 310 es
 
 void max_320815() {
-  uvec2 arg_0 = uvec2(0u);
-  uvec2 arg_1 = uvec2(0u);
+  uvec2 arg_0 = uvec2(1u);
+  uvec2 arg_1 = uvec2(1u);
   uvec2 res = max(arg_0, arg_1);
 }
 

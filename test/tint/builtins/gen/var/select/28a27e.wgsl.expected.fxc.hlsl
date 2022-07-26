@@ -1,7 +1,7 @@
 void select_28a27e() {
-  uint3 arg_0 = (0u).xxx;
-  uint3 arg_1 = (0u).xxx;
-  bool3 arg_2 = (false).xxx;
+  uint3 arg_0 = (1u).xxx;
+  uint3 arg_1 = (1u).xxx;
+  bool3 arg_2 = (true).xxx;
   uint3 res = (arg_2 ? arg_1 : arg_0);
 }
 

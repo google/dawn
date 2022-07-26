@@ -1,5 +1,5 @@
 fn length_becebf() {
-  var res : f32 = length(vec4<f32>());
+  var res : f32 = length(vec4<f32>(1.0f));
 }
 
 @vertex

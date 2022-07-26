@@ -25,7 +25,7 @@
 
 // fn transpose(mat<2, 2, f32>) -> mat<2, 2, f32>
 fn transpose_31d679() {
-  var res: mat2x2<f32> = transpose(mat2x2<f32>());
+  var res: mat2x2<f32> = transpose(mat2x2<f32>(1.f, 1.f, 1.f, 1.f));
 }
 
 @vertex

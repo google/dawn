@@ -1,5 +1,5 @@
 fn sqrt_f8c59a() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.0f);
   var res : vec3<f32> = sqrt(arg_0);
 }
 

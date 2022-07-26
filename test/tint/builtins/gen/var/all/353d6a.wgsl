@@ -25,7 +25,7 @@
 
 // fn all(bool) -> bool
 fn all_353d6a() {
-  var arg_0 = bool();
+  var arg_0 = true;
   var res: bool = all(arg_0);
 }
 

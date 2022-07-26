@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 48
+; Bound: 50
 ; Schema: 0
                OpCapability Shader
          %19 = OpExtInstImport "GLSL.std.450"
@@ -40,10 +40,12 @@
     %uint_32 = OpConstant %uint 32
        %void = OpTypeVoid
          %25 = OpTypeFunction %void
-         %30 = OpConstantNull %v3int
+      %int_1 = OpConstant %int 1
+         %31 = OpConstantComposite %v3int %int_1 %int_1 %int_1
      %uint_1 = OpConstant %uint 1
 %_ptr_Function_v3int = OpTypePointer Function %v3int
-         %34 = OpTypeFunction %v4float
+         %35 = OpConstantNull %v3int
+         %36 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %tint_extract_bits = OpFunction %v3int None %9
           %v = OpFunctionParameter %v3int
@@ -59,30 +61,30 @@
                OpFunctionEnd
 %extractBits_e04f5d = OpFunction %void None %25
          %28 = OpLabel
-        %res = OpVariable %_ptr_Function_v3int Function %30
-         %29 = OpFunctionCall %v3int %tint_extract_bits %30 %uint_1 %uint_1
+        %res = OpVariable %_ptr_Function_v3int Function %35
+         %29 = OpFunctionCall %v3int %tint_extract_bits %31 %uint_1 %uint_1
                OpStore %res %29
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %34
-         %36 = OpLabel
-         %37 = OpFunctionCall %void %extractBits_e04f5d
+%vertex_main_inner = OpFunction %v4float None %36
+         %38 = OpLabel
+         %39 = OpFunctionCall %void %extractBits_e04f5d
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %25
-         %39 = OpLabel
-         %40 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %40
+         %41 = OpLabel
+         %42 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %42
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %25
-         %43 = OpLabel
-         %44 = OpFunctionCall %void %extractBits_e04f5d
+         %45 = OpLabel
+         %46 = OpFunctionCall %void %extractBits_e04f5d
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %25
-         %46 = OpLabel
-         %47 = OpFunctionCall %void %extractBits_e04f5d
+         %48 = OpLabel
+         %49 = OpFunctionCall %void %extractBits_e04f5d
                OpReturn
                OpFunctionEnd

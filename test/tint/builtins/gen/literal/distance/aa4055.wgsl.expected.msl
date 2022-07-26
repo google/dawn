@@ -2,7 +2,7 @@
 
 using namespace metal;
 void distance_aa4055() {
-  float res = distance(float2(0.0f), float2(0.0f));
+  float res = distance(float2(1.0f), float2(1.0f));
 }
 
 struct tint_symbol {

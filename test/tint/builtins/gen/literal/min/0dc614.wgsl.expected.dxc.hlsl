@@ -1,5 +1,5 @@
 void min_0dc614() {
-  uint4 res = min((0u).xxxx, (0u).xxxx);
+  uint4 res = min((1u).xxxx, (1u).xxxx);
 }
 
 struct tint_symbol {

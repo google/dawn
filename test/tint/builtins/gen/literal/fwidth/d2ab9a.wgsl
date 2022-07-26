@@ -25,7 +25,7 @@
 
 // fn fwidth(vec<4, f32>) -> vec<4, f32>
 fn fwidth_d2ab9a() {
-  var res: vec4<f32> = fwidth(vec4<f32>());
+  var res: vec4<f32> = fwidth(vec4<f32>(1.f));
 }
 
 @fragment

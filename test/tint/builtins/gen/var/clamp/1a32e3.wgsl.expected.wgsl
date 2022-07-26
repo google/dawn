@@ -1,7 +1,7 @@
 fn clamp_1a32e3() {
-  var arg_0 = vec4<i32>();
-  var arg_1 = vec4<i32>();
-  var arg_2 = vec4<i32>();
+  var arg_0 = vec4<i32>(1);
+  var arg_1 = vec4<i32>(1);
+  var arg_2 = vec4<i32>(1);
   var res : vec4<i32> = clamp(arg_0, arg_1, arg_2);
 }
 

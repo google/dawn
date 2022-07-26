@@ -25,7 +25,7 @@
 
 // fn abs(vec<3, i32>) -> vec<3, i32>
 fn abs_5ad50a() {
-  var arg_0 = vec3<i32>();
+  var arg_0 = vec3<i32>(1);
   var res: vec3<i32> = abs(arg_0);
 }
 

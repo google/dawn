@@ -25,8 +25,8 @@
 
 // fn dot(vec<2, i32>, vec<2, i32>) -> i32
 fn dot_fc5f7c() {
-  var arg_0 = vec2<i32>();
-  var arg_1 = vec2<i32>();
+  var arg_0 = vec2<i32>(1);
+  var arg_1 = vec2<i32>(1);
   var res: i32 = dot(arg_0, arg_1);
 }
 

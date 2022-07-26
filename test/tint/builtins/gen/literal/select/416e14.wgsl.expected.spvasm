@@ -31,14 +31,14 @@
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
        %bool = OpTypeBool
-         %15 = OpConstantNull %bool
+       %true = OpConstantTrue %bool
     %float_1 = OpConstant %float 1
 %_ptr_Function_float = OpTypePointer Function %float
          %19 = OpTypeFunction %v4float
 %select_416e14 = OpFunction %void None %9
          %12 = OpLabel
         %res = OpVariable %_ptr_Function_float Function %8
-         %13 = OpSelect %float %15 %float_1 %float_1
+         %13 = OpSelect %float %true %float_1 %float_1
                OpStore %res %13
                OpReturn
                OpFunctionEnd

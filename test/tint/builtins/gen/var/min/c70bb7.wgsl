@@ -25,8 +25,8 @@
 
 // fn min(vec<3, u32>, vec<3, u32>) -> vec<3, u32>
 fn min_c70bb7() {
-  var arg_0 = vec3<u32>();
-  var arg_1 = vec3<u32>();
+  var arg_0 = vec3<u32>(1u);
+  var arg_1 = vec3<u32>(1u);
   var res: vec3<u32> = min(arg_0, arg_1);
 }
 

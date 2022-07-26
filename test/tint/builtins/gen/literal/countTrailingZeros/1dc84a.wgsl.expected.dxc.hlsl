@@ -14,7 +14,7 @@ int4 tint_count_trailing_zeros(int4 v) {
 }
 
 void countTrailingZeros_1dc84a() {
-  int4 res = tint_count_trailing_zeros((0).xxxx);
+  int4 res = tint_count_trailing_zeros((1).xxxx);
 }
 
 struct tint_symbol {

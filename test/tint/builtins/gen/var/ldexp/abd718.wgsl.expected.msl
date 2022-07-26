@@ -2,8 +2,8 @@
 
 using namespace metal;
 void ldexp_abd718() {
-  float2 arg_0 = float2(0.0f);
-  int2 arg_1 = int2(0);
+  float2 arg_0 = float2(1.0f);
+  int2 arg_1 = int2(1);
   float2 res = ldexp(arg_0, arg_1);
 }
 

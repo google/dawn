@@ -25,9 +25,9 @@
 
 // fn select(vec<2, f32>, vec<2, f32>, bool) -> vec<2, f32>
 fn select_bf3d29() {
-  var arg_0 = vec2<f32>();
-  var arg_1 = vec2<f32>();
-  var arg_2 = bool();
+  var arg_0 = vec2<f32>(1.f);
+  var arg_1 = vec2<f32>(1.f);
+  var arg_2 = true;
   var res: vec2<f32> = select(arg_0, arg_1, arg_2);
 }
 

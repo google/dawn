@@ -25,7 +25,7 @@
 
 // fn cosh(vec<2, f32>) -> vec<2, f32>
 fn cosh_c13756() {
-  var res: vec2<f32> = cosh(vec2<f32>());
+  var res: vec2<f32> = cosh(vec2<f32>(1.f));
 }
 
 @vertex

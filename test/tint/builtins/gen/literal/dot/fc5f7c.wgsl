@@ -25,7 +25,7 @@
 
 // fn dot(vec<2, i32>, vec<2, i32>) -> i32
 fn dot_fc5f7c() {
-  var res: i32 = dot(vec2<i32>(), vec2<i32>());
+  var res: i32 = dot(vec2<i32>(1), vec2<i32>(1));
 }
 
 @vertex

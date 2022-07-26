@@ -1,5 +1,5 @@
 void sign_159665() {
-  float3 res = sign((0.0f).xxx);
+  float3 res = sign((1.0f).xxx);
 }
 
 struct tint_symbol {

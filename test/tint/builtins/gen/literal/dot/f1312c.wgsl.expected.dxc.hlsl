@@ -1,5 +1,5 @@
 void dot_f1312c() {
-  int res = dot((0).xxx, (0).xxx);
+  int res = dot((1).xxx, (1).xxx);
 }
 
 struct tint_symbol {

@@ -109,7 +109,7 @@
          %76 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_v3uint Function %18
         %res = OpVariable %_ptr_Function_v3uint Function %18
-               OpStore %arg_0 %18
+               OpStore %arg_0 %63
          %79 = OpLoad %v3uint %arg_0
          %78 = OpFunctionCall %v3uint %tint_count_leading_zeros %79
                OpStore %res %78

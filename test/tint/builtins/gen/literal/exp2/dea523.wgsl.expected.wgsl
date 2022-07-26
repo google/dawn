@@ -1,5 +1,5 @@
 fn exp2_dea523() {
-  var res : f32 = exp2(1.0);
+  var res : f32 = exp2(1.0f);
 }
 
 @vertex

@@ -38,27 +38,27 @@
           %9 = OpTypeFunction %void
     %v3float = OpTypeVector %float 3
 %__modf_result_vec3 = OpTypeStruct %v3float %v3float
-         %17 = OpConstantNull %v3float
-%_ptr_Function___modf_result_vec3 = OpTypePointer Function %__modf_result_vec3
-         %20 = OpConstantNull %__modf_result_vec3
-         %21 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
+         %18 = OpConstantComposite %v3float %float_1 %float_1 %float_1
+%_ptr_Function___modf_result_vec3 = OpTypePointer Function %__modf_result_vec3
+         %21 = OpConstantNull %__modf_result_vec3
+         %22 = OpTypeFunction %v4float
 %modf_9b75f7 = OpFunction %void None %9
          %12 = OpLabel
-        %res = OpVariable %_ptr_Function___modf_result_vec3 Function %20
-         %13 = OpExtInst %__modf_result_vec3 %16 ModfStruct %17
+        %res = OpVariable %_ptr_Function___modf_result_vec3 Function %21
+         %13 = OpExtInst %__modf_result_vec3 %16 ModfStruct %18
                OpStore %res %13
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %21
-         %23 = OpLabel
-         %24 = OpFunctionCall %void %modf_9b75f7
+%vertex_main_inner = OpFunction %v4float None %22
+         %24 = OpLabel
+         %25 = OpFunctionCall %void %modf_9b75f7
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %26 = OpLabel
-         %27 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %27
+         %27 = OpLabel
+         %28 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %28
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd

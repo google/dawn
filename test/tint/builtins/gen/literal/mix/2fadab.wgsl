@@ -25,7 +25,7 @@
 
 // fn mix(vec<2, f32>, vec<2, f32>, f32) -> vec<2, f32>
 fn mix_2fadab() {
-  var res: vec2<f32> = mix(vec2<f32>(), vec2<f32>(), 1.0);
+  var res: vec2<f32> = mix(vec2<f32>(1.f), vec2<f32>(1.f), 1.f);
 }
 
 @vertex

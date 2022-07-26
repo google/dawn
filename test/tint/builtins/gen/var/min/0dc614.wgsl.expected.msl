@@ -2,8 +2,8 @@
 
 using namespace metal;
 void min_0dc614() {
-  uint4 arg_0 = uint4(0u);
-  uint4 arg_1 = uint4(0u);
+  uint4 arg_0 = uint4(1u);
+  uint4 arg_1 = uint4(1u);
   uint4 res = min(arg_0, arg_1);
 }
 

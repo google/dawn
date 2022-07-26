@@ -25,7 +25,7 @@
 
 // fn log2(f32) -> f32
 fn log2_4036ed() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = log2(arg_0);
 }
 

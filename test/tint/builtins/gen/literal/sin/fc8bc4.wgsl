@@ -25,7 +25,7 @@
 
 // fn sin(vec<2, f32>) -> vec<2, f32>
 fn sin_fc8bc4() {
-  var res: vec2<f32> = sin(vec2<f32>());
+  var res: vec2<f32> = sin(vec2<f32>(1.f));
 }
 
 @vertex

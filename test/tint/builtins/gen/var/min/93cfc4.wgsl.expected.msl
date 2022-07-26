@@ -2,8 +2,8 @@
 
 using namespace metal;
 void min_93cfc4() {
-  float3 arg_0 = float3(0.0f);
-  float3 arg_1 = float3(0.0f);
+  float3 arg_0 = float3(1.0f);
+  float3 arg_1 = float3(1.0f);
   float3 res = fmin(arg_0, arg_1);
 }
 

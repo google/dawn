@@ -32,7 +32,7 @@
           %9 = OpTypeFunction %void
         %int = OpTypeInt 32 1
        %bool = OpTypeBool
-         %16 = OpConstantNull %bool
+       %true = OpConstantTrue %bool
       %int_1 = OpConstant %int 1
 %_ptr_Function_int = OpTypePointer Function %int
          %20 = OpConstantNull %int
@@ -41,7 +41,7 @@
 %select_ed8a15 = OpFunction %void None %9
          %12 = OpLabel
         %res = OpVariable %_ptr_Function_int Function %20
-         %13 = OpSelect %int %16 %int_1 %int_1
+         %13 = OpSelect %int %true %int_1 %int_1
                OpStore %res %13
                OpReturn
                OpFunctionEnd

@@ -1,5 +1,5 @@
 void select_bf3d29() {
-  float2 res = (false ? (0.0f).xx : (0.0f).xx);
+  float2 res = (true ? (1.0f).xx : (1.0f).xx);
 }
 
 struct tint_symbol {

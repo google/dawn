@@ -14,7 +14,7 @@ uint4 tint_count_leading_zeros(uint4 v) {
 }
 
 void countLeadingZeros_f70103() {
-  uint4 res = tint_count_leading_zeros((0u).xxxx);
+  uint4 res = tint_count_leading_zeros((1u).xxxx);
 }
 
 struct tint_symbol {

@@ -25,7 +25,7 @@
 
 // fn select(vec<3, u32>, vec<3, u32>, bool) -> vec<3, u32>
 fn select_b04721() {
-  var res: vec3<u32> = select(vec3<u32>(), vec3<u32>(), bool());
+  var res: vec3<u32> = select(vec3<u32>(1u), vec3<u32>(1u), true);
 }
 
 @vertex

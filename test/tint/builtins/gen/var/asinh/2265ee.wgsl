@@ -25,7 +25,7 @@
 
 // fn asinh(vec<3, f32>) -> vec<3, f32>
 fn asinh_2265ee() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.f);
   var res: vec3<f32> = asinh(arg_0);
 }
 

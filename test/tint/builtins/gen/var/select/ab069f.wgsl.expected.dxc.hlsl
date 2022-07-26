@@ -1,7 +1,7 @@
 void select_ab069f() {
-  int4 arg_0 = (0).xxxx;
-  int4 arg_1 = (0).xxxx;
-  bool arg_2 = false;
+  int4 arg_0 = (1).xxxx;
+  int4 arg_1 = (1).xxxx;
+  bool arg_2 = true;
   int4 res = (arg_2 ? arg_1 : arg_0);
 }
 

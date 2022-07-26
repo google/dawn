@@ -1,5 +1,5 @@
 void dpdyFine_d0a648() {
-  float4 res = ddy_fine((0.0f).xxxx);
+  float4 res = ddy_fine((1.0f).xxxx);
 }
 
 void fragment_main() {

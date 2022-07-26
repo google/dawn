@@ -1,8 +1,8 @@
 #version 310 es
 
 void atan2_a70d0d() {
-  vec3 arg_0 = vec3(0.0f);
-  vec3 arg_1 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
+  vec3 arg_1 = vec3(1.0f);
   vec3 res = atan(arg_0, arg_1);
 }
 
@@ -23,8 +23,8 @@ void main() {
 precision mediump float;
 
 void atan2_a70d0d() {
-  vec3 arg_0 = vec3(0.0f);
-  vec3 arg_1 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
+  vec3 arg_1 = vec3(1.0f);
   vec3 res = atan(arg_0, arg_1);
 }
 
@@ -39,8 +39,8 @@ void main() {
 #version 310 es
 
 void atan2_a70d0d() {
-  vec3 arg_0 = vec3(0.0f);
-  vec3 arg_1 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
+  vec3 arg_1 = vec3(1.0f);
   vec3 res = atan(arg_0, arg_1);
 }
 

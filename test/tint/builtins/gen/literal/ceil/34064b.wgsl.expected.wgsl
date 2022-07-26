@@ -1,5 +1,5 @@
 fn ceil_34064b() {
-  var res : vec3<f32> = ceil(vec3<f32>());
+  var res : vec3<f32> = ceil(vec3<f32>(1.0f));
 }
 
 @vertex

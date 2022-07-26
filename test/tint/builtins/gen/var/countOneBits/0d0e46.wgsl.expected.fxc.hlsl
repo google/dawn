@@ -1,5 +1,5 @@
 void countOneBits_0d0e46() {
-  uint4 arg_0 = (0u).xxxx;
+  uint4 arg_0 = (1u).xxxx;
   uint4 res = countbits(arg_0);
 }
 

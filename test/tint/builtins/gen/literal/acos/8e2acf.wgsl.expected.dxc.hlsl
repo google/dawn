@@ -1,5 +1,5 @@
 void acos_8e2acf() {
-  float4 res = acos((0.0f).xxxx);
+  float4 res = acos((1.0f).xxxx);
 }
 
 struct tint_symbol {

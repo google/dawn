@@ -16,7 +16,7 @@ uvec4 tint_count_trailing_zeros(uvec4 v) {
 }
 
 void countTrailingZeros_d2b4a0() {
-  uvec4 arg_0 = uvec4(0u);
+  uvec4 arg_0 = uvec4(1u);
   uvec4 res = tint_count_trailing_zeros(arg_0);
 }
 
@@ -52,7 +52,7 @@ uvec4 tint_count_trailing_zeros(uvec4 v) {
 }
 
 void countTrailingZeros_d2b4a0() {
-  uvec4 arg_0 = uvec4(0u);
+  uvec4 arg_0 = uvec4(1u);
   uvec4 res = tint_count_trailing_zeros(arg_0);
 }
 
@@ -82,7 +82,7 @@ uvec4 tint_count_trailing_zeros(uvec4 v) {
 }
 
 void countTrailingZeros_d2b4a0() {
-  uvec4 arg_0 = uvec4(0u);
+  uvec4 arg_0 = uvec4(1u);
   uvec4 res = tint_count_trailing_zeros(arg_0);
 }
 

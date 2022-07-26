@@ -25,7 +25,7 @@
 
 // fn round(vec<4, f32>) -> vec<4, f32>
 fn round_106c0b() {
-  var res: vec4<f32> = round(vec4<f32>());
+  var res: vec4<f32> = round(vec4<f32>(1.f));
 }
 
 @vertex

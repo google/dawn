@@ -25,8 +25,8 @@
 
 // fn min(vec<3, i32>, vec<3, i32>) -> vec<3, i32>
 fn min_a45171() {
-  var arg_0 = vec3<i32>();
-  var arg_1 = vec3<i32>();
+  var arg_0 = vec3<i32>(1);
+  var arg_1 = vec3<i32>(1);
   var res: vec3<i32> = min(arg_0, arg_1);
 }
 

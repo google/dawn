@@ -25,7 +25,7 @@
 
 // fn floor(f32) -> f32
 fn floor_66f154() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = floor(arg_0);
 }
 

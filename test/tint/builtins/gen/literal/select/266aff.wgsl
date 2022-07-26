@@ -25,7 +25,7 @@
 
 // fn select(vec<2, f32>, vec<2, f32>, vec<2, bool>) -> vec<2, f32>
 fn select_266aff() {
-  var res: vec2<f32> = select(vec2<f32>(), vec2<f32>(), vec2<bool>());
+  var res: vec2<f32> = select(vec2<f32>(1.f), vec2<f32>(1.f), vec2<bool>(true));
 }
 
 @vertex

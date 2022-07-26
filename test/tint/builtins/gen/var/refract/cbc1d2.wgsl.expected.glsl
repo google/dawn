@@ -1,8 +1,8 @@
 #version 310 es
 
 void refract_cbc1d2() {
-  vec3 arg_0 = vec3(0.0f);
-  vec3 arg_1 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
+  vec3 arg_1 = vec3(1.0f);
   float arg_2 = 1.0f;
   vec3 res = refract(arg_0, arg_1, arg_2);
 }
@@ -24,8 +24,8 @@ void main() {
 precision mediump float;
 
 void refract_cbc1d2() {
-  vec3 arg_0 = vec3(0.0f);
-  vec3 arg_1 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
+  vec3 arg_1 = vec3(1.0f);
   float arg_2 = 1.0f;
   vec3 res = refract(arg_0, arg_1, arg_2);
 }
@@ -41,8 +41,8 @@ void main() {
 #version 310 es
 
 void refract_cbc1d2() {
-  vec3 arg_0 = vec3(0.0f);
-  vec3 arg_1 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
+  vec3 arg_1 = vec3(1.0f);
   float arg_2 = 1.0f;
   vec3 res = refract(arg_0, arg_1, arg_2);
 }

@@ -2,8 +2,8 @@
 
 using namespace metal;
 void step_e2b337() {
-  float4 arg_0 = float4(0.0f);
-  float4 arg_1 = float4(0.0f);
+  float4 arg_0 = float4(1.0f);
+  float4 arg_1 = float4(1.0f);
   float4 res = step(arg_0, arg_1);
 }
 

@@ -112,7 +112,7 @@
 %firstLeadingBit_3fd7d0 = OpFunction %void None %77
          %80 = OpLabel
         %res = OpVariable %_ptr_Function_v3uint Function %17
-         %81 = OpFunctionCall %v3uint %tint_first_leading_bit %17
+         %81 = OpFunctionCall %v3uint %tint_first_leading_bit %65
                OpStore %res %81
                OpReturn
                OpFunctionEnd

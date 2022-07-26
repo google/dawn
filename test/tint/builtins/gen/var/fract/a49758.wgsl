@@ -25,7 +25,7 @@
 
 // fn fract(vec<3, f32>) -> vec<3, f32>
 fn fract_a49758() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.f);
   var res: vec3<f32> = fract(arg_0);
 }
 

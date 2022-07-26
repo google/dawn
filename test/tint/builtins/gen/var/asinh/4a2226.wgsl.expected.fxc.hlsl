@@ -3,7 +3,7 @@ float2 tint_sinh(float2 x) {
 }
 
 void asinh_4a2226() {
-  float2 arg_0 = (0.0f).xx;
+  float2 arg_0 = (1.0f).xx;
   float2 res = tint_sinh(arg_0);
 }
 

@@ -1,6 +1,6 @@
 fn min_aa28ad() {
-  var arg_0 = vec2<f32>();
-  var arg_1 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.0f);
+  var arg_1 = vec2<f32>(1.0f);
   var res : vec2<f32> = min(arg_0, arg_1);
 }
 

@@ -1,5 +1,5 @@
 fn asinh_157447() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.0f;
   var res : f32 = asinh(arg_0);
 }
 

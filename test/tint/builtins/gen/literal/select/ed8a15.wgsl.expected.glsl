@@ -1,7 +1,7 @@
 #version 310 es
 
 void select_ed8a15() {
-  int res = (false ? 1 : 1);
+  int res = (true ? 1 : 1);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void select_ed8a15() {
-  int res = (false ? 1 : 1);
+  int res = (true ? 1 : 1);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void select_ed8a15() {
-  int res = (false ? 1 : 1);
+  int res = (true ? 1 : 1);
 }
 
 void compute_main() {

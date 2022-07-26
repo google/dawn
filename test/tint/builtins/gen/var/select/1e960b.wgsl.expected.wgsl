@@ -1,7 +1,7 @@
 fn select_1e960b() {
-  var arg_0 = vec2<u32>();
-  var arg_1 = vec2<u32>();
-  var arg_2 = vec2<bool>();
+  var arg_0 = vec2<u32>(1u);
+  var arg_1 = vec2<u32>(1u);
+  var arg_2 = vec2<bool>(true);
   var res : vec2<u32> = select(arg_0, arg_1, arg_2);
 }
 

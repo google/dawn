@@ -25,7 +25,7 @@
 
 // fn dpdxCoarse(f32) -> f32
 fn dpdxCoarse_029152() {
-  var res: f32 = dpdxCoarse(1.0);
+  var res: f32 = dpdxCoarse(1.f);
 }
 
 @fragment

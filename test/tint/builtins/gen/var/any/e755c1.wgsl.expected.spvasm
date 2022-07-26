@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 37
+; Bound: 39
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -33,41 +33,43 @@
           %9 = OpTypeFunction %void
        %bool = OpTypeBool
      %v3bool = OpTypeVector %bool 3
-         %15 = OpConstantNull %v3bool
+       %true = OpConstantTrue %bool
+         %16 = OpConstantComposite %v3bool %true %true %true
 %_ptr_Function_v3bool = OpTypePointer Function %v3bool
+         %19 = OpConstantNull %v3bool
 %_ptr_Function_bool = OpTypePointer Function %bool
-         %22 = OpConstantNull %bool
-         %23 = OpTypeFunction %v4float
+         %24 = OpConstantNull %bool
+         %25 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
  %any_e755c1 = OpFunction %void None %9
          %12 = OpLabel
-      %arg_0 = OpVariable %_ptr_Function_v3bool Function %15
-        %res = OpVariable %_ptr_Function_bool Function %22
-               OpStore %arg_0 %15
-         %19 = OpLoad %v3bool %arg_0
-         %18 = OpAny %bool %19
-               OpStore %res %18
+      %arg_0 = OpVariable %_ptr_Function_v3bool Function %19
+        %res = OpVariable %_ptr_Function_bool Function %24
+               OpStore %arg_0 %16
+         %21 = OpLoad %v3bool %arg_0
+         %20 = OpAny %bool %21
+               OpStore %res %20
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %23
-         %25 = OpLabel
-         %26 = OpFunctionCall %void %any_e755c1
+%vertex_main_inner = OpFunction %v4float None %25
+         %27 = OpLabel
+         %28 = OpFunctionCall %void %any_e755c1
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %28 = OpLabel
-         %29 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %29
+         %30 = OpLabel
+         %31 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %31
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
-         %32 = OpLabel
-         %33 = OpFunctionCall %void %any_e755c1
+         %34 = OpLabel
+         %35 = OpFunctionCall %void %any_e755c1
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
-         %35 = OpLabel
-         %36 = OpFunctionCall %void %any_e755c1
+         %37 = OpLabel
+         %38 = OpFunctionCall %void %any_e755c1
                OpReturn
                OpFunctionEnd

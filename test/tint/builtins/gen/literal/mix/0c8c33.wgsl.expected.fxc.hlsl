@@ -1,5 +1,5 @@
 void mix_0c8c33() {
-  float3 res = lerp((0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
+  float3 res = lerp((1.0f).xxx, (1.0f).xxx, (1.0f).xxx);
 }
 
 struct tint_symbol {

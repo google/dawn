@@ -25,7 +25,7 @@
 
 // fn tan(vec<4, f32>) -> vec<4, f32>
 fn tan_244e2a() {
-  var res: vec4<f32> = tan(vec4<f32>());
+  var res: vec4<f32> = tan(vec4<f32>(1.f));
 }
 
 @vertex

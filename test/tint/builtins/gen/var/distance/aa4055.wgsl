@@ -25,8 +25,8 @@
 
 // fn distance(vec<2, f32>, vec<2, f32>) -> f32
 fn distance_aa4055() {
-  var arg_0 = vec2<f32>();
-  var arg_1 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.f);
+  var arg_1 = vec2<f32>(1.f);
   var res: f32 = distance(arg_0, arg_1);
 }
 

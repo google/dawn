@@ -14,7 +14,7 @@ uint4 tint_first_trailing_bit(uint4 v) {
 }
 
 void firstTrailingBit_110f2c() {
-  uint4 res = tint_first_trailing_bit((0u).xxxx);
+  uint4 res = tint_first_trailing_bit((1u).xxxx);
 }
 
 struct tint_symbol {

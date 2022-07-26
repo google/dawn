@@ -2,7 +2,7 @@
 precision mediump float;
 
 void fwidthFine_523fdc() {
-  vec3 arg_0 = vec3(0.0f);
+  vec3 arg_0 = vec3(1.0f);
   vec3 res = fwidth(arg_0);
 }
 

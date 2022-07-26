@@ -25,7 +25,7 @@
 
 // fn exp(f32) -> f32
 fn exp_771fd2() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = exp(arg_0);
 }
 

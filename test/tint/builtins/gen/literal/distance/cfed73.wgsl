@@ -25,7 +25,7 @@
 
 // fn distance(f32, f32) -> f32
 fn distance_cfed73() {
-  var res: f32 = distance(1.0, 1.0);
+  var res: f32 = distance(1.f, 1.f);
 }
 
 @vertex

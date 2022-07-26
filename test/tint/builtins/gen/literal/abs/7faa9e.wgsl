@@ -25,7 +25,7 @@
 
 // fn abs(vec<2, i32>) -> vec<2, i32>
 fn abs_7faa9e() {
-  var res: vec2<i32> = abs(vec2<i32>());
+  var res: vec2<i32> = abs(vec2<i32>(1));
 }
 
 @vertex

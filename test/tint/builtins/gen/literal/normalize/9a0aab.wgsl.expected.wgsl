@@ -1,5 +1,5 @@
 fn normalize_9a0aab() {
-  var res : vec4<f32> = normalize(vec4<f32>());
+  var res : vec4<f32> = normalize(vec4<f32>(1.0f));
 }
 
 @vertex

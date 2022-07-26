@@ -25,7 +25,7 @@
 
 // fn asin(f32) -> f32
 fn asin_c0c272() {
-  var res: f32 = asin(1.0);
+  var res: f32 = asin(1.f);
 }
 
 @vertex

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void floor_60d7ea() {
-  float3 arg_0 = float3(0.0f);
+  float3 arg_0 = float3(1.0f);
   float3 res = floor(arg_0);
 }
 

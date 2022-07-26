@@ -1,7 +1,7 @@
 #version 310 es
 
 void reverseBits_222177() {
-  ivec2 res = bitfieldReverse(ivec2(0));
+  ivec2 res = bitfieldReverse(ivec2(1));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void reverseBits_222177() {
-  ivec2 res = bitfieldReverse(ivec2(0));
+  ivec2 res = bitfieldReverse(ivec2(1));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void reverseBits_222177() {
-  ivec2 res = bitfieldReverse(ivec2(0));
+  ivec2 res = bitfieldReverse(ivec2(1));
 }
 
 void compute_main() {

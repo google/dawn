@@ -1,6 +1,6 @@
 fn step_e2b337() {
-  var arg_0 = vec4<f32>();
-  var arg_1 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.0f);
+  var arg_1 = vec4<f32>(1.0f);
   var res : vec4<f32> = step(arg_0, arg_1);
 }
 

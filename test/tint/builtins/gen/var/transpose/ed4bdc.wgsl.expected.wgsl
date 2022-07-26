@@ -1,5 +1,5 @@
 fn transpose_ed4bdc() {
-  var arg_0 = mat3x2<f32>();
+  var arg_0 = mat3x2<f32>(1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f);
   var res : mat2x3<f32> = transpose(arg_0);
 }
 

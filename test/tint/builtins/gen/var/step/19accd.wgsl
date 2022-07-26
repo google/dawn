@@ -25,8 +25,8 @@
 
 // fn step(vec<2, f32>, vec<2, f32>) -> vec<2, f32>
 fn step_19accd() {
-  var arg_0 = vec2<f32>();
-  var arg_1 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.f);
+  var arg_1 = vec2<f32>(1.f);
   var res: vec2<f32> = step(arg_0, arg_1);
 }
 

@@ -1,6 +1,6 @@
 void min_c70bb7() {
-  uint3 arg_0 = (0u).xxx;
-  uint3 arg_1 = (0u).xxx;
+  uint3 arg_0 = (1u).xxx;
+  uint3 arg_1 = (1u).xxx;
   uint3 res = min(arg_0, arg_1);
 }
 

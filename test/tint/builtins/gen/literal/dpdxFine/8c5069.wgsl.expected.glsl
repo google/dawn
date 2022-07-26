@@ -2,7 +2,7 @@
 precision mediump float;
 
 void dpdxFine_8c5069() {
-  vec4 res = dFdx(vec4(0.0f));
+  vec4 res = dFdx(vec4(1.0f));
 }
 
 void fragment_main() {

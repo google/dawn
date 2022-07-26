@@ -25,7 +25,7 @@
 
 // fn dpdy(f32) -> f32
 fn dpdy_7f8d84() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = dpdy(arg_0);
 }
 

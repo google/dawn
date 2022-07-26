@@ -25,7 +25,7 @@
 
 // fn degrees(f32) -> f32
 fn degrees_51f705() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = degrees(arg_0);
 }
 

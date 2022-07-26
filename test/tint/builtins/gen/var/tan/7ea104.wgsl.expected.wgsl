@@ -1,5 +1,5 @@
 fn tan_7ea104() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.0f);
   var res : vec3<f32> = tan(arg_0);
 }
 

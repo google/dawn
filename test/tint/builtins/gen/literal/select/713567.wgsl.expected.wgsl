@@ -1,5 +1,5 @@
 fn select_713567() {
-  var res : vec4<f32> = select(vec4<f32>(), vec4<f32>(), bool());
+  var res : vec4<f32> = select(vec4<f32>(1.0f), vec4<f32>(1.0f), true);
 }
 
 @vertex

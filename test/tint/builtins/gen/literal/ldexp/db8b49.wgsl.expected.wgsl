@@ -1,5 +1,5 @@
 fn ldexp_db8b49() {
-  var res : f32 = ldexp(1.0, 1);
+  var res : f32 = ldexp(1.0f, 1);
 }
 
 @vertex

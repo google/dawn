@@ -7,7 +7,7 @@ int3 tint_extract_bits(int3 v, uint offset, uint count) {
 }
 
 void extractBits_e04f5d() {
-  int3 res = tint_extract_bits((0).xxx, 1u, 1u);
+  int3 res = tint_extract_bits((1).xxx, 1u, 1u);
 }
 
 struct tint_symbol {

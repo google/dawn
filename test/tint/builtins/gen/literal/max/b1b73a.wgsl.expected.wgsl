@@ -1,5 +1,5 @@
 fn max_b1b73a() {
-  var res : vec3<u32> = max(vec3<u32>(), vec3<u32>());
+  var res : vec3<u32> = max(vec3<u32>(1u), vec3<u32>(1u));
 }
 
 @vertex

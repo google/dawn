@@ -1,5 +1,5 @@
 fn select_a2860e() {
-  var res : vec4<i32> = select(vec4<i32>(), vec4<i32>(), vec4<bool>());
+  var res : vec4<i32> = select(vec4<i32>(1), vec4<i32>(1), vec4<bool>(true));
 }
 
 @vertex

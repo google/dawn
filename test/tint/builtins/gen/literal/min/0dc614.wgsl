@@ -25,7 +25,7 @@
 
 // fn min(vec<4, u32>, vec<4, u32>) -> vec<4, u32>
 fn min_0dc614() {
-  var res: vec4<u32> = min(vec4<u32>(), vec4<u32>());
+  var res: vec4<u32> = min(vec4<u32>(1u), vec4<u32>(1u));
 }
 
 @vertex

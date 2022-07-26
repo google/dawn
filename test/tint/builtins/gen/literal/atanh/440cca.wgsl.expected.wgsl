@@ -1,5 +1,5 @@
 fn atanh_440cca() {
-  var res : vec3<f32> = atanh(vec3<f32>());
+  var res : vec3<f32> = atanh(vec3<f32>(1.0f));
 }
 
 @vertex

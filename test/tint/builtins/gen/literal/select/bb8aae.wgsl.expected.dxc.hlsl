@@ -1,5 +1,5 @@
 void select_bb8aae() {
-  float4 res = ((false).xxxx ? (0.0f).xxxx : (0.0f).xxxx);
+  float4 res = ((true).xxxx ? (1.0f).xxxx : (1.0f).xxxx);
 }
 
 struct tint_symbol {

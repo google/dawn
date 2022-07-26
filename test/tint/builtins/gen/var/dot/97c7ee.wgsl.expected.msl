@@ -7,8 +7,8 @@ T tint_dot2(vec<T,2> a, vec<T,2> b) {
   return a[0]*b[0] + a[1]*b[1];
 }
 void dot_97c7ee() {
-  uint2 arg_0 = uint2(0u);
-  uint2 arg_1 = uint2(0u);
+  uint2 arg_0 = uint2(1u);
+  uint2 arg_1 = uint2(1u);
   uint res = tint_dot2(arg_0, arg_1);
 }
 

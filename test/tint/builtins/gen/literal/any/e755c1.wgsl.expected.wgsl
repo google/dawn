@@ -1,5 +1,5 @@
 fn any_e755c1() {
-  var res : bool = any(vec3<bool>());
+  var res : bool = any(vec3<bool>(true));
 }
 
 @vertex

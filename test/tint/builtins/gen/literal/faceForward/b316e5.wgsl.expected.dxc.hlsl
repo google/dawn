@@ -1,5 +1,5 @@
 void faceForward_b316e5() {
-  float4 res = faceforward((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx);
+  float4 res = faceforward((1.0f).xxxx, (1.0f).xxxx, (1.0f).xxxx);
 }
 
 struct tint_symbol {

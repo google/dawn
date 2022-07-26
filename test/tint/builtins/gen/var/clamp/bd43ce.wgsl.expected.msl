@@ -2,9 +2,9 @@
 
 using namespace metal;
 void clamp_bd43ce() {
-  uint4 arg_0 = uint4(0u);
-  uint4 arg_1 = uint4(0u);
-  uint4 arg_2 = uint4(0u);
+  uint4 arg_0 = uint4(1u);
+  uint4 arg_1 = uint4(1u);
+  uint4 arg_2 = uint4(1u);
   uint4 res = clamp(arg_0, arg_1, arg_2);
 }
 

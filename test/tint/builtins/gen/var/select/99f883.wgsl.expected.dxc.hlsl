@@ -1,7 +1,7 @@
 void select_99f883() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
-  bool arg_2 = false;
+  bool arg_2 = true;
   uint res = (arg_2 ? arg_1 : arg_0);
 }
 

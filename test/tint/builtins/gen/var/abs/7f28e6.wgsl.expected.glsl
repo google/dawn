@@ -1,7 +1,7 @@
 #version 310 es
 
 void abs_7f28e6() {
-  uvec2 arg_0 = uvec2(0u);
+  uvec2 arg_0 = uvec2(1u);
   uvec2 res = arg_0;
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void abs_7f28e6() {
-  uvec2 arg_0 = uvec2(0u);
+  uvec2 arg_0 = uvec2(1u);
   uvec2 res = arg_0;
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void abs_7f28e6() {
-  uvec2 arg_0 = uvec2(0u);
+  uvec2 arg_0 = uvec2(1u);
   uvec2 res = arg_0;
 }
 

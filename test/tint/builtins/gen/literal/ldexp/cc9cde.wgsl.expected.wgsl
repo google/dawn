@@ -1,5 +1,5 @@
 fn ldexp_cc9cde() {
-  var res : vec4<f32> = ldexp(vec4<f32>(), vec4<i32>());
+  var res : vec4<f32> = ldexp(vec4<f32>(1.0f), vec4<i32>(1));
 }
 
 @vertex

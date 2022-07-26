@@ -1,7 +1,7 @@
 #version 310 es
 
 void any_2ab91a() {
-  bool arg_0 = false;
+  bool arg_0 = true;
   bool res = arg_0;
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void any_2ab91a() {
-  bool arg_0 = false;
+  bool arg_0 = true;
   bool res = arg_0;
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void any_2ab91a() {
-  bool arg_0 = false;
+  bool arg_0 = true;
   bool res = arg_0;
 }
 

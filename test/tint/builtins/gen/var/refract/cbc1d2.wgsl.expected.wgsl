@@ -1,7 +1,7 @@
 fn refract_cbc1d2() {
-  var arg_0 = vec3<f32>();
-  var arg_1 = vec3<f32>();
-  var arg_2 = 1.0;
+  var arg_0 = vec3<f32>(1.0f);
+  var arg_1 = vec3<f32>(1.0f);
+  var arg_2 = 1.0f;
   var res : vec3<f32> = refract(arg_0, arg_1, arg_2);
 }
 

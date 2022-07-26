@@ -3,7 +3,7 @@
 @group(1) @binding(1) var arg_1 : sampler_comparison;
 
 fn textureGatherCompare_182fd4() {
-  var res : vec4<f32> = textureGatherCompare(arg_0, arg_1, vec3<f32>(), 1.0);
+  var res : vec4<f32> = textureGatherCompare(arg_0, arg_1, vec3<f32>(), 1.0f);
 }
 
 @vertex

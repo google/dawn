@@ -55,7 +55,7 @@
          %26 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_v3float Function %20
         %res = OpVariable %_ptr_Function_v3float Function %20
-               OpStore %arg_0 %20
+               OpStore %arg_0 %16
          %30 = OpLoad %v3float %arg_0
          %29 = OpFunctionCall %v3float %tint_acosh %30
                OpStore %res %29

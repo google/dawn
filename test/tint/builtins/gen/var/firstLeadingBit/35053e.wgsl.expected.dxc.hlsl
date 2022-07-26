@@ -14,7 +14,7 @@ int3 tint_first_leading_bit(int3 v) {
 }
 
 void firstLeadingBit_35053e() {
-  int3 arg_0 = (0).xxx;
+  int3 arg_0 = (1).xxx;
   int3 res = tint_first_leading_bit(arg_0);
 }
 

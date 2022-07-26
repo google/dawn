@@ -1,5 +1,5 @@
 fn countOneBits_af90e2() {
-  var res : vec2<i32> = countOneBits(vec2<i32>());
+  var res : vec2<i32> = countOneBits(vec2<i32>(1));
 }
 
 @vertex

@@ -1,5 +1,5 @@
 void select_78be5f() {
-  float3 res = (false ? (0.0f).xxx : (0.0f).xxx);
+  float3 res = (true ? (1.0f).xxx : (1.0f).xxx);
 }
 
 struct tint_symbol {

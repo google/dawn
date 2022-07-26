@@ -1,7 +1,7 @@
 void clamp_1a32e3() {
-  int4 arg_0 = (0).xxxx;
-  int4 arg_1 = (0).xxxx;
-  int4 arg_2 = (0).xxxx;
+  int4 arg_0 = (1).xxxx;
+  int4 arg_1 = (1).xxxx;
+  int4 arg_2 = (1).xxxx;
   int4 res = clamp(arg_0, arg_1, arg_2);
 }
 

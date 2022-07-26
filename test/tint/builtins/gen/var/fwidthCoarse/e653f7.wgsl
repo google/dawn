@@ -25,7 +25,7 @@
 
 // fn fwidthCoarse(vec<2, f32>) -> vec<2, f32>
 fn fwidthCoarse_e653f7() {
-  var arg_0 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.f);
   var res: vec2<f32> = fwidthCoarse(arg_0);
 }
 

@@ -1,7 +1,7 @@
 #version 310 es
 
 void any_0e3e58() {
-  bool res = any(bvec2(false));
+  bool res = any(bvec2(true));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void any_0e3e58() {
-  bool res = any(bvec2(false));
+  bool res = any(bvec2(true));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void any_0e3e58() {
-  bool res = any(bvec2(false));
+  bool res = any(bvec2(true));
 }
 
 void compute_main() {

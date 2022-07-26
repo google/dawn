@@ -1,5 +1,5 @@
 fn countLeadingZeros_f70103() {
-  var res : vec4<u32> = countLeadingZeros(vec4<u32>());
+  var res : vec4<u32> = countLeadingZeros(vec4<u32>(1u));
 }
 
 @vertex

@@ -1,6 +1,6 @@
 void distance_aa4055() {
-  float2 arg_0 = (0.0f).xx;
-  float2 arg_1 = (0.0f).xx;
+  float2 arg_0 = (1.0f).xx;
+  float2 arg_1 = (1.0f).xx;
   float res = distance(arg_0, arg_1);
 }
 

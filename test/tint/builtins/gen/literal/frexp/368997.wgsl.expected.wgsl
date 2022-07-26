@@ -1,5 +1,5 @@
 fn frexp_368997() {
-  var res = frexp(vec3<f32>());
+  var res = frexp(vec3<f32>(1.0f));
 }
 
 @vertex

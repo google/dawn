@@ -25,7 +25,7 @@
 
 // fn exp2(f32) -> f32
 fn exp2_dea523() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = exp2(arg_0);
 }
 

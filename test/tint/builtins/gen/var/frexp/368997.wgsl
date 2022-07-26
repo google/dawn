@@ -25,7 +25,7 @@
 
 // fn frexp(vec<3, f32>) -> __frexp_result_vec<3>
 fn frexp_368997() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.f);
   var res = frexp(arg_0);
 }
 

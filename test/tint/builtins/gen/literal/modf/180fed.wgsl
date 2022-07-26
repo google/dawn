@@ -25,7 +25,7 @@
 
 // fn modf(f32) -> __modf_result
 fn modf_180fed() {
-  var res = modf(1.0);
+  var res = modf(1.f);
 }
 
 @vertex

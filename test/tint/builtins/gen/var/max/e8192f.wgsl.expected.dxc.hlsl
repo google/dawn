@@ -1,6 +1,6 @@
 void max_e8192f() {
-  int2 arg_0 = (0).xx;
-  int2 arg_1 = (0).xx;
+  int2 arg_0 = (1).xx;
+  int2 arg_1 = (1).xx;
   int2 res = max(arg_0, arg_1);
 }
 

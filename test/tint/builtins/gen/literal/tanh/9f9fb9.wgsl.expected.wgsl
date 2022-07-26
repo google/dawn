@@ -1,5 +1,5 @@
 fn tanh_9f9fb9() {
-  var res : vec3<f32> = tanh(vec3<f32>());
+  var res : vec3<f32> = tanh(vec3<f32>(1.0f));
 }
 
 @vertex

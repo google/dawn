@@ -1,7 +1,7 @@
 void select_416e14() {
   float arg_0 = 1.0f;
   float arg_1 = 1.0f;
-  bool arg_2 = false;
+  bool arg_2 = true;
   float res = (arg_2 ? arg_1 : arg_0);
 }
 

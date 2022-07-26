@@ -1,8 +1,8 @@
 #version 310 es
 
 void min_3941e1() {
-  ivec4 arg_0 = ivec4(0);
-  ivec4 arg_1 = ivec4(0);
+  ivec4 arg_0 = ivec4(1);
+  ivec4 arg_1 = ivec4(1);
   ivec4 res = min(arg_0, arg_1);
 }
 
@@ -23,8 +23,8 @@ void main() {
 precision mediump float;
 
 void min_3941e1() {
-  ivec4 arg_0 = ivec4(0);
-  ivec4 arg_1 = ivec4(0);
+  ivec4 arg_0 = ivec4(1);
+  ivec4 arg_1 = ivec4(1);
   ivec4 res = min(arg_0, arg_1);
 }
 
@@ -39,8 +39,8 @@ void main() {
 #version 310 es
 
 void min_3941e1() {
-  ivec4 arg_0 = ivec4(0);
-  ivec4 arg_1 = ivec4(0);
+  ivec4 arg_0 = ivec4(1);
+  ivec4 arg_1 = ivec4(1);
   ivec4 res = min(arg_0, arg_1);
 }
 

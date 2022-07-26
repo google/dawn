@@ -1,9 +1,9 @@
 #version 310 es
 
 void select_78be5f() {
-  vec3 arg_0 = vec3(0.0f);
-  vec3 arg_1 = vec3(0.0f);
-  bool arg_2 = false;
+  vec3 arg_0 = vec3(1.0f);
+  vec3 arg_1 = vec3(1.0f);
+  bool arg_2 = true;
   vec3 res = (arg_2 ? arg_1 : arg_0);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void select_78be5f() {
-  vec3 arg_0 = vec3(0.0f);
-  vec3 arg_1 = vec3(0.0f);
-  bool arg_2 = false;
+  vec3 arg_0 = vec3(1.0f);
+  vec3 arg_1 = vec3(1.0f);
+  bool arg_2 = true;
   vec3 res = (arg_2 ? arg_1 : arg_0);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void select_78be5f() {
-  vec3 arg_0 = vec3(0.0f);
-  vec3 arg_1 = vec3(0.0f);
-  bool arg_2 = false;
+  vec3 arg_0 = vec3(1.0f);
+  vec3 arg_1 = vec3(1.0f);
+  bool arg_2 = true;
   vec3 res = (arg_2 ? arg_1 : arg_0);
 }
 

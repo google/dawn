@@ -1,5 +1,5 @@
 fn degrees_51f705() {
-  var res : f32 = degrees(1.0);
+  var res : f32 = degrees(1.0f);
 }
 
 @vertex

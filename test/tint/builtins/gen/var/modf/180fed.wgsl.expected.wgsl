@@ -1,5 +1,5 @@
 fn modf_180fed() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.0f;
   var res = modf(arg_0);
 }
 

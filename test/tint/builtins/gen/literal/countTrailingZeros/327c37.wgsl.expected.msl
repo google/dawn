@@ -2,7 +2,7 @@
 
 using namespace metal;
 void countTrailingZeros_327c37() {
-  int2 res = ctz(int2(0));
+  int2 res = ctz(int2(1));
 }
 
 struct tint_symbol {

@@ -7,8 +7,8 @@ ivec2 tint_insert_bits(ivec2 v, ivec2 n, uint offset, uint count) {
 }
 
 void insertBits_fe6ba6() {
-  ivec2 arg_0 = ivec2(0);
-  ivec2 arg_1 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
+  ivec2 arg_1 = ivec2(1);
   uint arg_2 = 1u;
   uint arg_3 = 1u;
   ivec2 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
@@ -37,8 +37,8 @@ ivec2 tint_insert_bits(ivec2 v, ivec2 n, uint offset, uint count) {
 }
 
 void insertBits_fe6ba6() {
-  ivec2 arg_0 = ivec2(0);
-  ivec2 arg_1 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
+  ivec2 arg_1 = ivec2(1);
   uint arg_2 = 1u;
   uint arg_3 = 1u;
   ivec2 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);
@@ -61,8 +61,8 @@ ivec2 tint_insert_bits(ivec2 v, ivec2 n, uint offset, uint count) {
 }
 
 void insertBits_fe6ba6() {
-  ivec2 arg_0 = ivec2(0);
-  ivec2 arg_1 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
+  ivec2 arg_1 = ivec2(1);
   uint arg_2 = 1u;
   uint arg_3 = 1u;
   ivec2 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);

@@ -25,7 +25,7 @@
 
 // fn tanh(f32) -> f32
 fn tanh_c15fdb() {
-  var res: f32 = tanh(1.0);
+  var res: f32 = tanh(1.f);
 }
 
 @vertex

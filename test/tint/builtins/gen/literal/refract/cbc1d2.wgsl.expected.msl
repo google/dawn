@@ -2,7 +2,7 @@
 
 using namespace metal;
 void refract_cbc1d2() {
-  float3 res = refract(float3(0.0f), float3(0.0f), 1.0f);
+  float3 res = refract(float3(1.0f), float3(1.0f), 1.0f);
 }
 
 struct tint_symbol {

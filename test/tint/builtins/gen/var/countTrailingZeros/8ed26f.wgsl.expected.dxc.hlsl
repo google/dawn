@@ -14,7 +14,7 @@ uint3 tint_count_trailing_zeros(uint3 v) {
 }
 
 void countTrailingZeros_8ed26f() {
-  uint3 arg_0 = (0u).xxx;
+  uint3 arg_0 = (1u).xxx;
   uint3 res = tint_count_trailing_zeros(arg_0);
 }
 

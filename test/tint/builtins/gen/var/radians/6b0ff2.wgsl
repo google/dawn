@@ -25,7 +25,7 @@
 
 // fn radians(f32) -> f32
 fn radians_6b0ff2() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = radians(arg_0);
 }
 

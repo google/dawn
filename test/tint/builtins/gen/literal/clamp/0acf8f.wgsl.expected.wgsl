@@ -1,5 +1,5 @@
 fn clamp_0acf8f() {
-  var res : vec2<f32> = clamp(vec2<f32>(), vec2<f32>(), vec2<f32>());
+  var res : vec2<f32> = clamp(vec2<f32>(1.0f), vec2<f32>(1.0f), vec2<f32>(1.0f));
 }
 
 @vertex

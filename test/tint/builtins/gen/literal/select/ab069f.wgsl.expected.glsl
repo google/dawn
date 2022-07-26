@@ -1,7 +1,7 @@
 #version 310 es
 
 void select_ab069f() {
-  ivec4 res = (false ? ivec4(0) : ivec4(0));
+  ivec4 res = (true ? ivec4(1) : ivec4(1));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void select_ab069f() {
-  ivec4 res = (false ? ivec4(0) : ivec4(0));
+  ivec4 res = (true ? ivec4(1) : ivec4(1));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void select_ab069f() {
-  ivec4 res = (false ? ivec4(0) : ivec4(0));
+  ivec4 res = (true ? ivec4(1) : ivec4(1));
 }
 
 void compute_main() {

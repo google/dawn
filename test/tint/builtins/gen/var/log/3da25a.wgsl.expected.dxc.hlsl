@@ -1,5 +1,5 @@
 void log_3da25a() {
-  float4 arg_0 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
   float4 res = log(arg_0);
 }
 

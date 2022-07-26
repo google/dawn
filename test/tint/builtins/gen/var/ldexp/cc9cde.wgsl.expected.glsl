@@ -1,8 +1,8 @@
 #version 310 es
 
 void ldexp_cc9cde() {
-  vec4 arg_0 = vec4(0.0f);
-  ivec4 arg_1 = ivec4(0);
+  vec4 arg_0 = vec4(1.0f);
+  ivec4 arg_1 = ivec4(1);
   vec4 res = ldexp(arg_0, arg_1);
 }
 
@@ -23,8 +23,8 @@ void main() {
 precision mediump float;
 
 void ldexp_cc9cde() {
-  vec4 arg_0 = vec4(0.0f);
-  ivec4 arg_1 = ivec4(0);
+  vec4 arg_0 = vec4(1.0f);
+  ivec4 arg_1 = ivec4(1);
   vec4 res = ldexp(arg_0, arg_1);
 }
 
@@ -39,8 +39,8 @@ void main() {
 #version 310 es
 
 void ldexp_cc9cde() {
-  vec4 arg_0 = vec4(0.0f);
-  ivec4 arg_1 = ivec4(0);
+  vec4 arg_0 = vec4(1.0f);
+  ivec4 arg_1 = ivec4(1);
   vec4 res = ldexp(arg_0, arg_1);
 }
 

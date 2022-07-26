@@ -25,7 +25,7 @@
 
 // fn radians(f32) -> f32
 fn radians_6b0ff2() {
-  var res: f32 = radians(1.0);
+  var res: f32 = radians(1.f);
 }
 
 @vertex

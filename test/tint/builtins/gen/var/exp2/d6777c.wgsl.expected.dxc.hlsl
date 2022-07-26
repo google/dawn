@@ -1,5 +1,5 @@
 void exp2_d6777c() {
-  float2 arg_0 = (0.0f).xx;
+  float2 arg_0 = (1.0f).xx;
   float2 res = exp2(arg_0);
 }
 

@@ -25,7 +25,7 @@
 
 // fn trunc(f32) -> f32
 fn trunc_eb83df() {
-  var res: f32 = trunc(1.0);
+  var res: f32 = trunc(1.f);
 }
 
 @vertex

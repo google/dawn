@@ -1,5 +1,5 @@
 void dpdy_a8b56e() {
-  float2 arg_0 = (0.0f).xx;
+  float2 arg_0 = (1.0f).xx;
   float2 res = ddy(arg_0);
 }
 

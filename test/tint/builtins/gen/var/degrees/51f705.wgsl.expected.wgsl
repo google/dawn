@@ -1,5 +1,5 @@
 fn degrees_51f705() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.0f;
   var res : f32 = degrees(arg_0);
 }
 

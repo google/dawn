@@ -1,5 +1,5 @@
 fn countTrailingZeros_8ed26f() {
-  var res : vec3<u32> = countTrailingZeros(vec3<u32>());
+  var res : vec3<u32> = countTrailingZeros(vec3<u32>(1u));
 }
 
 @vertex

@@ -1,5 +1,5 @@
 fn all_986c7b() {
-  var arg_0 = vec4<bool>();
+  var arg_0 = vec4<bool>(true);
   var res : bool = all(arg_0);
 }
 

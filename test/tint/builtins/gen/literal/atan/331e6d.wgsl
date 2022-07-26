@@ -25,7 +25,7 @@
 
 // fn atan(vec<3, f32>) -> vec<3, f32>
 fn atan_331e6d() {
-  var res: vec3<f32> = atan(vec3<f32>());
+  var res: vec3<f32> = atan(vec3<f32>(1.f));
 }
 
 @vertex

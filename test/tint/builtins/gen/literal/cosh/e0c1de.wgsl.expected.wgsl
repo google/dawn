@@ -1,5 +1,5 @@
 fn cosh_e0c1de() {
-  var res : vec4<f32> = cosh(vec4<f32>());
+  var res : vec4<f32> = cosh(vec4<f32>(1.0f));
 }
 
 @vertex

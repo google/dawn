@@ -1,5 +1,5 @@
 fn tanh_c15fdb() {
-  var res : f32 = tanh(1.0);
+  var res : f32 = tanh(1.0f);
 }
 
 @vertex

@@ -25,7 +25,7 @@
 
 // fn acosh(f32) -> f32
 fn acosh_ecf2d1() {
-  var res: f32 = acosh(1.0);
+  var res: f32 = acosh(1.f);
 }
 
 @vertex

@@ -3,7 +3,7 @@ float2 tint_radians(float2 param_0) {
 }
 
 void radians_61687a() {
-  float2 arg_0 = (0.0f).xx;
+  float2 arg_0 = (1.0f).xx;
   float2 res = tint_radians(arg_0);
 }
 

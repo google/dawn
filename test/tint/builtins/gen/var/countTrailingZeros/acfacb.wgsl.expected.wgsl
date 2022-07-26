@@ -1,5 +1,5 @@
 fn countTrailingZeros_acfacb() {
-  var arg_0 = vec3<i32>();
+  var arg_0 = vec3<i32>(1);
   var res : vec3<i32> = countTrailingZeros(arg_0);
 }
 

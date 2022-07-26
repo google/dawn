@@ -53,7 +53,7 @@
 %acosh_e38f5c = OpFunction %void None %23
          %26 = OpLabel
         %res = OpVariable %_ptr_Function_v3float Function %20
-         %27 = OpFunctionCall %v3float %tint_acosh %20
+         %27 = OpFunctionCall %v3float %tint_acosh %16
                OpStore %res %27
                OpReturn
                OpFunctionEnd

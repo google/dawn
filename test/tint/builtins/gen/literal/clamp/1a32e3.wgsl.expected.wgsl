@@ -1,5 +1,5 @@
 fn clamp_1a32e3() {
-  var res : vec4<i32> = clamp(vec4<i32>(), vec4<i32>(), vec4<i32>());
+  var res : vec4<i32> = clamp(vec4<i32>(1), vec4<i32>(1), vec4<i32>(1));
 }
 
 @vertex

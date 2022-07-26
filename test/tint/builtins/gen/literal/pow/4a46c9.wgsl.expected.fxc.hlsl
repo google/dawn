@@ -1,5 +1,5 @@
 void pow_4a46c9() {
-  float3 res = pow((0.0f).xxx, (0.0f).xxx);
+  float3 res = pow((1.0f).xxx, (1.0f).xxx);
 }
 
 struct tint_symbol {

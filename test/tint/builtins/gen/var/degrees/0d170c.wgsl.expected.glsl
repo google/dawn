@@ -6,7 +6,7 @@ vec4 tint_degrees(vec4 param_0) {
 
 
 void degrees_0d170c() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_degrees(arg_0);
 }
 
@@ -32,7 +32,7 @@ vec4 tint_degrees(vec4 param_0) {
 
 
 void degrees_0d170c() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_degrees(arg_0);
 }
 
@@ -52,7 +52,7 @@ vec4 tint_degrees(vec4 param_0) {
 
 
 void degrees_0d170c() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   vec4 res = tint_degrees(arg_0);
 }
 

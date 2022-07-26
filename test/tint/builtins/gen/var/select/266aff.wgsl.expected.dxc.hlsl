@@ -1,7 +1,7 @@
 void select_266aff() {
-  float2 arg_0 = (0.0f).xx;
-  float2 arg_1 = (0.0f).xx;
-  bool2 arg_2 = (false).xx;
+  float2 arg_0 = (1.0f).xx;
+  float2 arg_1 = (1.0f).xx;
+  bool2 arg_2 = (true).xx;
   float2 res = (arg_2 ? arg_1 : arg_0);
 }
 

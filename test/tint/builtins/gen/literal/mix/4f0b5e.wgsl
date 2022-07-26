@@ -25,7 +25,7 @@
 
 // fn mix(f32, f32, f32) -> f32
 fn mix_4f0b5e() {
-  var res: f32 = mix(1.0, 1.0, 1.0);
+  var res: f32 = mix(1.f, 1.f, 1.f);
 }
 
 @vertex

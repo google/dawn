@@ -32,26 +32,26 @@
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
     %v3float = OpTypeVector %float 3
-         %16 = OpConstantNull %v3float
-%_ptr_Function_float = OpTypePointer Function %float
-         %19 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
+         %17 = OpConstantComposite %v3float %float_1 %float_1 %float_1
+%_ptr_Function_float = OpTypePointer Function %float
+         %20 = OpTypeFunction %v4float
 %length_056071 = OpFunction %void None %9
          %12 = OpLabel
         %res = OpVariable %_ptr_Function_float Function %8
-         %13 = OpExtInst %float %14 Length %16
+         %13 = OpExtInst %float %14 Length %17
                OpStore %res %13
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %19
-         %21 = OpLabel
-         %22 = OpFunctionCall %void %length_056071
+%vertex_main_inner = OpFunction %v4float None %20
+         %22 = OpLabel
+         %23 = OpFunctionCall %void %length_056071
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %24 = OpLabel
-         %25 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %25
+         %25 = OpLabel
+         %26 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %26
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd

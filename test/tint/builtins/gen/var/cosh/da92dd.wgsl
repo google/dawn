@@ -25,7 +25,7 @@
 
 // fn cosh(f32) -> f32
 fn cosh_da92dd() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = cosh(arg_0);
 }
 

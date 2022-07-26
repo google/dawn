@@ -1,6 +1,6 @@
 void dot_ef6b1d() {
-  int4 arg_0 = (0).xxxx;
-  int4 arg_1 = (0).xxxx;
+  int4 arg_0 = (1).xxxx;
+  int4 arg_1 = (1).xxxx;
   int res = dot(arg_0, arg_1);
 }
 

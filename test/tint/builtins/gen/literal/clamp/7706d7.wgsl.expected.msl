@@ -2,7 +2,7 @@
 
 using namespace metal;
 void clamp_7706d7() {
-  uint2 res = clamp(uint2(0u), uint2(0u), uint2(0u));
+  uint2 res = clamp(uint2(1u), uint2(1u), uint2(1u));
 }
 
 struct tint_symbol {

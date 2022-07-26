@@ -2,7 +2,7 @@
 
 using namespace metal;
 void atan_a8b696() {
-  float4 res = atan(float4(0.0f));
+  float4 res = atan(float4(1.0f));
 }
 
 struct tint_symbol {

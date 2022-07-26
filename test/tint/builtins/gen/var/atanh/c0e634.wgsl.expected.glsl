@@ -5,7 +5,7 @@ vec2 tint_atanh(vec2 x) {
 }
 
 void atanh_c0e634() {
-  vec2 arg_0 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
   vec2 res = tint_atanh(arg_0);
 }
 
@@ -30,7 +30,7 @@ vec2 tint_atanh(vec2 x) {
 }
 
 void atanh_c0e634() {
-  vec2 arg_0 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
   vec2 res = tint_atanh(arg_0);
 }
 
@@ -49,7 +49,7 @@ vec2 tint_atanh(vec2 x) {
 }
 
 void atanh_c0e634() {
-  vec2 arg_0 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
   vec2 res = tint_atanh(arg_0);
 }
 

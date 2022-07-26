@@ -1,5 +1,5 @@
 fn all_986c7b() {
-  var res : bool = all(vec4<bool>());
+  var res : bool = all(vec4<bool>(true));
 }
 
 @vertex

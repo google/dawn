@@ -2,7 +2,7 @@
 
 using namespace metal;
 void fwidth_5d1b39() {
-  float3 arg_0 = float3(0.0f);
+  float3 arg_0 = float3(1.0f);
   float3 res = fwidth(arg_0);
 }
 

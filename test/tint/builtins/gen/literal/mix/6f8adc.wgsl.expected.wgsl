@@ -1,5 +1,5 @@
 fn mix_6f8adc() {
-  var res : vec2<f32> = mix(vec2<f32>(), vec2<f32>(), vec2<f32>());
+  var res : vec2<f32> = mix(vec2<f32>(1.0f), vec2<f32>(1.0f), vec2<f32>(1.0f));
 }
 
 @vertex

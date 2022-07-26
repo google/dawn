@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 32
+; Bound: 33
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -31,36 +31,37 @@
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
        %bool = OpTypeBool
-         %15 = OpConstantNull %bool
+       %true = OpConstantTrue %bool
 %_ptr_Function_bool = OpTypePointer Function %bool
-         %18 = OpTypeFunction %v4float
+         %18 = OpConstantNull %bool
+         %19 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %select_c31f9e = OpFunction %void None %9
          %12 = OpLabel
-        %res = OpVariable %_ptr_Function_bool Function %15
-         %13 = OpSelect %bool %15 %15 %15
+        %res = OpVariable %_ptr_Function_bool Function %18
+         %13 = OpSelect %bool %true %true %true
                OpStore %res %13
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %18
-         %20 = OpLabel
-         %21 = OpFunctionCall %void %select_c31f9e
+%vertex_main_inner = OpFunction %v4float None %19
+         %21 = OpLabel
+         %22 = OpFunctionCall %void %select_c31f9e
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %23 = OpLabel
-         %24 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %24
+         %24 = OpLabel
+         %25 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %25
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
-         %27 = OpLabel
-         %28 = OpFunctionCall %void %select_c31f9e
+         %28 = OpLabel
+         %29 = OpFunctionCall %void %select_c31f9e
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
-         %30 = OpLabel
-         %31 = OpFunctionCall %void %select_c31f9e
+         %31 = OpLabel
+         %32 = OpFunctionCall %void %select_c31f9e
                OpReturn
                OpFunctionEnd

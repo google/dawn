@@ -1,5 +1,5 @@
 fn max_44a39d() {
-  var res : f32 = max(1.0, 1.0);
+  var res : f32 = max(1.0f, 1.0f);
 }
 
 @vertex

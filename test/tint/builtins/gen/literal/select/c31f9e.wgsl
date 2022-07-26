@@ -25,7 +25,7 @@
 
 // fn select(bool, bool, bool) -> bool
 fn select_c31f9e() {
-  var res: bool = select(bool(), bool(), bool());
+  var res: bool = select(true, true, true);
 }
 
 @vertex

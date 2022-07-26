@@ -1,7 +1,7 @@
 #version 310 es
 
 void select_51b047() {
-  uvec2 res = (false ? uvec2(0u) : uvec2(0u));
+  uvec2 res = (true ? uvec2(1u) : uvec2(1u));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void select_51b047() {
-  uvec2 res = (false ? uvec2(0u) : uvec2(0u));
+  uvec2 res = (true ? uvec2(1u) : uvec2(1u));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void select_51b047() {
-  uvec2 res = (false ? uvec2(0u) : uvec2(0u));
+  uvec2 res = (true ? uvec2(1u) : uvec2(1u));
 }
 
 void compute_main() {

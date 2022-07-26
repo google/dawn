@@ -14,7 +14,7 @@ uint4 tint_first_trailing_bit(uint4 v) {
 }
 
 void firstTrailingBit_110f2c() {
-  uint4 arg_0 = (0u).xxxx;
+  uint4 arg_0 = (1u).xxxx;
   uint4 res = tint_first_trailing_bit(arg_0);
 }
 

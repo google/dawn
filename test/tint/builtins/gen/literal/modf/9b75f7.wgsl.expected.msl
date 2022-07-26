@@ -13,7 +13,7 @@ modf_result_vec3 tint_modf(float3 param_0) {
 }
 
 void modf_9b75f7() {
-  modf_result_vec3 res = tint_modf(float3(0.0f));
+  modf_result_vec3 res = tint_modf(float3(1.0f));
 }
 
 struct tint_symbol {

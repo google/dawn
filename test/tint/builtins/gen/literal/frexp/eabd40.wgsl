@@ -25,7 +25,7 @@
 
 // fn frexp(f32) -> __frexp_result
 fn frexp_eabd40() {
-  var res = frexp(1.0);
+  var res = frexp(1.f);
 }
 
 @vertex

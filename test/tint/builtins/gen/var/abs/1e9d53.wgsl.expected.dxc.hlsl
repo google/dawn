@@ -1,5 +1,5 @@
 void abs_1e9d53() {
-  float2 arg_0 = (0.0f).xx;
+  float2 arg_0 = (1.0f).xx;
   float2 res = abs(arg_0);
 }
 

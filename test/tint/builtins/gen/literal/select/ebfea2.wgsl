@@ -25,7 +25,7 @@
 
 // fn select(vec<3, f32>, vec<3, f32>, vec<3, bool>) -> vec<3, f32>
 fn select_ebfea2() {
-  var res: vec3<f32> = select(vec3<f32>(), vec3<f32>(), vec3<bool>());
+  var res: vec3<f32> = select(vec3<f32>(1.f), vec3<f32>(1.f), vec3<bool>(true));
 }
 
 @vertex

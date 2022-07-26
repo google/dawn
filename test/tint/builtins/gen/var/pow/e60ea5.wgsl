@@ -25,8 +25,8 @@
 
 // fn pow(vec<2, f32>, vec<2, f32>) -> vec<2, f32>
 fn pow_e60ea5() {
-  var arg_0 = vec2<f32>();
-  var arg_1 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.f);
+  var arg_1 = vec2<f32>(1.f);
   var res: vec2<f32> = pow(arg_0, arg_1);
 }
 

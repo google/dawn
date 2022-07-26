@@ -25,8 +25,8 @@
 
 // fn atan2(f32, f32) -> f32
 fn atan2_96057c() {
-  var arg_0 = 1.0;
-  var arg_1 = 1.0;
+  var arg_0 = 1.f;
+  var arg_1 = 1.f;
   var res: f32 = atan2(arg_0, arg_1);
 }
 

@@ -1,5 +1,5 @@
 void refract_7e02e6() {
-  float4 res = refract((0.0f).xxxx, (0.0f).xxxx, 1.0f);
+  float4 res = refract((1.0f).xxxx, (1.0f).xxxx, 1.0f);
 }
 
 struct tint_symbol {

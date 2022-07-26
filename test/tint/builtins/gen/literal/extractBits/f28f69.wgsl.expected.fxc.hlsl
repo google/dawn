@@ -7,7 +7,7 @@ uint2 tint_extract_bits(uint2 v, uint offset, uint count) {
 }
 
 void extractBits_f28f69() {
-  uint2 res = tint_extract_bits((0u).xx, 1u, 1u);
+  uint2 res = tint_extract_bits((1u).xx, 1u, 1u);
 }
 
 struct tint_symbol {

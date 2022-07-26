@@ -1,5 +1,5 @@
 fn cos_29d66d() {
-  var res : vec4<f32> = cos(vec4<f32>());
+  var res : vec4<f32> = cos(vec4<f32>(1.0f));
 }
 
 @vertex

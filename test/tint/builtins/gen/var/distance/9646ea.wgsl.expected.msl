@@ -2,8 +2,8 @@
 
 using namespace metal;
 void distance_9646ea() {
-  float4 arg_0 = float4(0.0f);
-  float4 arg_1 = float4(0.0f);
+  float4 arg_0 = float4(1.0f);
+  float4 arg_1 = float4(1.0f);
   float res = distance(arg_0, arg_1);
 }
 

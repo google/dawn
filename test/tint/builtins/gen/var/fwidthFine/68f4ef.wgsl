@@ -25,7 +25,7 @@
 
 // fn fwidthFine(vec<4, f32>) -> vec<4, f32>
 fn fwidthFine_68f4ef() {
-  var arg_0 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.f);
   var res: vec4<f32> = fwidthFine(arg_0);
 }
 

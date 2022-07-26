@@ -1,5 +1,5 @@
 void dot_e994c7() {
-  uint res = dot((0u).xxxx, (0u).xxxx);
+  uint res = dot((1u).xxxx, (1u).xxxx);
 }
 
 struct tint_symbol {

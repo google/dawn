@@ -2,7 +2,7 @@
 
 using namespace metal;
 void normalize_64d8c0() {
-  float3 res = normalize(float3(0.0f));
+  float3 res = normalize(float3(1.0f));
 }
 
 struct tint_symbol {

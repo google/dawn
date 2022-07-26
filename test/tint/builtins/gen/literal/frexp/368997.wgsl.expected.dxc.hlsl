@@ -10,7 +10,7 @@ frexp_result_vec3 tint_frexp(float3 param_0) {
 }
 
 void frexp_368997() {
-  frexp_result_vec3 res = tint_frexp((0.0f).xxx);
+  frexp_result_vec3 res = tint_frexp((1.0f).xxx);
 }
 
 struct tint_symbol {

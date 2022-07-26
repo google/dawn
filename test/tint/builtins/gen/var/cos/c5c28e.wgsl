@@ -25,7 +25,7 @@
 
 // fn cos(f32) -> f32
 fn cos_c5c28e() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = cos(arg_0);
 }
 

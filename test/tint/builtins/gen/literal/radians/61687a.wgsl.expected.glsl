@@ -6,7 +6,7 @@ vec2 tint_radians(vec2 param_0) {
 
 
 void radians_61687a() {
-  vec2 res = tint_radians(vec2(0.0f));
+  vec2 res = tint_radians(vec2(1.0f));
 }
 
 vec4 vertex_main() {
@@ -31,7 +31,7 @@ vec2 tint_radians(vec2 param_0) {
 
 
 void radians_61687a() {
-  vec2 res = tint_radians(vec2(0.0f));
+  vec2 res = tint_radians(vec2(1.0f));
 }
 
 void fragment_main() {
@@ -50,7 +50,7 @@ vec2 tint_radians(vec2 param_0) {
 
 
 void radians_61687a() {
-  vec2 res = tint_radians(vec2(0.0f));
+  vec2 res = tint_radians(vec2(1.0f));
 }
 
 void compute_main() {

@@ -5,8 +5,8 @@ int tint_int_dot(ivec2 a, ivec2 b) {
 }
 
 void dot_fc5f7c() {
-  ivec2 arg_0 = ivec2(0);
-  ivec2 arg_1 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
+  ivec2 arg_1 = ivec2(1);
   int res = tint_int_dot(arg_0, arg_1);
 }
 
@@ -31,8 +31,8 @@ int tint_int_dot(ivec2 a, ivec2 b) {
 }
 
 void dot_fc5f7c() {
-  ivec2 arg_0 = ivec2(0);
-  ivec2 arg_1 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
+  ivec2 arg_1 = ivec2(1);
   int res = tint_int_dot(arg_0, arg_1);
 }
 
@@ -51,8 +51,8 @@ int tint_int_dot(ivec2 a, ivec2 b) {
 }
 
 void dot_fc5f7c() {
-  ivec2 arg_0 = ivec2(0);
-  ivec2 arg_1 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
+  ivec2 arg_1 = ivec2(1);
   int res = tint_int_dot(arg_0, arg_1);
 }
 

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void transpose_ed4bdc() {
-  float3x2 arg_0 = float3x2(float2(0.0f), float2(0.0f), float2(0.0f));
+  float3x2 arg_0 = float3x2(float2(1.0f), float2(1.0f), float2(1.0f));
   float2x3 res = transpose(arg_0);
 }
 

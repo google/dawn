@@ -1,6 +1,6 @@
 void max_b1b73a() {
-  uint3 arg_0 = (0u).xxx;
-  uint3 arg_1 = (0u).xxx;
+  uint3 arg_0 = (1u).xxx;
+  uint3 arg_1 = (1u).xxx;
   uint3 res = max(arg_0, arg_1);
 }
 

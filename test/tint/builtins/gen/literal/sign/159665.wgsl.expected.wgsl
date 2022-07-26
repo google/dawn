@@ -1,5 +1,5 @@
 fn sign_159665() {
-  var res : vec3<f32> = sign(vec3<f32>());
+  var res : vec3<f32> = sign(vec3<f32>(1.0f));
 }
 
 @vertex

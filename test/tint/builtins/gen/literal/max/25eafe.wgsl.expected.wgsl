@@ -1,5 +1,5 @@
 fn max_25eafe() {
-  var res : vec3<i32> = max(vec3<i32>(), vec3<i32>());
+  var res : vec3<i32> = max(vec3<i32>(1), vec3<i32>(1));
 }
 
 @vertex

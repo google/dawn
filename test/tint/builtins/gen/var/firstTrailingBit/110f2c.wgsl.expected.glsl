@@ -16,7 +16,7 @@ uvec4 tint_first_trailing_bit(uvec4 v) {
 }
 
 void firstTrailingBit_110f2c() {
-  uvec4 arg_0 = uvec4(0u);
+  uvec4 arg_0 = uvec4(1u);
   uvec4 res = tint_first_trailing_bit(arg_0);
 }
 
@@ -52,7 +52,7 @@ uvec4 tint_first_trailing_bit(uvec4 v) {
 }
 
 void firstTrailingBit_110f2c() {
-  uvec4 arg_0 = uvec4(0u);
+  uvec4 arg_0 = uvec4(1u);
   uvec4 res = tint_first_trailing_bit(arg_0);
 }
 
@@ -82,7 +82,7 @@ uvec4 tint_first_trailing_bit(uvec4 v) {
 }
 
 void firstTrailingBit_110f2c() {
-  uvec4 arg_0 = uvec4(0u);
+  uvec4 arg_0 = uvec4(1u);
   uvec4 res = tint_first_trailing_bit(arg_0);
 }
 

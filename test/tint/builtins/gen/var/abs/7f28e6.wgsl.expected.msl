@@ -2,7 +2,7 @@
 
 using namespace metal;
 void abs_7f28e6() {
-  uint2 arg_0 = uint2(0u);
+  uint2 arg_0 = uint2(1u);
   uint2 res = abs(arg_0);
 }
 

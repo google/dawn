@@ -2,8 +2,8 @@
 
 using namespace metal;
 void refract_cbc1d2() {
-  float3 arg_0 = float3(0.0f);
-  float3 arg_1 = float3(0.0f);
+  float3 arg_0 = float3(1.0f);
+  float3 arg_1 = float3(1.0f);
   float arg_2 = 1.0f;
   float3 res = refract(arg_0, arg_1, arg_2);
 }

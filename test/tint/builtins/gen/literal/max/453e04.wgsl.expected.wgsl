@@ -1,5 +1,5 @@
 fn max_453e04() {
-  var res : vec4<u32> = max(vec4<u32>(), vec4<u32>());
+  var res : vec4<u32> = max(vec4<u32>(1u), vec4<u32>(1u));
 }
 
 @vertex

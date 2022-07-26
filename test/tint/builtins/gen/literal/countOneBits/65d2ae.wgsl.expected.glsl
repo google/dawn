@@ -1,7 +1,7 @@
 #version 310 es
 
 void countOneBits_65d2ae() {
-  ivec3 res = ivec3(bitCount(ivec3(0)));
+  ivec3 res = ivec3(bitCount(ivec3(1)));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void countOneBits_65d2ae() {
-  ivec3 res = ivec3(bitCount(ivec3(0)));
+  ivec3 res = ivec3(bitCount(ivec3(1)));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void countOneBits_65d2ae() {
-  ivec3 res = ivec3(bitCount(ivec3(0)));
+  ivec3 res = ivec3(bitCount(ivec3(1)));
 }
 
 void compute_main() {

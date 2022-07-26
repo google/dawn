@@ -25,7 +25,7 @@
 
 // fn modf(vec<4, f32>) -> __modf_result_vec<4>
 fn modf_ec2dbc() {
-  var arg_0 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.f);
   var res = modf(arg_0);
 }
 

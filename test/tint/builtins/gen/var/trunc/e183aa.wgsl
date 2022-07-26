@@ -25,7 +25,7 @@
 
 // fn trunc(vec<4, f32>) -> vec<4, f32>
 fn trunc_e183aa() {
-  var arg_0 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.f);
   var res: vec4<f32> = trunc(arg_0);
 }
 

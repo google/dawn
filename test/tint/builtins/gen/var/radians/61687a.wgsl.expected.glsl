@@ -6,7 +6,7 @@ vec2 tint_radians(vec2 param_0) {
 
 
 void radians_61687a() {
-  vec2 arg_0 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
   vec2 res = tint_radians(arg_0);
 }
 
@@ -32,7 +32,7 @@ vec2 tint_radians(vec2 param_0) {
 
 
 void radians_61687a() {
-  vec2 arg_0 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
   vec2 res = tint_radians(arg_0);
 }
 
@@ -52,7 +52,7 @@ vec2 tint_radians(vec2 param_0) {
 
 
 void radians_61687a() {
-  vec2 arg_0 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
   vec2 res = tint_radians(arg_0);
 }
 

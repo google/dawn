@@ -1,7 +1,7 @@
 #version 310 es
 
 void select_266aff() {
-  vec2 res = mix(vec2(0.0f), vec2(0.0f), bvec2(false));
+  vec2 res = mix(vec2(1.0f), vec2(1.0f), bvec2(true));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void select_266aff() {
-  vec2 res = mix(vec2(0.0f), vec2(0.0f), bvec2(false));
+  vec2 res = mix(vec2(1.0f), vec2(1.0f), bvec2(true));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void select_266aff() {
-  vec2 res = mix(vec2(0.0f), vec2(0.0f), bvec2(false));
+  vec2 res = mix(vec2(1.0f), vec2(1.0f), bvec2(true));
 }
 
 void compute_main() {

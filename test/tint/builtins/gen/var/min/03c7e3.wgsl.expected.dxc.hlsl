@@ -1,6 +1,6 @@
 void min_03c7e3() {
-  int2 arg_0 = (0).xx;
-  int2 arg_1 = (0).xx;
+  int2 arg_0 = (1).xx;
+  int2 arg_1 = (1).xx;
   int2 res = min(arg_0, arg_1);
 }
 

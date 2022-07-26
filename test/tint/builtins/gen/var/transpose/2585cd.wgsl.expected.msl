@@ -2,7 +2,7 @@
 
 using namespace metal;
 void transpose_2585cd() {
-  float4x3 arg_0 = float4x3(float3(0.0f), float3(0.0f), float3(0.0f), float3(0.0f));
+  float4x3 arg_0 = float4x3(float3(1.0f), float3(1.0f), float3(1.0f), float3(1.0f));
   float3x4 res = transpose(arg_0);
 }
 

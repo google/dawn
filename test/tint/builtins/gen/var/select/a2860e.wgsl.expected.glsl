@@ -1,9 +1,9 @@
 #version 310 es
 
 void select_a2860e() {
-  ivec4 arg_0 = ivec4(0);
-  ivec4 arg_1 = ivec4(0);
-  bvec4 arg_2 = bvec4(false);
+  ivec4 arg_0 = ivec4(1);
+  ivec4 arg_1 = ivec4(1);
+  bvec4 arg_2 = bvec4(true);
   ivec4 res = mix(arg_0, arg_1, arg_2);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void select_a2860e() {
-  ivec4 arg_0 = ivec4(0);
-  ivec4 arg_1 = ivec4(0);
-  bvec4 arg_2 = bvec4(false);
+  ivec4 arg_0 = ivec4(1);
+  ivec4 arg_1 = ivec4(1);
+  bvec4 arg_2 = bvec4(true);
   ivec4 res = mix(arg_0, arg_1, arg_2);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void select_a2860e() {
-  ivec4 arg_0 = ivec4(0);
-  ivec4 arg_1 = ivec4(0);
-  bvec4 arg_2 = bvec4(false);
+  ivec4 arg_0 = ivec4(1);
+  ivec4 arg_1 = ivec4(1);
+  bvec4 arg_2 = bvec4(true);
   ivec4 res = mix(arg_0, arg_1, arg_2);
 }
 

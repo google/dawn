@@ -2,7 +2,7 @@
 
 using namespace metal;
 void sinh_b9860e() {
-  float2 arg_0 = float2(0.0f);
+  float2 arg_0 = float2(1.0f);
   float2 res = sinh(arg_0);
 }
 

@@ -25,7 +25,7 @@
 
 // fn modf(vec<2, f32>) -> __modf_result_vec<2>
 fn modf_f5f20d() {
-  var arg_0 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.f);
   var res = modf(arg_0);
 }
 

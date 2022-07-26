@@ -25,7 +25,7 @@
 
 // fn fma(vec<4, f32>, vec<4, f32>, vec<4, f32>) -> vec<4, f32>
 fn fma_6a3283() {
-  var res: vec4<f32> = fma(vec4<f32>(), vec4<f32>(), vec4<f32>());
+  var res: vec4<f32> = fma(vec4<f32>(1.f), vec4<f32>(1.f), vec4<f32>(1.f));
 }
 
 @vertex

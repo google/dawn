@@ -1,5 +1,5 @@
 fn sign_b8f634() {
-  var arg_0 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.0f);
   var res : vec4<f32> = sign(arg_0);
 }
 

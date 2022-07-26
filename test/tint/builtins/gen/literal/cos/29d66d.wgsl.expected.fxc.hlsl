@@ -1,5 +1,5 @@
 void cos_29d66d() {
-  float4 res = cos((0.0f).xxxx);
+  float4 res = cos((1.0f).xxxx);
 }
 
 struct tint_symbol {

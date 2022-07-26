@@ -25,7 +25,7 @@
 
 // fn dpdxCoarse(vec<3, f32>) -> vec<3, f32>
 fn dpdxCoarse_f64d7b() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.f);
   var res: vec3<f32> = dpdxCoarse(arg_0);
 }
 

@@ -25,7 +25,7 @@
 
 // fn log(vec<3, f32>) -> vec<3, f32>
 fn log_f4c570() {
-  var res: vec3<f32> = log(vec3<f32>());
+  var res: vec3<f32> = log(vec3<f32>(1.f));
 }
 
 @vertex

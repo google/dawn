@@ -16,7 +16,7 @@ ivec2 tint_count_leading_zeros(ivec2 v) {
 }
 
 void countLeadingZeros_858d40() {
-  ivec2 arg_0 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
   ivec2 res = tint_count_leading_zeros(arg_0);
 }
 
@@ -52,7 +52,7 @@ ivec2 tint_count_leading_zeros(ivec2 v) {
 }
 
 void countLeadingZeros_858d40() {
-  ivec2 arg_0 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
   ivec2 res = tint_count_leading_zeros(arg_0);
 }
 
@@ -82,7 +82,7 @@ ivec2 tint_count_leading_zeros(ivec2 v) {
 }
 
 void countLeadingZeros_858d40() {
-  ivec2 arg_0 = ivec2(0);
+  ivec2 arg_0 = ivec2(1);
   ivec2 res = tint_count_leading_zeros(arg_0);
 }
 

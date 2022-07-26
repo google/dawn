@@ -25,7 +25,7 @@
 
 // fn acosh(f32) -> f32
 fn acosh_ecf2d1() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = acosh(arg_0);
 }
 

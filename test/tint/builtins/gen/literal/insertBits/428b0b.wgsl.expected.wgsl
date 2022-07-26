@@ -1,5 +1,5 @@
 fn insertBits_428b0b() {
-  var res : vec3<i32> = insertBits(vec3<i32>(), vec3<i32>(), 1u, 1u);
+  var res : vec3<i32> = insertBits(vec3<i32>(1), vec3<i32>(1), 1u, 1u);
 }
 
 @vertex

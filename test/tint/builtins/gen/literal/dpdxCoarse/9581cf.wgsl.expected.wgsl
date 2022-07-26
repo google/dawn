@@ -1,5 +1,5 @@
 fn dpdxCoarse_9581cf() {
-  var res : vec2<f32> = dpdxCoarse(vec2<f32>());
+  var res : vec2<f32> = dpdxCoarse(vec2<f32>(1.0f));
 }
 
 @fragment

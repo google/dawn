@@ -1,5 +1,5 @@
 fn firstLeadingBit_a622c2() {
-  var res : vec2<i32> = firstLeadingBit(vec2<i32>());
+  var res : vec2<i32> = firstLeadingBit(vec2<i32>(1));
 }
 
 @vertex

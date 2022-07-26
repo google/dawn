@@ -2,7 +2,7 @@
 
 using namespace metal;
 void fract_a49758() {
-  float3 res = fract(float3(0.0f));
+  float3 res = fract(float3(1.0f));
 }
 
 struct tint_symbol {

@@ -25,7 +25,7 @@
 
 // fn max(f32, f32) -> f32
 fn max_44a39d() {
-  var res: f32 = max(1.0, 1.0);
+  var res: f32 = max(1.f, 1.f);
 }
 
 @vertex

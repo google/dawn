@@ -25,9 +25,9 @@
 
 // fn select(f32, f32, bool) -> f32
 fn select_416e14() {
-  var arg_0 = 1.0;
-  var arg_1 = 1.0;
-  var arg_2 = bool();
+  var arg_0 = 1.f;
+  var arg_1 = 1.f;
+  var arg_2 = true;
   var res: f32 = select(arg_0, arg_1, arg_2);
 }
 

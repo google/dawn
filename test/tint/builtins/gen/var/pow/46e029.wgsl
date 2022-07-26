@@ -25,8 +25,8 @@
 
 // fn pow(f32, f32) -> f32
 fn pow_46e029() {
-  var arg_0 = 1.0;
-  var arg_1 = 1.0;
+  var arg_0 = 1.f;
+  var arg_1 = 1.f;
   var res: f32 = pow(arg_0, arg_1);
 }
 

@@ -3,7 +3,7 @@ float3 tint_sinh(float3 x) {
 }
 
 void asinh_2265ee() {
-  float3 res = tint_sinh((0.0f).xxx);
+  float3 res = tint_sinh((1.0f).xxx);
 }
 
 struct tint_symbol {

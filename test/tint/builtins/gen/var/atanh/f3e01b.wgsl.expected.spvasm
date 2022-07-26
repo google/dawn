@@ -53,7 +53,7 @@
          %24 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_v4float Function %5
         %res = OpVariable %_ptr_Function_v4float Function %5
-               OpStore %arg_0 %5
+               OpStore %arg_0 %15
          %28 = OpLoad %v4float %arg_0
          %27 = OpFunctionCall %v4float %tint_atanh %28
                OpStore %res %27

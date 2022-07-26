@@ -3,7 +3,7 @@ float2 tint_radians(float2 param_0) {
 }
 
 void radians_61687a() {
-  float2 res = tint_radians((0.0f).xx);
+  float2 res = tint_radians((1.0f).xx);
 }
 
 struct tint_symbol {

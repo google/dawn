@@ -27,7 +27,7 @@
 
 // fn textureSampleCompareLevel(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: i32, depth_ref: f32) -> f32
 fn textureSampleCompareLevel_1116ed() {
-  var res: f32 = textureSampleCompareLevel(arg_0, arg_1, vec2<f32>(), 1, 1.0);
+  var res: f32 = textureSampleCompareLevel(arg_0, arg_1, vec2<f32>(), 1, 1.f);
 }
 
 @vertex

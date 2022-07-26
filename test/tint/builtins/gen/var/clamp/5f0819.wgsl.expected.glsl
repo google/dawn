@@ -1,9 +1,9 @@
 #version 310 es
 
 void clamp_5f0819() {
-  ivec3 arg_0 = ivec3(0);
-  ivec3 arg_1 = ivec3(0);
-  ivec3 arg_2 = ivec3(0);
+  ivec3 arg_0 = ivec3(1);
+  ivec3 arg_1 = ivec3(1);
+  ivec3 arg_2 = ivec3(1);
   ivec3 res = clamp(arg_0, arg_1, arg_2);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void clamp_5f0819() {
-  ivec3 arg_0 = ivec3(0);
-  ivec3 arg_1 = ivec3(0);
-  ivec3 arg_2 = ivec3(0);
+  ivec3 arg_0 = ivec3(1);
+  ivec3 arg_1 = ivec3(1);
+  ivec3 arg_2 = ivec3(1);
   ivec3 res = clamp(arg_0, arg_1, arg_2);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void clamp_5f0819() {
-  ivec3 arg_0 = ivec3(0);
-  ivec3 arg_1 = ivec3(0);
-  ivec3 arg_2 = ivec3(0);
+  ivec3 arg_0 = ivec3(1);
+  ivec3 arg_1 = ivec3(1);
+  ivec3 arg_2 = ivec3(1);
   ivec3 res = clamp(arg_0, arg_1, arg_2);
 }
 

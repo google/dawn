@@ -25,7 +25,7 @@
 
 // fn ceil(vec<4, f32>) -> vec<4, f32>
 fn ceil_b74c16() {
-  var res: vec4<f32> = ceil(vec4<f32>());
+  var res: vec4<f32> = ceil(vec4<f32>(1.f));
 }
 
 @vertex

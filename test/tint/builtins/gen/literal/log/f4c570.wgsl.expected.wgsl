@@ -1,5 +1,5 @@
 fn log_f4c570() {
-  var res : vec3<f32> = log(vec3<f32>());
+  var res : vec3<f32> = log(vec3<f32>(1.0f));
 }
 
 @vertex

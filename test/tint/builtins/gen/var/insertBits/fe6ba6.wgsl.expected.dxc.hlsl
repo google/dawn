@@ -6,8 +6,8 @@ int2 tint_insert_bits(int2 v, int2 n, uint offset, uint count) {
 }
 
 void insertBits_fe6ba6() {
-  int2 arg_0 = (0).xx;
-  int2 arg_1 = (0).xx;
+  int2 arg_0 = (1).xx;
+  int2 arg_1 = (1).xx;
   uint arg_2 = 1u;
   uint arg_3 = 1u;
   int2 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);

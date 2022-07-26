@@ -1,7 +1,7 @@
 #version 310 es
 
 void reverseBits_35fea9() {
-  uvec4 res = bitfieldReverse(uvec4(0u));
+  uvec4 res = bitfieldReverse(uvec4(1u));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void reverseBits_35fea9() {
-  uvec4 res = bitfieldReverse(uvec4(0u));
+  uvec4 res = bitfieldReverse(uvec4(1u));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void reverseBits_35fea9() {
-  uvec4 res = bitfieldReverse(uvec4(0u));
+  uvec4 res = bitfieldReverse(uvec4(1u));
 }
 
 void compute_main() {

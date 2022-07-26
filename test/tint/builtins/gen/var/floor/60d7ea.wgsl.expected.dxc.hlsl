@@ -1,5 +1,5 @@
 void floor_60d7ea() {
-  float3 arg_0 = (0.0f).xxx;
+  float3 arg_0 = (1.0f).xxx;
   float3 res = floor(arg_0);
 }
 

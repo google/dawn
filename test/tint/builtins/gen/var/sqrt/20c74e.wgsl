@@ -25,7 +25,7 @@
 
 // fn sqrt(f32) -> f32
 fn sqrt_20c74e() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = sqrt(arg_0);
 }
 

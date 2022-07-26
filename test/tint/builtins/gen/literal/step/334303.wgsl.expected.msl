@@ -2,7 +2,7 @@
 
 using namespace metal;
 void step_334303() {
-  float3 res = step(float3(0.0f), float3(0.0f));
+  float3 res = step(float3(1.0f), float3(1.0f));
 }
 
 struct tint_symbol {

@@ -7,7 +7,7 @@ int4 tint_extract_bits(int4 v, uint offset, uint count) {
 }
 
 void extractBits_fb850f() {
-  int4 arg_0 = (0).xxxx;
+  int4 arg_0 = (1).xxxx;
   uint arg_1 = 1u;
   uint arg_2 = 1u;
   int4 res = tint_extract_bits(arg_0, arg_1, arg_2);

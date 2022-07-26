@@ -1,6 +1,6 @@
 void reflect_f47fdb() {
-  float3 arg_0 = (0.0f).xxx;
-  float3 arg_1 = (0.0f).xxx;
+  float3 arg_0 = (1.0f).xxx;
+  float3 arg_1 = (1.0f).xxx;
   float3 res = reflect(arg_0, arg_1);
 }
 

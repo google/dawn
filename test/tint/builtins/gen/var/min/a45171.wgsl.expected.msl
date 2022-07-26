@@ -2,8 +2,8 @@
 
 using namespace metal;
 void min_a45171() {
-  int3 arg_0 = int3(0);
-  int3 arg_1 = int3(0);
+  int3 arg_0 = int3(1);
+  int3 arg_1 = int3(1);
   int3 res = min(arg_0, arg_1);
 }
 

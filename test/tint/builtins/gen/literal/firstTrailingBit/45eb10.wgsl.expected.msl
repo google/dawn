@@ -17,7 +17,7 @@ uint2 tint_first_trailing_bit(uint2 v) {
 }
 
 void firstTrailingBit_45eb10() {
-  uint2 res = tint_first_trailing_bit(uint2(0u));
+  uint2 res = tint_first_trailing_bit(uint2(1u));
 }
 
 struct tint_symbol {

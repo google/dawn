@@ -25,7 +25,7 @@
 
 // fn dot(vec<3, u32>, vec<3, u32>) -> u32
 fn dot_7548a0() {
-  var res: u32 = dot(vec3<u32>(), vec3<u32>());
+  var res: u32 = dot(vec3<u32>(1u), vec3<u32>(1u));
 }
 
 @vertex

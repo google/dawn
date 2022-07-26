@@ -2,7 +2,7 @@
 
 using namespace metal;
 void atan_331e6d() {
-  float3 arg_0 = float3(0.0f);
+  float3 arg_0 = float3(1.0f);
   float3 res = atan(arg_0);
 }
 

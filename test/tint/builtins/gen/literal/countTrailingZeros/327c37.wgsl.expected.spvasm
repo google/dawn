@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 100
+; Bound: 102
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -60,9 +60,11 @@
          %67 = OpConstantComposite %v2uint %uint_1 %uint_1
        %void = OpTypeVoid
          %78 = OpTypeFunction %void
-         %83 = OpConstantNull %v2int
+      %int_1 = OpConstant %int 1
+         %84 = OpConstantComposite %v2int %int_1 %int_1
 %_ptr_Function_v2int = OpTypePointer Function %v2int
-         %86 = OpTypeFunction %v4float
+         %87 = OpConstantNull %v2int
+         %88 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %tint_count_trailing_zeros = OpFunction %v2int None %9
           %v = OpFunctionParameter %v2int
@@ -115,30 +117,30 @@
                OpFunctionEnd
 %countTrailingZeros_327c37 = OpFunction %void None %78
          %81 = OpLabel
-        %res = OpVariable %_ptr_Function_v2int Function %83
-         %82 = OpFunctionCall %v2int %tint_count_trailing_zeros %83
+        %res = OpVariable %_ptr_Function_v2int Function %87
+         %82 = OpFunctionCall %v2int %tint_count_trailing_zeros %84
                OpStore %res %82
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %86
-         %88 = OpLabel
-         %89 = OpFunctionCall %void %countTrailingZeros_327c37
+%vertex_main_inner = OpFunction %v4float None %88
+         %90 = OpLabel
+         %91 = OpFunctionCall %void %countTrailingZeros_327c37
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %78
-         %91 = OpLabel
-         %92 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %92
+         %93 = OpLabel
+         %94 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %94
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %78
-         %95 = OpLabel
-         %96 = OpFunctionCall %void %countTrailingZeros_327c37
+         %97 = OpLabel
+         %98 = OpFunctionCall %void %countTrailingZeros_327c37
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %78
-         %98 = OpLabel
-         %99 = OpFunctionCall %void %countTrailingZeros_327c37
+        %100 = OpLabel
+        %101 = OpFunctionCall %void %countTrailingZeros_327c37
                OpReturn
                OpFunctionEnd

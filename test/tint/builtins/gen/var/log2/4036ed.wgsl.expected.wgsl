@@ -1,5 +1,5 @@
 fn log2_4036ed() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.0f;
   var res : f32 = log2(arg_0);
 }
 

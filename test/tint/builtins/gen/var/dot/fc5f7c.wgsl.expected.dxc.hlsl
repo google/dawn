@@ -1,6 +1,6 @@
 void dot_fc5f7c() {
-  int2 arg_0 = (0).xx;
-  int2 arg_1 = (0).xx;
+  int2 arg_0 = (1).xx;
+  int2 arg_1 = (1).xx;
   int res = dot(arg_0, arg_1);
 }
 

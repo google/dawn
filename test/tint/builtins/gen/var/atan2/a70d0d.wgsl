@@ -25,8 +25,8 @@
 
 // fn atan2(vec<3, f32>, vec<3, f32>) -> vec<3, f32>
 fn atan2_a70d0d() {
-  var arg_0 = vec3<f32>();
-  var arg_1 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.f);
+  var arg_1 = vec3<f32>(1.f);
   var res: vec3<f32> = atan2(arg_0, arg_1);
 }
 

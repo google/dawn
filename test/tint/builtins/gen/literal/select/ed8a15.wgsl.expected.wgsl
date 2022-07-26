@@ -1,5 +1,5 @@
 fn select_ed8a15() {
-  var res : i32 = select(1, 1, bool());
+  var res : i32 = select(1, 1, true);
 }
 
 @vertex

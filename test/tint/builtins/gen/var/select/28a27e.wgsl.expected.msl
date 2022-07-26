@@ -2,9 +2,9 @@
 
 using namespace metal;
 void select_28a27e() {
-  uint3 arg_0 = uint3(0u);
-  uint3 arg_1 = uint3(0u);
-  bool3 arg_2 = bool3(false);
+  uint3 arg_0 = uint3(1u);
+  uint3 arg_1 = uint3(1u);
+  bool3 arg_2 = bool3(true);
   uint3 res = select(arg_0, arg_1, arg_2);
 }
 

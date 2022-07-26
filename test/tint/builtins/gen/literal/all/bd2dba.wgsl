@@ -25,7 +25,7 @@
 
 // fn all(vec<3, bool>) -> bool
 fn all_bd2dba() {
-  var res: bool = all(vec3<bool>());
+  var res: bool = all(vec3<bool>(true));
 }
 
 @vertex

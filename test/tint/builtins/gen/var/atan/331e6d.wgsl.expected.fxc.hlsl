@@ -1,5 +1,5 @@
 void atan_331e6d() {
-  float3 arg_0 = (0.0f).xxx;
+  float3 arg_0 = (1.0f).xxx;
   float3 res = atan(arg_0);
 }
 

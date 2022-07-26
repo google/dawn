@@ -1,5 +1,5 @@
 void sqrt_aa0d7a() {
-  float4 arg_0 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
   float4 res = sqrt(arg_0);
 }
 

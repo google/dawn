@@ -25,7 +25,7 @@
 
 // fn inverseSqrt(vec<4, f32>) -> vec<4, f32>
 fn inverseSqrt_c22347() {
-  var arg_0 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.f);
   var res: vec4<f32> = inverseSqrt(arg_0);
 }
 

@@ -1,5 +1,5 @@
 void mix_2fadab() {
-  float2 res = lerp((0.0f).xx, (0.0f).xx, 1.0f);
+  float2 res = lerp((1.0f).xx, (1.0f).xx, 1.0f);
 }
 
 struct tint_symbol {

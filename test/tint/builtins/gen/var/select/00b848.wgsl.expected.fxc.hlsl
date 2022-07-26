@@ -1,7 +1,7 @@
 void select_00b848() {
-  int2 arg_0 = (0).xx;
-  int2 arg_1 = (0).xx;
-  bool2 arg_2 = (false).xx;
+  int2 arg_0 = (1).xx;
+  int2 arg_1 = (1).xx;
+  bool2 arg_2 = (true).xx;
   int2 res = (arg_2 ? arg_1 : arg_0);
 }
 

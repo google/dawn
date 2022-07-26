@@ -25,7 +25,7 @@
 
 // fn transpose(mat<4, 3, f32>) -> mat<3, 4, f32>
 fn transpose_2585cd() {
-  var arg_0 = mat4x3<f32>();
+  var arg_0 = mat4x3<f32>(1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f);
   var res: mat3x4<f32> = transpose(arg_0);
 }
 

@@ -1,7 +1,7 @@
 #version 310 es
 
 void select_bb8aae() {
-  vec4 res = mix(vec4(0.0f), vec4(0.0f), bvec4(false));
+  vec4 res = mix(vec4(1.0f), vec4(1.0f), bvec4(true));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void select_bb8aae() {
-  vec4 res = mix(vec4(0.0f), vec4(0.0f), bvec4(false));
+  vec4 res = mix(vec4(1.0f), vec4(1.0f), bvec4(true));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void select_bb8aae() {
-  vec4 res = mix(vec4(0.0f), vec4(0.0f), bvec4(false));
+  vec4 res = mix(vec4(1.0f), vec4(1.0f), bvec4(true));
 }
 
 void compute_main() {

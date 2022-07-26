@@ -25,7 +25,7 @@
 
 // fn min(vec<3, i32>, vec<3, i32>) -> vec<3, i32>
 fn min_a45171() {
-  var res: vec3<i32> = min(vec3<i32>(), vec3<i32>());
+  var res: vec3<i32> = min(vec3<i32>(1), vec3<i32>(1));
 }
 
 @vertex

@@ -6,8 +6,8 @@ uint4 tint_insert_bits(uint4 v, uint4 n, uint offset, uint count) {
 }
 
 void insertBits_51ede1() {
-  uint4 arg_0 = (0u).xxxx;
-  uint4 arg_1 = (0u).xxxx;
+  uint4 arg_0 = (1u).xxxx;
+  uint4 arg_1 = (1u).xxxx;
   uint arg_2 = 1u;
   uint arg_3 = 1u;
   uint4 res = tint_insert_bits(arg_0, arg_1, arg_2, arg_3);

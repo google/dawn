@@ -2,8 +2,8 @@
 
 using namespace metal;
 void max_b1b73a() {
-  uint3 arg_0 = uint3(0u);
-  uint3 arg_1 = uint3(0u);
+  uint3 arg_0 = uint3(1u);
+  uint3 arg_1 = uint3(1u);
   uint3 res = max(arg_0, arg_1);
 }
 

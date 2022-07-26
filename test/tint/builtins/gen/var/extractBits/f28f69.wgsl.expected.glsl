@@ -7,7 +7,7 @@ uvec2 tint_extract_bits(uvec2 v, uint offset, uint count) {
 }
 
 void extractBits_f28f69() {
-  uvec2 arg_0 = uvec2(0u);
+  uvec2 arg_0 = uvec2(1u);
   uint arg_1 = 1u;
   uint arg_2 = 1u;
   uvec2 res = tint_extract_bits(arg_0, arg_1, arg_2);
@@ -36,7 +36,7 @@ uvec2 tint_extract_bits(uvec2 v, uint offset, uint count) {
 }
 
 void extractBits_f28f69() {
-  uvec2 arg_0 = uvec2(0u);
+  uvec2 arg_0 = uvec2(1u);
   uint arg_1 = 1u;
   uint arg_2 = 1u;
   uvec2 res = tint_extract_bits(arg_0, arg_1, arg_2);
@@ -59,7 +59,7 @@ uvec2 tint_extract_bits(uvec2 v, uint offset, uint count) {
 }
 
 void extractBits_f28f69() {
-  uvec2 arg_0 = uvec2(0u);
+  uvec2 arg_0 = uvec2(1u);
   uint arg_1 = 1u;
   uint arg_2 = 1u;
   uvec2 res = tint_extract_bits(arg_0, arg_1, arg_2);

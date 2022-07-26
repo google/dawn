@@ -1,5 +1,5 @@
 fn extractBits_fb850f() {
-  var arg_0 = vec4<i32>();
+  var arg_0 = vec4<i32>(1);
   var arg_1 = 1u;
   var arg_2 = 1u;
   var res : vec4<i32> = extractBits(arg_0, arg_1, arg_2);

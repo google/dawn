@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 99
+; Bound: 101
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -63,9 +63,11 @@
          %65 = OpConstantComposite %v2uint %uint_1 %uint_1
        %void = OpTypeVoid
          %75 = OpTypeFunction %void
-         %79 = OpConstantNull %v2int
+      %int_1 = OpConstant %int 1
+         %80 = OpConstantComposite %v2int %int_1 %int_1
 %_ptr_Function_v2int = OpTypePointer Function %v2int
-         %85 = OpTypeFunction %v4float
+         %83 = OpConstantNull %v2int
+         %87 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %tint_count_leading_zeros = OpFunction %v2int None %9
           %v = OpFunctionParameter %v2int
@@ -113,33 +115,33 @@
                OpFunctionEnd
 %countLeadingZeros_858d40 = OpFunction %void None %75
          %78 = OpLabel
-      %arg_0 = OpVariable %_ptr_Function_v2int Function %79
-        %res = OpVariable %_ptr_Function_v2int Function %79
-               OpStore %arg_0 %79
-         %83 = OpLoad %v2int %arg_0
-         %82 = OpFunctionCall %v2int %tint_count_leading_zeros %83
-               OpStore %res %82
+      %arg_0 = OpVariable %_ptr_Function_v2int Function %83
+        %res = OpVariable %_ptr_Function_v2int Function %83
+               OpStore %arg_0 %80
+         %85 = OpLoad %v2int %arg_0
+         %84 = OpFunctionCall %v2int %tint_count_leading_zeros %85
+               OpStore %res %84
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %85
-         %87 = OpLabel
-         %88 = OpFunctionCall %void %countLeadingZeros_858d40
+%vertex_main_inner = OpFunction %v4float None %87
+         %89 = OpLabel
+         %90 = OpFunctionCall %void %countLeadingZeros_858d40
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %75
-         %90 = OpLabel
-         %91 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %91
+         %92 = OpLabel
+         %93 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %93
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %75
-         %94 = OpLabel
-         %95 = OpFunctionCall %void %countLeadingZeros_858d40
+         %96 = OpLabel
+         %97 = OpFunctionCall %void %countLeadingZeros_858d40
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %75
-         %97 = OpLabel
-         %98 = OpFunctionCall %void %countLeadingZeros_858d40
+         %99 = OpLabel
+        %100 = OpFunctionCall %void %countLeadingZeros_858d40
                OpReturn
                OpFunctionEnd

@@ -1,5 +1,5 @@
 void ceil_96f597() {
-  float2 res = ceil((0.0f).xx);
+  float2 res = ceil((1.0f).xx);
 }
 
 struct tint_symbol {

@@ -1,5 +1,5 @@
 fn exp2_a9d0a7() {
-  var arg_0 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.0f);
   var res : vec4<f32> = exp2(arg_0);
 }
 

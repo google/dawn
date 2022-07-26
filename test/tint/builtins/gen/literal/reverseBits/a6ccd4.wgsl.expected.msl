@@ -2,7 +2,7 @@
 
 using namespace metal;
 void reverseBits_a6ccd4() {
-  uint3 res = reverse_bits(uint3(0u));
+  uint3 res = reverse_bits(uint3(1u));
 }
 
 struct tint_symbol {

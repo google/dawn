@@ -1,5 +1,5 @@
 fn atanh_7997d8() {
-  var res : f32 = atanh(1.0);
+  var res : f32 = atanh(1.0f);
 }
 
 @vertex

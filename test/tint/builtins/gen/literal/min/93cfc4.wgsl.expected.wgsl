@@ -1,5 +1,5 @@
 fn min_93cfc4() {
-  var res : vec3<f32> = min(vec3<f32>(), vec3<f32>());
+  var res : vec3<f32> = min(vec3<f32>(1.0f), vec3<f32>(1.0f));
 }
 
 @vertex

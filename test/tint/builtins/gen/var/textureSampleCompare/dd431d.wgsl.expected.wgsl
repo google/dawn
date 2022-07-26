@@ -5,7 +5,7 @@
 fn textureSampleCompare_dd431d() {
   var arg_2 = vec2<f32>();
   var arg_3 = 1;
-  var arg_4 = 1.0;
+  var arg_4 = 1.0f;
   var res : f32 = textureSampleCompare(arg_0, arg_1, arg_2, arg_3, arg_4);
 }
 

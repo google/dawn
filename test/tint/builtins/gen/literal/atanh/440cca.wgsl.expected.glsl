@@ -5,7 +5,7 @@ vec3 tint_atanh(vec3 x) {
 }
 
 void atanh_440cca() {
-  vec3 res = tint_atanh(vec3(0.0f));
+  vec3 res = tint_atanh(vec3(1.0f));
 }
 
 vec4 vertex_main() {
@@ -29,7 +29,7 @@ vec3 tint_atanh(vec3 x) {
 }
 
 void atanh_440cca() {
-  vec3 res = tint_atanh(vec3(0.0f));
+  vec3 res = tint_atanh(vec3(1.0f));
 }
 
 void fragment_main() {
@@ -47,7 +47,7 @@ vec3 tint_atanh(vec3 x) {
 }
 
 void atanh_440cca() {
-  vec3 res = tint_atanh(vec3(0.0f));
+  vec3 res = tint_atanh(vec3(1.0f));
 }
 
 void compute_main() {

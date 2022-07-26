@@ -5,7 +5,7 @@ int tint_int_dot(ivec4 a, ivec4 b) {
 }
 
 void dot_ef6b1d() {
-  int res = tint_int_dot(ivec4(0), ivec4(0));
+  int res = tint_int_dot(ivec4(1), ivec4(1));
 }
 
 vec4 vertex_main() {
@@ -29,7 +29,7 @@ int tint_int_dot(ivec4 a, ivec4 b) {
 }
 
 void dot_ef6b1d() {
-  int res = tint_int_dot(ivec4(0), ivec4(0));
+  int res = tint_int_dot(ivec4(1), ivec4(1));
 }
 
 void fragment_main() {
@@ -47,7 +47,7 @@ int tint_int_dot(ivec4 a, ivec4 b) {
 }
 
 void dot_ef6b1d() {
-  int res = tint_int_dot(ivec4(0), ivec4(0));
+  int res = tint_int_dot(ivec4(1), ivec4(1));
 }
 
 void compute_main() {

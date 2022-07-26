@@ -25,9 +25,9 @@
 
 // fn mix(vec<4, f32>, vec<4, f32>, vec<4, f32>) -> vec<4, f32>
 fn mix_c37ede() {
-  var arg_0 = vec4<f32>();
-  var arg_1 = vec4<f32>();
-  var arg_2 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.f);
+  var arg_1 = vec4<f32>(1.f);
+  var arg_2 = vec4<f32>(1.f);
   var res: vec4<f32> = mix(arg_0, arg_1, arg_2);
 }
 

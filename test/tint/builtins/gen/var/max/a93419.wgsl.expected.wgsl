@@ -1,6 +1,6 @@
 fn max_a93419() {
-  var arg_0 = vec4<f32>();
-  var arg_1 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.0f);
+  var arg_1 = vec4<f32>(1.0f);
   var res : vec4<f32> = max(arg_0, arg_1);
 }
 

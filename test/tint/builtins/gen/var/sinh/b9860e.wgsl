@@ -25,7 +25,7 @@
 
 // fn sinh(vec<2, f32>) -> vec<2, f32>
 fn sinh_b9860e() {
-  var arg_0 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.f);
   var res: vec2<f32> = sinh(arg_0);
 }
 

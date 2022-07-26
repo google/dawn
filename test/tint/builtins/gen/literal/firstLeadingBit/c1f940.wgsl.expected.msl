@@ -17,7 +17,7 @@ int4 tint_first_leading_bit(int4 v) {
 }
 
 void firstLeadingBit_c1f940() {
-  int4 res = tint_first_leading_bit(int4(0));
+  int4 res = tint_first_leading_bit(int4(1));
 }
 
 struct tint_symbol {

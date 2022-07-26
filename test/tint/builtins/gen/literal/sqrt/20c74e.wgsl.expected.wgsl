@@ -1,5 +1,5 @@
 fn sqrt_20c74e() {
-  var res : f32 = sqrt(1.0);
+  var res : f32 = sqrt(1.0f);
 }
 
 @vertex

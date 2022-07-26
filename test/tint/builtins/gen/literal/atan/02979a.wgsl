@@ -25,7 +25,7 @@
 
 // fn atan(f32) -> f32
 fn atan_02979a() {
-  var res: f32 = atan(1.0);
+  var res: f32 = atan(1.f);
 }
 
 @vertex

@@ -1,5 +1,5 @@
 void exp2_a9d0a7() {
-  float4 arg_0 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
   float4 res = exp2(arg_0);
 }
 

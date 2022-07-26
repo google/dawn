@@ -1,5 +1,5 @@
 fn normalize_64d8c0() {
-  var res : vec3<f32> = normalize(vec3<f32>());
+  var res : vec3<f32> = normalize(vec3<f32>(1.0f));
 }
 
 @vertex

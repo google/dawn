@@ -2,7 +2,7 @@
 
 using namespace metal;
 void reverseBits_e1f4c1() {
-  uint2 arg_0 = uint2(0u);
+  uint2 arg_0 = uint2(1u);
   uint2 res = reverse_bits(arg_0);
 }
 

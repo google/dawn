@@ -1,5 +1,5 @@
 void all_bd2dba() {
-  bool3 arg_0 = (false).xxx;
+  bool3 arg_0 = (true).xxx;
   bool res = all(arg_0);
 }
 

@@ -7,7 +7,7 @@ T tint_dot3(vec<T,3> a, vec<T,3> b) {
   return a[0]*b[0] + a[1]*b[1] + a[2]*b[2];
 }
 void dot_7548a0() {
-  uint res = tint_dot3(uint3(0u), uint3(0u));
+  uint res = tint_dot3(uint3(1u), uint3(1u));
 }
 
 struct tint_symbol {

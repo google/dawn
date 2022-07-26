@@ -70,6 +70,7 @@ func (g *generator) generate(tmpl string, w io.Writer, writeFile WriteFile) erro
 		"IsTemplateNumberParam": is(sem.TemplateNumberParam{}),
 		"IsTemplateTypeParam":   is(sem.TemplateTypeParam{}),
 		"IsType":                is(sem.Type{}),
+		"IsAbstract":            isAbstract,
 		"IsDeclarable":          isDeclarable,
 		"IsFirstIn":             isFirstIn,
 		"IsLastIn":              isLastIn,
@@ -205,11 +206,24 @@ func iterate(n int) []int {
 	return out
 }
 
-// isDeclarable returns false if the FullyQualifiedName starts with a
-// leading underscore. These are undeclarable as WGSL does not allow identifers
-// to have a leading underscore.
+// isAbstract returns true if the FullyQualifiedName refers to an abstract
+// numeric type
+func isAbstract(fqn sem.FullyQualifiedName) bool {
+	switch fqn.Target.GetName() {
+	case "ia", "fa":
+		return true
+	case "vec":
+		return isAbstract(fqn.TemplateArguments[1].(sem.FullyQualifiedName))
+	case "mat":
+		return isAbstract(fqn.TemplateArguments[2].(sem.FullyQualifiedName))
+	}
+	return false
+}
+
+// isDeclarable returns false if the FullyQualifiedName refers to an abstract
+// numeric type, or if it starts with a leading underscore.
 func isDeclarable(fqn sem.FullyQualifiedName) bool {
-	return !strings.HasPrefix(fqn.Target.GetName(), "_")
+	return !isAbstract(fqn) && !strings.HasPrefix(fqn.Target.GetName(), "_")
 }
 
 // pascalCase returns the snake-case string s transformed into 'PascalCase',

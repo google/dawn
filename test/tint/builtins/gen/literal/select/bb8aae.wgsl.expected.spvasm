@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 33
+; Bound: 35
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -32,36 +32,38 @@
           %9 = OpTypeFunction %void
        %bool = OpTypeBool
      %v4bool = OpTypeVector %bool 4
-         %16 = OpConstantNull %v4bool
-%_ptr_Function_v4float = OpTypePointer Function %v4float
-         %19 = OpTypeFunction %v4float
+       %true = OpConstantTrue %bool
+         %17 = OpConstantComposite %v4bool %true %true %true %true
     %float_1 = OpConstant %float 1
+         %19 = OpConstantComposite %v4float %float_1 %float_1 %float_1 %float_1
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+         %22 = OpTypeFunction %v4float
 %select_bb8aae = OpFunction %void None %9
          %12 = OpLabel
         %res = OpVariable %_ptr_Function_v4float Function %5
-         %13 = OpSelect %v4float %16 %5 %5
+         %13 = OpSelect %v4float %17 %19 %19
                OpStore %res %13
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %19
-         %21 = OpLabel
-         %22 = OpFunctionCall %void %select_bb8aae
+%vertex_main_inner = OpFunction %v4float None %22
+         %24 = OpLabel
+         %25 = OpFunctionCall %void %select_bb8aae
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %24 = OpLabel
-         %25 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %25
+         %27 = OpLabel
+         %28 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %28
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
-         %28 = OpLabel
-         %29 = OpFunctionCall %void %select_bb8aae
+         %30 = OpLabel
+         %31 = OpFunctionCall %void %select_bb8aae
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
-         %31 = OpLabel
-         %32 = OpFunctionCall %void %select_bb8aae
+         %33 = OpLabel
+         %34 = OpFunctionCall %void %select_bb8aae
                OpReturn
                OpFunctionEnd

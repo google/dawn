@@ -1,5 +1,5 @@
 fn floor_5fc9ac() {
-  var res : vec2<f32> = floor(vec2<f32>());
+  var res : vec2<f32> = floor(vec2<f32>(1.0f));
 }
 
 @vertex

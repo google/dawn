@@ -25,9 +25,9 @@
 
 // fn clamp(vec<2, i32>, vec<2, i32>, vec<2, i32>) -> vec<2, i32>
 fn clamp_6c1749() {
-  var arg_0 = vec2<i32>();
-  var arg_1 = vec2<i32>();
-  var arg_2 = vec2<i32>();
+  var arg_0 = vec2<i32>(1);
+  var arg_1 = vec2<i32>(1);
+  var arg_2 = vec2<i32>(1);
   var res: vec2<i32> = clamp(arg_0, arg_1, arg_2);
 }
 

@@ -1,6 +1,6 @@
 fn max_4883ac() {
-  var arg_0 = vec3<f32>();
-  var arg_1 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.0f);
+  var arg_1 = vec3<f32>(1.0f);
   var res : vec3<f32> = max(arg_0, arg_1);
 }
 

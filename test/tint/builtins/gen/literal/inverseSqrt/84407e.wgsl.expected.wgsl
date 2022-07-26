@@ -1,5 +1,5 @@
 fn inverseSqrt_84407e() {
-  var res : f32 = inverseSqrt(1.0);
+  var res : f32 = inverseSqrt(1.0f);
 }
 
 @vertex

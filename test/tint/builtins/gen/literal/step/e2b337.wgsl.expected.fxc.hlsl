@@ -1,5 +1,5 @@
 void step_e2b337() {
-  float4 res = step((0.0f).xxxx, (0.0f).xxxx);
+  float4 res = step((1.0f).xxxx, (1.0f).xxxx);
 }
 
 struct tint_symbol {

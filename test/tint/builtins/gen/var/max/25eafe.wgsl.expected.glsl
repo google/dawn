@@ -1,8 +1,8 @@
 #version 310 es
 
 void max_25eafe() {
-  ivec3 arg_0 = ivec3(0);
-  ivec3 arg_1 = ivec3(0);
+  ivec3 arg_0 = ivec3(1);
+  ivec3 arg_1 = ivec3(1);
   ivec3 res = max(arg_0, arg_1);
 }
 
@@ -23,8 +23,8 @@ void main() {
 precision mediump float;
 
 void max_25eafe() {
-  ivec3 arg_0 = ivec3(0);
-  ivec3 arg_1 = ivec3(0);
+  ivec3 arg_0 = ivec3(1);
+  ivec3 arg_1 = ivec3(1);
   ivec3 res = max(arg_0, arg_1);
 }
 
@@ -39,8 +39,8 @@ void main() {
 #version 310 es
 
 void max_25eafe() {
-  ivec3 arg_0 = ivec3(0);
-  ivec3 arg_1 = ivec3(0);
+  ivec3 arg_0 = ivec3(1);
+  ivec3 arg_1 = ivec3(1);
   ivec3 res = max(arg_0, arg_1);
 }
 

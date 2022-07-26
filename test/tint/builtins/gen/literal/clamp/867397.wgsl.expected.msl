@@ -2,7 +2,7 @@
 
 using namespace metal;
 void clamp_867397() {
-  float3 res = clamp(float3(0.0f), float3(0.0f), float3(0.0f));
+  float3 res = clamp(float3(1.0f), float3(1.0f), float3(1.0f));
 }
 
 struct tint_symbol {

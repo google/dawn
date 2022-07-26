@@ -1,5 +1,5 @@
 void countOneBits_94fd81() {
-  uint2 res = countbits((0u).xx);
+  uint2 res = countbits((1u).xx);
 }
 
 struct tint_symbol {

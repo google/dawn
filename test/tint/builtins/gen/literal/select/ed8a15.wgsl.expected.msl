@@ -2,7 +2,7 @@
 
 using namespace metal;
 void select_ed8a15() {
-  int res = select(1, 1, false);
+  int res = select(1, 1, true);
 }
 
 struct tint_symbol {

@@ -1,5 +1,5 @@
 fn countOneBits_690cfc() {
-  var res : vec3<u32> = countOneBits(vec3<u32>());
+  var res : vec3<u32> = countOneBits(vec3<u32>(1u));
 }
 
 @vertex

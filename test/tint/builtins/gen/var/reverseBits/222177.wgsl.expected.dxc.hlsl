@@ -1,5 +1,5 @@
 void reverseBits_222177() {
-  int2 arg_0 = (0).xx;
+  int2 arg_0 = (1).xx;
   int2 res = asint(reversebits(asuint(arg_0)));
 }
 

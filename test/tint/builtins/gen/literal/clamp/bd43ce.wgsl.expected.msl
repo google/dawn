@@ -2,7 +2,7 @@
 
 using namespace metal;
 void clamp_bd43ce() {
-  uint4 res = clamp(uint4(0u), uint4(0u), uint4(0u));
+  uint4 res = clamp(uint4(1u), uint4(1u), uint4(1u));
 }
 
 struct tint_symbol {

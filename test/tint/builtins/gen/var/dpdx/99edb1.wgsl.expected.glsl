@@ -2,7 +2,7 @@
 precision mediump float;
 
 void dpdx_99edb1() {
-  vec2 arg_0 = vec2(0.0f);
+  vec2 arg_0 = vec2(1.0f);
   vec2 res = dFdx(arg_0);
 }
 

@@ -1,7 +1,7 @@
 #version 310 es
 
 void all_353d6a() {
-  bool res = false;
+  bool res = true;
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void all_353d6a() {
-  bool res = false;
+  bool res = true;
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void all_353d6a() {
-  bool res = false;
+  bool res = true;
 }
 
 void compute_main() {

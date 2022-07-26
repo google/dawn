@@ -3,7 +3,7 @@ float3 tint_degrees(float3 param_0) {
 }
 
 void degrees_2af623() {
-  float3 res = tint_degrees((0.0f).xxx);
+  float3 res = tint_degrees((1.0f).xxx);
 }
 
 struct tint_symbol {

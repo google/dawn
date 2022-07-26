@@ -25,7 +25,7 @@
 
 // fn round(f32) -> f32
 fn round_9edc38() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.f;
   var res: f32 = round(arg_0);
 }
 

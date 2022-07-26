@@ -1,6 +1,6 @@
 void max_462050() {
-  float2 arg_0 = (0.0f).xx;
-  float2 arg_1 = (0.0f).xx;
+  float2 arg_0 = (1.0f).xx;
+  float2 arg_1 = (1.0f).xx;
   float2 res = max(arg_0, arg_1);
 }
 

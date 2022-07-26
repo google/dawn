@@ -1,5 +1,5 @@
 fn firstTrailingBit_7496d6() {
-  var arg_0 = vec3<i32>();
+  var arg_0 = vec3<i32>(1);
   var res : vec3<i32> = firstTrailingBit(arg_0);
 }
 

@@ -1,7 +1,7 @@
 #version 310 es
 
 void atan2_a70d0d() {
-  vec3 res = atan(vec3(0.0f), vec3(0.0f));
+  vec3 res = atan(vec3(1.0f), vec3(1.0f));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void atan2_a70d0d() {
-  vec3 res = atan(vec3(0.0f), vec3(0.0f));
+  vec3 res = atan(vec3(1.0f), vec3(1.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void atan2_a70d0d() {
-  vec3 res = atan(vec3(0.0f), vec3(0.0f));
+  vec3 res = atan(vec3(1.0f), vec3(1.0f));
 }
 
 void compute_main() {

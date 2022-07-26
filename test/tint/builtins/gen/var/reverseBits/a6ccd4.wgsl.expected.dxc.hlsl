@@ -1,5 +1,5 @@
 void reverseBits_a6ccd4() {
-  uint3 arg_0 = (0u).xxx;
+  uint3 arg_0 = (1u).xxx;
   uint3 res = reversebits(arg_0);
 }
 

@@ -1,5 +1,5 @@
 fn normalize_fc2ef1() {
-  var res : vec2<f32> = normalize(vec2<f32>());
+  var res : vec2<f32> = normalize(vec2<f32>(1.0f));
 }
 
 @vertex

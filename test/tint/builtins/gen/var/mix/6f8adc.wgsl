@@ -25,9 +25,9 @@
 
 // fn mix(vec<2, f32>, vec<2, f32>, vec<2, f32>) -> vec<2, f32>
 fn mix_6f8adc() {
-  var arg_0 = vec2<f32>();
-  var arg_1 = vec2<f32>();
-  var arg_2 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.f);
+  var arg_1 = vec2<f32>(1.f);
+  var arg_2 = vec2<f32>(1.f);
   var res: vec2<f32> = mix(arg_0, arg_1, arg_2);
 }
 

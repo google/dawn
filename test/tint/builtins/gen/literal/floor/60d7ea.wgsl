@@ -25,7 +25,7 @@
 
 // fn floor(vec<3, f32>) -> vec<3, f32>
 fn floor_60d7ea() {
-  var res: vec3<f32> = floor(vec3<f32>());
+  var res: vec3<f32> = floor(vec3<f32>(1.f));
 }
 
 @vertex

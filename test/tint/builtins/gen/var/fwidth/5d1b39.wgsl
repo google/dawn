@@ -25,7 +25,7 @@
 
 // fn fwidth(vec<3, f32>) -> vec<3, f32>
 fn fwidth_5d1b39() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.f);
   var res: vec3<f32> = fwidth(arg_0);
 }
 

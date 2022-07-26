@@ -1,7 +1,7 @@
 #version 310 es
 
 void transpose_c1b600() {
-  mat4 arg_0 = mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f));
+  mat4 arg_0 = mat4(vec4(1.0f), vec4(1.0f), vec4(1.0f), vec4(1.0f));
   mat4 res = transpose(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void transpose_c1b600() {
-  mat4 arg_0 = mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f));
+  mat4 arg_0 = mat4(vec4(1.0f), vec4(1.0f), vec4(1.0f), vec4(1.0f));
   mat4 res = transpose(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void transpose_c1b600() {
-  mat4 arg_0 = mat4(vec4(0.0f), vec4(0.0f), vec4(0.0f), vec4(0.0f));
+  mat4 arg_0 = mat4(vec4(1.0f), vec4(1.0f), vec4(1.0f), vec4(1.0f));
   mat4 res = transpose(arg_0);
 }
 

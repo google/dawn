@@ -1,5 +1,5 @@
 fn step_334303() {
-  var res : vec3<f32> = step(vec3<f32>(), vec3<f32>());
+  var res : vec3<f32> = step(vec3<f32>(1.0f), vec3<f32>(1.0f));
 }
 
 @vertex

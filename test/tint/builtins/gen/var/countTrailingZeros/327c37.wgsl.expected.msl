@@ -2,7 +2,7 @@
 
 using namespace metal;
 void countTrailingZeros_327c37() {
-  int2 arg_0 = int2(0);
+  int2 arg_0 = int2(1);
   int2 res = ctz(arg_0);
 }
 

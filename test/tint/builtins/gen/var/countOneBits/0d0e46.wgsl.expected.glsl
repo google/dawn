@@ -1,7 +1,7 @@
 #version 310 es
 
 void countOneBits_0d0e46() {
-  uvec4 arg_0 = uvec4(0u);
+  uvec4 arg_0 = uvec4(1u);
   uvec4 res = uvec4(bitCount(arg_0));
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void countOneBits_0d0e46() {
-  uvec4 arg_0 = uvec4(0u);
+  uvec4 arg_0 = uvec4(1u);
   uvec4 res = uvec4(bitCount(arg_0));
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void countOneBits_0d0e46() {
-  uvec4 arg_0 = uvec4(0u);
+  uvec4 arg_0 = uvec4(1u);
   uvec4 res = uvec4(bitCount(arg_0));
 }
 

@@ -1,5 +1,5 @@
 fn sinh_7bb598() {
-  var res : f32 = sinh(1.0);
+  var res : f32 = sinh(1.0f);
 }
 
 @vertex

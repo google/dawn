@@ -2,9 +2,9 @@
 
 using namespace metal;
 void select_bb8aae() {
-  float4 arg_0 = float4(0.0f);
-  float4 arg_1 = float4(0.0f);
-  bool4 arg_2 = bool4(false);
+  float4 arg_0 = float4(1.0f);
+  float4 arg_1 = float4(1.0f);
+  bool4 arg_2 = bool4(true);
   float4 res = select(arg_0, arg_1, arg_2);
 }
 

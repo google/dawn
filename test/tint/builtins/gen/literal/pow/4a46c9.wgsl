@@ -25,7 +25,7 @@
 
 // fn pow(vec<3, f32>, vec<3, f32>) -> vec<3, f32>
 fn pow_4a46c9() {
-  var res: vec3<f32> = pow(vec3<f32>(), vec3<f32>());
+  var res: vec3<f32> = pow(vec3<f32>(1.f), vec3<f32>(1.f));
 }
 
 @vertex

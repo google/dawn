@@ -1,5 +1,5 @@
 void clamp_7706d7() {
-  uint2 res = clamp((0u).xx, (0u).xx, (0u).xx);
+  uint2 res = clamp((1u).xx, (1u).xx, (1u).xx);
 }
 
 struct tint_symbol {

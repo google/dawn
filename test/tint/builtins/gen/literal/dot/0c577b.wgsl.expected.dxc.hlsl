@@ -1,5 +1,5 @@
 void dot_0c577b() {
-  float res = dot((0.0f).xxxx, (0.0f).xxxx);
+  float res = dot((1.0f).xxxx, (1.0f).xxxx);
 }
 
 struct tint_symbol {

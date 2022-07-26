@@ -1,6 +1,6 @@
 void ldexp_cc9cde() {
-  float4 arg_0 = (0.0f).xxxx;
-  int4 arg_1 = (0).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
+  int4 arg_1 = (1).xxxx;
   float4 res = ldexp(arg_0, arg_1);
 }
 

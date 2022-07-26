@@ -2,7 +2,7 @@
 
 using namespace metal;
 void sign_b8f634() {
-  float4 res = sign(float4(0.0f));
+  float4 res = sign(float4(1.0f));
 }
 
 struct tint_symbol {

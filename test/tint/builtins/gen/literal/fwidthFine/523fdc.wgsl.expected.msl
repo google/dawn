@@ -2,7 +2,7 @@
 
 using namespace metal;
 void fwidthFine_523fdc() {
-  float3 res = fwidth(float3(0.0f));
+  float3 res = fwidth(float3(1.0f));
 }
 
 fragment void fragment_main() {

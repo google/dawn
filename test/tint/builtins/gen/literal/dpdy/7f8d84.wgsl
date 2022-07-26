@@ -25,7 +25,7 @@
 
 // fn dpdy(f32) -> f32
 fn dpdy_7f8d84() {
-  var res: f32 = dpdy(1.0);
+  var res: f32 = dpdy(1.f);
 }
 
 @fragment

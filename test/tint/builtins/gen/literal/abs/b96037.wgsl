@@ -25,7 +25,7 @@
 
 // fn abs(f32) -> f32
 fn abs_b96037() {
-  var res: f32 = abs(1.0);
+  var res: f32 = abs(1.f);
 }
 
 @vertex

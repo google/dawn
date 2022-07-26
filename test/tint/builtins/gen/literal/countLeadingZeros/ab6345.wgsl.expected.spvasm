@@ -107,7 +107,7 @@
 %countLeadingZeros_ab6345 = OpFunction %void None %73
          %76 = OpLabel
         %res = OpVariable %_ptr_Function_v3uint Function %18
-         %77 = OpFunctionCall %v3uint %tint_count_leading_zeros %18
+         %77 = OpFunctionCall %v3uint %tint_count_leading_zeros %63
                OpStore %res %77
                OpReturn
                OpFunctionEnd

@@ -25,7 +25,7 @@
 
 // fn atanh(vec<4, f32>) -> vec<4, f32>
 fn atanh_f3e01b() {
-  var arg_0 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.f);
   var res: vec4<f32> = atanh(arg_0);
 }
 

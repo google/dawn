@@ -3,7 +3,7 @@ float4 tint_sinh(float4 x) {
 }
 
 void asinh_8d2e51() {
-  float4 res = tint_sinh((0.0f).xxxx);
+  float4 res = tint_sinh((1.0f).xxxx);
 }
 
 struct tint_symbol {

@@ -1,6 +1,6 @@
 void max_a93419() {
-  float4 arg_0 = (0.0f).xxxx;
-  float4 arg_1 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
+  float4 arg_1 = (1.0f).xxxx;
   float4 res = max(arg_0, arg_1);
 }
 

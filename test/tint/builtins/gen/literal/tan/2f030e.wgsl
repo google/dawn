@@ -25,7 +25,7 @@
 
 // fn tan(f32) -> f32
 fn tan_2f030e() {
-  var res: f32 = tan(1.0);
+  var res: f32 = tan(1.f);
 }
 
 @vertex

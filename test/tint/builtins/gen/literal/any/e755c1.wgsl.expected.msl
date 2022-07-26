@@ -2,7 +2,7 @@
 
 using namespace metal;
 void any_e755c1() {
-  bool res = any(bool3(false));
+  bool res = any(bool3(true));
 }
 
 struct tint_symbol {

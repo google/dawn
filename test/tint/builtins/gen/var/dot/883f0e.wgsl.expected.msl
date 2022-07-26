@@ -2,8 +2,8 @@
 
 using namespace metal;
 void dot_883f0e() {
-  float2 arg_0 = float2(0.0f);
-  float2 arg_1 = float2(0.0f);
+  float2 arg_0 = float2(1.0f);
+  float2 arg_1 = float2(1.0f);
   float res = dot(arg_0, arg_1);
 }
 

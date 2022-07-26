@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 59
+; Bound: 61
 ; Schema: 0
                OpCapability Shader
          %20 = OpExtInstImport "GLSL.std.450"
@@ -45,12 +45,14 @@
     %uint_32 = OpConstant %uint 32
        %void = OpTypeVoid
          %26 = OpTypeFunction %void
-         %30 = OpConstantNull %v2int
+      %int_1 = OpConstant %int 1
+         %31 = OpConstantComposite %v2int %int_1 %int_1
 %_ptr_Function_v2int = OpTypePointer Function %v2int
+         %34 = OpConstantNull %v2int
      %uint_1 = OpConstant %uint 1
 %_ptr_Function_uint = OpTypePointer Function %uint
-         %37 = OpConstantNull %uint
-         %45 = OpTypeFunction %v4float
+         %39 = OpConstantNull %uint
+         %47 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %tint_insert_bits = OpFunction %v2int None %9
           %v = OpFunctionParameter %v2int
@@ -67,42 +69,42 @@
                OpFunctionEnd
 %insertBits_fe6ba6 = OpFunction %void None %26
          %29 = OpLabel
-      %arg_0 = OpVariable %_ptr_Function_v2int Function %30
-      %arg_1 = OpVariable %_ptr_Function_v2int Function %30
-      %arg_2 = OpVariable %_ptr_Function_uint Function %37
-      %arg_3 = OpVariable %_ptr_Function_uint Function %37
-        %res = OpVariable %_ptr_Function_v2int Function %30
-               OpStore %arg_0 %30
-               OpStore %arg_1 %30
+      %arg_0 = OpVariable %_ptr_Function_v2int Function %34
+      %arg_1 = OpVariable %_ptr_Function_v2int Function %34
+      %arg_2 = OpVariable %_ptr_Function_uint Function %39
+      %arg_3 = OpVariable %_ptr_Function_uint Function %39
+        %res = OpVariable %_ptr_Function_v2int Function %34
+               OpStore %arg_0 %31
+               OpStore %arg_1 %31
                OpStore %arg_2 %uint_1
                OpStore %arg_3 %uint_1
-         %40 = OpLoad %v2int %arg_0
-         %41 = OpLoad %v2int %arg_1
-         %42 = OpLoad %uint %arg_2
-         %43 = OpLoad %uint %arg_3
-         %39 = OpFunctionCall %v2int %tint_insert_bits %40 %41 %42 %43
-               OpStore %res %39
+         %42 = OpLoad %v2int %arg_0
+         %43 = OpLoad %v2int %arg_1
+         %44 = OpLoad %uint %arg_2
+         %45 = OpLoad %uint %arg_3
+         %41 = OpFunctionCall %v2int %tint_insert_bits %42 %43 %44 %45
+               OpStore %res %41
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %45
-         %47 = OpLabel
-         %48 = OpFunctionCall %void %insertBits_fe6ba6
+%vertex_main_inner = OpFunction %v4float None %47
+         %49 = OpLabel
+         %50 = OpFunctionCall %void %insertBits_fe6ba6
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %26
-         %50 = OpLabel
-         %51 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %51
+         %52 = OpLabel
+         %53 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %53
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %26
-         %54 = OpLabel
-         %55 = OpFunctionCall %void %insertBits_fe6ba6
+         %56 = OpLabel
+         %57 = OpFunctionCall %void %insertBits_fe6ba6
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %26
-         %57 = OpLabel
-         %58 = OpFunctionCall %void %insertBits_fe6ba6
+         %59 = OpLabel
+         %60 = OpFunctionCall %void %insertBits_fe6ba6
                OpReturn
                OpFunctionEnd

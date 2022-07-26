@@ -25,7 +25,7 @@
 
 // fn dpdx(vec<3, f32>) -> vec<3, f32>
 fn dpdx_0763f7() {
-  var res: vec3<f32> = dpdx(vec3<f32>());
+  var res: vec3<f32> = dpdx(vec3<f32>(1.f));
 }
 
 @fragment

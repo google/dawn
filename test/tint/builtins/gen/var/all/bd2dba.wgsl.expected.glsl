@@ -1,7 +1,7 @@
 #version 310 es
 
 void all_bd2dba() {
-  bvec3 arg_0 = bvec3(false);
+  bvec3 arg_0 = bvec3(true);
   bool res = all(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void all_bd2dba() {
-  bvec3 arg_0 = bvec3(false);
+  bvec3 arg_0 = bvec3(true);
   bool res = all(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void all_bd2dba() {
-  bvec3 arg_0 = bvec3(false);
+  bvec3 arg_0 = bvec3(true);
   bool res = all(arg_0);
 }
 

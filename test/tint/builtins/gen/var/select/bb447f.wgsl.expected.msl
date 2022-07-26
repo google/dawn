@@ -2,9 +2,9 @@
 
 using namespace metal;
 void select_bb447f() {
-  int2 arg_0 = int2(0);
-  int2 arg_1 = int2(0);
-  bool arg_2 = false;
+  int2 arg_0 = int2(1);
+  int2 arg_1 = int2(1);
+  bool arg_2 = true;
   int2 res = select(arg_0, arg_1, arg_2);
 }
 

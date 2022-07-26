@@ -25,7 +25,7 @@
 
 // fn asinh(f32) -> f32
 fn asinh_157447() {
-  var res: f32 = asinh(1.0);
+  var res: f32 = asinh(1.f);
 }
 
 @vertex

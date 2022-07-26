@@ -3,7 +3,7 @@ float4 tint_radians(float4 param_0) {
 }
 
 void radians_09b7fc() {
-  float4 arg_0 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
   float4 res = tint_radians(arg_0);
 }
 

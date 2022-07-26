@@ -16,7 +16,7 @@ uvec2 tint_count_leading_zeros(uvec2 v) {
 }
 
 void countLeadingZeros_70783f() {
-  uvec2 res = tint_count_leading_zeros(uvec2(0u));
+  uvec2 res = tint_count_leading_zeros(uvec2(1u));
 }
 
 vec4 vertex_main() {
@@ -51,7 +51,7 @@ uvec2 tint_count_leading_zeros(uvec2 v) {
 }
 
 void countLeadingZeros_70783f() {
-  uvec2 res = tint_count_leading_zeros(uvec2(0u));
+  uvec2 res = tint_count_leading_zeros(uvec2(1u));
 }
 
 void fragment_main() {
@@ -80,7 +80,7 @@ uvec2 tint_count_leading_zeros(uvec2 v) {
 }
 
 void countLeadingZeros_70783f() {
-  uvec2 res = tint_count_leading_zeros(uvec2(0u));
+  uvec2 res = tint_count_leading_zeros(uvec2(1u));
 }
 
 void compute_main() {

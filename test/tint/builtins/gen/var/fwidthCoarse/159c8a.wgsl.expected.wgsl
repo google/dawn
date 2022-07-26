@@ -1,5 +1,5 @@
 fn fwidthCoarse_159c8a() {
-  var arg_0 = 1.0;
+  var arg_0 = 1.0f;
   var res : f32 = fwidthCoarse(arg_0);
 }
 

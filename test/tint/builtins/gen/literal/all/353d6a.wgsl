@@ -25,7 +25,7 @@
 
 // fn all(bool) -> bool
 fn all_353d6a() {
-  var res: bool = all(bool());
+  var res: bool = all(true);
 }
 
 @vertex

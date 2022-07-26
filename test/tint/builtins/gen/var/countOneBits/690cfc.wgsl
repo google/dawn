@@ -25,7 +25,7 @@
 
 // fn countOneBits(vec<3, u32>) -> vec<3, u32>
 fn countOneBits_690cfc() {
-  var arg_0 = vec3<u32>();
+  var arg_0 = vec3<u32>(1u);
   var res: vec3<u32> = countOneBits(arg_0);
 }
 

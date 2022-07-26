@@ -1,5 +1,5 @@
 fn mix_c37ede() {
-  var res : vec4<f32> = mix(vec4<f32>(), vec4<f32>(), vec4<f32>());
+  var res : vec4<f32> = mix(vec4<f32>(1.0f), vec4<f32>(1.0f), vec4<f32>(1.0f));
 }
 
 @vertex

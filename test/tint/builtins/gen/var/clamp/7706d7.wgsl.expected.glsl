@@ -1,9 +1,9 @@
 #version 310 es
 
 void clamp_7706d7() {
-  uvec2 arg_0 = uvec2(0u);
-  uvec2 arg_1 = uvec2(0u);
-  uvec2 arg_2 = uvec2(0u);
+  uvec2 arg_0 = uvec2(1u);
+  uvec2 arg_1 = uvec2(1u);
+  uvec2 arg_2 = uvec2(1u);
   uvec2 res = clamp(arg_0, arg_1, arg_2);
 }
 
@@ -24,9 +24,9 @@ void main() {
 precision mediump float;
 
 void clamp_7706d7() {
-  uvec2 arg_0 = uvec2(0u);
-  uvec2 arg_1 = uvec2(0u);
-  uvec2 arg_2 = uvec2(0u);
+  uvec2 arg_0 = uvec2(1u);
+  uvec2 arg_1 = uvec2(1u);
+  uvec2 arg_2 = uvec2(1u);
   uvec2 res = clamp(arg_0, arg_1, arg_2);
 }
 
@@ -41,9 +41,9 @@ void main() {
 #version 310 es
 
 void clamp_7706d7() {
-  uvec2 arg_0 = uvec2(0u);
-  uvec2 arg_1 = uvec2(0u);
-  uvec2 arg_2 = uvec2(0u);
+  uvec2 arg_0 = uvec2(1u);
+  uvec2 arg_1 = uvec2(1u);
+  uvec2 arg_2 = uvec2(1u);
   uvec2 res = clamp(arg_0, arg_1, arg_2);
 }
 

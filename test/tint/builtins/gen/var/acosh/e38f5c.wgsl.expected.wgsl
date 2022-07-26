@@ -1,5 +1,5 @@
 fn acosh_e38f5c() {
-  var arg_0 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.0f);
   var res : vec3<f32> = acosh(arg_0);
 }
 

@@ -25,7 +25,7 @@
 
 // fn sign(vec<2, f32>) -> vec<2, f32>
 fn sign_d065d8() {
-  var arg_0 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.f);
   var res: vec2<f32> = sign(arg_0);
 }
 
