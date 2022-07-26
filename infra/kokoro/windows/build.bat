@@ -62,17 +62,10 @@ mkdir %TEMP_DIR% || goto :error
 
 call :status "Fetching and installing DXC"
 @echo on
-set DXC_RELEASE="https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.6.2112/dxc_2021_12_08.zip"
+set DXC_RELEASE="https://github.com/microsoft/DirectXShaderCompiler/releases/download/v1.7.2207/dxc_2022_07_18.zip"
 curl -k -L %DXC_RELEASE% --output "%TEMP_DIR%\dxc_release.zip" || goto :error
 powershell.exe -Command "Expand-Archive -LiteralPath '%TEMP_DIR%\dxc_release.zip' -DestinationPath '%TEMP_DIR%\dxc'" || goto :error
 set DXC_PATH=%TEMP_DIR%\dxc\bin\x64
-
-rem Patch with artifact build that contains fixes not present in the release build
-set DXC_ARTIFACT="https://ci.appveyor.com/api/projects/dnovillo/directxshadercompiler/artifacts/build%%2FRelease%%2Fdxc-artifacts.zip?branch=master&pr=false&job=image%%3A%%20Visual%%20Studio%%202019"
-curl -k -L %DXC_ARTIFACT% --output "%TEMP_DIR%\dxc_artifact.zip" || goto :error
-powershell.exe -Command "Expand-Archive -Force -LiteralPath '%TEMP_DIR%\dxc_artifact.zip' -DestinationPath '%TEMP_DIR%\dxc_artifact'" || goto :error
-move /Y %TEMP_DIR%\dxc_artifact\bin\* %DXC_PATH%
-@echo off
 
 call :status "Fetching and installing Windows SDK for d3dcompiler DLL"
 @echo on
