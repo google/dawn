@@ -275,14 +275,17 @@ void ParserImpl::deprecated(const Source& source, const std::string& msg) {
 }
 
 const Token& ParserImpl::next() {
-    if (!tokens_[next_token_idx_].IsEof() && !tokens_[next_token_idx_].IsError()) {
-        // Skip over any placeholder elements
-        while (true) {
-            if (!tokens_[next_token_idx_].IsPlaceholder()) {
-                break;
-            }
-            next_token_idx_++;
+    // If the next token is already an error or the end of file, stay there.
+    if (tokens_[next_token_idx_].IsEof() || tokens_[next_token_idx_].IsError()) {
+        return tokens_[next_token_idx_];
+    }
+
+    // Skip over any placeholder elements
+    while (true) {
+        if (!tokens_[next_token_idx_].IsPlaceholder()) {
+            break;
         }
+        next_token_idx_++;
     }
     last_source_idx_ = next_token_idx_;
     return tokens_[next_token_idx_++];
