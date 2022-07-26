@@ -56,7 +56,7 @@ TEST(SpvParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
     EXPECT_NE(ty.Pointer(ty.I32(), ast::StorageClass::kNone),
               ty.Pointer(ty.U32(), ast::StorageClass::kNone));
     EXPECT_NE(ty.Pointer(ty.I32(), ast::StorageClass::kNone),
-              ty.Pointer(ty.I32(), ast::StorageClass::kInput));
+              ty.Pointer(ty.I32(), ast::StorageClass::kIn));
     EXPECT_NE(ty.Vector(ty.I32(), 3), ty.Vector(ty.U32(), 3));
     EXPECT_NE(ty.Vector(ty.I32(), 3), ty.Vector(ty.I32(), 2));
     EXPECT_NE(ty.Matrix(ty.I32(), 3, 2), ty.Matrix(ty.U32(), 3, 2));

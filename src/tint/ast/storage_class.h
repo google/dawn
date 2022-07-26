@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,17 +21,27 @@ namespace tint::ast {
 
 /// Storage class of a given pointer.
 enum class StorageClass {
-    kInvalid = -1,
+    kInvalid,
     kNone,
-    kInput,
-    kOutput,
-    kUniform,
-    kWorkgroup,
-    kHandle,
-    kStorage,
+    kFunction,
     kPrivate,
-    kFunction
+    kWorkgroup,
+    kUniform,
+    kStorage,
+    kHandle,
+    kIn,
+    kOut,
 };
+
+/// @param out the std::ostream to write to
+/// @param sc the StorageClass
+/// @return the std::ostream so calls can be chained
+std::ostream& operator<<(std::ostream& out, StorageClass sc);
+
+/// ParseStorageClass parses a StorageClass from a string.
+/// @param str the string to parse
+/// @returns the parsed enum, or StorageClass::kInvalid if the string could not be parsed.
+StorageClass ParseStorageClass(std::string_view str);
 
 /// @returns true if the StorageClass is host-shareable
 /// @param sc the StorageClass
@@ -39,15 +49,6 @@ enum class StorageClass {
 inline bool IsHostShareable(StorageClass sc) {
     return sc == ast::StorageClass::kUniform || sc == ast::StorageClass::kStorage;
 }
-
-/// @param sc the StorageClass
-/// @return the name of the given storage class
-const char* ToString(StorageClass sc);
-
-/// @param out the std::ostream to write to
-/// @param sc the StorageClass
-/// @return the std::ostream so calls can be chained
-std::ostream& operator<<(std::ostream& out, StorageClass sc);
 
 }  // namespace tint::ast
 

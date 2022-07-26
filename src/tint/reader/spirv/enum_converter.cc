@@ -39,9 +39,9 @@ ast::PipelineStage EnumConverter::ToPipelineStage(SpvExecutionModel model) {
 ast::StorageClass EnumConverter::ToStorageClass(const SpvStorageClass sc) {
     switch (sc) {
         case SpvStorageClassInput:
-            return ast::StorageClass::kInput;
+            return ast::StorageClass::kIn;
         case SpvStorageClassOutput:
-            return ast::StorageClass::kOutput;
+            return ast::StorageClass::kOut;
         case SpvStorageClassUniform:
             return ast::StorageClass::kUniform;
         case SpvStorageClassWorkgroup:

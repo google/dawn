@@ -181,7 +181,7 @@ struct CanonicalizeEntryPointIO::State {
             auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(attributes);
             if (cfg.shader_style == ShaderStyle::kGlsl && builtin) {
                 name = GLSLBuiltinToString(builtin->builtin, func_ast->PipelineStage(),
-                                           ast::StorageClass::kInput);
+                                           ast::StorageClass::kIn);
             }
             auto symbol = ctx.dst->Symbols().New(name);
 
@@ -198,7 +198,7 @@ struct CanonicalizeEntryPointIO::State {
                     value = ctx.dst->IndexAccessor(value, 0_i);
                 }
             }
-            ctx.dst->GlobalVar(symbol, ast_type, ast::StorageClass::kInput, std::move(attributes));
+            ctx.dst->GlobalVar(symbol, ast_type, ast::StorageClass::kIn, std::move(attributes));
             return value;
         } else if (cfg.shader_style == ShaderStyle::kMsl &&
                    ast::HasAttribute<ast::BuiltinAttribute>(attributes)) {
@@ -246,7 +246,7 @@ struct CanonicalizeEntryPointIO::State {
         if (cfg.shader_style == ShaderStyle::kGlsl) {
             if (auto* b = ast::GetAttribute<ast::BuiltinAttribute>(attributes)) {
                 name = GLSLBuiltinToString(b->builtin, func_ast->PipelineStage(),
-                                           ast::StorageClass::kOutput);
+                                           ast::StorageClass::kOut);
                 value = ToGLSLBuiltin(b->builtin, value, type);
             }
         }
@@ -463,7 +463,7 @@ struct CanonicalizeEntryPointIO::State {
                 type = ctx.dst->ty.array(type, 1_u);
                 lhs = ctx.dst->IndexAccessor(lhs, 0_i);
             }
-            ctx.dst->GlobalVar(name, type, ast::StorageClass::kOutput, std::move(attributes));
+            ctx.dst->GlobalVar(name, type, ast::StorageClass::kOut, std::move(attributes));
             wrapper_body.push_back(ctx.dst->Assign(lhs, outval.value));
         }
     }
@@ -640,7 +640,7 @@ struct CanonicalizeEntryPointIO::State {
             case ast::Builtin::kSampleIndex:
                 return "gl_SampleID";
             case ast::Builtin::kSampleMask:
-                if (storage_class == ast::StorageClass::kInput) {
+                if (storage_class == ast::StorageClass::kIn) {
                     return "gl_SampleMaskIn";
                 } else {
                     return "gl_SampleMask";

@@ -32,5 +32,10 @@ TEST(StringTest, ReplaceAll) {
     ASSERT_EQ("aabxybbxybcc", ReplaceAll("aabbcc", "b", "bxyb"));
 }
 
+TEST(StringTest, ToString) {
+    ASSERT_EQ("123", ToString(123));
+    ASSERT_EQ("hello", ToString("hello"));
+}
+
 }  // namespace
 }  // namespace tint::utils

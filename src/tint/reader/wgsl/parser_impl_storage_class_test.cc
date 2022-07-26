@@ -46,7 +46,6 @@ INSTANTIATE_TEST_SUITE_P(
     testing::Values(StorageClassData{"uniform", ast::StorageClass::kUniform},
                     StorageClassData{"workgroup", ast::StorageClass::kWorkgroup},
                     StorageClassData{"storage", ast::StorageClass::kStorage},
-                    StorageClassData{"storage_buffer", ast::StorageClass::kStorage},
                     StorageClassData{"private", ast::StorageClass::kPrivate},
                     StorageClassData{"function", ast::StorageClass::kFunction}));
 

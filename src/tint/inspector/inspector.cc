@@ -49,6 +49,7 @@
 #include "src/tint/sem/vector.h"
 #include "src/tint/sem/void.h"
 #include "src/tint/utils/math.h"
+#include "src/tint/utils/string.h"
 #include "src/tint/utils/unique_vector.h"
 
 namespace tint::inspector {
@@ -570,7 +571,7 @@ std::vector<std::string> Inspector::GetUsedExtensionNames() {
     std::vector<std::string> out;
     out.reserve(extensions.size());
     for (auto ext : extensions) {
-        out.push_back(ast::str(ext));
+        out.push_back(utils::ToString(ext));
     }
     return out;
 }
@@ -582,7 +583,7 @@ std::vector<std::pair<std::string, Source>> Inspector::GetEnableDirectives() {
     auto global_decls = program_->AST().GlobalDeclarations();
     for (auto* node : global_decls) {
         if (auto* ext = node->As<ast::Enable>()) {
-            result.push_back({ast::str(ext->extension), ext->source});
+            result.push_back({utils::ToString(ext->extension), ext->source});
         }
     }
 

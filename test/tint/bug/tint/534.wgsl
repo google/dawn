@@ -9,7 +9,7 @@
 };
 @group(0) @binding(0) var src : texture_2d<f32>;
 @group(0) @binding(1) var dst : texture_2d<f32>;
-@group(0) @binding(2) var<storage_buffer, read_write> output : OutputBuf;
+@group(0) @binding(2) var<storage, read_write> output : OutputBuf;
 @group(0) @binding(3) var<uniform> uniforms : Uniforms;
 //@builtin(global_invocation_id) var<in> GlobalInvocationID : vec3<u32>;
 // Fp16 logic

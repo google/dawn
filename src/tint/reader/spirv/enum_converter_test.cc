@@ -125,8 +125,8 @@ INSTANTIATE_TEST_SUITE_P(
     EnumConverterGood,
     SpvStorageClassTest,
     testing::Values(
-        StorageClassCase{SpvStorageClassInput, true, ast::StorageClass::kInput},
-        StorageClassCase{SpvStorageClassOutput, true, ast::StorageClass::kOutput},
+        StorageClassCase{SpvStorageClassInput, true, ast::StorageClass::kIn},
+        StorageClassCase{SpvStorageClassOutput, true, ast::StorageClass::kOut},
         StorageClassCase{SpvStorageClassUniform, true, ast::StorageClass::kUniform},
         StorageClassCase{SpvStorageClassWorkgroup, true, ast::StorageClass::kWorkgroup},
         StorageClassCase{SpvStorageClassUniformConstant, true, ast::StorageClass::kNone},

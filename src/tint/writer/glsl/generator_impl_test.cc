@@ -62,7 +62,7 @@ TEST_F(GlslGeneratorImplTest, GenerateSampleIndexES) {
                   Builtin(ast::Builtin::kSampleIndex),
                   Disable(ast::DisabledValidation::kIgnoreStorageClass),
               },
-              ast::StorageClass::kInput);
+              ast::StorageClass::kIn);
     Func("my_func", {}, ty.i32(),
          {
              Return(Expr("gl_SampleID")),
@@ -87,7 +87,7 @@ TEST_F(GlslGeneratorImplTest, GenerateSampleIndexDesktop) {
                   Builtin(ast::Builtin::kSampleIndex),
                   Disable(ast::DisabledValidation::kIgnoreStorageClass),
               },
-              ast::StorageClass::kInput);
+              ast::StorageClass::kIn);
     Func("my_func", {}, ty.i32(),
          {
              Return(Expr("gl_SampleID")),

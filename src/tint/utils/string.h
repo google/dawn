@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_UTILS_STRING_H_
 #define SRC_TINT_UTILS_STRING_H_
 
+#include <sstream>
 #include <string>
 
 namespace tint::utils {
@@ -32,6 +33,15 @@ inline std::string ReplaceAll(std::string str,
         pos += replacement.length();
     }
     return str;
+}
+
+/// @param value the value to be printed as a string
+/// @returns value printed as a string via the std::ostream `<<` operator
+template <typename T>
+std::string ToString(const T& value) {
+    std::stringstream s;
+    s << value;
+    return s.str();
 }
 
 }  // namespace tint::utils

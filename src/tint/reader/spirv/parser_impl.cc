@@ -1219,8 +1219,8 @@ const Type* ParserImpl::ConvertType(uint32_t type_id,
     }
 
     // Pipeline input and output variables map to private variables.
-    if (ast_storage_class == ast::StorageClass::kInput ||
-        ast_storage_class == ast::StorageClass::kOutput) {
+    if (ast_storage_class == ast::StorageClass::kIn ||
+        ast_storage_class == ast::StorageClass::kOut) {
         ast_storage_class = ast::StorageClass::kPrivate;
     }
     switch (ptr_as) {
@@ -1446,8 +1446,8 @@ bool ParserImpl::EmitModuleScopeVariables() {
         }
         switch (enum_converter_.ToStorageClass(spirv_storage_class)) {
             case ast::StorageClass::kNone:
-            case ast::StorageClass::kInput:
-            case ast::StorageClass::kOutput:
+            case ast::StorageClass::kIn:
+            case ast::StorageClass::kOut:
             case ast::StorageClass::kUniform:
             case ast::StorageClass::kHandle:
             case ast::StorageClass::kStorage:

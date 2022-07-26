@@ -16,7 +16,7 @@ struct PointLight {
 };
 
 @binding(0) @group(0) var<uniform> uniforms : Uniforms;
-@binding(1) @group(0) var<storage_buffer, read> pointLights : PointLights;
+@binding(1) @group(0) var<storage, read> pointLights : PointLights;
 @binding(2) @group(0) var mySampler: sampler;
 @binding(3) @group(0) var myTexture: texture_2d<f32>;
 

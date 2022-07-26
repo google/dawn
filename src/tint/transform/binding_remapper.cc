@@ -22,6 +22,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/function.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/utils/string.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::BindingRemapper);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::BindingRemapper::Remappings);
@@ -125,7 +126,7 @@ void BindingRemapper::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) co
                     ctx.dst->Diagnostics().add_error(
                         diag::System::Transform,
                         "cannot apply access control to variable with storage class " +
-                            std::string(ast::ToString(sem->StorageClass())));
+                            std::string(utils::ToString(sem->StorageClass())));
                     return;
                 }
                 auto* ty = sem->Type()->UnwrapRef();

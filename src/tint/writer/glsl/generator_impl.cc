@@ -1929,8 +1929,8 @@ bool GeneratorImpl::EmitGlobalVariable(const ast::Variable* global) {
                     return EmitPrivateVariable(sem);
                 case ast::StorageClass::kWorkgroup:
                     return EmitWorkgroupVariable(sem);
-                case ast::StorageClass::kInput:
-                case ast::StorageClass::kOutput:
+                case ast::StorageClass::kIn:
+                case ast::StorageClass::kOut:
                     return EmitIOVariable(sem);
                 default:
                     TINT_ICE(Writer, diagnostics_)
@@ -2738,11 +2738,11 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         *name_printed = false;
     }
     switch (storage_class) {
-        case ast::StorageClass::kInput: {
+        case ast::StorageClass::kIn: {
             out << "in ";
             break;
         }
-        case ast::StorageClass::kOutput: {
+        case ast::StorageClass::kOut: {
             out << "out ";
             break;
         }

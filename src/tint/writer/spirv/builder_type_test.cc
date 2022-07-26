@@ -299,7 +299,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedF16Matrix) {
 
 TEST_F(BuilderTest_Type, GeneratePtr) {
     auto* i32 = create<sem::I32>();
-    auto* ptr = create<sem::Pointer>(i32, ast::StorageClass::kOutput, ast::Access::kReadWrite);
+    auto* ptr = create<sem::Pointer>(i32, ast::StorageClass::kOut, ast::Access::kReadWrite);
 
     spirv::Builder& b = Build();
 
@@ -314,7 +314,7 @@ TEST_F(BuilderTest_Type, GeneratePtr) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
     auto* i32 = create<sem::I32>();
-    auto* ptr = create<sem::Pointer>(i32, ast::StorageClass::kOutput, ast::Access::kReadWrite);
+    auto* ptr = create<sem::Pointer>(i32, ast::StorageClass::kOut, ast::Access::kReadWrite);
 
     spirv::Builder& b = Build();
 
@@ -601,8 +601,8 @@ INSTANTIATE_TEST_SUITE_P(
     BuilderTest_Type,
     PtrDataTest,
     testing::Values(PtrData{ast::StorageClass::kNone, SpvStorageClassMax},
-                    PtrData{ast::StorageClass::kInput, SpvStorageClassInput},
-                    PtrData{ast::StorageClass::kOutput, SpvStorageClassOutput},
+                    PtrData{ast::StorageClass::kIn, SpvStorageClassInput},
+                    PtrData{ast::StorageClass::kOut, SpvStorageClassOutput},
                     PtrData{ast::StorageClass::kUniform, SpvStorageClassUniform},
                     PtrData{ast::StorageClass::kWorkgroup, SpvStorageClassWorkgroup},
                     PtrData{ast::StorageClass::kHandle, SpvStorageClassUniformConstant},

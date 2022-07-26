@@ -477,8 +477,8 @@ bool Builder::GenerateEntryPoint(const ast::Function* func, uint32_t id) {
     for (const auto* var : func_sem->TransitivelyReferencedGlobals()) {
         // For SPIR-V 1.3 we only output Input/output variables. If we update to
         // SPIR-V 1.4 or later this should be all variables.
-        if (var->StorageClass() != ast::StorageClass::kInput &&
-            var->StorageClass() != ast::StorageClass::kOutput) {
+        if (var->StorageClass() != ast::StorageClass::kIn &&
+            var->StorageClass() != ast::StorageClass::kOut) {
             continue;
         }
 
@@ -856,7 +856,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
             // VK_KHR_zero_initialize_workgroup_memory extension is enabled, we should
             // also zero-initialize.
             if (sem->StorageClass() == ast::StorageClass::kPrivate ||
-                sem->StorageClass() == ast::StorageClass::kOutput ||
+                sem->StorageClass() == ast::StorageClass::kOut ||
                 (zero_initialize_workgroup_memory_ &&
                  sem->StorageClass() == ast::StorageClass::kWorkgroup)) {
                 init_id = GenerateConstantNullIfNeeded(type);
@@ -4113,9 +4113,9 @@ SpvStorageClass Builder::ConvertStorageClass(ast::StorageClass klass) const {
     switch (klass) {
         case ast::StorageClass::kInvalid:
             return SpvStorageClassMax;
-        case ast::StorageClass::kInput:
+        case ast::StorageClass::kIn:
             return SpvStorageClassInput;
-        case ast::StorageClass::kOutput:
+        case ast::StorageClass::kOut:
             return SpvStorageClassOutput;
         case ast::StorageClass::kUniform:
             return SpvStorageClassUniform;
@@ -4138,9 +4138,9 @@ SpvStorageClass Builder::ConvertStorageClass(ast::StorageClass klass) const {
 SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin, ast::StorageClass storage) {
     switch (builtin) {
         case ast::Builtin::kPosition:
-            if (storage == ast::StorageClass::kInput) {
+            if (storage == ast::StorageClass::kIn) {
                 return SpvBuiltInFragCoord;
-            } else if (storage == ast::StorageClass::kOutput) {
+            } else if (storage == ast::StorageClass::kOut) {
                 return SpvBuiltInPosition;
             } else {
                 TINT_ICE(Writer, builder_.Diagnostics()) << "invalid storage class for builtin";

@@ -16,34 +16,52 @@
 
 namespace tint::ast {
 
-const char* ToString(StorageClass sc) {
-    switch (sc) {
-        case StorageClass::kInvalid:
-            return "invalid";
-        case StorageClass::kNone:
-            return "none";
-        case StorageClass::kInput:
-            return "in";
-        case StorageClass::kOutput:
-            return "out";
-        case StorageClass::kUniform:
-            return "uniform";
-        case StorageClass::kWorkgroup:
-            return "workgroup";
-        case StorageClass::kHandle:
-            return "handle";
-        case StorageClass::kStorage:
-            return "storage";
-        case StorageClass::kPrivate:
-            return "private";
-        case StorageClass::kFunction:
-            return "function";
+/// ParseStorageClass parses a StorageClass from a string.
+/// @param str the string to parse
+/// @returns the parsed enum, or StorageClass::kInvalid if the string could not be parsed.
+StorageClass ParseStorageClass(std::string_view str) {
+    if (str == "function") {
+        return StorageClass::kFunction;
     }
-    return "<unknown>";
+    if (str == "private") {
+        return StorageClass::kPrivate;
+    }
+    if (str == "workgroup") {
+        return StorageClass::kWorkgroup;
+    }
+    if (str == "uniform") {
+        return StorageClass::kUniform;
+    }
+    if (str == "storage") {
+        return StorageClass::kStorage;
+    }
+    return StorageClass::kInvalid;
 }
-std::ostream& operator<<(std::ostream& out, StorageClass sc) {
-    out << ToString(sc);
-    return out;
+
+std::ostream& operator<<(std::ostream& out, StorageClass value) {
+    switch (value) {
+        case StorageClass::kInvalid:
+            return out << "invalid";
+        case StorageClass::kNone:
+            return out << "none";
+        case StorageClass::kFunction:
+            return out << "function";
+        case StorageClass::kPrivate:
+            return out << "private";
+        case StorageClass::kWorkgroup:
+            return out << "workgroup";
+        case StorageClass::kUniform:
+            return out << "uniform";
+        case StorageClass::kStorage:
+            return out << "storage";
+        case StorageClass::kHandle:
+            return out << "handle";
+        case StorageClass::kIn:
+            return out << "in";
+        case StorageClass::kOut:
+            return out << "out";
+    }
+    return out << "<unknown>";
 }
 
 }  // namespace tint::ast

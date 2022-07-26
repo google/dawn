@@ -400,7 +400,7 @@ Maybe<bool> ParserImpl::enable_directive() {
             synchronized_ = true;
             next();
             name = {"f16", t.source()};
-        } else if (t.Is(Token::Type::kParenLeft)){
+        } else if (t.Is(Token::Type::kParenLeft)) {
             // A common error case is writing `enable(foo);` instead of `enable foo;`.
             synchronized_ = false;
             return add_error(t.source(), "enable directives don't take parenthesis");
@@ -1315,28 +1315,12 @@ Expect<ast::StorageClass> ParserImpl::expect_storage_class(std::string_view use)
         return Failure::kErrored;
     }
 
-    auto name = ident.value;
-    if (name == "uniform") {
-        return {ast::StorageClass::kUniform, t.source()};
+    auto storage_class = ast::ParseStorageClass(ident.value);
+    if (storage_class == ast::StorageClass::kInvalid) {
+        return add_error(t.source(), "invalid storage class", use);
     }
 
-    if (name == "workgroup") {
-        return {ast::StorageClass::kWorkgroup, t.source()};
-    }
-
-    if (name == "storage" || name == "storage_buffer") {
-        return {ast::StorageClass::kStorage, t.source()};
-    }
-
-    if (name == "private") {
-        return {ast::StorageClass::kPrivate, t.source()};
-    }
-
-    if (name == "function") {
-        return {ast::StorageClass::kFunction, t.source()};
-    }
-
-    return add_error(t.source(), "invalid storage class", use);
+    return {storage_class, t.source()};
 }
 
 // struct_decl

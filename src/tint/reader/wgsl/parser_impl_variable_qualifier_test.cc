@@ -50,7 +50,6 @@ INSTANTIATE_TEST_SUITE_P(
         VariableStorageData{"uniform", ast::StorageClass::kUniform, ast::Access::kUndefined},
         VariableStorageData{"workgroup", ast::StorageClass::kWorkgroup, ast::Access::kUndefined},
         VariableStorageData{"storage", ast::StorageClass::kStorage, ast::Access::kUndefined},
-        VariableStorageData{"storage_buffer", ast::StorageClass::kStorage, ast::Access::kUndefined},
         VariableStorageData{"private", ast::StorageClass::kPrivate, ast::Access::kUndefined},
         VariableStorageData{"function", ast::StorageClass::kFunction, ast::Access::kUndefined},
         VariableStorageData{"storage, read", ast::StorageClass::kStorage, ast::Access::kRead},
