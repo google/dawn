@@ -164,7 +164,7 @@ Command::Output Command::Exec(std::initializer_list<std::string> arguments) cons
     // run the target command.
     //
     // The parent process is responsible for feeding any input to the stdin_pipe
-    // and collectting output from the std[out,err]_pipes.
+    // and collecting output from the std[out,err]_pipes.
 
     int child_id = fork();
     if (child_id < 0) {
