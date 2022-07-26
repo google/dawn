@@ -14,10 +14,88 @@
 
 #include <cstring>
 
-#include "dawn/native/vulkan/CacheKeyVk.h"
+#include "dawn/common/Assert.h"
+#include "dawn/common/vulkan_platform.h"
+#include "dawn/native/CacheKey.h"
 #include "dawn/native/vulkan/RenderPassCache.h"
 
+#include "icd/generated/vk_typemap_helper.h"
+
 namespace dawn::native {
+
+namespace {
+
+namespace detail {
+
+template <typename... VK_STRUCT_TYPES>
+void ValidatePnextImpl(const VkBaseOutStructure* root) {
+    const VkBaseOutStructure* next = reinterpret_cast<const VkBaseOutStructure*>(root->pNext);
+    while (next != nullptr) {
+        // Assert that the type of each pNext struct is exactly one of the specified
+        // templates.
+        ASSERT(((LvlTypeMap<VK_STRUCT_TYPES>::kSType == next->sType ? 1 : 0) + ... + 0) == 1);
+        next = reinterpret_cast<const VkBaseOutStructure*>(next->pNext);
+    }
+}
+
+template <typename VK_STRUCT_TYPE>
+void SerializePnextImpl(CacheKey* key, const VkBaseOutStructure* root) {
+    const VkBaseOutStructure* next = reinterpret_cast<const VkBaseOutStructure*>(root->pNext);
+    const VK_STRUCT_TYPE* found = nullptr;
+    while (next != nullptr) {
+        if (LvlTypeMap<VK_STRUCT_TYPE>::kSType == next->sType) {
+            if (found == nullptr) {
+                found = reinterpret_cast<const VK_STRUCT_TYPE*>(next);
+            } else {
+                // Fail an assert here since that means that the chain had more than one of
+                // the same typed chained object.
+                ASSERT(false);
+            }
+        }
+        next = reinterpret_cast<const VkBaseOutStructure*>(next->pNext);
+    }
+    if (found != nullptr) {
+        key->Record(found);
+    }
+}
+
+template <typename VK_STRUCT_TYPE,
+          typename... VK_STRUCT_TYPES,
+          typename = std::enable_if_t<(sizeof...(VK_STRUCT_TYPES) > 0)>>
+void SerializePnextImpl(CacheKey* key, const VkBaseOutStructure* root) {
+    SerializePnextImpl<VK_STRUCT_TYPE>(key, root);
+    SerializePnextImpl<VK_STRUCT_TYPES...>(key, root);
+}
+
+template <typename VK_STRUCT_TYPE>
+const VkBaseOutStructure* ToVkBaseOutStructure(const VK_STRUCT_TYPE* t) {
+    // Checks to ensure proper type safety.
+    static_assert(offsetof(VK_STRUCT_TYPE, sType) == offsetof(VkBaseOutStructure, sType) &&
+                      offsetof(VK_STRUCT_TYPE, pNext) == offsetof(VkBaseOutStructure, pNext),
+                  "Argument type is not a proper Vulkan structure type");
+    return reinterpret_cast<const VkBaseOutStructure*>(t);
+}
+
+}  // namespace detail
+
+template <typename... VK_STRUCT_TYPES,
+          typename VK_STRUCT_TYPE,
+          typename = std::enable_if_t<(sizeof...(VK_STRUCT_TYPES) > 0)>>
+void SerializePnext(CacheKey* key, const VK_STRUCT_TYPE* t) {
+    const VkBaseOutStructure* root = detail::ToVkBaseOutStructure(t);
+    detail::ValidatePnextImpl<VK_STRUCT_TYPES...>(root);
+    detail::SerializePnextImpl<VK_STRUCT_TYPES...>(key, root);
+}
+
+// Empty template specialization so that we can put this in to ensure failures occur if new
+// extensions are added without updating serialization.
+template <typename VK_STRUCT_TYPE>
+void SerializePnext(CacheKey* key, const VK_STRUCT_TYPE* t) {
+    const VkBaseOutStructure* root = detail::ToVkBaseOutStructure(t);
+    detail::ValidatePnextImpl<>(root);
+}
+
+}  // namespace
 
 template <>
 void CacheKeySerializer<VkDescriptorSetLayoutBinding>::Serialize(
@@ -31,7 +109,7 @@ void CacheKeySerializer<VkDescriptorSetLayoutCreateInfo>::Serialize(
     CacheKey* key,
     const VkDescriptorSetLayoutCreateInfo& t) {
     key->Record(t.flags).RecordIterable(t.pBindings, t.bindingCount);
-    vulkan::SerializePnext<>(key, &t);
+    SerializePnext(key, &t);
 }
 
 template <>
@@ -47,7 +125,7 @@ void CacheKeySerializer<VkPipelineLayoutCreateInfo>::Serialize(
     // The set layouts are not serialized here because they are pointers to backend objects.
     // They need to be cross-referenced with the frontend objects and serialized from there.
     key->Record(t.flags).RecordIterable(t.pPushConstantRanges, t.pushConstantRangeCount);
-    vulkan::SerializePnext<>(key, &t);
+    SerializePnext(key, &t);
 }
 
 template <>
@@ -85,7 +163,7 @@ void CacheKeySerializer<VkPipelineShaderStageCreateInfo>::Serialize(
     key->Record(t.flags, t.stage)
         .RecordIterable(t.pName, strlen(t.pName))
         .Record(t.pSpecializationInfo);
-    vulkan::SerializePnext<VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT>(key, &t);
+    SerializePnext<VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT>(key, &t);
 }
 
 template <>
@@ -121,7 +199,7 @@ void CacheKeySerializer<VkPipelineVertexInputStateCreateInfo>::Serialize(
     key->Record(t.flags)
         .RecordIterable(t.pVertexBindingDescriptions, t.vertexBindingDescriptionCount)
         .RecordIterable(t.pVertexAttributeDescriptions, t.vertexAttributeDescriptionCount);
-    vulkan::SerializePnext<>(key, &t);
+    SerializePnext(key, &t);
 }
 
 template <>
@@ -129,7 +207,7 @@ void CacheKeySerializer<VkPipelineInputAssemblyStateCreateInfo>::Serialize(
     CacheKey* key,
     const VkPipelineInputAssemblyStateCreateInfo& t) {
     key->Record(t.flags, t.topology, t.primitiveRestartEnable);
-    vulkan::SerializePnext<>(key, &t);
+    SerializePnext(key, &t);
 }
 
 template <>
@@ -137,7 +215,7 @@ void CacheKeySerializer<VkPipelineTessellationStateCreateInfo>::Serialize(
     CacheKey* key,
     const VkPipelineTessellationStateCreateInfo& t) {
     key->Record(t.flags, t.patchControlPoints);
-    vulkan::SerializePnext<>(key, &t);
+    SerializePnext(key, &t);
 }
 
 template <>
@@ -167,7 +245,7 @@ void CacheKeySerializer<VkPipelineViewportStateCreateInfo>::Serialize(
     key->Record(t.flags)
         .RecordIterable(t.pViewports, t.viewportCount)
         .RecordIterable(t.pScissors, t.scissorCount);
-    vulkan::SerializePnext<>(key, &t);
+    SerializePnext(key, &t);
 }
 
 template <>
@@ -177,7 +255,7 @@ void CacheKeySerializer<VkPipelineRasterizationStateCreateInfo>::Serialize(
     key->Record(t.flags, t.depthClampEnable, t.rasterizerDiscardEnable, t.polygonMode, t.cullMode,
                 t.frontFace, t.depthBiasEnable, t.depthBiasConstantFactor, t.depthBiasClamp,
                 t.depthBiasSlopeFactor, t.lineWidth);
-    vulkan::SerializePnext<VkPipelineRasterizationDepthClipStateCreateInfoEXT>(key, &t);
+    SerializePnext<VkPipelineRasterizationDepthClipStateCreateInfoEXT>(key, &t);
 }
 
 template <>
@@ -186,7 +264,7 @@ void CacheKeySerializer<VkPipelineMultisampleStateCreateInfo>::Serialize(
     const VkPipelineMultisampleStateCreateInfo& t) {
     key->Record(t.flags, t.rasterizationSamples, t.sampleShadingEnable, t.minSampleShading,
                 t.pSampleMask, t.alphaToCoverageEnable, t.alphaToOneEnable);
-    vulkan::SerializePnext<>(key, &t);
+    SerializePnext(key, &t);
 }
 
 template <>
@@ -202,7 +280,7 @@ void CacheKeySerializer<VkPipelineDepthStencilStateCreateInfo>::Serialize(
     key->Record(t.flags, t.depthTestEnable, t.depthWriteEnable, t.depthCompareOp,
                 t.depthBoundsTestEnable, t.stencilTestEnable, t.front, t.back, t.minDepthBounds,
                 t.maxDepthBounds);
-    vulkan::SerializePnext<>(key, &t);
+    SerializePnext(key, &t);
 }
 
 template <>
@@ -220,7 +298,7 @@ void CacheKeySerializer<VkPipelineColorBlendStateCreateInfo>::Serialize(
     key->Record(t.flags, t.logicOpEnable, t.logicOp)
         .RecordIterable(t.pAttachments, t.attachmentCount)
         .Record(t.blendConstants);
-    vulkan::SerializePnext<>(key, &t);
+    SerializePnext(key, &t);
 }
 
 template <>
@@ -228,7 +306,7 @@ void CacheKeySerializer<VkPipelineDynamicStateCreateInfo>::Serialize(
     CacheKey* key,
     const VkPipelineDynamicStateCreateInfo& t) {
     key->Record(t.flags).RecordIterable(t.pDynamicStates, t.dynamicStateCount);
-    vulkan::SerializePnext<>(key, &t);
+    SerializePnext(key, &t);
 }
 
 template <>
@@ -266,7 +344,7 @@ void CacheKeySerializer<VkGraphicsPipelineCreateInfo>::Serialize(
         .Record(t.pVertexInputState, t.pInputAssemblyState, t.pTessellationState, t.pViewportState,
                 t.pRasterizationState, t.pMultisampleState, t.pDepthStencilState,
                 t.pColorBlendState, t.pDynamicState, t.subpass);
-    vulkan::SerializePnext<>(key, &t);
+    SerializePnext(key, &t);
 }
 
 }  // namespace dawn::native

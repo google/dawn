@@ -193,6 +193,7 @@ target_sources(dawn_native PRIVATE
     "dawn_platform.h"
     "webgpu_absl_format.cpp"
     "webgpu_absl_format.h"
+    "stream/Stream.h"
     "utils/WGPUHelpers.cpp"
     "utils/WGPUHelpers.h"
 )
@@ -486,7 +487,6 @@ if (DAWN_ENABLE_VULKAN)
         "vulkan/BufferVk.cpp"
         "vulkan/BufferVk.h"
         "vulkan/CacheKeyVk.cpp"
-        "vulkan/CacheKeyVk.h"
         "vulkan/CommandBufferVk.cpp"
         "vulkan/CommandBufferVk.h"
         "vulkan/CommandRecordingContext.h"
