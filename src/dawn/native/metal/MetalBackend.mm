@@ -22,10 +22,6 @@
 
 namespace dawn::native::metal {
 
-id<MTLDevice> GetMetalDevice(WGPUDevice device) {
-    return ToBackend(FromAPI(device))->GetMTLDevice();
-}
-
 AdapterDiscoveryOptions::AdapterDiscoveryOptions()
     : AdapterDiscoveryOptionsBase(WGPUBackendType_Metal) {}
 

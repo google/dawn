@@ -60,14 +60,6 @@ DAWN_NATIVE_EXPORT void WaitForCommandsToBeScheduled(WGPUDevice device);
 
 }  // namespace dawn::native::metal
 
-#ifdef __OBJC__
-namespace dawn::native::metal {
-
-DAWN_NATIVE_EXPORT id<MTLDevice> GetMetalDevice(WGPUDevice device);
-
-}  // namespace dawn::native::metal
-#endif  // __OBJC__
-
 #pragma clang diagnostic pop
 
 #endif  // INCLUDE_DAWN_NATIVE_METALBACKEND_H_
