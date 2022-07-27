@@ -26,9 +26,9 @@ inline std::ostream& operator<<(std::ostream& out, StorageClassData data) {
     return out;
 }
 
-class StorageClassTest : public ParserImplTestWithParam<StorageClassData> {};
+class ParserStorageClassTest : public ParserImplTestWithParam<StorageClassData> {};
 
-TEST_P(StorageClassTest, Parses) {
+TEST_P(ParserStorageClassTest, Parses) {
     auto params = GetParam();
     auto p = parser(params.input);
 
@@ -42,7 +42,7 @@ TEST_P(StorageClassTest, Parses) {
 }
 INSTANTIATE_TEST_SUITE_P(
     ParserImplTest,
-    StorageClassTest,
+    ParserStorageClassTest,
     testing::Values(StorageClassData{"uniform", ast::StorageClass::kUniform},
                     StorageClassData{"workgroup", ast::StorageClass::kWorkgroup},
                     StorageClassData{"storage", ast::StorageClass::kStorage},

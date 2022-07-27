@@ -25,12 +25,15 @@
 
 // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 enum storage_class {
+  @internal none
   function
   private
   workgroup
   uniform
   storage
   @internal handle
+  @internal in
+  @internal out
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#memory-access-mode

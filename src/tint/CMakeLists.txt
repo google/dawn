@@ -739,6 +739,7 @@ if(TINT_BUILD_TESTS)
     ast/sampled_texture_test.cc
     ast/sampler_test.cc
     ast/stage_attribute_test.cc
+    ast/storage_class_test.cc
     ast/storage_texture_test.cc
     ast/stride_attribute_test.cc
     ast/struct_member_align_attribute_test.cc
@@ -1277,6 +1278,7 @@ if(TINT_BUILD_BENCHMARKS)
 
   set(TINT_BENCHMARK_SRC
     "castable_bench.cc"
+    "ast/storage_class_bench.cc"
     "bench/benchmark.cc"
     "reader/wgsl/parser_bench.cc"
   )
