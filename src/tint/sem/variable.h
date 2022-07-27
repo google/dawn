@@ -18,6 +18,8 @@
 #include <utility>
 #include <vector>
 
+#include "tint/override_id.h"
+
 #include "src/tint/ast/access.h"
 #include "src/tint/ast/storage_class.h"
 #include "src/tint/sem/binding_point.h"
@@ -165,15 +167,15 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
     sem::BindingPoint BindingPoint() const { return binding_point_; }
 
     /// @param id the constant identifier to assign to this variable
-    void SetConstantId(uint16_t id) { constant_id_ = id; }
+    void SetOverrideId(OverrideId id) { override_id_ = id; }
 
     /// @returns the pipeline constant ID associated with the variable
-    uint16_t ConstantId() const { return constant_id_; }
+    tint::OverrideId OverrideId() const { return override_id_; }
 
   private:
     const sem::BindingPoint binding_point_;
 
-    uint16_t constant_id_ = 0;
+    tint::OverrideId override_id_;
 };
 
 /// Parameter is a function parameter

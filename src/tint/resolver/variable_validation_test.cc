@@ -77,6 +77,37 @@ TEST_F(ResolverVariableValidationTest, OverrideNoInitializerNoType) {
     EXPECT_EQ(r()->error(), "12:34 error: override declaration requires a type or initializer");
 }
 
+TEST_F(ResolverVariableValidationTest, OverrideExceedsIDLimit_LastUnreserved) {
+    // override o0 : i32;
+    // override o1 : i32;
+    // ...
+    // override bang : i32;
+    constexpr size_t kLimit = std::numeric_limits<decltype(OverrideId::value)>::max();
+    for (size_t i = 0; i <= kLimit; i++) {
+        Override("o" + std::to_string(i), ty.i32(), nullptr);
+    }
+    Override(Source{{12, 34}}, "bang", ty.i32(), nullptr);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: number of 'override' variables exceeded limit of 65535");
+}
+
+TEST_F(ResolverVariableValidationTest, OverrideExceedsIDLimit_LastReserved) {
+    // override o0 : i32;
+    // override o1 : i32;
+    // ...
+    // @id(N) override oN : i32;
+    constexpr size_t kLimit = std::numeric_limits<decltype(OverrideId::value)>::max();
+    Override("reserved", ty.i32(), nullptr, {Id(kLimit)});
+    for (size_t i = 0; i < kLimit; i++) {
+        Override("o" + std::to_string(i), ty.i32(), nullptr);
+    }
+    Override(Source{{12, 34}}, "bang", ty.i32(), nullptr);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: number of 'override' variables exceeded limit of 65535");
+}
+
 TEST_F(ResolverVariableValidationTest, VarTypeNotConstructible) {
     // var i : i32;
     // var p : pointer<function, i32> = &v;

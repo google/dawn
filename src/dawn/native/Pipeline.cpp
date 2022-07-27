@@ -66,16 +66,16 @@ MaybeError ValidateProgrammableStage(DeviceBase* device,
 
     // Validate if overridable constants exist in shader module
     // pipelineBase is not yet constructed at this moment so iterate constants from descriptor
-    size_t numUninitializedConstants = metadata.uninitializedOverridableConstants.size();
+    size_t numUninitializedConstants = metadata.uninitializedOverrides.size();
     // Keep an initialized constants sets to handle duplicate initialization cases
     std::unordered_set<std::string> stageInitializedConstantIdentifiers;
     for (uint32_t i = 0; i < constantCount; i++) {
-        DAWN_INVALID_IF(metadata.overridableConstants.count(constants[i].key) == 0,
+        DAWN_INVALID_IF(metadata.overrides.count(constants[i].key) == 0,
                         "Pipeline overridable constant \"%s\" not found in %s.", constants[i].key,
                         module);
 
         if (stageInitializedConstantIdentifiers.count(constants[i].key) == 0) {
-            if (metadata.uninitializedOverridableConstants.count(constants[i].key) > 0) {
+            if (metadata.uninitializedOverrides.count(constants[i].key) > 0) {
                 numUninitializedConstants--;
             }
             stageInitializedConstantIdentifiers.insert(constants[i].key);
@@ -91,7 +91,7 @@ MaybeError ValidateProgrammableStage(DeviceBase* device,
     if (DAWN_UNLIKELY(numUninitializedConstants > 0)) {
         std::string uninitializedConstantsArray;
         bool isFirst = true;
-        for (std::string identifier : metadata.uninitializedOverridableConstants) {
+        for (std::string identifier : metadata.uninitializedOverrides) {
             if (stageInitializedConstantIdentifiers.count(identifier) > 0) {
                 continue;
             }

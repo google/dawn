@@ -206,28 +206,28 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
 
             auto* global = var->As<sem::GlobalVariable>();
             if (global && global->Declaration()->Is<ast::Override>()) {
-                OverridableConstant overridable_constant;
-                overridable_constant.name = name;
-                overridable_constant.numeric_id = global->ConstantId();
+                Override override;
+                override.name = name;
+                override.id = global->OverrideId();
                 auto* type = var->Type();
                 TINT_ASSERT(Inspector, type->is_scalar());
                 if (type->is_bool_scalar_or_vector()) {
-                    overridable_constant.type = OverridableConstant::Type::kBool;
+                    override.type = Override::Type::kBool;
                 } else if (type->is_float_scalar()) {
-                    overridable_constant.type = OverridableConstant::Type::kFloat32;
+                    override.type = Override::Type::kFloat32;
                 } else if (type->is_signed_integer_scalar()) {
-                    overridable_constant.type = OverridableConstant::Type::kInt32;
+                    override.type = Override::Type::kInt32;
                 } else if (type->is_unsigned_integer_scalar()) {
-                    overridable_constant.type = OverridableConstant::Type::kUint32;
+                    override.type = Override::Type::kUint32;
                 } else {
                     TINT_UNREACHABLE(Inspector, diagnostics_);
                 }
 
-                overridable_constant.is_initialized = global->Declaration()->constructor;
-                overridable_constant.is_numeric_id_specified =
+                override.is_initialized = global->Declaration()->constructor;
+                override.is_id_specified =
                     ast::HasAttribute<ast::IdAttribute>(global->Declaration()->attributes);
 
-                entry_point.overridable_constants.push_back(overridable_constant);
+                entry_point.overrides.push_back(override);
             }
         }
 
@@ -237,37 +237,37 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
     return result;
 }
 
-std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
-    std::map<uint32_t, Scalar> result;
+std::map<OverrideId, Scalar> Inspector::GetOverrideDefaultValues() {
+    std::map<OverrideId, Scalar> result;
     for (auto* var : program_->AST().GlobalVariables()) {
         auto* global = program_->Sem().Get<sem::GlobalVariable>(var);
         if (!global || !global->Declaration()->Is<ast::Override>()) {
             continue;
         }
 
-        // If there are conflicting defintions for a constant id, that is invalid
+        // If there are conflicting defintions for an override id, that is invalid
         // WGSL, so the resolver should catch it. Thus here the inspector just
-        // assumes all definitions of the constant id are the same, so only needs
-        // to find the first reference to constant id.
-        uint32_t constant_id = global->ConstantId();
-        if (result.find(constant_id) != result.end()) {
+        // assumes all definitions of the override id are the same, so only needs
+        // to find the first reference to override id.
+        OverrideId override_id = global->OverrideId();
+        if (result.find(override_id) != result.end()) {
             continue;
         }
 
         if (!var->constructor) {
-            result[constant_id] = Scalar();
+            result[override_id] = Scalar();
             continue;
         }
 
         auto* literal = var->constructor->As<ast::LiteralExpression>();
         if (!literal) {
             // This is invalid WGSL, but handling gracefully.
-            result[constant_id] = Scalar();
+            result[override_id] = Scalar();
             continue;
         }
 
         if (auto* l = literal->As<ast::BoolLiteralExpression>()) {
-            result[constant_id] = Scalar(l->value);
+            result[override_id] = Scalar(l->value);
             continue;
         }
 
@@ -275,32 +275,32 @@ std::map<uint32_t, Scalar> Inspector::GetConstantIDs() {
             switch (l->suffix) {
                 case ast::IntLiteralExpression::Suffix::kNone:
                 case ast::IntLiteralExpression::Suffix::kI:
-                    result[constant_id] = Scalar(static_cast<int32_t>(l->value));
+                    result[override_id] = Scalar(static_cast<int32_t>(l->value));
                     continue;
                 case ast::IntLiteralExpression::Suffix::kU:
-                    result[constant_id] = Scalar(static_cast<uint32_t>(l->value));
+                    result[override_id] = Scalar(static_cast<uint32_t>(l->value));
                     continue;
             }
         }
 
         if (auto* l = literal->As<ast::FloatLiteralExpression>()) {
-            result[constant_id] = Scalar(static_cast<float>(l->value));
+            result[override_id] = Scalar(static_cast<float>(l->value));
             continue;
         }
 
-        result[constant_id] = Scalar();
+        result[override_id] = Scalar();
     }
 
     return result;
 }
 
-std::map<std::string, uint32_t> Inspector::GetConstantNameToIdMap() {
-    std::map<std::string, uint32_t> result;
+std::map<std::string, OverrideId> Inspector::GetNamedOverrideIds() {
+    std::map<std::string, OverrideId> result;
     for (auto* var : program_->AST().GlobalVariables()) {
         auto* global = program_->Sem().Get<sem::GlobalVariable>(var);
         if (global && global->Declaration()->Is<ast::Override>()) {
             auto name = program_->Symbols().NameFor(var->symbol);
-            result[name] = global->ConstantId();
+            result[name] = global->OverrideId();
         }
     }
     return result;

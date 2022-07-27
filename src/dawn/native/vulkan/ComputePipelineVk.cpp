@@ -66,7 +66,7 @@ MaybeError ComputePipeline::Initialize() {
     createInfo.stage.module = moduleAndSpirv.module;
     createInfo.stage.pName = computeStage.entryPoint.c_str();
 
-    std::vector<OverridableConstantScalar> specializationDataEntries;
+    std::vector<OverrideScalar> specializationDataEntries;
     std::vector<VkSpecializationMapEntry> specializationMapEntries;
     VkSpecializationInfo specializationInfo{};
     createInfo.stage.pSpecializationInfo = GetVkSpecializationInfo(

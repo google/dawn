@@ -562,7 +562,7 @@ bool Validator::LocalVariable(const sem::Variable* v) const {
 
 bool Validator::GlobalVariable(
     const sem::GlobalVariable* global,
-    const std::unordered_map<uint32_t, const sem::Variable*>& constant_ids,
+    const std::unordered_map<OverrideId, const sem::Variable*>& override_ids,
     const std::unordered_map<const sem::Type*, const Source&>& atomic_composite_info) const {
     auto* decl = global->Declaration();
     bool ok = Switch(
@@ -627,7 +627,7 @@ bool Validator::GlobalVariable(
 
             return Var(global);
         },
-        [&](const ast::Override*) { return Override(global, constant_ids); },
+        [&](const ast::Override*) { return Override(global, override_ids); },
         [&](const ast::Const*) {
             if (!decl->attributes.empty()) {
                 AddError("attribute is not valid for module-scope 'const' declaration",
@@ -763,7 +763,7 @@ bool Validator::Let(const sem::Variable* v) const {
 
 bool Validator::Override(
     const sem::Variable* v,
-    const std::unordered_map<uint32_t, const sem::Variable*>& constant_ids) const {
+    const std::unordered_map<OverrideId, const sem::Variable*>& override_ids) const {
     auto* decl = v->Declaration();
     auto* storage_ty = v->Type()->UnwrapRef();
 
@@ -776,17 +776,21 @@ bool Validator::Override(
     for (auto* attr : decl->attributes) {
         if (auto* id_attr = attr->As<ast::IdAttribute>()) {
             uint32_t id = id_attr->value;
-            auto it = constant_ids.find(id);
-            if (it != constant_ids.end() && it->second != v) {
-                AddError("pipeline constant IDs must be unique", attr->source);
-                AddNote("a pipeline constant with an ID of " + std::to_string(id) +
+            if (id > std::numeric_limits<decltype(OverrideId::value)>::max()) {
+                AddError(
+                    "override IDs must be between 0 and " +
+                        std::to_string(std::numeric_limits<decltype(OverrideId::value)>::max()),
+                    attr->source);
+                return false;
+            }
+            if (auto it =
+                    override_ids.find(OverrideId{static_cast<decltype(OverrideId::value)>(id)});
+                it != override_ids.end() && it->second != v) {
+                AddError("override IDs must be unique", attr->source);
+                AddNote("a override with an ID of " + std::to_string(id) +
                             " was previously declared here:",
                         ast::GetAttribute<ast::IdAttribute>(it->second->Declaration()->attributes)
                             ->source);
-                return false;
-            }
-            if (id > 65535) {
-                AddError("pipeline constant IDs must be between 0 and 65535", attr->source);
                 return false;
             }
         } else {

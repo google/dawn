@@ -155,8 +155,8 @@ struct ShaderBindingInfo {
 using BindingGroupInfoMap = std::map<BindingNumber, ShaderBindingInfo>;
 using BindingInfoArray = ityp::array<BindGroupIndex, BindingGroupInfoMap, kMaxBindGroups>;
 
-// The WebGPU overridable constants only support these scalar types
-union OverridableConstantScalar {
+// The WebGPU override variables only support these scalar types
+union OverrideScalar {
     // Use int32_t for boolean to initialize the full 32bit
     int32_t b;
     float f32;
@@ -216,9 +216,9 @@ struct EntryPointMetadata {
     // The shader stage for this binding.
     SingleShaderStage stage;
 
-    struct OverridableConstant {
+    struct Override {
         uint32_t id;
-        // Match tint::inspector::OverridableConstant::Type
+        // Match tint::inspector::Override::Type
         // Bool is defined as a macro on linux X11 and cannot compile
         enum class Type { Boolean, Float32, Uint32, Int32 } type;
 
@@ -230,23 +230,23 @@ struct EntryPointMetadata {
         // Store the default initialized value in shader
         // This is used by metal backend as the function_constant does not have dafault values
         // Initialized when isInitialized == true
-        OverridableConstantScalar defaultValue;
+        OverrideScalar defaultValue;
     };
 
-    using OverridableConstantsMap = std::unordered_map<std::string, OverridableConstant>;
+    using OverridesMap = std::unordered_map<std::string, Override>;
 
-    // Map identifier to overridable constant
+    // Map identifier to override variable
     // Identifier is unique: either the variable name or the numeric ID if specified
-    OverridableConstantsMap overridableConstants;
+    OverridesMap overrides;
 
-    // Overridable constants that are not initialized in shaders
+    // Override variables that are not initialized in shaders
     // They need value initialization from pipeline stage or it is a validation error
-    std::unordered_set<std::string> uninitializedOverridableConstants;
+    std::unordered_set<std::string> uninitializedOverrides;
 
     // Store constants with shader initialized values as well
     // This is used by metal backend to set values with default initializers that are not
     // overridden
-    std::unordered_set<std::string> initializedOverridableConstants;
+    std::unordered_set<std::string> initializedOverrides;
 
     bool usesNumWorkgroups = false;
     // Used at render pipeline validation.

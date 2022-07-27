@@ -362,7 +362,8 @@ class Resolver {
     ast::Access DefaultAccessForStorageClass(ast::StorageClass storage_class);
 
     /// Allocate constant IDs for pipeline-overridable constants.
-    void AllocateOverridableConstantIds();
+    /// @returns true on success, false on error
+    bool AllocateOverridableConstantIds();
 
     /// Set the shadowing information on variable declarations.
     /// @note this method must only be called after all semantic nodes are built.
@@ -422,7 +423,7 @@ class Resolver {
     std::vector<sem::Function*> entry_points_;
     std::unordered_map<const sem::Type*, const Source&> atomic_composite_info_;
     utils::Bitset<0> marked_;
-    std::unordered_map<uint32_t, const sem::Variable*> constant_ids_;
+    std::unordered_map<OverrideId, const sem::Variable*> override_ids_;
     std::unordered_map<ArrayConstructorSig, sem::CallTarget*> array_ctors_;
     std::unordered_map<StructConstructorSig, sem::CallTarget*> struct_ctors_;
 

@@ -268,10 +268,10 @@ void CommonFuzzer::RunInspector(Program* program) {
     auto entry_points = inspector.GetEntryPoints();
     CHECK_INSPECTOR(program, inspector);
 
-    auto constant_ids = inspector.GetConstantIDs();
+    auto override_ids = inspector.GetOverrideDefaultValues();
     CHECK_INSPECTOR(program, inspector);
 
-    auto constant_name_to_id = inspector.GetConstantNameToIdMap();
+    auto override_name_to_id = inspector.GetNamedOverrideIds();
     CHECK_INSPECTOR(program, inspector);
 
     for (auto& ep : entry_points) {

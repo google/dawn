@@ -341,7 +341,7 @@ MaybeError RenderPipeline::Initialize() {
 
     // There are at most 2 shader stages in render pipeline, i.e. vertex and fragment
     std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
-    std::array<std::vector<OverridableConstantScalar>, 2> specializationDataEntriesPerStages;
+    std::array<std::vector<OverrideScalar>, 2> specializationDataEntriesPerStages;
     std::array<std::vector<VkSpecializationMapEntry>, 2> specializationMapEntriesPerStages;
     std::array<VkSpecializationInfo, 2> specializationInfoPerStages;
     uint32_t stageCount = 0;

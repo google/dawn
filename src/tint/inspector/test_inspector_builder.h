@@ -92,31 +92,6 @@ class InspectorBuilder : public ProgramBuilder {
         std::vector<std::tuple<std::string, std::string>> inout_vars,
         ast::AttributeList attributes);
 
-    /// Add a pipeline constant to the global variables, with a specific ID.
-    /// @param name name of the variable to add
-    /// @param id id number for the constant id
-    /// @param type type of the variable
-    /// @param constructor val to initialize the constant with, if NULL no
-    ///             constructor will be added.
-    /// @returns the constant that was created
-    const ast::Variable* AddOverridableConstantWithID(std::string name,
-                                                      uint32_t id,
-                                                      const ast::Type* type,
-                                                      const ast::Expression* constructor) {
-        return Override(name, type, constructor, {Id(id)});
-    }
-
-    /// Add a pipeline constant to the global variables, without a specific ID.
-    /// @param name name of the variable to add
-    /// @param type type of the variable
-    /// @param constructor val to initialize the constant with, if NULL no
-    ///             constructor will be added.
-    /// @returns the constant that was created
-    const ast::Variable* AddOverridableConstantWithoutID(std::string name,
-                                                         const ast::Type* type,
-                                                         const ast::Expression* constructor) {
-        return Override(name, type, constructor);
-    }
 
     /// Generates a function that references module-scoped, plain-typed constant
     /// or variable.

@@ -76,11 +76,11 @@ void SingleEntryPoint::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) c
             [&](const ast::Override* override) {
                 if (referenced_vars.count(override)) {
                     if (!ast::HasAttribute<ast::IdAttribute>(override->attributes)) {
-                        // If the constant doesn't already have an @id() attribute, add one
+                        // If the override doesn't already have an @id() attribute, add one
                         // so that its allocated ID so that it won't be affected by other
-                        // stripped away constants
+                        // stripped away overrides
                         auto* global = sem.Get(override);
-                        const auto* id = ctx.dst->Id(global->ConstantId());
+                        const auto* id = ctx.dst->Id(global->OverrideId());
                         ctx.InsertFront(override->attributes, id);
                     }
                     ctx.dst->AST().AddGlobalVariable(ctx.Clone(override));

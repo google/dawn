@@ -3063,7 +3063,7 @@ bool GeneratorImpl::EmitOverride(const ast::Override* override) {
     }
     out << " " << program_->Symbols().NameFor(override->symbol);
 
-    out << " [[function_constant(" << global->ConstantId() << ")]];";
+    out << " [[function_constant(" << global->OverrideId().value << ")]];";
 
     return true;
 }

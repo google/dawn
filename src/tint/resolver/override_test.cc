@@ -21,23 +21,23 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::resolver {
 namespace {
 
-class ResolverPipelineOverridableConstantTest : public ResolverTest {
+class ResolverOverrideTest : public ResolverTest {
   protected:
     /// Verify that the AST node `var` was resolved to an overridable constant
     /// with an ID equal to `id`.
     /// @param var the overridable constant AST node
     /// @param id the expected constant ID
-    void ExpectConstantId(const ast::Variable* var, uint16_t id) {
+    void ExpectOverrideId(const ast::Variable* var, uint16_t id) {
         auto* sem = Sem().Get<sem::GlobalVariable>(var);
         ASSERT_NE(sem, nullptr);
         EXPECT_EQ(sem->Declaration(), var);
         EXPECT_TRUE(sem->Declaration()->Is<ast::Override>());
-        EXPECT_EQ(sem->ConstantId(), id);
+        EXPECT_EQ(sem->OverrideId().value, id);
         EXPECT_FALSE(sem->ConstantValue());
     }
 };
 
-TEST_F(ResolverPipelineOverridableConstantTest, NonOverridable) {
+TEST_F(ResolverOverrideTest, NonOverridable) {
     auto* a = GlobalConst("a", ty.f32(), Expr(1_f));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -49,23 +49,23 @@ TEST_F(ResolverPipelineOverridableConstantTest, NonOverridable) {
     EXPECT_TRUE(sem_a->ConstantValue());
 }
 
-TEST_F(ResolverPipelineOverridableConstantTest, WithId) {
+TEST_F(ResolverOverrideTest, WithId) {
     auto* a = Override("a", ty.f32(), Expr(1_f), {Id(7u)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    ExpectConstantId(a, 7u);
+    ExpectOverrideId(a, 7u);
 }
 
-TEST_F(ResolverPipelineOverridableConstantTest, WithoutId) {
+TEST_F(ResolverOverrideTest, WithoutId) {
     auto* a = Override("a", ty.f32(), Expr(1_f));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    ExpectConstantId(a, 0u);
+    ExpectOverrideId(a, 0u);
 }
 
-TEST_F(ResolverPipelineOverridableConstantTest, WithAndWithoutIds) {
+TEST_F(ResolverOverrideTest, WithAndWithoutIds) {
     std::vector<ast::Variable*> variables;
     auto* a = Override("a", ty.f32(), Expr(1_f));
     auto* b = Override("b", ty.f32(), Expr(1_f));
@@ -77,33 +77,33 @@ TEST_F(ResolverPipelineOverridableConstantTest, WithAndWithoutIds) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     // Verify that constant id allocation order is deterministic.
-    ExpectConstantId(a, 0u);
-    ExpectConstantId(b, 3u);
-    ExpectConstantId(c, 2u);
-    ExpectConstantId(d, 4u);
-    ExpectConstantId(e, 5u);
-    ExpectConstantId(f, 1u);
+    ExpectOverrideId(a, 0u);
+    ExpectOverrideId(b, 3u);
+    ExpectOverrideId(c, 2u);
+    ExpectOverrideId(d, 4u);
+    ExpectOverrideId(e, 5u);
+    ExpectOverrideId(f, 1u);
 }
 
-TEST_F(ResolverPipelineOverridableConstantTest, DuplicateIds) {
+TEST_F(ResolverOverrideTest, DuplicateIds) {
     Override("a", ty.f32(), Expr(1_f), {Id(Source{{12, 34}}, 7u)});
     Override("b", ty.f32(), Expr(1_f), {Id(Source{{56, 78}}, 7u)});
 
     EXPECT_FALSE(r()->Resolve());
 
-    EXPECT_EQ(r()->error(), R"(56:78 error: pipeline constant IDs must be unique
-12:34 note: a pipeline constant with an ID of 7 was previously declared here:)");
+    EXPECT_EQ(r()->error(), R"(56:78 error: override IDs must be unique
+12:34 note: a override with an ID of 7 was previously declared here:)");
 }
 
-TEST_F(ResolverPipelineOverridableConstantTest, IdTooLarge) {
+TEST_F(ResolverOverrideTest, IdTooLarge) {
     Override("a", ty.f32(), Expr(1_f), {Id(Source{{12, 34}}, 65536u)});
 
     EXPECT_FALSE(r()->Resolve());
 
-    EXPECT_EQ(r()->error(), "12:34 error: pipeline constant IDs must be between 0 and 65535");
+    EXPECT_EQ(r()->error(), "12:34 error: override IDs must be between 0 and 65535");
 }
 
-TEST_F(ResolverPipelineOverridableConstantTest, F16_TemporallyBan) {
+TEST_F(ResolverOverrideTest, F16_TemporallyBan) {
     Enable(ast::Extension::kF16);
 
     Override(Source{{12, 34}}, "a", ty.f16(), Expr(1_h), {Id(1u)});

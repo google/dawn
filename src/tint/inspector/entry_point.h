@@ -20,6 +20,8 @@
 #include <tuple>
 #include <vector>
 
+#include "tint/override_id.h"
+
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/pipeline_stage.h"
 
@@ -93,14 +95,13 @@ InterpolationType ASTToInspectorInterpolationType(ast::InterpolationType ast_typ
 /// @returns the publicly visible equivalent
 InterpolationSampling ASTToInspectorInterpolationSampling(ast::InterpolationSampling sampling);
 
-/// Reflection data about a pipeline overridable constant referenced by an entry
-/// point
-struct OverridableConstant {
-    /// Name of the constant
+/// Reflection data about an override variable referenced by an entry point
+struct Override {
+    /// Name of the override
     std::string name;
 
-    /// ID of the constant
-    uint16_t numeric_id;
+    /// ID of the override
+    OverrideId id;
 
     /// Type of the scalar
     enum class Type {
@@ -113,12 +114,11 @@ struct OverridableConstant {
     /// Type of the scalar
     Type type;
 
-    /// Does this pipeline overridable constant have an initializer?
+    /// Does this override have an initializer?
     bool is_initialized = false;
 
-    /// Does this pipeline overridable constant have a numeric ID specified
-    /// explicitly?
-    bool is_numeric_id_specified = false;
+    /// Does this override have a numeric ID specified explicitly?
+    bool is_id_specified = false;
 };
 
 /// The pipeline stage
@@ -159,7 +159,7 @@ struct EntryPoint {
     /// List of the output variable accessed via this entry point.
     std::vector<StageVariable> output_variables;
     /// List of the pipeline overridable constants accessed via this entry point.
-    std::vector<OverridableConstant> overridable_constants;
+    std::vector<Override> overrides;
     /// Does the entry point use the sample_mask builtin as an input builtin
     /// variable.
     bool input_sample_mask_used = false;

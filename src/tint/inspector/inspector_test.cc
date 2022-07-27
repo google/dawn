@@ -60,7 +60,7 @@ struct InspectorGetEntryPointInterpolateTestParams {
 class InspectorGetEntryPointInterpolateTest
     : public InspectorBuilder,
       public testing::TestWithParam<InspectorGetEntryPointInterpolateTestParams> {};
-class InspectorGetConstantIDsTest : public InspectorBuilder, public testing::Test {};
+class InspectorGetOverrideDefaultValuesTest : public InspectorBuilder, public testing::Test {};
 class InspectorGetConstantNameToIdMapTest : public InspectorBuilder, public testing::Test {};
 class InspectorGetStorageSizeTest : public InspectorBuilder, public testing::Test {};
 class InspectorGetResourceBindingsTest : public InspectorBuilder, public testing::Test {};
@@ -605,8 +605,8 @@ TEST_F(InspectorGetEntryPointTest, MixInOutVariablesAndStruct) {
     EXPECT_EQ(ComponentType::kUInt, result[0].output_variables[1].component_type);
 }
 
-TEST_F(InspectorGetEntryPointTest, OverridableConstantUnreferenced) {
-    AddOverridableConstantWithoutID("foo", ty.f32(), nullptr);
+TEST_F(InspectorGetEntryPointTest, OverrideUnreferenced) {
+    Override("foo", ty.f32(), nullptr);
     MakeEmptyBodyFunction("ep_func", {
                                          Stage(ast::PipelineStage::kCompute),
                                          WorkgroupSize(1_i),
@@ -617,11 +617,11 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantUnreferenced) {
     auto result = inspector.GetEntryPoints();
 
     ASSERT_EQ(1u, result.size());
-    EXPECT_EQ(0u, result[0].overridable_constants.size());
+    EXPECT_EQ(0u, result[0].overrides.size());
 }
 
-TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByEntryPoint) {
-    AddOverridableConstantWithoutID("foo", ty.f32(), nullptr);
+TEST_F(InspectorGetEntryPointTest, OverrideReferencedByEntryPoint) {
+    Override("foo", ty.f32(), nullptr);
     MakePlainGlobalReferenceBodyFunction("ep_func", "foo", ty.f32(),
                                          {
                                              Stage(ast::PipelineStage::kCompute),
@@ -633,12 +633,12 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByEntryPoint) {
     auto result = inspector.GetEntryPoints();
 
     ASSERT_EQ(1u, result.size());
-    ASSERT_EQ(1u, result[0].overridable_constants.size());
-    EXPECT_EQ("foo", result[0].overridable_constants[0].name);
+    ASSERT_EQ(1u, result[0].overrides.size());
+    EXPECT_EQ("foo", result[0].overrides[0].name);
 }
 
-TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByCallee) {
-    AddOverridableConstantWithoutID("foo", ty.f32(), nullptr);
+TEST_F(InspectorGetEntryPointTest, OverrideReferencedByCallee) {
+    Override("foo", ty.f32(), nullptr);
     MakePlainGlobalReferenceBodyFunction("callee_func", "foo", ty.f32(), {});
     MakeCallerBodyFunction("ep_func", {"callee_func"},
                            {
@@ -651,13 +651,13 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantReferencedByCallee) {
     auto result = inspector.GetEntryPoints();
 
     ASSERT_EQ(1u, result.size());
-    ASSERT_EQ(1u, result[0].overridable_constants.size());
-    EXPECT_EQ("foo", result[0].overridable_constants[0].name);
+    ASSERT_EQ(1u, result[0].overrides.size());
+    EXPECT_EQ("foo", result[0].overrides[0].name);
 }
 
-TEST_F(InspectorGetEntryPointTest, OverridableConstantSomeReferenced) {
-    AddOverridableConstantWithID("foo", 1, ty.f32(), nullptr);
-    AddOverridableConstantWithID("bar", 2, ty.f32(), nullptr);
+TEST_F(InspectorGetEntryPointTest, OverrideSomeReferenced) {
+    Override("foo", ty.f32(), nullptr, {Id(1)});
+    Override("bar", ty.f32(), nullptr, {Id(2)});
     MakePlainGlobalReferenceBodyFunction("callee_func", "foo", ty.f32(), {});
     MakeCallerBodyFunction("ep_func", {"callee_func"},
                            {
@@ -670,16 +670,16 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantSomeReferenced) {
     auto result = inspector.GetEntryPoints();
 
     ASSERT_EQ(1u, result.size());
-    ASSERT_EQ(1u, result[0].overridable_constants.size());
-    EXPECT_EQ("foo", result[0].overridable_constants[0].name);
-    EXPECT_EQ(1, result[0].overridable_constants[0].numeric_id);
+    ASSERT_EQ(1u, result[0].overrides.size());
+    EXPECT_EQ("foo", result[0].overrides[0].name);
+    EXPECT_EQ(1, result[0].overrides[0].id.value);
 }
 
-TEST_F(InspectorGetEntryPointTest, OverridableConstantTypes) {
-    AddOverridableConstantWithoutID("bool_var", ty.bool_(), nullptr);
-    AddOverridableConstantWithoutID("float_var", ty.f32(), nullptr);
-    AddOverridableConstantWithoutID("u32_var", ty.u32(), nullptr);
-    AddOverridableConstantWithoutID("i32_var", ty.i32(), nullptr);
+TEST_F(InspectorGetEntryPointTest, OverrideTypes) {
+    Override("bool_var", ty.bool_(), nullptr);
+    Override("float_var", ty.f32(), nullptr);
+    Override("u32_var", ty.u32(), nullptr);
+    Override("i32_var", ty.i32(), nullptr);
 
     MakePlainGlobalReferenceBodyFunction("bool_func", "bool_var", ty.bool_(), {});
     MakePlainGlobalReferenceBodyFunction("float_func", "float_var", ty.f32(), {});
@@ -697,22 +697,19 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantTypes) {
     auto result = inspector.GetEntryPoints();
 
     ASSERT_EQ(1u, result.size());
-    ASSERT_EQ(4u, result[0].overridable_constants.size());
-    EXPECT_EQ("bool_var", result[0].overridable_constants[0].name);
-    EXPECT_EQ(inspector::OverridableConstant::Type::kBool, result[0].overridable_constants[0].type);
-    EXPECT_EQ("float_var", result[0].overridable_constants[1].name);
-    EXPECT_EQ(inspector::OverridableConstant::Type::kFloat32,
-              result[0].overridable_constants[1].type);
-    EXPECT_EQ("u32_var", result[0].overridable_constants[2].name);
-    EXPECT_EQ(inspector::OverridableConstant::Type::kUint32,
-              result[0].overridable_constants[2].type);
-    EXPECT_EQ("i32_var", result[0].overridable_constants[3].name);
-    EXPECT_EQ(inspector::OverridableConstant::Type::kInt32,
-              result[0].overridable_constants[3].type);
+    ASSERT_EQ(4u, result[0].overrides.size());
+    EXPECT_EQ("bool_var", result[0].overrides[0].name);
+    EXPECT_EQ(inspector::Override::Type::kBool, result[0].overrides[0].type);
+    EXPECT_EQ("float_var", result[0].overrides[1].name);
+    EXPECT_EQ(inspector::Override::Type::kFloat32, result[0].overrides[1].type);
+    EXPECT_EQ("u32_var", result[0].overrides[2].name);
+    EXPECT_EQ(inspector::Override::Type::kUint32, result[0].overrides[2].type);
+    EXPECT_EQ("i32_var", result[0].overrides[3].name);
+    EXPECT_EQ(inspector::Override::Type::kInt32, result[0].overrides[3].type);
 }
 
-TEST_F(InspectorGetEntryPointTest, OverridableConstantInitialized) {
-    AddOverridableConstantWithoutID("foo", ty.f32(), Expr(0_f));
+TEST_F(InspectorGetEntryPointTest, OverrideInitialized) {
+    Override("foo", ty.f32(), Expr(0_f));
     MakePlainGlobalReferenceBodyFunction("ep_func", "foo", ty.f32(),
                                          {
                                              Stage(ast::PipelineStage::kCompute),
@@ -724,13 +721,13 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantInitialized) {
     auto result = inspector.GetEntryPoints();
 
     ASSERT_EQ(1u, result.size());
-    ASSERT_EQ(1u, result[0].overridable_constants.size());
-    EXPECT_EQ("foo", result[0].overridable_constants[0].name);
-    EXPECT_TRUE(result[0].overridable_constants[0].is_initialized);
+    ASSERT_EQ(1u, result[0].overrides.size());
+    EXPECT_EQ("foo", result[0].overrides[0].name);
+    EXPECT_TRUE(result[0].overrides[0].is_initialized);
 }
 
-TEST_F(InspectorGetEntryPointTest, OverridableConstantUninitialized) {
-    AddOverridableConstantWithoutID("foo", ty.f32(), nullptr);
+TEST_F(InspectorGetEntryPointTest, OverrideUninitialized) {
+    Override("foo", ty.f32(), nullptr);
     MakePlainGlobalReferenceBodyFunction("ep_func", "foo", ty.f32(),
                                          {
                                              Stage(ast::PipelineStage::kCompute),
@@ -742,15 +739,15 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantUninitialized) {
     auto result = inspector.GetEntryPoints();
 
     ASSERT_EQ(1u, result.size());
-    ASSERT_EQ(1u, result[0].overridable_constants.size());
-    EXPECT_EQ("foo", result[0].overridable_constants[0].name);
+    ASSERT_EQ(1u, result[0].overrides.size());
+    EXPECT_EQ("foo", result[0].overrides[0].name);
 
-    EXPECT_FALSE(result[0].overridable_constants[0].is_initialized);
+    EXPECT_FALSE(result[0].overrides[0].is_initialized);
 }
 
-TEST_F(InspectorGetEntryPointTest, OverridableConstantNumericIDSpecified) {
-    AddOverridableConstantWithoutID("foo_no_id", ty.f32(), nullptr);
-    AddOverridableConstantWithID("foo_id", 1234, ty.f32(), nullptr);
+TEST_F(InspectorGetEntryPointTest, OverrideNumericIDSpecified) {
+    Override("foo_no_id", ty.f32(), nullptr);
+    Override("foo_id", ty.f32(), nullptr, {Id(1234)});
 
     MakePlainGlobalReferenceBodyFunction("no_id_func", "foo_no_id", ty.f32(), {});
     MakePlainGlobalReferenceBodyFunction("id_func", "foo_id", ty.f32(), {});
@@ -766,16 +763,16 @@ TEST_F(InspectorGetEntryPointTest, OverridableConstantNumericIDSpecified) {
     auto result = inspector.GetEntryPoints();
 
     ASSERT_EQ(1u, result.size());
-    ASSERT_EQ(2u, result[0].overridable_constants.size());
-    EXPECT_EQ("foo_no_id", result[0].overridable_constants[0].name);
-    EXPECT_EQ("foo_id", result[0].overridable_constants[1].name);
-    EXPECT_EQ(1234, result[0].overridable_constants[1].numeric_id);
+    ASSERT_EQ(2u, result[0].overrides.size());
+    EXPECT_EQ("foo_no_id", result[0].overrides[0].name);
+    EXPECT_EQ("foo_id", result[0].overrides[1].name);
+    EXPECT_EQ(1234, result[0].overrides[1].id.value);
 
-    EXPECT_FALSE(result[0].overridable_constants[0].is_numeric_id_specified);
-    EXPECT_TRUE(result[0].overridable_constants[1].is_numeric_id_specified);
+    EXPECT_FALSE(result[0].overrides[0].is_id_specified);
+    EXPECT_TRUE(result[0].overrides[1].is_id_specified);
 }
 
-TEST_F(InspectorGetEntryPointTest, NonOverridableConstantSkipped) {
+TEST_F(InspectorGetEntryPointTest, NonOverrideSkipped) {
     auto* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
     AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
     MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
@@ -789,7 +786,7 @@ TEST_F(InspectorGetEntryPointTest, NonOverridableConstantSkipped) {
     auto result = inspector.GetEntryPoints();
 
     ASSERT_EQ(1u, result.size());
-    EXPECT_EQ(0u, result[0].overridable_constants.size());
+    EXPECT_EQ(0u, result[0].overrides.size());
 }
 
 TEST_F(InspectorGetEntryPointTest, BuiltinNotReferenced) {
@@ -1172,127 +1169,127 @@ INSTANTIATE_TEST_SUITE_P(
             ast::InterpolationType::kFlat, ast::InterpolationSampling::kNone,
             InterpolationType::kFlat, InterpolationSampling::kNone}));
 
-TEST_F(InspectorGetConstantIDsTest, Bool) {
-    AddOverridableConstantWithID("foo", 1, ty.bool_(), nullptr);
-    AddOverridableConstantWithID("bar", 20, ty.bool_(), Expr(true));
-    AddOverridableConstantWithID("baz", 300, ty.bool_(), Expr(false));
+TEST_F(InspectorGetOverrideDefaultValuesTest, Bool) {
+    Override("foo", ty.bool_(), nullptr, {Id(1)});
+    Override("bar", ty.bool_(), Expr(true), {Id(20)});
+    Override("baz", ty.bool_(), Expr(false), {Id(300)});
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetConstantIDs();
+    auto result = inspector.GetOverrideDefaultValues();
     ASSERT_EQ(3u, result.size());
 
-    ASSERT_TRUE(result.find(1) != result.end());
-    EXPECT_TRUE(result[1].IsNull());
+    ASSERT_TRUE(result.find(OverrideId{1}) != result.end());
+    EXPECT_TRUE(result[OverrideId{1}].IsNull());
 
-    ASSERT_TRUE(result.find(20) != result.end());
-    EXPECT_TRUE(result[20].IsBool());
-    EXPECT_TRUE(result[20].AsBool());
+    ASSERT_TRUE(result.find(OverrideId{20}) != result.end());
+    EXPECT_TRUE(result[OverrideId{20}].IsBool());
+    EXPECT_TRUE(result[OverrideId{20}].AsBool());
 
-    ASSERT_TRUE(result.find(300) != result.end());
-    EXPECT_TRUE(result[300].IsBool());
-    EXPECT_FALSE(result[300].AsBool());
+    ASSERT_TRUE(result.find(OverrideId{300}) != result.end());
+    EXPECT_TRUE(result[OverrideId{300}].IsBool());
+    EXPECT_FALSE(result[OverrideId{300}].AsBool());
 }
 
-TEST_F(InspectorGetConstantIDsTest, U32) {
-    AddOverridableConstantWithID("foo", 1, ty.u32(), nullptr);
-    AddOverridableConstantWithID("bar", 20, ty.u32(), Expr(42_u));
+TEST_F(InspectorGetOverrideDefaultValuesTest, U32) {
+    Override("foo", ty.u32(), nullptr, {Id(1)});
+    Override("bar", ty.u32(), Expr(42_u), {Id(20)});
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetConstantIDs();
+    auto result = inspector.GetOverrideDefaultValues();
     ASSERT_EQ(2u, result.size());
 
-    ASSERT_TRUE(result.find(1) != result.end());
-    EXPECT_TRUE(result[1].IsNull());
+    ASSERT_TRUE(result.find(OverrideId{1}) != result.end());
+    EXPECT_TRUE(result[OverrideId{1}].IsNull());
 
-    ASSERT_TRUE(result.find(20) != result.end());
-    EXPECT_TRUE(result[20].IsU32());
-    EXPECT_EQ(42u, result[20].AsU32());
+    ASSERT_TRUE(result.find(OverrideId{20}) != result.end());
+    EXPECT_TRUE(result[OverrideId{20}].IsU32());
+    EXPECT_EQ(42u, result[OverrideId{20}].AsU32());
 }
 
-TEST_F(InspectorGetConstantIDsTest, I32) {
-    AddOverridableConstantWithID("foo", 1, ty.i32(), nullptr);
-    AddOverridableConstantWithID("bar", 20, ty.i32(), Expr(-42_i));
-    AddOverridableConstantWithID("baz", 300, ty.i32(), Expr(42_i));
+TEST_F(InspectorGetOverrideDefaultValuesTest, I32) {
+    Override("foo", ty.i32(), nullptr, {Id(1)});
+    Override("bar", ty.i32(), Expr(-42_i), {Id(20)});
+    Override("baz", ty.i32(), Expr(42_i), {Id(300)});
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetConstantIDs();
+    auto result = inspector.GetOverrideDefaultValues();
     ASSERT_EQ(3u, result.size());
 
-    ASSERT_TRUE(result.find(1) != result.end());
-    EXPECT_TRUE(result[1].IsNull());
+    ASSERT_TRUE(result.find(OverrideId{1}) != result.end());
+    EXPECT_TRUE(result[OverrideId{1}].IsNull());
 
-    ASSERT_TRUE(result.find(20) != result.end());
-    EXPECT_TRUE(result[20].IsI32());
-    EXPECT_EQ(-42, result[20].AsI32());
+    ASSERT_TRUE(result.find(OverrideId{20}) != result.end());
+    EXPECT_TRUE(result[OverrideId{20}].IsI32());
+    EXPECT_EQ(-42, result[OverrideId{20}].AsI32());
 
-    ASSERT_TRUE(result.find(300) != result.end());
-    EXPECT_TRUE(result[300].IsI32());
-    EXPECT_EQ(42, result[300].AsI32());
+    ASSERT_TRUE(result.find(OverrideId{300}) != result.end());
+    EXPECT_TRUE(result[OverrideId{300}].IsI32());
+    EXPECT_EQ(42, result[OverrideId{300}].AsI32());
 }
 
-TEST_F(InspectorGetConstantIDsTest, Float) {
-    AddOverridableConstantWithID("foo", 1, ty.f32(), nullptr);
-    AddOverridableConstantWithID("bar", 20, ty.f32(), Expr(0_f));
-    AddOverridableConstantWithID("baz", 300, ty.f32(), Expr(-10_f));
-    AddOverridableConstantWithID("x", 4000, ty.f32(), Expr(15_f));
+TEST_F(InspectorGetOverrideDefaultValuesTest, Float) {
+    Override("foo", ty.f32(), nullptr, {Id(1)});
+    Override("bar", ty.f32(), Expr(0_f), {Id(20)});
+    Override("baz", ty.f32(), Expr(-10_f), {Id(300)});
+    Override("x", ty.f32(), Expr(15_f), {Id(4000)});
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetConstantIDs();
+    auto result = inspector.GetOverrideDefaultValues();
     ASSERT_EQ(4u, result.size());
 
-    ASSERT_TRUE(result.find(1) != result.end());
-    EXPECT_TRUE(result[1].IsNull());
+    ASSERT_TRUE(result.find(OverrideId{1}) != result.end());
+    EXPECT_TRUE(result[OverrideId{1}].IsNull());
 
-    ASSERT_TRUE(result.find(20) != result.end());
-    EXPECT_TRUE(result[20].IsFloat());
-    EXPECT_FLOAT_EQ(0.0f, result[20].AsFloat());
+    ASSERT_TRUE(result.find(OverrideId{20}) != result.end());
+    EXPECT_TRUE(result[OverrideId{20}].IsFloat());
+    EXPECT_FLOAT_EQ(0.0f, result[OverrideId{20}].AsFloat());
 
-    ASSERT_TRUE(result.find(300) != result.end());
-    EXPECT_TRUE(result[300].IsFloat());
-    EXPECT_FLOAT_EQ(-10.0f, result[300].AsFloat());
+    ASSERT_TRUE(result.find(OverrideId{300}) != result.end());
+    EXPECT_TRUE(result[OverrideId{300}].IsFloat());
+    EXPECT_FLOAT_EQ(-10.0f, result[OverrideId{300}].AsFloat());
 
-    ASSERT_TRUE(result.find(4000) != result.end());
-    EXPECT_TRUE(result[4000].IsFloat());
-    EXPECT_FLOAT_EQ(15.0f, result[4000].AsFloat());
+    ASSERT_TRUE(result.find(OverrideId{4000}) != result.end());
+    EXPECT_TRUE(result[OverrideId{4000}].IsFloat());
+    EXPECT_FLOAT_EQ(15.0f, result[OverrideId{4000}].AsFloat());
 }
 
 TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {
-    AddOverridableConstantWithID("v1", 1, ty.f32(), nullptr);
-    AddOverridableConstantWithID("v20", 20, ty.f32(), nullptr);
-    AddOverridableConstantWithID("v300", 300, ty.f32(), nullptr);
-    auto* a = AddOverridableConstantWithoutID("a", ty.f32(), nullptr);
-    auto* b = AddOverridableConstantWithoutID("b", ty.f32(), nullptr);
-    auto* c = AddOverridableConstantWithoutID("c", ty.f32(), nullptr);
+    Override("v1", ty.f32(), nullptr, {Id(1)});
+    Override("v20", ty.f32(), nullptr, {Id(20)});
+    Override("v300", ty.f32(), nullptr, {Id(300)});
+    auto* a = Override("a", ty.f32(), nullptr);
+    auto* b = Override("b", ty.f32(), nullptr);
+    auto* c = Override("c", ty.f32(), nullptr);
 
     Inspector& inspector = Build();
 
-    auto result = inspector.GetConstantNameToIdMap();
+    auto result = inspector.GetNamedOverrideIds();
     ASSERT_EQ(6u, result.size());
 
     ASSERT_TRUE(result.count("v1"));
-    EXPECT_EQ(result["v1"], 1u);
+    EXPECT_EQ(result["v1"].value, 1u);
 
     ASSERT_TRUE(result.count("v20"));
-    EXPECT_EQ(result["v20"], 20u);
+    EXPECT_EQ(result["v20"].value, 20u);
 
     ASSERT_TRUE(result.count("v300"));
-    EXPECT_EQ(result["v300"], 300u);
+    EXPECT_EQ(result["v300"].value, 300u);
 
     ASSERT_TRUE(result.count("a"));
     ASSERT_TRUE(program_->Sem().Get<sem::GlobalVariable>(a));
-    EXPECT_EQ(result["a"], program_->Sem().Get<sem::GlobalVariable>(a)->ConstantId());
+    EXPECT_EQ(result["a"], program_->Sem().Get<sem::GlobalVariable>(a)->OverrideId());
 
     ASSERT_TRUE(result.count("b"));
     ASSERT_TRUE(program_->Sem().Get<sem::GlobalVariable>(b));
-    EXPECT_EQ(result["b"], program_->Sem().Get<sem::GlobalVariable>(b)->ConstantId());
+    EXPECT_EQ(result["b"], program_->Sem().Get<sem::GlobalVariable>(b)->OverrideId());
 
     ASSERT_TRUE(result.count("c"));
     ASSERT_TRUE(program_->Sem().Get<sem::GlobalVariable>(c));
-    EXPECT_EQ(result["c"], program_->Sem().Get<sem::GlobalVariable>(c)->ConstantId());
+    EXPECT_EQ(result["c"], program_->Sem().Get<sem::GlobalVariable>(c)->OverrideId());
 }
 
 TEST_F(InspectorGetStorageSizeTest, Empty) {

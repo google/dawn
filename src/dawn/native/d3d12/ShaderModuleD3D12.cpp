@@ -111,17 +111,17 @@ std::string FloatToStringWithPrecision(float v, std::streamsize n = 8) {
     return out.str();
 }
 
-std::string GetHLSLValueString(EntryPointMetadata::OverridableConstant::Type dawnType,
-                               const OverridableConstantScalar* entry,
+std::string GetHLSLValueString(EntryPointMetadata::Override::Type dawnType,
+                               const OverrideScalar* entry,
                                double value = 0) {
     switch (dawnType) {
-        case EntryPointMetadata::OverridableConstant::Type::Boolean:
+        case EntryPointMetadata::Override::Type::Boolean:
             return std::to_string(entry ? entry->b : static_cast<int32_t>(value));
-        case EntryPointMetadata::OverridableConstant::Type::Float32:
+        case EntryPointMetadata::Override::Type::Float32:
             return FloatToStringWithPrecision(entry ? entry->f32 : static_cast<float>(value));
-        case EntryPointMetadata::OverridableConstant::Type::Int32:
+        case EntryPointMetadata::Override::Type::Int32:
             return std::to_string(entry ? entry->i32 : static_cast<int32_t>(value));
-        case EntryPointMetadata::OverridableConstant::Type::Uint32:
+        case EntryPointMetadata::Override::Type::Uint32:
             return std::to_string(entry ? entry->u32 : static_cast<uint32_t>(value));
         default:
             UNREACHABLE();
@@ -133,7 +133,7 @@ constexpr char kSpecConstantPrefix[] = "WGSL_SPEC_CONSTANT_";
 void GetOverridableConstantsDefines(
     std::vector<std::pair<std::string, std::string>>* defineStrings,
     const PipelineConstantEntries* pipelineConstantEntries,
-    const EntryPointMetadata::OverridableConstantsMap* shaderEntryPointConstants) {
+    const EntryPointMetadata::OverridesMap* shaderEntryPointConstants) {
     std::unordered_set<std::string> overriddenConstants;
 
     // Set pipeline overridden values
@@ -305,8 +305,7 @@ struct ShaderCompilationRequest {
 
         GetOverridableConstantsDefines(
             &request.defineStrings, &programmableStage.constants,
-            &programmableStage.module->GetEntryPoint(programmableStage.entryPoint)
-                 .overridableConstants);
+            &programmableStage.module->GetEntryPoint(programmableStage.entryPoint).overrides);
 
         return std::move(request);
     }

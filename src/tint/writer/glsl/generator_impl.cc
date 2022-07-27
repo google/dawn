@@ -2159,7 +2159,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
                     TINT_ICE(Writer, builder_.Diagnostics())
                         << "expected a pipeline-overridable constant";
                 }
-                out << kSpecConstantPrefix << global->ConstantId();
+                out << kSpecConstantPrefix << global->OverrideId().value;
             } else {
                 out << std::to_string(wgsize[i].value);
             }
@@ -3053,18 +3053,18 @@ bool GeneratorImpl::EmitOverride(const ast::Override* override) {
     auto* type = sem->Type();
 
     auto* global = sem->As<sem::GlobalVariable>();
-    auto const_id = global->ConstantId();
+    auto override_id = global->OverrideId();
 
-    line() << "#ifndef " << kSpecConstantPrefix << const_id;
+    line() << "#ifndef " << kSpecConstantPrefix << override_id.value;
 
     if (override->constructor != nullptr) {
         auto out = line();
-        out << "#define " << kSpecConstantPrefix << const_id << " ";
+        out << "#define " << kSpecConstantPrefix << override_id.value << " ";
         if (!EmitExpression(out, override->constructor)) {
             return false;
         }
     } else {
-        line() << "#error spec constant required for constant id " << const_id;
+        line() << "#error spec constant required for constant id " << override_id.value;
     }
     line() << "#endif";
     {
@@ -3074,7 +3074,7 @@ bool GeneratorImpl::EmitOverride(const ast::Override* override) {
                              builder_.Symbols().NameFor(override->symbol))) {
             return false;
         }
-        out << " = " << kSpecConstantPrefix << const_id << ";";
+        out << " = " << kSpecConstantPrefix << override_id.value << ";";
     }
 
     return true;

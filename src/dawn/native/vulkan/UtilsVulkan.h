@@ -24,7 +24,7 @@
 
 namespace dawn::native {
 struct ProgrammableStage;
-union OverridableConstantScalar;
+union OverrideScalar;
 }  // namespace dawn::native
 
 namespace dawn::native::vulkan {
@@ -150,7 +150,7 @@ std::string GetDeviceDebugPrefixFromDebugName(const char* debugName);
 VkSpecializationInfo* GetVkSpecializationInfo(
     const ProgrammableStage& programmableStage,
     VkSpecializationInfo* specializationInfo,
-    std::vector<OverridableConstantScalar>* specializationDataEntries,
+    std::vector<OverrideScalar>* specializationDataEntries,
     std::vector<VkSpecializationMapEntry>* specializationMapEntries);
 
 }  // namespace dawn::native::vulkan

@@ -358,17 +358,16 @@ ResultOrError<InterpolationSampling> TintInterpolationSamplingToInterpolationSam
     UNREACHABLE();
 }
 
-EntryPointMetadata::OverridableConstant::Type FromTintOverridableConstantType(
-    tint::inspector::OverridableConstant::Type type) {
+EntryPointMetadata::Override::Type FromTintOverrideType(tint::inspector::Override::Type type) {
     switch (type) {
-        case tint::inspector::OverridableConstant::Type::kBool:
-            return EntryPointMetadata::OverridableConstant::Type::Boolean;
-        case tint::inspector::OverridableConstant::Type::kFloat32:
-            return EntryPointMetadata::OverridableConstant::Type::Float32;
-        case tint::inspector::OverridableConstant::Type::kInt32:
-            return EntryPointMetadata::OverridableConstant::Type::Int32;
-        case tint::inspector::OverridableConstant::Type::kUint32:
-            return EntryPointMetadata::OverridableConstant::Type::Uint32;
+        case tint::inspector::Override::Type::kBool:
+            return EntryPointMetadata::Override::Type::Boolean;
+        case tint::inspector::Override::Type::kFloat32:
+            return EntryPointMetadata::Override::Type::Float32;
+        case tint::inspector::Override::Type::kInt32:
+            return EntryPointMetadata::Override::Type::Int32;
+        case tint::inspector::Override::Type::kUint32:
+            return EntryPointMetadata::Override::Type::Uint32;
     }
     UNREACHABLE();
 }
@@ -610,17 +609,17 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
         return invalid;                                                             \
     })()
 
-    if (!entryPoint.overridable_constants.empty()) {
+    if (!entryPoint.overrides.empty()) {
         DAWN_INVALID_IF(device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs),
                         "Pipeline overridable constants are disallowed because they "
                         "are partially implemented.");
 
-        const auto& name2Id = inspector->GetConstantNameToIdMap();
-        const auto& id2Scalar = inspector->GetConstantIDs();
+        const auto& name2Id = inspector->GetNamedOverrideIds();
+        const auto& id2Scalar = inspector->GetOverrideDefaultValues();
 
-        for (auto& c : entryPoint.overridable_constants) {
-            uint32_t id = name2Id.at(c.name);
-            OverridableConstantScalar defaultValue;
+        for (auto& c : entryPoint.overrides) {
+            auto id = name2Id.at(c.name);
+            OverrideScalar defaultValue;
             if (c.is_initialized) {
                 // if it is initialized, the scalar must exist
                 const auto& scalar = id2Scalar.at(id);
@@ -636,21 +635,19 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                     UNREACHABLE();
                 }
             }
-            EntryPointMetadata::OverridableConstant constant = {
-                id, FromTintOverridableConstantType(c.type), c.is_initialized, defaultValue};
+            EntryPointMetadata::Override override = {id.value, FromTintOverrideType(c.type),
+                                                     c.is_initialized, defaultValue};
 
-            std::string identifier =
-                c.is_numeric_id_specified ? std::to_string(constant.id) : c.name;
-            metadata->overridableConstants[identifier] = constant;
+            std::string identifier = c.is_id_specified ? std::to_string(override.id) : c.name;
+            metadata->overrides[identifier] = override;
 
             if (!c.is_initialized) {
                 auto [_, inserted] =
-                    metadata->uninitializedOverridableConstants.emplace(std::move(identifier));
+                    metadata->uninitializedOverrides.emplace(std::move(identifier));
                 // The insertion should have taken place
                 ASSERT(inserted);
             } else {
-                auto [_, inserted] =
-                    metadata->initializedOverridableConstants.emplace(std::move(identifier));
+                auto [_, inserted] = metadata->initializedOverrides.emplace(std::move(identifier));
                 // The insertion should have taken place
                 ASSERT(inserted);
             }

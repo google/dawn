@@ -540,7 +540,7 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
                             << "expected a pipeline-overridable constant";
                     }
                     constant.is_spec_op = true;
-                    constant.constant_id = sem_const->ConstantId();
+                    constant.constant_id = sem_const->OverrideId().value;
                 }
 
                 auto result = GenerateConstantIfNeeded(constant);
@@ -1340,7 +1340,7 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(const sem::Call* call,
     // Generate the zero initializer if there are no values provided.
     if (args.IsEmpty()) {
         if (global_var && global_var->Declaration()->Is<ast::Override>()) {
-            auto constant_id = global_var->ConstantId();
+            auto constant_id = global_var->OverrideId().value;
             if (result_type->Is<sem::I32>()) {
                 return GenerateConstantIfNeeded(ScalarConstant::I32(0).AsSpecOp(constant_id));
             }
@@ -1664,7 +1664,7 @@ uint32_t Builder::GenerateLiteralIfNeeded(const ast::Variable* var,
     auto* global = builder_.Sem().Get<sem::GlobalVariable>(var);
     if (global && global->Declaration()->Is<ast::Override>()) {
         constant.is_spec_op = true;
-        constant.constant_id = global->ConstantId();
+        constant.constant_id = global->OverrideId().value;
     }
 
     Switch(

@@ -794,7 +794,7 @@ if(TINT_BUILD_TESTS)
     resolver/is_host_shareable_test.cc
     resolver/is_storeable_test.cc
     resolver/materialize_test.cc
-    resolver/pipeline_overridable_constant_test.cc
+    resolver/override_test.cc
     resolver/ptr_ref_test.cc
     resolver/ptr_ref_validation_test.cc
     resolver/resolver_behavior_test.cc

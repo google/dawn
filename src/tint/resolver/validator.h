@@ -234,12 +234,12 @@ class Validator {
 
     /// Validates a global variable
     /// @param var the global variable to validate
-    /// @param constant_ids the set of constant ids in the module
+    /// @param override_id the set of override ids in the module
     /// @param atomic_composite_info atomic composite info in the module
     /// @returns true on success, false otherwise
     bool GlobalVariable(
         const sem::GlobalVariable* var,
-        const std::unordered_map<uint32_t, const sem::Variable*>& constant_ids,
+        const std::unordered_map<OverrideId, const sem::Variable*>& override_id,
         const std::unordered_map<const sem::Type*, const Source&>& atomic_composite_info) const;
 
     /// Validates an if statement
@@ -371,10 +371,10 @@ class Validator {
 
     /// Validates a 'override' variable declaration
     /// @param v the variable to validate
-    /// @param constant_ids the set of constant ids in the module
+    /// @param override_id the set of override ids in the module
     /// @returns true on success, false otherwise.
     bool Override(const sem::Variable* v,
-                  const std::unordered_map<uint32_t, const sem::Variable*>& constant_ids) const;
+                  const std::unordered_map<OverrideId, const sem::Variable*>& override_id) const;
 
     /// Validates a 'const' variable declaration
     /// @param v the variable to validate
