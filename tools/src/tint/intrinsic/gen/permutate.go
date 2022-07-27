@@ -336,8 +336,8 @@ func validate(fqn sem.FullyQualifiedName, uses *sem.StageUses) bool {
 			strings.Contains(elTyName, "sampler"),
 			strings.Contains(elTyName, "texture"):
 			return false // Not storable
-		case IsAbstract(elTy):
-			return false // Abstract types are not typeable nor supported by arrays
+		case IsAbstract(DeepestElementType(elTy)):
+			return false // Abstract types are not typeable
 		}
 	case "ptr":
 		// https://gpuweb.github.io/gpuweb/wgsl/#storage-class

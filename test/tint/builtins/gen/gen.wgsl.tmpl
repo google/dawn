@@ -116,7 +116,7 @@ fn {{$permutation}}() {
 {{/* Build the parameters either as 'var' or inline values */ -}}
 {{-   range $i, $p := $overload.Parameters -}}
 {{-     $class       := Eval "StorageClass" $p.Type -}}
-{{-     $is_abstract := IsAbstract $p.Type -}}
+{{-     $is_abstract := DeepestElementType $p.Type | IsAbstract -}}
 {{-     if eq "function" $class -}}
 {{-       if eq "ptr" $p.Type.Target.Name -}}
 {{template "Type" index $p.Type.TemplateArguments 1}};
@@ -270,10 +270,10 @@ enable chromium_experimental_dp4a;
 {{-   else if eq $ty.Target.Name "ia"    -}}1.0
 {{-   else if eq $ty.Target.Name "bool"  -}}true
 {{-   else if eq $ty.Target.Name "vec"   -}}
-{{-     $el := Eval "ArgumentValue" "Type" (index $ty.TemplateArguments 1) "Name" ""}}
+{{-     $el := Eval "ArgumentValue" "Type" (ElementType .Type) "Name" ""}}
 {{-     template "Type" $ty}}({{$el}})
 {{-   else if eq $ty.Target.Name "mat"   -}}{{template "Type" $ty}}(
-{{-     $el := Eval "ArgumentValue" "Type" (index $ty.TemplateArguments 2) "Name" ""}}
+{{-     $el := Eval "ArgumentValue" "Type" (ElementType .Type) "Name" ""}}
 {{-     range $col := Iterate (index $ty.TemplateArguments 0)     }}
 {{-       range $row := Iterate (index $ty.TemplateArguments 1)   }}
 {{-         if or $col $row -}}, {{end}}{{$el}}
@@ -289,13 +289,13 @@ enable chromium_experimental_dp4a;
 {{- /* Emits the WGSL for the Fully Qualified Name argument               */ -}}
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-   if IsType .Target -}}
-{{-     if IsAbstract . -}}
+{{-     if DeepestElementType . | IsAbstract -}}
 {{-              if eq .Target.Name "vec" -}}vec{{index .TemplateArguments 0}}
 {{-         else if eq .Target.Name "mat" -}}mat{{index .TemplateArguments 0}}x{{index .TemplateArguments 1}}
 {{-         else                          -}}
 {{-         end                           -}}
-{{-     else if eq .Target.Name "vec" -}}vec{{index .TemplateArguments 0}}<{{template "Type" index .TemplateArguments 1}}>
-{{-     else if eq .Target.Name "mat" -}}mat{{index .TemplateArguments 0}}x{{index .TemplateArguments 1}}<{{template "Type" index .TemplateArguments 2}}>
+{{-     else if eq .Target.Name "vec" -}}vec{{index .TemplateArguments 0}}<{{template "Type" (ElementType .)}}>
+{{-     else if eq .Target.Name "mat" -}}mat{{index .TemplateArguments 0}}x{{index .TemplateArguments 1}}<{{template "Type" (ElementType .)}}>
 {{-     else                          -}}{{.Target.Name}}{{template "TemplateArguments" .TemplateArguments}}
 {{-     end                           -}}
 {{-   else if IsEnumEntry   .Target   -}}{{.Target.Name}}

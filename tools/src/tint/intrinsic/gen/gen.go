@@ -444,16 +444,40 @@ func SplitDisplayName(displayName string) []string {
 	return parts
 }
 
-// IsAbstract returns true if the FullyQualifiedName refers to an abstract
-// numeric type
+// ElementType returns the nested type for type represented by the fully qualified name.
+// If the type is not a composite type, then the fully qualified name is returned
+func ElementType(fqn sem.FullyQualifiedName) sem.FullyQualifiedName {
+	switch fqn.Target.GetName() {
+	case "vec":
+		return fqn.TemplateArguments[1].(sem.FullyQualifiedName)
+	case "mat":
+		return fqn.TemplateArguments[2].(sem.FullyQualifiedName)
+	case "array":
+		return fqn.TemplateArguments[0].(sem.FullyQualifiedName)
+	}
+	return fqn
+}
+
+// DeepestElementType returns the inner most nested type for type represented by the
+// fully qualified name.
+func DeepestElementType(fqn sem.FullyQualifiedName) sem.FullyQualifiedName {
+	switch fqn.Target.GetName() {
+	case "vec":
+		return fqn.TemplateArguments[1].(sem.FullyQualifiedName)
+	case "mat":
+		return DeepestElementType(fqn.TemplateArguments[2].(sem.FullyQualifiedName))
+	case "array":
+		return DeepestElementType(fqn.TemplateArguments[0].(sem.FullyQualifiedName))
+	}
+	return fqn
+}
+
+// IsAbstract returns true if the FullyQualifiedName refers to an abstract numeric type float.
+// Use DeepestElementType if you want to include vector, matrices and arrays of abstract types.
 func IsAbstract(fqn sem.FullyQualifiedName) bool {
 	switch fqn.Target.GetName() {
 	case "ia", "fa":
 		return true
-	case "vec":
-		return IsAbstract(fqn.TemplateArguments[1].(sem.FullyQualifiedName))
-	case "mat":
-		return IsAbstract(fqn.TemplateArguments[2].(sem.FullyQualifiedName))
 	}
 	return false
 }
@@ -461,5 +485,20 @@ func IsAbstract(fqn sem.FullyQualifiedName) bool {
 // IsDeclarable returns false if the FullyQualifiedName refers to an abstract
 // numeric type, or if it starts with a leading underscore.
 func IsDeclarable(fqn sem.FullyQualifiedName) bool {
-	return !IsAbstract(fqn) && !strings.HasPrefix(fqn.Target.GetName(), "_")
+	return !IsAbstract(DeepestElementType(fqn)) && !strings.HasPrefix(fqn.Target.GetName(), "_")
+}
+
+// OverloadUsesF16 returns true if the overload uses the f16 type anywhere in the signature.
+func OverloadUsesF16(overload *sem.Overload, typename string) bool {
+	for _, param := range overload.Parameters {
+		if DeepestElementType(param.Type).Target.GetName() == "f16" {
+			return true
+		}
+	}
+	if ret := overload.ReturnType; ret != nil {
+		if DeepestElementType(*overload.ReturnType).Target.GetName() == "f16" {
+			return true
+		}
+	}
+	return false
 }
