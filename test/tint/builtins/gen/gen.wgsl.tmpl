@@ -11,8 +11,6 @@ See:
 
 {{- /* For each permutation of each overload of each function... */ -}}
 {{- range Sem.Builtins -}}
-{{- /* TODO(crbug.com/tint/1536): Remove the bodge below after we support [[extension("extension_name")]] in intrinsics.def */}}
-{{- if not (or (eq .Name "dot4I8Packed") (eq .Name "dot4U8Packed"))}}
 {{-   range .Overloads  -}}
 {{-     range Permute . -}}
 {{- /*    Generate a ./literal/<function>/<permuataion-hash>.wgsl file using
@@ -28,7 +26,6 @@ See:
 {{-     end  }}
 {{-   end  }}
 {{- end  }}
-{{- end  }}
 
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-                          define "Permutation"                            -}}
@@ -39,6 +36,9 @@ See:
 {{-   $builtin     := $overload.Intrinsic.Name -}}
 {{-   $permutation := printf "%v_%v" $builtin $overload.Hash -}}
 {{-   $args        := Map -}}
+
+{{- /* Generate enable directives */ -}}
+{{- template "EnableDirectives" $overload -}}
 
 {{- /* Generate RW storage buffer parameters */ -}}
 {{-   $sb_rw_fields := Eval "EmitBufferFields" "overload"    $overload
@@ -167,6 +167,20 @@ fn compute_main() {
   {{$permutation}}();
 }
 {{ end -}}
+
+{{- end -}}
+
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-                        define "EnableDirectives"                         -}}
+{{- /* Emits the required enable directives for a given overload          */ -}}
+{{- /* ------------------------------------------------------------------ */ -}}
+{{-   $overload     := . -}}
+{{-   $builtin_name := $overload.Intrinsic.Name -}}
+
+{{- /* Check and emit chromium_experimental_dp4a */ -}}
+{{-   if or (eq "dot4I8Packed" $builtin_name) (eq "dot4U8Packed" $builtin_name)}}
+enable chromium_experimental_dp4a;
+{{    end -}}
 
 {{- end -}}
 

@@ -537,7 +537,7 @@ func (r *resolver) lookupNamed(s *scope, a ast.TemplatedName) (sem.Named, error)
 	case sem.Named:
 		return target, nil
 	default:
-		panic(fmt.Errorf("Unknown resolved type %T", target))
+		panic(fmt.Errorf("unknown resolved type %T", target))
 	}
 	// ... and that something takes template parameters
 	// Check the number of templated name template arguments match the number of
