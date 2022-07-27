@@ -384,7 +384,7 @@ using ResolverDP4aExtensionValidationTest = ResolverTest;
 TEST_F(ResolverDP4aExtensionValidationTest, Dot4I8PackedWithExtension) {
     // enable chromium_experimental_dp4a;
     // fn func { return dot4I8Packed(1u, 2u); }
-    Enable(ast::Extension::kChromiumExperimentalDP4a);
+    Enable(ast::Extension::kChromiumExperimentalDp4A);
 
     Func("func", {}, ty.i32(),
          {
@@ -412,7 +412,7 @@ TEST_F(ResolverDP4aExtensionValidationTest, Dot4I8PackedWithoutExtension) {
 TEST_F(ResolverDP4aExtensionValidationTest, Dot4U8PackedWithExtension) {
     // enable chromium_experimental_dp4a;
     // fn func { return dot4U8Packed(1u, 2u); }
-    Enable(ast::Extension::kChromiumExperimentalDP4a);
+    Enable(ast::Extension::kChromiumExperimentalDp4A);
 
     Func("func", {}, ty.u32(),
          {

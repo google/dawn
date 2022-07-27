@@ -164,9 +164,9 @@ bool Builtin::HasSideEffects() const {
 
 ast::Extension Builtin::RequiredExtension() const {
     if (IsDP4a()) {
-        return ast::Extension::kChromiumExperimentalDP4a;
+        return ast::Extension::kChromiumExperimentalDp4A;
     }
-    return ast::Extension::kNone;
+    return ast::Extension::kInvalid;
 }
 
 }  // namespace tint::sem

@@ -1708,13 +1708,13 @@ bool Validator::RequiredExtensionForBuiltinFunction(
     }
 
     const auto extension = builtin->RequiredExtension();
-    if (extension == ast::Extension::kNone) {
+    if (extension == ast::Extension::kInvalid) {
         return true;
     }
 
     if (!enabled_extensions.contains(extension)) {
         AddError("cannot call built-in function '" + std::string(builtin->str()) +
-                     "' without extension " + ast::str(extension),
+                     "' without extension " + utils::ToString(extension),
                  call->Declaration()->source);
         return false;
     }

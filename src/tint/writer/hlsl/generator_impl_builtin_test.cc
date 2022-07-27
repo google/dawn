@@ -725,7 +725,7 @@ void main() {
 }
 
 TEST_F(HlslGeneratorImplTest_Builtin, Dot4I8Packed) {
-    Enable(ast::Extension::kChromiumExperimentalDP4a);
+    Enable(ast::Extension::kChromiumExperimentalDp4A);
 
     auto* val1 = Var("val1", ty.u32());
     auto* val2 = Var("val2", ty.u32());
@@ -751,7 +751,7 @@ void test_function() {
 }
 
 TEST_F(HlslGeneratorImplTest_Builtin, Dot4U8Packed) {
-    Enable(ast::Extension::kChromiumExperimentalDP4a);
+    Enable(ast::Extension::kChromiumExperimentalDp4A);
 
     auto* val1 = Var("val1", ty.u32());
     auto* val2 = Var("val2", ty.u32());

@@ -380,7 +380,7 @@ void Builder::push_extension(const char* extension) {
 
 bool Builder::GenerateExtension(ast::Extension extension) {
     switch (extension) {
-        case ast::Extension::kChromiumExperimentalDP4a:
+        case ast::Extension::kChromiumExperimentalDp4A:
             push_extension("SPV_KHR_integer_dot_product");
             push_capability(SpvCapabilityDotProductKHR);
             push_capability(SpvCapabilityDotProductInput4x8BitPackedKHR);

@@ -23,7 +23,7 @@
 // clang-format off
 
 /// TypeMatcher for 'type bool'
-/// @see src/tint/intrinsics.def:76:6
+/// @see src/tint/intrinsics.def:87:6
 class Bool : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -50,7 +50,7 @@ std::string Bool::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type fa'
-/// @see src/tint/intrinsics.def:77:48
+/// @see src/tint/intrinsics.def:88:48
 class Fa : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -79,7 +79,7 @@ std::string Fa::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type ia'
-/// @see src/tint/intrinsics.def:78:48
+/// @see src/tint/intrinsics.def:89:48
 class Ia : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -108,7 +108,7 @@ std::string Ia::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type i32'
-/// @see src/tint/intrinsics.def:79:21
+/// @see src/tint/intrinsics.def:90:21
 class I32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -135,7 +135,7 @@ std::string I32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type u32'
-/// @see src/tint/intrinsics.def:80:21
+/// @see src/tint/intrinsics.def:91:21
 class U32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -162,7 +162,7 @@ std::string U32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type f32'
-/// @see src/tint/intrinsics.def:81:21
+/// @see src/tint/intrinsics.def:92:21
 class F32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -189,7 +189,7 @@ std::string F32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type f16'
-/// @see src/tint/intrinsics.def:82:21
+/// @see src/tint/intrinsics.def:93:21
 class F16 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -216,7 +216,7 @@ std::string F16::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type vec2'
-/// @see src/tint/intrinsics.def:83:6
+/// @see src/tint/intrinsics.def:94:6
 class Vec2 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -249,7 +249,7 @@ std::string Vec2::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type vec3'
-/// @see src/tint/intrinsics.def:84:6
+/// @see src/tint/intrinsics.def:95:6
 class Vec3 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -282,7 +282,7 @@ std::string Vec3::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type vec4'
-/// @see src/tint/intrinsics.def:85:6
+/// @see src/tint/intrinsics.def:96:6
 class Vec4 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -315,7 +315,7 @@ std::string Vec4::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type mat2x2'
-/// @see src/tint/intrinsics.def:86:6
+/// @see src/tint/intrinsics.def:97:6
 class Mat2X2 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -348,7 +348,7 @@ std::string Mat2X2::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type mat2x3'
-/// @see src/tint/intrinsics.def:87:6
+/// @see src/tint/intrinsics.def:98:6
 class Mat2X3 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -381,7 +381,7 @@ std::string Mat2X3::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type mat2x4'
-/// @see src/tint/intrinsics.def:88:6
+/// @see src/tint/intrinsics.def:99:6
 class Mat2X4 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -414,7 +414,7 @@ std::string Mat2X4::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type mat3x2'
-/// @see src/tint/intrinsics.def:89:6
+/// @see src/tint/intrinsics.def:100:6
 class Mat3X2 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -447,7 +447,7 @@ std::string Mat3X2::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type mat3x3'
-/// @see src/tint/intrinsics.def:90:6
+/// @see src/tint/intrinsics.def:101:6
 class Mat3X3 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -480,7 +480,7 @@ std::string Mat3X3::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type mat3x4'
-/// @see src/tint/intrinsics.def:91:6
+/// @see src/tint/intrinsics.def:102:6
 class Mat3X4 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -513,7 +513,7 @@ std::string Mat3X4::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type mat4x2'
-/// @see src/tint/intrinsics.def:92:6
+/// @see src/tint/intrinsics.def:103:6
 class Mat4X2 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -546,7 +546,7 @@ std::string Mat4X2::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type mat4x3'
-/// @see src/tint/intrinsics.def:93:6
+/// @see src/tint/intrinsics.def:104:6
 class Mat4X3 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -579,7 +579,7 @@ std::string Mat4X3::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type mat4x4'
-/// @see src/tint/intrinsics.def:94:6
+/// @see src/tint/intrinsics.def:105:6
 class Mat4X4 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -612,7 +612,7 @@ std::string Mat4X4::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type vec'
-/// @see src/tint/intrinsics.def:95:34
+/// @see src/tint/intrinsics.def:106:34
 class Vec : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -653,7 +653,7 @@ std::string Vec::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type mat'
-/// @see src/tint/intrinsics.def:96:34
+/// @see src/tint/intrinsics.def:107:34
 class Mat : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -700,7 +700,7 @@ std::string Mat::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type ptr'
-/// @see src/tint/intrinsics.def:97:6
+/// @see src/tint/intrinsics.def:108:6
 class Ptr : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -745,7 +745,7 @@ std::string Ptr::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type atomic'
-/// @see src/tint/intrinsics.def:98:6
+/// @see src/tint/intrinsics.def:109:6
 class Atomic : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -778,7 +778,7 @@ std::string Atomic::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type array'
-/// @see src/tint/intrinsics.def:99:6
+/// @see src/tint/intrinsics.def:110:6
 class Array : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -811,7 +811,7 @@ std::string Array::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type sampler'
-/// @see src/tint/intrinsics.def:100:6
+/// @see src/tint/intrinsics.def:111:6
 class Sampler : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -838,7 +838,7 @@ std::string Sampler::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type sampler_comparison'
-/// @see src/tint/intrinsics.def:101:6
+/// @see src/tint/intrinsics.def:112:6
 class SamplerComparison : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -865,7 +865,7 @@ std::string SamplerComparison::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type texture_1d'
-/// @see src/tint/intrinsics.def:102:6
+/// @see src/tint/intrinsics.def:113:6
 class Texture1D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -898,7 +898,7 @@ std::string Texture1D::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type texture_2d'
-/// @see src/tint/intrinsics.def:103:6
+/// @see src/tint/intrinsics.def:114:6
 class Texture2D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -931,7 +931,7 @@ std::string Texture2D::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type texture_2d_array'
-/// @see src/tint/intrinsics.def:104:6
+/// @see src/tint/intrinsics.def:115:6
 class Texture2DArray : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -964,7 +964,7 @@ std::string Texture2DArray::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type texture_3d'
-/// @see src/tint/intrinsics.def:105:6
+/// @see src/tint/intrinsics.def:116:6
 class Texture3D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -997,7 +997,7 @@ std::string Texture3D::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type texture_cube'
-/// @see src/tint/intrinsics.def:106:6
+/// @see src/tint/intrinsics.def:117:6
 class TextureCube : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1030,7 +1030,7 @@ std::string TextureCube::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type texture_cube_array'
-/// @see src/tint/intrinsics.def:107:6
+/// @see src/tint/intrinsics.def:118:6
 class TextureCubeArray : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1063,7 +1063,7 @@ std::string TextureCubeArray::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type texture_multisampled_2d'
-/// @see src/tint/intrinsics.def:108:6
+/// @see src/tint/intrinsics.def:119:6
 class TextureMultisampled2D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1096,7 +1096,7 @@ std::string TextureMultisampled2D::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type texture_depth_2d'
-/// @see src/tint/intrinsics.def:109:6
+/// @see src/tint/intrinsics.def:120:6
 class TextureDepth2D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1123,7 +1123,7 @@ std::string TextureDepth2D::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type texture_depth_2d_array'
-/// @see src/tint/intrinsics.def:110:6
+/// @see src/tint/intrinsics.def:121:6
 class TextureDepth2DArray : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1150,7 +1150,7 @@ std::string TextureDepth2DArray::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type texture_depth_cube'
-/// @see src/tint/intrinsics.def:111:6
+/// @see src/tint/intrinsics.def:122:6
 class TextureDepthCube : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1177,7 +1177,7 @@ std::string TextureDepthCube::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type texture_depth_cube_array'
-/// @see src/tint/intrinsics.def:112:6
+/// @see src/tint/intrinsics.def:123:6
 class TextureDepthCubeArray : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1204,7 +1204,7 @@ std::string TextureDepthCubeArray::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type texture_depth_multisampled_2d'
-/// @see src/tint/intrinsics.def:113:6
+/// @see src/tint/intrinsics.def:124:6
 class TextureDepthMultisampled2D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1231,7 +1231,7 @@ std::string TextureDepthMultisampled2D::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type texture_storage_1d'
-/// @see src/tint/intrinsics.def:114:6
+/// @see src/tint/intrinsics.def:125:6
 class TextureStorage1D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1270,7 +1270,7 @@ std::string TextureStorage1D::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type texture_storage_2d'
-/// @see src/tint/intrinsics.def:115:6
+/// @see src/tint/intrinsics.def:126:6
 class TextureStorage2D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1309,7 +1309,7 @@ std::string TextureStorage2D::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type texture_storage_2d_array'
-/// @see src/tint/intrinsics.def:116:6
+/// @see src/tint/intrinsics.def:127:6
 class TextureStorage2DArray : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1348,7 +1348,7 @@ std::string TextureStorage2DArray::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type texture_storage_3d'
-/// @see src/tint/intrinsics.def:117:6
+/// @see src/tint/intrinsics.def:128:6
 class TextureStorage3D : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1387,7 +1387,7 @@ std::string TextureStorage3D::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type texture_external'
-/// @see src/tint/intrinsics.def:118:6
+/// @see src/tint/intrinsics.def:129:6
 class TextureExternal : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1414,7 +1414,7 @@ std::string TextureExternal::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type __modf_result'
-/// @see src/tint/intrinsics.def:120:6
+/// @see src/tint/intrinsics.def:131:6
 class ModfResult : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1441,7 +1441,7 @@ std::string ModfResult::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type __modf_result_vec'
-/// @see src/tint/intrinsics.def:121:39
+/// @see src/tint/intrinsics.def:132:39
 class ModfResultVec : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1476,7 +1476,7 @@ std::string ModfResultVec::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type __frexp_result'
-/// @see src/tint/intrinsics.def:122:6
+/// @see src/tint/intrinsics.def:133:6
 class FrexpResult : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1503,7 +1503,7 @@ std::string FrexpResult::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'type __frexp_result_vec'
-/// @see src/tint/intrinsics.def:123:40
+/// @see src/tint/intrinsics.def:134:40
 class FrexpResultVec : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1538,7 +1538,7 @@ std::string FrexpResultVec::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'type __atomic_compare_exchange_result'
-/// @see src/tint/intrinsics.def:125:6
+/// @see src/tint/intrinsics.def:136:6
 class AtomicCompareExchangeResult : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules.
@@ -1571,7 +1571,7 @@ std::string AtomicCompareExchangeResult::String(MatchState* state) const {
 }
 
 /// TypeMatcher for 'match abstract_or_scalar'
-/// @see src/tint/intrinsics.def:133:7
+/// @see src/tint/intrinsics.def:144:7
 class AbstractOrScalar : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -1621,7 +1621,7 @@ std::string AbstractOrScalar::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match scalar'
-/// @see src/tint/intrinsics.def:134:7
+/// @see src/tint/intrinsics.def:145:7
 class Scalar : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -1665,7 +1665,7 @@ std::string Scalar::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match scalar_no_f32'
-/// @see src/tint/intrinsics.def:135:7
+/// @see src/tint/intrinsics.def:146:7
 class ScalarNoF32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -1706,7 +1706,7 @@ std::string ScalarNoF32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match scalar_no_f16'
-/// @see src/tint/intrinsics.def:136:7
+/// @see src/tint/intrinsics.def:147:7
 class ScalarNoF16 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -1747,7 +1747,7 @@ std::string ScalarNoF16::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match scalar_no_i32'
-/// @see src/tint/intrinsics.def:137:7
+/// @see src/tint/intrinsics.def:148:7
 class ScalarNoI32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -1788,7 +1788,7 @@ std::string ScalarNoI32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match scalar_no_u32'
-/// @see src/tint/intrinsics.def:138:7
+/// @see src/tint/intrinsics.def:149:7
 class ScalarNoU32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -1829,7 +1829,7 @@ std::string ScalarNoU32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match scalar_no_bool'
-/// @see src/tint/intrinsics.def:139:7
+/// @see src/tint/intrinsics.def:150:7
 class ScalarNoBool : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -1870,7 +1870,7 @@ std::string ScalarNoBool::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match fia_fi32_f16'
-/// @see src/tint/intrinsics.def:140:7
+/// @see src/tint/intrinsics.def:151:7
 class FiaFi32F16 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -1914,7 +1914,7 @@ std::string FiaFi32F16::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match fia_fiu32'
-/// @see src/tint/intrinsics.def:141:7
+/// @see src/tint/intrinsics.def:152:7
 class FiaFiu32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -1958,7 +1958,7 @@ std::string FiaFiu32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match fa_f32'
-/// @see src/tint/intrinsics.def:142:7
+/// @see src/tint/intrinsics.def:153:7
 class FaF32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -1993,7 +1993,7 @@ std::string FaF32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match fa_f32_f16'
-/// @see src/tint/intrinsics.def:143:7
+/// @see src/tint/intrinsics.def:154:7
 class FaF32F16 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2031,7 +2031,7 @@ std::string FaF32F16::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match ia_iu32'
-/// @see src/tint/intrinsics.def:144:7
+/// @see src/tint/intrinsics.def:155:7
 class IaIu32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2069,7 +2069,7 @@ std::string IaIu32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match fiu32_f16'
-/// @see src/tint/intrinsics.def:145:7
+/// @see src/tint/intrinsics.def:156:7
 class Fiu32F16 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2110,7 +2110,7 @@ std::string Fiu32F16::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match fiu32'
-/// @see src/tint/intrinsics.def:146:7
+/// @see src/tint/intrinsics.def:157:7
 class Fiu32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2148,7 +2148,7 @@ std::string Fiu32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match fi32_f16'
-/// @see src/tint/intrinsics.def:147:7
+/// @see src/tint/intrinsics.def:158:7
 class Fi32F16 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2186,7 +2186,7 @@ std::string Fi32F16::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match fi32'
-/// @see src/tint/intrinsics.def:148:7
+/// @see src/tint/intrinsics.def:159:7
 class Fi32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2221,7 +2221,7 @@ std::string Fi32::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match f32_f16'
-/// @see src/tint/intrinsics.def:149:7
+/// @see src/tint/intrinsics.def:160:7
 class F32F16 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2256,7 +2256,7 @@ std::string F32F16::String(MatchState*) const {
 }
 
 /// TypeMatcher for 'match iu32'
-/// @see src/tint/intrinsics.def:150:7
+/// @see src/tint/intrinsics.def:161:7
 class Iu32 : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
@@ -2291,7 +2291,7 @@ std::string Iu32::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match f32_texel_format'
-/// @see src/tint/intrinsics.def:161:7
+/// @see src/tint/intrinsics.def:172:7
 class F32TexelFormat : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2324,7 +2324,7 @@ std::string F32TexelFormat::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match i32_texel_format'
-/// @see src/tint/intrinsics.def:168:7
+/// @see src/tint/intrinsics.def:179:7
 class I32TexelFormat : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2356,7 +2356,7 @@ std::string I32TexelFormat::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match u32_texel_format'
-/// @see src/tint/intrinsics.def:174:7
+/// @see src/tint/intrinsics.def:185:7
 class U32TexelFormat : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2388,7 +2388,7 @@ std::string U32TexelFormat::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match write'
-/// @see src/tint/intrinsics.def:181:7
+/// @see src/tint/intrinsics.def:192:7
 class Write : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2414,7 +2414,7 @@ std::string Write::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match read_write'
-/// @see src/tint/intrinsics.def:182:7
+/// @see src/tint/intrinsics.def:193:7
 class ReadWrite : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2440,7 +2440,7 @@ std::string ReadWrite::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match function_private_workgroup'
-/// @see src/tint/intrinsics.def:184:7
+/// @see src/tint/intrinsics.def:195:7
 class FunctionPrivateWorkgroup : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2470,7 +2470,7 @@ std::string FunctionPrivateWorkgroup::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match workgroup_or_storage'
-/// @see src/tint/intrinsics.def:188:7
+/// @see src/tint/intrinsics.def:199:7
 class WorkgroupOrStorage : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.
@@ -2499,7 +2499,7 @@ std::string WorkgroupOrStorage::String(MatchState*) const {
 }
 
 /// EnumMatcher for 'match storage'
-/// @see src/tint/intrinsics.def:191:7
+/// @see src/tint/intrinsics.def:202:7
 class Storage : public NumberMatcher {
  public:
   /// Checks whether the given number matches the enum matcher rules.

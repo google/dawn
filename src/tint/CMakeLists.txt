@@ -1278,6 +1278,7 @@ if(TINT_BUILD_BENCHMARKS)
 
   set(TINT_BENCHMARK_SRC
     "castable_bench.cc"
+    "ast/extension_bench.cc"
     "ast/storage_class_bench.cc"
     "bench/benchmark.cc"
     "reader/wgsl/parser_bench.cc"

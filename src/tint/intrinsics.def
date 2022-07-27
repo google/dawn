@@ -23,6 +23,17 @@
 // Enumerators                                                                //
 ////////////////////////////////////////////////////////////////////////////////
 
+// https://gpuweb.github.io/gpuweb/wgsl/#extension
+enum extension {
+  // WGSL Extension "f16"
+  f16
+  // An extension for the experimental feature "chromium_experimental_dp4a".
+  // See crbug.com/tint/1497 for more details
+  chromium_experimental_dp4a
+  // A Chromium-specific extension for disabling uniformity analysis.
+  chromium_disable_uniformity_analysis
+}
+
 // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 enum storage_class {
   @internal none

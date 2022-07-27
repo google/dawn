@@ -418,7 +418,7 @@ Maybe<bool> ParserImpl::enable_directive() {
         }
 
         auto extension = ast::ParseExtension(name.value);
-        if (extension == ast::Extension::kNone) {
+        if (extension == ast::Extension::kInvalid) {
             return add_error(name.source, "unsupported extension: '" + name.value + "'");
         }
         builder_.AST().AddEnable(create<ast::Enable>(name.source, extension));
