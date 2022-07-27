@@ -46,27 +46,47 @@ namespace tint::resolver {
 
 namespace {
 
-/// Helper that calls 'f' passing in `c`'s value
-template <typename F>
-auto Dispatch_ia_iu32(const sem::Constant* c, F&& f) {
-    return Switch(
-        c->Type(), [&](const sem::AbstractInt*) { return f(c->As<AInt>()); },
-        [&](const sem::I32*) { return f(c->As<i32>()); },
-        [&](const sem::U32*) { return f(c->As<u32>()); });
+/// Returns the first element of a parameter pack
+template <typename T>
+T First(T&& first, ...) {
+    return std::forward<T>(first);
 }
 
-/// Helper that calls 'f' passing in `c`'s value
-template <typename F>
-auto Dispatch_fia_fi32_f16(const sem::Constant* c, F&& f) {
+/// Helper that calls `f` passing in the value of all `cs`.
+/// Assumes all `cs` are of the same type.
+template <typename F, typename... CONSTANTS>
+auto Dispatch_ia_iu32(F&& f, CONSTANTS&&... cs) {
     return Switch(
-        c->Type(), [&](const sem::AbstractInt*) { return f(c->As<AInt>()); },
-        [&](const sem::AbstractFloat*) { return f(c->As<AFloat>()); },
-        [&](const sem::F32*) { return f(c->As<f32>()); },
-        [&](const sem::I32*) { return f(c->As<i32>()); },
+        First(cs...)->Type(),  //
+        [&](const sem::AbstractInt*) { return f(cs->template As<AInt>()...); },
+        [&](const sem::I32*) { return f(cs->template As<i32>()...); },
+        [&](const sem::U32*) { return f(cs->template As<u32>()...); });
+}
+
+/// Helper that calls `f` passing in the value of all `cs`.
+/// Assumes all `cs` are of the same type.
+template <typename F, typename... CONSTANTS>
+auto Dispatch_fia_fi32_f16(F&& f, CONSTANTS&&... cs) {
+    return Switch(
+        First(cs...)->Type(),  //
+        [&](const sem::AbstractInt*) { return f(cs->template As<AInt>()...); },
+        [&](const sem::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
+        [&](const sem::F32*) { return f(cs->template As<f32>()...); },
+        [&](const sem::I32*) { return f(cs->template As<i32>()...); },
         [&](const sem::F16*) {
             // TODO(crbug.com/tint/1502): Support const eval for f16
             return nullptr;
         });
+}
+
+/// Helper that calls `f` passing in the value of all `cs`.
+/// Assumes all `cs` are of the same type.
+template <typename F, typename... CONSTANTS>
+auto Dispatch_fa_f32(F&& f, CONSTANTS&&... cs) {
+    return Switch(
+        First(cs...)->Type(),  //
+        [&](const sem::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
+        [&](const sem::F32*) { return f(cs->template As<f32>()...); });
 }
 
 /// ZeroTypeDispatch is a helper for calling the function `f`, passing a single zero-value argument
@@ -427,21 +447,21 @@ const Constant* CreateComposite(ProgramBuilder& builder,
 }
 
 /// TransformElements constructs a new constant by applying the transformation function 'f' on each
-/// of the most deeply nested elements of 'c'.
-template <typename F>
-const Constant* TransformElements(ProgramBuilder& builder, const sem::Constant* c, F&& f) {
+/// of the most deeply nested elements of 'cs'.
+template <typename F, typename... CONSTANTS>
+const Constant* TransformElements(ProgramBuilder& builder, F&& f, CONSTANTS&&... cs) {
     uint32_t n = 0;
-    auto* ty = c->Type();
+    auto* ty = First(cs...)->Type();
     auto* el_ty = sem::Type::ElementOf(ty, &n);
     if (el_ty == ty) {
-        return f(c);
+        return f(cs...);
     }
     utils::Vector<const sem::Constant*, 8> els;
     els.Reserve(n);
     for (uint32_t i = 0; i < n; i++) {
-        els.Push(TransformElements(builder, c->Index(i), f));
+        els.Push(TransformElements(builder, f, cs->Index(i)...));
     }
-    return CreateComposite(builder, c->Type(), std::move(els));
+    return CreateComposite(builder, ty, std::move(els));
 }
 
 }  // namespace
@@ -658,20 +678,23 @@ const sem::Constant* ConstEval::Bitcast(const sem::Type*, const sem::Expression*
 
 const sem::Constant* ConstEval::OpComplement(const sem::Type*,
                                              utils::ConstVectorRef<const sem::Expression*> args) {
-    return TransformElements(builder, args[0]->ConstantValue(), [&](const sem::Constant* c) {
-        return Dispatch_ia_iu32(c, [&](auto i) {  //
+    auto transform = [&](const sem::Constant* c) {
+        auto create = [&](auto i) {
             return CreateElement(builder, c->Type(), decltype(i)(~i.value));
-        });
-    });
+        };
+        return Dispatch_ia_iu32(create, c);
+    };
+    return TransformElements(builder, transform, args[0]->ConstantValue());
 }
 
 const sem::Constant* ConstEval::OpMinus(const sem::Type*,
                                         utils::ConstVectorRef<const sem::Expression*> args) {
-    return TransformElements(builder, args[0]->ConstantValue(), [&](const sem::Constant* c) {
-        return Dispatch_fia_fi32_f16(c, [&](auto i) {  //
-            // For signed integrals, avoid C++ UB by not negating the smallest negative number. In
-            // WGSL, this operation is well defined to return the same value, see:
-            // https://gpuweb.github.io/gpuweb/wgsl/#arithmetic-expr.
+    auto transform = [&](const sem::Constant* c) {
+        auto create = [&](auto i) {  //
+                                     // For signed integrals, avoid C++ UB by not negating the
+                                     // smallest negative number. In WGSL, this operation is well
+                                     // defined to return the same value, see:
+                                     // https://gpuweb.github.io/gpuweb/wgsl/#arithmetic-expr.
             using T = UnwrapNumber<decltype(i)>;
             if constexpr (std::is_integral_v<T>) {
                 auto v = i.value;
@@ -682,8 +705,22 @@ const sem::Constant* ConstEval::OpMinus(const sem::Type*,
             } else {
                 return CreateElement(builder, c->Type(), decltype(i)(-i.value));
             }
-        });
-    });
+        };
+        return Dispatch_fia_fi32_f16(create, c);
+    };
+    return TransformElements(builder, transform, args[0]->ConstantValue());
+}
+
+const sem::Constant* ConstEval::atan2(const sem::Type*,
+                                      utils::ConstVectorRef<const sem::Expression*> args) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        auto create = [&](auto i, auto j) {
+            return CreateElement(builder, c0->Type(), decltype(i)(std::atan2(i.value, j.value)));
+        };
+        return Dispatch_fa_f32(create, c0, c1);
+    };
+    return TransformElements(builder, transform, args[0]->ConstantValue(),
+                             args[1]->ConstantValue());
 }
 
 utils::Result<const sem::Constant*> ConstEval::Convert(const sem::Type* target_ty,

@@ -1068,6 +1068,70 @@ TEST_P(ResolverBuiltinTest_TwoParam, Error_NoTooManyParams) {
 
     EXPECT_FALSE(r()->Resolve());
 
+    EXPECT_EQ(r()->error(),
+              "error: no matching call to " + std::string(param.name) +
+                  "(i32, i32, i32)\n\n"
+                  "2 candidate functions:\n  " +
+                  std::string(param.name) + "(T, T) -> T  where: T is abstract-float or f32\n  " +
+                  std::string(param.name) +
+                  "(vecN<T>, vecN<T>) -> vecN<T>  where: T is abstract-float or f32\n");
+}
+
+TEST_P(ResolverBuiltinTest_TwoParam, Error_NoParams) {
+    auto param = GetParam();
+
+    auto* call = Call(param.name);
+    WrapInFunction(call);
+
+    EXPECT_FALSE(r()->Resolve());
+
+    EXPECT_EQ(r()->error(),
+              "error: no matching call to " + std::string(param.name) +
+                  "()\n\n"
+                  "2 candidate functions:\n  " +
+                  std::string(param.name) + "(T, T) -> T  where: T is abstract-float or f32\n  " +
+                  std::string(param.name) +
+                  "(vecN<T>, vecN<T>) -> vecN<T>  where: T is abstract-float or f32\n");
+}
+
+INSTANTIATE_TEST_SUITE_P(ResolverTest,
+                         ResolverBuiltinTest_TwoParam,
+                         testing::Values(BuiltinData{"atan2", BuiltinType::kAtan2}));
+
+using ResolverBuiltinTest_TwoParam_NoConstEval = ResolverTestWithParam<BuiltinData>;
+TEST_P(ResolverBuiltinTest_TwoParam_NoConstEval, Scalar) {
+    auto param = GetParam();
+
+    auto* call = Call(param.name, 1_f, 1_f);
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    EXPECT_TRUE(TypeOf(call)->is_float_scalar());
+}
+
+TEST_P(ResolverBuiltinTest_TwoParam_NoConstEval, Vector) {
+    auto param = GetParam();
+
+    auto* call = Call(param.name, vec3<f32>(1_f, 1_f, 3_f), vec3<f32>(1_f, 1_f, 3_f));
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    EXPECT_TRUE(TypeOf(call)->is_float_vector());
+    EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
+}
+
+TEST_P(ResolverBuiltinTest_TwoParam_NoConstEval, Error_NoTooManyParams) {
+    auto param = GetParam();
+
+    auto* call = Call(param.name, 1_i, 2_i, 3_i);
+    WrapInFunction(call);
+
+    EXPECT_FALSE(r()->Resolve());
+
     EXPECT_EQ(r()->error(), "error: no matching call to " + std::string(param.name) +
                                 "(i32, i32, i32)\n\n"
                                 "2 candidate functions:\n  " +
@@ -1075,7 +1139,7 @@ TEST_P(ResolverBuiltinTest_TwoParam, Error_NoTooManyParams) {
                                 std::string(param.name) + "(vecN<f32>, vecN<f32>) -> vecN<f32>\n");
 }
 
-TEST_P(ResolverBuiltinTest_TwoParam, Error_NoParams) {
+TEST_P(ResolverBuiltinTest_TwoParam_NoConstEval, Error_NoParams) {
     auto param = GetParam();
 
     auto* call = Call(param.name);
@@ -1091,9 +1155,8 @@ TEST_P(ResolverBuiltinTest_TwoParam, Error_NoParams) {
 }
 
 INSTANTIATE_TEST_SUITE_P(ResolverTest,
-                         ResolverBuiltinTest_TwoParam,
-                         testing::Values(BuiltinData{"atan2", BuiltinType::kAtan2},
-                                         BuiltinData{"pow", BuiltinType::kPow},
+                         ResolverBuiltinTest_TwoParam_NoConstEval,
+                         testing::Values(BuiltinData{"pow", BuiltinType::kPow},
                                          BuiltinData{"step", BuiltinType::kStep}));
 
 TEST_F(ResolverBuiltinTest, Distance_Scalar) {

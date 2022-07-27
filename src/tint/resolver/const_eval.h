@@ -187,6 +187,17 @@ class ConstEval {
     const sem::Constant* OpMinus(const sem::Type* ty,
                                  utils::ConstVectorRef<const sem::Expression*> args);
 
+    ////////////////////////////////////////////////////////////////////////////
+    // Builtins
+    ////////////////////////////////////////////////////////////////////////////
+
+    /// atan2 builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @return the result value, or null if the value cannot be calculated
+    const sem::Constant* atan2(const sem::Type* ty,
+                               utils::ConstVectorRef<const sem::Expression*> args);
+
   private:
     /// Adds the given error message to the diagnostics
     void AddError(const std::string& msg, const Source& source) const;

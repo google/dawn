@@ -918,9 +918,11 @@ OpFunctionEnd
 using Builtin_Builtin_ThreeParam_Float_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_ThreeParam_Float_Test, Call_Scalar) {
     auto param = GetParam();
-    auto* expr = Call(param.name, 1_f, 1_f, 1_f);
+    auto* decl = Decl(Var("a", nullptr, Expr(1_f)));
+    auto* expr = Call(param.name, Expr("a"), 1_f, 1_f);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
+                          decl,
                           Assign(Phony(), expr),
                       });
 
@@ -929,17 +931,23 @@ TEST_P(Builtin_Builtin_ThreeParam_Float_Test, Call_Scalar) {
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
     auto got = DumpBuilder(b);
-    auto expect = R"(%7 = OpExtInstImport "GLSL.std.450"
+    auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
+OpName %7 "a"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
-%6 = OpTypeFloat 32
-%8 = OpConstant %6 1
+%5 = OpTypeFloat 32
+%6 = OpConstant %5 1
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %7 )" +
+%7 = OpVariable %8 Function %9
+OpStore %7 %6
+%12 = OpLoad %5 %7
+%10 = OpExtInst %5 %11 )" +
                   param.op +
-                  R"( %8 %8 %8
+                  R"( %12 %6 %6
 OpReturn
 OpFunctionEnd
 )";
@@ -948,9 +956,11 @@ OpFunctionEnd
 
 TEST_P(Builtin_Builtin_ThreeParam_Float_Test, Call_Vector) {
     auto param = GetParam();
-    auto* expr = Call(param.name, vec2<f32>(1_f, 1_f), vec2<f32>(1_f, 1_f), vec2<f32>(1_f, 1_f));
+    auto* decl = Decl(Var("a", nullptr, vec2<f32>(1_f, 1_f)));
+    auto* expr = Call(param.name, Expr("a"), vec2<f32>(1_f, 1_f), vec2<f32>(1_f, 1_f));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
+                          decl,
                           Assign(Phony(), expr),
                       });
 
@@ -959,19 +969,25 @@ TEST_P(Builtin_Builtin_ThreeParam_Float_Test, Call_Vector) {
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
     auto got = DumpBuilder(b);
-    auto expect = R"(%8 = OpExtInstImport "GLSL.std.450"
+    auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
+OpName %9 "a"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
-%7 = OpTypeFloat 32
-%6 = OpTypeVector %7 2
-%9 = OpConstant %7 1
-%10 = OpConstantComposite %6 %9 %9
+%6 = OpTypeFloat 32
+%5 = OpTypeVector %6 2
+%7 = OpConstant %6 1
+%8 = OpConstantComposite %5 %7 %7
+%10 = OpTypePointer Function %5
+%11 = OpConstantNull %5
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %8 )" +
+%9 = OpVariable %10 Function %11
+OpStore %9 %8
+%14 = OpLoad %5 %9
+%12 = OpExtInst %5 %13 )" +
                   param.op +
-                  R"( %10 %10 %10
+                  R"( %14 %8 %8
 OpReturn
 OpFunctionEnd
 )";
@@ -1305,9 +1321,11 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
 using Builtin_Builtin_ThreeParam_Sint_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_ThreeParam_Sint_Test, Call_Scalar) {
     auto param = GetParam();
-    auto* expr = Call(param.name, 1_i, 1_i, 1_i);
+    auto* decl = Decl(Var("a", nullptr, Expr(1_i)));
+    auto* expr = Call(param.name, Expr("a"), 1_i, 1_i);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
+                          decl,
                           Assign(Phony(), expr),
                       });
 
@@ -1316,17 +1334,23 @@ TEST_P(Builtin_Builtin_ThreeParam_Sint_Test, Call_Scalar) {
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
     auto got = DumpBuilder(b);
-    auto expect = R"(%7 = OpExtInstImport "GLSL.std.450"
+    auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
+OpName %7 "a"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
-%6 = OpTypeInt 32 1
-%8 = OpConstant %6 1
+%5 = OpTypeInt 32 1
+%6 = OpConstant %5 1
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %7 )" +
+%7 = OpVariable %8 Function %9
+OpStore %7 %6
+%12 = OpLoad %5 %7
+%10 = OpExtInst %5 %11 )" +
                   param.op +
-                  R"( %8 %8 %8
+                  R"( %12 %6 %6
 OpReturn
 OpFunctionEnd
 )";
@@ -1335,9 +1359,11 @@ OpFunctionEnd
 
 TEST_P(Builtin_Builtin_ThreeParam_Sint_Test, Call_Vector) {
     auto param = GetParam();
-    auto* expr = Call(param.name, vec2<i32>(1_i, 1_i), vec2<i32>(1_i, 1_i), vec2<i32>(1_i, 1_i));
+    auto* decl = Decl(Var("a", nullptr, vec2<i32>(1_i, 1_i)));
+    auto* expr = Call(param.name, Expr("a"), vec2<i32>(1_i, 1_i), vec2<i32>(1_i, 1_i));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
+                          decl,
                           Assign(Phony(), expr),
                       });
 
@@ -1346,19 +1372,25 @@ TEST_P(Builtin_Builtin_ThreeParam_Sint_Test, Call_Vector) {
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
     auto got = DumpBuilder(b);
-    auto expect = R"(%8 = OpExtInstImport "GLSL.std.450"
+    auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
+OpName %9 "a"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
-%7 = OpTypeInt 32 1
-%6 = OpTypeVector %7 2
-%9 = OpConstant %7 1
-%10 = OpConstantComposite %6 %9 %9
+%6 = OpTypeInt 32 1
+%5 = OpTypeVector %6 2
+%7 = OpConstant %6 1
+%8 = OpConstantComposite %5 %7 %7
+%10 = OpTypePointer Function %5
+%11 = OpConstantNull %5
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %8 )" +
+%9 = OpVariable %10 Function %11
+OpStore %9 %8
+%14 = OpLoad %5 %9
+%12 = OpExtInst %5 %13 )" +
                   param.op +
-                  R"( %10 %10 %10
+                  R"( %14 %8 %8
 OpReturn
 OpFunctionEnd
 )";
@@ -1371,9 +1403,11 @@ INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
 using Builtin_Builtin_ThreeParam_Uint_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builtin_ThreeParam_Uint_Test, Call_Scalar) {
     auto param = GetParam();
-    auto* expr = Call(param.name, 1_u, 1_u, 1_u);
+    auto* decl = Decl(Var("a", nullptr, Expr(1_u)));
+    auto* expr = Call(param.name, Expr("a"), 1_u, 1_u);
     auto* func = Func("a_func", {}, ty.void_(),
                       {
+                          decl,
                           Assign(Phony(), expr),
                       });
 
@@ -1382,17 +1416,23 @@ TEST_P(Builtin_Builtin_ThreeParam_Uint_Test, Call_Scalar) {
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
     auto got = DumpBuilder(b);
-    auto expect = R"(%7 = OpExtInstImport "GLSL.std.450"
+    auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
+OpName %7 "a"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
-%6 = OpTypeInt 32 0
-%8 = OpConstant %6 1
+%5 = OpTypeInt 32 0
+%6 = OpConstant %5 1
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %7 )" +
+%7 = OpVariable %8 Function %9
+OpStore %7 %6
+%12 = OpLoad %5 %7
+%10 = OpExtInst %5 %11 )" +
                   param.op +
-                  R"( %8 %8 %8
+                  R"( %12 %6 %6
 OpReturn
 OpFunctionEnd
 )";
@@ -1401,9 +1441,11 @@ OpFunctionEnd
 
 TEST_P(Builtin_Builtin_ThreeParam_Uint_Test, Call_Vector) {
     auto param = GetParam();
-    auto* expr = Call(param.name, vec2<u32>(1_u, 1_u), vec2<u32>(1_u, 1_u), vec2<u32>(1_u, 1_u));
+    auto* decl = Decl(Var("a", nullptr, vec2<u32>(1_u, 1_u)));
+    auto* expr = Call(param.name, Expr("a"), vec2<u32>(1_u, 1_u), vec2<u32>(1_u, 1_u));
     auto* func = Func("a_func", {}, ty.void_(),
                       {
+                          decl,
                           Assign(Phony(), expr),
                       });
 
@@ -1412,19 +1454,25 @@ TEST_P(Builtin_Builtin_ThreeParam_Uint_Test, Call_Vector) {
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
     auto got = DumpBuilder(b);
-    auto expect = R"(%8 = OpExtInstImport "GLSL.std.450"
+    auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
 OpName %3 "a_func"
+OpName %9 "a"
 %2 = OpTypeVoid
 %1 = OpTypeFunction %2
-%7 = OpTypeInt 32 0
-%6 = OpTypeVector %7 2
-%9 = OpConstant %7 1
-%10 = OpConstantComposite %6 %9 %9
+%6 = OpTypeInt 32 0
+%5 = OpTypeVector %6 2
+%7 = OpConstant %6 1
+%8 = OpConstantComposite %5 %7 %7
+%10 = OpTypePointer Function %5
+%11 = OpConstantNull %5
 %3 = OpFunction %2 None %1
 %4 = OpLabel
-%5 = OpExtInst %6 %8 )" +
+%9 = OpVariable %10 Function %11
+OpStore %9 %8
+%14 = OpLoad %5 %9
+%12 = OpExtInst %5 %13 )" +
                   param.op +
-                  R"( %10 %10 %10
+                  R"( %14 %8 %8
 OpReturn
 OpFunctionEnd
 )";

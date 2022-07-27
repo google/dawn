@@ -1,0 +1,67 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 33
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vertex_main "vertex_main" %value %vertex_point_size
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpName %value "value"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %atan2_3c2865 "atan2_3c2865"
+               OpName %res "res"
+               OpName %vertex_main_inner "vertex_main_inner"
+               OpName %vertex_main "vertex_main"
+               OpName %fragment_main "fragment_main"
+               OpName %compute_main "compute_main"
+               OpDecorate %value BuiltIn Position
+               OpDecorate %vertex_point_size BuiltIn PointSize
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+      %value = OpVariable %_ptr_Output_v4float Output %5
+%_ptr_Output_float = OpTypePointer Output %float
+          %8 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %8
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+    %v3float = OpTypeVector %float 3
+%float_0_785398185 = OpConstant %float 0.785398185
+         %15 = OpConstantComposite %v3float %float_0_785398185 %float_0_785398185 %float_0_785398185
+%_ptr_Function_v3float = OpTypePointer Function %v3float
+         %18 = OpConstantNull %v3float
+         %19 = OpTypeFunction %v4float
+    %float_1 = OpConstant %float 1
+%atan2_3c2865 = OpFunction %void None %9
+         %12 = OpLabel
+        %res = OpVariable %_ptr_Function_v3float Function %18
+               OpStore %res %15
+               OpReturn
+               OpFunctionEnd
+%vertex_main_inner = OpFunction %v4float None %19
+         %21 = OpLabel
+         %22 = OpFunctionCall %void %atan2_3c2865
+               OpReturnValue %5
+               OpFunctionEnd
+%vertex_main = OpFunction %void None %9
+         %24 = OpLabel
+         %25 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %25
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %9
+         %28 = OpLabel
+         %29 = OpFunctionCall %void %atan2_3c2865
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %9
+         %31 = OpLabel
+         %32 = OpFunctionCall %void %atan2_3c2865
+               OpReturn
+               OpFunctionEnd

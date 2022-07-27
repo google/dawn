@@ -2,7 +2,7 @@
 
 using namespace metal;
 void atan2_57fb13() {
-  float2 res = atan2(float2(1.0f), float2(1.0f));
+  float2 res = float2(0.785398185f);
 }
 
 struct tint_symbol {

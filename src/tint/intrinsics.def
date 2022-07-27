@@ -135,6 +135,7 @@ match scalar_no_i32: f32 | f16 | u32 | bool
 match scalar_no_u32: f32 | f16 | i32 | bool
 match scalar_no_bool: f32 | f16 | i32 | u32
 match fia_fi32_f16: fa | ia | f32 | i32 | f16
+match fa_f32: fa | f32
 match fa_f32_f16: fa | f32 | f16
 match ia_iu32: ia | i32 | u32
 match fiu32_f16: f32 | i32 | u32 | f16
@@ -370,8 +371,8 @@ fn asinh(f32) -> f32
 fn asinh<N: num>(vec<N, f32>) -> vec<N, f32>
 fn atan(f32) -> f32
 fn atan<N: num>(vec<N, f32>) -> vec<N, f32>
-fn atan2(f32, f32) -> f32
-fn atan2<N: num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32>
+@const fn atan2<T: fa_f32>(T, T) -> T
+@const fn atan2<N: num, T: fa_f32>(vec<N, T>, vec<N, T>) -> vec<N, T>
 fn atanh(f32) -> f32
 fn atanh<N: num>(vec<N, f32>) -> vec<N, f32>
 fn ceil(f32) -> f32

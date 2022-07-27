@@ -17,15 +17,72 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/resolver/resolver_test_helper.h"
+#include "src/tint/sem/builtin_type.h"
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/index_accessor_expression.h"
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/test_helper.h"
+#include "src/tint/utils/transform.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::resolver {
 namespace {
+
+template <typename T>
+const auto kHighest = T(T::kHighest);
+
+template <typename T>
+const auto kLowest = T(T::kLowest);
+
+template <typename T>
+const auto kNaN = T(std::numeric_limits<UnwrapNumber<T>>::quiet_NaN());
+
+template <typename T>
+const auto kInf = T(std::numeric_limits<UnwrapNumber<T>>::infinity());
+
+template <typename T>
+const auto kPi = T(UnwrapNumber<T>(3.14159265358979323846));
+
+template <typename T>
+const auto kPiOver2 = T(UnwrapNumber<T>(1.57079632679489661923));
+
+template <typename T>
+const auto kPiOver4 = T(UnwrapNumber<T>(0.785398163397448309616));
+
+template <typename T>
+const auto k3PiOver4 = T(UnwrapNumber<T>(2.356194490192344928846));
+
+template <typename T>
+constexpr auto Negate(const Number<T>& v) {
+    // For signed integrals, avoid C++ UB by not negating the smallest negative number. In
+    // WGSL, this operation is well defined to return the same value, see:
+    // https://gpuweb.github.io/gpuweb/wgsl/#arithmetic-expr.
+    if constexpr (std::is_integral_v<T> && std::is_signed_v<T>) {
+        if (v == std::numeric_limits<T>::min()) {
+            return v;
+        }
+    }
+    return -v;
+}
+
+template <typename T>
+auto Abs(const Number<T>& v) {
+    if constexpr (std::is_integral_v<T> && std::is_unsigned_v<T>) {
+        return v;
+    } else {
+        return Number<T>(std::abs(v));
+    }
+}
+
+// Concats any number of std::vectors
+template <typename Vec, typename... Vecs>
+auto Concat(Vec&& v1, Vecs&&... vs) {
+    auto total_size = v1.size() + (vs.size() + ...);
+    v1.reserve(total_size);
+    (std::move(vs.begin(), vs.end(), std::back_inserter(v1)), ...);
+    return std::move(v1);
+}
 
 using ResolverConstEvalTest = ResolverTest;
 
@@ -1333,7 +1390,7 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_f16) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    constexpr auto kInf = std::numeric_limits<double>::infinity();
+    constexpr auto kInfinity = std::numeric_limits<double>::infinity();
 
     auto* sem = Sem().Get(expr);
     ASSERT_NE(sem, nullptr);
@@ -1349,17 +1406,17 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_f16) {
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<AFloat>(), kInf);
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<AFloat>(), kInfinity);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<AFloat>(), -kInf);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<AFloat>(), -kInfinity);
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<AFloat>(), kInf);
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<AFloat>(), kInfinity);
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Small_f32_to_f16) {
@@ -2931,29 +2988,6 @@ TEST_F(ResolverConstEvalTest, MemberAccess) {
 namespace unary_op {
 
 template <typename T>
-auto Highest() {
-    return T(T::kHighest);
-}
-
-template <typename T>
-auto Lowest() {
-    return T(T::kLowest);
-}
-
-template <typename T>
-constexpr auto Negate(const Number<T>& v) {
-    // For signed integrals, avoid C++ UB by not negating the smallest negative number. In
-    // WGSL, this operation is well defined to return the same value, see:
-    // https://gpuweb.github.io/gpuweb/wgsl/#arithmetic-expr.
-    if constexpr (std::is_integral_v<T> && std::is_signed_v<T>) {
-        if (v == std::numeric_limits<T>::min()) {
-            return v;
-        }
-    }
-    return -v;
-}
-
-template <typename T>
 struct Values {
     T input;
     T expect;
@@ -3036,37 +3070,37 @@ INSTANTIATE_TEST_SUITE_P(Negation,
                                               C(-0_a, 0_a),
                                               C(1_a, -1_a),
                                               C(-1_a, 1_a),
-                                              C(Highest<AInt>(), -Highest<AInt>()),
-                                              C(-Highest<AInt>(), Highest<AInt>()),
-                                              C(Lowest<AInt>(), Negate(Lowest<AInt>())),
-                                              C(Negate(Lowest<AInt>()), Lowest<AInt>()),
+                                              C(kHighest<AInt>, -kHighest<AInt>),
+                                              C(-kHighest<AInt>, kHighest<AInt>),
+                                              C(kLowest<AInt>, Negate(kLowest<AInt>)),
+                                              C(Negate(kLowest<AInt>), kLowest<AInt>),
                                               // i32
                                               C(0_i, -0_i),
                                               C(-0_i, 0_i),
                                               C(1_i, -1_i),
                                               C(-1_i, 1_i),
-                                              C(Highest<i32>(), -Highest<i32>()),
-                                              C(-Highest<i32>(), Highest<i32>()),
-                                              C(Lowest<i32>(), Negate(Lowest<i32>())),
-                                              C(Negate(Lowest<i32>()), Lowest<i32>()),
+                                              C(kHighest<i32>, -kHighest<i32>),
+                                              C(-kHighest<i32>, kHighest<i32>),
+                                              C(kLowest<i32>, Negate(kLowest<i32>)),
+                                              C(Negate(kLowest<i32>), kLowest<i32>),
                                               // AFloat
                                               C(0.0_a, -0.0_a),
                                               C(-0.0_a, 0.0_a),
                                               C(1.0_a, -1.0_a),
                                               C(-1.0_a, 1.0_a),
-                                              C(Highest<AFloat>(), -Highest<AFloat>()),
-                                              C(-Highest<AFloat>(), Highest<AFloat>()),
-                                              C(Lowest<AFloat>(), Negate(Lowest<AFloat>())),
-                                              C(Negate(Lowest<AFloat>()), Lowest<AFloat>()),
+                                              C(kHighest<AFloat>, -kHighest<AFloat>),
+                                              C(-kHighest<AFloat>, kHighest<AFloat>),
+                                              C(kLowest<AFloat>, Negate(kLowest<AFloat>)),
+                                              C(Negate(kLowest<AFloat>), kLowest<AFloat>),
                                               // f32
                                               C(0.0_f, -0.0_f),
                                               C(-0.0_f, 0.0_f),
                                               C(1.0_f, -1.0_f),
                                               C(-1.0_f, 1.0_f),
-                                              C(Highest<f32>(), -Highest<f32>()),
-                                              C(-Highest<f32>(), Highest<f32>()),
-                                              C(Lowest<f32>(), Negate(Lowest<f32>())),
-                                              C(Negate(Lowest<f32>()), Lowest<f32>()),
+                                              C(kHighest<f32>, -kHighest<f32>),
+                                              C(-kHighest<f32>, kHighest<f32>),
+                                              C(kLowest<f32>, Negate(kLowest<f32>)),
+                                              C(Negate(kLowest<f32>), kLowest<f32>),
                                           })));
 
 // Make sure UBSan doesn't trip on C++'s undefined behaviour of negating the smallest negative
@@ -3081,6 +3115,146 @@ TEST_F(ResolverConstEvalTest, UnaryNegateLowestAbstract) {
 }
 
 }  // namespace unary_op
+
+namespace builtin {
+
+template <typename T>
+struct Values {
+    std::vector<T> args;
+    T result;
+    bool result_pos_or_neg;
+};
+
+struct Case {
+    std::variant<Values<AInt>, Values<AFloat>, Values<u32>, Values<i32>, Values<f32>, Values<f16>>
+        values;
+};
+
+static std::ostream& operator<<(std::ostream& o, const Case& c) {
+    std::visit(
+        [&](auto&& v) {
+            for (auto& e : v.args) {
+                o << e << ((&e != &v.args.back()) ? " " : "");
+            }
+        },
+        c.values);
+    return o;
+}
+
+template <typename T>
+Case C(std::vector<T> args, T result, bool result_pos_or_neg = false) {
+    return Case{Values<T>{std::move(args), result, result_pos_or_neg}};
+}
+
+using ResolverConstEvalBuiltinTest = ResolverTestWithParam<std::tuple<sem::BuiltinType, Case>>;
+
+TEST_P(ResolverConstEvalBuiltinTest, Test) {
+    Enable(ast::Extension::kF16);
+
+    auto builtin = std::get<0>(GetParam());
+    auto c = std::get<1>(GetParam());
+    std::visit(
+        [&](auto&& values) {
+            using T = decltype(values.result);
+            auto args = utils::Transform(values.args, [&](auto&& a) {
+                return static_cast<const ast::Expression*>(Expr(a));
+            });
+            auto* expr = Call(sem::str(builtin), std::move(args));
+
+            GlobalConst("C", nullptr, expr);
+
+            EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+            auto* sem = Sem().Get(expr);
+            const sem::Constant* value = sem->ConstantValue();
+            ASSERT_NE(value, nullptr);
+            EXPECT_TYPE(value->Type(), sem->Type());
+
+            auto actual = value->As<T>();
+
+            if constexpr (IsFloatingPoint<UnwrapNumber<T>>) {
+                if (std::isnan(values.result)) {
+                    EXPECT_TRUE(std::isnan(actual));
+                } else {
+                    EXPECT_FLOAT_EQ(values.result_pos_or_neg ? Abs(actual) : actual, values.result);
+                }
+            } else {
+                EXPECT_EQ(values.result_pos_or_neg ? Abs(actual) : actual, values.result);
+            }
+
+            if constexpr (IsInteger<UnwrapNumber<T>>) {
+                // Check that the constant's integer doesn't contain unexpected data in the MSBs
+                // that are outside of the bit-width of T.
+                EXPECT_EQ(value->As<AInt>(), AInt(values.result));
+            }
+        },
+        c.values);
+}
+
+template <typename T, bool finite_only>
+std::vector<Case> Atan2Cases() {
+    std::vector<Case> cases = {
+        // If y is +/-0 and x is negative or -0, +/-PI is returned
+        C({T(0.0), -T(0.0)}, kPi<T>, true),
+
+        // If y is +/-0 and x is positive or +0, +/-0 is returned
+        C({T(0.0), T(0.0)}, T(0.0), true),
+
+        // If x is +/-0 and y is negative, -PI/2 is returned
+        C({-T(1.0), T(0.0)}, -kPiOver2<T>),
+        C({-T(1.0), -T(0.0)}, -kPiOver2<T>),
+
+        // If x is +/-0 and y is positive, +PI/2 is returned
+        C({T(1.0), T(0.0)}, kPiOver2<T>),
+        C({T(1.0), -T(0.0)}, kPiOver2<T>),
+    };
+
+    if constexpr (!finite_only) {
+        std::vector<Case> non_finite_cases = {
+            // If y is +/-INF and x is finite, +/-PI/2 is returned
+            C({kInf<T>, T(0.0)}, kPiOver2<T>, true),
+            C({-kInf<T>, T(0.0)}, kPiOver2<T>, true),
+
+            // If y is +/-INF and x is -INF, +/-3PI/4 is returned
+            C({kInf<T>, -kInf<T>}, k3PiOver4<T>, true),
+            C({-kInf<T>, -kInf<T>}, k3PiOver4<T>, true),
+
+            // If y is +/-INF and x is +INF, +/-PI/4 is returned
+            C({kInf<T>, kInf<T>}, kPiOver4<T>, true),
+            C({-kInf<T>, kInf<T>}, kPiOver4<T>, true),
+
+            // If x is -INF and y is finite and positive, +PI is returned
+            C({T(0.0), -kInf<T>}, kPi<T>),
+
+            // If x is -INF and y is finite and negative, -PI is returned
+            C({-T(0.0), -kInf<T>}, -kPi<T>),
+
+            // If x is +INF and y is finite and positive, +0 is returned
+            C({T(0.0), kInf<T>}, T(0.0)),
+
+            // If x is +INF and y is finite and negative, -0 is returned
+            C({-T(0.0), kInf<T>}, -T(0.0)),
+
+            // If either x is NaN or y is NaN, NaN is returned
+            C({kNaN<T>, T(0.0)}, kNaN<T>),
+            C({T(0.0), kNaN<T>}, kNaN<T>),
+            C({kNaN<T>, kNaN<T>}, kNaN<T>),
+        };
+
+        cases = Concat(cases, non_finite_cases);
+    }
+
+    return cases;
+}
+
+INSTANTIATE_TEST_SUITE_P(  //
+    Atan2,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kAtan2),
+                     testing::ValuesIn(Concat(Atan2Cases<AFloat, true>(),  //
+                                              Atan2Cases<f32, false>()))));
+
+}  // namespace builtin
 
 }  // namespace
 }  // namespace tint::resolver
