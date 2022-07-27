@@ -696,6 +696,9 @@ TEST_P(StorageTextureTests, WriteonlyStorageTextureInFragmentShader) {
     // NVidia OpenGLES drivers.
     DAWN_SUPPRESS_TEST_IF(IsNvidia() && IsLinux() && IsOpenGLES());
 
+    // TODO(crbug.com/dawn/1503): Investigate the regression in ANGLE that causes the test failure.
+    DAWN_SUPPRESS_TEST_IF(IsANGLE());
+
     for (wgpu::TextureFormat format : utils::kAllTextureFormats) {
         if (!utils::TextureFormatSupportsStorageTexture(format)) {
             continue;
@@ -913,6 +916,9 @@ fn doTest() -> bool {
 // Verify that the texture is correctly cleared to 0 before its first usage as a write-only storage
 // storage texture in a render pass.
 TEST_P(StorageTextureZeroInitTests, WriteonlyStorageTextureClearsToZeroInRenderPass) {
+    // TODO(crbug.com/dawn/1503): Investigate the regression in ANGLE that causes the test failure.
+    DAWN_SUPPRESS_TEST_IF(IsANGLE());
+
     // Prepare the write-only storage texture.
     wgpu::Texture writeonlyStorageTexture = CreateTexture(
         wgpu::TextureFormat::R32Uint,
