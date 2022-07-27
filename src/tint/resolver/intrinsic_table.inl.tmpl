@@ -182,7 +182,6 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
 {{- $class := PascalCase .Name -}}
 /// TypeMatcher for 'type {{.Name}}'
 {{- if .Decl.Source.S.Filepath  }}
-/// @see {{.Decl.Source}}
 {{- end  }}
 class {{$class}} : public TypeMatcher {
  public:
@@ -237,7 +236,6 @@ std::string {{$class}}::String(MatchState*{{if .TemplateParams}} state{{end}}) c
 {{- $class := PascalCase .Name -}}
 /// TypeMatcher for 'match {{.Name}}'
 {{- if .Decl.Source.S.Filepath  }}
-/// @see {{.Decl.Source}}
 {{- end  }}
 class {{$class}} : public TypeMatcher {
  public:
@@ -285,7 +283,6 @@ std::string {{$class}}::String(MatchState*) const {
 {{- $enum := PascalCase .Enum.Name -}}
 /// EnumMatcher for 'match {{.Name}}'
 {{- if .Decl.Source.S.Filepath  }}
-/// @see {{.Decl.Source}}
 {{- end  }}
 class {{$class}} : public NumberMatcher {
  public:
