@@ -21,13 +21,18 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
+	"strconv"
 	"strings"
 	"text/template"
+	"time"
 	"unicode"
 
+	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/glob"
 	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/gen"
@@ -78,6 +83,8 @@ func run() error {
 		return err
 	}
 
+	cache := &genCache{}
+
 	// For each template file...
 	for _, relTmplPath := range files {
 		// Make tmplPath absolute
@@ -89,21 +96,36 @@ func run() error {
 			return fmt.Errorf("failed to open '%v': %w", tmplPath, err)
 		}
 
-		// Create or update the file at relpath if the file content has changed
+		// Create or update the file at relpath if the file content has changed,
+		// preserving the copyright year in the header.
 		// relpath is a path relative to the template
 		writeFile := func(relpath, body string) error {
+			abspath := filepath.Join(filepath.Dir(tmplPath), relpath)
+
+			copyrightYear := time.Now().Year()
+
+			// Load the old file
+			existing, err := ioutil.ReadFile(abspath)
+			if err == nil {
+				// Look for the existing copyright year
+				if match := copyrightRegex.FindStringSubmatch(string(existing)); len(match) == 2 {
+					if year, err := strconv.Atoi(match[1]); err == nil {
+						copyrightYear = year
+					}
+				}
+			}
+
 			// Write the common file header
 			sb := strings.Builder{}
-			sb.WriteString(fmt.Sprintf(header, filepath.ToSlash(relTmplPath)))
+			sb.WriteString(fmt.Sprintf(header, copyrightYear, filepath.ToSlash(relTmplPath)))
 			sb.WriteString(body)
 			content := sb.String()
-			abspath := filepath.Join(filepath.Dir(tmplPath), relpath)
-			return writeFileIfChanged(abspath, content)
+			return writeFileIfChanged(abspath, content, string(existing))
 		}
 
 		// Write the content generated using the template and semantic info
 		sb := strings.Builder{}
-		if err := generate(string(tmpl), &sb, writeFile); err != nil {
+		if err := generate(string(tmpl), cache, &sb, writeFile); err != nil {
 			return fmt.Errorf("while processing '%v': %w", tmplPath, err)
 		}
 
@@ -119,22 +141,92 @@ func run() error {
 	return nil
 }
 
+// Cache for objects that are expensive to build, and can be reused between templates.
+type genCache struct {
+	cached struct {
+		sem            *sem.Sem            // lazily built by sem()
+		intrinsicTable *gen.IntrinsicTable // lazily built by intrinsicTable()
+		permuter       *gen.Permuter       // lazily built by permute()
+	}
+}
+
+// sem lazily parses and resolves the intrinsic.def file, returning the semantic info.
+func (g *genCache) sem() (*sem.Sem, error) {
+	if g.cached.sem == nil {
+		// Load the builtins definition file
+		defPath := filepath.Join(fileutils.ProjectRoot(), defProjectRelPath)
+
+		defSource, err := ioutil.ReadFile(defPath)
+		if err != nil {
+			return nil, err
+		}
+
+		// Parse the definition file to produce an AST
+		ast, err := parser.Parse(string(defSource), defProjectRelPath)
+		if err != nil {
+			return nil, err
+		}
+
+		// Resolve the AST to produce the semantic info
+		sem, err := resolver.Resolve(ast)
+		if err != nil {
+			return nil, err
+		}
+
+		g.cached.sem = sem
+	}
+	return g.cached.sem, nil
+}
+
+// intrinsicTable lazily calls and returns the result of buildIntrinsicTable(),
+// caching the result for repeated calls.
+func (g *genCache) intrinsicTable() (*gen.IntrinsicTable, error) {
+	if g.cached.intrinsicTable == nil {
+		sem, err := g.sem()
+		if err != nil {
+			return nil, err
+		}
+		g.cached.intrinsicTable, err = gen.BuildIntrinsicTable(sem)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return g.cached.intrinsicTable, nil
+}
+
+// permute lazily calls buildPermuter(), caching the result for repeated
+// calls, then passes the argument to Permutator.Permute()
+func (g *genCache) permute(overload *sem.Overload) ([]gen.Permutation, error) {
+	if g.cached.permuter == nil {
+		sem, err := g.sem()
+		if err != nil {
+			return nil, err
+		}
+		g.cached.permuter, err = gen.NewPermuter(sem)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return g.cached.permuter.Permute(overload)
+}
+
 // writes content to path if the file has changed
-func writeFileIfChanged(path, content string) error {
-	existing, err := ioutil.ReadFile(path)
-	if err == nil && string(existing) == content {
+func writeFileIfChanged(path, newContent, oldContent string) error {
+	if oldContent == newContent {
 		return nil // Not changed
 	}
 	if err := os.MkdirAll(filepath.Dir(path), 0777); err != nil {
 		return fmt.Errorf("failed to create directory for '%v': %w", path, err)
 	}
-	if err := ioutil.WriteFile(path, []byte(content), 0666); err != nil {
+	if err := ioutil.WriteFile(path, []byte(newContent), 0666); err != nil {
 		return fmt.Errorf("failed to write file '%v': %w", path, err)
 	}
 	return nil
 }
 
-const header = `// Copyright 2021 The Tint Authors.
+var copyrightRegex = regexp.MustCompile(`// Copyright (\d+) The`)
+
+const header = `// Copyright %v The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -159,12 +251,10 @@ const header = `// Copyright 2021 The Tint Authors.
 `
 
 type generator struct {
-	t      *template.Template
-	cached struct {
-		sem            *sem.Sem            // lazily built by sem()
-		intrinsicTable *gen.IntrinsicTable // lazily built by intrinsicTable()
-		permuter       *gen.Permuter       // lazily built by permute()
-	}
+	template  *template.Template
+	cache     *genCache
+	writeFile WriteFile
+	rnd       *rand.Rand
 }
 
 // WriteFile is a function that Generate() may call to emit a new file from a
@@ -176,13 +266,21 @@ type WriteFile func(relpath, content string) error
 // generate executes the template tmpl, writing the output to w.
 // See https://golang.org/pkg/text/template/ for documentation on the template
 // syntax.
-func generate(tmpl string, w io.Writer, writeFile WriteFile) error {
-	g := generator{}
-	return g.generate(tmpl, w, writeFile)
+func generate(tmpl string, cache *genCache, w io.Writer, writeFile WriteFile) error {
+	g := generator{
+		template:  template.New("<template>"),
+		cache:     cache,
+		writeFile: writeFile,
+		rnd:       rand.New(rand.NewSource(4561123)),
+	}
+	if err := g.bindAndParse(g.template, tmpl); err != nil {
+		return err
+	}
+	return g.template.Execute(w, nil)
 }
 
-func (g *generator) generate(tmpl string, w io.Writer, writeFile WriteFile) error {
-	t, err := template.New("<template>").Funcs(map[string]interface{}{
+func (g *generator) bindAndParse(t *template.Template, text string) error {
+	_, err := t.Funcs(map[string]interface{}{
 		"Map":                   newMap,
 		"Iterate":               iterate,
 		"Title":                 strings.Title,
@@ -194,6 +292,8 @@ func (g *generator) generate(tmpl string, w io.Writer, writeFile WriteFile) erro
 		"TrimSuffix":            strings.TrimSuffix,
 		"TrimLeft":              strings.TrimLeft,
 		"TrimRight":             strings.TrimRight,
+		"Split":                 strings.Split,
+		"Scramble":              g.scramble,
 		"IsEnumEntry":           is(sem.EnumEntry{}),
 		"IsEnumMatcher":         is(sem.EnumMatcher{}),
 		"IsFQN":                 is(sem.FullyQualifiedName{}),
@@ -206,24 +306,20 @@ func (g *generator) generate(tmpl string, w io.Writer, writeFile WriteFile) erro
 		"IsDeclarable":          gen.IsDeclarable,
 		"IsFirstIn":             isFirstIn,
 		"IsLastIn":              isLastIn,
-		"Sem":                   g.sem,
-		"IntrinsicTable":        g.intrinsicTable,
-		"Permute":               g.permute,
+		"Sem":                   g.cache.sem,
+		"IntrinsicTable":        g.cache.intrinsicTable,
+		"Permute":               g.cache.permute,
 		"Eval":                  g.eval,
-		"WriteFile":             func(relpath, content string) (string, error) { return "", writeFile(relpath, content) },
-	}).Option("missingkey=error").
-		Parse(tmpl)
-	if err != nil {
-		return err
-	}
-	g.t = t
-	return t.Execute(w, map[string]interface{}{})
+		"Import":                g.importTmpl,
+		"WriteFile":             func(relpath, content string) (string, error) { return "", g.writeFile(relpath, content) },
+	}).Option("missingkey=error").Parse(text)
+	return err
 }
 
 // eval executes the sub-template with the given name and argument, returning
 // the generated output
 func (g *generator) eval(template string, args ...interface{}) (string, error) {
-	target := g.t.Lookup(template)
+	target := g.template.Lookup(template)
 	if target == nil {
 		return "", fmt.Errorf("template '%v' not found", template)
 	}
@@ -253,64 +349,54 @@ func (g *generator) eval(template string, args ...interface{}) (string, error) {
 	return sb.String(), nil
 }
 
-// sem lazily parses and resolves the intrinsic.def file, returning the semantic info.
-func (g *generator) sem() (*sem.Sem, error) {
-	if g.cached.sem == nil {
-		// Load the builtins definition file
-		defPath := filepath.Join(fileutils.ProjectRoot(), defProjectRelPath)
-
-		defSource, err := ioutil.ReadFile(defPath)
-		if err != nil {
-			return nil, err
-		}
-
-		// Parse the definition file to produce an AST
-		ast, err := parser.Parse(string(defSource), defProjectRelPath)
-		if err != nil {
-			return nil, err
-		}
-
-		// Resolve the AST to produce the semantic info
-		sem, err := resolver.Resolve(ast)
-		if err != nil {
-			return nil, err
-		}
-
-		g.cached.sem = sem
+// importTmpl parses the template at the given project-relative path, merging
+// the template definitions into the global namespace.
+// Note: The body of the template is not executed.
+func (g *generator) importTmpl(path string) (string, error) {
+	if strings.Contains(path, "..") {
+		return "", fmt.Errorf("import path must not contain '..'")
 	}
-	return g.cached.sem, nil
+	path = filepath.Join(fileutils.ProjectRoot(), path)
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return "", fmt.Errorf("failed to open '%v': %w", path, err)
+	}
+	t := g.template.New("")
+	if err := g.bindAndParse(t, string(data)); err != nil {
+		return "", fmt.Errorf("failed to parse '%v': %w", path, err)
+	}
+	return "", nil
 }
 
-// intrinsicTable lazily calls and returns the result of buildIntrinsicTable(),
-// caching the result for repeated calls.
-func (g *generator) intrinsicTable() (*gen.IntrinsicTable, error) {
-	if g.cached.intrinsicTable == nil {
-		sem, err := g.sem()
-		if err != nil {
-			return nil, err
-		}
-		g.cached.intrinsicTable, err = gen.BuildIntrinsicTable(sem)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return g.cached.intrinsicTable, nil
-}
+// scramble randomly modifies the input string so that it is no longer equal to
+// any of the strings in 'avoid'.
+func (g *generator) scramble(str string, avoid container.Set[string]) (string, error) {
+	bytes := []byte(str)
+	passes := g.rnd.Intn(5) + 1
 
-// permute lazily calls buildPermuter(), caching the result for repeated
-// calls, then passes the argument to Permutator.Permute()
-func (g *generator) permute(overload *sem.Overload) ([]gen.Permutation, error) {
-	if g.cached.permuter == nil {
-		sem, err := g.sem()
-		if err != nil {
-			return nil, err
-		}
-		g.cached.permuter, err = gen.NewPermuter(sem)
-		if err != nil {
-			return nil, err
+	const chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz"
+
+	char := func() byte { return chars[g.rnd.Intn(len(chars))] }
+	replace := func(at int) { bytes[at] = char() }
+	delete := func(at int) { bytes = append(bytes[:at], bytes[at+1:]...) }
+	insert := func(at int) { bytes = append(append(bytes[:at], char()), bytes[at:]...) }
+
+	for i := 0; i < passes || avoid.Contains(string(bytes)); i++ {
+		if len(bytes) > 0 {
+			at := g.rnd.Intn(len(bytes))
+			switch g.rnd.Intn(3) {
+			case 0:
+				replace(at)
+			case 1:
+				delete(at)
+			case 2:
+				insert(at)
+			}
+		} else {
+			insert(0)
 		}
 	}
-	return g.cached.permuter.Permute(overload)
+	return string(bytes), nil
 }
 
 // Map is a simple generic key-value map, which can be used in the template
