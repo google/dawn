@@ -93,7 +93,7 @@ ast::BuiltinValue EnumConverter::ToBuiltin(SpvBuiltIn b) {
     }
 
     Fail() << "unknown SPIR-V builtin: " << uint32_t(b);
-    return ast::BuiltinValue::kNone;
+    return ast::BuiltinValue::kInvalid;
 }
 
 ast::TextureDimension EnumConverter::ToDim(SpvDim dim, bool arrayed) {

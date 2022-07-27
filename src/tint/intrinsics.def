@@ -23,6 +23,23 @@
 // Enumerators                                                                //
 ////////////////////////////////////////////////////////////////////////////////
 
+// https://gpuweb.github.io/gpuweb/wgsl/#builtin-values
+enum builtin_value {
+  position
+  vertex_index
+  instance_index
+  front_facing
+  frag_depth
+  local_invocation_id
+  local_invocation_index
+  global_invocation_id
+  workgroup_id
+  num_workgroups
+  sample_index
+  sample_mask
+  @internal point_size
+}
+
 // https://gpuweb.github.io/gpuweb/wgsl/#extension
 enum extension {
   // WGSL Extension "f16"

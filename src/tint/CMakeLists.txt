@@ -698,6 +698,7 @@ if(TINT_BUILD_TESTS)
     ast/builtin_attribute_test.cc
     ast/builtin_texture_helper_test.cc
     ast/builtin_texture_helper_test.h
+    ast/builtin_value_test.cc
     ast/call_expression_test.cc
     ast/call_statement_test.cc
     ast/case_statement_test.cc

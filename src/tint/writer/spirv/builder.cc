@@ -4171,7 +4171,7 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::BuiltinValue builtin, ast::StorageClass 
             return SpvBuiltInSampleId;
         case ast::BuiltinValue::kSampleMask:
             return SpvBuiltInSampleMask;
-        case ast::BuiltinValue::kNone:
+        case ast::BuiltinValue::kInvalid:
             break;
     }
     return SpvBuiltInMax;

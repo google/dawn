@@ -70,46 +70,6 @@ const char kReadAccess[] = "read";
 const char kWriteAccess[] = "write";
 const char kReadWriteAccess[] = "read_write";
 
-ast::BuiltinValue ident_to_builtin(std::string_view str) {
-    if (str == "position") {
-        return ast::BuiltinValue::kPosition;
-    }
-    if (str == "vertex_index") {
-        return ast::BuiltinValue::kVertexIndex;
-    }
-    if (str == "instance_index") {
-        return ast::BuiltinValue::kInstanceIndex;
-    }
-    if (str == "front_facing") {
-        return ast::BuiltinValue::kFrontFacing;
-    }
-    if (str == "frag_depth") {
-        return ast::BuiltinValue::kFragDepth;
-    }
-    if (str == "local_invocation_id") {
-        return ast::BuiltinValue::kLocalInvocationId;
-    }
-    if (str == "local_invocation_idx" || str == "local_invocation_index") {
-        return ast::BuiltinValue::kLocalInvocationIndex;
-    }
-    if (str == "global_invocation_id") {
-        return ast::BuiltinValue::kGlobalInvocationId;
-    }
-    if (str == "workgroup_id") {
-        return ast::BuiltinValue::kWorkgroupId;
-    }
-    if (str == "num_workgroups") {
-        return ast::BuiltinValue::kNumWorkgroups;
-    }
-    if (str == "sample_index") {
-        return ast::BuiltinValue::kSampleIndex;
-    }
-    if (str == "sample_mask") {
-        return ast::BuiltinValue::kSampleMask;
-    }
-    return ast::BuiltinValue::kNone;
-}
-
 const char kBindingAttribute[] = "binding";
 const char kBuiltinAttribute[] = "builtin";
 const char kGroupAttribute[] = "group";
@@ -1564,8 +1524,8 @@ Expect<ast::BuiltinValue> ParserImpl::expect_builtin() {
         return Failure::kErrored;
     }
 
-    ast::BuiltinValue builtin = ident_to_builtin(ident.value);
-    if (builtin == ast::BuiltinValue::kNone) {
+    ast::BuiltinValue builtin = ast::ParseBuiltinValue(ident.value);
+    if (builtin == ast::BuiltinValue::kInvalid) {
         return add_error(ident.source, "invalid value for builtin attribute");
     }
 

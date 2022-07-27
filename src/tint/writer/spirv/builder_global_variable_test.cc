@@ -442,7 +442,7 @@ INSTANTIATE_TEST_SUITE_P(
     BuilderTest_Type,
     BuiltinDataTest,
     testing::Values(
-        BuiltinData{ast::BuiltinValue::kNone, ast::StorageClass::kNone, SpvBuiltInMax},
+        BuiltinData{ast::BuiltinValue::kInvalid, ast::StorageClass::kNone, SpvBuiltInMax},
         BuiltinData{ast::BuiltinValue::kPosition, ast::StorageClass::kIn, SpvBuiltInFragCoord},
         BuiltinData{ast::BuiltinValue::kPosition, ast::StorageClass::kOut, SpvBuiltInPosition},
         BuiltinData{

@@ -205,9 +205,9 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     EnumConverterBad,
     SpvBuiltinTest,
-    testing::Values(BuiltinCase{static_cast<SpvBuiltIn>(9999), false, ast::BuiltinValue::kNone},
-                    BuiltinCase{static_cast<SpvBuiltIn>(9999), false, ast::BuiltinValue::kNone},
-                    BuiltinCase{SpvBuiltInNumWorkgroups, false, ast::BuiltinValue::kNone}));
+    testing::Values(BuiltinCase{static_cast<SpvBuiltIn>(9999), false, ast::BuiltinValue::kInvalid},
+                    BuiltinCase{static_cast<SpvBuiltIn>(9999), false, ast::BuiltinValue::kInvalid},
+                    BuiltinCase{SpvBuiltInNumWorkgroups, false, ast::BuiltinValue::kInvalid}));
 
 // Dim
 
