@@ -1,5 +1,5 @@
 void clamp_5f0819() {
-  int3 res = clamp((1).xxx, (1).xxx, (1).xxx);
+  int3 res = (1).xxx;
 }
 
 struct tint_symbol {

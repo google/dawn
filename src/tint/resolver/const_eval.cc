@@ -82,6 +82,19 @@ auto Dispatch_fia_fi32_f16(F&& f, CONSTANTS&&... cs) {
 /// Helper that calls `f` passing in the value of all `cs`.
 /// Assumes all `cs` are of the same type.
 template <typename F, typename... CONSTANTS>
+auto Dispatch_fia_fiu32(F&& f, CONSTANTS&&... cs) {
+    return Switch(
+        First(cs...)->Type(),  //
+        [&](const sem::AbstractInt*) { return f(cs->template As<AInt>()...); },
+        [&](const sem::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
+        [&](const sem::F32*) { return f(cs->template As<f32>()...); },
+        [&](const sem::I32*) { return f(cs->template As<i32>()...); },
+        [&](const sem::U32*) { return f(cs->template As<u32>()...); });
+}
+
+/// Helper that calls `f` passing in the value of all `cs`.
+/// Assumes all `cs` are of the same type.
+template <typename F, typename... CONSTANTS>
 auto Dispatch_fa_f32(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
@@ -721,6 +734,20 @@ const sem::Constant* ConstEval::atan2(const sem::Type*,
     };
     return TransformElements(builder, transform, args[0]->ConstantValue(),
                              args[1]->ConstantValue());
+}
+
+const sem::Constant* ConstEval::clamp(const sem::Type*,
+                                      utils::ConstVectorRef<const sem::Expression*> args) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1,
+                         const sem::Constant* c2) {
+        auto create = [&](auto e, auto low, auto high) {
+            return CreateElement(builder, c0->Type(),
+                                 decltype(e)(std::min(std::max(e, low), high)));
+        };
+        return Dispatch_fia_fiu32(create, c0, c1, c2);
+    };
+    return TransformElements(builder, transform, args[0]->ConstantValue(), args[1]->ConstantValue(),
+                             args[2]->ConstantValue());
 }
 
 utils::Result<const sem::Constant*> ConstEval::Convert(const sem::Type* target_ty,

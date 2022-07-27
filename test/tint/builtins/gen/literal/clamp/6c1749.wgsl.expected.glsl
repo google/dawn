@@ -1,7 +1,7 @@
 #version 310 es
 
 void clamp_6c1749() {
-  ivec2 res = clamp(ivec2(1), ivec2(1), ivec2(1));
+  ivec2 res = ivec2(1);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void clamp_6c1749() {
-  ivec2 res = clamp(ivec2(1), ivec2(1), ivec2(1));
+  ivec2 res = ivec2(1);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void clamp_6c1749() {
-  ivec2 res = clamp(ivec2(1), ivec2(1), ivec2(1));
+  ivec2 res = ivec2(1);
 }
 
 void compute_main() {

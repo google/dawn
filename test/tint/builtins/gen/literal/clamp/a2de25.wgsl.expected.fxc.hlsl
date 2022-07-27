@@ -1,5 +1,5 @@
 void clamp_a2de25() {
-  uint res = clamp(1u, 1u, 1u);
+  uint res = 1u;
 }
 
 struct tint_symbol {

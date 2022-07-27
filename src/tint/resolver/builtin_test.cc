@@ -1415,14 +1415,16 @@ TEST_P(ResolverBuiltinTest_ThreeParam_FloatOrInt, Error_NoParams) {
 
     EXPECT_FALSE(r()->Resolve());
 
-    EXPECT_EQ(r()->error(), "error: no matching call to " + std::string(param.name) +
-                                "()\n\n"
-                                "2 candidate functions:\n  " +
-                                std::string(param.name) +
-                                "(T, T, T) -> T  where: T is f32, i32 or u32\n  " +
-                                std::string(param.name) +
-                                "(vecN<T>, vecN<T>, vecN<T>) -> vecN<T>  where: T is f32, i32 "
-                                "or u32\n");
+    EXPECT_EQ(
+        r()->error(),
+        "error: no matching call to " + std::string(param.name) +
+            "()\n\n"
+            "2 candidate functions:\n  " +
+            std::string(param.name) +
+            "(T, T, T) -> T  where: T is abstract-float, abstract-int, f32, i32 or u32\n  " +
+            std::string(param.name) +
+            "(vecN<T>, vecN<T>, vecN<T>) -> vecN<T>  where: T is abstract-float, abstract-int, "
+            "f32, i32 or u32\n");
 }
 
 INSTANTIATE_TEST_SUITE_P(ResolverTest,

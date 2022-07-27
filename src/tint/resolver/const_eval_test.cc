@@ -3254,6 +3254,31 @@ INSTANTIATE_TEST_SUITE_P(  //
                      testing::ValuesIn(Concat(Atan2Cases<AFloat, true>(),  //
                                               Atan2Cases<f32, false>()))));
 
+template <typename T>
+std::vector<Case> ClampCases() {
+    return {
+        C({T(0), T(0), T(0)}, T(0)),
+        C({T(0), T(42), kHighest<T>}, T(42)),
+        C({kLowest<T>, T(0), T(42)}, T(0)),
+        C({T(0), kLowest<T>, kHighest<T>}, T(0)),
+        C({T(0), kHighest<T>, kLowest<T>}, kLowest<T>),
+        C({kHighest<T>, kHighest<T>, kHighest<T>}, kHighest<T>),
+        C({kLowest<T>, kLowest<T>, kLowest<T>}, kLowest<T>),
+        C({kHighest<T>, kLowest<T>, kHighest<T>}, kHighest<T>),
+        C({kLowest<T>, kLowest<T>, kHighest<T>}, kLowest<T>),
+    };
+}
+
+INSTANTIATE_TEST_SUITE_P(  //
+    Clamp,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kClamp),
+                     testing::ValuesIn(Concat(ClampCases<AInt>(),  //
+                                              ClampCases<i32>(),
+                                              ClampCases<u32>(),
+                                              ClampCases<AFloat>(),
+                                              ClampCases<f32>()))));
+
 }  // namespace builtin
 
 }  // namespace

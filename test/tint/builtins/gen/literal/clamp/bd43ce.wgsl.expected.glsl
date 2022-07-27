@@ -1,7 +1,7 @@
 #version 310 es
 
 void clamp_bd43ce() {
-  uvec4 res = clamp(uvec4(1u), uvec4(1u), uvec4(1u));
+  uvec4 res = uvec4(1u);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void clamp_bd43ce() {
-  uvec4 res = clamp(uvec4(1u), uvec4(1u), uvec4(1u));
+  uvec4 res = uvec4(1u);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void clamp_bd43ce() {
-  uvec4 res = clamp(uvec4(1u), uvec4(1u), uvec4(1u));
+  uvec4 res = uvec4(1u);
 }
 
 void compute_main() {
