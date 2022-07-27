@@ -12,65 +12,65 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/builtin.h"
+#include "src/tint/ast/builtin_value.h"
 
 namespace tint::ast {
 
-std::ostream& operator<<(std::ostream& out, Builtin builtin) {
+std::ostream& operator<<(std::ostream& out, BuiltinValue builtin) {
     switch (builtin) {
-        case Builtin::kNone: {
+        case BuiltinValue::kNone: {
             out << "none";
             break;
         }
-        case Builtin::kPosition: {
+        case BuiltinValue::kPosition: {
             out << "position";
             break;
         }
-        case Builtin::kVertexIndex: {
+        case BuiltinValue::kVertexIndex: {
             out << "vertex_index";
             break;
         }
-        case Builtin::kInstanceIndex: {
+        case BuiltinValue::kInstanceIndex: {
             out << "instance_index";
             break;
         }
-        case Builtin::kFrontFacing: {
+        case BuiltinValue::kFrontFacing: {
             out << "front_facing";
             break;
         }
-        case Builtin::kFragDepth: {
+        case BuiltinValue::kFragDepth: {
             out << "frag_depth";
             break;
         }
-        case Builtin::kLocalInvocationId: {
+        case BuiltinValue::kLocalInvocationId: {
             out << "local_invocation_id";
             break;
         }
-        case Builtin::kLocalInvocationIndex: {
+        case BuiltinValue::kLocalInvocationIndex: {
             out << "local_invocation_index";
             break;
         }
-        case Builtin::kGlobalInvocationId: {
+        case BuiltinValue::kGlobalInvocationId: {
             out << "global_invocation_id";
             break;
         }
-        case Builtin::kWorkgroupId: {
+        case BuiltinValue::kWorkgroupId: {
             out << "workgroup_id";
             break;
         }
-        case Builtin::kNumWorkgroups: {
+        case BuiltinValue::kNumWorkgroups: {
             out << "num_workgroups";
             break;
         }
-        case Builtin::kSampleIndex: {
+        case BuiltinValue::kSampleIndex: {
             out << "sample_index";
             break;
         }
-        case Builtin::kSampleMask: {
+        case BuiltinValue::kSampleMask: {
             out << "sample_mask";
             break;
         }
-        case Builtin::kPointSize: {
+        case BuiltinValue::kPointSize: {
             out << "pointsize";
         }
     }

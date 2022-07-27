@@ -93,7 +93,7 @@ static ast::AttributeList createAttributes(const Source& source,
         case AttributeKind::kBinding:
             return {builder.create<ast::BindingAttribute>(source, 1u)};
         case AttributeKind::kBuiltin:
-            return {builder.Builtin(source, ast::Builtin::kPosition)};
+            return {builder.Builtin(source, ast::BuiltinValue::kPosition)};
         case AttributeKind::kGroup:
             return {builder.create<ast::GroupAttribute>(source, 1u)};
         case AttributeKind::kId:
@@ -250,7 +250,7 @@ TEST_P(FragmentShaderParameterAttributeTest, IsValid) {
     auto& params = GetParam();
     auto attrs = createAttributes(Source{{12, 34}}, *this, params.kind);
     if (params.kind != AttributeKind::kBuiltin && params.kind != AttributeKind::kLocation) {
-        attrs.push_back(Builtin(Source{{34, 56}}, ast::Builtin::kPosition));
+        attrs.push_back(Builtin(Source{{34, 56}}, ast::BuiltinValue::kPosition));
     }
     auto* p = Param("a", ty.vec4<f32>(), attrs);
     Func("frag_main", {p}, ty.void_(), {},
@@ -298,7 +298,7 @@ TEST_P(VertexShaderParameterAttributeTest, IsValid) {
              Stage(ast::PipelineStage::kVertex),
          },
          {
-             Builtin(ast::Builtin::kPosition),
+             Builtin(ast::BuiltinValue::kPosition),
          });
 
     if (params.should_pass) {
@@ -442,7 +442,7 @@ TEST_P(VertexShaderReturnTypeAttributeTest, IsValid) {
     auto attrs = createAttributes(Source{{12, 34}}, *this, params.kind);
     // a vertex shader must include the 'position' builtin in its return type
     if (params.kind != AttributeKind::kBuiltin) {
-        attrs.push_back(Builtin(Source{{34, 56}}, ast::Builtin::kPosition));
+        attrs.push_back(Builtin(Source{{34, 56}}, ast::BuiltinValue::kPosition));
     }
     Func("vertex_main", {}, ty.vec4<f32>(),
          {
@@ -645,7 +645,7 @@ TEST_F(StructMemberAttributeTest, InvariantAttributeWithPosition) {
                               Member("a", ty.vec4<f32>(),
                                      {
                                          Invariant(),
-                                         Builtin(ast::Builtin::kPosition),
+                                         Builtin(ast::BuiltinValue::kPosition),
                                      }),
                           });
     WrapInFunction();
@@ -1140,9 +1140,9 @@ namespace InvariantAttributeTests {
 namespace {
 using InvariantAttributeTests = ResolverTest;
 TEST_F(InvariantAttributeTests, InvariantWithPosition) {
-    auto* param =
-        Param("p", ty.vec4<f32>(),
-              {Invariant(Source{{12, 34}}), Builtin(Source{{56, 78}}, ast::Builtin::kPosition)});
+    auto* param = Param(
+        "p", ty.vec4<f32>(),
+        {Invariant(Source{{12, 34}}), Builtin(Source{{56, 78}}, ast::BuiltinValue::kPosition)});
     Func("main", {param}, ty.vec4<f32>(),
          {
              Return(Construct(ty.vec4<f32>())),
@@ -1368,10 +1368,11 @@ TEST_F(InterpolateTest, FragmentInput_Integer_MissingFlatInterpolation) {
 }
 
 TEST_F(InterpolateTest, VertexOutput_Integer_MissingFlatInterpolation) {
-    auto* s = Structure("S", {
-                                 Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)}),
-                                 Member(Source{{12, 34}}, "u", ty.u32(), {Location(0)}),
-                             });
+    auto* s =
+        Structure("S", {
+                           Member("pos", ty.vec4<f32>(), {Builtin(ast::BuiltinValue::kPosition)}),
+                           Member(Source{{12, 34}}, "u", ty.u32(), {Location(0)}),
+                       });
     Func("main", {}, ty.Of(s),
          {
              Return(Construct(ty.Of(s))),
@@ -1392,7 +1393,7 @@ TEST_F(InterpolateTest, MissingLocationAttribute_Parameter) {
          {
              Param("a", ty.vec4<f32>(),
                    {
-                       Builtin(ast::Builtin::kPosition),
+                       Builtin(ast::BuiltinValue::kPosition),
                        Interpolate(Source{{12, 34}}, ast::InterpolationType::kFlat,
                                    ast::InterpolationSampling::kNone),
                    }),
@@ -1416,7 +1417,7 @@ TEST_F(InterpolateTest, MissingLocationAttribute_ReturnType) {
              Stage(ast::PipelineStage::kVertex),
          },
          {
-             Builtin(ast::Builtin::kPosition),
+             Builtin(ast::BuiltinValue::kPosition),
              Interpolate(Source{{12, 34}}, ast::InterpolationType::kFlat,
                          ast::InterpolationSampling::kNone),
          });

@@ -15,8 +15,8 @@
 #include <memory>
 
 #include "gtest/gtest.h"
-#include "src/tint/ast/builtin.h"
 #include "src/tint/ast/builtin_attribute.h"
+#include "src/tint/ast/builtin_value.h"
 #include "src/tint/ast/location_attribute.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/stage_attribute.h"
@@ -42,7 +42,7 @@ TEST_F(BuilderTest, EntryPoint_Parameters) {
     //              @location(1) loc1 : f32) {
     //   var col : f32 = (coord.x * loc1);
     // }
-    auto* coord = Param("coord", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)});
+    auto* coord = Param("coord", ty.vec4<f32>(), {Builtin(ast::BuiltinValue::kPosition)});
     auto* loc1 = Param("loc1", ty.f32(), {Location(1u)});
     auto* mul = Mul(Expr(MemberAccessor("coord", "x")), Expr("loc1"));
     auto* col = Var("col", ty.f32(), ast::StorageClass::kNone, mul);
@@ -199,7 +199,7 @@ TEST_F(BuilderTest, EntryPoint_SharedStruct) {
     auto* interface = Structure(
         "Interface", {
                          Member("value", ty.f32(), {Location(1u)}),
-                         Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)}),
+                         Member("pos", ty.vec4<f32>(), {Builtin(ast::BuiltinValue::kPosition)}),
                      });
 
     auto* vert_retval = Construct(ty.Of(interface), 42_f, Construct(ty.vec4<f32>()));
@@ -211,7 +211,7 @@ TEST_F(BuilderTest, EntryPoint_SharedStruct) {
          {
              Return(MemberAccessor(Expr("inputs"), "value")),
          },
-         {Stage(ast::PipelineStage::kFragment)}, {Builtin(ast::Builtin::kFragDepth)});
+         {Stage(ast::PipelineStage::kFragment)}, {Builtin(ast::BuiltinValue::kFragDepth)});
 
     spirv::Builder& b = SanitizeAndBuild();
 
@@ -302,7 +302,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, SampleIndex_SampleRateShadingCapability) {
-    Func("main", {Param("sample_index", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)})},
+    Func("main", {Param("sample_index", ty.u32(), {Builtin(ast::BuiltinValue::kSampleIndex)})},
          ty.void_(), {}, {Stage(ast::PipelineStage::kFragment)});
 
     spirv::Builder& b = SanitizeAndBuild();

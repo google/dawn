@@ -85,10 +85,10 @@ bool IsRelational(tint::ast::BinaryOp op) {
            op == tint::ast::BinaryOp::kGreaterThanEqual;
 }
 
-bool RequiresOESSampleVariables(tint::ast::Builtin builtin) {
+bool RequiresOESSampleVariables(tint::ast::BuiltinValue builtin) {
     switch (builtin) {
-        case tint::ast::Builtin::kSampleIndex:
-        case tint::ast::Builtin::kSampleMask:
+        case tint::ast::BuiltinValue::kSampleIndex:
+        case tint::ast::BuiltinValue::kSampleMask:
             return true;
         default:
             return false;

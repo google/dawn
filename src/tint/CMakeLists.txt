@@ -77,8 +77,8 @@ set(TINT_LIB_SRCS
   ast/break_statement.h
   ast/builtin_attribute.cc
   ast/builtin_attribute.h
-  ast/builtin.cc
-  ast/builtin.h
+  ast/builtin_value.cc
+  ast/builtin_value.h
   ast/call_expression.cc
   ast/call_expression.h
   ast/call_statement.cc

@@ -95,7 +95,7 @@ TEST_F(VariableTest, WithAttributes) {
     auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
                     AttributeList{
                         create<LocationAttribute>(1u),
-                        create<BuiltinAttribute>(Builtin::kPosition),
+                        create<BuiltinAttribute>(BuiltinValue::kPosition),
                         create<IdAttribute>(1200u),
                     });
 

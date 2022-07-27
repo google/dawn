@@ -20,8 +20,8 @@ namespace {
 using BuiltinAttributeTest = TestHelper;
 
 TEST_F(BuiltinAttributeTest, Creation) {
-    auto* d = create<BuiltinAttribute>(Builtin::kFragDepth);
-    EXPECT_EQ(Builtin::kFragDepth, d->builtin);
+    auto* d = create<BuiltinAttribute>(BuiltinValue::kFragDepth);
+    EXPECT_EQ(BuiltinValue::kFragDepth, d->builtin);
 }
 
 }  // namespace

@@ -434,7 +434,7 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
 }
 
 TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
-    auto* in_var0 = Param("in_var0", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)});
+    auto* in_var0 = Param("in_var0", ty.u32(), {Builtin(ast::BuiltinValue::kSampleIndex)});
     auto* in_var1 = Param("in_var1", ty.f32(), {Location(0u)});
     Func("foo", {in_var0, in_var1}, ty.f32(),
          {
@@ -444,7 +444,7 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
              Stage(ast::PipelineStage::kFragment),
          },
          {
-             Builtin(ast::Builtin::kFragDepth),
+             Builtin(ast::BuiltinValue::kFragDepth),
          });
     Inspector& inspector = Build();
 
@@ -811,7 +811,7 @@ TEST_F(InspectorGetEntryPointTest, BuiltinNotReferenced) {
 }
 
 TEST_F(InspectorGetEntryPointTest, InputSampleMaskSimpleReferenced) {
-    auto* in_var = Param("in_var", ty.u32(), {Builtin(ast::Builtin::kSampleMask)});
+    auto* in_var = Param("in_var", ty.u32(), {Builtin(ast::BuiltinValue::kSampleMask)});
     Func("ep_func", {in_var}, ty.void_(),
          {
              Return(),
@@ -830,7 +830,8 @@ TEST_F(InspectorGetEntryPointTest, InputSampleMaskSimpleReferenced) {
 
 TEST_F(InspectorGetEntryPointTest, InputSampleMaskStructReferenced) {
     ast::StructMemberList members;
-    members.push_back(Member("inner_position", ty.u32(), {Builtin(ast::Builtin::kSampleMask)}));
+    members.push_back(
+        Member("inner_position", ty.u32(), {Builtin(ast::BuiltinValue::kSampleMask)}));
     Structure("in_struct", members);
 
     Func("ep_func",
@@ -856,7 +857,7 @@ TEST_F(InspectorGetEntryPointTest, InputSampleMaskStructReferenced) {
 TEST_F(InspectorGetEntryPointTest, OutputSampleMaskSimpleReferenced) {
     Func("ep_func",
          {
-             Param("in_var", ty.u32(), {Builtin(ast::Builtin::kSampleMask)}),
+             Param("in_var", ty.u32(), {Builtin(ast::BuiltinValue::kSampleMask)}),
          },
          ty.u32(),
          {
@@ -865,7 +866,7 @@ TEST_F(InspectorGetEntryPointTest, OutputSampleMaskSimpleReferenced) {
          {
              Stage(ast::PipelineStage::kFragment),
          },
-         {Builtin(ast::Builtin::kSampleMask)});
+         {Builtin(ast::BuiltinValue::kSampleMask)});
 
     Inspector& inspector = Build();
 
@@ -878,7 +879,7 @@ TEST_F(InspectorGetEntryPointTest, OutputSampleMaskSimpleReferenced) {
 TEST_F(InspectorGetEntryPointTest, OutputSampleMaskStructReferenced) {
     Structure("out_struct",
               {
-                  Member("inner_sample_mask", ty.u32(), {Builtin(ast::Builtin::kSampleMask)}),
+                  Member("inner_sample_mask", ty.u32(), {Builtin(ast::BuiltinValue::kSampleMask)}),
               });
 
     Func("ep_func", {}, ty.type_name("out_struct"),
@@ -901,7 +902,7 @@ TEST_F(InspectorGetEntryPointTest, OutputSampleMaskStructReferenced) {
 TEST_F(InspectorGetEntryPointTest, InputPositionSimpleReferenced) {
     Func("ep_func",
          {
-             Param("in_var", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)}),
+             Param("in_var", ty.vec4<f32>(), {Builtin(ast::BuiltinValue::kPosition)}),
          },
          ty.void_(),
          {
@@ -922,7 +923,7 @@ TEST_F(InspectorGetEntryPointTest, InputPositionSimpleReferenced) {
 TEST_F(InspectorGetEntryPointTest, InputPositionStructReferenced) {
     Structure("in_struct",
               {
-                  Member("inner_position", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)}),
+                  Member("inner_position", ty.vec4<f32>(), {Builtin(ast::BuiltinValue::kPosition)}),
               });
 
     Func("ep_func",
@@ -948,7 +949,7 @@ TEST_F(InspectorGetEntryPointTest, InputPositionStructReferenced) {
 TEST_F(InspectorGetEntryPointTest, FrontFacingSimpleReferenced) {
     Func("ep_func",
          {
-             Param("in_var", ty.bool_(), {Builtin(ast::Builtin::kFrontFacing)}),
+             Param("in_var", ty.bool_(), {Builtin(ast::BuiltinValue::kFrontFacing)}),
          },
          ty.void_(),
          {
@@ -969,7 +970,7 @@ TEST_F(InspectorGetEntryPointTest, FrontFacingSimpleReferenced) {
 TEST_F(InspectorGetEntryPointTest, FrontFacingStructReferenced) {
     Structure("in_struct",
               {
-                  Member("inner_position", ty.bool_(), {Builtin(ast::Builtin::kFrontFacing)}),
+                  Member("inner_position", ty.bool_(), {Builtin(ast::BuiltinValue::kFrontFacing)}),
               });
 
     Func("ep_func",
@@ -995,7 +996,7 @@ TEST_F(InspectorGetEntryPointTest, FrontFacingStructReferenced) {
 TEST_F(InspectorGetEntryPointTest, SampleIndexSimpleReferenced) {
     Func("ep_func",
          {
-             Param("in_var", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)}),
+             Param("in_var", ty.u32(), {Builtin(ast::BuiltinValue::kSampleIndex)}),
          },
          ty.void_(),
          {
@@ -1016,7 +1017,7 @@ TEST_F(InspectorGetEntryPointTest, SampleIndexSimpleReferenced) {
 TEST_F(InspectorGetEntryPointTest, SampleIndexStructReferenced) {
     Structure("in_struct",
               {
-                  Member("inner_position", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)}),
+                  Member("inner_position", ty.u32(), {Builtin(ast::BuiltinValue::kSampleIndex)}),
               });
 
     Func("ep_func",
@@ -1042,7 +1043,7 @@ TEST_F(InspectorGetEntryPointTest, SampleIndexStructReferenced) {
 TEST_F(InspectorGetEntryPointTest, NumWorkgroupsSimpleReferenced) {
     Func("ep_func",
          {
-             Param("in_var", ty.vec3<u32>(), {Builtin(ast::Builtin::kNumWorkgroups)}),
+             Param("in_var", ty.vec3<u32>(), {Builtin(ast::BuiltinValue::kNumWorkgroups)}),
          },
          ty.void_(),
          {
@@ -1059,10 +1060,10 @@ TEST_F(InspectorGetEntryPointTest, NumWorkgroupsSimpleReferenced) {
 }
 
 TEST_F(InspectorGetEntryPointTest, NumWorkgroupsStructReferenced) {
-    Structure("in_struct",
-              {
-                  Member("inner_position", ty.vec3<u32>(), {Builtin(ast::Builtin::kNumWorkgroups)}),
-              });
+    Structure("in_struct", {
+                               Member("inner_position", ty.vec3<u32>(),
+                                      {Builtin(ast::BuiltinValue::kNumWorkgroups)}),
+                           });
 
     Func("ep_func",
          {

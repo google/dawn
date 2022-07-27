@@ -59,7 +59,7 @@ void my_func() {
 TEST_F(GlslGeneratorImplTest, GenerateSampleIndexES) {
     GlobalVar("gl_SampleID", ty.i32(),
               ast::AttributeList{
-                  Builtin(ast::Builtin::kSampleIndex),
+                  Builtin(ast::BuiltinValue::kSampleIndex),
                   Disable(ast::DisabledValidation::kIgnoreStorageClass),
               },
               ast::StorageClass::kIn);
@@ -84,7 +84,7 @@ int my_func() {
 TEST_F(GlslGeneratorImplTest, GenerateSampleIndexDesktop) {
     GlobalVar("gl_SampleID", ty.i32(),
               ast::AttributeList{
-                  Builtin(ast::Builtin::kSampleIndex),
+                  Builtin(ast::BuiltinValue::kSampleIndex),
                   Disable(ast::DisabledValidation::kIgnoreStorageClass),
               },
               ast::StorageClass::kIn);

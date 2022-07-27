@@ -99,7 +99,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize_WithIden
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
     auto* vec4 = ty.vec4<f32>();
-    auto* coord = Param("coord", vec4, {Builtin(ast::Builtin::kPosition)});
+    auto* coord = Param("coord", vec4, {Builtin(ast::BuiltinValue::kPosition)});
     auto* loc1 = Param("loc1", ty.f32(), {Location(1u)});
     auto* func = Func("frag_main", {coord, loc1}, ty.void_(), {},
                       {

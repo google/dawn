@@ -1676,7 +1676,7 @@ bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
                     break;
             }
             auto ast_builtin = enum_converter_.ToBuiltin(spv_builtin);
-            if (ast_builtin == ast::Builtin::kNone) {
+            if (ast_builtin == ast::BuiltinValue::kNone) {
                 // A diagnostic has already been emitted.
                 return false;
             }

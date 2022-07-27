@@ -74,7 +74,7 @@ TEST_F(ResolverValidationTest, WorkgroupMemoryUsedInVertexStage) {
              Stage(ast::PipelineStage::kVertex),
          },
          {
-             Builtin(ast::Builtin::kPosition),
+             Builtin(ast::BuiltinValue::kPosition),
          });
 
     EXPECT_FALSE(r()->Resolve());

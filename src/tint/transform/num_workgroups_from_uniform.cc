@@ -52,7 +52,7 @@ NumWorkgroupsFromUniform::~NumWorkgroupsFromUniform() = default;
 bool NumWorkgroupsFromUniform::ShouldRun(const Program* program, const DataMap&) const {
     for (auto* node : program->ASTNodes().Objects()) {
         if (auto* attr = node->As<ast::BuiltinAttribute>()) {
-            if (attr->builtin == ast::Builtin::kNumWorkgroups) {
+            if (attr->builtin == ast::BuiltinValue::kNumWorkgroups) {
                 return true;
             }
         }
@@ -89,7 +89,7 @@ void NumWorkgroupsFromUniform::Run(CloneContext& ctx, const DataMap& inputs, Dat
             for (auto* member : str->Members()) {
                 auto* builtin =
                     ast::GetAttribute<ast::BuiltinAttribute>(member->Declaration()->attributes);
-                if (!builtin || builtin->builtin != ast::Builtin::kNumWorkgroups) {
+                if (!builtin || builtin->builtin != ast::BuiltinValue::kNumWorkgroups) {
                     continue;
                 }
 

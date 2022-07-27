@@ -70,44 +70,44 @@ const char kReadAccess[] = "read";
 const char kWriteAccess[] = "write";
 const char kReadWriteAccess[] = "read_write";
 
-ast::Builtin ident_to_builtin(std::string_view str) {
+ast::BuiltinValue ident_to_builtin(std::string_view str) {
     if (str == "position") {
-        return ast::Builtin::kPosition;
+        return ast::BuiltinValue::kPosition;
     }
     if (str == "vertex_index") {
-        return ast::Builtin::kVertexIndex;
+        return ast::BuiltinValue::kVertexIndex;
     }
     if (str == "instance_index") {
-        return ast::Builtin::kInstanceIndex;
+        return ast::BuiltinValue::kInstanceIndex;
     }
     if (str == "front_facing") {
-        return ast::Builtin::kFrontFacing;
+        return ast::BuiltinValue::kFrontFacing;
     }
     if (str == "frag_depth") {
-        return ast::Builtin::kFragDepth;
+        return ast::BuiltinValue::kFragDepth;
     }
     if (str == "local_invocation_id") {
-        return ast::Builtin::kLocalInvocationId;
+        return ast::BuiltinValue::kLocalInvocationId;
     }
     if (str == "local_invocation_idx" || str == "local_invocation_index") {
-        return ast::Builtin::kLocalInvocationIndex;
+        return ast::BuiltinValue::kLocalInvocationIndex;
     }
     if (str == "global_invocation_id") {
-        return ast::Builtin::kGlobalInvocationId;
+        return ast::BuiltinValue::kGlobalInvocationId;
     }
     if (str == "workgroup_id") {
-        return ast::Builtin::kWorkgroupId;
+        return ast::BuiltinValue::kWorkgroupId;
     }
     if (str == "num_workgroups") {
-        return ast::Builtin::kNumWorkgroups;
+        return ast::BuiltinValue::kNumWorkgroups;
     }
     if (str == "sample_index") {
-        return ast::Builtin::kSampleIndex;
+        return ast::BuiltinValue::kSampleIndex;
     }
     if (str == "sample_mask") {
-        return ast::Builtin::kSampleMask;
+        return ast::BuiltinValue::kSampleMask;
     }
-    return ast::Builtin::kNone;
+    return ast::BuiltinValue::kNone;
 }
 
 const char kBindingAttribute[] = "binding";
@@ -1558,14 +1558,14 @@ Expect<ast::PipelineStage> ParserImpl::expect_pipeline_stage() {
     return add_error(peek(), "invalid value for stage attribute");
 }
 
-Expect<ast::Builtin> ParserImpl::expect_builtin() {
+Expect<ast::BuiltinValue> ParserImpl::expect_builtin() {
     auto ident = expect_ident("builtin");
     if (ident.errored) {
         return Failure::kErrored;
     }
 
-    ast::Builtin builtin = ident_to_builtin(ident.value);
-    if (builtin == ast::Builtin::kNone) {
+    ast::BuiltinValue builtin = ident_to_builtin(ident.value);
+    if (builtin == ast::BuiltinValue::kNone) {
         return add_error(ident.source, "invalid value for builtin attribute");
     }
 

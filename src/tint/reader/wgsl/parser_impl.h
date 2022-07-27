@@ -475,7 +475,7 @@ class ParserImpl {
     /// Parses a builtin identifier, erroring if the next token does not match a
     /// valid builtin name.
     /// @returns the parsed builtin.
-    Expect<ast::Builtin> expect_builtin();
+    Expect<ast::BuiltinValue> expect_builtin();
     /// Parses a `body_stmt` grammar element, erroring on parse failure.
     /// @returns the parsed statements
     Expect<ast::BlockStatement*> expect_body_stmt();

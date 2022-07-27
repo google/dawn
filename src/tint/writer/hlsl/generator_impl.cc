@@ -2981,29 +2981,29 @@ bool GeneratorImpl::EmitWorkgroupVariable(const sem::Variable* var) {
     return true;
 }
 
-std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
+std::string GeneratorImpl::builtin_to_attribute(ast::BuiltinValue builtin) const {
     switch (builtin) {
-        case ast::Builtin::kPosition:
+        case ast::BuiltinValue::kPosition:
             return "SV_Position";
-        case ast::Builtin::kVertexIndex:
+        case ast::BuiltinValue::kVertexIndex:
             return "SV_VertexID";
-        case ast::Builtin::kInstanceIndex:
+        case ast::BuiltinValue::kInstanceIndex:
             return "SV_InstanceID";
-        case ast::Builtin::kFrontFacing:
+        case ast::BuiltinValue::kFrontFacing:
             return "SV_IsFrontFace";
-        case ast::Builtin::kFragDepth:
+        case ast::BuiltinValue::kFragDepth:
             return "SV_Depth";
-        case ast::Builtin::kLocalInvocationId:
+        case ast::BuiltinValue::kLocalInvocationId:
             return "SV_GroupThreadID";
-        case ast::Builtin::kLocalInvocationIndex:
+        case ast::BuiltinValue::kLocalInvocationIndex:
             return "SV_GroupIndex";
-        case ast::Builtin::kGlobalInvocationId:
+        case ast::BuiltinValue::kGlobalInvocationId:
             return "SV_DispatchThreadID";
-        case ast::Builtin::kWorkgroupId:
+        case ast::BuiltinValue::kWorkgroupId:
             return "SV_GroupID";
-        case ast::Builtin::kSampleIndex:
+        case ast::BuiltinValue::kSampleIndex:
             return "SV_SampleIndex";
-        case ast::Builtin::kSampleMask:
+        case ast::BuiltinValue::kSampleMask:
             return "SV_Coverage";
         default:
             break;

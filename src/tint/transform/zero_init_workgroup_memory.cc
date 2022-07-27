@@ -137,7 +137,7 @@ struct ZeroInitWorkgroupMemory::State {
         std::function<const ast::Expression*()> local_index;
         for (auto* param : fn->params) {
             if (auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(param->attributes)) {
-                if (builtin->builtin == ast::Builtin::kLocalInvocationIndex) {
+                if (builtin->builtin == ast::BuiltinValue::kLocalInvocationIndex) {
                     local_index = [=] { return b.Expr(ctx.Clone(param->symbol)); };
                     break;
                 }
@@ -147,7 +147,7 @@ struct ZeroInitWorkgroupMemory::State {
                 for (auto* member : str->Members()) {
                     if (auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(
                             member->Declaration()->attributes)) {
-                        if (builtin->builtin == ast::Builtin::kLocalInvocationIndex) {
+                        if (builtin->builtin == ast::BuiltinValue::kLocalInvocationIndex) {
                             local_index = [=] {
                                 auto* param_expr = b.Expr(ctx.Clone(param->symbol));
                                 auto member_name = ctx.Clone(member->Declaration()->symbol);
@@ -162,7 +162,7 @@ struct ZeroInitWorkgroupMemory::State {
         if (!local_index) {
             // No existing local index parameter. Append one to the entry point.
             auto* param = b.Param(b.Symbols().New("local_invocation_index"), b.ty.u32(),
-                                  {b.Builtin(ast::Builtin::kLocalInvocationIndex)});
+                                  {b.Builtin(ast::BuiltinValue::kLocalInvocationIndex)});
             ctx.InsertBack(fn->params, param);
             local_index = [=] { return b.Expr(param->symbol); };
         }

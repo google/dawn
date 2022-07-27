@@ -422,7 +422,7 @@ OpDecorate %3 SpecId 1
 }
 
 struct BuiltinData {
-    ast::Builtin builtin;
+    ast::BuiltinValue builtin;
     ast::StorageClass storage;
     SpvBuiltIn result;
 };
@@ -442,28 +442,31 @@ INSTANTIATE_TEST_SUITE_P(
     BuilderTest_Type,
     BuiltinDataTest,
     testing::Values(
-        BuiltinData{ast::Builtin::kNone, ast::StorageClass::kNone, SpvBuiltInMax},
-        BuiltinData{ast::Builtin::kPosition, ast::StorageClass::kIn, SpvBuiltInFragCoord},
-        BuiltinData{ast::Builtin::kPosition, ast::StorageClass::kOut, SpvBuiltInPosition},
+        BuiltinData{ast::BuiltinValue::kNone, ast::StorageClass::kNone, SpvBuiltInMax},
+        BuiltinData{ast::BuiltinValue::kPosition, ast::StorageClass::kIn, SpvBuiltInFragCoord},
+        BuiltinData{ast::BuiltinValue::kPosition, ast::StorageClass::kOut, SpvBuiltInPosition},
         BuiltinData{
-            ast::Builtin::kVertexIndex,
+            ast::BuiltinValue::kVertexIndex,
             ast::StorageClass::kIn,
             SpvBuiltInVertexIndex,
         },
-        BuiltinData{ast::Builtin::kInstanceIndex, ast::StorageClass::kIn, SpvBuiltInInstanceIndex},
-        BuiltinData{ast::Builtin::kFrontFacing, ast::StorageClass::kIn, SpvBuiltInFrontFacing},
-        BuiltinData{ast::Builtin::kFragDepth, ast::StorageClass::kOut, SpvBuiltInFragDepth},
-        BuiltinData{ast::Builtin::kLocalInvocationId, ast::StorageClass::kIn,
+        BuiltinData{ast::BuiltinValue::kInstanceIndex, ast::StorageClass::kIn,
+                    SpvBuiltInInstanceIndex},
+        BuiltinData{ast::BuiltinValue::kFrontFacing, ast::StorageClass::kIn, SpvBuiltInFrontFacing},
+        BuiltinData{ast::BuiltinValue::kFragDepth, ast::StorageClass::kOut, SpvBuiltInFragDepth},
+        BuiltinData{ast::BuiltinValue::kLocalInvocationId, ast::StorageClass::kIn,
                     SpvBuiltInLocalInvocationId},
-        BuiltinData{ast::Builtin::kLocalInvocationIndex, ast::StorageClass::kIn,
+        BuiltinData{ast::BuiltinValue::kLocalInvocationIndex, ast::StorageClass::kIn,
                     SpvBuiltInLocalInvocationIndex},
-        BuiltinData{ast::Builtin::kGlobalInvocationId, ast::StorageClass::kIn,
+        BuiltinData{ast::BuiltinValue::kGlobalInvocationId, ast::StorageClass::kIn,
                     SpvBuiltInGlobalInvocationId},
-        BuiltinData{ast::Builtin::kWorkgroupId, ast::StorageClass::kIn, SpvBuiltInWorkgroupId},
-        BuiltinData{ast::Builtin::kNumWorkgroups, ast::StorageClass::kIn, SpvBuiltInNumWorkgroups},
-        BuiltinData{ast::Builtin::kSampleIndex, ast::StorageClass::kIn, SpvBuiltInSampleId},
-        BuiltinData{ast::Builtin::kSampleMask, ast::StorageClass::kIn, SpvBuiltInSampleMask},
-        BuiltinData{ast::Builtin::kSampleMask, ast::StorageClass::kOut, SpvBuiltInSampleMask}));
+        BuiltinData{ast::BuiltinValue::kWorkgroupId, ast::StorageClass::kIn, SpvBuiltInWorkgroupId},
+        BuiltinData{ast::BuiltinValue::kNumWorkgroups, ast::StorageClass::kIn,
+                    SpvBuiltInNumWorkgroups},
+        BuiltinData{ast::BuiltinValue::kSampleIndex, ast::StorageClass::kIn, SpvBuiltInSampleId},
+        BuiltinData{ast::BuiltinValue::kSampleMask, ast::StorageClass::kIn, SpvBuiltInSampleMask},
+        BuiltinData{ast::BuiltinValue::kSampleMask, ast::StorageClass::kOut,
+                    SpvBuiltInSampleMask}));
 
 TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
     // struct A {

@@ -156,7 +156,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_WithInOut_Built
     // fn frag_main(@position(0) coord : vec4<f32>) -> @frag_depth f32 {
     //   return coord.x;
     // }
-    auto* coord_in = Param("coord", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)});
+    auto* coord_in = Param("coord", ty.vec4<f32>(), {Builtin(ast::BuiltinValue::kPosition)});
     Func("frag_main", {coord_in}, ty.f32(),
          {
              Return(MemberAccessor("coord", "x")),
@@ -165,7 +165,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_WithInOut_Built
              Stage(ast::PipelineStage::kFragment),
          },
          {
-             Builtin(ast::Builtin::kFragDepth),
+             Builtin(ast::BuiltinValue::kFragDepth),
          });
 
     GeneratorImpl& gen = SanitizeAndBuild();
@@ -207,7 +207,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_SharedStruct_Di
     // }
     auto* interface_struct = Structure(
         "Interface", {
-                         Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)}),
+                         Member("pos", ty.vec4<f32>(), {Builtin(ast::BuiltinValue::kPosition)}),
                          Member("col1", ty.f32(), {Location(1)}),
                          Member("col2", ty.f32(), {Location(2)}),
                      });
@@ -287,7 +287,7 @@ TEST_F(HlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_SharedStruct_He
     //   return foo(0.25);
     // }
     auto* vertex_output_struct = Structure(
-        "VertexOutput", {Member("pos", ty.vec4<f32>(), {Builtin(ast::Builtin::kPosition)})});
+        "VertexOutput", {Member("pos", ty.vec4<f32>(), {Builtin(ast::BuiltinValue::kPosition)})});
 
     Func("foo", {Param("x", ty.f32())}, ty.Of(vertex_output_struct),
          {Return(Construct(ty.Of(vertex_output_struct),

@@ -270,9 +270,9 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithAttribute) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithEntryPointAttributes) {
-    auto* s = Structure(
-        "S", ast::StructMemberList{Member("a", ty.u32(), {Builtin(ast::Builtin::kVertexIndex)}),
-                                   Member("b", ty.f32(), {Location(2u)})});
+    auto* s = Structure("S", ast::StructMemberList{
+                                 Member("a", ty.u32(), {Builtin(ast::BuiltinValue::kVertexIndex)}),
+                                 Member("b", ty.f32(), {Location(2u)})});
 
     GeneratorImpl& gen = Build();
 

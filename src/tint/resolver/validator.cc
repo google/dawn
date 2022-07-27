@@ -886,7 +886,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
     bool is_stage_mismatch = false;
     bool is_output = !is_input;
     switch (attr->builtin) {
-        case ast::Builtin::kPosition:
+        case ast::BuiltinValue::kPosition:
             if (stage != ast::PipelineStage::kNone &&
                 !((is_input && stage == ast::PipelineStage::kFragment) ||
                   (is_output && stage == ast::PipelineStage::kVertex))) {
@@ -898,10 +898,10 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
-        case ast::Builtin::kGlobalInvocationId:
-        case ast::Builtin::kLocalInvocationId:
-        case ast::Builtin::kNumWorkgroups:
-        case ast::Builtin::kWorkgroupId:
+        case ast::BuiltinValue::kGlobalInvocationId:
+        case ast::BuiltinValue::kLocalInvocationId:
+        case ast::BuiltinValue::kNumWorkgroups:
+        case ast::BuiltinValue::kWorkgroupId:
             if (stage != ast::PipelineStage::kNone &&
                 !(stage == ast::PipelineStage::kCompute && is_input)) {
                 is_stage_mismatch = true;
@@ -912,7 +912,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
-        case ast::Builtin::kFragDepth:
+        case ast::BuiltinValue::kFragDepth:
             if (stage != ast::PipelineStage::kNone &&
                 !(stage == ast::PipelineStage::kFragment && !is_input)) {
                 is_stage_mismatch = true;
@@ -922,7 +922,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
-        case ast::Builtin::kFrontFacing:
+        case ast::BuiltinValue::kFrontFacing:
             if (stage != ast::PipelineStage::kNone &&
                 !(stage == ast::PipelineStage::kFragment && is_input)) {
                 is_stage_mismatch = true;
@@ -932,7 +932,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
-        case ast::Builtin::kLocalInvocationIndex:
+        case ast::BuiltinValue::kLocalInvocationIndex:
             if (stage != ast::PipelineStage::kNone &&
                 !(stage == ast::PipelineStage::kCompute && is_input)) {
                 is_stage_mismatch = true;
@@ -942,8 +942,8 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
-        case ast::Builtin::kVertexIndex:
-        case ast::Builtin::kInstanceIndex:
+        case ast::BuiltinValue::kVertexIndex:
+        case ast::BuiltinValue::kInstanceIndex:
             if (stage != ast::PipelineStage::kNone &&
                 !(stage == ast::PipelineStage::kVertex && is_input)) {
                 is_stage_mismatch = true;
@@ -953,7 +953,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
-        case ast::Builtin::kSampleMask:
+        case ast::BuiltinValue::kSampleMask:
             if (stage != ast::PipelineStage::kNone && !(stage == ast::PipelineStage::kFragment)) {
                 is_stage_mismatch = true;
             }
@@ -962,7 +962,7 @@ bool Validator::BuiltinAttribute(const ast::BuiltinAttribute* attr,
                 return false;
             }
             break;
-        case ast::Builtin::kSampleIndex:
+        case ast::BuiltinValue::kSampleIndex:
             if (stage != ast::PipelineStage::kNone &&
                 !(stage == ast::PipelineStage::kFragment && is_input)) {
                 is_stage_mismatch = true;
@@ -1102,7 +1102,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     // already been seen, in order to catch conflicts.
     // TODO(jrprice): This state could be stored in sem::Function instead, and
     // then passed to sem::Function since it would be useful there too.
-    std::unordered_set<ast::Builtin> builtins;
+    std::unordered_set<ast::BuiltinValue> builtins;
     std::unordered_set<uint32_t> locations;
     enum class ParamOrRetType {
         kParameter,
@@ -1237,7 +1237,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                 bool has_position = false;
                 if (pipeline_io_attribute) {
                     if (auto* builtin = pipeline_io_attribute->As<ast::BuiltinAttribute>()) {
-                        has_position = (builtin->builtin == ast::Builtin::kPosition);
+                        has_position = (builtin->builtin == ast::BuiltinValue::kPosition);
                     }
                 }
                 if (!has_position) {
@@ -1298,13 +1298,13 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     }
 
     if (decl->PipelineStage() == ast::PipelineStage::kVertex &&
-        builtins.count(ast::Builtin::kPosition) == 0) {
+        builtins.count(ast::BuiltinValue::kPosition) == 0) {
         // Check module-scope variables, as the SPIR-V sanitizer generates these.
         bool found = false;
         for (auto* global : func->TransitivelyReferencedGlobals()) {
             if (auto* builtin =
                     ast::GetAttribute<ast::BuiltinAttribute>(global->Declaration()->attributes)) {
-                if (builtin->builtin == ast::Builtin::kPosition) {
+                if (builtin->builtin == ast::BuiltinValue::kPosition) {
                     found = true;
                     break;
                 }
@@ -2111,7 +2111,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                                       /* is_input */ false)) {
                     return false;
                 }
-                if (builtin->builtin == ast::Builtin::kPosition) {
+                if (builtin->builtin == ast::BuiltinValue::kPosition) {
                     has_position = true;
                 }
             } else if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {

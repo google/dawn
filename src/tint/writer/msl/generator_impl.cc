@@ -1862,33 +1862,33 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
     return true;
 }
 
-std::string GeneratorImpl::builtin_to_attribute(ast::Builtin builtin) const {
+std::string GeneratorImpl::builtin_to_attribute(ast::BuiltinValue builtin) const {
     switch (builtin) {
-        case ast::Builtin::kPosition:
+        case ast::BuiltinValue::kPosition:
             return "position";
-        case ast::Builtin::kVertexIndex:
+        case ast::BuiltinValue::kVertexIndex:
             return "vertex_id";
-        case ast::Builtin::kInstanceIndex:
+        case ast::BuiltinValue::kInstanceIndex:
             return "instance_id";
-        case ast::Builtin::kFrontFacing:
+        case ast::BuiltinValue::kFrontFacing:
             return "front_facing";
-        case ast::Builtin::kFragDepth:
+        case ast::BuiltinValue::kFragDepth:
             return "depth(any)";
-        case ast::Builtin::kLocalInvocationId:
+        case ast::BuiltinValue::kLocalInvocationId:
             return "thread_position_in_threadgroup";
-        case ast::Builtin::kLocalInvocationIndex:
+        case ast::BuiltinValue::kLocalInvocationIndex:
             return "thread_index_in_threadgroup";
-        case ast::Builtin::kGlobalInvocationId:
+        case ast::BuiltinValue::kGlobalInvocationId:
             return "thread_position_in_grid";
-        case ast::Builtin::kWorkgroupId:
+        case ast::BuiltinValue::kWorkgroupId:
             return "threadgroup_position_in_grid";
-        case ast::Builtin::kNumWorkgroups:
+        case ast::BuiltinValue::kNumWorkgroups:
             return "threadgroups_per_grid";
-        case ast::Builtin::kSampleIndex:
+        case ast::BuiltinValue::kSampleIndex:
             return "sample_id";
-        case ast::Builtin::kSampleMask:
+        case ast::BuiltinValue::kSampleMask:
             return "sample_mask";
-        case ast::Builtin::kPointSize:
+        case ast::BuiltinValue::kPointSize:
             return "point_size";
         default:
             break;

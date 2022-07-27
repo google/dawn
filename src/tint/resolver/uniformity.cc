@@ -973,8 +973,8 @@ class UniformityGraph {
         auto has_nonuniform_entry_point_attribute = [](auto* obj) {
             // Only the num_workgroups and workgroup_id builtins are uniform.
             if (auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(obj->attributes)) {
-                if (builtin->builtin == ast::Builtin::kNumWorkgroups ||
-                    builtin->builtin == ast::Builtin::kWorkgroupId) {
+                if (builtin->builtin == ast::BuiltinValue::kNumWorkgroups ||
+                    builtin->builtin == ast::BuiltinValue::kWorkgroupId) {
                     return false;
                 }
             }

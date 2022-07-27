@@ -56,7 +56,7 @@ TEST_P(Attribute_StageTest, Emit) {
     ast::StatementList body;
     if (params.stage == ast::PipelineStage::kVertex) {
         ret_type = ty.vec4<f32>();
-        ret_type_attrs.push_back(Builtin(ast::Builtin::kPosition));
+        ret_type_attrs.push_back(Builtin(ast::BuiltinValue::kPosition));
         body.push_back(Return(Construct(ty.vec4<f32>())));
     } else {
         ret_type = ty.void_();
@@ -250,7 +250,7 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_FragDepth) {
              Stage(ast::PipelineStage::kFragment),
          },
          {
-             Builtin(ast::Builtin::kFragDepth),
+             Builtin(ast::BuiltinValue::kFragDepth),
          });
 
     spirv::Builder& b = SanitizeAndBuild();

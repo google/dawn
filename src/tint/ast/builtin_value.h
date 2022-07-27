@@ -12,15 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_AST_BUILTIN_H_
-#define SRC_TINT_AST_BUILTIN_H_
+#ifndef SRC_TINT_AST_BUILTIN_VALUE_H_
+#define SRC_TINT_AST_BUILTIN_VALUE_H_
 
 #include <ostream>
 
 namespace tint::ast {
 
 /// The builtin identifiers
-enum class Builtin {
+enum class BuiltinValue {
     kNone = -1,
     kPosition,
     kVertexIndex,
@@ -43,8 +43,8 @@ enum class Builtin {
 /// @param out the std::ostream to write to
 /// @param builtin the Builtin
 /// @return the std::ostream so calls can be chained
-std::ostream& operator<<(std::ostream& out, Builtin builtin);
+std::ostream& operator<<(std::ostream& out, BuiltinValue builtin);
 
 }  // namespace tint::ast
 
-#endif  // SRC_TINT_AST_BUILTIN_H_
+#endif  // SRC_TINT_AST_BUILTIN_VALUE_H_

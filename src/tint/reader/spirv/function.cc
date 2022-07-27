@@ -20,8 +20,8 @@
 #include "src/tint/ast/assignment_statement.h"
 #include "src/tint/ast/bitcast_expression.h"
 #include "src/tint/ast/break_statement.h"
-#include "src/tint/ast/builtin.h"
 #include "src/tint/ast/builtin_attribute.h"
+#include "src/tint/ast/builtin_value.h"
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/continue_statement.h"
 #include "src/tint/ast/discard_statement.h"
@@ -746,7 +746,7 @@ struct LoopStatementBuilder final : public Castable<LoopStatementBuilder, Statem
 /// @returns true if the decorations include a SampleMask builtin
 bool HasBuiltinSampleMask(const ast::AttributeList& decos) {
     if (auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(decos)) {
-        return builtin->builtin == ast::Builtin::kSampleMask;
+        return builtin->builtin == ast::BuiltinValue::kSampleMask;
     }
     return false;
 }
@@ -1332,7 +1332,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
                 // a gl_Position variable.  Substitute the type.
                 const Type* param_type = ty_.Vector(ty_.F32(), 4);
                 ast::AttributeList out_decos{
-                    create<ast::BuiltinAttribute>(source, ast::Builtin::kPosition)};
+                    create<ast::BuiltinAttribute>(source, ast::BuiltinValue::kPosition)};
 
                 const auto var_name = namer_.GetName(var_id);
                 return_members.push_back(

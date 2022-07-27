@@ -709,11 +709,11 @@ struct State {
             location_info[location->value] = info;
         } else if (auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(param->attributes)) {
             // Check for existing vertex_index and instance_index builtins.
-            if (builtin->builtin == ast::Builtin::kVertexIndex) {
+            if (builtin->builtin == ast::BuiltinValue::kVertexIndex) {
                 vertex_index_expr = [this, param]() {
                     return ctx.dst->Expr(ctx.Clone(param->symbol));
                 };
-            } else if (builtin->builtin == ast::Builtin::kInstanceIndex) {
+            } else if (builtin->builtin == ast::BuiltinValue::kInstanceIndex) {
                 instance_index_expr = [this, param]() {
                     return ctx.dst->Expr(ctx.Clone(param->symbol));
                 };
@@ -756,9 +756,9 @@ struct State {
             } else if (auto* builtin =
                            ast::GetAttribute<ast::BuiltinAttribute>(member->attributes)) {
                 // Check for existing vertex_index and instance_index builtins.
-                if (builtin->builtin == ast::Builtin::kVertexIndex) {
+                if (builtin->builtin == ast::BuiltinValue::kVertexIndex) {
                     vertex_index_expr = member_expr;
-                } else if (builtin->builtin == ast::Builtin::kInstanceIndex) {
+                } else if (builtin->builtin == ast::BuiltinValue::kInstanceIndex) {
                     instance_index_expr = member_expr;
                 }
                 members_to_clone.push_back(member);
@@ -825,8 +825,9 @@ struct State {
             for (const VertexBufferLayoutDescriptor& layout : cfg.vertex_state) {
                 if (layout.step_mode == VertexStepMode::kVertex) {
                     auto name = ctx.dst->Symbols().New("tint_pulling_vertex_index");
-                    new_function_parameters.push_back(ctx.dst->Param(
-                        name, ctx.dst->ty.u32(), {ctx.dst->Builtin(ast::Builtin::kVertexIndex)}));
+                    new_function_parameters.push_back(
+                        ctx.dst->Param(name, ctx.dst->ty.u32(),
+                                       {ctx.dst->Builtin(ast::BuiltinValue::kVertexIndex)}));
                     vertex_index_expr = [this, name]() { return ctx.dst->Expr(name); };
                     break;
                 }
@@ -836,8 +837,9 @@ struct State {
             for (const VertexBufferLayoutDescriptor& layout : cfg.vertex_state) {
                 if (layout.step_mode == VertexStepMode::kInstance) {
                     auto name = ctx.dst->Symbols().New("tint_pulling_instance_index");
-                    new_function_parameters.push_back(ctx.dst->Param(
-                        name, ctx.dst->ty.u32(), {ctx.dst->Builtin(ast::Builtin::kInstanceIndex)}));
+                    new_function_parameters.push_back(
+                        ctx.dst->Param(name, ctx.dst->ty.u32(),
+                                       {ctx.dst->Builtin(ast::BuiltinValue::kInstanceIndex)}));
                     instance_index_expr = [this, name]() { return ctx.dst->Expr(name); };
                     break;
                 }

@@ -2518,14 +2518,14 @@ class ProgramBuilder {
     /// @param source the source information
     /// @param builtin the builtin value
     /// @returns the builtin attribute pointer
-    const ast::BuiltinAttribute* Builtin(const Source& source, ast::Builtin builtin) {
+    const ast::BuiltinAttribute* Builtin(const Source& source, ast::BuiltinValue builtin) {
         return create<ast::BuiltinAttribute>(source, builtin);
     }
 
     /// Creates an ast::BuiltinAttribute
     /// @param builtin the builtin value
     /// @returns the builtin attribute pointer
-    const ast::BuiltinAttribute* Builtin(ast::Builtin builtin) {
+    const ast::BuiltinAttribute* Builtin(ast::BuiltinValue builtin) {
         return create<ast::BuiltinAttribute>(source_, builtin);
     }
 

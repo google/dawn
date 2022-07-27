@@ -59,7 +59,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Builtin) {
     // @vertex
     // fn main() -> @builtin(position) vec4<f32> { return vec4<f32>(); }
     Func(Source{{12, 34}}, "main", {}, ty.vec4<f32>(), {Return(Construct(ty.vec4<f32>()))},
-         {Stage(ast::PipelineStage::kVertex)}, {Builtin(ast::Builtin::kPosition)});
+         {Stage(ast::PipelineStage::kVertex)}, {Builtin(ast::BuiltinValue::kPosition)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -83,7 +83,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnTypeAttribute_Multiple) {
     // }
     Func(Source{{12, 34}}, "main", {}, ty.vec4<f32>(), {Return(Construct(ty.vec4<f32>()))},
          {Stage(ast::PipelineStage::kVertex)},
-         {Location(Source{{13, 43}}, 0), Builtin(Source{{14, 52}}, ast::Builtin::kPosition)});
+         {Location(Source{{13, 43}}, 0), Builtin(Source{{14, 52}}, ast::BuiltinValue::kPosition)});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(14:52 error: multiple entry point IO attributes
@@ -101,7 +101,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_Valid) {
     // }
     auto* output =
         Structure("Output", {Member("a", ty.f32(), {Location(0)}),
-                             Member("b", ty.f32(), {Builtin(ast::Builtin::kFragDepth)})});
+                             Member("b", ty.f32(), {Builtin(ast::BuiltinValue::kFragDepth)})});
     Func(Source{{12, 34}}, "main", {}, ty.Of(output), {Return(Construct(ty.Of(output)))},
          {Stage(ast::PipelineStage::kFragment)});
 
@@ -119,7 +119,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_MemberMultipleAttribu
     auto* output =
         Structure("Output", {Member("a", ty.f32(),
                                     {Location(Source{{13, 43}}, 0),
-                                     Builtin(Source{{14, 52}}, ast::Builtin::kFragDepth)})});
+                                     Builtin(Source{{14, 52}}, ast::BuiltinValue::kFragDepth)})});
     Func(Source{{12, 34}}, "main", {}, ty.Of(output), {Return(Construct(ty.Of(output)))},
          {Stage(ast::PipelineStage::kFragment)});
 
@@ -159,8 +159,8 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateBuiltins) {
     //   return Output();
     // }
     auto* output =
-        Structure("Output", {Member("a", ty.f32(), {Builtin(ast::Builtin::kFragDepth)}),
-                             Member("b", ty.f32(), {Builtin(ast::Builtin::kFragDepth)})});
+        Structure("Output", {Member("a", ty.f32(), {Builtin(ast::BuiltinValue::kFragDepth)}),
+                             Member("b", ty.f32(), {Builtin(ast::BuiltinValue::kFragDepth)})});
     Func(Source{{12, 34}}, "main", {}, ty.Of(output), {Return(Construct(ty.Of(output)))},
          {Stage(ast::PipelineStage::kFragment)});
 
@@ -193,9 +193,9 @@ TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Missing) {
 TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Multiple) {
     // @fragment
     // fn main(@location(0) @builtin(sample_index) param : u32) {}
-    auto* param = Param(
-        "param", ty.u32(),
-        {Location(Source{{13, 43}}, 0), Builtin(Source{{14, 52}}, ast::Builtin::kSampleIndex)});
+    auto* param = Param("param", ty.u32(),
+                        {Location(Source{{13, 43}}, 0),
+                         Builtin(Source{{14, 52}}, ast::BuiltinValue::kSampleIndex)});
     Func(Source{{12, 34}}, "main", {param}, ty.void_(), {}, {Stage(ast::PipelineStage::kFragment)});
 
     EXPECT_FALSE(r()->Resolve());
@@ -212,7 +212,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_Valid) {
     // fn main(param : Input) {}
     auto* input =
         Structure("Input", {Member("a", ty.f32(), {Location(0)}),
-                            Member("b", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)})});
+                            Member("b", ty.u32(), {Builtin(ast::BuiltinValue::kSampleIndex)})});
     auto* param = Param("param", ty.Of(input));
     Func(Source{{12, 34}}, "main", {param}, ty.void_(), {}, {Stage(ast::PipelineStage::kFragment)});
 
@@ -228,7 +228,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_MemberMultipleAttribut
     auto* input =
         Structure("Input", {Member("a", ty.u32(),
                                    {Location(Source{{13, 43}}, 0),
-                                    Builtin(Source{{14, 52}}, ast::Builtin::kSampleIndex)})});
+                                    Builtin(Source{{14, 52}}, ast::BuiltinValue::kSampleIndex)})});
     auto* param = Param("param", ty.Of(input));
     Func(Source{{12, 34}}, "main", {param}, ty.void_(), {}, {Stage(ast::PipelineStage::kFragment)});
 
@@ -259,8 +259,8 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_DuplicateBuiltins) {
     // @fragment
     // fn main(@builtin(sample_index) param_a : u32,
     //         @builtin(sample_index) param_b : u32) {}
-    auto* param_a = Param("param_a", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)});
-    auto* param_b = Param("param_b", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)});
+    auto* param_a = Param("param_a", ty.u32(), {Builtin(ast::BuiltinValue::kSampleIndex)});
+    auto* param_b = Param("param_b", ty.u32(), {Builtin(ast::BuiltinValue::kSampleIndex)});
     Func(Source{{12, 34}}, "main", {param_a, param_b}, ty.void_(), {},
          {Stage(ast::PipelineStage::kFragment)});
 
@@ -280,9 +280,9 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateBuiltins) {
     // @fragment
     // fn main(param_a : InputA, param_b : InputB) {}
     auto* input_a =
-        Structure("InputA", {Member("a", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)})});
+        Structure("InputA", {Member("a", ty.u32(), {Builtin(ast::BuiltinValue::kSampleIndex)})});
     auto* input_b =
-        Structure("InputB", {Member("a", ty.u32(), {Builtin(ast::Builtin::kSampleIndex)})});
+        Structure("InputB", {Member("a", ty.u32(), {Builtin(ast::BuiltinValue::kSampleIndex)})});
     auto* param_a = Param("param_a", ty.Of(input_a));
     auto* param_b = Param("param_b", ty.Of(input_b));
     Func(Source{{12, 34}}, "main", {param_a, param_b}, ty.void_(), {},
@@ -601,7 +601,7 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_Valid) {
     // }
     auto* output =
         Structure("Output", {Member("a", ty.f32(), {Location(0)}),
-                             Member("b", ty.f32(), {Builtin(ast::Builtin::kFragDepth)})});
+                             Member("b", ty.f32(), {Builtin(ast::BuiltinValue::kFragDepth)})});
     Func(Source{{12, 34}}, "main", {}, ty.Of(output), {Return(Construct(ty.Of(output)))},
          {Stage(ast::PipelineStage::kFragment)});
 

@@ -105,7 +105,7 @@ TEST_F(ParserImplTest, ParamList_Attributes) {
     auto attrs_0 = e.value[0]->attributes;
     ASSERT_EQ(attrs_0.size(), 1u);
     EXPECT_TRUE(attrs_0[0]->Is<ast::BuiltinAttribute>());
-    EXPECT_EQ(attrs_0[0]->As<ast::BuiltinAttribute>()->builtin, ast::Builtin::kPosition);
+    EXPECT_EQ(attrs_0[0]->As<ast::BuiltinAttribute>()->builtin, ast::BuiltinValue::kPosition);
 
     ASSERT_EQ(e.value[0]->source.range.begin.line, 1u);
     ASSERT_EQ(e.value[0]->source.range.begin.column, 20u);

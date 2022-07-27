@@ -79,13 +79,13 @@ void FirstIndexOffset::Run(CloneContext& ctx, const DataMap& inputs, DataMap& ou
         if (auto* var = node->As<ast::Variable>()) {
             for (auto* attr : var->attributes) {
                 if (auto* builtin_attr = attr->As<ast::BuiltinAttribute>()) {
-                    ast::Builtin builtin = builtin_attr->builtin;
-                    if (builtin == ast::Builtin::kVertexIndex) {
+                    ast::BuiltinValue builtin = builtin_attr->builtin;
+                    if (builtin == ast::BuiltinValue::kVertexIndex) {
                         auto* sem_var = ctx.src->Sem().Get(var);
                         builtin_vars.emplace(sem_var, kFirstVertexName);
                         has_vertex_or_instance_index = true;
                     }
-                    if (builtin == ast::Builtin::kInstanceIndex) {
+                    if (builtin == ast::BuiltinValue::kInstanceIndex) {
                         auto* sem_var = ctx.src->Sem().Get(var);
                         builtin_vars.emplace(sem_var, kFirstInstanceName);
                         has_vertex_or_instance_index = true;
@@ -96,13 +96,13 @@ void FirstIndexOffset::Run(CloneContext& ctx, const DataMap& inputs, DataMap& ou
         if (auto* member = node->As<ast::StructMember>()) {
             for (auto* attr : member->attributes) {
                 if (auto* builtin_attr = attr->As<ast::BuiltinAttribute>()) {
-                    ast::Builtin builtin = builtin_attr->builtin;
-                    if (builtin == ast::Builtin::kVertexIndex) {
+                    ast::BuiltinValue builtin = builtin_attr->builtin;
+                    if (builtin == ast::BuiltinValue::kVertexIndex) {
                         auto* sem_mem = ctx.src->Sem().Get(member);
                         builtin_members.emplace(sem_mem, kFirstVertexName);
                         has_vertex_or_instance_index = true;
                     }
-                    if (builtin == ast::Builtin::kInstanceIndex) {
+                    if (builtin == ast::BuiltinValue::kInstanceIndex) {
                         auto* sem_mem = ctx.src->Sem().Get(member);
                         builtin_members.emplace(sem_mem, kFirstInstanceName);
                         has_vertex_or_instance_index = true;

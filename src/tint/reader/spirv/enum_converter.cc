@@ -62,38 +62,38 @@ ast::StorageClass EnumConverter::ToStorageClass(const SpvStorageClass sc) {
     return ast::StorageClass::kInvalid;
 }
 
-ast::Builtin EnumConverter::ToBuiltin(SpvBuiltIn b) {
+ast::BuiltinValue EnumConverter::ToBuiltin(SpvBuiltIn b) {
     switch (b) {
         case SpvBuiltInPosition:
-            return ast::Builtin::kPosition;
+            return ast::BuiltinValue::kPosition;
         case SpvBuiltInVertexIndex:
-            return ast::Builtin::kVertexIndex;
+            return ast::BuiltinValue::kVertexIndex;
         case SpvBuiltInInstanceIndex:
-            return ast::Builtin::kInstanceIndex;
+            return ast::BuiltinValue::kInstanceIndex;
         case SpvBuiltInFrontFacing:
-            return ast::Builtin::kFrontFacing;
+            return ast::BuiltinValue::kFrontFacing;
         case SpvBuiltInFragCoord:
-            return ast::Builtin::kPosition;
+            return ast::BuiltinValue::kPosition;
         case SpvBuiltInFragDepth:
-            return ast::Builtin::kFragDepth;
+            return ast::BuiltinValue::kFragDepth;
         case SpvBuiltInLocalInvocationId:
-            return ast::Builtin::kLocalInvocationId;
+            return ast::BuiltinValue::kLocalInvocationId;
         case SpvBuiltInLocalInvocationIndex:
-            return ast::Builtin::kLocalInvocationIndex;
+            return ast::BuiltinValue::kLocalInvocationIndex;
         case SpvBuiltInGlobalInvocationId:
-            return ast::Builtin::kGlobalInvocationId;
+            return ast::BuiltinValue::kGlobalInvocationId;
         case SpvBuiltInWorkgroupId:
-            return ast::Builtin::kWorkgroupId;
+            return ast::BuiltinValue::kWorkgroupId;
         case SpvBuiltInSampleId:
-            return ast::Builtin::kSampleIndex;
+            return ast::BuiltinValue::kSampleIndex;
         case SpvBuiltInSampleMask:
-            return ast::Builtin::kSampleMask;
+            return ast::BuiltinValue::kSampleMask;
         default:
             break;
     }
 
     Fail() << "unknown SPIR-V builtin: " << uint32_t(b);
-    return ast::Builtin::kNone;
+    return ast::BuiltinValue::kNone;
 }
 
 ast::TextureDimension EnumConverter::ToDim(SpvDim dim, bool arrayed) {

@@ -563,7 +563,7 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
     }
 
     for (auto builtin : func_sem->TransitivelyReferencedBuiltinVariables()) {
-        if (builtin.second->builtin == ast::Builtin::kFragDepth) {
+        if (builtin.second->builtin == ast::BuiltinValue::kFragDepth) {
             push_execution_mode(spv::Op::OpExecutionMode,
                                 {Operand(id), U32Operand(SpvExecutionModeDepthReplacing)});
         }
@@ -4135,9 +4135,9 @@ SpvStorageClass Builder::ConvertStorageClass(ast::StorageClass klass) const {
     return SpvStorageClassMax;
 }
 
-SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin, ast::StorageClass storage) {
+SpvBuiltIn Builder::ConvertBuiltin(ast::BuiltinValue builtin, ast::StorageClass storage) {
     switch (builtin) {
-        case ast::Builtin::kPosition:
+        case ast::BuiltinValue::kPosition:
             if (storage == ast::StorageClass::kIn) {
                 return SpvBuiltInFragCoord;
             } else if (storage == ast::StorageClass::kOut) {
@@ -4146,32 +4146,32 @@ SpvBuiltIn Builder::ConvertBuiltin(ast::Builtin builtin, ast::StorageClass stora
                 TINT_ICE(Writer, builder_.Diagnostics()) << "invalid storage class for builtin";
                 break;
             }
-        case ast::Builtin::kVertexIndex:
+        case ast::BuiltinValue::kVertexIndex:
             return SpvBuiltInVertexIndex;
-        case ast::Builtin::kInstanceIndex:
+        case ast::BuiltinValue::kInstanceIndex:
             return SpvBuiltInInstanceIndex;
-        case ast::Builtin::kFrontFacing:
+        case ast::BuiltinValue::kFrontFacing:
             return SpvBuiltInFrontFacing;
-        case ast::Builtin::kFragDepth:
+        case ast::BuiltinValue::kFragDepth:
             return SpvBuiltInFragDepth;
-        case ast::Builtin::kLocalInvocationId:
+        case ast::BuiltinValue::kLocalInvocationId:
             return SpvBuiltInLocalInvocationId;
-        case ast::Builtin::kLocalInvocationIndex:
+        case ast::BuiltinValue::kLocalInvocationIndex:
             return SpvBuiltInLocalInvocationIndex;
-        case ast::Builtin::kGlobalInvocationId:
+        case ast::BuiltinValue::kGlobalInvocationId:
             return SpvBuiltInGlobalInvocationId;
-        case ast::Builtin::kPointSize:
+        case ast::BuiltinValue::kPointSize:
             return SpvBuiltInPointSize;
-        case ast::Builtin::kWorkgroupId:
+        case ast::BuiltinValue::kWorkgroupId:
             return SpvBuiltInWorkgroupId;
-        case ast::Builtin::kNumWorkgroups:
+        case ast::BuiltinValue::kNumWorkgroups:
             return SpvBuiltInNumWorkgroups;
-        case ast::Builtin::kSampleIndex:
+        case ast::BuiltinValue::kSampleIndex:
             push_capability(SpvCapabilitySampleRateShading);
             return SpvBuiltInSampleId;
-        case ast::Builtin::kSampleMask:
+        case ast::BuiltinValue::kSampleMask:
             return SpvBuiltInSampleMask;
-        case ast::Builtin::kNone:
+        case ast::BuiltinValue::kNone:
             break;
     }
     return SpvBuiltInMax;
