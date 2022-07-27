@@ -2849,10 +2849,11 @@ bool GeneratorImpl::EmitGlobalVariable(const ast::Variable* global) {
                     return EmitPrivateVariable(sem);
                 case ast::StorageClass::kWorkgroup:
                     return EmitWorkgroupVariable(sem);
-                default:
+                default: {
                     TINT_ICE(Writer, diagnostics_)
                         << "unhandled storage class " << sem->StorageClass();
                     return false;
+                }
             }
         },
         [&](const ast::Override* override) { return EmitOverride(override); },

@@ -219,12 +219,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     switch (output_) {
         case OutputFormat::kWGSL: {
 #if TINT_BUILD_WGSL_WRITER
-            auto result = writer::wgsl::Generate(&program, options_wgsl_);
-            generated_wgsl_ = std::move(result.wgsl);
-            if (!result.success) {
-                VALIDITY_ERROR(program.Diagnostics(),
-                               "WGSL writer errored on validated input:\n" + result.error);
-            }
+            writer::wgsl::Generate(&program, options_wgsl_);
 #endif  // TINT_BUILD_WGSL_WRITER
             break;
         }
@@ -232,10 +227,6 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 #if TINT_BUILD_SPV_WRITER
             auto result = writer::spirv::Generate(&program, options_spirv_);
             generated_spirv_ = std::move(result.spirv);
-            if (!result.success) {
-                VALIDITY_ERROR(program.Diagnostics(),
-                               "SPIR-V writer errored on validated input:\n" + result.error);
-            }
 
             if (!SPIRVToolsValidationCheck(program, generated_spirv_)) {
                 VALIDITY_ERROR(program.Diagnostics(),
@@ -247,12 +238,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
         }
         case OutputFormat::kHLSL: {
 #if TINT_BUILD_HLSL_WRITER
-            auto result = writer::hlsl::Generate(&program, options_hlsl_);
-            generated_hlsl_ = std::move(result.hlsl);
-            if (!result.success) {
-                VALIDITY_ERROR(program.Diagnostics(),
-                               "HLSL writer errored on validated input:\n" + result.error);
-            }
+            writer::hlsl::Generate(&program, options_hlsl_);
 #endif  // TINT_BUILD_HLSL_WRITER
             break;
         }
@@ -266,12 +252,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
                 input_program = &*flattened;
             }
 
-            auto result = writer::msl::Generate(input_program, options_msl_);
-            generated_msl_ = std::move(result.msl);
-            if (!result.success) {
-                VALIDITY_ERROR(input_program->Diagnostics(),
-                               "MSL writer errored on validated input:\n" + result.error);
-            }
+            writer::msl::Generate(input_program, options_msl_);
 #endif  // TINT_BUILD_MSL_WRITER
             break;
         }

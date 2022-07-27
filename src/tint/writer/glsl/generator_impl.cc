@@ -1932,10 +1932,11 @@ bool GeneratorImpl::EmitGlobalVariable(const ast::Variable* global) {
                 case ast::StorageClass::kIn:
                 case ast::StorageClass::kOut:
                     return EmitIOVariable(sem);
-                default:
+                default: {
                     TINT_ICE(Writer, diagnostics_)
                         << "unhandled storage class " << sem->StorageClass();
                     return false;
+                }
             }
         },
         [&](const ast::Let* let) { return EmitProgramConstVariable(let); },

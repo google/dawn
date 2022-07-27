@@ -219,9 +219,10 @@ struct ModuleScopeVarToEntryPointParam::State {
             case ast::StorageClass::kHandle:
             case ast::StorageClass::kWorkgroup:
                 break;
-            default:
+            default: {
                 TINT_ICE(Transform, ctx.dst->Diagnostics())
                     << "unhandled module-scope storage class (" << sc << ")";
+            }
         }
 
         // Use a pointer for non-handle types.
