@@ -90,7 +90,8 @@ async function runCtsTest(query, use_worker) {
         socket.send(JSON.stringify({'s': res.status,
                                     'l': piece,
                                     'final': isFinal,
-                                    'js_duration_ms': res.timems}));
+                                    'js_duration_ms': res.timems,
+                                    'type': 'TEST_FINISHED'}));
       });
     };
     await wpt_fn();
