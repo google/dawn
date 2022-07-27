@@ -4241,7 +4241,7 @@ SpvImageFormat Builder::convert_texel_format_to_spv(const ast::TexelFormat forma
             return SpvImageFormatRgba32i;
         case ast::TexelFormat::kRgba32Float:
             return SpvImageFormatRgba32f;
-        case ast::TexelFormat::kNone:
+        case ast::TexelFormat::kInvalid:
             return SpvImageFormatUnknown;
     }
     return SpvImageFormatUnknown;

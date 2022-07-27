@@ -18,35 +18,10 @@
 #include <string>
 
 #include "src/tint/ast/access.h"
+#include "src/tint/ast/texel_format.h"
 #include "src/tint/ast/texture.h"
 
 namespace tint::ast {
-
-/// The texel format in the storage texture
-enum class TexelFormat {
-    kNone = -1,
-    kRgba8Unorm,
-    kRgba8Snorm,
-    kRgba8Uint,
-    kRgba8Sint,
-    kRgba16Uint,
-    kRgba16Sint,
-    kRgba16Float,
-    kR32Uint,
-    kR32Sint,
-    kR32Float,
-    kRg32Uint,
-    kRg32Sint,
-    kRg32Float,
-    kRgba32Uint,
-    kRgba32Sint,
-    kRgba32Float,
-};
-
-/// @param out the std::ostream to write to
-/// @param format the TexelFormat
-/// @return the std::ostream so calls can be chained
-std::ostream& operator<<(std::ostream& out, TexelFormat format);
 
 /// A storage texture type.
 class StorageTexture final : public Castable<StorageTexture, Texture> {

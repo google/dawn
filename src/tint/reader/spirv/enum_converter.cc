@@ -129,7 +129,7 @@ ast::TextureDimension EnumConverter::ToDim(SpvDim dim, bool arrayed) {
 ast::TexelFormat EnumConverter::ToTexelFormat(SpvImageFormat fmt) {
     switch (fmt) {
         case SpvImageFormatUnknown:
-            return ast::TexelFormat::kNone;
+            return ast::TexelFormat::kInvalid;
 
         // 8 bit channels
         case SpvImageFormatRgba8:
@@ -172,7 +172,7 @@ ast::TexelFormat EnumConverter::ToTexelFormat(SpvImageFormat fmt) {
             break;
     }
     Fail() << "invalid image format: " << int(fmt);
-    return ast::TexelFormat::kNone;
+    return ast::TexelFormat::kInvalid;
 }
 
 }  // namespace tint::reader::spirv

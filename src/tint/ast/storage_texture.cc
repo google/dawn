@@ -23,65 +23,6 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::StorageTexture);
 
 namespace tint::ast {
 
-// Note, these names match the names in the WGSL spec. This behaviour is used
-// in the WGSL writer to emit the texture format names.
-std::ostream& operator<<(std::ostream& out, TexelFormat format) {
-    switch (format) {
-        case TexelFormat::kNone:
-            out << "none";
-            break;
-        case TexelFormat::kR32Uint:
-            out << "r32uint";
-            break;
-        case TexelFormat::kR32Sint:
-            out << "r32sint";
-            break;
-        case TexelFormat::kR32Float:
-            out << "r32float";
-            break;
-        case TexelFormat::kRgba8Unorm:
-            out << "rgba8unorm";
-            break;
-        case TexelFormat::kRgba8Snorm:
-            out << "rgba8snorm";
-            break;
-        case TexelFormat::kRgba8Uint:
-            out << "rgba8uint";
-            break;
-        case TexelFormat::kRgba8Sint:
-            out << "rgba8sint";
-            break;
-        case TexelFormat::kRg32Uint:
-            out << "rg32uint";
-            break;
-        case TexelFormat::kRg32Sint:
-            out << "rg32sint";
-            break;
-        case TexelFormat::kRg32Float:
-            out << "rg32float";
-            break;
-        case TexelFormat::kRgba16Uint:
-            out << "rgba16uint";
-            break;
-        case TexelFormat::kRgba16Sint:
-            out << "rgba16sint";
-            break;
-        case TexelFormat::kRgba16Float:
-            out << "rgba16float";
-            break;
-        case TexelFormat::kRgba32Uint:
-            out << "rgba32uint";
-            break;
-        case TexelFormat::kRgba32Sint:
-            out << "rgba32sint";
-            break;
-        case TexelFormat::kRgba32Float:
-            out << "rgba32float";
-            break;
-    }
-    return out;
-}
-
 StorageTexture::StorageTexture(ProgramID pid,
                                NodeID nid,
                                const Source& src,
@@ -135,7 +76,7 @@ Type* StorageTexture::SubtypeFor(TexelFormat format, ProgramBuilder& builder) {
             return builder.create<F32>();
         }
 
-        case TexelFormat::kNone:
+        case TexelFormat::kInvalid:
             break;
     }
 

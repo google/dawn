@@ -880,55 +880,11 @@ Maybe<const ast::Type*> ParserImpl::depth_texture() {
 //  | 'rgba32float'
 Expect<ast::TexelFormat> ParserImpl::expect_texel_format(std::string_view use) {
     auto& t = next();
-    if (t == "rgba8unorm") {
-        return ast::TexelFormat::kRgba8Unorm;
+    auto fmt = ast::ParseTexelFormat(t.to_str());
+    if (fmt == ast::TexelFormat::kInvalid) {
+        return add_error(t.source(), "invalid format", use);
     }
-    if (t == "rgba8snorm") {
-        return ast::TexelFormat::kRgba8Snorm;
-    }
-    if (t == "rgba8uint") {
-        return ast::TexelFormat::kRgba8Uint;
-    }
-    if (t == "rgba8sint") {
-        return ast::TexelFormat::kRgba8Sint;
-    }
-    if (t == "rgba16uint") {
-        return ast::TexelFormat::kRgba16Uint;
-    }
-    if (t == "rgba16sint") {
-        return ast::TexelFormat::kRgba16Sint;
-    }
-    if (t == "rgba16float") {
-        return ast::TexelFormat::kRgba16Float;
-    }
-    if (t == "r32uint") {
-        return ast::TexelFormat::kR32Uint;
-    }
-    if (t == "r32sint") {
-        return ast::TexelFormat::kR32Sint;
-    }
-    if (t == "r32float") {
-        return ast::TexelFormat::kR32Float;
-    }
-    if (t == "rg32uint") {
-        return ast::TexelFormat::kRg32Uint;
-    }
-    if (t == "rg32sint") {
-        return ast::TexelFormat::kRg32Sint;
-    }
-    if (t == "rg32float") {
-        return ast::TexelFormat::kRg32Float;
-    }
-    if (t == "rgba32uint") {
-        return ast::TexelFormat::kRgba32Uint;
-    }
-    if (t == "rgba32sint") {
-        return ast::TexelFormat::kRgba32Sint;
-    }
-    if (t == "rgba32float") {
-        return ast::TexelFormat::kRgba32Float;
-    }
-    return add_error(t.source(), "invalid format", use);
+    return fmt;
 }
 
 // variable_ident_decl

@@ -2476,7 +2476,7 @@ const Pointer* ParserImpl::GetTypeForHandleVar(const spvtools::opt::Instruction&
         } else {
             const auto access = ast::Access::kWrite;
             const auto format = enum_converter_.ToTexelFormat(image_type->format());
-            if (format == ast::TexelFormat::kNone) {
+            if (format == ast::TexelFormat::kInvalid) {
                 return nullptr;
             }
             ast_store_type = ty_.StorageTexture(dim, format, access);

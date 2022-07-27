@@ -326,7 +326,7 @@ INSTANTIATE_TEST_SUITE_P(
     SpvImageFormatTest,
     testing::Values(
         // Unknown.  This is used for sampled images.
-        TexelFormatCase{SpvImageFormatUnknown, true, ast::TexelFormat::kNone},
+        TexelFormatCase{SpvImageFormatUnknown, true, ast::TexelFormat::kInvalid},
         // 8 bit channels
         TexelFormatCase{SpvImageFormatRgba8, true, ast::TexelFormat::kRgba8Unorm},
         TexelFormatCase{SpvImageFormatRgba8Snorm, true, ast::TexelFormat::kRgba8Snorm},
@@ -355,23 +355,23 @@ INSTANTIATE_TEST_SUITE_P(
     SpvImageFormatTest,
     testing::Values(
         // Scanning in order from the SPIR-V spec.
-        TexelFormatCase{SpvImageFormatRg16f, false, ast::TexelFormat::kNone},
-        TexelFormatCase{SpvImageFormatR11fG11fB10f, false, ast::TexelFormat::kNone},
-        TexelFormatCase{SpvImageFormatR16f, false, ast::TexelFormat::kNone},
-        TexelFormatCase{SpvImageFormatRgb10A2, false, ast::TexelFormat::kNone},
-        TexelFormatCase{SpvImageFormatRg16, false, ast::TexelFormat::kNone},
-        TexelFormatCase{SpvImageFormatRg8, false, ast::TexelFormat::kNone},
-        TexelFormatCase{SpvImageFormatR16, false, ast::TexelFormat::kNone},
-        TexelFormatCase{SpvImageFormatR8, false, ast::TexelFormat::kNone},
-        TexelFormatCase{SpvImageFormatRgba16Snorm, false, ast::TexelFormat::kNone},
-        TexelFormatCase{SpvImageFormatRg16Snorm, false, ast::TexelFormat::kNone},
-        TexelFormatCase{SpvImageFormatRg8Snorm, false, ast::TexelFormat::kNone},
-        TexelFormatCase{SpvImageFormatRg16i, false, ast::TexelFormat::kNone},
-        TexelFormatCase{SpvImageFormatRg8i, false, ast::TexelFormat::kNone},
-        TexelFormatCase{SpvImageFormatR8i, false, ast::TexelFormat::kNone},
-        TexelFormatCase{SpvImageFormatRgb10a2ui, false, ast::TexelFormat::kNone},
-        TexelFormatCase{SpvImageFormatRg16ui, false, ast::TexelFormat::kNone},
-        TexelFormatCase{SpvImageFormatRg8ui, false, ast::TexelFormat::kNone}));
+        TexelFormatCase{SpvImageFormatRg16f, false, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatR11fG11fB10f, false, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatR16f, false, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatRgb10A2, false, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatRg16, false, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatRg8, false, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatR16, false, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatR8, false, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatRgba16Snorm, false, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatRg16Snorm, false, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatRg8Snorm, false, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatRg16i, false, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatRg8i, false, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatR8i, false, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatRgb10a2ui, false, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatRg16ui, false, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatRg8ui, false, ast::TexelFormat::kInvalid}));
 
 }  // namespace
 }  // namespace tint::reader::spirv

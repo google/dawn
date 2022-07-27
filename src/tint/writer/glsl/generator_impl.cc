@@ -141,7 +141,7 @@ const char* convert_texel_format_to_glsl(const ast::TexelFormat format) {
             return "rgba32i";
         case ast::TexelFormat::kRgba32Float:
             return "rgba32f";
-        case ast::TexelFormat::kNone:
+        case ast::TexelFormat::kInvalid:
             return "unknown";
     }
     return "unknown";
