@@ -239,11 +239,11 @@ TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
     ASSERT_EQ(1u, result.size());
-    uint32_t x, y, z;
-    std::tie(x, y, z) = result[0].workgroup_size();
-    EXPECT_EQ(8u, x);
-    EXPECT_EQ(2u, y);
-    EXPECT_EQ(1u, z);
+    auto workgroup_size = result[0].workgroup_size;
+    ASSERT_TRUE(workgroup_size.has_value());
+    EXPECT_EQ(8u, workgroup_size->x);
+    EXPECT_EQ(2u, workgroup_size->y);
+    EXPECT_EQ(1u, workgroup_size->z);
 }
 
 TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
@@ -258,11 +258,11 @@ TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
     ASSERT_FALSE(inspector.has_error()) << inspector.error();
 
     ASSERT_EQ(1u, result.size());
-    uint32_t x, y, z;
-    std::tie(x, y, z) = result[0].workgroup_size();
-    EXPECT_EQ(8u, x);
-    EXPECT_EQ(2u, y);
-    EXPECT_EQ(1u, z);
+    auto workgroup_size = result[0].workgroup_size;
+    ASSERT_TRUE(workgroup_size.has_value());
+    EXPECT_EQ(8u, workgroup_size->x);
+    EXPECT_EQ(2u, workgroup_size->y);
+    EXPECT_EQ(1u, workgroup_size->z);
 }
 
 TEST_F(InspectorGetEntryPointTest, NoInOutVariables) {

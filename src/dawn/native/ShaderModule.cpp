@@ -660,19 +660,24 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
     DAWN_TRY_ASSIGN(metadata->stage, TintPipelineStageToShaderStage(entryPoint.stage));
 
     if (metadata->stage == SingleShaderStage::Compute) {
-        DelayedInvalidIf(entryPoint.workgroup_size_x > limits.v1.maxComputeWorkgroupSizeX ||
-                             entryPoint.workgroup_size_y > limits.v1.maxComputeWorkgroupSizeY ||
-                             entryPoint.workgroup_size_z > limits.v1.maxComputeWorkgroupSizeZ,
+        auto workgroup_size = entryPoint.workgroup_size;
+        DAWN_INVALID_IF(
+            !workgroup_size.has_value(),
+            "TODO(crbug.com/dawn/1504): Dawn does not currently support @workgroup_size "
+            "attributes using override-expressions");
+        DelayedInvalidIf(workgroup_size->x > limits.v1.maxComputeWorkgroupSizeX ||
+                             workgroup_size->y > limits.v1.maxComputeWorkgroupSizeY ||
+                             workgroup_size->z > limits.v1.maxComputeWorkgroupSizeZ,
                          "Entry-point uses workgroup_size(%u, %u, %u) that exceeds the "
                          "maximum allowed (%u, %u, %u).",
-                         entryPoint.workgroup_size_x, entryPoint.workgroup_size_y,
-                         entryPoint.workgroup_size_z, limits.v1.maxComputeWorkgroupSizeX,
-                         limits.v1.maxComputeWorkgroupSizeY, limits.v1.maxComputeWorkgroupSizeZ);
+                         workgroup_size->x, workgroup_size->y, workgroup_size->z,
+                         limits.v1.maxComputeWorkgroupSizeX, limits.v1.maxComputeWorkgroupSizeY,
+                         limits.v1.maxComputeWorkgroupSizeZ);
 
         // Dimensions have already been validated against their individual limits above.
         // Cast to uint64_t to avoid overflow in this multiplication.
-        uint64_t numInvocations = static_cast<uint64_t>(entryPoint.workgroup_size_x) *
-                                  entryPoint.workgroup_size_y * entryPoint.workgroup_size_z;
+        uint64_t numInvocations =
+            static_cast<uint64_t>(workgroup_size->x) * workgroup_size->y * workgroup_size->z;
         DelayedInvalidIf(numInvocations > limits.v1.maxComputeInvocationsPerWorkgroup,
                          "The total number of workgroup invocations (%u) exceeds the "
                          "maximum allowed (%u).",
@@ -684,9 +689,9 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                          "the maximum allowed (%u bytes).",
                          workgroupStorageSize, limits.v1.maxComputeWorkgroupStorageSize);
 
-        metadata->localWorkgroupSize.x = entryPoint.workgroup_size_x;
-        metadata->localWorkgroupSize.y = entryPoint.workgroup_size_y;
-        metadata->localWorkgroupSize.z = entryPoint.workgroup_size_z;
+        metadata->localWorkgroupSize.x = workgroup_size->x;
+        metadata->localWorkgroupSize.y = workgroup_size->y;
+        metadata->localWorkgroupSize.z = workgroup_size->z;
 
         metadata->usesNumWorkgroups = entryPoint.num_workgroups_used;
     }

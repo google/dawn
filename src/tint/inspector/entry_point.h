@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_INSPECTOR_ENTRY_POINT_H_
 #define SRC_TINT_INSPECTOR_ENTRY_POINT_H_
 
+#include <optional>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -123,6 +124,16 @@ struct OverridableConstant {
 /// The pipeline stage
 enum class PipelineStage { kVertex, kFragment, kCompute };
 
+/// WorkgroupSize describes the dimensions of the workgroup grid for a compute shader.
+struct WorkgroupSize {
+    /// The 'x' dimension of the workgroup grid
+    uint32_t x = 1;
+    /// The 'y' dimension of the workgroup grid
+    uint32_t y = 1;
+    /// The 'z' dimension of the workgroup grid
+    uint32_t z = 1;
+};
+
 /// Reflection data for an entry point in the shader.
 struct EntryPoint {
     /// Constructors
@@ -139,12 +150,10 @@ struct EntryPoint {
     std::string remapped_name;
     /// The entry point stage
     PipelineStage stage;
-    /// The workgroup x size
-    uint32_t workgroup_size_x = 0;
-    /// The workgroup y size
-    uint32_t workgroup_size_y = 0;
-    /// The workgroup z size
-    uint32_t workgroup_size_z = 0;
+    /// The workgroup size. If PipelineStage is kCompute and this holds no value, then the workgroup
+    /// size is derived from an override-expression. In this situation you first need to run the
+    /// tint::transform::SubstituteOverride transform before using the inspector.
+    std::optional<WorkgroupSize> workgroup_size;
     /// List of the input variable accessed via this entry point.
     std::vector<StageVariable> input_variables;
     /// List of the output variable accessed via this entry point.
@@ -166,12 +175,6 @@ struct EntryPoint {
     bool sample_index_used = false;
     /// Does the entry point use the num_workgroups builtin
     bool num_workgroups_used = false;
-
-    /// @returns the size of the workgroup in {x,y,z} format
-    std::tuple<uint32_t, uint32_t, uint32_t> workgroup_size() {
-        return std::tuple<uint32_t, uint32_t, uint32_t>(workgroup_size_x, workgroup_size_y,
-                                                        workgroup_size_z);
-    }
 };
 
 }  // namespace tint::inspector

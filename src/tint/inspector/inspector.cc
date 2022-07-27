@@ -148,29 +148,30 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
         entry_point.remapped_name = program_->Symbols().NameFor(func->symbol);
 
         switch (func->PipelineStage()) {
-            case ast::PipelineStage::kCompute:
+            case ast::PipelineStage::kCompute: {
                 entry_point.stage = PipelineStage::kCompute;
+
+                auto wgsize = sem->WorkgroupSize();
+                if (!wgsize[0].overridable_const && !wgsize[1].overridable_const &&
+                    !wgsize[2].overridable_const) {
+                    entry_point.workgroup_size = {wgsize[0].value, wgsize[1].value,
+                                                  wgsize[2].value};
+                }
                 break;
-            case ast::PipelineStage::kFragment:
+            }
+            case ast::PipelineStage::kFragment: {
                 entry_point.stage = PipelineStage::kFragment;
                 break;
-            case ast::PipelineStage::kVertex:
+            }
+            case ast::PipelineStage::kVertex: {
                 entry_point.stage = PipelineStage::kVertex;
                 break;
-            default:
+            }
+            default: {
                 TINT_UNREACHABLE(Inspector, diagnostics_)
                     << "invalid pipeline stage for entry point '" << entry_point.name << "'";
                 break;
-        }
-
-        auto wgsize = sem->WorkgroupSize();
-        entry_point.workgroup_size_x = wgsize[0].value;
-        entry_point.workgroup_size_y = wgsize[1].value;
-        entry_point.workgroup_size_z = wgsize[2].value;
-        if (wgsize[0].overridable_const || wgsize[1].overridable_const ||
-            wgsize[2].overridable_const) {
-            // TODO(crbug.com/tint/713): Handle overridable constants.
-            TINT_ASSERT(Inspector, false);
+            }
         }
 
         for (auto* param : sem->Parameters()) {
