@@ -622,7 +622,7 @@ RenderPipelineBase::RenderPipelineBase(DeviceBase* device,
     TrackInDevice();
 
     // Initialize the cache key to include the cache type and device information.
-    mCacheKey.Record(CacheKey::Type::RenderPipeline, device->GetCacheKey());
+    StreamIn(&mCacheKey, CacheKey::Type::RenderPipeline, device->GetCacheKey());
 }
 
 RenderPipelineBase::RenderPipelineBase(DeviceBase* device) : PipelineBase(device) {

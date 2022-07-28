@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <cstring>
+#include <map>
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/vulkan_platform.h"
@@ -39,7 +40,7 @@ void ValidatePnextImpl(const VkBaseOutStructure* root) {
 }
 
 template <typename VK_STRUCT_TYPE>
-void SerializePnextImpl(CacheKey* key, const VkBaseOutStructure* root) {
+void SerializePnextImpl(stream::Sink* sink, const VkBaseOutStructure* root) {
     const VkBaseOutStructure* next = reinterpret_cast<const VkBaseOutStructure*>(root->pNext);
     const VK_STRUCT_TYPE* found = nullptr;
     while (next != nullptr) {
@@ -55,16 +56,16 @@ void SerializePnextImpl(CacheKey* key, const VkBaseOutStructure* root) {
         next = reinterpret_cast<const VkBaseOutStructure*>(next->pNext);
     }
     if (found != nullptr) {
-        key->Record(found);
+        StreamIn(sink, found);
     }
 }
 
 template <typename VK_STRUCT_TYPE,
           typename... VK_STRUCT_TYPES,
           typename = std::enable_if_t<(sizeof...(VK_STRUCT_TYPES) > 0)>>
-void SerializePnextImpl(CacheKey* key, const VkBaseOutStructure* root) {
-    SerializePnextImpl<VK_STRUCT_TYPE>(key, root);
-    SerializePnextImpl<VK_STRUCT_TYPES...>(key, root);
+void SerializePnextImpl(stream::Sink* sink, const VkBaseOutStructure* root) {
+    SerializePnextImpl<VK_STRUCT_TYPE>(sink, root);
+    SerializePnextImpl<VK_STRUCT_TYPES...>(sink, root);
 }
 
 template <typename VK_STRUCT_TYPE>
@@ -81,16 +82,16 @@ const VkBaseOutStructure* ToVkBaseOutStructure(const VK_STRUCT_TYPE* t) {
 template <typename... VK_STRUCT_TYPES,
           typename VK_STRUCT_TYPE,
           typename = std::enable_if_t<(sizeof...(VK_STRUCT_TYPES) > 0)>>
-void SerializePnext(CacheKey* key, const VK_STRUCT_TYPE* t) {
+void SerializePnext(stream::Sink* sink, const VK_STRUCT_TYPE* t) {
     const VkBaseOutStructure* root = detail::ToVkBaseOutStructure(t);
     detail::ValidatePnextImpl<VK_STRUCT_TYPES...>(root);
-    detail::SerializePnextImpl<VK_STRUCT_TYPES...>(key, root);
+    detail::SerializePnextImpl<VK_STRUCT_TYPES...>(sink, root);
 }
 
 // Empty template specialization so that we can put this in to ensure failures occur if new
 // extensions are added without updating serialization.
 template <typename VK_STRUCT_TYPE>
-void SerializePnext(CacheKey* key, const VK_STRUCT_TYPE* t) {
+void SerializePnext(stream::Sink* sink, const VK_STRUCT_TYPE* t) {
     const VkBaseOutStructure* root = detail::ToVkBaseOutStructure(t);
     detail::ValidatePnextImpl<>(root);
 }
@@ -98,253 +99,241 @@ void SerializePnext(CacheKey* key, const VK_STRUCT_TYPE* t) {
 }  // namespace
 
 template <>
-void CacheKeySerializer<VkDescriptorSetLayoutBinding>::Serialize(
-    CacheKey* key,
-    const VkDescriptorSetLayoutBinding& t) {
-    key->Record(t.binding, t.descriptorType, t.descriptorCount, t.stageFlags);
+void stream::Stream<VkDescriptorSetLayoutBinding>::Write(stream::Sink* sink,
+                                                         const VkDescriptorSetLayoutBinding& t) {
+    StreamIn(sink, t.binding, t.descriptorType, t.descriptorCount, t.stageFlags);
 }
 
 template <>
-void CacheKeySerializer<VkDescriptorSetLayoutCreateInfo>::Serialize(
-    CacheKey* key,
+void stream::Stream<VkDescriptorSetLayoutCreateInfo>::Write(
+    stream::Sink* sink,
     const VkDescriptorSetLayoutCreateInfo& t) {
-    key->Record(t.flags).RecordIterable(t.pBindings, t.bindingCount);
-    SerializePnext(key, &t);
+    StreamIn(sink, t.flags, Iterable(t.pBindings, t.bindingCount));
+    SerializePnext(sink, &t);
 }
 
 template <>
-void CacheKeySerializer<VkPushConstantRange>::Serialize(CacheKey* key,
-                                                        const VkPushConstantRange& t) {
-    key->Record(t.stageFlags, t.offset, t.size);
+void stream::Stream<VkPushConstantRange>::Write(stream::Sink* sink, const VkPushConstantRange& t) {
+    StreamIn(sink, t.stageFlags, t.offset, t.size);
 }
 
 template <>
-void CacheKeySerializer<VkPipelineLayoutCreateInfo>::Serialize(
-    CacheKey* key,
-    const VkPipelineLayoutCreateInfo& t) {
+void stream::Stream<VkPipelineLayoutCreateInfo>::Write(stream::Sink* sink,
+                                                       const VkPipelineLayoutCreateInfo& t) {
     // The set layouts are not serialized here because they are pointers to backend objects.
     // They need to be cross-referenced with the frontend objects and serialized from there.
-    key->Record(t.flags).RecordIterable(t.pPushConstantRanges, t.pushConstantRangeCount);
-    SerializePnext(key, &t);
+    StreamIn(sink, t.flags, Iterable(t.pPushConstantRanges, t.pushConstantRangeCount));
+    SerializePnext(sink, &t);
 }
 
 template <>
-void CacheKeySerializer<VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT>::Serialize(
-    CacheKey* key,
+void stream::Stream<VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT>::Write(
+    stream::Sink* sink,
     const VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT& t) {
-    key->Record(t.requiredSubgroupSize);
+    StreamIn(sink, t.requiredSubgroupSize);
 }
 
 template <>
-void CacheKeySerializer<VkPipelineRasterizationDepthClipStateCreateInfoEXT>::Serialize(
-    CacheKey* key,
+void stream::Stream<VkPipelineRasterizationDepthClipStateCreateInfoEXT>::Write(
+    stream::Sink* sink,
     const VkPipelineRasterizationDepthClipStateCreateInfoEXT& t) {
-    key->Record(t.depthClipEnable, t.flags);
+    StreamIn(sink, t.depthClipEnable, t.flags);
 }
 
 template <>
-void CacheKeySerializer<VkSpecializationMapEntry>::Serialize(CacheKey* key,
-                                                             const VkSpecializationMapEntry& t) {
-    key->Record(t.constantID, t.offset, t.size);
+void stream::Stream<VkSpecializationMapEntry>::Write(stream::Sink* sink,
+                                                     const VkSpecializationMapEntry& t) {
+    StreamIn(sink, t.constantID, t.offset, t.size);
 }
 
 template <>
-void CacheKeySerializer<VkSpecializationInfo>::Serialize(CacheKey* key,
-                                                         const VkSpecializationInfo& t) {
-    key->RecordIterable(t.pMapEntries, t.mapEntryCount)
-        .RecordIterable(static_cast<const uint8_t*>(t.pData), t.dataSize);
+void stream::Stream<VkSpecializationInfo>::Write(stream::Sink* sink,
+                                                 const VkSpecializationInfo& t) {
+    StreamIn(sink, Iterable(t.pMapEntries, t.mapEntryCount),
+             Iterable(static_cast<const uint8_t*>(t.pData), t.dataSize));
 }
 
 template <>
-void CacheKeySerializer<VkPipelineShaderStageCreateInfo>::Serialize(
-    CacheKey* key,
+void stream::Stream<VkPipelineShaderStageCreateInfo>::Write(
+    stream::Sink* sink,
     const VkPipelineShaderStageCreateInfo& t) {
     // The shader module is not serialized here because it is a pointer to a backend object.
-    key->Record(t.flags, t.stage)
-        .RecordIterable(t.pName, strlen(t.pName))
-        .Record(t.pSpecializationInfo);
-    SerializePnext<VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT>(key, &t);
+    StreamIn(sink, t.flags, t.stage, Iterable(t.pName, strlen(t.pName)), t.pSpecializationInfo);
+    SerializePnext<VkPipelineShaderStageRequiredSubgroupSizeCreateInfoEXT>(sink, &t);
 }
 
 template <>
-void CacheKeySerializer<VkComputePipelineCreateInfo>::Serialize(
-    CacheKey* key,
-    const VkComputePipelineCreateInfo& t) {
+void stream::Stream<VkComputePipelineCreateInfo>::Write(stream::Sink* sink,
+                                                        const VkComputePipelineCreateInfo& t) {
     // The pipeline layout is not serialized here because it is a pointer to a backend object.
     // It needs to be cross-referenced with the frontend objects and serialized from there. The
-    // base pipeline information is also currently not recorded since we do not use them in our
+    // base pipeline information is also currently not serialized since we do not use them in our
     // backend implementation. If we decide to use them later on, they also need to be
     // cross-referenced from the frontend.
-    key->Record(t.flags, t.stage);
+    StreamIn(sink, t.flags, t.stage);
 }
 
 template <>
-void CacheKeySerializer<VkVertexInputBindingDescription>::Serialize(
-    CacheKey* key,
+void stream::Stream<VkVertexInputBindingDescription>::Write(
+    stream::Sink* sink,
     const VkVertexInputBindingDescription& t) {
-    key->Record(t.binding, t.stride, t.inputRate);
+    StreamIn(sink, t.binding, t.stride, t.inputRate);
 }
 
 template <>
-void CacheKeySerializer<VkVertexInputAttributeDescription>::Serialize(
-    CacheKey* key,
+void stream::Stream<VkVertexInputAttributeDescription>::Write(
+    stream::Sink* sink,
     const VkVertexInputAttributeDescription& t) {
-    key->Record(t.location, t.binding, t.format, t.offset);
+    StreamIn(sink, t.location, t.binding, t.format, t.offset);
 }
 
 template <>
-void CacheKeySerializer<VkPipelineVertexInputStateCreateInfo>::Serialize(
-    CacheKey* key,
+void stream::Stream<VkPipelineVertexInputStateCreateInfo>::Write(
+    stream::Sink* sink,
     const VkPipelineVertexInputStateCreateInfo& t) {
-    key->Record(t.flags)
-        .RecordIterable(t.pVertexBindingDescriptions, t.vertexBindingDescriptionCount)
-        .RecordIterable(t.pVertexAttributeDescriptions, t.vertexAttributeDescriptionCount);
-    SerializePnext(key, &t);
+    StreamIn(sink, t.flags, Iterable(t.pVertexBindingDescriptions, t.vertexBindingDescriptionCount),
+             Iterable(t.pVertexAttributeDescriptions, t.vertexAttributeDescriptionCount));
+    SerializePnext(sink, &t);
 }
 
 template <>
-void CacheKeySerializer<VkPipelineInputAssemblyStateCreateInfo>::Serialize(
-    CacheKey* key,
+void stream::Stream<VkPipelineInputAssemblyStateCreateInfo>::Write(
+    stream::Sink* sink,
     const VkPipelineInputAssemblyStateCreateInfo& t) {
-    key->Record(t.flags, t.topology, t.primitiveRestartEnable);
-    SerializePnext(key, &t);
+    StreamIn(sink, t.flags, t.topology, t.primitiveRestartEnable);
+    SerializePnext(sink, &t);
 }
 
 template <>
-void CacheKeySerializer<VkPipelineTessellationStateCreateInfo>::Serialize(
-    CacheKey* key,
+void stream::Stream<VkPipelineTessellationStateCreateInfo>::Write(
+    stream::Sink* sink,
     const VkPipelineTessellationStateCreateInfo& t) {
-    key->Record(t.flags, t.patchControlPoints);
-    SerializePnext(key, &t);
+    StreamIn(sink, t.flags, t.patchControlPoints);
+    SerializePnext(sink, &t);
 }
 
 template <>
-void CacheKeySerializer<VkViewport>::Serialize(CacheKey* key, const VkViewport& t) {
-    key->Record(t.x, t.y, t.width, t.height, t.minDepth, t.maxDepth);
+void stream::Stream<VkViewport>::Write(stream::Sink* sink, const VkViewport& t) {
+    StreamIn(sink, t.x, t.y, t.width, t.height, t.minDepth, t.maxDepth);
 }
 
 template <>
-void CacheKeySerializer<VkOffset2D>::Serialize(CacheKey* key, const VkOffset2D& t) {
-    key->Record(t.x, t.y);
+void stream::Stream<VkOffset2D>::Write(stream::Sink* sink, const VkOffset2D& t) {
+    StreamIn(sink, t.x, t.y);
 }
 
 template <>
-void CacheKeySerializer<VkExtent2D>::Serialize(CacheKey* key, const VkExtent2D& t) {
-    key->Record(t.width, t.height);
+void stream::Stream<VkExtent2D>::Write(stream::Sink* sink, const VkExtent2D& t) {
+    StreamIn(sink, t.width, t.height);
 }
 
 template <>
-void CacheKeySerializer<VkRect2D>::Serialize(CacheKey* key, const VkRect2D& t) {
-    key->Record(t.offset, t.extent);
+void stream::Stream<VkRect2D>::Write(stream::Sink* sink, const VkRect2D& t) {
+    StreamIn(sink, t.offset, t.extent);
 }
 
 template <>
-void CacheKeySerializer<VkPipelineViewportStateCreateInfo>::Serialize(
-    CacheKey* key,
+void stream::Stream<VkPipelineViewportStateCreateInfo>::Write(
+    stream::Sink* sink,
     const VkPipelineViewportStateCreateInfo& t) {
-    key->Record(t.flags)
-        .RecordIterable(t.pViewports, t.viewportCount)
-        .RecordIterable(t.pScissors, t.scissorCount);
-    SerializePnext(key, &t);
+    StreamIn(sink, t.flags, Iterable(t.pViewports, t.viewportCount),
+             Iterable(t.pScissors, t.scissorCount));
+    SerializePnext(sink, &t);
 }
 
 template <>
-void CacheKeySerializer<VkPipelineRasterizationStateCreateInfo>::Serialize(
-    CacheKey* key,
+void stream::Stream<VkPipelineRasterizationStateCreateInfo>::Write(
+    stream::Sink* sink,
     const VkPipelineRasterizationStateCreateInfo& t) {
-    key->Record(t.flags, t.depthClampEnable, t.rasterizerDiscardEnable, t.polygonMode, t.cullMode,
-                t.frontFace, t.depthBiasEnable, t.depthBiasConstantFactor, t.depthBiasClamp,
-                t.depthBiasSlopeFactor, t.lineWidth);
-    SerializePnext<VkPipelineRasterizationDepthClipStateCreateInfoEXT>(key, &t);
+    StreamIn(sink, t.flags, t.depthClampEnable, t.rasterizerDiscardEnable, t.polygonMode,
+             t.cullMode, t.frontFace, t.depthBiasEnable, t.depthBiasConstantFactor,
+             t.depthBiasClamp, t.depthBiasSlopeFactor, t.lineWidth);
+    SerializePnext<VkPipelineRasterizationDepthClipStateCreateInfoEXT>(sink, &t);
 }
 
 template <>
-void CacheKeySerializer<VkPipelineMultisampleStateCreateInfo>::Serialize(
-    CacheKey* key,
+void stream::Stream<VkPipelineMultisampleStateCreateInfo>::Write(
+    stream::Sink* sink,
     const VkPipelineMultisampleStateCreateInfo& t) {
-    key->Record(t.flags, t.rasterizationSamples, t.sampleShadingEnable, t.minSampleShading,
-                t.pSampleMask, t.alphaToCoverageEnable, t.alphaToOneEnable);
-    SerializePnext(key, &t);
+    StreamIn(sink, t.flags, t.rasterizationSamples, t.sampleShadingEnable, t.minSampleShading,
+             t.pSampleMask, t.alphaToCoverageEnable, t.alphaToOneEnable);
+    SerializePnext(sink, &t);
 }
 
 template <>
-void CacheKeySerializer<VkStencilOpState>::Serialize(CacheKey* key, const VkStencilOpState& t) {
-    key->Record(t.failOp, t.passOp, t.depthFailOp, t.compareOp, t.compareMask, t.writeMask,
-                t.reference);
+void stream::Stream<VkStencilOpState>::Write(stream::Sink* sink, const VkStencilOpState& t) {
+    StreamIn(sink, t.failOp, t.passOp, t.depthFailOp, t.compareOp, t.compareMask, t.writeMask,
+             t.reference);
 }
 
 template <>
-void CacheKeySerializer<VkPipelineDepthStencilStateCreateInfo>::Serialize(
-    CacheKey* key,
+void stream::Stream<VkPipelineDepthStencilStateCreateInfo>::Write(
+    stream::Sink* sink,
     const VkPipelineDepthStencilStateCreateInfo& t) {
-    key->Record(t.flags, t.depthTestEnable, t.depthWriteEnable, t.depthCompareOp,
-                t.depthBoundsTestEnable, t.stencilTestEnable, t.front, t.back, t.minDepthBounds,
-                t.maxDepthBounds);
-    SerializePnext(key, &t);
+    StreamIn(sink, t.flags, t.depthTestEnable, t.depthWriteEnable, t.depthCompareOp,
+             t.depthBoundsTestEnable, t.stencilTestEnable, t.front, t.back, t.minDepthBounds,
+             t.maxDepthBounds);
+    SerializePnext(sink, &t);
 }
 
 template <>
-void CacheKeySerializer<VkPipelineColorBlendAttachmentState>::Serialize(
-    CacheKey* key,
+void stream::Stream<VkPipelineColorBlendAttachmentState>::Write(
+    stream::Sink* sink,
     const VkPipelineColorBlendAttachmentState& t) {
-    key->Record(t.blendEnable, t.srcColorBlendFactor, t.dstColorBlendFactor, t.colorBlendOp,
-                t.srcAlphaBlendFactor, t.dstAlphaBlendFactor, t.alphaBlendOp, t.colorWriteMask);
+    StreamIn(sink, t.blendEnable, t.srcColorBlendFactor, t.dstColorBlendFactor, t.colorBlendOp,
+             t.srcAlphaBlendFactor, t.dstAlphaBlendFactor, t.alphaBlendOp, t.colorWriteMask);
 }
 
 template <>
-void CacheKeySerializer<VkPipelineColorBlendStateCreateInfo>::Serialize(
-    CacheKey* key,
+void stream::Stream<VkPipelineColorBlendStateCreateInfo>::Write(
+    stream::Sink* sink,
     const VkPipelineColorBlendStateCreateInfo& t) {
-    key->Record(t.flags, t.logicOpEnable, t.logicOp)
-        .RecordIterable(t.pAttachments, t.attachmentCount)
-        .Record(t.blendConstants);
-    SerializePnext(key, &t);
+    StreamIn(sink, t.flags, t.logicOpEnable, t.logicOp, Iterable(t.pAttachments, t.attachmentCount),
+             t.blendConstants);
+    SerializePnext(sink, &t);
 }
 
 template <>
-void CacheKeySerializer<VkPipelineDynamicStateCreateInfo>::Serialize(
-    CacheKey* key,
+void stream::Stream<VkPipelineDynamicStateCreateInfo>::Write(
+    stream::Sink* sink,
     const VkPipelineDynamicStateCreateInfo& t) {
-    key->Record(t.flags).RecordIterable(t.pDynamicStates, t.dynamicStateCount);
-    SerializePnext(key, &t);
+    StreamIn(sink, t.flags, Iterable(t.pDynamicStates, t.dynamicStateCount));
+    SerializePnext(sink, &t);
 }
 
 template <>
-void CacheKeySerializer<vulkan::RenderPassCacheQuery>::Serialize(
-    CacheKey* key,
-    const vulkan::RenderPassCacheQuery& t) {
-    key->Record(t.colorMask.to_ulong(), t.resolveTargetMask.to_ulong(), t.sampleCount);
+void stream::Stream<vulkan::RenderPassCacheQuery>::Write(stream::Sink* sink,
+                                                         const vulkan::RenderPassCacheQuery& t) {
+    StreamIn(sink, t.colorMask.to_ulong(), t.resolveTargetMask.to_ulong(), t.sampleCount);
 
     // Manually iterate the color attachment indices and their corresponding format/load/store
-    // ops because the data is sparse and may be uninitialized. Since we record the colorMask
-    // member above, recording sparse data should be fine here.
+    // ops because the data is sparse and may be uninitialized. Since we serialize the colorMask
+    // member above, serializing sparse data should be fine here.
     for (ColorAttachmentIndex i : IterateBitSet(t.colorMask)) {
-        key->Record(t.colorFormats[i], t.colorLoadOp[i], t.colorStoreOp[i]);
+        StreamIn(sink, t.colorFormats[i], t.colorLoadOp[i], t.colorStoreOp[i]);
     }
 
     // Serialize the depth-stencil toggle bit, and the parameters if applicable.
-    key->Record(t.hasDepthStencil);
+    StreamIn(sink, t.hasDepthStencil);
     if (t.hasDepthStencil) {
-        key->Record(t.depthStencilFormat, t.depthLoadOp, t.depthStoreOp, t.stencilLoadOp,
-                    t.stencilStoreOp, t.readOnlyDepthStencil);
+        StreamIn(sink, t.depthStencilFormat, t.depthLoadOp, t.depthStoreOp, t.stencilLoadOp,
+                 t.stencilStoreOp, t.readOnlyDepthStencil);
     }
 }
 
 template <>
-void CacheKeySerializer<VkGraphicsPipelineCreateInfo>::Serialize(
-    CacheKey* key,
-    const VkGraphicsPipelineCreateInfo& t) {
+void stream::Stream<VkGraphicsPipelineCreateInfo>::Write(stream::Sink* sink,
+                                                         const VkGraphicsPipelineCreateInfo& t) {
     // The pipeline layout and render pass are not serialized here because they are pointers to
     // backend objects. They need to be cross-referenced with the frontend objects and
-    // serialized from there. The base pipeline information is also currently not recorded since
+    // serialized from there. The base pipeline information is also currently not serialized since
     // we do not use them in our backend implementation. If we decide to use them later on, they
     // also need to be cross-referenced from the frontend.
-    key->Record(t.flags)
-        .RecordIterable(t.pStages, t.stageCount)
-        .Record(t.pVertexInputState, t.pInputAssemblyState, t.pTessellationState, t.pViewportState,
-                t.pRasterizationState, t.pMultisampleState, t.pDepthStencilState,
-                t.pColorBlendState, t.pDynamicState, t.subpass);
-    SerializePnext(key, &t);
+    StreamIn(sink, t.flags, Iterable(t.pStages, t.stageCount), t.pVertexInputState,
+             t.pInputAssemblyState, t.pTessellationState, t.pViewportState, t.pRasterizationState,
+             t.pMultisampleState, t.pDepthStencilState, t.pColorBlendState, t.pDynamicState,
+             t.subpass);
+    SerializePnext(sink, &t);
 }
 
 }  // namespace dawn::native

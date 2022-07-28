@@ -12,17 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/CacheKey.h"
+#ifndef SRC_DAWN_NATIVE_STREAM_SINK_H_
+#define SRC_DAWN_NATIVE_STREAM_SINK_H_
 
-#include <iomanip>
-#include <string>
-#include <string_view>
+#include <cstddef>
 
-namespace dawn::native {
+namespace dawn::native::stream {
 
-template <>
-void stream::Stream<CacheKey>::Write(stream::Sink* sink, const CacheKey& t) {
-    StreamIn(sink, static_cast<const ByteVectorSink&>(t));
-}
+// Interface for a serialization sink.
+class Sink {
+  public:
+    // Allocate `bytes` space in the sink. Returns the pointer to the start
+    // of the allocation.
+    virtual void* GetSpace(size_t bytes) = 0;
+};
 
-}  // namespace dawn::native
+}  // namespace dawn::native::stream
+
+#endif  // SRC_DAWN_NATIVE_STREAM_SINK_H_

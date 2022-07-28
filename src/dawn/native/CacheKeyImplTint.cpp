@@ -20,10 +20,10 @@ namespace dawn::native {
 
 // static
 template <>
-void CacheKeySerializer<tint::Program>::Serialize(CacheKey* key, const tint::Program& p) {
+void stream::Stream<tint::Program>::Write(stream::Sink* sink, const tint::Program& p) {
 #if TINT_BUILD_WGSL_WRITER
     tint::writer::wgsl::Options options{};
-    key->Record(tint::writer::wgsl::Generate(&p, options).wgsl);
+    StreamIn(sink, tint::writer::wgsl::Generate(&p, options).wgsl);
 #else
     // TODO(crbug.com/dawn/1481): We shouldn't need to write back to WGSL if we have a CacheKey
     // built from the initial shader module input. Then, we would never need to parse the program
@@ -34,8 +34,21 @@ void CacheKeySerializer<tint::Program>::Serialize(CacheKey* key, const tint::Pro
 
 // static
 template <>
-void CacheKeySerializer<tint::transform::BindingPoints>::Serialize(
-    CacheKey* key,
+void stream::Stream<tint::sem::BindingPoint>::Write(stream::Sink* sink,
+                                                    const tint::sem::BindingPoint& p) {
+    static_assert(offsetof(tint::sem::BindingPoint, group) == 0,
+                  "Please update serialization for tint::sem::BindingPoint");
+    static_assert(offsetof(tint::sem::BindingPoint, binding) == 4,
+                  "Please update serialization for tint::sem::BindingPoint");
+    static_assert(sizeof(tint::sem::BindingPoint) == 8,
+                  "Please update serialization for tint::sem::BindingPoint");
+    StreamIn(sink, p.group, p.binding);
+}
+
+// static
+template <>
+void stream::Stream<tint::transform::BindingPoints>::Write(
+    stream::Sink* sink,
     const tint::transform::BindingPoints& points) {
     static_assert(offsetof(tint::transform::BindingPoints, plane_1) == 0,
                   "Please update serialization for tint::transform::BindingPoints");
@@ -43,20 +56,7 @@ void CacheKeySerializer<tint::transform::BindingPoints>::Serialize(
                   "Please update serialization for tint::transform::BindingPoints");
     static_assert(sizeof(tint::transform::BindingPoints) == 16,
                   "Please update serialization for tint::transform::BindingPoints");
-    key->Record(points.plane_1, points.params);
-}
-
-// static
-template <>
-void CacheKeySerializer<tint::sem::BindingPoint>::Serialize(CacheKey* key,
-                                                            const tint::sem::BindingPoint& p) {
-    static_assert(offsetof(tint::sem::BindingPoint, group) == 0,
-                  "Please update serialization for tint::sem::BindingPoint");
-    static_assert(offsetof(tint::sem::BindingPoint, binding) == 4,
-                  "Please update serialization for tint::sem::BindingPoint");
-    static_assert(sizeof(tint::sem::BindingPoint) == 8,
-                  "Please update serialization for tint::sem::BindingPoint");
-    key->Record(p.group, p.binding);
+    StreamIn(sink, points.plane_1, points.params);
 }
 
 }  // namespace dawn::native

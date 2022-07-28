@@ -50,7 +50,7 @@ ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
     TrackInDevice();
 
     // Initialize the cache key to include the cache type and device information.
-    mCacheKey.Record(CacheKey::Type::ComputePipeline, device->GetCacheKey());
+    StreamIn(&mCacheKey, CacheKey::Type::ComputePipeline, device->GetCacheKey());
 }
 
 ComputePipelineBase::ComputePipelineBase(DeviceBase* device) : PipelineBase(device) {

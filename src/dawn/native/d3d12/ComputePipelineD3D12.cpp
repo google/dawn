@@ -62,7 +62,7 @@ MaybeError ComputePipeline::Initialize() {
                                                     ToBackend(GetLayout()), compileFlags));
     d3dDesc.CS = compiledShader.GetD3D12ShaderBytecode();
 
-    mCacheKey.Record(d3dDesc, ToBackend(GetLayout())->GetRootSignatureBlob());
+    StreamIn(&mCacheKey, d3dDesc, ToBackend(GetLayout())->GetRootSignatureBlob());
 
     // Try to see if we have anything in the blob cache.
     Blob blob = device->LoadCachedBlob(GetCacheKey());

@@ -56,7 +56,7 @@ MaybeError PipelineLayout::Initialize() {
     createInfo.pPushConstantRanges = nullptr;
 
     // Record cache key information now since the createInfo is not stored.
-    mCacheKey.RecordIterable(cachedObjects.data(), numSetLayouts).Record(createInfo);
+    StreamIn(&mCacheKey, stream::Iterable(cachedObjects.data(), numSetLayouts), createInfo);
 
     Device* device = ToBackend(GetDevice());
     DAWN_TRY(CheckVkSuccess(

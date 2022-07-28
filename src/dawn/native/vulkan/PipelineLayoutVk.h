@@ -31,6 +31,11 @@ class PipelineLayout final : public PipelineLayoutBase {
 
     VkPipelineLayout GetHandle() const;
 
+    // Friend definition of StreamIn which can be found by ADL to override stream::StreamIn<T>.
+    friend void StreamIn(stream::Sink* sink, const PipelineLayout& obj) {
+        StreamIn(sink, static_cast<const CachedObject&>(obj));
+    }
+
   private:
     ~PipelineLayout() override;
     void DestroyImpl() override;

@@ -157,7 +157,7 @@ class CacheRequestImpl {
 #define DAWN_INTERNAL_CACHE_REQUEST_DECL_STRUCT_MEMBER(type, name) type name{};
 
 // Helper for X macro for recording cache request fields into a CacheKey.
-#define DAWN_INTERNAL_CACHE_REQUEST_RECORD_KEY(type, name) key.Record(name);
+#define DAWN_INTERNAL_CACHE_REQUEST_RECORD_KEY(type, name) StreamIn(&key, name);
 
 // Helper X macro to define a CacheRequest struct.
 // Example usage:
@@ -177,7 +177,7 @@ class CacheRequestImpl {
         /* Create a CacheKey from the request type and all members */                             \
         ::dawn::native::CacheKey CreateCacheKey(const ::dawn::native::DeviceBase* device) const { \
             ::dawn::native::CacheKey key = device->GetCacheKey();                                 \
-            key.Record(#Request);                                                                 \
+            StreamIn(&key, #Request);                                                             \
             MEMBERS(DAWN_INTERNAL_CACHE_REQUEST_RECORD_KEY)                                       \
             return key;                                                                           \
         }                                                                                         \

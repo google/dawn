@@ -102,7 +102,8 @@ TEST_F(CacheRequestTests, MakesCacheKey) {
 
     // Make the expected key.
     CacheKey expectedKey;
-    expectedKey.Record(GetDevice()->GetCacheKey(), "CacheRequestForTesting", req.a, req.b, req.c);
+    StreamIn(&expectedKey, GetDevice()->GetCacheKey(), "CacheRequestForTesting", req.a, req.b,
+             req.c);
 
     // Expect a call to LoadData with the expected key.
     EXPECT_CALL(mMockCache, LoadData(_, expectedKey.size(), nullptr, 0))

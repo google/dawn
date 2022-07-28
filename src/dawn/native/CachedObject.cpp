@@ -46,4 +46,10 @@ const CacheKey& CachedObject::GetCacheKey() const {
     return mCacheKey;
 }
 
+// static
+template <>
+void stream::Stream<CachedObject>::Write(stream::Sink* sink, const CachedObject& obj) {
+    StreamIn(sink, obj.GetCacheKey());
+}
+
 }  // namespace dawn::native

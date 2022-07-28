@@ -25,44 +25,44 @@
 namespace {{native_namespace}} {
 
 //
-// Cache key serializers for wgpu structures used in caching.
+// Cache key writers for wgpu structures used in caching.
 //
-{% macro render_serializer(member) %}
+{% macro render_writer(member) %}
     {%- set name = member.name.camelCase() -%}
     {% if member.length == None %}
-        key->Record(t.{{name}});
+        StreamIn(sink, t.{{name}});
     {% elif member.length == "strlen" %}
-        key->RecordIterable(t.{{name}}, strlen(t.{{name}}));
+        StreamIn(sink, Iterable(t.{{name}}, strlen(t.{{name}})));
     {% else %}
-        key->RecordIterable(t.{{name}}, t.{{member.length.name.camelCase()}});
+        StreamIn(sink, Iterable(t.{{name}}, t.{{member.length.name.camelCase()}}));
     {% endif %}
 {% endmacro %}
 
-{# Helper macro to render serializers. Should be used in a call block to provide additional custom
+{# Helper macro to render writers. Should be used in a call block to provide additional custom
    handling when necessary. The optional `omit` field can be used to omit fields that are either
    handled in the custom code, or unnecessary in the serialized output.
    Example:
-       {% call render_cache_key_serializer("struct name", omits=["omit field"]) %}
+       {% call render_cache_key_writer("struct name", omits=["omit field"]) %}
            // Custom C++ code to handle special types/members that are hard to generate code for
        {% endcall %}
 #}
-{% macro render_cache_key_serializer(json_type, omits=[]) %}
+{% macro render_cache_key_writer(json_type, omits=[]) %}
     {%- set cpp_type = types[json_type].name.CamelCase() -%}
     template <>
-    void CacheKeySerializer<{{cpp_type}}>::Serialize(CacheKey* key, const {{cpp_type}}& t) {
+    void stream::Stream<{{cpp_type}}>::Write(stream::Sink* sink, const {{cpp_type}}& t) {
     {{ caller() }}
     {% for member in types[json_type].members %}
         {%- if not member.name.get() in omits %}
-                {{render_serializer(member)}}
+                {{render_writer(member)}}
         {%- endif %}
     {% endfor %}
     }
 {% endmacro %}
 
-{% call render_cache_key_serializer("adapter properties") %}
+{% call render_cache_key_writer("adapter properties") %}
 {% endcall %}
 
-{% call render_cache_key_serializer("dawn cache device descriptor") %}
+{% call render_cache_key_writer("dawn cache device descriptor") %}
 {% endcall %}
 
 } // namespace {{native_namespace}}

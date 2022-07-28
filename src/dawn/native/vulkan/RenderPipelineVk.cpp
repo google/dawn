@@ -337,7 +337,7 @@ MaybeError RenderPipeline::Initialize() {
     const PipelineLayout* layout = ToBackend(GetLayout());
 
     // Vulkan devices need cache UUID field to be serialized into pipeline cache keys.
-    mCacheKey.Record(device->GetDeviceInfo().properties.pipelineCacheUUID);
+    StreamIn(&mCacheKey, device->GetDeviceInfo().properties.pipelineCacheUUID);
 
     // There are at most 2 shader stages in render pipeline, i.e. vertex and fragment
     std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
@@ -389,7 +389,7 @@ MaybeError RenderPipeline::Initialize() {
         stageCount++;
 
         // Record cache key for each shader since it will become inaccessible later on.
-        mCacheKey.Record(stage).RecordIterable(moduleAndSpirv.spirv, moduleAndSpirv.wordCount);
+        StreamIn(&mCacheKey, stream::Iterable(moduleAndSpirv.spirv, moduleAndSpirv.wordCount));
     }
 
     PipelineVertexInputStateCreateInfoTemporaryAllocations tempAllocations;
@@ -548,7 +548,7 @@ MaybeError RenderPipeline::Initialize() {
 
         query.SetSampleCount(GetSampleCount());
 
-        mCacheKey.Record(query);
+        StreamIn(&mCacheKey, query);
         DAWN_TRY_ASSIGN(renderPass, device->GetRenderPassCache()->GetRenderPass(query));
     }
 
@@ -577,7 +577,7 @@ MaybeError RenderPipeline::Initialize() {
     createInfo.basePipelineIndex = -1;
 
     // Record cache key information now since createInfo is not stored.
-    mCacheKey.Record(createInfo, layout->GetCacheKey());
+    StreamIn(&mCacheKey, createInfo, layout->GetCacheKey());
 
     // Try to see if we have anything in the blob cache.
     Ref<PipelineCache> cache = ToBackend(GetDevice()->GetOrCreatePipelineCache(GetCacheKey()));

@@ -12,17 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/CacheKey.h"
+#ifndef SRC_DAWN_NATIVE_STREAM_BLOBSOURCE_H_
+#define SRC_DAWN_NATIVE_STREAM_BLOBSOURCE_H_
 
-#include <iomanip>
-#include <string>
-#include <string_view>
+#include "dawn/native/Blob.h"
+#include "dawn/native/Error.h"
+#include "dawn/native/stream/Source.h"
 
-namespace dawn::native {
+namespace dawn::native::stream {
 
-template <>
-void stream::Stream<CacheKey>::Write(stream::Sink* sink, const CacheKey& t) {
-    StreamIn(sink, static_cast<const ByteVectorSink&>(t));
-}
+class BlobSource : public Source {
+  public:
+    explicit BlobSource(Blob&& blob);
 
-}  // namespace dawn::native
+    // stream::Source implementation.
+    MaybeError Read(const void** ptr, size_t bytes) override;
+
+  private:
+    const Blob mBlob;
+    size_t mOffset = 0;
+};
+
+}  // namespace dawn::native::stream
+
+#endif  // SRC_DAWN_NATIVE_STREAM_BLOBSOURCE_H_

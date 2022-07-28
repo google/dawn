@@ -271,7 +271,7 @@ MaybeError PipelineLayout::Initialize() {
                               0, mRootSignatureBlob->GetBufferPointer(),
                               mRootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&mRootSignature)),
                           "D3D12 create root signature"));
-    mCacheKey.Record(mRootSignatureBlob.Get());
+    StreamIn(&mCacheKey, mRootSignatureBlob.Get());
     return {};
 }
 

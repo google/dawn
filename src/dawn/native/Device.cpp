@@ -209,8 +209,8 @@ DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
     // Record the cache key from the properties. Note that currently, if a new extension
     // descriptor is added (and probably handled here), the cache key recording needs to be
     // updated.
-    mDeviceCacheKey.Record(kDawnVersion, adapterProperties, mEnabledFeatures.featuresBitSet,
-                           mEnabledToggles.toggleBitset, cacheDesc);
+    StreamIn(&mDeviceCacheKey, kDawnVersion, adapterProperties, mEnabledFeatures.featuresBitSet,
+             mEnabledToggles.toggleBitset, cacheDesc);
 }
 
 DeviceBase::DeviceBase() : mState(State::Alive) {

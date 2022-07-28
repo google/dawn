@@ -430,7 +430,7 @@ MaybeError RenderPipeline::Initialize() {
 
     mD3d12PrimitiveTopology = D3D12PrimitiveTopology(GetPrimitiveTopology());
 
-    mCacheKey.Record(descriptorD3D12, *layout->GetRootSignatureBlob());
+    StreamIn(&mCacheKey, descriptorD3D12, *layout->GetRootSignatureBlob());
 
     // Try to see if we have anything in the blob cache.
     Blob blob = device->LoadCachedBlob(GetCacheKey());

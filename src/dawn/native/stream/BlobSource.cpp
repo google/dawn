@@ -12,17 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/CacheKey.h"
+#include "dawn/native/stream/BlobSource.h"
 
-#include <iomanip>
-#include <string>
-#include <string_view>
+#include <utility>
 
-namespace dawn::native {
+namespace dawn::native::stream {
 
-template <>
-void stream::Stream<CacheKey>::Write(stream::Sink* sink, const CacheKey& t) {
-    StreamIn(sink, static_cast<const ByteVectorSink&>(t));
+BlobSource::BlobSource(Blob&& blob) : mBlob(std::move(blob)) {}
+
+MaybeError BlobSource::Read(const void** ptr, size_t bytes) {
+    DAWN_INVALID_IF(bytes > mBlob.Size() - mOffset, "Out of bounds.");
+    *ptr = mBlob.Data() + mOffset;
+    mOffset += bytes;
+    return {};
 }
 
-}  // namespace dawn::native
+}  // namespace dawn::native::stream

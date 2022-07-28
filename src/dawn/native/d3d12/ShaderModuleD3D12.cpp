@@ -62,11 +62,11 @@ struct CompareBindingPoint {
     }
 };
 
-void Serialize(std::stringstream& output, const tint::ast::Access& access) {
+void StreamIn(std::stringstream& output, const tint::ast::Access& access) {
     output << access;
 }
 
-void Serialize(std::stringstream& output, const tint::transform::BindingPoint& binding_point) {
+void StreamIn(std::stringstream& output, const tint::transform::BindingPoint& binding_point) {
     output << "(BindingPoint";
     output << " group=" << binding_point.group;
     output << " binding=" << binding_point.binding;
@@ -74,32 +74,32 @@ void Serialize(std::stringstream& output, const tint::transform::BindingPoint& b
 }
 
 template <typename T, typename = typename std::enable_if<std::is_fundamental<T>::value>::type>
-void Serialize(std::stringstream& output, const T& val) {
+void StreamIn(std::stringstream& output, const T& val) {
     output << val;
 }
 
 template <typename T>
-void Serialize(std::stringstream& output,
-               const std::unordered_map<tint::transform::BindingPoint, T>& map) {
+void StreamIn(std::stringstream& output,
+              const std::unordered_map<tint::transform::BindingPoint, T>& map) {
     output << "(map";
 
     std::map<tint::transform::BindingPoint, T, CompareBindingPoint> sorted(map.begin(), map.end());
     for (auto& [bindingPoint, value] : sorted) {
         output << " ";
-        Serialize(output, bindingPoint);
+        StreamIn(output, bindingPoint);
         output << "=";
-        Serialize(output, value);
+        StreamIn(output, value);
     }
     output << ")";
 }
 
-void Serialize(std::stringstream& output,
-               const tint::writer::ArrayLengthFromUniformOptions& arrayLengthFromUniform) {
+void StreamIn(std::stringstream& output,
+              const tint::writer::ArrayLengthFromUniformOptions& arrayLengthFromUniform) {
     output << "(ArrayLengthFromUniformOptions";
     output << " ubo_binding=";
-    Serialize(output, arrayLengthFromUniform.ubo_binding);
+    StreamIn(output, arrayLengthFromUniform.ubo_binding);
     output << " bindpoint_to_size_index=";
-    Serialize(output, arrayLengthFromUniform.bindpoint_to_size_index);
+    StreamIn(output, arrayLengthFromUniform.bindpoint_to_size_index);
     output << ")";
 }
 
@@ -344,17 +344,17 @@ struct ShaderCompilationRequest {
         stream << " disableSymbolRenaming=" << disableSymbolRenaming;
 
         stream << " remappedBindingPoints=";
-        Serialize(stream, remappedBindingPoints);
+        StreamIn(stream, remappedBindingPoints);
 
         stream << " remappedAccessControls=";
-        Serialize(stream, remappedAccessControls);
+        StreamIn(stream, remappedAccessControls);
 
         stream << " useNumWorkgroups=" << usesNumWorkgroups;
         stream << " numWorkgroupsRegisterSpace=" << numWorkgroupsRegisterSpace;
         stream << " numWorkgroupsShaderRegister=" << numWorkgroupsShaderRegister;
 
         stream << " arrayLengthFromUniform=";
-        Serialize(stream, arrayLengthFromUniform);
+        StreamIn(stream, arrayLengthFromUniform);
 
         stream << " shaderModel=" << deviceInfo->shaderModel;
         stream << " disableWorkgroupInit=" << disableWorkgroupInit;
