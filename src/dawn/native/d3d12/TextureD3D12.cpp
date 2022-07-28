@@ -581,6 +581,14 @@ MaybeError Texture::InitializeAsInternalTexture() {
     resourceDescriptor.Height = size.height;
     resourceDescriptor.DepthOrArraySize = size.depthOrArrayLayers;
 
+    Device* device = ToBackend(GetDevice());
+    bool applyForceClearCopyableDepthStencilTextureOnCreationToggle =
+        device->IsToggleEnabled(Toggle::D3D12ForceClearCopyableDepthStencilTextureOnCreation) &&
+        GetFormat().HasDepthOrStencil() && (GetInternalUsage() & wgpu::TextureUsage::CopyDst);
+    if (applyForceClearCopyableDepthStencilTextureOnCreationToggle) {
+        AddInternalUsage(wgpu::TextureUsage::RenderAttachment);
+    }
+
     // This will need to be much more nuanced when WebGPU has
     // texture view compatibility rules.
     const bool needsTypelessFormat =
@@ -601,17 +609,12 @@ MaybeError Texture::InitializeAsInternalTexture() {
     mD3D12ResourceFlags = resourceDescriptor.Flags;
 
     DAWN_TRY_ASSIGN(mResourceAllocation,
-                    ToBackend(GetDevice())
-                        ->AllocateMemory(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor,
-                                         D3D12_RESOURCE_STATE_COMMON));
+                    device->AllocateMemory(D3D12_HEAP_TYPE_DEFAULT, resourceDescriptor,
+                                           D3D12_RESOURCE_STATE_COMMON));
 
     SetLabelImpl();
 
-    Device* device = ToBackend(GetDevice());
-
-    if (device->IsToggleEnabled(
-            Toggle::D3D12ForceInitializeCopyableDepthStencilTextureOnCreation) &&
-        GetFormat().HasDepthOrStencil() && (GetInternalUsage() & wgpu::TextureUsage::CopyDst)) {
+    if (applyForceClearCopyableDepthStencilTextureOnCreationToggle) {
         CommandRecordingContext* commandContext;
         DAWN_TRY_ASSIGN(commandContext, device->GetPendingCommandContext());
         DAWN_TRY(ClearTexture(commandContext, GetAllSubresources(), TextureBase::ClearValue::Zero));

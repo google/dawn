@@ -72,7 +72,7 @@ enum class Toggle {
     D3D12SplitBufferTextureCopyForRowsPerImagePaddings,
     MetalRenderR8RG8UnormSmallMipToTempTexture,
     EnableBlobCache,
-    D3D12ForceInitializeCopyableDepthStencilTextureOnCreation,
+    D3D12ForceClearCopyableDepthStencilTextureOnCreation,
     D3D12DontSetClearValueOnDepthTextureCreation,
     D3D12AlwaysUseTypelessFormatsForCastableTexture,
 

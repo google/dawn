@@ -112,6 +112,7 @@ class TextureBase : public ApiObjectBase {
     ~TextureBase() override;
 
     void DestroyImpl() override;
+    void AddInternalUsage(wgpu::TextureUsage usage);
 
   private:
     TextureBase(DeviceBase* device, const TextureDescriptor* descriptor, ObjectBase::ErrorTag tag);

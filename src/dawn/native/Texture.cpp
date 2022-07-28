@@ -650,6 +650,10 @@ wgpu::TextureUsage TextureBase::GetInternalUsage() const {
     ASSERT(!IsError());
     return mInternalUsage;
 }
+void TextureBase::AddInternalUsage(wgpu::TextureUsage usage) {
+    ASSERT(!IsError());
+    mInternalUsage |= usage;
+}
 
 TextureBase::TextureState TextureBase::GetTextureState() const {
     ASSERT(!IsError());

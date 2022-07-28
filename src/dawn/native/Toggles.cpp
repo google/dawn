@@ -268,11 +268,11 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Enables usage of the blob cache (backed by the platform cache if set/passed). Necessary for "
       "any persistent caching capabilities, i.e. pipeline caching.",
       "https://crbug.com/dawn/549"}},
-    {Toggle::D3D12ForceInitializeCopyableDepthStencilTextureOnCreation,
-     {"d3d12_force_initialize_copyable_depth_stencil_texture_on_creation",
-      "Always initializing copyable depth stencil textures when creating them instead of skipping "
-      "the initialization when the entire subresource is the copy destination as a workaround on "
-      "Intel D3D12 drivers.",
+    {Toggle::D3D12ForceClearCopyableDepthStencilTextureOnCreation,
+     {"d3d12_force_clear_copyable_depth_stencil_texture_on_creation",
+      "Always clearing copyable depth stencil textures when creating them instead of skipping the "
+      "initialization when the entire subresource is the copy destination as a workaround on Intel "
+      "D3D12 drivers.",
       "https://crbug.com/dawn/1487"}},
     {Toggle::D3D12DontSetClearValueOnDepthTextureCreation,
      {"d3d12_dont_set_clear_value_on_depth_texture_creation",

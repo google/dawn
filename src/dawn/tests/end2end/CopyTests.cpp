@@ -2582,9 +2582,12 @@ std::ostream& operator<<(std::ostream& o, InitializationMethod method) {
     return o;
 }
 
+using AddRenderAttachmentUsage = bool;
+
 DAWN_TEST_PARAM_STRUCT(CopyToDepthStencilTextureAfterDestroyingBigBufferTestsParams,
                        TextureFormat,
-                       InitializationMethod);
+                       InitializationMethod,
+                       AddRenderAttachmentUsage);
 
 }  // anonymous namespace
 
@@ -2636,8 +2639,10 @@ TEST_P(CopyToDepthStencilTextureAfterDestroyingBigBufferTests, DoTest) {
     wgpu::TextureDescriptor textureDescriptor = {};
     textureDescriptor.format = format;
     textureDescriptor.size = {1, 1, 1};
-    textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
-                              wgpu::TextureUsage::RenderAttachment;
+    textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    if (GetParam().mAddRenderAttachmentUsage) {
+        textureDescriptor.usage |= wgpu::TextureUsage::RenderAttachment;
+    }
     wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
 
     // Finally, upload valid data into the texture and validate its contents.
@@ -2723,9 +2728,9 @@ TEST_P(CopyToDepthStencilTextureAfterDestroyingBigBufferTests, DoTest) {
 
 DAWN_INSTANTIATE_TEST_P(
     CopyToDepthStencilTextureAfterDestroyingBigBufferTests,
-    {D3D12Backend(),
-     D3D12Backend({"d3d12_force_initialize_copyable_depth_stencil_texture_on_creation"}),
+    {D3D12Backend(), D3D12Backend({"d3d12_force_clear_copyable_depth_stencil_texture_on_creation"}),
      MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
     {wgpu::TextureFormat::Depth16Unorm, wgpu::TextureFormat::Stencil8},
     {InitializationMethod::CopyBufferToTexture, InitializationMethod::WriteTexture,
-     InitializationMethod::CopyTextureToTexture});
+     InitializationMethod::CopyTextureToTexture},
+    {true, false});
