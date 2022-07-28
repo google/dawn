@@ -34,6 +34,7 @@
 
 #include "src/tint/utils/io/command.h"
 #include "src/tint/utils/string.h"
+#include "src/tint/utils/transform.h"
 #include "src/tint/val/val.h"
 #include "tint/tint.h"
 
@@ -990,30 +991,72 @@ int main(int argc, const char** argv) {
 
     struct TransformFactory {
         const char* name;
-        std::function<void(tint::transform::Manager& manager, tint::transform::DataMap& inputs)>
+        /// Build and adds the transform to the transform manager.
+        /// Parameters:
+        ///   inspector - an inspector created from the parsed program
+        ///   manager   - the transform manager. Add transforms to this.
+        ///   inputs    - the input data to the transform manager. Add inputs to this.
+        /// Returns true on success, false on error (program will immediately exit)
+        std::function<bool(tint::inspector::Inspector& inspector,
+                           tint::transform::Manager& manager,
+                           tint::transform::DataMap& inputs)>
             make;
     };
     std::vector<TransformFactory> transforms = {
         {"first_index_offset",
-         [](tint::transform::Manager& m, tint::transform::DataMap& i) {
+         [](tint::inspector::Inspector&, tint::transform::Manager& m, tint::transform::DataMap& i) {
              i.Add<tint::transform::FirstIndexOffset::BindingPoint>(0, 0);
              m.Add<tint::transform::FirstIndexOffset>();
+             return true;
          }},
         {"fold_trivial_single_use_lets",
-         [](tint::transform::Manager& m, tint::transform::DataMap&) {
+         [](tint::inspector::Inspector&, tint::transform::Manager& m, tint::transform::DataMap&) {
              m.Add<tint::transform::FoldTrivialSingleUseLets>();
+             return true;
          }},
-        {"renamer", [](tint::transform::Manager& m,
-                       tint::transform::DataMap&) { m.Add<tint::transform::Renamer>(); }},
-        {"robustness", [](tint::transform::Manager& m,
-                          tint::transform::DataMap&) { m.Add<tint::transform::Robustness>(); }},
+        {"renamer",
+         [](tint::inspector::Inspector&, tint::transform::Manager& m, tint::transform::DataMap&) {
+             m.Add<tint::transform::Renamer>();
+             return true;
+         }},
+        {"robustness",
+         [](tint::inspector::Inspector&, tint::transform::Manager& m, tint::transform::DataMap&) {
+             m.Add<tint::transform::Robustness>();
+             return true;
+         }},
         {"substitute_override",
-         [&](tint::transform::Manager& m, tint::transform::DataMap& i) {
+         [&](tint::inspector::Inspector& inspector, tint::transform::Manager& m,
+             tint::transform::DataMap& i) {
              tint::transform::SubstituteOverride::Config cfg;
-             cfg.map = options.overrides;
+
+             std::unordered_map<tint::OverrideId, double> values;
+             values.reserve(options.overrides.size());
+
+             for (const auto& [name, value] : options.overrides) {
+                 if (name.empty()) {
+                     std::cerr << "empty override name";
+                     return false;
+                 }
+                 if (isdigit(name[0])) {
+                     tint::OverrideId id{
+                         static_cast<decltype(tint::OverrideId::value)>(atoi(name.c_str()))};
+                     values.emplace(id, value);
+                 } else {
+                     auto override_names = inspector.GetNamedOverrideIds();
+                     auto it = override_names.find(name);
+                     if (it == override_names.end()) {
+                         std::cerr << "unknown override '" << name << "'";
+                         return false;
+                     }
+                     values.emplace(it->second, value);
+                 }
+             }
+
+             cfg.map = std::move(values);
 
              i.Add<tint::transform::SubstituteOverride::Config>(cfg);
              m.Add<tint::transform::SubstituteOverride>();
+             return true;
          }},
     };
     auto transform_names = [&] {
@@ -1144,6 +1187,40 @@ int main(int argc, const char** argv) {
         return 1;
     }
 
+    tint::inspector::Inspector inspector(program.get());
+
+    if (options.dump_inspector_bindings) {
+        std::cout << std::string(80, '-') << std::endl;
+        auto entry_points = inspector.GetEntryPoints();
+        if (!inspector.error().empty()) {
+            std::cerr << "Failed to get entry points from Inspector: " << inspector.error()
+                      << std::endl;
+            return 1;
+        }
+
+        for (auto& entry_point : entry_points) {
+            auto bindings = inspector.GetResourceBindings(entry_point.name);
+            if (!inspector.error().empty()) {
+                std::cerr << "Failed to get bindings from Inspector: " << inspector.error()
+                          << std::endl;
+                return 1;
+            }
+            std::cout << "Entry Point = " << entry_point.name << std::endl;
+            for (auto& binding : bindings) {
+                std::cout << "\t[" << binding.bind_group << "][" << binding.binding
+                          << "]:" << std::endl;
+                std::cout << "\t\t resource_type = " << ResourceTypeToString(binding.resource_type)
+                          << std::endl;
+                std::cout << "\t\t dim = " << TextureDimensionToString(binding.dim) << std::endl;
+                std::cout << "\t\t sampled_kind = " << SampledKindToString(binding.sampled_kind)
+                          << std::endl;
+                std::cout << "\t\t image_format = " << TexelFormatToString(binding.image_format)
+                          << std::endl;
+            }
+        }
+        std::cout << std::string(80, '-') << std::endl;
+    }
+
     tint::transform::Manager transform_manager;
     tint::transform::DataMap transform_inputs;
 
@@ -1151,7 +1228,9 @@ int main(int argc, const char** argv) {
     if (!options.overrides.empty()) {
         for (auto& t : transforms) {
             if (t.name == std::string("substitute_override")) {
-                t.make(transform_manager, transform_inputs);
+                if (!t.make(inspector, transform_manager, transform_inputs)) {
+                    return 1;
+                }
                 break;
             }
         }
@@ -1165,7 +1244,9 @@ int main(int argc, const char** argv) {
         bool found = false;
         for (auto& t : transforms) {
             if (t.name == name) {
-                t.make(transform_manager, transform_inputs);
+                if (!t.make(inspector, transform_manager, transform_inputs)) {
+                    return 1;
+                }
                 found = true;
                 break;
             }
@@ -1218,39 +1299,6 @@ int main(int argc, const char** argv) {
     }
 
     *program = std::move(out.program);
-
-    if (options.dump_inspector_bindings) {
-        std::cout << std::string(80, '-') << std::endl;
-        tint::inspector::Inspector inspector(program.get());
-        auto entry_points = inspector.GetEntryPoints();
-        if (!inspector.error().empty()) {
-            std::cerr << "Failed to get entry points from Inspector: " << inspector.error()
-                      << std::endl;
-            return 1;
-        }
-
-        for (auto& entry_point : entry_points) {
-            auto bindings = inspector.GetResourceBindings(entry_point.name);
-            if (!inspector.error().empty()) {
-                std::cerr << "Failed to get bindings from Inspector: " << inspector.error()
-                          << std::endl;
-                return 1;
-            }
-            std::cout << "Entry Point = " << entry_point.name << std::endl;
-            for (auto& binding : bindings) {
-                std::cout << "\t[" << binding.bind_group << "][" << binding.binding
-                          << "]:" << std::endl;
-                std::cout << "\t\t resource_type = " << ResourceTypeToString(binding.resource_type)
-                          << std::endl;
-                std::cout << "\t\t dim = " << TextureDimensionToString(binding.dim) << std::endl;
-                std::cout << "\t\t sampled_kind = " << SampledKindToString(binding.sampled_kind)
-                          << std::endl;
-                std::cout << "\t\t image_format = " << TexelFormatToString(binding.image_format)
-                          << std::endl;
-            }
-        }
-        std::cout << std::string(80, '-') << std::endl;
-    }
 
     bool success = false;
     switch (options.format) {

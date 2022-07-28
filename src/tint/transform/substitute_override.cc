@@ -46,14 +46,14 @@ void SubstituteOverride::Run(CloneContext& ctx, const DataMap& config, DataMap&)
     }
 
     ctx.ReplaceAll([&](const ast::Override* w) -> const ast::Const* {
-        auto ident = w->Identifier(ctx.src->Symbols());
+        auto* sem = ctx.src->Sem().Get(w);
 
         auto src = ctx.Clone(w->source);
         auto sym = ctx.Clone(w->symbol);
         auto* ty = ctx.Clone(w->type);
 
         // No replacement provided, just clone the override node as a const.
-        auto iter = data->map.find(ident);
+        auto iter = data->map.find(sem->OverrideId());
         if (iter == data->map.end()) {
             if (!w->constructor) {
                 ctx.dst->Diagnostics().add_error(
@@ -66,7 +66,7 @@ void SubstituteOverride::Run(CloneContext& ctx, const DataMap& config, DataMap&)
 
         auto value = iter->second;
         auto* ctor = Switch(
-            ctx.src->Sem().Get(w)->Type(),
+            sem->Type(),
             [&](const sem::Bool*) { return ctx.dst->Expr(!std::equal_to<double>()(value, 0.0)); },
             [&](const sem::I32*) { return ctx.dst->Expr(i32(value)); },
             [&](const sem::U32*) { return ctx.dst->Expr(u32(value)); },

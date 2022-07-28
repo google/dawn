@@ -18,6 +18,8 @@
 #include <string>
 #include <unordered_map>
 
+#include "tint/override_id.h"
+
 #include "src/tint/transform/transform.h"
 
 namespace tint::transform {
@@ -57,10 +59,10 @@ class SubstituteOverride final : public Castable<SubstituteOverride, Transform> 
         /// @returns this Config
         Config& operator=(const Config&);
 
-        /// The map of override name (either the identifier or id) to value.
+        /// The map of override identifier to the override value.
         /// The value is always a double coming into the transform and will be
         /// converted to the correct type through and initializer.
-        std::unordered_map<std::string, double> map;
+        std::unordered_map<OverrideId, double> map;
     };
 
     /// Constructor

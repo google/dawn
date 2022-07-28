@@ -82,7 +82,7 @@ fn main() -> @builtin(position) vec4<f32> {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SubstituteOverrideTest, Identifier) {
+TEST_F(SubstituteOverrideTest, ImplicitId) {
     auto* src = R"(
 override i_width: i32;
 override i_height = 1i;
@@ -127,14 +127,14 @@ fn main() -> @builtin(position) vec4<f32> {
 )";
 
     SubstituteOverride::Config cfg;
-    cfg.map.insert({"i_width", 42.0});
-    cfg.map.insert({"i_height", 11.0});
-    cfg.map.insert({"f_width", 22.3});
-    cfg.map.insert({"f_height", 12.4});
-    cfg.map.insert({"h_width", 9.4});
-    cfg.map.insert({"h_height", 3.4});
-    cfg.map.insert({"b_width", 1.0});
-    cfg.map.insert({"b_height", 0.0});
+    cfg.map.insert({OverrideId{0}, 42.0});
+    cfg.map.insert({OverrideId{1}, 11.0});
+    cfg.map.insert({OverrideId{2}, 22.3});
+    cfg.map.insert({OverrideId{3}, 12.4});
+    // cfg.map.insert({OverrideId{4}, 9.4});
+    // cfg.map.insert({OverrideId{5}, 3.4});
+    cfg.map.insert({OverrideId{4}, 1.0});
+    cfg.map.insert({OverrideId{5}, 0.0});
 
     DataMap data;
     data.Add<SubstituteOverride::Config>(cfg);
@@ -143,7 +143,7 @@ fn main() -> @builtin(position) vec4<f32> {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SubstituteOverrideTest, Id) {
+TEST_F(SubstituteOverrideTest, ExplicitId) {
     auto* src = R"(
 enable f16;
 
@@ -183,7 +183,7 @@ const b_width : bool = true;
 
 const b_height = false;
 
-const o_width = 2i;
+const o_width = 13i;
 
 @vertex
 fn main() -> @builtin(position) vec4<f32> {
@@ -192,16 +192,15 @@ fn main() -> @builtin(position) vec4<f32> {
 )";
 
     SubstituteOverride::Config cfg;
-    cfg.map.insert({"0", 42.0});
-    cfg.map.insert({"10", 11.0});
-    cfg.map.insert({"1", 22.3});
-    cfg.map.insert({"9", 12.4});
-    cfg.map.insert({"2", 9.4});
-    cfg.map.insert({"8", 3.4});
-    cfg.map.insert({"3", 1.0});
-    cfg.map.insert({"7", 0.0});
-    // No effect because an @id is set for o_width
-    cfg.map.insert({"o_width", 13});
+    cfg.map.insert({OverrideId{0}, 42.0});
+    cfg.map.insert({OverrideId{10}, 11.0});
+    cfg.map.insert({OverrideId{1}, 22.3});
+    cfg.map.insert({OverrideId{9}, 12.4});
+    cfg.map.insert({OverrideId{2}, 9.4});
+    cfg.map.insert({OverrideId{8}, 3.4});
+    cfg.map.insert({OverrideId{3}, 1.0});
+    cfg.map.insert({OverrideId{7}, 0.0});
+    cfg.map.insert({OverrideId{5}, 13});
 
     DataMap data;
     data.Add<SubstituteOverride::Config>(cfg);
@@ -230,7 +229,7 @@ fn main() -> @builtin(position) vec4<f32> {
 )";
 
     SubstituteOverride::Config cfg;
-    cfg.map.insert({"i_height", 11.0});
+    cfg.map.insert({OverrideId{0}, 11.0});
 
     DataMap data;
     data.Add<SubstituteOverride::Config>(cfg);
