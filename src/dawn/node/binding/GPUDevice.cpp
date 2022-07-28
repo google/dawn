@@ -172,7 +172,7 @@ GPUDevice::~GPUDevice() {
     // Without this, we'll get a 'Promise not resolved or rejected' fatal message as the
     // lost_promise_ is left hanging. We'll also not clean up any GPU objects before terminating the
     // process, which is not a good idea.
-    if (device_) {
+    if (!destroyed_) {
         destroy(env_);
     }
 }
@@ -204,7 +204,7 @@ void GPUDevice::destroy(Napi::Env env) {
             env_, interop::GPUDeviceLostReason::kDestroyed, "device was destroyed"));
     }
     device_.Destroy();
-    device_ = nullptr;
+    destroyed_ = true;
 }
 
 interop::Interface<interop::GPUBuffer> GPUDevice::createBuffer(

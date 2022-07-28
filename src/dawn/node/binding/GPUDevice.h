@@ -111,6 +111,8 @@ class GPUDevice final : public interop::GPUDevice {
     // This promise's JS object lives as long as the device because it is stored in .lost
     // of the wrapper JS object.
     interop::Promise<interop::Interface<interop::GPUDeviceLostInfo>> lost_promise_;
+
+    bool destroyed_ = false;
 };
 
 }  // namespace wgpu::binding
