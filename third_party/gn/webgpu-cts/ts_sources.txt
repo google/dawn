@@ -356,6 +356,7 @@ src/webgpu/shader/execution/expression/call/builtin/reflect.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/refract.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/reverseBits.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/round.spec.ts
+src/webgpu/shader/execution/expression/call/builtin/saturate.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/select.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/sign.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/sin.spec.ts
@@ -400,6 +401,7 @@ src/webgpu/shader/execution/sampling/gradients_in_varying_loop.spec.ts
 src/webgpu/shader/execution/shader_io/compute_builtins.spec.ts
 src/webgpu/shader/execution/shader_io/shared_structs.spec.ts
 src/webgpu/shader/validation/shader_validation_test.ts
+src/webgpu/shader/validation/parse/align.spec.ts
 src/webgpu/shader/validation/parse/blankspace.spec.ts
 src/webgpu/shader/validation/parse/comments.spec.ts
 src/webgpu/shader/validation/parse/identifiers.spec.ts
