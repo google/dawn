@@ -583,8 +583,11 @@ MaybeError Texture::InitializeAsInternalTexture() {
 
     // This will need to be much more nuanced when WebGPU has
     // texture view compatibility rules.
-    const bool needsTypelessFormat = GetFormat().HasDepthOrStencil() &&
-                                     (GetInternalUsage() & wgpu::TextureUsage::TextureBinding) != 0;
+    const bool needsTypelessFormat =
+        (GetDevice()->IsToggleEnabled(Toggle::D3D12AlwaysUseTypelessFormatsForCastableTexture) &&
+         GetViewFormats().any()) ||
+        (GetFormat().HasDepthOrStencil() &&
+         (GetInternalUsage() & wgpu::TextureUsage::TextureBinding) != 0);
 
     DXGI_FORMAT dxgiFormat = needsTypelessFormat ? D3D12TypelessTextureFormat(GetFormat().format)
                                                  : D3D12TextureFormat(GetFormat().format);

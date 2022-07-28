@@ -74,6 +74,7 @@ enum class Toggle {
     EnableBlobCache,
     D3D12ForceInitializeCopyableDepthStencilTextureOnCreation,
     D3D12DontSetClearValueOnDepthTextureCreation,
+    D3D12AlwaysUseTypelessFormatsForCastableTexture,
 
     EnumCount,
     InvalidEnum = EnumCount,

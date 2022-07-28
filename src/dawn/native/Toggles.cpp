@@ -279,6 +279,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Don't set D3D12_CLEAR_VALUE when creating depth textures with CreatePlacedResource() or "
       "CreateCommittedResource() as a workaround on Intel Gen12 D3D12 drivers.",
       "https://crbug.com/dawn/1487"}},
+    {Toggle::D3D12AlwaysUseTypelessFormatsForCastableTexture,
+     {"d3d12_always_use_typeless_formats_for_castable_texture",
+      "Always use the typeless DXGI format when we create a texture with valid viewFormat. This "
+      "Toggle is enabled by default on the D3D12 platforms where CastingFullyTypedFormatSupported "
+      "is false.",
+      "https://crbug.com/dawn/1276"}},
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
 }  // anonymous namespace

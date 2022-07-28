@@ -38,12 +38,31 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter) {
 
     info.isUMA = arch.UMA;
 
-    D3D12_FEATURE_DATA_D3D12_OPTIONS options = {};
-    DAWN_TRY(CheckHRESULT(adapter.GetDevice()->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS,
-                                                                   &options, sizeof(options)),
+    D3D12_FEATURE_DATA_D3D12_OPTIONS featureOptions = {};
+    DAWN_TRY(CheckHRESULT(adapter.GetDevice()->CheckFeatureSupport(
+                              D3D12_FEATURE_D3D12_OPTIONS, &featureOptions, sizeof(featureOptions)),
                           "ID3D12Device::CheckFeatureSupport"));
+    info.resourceHeapTier = featureOptions.ResourceHeapTier;
 
-    info.resourceHeapTier = options.ResourceHeapTier;
+    D3D12_FEATURE_DATA_D3D12_OPTIONS3 featureOptions3 = {};
+    if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
+            D3D12_FEATURE_D3D12_OPTIONS3, &featureOptions3, sizeof(featureOptions3)))) {
+        info.supportsCastingFullyTypedFormat = featureOptions3.CastingFullyTypedFormatSupported;
+    }
+
+    // Used to share resources cross-API. If we query CheckFeatureSupport for
+    // D3D12_FEATURE_D3D12_OPTIONS4 successfully, then we can use cross-API sharing.
+    info.supportsSharedResourceCapabilityTier1 = false;
+    D3D12_FEATURE_DATA_D3D12_OPTIONS4 featureOptions4 = {};
+    if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
+            D3D12_FEATURE_D3D12_OPTIONS4, &featureOptions4, sizeof(featureOptions4)))) {
+        // Tier 1 support additionally enables the NV12 format. Since only the NV12 format
+        // is used by Dawn, check for Tier 1.
+        if (featureOptions4.SharedResourceCompatibilityTier >=
+            D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_1) {
+            info.supportsSharedResourceCapabilityTier1 = true;
+        }
+    }
 
     // Windows builds 1809 and above can use the D3D12 render pass API. If we query
     // CheckFeatureSupport for D3D12_FEATURE_D3D12_OPTIONS5 successfully, then we can use
@@ -58,20 +77,6 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter) {
         if (featureOptions5.RenderPassesTier < D3D12_RENDER_PASS_TIER_1 ||
             !gpu_info::IsIntel(adapter.GetVendorId())) {
             info.supportsRenderPass = true;
-        }
-    }
-
-    // Used to share resources cross-API. If we query CheckFeatureSupport for
-    // D3D12_FEATURE_D3D12_OPTIONS4 successfully, then we can use cross-API sharing.
-    info.supportsSharedResourceCapabilityTier1 = false;
-    D3D12_FEATURE_DATA_D3D12_OPTIONS4 featureOptions4 = {};
-    if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
-            D3D12_FEATURE_D3D12_OPTIONS4, &featureOptions4, sizeof(featureOptions4)))) {
-        // Tier 1 support additionally enables the NV12 format. Since only the NV12 format
-        // is used by Dawn, check for Tier 1.
-        if (featureOptions4.SharedResourceCompatibilityTier >=
-            D3D12_SHARED_RESOURCE_COMPATIBILITY_TIER_1) {
-            info.supportsSharedResourceCapabilityTier1 = true;
         }
     }
 
@@ -110,12 +115,8 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter) {
     info.shaderProfiles[SingleShaderStage::Fragment] = L"p" + profileSuffix;
     info.shaderProfiles[SingleShaderStage::Compute] = L"c" + profileSuffix;
 
-    D3D12_FEATURE_DATA_D3D12_OPTIONS4 featureData4 = {};
-    if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS4,
-                                                           &featureData4, sizeof(featureData4)))) {
-        info.supportsShaderFloat16 =
-            driverShaderModel >= D3D_SHADER_MODEL_6_2 && featureData4.Native16BitShaderOpsSupported;
-    }
+    info.supportsShaderFloat16 =
+        driverShaderModel >= D3D_SHADER_MODEL_6_2 && featureOptions4.Native16BitShaderOpsSupported;
 
     info.supportsDP4a = driverShaderModel >= D3D_SHADER_MODEL_6_4;
 
