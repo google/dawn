@@ -17,6 +17,7 @@
 
 #include <optional>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -92,6 +93,12 @@ class WgslMutator {
     /// @return true if a function call replacement happened or false otherwise.
     bool ReplaceFunctionCallWithBuiltin(std::string& wgsl_code);
 
+    /// Given a WGSL-like string, adds a swizzle operation to either (a) an identifier, (b) a vector
+    /// constructor, or (c) an existing swizzle.
+    /// @param wgsl_code - the initial WGSL-like string that will be mutated.
+    /// @return true if a swizzle operation is added or false otherwise.
+    bool AddSwizzle(std::string& wgsl_code);
+
   protected:
     /// Given index idx1 it delets the region of length interval_len
     /// starting at index idx1;
@@ -108,13 +115,18 @@ class WgslMutator {
     /// @param wgsl_code - the string where the swap will occur.
     void DuplicateInterval(size_t idx1, size_t reg1_len, size_t idx2, std::string& wgsl_code);
 
-    /// Finds a possible closing brace corresponding to the opening
-    /// brace at position opening_bracket_pos.
-    /// @param opening_bracket_pos - the position of the opening brace.
-    /// @param wgsl_code - the WGSL-like string where the closing brace.
+    /// Finds a possible closing bracket corresponding to the opening
+    /// bracket at position opening_bracket_pos.
+    /// @param opening_bracket_pos - the position of the opening bracket.
+    /// @param wgsl_code - the WGSL-like string where the closing bracket.
+    /// @param opening_bracket_character - the opening bracket character, e.g. (, {, <, or [
+    /// @param closing_bracket_character - the closing bracket character, e.g. ), }, >, or ]
     /// @return the position of the closing bracket or 0 if there is no closing
-    /// brace.
-    size_t FindClosingBrace(size_t opening_bracket_pos, const std::string& wgsl_code);
+    /// bracket.
+    size_t FindClosingBracket(size_t opening_bracket_pos,
+                              const std::string& wgsl_code,
+                              char opening_bracket_character,
+                              char closing_bracket_character);
 
     /// Returns the starting position of the bodies of the functions identified by an appropriate
     /// function, together with a boolean indicating whether the function returns a value or not.
@@ -195,6 +207,16 @@ class WgslMutator {
         const std::string& wgsl_code,
         uint32_t start_index);
 
+    /// Finds all the swizzle operations in a WGSL-like string.
+    /// @param wgsl_code - the WGSL-like string where the swizzles will be found.
+    /// @return a vector with the positions and lengths of all the swizzles in wgsl_code.
+    std::vector<std::pair<size_t, size_t>> GetSwizzles(const std::string& wgsl_code);
+
+    /// Finds all the vector constructors in a WGSL-like string.
+    /// @param wgsl_code - the WGSL-like string where the vector constructors will be found.
+    /// @return a vector with the positions and lengths of all the vector constructors in wgsl_code.
+    std::vector<std::pair<size_t, size_t>> GetVectorConstructors(const std::string& wgsl_code);
+
   private:
     /// A function that given a delimiter, returns a vector that contains
     /// all the positions of the delimiter in the WGSL code.
@@ -221,6 +243,14 @@ class WgslMutator {
     /// @param existing_operator - the characters comprising some WGSL operator
     /// @return another WGSL operator falling into the same category.
     std::string ChooseRandomReplacementForOperator(const std::string& existing_operator);
+
+    /// Yields a fixed set of commonly-used WGSL keywords. The regex fuzzer relies heavily on
+    /// recognizing possible identifiers via regular expressions. There is a high chance that
+    /// keywords will be recognized as identifiers, which will leads to invalid code. It is valuable
+    /// for this to occur to some extent (to stress test validation), but it is useful to be able to
+    /// exclude the most common keywords so that invalidity does not occur too often.
+    /// @return a set of commonly-used WGSL keywords.
+    static std::unordered_set<std::string> GetCommonKeywords();
 
     RandomGenerator& generator_;
 };

@@ -19,6 +19,7 @@
 #include <map>
 #include <regex>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -39,8 +40,18 @@ std::vector<size_t> WgslMutator::FindDelimiterIndices(const std::string& delimit
     return result;
 }
 
+std::unordered_set<std::string> WgslMutator::GetCommonKeywords() {
+    return {"array",  "bool", "break", "compute", "continue", "f32",  "fn",     "fragment",
+            "i32",    "if",   "for",   "let",     "location", "loop", "ptr",    "return",
+            "struct", "u32",  "var",   "vec2",    "vec3",     "vec4", "vertex", "while"};
+}
+
 std::vector<std::pair<size_t, size_t>> WgslMutator::GetIdentifiers(const std::string& wgsl_code) {
     std::vector<std::pair<size_t, size_t>> result;
+
+    // To reduce the rate that invalid programs are produced, common keywords will be excluded from
+    // the identifiers that are returned.
+    std::unordered_set<std::string> common_keywords = GetCommonKeywords();
 
     // This regular expression works by looking for a character that
     // is not part of an identifier followed by a WGSL identifier, followed
@@ -54,6 +65,10 @@ std::vector<std::pair<size_t, size_t>> WgslMutator::GetIdentifiers(const std::st
     auto identifiers_end = std::sregex_iterator();
 
     for (std::sregex_iterator i = identifiers_begin; i != identifiers_end; ++i) {
+        if (common_keywords.count(i->str()) > 0) {
+            // This is a common keyword, so skip it.
+            continue;
+        }
         result.push_back(
             {static_cast<size_t>(i->prefix().second - wgsl_code.cbegin()), i->str().size()});
     }
@@ -99,13 +114,16 @@ std::vector<std::pair<size_t, size_t>> WgslMutator::GetIntLiterals(const std::st
     return result;
 }
 
-size_t WgslMutator::FindClosingBrace(size_t opening_bracket_pos, const std::string& wgsl_code) {
+size_t WgslMutator::FindClosingBracket(size_t opening_bracket_pos,
+                                       const std::string& wgsl_code,
+                                       char opening_bracket_character,
+                                       char closing_bracket_character) {
     size_t open_bracket_count = 1;
     size_t pos = opening_bracket_pos + 1;
     while (open_bracket_count >= 1 && pos < wgsl_code.size()) {
-        if (wgsl_code[pos] == '{') {
+        if (wgsl_code[pos] == opening_bracket_character) {
             ++open_bracket_count;
-        } else if (wgsl_code[pos] == '}') {
+        } else if (wgsl_code[pos] == closing_bracket_character) {
             --open_bracket_count;
         }
         ++pos;
@@ -160,7 +178,7 @@ bool WgslMutator::InsertReturnStatement(std::string& wgsl_code) {
     // function body.
     size_t left_bracket_pos = function.first;
 
-    size_t right_bracket_pos = FindClosingBrace(left_bracket_pos, wgsl_code);
+    size_t right_bracket_pos = FindClosingBracket(left_bracket_pos, wgsl_code, '{', '}');
 
     if (right_bracket_pos == 0) {
         return false;
@@ -206,7 +224,7 @@ bool WgslMutator::InsertBreakOrContinue(std::string& wgsl_code) {
     // bracket, and find a semi-colon within the loop body.
     size_t left_bracket_pos = generator_.GetRandomElement(loop_body_positions);
 
-    size_t right_bracket_pos = FindClosingBrace(left_bracket_pos, wgsl_code);
+    size_t right_bracket_pos = FindClosingBracket(left_bracket_pos, wgsl_code, '{', '}');
 
     if (right_bracket_pos == 0) {
         return false;
@@ -515,11 +533,10 @@ bool WgslMutator::ReplaceFunctionCallWithBuiltin(std::string& wgsl_code) {
     // Pick a random function
     auto function = generator_.GetRandomElement(function_body_positions);
 
-    // Find the corresponding closing bracket for the function, and find a semi-colon within the
-    // function body.
+    // Find the corresponding closing bracket for the function.
     size_t left_bracket_pos = function.first;
 
-    size_t right_bracket_pos = FindClosingBrace(left_bracket_pos, wgsl_code);
+    size_t right_bracket_pos = FindClosingBracket(left_bracket_pos, wgsl_code, '{', '}');
 
     if (right_bracket_pos == 0) {
         return false;
@@ -650,6 +667,129 @@ bool WgslMutator::ReplaceFunctionCallWithBuiltin(std::string& wgsl_code) {
                       function_call_identifier.second,
                       generator_.GetRandomElement(builtin_functions));
     return true;
+}
+
+bool WgslMutator::AddSwizzle(std::string& wgsl_code) {
+    std::vector<std::pair<size_t, bool>> function_body_positions =
+        GetFunctionBodyPositions(wgsl_code);
+
+    // No function was found in wgsl_code.
+    if (function_body_positions.empty()) {
+        return false;
+    }
+
+    // Pick a random function
+    auto function = generator_.GetRandomElement(function_body_positions);
+
+    // Find the corresponding closing bracket for the function.
+    size_t left_bracket_pos = function.first;
+    size_t right_bracket_pos = FindClosingBracket(left_bracket_pos, wgsl_code, '{', '}');
+
+    if (right_bracket_pos == 0) {
+        return false;
+    }
+
+    std::string function_body(
+        wgsl_code.substr(left_bracket_pos, right_bracket_pos - left_bracket_pos));
+
+    // It makes sense to try applying swizzles to:
+    // - identifiers, because they might be vectors
+    auto identifiers = GetIdentifiers(function_body);
+    // - existing swizzles, e.g. to turn v.xy into v.xy.xx
+    auto swizzles = GetSwizzles(function_body);
+    // - vector constructors, e.g. to turn vec3<f32>(...) into vec3<f32>(...).yyz
+    auto vector_constructors = GetVectorConstructors(function_body);
+
+    // Create a combined vector of all the possibilities for swizzling, so that they can be sampled
+    // from as a whole.
+    std::vector<std::pair<size_t, size_t>> combined;
+    combined.insert(combined.end(), identifiers.begin(), identifiers.end());
+    combined.insert(combined.end(), swizzles.begin(), swizzles.end());
+    combined.insert(combined.end(), vector_constructors.begin(), vector_constructors.end());
+
+    if (combined.empty()) {
+        // No opportunities for swizzling: give up.
+        return false;
+    }
+
+    // Randomly create a swizzle operation. This is done without checking the potential length of
+    // the target vector. For identifiers this isn't possible without proper context. For existing
+    // swizzles and vector constructors it would be possible to check the length, but it is anyway
+    // good to stress-test swizzle validation code paths.
+    std::string swizzle = ".";
+    {
+        // Choose a swizzle length between 1 and 4, inclusive.
+        uint32_t swizzle_length = generator_.GetUInt32(1, 5);
+        // Decide whether to use xyzw or rgba as convenience names.
+        bool use_xyzw = generator_.GetBool();
+        // Randomly choose a convenience name for each component of the swizzle.
+        for (uint32_t i = 0; i < swizzle_length; i++) {
+            switch (generator_.GetUInt32(4)) {
+                case 0:
+                    swizzle += use_xyzw ? "x" : "r";
+                    break;
+                case 1:
+                    swizzle += use_xyzw ? "y" : "g";
+                    break;
+                case 2:
+                    swizzle += use_xyzw ? "z" : "b";
+                    break;
+                case 3:
+                    swizzle += use_xyzw ? "w" : "a";
+                    break;
+                default:
+                    assert(false && "Unreachable");
+                    break;
+            }
+        }
+    }
+    // Choose a random opportunity for swizzling and add the swizzle right after it.
+    auto target = generator_.GetRandomElement(combined);
+    wgsl_code.insert(left_bracket_pos + target.first + target.second, swizzle);
+    return true;
+}
+
+std::vector<std::pair<size_t, size_t>> WgslMutator::GetSwizzles(const std::string& wgsl_code) {
+    std::regex swizzle_regex("\\.(([xyzw]+)|([rgba]+))");
+    std::vector<std::pair<size_t, size_t>> result;
+
+    auto swizzles_begin = std::sregex_iterator(wgsl_code.begin(), wgsl_code.end(), swizzle_regex);
+    auto swizles_end = std::sregex_iterator();
+
+    for (std::sregex_iterator i = swizzles_begin; i != swizles_end; ++i) {
+        result.push_back(
+            {static_cast<size_t>(i->prefix().second - wgsl_code.cbegin()), i->str().size()});
+    }
+    return result;
+}
+
+std::vector<std::pair<size_t, size_t>> WgslMutator::GetVectorConstructors(
+    const std::string& wgsl_code) {
+    // This regex recognises the prefixes of vector constructors, which have the form:
+    // "vecn<type>(", with possible whitespace between tokens.
+    std::regex vector_constructor_prefix_regex("vec\\d[ \\n]*<[ \\n]*[a-z0-9_]+[ \\n]*>[^\\(]*\\(");
+    std::vector<std::pair<size_t, size_t>> result;
+
+    auto vector_constructor_prefixes_begin =
+        std::sregex_iterator(wgsl_code.begin(), wgsl_code.end(), vector_constructor_prefix_regex);
+    auto vector_constructor_prefixes_end = std::sregex_iterator();
+
+    // Look through all of the vector constructor prefixes and see whether each one appears to
+    // correspond to a complete vector construction.
+    for (std::sregex_iterator i = vector_constructor_prefixes_begin;
+         i != vector_constructor_prefixes_end; ++i) {
+        // A prefix is deemed to correspond to a complete vector construction if it is possible to
+        // find a corresponding closing bracket for the "(" at the end of the prefix.
+        size_t closing_bracket = FindClosingBracket(
+            static_cast<size_t>(i->suffix().first - wgsl_code.cbegin()), wgsl_code, '(', ')');
+        if (closing_bracket != 0) {
+            // A closing bracket was found, so record the start and size of the entire vector
+            // constructor.
+            size_t start = static_cast<size_t>(i->prefix().second - wgsl_code.cbegin());
+            result.push_back({start, closing_bracket - start + 1});
+        }
+    }
+    return result;
 }
 
 }  // namespace tint::fuzzers::regex_fuzzer

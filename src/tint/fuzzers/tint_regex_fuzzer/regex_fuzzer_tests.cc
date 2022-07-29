@@ -28,13 +28,15 @@ class WgslMutatorTest : public WgslMutator {
 
     using WgslMutator::DeleteInterval;
     using WgslMutator::DuplicateInterval;
-    using WgslMutator::FindClosingBrace;
+    using WgslMutator::FindClosingBracket;
     using WgslMutator::FindOperatorOccurrence;
     using WgslMutator::GetFunctionBodyPositions;
     using WgslMutator::GetFunctionCallIdentifiers;
     using WgslMutator::GetIdentifiers;
     using WgslMutator::GetIntLiterals;
     using WgslMutator::GetLoopBodyPositions;
+    using WgslMutator::GetSwizzles;
+    using WgslMutator::GetVectorConstructors;
     using WgslMutator::ReplaceRegion;
     using WgslMutator::SwapIntervals;
 };
@@ -238,11 +240,8 @@ TEST(GetIdentifierTest, GetIdentifierTest1) {
 
     std::vector<std::pair<size_t, size_t>> identifiers_pos = mutator.GetIdentifiers(wgsl_code);
     std::vector<std::pair<size_t, size_t>> ground_truth = {
-        {0, 2},   {3, 12},  {28, 3},   {32, 3},   {37, 4},   {42, 3},   {49, 5},  {55, 4},
-        {60, 3},  {68, 4},  {73, 3},   {81, 4},   {86, 3},   {110, 6},  {123, 2}, {126, 11},
-        {144, 7}, {152, 8}, {162, 4},  {167, 3},  {183, 12}, {209, 6},  {216, 4}, {221, 3},
-        {244, 8}, {259, 2}, {262, 13}, {288, 12}, {319, 7},  {328, 14}, {352, 2}, {355, 12},
-        {381, 3}, {385, 7}, {394, 3},  {399, 3},  {418, 12}};
+        {3, 12},   {32, 3},   {49, 5},   {126, 11}, {144, 7}, {152, 8}, {183, 12},
+        {262, 13}, {288, 12}, {328, 14}, {355, 12}, {385, 7}, {394, 3}, {418, 12}};
     ASSERT_EQ(ground_truth, identifiers_pos);
 }
 
@@ -316,7 +315,8 @@ TEST(InsertReturnTest, FindClosingBrace) {
         var foo_3 : i32 = -20;
       )";
     size_t opening_bracket_pos = 18;
-    size_t closing_bracket_pos = mutator.FindClosingBrace(opening_bracket_pos, wgsl_code);
+    size_t closing_bracket_pos =
+        mutator.FindClosingBracket(opening_bracket_pos, wgsl_code, '{', '}');
 
     // The -1 is needed since the function body starts after the left bracket.
     std::string function_body =
@@ -363,7 +363,8 @@ TEST(InsertReturnTest, FindClosingBraceFailing) {
       foo_1 = 5 + 7;
       var foo_3 : i32 = -20;)";
     size_t opening_bracket_pos = 18;
-    size_t closing_bracket_pos = mutator.FindClosingBrace(opening_bracket_pos, wgsl_code);
+    size_t closing_bracket_pos =
+        mutator.FindClosingBracket(opening_bracket_pos, wgsl_code, '{', '}');
 
     // The -1 is needed since the function body starts after the left bracket.
     std::string function_body =
@@ -637,6 +638,31 @@ TEST(TestReplaceFunctionCallWithBuiltin, FindFunctionCalls) {
         mutator.GetFunctionCallIdentifiers(function_body);
     std::vector<std::pair<size_t, size_t>> ground_truth{{82, 12}, {110, 7}, {131, 1}};
     ASSERT_EQ(ground_truth, call_identifiers);
+}
+
+TEST(TestAddSwizzle, FindSwizzles) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
+    std::string code = R"(x
+v.xxyy.wz.x;
+u.rgba.rrg.b)";
+    std::vector<std::pair<size_t, size_t>> swizzles = mutator.GetSwizzles(code);
+    std::vector<std::pair<size_t, size_t>> ground_truth{{3, 5},  {8, 3},  {11, 2},
+                                                        {16, 5}, {21, 4}, {25, 2}};
+    ASSERT_EQ(ground_truth, swizzles);
+}
+
+TEST(TestAddSwizzle, FindVectorConstructors) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
+    std::string code = R"(
+vec4<f32>(vec2<f32>(1, 2), vec2<f32>(3))
+
+vec2<i32>(1, abs(abs(2)))
+)";
+    std::vector<std::pair<size_t, size_t>> swizzles = mutator.GetVectorConstructors(code);
+    std::vector<std::pair<size_t, size_t>> ground_truth{{1, 40}, {11, 15}, {28, 12}, {43, 25}};
+    ASSERT_EQ(ground_truth, swizzles);
 }
 
 }  // namespace
