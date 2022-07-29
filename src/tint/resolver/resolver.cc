@@ -2803,7 +2803,7 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
         str->AddUsage(sc);
 
         for (auto* member : str->Members()) {
-            if (!ApplyStorageClassUsageToType(sc, member->Type(), usage)) {
+            if (!ApplyStorageClassUsageToType(sc, const_cast<sem::Type*>(member->Type()), usage)) {
                 std::stringstream err;
                 err << "while analysing structure member " << sem_.TypeNameOf(str) << "."
                     << builder_->Symbols().NameFor(member->Declaration()->symbol);

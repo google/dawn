@@ -361,7 +361,7 @@ const Constant* ZeroValue(ProgramBuilder& builder, const sem::Type* type) {
             return nullptr;
         },
         [&](const sem::Struct* s) -> const Constant* {
-            std::unordered_map<sem::Type*, const Constant*> zero_by_type;
+            std::unordered_map<const sem::Type*, const Constant*> zero_by_type;
             utils::Vector<const sem::Constant*, 4> zeros;
             zeros.Reserve(s->Members().size());
             for (auto* member : s->Members()) {

@@ -157,7 +157,7 @@ bool Struct::IsConstructible() const {
 
 StructMember::StructMember(const ast::StructMember* declaration,
                            Symbol name,
-                           sem::Type* type,
+                           const sem::Type* type,
                            uint32_t index,
                            uint32_t offset,
                            uint32_t align,

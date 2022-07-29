@@ -182,7 +182,7 @@ class StructMember final : public Castable<StructMember, Node> {
     /// @param size the byte size of the member
     StructMember(const ast::StructMember* declaration,
                  Symbol name,
-                 sem::Type* type,
+                 const sem::Type* type,
                  uint32_t index,
                  uint32_t offset,
                  uint32_t align,
@@ -205,7 +205,7 @@ class StructMember final : public Castable<StructMember, Node> {
     const sem::Struct* Struct() const { return struct_; }
 
     /// @returns the type of the member
-    sem::Type* Type() const { return type_; }
+    const sem::Type* Type() const { return type_; }
 
     /// @returns the member index
     uint32_t Index() const { return index_; }
@@ -223,7 +223,7 @@ class StructMember final : public Castable<StructMember, Node> {
     const ast::StructMember* const declaration_;
     const Symbol name_;
     const sem::Struct* struct_;
-    sem::Type* const type_;
+    const sem::Type* type_;
     const uint32_t index_;
     const uint32_t offset_;
     const uint32_t align_;
