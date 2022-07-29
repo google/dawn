@@ -951,16 +951,16 @@ class MultiGeneratorFromDawnJSON(Generator):
                            'src/' + native_dir + '/' + api + '_absl_format_autogen.cpp',
                            frontend_params))
             renders.append(
+                FileRender(
+                    'dawn/native/api_StreamImpl.cpp', 'src/' + native_dir +
+                    '/' + api + '_StreamImpl_autogen.cpp', frontend_params))
+            renders.append(
                 FileRender('dawn/native/ObjectType.h',
                            'src/' + native_dir + '/ObjectType_autogen.h',
                            frontend_params))
             renders.append(
                 FileRender('dawn/native/ObjectType.cpp',
                            'src/' + native_dir + '/ObjectType_autogen.cpp',
-                           frontend_params))
-            renders.append(
-                FileRender('dawn/native/CacheKey.cpp',
-                           'src/' + native_dir + '/CacheKey_autogen.cpp',
                            frontend_params))
 
         if 'wire' in targets:

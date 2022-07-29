@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "dawn/native/CacheKey.h"
+#include "dawn/native/stream/Stream.h"
 
 #include "tint/tint.h"
 

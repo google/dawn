@@ -17,7 +17,7 @@
 
 #include "dawn/common/Assert.h"
 #include "dawn/common/vulkan_platform.h"
-#include "dawn/native/CacheKey.h"
+#include "dawn/native/stream/Stream.h"
 #include "dawn/native/vulkan/RenderPassCache.h"
 
 #include "icd/generated/vk_typemap_helper.h"
