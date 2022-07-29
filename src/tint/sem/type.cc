@@ -212,6 +212,14 @@ uint32_t Type::ConversionRank(const Type* from, const Type* to) {
             }
             return kNoConversion;
         },
+        [&](const Array* from_arr) {
+            if (auto* to_arr = to->As<Array>()) {
+                if (from_arr->Count() == to_arr->Count()) {
+                    return ConversionRank(from_arr->ElemType(), to_arr->ElemType());
+                }
+            }
+            return kNoConversion;
+        },
         [&](Default) { return kNoConversion; });
 }
 

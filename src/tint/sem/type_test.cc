@@ -14,34 +14,110 @@
 
 #include "src/tint/sem/abstract_float.h"
 #include "src/tint/sem/abstract_int.h"
+#include "src/tint/sem/f16.h"
 #include "src/tint/sem/reference.h"
 #include "src/tint/sem/test_helper.h"
 
 namespace tint::sem {
 namespace {
 
-using TypeTest = TestHelper;
+struct TypeTest : public TestHelper {
+    const sem::AbstractFloat* af = create<AbstractFloat>();
+    const sem::AbstractInt* ai = create<AbstractInt>();
+    const sem::F32* f32 = create<F32>();
+    const sem::F16* f16 = create<F16>();
+    const sem::I32* i32 = create<I32>();
+    const sem::U32* u32 = create<U32>();
+    const sem::Vector* vec2_f32 = create<Vector>(f32, 2u);
+    const sem::Vector* vec3_f32 = create<Vector>(f32, 3u);
+    const sem::Vector* vec3_f16 = create<Vector>(f16, 3u);
+    const sem::Vector* vec4_f32 = create<Vector>(f32, 4u);
+    const sem::Vector* vec3_u32 = create<Vector>(u32, 3u);
+    const sem::Vector* vec3_i32 = create<Vector>(i32, 3u);
+    const sem::Vector* vec3_af = create<Vector>(af, 3u);
+    const sem::Vector* vec3_ai = create<Vector>(ai, 3u);
+    const sem::Matrix* mat2x4_f32 = create<Matrix>(vec4_f32, 2u);
+    const sem::Matrix* mat3x4_f32 = create<Matrix>(vec4_f32, 3u);
+    const sem::Matrix* mat4x2_f32 = create<Matrix>(vec2_f32, 4u);
+    const sem::Matrix* mat4x3_f32 = create<Matrix>(vec3_f32, 4u);
+    const sem::Matrix* mat4x3_f16 = create<Matrix>(vec3_f16, 4u);
+    const sem::Matrix* mat4x3_af = create<Matrix>(vec3_af, 4u);
+    const sem::Reference* ref_u32 =
+        create<Reference>(u32, ast::StorageClass::kPrivate, ast::Access::kReadWrite);
+    const sem::Struct* str = create<Struct>(nullptr,
+                                            Sym("s"),
+                                            StructMemberList{
+                                                create<StructMember>(
+                                                    /* declaration */ nullptr,
+                                                    /* name */ Sym("x"),
+                                                    /* type */ f16,
+                                                    /* index */ 0u,
+                                                    /* offset */ 0u,
+                                                    /* align */ 4u,
+                                                    /* size */ 4u),
+                                            },
+                                            /* align*/ 4u,
+                                            /* size*/ 4u,
+                                            /* size_no_padding*/ 4u);
+    const sem::Array* arr_i32 = create<Array>(
+        /* element */ i32,
+        /* count */ 5u,
+        /* align */ 4u,
+        /* size */ 5u * 4u,
+        /* stride */ 5u * 4u,
+        /* implicit_stride */ 5u * 4u);
+    const sem::Array* arr_ai = create<Array>(
+        /* element */ ai,
+        /* count */ 5u,
+        /* align */ 4u,
+        /* size */ 5u * 4u,
+        /* stride */ 5u * 4u,
+        /* implicit_stride */ 5u * 4u);
+    const sem::Array* arr_vec3_i32 = create<Array>(
+        /* element */ vec3_i32,
+        /* count */ 5u,
+        /* align */ 16u,
+        /* size */ 5u * 16u,
+        /* stride */ 5u * 16u,
+        /* implicit_stride */ 5u * 16u);
+    const sem::Array* arr_vec3_ai = create<Array>(
+        /* element */ vec3_ai,
+        /* count */ 5u,
+        /* align */ 16u,
+        /* size */ 5u * 16u,
+        /* stride */ 5u * 16u,
+        /* implicit_stride */ 5u * 16u);
+    const sem::Array* arr_mat4x3_f16 = create<Array>(
+        /* element */ mat4x3_f16,
+        /* count */ 5u,
+        /* align */ 32u,
+        /* size */ 5u * 32u,
+        /* stride */ 5u * 32u,
+        /* implicit_stride */ 5u * 32u);
+    const sem::Array* arr_mat4x3_f32 = create<Array>(
+        /* element */ mat4x3_f32,
+        /* count */ 5u,
+        /* align */ 64u,
+        /* size */ 5u * 64u,
+        /* stride */ 5u * 64u,
+        /* implicit_stride */ 5u * 64u);
+    const sem::Array* arr_mat4x3_af = create<Array>(
+        /* element */ mat4x3_af,
+        /* count */ 5u,
+        /* align */ 64u,
+        /* size */ 5u * 64u,
+        /* stride */ 5u * 64u,
+        /* implicit_stride */ 5u * 64u);
+    const sem::Array* arr_str = create<Array>(
+        /* element */ str,
+        /* count */ 5u,
+        /* align */ 4u,
+        /* size */ 5u * 4u,
+        /* stride */ 5u * 4u,
+        /* implicit_stride */ 5u * 4u);
+};
 
 TEST_F(TypeTest, ConversionRank) {
-    auto* af = create<AbstractFloat>();
-    auto* ai = create<AbstractInt>();
-    auto* f32 = create<F32>();
-    auto* f16 = create<F16>();
-    auto* i32 = create<I32>();
-    auto* u32 = create<U32>();
-    auto* vec3_f32 = create<Vector>(f32, 3u);
-    auto* vec3_f16 = create<Vector>(f16, 3u);
-    auto* vec4_f32 = create<Vector>(f32, 4u);
-    auto* vec3_u32 = create<Vector>(u32, 3u);
-    auto* vec3_i32 = create<Vector>(i32, 3u);
-    auto* vec3_af = create<Vector>(af, 3u);
-    auto* vec3_ai = create<Vector>(ai, 3u);
-    auto* mat3x4_f32 = create<Matrix>(vec4_f32, 3u);
-    auto* mat4x3_f32 = create<Matrix>(vec3_f32, 4u);
-    auto* mat4x3_f16 = create<Matrix>(vec3_f16, 4u);
-    auto* mat4x3_af = create<Matrix>(vec3_af, 4u);
-    auto* ref_u32 = create<Reference>(u32, ast::StorageClass::kPrivate, ast::Access::kReadWrite);
-
     EXPECT_EQ(Type::ConversionRank(i32, i32), 0u);
     EXPECT_EQ(Type::ConversionRank(f32, f32), 0u);
     EXPECT_EQ(Type::ConversionRank(u32, u32), 0u);
@@ -55,17 +131,24 @@ TEST_F(TypeTest, ConversionRank) {
     EXPECT_EQ(Type::ConversionRank(mat3x4_f32, mat3x4_f32), 0u);
     EXPECT_EQ(Type::ConversionRank(mat4x3_f32, mat4x3_f32), 0u);
     EXPECT_EQ(Type::ConversionRank(mat4x3_f16, mat4x3_f16), 0u);
+    EXPECT_EQ(Type::ConversionRank(arr_vec3_ai, arr_vec3_ai), 0u);
+    EXPECT_EQ(Type::ConversionRank(arr_mat4x3_f16, arr_mat4x3_f16), 0u);
     EXPECT_EQ(Type::ConversionRank(mat4x3_af, mat4x3_af), 0u);
+    EXPECT_EQ(Type::ConversionRank(arr_mat4x3_af, arr_mat4x3_af), 0u);
     EXPECT_EQ(Type::ConversionRank(ref_u32, u32), 0u);
 
     EXPECT_EQ(Type::ConversionRank(af, f32), 1u);
     EXPECT_EQ(Type::ConversionRank(vec3_af, vec3_f32), 1u);
     EXPECT_EQ(Type::ConversionRank(mat4x3_af, mat4x3_f32), 1u);
+    EXPECT_EQ(Type::ConversionRank(arr_mat4x3_af, arr_mat4x3_f32), 1u);
     EXPECT_EQ(Type::ConversionRank(af, f16), 2u);
     EXPECT_EQ(Type::ConversionRank(vec3_af, vec3_f16), 2u);
     EXPECT_EQ(Type::ConversionRank(mat4x3_af, mat4x3_f16), 2u);
+    EXPECT_EQ(Type::ConversionRank(arr_mat4x3_af, arr_mat4x3_f16), 2u);
     EXPECT_EQ(Type::ConversionRank(ai, i32), 3u);
     EXPECT_EQ(Type::ConversionRank(vec3_ai, vec3_i32), 3u);
+    EXPECT_EQ(Type::ConversionRank(arr_ai, arr_i32), 3u);
+    EXPECT_EQ(Type::ConversionRank(arr_vec3_ai, arr_vec3_i32), 3u);
     EXPECT_EQ(Type::ConversionRank(ai, u32), 4u);
     EXPECT_EQ(Type::ConversionRank(vec3_ai, vec3_u32), 4u);
     EXPECT_EQ(Type::ConversionRank(ai, af), 5u);
@@ -80,6 +163,9 @@ TEST_F(TypeTest, ConversionRank) {
     EXPECT_EQ(Type::ConversionRank(mat3x4_f32, mat4x3_f32), Type::kNoConversion);
     EXPECT_EQ(Type::ConversionRank(mat4x3_f32, mat3x4_f32), Type::kNoConversion);
     EXPECT_EQ(Type::ConversionRank(mat4x3_f32, mat4x3_af), Type::kNoConversion);
+    EXPECT_EQ(Type::ConversionRank(arr_vec3_i32, arr_vec3_ai), Type::kNoConversion);
+    EXPECT_EQ(Type::ConversionRank(arr_mat4x3_f32, arr_mat4x3_af), Type::kNoConversion);
+    EXPECT_EQ(Type::ConversionRank(arr_mat4x3_f16, arr_mat4x3_f32), Type::kNoConversion);
     EXPECT_EQ(Type::ConversionRank(f32, af), Type::kNoConversion);
     EXPECT_EQ(Type::ConversionRank(f16, af), Type::kNoConversion);
     EXPECT_EQ(Type::ConversionRank(vec3_f16, vec3_af), Type::kNoConversion);
@@ -92,61 +178,6 @@ TEST_F(TypeTest, ConversionRank) {
 }
 
 TEST_F(TypeTest, ElementOf) {
-    auto* f32 = create<F32>();
-    auto* f16 = create<F16>();
-    auto* i32 = create<I32>();
-    auto* u32 = create<U32>();
-    auto* vec2_f32 = create<Vector>(f32, 2u);
-    auto* vec3_f16 = create<Vector>(f16, 3u);
-    auto* vec4_f32 = create<Vector>(f32, 4u);
-    auto* vec3_u32 = create<Vector>(u32, 3u);
-    auto* vec3_i32 = create<Vector>(i32, 3u);
-    auto* mat2x4_f32 = create<Matrix>(vec4_f32, 2u);
-    auto* mat4x2_f32 = create<Matrix>(vec2_f32, 4u);
-    auto* mat4x3_f16 = create<Matrix>(vec3_f16, 4u);
-    auto* str = create<Struct>(nullptr, Sym("s"),
-                               StructMemberList{
-                                   create<StructMember>(
-                                       /* declaration */ nullptr,
-                                       /* name */ Sym("x"),
-                                       /* type */ f16,
-                                       /* index */ 0u,
-                                       /* offset */ 0u,
-                                       /* align */ 4u,
-                                       /* size */ 4u),
-                               },
-                               /* align*/ 4u,
-                               /* size*/ 4u,
-                               /* size_no_padding*/ 4u);
-    auto* arr_i32 = create<Array>(
-        /* element */ i32,
-        /* count */ 5u,
-        /* align */ 4u,
-        /* size */ 5u * 4u,
-        /* stride */ 5u * 4u,
-        /* implicit_stride */ 5u * 4u);
-    auto* arr_vec3_i32 = create<Array>(
-        /* element */ vec3_i32,
-        /* count */ 5u,
-        /* align */ 16u,
-        /* size */ 5u * 16u,
-        /* stride */ 5u * 16u,
-        /* implicit_stride */ 5u * 16u);
-    auto* arr_mat4x3_f16 = create<Array>(
-        /* element */ mat4x3_f16,
-        /* count */ 5u,
-        /* align */ 64u,
-        /* size */ 5u * 64u,
-        /* stride */ 5u * 64u,
-        /* implicit_stride */ 5u * 64u);
-    auto* arr_str = create<Array>(
-        /* element */ str,
-        /* count */ 5u,
-        /* align */ 4u,
-        /* size */ 5u * 4u,
-        /* stride */ 5u * 4u,
-        /* implicit_stride */ 5u * 4u);
-
     // No count
     EXPECT_TYPE(Type::ElementOf(f32), f32);
     EXPECT_TYPE(Type::ElementOf(f16), f16);
@@ -164,6 +195,7 @@ TEST_F(TypeTest, ElementOf) {
     EXPECT_TYPE(Type::ElementOf(arr_i32), i32);
     EXPECT_TYPE(Type::ElementOf(arr_vec3_i32), vec3_i32);
     EXPECT_TYPE(Type::ElementOf(arr_mat4x3_f16), mat4x3_f16);
+    EXPECT_TYPE(Type::ElementOf(arr_mat4x3_af), mat4x3_af);
     EXPECT_TYPE(Type::ElementOf(arr_str), str);
 
     // With count
@@ -216,66 +248,14 @@ TEST_F(TypeTest, ElementOf) {
     EXPECT_TYPE(Type::ElementOf(arr_mat4x3_f16, &count), mat4x3_f16);
     EXPECT_EQ(count, 5u);
     count = 42;
+    EXPECT_TYPE(Type::ElementOf(arr_mat4x3_af, &count), mat4x3_af);
+    EXPECT_EQ(count, 5u);
+    count = 42;
     EXPECT_TYPE(Type::ElementOf(arr_str, &count), str);
     EXPECT_EQ(count, 5u);
 }
 
 TEST_F(TypeTest, DeepestElementOf) {
-    auto* f32 = create<F32>();
-    auto* f16 = create<F16>();
-    auto* i32 = create<I32>();
-    auto* u32 = create<U32>();
-    auto* vec2_f32 = create<Vector>(f32, 2u);
-    auto* vec3_f16 = create<Vector>(f16, 3u);
-    auto* vec4_f32 = create<Vector>(f32, 4u);
-    auto* vec3_u32 = create<Vector>(u32, 3u);
-    auto* vec3_i32 = create<Vector>(i32, 3u);
-    auto* mat2x4_f32 = create<Matrix>(vec4_f32, 2u);
-    auto* mat4x2_f32 = create<Matrix>(vec2_f32, 4u);
-    auto* mat4x3_f16 = create<Matrix>(vec3_f16, 4u);
-    auto* str = create<Struct>(nullptr, Sym("s"),
-                               StructMemberList{
-                                   create<StructMember>(
-                                       /* declaration */ nullptr,
-                                       /* name */ Sym("x"),
-                                       /* type */ f16,
-                                       /* index */ 0u,
-                                       /* offset */ 0u,
-                                       /* align */ 4u,
-                                       /* size */ 4u),
-                               },
-                               /* align*/ 4u,
-                               /* size*/ 4u,
-                               /* size_no_padding*/ 4u);
-    auto* arr_i32 = create<Array>(
-        /* element */ i32,
-        /* count */ 5u,
-        /* align */ 4u,
-        /* size */ 5u * 4u,
-        /* stride */ 5u * 4u,
-        /* implicit_stride */ 5u * 4u);
-    auto* arr_vec3_i32 = create<Array>(
-        /* element */ vec3_i32,
-        /* count */ 5u,
-        /* align */ 16u,
-        /* size */ 5u * 16u,
-        /* stride */ 5u * 16u,
-        /* implicit_stride */ 5u * 16u);
-    auto* arr_mat4x3_f16 = create<Array>(
-        /* element */ mat4x3_f16,
-        /* count */ 5u,
-        /* align */ 64u,
-        /* size */ 5u * 64u,
-        /* stride */ 5u * 64u,
-        /* implicit_stride */ 5u * 64u);
-    auto* arr_str = create<Array>(
-        /* element */ str,
-        /* count */ 5u,
-        /* align */ 4u,
-        /* size */ 5u * 4u,
-        /* stride */ 5u * 4u,
-        /* implicit_stride */ 5u * 4u);
-
     // No count
     EXPECT_TYPE(Type::DeepestElementOf(f32), f32);
     EXPECT_TYPE(Type::DeepestElementOf(f16), f16);
@@ -293,6 +273,7 @@ TEST_F(TypeTest, DeepestElementOf) {
     EXPECT_TYPE(Type::DeepestElementOf(arr_i32), i32);
     EXPECT_TYPE(Type::DeepestElementOf(arr_vec3_i32), i32);
     EXPECT_TYPE(Type::DeepestElementOf(arr_mat4x3_f16), f16);
+    EXPECT_TYPE(Type::DeepestElementOf(arr_mat4x3_af), af);
     EXPECT_TYPE(Type::DeepestElementOf(arr_str), nullptr);
 
     // With count
@@ -345,18 +326,14 @@ TEST_F(TypeTest, DeepestElementOf) {
     EXPECT_TYPE(Type::DeepestElementOf(arr_mat4x3_f16, &count), f16);
     EXPECT_EQ(count, 60u);
     count = 42;
+    EXPECT_TYPE(Type::DeepestElementOf(arr_mat4x3_af, &count), af);
+    EXPECT_EQ(count, 60u);
+    count = 42;
     EXPECT_TYPE(Type::DeepestElementOf(arr_str, &count), nullptr);
     EXPECT_EQ(count, 0u);
 }
 
 TEST_F(TypeTest, Common2) {
-    auto* ai = create<AbstractInt>();
-    auto* af = create<AbstractFloat>();
-    auto* f32 = create<F32>();
-    auto* f16 = create<F16>();
-    auto* i32 = create<I32>();
-    auto* u32 = create<U32>();
-
     EXPECT_TYPE(Type::Common(utils::Vector{ai, ai}), ai);
     EXPECT_TYPE(Type::Common(utils::Vector{af, af}), af);
     EXPECT_TYPE(Type::Common(utils::Vector{f32, f32}), f32);
@@ -393,14 +370,6 @@ TEST_F(TypeTest, Common2) {
     EXPECT_TYPE(Type::Common(utils::Vector{af, i32}), nullptr);
     EXPECT_TYPE(Type::Common(utils::Vector{af, u32}), nullptr);
 
-    auto* vec3_ai = create<Vector>(ai, 3u);
-    auto* vec3_af = create<Vector>(af, 3u);
-    auto* vec3_f32 = create<Vector>(f32, 3u);
-    auto* vec3_f16 = create<Vector>(f16, 3u);
-    auto* vec4_f32 = create<Vector>(f32, 4u);
-    auto* vec3_u32 = create<Vector>(u32, 3u);
-    auto* vec3_i32 = create<Vector>(i32, 3u);
-
     EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_ai}), vec3_ai);
     EXPECT_TYPE(Type::Common(utils::Vector{vec3_af, vec3_af}), vec3_af);
     EXPECT_TYPE(Type::Common(utils::Vector{vec3_f32, vec3_f32}), vec3_f32);
@@ -433,11 +402,6 @@ TEST_F(TypeTest, Common2) {
     EXPECT_TYPE(Type::Common(utils::Vector{vec3_u32, vec3_af}), nullptr);
     EXPECT_TYPE(Type::Common(utils::Vector{vec3_i32, vec3_af}), nullptr);
 
-    auto* mat4x3_af = create<Matrix>(vec3_af, 4u);
-    auto* mat3x4_f32 = create<Matrix>(vec4_f32, 3u);
-    auto* mat4x3_f32 = create<Matrix>(vec3_f32, 4u);
-    auto* mat4x3_f16 = create<Matrix>(vec3_f16, 4u);
-
     EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_af, mat4x3_af}), mat4x3_af);
     EXPECT_TYPE(Type::Common(utils::Vector{mat3x4_f32, mat3x4_f32}), mat3x4_f32);
     EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_f32, mat4x3_f32}), mat4x3_f32);
@@ -450,16 +414,13 @@ TEST_F(TypeTest, Common2) {
     EXPECT_TYPE(Type::Common(utils::Vector{mat3x4_f32, mat4x3_af}), nullptr);
     EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_f32, mat4x3_af}), mat4x3_f32);
     EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_f16, mat4x3_af}), mat4x3_f16);
+
+    EXPECT_TYPE(Type::Common(utils::Vector{arr_mat4x3_f32, arr_mat4x3_f16}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{arr_mat4x3_f32, arr_mat4x3_af}), arr_mat4x3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{arr_mat4x3_f16, arr_mat4x3_af}), arr_mat4x3_f16);
 }
 
 TEST_F(TypeTest, Common3) {
-    auto* ai = create<AbstractInt>();
-    auto* af = create<AbstractFloat>();
-    auto* f32 = create<F32>();
-    auto* f16 = create<F16>();
-    auto* i32 = create<I32>();
-    auto* u32 = create<U32>();
-
     EXPECT_TYPE(Type::Common(utils::Vector{ai, ai, ai}), ai);
     EXPECT_TYPE(Type::Common(utils::Vector{af, af, af}), af);
     EXPECT_TYPE(Type::Common(utils::Vector{f32, f32, f32}), f32);
@@ -504,14 +465,6 @@ TEST_F(TypeTest, Common3) {
     EXPECT_TYPE(Type::Common(utils::Vector{ai, af, i32}), nullptr);
     EXPECT_TYPE(Type::Common(utils::Vector{ai, af, u32}), nullptr);
 
-    auto* vec3_ai = create<Vector>(ai, 3u);
-    auto* vec3_af = create<Vector>(af, 3u);
-    auto* vec3_f32 = create<Vector>(f32, 3u);
-    auto* vec3_f16 = create<Vector>(f16, 3u);
-    auto* vec4_f32 = create<Vector>(f32, 4u);
-    auto* vec3_u32 = create<Vector>(u32, 3u);
-    auto* vec3_i32 = create<Vector>(i32, 3u);
-
     EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_ai, vec3_ai}), vec3_ai);
     EXPECT_TYPE(Type::Common(utils::Vector{vec3_af, vec3_af, vec3_af}), vec3_af);
     EXPECT_TYPE(Type::Common(utils::Vector{vec3_f32, vec3_f32, vec3_f32}), vec3_f32);
@@ -550,11 +503,6 @@ TEST_F(TypeTest, Common3) {
     EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_af, vec3_u32}), nullptr);
     EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_af, vec3_i32}), nullptr);
 
-    auto* mat4x3_af = create<Matrix>(vec3_af, 4u);
-    auto* mat3x4_f32 = create<Matrix>(vec4_f32, 3u);
-    auto* mat4x3_f32 = create<Matrix>(vec3_f32, 4u);
-    auto* mat4x3_f16 = create<Matrix>(vec3_f16, 4u);
-
     EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_af, mat4x3_af, mat4x3_af}), mat4x3_af);
     EXPECT_TYPE(Type::Common(utils::Vector{mat3x4_f32, mat3x4_f32, mat3x4_f32}), mat3x4_f32);
     EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_f32, mat4x3_f32, mat4x3_f32}), mat4x3_f32);
@@ -567,6 +515,13 @@ TEST_F(TypeTest, Common3) {
     EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_af, mat3x4_f32, mat4x3_af}), nullptr);
     EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_af, mat4x3_f32, mat4x3_af}), mat4x3_f32);
     EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_af, mat4x3_f16, mat4x3_af}), mat4x3_f16);
+
+    EXPECT_TYPE(Type::Common(utils::Vector{arr_mat4x3_f16, arr_mat4x3_f32, arr_mat4x3_f16}),
+                nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{arr_mat4x3_af, arr_mat4x3_f32, arr_mat4x3_af}),
+                arr_mat4x3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{arr_mat4x3_af, arr_mat4x3_f16, arr_mat4x3_af}),
+                arr_mat4x3_f16);
 }
 
 }  // namespace
