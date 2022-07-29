@@ -1318,46 +1318,7 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
     return nullptr;
 }
 
-const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
-                                             const sem::Type* target_type /* = nullptr */) {
-    if (!expr) {
-        return nullptr;  // Allow for Materialize(Expression(blah))
-    }
-
-    // Helper for actually creating the the materialize node, performing the constant cast, updating
-    // the ast -> sem binding, and performing validation.
-    auto materialize = [&](const sem::Type* target_ty) -> sem::Materialize* {
-        auto* src_ty = expr->Type();
-        auto* decl = expr->Declaration();
-        if (!validator_.Materialize(target_ty, src_ty, decl->source)) {
-            return nullptr;
-        }
-        auto expr_val = expr->ConstantValue();
-        if (!expr_val) {
-            TINT_ICE(Resolver, builder_->Diagnostics())
-                << decl->source << "Materialize(" << decl->TypeInfo().name
-                << ") called on expression with no constant value";
-            return nullptr;
-        }
-        auto materialized_val = const_eval_.Convert(target_ty, expr_val, decl->source);
-        if (!materialized_val) {
-            // ConvertValue() has already failed and raised an diagnostic error.
-            return nullptr;
-        }
-        if (!materialized_val.Get()) {
-            TINT_ICE(Resolver, builder_->Diagnostics())
-                << decl->source << "ConvertValue(" << builder_->FriendlyName(expr_val->Type())
-                << " -> " << builder_->FriendlyName(target_ty) << ") returned invalid value";
-            return nullptr;
-        }
-        auto* m =
-            builder_->create<sem::Materialize>(expr, current_statement_, materialized_val.Get());
-        m->Behaviors() = expr->Behaviors();
-        builder_->Sem().Replace(decl, m);
-        return m;
-    };
-
-    // Helpers for constructing semantic types
+const sem::Type* Resolver::ConcreteType(const sem::Type* ty, const sem::Type* target_ty) {
     auto i32 = [&] { return builder_->create<sem::I32>(); };
     auto f32 = [&] { return builder_->create<sem::F32>(); };
     auto i32v = [&](uint32_t width) { return builder_->create<sem::Vector>(i32(), width); };
@@ -1366,31 +1327,69 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
         return builder_->create<sem::Matrix>(f32v(rows), columns);
     };
 
-    // Type dispatch based on the expression type
-    return Switch<sem::Expression*>(
-        expr->Type(),  //
-        [&](const sem::AbstractInt*) { return materialize(target_type ? target_type : i32()); },
-        [&](const sem::AbstractFloat*) { return materialize(target_type ? target_type : f32()); },
+    return Switch(
+        ty,  //
+        [&](const sem::AbstractInt*) { return target_ty ? target_ty : i32(); },
+        [&](const sem::AbstractFloat*) { return target_ty ? target_ty : f32(); },
         [&](const sem::Vector* v) {
             return Switch(
                 v->type(),  //
-                [&](const sem::AbstractInt*) {
-                    return materialize(target_type ? target_type : i32v(v->Width()));
-                },
+                [&](const sem::AbstractInt*) { return target_ty ? target_ty : i32v(v->Width()); },
                 [&](const sem::AbstractFloat*) {
-                    return materialize(target_type ? target_type : f32v(v->Width()));
-                },
-                [&](Default) { return expr; });
+                    return target_ty ? target_ty : f32v(v->Width());
+                });
         },
         [&](const sem::Matrix* m) {
-            return Switch(
-                m->type(),  //
-                [&](const sem::AbstractFloat*) {
-                    return materialize(target_type ? target_type : f32m(m->columns(), m->rows()));
-                },
-                [&](Default) { return expr; });
-        },
-        [&](Default) { return expr; });
+            return Switch(m->type(),  //
+                          [&](const sem::AbstractFloat*) {
+                              return target_ty ? target_ty : f32m(m->columns(), m->rows());
+                          });
+        });
+}
+
+const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
+                                             const sem::Type* target_type /* = nullptr */) {
+    if (!expr) {
+        // Allow for Materialize(Expression(blah)), where failures pass through Materialize()
+        return nullptr;
+    }
+
+    auto* decl = expr->Declaration();
+
+    auto* concrete_ty = ConcreteType(expr->Type(), target_type);
+    if (!concrete_ty) {
+        return expr;  // Does not require materialization
+    }
+
+    auto* src_ty = expr->Type();
+    if (!validator_.Materialize(concrete_ty, src_ty, decl->source)) {
+        return nullptr;
+    }
+
+    auto expr_val = expr->ConstantValue();
+    if (!expr_val) {
+        TINT_ICE(Resolver, builder_->Diagnostics())
+            << decl->source << "Materialize(" << decl->TypeInfo().name
+            << ") called on expression with no constant value";
+        return nullptr;
+    }
+
+    auto materialized_val = const_eval_.Convert(concrete_ty, expr_val, decl->source);
+    if (!materialized_val) {
+        // ConvertValue() has already failed and raised an diagnostic error.
+        return nullptr;
+    }
+
+    if (!materialized_val.Get()) {
+        TINT_ICE(Resolver, builder_->Diagnostics())
+            << decl->source << "ConvertValue(" << builder_->FriendlyName(expr_val->Type()) << " -> "
+            << builder_->FriendlyName(concrete_ty) << ") returned invalid value";
+        return nullptr;
+    }
+    auto* m = builder_->create<sem::Materialize>(expr, current_statement_, materialized_val.Get());
+    m->Behaviors() = expr->Behaviors();
+    builder_->Sem().Replace(decl, m);
+    return m;
 }
 
 bool Resolver::MaterializeArguments(utils::VectorRef<const sem::Expression*> args,
