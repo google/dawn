@@ -18,6 +18,7 @@
 #include <utility>
 
 #include "src/tint/program_builder.h"
+#include "src/tint/sem/abstract_numeric.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/type_constructor.h"
@@ -54,7 +55,6 @@ void VectorizeScalarMatrixConstructors::Run(CloneContext& ctx, const DataMap&, D
         if (!ty_ctor) {
             return nullptr;
         }
-        // Check if this is a matrix constructor with scalar arguments.
         auto* mat_type = call->Type()->As<sem::Matrix>();
         if (!mat_type) {
             return nullptr;
@@ -64,7 +64,15 @@ void VectorizeScalarMatrixConstructors::Run(CloneContext& ctx, const DataMap&, D
         if (args.IsEmpty()) {
             return nullptr;
         }
-        if (!args[0]->Type()->UnwrapRef()->is_scalar()) {
+
+        // If the argument type is a matrix, then this is an identity / conversion constructor.
+        // If the argument type is a vector, then we're already column vectors.
+        // If the argument type is abstract, then we're const-expression and there's no need to
+        // adjust this, as it'll be constant folded by the backend.
+        if (args[0]
+                ->Type()
+                ->UnwrapRef()
+                ->IsAnyOf<sem::Matrix, sem::Vector, sem::AbstractNumeric>()) {
             return nullptr;
         }
 

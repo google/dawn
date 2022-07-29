@@ -71,8 +71,6 @@ class Type : public Castable<Type, Node> {
 
     /// @returns true if this type is a scalar
     bool is_scalar() const;
-    /// @returns true if this type is a scalar or an abstract numeric
-    bool is_abstract_or_scalar() const;
     /// @returns true if this type is a numeric scalar
     bool is_numeric_scalar() const;
     /// @returns true if this type is a float scalar
@@ -103,14 +101,10 @@ class Type : public Castable<Type, Node> {
     bool is_signed_scalar_or_vector() const;
     /// @returns true if this type is an integer scalar or vector
     bool is_integer_scalar_or_vector() const;
-    /// @returns true if this type is an abstract scalar vector
-    bool is_abstract_scalar_vector() const;
     /// @returns true if this type is an abstract integer vector
     bool is_abstract_integer_vector() const;
     /// @returns true if this type is an abstract float vector
     bool is_abstract_float_vector() const;
-    /// @returns true if this type is an abstract scalar or vector
-    bool is_abstract_scalar_or_vector() const;
     /// @returns true if this type is an abstract integer scalar or vector
     bool is_abstract_integer_scalar_or_vector() const;
     /// @returns true if this type is an abstract float scalar or vector
