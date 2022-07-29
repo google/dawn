@@ -165,6 +165,7 @@ match scalar_no_f16: f32 | i32 | u32 | bool
 match scalar_no_i32: f32 | f16 | u32 | bool
 match scalar_no_u32: f32 | f16 | i32 | bool
 match scalar_no_bool: f32 | f16 | i32 | u32
+match fia_fiu32_f16: fa | ia | f32 | i32 | u32 | f16
 match fia_fi32_f16: fa | ia | f32 | i32 | f16
 match fia_fiu32: fa | ia | f32 | i32 | u32
 match fa_f32: fa | f32
@@ -386,48 +387,48 @@ match storage
 ////////////////////////////////////////////////////////////////////////////////
 
 // https://gpuweb.github.io/gpuweb/wgsl/#builtin-functions
-fn abs<T: fiu32>(T) -> T
-fn abs<N: num, T: fiu32>(vec<N, T>) -> vec<N, T>
-fn acos(f32) -> f32
-fn acos<N: num>(vec<N, f32>) -> vec<N, f32>
-fn acosh(f32) -> f32
-fn acosh<N: num>(vec<N, f32>) -> vec<N, f32>
+fn abs<T: fiu32_f16>(T) -> T
+fn abs<N: num, T: fiu32_f16>(vec<N, T>) -> vec<N, T>
+fn acos<T: f32_f16>(T) -> T
+fn acos<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn acosh<T: f32_f16>(T) -> T
+fn acosh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn all(bool) -> bool
 fn all<N: num>(vec<N, bool>) -> bool
 fn any(bool) -> bool
 fn any<N: num>(vec<N, bool>) -> bool
 fn arrayLength<T, A: access>(ptr<storage, array<T>, A>) -> u32
-fn asin(f32) -> f32
-fn asin<N: num>(vec<N, f32>) -> vec<N, f32>
-fn asinh(f32) -> f32
-fn asinh<N: num>(vec<N, f32>) -> vec<N, f32>
-fn atan(f32) -> f32
-fn atan<N: num>(vec<N, f32>) -> vec<N, f32>
-@const fn atan2<T: fa_f32>(T, T) -> T
-@const fn atan2<N: num, T: fa_f32>(vec<N, T>, vec<N, T>) -> vec<N, T>
-fn atanh(f32) -> f32
-fn atanh<N: num>(vec<N, f32>) -> vec<N, f32>
-fn ceil(f32) -> f32
-fn ceil<N: num>(vec<N, f32>) -> vec<N, f32>
-@const fn clamp<T: fia_fiu32>(T, T, T) -> T
-@const fn clamp<N: num, T: fia_fiu32>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
-fn cos(f32) -> f32
-fn cos<N: num>(vec<N, f32>) -> vec<N, f32>
-fn cosh(f32) -> f32
-fn cosh<N: num>(vec<N, f32>) -> vec<N, f32>
+fn asin<T: f32_f16>(T) -> T
+fn asin<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn asinh<T: f32_f16>(T) -> T
+fn asinh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn atan<T: f32_f16>(T) -> T
+fn atan<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn atan2<T: fa_f32_f16>(T, T) -> T
+@const fn atan2<T: fa_f32_f16, N: num>(vec<N, T>, vec<N, T>) -> vec<N, T>
+fn atanh<T: f32_f16>(T) -> T
+fn atanh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn ceil<T: f32_f16>(T) -> T
+fn ceil<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn clamp<T: fia_fiu32_f16>(T, T, T) -> T
+@const fn clamp<T: fia_fiu32_f16, N: num>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
+fn cos<T: f32_f16>(T) -> T
+fn cos<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn cosh<T: f32_f16>(T) -> T
+fn cosh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn countLeadingZeros<T: iu32>(T) -> T
 fn countLeadingZeros<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
 fn countOneBits<T: iu32>(T) -> T
 fn countOneBits<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
 fn countTrailingZeros<T: iu32>(T) -> T
 fn countTrailingZeros<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
-fn cross(vec3<f32>, vec3<f32>) -> vec3<f32>
-fn degrees(f32) -> f32
-fn degrees<N: num>(vec<N, f32>) -> vec<N, f32>
-fn determinant<N: num>(mat<N, N, f32>) -> f32
-fn distance(f32, f32) -> f32
-fn distance<N: num>(vec<N, f32>, vec<N, f32>) -> f32
-fn dot<N: num, T: fiu32>(vec<N, T>, vec<N, T>) -> T
+fn cross<T: f32_f16>(vec3<T>, vec3<T>) -> vec3<T>
+fn degrees<T: f32_f16>(T) -> T
+fn degrees<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn determinant<N: num, T: f32_f16>(mat<N, N, T>) -> T
+fn distance<T: f32_f16>(T, T) -> T
+fn distance<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> T
+fn dot<N: num, T: fiu32_f16>(vec<N, T>, vec<N, T>) -> T
 fn dot4I8Packed(u32, u32) -> i32
 fn dot4U8Packed(u32, u32) -> u32
 @stage("fragment") fn dpdx(f32) -> f32
@@ -442,23 +443,23 @@ fn dot4U8Packed(u32, u32) -> u32
 @stage("fragment") fn dpdyCoarse<N: num>(vec<N, f32>) -> vec<N, f32>
 @stage("fragment") fn dpdyFine(f32) -> f32
 @stage("fragment") fn dpdyFine<N: num>(vec<N, f32>) -> vec<N, f32>
-fn exp(f32) -> f32
-fn exp<N: num>(vec<N, f32>) -> vec<N, f32>
-fn exp2(f32) -> f32
-fn exp2<N: num>(vec<N, f32>) -> vec<N, f32>
+fn exp<T: f32_f16>(T) -> T
+fn exp<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn exp2<T: f32_f16>(T) -> T
+fn exp2<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn extractBits<T: iu32>(T, u32, u32) -> T
 fn extractBits<N: num, T: iu32>(vec<N, T>, u32, u32) -> vec<N, T>
-fn faceForward<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
+fn faceForward<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
 fn firstLeadingBit<T: iu32>(T) -> T
 fn firstLeadingBit<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
 fn firstTrailingBit<T: iu32>(T) -> T
 fn firstTrailingBit<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
-fn floor(f32) -> f32
-fn floor<N: num>(vec<N, f32>) -> vec<N, f32>
-fn fma(f32, f32, f32) -> f32
-fn fma<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
-fn fract(f32) -> f32
-fn fract<N: num>(vec<N, f32>) -> vec<N, f32>
+fn floor<T: f32_f16>(T) -> T
+fn floor<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn fma<T: f32_f16>(T, T, T) -> T
+fn fma<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
+fn fract<T: f32_f16>(T) -> T
+fn fract<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn frexp(f32) -> __frexp_result
 fn frexp<N: num>(vec<N, f32>) -> __frexp_result_vec<N>
 @stage("fragment") fn fwidth(f32) -> f32
@@ -469,64 +470,64 @@ fn frexp<N: num>(vec<N, f32>) -> __frexp_result_vec<N>
 @stage("fragment") fn fwidthFine<N: num>(vec<N, f32>) -> vec<N, f32>
 fn insertBits<T: iu32>(T, T, u32, u32) -> T
 fn insertBits<N: num, T: iu32>(vec<N, T>, vec<N, T>, u32, u32) -> vec<N, T>
-fn inverseSqrt(f32) -> f32
-fn inverseSqrt<N: num>(vec<N, f32>) -> vec<N, f32>
-fn ldexp(f32, i32) -> f32
-fn ldexp<N: num>(vec<N, f32>, vec<N, i32>) -> vec<N, f32>
-fn length(f32) -> f32
-fn length<N: num>(vec<N, f32>) -> f32
-fn log(f32) -> f32
-fn log<N: num>(vec<N, f32>) -> vec<N, f32>
-fn log2(f32) -> f32
-fn log2<N: num>(vec<N, f32>) -> vec<N, f32>
-fn max<T: fiu32>(T, T) -> T
-fn max<N: num, T: fiu32>(vec<N, T>, vec<N, T>) -> vec<N, T>
-fn min<T: fiu32>(T, T) -> T
-fn min<N: num, T: fiu32>(vec<N, T>, vec<N, T>) -> vec<N, T>
-fn mix(f32, f32, f32) -> f32
-fn mix<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
-fn mix<N: num>(vec<N, f32>, vec<N, f32>, f32) -> vec<N, f32>
+fn inverseSqrt<T: f32_f16>(T) -> T
+fn inverseSqrt<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn ldexp<T: f32_f16>(T, i32) -> T
+fn ldexp<N: num, T: f32_f16>(vec<N, T>, vec<N, i32>) -> vec<N, T>
+fn length<T: f32_f16>(T) -> T
+fn length<N: num, T: f32_f16>(vec<N, T>) -> T
+fn log<T: f32_f16>(T) -> T
+fn log<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn log2<T: f32_f16>(T) -> T
+fn log2<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn max<T: fiu32_f16>(T, T) -> T
+fn max<N: num, T: fiu32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
+fn min<T: fiu32_f16>(T, T) -> T
+fn min<N: num, T: fiu32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
+fn mix<T: f32_f16>(T, T, T) -> T
+fn mix<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
+fn mix<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, T) -> vec<N, T>
 fn modf(f32) -> __modf_result
 fn modf<N: num>(vec<N, f32>) -> __modf_result_vec<N>
-fn normalize<N: num>(vec<N, f32>) -> vec<N, f32>
+fn normalize<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn pack2x16float(vec2<f32>) -> u32
 fn pack2x16snorm(vec2<f32>) -> u32
 fn pack2x16unorm(vec2<f32>) -> u32
 fn pack4x8snorm(vec4<f32>) -> u32
 fn pack4x8unorm(vec4<f32>) -> u32
-fn pow(f32, f32) -> f32
-fn pow<N: num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32>
-fn radians(f32) -> f32
-fn radians<N: num>(vec<N, f32>) -> vec<N, f32>
-fn reflect<N: num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32>
-fn refract<N: num>(vec<N, f32>, vec<N, f32>, f32) -> vec<N, f32>
+fn pow<T: f32_f16>(T, T) -> T
+fn pow<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
+fn radians<T: f32_f16>(T) -> T
+fn radians<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn reflect<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
+fn refract<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, T) -> vec<N, T>
 fn reverseBits<T: iu32>(T) -> T
 fn reverseBits<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
-fn round(f32) -> f32
-fn round<N: num>(vec<N, f32>) -> vec<N, f32>
-fn select<T: scalar_no_f16>(T, T, bool) -> T
-fn select<T: scalar_no_f16, N: num>(vec<N, T>, vec<N, T>, bool) -> vec<N, T>
-fn select<N: num, T: scalar_no_f16>(vec<N, T>, vec<N, T>, vec<N, bool>) -> vec<N, T>
-fn sign(f32) -> f32
-fn sign<N: num>(vec<N, f32>) -> vec<N, f32>
-fn sin(f32) -> f32
-fn sin<N: num>(vec<N, f32>) -> vec<N, f32>
-fn sinh(f32) -> f32
-fn sinh<N: num>(vec<N, f32>) -> vec<N, f32>
-fn smoothstep(f32, f32, f32) -> f32
-fn smoothstep<N: num>(vec<N, f32>, vec<N, f32>, vec<N, f32>) -> vec<N, f32>
-fn sqrt(f32) -> f32
-fn sqrt<N: num>(vec<N, f32>) -> vec<N, f32>
-fn step(f32, f32) -> f32
-fn step<N: num>(vec<N, f32>, vec<N, f32>) -> vec<N, f32>
+fn round<T: f32_f16>(T) -> T
+fn round<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn select<T: scalar>(T, T, bool) -> T
+fn select<T: scalar, N: num>(vec<N, T>, vec<N, T>, bool) -> vec<N, T>
+fn select<N: num, T: scalar>(vec<N, T>, vec<N, T>, vec<N, bool>) -> vec<N, T>
+fn sign<T: f32_f16>(T) -> T
+fn sign<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn sin<T: f32_f16>(T) -> T
+fn sin<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn sinh<T: f32_f16>(T) -> T
+fn sinh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn smoothstep<T: f32_f16>(T, T, T) -> T
+fn smoothstep<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
+fn sqrt<T: f32_f16>(T) -> T
+fn sqrt<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn step<T: f32_f16>(T, T) -> T
+fn step<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
 @stage("compute") fn storageBarrier()
-fn tan(f32) -> f32
-fn tan<N: num>(vec<N, f32>) -> vec<N, f32>
-fn tanh(f32) -> f32
-fn tanh<N: num>(vec<N, f32>) -> vec<N, f32>
-fn transpose<M: num, N: num>(mat<M, N, f32>) -> mat<N, M, f32>
-fn trunc(f32) -> f32
-fn trunc<N: num>(vec<N, f32>) -> vec<N, f32>
+fn tan<T: f32_f16>(T) -> T
+fn tan<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn tanh<T: f32_f16>(T) -> T
+fn tanh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn transpose<M: num, N: num, T: f32_f16>(mat<M, N, T>) -> mat<N, M, T>
+fn trunc<T: f32_f16>(T) -> T
+fn trunc<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn unpack2x16float(u32) -> vec2<f32>
 fn unpack2x16snorm(u32) -> vec2<f32>
 fn unpack2x16unorm(u32) -> vec2<f32>

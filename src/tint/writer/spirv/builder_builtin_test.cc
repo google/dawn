@@ -131,6 +131,42 @@ OpFunctionEnd
     EXPECT_EQ(got, expect);
 }
 
+TEST_F(BuiltinBuilderTest, Call_GLSLMethod_WithLoad_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = GlobalVar("ident", ty.f16(), ast::StorageClass::kPrivate);
+    auto* expr = Call("round", "ident");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect =
+        R"(%10 = OpExtInstImport "GLSL.std.450"
+OpName %1 "ident"
+OpName %7 "a_func"
+%3 = OpTypeFloat 16
+%2 = OpTypePointer Private %3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+%6 = OpTypeVoid
+%5 = OpTypeFunction %6
+%7 = OpFunction %6 None %5
+%8 = OpLabel
+%11 = OpLoad %3 %1
+%9 = OpExtInst %3 %10 RoundEven %11
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
 // Tests for Logical builtins
 namespace logical_builtin_tests {
 
@@ -485,6 +521,47 @@ OpFunctionEnd
     EXPECT_EQ(got, expect);
 }
 
+TEST_P(Builtin_Builder_SingleParam_Float_Test, Call_Scalar_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto param = GetParam();
+    // Use a variable to prevent the function being evaluated as constant.
+    auto* scalar = Var("a", nullptr, Expr(1_h));
+    auto* expr = Call(param.name, scalar);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Decl(scalar),
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+OpName %7 "a"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%5 = OpTypeFloat 16
+%6 = OpConstant %5 0x1p+0
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%7 = OpVariable %8 Function %9
+OpStore %7 %6
+%12 = OpLoad %5 %7
+%10 = OpExtInst %5 %11 )" +
+                  param.op +
+                  R"( %12
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
 TEST_P(Builtin_Builder_SingleParam_Float_Test, Call_Vector_f32) {
     auto param = GetParam();
 
@@ -510,6 +587,50 @@ OpName %9 "a"
 %6 = OpTypeFloat 32
 %5 = OpTypeVector %6 2
 %7 = OpConstant %6 1
+%8 = OpConstantComposite %5 %7 %7
+%10 = OpTypePointer Function %5
+%11 = OpConstantNull %5
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%9 = OpVariable %10 Function %11
+OpStore %9 %8
+%14 = OpLoad %5 %9
+%12 = OpExtInst %5 %13 )" +
+                  param.op +
+                  R"( %14
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
+TEST_P(Builtin_Builder_SingleParam_Float_Test, Call_Vector_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto param = GetParam();
+
+    // Use a variable to prevent the function being evaluated as constant.
+    auto* vec = Var("a", nullptr, vec2<f16>(1_h, 1_h));
+    auto* expr = Call(param.name, vec);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Decl(vec),
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+OpName %9 "a"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 16
+%5 = OpTypeVector %6 2
+%7 = OpConstant %6 0x1p+0
 %8 = OpConstantComposite %5 %7 %7
 %10 = OpTypePointer Function %5
 %11 = OpConstantNull %5
@@ -589,6 +710,43 @@ OpFunctionEnd
     EXPECT_EQ(got, expect);
 }
 
+TEST_F(BuiltinBuilderTest, Call_Length_Scalar_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* scalar = Var("a", nullptr, Expr(1_h));
+    auto* expr = Call("length", scalar);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Decl(scalar),
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+OpName %7 "a"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%5 = OpTypeFloat 16
+%6 = OpConstant %5 0x1p+0
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%7 = OpVariable %8 Function %9
+OpStore %7 %6
+%12 = OpLoad %5 %7
+%10 = OpExtInst %5 %11 Length %12
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
 TEST_F(BuiltinBuilderTest, Call_Length_Vector_f32) {
     auto* vec = Var("a", nullptr, vec2<f32>(1_f, 1_f));
     auto* expr = Call("length", vec);
@@ -626,6 +784,45 @@ OpFunctionEnd
     EXPECT_EQ(got, expect);
 }
 
+TEST_F(BuiltinBuilderTest, Call_Length_Vector_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* vec = Var("a", nullptr, vec2<f16>(1_h, 1_h));
+    auto* expr = Call("length", vec);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Decl(vec),
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+OpName %9 "a"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 16
+%5 = OpTypeVector %6 2
+%7 = OpConstant %6 0x1p+0
+%8 = OpConstantComposite %5 %7 %7
+%10 = OpTypePointer Function %5
+%11 = OpConstantNull %5
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%9 = OpVariable %10 Function %11
+OpStore %9 %8
+%14 = OpLoad %5 %9
+%12 = OpExtInst %6 %13 Length %14
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
 TEST_F(BuiltinBuilderTest, Call_Normalize_f32) {
     auto* vec = Var("a", nullptr, vec2<f32>(1_f, 1_f));
     auto* expr = Call("normalize", vec);
@@ -648,6 +845,45 @@ OpName %9 "a"
 %6 = OpTypeFloat 32
 %5 = OpTypeVector %6 2
 %7 = OpConstant %6 1
+%8 = OpConstantComposite %5 %7 %7
+%10 = OpTypePointer Function %5
+%11 = OpConstantNull %5
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%9 = OpVariable %10 Function %11
+OpStore %9 %8
+%14 = OpLoad %5 %9
+%12 = OpExtInst %5 %13 Normalize %14
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
+TEST_F(BuiltinBuilderTest, Call_Normalize_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* vec = Var("a", nullptr, vec2<f16>(1_h, 1_h));
+    auto* expr = Call("normalize", vec);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Decl(vec),
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+OpName %9 "a"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 16
+%5 = OpTypeVector %6 2
+%7 = OpConstant %6 0x1p+0
 %8 = OpConstantComposite %5 %7 %7
 %10 = OpTypePointer Function %5
 %11 = OpConstantNull %5
@@ -703,6 +939,47 @@ OpFunctionEnd
     EXPECT_EQ(got, expect);
 }
 
+TEST_P(Builtin_Builder_DualParam_Float_Test, Call_Scalar_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto param = GetParam();
+    auto* scalar = Var("scalar", nullptr, Expr(1_h));
+    auto* expr = Call(param.name, scalar, scalar);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Decl(scalar),
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+OpName %7 "scalar"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%5 = OpTypeFloat 16
+%6 = OpConstant %5 0x1p+0
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%7 = OpVariable %8 Function %9
+OpStore %7 %6
+%12 = OpLoad %5 %7
+%13 = OpLoad %5 %7
+%10 = OpExtInst %5 %11 )" +
+                  param.op +
+                  R"( %12 %13
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
 TEST_P(Builtin_Builder_DualParam_Float_Test, Call_Vector_f32) {
     auto param = GetParam();
     auto* vec = Var("vec", nullptr, vec2<f32>(1_f, 1_f));
@@ -726,6 +1003,49 @@ OpName %9 "vec"
 %6 = OpTypeFloat 32
 %5 = OpTypeVector %6 2
 %7 = OpConstant %6 1
+%8 = OpConstantComposite %5 %7 %7
+%10 = OpTypePointer Function %5
+%11 = OpConstantNull %5
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%9 = OpVariable %10 Function %11
+OpStore %9 %8
+%14 = OpLoad %5 %9
+%15 = OpLoad %5 %9
+%12 = OpExtInst %5 %13 )" +
+                  param.op +
+                  R"( %14 %15
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
+TEST_P(Builtin_Builder_DualParam_Float_Test, Call_Vector_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto param = GetParam();
+    auto* vec = Var("vec", nullptr, vec2<f16>(1_h, 1_h));
+    auto* expr = Call(param.name, vec, vec);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Decl(vec),
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+OpName %9 "vec"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 16
+%5 = OpTypeVector %6 2
+%7 = OpConstant %6 0x1p+0
 %8 = OpConstantComposite %5 %7 %7
 %10 = OpTypePointer Function %5
 %11 = OpConstantNull %5
@@ -790,6 +1110,46 @@ OpFunctionEnd
     EXPECT_EQ(got, expect);
 }
 
+TEST_F(BuiltinBuilderTest, Call_Reflect_Vector_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* vec = Var("vec", nullptr, vec2<f16>(1_h, 1_h));
+    auto* expr = Call("reflect", vec, vec);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Decl(vec),
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+OpName %9 "vec"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 16
+%5 = OpTypeVector %6 2
+%7 = OpConstant %6 0x1p+0
+%8 = OpConstantComposite %5 %7 %7
+%10 = OpTypePointer Function %5
+%11 = OpConstantNull %5
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%9 = OpVariable %10 Function %11
+OpStore %9 %8
+%14 = OpLoad %5 %9
+%15 = OpLoad %5 %9
+%12 = OpExtInst %5 %13 Reflect %14 %15
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
 TEST_F(BuiltinBuilderTest, Call_Distance_Scalar_f32) {
     auto* scalar = Var("scalar", nullptr, Expr(1_f));
     auto* expr = Call("distance", scalar, scalar);
@@ -811,6 +1171,44 @@ OpName %7 "scalar"
 %1 = OpTypeFunction %2
 %5 = OpTypeFloat 32
 %6 = OpConstant %5 1
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%7 = OpVariable %8 Function %9
+OpStore %7 %6
+%12 = OpLoad %5 %7
+%13 = OpLoad %5 %7
+%10 = OpExtInst %5 %11 Distance %12 %13
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
+TEST_F(BuiltinBuilderTest, Call_Distance_Scalar_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* scalar = Var("scalar", nullptr, Expr(1_h));
+    auto* expr = Call("distance", scalar, scalar);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Decl(scalar),
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+OpName %7 "scalar"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%5 = OpTypeFloat 16
+%6 = OpConstant %5 0x1p+0
 %8 = OpTypePointer Function %5
 %9 = OpConstantNull %5
 %3 = OpFunction %2 None %1
@@ -848,6 +1246,46 @@ OpName %9 "vec"
 %6 = OpTypeFloat 32
 %5 = OpTypeVector %6 2
 %7 = OpConstant %6 1
+%8 = OpConstantComposite %5 %7 %7
+%10 = OpTypePointer Function %5
+%11 = OpConstantNull %5
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%9 = OpVariable %10 Function %11
+OpStore %9 %8
+%14 = OpLoad %5 %9
+%15 = OpLoad %5 %9
+%12 = OpExtInst %6 %13 Distance %14 %15
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
+TEST_F(BuiltinBuilderTest, Call_Distance_Vector_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* vec = Var("vec", nullptr, vec2<f16>(1_h, 1_h));
+    auto* expr = Call("distance", vec, vec);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Decl(vec),
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+OpName %9 "vec"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 16
+%5 = OpTypeVector %6 2
+%7 = OpConstant %6 0x1p+0
 %8 = OpConstantComposite %5 %7 %7
 %10 = OpTypePointer Function %5
 %11 = OpConstantNull %5
@@ -902,6 +1340,46 @@ OpFunctionEnd
     EXPECT_EQ(got, expect);
 }
 
+TEST_F(BuiltinBuilderTest, Call_Cross_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* vec = Var("vec", nullptr, vec3<f16>(1_h, 1_h, 1_h));
+    auto* expr = Call("cross", vec, vec);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Decl(vec),
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+OpName %9 "vec"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 16
+%5 = OpTypeVector %6 3
+%7 = OpConstant %6 0x1p+0
+%8 = OpConstantComposite %5 %7 %7 %7
+%10 = OpTypePointer Function %5
+%11 = OpConstantNull %5
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%9 = OpVariable %10 Function %11
+OpStore %9 %8
+%14 = OpLoad %5 %9
+%15 = OpLoad %5 %9
+%12 = OpExtInst %5 %13 Cross %14 %15
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
 using Builtin_Builder_ThreeParam_Float_Test = BuiltinBuilderTestWithParam<BuiltinData>;
 TEST_P(Builtin_Builder_ThreeParam_Float_Test, Call_Scalar_f32) {
     auto param = GetParam();
@@ -925,6 +1403,48 @@ OpName %7 "scalar"
 %1 = OpTypeFunction %2
 %5 = OpTypeFloat 32
 %6 = OpConstant %5 1
+%8 = OpTypePointer Function %5
+%9 = OpConstantNull %5
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%7 = OpVariable %8 Function %9
+OpStore %7 %6
+%12 = OpLoad %5 %7
+%13 = OpLoad %5 %7
+%14 = OpLoad %5 %7
+%10 = OpExtInst %5 %11 )" +
+                  param.op +
+                  R"( %12 %13 %14
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
+TEST_P(Builtin_Builder_ThreeParam_Float_Test, Call_Scalar_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto param = GetParam();
+    auto* scalar = Var("scalar", nullptr, Expr(1_h));
+    auto* expr = Call(param.name, scalar, scalar, scalar);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Decl(scalar),
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect = R"(%11 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+OpName %7 "scalar"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%5 = OpTypeFloat 16
+%6 = OpConstant %5 0x1p+0
 %8 = OpTypePointer Function %5
 %9 = OpConstantNull %5
 %3 = OpFunction %2 None %1
@@ -985,6 +1505,50 @@ OpFunctionEnd
     EXPECT_EQ(got, expect);
 }
 
+TEST_P(Builtin_Builder_ThreeParam_Float_Test, Call_Vector_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto param = GetParam();
+    auto* vec = Var("vec", nullptr, vec2<f16>(1_h, 1_h));
+    auto* expr = Call(param.name, vec, vec, vec);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Decl(vec),
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+OpName %9 "vec"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 16
+%5 = OpTypeVector %6 2
+%7 = OpConstant %6 0x1p+0
+%8 = OpConstantComposite %5 %7 %7
+%10 = OpTypePointer Function %5
+%11 = OpConstantNull %5
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%9 = OpVariable %10 Function %11
+OpStore %9 %8
+%14 = OpLoad %5 %9
+%15 = OpLoad %5 %9
+%16 = OpLoad %5 %9
+%12 = OpExtInst %5 %13 )" +
+                  param.op +
+                  R"( %14 %15 %16
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
 INSTANTIATE_TEST_SUITE_P(BuiltinBuilderTest,
                          Builtin_Builder_ThreeParam_Float_Test,
                          testing::Values(BuiltinData{"clamp", "NClamp"},
@@ -1015,6 +1579,47 @@ OpName %9 "vec"
 %6 = OpTypeFloat 32
 %5 = OpTypeVector %6 2
 %7 = OpConstant %6 1
+%8 = OpConstantComposite %5 %7 %7
+%10 = OpTypePointer Function %5
+%11 = OpConstantNull %5
+%3 = OpFunction %2 None %1
+%4 = OpLabel
+%9 = OpVariable %10 Function %11
+OpStore %9 %8
+%14 = OpLoad %5 %9
+%15 = OpLoad %5 %9
+%16 = OpLoad %5 %9
+%12 = OpExtInst %5 %13 FaceForward %14 %15 %16
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
+TEST_F(BuiltinBuilderTest, Call_FaceForward_Vector_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* vec = Var("vec", nullptr, vec2<f16>(1_h, 1_h));
+    auto* expr = Call("faceForward", vec, vec, vec);
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Decl(vec),
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect = R"(%13 = OpExtInstImport "GLSL.std.450"
+OpName %3 "a_func"
+OpName %9 "vec"
+%2 = OpTypeVoid
+%1 = OpTypeFunction %2
+%6 = OpTypeFloat 16
+%5 = OpTypeVector %6 2
+%7 = OpConstant %6 0x1p+0
 %8 = OpConstantComposite %5 %7 %7
 %10 = OpTypePointer Function %5
 %11 = OpConstantNull %5
@@ -2130,6 +2735,43 @@ OpFunctionEnd
     EXPECT_EQ(got, expect);
 }
 
+TEST_F(BuiltinBuilderTest, Call_Determinant_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = GlobalVar("var", ty.mat3x3<f16>(), ast::StorageClass::kPrivate);
+    auto* expr = Call("determinant", "var");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect = R"(%12 = OpExtInstImport "GLSL.std.450"
+OpName %1 "var"
+OpName %9 "a_func"
+%5 = OpTypeFloat 16
+%4 = OpTypeVector %5 3
+%3 = OpTypeMatrix %4 3
+%2 = OpTypePointer Private %3
+%6 = OpConstantNull %3
+%1 = OpVariable %2 Private %6
+%8 = OpTypeVoid
+%7 = OpTypeFunction %8
+%9 = OpFunction %8 None %7
+%10 = OpLabel
+%13 = OpLoad %3 %1
+%11 = OpExtInst %5 %12 Determinant %13
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
 TEST_F(BuiltinBuilderTest, Call_Transpose_f32) {
     auto* var = GlobalVar("var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
     auto* expr = Call("transpose", "var");
@@ -2147,6 +2789,44 @@ TEST_F(BuiltinBuilderTest, Call_Transpose_f32) {
     auto expect = R"(OpName %1 "var"
 OpName %9 "a_func"
 %5 = OpTypeFloat 32
+%4 = OpTypeVector %5 3
+%3 = OpTypeMatrix %4 2
+%2 = OpTypePointer Private %3
+%6 = OpConstantNull %3
+%1 = OpVariable %2 Private %6
+%8 = OpTypeVoid
+%7 = OpTypeFunction %8
+%13 = OpTypeVector %5 2
+%12 = OpTypeMatrix %13 3
+%9 = OpFunction %8 None %7
+%10 = OpLabel
+%14 = OpLoad %3 %1
+%11 = OpTranspose %12 %14
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(got, expect);
+}
+
+TEST_F(BuiltinBuilderTest, Call_Transpose_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = GlobalVar("var", ty.mat2x3<f16>(), ast::StorageClass::kPrivate);
+    auto* expr = Call("transpose", "var");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    auto got = DumpBuilder(b);
+    auto expect = R"(OpName %1 "var"
+OpName %9 "a_func"
+%5 = OpTypeFloat 16
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 2
 %2 = OpTypePointer Private %3
@@ -2185,6 +2865,37 @@ TEST_F(BuiltinBuilderTest, Call_Dot_F32) {
     ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%11 = OpLoad %3 %1
+%12 = OpLoad %3 %1
+%10 = OpDot %4 %11 %12
+OpReturn
+)");
+}
+
+TEST_F(BuiltinBuilderTest, Call_Dot_F16) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = GlobalVar("v", ty.vec3<f16>(), ast::StorageClass::kPrivate);
+    auto* expr = Call("dot", "v", "v");
+    auto* func = Func("a_func", {}, ty.void_(),
+                      {
+                          Assign(Phony(), expr),
+                      });
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 16
 %3 = OpTypeVector %4 3
 %2 = OpTypePointer Private %3
 %5 = OpConstantNull %3

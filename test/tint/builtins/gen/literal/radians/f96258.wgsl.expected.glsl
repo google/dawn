@@ -1,7 +1,7 @@
 #version 310 es
 
 vec3 tint_radians(vec3 param_0) {
-  return param_0 * 0.017453292519943295474;
+  return param_0 * 0.017453292519943295474f;
 }
 
 
@@ -26,7 +26,7 @@ void main() {
 precision mediump float;
 
 vec3 tint_radians(vec3 param_0) {
-  return param_0 * 0.017453292519943295474;
+  return param_0 * 0.017453292519943295474f;
 }
 
 
@@ -45,7 +45,7 @@ void main() {
 #version 310 es
 
 vec3 tint_radians(vec3 param_0) {
-  return param_0 * 0.017453292519943295474;
+  return param_0 * 0.017453292519943295474f;
 }
 
 

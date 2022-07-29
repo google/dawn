@@ -448,6 +448,8 @@ func SplitDisplayName(displayName string) []string {
 // If the type is not a composite type, then the fully qualified name is returned
 func ElementType(fqn sem.FullyQualifiedName) sem.FullyQualifiedName {
 	switch fqn.Target.GetName() {
+	case "vec2", "vec3", "vec4":
+		return fqn.TemplateArguments[0].(sem.FullyQualifiedName)
 	case "vec":
 		return fqn.TemplateArguments[1].(sem.FullyQualifiedName)
 	case "mat":
@@ -462,12 +464,16 @@ func ElementType(fqn sem.FullyQualifiedName) sem.FullyQualifiedName {
 // fully qualified name.
 func DeepestElementType(fqn sem.FullyQualifiedName) sem.FullyQualifiedName {
 	switch fqn.Target.GetName() {
+	case "vec2", "vec3", "vec4":
+		return fqn.TemplateArguments[0].(sem.FullyQualifiedName)
 	case "vec":
 		return fqn.TemplateArguments[1].(sem.FullyQualifiedName)
 	case "mat":
 		return DeepestElementType(fqn.TemplateArguments[2].(sem.FullyQualifiedName))
 	case "array":
 		return DeepestElementType(fqn.TemplateArguments[0].(sem.FullyQualifiedName))
+	case "ptr":
+		return DeepestElementType(fqn.TemplateArguments[1].(sem.FullyQualifiedName))
 	}
 	return fqn
 }
@@ -489,7 +495,7 @@ func IsDeclarable(fqn sem.FullyQualifiedName) bool {
 }
 
 // OverloadUsesF16 returns true if the overload uses the f16 type anywhere in the signature.
-func OverloadUsesF16(overload *sem.Overload, typename string) bool {
+func OverloadUsesF16(overload *sem.Overload) bool {
 	for _, param := range overload.Parameters {
 		if DeepestElementType(param.Type).Target.GetName() == "f16" {
 			return true

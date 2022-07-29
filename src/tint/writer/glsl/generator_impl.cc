@@ -1302,10 +1302,12 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
 bool GeneratorImpl::EmitDegreesCall(std::ostream& out,
                                     const ast::CallExpression* expr,
                                     const sem::Builtin* builtin) {
+    auto* return_elem_type = sem::Type::DeepestElementOf(builtin->ReturnType());
+    const std::string suffix = Is<sem::F16>(return_elem_type) ? "hf" : "f";
     return CallBuiltinHelper(out, expr, builtin,
                              [&](TextBuffer* b, const std::vector<std::string>& params) {
                                  line(b) << "return " << params[0] << " * " << std::setprecision(20)
-                                         << sem::kRadToDeg << ";";
+                                         << sem::kRadToDeg << suffix << ";";
                                  return true;
                              });
 }
@@ -1313,10 +1315,12 @@ bool GeneratorImpl::EmitDegreesCall(std::ostream& out,
 bool GeneratorImpl::EmitRadiansCall(std::ostream& out,
                                     const ast::CallExpression* expr,
                                     const sem::Builtin* builtin) {
+    auto* return_elem_type = sem::Type::DeepestElementOf(builtin->ReturnType());
+    const std::string suffix = Is<sem::F16>(return_elem_type) ? "hf" : "f";
     return CallBuiltinHelper(out, expr, builtin,
                              [&](TextBuffer* b, const std::vector<std::string>& params) {
                                  line(b) << "return " << params[0] << " * " << std::setprecision(20)
-                                         << sem::kDegToRad << ";";
+                                         << sem::kDegToRad << suffix << ";";
                                  return true;
                              });
 }

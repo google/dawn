@@ -13,16 +13,20 @@ See:
 {{- range Sem.Builtins -}}
 {{-   range .Overloads  -}}
 {{-     range Permute . -}}
-{{- /*    Generate a ./literal/<function>/<permuataion-hash>.wgsl file using
-          the Permutation macro defined below                             */ -}}
-{{-       $file := printf "./literal/%v/%v.wgsl" .Intrinsic.Name .Hash -}}
-{{-       $content := Eval "Permutation" "Overload" . "Mode" "literal" -}}
-{{-       WriteFile $file $content -}}
-{{- /*    Generate a ./var/<function>/<permuataion-hash>.wgsl file using
-          the Permutation macro defined below                             */ -}}
-{{-       $file := printf "./var/%v/%v.wgsl" .Intrinsic.Name .Hash -}}
-{{-       $content := Eval "Permutation" "Overload" . "Mode" "var" -}}
-{{-       WriteFile $file $content -}}
+{{- /*    TODO(crbug.com/tint/1502): Remove the bodge below and emit "enable f16;" after
+          getting ready for F16 end-to-end tests.                                        */ -}}
+{{-       if not (OverloadUsesF16 .Overload) -}}
+{{- /*      Generate a ./literal/<function>/<permuataion-hash>.wgsl file using
+            the Permutation macro defined below                             */ -}}
+{{-         $file := printf "./literal/%v/%v.wgsl" .Intrinsic.Name .Hash -}}
+{{-         $content := Eval "Permutation" "Overload" . "Mode" "literal" -}}
+{{-         WriteFile $file $content -}}
+{{- /*      Generate a ./var/<function>/<permuataion-hash>.wgsl file using
+            the Permutation macro defined below                             */ -}}
+{{-         $file := printf "./var/%v/%v.wgsl" .Intrinsic.Name .Hash -}}
+{{-         $content := Eval "Permutation" "Overload" . "Mode" "var" -}}
+{{-         WriteFile $file $content -}}
+{{-       end  }}
 {{-     end  }}
 {{-   end  }}
 {{- end  }}

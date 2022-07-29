@@ -1,7 +1,7 @@
 #version 310 es
 
 vec4 tint_degrees(vec4 param_0) {
-  return param_0 * 57.295779513082322865;
+  return param_0 * 57.295779513082322865f;
 }
 
 
@@ -27,7 +27,7 @@ void main() {
 precision mediump float;
 
 vec4 tint_degrees(vec4 param_0) {
-  return param_0 * 57.295779513082322865;
+  return param_0 * 57.295779513082322865f;
 }
 
 
@@ -47,7 +47,7 @@ void main() {
 #version 310 es
 
 vec4 tint_degrees(vec4 param_0) {
-  return param_0 * 57.295779513082322865;
+  return param_0 * 57.295779513082322865f;
 }
 
 

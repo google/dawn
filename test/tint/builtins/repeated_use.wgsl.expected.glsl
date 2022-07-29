@@ -1,19 +1,19 @@
 #version 310 es
 
 vec4 tint_degrees(vec4 param_0) {
-  return param_0 * 57.295779513082322865;
+  return param_0 * 57.295779513082322865f;
 }
 
 vec3 tint_degrees_1(vec3 param_0) {
-  return param_0 * 57.295779513082322865;
+  return param_0 * 57.295779513082322865f;
 }
 
 vec2 tint_degrees_2(vec2 param_0) {
-  return param_0 * 57.295779513082322865;
+  return param_0 * 57.295779513082322865f;
 }
 
 float tint_degrees_3(float param_0) {
-  return param_0 * 57.295779513082322865;
+  return param_0 * 57.295779513082322865f;
 }
 
 

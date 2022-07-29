@@ -73,33 +73,32 @@ auto Dispatch_fia_fi32_f16(F&& f, CONSTANTS&&... cs) {
         [&](const sem::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
         [&](const sem::F32*) { return f(cs->template As<f32>()...); },
         [&](const sem::I32*) { return f(cs->template As<i32>()...); },
-        [&](const sem::F16*) {
-            // TODO(crbug.com/tint/1502): Support const eval for f16
-            return nullptr;
-        });
+        [&](const sem::F16*) { return f(cs->template As<f16>()...); });
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
 /// Assumes all `cs` are of the same type.
 template <typename F, typename... CONSTANTS>
-auto Dispatch_fia_fiu32(F&& f, CONSTANTS&&... cs) {
+auto Dispatch_fia_fiu32_f16(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
         [&](const sem::AbstractInt*) { return f(cs->template As<AInt>()...); },
         [&](const sem::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
         [&](const sem::F32*) { return f(cs->template As<f32>()...); },
         [&](const sem::I32*) { return f(cs->template As<i32>()...); },
-        [&](const sem::U32*) { return f(cs->template As<u32>()...); });
+        [&](const sem::U32*) { return f(cs->template As<u32>()...); },
+        [&](const sem::F16*) { return f(cs->template As<f16>()...); });
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
 /// Assumes all `cs` are of the same type.
 template <typename F, typename... CONSTANTS>
-auto Dispatch_fa_f32(F&& f, CONSTANTS&&... cs) {
+auto Dispatch_fa_f32_f16(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
         [&](const sem::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
-        [&](const sem::F32*) { return f(cs->template As<f32>()...); });
+        [&](const sem::F32*) { return f(cs->template As<f32>()...); },
+        [&](const sem::F16*) { return f(cs->template As<f16>()...); });
 }
 
 /// ZeroTypeDispatch is a helper for calling the function `f`, passing a single zero-value argument
@@ -730,7 +729,7 @@ const sem::Constant* ConstEval::atan2(const sem::Type*,
         auto create = [&](auto i, auto j) {
             return CreateElement(builder, c0->Type(), decltype(i)(std::atan2(i.value, j.value)));
         };
-        return Dispatch_fa_f32(create, c0, c1);
+        return Dispatch_fa_f32_f16(create, c0, c1);
     };
     return TransformElements(builder, transform, args[0]->ConstantValue(),
                              args[1]->ConstantValue());
@@ -744,7 +743,7 @@ const sem::Constant* ConstEval::clamp(const sem::Type*,
             return CreateElement(builder, c0->Type(),
                                  decltype(e)(std::min(std::max(e, low), high)));
         };
-        return Dispatch_fia_fiu32(create, c0, c1, c2);
+        return Dispatch_fia_fiu32_f16(create, c0, c1, c2);
     };
     return TransformElements(builder, transform, args[0]->ConstantValue(), args[1]->ConstantValue(),
                              args[2]->ConstantValue());

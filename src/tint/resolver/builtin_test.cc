@@ -129,9 +129,9 @@ TEST_F(ResolverBuiltinTest, Select_Error_NoParams) {
               R"(error: no matching call to select()
 
 3 candidate functions:
-  select(T, T, bool) -> T  where: T is f32, i32, u32 or bool
-  select(vecN<T>, vecN<T>, bool) -> vecN<T>  where: T is f32, i32, u32 or bool
-  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is f32, i32, u32 or bool
+  select(T, T, bool) -> T  where: T is f32, f16, i32, u32 or bool
+  select(vecN<T>, vecN<T>, bool) -> vecN<T>  where: T is f32, f16, i32, u32 or bool
+  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is f32, f16, i32, u32 or bool
 )");
 }
 
@@ -145,9 +145,9 @@ TEST_F(ResolverBuiltinTest, Select_Error_SelectorInt) {
               R"(error: no matching call to select(i32, i32, i32)
 
 3 candidate functions:
-  select(T, T, bool) -> T  where: T is f32, i32, u32 or bool
-  select(vecN<T>, vecN<T>, bool) -> vecN<T>  where: T is f32, i32, u32 or bool
-  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is f32, i32, u32 or bool
+  select(T, T, bool) -> T  where: T is f32, f16, i32, u32 or bool
+  select(vecN<T>, vecN<T>, bool) -> vecN<T>  where: T is f32, f16, i32, u32 or bool
+  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is f32, f16, i32, u32 or bool
 )");
 }
 
@@ -162,9 +162,9 @@ TEST_F(ResolverBuiltinTest, Select_Error_Matrix) {
               R"(error: no matching call to select(mat2x2<f32>, mat2x2<f32>, bool)
 
 3 candidate functions:
-  select(T, T, bool) -> T  where: T is f32, i32, u32 or bool
-  select(vecN<T>, vecN<T>, bool) -> vecN<T>  where: T is f32, i32, u32 or bool
-  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is f32, i32, u32 or bool
+  select(T, T, bool) -> T  where: T is f32, f16, i32, u32 or bool
+  select(vecN<T>, vecN<T>, bool) -> vecN<T>  where: T is f32, f16, i32, u32 or bool
+  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is f32, f16, i32, u32 or bool
 )");
 }
 
@@ -178,9 +178,9 @@ TEST_F(ResolverBuiltinTest, Select_Error_MismatchTypes) {
               R"(error: no matching call to select(f32, vec2<f32>, bool)
 
 3 candidate functions:
-  select(T, T, bool) -> T  where: T is f32, i32, u32 or bool
-  select(vecN<T>, vecN<T>, bool) -> vecN<T>  where: T is f32, i32, u32 or bool
-  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is f32, i32, u32 or bool
+  select(T, T, bool) -> T  where: T is f32, f16, i32, u32 or bool
+  select(vecN<T>, vecN<T>, bool) -> vecN<T>  where: T is f32, f16, i32, u32 or bool
+  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is f32, f16, i32, u32 or bool
 )");
 }
 
@@ -194,9 +194,9 @@ TEST_F(ResolverBuiltinTest, Select_Error_MismatchVectorSize) {
               R"(error: no matching call to select(vec2<f32>, vec3<f32>, bool)
 
 3 candidate functions:
-  select(T, T, bool) -> T  where: T is f32, i32, u32 or bool
-  select(vecN<T>, vecN<T>, bool) -> vecN<T>  where: T is f32, i32, u32 or bool
-  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is f32, i32, u32 or bool
+  select(T, T, bool) -> T  where: T is f32, f16, i32, u32 or bool
+  select(vecN<T>, vecN<T>, bool) -> vecN<T>  where: T is f32, f16, i32, u32 or bool
+  select(vecN<T>, vecN<T>, vecN<bool>) -> vecN<T>  where: T is f32, f16, i32, u32 or bool
 )");
 }
 
@@ -458,6 +458,206 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, FourParams_Vector_f32) {
     }
 }
 
+TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Scalar_f16) {
+    auto param = GetParam();
+
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call(param.name, 1_h);
+    WrapInFunction(call);
+
+    if (param.args_number == 1u) {
+        // Parameter count matched.
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+        ASSERT_NE(TypeOf(call), nullptr);
+        EXPECT_TRUE(TypeOf(call)->Is<sem::F16>());
+    } else {
+        // Invalid parameter count.
+        EXPECT_FALSE(r()->Resolve());
+
+        EXPECT_THAT(r()->error(),
+                    HasSubstr("error: no matching call to " + std::string(param.name) + "(f16)"));
+    }
+}
+
+TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Vector_f16) {
+    auto param = GetParam();
+
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call(param.name, vec3<f16>(1_h, 1_h, 3_h));
+    WrapInFunction(call);
+
+    if (param.args_number == 1u) {
+        // Parameter count matched.
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+        ASSERT_NE(TypeOf(call), nullptr);
+        EXPECT_TRUE(TypeOf(call)->is_float_vector());
+        EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
+        ASSERT_NE(TypeOf(call)->As<sem::Vector>()->type(), nullptr);
+        EXPECT_TRUE(TypeOf(call)->As<sem::Vector>()->type()->Is<sem::F16>());
+    } else {
+        // Invalid parameter count.
+        EXPECT_FALSE(r()->Resolve());
+
+        EXPECT_THAT(r()->error(), HasSubstr("error: no matching call to " +
+                                            std::string(param.name) + "(vec3<f16>)"));
+    }
+}
+
+TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, TwoParams_Scalar_f16) {
+    auto param = GetParam();
+
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call(param.name, 1_h, 1_h);
+    WrapInFunction(call);
+
+    if (param.args_number == 2u) {
+        // Parameter count matched.
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+        ASSERT_NE(TypeOf(call), nullptr);
+        EXPECT_TRUE(TypeOf(call)->Is<sem::F16>());
+    } else {
+        // Invalid parameter count.
+        EXPECT_FALSE(r()->Resolve());
+
+        EXPECT_THAT(r()->error(), HasSubstr("error: no matching call to " +
+                                            std::string(param.name) + "(f16, f16)"));
+    }
+}
+
+TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, TwoParams_Vector_f16) {
+    auto param = GetParam();
+
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call(param.name, vec3<f16>(1_h, 1_h, 3_h), vec3<f16>(1_h, 1_h, 3_h));
+    WrapInFunction(call);
+
+    if (param.args_number == 2u) {
+        // Parameter count matched.
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+        ASSERT_NE(TypeOf(call), nullptr);
+        EXPECT_TRUE(TypeOf(call)->is_float_vector());
+        EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
+        ASSERT_NE(TypeOf(call)->As<sem::Vector>()->type(), nullptr);
+        EXPECT_TRUE(TypeOf(call)->As<sem::Vector>()->type()->Is<sem::F16>());
+    } else {
+        // Invalid parameter count.
+        EXPECT_FALSE(r()->Resolve());
+
+        EXPECT_THAT(r()->error(), HasSubstr("error: no matching call to " +
+                                            std::string(param.name) + "(vec3<f16>, vec3<f16>)"));
+    }
+}
+
+TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, ThreeParams_Scalar_f16) {
+    auto param = GetParam();
+
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call(param.name, 1_h, 1_h, 1_h);
+    WrapInFunction(call);
+
+    if (param.args_number == 3u) {
+        // Parameter count matched.
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+        ASSERT_NE(TypeOf(call), nullptr);
+        EXPECT_TRUE(TypeOf(call)->Is<sem::F16>());
+    } else {
+        // Invalid parameter count.
+        EXPECT_FALSE(r()->Resolve());
+
+        EXPECT_THAT(r()->error(), HasSubstr("error: no matching call to " +
+                                            std::string(param.name) + "(f16, f16, f16)"));
+    }
+}
+
+TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, ThreeParams_Vector_f16) {
+    auto param = GetParam();
+
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call(param.name, vec3<f16>(1_h, 1_h, 3_h), vec3<f16>(1_h, 1_h, 3_h),
+                      vec3<f16>(1_h, 1_h, 3_h));
+    WrapInFunction(call);
+
+    if (param.args_number == 3u) {
+        // Parameter count matched.
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+        ASSERT_NE(TypeOf(call), nullptr);
+        EXPECT_TRUE(TypeOf(call)->is_float_vector());
+        EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
+        ASSERT_NE(TypeOf(call)->As<sem::Vector>()->type(), nullptr);
+        EXPECT_TRUE(TypeOf(call)->As<sem::Vector>()->type()->Is<sem::F16>());
+    } else {
+        // Invalid parameter count.
+        EXPECT_FALSE(r()->Resolve());
+
+        EXPECT_THAT(r()->error(),
+                    HasSubstr("error: no matching call to " + std::string(param.name) +
+                              "(vec3<f16>, vec3<f16>, vec3<f16>)"));
+    }
+}
+
+TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, FourParams_Scalar_f16) {
+    auto param = GetParam();
+
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call(param.name, 1_h, 1_h, 1_h, 1_h);
+    WrapInFunction(call);
+
+    if (param.args_number == 4u) {
+        // Parameter count matched.
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+        ASSERT_NE(TypeOf(call), nullptr);
+        EXPECT_TRUE(TypeOf(call)->Is<sem::F16>());
+    } else {
+        // Invalid parameter count.
+        EXPECT_FALSE(r()->Resolve());
+
+        EXPECT_THAT(r()->error(), HasSubstr("error: no matching call to " +
+                                            std::string(param.name) + "(f16, f16, f16, f16)"));
+    }
+}
+
+TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, FourParams_Vector_f16) {
+    auto param = GetParam();
+
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call(param.name, vec3<f16>(1_h, 1_h, 3_h), vec3<f16>(1_h, 1_h, 3_h),
+                      vec3<f16>(1_h, 1_h, 3_h), vec3<f16>(1_h, 1_h, 3_h));
+    WrapInFunction(call);
+
+    if (param.args_number == 4u) {
+        // Parameter count matched.
+        EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+        ASSERT_NE(TypeOf(call), nullptr);
+        EXPECT_TRUE(TypeOf(call)->is_float_vector());
+        EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
+        ASSERT_NE(TypeOf(call)->As<sem::Vector>()->type(), nullptr);
+        EXPECT_TRUE(TypeOf(call)->As<sem::Vector>()->type()->Is<sem::F16>());
+    } else {
+        // Invalid parameter count.
+        EXPECT_FALSE(r()->Resolve());
+
+        EXPECT_THAT(r()->error(),
+                    HasSubstr("error: no matching call to " + std::string(param.name) +
+                              "(vec3<f16>, vec3<f16>, vec3<f16>, vec3<f16>)"));
+    }
+}
+
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_FloatBuiltin_IdenticalType,
@@ -526,6 +726,20 @@ TEST_F(ResolverBuiltinFloatTest, Cross_f32) {
     EXPECT_TRUE(TypeOf(call)->As<sem::Vector>()->type()->Is<sem::F32>());
 }
 
+TEST_F(ResolverBuiltinFloatTest, Cross_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call("cross", vec3<f16>(1_h, 2_h, 3_h), vec3<f16>(1_h, 2_h, 3_h));
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    EXPECT_TRUE(TypeOf(call)->is_float_vector());
+    EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
+    EXPECT_TRUE(TypeOf(call)->As<sem::Vector>()->type()->Is<sem::F16>());
+}
+
 TEST_F(ResolverBuiltinFloatTest, Cross_Error_NoArgs) {
     auto* call = Call("cross");
     WrapInFunction(call);
@@ -535,7 +749,7 @@ TEST_F(ResolverBuiltinFloatTest, Cross_Error_NoArgs) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to cross()
 
 1 candidate function:
-  cross(vec3<f32>, vec3<f32>) -> vec3<f32>
+  cross(vec3<T>, vec3<T>) -> vec3<T>  where: T is f32 or f16
 )");
 }
 
@@ -548,7 +762,7 @@ TEST_F(ResolverBuiltinFloatTest, Cross_Error_Scalar) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to cross(f32, f32)
 
 1 candidate function:
-  cross(vec3<f32>, vec3<f32>) -> vec3<f32>
+  cross(vec3<T>, vec3<T>) -> vec3<T>  where: T is f32 or f16
 )");
 }
 
@@ -562,7 +776,7 @@ TEST_F(ResolverBuiltinFloatTest, Cross_Error_Vec3Int) {
               R"(error: no matching call to cross(vec3<i32>, vec3<i32>)
 
 1 candidate function:
-  cross(vec3<f32>, vec3<f32>) -> vec3<f32>
+  cross(vec3<T>, vec3<T>) -> vec3<T>  where: T is f32 or f16
 )");
 }
 
@@ -577,7 +791,7 @@ TEST_F(ResolverBuiltinFloatTest, Cross_Error_Vec4) {
               R"(error: no matching call to cross(vec4<f32>, vec4<f32>)
 
 1 candidate function:
-  cross(vec3<f32>, vec3<f32>) -> vec3<f32>
+  cross(vec3<T>, vec3<T>) -> vec3<T>  where: T is f32 or f16
 )");
 }
 
@@ -593,7 +807,7 @@ TEST_F(ResolverBuiltinFloatTest, Cross_Error_TooManyParams) {
               R"(error: no matching call to cross(vec3<f32>, vec3<f32>, vec3<f32>)
 
 1 candidate function:
-  cross(vec3<f32>, vec3<f32>) -> vec3<f32>
+  cross(vec3<T>, vec3<T>) -> vec3<T>  where: T is f32 or f16
 )");
 }
 
@@ -608,6 +822,18 @@ TEST_F(ResolverBuiltinFloatTest, Distance_Scalar_f32) {
     EXPECT_TRUE(TypeOf(call)->Is<sem::F32>());
 }
 
+TEST_F(ResolverBuiltinFloatTest, Distance_Scalar_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call("distance", 1_h, 1_h);
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    EXPECT_TRUE(TypeOf(call)->Is<sem::F16>());
+}
+
 TEST_F(ResolverBuiltinFloatTest, Distance_Vector_f32) {
     auto* call = Call("distance", vec3<f32>(1_f, 1_f, 3_f), vec3<f32>(1_f, 1_f, 3_f));
     WrapInFunction(call);
@@ -618,31 +844,44 @@ TEST_F(ResolverBuiltinFloatTest, Distance_Vector_f32) {
     EXPECT_TRUE(TypeOf(call)->Is<sem::F32>());
 }
 
+TEST_F(ResolverBuiltinFloatTest, Distance_Vector_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call("distance", vec3<f16>(1_h, 1_h, 3_h), vec3<f16>(1_h, 1_h, 3_h));
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    EXPECT_TRUE(TypeOf(call)->Is<sem::F16>());
+}
+
 TEST_F(ResolverBuiltinFloatTest, Distance_TooManyParams) {
-    auto* call = Call("distance", 1_f, 1_f, 3_f);
+    auto* call = Call("distance", vec3<f32>(1_f, 1_f, 3_f), vec3<f32>(1_f, 1_f, 3_f),
+                      vec3<f32>(1_f, 1_f, 3_f));
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
 
-    EXPECT_EQ(r()->error(), R"(error: no matching call to distance(f32, f32, f32)
+    EXPECT_EQ(r()->error(), R"(error: no matching call to distance(vec3<f32>, vec3<f32>, vec3<f32>)
 
 2 candidate functions:
-  distance(f32, f32) -> f32
-  distance(vecN<f32>, vecN<f32>) -> f32
+  distance(T, T) -> T  where: T is f32 or f16
+  distance(vecN<T>, vecN<T>) -> T  where: T is f32 or f16
 )");
 }
 
 TEST_F(ResolverBuiltinFloatTest, Distance_TooFewParams) {
-    auto* call = Call("distance", 1_f);
+    auto* call = Call("distance", vec3<f32>(1_f, 1_f, 3_f));
     WrapInFunction(call);
 
     EXPECT_FALSE(r()->Resolve());
 
-    EXPECT_EQ(r()->error(), R"(error: no matching call to distance(f32)
+    EXPECT_EQ(r()->error(), R"(error: no matching call to distance(vec3<f32>)
 
 2 candidate functions:
-  distance(f32, f32) -> f32
-  distance(vecN<f32>, vecN<f32>) -> f32
+  distance(T, T) -> T  where: T is f32 or f16
+  distance(vecN<T>, vecN<T>) -> T  where: T is f32 or f16
 )");
 }
 
@@ -655,8 +894,8 @@ TEST_F(ResolverBuiltinFloatTest, Distance_NoParams) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to distance()
 
 2 candidate functions:
-  distance(f32, f32) -> f32
-  distance(vecN<f32>, vecN<f32>) -> f32
+  distance(T, T) -> T  where: T is f32 or f16
+  distance(vecN<T>, vecN<T>) -> T  where: T is f32 or f16
 )");
 }
 
@@ -796,6 +1035,18 @@ TEST_F(ResolverBuiltinFloatTest, Length_Scalar_f32) {
     EXPECT_TRUE(TypeOf(call)->Is<sem::F32>());
 }
 
+TEST_F(ResolverBuiltinFloatTest, Length_Scalar_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call("length", 1_h);
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    EXPECT_TRUE(TypeOf(call)->Is<sem::F16>());
+}
+
 TEST_F(ResolverBuiltinFloatTest, Length_FloatVector_f32) {
     auto* call = Call("length", vec3<f32>(1_f, 1_f, 3_f));
     WrapInFunction(call);
@@ -804,6 +1055,18 @@ TEST_F(ResolverBuiltinFloatTest, Length_FloatVector_f32) {
 
     ASSERT_NE(TypeOf(call), nullptr);
     EXPECT_TRUE(TypeOf(call)->Is<sem::F32>());
+}
+
+TEST_F(ResolverBuiltinFloatTest, Length_FloatVector_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call("length", vec3<f16>(1_h, 1_h, 3_h));
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    EXPECT_TRUE(TypeOf(call)->Is<sem::F16>());
 }
 
 TEST_F(ResolverBuiltinFloatTest, Length_NoParams) {
@@ -815,8 +1078,8 @@ TEST_F(ResolverBuiltinFloatTest, Length_NoParams) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to length()
 
 2 candidate functions:
-  length(f32) -> f32
-  length(vecN<f32>) -> f32
+  length(T) -> T  where: T is f32 or f16
+  length(vecN<T>) -> T  where: T is f32 or f16
 )");
 }
 
@@ -829,8 +1092,8 @@ TEST_F(ResolverBuiltinFloatTest, Length_TooManyParams) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to length(f32, f32)
 
 2 candidate functions:
-  length(f32) -> f32
-  length(vecN<f32>) -> f32
+  length(T) -> T  where: T is f32 or f16
+  length(vecN<T>) -> T  where: T is f32 or f16
 )");
 }
 
@@ -847,6 +1110,21 @@ TEST_F(ResolverBuiltinFloatTest, Mix_VectorScalar_f32) {
     EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
     ASSERT_NE(TypeOf(call)->As<sem::Vector>()->type(), nullptr);
     EXPECT_TRUE(TypeOf(call)->As<sem::Vector>()->type()->Is<sem::F32>());
+}
+
+TEST_F(ResolverBuiltinFloatTest, Mix_VectorScalar_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call("mix", vec3<f16>(1_h, 1_h, 1_h), vec3<f16>(1_h, 1_h, 1_h), 4_h);
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    EXPECT_TRUE(TypeOf(call)->is_float_vector());
+    EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
+    ASSERT_NE(TypeOf(call)->As<sem::Vector>()->type(), nullptr);
+    EXPECT_TRUE(TypeOf(call)->As<sem::Vector>()->type()->Is<sem::F16>());
 }
 
 // modf: (f32) -> __modf_result, (vecN<f32>) -> __modf_result_vecN
@@ -987,6 +1265,20 @@ TEST_F(ResolverBuiltinFloatTest, Normalize_Vector_f32) {
     EXPECT_TRUE(TypeOf(call)->As<sem::Vector>()->type()->Is<sem::F32>());
 }
 
+TEST_F(ResolverBuiltinFloatTest, Normalize_Vector_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call("normalize", vec3<f16>(1_h, 1_h, 3_h));
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    EXPECT_TRUE(TypeOf(call)->is_float_vector());
+    EXPECT_EQ(TypeOf(call)->As<sem::Vector>()->Width(), 3u);
+    EXPECT_TRUE(TypeOf(call)->As<sem::Vector>()->type()->Is<sem::F16>());
+}
+
 TEST_F(ResolverBuiltinFloatTest, Normalize_Error_NoParams) {
     auto* call = Call("normalize");
     WrapInFunction(call);
@@ -996,7 +1288,7 @@ TEST_F(ResolverBuiltinFloatTest, Normalize_Error_NoParams) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to normalize()
 
 1 candidate function:
-  normalize(vecN<f32>) -> vecN<f32>
+  normalize(vecN<T>) -> vecN<T>  where: T is f32 or f16
 )");
 }
 
@@ -1436,6 +1728,20 @@ TEST_F(ResolverBuiltinTest, Determinant_2x2_f32) {
     EXPECT_TRUE(TypeOf(call)->Is<sem::F32>());
 }
 
+TEST_F(ResolverBuiltinTest, Determinant_2x2_f16) {
+    Enable(ast::Extension::kF16);
+
+    GlobalVar("var", ty.mat2x2<f16>(), ast::StorageClass::kPrivate);
+
+    auto* call = Call("determinant", "var");
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    EXPECT_TRUE(TypeOf(call)->Is<sem::F16>());
+}
+
 TEST_F(ResolverBuiltinTest, Determinant_3x3_f32) {
     GlobalVar("var", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
 
@@ -1446,6 +1752,20 @@ TEST_F(ResolverBuiltinTest, Determinant_3x3_f32) {
 
     ASSERT_NE(TypeOf(call), nullptr);
     EXPECT_TRUE(TypeOf(call)->Is<sem::F32>());
+}
+
+TEST_F(ResolverBuiltinTest, Determinant_3x3_f16) {
+    Enable(ast::Extension::kF16);
+
+    GlobalVar("var", ty.mat3x3<f16>(), ast::StorageClass::kPrivate);
+
+    auto* call = Call("determinant", "var");
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    EXPECT_TRUE(TypeOf(call)->Is<sem::F16>());
 }
 
 TEST_F(ResolverBuiltinTest, Determinant_4x4_f32) {
@@ -1460,6 +1780,20 @@ TEST_F(ResolverBuiltinTest, Determinant_4x4_f32) {
     EXPECT_TRUE(TypeOf(call)->Is<sem::F32>());
 }
 
+TEST_F(ResolverBuiltinTest, Determinant_4x4_f16) {
+    Enable(ast::Extension::kF16);
+
+    GlobalVar("var", ty.mat4x4<f16>(), ast::StorageClass::kPrivate);
+
+    auto* call = Call("determinant", "var");
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    EXPECT_TRUE(TypeOf(call)->Is<sem::F16>());
+}
+
 TEST_F(ResolverBuiltinTest, Determinant_NotSquare) {
     GlobalVar("var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
 
@@ -1471,7 +1805,7 @@ TEST_F(ResolverBuiltinTest, Determinant_NotSquare) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to determinant(mat2x3<f32>)
 
 1 candidate function:
-  determinant(matNxN<f32>) -> f32
+  determinant(matNxN<T>) -> T  where: T is f32 or f16
 )");
 }
 
@@ -1486,7 +1820,7 @@ TEST_F(ResolverBuiltinTest, Determinant_NotMatrix) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to determinant(f32)
 
 1 candidate function:
-  determinant(matNxN<f32>) -> f32
+  determinant(matNxN<T>) -> T  where: T is f32 or f16
 )");
 }
 
@@ -1505,6 +1839,20 @@ TEST_F(ResolverBuiltinTest, Dot_Vec2_f32) {
 
     ASSERT_NE(TypeOf(expr), nullptr);
     EXPECT_TRUE(TypeOf(expr)->Is<sem::F32>());
+}
+
+TEST_F(ResolverBuiltinTest, Dot_Vec2_f16) {
+    Enable(ast::Extension::kF16);
+
+    GlobalVar("my_var", ty.vec2<f16>(), ast::StorageClass::kPrivate);
+
+    auto* expr = Call("dot", "my_var", "my_var");
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(expr), nullptr);
+    EXPECT_TRUE(TypeOf(expr)->Is<sem::F16>());
 }
 
 TEST_F(ResolverBuiltinTest, Dot_Vec3_i32) {
@@ -1541,7 +1889,7 @@ TEST_F(ResolverBuiltinTest, Dot_Error_Scalar) {
               R"(error: no matching call to dot(f32, f32)
 
 1 candidate function:
-  dot(vecN<T>, vecN<T>) -> T  where: T is f32, i32 or u32
+  dot(vecN<T>, vecN<T>) -> T  where: T is f32, i32, u32 or f16
 )");
 }
 
