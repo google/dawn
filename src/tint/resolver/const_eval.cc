@@ -209,21 +209,20 @@ struct Element : Constant {
             } else if constexpr (IsFloatingPoint<UnwrapNumber<TO>>) {
                 // [x -> floating-point] - number not exactly representable
                 // https://www.w3.org/TR/WGSL/#floating-point-conversion
-                constexpr auto kInf = std::numeric_limits<double>::infinity();
                 switch (conv.Failure()) {
                     case ConversionFailure::kExceedsNegativeLimit:
-                        return builder.create<Element<TO>>(target_ty, TO(-kInf));
+                        return builder.create<Element<TO>>(target_ty, -TO::Inf());
                     case ConversionFailure::kExceedsPositiveLimit:
-                        return builder.create<Element<TO>>(target_ty, TO(kInf));
+                        return builder.create<Element<TO>>(target_ty, TO::Inf());
                 }
             } else {
                 // [x -> integer] - number not exactly representable
                 // https://www.w3.org/TR/WGSL/#floating-point-conversion
                 switch (conv.Failure()) {
                     case ConversionFailure::kExceedsNegativeLimit:
-                        return builder.create<Element<TO>>(target_ty, TO(TO::kLowest));
+                        return builder.create<Element<TO>>(target_ty, TO::Lowest());
                     case ConversionFailure::kExceedsPositiveLimit:
-                        return builder.create<Element<TO>>(target_ty, TO(TO::kHighest));
+                        return builder.create<Element<TO>>(target_ty, TO::Highest());
                 }
             }
             return nullptr;  // Expression is not constant.

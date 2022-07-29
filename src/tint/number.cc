@@ -34,10 +34,10 @@ std::ostream& operator<<(std::ostream& out, ConversionFailure failure) {
 }
 
 f16::type f16::Quantize(f16::type value) {
-    if (value > kHighest) {
+    if (value > kHighestValue) {
         return std::numeric_limits<f16::type>::infinity();
     }
-    if (value < kLowest) {
+    if (value < kLowestValue) {
         return -std::numeric_limits<f16::type>::infinity();
     }
     // Below value must be within the finite range of a f16.
@@ -82,17 +82,17 @@ f16::type f16::Quantize(f16::type value) {
     // 2. We can decide whether a given normal f32 number v is in the set R, by looking at its
     // mantissa bits and biased exponent `e`. Recall that biased exponent e is unbiased exponent +
     // 127, and in the range of 1 to 254 for normal f32 number.
-    //   2.1. If e >= 143, i.e. abs(v) >= 2^16 > f16::kHighest = 0x1.ffcp15, v is larger than any
-    //   finite f16 value and can not be in set R.
-    //   2.2. If 142 >= e >= 113, or f16::kHighest >= abs(v) >= f16::kSmallest = 2^-14, v falls in
-    //   the range of normal f16 values. In this case, v is in the set R iff the lowest 13 mantissa
-    //   bits are all 0. (See below for proof)
+    //   2.1. If e >= 143, i.e. abs(v) >= 2^16 > f16::kHighestValue = 0x1.ffcp15, v is larger than
+    //   any finite f16 value and can not be in set R. 2.2. If 142 >= e >= 113, or
+    //   f16::kHighestValue >= abs(v) >= f16::kSmallestValue = 2^-14, v falls in the range of normal
+    //   f16 values. In this case, v is in the set R iff the lowest 13 mantissa bits are all 0. (See
+    //   below for proof)
     //     2.2.1. If we let v' be v with lowest 13 mantissa bits masked to 0, v' will be in set R
     //     and the largest one in set R that no larger than v. Such v' is the quantized value of v.
-    //   2.3. If 112 >= e >= 103, i.e. 2^-14 > abs(v) >= f16::kSmallestSubnormal = 2^-24, v falls in
-    //   the range of subnormal f16 values. In this case, v is in the set R iff the lowest 126-e
-    //   mantissa bits are all 0. Notice that 126-e is in range 14 to 23, inclusive. (See below for
-    //   proof)
+    //   2.3. If 112 >= e >= 103, i.e. 2^-14 > abs(v) >= f16::kSmallestSubnormalValue = 2^-24, v
+    //   falls in the range of subnormal f16 values. In this case, v is in the set R iff the lowest
+    //   126-e mantissa bits are all 0. Notice that 126-e is in range 14 to 23, inclusive. (See
+    //   below for proof)
     //     2.3.1. If we let v' be v with lowest 126-e mantissa bits masked to 0, v' will be in set R
     //     and the largest on in set R that no larger than v. Such v' is the quantized value of v.
     //   2.4. If 2^-24 > abs(v) > 0, i.e. 103 > e, v is smaller than any finite f16 value and not
@@ -174,17 +174,17 @@ f16::type f16::Quantize(f16::type value) {
     // in range [103, 112], or unbiased exponent in [-24, -15].
 
     float abs_value = std::fabs(value);
-    if (abs_value >= kSmallest) {
+    if (abs_value >= kSmallestValue) {
         // Value falls in the normal f16 range, quantize it to a normal f16 value by masking out
         // lowest 13 mantissa bits.
         u32 = u32 & ~((1u << 13) - 1);
-    } else if (abs_value >= kSmallestSubnormal) {
+    } else if (abs_value >= kSmallestSubnormalValue) {
         // Value should be quantized to a subnormal f16 value.
 
         // Get the biased exponent `e` of f32 value, e.g. value 127 representing exponent 2^0.
         uint32_t biased_exponent_original = (u32 & exponent_mask) >> 23;
-        // Since we ensure that kSmallest = 0x1f-14 > abs(value) >= kSmallestSubnormal = 0x1f-24,
-        // value will have a unbiased exponent in range -24 to -15 (inclusive), and the
+        // Since we ensure that kSmallestValue = 0x1f-14 > abs(value) >= kSmallestSubnormalValue =
+        // 0x1f-24, value will have a unbiased exponent in range -24 to -15 (inclusive), and the
         // corresponding biased exponent in f32 is in range 103 to 112 (inclusive).
         TINT_ASSERT(Semantic,
                     (103 <= biased_exponent_original) && (biased_exponent_original <= 112));

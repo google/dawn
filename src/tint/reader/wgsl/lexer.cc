@@ -706,8 +706,8 @@ Token Lexer::try_hex_float() {
 
     if (has_f_suffix) {
         // Check value fits in f32
-        if (result_f64 < static_cast<double>(f32::kLowest) ||
-            result_f64 > static_cast<double>(f32::kHighest)) {
+        if (result_f64 < static_cast<double>(f32::kLowestValue) ||
+            result_f64 > static_cast<double>(f32::kHighestValue)) {
             return {Token::Type::kError, source, "value cannot be represented as 'f32'"};
         }
         // Check the value can be exactly represented, i.e. only high 23 mantissa bits are valid for
@@ -715,13 +715,14 @@ Token Lexer::try_hex_float() {
         // 0.
         int valid_mantissa_bits = 0;
         double abs_result_f64 = std::fabs(result_f64);
-        if (abs_result_f64 >= static_cast<double>(f32::kSmallest)) {
+        if (abs_result_f64 >= static_cast<double>(f32::kSmallestValue)) {
             // The result shall be a normal f32 value.
             valid_mantissa_bits = 23;
-        } else if (abs_result_f64 >= static_cast<double>(f32::kSmallestSubnormal)) {
+        } else if (abs_result_f64 >= static_cast<double>(f32::kSmallestSubnormalValue)) {
             // The result shall be a subnormal f32 value, represented as double.
-            // The smallest positive normal f32 is f32::kSmallest = 2^-126 = 0x1.0p-126, and the
-            //   smallest positive subnormal f32 is f32::kSmallestSubnormal = 2^-149. Thus, the
+            // The smallest positive normal f32 is f32::kSmallestValue = 2^-126 = 0x1.0p-126, and
+            // the
+            //   smallest positive subnormal f32 is f32::kSmallestSubnormalValue = 2^-149. Thus, the
             //   value v in range 2^-126 > v >= 2^-149 must be represented as a subnormal f32
             //   number, but is still normal double (f64) number, and has a exponent in range -127
             //   to -149, inclusive.
@@ -758,8 +759,8 @@ Token Lexer::try_hex_float() {
         return {Token::Type::kFloatLiteral_F, source, result_f64};
     } else if (has_h_suffix) {
         // Check value fits in f16
-        if (result_f64 < static_cast<double>(f16::kLowest) ||
-            result_f64 > static_cast<double>(f16::kHighest)) {
+        if (result_f64 < static_cast<double>(f16::kLowestValue) ||
+            result_f64 > static_cast<double>(f16::kHighestValue)) {
             return {Token::Type::kError, source, "value cannot be represented as 'f16'"};
         }
         // Check the value can be exactly represented, i.e. only high 10 mantissa bits are valid for
@@ -767,15 +768,15 @@ Token Lexer::try_hex_float() {
         // 0.
         int valid_mantissa_bits = 0;
         double abs_result_f64 = std::fabs(result_f64);
-        if (abs_result_f64 >= static_cast<double>(f16::kSmallest)) {
+        if (abs_result_f64 >= static_cast<double>(f16::kSmallestValue)) {
             // The result shall be a normal f16 value.
             valid_mantissa_bits = 10;
-        } else if (abs_result_f64 >= static_cast<double>(f16::kSmallestSubnormal)) {
+        } else if (abs_result_f64 >= static_cast<double>(f16::kSmallestSubnormalValue)) {
             // The result shall be a subnormal f16 value, represented as double.
-            // The smallest positive normal f16 is f16::kSmallest = 2^-14 = 0x1.0p-14, and the
-            //   smallest positive subnormal f16 is f16::kSmallestSubnormal = 2^-24. Thus, the value
-            //   v in range 2^-14 > v >= 2^-24 must be represented as a subnormal f16 number, but
-            //   is still normal double (f64) number, and has a exponent in range -15 to -24,
+            // The smallest positive normal f16 is f16::kSmallestValue = 2^-14 = 0x1.0p-14, and the
+            //   smallest positive subnormal f16 is f16::kSmallestSubnormalValue = 2^-24. Thus, the
+            //   value v in range 2^-14 > v >= 2^-24 must be represented as a subnormal f16 number,
+            //   but is still normal double (f64) number, and has a exponent in range -15 to -24,
             //   inclusive.
             // A value v, if 2^-14 > v >= 2^-15, its binary16 representation will have binary form
             //   s_00000_1xxxxxxxxx, having mantissa of 1 leading 1 bit and 9 arbitrary bits. Since

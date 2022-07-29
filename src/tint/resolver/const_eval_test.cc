@@ -30,18 +30,6 @@ namespace tint::resolver {
 namespace {
 
 template <typename T>
-const auto kHighest = T(T::kHighest);
-
-template <typename T>
-const auto kLowest = T(T::kLowest);
-
-template <typename T>
-const auto kNaN = T(std::numeric_limits<UnwrapNumber<T>>::quiet_NaN());
-
-template <typename T>
-const auto kInf = T(std::numeric_limits<UnwrapNumber<T>>::infinity());
-
-template <typename T>
 const auto kPi = T(UnwrapNumber<T>(3.14159265358979323846));
 
 template <typename T>
@@ -1336,17 +1324,17 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_i32) {
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<AInt>(), i32::kHighest);
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<AInt>(), i32::Highest());
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<AInt>(), i32::kLowest);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<AInt>(), i32::Lowest());
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<AInt>(), i32::kHighest);
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<AInt>(), i32::Highest());
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
@@ -1369,17 +1357,17 @@ TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_u32) {
     EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<AInt>(), u32::kHighest);
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<AInt>(), u32::Highest());
 
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AnyZero());
     EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<AInt>(), u32::kLowest);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<AInt>(), u32::Lowest());
 
     EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
     EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<AInt>(), u32::kHighest);
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<AInt>(), u32::Highest());
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Convert_Large_f32_to_f16) {
@@ -3071,46 +3059,46 @@ INSTANTIATE_TEST_SUITE_P(Negation,
                                               C(-0_a, 0_a),
                                               C(1_a, -1_a),
                                               C(-1_a, 1_a),
-                                              C(kHighest<AInt>, -kHighest<AInt>),
-                                              C(-kHighest<AInt>, kHighest<AInt>),
-                                              C(kLowest<AInt>, Negate(kLowest<AInt>)),
-                                              C(Negate(kLowest<AInt>), kLowest<AInt>),
+                                              C(AInt::Highest(), -AInt::Highest()),
+                                              C(-AInt::Highest(), AInt::Highest()),
+                                              C(AInt::Lowest(), Negate(AInt::Lowest())),
+                                              C(Negate(AInt::Lowest()), AInt::Lowest()),
                                               // i32
                                               C(0_i, -0_i),
                                               C(-0_i, 0_i),
                                               C(1_i, -1_i),
                                               C(-1_i, 1_i),
-                                              C(kHighest<i32>, -kHighest<i32>),
-                                              C(-kHighest<i32>, kHighest<i32>),
-                                              C(kLowest<i32>, Negate(kLowest<i32>)),
-                                              C(Negate(kLowest<i32>), kLowest<i32>),
+                                              C(i32::Highest(), -i32::Highest()),
+                                              C(-i32::Highest(), i32::Highest()),
+                                              C(i32::Lowest(), Negate(i32::Lowest())),
+                                              C(Negate(i32::Lowest()), i32::Lowest()),
                                               // AFloat
                                               C(0.0_a, -0.0_a),
                                               C(-0.0_a, 0.0_a),
                                               C(1.0_a, -1.0_a),
                                               C(-1.0_a, 1.0_a),
-                                              C(kHighest<AFloat>, -kHighest<AFloat>),
-                                              C(-kHighest<AFloat>, kHighest<AFloat>),
-                                              C(kLowest<AFloat>, Negate(kLowest<AFloat>)),
-                                              C(Negate(kLowest<AFloat>), kLowest<AFloat>),
+                                              C(AFloat::Highest(), -AFloat::Highest()),
+                                              C(-AFloat::Highest(), AFloat::Highest()),
+                                              C(AFloat::Lowest(), Negate(AFloat::Lowest())),
+                                              C(Negate(AFloat::Lowest()), AFloat::Lowest()),
                                               // f32
                                               C(0.0_f, -0.0_f),
                                               C(-0.0_f, 0.0_f),
                                               C(1.0_f, -1.0_f),
                                               C(-1.0_f, 1.0_f),
-                                              C(kHighest<f32>, -kHighest<f32>),
-                                              C(-kHighest<f32>, kHighest<f32>),
-                                              C(kLowest<f32>, Negate(kLowest<f32>)),
-                                              C(Negate(kLowest<f32>), kLowest<f32>),
+                                              C(f32::Highest(), -f32::Highest()),
+                                              C(-f32::Highest(), f32::Highest()),
+                                              C(f32::Lowest(), Negate(f32::Lowest())),
+                                              C(Negate(f32::Lowest()), f32::Lowest()),
                                               // f16
                                               C(0.0_h, -0.0_h),
                                               C(-0.0_h, 0.0_h),
                                               C(1.0_h, -1.0_h),
                                               C(-1.0_h, 1.0_h),
-                                              C(kHighest<f16>, -kHighest<f16>),
-                                              C(-kHighest<f16>, kHighest<f16>),
-                                              C(kLowest<f16>, Negate(kLowest<f16>)),
-                                              C(Negate(kLowest<f16>), kLowest<f16>),
+                                              C(f16::Highest(), -f16::Highest()),
+                                              C(-f16::Highest(), f16::Highest()),
+                                              C(f16::Lowest(), Negate(f16::Lowest())),
+                                              C(Negate(f16::Lowest()), f16::Lowest()),
                                           })));
 
 // Make sure UBSan doesn't trip on C++'s undefined behaviour of negating the smallest negative
@@ -3222,33 +3210,33 @@ std::vector<Case> Atan2Cases() {
     if constexpr (!finite_only) {
         std::vector<Case> non_finite_cases = {
             // If y is +/-INF and x is finite, +/-PI/2 is returned
-            C({kInf<T>, T(0.0)}, kPiOver2<T>, true),
-            C({-kInf<T>, T(0.0)}, kPiOver2<T>, true),
+            C({T::Inf(), T(0.0)}, kPiOver2<T>, true),
+            C({-T::Inf(), T(0.0)}, kPiOver2<T>, true),
 
             // If y is +/-INF and x is -INF, +/-3PI/4 is returned
-            C({kInf<T>, -kInf<T>}, k3PiOver4<T>, true),
-            C({-kInf<T>, -kInf<T>}, k3PiOver4<T>, true),
+            C({T::Inf(), -T::Inf()}, k3PiOver4<T>, true),
+            C({-T::Inf(), -T::Inf()}, k3PiOver4<T>, true),
 
             // If y is +/-INF and x is +INF, +/-PI/4 is returned
-            C({kInf<T>, kInf<T>}, kPiOver4<T>, true),
-            C({-kInf<T>, kInf<T>}, kPiOver4<T>, true),
+            C({T::Inf(), T::Inf()}, kPiOver4<T>, true),
+            C({-T::Inf(), T::Inf()}, kPiOver4<T>, true),
 
             // If x is -INF and y is finite and positive, +PI is returned
-            C({T(0.0), -kInf<T>}, kPi<T>),
+            C({T(0.0), -T::Inf()}, kPi<T>),
 
             // If x is -INF and y is finite and negative, -PI is returned
-            C({-T(0.0), -kInf<T>}, -kPi<T>),
+            C({-T(0.0), -T::Inf()}, -kPi<T>),
 
             // If x is +INF and y is finite and positive, +0 is returned
-            C({T(0.0), kInf<T>}, T(0.0)),
+            C({T(0.0), T::Inf()}, T(0.0)),
 
             // If x is +INF and y is finite and negative, -0 is returned
-            C({-T(0.0), kInf<T>}, -T(0.0)),
+            C({-T(0.0), T::Inf()}, -T(0.0)),
 
             // If either x is NaN or y is NaN, NaN is returned
-            C({kNaN<T>, T(0.0)}, kNaN<T>),
-            C({T(0.0), kNaN<T>}, kNaN<T>),
-            C({kNaN<T>, kNaN<T>}, kNaN<T>),
+            C({T::NaN(), T(0.0)}, T::NaN()),
+            C({T(0.0), T::NaN()}, T::NaN()),
+            C({T::NaN(), T::NaN()}, T::NaN()),
         };
 
         cases = Concat(cases, non_finite_cases);
@@ -3269,14 +3257,14 @@ template <typename T>
 std::vector<Case> ClampCases() {
     return {
         C({T(0), T(0), T(0)}, T(0)),
-        C({T(0), T(42), kHighest<T>}, T(42)),
-        C({kLowest<T>, T(0), T(42)}, T(0)),
-        C({T(0), kLowest<T>, kHighest<T>}, T(0)),
-        C({T(0), kHighest<T>, kLowest<T>}, kLowest<T>),
-        C({kHighest<T>, kHighest<T>, kHighest<T>}, kHighest<T>),
-        C({kLowest<T>, kLowest<T>, kLowest<T>}, kLowest<T>),
-        C({kHighest<T>, kLowest<T>, kHighest<T>}, kHighest<T>),
-        C({kLowest<T>, kLowest<T>, kHighest<T>}, kLowest<T>),
+        C({T(0), T(42), T::Highest()}, T(42)),
+        C({T::Lowest(), T(0), T(42)}, T(0)),
+        C({T(0), T::Lowest(), T::Highest()}, T(0)),
+        C({T(0), T::Highest(), T::Lowest()}, T::Lowest()),
+        C({T::Highest(), T::Highest(), T::Highest()}, T::Highest()),
+        C({T::Lowest(), T::Lowest(), T::Lowest()}, T::Lowest()),
+        C({T::Highest(), T::Lowest(), T::Highest()}, T::Highest()),
+        C({T::Lowest(), T::Lowest(), T::Highest()}, T::Lowest()),
     };
 }
 

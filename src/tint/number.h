@@ -68,26 +68,47 @@ constexpr bool IsInteger = std::is_integral_v<T>;
 template <typename T>
 constexpr bool IsNumeric = IsInteger<T> || IsFloatingPoint<T>;
 
+/// Resolves to the underlying type for a Number.
+template <typename T>
+using UnwrapNumber = typename detail::NumberUnwrapper<T>::type;
+
+/// NumberBase is a CRTP base class for Number<T>
+template <typename NumberT>
+struct NumberBase {
+    /// @returns value of type `Number<T>` with the highest value for that type.
+    static NumberT Highest() { return NumberT(NumberT::kHighestValue); }
+    /// @returns value of type `Number<T>` with the lowest value for that type.
+    static NumberT Lowest() { return NumberT(NumberT::kLowestValue); }
+    /// @returns value of type `Number<T>` with the smallest value for that type.
+    static NumberT Smallest() { return NumberT(NumberT::kSmallestValue); }
+    /// @returns value of type `Number<T>` that represents NaN for that type.
+    static NumberT NaN() {
+        return NumberT(std::numeric_limits<UnwrapNumber<NumberT>>::quiet_NaN());
+    }
+    /// @returns value of type `Number<T>` that represents infinity for that type.
+    static NumberT Inf() { return NumberT(std::numeric_limits<UnwrapNumber<NumberT>>::infinity()); }
+};
+
 /// Number wraps a integer or floating point number, enforcing explicit casting.
 template <typename T>
-struct Number {
+struct Number : NumberBase<Number<T>> {
     static_assert(IsNumeric<T>, "Number<T> constructed with non-numeric type");
 
     /// type is the underlying type of the Number
     using type = T;
 
     /// Highest finite representable value of this type.
-    static constexpr type kHighest = std::numeric_limits<type>::max();
+    static constexpr type kHighestValue = std::numeric_limits<type>::max();
 
     /// Lowest finite representable value of this type.
-    static constexpr type kLowest = std::numeric_limits<type>::lowest();
+    static constexpr type kLowestValue = std::numeric_limits<type>::lowest();
 
     /// Smallest positive normal value of this type.
-    static constexpr type kSmallest =
+    static constexpr type kSmallestValue =
         std::is_integral_v<type> ? 0 : std::numeric_limits<type>::min();
 
     /// Smallest positive subnormal value of this type, 0 for integral type.
-    static constexpr type kSmallestSubnormal =
+    static constexpr type kSmallestSubnormalValue =
         std::is_integral_v<type> ? 0 : std::numeric_limits<type>::denorm_min();
 
     /// Constructor. The value is zero-initialized.
@@ -123,10 +144,6 @@ struct Number {
     type value = {};
 };
 
-/// Resolves to the underlying type for a Number.
-template <typename T>
-using UnwrapNumber = typename detail::NumberUnwrapper<T>::type;
-
 /// Writes the number to the ostream.
 /// @param out the std::ostream to write to
 /// @param num the Number
@@ -139,23 +156,23 @@ inline std::ostream& operator<<(std::ostream& out, Number<T> num) {
 /// The partial specification of Number for f16 type, storing the f16 value as float,
 /// and enforcing proper explicit casting.
 template <>
-struct Number<detail::NumberKindF16> {
+struct Number<detail::NumberKindF16> : NumberBase<Number<detail::NumberKindF16>> {
     /// C++ does not have a native float16 type, so we use a 32-bit float instead.
     using type = float;
 
     /// Highest finite representable value of this type.
-    static constexpr type kHighest = 65504.0f;  // 2¹⁵ × (1 + 1023/1024)
+    static constexpr type kHighestValue = 65504.0f;  // 2¹⁵ × (1 + 1023/1024)
 
     /// Lowest finite representable value of this type.
-    static constexpr type kLowest = -65504.0f;
+    static constexpr type kLowestValue = -65504.0f;
 
     /// Smallest positive normal value of this type.
     /// binary16 0_00001_0000000000, value is 2⁻¹⁴.
-    static constexpr type kSmallest = 0x1p-14f;
+    static constexpr type kSmallestValue = 0x1p-14f;
 
     /// Smallest positive subnormal value of this type.
     /// binary16 0_00000_0000000001, value is 2⁻¹⁴ * 2⁻¹⁰ = 2⁻²⁴.
-    static constexpr type kSmallestSubnormal = 0x1p-24f;
+    static constexpr type kSmallestSubnormalValue = 0x1p-24f;
 
     /// Constructor. The value is zero-initialized.
     Number() = default;
@@ -239,10 +256,10 @@ utils::Result<TO, ConversionFailure> CheckedConvert(Number<FROM> num) {
     using T = std::conditional_t<IsFloatingPoint<UnwrapNumber<TO>> || IsFloatingPoint<FROM>,
                                  AFloat::type, AInt::type>;
     const auto value = static_cast<T>(num.value);
-    if (value > static_cast<T>(TO::kHighest)) {
+    if (value > static_cast<T>(TO::kHighestValue)) {
         return ConversionFailure::kExceedsPositiveLimit;
     }
-    if (value < static_cast<T>(TO::kLowest)) {
+    if (value < static_cast<T>(TO::kLowestValue)) {
         return ConversionFailure::kExceedsNegativeLimit;
     }
     return TO(value);  // Success
@@ -333,11 +350,11 @@ inline std::optional<AInt> CheckedAdd(AInt a, AInt b) {
     }
 #else   // TINT_HAS_OVERFLOW_BUILTINS
     if (a.value >= 0) {
-        if (AInt::kHighest - a.value < b.value) {
+        if (AInt::kHighestValue - a.value < b.value) {
             return {};
         }
     } else {
-        if (b.value < AInt::kLowest - a.value) {
+        if (b.value < AInt::kLowestValue - a.value) {
             return {};
         }
     }
@@ -356,21 +373,21 @@ inline std::optional<AInt> CheckedMul(AInt a, AInt b) {
 #else   // TINT_HAS_OVERFLOW_BUILTINS
     if (a > 0) {
         if (b > 0) {
-            if (a > (AInt::kHighest / b)) {
+            if (a > (AInt::kHighestValue / b)) {
                 return {};
             }
         } else {
-            if (b < (AInt::kLowest / a)) {
+            if (b < (AInt::kLowestValue / a)) {
                 return {};
             }
         }
     } else {
         if (b > 0) {
-            if (a < (AInt::kLowest / b)) {
+            if (a < (AInt::kLowestValue / b)) {
                 return {};
             }
         } else {
-            if ((a != 0) && (b < (AInt::kHighest / a))) {
+            if ((a != 0) && (b < (AInt::kHighestValue / a))) {
                 return {};
             }
         }
