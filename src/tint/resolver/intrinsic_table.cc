@@ -131,7 +131,7 @@ class TemplateState {
         if (existing == ty) {
             return ty;
         }
-        ty = sem::Type::Common({existing, ty});
+        ty = sem::Type::Common(utils::Vector{existing, ty});
         if (ty) {
             res.first->second = ty;
         }

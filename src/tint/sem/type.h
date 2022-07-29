@@ -19,6 +19,7 @@
 #include <string>
 
 #include "src/tint/sem/node.h"
+#include "src/tint/utils/vector.h"
 
 // Forward declarations
 namespace tint {
@@ -156,20 +157,11 @@ class Type : public Castable<Type, Node> {
     ///   * `nullptr` if `ty` is none of the above
     static const Type* DeepestElementOf(const Type* ty, uint32_t* count = nullptr);
 
-    /// @param types a pointer to a list of `const Type*`.
-    /// @param count the number of types in `types`.
+    /// @param types the list of types
     /// @returns the lowest-ranking type that all types in `types` can be implicitly converted to,
-    /// or nullptr if there is no consistent common type across all types in `types`.
+    ///          or nullptr if there is no consistent common type across all types in `types`.
     /// @see https://www.w3.org/TR/WGSL/#conversion-rank
-    static const sem::Type* Common(Type const* const* types, size_t count);
-
-    /// @param types an initializer_list of `const Type*`.
-    /// @returns the lowest-ranking type that all types in `types` can be implicitly converted to,
-    /// or nullptr if there is no consistent common type across all types in `types`.
-    /// @see https://www.w3.org/TR/WGSL/#conversion-rank
-    static const sem::Type* Common(std::initializer_list<const Type*> types) {
-        return Common(types.begin(), types.size());
-    }
+    static const sem::Type* Common(utils::ConstVectorRef<const Type*> types);
 
   protected:
     Type();

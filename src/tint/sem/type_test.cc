@@ -357,41 +357,41 @@ TEST_F(TypeTest, Common2) {
     auto* i32 = create<I32>();
     auto* u32 = create<U32>();
 
-    EXPECT_TYPE(Type::Common({ai, ai}), ai);
-    EXPECT_TYPE(Type::Common({af, af}), af);
-    EXPECT_TYPE(Type::Common({f32, f32}), f32);
-    EXPECT_TYPE(Type::Common({f16, f16}), f16);
-    EXPECT_TYPE(Type::Common({i32, i32}), i32);
-    EXPECT_TYPE(Type::Common({u32, u32}), u32);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, ai}), ai);
+    EXPECT_TYPE(Type::Common(utils::Vector{af, af}), af);
+    EXPECT_TYPE(Type::Common(utils::Vector{f32, f32}), f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{f16, f16}), f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{i32, i32}), i32);
+    EXPECT_TYPE(Type::Common(utils::Vector{u32, u32}), u32);
 
-    EXPECT_TYPE(Type::Common({i32, u32}), nullptr);
-    EXPECT_TYPE(Type::Common({u32, f32}), nullptr);
-    EXPECT_TYPE(Type::Common({f32, f16}), nullptr);
-    EXPECT_TYPE(Type::Common({f16, i32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{i32, u32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{u32, f32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{f32, f16}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{f16, i32}), nullptr);
 
-    EXPECT_TYPE(Type::Common({ai, af}), af);
-    EXPECT_TYPE(Type::Common({ai, f32}), f32);
-    EXPECT_TYPE(Type::Common({ai, f16}), f16);
-    EXPECT_TYPE(Type::Common({ai, i32}), i32);
-    EXPECT_TYPE(Type::Common({ai, u32}), u32);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, af}), af);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, f32}), f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, f16}), f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, i32}), i32);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, u32}), u32);
 
-    EXPECT_TYPE(Type::Common({af, ai}), af);
-    EXPECT_TYPE(Type::Common({f32, ai}), f32);
-    EXPECT_TYPE(Type::Common({f16, ai}), f16);
-    EXPECT_TYPE(Type::Common({i32, ai}), i32);
-    EXPECT_TYPE(Type::Common({u32, ai}), u32);
+    EXPECT_TYPE(Type::Common(utils::Vector{af, ai}), af);
+    EXPECT_TYPE(Type::Common(utils::Vector{f32, ai}), f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{f16, ai}), f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{i32, ai}), i32);
+    EXPECT_TYPE(Type::Common(utils::Vector{u32, ai}), u32);
 
-    EXPECT_TYPE(Type::Common({ai, af}), af);
-    EXPECT_TYPE(Type::Common({f32, af}), f32);
-    EXPECT_TYPE(Type::Common({f16, af}), f16);
-    EXPECT_TYPE(Type::Common({i32, af}), nullptr);
-    EXPECT_TYPE(Type::Common({u32, af}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, af}), af);
+    EXPECT_TYPE(Type::Common(utils::Vector{f32, af}), f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{f16, af}), f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{i32, af}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{u32, af}), nullptr);
 
-    EXPECT_TYPE(Type::Common({af, ai}), af);
-    EXPECT_TYPE(Type::Common({af, f32}), f32);
-    EXPECT_TYPE(Type::Common({af, f16}), f16);
-    EXPECT_TYPE(Type::Common({af, i32}), nullptr);
-    EXPECT_TYPE(Type::Common({af, u32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{af, ai}), af);
+    EXPECT_TYPE(Type::Common(utils::Vector{af, f32}), f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{af, f16}), f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{af, i32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{af, u32}), nullptr);
 
     auto* vec3_ai = create<Vector>(ai, 3u);
     auto* vec3_af = create<Vector>(af, 3u);
@@ -401,55 +401,55 @@ TEST_F(TypeTest, Common2) {
     auto* vec3_u32 = create<Vector>(u32, 3u);
     auto* vec3_i32 = create<Vector>(i32, 3u);
 
-    EXPECT_TYPE(Type::Common({vec3_ai, vec3_ai}), vec3_ai);
-    EXPECT_TYPE(Type::Common({vec3_af, vec3_af}), vec3_af);
-    EXPECT_TYPE(Type::Common({vec3_f32, vec3_f32}), vec3_f32);
-    EXPECT_TYPE(Type::Common({vec3_f16, vec3_f16}), vec3_f16);
-    EXPECT_TYPE(Type::Common({vec4_f32, vec4_f32}), vec4_f32);
-    EXPECT_TYPE(Type::Common({vec3_u32, vec3_u32}), vec3_u32);
-    EXPECT_TYPE(Type::Common({vec3_i32, vec3_i32}), vec3_i32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_ai}), vec3_ai);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_af, vec3_af}), vec3_af);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_f32, vec3_f32}), vec3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_f16, vec3_f16}), vec3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec4_f32, vec4_f32}), vec4_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_u32, vec3_u32}), vec3_u32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_i32, vec3_i32}), vec3_i32);
 
-    EXPECT_TYPE(Type::Common({vec3_ai, vec3_f32}), vec3_f32);
-    EXPECT_TYPE(Type::Common({vec3_ai, vec3_f16}), vec3_f16);
-    EXPECT_TYPE(Type::Common({vec3_ai, vec4_f32}), nullptr);
-    EXPECT_TYPE(Type::Common({vec3_ai, vec3_u32}), vec3_u32);
-    EXPECT_TYPE(Type::Common({vec3_ai, vec3_i32}), vec3_i32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_f32}), vec3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_f16}), vec3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec4_f32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_u32}), vec3_u32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_i32}), vec3_i32);
 
-    EXPECT_TYPE(Type::Common({vec3_f32, vec3_ai}), vec3_f32);
-    EXPECT_TYPE(Type::Common({vec3_f16, vec3_ai}), vec3_f16);
-    EXPECT_TYPE(Type::Common({vec4_f32, vec3_ai}), nullptr);
-    EXPECT_TYPE(Type::Common({vec3_u32, vec3_ai}), vec3_u32);
-    EXPECT_TYPE(Type::Common({vec3_i32, vec3_ai}), vec3_i32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_f32, vec3_ai}), vec3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_f16, vec3_ai}), vec3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec4_f32, vec3_ai}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_u32, vec3_ai}), vec3_u32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_i32, vec3_ai}), vec3_i32);
 
-    EXPECT_TYPE(Type::Common({vec3_af, vec3_f32}), vec3_f32);
-    EXPECT_TYPE(Type::Common({vec3_af, vec3_f16}), vec3_f16);
-    EXPECT_TYPE(Type::Common({vec3_af, vec4_f32}), nullptr);
-    EXPECT_TYPE(Type::Common({vec3_af, vec3_u32}), nullptr);
-    EXPECT_TYPE(Type::Common({vec3_af, vec3_i32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_af, vec3_f32}), vec3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_af, vec3_f16}), vec3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_af, vec4_f32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_af, vec3_u32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_af, vec3_i32}), nullptr);
 
-    EXPECT_TYPE(Type::Common({vec3_f32, vec3_af}), vec3_f32);
-    EXPECT_TYPE(Type::Common({vec3_f16, vec3_af}), vec3_f16);
-    EXPECT_TYPE(Type::Common({vec4_f32, vec3_af}), nullptr);
-    EXPECT_TYPE(Type::Common({vec3_u32, vec3_af}), nullptr);
-    EXPECT_TYPE(Type::Common({vec3_i32, vec3_af}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_f32, vec3_af}), vec3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_f16, vec3_af}), vec3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec4_f32, vec3_af}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_u32, vec3_af}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_i32, vec3_af}), nullptr);
 
     auto* mat4x3_af = create<Matrix>(vec3_af, 4u);
     auto* mat3x4_f32 = create<Matrix>(vec4_f32, 3u);
     auto* mat4x3_f32 = create<Matrix>(vec3_f32, 4u);
     auto* mat4x3_f16 = create<Matrix>(vec3_f16, 4u);
 
-    EXPECT_TYPE(Type::Common({mat4x3_af, mat4x3_af}), mat4x3_af);
-    EXPECT_TYPE(Type::Common({mat3x4_f32, mat3x4_f32}), mat3x4_f32);
-    EXPECT_TYPE(Type::Common({mat4x3_f32, mat4x3_f32}), mat4x3_f32);
-    EXPECT_TYPE(Type::Common({mat4x3_f16, mat4x3_f16}), mat4x3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_af, mat4x3_af}), mat4x3_af);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat3x4_f32, mat3x4_f32}), mat3x4_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_f32, mat4x3_f32}), mat4x3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_f16, mat4x3_f16}), mat4x3_f16);
 
-    EXPECT_TYPE(Type::Common({mat4x3_af, mat3x4_f32}), nullptr);
-    EXPECT_TYPE(Type::Common({mat4x3_af, mat4x3_f32}), mat4x3_f32);
-    EXPECT_TYPE(Type::Common({mat4x3_af, mat4x3_f16}), mat4x3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_af, mat3x4_f32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_af, mat4x3_f32}), mat4x3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_af, mat4x3_f16}), mat4x3_f16);
 
-    EXPECT_TYPE(Type::Common({mat3x4_f32, mat4x3_af}), nullptr);
-    EXPECT_TYPE(Type::Common({mat4x3_f32, mat4x3_af}), mat4x3_f32);
-    EXPECT_TYPE(Type::Common({mat4x3_f16, mat4x3_af}), mat4x3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat3x4_f32, mat4x3_af}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_f32, mat4x3_af}), mat4x3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_f16, mat4x3_af}), mat4x3_f16);
 }
 
 TEST_F(TypeTest, Common3) {
@@ -460,49 +460,49 @@ TEST_F(TypeTest, Common3) {
     auto* i32 = create<I32>();
     auto* u32 = create<U32>();
 
-    EXPECT_TYPE(Type::Common({ai, ai, ai}), ai);
-    EXPECT_TYPE(Type::Common({af, af, af}), af);
-    EXPECT_TYPE(Type::Common({f32, f32, f32}), f32);
-    EXPECT_TYPE(Type::Common({f16, f16, f16}), f16);
-    EXPECT_TYPE(Type::Common({i32, i32, i32}), i32);
-    EXPECT_TYPE(Type::Common({u32, u32, u32}), u32);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, ai, ai}), ai);
+    EXPECT_TYPE(Type::Common(utils::Vector{af, af, af}), af);
+    EXPECT_TYPE(Type::Common(utils::Vector{f32, f32, f32}), f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{f16, f16, f16}), f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{i32, i32, i32}), i32);
+    EXPECT_TYPE(Type::Common(utils::Vector{u32, u32, u32}), u32);
 
-    EXPECT_TYPE(Type::Common({ai, af, ai}), af);
-    EXPECT_TYPE(Type::Common({ai, f32, ai}), f32);
-    EXPECT_TYPE(Type::Common({ai, f16, ai}), f16);
-    EXPECT_TYPE(Type::Common({ai, i32, ai}), i32);
-    EXPECT_TYPE(Type::Common({ai, u32, ai}), u32);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, af, ai}), af);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, f32, ai}), f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, f16, ai}), f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, i32, ai}), i32);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, u32, ai}), u32);
 
-    EXPECT_TYPE(Type::Common({af, ai, af}), af);
-    EXPECT_TYPE(Type::Common({f32, ai, f32}), f32);
-    EXPECT_TYPE(Type::Common({f16, ai, f16}), f16);
-    EXPECT_TYPE(Type::Common({i32, ai, i32}), i32);
-    EXPECT_TYPE(Type::Common({u32, ai, u32}), u32);
+    EXPECT_TYPE(Type::Common(utils::Vector{af, ai, af}), af);
+    EXPECT_TYPE(Type::Common(utils::Vector{f32, ai, f32}), f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{f16, ai, f16}), f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{i32, ai, i32}), i32);
+    EXPECT_TYPE(Type::Common(utils::Vector{u32, ai, u32}), u32);
 
-    EXPECT_TYPE(Type::Common({ai, f32, ai}), f32);
-    EXPECT_TYPE(Type::Common({ai, f16, ai}), f16);
-    EXPECT_TYPE(Type::Common({ai, i32, ai}), i32);
-    EXPECT_TYPE(Type::Common({ai, u32, ai}), u32);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, f32, ai}), f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, f16, ai}), f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, i32, ai}), i32);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, u32, ai}), u32);
 
-    EXPECT_TYPE(Type::Common({f32, ai, f32}), f32);
-    EXPECT_TYPE(Type::Common({f16, ai, f16}), f16);
-    EXPECT_TYPE(Type::Common({i32, ai, i32}), i32);
-    EXPECT_TYPE(Type::Common({u32, ai, u32}), u32);
+    EXPECT_TYPE(Type::Common(utils::Vector{f32, ai, f32}), f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{f16, ai, f16}), f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{i32, ai, i32}), i32);
+    EXPECT_TYPE(Type::Common(utils::Vector{u32, ai, u32}), u32);
 
-    EXPECT_TYPE(Type::Common({af, f32, af}), f32);
-    EXPECT_TYPE(Type::Common({af, f16, af}), f16);
-    EXPECT_TYPE(Type::Common({af, i32, af}), nullptr);
-    EXPECT_TYPE(Type::Common({af, u32, af}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{af, f32, af}), f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{af, f16, af}), f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{af, i32, af}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{af, u32, af}), nullptr);
 
-    EXPECT_TYPE(Type::Common({f32, af, f32}), f32);
-    EXPECT_TYPE(Type::Common({f16, af, f16}), f16);
-    EXPECT_TYPE(Type::Common({i32, af, i32}), nullptr);
-    EXPECT_TYPE(Type::Common({u32, af, u32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{f32, af, f32}), f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{f16, af, f16}), f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{i32, af, i32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{u32, af, u32}), nullptr);
 
-    EXPECT_TYPE(Type::Common({ai, af, f32}), f32);
-    EXPECT_TYPE(Type::Common({ai, af, f16}), f16);
-    EXPECT_TYPE(Type::Common({ai, af, i32}), nullptr);
-    EXPECT_TYPE(Type::Common({ai, af, u32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, af, f32}), f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, af, f16}), f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, af, i32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{ai, af, u32}), nullptr);
 
     auto* vec3_ai = create<Vector>(ai, 3u);
     auto* vec3_af = create<Vector>(af, 3u);
@@ -512,61 +512,61 @@ TEST_F(TypeTest, Common3) {
     auto* vec3_u32 = create<Vector>(u32, 3u);
     auto* vec3_i32 = create<Vector>(i32, 3u);
 
-    EXPECT_TYPE(Type::Common({vec3_ai, vec3_ai, vec3_ai}), vec3_ai);
-    EXPECT_TYPE(Type::Common({vec3_af, vec3_af, vec3_af}), vec3_af);
-    EXPECT_TYPE(Type::Common({vec3_f32, vec3_f32, vec3_f32}), vec3_f32);
-    EXPECT_TYPE(Type::Common({vec3_f16, vec3_f16, vec3_f16}), vec3_f16);
-    EXPECT_TYPE(Type::Common({vec4_f32, vec4_f32, vec4_f32}), vec4_f32);
-    EXPECT_TYPE(Type::Common({vec3_u32, vec3_u32, vec3_u32}), vec3_u32);
-    EXPECT_TYPE(Type::Common({vec3_i32, vec3_i32, vec3_i32}), vec3_i32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_ai, vec3_ai}), vec3_ai);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_af, vec3_af, vec3_af}), vec3_af);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_f32, vec3_f32, vec3_f32}), vec3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_f16, vec3_f16, vec3_f16}), vec3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec4_f32, vec4_f32, vec4_f32}), vec4_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_u32, vec3_u32, vec3_u32}), vec3_u32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_i32, vec3_i32, vec3_i32}), vec3_i32);
 
-    EXPECT_TYPE(Type::Common({vec3_f32, vec3_ai, vec3_f32}), vec3_f32);
-    EXPECT_TYPE(Type::Common({vec3_f16, vec3_ai, vec3_f16}), vec3_f16);
-    EXPECT_TYPE(Type::Common({vec4_f32, vec3_ai, vec4_f32}), nullptr);
-    EXPECT_TYPE(Type::Common({vec3_u32, vec3_ai, vec3_u32}), vec3_u32);
-    EXPECT_TYPE(Type::Common({vec3_i32, vec3_ai, vec3_i32}), vec3_i32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_f32, vec3_ai, vec3_f32}), vec3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_f16, vec3_ai, vec3_f16}), vec3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec4_f32, vec3_ai, vec4_f32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_u32, vec3_ai, vec3_u32}), vec3_u32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_i32, vec3_ai, vec3_i32}), vec3_i32);
 
-    EXPECT_TYPE(Type::Common({vec3_ai, vec3_f32, vec3_ai}), vec3_f32);
-    EXPECT_TYPE(Type::Common({vec3_ai, vec3_f16, vec3_ai}), vec3_f16);
-    EXPECT_TYPE(Type::Common({vec3_ai, vec4_f32, vec3_ai}), nullptr);
-    EXPECT_TYPE(Type::Common({vec3_ai, vec3_u32, vec3_ai}), vec3_u32);
-    EXPECT_TYPE(Type::Common({vec3_ai, vec3_i32, vec3_ai}), vec3_i32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_f32, vec3_ai}), vec3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_f16, vec3_ai}), vec3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec4_f32, vec3_ai}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_u32, vec3_ai}), vec3_u32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_i32, vec3_ai}), vec3_i32);
 
-    EXPECT_TYPE(Type::Common({vec3_f32, vec3_af, vec3_f32}), vec3_f32);
-    EXPECT_TYPE(Type::Common({vec3_f16, vec3_af, vec3_f16}), vec3_f16);
-    EXPECT_TYPE(Type::Common({vec4_f32, vec3_af, vec4_f32}), nullptr);
-    EXPECT_TYPE(Type::Common({vec3_u32, vec3_af, vec3_u32}), nullptr);
-    EXPECT_TYPE(Type::Common({vec3_i32, vec3_af, vec3_i32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_f32, vec3_af, vec3_f32}), vec3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_f16, vec3_af, vec3_f16}), vec3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec4_f32, vec3_af, vec4_f32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_u32, vec3_af, vec3_u32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_i32, vec3_af, vec3_i32}), nullptr);
 
-    EXPECT_TYPE(Type::Common({vec3_af, vec3_f32, vec3_af}), vec3_f32);
-    EXPECT_TYPE(Type::Common({vec3_af, vec3_f16, vec3_af}), vec3_f16);
-    EXPECT_TYPE(Type::Common({vec3_af, vec4_f32, vec3_af}), nullptr);
-    EXPECT_TYPE(Type::Common({vec3_af, vec3_u32, vec3_af}), nullptr);
-    EXPECT_TYPE(Type::Common({vec3_af, vec3_i32, vec3_af}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_af, vec3_f32, vec3_af}), vec3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_af, vec3_f16, vec3_af}), vec3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_af, vec4_f32, vec3_af}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_af, vec3_u32, vec3_af}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_af, vec3_i32, vec3_af}), nullptr);
 
-    EXPECT_TYPE(Type::Common({vec3_ai, vec3_af, vec3_f32}), vec3_f32);
-    EXPECT_TYPE(Type::Common({vec3_ai, vec3_af, vec3_f16}), vec3_f16);
-    EXPECT_TYPE(Type::Common({vec3_ai, vec3_af, vec4_f32}), nullptr);
-    EXPECT_TYPE(Type::Common({vec3_ai, vec3_af, vec3_u32}), nullptr);
-    EXPECT_TYPE(Type::Common({vec3_ai, vec3_af, vec3_i32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_af, vec3_f32}), vec3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_af, vec3_f16}), vec3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_af, vec4_f32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_af, vec3_u32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{vec3_ai, vec3_af, vec3_i32}), nullptr);
 
     auto* mat4x3_af = create<Matrix>(vec3_af, 4u);
     auto* mat3x4_f32 = create<Matrix>(vec4_f32, 3u);
     auto* mat4x3_f32 = create<Matrix>(vec3_f32, 4u);
     auto* mat4x3_f16 = create<Matrix>(vec3_f16, 4u);
 
-    EXPECT_TYPE(Type::Common({mat4x3_af, mat4x3_af, mat4x3_af}), mat4x3_af);
-    EXPECT_TYPE(Type::Common({mat3x4_f32, mat3x4_f32, mat3x4_f32}), mat3x4_f32);
-    EXPECT_TYPE(Type::Common({mat4x3_f32, mat4x3_f32, mat4x3_f32}), mat4x3_f32);
-    EXPECT_TYPE(Type::Common({mat4x3_f16, mat4x3_f16, mat4x3_f16}), mat4x3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_af, mat4x3_af, mat4x3_af}), mat4x3_af);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat3x4_f32, mat3x4_f32, mat3x4_f32}), mat3x4_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_f32, mat4x3_f32, mat4x3_f32}), mat4x3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_f16, mat4x3_f16, mat4x3_f16}), mat4x3_f16);
 
-    EXPECT_TYPE(Type::Common({mat3x4_f32, mat4x3_af, mat3x4_f32}), nullptr);
-    EXPECT_TYPE(Type::Common({mat4x3_f32, mat4x3_af, mat4x3_f32}), mat4x3_f32);
-    EXPECT_TYPE(Type::Common({mat4x3_f16, mat4x3_af, mat4x3_f16}), mat4x3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat3x4_f32, mat4x3_af, mat3x4_f32}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_f32, mat4x3_af, mat4x3_f32}), mat4x3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_f16, mat4x3_af, mat4x3_f16}), mat4x3_f16);
 
-    EXPECT_TYPE(Type::Common({mat4x3_af, mat3x4_f32, mat4x3_af}), nullptr);
-    EXPECT_TYPE(Type::Common({mat4x3_af, mat4x3_f32, mat4x3_af}), mat4x3_f32);
-    EXPECT_TYPE(Type::Common({mat4x3_af, mat4x3_f16, mat4x3_af}), mat4x3_f16);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_af, mat3x4_f32, mat4x3_af}), nullptr);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_af, mat4x3_f32, mat4x3_af}), mat4x3_f32);
+    EXPECT_TYPE(Type::Common(utils::Vector{mat4x3_af, mat4x3_f16, mat4x3_af}), mat4x3_f16);
 }
 
 }  // namespace

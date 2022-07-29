@@ -896,9 +896,8 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
     }
 
     auto values = attr->Values();
-    std::array<const sem::Expression*, 3> args = {};
-    std::array<const sem::Type*, 3> arg_tys = {};
-    size_t arg_count = 0;
+    utils::Vector<const sem::Expression*, 3> args;
+    utils::Vector<const sem::Type*, 3> arg_tys;
 
     constexpr const char* kErrBadExpr =
         "workgroup_size argument must be either a literal, constant, or overridable of type "
@@ -921,12 +920,11 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
             return false;
         }
 
-        args[i] = expr;
-        arg_tys[i] = ty;
-        arg_count++;
+        args.Push(expr);
+        arg_tys.Push(ty);
     }
 
-    auto* common_ty = sem::Type::Common(arg_tys.data(), arg_count);
+    auto* common_ty = sem::Type::Common(arg_tys);
     if (!common_ty) {
         AddError("workgroup_size arguments must be of the same type, either i32 or u32",
                  attr->source);
@@ -938,7 +936,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
         common_ty = builder_->create<sem::I32>();
     }
 
-    for (size_t i = 0; i < arg_count; i++) {
+    for (size_t i = 0; i < args.Length(); i++) {
         auto* materialized = Materialize(args[i], common_ty);
         if (!materialized) {
             return false;
@@ -2576,8 +2574,8 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
 
         auto* cond_ty = cond->Type()->UnwrapRef();
 
-        utils::UniqueVector<const sem::Type*> types;
-        types.add(cond_ty);
+        utils::Vector<const sem::Type*, 8> types;
+        types.Push(cond_ty);
 
         std::vector<sem::CaseStatement*> cases;
         cases.reserve(stmt->body.size());
@@ -2588,7 +2586,7 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
                 return false;
             }
             for (auto* expr : c->Selectors()) {
-                types.add(expr->Type()->UnwrapRef());
+                types.Push(expr->Type()->UnwrapRef());
             }
             cases.emplace_back(c);
             behaviors.Add(c->Behaviors());
@@ -2597,7 +2595,7 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
 
         // Determine the common type across all selectors and the switch expression
         // This must materialize to an integer scalar (non-abstract).
-        auto* common_ty = sem::Type::Common(types.data(), types.size());
+        auto* common_ty = sem::Type::Common(types);
         if (!common_ty || !common_ty->is_integer_scalar()) {
             // No common type found or the common type was abstract.
             // Pick i32 and let validation deal with any mismatches.
