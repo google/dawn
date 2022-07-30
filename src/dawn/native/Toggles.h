@@ -75,6 +75,7 @@ enum class Toggle {
     D3D12ForceClearCopyableDepthStencilTextureOnCreation,
     D3D12DontSetClearValueOnDepthTextureCreation,
     D3D12AlwaysUseTypelessFormatsForCastableTexture,
+    D3D12AllocateExtraMemoryFor2DArrayTexture,
 
     EnumCount,
     InvalidEnum = EnumCount,

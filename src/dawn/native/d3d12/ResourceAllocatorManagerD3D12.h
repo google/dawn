@@ -86,6 +86,15 @@ class ResourceAllocatorManager {
         const D3D12_CLEAR_VALUE* optimizedClearValue,
         D3D12_RESOURCE_STATES initialUsage);
 
+    ResultOrError<ComPtr<ID3D12Resource>> CreatePlacedResourceInHeap(
+        Heap* heap,
+        const uint64_t offset,
+        const D3D12_RESOURCE_DESC& resourceDescriptor,
+        const D3D12_CLEAR_VALUE* optimizedClearValue,
+        D3D12_RESOURCE_STATES initialUsage);
+
+    uint64_t GetResourcePadding(const D3D12_RESOURCE_DESC& resourceDescriptor) const;
+
     Device* mDevice;
     uint32_t mResourceHeapTier;
 
