@@ -527,9 +527,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Array_type_Mismat
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in array constructor does not match array type: "
-              "expected 'u32', found 'f32'");
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'f32' cannot be used to construct an array of 'u32')");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -539,9 +537,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in array constructor does not match array type: "
-              "expected 'f32', found 'i32'");
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'i32' cannot be used to construct an array of 'f32')");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -552,9 +548,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in array constructor does not match array type: "
-              "expected 'u32', found 'i32'");
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'i32' cannot be used to construct an array of 'u32')");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -564,8 +558,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
     WrapInFunction(tc);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: type in array constructor does not match array type: "
-              "expected 'i32', found 'vec2<i32>'");
+              R"(12:34 error: 'vec2<i32>' cannot be used to construct an array of 'i32')");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -579,8 +572,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: type in array constructor does not match array type: "
-              "expected 'vec3<i32>', found 'vec3<u32>'");
+              R"(12:34 error: 'vec3<u32>' cannot be used to construct an array of 'vec3<i32>')");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest,
@@ -594,8 +586,7 @@ TEST_F(ResolverTypeConstructorValidationTest,
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: type in array constructor does not match array type: "
-              "expected 'vec3<i32>', found 'vec3<bool>'");
+              R"(12:34 error: 'vec3<bool>' cannot be used to construct an array of 'vec3<i32>')");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_ArrayOfArray_SubElemSizeMismatch) {
@@ -607,9 +598,9 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_ArrayOfArray_SubE
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in array constructor does not match array type: "
-              "expected 'array<i32, 2>', found 'array<i32, 3>'");
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: 'array<i32, 3>' cannot be used to construct an array of 'array<i32, 2>')");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_ArrayOfArray_SubElemTypeMismatch) {
@@ -621,9 +612,9 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_ArrayOfArray_SubE
     WrapInFunction(t);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: type in array constructor does not match array type: "
-              "expected 'array<i32, 2>', found 'array<u32, 2>'");
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: 'array<u32, 2>' cannot be used to construct an array of 'array<i32, 2>')");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Array_TooFewElements) {
@@ -656,7 +647,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Array_Runtime) {
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "error: cannot init a runtime-sized array");
+    EXPECT_EQ(r()->error(), "error: cannot construct a runtime-sized array");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Array_RuntimeZeroValue) {
@@ -665,7 +656,7 @@ TEST_F(ResolverTypeConstructorValidationTest, Expr_Constructor_Array_RuntimeZero
     WrapInFunction(tc);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "error: cannot init a runtime-sized array");
+    EXPECT_EQ(r()->error(), "error: cannot construct a runtime-sized array");
 }
 
 }  // namespace ArrayConstructor

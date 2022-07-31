@@ -131,12 +131,10 @@ class Validator {
     /// @param attr the stride attribute to validate
     /// @param el_size the element size
     /// @param el_align the element alignment
-    /// @param source the source of the attribute
     /// @returns true on success, false otherwise
     bool ArrayStrideAttribute(const ast::StrideAttribute* attr,
                               uint32_t el_size,
-                              uint32_t el_align,
-                              const Source& source) const;
+                              uint32_t el_align) const;
 
     /// Validates an atomic
     /// @param a the atomic ast node to validate

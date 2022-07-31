@@ -895,7 +895,8 @@ TEST_P(ArrayStrideTest, All) {
        << ", should_pass: " << params.should_pass;
     SCOPED_TRACE(ss.str());
 
-    auto* arr = ty.array(Source{{12, 34}}, el_ty, 4_u, params.stride);
+    auto* arr =
+        ty.array(el_ty, 4_u, {create<ast::StrideAttribute>(Source{{12, 34}}, params.stride)});
 
     GlobalVar("myarray", arr, ast::StorageClass::kPrivate);
 
@@ -906,7 +907,7 @@ TEST_P(ArrayStrideTest, All) {
         EXPECT_EQ(r()->error(),
                   "12:34 error: arrays decorated with the stride attribute must "
                   "have a stride that is at least the size of the element type, "
-                  "and be a multiple of the element type's alignment value.");
+                  "and be a multiple of the element type's alignment value");
     }
 }
 

@@ -1875,17 +1875,16 @@ bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
     for (auto* value : values) {
         auto* value_ty = sem_.TypeOf(value)->UnwrapRef();
         if (value_ty != elem_ty) {
-            AddError(
-                "type in array constructor does not match array type: "
-                "expected '" +
-                    sem_.TypeNameOf(elem_ty) + "', found '" + sem_.TypeNameOf(value_ty) + "'",
-                value->source);
+            AddError("'" + sem_.TypeNameOf(value_ty) +
+                         "' cannot be used to construct an array of '" + sem_.TypeNameOf(elem_ty) +
+                         "'",
+                     value->source);
             return false;
         }
     }
 
     if (array_type->IsRuntimeSized()) {
-        AddError("cannot init a runtime-sized array", ctor->source);
+        AddError("cannot construct a runtime-sized array", ctor->source);
         return false;
     } else if (!elem_ty->IsConstructible()) {
         AddError("array constructor has non-constructible element type", ctor->source);
@@ -2011,6 +2010,11 @@ bool Validator::PipelineStages(const std::vector<sem::Function*>& entry_points) 
 bool Validator::Array(const sem::Array* arr, const Source& source) const {
     auto* el_ty = arr->ElemType();
 
+    if (!IsPlain(el_ty)) {
+        AddError(sem_.TypeNameOf(el_ty) + " cannot be used as an element type of an array", source);
+        return false;
+    }
+
     if (!IsFixedFootprint(el_ty)) {
         AddError("an array element type cannot contain a runtime-sized array", source);
         return false;
@@ -2020,8 +2024,7 @@ bool Validator::Array(const sem::Array* arr, const Source& source) const {
 
 bool Validator::ArrayStrideAttribute(const ast::StrideAttribute* attr,
                                      uint32_t el_size,
-                                     uint32_t el_align,
-                                     const Source& source) const {
+                                     uint32_t el_align) const {
     auto stride = attr->stride;
     bool is_valid_stride = (stride >= el_size) && (stride >= el_align) && (stride % el_align == 0);
     if (!is_valid_stride) {
@@ -2032,8 +2035,8 @@ bool Validator::ArrayStrideAttribute(const ast::StrideAttribute* attr,
         AddError(
             "arrays decorated with the stride attribute must have a stride "
             "that is at least the size of the element type, and be a multiple "
-            "of the element type's alignment value.",
-            source);
+            "of the element type's alignment value",
+            attr->source);
         return false;
     }
     return true;
