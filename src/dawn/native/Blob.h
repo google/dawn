@@ -15,6 +15,7 @@
 #ifndef SRC_DAWN_NATIVE_BLOB_H_
 #define SRC_DAWN_NATIVE_BLOB_H_
 
+#include <cstdint>
 #include <functional>
 #include <type_traits>
 #include <utility>
