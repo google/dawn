@@ -2,7 +2,7 @@
 
 using namespace metal;
 kernel void tint_symbol() {
-  mix(1.0f, 1.0f, 1.0f);
+  float const a = mix(1.0f, 1.0f, 1.0f);
   return;
 }
 

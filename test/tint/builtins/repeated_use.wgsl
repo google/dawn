@@ -2,19 +2,19 @@
 // same builtin overload results in single helper being generated.
 @compute @workgroup_size(1)
 fn main() {
-    _ = degrees(vec4<f32>());
-    _ = degrees(vec4<f32>(1.));
-    _ = degrees(vec4<f32>(1., 2., 3., 4.));
+    let a = degrees(vec4<f32>());
+    let b = degrees(vec4<f32>(1.));
+    let c = degrees(vec4<f32>(1., 2., 3., 4.));
 
-    _ = degrees(vec3<f32>());
-    _ = degrees(vec3<f32>(1.));
-    _ = degrees(vec3<f32>(1., 2., 3.));
+    let d = degrees(vec3<f32>());
+    let e = degrees(vec3<f32>(1.));
+    let f = degrees(vec3<f32>(1., 2., 3.));
 
-    _ = degrees(vec2<f32>());
-    _ = degrees(vec2<f32>(1.));
-    _ = degrees(vec2<f32>(1., 2.));
+    let g = degrees(vec2<f32>());
+    let h = degrees(vec2<f32>(1.));
+    let i = degrees(vec2<f32>(1., 2.));
 
-    _ = degrees(1.);
-    _ = degrees(2.);
-    _ = degrees(3.);
+    let j = degrees(1.);
+    let k = degrees(2.);
+    let l = degrees(3.);
 }

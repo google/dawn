@@ -19,18 +19,18 @@ float tint_degrees_3(float param_0) {
 }
 
 kernel void tint_symbol() {
-  tint_degrees(float4(0.0f));
-  tint_degrees(float4(1.0f));
-  tint_degrees(float4(1.0f, 2.0f, 3.0f, 4.0f));
-  tint_degrees_1(float3(0.0f));
-  tint_degrees_1(float3(1.0f));
-  tint_degrees_1(float3(1.0f, 2.0f, 3.0f));
-  tint_degrees_2(float2(0.0f));
-  tint_degrees_2(float2(1.0f));
-  tint_degrees_2(float2(1.0f, 2.0f));
-  tint_degrees_3(1.0f);
-  tint_degrees_3(2.0f);
-  tint_degrees_3(3.0f);
+  float4 const a = tint_degrees(float4(0.0f));
+  float4 const b = tint_degrees(float4(1.0f));
+  float4 const c = tint_degrees(float4(1.0f, 2.0f, 3.0f, 4.0f));
+  float3 const d = tint_degrees_1(float3(0.0f));
+  float3 const e = tint_degrees_1(float3(1.0f));
+  float3 const f = tint_degrees_1(float3(1.0f, 2.0f, 3.0f));
+  float2 const g = tint_degrees_2(float2(0.0f));
+  float2 const h = tint_degrees_2(float2(1.0f));
+  float2 const i = tint_degrees_2(float2(1.0f, 2.0f));
+  float const j = tint_degrees_3(1.0f);
+  float const k = tint_degrees_3(2.0f);
+  float const l = tint_degrees_3(3.0f);
   return;
 }
 

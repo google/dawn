@@ -97,7 +97,8 @@ void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
                                 // Just skip.
                                 return ast::TraverseAction::Skip;
                             }
-                            if (call->Target()->IsAnyOf<sem::Function, sem::Builtin>()) {
+                            if (call->Target()->IsAnyOf<sem::Function, sem::Builtin>() &&
+                                call->HasSideEffects()) {
                                 side_effects.push_back(expr);
                                 return ast::TraverseAction::Skip;
                             }
