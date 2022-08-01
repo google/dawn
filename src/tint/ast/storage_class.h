@@ -37,8 +37,8 @@ enum class StorageClass {
     kUniform,
     kStorage,
     kHandle,  // Tint-internal enum entry - not parsed
-    kIn,  // Tint-internal enum entry - not parsed
-    kOut,  // Tint-internal enum entry - not parsed
+    kIn,      // Tint-internal enum entry - not parsed
+    kOut,     // Tint-internal enum entry - not parsed
 };
 
 /// @param out the std::ostream to write to

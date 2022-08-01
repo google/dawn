@@ -23,9 +23,11 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"text/template"
@@ -71,6 +73,12 @@ optional flags:`)
 
 func run() error {
 	projectRoot := fileutils.ProjectRoot()
+
+	// Find clang-format
+	clangFormatPath := findClangFormat(projectRoot)
+	if clangFormatPath == "" {
+		return fmt.Errorf("cannot find clang-format in <dawn>/buildtools nor PATH")
+	}
 
 	// Recursively find all the template files in the <tint>/src directory
 	files, err := glob.Scan(projectRoot, glob.MustParseConfig(`{
@@ -132,6 +140,15 @@ func run() error {
 		if body := sb.String(); body != "" {
 			_, tmplFileName := filepath.Split(tmplPath)
 			outFileName := strings.TrimSuffix(tmplFileName, ".tmpl")
+
+			switch filepath.Ext(outFileName) {
+			case ".cc", ".h", ".inl":
+				body, err = clangFormat(body, clangFormatPath)
+				if err != nil {
+					return err
+				}
+			}
+
 			if err := writeFile(outFileName, body); err != nil {
 				return err
 			}
@@ -485,4 +502,38 @@ func pascalCase(s string) string {
 		}
 	}
 	return b.String()
+}
+
+// Invokes the clang-format executable at 'exe' to format the file content 'in'.
+// Returns the formatted file.
+func clangFormat(in, exe string) (string, error) {
+	cmd := exec.Command(exe)
+	cmd.Stdin = strings.NewReader(in)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", fmt.Errorf("clang-format failed:\n%v\n%v", string(out), err)
+	}
+	return string(out), nil
+}
+
+// Looks for clang-format in the 'buildtools' directory, falling back to PATH
+func findClangFormat(projectRoot string) string {
+	var path string
+	switch runtime.GOOS {
+	case "linux":
+		path = filepath.Join(projectRoot, "buildtools/linux64/clang-format")
+	case "darwin":
+		path = filepath.Join(projectRoot, "buildtools/mac/clang-format")
+	case "windows":
+		path = filepath.Join(projectRoot, "buildtools/win/clang-format.exe")
+	}
+	if fileutils.IsExe(path) {
+		return path
+	}
+	var err error
+	path, err = exec.LookPath("clang-format")
+	if err == nil {
+		return path
+	}
+	return ""
 }
