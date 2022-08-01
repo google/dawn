@@ -174,5 +174,17 @@ TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_Array) {
                           "vec3<f32>(4.0f, 5.0f, 6.0f), vec3<f32>(7.0f, 8.0f, 9.0f))"));
 }
 
+TEST_F(WgslGeneratorImplTest, EmitConstructor_Type_ImplicitArray) {
+    WrapInFunction(Construct(ty.array(nullptr, nullptr), vec3<f32>(1_f, 2_f, 3_f),
+                             vec3<f32>(4_f, 5_f, 6_f), vec3<f32>(7_f, 8_f, 9_f)));
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_THAT(gen.result(),
+                HasSubstr("array(vec3<f32>(1.0f, 2.0f, 3.0f), "
+                          "vec3<f32>(4.0f, 5.0f, 6.0f), vec3<f32>(7.0f, 8.0f, 9.0f))"));
+}
+
 }  // namespace
 }  // namespace tint::writer::wgsl

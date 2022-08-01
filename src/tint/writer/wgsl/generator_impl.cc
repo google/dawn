@@ -382,19 +382,22 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
                 }
             }
 
-            out << "array<";
-            if (!EmitType(out, ary->type)) {
-                return false;
-            }
+            out << "array";
+            if (ary->type) {
+                out << "<";
+                TINT_DEFER(out << ">");
 
-            if (!ary->IsRuntimeArray()) {
-                out << ", ";
-                if (!EmitExpression(out, ary->count)) {
+                if (!EmitType(out, ary->type)) {
                     return false;
                 }
-            }
 
-            out << ">";
+                if (!ary->IsRuntimeArray()) {
+                    out << ", ";
+                    if (!EmitExpression(out, ary->count)) {
+                        return false;
+                    }
+                }
+            }
             return true;
         },
         [&](const ast::Bool*) {
