@@ -1592,7 +1592,17 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                         return builder_->create<sem::TypeConstructor>(arr, std::move(params),
                                                                       args_stage);
                     });
-                return arr_or_str_ctor(arr, call_target);
+
+                auto* call = arr_or_str_ctor(arr, call_target);
+                if (!call) {
+                    return nullptr;
+                }
+
+                // Validation must occur after argument materialization in arr_or_str_ctor().
+                if (!validator_.ArrayConstructor(expr, arr)) {
+                    return nullptr;
+                }
+                return call;
             },
             [&](const sem::Struct* str) -> sem::Call* {
                 auto* call_target = utils::GetOrCreate(
@@ -1611,7 +1621,17 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                         return builder_->create<sem::TypeConstructor>(str, std::move(params),
                                                                       args_stage);
                     });
-                return arr_or_str_ctor(str, call_target);
+
+                auto* call = arr_or_str_ctor(str, call_target);
+                if (!call) {
+                    return nullptr;
+                }
+
+                // Validation must occur after argument materialization in arr_or_str_ctor().
+                if (!validator_.StructureConstructor(expr, str)) {
+                    return nullptr;
+                }
+                return call;
             },
             [&](Default) {
                 AddError("type is not constructible", expr->source);

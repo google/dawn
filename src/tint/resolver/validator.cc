@@ -1495,28 +1495,21 @@ bool Validator::Call(const sem::Call* call, sem::Statement* current_statement) c
     bool is_call_stmt =
         current_statement && Is<ast::CallStatement>(current_statement->Declaration(),
                                                     [&](auto* stmt) { return stmt->expr == expr; });
-
-    return Switch(
-        call->Target(),  //
-        [&](const sem::TypeConversion*) {
-            if (is_call_stmt) {
+    if (is_call_stmt) {
+        return Switch(
+            call->Target(),  //
+            [&](const sem::TypeConversion*) {
                 AddError("type conversion evaluated but not used", call->Declaration()->source);
                 return false;
-            }
-            return true;
-        },
-        [&](const sem::TypeConstructor* ctor) {
-            if (is_call_stmt) {
+            },
+            [&](const sem::TypeConstructor*) {
                 AddError("type constructor evaluated but not used", call->Declaration()->source);
                 return false;
-            }
-            return Switch(
-                ctor->ReturnType(),  //
-                [&](const sem::Array* arr) { return ArrayConstructor(expr, arr); },
-                [&](const sem::Struct* str) { return StructureConstructor(expr, str); },
-                [&](Default) { return true; });
-        },
-        [&](Default) { return true; });
+            },
+            [&](Default) { return true; });
+    }
+
+    return true;
 }
 
 bool Validator::DiscardStatement(const sem::Statement* stmt,
