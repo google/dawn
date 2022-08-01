@@ -1175,33 +1175,40 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_vector(const Token& t) {
 Expect<const ast::Type*> ParserImpl::expect_type_decl_array(const Token& t) {
     const char* use = "array declaration";
 
-    const ast::Expression* size = nullptr;
+    struct TypeAndSize {
+        const ast::Type* type = nullptr;
+        const ast::Expression* size = nullptr;
+    };
 
-    auto subtype = expect_lt_gt_block(use, [&]() -> Expect<const ast::Type*> {
+    if (!peek_is(Token::Type::kLessThan)) {
+        return builder_.ty.array(make_source_range_from(t.source()), nullptr, nullptr);
+    }
+
+    auto type_size = expect_lt_gt_block(use, [&]() -> Expect<TypeAndSize> {
         auto type = expect_type(use);
         if (type.errored) {
             return Failure::kErrored;
         }
 
-        if (match(Token::Type::kComma)) {
-            auto expr = primary_expression();
-            if (expr.errored) {
-                return Failure::kErrored;
-            } else if (!expr.matched) {
-                return add_error(peek(), "expected array size expression");
-            }
-
-            size = std::move(expr.value);
+        if (!match(Token::Type::kComma)) {
+            return TypeAndSize{type.value, nullptr};
         }
 
-        return type.value;
+        auto size = primary_expression();
+        if (size.errored) {
+            return Failure::kErrored;
+        } else if (!size.matched) {
+            return add_error(peek(), "expected array size expression");
+        }
+
+        return TypeAndSize{type.value, size.value};
     });
 
-    if (subtype.errored) {
+    if (type_size.errored) {
         return Failure::kErrored;
     }
 
-    return builder_.ty.array(make_source_range_from(t.source()), subtype.value, size);
+    return builder_.ty.array(make_source_range_from(t.source()), type_size->type, type_size->size);
 }
 
 Expect<const ast::Type*> ParserImpl::expect_type_decl_matrix(const Token& t) {

@@ -603,8 +603,9 @@ let i : vec2<i32> = vec2<i32>(1., 2.;
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclLetBadConstLiteral) {
-    EXPECT("let i : vec2<i32> = vec2<i32>(!);",
-           R"(test.wgsl:1:1 warning: use of deprecated language feature: module-scope 'let' has been replaced with 'const'
+    EXPECT(
+        "let i : vec2<i32> = vec2<i32>(!);",
+        R"(test.wgsl:1:1 warning: use of deprecated language feature: module-scope 'let' has been replaced with 'const'
 let i : vec2<i32> = vec2<i32>(!);
 ^^^
 
@@ -818,14 +819,6 @@ TEST_F(ParserImplErrorTest, GlobalDeclTypeAliasMissingSemicolon) {
     EXPECT("type meow = f32", R"(test.wgsl:1:16 error: expected ';' for type alias
 type meow = f32
                ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclVarArrayMissingLessThan) {
-    EXPECT("var i : array;",
-           R"(test.wgsl:1:14 error: expected '<' for array declaration
-var i : array;
-             ^
 )");
 }
 
