@@ -1867,7 +1867,7 @@ bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
     auto* elem_ty = array_type->ElemType();
     for (auto* value : values) {
         auto* value_ty = sem_.TypeOf(value)->UnwrapRef();
-        if (value_ty != elem_ty) {
+        if (sem::Type::ConversionRank(value_ty, elem_ty) == sem::Type::kNoConversion) {
             AddError("'" + sem_.TypeNameOf(value_ty) +
                          "' cannot be used to construct an array of '" + sem_.TypeNameOf(elem_ty) +
                          "'",

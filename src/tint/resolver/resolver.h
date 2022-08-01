@@ -233,9 +233,12 @@ class Resolver {
     /// @param ty the type that may hold abstract numeric types
     /// @param target_ty the target type for the expression (variable type, parameter type, etc).
     ///        May be nullptr.
+    /// @param source the source of the expression requiring materialization
     /// @returns the concrete (materialized) type for the given type, or nullptr if the type is
     ///          already concrete.
-    const sem::Type* ConcreteType(const sem::Type* ty, const sem::Type* target_ty);
+    const sem::Type* ConcreteType(const sem::Type* ty,
+                                  const sem::Type* target_ty,
+                                  const Source& source);
 
     // Statement resolving methods
     // Each return true on success, false on failure.

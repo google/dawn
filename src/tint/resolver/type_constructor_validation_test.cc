@@ -521,6 +521,145 @@ TEST_F(ResolverTypeConstructorValidationTest, Array_U32U32U32) {
     EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<sem::U32>());
 }
 
+TEST_F(ResolverTypeConstructorValidationTest, InferredArray_U32U32U32) {
+    // array(0u, 10u, 20u);
+    auto* tc = array(Source{{12, 34}}, nullptr, nullptr, 0_u, 10_u, 20_u);
+    WrapInFunction(tc);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* call = Sem().Get<sem::Call>(tc);
+    ASSERT_NE(call, nullptr);
+    EXPECT_TRUE(call->Type()->Is<sem::Array>());
+    auto* ctor = call->Target()->As<sem::TypeConstructor>();
+    ASSERT_NE(ctor, nullptr);
+    EXPECT_EQ(call->Type(), ctor->ReturnType());
+    ASSERT_EQ(ctor->Parameters().Length(), 3u);
+    EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<sem::U32>());
+    EXPECT_TRUE(ctor->Parameters()[1]->Type()->Is<sem::U32>());
+    EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<sem::U32>());
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, Array_U32AIU32) {
+    // array<u32, 3u>(0u, 10, 20u);
+    auto* tc = array<u32, 3>(0_u, 10_a, 20_u);
+    WrapInFunction(tc);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* call = Sem().Get<sem::Call>(tc);
+    ASSERT_NE(call, nullptr);
+    EXPECT_TRUE(call->Type()->Is<sem::Array>());
+    auto* ctor = call->Target()->As<sem::TypeConstructor>();
+    ASSERT_NE(ctor, nullptr);
+    EXPECT_EQ(call->Type(), ctor->ReturnType());
+    ASSERT_EQ(ctor->Parameters().Length(), 3u);
+    EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<sem::U32>());
+    EXPECT_TRUE(ctor->Parameters()[1]->Type()->Is<sem::U32>());
+    EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<sem::U32>());
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, InferredArray_U32AIU32) {
+    // array(0u, 10u, 20u);
+    auto* tc = array(Source{{12, 34}}, nullptr, nullptr, 0_u, 10_a, 20_u);
+    WrapInFunction(tc);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* call = Sem().Get<sem::Call>(tc);
+    ASSERT_NE(call, nullptr);
+    EXPECT_TRUE(call->Type()->Is<sem::Array>());
+    auto* ctor = call->Target()->As<sem::TypeConstructor>();
+    ASSERT_NE(ctor, nullptr);
+    EXPECT_EQ(call->Type(), ctor->ReturnType());
+    ASSERT_EQ(ctor->Parameters().Length(), 3u);
+    EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<sem::U32>());
+    EXPECT_TRUE(ctor->Parameters()[1]->Type()->Is<sem::U32>());
+    EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<sem::U32>());
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, ArrayU32_AIAIAI) {
+    // array<u32, 3u>(0, 10, 20);
+    auto* tc = array<u32, 3>(0_a, 10_a, 20_a);
+    WrapInFunction(tc);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* call = Sem().Get<sem::Call>(tc);
+    ASSERT_NE(call, nullptr);
+    EXPECT_TRUE(call->Type()->Is<sem::Array>());
+    auto* ctor = call->Target()->As<sem::TypeConstructor>();
+    ASSERT_NE(ctor, nullptr);
+    EXPECT_EQ(call->Type(), ctor->ReturnType());
+    ASSERT_EQ(ctor->Parameters().Length(), 3u);
+    EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<sem::U32>());
+    EXPECT_TRUE(ctor->Parameters()[1]->Type()->Is<sem::U32>());
+    EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<sem::U32>());
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, InferredArray_AIAIAI) {
+    // const c = array(0, 10, 20);
+    auto* tc = array(Source{{12, 34}}, nullptr, nullptr, 0_a, 10_a, 20_a);
+    WrapInFunction(Decl(Const("C", nullptr, tc)));
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* call = Sem().Get<sem::Call>(tc);
+    ASSERT_NE(call, nullptr);
+    EXPECT_TRUE(call->Type()->Is<sem::Array>());
+    auto* ctor = call->Target()->As<sem::TypeConstructor>();
+    ASSERT_NE(ctor, nullptr);
+    EXPECT_EQ(call->Type(), ctor->ReturnType());
+    ASSERT_EQ(ctor->Parameters().Length(), 3u);
+    EXPECT_TRUE(ctor->Parameters()[0]->Type()->Is<sem::AbstractInt>());
+    EXPECT_TRUE(ctor->Parameters()[1]->Type()->Is<sem::AbstractInt>());
+    EXPECT_TRUE(ctor->Parameters()[2]->Type()->Is<sem::AbstractInt>());
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, InferredArrayU32_VecI32_VecAI) {
+    // array(vec2(10i), vec2(20));
+    auto* tc = array(Source{{12, 34}}, nullptr, nullptr,   //
+                     Construct(ty.vec(nullptr, 2), 20_i),  //
+                     Construct(ty.vec(nullptr, 2), 20_a));
+    WrapInFunction(tc);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* call = Sem().Get<sem::Call>(tc);
+    ASSERT_NE(call, nullptr);
+    EXPECT_TRUE(call->Type()->Is<sem::Array>());
+    auto* ctor = call->Target()->As<sem::TypeConstructor>();
+    ASSERT_NE(ctor, nullptr);
+    EXPECT_EQ(call->Type(), ctor->ReturnType());
+    ASSERT_EQ(ctor->Parameters().Length(), 2u);
+    ASSERT_TRUE(ctor->Parameters()[0]->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(ctor->Parameters()[0]->Type()->As<sem::Vector>()->type()->Is<sem::I32>());
+    ASSERT_TRUE(ctor->Parameters()[1]->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(ctor->Parameters()[1]->Type()->As<sem::Vector>()->type()->Is<sem::I32>());
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, InferredArrayU32_VecAI_VecF32) {
+    // array(vec2(20), vec2(10f));
+    auto* tc = array(Source{{12, 34}}, nullptr, nullptr,   //
+                     Construct(ty.vec(nullptr, 2), 20_a),  //
+                     Construct(ty.vec(nullptr, 2), 20_f));
+    WrapInFunction(tc);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* call = Sem().Get<sem::Call>(tc);
+    ASSERT_NE(call, nullptr);
+    EXPECT_TRUE(call->Type()->Is<sem::Array>());
+    auto* ctor = call->Target()->As<sem::TypeConstructor>();
+    ASSERT_NE(ctor, nullptr);
+    EXPECT_EQ(call->Type(), ctor->ReturnType());
+    ASSERT_EQ(ctor->Parameters().Length(), 2u);
+    ASSERT_TRUE(ctor->Parameters()[0]->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(ctor->Parameters()[0]->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+    ASSERT_TRUE(ctor->Parameters()[1]->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(ctor->Parameters()[1]->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+}
+
 TEST_F(ResolverTypeConstructorValidationTest, ArrayArgumentTypeMismatch_U32F32) {
     // array<u32, 3u>(0u, 1.0f, 20u);
     auto* tc = array<u32, 3>(0_u, Expr(Source{{12, 34}}, 1_f), 20_u);
@@ -528,6 +667,18 @@ TEST_F(ResolverTypeConstructorValidationTest, ArrayArgumentTypeMismatch_U32F32) 
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(12:34 error: 'f32' cannot be used to construct an array of 'u32')");
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, InferredArrayArgumentTypeMismatch_U32F32) {
+    // array(0u, 1.0f, 20u);
+    auto* tc = array(Source{{12, 34}}, nullptr, nullptr, 0_u, 1_f, 20_u);
+    WrapInFunction(tc);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: cannot infer common array element type from constructor arguments
+note: argument 0 is of type 'u32'
+note: argument 1 is of type 'f32')");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, ArrayArgumentTypeMismatch_F32I32) {
@@ -539,6 +690,18 @@ TEST_F(ResolverTypeConstructorValidationTest, ArrayArgumentTypeMismatch_F32I32) 
     EXPECT_EQ(r()->error(), R"(12:34 error: 'i32' cannot be used to construct an array of 'f32')");
 }
 
+TEST_F(ResolverTypeConstructorValidationTest, InferredArrayArgumentTypeMismatch_F32I32) {
+    // array(1f, 1i);
+    auto* tc = array(Source{{12, 34}}, nullptr, nullptr, 1_f, 1_i);
+    WrapInFunction(tc);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: cannot infer common array element type from constructor arguments
+note: argument 0 is of type 'f32'
+note: argument 1 is of type 'i32')");
+}
+
 TEST_F(ResolverTypeConstructorValidationTest, ArrayArgumentTypeMismatch_U32I32) {
     // array<u32, 1u>(1i, 0u, 0u, 0u, 0u, 0u);
     auto* tc = array<u32, 1>(Expr(Source{{12, 34}}, 1_i), 0_u, 0_u, 0_u, 0_u);
@@ -548,6 +711,18 @@ TEST_F(ResolverTypeConstructorValidationTest, ArrayArgumentTypeMismatch_U32I32) 
     EXPECT_EQ(r()->error(), R"(12:34 error: 'i32' cannot be used to construct an array of 'u32')");
 }
 
+TEST_F(ResolverTypeConstructorValidationTest, InferredArrayArgumentTypeMismatch_U32I32) {
+    // array(1i, 0u, 0u, 0u, 0u, 0u);
+    auto* tc = array(Source{{12, 34}}, nullptr, nullptr, 1_i, 0_u, 0_u, 0_u, 0_u);
+    WrapInFunction(tc);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: cannot infer common array element type from constructor arguments
+note: argument 0 is of type 'i32'
+note: argument 1 is of type 'u32')");
+}
+
 TEST_F(ResolverTypeConstructorValidationTest, ArrayArgumentTypeMismatch_I32Vec2) {
     // array<i32, 3u>(1i, vec2<i32>());
     auto* tc = array<i32, 3>(1_i, vec2<i32>(Source{{12, 34}}));
@@ -555,6 +730,17 @@ TEST_F(ResolverTypeConstructorValidationTest, ArrayArgumentTypeMismatch_I32Vec2)
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(12:34 error: 'vec2<i32>' cannot be used to construct an array of 'i32')");
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, InferredArrayArgumentTypeMismatch_I32Vec2) {
+    // array(1i, vec2<i32>());
+    auto* tc = array(Source{{12, 34}}, nullptr, nullptr, 1_i, vec2<i32>());
+    WrapInFunction(tc);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: cannot infer common array element type from constructor arguments
+note: argument 0 is of type 'i32'
+note: argument 1 is of type 'vec2<i32>')");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, ArrayArgumentTypeMismatch_Vec3i32_Vec3u32) {
@@ -567,6 +753,31 @@ TEST_F(ResolverTypeConstructorValidationTest, ArrayArgumentTypeMismatch_Vec3i32_
               R"(12:34 error: 'vec3<u32>' cannot be used to construct an array of 'vec3<i32>')");
 }
 
+TEST_F(ResolverTypeConstructorValidationTest, InferredArrayArgumentTypeMismatch_Vec3i32_Vec3u32) {
+    // array(vec3<i32>(), vec3<u32>());
+    auto* t = array(Source{{12, 34}}, nullptr, nullptr, vec3<i32>(), vec3<u32>());
+    WrapInFunction(t);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: cannot infer common array element type from constructor arguments
+note: argument 0 is of type 'vec3<i32>'
+note: argument 1 is of type 'vec3<u32>')");
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, InferredArrayArgumentTypeMismatch_Vec3i32_Vec3AF) {
+    // array(vec3<i32>(), vec3(1.0));
+    auto* t =
+        array(Source{{12, 34}}, nullptr, nullptr, vec3<i32>(), Construct(ty.vec3(nullptr), 1._a));
+    WrapInFunction(t);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: cannot infer common array element type from constructor arguments
+note: argument 0 is of type 'vec3<i32>'
+note: argument 1 is of type 'vec3<abstract-float>')");
+}
+
 TEST_F(ResolverTypeConstructorValidationTest, ArrayArgumentTypeMismatch_Vec3i32_Vec3bool) {
     // array<vec3<i32>, 2u>(vec3<i32>(), vec3<bool>());
     auto* t = array(ty.vec3<i32>(), 2_u, vec3<i32>(), vec3<bool>());
@@ -575,6 +786,18 @@ TEST_F(ResolverTypeConstructorValidationTest, ArrayArgumentTypeMismatch_Vec3i32_
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(error: 'vec3<bool>' cannot be used to construct an array of 'vec3<i32>')");
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, InferredArrayArgumentTypeMismatch_Vec3i32_Vec3bool) {
+    // array(vec3<i32>(), vec3<bool>());
+    auto* t = array(Source{{12, 34}}, nullptr, nullptr, vec3<i32>(), vec3<bool>());
+    WrapInFunction(t);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: cannot infer common array element type from constructor arguments
+note: argument 0 is of type 'vec3<i32>'
+note: argument 1 is of type 'vec3<bool>')");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, ArrayOfArray_SubElemSizeMismatch) {
@@ -587,6 +810,18 @@ TEST_F(ResolverTypeConstructorValidationTest, ArrayOfArray_SubElemSizeMismatch) 
               R"(error: 'array<i32, 3>' cannot be used to construct an array of 'array<i32, 2>')");
 }
 
+TEST_F(ResolverTypeConstructorValidationTest, InferredArrayOfArray_SubElemSizeMismatch) {
+    // array<array<i32, 2u>, 2u>(array<i32, 3u>(), array<i32, 2u>());
+    auto* t = array(Source{{12, 34}}, nullptr, nullptr, array<i32, 3>(), array<i32, 2>());
+    WrapInFunction(t);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: cannot infer common array element type from constructor arguments
+note: argument 0 is of type 'array<i32, 3>'
+note: argument 1 is of type 'array<i32, 2>')");
+}
+
 TEST_F(ResolverTypeConstructorValidationTest, ArrayOfArray_SubElemTypeMismatch) {
     // array<array<i32, 2u>, 2u>(array<i32, 2u>(), array<u32, 2u>());
     auto* t = array(Source{{12, 34}}, ty.array<i32, 2>(), 2_i, array<i32, 2>(), array<u32, 2>());
@@ -595,6 +830,18 @@ TEST_F(ResolverTypeConstructorValidationTest, ArrayOfArray_SubElemTypeMismatch) 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(error: 'array<u32, 2>' cannot be used to construct an array of 'array<i32, 2>')");
+}
+
+TEST_F(ResolverTypeConstructorValidationTest, InferredArrayOfArray_SubElemTypeMismatch) {
+    // array<array<i32, 2u>, 2u>(array<i32, 2u>(), array<u32, 2u>());
+    auto* t = array(Source{{12, 34}}, nullptr, nullptr, array<i32, 2>(), array<u32, 2>());
+    WrapInFunction(t);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: cannot infer common array element type from constructor arguments
+note: argument 0 is of type 'array<i32, 2>'
+note: argument 1 is of type 'array<u32, 2>')");
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Array_TooFewElements) {

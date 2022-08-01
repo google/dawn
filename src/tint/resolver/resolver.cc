@@ -1316,7 +1316,9 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
     return nullptr;
 }
 
-const sem::Type* Resolver::ConcreteType(const sem::Type* ty, const sem::Type* target_ty) {
+const sem::Type* Resolver::ConcreteType(const sem::Type* ty,
+                                        const sem::Type* target_ty,
+                                        const Source& source) {
     auto i32 = [&] { return builder_->create<sem::I32>(); };
     auto f32 = [&] { return builder_->create<sem::F32>(); };
     auto i32v = [&](uint32_t width) { return builder_->create<sem::Vector>(i32(), width); };
@@ -1342,6 +1344,16 @@ const sem::Type* Resolver::ConcreteType(const sem::Type* ty, const sem::Type* ta
                           [&](const sem::AbstractFloat*) {
                               return target_ty ? target_ty : f32m(m->columns(), m->rows());
                           });
+        },
+        [&](const sem::Array* a) -> const sem::Type* {
+            const sem::Type* target_el_ty = nullptr;
+            if (auto* target_arr_ty = As<sem::Array>(target_ty)) {
+                target_el_ty = target_arr_ty->ElemType();
+            }
+            if (auto* el_ty = ConcreteType(a->ElemType(), target_el_ty, source)) {
+                return Array(source, el_ty, a->Count(), /* explicit_stride */ 0);
+            }
+            return nullptr;
         });
 }
 
@@ -1354,7 +1366,7 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
 
     auto* decl = expr->Declaration();
 
-    auto* concrete_ty = ConcreteType(expr->Type(), target_type);
+    auto* concrete_ty = ConcreteType(expr->Type(), target_type, decl->source);
     if (!concrete_ty) {
         return expr;  // Does not require materialization
     }
@@ -1579,16 +1591,14 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 auto* call_target = utils::GetOrCreate(
                     array_ctors_, ArrayConstructorSig{{arr, args.Length(), args_stage}},
                     [&]() -> sem::TypeConstructor* {
-                        utils::Vector<const sem::Parameter*, 8> params;
-                        params.Reserve(args.Length());
-                        for (size_t i = 0; i < args.Length(); i++) {
-                            params.Push(builder_->create<sem::Parameter>(
-                                nullptr,                    // declaration
-                                static_cast<uint32_t>(i),   // index
-                                arr->ElemType(),            // type
-                                ast::StorageClass::kNone,   // storage_class
-                                ast::Access::kUndefined));  // access
-                        }
+                        auto params = utils::Transform(args, [&](auto, size_t i) {
+                            return builder_->create<sem::Parameter>(
+                                nullptr,                   // declaration
+                                static_cast<uint32_t>(i),  // index
+                                arr->ElemType(),           // type
+                                ast::StorageClass::kNone,  // storage_class
+                                ast::Access::kUndefined);
+                        });
                         return builder_->create<sem::TypeConstructor>(arr, std::move(params),
                                                                       args_stage);
                     });
@@ -1678,6 +1688,59 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                     return c;
                 }
                 return nullptr;
+            },
+            [&](const ast::Array* a) -> sem::Call* {
+                Mark(a);
+                // array element type must be inferred if it was not specified.
+                auto el_count = static_cast<uint32_t>(args.Length());
+                const sem::Type* el_ty = nullptr;
+                if (a->type) {
+                    el_ty = Type(a->type);
+                    if (!el_ty) {
+                        return nullptr;
+                    }
+                    if (!a->count) {
+                        AddError("cannot construct a runtime-sized array", expr->source);
+                        return nullptr;
+                    }
+                    if (auto count = ArrayCount(a->count)) {
+                        el_count = count.Get();
+                    } else {
+                        return nullptr;
+                    }
+                    // Note: validation later will detect any mismatches between explicit array
+                    // size and number of constructor expressions.
+                } else {
+                    auto arg_tys =
+                        utils::Transform(args, [](auto* arg) { return arg->Type()->UnwrapRef(); });
+                    el_ty = sem::Type::Common(arg_tys);
+                    if (!el_ty) {
+                        AddError(
+                            "cannot infer common array element type from constructor arguments",
+                            expr->source);
+                        std::unordered_set<const sem::Type*> types;
+                        for (size_t i = 0; i < args.Length(); i++) {
+                            if (types.emplace(args[i]->Type()).second) {
+                                AddNote("argument " + std::to_string(i) + " is of type '" +
+                                            sem_.TypeNameOf(args[i]->Type()) + "'",
+                                        args[i]->Declaration()->source);
+                            }
+                        }
+                        return nullptr;
+                    }
+                }
+                uint32_t explicit_stride = 0;
+                if (!ArrayAttributes(a->attributes, el_ty, explicit_stride)) {
+                    return nullptr;
+                }
+
+                auto* arr = Array(a->source, el_ty, el_count, explicit_stride);
+                if (!arr) {
+                    return nullptr;
+                }
+                builder_->Sem().Add(a, arr);
+
+                return ty_ctor_or_conv(arr);
             },
             [&](const ast::Type* ast) -> sem::Call* {
                 // Handler for AST types that do not have an optional element type.

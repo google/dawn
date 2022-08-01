@@ -538,7 +538,10 @@ struct DataType<array<N, T>> {
     /// @param b the ProgramBuilder
     /// @return a new AST array type
     static inline const ast::Type* AST(ProgramBuilder& b) {
-        return b.ty.array(DataType<T>::AST(b), u32(N));
+        if (auto* ast = DataType<T>::AST(b)) {
+            return b.ty.array(ast, u32(N));
+        }
+        return b.ty.array(nullptr, nullptr);
     }
     /// @param b the ProgramBuilder
     /// @return the semantic array type
@@ -548,7 +551,7 @@ struct DataType<array<N, T>> {
             /* element */ el,
             /* count */ N,
             /* align */ el->Align(),
-            /* size */ el->Size(),
+            /* size */ N * el->Size(),
             /* stride */ el->Align(),
             /* implicit_stride */ el->Align());
     }

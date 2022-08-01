@@ -31,7 +31,7 @@ uint32_t AbstractNumeric::Align() const {
 }
 
 bool AbstractNumeric::IsConstructible() const {
-    return false;
+    return true;
 }
 
 }  // namespace tint::sem
