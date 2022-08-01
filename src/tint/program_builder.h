@@ -489,13 +489,34 @@ class ProgramBuilder {
         /// @return the tint AST type for a 2-element vector of `type`.
         const ast::Vector* vec2(const ast::Type* type) const { return vec(type, 2u); }
 
+        /// @param source the vector source
+        /// @param type vector subtype
+        /// @return the tint AST type for a 2-element vector of `type`.
+        const ast::Vector* vec2(const Source& source, const ast::Type* type) const {
+            return vec(source, type, 2u);
+        }
+
         /// @param type vector subtype
         /// @return the tint AST type for a 3-element vector of `type`.
         const ast::Vector* vec3(const ast::Type* type) const { return vec(type, 3u); }
 
+        /// @param source the vector source
+        /// @param type vector subtype
+        /// @return the tint AST type for a 3-element vector of `type`.
+        const ast::Vector* vec3(const Source& source, const ast::Type* type) const {
+            return vec(source, type, 3u);
+        }
+
         /// @param type vector subtype
         /// @return the tint AST type for a 4-element vector of `type`.
         const ast::Vector* vec4(const ast::Type* type) const { return vec(type, 4u); }
+
+        /// @param source the vector source
+        /// @param type vector subtype
+        /// @return the tint AST type for a 4-element vector of `type`.
+        const ast::Vector* vec4(const Source& source, const ast::Type* type) const {
+            return vec(source, type, 4u);
+        }
 
         /// @param n vector width in elements
         /// @return the tint AST type for a `n`-element vector of `type`.
@@ -510,16 +531,37 @@ class ProgramBuilder {
             return vec2(Of<T>());
         }
 
+        /// @param source the Source of the node
+        /// @return the tint AST type for a 2-element vector of the C type `T`.
+        template <typename T>
+        const ast::Vector* vec2(const Source& source) const {
+            return vec2(source, Of<T>());
+        }
+
         /// @return the tint AST type for a 3-element vector of the C type `T`.
         template <typename T>
         const ast::Vector* vec3() const {
             return vec3(Of<T>());
         }
 
+        /// @param source the Source of the node
+        /// @return the tint AST type for a 3-element vector of the C type `T`.
+        template <typename T>
+        const ast::Vector* vec3(const Source& source) const {
+            return vec3(source, Of<T>());
+        }
+
         /// @return the tint AST type for a 4-element vector of the C type `T`.
         template <typename T>
         const ast::Vector* vec4() const {
             return vec4(Of<T>());
+        }
+
+        /// @param source the Source of the node
+        /// @return the tint AST type for a 4-element vector of the C type `T`.
+        template <typename T>
+        const ast::Vector* vec4(const Source& source) const {
+            return vec4(source, Of<T>());
         }
 
         /// @param type matrix subtype
@@ -1245,97 +1287,205 @@ class ProgramBuilder {
     /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a 2-element vector of type
     /// `T`, constructed with the values `args`.
-    template <typename T, typename... ARGS>
+    template <typename T, typename... ARGS, typename _ = DisableIfSource<ARGS...>>
     const ast::CallExpression* vec2(ARGS&&... args) {
         return Construct(ty.vec2<T>(), std::forward<ARGS>(args)...);
+    }
+
+    /// @param source the vector source
+    /// @param args the arguments for the vector constructor
+    /// @return an `ast::CallExpression` of a 2-element vector of type
+    /// `T`, constructed with the values `args`.
+    template <typename T, typename... ARGS>
+    const ast::CallExpression* vec2(const Source& source, ARGS&&... args) {
+        return Construct(source, ty.vec2<T>(), std::forward<ARGS>(args)...);
     }
 
     /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a 3-element vector of type
     /// `T`, constructed with the values `args`.
-    template <typename T, typename... ARGS>
+    template <typename T, typename... ARGS, typename _ = DisableIfSource<ARGS...>>
     const ast::CallExpression* vec3(ARGS&&... args) {
         return Construct(ty.vec3<T>(), std::forward<ARGS>(args)...);
+    }
+
+    /// @param source the vector source
+    /// @param args the arguments for the vector constructor
+    /// @return an `ast::CallExpression` of a 3-element vector of type
+    /// `T`, constructed with the values `args`.
+    template <typename T, typename... ARGS>
+    const ast::CallExpression* vec3(const Source& source, ARGS&&... args) {
+        return Construct(source, ty.vec3<T>(), std::forward<ARGS>(args)...);
     }
 
     /// @param args the arguments for the vector constructor
     /// @return an `ast::CallExpression` of a 4-element vector of type
     /// `T`, constructed with the values `args`.
-    template <typename T, typename... ARGS>
+    template <typename T, typename... ARGS, typename _ = DisableIfSource<ARGS...>>
     const ast::CallExpression* vec4(ARGS&&... args) {
         return Construct(ty.vec4<T>(), std::forward<ARGS>(args)...);
+    }
+
+    /// @param source the vector source
+    /// @param args the arguments for the vector constructor
+    /// @return an `ast::CallExpression` of a 4-element vector of type
+    /// `T`, constructed with the values `args`.
+    template <typename T, typename... ARGS>
+    const ast::CallExpression* vec4(const Source& source, ARGS&&... args) {
+        return Construct(source, ty.vec4<T>(), std::forward<ARGS>(args)...);
     }
 
     /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 2x2 matrix of type
     /// `T`, constructed with the values `args`.
-    template <typename T, typename... ARGS>
+    template <typename T, typename... ARGS, typename _ = DisableIfSource<ARGS...>>
     const ast::CallExpression* mat2x2(ARGS&&... args) {
         return Construct(ty.mat2x2<T>(), std::forward<ARGS>(args)...);
+    }
+
+    /// @param source the matrix source
+    /// @param args the arguments for the matrix constructor
+    /// @return an `ast::CallExpression` of a 2x2 matrix of type
+    /// `T`, constructed with the values `args`.
+    template <typename T, typename... ARGS>
+    const ast::CallExpression* mat2x2(const Source& source, ARGS&&... args) {
+        return Construct(source, ty.mat2x2<T>(), std::forward<ARGS>(args)...);
     }
 
     /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 2x3 matrix of type
     /// `T`, constructed with the values `args`.
-    template <typename T, typename... ARGS>
+    template <typename T, typename... ARGS, typename _ = DisableIfSource<ARGS...>>
     const ast::CallExpression* mat2x3(ARGS&&... args) {
         return Construct(ty.mat2x3<T>(), std::forward<ARGS>(args)...);
+    }
+
+    /// @param source the matrix source
+    /// @param args the arguments for the matrix constructor
+    /// @return an `ast::CallExpression` of a 2x3 matrix of type
+    /// `T`, constructed with the values `args`.
+    template <typename T, typename... ARGS>
+    const ast::CallExpression* mat2x3(const Source& source, ARGS&&... args) {
+        return Construct(source, ty.mat2x3<T>(), std::forward<ARGS>(args)...);
     }
 
     /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 2x4 matrix of type
     /// `T`, constructed with the values `args`.
-    template <typename T, typename... ARGS>
+    template <typename T, typename... ARGS, typename _ = DisableIfSource<ARGS...>>
     const ast::CallExpression* mat2x4(ARGS&&... args) {
         return Construct(ty.mat2x4<T>(), std::forward<ARGS>(args)...);
+    }
+
+    /// @param source the matrix source
+    /// @param args the arguments for the matrix constructor
+    /// @return an `ast::CallExpression` of a 2x4 matrix of type
+    /// `T`, constructed with the values `args`.
+    template <typename T, typename... ARGS>
+    const ast::CallExpression* mat2x4(const Source& source, ARGS&&... args) {
+        return Construct(source, ty.mat2x4<T>(), std::forward<ARGS>(args)...);
     }
 
     /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 3x2 matrix of type
     /// `T`, constructed with the values `args`.
-    template <typename T, typename... ARGS>
+    template <typename T, typename... ARGS, typename _ = DisableIfSource<ARGS...>>
     const ast::CallExpression* mat3x2(ARGS&&... args) {
         return Construct(ty.mat3x2<T>(), std::forward<ARGS>(args)...);
+    }
+
+    /// @param source the matrix source
+    /// @param args the arguments for the matrix constructor
+    /// @return an `ast::CallExpression` of a 3x2 matrix of type
+    /// `T`, constructed with the values `args`.
+    template <typename T, typename... ARGS>
+    const ast::CallExpression* mat3x2(const Source& source, ARGS&&... args) {
+        return Construct(source, ty.mat3x2<T>(), std::forward<ARGS>(args)...);
     }
 
     /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 3x3 matrix of type
     /// `T`, constructed with the values `args`.
-    template <typename T, typename... ARGS>
+    template <typename T, typename... ARGS, typename _ = DisableIfSource<ARGS...>>
     const ast::CallExpression* mat3x3(ARGS&&... args) {
         return Construct(ty.mat3x3<T>(), std::forward<ARGS>(args)...);
+    }
+
+    /// @param source the matrix source
+    /// @param args the arguments for the matrix constructor
+    /// @return an `ast::CallExpression` of a 3x3 matrix of type
+    /// `T`, constructed with the values `args`.
+    template <typename T, typename... ARGS>
+    const ast::CallExpression* mat3x3(const Source& source, ARGS&&... args) {
+        return Construct(source, ty.mat3x3<T>(), std::forward<ARGS>(args)...);
     }
 
     /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 3x4 matrix of type
     /// `T`, constructed with the values `args`.
-    template <typename T, typename... ARGS>
+    template <typename T, typename... ARGS, typename _ = DisableIfSource<ARGS...>>
     const ast::CallExpression* mat3x4(ARGS&&... args) {
         return Construct(ty.mat3x4<T>(), std::forward<ARGS>(args)...);
+    }
+
+    /// @param source the matrix source
+    /// @param args the arguments for the matrix constructor
+    /// @return an `ast::CallExpression` of a 3x4 matrix of type
+    /// `T`, constructed with the values `args`.
+    template <typename T, typename... ARGS>
+    const ast::CallExpression* mat3x4(const Source& source, ARGS&&... args) {
+        return Construct(source, ty.mat3x4<T>(), std::forward<ARGS>(args)...);
     }
 
     /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 4x2 matrix of type
     /// `T`, constructed with the values `args`.
-    template <typename T, typename... ARGS>
+    template <typename T, typename... ARGS, typename _ = DisableIfSource<ARGS...>>
     const ast::CallExpression* mat4x2(ARGS&&... args) {
         return Construct(ty.mat4x2<T>(), std::forward<ARGS>(args)...);
+    }
+
+    /// @param source the matrix source
+    /// @param args the arguments for the matrix constructor
+    /// @return an `ast::CallExpression` of a 4x2 matrix of type
+    /// `T`, constructed with the values `args`.
+    template <typename T, typename... ARGS>
+    const ast::CallExpression* mat4x2(const Source& source, ARGS&&... args) {
+        return Construct(source, ty.mat4x2<T>(), std::forward<ARGS>(args)...);
     }
 
     /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 4x3 matrix of type
     /// `T`, constructed with the values `args`.
-    template <typename T, typename... ARGS>
+    template <typename T, typename... ARGS, typename _ = DisableIfSource<ARGS...>>
     const ast::CallExpression* mat4x3(ARGS&&... args) {
         return Construct(ty.mat4x3<T>(), std::forward<ARGS>(args)...);
+    }
+
+    /// @param source the matrix source
+    /// @param args the arguments for the matrix constructor
+    /// @return an `ast::CallExpression` of a 4x3 matrix of type
+    /// `T`, constructed with the values `args`.
+    template <typename T, typename... ARGS>
+    const ast::CallExpression* mat4x3(const Source& source, ARGS&&... args) {
+        return Construct(source, ty.mat4x3<T>(), std::forward<ARGS>(args)...);
     }
 
     /// @param args the arguments for the matrix constructor
     /// @return an `ast::CallExpression` of a 4x4 matrix of type
     /// `T`, constructed with the values `args`.
-    template <typename T, typename... ARGS>
+    template <typename T, typename... ARGS, typename _ = DisableIfSource<ARGS...>>
     const ast::CallExpression* mat4x4(ARGS&&... args) {
         return Construct(ty.mat4x4<T>(), std::forward<ARGS>(args)...);
+    }
+
+    /// @param source the matrix source
+    /// @param args the arguments for the matrix constructor
+    /// @return an `ast::CallExpression` of a 4x4 matrix of type
+    /// `T`, constructed with the values `args`.
+    template <typename T, typename... ARGS>
+    const ast::CallExpression* mat4x4(const Source& source, ARGS&&... args) {
+        return Construct(source, ty.mat4x4<T>(), std::forward<ARGS>(args)...);
     }
 
     /// @param args the arguments for the array constructor
@@ -1346,6 +1496,15 @@ class ProgramBuilder {
         return Construct(ty.array<T, N>(), std::forward<ARGS>(args)...);
     }
 
+    /// @param source the array source
+    /// @param args the arguments for the array constructor
+    /// @return an `ast::CallExpression` of an array with element type
+    /// `T` and size `N`, constructed with the values `args`.
+    template <typename T, int N, typename... ARGS>
+    const ast::CallExpression* array(const Source& source, ARGS&&... args) {
+        return Construct(source, ty.array<T, N>(), std::forward<ARGS>(args)...);
+    }
+
     /// @param subtype the array element type
     /// @param n the array size. nullptr represents a runtime-array.
     /// @param args the arguments for the array constructor
@@ -1354,6 +1513,21 @@ class ProgramBuilder {
     template <typename EXPR, typename... ARGS>
     const ast::CallExpression* array(const ast::Type* subtype, EXPR&& n, ARGS&&... args) {
         return Construct(ty.array(subtype, std::forward<EXPR>(n)), std::forward<ARGS>(args)...);
+    }
+
+    /// @param source the array source
+    /// @param subtype the array element type
+    /// @param n the array size. nullptr represents a runtime-array.
+    /// @param args the arguments for the array constructor
+    /// @return an `ast::CallExpression` of an array with element type
+    /// `subtype`, constructed with the values `args`.
+    template <typename EXPR, typename... ARGS>
+    const ast::CallExpression* array(const Source& source,
+                                     const ast::Type* subtype,
+                                     EXPR&& n,
+                                     ARGS&&... args) {
+        return Construct(source, ty.array(subtype, std::forward<EXPR>(n)),
+                         std::forward<ARGS>(args)...);
     }
 
     /// Adds the extension to the list of enable directives at the top of the module.
