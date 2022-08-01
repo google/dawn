@@ -868,9 +868,13 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
         if (options.verbose) {
             if (fxc_found && !fxc_res.failed) {
                 std::cout << "Passed FXC validation" << std::endl;
+                std::cout << fxc_res.output;
+                std::cout << std::endl;
             }
             if (dxc_found && !dxc_res.failed) {
                 std::cout << "Passed DXC validation" << std::endl;
+                std::cout << dxc_res.output;
+                std::cout << std::endl;
             }
         }
     }

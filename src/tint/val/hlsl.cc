@@ -114,10 +114,18 @@ Result HlslUsingFXC(const std::string& fxc_path,
         return result;
     }
 
-    pD3DCompile d3dCompile = reinterpret_cast<pD3DCompile>(
+    auto* d3dCompile = reinterpret_cast<pD3DCompile>(
         reinterpret_cast<void*>(GetProcAddress(fxcLib, "D3DCompile")));
+    auto* d3dDisassemble = reinterpret_cast<pD3DDisassemble>(
+        reinterpret_cast<void*>(GetProcAddress(fxcLib, "D3DDisassemble")));
+
     if (d3dCompile == nullptr) {
         result.output = "Couldn't load D3DCompile from FXC";
+        result.failed = true;
+        return result;
+    }
+    if (d3dDisassemble == nullptr) {
+        result.output = "Couldn't load D3DDisassemble from FXC";
         result.failed = true;
         return result;
     }
@@ -147,21 +155,30 @@ Result HlslUsingFXC(const std::string& fxc_path,
 
         ComPtr<ID3DBlob> compiledShader;
         ComPtr<ID3DBlob> errors;
-        HRESULT cr = d3dCompile(source.c_str(),    // pSrcData
-                                source.length(),   // SrcDataSize
-                                nullptr,           // pSourceName
-                                nullptr,           // pDefines
-                                nullptr,           // pInclude
-                                ep.first.c_str(),  // pEntrypoint
-                                profile,           // pTarget
-                                compileFlags,      // Flags1
-                                0,                 // Flags2
-                                &compiledShader,   // ppCode
-                                &errors);          // ppErrorMsgs
-        if (FAILED(cr)) {
+        HRESULT res = d3dCompile(source.c_str(),    // pSrcData
+                                 source.length(),   // SrcDataSize
+                                 nullptr,           // pSourceName
+                                 nullptr,           // pDefines
+                                 nullptr,           // pInclude
+                                 ep.first.c_str(),  // pEntrypoint
+                                 profile,           // pTarget
+                                 compileFlags,      // Flags1
+                                 0,                 // Flags2
+                                 &compiledShader,   // ppCode
+                                 &errors);          // ppErrorMsgs
+        if (FAILED(res)) {
             result.output = static_cast<char*>(errors->GetBufferPointer());
             result.failed = true;
             return result;
+        } else {
+            ComPtr<ID3DBlob> disassembly;
+            res = d3dDisassemble(compiledShader->GetBufferPointer(),
+                                 compiledShader->GetBufferSize(), 0, "", &disassembly);
+            if (FAILED(res)) {
+                result.output = "failed to disassemble shader";
+            } else {
+                result.output = static_cast<char*>(disassembly->GetBufferPointer());
+            }
         }
     }
 
