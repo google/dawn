@@ -1486,7 +1486,7 @@
         "values": [
             {"value": 0, "name": "vertex"},
             {"value": 1, "name": "instance"},
-            {"value": 2, "name": "vertex buffer not used"}
+            {"value": 2, "name": "vertex buffer not used", "jsrepr": "undefined", "valid": true}
         ]
     },
     "load op": {
