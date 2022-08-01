@@ -35,9 +35,9 @@ class Array final : public Castable<Array, Type> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param subtype the type of the array elements
-    /// @param count the number of elements in the array. nullptr represents a
-    /// runtime-sized array.
+    /// @param count the number of elements in the array
     /// @param attributes the array attributes
+    /// @note a runtime-sized array is represented by a null count and a non-null type
     Array(ProgramID pid,
           NodeID nid,
           const Source& src,
@@ -50,7 +50,7 @@ class Array final : public Castable<Array, Type> {
 
     /// @returns true if this is a runtime array.
     /// i.e. the size is determined at runtime
-    bool IsRuntimeArray() const { return count == nullptr; }
+    bool IsRuntimeArray() const { return type != nullptr && count == nullptr; }
 
     /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be

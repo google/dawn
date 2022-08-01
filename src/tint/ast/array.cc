@@ -56,11 +56,14 @@ std::string Array::FriendlyName(const SymbolTable& symbols) const {
             out << "@stride(" << stride->stride << ") ";
         }
     }
-    out << "array<" << type->FriendlyName(symbols);
-    if (!IsRuntimeArray()) {
-        out << ", " << SizeExprToString(count, symbols);
+    out << "array";
+    if (type) {
+        out << "<" << type->FriendlyName(symbols);
+        if (count) {
+            out << ", " << SizeExprToString(count, symbols);
+        }
+        out << ">";
     }
-    out << ">";
     return out.str();
 }
 

@@ -42,6 +42,14 @@ TEST_F(AstArrayTest, CreateRuntimeArray) {
     EXPECT_TRUE(arr->IsRuntimeArray());
 }
 
+TEST_F(AstArrayTest, CreateInferredTypeArray) {
+    auto* arr = create<Array>(nullptr, nullptr, AttributeList{});
+    EXPECT_EQ(arr->type, nullptr);
+    EXPECT_EQ(arr->count, nullptr);
+    EXPECT_TRUE(arr->Is<Array>());
+    EXPECT_FALSE(arr->IsRuntimeArray());
+}
+
 TEST_F(AstArrayTest, FriendlyName_RuntimeSized) {
     auto* i32 = create<I32>();
     auto* arr = create<Array>(i32, nullptr, AttributeList{});
@@ -64,6 +72,16 @@ TEST_F(AstArrayTest, FriendlyName_WithStride) {
     auto* i32 = create<I32>();
     auto* arr = create<Array>(i32, Expr(5_u), AttributeList{create<StrideAttribute>(32u)});
     EXPECT_EQ(arr->FriendlyName(Symbols()), "@stride(32) array<i32, 5>");
+}
+
+TEST_F(AstArrayTest, FriendlyName_InferredTypeAndCount) {
+    auto* arr = create<Array>(nullptr, nullptr, AttributeList{});
+    EXPECT_EQ(arr->FriendlyName(Symbols()), "array");
+}
+
+TEST_F(AstArrayTest, FriendlyName_InferredTypeAndCount_WithStrize) {
+    auto* arr = create<Array>(nullptr, nullptr, AttributeList{create<StrideAttribute>(32u)});
+    EXPECT_EQ(arr->FriendlyName(Symbols()), "@stride(32) array");
 }
 
 }  // namespace
