@@ -1434,6 +1434,9 @@ sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* exp
         //     vec2(1, 2)[runtime-index]
         obj = Materialize(obj);
     }
+    if (!obj) {
+        return nullptr;
+    }
     auto* obj_raw_ty = obj->Type();
     auto* obj_ty = obj_raw_ty->UnwrapRef();
     auto* ty = Switch(

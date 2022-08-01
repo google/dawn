@@ -243,7 +243,7 @@ static std::ostream& operator<<(std::ostream& o, Method m) {
         case Method::kWorkgroupSize:
             return o << "workgroup-size";
         case Method::kRuntimeIndex:
-            return o << "dynamic-index";
+            return o << "runtime-index";
     }
     return o << "<unknown>";
 }
@@ -788,6 +788,9 @@ enum class Method {
 
     // arr[abstract_expr]
     kIndex,
+
+    // abstract_expr[runtime-index]
+    kRuntimeIndex,
 };
 
 static std::ostream& operator<<(std::ostream& o, Method m) {
@@ -810,6 +813,8 @@ static std::ostream& operator<<(std::ostream& o, Method m) {
             return o << "workgroup-size";
         case Method::kIndex:
             return o << "index";
+        case Method::kRuntimeIndex:
+            return o << "runtime-index";
     }
     return o << "<unknown>";
 }
@@ -895,6 +900,10 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
             GlobalVar("arr", ty.array<i32, 4>(), ast::StorageClass::kPrivate);
             WrapInFunction(IndexAccessor("arr", abstract_expr()));
             break;
+        case Method::kRuntimeIndex:
+            auto* runtime_index = Var("runtime_index", nullptr, Expr(1_i));
+            WrapInFunction(runtime_index, IndexAccessor(abstract_expr(), runtime_index));
+            break;
     }
 
     switch (expectation) {
@@ -952,10 +961,8 @@ constexpr Method kAIntMethods[] = {
 
 /// Methods that support vector materialization
 constexpr Method kVectorMethods[] = {
-    Method::kLet,
-    Method::kVar,
-    Method::kBuiltinArg,
-    Method::kBitcastVec3F32Arg,
+    Method::kLet,          Method::kVar, Method::kBuiltinArg, Method::kBitcastVec3F32Arg,
+    Method::kRuntimeIndex,
 };
 
 /// Methods that support matrix materialization
