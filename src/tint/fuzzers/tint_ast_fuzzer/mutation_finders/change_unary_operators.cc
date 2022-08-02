@@ -50,6 +50,12 @@ MutationList MutationFinderChangeUnaryOperators::FindMutations(
             continue;
         }
 
+        // Only complement and negation operators can be swapped.
+        if (!(unary_expr->op == ast::UnaryOp::kComplement ||
+              unary_expr->op == ast::UnaryOp::kNegation)) {
+            continue;
+        }
+
         result.push_back(std::make_unique<MutationChangeUnaryOperator>(
             node_id_map->GetId(unary_expr),
             MutationChangeUnaryOperator::ToggleOperator(unary_expr->op)));
