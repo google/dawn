@@ -1,3 +1,5 @@
+SKIP: FAILED
+
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
@@ -114,3 +116,6 @@
          %66 = OpLoad %_arr_Inner_uint_4 %65
                OpReturn
                OpFunctionEnd
+1:1: Structure id 3 decorated as Block for variable in Uniform storage class must follow relaxed uniform buffer layout rules: member 9 is a matrix with stride 8 not satisfying alignment to 16
+  %S = OpTypeStruct %v3int %int %v3uint %uint %v3float %float %v2int %v2int %mat2v3float %mat3v2float %Inner %_arr_Inner_uint_4
+
