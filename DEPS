@@ -14,10 +14,10 @@ vars = {
 
   'dawn_standalone': True,
   'dawn_node': False, # Also fetches dependencies required for building NodeJS bindings.
-  'dawn_cmake_version': 'version:3.13.5',
+  'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
   'dawn_gn_version': 'git_revision:bd99dbf98cbdefe18a4128189665c5761263bcfb',
-  'dawn_go_version': 'version:1.16',
+  'dawn_go_version': 'version:2@1.18.4',
 
   'node_darwin_arm64_sha': '31859fc1fa0994a95f44f09c367d6ff63607cfde',
   'node_darwin_x64_sha': '16dfd094763b71988933a31735f9dea966f9abd6',
