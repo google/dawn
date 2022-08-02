@@ -35,18 +35,20 @@ using f16V = builder::vec<3, f16>;
 using i32V = builder::vec<3, i32>;
 using u32V = builder::vec<3, u32>;
 using f32M = builder::mat<3, 2, f32>;
+using f16M = builder::mat<3, 2, f16>;
 using f32A = builder::array<3, f32>;
+using f16A = builder::array<3, f16>;
 using i32A = builder::array<3, i32>;
 using u32A = builder::array<3, u32>;
 
 constexpr double kTooBigF32 = static_cast<double>(3.5e+38);
-// constexpr double kTooBigF16 = static_cast<double>(6.6e+4);
+constexpr double kTooBigF16 = static_cast<double>(6.6e+4);
 constexpr double kPiF64 = 3.141592653589793;
 constexpr double kPiF32 = 3.1415927410125732;  // kPiF64 quantized to f32
-// constexpr double kPiF16 = 3.140625;         // kPiF64 quantized to f16
+constexpr double kPiF16 = 3.140625;            // kPiF64 quantized to f16
 
 constexpr double kSubnormalF32 = 0x1.0p-128;
-// constexpr double kSubnormalF16 = 0x1.0p-16;
+constexpr double kSubnormalF16 = 0x1.0p-16;
 
 enum class Expectation {
     kMaterialize,
@@ -308,8 +310,7 @@ using MaterializeAbstractNumericToConcreteType =
     MaterializeTest<std::tuple<Expectation, Method, Data>>;
 
 TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
-    // Once built-in and ops using f16 is properly supported, we'll need to enable this:
-    // Enable(ast::Extension::kF16);
+    Enable(ast::Extension::kF16);
 
     const auto& param = GetParam();
     const auto& expectation = std::get<0>(param);
@@ -489,13 +490,13 @@ INSTANTIATE_TEST_SUITE_P(
             Types<f32, AFloat>(AFloat(kPiF32), kPiF64),                                       //
             Types<f32, AFloat>(AFloat(kSubnormalF32), kSubnormalF32),                         //
             Types<f32, AFloat>(AFloat(-kSubnormalF32), -kSubnormalF32),                       //
-            /* Types<f16, AFloat>(0.0_a, 0.0),                             */                 //
-            /* Types<f16, AFloat>(1.0_a, 1.0),                             */                 //
-            /* Types<f16, AFloat>(AFloat(kHighestF16), kHighestF16),       */                 //
-            /* Types<f16, AFloat>(AFloat(kLowestF16), kLowestF16),         */                 //
-            /* Types<f16, AFloat>(AFloat(kPiF16), kPiF64),                 */                 //
-            /* Types<f16, AFloat>(AFloat(kSubnormalF16), kSubnormalF16),   */                 //
-            /* Types<f16, AFloat>(AFloat(-kSubnormalF16), -kSubnormalF16), */                 //
+            Types<f16, AFloat>(0.0_a, 0.0),                                                   //
+            Types<f16, AFloat>(1.0_a, 1.0),                                                   //
+            Types<f16, AFloat>(AFloat(f16::Highest()), static_cast<double>(f16::Highest())),  //
+            Types<f16, AFloat>(AFloat(f16::Lowest()), static_cast<double>(f16::Lowest())),    //
+            Types<f16, AFloat>(AFloat(kPiF16), kPiF64),                                       //
+            Types<f16, AFloat>(AFloat(kSubnormalF16), kSubnormalF16),                         //
+            Types<f16, AFloat>(AFloat(-kSubnormalF16), -kSubnormalF16),                       //
         })));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -522,14 +523,14 @@ INSTANTIATE_TEST_SUITE_P(
             Types<f32V, AFloatV>(AFloat(kPiF32), kPiF64),                                       //
             Types<f32V, AFloatV>(AFloat(kSubnormalF32), kSubnormalF32),                         //
             Types<f32V, AFloatV>(AFloat(-kSubnormalF32), -kSubnormalF32),                       //
-            /* Types<f16V, AFloatV>(0.0_a, 0.0),                             */                 //
-            /* Types<f16V, AFloatV>(1.0_a, 1.0),                             */                 //
-            /* Types<f16V, AFloatV>(-1.0_a, -1.0),                           */                 //
-            /* Types<f16V, AFloatV>(AFloat(kHighestF16), kHighestF16),       */                 //
-            /* Types<f16V, AFloatV>(AFloat(kLowestF16), kLowestF16),         */                 //
-            /* Types<f16V, AFloatV>(AFloat(kPiF16), kPiF64),                 */                 //
-            /* Types<f16V, AFloatV>(AFloat(kSubnormalF16), kSubnormalF16),   */                 //
-            /* Types<f16V, AFloatV>(AFloat(-kSubnormalF16), -kSubnormalF16), */                 //
+            Types<f16V, AFloatV>(0.0_a, 0.0),                                                   //
+            Types<f16V, AFloatV>(1.0_a, 1.0),                                                   //
+            Types<f16V, AFloatV>(-1.0_a, -1.0),                                                 //
+            Types<f16V, AFloatV>(AFloat(f16::Highest()), static_cast<double>(f16::Highest())),  //
+            Types<f16V, AFloatV>(AFloat(f16::Lowest()), static_cast<double>(f16::Lowest())),    //
+            Types<f16V, AFloatV>(AFloat(kPiF16), kPiF64),                                       //
+            Types<f16V, AFloatV>(AFloat(kSubnormalF16), kSubnormalF16),                         //
+            Types<f16V, AFloatV>(AFloat(-kSubnormalF16), -kSubnormalF16),                       //
         })));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -569,14 +570,14 @@ INSTANTIATE_TEST_SUITE_P(
             Types<f32M, AFloatM>(AFloat(kPiF32), kPiF64),                                       //
             Types<f32M, AFloatM>(AFloat(kSubnormalF32), kSubnormalF32),                         //
             Types<f32M, AFloatM>(AFloat(-kSubnormalF32), -kSubnormalF32),                       //
-            /* Types<f16M, AFloatM>(0.0_a, 0.0),                             */                 //
-            /* Types<f16M, AFloatM>(1.0_a, 1.0),                             */                 //
-            /* Types<f16M, AFloatM>(-1.0_a, -1.0),                           */                 //
-            /* Types<f16M, AFloatM>(AFloat(kHighestF16), kHighestF16),       */                 //
-            /* Types<f16M, AFloatM>(AFloat(kLowestF16), kLowestF16),         */                 //
-            /* Types<f16M, AFloatM>(AFloat(kPiF16), kPiF64),                 */                 //
-            /* Types<f16M, AFloatM>(AFloat(kSubnormalF16), kSubnormalF16),   */                 //
-            /* Types<f16M, AFloatM>(AFloat(-kSubnormalF16), -kSubnormalF16), */                 //
+            Types<f16M, AFloatM>(0.0_a, 0.0),                                                   //
+            Types<f16M, AFloatM>(1.0_a, 1.0),                                                   //
+            Types<f16M, AFloatM>(-1.0_a, -1.0),                                                 //
+            Types<f16M, AFloatM>(AFloat(f16::Highest()), static_cast<double>(f16::Highest())),  //
+            Types<f16M, AFloatM>(AFloat(f16::Lowest()), static_cast<double>(f16::Lowest())),    //
+            Types<f16M, AFloatM>(AFloat(kPiF16), kPiF64),                                       //
+            Types<f16M, AFloatM>(AFloat(kSubnormalF16), kSubnormalF16),                         //
+            Types<f16M, AFloatM>(AFloat(-kSubnormalF16), -kSubnormalF16),                       //
         })));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -637,14 +638,14 @@ INSTANTIATE_TEST_SUITE_P(
             Types<f32A, AFloatA>(AFloat(kPiF32), kPiF64),                                       //
             Types<f32A, AFloatA>(AFloat(kSubnormalF32), kSubnormalF32),                         //
             Types<f32A, AFloatA>(AFloat(-kSubnormalF32), -kSubnormalF32),                       //
-            /* Types<f16A, AFloatA>(0.0_a, 0.0),                             */                 //
-            /* Types<f16A, AFloatA>(1.0_a, 1.0),                             */                 //
-            /* Types<f16A, AFloatA>(-1.0_a, -1.0),                           */                 //
-            /* Types<f16A, AFloatA>(AFloat(kHighestF16), kHighestF16),       */                 //
-            /* Types<f16A, AFloatA>(AFloat(kLowestF16), kLowestF16),         */                 //
-            /* Types<f16A, AFloatA>(AFloat(kPiF16), kPiF64),                 */                 //
-            /* Types<f16A, AFloatA>(AFloat(kSubnormalF16), kSubnormalF16),   */                 //
-            /* Types<f16A, AFloatA>(AFloat(-kSubnormalF16), -kSubnormalF16), */                 //
+            Types<f16A, AFloatA>(0.0_a, 0.0),                                                   //
+            Types<f16A, AFloatA>(1.0_a, 1.0),                                                   //
+            Types<f16A, AFloatA>(-1.0_a, -1.0),                                                 //
+            Types<f16A, AFloatA>(AFloat(f16::Highest()), static_cast<double>(f16::Highest())),  //
+            Types<f16A, AFloatA>(AFloat(f16::Lowest()), static_cast<double>(f16::Lowest())),    //
+            Types<f16A, AFloatA>(AFloat(kPiF16), kPiF64),                                       //
+            Types<f16A, AFloatA>(AFloat(kSubnormalF16), kSubnormalF16),                         //
+            Types<f16A, AFloatA>(AFloat(-kSubnormalF16), -kSubnormalF16),                       //
         })));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -716,8 +717,8 @@ INSTANTIATE_TEST_SUITE_P(
                          Types<u32, AInt>(0_a, static_cast<double>(u32::kLowestValue) - 1),   //
                          Types<f32, AFloat>(0.0_a, kTooBigF32),                               //
                          Types<f32, AFloat>(0.0_a, -kTooBigF32),                              //
-                         /* Types<f16, AFloat>(0.0_a, kTooBigF16),  */                        //
-                         /* Types<f16, AFloat>(0.0_a, -kTooBigF16), */                        //
+                         Types<f16, AFloat>(0.0_a, kTooBigF16),                               //
+                         Types<f16, AFloat>(0.0_a, -kTooBigF16),                              //
                      })));
 
 INSTANTIATE_TEST_SUITE_P(
@@ -732,8 +733,8 @@ INSTANTIATE_TEST_SUITE_P(
                          Types<u32V, AIntV>(0_a, static_cast<double>(u32::kLowestValue) - 1),   //
                          Types<f32V, AFloatV>(0.0_a, kTooBigF32),                               //
                          Types<f32V, AFloatV>(0.0_a, -kTooBigF32),                              //
-                         /* Types<f16V, AFloatV>(0.0_a, kTooBigF16),  */                        //
-                         /* Types<f16V, AFloatV>(0.0_a, -kTooBigF16), */                        //
+                         Types<f16V, AFloatV>(0.0_a, kTooBigF16),                               //
+                         Types<f16V, AFloatV>(0.0_a, -kTooBigF16),                              //
                      })));
 
 INSTANTIATE_TEST_SUITE_P(MatrixValueCannotBeRepresented,
@@ -741,10 +742,10 @@ INSTANTIATE_TEST_SUITE_P(MatrixValueCannotBeRepresented,
                          testing::Combine(testing::Values(Expectation::kValueCannotBeRepresented),
                                           testing::ValuesIn(kMatrixMethods),
                                           testing::ValuesIn(std::vector<Data>{
-                                              Types<f32M, AFloatM>(0.0_a, kTooBigF32),         //
-                                              Types<f32M, AFloatM>(0.0_a, -kTooBigF32),        //
-                                              /* Types<f16M, AFloatM>(0.0_a, kTooBigF16),  */  //
-                                              /* Types<f16M, AFloatM>(0.0_a, -kTooBigF16), */  //
+                                              Types<f32M, AFloatM>(0.0_a, kTooBigF32),   //
+                                              Types<f32M, AFloatM>(0.0_a, -kTooBigF32),  //
+                                              Types<f16M, AFloatM>(0.0_a, kTooBigF16),   //
+                                              Types<f16M, AFloatM>(0.0_a, -kTooBigF16),  //
                                           })));
 
 }  // namespace materialize_abstract_numeric_to_concrete_type
