@@ -111,8 +111,14 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToPhony) {
     ASSERT_TRUE(a->lhs->Is<ast::PhonyExpression>());
 }
 
-TEST_F(ParserImplTest, AssignmentStmt_Parses_CompoundOp) {
-    auto p = parser("a += 123u");
+struct CompoundData {
+    std::string str;
+    ast::BinaryOp op;
+};
+using CompoundOpTest = ParserImplTestWithParam<CompoundData>;
+TEST_P(CompoundOpTest, CompoundOp) {
+    auto params = GetParam();
+    auto p = parser("a " + params.str + " 123u");
     auto e = p->assignment_stmt();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
@@ -123,7 +129,7 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_CompoundOp) {
     ASSERT_NE(a, nullptr);
     ASSERT_NE(a->lhs, nullptr);
     ASSERT_NE(a->rhs, nullptr);
-    EXPECT_EQ(a->op, ast::BinaryOp::kAdd);
+    EXPECT_EQ(a->op, params.op);
 
     ASSERT_TRUE(a->lhs->Is<ast::IdentifierExpression>());
     auto* ident = a->lhs->As<ast::IdentifierExpression>();
@@ -134,6 +140,18 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_CompoundOp) {
     EXPECT_EQ(a->rhs->As<ast::IntLiteralExpression>()->suffix,
               ast::IntLiteralExpression::Suffix::kU);
 }
+INSTANTIATE_TEST_SUITE_P(ParserImplTest,
+                         CompoundOpTest,
+                         testing::Values(CompoundData{"+=", ast::BinaryOp::kAdd},
+                                         CompoundData{"-=", ast::BinaryOp::kSubtract},
+                                         CompoundData{"*=", ast::BinaryOp::kMultiply},
+                                         CompoundData{"/=", ast::BinaryOp::kDivide},
+                                         CompoundData{"%=", ast::BinaryOp::kModulo},
+                                         CompoundData{"&=", ast::BinaryOp::kAnd},
+                                         CompoundData{"|=", ast::BinaryOp::kOr},
+                                         CompoundData{"^=", ast::BinaryOp::kXor},
+                                         CompoundData{">>=", ast::BinaryOp::kShiftRight},
+                                         CompoundData{"<<=", ast::BinaryOp::kShiftLeft}));
 
 TEST_F(ParserImplTest, AssignmentStmt_MissingEqual) {
     auto p = parser("a.b.c[2].d 123");

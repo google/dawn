@@ -140,6 +140,10 @@ class Token {
         kOrEqual,
         /// A '^='
         kXorEqual,
+        /// A '>>='
+        kShiftRightEqual,
+        /// A '<<='
+        kShiftLeftEqual,
 
         /// A 'array'
         kArray,

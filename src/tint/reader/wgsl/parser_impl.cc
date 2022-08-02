@@ -2924,6 +2924,8 @@ Maybe<const ast::Expression*> ParserImpl::logical_or_expression() {
 // | and_equal
 // | or_equal
 // | xor_equal
+// | shift_right_equal
+// | shift_left_equal
 Maybe<ast::BinaryOp> ParserImpl::compound_assignment_operator() {
     ast::BinaryOp compound_op = ast::BinaryOp::kNone;
     if (peek_is(Token::Type::kPlusEqual)) {
@@ -2942,6 +2944,10 @@ Maybe<ast::BinaryOp> ParserImpl::compound_assignment_operator() {
         compound_op = ast::BinaryOp::kOr;
     } else if (peek_is(Token::Type::kXorEqual)) {
         compound_op = ast::BinaryOp::kXor;
+    } else if (peek_is(Token::Type::kShiftLeftEqual)) {
+        compound_op = ast::BinaryOp::kShiftLeft;
+    } else if (peek_is(Token::Type::kShiftRightEqual)) {
+        compound_op = ast::BinaryOp::kShiftRight;
     }
     if (compound_op != ast::BinaryOp::kNone) {
         next();

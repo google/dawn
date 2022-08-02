@@ -1025,8 +1025,13 @@ Token Lexer::try_punctuation() {
             type = Token::Type::kGreaterThanEqual;
             advance(2);
         } else if (matches(pos() + 1, '>')) {
-            type = Token::Type::kShiftRight;
-            advance(2);
+            if (matches(pos() + 2, '=')) {
+                type = Token::Type::kShiftRightEqual;
+                advance(3);
+            } else {
+                type = Token::Type::kShiftRight;
+                advance(2);
+            }
         } else {
             type = Token::Type::kGreaterThan;
             advance(1);
@@ -1036,8 +1041,13 @@ Token Lexer::try_punctuation() {
             type = Token::Type::kLessThanEqual;
             advance(2);
         } else if (matches(pos() + 1, '<')) {
-            type = Token::Type::kShiftLeft;
-            advance(2);
+            if (matches(pos() + 2, '=')) {
+                type = Token::Type::kShiftLeftEqual;
+                advance(3);
+            } else {
+                type = Token::Type::kShiftLeft;
+                advance(2);
+            }
         } else {
             type = Token::Type::kLessThan;
             advance(1);

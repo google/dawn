@@ -1049,7 +1049,9 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          TokenData{"%=", Token::Type::kModuloEqual},
                                          TokenData{"&=", Token::Type::kAndEqual},
                                          TokenData{"|=", Token::Type::kOrEqual},
-                                         TokenData{"^=", Token::Type::kXorEqual}));
+                                         TokenData{"^=", Token::Type::kXorEqual},
+                                         TokenData{">>=", Token::Type::kShiftRightEqual},
+                                         TokenData{"<<=", Token::Type::kShiftLeftEqual}));
 
 using SplittablePunctuationTest = testing::TestWithParam<TokenData>;
 TEST_P(SplittablePunctuationTest, Parses) {
