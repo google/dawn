@@ -992,7 +992,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
     return true;
 }
 
-bool Resolver::Statements(const ast::StatementList& stmts) {
+bool Resolver::Statements(utils::VectorRef<const ast::Statement*> stmts) {
     sem::Behaviors behaviors{sem::Behavior::kNext};
 
     bool reachable = true;
@@ -1058,7 +1058,7 @@ sem::CaseStatement* Resolver::CaseStatement(const ast::CaseStatement* stmt) {
     auto* sem =
         builder_->create<sem::CaseStatement>(stmt, current_compound_statement_, current_function_);
     return StatementScope(stmt, sem, [&] {
-        sem->Selectors().reserve(stmt->selectors.size());
+        sem->Selectors().reserve(stmt->selectors.Length());
         for (auto* sel : stmt->selectors) {
             auto* expr = Expression(sel);
             if (!expr) {
@@ -1514,10 +1514,10 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
 
     // Resolve all of the arguments, their types and the set of behaviors.
     utils::Vector<const sem::Expression*, 8> args;
-    args.Reserve(expr->args.size());
+    args.Reserve(expr->args.Length());
     auto args_stage = sem::EvaluationStage::kConstant;
     sem::Behaviors arg_behaviors;
-    for (size_t i = 0; i < expr->args.size(); i++) {
+    for (size_t i = 0; i < expr->args.Length(); i++) {
         auto* arg = sem_.Get(expr->args[i]);
         if (!arg) {
             return nullptr;
@@ -2422,7 +2422,7 @@ utils::Result<uint32_t> Resolver::ArrayCount(const ast::Expression* count_expr) 
     return static_cast<uint32_t>(count);
 }
 
-bool Resolver::ArrayAttributes(const ast::AttributeList& attributes,
+bool Resolver::ArrayAttributes(utils::VectorRef<const ast::Attribute*> attributes,
                                const sem::Type* el_ty,
                                uint32_t& explicit_stride) {
     if (!validator_.NoDuplicateAttributes(attributes)) {
@@ -2493,7 +2493,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     }
 
     sem::StructMemberList sem_members;
-    sem_members.reserve(str->members.size());
+    sem_members.reserve(str->members.Length());
 
     // Calculate the effective size and alignment of each field, and the overall
     // size of the structure.
@@ -2692,8 +2692,8 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
         utils::Vector<const sem::Type*, 8> types;
         types.Push(cond_ty);
 
-        std::vector<sem::CaseStatement*> cases;
-        cases.reserve(stmt->body.size());
+        utils::Vector<sem::CaseStatement*, 4> cases;
+        cases.Reserve(stmt->body.Length());
         for (auto* case_stmt : stmt->body) {
             Mark(case_stmt);
             auto* c = CaseStatement(case_stmt);
@@ -2703,7 +2703,7 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
             for (auto* expr : c->Selectors()) {
                 types.Push(expr->Type()->UnwrapRef());
             }
-            cases.emplace_back(c);
+            cases.Push(c);
             behaviors.Add(c->Behaviors());
             sem->Cases().emplace_back(c);
         }

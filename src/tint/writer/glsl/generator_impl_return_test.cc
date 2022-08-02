@@ -35,7 +35,7 @@ TEST_F(GlslGeneratorImplTest_Return, Emit_Return) {
 
 TEST_F(GlslGeneratorImplTest_Return, Emit_ReturnWithValue) {
     auto* r = Return(123_i);
-    Func("f", {}, ty.i32(), {r});
+    Func("f", utils::Empty, ty.i32(), utils::Vector{r});
 
     GeneratorImpl& gen = Build();
 

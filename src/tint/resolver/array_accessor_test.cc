@@ -282,8 +282,8 @@ TEST_F(ResolverIndexAccessorTest, Array_Dynamic_I32) {
     auto* idx = Var("idx", ty.i32(), Construct(ty.i32()));
     auto* acc = IndexAccessor("a", Expr(Source{{12, 34}}, idx));
     auto* f = Var("f", ty.f32(), acc);
-    Func("my_func", {}, ty.void_(),
-         {
+    Func("my_func", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(a),
              Decl(idx),
              Decl(f),
@@ -303,8 +303,8 @@ TEST_F(ResolverIndexAccessorTest, Array_Literal_F32) {
     // var f : f32 = a[2.0f];
     auto* a = Let("a", ty.array<f32, 3>(), array<f32, 3>());
     auto* f = Var("a_2", ty.f32(), IndexAccessor("a", Expr(Source{{12, 34}}, 2_f)));
-    Func("my_func", {}, ty.void_(),
-         {
+    Func("my_func", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(a),
              Decl(f),
          });
@@ -318,8 +318,8 @@ TEST_F(ResolverIndexAccessorTest, Array_Literal_I32) {
     auto* a = Let("a", ty.array<f32, 3>(), array<f32, 3>());
     auto* acc = IndexAccessor("a", 2_i);
     auto* f = Var("a_2", ty.f32(), acc);
-    Func("my_func", {}, ty.void_(),
-         {
+    Func("my_func", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(a),
              Decl(f),
          });
@@ -342,7 +342,7 @@ TEST_F(ResolverIndexAccessorTest, Expr_Deref_FuncGoodParent) {
     auto* star_p = Deref(p);
     auto* acc = IndexAccessor(Source{{12, 34}}, star_p, idx);
     auto* x = Var("x", ty.f32(), acc);
-    Func("func", {p}, ty.f32(), {Decl(idx), Decl(x), Return(x)});
+    Func("func", utils::Vector{p}, ty.f32(), utils::Vector{Decl(idx), Decl(x), Return(x)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -363,7 +363,7 @@ TEST_F(ResolverIndexAccessorTest, Expr_Deref_FuncBadParent) {
     auto* accessor_expr = IndexAccessor(Source{{12, 34}}, p, idx);
     auto* star_p = Deref(accessor_expr);
     auto* x = Var("x", ty.f32(), star_p);
-    Func("func", {p}, ty.f32(), {Decl(idx), Decl(x), Return(x)});
+    Func("func", utils::Vector{p}, ty.f32(), utils::Vector{Decl(idx), Decl(x), Return(x)});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

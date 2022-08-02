@@ -25,54 +25,47 @@ namespace {
 using SwitchStatementTest = TestHelper;
 
 TEST_F(SwitchStatementTest, Creation) {
-    CaseSelectorList lit;
-    lit.push_back(Expr(1_u));
-
+    auto* case_stmt = create<CaseStatement>(utils::Vector{Expr(1_u)}, Block());
     auto* ident = Expr("ident");
-    CaseStatementList body;
-    auto* case_stmt = create<CaseStatement>(lit, Block());
-    body.push_back(case_stmt);
+    utils::Vector body{case_stmt};
 
     auto* stmt = create<SwitchStatement>(ident, body);
     EXPECT_EQ(stmt->condition, ident);
-    ASSERT_EQ(stmt->body.size(), 1u);
+    ASSERT_EQ(stmt->body.Length(), 1u);
     EXPECT_EQ(stmt->body[0], case_stmt);
 }
 
 TEST_F(SwitchStatementTest, Creation_WithSource) {
     auto* ident = Expr("ident");
-
-    auto* stmt =
-        create<SwitchStatement>(Source{Source::Location{20, 2}}, ident, CaseStatementList());
+    auto* stmt = create<SwitchStatement>(Source{Source::Location{20, 2}}, ident, utils::Empty);
     auto src = stmt->source;
     EXPECT_EQ(src.range.begin.line, 20u);
     EXPECT_EQ(src.range.begin.column, 2u);
 }
 
 TEST_F(SwitchStatementTest, IsSwitch) {
-    CaseSelectorList lit;
-    lit.push_back(Expr(2_i));
-
+    utils::Vector lit{Expr(2_i)};
     auto* ident = Expr("ident");
-    CaseStatementList body;
-    body.push_back(create<CaseStatement>(lit, Block()));
+    utils::Vector body{create<CaseStatement>(lit, Block())};
 
     auto* stmt = create<SwitchStatement>(ident, body);
     EXPECT_TRUE(stmt->Is<SwitchStatement>());
 }
 
 TEST_F(SwitchStatementTest, Assert_Null_Condition) {
+    using CaseStatementList = utils::Vector<const ast::CaseStatement*, 2>;
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
             CaseStatementList cases;
-            cases.push_back(b.create<CaseStatement>(CaseSelectorList{b.Expr(1_i)}, b.Block()));
+            cases.Push(b.create<CaseStatement>(utils::Vector{b.Expr(1_i)}, b.Block()));
             b.create<SwitchStatement>(nullptr, cases);
         },
         "internal compiler error");
 }
 
 TEST_F(SwitchStatementTest, Assert_Null_CaseStatement) {
+    using CaseStatementList = utils::Vector<const ast::CaseStatement*, 2>;
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
@@ -86,9 +79,9 @@ TEST_F(SwitchStatementTest, Assert_DifferentProgramID_Condition) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<SwitchStatement>(b2.Expr(true), CaseStatementList{
+            b1.create<SwitchStatement>(b2.Expr(true), utils::Vector{
                                                           b1.create<CaseStatement>(
-                                                              CaseSelectorList{
+                                                              utils::Vector{
                                                                   b1.Expr(1_i),
                                                               },
                                                               b1.Block()),
@@ -102,9 +95,9 @@ TEST_F(SwitchStatementTest, Assert_DifferentProgramID_CaseStatement) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<SwitchStatement>(b1.Expr(true), CaseStatementList{
+            b1.create<SwitchStatement>(b1.Expr(true), utils::Vector{
                                                           b2.create<CaseStatement>(
-                                                              CaseSelectorList{
+                                                              utils::Vector{
                                                                   b2.Expr(1_i),
                                                               },
                                                               b2.Block()),

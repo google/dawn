@@ -213,8 +213,8 @@ TEST_F(ResolverControlBlockValidationTest, SwitchConditionTypeMustMatchSelectorT
     // }
     auto* var = Var("a", ty.i32(), Expr(2_i));
 
-    auto* block = Block(Decl(var), Switch("a",                                  //
-                                          Case(Source{{12, 34}}, {Expr(1_u)}),  //
+    auto* block = Block(Decl(var), Switch("a",                                               //
+                                          Case(Source{{12, 34}}, utils::Vector{Expr(1_u)}),  //
                                           DefaultCase()));
     WrapInFunction(block);
 
@@ -232,9 +232,9 @@ TEST_F(ResolverControlBlockValidationTest, SwitchConditionTypeMustMatchSelectorT
     // }
     auto* var = Var("a", ty.u32(), Expr(2_u));
 
-    auto* block = Block(Decl(var),                                    //
-                        Switch("a",                                   //
-                               Case(Source{{12, 34}}, {Expr(-1_i)}),  //
+    auto* block = Block(Decl(var),                                                 //
+                        Switch("a",                                                //
+                               Case(Source{{12, 34}}, utils::Vector{Expr(-1_i)}),  //
                                DefaultCase()));
     WrapInFunction(block);
 
@@ -256,7 +256,7 @@ TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorValueUint_Fail) 
     auto* block = Block(Decl(var),   //
                         Switch("a",  //
                                Case(Expr(0_u)),
-                               Case({
+                               Case(utils::Vector{
                                    Expr(Source{{12, 34}}, 2_u),
                                    Expr(3_u),
                                    Expr(Source{{56, 78}}, 2_u),
@@ -282,7 +282,7 @@ TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorValueSint_Fail) 
     auto* block = Block(Decl(var),   //
                         Switch("a",  //
                                Case(Expr(Source{{12, 34}}, -10_i)),
-                               Case({
+                               Case(utils::Vector{
                                    Expr(0_i),
                                    Expr(1_i),
                                    Expr(2_i),

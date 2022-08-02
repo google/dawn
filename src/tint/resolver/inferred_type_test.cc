@@ -83,7 +83,6 @@ TEST_P(ResolverInferredTypeParamTest, GlobalConst_Pass) {
     // const a = <type constructor>;
     auto* ctor_expr = params.create_value(*this, 0);
     auto* a = GlobalConst("a", nullptr, ctor_expr);
-    WrapInFunction();
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     EXPECT_EQ(TypeOf(a), expected_type);
@@ -97,7 +96,6 @@ TEST_P(ResolverInferredTypeParamTest, GlobalVar_Pass) {
     // var a = <type constructor>;
     auto* ctor_expr = params.create_value(*this, 0);
     auto* var = GlobalVar("a", nullptr, ast::StorageClass::kPrivate, ctor_expr);
-    WrapInFunction();
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     EXPECT_EQ(TypeOf(var)->UnwrapRef(), expected_type);
@@ -147,7 +145,7 @@ TEST_F(ResolverInferredTypeTest, InferArray_Pass) {
 
 TEST_F(ResolverInferredTypeTest, InferStruct_Pass) {
     auto* member = Member("x", ty.i32());
-    auto* str = Structure("S", {member});
+    auto* str = Structure("S", utils::Vector{member});
 
     auto* expected_type =
         create<sem::Struct>(str, str->name,

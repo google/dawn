@@ -59,7 +59,7 @@ class Var final : public Castable<Var, Variable> {
         StorageClass declared_storage_class,
         Access declared_access,
         const Expression* constructor,
-        AttributeList attributes);
+        utils::VectorRef<const Attribute*> attributes);
 
     /// Move constructor
     Var(Var&&);

@@ -38,9 +38,6 @@ class Expression : public Castable<Expression, Node> {
     Expression(Expression&&);
 };
 
-/// A list of expressions
-using ExpressionList = std::vector<const Expression*>;
-
 }  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_EXPRESSION_H_

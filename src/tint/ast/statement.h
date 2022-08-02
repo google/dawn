@@ -39,9 +39,6 @@ class Statement : public Castable<Statement, Node> {
     Statement(Statement&&);
 };
 
-/// A list of statements
-using StatementList = std::vector<const Statement*>;
-
 }  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_STATEMENT_H_

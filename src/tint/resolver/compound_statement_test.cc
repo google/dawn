@@ -35,7 +35,7 @@ TEST_F(ResolverCompoundStatementTest, FunctionBlock) {
     //   var x : 32;
     // }
     auto* stmt = Decl(Var("x", ty.i32()));
-    auto* f = Func("F", {}, ty.void_(), {stmt});
+    auto* f = Func("F", utils::Empty, ty.void_(), utils::Vector{stmt});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -57,7 +57,7 @@ TEST_F(ResolverCompoundStatementTest, Block) {
     // }
     auto* stmt = Decl(Var("x", ty.i32()));
     auto* block = Block(stmt);
-    auto* f = Func("F", {}, ty.void_(), {block});
+    auto* f = Func("F", utils::Empty, ty.void_(), utils::Vector{block});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -92,7 +92,7 @@ TEST_F(ResolverCompoundStatementTest, Loop) {
     auto* brk = Break();
     auto* stmt = Ignore(1_i);
     auto* loop = Loop(Block(brk), Block(stmt));
-    auto* f = Func("F", {}, ty.void_(), {loop});
+    auto* f = Func("F", utils::Empty, ty.void_(), utils::Vector{loop});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -155,7 +155,7 @@ TEST_F(ResolverCompoundStatementTest, Loop_EmptyContinuing) {
     // }
     auto* brk = Break();
     auto* loop = Loop(Block(brk), Block());
-    Func("F", {}, ty.void_(), {loop});
+    Func("F", utils::Empty, ty.void_(), utils::Vector{loop});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -186,7 +186,7 @@ TEST_F(ResolverCompoundStatementTest, ForLoop) {
     auto* stmt = Return();
     auto* body = Block(stmt);
     auto* for_ = For(init, cond, cont, body);
-    auto* f = Func("F", {}, ty.void_(), {for_});
+    auto* f = Func("F", utils::Empty, ty.void_(), utils::Vector{for_});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -250,7 +250,7 @@ TEST_F(ResolverCompoundStatementTest, While) {
     auto* stmt = Return();
     auto* body = Block(stmt);
     auto* while_ = While(cond, body);
-    auto* f = Func("W", {}, ty.void_(), {while_});
+    auto* f = Func("W", utils::Empty, ty.void_(), utils::Vector{while_});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 

@@ -16,7 +16,6 @@
 #define SRC_TINT_AST_STRUCT_MEMBER_H_
 
 #include <utility>
-#include <vector>
 
 #include "src/tint/ast/attribute.h"
 
@@ -42,7 +41,7 @@ class StructMember final : public Castable<StructMember, Node> {
                  const Source& src,
                  const Symbol& sym,
                  const ast::Type* type,
-                 AttributeList attributes);
+                 utils::VectorRef<const Attribute*> attributes);
     /// Move constructor
     StructMember(StructMember&&);
 
@@ -61,11 +60,8 @@ class StructMember final : public Castable<StructMember, Node> {
     const ast::Type* const type;
 
     /// The attributes
-    const AttributeList attributes;
+    const utils::Vector<const Attribute*, 4> attributes;
 };
-
-/// A list of struct members
-using StructMemberList = std::vector<const StructMember*>;
 
 }  // namespace tint::ast
 

@@ -121,7 +121,9 @@ void NumWorkgroupsFromUniform::Run(CloneContext& ctx, const DataMap& inputs, Dat
         if (!num_workgroups_ubo) {
             auto* num_workgroups_struct = ctx.dst->Structure(
                 ctx.dst->Sym(),
-                {ctx.dst->Member(kNumWorkgroupsMemberName, ctx.dst->ty.vec3(ctx.dst->ty.u32()))});
+                utils::Vector{
+                    ctx.dst->Member(kNumWorkgroupsMemberName, ctx.dst->ty.vec3(ctx.dst->ty.u32())),
+                });
 
             uint32_t group, binding;
             if (cfg->ubo_binding.has_value()) {
@@ -146,7 +148,7 @@ void NumWorkgroupsFromUniform::Run(CloneContext& ctx, const DataMap& inputs, Dat
 
             num_workgroups_ubo = ctx.dst->GlobalVar(
                 ctx.dst->Sym(), ctx.dst->ty.Of(num_workgroups_struct), ast::StorageClass::kUniform,
-                ast::AttributeList{ctx.dst->GroupAndBinding(group, binding)});
+                ctx.dst->GroupAndBinding(group, binding));
         }
         return num_workgroups_ubo;
     };

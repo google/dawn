@@ -28,10 +28,10 @@ TEST_F(EnableDirectiveTest, Valid) {
     EXPECT_FALSE(p->has_error()) << p->error();
     auto program = p->program();
     auto& ast = program.AST();
-    ASSERT_EQ(ast.Enables().size(), 1u);
+    ASSERT_EQ(ast.Enables().Length(), 1u);
     auto* enable = ast.Enables()[0];
     EXPECT_EQ(enable->extension, ast::Extension::kF16);
-    ASSERT_EQ(ast.GlobalDeclarations().size(), 1u);
+    ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
     EXPECT_EQ(ast.GlobalDeclarations()[0], enable);
 }
 
@@ -45,12 +45,12 @@ enable f16;
     EXPECT_FALSE(p->has_error()) << p->error();
     auto program = p->program();
     auto& ast = program.AST();
-    ASSERT_EQ(ast.Enables().size(), 2u);
+    ASSERT_EQ(ast.Enables().Length(), 2u);
     auto* enable_a = ast.Enables()[0];
     auto* enable_b = ast.Enables()[1];
     EXPECT_EQ(enable_a->extension, ast::Extension::kF16);
     EXPECT_EQ(enable_b->extension, ast::Extension::kF16);
-    ASSERT_EQ(ast.GlobalDeclarations().size(), 2u);
+    ASSERT_EQ(ast.GlobalDeclarations().Length(), 2u);
     EXPECT_EQ(ast.GlobalDeclarations()[0], enable_a);
     EXPECT_EQ(ast.GlobalDeclarations()[1], enable_b);
 }
@@ -64,8 +64,8 @@ TEST_F(EnableDirectiveTest, InvalidIdentifier) {
     EXPECT_EQ(p->error(), "1:8: unsupported extension: 'NotAValidExtensionName'");
     auto program = p->program();
     auto& ast = program.AST();
-    EXPECT_EQ(ast.Enables().size(), 0u);
-    EXPECT_EQ(ast.GlobalDeclarations().size(), 0u);
+    EXPECT_EQ(ast.Enables().Length(), 0u);
+    EXPECT_EQ(ast.GlobalDeclarations().Length(), 0u);
 }
 
 // Test an enable directive missing ending semicolon.
@@ -76,8 +76,8 @@ TEST_F(EnableDirectiveTest, MissingEndingSemicolon) {
     EXPECT_EQ(p->error(), "1:11: expected ';' for enable directive");
     auto program = p->program();
     auto& ast = program.AST();
-    EXPECT_EQ(ast.Enables().size(), 0u);
-    EXPECT_EQ(ast.GlobalDeclarations().size(), 0u);
+    EXPECT_EQ(ast.Enables().Length(), 0u);
+    EXPECT_EQ(ast.GlobalDeclarations().Length(), 0u);
 }
 
 // Test the special error message when enable are used with parenthesis.
@@ -88,8 +88,8 @@ TEST_F(EnableDirectiveTest, ParenthesisSpecialCase) {
     EXPECT_EQ(p->error(), "1:7: enable directives don't take parenthesis");
     auto program = p->program();
     auto& ast = program.AST();
-    EXPECT_EQ(ast.Enables().size(), 0u);
-    EXPECT_EQ(ast.GlobalDeclarations().size(), 0u);
+    EXPECT_EQ(ast.Enables().Length(), 0u);
+    EXPECT_EQ(ast.GlobalDeclarations().Length(), 0u);
 }
 
 // Test using invalid tokens in an enable directive.
@@ -101,8 +101,8 @@ TEST_F(EnableDirectiveTest, InvalidTokens) {
         EXPECT_EQ(p->error(), "1:11: expected ';' for enable directive");
         auto program = p->program();
         auto& ast = program.AST();
-        EXPECT_EQ(ast.Enables().size(), 0u);
-        EXPECT_EQ(ast.GlobalDeclarations().size(), 0u);
+        EXPECT_EQ(ast.Enables().Length(), 0u);
+        EXPECT_EQ(ast.GlobalDeclarations().Length(), 0u);
     }
     {
         auto p = parser("enable <f16;");
@@ -111,8 +111,8 @@ TEST_F(EnableDirectiveTest, InvalidTokens) {
         EXPECT_EQ(p->error(), "1:8: invalid extension name");
         auto program = p->program();
         auto& ast = program.AST();
-        EXPECT_EQ(ast.Enables().size(), 0u);
-        EXPECT_EQ(ast.GlobalDeclarations().size(), 0u);
+        EXPECT_EQ(ast.Enables().Length(), 0u);
+        EXPECT_EQ(ast.GlobalDeclarations().Length(), 0u);
     }
     {
         auto p = parser("enable =;");
@@ -121,8 +121,8 @@ TEST_F(EnableDirectiveTest, InvalidTokens) {
         EXPECT_EQ(p->error(), "1:8: invalid extension name");
         auto program = p->program();
         auto& ast = program.AST();
-        EXPECT_EQ(ast.Enables().size(), 0u);
-        EXPECT_EQ(ast.GlobalDeclarations().size(), 0u);
+        EXPECT_EQ(ast.Enables().Length(), 0u);
+        EXPECT_EQ(ast.GlobalDeclarations().Length(), 0u);
     }
     {
         auto p = parser("enable vec4;");
@@ -131,8 +131,8 @@ TEST_F(EnableDirectiveTest, InvalidTokens) {
         EXPECT_EQ(p->error(), "1:8: invalid extension name");
         auto program = p->program();
         auto& ast = program.AST();
-        EXPECT_EQ(ast.Enables().size(), 0u);
-        EXPECT_EQ(ast.GlobalDeclarations().size(), 0u);
+        EXPECT_EQ(ast.Enables().Length(), 0u);
+        EXPECT_EQ(ast.GlobalDeclarations().Length(), 0u);
     }
 }
 
@@ -148,10 +148,10 @@ enable f16;
     auto program = p->program();
     auto& ast = program.AST();
     // Accept the enable directive although it caused an error
-    ASSERT_EQ(ast.Enables().size(), 1u);
+    ASSERT_EQ(ast.Enables().Length(), 1u);
     auto* enable = ast.Enables()[0];
     EXPECT_EQ(enable->extension, ast::Extension::kF16);
-    ASSERT_EQ(ast.GlobalDeclarations().size(), 2u);
+    ASSERT_EQ(ast.GlobalDeclarations().Length(), 2u);
     EXPECT_EQ(ast.GlobalDeclarations()[1], enable);
 }
 
@@ -168,10 +168,10 @@ enable f16;
     auto program = p->program();
     auto& ast = program.AST();
     // Accept the enable directive although it cause an error
-    ASSERT_EQ(ast.Enables().size(), 1u);
+    ASSERT_EQ(ast.Enables().Length(), 1u);
     auto* enable = ast.Enables()[0];
     EXPECT_EQ(enable->extension, ast::Extension::kF16);
-    ASSERT_EQ(ast.GlobalDeclarations().size(), 1u);
+    ASSERT_EQ(ast.GlobalDeclarations().Length(), 1u);
     EXPECT_EQ(ast.GlobalDeclarations()[0], enable);
 }
 

@@ -154,7 +154,7 @@ TEST_F(InspectorGetEntryPointTest, NoEntryPoints) {
 }
 
 TEST_F(InspectorGetEntryPointTest, OneEntryPoint) {
-    MakeEmptyBodyFunction("foo", {
+    MakeEmptyBodyFunction("foo", utils::Vector{
                                      Stage(ast::PipelineStage::kFragment),
                                  });
 
@@ -172,11 +172,11 @@ TEST_F(InspectorGetEntryPointTest, OneEntryPoint) {
 }
 
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
-    MakeEmptyBodyFunction("foo", {
+    MakeEmptyBodyFunction("foo", utils::Vector{
                                      Stage(ast::PipelineStage::kFragment),
                                  });
 
-    MakeEmptyBodyFunction("bar", {
+    MakeEmptyBodyFunction("bar", utils::Vector{
                                      Stage(ast::PipelineStage::kCompute),
                                      WorkgroupSize(1_i),
                                  });
@@ -198,16 +198,16 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPoints) {
 }
 
 TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
-    MakeEmptyBodyFunction("func", {});
+    MakeEmptyBodyFunction("func", utils::Empty);
 
-    MakeCallerBodyFunction("foo", {"func"},
-                           {
+    MakeCallerBodyFunction("foo", utils::Vector{std::string("func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kCompute),
                                WorkgroupSize(1_i),
                            });
 
-    MakeCallerBodyFunction("bar", {"func"},
-                           {
+    MakeCallerBodyFunction("bar", utils::Vector{std::string("func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -228,7 +228,7 @@ TEST_F(InspectorGetEntryPointTest, MixFunctionsAndEntryPoints) {
 }
 
 TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
-    MakeEmptyBodyFunction("foo", {
+    MakeEmptyBodyFunction("foo", utils::Vector{
                                      Stage(ast::PipelineStage::kCompute),
                                      WorkgroupSize(8_i, 2_i, 1_i),
                                  });
@@ -247,7 +247,7 @@ TEST_F(InspectorGetEntryPointTest, DefaultWorkgroupSize) {
 }
 
 TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
-    MakeEmptyBodyFunction("foo", {
+    MakeEmptyBodyFunction("foo", utils::Vector{
                                      Stage(ast::PipelineStage::kCompute),
                                      WorkgroupSize(8_i, 2_i, 1_i),
                                  });
@@ -266,10 +266,10 @@ TEST_F(InspectorGetEntryPointTest, NonDefaultWorkgroupSize) {
 }
 
 TEST_F(InspectorGetEntryPointTest, NoInOutVariables) {
-    MakeEmptyBodyFunction("func", {});
+    MakeEmptyBodyFunction("func", utils::Empty);
 
-    MakeCallerBodyFunction("foo", {"func"},
-                           {
+    MakeCallerBodyFunction("foo", utils::Vector{std::string("func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -289,15 +289,19 @@ TEST_P(InspectorGetEntryPointComponentAndCompositionTest, Test) {
     std::tie(component, composition) = GetParam();
     std::function<const ast::Type*()> tint_type = GetTypeFunction(component, composition);
 
-    auto* in_var = Param("in_var", tint_type(), {Location(0u), Flat()});
-    Func("foo", {in_var}, tint_type(),
-         {
+    auto* in_var = Param("in_var", tint_type(),
+                         utils::Vector{
+                             Location(0u),
+                             Flat(),
+                         });
+    Func("foo", utils::Vector{in_var}, tint_type(),
+         utils::Vector{
              Return("in_var"),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         {
+         utils::Vector{
              Location(0u),
          });
     Inspector& inspector = Build();
@@ -330,17 +334,29 @@ INSTANTIATE_TEST_SUITE_P(InspectorGetEntryPointTest,
                                                           CompositionType::kVec4)));
 
 TEST_F(InspectorGetEntryPointTest, MultipleInOutVariables) {
-    auto* in_var0 = Param("in_var0", ty.u32(), {Location(0u), Flat()});
-    auto* in_var1 = Param("in_var1", ty.u32(), {Location(1u), Flat()});
-    auto* in_var4 = Param("in_var4", ty.u32(), {Location(4u), Flat()});
-    Func("foo", {in_var0, in_var1, in_var4}, ty.u32(),
-         {
+    auto* in_var0 = Param("in_var0", ty.u32(),
+                          utils::Vector{
+                              Location(0u),
+                              Flat(),
+                          });
+    auto* in_var1 = Param("in_var1", ty.u32(),
+                          utils::Vector{
+                              Location(1u),
+                              Flat(),
+                          });
+    auto* in_var4 = Param("in_var4", ty.u32(),
+                          utils::Vector{
+                              Location(4u),
+                              Flat(),
+                          });
+    Func("foo", utils::Vector{in_var0, in_var1, in_var4}, ty.u32(),
+         utils::Vector{
              Return("in_var0"),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         {
+         utils::Vector{
              Location(0u),
          });
     Inspector& inspector = Build();
@@ -375,27 +391,35 @@ TEST_F(InspectorGetEntryPointTest, MultipleInOutVariables) {
 }
 
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
-    auto* in_var_foo = Param("in_var_foo", ty.u32(), {Location(0u), Flat()});
-    Func("foo", {in_var_foo}, ty.u32(),
-         {
+    auto* in_var_foo = Param("in_var_foo", ty.u32(),
+                             utils::Vector{
+                                 Location(0u),
+                                 Flat(),
+                             });
+    Func("foo", utils::Vector{in_var_foo}, ty.u32(),
+         utils::Vector{
              Return("in_var_foo"),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         {
+         utils::Vector{
              Location(0u),
          });
 
-    auto* in_var_bar = Param("in_var_bar", ty.u32(), {Location(0u), Flat()});
-    Func("bar", {in_var_bar}, ty.u32(),
-         {
+    auto* in_var_bar = Param("in_var_bar", ty.u32(),
+                             utils::Vector{
+                                 Location(0u),
+                                 Flat(),
+                             });
+    Func("bar", utils::Vector{in_var_bar}, ty.u32(),
+         utils::Vector{
              Return("in_var_bar"),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         {
+         utils::Vector{
              Location(1u),
          });
 
@@ -434,16 +458,22 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
 }
 
 TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
-    auto* in_var0 = Param("in_var0", ty.u32(), {Builtin(ast::BuiltinValue::kSampleIndex)});
-    auto* in_var1 = Param("in_var1", ty.f32(), {Location(0u)});
-    Func("foo", {in_var0, in_var1}, ty.f32(),
-         {
+    auto* in_var0 = Param("in_var0", ty.u32(),
+                          utils::Vector{
+                              Builtin(ast::BuiltinValue::kSampleIndex),
+                          });
+    auto* in_var1 = Param("in_var1", ty.f32(),
+                          utils::Vector{
+                              Location(0u),
+                          });
+    Func("foo", utils::Vector{in_var0, in_var1}, ty.f32(),
+         utils::Vector{
              Return("in_var1"),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         {
+         utils::Vector{
              Builtin(ast::BuiltinValue::kFragDepth),
          });
     Inspector& inspector = Build();
@@ -463,16 +493,19 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
 }
 
 TEST_F(InspectorGetEntryPointTest, InOutStruct) {
-    auto* interface = MakeInOutStruct("interface", {{"a", 0u}, {"b", 1u}});
+    auto* interface = MakeInOutStruct("interface", utils::Vector{
+                                                       InOutInfo{"a", 0u},
+                                                       InOutInfo{"b", 1u},
+                                                   });
     Func("foo",
-         {
+         utils::Vector{
              Param("param", ty.Of(interface)),
          },
          ty.Of(interface),
-         {
+         utils::Vector{
              Return("param"),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
     Inspector& inspector = Build();
@@ -504,16 +537,19 @@ TEST_F(InspectorGetEntryPointTest, InOutStruct) {
 }
 
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutSharedStruct) {
-    auto* interface = MakeInOutStruct("interface", {{"a", 0u}, {"b", 1u}});
-    Func("foo", {}, ty.Of(interface),
-         {
+    auto* interface = MakeInOutStruct("interface", utils::Vector{
+                                                       InOutInfo{"a", 0u},
+                                                       InOutInfo{"b", 1u},
+                                                   });
+    Func("foo", utils::Empty, ty.Of(interface),
+         utils::Vector{
              Return(Construct(ty.Of(interface))),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
-    Func("bar", {Param("param", ty.Of(interface))}, ty.void_(), {},
-         {
+    Func("bar", utils::Vector{Param("param", ty.Of(interface))}, ty.void_(), utils::Empty,
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
     Inspector& inspector = Build();
@@ -549,20 +585,25 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutSharedStruct) {
 }
 
 TEST_F(InspectorGetEntryPointTest, MixInOutVariablesAndStruct) {
-    auto* struct_a = MakeInOutStruct("struct_a", {{"a", 0u}, {"b", 1u}});
-    auto* struct_b = MakeInOutStruct("struct_b", {{"a", 2u}});
+    auto* struct_a = MakeInOutStruct("struct_a", utils::Vector{
+                                                     InOutInfo{"a", 0u},
+                                                     InOutInfo{"b", 1u},
+                                                 });
+    auto* struct_b = MakeInOutStruct("struct_b", utils::Vector{
+                                                     InOutInfo{"a", 2u},
+                                                 });
     Func("foo",
-         {
+         utils::Vector{
              Param("param_a", ty.Of(struct_a)),
              Param("param_b", ty.Of(struct_b)),
-             Param("param_c", ty.f32(), {Location(3u)}),
-             Param("param_d", ty.f32(), {Location(4u)}),
+             Param("param_c", ty.f32(), utils::Vector{Location(3u)}),
+             Param("param_d", ty.f32(), utils::Vector{Location(4u)}),
          },
          ty.Of(struct_a),
-         {
+         utils::Vector{
              Return("param_a"),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
     Inspector& inspector = Build();
@@ -607,7 +648,7 @@ TEST_F(InspectorGetEntryPointTest, MixInOutVariablesAndStruct) {
 
 TEST_F(InspectorGetEntryPointTest, OverrideUnreferenced) {
     Override("foo", ty.f32(), nullptr);
-    MakeEmptyBodyFunction("ep_func", {
+    MakeEmptyBodyFunction("ep_func", utils::Vector{
                                          Stage(ast::PipelineStage::kCompute),
                                          WorkgroupSize(1_i),
                                      });
@@ -623,7 +664,7 @@ TEST_F(InspectorGetEntryPointTest, OverrideUnreferenced) {
 TEST_F(InspectorGetEntryPointTest, OverrideReferencedByEntryPoint) {
     Override("foo", ty.f32(), nullptr);
     MakePlainGlobalReferenceBodyFunction("ep_func", "foo", ty.f32(),
-                                         {
+                                         utils::Vector{
                                              Stage(ast::PipelineStage::kCompute),
                                              WorkgroupSize(1_i),
                                          });
@@ -639,9 +680,9 @@ TEST_F(InspectorGetEntryPointTest, OverrideReferencedByEntryPoint) {
 
 TEST_F(InspectorGetEntryPointTest, OverrideReferencedByCallee) {
     Override("foo", ty.f32(), nullptr);
-    MakePlainGlobalReferenceBodyFunction("callee_func", "foo", ty.f32(), {});
-    MakeCallerBodyFunction("ep_func", {"callee_func"},
-                           {
+    MakePlainGlobalReferenceBodyFunction("callee_func", "foo", ty.f32(), utils::Empty);
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("callee_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kCompute),
                                WorkgroupSize(1_i),
                            });
@@ -656,11 +697,17 @@ TEST_F(InspectorGetEntryPointTest, OverrideReferencedByCallee) {
 }
 
 TEST_F(InspectorGetEntryPointTest, OverrideSomeReferenced) {
-    Override("foo", ty.f32(), nullptr, {Id(1)});
-    Override("bar", ty.f32(), nullptr, {Id(2)});
-    MakePlainGlobalReferenceBodyFunction("callee_func", "foo", ty.f32(), {});
-    MakeCallerBodyFunction("ep_func", {"callee_func"},
-                           {
+    Override("foo", ty.f32(), nullptr,
+             utils::Vector{
+                 Id(1),
+             });
+    Override("bar", ty.f32(), nullptr,
+             utils::Vector{
+                 Id(2),
+             });
+    MakePlainGlobalReferenceBodyFunction("callee_func", "foo", ty.f32(), utils::Empty);
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("callee_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kCompute),
                                WorkgroupSize(1_i),
                            });
@@ -681,16 +728,17 @@ TEST_F(InspectorGetEntryPointTest, OverrideTypes) {
     Override("u32_var", ty.u32(), nullptr);
     Override("i32_var", ty.i32(), nullptr);
 
-    MakePlainGlobalReferenceBodyFunction("bool_func", "bool_var", ty.bool_(), {});
-    MakePlainGlobalReferenceBodyFunction("float_func", "float_var", ty.f32(), {});
-    MakePlainGlobalReferenceBodyFunction("u32_func", "u32_var", ty.u32(), {});
-    MakePlainGlobalReferenceBodyFunction("i32_func", "i32_var", ty.i32(), {});
+    MakePlainGlobalReferenceBodyFunction("bool_func", "bool_var", ty.bool_(), utils::Empty);
+    MakePlainGlobalReferenceBodyFunction("float_func", "float_var", ty.f32(), utils::Empty);
+    MakePlainGlobalReferenceBodyFunction("u32_func", "u32_var", ty.u32(), utils::Empty);
+    MakePlainGlobalReferenceBodyFunction("i32_func", "i32_var", ty.i32(), utils::Empty);
 
-    MakeCallerBodyFunction("ep_func", {"bool_func", "float_func", "u32_func", "i32_func"},
-                           {
-                               Stage(ast::PipelineStage::kCompute),
-                               WorkgroupSize(1_i),
-                           });
+    MakeCallerBodyFunction(
+        "ep_func", utils::Vector{std::string("bool_func"), "float_func", "u32_func", "i32_func"},
+        utils::Vector{
+            Stage(ast::PipelineStage::kCompute),
+            WorkgroupSize(1_i),
+        });
 
     Inspector& inspector = Build();
 
@@ -711,7 +759,7 @@ TEST_F(InspectorGetEntryPointTest, OverrideTypes) {
 TEST_F(InspectorGetEntryPointTest, OverrideInitialized) {
     Override("foo", ty.f32(), Expr(0_f));
     MakePlainGlobalReferenceBodyFunction("ep_func", "foo", ty.f32(),
-                                         {
+                                         utils::Vector{
                                              Stage(ast::PipelineStage::kCompute),
                                              WorkgroupSize(1_i),
                                          });
@@ -729,7 +777,7 @@ TEST_F(InspectorGetEntryPointTest, OverrideInitialized) {
 TEST_F(InspectorGetEntryPointTest, OverrideUninitialized) {
     Override("foo", ty.f32(), nullptr);
     MakePlainGlobalReferenceBodyFunction("ep_func", "foo", ty.f32(),
-                                         {
+                                         utils::Vector{
                                              Stage(ast::PipelineStage::kCompute),
                                              WorkgroupSize(1_i),
                                          });
@@ -747,13 +795,16 @@ TEST_F(InspectorGetEntryPointTest, OverrideUninitialized) {
 
 TEST_F(InspectorGetEntryPointTest, OverrideNumericIDSpecified) {
     Override("foo_no_id", ty.f32(), nullptr);
-    Override("foo_id", ty.f32(), nullptr, {Id(1234)});
+    Override("foo_id", ty.f32(), nullptr,
+             utils::Vector{
+                 Id(1234),
+             });
 
-    MakePlainGlobalReferenceBodyFunction("no_id_func", "foo_no_id", ty.f32(), {});
-    MakePlainGlobalReferenceBodyFunction("id_func", "foo_id", ty.f32(), {});
+    MakePlainGlobalReferenceBodyFunction("no_id_func", "foo_no_id", ty.f32(), utils::Empty);
+    MakePlainGlobalReferenceBodyFunction("id_func", "foo_id", ty.f32(), utils::Empty);
 
-    MakeCallerBodyFunction("ep_func", {"no_id_func", "id_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("no_id_func"), "id_func"},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kCompute),
                                WorkgroupSize(1_i),
                            });
@@ -773,11 +824,16 @@ TEST_F(InspectorGetEntryPointTest, OverrideNumericIDSpecified) {
 }
 
 TEST_F(InspectorGetEntryPointTest, NonOverrideSkipped) {
-    auto* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
+    auto* foo_struct_type = MakeUniformBufferType("foo_type", utils::Vector{
+                                                                  ty.i32(),
+                                                              });
     AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
-    MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
-    MakeCallerBodyFunction("ep_func", {"ub_func"},
-                           {
+    MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("ub_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -790,7 +846,7 @@ TEST_F(InspectorGetEntryPointTest, NonOverrideSkipped) {
 }
 
 TEST_F(InspectorGetEntryPointTest, BuiltinNotReferenced) {
-    MakeEmptyBodyFunction("ep_func", {
+    MakeEmptyBodyFunction("ep_func", utils::Vector{
                                          Stage(ast::PipelineStage::kFragment),
                                      });
 
@@ -808,12 +864,15 @@ TEST_F(InspectorGetEntryPointTest, BuiltinNotReferenced) {
 }
 
 TEST_F(InspectorGetEntryPointTest, InputSampleMaskSimpleReferenced) {
-    auto* in_var = Param("in_var", ty.u32(), {Builtin(ast::BuiltinValue::kSampleMask)});
-    Func("ep_func", {in_var}, ty.void_(),
-         {
+    auto* in_var = Param("in_var", ty.u32(),
+                         utils::Vector{
+                             Builtin(ast::BuiltinValue::kSampleMask),
+                         });
+    Func("ep_func", utils::Vector{in_var}, ty.void_(),
+         utils::Vector{
              Return(),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -826,20 +885,21 @@ TEST_F(InspectorGetEntryPointTest, InputSampleMaskSimpleReferenced) {
 }
 
 TEST_F(InspectorGetEntryPointTest, InputSampleMaskStructReferenced) {
-    ast::StructMemberList members;
-    members.push_back(
-        Member("inner_position", ty.u32(), {Builtin(ast::BuiltinValue::kSampleMask)}));
+    utils::Vector members{
+        Member("inner_position", ty.u32(), utils::Vector{Builtin(ast::BuiltinValue::kSampleMask)}),
+    };
+
     Structure("in_struct", members);
 
     Func("ep_func",
-         {
-             Param("in_var", ty.type_name("in_struct"), {}),
+         utils::Vector{
+             Param("in_var", ty.type_name("in_struct"), utils::Empty),
          },
          ty.void_(),
-         {
+         utils::Vector{
              Return(),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -853,17 +913,19 @@ TEST_F(InspectorGetEntryPointTest, InputSampleMaskStructReferenced) {
 
 TEST_F(InspectorGetEntryPointTest, OutputSampleMaskSimpleReferenced) {
     Func("ep_func",
-         {
-             Param("in_var", ty.u32(), {Builtin(ast::BuiltinValue::kSampleMask)}),
+         utils::Vector{
+             Param("in_var", ty.u32(), utils::Vector{Builtin(ast::BuiltinValue::kSampleMask)}),
          },
          ty.u32(),
-         {
+         utils::Vector{
              Return("in_var"),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         {Builtin(ast::BuiltinValue::kSampleMask)});
+         utils::Vector{
+             Builtin(ast::BuiltinValue::kSampleMask),
+         });
 
     Inspector& inspector = Build();
 
@@ -874,17 +936,17 @@ TEST_F(InspectorGetEntryPointTest, OutputSampleMaskSimpleReferenced) {
 }
 
 TEST_F(InspectorGetEntryPointTest, OutputSampleMaskStructReferenced) {
-    Structure("out_struct",
-              {
-                  Member("inner_sample_mask", ty.u32(), {Builtin(ast::BuiltinValue::kSampleMask)}),
-              });
+    Structure("out_struct", utils::Vector{
+                                Member("inner_sample_mask", ty.u32(),
+                                       utils::Vector{Builtin(ast::BuiltinValue::kSampleMask)}),
+                            });
 
-    Func("ep_func", {}, ty.type_name("out_struct"),
-         {
+    Func("ep_func", utils::Empty, ty.type_name("out_struct"),
+         utils::Vector{
              Decl(Var("out_var", ty.type_name("out_struct"))),
              Return("out_var"),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -898,14 +960,14 @@ TEST_F(InspectorGetEntryPointTest, OutputSampleMaskStructReferenced) {
 
 TEST_F(InspectorGetEntryPointTest, InputPositionSimpleReferenced) {
     Func("ep_func",
-         {
-             Param("in_var", ty.vec4<f32>(), {Builtin(ast::BuiltinValue::kPosition)}),
+         utils::Vector{
+             Param("in_var", ty.vec4<f32>(), utils::Vector{Builtin(ast::BuiltinValue::kPosition)}),
          },
          ty.void_(),
-         {
+         utils::Vector{
              Return(),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -918,20 +980,20 @@ TEST_F(InspectorGetEntryPointTest, InputPositionSimpleReferenced) {
 }
 
 TEST_F(InspectorGetEntryPointTest, InputPositionStructReferenced) {
-    Structure("in_struct",
-              {
-                  Member("inner_position", ty.vec4<f32>(), {Builtin(ast::BuiltinValue::kPosition)}),
-              });
+    Structure("in_struct", utils::Vector{
+                               Member("inner_position", ty.vec4<f32>(),
+                                      utils::Vector{Builtin(ast::BuiltinValue::kPosition)}),
+                           });
 
     Func("ep_func",
-         {
-             Param("in_var", ty.type_name("in_struct"), {}),
+         utils::Vector{
+             Param("in_var", ty.type_name("in_struct"), utils::Empty),
          },
          ty.void_(),
-         {
+         utils::Vector{
              Return(),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -945,14 +1007,14 @@ TEST_F(InspectorGetEntryPointTest, InputPositionStructReferenced) {
 
 TEST_F(InspectorGetEntryPointTest, FrontFacingSimpleReferenced) {
     Func("ep_func",
-         {
-             Param("in_var", ty.bool_(), {Builtin(ast::BuiltinValue::kFrontFacing)}),
+         utils::Vector{
+             Param("in_var", ty.bool_(), utils::Vector{Builtin(ast::BuiltinValue::kFrontFacing)}),
          },
          ty.void_(),
-         {
+         utils::Vector{
              Return(),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -965,20 +1027,20 @@ TEST_F(InspectorGetEntryPointTest, FrontFacingSimpleReferenced) {
 }
 
 TEST_F(InspectorGetEntryPointTest, FrontFacingStructReferenced) {
-    Structure("in_struct",
-              {
-                  Member("inner_position", ty.bool_(), {Builtin(ast::BuiltinValue::kFrontFacing)}),
-              });
+    Structure("in_struct", utils::Vector{
+                               Member("inner_position", ty.bool_(),
+                                      utils::Vector{Builtin(ast::BuiltinValue::kFrontFacing)}),
+                           });
 
     Func("ep_func",
-         {
-             Param("in_var", ty.type_name("in_struct"), {}),
+         utils::Vector{
+             Param("in_var", ty.type_name("in_struct"), utils::Empty),
          },
          ty.void_(),
-         {
+         utils::Vector{
              Return(),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -992,14 +1054,14 @@ TEST_F(InspectorGetEntryPointTest, FrontFacingStructReferenced) {
 
 TEST_F(InspectorGetEntryPointTest, SampleIndexSimpleReferenced) {
     Func("ep_func",
-         {
-             Param("in_var", ty.u32(), {Builtin(ast::BuiltinValue::kSampleIndex)}),
+         utils::Vector{
+             Param("in_var", ty.u32(), utils::Vector{Builtin(ast::BuiltinValue::kSampleIndex)}),
          },
          ty.void_(),
-         {
+         utils::Vector{
              Return(),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -1012,20 +1074,20 @@ TEST_F(InspectorGetEntryPointTest, SampleIndexSimpleReferenced) {
 }
 
 TEST_F(InspectorGetEntryPointTest, SampleIndexStructReferenced) {
-    Structure("in_struct",
-              {
-                  Member("inner_position", ty.u32(), {Builtin(ast::BuiltinValue::kSampleIndex)}),
-              });
+    Structure("in_struct", utils::Vector{
+                               Member("inner_position", ty.u32(),
+                                      utils::Vector{Builtin(ast::BuiltinValue::kSampleIndex)}),
+                           });
 
     Func("ep_func",
-         {
-             Param("in_var", ty.type_name("in_struct"), {}),
+         utils::Vector{
+             Param("in_var", ty.type_name("in_struct"), utils::Empty),
          },
          ty.void_(),
-         {
+         utils::Vector{
              Return(),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -1039,14 +1101,15 @@ TEST_F(InspectorGetEntryPointTest, SampleIndexStructReferenced) {
 
 TEST_F(InspectorGetEntryPointTest, NumWorkgroupsSimpleReferenced) {
     Func("ep_func",
-         {
-             Param("in_var", ty.vec3<u32>(), {Builtin(ast::BuiltinValue::kNumWorkgroups)}),
+         utils::Vector{
+             Param("in_var", ty.vec3<u32>(),
+                   utils::Vector{Builtin(ast::BuiltinValue::kNumWorkgroups)}),
          },
          ty.void_(),
-         {
+         utils::Vector{
              Return(),
          },
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)}, {});
+         utils::Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)}, utils::Empty);
 
     Inspector& inspector = Build();
 
@@ -1057,20 +1120,20 @@ TEST_F(InspectorGetEntryPointTest, NumWorkgroupsSimpleReferenced) {
 }
 
 TEST_F(InspectorGetEntryPointTest, NumWorkgroupsStructReferenced) {
-    Structure("in_struct", {
+    Structure("in_struct", utils::Vector{
                                Member("inner_position", ty.vec3<u32>(),
-                                      {Builtin(ast::BuiltinValue::kNumWorkgroups)}),
+                                      utils::Vector{Builtin(ast::BuiltinValue::kNumWorkgroups)}),
                            });
 
     Func("ep_func",
-         {
-             Param("in_var", ty.type_name("in_struct"), {}),
+         utils::Vector{
+             Param("in_var", ty.type_name("in_struct"), utils::Empty),
          },
          ty.void_(),
-         {
+         utils::Vector{
              Return(),
          },
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)}, {});
+         utils::Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)}, utils::Empty);
 
     Inspector& inspector = Build();
 
@@ -1081,19 +1144,19 @@ TEST_F(InspectorGetEntryPointTest, NumWorkgroupsStructReferenced) {
 }
 
 TEST_F(InspectorGetEntryPointTest, ImplicitInterpolate) {
-    Structure("in_struct", {
-                               Member("struct_inner", ty.f32(), {Location(0)}),
+    Structure("in_struct", utils::Vector{
+                               Member("struct_inner", ty.f32(), utils::Vector{Location(0)}),
                            });
 
     Func("ep_func",
-         {
-             Param("in_var", ty.type_name("in_struct"), {}),
+         utils::Vector{
+             Param("in_var", ty.type_name("in_struct"), utils::Empty),
          },
          ty.void_(),
-         {
+         utils::Vector{
              Return(),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -1109,21 +1172,22 @@ TEST_F(InspectorGetEntryPointTest, ImplicitInterpolate) {
 
 TEST_P(InspectorGetEntryPointInterpolateTest, Test) {
     auto& params = GetParam();
-    Structure("in_struct",
-              {
-                  Member("struct_inner", ty.f32(),
-                         {Interpolate(params.in_type, params.in_sampling), Location(0)}),
-              });
+    Structure(
+        "in_struct",
+        utils::Vector{
+            Member("struct_inner", ty.f32(),
+                   utils::Vector{Interpolate(params.in_type, params.in_sampling), Location(0)}),
+        });
 
     Func("ep_func",
-         {
-             Param("in_var", ty.type_name("in_struct"), {}),
+         utils::Vector{
+             Param("in_var", ty.type_name("in_struct"), utils::Empty),
          },
          ty.void_(),
-         {
+         utils::Vector{
              Return(),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -1170,9 +1234,18 @@ INSTANTIATE_TEST_SUITE_P(
             InterpolationType::kFlat, InterpolationSampling::kNone}));
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, Bool) {
-    Override("foo", ty.bool_(), nullptr, {Id(1)});
-    Override("bar", ty.bool_(), Expr(true), {Id(20)});
-    Override("baz", ty.bool_(), Expr(false), {Id(300)});
+    Override("foo", ty.bool_(), nullptr,
+             utils::Vector{
+                 Id(1),
+             });
+    Override("bar", ty.bool_(), Expr(true),
+             utils::Vector{
+                 Id(20),
+             });
+    Override("baz", ty.bool_(), Expr(false),
+             utils::Vector{
+                 Id(300),
+             });
 
     Inspector& inspector = Build();
 
@@ -1192,8 +1265,14 @@ TEST_F(InspectorGetOverrideDefaultValuesTest, Bool) {
 }
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, U32) {
-    Override("foo", ty.u32(), nullptr, {Id(1)});
-    Override("bar", ty.u32(), Expr(42_u), {Id(20)});
+    Override("foo", ty.u32(), nullptr,
+             utils::Vector{
+                 Id(1),
+             });
+    Override("bar", ty.u32(), Expr(42_u),
+             utils::Vector{
+                 Id(20),
+             });
 
     Inspector& inspector = Build();
 
@@ -1209,9 +1288,18 @@ TEST_F(InspectorGetOverrideDefaultValuesTest, U32) {
 }
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, I32) {
-    Override("foo", ty.i32(), nullptr, {Id(1)});
-    Override("bar", ty.i32(), Expr(-42_i), {Id(20)});
-    Override("baz", ty.i32(), Expr(42_i), {Id(300)});
+    Override("foo", ty.i32(), nullptr,
+             utils::Vector{
+                 Id(1),
+             });
+    Override("bar", ty.i32(), Expr(-42_i),
+             utils::Vector{
+                 Id(20),
+             });
+    Override("baz", ty.i32(), Expr(42_i),
+             utils::Vector{
+                 Id(300),
+             });
 
     Inspector& inspector = Build();
 
@@ -1231,10 +1319,22 @@ TEST_F(InspectorGetOverrideDefaultValuesTest, I32) {
 }
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, Float) {
-    Override("foo", ty.f32(), nullptr, {Id(1)});
-    Override("bar", ty.f32(), Expr(0_f), {Id(20)});
-    Override("baz", ty.f32(), Expr(-10_f), {Id(300)});
-    Override("x", ty.f32(), Expr(15_f), {Id(4000)});
+    Override("foo", ty.f32(), nullptr,
+             utils::Vector{
+                 Id(1),
+             });
+    Override("bar", ty.f32(), Expr(0_f),
+             utils::Vector{
+                 Id(20),
+             });
+    Override("baz", ty.f32(), Expr(-10_f),
+             utils::Vector{
+                 Id(300),
+             });
+    Override("x", ty.f32(), Expr(15_f),
+             utils::Vector{
+                 Id(4000),
+             });
 
     Inspector& inspector = Build();
 
@@ -1258,9 +1358,18 @@ TEST_F(InspectorGetOverrideDefaultValuesTest, Float) {
 }
 
 TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {
-    Override("v1", ty.f32(), nullptr, {Id(1)});
-    Override("v20", ty.f32(), nullptr, {Id(20)});
-    Override("v300", ty.f32(), nullptr, {Id(300)});
+    Override("v1", ty.f32(), nullptr,
+             utils::Vector{
+                 Id(1),
+             });
+    Override("v20", ty.f32(), nullptr,
+             utils::Vector{
+                 Id(20),
+             });
+    Override("v300", ty.f32(), nullptr,
+             utils::Vector{
+                 Id(300),
+             });
     auto* a = Override("a", ty.f32(), nullptr);
     auto* b = Override("b", ty.f32(), nullptr);
     auto* c = Override("c", ty.f32(), nullptr);
@@ -1293,7 +1402,7 @@ TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {
 }
 
 TEST_F(InspectorGetStorageSizeTest, Empty) {
-    MakeEmptyBodyFunction("ep_func", {
+    MakeEmptyBodyFunction("ep_func", utils::Vector{
                                          Stage(ast::PipelineStage::kCompute),
                                          WorkgroupSize(1_i),
                                      });
@@ -1305,13 +1414,13 @@ TEST_F(InspectorGetStorageSizeTest, Simple_NonStruct) {
     AddUniformBuffer("ub_var", ty.i32(), 0, 0);
     AddStorageBuffer("sb_var", ty.i32(), ast::Access::kReadWrite, 1, 0);
     AddStorageBuffer("rosb_var", ty.i32(), ast::Access::kRead, 1, 1);
-    Func("ep_func", {}, ty.void_(),
-         {
+    Func("ep_func", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Let("ub", nullptr, Expr("ub_var"))),
              Decl(Let("sb", nullptr, Expr("sb_var"))),
              Decl(Let("rosb", nullptr, Expr("rosb_var"))),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
@@ -1322,20 +1431,36 @@ TEST_F(InspectorGetStorageSizeTest, Simple_NonStruct) {
 }
 
 TEST_F(InspectorGetStorageSizeTest, Simple_Struct) {
-    auto* ub_struct_type = MakeUniformBufferType("ub_type", {ty.i32(), ty.i32()});
+    auto* ub_struct_type = MakeUniformBufferType("ub_type", utils::Vector{
+                                                                ty.i32(),
+                                                                ty.i32(),
+                                                            });
     AddUniformBuffer("ub_var", ty.Of(ub_struct_type), 0, 0);
-    MakeStructVariableReferenceBodyFunction("ub_func", "ub_var", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("ub_func", "ub_var",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
-    auto sb = MakeStorageBufferTypes("sb_type", {ty.i32()});
+    auto sb = MakeStorageBufferTypes("sb_type", utils::Vector{
+                                                    ty.i32(),
+                                                });
     AddStorageBuffer("sb_var", sb(), ast::Access::kReadWrite, 1, 0);
-    MakeStructVariableReferenceBodyFunction("sb_func", "sb_var", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("sb_func", "sb_var",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
-    auto ro_sb = MakeStorageBufferTypes("rosb_type", {ty.i32()});
+    auto ro_sb = MakeStorageBufferTypes("rosb_type", utils::Vector{
+                                                         ty.i32(),
+                                                     });
     AddStorageBuffer("rosb_var", ro_sb(), ast::Access::kRead, 1, 1);
-    MakeStructVariableReferenceBodyFunction("rosb_func", "rosb_var", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("rosb_func", "rosb_var",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"ub_func", "sb_func", "rosb_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("ub_func"), "sb_func", "rosb_func"},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kCompute),
                                WorkgroupSize(1_i),
                            });
@@ -1347,11 +1472,11 @@ TEST_F(InspectorGetStorageSizeTest, Simple_Struct) {
 
 TEST_F(InspectorGetStorageSizeTest, NonStructVec3) {
     AddUniformBuffer("ub_var", ty.vec3<f32>(), 0, 0);
-    Func("ep_func", {}, ty.void_(),
-         {
+    Func("ep_func", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Let("ub", nullptr, Expr("ub_var"))),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
@@ -1362,13 +1487,15 @@ TEST_F(InspectorGetStorageSizeTest, NonStructVec3) {
 }
 
 TEST_F(InspectorGetStorageSizeTest, StructVec3) {
-    auto* ub_struct_type = MakeUniformBufferType("ub_type", {ty.vec3<f32>()});
+    auto* ub_struct_type = MakeUniformBufferType("ub_type", utils::Vector{
+                                                                ty.vec3<f32>(),
+                                                            });
     AddUniformBuffer("ub_var", ty.Of(ub_struct_type), 0, 0);
-    Func("ep_func", {}, ty.void_(),
-         {
+    Func("ep_func", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Let("ub", nullptr, Expr("ub_var"))),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
@@ -1379,8 +1506,8 @@ TEST_F(InspectorGetStorageSizeTest, StructVec3) {
 }
 
 TEST_F(InspectorGetResourceBindingsTest, Empty) {
-    MakeCallerBodyFunction("ep_func", {},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Empty,
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1392,23 +1519,39 @@ TEST_F(InspectorGetResourceBindingsTest, Empty) {
 }
 
 TEST_F(InspectorGetResourceBindingsTest, Simple) {
-    auto* ub_struct_type = MakeUniformBufferType("ub_type", {ty.i32()});
+    auto* ub_struct_type = MakeUniformBufferType("ub_type", utils::Vector{
+                                                                ty.i32(),
+                                                            });
     AddUniformBuffer("ub_var", ty.Of(ub_struct_type), 0, 0);
-    MakeStructVariableReferenceBodyFunction("ub_func", "ub_var", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("ub_func", "ub_var",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
-    auto sb = MakeStorageBufferTypes("sb_type", {ty.i32()});
+    auto sb = MakeStorageBufferTypes("sb_type", utils::Vector{
+                                                    ty.i32(),
+                                                });
     AddStorageBuffer("sb_var", sb(), ast::Access::kReadWrite, 1, 0);
-    MakeStructVariableReferenceBodyFunction("sb_func", "sb_var", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("sb_func", "sb_var",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
-    auto ro_sb = MakeStorageBufferTypes("rosb_type", {ty.i32()});
+    auto ro_sb = MakeStorageBufferTypes("rosb_type", utils::Vector{
+                                                         ty.i32(),
+                                                     });
     AddStorageBuffer("rosb_var", ro_sb(), ast::Access::kRead, 1, 1);
-    MakeStructVariableReferenceBodyFunction("rosb_func", "rosb_var", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("rosb_func", "rosb_var",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
     auto* s_texture_type = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
     AddResource("s_texture", s_texture_type, 2, 0);
     AddSampler("s_var", 3, 0);
     AddGlobalVariable("s_coords", ty.f32());
-    MakeSamplerReferenceBodyFunction("s_func", "s_texture", "s_var", "s_coords", ty.f32(), {});
+    MakeSamplerReferenceBodyFunction("s_func", "s_texture", "s_var", "s_coords", ty.f32(),
+                                     utils::Empty);
 
     auto* cs_depth_texture_type = ty.depth_texture(ast::TextureDimension::k2d);
     AddResource("cs_texture", cs_depth_texture_type, 3, 1);
@@ -1416,22 +1559,32 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
     AddGlobalVariable("cs_coords", ty.vec2<f32>());
     AddGlobalVariable("cs_depth", ty.f32());
     MakeComparisonSamplerReferenceBodyFunction("cs_func", "cs_texture", "cs_var", "cs_coords",
-                                               "cs_depth", ty.f32(), {});
+                                               "cs_depth", ty.f32(), utils::Empty);
 
     auto* depth_ms_texture_type = ty.depth_multisampled_texture(ast::TextureDimension::k2d);
     AddResource("depth_ms_texture", depth_ms_texture_type, 3, 3);
-    Func("depth_ms_func", {}, ty.void_(), {Ignore("depth_ms_texture")});
+    Func("depth_ms_func", utils::Empty, ty.void_(),
+         utils::Vector{
+             Ignore("depth_ms_texture"),
+         });
 
     auto* st_type = MakeStorageTextureTypes(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint);
     AddStorageTexture("st_var", st_type, 4, 0);
-    MakeStorageTextureBodyFunction("st_func", "st_var", ty.vec2<i32>(), {});
+    MakeStorageTextureBodyFunction("st_func", "st_var", ty.vec2<i32>(), utils::Empty);
 
-    MakeCallerBodyFunction(
-        "ep_func",
-        {"ub_func", "sb_func", "rosb_func", "s_func", "cs_func", "depth_ms_func", "st_func"},
-        {
-            Stage(ast::PipelineStage::kFragment),
-        });
+    MakeCallerBodyFunction("ep_func",
+                           utils::Vector{
+                               std::string("ub_func"),
+                               std::string("sb_func"),
+                               std::string("rosb_func"),
+                               std::string("s_func"),
+                               std::string("cs_func"),
+                               std::string("depth_ms_func"),
+                               std::string("st_func"),
+                           },
+                           utils::Vector{
+                               Stage(ast::PipelineStage::kFragment),
+                           });
 
     Inspector& inspector = Build();
 
@@ -1486,13 +1639,18 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MissingEntryPoint) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
-    auto* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
+    auto* foo_struct_type = MakeUniformBufferType("foo_type", utils::Vector{
+                                                                  ty.i32(),
+                                                              });
     AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
-    MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"ub_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("ub_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1505,10 +1663,10 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonEntryPointFunc) {
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple_NonStruct) {
     AddUniformBuffer("foo_ub", ty.i32(), 0, 0);
-    MakePlainGlobalReferenceBodyFunction("ub_func", "foo_ub", ty.i32(), {});
+    MakePlainGlobalReferenceBodyFunction("ub_func", "foo_ub", ty.i32(), utils::Empty);
 
-    MakeCallerBodyFunction("ep_func", {"ub_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("ub_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1526,13 +1684,18 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple_NonStruct) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple_Struct) {
-    auto* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32()});
+    auto* foo_struct_type = MakeUniformBufferType("foo_type", utils::Vector{
+                                                                  ty.i32(),
+                                                              });
     AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
-    MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"ub_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("ub_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1550,14 +1713,22 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, Simple_Struct) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
-    auto* foo_struct_type = MakeUniformBufferType("foo_type", {ty.i32(), ty.u32(), ty.f32()});
+    auto* foo_struct_type = MakeUniformBufferType("foo_type", utils::Vector{
+                                                                  ty.i32(),
+                                                                  ty.u32(),
+                                                                  ty.f32(),
+                                                              });
     AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
     MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
-                                            {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                                MemberInfo{1, ty.u32()},
+                                                MemberInfo{2, ty.f32()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"ub_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("ub_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1575,13 +1746,18 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleMembers) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingPadding) {
-    auto* foo_struct_type = MakeUniformBufferType("foo_type", {ty.vec3<f32>()});
+    auto* foo_struct_type = MakeUniformBufferType("foo_type", utils::Vector{
+                                                                  ty.vec3<f32>(),
+                                                              });
     AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
-    MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.vec3<f32>()}});
+    MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.vec3<f32>()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"ub_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("ub_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1600,10 +1776,10 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingPadding) {
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonStructVec3) {
     AddUniformBuffer("foo_ub", ty.vec3<f32>(), 0, 0);
-    MakePlainGlobalReferenceBodyFunction("ub_func", "foo_ub", ty.vec3<f32>(), {});
+    MakePlainGlobalReferenceBodyFunction("ub_func", "foo_ub", ty.vec3<f32>(), utils::Empty);
 
-    MakeCallerBodyFunction("ep_func", {"ub_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("ub_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1621,14 +1797,22 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, NonStructVec3) {
 }
 
 TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
-    auto* ub_struct_type = MakeUniformBufferType("ub_type", {ty.i32(), ty.u32(), ty.f32()});
+    auto* ub_struct_type = MakeUniformBufferType("ub_type", utils::Vector{
+                                                                ty.i32(),
+                                                                ty.u32(),
+                                                                ty.f32(),
+                                                            });
     AddUniformBuffer("ub_foo", ty.Of(ub_struct_type), 0, 0);
     AddUniformBuffer("ub_bar", ty.Of(ub_struct_type), 0, 1);
     AddUniformBuffer("ub_baz", ty.Of(ub_struct_type), 2, 0);
 
     auto AddReferenceFunc = [this](const std::string& func_name, const std::string& var_name) {
         MakeStructVariableReferenceBodyFunction(func_name, var_name,
-                                                {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
+                                                utils::Vector{
+                                                    MemberInfo{0, ty.i32()},
+                                                    MemberInfo{1, ty.u32()},
+                                                    MemberInfo{2, ty.f32()},
+                                                });
     };
     AddReferenceFunc("ub_foo_func", "ub_foo");
     AddReferenceFunc("ub_bar_func", "ub_bar");
@@ -1638,14 +1822,14 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, MultipleUniformBuffers) {
         return create<ast::CallStatement>(Call(callee));
     };
 
-    Func("ep_func", {}, ty.void_(),
-         {
+    Func("ep_func", utils::Empty, ty.void_(),
+         utils::Vector{
              FuncCall("ub_foo_func"),
              FuncCall("ub_bar_func"),
              FuncCall("ub_baz_func"),
              Return(),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -1678,15 +1862,21 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
     // Manually create uniform buffer to make sure it had a valid layout (array
     // with elem stride of 16, and that is 16-byte aligned within the struct)
     auto* foo_struct_type = Structure(
-        "foo_type", {Member("0i32", ty.i32()),
-                     Member("b", ty.array(ty.u32(), 4_u, /*stride*/ 16), {MemberAlign(16)})});
+        "foo_type",
+        utils::Vector{
+            Member("0i32", ty.i32()),
+            Member("b", ty.array(ty.u32(), 4_u, /*stride*/ 16), utils::Vector{MemberAlign(16)}),
+        });
 
     AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
 
-    MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("ub_func", "foo_ub",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"ub_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("ub_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1705,10 +1895,10 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple_NonStruct) {
     AddStorageBuffer("foo_sb", ty.i32(), ast::Access::kReadWrite, 0, 0);
-    MakePlainGlobalReferenceBodyFunction("sb_func", "foo_sb", ty.i32(), {});
+    MakePlainGlobalReferenceBodyFunction("sb_func", "foo_sb", ty.i32(), utils::Empty);
 
-    MakeCallerBodyFunction("ep_func", {"sb_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("sb_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1726,13 +1916,18 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple_NonStruct) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple_Struct) {
-    auto foo_struct_type = MakeStorageBufferTypes("foo_type", {ty.i32()});
+    auto foo_struct_type = MakeStorageBufferTypes("foo_type", utils::Vector{
+                                                                  ty.i32(),
+                                                              });
     AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kReadWrite, 0, 0);
 
-    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"sb_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("sb_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1750,7 +1945,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, Simple_Struct) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
-    auto foo_struct_type = MakeStorageBufferTypes("foo_type", {
+    auto foo_struct_type = MakeStorageBufferTypes("foo_type", utils::Vector{
                                                                   ty.i32(),
                                                                   ty.u32(),
                                                                   ty.f32(),
@@ -1758,10 +1953,14 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
     AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kReadWrite, 0, 0);
 
     MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
-                                            {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                                MemberInfo{1, ty.u32()},
+                                                MemberInfo{2, ty.f32()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"sb_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("sb_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1779,7 +1978,7 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleMembers) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
-    auto sb_struct_type = MakeStorageBufferTypes("sb_type", {
+    auto sb_struct_type = MakeStorageBufferTypes("sb_type", utils::Vector{
                                                                 ty.i32(),
                                                                 ty.u32(),
                                                                 ty.f32(),
@@ -1790,7 +1989,11 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
 
     auto AddReferenceFunc = [this](const std::string& func_name, const std::string& var_name) {
         MakeStructVariableReferenceBodyFunction(func_name, var_name,
-                                                {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
+                                                utils::Vector{
+                                                    MemberInfo{0, ty.i32()},
+                                                    MemberInfo{1, ty.u32()},
+                                                    MemberInfo{2, ty.f32()},
+                                                });
     };
     AddReferenceFunc("sb_foo_func", "sb_foo");
     AddReferenceFunc("sb_bar_func", "sb_bar");
@@ -1800,14 +2003,14 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
         return create<ast::CallStatement>(Call(callee));
     };
 
-    Func("ep_func", {}, ty.void_(),
-         {
+    Func("ep_func", utils::Empty, ty.void_(),
+         utils::Vector{
              FuncCall("sb_foo_func"),
              FuncCall("sb_bar_func"),
              FuncCall("sb_baz_func"),
              Return(),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -1837,13 +2040,19 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
-    auto foo_struct_type = MakeStorageBufferTypes("foo_type", {ty.i32(), ty.array<u32, 4>()});
+    auto foo_struct_type = MakeStorageBufferTypes("foo_type", utils::Vector{
+                                                                  ty.i32(),
+                                                                  ty.array<u32, 4>(),
+                                                              });
     AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kReadWrite, 0, 0);
 
-    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"sb_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("sb_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1861,16 +2070,19 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingArray) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
-    auto foo_struct_type = MakeStorageBufferTypes("foo_type", {
+    auto foo_struct_type = MakeStorageBufferTypes("foo_type", utils::Vector{
                                                                   ty.i32(),
                                                                   ty.array<u32>(),
                                                               });
     AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kReadWrite, 0, 0);
 
-    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"sb_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("sb_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1888,13 +2100,18 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
-    auto foo_struct_type = MakeStorageBufferTypes("foo_type", {ty.vec3<f32>()});
+    auto foo_struct_type = MakeStorageBufferTypes("foo_type", utils::Vector{
+                                                                  ty.vec3<f32>(),
+                                                              });
     AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kReadWrite, 0, 0);
 
-    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.vec3<f32>()}});
+    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.vec3<f32>()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"sb_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("sb_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1913,10 +2130,10 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, ContainingPadding) {
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, NonStructVec3) {
     AddStorageBuffer("foo_ub", ty.vec3<f32>(), ast::Access::kReadWrite, 0, 0);
-    MakePlainGlobalReferenceBodyFunction("ub_func", "foo_ub", ty.vec3<f32>(), {});
+    MakePlainGlobalReferenceBodyFunction("ub_func", "foo_ub", ty.vec3<f32>(), utils::Empty);
 
-    MakeCallerBodyFunction("ep_func", {"ub_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("ub_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1934,13 +2151,18 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, NonStructVec3) {
 }
 
 TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
-    auto foo_struct_type = MakeStorageBufferTypes("foo_type", {ty.i32()});
+    auto foo_struct_type = MakeStorageBufferTypes("foo_type", utils::Vector{
+                                                                  ty.i32(),
+                                                              });
     AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kRead, 0, 0);
 
-    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"sb_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("sb_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1952,13 +2174,18 @@ TEST_F(InspectorGetStorageBufferResourceBindingsTest, SkipReadOnly) {
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
-    auto foo_struct_type = MakeStorageBufferTypes("foo_type", {ty.i32()});
+    auto foo_struct_type = MakeStorageBufferTypes("foo_type", utils::Vector{
+                                                                  ty.i32(),
+                                                              });
     AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kRead, 0, 0);
 
-    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"sb_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("sb_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -1976,7 +2203,7 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, MultipleStorageBuffers) {
-    auto sb_struct_type = MakeStorageBufferTypes("sb_type", {
+    auto sb_struct_type = MakeStorageBufferTypes("sb_type", utils::Vector{
                                                                 ty.i32(),
                                                                 ty.u32(),
                                                                 ty.f32(),
@@ -1987,7 +2214,11 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, MultipleStorageBuf
 
     auto AddReferenceFunc = [this](const std::string& func_name, const std::string& var_name) {
         MakeStructVariableReferenceBodyFunction(func_name, var_name,
-                                                {{0, ty.i32()}, {1, ty.u32()}, {2, ty.f32()}});
+                                                utils::Vector{
+                                                    MemberInfo{0, ty.i32()},
+                                                    MemberInfo{1, ty.u32()},
+                                                    MemberInfo{2, ty.f32()},
+                                                });
     };
     AddReferenceFunc("sb_foo_func", "sb_foo");
     AddReferenceFunc("sb_bar_func", "sb_bar");
@@ -1997,14 +2228,14 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, MultipleStorageBuf
         return create<ast::CallStatement>(Call(callee));
     };
 
-    Func("ep_func", {}, ty.void_(),
-         {
+    Func("ep_func", utils::Empty, ty.void_(),
+         utils::Vector{
              FuncCall("sb_foo_func"),
              FuncCall("sb_bar_func"),
              FuncCall("sb_baz_func"),
              Return(),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -2034,16 +2265,19 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, MultipleStorageBuf
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
-    auto foo_struct_type = MakeStorageBufferTypes("foo_type", {
+    auto foo_struct_type = MakeStorageBufferTypes("foo_type", utils::Vector{
                                                                   ty.i32(),
                                                                   ty.array<u32, 4>(),
                                                               });
     AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kRead, 0, 0);
 
-    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"sb_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("sb_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -2061,16 +2295,19 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingArray) {
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingRuntimeArray) {
-    auto foo_struct_type = MakeStorageBufferTypes("foo_type", {
+    auto foo_struct_type = MakeStorageBufferTypes("foo_type", utils::Vector{
                                                                   ty.i32(),
                                                                   ty.array<u32>(),
                                                               });
     AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kRead, 0, 0);
 
-    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"sb_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("sb_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -2088,13 +2325,18 @@ TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, ContainingRuntimeA
 }
 
 TEST_F(InspectorGetReadOnlyStorageBufferResourceBindingsTest, SkipNonReadOnly) {
-    auto foo_struct_type = MakeStorageBufferTypes("foo_type", {ty.i32()});
+    auto foo_struct_type = MakeStorageBufferTypes("foo_type", utils::Vector{
+                                                                  ty.i32(),
+                                                              });
     AddStorageBuffer("foo_sb", foo_struct_type(), ast::Access::kReadWrite, 0, 0);
 
-    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("sb_func", "foo_sb",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"sb_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("sb_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -2112,7 +2354,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, Simple) {
     AddGlobalVariable("foo_coords", ty.f32());
 
     MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler", "foo_coords", ty.f32(),
-                                     {
+                                     utils::Vector{
                                          Stage(ast::PipelineStage::kFragment),
                                      });
 
@@ -2128,7 +2370,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetSamplerResourceBindingsTest, NoSampler) {
-    MakeEmptyBodyFunction("ep_func", {
+    MakeEmptyBodyFunction("ep_func", utils::Vector{
                                          Stage(ast::PipelineStage::kFragment),
                                      });
 
@@ -2147,10 +2389,10 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, InFunction) {
     AddGlobalVariable("foo_coords", ty.f32());
 
     MakeSamplerReferenceBodyFunction("foo_func", "foo_texture", "foo_sampler", "foo_coords",
-                                     ty.f32(), {});
+                                     ty.f32(), utils::Empty);
 
-    MakeCallerBodyFunction("ep_func", {"foo_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("foo_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -2172,7 +2414,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, UnknownEntryPoint) {
     AddGlobalVariable("foo_coords", ty.f32());
 
     MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler", "foo_coords", ty.f32(),
-                                     {
+                                     utils::Vector{
                                          Stage(ast::PipelineStage::kFragment),
                                      });
 
@@ -2191,7 +2433,7 @@ TEST_F(InspectorGetSamplerResourceBindingsTest, SkipsComparisonSamplers) {
 
     MakeComparisonSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler", "foo_coords",
                                                "foo_depth", ty.f32(),
-                                               {
+                                               utils::Vector{
                                                    Stage(ast::PipelineStage::kFragment),
                                                });
 
@@ -2212,7 +2454,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, Simple) {
 
     MakeComparisonSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler", "foo_coords",
                                                "foo_depth", ty.f32(),
-                                               {
+                                               utils::Vector{
                                                    Stage(ast::PipelineStage::kFragment),
                                                });
 
@@ -2228,7 +2470,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, Simple) {
 }
 
 TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, NoSampler) {
-    MakeEmptyBodyFunction("ep_func", {
+    MakeEmptyBodyFunction("ep_func", utils::Vector{
                                          Stage(ast::PipelineStage::kFragment),
                                      });
 
@@ -2248,10 +2490,10 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, InFunction) {
     AddGlobalVariable("foo_depth", ty.f32());
 
     MakeComparisonSamplerReferenceBodyFunction("foo_func", "foo_texture", "foo_sampler",
-                                               "foo_coords", "foo_depth", ty.f32(), {});
+                                               "foo_coords", "foo_depth", ty.f32(), utils::Empty);
 
-    MakeCallerBodyFunction("ep_func", {"foo_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("foo_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kFragment),
                            });
 
@@ -2275,7 +2517,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, UnknownEntryPoint) {
 
     MakeComparisonSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler", "foo_coords",
                                                "foo_depth", ty.f32(),
-                                               {
+                                               utils::Vector{
                                                    Stage(ast::PipelineStage::kFragment),
                                                });
 
@@ -2292,7 +2534,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, SkipsSamplers) {
     AddGlobalVariable("foo_coords", ty.f32());
 
     MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler", "foo_coords", ty.f32(),
-                                     {
+                                     utils::Vector{
                                          Stage(ast::PipelineStage::kFragment),
                                      });
 
@@ -2305,7 +2547,7 @@ TEST_F(InspectorGetComparisonSamplerResourceBindingsTest, SkipsSamplers) {
 }
 
 TEST_F(InspectorGetSampledTextureResourceBindingsTest, Empty) {
-    MakeEmptyBodyFunction("foo", {
+    MakeEmptyBodyFunction("foo", utils::Vector{
                                      Stage(ast::PipelineStage::kFragment),
                                  });
 
@@ -2327,7 +2569,7 @@ TEST_P(InspectorGetSampledTextureResourceBindingsTestWithParam, textureSample) {
 
     MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler", "foo_coords",
                                      GetBaseType(GetParam().sampled_kind),
-                                     {
+                                     utils::Vector{
                                          Stage(ast::PipelineStage::kFragment),
                                      });
 
@@ -2377,7 +2619,7 @@ TEST_P(InspectorGetSampledArrayTextureResourceBindingsTestWithParam, textureSamp
 
     MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler", "foo_coords",
                                      "foo_array_index", GetBaseType(GetParam().sampled_kind),
-                                     {
+                                     utils::Vector{
                                          Stage(ast::PipelineStage::kFragment),
                                      });
 
@@ -2413,11 +2655,11 @@ TEST_P(InspectorGetMultisampledTextureResourceBindingsTestWithParam, textureLoad
     AddGlobalVariable("foo_coords", coord_type);
     AddGlobalVariable("foo_sample_index", ty.i32());
 
-    Func("ep", {}, ty.void_(),
-         {
+    Func("ep", utils::Empty, ty.void_(),
+         utils::Vector{
              CallStmt(Call("textureLoad", "foo_texture", "foo_coords", "foo_sample_index")),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -2455,7 +2697,7 @@ INSTANTIATE_TEST_SUITE_P(
                                          inspector::ResourceBinding::SampledKind::kUInt}));
 
 TEST_F(InspectorGetMultisampledArrayTextureResourceBindingsTest, Empty) {
-    MakeEmptyBodyFunction("foo", {
+    MakeEmptyBodyFunction("foo", utils::Vector{
                                      Stage(ast::PipelineStage::kFragment),
                                  });
 
@@ -2478,7 +2720,7 @@ TEST_P(InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam, DISABL
 
     MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler", "foo_coords",
                                      "foo_array_index", GetBaseType(GetParam().sampled_kind),
-                                     {
+                                     utils::Vector{
                                          Stage(ast::PipelineStage::kFragment),
                                      });
 
@@ -2510,7 +2752,7 @@ INSTANTIATE_TEST_SUITE_P(
                                          inspector::ResourceBinding::SampledKind::kUInt}));
 
 TEST_F(InspectorGetStorageTextureResourceBindingsTest, Empty) {
-    MakeEmptyBodyFunction("ep", {
+    MakeEmptyBodyFunction("ep", utils::Vector{
                                     Stage(ast::PipelineStage::kFragment),
                                 });
 
@@ -2557,7 +2799,7 @@ TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
     ASSERT_FALSE(dim_type == nullptr);
 
     MakeStorageTextureBodyFunction("ep", "st_var", dim_type,
-                                   {
+                                   utils::Vector{
                                        Stage(ast::PipelineStage::kFragment),
                                    });
 
@@ -2639,11 +2881,11 @@ TEST_P(InspectorGetDepthTextureResourceBindingsTestWithParam, textureDimensions)
     auto* depth_texture_type = ty.depth_texture(GetParam().type_dim);
     AddResource("dt", depth_texture_type, 0, 0);
 
-    Func("ep", {}, ty.void_(),
-         {
+    Func("ep", utils::Empty, ty.void_(),
+         utils::Vector{
              CallStmt(Call("textureDimensions", "dt")),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -2676,11 +2918,11 @@ TEST_F(InspectorGetDepthMultisampledTextureResourceBindingsTest, textureDimensio
     auto* depth_ms_texture_type = ty.depth_multisampled_texture(ast::TextureDimension::k2d);
     AddResource("tex", depth_ms_texture_type, 0, 0);
 
-    Func("ep", {}, ty.void_(),
-         {
+    Func("ep", utils::Empty, ty.void_(),
+         utils::Vector{
              CallStmt(Call("textureDimensions", "tex")),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -2700,11 +2942,11 @@ TEST_F(InspectorGetExternalTextureResourceBindingsTest, Simple) {
     auto* external_texture_type = ty.external_texture();
     AddResource("et", external_texture_type, 0, 0);
 
-    Func("ep", {}, ty.void_(),
-         {
+    Func("ep", utils::Empty, ty.void_(),
+         utils::Vector{
              CallStmt(Call("textureDimensions", "et")),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -2980,7 +3222,7 @@ fn direct(@location(0) fragUV: vec2<f32>,
 }
 
 TEST_F(InspectorGetWorkgroupStorageSizeTest, Empty) {
-    MakeEmptyBodyFunction("ep_func", {
+    MakeEmptyBodyFunction("ep_func", utils::Vector{
                                          Stage(ast::PipelineStage::kCompute),
                                          WorkgroupSize(1_i),
                                      });
@@ -2990,10 +3232,10 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, Empty) {
 
 TEST_F(InspectorGetWorkgroupStorageSizeTest, Simple) {
     AddWorkgroupStorage("wg_f32", ty.f32());
-    MakePlainGlobalReferenceBodyFunction("f32_func", "wg_f32", ty.f32(), {});
+    MakePlainGlobalReferenceBodyFunction("f32_func", "wg_f32", ty.f32(), utils::Empty);
 
-    MakeCallerBodyFunction("ep_func", {"f32_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("f32_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kCompute),
                                WorkgroupSize(1_i),
                            });
@@ -3005,17 +3247,22 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, Simple) {
 TEST_F(InspectorGetWorkgroupStorageSizeTest, CompoundTypes) {
     // This struct should occupy 68 bytes. 4 from the i32 field, and another 64
     // from the 4-element array with 16-byte stride.
-    auto* wg_struct_type =
-        MakeStructType("WgStruct", {ty.i32(), ty.array(ty.i32(), 4_u, /*stride=*/16)});
+    auto* wg_struct_type = MakeStructType("WgStruct", utils::Vector{
+                                                          ty.i32(),
+                                                          ty.array(ty.i32(), 4_u, /*stride=*/16),
+                                                      });
     AddWorkgroupStorage("wg_struct_var", ty.Of(wg_struct_type));
-    MakeStructVariableReferenceBodyFunction("wg_struct_func", "wg_struct_var", {{0, ty.i32()}});
+    MakeStructVariableReferenceBodyFunction("wg_struct_func", "wg_struct_var",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.i32()},
+                                            });
 
     // Plus another 4 bytes from this other workgroup-class f32.
     AddWorkgroupStorage("wg_f32", ty.f32());
-    MakePlainGlobalReferenceBodyFunction("f32_func", "wg_f32", ty.f32(), {});
+    MakePlainGlobalReferenceBodyFunction("f32_func", "wg_f32", ty.f32(), utils::Empty);
 
-    MakeCallerBodyFunction("ep_func", {"wg_struct_func", "f32_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("wg_struct_func"), "f32_func"},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kCompute),
                                WorkgroupSize(1_i),
                            });
@@ -3028,10 +3275,10 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, AlignmentPadding) {
     // vec3<f32> has an alignment of 16 but a size of 12. We leverage this to test
     // that our padded size calculation for workgroup storage is accurate.
     AddWorkgroupStorage("wg_vec3", ty.vec3<f32>());
-    MakePlainGlobalReferenceBodyFunction("wg_func", "wg_vec3", ty.vec3<f32>(), {});
+    MakePlainGlobalReferenceBodyFunction("wg_func", "wg_vec3", ty.vec3<f32>(), utils::Empty);
 
-    MakeCallerBodyFunction("ep_func", {"wg_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("wg_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kCompute),
                                WorkgroupSize(1_i),
                            });
@@ -3046,13 +3293,19 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, StructAlignment) {
     // here the struct is expected to occupy 1024 bytes of workgroup storage.
     const auto* wg_struct_type = MakeStructTypeFromMembers(
         "WgStruct",
-        {MakeStructMember(0, ty.f32(), {create<ast::StructMemberAlignAttribute>(1024u)})});
+        utils::Vector{
+            MakeStructMember(0, ty.f32(),
+                             utils::Vector{create<ast::StructMemberAlignAttribute>(1024u)}),
+        });
 
     AddWorkgroupStorage("wg_struct_var", ty.Of(wg_struct_type));
-    MakeStructVariableReferenceBodyFunction("wg_struct_func", "wg_struct_var", {{0, ty.f32()}});
+    MakeStructVariableReferenceBodyFunction("wg_struct_func", "wg_struct_var",
+                                            utils::Vector{
+                                                MemberInfo{0, ty.f32()},
+                                            });
 
-    MakeCallerBodyFunction("ep_func", {"wg_struct_func"},
-                           {
+    MakeCallerBodyFunction("ep_func", utils::Vector{std::string("wg_struct_func")},
+                           utils::Vector{
                                Stage(ast::PipelineStage::kCompute),
                                WorkgroupSize(1_i),
                            });

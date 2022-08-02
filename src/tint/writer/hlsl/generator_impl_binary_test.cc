@@ -483,7 +483,7 @@ TEST_F(HlslGeneratorImplTest_Binary, If_WithLogical) {
            Block(Return(1_i)),
            Else(If(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"), Expr("c")),
                    Block(Return(2_i)), Else(Block(Return(3_i))))));
-    Func("func", {}, ty.i32(), {WrapInStatement(expr)});
+    Func("func", utils::Empty, ty.i32(), utils::Vector{WrapInStatement(expr)});
 
     GeneratorImpl& gen = Build();
 
@@ -519,7 +519,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Return_WithLogical) {
         ast::BinaryOp::kLogicalOr,
         create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
         Expr("c")));
-    Func("func", {}, ty.bool_(), {WrapInStatement(expr)});
+    Func("func", utils::Empty, ty.bool_(), utils::Vector{WrapInStatement(expr)});
 
     GeneratorImpl& gen = Build();
 
@@ -603,26 +603,25 @@ TEST_F(HlslGeneratorImplTest_Binary, Call_WithLogical) {
     // foo(a && b, c || d, (a || c) && (b || d))
 
     Func("foo",
-         {
+         utils::Vector{
              Param(Sym(), ty.bool_()),
              Param(Sym(), ty.bool_()),
              Param(Sym(), ty.bool_()),
          },
-         ty.void_(), ast::StatementList{}, ast::AttributeList{});
+         ty.void_(), utils::Empty, utils::Empty);
     GlobalVar("a", ty.bool_(), ast::StorageClass::kPrivate);
     GlobalVar("b", ty.bool_(), ast::StorageClass::kPrivate);
     GlobalVar("c", ty.bool_(), ast::StorageClass::kPrivate);
     GlobalVar("d", ty.bool_(), ast::StorageClass::kPrivate);
 
-    ast::ExpressionList params;
-    params.push_back(
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")));
-    params.push_back(
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("c"), Expr("d")));
-    params.push_back(create<ast::BinaryExpression>(
-        ast::BinaryOp::kLogicalAnd,
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("a"), Expr("c")),
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"), Expr("d"))));
+    utils::Vector params{
+        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
+        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("c"), Expr("d")),
+        create<ast::BinaryExpression>(
+            ast::BinaryOp::kLogicalAnd,
+            create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("a"), Expr("c")),
+            create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"), Expr("d"))),
+    };
 
     auto* expr = CallStmt(Call("foo", params));
     WrapInFunction(expr);
@@ -676,8 +675,8 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest,
                          testing::Values(Params{Params::Type::Div}, Params{Params::Type::Mod}));
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_i32) {
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("a", ty.i32())),
              Decl(Let("r", nullptr, Op("a", 0_i))),
          });
@@ -694,8 +693,8 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_i32) {
 }
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_u32) {
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("a", ty.u32())),
              Decl(Let("r", nullptr, Op("a", 0_u))),
          });
@@ -712,8 +711,8 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_u32) {
 }
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_vec_i32) {
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("a", nullptr, vec4<i32>(100_i, 100_i, 100_i, 100_i))),
              Decl(Let("r", nullptr, Op("a", vec4<i32>(50_i, 0_i, 25_i, 0_i)))),
          });
@@ -730,8 +729,8 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_vec_i32) {
 }
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_scalar_i32) {
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("a", nullptr, vec4<i32>(100_i, 100_i, 100_i, 100_i))),
              Decl(Let("r", nullptr, Op("a", 0_i))),
          });
@@ -748,8 +747,8 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByLiteralZero_vec_by_scalar_i32) {
 }
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_i32) {
-    Func("fn", {Param("b", ty.i32())}, ty.void_(),
-         {
+    Func("fn", utils::Vector{Param("b", ty.i32())}, ty.void_(),
+         utils::Vector{
              Decl(Var("a", ty.i32())),
              Decl(Let("r", nullptr, Op("a", "b"))),
          });
@@ -766,8 +765,8 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_i32) {
 }
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_u32) {
-    Func("fn", {Param("b", ty.u32())}, ty.void_(),
-         {
+    Func("fn", utils::Vector{Param("b", ty.u32())}, ty.void_(),
+         utils::Vector{
              Decl(Var("a", ty.u32())),
              Decl(Let("r", nullptr, Op("a", "b"))),
          });
@@ -784,8 +783,8 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_u32) {
 }
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_vec_by_vec_i32) {
-    Func("fn", {Param("b", ty.vec3<i32>())}, ty.void_(),
-         {
+    Func("fn", utils::Vector{Param("b", ty.vec3<i32>())}, ty.void_(),
+         utils::Vector{
              Decl(Var("a", ty.vec3<i32>())),
              Decl(Let("r", nullptr, Op("a", "b"))),
          });
@@ -802,8 +801,8 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_vec_by_vec_i32) {
 }
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_vec_by_scalar_i32) {
-    Func("fn", {Param("b", ty.i32())}, ty.void_(),
-         {
+    Func("fn", utils::Vector{Param("b", ty.i32())}, ty.void_(),
+         utils::Vector{
              Decl(Var("a", ty.vec3<i32>())),
              Decl(Let("r", nullptr, Op("a", "b"))),
          });
@@ -820,13 +819,13 @@ TEST_P(HlslGeneratorDivModTest, DivOrModByIdentifier_vec_by_scalar_i32) {
 }
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_i32) {
-    Func("zero", {}, ty.i32(),
-         {
+    Func("zero", utils::Empty, ty.i32(),
+         utils::Vector{
              Return(Expr(0_i)),
          });
 
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("a", ty.i32())),
              Decl(Let("r", nullptr, Op("a", Call("zero")))),
          });
@@ -851,13 +850,13 @@ void fn() {
 }
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_u32) {
-    Func("zero", {}, ty.u32(),
-         {
+    Func("zero", utils::Empty, ty.u32(),
+         utils::Vector{
              Return(Expr(0_u)),
          });
 
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("a", ty.u32())),
              Decl(Let("r", nullptr, Op("a", Call("zero")))),
          });
@@ -882,13 +881,13 @@ void fn() {
 }
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_vec_by_vec_i32) {
-    Func("zero", {}, ty.vec3<i32>(),
-         {
+    Func("zero", utils::Empty, ty.vec3<i32>(),
+         utils::Vector{
              Return(vec3<i32>(0_i, 0_i, 0_i)),
          });
 
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("a", ty.vec3<i32>())),
              Decl(Let("r", nullptr, Op("a", Call("zero")))),
          });
@@ -913,13 +912,13 @@ void fn() {
 }
 
 TEST_P(HlslGeneratorDivModTest, DivOrModByExpression_vec_by_scalar_i32) {
-    Func("zero", {}, ty.i32(),
-         {
+    Func("zero", utils::Empty, ty.i32(),
+         utils::Vector{
              Return(0_i),
          });
 
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("a", ty.vec3<i32>())),
              Decl(Let("r", nullptr, Op("a", Call("zero")))),
          });

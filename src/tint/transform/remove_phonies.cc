@@ -133,18 +133,18 @@ void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
                     }
                     auto sink = utils::GetOrCreate(sinks, sig, [&] {
                         auto name = ctx.dst->Symbols().New("phony_sink");
-                        ast::ParameterList params;
+                        utils::Vector<const ast::Parameter*, 8> params;
                         for (auto* ty : sig.types) {
                             auto* ast_ty = CreateASTTypeFor(ctx, ty);
-                            params.push_back(
-                                ctx.dst->Param("p" + std::to_string(params.size()), ast_ty));
+                            params.Push(
+                                ctx.dst->Param("p" + std::to_string(params.Length()), ast_ty));
                         }
                         ctx.dst->Func(name, params, ctx.dst->ty.void_(), {});
                         return name;
                     });
-                    ast::ExpressionList args;
+                    utils::Vector<const ast::Expression*, 8> args;
                     for (auto* arg : side_effects) {
-                        args.push_back(ctx.Clone(arg));
+                        args.Push(ctx.Clone(arg));
                     }
                     return ctx.dst->CallStmt(ctx.dst->Call(sink, args));
                 });

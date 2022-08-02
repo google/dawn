@@ -128,7 +128,7 @@ TEST_F(ResolverSourceVariableTest, FunctionLet) {
 TEST_F(ResolverSourceVariableTest, Parameter) {
     auto* a = Param("a", ty.f32());
     auto* expr = Expr(a);
-    Func("foo", {a}, ty.void_(), {WrapInStatement(expr)});
+    Func("foo", utils::Vector{a}, ty.void_(), utils::Vector{WrapInStatement(expr)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -145,7 +145,8 @@ TEST_F(ResolverSourceVariableTest, PointerParameter) {
     auto* expr_param = Expr(param);
     auto* let = Let("b", nullptr, expr_param);
     auto* expr_let = Expr("b");
-    Func("foo", {param}, ty.void_(), {WrapInStatement(let), WrapInStatement(expr_let)});
+    Func("foo", utils::Vector{param}, ty.void_(),
+         utils::Vector{WrapInStatement(let), WrapInStatement(expr_let)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -213,7 +214,7 @@ TEST_F(ResolverSourceVariableTest, ThroughMemberAccessor) {
     // {
     //   a.f
     // }
-    auto* S = Structure("S", {Member("f", ty.f32())});
+    auto* S = Structure("S", utils::Vector{Member("f", ty.f32())});
     auto* a = GlobalVar("a", ty.Of(S), ast::StorageClass::kPrivate);
     auto* expr = MemberAccessor(a, "f");
     WrapInFunction(expr);

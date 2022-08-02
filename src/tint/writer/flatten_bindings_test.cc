@@ -28,7 +28,6 @@ class FlattenBindingsTest : public ::testing::Test {};
 
 TEST_F(FlattenBindingsTest, NoBindings) {
     ProgramBuilder b;
-    b.WrapInFunction();
 
     resolver::Resolver resolver(&b);
 
@@ -44,7 +43,6 @@ TEST_F(FlattenBindingsTest, AlreadyFlat) {
     b.GlobalVar("a", b.ty.i32(), ast::StorageClass::kUniform, b.GroupAndBinding(0, 0));
     b.GlobalVar("b", b.ty.i32(), ast::StorageClass::kUniform, b.GroupAndBinding(0, 1));
     b.GlobalVar("c", b.ty.i32(), ast::StorageClass::kUniform, b.GroupAndBinding(0, 2));
-    b.WrapInFunction();
 
     resolver::Resolver resolver(&b);
 

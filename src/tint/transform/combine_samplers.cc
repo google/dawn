@@ -78,9 +78,9 @@ struct CombineSamplers::State {
     /// Group and binding attributes used by all combined sampler globals.
     /// Group 0 and binding 0 are used, with collisions disabled.
     /// @returns the newly-created attribute list
-    ast::AttributeList Attributes() const {
-        auto attributes = ctx.dst->GroupAndBinding(0, 0);
-        attributes.push_back(ctx.dst->Disable(ast::DisabledValidation::kBindingPointCollision));
+    auto Attributes() const {
+        utils::Vector<const ast::Attribute*, 3> attributes = ctx.dst->GroupAndBinding(0, 0);
+        attributes.Push(ctx.dst->Disable(ast::DisabledValidation::kBindingPointCollision));
         return attributes;
     }
 
@@ -170,7 +170,7 @@ struct CombineSamplers::State {
                 if (pairs.empty()) {
                     return nullptr;
                 }
-                ast::ParameterList params;
+                utils::Vector<const ast::Parameter*, 8> params;
                 for (auto pair : func->TextureSamplerPairs()) {
                     const sem::Variable* texture_var = pair.first;
                     const sem::Variable* sampler_var = pair.second;
@@ -191,7 +191,7 @@ struct CombineSamplers::State {
                         // add a new function parameter to represent the combined sampler.
                         auto* type = CreateCombinedASTTypeFor(texture_var, sampler_var);
                         auto* var = ctx.dst->Param(ctx.dst->Symbols().New(name), type);
-                        params.push_back(var);
+                        params.Push(var);
                         function_combined_texture_samplers_[func][pair] = var;
                     }
                 }
@@ -199,7 +199,7 @@ struct CombineSamplers::State {
                 // function signature.
                 for (auto* var : src->params) {
                     if (!sem.Get(var->type)->IsAnyOf<sem::Texture, sem::Sampler>()) {
-                        params.push_back(ctx.Clone(var));
+                        params.Push(ctx.Clone(var));
                     }
                 }
                 // Create a new function signature that differs only in the parameter
@@ -221,7 +221,7 @@ struct CombineSamplers::State {
         // the combined global samplers, as appropriate.
         ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::Expression* {
             if (auto* call = sem.Get(expr)->UnwrapMaterialize()->As<sem::Call>()) {
-                ast::ExpressionList args;
+                utils::Vector<const ast::Expression*, 8> args;
                 // Replace all texture builtin calls.
                 if (auto* builtin = call->Target()->As<sem::Builtin>()) {
                     const auto& signature = builtin->Signature();
@@ -252,7 +252,7 @@ struct CombineSamplers::State {
                                     ? global_combined_texture_samplers_[new_pair]
                                     : function_combined_texture_samplers_[call->Stmt()->Function()]
                                                                          [new_pair];
-                            args.push_back(ctx.dst->Expr(var->symbol));
+                            args.Push(ctx.dst->Expr(var->symbol));
                         } else if (auto* sampler_type = type->As<sem::Sampler>()) {
                             ast::SamplerKind kind = sampler_type->kind();
                             int index = (kind == ast::SamplerKind::kSampler) ? 0 : 1;
@@ -260,9 +260,9 @@ struct CombineSamplers::State {
                             if (!p) {
                                 p = CreatePlaceholder(kind);
                             }
-                            args.push_back(ctx.dst->Expr(p->symbol));
+                            args.Push(ctx.dst->Expr(p->symbol));
                         } else {
-                            args.push_back(ctx.Clone(arg));
+                            args.Push(ctx.Clone(arg));
                         }
                     }
                     const ast::Expression* value =
@@ -304,7 +304,7 @@ struct CombineSamplers::State {
                                 : function_combined_texture_samplers_[call->Stmt()->Function()]
                                                                      [new_pair];
                         auto* arg = ctx.dst->Expr(var->symbol);
-                        args.push_back(arg);
+                        args.Push(arg);
                     }
                     // Append all of the remaining non-texture and non-sampler
                     // parameters.
@@ -312,7 +312,7 @@ struct CombineSamplers::State {
                         if (!ctx.src->TypeOf(arg)
                                  ->UnwrapRef()
                                  ->IsAnyOf<sem::Texture, sem::Sampler>()) {
-                            args.push_back(ctx.Clone(arg));
+                            args.Push(ctx.Clone(arg));
                         }
                     }
                     return ctx.dst->Call(ctx.Clone(expr->target.name), args);

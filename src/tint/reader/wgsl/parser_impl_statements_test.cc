@@ -23,7 +23,7 @@ TEST_F(ParserImplTest, Statements) {
     auto e = p->expect_statements();
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
-    ASSERT_EQ(e->size(), 2u);
+    ASSERT_EQ(e->Length(), 2u);
     EXPECT_TRUE(e.value[0]->Is<ast::DiscardStatement>());
     EXPECT_TRUE(e.value[1]->Is<ast::ReturnStatement>());
 }
@@ -33,7 +33,7 @@ TEST_F(ParserImplTest, Statements_Empty) {
     auto e = p->expect_statements();
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
-    ASSERT_EQ(e->size(), 0u);
+    ASSERT_EQ(e->Length(), 0u);
 }
 
 }  // namespace

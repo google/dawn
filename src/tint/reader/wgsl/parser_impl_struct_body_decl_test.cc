@@ -25,12 +25,12 @@ TEST_F(ParserImplTest, StructBodyDecl_Parses) {
     auto m = p->expect_struct_body_decl();
     ASSERT_FALSE(p->has_error());
     ASSERT_FALSE(m.errored);
-    ASSERT_EQ(m.value.size(), 1u);
+    ASSERT_EQ(m.value.Length(), 1u);
 
     const auto* mem = m.value[0];
     EXPECT_EQ(mem->symbol, builder.Symbols().Get("a"));
     EXPECT_TRUE(mem->type->Is<ast::I32>());
-    EXPECT_EQ(mem->attributes.size(), 0u);
+    EXPECT_EQ(mem->attributes.Length(), 0u);
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_Parses_TrailingComma) {
@@ -41,12 +41,12 @@ TEST_F(ParserImplTest, StructBodyDecl_Parses_TrailingComma) {
     auto m = p->expect_struct_body_decl();
     ASSERT_FALSE(p->has_error());
     ASSERT_FALSE(m.errored);
-    ASSERT_EQ(m.value.size(), 1u);
+    ASSERT_EQ(m.value.Length(), 1u);
 
     const auto* mem = m.value[0];
     EXPECT_EQ(mem->symbol, builder.Symbols().Get("a"));
     EXPECT_TRUE(mem->type->Is<ast::I32>());
-    EXPECT_EQ(mem->attributes.size(), 0u);
+    EXPECT_EQ(mem->attributes.Length(), 0u);
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_ParsesEmpty) {
@@ -54,7 +54,7 @@ TEST_F(ParserImplTest, StructBodyDecl_ParsesEmpty) {
     auto m = p->expect_struct_body_decl();
     ASSERT_FALSE(p->has_error());
     ASSERT_FALSE(m.errored);
-    ASSERT_EQ(m.value.size(), 0u);
+    ASSERT_EQ(m.value.Length(), 0u);
 }
 
 TEST_F(ParserImplTest, StructBodyDecl_InvalidAlign) {

@@ -15,6 +15,7 @@
 #include "src/tint/transform/builtin_polyfill.h"
 
 #include <unordered_map>
+#include <utility>
 
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/builtin.h"
@@ -59,16 +60,16 @@ struct BuiltinPolyfill::State {
             return b.Construct(T(ty), expr);
         };
 
-        ast::StatementList body;
+        utils::Vector<const ast::Statement*, 4> body;
         switch (polyfill.acosh) {
             case Level::kFull:
                 // return log(x + sqrt(x*x - 1));
-                body.emplace_back(b.Return(
+                body.Push(b.Return(
                     b.Call("log", b.Add("x", b.Call("sqrt", b.Sub(b.Mul("x", "x"), 1_a))))));
                 break;
             case Level::kRangeCheck: {
                 // return select(acosh(x), 0, x < 1);
-                body.emplace_back(b.Return(
+                body.Push(b.Return(
                     b.Call("select", b.Call("acosh", "x"), V(0.0_a), b.LessThan("x", V(1.0_a)))));
                 break;
             }
@@ -78,7 +79,7 @@ struct BuiltinPolyfill::State {
                 return {};
         }
 
-        b.Func(name, {b.Param("x", T(ty))}, T(ty), body);
+        b.Func(name, utils::Vector{b.Param("x", T(ty))}, T(ty), body);
 
         return name;
     }
@@ -89,13 +90,11 @@ struct BuiltinPolyfill::State {
     Symbol asinh(const sem::Type* ty) {
         auto name = b.Symbols().New("tint_sinh");
 
-        ast::StatementList body;
-
         // return log(x + sqrt(x*x + 1));
-        body.emplace_back(
-            b.Return(b.Call("log", b.Add("x", b.Call("sqrt", b.Add(b.Mul("x", "x"), 1_a))))));
-
-        b.Func(name, {b.Param("x", T(ty))}, T(ty), body);
+        b.Func(name, utils::Vector{b.Param("x", T(ty))}, T(ty),
+               utils::Vector{
+                   b.Return(b.Call("log", b.Add("x", b.Call("sqrt", b.Add(b.Mul("x", "x"), 1_a))))),
+               });
 
         return name;
     }
@@ -115,17 +114,17 @@ struct BuiltinPolyfill::State {
             return b.Construct(T(ty), expr);
         };
 
-        ast::StatementList body;
+        utils::Vector<const ast::Statement*, 1> body;
         switch (polyfill.atanh) {
             case Level::kFull:
                 // return log((1+x) / (1-x)) * 0.5
-                body.emplace_back(
+                body.Push(
                     b.Return(b.Mul(b.Call("log", b.Div(b.Add(1_a, "x"), b.Sub(1_a, "x"))), 0.5_a)));
                 break;
             case Level::kRangeCheck:
                 // return select(atanh(x), 0, x >= 1);
-                body.emplace_back(b.Return(b.Call("select", b.Call("atanh", "x"), V(0.0_a),
-                                                  b.GreaterThanEqual("x", V(1.0_a)))));
+                body.Push(b.Return(b.Call("select", b.Call("atanh", "x"), V(0.0_a),
+                                          b.GreaterThanEqual("x", V(1.0_a)))));
                 break;
             default:
                 TINT_ICE(Transform, b.Diagnostics())
@@ -133,7 +132,7 @@ struct BuiltinPolyfill::State {
                 return {};
         }
 
-        b.Func(name, {b.Param("x", T(ty))}, T(ty), body);
+        b.Func(name, utils::Vector{b.Param("x", T(ty))}, T(ty), body);
 
         return name;
     }
@@ -156,8 +155,12 @@ struct BuiltinPolyfill::State {
             return ScalarOrVector(width, u32(value));
         };
         b.Func(
-            name, {b.Param("v", T(ty))}, T(ty),
-            {
+            name,
+            utils::Vector{
+                b.Param("v", T(ty)),
+            },
+            T(ty),
+            utils::Vector{
                 // var x = U(v);
                 b.Decl(b.Var("x", nullptr, b.Construct(U(), b.Expr("v")))),
                 // let b16 = select(0, 16, x <= 0x0000ffff);
@@ -217,8 +220,12 @@ struct BuiltinPolyfill::State {
             return b.Construct(b.ty.vec<bool>(width), value);
         };
         b.Func(
-            name, {b.Param("v", T(ty))}, T(ty),
-            {
+            name,
+            utils::Vector{
+                b.Param("v", T(ty)),
+            },
+            T(ty),
+            utils::Vector{
                 // var x = U(v);
                 b.Decl(b.Var("x", nullptr, b.Construct(U(), b.Expr("v")))),
                 // let b16 = select(16, 0, bool(x & 0x0000ffff));
@@ -270,20 +277,20 @@ struct BuiltinPolyfill::State {
             return b.Construct(b.ty.vec<u32>(width), value);
         };
 
-        ast::StatementList body = {
+        utils::Vector<const ast::Statement*, 8> body{
             b.Decl(b.Let("s", nullptr, b.Call("min", "offset", u32(W)))),
             b.Decl(b.Let("e", nullptr, b.Call("min", u32(W), b.Add("s", "count")))),
         };
 
         switch (polyfill.extract_bits) {
             case Level::kFull:
-                body.emplace_back(b.Decl(b.Let("shl", nullptr, b.Sub(u32(W), "e"))));
-                body.emplace_back(b.Decl(b.Let("shr", nullptr, b.Add("shl", "s"))));
-                body.emplace_back(
+                body.Push(b.Decl(b.Let("shl", nullptr, b.Sub(u32(W), "e"))));
+                body.Push(b.Decl(b.Let("shr", nullptr, b.Add("shl", "s"))));
+                body.Push(
                     b.Return(b.Shr(b.Shl("v", vecN_u32(b.Expr("shl"))), vecN_u32(b.Expr("shr")))));
                 break;
             case Level::kClampParameters:
-                body.emplace_back(b.Return(b.Call("extractBits", "v", "s", b.Sub("e", "s"))));
+                body.Push(b.Return(b.Call("extractBits", "v", "s", b.Sub("e", "s"))));
                 break;
             default:
                 TINT_ICE(Transform, b.Diagnostics())
@@ -292,12 +299,12 @@ struct BuiltinPolyfill::State {
         }
 
         b.Func(name,
-               {
+               utils::Vector{
                    b.Param("v", T(ty)),
                    b.Param("offset", b.ty.u32()),
                    b.Param("count", b.ty.u32()),
                },
-               T(ty), body);
+               T(ty), std::move(body));
 
         return name;
     }
@@ -338,8 +345,12 @@ struct BuiltinPolyfill::State {
         }
 
         b.Func(
-            name, {b.Param("v", T(ty))}, T(ty),
-            {
+            name,
+            utils::Vector{
+                b.Param("v", T(ty)),
+            },
+            T(ty),
+            utils::Vector{
                 // var x = v;                          (unsigned)
                 // var x = select(U(v), ~U(v), v < 0); (signed)
                 b.Decl(b.Var("x", nullptr, x)),
@@ -400,8 +411,12 @@ struct BuiltinPolyfill::State {
             return b.Construct(b.ty.vec<bool>(width), value);
         };
         b.Func(
-            name, {b.Param("v", T(ty))}, T(ty),
-            {
+            name,
+            utils::Vector{
+                b.Param("v", T(ty)),
+            },
+            T(ty),
+            utils::Vector{
                 // var x = U(v);
                 b.Decl(b.Var("x", nullptr, b.Construct(U(), b.Expr("v")))),
                 // let b16 = select(16, 0, bool(x & 0x0000ffff));
@@ -463,7 +478,7 @@ struct BuiltinPolyfill::State {
             return b.vec(b.ty.u32(), width, value);
         };
 
-        ast::StatementList body = {
+        utils::Vector<const ast::Statement*, 8> body = {
             b.Decl(b.Let("s", nullptr, b.Call("min", "offset", u32(W)))),
             b.Decl(b.Let("e", nullptr, b.Call("min", u32(W), b.Add("s", "count")))),
         };
@@ -471,15 +486,15 @@ struct BuiltinPolyfill::State {
         switch (polyfill.insert_bits) {
             case Level::kFull:
                 // let mask = ((1 << s) - 1) ^ ((1 << e) - 1)
-                body.emplace_back(
+                body.Push(
                     b.Decl(b.Let("mask", nullptr,
                                  b.Xor(b.Sub(b.Shl(1_u, "s"), 1_u), b.Sub(b.Shl(1_u, "e"), 1_u)))));
                 // return ((n << s) & mask) | (v & ~mask)
-                body.emplace_back(b.Return(b.Or(b.And(b.Shl("n", U("s")), V("mask")),
-                                                b.And("v", V(b.Complement("mask"))))));
+                body.Push(b.Return(b.Or(b.And(b.Shl("n", U("s")), V("mask")),
+                                        b.And("v", V(b.Complement("mask"))))));
                 break;
             case Level::kClampParameters:
-                body.emplace_back(b.Return(b.Call("insertBits", "v", "n", "s", b.Sub("e", "s"))));
+                body.Push(b.Return(b.Call("insertBits", "v", "n", "s", b.Sub("e", "s"))));
                 break;
             default:
                 TINT_ICE(Transform, b.Diagnostics())
@@ -488,7 +503,7 @@ struct BuiltinPolyfill::State {
         }
 
         b.Func(name,
-               {
+               utils::Vector{
                    b.Param("v", T(ty)),
                    b.Param("n", T(ty)),
                    b.Param("offset", b.ty.u32()),

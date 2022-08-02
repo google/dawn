@@ -43,7 +43,7 @@ class Array final : public Castable<Array, Type> {
           const Source& src,
           const Type* subtype,
           const Expression* count,
-          AttributeList attributes);
+          utils::VectorRef<const Attribute*> attributes);
     /// Move constructor
     Array(Array&&);
     ~Array() override;
@@ -69,7 +69,7 @@ class Array final : public Castable<Array, Type> {
     const Expression* const count;
 
     /// the array attributes
-    const AttributeList attributes;
+    const utils::Vector<const Attribute*, 1> attributes;
 };
 
 }  // namespace tint::ast

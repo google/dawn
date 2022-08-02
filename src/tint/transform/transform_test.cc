@@ -69,7 +69,7 @@ TEST_F(CreateASTTypeForTest, ArrayImplicitStride) {
     });
     ASSERT_TRUE(arr->Is<ast::Array>());
     ASSERT_TRUE(arr->As<ast::Array>()->type->Is<ast::F32>());
-    ASSERT_EQ(arr->As<ast::Array>()->attributes.size(), 0u);
+    ASSERT_EQ(arr->As<ast::Array>()->attributes.Length(), 0u);
 
     auto* size = arr->As<ast::Array>()->count->As<ast::IntLiteralExpression>();
     ASSERT_NE(size, nullptr);
@@ -82,7 +82,7 @@ TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
     });
     ASSERT_TRUE(arr->Is<ast::Array>());
     ASSERT_TRUE(arr->As<ast::Array>()->type->Is<ast::F32>());
-    ASSERT_EQ(arr->As<ast::Array>()->attributes.size(), 1u);
+    ASSERT_EQ(arr->As<ast::Array>()->attributes.Length(), 1u);
     ASSERT_TRUE(arr->As<ast::Array>()->attributes[0]->Is<ast::StrideAttribute>());
     ASSERT_EQ(arr->As<ast::Array>()->attributes[0]->As<ast::StrideAttribute>()->stride, 64u);
 

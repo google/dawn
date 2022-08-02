@@ -214,8 +214,11 @@ TEST_P(GlslBuiltinTest, Emit) {
 
     auto* call = GenerateCall(param.builtin, param.type, this);
     ASSERT_NE(nullptr, call) << "Unhandled builtin";
-    Func("func", {}, ty.void_(), {CallStmt(call)},
-         {create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
+    Func("func", utils::Empty, ty.void_(),
+         utils::Vector{
+             CallStmt(call),
+         },
+         utils::Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
     GeneratorImpl& gen = Build();
 
@@ -1019,8 +1022,11 @@ void test_function() {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, StorageBarrier) {
-    Func("main", {}, ty.void_(), {CallStmt(Call("storageBarrier"))},
-         {
+    Func("main", utils::Empty, ty.void_(),
+         utils::Vector{
+             CallStmt(Call("storageBarrier")),
+         },
+         utils::Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
@@ -1039,8 +1045,11 @@ void main() {
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, WorkgroupBarrier) {
-    Func("main", {}, ty.void_(), {CallStmt(Call("workgroupBarrier"))},
-         {
+    Func("main", utils::Empty, ty.void_(),
+         utils::Vector{
+             CallStmt(Call("workgroupBarrier")),
+         },
+         utils::Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });

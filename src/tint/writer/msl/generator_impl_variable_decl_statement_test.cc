@@ -66,7 +66,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const) {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_AInt) {
     auto* C = Const("C", nullptr, Expr(1_a));
-    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(C), Decl(Let("l", nullptr, Expr(C)))});
 
     GeneratorImpl& gen = Build();
 
@@ -84,7 +84,7 @@ void f() {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_AFloat) {
     auto* C = Const("C", nullptr, Expr(1._a));
-    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(C), Decl(Let("l", nullptr, Expr(C)))});
 
     GeneratorImpl& gen = Build();
 
@@ -102,7 +102,7 @@ void f() {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_i32) {
     auto* C = Const("C", nullptr, Expr(1_i));
-    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(C), Decl(Let("l", nullptr, Expr(C)))});
 
     GeneratorImpl& gen = Build();
 
@@ -120,7 +120,7 @@ void f() {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_u32) {
     auto* C = Const("C", nullptr, Expr(1_u));
-    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(C), Decl(Let("l", nullptr, Expr(C)))});
 
     GeneratorImpl& gen = Build();
 
@@ -138,7 +138,7 @@ void f() {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_f32) {
     auto* C = Const("C", nullptr, Expr(1_f));
-    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(C), Decl(Let("l", nullptr, Expr(C)))});
 
     GeneratorImpl& gen = Build();
 
@@ -158,7 +158,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_f16) {
     Enable(ast::Extension::kF16);
 
     auto* C = Const("C", nullptr, Expr(1_h));
-    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(C), Decl(Let("l", nullptr, Expr(C)))});
 
     GeneratorImpl& gen = Build();
 
@@ -176,7 +176,7 @@ void f() {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_AInt) {
     auto* C = Const("C", nullptr, Construct(ty.vec3(nullptr), 1_a, 2_a, 3_a));
-    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(C), Decl(Let("l", nullptr, Expr(C)))});
 
     GeneratorImpl& gen = Build();
 
@@ -194,7 +194,7 @@ void f() {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_AFloat) {
     auto* C = Const("C", nullptr, Construct(ty.vec3(nullptr), 1._a, 2._a, 3._a));
-    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(C), Decl(Let("l", nullptr, Expr(C)))});
 
     GeneratorImpl& gen = Build();
 
@@ -212,7 +212,7 @@ void f() {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_f32) {
     auto* C = Const("C", nullptr, vec3<f32>(1_f, 2_f, 3_f));
-    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(C), Decl(Let("l", nullptr, Expr(C)))});
 
     GeneratorImpl& gen = Build();
 
@@ -232,7 +232,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_vec3_f16) {
     Enable(ast::Extension::kF16);
 
     auto* C = Const("C", nullptr, vec3<f16>(1_h, 2_h, 3_h));
-    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(C), Decl(Let("l", nullptr, Expr(C)))});
 
     GeneratorImpl& gen = Build();
 
@@ -251,7 +251,7 @@ void f() {
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_mat2x3_AFloat) {
     auto* C =
         Const("C", nullptr, Construct(ty.mat(nullptr, 2, 3), 1._a, 2._a, 3._a, 4._a, 5._a, 6._a));
-    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(C), Decl(Let("l", nullptr, Expr(C)))});
 
     GeneratorImpl& gen = Build();
 
@@ -269,7 +269,7 @@ void f() {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_mat2x3_f32) {
     auto* C = Const("C", nullptr, mat2x3<f32>(1_f, 2_f, 3_f, 4_f, 5_f, 6_f));
-    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(C), Decl(Let("l", nullptr, Expr(C)))});
 
     GeneratorImpl& gen = Build();
 
@@ -289,7 +289,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_mat2x3_f16) {
     Enable(ast::Extension::kF16);
 
     auto* C = Const("C", nullptr, mat2x3<f16>(1_h, 2_h, 3_h, 4_h, 5_h, 6_h));
-    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(C), Decl(Let("l", nullptr, Expr(C)))});
 
     GeneratorImpl& gen = Build();
 
@@ -307,7 +307,7 @@ void f() {
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_arr_f32) {
     auto* C = Const("C", nullptr, Construct(ty.array<f32, 3>(), 1_f, 2_f, 3_f));
-    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(C), Decl(Let("l", nullptr, Expr(C)))});
 
     GeneratorImpl& gen = Build();
 
@@ -342,7 +342,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Const_arr_vec2_bool) {
                               vec2<bool>(true, false),         //
                               vec2<bool>(false, true),         //
                               vec2<bool>(true, true)));
-    Func("f", {}, ty.void_(), {Decl(C), Decl(Let("l", nullptr, Expr(C)))});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Decl(C), Decl(Let("l", nullptr, Expr(C)))});
 
     GeneratorImpl& gen = Build();
 
@@ -385,7 +385,7 @@ TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Array) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_VariableDeclStatement_Struct) {
-    auto* s = Structure("S", {
+    auto* s = Structure("S", utils::Vector{
                                  Member("a", ty.f32()),
                                  Member("b", ty.f32()),
                              });

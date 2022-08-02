@@ -27,7 +27,7 @@ TEST_F(OverrideTest, Identifier_NoId) {
 }
 
 TEST_F(OverrideTest, Identifier_WithId) {
-    auto* o = Override("o", nullptr, Expr(f32(1.0)), {Id(4u)});
+    auto* o = Override("o", nullptr, Expr(f32(1.0)), utils::Vector{Id(4u)});
     EXPECT_EQ(std::string("4"), o->Identifier(Symbols()));
 }
 

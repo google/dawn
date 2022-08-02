@@ -29,7 +29,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable) {
     ASSERT_FALSE(p->has_error()) << p->error();
 
     auto program = p->program();
-    ASSERT_EQ(program.AST().GlobalVariables().size(), 1u);
+    ASSERT_EQ(program.AST().GlobalVariables().Length(), 1u);
 
     auto* v = program.AST().GlobalVariables()[0];
     EXPECT_EQ(v->symbol, program.Symbols().Get("a"));
@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_Inferred) {
     ASSERT_FALSE(p->has_error()) << p->error();
 
     auto program = p->program();
-    ASSERT_EQ(program.AST().GlobalVariables().size(), 1u);
+    ASSERT_EQ(program.AST().GlobalVariables().Length(), 1u);
 
     auto* v = program.AST().GlobalVariables()[0];
     EXPECT_EQ(v->symbol, program.Symbols().Get("a"));
@@ -62,7 +62,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalLet) {
     ASSERT_FALSE(p->has_error()) << p->error();
 
     auto program = p->program();
-    ASSERT_EQ(program.AST().GlobalVariables().size(), 1u);
+    ASSERT_EQ(program.AST().GlobalVariables().Length(), 1u);
 
     auto* v = program.AST().GlobalVariables()[0];
     EXPECT_EQ(v->symbol, program.Symbols().Get("a"));
@@ -104,7 +104,7 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalConst) {
     ASSERT_FALSE(p->has_error()) << p->error();
 
     auto program = p->program();
-    ASSERT_EQ(program.AST().GlobalVariables().size(), 1u);
+    ASSERT_EQ(program.AST().GlobalVariables().Length(), 1u);
 
     auto* v = program.AST().GlobalVariables()[0];
     EXPECT_EQ(v->symbol, program.Symbols().Get("a"));
@@ -137,7 +137,7 @@ TEST_F(ParserImplTest, GlobalDecl_TypeAlias) {
     ASSERT_FALSE(p->has_error()) << p->error();
 
     auto program = p->program();
-    ASSERT_EQ(program.AST().TypeDecls().size(), 1u);
+    ASSERT_EQ(program.AST().TypeDecls().Length(), 1u);
     ASSERT_TRUE(program.AST().TypeDecls()[0]->Is<ast::Alias>());
     EXPECT_EQ(program.Symbols().NameFor(program.AST().TypeDecls()[0]->As<ast::Alias>()->name), "A");
 }
@@ -152,7 +152,7 @@ type B = A;)");
     ASSERT_FALSE(p->has_error()) << p->error();
 
     auto program = p->program();
-    ASSERT_EQ(program.AST().TypeDecls().size(), 2u);
+    ASSERT_EQ(program.AST().TypeDecls().Length(), 2u);
     ASSERT_TRUE(program.AST().TypeDecls()[0]->Is<ast::Struct>());
     auto* str = program.AST().TypeDecls()[0]->As<ast::Struct>();
     EXPECT_EQ(str->name, program.Symbols().Get("A"));
@@ -178,7 +178,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function) {
     ASSERT_FALSE(p->has_error()) << p->error();
 
     auto program = p->program();
-    ASSERT_EQ(program.AST().Functions().size(), 1u);
+    ASSERT_EQ(program.AST().Functions().Length(), 1u);
     EXPECT_EQ(program.Symbols().NameFor(program.AST().Functions()[0]->symbol), "main");
 }
 
@@ -188,7 +188,7 @@ TEST_F(ParserImplTest, GlobalDecl_Function_WithAttribute) {
     ASSERT_FALSE(p->has_error()) << p->error();
 
     auto program = p->program();
-    ASSERT_EQ(program.AST().Functions().size(), 1u);
+    ASSERT_EQ(program.AST().Functions().Length(), 1u);
     EXPECT_EQ(program.Symbols().NameFor(program.AST().Functions()[0]->symbol), "main");
 }
 
@@ -205,7 +205,7 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
     ASSERT_FALSE(p->has_error()) << p->error();
 
     auto program = p->program();
-    ASSERT_EQ(program.AST().TypeDecls().size(), 1u);
+    ASSERT_EQ(program.AST().TypeDecls().Length(), 1u);
 
     auto* t = program.AST().TypeDecls()[0];
     ASSERT_NE(t, nullptr);
@@ -213,7 +213,7 @@ TEST_F(ParserImplTest, GlobalDecl_ParsesStruct) {
 
     auto* str = t->As<ast::Struct>();
     EXPECT_EQ(str->name, program.Symbols().Get("A"));
-    EXPECT_EQ(str->members.size(), 2u);
+    EXPECT_EQ(str->members.Length(), 2u);
 }
 
 TEST_F(ParserImplTest, GlobalDecl_Struct_Invalid) {

@@ -33,8 +33,8 @@ class ResolverBehaviorTest : public ResolverTest {
         // Create a function called 'DiscardOrNext' which returns an i32, and has
         // the behavior of {Discard, Return}, which when called, will have the
         // behavior {Discard, Next}.
-        Func("DiscardOrNext", {}, ty.i32(),
-             {
+        Func("DiscardOrNext", utils::Empty, ty.i32(),
+             utils::Vector{
                  If(true, Block(Discard())),
                  Return(1_i),
              });
@@ -72,8 +72,8 @@ TEST_F(ResolverBehaviorTest, ExprBitcastOp) {
 }
 
 TEST_F(ResolverBehaviorTest, ExprIndex_Arr) {
-    Func("ArrayDiscardOrNext", {}, ty.array<i32, 4>(),
-         {
+    Func("ArrayDiscardOrNext", utils::Empty, ty.array<i32, 4>(),
+         utils::Vector{
              If(true, Block(Discard())),
              Return(Construct(ty.array<i32, 4>())),
          });
@@ -165,7 +165,7 @@ TEST_F(ResolverBehaviorTest, StmtBlockSingleStmt) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtCallReturn) {
-    Func("f", {}, ty.void_(), {Return()});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Return()});
     auto* stmt = CallStmt(Call("f"));
     WrapInFunction(stmt);
 
@@ -176,7 +176,7 @@ TEST_F(ResolverBehaviorTest, StmtCallReturn) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtCallFuncDiscard) {
-    Func("f", {}, ty.void_(), {Discard()});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Discard()});
     auto* stmt = CallStmt(Call("f"));
     WrapInFunction(stmt);
 
@@ -522,7 +522,7 @@ TEST_F(ResolverBehaviorTest, StmtReturn) {
 
 TEST_F(ResolverBehaviorTest, StmtReturn_DiscardOrNext) {
     auto* stmt = Return(Call("DiscardOrNext"));
-    Func("F", {}, ty.i32(), {stmt});
+    Func("F", utils::Empty, ty.i32(), utils::Vector{stmt});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 

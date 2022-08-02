@@ -46,7 +46,7 @@ class Override final : public Castable<Override, Variable> {
              const Symbol& sym,
              const ast::Type* type,
              const Expression* constructor,
-             AttributeList attributes);
+             utils::VectorRef<const Attribute*> attributes);
 
     /// Move constructor
     Override(Override&&);

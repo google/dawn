@@ -29,7 +29,7 @@ TextureOverloadCase::TextureOverloadCase(ValidTextureOverload o,
                                          ast::TextureDimension dims,
                                          TextureDataType datatype,
                                          const char* f,
-                                         std::function<ExpressionList(ProgramBuilder*)> a)
+                                         std::function<Args(ProgramBuilder*)> a)
     : overload(o),
       description(desc),
       texture_kind(tk),
@@ -44,7 +44,7 @@ TextureOverloadCase::TextureOverloadCase(ValidTextureOverload o,
                                          ast::TextureDimension dims,
                                          TextureDataType datatype,
                                          const char* f,
-                                         std::function<ExpressionList(ProgramBuilder*)> a)
+                                         std::function<Args(ProgramBuilder*)> a)
     : overload(o),
       description(desc),
       texture_kind(tk),
@@ -59,7 +59,7 @@ TextureOverloadCase::TextureOverloadCase(ValidTextureOverload o,
                                          ast::TextureDimension dims,
                                          TextureDataType datatype,
                                          const char* f,
-                                         std::function<ExpressionList(ProgramBuilder*)> a)
+                                         std::function<Args(ProgramBuilder*)> a)
     : overload(o),
       description(d),
       texture_kind(TextureKind::kStorage),
@@ -141,7 +141,7 @@ const ast::Type* TextureOverloadCase::BuildResultVectorComponentType(ProgramBuil
 }
 
 const ast::Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b) const {
-    AttributeList attrs = {
+    utils::Vector attrs{
         b->create<ast::GroupAttribute>(0u),
         b->create<ast::BindingAttribute>(0u),
     };
@@ -175,7 +175,7 @@ const ast::Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b
 }
 
 const ast::Variable* TextureOverloadCase::BuildSamplerVariable(ProgramBuilder* b) const {
-    AttributeList attrs = {
+    utils::Vector attrs = {
         b->create<ast::GroupAttribute>(0u),
         b->create<ast::BindingAttribute>(1u),
     };

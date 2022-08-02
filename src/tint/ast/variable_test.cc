@@ -38,7 +38,7 @@ TEST_F(VariableTest, Creation) {
 
 TEST_F(VariableTest, CreationWithSource) {
     auto* v = Var(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 5}}}, "i",
-                  ty.f32(), StorageClass::kPrivate, nullptr, AttributeList{});
+                  ty.f32(), StorageClass::kPrivate, nullptr, utils::Empty);
 
     EXPECT_EQ(v->symbol, Symbol(1, ID()));
     EXPECT_EQ(v->declared_storage_class, StorageClass::kPrivate);
@@ -51,7 +51,7 @@ TEST_F(VariableTest, CreationWithSource) {
 
 TEST_F(VariableTest, CreationEmpty) {
     auto* v = Var(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 7}}}, "a_var",
-                  ty.i32(), StorageClass::kWorkgroup, nullptr, AttributeList{});
+                  ty.i32(), StorageClass::kWorkgroup, nullptr, utils::Empty);
 
     EXPECT_EQ(v->symbol, Symbol(1, ID()));
     EXPECT_EQ(v->declared_storage_class, StorageClass::kWorkgroup);
@@ -93,7 +93,7 @@ TEST_F(VariableTest, Assert_DifferentProgramID_Constructor) {
 
 TEST_F(VariableTest, WithAttributes) {
     auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
-                    AttributeList{
+                    utils::Vector{
                         create<LocationAttribute>(1u),
                         create<BuiltinAttribute>(BuiltinValue::kPosition),
                         create<IdAttribute>(1200u),
@@ -111,7 +111,7 @@ TEST_F(VariableTest, WithAttributes) {
 
 TEST_F(VariableTest, BindingPoint) {
     auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
-                    AttributeList{
+                    utils::Vector{
                         create<BindingAttribute>(2u),
                         create<GroupAttribute>(1u),
                     });
@@ -123,7 +123,7 @@ TEST_F(VariableTest, BindingPoint) {
 }
 
 TEST_F(VariableTest, BindingPointAttributes) {
-    auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr, AttributeList{});
+    auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr, utils::Empty);
     EXPECT_FALSE(var->BindingPoint());
     EXPECT_EQ(var->BindingPoint().group, nullptr);
     EXPECT_EQ(var->BindingPoint().binding, nullptr);
@@ -131,7 +131,7 @@ TEST_F(VariableTest, BindingPointAttributes) {
 
 TEST_F(VariableTest, BindingPointMissingGroupAttribute) {
     auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
-                    AttributeList{
+                    utils::Vector{
                         create<BindingAttribute>(2u),
                     });
     EXPECT_FALSE(var->BindingPoint());
@@ -142,7 +142,7 @@ TEST_F(VariableTest, BindingPointMissingGroupAttribute) {
 
 TEST_F(VariableTest, BindingPointMissingBindingAttribute) {
     auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, nullptr,
-                    AttributeList{create<GroupAttribute>(1u)});
+                    utils::Vector{create<GroupAttribute>(1u)});
     EXPECT_FALSE(var->BindingPoint());
     ASSERT_NE(var->BindingPoint().group, nullptr);
     EXPECT_EQ(var->BindingPoint().group->value, 1u);

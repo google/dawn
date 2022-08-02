@@ -334,20 +334,20 @@ TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
             WrapInFunction(Assign(Phony(), abstract_expr));
             break;
         case Method::kFnArg:
-            Func("F", {Param("P", target_ty())}, ty.void_(), {});
+            Func("F", utils::Vector{Param("P", target_ty())}, ty.void_(), utils::Empty);
             WrapInFunction(CallStmt(Call("F", abstract_expr)));
             break;
         case Method::kBuiltinArg:
             WrapInFunction(CallStmt(Call("min", target_expr(), abstract_expr)));
             break;
         case Method::kReturn:
-            Func("F", {}, target_ty(), {Return(abstract_expr)});
+            Func("F", utils::Empty, target_ty(), utils::Vector{Return(abstract_expr)});
             break;
         case Method::kArray:
             WrapInFunction(Construct(ty.array(target_ty(), 1_i), abstract_expr));
             break;
         case Method::kStruct:
-            Structure("S", {Member("v", target_ty())});
+            Structure("S", utils::Vector{Member("v", target_ty())});
             WrapInFunction(Construct(ty.type_name("S"), abstract_expr));
             break;
         case Method::kBinaryOp:
@@ -376,9 +376,9 @@ TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
                                   DefaultCase()));
             break;
         case Method::kWorkgroupSize:
-            Func("f", {}, ty.void_(), {},
-                 {WorkgroupSize(target_expr(), abstract_expr, Expr(123_a)),
-                  Stage(ast::PipelineStage::kCompute)});
+            Func("f", utils::Empty, ty.void_(), utils::Empty,
+                 utils::Vector{WorkgroupSize(target_expr(), abstract_expr, Expr(123_a)),
+                               Stage(ast::PipelineStage::kCompute)});
             break;
         case Method::kRuntimeIndex:
             auto* runtime_index = Var("runtime_index", nullptr, Expr(1_i));
@@ -863,10 +863,10 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
     const auto& method = std::get<1>(param);
     const auto& data = std::get<2>(param);
 
-    ast::ExpressionList abstract_exprs;
+    utils::Vector<const ast::Expression*, 4> abstract_exprs;
     auto abstract_expr = [&] {
         auto* expr = data.abstract_expr(*this, data.literal_value);
-        abstract_exprs.emplace_back(expr);
+        abstract_exprs.Push(expr);
         return expr;
     };
     switch (method) {
@@ -894,8 +894,9 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
                                   DefaultCase()));
             break;
         case Method::kWorkgroupSize:
-            Func("f", {}, ty.void_(), {},
-                 {WorkgroupSize(abstract_expr()), Stage(ast::PipelineStage::kCompute)});
+            Func(
+                "f", utils::Empty, ty.void_(), utils::Empty,
+                utils::Vector{WorkgroupSize(abstract_expr()), Stage(ast::PipelineStage::kCompute)});
             break;
         case Method::kIndex:
             GlobalVar("arr", ty.array<i32, 4>(), ast::StorageClass::kPrivate);
@@ -1163,7 +1164,7 @@ namespace materialize_abstract_numeric_to_unrelated_type {
 using MaterializeAbstractNumericToUnrelatedType = resolver::ResolverTest;
 
 TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructVarCtor) {
-    Structure("S", {Member("a", ty.i32())});
+    Structure("S", utils::Vector{Member("a", ty.i32())});
     WrapInFunction(Decl(Var("v", ty.type_name("S"), Expr(Source{{12, 34}}, 1_a))));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(
@@ -1172,7 +1173,7 @@ TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructVarCtor) {
 }
 
 TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructLetCtor) {
-    Structure("S", {Member("a", ty.i32())});
+    Structure("S", utils::Vector{Member("a", ty.i32())});
     WrapInFunction(Decl(Let("v", ty.type_name("S"), Expr(Source{{12, 34}}, 1_a))));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_THAT(

@@ -106,9 +106,9 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const sem::Type*
     }
     if (auto* a = ty->As<sem::Array>()) {
         auto* el = CreateASTTypeFor(ctx, a->ElemType());
-        ast::AttributeList attrs;
+        utils::Vector<const ast::Attribute*, 1> attrs;
         if (!a->IsStrideImplicit()) {
-            attrs.emplace_back(ctx.dst->create<ast::StrideAttribute>(a->Stride()));
+            attrs.Push(ctx.dst->create<ast::StrideAttribute>(a->Stride()));
         }
         if (a->IsRuntimeSized()) {
             return ctx.dst->ty.array(el, nullptr, std::move(attrs));

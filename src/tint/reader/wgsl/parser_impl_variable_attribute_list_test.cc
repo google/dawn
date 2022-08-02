@@ -23,7 +23,7 @@ TEST_F(ParserImplTest, AttributeList_Parses) {
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(attrs.errored);
     ASSERT_TRUE(attrs.matched);
-    ASSERT_EQ(attrs.value.size(), 2u);
+    ASSERT_EQ(attrs.value.Length(), 2u);
 
     auto* attr_0 = attrs.value[0]->As<ast::Attribute>();
     auto* attr_1 = attrs.value[1]->As<ast::Attribute>();
@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, AttributeList_Invalid) {
     EXPECT_TRUE(p->has_error());
     EXPECT_TRUE(attrs.errored);
     EXPECT_FALSE(attrs.matched);
-    EXPECT_TRUE(attrs.value.empty());
+    EXPECT_TRUE(attrs.value.IsEmpty());
     EXPECT_EQ(p->error(), R"(1:2: expected attribute)");
 }
 
@@ -52,7 +52,7 @@ TEST_F(ParserImplTest, AttributeList_InvalidValue) {
     EXPECT_TRUE(p->has_error());
     EXPECT_TRUE(attrs.errored);
     EXPECT_FALSE(attrs.matched);
-    EXPECT_TRUE(attrs.value.empty());
+    EXPECT_TRUE(attrs.value.IsEmpty());
     EXPECT_EQ(p->error(), "1:10: invalid value for builtin attribute");
 }
 

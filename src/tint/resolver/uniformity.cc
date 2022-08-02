@@ -152,8 +152,8 @@ struct FunctionInfo {
         }
 
         // Create nodes for parameters.
-        parameters.resize(func->params.size());
-        for (size_t i = 0; i < func->params.size(); i++) {
+        parameters.resize(func->params.Length());
+        for (size_t i = 0; i < func->params.Length(); i++) {
             auto* param = func->params[i];
             auto param_name = builder->Symbols().NameFor(param->symbol);
             auto* sem = builder->Sem().Get<sem::Parameter>(param);
@@ -349,7 +349,7 @@ class UniformityGraph {
 
             // Set the parameter tag to ParameterRequiredToBeUniform for each parameter node that
             // was reachable.
-            for (size_t i = 0; i < func->params.size(); i++) {
+            for (size_t i = 0; i < func->params.Length(); i++) {
                 auto* param = func->params[i];
                 if (reachable.contains(current_function_->variables.Get(sem_.Get(param)))) {
                     current_function_->parameters[i].tag = ParameterRequiredToBeUniform;
@@ -367,7 +367,7 @@ class UniformityGraph {
 
             // Set the parameter tag to ParameterRequiredToBeUniformForSubsequentControlFlow for
             // each parameter node that was reachable.
-            for (size_t i = 0; i < func->params.size(); i++) {
+            for (size_t i = 0; i < func->params.Length(); i++) {
                 auto* param = func->params[i];
                 if (reachable.contains(current_function_->variables.Get(sem_.Get(param)))) {
                     current_function_->parameters[i].tag =
@@ -386,7 +386,7 @@ class UniformityGraph {
 
             // Set the parameter tag to ParameterRequiredToBeUniformForReturnValue for each
             // parameter node that was reachable.
-            for (size_t i = 0; i < func->params.size(); i++) {
+            for (size_t i = 0; i < func->params.Length(); i++) {
                 auto* param = func->params[i];
                 if (reachable.contains(current_function_->variables.Get(sem_.Get(param)))) {
                     current_function_->parameters[i].tag =
@@ -396,7 +396,7 @@ class UniformityGraph {
         }
 
         // Traverse the graph for each pointer parameter.
-        for (size_t i = 0; i < func->params.size(); i++) {
+        for (size_t i = 0; i < func->params.Length(); i++) {
             if (current_function_->parameters[i].pointer_return_value == nullptr) {
                 continue;
             }
@@ -411,7 +411,7 @@ class UniformityGraph {
             }
 
             // Check every other parameter to see if they feed into this parameter's final value.
-            for (size_t j = 0; j < func->params.size(); j++) {
+            for (size_t j = 0; j < func->params.Length(); j++) {
                 auto* param_source = sem_.Get<sem::Parameter>(func->params[j]);
                 if (reachable.contains(current_function_->parameters[j].init_value)) {
                     current_function_->parameters[i].pointer_param_output_sources.push_back(
@@ -1204,7 +1204,7 @@ class UniformityGraph {
         // Process call arguments
         Node* cf_last_arg = cf;
         std::vector<Node*> args;
-        for (size_t i = 0; i < call->args.size(); i++) {
+        for (size_t i = 0; i < call->args.Length(); i++) {
             auto [cf_i, arg_i] = ProcessExpression(cf_last_arg, call->args[i]);
 
             // Capture the index of this argument in a new node.

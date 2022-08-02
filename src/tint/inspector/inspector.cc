@@ -107,7 +107,7 @@ std::tuple<ComponentType, CompositionType> CalculateComponentAndComposition(cons
 
 std::tuple<InterpolationType, InterpolationSampling> CalculateInterpolationData(
     const sem::Type* type,
-    const ast::AttributeList& attributes) {
+    utils::VectorRef<const ast::Attribute*> attributes) {
     auto* interpolation_attribute = ast::GetAttribute<ast::InterpolateAttribute>(attributes);
     if (type->is_integer_scalar_or_vector()) {
         return {InterpolationType::kFlat, InterpolationSampling::kNone};
@@ -608,7 +608,7 @@ const ast::Function* Inspector::FindEntryPointByName(const std::string& name) {
 
 void Inspector::AddEntryPointInOutVariables(std::string name,
                                             const sem::Type* type,
-                                            const ast::AttributeList& attributes,
+                                            utils::VectorRef<const ast::Attribute*> attributes,
                                             std::vector<StageVariable>& variables) const {
     // Skip builtins.
     if (ast::HasAttribute<ast::BuiltinAttribute>(attributes)) {
@@ -647,7 +647,7 @@ void Inspector::AddEntryPointInOutVariables(std::string name,
 
 bool Inspector::ContainsBuiltin(ast::BuiltinValue builtin,
                                 const sem::Type* type,
-                                const ast::AttributeList& attributes) const {
+                                utils::VectorRef<const ast::Attribute*> attributes) const {
     auto* unwrapped_type = type->UnwrapRef();
 
     if (auto* struct_ty = unwrapped_type->As<sem::Struct>()) {

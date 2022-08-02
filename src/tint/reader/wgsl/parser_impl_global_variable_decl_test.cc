@@ -91,7 +91,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute) {
     ASSERT_EQ(var->constructor, nullptr);
 
     auto& attributes = var->attributes;
-    ASSERT_EQ(attributes.size(), 2u);
+    ASSERT_EQ(attributes.Length(), 2u);
     ASSERT_TRUE(attributes[0]->Is<ast::BindingAttribute>());
     ASSERT_TRUE(attributes[1]->Is<ast::GroupAttribute>());
 }
@@ -122,7 +122,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute_MulitpleGroups) {
     ASSERT_EQ(var->constructor, nullptr);
 
     auto& attributes = var->attributes;
-    ASSERT_EQ(attributes.size(), 2u);
+    ASSERT_EQ(attributes.Length(), 2u);
     ASSERT_TRUE(attributes[0]->Is<ast::BindingAttribute>());
     ASSERT_TRUE(attributes[1]->Is<ast::GroupAttribute>());
 }
@@ -152,7 +152,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidConstExpr) {
     EXPECT_TRUE(e.errored);
     EXPECT_FALSE(e.matched);
     EXPECT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:24: missing initalizer for 'var' declaration");
+    EXPECT_EQ(p->error(), "1:24: missing initializer for 'var' declaration");
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_InvalidVariableDecl) {

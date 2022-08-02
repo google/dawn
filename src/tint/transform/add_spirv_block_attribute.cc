@@ -76,8 +76,8 @@ void AddSpirvBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) co
                 auto wrapper_name = ctx.src->Symbols().NameFor(var->symbol) + "_block";
                 auto* ret = ctx.dst->create<ast::Struct>(
                     ctx.dst->Symbols().New(wrapper_name),
-                    ast::StructMemberList{ctx.dst->Member(kMemberName, CreateASTTypeFor(ctx, ty))},
-                    ast::AttributeList{block});
+                    utils::Vector{ctx.dst->Member(kMemberName, CreateASTTypeFor(ctx, ty))},
+                    utils::Vector{block});
                 ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), var, ret);
                 return ret;
             });

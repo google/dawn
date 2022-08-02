@@ -82,7 +82,7 @@ bool TraverseExpressions(const ast::Expression* root, diag::List& diags, CALLBAC
             to_visit.Push({right, depth});
         }
     };
-    auto push_list = [&](const std::vector<const ast::Expression*>& exprs, size_t depth) {
+    auto push_list = [&](utils::VectorRef<const ast::Expression*> exprs, size_t depth) {
         if (ORDER == TraverseOrder::LeftToRight) {
             for (auto* expr : utils::Reverse(exprs)) {
                 to_visit.Push({expr, depth});

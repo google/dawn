@@ -42,9 +42,9 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
-    auto* s = Structure("S", {Member("a", ty.i32())});
+    auto* s = Structure("S", utils::Vector{Member("a", ty.i32())});
     auto* v = GlobalVar("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-                        ast::AttributeList{
+                        utils::Vector{
                             create<ast::BindingAttribute>(0u),
                             create<ast::GroupAttribute>(0u),
                         });
@@ -57,9 +57,9 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
-    auto* s = Structure("S", {Member("a", ty.i32())});
+    auto* s = Structure("S", utils::Vector{Member("a", ty.i32())});
     auto* v = GlobalVar("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                        ast::AttributeList{
+                        utils::Vector{
                             create<ast::BindingAttribute>(0u),
                             create<ast::GroupAttribute>(0u),
                         });
@@ -74,7 +74,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
     auto* v =
         GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone, nullptr,
-                  ast::AttributeList{
+                  utils::Vector{
                       create<ast::GroupAttribute>(1u),
                       create<ast::BindingAttribute>(2u),
                   });

@@ -91,7 +91,7 @@ static constexpr bool IsTypeOrDerived =
 
 /// If `CONDITION` is true then EnableIf resolves to type T, otherwise an
 /// invalid type.
-template <bool CONDITION, typename T>
+template <bool CONDITION, typename T = void>
 using EnableIf = typename std::enable_if<CONDITION, T>::type;
 
 /// If `T` is of type `BASE`, or derives from `BASE`, then EnableIfIsType

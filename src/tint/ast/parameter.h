@@ -45,7 +45,7 @@ class Parameter final : public Castable<Parameter, Variable> {
               const Source& source,
               const Symbol& sym,
               const ast::Type* type,
-              AttributeList attributes);
+              utils::VectorRef<const Attribute*> attributes);
 
     /// Move constructor
     Parameter(Parameter&&);
@@ -62,9 +62,6 @@ class Parameter final : public Castable<Parameter, Variable> {
     /// @return the newly cloned node
     const Parameter* Clone(CloneContext* ctx) const override;
 };
-
-/// A list of parameters
-using ParameterList = std::vector<const Parameter*>;
 
 }  // namespace tint::ast
 

@@ -24,8 +24,8 @@ using ResolverBuiltinValidationTest = ResolverTest;
 
 TEST_F(ResolverBuiltinValidationTest, FunctionTypeMustMatchReturnStatementType_void_fail) {
     // fn func { return workgroupBarrier(); }
-    Func("func", {}, ty.void_(),
-         {
+    Func("func", utils::Empty, ty.void_(),
+         utils::Vector{
              Return(Call(Source{Source::Location{12, 34}}, "workgroupBarrier")),
          });
 
@@ -36,13 +36,15 @@ TEST_F(ResolverBuiltinValidationTest, FunctionTypeMustMatchReturnStatementType_v
 TEST_F(ResolverBuiltinValidationTest, InvalidPipelineStageDirect) {
     // @compute @workgroup_size(1) fn func { return dpdx(1.0); }
 
-    auto* dpdx =
-        create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"), ast::ExpressionList{Expr(1_f)});
-    Func(Source{{1, 2}}, "func", {}, ty.void_(),
-         {
+    auto* dpdx = create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"),
+                                             utils::Vector{
+                                                 Expr(1_f),
+                                             });
+    Func(Source{{1, 2}}, "func", utils::Empty, ty.void_(),
+         utils::Vector{
              CallStmt(dpdx),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
@@ -57,16 +59,33 @@ TEST_F(ResolverBuiltinValidationTest, InvalidPipelineStageIndirect) {
     // fn f2 { f1(); }
     // @compute @workgroup_size(1) fn main { return f2(); }
 
-    auto* dpdx =
-        create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"), ast::ExpressionList{Expr(1_f)});
-    Func(Source{{1, 2}}, "f0", {}, ty.void_(), {CallStmt(dpdx)});
+    auto* dpdx = create<ast::CallExpression>(Source{{3, 4}}, Expr("dpdx"),
+                                             utils::Vector{
+                                                 Expr(1_f),
+                                             });
+    Func(Source{{1, 2}}, "f0", utils::Empty, ty.void_(),
+         utils::Vector{
+             CallStmt(dpdx),
+         });
 
-    Func(Source{{3, 4}}, "f1", {}, ty.void_(), {CallStmt(Call("f0"))});
+    Func(Source{{3, 4}}, "f1", utils::Empty, ty.void_(),
+         utils::Vector{
+             CallStmt(Call("f0")),
+         });
 
-    Func(Source{{5, 6}}, "f2", {}, ty.void_(), {CallStmt(Call("f1"))});
+    Func(Source{{5, 6}}, "f2", utils::Empty, ty.void_(),
+         utils::Vector{
+             CallStmt(Call("f1")),
+         });
 
-    Func(Source{{7, 8}}, "main", {}, ty.void_(), {CallStmt(Call("f2"))},
-         {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
+    Func(Source{{7, 8}}, "main", utils::Empty, ty.void_(),
+         utils::Vector{
+             CallStmt(Call("f2")),
+         },
+         utils::Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+         });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -78,7 +97,7 @@ TEST_F(ResolverBuiltinValidationTest, InvalidPipelineStageIndirect) {
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsFunction) {
-    Func(Source{{12, 34}}, "mix", {}, ty.i32(), {});
+    Func(Source{{12, 34}}, "mix", utils::Empty, ty.i32(), {});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -111,7 +130,10 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAlias) {
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsStruct) {
-    Structure(Source{{12, 34}}, "mix", {Member("m", ty.i32())});
+    Structure(Source{{12, 34}}, "mix",
+              utils::Vector{
+                  Member("m", ty.i32()),
+              });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -232,7 +254,7 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, Immediate) {
     overload.BuildSamplerVariable(this);
 
     auto args = overload.args(this);
-    auto*& arg_to_replace = (param.position == Position::kFirst) ? args.front() : args.back();
+    auto*& arg_to_replace = (param.position == Position::kFirst) ? args.Front() : args.Back();
 
     // BuildTextureVariable() uses a Literal for scalars, and a CallExpression for
     // a vector constructor.
@@ -245,8 +267,13 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, Immediate) {
     arg_to_replace = expr(Source{{12, 34}}, *this);
 
     // Call the builtin with the constexpr argument replaced
-    Func("func", {}, ty.void_(), {CallStmt(Call(overload.function, args))},
-         {Stage(ast::PipelineStage::kFragment)});
+    Func("func", utils::Empty, ty.void_(),
+         utils::Vector{
+             CallStmt(Call(overload.function, args)),
+         },
+         utils::Vector{
+             Stage(ast::PipelineStage::kFragment),
+         });
 
     if (expr.invalid_index == Constexpr::kValid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -281,7 +308,7 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalConst) {
     GlobalConst("G", nullptr, expr({}, *this));
 
     auto args = overload.args(this);
-    auto*& arg_to_replace = (param.position == Position::kFirst) ? args.front() : args.back();
+    auto*& arg_to_replace = (param.position == Position::kFirst) ? args.Front() : args.Back();
 
     // Make the expression to be replaced, reachable. This keeps the resolver
     // happy.
@@ -290,8 +317,13 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalConst) {
     arg_to_replace = Expr(Source{{12, 34}}, "G");
 
     // Call the builtin with the constexpr argument replaced
-    Func("func", {}, ty.void_(), {CallStmt(Call(overload.function, args))},
-         {Stage(ast::PipelineStage::kFragment)});
+    Func("func", utils::Empty, ty.void_(),
+         utils::Vector{
+             CallStmt(Call(overload.function, args)),
+         },
+         utils::Vector{
+             Stage(ast::PipelineStage::kFragment),
+         });
 
     EXPECT_FALSE(r()->Resolve());
     std::stringstream err;
@@ -386,10 +418,10 @@ TEST_F(ResolverDP4aExtensionValidationTest, Dot4I8PackedWithExtension) {
     // fn func { return dot4I8Packed(1u, 2u); }
     Enable(ast::Extension::kChromiumExperimentalDp4A);
 
-    Func("func", {}, ty.i32(),
-         {
+    Func("func", utils::Empty, ty.i32(),
+         utils::Vector{
              Return(Call(Source{Source::Location{12, 34}}, "dot4I8Packed",
-                         ast::ExpressionList{Expr(1_u), Expr(2_u)})),
+                         utils::Vector{Expr(1_u), Expr(2_u)})),
          });
 
     EXPECT_TRUE(r()->Resolve());
@@ -397,10 +429,10 @@ TEST_F(ResolverDP4aExtensionValidationTest, Dot4I8PackedWithExtension) {
 
 TEST_F(ResolverDP4aExtensionValidationTest, Dot4I8PackedWithoutExtension) {
     // fn func { return dot4I8Packed(1u, 2u); }
-    Func("func", {}, ty.i32(),
-         {
+    Func("func", utils::Empty, ty.i32(),
+         utils::Vector{
              Return(Call(Source{Source::Location{12, 34}}, "dot4I8Packed",
-                         ast::ExpressionList{Expr(1_u), Expr(2_u)})),
+                         utils::Vector{Expr(1_u), Expr(2_u)})),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -414,10 +446,10 @@ TEST_F(ResolverDP4aExtensionValidationTest, Dot4U8PackedWithExtension) {
     // fn func { return dot4U8Packed(1u, 2u); }
     Enable(ast::Extension::kChromiumExperimentalDp4A);
 
-    Func("func", {}, ty.u32(),
-         {
+    Func("func", utils::Empty, ty.u32(),
+         utils::Vector{
              Return(Call(Source{Source::Location{12, 34}}, "dot4U8Packed",
-                         ast::ExpressionList{Expr(1_u), Expr(2_u)})),
+                         utils::Vector{Expr(1_u), Expr(2_u)})),
          });
 
     EXPECT_TRUE(r()->Resolve());
@@ -425,10 +457,10 @@ TEST_F(ResolverDP4aExtensionValidationTest, Dot4U8PackedWithExtension) {
 
 TEST_F(ResolverDP4aExtensionValidationTest, Dot4U8PackedWithoutExtension) {
     // fn func { return dot4U8Packed(1u, 2u); }
-    Func("func", {}, ty.u32(),
-         {
+    Func("func", utils::Empty, ty.u32(),
+         utils::Vector{
              Return(Call(Source{Source::Location{12, 34}}, "dot4U8Packed",
-                         ast::ExpressionList{Expr(1_u), Expr(2_u)})),
+                         utils::Vector{Expr(1_u), Expr(2_u)})),
          });
 
     EXPECT_FALSE(r()->Resolve());

@@ -35,7 +35,7 @@ TEST_F(ParserImplTest, FunctionDecl) {
     ASSERT_NE(f->return_type, nullptr);
     EXPECT_TRUE(f->return_type->Is<ast::Void>());
 
-    ASSERT_EQ(f->params.size(), 2u);
+    ASSERT_EQ(f->params.Length(), 2u);
     EXPECT_EQ(f->params[0]->symbol, p->builder().Symbols().Get("a"));
     EXPECT_EQ(f->params[1]->symbol, p->builder().Symbols().Get("b"));
 
@@ -43,7 +43,7 @@ TEST_F(ParserImplTest, FunctionDecl) {
     EXPECT_TRUE(f->return_type->Is<ast::Void>());
 
     auto* body = f->body;
-    ASSERT_EQ(body->statements.size(), 1u);
+    ASSERT_EQ(body->statements.Length(), 1u);
     EXPECT_TRUE(body->statements[0]->Is<ast::ReturnStatement>());
 }
 
@@ -80,7 +80,7 @@ TEST_F(ParserImplTest, FunctionDecl_Unicode) {
     ASSERT_NE(f->return_type, nullptr);
     EXPECT_TRUE(f->return_type->Is<ast::Void>());
 
-    ASSERT_EQ(f->params.size(), 2u);
+    ASSERT_EQ(f->params.Length(), 2u);
     EXPECT_EQ(f->params[0]->symbol, p->builder().Symbols().Get(param_a_ident));
     EXPECT_EQ(f->params[1]->symbol, p->builder().Symbols().Get(param_b_ident));
 
@@ -88,7 +88,7 @@ TEST_F(ParserImplTest, FunctionDecl_Unicode) {
     EXPECT_TRUE(f->return_type->Is<ast::Void>());
 
     auto* body = f->body;
-    ASSERT_EQ(body->statements.size(), 1u);
+    ASSERT_EQ(body->statements.Length(), 1u);
     EXPECT_TRUE(body->statements[0]->Is<ast::ReturnStatement>());
 }
 
@@ -107,10 +107,10 @@ TEST_F(ParserImplTest, FunctionDecl_AttributeList) {
     EXPECT_EQ(f->symbol, p->builder().Symbols().Get("main"));
     ASSERT_NE(f->return_type, nullptr);
     EXPECT_TRUE(f->return_type->Is<ast::Void>());
-    ASSERT_EQ(f->params.size(), 0u);
+    ASSERT_EQ(f->params.Length(), 0u);
 
     auto& attributes = f->attributes;
-    ASSERT_EQ(attributes.size(), 1u);
+    ASSERT_EQ(attributes.Length(), 1u);
     ASSERT_TRUE(attributes[0]->Is<ast::WorkgroupAttribute>());
 
     auto values = attributes[0]->As<ast::WorkgroupAttribute>()->Values();
@@ -131,7 +131,7 @@ TEST_F(ParserImplTest, FunctionDecl_AttributeList) {
               ast::IntLiteralExpression::Suffix::kNone);
 
     auto* body = f->body;
-    ASSERT_EQ(body->statements.size(), 1u);
+    ASSERT_EQ(body->statements.Length(), 1u);
     EXPECT_TRUE(body->statements[0]->Is<ast::ReturnStatement>());
 }
 
@@ -152,10 +152,10 @@ fn main() { return; })");
     EXPECT_EQ(f->symbol, p->builder().Symbols().Get("main"));
     ASSERT_NE(f->return_type, nullptr);
     EXPECT_TRUE(f->return_type->Is<ast::Void>());
-    ASSERT_EQ(f->params.size(), 0u);
+    ASSERT_EQ(f->params.Length(), 0u);
 
     auto& attributes = f->attributes;
-    ASSERT_EQ(attributes.size(), 2u);
+    ASSERT_EQ(attributes.Length(), 2u);
 
     ASSERT_TRUE(attributes[0]->Is<ast::WorkgroupAttribute>());
     auto values = attributes[0]->As<ast::WorkgroupAttribute>()->Values();
@@ -179,7 +179,7 @@ fn main() { return; })");
     EXPECT_EQ(attributes[1]->As<ast::StageAttribute>()->stage, ast::PipelineStage::kCompute);
 
     auto* body = f->body;
-    ASSERT_EQ(body->statements.size(), 1u);
+    ASSERT_EQ(body->statements.Length(), 1u);
     EXPECT_TRUE(body->statements[0]->Is<ast::ReturnStatement>());
 }
 
@@ -201,10 +201,10 @@ fn main() { return; })");
     EXPECT_EQ(f->symbol, p->builder().Symbols().Get("main"));
     ASSERT_NE(f->return_type, nullptr);
     EXPECT_TRUE(f->return_type->Is<ast::Void>());
-    ASSERT_EQ(f->params.size(), 0u);
+    ASSERT_EQ(f->params.Length(), 0u);
 
     auto& attrs = f->attributes;
-    ASSERT_EQ(attrs.size(), 2u);
+    ASSERT_EQ(attrs.Length(), 2u);
 
     ASSERT_TRUE(attrs[0]->Is<ast::WorkgroupAttribute>());
     auto values = attrs[0]->As<ast::WorkgroupAttribute>()->Values();
@@ -228,7 +228,7 @@ fn main() { return; })");
     EXPECT_EQ(attrs[1]->As<ast::StageAttribute>()->stage, ast::PipelineStage::kCompute);
 
     auto* body = f->body;
-    ASSERT_EQ(body->statements.size(), 1u);
+    ASSERT_EQ(body->statements.Length(), 1u);
     EXPECT_TRUE(body->statements[0]->Is<ast::ReturnStatement>());
 }
 
@@ -247,19 +247,19 @@ TEST_F(ParserImplTest, FunctionDecl_ReturnTypeAttributeList) {
     EXPECT_EQ(f->symbol, p->builder().Symbols().Get("main"));
     ASSERT_NE(f->return_type, nullptr);
     EXPECT_TRUE(f->return_type->Is<ast::F32>());
-    ASSERT_EQ(f->params.size(), 0u);
+    ASSERT_EQ(f->params.Length(), 0u);
 
     auto& attributes = f->attributes;
-    EXPECT_EQ(attributes.size(), 0u);
+    EXPECT_EQ(attributes.Length(), 0u);
 
     auto& ret_type_attributes = f->return_type_attributes;
-    ASSERT_EQ(ret_type_attributes.size(), 1u);
+    ASSERT_EQ(ret_type_attributes.Length(), 1u);
     auto* loc = ret_type_attributes[0]->As<ast::LocationAttribute>();
     ASSERT_TRUE(loc != nullptr);
     EXPECT_EQ(loc->value, 1u);
 
     auto* body = f->body;
-    ASSERT_EQ(body->statements.size(), 1u);
+    ASSERT_EQ(body->statements.Length(), 1u);
     EXPECT_TRUE(body->statements[0]->Is<ast::ReturnStatement>());
 }
 

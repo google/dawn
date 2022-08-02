@@ -23,7 +23,7 @@ TEST_F(ParserImplTest, AttributeDecl_EmptyStr) {
     EXPECT_FALSE(p->has_error());
     EXPECT_FALSE(attrs.errored);
     EXPECT_FALSE(attrs.matched);
-    EXPECT_EQ(attrs.value.size(), 0u);
+    EXPECT_EQ(attrs.value.Length(), 0u);
 }
 
 TEST_F(ParserImplTest, AttributeDecl_Single) {
@@ -32,7 +32,7 @@ TEST_F(ParserImplTest, AttributeDecl_Single) {
     EXPECT_FALSE(p->has_error());
     EXPECT_FALSE(attrs.errored);
     EXPECT_TRUE(attrs.matched);
-    ASSERT_EQ(attrs.value.size(), 1u);
+    ASSERT_EQ(attrs.value.Length(), 1u);
     auto* attr = attrs.value[0]->As<ast::Attribute>();
     ASSERT_NE(attr, nullptr);
     EXPECT_TRUE(attr->Is<ast::StructMemberSizeAttribute>());

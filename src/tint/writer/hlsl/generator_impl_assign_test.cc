@@ -22,8 +22,8 @@ namespace {
 using HlslGeneratorImplTest_Assign = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("lhs", ty.i32())),
              Decl(Var("rhs", ty.i32())),
              Assign("lhs", "rhs"),
@@ -42,8 +42,8 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Assign) {
 }
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Vector_Assign_LetIndex) {
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("lhs", ty.vec3<f32>())),
              Decl(Var("rhs", ty.f32())),
              Decl(Let("index", ty.u32(), Expr(0_u))),
@@ -68,8 +68,8 @@ void fn() {
 }
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Vector_Assign_ConstIndex) {
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("lhs", ty.vec3<f32>())),
              Decl(Var("rhs", ty.f32())),
              Decl(Const("index", ty.u32(), Expr(0_u))),
@@ -89,8 +89,8 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Vector_Assign_ConstIndex) {
 }
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Vector_Assign_DynamicIndex) {
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("lhs", ty.vec3<f32>())),
              Decl(Var("rhs", ty.f32())),
              Decl(Var("index", ty.u32())),
@@ -115,8 +115,8 @@ void fn() {
 }
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Vector_LetIndex) {
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("lhs", ty.mat4x2<f32>())),
              Decl(Var("rhs", ty.vec2<f32>())),
              Decl(Let("index", ty.u32(), Expr(0_u))),
@@ -146,8 +146,8 @@ void fn() {
 }
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Vector_ConstIndex) {
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("lhs", ty.mat4x2<f32>())),
              Decl(Var("rhs", ty.vec2<f32>())),
              Decl(Const("index", ty.u32(), Expr(0_u))),
@@ -167,8 +167,8 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Vector_ConstIndex) {
 }
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Vector_DynamicIndex) {
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("lhs", ty.mat4x2<f32>())),
              Decl(Var("rhs", ty.vec2<f32>())),
              Decl(Var("index", ty.u32())),
@@ -198,8 +198,8 @@ void fn() {
 }
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_LetIndex) {
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("lhs", ty.mat4x2<f32>())),
              Decl(Var("rhs", ty.f32())),
              Decl(Let("index", ty.u32(), Expr(0_u))),
@@ -237,8 +237,8 @@ void fn() {
 }
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_ConstIndex) {
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("lhs", ty.mat4x2<f32>())),
              Decl(Var("rhs", ty.f32())),
              Decl(Const("index", ty.u32(), Expr(0_u))),
@@ -258,8 +258,8 @@ TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_ConstIndex) {
 }
 
 TEST_F(HlslGeneratorImplTest_Assign, Emit_Matrix_Assign_Scalar_DynamicIndex) {
-    Func("fn", {}, ty.void_(),
-         {
+    Func("fn", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("lhs", ty.mat4x2<f32>())),
              Decl(Var("rhs", ty.f32())),
              Decl(Var("index", ty.u32())),

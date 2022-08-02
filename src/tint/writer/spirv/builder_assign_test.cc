@@ -172,7 +172,7 @@ TEST_F(BuilderTest, Assign_StructMember) {
     // var ident : my_struct
     // ident.b = 4.0;
 
-    auto* s = Structure("my_struct", {
+    auto* s = Structure("my_struct", utils::Vector{
                                          Member("a", ty.f32()),
                                          Member("b", ty.f32()),
                                      });

@@ -237,7 +237,7 @@ class DependencyScanner {
 
     /// Traverses the statements, performing symbol resolution and determining
     /// global dependencies.
-    void TraverseStatements(const ast::StatementList& stmts) {
+    void TraverseStatements(utils::VectorRef<const ast::Statement*> stmts) {
         for (auto* s : stmts) {
             TraverseStatement(s);
         }
@@ -404,7 +404,7 @@ class DependencyScanner {
 
     /// Traverses the attribute list, performing symbol resolution and
     /// determining global dependencies.
-    void TraverseAttributes(const ast::AttributeList& attrs) {
+    void TraverseAttributes(utils::VectorRef<const ast::Attribute*> attrs) {
         for (auto* attr : attrs) {
             TraverseAttribute(attr);
         }

@@ -26,12 +26,13 @@ using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Expression_Call) {
     auto* a_func = Func("a_func",
-                        {
+                        utils::Vector{
                             Param("a", ty.f32()),
                             Param("b", ty.f32()),
                         },
-                        ty.f32(), {Return(Add("a", "b"))});
-    auto* func = Func("main", {}, ty.void_(), {Assign(Phony(), Call("a_func", 1_f, 1_f))});
+                        ty.f32(), utils::Vector{Return(Add("a", "b"))});
+    auto* func = Func("main", utils::Empty, ty.void_(),
+                      utils::Vector{Assign(Phony(), Call("a_func", 1_f, 1_f))});
 
     spirv::Builder& b = Build();
 
@@ -64,13 +65,14 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, Statement_Call) {
     auto* a_func = Func("a_func",
-                        {
+                        utils::Vector{
                             Param("a", ty.f32()),
                             Param("b", ty.f32()),
                         },
-                        ty.f32(), {Return(Add("a", "b"))});
+                        ty.f32(), utils::Vector{Return(Add("a", "b"))});
 
-    auto* func = Func("main", {}, ty.void_(), {CallStmt(Call("a_func", 1_f, 1_f))});
+    auto* func =
+        Func("main", utils::Empty, ty.void_(), utils::Vector{CallStmt(Call("a_func", 1_f, 1_f))});
 
     spirv::Builder& b = Build();
 

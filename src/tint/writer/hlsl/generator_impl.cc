@@ -921,7 +921,7 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
     return true;
 }
 
-bool GeneratorImpl::EmitStatements(const ast::StatementList& stmts) {
+bool GeneratorImpl::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) {
     for (auto* s : stmts) {
         if (!EmitStatement(s)) {
             return false;
@@ -930,7 +930,7 @@ bool GeneratorImpl::EmitStatements(const ast::StatementList& stmts) {
     return true;
 }
 
-bool GeneratorImpl::EmitStatementsWithIndent(const ast::StatementList& stmts) {
+bool GeneratorImpl::EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts) {
     ScopedIndent si(this);
     return EmitStatements(stmts);
 }
@@ -1664,7 +1664,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
 
         {
             ScopedParen sp(pre);
-            for (size_t i = 0; i < expr->args.size(); i++) {
+            for (size_t i = 0; i < expr->args.Length(); i++) {
                 auto* arg = expr->args[i];
                 if (i > 0) {
                     pre << ", ";
@@ -2572,7 +2572,7 @@ bool GeneratorImpl::EmitCase(const ast::SwitchStatement* s, size_t case_idx) {
                 return false;
             }
             out << ":";
-            if (selector == stmt->selectors.back()) {
+            if (selector == stmt->selectors.Back()) {
                 out << " {";
             }
         }
@@ -2687,7 +2687,7 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
                 return false;
             }
         } else {
-            if (!EmitStatementsWithIndent({stmt->else_statement})) {
+            if (!EmitStatementsWithIndent(utils::Vector{stmt->else_statement})) {
                 return false;
             }
         }
@@ -3654,7 +3654,7 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
 }
 
 bool GeneratorImpl::EmitDefaultOnlySwitch(const ast::SwitchStatement* stmt) {
-    TINT_ASSERT(Writer, stmt->body.size() == 1 && stmt->body[0]->IsDefault());
+    TINT_ASSERT(Writer, stmt->body.Length() == 1 && stmt->body[0]->IsDefault());
 
     // FXC fails to compile a switch with just a default case, ignoring the
     // default case body. We work around this here by emitting the default case
@@ -3687,7 +3687,7 @@ bool GeneratorImpl::EmitDefaultOnlySwitch(const ast::SwitchStatement* stmt) {
 
 bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
     // BUG(crbug.com/tint/1188): work around default-only switches
-    if (stmt->body.size() == 1 && stmt->body[0]->IsDefault()) {
+    if (stmt->body.Length() == 1 && stmt->body[0]->IsDefault()) {
         return EmitDefaultOnlySwitch(stmt);
     }
 
@@ -3702,7 +3702,7 @@ bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
 
     {
         ScopedIndent si(this);
-        for (size_t i = 0; i < stmt->body.size(); i++) {
+        for (size_t i = 0; i < stmt->body.Length(); i++) {
             if (!EmitCase(stmt, i)) {
                 return false;
             }

@@ -69,7 +69,13 @@ TEST_F(GlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
 }
 
 TEST_F(GlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
-    auto* s = Switch(1_i, Case({Expr(5_i), Expr(6_i)}, Block(create<ast::BreakStatement>())),
+    auto* s = Switch(1_i,
+                     Case(
+                         utils::Vector{
+                             Expr(5_i),
+                             Expr(6_i),
+                         },
+                         Block(create<ast::BreakStatement>())),
                      DefaultCase());
     WrapInFunction(s);
 

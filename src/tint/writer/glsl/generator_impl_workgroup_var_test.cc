@@ -29,8 +29,8 @@ using GlslGeneratorImplTest_WorkgroupVar = TestHelper;
 TEST_F(GlslGeneratorImplTest_WorkgroupVar, Basic) {
     GlobalVar("wg", ty.f32(), ast::StorageClass::kWorkgroup);
 
-    Func("main", {}, ty.void_(), {Assign("wg", 1.2_f)},
-         {
+    Func("main", utils::Empty, ty.void_(), utils::Vector{Assign("wg", 1.2_f)},
+         utils::Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
@@ -45,8 +45,8 @@ TEST_F(GlslGeneratorImplTest_WorkgroupVar, Aliased) {
 
     GlobalVar("wg", ty.Of(alias), ast::StorageClass::kWorkgroup);
 
-    Func("main", {}, ty.void_(), {Assign("wg", 1.2_f)},
-         {
+    Func("main", utils::Empty, ty.void_(), utils::Vector{Assign("wg", 1.2_f)},
+         utils::Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });

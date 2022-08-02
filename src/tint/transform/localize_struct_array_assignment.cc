@@ -98,8 +98,8 @@ class LocalizeStructArrayAssignment::State {
     void Run() {
         struct Shared {
             bool process_nested_nodes = false;
-            ast::StatementList insert_before_stmts;
-            ast::StatementList insert_after_stmts;
+            utils::Vector<const ast::Statement*, 4> insert_before_stmts;
+            utils::Vector<const ast::Statement*, 4> insert_after_stmts;
         } s;
 
         ctx.ReplaceAll([&](const ast::AssignmentStatement* assign_stmt) -> const ast::Statement* {
@@ -130,10 +130,12 @@ class LocalizeStructArrayAssignment::State {
 
             // Combine insert_before_stmts + new_assign_stmt + insert_after_stmts into
             // a block and return it
-            ast::StatementList stmts = std::move(s.insert_before_stmts);
-            stmts.reserve(1 + s.insert_after_stmts.size());
-            stmts.emplace_back(new_assign_stmt);
-            stmts.insert(stmts.end(), s.insert_after_stmts.begin(), s.insert_after_stmts.end());
+            auto stmts = std::move(s.insert_before_stmts);
+            stmts.Reserve(1 + s.insert_after_stmts.Length());
+            stmts.Push(new_assign_stmt);
+            for (auto* stmt : s.insert_after_stmts) {
+                stmts.Push(stmt);
+            }
 
             return b.Block(std::move(stmts));
         });
@@ -156,7 +158,7 @@ class LocalizeStructArrayAssignment::State {
                 // Store the address of the member access into a let as we need to read
                 // the value twice e.g. let tint_symbol = &(s.a1);
                 auto mem_access_ptr = b.Sym();
-                s.insert_before_stmts.push_back(
+                s.insert_before_stmts.Push(
                     b.Decl(b.Let(mem_access_ptr, nullptr, b.AddressOf(mem_access))));
 
                 // Disable further transforms when cloning
@@ -165,7 +167,7 @@ class LocalizeStructArrayAssignment::State {
                 // Copy entire array out of struct into local temp var
                 // e.g. var tint_symbol_1 = *(tint_symbol);
                 auto tmp_var = b.Sym();
-                s.insert_before_stmts.push_back(
+                s.insert_before_stmts.Push(
                     b.Decl(b.Var(tmp_var, nullptr, b.Deref(mem_access_ptr))));
 
                 // Replace input index_access with a clone of itself, but with its
@@ -177,8 +179,13 @@ class LocalizeStructArrayAssignment::State {
                 // Assign temp var back to array
                 // e.g. *(tint_symbol) = tint_symbol_1;
                 auto* assign_rhs_to_temp = b.Assign(b.Deref(mem_access_ptr), tmp_var);
-                s.insert_after_stmts.insert(s.insert_after_stmts.begin(),
-                                            assign_rhs_to_temp);  // push_front
+                {
+                    utils::Vector<const ast::Statement*, 8> stmts{assign_rhs_to_temp};
+                    for (auto* stmt : s.insert_after_stmts) {
+                        stmts.Push(stmt);
+                    }
+                    s.insert_after_stmts = std::move(stmts);
+                }
 
                 return new_index_access;
             });

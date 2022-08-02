@@ -180,11 +180,12 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
     }
 
     // Hoists any expressions in `maybe_hoist` and clears it
-    void Flush(ast::ExpressionList& maybe_hoist) {
+    template <size_t N>
+    void Flush(tint::utils::Vector<const ast::Expression*, N>& maybe_hoist) {
         for (auto* m : maybe_hoist) {
             Hoist(m);
         }
-        maybe_hoist.clear();
+        maybe_hoist.Clear();
     }
 
     // Recursive function that processes expressions for side-effects. It
@@ -197,7 +198,9 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
     // * For index and member accessor expressions, special care is taken to not
     // over-hoist the lhs expressions, as these may be be chained to refer to a
     // single memory location.
-    bool ProcessExpression(const ast::Expression* expr, ast::ExpressionList& maybe_hoist) {
+    template <size_t N>
+    bool ProcessExpression(const ast::Expression* expr,
+                           tint::utils::Vector<const ast::Expression*, N>& maybe_hoist) {
         auto process = [&](const ast::Expression* e) -> bool {
             return ProcessExpression(e, maybe_hoist);
         };
@@ -205,7 +208,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
         auto default_process = [&](const ast::Expression* e) {
             auto maybe = process(e);
             if (maybe) {
-                maybe_hoist.emplace_back(e);
+                maybe_hoist.Push(e);
             }
             if (HasSideEffects(e)) {
                 Flush(maybe_hoist);
@@ -240,7 +243,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
             // for "v[a][b][c] + g()" we want to hoist all of "v[a][b][c]", not "t1 =
             // v[a]", then "t2 = t1[b]" then "t3 = t2[c]").
             if (maybe && HasSideEffects(lhs)) {
-                maybe_hoist.emplace_back(lhs);
+                maybe_hoist.Push(lhs);
                 Flush(maybe_hoist);
                 maybe = false;
             }
@@ -337,7 +340,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
             return;
         }
 
-        ast::ExpressionList maybe_hoist;
+        tint::utils::Vector<const ast::Expression*, 8> maybe_hoist;
         ProcessExpression(expr, maybe_hoist);
     }
 
@@ -345,9 +348,9 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
     // evaluate the rhs before the lhs, and possibly hoist the rhs expression.
     void ProcessAssignment(const ast::Expression* lhs, const ast::Expression* rhs) {
         // Evaluate rhs before lhs
-        ast::ExpressionList maybe_hoist;
+        tint::utils::Vector<const ast::Expression*, 8> maybe_hoist;
         if (ProcessExpression(rhs, maybe_hoist)) {
-            maybe_hoist.emplace_back(rhs);
+            maybe_hoist.Push(rhs);
         }
 
         // If the rhs has side-effects, it may affect the lhs, so hoist it right
@@ -414,7 +417,9 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
     }
 
     // Recursive function used to decompose an expression for short-circuit eval.
-    const ast::Expression* Decompose(const ast::Expression* expr, ast::StatementList* curr_stmts) {
+    template <size_t N>
+    const ast::Expression* Decompose(const ast::Expression* expr,
+                                     tint::utils::Vector<const ast::Statement*, N>* curr_stmts) {
         // Helper to avoid passing in same args.
         auto decompose = [&](auto& e) { return Decompose(e, curr_stmts); };
 
@@ -424,7 +429,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 auto name = b.Symbols().New();
                 auto* v = b.Let(name, nullptr, ctx.Clone(e));
                 auto* decl = b.Decl(v);
-                curr_stmts->push_back(decl);
+                curr_stmts->Push(decl);
                 return b.Expr(name);
             }
             return ctx.Clone(e);
@@ -471,7 +476,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 // let r = temp;
 
                 auto name = b.Sym();
-                curr_stmts->push_back(b.Decl(b.Var(name, nullptr, decompose(bin_expr->lhs))));
+                curr_stmts->Push(b.Decl(b.Var(name, nullptr, decompose(bin_expr->lhs))));
 
                 const ast::Expression* if_cond = nullptr;
                 if (bin_expr->IsLogicalOr()) {
@@ -482,14 +487,14 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
 
                 const ast::BlockStatement* if_body = nullptr;
                 {
-                    ast::StatementList stmts;
+                    tint::utils::Vector<const ast::Statement*, N> stmts;
                     TINT_SCOPED_ASSIGNMENT(curr_stmts, &stmts);
                     auto* new_rhs = decompose(bin_expr->rhs);
-                    curr_stmts->push_back(b.Assign(name, new_rhs));
+                    curr_stmts->Push(b.Assign(name, new_rhs));
                     if_body = b.Block(std::move(*curr_stmts));
                 }
 
-                curr_stmts->push_back(b.If(if_cond, if_body));
+                curr_stmts->Push(b.If(if_cond, if_body));
 
                 return b.Expr(name);
             },
@@ -537,8 +542,10 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
     }
 
     // Inserts statements in `stmts` before `stmt`
-    void InsertBefore(const ast::StatementList& stmts, const ast::Statement* stmt) {
-        if (!stmts.empty()) {
+    template <size_t N>
+    void InsertBefore(tint::utils::Vector<const ast::Statement*, N>& stmts,
+                      const ast::Statement* stmt) {
+        if (!stmts.IsEmpty()) {
             auto ip = utils::GetInsertionPoint(ctx, stmt);
             for (auto* s : stmts) {
                 ctx.InsertBefore(ip.first->Declaration()->statements, ip.second, s);
@@ -556,7 +563,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                     return nullptr;
                 }
                 // rhs before lhs
-                ast::StatementList stmts;
+                tint::utils::Vector<const ast::Statement*, 8> stmts;
                 ctx.Replace(s->rhs, Decompose(s->rhs, &stmts));
                 ctx.Replace(s->lhs, Decompose(s->lhs, &stmts));
                 InsertBefore(stmts, s);
@@ -566,7 +573,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 if (!sem.Get(s->expr)->HasSideEffects()) {
                     return nullptr;
                 }
-                ast::StatementList stmts;
+                tint::utils::Vector<const ast::Statement*, 8> stmts;
                 ctx.Replace(s->expr, Decompose(s->expr, &stmts));
                 InsertBefore(stmts, s);
                 return ctx.CloneWithoutTransform(s);
@@ -575,7 +582,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 if (!s->condition || !sem.Get(s->condition)->HasSideEffects()) {
                     return nullptr;
                 }
-                ast::StatementList stmts;
+                tint::utils::Vector<const ast::Statement*, 8> stmts;
                 ctx.Replace(s->condition, Decompose(s->condition, &stmts));
                 InsertBefore(stmts, s);
                 return ctx.CloneWithoutTransform(s);
@@ -584,7 +591,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 if (!sem.Get(s->condition)->HasSideEffects()) {
                     return nullptr;
                 }
-                ast::StatementList stmts;
+                tint::utils::Vector<const ast::Statement*, 8> stmts;
                 ctx.Replace(s->condition, Decompose(s->condition, &stmts));
                 InsertBefore(stmts, s);
                 return ctx.CloneWithoutTransform(s);
@@ -593,7 +600,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 if (!sem.Get(s->condition)->HasSideEffects()) {
                     return nullptr;
                 }
-                ast::StatementList stmts;
+                tint::utils::Vector<const ast::Statement*, 8> stmts;
                 ctx.Replace(s->condition, Decompose(s->condition, &stmts));
                 InsertBefore(stmts, s);
                 return ctx.CloneWithoutTransform(s);
@@ -602,7 +609,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 if (!s->value || !sem.Get(s->value)->HasSideEffects()) {
                     return nullptr;
                 }
-                ast::StatementList stmts;
+                tint::utils::Vector<const ast::Statement*, 8> stmts;
                 ctx.Replace(s->value, Decompose(s->value, &stmts));
                 InsertBefore(stmts, s);
                 return ctx.CloneWithoutTransform(s);
@@ -611,7 +618,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 if (!sem.Get(s->condition)) {
                     return nullptr;
                 }
-                ast::StatementList stmts;
+                tint::utils::Vector<const ast::Statement*, 8> stmts;
                 ctx.Replace(s->condition, Decompose(s->condition, &stmts));
                 InsertBefore(stmts, s);
                 return ctx.CloneWithoutTransform(s);
@@ -621,7 +628,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 if (!var->constructor || !sem.Get(var->constructor)->HasSideEffects()) {
                     return nullptr;
                 }
-                ast::StatementList stmts;
+                tint::utils::Vector<const ast::Statement*, 8> stmts;
                 ctx.Replace(var->constructor, Decompose(var->constructor, &stmts));
                 InsertBefore(stmts, s);
                 return b.Decl(ctx.CloneWithoutTransform(var));

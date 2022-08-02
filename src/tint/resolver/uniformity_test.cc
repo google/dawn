@@ -5299,18 +5299,18 @@ TEST_F(UniformityAnalysisTest, MaximumNumberOfPointerParameters) {
     //   ...
     //   *p254 = rhs;
     // }
-    ast::ParameterList params;
-    ast::StatementList foo_body;
+    utils::Vector<const ast::Parameter*, 8> params;
+    utils::Vector<const ast::Statement*, 8> foo_body;
     const ast::Expression* rhs_init = b.Deref("p0");
     for (int i = 1; i < 255; i++) {
         rhs_init = b.Add(rhs_init, b.Deref("p" + std::to_string(i)));
     }
-    foo_body.push_back(b.Decl(b.Let("rhs", nullptr, rhs_init)));
+    foo_body.Push(b.Decl(b.Let("rhs", nullptr, rhs_init)));
     for (int i = 0; i < 255; i++) {
-        params.push_back(
+        params.Push(
             b.Param("p" + std::to_string(i), ty.pointer(ty.i32(), ast::StorageClass::kFunction)));
         if (i > 0) {
-            foo_body.push_back(b.Assign(b.Deref("p" + std::to_string(i)), "rhs"));
+            foo_body.Push(b.Assign(b.Deref("p" + std::to_string(i)), "rhs"));
         }
     }
     b.Func("foo", std::move(params), ty.void_(), foo_body);
@@ -5328,18 +5328,17 @@ TEST_F(UniformityAnalysisTest, MaximumNumberOfPointerParameters) {
     //   }
     // }
     b.GlobalVar("non_uniform_global", ty.i32(), ast::StorageClass::kPrivate);
-    ast::StatementList main_body;
-    ast::ExpressionList args;
+    utils::Vector<const ast::Statement*, 8> main_body;
+    utils::Vector<const ast::Expression*, 8> args;
     for (int i = 0; i < 255; i++) {
         auto name = "v" + std::to_string(i);
-        main_body.push_back(b.Decl(b.Var(name, ty.i32())));
-        args.push_back(b.AddressOf(name));
+        main_body.Push(b.Decl(b.Var(name, ty.i32())));
+        args.Push(b.AddressOf(name));
     }
-    main_body.push_back(b.Assign("v0", "non_uniform_global"));
-    main_body.push_back(b.CallStmt(b.create<ast::CallExpression>(b.Expr("foo"), args)));
-    main_body.push_back(
-        b.If(b.Equal("v254", 0_i), b.Block(b.CallStmt(b.Call("workgroupBarrier")))));
-    b.Func("main", {}, ty.void_(), main_body);
+    main_body.Push(b.Assign("v0", "non_uniform_global"));
+    main_body.Push(b.CallStmt(b.create<ast::CallExpression>(b.Expr("foo"), args)));
+    main_body.Push(b.If(b.Equal("v254", 0_i), b.Block(b.CallStmt(b.Call("workgroupBarrier")))));
+    b.Func("main", utils::Empty, ty.void_(), main_body);
 
     // TODO(jrprice): Expect false when uniformity issues become errors.
     EXPECT_TRUE(RunTest(std::move(b))) << error_;
@@ -6539,15 +6538,15 @@ TEST_F(UniformityAnalysisTest, StressGraphTraversalDepth) {
     //   }
     // }
     b.GlobalVar("v0", ty.i32(), ast::StorageClass::kPrivate, b.Expr(0_i));
-    ast::StatementList foo_body;
+    utils::Vector<const ast::Statement*, 8> foo_body;
     std::string v_last = "v0";
     for (int i = 1; i < 100000; i++) {
         auto v = "v" + std::to_string(i);
-        foo_body.push_back(b.Decl(b.Var(v, nullptr, b.Expr(v_last))));
+        foo_body.Push(b.Decl(b.Var(v, nullptr, b.Expr(v_last))));
         v_last = v;
     }
-    foo_body.push_back(b.If(b.Equal(v_last, 0_i), b.Block(b.CallStmt(b.Call("workgroupBarrier")))));
-    b.Func("foo", {}, ty.void_(), foo_body);
+    foo_body.Push(b.If(b.Equal(v_last, 0_i), b.Block(b.CallStmt(b.Call("workgroupBarrier")))));
+    b.Func("foo", utils::Empty, ty.void_(), foo_body);
 
     // TODO(jrprice): Expect false when uniformity issues become errors.
     EXPECT_TRUE(RunTest(std::move(b))) << error_;

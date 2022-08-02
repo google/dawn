@@ -31,9 +31,9 @@ TEST_F(LoopStatementTest, Creation) {
     auto* continuing = Block(create<DiscardStatement>());
 
     auto* l = create<LoopStatement>(body, continuing);
-    ASSERT_EQ(l->body->statements.size(), 1u);
+    ASSERT_EQ(l->body->statements.Length(), 1u);
     EXPECT_EQ(l->body->statements[0], b);
-    ASSERT_EQ(l->continuing->statements.size(), 1u);
+    ASSERT_EQ(l->continuing->statements.Length(), 1u);
     EXPECT_EQ(l->continuing->statements[0], continuing->Last());
 }
 

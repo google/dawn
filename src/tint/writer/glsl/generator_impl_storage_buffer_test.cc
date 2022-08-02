@@ -29,14 +29,14 @@ void TestAlign(ProgramBuilder* ctx) {
     //   @align(256) louie : f32;
     // };
     // @group(0) @binding(0) var<storage, read_write> nephews : Nephews;
-    auto* nephews =
-        ctx->Structure("Nephews", {
-                                      ctx->Member("huey", ctx->ty.f32(), {ctx->MemberAlign(256)}),
-                                      ctx->Member("dewey", ctx->ty.f32(), {ctx->MemberAlign(256)}),
-                                      ctx->Member("louie", ctx->ty.f32(), {ctx->MemberAlign(256)}),
-                                  });
+    auto* nephews = ctx->Structure(
+        "Nephews", utils::Vector{
+                       ctx->Member("huey", ctx->ty.f32(), utils::Vector{ctx->MemberAlign(256)}),
+                       ctx->Member("dewey", ctx->ty.f32(), utils::Vector{ctx->MemberAlign(256)}),
+                       ctx->Member("louie", ctx->ty.f32(), utils::Vector{ctx->MemberAlign(256)}),
+                   });
     ctx->GlobalVar("nephews", ctx->ty.Of(nephews), ast::StorageClass::kStorage,
-                   ast::AttributeList{
+                   utils::Vector{
                        ctx->create<ast::BindingAttribute>(0u),
                        ctx->create<ast::GroupAttribute>(0u),
                    });

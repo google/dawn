@@ -3635,11 +3635,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3_F16) {
 TEST_F(SpvBuilderConstructorTest, CommonInitializer_TwoVectors) {
     auto* v1 = vec3<f32>(2_f, 2_f, 2_f);
     auto* v2 = vec3<f32>(2_f, 2_f, 2_f);
-    ast::StatementList stmts = {
-        WrapInStatement(v1),
-        WrapInStatement(v2),
-    };
-    WrapInFunction(stmts);
+    WrapInFunction(WrapInStatement(v1), WrapInStatement(v2));
 
     spirv::Builder& b = Build();
 
@@ -3657,11 +3653,7 @@ TEST_F(SpvBuilderConstructorTest, CommonInitializer_TwoVectors) {
 TEST_F(SpvBuilderConstructorTest, CommonInitializer_TwoArrays) {
     auto* a1 = array<f32, 3>(2_f, 2_f, 2_f);
     auto* a2 = array<f32, 3>(2_f, 2_f, 2_f);
-    ast::StatementList stmts = {
-        WrapInStatement(a1),
-        WrapInStatement(a2),
-    };
-    WrapInFunction(stmts);
+    WrapInFunction(WrapInStatement(a1), WrapInStatement(a2));
 
     spirv::Builder& b = Build();
 
@@ -3684,11 +3676,7 @@ TEST_F(SpvBuilderConstructorTest, CommonInitializer_Array_VecArray) {
     // crbug.com/tint/777
     auto* a1 = array<f32, 2>(1_f, 2_f);
     auto* a2 = vec2<f32>(1_f, 2_f);
-    ast::StatementList stmts = {
-        WrapInStatement(a1),
-        WrapInStatement(a2),
-    };
-    WrapInFunction(stmts);
+    WrapInFunction(WrapInStatement(a1), WrapInStatement(a2));
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
@@ -3708,7 +3696,7 @@ TEST_F(SpvBuilderConstructorTest, CommonInitializer_Array_VecArray) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_Struct) {
-    auto* s = Structure("my_struct", {
+    auto* s = Structure("my_struct", utils::Vector{
                                          Member("a", ty.f32()),
                                          Member("b", ty.vec3<f32>()),
                                      });
@@ -3898,7 +3886,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Array) {
 }
 
 TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
-    auto* s = Structure("my_struct", {Member("a", ty.f32())});
+    auto* s = Structure("my_struct", utils::Vector{Member("a", ty.f32())});
     auto* t = Construct(ty.Of(s));
     WrapInFunction(t);
 
@@ -4546,7 +4534,7 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_BitCastScalars) {
 }
 
 TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
-    auto* s = Structure("my_struct", {
+    auto* s = Structure("my_struct", utils::Vector{
                                          Member("a", ty.f32()),
                                          Member("b", ty.vec3<f32>()),
                                      });
@@ -4561,7 +4549,7 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
 }
 
 TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct_WithIdentSubExpression) {
-    auto* s = Structure("my_struct", {
+    auto* s = Structure("my_struct", utils::Vector{
                                          Member("a", ty.f32()),
                                          Member("b", ty.vec3<f32>()),
                                      });

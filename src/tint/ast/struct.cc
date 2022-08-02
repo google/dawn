@@ -26,8 +26,8 @@ Struct::Struct(ProgramID pid,
                NodeID nid,
                const Source& src,
                Symbol n,
-               StructMemberList m,
-               AttributeList attrs)
+               utils::VectorRef<const ast::StructMember*> m,
+               utils::VectorRef<const ast::Attribute*> attrs)
     : Base(pid, nid, src, n), members(std::move(m)), attributes(std::move(attrs)) {
     for (auto* mem : members) {
         TINT_ASSERT(AST, mem);
@@ -49,7 +49,7 @@ const Struct* Struct::Clone(CloneContext* ctx) const {
     auto n = ctx->Clone(name);
     auto mem = ctx->Clone(members);
     auto attrs = ctx->Clone(attributes);
-    return ctx->dst->create<Struct>(src, n, mem, attrs);
+    return ctx->dst->create<Struct>(src, n, std::move(mem), std::move(attrs));
 }
 
 }  // namespace tint::ast

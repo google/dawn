@@ -16,6 +16,7 @@
 #define SRC_TINT_READER_SPIRV_FUNCTION_H_
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -125,7 +126,7 @@ struct BlockInfo {
     /// switch?
     bool default_is_merge = false;
     /// The list of switch values that cause a branch to this block.
-    std::unique_ptr<std::vector<uint64_t>> case_values;
+    std::optional<utils::Vector<uint64_t, 4>> case_values;
 
     /// The following fields record relationships among blocks in a selection
     /// construct for an OpBranchConditional instruction.
@@ -158,7 +159,7 @@ struct BlockInfo {
     /// The result IDs that this block is responsible for declaring as a
     /// hoisted variable.
     /// @see DefInfo#requires_hoisted_def
-    std::vector<uint32_t> hoisted_ids;
+    utils::Vector<uint32_t, 4> hoisted_ids;
 
     /// A PhiAssignment represents the assignment of a value to the state
     /// variable associated with an OpPhi in a successor block.
@@ -170,10 +171,10 @@ struct BlockInfo {
     };
     /// If this basic block branches to a visited basic block containing phis,
     /// then this is the list of writes to the variables associated those phis.
-    std::vector<PhiAssignment> phi_assignments;
+    utils::Vector<PhiAssignment, 4> phi_assignments;
     /// The IDs of OpPhi instructions which require their associated state
     /// variable to be declared in this basic block.
-    std::vector<uint32_t> phis_needing_state_vars;
+    utils::Vector<uint32_t, 4> phis_needing_state_vars;
 };
 
 /// Writes the BlockInfo to the ostream
@@ -388,6 +389,12 @@ class StatementBuilder : public Castable<StatementBuilder, ast::Statement> {
 
 /// A FunctionEmitter emits a SPIR-V function onto a Tint AST module.
 class FunctionEmitter {
+    using AttributeList = utils::Vector<const ast::Attribute*, 8>;
+    using StructMemberList = utils::Vector<const ast::StructMember*, 8>;
+    using ExpressionList = utils::Vector<const ast::Expression*, 8>;
+    using ParameterList = utils::Vector<const ast::Parameter*, 8>;
+    using StatementList = utils::Vector<const ast::Statement*, 8>;
+
   public:
     /// Creates a FunctionEmitter, and prepares to write to the AST module
     /// in `pi`
@@ -420,7 +427,7 @@ class FunctionEmitter {
     /// Finalizes any StatementBuilders returns the body of the function.
     /// Must only be called once, and to be used only for testing.
     /// @returns the body of the function.
-    const ast::StatementList ast_body();
+    StatementList ast_body();
 
     /// Records failure.
     /// @returns a FailStream on which to emit diagnostics.
@@ -455,12 +462,12 @@ class FunctionEmitter {
     /// @returns false if emission failed
     bool EmitPipelineInput(std::string var_name,
                            const Type* var_type,
-                           ast::AttributeList* decos,
-                           std::vector<int> index_prefix,
+                           AttributeList* decos,
+                           utils::Vector<int, 8> index_prefix,
                            const Type* tip_type,
                            const Type* forced_param_type,
-                           ast::ParameterList* params,
-                           ast::StatementList* statements);
+                           ParameterList* params,
+                           StatementList* statements);
 
     /// Creates one or more struct members from an output variable, and the
     /// expressions that compute the value they contribute to the entry point
@@ -471,37 +478,30 @@ class FunctionEmitter {
     /// @param var_name The name of the variable
     /// @param var_type The store type of the variable
     /// @param decos The variable's decorations
-    /// @param index_prefix Indices stepping into the variable, indicating
-    /// what part of the variable to populate.
-    /// @param tip_type The type of the component inside variable, after indexing
-    /// with the indices in `index_prefix`.
-    /// @param forced_member_type The type forced by WGSL, if the variable is a
-    /// builtin, otherwise the same as var_type.
-    /// @param return_members The struct member list where the new member is
-    /// added.
-    /// @param return_exprs The expression list where the return expression is
-    /// added.
+    /// @param index_prefix Indices stepping into the variable, indicating what part of the variable
+    /// to populate.
+    /// @param tip_type The type of the component inside variable, after indexing with the indices
+    /// in `index_prefix`.
+    /// @param forced_member_type The type forced by WGSL, if the variable is a builtin, otherwise
+    /// the same as var_type.
+    /// @param return_members The struct member list where the new member is added.
+    /// @param return_exprs The expression list where the return expression is added.
     /// @returns false if emission failed
     bool EmitPipelineOutput(std::string var_name,
                             const Type* var_type,
-                            ast::AttributeList* decos,
-                            std::vector<int> index_prefix,
+                            AttributeList* decos,
+                            utils::Vector<int, 8> index_prefix,
                             const Type* tip_type,
                             const Type* forced_member_type,
-                            ast::StructMemberList* return_members,
-                            ast::ExpressionList* return_exprs);
+                            StructMemberList* return_members,
+                            ExpressionList* return_exprs);
 
     /// Updates the attribute list, replacing an existing Location attribute
     /// with another having one higher location value. Does nothing if no
     /// location attribute exists.
     /// Assumes the list contains at most one Location attribute.
     /// @param attributes the attribute list to modify
-    void IncrementLocation(ast::AttributeList* attributes);
-
-    /// Returns the Location attribute, if it exists.
-    /// @param attributes the list of attributes to search
-    /// @returns the Location attribute, or nullptr if it doesn't exist
-    const ast::Attribute* GetLocation(const ast::AttributeList& attributes);
+    void IncrementLocation(AttributeList* attributes);
 
     /// Create an ast::BlockStatement representing the body of the function.
     /// This creates the statement stack, which is non-empty for the lifetime
@@ -913,7 +913,7 @@ class FunctionEmitter {
     /// On failure, issues an error and returns an empty expression list.
     /// @param image_access the image access instruction
     /// @returns an ExpressionList of the coordinate and array index (if any)
-    ast::ExpressionList MakeCoordinateOperandsForImageAccess(
+    ExpressionList MakeCoordinateOperandsForImageAccess(
         const spvtools::opt::Instruction& image_access);
 
     /// Returns the given value as an I32.  If it's already an I32 then this
@@ -951,11 +951,11 @@ class FunctionEmitter {
         /// Function name
         std::string name;
         /// Function parameters
-        ast::ParameterList params;
+        ParameterList params;
         /// Function return type
         const Type* return_type;
         /// Function attributes
-        ast::AttributeList attributes;
+        AttributeList attributes;
     };
 
     /// Parse the function declaration, which comprises the name, parameters, and
@@ -1117,8 +1117,8 @@ class FunctionEmitter {
     /// @return the built StatementBuilder
     template <typename T, typename... ARGS>
     T* AddStatementBuilder(ARGS&&... args) {
-        TINT_ASSERT(Reader, !statements_stack_.empty());
-        return statements_stack_.back().AddStatementBuilder<T>(std::forward<ARGS>(args)...);
+        TINT_ASSERT(Reader, !statements_stack_.IsEmpty());
+        return statements_stack_.Back().AddStatementBuilder<T>(std::forward<ARGS>(args)...);
     }
 
     /// Returns the source record for the given instruction.
@@ -1126,10 +1126,10 @@ class FunctionEmitter {
     /// @return the Source record, or a default one
     Source GetSourceForInst(const spvtools::opt::Instruction& inst) const;
 
-    /// @returns the last statetment in the top of the statement stack.
+    /// @returns the last statement in the top of the statement stack.
     const ast::Statement* LastStatement();
 
-    using CompletionAction = std::function<void(const ast::StatementList&)>;
+    using CompletionAction = std::function<void(const StatementList&)>;
 
     // A StatementBlock represents a braced-list of statements while it is being
     // constructed.
@@ -1181,7 +1181,7 @@ class FunctionEmitter {
 
         /// @return the list of statements being built, if this construct is not a
         /// switch.
-        const ast::StatementList& GetStatements() const { return statements_; }
+        const StatementList& GetStatements() const { return statements_; }
 
       private:
         /// The construct to which this construct constributes.
@@ -1193,7 +1193,7 @@ class FunctionEmitter {
         /// The completion action finishes processing this statement block.
         FunctionEmitter::CompletionAction const completion_action_;
         /// The list of statements being built, if this construct is not a switch.
-        ast::StatementList statements_;
+        StatementList statements_;
 
         /// Owned statement builders
         std::vector<std::unique_ptr<StatementBuilder>> builders_;
@@ -1251,7 +1251,6 @@ class FunctionEmitter {
         return builder_.create<T>(std::forward<ARGS>(args)...);
     }
 
-    using StatementsStack = std::vector<StatementBlock>;
     using PtrAs = ParserImpl::PtrAs;
 
     ParserImpl& parser_impl_;
@@ -1275,7 +1274,7 @@ class FunctionEmitter {
     // for the entire function.  This stack is never empty.
     // The `construct` member for the 0th element is only valid during the
     // lifetime of the EmitFunctionBodyStatements method.
-    StatementsStack statements_stack_;
+    utils::Vector<StatementBlock, 8> statements_stack_;
 
     // The map of IDs that have already had an identifier name generated for it,
     // to their Type.

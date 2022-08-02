@@ -47,25 +47,29 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalDeclAfterFunction) {
 TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
     GlobalVar("a0", ty.f32(), ast::StorageClass::kPrivate);
 
-    auto* s0 = Structure("S0", {Member("a", ty.i32())});
+    auto* s0 = Structure("S0", utils::Vector{
+                                   Member("a", ty.i32()),
+                               });
 
     Func("func", {}, ty.f32(),
-         {
+         utils::Vector{
              Return("a0"),
          },
-         {});
+         utils::Empty);
 
     GlobalVar("a1", ty.f32(), ast::StorageClass::kPrivate);
 
-    auto* s1 = Structure("S1", {Member("a", ty.i32())});
+    auto* s1 = Structure("S1", utils::Vector{
+                                   Member("a", ty.i32()),
+                               });
 
     Func("main", {}, ty.void_(),
-         {
+         utils::Vector{
              Decl(Var("s0", ty.Of(s0))),
              Decl(Var("s1", ty.Of(s1))),
              Assign("a1", Call("func")),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
@@ -102,7 +106,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
 
 TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
     GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler),
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::GroupAttribute>(0u),
                   create<ast::BindingAttribute>(0u),
               });
@@ -118,7 +122,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
 TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
     auto* st = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
     GlobalVar("t", st,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::GroupAttribute>(0u),
                   create<ast::BindingAttribute>(0u),
               });
@@ -148,7 +152,10 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalConst) {
 
 TEST_F(WgslGeneratorImplTest, Emit_OverridableConstants) {
     Override("a", ty.f32(), nullptr);
-    Override("b", ty.f32(), nullptr, {Id(7u)});
+    Override("b", ty.f32(), nullptr,
+             utils::Vector{
+                 Id(7u),
+             });
 
     GeneratorImpl& gen = Build();
 

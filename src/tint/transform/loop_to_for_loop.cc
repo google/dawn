@@ -29,7 +29,7 @@ namespace tint::transform {
 namespace {
 
 bool IsBlockWithSingleBreak(const ast::BlockStatement* block) {
-    if (block->statements.size() != 1) {
+    if (block->statements.Length() != 1) {
         return false;
     }
     return block->statements[0]->Is<ast::BreakStatement>();
@@ -74,7 +74,7 @@ void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
         //   loop {  if (condition) { break; } ... }
         //   loop {  if (condition) {} else { break; } ... }
         auto& stmts = loop->body->statements;
-        if (stmts.empty()) {
+        if (stmts.IsEmpty()) {
             return nullptr;
         }
         auto* if_stmt = stmts[0]->As<ast::IfStatement>();
@@ -96,7 +96,7 @@ void LoopToForLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
         // function call statement.
         const ast::Statement* continuing = nullptr;
         if (auto* loop_cont = loop->continuing) {
-            if (loop_cont->statements.size() != 1) {
+            if (loop_cont->statements.Length() != 1) {
                 return nullptr;
             }
 

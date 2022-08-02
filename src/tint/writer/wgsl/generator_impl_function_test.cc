@@ -25,8 +25,8 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Function) {
-    auto* func = Func("my_func", {}, ty.void_(),
-                      {
+    auto* func = Func("my_func", utils::Empty, ty.void_(),
+                      utils::Vector{
                           Return(),
                       });
 
@@ -42,8 +42,13 @@ TEST_F(WgslGeneratorImplTest, Emit_Function) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
-    auto* func = Func("my_func", {Param("a", ty.f32()), Param("b", ty.i32())}, ty.void_(),
-                      {
+    auto* func = Func("my_func",
+                      utils::Vector{
+                          Param("a", ty.f32()),
+                          Param("b", ty.i32()),
+                      },
+                      ty.void_(),
+                      utils::Vector{
                           Return(),
                       });
 
@@ -59,8 +64,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithParams) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize) {
-    auto* func = Func("my_func", {}, ty.void_(), {Return()},
-                      {
+    auto* func = Func("my_func", utils::Empty, ty.void_(),
+                      utils::Vector{
+                          Return(),
+                      },
+                      utils::Vector{
                           Stage(ast::PipelineStage::kCompute),
                           WorkgroupSize(2_i, 4_i, 6_i),
                       });
@@ -79,8 +87,11 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize) {
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize_WithIdent) {
     GlobalConst("height", ty.i32(), Expr(2_i));
-    auto* func = Func("my_func", {}, ty.void_(), {Return()},
-                      {
+    auto* func = Func("my_func", utils::Empty, ty.void_(),
+                      utils::Vector{
+                          Return(),
+                      },
+                      utils::Vector{
                           Stage(ast::PipelineStage::kCompute),
                           WorkgroupSize(2_i, "height"),
                       });
@@ -99,10 +110,16 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_WithAttribute_WorkgroupSize_WithIden
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
     auto* vec4 = ty.vec4<f32>();
-    auto* coord = Param("coord", vec4, {Builtin(ast::BuiltinValue::kPosition)});
-    auto* loc1 = Param("loc1", ty.f32(), {Location(1u)});
-    auto* func = Func("frag_main", {coord, loc1}, ty.void_(), {},
-                      {
+    auto* coord = Param("coord", vec4,
+                        utils::Vector{
+                            Builtin(ast::BuiltinValue::kPosition),
+                        });
+    auto* loc1 = Param("loc1", ty.f32(),
+                       utils::Vector{
+                           Location(1u),
+                       });
+    auto* func = Func("frag_main", utils::Vector{coord, loc1}, ty.void_(), utils::Empty,
+                      utils::Vector{
                           Stage(ast::PipelineStage::kFragment),
                       });
 
@@ -118,14 +135,14 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_ReturnValue) {
-    auto* func = Func("frag_main", {}, ty.f32(),
-                      {
+    auto* func = Func("frag_main", utils::Empty, ty.f32(),
+                      utils::Vector{
                           Return(1_f),
                       },
-                      {
+                      utils::Vector{
                           Stage(ast::PipelineStage::kFragment),
                       },
-                      {
+                      utils::Vector{
                           Location(1u),
                       });
 
@@ -158,10 +175,12 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_Module
     //   return;
     // }
 
-    auto* s = Structure("Data", {Member("d", ty.f32())});
+    auto* s = Structure("Data", utils::Vector{
+                                    Member("d", ty.f32()),
+                                });
 
     GlobalVar("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -169,12 +188,12 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_Module
     {
         auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("data", "d"));
 
-        Func("a", {}, ty.void_(),
-             {
+        Func("a", utils::Empty, ty.void_(),
+             utils::Vector{
                  Decl(var),
                  Return(),
              },
-             {
+             utils::Vector{
                  Stage(ast::PipelineStage::kCompute),
                  WorkgroupSize(1_i),
              });
@@ -183,12 +202,12 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_Module
     {
         auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("data", "d"));
 
-        Func("b", {}, ty.void_(),
-             {
+        Func("b", utils::Empty, ty.void_(),
+             utils::Vector{
                  Decl(var),
                  Return(),
              },
-             {
+             utils::Vector{
                  Stage(ast::PipelineStage::kCompute),
                  WorkgroupSize(1_i),
              });

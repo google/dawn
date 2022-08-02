@@ -25,18 +25,18 @@ TEST_F(WgslGeneratorImplTest, Emit_Switch) {
     GlobalVar("cond", ty.i32(), ast::StorageClass::kPrivate);
 
     auto* def_body = Block(create<ast::BreakStatement>());
-    auto* def = create<ast::CaseStatement>(ast::CaseSelectorList{}, def_body);
+    auto* def = create<ast::CaseStatement>(utils::Empty, def_body);
 
-    ast::CaseSelectorList case_val;
-    case_val.push_back(Expr(5_i));
+    utils::Vector case_val{Expr(5_i)};
 
     auto* case_body = Block(create<ast::BreakStatement>());
 
     auto* case_stmt = create<ast::CaseStatement>(case_val, case_body);
 
-    ast::CaseStatementList body;
-    body.push_back(case_stmt);
-    body.push_back(def);
+    utils::Vector body{
+        case_stmt,
+        def,
+    };
 
     auto* cond = Expr("cond");
     auto* s = create<ast::SwitchStatement>(cond, body);

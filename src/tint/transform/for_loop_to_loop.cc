@@ -35,7 +35,7 @@ bool ForLoopToLoop::ShouldRun(const Program* program, const DataMap&) const {
 
 void ForLoopToLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
     ctx.ReplaceAll([&](const ast::ForLoopStatement* for_loop) -> const ast::Statement* {
-        ast::StatementList stmts;
+        utils::Vector<const ast::Statement*, 8> stmts;
         if (auto* cond = for_loop->condition) {
             // !condition
             auto* not_cond =
@@ -45,10 +45,10 @@ void ForLoopToLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
             auto* break_body = ctx.dst->Block(ctx.dst->create<ast::BreakStatement>());
 
             // if (!condition) { break; }
-            stmts.emplace_back(ctx.dst->If(not_cond, break_body));
+            stmts.Push(ctx.dst->If(not_cond, break_body));
         }
         for (auto* stmt : for_loop->body->statements) {
-            stmts.emplace_back(ctx.Clone(stmt));
+            stmts.Push(ctx.Clone(stmt));
         }
 
         const ast::BlockStatement* continuing = nullptr;

@@ -2894,8 +2894,8 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_OuterConstructIsFunction_Sin
     fe.ComputeBlockOrderAndPositions();
     fe.RegisterMerges();
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
-    EXPECT_EQ(fe.constructs().size(), 1u);
-    auto& c = fe.constructs().front();
+    EXPECT_EQ(fe.constructs().Length(), 1u);
+    auto& c = fe.constructs().Front();
     EXPECT_THAT(ToString(c), Eq("Construct{ Function [0,1) begin_id:10 end_id:0 "
                                 "depth:0 parent:null }"));
     EXPECT_EQ(fe.GetBlockInfo(10)->construct, c.get());
@@ -2920,8 +2920,8 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_OuterConstructIsFunction_Mul
     fe.ComputeBlockOrderAndPositions();
     fe.RegisterMerges();
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
-    EXPECT_EQ(fe.constructs().size(), 1u);
-    auto& c = fe.constructs().front();
+    EXPECT_EQ(fe.constructs().Length(), 1u);
+    auto& c = fe.constructs().Front();
     EXPECT_THAT(ToString(c), Eq("Construct{ Function [0,2) begin_id:10 end_id:0 "
                                 "depth:0 parent:null }"));
     EXPECT_EQ(fe.GetBlockInfo(10)->construct, c.get());
@@ -2955,7 +2955,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_FunctionIsOnlyIfSelectionAnd
     fe.RegisterMerges();
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
     const auto& constructs = fe.constructs();
-    EXPECT_EQ(constructs.size(), 2u);
+    EXPECT_EQ(constructs.Length(), 2u);
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,4) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ IfSelection [0,3) begin_id:10 end_id:99 depth:1 parent:Function@10 }
@@ -3001,7 +3001,7 @@ TEST_F(SpvParserCFGTest,
     fe.RegisterMerges();
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
     const auto& constructs = fe.constructs();
-    EXPECT_EQ(constructs.size(), 2u);
+    EXPECT_EQ(constructs.Length(), 2u);
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,6) begin_id:5 end_id:0 depth:0 parent:null }
   Construct{ IfSelection [1,4) begin_id:10 end_id:99 depth:1 parent:Function@5 }
@@ -3045,7 +3045,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_SwitchSelection) {
     fe.RegisterMerges();
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
     const auto& constructs = fe.constructs();
-    EXPECT_EQ(constructs.size(), 2u);
+    EXPECT_EQ(constructs.Length(), 2u);
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,5) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ SwitchSelection [0,4) begin_id:10 end_id:99 depth:1 parent:Function@10 in-c-l-s:SwitchSelection@10 }
@@ -3082,7 +3082,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_SingleBlockLoop) {
     fe.RegisterMerges();
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
     const auto& constructs = fe.constructs();
-    EXPECT_EQ(constructs.size(), 2u);
+    EXPECT_EQ(constructs.Length(), 2u);
     // A single-block loop consists *only* of a continue target with one block in
     // it.
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
@@ -3188,7 +3188,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_MultiBlockLoop_HeaderIsConti
     EXPECT_EQ(fe.GetBlockInfo(40)->construct, constructs[1].get());
     EXPECT_EQ(fe.GetBlockInfo(50)->construct, constructs[1].get());
     EXPECT_EQ(fe.GetBlockInfo(99)->construct, constructs[0].get());
-    
+
     // SPIR-V 1.6 Rev 2 made this invalid SPIR-V.
     p->DeliberatelyInvalidSpirv();
 }
@@ -3223,7 +3223,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_MergeBlockIsAlsoSingleBlockL
     fe.RegisterMerges();
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
     const auto& constructs = fe.constructs();
-    EXPECT_EQ(constructs.size(), 3u);
+    EXPECT_EQ(constructs.Length(), 3u);
     // A single-block loop consists *only* of a continue target with one block in
     // it.
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
@@ -3271,7 +3271,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_MergeBlockIsAlsoMultiBlockLo
     fe.RegisterMerges();
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
     const auto& constructs = fe.constructs();
-    EXPECT_EQ(constructs.size(), 4u);
+    EXPECT_EQ(constructs.Length(), 4u);
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,5) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ IfSelection [0,2) begin_id:10 end_id:50 depth:1 parent:Function@10 }
@@ -3330,7 +3330,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_If_If) {
     fe.RegisterMerges();
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
     const auto& constructs = fe.constructs();
-    EXPECT_EQ(constructs.size(), 4u);
+    EXPECT_EQ(constructs.Length(), 4u);
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,9) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ IfSelection [0,8) begin_id:10 end_id:99 depth:1 parent:Function@10 }
@@ -3390,7 +3390,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_Switch_If) {
     fe.RegisterMerges();
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
     const auto& constructs = fe.constructs();
-    EXPECT_EQ(constructs.size(), 4u);
+    EXPECT_EQ(constructs.Length(), 4u);
     // The ordering among siblings depends on the computed block order.
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,8) begin_id:10 end_id:0 depth:0 parent:null }
@@ -3440,7 +3440,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_If_Switch) {
     fe.RegisterMerges();
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
     const auto& constructs = fe.constructs();
-    EXPECT_EQ(constructs.size(), 3u);
+    EXPECT_EQ(constructs.Length(), 3u);
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,5) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ IfSelection [0,4) begin_id:10 end_id:99 depth:1 parent:Function@10 }
@@ -3494,7 +3494,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_Loop_Loop) {
     fe.RegisterMerges();
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
     const auto& constructs = fe.constructs();
-    EXPECT_EQ(constructs.size(), 4u);
+    EXPECT_EQ(constructs.Length(), 4u);
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,8) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ Continue [4,6) begin_id:50 end_id:89 depth:1 parent:Function@10 in-c:Continue@50 }
@@ -3549,7 +3549,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_Loop_If) {
     fe.RegisterMerges();
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
     const auto& constructs = fe.constructs();
-    EXPECT_EQ(constructs.size(), 4u);
+    EXPECT_EQ(constructs.Length(), 4u);
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,7) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ Continue [5,6) begin_id:80 end_id:99 depth:1 parent:Function@10 in-c:Continue@80 }
@@ -3600,7 +3600,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_LoopContinue_If) {
     fe.RegisterMerges();
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
     const auto& constructs = fe.constructs();
-    EXPECT_EQ(constructs.size(), 4u);
+    EXPECT_EQ(constructs.Length(), 4u);
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,6) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ Continue [2,5) begin_id:30 end_id:99 depth:1 parent:Function@10 in-c:Continue@30 }
@@ -3644,7 +3644,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_If_SingleBlockLoop) {
     fe.RegisterMerges();
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
     const auto& constructs = fe.constructs();
-    EXPECT_EQ(constructs.size(), 3u);
+    EXPECT_EQ(constructs.Length(), 3u);
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,4) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ IfSelection [0,3) begin_id:10 end_id:99 depth:1 parent:Function@10 }
@@ -3693,7 +3693,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_Nest_If_MultiBlockLoop) {
     fe.RegisterMerges();
     EXPECT_TRUE(fe.LabelControlFlowConstructs());
     const auto& constructs = fe.constructs();
-    EXPECT_EQ(constructs.size(), 4u);
+    EXPECT_EQ(constructs.Length(), 4u);
     EXPECT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,7) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ IfSelection [0,6) begin_id:10 end_id:99 depth:1 parent:Function@10 }
@@ -3743,7 +3743,7 @@ TEST_F(SpvParserCFGTest, LabelControlFlowConstructs_LoopInterallyDiverge) {
     auto fe = p->function_emitter(100);
     ASSERT_TRUE(FlowLabelControlFlowConstructs(&fe)) << p->error();
     const auto& constructs = fe.constructs();
-    EXPECT_EQ(constructs.size(), 4u);
+    EXPECT_EQ(constructs.Length(), 4u);
     ASSERT_THAT(ToString(constructs), Eq(R"(ConstructList{
   Construct{ Function [0,6) begin_id:10 end_id:0 depth:0 parent:null }
   Construct{ Continue [4,5) begin_id:90 end_id:99 depth:1 parent:Function@10 in-c:Continue@90 }
@@ -4157,7 +4157,7 @@ TEST_F(SpvParserCFGTest, FindSwitchCaseHeaders_NoSwitch) {
     EXPECT_EQ(bi10->case_head_for, nullptr);
     EXPECT_EQ(bi10->default_head_for, nullptr);
     EXPECT_FALSE(bi10->default_is_merge);
-    EXPECT_EQ(bi10->case_values.get(), nullptr);
+    EXPECT_FALSE(bi10->case_values.has_value());
 }
 
 TEST_F(SpvParserCFGTest, FindSwitchCaseHeaders_DefaultIsMerge) {
@@ -4192,7 +4192,7 @@ TEST_F(SpvParserCFGTest, FindSwitchCaseHeaders_DefaultIsMerge) {
     ASSERT_NE(bi99->default_head_for, nullptr);
     EXPECT_EQ(bi99->default_head_for->begin_id, 10u);
     EXPECT_TRUE(bi99->default_is_merge);
-    EXPECT_EQ(bi99->case_values.get(), nullptr);
+    EXPECT_FALSE(bi99->case_values.has_value());
 }
 
 TEST_F(SpvParserCFGTest, FindSwitchCaseHeaders_DefaultIsNotMerge) {
@@ -4230,7 +4230,7 @@ TEST_F(SpvParserCFGTest, FindSwitchCaseHeaders_DefaultIsNotMerge) {
     ASSERT_NE(bi30->default_head_for, nullptr);
     EXPECT_EQ(bi30->default_head_for->begin_id, 10u);
     EXPECT_FALSE(bi30->default_is_merge);
-    EXPECT_EQ(bi30->case_values.get(), nullptr);
+    EXPECT_FALSE(bi30->case_values.has_value());
 }
 
 TEST_F(SpvParserCFGTest, FindSwitchCaseHeaders_CaseIsNotDefault) {
@@ -4268,7 +4268,7 @@ TEST_F(SpvParserCFGTest, FindSwitchCaseHeaders_CaseIsNotDefault) {
     EXPECT_EQ(bi20->case_head_for->begin_id, 10u);
     EXPECT_EQ(bi20->default_head_for, nullptr);
     EXPECT_FALSE(bi20->default_is_merge);
-    EXPECT_THAT(*(bi20->case_values.get()), UnorderedElementsAre(200));
+    EXPECT_THAT(bi20->case_values.value(), UnorderedElementsAre(200));
 }
 
 TEST_F(SpvParserCFGTest, FindSwitchCaseHeaders_CaseIsDefault) {
@@ -4303,7 +4303,7 @@ TEST_F(SpvParserCFGTest, FindSwitchCaseHeaders_CaseIsDefault) {
     EXPECT_EQ(bi20->case_head_for->begin_id, 10u);
     EXPECT_EQ(bi20->default_head_for, bi20->case_head_for);
     EXPECT_FALSE(bi20->default_is_merge);
-    EXPECT_THAT(*(bi20->case_values.get()), UnorderedElementsAre(200));
+    EXPECT_THAT(bi20->case_values.value(), UnorderedElementsAre(200));
 }
 
 TEST_F(SpvParserCFGTest, FindSwitchCaseHeaders_ManyCasesWithSameValue_IsError) {
@@ -4370,7 +4370,7 @@ TEST_F(SpvParserCFGTest, FindSwitchCaseHeaders_ManyValuesWithSameCase) {
     EXPECT_EQ(bi20->case_head_for->begin_id, 10u);
     EXPECT_EQ(bi20->default_head_for, nullptr);
     EXPECT_FALSE(bi20->default_is_merge);
-    EXPECT_THAT(*(bi20->case_values.get()), UnorderedElementsAre(200, 300));
+    EXPECT_THAT(bi20->case_values.value(), UnorderedElementsAre(200, 300));
 }
 
 TEST_F(SpvParserCFGTest, ClassifyCFGEdges_BranchEscapesIfConstruct) {

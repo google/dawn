@@ -26,7 +26,7 @@ TEST_F(ParserImplTest, BodyStmt) {
     auto e = p->expect_body_stmt();
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
-    ASSERT_EQ(e->statements.size(), 2u);
+    ASSERT_EQ(e->statements.Length(), 2u);
     EXPECT_TRUE(e->statements[0]->Is<ast::DiscardStatement>());
     EXPECT_TRUE(e->statements[1]->Is<ast::ReturnStatement>());
 }
@@ -36,7 +36,7 @@ TEST_F(ParserImplTest, BodyStmt_Empty) {
     auto e = p->expect_body_stmt();
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
-    EXPECT_EQ(e->statements.size(), 0u);
+    EXPECT_EQ(e->statements.Length(), 0u);
 }
 
 TEST_F(ParserImplTest, BodyStmt_InvalidStmt) {

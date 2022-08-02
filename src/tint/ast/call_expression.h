@@ -42,7 +42,7 @@ class CallExpression final : public Castable<CallExpression, Expression> {
                    NodeID nid,
                    const Source& source,
                    const IdentifierExpression* name,
-                   ExpressionList args);
+                   utils::VectorRef<const Expression*> args);
 
     /// Constructor
     /// @param pid the identifier of the program that owns this node
@@ -54,7 +54,7 @@ class CallExpression final : public Castable<CallExpression, Expression> {
                    NodeID nid,
                    const Source& source,
                    const Type* type,
-                   ExpressionList args);
+                   utils::VectorRef<const Expression*> args);
 
     /// Move constructor
     CallExpression(CallExpression&&);
@@ -80,7 +80,7 @@ class CallExpression final : public Castable<CallExpression, Expression> {
     const Target target;
 
     /// The arguments
-    const ExpressionList args;
+    const utils::Vector<const Expression*, 8> args;
 };
 
 }  // namespace tint::ast

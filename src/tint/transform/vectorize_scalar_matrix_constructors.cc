@@ -79,16 +79,16 @@ void VectorizeScalarMatrixConstructors::Run(CloneContext& ctx, const DataMap&, D
         // Constructs a matrix using vector columns, with the elements constructed using the
         // 'element(uint32_t c, uint32_t r)' callback.
         auto build_mat = [&](auto&& element) {
-            ast::ExpressionList columns(mat_type->columns());
+            utils::Vector<const ast::Expression*, 4> columns;
             for (uint32_t c = 0; c < mat_type->columns(); c++) {
-                ast::ExpressionList row_values(mat_type->rows());
+                utils::Vector<const ast::Expression*, 4> row_values;
                 for (uint32_t r = 0; r < mat_type->rows(); r++) {
-                    row_values[r] = element(c, r);
+                    row_values.Push(element(c, r));
                 }
 
                 // Construct the column vector.
-                columns[c] = ctx.dst->vec(CreateASTTypeFor(ctx, mat_type->type()), mat_type->rows(),
-                                          row_values);
+                columns.Push(ctx.dst->vec(CreateASTTypeFor(ctx, mat_type->type()), mat_type->rows(),
+                                          std::move(row_values)));
             }
             return ctx.dst->Construct(CreateASTTypeFor(ctx, mat_type), columns);
         };
@@ -102,12 +102,12 @@ void VectorizeScalarMatrixConstructors::Run(CloneContext& ctx, const DataMap&, D
                     ctx.dst->Symbols().New("build_mat" + std::to_string(mat_type->columns()) + "x" +
                                            std::to_string(mat_type->rows()));
                 ctx.dst->Func(name,
-                              {
+                              utils::Vector{
                                   // Single scalar parameter
                                   ctx.dst->Param("value", CreateASTTypeFor(ctx, mat_type->type())),
                               },
                               CreateASTTypeFor(ctx, mat_type),
-                              {
+                              utils::Vector{
                                   ctx.dst->Return(build_mat([&](uint32_t, uint32_t) {  //
                                       return ctx.dst->Expr("value");
                                   })),

@@ -14,6 +14,8 @@
 
 #include "src/tint/ast/let.h"
 
+#include <utility>
+
 #include "src/tint/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Let);
@@ -26,8 +28,8 @@ Let::Let(ProgramID pid,
          const Symbol& sym,
          const ast::Type* ty,
          const Expression* ctor,
-         AttributeList attrs)
-    : Base(pid, nid, src, sym, ty, ctor, attrs) {
+         utils::VectorRef<const Attribute*> attrs)
+    : Base(pid, nid, src, sym, ty, ctor, std::move(attrs)) {
     TINT_ASSERT(AST, ctor != nullptr);
 }
 
@@ -45,7 +47,7 @@ const Let* Let::Clone(CloneContext* ctx) const {
     auto* ty = ctx->Clone(type);
     auto* ctor = ctx->Clone(constructor);
     auto attrs = ctx->Clone(attributes);
-    return ctx->dst->create<Let>(src, sym, ty, ctor, attrs);
+    return ctx->dst->create<Let>(src, sym, ty, ctor, std::move(attrs));
 }
 
 }  // namespace tint::ast

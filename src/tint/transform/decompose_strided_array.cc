@@ -72,8 +72,10 @@ void DecomposeStridedArray::Run(CloneContext& ctx, const DataMap&, DataMap&) con
                     auto name = ctx.dst->Symbols().New("strided_arr");
                     auto* member_ty = ctx.Clone(ast->type);
                     auto* member = ctx.dst->Member(kMemberName, member_ty,
-                                                   {ctx.dst->MemberSize(arr->Stride())});
-                    ctx.dst->Structure(name, {member});
+                                                   utils::Vector{
+                                                       ctx.dst->MemberSize(arr->Stride()),
+                                                   });
+                    ctx.dst->Structure(name, utils::Vector{member});
                     return name;
                 });
                 auto* count = ctx.Clone(ast->count);
@@ -114,7 +116,7 @@ void DecomposeStridedArray::Run(CloneContext& ctx, const DataMap&, DataMap&) con
     // ->
     //   `array<strided_arr, 3>(strided_arr(1), strided_arr(2), strided_arr(3))`
     ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::Expression* {
-        if (!expr->args.empty()) {
+        if (!expr->args.IsEmpty()) {
             if (auto* call = sem.Get(expr)->UnwrapMaterialize()->As<sem::Call>()) {
                 if (auto* ctor = call->Target()->As<sem::TypeConstructor>()) {
                     if (auto* arr = ctor->ReturnType()->As<sem::Array>()) {
@@ -130,18 +132,18 @@ void DecomposeStridedArray::Run(CloneContext& ctx, const DataMap&, DataMap&) con
                             target.name = ctx.Clone(expr->target.name);
                         }
 
-                        ast::ExpressionList args;
+                        utils::Vector<const ast::Expression*, 8> args;
                         if (auto it = decomposed.find(arr); it != decomposed.end()) {
-                            args.reserve(expr->args.size());
+                            args.Reserve(expr->args.Length());
                             for (auto* arg : expr->args) {
-                                args.emplace_back(ctx.dst->Call(it->second, ctx.Clone(arg)));
+                                args.Push(ctx.dst->Call(it->second, ctx.Clone(arg)));
                             }
                         } else {
                             args = ctx.Clone(expr->args);
                         }
 
-                        return target.type ? ctx.dst->Construct(target.type, args)
-                                           : ctx.dst->Call(target.name, args);
+                        return target.type ? ctx.dst->Construct(target.type, std::move(args))
+                                           : ctx.dst->Call(target.name, std::move(args));
                     }
                 }
             }

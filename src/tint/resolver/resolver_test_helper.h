@@ -18,7 +18,6 @@
 #include <functional>
 #include <memory>
 #include <string>
-#include <vector>
 
 #include "gtest/gtest.h"
 #include "src/tint/program_builder.h"
@@ -28,6 +27,7 @@
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/utils/vector.h"
 
 namespace tint::resolver {
 
@@ -88,9 +88,9 @@ class TestHelper : public ProgramBuilder {
     /// @param expected_users the expected users of the variable
     /// @return true if all users are as expected
     bool CheckVarUsers(const ast::Variable* var,
-                       std::vector<const ast::Expression*>&& expected_users) {
+                       utils::VectorRef<const ast::Expression*> expected_users) {
         auto& var_users = Sem().Get(var)->Users();
-        if (var_users.size() != expected_users.size()) {
+        if (var_users.size() != expected_users.Length()) {
             return false;
         }
         for (size_t i = 0; i < var_users.size(); i++) {
@@ -389,10 +389,10 @@ struct DataType<vec<N, T>> {
     /// @param b the ProgramBuilder
     /// @param elem_value the value each element will be initialized with
     /// @return the list of expressions that are used to construct the vector
-    static inline ast::ExpressionList ExprArgs(ProgramBuilder& b, double elem_value) {
-        ast::ExpressionList args;
+    static inline auto ExprArgs(ProgramBuilder& b, double elem_value) {
+        utils::Vector<const ast::Expression*, N> args;
         for (uint32_t i = 0; i < N; i++) {
-            args.emplace_back(DataType<T>::Expr(b, elem_value));
+            args.Push(DataType<T>::Expr(b, elem_value));
         }
         return args;
     }
@@ -433,10 +433,10 @@ struct DataType<mat<N, M, T>> {
     /// @param b the ProgramBuilder
     /// @param elem_value the value each element will be initialized with
     /// @return the list of expressions that are used to construct the matrix
-    static inline ast::ExpressionList ExprArgs(ProgramBuilder& b, double elem_value) {
-        ast::ExpressionList args;
+    static inline auto ExprArgs(ProgramBuilder& b, double elem_value) {
+        utils::Vector<const ast::Expression*, N> args;
         for (uint32_t i = 0; i < N; i++) {
-            args.emplace_back(DataType<vec<M, T>>::Expr(b, elem_value));
+            args.Push(DataType<vec<M, T>>::Expr(b, elem_value));
         }
         return args;
     }
@@ -566,10 +566,10 @@ struct DataType<array<N, T>> {
     /// @param b the ProgramBuilder
     /// @param elem_value the value each element will be initialized with
     /// @return the list of expressions that are used to construct the array
-    static inline ast::ExpressionList ExprArgs(ProgramBuilder& b, double elem_value) {
-        ast::ExpressionList args;
+    static inline auto ExprArgs(ProgramBuilder& b, double elem_value) {
+        utils::Vector<const ast::Expression*, N> args;
         for (uint32_t i = 0; i < N; i++) {
-            args.emplace_back(DataType<T>::Expr(b, elem_value));
+            args.Push(DataType<T>::Expr(b, elem_value));
         }
         return args;
     }

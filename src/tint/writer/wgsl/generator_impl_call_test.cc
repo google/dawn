@@ -23,7 +23,10 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
-    Func("my_func", {}, ty.f32(), {Return(1.23_f)});
+    Func("my_func", utils::Empty, ty.f32(),
+         utils::Vector{
+             Return(1.23_f),
+         });
 
     auto* call = Call("my_func");
     WrapInFunction(call);
@@ -37,11 +40,14 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithoutParams) {
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
     Func("my_func",
-         {
+         utils::Vector{
              Param(Sym(), ty.f32()),
              Param(Sym(), ty.f32()),
          },
-         ty.f32(), {Return(1.23_f)});
+         ty.f32(),
+         utils::Vector{
+             Return(1.23_f),
+         });
     GlobalVar("param1", ty.f32(), ast::StorageClass::kPrivate);
     GlobalVar("param2", ty.f32(), ast::StorageClass::kPrivate);
 
@@ -57,11 +63,11 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_Call_WithParams) {
 
 TEST_F(WgslGeneratorImplTest, EmitStatement_Call) {
     Func("my_func",
-         {
+         utils::Vector{
              Param(Sym(), ty.f32()),
              Param(Sym(), ty.f32()),
          },
-         ty.void_(), ast::StatementList{}, ast::AttributeList{});
+         ty.void_(), utils::Empty, utils::Empty);
     GlobalVar("param1", ty.f32(), ast::StorageClass::kPrivate);
     GlobalVar("param2", ty.f32(), ast::StorageClass::kPrivate);
 

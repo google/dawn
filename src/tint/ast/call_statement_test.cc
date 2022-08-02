@@ -23,7 +23,7 @@ namespace {
 using CallStatementTest = TestHelper;
 
 TEST_F(CallStatementTest, Creation) {
-    auto* expr = create<CallExpression>(Expr("func"), ExpressionList{});
+    auto* expr = create<CallExpression>(Expr("func"), utils::Empty);
 
     auto* c = create<CallStatement>(expr);
     EXPECT_EQ(c->expr, expr);
@@ -48,7 +48,7 @@ TEST_F(CallStatementTest, Assert_DifferentProgramID_Call) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<CallStatement>(b2.create<CallExpression>(b2.Expr("func"), ExpressionList{}));
+            b1.create<CallStatement>(b2.create<CallExpression>(b2.Expr("func"), utils::Empty));
         },
         "internal compiler error");
 }

@@ -31,8 +31,8 @@ struct SideEffectsTest : ResolverTest {
         auto global = Sym();
         GlobalVar(global, ty.Of<T>(), ast::StorageClass::kPrivate);
         auto local = Sym();
-        Func(name, {}, ty.Of<T>(),
-             {
+        Func(name, utils::Empty, ty.Of<T>(),
+             utils::Vector{
                  Decl(Var(local, ty.Of<T>())),
                  Assign(global, local),
                  Return(global),
@@ -44,8 +44,8 @@ struct SideEffectsTest : ResolverTest {
         auto global = Sym();
         GlobalVar(global, make_type(), ast::StorageClass::kPrivate);
         auto local = Sym();
-        Func(name, {}, make_type(),
-             {
+        Func(name, utils::Empty, make_type(),
+             utils::Vector{
                  Decl(Var(local, make_type())),
                  Assign(global, local),
                  Return(global),
@@ -89,8 +89,8 @@ TEST_F(SideEffectsTest, VariableUser) {
 TEST_F(SideEffectsTest, Call_Builtin_NoSE) {
     GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate);
     auto* expr = Call("dpdx", "a");
-    Func("f", {}, ty.void_(), {Ignore(expr)},
-         {create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Ignore(expr)},
+         utils::Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* sem = Sem().Get(expr);
@@ -102,8 +102,8 @@ TEST_F(SideEffectsTest, Call_Builtin_NoSE) {
 TEST_F(SideEffectsTest, Call_Builtin_NoSE_WithSEArg) {
     MakeSideEffectFunc<f32>("se");
     auto* expr = Call("dpdx", Call("se"));
-    Func("f", {}, ty.void_(), {Ignore(expr)},
-         {create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
+    Func("f", utils::Empty, ty.void_(), utils::Vector{Ignore(expr)},
+         utils::Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* sem = Sem().Get(expr);
@@ -125,7 +125,7 @@ TEST_F(SideEffectsTest, Call_Builtin_SE) {
 }
 
 TEST_F(SideEffectsTest, Call_Function) {
-    Func("f", {}, ty.i32(), {Return(1_i)});
+    Func("f", utils::Empty, ty.i32(), utils::Vector{Return(1_i)});
     auto* expr = Call("f");
     WrapInFunction(expr);
 
@@ -185,7 +185,7 @@ TEST_F(SideEffectsTest, Call_TypeConstructor_SE) {
 }
 
 TEST_F(SideEffectsTest, MemberAccessor_Struct_NoSE) {
-    auto* s = Structure("S", {Member("m", ty.i32())});
+    auto* s = Structure("S", utils::Vector{Member("m", ty.i32())});
     auto* var = Decl(Var("a", ty.Of(s)));
     auto* expr = MemberAccessor("a", "m");
     WrapInFunction(var, expr);
@@ -197,7 +197,7 @@ TEST_F(SideEffectsTest, MemberAccessor_Struct_NoSE) {
 }
 
 TEST_F(SideEffectsTest, MemberAccessor_Struct_SE) {
-    auto* s = Structure("S", {Member("m", ty.i32())});
+    auto* s = Structure("S", utils::Vector{Member("m", ty.i32())});
     MakeSideEffectFunc("se", [&] { return ty.Of(s); });
     auto* expr = MemberAccessor(Call("se"), "m");
     WrapInFunction(expr);

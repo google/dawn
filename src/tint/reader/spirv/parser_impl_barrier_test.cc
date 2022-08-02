@@ -65,10 +65,10 @@ TEST_F(SpvParserTest, WorkgroupBarrier) {
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
     auto* helper = program.AST().Functions().Find(program.Symbols().Get("helper"));
     ASSERT_NE(helper, nullptr);
-    ASSERT_GT(helper->body->statements.size(), 0u);
+    ASSERT_GT(helper->body->statements.Length(), 0u);
     auto* call = helper->body->statements[0]->As<ast::CallStatement>();
     ASSERT_NE(call, nullptr);
-    EXPECT_EQ(call->expr->args.size(), 0u);
+    EXPECT_EQ(call->expr->args.Length(), 0u);
     auto* sem_call = program.Sem().Get<sem::Call>(call->expr);
     ASSERT_NE(sem_call, nullptr);
     auto* builtin = sem_call->Target()->As<sem::Builtin>();
@@ -98,10 +98,10 @@ TEST_F(SpvParserTest, StorageBarrier) {
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
     auto* helper = program.AST().Functions().Find(program.Symbols().Get("helper"));
     ASSERT_NE(helper, nullptr);
-    ASSERT_GT(helper->body->statements.size(), 0u);
+    ASSERT_GT(helper->body->statements.Length(), 0u);
     auto* call = helper->body->statements[0]->As<ast::CallStatement>();
     ASSERT_NE(call, nullptr);
-    EXPECT_EQ(call->expr->args.size(), 0u);
+    EXPECT_EQ(call->expr->args.Length(), 0u);
     auto* sem_call = program.Sem().Get<sem::Call>(call->expr);
     ASSERT_NE(sem_call, nullptr);
     auto* builtin = sem_call->Target()->As<sem::Builtin>();

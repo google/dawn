@@ -36,7 +36,7 @@ TEST_F(ParserImplTest, Statement_Call) {
 
     EXPECT_EQ(c->target.name->symbol, p->builder().Symbols().Get("a"));
 
-    EXPECT_EQ(c->args.size(), 0u);
+    EXPECT_EQ(c->args.Length(), 0u);
 }
 
 TEST_F(ParserImplTest, Statement_Call_WithParams) {
@@ -52,7 +52,7 @@ TEST_F(ParserImplTest, Statement_Call_WithParams) {
 
     EXPECT_EQ(c->target.name->symbol, p->builder().Symbols().Get("a"));
 
-    EXPECT_EQ(c->args.size(), 3u);
+    EXPECT_EQ(c->args.Length(), 3u);
     EXPECT_TRUE(c->args[0]->Is<ast::IntLiteralExpression>());
     EXPECT_TRUE(c->args[1]->Is<ast::IdentifierExpression>());
     EXPECT_TRUE(c->args[2]->Is<ast::BinaryExpression>());
@@ -71,7 +71,7 @@ TEST_F(ParserImplTest, Statement_Call_WithParams_TrailingComma) {
 
     EXPECT_EQ(c->target.name->symbol, p->builder().Symbols().Get("a"));
 
-    EXPECT_EQ(c->args.size(), 2u);
+    EXPECT_EQ(c->args.Length(), 2u);
     EXPECT_TRUE(c->args[0]->Is<ast::IntLiteralExpression>());
     EXPECT_TRUE(c->args[1]->Is<ast::IdentifierExpression>());
 }

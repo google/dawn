@@ -15,6 +15,7 @@
 #include "src/tint/ast/array.h"
 
 #include <cmath>
+#include <utility>
 
 #include "src/tint/program_builder.h"
 
@@ -42,8 +43,8 @@ Array::Array(ProgramID pid,
              const Source& src,
              const Type* subtype,
              const Expression* cnt,
-             AttributeList attrs)
-    : Base(pid, nid, src), type(subtype), count(cnt), attributes(attrs) {}
+             utils::VectorRef<const Attribute*> attrs)
+    : Base(pid, nid, src), type(subtype), count(cnt), attributes(std::move(attrs)) {}
 
 Array::Array(Array&&) = default;
 
@@ -73,7 +74,7 @@ const Array* Array::Clone(CloneContext* ctx) const {
     auto* ty = ctx->Clone(type);
     auto* cnt = ctx->Clone(count);
     auto attrs = ctx->Clone(attributes);
-    return ctx->dst->create<Array>(src, ty, cnt, attrs);
+    return ctx->dst->create<Array>(src, ty, cnt, std::move(attrs));
 }
 
 }  // namespace tint::ast

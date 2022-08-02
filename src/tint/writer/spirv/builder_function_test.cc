@@ -24,7 +24,7 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Function_Empty) {
-    Func("a_func", {}, ty.void_(), {});
+    Func("a_func", utils::Empty, ty.void_(), utils::Empty);
 
     spirv::Builder& b = Build();
 
@@ -41,8 +41,8 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_Return) {
-    Func("a_func", {}, ty.void_(),
-         {
+    Func("a_func", utils::Empty, ty.void_(),
+         utils::Vector{
              Return(),
          });
 
@@ -63,7 +63,7 @@ OpFunctionEnd
 TEST_F(BuilderTest, Function_Terminator_ReturnValue) {
     GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate);
 
-    Func("a_func", {}, ty.f32(), {Return("a")}, {});
+    Func("a_func", utils::Empty, ty.f32(), utils::Vector{Return("a")}, utils::Empty);
 
     spirv::Builder& b = Build();
 
@@ -88,8 +88,8 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_Terminator_Discard) {
-    Func("a_func", {}, ty.void_(),
-         {
+    Func("a_func", utils::Empty, ty.void_(),
+         utils::Vector{
              create<ast::DiscardStatement>(),
          });
 
@@ -109,11 +109,11 @@ OpFunctionEnd
 
 TEST_F(BuilderTest, Function_WithParams) {
     Func("a_func",
-         {
+         utils::Vector{
              Param("a", ty.f32()),
              Param("b", ty.i32()),
          },
-         ty.f32(), {Return("a")}, {});
+         ty.f32(), utils::Vector{Return("a")}, utils::Empty);
 
     spirv::Builder& b = Build();
 
@@ -135,8 +135,8 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Function_WithBody) {
-    Func("a_func", {}, ty.void_(),
-         {
+    Func("a_func", utils::Empty, ty.void_(),
+         utils::Vector{
              Return(),
          });
 
@@ -155,7 +155,7 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, FunctionType) {
-    Func("a_func", {}, ty.void_(), {}, {});
+    Func("a_func", utils::Empty, ty.void_(), utils::Empty, utils::Empty);
 
     spirv::Builder& b = Build();
 
@@ -167,8 +167,8 @@ TEST_F(BuilderTest, FunctionType) {
 }
 
 TEST_F(BuilderTest, FunctionType_DeDuplicate) {
-    auto* func1 = Func("a_func", {}, ty.void_(), {}, {});
-    auto* func2 = Func("b_func", {}, ty.void_(), {}, {});
+    auto* func1 = Func("a_func", utils::Empty, ty.void_(), utils::Empty, utils::Empty);
+    auto* func2 = Func("b_func", utils::Empty, ty.void_(), utils::Empty, utils::Empty);
 
     spirv::Builder& b = Build();
 
@@ -196,10 +196,10 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     //   return;
     // }
 
-    auto* s = Structure("Data", {Member("d", ty.f32())});
+    auto* s = Structure("Data", utils::Vector{Member("d", ty.f32())});
 
     GlobalVar("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -207,23 +207,23 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     {
         auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("data", "d"));
 
-        Func("a", {}, ty.void_(),
-             {
+        Func("a", utils::Empty, ty.void_(),
+             utils::Vector{
                  Decl(var),
                  Return(),
              },
-             {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
+             utils::Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
     }
 
     {
         auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("data", "d"));
 
-        Func("b", {}, ty.void_(),
-             {
+        Func("b", utils::Empty, ty.void_(),
+             utils::Vector{
                  Decl(var),
                  Return(),
              },
-             {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
+             utils::Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
     }
 
     spirv::Builder& b = SanitizeAndBuild();

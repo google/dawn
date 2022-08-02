@@ -325,7 +325,7 @@ class Validator {
     /// Validates a list of statements
     /// @param stmts the statements to validate
     /// @returns true on success, false otherwise
-    bool Statements(const ast::StatementList& stmts) const;
+    bool Statements(utils::VectorRef<const ast::Statement*> stmts) const;
 
     /// Validates a storage texture
     /// @param t the texture to validate
@@ -422,7 +422,7 @@ class Validator {
     /// Validates there are no duplicate attributes
     /// @param attributes the list of attributes to validate
     /// @returns true on success, false otherwise.
-    bool NoDuplicateAttributes(const ast::AttributeList& attributes) const;
+    bool NoDuplicateAttributes(utils::VectorRef<const ast::Attribute*> attributes) const;
 
     /// Validates a storage class layout
     /// @param type the type to validate
@@ -449,7 +449,7 @@ class Validator {
     /// `validation`
     /// @param attributes the attribute list to check
     /// @param validation the validation mode to check
-    bool IsValidationDisabled(const ast::AttributeList& attributes,
+    bool IsValidationDisabled(utils::VectorRef<const ast::Attribute*> attributes,
                               ast::DisabledValidation validation) const;
 
     /// @returns true if the attribute list does not contains a
@@ -457,7 +457,7 @@ class Validator {
     /// `validation`
     /// @param attributes the attribute list to check
     /// @param validation the validation mode to check
-    bool IsValidationEnabled(const ast::AttributeList& attributes,
+    bool IsValidationEnabled(utils::VectorRef<const ast::Attribute*> attributes,
                              ast::DisabledValidation validation) const;
 
   private:

@@ -387,7 +387,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Array) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Struct) {
-    auto* str = Structure("S", {
+    auto* str = Structure("S", utils::Vector{
                                    Member("a", ty.i32()),
                                    Member("b", ty.f32()),
                                    Member("c", ty.vec3<i32>()),
@@ -402,7 +402,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Struct) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Struct_Empty) {
-    auto* str = Structure("S", {
+    auto* str = Structure("S", utils::Vector{
                                    Member("a", ty.i32()),
                                    Member("b", ty.f32()),
                                    Member("c", ty.vec3<i32>()),

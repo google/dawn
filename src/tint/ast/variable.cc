@@ -26,7 +26,7 @@ Variable::Variable(ProgramID pid,
                    const Symbol& sym,
                    const ast::Type* ty,
                    const Expression* ctor,
-                   AttributeList attrs)
+                   utils::VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src), symbol(sym), type(ty), constructor(ctor), attributes(std::move(attrs)) {
     TINT_ASSERT(AST, symbol.IsValid());
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol, program_id);

@@ -126,11 +126,11 @@ class GeneratorImpl : public TextGenerator {
     /// Emits a list of statements
     /// @param stmts the statement list
     /// @returns true if the statements were emitted successfully
-    bool EmitStatements(const ast::StatementList& stmts);
+    bool EmitStatements(utils::VectorRef<const ast::Statement*> stmts);
     /// Emits a list of statements with an indentation
     /// @param stmts the statement list
     /// @returns true if the statements were emitted successfully
-    bool EmitStatementsWithIndent(const ast::StatementList& stmts);
+    bool EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts);
     /// Handles a block statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted successfully
@@ -329,12 +329,13 @@ class GeneratorImpl : public TextGenerator {
     /// Handles emitting interpolation qualifiers
     /// @param out the output of the expression stream
     /// @param attrs the attributes
-    void EmitInterpolationQualifiers(std::ostream& out, const ast::AttributeList& attrs);
+    void EmitInterpolationQualifiers(std::ostream& out,
+                                     utils::VectorRef<const ast::Attribute*> attrs);
     /// Handles emitting attributes
     /// @param out the output of the expression stream
     /// @param attrs the attributes
     /// @returns true if the attributes were emitted
-    bool EmitAttributes(std::ostream& out, const ast::AttributeList& attrs);
+    bool EmitAttributes(std::ostream& out, utils::VectorRef<const ast::Attribute*> attrs);
     /// Handles emitting the entry point function
     /// @param func the entry point
     /// @returns true if the entry point function was emitted

@@ -234,8 +234,8 @@ TEST_P(MslBuiltinTest, Emit) {
 
     auto* call = GenerateCall(param.builtin, param.type, this);
     ASSERT_NE(nullptr, call) << "Unhandled builtin";
-    Func("func", {}, ty.void_(), {Ignore(call)},
-         {create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
+    Func("func", utils::Empty, ty.void_(), utils::Vector{Ignore(call)},
+         utils::Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
     GeneratorImpl& gen = Build();
 
@@ -662,11 +662,11 @@ kernel void test_function() {
 }
 
 TEST_F(MslGeneratorImplTest, Ignore) {
-    Func("f", {Param("a", ty.i32()), Param("b", ty.i32()), Param("c", ty.i32())}, ty.i32(),
-         {Return(Mul(Add("a", "b"), "c"))});
+    Func("f", utils::Vector{Param("a", ty.i32()), Param("b", ty.i32()), Param("c", ty.i32())},
+         ty.i32(), utils::Vector{Return(Mul(Add("a", "b"), "c"))});
 
-    Func("func", {}, ty.void_(), {CallStmt(Call("f", 1_i, 2_i, 3_i))},
-         {
+    Func("func", utils::Empty, ty.void_(), utils::Vector{CallStmt(Call("f", 1_i, 2_i, 3_i))},
+         utils::Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });

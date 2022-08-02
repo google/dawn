@@ -23,7 +23,7 @@ TEST_F(ParserImplTest, ArgumentExpressionList_Parses) {
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
 
-    ASSERT_EQ(e.value.size(), 1u);
+    ASSERT_EQ(e.value.Length(), 1u);
     ASSERT_TRUE(e.value[0]->Is<ast::IdentifierExpression>());
 }
 
@@ -33,7 +33,7 @@ TEST_F(ParserImplTest, ArgumentExpressionList_ParsesEmptyList) {
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
 
-    ASSERT_EQ(e.value.size(), 0u);
+    ASSERT_EQ(e.value.Length(), 0u);
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_ParsesMultiple) {
@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, ArgumentExpressionList_ParsesMultiple) {
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
 
-    ASSERT_EQ(e.value.size(), 3u);
+    ASSERT_EQ(e.value.Length(), 3u);
     ASSERT_TRUE(e.value[0]->Is<ast::IdentifierExpression>());
     ASSERT_TRUE(e.value[1]->Is<ast::LiteralExpression>());
     ASSERT_TRUE(e.value[2]->Is<ast::BinaryExpression>());
@@ -54,7 +54,7 @@ TEST_F(ParserImplTest, ArgumentExpressionList_TrailingComma) {
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
 
-    ASSERT_EQ(e.value.size(), 2u);
+    ASSERT_EQ(e.value.Length(), 2u);
     ASSERT_TRUE(e.value[0]->Is<ast::IdentifierExpression>());
     ASSERT_TRUE(e.value[1]->Is<ast::LiteralExpression>());
 }

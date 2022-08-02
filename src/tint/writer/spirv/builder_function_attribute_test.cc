@@ -25,8 +25,8 @@ namespace {
 using BuilderTest = TestHelper;
 
 TEST_F(BuilderTest, Attribute_Stage) {
-    auto* func = Func("main", {}, ty.void_(), {},
-                      {
+    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
+                      utils::Vector{
                           Stage(ast::PipelineStage::kFragment),
                       });
 
@@ -52,22 +52,22 @@ TEST_P(Attribute_StageTest, Emit) {
 
     const ast::Variable* var = nullptr;
     const ast::Type* ret_type = nullptr;
-    ast::AttributeList ret_type_attrs;
-    ast::StatementList body;
+    utils::Vector<const ast::Attribute*, 2> ret_type_attrs;
+    utils::Vector<const ast::Statement*, 2> body;
     if (params.stage == ast::PipelineStage::kVertex) {
         ret_type = ty.vec4<f32>();
-        ret_type_attrs.push_back(Builtin(ast::BuiltinValue::kPosition));
-        body.push_back(Return(Construct(ty.vec4<f32>())));
+        ret_type_attrs.Push(Builtin(ast::BuiltinValue::kPosition));
+        body.Push(Return(Construct(ty.vec4<f32>())));
     } else {
         ret_type = ty.void_();
     }
 
-    auto deco_list = ast::AttributeList{Stage(params.stage)};
+    utils::Vector<const ast::Attribute*, 2> deco_list{Stage(params.stage)};
     if (params.stage == ast::PipelineStage::kCompute) {
-        deco_list.push_back(WorkgroupSize(1_i));
+        deco_list.Push(WorkgroupSize(1_i));
     }
 
-    auto* func = Func("main", {}, ret_type, body, deco_list, ret_type_attrs);
+    auto* func = Func("main", utils::Empty, ret_type, body, deco_list, ret_type_attrs);
 
     spirv::Builder& b = Build();
 
@@ -91,8 +91,8 @@ INSTANTIATE_TEST_SUITE_P(
                     FunctionStageData{ast::PipelineStage::kCompute, SpvExecutionModelGLCompute}));
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_Fragment_OriginUpperLeft) {
-    auto* func = Func("main", {}, ty.void_(), {},
-                      {
+    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
+                      utils::Vector{
                           Stage(ast::PipelineStage::kFragment),
                       });
 
@@ -105,8 +105,8 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_Fragment_OriginUpperLeft) {
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Default) {
-    auto* func =
-        Func("main", {}, ty.void_(), {}, {Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
+    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
+                      utils::Vector{Stage(ast::PipelineStage::kCompute), WorkgroupSize(1_i)});
 
     spirv::Builder& b = Build();
 
@@ -117,8 +117,8 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Default) {
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Literals) {
-    auto* func = Func("main", {}, ty.void_(), {},
-                      {
+    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
+                      utils::Vector{
                           WorkgroupSize(2_i, 4_i, 6_i),
                           Stage(ast::PipelineStage::kCompute),
                       });
@@ -135,8 +135,8 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Const) {
     GlobalConst("width", ty.i32(), Construct(ty.i32(), 2_i));
     GlobalConst("height", ty.i32(), Construct(ty.i32(), 3_i));
     GlobalConst("depth", ty.i32(), Construct(ty.i32(), 4_i));
-    auto* func = Func("main", {}, ty.void_(), {},
-                      {
+    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
+                      utils::Vector{
                           WorkgroupSize("width", "height", "depth"),
                           Stage(ast::PipelineStage::kCompute),
                       });
@@ -150,11 +150,11 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Const) {
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_OverridableConst) {
-    Override("width", ty.i32(), Construct(ty.i32(), 2_i), {Id(7u)});
-    Override("height", ty.i32(), Construct(ty.i32(), 3_i), {Id(8u)});
-    Override("depth", ty.i32(), Construct(ty.i32(), 4_i), {Id(9u)});
-    auto* func = Func("main", {}, ty.void_(), {},
-                      {
+    Override("width", ty.i32(), Construct(ty.i32(), 2_i), utils::Vector{Id(7u)});
+    Override("height", ty.i32(), Construct(ty.i32(), 3_i), utils::Vector{Id(8u)});
+    Override("depth", ty.i32(), Construct(ty.i32(), 4_i), utils::Vector{Id(9u)});
+    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
+                      utils::Vector{
                           WorkgroupSize("width", "height", "depth"),
                           Stage(ast::PipelineStage::kCompute),
                       });
@@ -180,10 +180,10 @@ OpDecorate %3 BuiltIn WorkgroupSize
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndConst) {
-    Override("height", ty.i32(), Construct(ty.i32(), 2_i), {Id(7u)});
+    Override("height", ty.i32(), Construct(ty.i32(), 2_i), utils::Vector{Id(7u)});
     GlobalConst("depth", ty.i32(), Construct(ty.i32(), 3_i));
-    auto* func = Func("main", {}, ty.void_(), {},
-                      {
+    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
+                      utils::Vector{
                           WorkgroupSize(4_i, "height", "depth"),
                           Stage(ast::PipelineStage::kCompute),
                       });
@@ -207,13 +207,13 @@ OpDecorate %3 BuiltIn WorkgroupSize
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_MultipleFragment) {
-    auto* func1 = Func("main1", {}, ty.void_(), {},
-                       {
+    auto* func1 = Func("main1", utils::Empty, ty.void_(), utils::Empty,
+                       utils::Vector{
                            Stage(ast::PipelineStage::kFragment),
                        });
 
-    auto* func2 = Func("main2", {}, ty.void_(), {},
-                       {
+    auto* func2 = Func("main2", utils::Empty, ty.void_(), utils::Empty,
+                       utils::Vector{
                            Stage(ast::PipelineStage::kFragment),
                        });
 
@@ -242,14 +242,14 @@ OpFunctionEnd
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_FragDepth) {
-    Func("main", {}, ty.f32(),
-         {
+    Func("main", utils::Empty, ty.f32(),
+         utils::Vector{
              Return(Expr(1_f)),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         {
+         utils::Vector{
              Builtin(ast::BuiltinValue::kFragDepth),
          });
 

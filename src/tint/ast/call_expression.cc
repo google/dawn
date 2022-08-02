@@ -14,6 +14,8 @@
 
 #include "src/tint/ast/call_expression.h"
 
+#include <utility>
+
 #include "src/tint/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::CallExpression);
@@ -37,8 +39,8 @@ CallExpression::CallExpression(ProgramID pid,
                                NodeID nid,
                                const Source& src,
                                const IdentifierExpression* name,
-                               ExpressionList a)
-    : Base(pid, nid, src), target(ToTarget(name)), args(a) {
+                               utils::VectorRef<const Expression*> a)
+    : Base(pid, nid, src), target(ToTarget(name)), args(std::move(a)) {
     TINT_ASSERT(AST, name);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, name, program_id);
     for (auto* arg : args) {
@@ -51,8 +53,8 @@ CallExpression::CallExpression(ProgramID pid,
                                NodeID nid,
                                const Source& src,
                                const Type* type,
-                               ExpressionList a)
-    : Base(pid, nid, src), target(ToTarget(type)), args(a) {
+                               utils::VectorRef<const Expression*> a)
+    : Base(pid, nid, src), target(ToTarget(type)), args(std::move(a)) {
     TINT_ASSERT(AST, type);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id);
     for (auto* arg : args) {
@@ -69,8 +71,9 @@ const CallExpression* CallExpression::Clone(CloneContext* ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
     auto src = ctx->Clone(source);
     auto p = ctx->Clone(args);
-    return target.name ? ctx->dst->create<CallExpression>(src, ctx->Clone(target.name), p)
-                       : ctx->dst->create<CallExpression>(src, ctx->Clone(target.type), p);
+    return target.name
+               ? ctx->dst->create<CallExpression>(src, ctx->Clone(target.name), std::move(p))
+               : ctx->dst->create<CallExpression>(src, ctx->Clone(target.type), std::move(p));
 }
 
 }  // namespace tint::ast

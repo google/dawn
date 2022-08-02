@@ -186,8 +186,8 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
 
     Enable(ast::Extension::kF16);
 
-    Func("foo", {}, params.create_rhs_ast_type(*this),
-         {Return(Construct(params.create_rhs_ast_type(*this)))}, {});
+    Func("foo", utils::Empty, params.create_rhs_ast_type(*this),
+         utils::Vector{Return(Construct(params.create_rhs_ast_type(*this)))}, {});
 
     auto* a = Var("a", nullptr, Call("foo"));
     // Self-assign 'a' to force the expression to be resolved so we can test its
@@ -2474,10 +2474,10 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooFewArguments) {
 
     const std::string element_type_name = param.get_element_type_name();
     std::stringstream args_tys;
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns - 1; i++) {
         auto* vec_type = param.create_column_ast_type(*this);
-        args.push_back(Construct(vec_type));
+        args.Push(Construct(vec_type));
         if (i > 0) {
             args_tys << ", ";
         }
@@ -2503,9 +2503,9 @@ TEST_P(MatrixConstructorTest, ElementConstructor_Error_TooFewArguments) {
 
     const std::string element_type_name = param.get_element_type_name();
     std::stringstream args_tys;
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns * param.rows - 1; i++) {
-        args.push_back(Construct(param.create_element_ast_type(*this)));
+        args.Push(Construct(param.create_element_ast_type(*this)));
         if (i > 0) {
             args_tys << ", ";
         }
@@ -2531,10 +2531,10 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooManyArguments) {
 
     const std::string element_type_name = param.get_element_type_name();
     std::stringstream args_tys;
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns + 1; i++) {
         auto* vec_type = param.create_column_ast_type(*this);
-        args.push_back(Construct(vec_type));
+        args.Push(Construct(vec_type));
         if (i > 0) {
             args_tys << ", ";
         }
@@ -2560,9 +2560,9 @@ TEST_P(MatrixConstructorTest, ElementConstructor_Error_TooManyArguments) {
 
     const std::string element_type_name = param.get_element_type_name();
     std::stringstream args_tys;
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns * param.rows + 1; i++) {
-        args.push_back(Construct(param.create_element_ast_type(*this)));
+        args.Push(Construct(param.create_element_ast_type(*this)));
         if (i > 0) {
             args_tys << ", ";
         }
@@ -2587,10 +2587,10 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_InvalidArgumentType) {
     Enable(ast::Extension::kF16);
 
     std::stringstream args_tys;
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = ty.vec<u32>(param.rows);
-        args.push_back(Construct(vec_type));
+        args.Push(Construct(vec_type));
         if (i > 0) {
             args_tys << ", ";
         }
@@ -2615,9 +2615,9 @@ TEST_P(MatrixConstructorTest, ElementConstructor_Error_InvalidArgumentType) {
     Enable(ast::Extension::kF16);
 
     std::stringstream args_tys;
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns; i++) {
-        args.push_back(Expr(1_u));
+        args.Push(Expr(1_u));
         if (i > 0) {
             args_tys << ", ";
         }
@@ -2648,10 +2648,10 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooFewRowsInVectorArgument
 
     const std::string element_type_name = param.get_element_type_name();
     std::stringstream args_tys;
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         auto* valid_vec_type = param.create_column_ast_type(*this);
-        args.push_back(Construct(valid_vec_type));
+        args.Push(Construct(valid_vec_type));
         if (i > 0) {
             args_tys << ", ";
         }
@@ -2659,7 +2659,7 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooFewRowsInVectorArgument
     }
     const size_t kInvalidLoc = 2 * (param.columns - 1);
     auto* invalid_vec_type = ty.vec(param.create_element_ast_type(*this), param.rows - 1);
-    args.push_back(Construct(Source{{12, kInvalidLoc}}, invalid_vec_type));
+    args.Push(Construct(Source{{12, kInvalidLoc}}, invalid_vec_type));
     args_tys << ", vec" << (param.rows - 1) << "<" + element_type_name + ">";
 
     auto* matrix_type = param.create_mat_ast_type(*this);
@@ -2686,17 +2686,17 @@ TEST_P(MatrixConstructorTest, ColumnConstructor_Error_TooManyRowsInVectorArgumen
 
     const std::string element_type_name = param.get_element_type_name();
     std::stringstream args_tys;
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         auto* valid_vec_type = param.create_column_ast_type(*this);
-        args.push_back(Construct(valid_vec_type));
+        args.Push(Construct(valid_vec_type));
         if (i > 0) {
             args_tys << ", ";
         }
         args_tys << "vec" << param.rows << "<" + element_type_name + ">";
     }
     auto* invalid_vec_type = ty.vec(param.create_element_ast_type(*this), param.rows + 1);
-    args.push_back(Construct(invalid_vec_type));
+    args.Push(Construct(invalid_vec_type));
     args_tys << ", vec" << (param.rows + 1) << "<" + element_type_name + ">";
 
     auto* matrix_type = param.create_mat_ast_type(*this);
@@ -2731,10 +2731,10 @@ TEST_P(MatrixConstructorTest, WithColumns_Success) {
 
     Enable(ast::Extension::kF16);
 
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 4> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = param.create_column_ast_type(*this);
-        args.push_back(Construct(vec_type));
+        args.Push(Construct(vec_type));
     }
 
     auto* matrix_type = param.create_mat_ast_type(*this);
@@ -2752,9 +2752,9 @@ TEST_P(MatrixConstructorTest, WithElements_Success) {
 
     Enable(ast::Extension::kF16);
 
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 16> args;
     for (uint32_t i = 0; i < param.columns * param.rows; i++) {
-        args.push_back(Construct(param.create_element_ast_type(*this)));
+        args.Push(Construct(param.create_element_ast_type(*this)));
     }
 
     auto* matrix_type = param.create_mat_ast_type(*this);
@@ -2775,10 +2775,10 @@ TEST_P(MatrixConstructorTest, ElementTypeAlias_Error) {
     auto* elem_type_alias = Alias("ElemType", param.create_element_ast_type(*this));
 
     std::stringstream args_tys;
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 4> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = ty.vec(ty.u32(), param.rows);
-        args.push_back(Construct(vec_type));
+        args.Push(Construct(vec_type));
         if (i > 0) {
             args_tys << ", ";
         }
@@ -2804,10 +2804,10 @@ TEST_P(MatrixConstructorTest, ElementTypeAlias_Success) {
 
     auto* elem_type_alias = Alias("ElemType", param.create_element_ast_type(*this));
 
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = param.create_column_ast_type(*this);
-        args.push_back(Construct(vec_type));
+        args.Push(Construct(vec_type));
     }
 
     auto* matrix_type = ty.mat(ty.Of(elem_type_alias), param.columns, param.rows);
@@ -2837,9 +2837,9 @@ TEST_P(MatrixConstructorTest, ArgumentTypeAlias_Success) {
     auto* vec_type = param.create_column_ast_type(*this);
     auto* vec_alias = Alias("ColVectorAlias", vec_type);
 
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 4> args;
     for (uint32_t i = 0; i < param.columns; i++) {
-        args.push_back(Construct(ty.Of(vec_alias)));
+        args.Push(Construct(ty.Of(vec_alias)));
     }
 
     auto* tc = Construct(Source{}, matrix_type, std::move(args));
@@ -2857,10 +2857,10 @@ TEST_P(MatrixConstructorTest, ArgumentElementTypeAlias_Error) {
     auto* u32_type_alias = Alias("UnsignedInt", ty.u32());
 
     std::stringstream args_tys;
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 4> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = ty.vec(ty.Of(u32_type_alias), param.rows);
-        args.push_back(Construct(vec_type));
+        args.Push(Construct(vec_type));
         if (i > 0) {
             args_tys << ", ";
         }
@@ -2882,10 +2882,10 @@ TEST_P(MatrixConstructorTest, ArgumentElementTypeAlias_Success) {
 
     auto* elem_type_alias = Alias("ElemType", param.create_element_ast_type(*this));
 
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 4> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         auto* vec_type = ty.vec(ty.Of(elem_type_alias), param.rows);
-        args.push_back(Construct(vec_type));
+        args.Push(Construct(vec_type));
     }
 
     auto* matrix_type = param.create_mat_ast_type(*this);
@@ -2900,9 +2900,9 @@ TEST_P(MatrixConstructorTest, InferElementTypeFromVectors) {
 
     Enable(ast::Extension::kF16);
 
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns; i++) {
-        args.push_back(Construct(param.create_column_ast_type(*this)));
+        args.Push(Construct(param.create_column_ast_type(*this)));
     }
 
     auto* matrix_type = create<ast::Matrix>(nullptr, param.rows, param.columns);
@@ -2917,9 +2917,9 @@ TEST_P(MatrixConstructorTest, InferElementTypeFromScalars) {
 
     Enable(ast::Extension::kF16);
 
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.rows * param.columns; i++) {
-        args.push_back(param.create_element_ast_value(*this, static_cast<double>(i)));
+        args.Push(param.create_element_ast_value(*this, static_cast<double>(i)));
     }
 
     auto* matrix_type = create<ast::Matrix>(nullptr, param.rows, param.columns);
@@ -2937,17 +2937,17 @@ TEST_P(MatrixConstructorTest, CannotInferElementTypeFromVectors_Mismatch) {
     err << "12:34 error: no matching constructor for mat" << param.columns << "x" << param.rows
         << "(";
 
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 8> args;
     for (uint32_t i = 0; i < param.columns; i++) {
         if (i > 0) {
             err << ", ";
         }
         if (i == 1) {
             // Odd one out
-            args.push_back(Construct(ty.vec<i32>(param.rows)));
+            args.Push(Construct(ty.vec<i32>(param.rows)));
             err << "vec" << param.rows << "<i32>";
         } else {
-            args.push_back(Construct(param.create_column_ast_type(*this)));
+            args.Push(Construct(param.create_column_ast_type(*this)));
             err << "vec" << param.rows << "<" + param.get_element_type_name() + ">";
         }
     }
@@ -2968,16 +2968,16 @@ TEST_P(MatrixConstructorTest, CannotInferElementTypeFromScalars_Mismatch) {
     err << "12:34 error: no matching constructor for mat" << param.columns << "x" << param.rows
         << "(";
 
-    ast::ExpressionList args;
+    utils::Vector<const ast::Expression*, 16> args;
     for (uint32_t i = 0; i < param.rows * param.columns; i++) {
         if (i > 0) {
             err << ", ";
         }
         if (i == 3) {
-            args.push_back(Expr(static_cast<i32>(i)));  // The odd one out
+            args.Push(Expr(static_cast<i32>(i)));  // The odd one out
             err << "i32";
         } else {
-            args.push_back(param.create_element_ast_value(*this, static_cast<double>(i)));
+            args.Push(param.create_element_ast_value(*this, static_cast<double>(i)));
             err << param.get_element_type_name();
         }
     }
@@ -3054,14 +3054,14 @@ TEST_P(StructConstructorInputsTest, TooFew) {
 
     Enable(ast::Extension::kF16);
 
-    ast::StructMemberList members;
-    ast::ExpressionList values;
+    utils::Vector<const ast::StructMember*, 16> members;
+    utils::Vector<const ast::Expression*, 16> values;
     for (uint32_t i = 0; i < N; i++) {
         auto* struct_type = str_params.ast(*this);
-        members.push_back(Member("member_" + std::to_string(i), struct_type));
+        members.Push(Member("member_" + std::to_string(i), struct_type));
         if (i < N - 1) {
             auto* ctor_value_expr = str_params.expr(*this, 0);
-            values.push_back(ctor_value_expr);
+            values.Push(ctor_value_expr);
         }
     }
     auto* s = Structure("s", members);
@@ -3079,15 +3079,15 @@ TEST_P(StructConstructorInputsTest, TooMany) {
 
     Enable(ast::Extension::kF16);
 
-    ast::StructMemberList members;
-    ast::ExpressionList values;
+    utils::Vector<const ast::StructMember*, 16> members;
+    utils::Vector<const ast::Expression*, 8> values;
     for (uint32_t i = 0; i < N + 1; i++) {
         if (i < N) {
             auto* struct_type = str_params.ast(*this);
-            members.push_back(Member("member_" + std::to_string(i), struct_type));
+            members.Push(Member("member_" + std::to_string(i), struct_type));
         }
         auto* ctor_value_expr = str_params.expr(*this, 0);
-        values.push_back(ctor_value_expr);
+        values.Push(ctor_value_expr);
     }
     auto* s = Structure("s", members);
     auto* tc = Construct(Source{{12, 34}}, ty.Of(s), values);
@@ -3116,17 +3116,17 @@ TEST_P(StructConstructorTypeTest, AllTypes) {
         return;
     }
 
-    ast::StructMemberList members;
-    ast::ExpressionList values;
+    utils::Vector<const ast::StructMember*, 16> members;
+    utils::Vector<const ast::Expression*, 8> values;
     // make the last value of the constructor to have a different type
     uint32_t constructor_value_with_different_type = N - 1;
     for (uint32_t i = 0; i < N; i++) {
         auto* struct_type = str_params.ast(*this);
-        members.push_back(Member("member_" + std::to_string(i), struct_type));
+        members.Push(Member("member_" + std::to_string(i), struct_type));
         auto* ctor_value_expr = (i == constructor_value_with_different_type)
                                     ? ctor_params.expr(*this, 0)
                                     : str_params.expr(*this, 0);
-        values.push_back(ctor_value_expr);
+        values.Push(ctor_value_expr);
     }
     auto* s = Structure("s", members);
     auto* tc = Construct(ty.Of(s), values);
@@ -3149,12 +3149,12 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeConstructorValidationTest,
 
 TEST_F(ResolverTypeConstructorValidationTest, Struct_Nested) {
     auto* inner_m = Member("m", ty.i32());
-    auto* inner_s = Structure("inner_s", {inner_m});
+    auto* inner_s = Structure("inner_s", utils::Vector{inner_m});
 
     auto* m0 = Member("m0", ty.i32());
     auto* m1 = Member("m1", ty.Of(inner_s));
     auto* m2 = Member("m2", ty.i32());
-    auto* s = Structure("s", {m0, m1, m2});
+    auto* s = Structure("s", utils::Vector{m0, m1, m2});
 
     auto* tc = Construct(Source{{12, 34}}, ty.Of(s), 1_i, 1_i, 1_i);
     WrapInFunction(tc);
@@ -3166,14 +3166,14 @@ TEST_F(ResolverTypeConstructorValidationTest, Struct_Nested) {
 
 TEST_F(ResolverTypeConstructorValidationTest, Struct) {
     auto* m = Member("m", ty.i32());
-    auto* s = Structure("MyInputs", {m});
+    auto* s = Structure("MyInputs", utils::Vector{m});
     auto* tc = Construct(Source{{12, 34}}, ty.Of(s));
     WrapInFunction(tc);
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, Struct_Empty) {
-    auto* str = Structure("S", {
+    auto* str = Structure("S", utils::Vector{
                                    Member("a", ty.i32()),
                                    Member("b", ty.f32()),
                                    Member("c", ty.vec3<i32>()),
@@ -3200,7 +3200,7 @@ TEST_F(ResolverTypeConstructorValidationTest, NonConstructibleType_AtomicArray) 
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, NonConstructibleType_AtomicStructMember) {
-    auto* str = Structure("S", {Member("a", ty.atomic(ty.i32()))});
+    auto* str = Structure("S", utils::Vector{Member("a", ty.atomic(ty.i32()))});
     WrapInFunction(Assign(Phony(), Construct(Source{{12, 34}}, ty.Of(str))));
 
     EXPECT_FALSE(r()->Resolve());

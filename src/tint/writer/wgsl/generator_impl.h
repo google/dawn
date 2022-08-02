@@ -172,11 +172,11 @@ class GeneratorImpl : public TextGenerator {
     /// Handles a statement list
     /// @param stmts the statements to emit
     /// @returns true if the statements were emitted
-    bool EmitStatements(const ast::StatementList& stmts);
+    bool EmitStatements(utils::VectorRef<const ast::Statement*> stmts);
     /// Handles a statement list with an increased indentation
     /// @param stmts the statements to emit
     /// @returns true if the statements were emitted
-    bool EmitStatementsWithIndent(const ast::StatementList& stmts);
+    bool EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts);
     /// Handles generating a switch statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted
@@ -214,7 +214,7 @@ class GeneratorImpl : public TextGenerator {
     /// @param out the output of the expression stream
     /// @param attrs the attribute list
     /// @returns true if the attributes were emitted
-    bool EmitAttributes(std::ostream& out, const ast::AttributeList& attrs);
+    bool EmitAttributes(std::ostream& out, utils::VectorRef<const ast::Attribute*> attrs);
 };
 
 }  // namespace tint::writer::wgsl

@@ -687,7 +687,7 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
     return true;
 }
 
-bool GeneratorImpl::EmitStatements(const ast::StatementList& stmts) {
+bool GeneratorImpl::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) {
     for (auto* s : stmts) {
         if (!EmitStatement(s)) {
             return false;
@@ -696,7 +696,7 @@ bool GeneratorImpl::EmitStatements(const ast::StatementList& stmts) {
     return true;
 }
 
-bool GeneratorImpl::EmitStatementsWithIndent(const ast::StatementList& stmts) {
+bool GeneratorImpl::EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts) {
     ScopedIndent si(this);
     return EmitStatements(stmts);
 }
@@ -893,7 +893,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
         out << name;
         {
             ScopedParen sp(out);
-            for (size_t i = 0; i < expr->args.size(); i++) {
+            for (size_t i = 0; i < expr->args.Length(); i++) {
                 auto* arg = expr->args[i];
                 if (i > 0) {
                     out << ", ";
@@ -1205,7 +1205,7 @@ bool GeneratorImpl::EmitDotCall(std::ostream& out,
 bool GeneratorImpl::EmitModfCall(std::ostream& out,
                                  const ast::CallExpression* expr,
                                  const sem::Builtin* builtin) {
-    if (expr->args.size() == 1) {
+    if (expr->args.Length() == 1) {
         return CallBuiltinHelper(
             out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
                 // Emit the builtin return type unique to this overload. This does not
@@ -1244,7 +1244,7 @@ bool GeneratorImpl::EmitModfCall(std::ostream& out,
 bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
                                   const ast::CallExpression* expr,
                                   const sem::Builtin* builtin) {
-    if (expr->args.size() == 1) {
+    if (expr->args.Length() == 1) {
         return CallBuiltinHelper(
             out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
                 // Emit the builtin return type unique to this overload. This does not
@@ -1746,7 +1746,7 @@ bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
                 return false;
             }
             out << ":";
-            if (selector == stmt->selectors.back()) {
+            if (selector == stmt->selectors.Back()) {
                 out << " {";
             }
         }
@@ -1847,7 +1847,7 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
                 return false;
             }
         } else {
-            if (!EmitStatementsWithIndent({stmt->else_statement})) {
+            if (!EmitStatementsWithIndent(utils::Vector{stmt->else_statement})) {
                 return false;
             }
         }
@@ -2102,8 +2102,9 @@ bool GeneratorImpl::EmitIOVariable(const sem::Variable* var) {
     return true;
 }
 
-void GeneratorImpl::EmitInterpolationQualifiers(std::ostream& out,
-                                                const ast::AttributeList& attributes) {
+void GeneratorImpl::EmitInterpolationQualifiers(
+    std::ostream& out,
+    utils::VectorRef<const ast::Attribute*> attributes) {
     for (auto* attr : attributes) {
         if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
             switch (interpolate->type) {
@@ -2127,8 +2128,9 @@ void GeneratorImpl::EmitInterpolationQualifiers(std::ostream& out,
     }
 }
 
-bool GeneratorImpl::EmitAttributes(std::ostream& out, const ast::AttributeList& attributes) {
-    if (attributes.empty()) {
+bool GeneratorImpl::EmitAttributes(std::ostream& out,
+                                   utils::VectorRef<const ast::Attribute*> attributes) {
+    if (attributes.IsEmpty()) {
         return true;
     }
     bool first = true;

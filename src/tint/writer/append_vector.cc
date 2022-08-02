@@ -150,9 +150,8 @@ const sem::Call* AppendVector(ProgramBuilder* b,
     }
 
     auto* constructor_ast = b->Construct(
-        packed_ast_ty, utils::ToStdVector(utils::Transform(packed, [&](const sem::Expression* expr) {
-            return expr->Declaration();
-        })));
+        packed_ast_ty,
+        utils::Transform(packed, [&](const sem::Expression* expr) { return expr->Declaration(); }));
     auto* constructor_target = b->create<sem::TypeConstructor>(
         packed_sem_ty,
         utils::Transform(packed,

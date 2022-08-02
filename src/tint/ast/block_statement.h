@@ -32,16 +32,16 @@ class BlockStatement final : public Castable<BlockStatement, Statement> {
     BlockStatement(ProgramID pid,
                    NodeID nid,
                    const Source& source,
-                   const StatementList& statements);
+                   utils::VectorRef<const Statement*> statements);
     /// Move constructor
     BlockStatement(BlockStatement&&);
     ~BlockStatement() override;
 
     /// @returns true if the block has no statements
-    bool Empty() const { return statements.empty(); }
+    bool Empty() const { return statements.IsEmpty(); }
 
     /// @returns the last statement in the block or nullptr if block empty
-    const Statement* Last() const { return statements.empty() ? nullptr : statements.back(); }
+    const Statement* Last() const { return statements.IsEmpty() ? nullptr : statements.Back(); }
 
     /// Clones this node and all transitive child nodes using the `CloneContext`
     /// `ctx`.
@@ -50,7 +50,7 @@ class BlockStatement final : public Castable<BlockStatement, Statement> {
     const BlockStatement* Clone(CloneContext* ctx) const override;
 
     /// the statement list
-    const StatementList statements;
+    const utils::Vector<const Statement*, 8> statements;
 };
 
 }  // namespace tint::ast

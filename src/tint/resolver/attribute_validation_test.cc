@@ -84,9 +84,9 @@ struct TestParams {
 };
 struct TestWithParams : ResolverTestWithParam<TestParams> {};
 
-static ast::AttributeList createAttributes(const Source& source,
-                                           ProgramBuilder& builder,
-                                           AttributeKind kind) {
+static utils::Vector<const ast::Attribute*, 2> createAttributes(const Source& source,
+                                                                ProgramBuilder& builder,
+                                                                AttributeKind kind) {
     switch (kind) {
         case AttributeKind::kAlign:
             return {builder.create<ast::StructMemberAlignAttribute>(source, 4u)};
@@ -128,10 +128,10 @@ TEST_P(FunctionParameterAttributeTest, IsValid) {
     auto& params = GetParam();
 
     Func("main",
-         {
+         utils::Vector{
              Param("a", ty.vec4<f32>(), createAttributes({}, *this, params.kind)),
          },
-         ty.void_(), {});
+         ty.void_(), utils::Empty);
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -163,11 +163,11 @@ using FunctionReturnTypeAttributeTest = TestWithParams;
 TEST_P(FunctionReturnTypeAttributeTest, IsValid) {
     auto& params = GetParam();
 
-    Func("main", {}, ty.f32(),
-         {
+    Func("main", utils::Empty, ty.f32(),
+         utils::Vector{
              Return(1_f),
          },
-         {}, createAttributes({}, *this, params.kind));
+         utils::Empty, createAttributes({}, *this, params.kind));
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -201,11 +201,11 @@ using ComputeShaderParameterAttributeTest = TestWithParams;
 TEST_P(ComputeShaderParameterAttributeTest, IsValid) {
     auto& params = GetParam();
     Func("main",
-         {
+         utils::Vector{
              Param("a", ty.vec4<f32>(), createAttributes(Source{{12, 34}}, *this, params.kind)),
          },
-         ty.void_(), {},
-         {
+         ty.void_(), utils::Empty,
+         utils::Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          });
@@ -250,11 +250,11 @@ TEST_P(FragmentShaderParameterAttributeTest, IsValid) {
     auto& params = GetParam();
     auto attrs = createAttributes(Source{{12, 34}}, *this, params.kind);
     if (params.kind != AttributeKind::kBuiltin && params.kind != AttributeKind::kLocation) {
-        attrs.push_back(Builtin(Source{{34, 56}}, ast::BuiltinValue::kPosition));
+        attrs.Push(Builtin(Source{{34, 56}}, ast::BuiltinValue::kPosition));
     }
     auto* p = Param("a", ty.vec4<f32>(), attrs);
-    Func("frag_main", {p}, ty.void_(), {},
-         {
+    Func("frag_main", utils::Vector{p}, ty.void_(), utils::Empty,
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -287,17 +287,17 @@ TEST_P(VertexShaderParameterAttributeTest, IsValid) {
     auto& params = GetParam();
     auto attrs = createAttributes(Source{{12, 34}}, *this, params.kind);
     if (params.kind != AttributeKind::kLocation) {
-        attrs.push_back(Location(Source{{34, 56}}, 2));
+        attrs.Push(Location(Source{{34, 56}}, 2));
     }
     auto* p = Param("a", ty.vec4<f32>(), attrs);
-    Func("vertex_main", {p}, ty.vec4<f32>(),
-         {
+    Func("vertex_main", utils::Vector{p}, ty.vec4<f32>(),
+         utils::Vector{
              Return(Construct(ty.vec4<f32>())),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kVertex),
          },
-         {
+         utils::Vector{
              Builtin(ast::BuiltinValue::kPosition),
          });
 
@@ -338,11 +338,11 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 using ComputeShaderReturnTypeAttributeTest = TestWithParams;
 TEST_P(ComputeShaderReturnTypeAttributeTest, IsValid) {
     auto& params = GetParam();
-    Func("main", {}, ty.vec4<f32>(),
-         {
+    Func("main", utils::Empty, ty.vec4<f32>(),
+         utils::Vector{
              Return(Construct(ty.vec4<f32>(), 1_f)),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(1_i),
          },
@@ -389,9 +389,10 @@ using FragmentShaderReturnTypeAttributeTest = TestWithParams;
 TEST_P(FragmentShaderReturnTypeAttributeTest, IsValid) {
     auto& params = GetParam();
     auto attrs = createAttributes(Source{{12, 34}}, *this, params.kind);
-    attrs.push_back(Location(Source{{34, 56}}, 2));
-    Func("frag_main", {}, ty.vec4<f32>(), {Return(Construct(ty.vec4<f32>()))},
-         {
+    attrs.Push(Location(Source{{34, 56}}, 2));
+    Func("frag_main", utils::Empty, ty.vec4<f32>(),
+         utils::Vector{Return(Construct(ty.vec4<f32>()))},
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          },
          attrs);
@@ -442,13 +443,13 @@ TEST_P(VertexShaderReturnTypeAttributeTest, IsValid) {
     auto attrs = createAttributes(Source{{12, 34}}, *this, params.kind);
     // a vertex shader must include the 'position' builtin in its return type
     if (params.kind != AttributeKind::kBuiltin) {
-        attrs.push_back(Builtin(Source{{34, 56}}, ast::BuiltinValue::kPosition));
+        attrs.Push(Builtin(Source{{34, 56}}, ast::BuiltinValue::kPosition));
     }
-    Func("vertex_main", {}, ty.vec4<f32>(),
-         {
+    Func("vertex_main", utils::Empty, ty.vec4<f32>(),
+         utils::Vector{
              Return(Construct(ty.vec4<f32>())),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kVertex),
          },
          attrs);
@@ -487,14 +488,14 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 
 using EntryPointParameterAttributeTest = TestWithParams;
 TEST_F(EntryPointParameterAttributeTest, DuplicateAttribute) {
-    Func("main", {}, ty.f32(),
-         {
+    Func("main", utils::Empty, ty.f32(),
+         utils::Vector{
              Return(1_f),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         {
+         utils::Vector{
              Location(Source{{12, 34}}, 2),
              Location(Source{{56, 78}}, 3),
          });
@@ -507,14 +508,14 @@ TEST_F(EntryPointParameterAttributeTest, DuplicateAttribute) {
 
 TEST_F(EntryPointParameterAttributeTest, DuplicateInternalAttribute) {
     auto* s = Param("s", ty.sampler(ast::SamplerKind::kSampler),
-                    ast::AttributeList{
+                    utils::Vector{
                         create<ast::BindingAttribute>(0u),
                         create<ast::GroupAttribute>(0u),
                         Disable(ast::DisabledValidation::kBindingPointCollision),
                         Disable(ast::DisabledValidation::kEntryPointParameter),
                     });
-    Func("f", {s}, ty.void_(), {},
-         {
+    Func("f", utils::Vector{s}, ty.void_(), utils::Empty,
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -523,14 +524,14 @@ TEST_F(EntryPointParameterAttributeTest, DuplicateInternalAttribute) {
 
 using EntryPointReturnTypeAttributeTest = ResolverTest;
 TEST_F(EntryPointReturnTypeAttributeTest, DuplicateAttribute) {
-    Func("main", {}, ty.f32(),
-         {
+    Func("main", utils::Empty, ty.f32(),
+         utils::Vector{
              Return(1_f),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         ast::AttributeList{
+         utils::Vector{
              Location(Source{{12, 34}}, 2),
              Location(Source{{56, 78}}, 3),
          });
@@ -542,11 +543,11 @@ TEST_F(EntryPointReturnTypeAttributeTest, DuplicateAttribute) {
 }
 
 TEST_F(EntryPointReturnTypeAttributeTest, DuplicateInternalAttribute) {
-    Func("f", {}, ty.i32(), {Return(1_i)},
-         {
+    Func("f", utils::Empty, ty.i32(), utils::Vector{Return(1_i)},
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         ast::AttributeList{
+         utils::Vector{
              Disable(ast::DisabledValidation::kBindingPointCollision),
              Disable(ast::DisabledValidation::kEntryPointParameter),
          });
@@ -561,7 +562,7 @@ using SpirvBlockAttribute = transform::AddSpirvBlockAttribute::SpirvBlockAttribu
 TEST_P(StructAttributeTest, IsValid) {
     auto& params = GetParam();
 
-    auto* str = create<ast::Struct>(Sym("mystruct"), ast::StructMemberList{Member("a", ty.f32())},
+    auto* str = create<ast::Struct>(Sym("mystruct"), utils::Vector{Member("a", ty.f32())},
                                     createAttributes(Source{{12, 34}}, *this, params.kind));
     AST().AddGlobalDeclaration(str);
 
@@ -592,16 +593,14 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 using StructMemberAttributeTest = TestWithParams;
 TEST_P(StructMemberAttributeTest, IsValid) {
     auto& params = GetParam();
-    ast::StructMemberList members;
+    utils::Vector<const ast::StructMember*, 1> members;
     if (params.kind == AttributeKind::kBuiltin) {
-        members.push_back(
-            {Member("a", ty.vec4<f32>(), createAttributes(Source{{12, 34}}, *this, params.kind))});
+        members.Push(
+            Member("a", ty.vec4<f32>(), createAttributes(Source{{12, 34}}, *this, params.kind)));
     } else {
-        members.push_back(
-            {Member("a", ty.f32(), createAttributes(Source{{12, 34}}, *this, params.kind))});
+        members.Push(Member("a", ty.f32(), createAttributes(Source{{12, 34}}, *this, params.kind)));
     }
     Structure("mystruct", members);
-    WrapInFunction();
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
@@ -627,38 +626,35 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                          TestParams{AttributeKind::kBindingAndGroup, false}));
 TEST_F(StructMemberAttributeTest, DuplicateAttribute) {
     Structure("mystruct",
-              {
+              utils::Vector{
                   Member("a", ty.i32(),
-                         {
+                         utils::Vector{
                              create<ast::StructMemberAlignAttribute>(Source{{12, 34}}, 4u),
                              create<ast::StructMemberAlignAttribute>(Source{{56, 78}}, 8u),
                          }),
               });
-    WrapInFunction();
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(56:78 error: duplicate align attribute
 12:34 note: first attribute declared here)");
 }
 TEST_F(StructMemberAttributeTest, InvariantAttributeWithPosition) {
-    Structure("mystruct", {
+    Structure("mystruct", utils::Vector{
                               Member("a", ty.vec4<f32>(),
-                                     {
+                                     utils::Vector{
                                          Invariant(),
                                          Builtin(ast::BuiltinValue::kPosition),
                                      }),
                           });
-    WrapInFunction();
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 TEST_F(StructMemberAttributeTest, InvariantAttributeWithoutPosition) {
-    Structure("mystruct", {
+    Structure("mystruct", utils::Vector{
                               Member("a", ty.vec4<f32>(),
-                                     {
+                                     utils::Vector{
                                          Invariant(Source{{12, 34}}),
                                      }),
                           });
-    WrapInFunction();
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: invariant attribute must only be applied to a "
@@ -672,11 +668,9 @@ TEST_P(ArrayAttributeTest, IsValid) {
     auto& params = GetParam();
 
     auto* arr = ty.array(ty.f32(), nullptr, createAttributes(Source{{12, 34}}, *this, params.kind));
-    Structure("mystruct", {
+    Structure("mystruct", utils::Vector{
                               Member("a", arr),
                           });
-
-    WrapInFunction();
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -714,8 +708,6 @@ TEST_P(VariableAttributeTest, IsValid) {
                   createAttributes(Source{{12, 34}}, *this, params.kind));
     }
 
-    WrapInFunction();
-
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
     } else {
@@ -744,13 +736,11 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 
 TEST_F(VariableAttributeTest, DuplicateAttribute) {
     GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler),
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(Source{{12, 34}}, 2u),
                   create<ast::GroupAttribute>(2u),
                   create<ast::BindingAttribute>(Source{{56, 78}}, 3u),
               });
-
-    WrapInFunction();
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -760,7 +750,7 @@ TEST_F(VariableAttributeTest, DuplicateAttribute) {
 
 TEST_F(VariableAttributeTest, LocalVariable) {
     auto* v = Var("a", ty.f32(),
-                  ast::AttributeList{
+                  utils::Vector{
                       create<ast::BindingAttribute>(Source{{12, 34}}, 2u),
                   });
 
@@ -776,8 +766,6 @@ TEST_P(ConstantAttributeTest, IsValid) {
 
     GlobalConst("a", ty.f32(), Expr(1.23_f),
                 createAttributes(Source{{12, 34}}, *this, params.kind));
-
-    WrapInFunction();
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -806,12 +794,10 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 
 TEST_F(ConstantAttributeTest, DuplicateAttribute) {
     GlobalConst("a", ty.f32(), Expr(1.23_f),
-                ast::AttributeList{
+                utils::Vector{
                     create<ast::IdAttribute>(Source{{12, 34}}, 0u),
                     create<ast::IdAttribute>(Source{{56, 78}}, 1u),
                 });
-
-    WrapInFunction();
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -824,8 +810,6 @@ TEST_P(OverrideAttributeTest, IsValid) {
     auto& params = GetParam();
 
     Override("a", ty.f32(), Expr(1.23_f), createAttributes(Source{{12, 34}}, *this, params.kind));
-
-    WrapInFunction();
 
     if (params.should_pass) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -853,12 +837,10 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 
 TEST_F(OverrideAttributeTest, DuplicateAttribute) {
     Override("a", ty.f32(), Expr(1.23_f),
-             ast::AttributeList{
+             utils::Vector{
                  create<ast::IdAttribute>(Source{{12, 34}}, 0u),
                  create<ast::IdAttribute>(Source{{56, 78}}, 1u),
              });
-
-    WrapInFunction();
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -895,8 +877,10 @@ TEST_P(ArrayStrideTest, All) {
        << ", should_pass: " << params.should_pass;
     SCOPED_TRACE(ss.str());
 
-    auto* arr =
-        ty.array(el_ty, 4_u, {create<ast::StrideAttribute>(Source{{12, 34}}, params.stride)});
+    auto* arr = ty.array(el_ty, 4_u,
+                         utils::Vector{
+                             create<ast::StrideAttribute>(Source{{12, 34}}, params.stride),
+                         });
 
     GlobalVar("myarray", arr, ast::StorageClass::kPrivate);
 
@@ -976,7 +960,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 
 TEST_F(ArrayStrideTest, DuplicateAttribute) {
     auto* arr = ty.array(Source{{12, 34}}, ty.i32(), 4_u,
-                         {
+                         utils::Vector{
                              create<ast::StrideAttribute>(Source{{12, 34}}, 4u),
                              create<ast::StrideAttribute>(Source{{56, 78}}, 4u),
                          });
@@ -997,7 +981,9 @@ namespace {
 
 using ResourceAttributeTest = ResolverTest;
 TEST_F(ResourceAttributeTest, UniformBufferMissingBinding) {
-    auto* s = Structure("S", {Member("x", ty.i32())});
+    auto* s = Structure("S", utils::Vector{
+                                 Member("x", ty.i32()),
+                             });
     GlobalVar(Source{{12, 34}}, "G", ty.Of(s), ast::StorageClass::kUniform);
 
     EXPECT_FALSE(r()->Resolve());
@@ -1006,7 +992,9 @@ TEST_F(ResourceAttributeTest, UniformBufferMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, StorageBufferMissingBinding) {
-    auto* s = Structure("S", {Member("x", ty.i32())});
+    auto* s = Structure("S", utils::Vector{
+                                 Member("x", ty.i32()),
+                             });
     GlobalVar(Source{{12, 34}}, "G", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead);
 
     EXPECT_FALSE(r()->Resolve());
@@ -1035,7 +1023,7 @@ TEST_F(ResourceAttributeTest, SamplerMissingBinding) {
 TEST_F(ResourceAttributeTest, BindingPairMissingBinding) {
     GlobalVar(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler),
               ast::StorageClass::kNone,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::GroupAttribute>(1u),
               });
 
@@ -1047,7 +1035,7 @@ TEST_F(ResourceAttributeTest, BindingPairMissingBinding) {
 TEST_F(ResourceAttributeTest, BindingPairMissingGroup) {
     GlobalVar(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler),
               ast::StorageClass::kNone,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(1u),
               });
 
@@ -1059,25 +1047,25 @@ TEST_F(ResourceAttributeTest, BindingPairMissingGroup) {
 TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByEntryPoint) {
     GlobalVar(Source{{12, 34}}, "A", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
               ast::StorageClass::kNone,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(1u),
                   create<ast::GroupAttribute>(2u),
               });
     GlobalVar(Source{{56, 78}}, "B", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
               ast::StorageClass::kNone,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(1u),
                   create<ast::GroupAttribute>(2u),
               });
 
-    Func("F", {}, ty.void_(),
-         {
+    Func("F", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("a", ty.vec4<f32>(), ast::StorageClass::kNone,
                       Call("textureLoad", "A", vec2<i32>(1_i, 2_i), 0_i))),
              Decl(Var("b", ty.vec4<f32>(), ast::StorageClass::kNone,
                       Call("textureLoad", "B", vec2<i32>(1_i, 2_i), 0_i))),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -1091,31 +1079,31 @@ TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByEntryPoint) {
 TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByDifferentEntryPoints) {
     GlobalVar(Source{{12, 34}}, "A", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
               ast::StorageClass::kNone,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(1u),
                   create<ast::GroupAttribute>(2u),
               });
     GlobalVar(Source{{56, 78}}, "B", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
               ast::StorageClass::kNone,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(1u),
                   create<ast::GroupAttribute>(2u),
               });
 
-    Func("F_A", {}, ty.void_(),
-         {
+    Func("F_A", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("a", ty.vec4<f32>(), ast::StorageClass::kNone,
                       Call("textureLoad", "A", vec2<i32>(1_i, 2_i), 0_i))),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
-    Func("F_B", {}, ty.void_(),
-         {
+    Func("F_B", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("b", ty.vec4<f32>(), ast::StorageClass::kNone,
                       Call("textureLoad", "B", vec2<i32>(1_i, 2_i), 0_i))),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -1124,7 +1112,7 @@ TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByDifferentEntryPoints) {
 
 TEST_F(ResourceAttributeTest, BindingPointOnNonResource) {
     GlobalVar(Source{{12, 34}}, "G", ty.f32(), ast::StorageClass::kPrivate,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(1u),
                   create<ast::GroupAttribute>(2u),
               });
@@ -1141,32 +1129,38 @@ namespace InvariantAttributeTests {
 namespace {
 using InvariantAttributeTests = ResolverTest;
 TEST_F(InvariantAttributeTests, InvariantWithPosition) {
-    auto* param = Param(
-        "p", ty.vec4<f32>(),
-        {Invariant(Source{{12, 34}}), Builtin(Source{{56, 78}}, ast::BuiltinValue::kPosition)});
-    Func("main", {param}, ty.vec4<f32>(),
-         {
+    auto* param = Param("p", ty.vec4<f32>(),
+                        utils::Vector{
+                            Invariant(Source{{12, 34}}),
+                            Builtin(Source{{56, 78}}, ast::BuiltinValue::kPosition),
+                        });
+    Func("main", utils::Vector{param}, ty.vec4<f32>(),
+         utils::Vector{
              Return(Construct(ty.vec4<f32>())),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         {
+         utils::Vector{
              Location(0),
          });
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(InvariantAttributeTests, InvariantWithoutPosition) {
-    auto* param = Param("p", ty.vec4<f32>(), {Invariant(Source{{12, 34}}), Location(0)});
-    Func("main", {param}, ty.vec4<f32>(),
-         {
+    auto* param = Param("p", ty.vec4<f32>(),
+                        utils::Vector{
+                            Invariant(Source{{12, 34}}),
+                            Location(0),
+                        });
+    Func("main", utils::Vector{param}, ty.vec4<f32>(),
+         utils::Vector{
              Return(Construct(ty.vec4<f32>())),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          },
-         {
+         utils::Vector{
              Location(0),
          });
     EXPECT_FALSE(r()->Resolve());
@@ -1182,15 +1176,20 @@ namespace {
 
 using WorkgroupAttribute = ResolverTest;
 TEST_F(WorkgroupAttribute, ComputeShaderPass) {
-    Func("main", {}, ty.void_(), {},
-         {Stage(ast::PipelineStage::kCompute),
-          create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i))});
+    Func("main", utils::Empty, ty.void_(), utils::Empty,
+         utils::Vector{
+             Stage(ast::PipelineStage::kCompute),
+             create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i)),
+         });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(WorkgroupAttribute, Missing) {
-    Func(Source{{12, 34}}, "main", {}, ty.void_(), {}, {Stage(ast::PipelineStage::kCompute)});
+    Func(Source{{12, 34}}, "main", utils::Empty, ty.void_(), utils::Empty,
+         utils::Vector{
+             Stage(ast::PipelineStage::kCompute),
+         });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1199,8 +1198,10 @@ TEST_F(WorkgroupAttribute, Missing) {
 }
 
 TEST_F(WorkgroupAttribute, NotAnEntryPoint) {
-    Func("main", {}, ty.void_(), {},
-         {create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i))});
+    Func("main", utils::Empty, ty.void_(), utils::Empty,
+         utils::Vector{
+             create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i)),
+         });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1209,9 +1210,11 @@ TEST_F(WorkgroupAttribute, NotAnEntryPoint) {
 }
 
 TEST_F(WorkgroupAttribute, NotAComputeShader) {
-    Func("main", {}, ty.void_(), {},
-         {Stage(ast::PipelineStage::kFragment),
-          create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i))});
+    Func("main", utils::Empty, ty.void_(), utils::Empty,
+         utils::Vector{
+             Stage(ast::PipelineStage::kFragment),
+             create<ast::WorkgroupAttribute>(Source{{12, 34}}, Expr(1_i)),
+         });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1220,8 +1223,8 @@ TEST_F(WorkgroupAttribute, NotAComputeShader) {
 }
 
 TEST_F(WorkgroupAttribute, DuplicateAttribute) {
-    Func(Source{{12, 34}}, "main", {}, ty.void_(), {},
-         {
+    Func(Source{{12, 34}}, "main", utils::Empty, ty.void_(), utils::Empty,
+         utils::Vector{
              Stage(ast::PipelineStage::kCompute),
              WorkgroupSize(Source{{12, 34}}, 1_i, nullptr, nullptr),
              WorkgroupSize(Source{{56, 78}}, 2_i, nullptr, nullptr),
@@ -1254,15 +1257,15 @@ TEST_P(InterpolateParameterTest, All) {
     auto& params = GetParam();
 
     Func("main",
-         {
+         utils::Vector{
              Param("a", ty.f32(),
-                   {
+                   utils::Vector{
                        Location(0),
                        Interpolate(Source{{12, 34}}, params.type, params.sampling),
                    }),
          },
-         ty.void_(), {},
-         {
+         ty.void_(), utils::Empty,
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -1280,15 +1283,15 @@ TEST_P(InterpolateParameterTest, IntegerScalar) {
     auto& params = GetParam();
 
     Func("main",
-         {
+         utils::Vector{
              Param("a", ty.i32(),
-                   {
+                   utils::Vector{
                        Location(0),
                        Interpolate(Source{{12, 34}}, params.type, params.sampling),
                    }),
          },
-         ty.void_(), {},
-         {
+         ty.void_(), utils::Empty,
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -1311,15 +1314,15 @@ TEST_P(InterpolateParameterTest, IntegerVector) {
     auto& params = GetParam();
 
     Func("main",
-         {
+         utils::Vector{
              Param("a", ty.vec4<u32>(),
-                   {
+                   utils::Vector{
                        Location(0),
                        Interpolate(Source{{12, 34}}, params.type, params.sampling),
                    }),
          },
-         ty.void_(), {},
-         {
+         ty.void_(), utils::Empty,
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -1357,8 +1360,9 @@ INSTANTIATE_TEST_SUITE_P(
         Params{ast::InterpolationType::kFlat, ast::InterpolationSampling::kSample, false}));
 
 TEST_F(InterpolateTest, FragmentInput_Integer_MissingFlatInterpolation) {
-    Func("main", {Param(Source{{12, 34}}, "a", ty.i32(), {Location(0)})}, ty.void_(), {},
-         {
+    Func("main", utils::Vector{Param(Source{{12, 34}}, "a", ty.i32(), utils::Vector{Location(0)})},
+         ty.void_(), utils::Empty,
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -1369,16 +1373,17 @@ TEST_F(InterpolateTest, FragmentInput_Integer_MissingFlatInterpolation) {
 }
 
 TEST_F(InterpolateTest, VertexOutput_Integer_MissingFlatInterpolation) {
-    auto* s =
-        Structure("S", {
-                           Member("pos", ty.vec4<f32>(), {Builtin(ast::BuiltinValue::kPosition)}),
-                           Member(Source{{12, 34}}, "u", ty.u32(), {Location(0)}),
-                       });
-    Func("main", {}, ty.Of(s),
-         {
+    auto* s = Structure(
+        "S",
+        utils::Vector{
+            Member("pos", ty.vec4<f32>(), utils::Vector{Builtin(ast::BuiltinValue::kPosition)}),
+            Member(Source{{12, 34}}, "u", ty.u32(), utils::Vector{Location(0)}),
+        });
+    Func("main", utils::Empty, ty.Of(s),
+         utils::Vector{
              Return(Construct(ty.Of(s))),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kVertex),
          });
 
@@ -1391,16 +1396,16 @@ note: while analysing entry point 'main')");
 
 TEST_F(InterpolateTest, MissingLocationAttribute_Parameter) {
     Func("main",
-         {
+         utils::Vector{
              Param("a", ty.vec4<f32>(),
-                   {
+                   utils::Vector{
                        Builtin(ast::BuiltinValue::kPosition),
                        Interpolate(Source{{12, 34}}, ast::InterpolationType::kFlat,
                                    ast::InterpolationSampling::kNone),
                    }),
          },
-         ty.void_(), {},
-         {
+         ty.void_(), utils::Empty,
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -1410,14 +1415,14 @@ TEST_F(InterpolateTest, MissingLocationAttribute_Parameter) {
 }
 
 TEST_F(InterpolateTest, MissingLocationAttribute_ReturnType) {
-    Func("main", {}, ty.vec4<f32>(),
-         {
+    Func("main", utils::Empty, ty.vec4<f32>(),
+         utils::Vector{
              Return(Construct(ty.vec4<f32>())),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kVertex),
          },
-         {
+         utils::Vector{
              Builtin(ast::BuiltinValue::kPosition),
              Interpolate(Source{{12, 34}}, ast::InterpolationType::kFlat,
                          ast::InterpolationSampling::kNone),
@@ -1429,9 +1434,12 @@ TEST_F(InterpolateTest, MissingLocationAttribute_ReturnType) {
 }
 
 TEST_F(InterpolateTest, MissingLocationAttribute_Struct) {
-    Structure("S", {Member("a", ty.f32(),
-                           {Interpolate(Source{{12, 34}}, ast::InterpolationType::kFlat,
-                                        ast::InterpolationSampling::kNone)})});
+    Structure("S",
+              utils::Vector{
+                  Member("a", ty.f32(),
+                         utils::Vector{Interpolate(Source{{12, 34}}, ast::InterpolationType::kFlat,
+                                                   ast::InterpolationSampling::kNone)}),
+              });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

@@ -269,7 +269,7 @@ TEST_F(ResolverEvaluationStageTest, MemberAccessor_Const) {
     // struct S { m : i32 };
     // const str = S();
     // str.m
-    Structure("S", {Member("m", ty.i32())});
+    Structure("S", utils::Vector{Member("m", ty.i32())});
     auto* str = Const("str", nullptr, Construct(ty.type_name("S")));
     auto* expr = MemberAccessor(str, "m");
     WrapInFunction(str, expr);
@@ -283,7 +283,7 @@ TEST_F(ResolverEvaluationStageTest, MemberAccessor_Runtime) {
     // struct S { m : i32 };
     // var str = S();
     // str.m
-    Structure("S", {Member("m", ty.i32())});
+    Structure("S", utils::Vector{Member("m", ty.i32())});
     auto* str = Var("str", nullptr, Construct(ty.type_name("S")));
     auto* expr = MemberAccessor(str, "m");
     WrapInFunction(str, expr);

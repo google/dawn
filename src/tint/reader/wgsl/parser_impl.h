@@ -71,6 +71,17 @@ class ParserImpl {
     };
 
   public:
+    /// Pre-determined small vector sizes for AST pointers
+    //! @cond Doxygen_Suppress
+    using AttributeList = utils::Vector<const ast::Attribute*, 4>;
+    using CaseSelectorList = utils::Vector<const ast::IntLiteralExpression*, 4>;
+    using CaseStatementList = utils::Vector<const ast::CaseStatement*, 4>;
+    using ExpressionList = utils::Vector<const ast::Expression*, 8>;
+    using ParameterList = utils::Vector<const ast::Parameter*, 8>;
+    using StatementList = utils::Vector<const ast::Statement*, 8>;
+    using StructMemberList = utils::Vector<const ast::StructMember*, 8>;
+    //! @endcond
+
     /// Expect is the return type of the parser methods that are expected to
     /// return a parsed value of type T, unless there was an parse error.
     /// In the case of a parse error the called method will have called
@@ -231,9 +242,9 @@ class ParserImpl {
         /// @param ret_attrs return type attributes
         FunctionHeader(Source src,
                        std::string n,
-                       ast::ParameterList p,
+                       utils::VectorRef<const ast::Parameter*> p,
                        const ast::Type* ret_ty,
-                       ast::AttributeList ret_attrs);
+                       utils::VectorRef<const ast::Attribute*> ret_attrs);
         /// Destructor
         ~FunctionHeader();
         /// Assignment operator
@@ -246,11 +257,11 @@ class ParserImpl {
         /// Function name
         std::string name;
         /// Function parameters
-        ast::ParameterList params;
+        utils::Vector<const ast::Parameter*, 8> params;
         /// Function return type
         const ast::Type* return_type = nullptr;
         /// Function return type attributes
-        ast::AttributeList return_type_attributes;
+        AttributeList return_type_attributes;
     };
 
     /// VarDeclInfo contains the parsed information for variable declaration.
@@ -383,13 +394,15 @@ class ParserImpl {
     /// Parses a `global_variable_decl` grammar element with the initial
     /// `variable_attribute_list*` provided as `attrs`
     /// @returns the variable parsed or nullptr
-    /// @param attrs the list of attributes for the variable declaration.
-    Maybe<const ast::Variable*> global_variable_decl(ast::AttributeList& attrs);
+    /// @param attrs the list of attributes for the variable declaration. If attributes are consumed
+    ///        by the declaration, then this vector is cleared before returning.
+    Maybe<const ast::Variable*> global_variable_decl(AttributeList& attrs);
     /// Parses a `global_constant_decl` grammar element with the initial
     /// `variable_attribute_list*` provided as `attrs`
     /// @returns the const object or nullptr
-    /// @param attrs the list of attributes for the constant declaration.
-    Maybe<const ast::Variable*> global_constant_decl(ast::AttributeList& attrs);
+    /// @param attrs the list of attributes for the constant declaration. If attributes are consumed
+    ///        by the declaration, then this vector is cleared before returning.
+    Maybe<const ast::Variable*> global_constant_decl(AttributeList& attrs);
     /// Parses a `variable_decl` grammar element
     /// @returns the parsed variable declaration info
     Maybe<VarDeclInfo> variable_decl();
@@ -418,15 +431,16 @@ class ParserImpl {
     Maybe<const ast::Struct*> struct_decl();
     /// Parses a `struct_body_decl` grammar element, erroring on parse failure.
     /// @returns the struct members
-    Expect<ast::StructMemberList> expect_struct_body_decl();
+    Expect<StructMemberList> expect_struct_body_decl();
     /// Parses a `struct_member` grammar element, erroring on parse failure.
     /// @returns the struct member or nullptr
     Expect<ast::StructMember*> expect_struct_member();
     /// Parses a `function_decl` grammar element with the initial
     /// `function_attribute_decl*` provided as `attrs`.
-    /// @param attrs the list of attributes for the function declaration.
+    /// @param attrs the list of attributes for the function declaration. If attributes are consumed
+    ///        by the declaration, then this vector is cleared before returning.
     /// @returns the parsed function, nullptr otherwise
-    Maybe<const ast::Function*> function_decl(ast::AttributeList& attrs);
+    Maybe<const ast::Function*> function_decl(AttributeList& attrs);
     /// Parses a `texture_samplers` grammar element
     /// @returns the parsed Type or nullptr if none matched.
     Maybe<const ast::Type*> texture_samplers();
@@ -459,7 +473,7 @@ class ParserImpl {
     Maybe<FunctionHeader> function_header();
     /// Parses a `param_list` grammar element, erroring on parse failure.
     /// @returns the parsed variables
-    Expect<ast::ParameterList> expect_param_list();
+    Expect<ParameterList> expect_param_list();
     /// Parses a `param` grammar element, erroring on parse failure.
     /// @returns the parsed variable
     Expect<ast::Parameter*> expect_param();
@@ -484,7 +498,7 @@ class ParserImpl {
     Expect<const ast::Expression*> expect_paren_expression();
     /// Parses a `statements` grammar element
     /// @returns the statements parsed
-    Expect<ast::StatementList> expect_statements();
+    Expect<StatementList> expect_statements();
     /// Parses a `statement` grammar element
     /// @returns the parsed statement or nullptr
     Maybe<const ast::Statement*> statement();
@@ -511,7 +525,7 @@ class ParserImpl {
     Maybe<const ast::CaseStatement*> switch_body();
     /// Parses a `case_selectors` grammar element
     /// @returns the list of literals
-    Expect<ast::CaseSelectorList> expect_case_selectors();
+    Expect<CaseSelectorList> expect_case_selectors();
     /// Parses a `case_body` grammar element
     /// @returns the parsed statements
     Maybe<const ast::BlockStatement*> case_body();
@@ -543,7 +557,7 @@ class ParserImpl {
     /// failure.
     /// @param use a description of what was being parsed if an error was raised
     /// @returns the list of arguments
-    Expect<ast::ExpressionList> expect_argument_expression_list(std::string_view use);
+    Expect<ExpressionList> expect_argument_expression_list(std::string_view use);
     /// Parses the recursive portion of the postfix_expression
     /// @param prefix the left side of the expression
     /// @returns the parsed expression or nullptr
@@ -642,7 +656,7 @@ class ParserImpl {
     Maybe<const ast::Statement*> assignment_stmt();
     /// Parses one or more attribute lists.
     /// @return the parsed attribute list, or an empty list on error.
-    Maybe<ast::AttributeList> attribute_list();
+    Maybe<AttributeList> attribute_list();
     /// Parses a single attribute of the following types:
     /// * `struct_attribute`
     /// * `struct_member_attribute`
@@ -813,7 +827,7 @@ class ParserImpl {
 
     /// Reports an error if the attribute list `list` is not empty.
     /// Used to ensure that all attributes are consumed.
-    bool expect_attributes_consumed(ast::AttributeList& list);
+    bool expect_attributes_consumed(utils::VectorRef<const ast::Attribute*> list);
 
     Expect<const ast::Type*> expect_type_decl_pointer(const Token& t);
     Expect<const ast::Type*> expect_type_decl_atomic(const Token& t);

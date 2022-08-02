@@ -21,10 +21,10 @@ namespace {
 using StructMemberTest = TestHelper;
 
 TEST_F(StructMemberTest, Creation) {
-    auto* st = Member("a", ty.i32(), {MemberSize(4)});
+    auto* st = Member("a", ty.i32(), utils::Vector{MemberSize(4)});
     EXPECT_EQ(st->symbol, Symbol(1, ID()));
     EXPECT_TRUE(st->type->Is<ast::I32>());
-    EXPECT_EQ(st->attributes.size(), 1u);
+    EXPECT_EQ(st->attributes.Length(), 1u);
     EXPECT_TRUE(st->attributes[0]->Is<StructMemberSizeAttribute>());
     EXPECT_EQ(st->source.range.begin.line, 0u);
     EXPECT_EQ(st->source.range.begin.column, 0u);
@@ -37,7 +37,7 @@ TEST_F(StructMemberTest, CreationWithSource) {
                       ty.i32());
     EXPECT_EQ(st->symbol, Symbol(1, ID()));
     EXPECT_TRUE(st->type->Is<ast::I32>());
-    EXPECT_EQ(st->attributes.size(), 0u);
+    EXPECT_EQ(st->attributes.Length(), 0u);
     EXPECT_EQ(st->source.range.begin.line, 27u);
     EXPECT_EQ(st->source.range.begin.column, 4u);
     EXPECT_EQ(st->source.range.end.line, 27u);
@@ -66,7 +66,7 @@ TEST_F(StructMemberTest, Assert_Null_Attribute) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b;
-            b.Member("a", b.ty.i32(), {b.MemberSize(4), nullptr});
+            b.Member("a", b.ty.i32(), utils::Vector{b.MemberSize(4), nullptr});
         },
         "internal compiler error");
 }
@@ -76,7 +76,7 @@ TEST_F(StructMemberTest, Assert_DifferentProgramID_Symbol) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.Member(b2.Sym("a"), b1.ty.i32(), {b1.MemberSize(4)});
+            b1.Member(b2.Sym("a"), b1.ty.i32(), utils::Vector{b1.MemberSize(4)});
         },
         "internal compiler error");
 }
@@ -86,7 +86,7 @@ TEST_F(StructMemberTest, Assert_DifferentProgramID_Attribute) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.Member("a", b1.ty.i32(), {b2.MemberSize(4)});
+            b1.Member("a", b1.ty.i32(), utils::Vector{b2.MemberSize(4)});
         },
         "internal compiler error");
 }

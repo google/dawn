@@ -30,7 +30,7 @@ TEST_F(WgslGeneratorImplTest, EmitAlias_F32) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitTypeDecl_Struct) {
-    auto* s = Structure("A", {
+    auto* s = Structure("A", utils::Vector{
                                  Member("a", ty.f32()),
                                  Member("b", ty.i32()),
                              });
@@ -50,7 +50,7 @@ type B = A;
 }
 
 TEST_F(WgslGeneratorImplTest, EmitAlias_ToStruct) {
-    auto* s = Structure("A", {
+    auto* s = Structure("A", utils::Vector{
                                  Member("a", ty.f32()),
                                  Member("b", ty.i32()),
                              });

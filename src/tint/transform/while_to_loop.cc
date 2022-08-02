@@ -36,7 +36,7 @@ bool WhileToLoop::ShouldRun(const Program* program, const DataMap&) const {
 
 void WhileToLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
     ctx.ReplaceAll([&](const ast::WhileStatement* w) -> const ast::Statement* {
-        ast::StatementList stmts;
+        utils::Vector<const ast::Statement*, 16> stmts;
         auto* cond = w->condition;
 
         // !condition
@@ -47,10 +47,10 @@ void WhileToLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
         auto* break_body = ctx.dst->Block(ctx.dst->create<ast::BreakStatement>());
 
         // if (!condition) { break; }
-        stmts.emplace_back(ctx.dst->If(not_cond, break_body));
+        stmts.Push(ctx.dst->If(not_cond, break_body));
 
         for (auto* stmt : w->body->statements) {
-            stmts.emplace_back(ctx.Clone(stmt));
+            stmts.Push(ctx.Clone(stmt));
         }
 
         const ast::BlockStatement* continuing = nullptr;

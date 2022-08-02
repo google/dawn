@@ -668,7 +668,7 @@ TEST_F(GlslGeneratorImplTest_Binary, If_WithLogical) {
            Block(Return(1_i)),
            Else(If(create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"), Expr("c")),
                    Block(Return(2_i)), Else(Block(Return(3_i))))));
-    Func("func", {}, ty.i32(), {WrapInStatement(expr)});
+    Func("func", utils::Empty, ty.i32(), utils::Vector{WrapInStatement(expr)});
 
     GeneratorImpl& gen = Build();
 
@@ -704,7 +704,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Return_WithLogical) {
         ast::BinaryOp::kLogicalOr,
         create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
         Expr("c")));
-    Func("func", {}, ty.bool_(), {WrapInStatement(expr)});
+    Func("func", utils::Empty, ty.bool_(), utils::Vector{WrapInStatement(expr)});
 
     GeneratorImpl& gen = Build();
 
@@ -788,26 +788,25 @@ TEST_F(GlslGeneratorImplTest_Binary, Call_WithLogical) {
     // foo(a && b, c || d, (a || c) && (b || d))
 
     Func("foo",
-         {
+         utils::Vector{
              Param(Sym(), ty.bool_()),
              Param(Sym(), ty.bool_()),
              Param(Sym(), ty.bool_()),
          },
-         ty.void_(), ast::StatementList{}, ast::AttributeList{});
+         ty.void_(), utils::Empty, utils::Empty);
     GlobalVar("a", ty.bool_(), ast::StorageClass::kPrivate);
     GlobalVar("b", ty.bool_(), ast::StorageClass::kPrivate);
     GlobalVar("c", ty.bool_(), ast::StorageClass::kPrivate);
     GlobalVar("d", ty.bool_(), ast::StorageClass::kPrivate);
 
-    ast::ExpressionList params;
-    params.push_back(
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")));
-    params.push_back(
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("c"), Expr("d")));
-    params.push_back(create<ast::BinaryExpression>(
-        ast::BinaryOp::kLogicalAnd,
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("a"), Expr("c")),
-        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"), Expr("d"))));
+    utils::Vector params{
+        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b")),
+        create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("c"), Expr("d")),
+        create<ast::BinaryExpression>(
+            ast::BinaryOp::kLogicalAnd,
+            create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("a"), Expr("c")),
+            create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, Expr("b"), Expr("d"))),
+    };
 
     auto* expr = CallStmt(Call("foo", params));
     WrapInFunction(expr);

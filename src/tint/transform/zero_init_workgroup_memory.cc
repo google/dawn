@@ -32,6 +32,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::ZeroInitWorkgroupMemory);
 
 namespace tint::transform {
 
+using StatementList = utils::Vector<const ast::Statement*, 8>;
+
 /// PIMPL state for the ZeroInitWorkgroupMemory transform
 struct ZeroInitWorkgroupMemory::State {
     /// The clone context
@@ -162,7 +164,9 @@ struct ZeroInitWorkgroupMemory::State {
         if (!local_index) {
             // No existing local index parameter. Append one to the entry point.
             auto* param = b.Param(b.Symbols().New("local_invocation_index"), b.ty.u32(),
-                                  {b.Builtin(ast::BuiltinValue::kLocalInvocationIndex)});
+                                  utils::Vector{
+                                      b.Builtin(ast::BuiltinValue::kLocalInvocationIndex),
+                                  });
             ctx.InsertBack(fn->params, param);
             local_index = [=] { return b.Expr(param->symbol); };
         }
@@ -216,7 +220,7 @@ struct ZeroInitWorkgroupMemory::State {
                 auto block =
                     DeclareArrayIndices(num_iterations, array_indices, [&] { return b.Expr(idx); });
                 for (auto& s : stmts) {
-                    block.emplace_back(s.stmt);
+                    block.Push(s.stmt);
                 }
                 auto* for_loop = b.For(init, cond, cont, b.Block(block));
                 ctx.InsertFront(fn->body->statements, for_loop);
@@ -232,7 +236,7 @@ struct ZeroInitWorkgroupMemory::State {
                 auto block = DeclareArrayIndices(num_iterations, array_indices,
                                                  [&] { return b.Expr(local_index()); });
                 for (auto& s : stmts) {
-                    block.emplace_back(s.stmt);
+                    block.Push(s.stmt);
                 }
                 auto* if_stmt = b.If(cond, b.Block(block));
                 ctx.InsertFront(fn->body->statements, if_stmt);
@@ -246,7 +250,7 @@ struct ZeroInitWorkgroupMemory::State {
                 auto block = DeclareArrayIndices(num_iterations, array_indices,
                                                  [&] { return b.Expr(local_index()); });
                 for (auto& s : stmts) {
-                    block.emplace_back(s.stmt);
+                    block.Push(s.stmt);
                 }
                 ctx.InsertFront(fn->body->statements, b.Block(block));
             }
@@ -327,11 +331,10 @@ struct ZeroInitWorkgroupMemory::State {
     /// @param iteration a function that returns the index of the current
     ///         iteration.
     /// @returns the list of `let` statements that declare the array indices
-    ast::StatementList DeclareArrayIndices(
-        uint32_t num_iterations,
-        const ArrayIndices& array_indices,
-        const std::function<const ast::Expression*()>& iteration) {
-        ast::StatementList stmts;
+    StatementList DeclareArrayIndices(uint32_t num_iterations,
+                                      const ArrayIndices& array_indices,
+                                      const std::function<const ast::Expression*()>& iteration) {
+        StatementList stmts;
         std::map<Symbol, ArrayIndex> indices_by_name;
         for (auto index : array_indices) {
             auto name = array_index_names.at(index);
@@ -341,7 +344,7 @@ struct ZeroInitWorkgroupMemory::State {
                             : iteration();
             auto* div = (index.division != 1u) ? b.Div(mod, u32(index.division)) : mod;
             auto* decl = b.Decl(b.Let(name, b.ty.u32(), div));
-            stmts.emplace_back(decl);
+            stmts.Push(decl);
         }
         return stmts;
     }

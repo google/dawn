@@ -75,7 +75,10 @@ TEST_F(ResolverTypeValidationTest, VariableDeclNoConstructor_Pass) {
 
 TEST_F(ResolverTypeValidationTest, GlobalOverrideNoConstructor_Pass) {
     // @id(0) override a :i32;
-    Override(Source{{12, 34}}, "a", ty.i32(), nullptr, ast::AttributeList{Id(0)});
+    Override(Source{{12, 34}}, "a", ty.i32(), nullptr,
+             utils::Vector{
+                 Id(0),
+             });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -111,8 +114,8 @@ TEST_F(ResolverTypeValidationTest, GlobalVariableFunctionVariableNotUnique_Pass)
     // }
     // var a: f32 = 2.1;
 
-    Func("my_func", {}, ty.void_(),
-         {
+    Func("my_func", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("a", ty.f32(), ast::StorageClass::kNone, Expr(2_f))),
          });
 
@@ -163,14 +166,14 @@ TEST_F(ResolverTypeValidationTest, RedeclaredIdentifierDifferentFunctions_Pass) 
 
     auto* var1 = Var("a", ty.f32(), ast::StorageClass::kNone, Expr(1_f));
 
-    Func("func0", {}, ty.void_(),
-         {
+    Func("func0", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Source{{12, 34}}, var0),
              Return(),
          });
 
-    Func("func1", {}, ty.void_(),
-         {
+    Func("func1", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Source{{13, 34}}, var1),
              Return(),
          });
@@ -383,11 +386,11 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInFunction_Fail) {
 
     auto* var = Var(Source{{12, 34}}, "a", ty.array<i32>(), ast::StorageClass::kNone);
 
-    Func("func", {}, ty.void_(),
-         {
+    Func("func", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(var),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kVertex),
          });
 
@@ -402,7 +405,9 @@ TEST_F(ResolverTypeValidationTest, Struct_Member_VectorNoType) {
     //   a: vec3;
     // };
 
-    Structure("S", {Member("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3u))});
+    Structure("S", utils::Vector{
+                       Member("a", create<ast::Vector>(Source{{12, 34}}, nullptr, 3u)),
+                   });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: missing vector element type");
@@ -412,7 +417,9 @@ TEST_F(ResolverTypeValidationTest, Struct_Member_MatrixNoType) {
     // struct S {
     //   a: mat3x3;
     // };
-    Structure("S", {Member("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3u, 3u))});
+    Structure("S", utils::Vector{
+                       Member("a", create<ast::Matrix>(Source{{12, 34}}, nullptr, 3u, 3u)),
+                   });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: missing matrix element type");
@@ -425,12 +432,10 @@ TEST_F(ResolverTypeValidationTest, Struct_TooBig) {
     // };
 
     Structure(Source{{12, 34}}, "Foo",
-              {
+              utils::Vector{
                   Member("a", ty.array<f32, 0x20000000>()),
                   Member("b", ty.array<f32, 0x20000000>()),
               });
-
-    WrapInFunction();
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -444,13 +449,11 @@ TEST_F(ResolverTypeValidationTest, Struct_MemberOffset_TooBig) {
     //   c: f32;
     // };
 
-    Structure("Foo", {
+    Structure("Foo", utils::Vector{
                          Member("a", ty.array<f32, 0x3fffffff>()),
                          Member("b", ty.f32()),
                          Member(Source{{12, 34}}, "c", ty.f32()),
                      });
-
-    WrapInFunction();
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -463,12 +466,10 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsLast_Pass) {
     //   rt: array<f32>;
     // };
 
-    Structure("Foo", {
+    Structure("Foo", utils::Vector{
                          Member("vf", ty.f32()),
                          Member("rt", ty.array<f32>()),
                      });
-
-    WrapInFunction();
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -478,7 +479,9 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInArray) {
     //   rt : array<array<f32>, 4u>;
     // };
 
-    Structure("Foo", {Member("rt", ty.array(Source{{12, 34}}, ty.array<f32>(), 4_u))});
+    Structure("Foo", utils::Vector{
+                         Member("rt", ty.array(Source{{12, 34}}, ty.array<f32>(), 4_u)),
+                     });
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
@@ -491,7 +494,9 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInStructInArray) {
     // };
     // var<private> a : array<Foo, 4>;
 
-    auto* foo = Structure("Foo", {Member("rt", ty.array<f32>())});
+    auto* foo = Structure("Foo", utils::Vector{
+                                     Member("rt", ty.array<f32>()),
+                                 });
     GlobalVar("v", ty.array(Source{{12, 34}}, ty.Of(foo), 4_u), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
@@ -507,8 +512,12 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInStructInStruct) {
     //   inner : Foo;
     // };
 
-    auto* foo = Structure("Foo", {Member("rt", ty.array<f32>())});
-    Structure("Outer", {Member(Source{{12, 34}}, "inner", ty.Of(foo))});
+    auto* foo = Structure("Foo", utils::Vector{
+                                     Member("rt", ty.array<f32>()),
+                                 });
+    Structure("Outer", utils::Vector{
+                           Member(Source{{12, 34}}, "inner", ty.Of(foo)),
+                       });
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
@@ -522,12 +531,10 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayIsNotLast_Fail) {
     //   vf: f32;
     // };
 
-    Structure("Foo", {
+    Structure("Foo", utils::Vector{
                          Member(Source{{12, 34}}, "rt", ty.array<f32>()),
                          Member("vf", ty.f32()),
                      });
-
-    WrapInFunction();
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
@@ -561,16 +568,16 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayAsParameter_Fail) {
 
     auto* param = Param(Source{{12, 34}}, "a", ty.array<i32>());
 
-    Func("func", {param}, ty.void_(),
-         {
+    Func("func", utils::Vector{param}, ty.void_(),
+         utils::Vector{
              Return(),
          });
 
-    Func("main", {}, ty.void_(),
-         {
+    Func("main", utils::Empty, ty.void_(),
+         utils::Vector{
              Return(),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kVertex),
          });
 
@@ -586,8 +593,8 @@ TEST_F(ResolverTypeValidationTest, PtrToRuntimeArrayAsParameter_Fail) {
     auto* param =
         Param(Source{{12, 34}}, "a", ty.pointer(ty.array<i32>(), ast::StorageClass::kWorkgroup));
 
-    Func("func", {param}, ty.void_(),
-         {
+    Func("func", utils::Vector{param}, ty.void_(),
+         utils::Vector{
              Return(),
          });
 
@@ -605,12 +612,10 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsNotLast_Fail) {
     //}
 
     auto* alias = Alias("RTArr", ty.array<u32>());
-    Structure("s", {
+    Structure("s", utils::Vector{
                        Member(Source{{12, 34}}, "b", ty.Of(alias)),
                        Member("a", ty.u32()),
                    });
-
-    WrapInFunction();
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
@@ -625,12 +630,10 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
     //}
 
     auto* alias = Alias("RTArr", ty.array<u32>());
-    Structure("s", {
+    Structure("s", utils::Vector{
                        Member("a", ty.u32()),
                        Member("b", ty.Of(alias)),
                    });
-
-    WrapInFunction();
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -659,7 +662,7 @@ note: 'a' declared here)");
 TEST_F(ResolverTypeValidationTest, FunctionAsType) {
     // fn f() {}
     // var<private> v : f;
-    Func("f", {}, ty.void_(), {});
+    Func("f", utils::Empty, ty.void_(), {});
     GlobalVar("v", ty.type_name("f"), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
@@ -761,7 +764,10 @@ using SampledTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
 TEST_P(SampledTextureDimensionTest, All) {
     auto& params = GetParam();
     GlobalVar(Source{{12, 34}}, "a", ty.sampled_texture(params.dim, ty.i32()),
-              ast::StorageClass::kNone, nullptr, ast::AttributeList{GroupAndBinding(0, 0)});
+              ast::StorageClass::kNone, nullptr,
+              utils::Vector{
+                  GroupAndBinding(0, 0),
+              });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -779,7 +785,10 @@ using MultisampledTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
 TEST_P(MultisampledTextureDimensionTest, All) {
     auto& params = GetParam();
     GlobalVar("a", ty.multisampled_texture(Source{{12, 34}}, params.dim, ty.i32()),
-              ast::StorageClass::kNone, nullptr, ast::AttributeList{GroupAndBinding(0, 0)});
+              ast::StorageClass::kNone, nullptr,
+              utils::Vector{
+                  GroupAndBinding(0, 0),
+              });
 
     if (params.is_valid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -832,7 +841,10 @@ TEST_P(SampledTextureTypeTest, All) {
     GlobalVar(
         "a",
         ty.sampled_texture(Source{{12, 34}}, ast::TextureDimension::k2d, params.type_func(*this)),
-        ast::StorageClass::kNone, nullptr, ast::AttributeList{GroupAndBinding(0, 0)});
+        ast::StorageClass::kNone, nullptr,
+        utils::Vector{
+            GroupAndBinding(0, 0),
+        });
 
     if (params.is_valid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -851,7 +863,10 @@ TEST_P(MultisampledTextureTypeTest, All) {
     GlobalVar("a",
               ty.multisampled_texture(Source{{12, 34}}, ast::TextureDimension::k2d,
                                       params.type_func(*this)),
-              ast::StorageClass::kNone, nullptr, ast::AttributeList{GroupAndBinding(0, 0)});
+              ast::StorageClass::kNone, nullptr,
+              utils::Vector{
+                  GroupAndBinding(0, 0),
+              });
 
     if (params.is_valid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -890,7 +905,10 @@ TEST_P(StorageTextureDimensionTest, All) {
     auto* st = ty.storage_texture(Source{{12, 34}}, params.dim, ast::TexelFormat::kR32Uint,
                                   ast::Access::kWrite);
 
-    GlobalVar("a", st, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 0)});
+    GlobalVar("a", st, ast::StorageClass::kNone,
+              utils::Vector{
+                  GroupAndBinding(0, 0),
+              });
 
     if (params.is_valid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -940,17 +958,29 @@ TEST_P(StorageTextureFormatTest, All) {
 
     auto* st_a = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d, params.format,
                                     ast::Access::kWrite);
-    GlobalVar("a", st_a, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 0)});
+    GlobalVar("a", st_a, ast::StorageClass::kNone,
+              utils::Vector{
+                  GroupAndBinding(0, 0),
+              });
 
     auto* st_b = ty.storage_texture(ast::TextureDimension::k2d, params.format, ast::Access::kWrite);
-    GlobalVar("b", st_b, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 1)});
+    GlobalVar("b", st_b, ast::StorageClass::kNone,
+              utils::Vector{
+                  GroupAndBinding(0, 1),
+              });
 
     auto* st_c =
         ty.storage_texture(ast::TextureDimension::k2dArray, params.format, ast::Access::kWrite);
-    GlobalVar("c", st_c, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 2)});
+    GlobalVar("c", st_c, ast::StorageClass::kNone,
+              utils::Vector{
+                  GroupAndBinding(0, 2),
+              });
 
     auto* st_d = ty.storage_texture(ast::TextureDimension::k3d, params.format, ast::Access::kWrite);
-    GlobalVar("d", st_d, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 3)});
+    GlobalVar("d", st_d, ast::StorageClass::kNone,
+              utils::Vector{
+                  GroupAndBinding(0, 3),
+              });
 
     if (params.is_valid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -974,7 +1004,10 @@ TEST_F(StorageTextureAccessTest, MissingAccess_Fail) {
     auto* st = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d,
                                   ast::TexelFormat::kR32Uint, ast::Access::kUndefined);
 
-    GlobalVar("a", st, ast::StorageClass::kNone, ast::AttributeList{GroupAndBinding(0, 0)});
+    GlobalVar("a", st, ast::StorageClass::kNone,
+              utils::Vector{
+                  GroupAndBinding(0, 0),
+              });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: storage texture missing access control");
@@ -988,7 +1021,9 @@ TEST_F(StorageTextureAccessTest, RWAccess_Fail) {
                                   ast::TexelFormat::kR32Uint, ast::Access::kReadWrite);
 
     GlobalVar("a", st, ast::StorageClass::kNone, nullptr,
-              ast::AttributeList{GroupAndBinding(0, 0)});
+              utils::Vector{
+                  GroupAndBinding(0, 0),
+              });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1003,7 +1038,9 @@ TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Fail) {
                                   ast::TexelFormat::kR32Uint, ast::Access::kRead);
 
     GlobalVar("a", st, ast::StorageClass::kNone, nullptr,
-              ast::AttributeList{GroupAndBinding(0, 0)});
+              utils::Vector{
+                  GroupAndBinding(0, 0),
+              });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1018,7 +1055,9 @@ TEST_F(StorageTextureAccessTest, WriteOnlyAccess_Pass) {
                                   ast::Access::kWrite);
 
     GlobalVar("a", st, ast::StorageClass::kNone, nullptr,
-              ast::AttributeList{GroupAndBinding(0, 0)});
+              utils::Vector{
+                  GroupAndBinding(0, 0),
+              });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }

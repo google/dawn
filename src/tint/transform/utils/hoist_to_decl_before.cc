@@ -36,14 +36,14 @@ class HoistToDeclBefore::State {
     /// loop, so that declaration statements can be inserted before the
     /// condition expression or continuing statement.
     struct LoopInfo {
-        ast::StatementList cond_decls;
-        ast::StatementList cont_decls;
+        utils::Vector<const ast::Statement*, 8> cond_decls;
+        utils::Vector<const ast::Statement*, 8> cont_decls;
     };
 
     /// Info for each else-if that needs decomposing
     struct ElseIfInfo {
         /// Decls to insert before condition
-        ast::StatementList cond_decls;
+        utils::Vector<const ast::Statement*, 8> cond_decls;
     };
 
     /// For-loops that need to be decomposed to loops.
@@ -85,10 +85,10 @@ class HoistToDeclBefore::State {
                         // { break; }
                         auto* break_body = b.Block(b.create<ast::BreakStatement>());
                         // if (!condition) { break; }
-                        body_stmts.emplace_back(b.If(not_cond, break_body));
+                        body_stmts.Push(b.If(not_cond, break_body));
                     }
                     // Next emit the for-loop body
-                    body_stmts.emplace_back(ctx.Clone(for_loop->body));
+                    body_stmts.Push(ctx.Clone(for_loop->body));
 
                     // Finally create the continuing block if there was one.
                     const ast::BlockStatement* continuing = nullptr;
@@ -96,7 +96,7 @@ class HoistToDeclBefore::State {
                         // Continuing block starts with any let declarations used by
                         // the continuing.
                         auto cont_stmts = info.cont_decls;
-                        cont_stmts.emplace_back(ctx.Clone(cont));
+                        cont_stmts.Push(ctx.Clone(cont));
                         continuing = b.Block(cont_stmts);
                     }
 
@@ -141,10 +141,10 @@ class HoistToDeclBefore::State {
                     // { break; }
                     auto* break_body = b.Block(b.create<ast::BreakStatement>());
                     // if (!condition) { break; }
-                    body_stmts.emplace_back(b.If(not_cond, break_body));
+                    body_stmts.Push(b.If(not_cond, break_body));
 
                     // Next emit the body
-                    body_stmts.emplace_back(ctx.Clone(while_loop->body));
+                    body_stmts.Push(ctx.Clone(while_loop->body));
 
                     const ast::BlockStatement* continuing = nullptr;
 
@@ -173,7 +173,7 @@ class HoistToDeclBefore::State {
             auto* cond = ctx.Clone(else_if->condition);
             auto* body = ctx.Clone(else_if->body);
             auto* new_if = b.If(cond, body, b.Else(ctx.Clone(else_if->else_statement)));
-            body_stmts.emplace_back(new_if);
+            body_stmts.Push(new_if);
 
             // Replace the 'else-if' with the new 'else' block.
             return b.Block(body_stmts);
@@ -231,7 +231,7 @@ class HoistToDeclBefore::State {
             // Index the map to convert this else if, even if `stmt` is nullptr.
             auto& decls = else_if_info.cond_decls;
             if (stmt) {
-                decls.emplace_back(stmt);
+                decls.Push(stmt);
             }
             return true;
         }
@@ -243,7 +243,7 @@ class HoistToDeclBefore::State {
             // Index the map to convert this for-loop, even if `stmt` is nullptr.
             auto& decls = for_loops[fl].cond_decls;
             if (stmt) {
-                decls.emplace_back(stmt);
+                decls.Push(stmt);
             }
             return true;
         }
@@ -255,7 +255,7 @@ class HoistToDeclBefore::State {
             // Index the map to convert this while, even if `stmt` is nullptr.
             auto& decls = while_loops[w].cond_decls;
             if (stmt) {
-                decls.emplace_back(stmt);
+                decls.Push(stmt);
             }
             return true;
         }
@@ -290,7 +290,7 @@ class HoistToDeclBefore::State {
                 // Index the map to convert this for-loop, even if `stmt` is nullptr.
                 auto& decls = for_loops[fl].cont_decls;
                 if (stmt) {
-                    decls.emplace_back(stmt);
+                    decls.Push(stmt);
                 }
                 return true;
             }

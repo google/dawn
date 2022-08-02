@@ -278,7 +278,8 @@ TEST_P(GlslGeneratorBuiltinTextureTest, Call) {
     auto* call = Call(param.function, param.args(this));
     auto* stmt = CallStmt(call);
 
-    Func("main", {}, ty.void_(), {stmt}, {Stage(ast::PipelineStage::kFragment)});
+    Func("main", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     GeneratorImpl& gen = SanitizeAndBuild();
 

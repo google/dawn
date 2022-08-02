@@ -50,7 +50,7 @@ TEST_F(ResolverOverrideTest, NonOverridable) {
 }
 
 TEST_F(ResolverOverrideTest, WithId) {
-    auto* a = Override("a", ty.f32(), Expr(1_f), {Id(7u)});
+    auto* a = Override("a", ty.f32(), Expr(1_f), utils::Vector{Id(7u)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -69,10 +69,10 @@ TEST_F(ResolverOverrideTest, WithAndWithoutIds) {
     std::vector<ast::Variable*> variables;
     auto* a = Override("a", ty.f32(), Expr(1_f));
     auto* b = Override("b", ty.f32(), Expr(1_f));
-    auto* c = Override("c", ty.f32(), Expr(1_f), {Id(2u)});
-    auto* d = Override("d", ty.f32(), Expr(1_f), {Id(4u)});
+    auto* c = Override("c", ty.f32(), Expr(1_f), utils::Vector{Id(2u)});
+    auto* d = Override("d", ty.f32(), Expr(1_f), utils::Vector{Id(4u)});
     auto* e = Override("e", ty.f32(), Expr(1_f));
-    auto* f = Override("f", ty.f32(), Expr(1_f), {Id(1u)});
+    auto* f = Override("f", ty.f32(), Expr(1_f), utils::Vector{Id(1u)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -86,8 +86,8 @@ TEST_F(ResolverOverrideTest, WithAndWithoutIds) {
 }
 
 TEST_F(ResolverOverrideTest, DuplicateIds) {
-    Override("a", ty.f32(), Expr(1_f), {Id(Source{{12, 34}}, 7u)});
-    Override("b", ty.f32(), Expr(1_f), {Id(Source{{56, 78}}, 7u)});
+    Override("a", ty.f32(), Expr(1_f), utils::Vector{Id(Source{{12, 34}}, 7u)});
+    Override("b", ty.f32(), Expr(1_f), utils::Vector{Id(Source{{56, 78}}, 7u)});
 
     EXPECT_FALSE(r()->Resolve());
 
@@ -96,7 +96,7 @@ TEST_F(ResolverOverrideTest, DuplicateIds) {
 }
 
 TEST_F(ResolverOverrideTest, IdTooLarge) {
-    Override("a", ty.f32(), Expr(1_f), {Id(Source{{12, 34}}, 65536u)});
+    Override("a", ty.f32(), Expr(1_f), utils::Vector{Id(Source{{12, 34}}, 65536u)});
 
     EXPECT_FALSE(r()->Resolve());
 
@@ -106,7 +106,7 @@ TEST_F(ResolverOverrideTest, IdTooLarge) {
 TEST_F(ResolverOverrideTest, F16_TemporallyBan) {
     Enable(ast::Extension::kF16);
 
-    Override(Source{{12, 34}}, "a", ty.f16(), Expr(1_h), {Id(1u)});
+    Override(Source{{12, 34}}, "a", ty.f16(), Expr(1_h), utils::Vector{Id(1u)});
 
     EXPECT_FALSE(r()->Resolve());
 

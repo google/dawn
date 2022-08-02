@@ -114,16 +114,16 @@ void FirstIndexOffset::Run(CloneContext& ctx, const DataMap& inputs, DataMap& ou
 
     if (has_vertex_or_instance_index) {
         // Add uniform buffer members and calculate byte offsets
-        ast::StructMemberList members;
-        members.push_back(ctx.dst->Member(kFirstVertexName, ctx.dst->ty.u32()));
-        members.push_back(ctx.dst->Member(kFirstInstanceName, ctx.dst->ty.u32()));
+        utils::Vector<const ast::StructMember*, 8> members;
+        members.Push(ctx.dst->Member(kFirstVertexName, ctx.dst->ty.u32()));
+        members.Push(ctx.dst->Member(kFirstInstanceName, ctx.dst->ty.u32()));
         auto* struct_ = ctx.dst->Structure(ctx.dst->Sym(), std::move(members));
 
         // Create a global to hold the uniform buffer
         Symbol buffer_name = ctx.dst->Sym();
         ctx.dst->GlobalVar(buffer_name, ctx.dst->ty.Of(struct_), ast::StorageClass::kUniform,
                            nullptr,
-                           ast::AttributeList{
+                           utils::Vector{
                                ctx.dst->create<ast::BindingAttribute>(ub_binding),
                                ctx.dst->create<ast::GroupAttribute>(ub_group),
                            });

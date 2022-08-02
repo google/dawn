@@ -160,19 +160,6 @@ class Resolver {
     /// ProgramBuilder.
     void CreateSemanticNodes() const;
 
-    /// Retrieves information for the requested import.
-    /// @param src the source of the import
-    /// @param path the import path
-    /// @param name the method name to get information on
-    /// @param params the parameters to the method call
-    /// @param id out parameter for the external call ID. Must not be a nullptr.
-    /// @returns the return type of `name` in `path` or nullptr on error.
-    sem::Type* GetImportData(const Source& src,
-                             const std::string& path,
-                             const std::string& name,
-                             const ast::ExpressionList& params,
-                             uint32_t* id);
-
     /// Expression traverses the graph of expressions starting at `expr`, building a postordered
     /// list (leaf-first) of all the expression nodes. Each of the expressions are then resolved by
     /// dispatching to the appropriate expression handlers below.
@@ -265,7 +252,7 @@ class Resolver {
     sem::Statement* Statement(const ast::Statement*);
     sem::SwitchStatement* SwitchStatement(const ast::SwitchStatement* s);
     sem::Statement* VariableDeclStatement(const ast::VariableDeclStatement*);
-    bool Statements(const ast::StatementList&);
+    bool Statements(utils::VectorRef<const ast::Statement*>);
 
     // CollectTextureSamplerPairs() collects all the texture/sampler pairs from the target function
     // / builtin, and records these on the current function by calling AddTextureSamplerPair().
@@ -309,7 +296,7 @@ class Resolver {
     /// @param el_ty the element type of the array.
     /// @param explicit_stride assigned the specified stride of the array in bytes.
     /// @returns true on success, false on failure
-    bool ArrayAttributes(const ast::AttributeList& attributes,
+    bool ArrayAttributes(utils::VectorRef<const ast::Attribute*> attributes,
                          const sem::Type* el_ty,
                          uint32_t& explicit_stride);
 

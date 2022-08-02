@@ -28,7 +28,7 @@ Module::Module(ProgramID pid, NodeID nid, const Source& src) : Base(pid, nid, sr
 Module::Module(ProgramID pid,
                NodeID nid,
                const Source& src,
-               std::vector<const ast::Node*> global_decls)
+               utils::VectorRef<const ast::Node*> global_decls)
     : Base(pid, nid, src), global_declarations_(std::move(global_decls)) {
     for (auto* decl : global_declarations_) {
         if (decl == nullptr) {
@@ -53,7 +53,7 @@ const ast::TypeDecl* Module::LookupType(Symbol name) const {
 void Module::AddGlobalDeclaration(const tint::ast::Node* decl) {
     diag::List diags;
     BinGlobalDeclaration(decl, diags);
-    global_declarations_.emplace_back(decl);
+    global_declarations_.Push(decl);
 }
 
 void Module::BinGlobalDeclaration(const tint::ast::Node* decl, diag::List& diags) {
@@ -61,19 +61,19 @@ void Module::BinGlobalDeclaration(const tint::ast::Node* decl, diag::List& diags
         decl,  //
         [&](const ast::TypeDecl* type) {
             TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id);
-            type_decls_.push_back(type);
+            type_decls_.Push(type);
         },
         [&](const Function* func) {
             TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func, program_id);
-            functions_.push_back(func);
+            functions_.Push(func);
         },
         [&](const Variable* var) {
             TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, var, program_id);
-            global_variables_.push_back(var);
+            global_variables_.Push(var);
         },
         [&](const Enable* enable) {
             TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, enable, program_id);
-            enables_.push_back(enable);
+            enables_.Push(enable);
         },
         [&](Default) { TINT_ICE(AST, diags) << "Unknown global declaration type"; });
 }
@@ -81,29 +81,29 @@ void Module::BinGlobalDeclaration(const tint::ast::Node* decl, diag::List& diags
 void Module::AddEnable(const ast::Enable* enable) {
     TINT_ASSERT(AST, enable);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, enable, program_id);
-    global_declarations_.push_back(enable);
-    enables_.push_back(enable);
+    global_declarations_.Push(enable);
+    enables_.Push(enable);
 }
 
 void Module::AddGlobalVariable(const ast::Variable* var) {
     TINT_ASSERT(AST, var);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, var, program_id);
-    global_variables_.push_back(var);
-    global_declarations_.push_back(var);
+    global_variables_.Push(var);
+    global_declarations_.Push(var);
 }
 
 void Module::AddTypeDecl(const ast::TypeDecl* type) {
     TINT_ASSERT(AST, type);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, type, program_id);
-    type_decls_.push_back(type);
-    global_declarations_.push_back(type);
+    type_decls_.Push(type);
+    global_declarations_.Push(type);
 }
 
 void Module::AddFunction(const ast::Function* func) {
     TINT_ASSERT(AST, func);
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, func, program_id);
-    functions_.push_back(func);
-    global_declarations_.push_back(func);
+    functions_.Push(func);
+    global_declarations_.Push(func);
 }
 
 const Module* Module::Clone(CloneContext* ctx) const {
@@ -117,10 +117,10 @@ void Module::Copy(CloneContext* ctx, const Module* src) {
 
     // During the clone, declarations may have been placed into the module.
     // Clear everything out, as we're about to re-bin the declarations.
-    type_decls_.clear();
-    functions_.clear();
-    global_variables_.clear();
-    enables_.clear();
+    type_decls_.Clear();
+    functions_.Clear();
+    global_variables_.Clear();
+    enables_.Clear();
 
     for (auto* decl : global_declarations_) {
         if (!decl) {

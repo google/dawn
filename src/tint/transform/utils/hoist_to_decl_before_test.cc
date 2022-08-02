@@ -36,7 +36,7 @@ TEST_F(HoistToDeclBeforeTest, VarInit) {
     ProgramBuilder b;
     auto* expr = b.Expr(1_i);
     auto* var = b.Decl(b.Var("a", nullptr, expr));
-    b.Func("f", {}, b.ty.void_(), {var});
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
@@ -67,8 +67,8 @@ TEST_F(HoistToDeclBeforeTest, ForLoopInit) {
     // }
     ProgramBuilder b;
     auto* expr = b.Expr(1_i);
-    auto* s = b.For(b.Decl(b.Var("a", nullptr, expr)), b.Expr(true), {}, b.Block());
-    b.Func("f", {}, b.ty.void_(), {s});
+    auto* s = b.For(b.Decl(b.Var("a", nullptr, expr)), b.Expr(true), nullptr, b.Block());
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{s});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
@@ -102,8 +102,8 @@ TEST_F(HoistToDeclBeforeTest, ForLoopCond) {
     ProgramBuilder b;
     auto* var = b.Decl(b.Var("a", b.ty.bool_()));
     auto* expr = b.Expr("a");
-    auto* s = b.For({}, expr, {}, b.Block());
-    b.Func("f", {}, b.ty.void_(), {var, s});
+    auto* s = b.For(nullptr, expr, nullptr, b.Block());
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var, s});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
@@ -141,8 +141,8 @@ TEST_F(HoistToDeclBeforeTest, ForLoopCont) {
     // }
     ProgramBuilder b;
     auto* expr = b.Expr(1_i);
-    auto* s = b.For({}, b.Expr(true), b.Decl(b.Var("a", nullptr, expr)), b.Block());
-    b.Func("f", {}, b.ty.void_(), {s});
+    auto* s = b.For(nullptr, b.Expr(true), b.Decl(b.Var("a", nullptr, expr)), b.Block());
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{s});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
@@ -186,7 +186,7 @@ TEST_F(HoistToDeclBeforeTest, WhileCond) {
     auto* var = b.Decl(b.Var("a", b.ty.bool_()));
     auto* expr = b.Expr("a");
     auto* s = b.While(expr, b.Block());
-    b.Func("f", {}, b.ty.void_(), {var, s});
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var, s});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
@@ -231,7 +231,7 @@ TEST_F(HoistToDeclBeforeTest, ElseIf) {
     auto* s = b.If(b.Expr(true), b.Block(),      //
                    b.Else(b.If(expr, b.Block(),  //
                                b.Else(b.Block()))));
-    b.Func("f", {}, b.ty.void_(), {var, s});
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var, s});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
@@ -270,7 +270,7 @@ TEST_F(HoistToDeclBeforeTest, Array1D) {
     auto* var1 = b.Decl(b.Var("a", b.ty.array<i32, 10>()));
     auto* expr = b.IndexAccessor("a", 0_i);
     auto* var2 = b.Decl(b.Var("b", nullptr, expr));
-    b.Func("f", {}, b.ty.void_(), {var1, var2});
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var1, var2});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
@@ -305,7 +305,7 @@ TEST_F(HoistToDeclBeforeTest, Array2D) {
     auto* var1 = b.Decl(b.Var("a", b.ty.array(b.ty.array<i32, 10>(), 10_i)));
     auto* expr = b.IndexAccessor(b.IndexAccessor("a", 0_i), 0_i);
     auto* var2 = b.Decl(b.Var("b", nullptr, expr));
-    b.Func("f", {}, b.ty.void_(), {var1, var2});
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var1, var2});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
@@ -339,8 +339,8 @@ TEST_F(HoistToDeclBeforeTest, Prepare_ForLoopCond) {
     ProgramBuilder b;
     auto* var = b.Decl(b.Var("a", b.ty.bool_()));
     auto* expr = b.Expr("a");
-    auto* s = b.For({}, expr, {}, b.Block());
-    b.Func("f", {}, b.ty.void_(), {var, s});
+    auto* s = b.For(nullptr, expr, nullptr, b.Block());
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var, s});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
@@ -377,8 +377,8 @@ TEST_F(HoistToDeclBeforeTest, Prepare_ForLoopCont) {
     // }
     ProgramBuilder b;
     auto* expr = b.Expr(1_i);
-    auto* s = b.For({}, b.Expr(true), b.Decl(b.Var("a", nullptr, expr)), b.Block());
-    b.Func("f", {}, b.ty.void_(), {s});
+    auto* s = b.For(nullptr, b.Expr(true), b.Decl(b.Var("a", nullptr, expr)), b.Block());
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{s});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
@@ -425,7 +425,7 @@ TEST_F(HoistToDeclBeforeTest, Prepare_ElseIf) {
     auto* s = b.If(b.Expr(true), b.Block(),      //
                    b.Else(b.If(expr, b.Block(),  //
                                b.Else(b.Block()))));
-    b.Func("f", {}, b.ty.void_(), {var, s});
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var, s});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
@@ -461,9 +461,9 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_Block) {
     //     var a = 1i;
     // }
     ProgramBuilder b;
-    b.Func("foo", {}, b.ty.void_(), {});
+    b.Func("foo", utils::Empty, b.ty.void_(), utils::Empty);
     auto* var = b.Decl(b.Var("a", nullptr, b.Expr(1_i)));
-    b.Func("f", {}, b.ty.void_(), {var});
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
@@ -499,10 +499,10 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopInit) {
     //     }
     // }
     ProgramBuilder b;
-    b.Func("foo", {}, b.ty.void_(), {});
+    b.Func("foo", utils::Empty, b.ty.void_(), utils::Empty);
     auto* var = b.Decl(b.Var("a", nullptr, b.Expr(1_i)));
-    auto* s = b.For(var, b.Expr(true), {}, b.Block());
-    b.Func("f", {}, b.ty.void_(), {s});
+    auto* s = b.For(var, b.Expr(true), nullptr, b.Block());
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{s});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
@@ -540,11 +540,11 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopCont) {
     //     }
     // }
     ProgramBuilder b;
-    b.Func("foo", {}, b.ty.void_(), {});
+    b.Func("foo", utils::Empty, b.ty.void_(), utils::Empty);
     auto* var = b.Decl(b.Var("a", nullptr, b.Expr(1_i)));
     auto* cont = b.CompoundAssign("a", b.Expr(1_i), ast::BinaryOp::kAdd);
-    auto* s = b.For({}, b.Expr(true), cont, b.Block());
-    b.Func("f", {}, b.ty.void_(), {var, s});
+    auto* s = b.For(nullptr, b.Expr(true), cont, b.Block());
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var, s});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;
@@ -594,12 +594,12 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ElseIf) {
     //     }
     // }
     ProgramBuilder b;
-    b.Func("foo", {}, b.ty.void_(), {});
+    b.Func("foo", utils::Empty, b.ty.void_(), utils::Empty);
     auto* var = b.Decl(b.Var("a", b.ty.bool_()));
     auto* elseif = b.If(b.Expr("a"), b.Block(), b.Else(b.Block()));
     auto* s = b.If(b.Expr(true), b.Block(),  //
                    b.Else(elseif));
-    b.Func("f", {}, b.ty.void_(), {var, s});
+    b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var, s});
 
     Program original(std::move(b));
     ProgramBuilder cloned_b;

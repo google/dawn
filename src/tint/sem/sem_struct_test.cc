@@ -23,7 +23,7 @@ using StructTest = TestHelper;
 
 TEST_F(StructTest, Creation) {
     auto name = Sym("S");
-    auto* impl = create<ast::Struct>(name, ast::StructMemberList{}, ast::AttributeList{});
+    auto* impl = create<ast::Struct>(name, utils::Empty, utils::Empty);
     auto* ptr = impl;
     auto* s = create<sem::Struct>(impl, impl->name, StructMemberList{}, 4u /* align */,
                                   8u /* size */, 16u /* size_no_padding */);
@@ -34,10 +34,10 @@ TEST_F(StructTest, Creation) {
 }
 
 TEST_F(StructTest, Hash) {
-    auto* a_impl = create<ast::Struct>(Sym("a"), ast::StructMemberList{}, ast::AttributeList{});
+    auto* a_impl = create<ast::Struct>(Sym("a"), utils::Empty, utils::Empty);
     auto* a = create<sem::Struct>(a_impl, a_impl->name, StructMemberList{}, 4u /* align */,
                                   4u /* size */, 4u /* size_no_padding */);
-    auto* b_impl = create<ast::Struct>(Sym("b"), ast::StructMemberList{}, ast::AttributeList{});
+    auto* b_impl = create<ast::Struct>(Sym("b"), utils::Empty, utils::Empty);
     auto* b = create<sem::Struct>(b_impl, b_impl->name, StructMemberList{}, 4u /* align */,
                                   4u /* size */, 4u /* size_no_padding */);
 
@@ -45,10 +45,10 @@ TEST_F(StructTest, Hash) {
 }
 
 TEST_F(StructTest, Equals) {
-    auto* a_impl = create<ast::Struct>(Sym("a"), ast::StructMemberList{}, ast::AttributeList{});
+    auto* a_impl = create<ast::Struct>(Sym("a"), utils::Empty, utils::Empty);
     auto* a = create<sem::Struct>(a_impl, a_impl->name, StructMemberList{}, 4u /* align */,
                                   4u /* size */, 4u /* size_no_padding */);
-    auto* b_impl = create<ast::Struct>(Sym("b"), ast::StructMemberList{}, ast::AttributeList{});
+    auto* b_impl = create<ast::Struct>(Sym("b"), utils::Empty, utils::Empty);
     auto* b = create<sem::Struct>(b_impl, b_impl->name, StructMemberList{}, 4u /* align */,
                                   4u /* size */, 4u /* size_no_padding */);
 
@@ -59,7 +59,7 @@ TEST_F(StructTest, Equals) {
 
 TEST_F(StructTest, FriendlyName) {
     auto name = Sym("my_struct");
-    auto* impl = create<ast::Struct>(name, ast::StructMemberList{}, ast::AttributeList{});
+    auto* impl = create<ast::Struct>(name, utils::Empty, utils::Empty);
     auto* s = create<sem::Struct>(impl, impl->name, StructMemberList{}, 4u /* align */,
                                   4u /* size */, 4u /* size_no_padding */);
     EXPECT_EQ(s->FriendlyName(Symbols()), "my_struct");
@@ -67,7 +67,7 @@ TEST_F(StructTest, FriendlyName) {
 
 TEST_F(StructTest, Layout) {
     auto* inner_st =  //
-        Structure("Inner", {
+        Structure("Inner", utils::Vector{
                                Member("a", ty.i32()),
                                Member("b", ty.u32()),
                                Member("c", ty.f32()),
@@ -75,7 +75,7 @@ TEST_F(StructTest, Layout) {
                                Member("e", ty.mat4x2<f32>()),
                            });
 
-    auto* outer_st = Structure("Outer", {
+    auto* outer_st = Structure("Outer", utils::Vector{
                                             Member("inner", ty.type_name("Inner")),
                                             Member("a", ty.i32()),
                                         });

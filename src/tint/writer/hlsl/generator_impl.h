@@ -112,11 +112,11 @@ class GeneratorImpl : public TextGenerator {
     /// Emits a list of statements
     /// @param stmts the statement list
     /// @returns true if the statements were emitted successfully
-    bool EmitStatements(const ast::StatementList& stmts);
+    bool EmitStatements(utils::VectorRef<const ast::Statement*> stmts);
     /// Emits a list of statements with an indentation
     /// @param stmts the statement list
     /// @returns true if the statements were emitted successfully
-    bool EmitStatementsWithIndent(const ast::StatementList& stmts);
+    bool EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts);
     /// Handles a block statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted successfully

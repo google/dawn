@@ -1771,7 +1771,7 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Zero) {
 }
 
 TEST_F(ResolverConstEvalTest, Array_Struct_f32_Zero) {
-    Structure("S", {
+    Structure("S", utils::Vector{
                        Member("m1", ty.f32()),
                        Member("m2", ty.f32()),
                    });
@@ -1914,7 +1914,7 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Elements) {
 }
 
 TEST_F(ResolverConstEvalTest, Array_Struct_f32_Elements) {
-    Structure("S", {
+    Structure("S", utils::Vector{
                        Member("m1", ty.f32()),
                        Member("m2", ty.f32()),
                    });
@@ -1958,7 +1958,8 @@ TEST_F(ResolverConstEvalTest, Array_Struct_f32_Elements) {
 }
 
 TEST_F(ResolverConstEvalTest, Struct_I32s_ZeroInit) {
-    Structure("S", {Member("m1", ty.i32()), Member("m2", ty.i32()), Member("m3", ty.i32())});
+    Structure(
+        "S", utils::Vector{Member("m1", ty.i32()), Member("m2", ty.i32()), Member("m3", ty.i32())});
     auto* expr = Construct(ty.type_name("S"));
     WrapInFunction(expr);
 
@@ -1997,7 +1998,7 @@ TEST_F(ResolverConstEvalTest, Struct_I32s_ZeroInit) {
 TEST_F(ResolverConstEvalTest, Struct_MixedScalars_ZeroInit) {
     Enable(ast::Extension::kF16);
 
-    Structure("S", {
+    Structure("S", utils::Vector{
                        Member("m1", ty.i32()),
                        Member("m2", ty.u32()),
                        Member("m3", ty.f32()),
@@ -2052,7 +2053,7 @@ TEST_F(ResolverConstEvalTest, Struct_MixedScalars_ZeroInit) {
 }
 
 TEST_F(ResolverConstEvalTest, Struct_VectorF32s_ZeroInit) {
-    Structure("S", {
+    Structure("S", utils::Vector{
                        Member("m1", ty.vec3<f32>()),
                        Member("m2", ty.vec3<f32>()),
                        Member("m3", ty.vec3<f32>()),
@@ -2104,7 +2105,7 @@ TEST_F(ResolverConstEvalTest, Struct_VectorF32s_ZeroInit) {
 TEST_F(ResolverConstEvalTest, Struct_MixedVectors_ZeroInit) {
     Enable(ast::Extension::kF16);
 
-    Structure("S", {
+    Structure("S", utils::Vector{
                        Member("m1", ty.vec2<i32>()),
                        Member("m2", ty.vec3<u32>()),
                        Member("m3", ty.vec4<f32>()),
@@ -2173,13 +2174,13 @@ TEST_F(ResolverConstEvalTest, Struct_MixedVectors_ZeroInit) {
 }
 
 TEST_F(ResolverConstEvalTest, Struct_Struct_ZeroInit) {
-    Structure("Inner", {
+    Structure("Inner", utils::Vector{
                            Member("m1", ty.i32()),
                            Member("m2", ty.u32()),
                            Member("m3", ty.f32()),
                        });
 
-    Structure("Outer", {
+    Structure("Outer", utils::Vector{
                            Member("m1", ty.type_name("Inner")),
                            Member("m2", ty.type_name("Inner")),
                        });
@@ -2219,7 +2220,7 @@ TEST_F(ResolverConstEvalTest, Struct_Struct_ZeroInit) {
 TEST_F(ResolverConstEvalTest, Struct_MixedScalars_Construct) {
     Enable(ast::Extension::kF16);
 
-    Structure("S", {
+    Structure("S", utils::Vector{
                        Member("m1", ty.i32()),
                        Member("m2", ty.u32()),
                        Member("m3", ty.f32()),
@@ -2276,7 +2277,7 @@ TEST_F(ResolverConstEvalTest, Struct_MixedScalars_Construct) {
 TEST_F(ResolverConstEvalTest, Struct_MixedVectors_Construct) {
     Enable(ast::Extension::kF16);
 
-    Structure("S", {
+    Structure("S", utils::Vector{
                        Member("m1", ty.vec2<i32>()),
                        Member("m2", ty.vec3<u32>()),
                        Member("m3", ty.vec4<f32>()),
@@ -2346,13 +2347,13 @@ TEST_F(ResolverConstEvalTest, Struct_MixedVectors_Construct) {
 }
 
 TEST_F(ResolverConstEvalTest, Struct_Struct_Construct) {
-    Structure("Inner", {
+    Structure("Inner", utils::Vector{
                            Member("m1", ty.i32()),
                            Member("m2", ty.u32()),
                            Member("m3", ty.f32()),
                        });
 
-    Structure("Outer", {
+    Structure("Outer", utils::Vector{
                            Member("m1", ty.type_name("Inner")),
                            Member("m2", ty.type_name("Inner")),
                        });
@@ -2392,7 +2393,7 @@ TEST_F(ResolverConstEvalTest, Struct_Struct_Construct) {
 }
 
 TEST_F(ResolverConstEvalTest, Struct_Array_Construct) {
-    Structure("S", {
+    Structure("S", utils::Vector{
                        Member("m1", ty.array<i32, 2>()),
                        Member("m2", ty.array<f32, 3>()),
                    });
@@ -2921,13 +2922,13 @@ TEST_F(ResolverConstEvalTest, ChainedIndex_OOB) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 TEST_F(ResolverConstEvalTest, MemberAccess) {
-    Structure("Inner", {
+    Structure("Inner", utils::Vector{
                            Member("i1", ty.i32()),
                            Member("i2", ty.u32()),
                            Member("i3", ty.f32()),
                        });
 
-    Structure("Outer", {
+    Structure("Outer", utils::Vector{
                            Member("o1", ty.type_name("Inner")),
                            Member("o2", ty.type_name("Inner")),
                        });
@@ -3118,7 +3119,7 @@ namespace builtin {
 
 template <typename T>
 struct Values {
-    std::vector<T> args;
+    utils::Vector<T, 8> args;
     T result;
     bool result_pos_or_neg;
 };
@@ -3132,7 +3133,7 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
     std::visit(
         [&](auto&& v) {
             for (auto& e : v.args) {
-                o << e << ((&e != &v.args.back()) ? " " : "");
+                o << e << ((&e != &v.args.Back()) ? " " : "");
             }
         },
         c.values);
@@ -3140,7 +3141,7 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
 }
 
 template <typename T>
-Case C(std::vector<T> args, T result, bool result_pos_or_neg = false) {
+Case C(std::initializer_list<T> args, T result, bool result_pos_or_neg = false) {
     return Case{Values<T>{std::move(args), result, result_pos_or_neg}};
 }
 

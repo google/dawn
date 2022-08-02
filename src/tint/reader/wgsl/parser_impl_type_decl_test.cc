@@ -399,7 +399,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_AbstractIntLiteralSize) {
     auto* a = t.value->As<ast::Array>();
     ASSERT_FALSE(a->IsRuntimeArray());
     ASSERT_TRUE(a->type->Is<ast::F32>());
-    EXPECT_EQ(a->attributes.size(), 0u);
+    EXPECT_EQ(a->attributes.Length(), 0u);
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 14u}}));
 
     auto* size = a->count->As<ast::IntLiteralExpression>();
@@ -420,7 +420,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_SintLiteralSize) {
     auto* a = t.value->As<ast::Array>();
     ASSERT_FALSE(a->IsRuntimeArray());
     ASSERT_TRUE(a->type->Is<ast::F32>());
-    EXPECT_EQ(a->attributes.size(), 0u);
+    EXPECT_EQ(a->attributes.Length(), 0u);
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 15u}}));
 
     auto* size = a->count->As<ast::IntLiteralExpression>();
@@ -441,7 +441,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_UintLiteralSize) {
     auto* a = t.value->As<ast::Array>();
     ASSERT_FALSE(a->IsRuntimeArray());
     ASSERT_TRUE(a->type->Is<ast::F32>());
-    EXPECT_EQ(a->attributes.size(), 0u);
+    EXPECT_EQ(a->attributes.Length(), 0u);
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 15u}}));
 
     auto* size = a->count->As<ast::IntLiteralExpression>();
@@ -461,7 +461,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_ConstantSize) {
     auto* a = t.value->As<ast::Array>();
     ASSERT_FALSE(a->IsRuntimeArray());
     ASSERT_TRUE(a->type->Is<ast::F32>());
-    EXPECT_EQ(a->attributes.size(), 0u);
+    EXPECT_EQ(a->attributes.Length(), 0u);
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 17u}}));
 
     auto* count_expr = a->count->As<ast::IdentifierExpression>();

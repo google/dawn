@@ -26,10 +26,10 @@ TEST_F(ParserImplTest, LoopStmt_BodyNoContinuing) {
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
-    ASSERT_EQ(e->body->statements.size(), 1u);
+    ASSERT_EQ(e->body->statements.Length(), 1u);
     EXPECT_TRUE(e->body->statements[0]->Is<ast::DiscardStatement>());
 
-    EXPECT_EQ(e->continuing->statements.size(), 0u);
+    EXPECT_EQ(e->continuing->statements.Length(), 0u);
 }
 
 TEST_F(ParserImplTest, LoopStmt_BodyWithContinuing) {
@@ -40,10 +40,10 @@ TEST_F(ParserImplTest, LoopStmt_BodyWithContinuing) {
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
-    ASSERT_EQ(e->body->statements.size(), 1u);
+    ASSERT_EQ(e->body->statements.Length(), 1u);
     EXPECT_TRUE(e->body->statements[0]->Is<ast::DiscardStatement>());
 
-    EXPECT_EQ(e->continuing->statements.size(), 1u);
+    EXPECT_EQ(e->continuing->statements.Length(), 1u);
     EXPECT_TRUE(e->continuing->statements[0]->Is<ast::DiscardStatement>());
 }
 
@@ -54,8 +54,8 @@ TEST_F(ParserImplTest, LoopStmt_NoBodyNoContinuing) {
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
-    ASSERT_EQ(e->body->statements.size(), 0u);
-    ASSERT_EQ(e->continuing->statements.size(), 0u);
+    ASSERT_EQ(e->body->statements.Length(), 0u);
+    ASSERT_EQ(e->continuing->statements.Length(), 0u);
 }
 
 TEST_F(ParserImplTest, LoopStmt_NoBodyWithContinuing) {
@@ -65,8 +65,8 @@ TEST_F(ParserImplTest, LoopStmt_NoBodyWithContinuing) {
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
-    ASSERT_EQ(e->body->statements.size(), 0u);
-    ASSERT_EQ(e->continuing->statements.size(), 1u);
+    ASSERT_EQ(e->body->statements.Length(), 0u);
+    ASSERT_EQ(e->continuing->statements.Length(), 1u);
     EXPECT_TRUE(e->continuing->statements[0]->Is<ast::DiscardStatement>());
 }
 

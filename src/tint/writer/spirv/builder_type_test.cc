@@ -27,9 +27,9 @@ using BuilderTest_Type = TestHelper;
 
 TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
     auto* ary = ty.array(ty.i32());
-    auto* str = Structure("S", {Member("x", ary)});
+    auto* str = Structure("S", utils::Vector{Member("x", ary)});
     GlobalVar("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -47,9 +47,9 @@ TEST_F(BuilderTest_Type, GenerateRuntimeArray) {
 
 TEST_F(BuilderTest_Type, ReturnsGeneratedRuntimeArray) {
     auto* ary = ty.array(ty.i32());
-    auto* str = Structure("S", {Member("x", ary)});
+    auto* str = Structure("S", utils::Vector{Member("x", ary)});
     GlobalVar("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -323,7 +323,7 @@ TEST_F(BuilderTest_Type, ReturnsGeneratedPtr) {
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct) {
-    auto* s = Structure("my_struct", {Member("a", ty.f32())});
+    auto* s = Structure("my_struct", utils::Vector{Member("a", ty.f32())});
 
     spirv::Builder& b = Build();
 
@@ -340,9 +340,9 @@ OpMemberName %1 0 "a"
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
-    auto* s = Structure("S", {
+    auto* s = Structure("S", utils::Vector{
                                  Member("a", ty.f32()),
-                                 Member("b", ty.f32(), {MemberAlign(8)}),
+                                 Member("b", ty.f32(), utils::Vector{MemberAlign(8)}),
                              });
 
     spirv::Builder& b = Build();
@@ -364,7 +364,7 @@ OpMemberDecorate %1 1 Offset 8
 }
 
 TEST_F(BuilderTest_Type, GenerateStruct_NonLayout_Matrix) {
-    auto* s = Structure("S", {
+    auto* s = Structure("S", utils::Vector{
                                  Member("a", ty.mat2x2<f32>()),
                                  Member("b", ty.mat2x3<f32>()),
                                  Member("c", ty.mat4x4<f32>()),
@@ -404,7 +404,7 @@ OpMemberDecorate %1 2 MatrixStride 16
 
 TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutMatrix) {
     // We have to infer layout for matrix when it also has an offset.
-    auto* s = Structure("S", {
+    auto* s = Structure("S", utils::Vector{
                                  Member("a", ty.mat2x2<f32>()),
                                  Member("b", ty.mat2x3<f32>()),
                                  Member("c", ty.mat4x4<f32>()),
@@ -450,7 +450,7 @@ TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers_LayoutArraysOfMatrix) {
     auto* arr_arr_mat2x3 = ty.array(ty.mat2x3<f32>(), 1_u);  // Doubly nested array
     auto* rtarr_mat4x4 = ty.array(ty.mat4x4<f32>());         // Runtime array
 
-    auto* s = Structure("S", {
+    auto* s = Structure("S", utils::Vector{
                                  Member("a", arr_mat2x2),
                                  Member("b", arr_arr_mat2x3),
                                  Member("c", rtarr_mat4x4),
@@ -843,7 +843,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_1d) {
                                  ast::Access::kWrite);
 
     GlobalVar("test_var", s,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -862,7 +862,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2d) {
                                  ast::Access::kWrite);
 
     GlobalVar("test_var", s,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -881,7 +881,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_2dArray) {
                                  ast::Access::kWrite);
 
     GlobalVar("test_var", s,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -900,7 +900,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_3d) {
                                  ast::Access::kWrite);
 
     GlobalVar("test_var", s,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -919,7 +919,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_SampledTypeFloat_Format_r32floa
                                  ast::Access::kWrite);
 
     GlobalVar("test_var", s,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -938,7 +938,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_SampledTypeSint_Format_r32sint)
                                  ast::Access::kWrite);
 
     GlobalVar("test_var", s,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -957,7 +957,7 @@ TEST_F(BuilderTest_Type, StorageTexture_Generate_SampledTypeUint_Format_r32uint)
                                  ast::Access::kWrite);
 
     GlobalVar("test_var", s,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });

@@ -27,10 +27,10 @@ TEST_F(ParserImplTest, SwitchBody_Case) {
     ASSERT_TRUE(e->Is<ast::CaseStatement>());
     EXPECT_FALSE(e->IsDefault());
     auto* stmt = e->As<ast::CaseStatement>();
-    ASSERT_EQ(stmt->selectors.size(), 1u);
+    ASSERT_EQ(stmt->selectors.Length(), 1u);
     EXPECT_EQ(stmt->selectors[0]->value, 1);
     EXPECT_EQ(stmt->selectors[0]->suffix, ast::IntLiteralExpression::Suffix::kNone);
-    ASSERT_EQ(e->body->statements.size(), 1u);
+    ASSERT_EQ(e->body->statements.Length(), 1u);
     EXPECT_TRUE(e->body->statements[0]->Is<ast::AssignmentStatement>());
 }
 
@@ -44,10 +44,10 @@ TEST_F(ParserImplTest, SwitchBody_Case_WithColon) {
     ASSERT_TRUE(e->Is<ast::CaseStatement>());
     EXPECT_FALSE(e->IsDefault());
     auto* stmt = e->As<ast::CaseStatement>();
-    ASSERT_EQ(stmt->selectors.size(), 1u);
+    ASSERT_EQ(stmt->selectors.Length(), 1u);
     EXPECT_EQ(stmt->selectors[0]->value, 1);
     EXPECT_EQ(stmt->selectors[0]->suffix, ast::IntLiteralExpression::Suffix::kNone);
-    ASSERT_EQ(e->body->statements.size(), 1u);
+    ASSERT_EQ(e->body->statements.Length(), 1u);
     EXPECT_TRUE(e->body->statements[0]->Is<ast::AssignmentStatement>());
 }
 
@@ -61,7 +61,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_TrailingComma) {
     ASSERT_TRUE(e->Is<ast::CaseStatement>());
     EXPECT_FALSE(e->IsDefault());
     auto* stmt = e->As<ast::CaseStatement>();
-    ASSERT_EQ(stmt->selectors.size(), 2u);
+    ASSERT_EQ(stmt->selectors.Length(), 2u);
     EXPECT_EQ(stmt->selectors[0]->value, 1);
     EXPECT_EQ(stmt->selectors[0]->suffix, ast::IntLiteralExpression::Suffix::kNone);
     EXPECT_EQ(stmt->selectors[1]->value, 2);
@@ -77,7 +77,7 @@ TEST_F(ParserImplTest, SwitchBody_Case_TrailingComma_WithColon) {
     ASSERT_TRUE(e->Is<ast::CaseStatement>());
     EXPECT_FALSE(e->IsDefault());
     auto* stmt = e->As<ast::CaseStatement>();
-    ASSERT_EQ(stmt->selectors.size(), 2u);
+    ASSERT_EQ(stmt->selectors.Length(), 2u);
     EXPECT_EQ(stmt->selectors[0]->value, 1);
     EXPECT_EQ(stmt->selectors[0]->suffix, ast::IntLiteralExpression::Suffix::kNone);
     EXPECT_EQ(stmt->selectors[1]->value, 2);
@@ -162,8 +162,8 @@ TEST_F(ParserImplTest, SwitchBody_Case_MultipleSelectors) {
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::CaseStatement>());
     EXPECT_FALSE(e->IsDefault());
-    ASSERT_EQ(e->body->statements.size(), 0u);
-    ASSERT_EQ(e->selectors.size(), 2u);
+    ASSERT_EQ(e->body->statements.Length(), 0u);
+    ASSERT_EQ(e->selectors.Length(), 2u);
     ASSERT_EQ(e->selectors[0]->value, 1);
     EXPECT_EQ(e->selectors[0]->suffix, ast::IntLiteralExpression::Suffix::kNone);
     ASSERT_EQ(e->selectors[1]->value, 2);
@@ -179,8 +179,8 @@ TEST_F(ParserImplTest, SwitchBody_Case_MultipleSelectors_WithColon) {
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::CaseStatement>());
     EXPECT_FALSE(e->IsDefault());
-    ASSERT_EQ(e->body->statements.size(), 0u);
-    ASSERT_EQ(e->selectors.size(), 2u);
+    ASSERT_EQ(e->body->statements.Length(), 0u);
+    ASSERT_EQ(e->selectors.Length(), 2u);
     ASSERT_EQ(e->selectors[0]->value, 1);
     EXPECT_EQ(e->selectors[0]->suffix, ast::IntLiteralExpression::Suffix::kNone);
     ASSERT_EQ(e->selectors[1]->value, 2);
@@ -216,7 +216,7 @@ TEST_F(ParserImplTest, SwitchBody_Default) {
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::CaseStatement>());
     EXPECT_TRUE(e->IsDefault());
-    ASSERT_EQ(e->body->statements.size(), 1u);
+    ASSERT_EQ(e->body->statements.Length(), 1u);
     EXPECT_TRUE(e->body->statements[0]->Is<ast::AssignmentStatement>());
 }
 
@@ -229,7 +229,7 @@ TEST_F(ParserImplTest, SwitchBody_Default_WithColon) {
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::CaseStatement>());
     EXPECT_TRUE(e->IsDefault());
-    ASSERT_EQ(e->body->statements.size(), 1u);
+    ASSERT_EQ(e->body->statements.Length(), 1u);
     EXPECT_TRUE(e->body->statements[0]->Is<ast::AssignmentStatement>());
 }
 

@@ -24,7 +24,7 @@ TEST_F(ParserImplTest, CaseBody_Empty) {
     ASSERT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(e.errored);
     EXPECT_TRUE(e.matched);
-    EXPECT_EQ(e->statements.size(), 0u);
+    EXPECT_EQ(e->statements.Length(), 0u);
 }
 
 TEST_F(ParserImplTest, CaseBody_Statements) {
@@ -36,7 +36,7 @@ TEST_F(ParserImplTest, CaseBody_Statements) {
     ASSERT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(e.errored);
     EXPECT_TRUE(e.matched);
-    ASSERT_EQ(e->statements.size(), 2u);
+    ASSERT_EQ(e->statements.Length(), 2u);
     EXPECT_TRUE(e->statements[0]->Is<ast::VariableDeclStatement>());
     EXPECT_TRUE(e->statements[1]->Is<ast::AssignmentStatement>());
 }
@@ -56,7 +56,7 @@ TEST_F(ParserImplTest, CaseBody_Fallthrough) {
     ASSERT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(e.errored);
     EXPECT_TRUE(e.matched);
-    ASSERT_EQ(e->statements.size(), 1u);
+    ASSERT_EQ(e->statements.Length(), 1u);
     EXPECT_TRUE(e->statements[0]->Is<ast::FallthroughStatement>());
 }
 

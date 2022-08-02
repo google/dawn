@@ -43,7 +43,7 @@ class Let final : public Castable<Let, Variable> {
         const Symbol& sym,
         const ast::Type* type,
         const Expression* constructor,
-        AttributeList attributes);
+        utils::VectorRef<const Attribute*> attributes);
 
     /// Move constructor
     Let(Let&&);

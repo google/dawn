@@ -62,7 +62,7 @@ void CloneContext::Clone() {
 
 ast::FunctionList CloneContext::Clone(const ast::FunctionList& v) {
     ast::FunctionList out;
-    out.reserve(v.size());
+    out.Reserve(v.Length());
     for (const ast::Function* el : v) {
         out.Add(Clone(el));
     }

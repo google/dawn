@@ -44,7 +44,7 @@ TEST_F(ForStmtTest, Body) {
     EXPECT_EQ(fl->initializer, nullptr);
     EXPECT_EQ(fl->condition, nullptr);
     EXPECT_EQ(fl->continuing, nullptr);
-    ASSERT_EQ(fl->body->statements.size(), 1u);
+    ASSERT_EQ(fl->body->statements.Length(), 1u);
     EXPECT_TRUE(fl->body->statements[0]->Is<ast::DiscardStatement>());
 }
 

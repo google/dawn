@@ -67,7 +67,7 @@ bool GeneratorImpl::Generate() {
             return false;
         }
     }
-    if (!program_->AST().Enables().empty()) {
+    if (!program_->AST().Enables().IsEmpty()) {
         line();
     }
     // Generate global declarations in the order they appear in the module.
@@ -86,7 +86,7 @@ bool GeneratorImpl::Generate() {
                 })) {
             return false;
         }
-        if (decl != program_->AST().GlobalDeclarations().back()) {
+        if (decl != program_->AST().GlobalDeclarations().Back()) {
             line();
         }
     }
@@ -281,7 +281,7 @@ bool GeneratorImpl::EmitIdentifier(std::ostream& out, const ast::IdentifierExpre
 }
 
 bool GeneratorImpl::EmitFunction(const ast::Function* func) {
-    if (func->attributes.size()) {
+    if (func->attributes.Length()) {
         if (!EmitAttributes(line(), func->attributes)) {
             return false;
         }
@@ -297,7 +297,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
             }
             first = false;
 
-            if (!v->attributes.empty()) {
+            if (!v->attributes.IsEmpty()) {
                 if (!EmitAttributes(out, v->attributes)) {
                     return false;
                 }
@@ -313,10 +313,10 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
 
         out << ")";
 
-        if (!func->return_type->Is<ast::Void>() || !func->return_type_attributes.empty()) {
+        if (!func->return_type->Is<ast::Void>() || !func->return_type_attributes.IsEmpty()) {
             out << " -> ";
 
-            if (!func->return_type_attributes.empty()) {
+            if (!func->return_type_attributes.IsEmpty()) {
                 if (!EmitAttributes(out, func->return_type_attributes)) {
                     return false;
                 }
@@ -582,7 +582,7 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
 }
 
 bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
-    if (str->attributes.size()) {
+    if (str->attributes.Length()) {
         if (!EmitAttributes(line(), str->attributes)) {
             return false;
         }
@@ -614,15 +614,15 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
         // Offset attributes no longer exist in the WGSL spec, but are emitted
         // by the SPIR-V reader and are consumed by the Resolver(). These should not
         // be emitted, but instead struct padding fields should be emitted.
-        ast::AttributeList attributes_sanitized;
-        attributes_sanitized.reserve(mem->attributes.size());
+        utils::Vector<const ast::Attribute*, 4> attributes_sanitized;
+        attributes_sanitized.Reserve(mem->attributes.Length());
         for (auto* attr : mem->attributes) {
             if (!attr->Is<ast::StructMemberOffsetAttribute>()) {
-                attributes_sanitized.emplace_back(attr);
+                attributes_sanitized.Push(attr);
             }
         }
 
-        if (!attributes_sanitized.empty()) {
+        if (!attributes_sanitized.IsEmpty()) {
             if (!EmitAttributes(line(), attributes_sanitized)) {
                 return false;
             }
@@ -642,7 +642,7 @@ bool GeneratorImpl::EmitStructType(const ast::Struct* str) {
 }
 
 bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* v) {
-    if (!v->attributes.empty()) {
+    if (!v->attributes.IsEmpty()) {
         if (!EmitAttributes(out, v->attributes)) {
             return false;
         }
@@ -707,7 +707,8 @@ bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* v) {
     return true;
 }
 
-bool GeneratorImpl::EmitAttributes(std::ostream& out, const ast::AttributeList& attrs) {
+bool GeneratorImpl::EmitAttributes(std::ostream& out,
+                                   utils::VectorRef<const ast::Attribute*> attrs) {
     bool first = true;
     for (auto* attr : attrs) {
         if (!first) {
@@ -954,7 +955,7 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
         });
 }
 
-bool GeneratorImpl::EmitStatements(const ast::StatementList& stmts) {
+bool GeneratorImpl::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) {
     for (auto* s : stmts) {
         if (!EmitStatement(s)) {
             return false;
@@ -963,7 +964,7 @@ bool GeneratorImpl::EmitStatements(const ast::StatementList& stmts) {
     return true;
 }
 
-bool GeneratorImpl::EmitStatementsWithIndent(const ast::StatementList& stmts) {
+bool GeneratorImpl::EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts) {
     ScopedIndent si(this);
     return EmitStatements(stmts);
 }

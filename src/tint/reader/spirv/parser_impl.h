@@ -123,6 +123,9 @@ struct WorkgroupSizeInfo {
 
 /// Parser implementation for SPIR-V.
 class ParserImpl : Reader {
+    using AttributeList = utils::Vector<const ast::Attribute*, 8>;
+    using ExpressionList = utils::Vector<const ast::Expression*, 8>;
+
   public:
     /// Creates a new parser
     /// @param input the input data to parse
@@ -252,15 +255,14 @@ class ParserImpl : Reader {
     /// a diagnostic), or when the variable should not be emitted, e.g. for a
     /// PointSize builtin.
     /// @param id the ID of the SPIR-V variable
-    /// @param store_type the WGSL store type for the variable, which should be
-    /// prepopulatd
+    /// @param store_type the WGSL store type for the variable, which should be prepopulated
     /// @param attributes the attribute list to populate
     /// @param transfer_pipeline_io true if pipeline IO decorations (builtins,
     /// or locations) will update the store type and the decorations list
     /// @returns false when the variable should not be emitted as a variable
     bool ConvertDecorationsForVariable(uint32_t id,
                                        const Type** store_type,
-                                       ast::AttributeList* attributes,
+                                       AttributeList* attributes,
                                        bool transfer_pipeline_io);
 
     /// Converts SPIR-V decorations for pipeline IO into AST decorations.
@@ -270,7 +272,7 @@ class ParserImpl : Reader {
     /// @returns false if conversion fails
     bool ConvertPipelineDecorations(const Type* store_type,
                                     const DecorationList& decorations,
-                                    ast::AttributeList* attributes);
+                                    AttributeList* attributes);
 
     /// Updates the attribute list, placing a non-null location decoration into
     /// the list, replacing an existing one if it exists. Does nothing if the
@@ -280,7 +282,7 @@ class ParserImpl : Reader {
     /// @param replacement the location decoration to place into the list
     /// @returns the location decoration that was replaced, if one was replaced,
     /// or null otherwise.
-    const ast::Attribute* SetLocation(ast::AttributeList* decos, const ast::Attribute* replacement);
+    const ast::Attribute* SetLocation(AttributeList* decos, const ast::Attribute* replacement);
 
     /// Converts a SPIR-V struct member decoration into a number of AST
     /// decorations. If the decoration is recognized but deliberately dropped,
@@ -291,10 +293,10 @@ class ParserImpl : Reader {
     /// @param member_ty the type of the member
     /// @param decoration an encoded SPIR-V Decoration
     /// @returns the AST decorations
-    ast::AttributeList ConvertMemberDecoration(uint32_t struct_type_id,
-                                               uint32_t member_index,
-                                               const Type* member_ty,
-                                               const Decoration& decoration);
+    AttributeList ConvertMemberDecoration(uint32_t struct_type_id,
+                                          uint32_t member_index,
+                                          const Type* member_ty,
+                                          const Decoration& decoration);
 
     /// Returns a string for the given type.  If the type ID is invalid,
     /// then the resulting string only names the type ID.
@@ -434,7 +436,7 @@ class ParserImpl : Reader {
                       ast::StorageClass sc,
                       const Type* storage_type,
                       const ast::Expression* constructor,
-                      ast::AttributeList decorations);
+                      AttributeList decorations);
 
     /// Creates an AST 'let' node for a SPIR-V ID, including any attached decorations,.
     /// @param id the SPIR-V result ID
@@ -452,7 +454,7 @@ class ParserImpl : Reader {
     ast::Override* MakeOverride(uint32_t id,
                                 const Type* type,
                                 const ast::Expression* constructor,
-                                ast::AttributeList decorations);
+                                AttributeList decorations);
 
     /// Creates an AST parameter node for a SPIR-V ID, including any attached decorations, unless
     /// it's an ignorable builtin variable.
@@ -460,7 +462,7 @@ class ParserImpl : Reader {
     /// @param type the type of the parameter
     /// @param decorations the parameter decorations
     /// @returns the AST parameter node
-    ast::Parameter* MakeParameter(uint32_t id, const Type* type, ast::AttributeList decorations);
+    ast::Parameter* MakeParameter(uint32_t id, const Type* type, AttributeList decorations);
 
     /// Returns true if a constant expression can be generated.
     /// @param id the SPIR-V ID of the value

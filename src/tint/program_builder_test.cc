@@ -38,14 +38,14 @@ TEST_F(ProgramBuilderTest, WrapDoesntAffectInner) {
         return builder;
     }());
 
-    ASSERT_EQ(inner.AST().Functions().size(), 1u);
+    ASSERT_EQ(inner.AST().Functions().Length(), 1u);
     ASSERT_TRUE(inner.Symbols().Get("a").IsValid());
     ASSERT_FALSE(inner.Symbols().Get("b").IsValid());
 
     ProgramBuilder outer = ProgramBuilder::Wrap(&inner);
 
-    ASSERT_EQ(inner.AST().Functions().size(), 1u);
-    ASSERT_EQ(outer.AST().Functions().size(), 1u);
+    ASSERT_EQ(inner.AST().Functions().Length(), 1u);
+    ASSERT_EQ(outer.AST().Functions().Length(), 1u);
     EXPECT_EQ(inner.AST().Functions()[0], outer.AST().Functions()[0]);
     EXPECT_TRUE(inner.Symbols().Get("a").IsValid());
     EXPECT_EQ(inner.Symbols().Get("a"), outer.Symbols().Get("a"));
@@ -57,8 +57,8 @@ TEST_F(ProgramBuilderTest, WrapDoesntAffectInner) {
     auto* ty = outer.ty.f32();
     outer.Func("b", {}, ty, {}, {});
 
-    ASSERT_EQ(inner.AST().Functions().size(), 1u);
-    ASSERT_EQ(outer.AST().Functions().size(), 2u);
+    ASSERT_EQ(inner.AST().Functions().Length(), 1u);
+    ASSERT_EQ(outer.AST().Functions().Length(), 2u);
     EXPECT_EQ(inner.AST().Functions()[0], outer.AST().Functions()[0]);
     EXPECT_EQ(outer.AST().Functions()[1]->symbol, outer.Symbols().Get("b"));
     EXPECT_EQ(inner.Symbols().Get("a"), outer.Symbols().Get("a"));

@@ -28,6 +28,7 @@
 #include "src/tint/program_id.h"
 #include "src/tint/symbol.h"
 #include "src/tint/traits.h"
+#include "src/tint/utils/vector.h"
 
 // Forward declarations
 namespace tint {
@@ -163,12 +164,12 @@ class CloneContext {
     ///
     /// @param v the vector to clone
     /// @return the cloned vector
-    template <typename T, typename A>
-    std::vector<T> Clone(const std::vector<T, A>& v) {
-        std::vector<T> out;
+    template <typename T, size_t N>
+    utils::Vector<T, N> Clone(const utils::Vector<T, N>& v) {
+        utils::Vector<T, N> out;
         out.reserve(v.size());
         for (auto& el : v) {
-            out.emplace_back(Clone(el));
+            out.Push(Clone(el));
         }
         return out;
     }
@@ -181,9 +182,9 @@ class CloneContext {
     ///
     /// @param v the vector to clone
     /// @return the cloned vector
-    template <typename T, typename A>
-    std::vector<T*, A> Clone(const std::vector<T*, A>& v) {
-        std::vector<T*, A> out;
+    template <typename T, size_t N>
+    utils::Vector<T*, N> Clone(const utils::Vector<T*, N>& v) {
+        utils::Vector<T*, N> out;
         Clone(out, v);
         return out;
     }
@@ -196,39 +197,39 @@ class CloneContext {
     ///
     /// @param from the vector to clone
     /// @param to the cloned result
-    template <typename T, typename A>
-    void Clone(std::vector<T*, A>& to, const std::vector<T*, A>& from) {
-        to.reserve(from.size());
+    template <typename T, size_t N>
+    void Clone(utils::Vector<T*, N>& to, const utils::Vector<T*, N>& from) {
+        to.Reserve(from.Length());
 
         auto list_transform_it = list_transforms_.find(&from);
         if (list_transform_it != list_transforms_.end()) {
             const auto& transforms = list_transform_it->second;
             for (auto* o : transforms.insert_front_) {
-                to.emplace_back(CheckedCast<T>(o));
+                to.Push(CheckedCast<T>(o));
             }
             for (auto& el : from) {
                 auto insert_before_it = transforms.insert_before_.find(el);
                 if (insert_before_it != transforms.insert_before_.end()) {
                     for (auto insert : insert_before_it->second) {
-                        to.emplace_back(CheckedCast<T>(insert));
+                        to.Push(CheckedCast<T>(insert));
                     }
                 }
                 if (transforms.remove_.count(el) == 0) {
-                    to.emplace_back(Clone(el));
+                    to.Push(Clone(el));
                 }
                 auto insert_after_it = transforms.insert_after_.find(el);
                 if (insert_after_it != transforms.insert_after_.end()) {
                     for (auto insert : insert_after_it->second) {
-                        to.emplace_back(CheckedCast<T>(insert));
+                        to.Push(CheckedCast<T>(insert));
                     }
                 }
             }
             for (auto* o : transforms.insert_back_) {
-                to.emplace_back(CheckedCast<T>(o));
+                to.Push(CheckedCast<T>(o));
             }
         } else {
             for (auto& el : from) {
-                to.emplace_back(Clone(el));
+                to.Push(Clone(el));
 
                 // Clone(el) may have inserted after
                 list_transform_it = list_transforms_.find(&from);
@@ -238,7 +239,7 @@ class CloneContext {
                     auto insert_after_it = transforms.insert_after_.find(el);
                     if (insert_after_it != transforms.insert_after_.end()) {
                         for (auto insert : insert_after_it->second) {
-                            to.emplace_back(CheckedCast<T>(insert));
+                            to.Push(CheckedCast<T>(insert));
                         }
                     }
                 }
@@ -250,7 +251,7 @@ class CloneContext {
                 const auto& transforms = list_transform_it->second;
 
                 for (auto* o : transforms.insert_back_) {
-                    to.emplace_back(CheckedCast<T>(o));
+                    to.Push(CheckedCast<T>(o));
                 }
             }
         }
@@ -318,7 +319,7 @@ class CloneContext {
         CloneableTransform transform;
         transform.typeinfo = &TypeInfo::Of<T>();
         transform.function = [=](const Cloneable* in) { return replacer(in->As<T>()); };
-        transforms_.emplace_back(std::move(transform));
+        transforms_.Push(std::move(transform));
         return *this;
     }
 
@@ -386,8 +387,8 @@ class CloneContext {
     /// @param object a pointer to the object in #src that will be omitted from
     /// the cloned vector.
     /// @returns this CloneContext so calls can be chained
-    template <typename T, typename A, typename OBJECT>
-    CloneContext& Remove(const std::vector<T, A>& vector, OBJECT* object) {
+    template <typename T, size_t N, typename OBJECT>
+    CloneContext& Remove(const utils::Vector<T, N>& vector, OBJECT* object) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, object);
         if (std::find(vector.begin(), vector.end(), object) == vector.end()) {
             TINT_ICE(Clone, Diagnostics())
@@ -404,12 +405,12 @@ class CloneContext {
     /// @param object a pointer to the object in #dst that will be inserted at the
     /// front of the vector
     /// @returns this CloneContext so calls can be chained
-    template <typename T, typename A, typename OBJECT>
-    CloneContext& InsertFront(const std::vector<T, A>& vector, OBJECT* object) {
+    template <typename T, size_t N, typename OBJECT>
+    CloneContext& InsertFront(const utils::Vector<T, N>& vector, OBJECT* object) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, object);
         auto& transforms = list_transforms_[&vector];
         auto& list = transforms.insert_front_;
-        list.emplace_back(object);
+        list.Push(object);
         return *this;
     }
 
@@ -418,12 +419,12 @@ class CloneContext {
     /// @param object a pointer to the object in #dst that will be inserted at the
     /// end of the vector
     /// @returns this CloneContext so calls can be chained
-    template <typename T, typename A, typename OBJECT>
-    CloneContext& InsertBack(const std::vector<T, A>& vector, OBJECT* object) {
+    template <typename T, size_t N, typename OBJECT>
+    CloneContext& InsertBack(const utils::Vector<T, N>& vector, OBJECT* object) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, object);
         auto& transforms = list_transforms_[&vector];
         auto& list = transforms.insert_back_;
-        list.emplace_back(object);
+        list.Push(object);
         return *this;
     }
 
@@ -433,8 +434,8 @@ class CloneContext {
     /// @param object a pointer to the object in #dst that will be inserted before
     /// any occurrence of the clone of `before`
     /// @returns this CloneContext so calls can be chained
-    template <typename T, typename A, typename BEFORE, typename OBJECT>
-    CloneContext& InsertBefore(const std::vector<T, A>& vector,
+    template <typename T, size_t N, typename BEFORE, typename OBJECT>
+    CloneContext& InsertBefore(const utils::Vector<T, N>& vector,
                                const BEFORE* before,
                                const OBJECT* object) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, before);
@@ -447,7 +448,7 @@ class CloneContext {
 
         auto& transforms = list_transforms_[&vector];
         auto& list = transforms.insert_before_[before];
-        list.emplace_back(object);
+        list.Push(object);
         return *this;
     }
 
@@ -457,8 +458,8 @@ class CloneContext {
     /// @param object a pointer to the object in #dst that will be inserted after
     /// any occurrence of the clone of `after`
     /// @returns this CloneContext so calls can be chained
-    template <typename T, typename A, typename AFTER, typename OBJECT>
-    CloneContext& InsertAfter(const std::vector<T, A>& vector,
+    template <typename T, size_t N, typename AFTER, typename OBJECT>
+    CloneContext& InsertAfter(const utils::Vector<T, N>& vector,
                               const AFTER* after,
                               const OBJECT* object) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, src, after);
@@ -471,7 +472,7 @@ class CloneContext {
 
         auto& transforms = list_transforms_[&vector];
         auto& list = transforms.insert_after_[after];
-        list.emplace_back(object);
+        list.Push(object);
         return *this;
     }
 
@@ -530,7 +531,7 @@ class CloneContext {
     diag::List& Diagnostics() const;
 
     /// A vector of const Cloneable*
-    using CloneableList = std::vector<const Cloneable*>;
+    using CloneableList = utils::Vector<const Cloneable*, 4>;
 
     /// Transformations to be applied to a list (vector)
     struct ListTransforms {
@@ -551,12 +552,12 @@ class CloneContext {
         CloneableList insert_back_;
 
         /// A map of object in #src to the list of cloned objects in #dst.
-        /// Clone(const std::vector<T*>& v) will use this to insert the map-value
+        /// Clone(const utils::Vector<T*>& v) will use this to insert the map-value
         /// list into the target vector before cloning and inserting the map-key.
         std::unordered_map<const Cloneable*, CloneableList> insert_before_;
 
         /// A map of object in #src to the list of cloned objects in #dst.
-        /// Clone(const std::vector<T*>& v) will use this to insert the map-value
+        /// Clone(const utils::Vector<T*>& v) will use this to insert the map-value
         /// list into the target vector after cloning and inserting the map-key.
         std::unordered_map<const Cloneable*, CloneableList> insert_after_;
     };
@@ -569,9 +570,9 @@ class CloneContext {
     std::unordered_map<Symbol, Symbol> cloned_symbols_;
 
     /// Cloneable transform functions registered with ReplaceAll()
-    std::vector<CloneableTransform> transforms_;
+    utils::Vector<CloneableTransform, 8> transforms_;
 
-    /// Map of std::vector pointer to transforms for that list
+    /// Map of utils::Vector pointer to transforms for that list
     std::unordered_map<const void*, ListTransforms> list_transforms_;
 
     /// Symbol transform registered with ReplaceAll()

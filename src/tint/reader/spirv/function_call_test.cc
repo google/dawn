@@ -87,13 +87,13 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParams) {
      OpFunctionEnd
   )"));
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-    ast::StatementList f100;
+    utils::Vector<const ast::Statement*, 4> f100;
     {
         auto fe = p->function_emitter(100);
         EXPECT_TRUE(fe.EmitBody()) << p->error();
         f100 = fe.ast_body();
     }
-    ast::StatementList f50;
+    utils::Vector<const ast::Statement*, 4> f50;
     {
         auto fe = p->function_emitter(50);
         EXPECT_TRUE(fe.EmitBody()) << p->error();
@@ -128,13 +128,13 @@ TEST_F(SpvParserTest, EmitStatement_ScalarCallNoParamsUsedTwice) {
      OpFunctionEnd
   )"));
     ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << p->error();
-    ast::StatementList f100;
+    utils::Vector<const ast::Statement*, 4> f100;
     {
         auto fe = p->function_emitter(100);
         EXPECT_TRUE(fe.EmitBody()) << p->error();
         f100 = fe.ast_body();
     }
-    ast::StatementList f50;
+    utils::Vector<const ast::Statement*, 4> f50;
     {
         auto fe = p->function_emitter(50);
         EXPECT_TRUE(fe.EmitBody()) << p->error();

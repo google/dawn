@@ -396,7 +396,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Array_Empty) {
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct) {
-    auto* str = Structure("S", {
+    auto* str = Structure("S", utils::Vector{
                                    Member("a", ty.i32()),
                                    Member("b", ty.f32()),
                                    Member("c", ty.vec3<i32>()),
@@ -411,7 +411,7 @@ TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct) {
 }
 
 TEST_F(GlslGeneratorImplTest_Constructor, EmitConstructor_Type_Struct_Empty) {
-    auto* str = Structure("S", {
+    auto* str = Structure("S", utils::Vector{
                                    Member("a", ty.i32()),
                                    Member("b", ty.f32()),
                                    Member("c", ty.vec3<i32>()),

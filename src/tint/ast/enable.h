@@ -52,9 +52,6 @@ class Enable final : public Castable<Enable, Node> {
     const Extension extension;
 };
 
-/// A list of enables
-using EnableList = std::vector<const Enable*>;
-
 }  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_ENABLE_H_

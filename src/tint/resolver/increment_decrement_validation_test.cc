@@ -161,7 +161,10 @@ TEST_F(ResolverIncrementDecrementValidationTest, Parameter) {
     //   a++;
     // }
     auto* a = Param(Source{{12, 34}}, "a", ty.i32());
-    Func("func", {a}, ty.void_(), {Increment(Expr(Source{{56, 78}}, "a"))});
+    Func("func", utils::Vector{a}, ty.void_(),
+         utils::Vector{
+             Increment(Expr(Source{{56, 78}}, "a")),
+         });
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(56:78 error: cannot modify function parameter
@@ -175,7 +178,10 @@ TEST_F(ResolverIncrementDecrementValidationTest, ReturnValue) {
     // {
     //   a++;
     // }
-    Func("func", {}, ty.i32(), {Return(0_i)});
+    Func("func", utils::Empty, ty.i32(),
+         utils::Vector{
+             Return(0_i),
+         });
     WrapInFunction(Increment(Call(Source{{56, 78}}, "func")));
 
     EXPECT_FALSE(r()->Resolve());

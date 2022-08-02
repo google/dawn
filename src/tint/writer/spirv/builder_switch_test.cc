@@ -60,8 +60,8 @@ TEST_F(BuilderTest, Switch_WithCase) {
     auto* v = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
     auto* a = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
 
-    auto* func = Func("a_func", {}, ty.void_(),
-                      {
+    auto* func = Func("a_func", utils::Empty, ty.void_(),
+                      utils::Vector{
                           Switch("a",                                       //
                                  Case(Expr(1_i), Block(Assign("v", 1_i))),  //
                                  Case(Expr(2_i), Block(Assign("v", 2_i))),  //
@@ -117,8 +117,8 @@ TEST_F(BuilderTest, Switch_WithCase_Unsigned) {
     auto* v = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
     auto* a = GlobalVar("a", ty.u32(), ast::StorageClass::kPrivate);
 
-    auto* func = Func("a_func", {}, ty.void_(),
-                      {
+    auto* func = Func("a_func", utils::Empty, ty.void_(),
+                      utils::Vector{
                           Switch("a",                                       //
                                  Case(Expr(1_u), Block(Assign("v", 1_i))),  //
                                  Case(Expr(2_u), Block(Assign("v", 2_i))),  //
@@ -174,8 +174,8 @@ TEST_F(BuilderTest, Switch_WithDefault) {
     auto* v = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
     auto* a = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
 
-    auto* func = Func("a_func", {}, ty.void_(),
-                      {
+    auto* func = Func("a_func", utils::Empty, ty.void_(),
+                      utils::Vector{
                           Switch("a",                                    //
                                  DefaultCase(Block(Assign("v", 1_i)))),  //
                       });
@@ -224,13 +224,13 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
     auto* v = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
     auto* a = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
 
-    auto* func = Func("a_func", {}, ty.void_(),
-                      {
-                          Switch(Expr("a"),                      //
-                                 Case(Expr(1_i),                 //
-                                      Block(Assign("v", 1_i))),  //
-                                 Case({Expr(2_i), Expr(3_i)},    //
-                                      Block(Assign("v", 2_i))),  //
+    auto* func = Func("a_func", utils::Empty, ty.void_(),
+                      utils::Vector{
+                          Switch(Expr("a"),                                 //
+                                 Case(Expr(1_i),                            //
+                                      Block(Assign("v", 1_i))),             //
+                                 Case(utils::Vector{Expr(2_i), Expr(3_i)},  //
+                                      Block(Assign("v", 2_i))),             //
                                  DefaultCase(Block(Assign("v", 3_i)))),
                       });
 
@@ -287,8 +287,8 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
     auto* v = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
     auto* a = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
 
-    auto* func = Func("a_func", {}, ty.void_(),
-                      {
+    auto* func = Func("a_func", utils::Empty, ty.void_(),
+                      utils::Vector{
                           Switch(Expr("a"),                                     //
                                  Case(Expr(1_i),                                //
                                       Block(Assign("v", 1_i), Fallthrough())),  //
@@ -349,8 +349,8 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
     auto* v = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
     auto* a = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
 
-    auto* func = Func("a_func", {}, ty.void_(),
-                      {
+    auto* func = Func("a_func", utils::Empty, ty.void_(),
+                      utils::Vector{
                           Switch("a",             //
                                  Case(Expr(1_i),  //
                                       Block(      //
@@ -412,8 +412,8 @@ TEST_F(BuilderTest, Switch_AllReturn) {
     //   }
     // }
 
-    auto* fn = Func("f", {}, ty.i32(),
-                    {
+    auto* fn = Func("f", utils::Empty, ty.i32(),
+                    utils::Vector{
                         Switch(1_i,                                    //
                                Case(Expr(1_i), Block(Return(1_i))),    //
                                Case(Expr(2_i), Block(Fallthrough())),  //

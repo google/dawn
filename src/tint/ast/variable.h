@@ -67,7 +67,7 @@ class Variable : public Castable<Variable, Node> {
              const Symbol& sym,
              const ast::Type* type,
              const Expression* constructor,
-             AttributeList attributes);
+             utils::VectorRef<const Attribute*> attributes);
 
     /// Move constructor
     Variable(Variable&&);
@@ -95,11 +95,8 @@ class Variable : public Castable<Variable, Node> {
     const Expression* const constructor;
 
     /// The attributes attached to this variable
-    const AttributeList attributes;
+    const utils::Vector<const Attribute*, 2> attributes;
 };
-
-/// A list of variables
-using VariableList = std::vector<const Variable*>;
 
 }  // namespace tint::ast
 

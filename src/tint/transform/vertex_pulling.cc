@@ -228,7 +228,7 @@ struct State {
     Symbol pulling_position_name;
     Symbol struct_buffer_name;
     std::unordered_map<uint32_t, Symbol> vertex_buffer_names;
-    ast::ParameterList new_function_parameters;
+    utils::Vector<const ast::Parameter*, 8> new_function_parameters;
 
     /// Generate the vertex buffer binding name
     /// @param index index to append to buffer name
@@ -254,14 +254,14 @@ struct State {
         static const char kStructName[] = "TintVertexData";
         auto* struct_type =
             ctx.dst->Structure(ctx.dst->Symbols().New(kStructName),
-                               {
+                               utils::Vector{
                                    ctx.dst->Member(GetStructBufferName(), ctx.dst->ty.array<u32>()),
                                });
         for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
             // The decorated variable with struct type
             ctx.dst->GlobalVar(GetVertexBufferName(i), ctx.dst->ty.Of(struct_type),
                                ast::StorageClass::kStorage, ast::Access::kRead,
-                               ast::AttributeList{
+                               utils::Vector{
                                    ctx.dst->create<ast::BindingAttribute>(i),
                                    ctx.dst->create<ast::GroupAttribute>(cfg.pulling_group),
                                });
@@ -273,7 +273,7 @@ struct State {
         // Assign by looking at the vertex descriptor to find attributes with
         // matching location.
 
-        ast::StatementList stmts;
+        utils::Vector<const ast::Statement*, 8> stmts;
 
         for (uint32_t buffer_idx = 0; buffer_idx < cfg.vertex_state.size(); ++buffer_idx) {
             const VertexBufferLayoutDescriptor& buffer_layout = cfg.vertex_state[buffer_idx];
@@ -303,8 +303,7 @@ struct State {
             }
 
             // let pulling_offset_n = <attribute_offset>
-            stmts.emplace_back(
-                ctx.dst->Decl(ctx.dst->Let(buffer_array_base, nullptr, attribute_offset)));
+            stmts.Push(ctx.dst->Decl(ctx.dst->Let(buffer_array_base, nullptr, attribute_offset)));
 
             for (const VertexAttributeDescriptor& attribute_desc : buffer_layout.attributes) {
                 auto it = location_info.find(attribute_desc.shader_location);
@@ -356,24 +355,24 @@ struct State {
                 } else if (var_dt.width > fmt_dt.width) {
                     // WGSL variable vector width is wider than the loaded vector width
                     const ast::Type* ty = nullptr;
-                    ast::ExpressionList values{fetch};
+                    utils::Vector<const ast::Expression*, 8> values{fetch};
                     switch (var_dt.base_type) {
                         case BaseType::kI32:
                             ty = ctx.dst->ty.i32();
                             for (uint32_t i = fmt_dt.width; i < var_dt.width; i++) {
-                                values.emplace_back(ctx.dst->Expr((i == 3) ? 1_i : 0_i));
+                                values.Push(ctx.dst->Expr((i == 3) ? 1_i : 0_i));
                             }
                             break;
                         case BaseType::kU32:
                             ty = ctx.dst->ty.u32();
                             for (uint32_t i = fmt_dt.width; i < var_dt.width; i++) {
-                                values.emplace_back(ctx.dst->Expr((i == 3) ? 1_u : 0_u));
+                                values.Push(ctx.dst->Expr((i == 3) ? 1_u : 0_u));
                             }
                             break;
                         case BaseType::kF32:
                             ty = ctx.dst->ty.f32();
                             for (uint32_t i = fmt_dt.width; i < var_dt.width; i++) {
-                                values.emplace_back(ctx.dst->Expr((i == 3) ? 1_f : 0_f));
+                                values.Push(ctx.dst->Expr((i == 3) ? 1_f : 0_f));
                             }
                             break;
                         default:
@@ -384,15 +383,15 @@ struct State {
                 }
 
                 // Assign the value to the WGSL variable
-                stmts.emplace_back(ctx.dst->Assign(var.expr(), value));
+                stmts.Push(ctx.dst->Assign(var.expr(), value));
             }
         }
 
-        if (stmts.empty()) {
+        if (stmts.IsEmpty()) {
             return nullptr;
         }
 
-        return ctx.dst->create<ast::BlockStatement>(stmts);
+        return ctx.dst->create<ast::BlockStatement>(std::move(stmts));
     }
 
     /// Generates an expression reading from a buffer a specific format.
@@ -679,11 +678,11 @@ struct State {
                                    const ast::Type* base_type,
                                    VertexFormat base_format,
                                    uint32_t count) {
-        ast::ExpressionList expr_list;
+        utils::Vector<const ast::Expression*, 8> expr_list;
         for (uint32_t i = 0; i < count; ++i) {
             // Offset read position by element_stride for each component
             uint32_t primitive_offset = offset + element_stride * i;
-            expr_list.push_back(LoadPrimitive(array_base, primitive_offset, buffer, base_format));
+            expr_list.Push(LoadPrimitive(array_base, primitive_offset, buffer, base_format));
         }
 
         return ctx.dst->Construct(ctx.dst->create<ast::Vector>(base_type, count),
@@ -718,7 +717,7 @@ struct State {
                     return ctx.dst->Expr(ctx.Clone(param->symbol));
                 };
             }
-            new_function_parameters.push_back(ctx.Clone(param));
+            new_function_parameters.Push(ctx.Clone(param));
         } else {
             TINT_ICE(Transform, ctx.dst->Diagnostics()) << "Invalid entry point parameter";
         }
@@ -739,7 +738,7 @@ struct State {
 
         // Process the struct members.
         bool has_locations = false;
-        ast::StructMemberList members_to_clone;
+        utils::Vector<const ast::StructMember*, 8> members_to_clone;
         for (auto* member : struct_ty->members) {
             auto member_sym = ctx.Clone(member->symbol);
             std::function<const ast::Expression*()> member_expr = [this, param_sym, member_sym]() {
@@ -761,7 +760,7 @@ struct State {
                 } else if (builtin->builtin == ast::BuiltinValue::kInstanceIndex) {
                     instance_index_expr = member_expr;
                 }
-                members_to_clone.push_back(member);
+                members_to_clone.Push(member);
             } else {
                 TINT_ICE(Transform, ctx.dst->Diagnostics()) << "Invalid entry point parameter";
             }
@@ -769,7 +768,7 @@ struct State {
 
         if (!has_locations) {
             // Nothing to do.
-            new_function_parameters.push_back(ctx.Clone(param));
+            new_function_parameters.Push(ctx.Clone(param));
             return;
         }
 
@@ -777,21 +776,20 @@ struct State {
         auto* func_var = ctx.dst->Var(param_sym, ctx.Clone(param->type));
         ctx.InsertFront(func->body->statements, ctx.dst->Decl(func_var));
 
-        if (!members_to_clone.empty()) {
+        if (!members_to_clone.IsEmpty()) {
             // Create a new struct without the location attributes.
-            ast::StructMemberList new_members;
+            utils::Vector<const ast::StructMember*, 8> new_members;
             for (auto* member : members_to_clone) {
                 auto member_sym = ctx.Clone(member->symbol);
                 auto* member_type = ctx.Clone(member->type);
                 auto member_attrs = ctx.Clone(member->attributes);
-                new_members.push_back(
-                    ctx.dst->Member(member_sym, member_type, std::move(member_attrs)));
+                new_members.Push(ctx.dst->Member(member_sym, member_type, std::move(member_attrs)));
             }
             auto* new_struct = ctx.dst->Structure(ctx.dst->Sym(), new_members);
 
             // Create a new function parameter with this struct.
             auto* new_param = ctx.dst->Param(ctx.dst->Sym(), ctx.dst->ty.Of(new_struct));
-            new_function_parameters.push_back(new_param);
+            new_function_parameters.Push(new_param);
 
             // Copy values from the new parameter to the function-scope variable.
             for (auto* member : members_to_clone) {
@@ -825,9 +823,9 @@ struct State {
             for (const VertexBufferLayoutDescriptor& layout : cfg.vertex_state) {
                 if (layout.step_mode == VertexStepMode::kVertex) {
                     auto name = ctx.dst->Symbols().New("tint_pulling_vertex_index");
-                    new_function_parameters.push_back(
-                        ctx.dst->Param(name, ctx.dst->ty.u32(),
-                                       {ctx.dst->Builtin(ast::BuiltinValue::kVertexIndex)}));
+                    new_function_parameters.Push(ctx.dst->Param(
+                        name, ctx.dst->ty.u32(),
+                        utils::Vector{ctx.dst->Builtin(ast::BuiltinValue::kVertexIndex)}));
                     vertex_index_expr = [this, name]() { return ctx.dst->Expr(name); };
                     break;
                 }
@@ -837,9 +835,9 @@ struct State {
             for (const VertexBufferLayoutDescriptor& layout : cfg.vertex_state) {
                 if (layout.step_mode == VertexStepMode::kInstance) {
                     auto name = ctx.dst->Symbols().New("tint_pulling_instance_index");
-                    new_function_parameters.push_back(
-                        ctx.dst->Param(name, ctx.dst->ty.u32(),
-                                       {ctx.dst->Builtin(ast::BuiltinValue::kInstanceIndex)}));
+                    new_function_parameters.Push(ctx.dst->Param(
+                        name, ctx.dst->ty.u32(),
+                        utils::Vector{ctx.dst->Builtin(ast::BuiltinValue::kInstanceIndex)}));
                     instance_index_expr = [this, name]() { return ctx.dst->Expr(name); };
                     break;
                 }

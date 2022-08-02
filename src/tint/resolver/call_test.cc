@@ -84,14 +84,14 @@ static constexpr Params all_param_types[] = {
 TEST_F(ResolverCallTest, Valid) {
     Enable(ast::Extension::kF16);
 
-    ast::ParameterList params;
-    ast::ExpressionList args;
+    utils::Vector<const ast::Parameter*, 4> params;
+    utils::Vector<const ast::Expression*, 4> args;
     for (auto& p : all_param_types) {
-        params.push_back(Param(Sym(), p.create_type(*this)));
-        args.push_back(p.create_value(*this, 0));
+        params.Push(Param(Sym(), p.create_type(*this)));
+        args.Push(p.create_value(*this, 0));
     }
 
-    auto* func = Func("foo", std::move(params), ty.f32(), {Return(1.23_f)});
+    auto* func = Func("foo", std::move(params), ty.f32(), utils::Vector{Return(1.23_f)});
     auto* call_expr = Call("foo", std::move(args));
     WrapInFunction(call_expr);
 
@@ -104,8 +104,8 @@ TEST_F(ResolverCallTest, Valid) {
 
 TEST_F(ResolverCallTest, OutOfOrder) {
     auto* call_expr = Call("b");
-    Func("a", {}, ty.void_(), {CallStmt(call_expr)});
-    auto* b = Func("b", {}, ty.void_(), {});
+    Func("a", utils::Empty, ty.void_(), utils::Vector{CallStmt(call_expr)});
+    auto* b = Func("b", utils::Empty, ty.void_(), utils::Empty);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 

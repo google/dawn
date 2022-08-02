@@ -99,7 +99,7 @@ TEST_F(ResolverIsStorableTest, ArrayUnsizedOfStorable) {
 }
 
 TEST_F(ResolverIsStorableTest, Struct_AllMembersStorable) {
-    Structure("S", {
+    Structure("S", utils::Vector{
                        Member("a", ty.i32()),
                        Member("b", ty.f32()),
                    });
@@ -108,7 +108,7 @@ TEST_F(ResolverIsStorableTest, Struct_AllMembersStorable) {
 }
 
 TEST_F(ResolverIsStorableTest, Struct_SomeMembersNonStorable) {
-    Structure("S", {
+    Structure("S", utils::Vector{
                        Member("a", ty.i32()),
                        Member("b", ty.pointer<i32>(ast::StorageClass::kPrivate)),
                    });
@@ -120,11 +120,11 @@ TEST_F(ResolverIsStorableTest, Struct_SomeMembersNonStorable) {
 }
 
 TEST_F(ResolverIsStorableTest, Struct_NestedStorable) {
-    auto* storable = Structure("Storable", {
+    auto* storable = Structure("Storable", utils::Vector{
                                                Member("a", ty.i32()),
                                                Member("b", ty.f32()),
                                            });
-    Structure("S", {
+    Structure("S", utils::Vector{
                        Member("a", ty.i32()),
                        Member("b", ty.Of(storable)),
                    });
@@ -134,11 +134,11 @@ TEST_F(ResolverIsStorableTest, Struct_NestedStorable) {
 
 TEST_F(ResolverIsStorableTest, Struct_NestedNonStorable) {
     auto* non_storable =
-        Structure("nonstorable", {
+        Structure("nonstorable", utils::Vector{
                                      Member("a", ty.i32()),
                                      Member("b", ty.pointer<i32>(ast::StorageClass::kPrivate)),
                                  });
-    Structure("S", {
+    Structure("S", utils::Vector{
                        Member("a", ty.i32()),
                        Member("b", ty.Of(non_storable)),
                    });

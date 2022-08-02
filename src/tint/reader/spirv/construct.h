@@ -18,7 +18,8 @@
 #include <memory>
 #include <sstream>
 #include <string>
-#include <vector>
+
+#include "src/tint/utils/vector.h"
 
 namespace tint::reader::spirv {
 
@@ -146,7 +147,7 @@ struct Construct {
 };
 
 /// ConstructList is a list of Construct unique pointers.
-using ConstructList = std::vector<std::unique_ptr<Construct>>;
+using ConstructList = utils::Vector<std::unique_ptr<Construct>, 8>;
 
 /// Converts a construct kind to a string.
 /// @param kind the construct kind to convert

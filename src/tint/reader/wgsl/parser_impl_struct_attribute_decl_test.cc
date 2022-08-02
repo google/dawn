@@ -24,7 +24,7 @@ TEST_F(ParserImplTest, AttributeDecl_Parses) {
     EXPECT_FALSE(p->has_error());
     EXPECT_FALSE(attrs.errored);
     EXPECT_TRUE(attrs.matched);
-    ASSERT_EQ(attrs.value.size(), 1u);
+    ASSERT_EQ(attrs.value.Length(), 1u);
     auto* invariant = attrs.value[0]->As<ast::Attribute>();
     EXPECT_TRUE(invariant->Is<ast::InvariantAttribute>());
 }
@@ -35,7 +35,7 @@ TEST_F(ParserImplTest, AttributeDecl_MissingParenLeft) {
     EXPECT_TRUE(p->has_error());
     EXPECT_TRUE(attrs.errored);
     EXPECT_FALSE(attrs.matched);
-    EXPECT_TRUE(attrs.value.empty());
+    EXPECT_TRUE(attrs.value.IsEmpty());
     EXPECT_EQ(p->error(), "1:11: expected '(' for location attribute");
 }
 
@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, AttributeDecl_MissingValue) {
     EXPECT_TRUE(p->has_error());
     EXPECT_TRUE(attrs.errored);
     EXPECT_FALSE(attrs.matched);
-    EXPECT_TRUE(attrs.value.empty());
+    EXPECT_TRUE(attrs.value.IsEmpty());
     EXPECT_EQ(p->error(), "1:11: expected signed integer literal for location attribute");
 }
 
@@ -55,7 +55,7 @@ TEST_F(ParserImplTest, AttributeDecl_MissingParenRight) {
     EXPECT_TRUE(p->has_error());
     EXPECT_TRUE(attrs.errored);
     EXPECT_FALSE(attrs.matched);
-    EXPECT_TRUE(attrs.value.empty());
+    EXPECT_TRUE(attrs.value.IsEmpty());
     EXPECT_EQ(p->error(), "1:12: expected ')' for location attribute");
 }
 
@@ -65,7 +65,7 @@ TEST_F(ParserImplTest, AttributeDecl_Invalidattribute) {
     EXPECT_TRUE(p->has_error());
     EXPECT_TRUE(attrs.errored);
     EXPECT_FALSE(attrs.matched);
-    EXPECT_TRUE(attrs.value.empty());
+    EXPECT_TRUE(attrs.value.IsEmpty());
 }
 
 }  // namespace

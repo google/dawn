@@ -14,6 +14,8 @@
 
 #include "src/tint/ast/parameter.h"
 
+#include <utility>
+
 #include "src/tint/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::ast::Parameter);
@@ -25,8 +27,8 @@ Parameter::Parameter(ProgramID pid,
                      const Source& src,
                      const Symbol& sym,
                      const ast::Type* ty,
-                     AttributeList attrs)
-    : Base(pid, nid, src, sym, ty, nullptr, attrs) {}
+                     utils::VectorRef<const Attribute*> attrs)
+    : Base(pid, nid, src, sym, ty, nullptr, std::move(attrs)) {}
 
 Parameter::Parameter(Parameter&&) = default;
 
@@ -41,7 +43,7 @@ const Parameter* Parameter::Clone(CloneContext* ctx) const {
     auto sym = ctx->Clone(symbol);
     auto* ty = ctx->Clone(type);
     auto attrs = ctx->Clone(attributes);
-    return ctx->dst->create<Parameter>(src, sym, ty, attrs);
+    return ctx->dst->create<Parameter>(src, sym, ty, std::move(attrs));
 }
 
 }  // namespace tint::ast

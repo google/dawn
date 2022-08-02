@@ -641,7 +641,7 @@ bool Validator::GlobalVariable(
         },
         [&](const ast::Override*) { return Override(global, override_ids); },
         [&](const ast::Const*) {
-            if (!decl->attributes.empty()) {
+            if (!decl->attributes.IsEmpty()) {
                 AddError("attribute is not valid for module-scope 'const' declaration",
                          decl->attributes[0]->source);
                 return false;
@@ -1044,7 +1044,7 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
         }
     }
 
-    if (decl->params.size() > 255) {
+    if (decl->params.Length() > 255) {
         AddError("functions may declare at most 255 parameters", decl->source);
         return false;
     }
@@ -1126,12 +1126,13 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     };
 
     // Inner lambda that is applied to a type and all of its members.
-    auto validate_entry_point_attributes_inner = [&](const ast::AttributeList& attrs,
+    auto validate_entry_point_attributes_inner = [&](utils::VectorRef<const ast::Attribute*> attrs,
                                                      const sem::Type* ty, Source source,
                                                      ParamOrRetType param_or_ret,
                                                      bool is_struct_member) {
         // Temporally forbid using f16 types in entry point IO.
-        // TODO(tint:1473, tint:1502): Remove this error after f16 is supported in entry point IO.
+        // TODO(tint:1473, tint:1502): Remove this error after f16 is supported in entry point
+        // IO.
         if (Is<sem::F16>(sem::Type::DeepestElementOf(ty))) {
             AddError("entry point IO of f16 types is not implemented yet", source);
             return false;
@@ -1269,8 +1270,9 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     };
 
     // Outer lambda for validating the entry point attributes for a type.
-    auto validate_entry_point_attributes = [&](const ast::AttributeList& attrs, const sem::Type* ty,
-                                               Source source, ParamOrRetType param_or_ret) {
+    auto validate_entry_point_attributes = [&](utils::VectorRef<const ast::Attribute*> attrs,
+                                               const sem::Type* ty, Source source,
+                                               ParamOrRetType param_or_ret) {
         if (!validate_entry_point_attributes_inner(attrs, ty, source, param_or_ret,
                                                    /*is_struct_member*/ false)) {
             return false;
@@ -1379,7 +1381,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     return true;
 }
 
-bool Validator::Statements(const ast::StatementList& stmts) const {
+bool Validator::Statements(utils::VectorRef<const ast::Statement*> stmts) const {
     for (auto* stmt : stmts) {
         if (!sem_.Get(stmt)->IsReachable()) {
             /// TODO(https://github.com/gpuweb/gpuweb/issues/2378): This may need to
@@ -1443,7 +1445,7 @@ bool Validator::BreakStatement(const sem::Statement* stmt,
                 return fail("break statement is not directly in if statement block",
                             stmt->Declaration()->source);
             }
-            if (block->Declaration()->statements.size() != 1) {
+            if (block->Declaration()->statements.Length() != 1) {
                 return fail("if statement block contains multiple statements",
                             block->Declaration()->source);
             }
@@ -1542,7 +1544,7 @@ bool Validator::FallthroughStatement(const sem::Statement* stmt) const {
         if (auto* c = As<sem::CaseStatement>(block->Parent())) {
             if (block->Declaration()->Last() == stmt->Declaration()) {
                 if (auto* s = As<sem::SwitchStatement>(c->Parent())) {
-                    if (c->Declaration() != s->Declaration()->body.back()) {
+                    if (c->Declaration() != s->Declaration()->body.Back()) {
                         return true;
                     }
                     AddError(
@@ -1749,8 +1751,8 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
         return false;
     }
 
-    if (decl->args.size() != target->Parameters().Length()) {
-        bool more = decl->args.size() > target->Parameters().Length();
+    if (decl->args.Length() != target->Parameters().Length()) {
+        bool more = decl->args.Length() > target->Parameters().Length();
         AddError("too " + (more ? std::string("many") : std::string("few")) +
                      " arguments in call to '" + name + "', expected " +
                      std::to_string(target->Parameters().Length()) + ", got " +
@@ -1847,12 +1849,12 @@ bool Validator::StructureConstructor(const ast::CallExpression* ctor,
         return false;
     }
 
-    if (ctor->args.size() > 0) {
-        if (ctor->args.size() != struct_type->Members().size()) {
-            std::string fm = ctor->args.size() < struct_type->Members().size() ? "few" : "many";
+    if (ctor->args.Length() > 0) {
+        if (ctor->args.Length() != struct_type->Members().size()) {
+            std::string fm = ctor->args.Length() < struct_type->Members().size() ? "few" : "many";
             AddError("struct constructor has too " + fm + " inputs: expected " +
                          std::to_string(struct_type->Members().size()) + ", found " +
-                         std::to_string(ctor->args.size()),
+                         std::to_string(ctor->args.Length()),
                      ctor->source);
             return false;
         }
@@ -1894,17 +1896,17 @@ bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
     } else if (!elem_ty->IsConstructible()) {
         AddError("array constructor has non-constructible element type", ctor->source);
         return false;
-    } else if (!values.empty() && (values.size() != array_type->Count())) {
-        std::string fm = values.size() < array_type->Count() ? "few" : "many";
+    } else if (!values.IsEmpty() && (values.Length() != array_type->Count())) {
+        std::string fm = values.Length() < array_type->Count() ? "few" : "many";
         AddError("array constructor has too " + fm + " elements: expected " +
                      std::to_string(array_type->Count()) + ", found " +
-                     std::to_string(values.size()),
+                     std::to_string(values.Length()),
                  ctor->source);
         return false;
-    } else if (values.size() > array_type->Count()) {
+    } else if (values.Length() > array_type->Count()) {
         AddError("array constructor has too many elements: expected " +
                      std::to_string(array_type->Count()) + ", found " +
-                     std::to_string(values.size()),
+                     std::to_string(values.Length()),
                  ctor->source);
         return false;
     }
@@ -2448,7 +2450,7 @@ bool Validator::IncrementDecrementStatement(const ast::IncrementDecrementStateme
     return true;
 }
 
-bool Validator::NoDuplicateAttributes(const ast::AttributeList& attributes) const {
+bool Validator::NoDuplicateAttributes(utils::VectorRef<const ast::Attribute*> attributes) const {
     std::unordered_map<const TypeInfo*, Source> seen;
     for (auto* d : attributes) {
         auto res = seen.emplace(&d->TypeInfo(), d->source);
@@ -2461,7 +2463,7 @@ bool Validator::NoDuplicateAttributes(const ast::AttributeList& attributes) cons
     return true;
 }
 
-bool Validator::IsValidationDisabled(const ast::AttributeList& attributes,
+bool Validator::IsValidationDisabled(utils::VectorRef<const ast::Attribute*> attributes,
                                      ast::DisabledValidation validation) const {
     for (auto* attribute : attributes) {
         if (auto* dv = attribute->As<ast::DisableValidationAttribute>()) {
@@ -2473,7 +2475,7 @@ bool Validator::IsValidationDisabled(const ast::AttributeList& attributes,
     return false;
 }
 
-bool Validator::IsValidationEnabled(const ast::AttributeList& attributes,
+bool Validator::IsValidationEnabled(utils::VectorRef<const ast::Attribute*> attributes,
                                     ast::DisabledValidation validation) const {
     return !IsValidationDisabled(attributes, validation);
 }

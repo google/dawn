@@ -804,7 +804,7 @@ bool GeneratorImpl::EmitAtomicCall(std::ostream& out,
         out << name;
         {
             ScopedParen sp(out);
-            for (size_t i = 0; i < expr->args.size(); i++) {
+            for (size_t i = 0; i < expr->args.Length(); i++) {
                 auto* arg = expr->args[i];
                 if (i > 0) {
                     out << ", ";
@@ -1524,7 +1524,7 @@ bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
                 return false;
             }
             out << ":";
-            if (selector == stmt->selectors.back()) {
+            if (selector == stmt->selectors.Back()) {
                 out << " {";
             }
         }
@@ -2268,7 +2268,7 @@ bool GeneratorImpl::EmitIf(const ast::IfStatement* stmt) {
                 return false;
             }
         } else {
-            if (!EmitStatementsWithIndent({stmt->else_statement})) {
+            if (!EmitStatementsWithIndent(utils::Vector{stmt->else_statement})) {
                 return false;
             }
         }
@@ -2426,7 +2426,7 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
         });
 }
 
-bool GeneratorImpl::EmitStatements(const ast::StatementList& stmts) {
+bool GeneratorImpl::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) {
     for (auto* s : stmts) {
         if (!EmitStatement(s)) {
             return false;
@@ -2435,7 +2435,7 @@ bool GeneratorImpl::EmitStatements(const ast::StatementList& stmts) {
     return true;
 }
 
-bool GeneratorImpl::EmitStatementsWithIndent(const ast::StatementList& stmts) {
+bool GeneratorImpl::EmitStatementsWithIndent(utils::VectorRef<const ast::Statement*> stmts) {
     ScopedIndent si(this);
     return EmitStatements(stmts);
 }

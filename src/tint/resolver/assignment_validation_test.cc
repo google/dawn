@@ -29,9 +29,11 @@ TEST_F(ResolverAssignmentValidationTest, ReadOnlyBuffer) {
     // struct S { m : i32 };
     // @group(0) @binding(0)
     // var<storage,read> a : S;
-    auto* s = Structure("S", {Member("m", ty.i32())});
+    auto* s = Structure("S", utils::Vector{
+                                 Member("m", ty.i32()),
+                             });
     GlobalVar(Source{{12, 34}}, "a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -236,12 +238,12 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Handle) {
     };
 
     GlobalVar("a", make_type(), ast::StorageClass::kNone,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
     GlobalVar("b", make_type(), ast::StorageClass::kNone,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(1u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -257,9 +259,11 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_Atomic) {
     // @group(0) @binding(0) var<storage, read_write> v : S;
     // v.a = v.a;
 
-    auto* s = Structure("S", {Member("a", ty.atomic(ty.i32()))});
+    auto* s = Structure("S", utils::Vector{
+                                 Member("a", ty.atomic(ty.i32())),
+                             });
     GlobalVar(Source{{12, 34}}, "v", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -275,9 +279,11 @@ TEST_F(ResolverAssignmentValidationTest, AssignNonConstructible_RuntimeArray) {
     // @group(0) @binding(0) var<storage, read_write> v : S;
     // v.a = v.a;
 
-    auto* s = Structure("S", {Member("a", ty.array(ty.f32()))});
+    auto* s = Structure("S", utils::Vector{
+                                 Member("a", ty.array(ty.f32())),
+                             });
     GlobalVar(Source{{12, 34}}, "v", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -296,7 +302,9 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_NonConstructibleStruct_Fa
     // fn f() {
     //   _ = s;
     // }
-    auto* s = Structure("S", {Member("arr", ty.array<i32>())});
+    auto* s = Structure("S", utils::Vector{
+                                 Member("arr", ty.array<i32>()),
+                             });
     GlobalVar("s", ty.Of(s), ast::StorageClass::kStorage, GroupAndBinding(0, 0));
 
     WrapInFunction(Assign(Phony(), Expr(Source{{12, 34}}, "s")));
@@ -316,7 +324,9 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_DynamicArray_Fail) {
     // fn f() {
     //   _ = s.arr;
     // }
-    auto* s = Structure("S", {Member("arr", ty.array<i32>())});
+    auto* s = Structure("S", utils::Vector{
+                                 Member("arr", ty.array<i32>()),
+                             });
     GlobalVar("s", ty.Of(s), ast::StorageClass::kStorage, GroupAndBinding(0, 0));
 
     WrapInFunction(Assign(Phony(), MemberAccessor(Source{{12, 34}}, "s", "arr")));
@@ -360,11 +370,13 @@ TEST_F(ResolverAssignmentValidationTest, AssignToPhony_Pass) {
     //   _ = wg;
     //   _ = wg[3i];
     // }
-    auto* S = Structure("S", {
+    auto* S = Structure("S", utils::Vector{
                                  Member("i", ty.i32()),
                                  Member("arr", ty.array<i32>()),
                              });
-    auto* U = Structure("U", {Member("i", ty.i32())});
+    auto* U = Structure("U", utils::Vector{
+                                 Member("i", ty.i32()),
+                             });
     GlobalVar("tex", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
               GroupAndBinding(0, 0));
     GlobalVar("smp", ty.sampler(ast::SamplerKind::kSampler), GroupAndBinding(0, 1));

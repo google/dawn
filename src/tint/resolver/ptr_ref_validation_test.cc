@@ -141,10 +141,10 @@ TEST_F(ResolverPtrRefValidationTest, InferredPtrAccessMismatch) {
     // fn f() {
     //   let p : pointer<storage, i32> = &s.inner.arr[2i];
     // }
-    auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
-    auto* buf = Structure("S", {Member("inner", ty.Of(inner))});
+    auto* inner = Structure("Inner", utils::Vector{Member("arr", ty.array<i32, 4>())});
+    auto* buf = Structure("S", utils::Vector{Member("inner", ty.Of(inner))});
     auto* storage = GlobalVar("s", ty.Of(buf), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                              ast::AttributeList{
+                              utils::Vector{
                                   create<ast::BindingAttribute>(0u),
                                   create<ast::GroupAttribute>(0u),
                               });

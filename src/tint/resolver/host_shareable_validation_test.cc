@@ -24,10 +24,10 @@ namespace {
 using ResolverHostShareableValidationTest = ResolverTest;
 
 TEST_F(ResolverHostShareableValidationTest, BoolMember) {
-    auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.bool_())});
+    auto* s = Structure("S", utils::Vector{Member(Source{{12, 34}}, "x", ty.bool_())});
 
     GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -42,10 +42,10 @@ TEST_F(ResolverHostShareableValidationTest, BoolMember) {
 }
 
 TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
-    auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.vec3<bool>())});
+    auto* s = Structure("S", utils::Vector{Member(Source{{12, 34}}, "x", ty.vec3<bool>())});
 
     GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -61,10 +61,10 @@ TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
 
 TEST_F(ResolverHostShareableValidationTest, Aliases) {
     auto* a1 = Alias("a1", ty.bool_());
-    auto* s = Structure("S", {Member(Source{{12, 34}}, "x", ty.Of(a1))});
+    auto* s = Structure("S", utils::Vector{Member(Source{{12, 34}}, "x", ty.Of(a1))});
     auto* a2 = Alias("a2", ty.Of(s));
     GlobalVar(Source{{56, 78}}, "g", ty.Of(a2), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -79,14 +79,14 @@ TEST_F(ResolverHostShareableValidationTest, Aliases) {
 }
 
 TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
-    auto* i1 = Structure("I1", {Member(Source{{1, 2}}, "x", ty.bool_())});
-    auto* i2 = Structure("I2", {Member(Source{{3, 4}}, "y", ty.Of(i1))});
-    auto* i3 = Structure("I3", {Member(Source{{5, 6}}, "z", ty.Of(i2))});
+    auto* i1 = Structure("I1", utils::Vector{Member(Source{{1, 2}}, "x", ty.bool_())});
+    auto* i2 = Structure("I2", utils::Vector{Member(Source{{3, 4}}, "y", ty.Of(i1))});
+    auto* i3 = Structure("I3", utils::Vector{Member(Source{{5, 6}}, "z", ty.Of(i2))});
 
-    auto* s = Structure("S", {Member(Source{{7, 8}}, "m", ty.Of(i3))});
+    auto* s = Structure("S", utils::Vector{Member(Source{{7, 8}}, "m", ty.Of(i3))});
 
     GlobalVar(Source{{9, 10}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -106,33 +106,32 @@ TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
 TEST_F(ResolverHostShareableValidationTest, NoError) {
     Enable(ast::Extension::kF16);
 
-    auto* i1 = Structure("I1", {
+    auto* i1 = Structure("I1", utils::Vector{
                                    Member(Source{{1, 1}}, "w1", ty.f32()),
                                    Member(Source{{2, 1}}, "x1", ty.f32()),
                                    Member(Source{{3, 1}}, "y1", ty.vec3<f32>()),
                                    Member(Source{{4, 1}}, "z1", ty.array<i32, 4>()),
                                });
     auto* a1 = Alias("a1", ty.Of(i1));
-    auto* i2 = Structure("I2", {
+    auto* i2 = Structure("I2", utils::Vector{
                                    Member(Source{{5, 1}}, "x2", ty.mat2x2<f32>()),
                                    Member(Source{{6, 1}}, "w2", ty.mat3x4<f32>()),
                                    Member(Source{{7, 1}}, "z2", ty.Of(i1)),
                                });
     auto* a2 = Alias("a2", ty.Of(i2));
-    auto* i3 = Structure("I3", {
+    auto* i3 = Structure("I3", utils::Vector{
                                    Member(Source{{4, 1}}, "x3", ty.Of(a1)),
                                    Member(Source{{5, 1}}, "y3", ty.Of(i2)),
                                    Member(Source{{6, 1}}, "z3", ty.Of(a2)),
                                });
 
-    auto* s = Structure("S", {Member(Source{{7, 8}}, "m", ty.Of(i3))});
+    auto* s = Structure("S", utils::Vector{Member(Source{{7, 8}}, "m", ty.Of(i3))});
 
     GlobalVar(Source{{9, 10}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
-    WrapInFunction();
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }

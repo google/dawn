@@ -101,20 +101,20 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) cons
                 ctx.dst->Disable(ast::DisabledValidation::kFunctionParameter);
             ctx.dst->AST().AddFunction(ctx.dst->create<ast::Function>(
                 name,
-                ast::ParameterList{
+                utils::Vector{
                     ctx.dst->Param("buffer",
                                    ctx.dst->ty.pointer(type, buffer_type->StorageClass(),
                                                        buffer_type->Access()),
-                                   {disable_validation}),
+                                   utils::Vector{disable_validation}),
                     ctx.dst->Param("result", ctx.dst->ty.pointer(ctx.dst->ty.u32(),
                                                                  ast::StorageClass::kFunction)),
                 },
                 ctx.dst->ty.void_(), nullptr,
-                ast::AttributeList{
+                utils::Vector{
                     ctx.dst->ASTNodes().Create<BufferSizeIntrinsic>(ctx.dst->ID(),
                                                                     ctx.dst->AllocateNodeID()),
                 },
-                ast::AttributeList{}));
+                utils::Empty));
 
             return name;
         });

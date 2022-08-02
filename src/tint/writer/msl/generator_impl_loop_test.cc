@@ -40,7 +40,7 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
-    Func("a_statement", {}, ty.void_(), {});
+    Func("a_statement", {}, ty.void_(), utils::Empty);
 
     auto* body = Block(create<ast::DiscardStatement>());
     auto* continuing = Block(CallStmt(Call("a_statement")));
@@ -62,7 +62,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
-    Func("a_statement", {}, ty.void_(), {});
+    Func("a_statement", {}, ty.void_(), utils::Empty);
 
     GlobalVar("lhs", ty.f32(), ast::StorageClass::kPrivate);
     GlobalVar("rhs", ty.f32(), ast::StorageClass::kPrivate);
@@ -181,7 +181,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInit) {
     //   return;
     // }
 
-    Func("f", {Param("i", ty.i32())}, ty.void_(), {});
+    Func("f", utils::Vector{Param("i", ty.i32())}, ty.void_(), utils::Empty);
     auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
 
     GlobalVar("a", ty.atomic<i32>(), ast::StorageClass::kWorkgroup);
@@ -257,7 +257,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtCont) {
     //   return;
     // }
 
-    Func("f", {Param("i", ty.i32())}, ty.void_(), {});
+    Func("f", utils::Vector{Param("i", ty.i32())}, ty.void_(), utils::Empty);
     auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
 
     GlobalVar("a", ty.atomic<i32>(), ast::StorageClass::kWorkgroup);
@@ -286,7 +286,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithSimpleInitCondCont) {
     //   return;
     // }
 
-    Func("a_statement", {}, ty.void_(), {});
+    Func("a_statement", {}, ty.void_(), utils::Empty);
 
     auto* f = For(Decl(Var("i", ty.i32())), true, Assign("i", Add("i", 1_i)),
                   Block(CallStmt(Call("a_statement"))));
@@ -312,7 +312,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInitCondCont) {
     //   return;
     // }
 
-    Func("f", {Param("i", ty.i32())}, ty.void_(), {});
+    Func("f", utils::Vector{Param("i", ty.i32())}, ty.void_(), utils::Empty);
     auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
 
     GlobalVar("a", ty.atomic<i32>(), ast::StorageClass::kWorkgroup);

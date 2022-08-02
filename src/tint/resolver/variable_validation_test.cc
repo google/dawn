@@ -98,7 +98,10 @@ TEST_F(ResolverVariableValidationTest, OverrideExceedsIDLimit_LastReserved) {
     // ...
     // @id(N) override oN : i32;
     constexpr size_t kLimit = std::numeric_limits<decltype(OverrideId::value)>::max();
-    Override("reserved", ty.i32(), nullptr, {Id(kLimit)});
+    Override("reserved", ty.i32(), nullptr,
+             utils::Vector{
+                 Id(kLimit),
+             });
     for (size_t i = 0; i < kLimit; i++) {
         Override("o" + std::to_string(i), ty.i32(), nullptr);
     }
@@ -288,10 +291,14 @@ TEST_F(ResolverVariableValidationTest, InferredPtrStorageAccessMismatch) {
     // fn f() {
     //   let p : pointer<storage, i32, read_write> = &s.inner.arr[2i];
     // }
-    auto* inner = Structure("Inner", {Member("arr", ty.array<i32, 4>())});
-    auto* buf = Structure("S", {Member("inner", ty.Of(inner))});
+    auto* inner = Structure("Inner", utils::Vector{
+                                         Member("arr", ty.array<i32, 4>()),
+                                     });
+    auto* buf = Structure("S", utils::Vector{
+                                   Member("inner", ty.Of(inner)),
+                               });
     auto* storage = GlobalVar("s", ty.Of(buf), ast::StorageClass::kStorage,
-                              ast::AttributeList{
+                              utils::Vector{
                                   create<ast::BindingAttribute>(0u),
                                   create<ast::GroupAttribute>(0u),
                               });
@@ -319,7 +326,9 @@ TEST_F(ResolverVariableValidationTest, NonConstructibleType_Atomic) {
 }
 
 TEST_F(ResolverVariableValidationTest, NonConstructibleType_RuntimeArray) {
-    auto* s = Structure("S", {Member(Source{{56, 78}}, "m", ty.array(ty.i32()))});
+    auto* s = Structure("S", utils::Vector{
+                                 Member(Source{{56, 78}}, "m", ty.array(ty.i32())),
+                             });
     auto* v = Var(Source{{12, 34}}, "v", ty.Of(s));
     WrapInFunction(v);
 
@@ -331,7 +340,9 @@ TEST_F(ResolverVariableValidationTest, NonConstructibleType_RuntimeArray) {
 }
 
 TEST_F(ResolverVariableValidationTest, NonConstructibleType_Struct_WithAtomic) {
-    auto* s = Structure("S", {Member("m", ty.atomic(ty.i32()))});
+    auto* s = Structure("S", utils::Vector{
+                                 Member("m", ty.atomic(ty.i32())),
+                             });
     auto* v = Var("v", ty.Of(s));
     WrapInFunction(v);
 

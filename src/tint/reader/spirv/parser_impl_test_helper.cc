@@ -39,7 +39,7 @@ std::string ToString(const Program& program) {
     return writer.result();
 }
 
-std::string ToString(const Program& program, const ast::StatementList& stmts) {
+std::string ToString(const Program& program, utils::VectorRef<const ast::Statement*> stmts) {
     writer::wgsl::GeneratorImpl writer(&program);
     for (const auto* stmt : stmts) {
         if (!writer.EmitStatement(stmt)) {

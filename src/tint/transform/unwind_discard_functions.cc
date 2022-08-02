@@ -67,7 +67,8 @@ class State {
     Symbol ModuleDiscardFuncName() {
         if (!module_discard_func_name.IsValid()) {
             module_discard_func_name = b.Symbols().New("tint_discard_func");
-            b.Func(module_discard_func_name, {}, b.ty.void_(), {b.Discard()});
+            b.Func(module_discard_func_name, tint::utils::Empty, b.ty.void_(),
+                   tint::utils::Vector{b.Discard()});
         }
         return module_discard_func_name;
     }
@@ -108,14 +109,14 @@ class State {
     //    }
     //
     const ast::IfStatement* IfDiscardReturn(const ast::Statement* stmt) {
-        ast::StatementList stmts;
+        tint::utils::Vector<const ast::Statement*, 2> stmts;
 
         // For entry point functions, also emit the discard statement
         if (IsInEntryPointFunc(stmt)) {
-            stmts.emplace_back(CallDiscardFunc());
+            stmts.Push(CallDiscardFunc());
         }
 
-        stmts.emplace_back(Return(stmt));
+        stmts.Push(Return(stmt));
 
         auto var_name = ModuleDiscardVarName();
         return b.If(var_name, b.Block(stmts));

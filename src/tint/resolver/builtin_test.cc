@@ -44,6 +44,8 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::resolver {
 namespace {
 
+using ExpressionList = utils::Vector<const ast::Expression*, 8>;
+
 using BuiltinType = sem::BuiltinType;
 
 using ResolverBuiltinTest = ResolverTest;
@@ -209,9 +211,9 @@ using ResolverBuiltinArrayTest = ResolverTest;
 
 TEST_F(ResolverBuiltinArrayTest, ArrayLength_Vector) {
     auto* ary = ty.array<i32>();
-    auto* str = Structure("S", {Member("x", ary)});
+    auto* str = Structure("S", utils::Vector{Member("x", ary)});
     GlobalVar("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -1906,8 +1908,8 @@ TEST_P(ResolverBuiltinDerivativeTest, Scalar) {
     GlobalVar("ident", ty.f32(), ast::StorageClass::kPrivate);
 
     auto* expr = Call(name, "ident");
-    Func("func", {}, ty.void_(), {Ignore(expr)},
-         {create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
+    Func("func", utils::Empty, ty.void_(), utils::Vector{Ignore(expr)},
+         utils::Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1920,8 +1922,8 @@ TEST_P(ResolverBuiltinDerivativeTest, Vector) {
     GlobalVar("ident", ty.vec4<f32>(), ast::StorageClass::kPrivate);
 
     auto* expr = Call(name, "ident");
-    Func("func", {}, ty.void_(), {Ignore(expr)},
-         {create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
+    Func("func", utils::Empty, ty.void_(), utils::Vector{Ignore(expr)},
+         utils::Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -2008,10 +2010,10 @@ class ResolverBuiltinTest_TextureOperation : public ResolverTestWithParam<Textur
         return nullptr;
     }
 
-    void add_call_param(std::string name, const ast::Type* type, ast::ExpressionList* call_params) {
+    void add_call_param(std::string name, const ast::Type* type, ExpressionList* call_params) {
         if (type->IsAnyOf<ast::Texture, ast::Sampler>()) {
             GlobalVar(name, type,
-                      ast::AttributeList{
+                      utils::Vector{
                           create<ast::BindingAttribute>(0u),
                           create<ast::GroupAttribute>(0u),
                       });
@@ -2020,7 +2022,7 @@ class ResolverBuiltinTest_TextureOperation : public ResolverTestWithParam<Textur
             GlobalVar(name, type, ast::StorageClass::kPrivate);
         }
 
-        call_params->push_back(Expr(name));
+        call_params->Push(Expr(name));
     }
     const ast::Type* subtype(Texture type) {
         if (type == Texture::kF32) {
@@ -2042,7 +2044,7 @@ TEST_P(ResolverBuiltinTest_SampledTextureOperation, TextureLoadSampled) {
     auto* coords_type = GetCoordsType(dim, ty.i32());
     auto* texture_type = ty.sampled_texture(dim, s);
 
-    ast::ExpressionList call_params;
+    ExpressionList call_params;
 
     add_call_param("texture", texture_type, &call_params);
     add_call_param("coords", coords_type, &call_params);
@@ -2337,7 +2339,8 @@ TEST_P(ResolverBuiltinTest_Texture, Call) {
 
     auto* call = Call(param.function, param.args(this));
     auto* stmt = CallStmt(call);
-    Func("func", {}, ty.void_(), {stmt}, {Stage(ast::PipelineStage::kFragment)});
+    Func("func", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 

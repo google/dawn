@@ -97,19 +97,19 @@ TEST_F(TraverseExpressionsTest, DescendBitcastExpression) {
     auto* b2 = Bitcast<i32>(b1);
     auto* root = Bitcast<i32>(b2);
     {
-        std::vector<const ast::Expression*> l2r;
+        utils::Vector<const ast::Expression*, 8> l2r;
         TraverseExpressions<TraverseOrder::LeftToRight>(root, Diagnostics(),
                                                         [&](const ast::Expression* expr) {
-                                                            l2r.push_back(expr);
+                                                            l2r.Push(expr);
                                                             return ast::TraverseAction::Descend;
                                                         });
         EXPECT_THAT(l2r, ElementsAre(root, b2, b1, b0, e));
     }
     {
-        std::vector<const ast::Expression*> r2l;
+        utils::Vector<const ast::Expression*, 8> r2l;
         TraverseExpressions<TraverseOrder::RightToLeft>(root, Diagnostics(),
                                                         [&](const ast::Expression* expr) {
-                                                            r2l.push_back(expr);
+                                                            r2l.Push(expr);
                                                             return ast::TraverseAction::Descend;
                                                         });
         EXPECT_THAT(r2l, ElementsAre(root, b2, b1, b0, e));
@@ -117,23 +117,23 @@ TEST_F(TraverseExpressionsTest, DescendBitcastExpression) {
 }
 
 TEST_F(TraverseExpressionsTest, DescendCallExpression) {
-    std::vector<const ast::Expression*> e = {Expr(1_i), Expr(1_i), Expr(1_i), Expr(1_i)};
-    std::vector<const ast::Expression*> c = {Call("a", e[0], e[1]), Call("b", e[2], e[3])};
+    utils::Vector e{Expr(1_i), Expr(1_i), Expr(1_i), Expr(1_i)};
+    utils::Vector c{Call("a", e[0], e[1]), Call("b", e[2], e[3])};
     auto* root = Call("c", c[0], c[1]);
     {
-        std::vector<const ast::Expression*> l2r;
+        utils::Vector<const ast::Expression*, 8> l2r;
         TraverseExpressions<TraverseOrder::LeftToRight>(root, Diagnostics(),
                                                         [&](const ast::Expression* expr) {
-                                                            l2r.push_back(expr);
+                                                            l2r.Push(expr);
                                                             return ast::TraverseAction::Descend;
                                                         });
         EXPECT_THAT(l2r, ElementsAre(root, c[0], e[0], e[1], c[1], e[2], e[3]));
     }
     {
-        std::vector<const ast::Expression*> r2l;
+        utils::Vector<const ast::Expression*, 8> r2l;
         TraverseExpressions<TraverseOrder::RightToLeft>(root, Diagnostics(),
                                                         [&](const ast::Expression* expr) {
-                                                            r2l.push_back(expr);
+                                                            r2l.Push(expr);
                                                             return ast::TraverseAction::Descend;
                                                         });
         EXPECT_THAT(r2l, ElementsAre(root, c[1], e[3], e[2], c[0], e[1], e[0]));

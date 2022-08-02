@@ -26,19 +26,19 @@ using ::testing::HasSubstr;
 using MslSanitizerTest = TestHelper;
 
 TEST_F(MslSanitizerTest, Call_ArrayLength) {
-    auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))});
+    auto* s = Structure("my_struct", utils::Vector{Member(0, "a", ty.array<f32>(4))});
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(1u),
                   create<ast::GroupAttribute>(2u),
               });
 
-    Func("a_func", {}, ty.void_(),
-         {
+    Func("a_func", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("len", ty.u32(), ast::StorageClass::kNone,
                       Call("arrayLength", AddressOf(MemberAccessor("b", "a"))))),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -81,22 +81,22 @@ fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(30)]]) {
 }
 
 TEST_F(MslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
-    auto* s = Structure("my_struct", {
+    auto* s = Structure("my_struct", utils::Vector{
                                          Member(0, "z", ty.f32()),
                                          Member(4, "a", ty.array<f32>(4)),
                                      });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(1u),
                   create<ast::GroupAttribute>(2u),
               });
 
-    Func("a_func", {}, ty.void_(),
-         {
+    Func("a_func", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("len", ty.u32(), ast::StorageClass::kNone,
                       Call("arrayLength", AddressOf(MemberAccessor("b", "a"))))),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -141,9 +141,9 @@ fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(30)]]) {
 }
 
 TEST_F(MslSanitizerTest, Call_ArrayLength_ViaLets) {
-    auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))});
+    auto* s = Structure("my_struct", utils::Vector{Member(0, "a", ty.array<f32>(4))});
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(1u),
                   create<ast::GroupAttribute>(2u),
               });
@@ -151,13 +151,13 @@ TEST_F(MslSanitizerTest, Call_ArrayLength_ViaLets) {
     auto* p = Let("p", nullptr, AddressOf("b"));
     auto* p2 = Let("p2", nullptr, AddressOf(MemberAccessor(Deref(p), "a")));
 
-    Func("a_func", {}, ty.void_(),
-         {
+    Func("a_func", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(p),
              Decl(p2),
              Decl(Var("len", ty.u32(), ast::StorageClass::kNone, Call("arrayLength", p2))),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -201,25 +201,25 @@ fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(30)]]) {
 }
 
 TEST_F(MslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
-    auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))});
+    auto* s = Structure("my_struct", utils::Vector{Member(0, "a", ty.array<f32>(4))});
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(1u),
                   create<ast::GroupAttribute>(0u),
               });
     GlobalVar("c", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(2u),
                   create<ast::GroupAttribute>(0u),
               });
 
-    Func("a_func", {}, ty.void_(),
-         {
+    Func("a_func", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("len", ty.u32(), ast::StorageClass::kNone,
                       Add(Call("arrayLength", AddressOf(MemberAccessor("b", "a"))),
                           Call("arrayLength", AddressOf(MemberAccessor("c", "a")))))),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 
@@ -266,25 +266,25 @@ fragment void a_func(const constant tint_symbol* tint_symbol_2 [[buffer(29)]]) {
 }
 
 TEST_F(MslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniformMissingBinding) {
-    auto* s = Structure("my_struct", {Member(0, "a", ty.array<f32>(4))});
+    auto* s = Structure("my_struct", utils::Vector{Member(0, "a", ty.array<f32>(4))});
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(1u),
                   create<ast::GroupAttribute>(0u),
               });
     GlobalVar("c", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(2u),
                   create<ast::GroupAttribute>(0u),
               });
 
-    Func("a_func", {}, ty.void_(),
-         {
+    Func("a_func", utils::Empty, ty.void_(),
+         utils::Vector{
              Decl(Var("len", ty.u32(), ast::StorageClass::kNone,
                       Add(Call("arrayLength", AddressOf(MemberAccessor("b", "a"))),
                           Call("arrayLength", AddressOf(MemberAccessor("c", "a")))))),
          },
-         {
+         utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
 

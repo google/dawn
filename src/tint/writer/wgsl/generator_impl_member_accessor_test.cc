@@ -20,7 +20,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor) {
-    auto* s = Structure("Data", {Member("mem", ty.f32())});
+    auto* s = Structure("Data", utils::Vector{Member("mem", ty.f32())});
     GlobalVar("str", ty.Of(s), ast::StorageClass::kPrivate);
 
     auto* expr = MemberAccessor("str", "mem");
@@ -34,7 +34,7 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor_OfDref) {
-    auto* s = Structure("Data", {Member("mem", ty.f32())});
+    auto* s = Structure("Data", utils::Vector{Member("mem", ty.f32())});
     GlobalVar("str", ty.Of(s), ast::StorageClass::kPrivate);
 
     auto* p = Let("p", nullptr, AddressOf("str"));

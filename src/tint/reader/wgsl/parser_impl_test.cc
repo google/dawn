@@ -32,7 +32,7 @@ fn main() -> @location(0) vec4<f32> {
     ASSERT_TRUE(p->Parse()) << p->error();
 
     Program program = p->program();
-    ASSERT_EQ(1u, program.AST().Functions().size());
+    ASSERT_EQ(1u, program.AST().Functions().Length());
 }
 
 TEST_F(ParserImplTest, Parses_ExtraSemicolons) {
@@ -52,8 +52,8 @@ fn foo() -> S {
     ASSERT_TRUE(p->Parse()) << p->error();
 
     Program program = p->program();
-    ASSERT_EQ(1u, program.AST().Functions().size());
-    ASSERT_EQ(1u, program.AST().TypeDecls().size());
+    ASSERT_EQ(1u, program.AST().Functions().Length());
+    ASSERT_EQ(1u, program.AST().TypeDecls().Length());
 }
 
 TEST_F(ParserImplTest, HandlesError) {
@@ -121,7 +121,7 @@ parameters
 }/* block comments are OK at EOF...*/)");
 
     ASSERT_TRUE(p->Parse()) << p->error();
-    ASSERT_EQ(1u, p->program().AST().Functions().size());
+    ASSERT_EQ(1u, p->program().AST().Functions().Length());
 }
 
 TEST_F(ParserImplTest, Comments_UnterminatedBlockComment) {

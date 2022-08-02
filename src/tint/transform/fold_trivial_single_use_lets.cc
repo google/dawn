@@ -52,7 +52,7 @@ void FoldTrivialSingleUseLets::Run(CloneContext& ctx, const DataMap&, DataMap&) 
     for (auto* node : ctx.src->ASTNodes().Objects()) {
         if (auto* block = node->As<ast::BlockStatement>()) {
             auto& stmts = block->statements;
-            for (size_t stmt_idx = 0; stmt_idx < stmts.size(); stmt_idx++) {
+            for (size_t stmt_idx = 0; stmt_idx < stmts.Length(); stmt_idx++) {
                 auto* stmt = stmts[stmt_idx];
                 if (auto* let_decl = AsTrivialLetDecl(stmt)) {
                     auto* let = let_decl->variable;
@@ -65,7 +65,7 @@ void FoldTrivialSingleUseLets::Run(CloneContext& ctx, const DataMap&, DataMap&) 
                     auto* user = users[0];
                     auto* user_stmt = user->Stmt()->Declaration();
 
-                    for (size_t i = stmt_idx; i < stmts.size(); i++) {
+                    for (size_t i = stmt_idx; i < stmts.Length(); i++) {
                         if (user_stmt == stmts[i]) {
                             auto* user_expr = user->Declaration();
                             ctx.Remove(stmts, let_decl);

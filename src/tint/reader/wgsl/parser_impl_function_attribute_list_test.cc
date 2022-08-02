@@ -25,7 +25,7 @@ TEST_F(ParserImplTest, AttributeList_Parses_Stage) {
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(attrs.errored);
     EXPECT_TRUE(attrs.matched);
-    ASSERT_EQ(attrs.value.size(), 2u);
+    ASSERT_EQ(attrs.value.Length(), 2u);
 
     auto* attr_0 = attrs.value[0]->As<ast::Attribute>();
     auto* attr_1 = attrs.value[1]->As<ast::Attribute>();
@@ -51,7 +51,7 @@ TEST_F(ParserImplTest, AttributeList_Parses) {
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(attrs.errored);
     EXPECT_TRUE(attrs.matched);
-    ASSERT_EQ(attrs.value.size(), 2u);
+    ASSERT_EQ(attrs.value.Length(), 2u);
 
     auto* attr_0 = attrs.value[0]->As<ast::Attribute>();
     auto* attr_1 = attrs.value[1]->As<ast::Attribute>();
@@ -77,7 +77,7 @@ TEST_F(ParserImplTest, AttributeList_Invalid) {
     EXPECT_TRUE(p->has_error());
     EXPECT_TRUE(attrs.errored);
     EXPECT_FALSE(attrs.matched);
-    EXPECT_TRUE(attrs.value.empty());
+    EXPECT_TRUE(attrs.value.IsEmpty());
     EXPECT_EQ(p->error(), "1:2: expected attribute");
 }
 

@@ -40,7 +40,7 @@ TEST_F(WhileStmtTest, Body) {
     EXPECT_FALSE(wl.errored);
     ASSERT_TRUE(wl.matched);
     EXPECT_TRUE(Is<ast::Expression>(wl->condition));
-    ASSERT_EQ(wl->body->statements.size(), 1u);
+    ASSERT_EQ(wl->body->statements.Length(), 1u);
     EXPECT_TRUE(wl->body->statements[0]->Is<ast::DiscardStatement>());
 }
 

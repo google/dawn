@@ -46,7 +46,7 @@ class Const final : public Castable<Const, Variable> {
           const Symbol& sym,
           const ast::Type* type,
           const Expression* constructor,
-          AttributeList attributes);
+          utils::VectorRef<const Attribute*> attributes);
 
     /// Move constructor
     Const(Const&&);

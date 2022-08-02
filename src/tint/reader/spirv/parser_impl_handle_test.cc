@@ -3076,7 +3076,7 @@ TEST_P(SpvParserHandleTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess
         ASSERT_NE(anchor, nullptr);
         const spvtools::opt::Instruction& image_access = *(anchor->PreviousNode());
 
-        ast::ExpressionList result = fe.MakeCoordinateOperandsForImageAccess(image_access);
+        auto result = fe.MakeCoordinateOperandsForImageAccess(image_access);
         if (GetParam().expected_error.empty()) {
             EXPECT_TRUE(fe.success()) << p->error();
             EXPECT_TRUE(p->error().empty());
@@ -3090,7 +3090,7 @@ TEST_P(SpvParserHandleTest_ImageCoordsTest, MakeCoordinateOperandsForImageAccess
         } else {
             EXPECT_FALSE(fe.success());
             EXPECT_THAT(p->error(), Eq(GetParam().expected_error)) << assembly;
-            EXPECT_TRUE(result.empty());
+            EXPECT_TRUE(result.IsEmpty());
         }
     }
 

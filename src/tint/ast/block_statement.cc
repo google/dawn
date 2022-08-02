@@ -23,7 +23,7 @@ namespace tint::ast {
 BlockStatement::BlockStatement(ProgramID pid,
                                NodeID nid,
                                const Source& src,
-                               const StatementList& stmts)
+                               utils::VectorRef<const Statement*> stmts)
     : Base(pid, nid, src), statements(std::move(stmts)) {
     for (auto* stmt : statements) {
         TINT_ASSERT(AST, stmt);
@@ -39,7 +39,7 @@ const BlockStatement* BlockStatement::Clone(CloneContext* ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
     auto src = ctx->Clone(source);
     auto stmts = ctx->Clone(statements);
-    return ctx->dst->create<BlockStatement>(src, stmts);
+    return ctx->dst->create<BlockStatement>(src, std::move(stmts));
 }
 
 }  // namespace tint::ast

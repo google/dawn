@@ -235,7 +235,7 @@ TEST_F(BuilderTest, GlobalConst_Nested_Vec_Constructor) {
 TEST_F(BuilderTest, GlobalVar_WithBindingAndGroup) {
     auto* v =
         GlobalVar("var", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone, nullptr,
-                  ast::AttributeList{
+                  utils::Vector{
                       create<ast::BindingAttribute>(2u),
                       create<ast::GroupAttribute>(3u),
                   });
@@ -256,7 +256,7 @@ OpDecorate %1 DescriptorSet 3
 
 TEST_F(BuilderTest, GlobalVar_Override_Bool) {
     auto* v = Override("var", ty.bool_(), Expr(true),
-                       ast::AttributeList{
+                       utils::Vector{
                            Id(1200),
                        });
 
@@ -274,7 +274,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Bool) {
 
 TEST_F(BuilderTest, GlobalVar_Override_Bool_ZeroValue) {
     auto* v = Override("var", ty.bool_(), Construct<bool>(),
-                       ast::AttributeList{
+                       utils::Vector{
                            Id(1200),
                        });
 
@@ -292,7 +292,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Bool_ZeroValue) {
 
 TEST_F(BuilderTest, GlobalVar_Override_Bool_NoConstructor) {
     auto* v = Override("var", ty.bool_(), nullptr,
-                       ast::AttributeList{
+                       utils::Vector{
                            Id(1200),
                        });
 
@@ -310,7 +310,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Bool_NoConstructor) {
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar) {
     auto* v = Override("var", ty.f32(), Expr(2_f),
-                       ast::AttributeList{
+                       utils::Vector{
                            Id(0),
                        });
 
@@ -328,7 +328,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar) {
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar_ZeroValue) {
     auto* v = Override("var", ty.f32(), Construct<f32>(),
-                       ast::AttributeList{
+                       utils::Vector{
                            Id(0),
                        });
 
@@ -346,7 +346,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_ZeroValue) {
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar_F32_NoConstructor) {
     auto* v = Override("var", ty.f32(), nullptr,
-                       ast::AttributeList{
+                       utils::Vector{
                            Id(0),
                        });
 
@@ -364,7 +364,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_F32_NoConstructor) {
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar_I32_NoConstructor) {
     auto* v = Override("var", ty.i32(), nullptr,
-                       ast::AttributeList{
+                       utils::Vector{
                            Id(0),
                        });
 
@@ -382,7 +382,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_I32_NoConstructor) {
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar_U32_NoConstructor) {
     auto* v = Override("var", ty.u32(), nullptr,
-                       ast::AttributeList{
+                       utils::Vector{
                            Id(0),
                        });
 
@@ -400,7 +400,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_U32_NoConstructor) {
 
 TEST_F(BuilderTest, GlobalVar_Override_NoId) {
     auto* var_a = Override("a", ty.bool_(), Expr(true),
-                           ast::AttributeList{
+                           utils::Vector{
                                Id(0),
                            });
     auto* var_b = Override("b", ty.bool_(), Expr(false));
@@ -474,13 +474,13 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
     // };
     // var b<storage, read> : A
 
-    auto* A = Structure("A", {
+    auto* A = Structure("A", utils::Vector{
                                  Member("a", ty.i32()),
                                  Member("b", ty.i32()),
                              });
 
     GlobalVar("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -518,10 +518,10 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
     // type B = A;
     // var b<storage, read> : B
 
-    auto* A = Structure("A", {Member("a", ty.i32())});
+    auto* A = Structure("A", utils::Vector{Member("a", ty.i32())});
     auto* B = Alias("B", ty.Of(A));
     GlobalVar("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -557,10 +557,10 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
     // type B = A;
     // var<storage, read> b : B
 
-    auto* A = Structure("A", {Member("a", ty.i32())});
+    auto* A = Structure("A", utils::Vector{Member("a", ty.i32())});
     auto* B = Alias("B", ty.Of(A));
     GlobalVar("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::BindingAttribute>(0u),
                   create<ast::GroupAttribute>(0u),
               });
@@ -596,14 +596,14 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
     // var<storage, read> b : A
     // var<storage, read_write> c : A
 
-    auto* A = Structure("A", {Member("a", ty.i32())});
+    auto* A = Structure("A", utils::Vector{Member("a", ty.i32())});
     GlobalVar("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::GroupAttribute>(0u),
                   create<ast::BindingAttribute>(0u),
               });
     GlobalVar("c", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-              ast::AttributeList{
+              utils::Vector{
                   create<ast::GroupAttribute>(1u),
                   create<ast::BindingAttribute>(0u),
               });
@@ -644,7 +644,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
                                     ast::Access::kWrite);
 
     auto* var_a = GlobalVar("a", type,
-                            ast::AttributeList{
+                            utils::Vector{
                                 create<ast::BindingAttribute>(0u),
                                 create<ast::GroupAttribute>(0u),
                             });
@@ -675,7 +675,7 @@ TEST_F(BuilderTest, DISABLED_GlobalVar_TextureStorageWithDifferentAccess) {
     auto* type_a = ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
                                       ast::Access::kReadWrite);
     auto* var_a = GlobalVar("a", type_a, ast::StorageClass::kNone,
-                            ast::AttributeList{
+                            utils::Vector{
                                 create<ast::BindingAttribute>(0u),
                                 create<ast::GroupAttribute>(0u),
                             });
@@ -683,7 +683,7 @@ TEST_F(BuilderTest, DISABLED_GlobalVar_TextureStorageWithDifferentAccess) {
     auto* type_b = ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
                                       ast::Access::kWrite);
     auto* var_b = GlobalVar("b", type_b, ast::StorageClass::kNone,
-                            ast::AttributeList{
+                            utils::Vector{
                                 create<ast::BindingAttribute>(1u),
                                 create<ast::GroupAttribute>(0u),
                             });
@@ -718,7 +718,7 @@ TEST_F(BuilderTest, GlobalVar_WorkgroupWithZeroInit) {
     auto* type_array = ty.array<f32, 16>();
     auto* var_array = GlobalVar("b", type_array, ast::StorageClass::kWorkgroup);
 
-    auto* type_struct = Structure("C", {
+    auto* type_struct = Structure("C", utils::Vector{
                                            Member("a", ty.i32()),
                                            Member("b", ty.i32()),
                                        });
