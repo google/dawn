@@ -1026,14 +1026,14 @@ class Impl : public IntrinsicTable {
 
     // Prints the list of candidates for emitting diagnostics
     void PrintCandidates(std::ostream& ss,
-                         utils::ConstVectorRef<Candidate> candidates,
+                         utils::VectorRef<Candidate> candidates,
                          const char* intrinsic_name) const;
 
     /// Raises an error when no overload is a clear winner of overload resolution
     void ErrAmbiguousOverload(const char* intrinsic_name,
-                              utils::ConstVectorRef<const sem::Type*> args,
+                              utils::VectorRef<const sem::Type*> args,
                               TemplateState templates,
-                              utils::ConstVectorRef<Candidate> candidates) const;
+                              utils::VectorRef<Candidate> candidates) const;
 
     ProgramBuilder& builder;
     Matchers matchers;
@@ -1604,7 +1604,7 @@ void Impl::PrintOverload(std::ostream& ss,
 }
 
 void Impl::PrintCandidates(std::ostream& ss,
-                           utils::ConstVectorRef<Candidate> candidates,
+                           utils::VectorRef<Candidate> candidates,
                            const char* intrinsic_name) const {
     for (auto& candidate : candidates) {
         ss << "  ";
@@ -1638,9 +1638,9 @@ std::string MatchState::NumName() {
 }
 
 void Impl::ErrAmbiguousOverload(const char* intrinsic_name,
-                                utils::ConstVectorRef<const sem::Type*> args,
+                                utils::VectorRef<const sem::Type*> args,
                                 TemplateState templates,
-                                utils::ConstVectorRef<Candidate> candidates) const {
+                                utils::VectorRef<Candidate> candidates) const {
     std::stringstream ss;
     ss << "ambiguous overload while attempting to match " << intrinsic_name;
     for (size_t i = 0; i < std::numeric_limits<size_t>::max(); i++) {

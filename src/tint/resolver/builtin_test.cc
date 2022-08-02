@@ -2082,7 +2082,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          testing::ValuesIn(ast::builtin::test::TextureOverloadCase::ValidCases()));
 
 static std::string to_str(const std::string& function,
-                          utils::ConstVectorRef<const sem::Parameter*> params) {
+                          utils::VectorRef<const sem::Parameter*> params) {
     std::stringstream out;
     out << function << "(";
     bool first = true;

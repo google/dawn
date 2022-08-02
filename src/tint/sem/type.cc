@@ -272,7 +272,7 @@ const Type* Type::DeepestElementOf(const Type* ty, uint32_t* count /* = nullptr 
     return el_ty;
 }
 
-const sem::Type* Type::Common(utils::ConstVectorRef<const Type*> types) {
+const sem::Type* Type::Common(utils::VectorRef<const Type*> types) {
     const auto count = types.Length();
     if (count == 0) {
         return nullptr;

@@ -510,9 +510,8 @@ const sem::Constant* ConstEval::Literal(const sem::Type* ty,
         });
 }
 
-const sem::Constant* ConstEval::ArrayOrStructCtor(
-    const sem::Type* ty,
-    utils::ConstVectorRef<const sem::Expression*> args) {
+const sem::Constant* ConstEval::ArrayOrStructCtor(const sem::Type* ty,
+                                                  utils::VectorRef<const sem::Expression*> args) {
     if (args.IsEmpty()) {
         return ZeroValue(builder, ty);
     }
@@ -532,7 +531,7 @@ const sem::Constant* ConstEval::ArrayOrStructCtor(
 }
 
 const sem::Constant* ConstEval::Conv(const sem::Type* ty,
-                                     utils::ConstVectorRef<const sem::Expression*> args) {
+                                     utils::VectorRef<const sem::Expression*> args) {
     uint32_t el_count = 0;
     auto* el_ty = sem::Type::ElementOf(ty, &el_count);
     if (!el_ty) {
@@ -553,17 +552,17 @@ const sem::Constant* ConstEval::Conv(const sem::Type* ty,
 }
 
 const sem::Constant* ConstEval::Zero(const sem::Type* ty,
-                                     utils::ConstVectorRef<const sem::Expression*>) {
+                                     utils::VectorRef<const sem::Expression*>) {
     return ZeroValue(builder, ty);
 }
 
 const sem::Constant* ConstEval::Identity(const sem::Type*,
-                                         utils::ConstVectorRef<const sem::Expression*> args) {
+                                         utils::VectorRef<const sem::Expression*> args) {
     return args[0]->ConstantValue();
 }
 
 const sem::Constant* ConstEval::VecSplat(const sem::Type* ty,
-                                         utils::ConstVectorRef<const sem::Expression*> args) {
+                                         utils::VectorRef<const sem::Expression*> args) {
     if (auto* arg = args[0]->ConstantValue()) {
         return builder.create<Splat>(ty, arg, static_cast<const sem::Vector*>(ty)->Width());
     }
@@ -571,7 +570,7 @@ const sem::Constant* ConstEval::VecSplat(const sem::Type* ty,
 }
 
 const sem::Constant* ConstEval::VecCtorS(const sem::Type* ty,
-                                         utils::ConstVectorRef<const sem::Expression*> args) {
+                                         utils::VectorRef<const sem::Expression*> args) {
     utils::Vector<const sem::Constant*, 4> els;
     for (auto* arg : args) {
         els.Push(arg->ConstantValue());
@@ -580,7 +579,7 @@ const sem::Constant* ConstEval::VecCtorS(const sem::Type* ty,
 }
 
 const sem::Constant* ConstEval::VecCtorM(const sem::Type* ty,
-                                         utils::ConstVectorRef<const sem::Expression*> args) {
+                                         utils::VectorRef<const sem::Expression*> args) {
     utils::Vector<const sem::Constant*, 4> els;
     for (auto* arg : args) {
         auto* val = arg->ConstantValue();
@@ -605,7 +604,7 @@ const sem::Constant* ConstEval::VecCtorM(const sem::Type* ty,
 }
 
 const sem::Constant* ConstEval::MatCtorS(const sem::Type* ty,
-                                         utils::ConstVectorRef<const sem::Expression*> args) {
+                                         utils::VectorRef<const sem::Expression*> args) {
     auto* m = static_cast<const sem::Matrix*>(ty);
 
     utils::Vector<const sem::Constant*, 4> els;
@@ -621,7 +620,7 @@ const sem::Constant* ConstEval::MatCtorS(const sem::Type* ty,
 }
 
 const sem::Constant* ConstEval::MatCtorV(const sem::Type* ty,
-                                         utils::ConstVectorRef<const sem::Expression*> args) {
+                                         utils::VectorRef<const sem::Expression*> args) {
     utils::Vector<const sem::Constant*, 4> els;
     for (auto* arg : args) {
         els.Push(arg->ConstantValue());
@@ -668,7 +667,7 @@ const sem::Constant* ConstEval::MemberAccess(const sem::Expression* obj_expr,
 
 const sem::Constant* ConstEval::Swizzle(const sem::Type* ty,
                                         const sem::Expression* vec_expr,
-                                        utils::ConstVectorRef<uint32_t> indices) {
+                                        utils::VectorRef<uint32_t> indices) {
     auto* vec_val = vec_expr->ConstantValue();
     if (!vec_val) {
         return nullptr;
@@ -688,7 +687,7 @@ const sem::Constant* ConstEval::Bitcast(const sem::Type*, const sem::Expression*
 }
 
 const sem::Constant* ConstEval::OpComplement(const sem::Type*,
-                                             utils::ConstVectorRef<const sem::Expression*> args) {
+                                             utils::VectorRef<const sem::Expression*> args) {
     auto transform = [&](const sem::Constant* c) {
         auto create = [&](auto i) {
             return CreateElement(builder, c->Type(), decltype(i)(~i.value));
@@ -699,7 +698,7 @@ const sem::Constant* ConstEval::OpComplement(const sem::Type*,
 }
 
 const sem::Constant* ConstEval::OpMinus(const sem::Type*,
-                                        utils::ConstVectorRef<const sem::Expression*> args) {
+                                        utils::VectorRef<const sem::Expression*> args) {
     auto transform = [&](const sem::Constant* c) {
         auto create = [&](auto i) {  //
                                      // For signed integrals, avoid C++ UB by not negating the
@@ -723,7 +722,7 @@ const sem::Constant* ConstEval::OpMinus(const sem::Type*,
 }
 
 const sem::Constant* ConstEval::atan2(const sem::Type*,
-                                      utils::ConstVectorRef<const sem::Expression*> args) {
+                                      utils::VectorRef<const sem::Expression*> args) {
     auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
         auto create = [&](auto i, auto j) {
             return CreateElement(builder, c0->Type(), decltype(i)(std::atan2(i.value, j.value)));
@@ -735,7 +734,7 @@ const sem::Constant* ConstEval::atan2(const sem::Type*,
 }
 
 const sem::Constant* ConstEval::clamp(const sem::Type*,
-                                      utils::ConstVectorRef<const sem::Expression*> args) {
+                                      utils::VectorRef<const sem::Expression*> args) {
     auto transform = [&](const sem::Constant* c0, const sem::Constant* c1,
                          const sem::Constant* c2) {
         auto create = [&](auto e, auto low, auto high) {

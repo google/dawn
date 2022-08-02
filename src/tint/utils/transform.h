@@ -119,40 +119,6 @@ auto Transform(const VectorRef<IN>& in, TRANSFORMER&& transform)
     return result;
 }
 
-/// Transform performs an element-wise transformation of a vector reference.
-/// @param in the input vector.
-/// @param transform the transformation function with signature: `OUT(IN)`
-/// @tparam N the small-array size of the returned Vector
-/// @returns a new vector with each element of the source vector transformed by `transform`.
-template <size_t N, typename IN, typename TRANSFORMER>
-auto Transform(ConstVectorRef<IN> in, TRANSFORMER&& transform)
-    -> Vector<decltype(transform(in[0])), N> {
-    const auto count = in.Length();
-    Vector<decltype(transform(in[0])), N> result;
-    result.Reserve(count);
-    for (size_t i = 0; i < count; ++i) {
-        result.Push(transform(in[i]));
-    }
-    return result;
-}
-
-/// Transform performs an element-wise transformation of a vector reference.
-/// @param in the input vector.
-/// @param transform the transformation function with signature: `OUT(IN, size_t)`
-/// @tparam N the small-array size of the returned Vector
-/// @returns a new vector with each element of the source vector transformed by `transform`.
-template <size_t N, typename IN, typename TRANSFORMER>
-auto Transform(ConstVectorRef<IN> in, TRANSFORMER&& transform)
-    -> Vector<decltype(transform(in[0], 1u)), N> {
-    const auto count = in.Length();
-    Vector<decltype(transform(in[0], 1u)), N> result;
-    result.Reserve(count);
-    for (size_t i = 0; i < count; ++i) {
-        result.Push(transform(in[i], i));
-    }
-    return result;
-}
-
 /// TransformN performs an element-wise transformation of a vector, transforming and returning at
 /// most `n` elements.
 /// @param in the input vector.

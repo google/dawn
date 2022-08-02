@@ -1406,7 +1406,8 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
     return m;
 }
 
-bool Resolver::MaterializeArguments(utils::VectorRef<const sem::Expression*> args,
+template <size_t N>
+bool Resolver::MaterializeArguments(utils::Vector<const sem::Expression*, N>& args,
                                     const sem::CallTarget* target) {
     for (size_t i = 0, n = std::min(args.Length(), target->Parameters().Length()); i < n; i++) {
         const auto* param_ty = target->Parameters()[i]->Type();
@@ -1778,9 +1779,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 // there's no need to infer element types.
                 return ty_ctor_or_conv(ty);
             },
-            [&](sem::Function* func) {
-                return FunctionCall(expr, func, std::move(args), arg_behaviors);
-            },
+            [&](sem::Function* func) { return FunctionCall(expr, func, args, arg_behaviors); },
             [&](sem::Variable* var) {
                 auto name = builder_->Symbols().NameFor(var->Declaration()->symbol);
                 AddError("cannot call variable '" + name + "'", ident->source);
@@ -1791,7 +1790,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                 auto name = builder_->Symbols().NameFor(ident->symbol);
                 auto builtin_type = sem::ParseBuiltinType(name);
                 if (builtin_type != sem::BuiltinType::kNone) {
-                    return BuiltinCall(expr, builtin_type, std::move(args));
+                    return BuiltinCall(expr, builtin_type, args);
                 }
 
                 TINT_ICE(Resolver, diagnostics_)
@@ -1809,12 +1808,13 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     return validator_.Call(call, current_statement_) ? call : nullptr;
 }
 
+template <size_t N>
 sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
                                  sem::BuiltinType builtin_type,
-                                 utils::VectorRef<const sem::Expression*> args) {
+                                 utils::Vector<const sem::Expression*, N>& args) {
     IntrinsicTable::Builtin builtin;
     {
-        auto arg_tys = utils::Transform<8>(args, [](auto* arg) { return arg->Type(); });
+        auto arg_tys = utils::Transform(args, [](auto* arg) { return arg->Type(); });
         builtin = intrinsic_table_->Lookup(builtin_type, arg_tys, expr->source);
         if (!builtin.sem) {
             return nullptr;
@@ -1876,9 +1876,8 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     return call;
 }
 
-void Resolver::CollectTextureSamplerPairs(
-    const sem::Builtin* builtin,
-    utils::ConstVectorRef<const sem::Expression*> args) const {
+void Resolver::CollectTextureSamplerPairs(const sem::Builtin* builtin,
+                                          utils::VectorRef<const sem::Expression*> args) const {
     // Collect a texture/sampler pair for this builtin.
     const auto& signature = builtin->Signature();
     int texture_index = signature.IndexOf(sem::ParameterUsage::kTexture);
@@ -1896,9 +1895,10 @@ void Resolver::CollectTextureSamplerPairs(
     }
 }
 
+template <size_t N>
 sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
                                   sem::Function* target,
-                                  utils::VectorRef<const sem::Expression*> args,
+                                  utils::Vector<const sem::Expression*, N>& args,
                                   sem::Behaviors arg_behaviors) {
     auto sym = expr->target.name->symbol;
     auto name = builder_->Symbols().NameFor(sym);
@@ -1944,9 +1944,8 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
     return call;
 }
 
-void Resolver::CollectTextureSamplerPairs(
-    sem::Function* func,
-    utils::ConstVectorRef<const sem::Expression*> args) const {
+void Resolver::CollectTextureSamplerPairs(sem::Function* func,
+                                          utils::VectorRef<const sem::Expression*> args) const {
     // Map all texture/sampler pairs from the target function to the
     // current function. These can only be global or parameter
     // variables. Resolve any parameter variables to the corresponding

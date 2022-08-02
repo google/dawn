@@ -32,11 +32,17 @@ namespace tint::utils {
 template <typename>
 class VectorRef;
 template <typename>
-class ConstVectorRef;
+class VectorRef;
 
 }  // namespace tint::utils
 
 namespace tint::utils {
+
+/// A type used to indicate an empty array.
+struct EmptyType {};
+
+/// An instance of the EmptyType.
+static constexpr EmptyType Empty;
 
 /// A slice represents a contigious array of elements of type T.
 template <typename T>
@@ -165,6 +171,9 @@ class Vector {
     Vector() = default;
 
     /// Constructor
+    Vector(EmptyType) {}  // NOLINT(runtime/explicit)
+
+    /// Constructor
     /// @param elements the elements to place into the vector
     Vector(std::initializer_list<T> elements) {
         Reserve(elements.size());
@@ -217,10 +226,7 @@ class Vector {
 
     /// Copy constructor from an immutable vector reference
     /// @param other the vector reference to copy
-    explicit Vector(const ConstVectorRef<T>& other) { Copy(other.slice_); }
-
-    /// Move constructor from an immutable vector reference (invalid)
-    Vector(ConstVectorRef<T>&&) = delete;  // NOLINT(runtime/explicit)
+    explicit Vector(const VectorRef<T>& other) { Copy(other.slice_); }
 
     /// Destructor
     ~Vector() { ClearAndFree(); }
@@ -260,6 +266,26 @@ class Vector {
     template <size_t N2>
     Vector& operator=(Vector<T, N2>&& other) {
         MoveOrCopy(VectorRef<T>(std::move(other)));
+        return *this;
+    }
+
+    /// Assignment operator (differing N length)
+    /// @param other the vector reference to copy
+    /// @returns this vector so calls can be chained
+    Vector& operator=(const VectorRef<T>& other) {
+        if (&other.slice_ != &impl_.slice) {
+            Copy(other.slice_);
+        }
+        return *this;
+    }
+
+    /// Move operator (differing N length)
+    /// @param other the vector reference to copy
+    /// @returns this vector so calls can be chained
+    Vector& operator=(VectorRef<T>&& other) {
+        if (&other.slice_ != &impl_.slice) {
+            MoveOrCopy(std::move(other));
+        }
         return *this;
     }
 
@@ -367,7 +393,12 @@ class Vector {
 
     /// Removes and returns the last element from the vector.
     /// @returns the popped element
-    T Pop() { return std::move(impl_.slice.data[--impl_.slice.len]); }
+    T Pop() {
+        auto& el = impl_.slice.data[--impl_.slice.len];
+        auto val = std::move(el);
+        el.~T();
+        return val;
+    }
 
     /// @returns true if the vector is empty.
     bool IsEmpty() const { return impl_.slice.len == 0; }
@@ -419,7 +450,7 @@ class Vector {
 
     /// Friend class
     template <typename>
-    friend class ConstVectorRef;
+    friend class VectorRef;
 
     /// The slice type used by this vector
     using Slice = utils::Slice<T>;
@@ -573,11 +604,10 @@ Vector(Ts...) -> Vector<VectorCommonType<Ts...>, sizeof...(Ts)>;
 
 /// VectorRef is a weak reference to a Vector, used to pass vectors as parameters, avoiding copies
 /// between the caller and the callee. VectorRef can accept a Vector of any 'N' value, decoupling
-/// the caller's vector internal size from the callee's vector size.
-///
-/// A VectorRef tracks the usage of moves either side of the call. If at the call site, a Vector
-/// argument is moved to a VectorRef parameter, and within the callee, the VectorRef parameter is
-/// moved to a Vector, then the Vector heap allocation will be moved. For example:
+/// the caller's vector internal size from the callee's vector size. A VectorRef tracks the usage of
+/// moves either side of the call. If at the call site, a Vector argument is moved to a VectorRef
+/// parameter, and within the callee, the VectorRef parameter is moved to a Vector, then the Vector
+/// heap allocation will be moved. For example:
 ///
 /// ```
 ///     void func_a() {
@@ -596,12 +626,30 @@ class VectorRef {
     /// The slice type used by this vector reference
     using Slice = utils::Slice<T>;
 
+    /// @returns an empty slice.
+    static Slice& EmptySlice() {
+        static Slice empty;
+        return empty;
+    }
+
   public:
+    /// Constructor - empty reference
+    VectorRef() : slice_(EmptySlice()) {}
+
+    /// Constructor
+    VectorRef(EmptyType) : slice_(EmptySlice()) {}  // NOLINT(runtime/explicit)
+
     /// Constructor from a Vector
     /// @param vector the vector to create a reference of
     template <size_t N>
     VectorRef(Vector<T, N>& vector)  // NOLINT(runtime/explicit)
-        : slice_(vector.impl_.slice), can_move_(false) {}
+        : slice_(vector.impl_.slice) {}
+
+    /// Constructor from a const Vector
+    /// @param vector the vector to create a reference of
+    template <size_t N>
+    VectorRef(const Vector<T, N>& vector)  // NOLINT(runtime/explicit)
+        : slice_(const_cast<Slice&>(vector.impl_.slice)) {}
 
     /// Constructor from a moved Vector
     /// @param vector the vector being moved
@@ -611,7 +659,7 @@ class VectorRef {
 
     /// Copy constructor
     /// @param other the vector reference
-    VectorRef(const VectorRef& other) : slice_(other.slice_), can_move_(false) {}
+    VectorRef(const VectorRef& other) : slice_(other.slice_) {}
 
     /// Move constructor
     /// @param other the vector reference
@@ -621,7 +669,7 @@ class VectorRef {
     /// @param other the other vector reference
     template <typename U, typename = std::enable_if_t<CanReinterpretSlice<T, U>>>
     VectorRef(const VectorRef<U>& other)  // NOLINT(runtime/explicit)
-        : slice_(*ReinterpretSlice<T>(&other.slice_)), can_move_(false) {}
+        : slice_(*ReinterpretSlice<T>(&other.slice_)) {}
 
     /// Move constructor with covariance / const conversion
     /// @param other the vector reference
@@ -634,7 +682,7 @@ class VectorRef {
     /// @see CanReinterpretSlice for rules about conversion
     template <typename U, size_t N, typename = std::enable_if_t<CanReinterpretSlice<T, U>>>
     VectorRef(Vector<U, N>& vector)  // NOLINT(runtime/explicit)
-        : slice_(*ReinterpretSlice<T>(&vector.impl_.slice)), can_move_(false) {}
+        : slice_(*ReinterpretSlice<T>(&vector.impl_.slice)) {}
 
     /// Constructor from a moved Vector with covariance / const conversion
     /// @param vector the vector to create a reference of
@@ -642,11 +690,6 @@ class VectorRef {
     template <typename U, size_t N, typename = std::enable_if_t<CanReinterpretSlice<T, U>>>
     VectorRef(Vector<U, N>&& vector)  // NOLINT(runtime/explicit)
         : slice_(*ReinterpretSlice<T>(&vector.impl_.slice)), can_move_(vector.impl_.CanMove()) {}
-
-    /// Index operator
-    /// @param i the element index. Must be less than `len`.
-    /// @returns a reference to the i'th element.
-    T& operator[](size_t i) { return slice_[i]; }
 
     /// Index operator
     /// @param i the element index. Must be less than `len`.
@@ -710,105 +753,12 @@ class VectorRef {
 
     /// Friend class
     template <typename>
-    friend class ConstVectorRef;
+    friend class VectorRef;
 
     /// The slice of the vector being referenced.
     Slice& slice_;
     /// Whether the slice data is passed by r-value reference, and can be moved.
     bool can_move_ = false;
-};
-
-/// ConstVectorRef is a weak, immutable reference to a Vector, used to pass vectors as parameters,
-/// avoiding copies between the caller and the callee. VectorRef can accept a Vector of any 'N'
-/// value, decoupling the caller's vector internal size from the callee's vector size.
-template <typename T>
-class ConstVectorRef {
-    /// The slice type used by this vector reference
-    using Slice = utils::Slice<T>;
-
-  public:
-    /// Constructor from a Vector.
-    /// @param vector the vector reference
-    template <size_t N>
-    ConstVectorRef(const Vector<T, N>& vector)  // NOLINT(runtime/explicit)
-        : slice_(vector.impl_.slice) {}
-
-    /// Copy constructor
-    /// @param other the vector reference
-    ConstVectorRef(const ConstVectorRef& other) = default;
-
-    /// Conversion constructor to convert from a non-const to const vector reference
-    /// @param other the vector reference
-    ConstVectorRef(const VectorRef<T>& other) : slice_(other.slice_) {}  // NOLINT(runtime/explicit)
-
-    /// Move constructor. Deleted as this won't move anything.
-    ConstVectorRef(ConstVectorRef&&) = delete;
-
-    /// Constructor from a Vector with covariance / const conversion
-    /// @param vector the vector to create a reference of
-    /// @see CanReinterpretSlice for rules about conversion
-    template <typename U, size_t N, typename = std::enable_if_t<CanReinterpretSlice<T, U>>>
-    ConstVectorRef(const Vector<U, N>& vector)  // NOLINT(runtime/explicit)
-        : slice_(*ReinterpretSlice<T>(&vector.impl_.slice)) {}
-
-    /// Constructor from a VectorRef with covariance / const conversion
-    /// @param other the vector reference
-    /// @see CanReinterpretSlice for rules about conversion
-    template <typename U, typename = std::enable_if_t<CanReinterpretSlice<T, U>>>
-    ConstVectorRef(const VectorRef<U>& other)  // NOLINT(runtime/explicit)
-        : slice_(*ReinterpretSlice<T>(&other.slice_)) {}
-
-    /// Constructor from a ConstVectorRef with covariance / const conversion
-    /// @param other the vector reference
-    /// @see CanReinterpretSlice for rules about conversion
-    template <typename U, typename = std::enable_if_t<CanReinterpretSlice<T, U>>>
-    ConstVectorRef(const ConstVectorRef<U>& other)  // NOLINT(runtime/explicit)
-        : slice_(*ReinterpretSlice<T>(&other.slice_)) {}
-
-    /// Index operator
-    /// @param i the element index. Must be less than `len`.
-    /// @returns a reference to the i'th element.
-    const T& operator[](size_t i) const { return slice_[i]; }
-
-    /// @return the number of elements in the vector
-    size_t Length() const { return slice_.len; }
-
-    /// @return the number of elements that the vector could hold before a heap allocation needs to
-    /// be made
-    size_t Capacity() const { return slice_.cap; }
-
-    /// @returns true if the vector is empty.
-    bool IsEmpty() const { return slice_.len == 0; }
-
-    /// @returns a reference to the first element in the vector
-    const T& Front() const { return slice_.Front(); }
-
-    /// @returns a reference to the last element in the vector
-    const T& Back() const { return slice_.Back(); }
-
-    /// @returns a pointer to the first element in the vector
-    const T* begin() const { return slice_.begin(); }
-
-    /// @returns a pointer to one past the last element in the vector
-    const T* end() const { return slice_.end(); }
-
-    /// @returns a reverse iterator starting with the last element in the vector
-    auto rbegin() const { return slice_.rbegin(); }
-
-    /// @returns the end for a reverse iterator
-    auto rend() const { return slice_.rend(); }
-
-  private:
-    /// Friend class
-    template <typename, size_t>
-    friend class Vector;
-
-    /// Friend class
-    template <typename>
-    friend class ConstVectorRef;
-
-    /// The slice of the vector being referenced.
-    const Slice& slice_;
 };
 
 /// Helper for converting a Vector to a std::vector.

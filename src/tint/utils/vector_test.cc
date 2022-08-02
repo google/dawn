@@ -105,8 +105,20 @@ TEST(TintVectorTest, SmallArray_Empty) {
     EXPECT_EQ(vec.Capacity(), 2u);
 }
 
-TEST(TintVectorTest, Empty_NoSmallArray) {
+TEST(TintVectorTest, NoSmallArray) {
     Vector<int, 0> vec;
+    EXPECT_EQ(vec.Length(), 0u);
+    EXPECT_EQ(vec.Capacity(), 0u);
+}
+
+TEST(TintVectorTest, Empty_SmallArray_Empty) {
+    Vector<int, 2> vec(Empty);
+    EXPECT_EQ(vec.Length(), 0u);
+    EXPECT_EQ(vec.Capacity(), 2u);
+}
+
+TEST(TintVectorTest, Empty_NoSmallArray) {
+    Vector<int, 0> vec(Empty);
     EXPECT_EQ(vec.Length(), 0u);
     EXPECT_EQ(vec.Capacity(), 0u);
 }
@@ -800,7 +812,7 @@ TEST(TintVectorTest, RepeatMoveAssign_NoSpill) {
     EXPECT_TRUE(AllInternallyHeld(vec));
 }
 
-TEST(TintVectorTest, DoubleMoveAssign_WithSpill) {
+TEST(TintVectorTest, RepeatMoveAssign_WithSpill) {
     Vector<std::string, 1> vec_a{"hello", "world"};
     Vector<std::string, 1> vec_b{"Ciao", "mondo"};
     Vector<std::string, 1> vec_c{"bonjour", "le", "monde"};
@@ -808,6 +820,288 @@ TEST(TintVectorTest, DoubleMoveAssign_WithSpill) {
     vec = std::move(vec_a);
     vec = std::move(vec_b);
     vec = std::move(vec_c);
+    EXPECT_EQ(vec.Length(), 3u);
+    EXPECT_EQ(vec.Capacity(), 3u);
+    EXPECT_EQ(vec[0], "bonjour");
+    EXPECT_EQ(vec[1], "le");
+    EXPECT_EQ(vec[2], "monde");
+    EXPECT_TRUE(AllExternallyHeld(vec));
+}
+
+TEST(TintVectorTest, CopyAssignRef_NoSpill_N2_to_N2) {
+    Vector<std::string, 2> vec_a{"hello", "world"};
+    VectorRef<std::string> ref{std::move(vec_a)};
+    Vector<std::string, 2> vec_b;
+    vec_b = ref;
+    EXPECT_EQ(vec_b.Length(), 2u);
+    EXPECT_EQ(vec_b.Capacity(), 2u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_TRUE(AllInternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, CopyAssignRef_WithSpill_N2_to_N2) {
+    Vector<std::string, 2> vec_a{"hello", "world", "spill"};
+    VectorRef<std::string> ref{std::move(vec_a)};
+    Vector<std::string, 2> vec_b;
+    vec_b = ref;
+    EXPECT_EQ(vec_b.Length(), 3u);
+    EXPECT_EQ(vec_b.Capacity(), 3u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_EQ(vec_b[2], "spill");
+    EXPECT_TRUE(AllExternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, CopyAssignRef_NoSpill_N2_to_N1) {
+    Vector<std::string, 2> vec_a{"hello", "world"};
+    VectorRef<std::string> ref{std::move(vec_a)};
+    Vector<std::string, 1> vec_b;
+    vec_b = ref;
+    EXPECT_EQ(vec_b.Length(), 2u);
+    EXPECT_EQ(vec_b.Capacity(), 2u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_TRUE(AllExternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, CopyAssignRef_WithSpill_N2_to_N1) {
+    Vector<std::string, 2> vec_a{"hello", "world", "spill"};
+    VectorRef<std::string> ref{std::move(vec_a)};
+    Vector<std::string, 1> vec_b;
+    vec_b = ref;
+    EXPECT_EQ(vec_b.Length(), 3u);
+    EXPECT_EQ(vec_b.Capacity(), 3u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_EQ(vec_b[2], "spill");
+    EXPECT_TRUE(AllExternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, CopyAssignRef_NoSpill_N2_to_N3) {
+    Vector<std::string, 2> vec_a{"hello", "world"};
+    VectorRef<std::string> ref{std::move(vec_a)};
+    Vector<std::string, 3> vec_b;
+    vec_b = ref;
+    EXPECT_EQ(vec_b.Length(), 2u);
+    EXPECT_EQ(vec_b.Capacity(), 3u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_TRUE(AllInternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, CopyAssignRef_WithSpill_N2_to_N3) {
+    Vector<std::string, 2> vec_a{"hello", "world", "spill"};
+    VectorRef<std::string> ref{std::move(vec_a)};
+    Vector<std::string, 3> vec_b;
+    vec_b = ref;
+    EXPECT_EQ(vec_b.Length(), 3u);
+    EXPECT_EQ(vec_b.Capacity(), 3u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_EQ(vec_b[2], "spill");
+    EXPECT_TRUE(AllInternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, CopyAssignRef_NoSpill_N2_to_N0) {
+    Vector<std::string, 2> vec_a{"hello", "world"};
+    VectorRef<std::string> ref{std::move(vec_a)};
+    Vector<std::string, 0> vec_b;
+    vec_b = ref;
+    EXPECT_EQ(vec_b.Length(), 2u);
+    EXPECT_EQ(vec_b.Capacity(), 2u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_TRUE(AllExternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, CopyAssignRef_WithSpill_N2_to_N0) {
+    Vector<std::string, 2> vec_a{"hello", "world", "spill"};
+    VectorRef<std::string> ref{std::move(vec_a)};
+    Vector<std::string, 0> vec_b;
+    vec_b = ref;
+    EXPECT_EQ(vec_b.Length(), 3u);
+    EXPECT_EQ(vec_b.Capacity(), 3u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_EQ(vec_b[2], "spill");
+    EXPECT_TRUE(AllExternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, CopyAssignRef_Self_NoSpill) {
+    Vector<std::string, 2> vec{"hello", "world"};
+    VectorRef<std::string> ref{std::move(vec)};
+    vec = ref;
+    EXPECT_EQ(vec.Length(), 2u);
+    EXPECT_EQ(vec.Capacity(), 2u);
+    EXPECT_EQ(vec[0], "hello");
+    EXPECT_EQ(vec[1], "world");
+    EXPECT_TRUE(AllInternallyHeld(vec));
+}
+
+TEST(TintVectorTest, CopyAssignRef_Self_WithSpill) {
+    Vector<std::string, 1> vec{"hello", "world"};
+    VectorRef<std::string> ref{std::move(vec)};
+    vec = ref;
+    EXPECT_EQ(vec.Length(), 2u);
+    EXPECT_EQ(vec.Capacity(), 2u);
+    EXPECT_EQ(vec[0], "hello");
+    EXPECT_EQ(vec[1], "world");
+    EXPECT_TRUE(AllExternallyHeld(vec));
+}
+
+TEST(TintVectorTest, MoveAssignRef_NoSpill_N2_to_N2) {
+    Vector<std::string, 2> vec_a{"hello", "world"};
+    VectorRef<std::string> ref{std::move(vec_a)};
+    Vector<std::string, 2> vec_b;
+    vec_b = std::move(ref);
+    EXPECT_EQ(vec_b.Length(), 2u);
+    EXPECT_EQ(vec_b.Capacity(), 2u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_TRUE(AllInternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, MoveAssignRef_WithSpill_N2_to_N2) {
+    Vector<std::string, 2> vec_a{"hello", "world", "spill"};
+    VectorRef<std::string> ref{std::move(vec_a)};
+    Vector<std::string, 2> vec_b;
+    vec_b = std::move(ref);
+    EXPECT_EQ(vec_b.Length(), 3u);
+    EXPECT_EQ(vec_b.Capacity(), 3u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_EQ(vec_b[2], "spill");
+    EXPECT_TRUE(AllExternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, MoveAssignRef_NoSpill_N2_to_N1) {
+    Vector<std::string, 2> vec_a{"hello", "world"};
+    VectorRef<std::string> ref{std::move(vec_a)};
+    Vector<std::string, 1> vec_b;
+    vec_b = std::move(ref);
+    EXPECT_EQ(vec_b.Length(), 2u);
+    EXPECT_EQ(vec_b.Capacity(), 2u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_TRUE(AllExternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, MoveAssignRef_SpillSpill_N2_to_N1) {
+    Vector<std::string, 2> vec_a{"hello", "world", "spill"};
+    VectorRef<std::string> ref{std::move(vec_a)};
+    Vector<std::string, 1> vec_b;
+    vec_b = std::move(ref);
+    EXPECT_EQ(vec_b.Length(), 3u);
+    EXPECT_EQ(vec_b.Capacity(), 3u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_EQ(vec_b[2], "spill");
+    EXPECT_TRUE(AllExternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, MoveAssignRef_NoSpill_N2_to_N3) {
+    Vector<std::string, 2> vec_a{"hello", "world"};
+    VectorRef<std::string> ref{std::move(vec_a)};
+    Vector<std::string, 3> vec_b;
+    vec_b = std::move(ref);
+    EXPECT_EQ(vec_b.Length(), 2u);
+    EXPECT_EQ(vec_b.Capacity(), 3u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_TRUE(AllInternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, MoveAssignRef_WithSpill_N2_to_N3) {
+    Vector<std::string, 2> vec_a{"hello", "world", "spill"};
+    VectorRef<std::string> ref{std::move(vec_a)};
+    Vector<std::string, 3> vec_b;
+    vec_b = std::move(ref);
+    EXPECT_EQ(vec_b.Length(), 3u);
+    EXPECT_EQ(vec_b.Capacity(), 3u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_EQ(vec_b[2], "spill");
+    EXPECT_TRUE(AllExternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, MoveAssignRef_NoSpill_N2_to_N0) {
+    Vector<std::string, 2> vec_a{"hello", "world"};
+    VectorRef<std::string> ref{std::move(vec_a)};
+    Vector<std::string, 0> vec_b;
+    vec_b = std::move(ref);
+    EXPECT_EQ(vec_b.Length(), 2u);
+    EXPECT_EQ(vec_b.Capacity(), 2u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_TRUE(AllExternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, MoveAssignRef_WithSpill_N2_to_N0) {
+    Vector<std::string, 2> vec_a{"hello", "world", "spill"};
+    VectorRef<std::string> ref{std::move(vec_a)};
+    Vector<std::string, 0> vec_b;
+    vec_b = std::move(ref);
+    EXPECT_EQ(vec_b.Length(), 3u);
+    EXPECT_EQ(vec_b.Capacity(), 3u);
+    EXPECT_EQ(vec_b[0], "hello");
+    EXPECT_EQ(vec_b[1], "world");
+    EXPECT_EQ(vec_b[2], "spill");
+    EXPECT_TRUE(AllExternallyHeld(vec_b));
+}
+
+TEST(TintVectorTest, MoveAssignRef_Self_NoSpill) {
+    Vector<std::string, 2> vec{"hello", "world"};
+    VectorRef<std::string> ref{std::move(vec)};
+    vec = std::move(ref);
+    EXPECT_EQ(vec.Length(), 2u);
+    EXPECT_EQ(vec.Capacity(), 2u);
+    EXPECT_EQ(vec[0], "hello");
+    EXPECT_EQ(vec[1], "world");
+    EXPECT_TRUE(AllInternallyHeld(vec));
+}
+
+TEST(TintVectorTest, MoveAssignRef_Self_WithSpill) {
+    Vector<std::string, 1> vec{"hello", "world"};
+    VectorRef<std::string> ref{std::move(vec)};
+    vec = std::move(ref);
+    EXPECT_EQ(vec.Length(), 2u);
+    EXPECT_EQ(vec.Capacity(), 2u);
+    EXPECT_EQ(vec[0], "hello");
+    EXPECT_EQ(vec[1], "world");
+    EXPECT_TRUE(AllExternallyHeld(vec));
+}
+
+TEST(TintVectorTest, RepeatMoveAssignRef_NoSpill) {
+    Vector<std::string, 3> vec_a{"hello", "world"};
+    Vector<std::string, 3> vec_b{"Ciao", "mondo"};
+    Vector<std::string, 3> vec_c{"Bonjour", "le", "monde"};
+    VectorRef<std::string> ref_a{std::move(vec_a)};
+    VectorRef<std::string> ref_b{std::move(vec_b)};
+    VectorRef<std::string> ref_c{std::move(vec_c)};
+    Vector<std::string, 3> vec;
+    vec = std::move(ref_a);
+    vec = std::move(ref_b);
+    vec = std::move(ref_c);
+    EXPECT_EQ(vec.Length(), 3u);
+    EXPECT_EQ(vec.Capacity(), 3u);
+    EXPECT_EQ(vec[0], "Bonjour");
+    EXPECT_EQ(vec[1], "le");
+    EXPECT_EQ(vec[2], "monde");
+    EXPECT_TRUE(AllInternallyHeld(vec));
+}
+
+TEST(TintVectorTest, RepeatMoveAssignRef_WithSpill) {
+    Vector<std::string, 1> vec_a{"hello", "world"};
+    Vector<std::string, 1> vec_b{"Ciao", "mondo"};
+    Vector<std::string, 1> vec_c{"bonjour", "le", "monde"};
+    VectorRef<std::string> ref_a{std::move(vec_a)};
+    VectorRef<std::string> ref_b{std::move(vec_b)};
+    VectorRef<std::string> ref_c{std::move(vec_c)};
+    Vector<std::string, 1> vec;
+    vec = std::move(ref_a);
+    vec = std::move(ref_b);
+    vec = std::move(ref_c);
     EXPECT_EQ(vec.Length(), 3u);
     EXPECT_EQ(vec.Capacity(), 3u);
     EXPECT_EQ(vec[0], "bonjour");
@@ -1684,7 +1978,7 @@ TEST(TintVectorRefTest, MoveVector_UpcastAndAddConst) {
 TEST(TintVectorRefTest, Index) {
     Vector<std::string, 2> vec{"one", "two"};
     VectorRef<std::string> vec_ref(vec);
-    static_assert(!std::is_const_v<std::remove_reference_t<decltype(vec_ref[0])>>);
+    static_assert(std::is_const_v<std::remove_reference_t<decltype(vec_ref[0])>>);
     EXPECT_EQ(vec_ref[0], "one");
     EXPECT_EQ(vec_ref[1], "two");
 }
@@ -1749,206 +2043,6 @@ TEST(TintVectorRefTest, BeginEnd) {
 TEST(TintVectorRefTest, ConstBeginEnd) {
     Vector<std::string, 3> vec{"front", "mid", "back"};
     const VectorRef<std::string> vec_ref(vec);
-    static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec_ref.begin())>>);
-    static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec_ref.end())>>);
-    EXPECT_EQ(vec_ref.begin(), &vec[0]);
-    EXPECT_EQ(vec_ref.end(), &vec[0] + 3);
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// TintVectorConstRefTest
-////////////////////////////////////////////////////////////////////////////////
-TEST(TintVectorConstRefTest, CopyVectorConstRef) {
-    Vector<std::string, 1> vec_a{"one", "two"};
-    ConstVectorRef<std::string> vec_ref_a(vec_a);
-    ConstVectorRef<std::string> vec_ref_b(vec_ref_a);
-    Vector<std::string, 2> vec_b(vec_ref_b);
-    EXPECT_EQ(vec_b[0], "one");
-    EXPECT_EQ(vec_b[1], "two");
-    EXPECT_TRUE(AllInternallyHeld(vec_b));  // Copied, not moved
-}
-
-TEST(TintVectorConstRefTest, CopyVectorConstRef_Upcast) {
-    C2a c2a;
-    C2b c2b;
-    Vector<C1*, 1> vec_a{&c2a, &c2b};
-    ConstVectorRef<C1*> vec_ref_a(vec_a);
-    ConstVectorRef<C0*> vec_ref_b(vec_ref_a);  // Up-cast
-    Vector<C0*, 2> vec_b(vec_ref_b);
-    EXPECT_EQ(vec_b[0], &c2a);
-    EXPECT_EQ(vec_b[1], &c2b);
-    EXPECT_TRUE(AllInternallyHeld(vec_b));  // Copied, not moved
-}
-
-TEST(TintVectorConstRefTest, CopyVectorConstRef_AddConst) {
-    C2a c2a;
-    C2b c2b;
-    Vector<C1*, 1> vec_a{&c2a, &c2b};
-    ConstVectorRef<C1*> vec_ref_a(vec_a);
-    ConstVectorRef<const C1*> vec_ref_b(vec_ref_a);  // Up-cast
-    Vector<const C1*, 2> vec_b(vec_ref_b);
-    EXPECT_EQ(vec_b[0], &c2a);
-    EXPECT_EQ(vec_b[1], &c2b);
-    EXPECT_TRUE(AllInternallyHeld(vec_b));  // Copied, not moved
-}
-
-TEST(TintVectorConstRefTest, CopyVectorConstRef_UpcastAndAddConst) {
-    C2a c2a;
-    C2b c2b;
-    Vector<C1*, 1> vec_a{&c2a, &c2b};
-    ConstVectorRef<C1*> vec_ref_a(vec_a);
-    ConstVectorRef<const C0*> vec_ref_b(vec_ref_a);  // Up-cast
-    Vector<const C0*, 2> vec_b(vec_ref_b);
-    EXPECT_EQ(vec_b[0], &c2a);
-    EXPECT_EQ(vec_b[1], &c2b);
-    EXPECT_TRUE(AllInternallyHeld(vec_b));  // Copied, not moved
-}
-
-TEST(TintVectorConstRefTest, CopyVector) {
-    Vector<std::string, 1> vec_a{"one", "two"};
-    ConstVectorRef<std::string> vec_ref(vec_a);
-    Vector<std::string, 2> vec_b(vec_ref);
-    EXPECT_EQ(vec_b[0], "one");
-    EXPECT_EQ(vec_b[1], "two");
-    EXPECT_TRUE(AllInternallyHeld(vec_b));  // Copied, not moved
-}
-
-TEST(TintVectorConstRefTest, CopyVector_Upcast) {
-    C2a c2a;
-    C2b c2b;
-    Vector<C1*, 1> vec_a{&c2a, &c2b};
-    ConstVectorRef<C0*> vec_ref(vec_a);
-    EXPECT_EQ(vec_ref[0], &c2a);
-    EXPECT_EQ(vec_ref[1], &c2b);
-    Vector<C0*, 2> vec_b(vec_ref);
-    EXPECT_EQ(vec_b[0], &c2a);
-    EXPECT_EQ(vec_b[1], &c2b);
-    EXPECT_TRUE(AllInternallyHeld(vec_b));  // Copied, not moved
-}
-
-TEST(TintVectorConstRefTest, CopyVector_AddConst) {
-    C2a c2a;
-    C2b c2b;
-    Vector<C1*, 1> vec_a{&c2a, &c2b};
-    ConstVectorRef<const C1*> vec_ref(vec_a);
-    EXPECT_EQ(vec_ref[0], &c2a);
-    EXPECT_EQ(vec_ref[1], &c2b);
-    Vector<const C1*, 2> vec_b(vec_ref);
-    EXPECT_EQ(vec_b[0], &c2a);
-    EXPECT_EQ(vec_b[1], &c2b);
-    EXPECT_TRUE(AllInternallyHeld(vec_b));  // Copied, not moved
-}
-
-TEST(TintVectorConstRefTest, CopyVectorRef_Upcast) {
-    C2a c2a;
-    C2b c2b;
-    Vector<C1*, 1> vec_a{&c2a, &c2b};
-    VectorRef<C1*> vec_ref_a(vec_a);
-    ConstVectorRef<C0*> vec_ref_b(vec_ref_a);
-    EXPECT_EQ(vec_ref_b[0], &c2a);
-    EXPECT_EQ(vec_ref_b[1], &c2b);
-    Vector<C0*, 2> vec_b(vec_ref_b);
-    EXPECT_EQ(vec_b[0], &c2a);
-    EXPECT_EQ(vec_b[1], &c2b);
-    EXPECT_TRUE(AllInternallyHeld(vec_b));  // Copied, not moved
-}
-
-TEST(TintVectorConstRefTest, CopyVectorRef_AddConst) {
-    C2a c2a;
-    C2b c2b;
-    Vector<C1*, 1> vec_a{&c2a, &c2b};
-    VectorRef<C1*> vec_ref_a(vec_a);
-    ConstVectorRef<const C1*> vec_ref_b(vec_ref_a);
-    EXPECT_EQ(vec_ref_b[0], &c2a);
-    EXPECT_EQ(vec_ref_b[1], &c2b);
-    Vector<const C1*, 2> vec_b(vec_ref_b);
-    EXPECT_EQ(vec_b[0], &c2a);
-    EXPECT_EQ(vec_b[1], &c2b);
-    EXPECT_TRUE(AllInternallyHeld(vec_b));  // Copied, not moved
-}
-
-TEST(TintVectorConstRefTest, CopyVectorRef_UpcastAndAddConst) {
-    C2a c2a;
-    C2b c2b;
-    Vector<C1*, 1> vec_a{&c2a, &c2b};
-    VectorRef<C1*> vec_ref_a(vec_a);
-    ConstVectorRef<const C0*> vec_ref_b(vec_ref_a);
-    EXPECT_EQ(vec_ref_b[0], &c2a);
-    EXPECT_EQ(vec_ref_b[1], &c2b);
-    Vector<const C0*, 2> vec_b(vec_ref_b);
-    EXPECT_EQ(vec_b[0], &c2a);
-    EXPECT_EQ(vec_b[1], &c2b);
-    EXPECT_TRUE(AllInternallyHeld(vec_b));  // Copied, not moved
-}
-
-TEST(TintVectorConstRefTest, Index) {
-    Vector<std::string, 2> vec{"one", "two"};
-    ConstVectorRef<std::string> vec_ref(vec);
-    static_assert(std::is_const_v<std::remove_reference_t<decltype(vec_ref[0])>>);
-    EXPECT_EQ(vec_ref[0], "one");
-    EXPECT_EQ(vec_ref[1], "two");
-}
-
-TEST(TintVectorConstRefTest, ConstIndex) {
-    Vector<std::string, 2> vec{"one", "two"};
-    const ConstVectorRef<std::string> vec_ref(vec);
-    static_assert(std::is_const_v<std::remove_reference_t<decltype(vec_ref[0])>>);
-    EXPECT_EQ(vec_ref[0], "one");
-    EXPECT_EQ(vec_ref[1], "two");
-}
-
-TEST(TintVectorConstRefTest, Length) {
-    Vector<std::string, 2> vec{"one", "two", "three"};
-    ConstVectorRef<std::string> vec_ref(vec);
-    EXPECT_EQ(vec_ref.Length(), 3u);
-}
-
-TEST(TintVectorConstRefTest, Capacity) {
-    Vector<std::string, 5> vec{"one", "two", "three"};
-    ConstVectorRef<std::string> vec_ref(vec);
-    EXPECT_EQ(vec_ref.Capacity(), 5u);
-}
-
-TEST(TintVectorConstRefTest, IsEmpty) {
-    Vector<std::string, 1> vec;
-    ConstVectorRef<std::string> vec_ref(vec);
-    EXPECT_TRUE(vec_ref.IsEmpty());
-    vec.Push("one");
-    EXPECT_FALSE(vec_ref.IsEmpty());
-    vec.Pop();
-    EXPECT_TRUE(vec_ref.IsEmpty());
-}
-
-TEST(TintVectorConstRefTest, FrontBack) {
-    Vector<std::string, 3> vec{"front", "mid", "back"};
-    ConstVectorRef<std::string> vec_ref(vec);
-    static_assert(std::is_const_v<std::remove_reference_t<decltype(vec_ref.Front())>>);
-    static_assert(std::is_const_v<std::remove_reference_t<decltype(vec_ref.Back())>>);
-    EXPECT_EQ(vec_ref.Front(), "front");
-    EXPECT_EQ(vec_ref.Back(), "back");
-}
-
-TEST(TintVectorConstRefTest, ConstFrontBack) {
-    Vector<std::string, 3> vec{"front", "mid", "back"};
-    const ConstVectorRef<std::string> vec_ref(vec);
-    static_assert(std::is_const_v<std::remove_reference_t<decltype(vec_ref.Front())>>);
-    static_assert(std::is_const_v<std::remove_reference_t<decltype(vec_ref.Back())>>);
-    EXPECT_EQ(vec_ref.Front(), "front");
-    EXPECT_EQ(vec_ref.Back(), "back");
-}
-
-TEST(TintVectorConstRefTest, BeginEnd) {
-    Vector<std::string, 3> vec{"front", "mid", "back"};
-    ConstVectorRef<std::string> vec_ref(vec);
-    static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec_ref.begin())>>);
-    static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec_ref.end())>>);
-    EXPECT_EQ(vec_ref.begin(), &vec[0]);
-    EXPECT_EQ(vec_ref.end(), &vec[0] + 3);
-}
-
-TEST(TintVectorConstRefTest, ConstBeginEnd) {
-    Vector<std::string, 3> vec{"front", "mid", "back"};
-    const ConstVectorRef<std::string> vec_ref(vec);
     static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec_ref.begin())>>);
     static_assert(std::is_const_v<std::remove_reference_t<decltype(*vec_ref.end())>>);
     EXPECT_EQ(vec_ref.begin(), &vec[0]);

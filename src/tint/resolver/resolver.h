@@ -193,14 +193,16 @@ class Resolver {
     sem::Expression* Bitcast(const ast::BitcastExpression*);
     sem::Call* Call(const ast::CallExpression*);
     sem::Function* Function(const ast::Function*);
+    template <size_t N>
     sem::Call* FunctionCall(const ast::CallExpression*,
                             sem::Function* target,
-                            utils::VectorRef<const sem::Expression*> args,
+                            utils::Vector<const sem::Expression*, N>& args,
                             sem::Behaviors arg_behaviors);
     sem::Expression* Identifier(const ast::IdentifierExpression*);
+    template <size_t N>
     sem::Call* BuiltinCall(const ast::CallExpression*,
                            sem::BuiltinType,
-                           utils::VectorRef<const sem::Expression*> args);
+                           utils::Vector<const sem::Expression*, N>& args);
     sem::Expression* Literal(const ast::LiteralExpression*);
     sem::Expression* MemberAccessor(const ast::MemberAccessorExpression*);
     sem::Expression* UnaryOp(const ast::UnaryOpExpression*);
@@ -223,7 +225,8 @@ class Resolver {
 
     /// Materializes all the arguments in `args` to the parameter types of `target`.
     /// @returns true on success, false on failure.
-    bool MaterializeArguments(utils::VectorRef<const sem::Expression*> args,
+    template <size_t N>
+    bool MaterializeArguments(utils::Vector<const sem::Expression*, N>& args,
                               const sem::CallTarget* target);
 
     /// @returns true if an argument of an abstract numeric type, passed to a parameter of type
@@ -267,9 +270,9 @@ class Resolver {
     // CollectTextureSamplerPairs() collects all the texture/sampler pairs from the target function
     // / builtin, and records these on the current function by calling AddTextureSamplerPair().
     void CollectTextureSamplerPairs(sem::Function* func,
-                                    utils::ConstVectorRef<const sem::Expression*> args) const;
+                                    utils::VectorRef<const sem::Expression*> args) const;
     void CollectTextureSamplerPairs(const sem::Builtin* builtin,
-                                    utils::ConstVectorRef<const sem::Expression*> args) const;
+                                    utils::VectorRef<const sem::Expression*> args) const;
 
     /// Resolves the WorkgroupSize for the given function, assigning it to
     /// current_function_
