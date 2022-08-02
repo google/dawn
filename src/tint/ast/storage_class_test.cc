@@ -44,18 +44,19 @@ inline std::ostream& operator<<(std::ostream& out, Case c) {
 static constexpr Case kValidCases[] = {
     {"function", StorageClass::kFunction},   {"private", StorageClass::kPrivate},
     {"workgroup", StorageClass::kWorkgroup}, {"uniform", StorageClass::kUniform},
-    {"storage", StorageClass::kStorage},
+    {"storage", StorageClass::kStorage},     {"push_constant", StorageClass::kPushConstant},
 };
 
 static constexpr Case kInvalidCases[] = {
-    {"fccnctin", StorageClass::kInvalid},    {"ucti3", StorageClass::kInvalid},
-    {"functVon", StorageClass::kInvalid},    {"priv1te", StorageClass::kInvalid},
-    {"pqiJate", StorageClass::kInvalid},     {"privat7ll", StorageClass::kInvalid},
-    {"workroppqHH", StorageClass::kInvalid}, {"workru", StorageClass::kInvalid},
-    {"wbkgGoup", StorageClass::kInvalid},    {"unifiivm", StorageClass::kInvalid},
-    {"8WWiform", StorageClass::kInvalid},    {"uxxform", StorageClass::kInvalid},
-    {"sXraggg", StorageClass::kInvalid},     {"traXe", StorageClass::kInvalid},
-    {"stor3ge", StorageClass::kInvalid},
+    {"fccnctin", StorageClass::kInvalid},       {"ucti3", StorageClass::kInvalid},
+    {"functVon", StorageClass::kInvalid},       {"priv1te", StorageClass::kInvalid},
+    {"pqiJate", StorageClass::kInvalid},        {"privat7ll", StorageClass::kInvalid},
+    {"workroppqHH", StorageClass::kInvalid},    {"workru", StorageClass::kInvalid},
+    {"wbkgGoup", StorageClass::kInvalid},       {"unifiivm", StorageClass::kInvalid},
+    {"8WWiform", StorageClass::kInvalid},       {"uxxform", StorageClass::kInvalid},
+    {"sXraggg", StorageClass::kInvalid},        {"traXe", StorageClass::kInvalid},
+    {"stor3ge", StorageClass::kInvalid},        {"push_constanE", StorageClass::kInvalid},
+    {"push_TTPnstant", StorageClass::kInvalid}, {"puxxdh_constan", StorageClass::kInvalid},
 };
 
 using StorageClassParseTest = testing::TestWithParam<Case>;

@@ -4121,6 +4121,8 @@ SpvStorageClass Builder::ConvertStorageClass(ast::StorageClass klass) const {
             return SpvStorageClassUniform;
         case ast::StorageClass::kWorkgroup:
             return SpvStorageClassWorkgroup;
+        case ast::StorageClass::kPushConstant:
+            return SpvStorageClassPushConstant;
         case ast::StorageClass::kHandle:
             return SpvStorageClassUniformConstant;
         case ast::StorageClass::kStorage:

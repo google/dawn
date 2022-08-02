@@ -159,6 +159,10 @@ bool Resolver::ResolveInternal() {
         return false;
     }
 
+    if (!validator_.PushConstants(entry_points_)) {
+        return false;
+    }
+
     if (!enabled_extensions_.contains(ast::Extension::kChromiumDisableUniformityAnalysis)) {
         if (!AnalyzeUniformity(builder_, dependencies_)) {
             // TODO(jrprice): Reject programs that fail uniformity analysis.
@@ -726,7 +730,7 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
 
     // TODO(bclayton): Call this at the end of resolve on all uniform and storage
     // referenced structs
-    if (!validator_.StorageClassLayout(sem, valid_type_storage_layouts_)) {
+    if (!validator_.StorageClassLayout(sem, enabled_extensions_, valid_type_storage_layouts_)) {
         return nullptr;
     }
 

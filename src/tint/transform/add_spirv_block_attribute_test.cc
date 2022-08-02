@@ -196,6 +196,71 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(AddSpirvBlockAttributeTest, BasicScalar_PushConstant) {
+    auto* src = R"(
+enable chromium_experimental_push_constant;
+var<push_constant> u : f32;
+
+@fragment
+fn main() {
+  let f = u;
+}
+)";
+    auto* expect = R"(
+enable chromium_experimental_push_constant;
+
+@internal(spirv_block)
+struct u_block {
+  inner : f32,
+}
+
+var<push_constant> u : u_block;
+
+@fragment
+fn main() {
+  let f = u.inner;
+}
+)";
+
+    auto got = Run<AddSpirvBlockAttribute>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(AddSpirvBlockAttributeTest, BasicStruct_PushConstant) {
+    auto* src = R"(
+enable chromium_experimental_push_constant;
+struct S {
+  f : f32,
+};
+var<push_constant> u : S;
+
+@fragment
+fn main() {
+  let f = u.f;
+}
+)";
+    auto* expect = R"(
+enable chromium_experimental_push_constant;
+
+@internal(spirv_block)
+struct S {
+  f : f32,
+}
+
+var<push_constant> u : S;
+
+@fragment
+fn main() {
+  let f = u.f;
+}
+)";
+
+    auto got = Run<AddSpirvBlockAttribute>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(AddSpirvBlockAttributeTest, Nested_OuterBuffer_InnerNotBuffer) {
     auto* src = R"(
 struct Inner {

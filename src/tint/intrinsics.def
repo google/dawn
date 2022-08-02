@@ -49,6 +49,8 @@ enum extension {
   chromium_experimental_dp4a
   // A Chromium-specific extension for disabling uniformity analysis.
   chromium_disable_uniformity_analysis
+  // A Chromium-specific extension for push constants
+  chromium_experimental_push_constant
 }
 
 // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
@@ -59,6 +61,7 @@ enum storage_class {
   workgroup
   uniform
   storage
+  push_constant
   @internal handle
   @internal in
   @internal out

@@ -45,6 +45,7 @@ static constexpr Case kValidCases[] = {
     {"f16", Extension::kF16},
     {"chromium_experimental_dp4a", Extension::kChromiumExperimentalDp4A},
     {"chromium_disable_uniformity_analysis", Extension::kChromiumDisableUniformityAnalysis},
+    {"chromium_experimental_push_constant", Extension::kChromiumExperimentalPushConstant},
 };
 
 static constexpr Case kInvalidCases[] = {
@@ -57,6 +58,9 @@ static constexpr Case kInvalidCases[] = {
     {"chromiumppdisableqquniformity_aalysHHs", Extension::kInvalid},
     {"chromiu_disable_unifovmitc_analyi", Extension::kInvalid},
     {"chromium_diable_uGbformity_analysis", Extension::kInvalid},
+    {"chvomium_experimental_push_constiint", Extension::kInvalid},
+    {"chromiu8WWexperimental_push_constant", Extension::kInvalid},
+    {"chromium_experiMental_push_costanxx", Extension::kInvalid},
 };
 
 using ExtensionParseTest = testing::TestWithParam<Case>;

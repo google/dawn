@@ -36,6 +36,7 @@ enum class Extension {
     kF16,
     kChromiumExperimentalDp4A,
     kChromiumDisableUniformityAnalysis,
+    kChromiumExperimentalPushConstant,
 };
 
 /// @param out the std::ostream to write to

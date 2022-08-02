@@ -306,6 +306,129 @@ TEST_F(ResolverEntryPointValidationTest, VertexShaderMustReturnPosition) {
               "in its return type");
 }
 
+TEST_F(ResolverEntryPointValidationTest, PushConstantAllowedWithEnable) {
+    // enable chromium_experimental_push_constant;
+    // var<push_constant> a : u32;
+    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    GlobalVar("a", ty.u32(), ast::StorageClass::kPushConstant);
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverEntryPointValidationTest, PushConstantDisallowedWithoutEnable) {
+    // var<push_constant> a : u32;
+    GlobalVar(Source{{1, 2}}, "a", ty.u32(), ast::StorageClass::kPushConstant);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "1:2 error: use of variable storage class 'push_constant' requires enabling "
+              "extension 'chromium_experimental_push_constant'");
+}
+
+TEST_F(ResolverEntryPointValidationTest, PushConstantAllowedWithIgnoreStorageClassAttribute) {
+    // var<push_constant> a : u32; // With ast::DisabledValidation::kIgnoreStorageClass
+    GlobalVar("a", ty.u32(), ast::StorageClass::kPushConstant,
+              ast::AttributeList{Disable(ast::DisabledValidation::kIgnoreStorageClass)});
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverEntryPointValidationTest, PushConstantOneVariableUsedInEntryPoint) {
+    // enable chromium_experimental_push_constant;
+    // var<push_constant> a : u32;
+    // @compute @workgroup_size(1) fn main() {
+    //   _ = a;
+    // }
+    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    GlobalVar("a", ty.u32(), ast::StorageClass::kPushConstant);
+
+    Func("main", {}, ty.void_(), {Assign(Phony(), "a")},
+         {Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
+TEST_F(ResolverEntryPointValidationTest, PushConstantTwoVariablesUsedInEntryPoint) {
+    // enable chromium_experimental_push_constant;
+    // var<push_constant> a : u32;
+    // var<push_constant> b : u32;
+    // @compute @workgroup_size(1) fn main() {
+    //   _ = a;
+    //   _ = b;
+    // }
+    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    GlobalVar(Source{{1, 2}}, "a", ty.u32(), ast::StorageClass::kPushConstant);
+    GlobalVar(Source{{3, 4}}, "b", ty.u32(), ast::StorageClass::kPushConstant);
+
+    Func(Source{{5, 6}}, "main", {}, ty.void_(), {Assign(Phony(), "a"), Assign(Phony(), "b")},
+         {Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(5:6 error: entry point 'main' uses two different 'push_constant' variables.
+3:4 note: first 'push_constant' variable declaration is here
+1:2 note: second 'push_constant' variable declaration is here)");
+}
+
+TEST_F(ResolverEntryPointValidationTest,
+       PushConstantTwoVariablesUsedInEntryPointWithFunctionGraph) {
+    // enable chromium_experimental_push_constant;
+    // var<push_constant> a : u32;
+    // var<push_constant> b : u32;
+    // fn uses_a() {
+    //   _ = a;
+    // }
+    // fn uses_b() {
+    //   _ = b;
+    // }
+    // @compute @workgroup_size(1) fn main() {
+    //   uses_a();
+    //   uses_b();
+    // }
+    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    GlobalVar(Source{{1, 2}}, "a", ty.u32(), ast::StorageClass::kPushConstant);
+    GlobalVar(Source{{3, 4}}, "b", ty.u32(), ast::StorageClass::kPushConstant);
+
+    Func(Source{{5, 6}}, "uses_a", {}, ty.void_(), {Assign(Phony(), "a")});
+    Func(Source{{7, 8}}, "uses_b", {}, ty.void_(), {Assign(Phony(), "b")});
+
+    Func(Source{{9, 10}}, "main", {}, ty.void_(),
+         {CallStmt(Call("uses_a")), CallStmt(Call("uses_b"))},
+         {Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(9:10 error: entry point 'main' uses two different 'push_constant' variables.
+3:4 note: first 'push_constant' variable declaration is here
+7:8 note: called by function 'uses_b'
+9:10 note: called by entry point 'main'
+1:2 note: second 'push_constant' variable declaration is here
+5:6 note: called by function 'uses_a'
+9:10 note: called by entry point 'main')");
+}
+
+TEST_F(ResolverEntryPointValidationTest, PushConstantTwoVariablesUsedInDifferentEntryPoint) {
+    // enable chromium_experimental_push_constant;
+    // var<push_constant> a : u32;
+    // var<push_constant> b : u32;
+    // @compute @workgroup_size(1) fn uses_a() {
+    //   _ = a;
+    // }
+    // @compute @workgroup_size(1) fn uses_b() {
+    //   _ = a;
+    // }
+    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    GlobalVar("a", ty.u32(), ast::StorageClass::kPushConstant);
+    GlobalVar("b", ty.u32(), ast::StorageClass::kPushConstant);
+
+    Func("uses_a", {}, ty.void_(), {Assign(Phony(), "a")},
+         {Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
+    Func("uses_b", {}, ty.void_(), {Assign(Phony(), "b")},
+         {Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
+
+    EXPECT_TRUE(r()->Resolve());
+}
+
 namespace TypeValidationTests {
 struct Params {
     builder::ast_type_func_ptr create_ast_type;

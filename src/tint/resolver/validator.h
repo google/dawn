@@ -116,6 +116,11 @@ class Validator {
     /// @returns true on success, false otherwise.
     bool PipelineStages(const std::vector<sem::Function*>& entry_points) const;
 
+    /// Validates push_constant variables
+    /// @param entry_points the entry points to the module
+    /// @returns true on success, false otherwise.
+    bool PushConstants(const std::vector<sem::Function*>& entry_points) const;
+
     /// Validates aliases
     /// @param alias the alias to validate
     /// @returns true on success, false otherwise.
@@ -433,8 +438,11 @@ class Validator {
     /// Validates a storage class layout
     /// @param var the variable to validate
     /// @param layouts previously validated storage layouts
+    /// @param enabled_extensions all the extensions declared in current module
     /// @returns true on success, false otherwise.
-    bool StorageClassLayout(const sem::Variable* var, ValidTypeStorageLayouts& layouts) const;
+    bool StorageClassLayout(const sem::Variable* var,
+                            const ast::Extensions& enabled_extensions,
+                            ValidTypeStorageLayouts& layouts) const;
 
     /// @returns true if the attribute list contains a
     /// ast::DisableValidationAttribute with the validation mode equal to

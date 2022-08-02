@@ -58,7 +58,8 @@ void AddSpirvBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) co
     for (auto* var : ctx.src->AST().Globals<ast::Var>()) {
         auto* sem_var = sem.Get<sem::GlobalVariable>(var);
         if (var->declared_storage_class != ast::StorageClass::kStorage &&
-            var->declared_storage_class != ast::StorageClass::kUniform) {
+            var->declared_storage_class != ast::StorageClass::kUniform &&
+            var->declared_storage_class != ast::StorageClass::kPushConstant) {
             continue;
         }
 

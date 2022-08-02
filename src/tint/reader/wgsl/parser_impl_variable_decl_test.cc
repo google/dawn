@@ -88,6 +88,17 @@ TEST_F(ParserImplTest, VariableDecl_WithStorageClass) {
     EXPECT_EQ(v->source.range.end.column, 20u);
 }
 
+TEST_F(ParserImplTest, VariableDecl_WithPushConstant) {
+    auto p = parser("var<push_constant> my_var : f32");
+    auto v = p->variable_decl();
+    EXPECT_TRUE(v.matched);
+    EXPECT_FALSE(v.errored);
+    EXPECT_FALSE(p->has_error());
+    EXPECT_EQ(v->name, "my_var");
+    EXPECT_TRUE(v->type->Is<ast::F32>());
+    EXPECT_EQ(v->storage_class, ast::StorageClass::kPushConstant);
+}
+
 TEST_F(ParserImplTest, VariableDecl_InvalidStorageClass) {
     auto p = parser("var<unknown> my_var : f32");
     auto v = p->variable_decl();

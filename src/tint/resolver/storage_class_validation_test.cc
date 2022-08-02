@@ -598,5 +598,89 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferStructI32Aliases) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverStorageClassValidationTest, PushConstantBool) {
+    // enable chromium_experimental_push_constant;
+    // var<push_constant> g : bool;
+    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    GlobalVar(Source{{56, 78}}, "g", ty.bool_(), ast::StorageClass::kPushConstant);
+
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(56:78 error: Type 'bool' cannot be used in storage class 'push_constant' as it is non-host-shareable
+56:78 note: while instantiating 'var' g)");
+}
+
+TEST_F(ResolverStorageClassValidationTest, PushConstantF16) {
+    // enable chromium_experimental_push_constant;
+    // enable f16;
+    // var<push_constant> g : f16;
+    Enable(ast::Extension::kF16);
+    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    GlobalVar("g", ty.f16(Source{{56, 78}}), ast::StorageClass::kPushConstant);
+
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "56:78 error: using f16 types in 'push_constant' storage class is not "
+              "implemented yet");
+}
+
+TEST_F(ResolverStorageClassValidationTest, PushConstantPointer) {
+    // enable chromium_experimental_push_constant;
+    // var<push_constant> g : ptr<private, f32>;
+    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    GlobalVar(Source{{56, 78}}, "g", ty.pointer(ty.f32(), ast::StorageClass::kPrivate),
+              ast::StorageClass::kPushConstant);
+
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(56:78 error: Type 'ptr<private, f32, read_write>' cannot be used in storage class 'push_constant' as it is non-host-shareable
+56:78 note: while instantiating 'var' g)");
+}
+
+TEST_F(ResolverStorageClassValidationTest, PushConstantIntScalar) {
+    // enable chromium_experimental_push_constant;
+    // var<push_constant> g : i32;
+    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    GlobalVar("g", ty.i32(), ast::StorageClass::kPushConstant);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverStorageClassValidationTest, PushConstantVectorF32) {
+    // enable chromium_experimental_push_constant;
+    // var<push_constant> g : vec4<f32>;
+    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    GlobalVar("g", ty.vec4<f32>(), ast::StorageClass::kPushConstant);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverStorageClassValidationTest, PushConstantArrayF32) {
+    // enable chromium_experimental_push_constant;
+    // struct S { a : f32}
+    // var<push_constant> g : array<S, 3u>;
+    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    auto* s = Structure("S", {Member("a", ty.f32())});
+    auto* a = ty.array(ty.Of(s), 3_u);
+    GlobalVar("g", a, ast::StorageClass::kPushConstant);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverStorageClassValidationTest, PushConstantWithInitializer) {
+    // enable chromium_experimental_push_constant;
+    // var<push_constant> a : u32 = 0u;
+    Enable(ast::Extension::kChromiumExperimentalPushConstant);
+    GlobalVar(Source{{1u, 2u}}, "a", ty.u32(), ast::StorageClass::kPushConstant,
+              Expr(Source{{3u, 4u}}, u32(0)));
+
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(1:2 error: var of storage class 'push_constant' cannot have an initializer. var initializers are only supported for the storage classes 'private' and 'function')");
+}
+
 }  // namespace
 }  // namespace tint::resolver

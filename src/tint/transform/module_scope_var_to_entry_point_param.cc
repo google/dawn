@@ -26,6 +26,7 @@
 #include "src/tint/sem/module.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/utils/string.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ModuleScopeVarToEntryPointParam);
 
@@ -191,9 +192,16 @@ struct ModuleScopeVarToEntryPointParam::State {
 
                 break;
             }
+            case ast::StorageClass::kPushConstant: {
+                ctx.dst->Diagnostics().add_error(
+                    diag::System::Transform,
+                    "unhandled module-scope storage class (" + utils::ToString(sc) + ")");
+                break;
+            }
             default: {
                 TINT_ICE(Transform, ctx.dst->Diagnostics())
                     << "unhandled module-scope storage class (" << sc << ")";
+                break;
             }
         }
     }
@@ -219,6 +227,12 @@ struct ModuleScopeVarToEntryPointParam::State {
             case ast::StorageClass::kHandle:
             case ast::StorageClass::kWorkgroup:
                 break;
+            case ast::StorageClass::kPushConstant: {
+                ctx.dst->Diagnostics().add_error(
+                    diag::System::Transform,
+                    "unhandled module-scope storage class (" + utils::ToString(sc) + ")");
+                break;
+            }
             default: {
                 TINT_ICE(Transform, ctx.dst->Diagnostics())
                     << "unhandled module-scope storage class (" << sc << ")";

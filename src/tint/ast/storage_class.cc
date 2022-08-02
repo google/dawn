@@ -43,6 +43,9 @@ StorageClass ParseStorageClass(std::string_view str) {
     if (str == "storage") {
         return StorageClass::kStorage;
     }
+    if (str == "push_constant") {
+        return StorageClass::kPushConstant;
+    }
     return StorageClass::kInvalid;
 }
 
@@ -62,6 +65,8 @@ std::ostream& operator<<(std::ostream& out, StorageClass value) {
             return out << "uniform";
         case StorageClass::kStorage:
             return out << "storage";
+        case StorageClass::kPushConstant:
+            return out << "push_constant";
         case StorageClass::kHandle:
             return out << "handle";
         case StorageClass::kIn:

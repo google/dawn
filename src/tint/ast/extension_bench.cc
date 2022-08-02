@@ -52,6 +52,13 @@ void ExtensionParser(::benchmark::State& state) {
         "chromiuE_disable_uniformity_analysis",
         "chromium_disable_uniTTormity_aPPalsis",
         "ddhromium_disabexxuniformity_analysis",
+        "c44romium_experimental_push_constant",
+        "chromium_experimental_pSSsVV_constant",
+        "chrom22Rm_experimental_pushRonstant",
+        "chromium_experimental_push_constant",
+        "chromium_exp9rimFntal_ush_constant",
+        "chrmium_experimental_push_constant",
+        "cOOromium_experiVeHtal_puh_conRRtant",
     };
     for (auto _ : state) {
         for (auto& str : kStrings) {
