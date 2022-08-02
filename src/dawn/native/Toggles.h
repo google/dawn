@@ -59,7 +59,6 @@ enum class Toggle {
     EmitHLSLDebugSymbols,
     DisallowSpirv,
     DumpShaders,
-    DEPRECATED_DumpTranslatedShaders,  // Use DumpShaders
     ForceWGSLStep,
     DisableWorkgroupInit,
     DisableSymbolRenaming,
