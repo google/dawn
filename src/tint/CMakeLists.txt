@@ -809,6 +809,7 @@ if(TINT_BUILD_TESTS)
     resolver/resolver_test_helper.h
     resolver/resolver_test.cc
     resolver/side_effects_test.cc
+    resolver/static_assert_test.cc
     resolver/source_variable_test.cc
     resolver/storage_class_layout_validation_test.cc
     resolver/storage_class_validation_test.cc

@@ -847,6 +847,7 @@ class UniformityGraph {
                     return cfx;
                 }
             },
+
             [&](const ast::ReturnStatement* r) {
                 Node* cf_ret;
                 if (r->value) {
@@ -870,6 +871,7 @@ class UniformityGraph {
 
                 return cf_ret;
             },
+
             [&](const ast::SwitchStatement* s) {
                 auto* sem_switch = sem_.Get(s);
                 auto [cfx, v_cond] = ProcessExpression(cf, s->condition);
@@ -938,6 +940,7 @@ class UniformityGraph {
 
                 return cf_end ? cf_end : cf;
             },
+
             [&](const ast::VariableDeclStatement* decl) {
                 Node* node;
                 if (decl->variable->constructor) {
@@ -956,6 +959,11 @@ class UniformityGraph {
 
                 return cf;
             },
+
+            [&](const ast::StaticAssert*) {
+                return cf;  // No impact on uniformity
+            },
+
             [&](Default) {
                 TINT_ICE(Resolver, diagnostics_)
                     << "unknown statement type: " << std::string(stmt->TypeInfo().name);

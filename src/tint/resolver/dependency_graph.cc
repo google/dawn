@@ -204,6 +204,7 @@ class DependencyScanner {
             [&](const ast::Enable*) {
                 // Enable directives do not effect the dependency graph.
             },
+            [&](const ast::StaticAssert* assertion) { TraverseExpression(assertion->condition); },
             [&](Default) { UnhandledNode(diagnostics_, global->node); });
     }
 
@@ -315,6 +316,7 @@ class DependencyScanner {
                 TraverseExpression(w->condition);
                 TraverseStatement(w->body);
             },
+            [&](const ast::StaticAssert* assertion) { TraverseExpression(assertion->condition); },
             [&](Default) {
                 if (!stmt->IsAnyOf<ast::BreakStatement, ast::ContinueStatement,
                                    ast::DiscardStatement, ast::FallthroughStatement>()) {
@@ -515,6 +517,8 @@ struct DependencyAnalysis {
             [&](const ast::TypeDecl* td) { return td->name; },
             [&](const ast::Function* func) { return func->symbol; },
             [&](const ast::Variable* var) { return var->symbol; },
+            [&](const ast::Enable*) { return Symbol(); },
+            [&](const ast::StaticAssert*) { return Symbol(); },
             [&](Default) {
                 UnhandledNode(diagnostics_, node);
                 return Symbol{};
@@ -533,11 +537,12 @@ struct DependencyAnalysis {
     /// declaration
     std::string KindOf(const ast::Node* node) {
         return Switch(
-            node,                                               //
-            [&](const ast::Struct*) { return "struct"; },       //
-            [&](const ast::Alias*) { return "alias"; },         //
-            [&](const ast::Function*) { return "function"; },   //
-            [&](const ast::Variable* v) { return v->Kind(); },  //
+            node,                                                       //
+            [&](const ast::Struct*) { return "struct"; },               //
+            [&](const ast::Alias*) { return "alias"; },                 //
+            [&](const ast::Function*) { return "function"; },           //
+            [&](const ast::Variable* v) { return v->Kind(); },          //
+            [&](const ast::StaticAssert*) { return "static_assert"; },  //
             [&](Default) {
                 UnhandledNode(diagnostics_, node);
                 return "<error>";
@@ -549,9 +554,8 @@ struct DependencyAnalysis {
     void GatherGlobals(const ast::Module& module) {
         for (auto* node : module.GlobalDeclarations()) {
             auto* global = allocator_.Create(node);
-            // Enable directives do not form a symbol. Skip them.
-            if (!node->Is<ast::Enable>()) {
-                globals_.emplace(SymbolOf(node), global);
+            if (auto symbol = SymbolOf(node); symbol.IsValid()) {
+                globals_.emplace(symbol, global);
             }
             declaration_order_.emplace_back(global);
         }

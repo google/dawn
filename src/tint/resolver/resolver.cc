@@ -140,6 +140,7 @@ bool Resolver::ResolveInternal() {
                 [&](const ast::TypeDecl* td) { return TypeDecl(td); },
                 [&](const ast::Function* func) { return Function(func); },
                 [&](const ast::Variable* var) { return GlobalVariable(var); },
+                [&](const ast::StaticAssert* sa) { return StaticAssert(sa); },
                 [&](Default) {
                     TINT_UNREACHABLE(Resolver, diagnostics_)
                         << "unhandled global declaration: " << decl->TypeInfo().name;
@@ -737,6 +738,33 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
     return sem;
 }
 
+sem::Statement* Resolver::StaticAssert(const ast::StaticAssert* assertion) {
+    auto* expr = Expression(assertion->condition);
+    if (!expr) {
+        return nullptr;
+    }
+    auto* cond = expr->ConstantValue();
+    if (!cond) {
+        AddError("static assertion condition must be a constant expression",
+                 assertion->condition->source);
+        return nullptr;
+    }
+    if (auto* ty = cond->Type(); !ty->Is<sem::Bool>()) {
+        AddError(
+            "static assertion condition must be a bool, got '" + builder_->FriendlyName(ty) + "'",
+            assertion->condition->source);
+        return nullptr;
+    }
+    if (!cond->As<bool>()) {
+        AddError("static assertion failed", assertion->source);
+        return nullptr;
+    }
+    auto* sem =
+        builder_->create<sem::Statement>(assertion, current_compound_statement_, current_function_);
+    builder_->Sem().Add(assertion, sem);
+    return sem;
+}
+
 sem::Function* Resolver::Function(const ast::Function* decl) {
     uint32_t parameter_index = 0;
     std::unordered_map<Symbol, Source> parameter_names;
@@ -1042,6 +1070,7 @@ sem::Statement* Resolver::Statement(const ast::Statement* stmt) {
         [&](const ast::IncrementDecrementStatement* i) { return IncrementDecrementStatement(i); },
         [&](const ast::ReturnStatement* r) { return ReturnStatement(r); },
         [&](const ast::VariableDeclStatement* v) { return VariableDeclStatement(v); },
+        [&](const ast::StaticAssert* sa) { return StaticAssert(sa); },
 
         // Error cases
         [&](const ast::CaseStatement*) {

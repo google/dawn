@@ -1126,6 +1126,7 @@ if (tint_build_unittests) {
       "resolver/resolver_test_helper.cc",
       "resolver/resolver_test_helper.h",
       "resolver/side_effects_test.cc",
+      "resolver/static_assert_test.cc",
       "resolver/source_variable_test.cc",
       "resolver/storage_class_layout_validation_test.cc",
       "resolver/storage_class_validation_test.cc",
