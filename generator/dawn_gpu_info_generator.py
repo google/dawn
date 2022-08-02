@@ -19,6 +19,12 @@ from collections import namedtuple
 from generator_lib import Generator, run_generator, FileRender
 
 
+def parse_mask(mask):
+    if mask:
+        return int(mask, 0)
+    return 0xffffffff
+
+
 class Name:
     def __init__(self, name):
         self.name = name
@@ -59,11 +65,70 @@ class Name:
 
 
 class Architecture:
-    def __init__(self, name, json_data):
+    def __init__(self, name, json_data, mask):
         self.name = Name(name)
         self.devices = []
+
+        mask_num = parse_mask(mask)
+
         for device in json_data:
+            device_num = int(device, 0)
+
+            # Don't allow duplicate entries
+            assert device not in self.devices, 'Architecture "{}" contained duplicate deviceID "{}"'.format(
+                self.name.get(), device)
+            # Ensure that all device IDs don't contain bits outside the mask
+            assert device_num & mask_num == device_num, 'Architecture "{}" contained deviceID "{}" which doesn\'t match the given mask of "{}"'.format(
+                self.name.get(), device, mask)
+
             self.devices.append(device)
+
+
+class DeviceSet:
+    def __init__(self, json_data):
+        self.mask = None
+        self.internal = False
+
+        if 'mask' in json_data:
+            self.mask = json_data['mask']
+
+        if 'internal' in json_data:
+            self.internal = json_data['internal']
+
+        self.architectures = []
+        if 'architecture' in json_data:
+            for (arch_name, arch_data) in json_data['architecture'].items():
+                # Skip any entries that start with an underscore. Used for comments.
+                if arch_name[0] == '_':
+                    continue
+
+                architecture = Architecture(arch_name, arch_data, self.mask)
+
+                # Validate that deviceIDs are only allowed to be in one Architecture at a time
+                for other_architecture in self.architectures:
+                    for device in architecture.devices:
+                        assert device not in other_architecture.devices, 'Architectures "{}" and "{}" both contain deviceID "{}"'.format(
+                            architecture.name.get(),
+                            other_architecture.name.get(), device)
+
+                self.architectures.append(architecture)
+
+    def validate_devices(self, other_devices, other_mask):
+        combined_mask = parse_mask(self.mask) & parse_mask(other_mask)
+
+        for other_device in other_devices:
+            other_device_num = int(other_device, 0) & combined_mask
+            for architecture in self.architectures:
+                for device in architecture.devices:
+                    device_num = int(device, 0) & combined_mask
+                    assert device_num != other_device_num, 'DeviceID "{}" & mask "{}" conflicts with deviceId "{}" & mask "{}" in architecture "{}"'.format(
+                        other_device, other_mask, device, self.mask,
+                        architecture.name.get())
+
+    def maskDeviceId(self):
+        if not self.mask:
+            return ''
+        return ' & ' + self.mask
 
 
 class Vendor:
@@ -71,33 +136,65 @@ class Vendor:
         self.name = Name(name)
         self.id = json_data['id']
 
-        self.deviceMask = None
-        if 'deviceMask' in json_data:
-            self.deviceMask = json_data['deviceMask']
+        architecture_dict = {}
+        internal_architecture_dict = {}
 
-        self.architectures = []
+        self.device_sets = []
+        if 'devices' in json_data:
+            for device_data in json_data['devices']:
+                device_set = DeviceSet(device_data)
 
-        if 'architecture' in json_data:
-            for (arch_name, arch_data) in json_data['architecture'].items():
-                # Skip any entries that start with an underscore. Used for comments.
-                if arch_name[0] == '_':
-                    continue
+                for architecture in device_set.architectures:
 
-                self.architectures.append(Architecture(arch_name, arch_data))
+                    # Validate that deviceIDs are unique across device sets
+                    for other_device_set in self.device_sets:
+                        # Only validate device IDs between internal and public device sets.
+                        if other_device_set.internal == device_set.internal:
+                            assert device_set.mask != other_device_set.mask, 'Vendor "{}" contained duplicate device masks "{}"'.format(
+                                self.name.get(), device_set.mask)
+                            other_device_set.validate_devices(
+                                architecture.devices, device_set.mask)
 
-    def maskDeviceId(self):
-        if not self.deviceMask:
-            return ''
-        return ' & ' + self.deviceMask
+                        # Validate that architecture names are unique between internal and public device sets.
+                        else:
+                            for other_architecture in other_device_set.architectures:
+                                assert architecture.name.canonical_case(
+                                ) != other_architecture.name.canonical_case(
+                                ), '"{}" is defined as both an internal and public architecture'.format(
+                                    architecture.name.get())
+
+                    if device_set.internal:
+                        internal_architecture_dict[
+                            architecture.name.canonical_case(
+                            )] = architecture.name
+                    else:
+                        architecture_dict[architecture.name.canonical_case(
+                        )] = architecture.name
+
+                self.device_sets.append(device_set)
+
+        # List of unique architecture names under this vendor
+        self.architecture_names = architecture_dict.values()
+        self.internal_architecture_names = internal_architecture_dict.values()
 
 
 def parse_json(json):
     vendors = []
+    internal_architecture_count = 0
 
-    for (vendor, vendor_data) in json['vendors'].items():
-        vendors.append(Vendor(vendor, vendor_data))
+    for (vendor_name, vendor_data) in json['vendors'].items():
+        # Skip vendors that have a leading underscore. Those are intended to be "comments".
+        if vendor_name[0] == '_':
+            continue
 
-    return {'vendors': vendors}
+        vendor = Vendor(vendor_name, vendor_data)
+        vendors.append(vendor)
+        internal_architecture_count += len(vendor.internal_architecture_names)
+
+    return {
+        'vendors': vendors,
+        'has_internal': internal_architecture_count > 0
+    }
 
 
 class DawnGpuInfoGenerator(Generator):

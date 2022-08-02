@@ -35,11 +35,14 @@ namespace gpu_info {
 
 // Architecture checks
 {% for vendor in vendors %}
-    {% if len(vendor.architectures) %}
+    {% if len(vendor.architecture_names) %}
 
         // {{vendor.name.get()}} architectures
-        {% for architecture in vendor.architectures %}
-            bool Is{{vendor.name.CamelCase()}}{{architecture.name.CamelCase()}}(PCIVendorID vendorId, PCIDeviceID deviceId);
+        {% for architecture_name in vendor.architecture_names %}
+            bool Is{{vendor.name.CamelCase()}}{{architecture_name.CamelCase()}}(PCIVendorID vendorId, PCIDeviceID deviceId);
+        {% endfor %}
+        {% for architecture_name in vendor.internal_architecture_names %}
+            bool Is{{vendor.name.CamelCase()}}{{architecture_name.CamelCase()}}(PCIVendorID vendorId, PCIDeviceID deviceId);
         {% endfor %}
     {% endif %}
 {% endfor %}

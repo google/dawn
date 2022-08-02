@@ -28,8 +28,8 @@ namespace {
 enum class Architecture {
     Unknown,
     {% for vendor in vendors %}
-        {% for architecture in vendor.architectures %}
-            {{vendor.name.CamelCase()}}_{{architecture.name.CamelCase()}},
+        {% for architecture_name in vendor.architecture_names %}
+            {{vendor.name.CamelCase()}}_{{architecture_name.CamelCase()}},
         {% endfor %}
     {% endfor %}
 };
@@ -37,17 +37,20 @@ enum class Architecture {
 Architecture GetArchitecture(PCIVendorID vendorId, PCIDeviceID deviceId) {
     switch(vendorId) {
         {% for vendor in vendors %}
-            {% if len(vendor.architectures) %}
-
+            {% if len(vendor.device_sets) %}
                 case kVendorID_{{vendor.name.CamelCase()}}: {
-                    switch (deviceId{{vendor.maskDeviceId()}}) {
-                        {% for architecture in vendor.architectures %}
-                            {% for device in architecture.devices %}
-                                case {{device}}:
-                            {% endfor %}
-                                return Architecture::{{vendor.name.CamelCase()}}_{{architecture.name.CamelCase()}};
-                        {% endfor %}
-                    }
+                    {% for device_set in vendor.device_sets %}
+                        {% if not device_set.internal %}
+                            switch (deviceId{{device_set.maskDeviceId()}}) {
+                                {% for architecture in device_set.architectures %}
+                                    {% for device in architecture.devices %}
+                                        case {{device}}:
+                                    {% endfor %}
+                                        return Architecture::{{vendor.name.CamelCase()}}_{{architecture.name.CamelCase()}};
+                                {% endfor %}
+                            }
+                        {% endif %}
+                    {% endfor %}
                 } break;
             {% endif %}
         {% endfor %}
@@ -55,6 +58,44 @@ Architecture GetArchitecture(PCIVendorID vendorId, PCIDeviceID deviceId) {
 
     return Architecture::Unknown;
 }
+
+{% if has_internal %}
+
+    enum class InternalArchitecture {
+        Unknown,
+        {% for vendor in vendors %}
+            {% for architecture_name in vendor.internal_architecture_names %}
+                {{vendor.name.CamelCase()}}_{{architecture_name.CamelCase()}},
+            {% endfor %}
+        {% endfor %}
+    };
+
+    InternalArchitecture GetInternalArchitecture(PCIVendorID vendorId, PCIDeviceID deviceId) {
+        switch(vendorId) {
+            {% for vendor in vendors %}
+                {% if len(vendor.device_sets) %}
+                    case kVendorID_{{vendor.name.CamelCase()}}: {
+                        {% for device_set in vendor.device_sets %}
+                            {% if device_set.internal %}
+                                switch (deviceId{{device_set.maskDeviceId()}}) {
+                                    {% for architecture in device_set.architectures %}
+                                        {% for device in architecture.devices %}
+                                            case {{device}}:
+                                        {% endfor %}
+                                            return InternalArchitecture::{{vendor.name.CamelCase()}}_{{architecture.name.CamelCase()}};
+                                    {% endfor %}
+                                }
+                            {% endif %}
+                        {% endfor %}
+                    } break;
+                {% endif %}
+            {% endfor %}
+        }
+
+        return InternalArchitecture::Unknown;
+    }
+
+{% endif %}
 
 }  // namespace
 
@@ -68,11 +109,16 @@ Architecture GetArchitecture(PCIVendorID vendorId, PCIDeviceID deviceId) {
 // Architecture checks
 
 {% for vendor in vendors %}
-    {% if len(vendor.architectures) %}
+    {% if len(vendor.architecture_names) %}
         // {{vendor.name.get()}} architectures
-        {% for architecture in vendor.architectures %}
-            bool Is{{vendor.name.CamelCase()}}{{architecture.name.CamelCase()}}(PCIVendorID vendorId, PCIDeviceID deviceId) {
-                return GetArchitecture(vendorId, deviceId) == Architecture::{{vendor.name.CamelCase()}}_{{architecture.name.CamelCase()}};
+        {% for architecture_name in vendor.architecture_names %}
+            bool Is{{vendor.name.CamelCase()}}{{architecture_name.CamelCase()}}(PCIVendorID vendorId, PCIDeviceID deviceId) {
+                return GetArchitecture(vendorId, deviceId) == Architecture::{{vendor.name.CamelCase()}}_{{architecture_name.CamelCase()}};
+            }
+        {% endfor %}
+        {% for architecture_name in vendor.internal_architecture_names %}
+            bool Is{{vendor.name.CamelCase()}}{{architecture_name.CamelCase()}}(PCIVendorID vendorId, PCIDeviceID deviceId) {
+                return GetInternalArchitecture(vendorId, deviceId) == InternalArchitecture::{{vendor.name.CamelCase()}}_{{architecture_name.CamelCase()}};
             }
         {% endfor %}
     {% endif %}
@@ -95,9 +141,9 @@ std::string GetArchitectureName(PCIVendorID vendorId, PCIDeviceID deviceId) {
         case Architecture::Unknown:
             return "";
         {% for vendor in vendors %}
-            {% for architecture in vendor.architectures %}
-                case Architecture::{{vendor.name.CamelCase()}}_{{architecture.name.CamelCase()}}:
-                    return "{{architecture.name.js_enum_case()}}";
+            {% for architecture_name in vendor.architecture_names %}
+                case Architecture::{{vendor.name.CamelCase()}}_{{architecture_name.CamelCase()}}:
+                    return "{{architecture_name.js_enum_case()}}";
             {% endfor %}
         {% endfor %}
     }
