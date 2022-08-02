@@ -70,6 +70,7 @@
 #include "src/tint/ast/sampled_texture.h"
 #include "src/tint/ast/sampler.h"
 #include "src/tint/ast/stage_attribute.h"
+#include "src/tint/ast/static_assert.h"
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/stride_attribute.h"
 #include "src/tint/ast/struct_member_align_attribute.h"
@@ -1820,6 +1821,42 @@ class ProgramBuilder {
                                           std::move(attributes));
         AST().AddGlobalVariable(var);
         return var;
+    }
+
+    /// @param source the source information
+    /// @param condition the assertion condition
+    /// @returns a new `ast::StaticAssert`, which is automatically registered as a global statement
+    /// with the ast::Module.
+    template <typename EXPR>
+    const ast::StaticAssert* GlobalStaticAssert(const Source& source, EXPR&& condition) {
+        auto* sa = StaticAssert(source, std::forward<EXPR>(condition));
+        AST().AddStaticAssert(sa);
+        return sa;
+    }
+
+    /// @param condition the assertion condition
+    /// @returns a new `ast::StaticAssert`, which is automatically registered as a global statement
+    /// with the ast::Module.
+    template <typename EXPR, typename = DisableIfSource<EXPR>>
+    const ast::StaticAssert* GlobalStaticAssert(EXPR&& condition) {
+        auto* sa = StaticAssert(std::forward<EXPR>(condition));
+        AST().AddStaticAssert(sa);
+        return sa;
+    }
+
+    /// @param source the source information
+    /// @param condition the assertion condition
+    /// @returns a new `ast::StaticAssert` with the given assertion condition
+    template <typename EXPR>
+    const ast::StaticAssert* StaticAssert(const Source& source, EXPR&& condition) {
+        return create<ast::StaticAssert>(source, Expr(std::forward<EXPR>(condition)));
+    }
+
+    /// @param condition the assertion condition
+    /// @returns a new `ast::StaticAssert` with the given assertion condition
+    template <typename EXPR, typename = DisableIfSource<EXPR>>
+    const ast::StaticAssert* StaticAssert(EXPR&& condition) {
+        return create<ast::StaticAssert>(Expr(std::forward<EXPR>(condition)));
     }
 
     /// @param source the source information

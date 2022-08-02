@@ -19,6 +19,7 @@
 
 #include "src/tint/ast/enable.h"
 #include "src/tint/ast/function.h"
+#include "src/tint/ast/static_assert.h"
 #include "src/tint/ast/type.h"
 #include "src/tint/utils/vector.h"
 
@@ -53,11 +54,7 @@ class Module final : public Castable<Module, Node> {
     /// @returns the declaration-ordered global declarations for the module
     const auto& GlobalDeclarations() const { return global_declarations_; }
 
-    /// Add a enable directive to the Builder
-    /// @param ext the enable directive to add
-    void AddEnable(const Enable* ext);
-
-    /// Add a global variable to the Builder
+    /// Add a global variable to the module
     /// @param var the variable to add
     void AddGlobalVariable(const Variable* var);
 
@@ -72,7 +69,7 @@ class Module final : public Castable<Module, Node> {
         return false;
     }
 
-    /// Adds a global declaration to the Builder.
+    /// Adds a global declaration to the module.
     /// @param decl the declaration to add
     void AddGlobalDeclaration(const tint::ast::Node* decl);
 
@@ -95,10 +92,21 @@ class Module final : public Castable<Module, Node> {
         return out;
     }
 
+    /// Add a enable directive to the module
+    /// @param ext the enable directive to add
+    void AddEnable(const Enable* ext);
+
     /// @returns the extension set for the module
     const auto& Enables() const { return enables_; }
 
-    /// Adds a type declaration to the Builder.
+    /// Add a global static assertion to the module
+    /// @param assertion the static assert to add
+    void AddStaticAssert(const StaticAssert* assertion);
+
+    /// @returns the list of global static assertions
+    const auto& StaticAsserts() const { return static_asserts_; }
+
+    /// Adds a type declaration to the module
     /// @param decl the type declaration to add
     void AddTypeDecl(const TypeDecl* decl);
 
@@ -109,7 +117,7 @@ class Module final : public Castable<Module, Node> {
     /// @returns the declared types in the module
     const auto& TypeDecls() const { return type_decls_; }
 
-    /// Add a function to the Builder
+    /// Add a function to the module
     /// @param func the function to add
     void AddFunction(const Function* func);
 
@@ -139,6 +147,7 @@ class Module final : public Castable<Module, Node> {
     FunctionList functions_;
     utils::Vector<const Variable*, 32> global_variables_;
     utils::Vector<const Enable*, 8> enables_;
+    utils::Vector<const StaticAssert*, 8> static_asserts_;
 };
 
 }  // namespace tint::ast

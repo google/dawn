@@ -180,6 +180,8 @@ set(TINT_LIB_SRCS
   ast/stage_attribute.h
   ast/statement.cc
   ast/statement.h
+  ast/static_assert.cc
+  ast/static_assert.h
   ast/storage_class.cc
   ast/storage_class.h
   ast/storage_texture.cc
@@ -742,6 +744,7 @@ if(TINT_BUILD_TESTS)
     ast/sampled_texture_test.cc
     ast/sampler_test.cc
     ast/stage_attribute_test.cc
+    ast/static_assert_test.cc
     ast/storage_class_test.cc
     ast/storage_texture_test.cc
     ast/stride_attribute_test.cc

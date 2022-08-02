@@ -75,6 +75,10 @@ void Module::BinGlobalDeclaration(const tint::ast::Node* decl, diag::List& diags
             TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, enable, program_id);
             enables_.Push(enable);
         },
+        [&](const StaticAssert* assertion) {
+            TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, assertion, program_id);
+            static_asserts_.Push(assertion);
+        },
         [&](Default) { TINT_ICE(AST, diags) << "Unknown global declaration type"; });
 }
 
@@ -90,6 +94,13 @@ void Module::AddGlobalVariable(const ast::Variable* var) {
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, var, program_id);
     global_variables_.Push(var);
     global_declarations_.Push(var);
+}
+
+void Module::AddStaticAssert(const StaticAssert* assertion) {
+    TINT_ASSERT(AST, assertion);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, assertion, program_id);
+    static_asserts_.Push(assertion);
+    global_declarations_.Push(assertion);
 }
 
 void Module::AddTypeDecl(const ast::TypeDecl* type) {
