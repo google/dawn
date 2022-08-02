@@ -310,7 +310,7 @@ bool ParserImpl::Parse() {
 }
 
 // translation_unit
-//  : enable_directive* global_decl* EOF
+//  : global_directive* global_decl* EOF
 void ParserImpl::translation_unit() {
     bool after_global_decl = false;
     while (continue_parsing()) {
@@ -319,17 +319,9 @@ void ParserImpl::translation_unit() {
             break;
         }
 
-        auto ed = enable_directive();
-        if (ed.matched) {
-            if (after_global_decl) {
-                add_error(p, "enable directives must come before all global declarations");
-            }
-        } else if (ed.errored) {
-            // Found a invalid enable directive.
-            continue;
-        } else {
+        auto ed = global_directive(after_global_decl);
+        if (!ed.matched && !ed.errored) {
             auto gd = global_decl();
-
             if (gd.matched) {
                 after_global_decl = true;
             }
@@ -345,6 +337,17 @@ void ParserImpl::translation_unit() {
             break;
         }
     }
+}
+
+// global_directive
+//  : enable_directive
+Maybe<bool> ParserImpl::global_directive(bool have_parsed_decl) {
+    auto& p = peek();
+    auto ed = enable_directive();
+    if (ed.matched && have_parsed_decl) {
+        return add_error(p, "enable directives must come before all global declarations");
+    }
+    return ed;
 }
 
 // enable_directive
