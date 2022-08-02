@@ -137,6 +137,9 @@ class ComputeLayoutMemoryBufferTests
 };
 
 TEST_P(ComputeLayoutMemoryBufferTests, Fields) {
+    // TODO(tint:1632) Re-enable after the bug is fixed for Vulkan.
+    DAWN_SUPPRESS_TEST_IF(IsVulkan());
+
     // Sentinel value markers codes used to check that the start and end of
     // structures are correctly aligned. Each of these codes are distinct and
     // are not likely to be confused with data.
