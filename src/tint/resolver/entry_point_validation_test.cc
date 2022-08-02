@@ -471,7 +471,7 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantDisallowedWithoutEnable) {
 TEST_F(ResolverEntryPointValidationTest, PushConstantAllowedWithIgnoreStorageClassAttribute) {
     // var<push_constant> a : u32; // With ast::DisabledValidation::kIgnoreStorageClass
     GlobalVar("a", ty.u32(), ast::StorageClass::kPushConstant,
-              ast::AttributeList{Disable(ast::DisabledValidation::kIgnoreStorageClass)});
+              utils::Vector{Disable(ast::DisabledValidation::kIgnoreStorageClass)});
 
     EXPECT_TRUE(r()->Resolve());
 }
@@ -485,8 +485,9 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantOneVariableUsedInEntryPoint
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
     GlobalVar("a", ty.u32(), ast::StorageClass::kPushConstant);
 
-    Func("main", {}, ty.void_(), {Assign(Phony(), "a")},
-         {Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
+    Func("main", {}, ty.void_(), utils::Vector{Assign(Phony(), "a")},
+         utils::Vector{Stage(ast::PipelineStage::kCompute),
+                       create<ast::WorkgroupAttribute>(Expr(1_i))});
 
     EXPECT_TRUE(r()->Resolve());
 }
@@ -503,8 +504,10 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantTwoVariablesUsedInEntryPoin
     GlobalVar(Source{{1, 2}}, "a", ty.u32(), ast::StorageClass::kPushConstant);
     GlobalVar(Source{{3, 4}}, "b", ty.u32(), ast::StorageClass::kPushConstant);
 
-    Func(Source{{5, 6}}, "main", {}, ty.void_(), {Assign(Phony(), "a"), Assign(Phony(), "b")},
-         {Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
+    Func(Source{{5, 6}}, "main", {}, ty.void_(),
+         utils::Vector{Assign(Phony(), "a"), Assign(Phony(), "b")},
+         utils::Vector{Stage(ast::PipelineStage::kCompute),
+                       create<ast::WorkgroupAttribute>(Expr(1_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -532,12 +535,13 @@ TEST_F(ResolverEntryPointValidationTest,
     GlobalVar(Source{{1, 2}}, "a", ty.u32(), ast::StorageClass::kPushConstant);
     GlobalVar(Source{{3, 4}}, "b", ty.u32(), ast::StorageClass::kPushConstant);
 
-    Func(Source{{5, 6}}, "uses_a", {}, ty.void_(), {Assign(Phony(), "a")});
-    Func(Source{{7, 8}}, "uses_b", {}, ty.void_(), {Assign(Phony(), "b")});
+    Func(Source{{5, 6}}, "uses_a", {}, ty.void_(), utils::Vector{Assign(Phony(), "a")});
+    Func(Source{{7, 8}}, "uses_b", {}, ty.void_(), utils::Vector{Assign(Phony(), "b")});
 
     Func(Source{{9, 10}}, "main", {}, ty.void_(),
-         {CallStmt(Call("uses_a")), CallStmt(Call("uses_b"))},
-         {Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
+         utils::Vector{CallStmt(Call("uses_a")), CallStmt(Call("uses_b"))},
+         utils::Vector{Stage(ast::PipelineStage::kCompute),
+                       create<ast::WorkgroupAttribute>(Expr(1_i))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -564,10 +568,12 @@ TEST_F(ResolverEntryPointValidationTest, PushConstantTwoVariablesUsedInDifferent
     GlobalVar("a", ty.u32(), ast::StorageClass::kPushConstant);
     GlobalVar("b", ty.u32(), ast::StorageClass::kPushConstant);
 
-    Func("uses_a", {}, ty.void_(), {Assign(Phony(), "a")},
-         {Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
-    Func("uses_b", {}, ty.void_(), {Assign(Phony(), "b")},
-         {Stage(ast::PipelineStage::kCompute), create<ast::WorkgroupAttribute>(Expr(1_i))});
+    Func("uses_a", {}, ty.void_(), utils::Vector{Assign(Phony(), "a")},
+         utils::Vector{Stage(ast::PipelineStage::kCompute),
+                       create<ast::WorkgroupAttribute>(Expr(1_i))});
+    Func("uses_b", {}, ty.void_(), utils::Vector{Assign(Phony(), "b")},
+         utils::Vector{Stage(ast::PipelineStage::kCompute),
+                       create<ast::WorkgroupAttribute>(Expr(1_i))});
 
     EXPECT_TRUE(r()->Resolve());
 }

@@ -663,7 +663,7 @@ TEST_F(ResolverStorageClassValidationTest, PushConstantArrayF32) {
     // struct S { a : f32}
     // var<push_constant> g : array<S, 3u>;
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
-    auto* s = Structure("S", {Member("a", ty.f32())});
+    auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
     auto* a = ty.array(ty.Of(s), 3_u);
     GlobalVar("g", a, ast::StorageClass::kPushConstant);
 

@@ -548,9 +548,10 @@ TEST_F(ResolverStorageClassLayoutValidationTest, PushConstant_UnalignedMember) {
     // };
     // var<push_constant> a : S;
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
-    Structure(Source{{12, 34}}, "S",
-              {Member("a", ty.f32(), {MemberSize(5)}),
-               Member(Source{{34, 56}}, "b", ty.f32(), {MemberAlign(1)})});
+    Structure(
+        Source{{12, 34}}, "S",
+        utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(5)}),
+                      Member(Source{{34, 56}}, "b", ty.f32(), utils::Vector{MemberAlign(1)})});
     GlobalVar(Source{{78, 90}}, "a", ty.type_name("S"), ast::StorageClass::kPushConstant);
 
     ASSERT_FALSE(r()->Resolve());
@@ -574,8 +575,8 @@ TEST_F(ResolverStorageClassLayoutValidationTest, PushConstant_Aligned) {
     // };
     // var<push_constant> a : S;
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
-    Structure("S",
-              {Member("a", ty.f32(), {MemberSize(5)}), Member("b", ty.f32(), {MemberAlign(4)})});
+    Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(5)}),
+                                 Member("b", ty.f32(), utils::Vector{MemberAlign(4)})});
     GlobalVar("a", ty.type_name("S"), ast::StorageClass::kPushConstant);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
