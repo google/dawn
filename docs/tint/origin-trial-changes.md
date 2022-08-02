@@ -1,5 +1,11 @@
 # Tint changes during Origin Trial
 
+## Changes for M106
+
+### New features
+
+* `array()` constructor can now infer type and count. [tint:1628](crbug.com/tint/1628)
+
 ## Changes for M105
 
 ### New features
