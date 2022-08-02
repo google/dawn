@@ -111,23 +111,18 @@ ResultOrError<ComputePipelineBase*> GetOrCreateIndirectDispatchValidationPipelin
 ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                        const ComputePassDescriptor* descriptor,
                                        CommandEncoder* commandEncoder,
-                                       EncodingContext* encodingContext,
-                                       std::vector<TimestampWrite> timestampWritesAtEnd)
+                                       EncodingContext* encodingContext)
     : ProgrammableEncoder(device, descriptor->label, encodingContext),
-      mCommandEncoder(commandEncoder),
-      mTimestampWritesAtEnd(std::move(timestampWritesAtEnd)) {
+      mCommandEncoder(commandEncoder) {
     TrackInDevice();
 }
 
 // static
-Ref<ComputePassEncoder> ComputePassEncoder::Create(
-    DeviceBase* device,
-    const ComputePassDescriptor* descriptor,
-    CommandEncoder* commandEncoder,
-    EncodingContext* encodingContext,
-    std::vector<TimestampWrite> timestampWritesAtEnd) {
-    return AcquireRef(new ComputePassEncoder(device, descriptor, commandEncoder, encodingContext,
-                                             std::move(timestampWritesAtEnd)));
+Ref<ComputePassEncoder> ComputePassEncoder::Create(DeviceBase* device,
+                                                   const ComputePassDescriptor* descriptor,
+                                                   CommandEncoder* commandEncoder,
+                                                   EncodingContext* encodingContext) {
+    return AcquireRef(new ComputePassEncoder(device, descriptor, commandEncoder, encodingContext));
 }
 
 ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
@@ -162,11 +157,7 @@ void ComputePassEncoder::APIEnd() {
                     DAWN_TRY(ValidateProgrammableEncoderEnd());
                 }
 
-                EndComputePassCmd* cmd =
-                    allocator->Allocate<EndComputePassCmd>(Command::EndComputePass);
-                // The query availability has already been updated at the beginning of compute
-                // pass, and no need to do update here.
-                cmd->timestampWrites = std::move(mTimestampWritesAtEnd);
+                allocator->Allocate<EndComputePassCmd>(Command::EndComputePass);
 
                 return {};
             },

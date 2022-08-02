@@ -56,7 +56,6 @@ RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
                                      EncodingContext* encodingContext,
                                      RenderPassResourceUsageTracker usageTracker,
                                      Ref<AttachmentState> attachmentState,
-                                     std::vector<TimestampWrite> timestampWritesAtEnd,
                                      uint32_t renderTargetWidth,
                                      uint32_t renderTargetHeight,
                                      bool depthReadOnly,
@@ -70,8 +69,7 @@ RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
       mCommandEncoder(commandEncoder),
       mRenderTargetWidth(renderTargetWidth),
       mRenderTargetHeight(renderTargetHeight),
-      mOcclusionQuerySet(descriptor->occlusionQuerySet),
-      mTimestampWritesAtEnd(std::move(timestampWritesAtEnd)) {
+      mOcclusionQuerySet(descriptor->occlusionQuerySet) {
     mUsageTracker = std::move(usageTracker);
     const RenderPassDescriptorMaxDrawCount* maxDrawCountInfo = nullptr;
     FindInChain(descriptor->nextInChain, &maxDrawCountInfo);
@@ -88,15 +86,14 @@ Ref<RenderPassEncoder> RenderPassEncoder::Create(DeviceBase* device,
                                                  EncodingContext* encodingContext,
                                                  RenderPassResourceUsageTracker usageTracker,
                                                  Ref<AttachmentState> attachmentState,
-                                                 std::vector<TimestampWrite> timestampWritesAtEnd,
                                                  uint32_t renderTargetWidth,
                                                  uint32_t renderTargetHeight,
                                                  bool depthReadOnly,
                                                  bool stencilReadOnly) {
     return AcquireRef(new RenderPassEncoder(device, descriptor, commandEncoder, encodingContext,
                                             std::move(usageTracker), std::move(attachmentState),
-                                            std::move(timestampWritesAtEnd), renderTargetWidth,
-                                            renderTargetHeight, depthReadOnly, stencilReadOnly));
+                                            renderTargetWidth, renderTargetHeight, depthReadOnly,
+                                            stencilReadOnly));
 }
 
 RenderPassEncoder::RenderPassEncoder(DeviceBase* device,
@@ -152,10 +149,7 @@ void RenderPassEncoder::APIEnd() {
                                 mDrawCount, this, mMaxDrawCount);
             }
 
-            EndRenderPassCmd* cmd = allocator->Allocate<EndRenderPassCmd>(Command::EndRenderPass);
-            // The query availability has already been updated at the beginning of render
-            // pass, and no need to do update here.
-            cmd->timestampWrites = std::move(mTimestampWritesAtEnd);
+            allocator->Allocate<EndRenderPassCmd>(Command::EndRenderPass);
 
             DAWN_TRY(mEncodingContext->ExitRenderPass(this, std::move(mUsageTracker),
                                                       mCommandEncoder.Get(),

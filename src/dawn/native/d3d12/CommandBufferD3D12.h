@@ -19,6 +19,7 @@
 #include "dawn/native/Error.h"
 
 namespace dawn::native {
+struct BeginComputePassCmd;
 struct BeginRenderPassCmd;
 }  // namespace dawn::native
 
@@ -40,6 +41,7 @@ class CommandBuffer final : public CommandBufferBase {
 
     MaybeError RecordComputePass(CommandRecordingContext* commandContext,
                                  BindGroupStateTracker* bindingTracker,
+                                 BeginComputePassCmd* computePass,
                                  const ComputePassResourceUsage& resourceUsages);
     MaybeError RecordRenderPass(CommandRecordingContext* commandContext,
                                 BindGroupStateTracker* bindingTracker,

@@ -21,6 +21,7 @@
 #include "dawn/common/vulkan_platform.h"
 
 namespace dawn::native {
+struct BeginComputePassCmd;
 struct BeginRenderPassCmd;
 struct TextureCopy;
 }  // namespace dawn::native
@@ -41,6 +42,7 @@ class CommandBuffer final : public CommandBufferBase {
     CommandBuffer(CommandEncoder* encoder, const CommandBufferDescriptor* descriptor);
 
     MaybeError RecordComputePass(CommandRecordingContext* recordingContext,
+                                 BeginComputePassCmd* computePass,
                                  const ComputePassResourceUsage& resourceUsages);
     MaybeError RecordRenderPass(CommandRecordingContext* recordingContext,
                                 BeginRenderPassCmd* renderPass);

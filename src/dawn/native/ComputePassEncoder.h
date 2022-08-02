@@ -33,8 +33,7 @@ class ComputePassEncoder final : public ProgrammableEncoder {
     static Ref<ComputePassEncoder> Create(DeviceBase* device,
                                           const ComputePassDescriptor* descriptor,
                                           CommandEncoder* commandEncoder,
-                                          EncodingContext* encodingContext,
-                                          std::vector<TimestampWrite> timestampWritesAtEnd);
+                                          EncodingContext* encodingContext);
     static Ref<ComputePassEncoder> MakeError(DeviceBase* device,
                                              CommandEncoder* commandEncoder,
                                              EncodingContext* encodingContext);
@@ -72,8 +71,7 @@ class ComputePassEncoder final : public ProgrammableEncoder {
     ComputePassEncoder(DeviceBase* device,
                        const ComputePassDescriptor* descriptor,
                        CommandEncoder* commandEncoder,
-                       EncodingContext* encodingContext,
-                       std::vector<TimestampWrite> timestampWritesAtEnd);
+                       EncodingContext* encodingContext);
     ComputePassEncoder(DeviceBase* device,
                        CommandEncoder* commandEncoder,
                        EncodingContext* encodingContext,
@@ -98,8 +96,6 @@ class ComputePassEncoder final : public ProgrammableEncoder {
     // For render and compute passes, the encoding context is borrowed from the command encoder.
     // Keep a reference to the encoder to make sure the context isn't freed.
     Ref<CommandEncoder> mCommandEncoder;
-
-    std::vector<TimestampWrite> mTimestampWritesAtEnd;
 };
 
 }  // namespace dawn::native

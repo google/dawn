@@ -90,10 +90,12 @@ bool CanUseCopyResource(const TextureCopy& src, const TextureCopy& dst, const Ex
            copySize.depthOrArrayLayers == srcSize.depthOrArrayLayers;
 }
 
-void RecordWriteTimestampCmd(ID3D12GraphicsCommandList* commandList, WriteTimestampCmd* cmd) {
-    QuerySet* querySet = ToBackend(cmd->querySet.Get());
-    ASSERT(D3D12QueryType(querySet->GetQueryType()) == D3D12_QUERY_TYPE_TIMESTAMP);
-    commandList->EndQuery(querySet->GetQueryHeap(), D3D12_QUERY_TYPE_TIMESTAMP, cmd->queryIndex);
+void RecordWriteTimestampCmd(ID3D12GraphicsCommandList* commandList,
+                             QuerySetBase* querySet,
+                             uint32_t queryIndex) {
+    ASSERT(D3D12QueryType(ToBackend(querySet)->GetQueryType()) == D3D12_QUERY_TYPE_TIMESTAMP);
+    commandList->EndQuery(ToBackend(querySet)->GetQueryHeap(), D3D12_QUERY_TYPE_TIMESTAMP,
+                          queryIndex);
 }
 
 void RecordResolveQuerySetCmd(ID3D12GraphicsCommandList* commandList,
@@ -653,11 +655,12 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
     while (mCommands.NextCommandId(&type)) {
         switch (type) {
             case Command::BeginComputePass: {
-                mCommands.NextCommand<BeginComputePassCmd>();
+                BeginComputePassCmd* cmd = mCommands.NextCommand<BeginComputePassCmd>();
 
                 bindingTracker.SetInComputePass(true);
+
                 DAWN_TRY(
-                    RecordComputePass(commandContext, &bindingTracker,
+                    RecordComputePass(commandContext, &bindingTracker, cmd,
                                       GetResourceUsages().computePasses[nextComputePassNumber]));
 
                 nextComputePassNumber++;
@@ -942,7 +945,7 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
             case Command::WriteTimestamp: {
                 WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
 
-                RecordWriteTimestampCmd(commandList, cmd);
+                RecordWriteTimestampCmd(commandList, cmd->querySet.Get(), cmd->queryIndex);
                 break;
             }
 
@@ -1023,9 +1026,16 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
 
 MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandContext,
                                             BindGroupStateTracker* bindingTracker,
+                                            BeginComputePassCmd* computePass,
                                             const ComputePassResourceUsage& resourceUsages) {
     uint64_t currentDispatch = 0;
     ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
+
+    // Write timestamp at the beginning of compute pass if it's set.
+    if (computePass->beginTimestamp.querySet.Get() != nullptr) {
+        RecordWriteTimestampCmd(commandList, computePass->beginTimestamp.querySet.Get(),
+                                computePass->beginTimestamp.queryIndex);
+    }
 
     Command type;
     ComputePipeline* lastPipeline = nullptr;
@@ -1068,6 +1078,12 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
 
             case Command::EndComputePass: {
                 mCommands.NextCommand<EndComputePassCmd>();
+
+                // Write timestamp at the end of compute pass if it's set.
+                if (computePass->endTimestamp.querySet.Get() != nullptr) {
+                    RecordWriteTimestampCmd(commandList, computePass->endTimestamp.querySet.Get(),
+                                            computePass->endTimestamp.queryIndex);
+                }
                 return {};
             }
 
@@ -1136,7 +1152,7 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* commandCont
             case Command::WriteTimestamp: {
                 WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
 
-                RecordWriteTimestampCmd(commandList, cmd);
+                RecordWriteTimestampCmd(commandList, cmd->querySet.Get(), cmd->queryIndex);
                 break;
             }
 
@@ -1339,6 +1355,12 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
 
     ID3D12GraphicsCommandList* commandList = commandContext->GetCommandList();
 
+    // Write timestamp at the beginning of render pass if it's set.
+    if (renderPass->beginTimestamp.querySet.Get() != nullptr) {
+        RecordWriteTimestampCmd(commandList, renderPass->beginTimestamp.querySet.Get(),
+                                renderPass->beginTimestamp.queryIndex);
+    }
+
     // Set up default dynamic state
     {
         uint32_t width = renderPass->width;
@@ -1511,6 +1533,13 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
         switch (type) {
             case Command::EndRenderPass: {
                 mCommands.NextCommand<EndRenderPassCmd>();
+
+                // Write timestamp at the end of render pass if it's set.
+                if (renderPass->endTimestamp.querySet.Get() != nullptr) {
+                    RecordWriteTimestampCmd(commandList, renderPass->endTimestamp.querySet.Get(),
+                                            renderPass->endTimestamp.queryIndex);
+                }
+
                 if (useRenderPass) {
                     commandContext->GetCommandList4()->EndRenderPass();
                 } else if (renderPass->attachmentState->GetSampleCount() > 1) {
@@ -1596,7 +1625,7 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* commandConte
             case Command::WriteTimestamp: {
                 WriteTimestampCmd* cmd = mCommands.NextCommand<WriteTimestampCmd>();
 
-                RecordWriteTimestampCmd(commandList, cmd);
+                RecordWriteTimestampCmd(commandList, cmd->querySet.Get(), cmd->queryIndex);
                 break;
             }
 
