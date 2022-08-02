@@ -1,0 +1,44 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 25
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %arr "arr"
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %f "f"
+               OpName %v "v"
+               OpDecorate %_arr_int_uint_2 ArrayStride 4
+               OpDecorate %_arr__arr_int_uint_2_uint_2 ArrayStride 8
+        %int = OpTypeInt 32 1
+       %uint = OpTypeInt 32 0
+     %uint_2 = OpConstant %uint 2
+%_arr_int_uint_2 = OpTypeArray %int %uint_2
+%_arr__arr_int_uint_2_uint_2 = OpTypeArray %_arr_int_uint_2 %uint_2
+      %int_1 = OpConstant %int 1
+      %int_2 = OpConstant %int 2
+          %8 = OpConstantComposite %_arr_int_uint_2 %int_1 %int_2
+      %int_3 = OpConstant %int 3
+      %int_4 = OpConstant %int 4
+         %11 = OpConstantComposite %_arr_int_uint_2 %int_3 %int_4
+         %12 = OpConstantComposite %_arr__arr_int_uint_2_uint_2 %8 %11
+%_ptr_Private__arr__arr_int_uint_2_uint_2 = OpTypePointer Private %_arr__arr_int_uint_2_uint_2
+        %arr = OpVariable %_ptr_Private__arr__arr_int_uint_2_uint_2 Private %12
+       %void = OpTypeVoid
+         %15 = OpTypeFunction %void
+%_ptr_Function__arr__arr_int_uint_2_uint_2 = OpTypePointer Function %_arr__arr_int_uint_2_uint_2
+         %24 = OpConstantNull %_arr__arr_int_uint_2_uint_2
+%unused_entry_point = OpFunction %void None %15
+         %18 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %15
+         %20 = OpLabel
+          %v = OpVariable %_ptr_Function__arr__arr_int_uint_2_uint_2 Function %24
+         %21 = OpLoad %_arr__arr_int_uint_2_uint_2 %arr
+               OpStore %v %21
+               OpReturn
+               OpFunctionEnd

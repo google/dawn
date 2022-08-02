@@ -1,0 +1,52 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 34
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %arr "arr"
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %f "f"
+               OpName %v "v"
+               OpDecorate %_arr_mat2v2float_uint_2 ArrayStride 16
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+%mat2v2float = OpTypeMatrix %v2float 2
+       %uint = OpTypeInt 32 0
+     %uint_2 = OpConstant %uint 2
+%_arr_mat2v2float_uint_2 = OpTypeArray %mat2v2float %uint_2
+    %float_1 = OpConstant %float 1
+    %float_2 = OpConstant %float 2
+          %9 = OpConstantComposite %v2float %float_1 %float_2
+    %float_3 = OpConstant %float 3
+    %float_4 = OpConstant %float 4
+         %12 = OpConstantComposite %v2float %float_3 %float_4
+         %13 = OpConstantComposite %mat2v2float %9 %12
+    %float_5 = OpConstant %float 5
+    %float_6 = OpConstant %float 6
+         %16 = OpConstantComposite %v2float %float_5 %float_6
+    %float_7 = OpConstant %float 7
+    %float_8 = OpConstant %float 8
+         %19 = OpConstantComposite %v2float %float_7 %float_8
+         %20 = OpConstantComposite %mat2v2float %16 %19
+         %21 = OpConstantComposite %_arr_mat2v2float_uint_2 %13 %20
+%_ptr_Private__arr_mat2v2float_uint_2 = OpTypePointer Private %_arr_mat2v2float_uint_2
+        %arr = OpVariable %_ptr_Private__arr_mat2v2float_uint_2 Private %21
+       %void = OpTypeVoid
+         %24 = OpTypeFunction %void
+%_ptr_Function__arr_mat2v2float_uint_2 = OpTypePointer Function %_arr_mat2v2float_uint_2
+         %33 = OpConstantNull %_arr_mat2v2float_uint_2
+%unused_entry_point = OpFunction %void None %24
+         %27 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %24
+         %29 = OpLabel
+          %v = OpVariable %_ptr_Function__arr_mat2v2float_uint_2 Function %33
+         %30 = OpLoad %_arr_mat2v2float_uint_2 %arr
+               OpStore %v %30
+               OpReturn
+               OpFunctionEnd
