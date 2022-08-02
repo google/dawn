@@ -180,7 +180,14 @@ ResultOrError<Ref<AdapterBase>> InstanceBase::RequestAdapterInternal(
         if (GetEnabledBackends()[wgpu::BackendType::Vulkan]) {
             dawn_native::vulkan::AdapterDiscoveryOptions vulkanOptions;
             vulkanOptions.forceSwiftShader = true;
-            DAWN_TRY(DiscoverAdaptersInternal(&vulkanOptions));
+
+            MaybeError result = DiscoverAdaptersInternal(&vulkanOptions);
+            if (result.IsError()) {
+                dawn::WarningLog()
+                    << "Skipping Vulkan Swiftshader adapter because initialization failed: "
+                    << result.AcquireError()->GetFormattedMessage();
+                return Ref<AdapterBase>(nullptr);
+            }
         }
 #else
         return Ref<AdapterBase>(nullptr);
@@ -276,7 +283,16 @@ void InstanceBase::DiscoverDefaultAdapters() {
 
 // This is just a wrapper around the real logic that uses Error.h error handling.
 bool InstanceBase::DiscoverAdapters(const AdapterDiscoveryOptionsBase* options) {
-    return !ConsumedError(DiscoverAdaptersInternal(options));
+    MaybeError result = DiscoverAdaptersInternal(options);
+
+    if (result.IsError()) {
+        dawn::WarningLog() << "Skipping " << options->backendType
+                           << " adapter because initialization failed: "
+                           << result.AcquireError()->GetFormattedMessage();
+        return false;
+    }
+
+    return true;
 }
 
 const ToggleInfo* InstanceBase::GetToggleInfo(const char* toggleName) {
