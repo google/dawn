@@ -665,7 +665,8 @@ void Device::InitTogglesFromDriver() {
 
     // Currently this workaround is only needed on Intel Gen12 GPUs.
     // See http://crbug.com/dawn/1487 for more information.
-    if (gpu_info::IsIntelXe(vendorId, deviceId)) {
+    if (gpu_info::IsIntelGen12LP(vendorId, deviceId) ||
+        gpu_info::IsIntelGen12HP(vendorId, deviceId)) {
         SetToggle(Toggle::D3D12DontSetClearValueOnDepthTextureCreation, true);
     }
 
@@ -676,7 +677,7 @@ void Device::InitTogglesFromDriver() {
 
     // This workaround is only needed on Intel Gen12LP with driver prior to 30.0.101.1960.
     // See http://crbug.com/dawn/949 for more information.
-    if (gpu_info::IsIntelXe(vendorId, deviceId)) {
+    if (gpu_info::IsIntelGen12LP(vendorId, deviceId)) {
         const gpu_info::D3DDriverVersion version = {30, 0, 101, 1960};
         if (gpu_info::CompareD3DDriverVersion(vendorId, ToBackend(GetAdapter())->GetDriverVersion(),
                                               version) == -1) {
