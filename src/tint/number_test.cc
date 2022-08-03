@@ -356,24 +356,25 @@ INSTANTIATE_TEST_SUITE_P(
         /////////////////////////////////////
     }));
 
-using BinaryCheckedCase = std::tuple<std::optional<AInt>, AInt, AInt>;
-
 #undef OVERFLOW  // corecrt_math.h :(
 #define OVERFLOW \
     {}
 
-using CheckedAddTest = testing::TestWithParam<BinaryCheckedCase>;
-TEST_P(CheckedAddTest, Test) {
+using BinaryCheckedCase_AInt = std::tuple<std::optional<AInt>, AInt, AInt>;
+using BinaryCheckedCase_AFloat = std::tuple<std::optional<AFloat>, AFloat, AFloat>;
+
+using CheckedAddTest_AInt = testing::TestWithParam<BinaryCheckedCase_AInt>;
+TEST_P(CheckedAddTest_AInt, Test) {
     auto expect = std::get<0>(GetParam());
     auto a = std::get<1>(GetParam());
     auto b = std::get<2>(GetParam());
-    EXPECT_EQ(CheckedAdd(a, b), expect) << std::hex << "0x" << a << " * 0x" << b;
-    EXPECT_EQ(CheckedAdd(b, a), expect) << std::hex << "0x" << a << " * 0x" << b;
+    EXPECT_EQ(CheckedAdd(a, b), expect) << std::hex << "0x" << a << " + 0x" << b;
+    EXPECT_EQ(CheckedAdd(b, a), expect) << std::hex << "0x" << a << " + 0x" << b;
 }
 INSTANTIATE_TEST_SUITE_P(
-    CheckedAddTest,
-    CheckedAddTest,
-    testing::ValuesIn(std::vector<BinaryCheckedCase>{
+    CheckedAddTest_AInt,
+    CheckedAddTest_AInt,
+    testing::ValuesIn(std::vector<BinaryCheckedCase_AInt>{
         {AInt(0), AInt(0), AInt(0)},
         {AInt(1), AInt(1), AInt(0)},
         {AInt(2), AInt(1), AInt(1)},
@@ -398,8 +399,37 @@ INSTANTIATE_TEST_SUITE_P(
         ////////////////////////////////////////////////////////////////////////
     }));
 
-using CheckedMulTest = testing::TestWithParam<BinaryCheckedCase>;
-TEST_P(CheckedMulTest, Test) {
+using CheckedAddTest_AFloat = testing::TestWithParam<BinaryCheckedCase_AFloat>;
+TEST_P(CheckedAddTest_AFloat, Test) {
+    auto expect = std::get<0>(GetParam());
+    auto a = std::get<1>(GetParam());
+    auto b = std::get<2>(GetParam());
+    EXPECT_EQ(CheckedAdd(a, b), expect) << std::hex << "0x" << a << " + 0x" << b;
+    EXPECT_EQ(CheckedAdd(b, a), expect) << std::hex << "0x" << a << " + 0x" << b;
+}
+INSTANTIATE_TEST_SUITE_P(
+    CheckedAddTest_AFloat,
+    CheckedAddTest_AFloat,
+    testing::ValuesIn(std::vector<BinaryCheckedCase_AFloat>{
+        {AFloat(0), AFloat(0), AFloat(0)},
+        {AFloat(1), AFloat(1), AFloat(0)},
+        {AFloat(2), AFloat(1), AFloat(1)},
+        {AFloat(0), AFloat(-1), AFloat(1)},
+        {AFloat(3), AFloat(2), AFloat(1)},
+        {AFloat(-1), AFloat(-2), AFloat(1)},
+        {AFloat(0x300), AFloat(0x100), AFloat(0x200)},
+        {AFloat(0x100), AFloat(-0x100), AFloat(0x200)},
+        {AFloat::Highest(), AFloat(1), AFloat(AFloat::kHighestValue - 1)},
+        {AFloat::Lowest(), AFloat(-1), AFloat(AFloat::kLowestValue + 1)},
+        {AFloat::Highest(), AFloat::Highest(), AFloat(0)},
+        {AFloat::Lowest(), AFloat::Lowest(), AFloat(0)},
+        {OVERFLOW, AFloat::Highest(), AFloat::Highest()},
+        {OVERFLOW, AFloat::Lowest(), AFloat::Lowest()},
+        ////////////////////////////////////////////////////////////////////////
+    }));
+
+using CheckedMulTest_AInt = testing::TestWithParam<BinaryCheckedCase_AInt>;
+TEST_P(CheckedMulTest_AInt, Test) {
     auto expect = std::get<0>(GetParam());
     auto a = std::get<1>(GetParam());
     auto b = std::get<2>(GetParam());
@@ -407,9 +437,9 @@ TEST_P(CheckedMulTest, Test) {
     EXPECT_EQ(CheckedMul(b, a), expect) << std::hex << "0x" << a << " * 0x" << b;
 }
 INSTANTIATE_TEST_SUITE_P(
-    CheckedMulTest,
-    CheckedMulTest,
-    testing::ValuesIn(std::vector<BinaryCheckedCase>{
+    CheckedMulTest_AInt,
+    CheckedMulTest_AInt,
+    testing::ValuesIn(std::vector<BinaryCheckedCase_AInt>{
         {AInt(0), AInt(0), AInt(0)},
         {AInt(0), AInt(1), AInt(0)},
         {AInt(1), AInt(1), AInt(1)},
@@ -446,8 +476,8 @@ INSTANTIATE_TEST_SUITE_P(
 
 using TernaryCheckedCase = std::tuple<std::optional<AInt>, AInt, AInt, AInt>;
 
-using CheckedMaddTest = testing::TestWithParam<TernaryCheckedCase>;
-TEST_P(CheckedMaddTest, Test) {
+using CheckedMaddTest_AInt = testing::TestWithParam<TernaryCheckedCase>;
+TEST_P(CheckedMaddTest_AInt, Test) {
     auto expect = std::get<0>(GetParam());
     auto a = std::get<1>(GetParam());
     auto b = std::get<2>(GetParam());
@@ -458,8 +488,8 @@ TEST_P(CheckedMaddTest, Test) {
         << std::hex << "0x" << a << " * 0x" << b << " + 0x" << c;
 }
 INSTANTIATE_TEST_SUITE_P(
-    CheckedMaddTest,
-    CheckedMaddTest,
+    CheckedMaddTest_AInt,
+    CheckedMaddTest_AInt,
     testing::ValuesIn(std::vector<TernaryCheckedCase>{
         {AInt(0), AInt(0), AInt(0), AInt(0)},
         {AInt(0), AInt(1), AInt(0), AInt(0)},
