@@ -36,7 +36,7 @@ void main_1() {
   int d = 0;
   float GLF_live6sums[9] = (float[9])0;
   idx = 0;
-  m43 = float4x3(float3(1.0f, 0.0f, 0.0f), float3(0.0f, 1.0f, 0.0f), float3(0.0f, 0.0f, 1.0f), float3(0.0f, 0.0f, 0.0f));
+  m43 = float4x3(float3(1.0f, 0.0f, 0.0f), float3(0.0f, 1.0f, 0.0f), float3(0.0f, 0.0f, 1.0f), (0.0f).xxx);
   ll_1 = 0;
   GLF_live6rows = 2;
   [loop] while (true) {
@@ -65,22 +65,10 @@ void main_1() {
         {
           [loop] for(; (1 < z); c = (c + 1)) {
             d = 0;
-            bool tint_tmp = (d >= 0);
-            if (tint_tmp) {
-              tint_tmp = (d < 3);
-            }
-            bool tint_tmp_1 = (c >= 0);
-            if (tint_tmp_1) {
-              tint_tmp_1 = (c < 4);
-            }
-            set_scalar_float4x3(tempm43, ((tint_tmp) ? d : 0), ((tint_tmp_1) ? c : 0), 1.0f);
+            set_scalar_float4x3(tempm43, (((d >= 0) & (d < 3)) ? d : 0), (((c >= 0) & (c < 4)) ? c : 0), 1.0f);
           }
         }
-        bool tint_tmp_2 = (idx >= 0);
-        if (tint_tmp_2) {
-          tint_tmp_2 = (idx < 9);
-        }
-        const int x_117 = ((tint_tmp_2) ? idx : 0);
+        const int x_117 = (((idx >= 0) & (idx < 9)) ? idx : 0);
         const float x_119 = m43[ctr].y;
         const float x_121 = GLF_live6sums[x_117];
         GLF_live6sums[x_117] = (x_121 + x_119);
@@ -110,8 +98,11 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+DXC validation failure:
+warning: DXIL.dll not found.  Resulting DXIL will not be signed for use in release environments.
+
 error: validation errors
-C:\src\temp\u1tig.0:105: error: Loop must have break.
+shader.hlsl:93: error: Loop must have break.
 Validation failed.
 
 

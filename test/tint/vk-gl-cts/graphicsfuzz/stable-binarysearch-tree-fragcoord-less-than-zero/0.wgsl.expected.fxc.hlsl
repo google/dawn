@@ -1,5 +1,9 @@
 SKIP: FAILED
 
+vk-gl-cts/graphicsfuzz/stable-binarysearch-tree-fragcoord-less-than-zero/0.wgsl:85:15 warning: use of deprecated language feature: 'target' is a reserved keyword
+fn search_i1_(target : ptr<function, i32>) -> i32 {
+              ^^^^^^
+
 struct BST {
   int data;
   int leftIndex;
