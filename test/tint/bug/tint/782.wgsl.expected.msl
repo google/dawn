@@ -15,8 +15,8 @@ struct tint_array {
 };
 
 void foo() {
-  tint_array<int, 2> tint_symbol = {};
-  tint_array<int, 2> implict = {};
-  implict = tint_symbol;
+  tint_array<int, 2> explicitStride = {};
+  tint_array<int, 2> implictStride = {};
+  implictStride = explicitStride;
 }
 

@@ -4,5 +4,5 @@ var<workgroup> i : i32;
 fn main() {
   i = 123;
   let p : ptr<workgroup, i32> = &(i);
-  let use : i32 = (*(p) + 1);
+  let u : i32 = (*(p) + 1);
 }

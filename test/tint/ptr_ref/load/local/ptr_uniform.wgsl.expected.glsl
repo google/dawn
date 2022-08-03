@@ -9,7 +9,7 @@ layout(binding = 0) uniform S_1 {
 } v;
 
 void tint_symbol() {
-  int use = (v.a + 1);
+  int u = (v.a + 1);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

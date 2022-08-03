@@ -84,10 +84,40 @@ const char kWorkgroupSizeAttribute[] = "workgroup_size";
 
 // https://gpuweb.github.io/gpuweb/wgsl.html#reserved-keywords
 bool is_reserved(const Token& t) {
-    return t == "asm" || t == "bf16" || t == "do" || t == "enum" || t == "f64" || t == "handle" ||
-           t == "i8" || t == "i16" || t == "i64" || t == "mat" || t == "premerge" ||
-           t == "regardless" || t == "typedef" || t == "u8" || t == "u16" || t == "u64" ||
-           t == "unless" || t == "using" || t == "vec" || t == "void" || t == "while";
+    return t == "CompileShader" || t == "ComputeShader" || t == "DomainShader" ||
+           t == "GeometryShader" || t == "Hullshader" || t == "NULL" || t == "Self" ||
+           t == "abstract" || t == "active" || t == "alignas" || t == "alignof" || t == "as" ||
+           t == "asm" || t == "asm_fragment" || t == "async" || t == "attribute" || t == "auto" ||
+           t == "await" || t == "become" || t == "binding_array" || t == "cast" || t == "catch" ||
+           t == "class" || t == "co_await" || t == "co_return" || t == "co_yield" ||
+           t == "coherent" || t == "column_major" || t == "common" || t == "compile" ||
+           t == "compile_fragment" || t == "concept" || t == "const_cast" || t == "consteval" ||
+           t == "constexpr" || t == "constinit" || t == "crate" || t == "debugger" ||
+           t == "decltype" || t == "delete" || t == "demote" || t == "demote_to_helper" ||
+           t == "do" || t == "dynamic_cast" || t == "enum" || t == "explicit" || t == "export" ||
+           t == "extends" || t == "extern" || t == "external" || t == "filter" || t == "final" ||
+           t == "finally" || t == "friend" || t == "from" || t == "fxgroup" || t == "get" ||
+           t == "goto" || t == "groupshared" || t == "handle" || t == "highp" || t == "impl" ||
+           t == "implements" || t == "import" || t == "inline" || t == "inout" ||
+           t == "instanceof" || t == "interface" || t == "invariant" || t == "layout" ||
+           t == "line" || t == "lineadj" || t == "lowp" || t == "macro" || t == "macro_rules" ||
+           t == "match" || t == "mediump" || t == "meta" || t == "mod" || t == "module" ||
+           t == "move" || t == "mut" || t == "mutable" || t == "namespace" || t == "new" ||
+           t == "nil" || t == "noexcept" || t == "noinline" || t == "nointerpolation" ||
+           t == "noperspective" || t == "null" || t == "nullptr" || t == "of" || t == "operator" ||
+           t == "package" || t == "packoffset" || t == "partition" || t == "pass" || t == "patch" ||
+           t == "pixelfragment" || t == "point" || t == "precise" || t == "precision" ||
+           t == "premerge" || t == "priv" || t == "protected" || t == "pub" || t == "public" ||
+           t == "readonly" || t == "ref" || t == "regardless" || t == "register" ||
+           t == "reinterpret_cast" || t == "requires" || t == "resource" || t == "restrict" ||
+           t == "self" || t == "set" || t == "shared" || t == "signed" || t == "sizeof" ||
+           t == "smooth" || t == "snorm" || t == "static" || t == "static_assert" ||
+           t == "static_cast" || t == "std" || t == "subroutine" || t == "super" || t == "target" ||
+           t == "template" || t == "this" || t == "thread_local" || t == "throw" || t == "trait" ||
+           t == "try" || t == "typedef" || t == "typeid" || t == "typename" || t == "typeof" ||
+           t == "union" || t == "unless" || t == "unorm" || t == "unsafe" || t == "unsized" ||
+           t == "use" || t == "using" || t == "varying" || t == "virtual" || t == "volatile" ||
+           t == "wgsl" || t == "where" || t == "with" || t == "writeonly" || t == "yield";
 }
 
 /// Enter-exit counters for block token types.
@@ -3441,7 +3471,7 @@ Expect<std::string> ParserImpl::expect_ident(std::string_view use) {
         next();
 
         if (is_reserved(t)) {
-            return add_error(t.source(), "'" + t.to_str() + "' is a reserved keyword");
+            deprecated(t.source(), "'" + t.to_str() + "' is a reserved keyword");
         }
 
         return {t.to_str(), t.source()};

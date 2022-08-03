@@ -9,8 +9,8 @@
                OpExecutionMode %unused_entry_point LocalSize 1 1 1
                OpName %unused_entry_point "unused_entry_point"
                OpName %foo "foo"
-               OpName %explicit "explicit"
-               OpName %implict "implict"
+               OpName %explicitStride "explicitStride"
+               OpName %implictStride "implictStride"
                OpDecorate %_arr_int_uint_2 ArrayStride 4
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
@@ -26,9 +26,9 @@
                OpFunctionEnd
         %foo = OpFunction %void None %1
           %6 = OpLabel
-   %explicit = OpVariable %_ptr_Function__arr_int_uint_2 Function %13
-    %implict = OpVariable %_ptr_Function__arr_int_uint_2 Function %13
-         %15 = OpLoad %_arr_int_uint_2 %explicit
-               OpStore %implict %15
+%explicitStride = OpVariable %_ptr_Function__arr_int_uint_2 Function %13
+%implictStride = OpVariable %_ptr_Function__arr_int_uint_2 Function %13
+         %15 = OpLoad %_arr_int_uint_2 %explicitStride
+               OpStore %implictStride %15
                OpReturn
                OpFunctionEnd

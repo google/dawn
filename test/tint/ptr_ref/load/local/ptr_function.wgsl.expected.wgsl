@@ -2,5 +2,5 @@
 fn main() {
   var i : i32 = 123;
   let p : ptr<function, i32> = &(i);
-  let use : i32 = (*(p) + 1);
+  let u : i32 = (*(p) + 1);
 }

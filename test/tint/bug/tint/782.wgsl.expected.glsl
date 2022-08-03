@@ -5,8 +5,8 @@ void unused_entry_point() {
   return;
 }
 void foo() {
-  int explicit[2] = int[2](0, 0);
-  int implict[2] = int[2](0, 0);
-  implict = explicit;
+  int explicitStride[2] = int[2](0, 0);
+  int implictStride[2] = int[2](0, 0);
+  implictStride = explicitStride;
 }
 

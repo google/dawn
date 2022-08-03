@@ -7,5 +7,5 @@ struct S {
 @compute @workgroup_size(1)
 fn main() {
   let p : ptr<uniform, i32> = &(v.a);
-  let use : i32 = (*(p) + 1);
+  let u : i32 = (*(p) + 1);
 }

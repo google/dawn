@@ -4,7 +4,7 @@ void unused_entry_point() {
 }
 
 void foo() {
-  int tint_symbol[2] = (int[2])0;
-  int implict[2] = (int[2])0;
-  implict = tint_symbol;
+  int explicitStride[2] = (int[2])0;
+  int implictStride[2] = (int[2])0;
+  implictStride = explicitStride;
 }

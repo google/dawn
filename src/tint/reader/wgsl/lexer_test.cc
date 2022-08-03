@@ -1129,7 +1129,6 @@ INSTANTIATE_TEST_SUITE_P(
                     TokenData{"for", Token::Type::kFor},
                     TokenData{"i32", Token::Type::kI32},
                     TokenData{"if", Token::Type::kIf},
-                    TokenData{"import", Token::Type::kImport},
                     TokenData{"let", Token::Type::kLet},
                     TokenData{"loop", Token::Type::kLoop},
                     TokenData{"mat2x2", Token::Type::kMat2x2},
