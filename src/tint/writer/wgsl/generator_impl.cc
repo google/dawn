@@ -80,6 +80,7 @@ bool GeneratorImpl::Generate() {
                 [&](const ast::TypeDecl* td) { return EmitTypeDecl(td); },
                 [&](const ast::Function* func) { return EmitFunction(func); },
                 [&](const ast::Variable* var) { return EmitVariable(line(), var); },
+                [&](const ast::StaticAssert* sa) { return EmitStaticAssert(sa); },
                 [&](Default) {
                     TINT_UNREACHABLE(Writer, diagnostics_);
                     return false;
@@ -946,6 +947,7 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
         [&](const ast::ForLoopStatement* l) { return EmitForLoop(l); },
         [&](const ast::WhileStatement* l) { return EmitWhile(l); },
         [&](const ast::ReturnStatement* r) { return EmitReturn(r); },
+        [&](const ast::StaticAssert* s) { return EmitStaticAssert(s); },
         [&](const ast::SwitchStatement* s) { return EmitSwitch(s); },
         [&](const ast::VariableDeclStatement* v) { return EmitVariable(line(), v->variable); },
         [&](Default) {
@@ -1239,6 +1241,16 @@ bool GeneratorImpl::EmitReturn(const ast::ReturnStatement* stmt) {
         if (!EmitExpression(out, stmt->value)) {
             return false;
         }
+    }
+    out << ";";
+    return true;
+}
+
+bool GeneratorImpl::EmitStaticAssert(const ast::StaticAssert* stmt) {
+    auto out = line();
+    out << "static_assert ";
+    if (!EmitExpression(out, stmt->condition)) {
+        return false;
     }
     out << ";";
     return true;

@@ -275,12 +275,8 @@ bool GeneratorImpl::Generate() {
 
     auto* mod = builder_.Sem().Module();
     for (auto* decl : mod->DependencyOrderedDeclarations()) {
-        if (decl->Is<ast::Alias>()) {
-            continue;  // Ignore aliases.
-        }
-        if (decl->Is<ast::Enable>()) {
-            // Currently we don't have to do anything for using a extension in HLSL.
-            continue;
+        if (decl->IsAnyOf<ast::Alias, ast::Enable, ast::StaticAssert>()) {
+            continue;  // These are not emitted.
         }
 
         // Emit a new line between declarations if the type of declaration has
@@ -3645,6 +3641,9 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
                         << "unknown variable type: " << v->variable->TypeInfo().name;
                     return false;
                 });
+        },
+        [&](const ast::StaticAssert*) {
+            return true;  // Not emitted
         },
         [&](Default) {  //
             diagnostics_.add_error(diag::System::Writer,

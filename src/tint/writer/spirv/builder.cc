@@ -3723,12 +3723,8 @@ bool Builder::GenerateLoopStatement(const ast::LoopStatement* stmt) {
 bool Builder::GenerateStatement(const ast::Statement* stmt) {
     return Switch(
         stmt, [&](const ast::AssignmentStatement* a) { return GenerateAssignStatement(a); },
-        [&](const ast::BlockStatement* b) {  //
-            return GenerateBlockStatement(b);
-        },
-        [&](const ast::BreakStatement* b) {  //
-            return GenerateBreakStatement(b);
-        },
+        [&](const ast::BlockStatement* b) { return GenerateBlockStatement(b); },
+        [&](const ast::BreakStatement* b) { return GenerateBreakStatement(b); },
         [&](const ast::CallStatement* c) { return GenerateCallExpression(c->expr) != 0; },
         [&](const ast::ContinueStatement* c) { return GenerateContinueStatement(c); },
         [&](const ast::DiscardStatement* d) { return GenerateDiscardStatement(d); },
@@ -3736,19 +3732,14 @@ bool Builder::GenerateStatement(const ast::Statement* stmt) {
             // Do nothing here, the fallthrough gets handled by the switch code.
             return true;
         },
-        [&](const ast::IfStatement* i) {  //
-            return GenerateIfStatement(i);
-        },
-        [&](const ast::LoopStatement* l) {  //
-            return GenerateLoopStatement(l);
-        },
-        [&](const ast::ReturnStatement* r) {  //
-            return GenerateReturnStatement(r);
-        },
-        [&](const ast::SwitchStatement* s) {  //
-            return GenerateSwitchStatement(s);
-        },
+        [&](const ast::IfStatement* i) { return GenerateIfStatement(i); },
+        [&](const ast::LoopStatement* l) { return GenerateLoopStatement(l); },
+        [&](const ast::ReturnStatement* r) { return GenerateReturnStatement(r); },
+        [&](const ast::SwitchStatement* s) { return GenerateSwitchStatement(s); },
         [&](const ast::VariableDeclStatement* v) { return GenerateVariableDeclStatement(v); },
+        [&](const ast::StaticAssert*) {
+            return true;  // Not emitted
+        },
         [&](Default) {
             error_ = "Unknown statement: " + std::string(stmt->TypeInfo().name);
             return false;

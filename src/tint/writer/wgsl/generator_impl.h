@@ -165,6 +165,10 @@ class GeneratorImpl : public TextGenerator {
     /// @param stmt the statement to emit
     /// @returns true if the statement was successfully emitted
     bool EmitReturn(const ast::ReturnStatement* stmt);
+    /// Handles static assertion statements
+    /// @param stmt the statement to emit
+    /// @returns true if the statement was successfully emitted
+    bool EmitStaticAssert(const ast::StaticAssert* stmt);
     /// Handles statement
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted

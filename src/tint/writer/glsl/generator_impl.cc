@@ -273,8 +273,8 @@ bool GeneratorImpl::Generate() {
 
     auto* mod = builder_.Sem().Module();
     for (auto* decl : mod->DependencyOrderedDeclarations()) {
-        if (decl->Is<ast::Alias>()) {
-            continue;  // Ignore aliases.
+        if (decl->IsAnyOf<ast::Alias, ast::StaticAssert>()) {
+            continue;  // These are not emitted.
         }
 
         if (auto* global = decl->As<ast::Variable>()) {
@@ -2652,69 +2652,53 @@ bool GeneratorImpl::EmitReturn(const ast::ReturnStatement* stmt) {
 }
 
 bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
-    if (auto* a = stmt->As<ast::AssignmentStatement>()) {
-        return EmitAssign(a);
-    }
-    if (auto* b = stmt->As<ast::BlockStatement>()) {
-        return EmitBlock(b);
-    }
-    if (auto* b = stmt->As<ast::BreakStatement>()) {
-        return EmitBreak(b);
-    }
-    if (auto* c = stmt->As<ast::CallStatement>()) {
-        auto out = line();
-        if (!EmitCall(out, c->expr)) {
-            return false;
-        }
-        out << ";";
-        return true;
-    }
-    if (auto* c = stmt->As<ast::ContinueStatement>()) {
-        return EmitContinue(c);
-    }
-    if (auto* d = stmt->As<ast::DiscardStatement>()) {
-        return EmitDiscard(d);
-    }
-    if (stmt->As<ast::FallthroughStatement>()) {
-        line() << "/* fallthrough */";
-        return true;
-    }
-    if (auto* i = stmt->As<ast::IfStatement>()) {
-        return EmitIf(i);
-    }
-    if (auto* l = stmt->As<ast::LoopStatement>()) {
-        return EmitLoop(l);
-    }
-    if (auto* l = stmt->As<ast::ForLoopStatement>()) {
-        return EmitForLoop(l);
-    }
-    if (auto* l = stmt->As<ast::WhileStatement>()) {
-        return EmitWhile(l);
-    }
-    if (auto* r = stmt->As<ast::ReturnStatement>()) {
-        return EmitReturn(r);
-    }
-    if (auto* s = stmt->As<ast::SwitchStatement>()) {
-        return EmitSwitch(s);
-    }
-    if (auto* v = stmt->As<ast::VariableDeclStatement>()) {
-        return Switch(
-            v->variable,  //
-            [&](const ast::Var* var) { return EmitVar(var); },
-            [&](const ast::Let* let) { return EmitLet(let); },
-            [&](const ast::Const*) {
-                return true;  // Constants are embedded at their use
-            },
-            [&](Default) {  //
-                TINT_ICE(Writer, diagnostics_)
-                    << "unknown variable type: " << v->variable->TypeInfo().name;
+    return Switch(
+        stmt,  //
+        [&](const ast::AssignmentStatement* a) { return EmitAssign(a); },
+        [&](const ast::BlockStatement* b) { return EmitBlock(b); },
+        [&](const ast::BreakStatement* b) { return EmitBreak(b); },
+        [&](const ast::CallStatement* c) {
+            auto out = line();
+            if (!EmitCall(out, c->expr)) {
                 return false;
-            });
-    }
-
-    diagnostics_.add_error(diag::System::Writer,
-                           "unknown statement type: " + std::string(stmt->TypeInfo().name));
-    return false;
+            }
+            out << ";";
+            return true;
+        },
+        [&](const ast::ContinueStatement* c) { return EmitContinue(c); },
+        [&](const ast::DiscardStatement* d) { return EmitDiscard(d); },
+        [&](const ast::FallthroughStatement*) {
+            line() << "/* fallthrough */";
+            return true;
+        },
+        [&](const ast::IfStatement* i) { return EmitIf(i); },
+        [&](const ast::LoopStatement* l) { return EmitLoop(l); },
+        [&](const ast::ForLoopStatement* l) { return EmitForLoop(l); },
+        [&](const ast::WhileStatement* l) { return EmitWhile(l); },
+        [&](const ast::ReturnStatement* r) { return EmitReturn(r); },
+        [&](const ast::SwitchStatement* s) { return EmitSwitch(s); },
+        [&](const ast::VariableDeclStatement* v) {
+            return Switch(
+                v->variable,  //
+                [&](const ast::Var* var) { return EmitVar(var); },
+                [&](const ast::Let* let) { return EmitLet(let); },
+                [&](const ast::Const*) {
+                    return true;  // Constants are embedded at their use
+                },
+                [&](Default) {  //
+                    TINT_ICE(Writer, diagnostics_)
+                        << "unknown variable type: " << v->variable->TypeInfo().name;
+                    return false;
+                });
+        },
+        [&](const ast::StaticAssert*) {
+            return true;  // Not emitted
+        },
+        [&](Default) {
+            diagnostics_.add_error(diag::System::Writer,
+                                   "unknown statement type: " + std::string(stmt->TypeInfo().name));
+            return false;
+        });
 }
 
 bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {

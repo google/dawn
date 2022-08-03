@@ -286,6 +286,9 @@ bool GeneratorImpl::Generate() {
                 // Do nothing for enabling extension in MSL
                 return true;
             },
+            [&](const ast::StaticAssert*) {
+                return true;  // Not emitted
+            },
             [&](Default) {
                 // These are pushed into the entry point by sanitizer transforms.
                 TINT_ICE(Writer, diagnostics_) << "unhandled type: " << decl->TypeInfo().name;
@@ -2418,6 +2421,9 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
                         << "unknown statement type: " << stmt->TypeInfo().name;
                     return false;
                 });
+        },
+        [&](const ast::StaticAssert*) {
+            return true;  // Not emitted
         },
         [&](Default) {
             diagnostics_.add_error(diag::System::Writer,
