@@ -123,17 +123,17 @@ class TemplateState {
     /// If none of the above applies, then `ty` is a type mismatch for the template type, and
     /// nullptr is returned.
     const sem::Type* Type(size_t idx, const sem::Type* ty) {
-        auto res = types_.emplace(idx, ty);
-        if (res.second) {
+        if (idx >= types_.Length()) {
+            types_.Resize(idx + 1);
+        }
+        auto& t = types_[idx];
+        if (t == nullptr) {
+            t = ty;
             return ty;
         }
-        auto* existing = res.first->second;
-        if (existing == ty) {
-            return ty;
-        }
-        ty = sem::Type::Common(utils::Vector{existing, ty});
+        ty = sem::Type::Common(utils::Vector{t, ty});
         if (ty) {
-            res.first->second = ty;
+            t = ty;
         }
         return ty;
     }
@@ -142,28 +142,44 @@ class TemplateState {
     /// Num() returns true. If the number is defined, then `Num()` returns true iff it is equal to
     /// `ty`.
     bool Num(size_t idx, Number number) {
-        auto res = numbers_.emplace(idx, number.Value());
-        return res.second || res.first->second == number.Value();
+        if (idx >= numbers_.Length()) {
+            numbers_.Resize(idx + 1, Number::invalid);
+        }
+        auto& n = numbers_[idx];
+        if (!n.IsValid()) {
+            n = number.Value();
+            return true;
+        }
+        return n.Value() == number.Value();
     }
 
     /// Type returns the template type with index `idx`, or nullptr if the type was not defined.
     const sem::Type* Type(size_t idx) const {
-        auto it = types_.find(idx);
-        return (it != types_.end()) ? it->second : nullptr;
+        if (idx >= types_.Length()) {
+            return nullptr;
+        }
+        return types_[idx];
     }
 
     /// SetType replaces the template type with index `idx` with type `ty`.
-    void SetType(size_t idx, const sem::Type* ty) { types_[idx] = ty; }
+    void SetType(size_t idx, const sem::Type* ty) {
+        if (idx >= types_.Length()) {
+            types_.Resize(idx + 1);
+        }
+        types_[idx] = ty;
+    }
 
     /// Type returns the number type with index `idx`.
     Number Num(size_t idx) const {
-        auto it = numbers_.find(idx);
-        return (it != numbers_.end()) ? Number(it->second) : Number::invalid;
+        if (idx >= numbers_.Length()) {
+            return Number::invalid;
+        }
+        return numbers_[idx];
     }
 
   private:
-    std::unordered_map<size_t, const sem::Type*> types_;
-    std::unordered_map<size_t, uint32_t> numbers_;
+    utils::Vector<const sem::Type*, 4> types_;
+    utils::Vector<Number, 2> numbers_;
 };
 
 /// Index type used for matcher indices
