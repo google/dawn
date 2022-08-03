@@ -32,6 +32,7 @@
 #include "spirv-tools/libspirv.hpp"
 #endif  // TINT_BUILD_SPV_READER
 
+#include "src/tint/ast/module.h"
 #include "src/tint/utils/io/command.h"
 #include "src/tint/utils/string.h"
 #include "src/tint/utils/transform.h"
@@ -820,7 +821,18 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
                 tint::utils::Command::LookPath(options.dxc_path.empty() ? "dxc" : options.dxc_path);
             if (dxc.Found()) {
                 dxc_found = true;
-                dxc_res = tint::val::HlslUsingDXC(dxc.Path(), result.hlsl, result.entry_points);
+
+                auto enable_list = program->AST().Enables();
+                bool dxc_require_16bit_types = false;
+                for (auto enable : enable_list) {
+                    if (enable->extension == tint::ast::Extension::kF16) {
+                        dxc_require_16bit_types = true;
+                        break;
+                    }
+                }
+
+                dxc_res = tint::val::HlslUsingDXC(dxc.Path(), result.hlsl, result.entry_points,
+                                                  dxc_require_16bit_types);
             } else if (must_validate_dxc) {
                 // DXC was explicitly requested. Error if it could not be found.
                 dxc_res.failed = true;

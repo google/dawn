@@ -49,7 +49,8 @@ struct Result {
 /// @return the result of the compile
 Result HlslUsingDXC(const std::string& dxc_path,
                     const std::string& source,
-                    const EntryPointList& entry_points);
+                    const EntryPointList& entry_points,
+                    bool require_16bit_types);
 
 #ifdef _WIN32
 /// Hlsl attempts to compile the shader with FXC, verifying that the shader

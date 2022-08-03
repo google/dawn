@@ -1,0 +1,15 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct S {
+  half3 v;
+};
+
+void f() {
+  thread S tint_symbol = {};
+  tint_symbol.v = half3(1.0h, 2.0h, 3.0h);
+  tint_symbol.v[0] = 1.0h;
+  tint_symbol.v[1] = 2.0h;
+  tint_symbol.v[2] = 3.0h;
+}
+

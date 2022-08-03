@@ -1,0 +1,8 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void f() {
+  half4x3 m = half4x3(half3(0.0h), half3(0.0h), half3(0.0h), half3(0.0h));
+  half4x3 const m_1 = half4x3(m);
+}
+

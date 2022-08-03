@@ -1,0 +1,9 @@
+#include <metal_stdlib>
+
+using namespace metal;
+half4x2 f() {
+  thread half4x2 tint_symbol = half4x2(half2(0.0h, 1.0h), half2(2.0h, 3.0h), half2(4.0h, 5.0h), half2(6.0h, 7.0h));
+  half4x2 const m_1 = half4x2(tint_symbol);
+  return m_1;
+}
+

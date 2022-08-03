@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <string>
+
 #include "src/tint/val/val.h"
 
 #include "src/tint/utils/io/command.h"
@@ -31,7 +33,8 @@ namespace tint::val {
 
 Result HlslUsingDXC(const std::string& dxc_path,
                     const std::string& source,
-                    const EntryPointList& entry_points) {
+                    const EntryPointList& entry_points,
+                    bool require_16bit_types) {
     Result result;
 
     auto dxc = utils::Command(dxc_path);
@@ -41,11 +44,14 @@ Result HlslUsingDXC(const std::string& dxc_path,
         return result;
     }
 
+    // Native 16-bit types, e.g. float16_t, require SM6.2. Otherwise we use SM6.0.
+    const char* shader_model_version = require_16bit_types ? "6_2" : "6_0";
+
     utils::TmpFile file;
     file << source;
 
     for (auto ep : entry_points) {
-        const char* profile = "";
+        const char* stage_prefix = "";
 
         switch (ep.second) {
             case ast::PipelineStage::kNone:
@@ -53,20 +59,27 @@ Result HlslUsingDXC(const std::string& dxc_path,
                 result.failed = true;
                 return result;
             case ast::PipelineStage::kVertex:
-                profile = "-T vs_6_0";
+                stage_prefix = "vs";
                 break;
             case ast::PipelineStage::kFragment:
-                profile = "-T ps_6_0";
+                stage_prefix = "ps";
                 break;
             case ast::PipelineStage::kCompute:
-                profile = "-T cs_6_0";
+                stage_prefix = "cs";
                 break;
+        }
+
+        std::string profile =
+            "-T " + std::string(stage_prefix) + "_" + std::string(shader_model_version);
+        if (require_16bit_types) {
+            // Add "-enable-16bit-types" flag if required
+            profile = profile + " -enable-16bit-types";
         }
 
         // Match Dawn's compile flags
         // See dawn\src\dawn_native\d3d12\RenderPipelineD3D12.cpp
         // and dawn_native\d3d12\ShaderModuleD3D12.cpp (GetDXCArguments)
-        auto res = dxc(profile,
+        auto res = dxc(profile.c_str(),
                        "-E " + ep.first,  // Entry point
                        "/Zpr",            // D3DCOMPILE_PACK_MATRIX_ROW_MAJOR
                        "/Gis",            // D3DCOMPILE_IEEE_STRICTNESS
