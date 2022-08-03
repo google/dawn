@@ -489,6 +489,10 @@ struct DependencyAnalysis {
     /// #diagnostics.
     /// @returns true if analysis found no errors, otherwise false.
     bool Run(const ast::Module& module) {
+        // Reserve container memory
+        graph_.resolved_symbols.reserve(module.GlobalDeclarations().Length());
+        sorted_.reserve(module.GlobalDeclarations().Length());
+
         // Collect all the named globals from the AST module
         GatherGlobals(module);
 

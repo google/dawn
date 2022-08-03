@@ -93,6 +93,13 @@ struct UniqueVector {
     /// @returns a const reference to the internal vector
     operator const std::vector<T>&() const { return vector; }
 
+    /// Pre-allocates `count` elements in the vector and set
+    /// @param count the number of elements to pre-allocate
+    void reserve(size_t count) {
+        vector.reserve(count);
+        set.reserve(count);
+    }
+
     /// Removes the last element from the vector
     /// @returns the popped element
     T pop_back() {
