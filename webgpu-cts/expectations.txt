@@ -487,6 +487,8 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 win10 ] webgpu:sh
 crbug.com/dawn/0000 [ amd-0x6821 ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="uniform";vectorize=2 [ Failure ]
 crbug.com/dawn/0000 [ amd-0x6821 ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="uniform";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ amd-0x6821 ] webgpu:shader,execution,expression,call,builtin,min:f32:inputSource="uniform";vectorize=4 [ Failure ]
+crbug.com/tint/1632 [ linux ] webgpu:shader,execution,robust_access:linear_memory:storageClass="uniform";access="read";dynamicOffset=false;containerType="matrix";isAtomic=false [ Failure ]
+crbug.com/tint/1632 [ linux ] webgpu:shader,execution,robust_access:linear_memory:storageClass="uniform";access="read";dynamicOffset=true;containerType="matrix";isAtomic=false [ Failure ]
 crbug.com/tint/1500 [ nvidia-0x2184 win10 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":1,"y":1,"z":1} [ Failure ]
 crbug.com/tint/1500 [ nvidia-0x2184 win10 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":8,"y":4,"z":2} [ Failure ]
 crbug.com/tint/1500 [ nvidia-0x2184 win10 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":3,"y":7,"z":5};numGroups={"x":13,"y":9,"z":11} [ Failure ]
