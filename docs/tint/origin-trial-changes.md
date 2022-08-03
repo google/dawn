@@ -5,6 +5,7 @@
 ### New features
 
 * `array()` constructor can now infer type and count. [tint:1628](crbug.com/tint/1628)
+* `static_assert` statement has been added. [tint:1625](crbug.com/tint/1625)
 
 ## Changes for M105
 
