@@ -1276,7 +1276,7 @@ sem::WhileStatement* Resolver::WhileStatement(const ast::WhileStatement* stmt) {
 }
 
 sem::Expression* Resolver::Expression(const ast::Expression* root) {
-    utils::Vector<const ast::Expression*, 128> sorted;
+    utils::Vector<const ast::Expression*, 64> sorted;
     constexpr size_t kMaxExpressionDepth = 512U;
     bool failed = false;
     if (!ast::TraverseExpressions<ast::TraverseOrder::RightToLeft>(

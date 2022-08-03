@@ -68,7 +68,7 @@ bool TraverseExpressions(const ast::Expression* root, diag::List& diags, CALLBAC
         size_t depth;
     };
 
-    utils::Vector<Pending, 64> to_visit{{root, 0}};
+    utils::Vector<Pending, 32> to_visit{{root, 0}};
 
     auto push_single = [&](const ast::Expression* expr, size_t depth) {
         to_visit.Push({expr, depth});
