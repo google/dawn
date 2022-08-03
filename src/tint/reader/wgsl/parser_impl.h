@@ -472,6 +472,9 @@ class ParserImpl {
     /// @param use a description of what was being parsed if an error was raised
     /// @returns returns the texel format or kNone if none matched.
     Expect<ast::TexelFormat> expect_texel_format(std::string_view use);
+    /// Parses a `static_assert_statement` grammar element
+    /// @returns returns the static assert, if it matched.
+    Maybe<const ast::StaticAssert*> static_assert_stmt();
     /// Parses a `function_header` grammar element
     /// @returns the parsed function header
     Maybe<FunctionHeader> function_header();

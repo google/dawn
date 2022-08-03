@@ -306,6 +306,51 @@ fn f() { for (var i : i32 = 0; i < 8; i=i+1) {
 )");
 }
 
+TEST_F(ParserImplErrorTest, FunctionDeclStaticAssertMissingCondThenEOF) {
+    EXPECT("fn f() { static_assert }", R"(test.wgsl:1:24 error: unable to parse condition expression
+fn f() { static_assert }
+                       ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, FunctionDeclStaticAssertMissingCondThenSemicolon) {
+    EXPECT("fn f() { static_assert; }",
+           R"(test.wgsl:1:23 error: unable to parse condition expression
+fn f() { static_assert; }
+                      ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, FunctionDeclStaticAssertMissingCondThenLet) {
+    EXPECT("fn f() { static_assert\nlet x = 0; }",
+           R"(test.wgsl:2:1 error: unable to parse condition expression
+let x = 0; }
+^^^
+)");
+}
+
+TEST_F(ParserImplErrorTest, FunctionDeclStaticAssertMissingLParen) {
+    EXPECT("fn f() { static_assert true);", R"(test.wgsl:1:28 error: expected ';' for statement
+fn f() { static_assert true);
+                           ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, FunctionDeclStaticAssertMissingRParen) {
+    EXPECT("fn f() { static_assert (true;", R"(test.wgsl:1:29 error: expected ')'
+fn f() { static_assert (true;
+                            ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, FunctionDeclStaticAssertMissingSemicolon) {
+    EXPECT("fn f() { static_assert true }",
+           R"(test.wgsl:1:29 error: expected ';' for statement
+fn f() { static_assert true }
+                            ^
+)");
+}
+
 // TODO(crbug.com/tint/1503): Remove this when @stage is removed
 TEST_F(ParserImplErrorTest, FunctionDeclStageMissingLParen) {
     EXPECT("@stage vertex) fn f() {}",
@@ -694,6 +739,50 @@ TEST_F(ParserImplErrorTest, GlobalDeclMultisampledTextureInvalidSubtype) {
            R"(test.wgsl:1:33 error: invalid type for multisampled texture type
 var x : texture_multisampled_2d<1>;
                                 ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclStaticAssertMissingCondThenEOF) {
+    EXPECT("static_assert", R"(test.wgsl:1:14 error: unable to parse condition expression
+static_assert
+             ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclStaticAssertMissingCondThenSemicolon) {
+    EXPECT("static_assert;", R"(test.wgsl:1:14 error: unable to parse condition expression
+static_assert;
+             ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclStaticAssertMissingCondThenAlias) {
+    EXPECT("static_assert\ntype T = i32;",
+           R"(test.wgsl:2:1 error: unable to parse condition expression
+type T = i32;
+^^^^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclStaticAssertMissingLParen) {
+    EXPECT("static_assert true);", R"(test.wgsl:1:19 error: expected ';' for static assertion declaration
+static_assert true);
+                  ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclStaticAssertMissingRParen) {
+    EXPECT("static_assert (true;", R"(test.wgsl:1:20 error: expected ')'
+static_assert (true;
+                   ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclStaticAssertMissingSemicolon) {
+    EXPECT("static_assert true static_assert true;",
+           R"(test.wgsl:1:20 error: expected ';' for static assertion declaration
+static_assert true static_assert true;
+                   ^^^^^^^^^^^^^
 )");
 }
 

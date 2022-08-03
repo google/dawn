@@ -1243,6 +1243,9 @@ Token Lexer::check_keyword(const Source& source, std::string_view str) {
     if (str == "sampler_comparison") {
         return {Token::Type::kComparisonSampler, source, "sampler_comparison"};
     }
+    if (str == "static_assert") {
+        return {Token::Type::kStaticAssert, source, "static_assert"};
+    }
     if (str == "struct") {
         return {Token::Type::kStruct, source, "struct"};
     }

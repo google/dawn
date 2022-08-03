@@ -1145,6 +1145,7 @@ INSTANTIATE_TEST_SUITE_P(
                     TokenData{"return", Token::Type::kReturn},
                     TokenData{"sampler", Token::Type::kSampler},
                     TokenData{"sampler_comparison", Token::Type::kComparisonSampler},
+                    TokenData{"static_assert", Token::Type::kStaticAssert},
                     TokenData{"struct", Token::Type::kStruct},
                     TokenData{"switch", Token::Type::kSwitch},
                     TokenData{"texture_1d", Token::Type::kTextureSampled1d},
