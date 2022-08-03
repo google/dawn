@@ -200,7 +200,9 @@ Command::Output Command::Exec(std::initializer_list<std::string> arguments) cons
     std::stringstream args;
     args << path_;
     for (auto& arg : arguments) {
-        args << " " << arg;
+        if (!arg.empty()) {
+            args << " " << arg;
+        }
     }
 
     PROCESS_INFORMATION pi{};

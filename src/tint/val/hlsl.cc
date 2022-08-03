@@ -69,21 +69,16 @@ Result HlslUsingDXC(const std::string& dxc_path,
                 break;
         }
 
-        std::string profile =
-            "-T " + std::string(stage_prefix) + "_" + std::string(shader_model_version);
-        if (require_16bit_types) {
-            // Add "-enable-16bit-types" flag if required
-            profile = profile + " -enable-16bit-types";
-        }
-
         // Match Dawn's compile flags
         // See dawn\src\dawn_native\d3d12\RenderPipelineD3D12.cpp
         // and dawn_native\d3d12\ShaderModuleD3D12.cpp (GetDXCArguments)
-        auto res = dxc(profile.c_str(),
-                       "-E " + ep.first,  // Entry point
-                       "/Zpr",            // D3DCOMPILE_PACK_MATRIX_ROW_MAJOR
-                       "/Gis",            // D3DCOMPILE_IEEE_STRICTNESS
-                       file.Path());
+        auto res = dxc(
+            "-T " + std::string(stage_prefix) + "_" + std::string(shader_model_version),  // Profile
+            "-E " + ep.first,                                  // Entry point
+            "/Zpr",                                            // D3DCOMPILE_PACK_MATRIX_ROW_MAJOR
+            "/Gis",                                            // D3DCOMPILE_IEEE_STRICTNESS
+            require_16bit_types ? "-enable-16bit-types" : "",  // Enable 16-bit if required
+            file.Path());
         if (!res.out.empty()) {
             if (!result.output.empty()) {
                 result.output += "\n";
