@@ -20,7 +20,7 @@ namespace {
 TEST_F(ParserImplTest, TypeDecl_ParsesType) {
     auto p = parser("type a = i32");
 
-    auto t = p->type_alias();
+    auto t = p->type_alias_decl();
     EXPECT_FALSE(p->has_error());
     EXPECT_FALSE(t.errored);
     EXPECT_TRUE(t.matched);
@@ -35,7 +35,7 @@ TEST_F(ParserImplTest, TypeDecl_ParsesType) {
 TEST_F(ParserImplTest, TypeDecl_Parses_Ident) {
     auto p = parser("type a = B");
 
-    auto t = p->type_alias();
+    auto t = p->type_alias_decl();
     EXPECT_FALSE(p->has_error());
     EXPECT_FALSE(t.errored);
     EXPECT_TRUE(t.matched);
@@ -54,7 +54,7 @@ TEST_F(ParserImplTest, TypeDecl_Unicode_Parses_Ident) {
 
     auto p = parser("type " + ident + " = i32");
 
-    auto t = p->type_alias();
+    auto t = p->type_alias_decl();
     EXPECT_FALSE(p->has_error());
     EXPECT_FALSE(t.errored);
     EXPECT_TRUE(t.matched);
@@ -68,7 +68,7 @@ TEST_F(ParserImplTest, TypeDecl_Unicode_Parses_Ident) {
 
 TEST_F(ParserImplTest, TypeDecl_MissingIdent) {
     auto p = parser("type = i32");
-    auto t = p->type_alias();
+    auto t = p->type_alias_decl();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     EXPECT_TRUE(p->has_error());
@@ -78,7 +78,7 @@ TEST_F(ParserImplTest, TypeDecl_MissingIdent) {
 
 TEST_F(ParserImplTest, TypeDecl_InvalidIdent) {
     auto p = parser("type 123 = i32");
-    auto t = p->type_alias();
+    auto t = p->type_alias_decl();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     EXPECT_TRUE(p->has_error());
@@ -88,7 +88,7 @@ TEST_F(ParserImplTest, TypeDecl_InvalidIdent) {
 
 TEST_F(ParserImplTest, TypeDecl_MissingEqual) {
     auto p = parser("type a i32");
-    auto t = p->type_alias();
+    auto t = p->type_alias_decl();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     EXPECT_TRUE(p->has_error());

@@ -420,9 +420,9 @@ class ParserImpl {
     /// Parses a `variable_qualifier` grammar element
     /// @returns the variable qualifier information
     Maybe<VariableQualifier> variable_qualifier();
-    /// Parses a `type_alias` grammar element
+    /// Parses a `type_alias_decl` grammar element
     /// @returns the type alias or nullptr on error
-    Maybe<const ast::Alias*> type_alias();
+    Maybe<const ast::Alias*> type_alias_decl();
     /// Parses a `type_decl` grammar element
     /// @returns the parsed Type or nullptr if none matched.
     Maybe<const ast::Type*> type_decl();

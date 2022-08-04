@@ -440,7 +440,7 @@ Maybe<bool> ParserImpl::enable_directive() {
 //  : SEMICOLON
 //  | global_variable_decl SEMICOLON
 //  | global_constant_decl SEMICOLON
-//  | type_alias SEMICOLON
+//  | type_alias_decl SEMICOLON
 //  | struct_decl
 //  | function_decl
 //  | static_assert_statement SEMICOLON
@@ -450,7 +450,6 @@ Maybe<bool> ParserImpl::global_decl() {
     }
 
     bool errored = false;
-
     auto attrs = attribute_list();
     if (attrs.errored) {
         errored = true;
@@ -490,7 +489,7 @@ Maybe<bool> ParserImpl::global_decl() {
             return true;
         }
 
-        auto ta = type_alias();
+        auto ta = type_alias_decl();
         if (ta.errored) {
             return Failure::kErrored;
         }
@@ -500,15 +499,6 @@ Maybe<bool> ParserImpl::global_decl() {
             }
 
             builder_.AST().AddTypeDecl(ta.value);
-            return true;
-        }
-
-        auto str = struct_decl();
-        if (str.errored) {
-            return Failure::kErrored;
-        }
-        if (str.matched) {
-            builder_.AST().AddTypeDecl(str.value);
             return true;
         }
 
@@ -532,6 +522,15 @@ Maybe<bool> ParserImpl::global_decl() {
     }
     if (decl.matched) {
         return expect_attributes_consumed(attrs.value);
+    }
+
+    auto str = struct_decl();
+    if (str.errored) {
+        errored = true;
+    }
+    if (str.matched) {
+        builder_.AST().AddTypeDecl(str.value);
+        return true;
     }
 
     auto func = function_decl(attrs.value);
@@ -1021,9 +1020,9 @@ Maybe<ParserImpl::VariableQualifier> ParserImpl::variable_qualifier() {
     return vq;
 }
 
-// type_alias
+// type_alias_decl
 //   : TYPE IDENT EQUAL type_decl
-Maybe<const ast::Alias*> ParserImpl::type_alias() {
+Maybe<const ast::Alias*> ParserImpl::type_alias_decl() {
     if (!peek_is(Token::Type::kType)) {
         return Failure::kNoMatch;
     }
