@@ -65,27 +65,29 @@
 
 ################################################################################
 # webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero
-# Unexpected failures on mac.
+# Flakes on Windows Intel. depth32float-stencil8 and stencil8 fail consistently.
+# Marked all as failing to avoid expectation overlap with `dimension="2d";*`
+# and `dimension="2d";moreParams...`
 # KEEP
 ################################################################################
-crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth16unorm" [ Failure ]
-crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
-crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth16unorm" [ Failure ]
-crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
-crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth16unorm" [ Failure ]
-crbug.com/dawn/1389 [ mac ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="stencil8" [ Failure ]
+crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";* [ Failure ]
 
 ################################################################################
-# webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero
-# Unexpected failures on windows.
+# webgpu:web_platform,copyToTexture,ImageBitmap flakes on Windows Intel with rgba32float and rg32float formats
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 [ intel win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth16unorm" [ Failure ]
-crbug.com/dawn/0000 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ intel win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation intel win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
-crbug.com/dawn/0000 [ win ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";* [ Failure ]
+crbug.com/1343969 [ intel-gen-9 win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="flipY";srcDoFlipYDuringCopy=false;dstColorFormat="rgba32float";* [ RetryOnFailure ]
+crbug.com/1343969 [ intel-gen-9 win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="flipY";srcDoFlipYDuringCopy=true;dstColorFormat="rgba32float";* [ RetryOnFailure ]
+crbug.com/1343969 [ intel-gen-9 win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";srcDoFlipYDuringCopy=true;dstColorFormat="rg32float";* [ RetryOnFailure ]
+crbug.com/1343969 [ intel-gen-9 win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";srcDoFlipYDuringCopy=false;dstColorFormat="rg32float";* [ RetryOnFailure ]
+crbug.com/1343969 [ intel-gen-9 win10 webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="flipY";srcDoFlipYDuringCopy=false;dstColorFormat="rgba32float";* [ RetryOnFailure ]
+crbug.com/1343969 [ intel-gen-9 win10 webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="flipY";srcDoFlipYDuringCopy=true;dstColorFormat="rgba32float";* [ RetryOnFailure ]
+crbug.com/1343969 [ intel-gen-9 win10 webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";srcDoFlipYDuringCopy=true;dstColorFormat="rg32float";* [ RetryOnFailure ]
+crbug.com/1343969 [ intel-gen-9 win10 webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";srcDoFlipYDuringCopy=false;dstColorFormat="rg32float";* [ RetryOnFailure ]
+crbug.com/1343969 [ intel-gen-9 win10 webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="flipY";srcDoFlipYDuringCopy=false;dstColorFormat="rgba32float";* [ Failure ]
+crbug.com/1343969 [ intel-gen-9 win10 webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="flipY";srcDoFlipYDuringCopy=true;dstColorFormat="rgba32float";* [ Failure ]
+crbug.com/1343969 [ intel-gen-9 win10 webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";srcDoFlipYDuringCopy=true;dstColorFormat="rg32float";* [ Failure ]
+crbug.com/1343969 [ intel-gen-9 win10 webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";srcDoFlipYDuringCopy=false;dstColorFormat="rg32float";* [ Failure ]
 
 ################################################################################
 # copyToTexture failures on Linux
@@ -113,10 +115,32 @@ crbug.com/1344876 [ mac webgpu-adapter-swiftshader ] webgpu:web_platform,copyToT
 crbug.com/1344876 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Skip ]
 
 ################################################################################
+# copyToTexture failures with incorrect values on Mac Intel
+# KEEP
+################################################################################
+crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r32float";dstFormat="r32float";dimension="2d" [ Failure ]
+crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg11b10ufloat";dstFormat="rg11b10ufloat";dimension="2d" [ Failure ]
+crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg16float";dstFormat="rg16float";dimension="2d" [ Failure ]
+crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg32float";dstFormat="rg32float";dimension="2d" [ Failure ]
+crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba16float";dstFormat="rgba16float";dimension="2d" [ Failure ]
+crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba32float";dstFormat="rgba32float";dimension="2d" [ Failure ]
+crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r32float";dstFormat="r32float";dimension="2d" [ Failure ]
+crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg11b10ufloat";dstFormat="rg11b10ufloat";dimension="2d" [ Failure ]
+crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg16float";dstFormat="rg16float";dimension="2d" [ Failure ]
+crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg32float";dstFormat="rg32float";dimension="2d" [ Failure ]
+crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba16float";dstFormat="rgba16float";dimension="2d" [ Failure ]
+crbug.com/dawn/1107 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba32float";dstFormat="rgba32float";dimension="2d" [ Failure ]
+crbug.com/dawn/1047 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="r8snorm";* [ Failure ]
+crbug.com/dawn/1047 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg8snorm";* [ Failure ]
+crbug.com/dawn/1047 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rgba8snorm";* [ Failure ]
+crbug.com/dawn/1047 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="r8snorm";* [ Failure ]
+crbug.com/dawn/1047 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rg8snorm";* [ Failure ]
+crbug.com/dawn/1047 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,non_array:srcFormat="rgba8snorm";* [ Failure ]
+
+################################################################################
 # copyToTexture failures. Needs investigation
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 [ intel mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,* [ Failure ]
 crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg16sint";dstFormat="rg16sint";dimension="2d" [ Failure ]
 crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg16uint";dstFormat="rg16uint";dimension="2d" [ Failure ]
 crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextureToTexture:color_textures,non_compressed,array:srcFormat="rg32float";dstFormat="rg32float";dimension="2d" [ Failure ]
@@ -179,20 +203,10 @@ crbug.com/dawn/0000 [ win ] webgpu:shader,execution,robust_access:linear_memory:
 # webgpu:shader,execution,robust_access
 # Failures - mac, linux
 ################################################################################
-crbug.com/dawn/0000 [ amd-0x6821 ] webgpu:shader,execution,robust_access:linear_memory:storageClass="function";access="write";containerType="array";isAtomic=false [ Failure ]
-crbug.com/dawn/0000 [ amd-0x6821 ] webgpu:shader,execution,robust_access:linear_memory:storageClass="function";access="write";containerType="matrix";isAtomic=false [ Failure ]
-crbug.com/dawn/0000 [ amd-0x6821 ] webgpu:shader,execution,robust_access:linear_memory:storageClass="private";access="write";containerType="array";isAtomic=false [ Failure ]
-crbug.com/dawn/0000 [ amd-0x6821 ] webgpu:shader,execution,robust_access:linear_memory:storageClass="private";access="write";containerType="matrix";isAtomic=false [ Failure ]
-
-################################################################################
-# stencil8 failures
-# KEEP
-################################################################################
-crbug.com/dawn/0000 [ mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth32float-stencil8" [ Failure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="stencil8" [ Failure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="stencil8";* [ Failure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="stencil8";* [ Failure ]
-crbug.com/dawn/0000 [ mac ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,depth_stencil_attachment_only:depthStencilFormat="stencil8";* [ Failure ]
+crbug.com/tint/993 [ amd-0x6821 ] webgpu:shader,execution,robust_access:linear_memory:storageClass="function";access="write";containerType="array";isAtomic=false [ Failure ]
+crbug.com/tint/993 [ amd-0x6821 ] webgpu:shader,execution,robust_access:linear_memory:storageClass="function";access="write";containerType="matrix";isAtomic=false [ Failure ]
+crbug.com/tint/993 [ amd-0x6821 ] webgpu:shader,execution,robust_access:linear_memory:storageClass="private";access="write";containerType="array";isAtomic=false [ Failure ]
+crbug.com/tint/993 [ amd-0x6821 ] webgpu:shader,execution,robust_access:linear_memory:storageClass="private";access="write";containerType="matrix";isAtomic=false [ Failure ]
 
 ################################################################################
 # entry_point_name_must_match failures
@@ -575,46 +589,48 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,operation,render_pass,cl
 crbug.com/dawn/0000 [ amd-0x6821 monterey ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:stencilFormat="stencil8";stencilClearValue=65539;applyStencilClearValueAsStencilReferenceValue=true [ Failure ]
 crbug.com/dawn/0000 [ intel-0x3e9b monterey ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:stencilFormat="stencil8";stencilClearValue=65539;applyStencilClearValueAsStencilReferenceValue=true [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu ] webgpu:api,operation,render_pass,clear_value:stencil_clear_value:stencilFormat="stencil8";stencilClearValue=65539;applyStencilClearValueAsStencilReferenceValue=true [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rg16sint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rg32float" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rg32sint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rg32uint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rgba16sint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rgba32float" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rgba32sint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rgba32uint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rgba8snorm" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rgba8uint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rg16sint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rg16uint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rg32float" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rg32sint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rgba16sint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rgba16uint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rgba32float" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rgba32sint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rgba32uint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rgba8sint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rgba8uint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="r16sint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rg32float" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rg32sint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rgba32uint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rgba8sint" [ Failure ]
 
 ################################################################################
-# Failures from upgrading Intel Mac Minis to 12.4
+# Failures with stencil textures on AMD Mac. Needs triage.
 # KEEP
 ################################################################################
-crbug.com/dawn/1461 [ intel monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth16unorm" [ Failure ]
-crbug.com/dawn/1461 [ intel monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth24plus" [ Failure ]
-crbug.com/dawn/1461 [ intel monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth24plus-stencil8" [ Failure ]
+crbug.com/dawn/0000 [ amd monterey ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="stencil8";* [ Failure ]
+crbug.com/dawn/0000 [ amd monterey ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
+crbug.com/dawn/0000 [ amd monterey ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
+crbug.com/dawn/0000 [ amd monterey ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="stencil8" [ Failure ]
+crbug.com/dawn/0000 [ amd monterey ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="stencil8";* [ Failure ]
+crbug.com/dawn/0000 [ amd monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="stencil8" [ Failure ]
+
+################################################################################
+# Failures with depth/stencil textures on Intel Mac
+# KEEP
+################################################################################
+crbug.com/dawn/1083 [ intel monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth16unorm" [ Failure ]
+crbug.com/dawn/1083 [ intel monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth24plus" [ Failure ]
+crbug.com/dawn/1083 [ intel monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth32float" [ Failure ]
+crbug.com/dawn/1083 [ intel monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth24plus-stencil8" [ Failure ]
+crbug.com/dawn/1083 [ intel monterey ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth32float-stencil8" [ Failure ]
+crbug.com/dawn/1083 [ intel monterey ] webgpu:api,operation,command_buffer,image_copy:offsets_and_sizes_copy_depth_stencil:format="stencil8";* [ Failure ]
+crbug.com/dawn/1083 [ intel monterey ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,depth_stencil_attachment_only:depthStencilFormat="stencil8";* [ Failure ]
+crbug.com/dawn/1083 [ intel monterey ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="stencil8";* [ Failure ]
+
+################################################################################
+# webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero
+# Failures on Mac Intel, likely also due to crbug.com/dawn/1083
+# KEEP
+################################################################################
+crbug.com/dawn/1389 [ intel monterey ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth16unorm" [ Failure ]
+crbug.com/dawn/1389 [ intel monterey ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="depth32float-stencil8" [ Failure ]
+crbug.com/dawn/1389 [ intel monterey ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="stencil8" [ Failure ]
+crbug.com/dawn/1389 [ intel monterey ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth16unorm" [ Failure ]
+crbug.com/dawn/1389 [ intel monterey ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="stencil8" [ Failure ]
+crbug.com/dawn/1389 [ intel monterey ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="DepthTest";format="depth16unorm" [ Failure ]
+crbug.com/dawn/1389 [ intel monterey ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="StencilTest";format="stencil8" [ Failure ]
 
 ################################################################################
 # untriaged failures
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 [ mac ] webgpu:api,operation,command_buffer,copyTextureToTexture:copy_depth_stencil:format="depth32float" [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,render_pass,resolve:* [ Failure ]
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,component_count,blend:format="rg8unorm" [ Failure ]
 crbug.com/dawn/0000 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Failure ]
@@ -638,19 +654,6 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 win10 ] webgpu:api,
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x3e9b monterey ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="bc2-rgba-unorm-srgb";dimension="2d" [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-0x3e9b monterey ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="rgba32uint";dimension="3d" [ Failure ]
 crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,rendering,draw:arguments:first=0;count=3;first_instance=0;instance_count=4;indexed=true;indirect=true;vertex_buffer_offset=32;index_buffer_offset=16;base_vertex=9 [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rg16uint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToBuffer";format="rgba8sint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="depth32float" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="CopyToTexture";format="rg32uint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="r16float" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rg32uint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rg8sint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rgba16uint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rgba32sint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rgba8snorm" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="2d";readMethod="Sample";format="rgba8uint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="r32sint" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero:dimension="3d";readMethod="CopyToBuffer";format="rg8sint" [ Failure ]
 crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,shader_module,compilation_info:offset_and_length:valid=false;unicode=false [ Failure ]
 crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,texture_view,format_reinterpretation:texture_binding:format="rgba8unorm-srgb";viewFormat="rgba8unorm" [ Failure ]
 crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,vertex_state,correctness:array_stride_zero:format="float32x2" [ Failure ]
