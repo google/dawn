@@ -116,12 +116,6 @@ ResultOrError<tint::Program> RunTransforms(tint::transform::Transform* transform
                                            tint::transform::DataMap* outputs,
                                            OwnedCompilationMessages* messages);
 
-/// Creates and adds the tint::transform::VertexPulling::Config to transformInputs.
-void AddVertexPullingTransformConfig(const RenderPipelineBase& renderPipeline,
-                                     const std::string& entryPoint,
-                                     BindGroupIndex pullingBufferBindingSet,
-                                     tint::transform::DataMap* transformInputs);
-
 // Mirrors wgpu::SamplerBindingLayout but instead stores a single boolean
 // for isComparison instead of a wgpu::SamplerBindingType enum.
 struct ShaderSamplerBindingInfo {
@@ -294,10 +288,6 @@ class ShaderModuleBase : public ApiObjectBase, public CachedObject {
 
     MaybeError InitializeBase(ShaderModuleParseResult* parseResult,
                               OwnedCompilationMessages* compilationMessages);
-
-    static void AddExternalTextureTransform(const PipelineLayoutBase* layout,
-                                            tint::transform::Manager* transformManager,
-                                            tint::transform::DataMap* transformInputs);
 
   private:
     ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag);

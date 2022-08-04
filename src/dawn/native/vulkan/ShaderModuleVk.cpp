@@ -232,7 +232,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     }
 
     // Transform external textures into the binding locations specified in the bgl
-    // TODO(dawn:1082): Replace this block with ShaderModuleBase::AddExternalTextureTransform.
+    // TODO(dawn:1082): Replace this block with BuildExternalTextureTransformBindings.
     tint::transform::MultiplanarExternalTexture::BindingsMap newBindingsMap;
     for (BindGroupIndex i : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
         const BindGroupLayoutBase* bgl = layout->GetBindGroupLayout(i);

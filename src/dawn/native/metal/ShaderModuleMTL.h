@@ -55,15 +55,6 @@ class ShaderModule final : public ShaderModuleBase {
                               const RenderPipeline* renderPipeline = nullptr);
 
   private:
-    ResultOrError<std::string> TranslateToMSL(const char* entryPointName,
-                                              SingleShaderStage stage,
-                                              const PipelineLayout* layout,
-                                              uint32_t sampleMask,
-                                              const RenderPipeline* renderPipeline,
-                                              std::string* remappedEntryPointName,
-                                              bool* needsStorageBufferLength,
-                                              bool* hasInvariantAttribute,
-                                              std::vector<uint32_t>* workgroupAllocations);
     ShaderModule(Device* device, const ShaderModuleDescriptor* descriptor);
     ~ShaderModule() override;
     MaybeError Initialize(ShaderModuleParseResult* parseResult,

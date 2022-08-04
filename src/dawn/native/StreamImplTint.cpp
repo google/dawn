@@ -59,4 +59,41 @@ void stream::Stream<tint::transform::BindingPoints>::Write(
     StreamIn(sink, points.plane_1, points.params);
 }
 
+template <>
+void stream::Stream<tint::transform::VertexPulling::Config>::Write(
+    stream::Sink* sink,
+    const tint::transform::VertexPulling::Config& cfg) {
+    StreamIn(sink, cfg.entry_point_name, cfg.vertex_state, cfg.pulling_group);
+}
+
+template <>
+void stream::Stream<tint::transform::VertexBufferLayoutDescriptor>::Write(
+    stream::Sink* sink,
+    const tint::transform::VertexBufferLayoutDescriptor& layout) {
+    using Layout = tint::transform::VertexBufferLayoutDescriptor;
+    static_assert(offsetof(Layout, array_stride) == 0,
+                  "Please update serialization for tint::transform::VertexBufferLayoutDescriptor");
+    static_assert(offsetof(Layout, step_mode) == 4,
+                  "Please update serialization for tint::transform::VertexBufferLayoutDescriptor");
+    static_assert(offsetof(Layout, attributes) == 8,
+                  "Please update serialization for tint::transform::VertexBufferLayoutDescriptor");
+    StreamIn(sink, layout.array_stride, layout.step_mode, layout.attributes);
+}
+
+template <>
+void stream::Stream<tint::transform::VertexAttributeDescriptor>::Write(
+    stream::Sink* sink,
+    const tint::transform::VertexAttributeDescriptor& attrib) {
+    using Attrib = tint::transform::VertexAttributeDescriptor;
+    static_assert(offsetof(Attrib, format) == 0,
+                  "Please update serialization for tint::transform::VertexAttributeDescriptor");
+    static_assert(offsetof(Attrib, offset) == 4,
+                  "Please update serialization for tint::transform::VertexAttributeDescriptor");
+    static_assert(offsetof(Attrib, shader_location) == 8,
+                  "Please update serialization for tint::transform::VertexAttributeDescriptor");
+    static_assert(sizeof(Attrib) == 12,
+                  "Please update serialization for tint::transform::VertexAttributeDescriptor");
+    StreamIn(sink, attrib.format, attrib.offset, attrib.shader_location);
+}
+
 }  // namespace dawn::native

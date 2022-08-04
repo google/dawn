@@ -22,6 +22,7 @@
 
 #include "dawn/common/TypedInteger.h"
 #include "dawn/native/Blob.h"
+#include "dawn/native/VisitableMembers.h"
 #include "dawn/native/stream/BlobSource.h"
 #include "dawn/native/stream/ByteVectorSink.h"
 #include "dawn/native/stream/Stream.h"
@@ -193,6 +194,23 @@ TEST(SerializeTests, StdPair) {
     EXPECT_CACHE_KEY_EQ(std::make_pair(s, uint32_t(42)), expected);
 }
 
+// Test that ByteVectorSink serializes std::optional as expected.
+TEST(SerializeTests, StdOptional) {
+    std::string_view s = "webgpu";
+    {
+        ByteVectorSink expected;
+        StreamIn(&expected, true, s);
+
+        EXPECT_CACHE_KEY_EQ(std::optional(s), expected);
+    }
+    {
+        ByteVectorSink expected;
+        StreamIn(&expected, false);
+
+        EXPECT_CACHE_KEY_EQ(std::optional<std::string_view>(), expected);
+    }
+}
+
 // Test that ByteVectorSink serializes std::unordered_map as expected.
 TEST(SerializeTests, StdUnorderedMap) {
     std::unordered_map<uint32_t, std::string_view> m;
@@ -254,6 +272,41 @@ TEST(StreamTests, SerializeDeserializeParamPack) {
     EXPECT_EQ(a, aOut);
     EXPECT_EQ(b, bOut);
     EXPECT_EQ(c, cOut);
+}
+
+#define FOO_MEMBERS(X) \
+    X(int, a)          \
+    X(float, b)        \
+    X(std::string, c)
+struct Foo {
+    DAWN_VISITABLE_MEMBERS(FOO_MEMBERS)
+#undef FOO_MEMBERS
+};
+
+// Test that serializing then deserializing a struct made with DAWN_VISITABLE_MEMBERS works as
+// expected.
+TEST(StreamTests, SerializeDeserializeVisitableMembers) {
+    Foo foo{1, 2, "3"};
+    ByteVectorSink sink;
+    foo.VisitAll([&](const auto&... members) { StreamIn(&sink, members...); });
+
+    // Test that the serialization is correct.
+    {
+        ByteVectorSink expected;
+        StreamIn(&expected, foo.a, foo.b, foo.c);
+        EXPECT_THAT(sink, VectorEq(expected));
+    }
+
+    // Test that deserialization works for StructMembers, passed inline.
+    {
+        BlobSource src(CreateBlob(sink));
+        Foo out;
+        auto err = out.VisitAll([&](auto&... members) { return StreamOut(&src, &members...); });
+        EXPECT_FALSE(err.IsError());
+        EXPECT_EQ(foo.a, out.a);
+        EXPECT_EQ(foo.b, out.b);
+        EXPECT_EQ(foo.c, out.c);
+    }
 }
 
 template <size_t N>

@@ -37,87 +37,6 @@ namespace dawn::native {
 
 namespace {
 
-tint::transform::VertexFormat ToTintVertexFormat(wgpu::VertexFormat format) {
-    switch (format) {
-        case wgpu::VertexFormat::Uint8x2:
-            return tint::transform::VertexFormat::kUint8x2;
-        case wgpu::VertexFormat::Uint8x4:
-            return tint::transform::VertexFormat::kUint8x4;
-        case wgpu::VertexFormat::Sint8x2:
-            return tint::transform::VertexFormat::kSint8x2;
-        case wgpu::VertexFormat::Sint8x4:
-            return tint::transform::VertexFormat::kSint8x4;
-        case wgpu::VertexFormat::Unorm8x2:
-            return tint::transform::VertexFormat::kUnorm8x2;
-        case wgpu::VertexFormat::Unorm8x4:
-            return tint::transform::VertexFormat::kUnorm8x4;
-        case wgpu::VertexFormat::Snorm8x2:
-            return tint::transform::VertexFormat::kSnorm8x2;
-        case wgpu::VertexFormat::Snorm8x4:
-            return tint::transform::VertexFormat::kSnorm8x4;
-        case wgpu::VertexFormat::Uint16x2:
-            return tint::transform::VertexFormat::kUint16x2;
-        case wgpu::VertexFormat::Uint16x4:
-            return tint::transform::VertexFormat::kUint16x4;
-        case wgpu::VertexFormat::Sint16x2:
-            return tint::transform::VertexFormat::kSint16x2;
-        case wgpu::VertexFormat::Sint16x4:
-            return tint::transform::VertexFormat::kSint16x4;
-        case wgpu::VertexFormat::Unorm16x2:
-            return tint::transform::VertexFormat::kUnorm16x2;
-        case wgpu::VertexFormat::Unorm16x4:
-            return tint::transform::VertexFormat::kUnorm16x4;
-        case wgpu::VertexFormat::Snorm16x2:
-            return tint::transform::VertexFormat::kSnorm16x2;
-        case wgpu::VertexFormat::Snorm16x4:
-            return tint::transform::VertexFormat::kSnorm16x4;
-        case wgpu::VertexFormat::Float16x2:
-            return tint::transform::VertexFormat::kFloat16x2;
-        case wgpu::VertexFormat::Float16x4:
-            return tint::transform::VertexFormat::kFloat16x4;
-        case wgpu::VertexFormat::Float32:
-            return tint::transform::VertexFormat::kFloat32;
-        case wgpu::VertexFormat::Float32x2:
-            return tint::transform::VertexFormat::kFloat32x2;
-        case wgpu::VertexFormat::Float32x3:
-            return tint::transform::VertexFormat::kFloat32x3;
-        case wgpu::VertexFormat::Float32x4:
-            return tint::transform::VertexFormat::kFloat32x4;
-        case wgpu::VertexFormat::Uint32:
-            return tint::transform::VertexFormat::kUint32;
-        case wgpu::VertexFormat::Uint32x2:
-            return tint::transform::VertexFormat::kUint32x2;
-        case wgpu::VertexFormat::Uint32x3:
-            return tint::transform::VertexFormat::kUint32x3;
-        case wgpu::VertexFormat::Uint32x4:
-            return tint::transform::VertexFormat::kUint32x4;
-        case wgpu::VertexFormat::Sint32:
-            return tint::transform::VertexFormat::kSint32;
-        case wgpu::VertexFormat::Sint32x2:
-            return tint::transform::VertexFormat::kSint32x2;
-        case wgpu::VertexFormat::Sint32x3:
-            return tint::transform::VertexFormat::kSint32x3;
-        case wgpu::VertexFormat::Sint32x4:
-            return tint::transform::VertexFormat::kSint32x4;
-
-        case wgpu::VertexFormat::Undefined:
-            break;
-    }
-    UNREACHABLE();
-}
-
-tint::transform::VertexStepMode ToTintVertexStepMode(wgpu::VertexStepMode mode) {
-    switch (mode) {
-        case wgpu::VertexStepMode::Vertex:
-            return tint::transform::VertexStepMode::kVertex;
-        case wgpu::VertexStepMode::Instance:
-            return tint::transform::VertexStepMode::kInstance;
-        case wgpu::VertexStepMode::VertexBufferNotUsed:
-            break;
-    }
-    UNREACHABLE();
-}
-
 ResultOrError<SingleShaderStage> TintPipelineStageToShaderStage(
     tint::inspector::PipelineStage stage) {
     switch (stage) {
@@ -1088,39 +1007,6 @@ ResultOrError<tint::Program> RunTransforms(tint::transform::Transform* transform
     return std::move(output.program);
 }
 
-void AddVertexPullingTransformConfig(const RenderPipelineBase& renderPipeline,
-                                     const std::string& entryPoint,
-                                     BindGroupIndex pullingBufferBindingSet,
-                                     tint::transform::DataMap* transformInputs) {
-    tint::transform::VertexPulling::Config cfg;
-    cfg.entry_point_name = entryPoint;
-    cfg.pulling_group = static_cast<uint32_t>(pullingBufferBindingSet);
-
-    cfg.vertex_state.resize(renderPipeline.GetVertexBufferCount());
-    for (VertexBufferSlot slot : IterateBitSet(renderPipeline.GetVertexBufferSlotsUsed())) {
-        const VertexBufferInfo& dawnInfo = renderPipeline.GetVertexBuffer(slot);
-        tint::transform::VertexBufferLayoutDescriptor* tintInfo =
-            &cfg.vertex_state[static_cast<uint8_t>(slot)];
-
-        tintInfo->array_stride = dawnInfo.arrayStride;
-        tintInfo->step_mode = ToTintVertexStepMode(dawnInfo.stepMode);
-    }
-
-    for (VertexAttributeLocation location :
-         IterateBitSet(renderPipeline.GetAttributeLocationsUsed())) {
-        const VertexAttributeInfo& dawnInfo = renderPipeline.GetAttribute(location);
-        tint::transform::VertexAttributeDescriptor tintInfo;
-        tintInfo.format = ToTintVertexFormat(dawnInfo.format);
-        tintInfo.offset = dawnInfo.offset;
-        tintInfo.shader_location = static_cast<uint32_t>(static_cast<uint8_t>(location));
-
-        uint8_t vertexBufferSlot = static_cast<uint8_t>(dawnInfo.vertexBufferSlot);
-        cfg.vertex_state[vertexBufferSlot].attributes.push_back(tintInfo);
-    }
-
-    transformInputs->Add<tint::transform::VertexPulling::Config>(cfg);
-}
-
 MaybeError ValidateCompatibilityWithPipelineLayout(DeviceBase* device,
                                                    const EntryPointMetadata& entryPoint,
                                                    const PipelineLayoutBase* layout) {
@@ -1304,29 +1190,6 @@ void ShaderModuleBase::InjectCompilationMessages(
 
 OwnedCompilationMessages* ShaderModuleBase::GetCompilationMessages() const {
     return mCompilationMessages.get();
-}
-
-// static
-void ShaderModuleBase::AddExternalTextureTransform(const PipelineLayoutBase* layout,
-                                                   tint::transform::Manager* transformManager,
-                                                   tint::transform::DataMap* transformInputs) {
-    tint::transform::MultiplanarExternalTexture::BindingsMap newBindingsMap;
-    for (BindGroupIndex i : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
-        const BindGroupLayoutBase* bgl = layout->GetBindGroupLayout(i);
-
-        for (const auto& expansion : bgl->GetExternalTextureBindingExpansionMap()) {
-            newBindingsMap[{static_cast<uint32_t>(i),
-                            static_cast<uint32_t>(expansion.second.plane0)}] = {
-                {static_cast<uint32_t>(i), static_cast<uint32_t>(expansion.second.plane1)},
-                {static_cast<uint32_t>(i), static_cast<uint32_t>(expansion.second.params)}};
-        }
-    }
-
-    if (!newBindingsMap.empty()) {
-        transformManager->Add<tint::transform::MultiplanarExternalTexture>();
-        transformInputs->Add<tint::transform::MultiplanarExternalTexture::NewBindingPoints>(
-            newBindingsMap);
-    }
 }
 
 MaybeError ShaderModuleBase::InitializeBase(ShaderModuleParseResult* parseResult,

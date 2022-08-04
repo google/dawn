@@ -90,7 +90,12 @@ ResultOrError<std::string> ShaderModule::TranslateToGLSL(const char* entryPointN
     tint::transform::Manager transformManager;
     tint::transform::DataMap transformInputs;
 
-    AddExternalTextureTransform(layout, &transformManager, &transformInputs);
+    auto externalTextureBindings = BuildExternalTextureTransformBindings(layout);
+    if (!externalTextureBindings.empty()) {
+        transformManager.Add<tint::transform::MultiplanarExternalTexture>();
+        transformInputs.Add<tint::transform::MultiplanarExternalTexture::NewBindingPoints>(
+            std::move(externalTextureBindings));
+    }
 
     tint::Program program;
     DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, GetTintProgram(), transformInputs,

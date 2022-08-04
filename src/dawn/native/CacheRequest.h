@@ -26,6 +26,7 @@
 #include "dawn/native/CacheResult.h"
 #include "dawn/native/Device.h"
 #include "dawn/native/Error.h"
+#include "dawn/native/VisitableMembers.h"
 
 namespace dawn::native {
 
@@ -93,6 +94,15 @@ class CacheRequestImpl {
     CacheRequestImpl& operator=(CacheRequestImpl&&) = default;
     CacheRequestImpl(const CacheRequestImpl&) = delete;
     CacheRequestImpl& operator=(const CacheRequestImpl&) = delete;
+
+    // Create a CacheKey from the request type and all members
+    CacheKey CreateCacheKey(const DeviceBase* device) const {
+        CacheKey key = device->GetCacheKey();
+        StreamIn(&key, Request::kName);
+        static_cast<const Request*>(this)->VisitAll(
+            [&](const auto&... members) { StreamIn(&key, members...); });
+        return key;
+    }
 
     template <typename CacheHitFn, typename CacheMissFn>
     friend auto LoadOrRun(DeviceBase* device,
@@ -168,19 +178,12 @@ class CacheRequestImpl {
 //       X(Bar, bar)
 //   DAWN_MAKE_CACHE_REQUEST(MyCacheRequest, REQUEST_MEMBERS)
 //   #undef REQUEST_MEMBERS
-#define DAWN_MAKE_CACHE_REQUEST(Request, MEMBERS)                                                 \
-    class Request : public ::dawn::native::CacheRequestImpl<Request> {                            \
-      public:                                                                                     \
-        Request() = default;                                                                      \
-        MEMBERS(DAWN_INTERNAL_CACHE_REQUEST_DECL_STRUCT_MEMBER)                                   \
-                                                                                                  \
-        /* Create a CacheKey from the request type and all members */                             \
-        ::dawn::native::CacheKey CreateCacheKey(const ::dawn::native::DeviceBase* device) const { \
-            ::dawn::native::CacheKey key = device->GetCacheKey();                                 \
-            StreamIn(&key, #Request);                                                             \
-            MEMBERS(DAWN_INTERNAL_CACHE_REQUEST_RECORD_KEY)                                       \
-            return key;                                                                           \
-        }                                                                                         \
+#define DAWN_MAKE_CACHE_REQUEST(Request, MEMBERS)                      \
+    class Request : public ::dawn::native::CacheRequestImpl<Request> { \
+      public:                                                          \
+        static constexpr char kName[] = #Request;                      \
+        Request() = default;                                           \
+        DAWN_VISITABLE_MEMBERS(MEMBERS)                                \
     };
 
 // Helper macro for the common pattern of DAWN_TRY_ASSIGN around LoadOrRun.

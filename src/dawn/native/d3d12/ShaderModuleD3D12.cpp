@@ -756,7 +756,12 @@ ResultOrError<CompiledShader> ShaderModule::Compile(const ProgrammableStage& pro
     const tint::Program* program = GetTintProgram();
     tint::Program programAsValue;
 
-    AddExternalTextureTransform(layout, &transformManager, &transformInputs);
+    auto externalTextureBindings = BuildExternalTextureTransformBindings(layout);
+    if (!externalTextureBindings.empty()) {
+        transformManager.Add<tint::transform::MultiplanarExternalTexture>();
+        transformInputs.Add<tint::transform::MultiplanarExternalTexture::NewBindingPoints>(
+            std::move(externalTextureBindings));
+    }
 
     if (stage == SingleShaderStage::Vertex) {
         transformManager.Add<tint::transform::FirstIndexOffset>();

@@ -18,14 +18,15 @@
 #include <functional>
 
 #include "dawn/common/NonCopyable.h"
+#include "dawn/native/IntegerTypes.h"
 
-namespace tint::sem {
-struct BindingPoint;
-}
+#include "tint/tint.h"
 
 namespace dawn::native {
 
 class DeviceBase;
+class PipelineLayoutBase;
+class RenderPipelineBase;
 
 // Indicates that for the lifetime of this object tint internal compiler errors should be
 // reported to the given device.
@@ -37,6 +38,14 @@ class ScopedTintICEHandler : public NonCopyable {
   private:
     ScopedTintICEHandler(ScopedTintICEHandler&&) = delete;
 };
+
+tint::transform::MultiplanarExternalTexture::BindingsMap BuildExternalTextureTransformBindings(
+    const PipelineLayoutBase* layout);
+
+tint::transform::VertexPulling::Config BuildVertexPullingTransformConfig(
+    const RenderPipelineBase& renderPipeline,
+    const std::string_view& entryPoint,
+    BindGroupIndex pullingBufferBindingSet);
 
 }  // namespace dawn::native
 

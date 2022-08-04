@@ -23,6 +23,8 @@
 #include <utility>
 #include <vector>
 
+#include <optional>
+
 #include "dawn/common/Platform.h"
 #include "dawn/common/TypedInteger.h"
 #include "dawn/native/Error.h"
@@ -55,6 +57,14 @@ constexpr void StreamIn(Sink* s, const T& v) {
 template <typename T>
 MaybeError StreamOut(Source* s, T* v) {
     return Stream<T>::Read(s, v);
+}
+
+// Helper to take an rvalue passed to StreamOut and forward it as a pointer.
+// This makes it possible to pass output wrappers like stream::StructMembers inline.
+// For example: `DAWN_TRY(StreamOut(&source, stream::StructMembers(...)));`
+template <typename T>
+MaybeError StreamOut(Source* s, T&& v) {
+    return StreamOut(s, &v);
 }
 
 // Helper to call StreamIn on a parameter pack.
@@ -182,6 +192,19 @@ class Stream<T, std::enable_if_t<std::is_pointer_v<T>>> {
                       "std::string_view instead.");
         StreamIn(sink, t != nullptr);
         if (t != nullptr) {
+            StreamIn(sink, *t);
+        }
+    }
+};
+
+// Stream specialization for std::optional
+template <typename T>
+class Stream<std::optional<T>> {
+  public:
+    static void Write(stream::Sink* sink, const std::optional<T>& t) {
+        bool hasValue = t.has_value();
+        StreamIn(sink, hasValue);
+        if (hasValue) {
             StreamIn(sink, *t);
         }
     }
