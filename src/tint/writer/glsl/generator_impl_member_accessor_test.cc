@@ -405,8 +405,11 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
     });
 
     SetupFunction(utils::Vector{
+        Decl(Var("a", nullptr, Expr(2_i))),
+        Decl(Var("b", nullptr, Expr(4_i))),
+        Decl(Var("c", nullptr, Expr(3_i))),
         Decl(Var("x", nullptr, ast::StorageClass::kNone,
-                 IndexAccessor(MemberAccessor("data", "a"), Sub(Add(2_i, 4_i), 3_i)))),
+                 IndexAccessor(MemberAccessor("data", "a"), Sub(Add("a", "b"), "c")))),
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();
@@ -426,7 +429,10 @@ layout(binding = 0, std430) buffer Data_1 {
   int a[5];
 } data;
 void tint_symbol() {
-  int x = data.a[((2 + 4) - 3)];
+  int a = 2;
+  int b = 4;
+  int c = 3;
+  int x = data.a[((a + b) - c)];
 }
 
 void main() {

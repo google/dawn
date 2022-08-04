@@ -4,7 +4,7 @@ void unused_entry_point() {
 }
 
 void f() {
-  float v = (1.0f + 2.0f);
+  float v = 3.0f;
   float2 v2 = float2((v).xx);
   float3 v3 = float3((v).xxx);
   float4 v4 = float4((v).xxxx);

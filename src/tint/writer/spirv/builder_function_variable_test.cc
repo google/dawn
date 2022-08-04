@@ -73,32 +73,34 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 }
 
 TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
-    auto* init = vec2<f32>(1_f, Add(3_f, 3_f));
+    auto* a = Let("a", nullptr, Expr(3_f));
+    auto* init = vec2<f32>(1_f, Add(Expr("a"), 3_f));
 
     auto* v = Var("var", ty.vec2<f32>(), ast::StorageClass::kNone, init);
-    WrapInFunction(v);
+    WrapInFunction(a, v);
 
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateFunctionVariable(a)) << b.error();
     EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
     ASSERT_FALSE(b.has_error()) << b.error();
 
     EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %7 "var"
 )");
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
-%1 = OpTypeVector %2 2
-%3 = OpConstant %2 1
-%4 = OpConstant %2 3
-%8 = OpTypePointer Function %1
-%9 = OpConstantNull %1
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
+%2 = OpConstant %1 3
+%3 = OpTypeVector %1 2
+%4 = OpConstant %1 1
+%8 = OpTypePointer Function %3
+%9 = OpConstantNull %3
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].variables()),
               R"(%7 = OpVariable %8 Function %9
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%5 = OpFAdd %2 %4 %4
-%6 = OpCompositeConstruct %1 %3 %5
+              R"(%5 = OpFAdd %1 %2 %2
+%6 = OpCompositeConstruct %3 %4 %5
 OpStore %7 %6
 )");
 }

@@ -20,6 +20,7 @@
 %_ptr_Function_int = OpTypePointer Function %int
          %12 = OpConstantNull %int
       %int_1 = OpConstant %int 1
+%int_n2147483647 = OpConstant %int -2147483647
 %unused_entry_point = OpFunction %void None %1
           %4 = OpLabel
                OpReturn
@@ -33,8 +34,7 @@
          %13 = OpLoad %int %a
          %15 = OpIAdd %int %13 %int_1
                OpStore %b %15
-         %17 = OpIAdd %int %int_n2147483648 %int_1
-               OpStore %c %17
+               OpStore %c %int_n2147483647
          %19 = OpLoad %int %c
                OpReturnValue %19
                OpFunctionEnd

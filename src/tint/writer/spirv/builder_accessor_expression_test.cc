@@ -162,10 +162,10 @@ OpReturn
 
 TEST_F(BuilderTest, Const_IndexAccessor_Vector2) {
     // let ary : vec3<i32>(1, 2, 3);
-    // var x = ary[1i + 2i];
+    // var x = ary[1i + 1i];
 
     auto* ary = Let("ary", nullptr, vec3<i32>(1_i, 2_i, 3_i));
-    auto* x = Var("x", nullptr, IndexAccessor(ary, Add(1_i, 2_i)));
+    auto* x = Var("x", nullptr, IndexAccessor(ary, Add(1_i, 1_i)));
     WrapInFunction(ary, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -180,14 +180,14 @@ TEST_F(BuilderTest, Const_IndexAccessor_Vector2) {
 %8 = OpConstant %6 2
 %9 = OpConstant %6 3
 %10 = OpConstantComposite %5 %7 %8 %9
-%14 = OpTypePointer Function %6
-%15 = OpConstantNull %6
+%13 = OpTypePointer Function %6
+%14 = OpConstantNull %6
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"(%13 = OpVariable %14 Function %15
+    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"(%12 = OpVariable %13 Function %14
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(%11 = OpIAdd %6 %7 %8
-%12 = OpVectorExtractDynamic %6 %10 %11
-OpStore %13 %12
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%11 = OpCompositeExtract %6 %10 2
+OpStore %12 %11
 OpReturn
 )");
 
@@ -196,10 +196,10 @@ OpReturn
 
 TEST_F(BuilderTest, Runtime_IndexAccessor_Vector2) {
     // var ary : vec3<f32>;
-    // var x = ary[1i + 2i];
+    // var x = ary[1i + 1i];
 
     auto* ary = Var("ary", ty.vec3<f32>());
-    auto* x = Var("x", nullptr, IndexAccessor(ary, Add(1_i, 2_i)));
+    auto* x = Var("x", nullptr, IndexAccessor(ary, Add(1_i, 1_i)));
     WrapInFunction(ary, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -213,18 +213,16 @@ TEST_F(BuilderTest, Runtime_IndexAccessor_Vector2) {
 %6 = OpTypePointer Function %7
 %9 = OpConstantNull %7
 %10 = OpTypeInt 32 1
-%11 = OpConstant %10 1
-%12 = OpConstant %10 2
-%14 = OpTypePointer Function %8
-%18 = OpConstantNull %8
+%11 = OpConstant %10 2
+%12 = OpTypePointer Function %8
+%16 = OpConstantNull %8
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"(%5 = OpVariable %6 Function %9
-%17 = OpVariable %14 Function %18
+%15 = OpVariable %12 Function %16
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(%13 = OpIAdd %10 %11 %12
-%15 = OpAccessChain %14 %5 %13
-%16 = OpLoad %8 %15
-OpStore %17 %16
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(%13 = OpAccessChain %12 %5 %11
+%14 = OpLoad %8 %13
+OpStore %15 %14
 OpReturn
 )");
 

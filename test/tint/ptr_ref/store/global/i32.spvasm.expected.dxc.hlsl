@@ -2,7 +2,7 @@ static int I = 0;
 
 void main_1() {
   I = 123;
-  I = ((100 + 20) + 3);
+  I = 123;
   return;
 }
 

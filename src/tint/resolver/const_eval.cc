@@ -458,7 +458,7 @@ const Constant* CreateComposite(ProgramBuilder& builder,
 }
 
 /// TransformElements constructs a new constant by applying the transformation function 'f' on each
-/// of the most deeply nested elements of 'cs'.
+/// of the most deeply nested elements of 'cs'. Assumes that all constants are the same type.
 template <typename F, typename... CONSTANTS>
 const Constant* TransformElements(ProgramBuilder& builder, F&& f, CONSTANTS&&... cs) {
     uint32_t n = 0;
@@ -470,9 +470,52 @@ const Constant* TransformElements(ProgramBuilder& builder, F&& f, CONSTANTS&&...
     utils::Vector<const sem::Constant*, 8> els;
     els.Reserve(n);
     for (uint32_t i = 0; i < n; i++) {
-        els.Push(TransformElements(builder, f, cs->Index(i)...));
+        els.Push(TransformElements(builder, std::forward<F>(f), cs->Index(i)...));
     }
     return CreateComposite(builder, ty, std::move(els));
+}
+
+/// TransformBinaryElements constructs a new constant by applying the transformation function 'f' on
+/// each of the most deeply nested elements of both `c0` and `c1`. Unlike TransformElements, this
+/// function handles the constants being of different types, e.g. vector-scalar, scalar-vector.
+template <typename F>
+const Constant* TransformBinaryElements(ProgramBuilder& builder,
+                                        F&& f,
+                                        const sem::Constant* c0,
+                                        const sem::Constant* c1) {
+    uint32_t n0 = 0, n1 = 0;
+    sem::Type::ElementOf(c0->Type(), &n0);
+    sem::Type::ElementOf(c1->Type(), &n1);
+    uint32_t max_n = std::max(n0, n1);
+    // If arity of both constants is 1, invoke callback
+    if (max_n == 1u) {
+        return f(c0, c1);
+    }
+
+    utils::Vector<const sem::Constant*, 8> els;
+    els.Reserve(max_n);
+    for (uint32_t i = 0; i < max_n; i++) {
+        auto nested_or_self = [&](auto& c, uint32_t num_elems) {
+            if (num_elems == 1) {
+                return c;
+            }
+            return c->Index(i);
+        };
+        els.Push(TransformBinaryElements(builder, std::forward<F>(f), nested_or_self(c0, n0),
+                                         nested_or_self(c1, n1)));
+    }
+    // Use larger type
+    auto* ty = n0 > n1 ? c0->Type() : c1->Type();
+    return CreateComposite(builder, ty, std::move(els));
+}
+
+/// CombineSource returns the combined `Source`s of each expression in `exprs`.
+Source CombineSource(utils::VectorRef<const sem::Expression*> exprs) {
+    Source result = exprs[0]->Declaration()->source;
+    for (size_t i = 1; i < exprs.Length(); ++i) {
+        result = result.Combine(result, exprs[i]->Declaration()->source);
+    }
+    return result;
 }
 
 }  // namespace
@@ -720,6 +763,51 @@ ConstEval::ConstantResult ConstEval::OpMinus(const sem::Type*,
         return Dispatch_fia_fi32_f16(create, c);
     };
     return TransformElements(builder, transform, args[0]->ConstantValue());
+}
+
+ConstEval::ConstantResult ConstEval::OpPlus(const sem::Type* ty,
+                                            utils::VectorRef<const sem::Expression*> args) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        auto create = [&](auto i, auto j) -> const Constant* {
+            using NumberT = decltype(i);
+            using T = UnwrapNumber<NumberT>;
+
+            auto add_values = [](T lhs, T rhs) {
+                if constexpr (std::is_integral_v<T> && std::is_signed_v<T>) {
+                    // Ensure no UB for signed overflow
+                    using UT = std::make_unsigned_t<T>;
+                    return static_cast<T>(static_cast<UT>(lhs) + static_cast<UT>(rhs));
+                } else {
+                    return lhs + rhs;
+                }
+            };
+
+            NumberT result;
+            if constexpr (std::is_same_v<NumberT, AInt> || std::is_same_v<NumberT, AFloat>) {
+                // Check for over/underflow for abstract values
+                if (auto r = CheckedAdd(i, j)) {
+                    result = r->value;
+                } else {
+                    AddError("'" + std::to_string(add_values(i.value, j.value)) +
+                                 "' cannot be represented as '" +
+                                 ty->FriendlyName(builder.Symbols()) + "'",
+                             CombineSource(args));
+                    return nullptr;
+                }
+            } else {
+                result = add_values(i.value, j.value);
+            }
+            return CreateElement(builder, c0->Type(), result);
+        };
+        return Dispatch_fia_fiu32_f16(create, c0, c1);
+    };
+
+    auto r = TransformBinaryElements(builder, transform, args[0]->ConstantValue(),
+                                     args[1]->ConstantValue());
+    if (builder.Diagnostics().contains_errors()) {
+        return utils::Failure;
+    }
+    return r;
 }
 
 ConstEval::ConstantResult ConstEval::atan2(const sem::Type*,

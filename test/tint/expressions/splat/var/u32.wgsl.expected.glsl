@@ -5,7 +5,7 @@ void unused_entry_point() {
   return;
 }
 void f() {
-  uint v = (1u + 2u);
+  uint v = 3u;
   uvec2 v2 = uvec2(v);
   uvec3 v3 = uvec3(v);
   uvec4 v4 = uvec4(v);

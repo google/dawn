@@ -178,6 +178,16 @@ class ConstEval {
     ConstantResult OpMinus(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
 
     ////////////////////////////////////////////////////////////////////////////
+    // Binary Operators
+    ////////////////////////////////////////////////////////////////////////////
+
+    /// Plus operator '+'
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @return the result value, or null if the value cannot be calculated
+    ConstantResult OpPlus(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
+
+    ////////////////////////////////////////////////////////////////////////////
     // Builtins
     ////////////////////////////////////////////////////////////////////////////
 

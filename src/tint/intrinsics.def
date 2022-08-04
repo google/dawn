@@ -886,11 +886,11 @@ op ! <N: num> (vec<N, bool>) -> vec<N, bool>
 ////////////////////////////////////////////////////////////////////////////////
 // Binary Operators                                                           //
 ////////////////////////////////////////////////////////////////////////////////
-op + <T: fiu32_f16>(T, T) -> T
-op + <T: fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
-op + <T: fiu32_f16, N: num> (vec<N, T>, T) -> vec<N, T>
-op + <T: fiu32_f16, N: num> (T, vec<N, T>) -> vec<N, T>
-op + <T: f32_f16, N: num, M: num> (mat<N, M, T>, mat<N, M, T>) -> mat<N, M, T>
+@const op + <T: fia_fiu32_f16>(T, T) -> T
+@const op + <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+@const op + <T: fia_fiu32_f16, N: num> (vec<N, T>, T) -> vec<N, T>
+@const op + <T: fia_fiu32_f16, N: num> (T, vec<N, T>) -> vec<N, T>
+@const op + <T: fa_f32_f16, N: num, M: num> (mat<N, M, T>, mat<N, M, T>) -> mat<N, M, T>
 
 op - <T: fiu32_f16>(T, T) -> T
 op - <T: fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>

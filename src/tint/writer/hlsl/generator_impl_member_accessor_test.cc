@@ -418,8 +418,11 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
     });
 
     SetupFunction(utils::Vector{
+        Decl(Var("a", nullptr, Expr(2_i))),
+        Decl(Var("b", nullptr, Expr(4_i))),
+        Decl(Var("c", nullptr, Expr(3_i))),
         Decl(Var("x", nullptr, ast::StorageClass::kNone,
-                 IndexAccessor(MemberAccessor("data", "a"), Sub(Add(2_i, Expr(4_i)), Expr(3_i))))),
+                 IndexAccessor(MemberAccessor("data", "a"), Sub(Add("a", "b"), "c")))),
     });
 
     GeneratorImpl& gen = SanitizeAndBuild();
@@ -429,7 +432,10 @@ TEST_F(HlslGeneratorImplTest_MemberAccessor,
         R"(RWByteAddressBuffer data : register(u0, space1);
 
 void main() {
-  int x = asint(data.Load((4u + (4u * uint(((2 + 4) - 3))))));
+  int a = 2;
+  int b = 4;
+  int c = 3;
+  int x = asint(data.Load((4u + (4u * uint(((a + b) - c))))));
   return;
 }
 )";

@@ -43,15 +43,26 @@ const auto k3PiOver4 = T(UnwrapNumber<T>(2.356194490192344928846));
 
 template <typename T>
 constexpr auto Negate(const Number<T>& v) {
-    // For signed integrals, avoid C++ UB by not negating the smallest negative number. In
-    // WGSL, this operation is well defined to return the same value, see:
-    // https://gpuweb.github.io/gpuweb/wgsl/#arithmetic-expr.
-    if constexpr (std::is_integral_v<T> && std::is_signed_v<T>) {
-        if (v == std::numeric_limits<T>::min()) {
-            return v;
+    if constexpr (std::is_integral_v<T>) {
+        if constexpr (std::is_signed_v<T>) {
+            // For signed integrals, avoid C++ UB by not negating the smallest negative number. In
+            // WGSL, this operation is well defined to return the same value, see:
+            // https://gpuweb.github.io/gpuweb/wgsl/#arithmetic-expr.
+            if (v == std::numeric_limits<T>::min()) {
+                return v;
+            }
+            return -v;
+
+        } else {
+            // Allow negating unsigned values
+            using ST = std::make_signed_t<T>;
+            auto as_signed = Number<ST>{static_cast<ST>(v)};
+            return Number<T>{static_cast<T>(Negate(as_signed))};
         }
+    } else {
+        // float case
+        return -v;
     }
-    return -v;
 }
 
 template <typename T>
@@ -65,7 +76,7 @@ auto Abs(const Number<T>& v) {
 
 // Concats any number of std::vectors
 template <typename Vec, typename... Vecs>
-auto Concat(Vec&& v1, Vecs&&... vs) {
+[[nodiscard]] auto Concat(Vec&& v1, Vecs&&... vs) {
     auto total_size = v1.size() + (vs.size() + ...);
     v1.reserve(total_size);
     (std::move(vs.begin(), vs.end(), std::back_inserter(v1)), ...);
@@ -3114,6 +3125,140 @@ TEST_F(ResolverConstEvalTest, UnaryNegateLowestAbstract) {
 }
 
 }  // namespace unary_op
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Binary op
+////////////////////////////////////////////////////////////////////////////////////////////////////
+namespace binary_op {
+
+template <typename T>
+struct Values {
+    T lhs;
+    T rhs;
+    T expect;
+    bool is_overflow;
+};
+
+struct Case {
+    std::variant<Values<AInt>, Values<AFloat>, Values<u32>, Values<i32>, Values<f32>, Values<f16>>
+        values;
+};
+
+static std::ostream& operator<<(std::ostream& o, const Case& c) {
+    std::visit([&](auto&& v) { o << v.lhs << " " << v.rhs; }, c.values);
+    return o;
+}
+
+template <typename T>
+Case C(T lhs, T rhs, T expect, bool is_overflow = false) {
+    return Case{Values<T>{lhs, rhs, expect, is_overflow}};
+}
+
+using ResolverConstEvalBinaryOpTest = ResolverTestWithParam<std::tuple<ast::BinaryOp, Case>>;
+TEST_P(ResolverConstEvalBinaryOpTest, Test) {
+    Enable(ast::Extension::kF16);
+
+    auto op = std::get<0>(GetParam());
+    auto c = std::get<1>(GetParam());
+    std::visit(
+        [&](auto&& values) {
+            using T = decltype(values.expect);
+
+            if constexpr (std::is_same_v<T, AInt> || std::is_same_v<T, AFloat>) {
+                if (values.is_overflow) {
+                    return;
+                }
+            }
+
+            auto* expr = create<ast::BinaryExpression>(op, Expr(values.lhs), Expr(values.rhs));
+            GlobalConst("C", nullptr, expr);
+
+            EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+            auto* sem = Sem().Get(expr);
+            const sem::Constant* value = sem->ConstantValue();
+            ASSERT_NE(value, nullptr);
+            EXPECT_TYPE(value->Type(), sem->Type());
+            EXPECT_EQ(value->As<T>(), values.expect);
+
+            if constexpr (IsInteger<UnwrapNumber<T>>) {
+                // Check that the constant's integer doesn't contain unexpected data in the MSBs
+                // that are outside of the bit-width of T.
+                EXPECT_EQ(value->As<AInt>(), AInt(values.expect));
+            }
+        },
+        c.values);
+}
+
+template <typename T>
+std::vector<Case> OpAddIntCases() {
+    static_assert(IsInteger<UnwrapNumber<T>>);
+    return {
+        C(T{0}, T{0}, T{0}),
+        C(T{1}, T{2}, T{3}),
+        C(T::Lowest(), T{1}, T{T::Lowest() + 1}),
+        C(T::Highest(), Negate(T{1}), T{T::Highest() - 1}),
+        C(T::Lowest(), T::Highest(), Negate(T{1})),
+        C(T::Highest(), T{1}, T::Lowest(), true),
+        C(T::Lowest(), Negate(T{1}), T::Highest(), true),
+    };
+}
+template <typename T>
+std::vector<Case> OpAddFloatCases() {
+    static_assert(IsFloatingPoint<UnwrapNumber<T>>);
+    return {
+        C(T{0}, T{0}, T{0}),
+        C(T{1}, T{2}, T{3}),
+        C(T::Lowest(), T{1}, T{T::Lowest() + 1}),
+        C(T::Highest(), Negate(T{1}), T{T::Highest() - 1}),
+        C(T::Lowest(), T::Highest(), T{0}),
+        C(T::Highest(), T::Highest(), T::Inf(), true),
+        C(T::Lowest(), Negate(T::Highest()), -T::Inf(), true),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(Add,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(testing::Values(ast::BinaryOp::kAdd),
+                                          testing::ValuesIn(Concat(  //
+                                              OpAddIntCases<AInt>(),
+                                              OpAddIntCases<i32>(),
+                                              OpAddIntCases<u32>(),
+                                              OpAddFloatCases<AFloat>(),
+                                              OpAddFloatCases<f32>(),
+                                              OpAddFloatCases<f16>()  //
+                                              ))));
+
+TEST_F(ResolverConstEvalTest, BinaryAbstractAddOverflow_AInt) {
+    GlobalConst("c", nullptr, Add(Expr(Source{{1, 1}}, AInt::Highest()), 1_a));
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "1:1 error: '-9223372036854775808' cannot be represented as 'abstract-int'");
+}
+
+TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AInt) {
+    GlobalConst("c", nullptr, Add(Expr(Source{{1, 1}}, AInt::Lowest()), -1_a));
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "1:1 error: '9223372036854775807' cannot be represented as 'abstract-int'");
+}
+
+TEST_F(ResolverConstEvalTest, BinaryAbstractAddOverflow_AFloat) {
+    GlobalConst("c", nullptr, Add(Expr(Source{{1, 1}}, AFloat::Highest()), AFloat::Highest()));
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "1:1 error: 'inf' cannot be represented as 'abstract-float'");
+}
+
+TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AFloat) {
+    GlobalConst("c", nullptr, Add(Expr(Source{{1, 1}}, AFloat::Lowest()), AFloat::Lowest()));
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "1:1 error: '-inf' cannot be represented as 'abstract-float'");
+}
+
+}  // namespace binary_op
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// Builtin
+////////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace builtin {
 

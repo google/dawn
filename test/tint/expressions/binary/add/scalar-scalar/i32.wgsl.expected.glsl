@@ -1,7 +1,7 @@
 #version 310 es
 
 void f() {
-  int r = (1 + 2);
+  int r = 3;
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

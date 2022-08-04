@@ -6,7 +6,7 @@ void unused_entry_point() {
   return;
 }
 void f() {
-  float16_t v = (1.0hf + 2.0hf);
+  float16_t v = 3.0hf;
   f16vec2 v2 = f16vec2(v);
   f16vec3 v3 = f16vec3(v);
   f16vec4 v4 = f16vec4(v);

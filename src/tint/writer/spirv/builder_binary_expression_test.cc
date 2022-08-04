@@ -1219,30 +1219,48 @@ namespace BinaryArithVectorScalar {
 
 enum class Type { f32, f16, i32, u32 };
 static const ast::Expression* MakeVectorExpr(ProgramBuilder* builder, Type type) {
+    auto name = builder->Symbols().New();
     switch (type) {
         case Type::f32:
-            return builder->vec3<f32>(1_f, 1_f, 1_f);
+            builder->GlobalVar(name, builder->ty.vec3<f32>(), builder->vec3<f32>(1_f, 1_f, 1_f),
+                               ast::StorageClass::kPrivate);
+            break;
         case Type::f16:
-            return builder->vec3<f16>(1_h, 1_h, 1_h);
+            builder->GlobalVar(name, builder->ty.vec3<f16>(), builder->vec3<f16>(1_h, 1_h, 1_h),
+                               ast::StorageClass::kPrivate);
+            break;
         case Type::i32:
-            return builder->vec3<i32>(1_i, 1_i, 1_i);
+            builder->GlobalVar(name, builder->ty.vec3<i32>(), builder->vec3<i32>(1_i, 1_i, 1_i),
+                               ast::StorageClass::kPrivate);
+            break;
         case Type::u32:
-            return builder->vec3<u32>(1_u, 1_u, 1_u);
+            builder->GlobalVar(name, builder->ty.vec3<u32>(), builder->vec3<u32>(1_u, 1_u, 1_u),
+                               ast::StorageClass::kPrivate);
+            break;
     }
-    return nullptr;
+    return builder->Expr(name);
 }
 static const ast::Expression* MakeScalarExpr(ProgramBuilder* builder, Type type) {
+    auto name = builder->Symbols().New();
     switch (type) {
         case Type::f32:
-            return builder->Expr(1_f);
+            builder->GlobalVar(name, builder->ty.f32(), builder->Expr(1_f),
+                               ast::StorageClass::kPrivate);
+            break;
         case Type::f16:
-            return builder->Expr(1_h);
+            builder->GlobalVar(name, builder->ty.f16(), builder->Expr(1_h),
+                               ast::StorageClass::kPrivate);
+            break;
         case Type::i32:
-            return builder->Expr(1_i);
+            builder->GlobalVar(name, builder->ty.i32(), builder->Expr(1_i),
+                               ast::StorageClass::kPrivate);
+            break;
         case Type::u32:
-            return builder->Expr(1_u);
+            builder->GlobalVar(name, builder->ty.u32(), builder->Expr(1_u),
+                               ast::StorageClass::kPrivate);
+            break;
     }
-    return nullptr;
+    return builder->Expr(name);
 }
 static std::string OpTypeDecl(Type type) {
     switch (type) {
@@ -1310,26 +1328,33 @@ TEST_P(BinaryArithVectorScalarTest, VectorScalar) {
 
     spirv::Builder& b = Build();
     ASSERT_TRUE(b.Build()) << b.error();
-
     EXPECT_EQ(DumpBuilder(b), capability_decl + R"(
 OpMemoryModel Logical GLSL450
-OpEntryPoint GLCompute %3 "test_function"
-OpExecutionMode %3 LocalSize 1 1 1
-OpName %3 "test_function"
-%2 = OpTypeVoid
-%1 = OpTypeFunction %2
-%6 = )" + op_type_decl + R"(
-%5 = OpTypeVector %6 3
-%7 = OpConstant %6 )" + constant_value +
+OpEntryPoint GLCompute %11 "test_function"
+OpExecutionMode %11 LocalSize 1 1 1
+OpName %5 "tint_symbol"
+OpName %7 "tint_symbol_1"
+OpName %11 "test_function"
+%2 = )" + op_type_decl + R"(
+%1 = OpTypeVector %2 3
+%3 = OpConstant %2 )" + constant_value +
                                   R"(
-%8 = OpConstantComposite %5 %7 %7 %7
-%11 = OpTypePointer Function %5
-%12 = OpConstantNull %5
-%3 = OpFunction %2 None %1
-%4 = OpLabel
-%10 = OpVariable %11 Function %12
-%13 = OpCompositeConstruct %5 %7 %7 %7
-%9 = )" + param.name + R"( %5 %8 %13
+%4 = OpConstantComposite %1 %3 %3 %3
+%6 = OpTypePointer Private %1
+%5 = OpVariable %6 Private %4
+%8 = OpTypePointer Private %2
+%7 = OpVariable %8 Private %3
+%10 = OpTypeVoid
+%9 = OpTypeFunction %10
+%17 = OpTypePointer Function %1
+%18 = OpConstantNull %1
+%11 = OpFunction %10 None %9
+%12 = OpLabel
+%16 = OpVariable %17 Function %18
+%13 = OpLoad %1 %5
+%14 = OpLoad %2 %7
+%19 = OpCompositeConstruct %1 %14 %14 %14
+%15 = )" + param.name + R"( %1 %13 %19
 OpReturn
 OpFunctionEnd
 )");
@@ -1355,26 +1380,33 @@ TEST_P(BinaryArithVectorScalarTest, ScalarVector) {
 
     spirv::Builder& b = Build();
     ASSERT_TRUE(b.Build()) << b.error();
-
     EXPECT_EQ(DumpBuilder(b), capability_decl + R"(
 OpMemoryModel Logical GLSL450
-OpEntryPoint GLCompute %3 "test_function"
-OpExecutionMode %3 LocalSize 1 1 1
-OpName %3 "test_function"
-%2 = OpTypeVoid
-%1 = OpTypeFunction %2
-%5 = )" + op_type_decl + R"(
-%6 = OpConstant %5 )" + constant_value +
+OpEntryPoint GLCompute %11 "test_function"
+OpExecutionMode %11 LocalSize 1 1 1
+OpName %3 "tint_symbol"
+OpName %7 "tint_symbol_1"
+OpName %11 "test_function"
+%1 = )" + op_type_decl + R"(
+%2 = OpConstant %1 )" + constant_value +
                                   R"(
-%7 = OpTypeVector %5 3
-%8 = OpConstantComposite %7 %6 %6 %6
-%11 = OpTypePointer Function %7
-%12 = OpConstantNull %7
-%3 = OpFunction %2 None %1
-%4 = OpLabel
-%10 = OpVariable %11 Function %12
-%13 = OpCompositeConstruct %7 %6 %6 %6
-%9 = )" + param.name + R"( %7 %13 %8
+%4 = OpTypePointer Private %1
+%3 = OpVariable %4 Private %2
+%5 = OpTypeVector %1 3
+%6 = OpConstantComposite %5 %2 %2 %2
+%8 = OpTypePointer Private %5
+%7 = OpVariable %8 Private %6
+%10 = OpTypeVoid
+%9 = OpTypeFunction %10
+%17 = OpTypePointer Function %5
+%18 = OpConstantNull %5
+%11 = OpFunction %10 None %9
+%12 = OpLabel
+%16 = OpVariable %17 Function %18
+%13 = OpLoad %1 %3
+%14 = OpLoad %5 %7
+%19 = OpCompositeConstruct %5 %13 %13 %13
+%15 = )" + param.name + R"( %5 %19 %14
 OpReturn
 OpFunctionEnd
 )");
@@ -1428,22 +1460,29 @@ TEST_P(BinaryArithVectorScalarMultiplyTest, VectorScalar) {
 
     spirv::Builder& b = Build();
     ASSERT_TRUE(b.Build()) << b.error();
-
     EXPECT_EQ(DumpBuilder(b), capability_decl + R"(
 OpMemoryModel Logical GLSL450
-OpEntryPoint GLCompute %3 "test_function"
-OpExecutionMode %3 LocalSize 1 1 1
-OpName %3 "test_function"
-%2 = OpTypeVoid
-%1 = OpTypeFunction %2
-%6 = )" + op_type_decl + R"(
-%5 = OpTypeVector %6 3
-%7 = OpConstant %6 )" + constant_value +
+OpEntryPoint GLCompute %11 "test_function"
+OpExecutionMode %11 LocalSize 1 1 1
+OpName %5 "tint_symbol"
+OpName %7 "tint_symbol_1"
+OpName %11 "test_function"
+%2 = )" + op_type_decl + R"(
+%1 = OpTypeVector %2 3
+%3 = OpConstant %2 )" + constant_value +
                                   R"(
-%8 = OpConstantComposite %5 %7 %7 %7
-%3 = OpFunction %2 None %1
-%4 = OpLabel
-%9 = OpVectorTimesScalar %5 %8 %7
+%4 = OpConstantComposite %1 %3 %3 %3
+%6 = OpTypePointer Private %1
+%5 = OpVariable %6 Private %4
+%8 = OpTypePointer Private %2
+%7 = OpVariable %8 Private %3
+%10 = OpTypeVoid
+%9 = OpTypeFunction %10
+%11 = OpFunction %10 None %9
+%12 = OpLabel
+%13 = OpLoad %1 %5
+%14 = OpLoad %2 %7
+%15 = OpVectorTimesScalar %1 %13 %14
 OpReturn
 OpFunctionEnd
 )");
@@ -1469,22 +1508,29 @@ TEST_P(BinaryArithVectorScalarMultiplyTest, ScalarVector) {
 
     spirv::Builder& b = Build();
     ASSERT_TRUE(b.Build()) << b.error();
-
     EXPECT_EQ(DumpBuilder(b), capability_decl + R"(
 OpMemoryModel Logical GLSL450
-OpEntryPoint GLCompute %3 "test_function"
-OpExecutionMode %3 LocalSize 1 1 1
-OpName %3 "test_function"
-%2 = OpTypeVoid
-%1 = OpTypeFunction %2
-%5 = )" + op_type_decl + R"(
-%6 = OpConstant %5 )" + constant_value +
+OpEntryPoint GLCompute %11 "test_function"
+OpExecutionMode %11 LocalSize 1 1 1
+OpName %3 "tint_symbol"
+OpName %7 "tint_symbol_1"
+OpName %11 "test_function"
+%1 = )" + op_type_decl + R"(
+%2 = OpConstant %1 )" + constant_value +
                                   R"(
-%7 = OpTypeVector %5 3
-%8 = OpConstantComposite %7 %6 %6 %6
-%3 = OpFunction %2 None %1
-%4 = OpLabel
-%9 = OpVectorTimesScalar %7 %8 %6
+%4 = OpTypePointer Private %1
+%3 = OpVariable %4 Private %2
+%5 = OpTypeVector %1 3
+%6 = OpConstantComposite %5 %2 %2 %2
+%8 = OpTypePointer Private %5
+%7 = OpVariable %8 Private %6
+%10 = OpTypeVoid
+%9 = OpTypeFunction %10
+%11 = OpFunction %10 None %9
+%12 = OpLabel
+%13 = OpLoad %1 %3
+%14 = OpLoad %5 %7
+%15 = OpVectorTimesScalar %5 %14 %13
 OpReturn
 OpFunctionEnd
 )");
@@ -1502,22 +1548,31 @@ namespace BinaryArithMatrixMatrix {
 
 enum class Type { f32, f16 };
 static const ast::Expression* MakeMat3x4Expr(ProgramBuilder* builder, Type type) {
+    auto name = builder->Symbols().New();
     switch (type) {
         case Type::f32:
-            return builder->mat3x4<f32>();
+            builder->GlobalVar(name, builder->ty.mat3x4<f32>(), builder->mat3x4<f32>(),
+                               ast::StorageClass::kPrivate);
+            break;
         case Type::f16:
-            return builder->mat3x4<f16>();
+            builder->GlobalVar(name, builder->ty.mat3x4<f16>(), builder->mat3x4<f16>(),
+                               ast::StorageClass::kPrivate);
+            break;
     }
-    return nullptr;
+    return builder->Expr(name);
 }
 static const ast::Expression* MakeMat4x3Expr(ProgramBuilder* builder, Type type) {
+    auto name = builder->Symbols().New();
     switch (type) {
         case Type::f32:
-            return builder->mat4x3<f32>();
+            builder->GlobalVar(name, builder->ty.mat4x3<f32>(), builder->mat4x3<f32>(),
+                               ast::StorageClass::kPrivate);
+            break;
         case Type::f16:
-            return builder->mat4x3<f16>();
+            builder->GlobalVar(name, builder->ty.mat4x3<f16>(), builder->mat4x3<f16>(),
+                               ast::StorageClass::kPrivate);
     }
-    return nullptr;
+    return builder->Expr(name);
 }
 static std::string OpTypeDecl(Type type) {
     switch (type) {
@@ -1567,30 +1622,36 @@ TEST_P(BinaryArithMatrixMatrix, AddOrSubtract) {
 
     spirv::Builder& b = Build();
     ASSERT_TRUE(b.Build()) << b.error();
-
     EXPECT_EQ(DumpBuilder(b), capability_decl + R"(
 OpMemoryModel Logical GLSL450
-OpEntryPoint GLCompute %3 "test_function"
-OpExecutionMode %3 LocalSize 1 1 1
-OpName %3 "test_function"
-%2 = OpTypeVoid
-%1 = OpTypeFunction %2
-%7 = )" + op_type_decl + R"(
-%6 = OpTypeVector %7 4
-%5 = OpTypeMatrix %6 3
-%8 = OpConstantNull %5
-%3 = OpFunction %2 None %1
-%4 = OpLabel
-%10 = OpCompositeExtract %6 %8 0
-%11 = OpCompositeExtract %6 %8 0
-%12 = )" + param.name + R"( %6 %10 %11
-%13 = OpCompositeExtract %6 %8 1
-%14 = OpCompositeExtract %6 %8 1
-%15 = )" + param.name + R"( %6 %13 %14
-%16 = OpCompositeExtract %6 %8 2
-%17 = OpCompositeExtract %6 %8 2
-%18 = )" + param.name + R"( %6 %16 %17
-%19 = OpCompositeConstruct %5 %12 %15 %18
+OpEntryPoint GLCompute %10 "test_function"
+OpExecutionMode %10 LocalSize 1 1 1
+OpName %5 "tint_symbol"
+OpName %7 "tint_symbol_1"
+OpName %10 "test_function"
+%3 = )" + op_type_decl + R"(
+%2 = OpTypeVector %3 4
+%1 = OpTypeMatrix %2 3
+%4 = OpConstantNull %1
+%6 = OpTypePointer Private %1
+%5 = OpVariable %6 Private %4
+%7 = OpVariable %6 Private %4
+%9 = OpTypeVoid
+%8 = OpTypeFunction %9
+%10 = OpFunction %9 None %8
+%11 = OpLabel
+%12 = OpLoad %1 %5
+%13 = OpLoad %1 %7
+%15 = OpCompositeExtract %2 %12 0
+%16 = OpCompositeExtract %2 %13 0
+%17 = )" + param.name + R"( %2 %15 %16
+%18 = OpCompositeExtract %2 %12 1
+%19 = OpCompositeExtract %2 %13 1
+%20 = )" + param.name + R"( %2 %18 %19
+%21 = OpCompositeExtract %2 %12 2
+%22 = OpCompositeExtract %2 %13 2
+%23 = )" + param.name + R"( %2 %21 %22
+%24 = OpCompositeConstruct %1 %17 %20 %23
 OpReturn
 OpFunctionEnd
 )");
@@ -1624,25 +1685,32 @@ TEST_P(BinaryArithMatrixMatrixMultiply, Multiply) {
 
     spirv::Builder& b = Build();
     ASSERT_TRUE(b.Build()) << b.error();
-
     EXPECT_EQ(DumpBuilder(b), capability_decl + R"(
 OpMemoryModel Logical GLSL450
-OpEntryPoint GLCompute %3 "test_function"
-OpExecutionMode %3 LocalSize 1 1 1
-OpName %3 "test_function"
-%2 = OpTypeVoid
-%1 = OpTypeFunction %2
-%7 = )" + op_type_decl + R"(
-%6 = OpTypeVector %7 4
-%5 = OpTypeMatrix %6 3
-%8 = OpConstantNull %5
-%10 = OpTypeVector %7 3
-%9 = OpTypeMatrix %10 4
-%11 = OpConstantNull %9
-%13 = OpTypeMatrix %6 4
-%3 = OpFunction %2 None %1
-%4 = OpLabel
-%12 = OpMatrixTimesMatrix %13 %8 %11
+OpEntryPoint GLCompute %14 "test_function"
+OpExecutionMode %14 LocalSize 1 1 1
+OpName %5 "tint_symbol"
+OpName %10 "tint_symbol_1"
+OpName %14 "test_function"
+%3 = )" + op_type_decl + R"(
+%2 = OpTypeVector %3 4
+%1 = OpTypeMatrix %2 3
+%4 = OpConstantNull %1
+%6 = OpTypePointer Private %1
+%5 = OpVariable %6 Private %4
+%8 = OpTypeVector %3 3
+%7 = OpTypeMatrix %8 4
+%9 = OpConstantNull %7
+%11 = OpTypePointer Private %7
+%10 = OpVariable %11 Private %9
+%13 = OpTypeVoid
+%12 = OpTypeFunction %13
+%19 = OpTypeMatrix %2 4
+%14 = OpFunction %13 None %12
+%15 = OpLabel
+%16 = OpLoad %1 %5
+%17 = OpLoad %7 %10
+%18 = OpMatrixTimesMatrix %19 %16 %17
 OpReturn
 OpFunctionEnd
 )");

@@ -6,8 +6,8 @@ void unused_entry_point() {
   return;
 }
 void f() {
-  f16vec2 v2 = f16vec2((1.0hf + 2.0hf));
-  f16vec3 v3 = f16vec3((1.0hf + 2.0hf));
-  f16vec4 v4 = f16vec4((1.0hf + 2.0hf));
+  f16vec2 v2 = f16vec2(3.0hf);
+  f16vec3 v3 = f16vec3(3.0hf);
+  f16vec4 v4 = f16vec4(3.0hf);
 }
 
