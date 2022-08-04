@@ -1558,6 +1558,64 @@ Expect<ast::PipelineStage> ParserImpl::expect_pipeline_stage() {
     return add_error(peek(), "invalid value for stage attribute");
 }
 
+// interpolation_sample_name
+//   :  'center'
+//   | 'centroid'
+//   | 'sample'
+Expect<ast::InterpolationSampling> ParserImpl::expect_interpolation_sample_name() {
+    auto ident = expect_ident("interpolation sample name");
+    if (ident.errored) {
+        return Failure::kErrored;
+    }
+
+    if (ident.value == "center") {
+        return {ast::InterpolationSampling::kCenter, ident.source};
+    }
+    if (ident.value == "centroid") {
+        return {ast::InterpolationSampling::kCentroid, ident.source};
+    }
+    if (ident.value == "sample") {
+        return {ast::InterpolationSampling::kSample, ident.source};
+    }
+    return add_error(ident.source, "invalid interpolation sampling");
+}
+
+// interpolation_type_name
+//   : 'perspective'
+//   | 'linear'
+//   | 'flat'
+Expect<ast::InterpolationType> ParserImpl::expect_interpolation_type_name() {
+    auto ident = expect_ident("interpolation type name");
+    if (ident.errored) {
+        return Failure::kErrored;
+    }
+
+    if (ident.value == "perspective") {
+        return {ast::InterpolationType::kPerspective, ident.source};
+    }
+    if (ident.value == "linear") {
+        return {ast::InterpolationType::kLinear, ident.source};
+    }
+    if (ident.value == "flat") {
+        return {ast::InterpolationType::kFlat, ident.source};
+    }
+
+    return add_error(ident.source, "invalid interpolation type");
+}
+
+// builtin_value_name
+//   : 'vertex_index'
+//   | 'instance_index'
+//   | 'position'
+//   | 'front_facing'
+//   | 'frag_depth'
+//   | 'local_invocation_id'
+//   | 'local_invocation_index'
+//   | 'global_invocation_id'
+//   | 'workgroup_id'
+//   | 'num_workgroups'
+//   | 'sample_index'
+//   | 'sample_mask'
 Expect<ast::BuiltinValue> ParserImpl::expect_builtin() {
     auto ident = expect_ident("builtin");
     if (ident.errored) {
@@ -2995,17 +3053,17 @@ Maybe<const ast::Expression*> ParserImpl::expression() {
     return logical_or_expression();
 }
 
-// compound_assignment_operator:
-// | plus_equal
-// | minus_equal
-// | times_equal
-// | division_equal
-// | modulo_equal
-// | and_equal
-// | or_equal
-// | xor_equal
-// | shift_right_equal
-// | shift_left_equal
+// compound_assignment_operator
+//   : plus_equal
+//   | minus_equal
+//   | times_equal
+//   | division_equal
+//   | modulo_equal
+//   | and_equal
+//   | or_equal
+//   | xor_equal
+//   | shift_right_equal
+//   | shift_left_equal
 Maybe<ast::BinaryOp> ParserImpl::compound_assignment_operator() {
     ast::BinaryOp compound_op = ast::BinaryOp::kNone;
     if (peek_is(Token::Type::kPlusEqual)) {
@@ -3234,37 +3292,25 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
 
     if (t == kInterpolateAttribute) {
         return expect_paren_block("interpolate attribute", [&]() -> Result {
-            ast::InterpolationType type;
-            ast::InterpolationSampling sampling = ast::InterpolationSampling::kNone;
-
-            auto& type_tok = next();
-            if (type_tok == "perspective") {
-                type = ast::InterpolationType::kPerspective;
-            } else if (type_tok == "linear") {
-                type = ast::InterpolationType::kLinear;
-            } else if (type_tok == "flat") {
-                type = ast::InterpolationType::kFlat;
-            } else {
-                return add_error(type_tok, "invalid interpolation type");
+            auto type = expect_interpolation_type_name();
+            if (type.errored) {
+                return Failure::kErrored;
             }
 
+            ast::InterpolationSampling sampling = ast::InterpolationSampling::kNone;
             if (match(Token::Type::kComma)) {
                 if (!peek_is(Token::Type::kParenRight)) {
-                    auto& sampling_tok = next();
-                    if (sampling_tok == "center") {
-                        sampling = ast::InterpolationSampling::kCenter;
-                    } else if (sampling_tok == "centroid") {
-                        sampling = ast::InterpolationSampling::kCentroid;
-                    } else if (sampling_tok == "sample") {
-                        sampling = ast::InterpolationSampling::kSample;
-                    } else {
-                        return add_error(sampling_tok, "invalid interpolation sampling");
+                    auto sample = expect_interpolation_sample_name();
+                    if (sample.errored) {
+                        return Failure::kErrored;
                     }
+
+                    sampling = sample.value;
                     match(Token::Type::kComma);
                 }
             }
 
-            return create<ast::InterpolateAttribute>(t.source(), type, sampling);
+            return create<ast::InterpolateAttribute>(t.source(), type.value, sampling);
         });
     }
 
