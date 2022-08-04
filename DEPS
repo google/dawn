@@ -134,7 +134,7 @@ deps = {
   },
 
   'third_party/swiftshader': {
-    'url': '{swiftshader_git}/SwiftShader@a07b3fb6b3bd47be49c0c3879475d25452b22106',
+    'url': '{swiftshader_git}/SwiftShader@dcaef10ef0ada8ce283bb1ebc555e81869c64c52',
     'condition': 'dawn_standalone',
   },
 
