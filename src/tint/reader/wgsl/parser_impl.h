@@ -655,6 +655,9 @@ class ParserImpl {
     /// Parses a `logical_or_expression` grammar element
     /// @returns the parsed expression or nullptr
     Maybe<const ast::Expression*> logical_or_expression();
+    /// Parses an `expression` grammar element
+    /// @returns the parsed expression or nullptr
+    Maybe<const ast::Expression*> expression();
     /// Parses a `compound_assignment_operator` grammar element
     /// @returns the parsed compound assignment operator
     Maybe<ast::BinaryOp> compound_assignment_operator();

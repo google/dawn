@@ -581,7 +581,7 @@ Maybe<bool> ParserImpl::global_decl() {
 
 // global_variable_decl
 //  : variable_attribute_list* variable_decl
-//  | variable_attribute_list* variable_decl EQUAL const_expr
+//  | variable_attribute_list* variable_decl EQUAL expression
 Maybe<const ast::Variable*> ParserImpl::global_variable_decl(AttributeList& attrs) {
     auto decl = variable_decl();
     if (decl.errored) {
@@ -593,7 +593,7 @@ Maybe<const ast::Variable*> ParserImpl::global_variable_decl(AttributeList& attr
 
     const ast::Expression* initializer = nullptr;
     if (match(Token::Type::kEqual)) {
-        auto expr = logical_or_expression();
+        auto expr = expression();
         if (expr.errored) {
             return Failure::kErrored;
         }
@@ -653,7 +653,7 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(AttributeList& attr
 
     const ast::Expression* initializer = nullptr;
     if (has_initializer) {
-        auto expr = logical_or_expression();
+        auto expr = expression();
         if (expr.errored) {
             return Failure::kErrored;
         }
@@ -1374,13 +1374,15 @@ Expect<ast::StructMember*> ParserImpl::expect_struct_member() {
                                      decl->type, std::move(attrs.value));
 }
 
+// static_assert
+//   : STATIC_ASSERT expression
 Maybe<const ast::StaticAssert*> ParserImpl::static_assert_stmt() {
     Source start;
     if (!match(Token::Type::kStaticAssert, &start)) {
         return Failure::kNoMatch;
     }
 
-    auto condition = logical_or_expression();
+    auto condition = expression();
     if (condition.errored) {
         return Failure::kErrored;
     }
@@ -1583,10 +1585,10 @@ Expect<ast::BlockStatement*> ParserImpl::expect_body_stmt() {
 }
 
 // paren_expression
-//   : PAREN_LEFT logical_or_expression PAREN_RIGHT
+//   : PAREN_LEFT expression PAREN_RIGHT
 Expect<const ast::Expression*> ParserImpl::expect_paren_expression() {
     return expect_paren_block("", [&]() -> Expect<const ast::Expression*> {
-        auto expr = logical_or_expression();
+        auto expr = expression();
         if (expr.errored) {
             return Failure::kErrored;
         }
@@ -1791,7 +1793,7 @@ Maybe<const ast::Statement*> ParserImpl::non_block_statement() {
 }
 
 // return_stmt
-//   : RETURN logical_or_expression?
+//   : RETURN expression?
 Maybe<const ast::ReturnStatement*> ParserImpl::return_stmt() {
     Source source;
     if (!match(Token::Type::kReturn, &source)) {
@@ -1802,7 +1804,7 @@ Maybe<const ast::ReturnStatement*> ParserImpl::return_stmt() {
         return create<ast::ReturnStatement>(source, nullptr);
     }
 
-    auto expr = logical_or_expression();
+    auto expr = expression();
     if (expr.errored) {
         return Failure::kErrored;
     }
@@ -1813,8 +1815,8 @@ Maybe<const ast::ReturnStatement*> ParserImpl::return_stmt() {
 
 // variable_stmt
 //   : variable_decl
-//   | variable_decl EQUAL logical_or_expression
-//   | CONST variable_ident_decl EQUAL logical_or_expression
+//   | variable_decl EQUAL expression
+//   | CONST variable_ident_decl EQUAL expression
 Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
     if (match(Token::Type::kConst)) {
         auto decl = expect_variable_ident_decl("'const' declaration",
@@ -1827,7 +1829,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
             return Failure::kErrored;
         }
 
-        auto initializer = logical_or_expression();
+        auto initializer = expression();
         if (initializer.errored) {
             return Failure::kErrored;
         }
@@ -1855,7 +1857,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
             return Failure::kErrored;
         }
 
-        auto initializer = logical_or_expression();
+        auto initializer = expression();
         if (initializer.errored) {
             return Failure::kErrored;
         }
@@ -1882,7 +1884,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_stmt() {
 
     const ast::Expression* initializer = nullptr;
     if (match(Token::Type::kEqual)) {
-        auto initializer_expr = logical_or_expression();
+        auto initializer_expr = expression();
         if (initializer_expr.errored) {
             return Failure::kErrored;
         }
@@ -1926,7 +1928,7 @@ Maybe<const ast::IfStatement*> ParserImpl::if_stmt() {
             return Failure::kNoMatch;
         }
 
-        auto condition = logical_or_expression();
+        auto condition = expression();
         if (condition.errored) {
             return Failure::kErrored;
         }
@@ -1987,14 +1989,14 @@ Maybe<const ast::IfStatement*> ParserImpl::if_stmt() {
 }
 
 // switch_stmt
-//   : SWITCH paren_expression BRACKET_LEFT switch_body+ BRACKET_RIGHT
+//   : SWITCH expression BRACKET_LEFT switch_body+ BRACKET_RIGHT
 Maybe<const ast::SwitchStatement*> ParserImpl::switch_stmt() {
     Source source;
     if (!match(Token::Type::kSwitch, &source)) {
         return Failure::kNoMatch;
     }
 
-    auto condition = logical_or_expression();
+    auto condition = expression();
     if (condition.errored) {
         return Failure::kErrored;
     }
@@ -2210,7 +2212,7 @@ Maybe<const ast::Statement*> ParserImpl::for_header_continuing() {
 // for_header
 //   : (variable_stmt | assignment_stmt | func_call_stmt)?
 //   SEMICOLON
-//      logical_or_expression? SEMICOLON
+//      expression? SEMICOLON
 //      (assignment_stmt | func_call_stmt)?
 Expect<std::unique_ptr<ForHeader>> ParserImpl::expect_for_header() {
     auto initializer = for_header_initializer();
@@ -2222,7 +2224,7 @@ Expect<std::unique_ptr<ForHeader>> ParserImpl::expect_for_header() {
         return Failure::kErrored;
     }
 
-    auto condition = logical_or_expression();
+    auto condition = expression();
     if (condition.errored) {
         return Failure::kErrored;
     }
@@ -2270,7 +2272,7 @@ Maybe<const ast::WhileStatement*> ParserImpl::while_stmt() {
         return Failure::kNoMatch;
     }
 
-    auto condition = logical_or_expression();
+    auto condition = expression();
     if (condition.errored) {
         return Failure::kErrored;
     }
@@ -2420,7 +2422,7 @@ Maybe<const ast::Expression*> ParserImpl::primary_expression() {
 
 // postfix_expression
 //   :
-//   | BRACE_LEFT logical_or_expression BRACE_RIGHT postfix_expr
+//   | BRACE_LEFT expression BRACE_RIGHT postfix_expr
 //   | PERIOD IDENTIFIER postfix_expr
 Maybe<const ast::Expression*> ParserImpl::postfix_expression(const ast::Expression* prefix) {
     Source source;
@@ -2428,7 +2430,7 @@ Maybe<const ast::Expression*> ParserImpl::postfix_expression(const ast::Expressi
     while (continue_parsing()) {
         if (match(Token::Type::kBracketLeft, &source)) {
             auto res = sync(Token::Type::kBracketRight, [&]() -> Maybe<const ast::Expression*> {
-                auto param = logical_or_expression();
+                auto param = expression();
                 if (param.errored) {
                     return Failure::kErrored;
                 }
@@ -2484,14 +2486,14 @@ Maybe<const ast::Expression*> ParserImpl::singular_expression() {
 }
 
 // argument_expression_list
-//   : PAREN_LEFT ((logical_or_expression COMMA)* logical_or_expression COMMA?)?
+//   : PAREN_LEFT ((expression COMMA)* expression COMMA?)?
 //   PAREN_RIGHT
 Expect<ParserImpl::ExpressionList> ParserImpl::expect_argument_expression_list(
     std::string_view use) {
     return expect_paren_block(use, [&]() -> Expect<ExpressionList> {
         ExpressionList ret;
         while (continue_parsing()) {
-            auto arg = logical_or_expression();
+            auto arg = expression();
             if (arg.errored) {
                 return Failure::kErrored;
             } else if (!arg.matched) {
@@ -2984,6 +2986,15 @@ Maybe<const ast::Expression*> ParserImpl::logical_or_expression() {
     return expect_logical_or_expr(lhs.value);
 }
 
+// expression:
+//   : relational_expression
+//   | short_circuit_or_expression or_or relational_expression
+//   | short_circuit_and_expression and_and relational_expression
+//   | bitwise_expression
+Maybe<const ast::Expression*> ParserImpl::expression() {
+    return logical_or_expression();
+}
+
 // compound_assignment_operator:
 // | plus_equal
 // | minus_equal
@@ -3076,7 +3087,7 @@ Maybe<const ast::Statement*> ParserImpl::assignment_stmt() {
         }
     }
 
-    auto rhs = logical_or_expression();
+    auto rhs = expression();
     if (rhs.errored) {
         return Failure::kErrored;
     }
