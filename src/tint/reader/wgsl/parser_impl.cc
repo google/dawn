@@ -62,26 +62,6 @@ constexpr uint32_t kMaxParseDepth = 128;
 /// parser on error.
 constexpr size_t const kMaxResynchronizeLookahead = 32;
 
-const char kVertexStage[] = "vertex";
-const char kFragmentStage[] = "fragment";
-const char kComputeStage[] = "compute";
-
-const char kReadAccess[] = "read";
-const char kWriteAccess[] = "write";
-const char kReadWriteAccess[] = "read_write";
-
-const char kBindingAttribute[] = "binding";
-const char kBuiltinAttribute[] = "builtin";
-const char kGroupAttribute[] = "group";
-const char kIdAttribute[] = "id";
-const char kInterpolateAttribute[] = "interpolate";
-const char kInvariantAttribute[] = "invariant";
-const char kLocationAttribute[] = "location";
-const char kSizeAttribute[] = "size";
-const char kAlignAttribute[] = "align";
-const char kStageAttribute[] = "stage";
-const char kWorkgroupSizeAttribute[] = "workgroup_size";
-
 // https://gpuweb.github.io/gpuweb/wgsl.html#reserved-keywords
 bool is_reserved(const Token& t) {
     return t == "CompileShader" || t == "ComputeShader" || t == "DomainShader" ||
@@ -969,19 +949,23 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(std::
     return TypedIdentifier{type.value, ident.value, ident.source};
 }
 
+// access_mode
+//   : 'read'
+//   | 'write'
+//   | 'read_write'
 Expect<ast::Access> ParserImpl::expect_access(std::string_view use) {
     auto ident = expect_ident(use);
     if (ident.errored) {
         return Failure::kErrored;
     }
 
-    if (ident.value == kReadAccess) {
+    if (ident.value == "read") {
         return {ast::Access::kRead, ident.source};
     }
-    if (ident.value == kWriteAccess) {
+    if (ident.value == "write") {
         return {ast::Access::kWrite, ident.source};
     }
-    if (ident.value == kReadWriteAccess) {
+    if (ident.value == "read_write") {
         return {ast::Access::kReadWrite, ident.source};
     }
 
@@ -998,7 +982,7 @@ Maybe<ParserImpl::VariableQualifier> ParserImpl::variable_qualifier() {
     auto* use = "variable declaration";
     auto vq = expect_lt_gt_block(use, [&]() -> Expect<VariableQualifier> {
         auto source = make_source_range();
-        auto sc = expect_storage_class(use);
+        auto sc = expect_address_space(use);
         if (sc.errored) {
             return Failure::kErrored;
         }
@@ -1152,7 +1136,7 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_pointer(const Token& t) {
     auto access = ast::Access::kUndefined;
 
     auto subtype = expect_lt_gt_block(use, [&]() -> Expect<const ast::Type*> {
-        auto sc = expect_storage_class(use);
+        auto sc = expect_address_space(use);
         if (sc.errored) {
             return Failure::kErrored;
         }
@@ -1284,7 +1268,15 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_matrix(const Token& t) {
     return builder_.ty.mat(make_source_range_from(t.source()), subtype, columns, rows);
 }
 
-Expect<ast::StorageClass> ParserImpl::expect_storage_class(std::string_view use) {
+// address_space
+//   : 'function'
+//   | 'private'
+//   | 'workgroup'
+//   | 'uniform'
+//   | 'storage'
+//
+// Note, we also parse `push_constant` from the experimental extension
+Expect<ast::StorageClass> ParserImpl::expect_address_space(std::string_view use) {
     auto& t = peek();
     auto ident = expect_ident("storage class");
     if (ident.errored) {
@@ -1541,17 +1533,19 @@ Expect<ast::Parameter*> ParserImpl::expect_param() {
 //   : VERTEX
 //   | FRAGMENT
 //   | COMPUTE
+//
+// TODO(crbug.com/tint/1503): Remove when deprecation period is over.
 Expect<ast::PipelineStage> ParserImpl::expect_pipeline_stage() {
     auto& t = peek();
-    if (t == kVertexStage) {
+    if (t == "vertex") {
         next();  // Consume the peek
         return {ast::PipelineStage::kVertex, t.source()};
     }
-    if (t == kFragmentStage) {
+    if (t == "fragment") {
         next();  // Consume the peek
         return {ast::PipelineStage::kFragment, t.source()};
     }
-    if (t == kComputeStage) {
+    if (t == "compute") {
         next();  // Consume the peek
         return {ast::PipelineStage::kCompute, t.source()};
     }
@@ -3243,6 +3237,29 @@ Expect<const ast::Attribute*> ParserImpl::expect_attribute() {
     return add_error(t, "expected attribute");
 }
 
+// attribute
+//   : ATTR 'align' PAREN_LEFT expression attrib_end
+//   | ATTR 'binding' PAREN_LEFT expression attrib_end
+//   | ATTR 'builtin' PAREN_LEFT builtin_value_name attrib_end
+//   | ATTR 'const'
+//   | ATTR 'group' PAREN_LEFT expression attrib_end
+//   | ATTR 'id' PAREN_LEFT expression attrib_end
+//   | ATTR 'interpolate' PAREN_LEFT interpolation_type_name attrib_end
+//   | ATTR 'interpolate' PAREN_LEFT interpolation_type_name COMMA
+//                                   interpolation_sample_name attrib_end
+//   | ATTR 'invariant'
+//   | ATTR 'location' PAREN_LEFT expression attrib_end
+//   | ATTR 'size' PAREN_LEFT expression attrib_end
+//   | ATTR 'workgroup_size' PAREN_LEFT expression attrib_end
+//   | ATTR 'workgroup_size' PAREN_LEFT expression COMMA expression attrib_end
+//   | ATTR 'workgroup_size' PAREN_LEFT expression COMMA expression COMMA expression attrib_end
+//   | ATTR 'vertex'
+//   | ATTR 'fragment'
+//   | ATTR 'compute'
+//
+// attrib_end
+//   : COMMA? PAREN_RIGHT
+//
 Maybe<const ast::Attribute*> ParserImpl::attribute() {
     using Result = Maybe<const ast::Attribute*>;
     auto& t = next();
@@ -3251,8 +3268,8 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
         return Failure::kNoMatch;
     }
 
-    if (t == kLocationAttribute) {
-        const char* use = "location attribute";
+    if (t == "align") {
+        const char* use = "align attribute";
         return expect_paren_block(use, [&]() -> Result {
             auto val = expect_positive_sint(use);
             if (val.errored) {
@@ -3260,11 +3277,11 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
             }
             match(Token::Type::kComma);
 
-            return create<ast::LocationAttribute>(t.source(), val.value);
+            return create<ast::StructMemberAlignAttribute>(t.source(), val.value);
         });
     }
 
-    if (t == kBindingAttribute) {
+    if (t == "binding") {
         const char* use = "binding attribute";
         return expect_paren_block(use, [&]() -> Result {
             auto val = expect_positive_sint(use);
@@ -3277,7 +3294,29 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
         });
     }
 
-    if (t == kGroupAttribute) {
+    if (t == "builtin") {
+        return expect_paren_block("builtin attribute", [&]() -> Result {
+            auto builtin = expect_builtin();
+            if (builtin.errored) {
+                return Failure::kErrored;
+            }
+            match(Token::Type::kComma);
+
+            return create<ast::BuiltinAttribute>(t.source(), builtin.value);
+        });
+    }
+
+    if (t == "compute") {
+        return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kCompute);
+    }
+
+    // Note, `const` is not valid in a WGSL source file, it's internal only
+
+    if (t == "fragment") {
+        return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kFragment);
+    }
+
+    if (t == "group") {
         const char* use = "group attribute";
         return expect_paren_block(use, [&]() -> Result {
             auto val = expect_positive_sint(use);
@@ -3290,7 +3329,20 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
         });
     }
 
-    if (t == kInterpolateAttribute) {
+    if (t == "id") {
+        const char* use = "id attribute";
+        return expect_paren_block(use, [&]() -> Result {
+            auto val = expect_positive_sint(use);
+            if (val.errored) {
+                return Failure::kErrored;
+            }
+            match(Token::Type::kComma);
+
+            return create<ast::IdAttribute>(t.source(), val.value);
+        });
+    }
+
+    if (t == "interpolate") {
         return expect_paren_block("interpolate attribute", [&]() -> Result {
             auto type = expect_interpolation_type_name();
             if (type.errored) {
@@ -3314,23 +3366,69 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
         });
     }
 
-    if (t == kInvariantAttribute) {
+    if (t == "invariant") {
         return create<ast::InvariantAttribute>(t.source());
     }
 
-    if (t == kBuiltinAttribute) {
-        return expect_paren_block("builtin attribute", [&]() -> Result {
-            auto builtin = expect_builtin();
-            if (builtin.errored) {
+    if (t == "location") {
+        const char* use = "location attribute";
+        return expect_paren_block(use, [&]() -> Result {
+            auto val = expect_positive_sint(use);
+            if (val.errored) {
                 return Failure::kErrored;
             }
-
             match(Token::Type::kComma);
-            return create<ast::BuiltinAttribute>(t.source(), builtin.value);
+
+            return create<ast::LocationAttribute>(t.source(), val.value);
         });
     }
 
-    if (t == kWorkgroupSizeAttribute) {
+    if (t == "size") {
+        const char* use = "size attribute";
+        return expect_paren_block(use, [&]() -> Result {
+            auto val = expect_positive_sint(use);
+            if (val.errored) {
+                return Failure::kErrored;
+            }
+            match(Token::Type::kComma);
+
+            return create<ast::StructMemberSizeAttribute>(t.source(), val.value);
+        });
+    }
+
+    // TODO(crbug.com/tint/1503): Remove when deprecation period is over.
+    if (t == "stage") {
+        return expect_paren_block("stage attribute", [&]() -> Result {
+            auto stage = expect_pipeline_stage();
+            if (stage.errored) {
+                return Failure::kErrored;
+            }
+
+            std::string warning = "remove stage and use @";
+            switch (stage.value) {
+                case ast::PipelineStage::kVertex:
+                    warning += "vertex";
+                    break;
+                case ast::PipelineStage::kFragment:
+                    warning += "fragment";
+                    break;
+                case ast::PipelineStage::kCompute:
+                    warning += "compute";
+                    break;
+                case ast::PipelineStage::kNone:
+                    break;
+            }
+            deprecated(t.source(), warning);
+
+            return create<ast::StageAttribute>(t.source(), stage.value);
+        });
+    }
+
+    if (t == "vertex") {
+        return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kVertex);
+    }
+
+    if (t == "workgroup_size") {
         return expect_paren_block("workgroup_size attribute", [&]() -> Result {
             const ast::Expression* x = nullptr;
             const ast::Expression* y = nullptr;
@@ -3373,83 +3471,6 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
             return create<ast::WorkgroupAttribute>(t.source(), x, y, z);
         });
     }
-
-    // TODO(crbug.com/tint/1503): Remove when deprecation period is over.
-    if (t == kStageAttribute) {
-        return expect_paren_block("stage attribute", [&]() -> Result {
-            auto stage = expect_pipeline_stage();
-            if (stage.errored) {
-                return Failure::kErrored;
-            }
-
-            std::string warning = "remove stage and use @";
-            switch (stage.value) {
-                case ast::PipelineStage::kVertex:
-                    warning += "vertex";
-                    break;
-                case ast::PipelineStage::kFragment:
-                    warning += "fragment";
-                    break;
-                case ast::PipelineStage::kCompute:
-                    warning += "compute";
-                    break;
-                case ast::PipelineStage::kNone:
-                    break;
-            }
-            deprecated(t.source(), warning);
-
-            return create<ast::StageAttribute>(t.source(), stage.value);
-        });
-    }
-    if (t == kComputeStage) {
-        return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kCompute);
-    }
-    if (t == kVertexStage) {
-        return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kVertex);
-    }
-    if (t == kFragmentStage) {
-        return create<ast::StageAttribute>(t.source(), ast::PipelineStage::kFragment);
-    }
-
-    if (t == kSizeAttribute) {
-        const char* use = "size attribute";
-        return expect_paren_block(use, [&]() -> Result {
-            auto val = expect_positive_sint(use);
-            if (val.errored) {
-                return Failure::kErrored;
-            }
-            match(Token::Type::kComma);
-
-            return create<ast::StructMemberSizeAttribute>(t.source(), val.value);
-        });
-    }
-
-    if (t == kAlignAttribute) {
-        const char* use = "align attribute";
-        return expect_paren_block(use, [&]() -> Result {
-            auto val = expect_positive_sint(use);
-            if (val.errored) {
-                return Failure::kErrored;
-            }
-            match(Token::Type::kComma);
-
-            return create<ast::StructMemberAlignAttribute>(t.source(), val.value);
-        });
-    }
-
-    if (t == kIdAttribute) {
-        const char* use = "id attribute";
-        return expect_paren_block(use, [&]() -> Result {
-            auto val = expect_positive_sint(use);
-            if (val.errored) {
-                return Failure::kErrored;
-            }
-            match(Token::Type::kComma);
-
-            return create<ast::IdAttribute>(t.source(), val.value);
-        });
-    }
-
     return Failure::kNoMatch;
 }
 

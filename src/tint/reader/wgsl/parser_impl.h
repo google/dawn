@@ -426,10 +426,10 @@ class ParserImpl {
     /// Parses a `type_decl` grammar element
     /// @returns the parsed Type or nullptr if none matched.
     Maybe<const ast::Type*> type_decl();
-    /// Parses a `storage_class` grammar element, erroring on parse failure.
+    /// Parses an `address_space` grammar element, erroring on parse failure.
     /// @param use a description of what was being parsed if an error was raised.
-    /// @returns the storage class or StorageClass::kNone if none matched
-    Expect<ast::StorageClass> expect_storage_class(std::string_view use);
+    /// @returns the address space or StorageClass::kNone if none matched
+    Expect<ast::StorageClass> expect_address_space(std::string_view use);
     /// Parses a `struct_decl` grammar element.
     /// @returns the struct type or nullptr on error
     Maybe<const ast::Struct*> struct_decl();

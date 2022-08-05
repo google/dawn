@@ -32,7 +32,7 @@ TEST_P(ParserStorageClassTest, Parses) {
     auto params = GetParam();
     auto p = parser(params.input);
 
-    auto sc = p->expect_storage_class("test");
+    auto sc = p->expect_address_space("test");
     EXPECT_FALSE(sc.errored);
     EXPECT_FALSE(p->has_error());
     EXPECT_EQ(sc.value, params.result);
@@ -51,7 +51,7 @@ INSTANTIATE_TEST_SUITE_P(
 
 TEST_F(ParserImplTest, StorageClass_NoMatch) {
     auto p = parser("not-a-storage-class");
-    auto sc = p->expect_storage_class("test");
+    auto sc = p->expect_address_space("test");
     EXPECT_EQ(sc.errored, true);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(p->error(), "1:1: invalid storage class for test");
