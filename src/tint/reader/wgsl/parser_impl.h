@@ -474,7 +474,7 @@ class ParserImpl {
     Expect<ast::TexelFormat> expect_texel_format(std::string_view use);
     /// Parses a `static_assert_statement` grammar element
     /// @returns returns the static assert, if it matched.
-    Maybe<const ast::StaticAssert*> static_assert_stmt();
+    Maybe<const ast::StaticAssert*> static_assert_statement();
     /// Parses a `function_header` grammar element
     /// @returns the parsed function header
     Maybe<FunctionHeader> function_header();
@@ -505,9 +505,9 @@ class ParserImpl {
     /// valid builtin name.
     /// @returns the parsed builtin.
     Expect<ast::BuiltinValue> expect_builtin();
-    /// Parses a `body_stmt` grammar element, erroring on parse failure.
+    /// Parses a `compound_statement` grammar element, erroring on parse failure.
     /// @returns the parsed statements
-    Expect<ast::BlockStatement*> expect_body_stmt();
+    Expect<ast::BlockStatement*> expect_compound_statement();
     /// Parses a `paren_expression` grammar element, erroring on parse failure.
     /// @returns the parsed element or nullptr
     Expect<const ast::Expression*> expect_paren_expression();
@@ -517,24 +517,24 @@ class ParserImpl {
     /// Parses a `statement` grammar element
     /// @returns the parsed statement or nullptr
     Maybe<const ast::Statement*> statement();
-    /// Parses a `break_stmt` grammar element
+    /// Parses a `break_statement` grammar element
     /// @returns the parsed statement or nullptr
-    Maybe<const ast::BreakStatement*> break_stmt();
-    /// Parses a `return_stmt` grammar element
+    Maybe<const ast::BreakStatement*> break_statement();
+    /// Parses a `return_statement` grammar element
     /// @returns the parsed statement or nullptr
-    Maybe<const ast::ReturnStatement*> return_stmt();
-    /// Parses a `continue_stmt` grammar element
+    Maybe<const ast::ReturnStatement*> return_statement();
+    /// Parses a `continue_statement` grammar element
     /// @returns the parsed statement or nullptr
-    Maybe<const ast::ContinueStatement*> continue_stmt();
-    /// Parses a `variable_stmt` grammar element
+    Maybe<const ast::ContinueStatement*> continue_statement();
+    /// Parses a `variable_statement` grammar element
     /// @returns the parsed variable or nullptr
-    Maybe<const ast::VariableDeclStatement*> variable_stmt();
-    /// Parses a `if_stmt` grammar element
+    Maybe<const ast::VariableDeclStatement*> variable_statement();
+    /// Parses a `if_statement` grammar element
     /// @returns the parsed statement or nullptr
-    Maybe<const ast::IfStatement*> if_stmt();
-    /// Parses a `switch_stmt` grammar element
+    Maybe<const ast::IfStatement*> if_statement();
+    /// Parses a `switch_statement` grammar element
     /// @returns the parsed statement or nullptr
-    Maybe<const ast::SwitchStatement*> switch_stmt();
+    Maybe<const ast::SwitchStatement*> switch_statement();
     /// Parses a `switch_body` grammar element
     /// @returns the parsed statement or nullptr
     Maybe<const ast::CaseStatement*> switch_body();
@@ -544,21 +544,21 @@ class ParserImpl {
     /// Parses a `case_body` grammar element
     /// @returns the parsed statements
     Maybe<const ast::BlockStatement*> case_body();
-    /// Parses a `func_call_stmt` grammar element
+    /// Parses a `func_call_statement` grammar element
     /// @returns the parsed function call or nullptr
-    Maybe<const ast::CallStatement*> func_call_stmt();
-    /// Parses a `loop_stmt` grammar element
+    Maybe<const ast::CallStatement*> func_call_statement();
+    /// Parses a `loop_statement` grammar element
     /// @returns the parsed loop or nullptr
-    Maybe<const ast::LoopStatement*> loop_stmt();
+    Maybe<const ast::LoopStatement*> loop_statement();
     /// Parses a `for_header` grammar element, erroring on parse failure.
     /// @returns the parsed for header or nullptr
     Expect<std::unique_ptr<ForHeader>> expect_for_header();
-    /// Parses a `for_stmt` grammar element
+    /// Parses a `for_statement` grammar element
     /// @returns the parsed for loop or nullptr
-    Maybe<const ast::ForLoopStatement*> for_stmt();
-    /// Parses a `while_stmt` grammar element
+    Maybe<const ast::ForLoopStatement*> for_statement();
+    /// Parses a `while_statement` grammar element
     /// @returns the parsed while loop or nullptr
-    Maybe<const ast::WhileStatement*> while_stmt();
+    Maybe<const ast::WhileStatement*> while_statement();
     /// Parses a `continuing_stmt` grammar element
     /// @returns the parsed statements
     Maybe<const ast::BlockStatement*> continuing_stmt();
@@ -669,9 +669,9 @@ class ParserImpl {
     /// Parses a `compound_assignment_operator` grammar element
     /// @returns the parsed compound assignment operator
     Maybe<ast::BinaryOp> compound_assignment_operator();
-    /// Parses a `assignment_stmt` grammar element
+    /// Parses a `assignment_statement` grammar element
     /// @returns the parsed assignment or nullptr
-    Maybe<const ast::Statement*> assignment_stmt();
+    Maybe<const ast::Statement*> assignment_statement();
     /// Parses one or more attribute lists.
     /// @return the parsed attribute list, or an empty list on error.
     Maybe<AttributeList> attribute_list();

@@ -19,7 +19,7 @@ namespace {
 
 TEST_F(ParserImplTest, IncrementDecrementStmt_Increment) {
     auto p = parser("a++");
-    auto e = p->assignment_stmt();
+    auto e = p->assignment_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, IncrementDecrementStmt_Increment) {
 
 TEST_F(ParserImplTest, IncrementDecrementStmt_Decrement) {
     auto p = parser("a--");
-    auto e = p->assignment_stmt();
+    auto e = p->assignment_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -57,7 +57,7 @@ TEST_F(ParserImplTest, IncrementDecrementStmt_Decrement) {
 
 TEST_F(ParserImplTest, IncrementDecrementStmt_Parenthesized) {
     auto p = parser("(a)++");
-    auto e = p->assignment_stmt();
+    auto e = p->assignment_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -76,7 +76,7 @@ TEST_F(ParserImplTest, IncrementDecrementStmt_Parenthesized) {
 
 TEST_F(ParserImplTest, IncrementDecrementStmt_ToMember) {
     auto p = parser("a.b.c[2].d++");
-    auto e = p->assignment_stmt();
+    auto e = p->assignment_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -121,7 +121,7 @@ TEST_F(ParserImplTest, IncrementDecrementStmt_ToMember) {
 
 TEST_F(ParserImplTest, IncrementDecrementStmt_InvalidLHS) {
     auto p = parser("{}++");
-    auto e = p->assignment_stmt();
+    auto e = p->assignment_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();

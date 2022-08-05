@@ -22,7 +22,7 @@ TEST_F(ParserImplTest, SwitchStmt_WithoutDefault) {
   case 1: {}
   case 2: {}
 })");
-    auto e = p->switch_stmt();
+    auto e = p->switch_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -35,7 +35,7 @@ TEST_F(ParserImplTest, SwitchStmt_WithoutDefault) {
 
 TEST_F(ParserImplTest, SwitchStmt_Empty) {
     auto p = parser("switch a { }");
-    auto e = p->switch_stmt();
+    auto e = p->switch_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -50,7 +50,7 @@ TEST_F(ParserImplTest, SwitchStmt_DefaultInMiddle) {
   default: {}
   case 2: {}
 })");
-    auto e = p->switch_stmt();
+    auto e = p->switch_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -65,7 +65,7 @@ TEST_F(ParserImplTest, SwitchStmt_DefaultInMiddle) {
 
 TEST_F(ParserImplTest, SwitchStmt_WithParens) {
     auto p = parser("switch(a+b) { }");
-    auto e = p->switch_stmt();
+    auto e = p->switch_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -76,7 +76,7 @@ TEST_F(ParserImplTest, SwitchStmt_WithParens) {
 
 TEST_F(ParserImplTest, SwitchStmt_InvalidExpression) {
     auto p = parser("switch a=b {}");
-    auto e = p->switch_stmt();
+    auto e = p->switch_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -86,7 +86,7 @@ TEST_F(ParserImplTest, SwitchStmt_InvalidExpression) {
 
 TEST_F(ParserImplTest, SwitchStmt_MissingExpression) {
     auto p = parser("switch {}");
-    auto e = p->switch_stmt();
+    auto e = p->switch_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -96,7 +96,7 @@ TEST_F(ParserImplTest, SwitchStmt_MissingExpression) {
 
 TEST_F(ParserImplTest, SwitchStmt_MissingBracketLeft) {
     auto p = parser("switch a }");
-    auto e = p->switch_stmt();
+    auto e = p->switch_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -106,7 +106,7 @@ TEST_F(ParserImplTest, SwitchStmt_MissingBracketLeft) {
 
 TEST_F(ParserImplTest, SwitchStmt_MissingBracketRight) {
     auto p = parser("switch a {");
-    auto e = p->switch_stmt();
+    auto e = p->switch_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -118,7 +118,7 @@ TEST_F(ParserImplTest, SwitchStmt_InvalidBody) {
     auto p = parser(R"(switch a {
   case: {}
 })");
-    auto e = p->switch_stmt();
+    auto e = p->switch_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);

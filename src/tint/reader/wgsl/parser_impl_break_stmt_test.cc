@@ -20,7 +20,7 @@ namespace {
 
 TEST_F(ParserImplTest, BreakStmt) {
     auto p = parser("break");
-    auto e = p->break_stmt();
+    auto e = p->break_statement();
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);

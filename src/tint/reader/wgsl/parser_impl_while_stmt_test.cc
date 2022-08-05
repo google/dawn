@@ -24,7 +24,7 @@ using WhileStmtTest = ParserImplTest;
 // Test an empty while loop.
 TEST_F(WhileStmtTest, Empty) {
     auto p = parser("while (true) { }");
-    auto wl = p->while_stmt();
+    auto wl = p->while_statement();
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(wl.errored);
     ASSERT_TRUE(wl.matched);
@@ -35,7 +35,7 @@ TEST_F(WhileStmtTest, Empty) {
 // Test a while loop with non-empty body.
 TEST_F(WhileStmtTest, Body) {
     auto p = parser("while (true) { discard; }");
-    auto wl = p->while_stmt();
+    auto wl = p->while_statement();
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(wl.errored);
     ASSERT_TRUE(wl.matched);
@@ -47,7 +47,7 @@ TEST_F(WhileStmtTest, Body) {
 // Test a while loop with complex condition.
 TEST_F(WhileStmtTest, ComplexCondition) {
     auto p = parser("while ((a + 1 - 2) == 3) { }");
-    auto wl = p->while_stmt();
+    auto wl = p->while_statement();
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(wl.errored);
     ASSERT_TRUE(wl.matched);
@@ -58,7 +58,7 @@ TEST_F(WhileStmtTest, ComplexCondition) {
 // Test a while loop with no brackets.
 TEST_F(WhileStmtTest, NoBrackets) {
     auto p = parser("while (a + 1 - 2) == 3 { }");
-    auto wl = p->while_stmt();
+    auto wl = p->while_statement();
     EXPECT_FALSE(p->has_error()) << p->error();
     EXPECT_FALSE(wl.errored);
     ASSERT_TRUE(wl.matched);
@@ -70,7 +70,7 @@ class WhileStmtErrorTest : public ParserImplTest {
   public:
     void TestForWithError(std::string for_str, std::string error_str) {
         auto p_for = parser(for_str);
-        auto e_for = p_for->while_stmt();
+        auto e_for = p_for->while_statement();
 
         EXPECT_FALSE(e_for.matched);
         EXPECT_TRUE(e_for.errored);

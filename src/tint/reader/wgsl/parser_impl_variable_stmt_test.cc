@@ -19,7 +19,7 @@ namespace {
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl) {
     auto p = parser("var a : i32;");
-    auto e = p->variable_stmt();
+    auto e = p->variable_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -38,7 +38,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl) {
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
     auto p = parser("var a : i32 = 1;");
-    auto e = p->variable_stmt();
+    auto e = p->variable_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -58,7 +58,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_ConstructorInvalid) {
     auto p = parser("var a : i32 = if(a) {}");
-    auto e = p->variable_stmt();
+    auto e = p->variable_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -68,7 +68,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ConstructorInvalid) {
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit) {
     auto p = parser("var a : array<i32> = array<i32>();");
-    auto e = p->variable_stmt();
+    auto e = p->variable_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -86,7 +86,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit) {
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit_NoSpace) {
     auto p = parser("var a : array<i32>=array<i32>();");
-    auto e = p->variable_stmt();
+    auto e = p->variable_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -104,7 +104,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit_NoSpace) {
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit) {
     auto p = parser("var a : vec2<i32> = vec2<i32>();");
-    auto e = p->variable_stmt();
+    auto e = p->variable_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -122,7 +122,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit) {
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit_NoSpace) {
     auto p = parser("var a : vec2<i32>=vec2<i32>();");
-    auto e = p->variable_stmt();
+    auto e = p->variable_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -140,7 +140,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit_NoSpace) {
 
 TEST_F(ParserImplTest, VariableStmt_Let) {
     auto p = parser("let a : i32 = 1");
-    auto e = p->variable_stmt();
+    auto e = p->variable_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -155,7 +155,7 @@ TEST_F(ParserImplTest, VariableStmt_Let) {
 
 TEST_F(ParserImplTest, VariableStmt_Let_MissingEqual) {
     auto p = parser("let a : i32 1");
-    auto e = p->variable_stmt();
+    auto e = p->variable_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -165,7 +165,7 @@ TEST_F(ParserImplTest, VariableStmt_Let_MissingEqual) {
 
 TEST_F(ParserImplTest, VariableStmt_Let_MissingConstructor) {
     auto p = parser("let a : i32 =");
-    auto e = p->variable_stmt();
+    auto e = p->variable_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -175,7 +175,7 @@ TEST_F(ParserImplTest, VariableStmt_Let_MissingConstructor) {
 
 TEST_F(ParserImplTest, VariableStmt_Let_InvalidConstructor) {
     auto p = parser("let a : i32 = if (a) {}");
-    auto e = p->variable_stmt();
+    auto e = p->variable_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);

@@ -20,7 +20,7 @@ namespace {
 
 TEST_F(ParserImplTest, LoopStmt_BodyNoContinuing) {
     auto p = parser("loop { discard; }");
-    auto e = p->loop_stmt();
+    auto e = p->loop_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, LoopStmt_BodyNoContinuing) {
 
 TEST_F(ParserImplTest, LoopStmt_BodyWithContinuing) {
     auto p = parser("loop { discard; continuing { discard; }}");
-    auto e = p->loop_stmt();
+    auto e = p->loop_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -49,7 +49,7 @@ TEST_F(ParserImplTest, LoopStmt_BodyWithContinuing) {
 
 TEST_F(ParserImplTest, LoopStmt_NoBodyNoContinuing) {
     auto p = parser("loop { }");
-    auto e = p->loop_stmt();
+    auto e = p->loop_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -60,7 +60,7 @@ TEST_F(ParserImplTest, LoopStmt_NoBodyNoContinuing) {
 
 TEST_F(ParserImplTest, LoopStmt_NoBodyWithContinuing) {
     auto p = parser("loop { continuing { discard; }}");
-    auto e = p->loop_stmt();
+    auto e = p->loop_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -72,7 +72,7 @@ TEST_F(ParserImplTest, LoopStmt_NoBodyWithContinuing) {
 
 TEST_F(ParserImplTest, LoopStmt_MissingBracketLeft) {
     auto p = parser("loop discard; }");
-    auto e = p->loop_stmt();
+    auto e = p->loop_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -82,7 +82,7 @@ TEST_F(ParserImplTest, LoopStmt_MissingBracketLeft) {
 
 TEST_F(ParserImplTest, LoopStmt_MissingBracketRight) {
     auto p = parser("loop { discard; ");
-    auto e = p->loop_stmt();
+    auto e = p->loop_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -92,7 +92,7 @@ TEST_F(ParserImplTest, LoopStmt_MissingBracketRight) {
 
 TEST_F(ParserImplTest, LoopStmt_InvalidStatements) {
     auto p = parser("loop { discard }");
-    auto e = p->loop_stmt();
+    auto e = p->loop_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -102,7 +102,7 @@ TEST_F(ParserImplTest, LoopStmt_InvalidStatements) {
 
 TEST_F(ParserImplTest, LoopStmt_InvalidContinuing) {
     auto p = parser("loop { continuing { discard }}");
-    auto e = p->loop_stmt();
+    auto e = p->loop_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
