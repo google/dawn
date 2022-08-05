@@ -1,0 +1,22 @@
+enable f16;
+
+fn inverseSqrt_b85ebd() {
+  var arg_0 = vec3<f16>(f16());
+  var res : vec3<f16> = inverseSqrt(arg_0);
+}
+
+@vertex
+fn vertex_main() -> @builtin(position) vec4<f32> {
+  inverseSqrt_b85ebd();
+  return vec4<f32>();
+}
+
+@fragment
+fn fragment_main() {
+  inverseSqrt_b85ebd();
+}
+
+@compute @workgroup_size(1)
+fn compute_main() {
+  inverseSqrt_b85ebd();
+}

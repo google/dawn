@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void asin_11dfda() {
+  half res = asin(0.0h);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  asin_11dfda();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  asin_11dfda();
+  return;
+}
+
+kernel void compute_main() {
+  asin_11dfda();
+  return;
+}
+

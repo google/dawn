@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void select_86f9bd() {
+  half2 res = select(half2(0.0h), half2(0.0h), true);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  select_86f9bd();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  select_86f9bd();
+  return;
+}
+
+kernel void compute_main() {
+  select_86f9bd();
+  return;
+}
+

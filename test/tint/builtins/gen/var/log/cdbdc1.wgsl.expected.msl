@@ -1,0 +1,34 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void log_cdbdc1() {
+  half4 arg_0 = half4(0.0h);
+  half4 res = log(arg_0);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  log_cdbdc1();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  log_cdbdc1();
+  return;
+}
+
+kernel void compute_main() {
+  log_cdbdc1();
+  return;
+}
+

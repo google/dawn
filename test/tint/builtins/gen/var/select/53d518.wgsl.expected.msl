@@ -1,0 +1,36 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void select_53d518() {
+  half3 arg_0 = half3(0.0h);
+  half3 arg_1 = half3(0.0h);
+  bool3 arg_2 = bool3(true);
+  half3 res = select(arg_0, arg_1, arg_2);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  select_53d518();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  select_53d518();
+  return;
+}
+
+kernel void compute_main() {
+  select_53d518();
+  return;
+}
+

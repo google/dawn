@@ -13,20 +13,16 @@ See:
 {{- range Sem.Builtins -}}
 {{-   range .Overloads  -}}
 {{-     range Permute . -}}
-{{- /*    TODO(crbug.com/tint/1502): Remove the bodge below and emit "enable f16;" after
-          getting ready for F16 end-to-end tests.                                        */ -}}
-{{-       if not (OverloadUsesF16 .Overload) -}}
-{{- /*      Generate a ./literal/<function>/<permuataion-hash>.wgsl file using
-            the Permutation macro defined below                             */ -}}
-{{-         $file := printf "./literal/%v/%v.wgsl" .Intrinsic.Name .Hash -}}
-{{-         $content := Eval "Permutation" "Overload" . "Mode" "literal" -}}
-{{-         WriteFile $file $content -}}
-{{- /*      Generate a ./var/<function>/<permuataion-hash>.wgsl file using
-            the Permutation macro defined below                             */ -}}
-{{-         $file := printf "./var/%v/%v.wgsl" .Intrinsic.Name .Hash -}}
-{{-         $content := Eval "Permutation" "Overload" . "Mode" "var" -}}
-{{-         WriteFile $file $content -}}
-{{-       end  }}
+{{- /*    Generate a ./literal/<function>/<permuataion-hash>.wgsl file using
+          the Permutation macro defined below                             */ -}}
+{{-       $file := printf "./literal/%v/%v.wgsl" .Intrinsic.Name .Hash -}}
+{{-       $content := Eval "Permutation" "Overload" . "Mode" "literal" -}}
+{{-       WriteFile $file $content -}}
+{{- /*    Generate a ./var/<function>/<permuataion-hash>.wgsl file using
+          the Permutation macro defined below                             */ -}}
+{{-       $file := printf "./var/%v/%v.wgsl" .Intrinsic.Name .Hash -}}
+{{-       $content := Eval "Permutation" "Overload" . "Mode" "var" -}}
+{{-       WriteFile $file $content -}}
 {{-     end  }}
 {{-   end  }}
 {{- end  }}
@@ -178,12 +174,18 @@ fn compute_main() {
 {{-                        define "EnableDirectives"                         -}}
 {{- /* Emits the required enable directives for a given overload          */ -}}
 {{- /* ------------------------------------------------------------------ */ -}}
-{{-   $overload     := . -}}
-{{-   $builtin_name := $overload.Intrinsic.Name -}}
+{{-   $permutation  := . -}}
+{{-   $overload := $permutation.Overload -}}
+{{-   $builtin_name := $permutation.Intrinsic.Name -}}
 
 {{- /* Check and emit chromium_experimental_dp4a */ -}}
 {{-   if or (eq "dot4I8Packed" $builtin_name) (eq "dot4U8Packed" $builtin_name)}}
 enable chromium_experimental_dp4a;
+{{    end -}}
+
+{{- /* Check and emit f16 */ -}}
+{{-   if OverloadUsesF16 $overload}}
+enable f16;
 {{    end -}}
 
 {{- end -}}

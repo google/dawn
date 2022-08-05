@@ -1,0 +1,34 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void determinant_d7c86f() {
+  half3x3 arg_0 = half3x3(half3(0.0h), half3(0.0h), half3(0.0h));
+  half res = determinant(arg_0);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  determinant_d7c86f();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  determinant_d7c86f();
+  return;
+}
+
+kernel void compute_main() {
+  determinant_d7c86f();
+  return;
+}
+

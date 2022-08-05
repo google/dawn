@@ -1,0 +1,45 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+struct modf_result_vec2_f16 {
+  half2 fract;
+  half2 whole;
+};
+modf_result_vec2_f16 tint_modf(half2 param_0) {
+  modf_result_vec2_f16 result;
+  result.fract = modf(param_0, result.whole);
+  return result;
+}
+
+void modf_a545b9() {
+  half2 arg_0 = half2(0.0h);
+  modf_result_vec2_f16 res = tint_modf(arg_0);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  modf_a545b9();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  modf_a545b9();
+  return;
+}
+
+kernel void compute_main() {
+  modf_a545b9();
+  return;
+}
+

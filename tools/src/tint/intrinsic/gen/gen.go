@@ -495,7 +495,7 @@ func IsDeclarable(fqn sem.FullyQualifiedName) bool {
 }
 
 // OverloadUsesF16 returns true if the overload uses the f16 type anywhere in the signature.
-func OverloadUsesF16(overload *sem.Overload) bool {
+func OverloadUsesF16(overload sem.Overload) bool {
 	for _, param := range overload.Parameters {
 		if DeepestElementType(param.Type).Target.GetName() == "f16" {
 			return true

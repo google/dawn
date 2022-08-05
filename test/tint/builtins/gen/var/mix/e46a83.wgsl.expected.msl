@@ -1,0 +1,36 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void mix_e46a83() {
+  half2 arg_0 = half2(0.0h);
+  half2 arg_1 = half2(0.0h);
+  half arg_2 = 0.0h;
+  half2 res = mix(arg_0, arg_1, arg_2);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  mix_e46a83();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  mix_e46a83();
+  return;
+}
+
+kernel void compute_main() {
+  mix_e46a83();
+  return;
+}
+
