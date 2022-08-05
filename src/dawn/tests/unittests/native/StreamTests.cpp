@@ -174,6 +174,30 @@ TEST(SerializeTests, StdStringViews) {
     EXPECT_CACHE_KEY_EQ(str, expected);
 }
 
+// Test that ByteVectorSink serializes std::wstring_views as expected.
+TEST(SerializeTests, StdWStringViews) {
+    static constexpr std::wstring_view str(L"Hello world!");
+
+    ByteVectorSink expected;
+    StreamIn(&expected, size_t(str.length()));
+    size_t bytes = str.length() * sizeof(wchar_t);
+    memcpy(expected.GetSpace(bytes), str.data(), bytes);
+
+    EXPECT_CACHE_KEY_EQ(str, expected);
+}
+
+// Test that ByteVectorSink serializes Blobs as expected.
+TEST(SerializeTests, Blob) {
+    uint8_t data[] = "dawn native Blob";
+    Blob blob = Blob::UnsafeCreateWithDeleter(data, sizeof(data), []() {});
+
+    ByteVectorSink expected;
+    StreamIn(&expected, sizeof(data));
+    expected.insert(expected.end(), data, data + sizeof(data));
+
+    EXPECT_CACHE_KEY_EQ(blob, expected);
+}
+
 // Test that ByteVectorSink serializes other ByteVectorSinks as expected.
 TEST(SerializeTests, ByteVectorSinks) {
     ByteVectorSink data = {'d', 'a', 't', 'a'};
@@ -306,6 +330,41 @@ TEST(StreamTests, SerializeDeserializeVisitableMembers) {
         EXPECT_EQ(foo.a, out.a);
         EXPECT_EQ(foo.b, out.b);
         EXPECT_EQ(foo.c, out.c);
+    }
+}
+
+// Test that serializing then deserializing a Blob yields the same data.
+// Tested here instead of in the type-parameterized tests since Blobs are not copyable.
+TEST(StreamTests, SerializeDeserializeBlobs) {
+    // Test an empty blob
+    {
+        Blob blob;
+        EXPECT_EQ(blob.Size(), 0u);
+
+        ByteVectorSink sink;
+        StreamIn(&sink, blob);
+
+        BlobSource src(CreateBlob(sink));
+        Blob out;
+        auto err = StreamOut(&src, &out);
+        EXPECT_FALSE(err.IsError());
+        EXPECT_EQ(blob.Size(), out.Size());
+        EXPECT_EQ(memcmp(blob.Data(), out.Data(), blob.Size()), 0);
+    }
+
+    // Test a blob with some data
+    {
+        Blob blob = CreateBlob(std::vector<double>{6.24, 3.12222});
+
+        ByteVectorSink sink;
+        StreamIn(&sink, blob);
+
+        BlobSource src(CreateBlob(sink));
+        Blob out;
+        auto err = StreamOut(&src, &out);
+        EXPECT_FALSE(err.IsError());
+        EXPECT_EQ(blob.Size(), out.Size());
+        EXPECT_EQ(memcmp(blob.Data(), out.Data(), blob.Size()), 0);
     }
 }
 

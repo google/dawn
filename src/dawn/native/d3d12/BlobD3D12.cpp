@@ -28,4 +28,16 @@ Blob CreateBlob(ComPtr<ID3DBlob> blob) {
                                          });
 }
 
+Blob CreateBlob(ComPtr<IDxcBlob> blob) {
+    // Detach so the deleter callback can "own" the reference
+    IDxcBlob* ptr = blob.Detach();
+    return Blob::UnsafeCreateWithDeleter(reinterpret_cast<uint8_t*>(ptr->GetBufferPointer()),
+                                         ptr->GetBufferSize(), [=]() {
+                                             // Reattach and drop to delete it.
+                                             ComPtr<IDxcBlob> b;
+                                             b.Attach(ptr);
+                                             b = nullptr;
+                                         });
+}
+
 }  // namespace dawn::native

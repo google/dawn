@@ -14,7 +14,8 @@
 
 #include "dawn/native/stream/Stream.h"
 
-#include "tint/tint.h"
+#include "dawn/native/TintUtils.h"
+#include "tint/writer/array_length_from_uniform_options.h"
 
 namespace dawn::native {
 
@@ -94,6 +95,23 @@ void stream::Stream<tint::transform::VertexAttributeDescriptor>::Write(
     static_assert(sizeof(Attrib) == 12,
                   "Please update serialization for tint::transform::VertexAttributeDescriptor");
     StreamIn(sink, attrib.format, attrib.offset, attrib.shader_location);
+}
+
+// static
+template <>
+void stream::Stream<tint::writer::ArrayLengthFromUniformOptions>::Write(
+    stream::Sink* sink,
+    const tint::writer::ArrayLengthFromUniformOptions& o) {
+    static_assert(offsetof(tint::writer::ArrayLengthFromUniformOptions, ubo_binding) == 0,
+                  "Please update serialization for tint::writer::ArrayLengthFromUniformOptions");
+    static_assert(
+        offsetof(tint::writer::ArrayLengthFromUniformOptions, bindpoint_to_size_index) == 8,
+        "Please update serialization for tint::writer::ArrayLengthFromUniformOptions");
+    static_assert(
+        sizeof(tint::writer::ArrayLengthFromUniformOptions) ==
+            8 + sizeof(tint::writer::ArrayLengthFromUniformOptions::bindpoint_to_size_index),
+        "Please update serialization for tint::writer::ArrayLengthFromUniformOptions");
+    StreamIn(sink, o.ubo_binding, o.bindpoint_to_size_index);
 }
 
 }  // namespace dawn::native

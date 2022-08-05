@@ -297,10 +297,9 @@ class Stream<std::unordered_map<K, V>> {
   public:
     static void Write(stream::Sink* sink, const std::unordered_map<K, V>& m) {
         std::vector<std::pair<K, V>> ordered(m.begin(), m.end());
-        std::sort(ordered.begin(), ordered.end(),
-                  [](const std::pair<K, V>& a, const std::pair<K, V>& b) {
-                      return std::less<K>{}(a.first, b.first);
-                  });
+        std::sort(
+            ordered.begin(), ordered.end(),
+            [](const std::pair<K, V>& a, const std::pair<K, V>& b) { return a.first < b.first; });
         StreamIn(sink, ordered);
     }
 };

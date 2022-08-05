@@ -81,19 +81,19 @@ bool NeedBufferSizeWorkaroundForBufferTextureCopyOnD3D12(const BufferCopy& buffe
 
 }  // anonymous namespace
 
-ResultOrError<std::wstring> ConvertStringToWstring(const char* str) {
-    size_t len = strlen(str);
+ResultOrError<std::wstring> ConvertStringToWstring(std::string_view s) {
+    size_t len = s.length();
     if (len == 0) {
         return std::wstring();
     }
-    int numChars = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str, len, nullptr, 0);
+    int numChars = MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s.data(), len, nullptr, 0);
     if (numChars == 0) {
         return DAWN_INTERNAL_ERROR("Failed to convert string to wide string");
     }
     std::wstring result;
     result.resize(numChars);
     int numConvertedChars =
-        MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, str, len, &result[0], numChars);
+        MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, s.data(), len, &result[0], numChars);
     if (numConvertedChars != numChars) {
         return DAWN_INTERNAL_ERROR("Failed to convert string to wide string");
     }

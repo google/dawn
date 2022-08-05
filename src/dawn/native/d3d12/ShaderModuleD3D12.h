@@ -15,8 +15,11 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_SHADERMODULED3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_SHADERMODULED3D12_H_
 
-#include "dawn/native/ShaderModule.h"
+#include <string>
 
+#include "dawn/native/Blob.h"
+#include "dawn/native/ShaderModule.h"
+#include "dawn/native/VisitableMembers.h"
 #include "dawn/native/d3d12/d3d12_platform.h"
 
 namespace dawn::native {
@@ -28,14 +31,22 @@ namespace dawn::native::d3d12 {
 class Device;
 class PipelineLayout;
 
-// Manages a ref to one of the various representations of shader blobs and information used to
-// emulate vertex/instance index starts
+#define COMPILED_SHADER_MEMBERS(X) \
+    X(Blob, shaderBlob)            \
+    X(std::string, hlslSource)     \
+    X(bool, usesVertexOrInstanceIndex)
+
+// `CompiledShader` holds a ref to one of the various representations of shader blobs and
+// information used to emulate vertex/instance index starts. It also holds the `hlslSource` for the
+// shader compilation, which is only transiently available during Compile, and cleared before it
+// returns. It is not written to or loaded from the cache unless Toggle dump_shaders is true.
 struct CompiledShader {
-    ComPtr<ID3DBlob> compiledFXCShader;
-    ComPtr<IDxcBlob> compiledDXCShader;
+    static ResultOrError<CompiledShader> FromBlob(Blob blob);
+
     D3D12_SHADER_BYTECODE GetD3D12ShaderBytecode() const;
 
-    bool usesVertexOrInstanceIndex;
+    DAWN_VISITABLE_MEMBERS(COMPILED_SHADER_MEMBERS)
+#undef COMPILED_SHADER_MEMBERS
 };
 
 class ShaderModule final : public ShaderModuleBase {

@@ -48,4 +48,14 @@ void Stream<std::string_view>::Write(Sink* s, const std::string_view& t) {
     }
 }
 
+template <>
+void Stream<std::wstring_view>::Write(Sink* s, const std::wstring_view& t) {
+    StreamIn(s, t.length());
+    size_t size = t.length() * sizeof(wchar_t);
+    if (size > 0) {
+        void* ptr = s->GetSpace(size);
+        memcpy(ptr, t.data(), size);
+    }
+}
+
 }  // namespace dawn::native::stream

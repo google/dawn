@@ -26,7 +26,7 @@
 
 namespace dawn::native::d3d12 {
 
-ResultOrError<std::wstring> ConvertStringToWstring(const char* str);
+ResultOrError<std::wstring> ConvertStringToWstring(std::string_view s);
 
 D3D12_COMPARISON_FUNC ToD3D12ComparisonFunc(wgpu::CompareFunction func);
 

@@ -49,10 +49,11 @@ tint::transform::VertexPulling::Config BuildVertexPullingTransformConfig(
 
 }  // namespace dawn::native
 
-// std::less operator for std::map containing BindingPoint
-template <>
-struct std::less<tint::sem::BindingPoint> {
-    bool operator()(const tint::sem::BindingPoint& a, const tint::sem::BindingPoint& b) const;
-};
+namespace tint::sem {
+
+// Defin operator< for std::map containing BindingPoint
+bool operator<(const BindingPoint& a, const BindingPoint& b);
+
+}  // namespace tint::sem
 
 #endif  // SRC_DAWN_NATIVE_TINTUTILS_H_

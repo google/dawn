@@ -18,5 +18,6 @@
 namespace dawn::native {
 
 Blob CreateBlob(ComPtr<ID3DBlob> blob);
+Blob CreateBlob(ComPtr<IDxcBlob> blob);
 
 }  // namespace dawn::native

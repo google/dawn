@@ -185,7 +185,10 @@ tint::transform::VertexPulling::Config BuildVertexPullingTransformConfig(
 
 }  // namespace dawn::native
 
-bool std::less<tint::sem::BindingPoint>::operator()(const tint::sem::BindingPoint& a,
-                                                    const tint::sem::BindingPoint& b) const {
+namespace tint::sem {
+
+bool operator<(const BindingPoint& a, const BindingPoint& b) {
     return std::tie(a.group, a.binding) < std::tie(b.group, b.binding);
 }
+
+}  // namespace tint::sem
