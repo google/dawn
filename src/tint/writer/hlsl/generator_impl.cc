@@ -1855,16 +1855,15 @@ bool GeneratorImpl::EmitModfCall(std::ostream& out,
                 return false;
             }
 
-            line(b) << "float" << width << " whole;";
-            line(b) << "float" << width << " fract = modf(" << in << ", whole);";
             {
                 auto l = line(b);
                 if (!EmitType(l, builtin->ReturnType(), ast::StorageClass::kNone,
                               ast::Access::kUndefined, "")) {
                     return false;
                 }
-                l << " result = {fract, whole};";
+                l << " result;";
             }
+            line(b) << "result.fract = modf(" << params[0] << ", result.whole);";
             line(b) << "return result;";
             return true;
         });
@@ -1889,8 +1888,15 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
                 return false;
             }
 
-            line(b) << "float" << width << " exp;";
-            line(b) << "float" << width << " sig = frexp(" << in << ", exp);";
+            std::string member_type;
+            if (Is<sem::F16>(sem::Type::DeepestElementOf(ty))) {
+                member_type = width.empty() ? "float16_t" : ("vector<float16_t, " + width + ">");
+            } else {
+                member_type = "float" + width;
+            }
+
+            line(b) << member_type << " exp;";
+            line(b) << member_type << " sig = frexp(" << in << ", exp);";
             {
                 auto l = line(b);
                 if (!EmitType(l, builtin->ReturnType(), ast::StorageClass::kNone,

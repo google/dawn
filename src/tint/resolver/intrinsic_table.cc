@@ -732,24 +732,34 @@ const sem::ExternalTexture* build_texture_external(MatchState& state) {
 // Builtin types starting with a _ prefix cannot be declared in WGSL, so they
 // can only be used as return types. Because of this, they must only match Any,
 // which is used as the return type matcher.
-bool match_modf_result(const sem::Type* ty) {
-    return ty->Is<Any>();
-}
-bool match_modf_result_vec(const sem::Type* ty, Number& N) {
+bool match_modf_result(const sem::Type* ty, const sem::Type*& T) {
     if (!ty->Is<Any>()) {
         return false;
     }
-    N = Number::any;
+    T = ty;
     return true;
 }
-bool match_frexp_result(const sem::Type* ty) {
-    return ty->Is<Any>();
-}
-bool match_frexp_result_vec(const sem::Type* ty, Number& N) {
+bool match_modf_result_vec(const sem::Type* ty, Number& N, const sem::Type*& T) {
     if (!ty->Is<Any>()) {
         return false;
     }
     N = Number::any;
+    T = ty;
+    return true;
+}
+bool match_frexp_result(const sem::Type* ty, const sem::Type*& T) {
+    if (!ty->Is<Any>()) {
+        return false;
+    }
+    T = ty;
+    return true;
+}
+bool match_frexp_result_vec(const sem::Type* ty, Number& N, const sem::Type*& T) {
+    if (!ty->Is<Any>()) {
+        return false;
+    }
+    N = Number::any;
+    T = ty;
     return true;
 }
 
@@ -763,7 +773,7 @@ bool match_atomic_compare_exchange_result(const sem::Type* ty, const sem::Type*&
 
 struct NameAndType {
     std::string name;
-    sem::Type* type;
+    const sem::Type* type;
 };
 const sem::Struct* build_struct(MatchState& state,
                                 std::string name,
@@ -797,27 +807,46 @@ const sem::Struct* build_struct(MatchState& state,
         /* size_no_padding */ size_without_padding);
 }
 
-const sem::Struct* build_modf_result(MatchState& state) {
-    auto* f32 = state.builder.create<sem::F32>();
-    return build_struct(state, "__modf_result", {{"fract", f32}, {"whole", f32}});
+const sem::Struct* build_modf_result(MatchState& state, const sem::Type* el) {
+    std::string display_name;
+    if (el->Is<sem::F16>()) {
+        display_name = "__modf_result_f16";
+    } else {
+        display_name = "__modf_result";
+    }
+    return build_struct(state, display_name, {{"fract", el}, {"whole", el}});
 }
-const sem::Struct* build_modf_result_vec(MatchState& state, Number& n) {
-    auto* vec_f32 = state.builder.create<sem::Vector>(state.builder.create<sem::F32>(), n.Value());
-    return build_struct(state, "__modf_result_vec" + std::to_string(n.Value()),
-                        {{"fract", vec_f32}, {"whole", vec_f32}});
+const sem::Struct* build_modf_result_vec(MatchState& state, Number& n, const sem::Type* el) {
+    std::string display_name;
+    if (el->Is<sem::F16>()) {
+        display_name = "__modf_result_vec" + std::to_string(n.Value()) + "_f16";
+    } else {
+        display_name = "__modf_result_vec" + std::to_string(n.Value());
+    }
+    auto* vec = state.builder.create<sem::Vector>(el, n.Value());
+    return build_struct(state, display_name, {{"fract", vec}, {"whole", vec}});
 }
-const sem::Struct* build_frexp_result(MatchState& state) {
-    auto* f32 = state.builder.create<sem::F32>();
+const sem::Struct* build_frexp_result(MatchState& state, const sem::Type* el) {
+    std::string display_name;
+    if (el->Is<sem::F16>()) {
+        display_name = "__frexp_result_f16";
+    } else {
+        display_name = "__frexp_result";
+    }
     auto* i32 = state.builder.create<sem::I32>();
-    return build_struct(state, "__frexp_result", {{"sig", f32}, {"exp", i32}});
+    return build_struct(state, display_name, {{"sig", el}, {"exp", i32}});
 }
-const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n) {
-    auto* vec_f32 = state.builder.create<sem::Vector>(state.builder.create<sem::F32>(), n.Value());
+const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n, const sem::Type* el) {
+    std::string display_name;
+    if (el->Is<sem::F16>()) {
+        display_name = "__frexp_result_vec" + std::to_string(n.Value()) + "_f16";
+    } else {
+        display_name = "__frexp_result_vec" + std::to_string(n.Value());
+    }
+    auto* vec = state.builder.create<sem::Vector>(el, n.Value());
     auto* vec_i32 = state.builder.create<sem::Vector>(state.builder.create<sem::I32>(), n.Value());
-    return build_struct(state, "__frexp_result_vec" + std::to_string(n.Value()),
-                        {{"sig", vec_f32}, {"exp", vec_i32}});
+    return build_struct(state, display_name, {{"sig", vec}, {"exp", vec_i32}});
 }
-
 const sem::Struct* build_atomic_compare_exchange_result(MatchState& state, const sem::Type* ty) {
     return build_struct(
         state, "__atomic_compare_exchange_result" + ty->FriendlyName(state.builder.Symbols()),

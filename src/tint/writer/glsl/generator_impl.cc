@@ -1205,97 +1205,51 @@ bool GeneratorImpl::EmitDotCall(std::ostream& out,
 bool GeneratorImpl::EmitModfCall(std::ostream& out,
                                  const ast::CallExpression* expr,
                                  const sem::Builtin* builtin) {
-    if (expr->args.Length() == 1) {
-        return CallBuiltinHelper(
-            out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
-                // Emit the builtin return type unique to this overload. This does not
-                // exist in the AST, so it will not be generated in Generate().
-                if (!EmitStructType(&helpers_, builtin->ReturnType()->As<sem::Struct>())) {
+    TINT_ASSERT(Writer, expr->args.Length() == 1);
+    return CallBuiltinHelper(
+        out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
+            // Emit the builtin return type unique to this overload. This does not
+            // exist in the AST, so it will not be generated in Generate().
+            if (!EmitStructType(&helpers_, builtin->ReturnType()->As<sem::Struct>())) {
+                return false;
+            }
+
+            {
+                auto l = line(b);
+                if (!EmitType(l, builtin->ReturnType(), ast::StorageClass::kNone,
+                              ast::Access::kUndefined, "")) {
                     return false;
                 }
-
-                {
-                    auto l = line(b);
-                    if (!EmitType(l, builtin->ReturnType(), ast::StorageClass::kNone,
-                                  ast::Access::kUndefined, "")) {
-                        return false;
-                    }
-                    l << " result;";
-                }
-                line(b) << "result.fract = modf(" << params[0] << ", result.whole);";
-                line(b) << "return result;";
-                return true;
-            });
-    }
-
-    // DEPRECATED
-    out << "modf";
-    ScopedParen sp(out);
-    if (!EmitExpression(out, expr->args[0])) {
-        return false;
-    }
-    out << ", ";
-    if (!EmitExpression(out, expr->args[1])) {
-        return false;
-    }
-    return true;
+                l << " result;";
+            }
+            line(b) << "result.fract = modf(" << params[0] << ", result.whole);";
+            line(b) << "return result;";
+            return true;
+        });
 }
 
 bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
                                   const ast::CallExpression* expr,
                                   const sem::Builtin* builtin) {
-    if (expr->args.Length() == 1) {
-        return CallBuiltinHelper(
-            out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
-                // Emit the builtin return type unique to this overload. This does not
-                // exist in the AST, so it will not be generated in Generate().
-                if (!EmitStructType(&helpers_, builtin->ReturnType()->As<sem::Struct>())) {
-                    return false;
-                }
-
-                {
-                    auto l = line(b);
-                    if (!EmitType(l, builtin->ReturnType(), ast::StorageClass::kNone,
-                                  ast::Access::kUndefined, "")) {
-                        return false;
-                    }
-                    l << " result;";
-                }
-                line(b) << "result.sig = frexp(" << params[0] << ", result.exp);";
-                line(b) << "return result;";
-                return true;
-            });
-    }
-    // DEPRECATED
-    // Exponent is an integer in WGSL, but HLSL wants a float.
-    // We need to make the call with a temporary float, and then cast.
+    TINT_ASSERT(Writer, expr->args.Length() == 1);
     return CallBuiltinHelper(
         out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
-            auto* significand_ty = builtin->Parameters()[0]->Type();
-            auto significand = params[0];
-            auto* exponent_ty = builtin->Parameters()[1]->Type();
-            auto exponent = params[1];
-
-            std::string width;
-            if (auto* vec = significand_ty->As<sem::Vector>()) {
-                width = std::to_string(vec->Width());
+            // Emit the builtin return type unique to this overload. This does not
+            // exist in the AST, so it will not be generated in Generate().
+            if (!EmitStructType(&helpers_, builtin->ReturnType()->As<sem::Struct>())) {
+                return false;
             }
 
-            // Exponent is an integer, which HLSL does not have an overload for.
-            // We need to cast from a float.
-            line(b) << "float" << width << " float_exp;";
-            line(b) << "float" << width << " significand = frexp(" << significand
-                    << ", float_exp);";
             {
                 auto l = line(b);
-                l << exponent << " = ";
-                if (!EmitType(l, exponent_ty->UnwrapPtr(), ast::StorageClass::kNone,
+                if (!EmitType(l, builtin->ReturnType(), ast::StorageClass::kNone,
                               ast::Access::kUndefined, "")) {
                     return false;
                 }
-                l << "(float_exp);";
+                l << " result;";
             }
-            line(b) << "return significand;";
+            line(b) << "result.sig = frexp(" << params[0] << ", result.exp);";
+            line(b) << "return result;";
             return true;
         });
 }

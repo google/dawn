@@ -1308,9 +1308,9 @@ bool GeneratorImpl::EmitModfCall(std::ostream& out,
                 return false;
             }
 
-            line(b) << "float" << width << " whole;";
-            line(b) << "float" << width << " fract = modf(" << in << ", whole);";
-            line(b) << "return {fract, whole};";
+            line(b) << StructName(builtin->ReturnType()->As<sem::Struct>()) << " result;";
+            line(b) << "result.fract = modf(" << in << ", result.whole);";
+            line(b) << "return result;";
             return true;
         });
 }
@@ -1334,9 +1334,9 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
                 return false;
             }
 
-            line(b) << "int" << width << " exp;";
-            line(b) << "float" << width << " sig = frexp(" << in << ", exp);";
-            line(b) << "return {sig, exp};";
+            line(b) << StructName(builtin->ReturnType()->As<sem::Struct>()) << " result;";
+            line(b) << "result.sig = frexp(" << in << ", result.exp);";
+            line(b) << "return result;";
             return true;
         });
 }

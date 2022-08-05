@@ -3,9 +3,8 @@ struct modf_result {
   float whole;
 };
 modf_result tint_modf(float param_0) {
-  float whole;
-  float fract = modf(param_0, whole);
-  modf_result result = {fract, whole};
+  modf_result result;
+  result.fract = modf(param_0, result.whole);
   return result;
 }
 

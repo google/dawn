@@ -148,10 +148,10 @@ type texture_storage_2d_array<F: texel_format, A: access>
 type texture_storage_3d<F: texel_format, A: access>
 type texture_external
 
-type __modf_result
-@display("__modf_result_vec{N}") type __modf_result_vec<N: num>
-type __frexp_result
-@display("__frexp_result_vec{N}") type __frexp_result_vec<N: num>
+@display("__modf_result_{T}")        type __modf_result<T>
+@display("__modf_result_vec{N}_{T}") type __modf_result_vec<N: num, T>
+@display("__frexp_result_{T}")        type __frexp_result<T>
+@display("__frexp_result_vec{N}_{T}") type __frexp_result_vec<N: num, T>
 
 type __atomic_compare_exchange_result<T>
 
@@ -463,8 +463,8 @@ fn fma<T: f32_f16>(T, T, T) -> T
 fn fma<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
 fn fract<T: f32_f16>(T) -> T
 fn fract<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
-fn frexp(f32) -> __frexp_result
-fn frexp<N: num>(vec<N, f32>) -> __frexp_result_vec<N>
+fn frexp<T: f32_f16>(T) -> __frexp_result<T>
+fn frexp<N: num, T: f32_f16>(vec<N, T>) -> __frexp_result_vec<N, T>
 @stage("fragment") fn fwidth(f32) -> f32
 @stage("fragment") fn fwidth<N: num>(vec<N, f32>) -> vec<N, f32>
 @stage("fragment") fn fwidthCoarse(f32) -> f32
@@ -490,8 +490,8 @@ fn min<N: num, T: fiu32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
 fn mix<T: f32_f16>(T, T, T) -> T
 fn mix<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
 fn mix<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, T) -> vec<N, T>
-fn modf(f32) -> __modf_result
-fn modf<N: num>(vec<N, f32>) -> __modf_result_vec<N>
+fn modf<T: f32_f16>(T) -> __modf_result<T>
+fn modf<N: num, T: f32_f16>(vec<N, T>) -> __modf_result_vec<N, T>
 fn normalize<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn pack2x16float(vec2<f32>) -> u32
 fn pack2x16snorm(vec2<f32>) -> u32

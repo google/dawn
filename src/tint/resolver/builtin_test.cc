@@ -901,8 +901,9 @@ TEST_F(ResolverBuiltinFloatTest, Distance_NoParams) {
 )");
 }
 
-// frexp: (f32) -> __frexp_result, (vecN<f32>) -> __frexp_result_vecN
-TEST_F(ResolverBuiltinFloatTest, FrexpScalar) {
+// frexp: (f32) -> __frexp_result, (vecN<f32>) -> __frexp_result_vecN, (f16) -> __frexp_result_16,
+// (vecN<f16>) -> __frexp_result_vecN_f16
+TEST_F(ResolverBuiltinFloatTest, FrexpScalar_f32) {
     auto* call = Call("frexp", 1_f);
     WrapInFunction(call);
 
@@ -931,7 +932,38 @@ TEST_F(ResolverBuiltinFloatTest, FrexpScalar) {
     EXPECT_EQ(ty->SizeNoPadding(), 8u);
 }
 
-TEST_F(ResolverBuiltinFloatTest, FrexpVector) {
+TEST_F(ResolverBuiltinFloatTest, FrexpScalar_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call("frexp", 1_h);
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    auto* ty = TypeOf(call)->As<sem::Struct>();
+    ASSERT_NE(ty, nullptr);
+    ASSERT_EQ(ty->Members().size(), 2u);
+
+    auto* sig = ty->Members()[0];
+    EXPECT_TRUE(sig->Type()->Is<sem::F16>());
+    EXPECT_EQ(sig->Offset(), 0u);
+    EXPECT_EQ(sig->Size(), 2u);
+    EXPECT_EQ(sig->Align(), 2u);
+    EXPECT_EQ(sig->Name(), Sym("sig"));
+
+    auto* exp = ty->Members()[1];
+    EXPECT_TRUE(exp->Type()->Is<sem::I32>());
+    EXPECT_EQ(exp->Offset(), 4u);
+    EXPECT_EQ(exp->Size(), 4u);
+    EXPECT_EQ(exp->Align(), 4u);
+    EXPECT_EQ(exp->Name(), Sym("exp"));
+
+    EXPECT_EQ(ty->Size(), 8u);
+    EXPECT_EQ(ty->SizeNoPadding(), 8u);
+}
+
+TEST_F(ResolverBuiltinFloatTest, FrexpVector_f32) {
     auto* call = Call("frexp", vec3<f32>());
     WrapInFunction(call);
 
@@ -964,6 +996,41 @@ TEST_F(ResolverBuiltinFloatTest, FrexpVector) {
     EXPECT_EQ(ty->SizeNoPadding(), 28u);
 }
 
+TEST_F(ResolverBuiltinFloatTest, FrexpVector_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call("frexp", vec3<f16>());
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    auto* ty = TypeOf(call)->As<sem::Struct>();
+    ASSERT_NE(ty, nullptr);
+    ASSERT_EQ(ty->Members().size(), 2u);
+
+    auto* sig = ty->Members()[0];
+    ASSERT_TRUE(sig->Type()->Is<sem::Vector>());
+    EXPECT_EQ(sig->Type()->As<sem::Vector>()->Width(), 3u);
+    EXPECT_TRUE(sig->Type()->As<sem::Vector>()->type()->Is<sem::F16>());
+    EXPECT_EQ(sig->Offset(), 0u);
+    EXPECT_EQ(sig->Size(), 6u);
+    EXPECT_EQ(sig->Align(), 8u);
+    EXPECT_EQ(sig->Name(), Sym("sig"));
+
+    auto* exp = ty->Members()[1];
+    ASSERT_TRUE(exp->Type()->Is<sem::Vector>());
+    EXPECT_EQ(exp->Type()->As<sem::Vector>()->Width(), 3u);
+    EXPECT_TRUE(exp->Type()->As<sem::Vector>()->type()->Is<sem::I32>());
+    EXPECT_EQ(exp->Offset(), 16u);
+    EXPECT_EQ(exp->Size(), 12u);
+    EXPECT_EQ(exp->Align(), 16u);
+    EXPECT_EQ(exp->Name(), Sym("exp"));
+
+    EXPECT_EQ(ty->Size(), 32u);
+    EXPECT_EQ(ty->SizeNoPadding(), 28u);
+}
+
 TEST_F(ResolverBuiltinFloatTest, Frexp_Error_FirstParamInt) {
     GlobalVar("v", ty.i32(), ast::StorageClass::kWorkgroup);
     auto* call = Call("frexp", 1_i, AddressOf("v"));
@@ -975,8 +1042,8 @@ TEST_F(ResolverBuiltinFloatTest, Frexp_Error_FirstParamInt) {
               R"(error: no matching call to frexp(i32, ptr<workgroup, i32, read_write>)
 
 2 candidate functions:
-  frexp(f32) -> __frexp_result
-  frexp(vecN<f32>) -> __frexp_result_vecN
+  frexp(T) -> __frexp_result_T  where: T is f32 or f16
+  frexp(vecN<T>) -> __frexp_result_vecN_T  where: T is f32 or f16
 )");
 }
 
@@ -991,8 +1058,8 @@ TEST_F(ResolverBuiltinFloatTest, Frexp_Error_SecondParamFloatPtr) {
               R"(error: no matching call to frexp(f32, ptr<workgroup, f32, read_write>)
 
 2 candidate functions:
-  frexp(f32) -> __frexp_result
-  frexp(vecN<f32>) -> __frexp_result_vecN
+  frexp(T) -> __frexp_result_T  where: T is f32 or f16
+  frexp(vecN<T>) -> __frexp_result_vecN_T  where: T is f32 or f16
 )");
 }
 
@@ -1005,8 +1072,8 @@ TEST_F(ResolverBuiltinFloatTest, Frexp_Error_SecondParamNotAPointer) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to frexp(f32, i32)
 
 2 candidate functions:
-  frexp(f32) -> __frexp_result
-  frexp(vecN<f32>) -> __frexp_result_vecN
+  frexp(T) -> __frexp_result_T  where: T is f32 or f16
+  frexp(vecN<T>) -> __frexp_result_vecN_T  where: T is f32 or f16
 )");
 }
 
@@ -1021,8 +1088,8 @@ TEST_F(ResolverBuiltinFloatTest, Frexp_Error_VectorSizesDontMatch) {
               R"(error: no matching call to frexp(vec2<f32>, ptr<workgroup, vec4<i32>, read_write>)
 
 2 candidate functions:
-  frexp(vecN<f32>) -> __frexp_result_vecN
-  frexp(f32) -> __frexp_result
+  frexp(T) -> __frexp_result_T  where: T is f32 or f16
+  frexp(vecN<T>) -> __frexp_result_vecN_T  where: T is f32 or f16
 )");
 }
 
@@ -1129,8 +1196,9 @@ TEST_F(ResolverBuiltinFloatTest, Mix_VectorScalar_f16) {
     EXPECT_TRUE(TypeOf(call)->As<sem::Vector>()->type()->Is<sem::F16>());
 }
 
-// modf: (f32) -> __modf_result, (vecN<f32>) -> __modf_result_vecN
-TEST_F(ResolverBuiltinFloatTest, ModfScalar) {
+// modf: (f32) -> __modf_result, (vecN<f32>) -> __modf_result_vecN, (f16) -> __modf_result_f16,
+// (vecN<f16>) -> __modf_result_vecN_f16
+TEST_F(ResolverBuiltinFloatTest, ModfScalar_f32) {
     auto* call = Call("modf", 1_f);
     WrapInFunction(call);
 
@@ -1159,7 +1227,38 @@ TEST_F(ResolverBuiltinFloatTest, ModfScalar) {
     EXPECT_EQ(ty->SizeNoPadding(), 8u);
 }
 
-TEST_F(ResolverBuiltinFloatTest, ModfVector) {
+TEST_F(ResolverBuiltinFloatTest, ModfScalar_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call("modf", 1_h);
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    auto* ty = TypeOf(call)->As<sem::Struct>();
+    ASSERT_NE(ty, nullptr);
+    ASSERT_EQ(ty->Members().size(), 2u);
+
+    auto* fract = ty->Members()[0];
+    EXPECT_TRUE(fract->Type()->Is<sem::F16>());
+    EXPECT_EQ(fract->Offset(), 0u);
+    EXPECT_EQ(fract->Size(), 2u);
+    EXPECT_EQ(fract->Align(), 2u);
+    EXPECT_EQ(fract->Name(), Sym("fract"));
+
+    auto* whole = ty->Members()[1];
+    EXPECT_TRUE(whole->Type()->Is<sem::F16>());
+    EXPECT_EQ(whole->Offset(), 2u);
+    EXPECT_EQ(whole->Size(), 2u);
+    EXPECT_EQ(whole->Align(), 2u);
+    EXPECT_EQ(whole->Name(), Sym("whole"));
+
+    EXPECT_EQ(ty->Size(), 4u);
+    EXPECT_EQ(ty->SizeNoPadding(), 4u);
+}
+
+TEST_F(ResolverBuiltinFloatTest, ModfVector_f32) {
     auto* call = Call("modf", vec3<f32>());
     WrapInFunction(call);
 
@@ -1192,6 +1291,41 @@ TEST_F(ResolverBuiltinFloatTest, ModfVector) {
     EXPECT_EQ(ty->SizeNoPadding(), 28u);
 }
 
+TEST_F(ResolverBuiltinFloatTest, ModfVector_f16) {
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call("modf", vec3<f16>());
+    WrapInFunction(call);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    auto* ty = TypeOf(call)->As<sem::Struct>();
+    ASSERT_NE(ty, nullptr);
+    ASSERT_EQ(ty->Members().size(), 2u);
+
+    auto* fract = ty->Members()[0];
+    ASSERT_TRUE(fract->Type()->Is<sem::Vector>());
+    EXPECT_EQ(fract->Type()->As<sem::Vector>()->Width(), 3u);
+    EXPECT_TRUE(fract->Type()->As<sem::Vector>()->type()->Is<sem::F16>());
+    EXPECT_EQ(fract->Offset(), 0u);
+    EXPECT_EQ(fract->Size(), 6u);
+    EXPECT_EQ(fract->Align(), 8u);
+    EXPECT_EQ(fract->Name(), Sym("fract"));
+
+    auto* whole = ty->Members()[1];
+    ASSERT_TRUE(whole->Type()->Is<sem::Vector>());
+    EXPECT_EQ(whole->Type()->As<sem::Vector>()->Width(), 3u);
+    EXPECT_TRUE(whole->Type()->As<sem::Vector>()->type()->Is<sem::F16>());
+    EXPECT_EQ(whole->Offset(), 8u);
+    EXPECT_EQ(whole->Size(), 6u);
+    EXPECT_EQ(whole->Align(), 8u);
+    EXPECT_EQ(whole->Name(), Sym("whole"));
+
+    EXPECT_EQ(ty->Size(), 16u);
+    EXPECT_EQ(ty->SizeNoPadding(), 14u);
+}
+
 TEST_F(ResolverBuiltinFloatTest, Modf_Error_FirstParamInt) {
     GlobalVar("whole", ty.f32(), ast::StorageClass::kWorkgroup);
     auto* call = Call("modf", 1_i, AddressOf("whole"));
@@ -1203,8 +1337,8 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_FirstParamInt) {
               R"(error: no matching call to modf(i32, ptr<workgroup, f32, read_write>)
 
 2 candidate functions:
-  modf(f32) -> __modf_result
-  modf(vecN<f32>) -> __modf_result_vecN
+  modf(T) -> __modf_result_T  where: T is f32 or f16
+  modf(vecN<T>) -> __modf_result_vecN_T  where: T is f32 or f16
 )");
 }
 
@@ -1219,8 +1353,8 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_SecondParamIntPtr) {
               R"(error: no matching call to modf(f32, ptr<workgroup, i32, read_write>)
 
 2 candidate functions:
-  modf(f32) -> __modf_result
-  modf(vecN<f32>) -> __modf_result_vecN
+  modf(T) -> __modf_result_T  where: T is f32 or f16
+  modf(vecN<T>) -> __modf_result_vecN_T  where: T is f32 or f16
 )");
 }
 
@@ -1233,8 +1367,8 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_SecondParamNotAPointer) {
     EXPECT_EQ(r()->error(), R"(error: no matching call to modf(f32, f32)
 
 2 candidate functions:
-  modf(f32) -> __modf_result
-  modf(vecN<f32>) -> __modf_result_vecN
+  modf(T) -> __modf_result_T  where: T is f32 or f16
+  modf(vecN<T>) -> __modf_result_vecN_T  where: T is f32 or f16
 )");
 }
 
@@ -1249,8 +1383,8 @@ TEST_F(ResolverBuiltinFloatTest, Modf_Error_VectorSizesDontMatch) {
               R"(error: no matching call to modf(vec2<f32>, ptr<workgroup, vec4<f32>, read_write>)
 
 2 candidate functions:
-  modf(vecN<f32>) -> __modf_result_vecN
-  modf(f32) -> __modf_result
+  modf(T) -> __modf_result_T  where: T is f32 or f16
+  modf(vecN<T>) -> __modf_result_vecN_T  where: T is f32 or f16
 )");
 }
 

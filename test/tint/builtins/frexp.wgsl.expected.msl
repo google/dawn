@@ -7,9 +7,9 @@ struct frexp_result {
   int exp;
 };
 frexp_result tint_frexp(float param_0) {
-  int exp;
-  float sig = frexp(param_0, exp);
-  return {sig, exp};
+  frexp_result result;
+  result.sig = frexp(param_0, result.exp);
+  return result;
 }
 
 kernel void tint_symbol() {
