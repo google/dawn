@@ -640,6 +640,12 @@ void Device::InitTogglesFromDriver() {
     SetToggle(Toggle::D3D12AlwaysUseTypelessFormatsForCastableTexture,
               !GetDeviceInfo().supportsCastingFullyTypedFormat);
 
+    // The restriction on the source box specifying a portion of the depth stencil texture in
+    // CopyTextureRegion() is only available on the D3D12 platforms which doesn't support
+    // programmable sample positions.
+    SetToggle(Toggle::D3D12UseTempBufferInDepthStencilTextureAndBufferCopyWithNonZeroBufferOffset,
+              GetDeviceInfo().programmableSamplePositionsTier == 0);
+
     // Disable optimizations when using FXC
     // See https://crbug.com/dawn/1203
     SetToggle(Toggle::FxcOptimizations, false);
@@ -673,6 +679,8 @@ void Device::InitTogglesFromDriver() {
     // Currently this workaround is needed on any D3D12 backend for some particular situations.
     // But we may need to limit it if D3D12 runtime fixes the bug on its new release. See
     // https://crbug.com/dawn/1289 for more information.
+    // TODO(dawn:1289): Unset this toggle when we skip the split on the buffer-texture copy
+    // on the platforms where UnrestrictedBufferTextureCopyPitchSupported is true.
     SetToggle(Toggle::D3D12SplitBufferTextureCopyForRowsPerImagePaddings, true);
 
     // This workaround is only needed on Intel Gen12LP with driver prior to 30.0.101.1960.

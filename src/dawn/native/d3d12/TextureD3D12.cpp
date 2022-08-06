@@ -706,6 +706,10 @@ ID3D12Resource* Texture::GetD3D12Resource() const {
     return mResourceAllocation.GetD3D12Resource();
 }
 
+D3D12_RESOURCE_FLAGS Texture::GetD3D12ResourceFlags() const {
+    return mD3D12ResourceFlags;
+}
+
 DXGI_FORMAT Texture::GetD3D12CopyableSubresourceFormat(Aspect aspect) const {
     ASSERT(GetFormat().aspects & aspect);
 

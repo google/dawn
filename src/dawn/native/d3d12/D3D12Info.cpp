@@ -44,6 +44,12 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter) {
                           "ID3D12Device::CheckFeatureSupport"));
     info.resourceHeapTier = featureOptions.ResourceHeapTier;
 
+    D3D12_FEATURE_DATA_D3D12_OPTIONS2 featureOptions2 = {};
+    if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
+            D3D12_FEATURE_D3D12_OPTIONS2, &featureOptions2, sizeof(featureOptions2)))) {
+        info.programmableSamplePositionsTier = featureOptions2.ProgrammableSamplePositionsTier;
+    }
+
     D3D12_FEATURE_DATA_D3D12_OPTIONS3 featureOptions3 = {};
     if (SUCCEEDED(adapter.GetDevice()->CheckFeatureSupport(
             D3D12_FEATURE_D3D12_OPTIONS3, &featureOptions3, sizeof(featureOptions3)))) {

@@ -58,6 +58,7 @@ class Texture final : public TextureBase {
     DXGI_FORMAT GetD3D12Format() const;
     ID3D12Resource* GetD3D12Resource() const;
     DXGI_FORMAT GetD3D12CopyableSubresourceFormat(Aspect aspect) const;
+    D3D12_RESOURCE_FLAGS GetD3D12ResourceFlags() const;
 
     D3D12_RENDER_TARGET_VIEW_DESC GetRTVDescriptor(const Format& format,
                                                    uint32_t mipLevel,

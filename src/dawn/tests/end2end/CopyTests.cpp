@@ -1028,9 +1028,6 @@ TEST_P(CopyTests_T2B, CopyOneRowWithDepth32Float) {
     // depth.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_read"));
 
-    // TODO(crbug.com/dawn/727): currently this test fails on many D3D12 drivers.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12());
-
     constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::Depth32Float;
     constexpr uint32_t kPixelsPerRow = 4u;
 

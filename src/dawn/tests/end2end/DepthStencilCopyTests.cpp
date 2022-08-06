@@ -543,10 +543,6 @@ TEST_P(DepthCopyTests, FromDepthAspect) {
 
 // Test copying the depth-only aspect into a buffer at a non-zero offset.
 TEST_P(DepthCopyTests, FromDepthAspectToBufferAtNonZeroOffset) {
-    // TODO(crbug.com/dawn/727): currently this test fails on many D3D12 drivers as there is a bug
-    // in the implementation of texture-to-buffer copies with depth stencil textures on D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12());
-
     constexpr float kInitDepth = 0.2f;
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
@@ -661,10 +657,6 @@ TEST_P(DepthCopyFromBufferTests, BufferToNonRenderableDepthAspectAtNonZeroOffset
 // Test copying the depth-only aspect from a buffer at a non-zero offset.
 TEST_P(DepthCopyFromBufferTests, BufferToRenderableDepthAspectAtNonZeroOffset) {
     constexpr std::array<uint32_t, 2> kBufferCopyOffsets = {8, 512};
-
-    // TODO(crbug.com/dawn/727): currently this test fails on many D3D12 drivers as there is a bug
-    // in the implementation of texture-to-buffer copies with depth stencil textures on D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12());
     constexpr bool kIsRenderable = true;
     for (uint32_t offset : kBufferCopyOffsets) {
         DoTest(offset, kIsRenderable);
@@ -875,10 +867,6 @@ TEST_P(StencilCopyTests, FromStencilAspect) {
 
 // Test copying the stencil-only aspect into a buffer at a non-zero offset
 TEST_P(StencilCopyTests, FromStencilAspectAtNonZeroOffset) {
-    // TODO(crbug.com/dawn/727): currently this test fails on many D3D12 drivers as there is a bug
-    // in the implementation of texture-to-buffer copies with depth stencil textures on D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12());
-
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
     constexpr uint32_t kTestLevel = 0;
@@ -905,10 +893,6 @@ TEST_P(StencilCopyTests, ToStencilAspect) {
 
 // Test copying to the stencil-aspect of a texture at non-zero offset
 TEST_P(StencilCopyTests, ToStencilAspectAtNonZeroOffset) {
-    // TODO(crbug.com/dawn/727): currently this test fails on many D3D12 drivers as there is a bug
-    // in the implementation of texture-to-buffer copies with depth stencil textures on D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12());
-
     constexpr std::array<uint32_t, 2> kBufferCopyOffsets = {8, 512};
     for (uint32_t offset : kBufferCopyOffsets) {
         DoCopyToStencilTest(offset);
@@ -924,19 +908,26 @@ DAWN_INSTANTIATE_TEST_P(DepthStencilCopyTests,
                                                          utils::kDepthAndStencilFormats.end()));
 
 DAWN_INSTANTIATE_TEST_P(DepthCopyTests,
-                        {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
-                         VulkanBackend()},
+                        {D3D12Backend(),
+                         D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
+                                       "copy_with_non_zero_buffer_offset"}),
+                         MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
                         std::vector<wgpu::TextureFormat>(kValidDepthCopyTextureFormats.begin(),
                                                          kValidDepthCopyTextureFormats.end()));
 
 DAWN_INSTANTIATE_TEST_P(DepthCopyFromBufferTests,
-                        {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
-                         VulkanBackend()},
+                        {D3D12Backend(),
+                         D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
+                                       "copy_with_non_zero_buffer_offset"}),
+                         MetalBackend(), OpenGLBackend(), OpenGLESBackend(), VulkanBackend()},
                         std::vector<wgpu::TextureFormat>(kValidDepthCopyFromBufferFormats.begin(),
                                                          kValidDepthCopyFromBufferFormats.end()));
 
 DAWN_INSTANTIATE_TEST_P(StencilCopyTests,
-                        {D3D12Backend(), MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
+                        {D3D12Backend(),
+                         D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
+                                       "copy_with_non_zero_buffer_offset"}),
+                         MetalBackend(), OpenGLBackend(), OpenGLESBackend(),
                          // Test with the vulkan_use_s8 toggle forced on and off.
                          VulkanBackend({"vulkan_use_s8"}, {}),
                          VulkanBackend({}, {"vulkan_use_s8"})},

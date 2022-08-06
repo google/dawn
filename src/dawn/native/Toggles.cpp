@@ -182,9 +182,8 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "Split texture-to-texture copy into two copies: copy from source texture into a temporary "
       "buffer, and copy from the temporary buffer into the destination texture under specific "
       "situations. This workaround is by default enabled on some Intel GPUs which have a driver "
-      "bug "
-      "in the execution of CopyTextureRegion() when we copy with the formats whose texel block "
-      "sizes are less than 4 bytes from a greater mip level to a smaller mip level on D3D12 "
+      "bug in the execution of CopyTextureRegion() when we copy with the formats whose texel "
+      "block sizes are less than 4 bytes from a greater mip level to a smaller mip level on D3D12 "
       "backends.",
       "https://crbug.com/1161355"}},
     {Toggle::EmitHLSLDebugSymbols,
@@ -290,6 +289,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "issue. We can workaround this security issue via allocating extra memory and limiting its "
       "access in itself.",
       "https://crbug.com/dawn/949"}},
+    {Toggle::D3D12UseTempBufferInDepthStencilTextureAndBufferCopyWithNonZeroBufferOffset,
+     {"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_copy_with_non_zero_buffer_offset",
+      "Split buffer-texture copy into two copies: do first copy with a temporary buffer at offset "
+      "0, then copy from the temporary buffer to the destination. Now this toggle must be enabled "
+      "on the D3D12 platforms where programmable MSAA is not supported.",
+      "https://crbug.com/dawn/727"}},
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
 }  // anonymous namespace

@@ -225,6 +225,87 @@ MaybeError RecordCopyTextureWithTemporaryBuffer(CommandRecordingContext* recordi
     return {};
 }
 
+bool ShouldCopyUsingTemporaryBuffer(DeviceBase* device,
+                                    const BufferCopy& bufferCopy,
+                                    const TextureCopy& textureCopy) {
+    // Currently we only need the workaround for some D3D12 platforms.
+    if (device->IsToggleEnabled(
+            Toggle::D3D12UseTempBufferInDepthStencilTextureAndBufferCopyWithNonZeroBufferOffset)) {
+        if ((ToBackend(textureCopy.texture)->GetD3D12ResourceFlags() &
+             D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) &&
+            bufferCopy.offset % D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT > 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+MaybeError RecordBufferTextureCopyWithTemporaryBuffer(CommandRecordingContext* recordingContext,
+                                                      BufferTextureCopyDirection copyDirection,
+                                                      const BufferCopy& bufferCopy,
+                                                      const TextureCopy& textureCopy,
+                                                      const Extent3D& copySize) {
+    dawn::native::Format format = textureCopy.texture->GetFormat();
+    const TexelBlockInfo& blockInfo = format.GetAspectInfo(textureCopy.aspect).block;
+
+    // Create tempBuffer
+    // The size of temporary buffer isn't needed to be a multiple of 4 because we don't
+    // need to set mappedAtCreation to be true.
+    auto tempBufferSize = ComputeRequiredBytesInCopy(blockInfo, copySize, bufferCopy.bytesPerRow,
+                                                     bufferCopy.rowsPerImage);
+
+    BufferDescriptor tempBufferDescriptor;
+    tempBufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+    tempBufferDescriptor.size = tempBufferSize.AcquireSuccess();
+    Device* device = ToBackend(textureCopy.texture->GetDevice());
+    Ref<BufferBase> tempBufferBase;
+    DAWN_TRY_ASSIGN(tempBufferBase, device->CreateBuffer(&tempBufferDescriptor));
+    // D3D12 aligns the entire buffer to at least 64KB, so the virtual address of tempBuffer will
+    // always be aligned to D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT (512).
+    Ref<Buffer> tempBuffer = ToBackend(std::move(tempBufferBase));
+    ASSERT(tempBuffer->GetVA() % D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT == 0);
+
+    BufferCopy tempBufferCopy;
+    tempBufferCopy.buffer = tempBuffer;
+    tempBufferCopy.offset = 0;
+    tempBufferCopy.bytesPerRow = bufferCopy.bytesPerRow;
+    tempBufferCopy.rowsPerImage = bufferCopy.rowsPerImage;
+
+    tempBuffer->TrackUsageAndTransitionNow(recordingContext, wgpu::BufferUsage::CopyDst);
+
+    ID3D12GraphicsCommandList* commandList = recordingContext->GetCommandList();
+    switch (copyDirection) {
+        case BufferTextureCopyDirection::B2T: {
+            commandList->CopyBufferRegion(tempBuffer->GetD3D12Resource(), 0,
+                                          ToBackend(bufferCopy.buffer)->GetD3D12Resource(),
+                                          bufferCopy.offset, tempBufferDescriptor.size);
+            tempBuffer->TrackUsageAndTransitionNow(recordingContext, wgpu::BufferUsage::CopySrc);
+            RecordBufferTextureCopy(BufferTextureCopyDirection::B2T,
+                                    recordingContext->GetCommandList(), tempBufferCopy, textureCopy,
+                                    copySize);
+            break;
+        }
+        case BufferTextureCopyDirection::T2B: {
+            RecordBufferTextureCopy(BufferTextureCopyDirection::T2B,
+                                    recordingContext->GetCommandList(), tempBufferCopy, textureCopy,
+                                    copySize);
+            tempBuffer->TrackUsageAndTransitionNow(recordingContext, wgpu::BufferUsage::CopySrc);
+            commandList->CopyBufferRegion(ToBackend(bufferCopy.buffer)->GetD3D12Resource(),
+                                          bufferCopy.offset, tempBuffer->GetD3D12Resource(), 0,
+                                          tempBufferDescriptor.size);
+            break;
+        }
+        default:
+            UNREACHABLE();
+            break;
+    }
+
+    // Save tempBuffer into recordingContext
+    recordingContext->AddToTempBuffers(std::move(tempBuffer));
+
+    return {};
+}
+
 void RecordNumWorkgroupsForDispatch(ID3D12GraphicsCommandList* commandList,
                                     ComputePipeline* pipeline,
                                     DispatchCmd* dispatch) {
@@ -733,6 +814,12 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                 texture->TrackUsageAndTransitionNow(commandContext, wgpu::TextureUsage::CopyDst,
                                                     subresources);
 
+                if (ShouldCopyUsingTemporaryBuffer(GetDevice(), copy->source, copy->destination)) {
+                    DAWN_TRY(RecordBufferTextureCopyWithTemporaryBuffer(
+                        commandContext, BufferTextureCopyDirection::B2T, copy->source,
+                        copy->destination, copy->copySize));
+                    break;
+                }
                 RecordBufferTextureCopy(BufferTextureCopyDirection::B2T, commandList, copy->source,
                                         copy->destination, copy->copySize);
 
@@ -760,6 +847,12 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* commandContext
                                                     subresources);
                 buffer->TrackUsageAndTransitionNow(commandContext, wgpu::BufferUsage::CopyDst);
 
+                if (ShouldCopyUsingTemporaryBuffer(GetDevice(), copy->destination, copy->source)) {
+                    DAWN_TRY(RecordBufferTextureCopyWithTemporaryBuffer(
+                        commandContext, BufferTextureCopyDirection::T2B, copy->destination,
+                        copy->source, copy->copySize));
+                    break;
+                }
                 RecordBufferTextureCopy(BufferTextureCopyDirection::T2B, commandList,
                                         copy->destination, copy->source, copy->copySize);
 
