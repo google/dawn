@@ -17,7 +17,6 @@
 
 // Defines macros for compiler-specific functionality
 //  - DAWN_COMPILER_IS(CLANG|GCC|MSVC): Compiler detection
-//  - DAWN_BREAKPOINT(): Raises an exception and breaks in the debugger
 //  - DAWN_BUILTIN_UNREACHABLE(): Hints the compiler that a code path is unreachable
 //  - DAWN_(UN)?LIKELY(EXPR): Where available, hints the compiler that the expression will be true
 //      (resp. false) to help it generate code that leads to better branch prediction.
@@ -33,13 +32,6 @@
 #define DAWN_COMPILER_IS_CLANG 1
 #else
 #define DAWN_COMPILER_IS_GCC 1
-#endif
-
-#if defined(__i386__) || defined(__x86_64__)
-#define DAWN_BREAKPOINT() __asm__ __volatile__("int $3\n\t")
-#else
-// TODO(cwallez@chromium.org): Implement breakpoint on all supported architectures
-#define DAWN_BREAKPOINT()
 #endif
 
 #define DAWN_BUILTIN_UNREACHABLE() __builtin_unreachable()
@@ -59,9 +51,6 @@
 // MSVC
 #elif defined(_MSC_VER)
 #define DAWN_COMPILER_IS_MSVC 1
-
-extern void __cdecl __debugbreak(void);
-#define DAWN_BREAKPOINT() __debugbreak()
 
 #define DAWN_BUILTIN_UNREACHABLE() __assume(false)
 
