@@ -181,14 +181,14 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
 
     bool needsComma = false;
     for (ColorAttachmentIndex i : IterateBitSet(value->GetColorAttachmentsMask())) {
+        if (needsComma) {
+            s->Append(", ");
+        }
+
         while (nextColorIndex < i) {
             s->Append(absl::StrFormat("%s, ", wgpu::TextureFormat::Undefined));
             nextColorIndex++;
             needsComma = false;
-        }
-
-        if (needsComma) {
-            s->Append(", ");
         }
 
         s->Append(absl::StrFormat("%s", value->GetColorAttachmentFormat(i)));
