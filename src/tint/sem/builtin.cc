@@ -153,11 +153,21 @@ bool Builtin::IsDP4a() const {
 }
 
 bool Builtin::HasSideEffects() const {
-    if (IsAtomic() && type_ != sem::BuiltinType::kAtomicLoad) {
-        return true;
-    }
-    if (type_ == sem::BuiltinType::kTextureStore) {
-        return true;
+    switch (type_) {
+        case sem::BuiltinType::kAtomicAdd:
+        case sem::BuiltinType::kAtomicAnd:
+        case sem::BuiltinType::kAtomicCompareExchangeWeak:
+        case sem::BuiltinType::kAtomicExchange:
+        case sem::BuiltinType::kAtomicMax:
+        case sem::BuiltinType::kAtomicMin:
+        case sem::BuiltinType::kAtomicOr:
+        case sem::BuiltinType::kAtomicStore:
+        case sem::BuiltinType::kAtomicSub:
+        case sem::BuiltinType::kAtomicXor:
+        case sem::BuiltinType::kTextureStore:
+            return true;
+        default:
+            break;
     }
     return false;
 }
