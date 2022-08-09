@@ -21,6 +21,7 @@ namespace {
 
 const std::pair<uint32_t, uint32_t> kChanceOfChangingBinaryOperators = {30, 90};
 const std::pair<uint32_t, uint32_t> kChanceOfChangingUnaryOperators = {30, 70};
+const std::pair<uint32_t, uint32_t> kChanceOfDeletingStatements = {30, 70};
 const std::pair<uint32_t, uint32_t> kChanceOfReplacingIdentifiers = {30, 70};
 const std::pair<uint32_t, uint32_t> kChanceOfWrappingUnaryOperators = {30, 70};
 
@@ -30,6 +31,7 @@ ProbabilityContext::ProbabilityContext(RandomGenerator* generator)
     : generator_(generator),
       chance_of_changing_binary_operators_(RandomFromRange(kChanceOfChangingBinaryOperators)),
       chance_of_changing_unary_operators_(RandomFromRange(kChanceOfChangingUnaryOperators)),
+      chance_of_deleting_statements_(RandomFromRange(kChanceOfDeletingStatements)),
       chance_of_replacing_identifiers_(RandomFromRange(kChanceOfReplacingIdentifiers)),
       chance_of_wrapping_unary_operators_(RandomFromRange(kChanceOfWrappingUnaryOperators)) {
     assert(generator != nullptr && "generator must not be nullptr");

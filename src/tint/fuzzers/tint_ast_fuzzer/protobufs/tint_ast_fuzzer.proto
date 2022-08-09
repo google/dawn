@@ -22,6 +22,7 @@ message Mutation {
     MutationChangeBinaryOperator change_binary_operator = 2;
     MutationWrapUnaryOperator wrap_unary_operator = 3;
     MutationChangeUnaryOperator change_unary_operator = 4;
+    MutationDeleteStatement delete_statement = 5;
   };
 }
 
@@ -62,6 +63,14 @@ message MutationChangeUnaryOperator {
 
     // A UnaryOp representing the new unary operator.
     uint32 new_operator = 2;
+}
+
+message MutationDeleteStatement {
+    // This transformation deletes a statement, as long as doing so does not
+    // invalidate the program.
+
+    // The id of a statement to be deleted.
+    uint32 statement_id = 1;
 }
 
 message MutationReplaceIdentifier {

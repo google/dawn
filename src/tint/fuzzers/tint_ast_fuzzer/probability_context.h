@@ -61,6 +61,9 @@ class ProbabilityContext {
         return chance_of_changing_unary_operators_;
     }
 
+    /// @return the probability of changing operator for a binary expression.
+    uint32_t GetChanceOfDeletingStatements() const { return chance_of_deleting_statements_; }
+
     /// @return the probability of replacing some identifier with some other one.
     uint32_t GetChanceOfReplacingIdentifiers() const { return chance_of_replacing_identifiers_; }
 
@@ -78,6 +81,7 @@ class ProbabilityContext {
 
     uint32_t chance_of_changing_binary_operators_;
     uint32_t chance_of_changing_unary_operators_;
+    uint32_t chance_of_deleting_statements_;
     uint32_t chance_of_replacing_identifiers_;
     uint32_t chance_of_wrapping_unary_operators_;
 };
