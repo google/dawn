@@ -10,13 +10,9 @@ Dawn provides several WebGPU building blocks:
  - **WebGPU C/C++ headers** that applications and other building blocks use.
    - The `webgpu.h` version that Dawn implements.
    - A C++ wrapper for the `webgpu.h`.
- - **A "native" implementation of WebGPU** using platforms' GPU APIs:
-   - **D3D12** on Windows 10
-   - **Metal** on macOS and iOS
-   - **Vulkan** on Windows, Linux, ChromeOS, Android and Fuchsia
-   - OpenGL as best effort where available
+ - **A "native" implementation of WebGPU** using platforms' GPU APIs: D3D12, Metal, Vulkan and OpenGL. See [per API support](docs/support.md) for more details.
  - **A client-server implementation of WebGPU** for applications that are in a sandbox without access to native drivers
- - **Tint** is a compiler for the WebGPU Shader Language (WGSL).
+ - **Tint** is a compiler for the WebGPU Shader Language (WGSL) that can be used in standalone to convert shaders from and to WGSL.
 
 Helpful links:
 
