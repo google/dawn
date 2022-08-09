@@ -594,6 +594,7 @@ DawnJSONGenerator(
 add_library(webgpu_dawn ${DAWN_PLACEHOLDER_FILE})
 common_compile_options(webgpu_dawn)
 target_link_libraries(webgpu_dawn PRIVATE dawn_native)
+target_link_libraries(webgpu_dawn PUBLIC dawn_headers)
 target_compile_definitions(webgpu_dawn PRIVATE "WGPU_IMPLEMENTATION")
 if(BUILD_SHARED_LIBS)
     target_compile_definitions(webgpu_dawn PRIVATE "WGPU_SHARED_LIBRARY")

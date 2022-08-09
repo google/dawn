@@ -112,6 +112,8 @@ common_compile_options(dawncpp)
 target_sources(dawncpp PRIVATE ${DAWNCPP_GEN_SOURCES})
 target_link_libraries(dawncpp PUBLIC dawncpp_headers)
 
+add_library(webgpu_cpp ALIAS dawncpp)
+
 ###############################################################################
 # libdawn_proc
 ###############################################################################
