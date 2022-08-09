@@ -72,6 +72,11 @@ bool RemovePhonies::ShouldRun(const Program* program, const DataMap&) const {
         if (node->Is<ast::PhonyExpression>()) {
             return true;
         }
+        if (auto* stmt = node->As<ast::CallStatement>()) {
+            if (program->Sem().Get(stmt->expr)->ConstantValue() != nullptr) {
+                return true;
+            }
+        }
     }
     return false;
 }
@@ -82,74 +87,86 @@ void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
     std::unordered_map<SinkSignature, Symbol, SinkSignature::Hasher> sinks;
 
     for (auto* node : ctx.src->ASTNodes().Objects()) {
-        if (auto* stmt = node->As<ast::AssignmentStatement>()) {
-            if (stmt->lhs->Is<ast::PhonyExpression>()) {
-                std::vector<const ast::Expression*> side_effects;
-                if (!ast::TraverseExpressions(
-                        stmt->rhs, ctx.dst->Diagnostics(), [&](const ast::CallExpression* expr) {
-                            // ast::CallExpression may map to a function or builtin call
-                            // (both may have side-effects), or a type constructor or
-                            // type conversion (both do not have side effects).
-                            auto* call = sem.Get<sem::Call>(expr);
-                            if (!call) {
-                                // Semantic node must be a Materialize, in which case the expression
-                                // was creation-time (compile time), so could not have side effects.
-                                // Just skip.
-                                return ast::TraverseAction::Skip;
-                            }
-                            if (call->Target()->IsAnyOf<sem::Function, sem::Builtin>() &&
-                                call->HasSideEffects()) {
-                                side_effects.push_back(expr);
-                                return ast::TraverseAction::Skip;
-                            }
-                            return ast::TraverseAction::Descend;
-                        })) {
-                    return;
-                }
-
-                if (side_effects.empty()) {
-                    // Phony assignment with no side effects.
-                    // Just remove it.
-                    RemoveStatement(ctx, stmt);
-                    continue;
-                }
-
-                if (side_effects.size() == 1) {
-                    if (auto* call = side_effects[0]->As<ast::CallExpression>()) {
-                        // Phony assignment with single call side effect.
-                        // Replace phony assignment with call.
-                        ctx.Replace(stmt, [&, call] { return ctx.dst->CallStmt(ctx.Clone(call)); });
-                        continue;
+        Switch(
+            node,
+            [&](const ast::AssignmentStatement* stmt) {
+                if (stmt->lhs->Is<ast::PhonyExpression>()) {
+                    std::vector<const ast::Expression*> side_effects;
+                    if (!ast::TraverseExpressions(
+                            stmt->rhs, ctx.dst->Diagnostics(),
+                            [&](const ast::CallExpression* expr) {
+                                // ast::CallExpression may map to a function or builtin call
+                                // (both may have side-effects), or a type constructor or
+                                // type conversion (both do not have side effects).
+                                auto* call = sem.Get<sem::Call>(expr);
+                                if (!call) {
+                                    // Semantic node must be a Materialize, in which case the
+                                    // expression was creation-time (compile time), so could not
+                                    // have side effects. Just skip.
+                                    return ast::TraverseAction::Skip;
+                                }
+                                if (call->Target()->IsAnyOf<sem::Function, sem::Builtin>() &&
+                                    call->HasSideEffects()) {
+                                    side_effects.push_back(expr);
+                                    return ast::TraverseAction::Skip;
+                                }
+                                return ast::TraverseAction::Descend;
+                            })) {
+                        return;
                     }
-                }
 
-                // Phony assignment with multiple side effects.
-                // Generate a call to a placeholder function with the side
-                // effects as arguments.
-                ctx.Replace(stmt, [&, side_effects] {
-                    SinkSignature sig;
-                    for (auto* arg : side_effects) {
-                        sig.types.push_back(sem.Get(arg)->Type()->UnwrapRef());
+                    if (side_effects.empty()) {
+                        // Phony assignment with no side effects.
+                        // Just remove it.
+                        RemoveStatement(ctx, stmt);
+                        return;
                     }
-                    auto sink = utils::GetOrCreate(sinks, sig, [&] {
-                        auto name = ctx.dst->Symbols().New("phony_sink");
-                        utils::Vector<const ast::Parameter*, 8> params;
-                        for (auto* ty : sig.types) {
-                            auto* ast_ty = CreateASTTypeFor(ctx, ty);
-                            params.Push(
-                                ctx.dst->Param("p" + std::to_string(params.Length()), ast_ty));
+
+                    if (side_effects.size() == 1) {
+                        if (auto* call = side_effects[0]->As<ast::CallExpression>()) {
+                            // Phony assignment with single call side effect.
+                            // Replace phony assignment with call.
+                            ctx.Replace(stmt,
+                                        [&, call] { return ctx.dst->CallStmt(ctx.Clone(call)); });
+                            return;
                         }
-                        ctx.dst->Func(name, params, ctx.dst->ty.void_(), {});
-                        return name;
-                    });
-                    utils::Vector<const ast::Expression*, 8> args;
-                    for (auto* arg : side_effects) {
-                        args.Push(ctx.Clone(arg));
                     }
-                    return ctx.dst->CallStmt(ctx.dst->Call(sink, args));
-                });
-            }
-        }
+
+                    // Phony assignment with multiple side effects.
+                    // Generate a call to a placeholder function with the side
+                    // effects as arguments.
+                    ctx.Replace(stmt, [&, side_effects] {
+                        SinkSignature sig;
+                        for (auto* arg : side_effects) {
+                            sig.types.push_back(sem.Get(arg)->Type()->UnwrapRef());
+                        }
+                        auto sink = utils::GetOrCreate(sinks, sig, [&] {
+                            auto name = ctx.dst->Symbols().New("phony_sink");
+                            utils::Vector<const ast::Parameter*, 8> params;
+                            for (auto* ty : sig.types) {
+                                auto* ast_ty = CreateASTTypeFor(ctx, ty);
+                                params.Push(
+                                    ctx.dst->Param("p" + std::to_string(params.Length()), ast_ty));
+                            }
+                            ctx.dst->Func(name, params, ctx.dst->ty.void_(), {});
+                            return name;
+                        });
+                        utils::Vector<const ast::Expression*, 8> args;
+                        for (auto* arg : side_effects) {
+                            args.Push(ctx.Clone(arg));
+                        }
+                        return ctx.dst->CallStmt(ctx.dst->Call(sink, args));
+                    });
+                }
+            },
+            [&](const ast::CallStatement* stmt) {
+                // Remove call statements to const value-returning functions.
+                // TODO(crbug.com/tint/1637): Remove if `stmt->expr` has no side-effects.
+                auto* sem_expr = sem.Get(stmt->expr);
+                if ((sem_expr->ConstantValue() != nullptr) && !sem_expr->HasSideEffects()) {
+                    ctx.Remove(sem.Get(stmt)->Block()->Declaration()->statements, stmt);
+                }
+            });
     }
 
     ctx.Clone();
