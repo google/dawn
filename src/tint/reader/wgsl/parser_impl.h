@@ -559,9 +559,15 @@ class ParserImpl {
     /// Parses a `while_statement` grammar element
     /// @returns the parsed while loop or nullptr
     Maybe<const ast::WhileStatement*> while_statement();
-    /// Parses a `continuing_stmt` grammar element
+    /// Parses a `break_if_statement` grammar element
+    /// @returns the parsed statement or nullptr
+    Maybe<const ast::Statement*> break_if_statement();
+    /// Parses a `continuing_compound_statement` grammar element
     /// @returns the parsed statements
-    Maybe<const ast::BlockStatement*> continuing_stmt();
+    Maybe<const ast::BlockStatement*> continuing_compound_statement();
+    /// Parses a `continuing_statement` grammar element
+    /// @returns the parsed statements
+    Maybe<const ast::BlockStatement*> continuing_statement();
     /// Parses a `const_literal` grammar element
     /// @returns the const literal parsed or nullptr if none found
     Maybe<const ast::LiteralExpression*> const_literal();

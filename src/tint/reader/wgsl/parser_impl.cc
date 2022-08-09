@@ -560,8 +560,7 @@ Maybe<bool> ParserImpl::global_decl() {
 }
 
 // global_variable_decl
-//  : variable_attribute_list* variable_decl
-//  | variable_attribute_list* variable_decl EQUAL expression
+//  : variable_attribute_list* variable_decl (EQUAL expression)?
 Maybe<const ast::Variable*> ParserImpl::global_variable_decl(AttributeList& attrs) {
     auto decl = variable_decl();
     if (decl.errored) {
@@ -1044,10 +1043,8 @@ Maybe<const ast::Alias*> ParserImpl::type_alias_decl() {
 //   | VEC3 LESS_THAN type_decl GREATER_THAN
 //   | VEC4 LESS_THAN type_decl GREATER_THAN
 //   | PTR LESS_THAN storage_class, type_decl (COMMA access_mode)? GREATER_THAN
-//   | array_attribute_list* ARRAY LESS_THAN type_decl COMMA
-//          INT_LITERAL GREATER_THAN
-//   | array_attribute_list* ARRAY LESS_THAN type_decl
-//          GREATER_THAN
+//   | array_attribute_list* ARRAY LESS_THAN type_decl COMMA INT_LITERAL GREATER_THAN
+//   | array_attribute_list* ARRAY LESS_THAN type_decl GREATER_THAN
 //   | MAT2x2 LESS_THAN type_decl GREATER_THAN
 //   | MAT2x3 LESS_THAN type_decl GREATER_THAN
 //   | MAT2x4 LESS_THAN type_decl GREATER_THAN
@@ -1366,7 +1363,7 @@ Expect<ast::StructMember*> ParserImpl::expect_struct_member() {
                                      decl->type, std::move(attrs.value));
 }
 
-// static_assert
+// static_assert_statement
 //   : STATIC_ASSERT expression
 Maybe<const ast::StaticAssert*> ParserImpl::static_assert_statement() {
     Source start;
@@ -2170,7 +2167,7 @@ Maybe<const ast::BlockStatement*> ParserImpl::case_body() {
 }
 
 // loop_statement
-//   : LOOP BRACKET_LEFT statements continuing_stmt? BRACKET_RIGHT
+//   : LOOP BRACKET_LEFT statements continuing_statement? BRACKET_RIGHT
 Maybe<const ast::LoopStatement*> ParserImpl::loop_statement() {
     Source source;
     if (!match(Token::Type::kLoop, &source)) {
@@ -2183,7 +2180,7 @@ Maybe<const ast::LoopStatement*> ParserImpl::loop_statement() {
             return Failure::kErrored;
         }
 
-        auto continuing = continuing_stmt();
+        auto continuing = continuing_statement();
         if (continuing.errored) {
             return Failure::kErrored;
         }
@@ -2376,14 +2373,42 @@ Maybe<const ast::ContinueStatement*> ParserImpl::continue_statement() {
     return create<ast::ContinueStatement>(source);
 }
 
-// continuing_stmt
-//   : CONTINUING compound_statement
-Maybe<const ast::BlockStatement*> ParserImpl::continuing_stmt() {
+// break_if_statement:
+//    'break' 'if' expression semicolon
+Maybe<const ast::Statement*> ParserImpl::break_if_statement() {
+    // TODO(crbug.com/tint/1451): Add support for break-if
+    return Failure::kNoMatch;
+}
+
+// continuing_compound_statement:
+//   brace_left statement* break_if_statement? brace_right
+Maybe<const ast::BlockStatement*> ParserImpl::continuing_compound_statement() {
+    return expect_brace_block("", [&]() -> Expect<ast::BlockStatement*> {
+        auto stmts = expect_statements();
+        if (stmts.errored) {
+            return Failure::kErrored;
+        }
+
+        auto break_if = break_if_statement();
+        if (break_if.errored) {
+            return Failure::kErrored;
+        }
+        if (break_if.matched) {
+            stmts.value.Push(break_if.value);
+        }
+
+        return create<ast::BlockStatement>(Source{}, stmts.value);
+    });
+}
+
+// continuing_statement
+//   : CONTINUING continuing_compound_statement
+Maybe<const ast::BlockStatement*> ParserImpl::continuing_statement() {
     if (!match(Token::Type::kContinuing)) {
         return create<ast::BlockStatement>(Source{}, utils::Empty);
     }
 
-    return expect_compound_statement();
+    return continuing_compound_statement();
 }
 
 // primary_expression
@@ -2528,8 +2553,7 @@ Maybe<const ast::Expression*> ParserImpl::singular_expression() {
 }
 
 // argument_expression_list
-//   : PAREN_LEFT ((expression COMMA)* expression COMMA?)?
-//   PAREN_RIGHT
+//   : PAREN_LEFT ((expression COMMA)* expression COMMA?)? PAREN_RIGHT
 Expect<ParserImpl::ExpressionList> ParserImpl::expect_argument_expression_list(
     std::string_view use) {
     return expect_paren_block(use, [&]() -> Expect<ExpressionList> {
@@ -3079,8 +3103,8 @@ Maybe<ast::BinaryOp> ParserImpl::compound_assignment_operator() {
 }
 
 // assignment_statement
-// | lhs_expression ( equal | compound_assignment_operator ) expression
-// | underscore equal expression
+// | lhs_expression ( EQUAL | compound_assignment_operator ) expression
+// | UNDERSCORE EQUAL expression
 //
 // increment_statement
 // | lhs_expression PLUS_PLUS
