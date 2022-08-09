@@ -62,6 +62,10 @@ bool OpenGLVersion::IsES() const {
     return mStandard == Standard::ES;
 }
 
+OpenGLVersion::Standard OpenGLVersion::GetStandard() const {
+    return mStandard;
+}
+
 uint32_t OpenGLVersion::GetMajor() const {
     return mMajorVersion;
 }

@@ -30,22 +30,6 @@
 
 namespace dawn::native::opengl {
 
-namespace {
-
-GLenum GLShaderType(SingleShaderStage stage) {
-    switch (stage) {
-        case SingleShaderStage::Vertex:
-            return GL_VERTEX_SHADER;
-        case SingleShaderStage::Fragment:
-            return GL_FRAGMENT_SHADER;
-        case SingleShaderStage::Compute:
-            return GL_COMPUTE_SHADER;
-    }
-    UNREACHABLE();
-}
-
-}  // namespace
-
 PipelineGL::PipelineGL() : mProgram(0) {}
 
 PipelineGL::~PipelineGL() = default;
@@ -53,28 +37,6 @@ PipelineGL::~PipelineGL() = default;
 MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
                                       const PipelineLayout* layout,
                                       const PerStage<ProgrammableStage>& stages) {
-    auto CreateShader = [](const OpenGLFunctions& gl, GLenum type,
-                           const char* source) -> ResultOrError<GLuint> {
-        GLuint shader = gl.CreateShader(type);
-        gl.ShaderSource(shader, 1, &source, nullptr);
-        gl.CompileShader(shader);
-
-        GLint compileStatus = GL_FALSE;
-        gl.GetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
-        if (compileStatus == GL_FALSE) {
-            GLint infoLogLength = 0;
-            gl.GetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
-
-            if (infoLogLength > 1) {
-                std::vector<char> buffer(infoLogLength);
-                gl.GetShaderInfoLog(shader, infoLogLength, nullptr, &buffer[0]);
-                return DAWN_FORMAT_VALIDATION_ERROR("%s\nProgram compilation failed:\n%s", source,
-                                                    buffer.data());
-            }
-        }
-        return shader;
-    };
-
     mProgram = gl.CreateProgram();
 
     // Compute the set of active stages.
@@ -91,12 +53,10 @@ MaybeError PipelineGL::InitializeBase(const OpenGLFunctions& gl,
     std::vector<GLuint> glShaders;
     for (SingleShaderStage stage : IterateStages(activeStages)) {
         const ShaderModule* module = ToBackend(stages[stage].module.Get());
-        std::string glsl;
-        DAWN_TRY_ASSIGN(glsl, module->TranslateToGLSL(stages[stage].entryPoint.c_str(), stage,
-                                                      &combinedSamplers[stage], layout,
-                                                      &needsPlaceholderSampler));
         GLuint shader;
-        DAWN_TRY_ASSIGN(shader, CreateShader(gl, GLShaderType(stage), glsl.c_str()));
+        DAWN_TRY_ASSIGN(shader,
+                        module->CompileShader(gl, stages[stage], stage, &combinedSamplers[stage],
+                                              layout, &needsPlaceholderSampler));
         gl.AttachShader(mProgram, shader);
         glShaders.push_back(shader);
     }
