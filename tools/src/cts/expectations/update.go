@@ -17,7 +17,6 @@ package expectations
 import (
 	"errors"
 	"fmt"
-	"sort"
 	"strings"
 	"time"
 
@@ -271,24 +270,7 @@ func (u *updater) chunk(in Chunk) Chunk {
 	}
 
 	// Sort the expectations to keep things clean and tidy.
-	sort.Slice(out.Expectations, func(i, j int) bool {
-		switch {
-		case out.Expectations[i].Query < out.Expectations[j].Query:
-			return true
-		case out.Expectations[i].Query > out.Expectations[j].Query:
-			return false
-		}
-		a := result.TagsToString(out.Expectations[i].Tags)
-		b := result.TagsToString(out.Expectations[j].Tags)
-		switch {
-		case a < b:
-			return true
-		case a > b:
-			return false
-		}
-		return false
-	})
-
+	out.Expectations.Sort()
 	return out
 }
 
