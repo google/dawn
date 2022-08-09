@@ -94,7 +94,7 @@ void MutationDeleteStatement::Apply(const NodeIdMap& node_id_map,
         clone_context->Replace(statement_node, static_cast<const ast::Statement*>(nullptr));
     } else if (tint::Is<ast::CaseStatement>(statement_node)) {
         // Remove a case statement from its enclosing switch statement.
-        const std::vector<const ast::CaseStatement*>* case_statement_list =
+        const auto& case_statement_list =
             &sem_parent->Declaration()->As<ast::SwitchStatement>()->body;
         assert(std::find(case_statement_list->begin(), case_statement_list->end(),
                          statement_node) != case_statement_list->end() &&
@@ -156,14 +156,14 @@ bool MutationDeleteStatement::CanBeDeleted(const ast::Statement& statement_node,
         auto* switch_statement =
             program.Sem().Get(case_statement)->Parent()->Declaration()->As<ast::SwitchStatement>();
 
-        if (switch_statement->body.size() > 1 &&
-            switch_statement->body[switch_statement->body.size() - 1] == case_statement) {
+        if (switch_statement->body.Length() > 1 &&
+            switch_statement->body[switch_statement->body.Length() - 1] == case_statement) {
             // There are at least two case statements, and this is the final case statement.
             auto& penultimate_case_statement_body_statements =
-                switch_statement->body[switch_statement->body.size() - 2]->body->statements;
-            if (penultimate_case_statement_body_statements.size() > 0 &&
+                switch_statement->body[switch_statement->body.Length() - 2]->body->statements;
+            if (penultimate_case_statement_body_statements.Length() > 0 &&
                 penultimate_case_statement_body_statements
-                    [penultimate_case_statement_body_statements.size() - 1]
+                    [penultimate_case_statement_body_statements.Length() - 1]
                         ->Is<ast::FallthroughStatement>()) {
                 // The penultimate case statement falls through to the final case statement, thus
                 // the final case statement cannot be removed.
