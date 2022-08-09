@@ -17,6 +17,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <algorithm>
 #include <array>
 #include <iterator>
 #include <utility>
@@ -461,7 +462,7 @@ class Vector {
     }
 
     /// Expands the capacity of the vector
-    void Grow() { Reserve(impl_.slice.cap * 2); }
+    void Grow() { Reserve(std::max(impl_.slice.cap, static_cast<size_t>(1)) * 2); }
 
     /// Moves 'other' to this vector, if possible, otherwise performs a copy.
     void MoveOrCopy(VectorRef<T>&& other) {

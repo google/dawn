@@ -151,6 +151,17 @@ TEST(TintVectorTest, InitializerList_NoSmallArray) {
     EXPECT_TRUE(AllExternallyHeld(vec));
 }
 
+TEST(TintVectorTest, Push_NoSmallArray) {
+    Vector<std::string, 0> vec;
+    vec.Push("one");
+    vec.Push("two");
+    EXPECT_EQ(vec.Length(), 2u);
+    EXPECT_EQ(vec.Capacity(), 2u);
+    EXPECT_EQ(vec[0], "one");
+    EXPECT_EQ(vec[1], "two");
+    EXPECT_TRUE(AllExternallyHeld(vec));
+}
+
 TEST(TintVectorTest, InferTN_1CString) {
     auto vec = Vector{"one"};
     static_assert(std::is_same_v<decltype(vec)::value_type, const char*>);
