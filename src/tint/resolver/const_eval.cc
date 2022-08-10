@@ -509,15 +509,6 @@ const Constant* TransformBinaryElements(ProgramBuilder& builder,
     return CreateComposite(builder, ty, std::move(els));
 }
 
-/// CombineSource returns the combined `Source`s of each expression in `exprs`.
-Source CombineSource(utils::VectorRef<const sem::Expression*> exprs) {
-    Source result = exprs[0]->Declaration()->source;
-    for (size_t i = 1; i < exprs.Length(); ++i) {
-        result = result.Combine(result, exprs[i]->Declaration()->source);
-    }
-    return result;
-}
-
 }  // namespace
 
 ConstEval::ConstEval(ProgramBuilder& b) : builder(b) {}
@@ -575,20 +566,19 @@ ConstEval::ConstantResult ConstEval::ArrayOrStructCtor(
 }
 
 ConstEval::ConstantResult ConstEval::Conv(const sem::Type* ty,
-                                          utils::VectorRef<const sem::Expression*> args) {
+                                          utils::VectorRef<const sem::Constant*> args,
+                                          const Source& source) {
     uint32_t el_count = 0;
     auto* el_ty = sem::Type::ElementOf(ty, &el_count);
     if (!el_ty) {
         return nullptr;
     }
 
-    auto& src = args[0]->Declaration()->source;
-    auto* arg = args[0]->ConstantValue();
-    if (!arg) {
+    if (!args[0]) {
         return nullptr;  // Single argument is not constant.
     }
 
-    if (auto conv = Convert(ty, arg, src)) {
+    if (auto conv = Convert(ty, args[0], source)) {
         return conv.Get();
     }
 
@@ -596,37 +586,38 @@ ConstEval::ConstantResult ConstEval::Conv(const sem::Type* ty,
 }
 
 ConstEval::ConstantResult ConstEval::Zero(const sem::Type* ty,
-                                          utils::VectorRef<const sem::Expression*>) {
+                                          utils::VectorRef<const sem::Constant*>,
+                                          const Source&) {
     return ZeroValue(builder, ty);
 }
 
 ConstEval::ConstantResult ConstEval::Identity(const sem::Type*,
-                                              utils::VectorRef<const sem::Expression*> args) {
-    return args[0]->ConstantValue();
+                                              utils::VectorRef<const sem::Constant*> args,
+                                              const Source&) {
+    return args[0];
 }
 
 ConstEval::ConstantResult ConstEval::VecSplat(const sem::Type* ty,
-                                              utils::VectorRef<const sem::Expression*> args) {
-    if (auto* arg = args[0]->ConstantValue()) {
+                                              utils::VectorRef<const sem::Constant*> args,
+                                              const Source&) {
+    if (auto* arg = args[0]) {
         return builder.create<Splat>(ty, arg, static_cast<const sem::Vector*>(ty)->Width());
     }
     return nullptr;
 }
 
 ConstEval::ConstantResult ConstEval::VecCtorS(const sem::Type* ty,
-                                              utils::VectorRef<const sem::Expression*> args) {
-    utils::Vector<const sem::Constant*, 4> els;
-    for (auto* arg : args) {
-        els.Push(arg->ConstantValue());
-    }
-    return CreateComposite(builder, ty, std::move(els));
+                                              utils::VectorRef<const sem::Constant*> args,
+                                              const Source&) {
+    return CreateComposite(builder, ty, args);
 }
 
 ConstEval::ConstantResult ConstEval::VecCtorM(const sem::Type* ty,
-                                              utils::VectorRef<const sem::Expression*> args) {
+                                              utils::VectorRef<const sem::Constant*> args,
+                                              const Source&) {
     utils::Vector<const sem::Constant*, 4> els;
     for (auto* arg : args) {
-        auto* val = arg->ConstantValue();
+        auto* val = arg;
         if (!val) {
             return nullptr;
         }
@@ -648,7 +639,8 @@ ConstEval::ConstantResult ConstEval::VecCtorM(const sem::Type* ty,
 }
 
 ConstEval::ConstantResult ConstEval::MatCtorS(const sem::Type* ty,
-                                              utils::VectorRef<const sem::Expression*> args) {
+                                              utils::VectorRef<const sem::Constant*> args,
+                                              const Source&) {
     auto* m = static_cast<const sem::Matrix*>(ty);
 
     utils::Vector<const sem::Constant*, 4> els;
@@ -656,7 +648,7 @@ ConstEval::ConstantResult ConstEval::MatCtorS(const sem::Type* ty,
         utils::Vector<const sem::Constant*, 4> column;
         for (uint32_t r = 0; r < m->rows(); r++) {
             auto i = r + c * m->rows();
-            column.Push(args[i]->ConstantValue());
+            column.Push(args[i]);
         }
         els.Push(CreateComposite(builder, m->ColumnType(), std::move(column)));
     }
@@ -664,12 +656,9 @@ ConstEval::ConstantResult ConstEval::MatCtorS(const sem::Type* ty,
 }
 
 ConstEval::ConstantResult ConstEval::MatCtorV(const sem::Type* ty,
-                                              utils::VectorRef<const sem::Expression*> args) {
-    utils::Vector<const sem::Constant*, 4> els;
-    for (auto* arg : args) {
-        els.Push(arg->ConstantValue());
-    }
-    return CreateComposite(builder, ty, std::move(els));
+                                              utils::VectorRef<const sem::Constant*> args,
+                                              const Source&) {
+    return CreateComposite(builder, ty, args);
 }
 
 ConstEval::ConstantResult ConstEval::Index(const sem::Expression* obj_expr,
@@ -731,18 +720,20 @@ ConstEval::ConstantResult ConstEval::Bitcast(const sem::Type*, const sem::Expres
 }
 
 ConstEval::ConstantResult ConstEval::OpComplement(const sem::Type*,
-                                                  utils::VectorRef<const sem::Expression*> args) {
+                                                  utils::VectorRef<const sem::Constant*> args,
+                                                  const Source&) {
     auto transform = [&](const sem::Constant* c) {
         auto create = [&](auto i) {
             return CreateElement(builder, c->Type(), decltype(i)(~i.value));
         };
         return Dispatch_ia_iu32(create, c);
     };
-    return TransformElements(builder, transform, args[0]->ConstantValue());
+    return TransformElements(builder, transform, args[0]);
 }
 
 ConstEval::ConstantResult ConstEval::OpMinus(const sem::Type*,
-                                             utils::VectorRef<const sem::Expression*> args) {
+                                             utils::VectorRef<const sem::Constant*> args,
+                                             const Source&) {
     auto transform = [&](const sem::Constant* c) {
         auto create = [&](auto i) {
             // For signed integrals, avoid C++ UB by not negating the
@@ -762,11 +753,12 @@ ConstEval::ConstantResult ConstEval::OpMinus(const sem::Type*,
         };
         return Dispatch_fia_fi32_f16(create, c);
     };
-    return TransformElements(builder, transform, args[0]->ConstantValue());
+    return TransformElements(builder, transform, args[0]);
 }
 
 ConstEval::ConstantResult ConstEval::OpPlus(const sem::Type* ty,
-                                            utils::VectorRef<const sem::Expression*> args) {
+                                            utils::VectorRef<const sem::Constant*> args,
+                                            const Source& source) {
     auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
         auto create = [&](auto i, auto j) -> const Constant* {
             using NumberT = decltype(i);
@@ -791,7 +783,7 @@ ConstEval::ConstantResult ConstEval::OpPlus(const sem::Type* ty,
                     AddError("'" + std::to_string(add_values(i.value, j.value)) +
                                  "' cannot be represented as '" +
                                  ty->FriendlyName(builder.Symbols()) + "'",
-                             CombineSource(args));
+                             source);
                     return nullptr;
                 }
             } else {
@@ -802,8 +794,7 @@ ConstEval::ConstantResult ConstEval::OpPlus(const sem::Type* ty,
         return Dispatch_fia_fiu32_f16(create, c0, c1);
     };
 
-    auto r = TransformBinaryElements(builder, transform, args[0]->ConstantValue(),
-                                     args[1]->ConstantValue());
+    auto r = TransformBinaryElements(builder, transform, args[0], args[1]);
     if (builder.Diagnostics().contains_errors()) {
         return utils::Failure;
     }
@@ -811,19 +802,20 @@ ConstEval::ConstantResult ConstEval::OpPlus(const sem::Type* ty,
 }
 
 ConstEval::ConstantResult ConstEval::atan2(const sem::Type*,
-                                           utils::VectorRef<const sem::Expression*> args) {
+                                           utils::VectorRef<const sem::Constant*> args,
+                                           const Source&) {
     auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
         auto create = [&](auto i, auto j) {
             return CreateElement(builder, c0->Type(), decltype(i)(std::atan2(i.value, j.value)));
         };
         return Dispatch_fa_f32_f16(create, c0, c1);
     };
-    return TransformElements(builder, transform, args[0]->ConstantValue(),
-                             args[1]->ConstantValue());
+    return TransformElements(builder, transform, args[0], args[1]);
 }
 
 ConstEval::ConstantResult ConstEval::clamp(const sem::Type*,
-                                           utils::VectorRef<const sem::Expression*> args) {
+                                           utils::VectorRef<const sem::Constant*> args,
+                                           const Source&) {
     auto transform = [&](const sem::Constant* c0, const sem::Constant* c1,
                          const sem::Constant* c2) {
         auto create = [&](auto e, auto low, auto high) {
@@ -832,8 +824,7 @@ ConstEval::ConstantResult ConstEval::clamp(const sem::Type*,
         };
         return Dispatch_fia_fiu32_f16(create, c0, c1, c2);
     };
-    return TransformElements(builder, transform, args[0]->ConstantValue(), args[1]->ConstantValue(),
-                             args[2]->ConstantValue());
+    return TransformElements(builder, transform, args[0], args[1], args[2]);
 }
 
 utils::Result<const sem::Constant*> ConstEval::Convert(const sem::Type* target_ty,

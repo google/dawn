@@ -1978,6 +1978,17 @@ class ProgramBuilder {
                                              Expr(std::forward<RHS>(rhs)));
     }
 
+    /// @param source the source information
+    /// @param lhs the left hand argument to the addition operation
+    /// @param rhs the right hand argument to the addition operation
+    /// @returns a `ast::BinaryExpression` summing the arguments `lhs` and `rhs`
+    template <typename LHS, typename RHS>
+    const ast::BinaryExpression* Add(const Source& source, LHS&& lhs, RHS&& rhs) {
+        return create<ast::BinaryExpression>(source, ast::BinaryOp::kAdd,
+                                             Expr(std::forward<LHS>(lhs)),
+                                             Expr(std::forward<RHS>(rhs)));
+    }
+
     /// @param lhs the left hand argument to the and operation
     /// @param rhs the right hand argument to the and operation
     /// @returns a `ast::BinaryExpression` bitwise anding `lhs` and `rhs`

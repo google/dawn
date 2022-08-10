@@ -3229,27 +3229,27 @@ INSTANTIATE_TEST_SUITE_P(Add,
                                               ))));
 
 TEST_F(ResolverConstEvalTest, BinaryAbstractAddOverflow_AInt) {
-    GlobalConst("c", nullptr, Add(Expr(Source{{1, 1}}, AInt::Highest()), 1_a));
+    GlobalConst("c", nullptr, Add(Source{{1, 1}}, Expr(AInt::Highest()), 1_a));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "1:1 error: '-9223372036854775808' cannot be represented as 'abstract-int'");
 }
 
 TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AInt) {
-    GlobalConst("c", nullptr, Add(Expr(Source{{1, 1}}, AInt::Lowest()), -1_a));
+    GlobalConst("c", nullptr, Add(Source{{1, 1}}, Expr(AInt::Lowest()), -1_a));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "1:1 error: '9223372036854775807' cannot be represented as 'abstract-int'");
 }
 
 TEST_F(ResolverConstEvalTest, BinaryAbstractAddOverflow_AFloat) {
-    GlobalConst("c", nullptr, Add(Expr(Source{{1, 1}}, AFloat::Highest()), AFloat::Highest()));
+    GlobalConst("c", nullptr, Add(Source{{1, 1}}, Expr(AFloat::Highest()), AFloat::Highest()));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "1:1 error: 'inf' cannot be represented as 'abstract-float'");
 }
 
 TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AFloat) {
-    GlobalConst("c", nullptr, Add(Expr(Source{{1, 1}}, AFloat::Lowest()), AFloat::Lowest()));
+    GlobalConst("c", nullptr, Add(Source{{1, 1}}, Expr(AFloat::Lowest()), AFloat::Lowest()));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "1:1 error: '-inf' cannot be represented as 'abstract-float'");
 }

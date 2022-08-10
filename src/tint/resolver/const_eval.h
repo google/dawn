@@ -57,7 +57,8 @@ class ConstEval {
 
     /// Typedef for a constant evaluation function
     using Function = ConstantResult (ConstEval::*)(const sem::Type* result_ty,
-                                                   utils::VectorRef<const sem::Expression*>);
+                                                   utils::VectorRef<const sem::Constant*>,
+                                                   const Source&);
 
     /// Constructor
     /// @param b the program builder
@@ -116,50 +117,74 @@ class ConstEval {
     /// Type conversion
     /// @param ty the result type
     /// @param args the input arguments
+    /// @param source the source location of the conversion
     /// @return the converted value, or null if the value cannot be calculated
-    ConstantResult Conv(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
+    ConstantResult Conv(const sem::Type* ty,
+                        utils::VectorRef<const sem::Constant*> args,
+                        const Source& source);
 
     /// Zero value type constructor
     /// @param ty the result type
     /// @param args the input arguments (no arguments provided)
+    /// @param source the source location of the conversion
     /// @return the constructed value, or null if the value cannot be calculated
-    ConstantResult Zero(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
+    ConstantResult Zero(const sem::Type* ty,
+                        utils::VectorRef<const sem::Constant*> args,
+                        const Source& source);
 
     /// Identity value type constructor
     /// @param ty the result type
     /// @param args the input arguments
+    /// @param source the source location of the conversion
     /// @return the constructed value, or null if the value cannot be calculated
-    ConstantResult Identity(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
+    ConstantResult Identity(const sem::Type* ty,
+                            utils::VectorRef<const sem::Constant*> args,
+                            const Source& source);
 
     /// Vector splat constructor
     /// @param ty the vector type
     /// @param args the input arguments
+    /// @param source the source location of the conversion
     /// @return the constructed value, or null if the value cannot be calculated
-    ConstantResult VecSplat(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
+    ConstantResult VecSplat(const sem::Type* ty,
+                            utils::VectorRef<const sem::Constant*> args,
+                            const Source& source);
 
     /// Vector constructor using scalars
     /// @param ty the vector type
     /// @param args the input arguments
+    /// @param source the source location of the conversion
     /// @return the constructed value, or null if the value cannot be calculated
-    ConstantResult VecCtorS(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
+    ConstantResult VecCtorS(const sem::Type* ty,
+                            utils::VectorRef<const sem::Constant*> args,
+                            const Source& source);
 
     /// Vector constructor using a mix of scalars and smaller vectors
     /// @param ty the vector type
     /// @param args the input arguments
+    /// @param source the source location of the conversion
     /// @return the constructed value, or null if the value cannot be calculated
-    ConstantResult VecCtorM(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
+    ConstantResult VecCtorM(const sem::Type* ty,
+                            utils::VectorRef<const sem::Constant*> args,
+                            const Source& source);
 
     /// Matrix constructor using scalar values
     /// @param ty the matrix type
     /// @param args the input arguments
+    /// @param source the source location of the conversion
     /// @return the constructed value, or null if the value cannot be calculated
-    ConstantResult MatCtorS(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
+    ConstantResult MatCtorS(const sem::Type* ty,
+                            utils::VectorRef<const sem::Constant*> args,
+                            const Source& source);
 
     /// Matrix constructor using column vectors
     /// @param ty the matrix type
     /// @param args the input arguments
+    /// @param source the source location of the conversion
     /// @return the constructed value, or null if the value cannot be calculated
-    ConstantResult MatCtorV(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
+    ConstantResult MatCtorV(const sem::Type* ty,
+                            utils::VectorRef<const sem::Constant*> args,
+                            const Source& source);
 
     ////////////////////////////////////////////////////////////////////////////
     // Unary Operators
@@ -168,14 +193,20 @@ class ConstEval {
     /// Complement operator '~'
     /// @param ty the integer type
     /// @param args the input arguments
+    /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    ConstantResult OpComplement(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
+    ConstantResult OpComplement(const sem::Type* ty,
+                                utils::VectorRef<const sem::Constant*> args,
+                                const Source& source);
 
     /// Minus operator '-'
     /// @param ty the expression type
     /// @param args the input arguments
+    /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    ConstantResult OpMinus(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
+    ConstantResult OpMinus(const sem::Type* ty,
+                           utils::VectorRef<const sem::Constant*> args,
+                           const Source& source);
 
     ////////////////////////////////////////////////////////////////////////////
     // Binary Operators
@@ -184,8 +215,11 @@ class ConstEval {
     /// Plus operator '+'
     /// @param ty the expression type
     /// @param args the input arguments
+    /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    ConstantResult OpPlus(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
+    ConstantResult OpPlus(const sem::Type* ty,
+                          utils::VectorRef<const sem::Constant*> args,
+                          const Source& source);
 
     ////////////////////////////////////////////////////////////////////////////
     // Builtins
@@ -194,14 +228,20 @@ class ConstEval {
     /// atan2 builtin
     /// @param ty the expression type
     /// @param args the input arguments
+    /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    ConstantResult atan2(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
+    ConstantResult atan2(const sem::Type* ty,
+                         utils::VectorRef<const sem::Constant*> args,
+                         const Source& source);
 
     /// clamp builtin
     /// @param ty the expression type
     /// @param args the input arguments
+    /// @param source the source location of the conversion
     /// @return the result value, or null if the value cannot be calculated
-    ConstantResult clamp(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
+    ConstantResult clamp(const sem::Type* ty,
+                         utils::VectorRef<const sem::Constant*> args,
+                         const Source& source);
 
   private:
     /// Adds the given error message to the diagnostics

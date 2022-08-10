@@ -1585,8 +1585,10 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         const sem::Constant* value = nullptr;
         auto stage = sem::EarliestStage(ctor_or_conv.target->Stage(), args_stage);
         if (stage == sem::EvaluationStage::kConstant) {
+            auto const_args =
+                utils::Transform(args, [](auto* arg) { return arg->ConstantValue(); });
             if (auto r = (const_eval_.*ctor_or_conv.const_eval_fn)(
-                    ctor_or_conv.target->ReturnType(), args)) {
+                    ctor_or_conv.target->ReturnType(), const_args, expr->source)) {
                 value = r.Get();
             } else {
                 return nullptr;
@@ -1891,7 +1893,9 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     // If the builtin is @const, and all arguments have constant values, evaluate the builtin now.
     const sem::Constant* value = nullptr;
     if (stage == sem::EvaluationStage::kConstant) {
-        if (auto r = (const_eval_.*builtin.const_eval_fn)(builtin.sem->ReturnType(), args)) {
+        auto const_args = utils::Transform(args, [](auto* arg) { return arg->ConstantValue(); });
+        if (auto r = (const_eval_.*builtin.const_eval_fn)(builtin.sem->ReturnType(), const_args,
+                                                          expr->source)) {
             value = r.Get();
         } else {
             return nullptr;
@@ -2297,7 +2301,8 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
     auto stage = sem::EarliestStage(lhs->Stage(), rhs->Stage());
     if (stage == sem::EvaluationStage::kConstant) {
         if (op.const_eval_fn) {
-            if (auto r = (const_eval_.*op.const_eval_fn)(op.result, utils::Vector{lhs, rhs})) {
+            auto const_args = utils::Vector{lhs->ConstantValue(), rhs->ConstantValue()};
+            if (auto r = (const_eval_.*op.const_eval_fn)(op.result, const_args, expr->source)) {
                 value = r.Get();
             } else {
                 return nullptr;
@@ -2380,7 +2385,9 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
             stage = expr->Stage();
             if (stage == sem::EvaluationStage::kConstant) {
                 if (op.const_eval_fn) {
-                    if (auto r = (const_eval_.*op.const_eval_fn)(ty, utils::Vector{expr})) {
+                    if (auto r = (const_eval_.*op.const_eval_fn)(
+                            ty, utils::Vector{expr->ConstantValue()},
+                            expr->Declaration()->source)) {
                         value = r.Get();
                     } else {
                         return nullptr;
