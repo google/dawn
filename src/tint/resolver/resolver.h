@@ -220,6 +220,18 @@ class Resolver {
     /// `parameter_ty` should be materialized.
     bool ShouldMaterializeArgument(const sem::Type* parameter_ty) const;
 
+    /// Converts `c` to `target_ty`
+    /// @returns true on success, false on failure.
+    bool Convert(const sem::Constant*& c, const sem::Type* target_ty, const Source& source);
+
+    /// Transforms `args` to a vector of constants, and converts each constant to the call target's
+    /// parameter type.
+    /// @returns the vector of constants, `utils::Failure` on failure.
+    template <size_t N>
+    utils::Result<utils::Vector<const sem::Constant*, N>> ConvertArguments(
+        const utils::Vector<const sem::Expression*, N>& args,
+        const sem::CallTarget* target);
+
     /// @param ty the type that may hold abstract numeric types
     /// @param target_ty the target type for the expression (variable type, parameter type, etc).
     ///        May be nullptr.

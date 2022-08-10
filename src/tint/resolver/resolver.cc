@@ -1456,6 +1456,29 @@ bool Resolver::ShouldMaterializeArgument(const sem::Type* parameter_ty) const {
     return param_el_ty && !param_el_ty->Is<sem::AbstractNumeric>();
 }
 
+bool Resolver::Convert(const sem::Constant*& c, const sem::Type* target_ty, const Source& source) {
+    auto r = const_eval_.Convert(target_ty, c, source);
+    if (!r) {
+        return false;
+    }
+    c = r.Get();
+    return true;
+}
+
+template <size_t N>
+utils::Result<utils::Vector<const sem::Constant*, N>> Resolver::ConvertArguments(
+    const utils::Vector<const sem::Expression*, N>& args,
+    const sem::CallTarget* target) {
+    auto const_args = utils::Transform(args, [](auto* arg) { return arg->ConstantValue(); });
+    for (size_t i = 0, n = std::min(args.Length(), target->Parameters().Length()); i < n; i++) {
+        if (!Convert(const_args[i], target->Parameters()[i]->Type(),
+                     args[i]->Declaration()->source)) {
+            return utils::Failure;
+        }
+    }
+    return const_args;
+}
+
 sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* expr) {
     auto* idx = Materialize(sem_.Get(expr->index));
     if (!idx) {
@@ -1893,9 +1916,12 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
     // If the builtin is @const, and all arguments have constant values, evaluate the builtin now.
     const sem::Constant* value = nullptr;
     if (stage == sem::EvaluationStage::kConstant) {
-        auto const_args = utils::Transform(args, [](auto* arg) { return arg->ConstantValue(); });
-        if (auto r = (const_eval_.*builtin.const_eval_fn)(builtin.sem->ReturnType(), const_args,
-                                                          expr->source)) {
+        auto const_args = ConvertArguments(args, builtin.sem);
+        if (!const_args) {
+            return nullptr;
+        }
+        if (auto r = (const_eval_.*builtin.const_eval_fn)(builtin.sem->ReturnType(),
+                                                          const_args.Get(), expr->source)) {
             value = r.Get();
         } else {
             return nullptr;
@@ -2302,6 +2328,14 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
     if (stage == sem::EvaluationStage::kConstant) {
         if (op.const_eval_fn) {
             auto const_args = utils::Vector{lhs->ConstantValue(), rhs->ConstantValue()};
+            // Implicit conversion (e.g. AInt -> AFloat)
+            if (!Convert(const_args[0], op.result, lhs->Declaration()->source)) {
+                return nullptr;
+            }
+            if (!Convert(const_args[1], op.result, rhs->Declaration()->source)) {
+                return nullptr;
+            }
+
             if (auto r = (const_eval_.*op.const_eval_fn)(op.result, const_args, expr->source)) {
                 value = r.Get();
             } else {

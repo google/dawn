@@ -3131,27 +3131,27 @@ TEST_F(ResolverConstEvalTest, UnaryNegateLowestAbstract) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 namespace binary_op {
 
-template <typename T>
-struct Values {
-    T lhs;
-    T rhs;
-    T expect;
+using Types = std::variant<AInt, AFloat, u32, i32, f32, f16>;
+
+struct Case {
+    Types lhs;
+    Types rhs;
+    Types expected;
     bool is_overflow;
 };
 
-struct Case {
-    std::variant<Values<AInt>, Values<AFloat>, Values<u32>, Values<i32>, Values<f32>, Values<f16>>
-        values;
-};
-
 static std::ostream& operator<<(std::ostream& o, const Case& c) {
-    std::visit([&](auto&& v) { o << v.lhs << " " << v.rhs; }, c.values);
+    std::visit(
+        [&](auto&& lhs, auto&& rhs, auto&& expected) {
+            o << "lhs: " << lhs << ", rhs: " << rhs << ", expected: " << expected;
+        },
+        c.lhs, c.rhs, c.expected);
     return o;
 }
 
-template <typename T>
-Case C(T lhs, T rhs, T expect, bool is_overflow = false) {
-    return Case{Values<T>{lhs, rhs, expect, is_overflow}};
+template <typename T, typename U, typename V>
+Case C(T lhs, U rhs, V expected, bool is_overflow = false) {
+    return Case{lhs, rhs, expected, is_overflow};
 }
 
 using ResolverConstEvalBinaryOpTest = ResolverTestWithParam<std::tuple<ast::BinaryOp, Case>>;
@@ -3161,16 +3161,16 @@ TEST_P(ResolverConstEvalBinaryOpTest, Test) {
     auto op = std::get<0>(GetParam());
     auto c = std::get<1>(GetParam());
     std::visit(
-        [&](auto&& values) {
-            using T = decltype(values.expect);
+        [&](auto&& lhs, auto&& rhs, auto&& expected) {
+            using T = std::decay_t<decltype(expected)>;
 
             if constexpr (std::is_same_v<T, AInt> || std::is_same_v<T, AFloat>) {
-                if (values.is_overflow) {
+                if (c.is_overflow) {
                     return;
                 }
             }
 
-            auto* expr = create<ast::BinaryExpression>(op, Expr(values.lhs), Expr(values.rhs));
+            auto* expr = create<ast::BinaryExpression>(op, Expr(lhs), Expr(rhs));
             GlobalConst("C", nullptr, expr);
 
             EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -3179,16 +3179,25 @@ TEST_P(ResolverConstEvalBinaryOpTest, Test) {
             const sem::Constant* value = sem->ConstantValue();
             ASSERT_NE(value, nullptr);
             EXPECT_TYPE(value->Type(), sem->Type());
-            EXPECT_EQ(value->As<T>(), values.expect);
+            EXPECT_EQ(value->As<T>(), expected);
 
             if constexpr (IsInteger<UnwrapNumber<T>>) {
                 // Check that the constant's integer doesn't contain unexpected data in the MSBs
                 // that are outside of the bit-width of T.
-                EXPECT_EQ(value->As<AInt>(), AInt(values.expect));
+                EXPECT_EQ(value->As<AInt>(), AInt(expected));
             }
         },
-        c.values);
+        c.lhs, c.rhs, c.expected);
 }
+
+INSTANTIATE_TEST_SUITE_P(MixedAbstractArgs,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(testing::Values(ast::BinaryOp::kAdd),
+                                          testing::ValuesIn(std::vector{
+                                              // Mixed abstract type args
+                                              C(1_a, 2.3_a, 3.3_a),
+                                              C(2.3_a, 1_a, 3.3_a),
+                                          })));
 
 template <typename T>
 std::vector<Case> OpAddIntCases() {
@@ -3225,8 +3234,7 @@ INSTANTIATE_TEST_SUITE_P(Add,
                                               OpAddIntCases<u32>(),
                                               OpAddFloatCases<AFloat>(),
                                               OpAddFloatCases<f32>(),
-                                              OpAddFloatCases<f16>()  //
-                                              ))));
+                                              OpAddFloatCases<f16>()))));
 
 TEST_F(ResolverConstEvalTest, BinaryAbstractAddOverflow_AInt) {
     GlobalConst("c", nullptr, Add(Source{{1, 1}}, Expr(AInt::Highest()), 1_a));
@@ -3254,6 +3262,19 @@ TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AFloat) {
     EXPECT_EQ(r()->error(), "1:1 error: '-inf' cannot be represented as 'abstract-float'");
 }
 
+TEST_F(ResolverConstEvalTest, BinaryAbstractMixed) {
+    auto* a = Const("a", nullptr, Expr(1_a));
+    auto* b = Const("b", nullptr, Expr(2.3_a));
+    auto* c = Add(Expr("a"), Expr("b"));
+    WrapInFunction(a, b, c);
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    auto* sem = Sem().Get(c);
+    ASSERT_TRUE(sem);
+    ASSERT_TRUE(sem->ConstantValue());
+    auto result = sem->ConstantValue()->As<AFloat>();
+    EXPECT_EQ(result, 3.3f);
+}
+
 }  // namespace binary_op
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3262,32 +3283,24 @@ TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AFloat) {
 
 namespace builtin {
 
-template <typename T>
-struct Values {
-    utils::Vector<T, 8> args;
-    T result;
+using Types = std::variant<AInt, AFloat, u32, i32, f32, f16>;
+
+struct Case {
+    utils::Vector<Types, 8> args;
+    Types result;
     bool result_pos_or_neg;
 };
 
-struct Case {
-    std::variant<Values<AInt>, Values<AFloat>, Values<u32>, Values<i32>, Values<f32>, Values<f16>>
-        values;
-};
-
 static std::ostream& operator<<(std::ostream& o, const Case& c) {
-    std::visit(
-        [&](auto&& v) {
-            for (auto& e : v.args) {
-                o << e << ((&e != &v.args.Back()) ? " " : "");
-            }
-        },
-        c.values);
+    for (auto& a : c.args) {
+        std::visit([&](auto&& v) { o << v << ((&a != &c.args.Back()) ? " " : ""); }, a);
+    }
     return o;
 }
 
 template <typename T>
-Case C(std::initializer_list<T> args, T result, bool result_pos_or_neg = false) {
-    return Case{Values<T>{std::move(args), result, result_pos_or_neg}};
+Case C(std::initializer_list<Types> args, T result, bool result_pos_or_neg = false) {
+    return Case{std::move(args), std::move(result), result_pos_or_neg};
 }
 
 using ResolverConstEvalBuiltinTest = ResolverTestWithParam<std::tuple<sem::BuiltinType, Case>>;
@@ -3297,12 +3310,15 @@ TEST_P(ResolverConstEvalBuiltinTest, Test) {
 
     auto builtin = std::get<0>(GetParam());
     auto c = std::get<1>(GetParam());
+
+    utils::Vector<const ast::Expression*, 8> args;
+    for (auto& a : c.args) {
+        std::visit([&](auto&& v) { args.Push(Expr(v)); }, a);
+    }
+
     std::visit(
-        [&](auto&& values) {
-            using T = decltype(values.result);
-            auto args = utils::Transform(values.args, [&](auto&& a) {
-                return static_cast<const ast::Expression*>(Expr(a));
-            });
+        [&](auto&& result) {
+            using T = std::decay_t<decltype(result)>;
             auto* expr = Call(sem::str(builtin), std::move(args));
 
             GlobalConst("C", nullptr, expr);
@@ -3317,22 +3333,22 @@ TEST_P(ResolverConstEvalBuiltinTest, Test) {
             auto actual = value->As<T>();
 
             if constexpr (IsFloatingPoint<UnwrapNumber<T>>) {
-                if (std::isnan(values.result)) {
+                if (std::isnan(result)) {
                     EXPECT_TRUE(std::isnan(actual));
                 } else {
-                    EXPECT_FLOAT_EQ(values.result_pos_or_neg ? Abs(actual) : actual, values.result);
+                    EXPECT_FLOAT_EQ(c.result_pos_or_neg ? Abs(actual) : actual, result);
                 }
             } else {
-                EXPECT_EQ(values.result_pos_or_neg ? Abs(actual) : actual, values.result);
+                EXPECT_EQ(c.result_pos_or_neg ? Abs(actual) : actual, result);
             }
 
             if constexpr (IsInteger<UnwrapNumber<T>>) {
                 // Check that the constant's integer doesn't contain unexpected data in the MSBs
                 // that are outside of the bit-width of T.
-                EXPECT_EQ(value->As<AInt>(), AInt(values.result));
+                EXPECT_EQ(value->As<AInt>(), AInt(result));
             }
         },
-        c.values);
+        c.result);
 }
 
 template <typename T, bool finite_only>
@@ -3390,6 +3406,15 @@ std::vector<Case> Atan2Cases() {
 
     return cases;
 }
+
+INSTANTIATE_TEST_SUITE_P(  //
+    MixedAbstractArgs,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kAtan2),
+                     testing::ValuesIn(std::vector{
+                         C({1_a, 1.0_a}, 0.78539819_a),
+                         C({1.0_a, 1_a}, 0.78539819_a),
+                     })));
 
 INSTANTIATE_TEST_SUITE_P(  //
     Atan2,
