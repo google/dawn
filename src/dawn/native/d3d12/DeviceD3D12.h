@@ -162,6 +162,8 @@ class Device final : public DeviceBase {
 
     bool IsFeatureEnabled(Feature feature) const override;
 
+    uint64_t GetBufferCopyOffsetAlignmentForDepthStencil() const override;
+
     // Dawn APIs
     void SetLabelImpl() override;
 

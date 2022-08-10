@@ -704,8 +704,76 @@ TEST_P(QueueWriteTextureTests, WriteStencilAspectWithSourceOffsetUnalignedTo4) {
     EXPECT_BUFFER_U8_RANGE_EQ(expectedData.data(), outputBuffer, 0, 8);
 }
 
+// Tests calling queue.writeTexture() to a depth texture after calling queue.writeTexture() on
+// another texture always works. On some D3D12 backends the buffer offset of buffer-to-texture
+// copies must be a multiple of 512 when the destination texture is a depth stencil texture.
+TEST_P(QueueWriteTextureTests, WriteDepthAspectAfterOtherQueueWriteTextureCalls) {
+    // Copies to a single aspect are unsupported on OpenGL.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.format = wgpu::TextureFormat::Depth16Unorm;
+    textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    textureDescriptor.size = {1, 1, 1};
+    wgpu::Texture depthTexture1 = device.CreateTexture(&textureDescriptor);
+    wgpu::Texture depthTexture2 = device.CreateTexture(&textureDescriptor);
+
+    constexpr uint16_t kExpectedData1 = (204 << 8) | 205;
+    wgpu::ImageCopyTexture imageCopyTexture1 = utils::CreateImageCopyTexture(depthTexture1);
+    wgpu::TextureDataLayout textureDataLayout =
+        utils::CreateTextureDataLayout(0, sizeof(kExpectedData1));
+    queue.WriteTexture(&imageCopyTexture1, &kExpectedData1, sizeof(kExpectedData1),
+                       &textureDataLayout, &textureDescriptor.size);
+
+    constexpr uint16_t kExpectedData2 = (206 << 8) | 207;
+    wgpu::ImageCopyTexture imageCopyTexture2 = utils::CreateImageCopyTexture(depthTexture2);
+    queue.WriteTexture(&imageCopyTexture2, &kExpectedData2, sizeof(kExpectedData2),
+                       &textureDataLayout, &textureDescriptor.size);
+
+    EXPECT_TEXTURE_EQ(&kExpectedData1, depthTexture1, {0, 0}, {1, 1}, 0,
+                      wgpu::TextureAspect::DepthOnly);
+    EXPECT_TEXTURE_EQ(&kExpectedData2, depthTexture2, {0, 0}, {1, 1}, 0,
+                      wgpu::TextureAspect::DepthOnly);
+}
+
+// Tests calling queue.writeTexture() to the stencil aspect after calling queue.writeTexture() on
+// another texture always works. On some D3D12 backends the buffer offset of buffer-to-texture
+// copies must be a multiple of 512 when the destination texture is a depth stencil texture.
+TEST_P(QueueWriteTextureTests, WriteStencilAspectAfterOtherQueueWriteTextureCalls) {
+    // Copies to a single aspect are unsupported on OpenGL.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.format = wgpu::TextureFormat::Depth24PlusStencil8;
+    textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst;
+    textureDescriptor.size = {1, 1, 1};
+    wgpu::Texture depthStencilTexture1 = device.CreateTexture(&textureDescriptor);
+    wgpu::Texture depthStencilTexture2 = device.CreateTexture(&textureDescriptor);
+
+    constexpr uint8_t kExpectedData1 = 204u;
+    wgpu::ImageCopyTexture imageCopyTexture1 = utils::CreateImageCopyTexture(
+        depthStencilTexture1, 0, {0, 0, 0}, wgpu::TextureAspect::StencilOnly);
+    wgpu::TextureDataLayout textureDataLayout =
+        utils::CreateTextureDataLayout(0, sizeof(kExpectedData1));
+    queue.WriteTexture(&imageCopyTexture1, &kExpectedData1, sizeof(kExpectedData1),
+                       &textureDataLayout, &textureDescriptor.size);
+
+    constexpr uint8_t kExpectedData2 = 205;
+    wgpu::ImageCopyTexture imageCopyTexture2 = utils::CreateImageCopyTexture(
+        depthStencilTexture2, 0, {0, 0, 0}, wgpu::TextureAspect::StencilOnly);
+    queue.WriteTexture(&imageCopyTexture2, &kExpectedData2, sizeof(kExpectedData2),
+                       &textureDataLayout, &textureDescriptor.size);
+
+    EXPECT_TEXTURE_EQ(&kExpectedData1, depthStencilTexture1, {0, 0}, {1, 1}, 0,
+                      wgpu::TextureAspect::StencilOnly);
+    EXPECT_TEXTURE_EQ(&kExpectedData2, depthStencilTexture2, {0, 0}, {1, 1}, 0,
+                      wgpu::TextureAspect::StencilOnly);
+}
+
 DAWN_INSTANTIATE_TEST(QueueWriteTextureTests,
                       D3D12Backend(),
+                      D3D12Backend({"d3d12_use_temp_buffer_in_depth_stencil_texture_and_buffer_"
+                                    "copy_with_non_zero_buffer_offset"}),
                       MetalBackend(),
                       OpenGLBackend(),
                       OpenGLESBackend(),

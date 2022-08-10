@@ -899,4 +899,17 @@ bool Device::ShouldDuplicateParametersForDrawIndirect(
     return ToBackend(renderPipelineBase)->UsesVertexOrInstanceIndex();
 }
 
+uint64_t Device::GetBufferCopyOffsetAlignmentForDepthStencil() const {
+    // On the D3D12 platforms where programmable MSAA is not supported, the source box specifying a
+    // portion of the depth texture must all be 0, or an error and a device lost will occur, so on
+    // these platforms the buffer copy offset must be a multiple of 512 when the texture is created
+    // with D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL. See https://crbug.com/dawn/727 for more
+    // details.
+    if (IsToggleEnabled(
+            Toggle::D3D12UseTempBufferInDepthStencilTextureAndBufferCopyWithNonZeroBufferOffset)) {
+        return D3D12_TEXTURE_DATA_PLACEMENT_ALIGNMENT;
+    }
+    return DeviceBase::GetBufferCopyOffsetAlignmentForDepthStencil();
+}
+
 }  // namespace dawn::native::d3d12

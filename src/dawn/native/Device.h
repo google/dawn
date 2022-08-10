@@ -362,6 +362,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     // BackendMetadata that we can query from the device.
     virtual uint32_t GetOptimalBytesPerRowAlignment() const = 0;
     virtual uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const = 0;
+    virtual uint64_t GetBufferCopyOffsetAlignmentForDepthStencil() const;
 
     virtual float GetTimestampPeriodInNS() const = 0;
 
