@@ -19,7 +19,7 @@ namespace {
 
 TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
     auto p = parser("my_var : f32");
-    auto decl = p->expect_variable_ident_decl("test", /*allow_inferred = */ false);
+    auto decl = p->expect_variable_ident_decl("test");
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(decl.errored);
     ASSERT_EQ(decl->name, "my_var");
@@ -32,7 +32,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses) {
 
 TEST_F(ParserImplTest, VariableIdentDecl_Parses_AllowInferredType) {
     auto p = parser("my_var : f32");
-    auto decl = p->expect_variable_ident_decl("test", /*allow_inferred = */ true);
+    auto decl = p->expect_ident_or_variable_ident_decl("test");
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(decl.errored);
     ASSERT_EQ(decl->name, "my_var");
@@ -45,14 +45,14 @@ TEST_F(ParserImplTest, VariableIdentDecl_Parses_AllowInferredType) {
 
 TEST_F(ParserImplTest, VariableIdentDecl_Inferred_Parse_Failure) {
     auto p = parser("my_var = 1.0");
-    auto decl = p->expect_variable_ident_decl("test", /*allow_inferred = */ false);
+    auto decl = p->expect_variable_ident_decl("test");
     ASSERT_TRUE(p->has_error());
     ASSERT_EQ(p->error(), "1:8: expected ':' for test");
 }
 
 TEST_F(ParserImplTest, VariableIdentDecl_Inferred_Parses_AllowInferredType) {
     auto p = parser("my_var = 1.0");
-    auto decl = p->expect_variable_ident_decl("test", /*allow_inferred = */ true);
+    auto decl = p->expect_ident_or_variable_ident_decl("test");
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(decl.errored);
     ASSERT_EQ(decl->name, "my_var");
@@ -63,7 +63,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_Inferred_Parses_AllowInferredType) {
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingIdent) {
     auto p = parser(": f32");
-    auto decl = p->expect_variable_ident_decl("test", /*allow_inferred = */ false);
+    auto decl = p->expect_variable_ident_decl("test");
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(decl.errored);
     ASSERT_EQ(p->error(), "1:1: expected identifier for test");
@@ -71,7 +71,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_MissingIdent) {
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingIdent_AllowInferredType) {
     auto p = parser(": f32");
-    auto decl = p->expect_variable_ident_decl("test", /*allow_inferred = */ true);
+    auto decl = p->expect_ident_or_variable_ident_decl("test");
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(decl.errored);
     ASSERT_EQ(p->error(), "1:1: expected identifier for test");
@@ -79,7 +79,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_MissingIdent_AllowInferredType) {
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingType) {
     auto p = parser("my_var :");
-    auto decl = p->expect_variable_ident_decl("test", /*allow_inferred = */ false);
+    auto decl = p->expect_variable_ident_decl("test");
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(decl.errored);
     ASSERT_EQ(p->error(), "1:9: invalid type for test");
@@ -87,7 +87,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_MissingType) {
 
 TEST_F(ParserImplTest, VariableIdentDecl_MissingType_AllowInferredType) {
     auto p = parser("my_var :");
-    auto decl = p->expect_variable_ident_decl("test", /*allow_inferred = */ true);
+    auto decl = p->expect_ident_or_variable_ident_decl("test");
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(decl.errored);
     ASSERT_EQ(p->error(), "1:9: invalid type for test");
@@ -95,7 +95,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_MissingType_AllowInferredType) {
 
 TEST_F(ParserImplTest, VariableIdentDecl_InvalidIdent) {
     auto p = parser("123 : f32");
-    auto decl = p->expect_variable_ident_decl("test", /*allow_inferred = */ false);
+    auto decl = p->expect_variable_ident_decl("test");
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(decl.errored);
     ASSERT_EQ(p->error(), "1:1: expected identifier for test");
@@ -103,7 +103,7 @@ TEST_F(ParserImplTest, VariableIdentDecl_InvalidIdent) {
 
 TEST_F(ParserImplTest, VariableIdentDecl_InvalidIdent_AllowInferredType) {
     auto p = parser("123 : f32");
-    auto decl = p->expect_variable_ident_decl("test", /*allow_inferred = */ true);
+    auto decl = p->expect_ident_or_variable_ident_decl("test");
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(decl.errored);
     ASSERT_EQ(p->error(), "1:1: expected identifier for test");
