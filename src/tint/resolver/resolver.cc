@@ -1452,7 +1452,7 @@ bool Resolver::MaterializeArguments(utils::Vector<const sem::Expression*, N>& ar
 }
 
 bool Resolver::ShouldMaterializeArgument(const sem::Type* parameter_ty) const {
-    const auto* param_el_ty = sem::Type::ElementOf(parameter_ty);
+    const auto* param_el_ty = sem::Type::DeepestElementOf(parameter_ty);
     return param_el_ty && !param_el_ty->Is<sem::AbstractNumeric>();
 }
 

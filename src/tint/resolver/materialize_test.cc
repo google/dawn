@@ -464,9 +464,10 @@ constexpr Method kSwitchMethods[] = {
 
 /// Methods that do not materialize
 constexpr Method kNoMaterializeMethods[] = {
-    Method::kPhonyAssign,
-    // TODO(crbug.com/tint/1504): Enable once we have abstract overloads of builtins / binary
-    // ops: Method::kBuiltinArg, Method::kBinaryOp,
+    Method::kPhonyAssign,  //
+    Method::kBinaryOp,
+    // TODO(crbug.com/tint/1504): Enable once "min" supports const evaluation
+    // Method::kBuiltinArg,
 };
 INSTANTIATE_TEST_SUITE_P(
     MaterializeScalar,
