@@ -235,13 +235,6 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearOnIntegerFormats) {
 
 // This test verifies that input double values are being rendered correctly when clearing.
 TEST_P(RenderPassLoadOpTests, LoadOpClearIntegerFormatsToLargeValues) {
-    // TODO(crbug.com/dawn/1109): Re-enable once fixed on Mac Mini 8,1s w/ 11.5.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(11, 5));
-
-    // TODO(crbug.com/dawn/1463): Re-enable, might be the same as above just on
-    // 12.4 instead of 11.5.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(12, 4));
-
     constexpr double kUint32MaxDouble = 4294967295.0;
     constexpr uint32_t kUint32Max = static_cast<uint32_t>(kUint32MaxDouble);
     // RGBA32Uint for UINT32_MAX
@@ -385,13 +378,6 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearIntegerFormatsOutOfBound_Sint16) {
 // Test clearing a color attachment on Uint32 formats (R32Uint, RG32Uint, RGBA32Uint) when the clear
 // values are out of bound.
 TEST_P(RenderPassLoadOpTests, LoadOpClearIntegerFormatsOutOfBound_Uint32) {
-    // TODO(crbug.com/dawn/1109): Re-enable once fixed on Mac Mini 8,1s w/ 11.5.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(11, 5));
-
-    // TODO(crbug.com/dawn/1463): Re-enable, might be the same as above just on
-    // 12.4 instead of 11.5.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(12, 4));
-
     constexpr uint64_t kUint32Max = std::numeric_limits<uint32_t>::max();
 
     using TestCase = std::tuple<wgpu::TextureFormat, wgpu::Color, std::array<uint32_t, 4>>;
@@ -416,13 +402,6 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearIntegerFormatsOutOfBound_Uint32) {
 // Test clearing a color attachment on Sint32 formats (R32Sint, RG32Sint, RGBA32Sint) when the clear
 // values are out of bound.
 TEST_P(RenderPassLoadOpTests, LoadOpClearIntegerFormatsOutOfBound_Sint32) {
-    // TODO(crbug.com/dawn/1109): Re-enable once fixed on Mac Mini 8,1s w/ 11.5.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(11, 5));
-
-    // TODO(crbug.com/dawn/1463): Re-enable, might be the same as above just on
-    // 12.4 instead of 11.5.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(12, 4));
-
     constexpr int64_t kSint32Max = std::numeric_limits<int32_t>::max();
     constexpr int64_t kSint32Min = std::numeric_limits<int32_t>::min();
 
@@ -487,13 +466,6 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearNormalizedFormatsOutOfBound) {
 
 // Test clearing multiple color attachments with different big integers can still work correctly.
 TEST_P(RenderPassLoadOpTests, LoadOpClearWithBigInt32ValuesOnMultipleColorAttachments) {
-    // TODO(crbug.com/dawn/1109): Re-enable once fixed on Mac Mini 8,1s w/ 11.5.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(11, 5));
-
-    // TODO(crbug.com/dawn/1463): Re-enable, might be the same as above just on
-    // 12.4 instead of 11.5.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(12, 4));
-
     constexpr int32_t kMaxInt32RepresentableInFloat = 1 << std::numeric_limits<float>::digits;
     constexpr int32_t kMinInt32RepresentableInFloat = -kMaxInt32RepresentableInFloat;
 
@@ -582,13 +554,6 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBigInt32ValuesOnMultipleColorAttach
 // Test clearing multiple color attachments with different big unsigned integers can still work
 // correctly.
 TEST_P(RenderPassLoadOpTests, LoadOpClearWithBigUInt32ValuesOnMultipleColorAttachments) {
-    // TODO(crbug.com/dawn/1109): Re-enable once fixed on Mac Mini 8,1s w/ 11.5.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(11, 5));
-
-    // TODO(crbug.com/dawn/1463): Re-enable, might be the same as above just on
-    // 12.4 instead of 11.5.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(12, 4));
-
     constexpr int32_t kMaxUInt32RepresentableInFloat = 1 << std::numeric_limits<float>::digits;
 
     using TestCase = std::tuple<wgpu::TextureFormat, wgpu::Color, std::array<uint32_t, 4>>;
@@ -699,13 +664,6 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBigUInt32ValuesOnMultipleColorAttac
 // Test using LoadOp::Clear with different big unsigned integers as clearValues and LoadOp::Load on
 // the other color attachments in one render pass encoder works correctly.
 TEST_P(RenderPassLoadOpTests, MixedUseOfLoadOpLoadAndLoadOpClearWithBigIntegerValues) {
-    // TODO(crbug.com/dawn/1109): Re-enable once fixed on Mac Mini 8,1s w/ 11.5.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(11, 5));
-
-    // TODO(crbug.com/dawn/1463): Re-enable, might be the same as above just on
-    // 12.4 instead of 11.5.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(12, 4));
-
     constexpr int32_t kMaxUInt32RepresentableInFloat = 1 << std::numeric_limits<float>::digits;
 
     wgpu::TextureDescriptor textureDescriptor = {};

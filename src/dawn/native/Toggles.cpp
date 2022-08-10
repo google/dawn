@@ -302,7 +302,8 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "(> 2^24 or < -2^24 for signed integer formats) as the clear value of a color attachment "
       "with 32-bit integer or unsigned integer formats because D3D12 APIs only support using "
       "float numbers as clear values, while a float number cannot always precisely represent an "
-      "integer that is greater than 2^24 or smaller than -2^24).",
+      "integer that is greater than 2^24 or smaller than -2^24). This toggle is also enabled on "
+      "Intel GPUs on Metal backend due to a driver issue on Intel Metal driver.",
       "https://crbug.com/dawn/537"}},
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};

@@ -212,7 +212,7 @@ void Device::InitTogglesFromDriver() {
         SetToggle(Toggle::MetalRenderR8RG8UnormSmallMipToTempTexture, true);
     }
 
-    // On some Intel GPU vertex only render pipeline get wrong depth result if no fragment
+    // On some Intel GPUs vertex only render pipeline get wrong depth result if no fragment
     // shader provided. Create a placeholder fragment shader module to work around this issue.
     if (gpu_info::IsIntel(vendorId)) {
         bool usePlaceholderFragmentShader = true;
@@ -220,6 +220,14 @@ void Device::InitTogglesFromDriver() {
             usePlaceholderFragmentShader = false;
         }
         SetToggle(Toggle::UsePlaceholderFragmentInVertexOnlyPipeline, usePlaceholderFragmentShader);
+    }
+
+    // On some Intel GPUs using big integer values as clear values in render pass doesn't work
+    // correctly. Currently we have to add workaround for this issue by enabling the toggle
+    // "apply_clear_big_integer_color_value_with_draw". See https://crbug.com/dawn/1109 and
+    // https://crbug.com/dawn/1463 for more details.
+    if (gpu_info::IsIntel(vendorId)) {
+        SetToggle(Toggle::ApplyClearBigIntegerColorValueWithDraw, true);
     }
 }
 
