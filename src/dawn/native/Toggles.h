@@ -76,6 +76,7 @@ enum class Toggle {
     D3D12AlwaysUseTypelessFormatsForCastableTexture,
     D3D12AllocateExtraMemoryFor2DArrayTexture,
     D3D12UseTempBufferInDepthStencilTextureAndBufferCopyWithNonZeroBufferOffset,
+    ApplyClearBigIntegerColorValueWithDraw,
 
     EnumCount,
     InvalidEnum = EnumCount,

@@ -639,6 +639,7 @@ void Device::InitTogglesFromDriver() {
     SetToggle(Toggle::UseDXC, false);
     SetToggle(Toggle::D3D12AlwaysUseTypelessFormatsForCastableTexture,
               !GetDeviceInfo().supportsCastingFullyTypedFormat);
+    SetToggle(Toggle::ApplyClearBigIntegerColorValueWithDraw, true);
 
     // The restriction on the source box specifying a portion of the depth stencil texture in
     // CopyTextureRegion() is only available on the D3D12 platforms which doesn't support

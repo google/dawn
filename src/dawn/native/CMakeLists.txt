@@ -32,6 +32,8 @@ target_sources(dawn_native PRIVATE
     ${DAWN_NATIVE_UTILS_GEN_SOURCES}
     "Adapter.cpp"
     "Adapter.h"
+    "ApplyClearColorValueWithDrawHelper.cpp"
+    "ApplyClearColorValueWithDrawHelper.h"
     "AsyncTask.cpp"
     "AsyncTask.h"
     "AttachmentState.cpp"

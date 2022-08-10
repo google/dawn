@@ -17,6 +17,7 @@
 
 #include <unordered_map>
 
+#include "dawn/native/ApplyClearColorValueWithDrawHelper.h"
 #include "dawn/native/ObjectBase.h"
 #include "dawn/native/ScratchBuffer.h"
 #include "dawn/native/dawn_platform.h"
@@ -39,6 +40,8 @@ struct InternalPipelineStore {
 
     Ref<ComputePipelineBase> timestampComputePipeline;
     Ref<ShaderModuleBase> timestampCS;
+
+    ApplyClearColorValueWithDrawPipelinesCache applyClearColorValueWithDrawPipelines;
 
     Ref<ShaderModuleBase> placeholderFragmentShader;
 

@@ -295,6 +295,15 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "0, then copy from the temporary buffer to the destination. Now this toggle must be enabled "
       "on the D3D12 platforms where programmable MSAA is not supported.",
       "https://crbug.com/dawn/727"}},
+    {Toggle::ApplyClearBigIntegerColorValueWithDraw,
+     {"apply_clear_big_integer_color_value_with_draw",
+      "Apply the clear value of the color attachment with a draw call when load op is 'clear'. "
+      "This toggle is enabled by default on D3D12 backends when we set large integer values "
+      "(> 2^24 or < -2^24 for signed integer formats) as the clear value of a color attachment "
+      "with 32-bit integer or unsigned integer formats because D3D12 APIs only support using "
+      "float numbers as clear values, while a float number cannot always precisely represent an "
+      "integer that is greater than 2^24 or smaller than -2^24).",
+      "https://crbug.com/dawn/537"}},
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
 }  // anonymous namespace

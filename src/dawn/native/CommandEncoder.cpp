@@ -20,6 +20,7 @@
 
 #include "dawn/common/BitSetIterator.h"
 #include "dawn/common/Math.h"
+#include "dawn/native/ApplyClearColorValueWithDrawHelper.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/ChainUtils_autogen.h"
@@ -43,11 +44,6 @@
 namespace dawn::native {
 
 namespace {
-
-bool HasDeprecatedColor(const RenderPassColorAttachment& attachment) {
-    return !std::isnan(attachment.clearColor.r) || !std::isnan(attachment.clearColor.g) ||
-           !std::isnan(attachment.clearColor.b) || !std::isnan(attachment.clearColor.a);
-}
 
 MaybeError ValidateB2BCopyAlignment(uint64_t dataSize, uint64_t srcOffset, uint64_t dstOffset) {
     // Copy size must be a multiple of 4 bytes on macOS.
@@ -654,6 +650,13 @@ bool IsReadOnlyDepthStencilAttachment(
     return true;
 }
 
+}  // namespace
+
+bool HasDeprecatedColor(const RenderPassColorAttachment& attachment) {
+    return !std::isnan(attachment.clearColor.r) || !std::isnan(attachment.clearColor.g) ||
+           !std::isnan(attachment.clearColor.b) || !std::isnan(attachment.clearColor.a);
+}
+
 Color ClampClearColorValueToLegalRange(const Color& originalColor, const Format& format) {
     const AspectInfo& aspectInfo = format.GetAspectInfo(Aspect::Color);
     double minValue = 0;
@@ -687,8 +690,6 @@ Color ClampClearColorValueToLegalRange(const Color& originalColor, const Format&
             std::clamp(originalColor.b, minValue, maxValue),
             std::clamp(originalColor.a, minValue, maxValue)};
 }
-
-}  // namespace
 
 MaybeError ValidateCommandEncoderDescriptor(const DeviceBase* device,
                                             const CommandEncoderDescriptor* descriptor) {
@@ -997,6 +998,15 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
             device, descriptor, this, &mEncodingContext, std::move(usageTracker),
             std::move(attachmentState), width, height, depthReadOnly, stencilReadOnly);
         mEncodingContext.EnterPass(passEncoder.Get());
+
+        if (ShouldApplyClearBigIntegerColorValueWithDraw(device, descriptor)) {
+            MaybeError error =
+                ApplyClearBigIntegerColorValueWithDraw(passEncoder.Get(), descriptor);
+            if (error.IsError()) {
+                return RenderPassEncoder::MakeError(device, this, &mEncodingContext);
+            }
+        }
+
         return passEncoder;
     }
 

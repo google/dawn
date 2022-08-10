@@ -235,10 +235,6 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearOnIntegerFormats) {
 
 // This test verifies that input double values are being rendered correctly when clearing.
 TEST_P(RenderPassLoadOpTests, LoadOpClearIntegerFormatsToLargeValues) {
-    // TODO(http://crbug.com/dawn/537): Implemement a workaround to enable clearing integer formats
-    // to large values on D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12());
-
     // TODO(crbug.com/dawn/1109): Re-enable once fixed on Mac Mini 8,1s w/ 11.5.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(11, 5));
 
@@ -389,10 +385,6 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearIntegerFormatsOutOfBound_Sint16) {
 // Test clearing a color attachment on Uint32 formats (R32Uint, RG32Uint, RGBA32Uint) when the clear
 // values are out of bound.
 TEST_P(RenderPassLoadOpTests, LoadOpClearIntegerFormatsOutOfBound_Uint32) {
-    // TODO(http://crbug.com/dawn/537): Implemement a workaround to enable clearing integer formats
-    // to large values on D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12());
-
     // TODO(crbug.com/dawn/1109): Re-enable once fixed on Mac Mini 8,1s w/ 11.5.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(11, 5));
 
@@ -424,10 +416,6 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearIntegerFormatsOutOfBound_Uint32) {
 // Test clearing a color attachment on Sint32 formats (R32Sint, RG32Sint, RGBA32Sint) when the clear
 // values are out of bound.
 TEST_P(RenderPassLoadOpTests, LoadOpClearIntegerFormatsOutOfBound_Sint32) {
-    // TODO(http://crbug.com/dawn/537): Implemement a workaround to enable clearing integer formats
-    // to large values on D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12());
-
     // TODO(crbug.com/dawn/1109): Re-enable once fixed on Mac Mini 8,1s w/ 11.5.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(11, 5));
 
@@ -499,10 +487,6 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearNormalizedFormatsOutOfBound) {
 
 // Test clearing multiple color attachments with different big integers can still work correctly.
 TEST_P(RenderPassLoadOpTests, LoadOpClearWithBigInt32ValuesOnMultipleColorAttachments) {
-    // TODO(http://crbug.com/dawn/537): Implemement a workaround to enable clearing integer formats
-    // to large values on D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12());
-
     // TODO(crbug.com/dawn/1109): Re-enable once fixed on Mac Mini 8,1s w/ 11.5.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(11, 5));
 
@@ -598,10 +582,6 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBigInt32ValuesOnMultipleColorAttach
 // Test clearing multiple color attachments with different big unsigned integers can still work
 // correctly.
 TEST_P(RenderPassLoadOpTests, LoadOpClearWithBigUInt32ValuesOnMultipleColorAttachments) {
-    // TODO(http://crbug.com/dawn/537): Implemement a workaround to enable clearing integer formats
-    // to large values on D3D12.
-    DAWN_SUPPRESS_TEST_IF(IsD3D12());
-
     // TODO(crbug.com/dawn/1109): Re-enable once fixed on Mac Mini 8,1s w/ 11.5.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(11, 5));
 
@@ -714,6 +694,81 @@ TEST_P(RenderPassLoadOpTests, LoadOpClearWithBigUInt32ValuesOnMultipleColorAttac
         EXPECT_BUFFER_U8_RANGE_EQ(expected, outputBuffers[i], 0,
                                   sizeof(std::get<2>(kTestCases[i])));
     }
+}
+
+// Test using LoadOp::Clear with different big unsigned integers as clearValues and LoadOp::Load on
+// the other color attachments in one render pass encoder works correctly.
+TEST_P(RenderPassLoadOpTests, MixedUseOfLoadOpLoadAndLoadOpClearWithBigIntegerValues) {
+    // TODO(crbug.com/dawn/1109): Re-enable once fixed on Mac Mini 8,1s w/ 11.5.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(11, 5));
+
+    // TODO(crbug.com/dawn/1463): Re-enable, might be the same as above just on
+    // 12.4 instead of 11.5.
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(12, 4));
+
+    constexpr int32_t kMaxUInt32RepresentableInFloat = 1 << std::numeric_limits<float>::digits;
+
+    wgpu::TextureDescriptor textureDescriptor = {};
+    textureDescriptor.size = {1, 1, 1};
+    textureDescriptor.usage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::RenderAttachment;
+    textureDescriptor.format = wgpu::TextureFormat::R32Uint;
+
+    wgpu::Texture textureForLoad = device.CreateTexture(&textureDescriptor);
+    wgpu::Texture textureForClear = device.CreateTexture(&textureDescriptor);
+
+    constexpr uint32_t kExpectedLoadValue = 2u;
+    // Initialize textureForLoad with pixel value 2u.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPassForInit({textureForLoad.CreateView()});
+        renderPassForInit.cColorAttachments[0].loadOp = wgpu::LoadOp::Clear;
+        renderPassForInit.cColorAttachments[0].clearValue = {kExpectedLoadValue, 0, 0, 0};
+        wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPassForInit);
+        renderPassEncoder.End();
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        queue.Submit(1, &commandBuffer);
+    }
+
+    // Then set the load operation to Load while we still set the clear color to a big integer value
+    // that cannot be represented by float.
+    constexpr uint32_t kExpectedClearValue = kMaxUInt32RepresentableInFloat + 1;
+    wgpu::Buffer outputBuffer;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::ComboRenderPassDescriptor renderPassForClear(
+            {textureForLoad.CreateView(), textureForClear.CreateView()});
+        renderPassForClear.cColorAttachments[0].loadOp = wgpu::LoadOp::Load;
+        renderPassForClear.cColorAttachments[0].clearValue = {kExpectedClearValue, 0, 0, 0};
+        renderPassForClear.cColorAttachments[1].loadOp = wgpu::LoadOp::Clear;
+        renderPassForClear.cColorAttachments[1].clearValue = {kExpectedClearValue, 0, 0, 0};
+        wgpu::RenderPassEncoder renderPassEncoder = encoder.BeginRenderPass(&renderPassForClear);
+        renderPassEncoder.End();
+
+        wgpu::BufferDescriptor bufferDescriptor = {};
+        bufferDescriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
+        bufferDescriptor.size = 2 * sizeof(uint32_t);
+        outputBuffer = device.CreateBuffer(&bufferDescriptor);
+
+        wgpu::ImageCopyTexture imageCopyTextureForLoad =
+            utils::CreateImageCopyTexture(textureForLoad, 0, {0, 0, 0});
+        wgpu::ImageCopyBuffer imageCopyBufferForLoad =
+            utils::CreateImageCopyBuffer(outputBuffer, 0, kTextureBytesPerRowAlignment);
+        encoder.CopyTextureToBuffer(&imageCopyTextureForLoad, &imageCopyBufferForLoad,
+                                    &textureDescriptor.size);
+
+        wgpu::ImageCopyTexture imageCopyTextureForClear =
+            utils::CreateImageCopyTexture(textureForClear, 0, {0, 0, 0});
+        wgpu::ImageCopyBuffer imageCopyBufferForClear = utils::CreateImageCopyBuffer(
+            outputBuffer, sizeof(uint32_t), kTextureBytesPerRowAlignment);
+        encoder.CopyTextureToBuffer(&imageCopyTextureForClear, &imageCopyBufferForClear,
+                                    &textureDescriptor.size);
+
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        queue.Submit(1, &commandBuffer);
+    }
+
+    constexpr std::array<uint32_t, 2> kExpectedData = {kExpectedLoadValue, kExpectedClearValue};
+    EXPECT_BUFFER_U32_RANGE_EQ(kExpectedData.data(), outputBuffer, 0, kExpectedData.size());
 }
 
 DAWN_INSTANTIATE_TEST(RenderPassLoadOpTests,
