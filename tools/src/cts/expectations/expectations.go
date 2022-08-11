@@ -81,6 +81,7 @@ type Expectation struct {
 	Comment string      // Optional comment at end of line
 }
 
+// Expectations are a list of Expectation
 type Expectations []Expectation
 
 // Load loads the expectation file at 'path', returning a Content.

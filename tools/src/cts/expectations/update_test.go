@@ -169,8 +169,8 @@ a:b,c:* [ Failure ]
 		{ //////////////////////////////////////////////////////////////////////
 			name: "simple expectation with tags",
 			expectations: `
-[ os-a ] a:b,c:* [ Failure ]
 [ gpu-b ] a:b,c:* [ Failure ]
+[ os-a ] a:b,c:* [ Failure ]
 `,
 			results: result.List{
 				result.Result{
@@ -186,7 +186,7 @@ a:b,c:* [ Failure ]
 				{
 					Severity: expectations.Error,
 					Line:     headerLines + 3,
-					Message:  "[gpu-b] a:b,c:* collides with expectation at line 8",
+					Message:  "[os-a] a:b,c:* collides with expectation at line 8",
 				},
 			},
 		},
@@ -219,8 +219,8 @@ a:b,c:* [ Failure ]
 		{ //////////////////////////////////////////////////////////////////////
 			name: "collision with child-expectation",
 			expectations: `
-a:b:x:* [ Failure ]
-a:b:* [ Failure ]
+crbug.com/a/1 a:b:x:* [ Failure ]
+crbug.com/a/2 a:b:* [ Failure ]
 `,
 			results: result.List{
 				result.Result{
@@ -235,7 +235,7 @@ a:b:* [ Failure ]
 				},
 			},
 			updated: `
-a:b:x:* [ Failure ]
+crbug.com/a/1 a:b:x:* [ Failure ]
 
 # New failures. Please triage:
 crbug.com/dawn/0000 a:b:y:* [ Failure ]
