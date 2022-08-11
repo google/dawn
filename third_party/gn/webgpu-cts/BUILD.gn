@@ -24,6 +24,7 @@ group("webgpu-cts") {
     ":copy_resources",
     ":verify_gen_ts_dep_list",
   ]
+  data = [ "test_list.txt" ]
 }
 
 list_from_ts_sources_txt = read_file("ts_sources.txt", "list lines")
