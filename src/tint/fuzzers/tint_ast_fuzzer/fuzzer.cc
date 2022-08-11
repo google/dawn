@@ -21,9 +21,9 @@
 #include "src/tint/fuzzers/tint_ast_fuzzer/override_cli_params.h"
 #include "src/tint/fuzzers/tint_common_fuzzer.h"
 #include "src/tint/fuzzers/transform_builder.h"
-
 #include "src/tint/reader/wgsl/parser.h"
 #include "src/tint/writer/wgsl/generator.h"
+#include "testing/libfuzzer/libfuzzer_exports.h"
 
 namespace tint::fuzzers::ast_fuzzer {
 namespace {

@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/fuzzers/fuzzer_init.h"
+#include <cstddef>
+
 #include "src/tint/fuzzers/cli.h"
+#include "src/tint/fuzzers/fuzzer_init.h"
+#include "testing/libfuzzer/libfuzzer_exports.h"
 
 namespace tint::fuzzers {
 

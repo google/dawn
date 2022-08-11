@@ -24,6 +24,7 @@
 #include "src/tint/fuzzers/transform_builder.h"
 #include "src/tint/reader/wgsl/parser.h"
 #include "src/tint/writer/wgsl/generator.h"
+#include "testing/libfuzzer/libfuzzer_exports.h"
 
 namespace tint::fuzzers::regex_fuzzer {
 namespace {

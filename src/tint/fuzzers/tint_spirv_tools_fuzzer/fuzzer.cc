@@ -27,6 +27,7 @@
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/spirv_opt_mutator.h"
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/spirv_reduce_mutator.h"
 #include "src/tint/fuzzers/tint_spirv_tools_fuzzer/util.h"
+#include "testing/libfuzzer/libfuzzer_exports.h"
 
 namespace tint::fuzzers::spvtools_fuzzer {
 namespace {
