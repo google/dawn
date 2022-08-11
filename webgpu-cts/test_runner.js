@@ -55,6 +55,7 @@ async function runCtsTest(query, use_worker) {
     const name = testcase.query.toString();
 
     const wpt_fn = async () => {
+      sendMessageTestStarted();
       const [rec, res] = log.record(name);
       if (worker) {
         await worker.run(rec, name, expectations);
@@ -62,40 +63,61 @@ async function runCtsTest(query, use_worker) {
         await testcase.run(rec, expectations);
       }
 
+      sendMessageTestStatus(res.status, res.timems);
+
       let fullLogs = (res.logs ?? []).map(prettyPrintLog);
       fullLogs = fullLogs.join('\n\n\n');
-      let logPieces = [fullLogs]
-      // Split the log pieces until they all are guaranteed to fit into a
-      // websocket payload.
-      while (true) {
-        let tempLogPieces = []
-        for (const piece of logPieces) {
-          if (byteSize(piece) > LOGS_MAX_BYTES) {
-            let midpoint = Math.floor(piece.length / 2);
-            tempLogPieces.push(piece.substring(0, midpoint));
-            tempLogPieces.push(piece.substring(midpoint));
-          } else {
-            tempLogPieces.push(piece)
-          }
-        }
-        // Didn't make any changes - all pieces are under the size limit.
-        if (logPieces.every((value, index) => value == tempLogPieces[index])) {
-          break;
-        }
-        logPieces = tempLogPieces;
-      }
-
-      logPieces.forEach((piece, index, arr) => {
-        let isFinal = index == arr.length - 1;
-        socket.send(JSON.stringify({'s': res.status,
-                                    'l': piece,
-                                    'final': isFinal,
-                                    'js_duration_ms': res.timems,
-                                    'type': 'TEST_FINISHED'}));
-      });
+      let logPieces = splitLogsForPayload(fullLogs);
+      sendMessageTestLog(logPieces);
+      sendMessageTestFinished();
     };
     await wpt_fn();
   }
+}
+
+function splitLogsForPayload(fullLogs) {
+  let logPieces = [fullLogs]
+  // Split the log pieces until they all are guaranteed to fit into a
+  // websocket payload.
+  while (true) {
+    let tempLogPieces = []
+    for (const piece of logPieces) {
+      if (byteSize(piece) > LOGS_MAX_BYTES) {
+        let midpoint = Math.floor(piece.length / 2);
+        tempLogPieces.push(piece.substring(0, midpoint));
+        tempLogPieces.push(piece.substring(midpoint));
+      } else {
+        tempLogPieces.push(piece)
+      }
+    }
+    // Didn't make any changes - all pieces are under the size limit.
+    if (logPieces.every((value, index) => value == tempLogPieces[index])) {
+      break;
+    }
+    logPieces = tempLogPieces;
+  }
+  return logPieces
+}
+
+function sendMessageTestStarted() {
+  socket.send(JSON.stringify({'type': 'TEST_STARTED'}));
+}
+
+function sendMessageTestStatus(status, jsDurationMs) {
+  socket.send(JSON.stringify({'type': 'TEST_STATUS',
+                              'status': status,
+                              'js_duration_ms': jsDurationMs}));
+}
+
+function sendMessageTestLog(logPieces) {
+  logPieces.forEach((piece) => {
+    socket.send(JSON.stringify({'type': 'TEST_LOG',
+                                'log': piece}));
+  });
+}
+
+function sendMessageTestFinished() {
+  socket.send(JSON.stringify({'type': 'TEST_FINISHED'}));
 }
 
 window.runCtsTest = runCtsTest;
