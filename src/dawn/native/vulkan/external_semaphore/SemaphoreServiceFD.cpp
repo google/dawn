@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <unistd.h>
 #include <utility>
 
 #include "dawn/native/vulkan/AdapterVk.h"
@@ -133,6 +134,17 @@ ResultOrError<ExternalSemaphoreHandle> Service::ExportSemaphore(VkSemaphore sema
 
     ASSERT(fd >= 0);
     return fd;
+}
+
+ExternalSemaphoreHandle Service::DuplicateHandle(ExternalSemaphoreHandle handle) {
+    int fd = dup(handle);
+    ASSERT(fd >= 0);
+    return fd;
+}
+
+void Service::CloseHandle(ExternalSemaphoreHandle handle) {
+    int ret = close(handle);
+    ASSERT(ret == 0);
 }
 
 }  // namespace dawn::native::vulkan::external_semaphore

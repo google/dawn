@@ -15,6 +15,7 @@
 #include "dawn/native/vulkan/DeviceVk.h"
 
 #include "dawn/common/Log.h"
+#include "dawn/common/NonCopyable.h"
 #include "dawn/common/Platform.h"
 #include "dawn/native/BackendConnection.h"
 #include "dawn/native/ChainUtils_autogen.h"
@@ -46,6 +47,35 @@
 #include "dawn/native/vulkan/VulkanError.h"
 
 namespace dawn::native::vulkan {
+
+namespace {
+
+// Destroy the semaphore when out of scope.
+class ScopedSignalSemaphore : public NonMovable {
+  public:
+    ScopedSignalSemaphore(Device* device, VkSemaphore semaphore)
+        : mDevice(device), mSemaphore(semaphore) {}
+    ~ScopedSignalSemaphore() {
+        if (mSemaphore != VK_NULL_HANDLE) {
+            ASSERT(mDevice);
+            mDevice->fn.DestroySemaphore(mDevice->GetVkDevice(), mSemaphore, nullptr);
+        }
+    }
+
+    VkSemaphore Get() { return mSemaphore; }
+    VkSemaphore Detach() {
+        VkSemaphore semaphore = mSemaphore;
+        mSemaphore = VK_NULL_HANDLE;
+        return semaphore;
+    }
+    VkSemaphore* InitializeInto() { return &mSemaphore; }
+
+  private:
+    Device* mDevice = nullptr;
+    VkSemaphore mSemaphore = VK_NULL_HANDLE;
+};
+
+}  // namespace
 
 // static
 ResultOrError<Ref<Device>> Device::Create(Adapter* adapter, const DeviceDescriptor* descriptor) {
@@ -245,6 +275,10 @@ ResourceMemoryAllocator* Device::GetResourceMemoryAllocator() const {
     return mResourceMemoryAllocator.get();
 }
 
+external_semaphore::Service* Device::GetExternalSemaphoreService() const {
+    return mExternalSemaphoreService.get();
+}
+
 void Device::EnqueueDeferredDeallocation(DescriptorSetAllocator* allocator) {
     mDescriptorAllocatorsPendingDeallocation.Enqueue(allocator, GetPendingCommandSerial());
 }
@@ -258,6 +292,19 @@ CommandRecordingContext* Device::GetPendingRecordingContext() {
 MaybeError Device::SubmitPendingCommands() {
     if (!mRecordingContext.used) {
         return {};
+    }
+
+    ScopedSignalSemaphore scopedSignalSemaphore(this, VK_NULL_HANDLE);
+    if (mRecordingContext.externalTexturesForEagerTransition.size() > 0) {
+        // Create an external semaphore for all external textures that have been used in the pending
+        // submit.
+        DAWN_TRY_ASSIGN(*scopedSignalSemaphore.InitializeInto(),
+                        mExternalSemaphoreService->CreateExportableSemaphore());
+    }
+
+    // Transition eagerly all used external textures for export.
+    for (auto* texture : mRecordingContext.externalTexturesForEagerTransition) {
+        texture->TransitionEagerlyForExport(&mRecordingContext);
     }
 
     DAWN_TRY(
@@ -274,9 +321,8 @@ MaybeError Device::SubmitPendingCommands() {
     submitInfo.pWaitDstStageMask = dstStageMasks.data();
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &mRecordingContext.commandBuffer;
-    submitInfo.signalSemaphoreCount =
-        static_cast<uint32_t>(mRecordingContext.signalSemaphores.size());
-    submitInfo.pSignalSemaphores = AsVkArray(mRecordingContext.signalSemaphores.data());
+    submitInfo.signalSemaphoreCount = (scopedSignalSemaphore.Get() == VK_NULL_HANDLE ? 0 : 1);
+    submitInfo.pSignalSemaphores = AsVkArray(scopedSignalSemaphore.InitializeInto());
 
     VkFence fence = VK_NULL_HANDLE;
     DAWN_TRY_ASSIGN(fence, GetUnusedFence());
@@ -293,10 +339,6 @@ MaybeError Device::SubmitPendingCommands() {
     for (VkSemaphore semaphore : mRecordingContext.waitSemaphores) {
         mDeleter->DeleteWhenUnused(semaphore);
     }
-    for (VkSemaphore semaphore : mRecordingContext.signalSemaphores) {
-        mDeleter->DeleteWhenUnused(semaphore);
-    }
-
     IncrementLastSubmittedCommandSerial();
     ExecutionSerial lastSubmittedSerial = GetLastSubmittedCommandSerial();
     mFencesInFlight.emplace(fence, lastSubmittedSerial);
@@ -304,6 +346,26 @@ MaybeError Device::SubmitPendingCommands() {
     CommandPoolAndBuffer submittedCommands = {mRecordingContext.commandPool,
                                               mRecordingContext.commandBuffer};
     mCommandsInFlight.Enqueue(submittedCommands, lastSubmittedSerial);
+
+    if (mRecordingContext.externalTexturesForEagerTransition.size() > 0) {
+        // Export the signal semaphore.
+        ExternalSemaphoreHandle semaphoreHandle;
+        DAWN_TRY_ASSIGN(semaphoreHandle,
+                        mExternalSemaphoreService->ExportSemaphore(scopedSignalSemaphore.Get()));
+        // The ownership of signal semaphore has been transferred, we no longer need to track it.
+        scopedSignalSemaphore.Detach();
+        // Update all external textures, eagerly transitioned in the submit, with the exported
+        // handle, and the duplicated handles.
+        bool first = true;
+        for (auto* texture : mRecordingContext.externalTexturesForEagerTransition) {
+            ExternalSemaphoreHandle handle =
+                (first ? semaphoreHandle
+                       : mExternalSemaphoreService->DuplicateHandle(semaphoreHandle));
+            first = false;
+            texture->UpdateExternalSemaphoreHandle(handle);
+        }
+    }
+
     mRecordingContext = CommandRecordingContext();
     DAWN_TRY(PrepareRecordingContext());
 
@@ -770,7 +832,6 @@ MaybeError Device::ImportExternalImage(const ExternalImageDescriptorVk* descript
                                        ExternalMemoryHandle memoryHandle,
                                        VkImage image,
                                        const std::vector<ExternalSemaphoreHandle>& waitHandles,
-                                       VkSemaphore* outSignalSemaphore,
                                        VkDeviceMemory* outAllocation,
                                        std::vector<VkSemaphore>* outWaitSemaphores) {
     const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
@@ -793,9 +854,6 @@ MaybeError Device::ImportExternalImage(const ExternalImageDescriptorVk* descript
                         VulkanImageUsage(usage, GetValidInternalFormat(textureDescriptor->format)),
                         VK_IMAGE_CREATE_ALIAS_BIT_KHR),
                     "External memory usage not supported");
-
-    // Create an external semaphore to signal when the texture is done being used
-    DAWN_TRY_ASSIGN(*outSignalSemaphore, mExternalSemaphoreService->CreateExportableSemaphore());
 
     // Import the external image's memory
     external_memory::MemoryImportParams importParams;
@@ -821,15 +879,12 @@ bool Device::SignalAndExportExternalTexture(
     return !ConsumedError([&]() -> MaybeError {
         DAWN_TRY(ValidateObject(texture));
 
-        VkSemaphore signalSemaphore;
+        ExternalSemaphoreHandle semaphoreHandle;
         VkImageLayout releasedOldLayout;
         VkImageLayout releasedNewLayout;
-        DAWN_TRY(texture->ExportExternalTexture(desiredLayout, &signalSemaphore, &releasedOldLayout,
+        DAWN_TRY(texture->ExportExternalTexture(desiredLayout, &semaphoreHandle, &releasedOldLayout,
                                                 &releasedNewLayout));
 
-        ExternalSemaphoreHandle semaphoreHandle;
-        DAWN_TRY_ASSIGN(semaphoreHandle,
-                        mExternalSemaphoreService->ExportSemaphore(signalSemaphore));
         semaphoreHandles->push_back(semaphoreHandle);
         info->releasedOldLayout = releasedOldLayout;
         info->releasedNewLayout = releasedNewLayout;
@@ -856,7 +911,6 @@ TextureBase* Device::CreateTextureWrappingVulkanImage(
         return nullptr;
     }
 
-    VkSemaphore signalSemaphore = VK_NULL_HANDLE;
     VkDeviceMemory allocation = VK_NULL_HANDLE;
     std::vector<VkSemaphore> waitSemaphores;
     waitSemaphores.reserve(waitHandles.size());
@@ -869,17 +923,12 @@ TextureBase* Device::CreateTextureWrappingVulkanImage(
                                                   mExternalMemoryService.get()),
                       &result) ||
         ConsumedError(ImportExternalImage(descriptor, memoryHandle, result->GetHandle(),
-                                          waitHandles, &signalSemaphore, &allocation,
-                                          &waitSemaphores)) ||
-        ConsumedError(
-            result->BindExternalMemory(descriptor, signalSemaphore, allocation, waitSemaphores))) {
+                                          waitHandles, &allocation, &waitSemaphores)) ||
+        ConsumedError(result->BindExternalMemory(descriptor, allocation, waitSemaphores))) {
         // Delete the Texture if it was created
         if (result != nullptr) {
             result->Release();
         }
-
-        // Clear the signal semaphore
-        fn.DestroySemaphore(GetVkDevice(), signalSemaphore, nullptr);
 
         // Clear image memory
         fn.FreeMemory(GetVkDevice(), allocation, nullptr);
@@ -1014,11 +1063,6 @@ void Device::DestroyImpl() {
         fn.DestroySemaphore(mVkDevice, semaphore, nullptr);
     }
     mRecordingContext.waitSemaphores.clear();
-
-    for (VkSemaphore semaphore : mRecordingContext.signalSemaphores) {
-        fn.DestroySemaphore(mVkDevice, semaphore, nullptr);
-    }
-    mRecordingContext.signalSemaphores.clear();
 
     // Some commands might still be marked as in-flight if we shut down because of a device
     // loss. Recycle them as unused so that we free them below.

@@ -14,22 +14,29 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_COMMANDRECORDINGCONTEXT_H_
 #define SRC_DAWN_NATIVE_VULKAN_COMMANDRECORDINGCONTEXT_H_
 
+#include <set>
 #include <vector>
 
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/vulkan/BufferVk.h"
 
 namespace dawn::native::vulkan {
+
+class Texture;
+
 // Used to track operations that are handled after recording.
 // Currently only tracks semaphores, but may be used to do barrier coalescing in the future.
 struct CommandRecordingContext {
     VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
     std::vector<VkSemaphore> waitSemaphores = {};
-    std::vector<VkSemaphore> signalSemaphores = {};
 
     // The internal buffers used in the workaround of texture-to-texture copies with compressed
     // formats.
     std::vector<Ref<Buffer>> tempBuffers;
+
+    // External textures that will be eagerly transitioned just before VkSubmit. The textures are
+    // kept alive by the CommandBuffer so they don't need to be Ref-ed.
+    std::set<Texture*> externalTexturesForEagerTransition;
 
     // For Device state tracking only.
     VkCommandPool commandPool = VK_NULL_HANDLE;

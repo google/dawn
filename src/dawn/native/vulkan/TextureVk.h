@@ -24,6 +24,7 @@
 #include "dawn/native/Texture.h"
 #include "dawn/native/vulkan/ExternalHandle.h"
 #include "dawn/native/vulkan/external_memory/MemoryService.h"
+#include "dawn/native/vulkan/external_semaphore/SemaphoreService.h"
 
 namespace dawn::native::vulkan {
 
@@ -77,6 +78,9 @@ class Texture final : public TextureBase {
                                 VkPipelineStageFlags* srcStages,
                                 VkPipelineStageFlags* dstStages);
 
+    // Eagerly transition the texture for export.
+    void TransitionEagerlyForExport(CommandRecordingContext* recordingContext);
+
     void EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
                                              const SubresourceRange& range);
 
@@ -85,12 +89,12 @@ class Texture final : public TextureBase {
     // Binds externally allocated memory to the VkImage and on success, takes ownership of
     // semaphores.
     MaybeError BindExternalMemory(const ExternalImageDescriptorVk* descriptor,
-                                  VkSemaphore signalSemaphore,
                                   VkDeviceMemory externalMemoryAllocation,
                                   std::vector<VkSemaphore> waitSemaphores);
-
+    // Update the 'ExternalSemaphoreHandle' to be used for export with the newly submitted one.
+    void UpdateExternalSemaphoreHandle(ExternalSemaphoreHandle handle);
     MaybeError ExportExternalTexture(VkImageLayout desiredLayout,
-                                     VkSemaphore* signalSemaphore,
+                                     ExternalSemaphoreHandle* handle,
                                      VkImageLayout* releasedOldLayout,
                                      VkImageLayout* releasedNewLayout);
 
@@ -156,14 +160,30 @@ class Texture final : public TextureBase {
     ResourceMemoryAllocation mMemoryAllocation;
     VkDeviceMemory mExternalAllocation = VK_NULL_HANDLE;
 
-    enum class ExternalState { InternalOnly, PendingAcquire, Acquired, Released };
+    // The states of an external texture:
+    //   InternalOnly: Not initialized as an external texture yet.
+    //   PendingAcquire: Intialized as an external texture already, but unavailable for access yet.
+    //   Acquired: Ready for access.
+    //   EagerlyTransitioned: The texture has ever been used, and eagerly transitioned for export.
+    //   Now it can be acquired for access again, or directly exported. Released: The texture has
+    //   been destoried, and should no longer be used.
+    enum class ExternalState {
+        InternalOnly,
+        PendingAcquire,
+        Acquired,
+        EagerlyTransitioned,
+        Released
+    };
     ExternalState mExternalState = ExternalState::InternalOnly;
     ExternalState mLastExternalState = ExternalState::InternalOnly;
 
     VkImageLayout mPendingAcquireOldLayout;
     VkImageLayout mPendingAcquireNewLayout;
 
-    VkSemaphore mSignalSemaphore = VK_NULL_HANDLE;
+    VkImageLayout mDesiredExportLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+    ExternalSemaphoreHandle mExternalSemaphoreHandle = kNullExternalSemaphoreHandle;
+
     std::vector<VkSemaphore> mWaitRequirements;
 
     // Note that in early Vulkan versions it is not possible to transition depth and stencil

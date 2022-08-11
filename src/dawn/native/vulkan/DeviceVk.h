@@ -61,6 +61,7 @@ class Device final : public DeviceBase {
     FencedDeleter* GetFencedDeleter() const;
     RenderPassCache* GetRenderPassCache() const;
     ResourceMemoryAllocator* GetResourceMemoryAllocator() const;
+    external_semaphore::Service* GetExternalSemaphoreService() const;
 
     CommandRecordingContext* GetPendingRecordingContext();
     MaybeError SubmitPendingCommands();
@@ -216,7 +217,6 @@ class Device final : public DeviceBase {
                                    ExternalMemoryHandle memoryHandle,
                                    VkImage image,
                                    const std::vector<ExternalSemaphoreHandle>& waitHandles,
-                                   VkSemaphore* outSignalSemaphore,
                                    VkDeviceMemory* outAllocation,
                                    std::vector<VkSemaphore>* outWaitSemaphores);
 };

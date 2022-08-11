@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <zircon/syscalls.h>
 #include <utility>
 
 #include "dawn/native/vulkan/AdapterVk.h"
@@ -127,6 +128,18 @@ ResultOrError<ExternalSemaphoreHandle> Service::ExportSemaphore(VkSemaphore sema
 
     ASSERT(handle != ZX_HANDLE_INVALID);
     return handle;
+}
+
+ExternalSemaphoreHandle Service::DuplicateHandle(ExternalSemaphoreHandle handle) {
+    zx_handle_t out_handle = ZX_HANDLE_INVALID;
+    zx_status_t status = zx_handle_duplicate(handle, ZX_RIGHT_SAME_RIGHTS, &out_handle);
+    ASSERT(status == ZX_OK);
+    return out_handle;
+}
+
+void Service::CloseHandle(ExternalSemaphoreHandle handle) {
+    zx_status_t status = zx_handle_close(handle);
+    ASSERT(status == ZX_OK);
 }
 
 }  // namespace dawn::native::vulkan::external_semaphore

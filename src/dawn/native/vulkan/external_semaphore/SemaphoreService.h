@@ -48,6 +48,12 @@ class Service {
     // Export a VkSemaphore into an external handle
     ResultOrError<ExternalSemaphoreHandle> ExportSemaphore(VkSemaphore semaphore);
 
+    // Duplicate a new external handle from the given one.
+    ExternalSemaphoreHandle DuplicateHandle(ExternalSemaphoreHandle handle);
+
+    // Close an external handle.
+    void CloseHandle(ExternalSemaphoreHandle handle);
+
   private:
     Device* mDevice = nullptr;
 

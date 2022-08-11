@@ -110,7 +110,7 @@ class VulkanImageWrappingTestBase : public DawnTest {
     // assertion failure
     void IgnoreSignalSemaphore(wgpu::Texture wrappedTexture) {
         ExternalImageExportInfoVkForTesting exportInfo;
-        bool result = mBackend->ExportImage(wrappedTexture, VK_IMAGE_LAYOUT_GENERAL, &exportInfo);
+        bool result = mBackend->ExportImage(wrappedTexture, VK_IMAGE_LAYOUT_UNDEFINED, &exportInfo);
         ASSERT(result);
     }
 
@@ -202,7 +202,7 @@ TEST_P(VulkanImageWrappingValidationTests, DoubleSignalSemaphoreExport) {
 
     ExternalImageExportInfoVkForTesting exportInfo;
     ASSERT_DEVICE_ERROR(bool success =
-                            mBackend->ExportImage(texture, VK_IMAGE_LAYOUT_GENERAL, &exportInfo));
+                            mBackend->ExportImage(texture, VK_IMAGE_LAYOUT_UNDEFINED, &exportInfo));
     ASSERT_FALSE(success);
     ASSERT_EQ(exportInfo.semaphores.size(), 0u);
 }
@@ -214,7 +214,7 @@ TEST_P(VulkanImageWrappingValidationTests, NormalTextureSignalSemaphoreExport) {
 
     ExternalImageExportInfoVkForTesting exportInfo;
     ASSERT_DEVICE_ERROR(bool success =
-                            mBackend->ExportImage(texture, VK_IMAGE_LAYOUT_GENERAL, &exportInfo));
+                            mBackend->ExportImage(texture, VK_IMAGE_LAYOUT_UNDEFINED, &exportInfo));
     ASSERT_FALSE(success);
     ASSERT_EQ(exportInfo.semaphores.size(), 0u);
 }
@@ -227,7 +227,7 @@ TEST_P(VulkanImageWrappingValidationTests, DestroyedTextureSignalSemaphoreExport
 
     ExternalImageExportInfoVkForTesting exportInfo;
     ASSERT_DEVICE_ERROR(bool success =
-                            mBackend->ExportImage(texture, VK_IMAGE_LAYOUT_GENERAL, &exportInfo));
+                            mBackend->ExportImage(texture, VK_IMAGE_LAYOUT_UNDEFINED, &exportInfo));
     ASSERT_FALSE(success);
     ASSERT_EQ(exportInfo.semaphores.size(), 0u);
 }
