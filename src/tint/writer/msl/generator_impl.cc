@@ -1698,7 +1698,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
             return true;
         },
         [&](const sem::Struct* s) {
-            out << "{";
+            out << program_->Symbols().NameFor(s->Name()) << "{";
             TINT_DEFER(out << "}");
 
             if (constant->AllZero()) {

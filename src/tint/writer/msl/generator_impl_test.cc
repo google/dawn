@@ -117,7 +117,7 @@ struct Out {
 };
 
 vertex Out vert_main() {
-  return {};
+  return Out{};
 }
 
 )");
@@ -147,7 +147,7 @@ struct Out {
 };
 
 vertex Out vert_main() {
-  return {};
+  return Out{};
 }
 
 )");
@@ -283,7 +283,7 @@ struct tint_symbol_4 {
 
 void comp_main_inner(uint local_invocation_index, threadgroup S2* const tint_symbol_1) {
   {
-    S2 const tint_symbol = {};
+    S2 const tint_symbol = S2{};
     *(tint_symbol_1) = tint_symbol;
   }
   threadgroup_barrier(mem_flags::mem_threadgroup);

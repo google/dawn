@@ -9,6 +9,6 @@ struct S {
 };
 
 void f() {
-  S v = {};
+  S v = S{};
 }
 

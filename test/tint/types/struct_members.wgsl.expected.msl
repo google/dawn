@@ -32,7 +32,7 @@ struct S {
 };
 
 kernel void tint_symbol() {
-  S const s = {};
+  S const s = S{};
   return;
 }
 

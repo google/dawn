@@ -56,7 +56,7 @@ tint_array<float, 4> ret_arr() {
 }
 
 S ret_struct() {
-  S const tint_symbol_2 = {};
+  S const tint_symbol_2 = S{};
   return tint_symbol_2;
 }
 

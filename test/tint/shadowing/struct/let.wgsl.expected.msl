@@ -7,10 +7,10 @@ struct a {
 
 void f() {
   {
-    a const a_1 = {};
+    a const a_1 = a{};
     a const b = a_1;
   }
-  a const a_2 = {};
+  a const a_2 = a{};
   a const b = a_2;
 }
 

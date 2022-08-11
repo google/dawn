@@ -12,7 +12,7 @@ struct tint_symbol_1 {
 };
 
 FragmentOutputs tint_symbol_inner() {
-  FragmentOutputs const tint_symbol_2 = {.frag_depth=1.0f, .sample_mask=1u};
+  FragmentOutputs const tint_symbol_2 = FragmentOutputs{.frag_depth=1.0f, .sample_mask=1u};
   return tint_symbol_2;
 }
 

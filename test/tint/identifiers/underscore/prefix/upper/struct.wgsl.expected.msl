@@ -10,7 +10,7 @@ struct _A {
 };
 
 void f() {
-  _A const c = {};
+  _A const c = _A{};
   int const d = c._B;
 }
 

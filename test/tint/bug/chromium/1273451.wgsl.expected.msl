@@ -10,7 +10,7 @@ struct B {
 };
 
 B f(A a) {
-  B const tint_symbol = {};
+  B const tint_symbol = B{};
   return tint_symbol;
 }
 

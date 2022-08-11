@@ -51,7 +51,7 @@ kernel void tint_symbol(device S* tint_symbol_3 [[buffer(0)]]) {
   (*(tint_symbol_3)).f = 0.0f;
   (*(tint_symbol_3)).g = float2x3(float3(0.0f), float3(0.0f));
   (*(tint_symbol_3)).h = float3x2(float2(0.0f), float2(0.0f), float2(0.0f));
-  Inner const tint_symbol_1 = {};
+  Inner const tint_symbol_1 = Inner{};
   (*(tint_symbol_3)).i = tint_symbol_1;
   tint_array<Inner, 4> const tint_symbol_2 = tint_array<Inner, 4>{};
   (*(tint_symbol_3)).j = tint_symbol_2;

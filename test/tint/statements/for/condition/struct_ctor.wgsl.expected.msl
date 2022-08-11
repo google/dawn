@@ -8,7 +8,7 @@ struct S {
 void f() {
   int i = 0;
   while (true) {
-    S const tint_symbol = {.i=1};
+    S const tint_symbol = S{.i=1};
     if (!((i < tint_symbol.i))) {
       break;
     }

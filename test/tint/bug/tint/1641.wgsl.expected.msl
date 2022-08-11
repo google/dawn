@@ -14,14 +14,23 @@ struct tint_array {
     T elements[N];
 };
 
-struct S {
-  int m;
+struct Normals {
+  float3 f;
 };
 
-fragment void f() {
-  thread tint_array<S, 4> tint_symbol_1 = {};
-  S const tint_symbol = S{.m=1};
-  tint_symbol_1[0] = tint_symbol;
-  return;
+struct tint_symbol_1 {
+  float4 value [[position]];
+};
+
+float4 tint_symbol_inner() {
+  tint_array<Normals, 1> const tint_symbol_2 = tint_array<Normals, 1>{Normals{.f=float3(0.0f, 0.0f, 1.0f)}};
+  return float4(tint_symbol_2[0].f, 1.0f);
+}
+
+vertex tint_symbol_1 tint_symbol() {
+  float4 const inner_result = tint_symbol_inner();
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
 }
 

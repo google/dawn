@@ -25,13 +25,13 @@ kernel void f() {
   thread int3 tint_symbol_3 = int3(1);
   thread uint3 tint_symbol_4 = uint3(1u, 2u, 3u);
   thread float3 tint_symbol_5 = float3(1.0f, 2.0f, 3.0f);
-  thread MyStruct tint_symbol_6 = {.f1=1.0f};
+  thread MyStruct tint_symbol_6 = MyStruct{.f1=1.0f};
   thread tint_array<float, 10> tint_symbol_7 = tint_array<float, 10>{};
   thread int tint_symbol_8 = 0;
   thread uint tint_symbol_9 = 0u;
   thread float tint_symbol_10 = 0.0f;
-  thread MyStruct tint_symbol_11 = {};
-  thread MyStruct tint_symbol_12 = {};
+  thread MyStruct tint_symbol_11 = MyStruct{};
+  thread MyStruct tint_symbol_12 = MyStruct{};
   thread tint_array<float, 10> tint_symbol_13 = tint_array<float, 10>{};
   thread int3 tint_symbol_14 = int3(1, 2, 3);
   thread float3 tint_symbol_15 = float3(1.0f, 2.0f, 3.0f);

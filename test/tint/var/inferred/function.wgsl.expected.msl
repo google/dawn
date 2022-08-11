@@ -31,7 +31,7 @@ float ret_f32() {
 }
 
 MyStruct ret_MyStruct() {
-  MyStruct const tint_symbol_2 = {};
+  MyStruct const tint_symbol_2 = MyStruct{};
   return tint_symbol_2;
 }
 
@@ -48,7 +48,7 @@ void var_decls() {
   uint3 v5 = uint3(1u);
   float3 v6 = float3(1.0f);
   float3x3 v7 = float3x3(v6, v6, v6);
-  MyStruct v8 = {.f1=1.0f};
+  MyStruct v8 = MyStruct{.f1=1.0f};
   tint_array<float, 10> v9 = tint_array<float, 10>{};
   int v10 = ret_i32();
   uint v11 = ret_u32();

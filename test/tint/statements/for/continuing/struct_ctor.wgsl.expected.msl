@@ -15,7 +15,7 @@ void f() {
       {
       }
       {
-        S const tint_symbol = {.i=1};
+        S const tint_symbol = S{.i=1};
         i = as_type<int>((as_type<uint>(i) + as_type<uint>(tint_symbol.i)));
       }
     }

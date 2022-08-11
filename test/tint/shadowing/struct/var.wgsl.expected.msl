@@ -7,10 +7,10 @@ struct a {
 
 void f() {
   {
-    a a_1 = {};
+    a a_1 = a{};
     a b = a_1;
   }
-  a a_2 = {};
+  a a_2 = a{};
   a b = a_2;
 }
 

@@ -137,7 +137,7 @@ main_out tint_symbol_inner(float fClipDistance3_param, float fClipDistance4_para
   *(tint_symbol_15) = fClipDistance4_param;
   main_1(tint_symbol_14, tint_symbol_16, tint_symbol_15, tint_symbol_17, tint_symbol_18, tint_symbol_19, tint_symbol_20);
   if (*(tint_symbol_16)) {
-    main_out const tint_symbol_4 = {};
+    main_out const tint_symbol_4 = main_out{};
     return tint_symbol_4;
   }
   main_out const tint_symbol_5 = {.glFragColor_1=*(tint_symbol_20)};
@@ -156,7 +156,7 @@ fragment tint_symbol_3 tint_symbol(const constant Scene* tint_symbol_24 [[buffer
   main_out const inner_result = tint_symbol_inner(tint_symbol_1.fClipDistance3_param, tint_symbol_1.fClipDistance4_param, &(tint_symbol_21), &(tint_symbol_22), &(tint_symbol_23), tint_symbol_24, tint_symbol_25, tint_symbol_26, &(tint_symbol_27));
   if (tint_symbol_23) {
     tint_discard_func();
-    tint_symbol_3 const tint_symbol_6 = {};
+    tint_symbol_3 const tint_symbol_6 = tint_symbol_3{};
     return tint_symbol_6;
   }
   tint_symbol_3 wrapper_result = {};

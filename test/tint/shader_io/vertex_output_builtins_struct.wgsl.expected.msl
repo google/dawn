@@ -10,7 +10,7 @@ struct tint_symbol_1 {
 };
 
 VertexOutputs tint_symbol_inner() {
-  VertexOutputs const tint_symbol_2 = {.position=float4(1.0f, 2.0f, 3.0f, 4.0f)};
+  VertexOutputs const tint_symbol_2 = VertexOutputs{.position=float4(1.0f, 2.0f, 3.0f, 4.0f)};
   return tint_symbol_2;
 }
 

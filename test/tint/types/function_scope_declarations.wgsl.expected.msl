@@ -37,8 +37,8 @@ kernel void tint_symbol() {
   float3x4 const m3x4_let = float3x4(float4(0.0f), float4(0.0f), float4(0.0f));
   tint_array<float, 4> arr_var = tint_array<float, 4>{};
   tint_array<float, 4> const arr_let = tint_array<float, 4>{};
-  S struct_var = {};
-  S const struct_let = {};
+  S struct_var = S{};
+  S const struct_let = S{};
   return;
 }
 

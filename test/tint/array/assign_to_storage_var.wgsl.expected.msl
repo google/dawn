@@ -28,7 +28,7 @@ tint_array<int4, 4> ret_arr() {
 }
 
 S ret_struct_arr() {
-  S const tint_symbol_3 = {};
+  S const tint_symbol_3 = S{};
   return tint_symbol_3;
 }
 
