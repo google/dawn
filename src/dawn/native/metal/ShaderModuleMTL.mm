@@ -16,8 +16,8 @@
 
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/CacheRequest.h"
+#include "dawn/native/Serializable.h"
 #include "dawn/native/TintUtils.h"
-#include "dawn/native/VisitableMembers.h"
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/native/metal/PipelineLayoutMTL.h"
 #include "dawn/native/metal/RenderPipelineMTL.h"
@@ -60,36 +60,11 @@ using WorkgroupAllocations = std::vector<uint32_t>;
     X(bool, hasInvariantAttribute)         \
     X(WorkgroupAllocations, workgroupAllocations)
 
-struct MslCompilation {
-    static ResultOrError<MslCompilation> FromBlob(Blob blob);
-
-    DAWN_VISITABLE_MEMBERS(MSL_COMPILATION_MEMBERS)
+DAWN_SERIALIZABLE(struct, MslCompilation, MSL_COMPILATION_MEMBERS){};
 #undef MSL_COMPILATION_MEMBERS
-};
 
 }  // namespace
 }  // namespace dawn::native::metal
-
-namespace dawn::native {
-
-// Define the implementation to store MslCompilation into the BlobCache.
-template <>
-void BlobCache::Store<metal::MslCompilation>(const CacheKey& key, const metal::MslCompilation& c) {
-    stream::ByteVectorSink sink;
-    c.VisitAll([&](const auto&... members) { StreamIn(&sink, members...); });
-    Store(key, CreateBlob(std::move(sink)));
-}
-
-// Define the implementation to load MslCompilation from a blob.
-// static
-ResultOrError<metal::MslCompilation> metal::MslCompilation::FromBlob(Blob blob) {
-    stream::BlobSource source(std::move(blob));
-    metal::MslCompilation c;
-    DAWN_TRY(c.VisitAll([&](auto&... members) { return StreamOut(&source, &members...); }));
-    return c;
-}
-
-}  // namespace dawn::native
 
 namespace dawn::native::metal {
 
@@ -277,13 +252,13 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(DeviceBase* device,
 
             auto workgroupAllocations =
                 std::move(result.workgroup_allocations[remappedEntryPointName]);
-            return MslCompilation{
+            return MslCompilation{{
                 std::move(result.msl),
                 std::move(remappedEntryPointName),
                 result.needs_storage_buffer_sizes,
                 result.has_invariant_attribute,
                 std::move(workgroupAllocations),
-            };
+            }};
         });
 
     if (device->IsToggleEnabled(Toggle::DumpShaders)) {

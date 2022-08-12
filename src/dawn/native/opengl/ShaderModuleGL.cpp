@@ -31,7 +31,6 @@
 #include "tint/tint.h"
 
 namespace dawn::native {
-
 namespace {
 
 GLenum GLShaderType(SingleShaderStage stage) {
@@ -73,53 +72,11 @@ DAWN_MAKE_CACHE_REQUEST(GLSLCompilationRequest, GLSL_COMPILATION_REQUEST_MEMBERS
     X(std::string, glsl)             \
     X(bool, needsPlaceholderSampler) \
     X(opengl::CombinedSamplerInfo, combinedSamplerInfo)
-struct GLSLCompilation {
-    DAWN_VISITABLE_MEMBERS(GLSL_COMPILATION_MEMBERS)
+
+DAWN_SERIALIZABLE(struct, GLSLCompilation, GLSL_COMPILATION_MEMBERS){};
 #undef GLSL_COMPILATION_MEMBERS
 
-    static ResultOrError<GLSLCompilation> FromBlob(Blob blob) {
-        stream::BlobSource source(std::move(blob));
-        GLSLCompilation out;
-        DAWN_TRY(out.VisitAll([&](auto&... members) { return StreamOut(&source, &members...); }));
-        return out;
-    }
-};
-
 }  // namespace
-
-template <>
-void BlobCache::Store<GLSLCompilation>(const CacheKey& key, const GLSLCompilation& c) {
-    stream::ByteVectorSink sink;
-    c.VisitAll([&](const auto&... members) { StreamIn(&sink, members...); });
-    Store(key, CreateBlob(std::move(sink)));
-}
-
-template <>
-void stream::Stream<opengl::BindingLocation>::Write(
-    stream::Sink* s,
-    const opengl::BindingLocation& bindingLocation) {
-    bindingLocation.VisitAll([&](auto&... members) { return StreamIn(s, members...); });
-}
-
-template <>
-MaybeError stream::Stream<opengl::BindingLocation>::Read(stream::Source* s,
-                                                         opengl::BindingLocation* bindingLocation) {
-    return bindingLocation->VisitAll([&](auto&... members) { return StreamOut(s, &members...); });
-}
-
-template <>
-void stream::Stream<opengl::CombinedSampler>::Write(
-    stream::Sink* s,
-    const opengl::CombinedSampler& combinedSampler) {
-    combinedSampler.VisitAll([&](auto&... members) { return StreamIn(s, members...); });
-}
-
-template <>
-MaybeError stream::Stream<opengl::CombinedSampler>::Read(stream::Source* s,
-                                                         opengl::CombinedSampler* combinedSampler) {
-    return combinedSampler->VisitAll([&](auto&... members) { return StreamOut(s, &members...); });
-}
-
 }  // namespace dawn::native
 
 namespace dawn::native::opengl {
@@ -280,8 +237,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(const OpenGLFunctions& gl,
             DAWN_INVALID_IF(!result.success, "An error occured while generating GLSL: %s.",
                             result.error);
 
-            return GLSLCompilation{std::move(result.glsl), needsPlaceholderSampler,
-                                   std::move(combinedSamplerInfo)};
+            return GLSLCompilation{
+                {std::move(result.glsl), needsPlaceholderSampler, std::move(combinedSamplerInfo)}};
         });
 
     if (GetDevice()->IsToggleEnabled(Toggle::DumpShaders)) {

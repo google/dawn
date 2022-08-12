@@ -173,21 +173,13 @@ enum class Compiler { FXC, DXC };
     X(IDxcCompiler*, dxcCompiler)                   \
     X(DefineStrings, defineStrings)
 
-struct HlslCompilationRequest {
-    DAWN_VISITABLE_MEMBERS(HLSL_COMPILATION_REQUEST_MEMBERS)
+DAWN_SERIALIZABLE(struct, HlslCompilationRequest, HLSL_COMPILATION_REQUEST_MEMBERS){};
+#undef HLSL_COMPILATION_REQUEST_MEMBERS
 
-    friend void StreamIn(stream::Sink* sink, const HlslCompilationRequest& r) {
-        r.VisitAll([&](const auto&... members) { StreamIn(sink, members...); });
-    }
-};
-
-struct D3DBytecodeCompilationRequest {
-    DAWN_VISITABLE_MEMBERS(D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS)
-
-    friend void StreamIn(stream::Sink* sink, const D3DBytecodeCompilationRequest& r) {
-        r.VisitAll([&](const auto&... members) { StreamIn(sink, members...); });
-    }
-};
+DAWN_SERIALIZABLE(struct,
+                  D3DBytecodeCompilationRequest,
+                  D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS){};
+#undef D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS
 
 #define D3D_COMPILATION_REQUEST_MEMBERS(X)     \
     X(HlslCompilationRequest, hlsl)            \
@@ -195,8 +187,6 @@ struct D3DBytecodeCompilationRequest {
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, tracePlatform)
 
 DAWN_MAKE_CACHE_REQUEST(D3DCompilationRequest, D3D_COMPILATION_REQUEST_MEMBERS);
-#undef HLSL_COMPILATION_REQUEST_MEMBERS
-#undef D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS
 #undef D3D_COMPILATION_REQUEST_MEMBERS
 
 std::vector<const wchar_t*> GetDXCArguments(uint32_t compileFlags, bool enable16BitTypes) {
@@ -727,24 +717,3 @@ D3D12_SHADER_BYTECODE CompiledShader::GetD3D12ShaderBytecode() const {
 }
 
 }  // namespace dawn::native::d3d12
-
-namespace dawn::native {
-
-// Define the implementation to store d3d12::CompiledShader into the BlobCache.
-template <>
-void BlobCache::Store<d3d12::CompiledShader>(const CacheKey& key, const d3d12::CompiledShader& c) {
-    stream::ByteVectorSink sink;
-    c.VisitAll([&](const auto&... members) { StreamIn(&sink, members...); });
-    Store(key, CreateBlob(std::move(sink)));
-}
-
-// Define the implementation to load d3d12::CompiledShader from a Blob.
-// static
-ResultOrError<d3d12::CompiledShader> d3d12::CompiledShader::FromBlob(Blob blob) {
-    stream::BlobSource source(std::move(blob));
-    d3d12::CompiledShader c;
-    DAWN_TRY(c.VisitAll([&](auto&... members) { return StreamOut(&source, &members...); }));
-    return c;
-}
-
-}  // namespace dawn::native

@@ -20,8 +20,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "dawn/native/Serializable.h"
 #include "dawn/native/ShaderModule.h"
-#include "dawn/native/VisitableMembers.h"
 #include "dawn/native/opengl/opengl_platform.h"
 
 namespace dawn::native {
@@ -44,10 +44,9 @@ std::string GetBindingName(BindGroupIndex group, BindingNumber bindingNumber);
 #define BINDING_LOCATION_MEMBERS(X) \
     X(BindGroupIndex, group)        \
     X(BindingNumber, binding)
-struct BindingLocation {
-    DAWN_VISITABLE_MEMBERS(BINDING_LOCATION_MEMBERS)
+DAWN_SERIALIZABLE(struct, BindingLocation, BINDING_LOCATION_MEMBERS){};
 #undef BINDING_LOCATION_MEMBERS
-};
+
 bool operator<(const BindingLocation& a, const BindingLocation& b);
 
 #define COMBINED_SAMPLER_MEMBERS(X)                                                         \
@@ -58,12 +57,11 @@ bool operator<(const BindingLocation& a, const BindingLocation& b);
     /* |samplerLocation| is unused. */                                                      \
     X(bool, usePlaceholderSampler)
 
-struct CombinedSampler {
-    DAWN_VISITABLE_MEMBERS(COMBINED_SAMPLER_MEMBERS)
-#undef COMBINED_SAMPLER_MEMBERS
-
+DAWN_SERIALIZABLE(struct, CombinedSampler, COMBINED_SAMPLER_MEMBERS) {
     std::string GetName() const;
 };
+#undef COMBINED_SAMPLER_MEMBERS
+
 bool operator<(const CombinedSampler& a, const CombinedSampler& b);
 
 using CombinedSamplerInfo = std::vector<CombinedSampler>;

@@ -170,6 +170,7 @@ target_sources(dawn_native PRIVATE
     "Sampler.h"
     "ScratchBuffer.cpp"
     "ScratchBuffer.h"
+    "Serializable.h"
     "ShaderModule.cpp"
     "ShaderModule.h"
     "StagingBuffer.cpp"

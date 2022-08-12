@@ -44,6 +44,8 @@ class ShaderModule::Spirv : private Blob {
         return static_cast<Spirv&&>(blob);
     }
 
+    const Blob& ToBlob() const { return *this; }
+
     static Spirv Create(std::vector<uint32_t> code) {
         Blob blob = CreateBlob(std::move(code));
         ASSERT(IsPtrAligned(blob.Data(), alignof(uint32_t)));
@@ -55,17 +57,6 @@ class ShaderModule::Spirv : private Blob {
 };
 
 }  // namespace dawn::native::vulkan
-
-namespace dawn::native {
-
-// Define the implementation to store vulkan::ShaderModule::Spirv into the BlobCache.
-template <>
-void BlobCache::Store<vulkan::ShaderModule::Spirv>(const CacheKey& key,
-                                                   const vulkan::ShaderModule::Spirv& spirv) {
-    Store(key, spirv.WordCount() * sizeof(uint32_t), spirv.Code());
-}
-
-}  // namespace dawn::native
 
 namespace dawn::native::vulkan {
 

@@ -22,7 +22,7 @@
 
 #include "dawn/common/TypedInteger.h"
 #include "dawn/native/Blob.h"
-#include "dawn/native/VisitableMembers.h"
+#include "dawn/native/Serializable.h"
 #include "dawn/native/stream/BlobSource.h"
 #include "dawn/native/stream/ByteVectorSink.h"
 #include "dawn/native/stream/Stream.h"
@@ -302,17 +302,15 @@ TEST(StreamTests, SerializeDeserializeParamPack) {
     X(int, a)          \
     X(float, b)        \
     X(std::string, c)
-struct Foo {
-    DAWN_VISITABLE_MEMBERS(FOO_MEMBERS)
+DAWN_SERIALIZABLE(struct, Foo, FOO_MEMBERS){};
 #undef FOO_MEMBERS
-};
 
-// Test that serializing then deserializing a struct made with DAWN_VISITABLE_MEMBERS works as
+// Test that serializing then deserializing a struct made with DAWN_SERIALIZABLE works as
 // expected.
-TEST(StreamTests, SerializeDeserializeVisitableMembers) {
-    Foo foo{1, 2, "3"};
+TEST(StreamTests, SerializeDeserializeVisitable) {
+    Foo foo{{1, 2, "3"}};
     ByteVectorSink sink;
-    foo.VisitAll([&](const auto&... members) { StreamIn(&sink, members...); });
+    StreamIn(&sink, foo);
 
     // Test that the serialization is correct.
     {
@@ -325,7 +323,7 @@ TEST(StreamTests, SerializeDeserializeVisitableMembers) {
     {
         BlobSource src(CreateBlob(sink));
         Foo out;
-        auto err = out.VisitAll([&](auto&... members) { return StreamOut(&src, &members...); });
+        auto err = StreamOut(&src, &out);
         EXPECT_FALSE(err.IsError());
         EXPECT_EQ(foo.a, out.a);
         EXPECT_EQ(foo.b, out.b);
