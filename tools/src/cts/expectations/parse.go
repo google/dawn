@@ -55,7 +55,6 @@ func Parse(body string) (Content, error) {
 	// flush completes the current chunk, appending it to 'content'
 	flush := func() {
 		parseTags(&content.Tags, pending.Comments)
-		pending.Expectations.Sort()
 		content.Chunks = append(content.Chunks, pending)
 		pending = Chunk{}
 	}
