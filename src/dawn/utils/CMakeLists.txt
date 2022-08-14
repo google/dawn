@@ -73,8 +73,6 @@ if(DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
     target_sources(dawn_utils PRIVATE
         "BackendBinding.cpp"
         "BackendBinding.h"
-        "GLFWUtils.cpp"
-        "GLFWUtils.h"
     )
     target_link_libraries(dawn_utils PRIVATE glfw)
 
@@ -84,7 +82,6 @@ if(DAWN_SUPPORTS_GLFW_FOR_WINDOWING)
 
     if (DAWN_ENABLE_METAL)
         target_sources(dawn_utils PRIVATE
-            "GLFWUtils_metal.mm"
             "MetalBinding.mm"
         )
     endif()

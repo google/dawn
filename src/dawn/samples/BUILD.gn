@@ -36,10 +36,10 @@ static_library("utils") {
     "${dawn_root}/src/dawn:cpp",
     "${dawn_root}/src/dawn:proc_shared",
     "${dawn_root}/src/dawn/common",
+    "${dawn_root}/src/dawn/glfw",
     "${dawn_root}/src/dawn/native",
     "${dawn_root}/src/dawn/utils",
     "${dawn_root}/src/dawn/utils:bindings",
-    "${dawn_root}/src/dawn/utils:glfw",
     "${dawn_root}/src/dawn/wire",
   ]
   public_configs = [ "${dawn_root}/src/dawn/common:internal_config" ]

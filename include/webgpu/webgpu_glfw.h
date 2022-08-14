@@ -1,4 +1,4 @@
-// Copyright 2020 The Dawn Authors
+// Copyright 2022 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,27 +12,47 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_DAWN_UTILS_GLFWUTILS_H_
-#define SRC_DAWN_UTILS_GLFWUTILS_H_
+#ifndef INCLUDE_WEBGPU_WEBGPU_GLFW_H_
+#define INCLUDE_WEBGPU_WEBGPU_GLFW_H_
 
 #include <memory>
 
-#include "dawn/webgpu_cpp.h"
+#include "webgpu/webgpu_cpp.h"
+
+#if defined(WGPU_GLFW_SHARED_LIBRARY)
+#if defined(_WIN32)
+#if defined(WGPU_GLFW_IMPLEMENTATION)
+#define WGPU_GLFW_EXPORT __declspec(dllexport)
+#else
+#define WGPU_GLFW_EXPORT __declspec(dllimport)
+#endif
+#else  // defined(_WIN32)
+#if defined(WGPU_GLFW_IMPLEMENTATION)
+#define WGPU_GLFW_EXPORT __attribute__((visibility("default")))
+#else
+#define WGPU_GLFW_EXPORT
+#endif
+#endif  // defined(_WIN32)
+#else   // defined(WGPU_GLFW_SHARED_LIBRARY)
+#define WGPU_GLFW_EXPORT
+#endif  // defined(WGPU_GLFW_SHARED_LIBRARY)
 
 struct GLFWwindow;
 
-namespace utils {
+namespace wgpu::glfw {
 
 // Does the necessary setup on the GLFWwindow to allow creating a wgpu::Surface with it and
 // calls `instance.CreateSurface` with the correct descriptor for this window.
 // Returns a null wgpu::Surface on failure.
-wgpu::Surface CreateSurfaceForWindow(const wgpu::Instance& instance, GLFWwindow* window);
+WGPU_GLFW_EXPORT wgpu::Surface CreateSurfaceForWindow(const wgpu::Instance& instance,
+                                                      GLFWwindow* window);
 
 // Use for testing only. Does everything that CreateSurfaceForWindow does except the call to
 // CreateSurface. Useful to be able to modify the descriptor for testing, or when trying to
 // avoid using the global proc table.
-std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptor(GLFWwindow* window);
+WGPU_GLFW_EXPORT std::unique_ptr<wgpu::ChainedStruct> SetupWindowAndGetSurfaceDescriptor(
+    GLFWwindow* window);
 
-}  // namespace utils
+}  // namespace wgpu::glfw
 
-#endif  // SRC_DAWN_UTILS_GLFWUTILS_H_
+#endif  // INCLUDE_WEBGPU_WEBGPU_GLFW_H_

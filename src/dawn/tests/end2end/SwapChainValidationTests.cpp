@@ -17,8 +17,8 @@
 #include "dawn/common/Constants.h"
 #include "dawn/common/Log.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
-#include "dawn/utils/GLFWUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "webgpu/webgpu_glfw.h"
 
 #include "GLFW/glfw3.h"
 
@@ -38,7 +38,7 @@ class SwapChainValidationTests : public DawnTest {
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         window = glfwCreateWindow(400, 400, "SwapChainValidationTests window", nullptr, nullptr);
 
-        surface = utils::CreateSurfaceForWindow(GetInstance(), window);
+        surface = wgpu::glfw::CreateSurfaceForWindow(GetInstance(), window);
         ASSERT_NE(surface, nullptr);
 
         goodDescriptor.width = 1;

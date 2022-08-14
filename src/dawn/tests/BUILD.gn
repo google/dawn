@@ -371,7 +371,7 @@ source_set("test_infra_sources") {
 
   if (dawn_supports_glfw_for_windowing || dawn_enable_opengl) {
     assert(dawn_supports_glfw_for_windowing)
-    public_deps += [ "${dawn_root}/src/dawn/utils:glfw" ]
+    public_deps += [ "${dawn_root}/src/dawn/glfw" ]
   }
 
   sources = [

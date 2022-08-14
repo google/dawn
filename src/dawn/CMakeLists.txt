@@ -22,6 +22,7 @@ add_subdirectory(native)
 add_subdirectory(wire)
 # TODO(dawn:269): Remove once the implementation-based swapchains are removed.
 add_subdirectory(utils)
+add_subdirectory(glfw)
 
 if (DAWN_BUILD_SAMPLES)
     #TODO(dawn:269): Add this once implementation-based swapchains are removed.

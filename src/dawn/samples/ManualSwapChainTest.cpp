@@ -63,10 +63,10 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/native/DawnNative.h"
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
-#include "dawn/utils/GLFWUtils.h"
 #include "dawn/utils/ScopedAutoreleasePool.h"
 #include "dawn/utils/WGPUHelpers.h"
 #include "dawn/webgpu_cpp.h"
+#include "webgpu/webgpu_glfw.h"
 
 struct WindowData {
     GLFWwindow* window = nullptr;
@@ -123,7 +123,7 @@ void AddWindow() {
     std::unique_ptr<WindowData> data = std::make_unique<WindowData>();
     data->window = window;
     data->serial = windowSerial++;
-    data->surface = utils::CreateSurfaceForWindow(instance->Get(), window);
+    data->surface = wgpu::glfw::CreateSurfaceForWindow(instance->Get(), window);
     data->currentDesc = descriptor;
     data->targetDesc = descriptor;
     SyncFromWindow(data.get());

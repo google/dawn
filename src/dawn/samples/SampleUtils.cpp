@@ -28,10 +28,10 @@
 #include "dawn/dawn_proc.h"
 #include "dawn/dawn_wsi.h"
 #include "dawn/native/DawnNative.h"
-#include "dawn/utils/GLFWUtils.h"
 #include "dawn/utils/TerribleCommandBuffer.h"
 #include "dawn/wire/WireClient.h"
 #include "dawn/wire/WireServer.h"
+#include "webgpu/webgpu_glfw.h"
 
 void PrintDeviceError(WGPUErrorType errorType, const char* message, void*) {
     const char* errorTypeName = "";
@@ -132,7 +132,7 @@ wgpu::Device CreateCppDawnDevice() {
     DawnProcTable backendProcs = dawn::native::GetProcs();
 
     // Create the swapchain
-    auto surfaceChainedDesc = utils::SetupWindowAndGetSurfaceDescriptor(window);
+    auto surfaceChainedDesc = wgpu::glfw::SetupWindowAndGetSurfaceDescriptor(window);
     WGPUSurfaceDescriptor surfaceDesc;
     surfaceDesc.nextInChain = reinterpret_cast<WGPUChainedStruct*>(surfaceChainedDesc.get());
     WGPUSurface surface = backendProcs.instanceCreateSurface(instance->Get(), &surfaceDesc);

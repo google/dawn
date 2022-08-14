@@ -16,8 +16,8 @@
 
 #include "dawn/common/Constants.h"
 #include "dawn/common/Log.h"
-#include "dawn/utils/GLFWUtils.h"
 #include "dawn/utils/WGPUHelpers.h"
+#include "webgpu/webgpu_glfw.h"
 
 #include "GLFW/glfw3.h"
 
@@ -45,7 +45,7 @@ class SwapChainTests : public DawnTest {
         int height;
         glfwGetFramebufferSize(window, &width, &height);
 
-        surface = utils::CreateSurfaceForWindow(GetInstance(), window);
+        surface = wgpu::glfw::CreateSurfaceForWindow(GetInstance(), window);
         ASSERT_NE(surface, nullptr);
 
         baseDescriptor.width = width;

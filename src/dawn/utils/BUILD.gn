@@ -17,48 +17,6 @@ import("../../../scripts/dawn_overrides_with_defaults.gni")
 import("${dawn_root}/scripts/dawn_features.gni")
 
 ###############################################################################
-# GLFW wrapping target
-###############################################################################
-
-# GLFW does not support ChromeOS, Android or Fuchsia, so provide a small mock
-# library that can be linked into the Dawn tests on these platforms. Otherwise,
-# use the real library from third_party/.
-if (dawn_supports_glfw_for_windowing) {
-  group("glfw") {
-    public_deps = [ "${dawn_root}/third_party/gn/glfw" ]
-  }
-} else if (is_fuchsia) {
-  # The mock implementation of GLFW on Fuchsia
-  config("glfw_public_config") {
-    # Allow inclusion of <GLFW/glfw3.h>
-    include_dirs = [ "${dawn_glfw_dir}/include" ]
-
-    # The GLFW/glfw3.h header includes <GL/gl.h> by default, but the latter
-    # does not exist on Fuchsia. Defining GLFW_INCLUDE_NONE helps work around
-    # the issue, but it needs to be defined for any file that includes the
-    # header.
-    defines = [
-      "GLFW_INCLUDE_NONE",
-      "GLFW_INCLUDE_VULKAN",
-    ]
-  }
-
-  static_library("glfw") {
-    sources = [
-      # NOTE: The header below is required to pass "gn check".
-      "${dawn_glfw_dir}/include/GLFW/glfw3.h",
-      "Glfw3Fuchsia.cpp",
-    ]
-    public_configs = [ ":glfw_public_config" ]
-    deps = [ "${dawn_root}/src/dawn/common" ]
-  }
-} else {
-  # Just skip GLFW on other systems
-  group("glfw") {
-  }
-}
-
-###############################################################################
 # Utils for tests and samples
 ###############################################################################
 
@@ -121,19 +79,6 @@ static_library("utils") {
     sources += [ "ScopedAutoreleasePool.cpp" ]
   }
 
-  if (dawn_supports_glfw_for_windowing) {
-    sources += [
-      "GLFWUtils.cpp",
-      "GLFWUtils.h",
-    ]
-    deps += [ ":glfw" ]
-
-    if (dawn_enable_metal) {
-      sources += [ "GLFWUtils_metal.mm" ]
-      frameworks += [ "Metal.framework" ]
-    }
-  }
-
   public_deps = [ "${dawn_root}/include/dawn:cpp_headers" ]
 }
 
@@ -154,8 +99,8 @@ if (dawn_standalone) {
     public_deps = [ "${dawn_root}/include/dawn:headers" ]
 
     deps = [
-      ":glfw",
       "${dawn_root}/src/dawn/common",
+      "${dawn_root}/src/dawn/glfw",
       "${dawn_root}/src/dawn/native",
     ]
     libs = []

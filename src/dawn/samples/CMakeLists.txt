@@ -23,6 +23,7 @@ target_link_libraries(dawn_sample_utils PUBLIC
     dawncpp
     dawn_proc
     dawn_common
+    dawn_glfw
     dawn_native
     dawn_wire
     dawn_utils
