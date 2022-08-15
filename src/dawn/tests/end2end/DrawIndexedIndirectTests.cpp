@@ -103,7 +103,9 @@ class DrawIndexedIndirectTest : public DawnTest {
         return encoder.Finish();
     }
 
-    void TestDraw(wgpu::CommandBuffer commands, RGBA8 bottomLeftExpected, RGBA8 topRightExpected) {
+    void TestDraw(wgpu::CommandBuffer commands,
+                  utils::RGBA8 bottomLeftExpected,
+                  utils::RGBA8 topRightExpected) {
         queue.Submit(1, &commands);
 
         EXPECT_PIXEL_RGBA8_EQ(bottomLeftExpected, renderPass.color, 1, 3);
@@ -113,8 +115,8 @@ class DrawIndexedIndirectTest : public DawnTest {
     void Test(std::initializer_list<uint32_t> bufferList,
               uint64_t indexOffset,
               uint64_t indirectOffset,
-              RGBA8 bottomLeftExpected,
-              RGBA8 topRightExpected) {
+              utils::RGBA8 bottomLeftExpected,
+              utils::RGBA8 topRightExpected) {
         wgpu::Buffer indexBuffer =
             CreateIndexBuffer({0, 1, 2, 0, 3, 1,
                                // The indices below are added to test negatve baseVertex
@@ -133,8 +135,8 @@ TEST_P(DrawIndexedIndirectTest, Uint32) {
     // the offsets that Tint/GLSL produces.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     // Test a draw with no indices.
     Test({0, 0, 0, 0, 0}, 0, 0, notFilled, notFilled);
@@ -164,8 +166,8 @@ TEST_P(DrawIndexedIndirectTest, BaseVertex) {
     // the offsets that Tint/GLSL produces.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     // Test a draw with only the first 3 indices of the second quad (top right triangle)
     Test({3, 1, 0, 4, 0}, 0, 0, notFilled, filled);
@@ -197,8 +199,8 @@ TEST_P(DrawIndexedIndirectTest, IndirectOffset) {
     // the offsets that Tint/GLSL produces.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     // Test an offset draw call, with indirect buffer containing 2 calls:
     // 1) first 3 indices of the second quad (top right triangle)
@@ -222,8 +224,8 @@ TEST_P(DrawIndexedIndirectTest, BasicValidation) {
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
 
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     wgpu::Buffer indexBuffer = CreateIndexBuffer({0, 1, 2, 0, 3, 1});
 
@@ -249,8 +251,8 @@ TEST_P(DrawIndexedIndirectTest, ValidateWithOffsets) {
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
 
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     wgpu::Buffer indexBuffer = CreateIndexBuffer({0, 1, 2, 0, 3, 1, 0, 1, 2});
 
@@ -281,8 +283,8 @@ TEST_P(DrawIndexedIndirectTest, ValidateMultiplePasses) {
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
 
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     wgpu::Buffer indexBuffer = CreateIndexBuffer({0, 1, 2, 0, 3, 1, 0, 1, 2});
 
@@ -309,8 +311,8 @@ TEST_P(DrawIndexedIndirectTest, ValidateMultipleDraws) {
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
 
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     // Validate multiple draw calls using the same index and indirect buffers as input, but with
     // different indirect offsets.
@@ -409,8 +411,8 @@ TEST_P(DrawIndexedIndirectTest, ValidateEncodeMultipleThenSubmitInOrder) {
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
 
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     wgpu::Buffer indexBuffer = CreateIndexBuffer({0, 1, 2, 0, 3, 1, 0, 1, 2});
 
@@ -447,8 +449,8 @@ TEST_P(DrawIndexedIndirectTest, ValidateEncodeMultipleThenSubmitAtOnce) {
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
 
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     wgpu::Buffer indexBuffer = CreateIndexBuffer({0, 1, 2, 0, 3, 1, 0, 1, 2});
 
@@ -475,8 +477,8 @@ TEST_P(DrawIndexedIndirectTest, ValidateEncodeMultipleThenSubmitOutOfOrder) {
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
 
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     wgpu::Buffer indexBuffer = CreateIndexBuffer({0, 1, 2, 0, 3, 1, 0, 1, 2});
 
@@ -509,8 +511,8 @@ TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInSamePass) {
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
 
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     wgpu::Buffer indirectBuffer =
         CreateIndirectBuffer({3, 1, 3, 0, 0, 10, 1, 0, 0, 0, 3, 1, 6, 0, 0});
@@ -564,8 +566,8 @@ TEST_P(DrawIndexedIndirectTest, ValidateWithBundlesInDifferentPasses) {
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
 
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     wgpu::Buffer indirectBuffer =
         CreateIndirectBuffer({3, 1, 3, 0, 0, 10, 1, 0, 0, 0, 3, 1, 6, 0, 0});
@@ -636,8 +638,8 @@ TEST_P(DrawIndexedIndirectTest, ValidateReusedBundleWithChangingParams) {
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
 
-    RGBA8 filled(0, 255, 0, 255);
-    // RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    // utils::RGBA8 notFilled(0, 0, 0, 0);
 
     wgpu::Buffer indirectBuffer = CreateIndirectBuffer({0, 0, 0, 0, 0});
     wgpu::Buffer indexBuffer = CreateIndexBuffer({0, 1, 2, 0, 3, 1});

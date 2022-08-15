@@ -163,8 +163,8 @@ class VertexOnlyRenderPipelineTest : public DawnTest {
     wgpu::TextureView depthStencilView;
     wgpu::Texture renderTargetColor;
     // Render result
-    const RGBA8 filled = RGBA8(0, 255, 0, 255);
-    const RGBA8 notFilled = RGBA8(0, 0, 0, 0);
+    const utils::RGBA8 filled = utils::RGBA8(0, 255, 0, 255);
+    const utils::RGBA8 notFilled = utils::RGBA8(0, 0, 0, 0);
     // Render pass
     utils::ComboRenderPassDescriptor renderPassDescNoColor{};
     utils::ComboRenderPassDescriptor renderPassDescWithColor{};
@@ -181,7 +181,7 @@ class VertexOnlyRenderPipelineTest : public DawnTest {
 TEST_P(VertexOnlyRenderPipelineTest, Stencil) {
     auto doStencilTest = [&](const wgpu::RenderPassDescriptor* renderPass,
                              const wgpu::RenderPipeline& pipeline,
-                             const RGBA8& colorExpect) -> void {
+                             const utils::RGBA8& colorExpect) -> void {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         ClearAttachment(encoder);
@@ -218,7 +218,7 @@ TEST_P(VertexOnlyRenderPipelineTest, Stencil) {
 TEST_P(VertexOnlyRenderPipelineTest, Depth) {
     auto doStencilTest = [&](const wgpu::RenderPassDescriptor* renderPass,
                              const wgpu::RenderPipeline& pipeline,
-                             const RGBA8& colorExpect) -> void {
+                             const utils::RGBA8& colorExpect) -> void {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         ClearAttachment(encoder);

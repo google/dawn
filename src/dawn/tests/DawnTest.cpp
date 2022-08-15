@@ -50,40 +50,6 @@
 
 namespace {
 
-std::string ParamName(wgpu::BackendType type) {
-    switch (type) {
-        case wgpu::BackendType::D3D12:
-            return "D3D12";
-        case wgpu::BackendType::Metal:
-            return "Metal";
-        case wgpu::BackendType::Null:
-            return "Null";
-        case wgpu::BackendType::OpenGL:
-            return "OpenGL";
-        case wgpu::BackendType::OpenGLES:
-            return "OpenGLES";
-        case wgpu::BackendType::Vulkan:
-            return "Vulkan";
-        default:
-            UNREACHABLE();
-    }
-}
-
-const char* AdapterTypeName(wgpu::AdapterType type) {
-    switch (type) {
-        case wgpu::AdapterType::DiscreteGPU:
-            return "Discrete GPU";
-        case wgpu::AdapterType::IntegratedGPU:
-            return "Integrated GPU";
-        case wgpu::AdapterType::CPU:
-            return "CPU";
-        case wgpu::AdapterType::Unknown:
-            return "Unknown";
-        default:
-            UNREACHABLE();
-    }
-}
-
 struct MapReadUserdata {
     DawnTestBase* test;
     size_t slot;
@@ -108,88 +74,6 @@ void printBuffer(testing::AssertionResult& result, const T* buffer, const size_t
 }
 
 }  // anonymous namespace
-
-const RGBA8 RGBA8::kZero = RGBA8(0, 0, 0, 0);
-const RGBA8 RGBA8::kBlack = RGBA8(0, 0, 0, 255);
-const RGBA8 RGBA8::kRed = RGBA8(255, 0, 0, 255);
-const RGBA8 RGBA8::kGreen = RGBA8(0, 255, 0, 255);
-const RGBA8 RGBA8::kBlue = RGBA8(0, 0, 255, 255);
-const RGBA8 RGBA8::kYellow = RGBA8(255, 255, 0, 255);
-const RGBA8 RGBA8::kWhite = RGBA8(255, 255, 255, 255);
-
-BackendTestConfig::BackendTestConfig(wgpu::BackendType backendType,
-                                     std::initializer_list<const char*> forceEnabledWorkarounds,
-                                     std::initializer_list<const char*> forceDisabledWorkarounds)
-    : backendType(backendType),
-      forceEnabledWorkarounds(forceEnabledWorkarounds),
-      forceDisabledWorkarounds(forceDisabledWorkarounds) {}
-
-BackendTestConfig D3D12Backend(std::initializer_list<const char*> forceEnabledWorkarounds,
-                               std::initializer_list<const char*> forceDisabledWorkarounds) {
-    return BackendTestConfig(wgpu::BackendType::D3D12, forceEnabledWorkarounds,
-                             forceDisabledWorkarounds);
-}
-
-BackendTestConfig MetalBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
-                               std::initializer_list<const char*> forceDisabledWorkarounds) {
-    return BackendTestConfig(wgpu::BackendType::Metal, forceEnabledWorkarounds,
-                             forceDisabledWorkarounds);
-}
-
-BackendTestConfig NullBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
-                              std::initializer_list<const char*> forceDisabledWorkarounds) {
-    return BackendTestConfig(wgpu::BackendType::Null, forceEnabledWorkarounds,
-                             forceDisabledWorkarounds);
-}
-
-BackendTestConfig OpenGLBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
-                                std::initializer_list<const char*> forceDisabledWorkarounds) {
-    return BackendTestConfig(wgpu::BackendType::OpenGL, forceEnabledWorkarounds,
-                             forceDisabledWorkarounds);
-}
-
-BackendTestConfig OpenGLESBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
-                                  std::initializer_list<const char*> forceDisabledWorkarounds) {
-    return BackendTestConfig(wgpu::BackendType::OpenGLES, forceEnabledWorkarounds,
-                             forceDisabledWorkarounds);
-}
-
-BackendTestConfig VulkanBackend(std::initializer_list<const char*> forceEnabledWorkarounds,
-                                std::initializer_list<const char*> forceDisabledWorkarounds) {
-    return BackendTestConfig(wgpu::BackendType::Vulkan, forceEnabledWorkarounds,
-                             forceDisabledWorkarounds);
-}
-
-TestAdapterProperties::TestAdapterProperties(const wgpu::AdapterProperties& properties,
-                                             bool selected)
-    : wgpu::AdapterProperties(properties), adapterName(properties.name), selected(selected) {}
-
-AdapterTestParam::AdapterTestParam(const BackendTestConfig& config,
-                                   const TestAdapterProperties& adapterProperties)
-    : adapterProperties(adapterProperties),
-      forceEnabledWorkarounds(config.forceEnabledWorkarounds),
-      forceDisabledWorkarounds(config.forceDisabledWorkarounds) {}
-
-std::ostream& operator<<(std::ostream& os, const AdapterTestParam& param) {
-    os << ParamName(param.adapterProperties.backendType) << " "
-       << param.adapterProperties.adapterName;
-
-    // In a Windows Remote Desktop session there are two adapters named "Microsoft Basic Render
-    // Driver" with different adapter types. We must differentiate them to avoid any tests using the
-    // same name.
-    if (param.adapterProperties.deviceID == 0x008C) {
-        std::string adapterType = AdapterTypeName(param.adapterProperties.adapterType);
-        os << " " << adapterType;
-    }
-
-    for (const char* forceEnabledWorkaround : param.forceEnabledWorkarounds) {
-        os << "; e:" << forceEnabledWorkaround;
-    }
-    for (const char* forceDisabledWorkaround : param.forceDisabledWorkarounds) {
-        os << "; d:" << forceDisabledWorkaround;
-    }
-    return os;
-}
 
 DawnTestBase::PrintToStringParamName::PrintToStringParamName(const char* test) : mTest(test) {}
 
@@ -607,8 +491,8 @@ void DawnTestEnvironment::PrintTestConfigurationAndAdapterInfo(
 
             << " - \"" << properties.adapterName << "\" - \"" << properties.driverDescription
             << "\"\n"
-            << "   type: " << AdapterTypeName(properties.adapterType)
-            << ", backend: " << ParamName(properties.backendType) << "\n"
+            << "   type: " << properties.AdapterTypeName()
+            << ", backend: " << properties.ParamName() << "\n"
             << "   vendorId: 0x" << vendorId.str() << ", deviceId: 0x" << deviceId.str()
             << (properties.selected ? " [Selected]" : "") << "\n";
 
@@ -1610,25 +1494,20 @@ void DawnTestBase::ResolveDeferredExpectationsNow() {
     }
 }
 
-bool RGBA8::operator==(const RGBA8& other) const {
+bool utils::RGBA8::operator==(const utils::RGBA8& other) const {
     return r == other.r && g == other.g && b == other.b && a == other.a;
 }
 
-bool RGBA8::operator!=(const RGBA8& other) const {
+bool utils::RGBA8::operator!=(const utils::RGBA8& other) const {
     return !(*this == other);
 }
 
-bool RGBA8::operator<=(const RGBA8& other) const {
+bool utils::RGBA8::operator<=(const utils::RGBA8& other) const {
     return (r <= other.r && g <= other.g && b <= other.b && a <= other.a);
 }
 
-bool RGBA8::operator>=(const RGBA8& other) const {
+bool utils::RGBA8::operator>=(const utils::RGBA8& other) const {
     return (r >= other.r && g >= other.g && b >= other.b && a >= other.a);
-}
-
-std::ostream& operator<<(std::ostream& stream, const RGBA8& color) {
-    return stream << "RGBA8(" << static_cast<int>(color.r) << ", " << static_cast<int>(color.g)
-                  << ", " << static_cast<int>(color.b) << ", " << static_cast<int>(color.a) << ")";
 }
 
 namespace detail {
@@ -1723,7 +1602,7 @@ template class ExpectEq<uint8_t>;
 template class ExpectEq<uint16_t>;
 template class ExpectEq<uint32_t>;
 template class ExpectEq<uint64_t>;
-template class ExpectEq<RGBA8>;
+template class ExpectEq<utils::RGBA8>;
 template class ExpectEq<float>;
 template class ExpectEq<float, uint16_t>;
 
@@ -1780,5 +1659,5 @@ testing::AssertionResult ExpectBetweenColors<T>::Check(const void* data, size_t 
     return testing::AssertionSuccess();
 }
 
-template class ExpectBetweenColors<RGBA8>;
+template class ExpectBetweenColors<utils::RGBA8>;
 }  // namespace detail

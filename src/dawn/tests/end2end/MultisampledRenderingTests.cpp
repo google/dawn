@@ -189,7 +189,7 @@ class MultisampledRenderingTest : public DawnTest {
         constexpr uint32_t kMiddleX = (kWidth - 1) / 2;
         constexpr uint32_t kMiddleY = (kHeight - 1) / 2;
 
-        RGBA8 expectedColor = ExpectedMSAAColor(inputColor, msaaCoverage);
+        utils::RGBA8 expectedColor = ExpectedMSAAColor(inputColor, msaaCoverage);
         EXPECT_TEXTURE_EQ(&expectedColor, resolveTexture, {kMiddleX, kMiddleY, arrayLayer}, {1, 1},
                           mipmapLevel);
     }
@@ -274,8 +274,8 @@ class MultisampledRenderingTest : public DawnTest {
         return pipeline;
     }
 
-    RGBA8 ExpectedMSAAColor(const wgpu::Color color, const double msaaCoverage) {
-        RGBA8 result;
+    utils::RGBA8 ExpectedMSAAColor(const wgpu::Color color, const double msaaCoverage) {
+        utils::RGBA8 result;
         result.r = static_cast<uint8_t>(std::min(255.0, 256 * color.r * msaaCoverage));
         result.g = static_cast<uint8_t>(std::min(255.0, 256 * color.g * msaaCoverage));
         result.b = static_cast<uint8_t>(std::min(255.0, 256 * color.b * msaaCoverage));
@@ -778,7 +778,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithSampleMaskAndShaderOut
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
     queue.Submit(1, &commandBuffer);
 
-    RGBA8 expectedColor = ExpectedMSAAColor(kGreen, kMSAACoverage);
+    utils::RGBA8 expectedColor = ExpectedMSAAColor(kGreen, kMSAACoverage);
     EXPECT_TEXTURE_EQ(&expectedColor, mResolveTexture, {1, 0}, {1, 1});
 }
 
@@ -887,7 +887,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverage) {
             msaaCoverage = 1.0f;
         }
 
-        RGBA8 expectedColor = ExpectedMSAAColor(kGreen, msaaCoverage);
+        utils::RGBA8 expectedColor = ExpectedMSAAColor(kGreen, msaaCoverage);
         EXPECT_TEXTURE_EQ(&expectedColor, mResolveTexture, {1, 0}, {1, 1});
     }
 }
@@ -939,8 +939,8 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithAlphaToCo
 
         // Alpha to coverage affects both the color outputs, but the mask is computed
         // using only the first one.
-        RGBA8 expectedRed = ExpectedMSAAColor(kRed, kMSAACoverage);
-        RGBA8 expectedGreen = ExpectedMSAAColor(kGreen, kMSAACoverage);
+        utils::RGBA8 expectedRed = ExpectedMSAAColor(kRed, kMSAACoverage);
+        utils::RGBA8 expectedGreen = ExpectedMSAAColor(kGreen, kMSAACoverage);
         EXPECT_TEXTURE_EQ(&expectedRed, mResolveTexture, {1, 0}, {1, 1});
         EXPECT_TEXTURE_EQ(&expectedGreen, resolveTexture2, {1, 0}, {1, 1});
     }
@@ -1001,7 +1001,7 @@ TEST_P(MultisampledRenderingTest, MultisampledRenderingWithDepthTestAndAlphaToCo
     constexpr wgpu::Color kHalfGreenHalfRed = {(kGreen.r + kRed.r) / 2.0, (kGreen.g + kRed.g) / 2.0,
                                                (kGreen.b + kRed.b) / 2.0,
                                                (kGreen.a + kRed.a) / 2.0};
-    RGBA8 expectedColor = ExpectedMSAAColor(kHalfGreenHalfRed, 1.0f);
+    utils::RGBA8 expectedColor = ExpectedMSAAColor(kHalfGreenHalfRed, 1.0f);
 
     EXPECT_TEXTURE_EQ(&expectedColor, mResolveTexture, {1, 0}, {1, 1});
 }
@@ -1046,7 +1046,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithAlphaToCoverageAndSamp
         wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
         queue.Submit(1, &commandBuffer);
 
-        RGBA8 expectedColor = ExpectedMSAAColor(kGreen, kMSAACoverage * alpha);
+        utils::RGBA8 expectedColor = ExpectedMSAAColor(kGreen, kMSAACoverage * alpha);
         EXPECT_TEXTURE_EQ(&expectedColor, mResolveTexture, {1, 0}, {1, 1});
     }
 }

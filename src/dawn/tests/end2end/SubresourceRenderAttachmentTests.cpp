@@ -39,7 +39,7 @@ class SubresourceRenderAttachmentTest : public DawnTest {
         renderTargetViewDesc.mipLevelCount = 1;
         wgpu::TextureView renderTargetView = renderTarget.CreateView(&renderTargetViewDesc);
 
-        RGBA8 expectedColor(0, 255, 0, 255);
+        utils::RGBA8 expectedColor(0, 255, 0, 255);
         float expectedDepth = 0.3f;
         uint8_t expectedStencil = 7;
 
@@ -81,7 +81,8 @@ class SubresourceRenderAttachmentTest : public DawnTest {
         const uint32_t renderTargetSize = textureSize >> baseMipLevel;
         switch (type) {
             case Type::Color: {
-                std::vector<RGBA8> expected(renderTargetSize * renderTargetSize, expectedColor);
+                std::vector<utils::RGBA8> expected(renderTargetSize * renderTargetSize,
+                                                   expectedColor);
                 EXPECT_TEXTURE_EQ(expected.data(), renderTarget, {0, 0, baseArrayLayer},
                                   {renderTargetSize, renderTargetSize}, baseMipLevel);
                 break;

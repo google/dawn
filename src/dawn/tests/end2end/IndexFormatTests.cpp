@@ -92,7 +92,7 @@ TEST_P(IndexFormatTest, Uint32) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 100, 300);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 100, 300);
 }
 
 // Test that the Uint16 index format is correctly interpreted
@@ -119,7 +119,7 @@ TEST_P(IndexFormatTest, Uint16) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 100, 300);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 100, 300);
 }
 
 // Test that the index format used is the format of the last set pipeline. This is to
@@ -151,7 +151,7 @@ TEST_P(IndexFormatTest, ChangePipelineAfterSetIndexBuffer) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 100, 300);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 100, 300);
 }
 
 // Test that setting the index buffer before the pipeline works, this is important
@@ -179,7 +179,7 @@ TEST_P(IndexFormatTest, SetIndexBufferBeforeSetPipeline) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
 }
 
 // Test that index buffers of multiple formats can be used with a pipeline that
@@ -209,7 +209,7 @@ TEST_P(IndexFormatTest, SetIndexBufferDifferentFormats) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
 
     encoder = device.CreateCommandEncoder();
     {
@@ -224,7 +224,7 @@ TEST_P(IndexFormatTest, SetIndexBufferDifferentFormats) {
     commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 0, 255), renderPass.color, 100, 300);
 }
 
 // Tests for primitive restart use vertices like in the drawing and draw the following
@@ -286,9 +286,9 @@ TEST_P(TriangleStripPrimitiveRestartTests, Uint32PrimitiveRestart) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 50, 350);  // A
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 350, 50);  // B
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, 198, 200);  // C
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 50, 350);  // A
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 350, 50);  // B
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kZero, renderPass.color, 198, 200);  // C
 }
 
 // Same as the above test, but uses an OOB index to emulate primitive restart being disabled,
@@ -321,9 +321,9 @@ TEST_P(TriangleStripPrimitiveRestartTests, Uint32WithoutPrimitiveRestart) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 50, 350);   // A
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 350, 50);   // B
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 198, 200);  // C
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 50, 350);   // A
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 350, 50);   // B
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 198, 200);  // C
 }
 
 // Test use of primitive restart with an Uint16 index format
@@ -357,9 +357,9 @@ TEST_P(TriangleStripPrimitiveRestartTests, Uint16PrimitiveRestart) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 50, 350);  // A
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 350, 50);  // B
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, 198, 200);  // C
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 50, 350);  // A
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 350, 50);  // B
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kZero, renderPass.color, 198, 200);  // C
 }
 
 // Tests for primitive restart use vertices like in the drawing and draw the following
@@ -411,9 +411,9 @@ TEST_P(LineStripPrimitiveRestartTests, Uint32PrimitiveRestart) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 399, 199);  // 1
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 199, 199);  // 2
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, 300, 199);   // A
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 399, 199);  // 1
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 199, 199);  // 2
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kZero, renderPass.color, 300, 199);   // A
 }
 
 // Same as the above test, but uses an OOB index to emulate primitive restart being disabled,
@@ -440,9 +440,9 @@ TEST_P(LineStripPrimitiveRestartTests, Uint32WithoutPrimitiveRestart) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 399, 199);  // 1
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 199, 199);  // 2
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 300, 199);  // A
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 399, 199);  // 1
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 199, 199);  // 2
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 300, 199);  // A
 }
 
 TEST_P(LineStripPrimitiveRestartTests, Uint16PrimitiveRestart) {
@@ -467,9 +467,9 @@ TEST_P(LineStripPrimitiveRestartTests, Uint16PrimitiveRestart) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 399, 199);  // 1
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 199, 199);  // 2
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, 300, 199);   // A
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 399, 199);  // 1
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 199, 199);  // 2
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kZero, renderPass.color, 300, 199);   // A
 }
 
 DAWN_INSTANTIATE_TEST(IndexFormatTest,

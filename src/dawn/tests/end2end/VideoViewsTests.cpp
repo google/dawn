@@ -24,10 +24,10 @@ VideoViewsTestBackend::PlatformTexture::~PlatformTexture() = default;
 
 VideoViewsTestBackend::~VideoViewsTestBackend() = default;
 
-constexpr std::array<RGBA8, 2> VideoViewsTests::kYellowYUVColor;
-constexpr std::array<RGBA8, 2> VideoViewsTests::kWhiteYUVColor;
-constexpr std::array<RGBA8, 2> VideoViewsTests::kBlueYUVColor;
-constexpr std::array<RGBA8, 2> VideoViewsTests::kRedYUVColor;
+constexpr std::array<utils::RGBA8, 2> VideoViewsTests::kYellowYUVColor;
+constexpr std::array<utils::RGBA8, 2> VideoViewsTests::kWhiteYUVColor;
+constexpr std::array<utils::RGBA8, 2> VideoViewsTests::kBlueYUVColor;
+constexpr std::array<utils::RGBA8, 2> VideoViewsTests::kRedYUVColor;
 
 void VideoViewsTests::SetUp() {
     DawnTest::SetUp();
@@ -390,22 +390,24 @@ TEST_P(VideoViewsTests, NV12SampleYUVtoRGB) {
     queue.Submit(1, &commands);
 
     // Test four corners of the checkerboard image (YUV color space).
-    RGBA8 yellowYUV(kYellowYUVColor[kYUVLumaPlaneIndex].r, kYellowYUVColor[kYUVChromaPlaneIndex].r,
-                    kYellowYUVColor[kYUVChromaPlaneIndex].g, 0xFF);
+    utils::RGBA8 yellowYUV(kYellowYUVColor[kYUVLumaPlaneIndex].r,
+                           kYellowYUVColor[kYUVChromaPlaneIndex].r,
+                           kYellowYUVColor[kYUVChromaPlaneIndex].g, 0xFF);
     EXPECT_PIXEL_RGBA8_EQ(yellowYUV, renderPass.color, 0, 0);  // top left
 
-    RGBA8 redYUV(kRedYUVColor[kYUVLumaPlaneIndex].r, kRedYUVColor[kYUVChromaPlaneIndex].r,
-                 kRedYUVColor[kYUVChromaPlaneIndex].g, 0xFF);
+    utils::RGBA8 redYUV(kRedYUVColor[kYUVLumaPlaneIndex].r, kRedYUVColor[kYUVChromaPlaneIndex].r,
+                        kRedYUVColor[kYUVChromaPlaneIndex].g, 0xFF);
     EXPECT_PIXEL_RGBA8_EQ(redYUV, renderPass.color, kYUVImageDataWidthInTexels - 1,
                           kYUVImageDataHeightInTexels - 1);  // bottom right
 
-    RGBA8 blueYUV(kBlueYUVColor[kYUVLumaPlaneIndex].r, kBlueYUVColor[kYUVChromaPlaneIndex].r,
-                  kBlueYUVColor[kYUVChromaPlaneIndex].g, 0xFF);
+    utils::RGBA8 blueYUV(kBlueYUVColor[kYUVLumaPlaneIndex].r, kBlueYUVColor[kYUVChromaPlaneIndex].r,
+                         kBlueYUVColor[kYUVChromaPlaneIndex].g, 0xFF);
     EXPECT_PIXEL_RGBA8_EQ(blueYUV, renderPass.color, kYUVImageDataWidthInTexels - 1,
                           0);  // top right
 
-    RGBA8 whiteYUV(kWhiteYUVColor[kYUVLumaPlaneIndex].r, kWhiteYUVColor[kYUVChromaPlaneIndex].r,
-                   kWhiteYUVColor[kYUVChromaPlaneIndex].g, 0xFF);
+    utils::RGBA8 whiteYUV(kWhiteYUVColor[kYUVLumaPlaneIndex].r,
+                          kWhiteYUVColor[kYUVChromaPlaneIndex].r,
+                          kWhiteYUVColor[kYUVChromaPlaneIndex].g, 0xFF);
     EXPECT_PIXEL_RGBA8_EQ(whiteYUV, renderPass.color, 0,
                           kYUVImageDataHeightInTexels - 1);  // bottom left
     mBackend->DestroyVideoTextureForTest(std::move(platformTexture));

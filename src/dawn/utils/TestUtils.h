@@ -19,6 +19,26 @@
 
 namespace utils {
 
+struct RGBA8 {
+    constexpr RGBA8() : RGBA8(0, 0, 0, 0) {}
+    constexpr RGBA8(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : r(r), g(g), b(b), a(a) {}
+    bool operator==(const RGBA8& other) const;
+    bool operator!=(const RGBA8& other) const;
+    bool operator<=(const RGBA8& other) const;
+    bool operator>=(const RGBA8& other) const;
+
+    uint8_t r, g, b, a;
+
+    static const RGBA8 kZero;
+    static const RGBA8 kBlack;
+    static const RGBA8 kRed;
+    static const RGBA8 kGreen;
+    static const RGBA8 kBlue;
+    static const RGBA8 kYellow;
+    static const RGBA8 kWhite;
+};
+std::ostream& operator<<(std::ostream& stream, const RGBA8& color);
+
 struct TextureDataCopyLayout {
     uint64_t byteLength;
     uint64_t texelBlockCount;

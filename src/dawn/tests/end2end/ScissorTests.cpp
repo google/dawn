@@ -63,10 +63,10 @@ TEST_P(ScissorTest, DefaultsToWholeRenderTarget) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 0, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 0, 99);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 99, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 99, 99);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 0, 99);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 99, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 99, 99);
 }
 
 // Test setting a partial scissor (not empty, not full attachment)
@@ -92,11 +92,11 @@ TEST_P(ScissorTest, PartialRect) {
     queue.Submit(1, &commands);
 
     // Test the two opposite corners of the scissor box. With one pixel inside and on outside
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, kX - 1, kY - 1);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, kX, kY);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kZero, renderPass.color, kX - 1, kY - 1);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, kX, kY);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, kX + kW, kY + kH);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, kX + kW - 1, kY + kH - 1);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kZero, renderPass.color, kX + kW, kY + kH);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, kX + kW - 1, kY + kH - 1);
 }
 
 // Test setting an empty scissor
@@ -117,10 +117,10 @@ TEST_P(ScissorTest, EmptyRect) {
     queue.Submit(1, &commands);
 
     // Test that no pixel was written.
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, 0, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, 0, 1);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, 1, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, 1, 1);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kZero, renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kZero, renderPass.color, 0, 1);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kZero, renderPass.color, 1, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kZero, renderPass.color, 1, 1);
 }
 // Test that the scissor setting doesn't get inherited between renderpasses
 TEST_P(ScissorTest, NoInheritanceBetweenRenderPass) {
@@ -145,10 +145,10 @@ TEST_P(ScissorTest, NoInheritanceBetweenRenderPass) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 0, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 0, 99);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 99, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 99, 99);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 0, 99);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 99, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 99, 99);
 }
 
 DAWN_INSTANTIATE_TEST(ScissorTest,

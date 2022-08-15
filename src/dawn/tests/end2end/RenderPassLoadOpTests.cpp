@@ -70,11 +70,11 @@ class RenderPassLoadOpTests : public DawnTest {
 
         renderTargetView = renderTarget.CreateView();
 
-        std::fill(expectZero.begin(), expectZero.end(), RGBA8::kZero);
+        std::fill(expectZero.begin(), expectZero.end(), utils::RGBA8::kZero);
 
-        std::fill(expectGreen.begin(), expectGreen.end(), RGBA8::kGreen);
+        std::fill(expectGreen.begin(), expectGreen.end(), utils::RGBA8::kGreen);
 
-        std::fill(expectBlue.begin(), expectBlue.end(), RGBA8::kBlue);
+        std::fill(expectBlue.begin(), expectBlue.end(), utils::RGBA8::kBlue);
 
         // draws a blue quad on the right half of the screen
         const char* vsSource = R"(
@@ -140,9 +140,9 @@ class RenderPassLoadOpTests : public DawnTest {
     wgpu::Texture renderTarget;
     wgpu::TextureView renderTargetView;
 
-    std::array<RGBA8, kRTSize * kRTSize> expectZero;
-    std::array<RGBA8, kRTSize * kRTSize> expectGreen;
-    std::array<RGBA8, kRTSize * kRTSize> expectBlue;
+    std::array<utils::RGBA8, kRTSize * kRTSize> expectZero;
+    std::array<utils::RGBA8, kRTSize * kRTSize> expectGreen;
+    std::array<utils::RGBA8, kRTSize * kRTSize> expectBlue;
 
     DrawQuad blueQuad = {};
 };

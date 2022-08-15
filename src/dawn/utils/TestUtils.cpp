@@ -13,6 +13,7 @@
 // limitations under the License.
 
 #include <algorithm>
+#include <ostream>
 #include <vector>
 
 #include "dawn/common/Assert.h"
@@ -23,6 +24,19 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace utils {
+
+const RGBA8 RGBA8::kZero = RGBA8(0, 0, 0, 0);
+const RGBA8 RGBA8::kBlack = RGBA8(0, 0, 0, 255);
+const RGBA8 RGBA8::kRed = RGBA8(255, 0, 0, 255);
+const RGBA8 RGBA8::kGreen = RGBA8(0, 255, 0, 255);
+const RGBA8 RGBA8::kBlue = RGBA8(0, 0, 255, 255);
+const RGBA8 RGBA8::kYellow = RGBA8(255, 255, 0, 255);
+const RGBA8 RGBA8::kWhite = RGBA8(255, 255, 255, 255);
+
+std::ostream& operator<<(std::ostream& stream, const RGBA8& color) {
+    return stream << "RGBA8(" << static_cast<int>(color.r) << ", " << static_cast<int>(color.g)
+                  << ", " << static_cast<int>(color.b) << ", " << static_cast<int>(color.a) << ")";
+}
 
 uint32_t GetMinimumBytesPerRow(wgpu::TextureFormat format, uint32_t width) {
     const uint32_t bytesPerBlock = utils::GetTexelBlockSizeInBytes(format);

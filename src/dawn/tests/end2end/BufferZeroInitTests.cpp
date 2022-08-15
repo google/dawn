@@ -199,7 +199,7 @@ class BufferZeroInitTest : public DawnTest {
         EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_U32_RANGE_EQ(expectedBufferData.data(), buffer, 0,
                                                          expectedBufferData.size()));
 
-        constexpr RGBA8 kExpectedColor = {0, 255, 0, 255};
+        constexpr utils::RGBA8 kExpectedColor = {0, 255, 0, 255};
         EXPECT_PIXEL_RGBA8_EQ(kExpectedColor, outputTexture, 0u, 0u);
     }
 
@@ -243,7 +243,7 @@ class BufferZeroInitTest : public DawnTest {
         EXPECT_LAZY_CLEAR(0u, EXPECT_BUFFER_U32_RANGE_EQ(expectedBufferData.data(), buffer, 0,
                                                          expectedBufferData.size()));
 
-        const RGBA8 kExpectedPixelValue = {0, 255, 0, 255};
+        const utils::RGBA8 kExpectedPixelValue = {0, 255, 0, 255};
         EXPECT_PIXEL_RGBA8_EQ(kExpectedPixelValue, colorAttachment, 0, 0);
     }
 
@@ -1231,7 +1231,7 @@ TEST_P(BufferZeroInitTest, PaddingInitialized) {
 
                 EXPECT_LAZY_CLEAR(0u, queue.Submit(1, &commandBuffer));
 
-                constexpr RGBA8 kExpectedPixelValue = {0, 255, 0, 255};
+                constexpr utils::RGBA8 kExpectedPixelValue = {0, 255, 0, 255};
                 EXPECT_PIXEL_RGBA8_EQ(kExpectedPixelValue, colorAttachment, 0, 0);
             }
         }

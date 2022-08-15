@@ -156,8 +156,8 @@ TEST_P(TextureSubresourceTest, MipmapLevelsTest) {
 
     // Verify that pixel at bottom-left corner is red, while pixel at top-right corner is background
     // black in render view (mip level 1).
-    RGBA8 topRight = RGBA8::kBlack;
-    RGBA8 bottomLeft = RGBA8::kRed;
+    utils::RGBA8 topRight = utils::RGBA8::kBlack;
+    utils::RGBA8 bottomLeft = utils::RGBA8::kRed;
     EXPECT_TEXTURE_EQ(&topRight, texture, {kSize / 2 - 1, 0}, {1, 1}, 1);
     EXPECT_TEXTURE_EQ(&bottomLeft, texture, {0, kSize / 2 - 1}, {1, 1}, 1);
 }
@@ -182,8 +182,8 @@ TEST_P(TextureSubresourceTest, ArrayLayersTest) {
 
     // Verify that pixel at bottom-left corner is red, while pixel at top-right corner is background
     // black in render view (array layer 1).
-    RGBA8 topRight = RGBA8::kBlack;
-    RGBA8 bottomLeft = RGBA8::kRed;
+    utils::RGBA8 topRight = utils::RGBA8::kBlack;
+    utils::RGBA8 bottomLeft = utils::RGBA8::kRed;
     EXPECT_TEXTURE_EQ(&topRight, texture, {kSize - 1, 0, 1}, {1, 1});
     EXPECT_TEXTURE_EQ(&bottomLeft, texture, {0, kSize - 1, 1}, {1, 1});
 }

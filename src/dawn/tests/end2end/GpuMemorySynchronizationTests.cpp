@@ -144,7 +144,7 @@ TEST_P(GpuMemorySyncTests, RenderPass) {
     queue.Submit(1, &commands);
 
     // Verify the result.
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(iteration, 0, 0, 255), renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(iteration, 0, 0, 255), renderPass.color, 0, 0);
 }
 
 // Write into a storage buffer in a render pass. Then read that data in a compute
@@ -210,7 +210,7 @@ TEST_P(GpuMemorySyncTests, ComputePassToRenderPass) {
     queue.Submit(1, &commands);
 
     // Verify the result.
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(2, 0, 0, 255), renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(2, 0, 0, 255), renderPass.color, 0, 0);
 }
 
 DAWN_INSTANTIATE_TEST(GpuMemorySyncTests,
@@ -310,7 +310,7 @@ TEST_P(StorageToUniformSyncTests, ReadAfterWriteWithSameCommandBuffer) {
     queue.Submit(1, &commands);
 
     // Verify the rendering result.
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, renderPass.color, 0, 0);
 }
 
 // Write into a storage buffer in compute pass in a command buffer. Then read that data in a render
@@ -345,7 +345,7 @@ TEST_P(StorageToUniformSyncTests, ReadAfterWriteWithDifferentCommandBuffers) {
     queue.Submit(2, cb);
 
     // Verify the rendering result.
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, renderPass.color, 0, 0);
 }
 
 // Write into a storage buffer in compute pass in a command buffer. Then read that data in a render
@@ -381,7 +381,7 @@ TEST_P(StorageToUniformSyncTests, ReadAfterWriteWithDifferentQueueSubmits) {
     queue.Submit(1, &cb[1]);
 
     // Verify the rendering result.
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, renderPass.color, 0, 0);
 }
 
 DAWN_INSTANTIATE_TEST(StorageToUniformSyncTests,
@@ -521,10 +521,10 @@ TEST_P(MultipleWriteThenMultipleReadTests, SeparateBuffers) {
 
     // Verify the rendering result.
     uint32_t min = 1, max = kRTSize - 3;
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, min, min);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, max, min);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, min, max);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, max, max);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kYellow, renderPass.color, min, min);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kYellow, renderPass.color, max, min);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kYellow, renderPass.color, min, max);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kYellow, renderPass.color, max, max);
 }
 
 // Write into a storage buffer in compute pass. Then read that data in buffer in a render pass. The
@@ -639,10 +639,10 @@ TEST_P(MultipleWriteThenMultipleReadTests, OneBuffer) {
 
     // Verify the rendering result.
     uint32_t min = 1, max = kRTSize - 3;
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, min, min);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, max, min);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, min, max);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kYellow, renderPass.color, max, max);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kYellow, renderPass.color, min, min);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kYellow, renderPass.color, max, min);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kYellow, renderPass.color, min, max);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kYellow, renderPass.color, max, max);
 }
 
 DAWN_INSTANTIATE_TEST(MultipleWriteThenMultipleReadTests,

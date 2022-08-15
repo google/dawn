@@ -77,12 +77,12 @@ TEST_P(Texture3DTests, Sampling) {
         utils::RequiredBytesInCopy(bytesPerRow, copySize.height, copySize, kFormat);
     const uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(kFormat);
     uint32_t size = sizeInBytes / bytesPerTexel;
-    std::vector<RGBA8> data = std::vector<RGBA8>(size);
+    std::vector<utils::RGBA8> data = std::vector<utils::RGBA8>(size);
     for (uint32_t z = 0; z < copySize.depthOrArrayLayers; ++z) {
         for (uint32_t y = 0; y < copySize.height; ++y) {
             for (uint32_t x = 0; x < copySize.width; ++x) {
                 uint32_t i = (z * copySize.height + y) * bytesPerRow / bytesPerTexel + x;
-                data[i] = RGBA8(x, y, z, 255);
+                data[i] = utils::RGBA8(x, y, z, 255);
             }
         }
     }
@@ -112,7 +112,7 @@ TEST_P(Texture3DTests, Sampling) {
     // in shader, so the expected color at coordinate(x, y) should be (x, y, 1, 255).
     for (uint32_t i = 0; i < kRTSize; ++i) {
         for (uint32_t j = 0; j < kRTSize; ++j) {
-            EXPECT_PIXEL_RGBA8_EQ(RGBA8(i, j, 1, 255), renderPass.color, i, j);
+            EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(i, j, 1, 255), renderPass.color, i, j);
         }
     }
 }

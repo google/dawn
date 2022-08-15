@@ -19,6 +19,8 @@
 #include <utility>
 #include <vector>
 
+#include "dawn/tests/AdapterTestConfig.h"
+
 // ParamStruct is a custom struct which ParamStruct will yield when iterating.
 // The types Params... should be the same as the types passed to the constructor
 // of ParamStruct.
@@ -115,9 +117,6 @@ class ParamGenerator {
     ParamTuple mParams;
     bool mIsEmpty;
 };
-
-struct BackendTestConfig;
-struct AdapterTestParam;
 
 namespace detail {
 std::vector<AdapterTestParam> GetAvailableAdapterTestParamsForBackends(

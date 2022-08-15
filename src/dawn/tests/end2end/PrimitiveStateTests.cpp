@@ -78,14 +78,14 @@ class DepthClippingTest : public DawnTest {
 
     struct TestSpec {
         wgpu::PrimitiveDepthClipControl* depthClipControl;
-        RGBA8 color;
+        utils::RGBA8 color;
         float depth;
     };
 
     // Each test param represents a pair of triangles with a color, depth, stencil value, and
     // depthStencil state, one frontfacing, one backfacing Draw the triangles in order and check the
     // expected colors for the frontfaces and backfaces
-    void DoTest(const std::vector<TestSpec>& testParams, const RGBA8& expected) {
+    void DoTest(const std::vector<TestSpec>& testParams, const utils::RGBA8& expected) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
         struct TriangleData {
@@ -153,20 +153,20 @@ TEST_P(DepthClippingTest, UnclippedBeyondFarPlane) {
         {
             // Draw a red triangle at depth 1.
             {
-                nullptr,               /* depthClipControl */
-                RGBA8(255, 0, 0, 255), /* color */
-                1.f,                   /* depth */
+                nullptr,                      /* depthClipControl */
+                utils::RGBA8(255, 0, 0, 255), /* color */
+                1.f,                          /* depth */
             },
             // Draw a green triangle at depth 2 which should not be clipped.
             {
-                &depthClipControl,     /* depthClipControl */
-                RGBA8(0, 255, 0, 255), /* color */
-                2.f,                   /* depth */
+                &depthClipControl,            /* depthClipControl */
+                utils::RGBA8(0, 255, 0, 255), /* color */
+                2.f,                          /* depth */
             },
         },
         // The resulting fragment should be green even though the green triangle is
         // outside the clip volume.
-        RGBA8(0, 255, 0, 255));
+        utils::RGBA8(0, 255, 0, 255));
 }
 
 // Test that fragments beyond the far plane are clipped if unclippedDepth is false
@@ -178,20 +178,20 @@ TEST_P(DepthClippingTest, ClippedBeyondFarPlane) {
         {
             // Draw a red triangle at depth 1.
             {
-                nullptr,               /* depthClipControl */
-                RGBA8(255, 0, 0, 255), /* color */
-                1.f,                   /* depth */
+                nullptr,                      /* depthClipControl */
+                utils::RGBA8(255, 0, 0, 255), /* color */
+                1.f,                          /* depth */
             },
             // Draw a green triangle at depth 2 which should be clipped.
             {
-                &depthClipControl,     /* depthClipControl */
-                RGBA8(0, 255, 0, 255), /* color */
-                2.f,                   /* depth */
+                &depthClipControl,            /* depthClipControl */
+                utils::RGBA8(0, 255, 0, 255), /* color */
+                2.f,                          /* depth */
             },
         },
         // The resulting fragment should be red since the green triangle is
         // outside the clip volume.
-        RGBA8(255, 0, 0, 255));
+        utils::RGBA8(255, 0, 0, 255));
 }
 
 // Test that fragments beyond the far plane are clipped if unclippedDepth is not specified
@@ -200,20 +200,20 @@ TEST_P(DepthClippingTest, ClippedBeyondFarPlaneFeatureUnused) {
         {
             // Draw a red triangle at depth 1.
             {
-                nullptr,               /* depthClipControl */
-                RGBA8(255, 0, 0, 255), /* color */
-                1.f,                   /* depth */
+                nullptr,                      /* depthClipControl */
+                utils::RGBA8(255, 0, 0, 255), /* color */
+                1.f,                          /* depth */
             },
             // Draw a green triangle at depth 2 which should be clipped.
             {
-                nullptr,               /* depthClipControl */
-                RGBA8(0, 255, 0, 255), /* color */
-                2.f,                   /* depth */
+                nullptr,                      /* depthClipControl */
+                utils::RGBA8(0, 255, 0, 255), /* color */
+                2.f,                          /* depth */
             },
         },
         // The resulting fragment should be red since the green triangle is
         // outside the clip volume.
-        RGBA8(255, 0, 0, 255));
+        utils::RGBA8(255, 0, 0, 255));
 }
 
 // Test that fragments beyond the near plane are not clipped if unclippedDepth is true
@@ -225,20 +225,20 @@ TEST_P(DepthClippingTest, UnclippedBeyondNearPlane) {
         {
             // Draw a red triangle at depth 0.
             {
-                nullptr,               /* depthClipControl */
-                RGBA8(255, 0, 0, 255), /* color */
-                0.f,                   /* depth */
+                nullptr,                      /* depthClipControl */
+                utils::RGBA8(255, 0, 0, 255), /* color */
+                0.f,                          /* depth */
             },
             // Draw a green triangle at depth -1 which should not be clipped.
             {
-                &depthClipControl,     /* depthClipControl */
-                RGBA8(0, 255, 0, 255), /* color */
-                -1.f,                  /* depth */
+                &depthClipControl,            /* depthClipControl */
+                utils::RGBA8(0, 255, 0, 255), /* color */
+                -1.f,                         /* depth */
             },
         },
         // The resulting fragment should be green even though the green triangle is
         // outside the clip volume.
-        RGBA8(0, 255, 0, 255));
+        utils::RGBA8(0, 255, 0, 255));
 }
 
 // Test that fragments beyond the near plane are clipped if unclippedDepth is false
@@ -250,20 +250,20 @@ TEST_P(DepthClippingTest, ClippedBeyondNearPlane) {
         {
             // Draw a red triangle at depth 0.
             {
-                nullptr,               /* depthClipControl */
-                RGBA8(255, 0, 0, 255), /* color */
-                0.f,                   /* depth */
+                nullptr,                      /* depthClipControl */
+                utils::RGBA8(255, 0, 0, 255), /* color */
+                0.f,                          /* depth */
             },
             // Draw a green triangle at depth -1 which should be clipped.
             {
-                &depthClipControl,     /* depthClipControl */
-                RGBA8(0, 255, 0, 255), /* color */
-                -1.f,                  /* depth */
+                &depthClipControl,            /* depthClipControl */
+                utils::RGBA8(0, 255, 0, 255), /* color */
+                -1.f,                         /* depth */
             },
         },
         // The resulting fragment should be red because the green triangle is
         // outside the clip volume.
-        RGBA8(255, 0, 0, 255));
+        utils::RGBA8(255, 0, 0, 255));
 }
 
 // Test that fragments beyond the near plane are clipped if unclippedDepth is not specified
@@ -272,20 +272,20 @@ TEST_P(DepthClippingTest, ClippedBeyondNearPlaneFeatureUnused) {
         {
             // Draw a red triangle at depth 0.
             {
-                nullptr,               /* depthClipControl */
-                RGBA8(255, 0, 0, 255), /* color */
-                0.f,                   /* depth */
+                nullptr,                      /* depthClipControl */
+                utils::RGBA8(255, 0, 0, 255), /* color */
+                0.f,                          /* depth */
             },
             // Draw a green triangle at depth -1 which should be clipped.
             {
-                nullptr,               /* depthClipControl */
-                RGBA8(0, 255, 0, 255), /* color */
-                -1.f,                  /* depth */
+                nullptr,                      /* depthClipControl */
+                utils::RGBA8(0, 255, 0, 255), /* color */
+                -1.f,                         /* depth */
             },
         },
         // The resulting fragment should be red because the green triangle is
         // outside the clip volume.
-        RGBA8(255, 0, 0, 255));
+        utils::RGBA8(255, 0, 0, 255));
 }
 
 // Test that fragments are properly clipped or clamped if multiple render pipelines are used
@@ -301,16 +301,16 @@ TEST_P(DepthClippingTest, MultipleRenderPipelines) {
         {
             // Draw green with no clipping
             {
-                &depthClipControl1, RGBA8(0, 255, 0, 255), /* color */
-                2.f,                                       /* depth */
+                &depthClipControl1, utils::RGBA8(0, 255, 0, 255), /* color */
+                2.f,                                              /* depth */
             },
             // Draw red with clipping
             {
-                &depthClipControl2, RGBA8(255, 0, 0, 255), /* color */
-                2.f,                                       /* depth */
+                &depthClipControl2, utils::RGBA8(255, 0, 0, 255), /* color */
+                2.f,                                              /* depth */
             },
         },
-        RGBA8(0, 255, 0, 255));  // Result should be green
+        utils::RGBA8(0, 255, 0, 255));  // Result should be green
 }
 
 // Test that fragments are not clipped if unclippedDepth is true and that their
@@ -351,7 +351,8 @@ TEST_P(DepthClippingTest, UnclippedNotClamped) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_BETWEEN(RGBA8(127, 0, 0, 255), RGBA8(128, 0, 0, 255), renderTarget, 0, 0)
+    EXPECT_PIXEL_RGBA8_BETWEEN(utils::RGBA8(127, 0, 0, 255), utils::RGBA8(128, 0, 0, 255),
+                               renderTarget, 0, 0)
         << "Pixel check failed";
 }
 

@@ -214,7 +214,7 @@ class IOSurfaceUsageTests : public IOSurfaceTestBase {
                       wgpu::TextureFormat format,
                       void* data,
                       size_t dataSize,
-                      RGBA8 expectedColor) {
+                      utils::RGBA8 expectedColor) {
         // Write the data to the IOSurface
         IOSurfaceLock(ioSurface, 0, nullptr);
         memcpy(IOSurfaceGetBaseAddress(ioSurface), data, dataSize);
@@ -355,7 +355,7 @@ TEST_P(IOSurfaceUsageTests, SampleFromR8IOSurface) {
 
     uint8_t data = 0x01;
     DoSampleTest(ioSurface.get(), wgpu::TextureFormat::R8Unorm, &data, sizeof(data),
-                 RGBA8(1, 0, 0, 255));
+                 utils::RGBA8(1, 0, 0, 255));
 }
 
 // Test clearing a R8 IOSurface
@@ -376,7 +376,7 @@ TEST_P(IOSurfaceUsageTests, SampleFromRG8IOSurface) {
 
     uint16_t data = 0x0102;  // Stored as (G, R)
     DoSampleTest(ioSurface.get(), wgpu::TextureFormat::RG8Unorm, &data, sizeof(data),
-                 RGBA8(2, 1, 0, 255));
+                 utils::RGBA8(2, 1, 0, 255));
 }
 
 // Test clearing a RG8 IOSurface
@@ -396,7 +396,7 @@ TEST_P(IOSurfaceUsageTests, SampleFromBGRA8IOSurface) {
 
     uint32_t data = 0x01020304;  // Stored as (A, R, G, B)
     DoSampleTest(ioSurface.get(), wgpu::TextureFormat::BGRA8Unorm, &data, sizeof(data),
-                 RGBA8(2, 3, 4, 1));
+                 utils::RGBA8(2, 3, 4, 1));
 }
 
 // Test clearing a BGRA8 IOSurface
@@ -415,7 +415,7 @@ TEST_P(IOSurfaceUsageTests, SampleFromRGBA8IOSurface) {
 
     uint32_t data = 0x01020304;  // Stored as (A, B, G, R)
     DoSampleTest(ioSurface.get(), wgpu::TextureFormat::RGBA8Unorm, &data, sizeof(data),
-                 RGBA8(4, 3, 2, 1));
+                 utils::RGBA8(4, 3, 2, 1));
 }
 
 // Test clearing an RGBA8 IOSurface
@@ -448,7 +448,7 @@ TEST_P(IOSurfaceUsageTests, UninitializedTextureIsCleared) {
 
     // wrap ioSurface and ensure color is not visible when isInitialized set to false
     wgpu::Texture ioSurfaceTexture = WrapIOSurface(&textureDescriptor, ioSurface.get(), false);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), ioSurfaceTexture, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 0, 0, 0), ioSurfaceTexture, 0, 0);
 }
 
 DAWN_INSTANTIATE_TEST(IOSurfaceValidationTests, MetalBackend());

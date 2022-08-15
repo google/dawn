@@ -81,9 +81,9 @@ class ViewportTest : public DawnTest {
         for (uint32_t checkX = 0; checkX < kWidth; checkX++) {
             for (uint32_t checkY = 0; checkY < kHeight; checkY++) {
                 if (checkX >= x && checkX < x + width && checkY >= y && checkY < y + height) {
-                    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kWhite, rp.color, checkX, checkY);
+                    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kWhite, rp.color, checkX, checkY);
                 } else {
-                    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, rp.color, checkX, checkY);
+                    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kZero, rp.color, checkX, checkY);
                 }
             }
         }
@@ -210,7 +210,7 @@ TEST_P(ViewportTest, EmptyViewport) {
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kZero, renderPass.color, 0, 0);
     };
 
     // Test with a 0x0, 0xN and nx0 viewport.

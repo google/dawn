@@ -55,7 +55,7 @@ TEST_P(EntryPointTests, FragAndVertexSameModule) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, renderPass.color, 0, 0);
 }
 
 // Test creating two compute pipelines from the same module.

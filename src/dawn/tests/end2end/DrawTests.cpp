@@ -66,8 +66,8 @@ class DrawTest : public DawnTest {
               uint32_t instanceCount,
               uint32_t firstIndex,
               uint32_t firstInstance,
-              RGBA8 bottomLeftExpected,
-              RGBA8 topRightExpected) {
+              utils::RGBA8 bottomLeftExpected,
+              utils::RGBA8 topRightExpected) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
@@ -87,8 +87,8 @@ class DrawTest : public DawnTest {
 
 // The basic triangle draw.
 TEST_P(DrawTest, Uint32) {
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     // Test a draw with no indices.
     Test(0, 0, 0, 0, notFilled, notFilled);

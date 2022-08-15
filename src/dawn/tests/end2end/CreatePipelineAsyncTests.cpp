@@ -101,7 +101,7 @@ class CreatePipelineAsyncTest : public DawnTest {
 
         queue.Submit(1, &commands);
 
-        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), outputTexture, 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 0, 255), outputTexture, 0, 0);
     }
 
     void ValidateCreateRenderPipelineAsync() { ValidateCreateRenderPipelineAsync(&task); }
@@ -311,7 +311,7 @@ TEST_P(CreatePipelineAsyncTest, ReleaseEntryPointsAfterCreateRenderPipelineAsync
 
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), outputTexture, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 0, 255), outputTexture, 0, 0);
 }
 
 // Verify CreateRenderPipelineAsync() works as expected when there is any error that happens during
@@ -703,7 +703,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithVertexBufferLayouts
 
     // The color attachment will have the expected color when the vertex attribute values are
     // fetched correctly.
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 0, 255), renderTarget, 0, 0);
 }
 
 // Verify calling CreateRenderPipelineAsync() with valid depthStencilState works on all backends.
@@ -776,7 +776,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithDepthStencilState) 
 
     // The color in the color attachment should not be changed after the draw call as no pixel can
     // pass the stencil test.
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), renderTarget, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 0, 255), renderTarget, 0, 0);
 }
 
 // Verify calling CreateRenderPipelineAsync() with multisample.Count > 1 works on all backends.
@@ -842,7 +842,7 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineWithMultisampleState) {
     queue.Submit(1, &commands);
 
     // The color in resolveTarget should be the expected color (0, 1, 0, 1).
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 255, 0, 255), resolveTarget, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 255, 0, 255), resolveTarget, 0, 0);
 }
 
 // Verify calling CreateRenderPipelineAsync() with valid BlendState works on all backends.
@@ -946,8 +946,8 @@ TEST_P(CreatePipelineAsyncTest, CreateRenderPipelineAsyncWithBlendState) {
     // When the blend states are all set correctly, the color of renderTargets[0] should be
     // (0.6, 0, 0, 0.6) = colorAttachment0.clearValue + (0.4, 0.0, 0.0, 0.4), and the color of
     // renderTargets[1] should be (0.8, 0, 0, 0.8) = (1, 0, 0, 1) - colorAttachment1.clearValue.
-    RGBA8 expected0 = {153, 0, 0, 153};
-    RGBA8 expected1 = {0, 204, 0, 204};
+    utils::RGBA8 expected0 = {153, 0, 0, 153};
+    utils::RGBA8 expected1 = {0, 204, 0, 204};
     EXPECT_PIXEL_RGBA8_EQ(expected0, renderTargets[0], 0, 0);
     EXPECT_PIXEL_RGBA8_EQ(expected1, renderTargets[1], 0, 0);
 }

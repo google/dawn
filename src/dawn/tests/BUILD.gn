@@ -375,6 +375,8 @@ source_set("test_infra_sources") {
   }
 
   sources = [
+    "AdapterTestConfig.cpp",
+    "AdapterTestConfig.h",
     "DawnTest.cpp",
     "DawnTest.h",
     "MockCallback.h",

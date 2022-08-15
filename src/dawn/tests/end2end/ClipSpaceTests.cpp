@@ -88,8 +88,8 @@ TEST_P(ClipSpaceTest, ClipSpace) {
     wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
     queue.Submit(1, &commandBuffer);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, colorTexture, kSize - 1, kSize - 1);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, colorTexture, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, colorTexture, kSize - 1, kSize - 1);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, colorTexture, 0, 0);
 }
 
 DAWN_INSTANTIATE_TEST(ClipSpaceTest,

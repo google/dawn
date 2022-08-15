@@ -733,7 +733,7 @@ fn main(@builtin(vertex_index) VertexIndex : u32)
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(255, 255, 255, 255), renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(255, 255, 255, 255), renderPass.color, 0, 0);
 }
 
 // This is a regression test for crbug.com/dawn:1363 where the BindingRemapper transform was run

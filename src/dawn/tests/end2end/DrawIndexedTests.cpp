@@ -80,8 +80,8 @@ class DrawIndexedTest : public DawnTest {
               int32_t baseVertex,
               uint32_t firstInstance,
               uint64_t bufferOffset,
-              RGBA8 bottomLeftExpected,
-              RGBA8 topRightExpected) {
+              utils::RGBA8 bottomLeftExpected,
+              utils::RGBA8 topRightExpected) {
         // Regular draw with a reasonable index buffer
         TestImplementation(indexCount, instanceCount, firstIndex, baseVertex, firstInstance,
                            bufferOffset, indexBuffer, bottomLeftExpected, topRightExpected);
@@ -89,8 +89,8 @@ class DrawIndexedTest : public DawnTest {
 
     void TestZeroSizedIndexBufferDraw(uint32_t indexCount,
                                       uint32_t firstIndex,
-                                      RGBA8 bottomLeftExpected,
-                                      RGBA8 topRightExpected) {
+                                      utils::RGBA8 bottomLeftExpected,
+                                      utils::RGBA8 topRightExpected) {
         TestImplementation(indexCount, 1, firstIndex, 0, 0, 0, zeroSizedIndexBuffer,
                            bottomLeftExpected, topRightExpected);
     }
@@ -102,8 +102,8 @@ class DrawIndexedTest : public DawnTest {
                             uint32_t firstInstance,
                             uint64_t bufferOffset,
                             const wgpu::Buffer& curIndexBuffer,
-                            RGBA8 bottomLeftExpected,
-                            RGBA8 topRightExpected) {
+                            utils::RGBA8 bottomLeftExpected,
+                            utils::RGBA8 topRightExpected) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
         {
             wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
@@ -124,8 +124,8 @@ class DrawIndexedTest : public DawnTest {
 
 // The most basic DrawIndexed triangle draw.
 TEST_P(DrawIndexedTest, Uint32) {
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     // Test a draw with no indices.
     Test(0, 0, 0, 0, 0, 0, notFilled, notFilled);
@@ -140,8 +140,8 @@ TEST_P(DrawIndexedTest, Uint32) {
 // Test the parameter 'baseVertex' of DrawIndexed() works.
 TEST_P(DrawIndexedTest, BaseVertex) {
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_base_vertex"));
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     // Test a draw with only the first 3 indices of the second quad (top right triangle)
     Test(3, 1, 0, 4, 0, 0, notFilled, filled);

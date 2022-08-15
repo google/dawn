@@ -107,11 +107,11 @@ TEST_P(RenderPassTest, TwoRenderPassesInOneCommandBuffer) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kBlue, renderTarget1, 1, kRTSize - 1);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, renderTarget1, kRTSize - 1, 1);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kBlue, renderTarget1, 1, kRTSize - 1);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, renderTarget1, kRTSize - 1, 1);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kBlue, renderTarget2, 1, kRTSize - 1);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderTarget2, kRTSize - 1, 1);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kBlue, renderTarget2, 1, kRTSize - 1);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderTarget2, kRTSize - 1, 1);
 }
 
 // Verify that the content in the color attachment will not be changed if there is no corresponding
@@ -159,8 +159,8 @@ TEST_P(RenderPassTest, NoCorrespondingFragmentShaderOutputs) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kBlue, renderTarget, 1, kRTSize - 1);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, renderTarget, kRTSize - 1, 1);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kBlue, renderTarget, 1, kRTSize - 1);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, renderTarget, kRTSize - 1, 1);
 }
 
 class RenderPassTest_RegressionDawn1071 : public RenderPassTest {};

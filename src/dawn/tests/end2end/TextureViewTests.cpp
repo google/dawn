@@ -140,9 +140,9 @@ class TextureViewSamplingTest : public DawnTest {
 
         // Create a texture with pixel = (0, 0, 0, level * 10 + layer + 1) at level `level` and
         // layer `layer`.
-        static_assert((kTextureBytesPerRowAlignment % sizeof(RGBA8)) == 0,
+        static_assert((kTextureBytesPerRowAlignment % sizeof(utils::RGBA8)) == 0,
                       "Texture bytes per row alignment must be a multiple of sizeof(RGBA8).");
-        constexpr uint32_t kPixelsPerRowPitch = kTextureBytesPerRowAlignment / sizeof(RGBA8);
+        constexpr uint32_t kPixelsPerRowPitch = kTextureBytesPerRowAlignment / sizeof(utils::RGBA8);
         ASSERT_LE(textureWidthLevel0, kPixelsPerRowPitch);
 
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
@@ -154,9 +154,11 @@ class TextureViewSamplingTest : public DawnTest {
                 const int pixelValue = GenerateTestPixelValue(layer, level);
 
                 constexpr uint32_t kPaddedTexWidth = kPixelsPerRowPitch;
-                std::vector<RGBA8> data(kPaddedTexWidth * texHeight, RGBA8(0, 0, 0, pixelValue));
+                std::vector<utils::RGBA8> data(kPaddedTexWidth * texHeight,
+                                               utils::RGBA8(0, 0, 0, pixelValue));
                 wgpu::Buffer stagingBuffer = utils::CreateBufferFromData(
-                    device, data.data(), data.size() * sizeof(RGBA8), wgpu::BufferUsage::CopySrc);
+                    device, data.data(), data.size() * sizeof(utils::RGBA8),
+                    wgpu::BufferUsage::CopySrc);
                 wgpu::ImageCopyBuffer imageCopyBuffer =
                     utils::CreateImageCopyBuffer(stagingBuffer, 0, kTextureBytesPerRowAlignment);
                 wgpu::ImageCopyTexture imageCopyTexture =
@@ -194,7 +196,7 @@ class TextureViewSamplingTest : public DawnTest {
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
-        RGBA8 expectedPixel(0, 0, 0, expected);
+        utils::RGBA8 expectedPixel(0, 0, 0, expected);
         EXPECT_PIXEL_RGBA8_EQ(expectedPixel, mRenderPass.color, 0, 0);
         EXPECT_PIXEL_RGBA8_EQ(expectedPixel, mRenderPass.color, mRenderPass.width - 1,
                               mRenderPass.height - 1);
@@ -453,17 +455,17 @@ TEST_P(TextureViewSamplingTest, SRGBReinterpretation) {
 
     wgpu::ImageCopyTexture dst = {};
     dst.texture = texture;
-    std::array<RGBA8, 4> rgbaTextureData = {
-        RGBA8(180, 0, 0, 255),
-        RGBA8(0, 84, 0, 127),
-        RGBA8(0, 0, 62, 100),
-        RGBA8(62, 180, 84, 90),
+    std::array<utils::RGBA8, 4> rgbaTextureData = {
+        utils::RGBA8(180, 0, 0, 255),
+        utils::RGBA8(0, 84, 0, 127),
+        utils::RGBA8(0, 0, 62, 100),
+        utils::RGBA8(62, 180, 84, 90),
     };
 
     wgpu::TextureDataLayout dataLayout = {};
-    dataLayout.bytesPerRow = textureDesc.size.width * sizeof(RGBA8);
+    dataLayout.bytesPerRow = textureDesc.size.width * sizeof(utils::RGBA8);
 
-    queue.WriteTexture(&dst, rgbaTextureData.data(), rgbaTextureData.size() * sizeof(RGBA8),
+    queue.WriteTexture(&dst, rgbaTextureData.data(), rgbaTextureData.size() * sizeof(utils::RGBA8),
                        &dataLayout, &textureDesc.size);
 
     wgpu::TextureView textureView = texture.CreateView(&viewDesc);
@@ -512,18 +514,18 @@ TEST_P(TextureViewSamplingTest, SRGBReinterpretation) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_BETWEEN(  //
-        RGBA8(116, 0, 0, 255),   //
-        RGBA8(117, 0, 0, 255), renderPass.color, 0, 0);
-    EXPECT_PIXEL_RGBA8_BETWEEN(  //
-        RGBA8(0, 23, 0, 127),    //
-        RGBA8(0, 24, 0, 127), renderPass.color, 1, 0);
-    EXPECT_PIXEL_RGBA8_BETWEEN(  //
-        RGBA8(0, 0, 12, 100),    //
-        RGBA8(0, 0, 13, 100), renderPass.color, 0, 1);
-    EXPECT_PIXEL_RGBA8_BETWEEN(  //
-        RGBA8(12, 116, 23, 90),  //
-        RGBA8(13, 117, 24, 90), renderPass.color, 1, 1);
+    EXPECT_PIXEL_RGBA8_BETWEEN(        //
+        utils::RGBA8(116, 0, 0, 255),  //
+        utils::RGBA8(117, 0, 0, 255), renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_BETWEEN(       //
+        utils::RGBA8(0, 23, 0, 127),  //
+        utils::RGBA8(0, 24, 0, 127), renderPass.color, 1, 0);
+    EXPECT_PIXEL_RGBA8_BETWEEN(       //
+        utils::RGBA8(0, 0, 12, 100),  //
+        utils::RGBA8(0, 0, 13, 100), renderPass.color, 0, 1);
+    EXPECT_PIXEL_RGBA8_BETWEEN(         //
+        utils::RGBA8(12, 116, 23, 90),  //
+        utils::RGBA8(13, 117, 24, 90), renderPass.color, 1, 1);
 }
 
 // Test sampling from a cube map texture view that covers a whole 2D array texture.
@@ -636,8 +638,8 @@ class TextureViewRenderingTest : public DawnTest {
             Align(kBytesPerTexel * textureWidthLevel0, kTextureBytesPerRowAlignment);
         uint32_t expectedDataSize =
             bytesPerRow / kBytesPerTexel * (textureWidthLevel0 - 1) + textureHeightLevel0;
-        constexpr RGBA8 kExpectedPixel(0, 255, 0, 255);
-        std::vector<RGBA8> expected(expectedDataSize, kExpectedPixel);
+        constexpr utils::RGBA8 kExpectedPixel(0, 255, 0, 255);
+        std::vector<utils::RGBA8> expected(expectedDataSize, kExpectedPixel);
         EXPECT_TEXTURE_EQ(expected.data(), texture, {0, 0, textureViewBaseLayer},
                           {textureViewWidth, textureViewHeight}, textureViewBaseLevel);
     }
@@ -780,11 +782,11 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretationRenderAttachment) {
     wgpu::Texture sampledTexture = device.CreateTexture(&textureDesc);
 
     // Initial non-SRGB data to upload to |sampledTexture|.
-    std::array<RGBA8, 4> rgbaTextureData = {
-        RGBA8(117, 0, 0, 255),
-        RGBA8(0, 23, 0, 127),
-        RGBA8(0, 0, 12, 100),
-        RGBA8(13, 117, 24, 90),
+    std::array<utils::RGBA8, 4> rgbaTextureData = {
+        utils::RGBA8(117, 0, 0, 255),
+        utils::RGBA8(0, 23, 0, 127),
+        utils::RGBA8(0, 0, 12, 100),
+        utils::RGBA8(13, 117, 24, 90),
     };
 
     wgpu::ImageCopyTexture dst = {};
@@ -792,8 +794,8 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretationRenderAttachment) {
 
     // Upload |rgbaTextureData| into |sampledTexture|.
     dst.texture = sampledTexture;
-    dataLayout.bytesPerRow = textureDesc.size.width * sizeof(RGBA8);
-    queue.WriteTexture(&dst, rgbaTextureData.data(), rgbaTextureData.size() * sizeof(RGBA8),
+    dataLayout.bytesPerRow = textureDesc.size.width * sizeof(utils::RGBA8);
+    queue.WriteTexture(&dst, rgbaTextureData.data(), rgbaTextureData.size() * sizeof(utils::RGBA8),
                        &dataLayout, &textureDesc.size);
 
     // View both the attachment as SRGB.
@@ -846,18 +848,18 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretationRenderAttachment) {
 
     // Check the results. This is the sRGB encoding for the same non-SRGB colors
     // represented by |initialData|.
-    EXPECT_PIXEL_RGBA8_BETWEEN(  //
-        RGBA8(180, 0, 0, 255),   //
-        RGBA8(181, 0, 0, 255), texture, 0, 0);
-    EXPECT_PIXEL_RGBA8_BETWEEN(  //
-        RGBA8(0, 85, 0, 127),    //
-        RGBA8(0, 86, 0, 127), texture, 1, 0);
-    EXPECT_PIXEL_RGBA8_BETWEEN(  //
-        RGBA8(0, 0, 61, 100),    //
-        RGBA8(0, 0, 62, 100), texture, 0, 1);
-    EXPECT_PIXEL_RGBA8_BETWEEN(  //
-        RGBA8(64, 180, 86, 90),  //
-        RGBA8(15, 181, 87, 90), texture, 1, 1);
+    EXPECT_PIXEL_RGBA8_BETWEEN(        //
+        utils::RGBA8(180, 0, 0, 255),  //
+        utils::RGBA8(181, 0, 0, 255), texture, 0, 0);
+    EXPECT_PIXEL_RGBA8_BETWEEN(       //
+        utils::RGBA8(0, 85, 0, 127),  //
+        utils::RGBA8(0, 86, 0, 127), texture, 1, 0);
+    EXPECT_PIXEL_RGBA8_BETWEEN(       //
+        utils::RGBA8(0, 0, 61, 100),  //
+        utils::RGBA8(0, 0, 62, 100), texture, 0, 1);
+    EXPECT_PIXEL_RGBA8_BETWEEN(         //
+        utils::RGBA8(64, 180, 86, 90),  //
+        utils::RGBA8(15, 181, 87, 90), texture, 1, 1);
 }
 
 // Test that an RGBA8 texture may be interpreted as RGBA8UnormSrgb and resolved to.
@@ -893,11 +895,11 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretionResolveAttachment) {
     wgpu::Texture sampledTexture = device.CreateTexture(&textureDesc);
 
     // Initial non-SRGB data to upload to |sampledTexture|.
-    std::array<RGBA8, 4> rgbaTextureData = {
-        RGBA8(117, 0, 0, 255),
-        RGBA8(0, 23, 0, 127),
-        RGBA8(0, 0, 12, 100),
-        RGBA8(13, 117, 24, 90),
+    std::array<utils::RGBA8, 4> rgbaTextureData = {
+        utils::RGBA8(117, 0, 0, 255),
+        utils::RGBA8(0, 23, 0, 127),
+        utils::RGBA8(0, 0, 12, 100),
+        utils::RGBA8(13, 117, 24, 90),
     };
 
     wgpu::ImageCopyTexture dst = {};
@@ -905,8 +907,8 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretionResolveAttachment) {
 
     // Upload |rgbaTextureData| into |sampledTexture|.
     dst.texture = sampledTexture;
-    dataLayout.bytesPerRow = textureDesc.size.width * sizeof(RGBA8);
-    queue.WriteTexture(&dst, rgbaTextureData.data(), rgbaTextureData.size() * sizeof(RGBA8),
+    dataLayout.bytesPerRow = textureDesc.size.width * sizeof(utils::RGBA8);
+    queue.WriteTexture(&dst, rgbaTextureData.data(), rgbaTextureData.size() * sizeof(utils::RGBA8),
                        &dataLayout, &textureDesc.size);
 
     // View both the multisampled texture and the resolve texture as SRGB.
@@ -962,18 +964,18 @@ TEST_P(TextureViewRenderingTest, SRGBReinterpretionResolveAttachment) {
 
     // Check the results. This is the sRGB encoding for the same non-SRGB colors
     // represented by |initialData|.
-    EXPECT_PIXEL_RGBA8_BETWEEN(  //
-        RGBA8(180, 0, 0, 255),   //
-        RGBA8(181, 0, 0, 255), resolveTexture, 0, 0);
-    EXPECT_PIXEL_RGBA8_BETWEEN(  //
-        RGBA8(0, 85, 0, 127),    //
-        RGBA8(0, 86, 0, 127), resolveTexture, 1, 0);
-    EXPECT_PIXEL_RGBA8_BETWEEN(  //
-        RGBA8(0, 0, 61, 100),    //
-        RGBA8(0, 0, 62, 100), resolveTexture, 0, 1);
-    EXPECT_PIXEL_RGBA8_BETWEEN(  //
-        RGBA8(64, 180, 86, 90),  //
-        RGBA8(15, 181, 87, 90), resolveTexture, 1, 1);
+    EXPECT_PIXEL_RGBA8_BETWEEN(        //
+        utils::RGBA8(180, 0, 0, 255),  //
+        utils::RGBA8(181, 0, 0, 255), resolveTexture, 0, 0);
+    EXPECT_PIXEL_RGBA8_BETWEEN(       //
+        utils::RGBA8(0, 85, 0, 127),  //
+        utils::RGBA8(0, 86, 0, 127), resolveTexture, 1, 0);
+    EXPECT_PIXEL_RGBA8_BETWEEN(       //
+        utils::RGBA8(0, 0, 61, 100),  //
+        utils::RGBA8(0, 0, 62, 100), resolveTexture, 0, 1);
+    EXPECT_PIXEL_RGBA8_BETWEEN(         //
+        utils::RGBA8(64, 180, 86, 90),  //
+        utils::RGBA8(15, 181, 87, 90), resolveTexture, 1, 1);
 }
 
 DAWN_INSTANTIATE_TEST(TextureViewSamplingTest,
@@ -1058,7 +1060,8 @@ TEST_P(TextureView1DTest, Sampling) {
     texDesc.size = {4, 1, 1};
     wgpu::Texture tex = device.CreateTexture(&texDesc);
 
-    std::array<RGBA8, 4> data = {RGBA8::kGreen, RGBA8::kRed, RGBA8::kBlue, RGBA8::kWhite};
+    std::array<utils::RGBA8, 4> data = {utils::RGBA8::kGreen, utils::RGBA8::kRed,
+                                        utils::RGBA8::kBlue, utils::RGBA8::kWhite};
     wgpu::ImageCopyTexture target = utils::CreateImageCopyTexture(tex, 0, {});
     wgpu::TextureDataLayout layout = utils::CreateTextureDataLayout(0, wgpu::kCopyStrideUndefined);
     queue.WriteTexture(&target, &data, sizeof(data), &layout, &texDesc.size);

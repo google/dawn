@@ -65,8 +65,8 @@ class DrawIndirectTest : public DawnTest {
 
     void Test(std::initializer_list<uint32_t> bufferList,
               uint64_t indirectOffset,
-              RGBA8 bottomLeftExpected,
-              RGBA8 topRightExpected) {
+              utils::RGBA8 bottomLeftExpected,
+              utils::RGBA8 topRightExpected) {
         wgpu::Buffer indirectBuffer =
             utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, bufferList);
 
@@ -93,8 +93,8 @@ TEST_P(DrawIndirectTest, Uint32) {
     // the offsets that Tint/GLSL produces.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     // Test a draw with no indices.
     Test({0, 0, 0, 0}, 0, notFilled, notFilled);
@@ -114,8 +114,8 @@ TEST_P(DrawIndirectTest, IndirectOffset) {
     // the offsets that Tint/GLSL produces.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
-    RGBA8 filled(0, 255, 0, 255);
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     // Test an offset draw call, with indirect buffer containing 2 calls:
     // 1) only the first 3 indices (bottom left triangle)

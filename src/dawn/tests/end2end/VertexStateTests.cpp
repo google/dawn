@@ -236,9 +236,9 @@ class VertexStateTest : public DawnTest {
                 unsigned int x = kRTCellOffset + kRTCellSize * triangle;
                 unsigned int y = kRTCellOffset + kRTCellSize * instance;
                 if (triangle < triangles && instance < instances) {
-                    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, x, y);
+                    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, x, y);
                 } else {
-                    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kZero, renderPass.color, x, y);
+                    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kZero, renderPass.color, x, y);
                 }
             }
         }
@@ -642,7 +642,7 @@ TEST_P(VertexStateTest, OverlappingVertexAttributes) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 1, 1);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 1, 1);
 }
 
 DAWN_INSTANTIATE_TEST(VertexStateTest,
@@ -688,7 +688,7 @@ TEST_P(OptionalVertexStateTest, Basic) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 1, 1);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 1, 1);
 }
 
 DAWN_INSTANTIATE_TEST(OptionalVertexStateTest,

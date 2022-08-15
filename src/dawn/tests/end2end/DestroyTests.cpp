@@ -84,7 +84,7 @@ class DestroyTest : public DawnTest {
 
 // Destroy before submit will result in error, and nothing drawn
 TEST_P(DestroyTest, BufferDestroyBeforeSubmit) {
-    RGBA8 notFilled(0, 0, 0, 0);
+    utils::RGBA8 notFilled(0, 0, 0, 0);
 
     wgpu::CommandBuffer commands = CreateTriangleCommandBuffer();
     vertexBuffer.Destroy();
@@ -95,7 +95,7 @@ TEST_P(DestroyTest, BufferDestroyBeforeSubmit) {
 
 // Destroy after submit will draw successfully
 TEST_P(DestroyTest, BufferDestroyAfterSubmit) {
-    RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 filled(0, 255, 0, 255);
 
     wgpu::CommandBuffer commands = CreateTriangleCommandBuffer();
     queue.Submit(1, &commands);
@@ -107,7 +107,7 @@ TEST_P(DestroyTest, BufferDestroyAfterSubmit) {
 // First submit succeeds, draws triangle, second submit fails
 // after destroy is called on the buffer, pixel does not change
 TEST_P(DestroyTest, BufferSubmitDestroySubmit) {
-    RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 filled(0, 255, 0, 255);
 
     wgpu::CommandBuffer commands = CreateTriangleCommandBuffer();
     queue.Submit(1, &commands);
@@ -131,7 +131,7 @@ TEST_P(DestroyTest, TextureDestroyBeforeSubmit) {
 
 // Destroy after submit will draw successfully
 TEST_P(DestroyTest, TextureDestroyAfterSubmit) {
-    RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 filled(0, 255, 0, 255);
 
     wgpu::CommandBuffer commands = CreateTriangleCommandBuffer();
     queue.Submit(1, &commands);
@@ -143,7 +143,7 @@ TEST_P(DestroyTest, TextureDestroyAfterSubmit) {
 // First submit succeeds, draws triangle, second submit fails
 // after destroy is called on the texture
 TEST_P(DestroyTest, TextureSubmitDestroySubmit) {
-    RGBA8 filled(0, 255, 0, 255);
+    utils::RGBA8 filled(0, 255, 0, 255);
 
     wgpu::CommandBuffer commands = CreateTriangleCommandBuffer();
     queue.Submit(1, &commands);

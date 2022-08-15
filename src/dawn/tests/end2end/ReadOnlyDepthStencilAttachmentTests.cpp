@@ -224,11 +224,11 @@ TEST_P(ReadOnlyDepthAttachmentTests, SampleFromAttachment) {
 
     // The top part is not rendered by the pipeline. Its color is the default clear color for
     // color attachment.
-    const std::vector<RGBA8> kExpectedTopColors(kSize * kSize / 2, {0, 0, 0, 0});
+    const std::vector<utils::RGBA8> kExpectedTopColors(kSize * kSize / 2, {0, 0, 0, 0});
     // The bottom part is rendered, whose red channel is sampled from depth attachment, which
     // is initialized into 0.2.
-    const std::vector<RGBA8> kExpectedBottomColors(kSize * kSize / 2,
-                                                   {static_cast<uint8_t>(0.2 * 255), 0, 0, 0});
+    const std::vector<utils::RGBA8> kExpectedBottomColors(
+        kSize * kSize / 2, {static_cast<uint8_t>(0.2 * 255), 0, 0, 0});
     EXPECT_TEXTURE_EQ(kExpectedTopColors.data(), colorTexture, {0, 0}, {kSize, kSize / 2});
     EXPECT_TEXTURE_EQ(kExpectedBottomColors.data(), colorTexture, {0, kSize / 2},
                       {kSize, kSize / 2});
@@ -248,9 +248,9 @@ TEST_P(ReadOnlyDepthAttachmentTests, NotSampleFromAttachment) {
 
     // The top part is not rendered by the pipeline. Its color is the default clear color for
     // color attachment.
-    const std::vector<RGBA8> kExpectedTopColors(kSize * kSize / 2, {0, 0, 0, 0});
+    const std::vector<utils::RGBA8> kExpectedTopColors(kSize * kSize / 2, {0, 0, 0, 0});
     // The bottom part is rendered. Its color is set to blue.
-    const std::vector<RGBA8> kExpectedBottomColors(kSize * kSize / 2, {0, 0, 255, 0});
+    const std::vector<utils::RGBA8> kExpectedBottomColors(kSize * kSize / 2, {0, 0, 255, 0});
     EXPECT_TEXTURE_EQ(kExpectedTopColors.data(), colorTexture, {0, 0}, {kSize, kSize / 2});
     EXPECT_TEXTURE_EQ(kExpectedBottomColors.data(), colorTexture, {0, kSize / 2},
                       {kSize, kSize / 2});
@@ -277,14 +277,14 @@ TEST_P(ReadOnlyStencilAttachmentTests, SampleFromAttachment) {
     // stencilRefValue < stencilValue (stencilInitValue), so stencil test passes. The pipeline
     // samples from stencil buffer and writes into color buffer.
     DoTest(wgpu::TextureAspect::StencilOnly, stencilFormat, colorTexture, &values, true);
-    const std::vector<RGBA8> kSampledColors(kSize * kSize, {3, 0, 0, 0});
+    const std::vector<utils::RGBA8> kSampledColors(kSize * kSize, {3, 0, 0, 0});
     EXPECT_TEXTURE_EQ(kSampledColors.data(), colorTexture, {0, 0}, {kSize, kSize});
 
     values.stencilInitValue = 1;
     // stencilRefValue > stencilValue (stencilInitValue), so stencil test fails. The pipeline
     // doesn't change color buffer. Sampled data from stencil buffer is discarded.
     DoTest(wgpu::TextureAspect::StencilOnly, stencilFormat, colorTexture, &values, true);
-    const std::vector<RGBA8> kInitColors(kSize * kSize, {0, 0, 0, 0});
+    const std::vector<utils::RGBA8> kInitColors(kSize * kSize, {0, 0, 0, 0});
     EXPECT_TEXTURE_EQ(kInitColors.data(), colorTexture, {0, 0}, {kSize, kSize});
 }
 
@@ -301,14 +301,14 @@ TEST_P(ReadOnlyStencilAttachmentTests, NotSampleFromAttachment) {
     // stencilRefValue < stencilValue (stencilInitValue), so stencil test passes. The pipeline
     // draw solid blue into color buffer.
     DoTest(wgpu::TextureAspect::StencilOnly, stencilFormat, colorTexture, &values, false);
-    const std::vector<RGBA8> kSampledColors(kSize * kSize, {0, 0, 255, 0});
+    const std::vector<utils::RGBA8> kSampledColors(kSize * kSize, {0, 0, 255, 0});
     EXPECT_TEXTURE_EQ(kSampledColors.data(), colorTexture, {0, 0}, {kSize, kSize});
 
     values.stencilInitValue = 1;
     // stencilRefValue > stencilValue (stencilInitValue), so stencil test fails. The pipeline
     // doesn't change color buffer. drawing data is discarded.
     DoTest(wgpu::TextureAspect::StencilOnly, stencilFormat, colorTexture, &values, false);
-    const std::vector<RGBA8> kInitColors(kSize * kSize, {0, 0, 0, 0});
+    const std::vector<utils::RGBA8> kInitColors(kSize * kSize, {0, 0, 0, 0});
     EXPECT_TEXTURE_EQ(kInitColors.data(), colorTexture, {0, 0}, {kSize, kSize});
 }
 

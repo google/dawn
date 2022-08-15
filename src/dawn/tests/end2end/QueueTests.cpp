@@ -234,7 +234,7 @@ class QueueWriteTextureTests : public DawnTest {
                                 uint32_t width,
                                 uint32_t height,
                                 uint32_t srcBytesPerRow,
-                                RGBA8* dstData,
+                                utils::RGBA8* dstData,
                                 uint32_t dstTexelPerRow,
                                 uint32_t texelBlockSize) {
         for (uint64_t y = 0; y < height; ++y) {
@@ -299,7 +299,7 @@ class QueueWriteTextureTests : public DawnTest {
         for (uint32_t slice = textureSpec.copyOrigin.z; slice < maxArrayLayer; ++slice) {
             // Pack the data in the specified copy region to have the same
             // format as the expected texture data.
-            std::vector<RGBA8> expected(texelCountLastLayer);
+            std::vector<utils::RGBA8> expected(texelCountLastLayer);
             PackTextureData(data.data() + dataOffset, copySize.width, copySize.height,
                             dataSpec.bytesPerRow, expected.data(), copySize.width, bytesPerTexel);
 

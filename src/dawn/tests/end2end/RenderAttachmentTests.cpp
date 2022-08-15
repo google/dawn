@@ -72,7 +72,7 @@ TEST_P(RenderAttachmentTest, MoreFragmentOutputsThanAttachments) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, renderTarget, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, renderTarget, 0, 0);
 }
 
 DAWN_INSTANTIATE_TEST(RenderAttachmentTest,

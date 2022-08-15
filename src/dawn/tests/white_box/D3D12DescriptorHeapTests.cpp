@@ -550,7 +550,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeUBOOverflowMultipleSubmit) {
         queue.Submit(1, &commands);
     }
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 0, 0);
 
     // Encode a heap worth of descriptors.
     {
@@ -592,7 +592,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeUBOOverflowMultipleSubmit) {
         queue.Submit(1, &commands);
     }
 
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, renderPass.color, 0, 0);
 }
 
 // Verify encoding a heaps worth of bindgroups plus one more then reuse the first
@@ -653,7 +653,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOOverflow) {
     queue.Submit(1, &commands);
 
     // Make sure the first bindgroup was encoded correctly.
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kRed, renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kRed, renderPass.color, 0, 0);
 }
 
 // Verify encoding a heaps worth of bindgroups plus one more in the first submit then reuse the
@@ -735,7 +735,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeReuseUBOMultipleSubmits) {
     }
 
     // Make sure the first bindgroup was re-encoded correctly.
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, renderPass.color, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, renderPass.color, 0, 0);
 }
 
 // Verify encoding many sampler and ubo worth of bindgroups.
@@ -773,7 +773,7 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
         wgpu::CommandBuffer commandBuffer = encoder.Finish();
         queue.Submit(1, &commandBuffer);
 
-        RGBA8 filled(0, 255, 0, 255);
+        utils::RGBA8 filled(0, 255, 0, 255);
         EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 0, 0);
     }
 
@@ -884,8 +884,8 @@ TEST_P(D3D12DescriptorHeapTests, EncodeManyUBOAndSamplers) {
         queue.Submit(1, &commands);
 
         // Final accumulated color is result of sampled + UBO color.
-        RGBA8 filled(255, 255, 0, 255);
-        RGBA8 notFilled(0, 0, 0, 0);
+        utils::RGBA8 filled(255, 255, 0, 255);
+        utils::RGBA8 notFilled(0, 0, 0, 0);
         EXPECT_PIXEL_RGBA8_EQ(filled, renderPass.color, 0, 0);
         EXPECT_PIXEL_RGBA8_EQ(notFilled, renderPass.color, kRTSize - 1, 0);
 

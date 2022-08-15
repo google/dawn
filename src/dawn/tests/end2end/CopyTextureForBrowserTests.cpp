@@ -166,13 +166,13 @@ class CopyTextureForBrowserTests : public Parent {
     };
 
     // Source texture contains red pixels and dst texture contains green pixels at start.
-    static std::vector<RGBA8> GetTextureData(
+    static std::vector<utils::RGBA8> GetTextureData(
         const utils::TextureDataCopyLayout& layout,
         TextureCopyRole textureRole,
         wgpu::AlphaMode srcAlphaMode = wgpu::AlphaMode::Premultiplied,
         wgpu::AlphaMode dstAlphaMode = wgpu::AlphaMode::Unpremultiplied) {
         std::array<uint8_t, 4> alpha = {0, 102, 153, 255};  // 0.0, 0.4, 0.6, 1.0
-        std::vector<RGBA8> textureData(layout.texelBlockCount);
+        std::vector<utils::RGBA8> textureData(layout.texelBlockCount);
         for (uint32_t layer = 0; layer < layout.mipSize.depthOrArrayLayers; ++layer) {
             const uint32_t sliceOffset = layout.texelBlocksPerImage * layer;
             for (uint32_t y = 0; y < layout.mipSize.height; ++y) {
@@ -185,7 +185,7 @@ class CopyTextureForBrowserTests : public Parent {
                             dstAlphaMode == wgpu::AlphaMode::Premultiplied) {
                             // We expect each channel in dst
                             // texture will equal to the alpha channel value.
-                            textureData[sliceOffset + rowOffset + x] = RGBA8(
+                            textureData[sliceOffset + rowOffset + x] = utils::RGBA8(
                                 static_cast<uint8_t>(255), static_cast<uint8_t>(255),
                                 static_cast<uint8_t>(255), static_cast<uint8_t>(alpha[x % 4]));
                         } else if (srcAlphaMode == wgpu::AlphaMode::Premultiplied &&
@@ -193,21 +193,21 @@ class CopyTextureForBrowserTests : public Parent {
                             // We expect each channel in dst
                             // texture will equal to 1.0.
                             textureData[sliceOffset + rowOffset + x] =
-                                RGBA8(static_cast<uint8_t>(alpha[x % 4]),
-                                      static_cast<uint8_t>(alpha[x % 4]),
-                                      static_cast<uint8_t>(alpha[x % 4]),
-                                      static_cast<uint8_t>(alpha[x % 4]));
+                                utils::RGBA8(static_cast<uint8_t>(alpha[x % 4]),
+                                             static_cast<uint8_t>(alpha[x % 4]),
+                                             static_cast<uint8_t>(alpha[x % 4]),
+                                             static_cast<uint8_t>(alpha[x % 4]));
                         } else {
-                            textureData[sliceOffset + rowOffset + x] =
-                                RGBA8(static_cast<uint8_t>((x + layer * x) % 256),
-                                      static_cast<uint8_t>((y + layer * y) % 256),
-                                      static_cast<uint8_t>(x % 256), static_cast<uint8_t>(x % 256));
+                            textureData[sliceOffset + rowOffset + x] = utils::RGBA8(
+                                static_cast<uint8_t>((x + layer * x) % 256),
+                                static_cast<uint8_t>((y + layer * y) % 256),
+                                static_cast<uint8_t>(x % 256), static_cast<uint8_t>(x % 256));
                         }
                     } else {  // Dst textures will have be init as `green` to ensure subrect
                               // copy not cross bound.
                         textureData[sliceOffset + rowOffset + x] =
-                            RGBA8(static_cast<uint8_t>(0), static_cast<uint8_t>(255),
-                                  static_cast<uint8_t>(0), static_cast<uint8_t>(255));
+                            utils::RGBA8(static_cast<uint8_t>(0), static_cast<uint8_t>(255),
+                                         static_cast<uint8_t>(0), static_cast<uint8_t>(255));
                     }
                 }
             }
@@ -499,14 +499,14 @@ class CopyTextureForBrowserTests : public Parent {
                  copySize.depthOrArrayLayers},
                 srcSpec.level);
 
-        std::vector<RGBA8> srcTextureArrayCopyData = GetTextureData(
+        std::vector<utils::RGBA8> srcTextureArrayCopyData = GetTextureData(
             srcCopyLayout, TextureCopyRole::SOURCE, options.srcAlphaMode, options.dstAlphaMode);
 
         wgpu::TextureUsage srcUsage = wgpu::TextureUsage::CopySrc | wgpu::TextureUsage::CopyDst |
                                       wgpu::TextureUsage::TextureBinding;
         wgpu::Texture srcTexture =
             CreateAndInitTexture(srcSpec, srcUsage, srcCopyLayout, srcTextureArrayCopyData.data(),
-                                 srcTextureArrayCopyData.size() * sizeof(RGBA8));
+                                 srcTextureArrayCopyData.size() * sizeof(utils::RGBA8));
 
         bool testSubRectCopy = srcSpec.copyOrigin.x > 0 || srcSpec.copyOrigin.y > 0 ||
                                dstSpec.copyOrigin.x > 0 || dstSpec.copyOrigin.y > 0 ||
@@ -530,11 +530,11 @@ class CopyTextureForBrowserTests : public Parent {
                      copySize.depthOrArrayLayers},
                     dstSpec.level);
 
-            const std::vector<RGBA8> dstTextureArrayCopyData =
+            const std::vector<utils::RGBA8> dstTextureArrayCopyData =
                 GetTextureData(dstCopyLayout, TextureCopyRole::DEST);
-            dstTexture = CreateAndInitTexture(dstSpec, dstUsage, dstCopyLayout,
-                                              dstTextureArrayCopyData.data(),
-                                              dstTextureArrayCopyData.size() * sizeof(RGBA8));
+            dstTexture = CreateAndInitTexture(
+                dstSpec, dstUsage, dstCopyLayout, dstTextureArrayCopyData.data(),
+                dstTextureArrayCopyData.size() * sizeof(utils::RGBA8));
         } else {
             dstTexture = CreateTexture(dstSpec, dstUsage);
         }
@@ -588,25 +588,25 @@ class CopyTextureForBrowser_Formats
         // Create and init source texture.
         // This fixed source texture data is for color conversion tests.
         // The source data can fill a texture in default width and height.
-        std::vector<RGBA8> srcRGBA8UnormTextureArrayCopyData{
+        std::vector<utils::RGBA8> srcRGBA8UnormTextureArrayCopyData{
             // Take RGBA8Unorm as example:
             // R channel has different values
-            RGBA8(0, 255, 255, 255),    // r = 0.0
-            RGBA8(102, 255, 255, 255),  // r = 0.4
-            RGBA8(153, 255, 255, 255),  // r = 0.6
+            utils::RGBA8(0, 255, 255, 255),    // r = 0.0
+            utils::RGBA8(102, 255, 255, 255),  // r = 0.4
+            utils::RGBA8(153, 255, 255, 255),  // r = 0.6
 
             // G channel has different values
-            RGBA8(255, 0, 255, 255),    // g = 0.0
-            RGBA8(255, 102, 255, 255),  // g = 0.4
-            RGBA8(255, 153, 255, 255),  // g = 0.6
+            utils::RGBA8(255, 0, 255, 255),    // g = 0.0
+            utils::RGBA8(255, 102, 255, 255),  // g = 0.4
+            utils::RGBA8(255, 153, 255, 255),  // g = 0.6
 
             // B channel has different values
-            RGBA8(255, 255, 0, 255),    // b = 0.0
-            RGBA8(255, 255, 102, 255),  // b = 0.4
-            RGBA8(255, 255, 153, 255),  // b = 0.6
+            utils::RGBA8(255, 255, 0, 255),    // b = 0.0
+            utils::RGBA8(255, 255, 102, 255),  // b = 0.4
+            utils::RGBA8(255, 255, 153, 255),  // b = 0.6
 
             // A channel set to 0
-            RGBA8(255, 255, 255, 0)  // a = 0
+            utils::RGBA8(255, 255, 255, 0)  // a = 0
         };
 
         std::vector<uint16_t> srcRGBA16FloatTextureArrayCopyData{
@@ -659,7 +659,7 @@ class CopyTextureForBrowser_Formats
             case wgpu::TextureFormat::BGRA8Unorm:
                 return CreateAndInitTexture(
                     srcSpec, srcUsage, srcCopyLayout, srcRGBA8UnormTextureArrayCopyData.data(),
-                    srcRGBA8UnormTextureArrayCopyData.size() * sizeof(RGBA8));
+                    srcRGBA8UnormTextureArrayCopyData.size() * sizeof(utils::RGBA8));
             case wgpu::TextureFormat::RGBA16Float:
                 return CreateAndInitTexture(
                     srcSpec, srcUsage, srcCopyLayout, srcRGBA16FloatTextureArrayCopyData.data(),
@@ -813,45 +813,45 @@ class CopyTextureForBrowser_ColorSpace
     }
 
     // TODO(crbug.com/dawn/1140): Generate source data automatically.
-    std::vector<RGBA8> GetSourceData(wgpu::AlphaMode srcTextureAlphaMode) {
+    std::vector<utils::RGBA8> GetSourceData(wgpu::AlphaMode srcTextureAlphaMode) {
         if (srcTextureAlphaMode == wgpu::AlphaMode::Premultiplied) {
-            return std::vector<RGBA8>{
-                RGBA8(0, 102, 102, 102),  // a = 0.4
-                RGBA8(102, 0, 0, 102),    // a = 0.4
-                RGBA8(153, 0, 0, 153),    // a = 0.6
-                RGBA8(255, 0, 0, 255),    // a = 1.0
+            return std::vector<utils::RGBA8>{
+                utils::RGBA8(0, 102, 102, 102),  // a = 0.4
+                utils::RGBA8(102, 0, 0, 102),    // a = 0.4
+                utils::RGBA8(153, 0, 0, 153),    // a = 0.6
+                utils::RGBA8(255, 0, 0, 255),    // a = 1.0
 
-                RGBA8(153, 0, 153, 153),  // a = 0.6
-                RGBA8(0, 102, 0, 102),    // a = 0.4
-                RGBA8(0, 153, 0, 153),    // a = 0.6
-                RGBA8(0, 255, 0, 255),    // a = 1.0
+                utils::RGBA8(153, 0, 153, 153),  // a = 0.6
+                utils::RGBA8(0, 102, 0, 102),    // a = 0.4
+                utils::RGBA8(0, 153, 0, 153),    // a = 0.6
+                utils::RGBA8(0, 255, 0, 255),    // a = 1.0
 
-                RGBA8(255, 255, 0, 255),  // a = 1.0
-                RGBA8(0, 0, 102, 102),    // a = 0.4
-                RGBA8(0, 0, 153, 153),    // a = 0.6
-                RGBA8(0, 0, 255, 255),    // a = 1.0
+                utils::RGBA8(255, 255, 0, 255),  // a = 1.0
+                utils::RGBA8(0, 0, 102, 102),    // a = 0.4
+                utils::RGBA8(0, 0, 153, 153),    // a = 0.6
+                utils::RGBA8(0, 0, 255, 255),    // a = 1.0
             };
         }
 
-        return std::vector<RGBA8>{
+        return std::vector<utils::RGBA8>{
             // Take RGBA8Unorm as example:
             // R channel has different values
-            RGBA8(0, 255, 255, 255),  // r = 0.0
-            RGBA8(102, 0, 0, 255),    // r = 0.4
-            RGBA8(153, 0, 0, 255),    // r = 0.6
-            RGBA8(255, 0, 0, 255),    // r = 1.0
+            utils::RGBA8(0, 255, 255, 255),  // r = 0.0
+            utils::RGBA8(102, 0, 0, 255),    // r = 0.4
+            utils::RGBA8(153, 0, 0, 255),    // r = 0.6
+            utils::RGBA8(255, 0, 0, 255),    // r = 1.0
 
             // G channel has different values
-            RGBA8(255, 0, 255, 255),  // g = 0.0
-            RGBA8(0, 102, 0, 255),    // g = 0.4
-            RGBA8(0, 153, 0, 255),    // g = 0.6
-            RGBA8(0, 255, 0, 255),    // g = 1.0
+            utils::RGBA8(255, 0, 255, 255),  // g = 0.0
+            utils::RGBA8(0, 102, 0, 255),    // g = 0.4
+            utils::RGBA8(0, 153, 0, 255),    // g = 0.6
+            utils::RGBA8(0, 255, 0, 255),    // g = 1.0
 
             // B channel has different values
-            RGBA8(255, 255, 0, 255),  // b = 0.0
-            RGBA8(0, 0, 102, 255),    // b = 0.4
-            RGBA8(0, 0, 153, 255),    // b = 0.6
-            RGBA8(0, 0, 255, 255),    // b = 1.0
+            utils::RGBA8(255, 255, 0, 255),  // b = 0.0
+            utils::RGBA8(0, 0, 102, 255),    // b = 0.4
+            utils::RGBA8(0, 0, 153, 255),    // b = 0.6
+            utils::RGBA8(0, 0, 255, 255),    // b = 1.0
         };
     }
 
@@ -1021,7 +1021,7 @@ class CopyTextureForBrowser_ColorSpace
         options.dstTransferFunctionParameters = dstColorSpaceInfo.gammaEncodingParams.data();
         options.dstAlphaMode = GetParam().mDstAlphaMode;
 
-        std::vector<RGBA8> sourceTextureData = GetSourceData(options.srcAlphaMode);
+        std::vector<utils::RGBA8> sourceTextureData = GetSourceData(options.srcAlphaMode);
         const wgpu::Extent3D& copySize = {kWidth, kHeight};
 
         const utils::TextureDataCopyLayout srcCopyLayout =
@@ -1034,7 +1034,7 @@ class CopyTextureForBrowser_ColorSpace
                                       wgpu::TextureUsage::TextureBinding;
         wgpu::Texture srcTexture = this->CreateAndInitTexture(
             srcTextureSpec, srcUsage, srcCopyLayout, sourceTextureData.data(),
-            sourceTextureData.size() * sizeof(RGBA8));
+            sourceTextureData.size() * sizeof(utils::RGBA8));
 
         // Create dst texture.
         wgpu::Texture dstTexture = this->CreateTexture(

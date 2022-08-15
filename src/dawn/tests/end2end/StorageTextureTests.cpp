@@ -142,8 +142,9 @@ class StorageTextureTests : public DawnTest {
             // 8-bit (normalized/non-normalized signed/unsigned integer) 4-component formats
             case wgpu::TextureFormat::RGBA8Unorm:
             case wgpu::TextureFormat::RGBA8Uint: {
-                RGBA8* valuePtr = static_cast<RGBA8*>(pixelValuePtr);
-                *valuePtr = RGBA8(pixelValue, pixelValue * 2, pixelValue * 3, pixelValue * 4);
+                utils::RGBA8* valuePtr = static_cast<utils::RGBA8*>(pixelValuePtr);
+                *valuePtr =
+                    utils::RGBA8(pixelValue, pixelValue * 2, pixelValue * 3, pixelValue * 4);
                 break;
             }
 
@@ -488,7 +489,7 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         queue.Submit(1, &commandBuffer);
 
         // Check if the contents in the output texture are all as expected (green).
-        EXPECT_PIXEL_RGBA8_EQ(RGBA8::kGreen, outputTexture, 0, 0)
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8::kGreen, outputTexture, 0, 0)
             << "\nVertex Shader:\n"
             << vertexShader << "\n\nFragment Shader:\n"
             << fragmentShader;

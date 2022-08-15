@@ -581,9 +581,9 @@ TEST_P(D3D12SharedHandleUsageTests, ClearInD3D11CopyAndReadbackInD3D12) {
 
     // Readback the destination texture and ensure it contains the colors we used
     // to clear the source texture on the D3D device.
-    EXPECT_PIXEL_RGBA8_EQ(
-        RGBA8(clearColor.r * 255u, clearColor.g * 255u, clearColor.b * 255u, clearColor.a * 255u),
-        dawnCopyDestTexture, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(clearColor.r * 255u, clearColor.g * 255u,
+                                       clearColor.b * 255u, clearColor.a * 255u),
+                          dawnCopyDestTexture, 0, 0);
 }
 
 // 1. Create and clear a D3D11 texture
@@ -600,9 +600,9 @@ TEST_P(D3D12SharedHandleUsageTests, ClearInD3D11ReadbackInD3D12) {
 
     // Readback the destination texture and ensure it contains the colors we used
     // to clear the source texture on the D3D device.
-    EXPECT_PIXEL_RGBA8_EQ(
-        RGBA8(clearColor.r * 255, clearColor.g * 255, clearColor.b * 255, clearColor.a * 255),
-        dawnTexture, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(clearColor.r * 255, clearColor.g * 255, clearColor.b * 255,
+                                       clearColor.a * 255),
+                          dawnTexture, 0, 0);
 }
 
 // 1. Create and clear a D3D11 texture
@@ -690,7 +690,7 @@ TEST_P(D3D12SharedHandleUsageTests, UninitializedTextureIsCleared) {
 
     // Readback the destination texture and ensure it contains the colors we used
     // to clear the source texture on the D3D device.
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0, 0), dawnTexture, 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 0, 0, 0), dawnTexture, 0, 0);
 }
 
 // 1. Create an external image from the DX11 texture.
@@ -710,7 +710,7 @@ TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImage) {
         ASSERT_NE(texture.Get(), nullptr);
         ClearImage(texture.Get(), solidRed, device);
 
-        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0xFF, 0, 0, 0xFF), texture.Get(), 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0xFF, 0, 0, 0xFF), texture.Get(), 0, 0);
     }
 
     // Once finished with the first texture, destroy it so we may re-acquire the external image
@@ -727,7 +727,7 @@ TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImage) {
     texture = wgpu::Texture::Acquire(externalImage->ProduceTexture(&externalAccessDesc));
 
     // Check again that the new texture is still red
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0xFF, 0, 0, 0xFF), texture.Get(), 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0xFF, 0, 0, 0xFF), texture.Get(), 0, 0);
 
     // Clear the new texture to blue
     {
@@ -735,7 +735,7 @@ TEST_P(D3D12SharedHandleUsageTests, ReuseExternalImage) {
         ASSERT_NE(texture.Get(), nullptr);
         ClearImage(texture.Get(), solidBlue, device);
 
-        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0, 0, 0xFF, 0xFF), texture.Get(), 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 0, 0xFF, 0xFF), texture.Get(), 0, 0);
     }
 
     texture.Destroy();
@@ -755,7 +755,7 @@ TEST_P(D3D12SharedHandleUsageTests, ConcurrentExternalImageReadAccess) {
         ASSERT_NE(texture.Get(), nullptr);
         ClearImage(texture.Get(), solidRed, device);
 
-        EXPECT_PIXEL_RGBA8_EQ(RGBA8(0xFF, 0, 0, 0xFF), texture.Get(), 0, 0);
+        EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0xFF, 0, 0, 0xFF), texture.Get(), 0, 0);
     }
 
     texture.Destroy();
@@ -774,8 +774,8 @@ TEST_P(D3D12SharedHandleUsageTests, ConcurrentExternalImageReadAccess) {
         wgpu::Texture::Acquire(externalImage->ProduceTexture(&externalAccessDesc));
 
     // Check again that the new textures are also red.
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0xFF, 0, 0, 0xFF), texture1.Get(), 0, 0);
-    EXPECT_PIXEL_RGBA8_EQ(RGBA8(0xFF, 0, 0, 0xFF), texture2.Get(), 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0xFF, 0, 0, 0xFF), texture1.Get(), 0, 0);
+    EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0xFF, 0, 0, 0xFF), texture2.Get(), 0, 0);
 
     texture1.Destroy();
     texture2.Destroy();

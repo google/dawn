@@ -63,17 +63,21 @@ class VideoViewsTests : public DawnTest {
     // RGB colors converted into YUV (per plane), for testing.
     // RGB colors are mapped to the BT.601 definition of luma.
     // https://docs.microsoft.com/en-us/windows/win32/medfound/about-yuv-video
-    static constexpr std::array<RGBA8, 2> kYellowYUVColor = {RGBA8{210, 0, 0, 0xFF},    // Y
-                                                             RGBA8{16, 146, 0, 0xFF}};  // UV
+    static constexpr std::array<utils::RGBA8, 2> kYellowYUVColor = {
+        utils::RGBA8{210, 0, 0, 0xFF},    // Y
+        utils::RGBA8{16, 146, 0, 0xFF}};  // UV
 
-    static constexpr std::array<RGBA8, 2> kWhiteYUVColor = {RGBA8{235, 0, 0, 0xFF},     // Y
-                                                            RGBA8{128, 128, 0, 0xFF}};  // UV
+    static constexpr std::array<utils::RGBA8, 2> kWhiteYUVColor = {
+        utils::RGBA8{235, 0, 0, 0xFF},     // Y
+        utils::RGBA8{128, 128, 0, 0xFF}};  // UV
 
-    static constexpr std::array<RGBA8, 2> kBlueYUVColor = {RGBA8{41, 0, 0, 0xFF},      // Y
-                                                           RGBA8{240, 110, 0, 0xFF}};  // UV
+    static constexpr std::array<utils::RGBA8, 2> kBlueYUVColor = {
+        utils::RGBA8{41, 0, 0, 0xFF},      // Y
+        utils::RGBA8{240, 110, 0, 0xFF}};  // UV
 
-    static constexpr std::array<RGBA8, 2> kRedYUVColor = {RGBA8{81, 0, 0, 0xFF},     // Y
-                                                          RGBA8{90, 240, 0, 0xFF}};  // UV
+    static constexpr std::array<utils::RGBA8, 2> kRedYUVColor = {
+        utils::RGBA8{81, 0, 0, 0xFF},     // Y
+        utils::RGBA8{90, 240, 0, 0xFF}};  // UV
 
     static std::vector<uint8_t> GetTestTextureData(wgpu::TextureFormat format, bool isCheckerboard);
     static uint32_t NumPlanes(wgpu::TextureFormat format);

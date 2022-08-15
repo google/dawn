@@ -86,14 +86,15 @@ class CullingTest : public DawnTest {
         wgpu::CommandBuffer commandBuffer = commandEncoder.Finish();
         queue.Submit(1, &commandBuffer);
 
-        const RGBA8 kBackgroundColor = RGBA8::kBlue;
-        const RGBA8 kTopLeftColor = RGBA8::kBlack;
-        constexpr RGBA8 kBottomRightColor = RGBA8(3, 3, 0, 255);
+        const utils::RGBA8 kBackgroundColor = utils::RGBA8::kBlue;
+        const utils::RGBA8 kTopLeftColor = utils::RGBA8::kBlack;
+        constexpr utils::RGBA8 kBottomRightColor = utils::RGBA8(3, 3, 0, 255);
 
-        RGBA8 kCCWTriangleTopLeftColor = isCCWTriangleCulled ? kBackgroundColor : kTopLeftColor;
+        utils::RGBA8 kCCWTriangleTopLeftColor =
+            isCCWTriangleCulled ? kBackgroundColor : kTopLeftColor;
         EXPECT_PIXEL_RGBA8_EQ(kCCWTriangleTopLeftColor, colorTexture, 0, 0);
 
-        RGBA8 kCWTriangleBottomRightColor =
+        utils::RGBA8 kCWTriangleBottomRightColor =
             isCWTriangleCulled ? kBackgroundColor : kBottomRightColor;
         EXPECT_PIXEL_RGBA8_EQ(kCWTriangleBottomRightColor, colorTexture, kSize - 1, kSize - 1);
     }

@@ -89,7 +89,7 @@ class DepthStencilStateTest : public DawnTest {
 
     struct TestSpec {
         const wgpu::DepthStencilState& depthStencil;
-        RGBA8 color;
+        utils::RGBA8 color;
         float depth;
         uint32_t stencil;
         wgpu::FrontFace frontFace = wgpu::FrontFace::CCW;
@@ -125,10 +125,10 @@ class DepthStencilStateTest : public DawnTest {
         state.stencilReadMask = 0xff;
         state.stencilWriteMask = 0xff;
 
-        RGBA8 baseColor = RGBA8(255, 255, 255, 255);
-        RGBA8 lessColor = RGBA8(255, 0, 0, 255);
-        RGBA8 equalColor = RGBA8(0, 255, 0, 255);
-        RGBA8 greaterColor = RGBA8(0, 0, 255, 255);
+        utils::RGBA8 baseColor = utils::RGBA8(255, 255, 255, 255);
+        utils::RGBA8 lessColor = utils::RGBA8(255, 0, 0, 255);
+        utils::RGBA8 equalColor = utils::RGBA8(0, 255, 0, 255);
+        utils::RGBA8 greaterColor = utils::RGBA8(0, 0, 255, 255);
 
         // Base triangle at depth 0.5, depth always, depth write enabled
         TestSpec base = {baseState, baseColor, 0.5f, 0u};
@@ -179,10 +179,10 @@ class DepthStencilStateTest : public DawnTest {
         state.stencilReadMask = 0xff;
         state.stencilWriteMask = 0xff;
 
-        RGBA8 baseColor = RGBA8(255, 255, 255, 255);
-        RGBA8 lessColor = RGBA8(255, 0, 0, 255);
-        RGBA8 equalColor = RGBA8(0, 255, 0, 255);
-        RGBA8 greaterColor = RGBA8(0, 0, 255, 255);
+        utils::RGBA8 baseColor = utils::RGBA8(255, 255, 255, 255);
+        utils::RGBA8 lessColor = utils::RGBA8(255, 0, 0, 255);
+        utils::RGBA8 equalColor = utils::RGBA8(0, 255, 0, 255);
+        utils::RGBA8 greaterColor = utils::RGBA8(0, 0, 255, 255);
 
         // Base triangle with stencil reference 1
         TestSpec base = {baseState, baseColor, 0.0f, 1u};
@@ -235,10 +235,10 @@ class DepthStencilStateTest : public DawnTest {
         CheckStencil(
             {
                 // Wipe the stencil buffer with the initialStencil value
-                {baseState, RGBA8(255, 255, 255, 255), 0.f, initialStencil},
+                {baseState, utils::RGBA8(255, 255, 255, 255), 0.f, initialStencil},
 
                 // Draw a triangle with the provided stencil operation and reference
-                {state, RGBA8(255, 0, 0, 255), 0.f, reference},
+                {state, utils::RGBA8(255, 0, 0, 255), 0.f, reference},
             },
             expectedStencil);
     }
@@ -258,16 +258,16 @@ class DepthStencilStateTest : public DawnTest {
         state.stencilReadMask = 0xff;
         state.stencilWriteMask = 0xff;
 
-        testParams.push_back({state, RGBA8(0, 255, 0, 255), 0, expectedStencil});
-        DoTest(testParams, RGBA8(0, 255, 0, 255));
+        testParams.push_back({state, utils::RGBA8(0, 255, 0, 255), 0, expectedStencil});
+        DoTest(testParams, utils::RGBA8(0, 255, 0, 255));
     }
 
     // Each test param represents a pair of triangles with a color, depth, stencil value, and
     // depthStencil state, one frontfacing, one backfacing Draw the triangles in order and check the
     // expected colors for the frontfaces and backfaces
     void DoTest(const std::vector<TestSpec>& testParams,
-                const RGBA8& expectedFront,
-                const RGBA8& expectedBack,
+                const utils::RGBA8& expectedFront,
+                const utils::RGBA8& expectedBack,
                 bool isSingleEncoderMultiplePass = false) {
         wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
 
@@ -355,7 +355,7 @@ class DepthStencilStateTest : public DawnTest {
     }
 
     void DoTest(const std::vector<TestSpec>& testParams,
-                const RGBA8& expected,
+                const utils::RGBA8& expected,
                 bool isSingleEncoderMultiplePass = false) {
         DoTest(testParams, expected, expected, isSingleEncoderMultiplePass);
     }
@@ -386,9 +386,9 @@ TEST_P(DepthStencilStateTest, Basic) {
 
     DoTest(
         {
-            {state, RGBA8(0, 255, 0, 255), 0.5f, 0u},
+            {state, utils::RGBA8(0, 255, 0, 255), 0.5f, 0u},
         },
-        RGBA8(0, 255, 0, 255));
+        utils::RGBA8(0, 255, 0, 255));
 }
 
 // Test defaults: depth and stencil tests disabled
@@ -408,9 +408,9 @@ TEST_P(DepthStencilStateTest, DepthStencilDisabled) {
     state.stencilWriteMask = 0xff;
 
     TestSpec specs[3] = {
-        {state, RGBA8(255, 0, 0, 255), 0.0f, 0u},
-        {state, RGBA8(0, 255, 0, 255), 0.5f, 0u},
-        {state, RGBA8(0, 0, 255, 255), 1.0f, 0u},
+        {state, utils::RGBA8(255, 0, 0, 255), 0.0f, 0u},
+        {state, utils::RGBA8(0, 255, 0, 255), 0.5f, 0u},
+        {state, utils::RGBA8(0, 0, 255, 255), 1.0f, 0u},
     };
 
     // Test that for all combinations, the last triangle drawn is the one visible
@@ -490,15 +490,15 @@ TEST_P(DepthStencilStateTest, DepthWriteDisabled) {
 
     DoTest(
         {
-            {baseState, RGBA8(255, 255, 255, 255), 1.f,
+            {baseState, utils::RGBA8(255, 255, 255, 255), 1.f,
              0u},  // Draw a base triangle with depth enabled
-            {noDepthWrite, RGBA8(0, 0, 0, 255), 0.f,
+            {noDepthWrite, utils::RGBA8(0, 0, 0, 255), 0.f,
              0u},  // Draw a second triangle without depth enabled
-            {checkState, RGBA8(0, 255, 0, 255), 1.f,
+            {checkState, utils::RGBA8(0, 255, 0, 255), 1.f,
              0u},  // Draw a third triangle which should occlude the second even though it is behind
                    // it
         },
-        RGBA8(0, 255, 0, 255));
+        utils::RGBA8(0, 255, 0, 255));
 }
 
 // The following tests check that each stencil comparison function works
@@ -599,9 +599,9 @@ TEST_P(DepthStencilStateTest, StencilReadMask) {
     state.stencilReadMask = 0x2;
     state.stencilWriteMask = 0xff;
 
-    RGBA8 baseColor = RGBA8(255, 255, 255, 255);
-    RGBA8 red = RGBA8(255, 0, 0, 255);
-    RGBA8 green = RGBA8(0, 255, 0, 255);
+    utils::RGBA8 baseColor = utils::RGBA8(255, 255, 255, 255);
+    utils::RGBA8 red = utils::RGBA8(255, 0, 0, 255);
+    utils::RGBA8 green = utils::RGBA8(0, 255, 0, 255);
 
     TestSpec base = {baseState, baseColor, 0.5f, 3u};  // Base triangle to set the stencil to 3
     DoTest({base, {state, red, 0.f, 1u}}, baseColor);  // Triangle with stencil reference 1 and read
@@ -638,8 +638,8 @@ TEST_P(DepthStencilStateTest, StencilWriteMask) {
     state.stencilReadMask = 0xff;
     state.stencilWriteMask = 0xff;
 
-    RGBA8 baseColor = RGBA8(255, 255, 255, 255);
-    RGBA8 green = RGBA8(0, 255, 0, 255);
+    utils::RGBA8 baseColor = utils::RGBA8(255, 255, 255, 255);
+    utils::RGBA8 green = utils::RGBA8(0, 255, 0, 255);
 
     TestSpec base = {baseState, baseColor, 0.5f,
                      3u};  // Base triangle with stencil reference 3 and mask 1 to set the stencil 1
@@ -679,8 +679,9 @@ TEST_P(DepthStencilStateTest, StencilFail) {
 
     CheckStencil(
         {
-            {baseState, RGBA8(255, 255, 255, 255), 1.f, 1},  // Triangle to set stencil value to 1
-            {state, RGBA8(0, 0, 0, 255), 0.f,
+            {baseState, utils::RGBA8(255, 255, 255, 255), 1.f,
+             1},  // Triangle to set stencil value to 1
+            {state, utils::RGBA8(0, 0, 0, 255), 0.f,
              2}  // Triangle with stencil reference 2 fails the Less comparison function
         },
         2);  // Replace the stencil on failure, so it should be 2
@@ -714,9 +715,9 @@ TEST_P(DepthStencilStateTest, StencilDepthFail) {
     state.stencilReadMask = 0xff;
     state.stencilWriteMask = 0xff;
 
-    CheckStencil({{baseState, RGBA8(255, 255, 255, 255), 0.f,
+    CheckStencil({{baseState, utils::RGBA8(255, 255, 255, 255), 0.f,
                    1},  // Triangle to set stencil value to 1. Depth is 0
-                  {state, RGBA8(0, 0, 0, 255), 1.f,
+                  {state, utils::RGBA8(0, 0, 0, 255), 1.f,
                    2}},  // Triangle with stencil reference 2 passes the Greater comparison
                          // function. At depth 1, it fails the Less depth test
                  2);     // Replace the stencil on stencil pass, depth failure, so it should be 2
@@ -750,9 +751,9 @@ TEST_P(DepthStencilStateTest, StencilDepthPass) {
     state.stencilReadMask = 0xff;
     state.stencilWriteMask = 0xff;
 
-    CheckStencil({{baseState, RGBA8(255, 255, 255, 255), 1.f,
+    CheckStencil({{baseState, utils::RGBA8(255, 255, 255, 255), 1.f,
                    1},  // Triangle to set stencil value to 1. Depth is 0
-                  {state, RGBA8(0, 0, 0, 255), 0.f,
+                  {state, utils::RGBA8(0, 0, 0, 255), 0.f,
                    2}},  // Triangle with stencil reference 2 passes the Greater comparison
                          // function. At depth 0, it pass the Less depth test
                  2);     // Replace the stencil on stencil pass, depth pass, so it should be 2
@@ -784,8 +785,10 @@ TEST_P(DepthStencilStateTest, StencilFrontAndBackFace) {
     state.stencilBack.compare = wgpu::CompareFunction::Never;
 
     // The front facing triangle passes the stencil comparison but the back facing one doesn't.
-    DoTest({{state, RGBA8::kRed, 0.f, 0u, wgpu::FrontFace::CCW}}, RGBA8::kRed, RGBA8::kZero);
-    DoTest({{state, RGBA8::kRed, 0.f, 0u, wgpu::FrontFace::CW}}, RGBA8::kZero, RGBA8::kRed);
+    DoTest({{state, utils::RGBA8::kRed, 0.f, 0u, wgpu::FrontFace::CCW}}, utils::RGBA8::kRed,
+           utils::RGBA8::kZero);
+    DoTest({{state, utils::RGBA8::kRed, 0.f, 0u, wgpu::FrontFace::CW}}, utils::RGBA8::kZero,
+           utils::RGBA8::kRed);
 }
 
 // Test that the depth reference of a new render pass is initialized to default value 0
@@ -808,11 +811,11 @@ TEST_P(DepthStencilStateTest, StencilReferenceInitialized) {
         // Only set the stencil reference in the first pass, and test that for other pass it should
         // be default value rather than inherited
         std::vector<TestSpec> testParams = {
-            {stencilAlwaysReplaceState, RGBA8::kRed, 0.f, 0x1, wgpu::FrontFace::CCW, true},
-            {stencilEqualKeepState, RGBA8::kGreen, 0.f, 0x0, wgpu::FrontFace::CCW, false}};
+            {stencilAlwaysReplaceState, utils::RGBA8::kRed, 0.f, 0x1, wgpu::FrontFace::CCW, true},
+            {stencilEqualKeepState, utils::RGBA8::kGreen, 0.f, 0x0, wgpu::FrontFace::CCW, false}};
 
         // Since the stencil reference is not inherited, second draw won't pass the stencil test
-        DoTest(testParams, RGBA8::kZero, RGBA8::kZero, true);
+        DoTest(testParams, utils::RGBA8::kZero, utils::RGBA8::kZero, true);
     }
 
     // Test that stencil reference is initialized as zero for new render pass
@@ -820,12 +823,13 @@ TEST_P(DepthStencilStateTest, StencilReferenceInitialized) {
         // First pass sets the stencil to 0x1, the second pass sets the stencil to its default
         // value, and the third pass tests if the stencil is zero
         std::vector<TestSpec> testParams = {
-            {stencilAlwaysReplaceState, RGBA8::kRed, 0.f, 0x1, wgpu::FrontFace::CCW, true},
-            {stencilAlwaysReplaceState, RGBA8::kGreen, 0.f, 0x1, wgpu::FrontFace::CCW, false},
-            {stencilEqualKeepState, RGBA8::kBlue, 0.f, 0x0, wgpu::FrontFace::CCW, true}};
+            {stencilAlwaysReplaceState, utils::RGBA8::kRed, 0.f, 0x1, wgpu::FrontFace::CCW, true},
+            {stencilAlwaysReplaceState, utils::RGBA8::kGreen, 0.f, 0x1, wgpu::FrontFace::CCW,
+             false},
+            {stencilEqualKeepState, utils::RGBA8::kBlue, 0.f, 0x0, wgpu::FrontFace::CCW, true}};
 
         // The third draw should pass the stencil test since the second pass set it to default zero
-        DoTest(testParams, RGBA8::kBlue, RGBA8::kBlue, true);
+        DoTest(testParams, utils::RGBA8::kBlue, utils::RGBA8::kBlue, true);
     }
 }
 

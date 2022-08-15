@@ -19,7 +19,7 @@
 #include "dawn/utils/WGPUHelpers.h"
 
 constexpr uint32_t kRTSize = 4;
-const RGBA8 kColors[2] = {RGBA8::kGreen, RGBA8::kBlue};
+const utils::RGBA8 kColors[2] = {utils::RGBA8::kGreen, utils::RGBA8::kBlue};
 
 // RenderBundleTest tests simple usage of RenderBundles to draw. The implementaiton
 // of RenderBundle is shared significantly with render pass execution which is
