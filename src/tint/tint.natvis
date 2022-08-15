@@ -16,6 +16,34 @@
 -->
 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+	<Type Name="tint::utils::Slice&lt;*&gt;">
+		<DisplayString>{{ length={len}, capacity={cap} }}</DisplayString>
+		<Expand>
+			<!--<Item Name="[length]">len</Item>
+			<Item Name="[capacity]">cap</Item>-->
+			<ArrayItems>
+				<Size>len</Size>
+				<ValuePointer>data</ValuePointer>
+			</ArrayItems>
+		</Expand>
+	</Type>
+
+	<Type Name="tint::utils::Vector&lt;*,*&gt;">
+		<Expand>
+			<Item Name="[heap]">impl_.slice.cap > (int)$T2</Item>
+			<ExpandedItem>impl_.slice</ExpandedItem>
+			<!--<Item Name="[slice]">impl_.slice</Item>-->
+		</Expand>
+	</Type>
+
+	<Type Name="tint::utils::VectorRef&lt;*&gt;">
+		<Expand>
+			<Item Name="[can move]">can_move_</Item>
+			<ExpandedItem>slice_</ExpandedItem>
+			<!--<Item Name="[slice]">slice_</Item>-->
+		</Expand>
+	</Type>
+
 	<Type Name="tint::Symbol">
 		<!-- Requires TINT_SYMBOL_STORE_DEBUG_NAME defined to 1 -->
 		<DisplayString Optional="true">{debug_name_,sb}</DisplayString>
@@ -63,7 +91,7 @@
 	</Type>
 
 	<Type Name="tint::ast::IdentifierExpression">
-		 <!--the ",sb" specifier removes the double quotes on the displayed string -->
+		<!--the ",sb" specifier removes the double quotes on the displayed string -->
 		<DisplayString>{symbol}</DisplayString>
 		<Expand>
 			<Item Name="symbol">symbol</Item>
