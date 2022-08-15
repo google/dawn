@@ -3422,8 +3422,13 @@ fn foo() {
 )";
 
     RunTest(src, false);
-    EXPECT_EQ(error_,
-              R"(test:14:7 warning: 'workgroupBarrier' must only be called from uniform control flow
+    EXPECT_EQ(
+        error_,
+        R"(test:11:7 warning: use of deprecated language feature: fallthrough is set to be removed from WGSL. Case can accept multiple selectors if the existing case bodies are empty. default is not yet supported in a case selector list.
+      fallthrough;
+      ^^^^^^^^^^^
+
+test:14:7 warning: 'workgroupBarrier' must only be called from uniform control flow
       workgroupBarrier();
       ^^^^^^^^^^^^^^^^
 
@@ -3487,8 +3492,13 @@ fn foo() {
 )";
 
     RunTest(src, false);
-    EXPECT_EQ(error_,
-              R"(test:14:9 warning: 'workgroupBarrier' must only be called from uniform control flow
+    EXPECT_EQ(
+        error_,
+        R"(test:10:7 warning: use of deprecated language feature: fallthrough is set to be removed from WGSL. Case can accept multiple selectors if the existing case bodies are empty. default is not yet supported in a case selector list.
+      fallthrough;
+      ^^^^^^^^^^^
+
+test:14:9 warning: 'workgroupBarrier' must only be called from uniform control flow
         workgroupBarrier();
         ^^^^^^^^^^^^^^^^
 
@@ -3539,32 +3549,6 @@ test:6:11 note: reading from read_write storage buffer 'non_uniform' may result 
   var x = non_uniform;
           ^^^^^^^^^^^
 )");
-}
-
-TEST_F(UniformityAnalysisTest, Switch_VarBecomesUniformInDifferentCase_WithFallthrough) {
-    std::string src = R"(
-@group(0) @binding(0) var<storage, read_write> non_uniform : i32;
-@group(0) @binding(0) var<uniform> condition : i32;
-
-fn foo() {
-  var x = non_uniform;
-  switch (condition) {
-    case 0: {
-      x = 5;
-      fallthrough;
-    }
-    case 42: {
-      if (x == 0) {
-        workgroupBarrier();
-      }
-    }
-    default: {
-    }
-  }
-}
-)";
-
-    RunTest(src, true);
 }
 
 TEST_F(UniformityAnalysisTest, Switch_VarBecomesNonUniformInCase_BarrierAfter) {
