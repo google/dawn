@@ -32,7 +32,7 @@ static constexpr const FailureType Failure;
 ///         information about the failure, except that something failed. Must not be the same type
 ///         as SUCCESS_TYPE.
 template <typename SUCCESS_TYPE, typename FAILURE_TYPE = FailureType>
-struct Result {
+struct [[nodiscard]] Result {
     static_assert(!std::is_same_v<SUCCESS_TYPE, FAILURE_TYPE>,
                   "Result must not have the same type for SUCCESS_TYPE and FAILURE_TYPE");
 
