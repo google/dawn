@@ -3262,9 +3262,9 @@ TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AFloat) {
     EXPECT_EQ(r()->error(), "1:1 error: '-inf' cannot be represented as 'abstract-float'");
 }
 
-TEST_F(ResolverConstEvalTest, BinaryAbstractMixed) {
-    auto* a = Const("a", nullptr, Expr(1_a));
-    auto* b = Const("b", nullptr, Expr(2.3_a));
+TEST_F(ResolverConstEvalTest, BinaryAbstractMixed_ScalarScalar) {
+    auto* a = Const("a", nullptr, Expr(1_a));    // AInt
+    auto* b = Const("b", nullptr, Expr(2.3_a));  // AFloat
     auto* c = Add(Expr("a"), Expr("b"));
     WrapInFunction(a, b, c);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -3273,6 +3273,20 @@ TEST_F(ResolverConstEvalTest, BinaryAbstractMixed) {
     ASSERT_TRUE(sem->ConstantValue());
     auto result = sem->ConstantValue()->As<AFloat>();
     EXPECT_EQ(result, 3.3f);
+}
+
+TEST_F(ResolverConstEvalTest, BinaryAbstractMixed_ScalarVector) {
+    auto* a = Const("a", nullptr, Expr(1_a));                                   // AInt
+    auto* b = Const("b", nullptr, Construct(ty.vec(nullptr, 3), Expr(2.3_a)));  // AFloat
+    auto* c = Add(Expr("a"), Expr("b"));
+    WrapInFunction(a, b, c);
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    auto* sem = Sem().Get(c);
+    ASSERT_TRUE(sem);
+    ASSERT_TRUE(sem->ConstantValue());
+    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<AFloat>(), 3.3f);
+    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<AFloat>(), 3.3f);
+    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<AFloat>(), 3.3f);
 }
 
 }  // namespace binary_op

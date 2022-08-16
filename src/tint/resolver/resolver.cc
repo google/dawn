@@ -2329,10 +2329,10 @@ sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {
         if (op.const_eval_fn) {
             auto const_args = utils::Vector{lhs->ConstantValue(), rhs->ConstantValue()};
             // Implicit conversion (e.g. AInt -> AFloat)
-            if (!Convert(const_args[0], op.result, lhs->Declaration()->source)) {
+            if (!Convert(const_args[0], op.lhs, lhs->Declaration()->source)) {
                 return nullptr;
             }
-            if (!Convert(const_args[1], op.result, rhs->Declaration()->source)) {
+            if (!Convert(const_args[1], op.rhs, rhs->Declaration()->source)) {
                 return nullptr;
             }
 
