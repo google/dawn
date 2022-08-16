@@ -657,9 +657,9 @@ void Device::InitTogglesFromDriver() {
     uint32_t deviceId = GetAdapter()->GetDeviceId();
     uint32_t vendorId = GetAdapter()->GetVendorId();
 
-    // Currently this workaround is only needed on Intel Gen9 and Gen9.5 GPUs.
+    // Currently this workaround is only needed on Intel Gen9, Gen9.5 and Gen11 GPUs.
     // See http://crbug.com/1161355 for more information.
-    if (gpu_info::IsIntelGen9(vendorId, deviceId)) {
+    if (gpu_info::IsIntelGen9(vendorId, deviceId) || gpu_info::IsIntelGen11(vendorId, deviceId)) {
         SetToggle(Toggle::UseTempBufferInSmallFormatTextureToTextureCopyFromGreaterToLessMipLevel,
                   true);
     }
