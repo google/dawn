@@ -82,6 +82,10 @@ class ParserImpl {
     using StructMemberList = utils::Vector<const ast::StructMember*, 8>;
     //! @endcond
 
+    /// Empty structure used by functions that do not return a value, but need to signal success /
+    /// error with Expect<Void> or Maybe<NoError>.
+    struct Void {};
+
     /// Expect is the return type of the parser methods that are expected to
     /// return a parsed value of type T, unless there was an parse error.
     /// In the case of a parse error the called method will have called
@@ -388,13 +392,13 @@ class ParserImpl {
     /// Parses the `global_directive` grammar element, erroring on parse failure.
     /// @param has_parsed_decl flag indicating if the parser has consumed a global declaration.
     /// @return true on parse success, otherwise an error or no-match.
-    Maybe<bool> global_directive(bool has_parsed_decl);
+    Maybe<Void> global_directive(bool has_parsed_decl);
     /// Parses the `enable_directive` grammar element, erroring on parse failure.
     /// @return true on parse success, otherwise an error or no-match.
-    Maybe<bool> enable_directive();
+    Maybe<Void> enable_directive();
     /// Parses the `global_decl` grammar element, erroring on parse failure.
     /// @return true on parse success, otherwise an error or no-match.
-    Maybe<bool> global_decl();
+    Maybe<Void> global_decl();
     /// Parses a `global_variable_decl` grammar element with the initial
     /// `variable_attribute_list*` provided as `attrs`
     /// @returns the variable parsed or nullptr

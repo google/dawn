@@ -233,6 +233,17 @@ TEST_F(ParserImplTest, GlobalDecl_Struct_Invalid) {
     }
 }
 
+TEST_F(ParserImplTest, GlobalDecl_Struct_UnexpectedAttribute) {
+    auto p = parser("@vertex struct S { i : i32 }");
+
+    auto s = p->global_decl();
+    EXPECT_TRUE(s.errored);
+    EXPECT_FALSE(s.matched);
+
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), "1:2: unexpected attributes");
+}
+
 TEST_F(ParserImplTest, GlobalDecl_StaticAssert_WithParen) {
     auto p = parser("static_assert(true);");
     p->global_decl();

@@ -47,6 +47,12 @@
 namespace tint::reader::wgsl {
 namespace {
 
+using Void = ParserImpl::Void;
+
+/// An instance of Void that can be used to signal success for functions that return Expect<Void> or
+/// Maybe<NoError>.
+static constexpr Void kSuccess;
+
 template <typename T>
 using Expect = ParserImpl::Expect<T>;
 
@@ -351,7 +357,7 @@ void ParserImpl::translation_unit() {
 
 // global_directive
 //  : enable_directive
-Maybe<bool> ParserImpl::global_directive(bool have_parsed_decl) {
+Maybe<Void> ParserImpl::global_directive(bool have_parsed_decl) {
     auto& p = peek();
     auto ed = enable_directive();
     if (ed.matched && have_parsed_decl) {
@@ -362,8 +368,8 @@ Maybe<bool> ParserImpl::global_directive(bool have_parsed_decl) {
 
 // enable_directive
 //  : enable name SEMICLON
-Maybe<bool> ParserImpl::enable_directive() {
-    auto decl = sync(Token::Type::kSemicolon, [&]() -> Maybe<bool> {
+Maybe<Void> ParserImpl::enable_directive() {
+    auto decl = sync(Token::Type::kSemicolon, [&]() -> Maybe<Void> {
         if (!match(Token::Type::kEnable)) {
             return Failure::kNoMatch;
         }
@@ -403,14 +409,14 @@ Maybe<bool> ParserImpl::enable_directive() {
         }
         builder_.AST().AddEnable(create<ast::Enable>(name.source, extension));
 
-        return true;
+        return kSuccess;
     });
 
     if (decl.errored) {
         return Failure::kErrored;
     }
     if (decl.matched) {
-        return true;
+        return kSuccess;
     }
 
     return Failure::kNoMatch;
@@ -424,9 +430,9 @@ Maybe<bool> ParserImpl::enable_directive() {
 //  | struct_decl
 //  | function_decl
 //  | static_assert_statement SEMICOLON
-Maybe<bool> ParserImpl::global_decl() {
+Maybe<Void> ParserImpl::global_decl() {
     if (match(Token::Type::kSemicolon) || match(Token::Type::kEOF)) {
-        return true;
+        return kSuccess;
     }
 
     bool errored = false;
@@ -438,7 +444,7 @@ Maybe<bool> ParserImpl::global_decl() {
         return Failure::kErrored;
     }
 
-    auto decl = sync(Token::Type::kSemicolon, [&]() -> Maybe<bool> {
+    auto decl = sync(Token::Type::kSemicolon, [&]() -> Maybe<Void> {
         auto gv = global_variable_decl(attrs.value);
         if (gv.errored) {
             return Failure::kErrored;
@@ -449,7 +455,7 @@ Maybe<bool> ParserImpl::global_decl() {
             }
 
             builder_.AST().AddGlobalVariable(gv.value);
-            return true;
+            return kSuccess;
         }
 
         auto gc = global_constant_decl(attrs.value);
@@ -466,7 +472,7 @@ Maybe<bool> ParserImpl::global_decl() {
             }
 
             builder_.AST().AddGlobalVariable(gc.value);
-            return true;
+            return kSuccess;
         }
 
         auto ta = type_alias_decl();
@@ -479,7 +485,7 @@ Maybe<bool> ParserImpl::global_decl() {
             }
 
             builder_.AST().AddTypeDecl(ta.value);
-            return true;
+            return kSuccess;
         }
 
         auto assertion = static_assert_statement();
@@ -491,7 +497,7 @@ Maybe<bool> ParserImpl::global_decl() {
             if (!expect("static assertion declaration", Token::Type::kSemicolon)) {
                 return Failure::kErrored;
             }
-            return true;
+            return kSuccess;
         }
 
         return Failure::kNoMatch;
@@ -501,7 +507,10 @@ Maybe<bool> ParserImpl::global_decl() {
         errored = true;
     }
     if (decl.matched) {
-        return expect_attributes_consumed(attrs.value);
+        if (!expect_attributes_consumed(attrs.value)) {
+            return Failure::kErrored;
+        }
+        return kSuccess;
     }
 
     auto str = struct_decl();
@@ -510,7 +519,10 @@ Maybe<bool> ParserImpl::global_decl() {
     }
     if (str.matched) {
         builder_.AST().AddTypeDecl(str.value);
-        return true;
+        if (!expect_attributes_consumed(attrs.value)) {
+            return Failure::kErrored;
+        }
+        return kSuccess;
     }
 
     auto func = function_decl(attrs.value);
@@ -519,7 +531,7 @@ Maybe<bool> ParserImpl::global_decl() {
     }
     if (func.matched) {
         builder_.AST().AddFunction(func.value);
-        return true;
+        return kSuccess;
     }
 
     if (errored) {
