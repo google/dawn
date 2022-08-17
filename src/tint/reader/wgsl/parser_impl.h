@@ -410,21 +410,21 @@ class ParserImpl {
     /// Parses a `variable_decl` grammar element
     /// @returns the parsed variable declaration info
     Maybe<VarDeclInfo> variable_decl();
-    /// Helper for parsing ident or variable_ident_decl. Should not be called directly,
+    /// Helper for parsing ident with an optional type declaration. Should not be called directly,
     /// use the specific version below.
     /// @param use a description of what was being parsed if an error was raised.
     /// @param allow_inferred allow the identifier to be parsed without a type
     /// @returns the parsed identifier, and possibly type, or empty otherwise
-    Expect<TypedIdentifier> expect_ident_or_variable_ident_decl_impl(std::string_view use,
-                                                                     bool allow_inferred);
+    Expect<TypedIdentifier> expect_ident_with_optional_type_decl(std::string_view use,
+                                                                 bool allow_inferred);
     /// Parses a `ident` or a `variable_ident_decl` grammar element, erroring on parse failure.
     /// @param use a description of what was being parsed if an error was raised.
     /// @returns the identifier or empty otherwise.
-    Expect<TypedIdentifier> expect_ident_or_variable_ident_decl(std::string_view use);
+    Expect<TypedIdentifier> expect_optionally_typed_ident(std::string_view use);
     /// Parses a `variable_ident_decl` grammar element, erroring on parse failure.
     /// @param use a description of what was being parsed if an error was raised.
     /// @returns the identifier and type parsed or empty otherwise
-    Expect<TypedIdentifier> expect_variable_ident_decl(std::string_view use);
+    Expect<TypedIdentifier> expect_ident_with_type_decl(std::string_view use);
     /// Parses a `variable_qualifier` grammar element
     /// @returns the variable qualifier information
     Maybe<VariableQualifier> variable_qualifier();

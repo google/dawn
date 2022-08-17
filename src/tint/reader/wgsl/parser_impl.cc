@@ -594,8 +594,8 @@ Maybe<const ast::Variable*> ParserImpl::global_variable_decl(AttributeList& attr
 }
 
 // global_constant_decl :
-//  | LET (ident | variable_ident_decl) global_const_initializer
-//  | attribute* override (ident | variable_ident_decl) (equal expression)?
+//  | LET optionally_typed_ident global_const_initializer
+//  | attribute* override optionally_typed_ident (equal expression)?
 // global_const_initializer
 //  : EQUAL const_expr
 Maybe<const ast::Variable*> ParserImpl::global_constant_decl(AttributeList& attrs) {
@@ -615,7 +615,7 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(AttributeList& attr
         return Failure::kNoMatch;
     }
 
-    auto decl = expect_ident_or_variable_ident_decl(use);
+    auto decl = expect_optionally_typed_ident(use);
     if (decl.errored) {
         return Failure::kErrored;
     }
@@ -666,7 +666,7 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(AttributeList& attr
 }
 
 // variable_decl
-//   : VAR variable_qualifier? (ident | variable_ident_decl)
+//   : VAR variable_qualifier? optionally_typed_ident
 Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
     Source source;
     if (!match(Token::Type::kVar, &source)) {
@@ -682,7 +682,7 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
         vq = explicit_vq.value;
     }
 
-    auto decl = expect_ident_or_variable_ident_decl("variable declaration");
+    auto decl = expect_optionally_typed_ident("variable declaration");
     if (decl.errored) {
         return Failure::kErrored;
     }
@@ -918,7 +918,7 @@ Expect<ast::TexelFormat> ParserImpl::expect_texel_format(std::string_view use) {
     return fmt;
 }
 
-Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_or_variable_ident_decl_impl(
+Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_with_optional_type_decl(
     std::string_view use,
     bool allow_inferred) {
     auto ident = expect_ident(use);
@@ -946,16 +946,17 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_or_variable_ident_d
     return TypedIdentifier{type.value, ident.value, ident.source};
 }
 
-// (ident | variable_ident_decl)
-Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_or_variable_ident_decl(
+// optionally_typed_ident
+//   : ident ( COLON typed_decl ) ?
+Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_optionally_typed_ident(
     std::string_view use) {
-    return expect_ident_or_variable_ident_decl_impl(use, true);
+    return expect_ident_with_optional_type_decl(use, true);
 }
 
-// variable_ident_decl
+// ident_with_type_decl
 //   : IDENT COLON type_decl
-Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_variable_ident_decl(std::string_view use) {
-    return expect_ident_or_variable_ident_decl_impl(use, false);
+Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_with_type_decl(std::string_view use) {
+    return expect_ident_with_optional_type_decl(use, false);
 }
 
 // access_mode
@@ -1356,14 +1357,14 @@ Expect<ParserImpl::StructMemberList> ParserImpl::expect_struct_body_decl() {
 }
 
 // struct_member
-//   : attribute* variable_ident_decl
+//   : attribute* ident_with_type_decl
 Expect<ast::StructMember*> ParserImpl::expect_struct_member() {
     auto attrs = attribute_list();
     if (attrs.errored) {
         return Failure::kErrored;
     }
 
-    auto decl = expect_variable_ident_decl("struct member");
+    auto decl = expect_ident_with_type_decl("struct member");
     if (decl.errored) {
         return Failure::kErrored;
     }
@@ -1519,11 +1520,11 @@ Expect<ParserImpl::ParameterList> ParserImpl::expect_param_list() {
 }
 
 // param
-//   : attribute_list* variable_ident_decl
+//   : attribute_list* ident_with_type_decl
 Expect<ast::Parameter*> ParserImpl::expect_param() {
     auto attrs = attribute_list();
 
-    auto decl = expect_variable_ident_decl("parameter");
+    auto decl = expect_ident_with_type_decl("parameter");
     if (decl.errored) {
         return Failure::kErrored;
     }
@@ -1861,11 +1862,11 @@ Maybe<const ast::ReturnStatement*> ParserImpl::return_statement() {
 // variable_statement
 //   : variable_decl
 //   | variable_decl EQUAL expression
-//   | LET (ident | variable_ident_decl) EQUAL expression
-//   | CONST (ident | variable_ident_decl) EQUAL expression
+//   | LET optionally_typed_ident EQUAL expression
+//   | CONST optionally_typed_ident EQUAL expression
 Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_statement() {
     if (match(Token::Type::kConst)) {
-        auto decl = expect_ident_or_variable_ident_decl("'const' declaration");
+        auto decl = expect_optionally_typed_ident("'const' declaration");
         if (decl.errored) {
             return Failure::kErrored;
         }
@@ -1892,7 +1893,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_statement() {
     }
 
     if (match(Token::Type::kLet)) {
-        auto decl = expect_ident_or_variable_ident_decl("'let' declaration");
+        auto decl = expect_optionally_typed_ident("'let' declaration");
         if (decl.errored) {
             return Failure::kErrored;
         }
