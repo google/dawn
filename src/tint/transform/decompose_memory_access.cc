@@ -328,7 +328,7 @@ struct DecomposeMemoryAccess::State {
     /// @returns an Offset for the given ast::Expression
     const Offset* ToOffset(const ast::Expression* expr) {
         if (auto* lit = expr->As<ast::IntLiteralExpression>()) {
-            if (lit->value > 0) {
+            if (lit->value >= 0) {
                 return offsets_.Create<OffsetLiteral>(static_cast<uint32_t>(lit->value));
             }
         }
