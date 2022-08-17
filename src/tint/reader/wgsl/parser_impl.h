@@ -683,6 +683,12 @@ class ParserImpl {
     /// Parses a `compound_assignment_operator` grammar element
     /// @returns the parsed compound assignment operator
     Maybe<ast::BinaryOp> compound_assignment_operator();
+    /// Parses a `core_lhs_expression` grammar element
+    /// @returns the parsed expression or a non-kMatched failure
+    Expect<const ast::Expression*> core_lhs_expression();
+    /// Parses a `lhs_expression` grammar element
+    /// @returns the parsed expression or a non-kMatched failure
+    Expect<const ast::Expression*> lhs_expression();
     /// Parses a `assignment_statement` grammar element
     /// @returns the parsed assignment or nullptr
     Maybe<const ast::Statement*> assignment_statement();

@@ -1009,7 +1009,6 @@ TEST_P(PunctuationTest, Parses) {
 INSTANTIATE_TEST_SUITE_P(LexerTest,
                          PunctuationTest,
                          testing::Values(TokenData{"&", Token::Type::kAnd},
-                                         TokenData{"&&", Token::Type::kAndAnd},
                                          TokenData{"->", Token::Type::kArrow},
                                          TokenData{"@", Token::Type::kAttr},
                                          TokenData{"/", Token::Type::kForwardSlash},
@@ -1087,7 +1086,8 @@ TEST_P(SplittablePunctuationTest, Parses) {
 }
 INSTANTIATE_TEST_SUITE_P(LexerTest,
                          SplittablePunctuationTest,
-                         testing::Values(TokenData{">=", Token::Type::kGreaterThanEqual},
+                         testing::Values(TokenData{"&&", Token::Type::kAndAnd},
+                                         TokenData{">=", Token::Type::kGreaterThanEqual},
                                          TokenData{">>", Token::Type::kShiftRight}));
 
 using KeywordTest = testing::TestWithParam<TokenData>;

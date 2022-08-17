@@ -956,6 +956,7 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_const_literal_test.cc
       reader/wgsl/parser_impl_continue_stmt_test.cc
       reader/wgsl/parser_impl_continuing_stmt_test.cc
+      reader/wgsl/parser_impl_core_lhs_expression_test.cc
       reader/wgsl/parser_impl_depth_texture_test.cc
       reader/wgsl/parser_impl_enable_directive_test.cc
       reader/wgsl/parser_impl_external_texture_test.cc
@@ -974,6 +975,7 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_if_stmt_test.cc
       reader/wgsl/parser_impl_inclusive_or_expression_test.cc
       reader/wgsl/parser_impl_increment_decrement_stmt_test.cc
+      reader/wgsl/parser_impl_lhs_expression_test.cc
       reader/wgsl/parser_impl_logical_and_expression_test.cc
       reader/wgsl/parser_impl_logical_or_expression_test.cc
       reader/wgsl/parser_impl_loop_stmt_test.cc

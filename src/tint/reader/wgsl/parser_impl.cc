@@ -2501,8 +2501,9 @@ Maybe<const ast::Expression*> ParserImpl::primary_expression() {
 
 // postfix_expression
 //   :
-//   | BRACE_LEFT expression BRACE_RIGHT postfix_expr
-//   | PERIOD IDENTIFIER postfix_expr
+//   | BRACE_LEFT expression BRACE_RIGHT postfix_expression?
+//   | PERIOD member_ident postfix_expression?
+//   | PERIOD swizzle_name postfix_expression?
 Maybe<const ast::Expression*> ParserImpl::postfix_expression(const ast::Expression* prefix) {
     Source source;
 
@@ -3112,6 +3113,68 @@ Maybe<ast::BinaryOp> ParserImpl::compound_assignment_operator() {
         return compound_op;
     }
     return Failure::kNoMatch;
+}
+
+// core_lhs_expression
+//   : ident
+//   | PAREN_LEFT lhs_expression PAREN_RIGHT
+Expect<const ast::Expression*> ParserImpl::core_lhs_expression() {
+    auto& t = peek();
+    if (t.IsIdentifier()) {
+        next();
+
+        return create<ast::IdentifierExpression>(t.source(),
+                                                 builder_.Symbols().Register(t.to_str()));
+    }
+
+    if (peek_is(Token::Type::kParenLeft)) {
+        return expect_paren_block("", [&]() -> Expect<const ast::Expression*> {
+            auto expr = lhs_expression();
+            if (expr.errored) {
+                return Failure::kErrored;
+            }
+            return expr.value;
+        });
+    }
+    return add_error(peek(), "missing expression");
+}
+
+// lhs_expression
+//   : ( STAR | AND )* core_lhs_expression postfix_expression?
+Expect<const ast::Expression*> ParserImpl::lhs_expression() {
+    std::vector<const Token*> prefixes;
+    while (peek_is(Token::Type::kStar) || peek_is(Token::Type::kAnd) ||
+           peek_is(Token::Type::kAndAnd)) {
+        auto& t = next();
+
+        // If an '&&' is provided split into '&' and '&'
+        if (t.Is(Token::Type::kAndAnd)) {
+            split_token(Token::Type::kAnd, Token::Type::kAnd);
+        }
+
+        prefixes.push_back(&t);
+    }
+
+    auto core_expr = core_lhs_expression();
+    if (core_expr.errored) {
+        return Failure::kErrored;
+    }
+
+    const auto* expr = core_expr.value;
+    for (auto it = prefixes.rbegin(); it != prefixes.rend(); ++it) {
+        auto& t = **it;
+        ast::UnaryOp op = ast::UnaryOp::kAddressOf;
+        if (t.Is(Token::Type::kStar)) {
+            op = ast::UnaryOp::kIndirection;
+        }
+        expr = create<ast::UnaryOpExpression>(t.source(), op, expr);
+    }
+
+    auto e = postfix_expression(expr);
+    if (e.errored) {
+        return Failure::kErrored;
+    }
+    return e.value;
 }
 
 // assignment_statement
