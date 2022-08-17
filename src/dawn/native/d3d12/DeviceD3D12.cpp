@@ -536,6 +536,13 @@ ResultOrError<ResourceHeapAllocation> Device::AllocateMemory(
 
 std::unique_ptr<ExternalImageDXGIImpl> Device::CreateExternalImageDXGIImpl(
     const ExternalImageDescriptorDXGISharedHandle* descriptor) {
+    // ExternalImageDXGIImpl holds a weak reference to the device. If the device is destroyed before
+    // the image is created, the image will have a dangling reference to the device which can cause
+    // a use-after-free.
+    if (ConsumedError(ValidateIsAlive())) {
+        return nullptr;
+    }
+
     // Use sharedHandle as a fallback until Chromium code is changed to set textureSharedHandle.
     HANDLE textureSharedHandle = descriptor->textureSharedHandle;
     if (!textureSharedHandle) {

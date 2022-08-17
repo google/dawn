@@ -832,6 +832,23 @@ TEST_P(D3D12SharedHandleUsageTests, InvalidateExternalImageOnDestroyDevice) {
     EXPECT_EQ(wgpu::Texture::Acquire(externalImage->ProduceTexture(&externalAccessDesc)), nullptr);
 }
 
+// Verify external image cannot be created after the target device is destroyed.
+TEST_P(D3D12SharedHandleUsageTests, DisallowExternalImageAfterDestroyDevice) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+
+    wgpu::Texture texture;
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage;
+
+    DestroyDevice();
+
+    ASSERT_DEVICE_ERROR(WrapSharedHandle(&baseDawnDescriptor, &baseD3dDescriptor, &texture,
+                                         &d3d11Texture, &externalImage, /*fenceSignalValue=*/1));
+
+    EXPECT_EQ(externalImage, nullptr);
+    EXPECT_EQ(texture, nullptr);
+}
+
 DAWN_INSTANTIATE_TEST_P(D3D12SharedHandleValidation,
                         {D3D12Backend()},
                         {SyncMode::kKeyedMutex, SyncMode::kFence});
