@@ -75,19 +75,22 @@ void PromoteInitializersToLet::Run(CloneContext& ctx, const DataMap&, DataMap&) 
                 return true;
             },
             [&](const ast::IdentifierExpression* expr) {
-                if (auto* user = ctx.src->Sem().Get<sem::VariableUser>(expr)) {
-                    // Identifier resolves to a variable
-                    if (auto* stmt = user->Stmt()) {
-                        if (auto* decl = stmt->Declaration()->As<ast::VariableDeclStatement>();
-                            decl && decl->variable->Is<ast::Const>()) {
-                            // The identifier is used on the RHS of a 'const' declaration. Ignore.
-                            return true;
+                if (auto* sem = ctx.src->Sem().Get(expr)) {
+                    if (auto* user = sem->UnwrapMaterialize()->As<sem::VariableUser>()) {
+                        // Identifier resolves to a variable
+                        if (auto* stmt = user->Stmt()) {
+                            if (auto* decl = stmt->Declaration()->As<ast::VariableDeclStatement>();
+                                decl && decl->variable->Is<ast::Const>()) {
+                                // The identifier is used on the RHS of a 'const' declaration.
+                                // Ignore.
+                                return true;
+                            }
                         }
-                    }
-                    if (user->Variable()->Declaration()->Is<ast::Const>()) {
-                        // The identifier resolves to a 'const' variable, but isn't used to
-                        // initialize another 'const'. This needs promoting.
-                        return promote(user);
+                        if (user->Variable()->Declaration()->Is<ast::Const>()) {
+                            // The identifier resolves to a 'const' variable, but isn't used to
+                            // initialize another 'const'. This needs promoting.
+                            return promote(user);
+                        }
                     }
                 }
                 return true;

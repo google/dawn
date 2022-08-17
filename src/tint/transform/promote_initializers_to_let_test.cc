@@ -158,6 +158,37 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(PromoteInitializersToLetTest, GlobalConstArrayDynamicIndex) {
+    auto* src = R"(
+const TRI_VERTICES = array(
+  vec4(0., 0., 0., 1.),
+  vec4(0., 1., 0., 1.),
+  vec4(1., 1., 0., 1.),
+);
+
+@vertex
+fn vs_main(@builtin(vertex_index) in_vertex_index: u32) -> @builtin(position) vec4<f32> {
+  // note: TRI_VERTICES requires a materialize before the dynamic index.
+  return TRI_VERTICES[in_vertex_index];
+}
+)";
+
+    auto* expect = R"(
+const TRI_VERTICES = array(vec4(0.0, 0.0, 0.0, 1.0), vec4(0.0, 1.0, 0.0, 1.0), vec4(1.0, 1.0, 0.0, 1.0));
+
+@vertex
+fn vs_main(@builtin(vertex_index) in_vertex_index : u32) -> @builtin(position) vec4<f32> {
+  let tint_symbol = TRI_VERTICES;
+  return tint_symbol[in_vertex_index];
+}
+)";
+
+    DataMap data;
+    auto got = Run<PromoteInitializersToLet>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(PromoteInitializersToLetTest, GlobalConstBasicArray_OutOfOrder) {
     auto* src = R"(
 fn f() {
