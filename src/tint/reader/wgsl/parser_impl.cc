@@ -1762,9 +1762,7 @@ Maybe<const ast::Statement*> ParserImpl::statement() {
 //   | break_statement SEMICOLON
 //   | continue_statement SEMICOLON
 //   | DISCARD SEMICOLON
-//   | assignment_statement SEMICOLON
-//   | increment_statement SEMICOLON
-//   | decrement_statement SEMICOLON
+//   | variable_updating_statement SEMICOLON
 //   | static_assert_statement SEMICOLON
 Maybe<const ast::Statement*> ParserImpl::non_block_statement() {
     auto stmt = [&]() -> Maybe<const ast::Statement*> {
@@ -1814,7 +1812,7 @@ Maybe<const ast::Statement*> ParserImpl::non_block_statement() {
         }
 
         // Note, this covers assignment, increment and decrement
-        auto assign = assignment_statement();
+        auto assign = variable_updating_statement();
         if (assign.errored) {
             return Failure::kErrored;
         }
@@ -2209,7 +2207,7 @@ ForHeader::ForHeader(const ast::Statement* init,
 
 ForHeader::~ForHeader() = default;
 
-// (variable_statement | increment_statement | decrement_statement | assignment_statement |
+// (variable_statement | variable_updating_statement |
 // func_call_statement)?
 Maybe<const ast::Statement*> ParserImpl::for_header_initializer() {
     auto call = func_call_statement();
@@ -2228,7 +2226,7 @@ Maybe<const ast::Statement*> ParserImpl::for_header_initializer() {
         return var.value;
     }
 
-    auto assign = assignment_statement();
+    auto assign = variable_updating_statement();
     if (assign.errored) {
         return Failure::kErrored;
     }
@@ -2239,7 +2237,7 @@ Maybe<const ast::Statement*> ParserImpl::for_header_initializer() {
     return Failure::kNoMatch;
 }
 
-// (increment_statement | decrement_statement | assignment_statement | func_call_statement)?
+// (variable_updating_statement | func_call_statement)?
 Maybe<const ast::Statement*> ParserImpl::for_header_continuing() {
     auto call_stmt = func_call_statement();
     if (call_stmt.errored) {
@@ -2249,7 +2247,7 @@ Maybe<const ast::Statement*> ParserImpl::for_header_continuing() {
         return call_stmt.value;
     }
 
-    auto assign = assignment_statement();
+    auto assign = variable_updating_statement();
     if (assign.errored) {
         return Failure::kErrored;
     }
@@ -2261,10 +2259,10 @@ Maybe<const ast::Statement*> ParserImpl::for_header_continuing() {
 }
 
 // for_header
-//   : (variable_statement | assignment_statement | func_call_statement)?
+//   : (variable_statement | variable_updating_statement | func_call_statement)?
 //   SEMICOLON
 //      expression? SEMICOLON
-//      (assignment_statement | func_call_statement)?
+//      (variable_updating_statement | func_call_statement)?
 Expect<std::unique_ptr<ForHeader>> ParserImpl::expect_for_header() {
     auto initializer = for_header_initializer();
     if (initializer.errored) {
@@ -3118,7 +3116,7 @@ Maybe<ast::BinaryOp> ParserImpl::compound_assignment_operator() {
 // core_lhs_expression
 //   : ident
 //   | PAREN_LEFT lhs_expression PAREN_RIGHT
-Expect<const ast::Expression*> ParserImpl::core_lhs_expression() {
+Maybe<const ast::Expression*> ParserImpl::core_lhs_expression() {
     auto& t = peek();
     if (t.IsIdentifier()) {
         next();
@@ -3133,15 +3131,19 @@ Expect<const ast::Expression*> ParserImpl::core_lhs_expression() {
             if (expr.errored) {
                 return Failure::kErrored;
             }
+            if (!expr.matched) {
+                return add_error(t, "invalid expression");
+            }
             return expr.value;
         });
     }
-    return add_error(peek(), "missing expression");
+
+    return Failure::kNoMatch;
 }
 
 // lhs_expression
 //   : ( STAR | AND )* core_lhs_expression postfix_expression?
-Expect<const ast::Expression*> ParserImpl::lhs_expression() {
+Maybe<const ast::Expression*> ParserImpl::lhs_expression() {
     std::vector<const Token*> prefixes;
     while (peek_is(Token::Type::kStar) || peek_is(Token::Type::kAnd) ||
            peek_is(Token::Type::kAndAnd)) {
@@ -3158,6 +3160,12 @@ Expect<const ast::Expression*> ParserImpl::lhs_expression() {
     auto core_expr = core_lhs_expression();
     if (core_expr.errored) {
         return Failure::kErrored;
+    } else if (!core_expr.matched) {
+        if (prefixes.empty()) {
+            return Failure::kNoMatch;
+        }
+
+        return add_error(peek(), "missing expression");
     }
 
     const auto* expr = core_expr.value;
@@ -3177,16 +3185,15 @@ Expect<const ast::Expression*> ParserImpl::lhs_expression() {
     return e.value;
 }
 
-// assignment_statement
-// | lhs_expression ( EQUAL | compound_assignment_operator ) expression
-// | UNDERSCORE EQUAL expression
+// variable_updating_statement
+//   : lhs_expression ( EQUAL | compound_assignment_operator ) expression
+//   | lhs_expression MINUS_MINUS
+//   | lhs_expression PLUS_PLUS
+//   | UNDERSCORE EQUAL expression
 //
-// increment_statement
-// | lhs_expression PLUS_PLUS
-//
-// decrement_statement
-// | lhs_expression MINUS_MINUS
-Maybe<const ast::Statement*> ParserImpl::assignment_statement() {
+// Note, this is a simplification of the recursive grammar statement with the `lhs_expression`
+// substituted back into the expression.
+Maybe<const ast::Statement*> ParserImpl::variable_updating_statement() {
     auto& t = peek();
 
     // tint:295 - Test for `ident COLON` - this is invalid grammar, and without
@@ -3196,35 +3203,46 @@ Maybe<const ast::Statement*> ParserImpl::assignment_statement() {
         return add_error(peek(0).source(), "expected 'var' for variable declaration");
     }
 
-    auto lhs = unary_expression();
-    if (lhs.errored) {
-        return Failure::kErrored;
-    }
-    if (!lhs.matched) {
-        Source source = t.source();
-        if (!match(Token::Type::kUnderscore, &source)) {
-            return Failure::kNoMatch;
-        }
-        lhs = create<ast::PhonyExpression>(source);
-    }
+    const ast::Expression* lhs = nullptr;
+    ast::BinaryOp compound_op = ast::BinaryOp::kNone;
+    if (peek_is(Token::Type::kUnderscore)) {
+        next();  // Consume the peek.
 
-    // Handle increment and decrement statements.
-    // We do this here because the parsing of the LHS expression overlaps with
-    // the assignment statement, and we cannot tell which we are parsing until we
-    // hit the ++/--/= token.
-    if (match(Token::Type::kPlusPlus)) {
-        return create<ast::IncrementDecrementStatement>(t.source(), lhs.value, true);
-    } else if (match(Token::Type::kMinusMinus)) {
-        return create<ast::IncrementDecrementStatement>(t.source(), lhs.value, false);
-    }
-
-    auto compound_op = compound_assignment_operator();
-    if (compound_op.errored) {
-        return Failure::kErrored;
-    }
-    if (!compound_op.matched) {
         if (!expect("assignment", Token::Type::kEqual)) {
             return Failure::kErrored;
+        }
+
+        lhs = create<ast::PhonyExpression>(t.source());
+
+    } else {
+        auto lhs_result = lhs_expression();
+        if (lhs_result.errored) {
+            return Failure::kErrored;
+        }
+        if (!lhs_result.matched) {
+            return Failure::kNoMatch;
+        }
+
+        lhs = lhs_result.value;
+
+        // Handle increment and decrement statements.
+        if (match(Token::Type::kPlusPlus)) {
+            return create<ast::IncrementDecrementStatement>(t.source(), lhs, true);
+        }
+        if (match(Token::Type::kMinusMinus)) {
+            return create<ast::IncrementDecrementStatement>(t.source(), lhs, false);
+        }
+
+        auto compound_op_result = compound_assignment_operator();
+        if (compound_op_result.errored) {
+            return Failure::kErrored;
+        }
+        if (compound_op_result.matched) {
+            compound_op = compound_op_result.value;
+        } else {
+            if (!expect("assignment", Token::Type::kEqual)) {
+                return Failure::kErrored;
+            }
         }
     }
 
@@ -3236,12 +3254,10 @@ Maybe<const ast::Statement*> ParserImpl::assignment_statement() {
         return add_error(peek(), "unable to parse right side of assignment");
     }
 
-    if (compound_op.value != ast::BinaryOp::kNone) {
-        return create<ast::CompoundAssignmentStatement>(t.source(), lhs.value, rhs.value,
-                                                        compound_op.value);
-    } else {
-        return create<ast::AssignmentStatement>(t.source(), lhs.value, rhs.value);
+    if (compound_op != ast::BinaryOp::kNone) {
+        return create<ast::CompoundAssignmentStatement>(t.source(), lhs, rhs.value, compound_op);
     }
+    return create<ast::AssignmentStatement>(t.source(), lhs, rhs.value);
 }
 
 // const_literal

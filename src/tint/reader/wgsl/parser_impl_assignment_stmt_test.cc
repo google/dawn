@@ -19,7 +19,7 @@ namespace {
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
     auto p = parser("a = 123");
-    auto e = p->assignment_statement();
+    auto e = p->variable_updating_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToVariable) {
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
     auto p = parser("a.b.c[2].d = 123");
-    auto e = p->assignment_statement();
+    auto e = p->variable_updating_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -92,7 +92,7 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToMember) {
 
 TEST_F(ParserImplTest, AssignmentStmt_Parses_ToPhony) {
     auto p = parser("_ = 123i");
-    auto e = p->assignment_statement();
+    auto e = p->variable_updating_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -111,6 +111,38 @@ TEST_F(ParserImplTest, AssignmentStmt_Parses_ToPhony) {
     ASSERT_TRUE(a->lhs->Is<ast::PhonyExpression>());
 }
 
+TEST_F(ParserImplTest, AssignmentStmt_Phony_CompoundOpFails) {
+    auto p = parser("_ += 123i");
+    auto e = p->variable_updating_statement();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:3: expected '=' for assignment");
+}
+
+TEST_F(ParserImplTest, AssignmentStmt_Phony_IncrementFails) {
+    auto p = parser("_ ++");
+    auto e = p->variable_updating_statement();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:3: expected '=' for assignment");
+}
+
+TEST_F(ParserImplTest, AssignmentStmt_Phony_EqualIncrementFails) {
+    auto p = parser("_ = ++");
+    auto e = p->variable_updating_statement();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(e.value, nullptr);
+    EXPECT_EQ(
+        p->error(),
+        "1:5: prefix increment and decrement operators are reserved for a future WGSL version");
+}
+
 struct CompoundData {
     std::string str;
     ast::BinaryOp op;
@@ -119,7 +151,7 @@ using CompoundOpTest = ParserImplTestWithParam<CompoundData>;
 TEST_P(CompoundOpTest, CompoundOp) {
     auto params = GetParam();
     auto p = parser("a " + params.str + " 123u");
-    auto e = p->assignment_statement();
+    auto e = p->variable_updating_statement();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -155,7 +187,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
 
 TEST_F(ParserImplTest, AssignmentStmt_MissingEqual) {
     auto p = parser("a.b.c[2].d 123");
-    auto e = p->assignment_statement();
+    auto e = p->variable_updating_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_TRUE(p->has_error());
@@ -165,7 +197,7 @@ TEST_F(ParserImplTest, AssignmentStmt_MissingEqual) {
 
 TEST_F(ParserImplTest, AssignmentStmt_Compound_MissingEqual) {
     auto p = parser("a + 123");
-    auto e = p->assignment_statement();
+    auto e = p->variable_updating_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_TRUE(p->has_error());
@@ -175,7 +207,7 @@ TEST_F(ParserImplTest, AssignmentStmt_Compound_MissingEqual) {
 
 TEST_F(ParserImplTest, AssignmentStmt_InvalidLHS) {
     auto p = parser("if (true) {} = 123");
-    auto e = p->assignment_statement();
+    auto e = p->variable_updating_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -184,7 +216,7 @@ TEST_F(ParserImplTest, AssignmentStmt_InvalidLHS) {
 
 TEST_F(ParserImplTest, AssignmentStmt_InvalidRHS) {
     auto p = parser("a.b.c[2].d = if (true) {}");
-    auto e = p->assignment_statement();
+    auto e = p->variable_updating_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -194,7 +226,7 @@ TEST_F(ParserImplTest, AssignmentStmt_InvalidRHS) {
 
 TEST_F(ParserImplTest, AssignmentStmt_InvalidCompoundOp) {
     auto p = parser("a &&= true");
-    auto e = p->assignment_statement();
+    auto e = p->variable_updating_statement();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);

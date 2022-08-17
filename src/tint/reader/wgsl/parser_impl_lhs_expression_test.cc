@@ -22,8 +22,18 @@ TEST_F(ParserImplTest, LHSExpression_NoPrefix) {
     auto e = p->lhs_expression();
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
+    EXPECT_TRUE(e.matched);
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::IdentifierExpression>());
+}
+
+TEST_F(ParserImplTest, LHSExpression_NoMatch) {
+    auto p = parser("123");
+    auto e = p->lhs_expression();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    ASSERT_FALSE(e.errored);
+    EXPECT_FALSE(e.matched);
+    ASSERT_EQ(e.value, nullptr);
 }
 
 TEST_F(ParserImplTest, LHSExpression_And) {
@@ -31,6 +41,7 @@ TEST_F(ParserImplTest, LHSExpression_And) {
     auto e = p->lhs_expression();
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
+    EXPECT_TRUE(e.matched);
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
 
@@ -44,6 +55,7 @@ TEST_F(ParserImplTest, LHSExpression_Star) {
     auto e = p->lhs_expression();
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
+    EXPECT_TRUE(e.matched);
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
 
@@ -52,11 +64,22 @@ TEST_F(ParserImplTest, LHSExpression_Star) {
     EXPECT_TRUE(u->expr->Is<ast::IdentifierExpression>());
 }
 
+TEST_F(ParserImplTest, LHSExpression_InvalidCoreLHSExpr) {
+    auto p = parser("*123");
+    auto e = p->lhs_expression();
+    ASSERT_TRUE(p->has_error());
+    ASSERT_TRUE(e.errored);
+    EXPECT_FALSE(e.matched);
+    ASSERT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:2: missing expression");
+}
+
 TEST_F(ParserImplTest, LHSExpression_Multiple) {
     auto p = parser("*&**&&*a");
     auto e = p->lhs_expression();
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
+    EXPECT_TRUE(e.matched);
     ASSERT_NE(e.value, nullptr);
 
     std::vector<ast::UnaryOp> results = {ast::UnaryOp::kIndirection, ast::UnaryOp::kAddressOf,
@@ -82,6 +105,7 @@ TEST_F(ParserImplTest, LHSExpression_PostfixExpression) {
     auto e = p->lhs_expression();
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
+    EXPECT_TRUE(e.matched);
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::MemberAccessorExpression>());
 
@@ -98,6 +122,16 @@ TEST_F(ParserImplTest, LHSExpression_PostfixExpression) {
     ASSERT_TRUE(access->member->Is<ast::IdentifierExpression>());
     auto* member_ident = access->member->As<ast::IdentifierExpression>();
     EXPECT_EQ(member_ident->symbol, p->builder().Symbols().Get("foo"));
+}
+
+TEST_F(ParserImplTest, LHSExpression_InvalidPostfixExpression) {
+    auto p = parser("*a.if");
+    auto e = p->lhs_expression();
+    ASSERT_TRUE(p->has_error());
+    ASSERT_TRUE(e.errored);
+    EXPECT_FALSE(e.matched);
+    ASSERT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:4: expected identifier for member accessor");
 }
 
 }  // namespace

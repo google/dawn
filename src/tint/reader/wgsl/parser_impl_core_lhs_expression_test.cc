@@ -17,11 +17,20 @@
 namespace tint::reader::wgsl {
 namespace {
 
+TEST_F(ParserImplTest, CoreLHS_NoMatch) {
+    auto p = parser("123");
+    auto e = p->core_lhs_expression();
+    ASSERT_FALSE(p->has_error()) << p->error();
+    ASSERT_FALSE(e.errored);
+    EXPECT_FALSE(e.matched);
+}
+
 TEST_F(ParserImplTest, CoreLHS_Ident) {
     auto p = parser("identifier");
     auto e = p->core_lhs_expression();
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
+    EXPECT_TRUE(e.matched);
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::IdentifierExpression>());
 
@@ -34,6 +43,7 @@ TEST_F(ParserImplTest, CoreLHS_ParenStmt) {
     auto e = p->core_lhs_expression();
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);
+    EXPECT_TRUE(e.matched);
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::IdentifierExpression>());
 
@@ -46,6 +56,7 @@ TEST_F(ParserImplTest, CoreLHS_MissingRightParen) {
     auto e = p->core_lhs_expression();
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(e.errored);
+    EXPECT_FALSE(e.matched);
     ASSERT_EQ(e.value, nullptr);
     EXPECT_EQ(p->error(), "1:3: expected ')'");
 }
@@ -55,8 +66,9 @@ TEST_F(ParserImplTest, CoreLHS_InvalidLHSExpression) {
     auto e = p->core_lhs_expression();
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(e.errored);
+    EXPECT_FALSE(e.matched);
     ASSERT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:2: missing expression");
+    EXPECT_EQ(p->error(), "1:1: invalid expression");
 }
 
 TEST_F(ParserImplTest, CoreLHS_MissingLHSExpression) {
@@ -64,17 +76,17 @@ TEST_F(ParserImplTest, CoreLHS_MissingLHSExpression) {
     auto e = p->core_lhs_expression();
     ASSERT_TRUE(p->has_error());
     ASSERT_TRUE(e.errored);
+    EXPECT_FALSE(e.matched);
     ASSERT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:2: missing expression");
+    EXPECT_EQ(p->error(), "1:1: invalid expression");
 }
 
 TEST_F(ParserImplTest, CoreLHS_Invalid) {
     auto p = parser("1234");
     auto e = p->core_lhs_expression();
-    ASSERT_TRUE(p->has_error());
-    ASSERT_TRUE(e.errored);
-    ASSERT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:1: missing expression");
+    ASSERT_FALSE(p->has_error());
+    ASSERT_FALSE(e.errored);
+    EXPECT_FALSE(e.matched);
 }
 
 }  // namespace
