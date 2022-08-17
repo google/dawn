@@ -104,22 +104,42 @@ struct Slice {
     auto rend() const { return std::reverse_iterator<const T*>(begin()); }
 };
 
+namespace detail {
+
+/// Private implementation of tint::utils::CanReinterpretSlice.
+/// Specialized for the case of TO equal to FROM, which is the common case, and avoids inspection of
+/// the base classes, which can be troublesome if the slice is of an incomplete type.
+template <typename TO, typename FROM>
+struct CanReinterpretSlice {
+    /// True if a slice of FROM can be reinterpreted as a slice of TO
+    static constexpr bool value =
+        // Both TO and FROM are pointers
+        (std::is_pointer_v<TO> && std::is_pointer_v<FROM>)&&  //
+        // const can only be applied, not removed
+        (std::is_const_v<std::remove_pointer_t<TO>> ||
+         !std::is_const_v<std::remove_pointer_t<FROM>>)&&  //
+        // TO and FROM are both Castable
+        IsCastable<std::remove_pointer_t<FROM>, std::remove_pointer_t<TO>> &&  //
+        // FROM is of, or derives from TO
+        traits::IsTypeOrDerived<std::remove_pointer_t<FROM>, std::remove_pointer_t<TO>>;
+};
+
+/// Specialization of 'CanReinterpretSlice' for when TO and FROM are equal types.
+template <typename T>
+struct CanReinterpretSlice<T, T> {
+    /// Always `true` as TO and FROM are the same type.
+    static constexpr bool value = true;
+};
+
+}  // namespace detail
+
 /// Evaluates whether a `vector<FROM>` and be reinterpreted as a `vector<TO>`.
 /// Vectors can be reinterpreted if both `FROM` and `TO` are pointers to a type that derives from
 /// CastableBase, and the pointee type of `TO` is of the same type as, or is an ancestor of the
 /// pointee type of `FROM`. Vectors of non-`const` Castable pointers can be converted to a vector of
 /// `const` Castable pointers.
 template <typename TO, typename FROM>
-static constexpr bool CanReinterpretSlice =
-    // TO and FROM are both pointer types
-    std::is_pointer_v<TO> && std::is_pointer_v<FROM> &&  //
-    // const can only be applied, not removed
-    (std::is_const_v<std::remove_pointer_t<TO>> ||
-     !std::is_const_v<std::remove_pointer_t<FROM>>)&&  //
-    // TO and FROM are both Castable
-    IsCastable<std::remove_pointer_t<FROM>, std::remove_pointer_t<TO>> &&
-    // FROM is of, or derives from TO
-    traits::IsTypeOrDerived<std::remove_pointer_t<FROM>, std::remove_pointer_t<TO>>;
+static constexpr bool CanReinterpretSlice = detail::CanReinterpretSlice<TO, FROM>::value;
 
 /// Reinterprets `const Slice<FROM>*` as `const Slice<TO>*`
 /// @param slice a pointer to the slice to reinterpret
@@ -439,6 +459,21 @@ class Vector {
 
     /// @returns the end for a reverse iterator
     auto rend() const { return impl_.slice.rend(); }
+
+    /// Equality operator
+    /// @param other the other vector
+    /// @returns true if this vector is the same length as `other`, and all elements are equal.
+    bool operator==(const Vector& other) const {
+        const size_t len = Length();
+        if (len == other.Length()) {
+            for (size_t i = 0; i < len; i++) {
+                if ((*this)[i] != other[i]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
   private:
     /// Friend class (differing specializations of this class)
