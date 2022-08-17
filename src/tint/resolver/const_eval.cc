@@ -731,9 +731,9 @@ ConstEval::ConstantResult ConstEval::OpComplement(const sem::Type*,
     return TransformElements(builder, transform, args[0]);
 }
 
-ConstEval::ConstantResult ConstEval::OpMinus(const sem::Type*,
-                                             utils::VectorRef<const sem::Constant*> args,
-                                             const Source&) {
+ConstEval::ConstantResult ConstEval::OpUnaryMinus(const sem::Type*,
+                                                  utils::VectorRef<const sem::Constant*> args,
+                                                  const Source&) {
     auto transform = [&](const sem::Constant* c) {
         auto create = [&](auto i) {
             // For signed integrals, avoid C++ UB by not negating the
@@ -788,6 +788,51 @@ ConstEval::ConstantResult ConstEval::OpPlus(const sem::Type* ty,
                 }
             } else {
                 result = add_values(i.value, j.value);
+            }
+            return CreateElement(builder, c0->Type(), result);
+        };
+        return Dispatch_fia_fiu32_f16(create, c0, c1);
+    };
+
+    auto r = TransformBinaryElements(builder, transform, args[0], args[1]);
+    if (builder.Diagnostics().contains_errors()) {
+        return utils::Failure;
+    }
+    return r;
+}
+
+ConstEval::ConstantResult ConstEval::OpMinus(const sem::Type* ty,
+                                             utils::VectorRef<const sem::Constant*> args,
+                                             const Source& source) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        auto create = [&](auto i, auto j) -> const Constant* {
+            using NumberT = decltype(i);
+            using T = UnwrapNumber<NumberT>;
+
+            auto subtract_values = [](T lhs, T rhs) {
+                if constexpr (std::is_integral_v<T> && std::is_signed_v<T>) {
+                    // Ensure no UB for signed underflow
+                    using UT = std::make_unsigned_t<T>;
+                    return static_cast<T>(static_cast<UT>(lhs) - static_cast<UT>(rhs));
+                } else {
+                    return lhs - rhs;
+                }
+            };
+
+            NumberT result;
+            if constexpr (std::is_same_v<NumberT, AInt> || std::is_same_v<NumberT, AFloat>) {
+                // Check for over/underflow for abstract values
+                if (auto r = CheckedSub(i, j)) {
+                    result = r->value;
+                } else {
+                    AddError("'" + std::to_string(subtract_values(i.value, j.value)) +
+                                 "' cannot be represented as '" +
+                                 ty->FriendlyName(builder.Symbols()) + "'",
+                             source);
+                    return nullptr;
+                }
+            } else {
+                result = subtract_values(i.value, j.value);
             }
             return CreateElement(builder, c0->Type(), result);
         };

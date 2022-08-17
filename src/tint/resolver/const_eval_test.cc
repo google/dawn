@@ -3236,6 +3236,43 @@ INSTANTIATE_TEST_SUITE_P(Add,
                                               OpAddFloatCases<f32>(),
                                               OpAddFloatCases<f16>()))));
 
+template <typename T>
+std::vector<Case> OpSubIntCases() {
+    static_assert(IsInteger<UnwrapNumber<T>>);
+    return {
+        C(T{0}, T{0}, T{0}),
+        C(T{3}, T{2}, T{1}),
+        C(T{T::Lowest() + 1}, T{1}, T::Lowest()),
+        C(T{T::Highest() - 1}, Negate(T{1}), T::Highest()),
+        C(Negate(T{1}), T::Highest(), T::Lowest()),
+        C(T::Lowest(), T{1}, T::Highest(), true),
+        C(T::Highest(), Negate(T{1}), T::Lowest(), true),
+    };
+}
+template <typename T>
+std::vector<Case> OpSubFloatCases() {
+    static_assert(IsFloatingPoint<UnwrapNumber<T>>);
+    return {
+        C(T{0}, T{0}, T{0}),
+        C(T{3}, T{2}, T{1}),
+        C(T::Highest(), T{1}, T{T::Highest() - 1}),
+        C(T::Lowest(), Negate(T{1}), T{T::Lowest() + 1}),
+        C(T{0}, T::Highest(), T::Lowest()),
+        C(T::Highest(), Negate(T::Highest()), T::Inf(), true),
+        C(T::Lowest(), T::Highest(), -T::Inf(), true),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(Sub,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(testing::Values(ast::BinaryOp::kSubtract),
+                                          testing::ValuesIn(Concat(  //
+                                              OpSubIntCases<AInt>(),
+                                              OpSubIntCases<i32>(),
+                                              OpSubIntCases<u32>(),
+                                              OpSubFloatCases<AFloat>(),
+                                              OpSubFloatCases<f32>(),
+                                              OpSubFloatCases<f16>()))));
+
 TEST_F(ResolverConstEvalTest, BinaryAbstractAddOverflow_AInt) {
     GlobalConst("c", nullptr, Add(Source{{1, 1}}, Expr(AInt::Highest()), 1_a));
     EXPECT_FALSE(r()->Resolve());
