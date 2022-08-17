@@ -19,7 +19,7 @@ namespace {
 
 TEST_F(ParserImplTest, SampledTextureType_Invalid) {
     auto p = parser("1234");
-    auto t = p->sampled_texture();
+    auto t = p->sampled_texture_type();
     EXPECT_FALSE(t.matched);
     EXPECT_FALSE(t.errored);
     EXPECT_FALSE(p->has_error());
@@ -27,7 +27,7 @@ TEST_F(ParserImplTest, SampledTextureType_Invalid) {
 
 TEST_F(ParserImplTest, SampledTextureType_1d) {
     auto p = parser("texture_1d");
-    auto t = p->sampled_texture();
+    auto t = p->sampled_texture_type();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     EXPECT_EQ(t.value, ast::TextureDimension::k1d);
@@ -36,7 +36,7 @@ TEST_F(ParserImplTest, SampledTextureType_1d) {
 
 TEST_F(ParserImplTest, SampledTextureType_2d) {
     auto p = parser("texture_2d");
-    auto t = p->sampled_texture();
+    auto t = p->sampled_texture_type();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     EXPECT_EQ(t.value, ast::TextureDimension::k2d);
@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, SampledTextureType_2d) {
 
 TEST_F(ParserImplTest, SampledTextureType_2dArray) {
     auto p = parser("texture_2d_array");
-    auto t = p->sampled_texture();
+    auto t = p->sampled_texture_type();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     EXPECT_EQ(t.value, ast::TextureDimension::k2dArray);
@@ -54,7 +54,7 @@ TEST_F(ParserImplTest, SampledTextureType_2dArray) {
 
 TEST_F(ParserImplTest, SampledTextureType_3d) {
     auto p = parser("texture_3d");
-    auto t = p->sampled_texture();
+    auto t = p->sampled_texture_type();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     EXPECT_EQ(t.value, ast::TextureDimension::k3d);
@@ -63,7 +63,7 @@ TEST_F(ParserImplTest, SampledTextureType_3d) {
 
 TEST_F(ParserImplTest, SampledTextureType_Cube) {
     auto p = parser("texture_cube");
-    auto t = p->sampled_texture();
+    auto t = p->sampled_texture_type();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     EXPECT_EQ(t.value, ast::TextureDimension::kCube);
@@ -72,7 +72,7 @@ TEST_F(ParserImplTest, SampledTextureType_Cube) {
 
 TEST_F(ParserImplTest, SampledTextureType_kCubeArray) {
     auto p = parser("texture_cube_array");
-    auto t = p->sampled_texture();
+    auto t = p->sampled_texture_type();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     EXPECT_EQ(t.value, ast::TextureDimension::kCubeArray);

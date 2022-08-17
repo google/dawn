@@ -19,7 +19,7 @@ namespace {
 
 TEST_F(ParserImplTest, StorageTextureType_Invalid) {
     auto p = parser("abc");
-    auto t = p->storage_texture();
+    auto t = p->storage_texture_type();
     EXPECT_FALSE(t.matched);
     EXPECT_FALSE(t.errored);
     EXPECT_FALSE(p->has_error());
@@ -27,7 +27,7 @@ TEST_F(ParserImplTest, StorageTextureType_Invalid) {
 
 TEST_F(ParserImplTest, StorageTextureType_1d) {
     auto p = parser("texture_storage_1d");
-    auto t = p->storage_texture();
+    auto t = p->storage_texture_type();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     EXPECT_EQ(t.value, ast::TextureDimension::k1d);
@@ -36,7 +36,7 @@ TEST_F(ParserImplTest, StorageTextureType_1d) {
 
 TEST_F(ParserImplTest, StorageTextureType_2d) {
     auto p = parser("texture_storage_2d");
-    auto t = p->storage_texture();
+    auto t = p->storage_texture_type();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     EXPECT_EQ(t.value, ast::TextureDimension::k2d);
@@ -45,7 +45,7 @@ TEST_F(ParserImplTest, StorageTextureType_2d) {
 
 TEST_F(ParserImplTest, StorageTextureType_2dArray) {
     auto p = parser("texture_storage_2d_array");
-    auto t = p->storage_texture();
+    auto t = p->storage_texture_type();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     EXPECT_EQ(t.value, ast::TextureDimension::k2dArray);
@@ -54,7 +54,7 @@ TEST_F(ParserImplTest, StorageTextureType_2dArray) {
 
 TEST_F(ParserImplTest, StorageTextureType_3d) {
     auto p = parser("texture_storage_3d");
-    auto t = p->storage_texture();
+    auto t = p->storage_texture_type();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     EXPECT_EQ(t.value, ast::TextureDimension::k3d);
