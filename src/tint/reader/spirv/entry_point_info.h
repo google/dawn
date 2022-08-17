@@ -16,9 +16,9 @@
 #define SRC_TINT_READER_SPIRV_ENTRY_POINT_INFO_H_
 
 #include <string>
-#include <vector>
 
 #include "src/tint/ast/pipeline_stage.h"
+#include "src/tint/utils/vector.h"
 
 namespace tint::reader::spirv {
 
@@ -48,8 +48,8 @@ struct EntryPointInfo {
                    ast::PipelineStage the_stage,
                    bool the_owns_inner_implementation,
                    std::string the_inner_name,
-                   std::vector<uint32_t>&& the_inputs,
-                   std::vector<uint32_t>&& the_outputs,
+                   utils::VectorRef<uint32_t> the_inputs,
+                   utils::VectorRef<uint32_t> the_outputs,
                    GridSize the_wg_size);
     /// Copy constructor
     /// @param other the other entry point info to be built from
@@ -75,9 +75,9 @@ struct EntryPointInfo {
     /// The name of the inner implementation function of the entry point.
     std::string inner_name;
     /// IDs of pipeline input variables, sorted and without duplicates.
-    std::vector<uint32_t> inputs;
+    utils::Vector<uint32_t, 8> inputs;
     /// IDs of pipeline output variables, sorted and without duplicates.
-    std::vector<uint32_t> outputs;
+    utils::Vector<uint32_t, 8> outputs;
 
     /// If this is a compute shader, this is the workgroup size in the x, y,
     /// and z dimensions set via LocalSize, or via the composite value

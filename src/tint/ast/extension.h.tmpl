@@ -25,7 +25,7 @@ namespace tint::ast {
 {{ Eval "DeclareEnum" $enum}}
 
 // A unique vector of extensions
-using Extensions = utils::UniqueVector<Extension>;
+using Extensions = utils::UniqueVector<Extension, 4>;
 
 }  // namespace tint::ast
 

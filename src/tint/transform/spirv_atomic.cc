@@ -48,7 +48,7 @@ struct SpirvAtomic::State {
     ProgramBuilder& b = *ctx.dst;
     std::unordered_map<const ast::Struct*, ForkedStruct> forked_structs;
     std::unordered_set<const sem::Variable*> atomic_variables;
-    utils::UniqueVector<const sem::Expression*> atomic_expressions;
+    utils::UniqueVector<const sem::Expression*, 8> atomic_expressions;
 
   public:
     /// Constructor
@@ -92,7 +92,7 @@ struct SpirvAtomic::State {
 
                     // Keep track of this expression. We'll need to modify the source variable /
                     // structure to be atomic.
-                    atomic_expressions.add(ctx.src->Sem().Get(args[0]));
+                    atomic_expressions.Add(ctx.src->Sem().Get(args[0]));
                 }
 
                 // Remove the stub from the output program
@@ -153,7 +153,7 @@ struct SpirvAtomic::State {
     }
 
     void ProcessAtomicExpressions() {
-        for (size_t i = 0; i < atomic_expressions.size(); i++) {
+        for (size_t i = 0; i < atomic_expressions.Length(); i++) {
             Switch(
                 atomic_expressions[i],  //
                 [&](const sem::VariableUser* user) {
@@ -162,7 +162,7 @@ struct SpirvAtomic::State {
                         ctx.Replace(v->type, AtomicTypeFor(user->Variable()->Type()));
                     }
                     if (auto* ctor = user->Variable()->Constructor()) {
-                        atomic_expressions.add(ctor);
+                        atomic_expressions.Add(ctor);
                     }
                 },
                 [&](const sem::StructMemberAccess* access) {
@@ -170,14 +170,14 @@ struct SpirvAtomic::State {
                     // atomic.
                     auto* member = access->Member();
                     Fork(member->Struct()->Declaration()).atomic_members.emplace(member->Index());
-                    atomic_expressions.add(access->Object());
+                    atomic_expressions.Add(access->Object());
                 },
                 [&](const sem::IndexAccessorExpression* index) {
-                    atomic_expressions.add(index->Object());
+                    atomic_expressions.Add(index->Object());
                 },
                 [&](const sem::Expression* e) {
                     if (auto* unary = e->Declaration()->As<ast::UnaryOpExpression>()) {
-                        atomic_expressions.add(ctx.src->Sem().Get(unary->expr));
+                        atomic_expressions.Add(ctx.src->Sem().Get(unary->expr));
                     }
                 });
         }

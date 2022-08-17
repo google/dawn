@@ -800,7 +800,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
     EXPECT_TRUE(func_sem->ReturnType()->Is<sem::Void>());
 
     const auto& vars = func_sem->TransitivelyReferencedGlobals();
-    ASSERT_EQ(vars.size(), 3u);
+    ASSERT_EQ(vars.Length(), 3u);
     EXPECT_EQ(vars[0]->Declaration(), wg_var);
     EXPECT_EQ(vars[1]->Declaration(), sb_var);
     EXPECT_EQ(vars[2]->Declaration(), priv_var);
@@ -835,7 +835,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
     EXPECT_EQ(func2_sem->Parameters().Length(), 0u);
 
     const auto& vars = func2_sem->TransitivelyReferencedGlobals();
-    ASSERT_EQ(vars.size(), 3u);
+    ASSERT_EQ(vars.Length(), 3u);
     EXPECT_EQ(vars[0]->Declaration(), wg_var);
     EXPECT_EQ(vars[1]->Declaration(), sb_var);
     EXPECT_EQ(vars[2]->Declaration(), priv_var);
@@ -853,7 +853,7 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionVariable) {
     auto* func_sem = Sem().Get(func);
     ASSERT_NE(func_sem, nullptr);
 
-    EXPECT_EQ(func_sem->TransitivelyReferencedGlobals().size(), 0u);
+    EXPECT_EQ(func_sem->TransitivelyReferencedGlobals().Length(), 0u);
     EXPECT_TRUE(func_sem->ReturnType()->Is<sem::Void>());
 }
 
@@ -868,7 +868,7 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionConstant) {
     auto* func_sem = Sem().Get(func);
     ASSERT_NE(func_sem, nullptr);
 
-    EXPECT_EQ(func_sem->TransitivelyReferencedGlobals().size(), 0u);
+    EXPECT_EQ(func_sem->TransitivelyReferencedGlobals().Length(), 0u);
     EXPECT_TRUE(func_sem->ReturnType()->Is<sem::Void>());
 }
 
@@ -879,7 +879,7 @@ TEST_F(ResolverTest, Function_NotRegisterFunctionParams) {
     auto* func_sem = Sem().Get(func);
     ASSERT_NE(func_sem, nullptr);
 
-    EXPECT_EQ(func_sem->TransitivelyReferencedGlobals().size(), 0u);
+    EXPECT_EQ(func_sem->TransitivelyReferencedGlobals().Length(), 0u);
     EXPECT_TRUE(func_sem->ReturnType()->Is<sem::Void>());
 }
 
@@ -2006,7 +2006,7 @@ TEST_F(ResolverTest, TextureSampler_TextureSample) {
 
     const sem::Function* sf = Sem().Get(f);
     auto pairs = sf->TextureSamplerPairs();
-    ASSERT_EQ(pairs.size(), 1u);
+    ASSERT_EQ(pairs.Length(), 1u);
     EXPECT_TRUE(pairs[0].first != nullptr);
     EXPECT_TRUE(pairs[0].second != nullptr);
 }
@@ -2026,12 +2026,12 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleInFunction) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto inner_pairs = Sem().Get(inner_func)->TextureSamplerPairs();
-    ASSERT_EQ(inner_pairs.size(), 1u);
+    ASSERT_EQ(inner_pairs.Length(), 1u);
     EXPECT_TRUE(inner_pairs[0].first != nullptr);
     EXPECT_TRUE(inner_pairs[0].second != nullptr);
 
     auto outer_pairs = Sem().Get(outer_func)->TextureSamplerPairs();
-    ASSERT_EQ(outer_pairs.size(), 1u);
+    ASSERT_EQ(outer_pairs.Length(), 1u);
     EXPECT_TRUE(outer_pairs[0].first != nullptr);
     EXPECT_TRUE(outer_pairs[0].second != nullptr);
 }
@@ -2055,17 +2055,17 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondSameVariables) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto inner_pairs_1 = Sem().Get(inner_func_1)->TextureSamplerPairs();
-    ASSERT_EQ(inner_pairs_1.size(), 1u);
+    ASSERT_EQ(inner_pairs_1.Length(), 1u);
     EXPECT_TRUE(inner_pairs_1[0].first != nullptr);
     EXPECT_TRUE(inner_pairs_1[0].second != nullptr);
 
     auto inner_pairs_2 = Sem().Get(inner_func_2)->TextureSamplerPairs();
-    ASSERT_EQ(inner_pairs_1.size(), 1u);
+    ASSERT_EQ(inner_pairs_1.Length(), 1u);
     EXPECT_TRUE(inner_pairs_2[0].first != nullptr);
     EXPECT_TRUE(inner_pairs_2[0].second != nullptr);
 
     auto outer_pairs = Sem().Get(outer_func)->TextureSamplerPairs();
-    ASSERT_EQ(outer_pairs.size(), 1u);
+    ASSERT_EQ(outer_pairs.Length(), 1u);
     EXPECT_TRUE(outer_pairs[0].first != nullptr);
     EXPECT_TRUE(outer_pairs[0].second != nullptr);
 }
@@ -2092,17 +2092,17 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondDifferentVariabl
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto inner_pairs_1 = Sem().Get(inner_func_1)->TextureSamplerPairs();
-    ASSERT_EQ(inner_pairs_1.size(), 1u);
+    ASSERT_EQ(inner_pairs_1.Length(), 1u);
     EXPECT_TRUE(inner_pairs_1[0].first != nullptr);
     EXPECT_TRUE(inner_pairs_1[0].second != nullptr);
 
     auto inner_pairs_2 = Sem().Get(inner_func_2)->TextureSamplerPairs();
-    ASSERT_EQ(inner_pairs_2.size(), 1u);
+    ASSERT_EQ(inner_pairs_2.Length(), 1u);
     EXPECT_TRUE(inner_pairs_2[0].first != nullptr);
     EXPECT_TRUE(inner_pairs_2[0].second != nullptr);
 
     auto outer_pairs = Sem().Get(outer_func)->TextureSamplerPairs();
-    ASSERT_EQ(outer_pairs.size(), 2u);
+    ASSERT_EQ(outer_pairs.Length(), 2u);
     EXPECT_TRUE(outer_pairs[0].first == inner_pairs_1[0].first);
     EXPECT_TRUE(outer_pairs[0].second == inner_pairs_1[0].second);
     EXPECT_TRUE(outer_pairs[1].first == inner_pairs_2[0].first);
@@ -2119,7 +2119,7 @@ TEST_F(ResolverTest, TextureSampler_TextureDimensions) {
 
     const sem::Function* sf = Sem().Get(f);
     auto pairs = sf->TextureSamplerPairs();
-    ASSERT_EQ(pairs.size(), 1u);
+    ASSERT_EQ(pairs.Length(), 1u);
     EXPECT_TRUE(pairs[0].first != nullptr);
     EXPECT_TRUE(pairs[0].second == nullptr);
 }

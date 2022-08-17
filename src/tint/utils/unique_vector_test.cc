@@ -13,6 +13,9 @@
 // limitations under the License.
 
 #include "src/tint/utils/unique_vector.h"
+
+#include <vector>
+
 #include "src/tint/utils/reverse.h"
 
 #include "gtest/gtest.h"
@@ -21,16 +24,16 @@ namespace tint::utils {
 namespace {
 
 TEST(UniqueVectorTest, Empty) {
-    UniqueVector<int> unique_vec;
-    EXPECT_EQ(unique_vec.size(), 0u);
-    EXPECT_EQ(unique_vec.empty(), true);
+    UniqueVector<int, 4> unique_vec;
+    EXPECT_EQ(unique_vec.Length(), 0u);
+    EXPECT_EQ(unique_vec.IsEmpty(), true);
     EXPECT_EQ(unique_vec.begin(), unique_vec.end());
 }
 
 TEST(UniqueVectorTest, MoveConstructor) {
-    UniqueVector<int> unique_vec(std::vector<int>{0, 3, 2, 1, 2});
-    EXPECT_EQ(unique_vec.size(), 4u);
-    EXPECT_EQ(unique_vec.empty(), false);
+    UniqueVector<int, 4> unique_vec(std::vector<int>{0, 3, 2, 1, 2});
+    EXPECT_EQ(unique_vec.Length(), 4u);
+    EXPECT_EQ(unique_vec.IsEmpty(), false);
     EXPECT_EQ(unique_vec[0], 0);
     EXPECT_EQ(unique_vec[1], 3);
     EXPECT_EQ(unique_vec[2], 2);
@@ -38,12 +41,12 @@ TEST(UniqueVectorTest, MoveConstructor) {
 }
 
 TEST(UniqueVectorTest, AddUnique) {
-    UniqueVector<int> unique_vec;
-    unique_vec.add(0);
-    unique_vec.add(1);
-    unique_vec.add(2);
-    EXPECT_EQ(unique_vec.size(), 3u);
-    EXPECT_EQ(unique_vec.empty(), false);
+    UniqueVector<int, 4> unique_vec;
+    unique_vec.Add(0);
+    unique_vec.Add(1);
+    unique_vec.Add(2);
+    EXPECT_EQ(unique_vec.Length(), 3u);
+    EXPECT_EQ(unique_vec.IsEmpty(), false);
     int i = 0;
     for (auto n : unique_vec) {
         EXPECT_EQ(n, i);
@@ -59,15 +62,15 @@ TEST(UniqueVectorTest, AddUnique) {
 }
 
 TEST(UniqueVectorTest, AddDuplicates) {
-    UniqueVector<int> unique_vec;
-    unique_vec.add(0);
-    unique_vec.add(0);
-    unique_vec.add(0);
-    unique_vec.add(1);
-    unique_vec.add(1);
-    unique_vec.add(2);
-    EXPECT_EQ(unique_vec.size(), 3u);
-    EXPECT_EQ(unique_vec.empty(), false);
+    UniqueVector<int, 4> unique_vec;
+    unique_vec.Add(0);
+    unique_vec.Add(0);
+    unique_vec.Add(0);
+    unique_vec.Add(1);
+    unique_vec.Add(1);
+    unique_vec.Add(2);
+    EXPECT_EQ(unique_vec.Length(), 3u);
+    EXPECT_EQ(unique_vec.IsEmpty(), false);
     int i = 0;
     for (auto n : unique_vec) {
         EXPECT_EQ(n, i);
@@ -83,17 +86,17 @@ TEST(UniqueVectorTest, AddDuplicates) {
 }
 
 TEST(UniqueVectorTest, AsVector) {
-    UniqueVector<int> unique_vec;
-    unique_vec.add(0);
-    unique_vec.add(0);
-    unique_vec.add(0);
-    unique_vec.add(1);
-    unique_vec.add(1);
-    unique_vec.add(2);
+    UniqueVector<int, 4> unique_vec;
+    unique_vec.Add(0);
+    unique_vec.Add(0);
+    unique_vec.Add(0);
+    unique_vec.Add(1);
+    unique_vec.Add(1);
+    unique_vec.Add(2);
 
-    const std::vector<int>& vec = unique_vec;
-    EXPECT_EQ(vec.size(), 3u);
-    EXPECT_EQ(unique_vec.empty(), false);
+    const utils::Vector<int, 4>& vec = unique_vec;
+    EXPECT_EQ(vec.Length(), 3u);
+    EXPECT_EQ(unique_vec.IsEmpty(), false);
     int i = 0;
     for (auto n : vec) {
         EXPECT_EQ(n, i);
@@ -106,46 +109,46 @@ TEST(UniqueVectorTest, AsVector) {
 }
 
 TEST(UniqueVectorTest, PopBack) {
-    UniqueVector<int> unique_vec;
-    unique_vec.add(0);
-    unique_vec.add(2);
-    unique_vec.add(1);
+    UniqueVector<int, 4> unique_vec;
+    unique_vec.Add(0);
+    unique_vec.Add(2);
+    unique_vec.Add(1);
 
-    EXPECT_EQ(unique_vec.pop_back(), 1);
-    EXPECT_EQ(unique_vec.size(), 2u);
-    EXPECT_EQ(unique_vec.empty(), false);
+    EXPECT_EQ(unique_vec.Pop(), 1);
+    EXPECT_EQ(unique_vec.Length(), 2u);
+    EXPECT_EQ(unique_vec.IsEmpty(), false);
     EXPECT_EQ(unique_vec[0], 0);
     EXPECT_EQ(unique_vec[1], 2);
 
-    EXPECT_EQ(unique_vec.pop_back(), 2);
-    EXPECT_EQ(unique_vec.size(), 1u);
-    EXPECT_EQ(unique_vec.empty(), false);
+    EXPECT_EQ(unique_vec.Pop(), 2);
+    EXPECT_EQ(unique_vec.Length(), 1u);
+    EXPECT_EQ(unique_vec.IsEmpty(), false);
     EXPECT_EQ(unique_vec[0], 0);
 
-    unique_vec.add(1);
+    unique_vec.Add(1);
 
-    EXPECT_EQ(unique_vec.size(), 2u);
-    EXPECT_EQ(unique_vec.empty(), false);
+    EXPECT_EQ(unique_vec.Length(), 2u);
+    EXPECT_EQ(unique_vec.IsEmpty(), false);
     EXPECT_EQ(unique_vec[0], 0);
     EXPECT_EQ(unique_vec[1], 1);
 
-    EXPECT_EQ(unique_vec.pop_back(), 1);
-    EXPECT_EQ(unique_vec.size(), 1u);
-    EXPECT_EQ(unique_vec.empty(), false);
+    EXPECT_EQ(unique_vec.Pop(), 1);
+    EXPECT_EQ(unique_vec.Length(), 1u);
+    EXPECT_EQ(unique_vec.IsEmpty(), false);
     EXPECT_EQ(unique_vec[0], 0);
 
-    EXPECT_EQ(unique_vec.pop_back(), 0);
-    EXPECT_EQ(unique_vec.size(), 0u);
-    EXPECT_EQ(unique_vec.empty(), true);
+    EXPECT_EQ(unique_vec.Pop(), 0);
+    EXPECT_EQ(unique_vec.Length(), 0u);
+    EXPECT_EQ(unique_vec.IsEmpty(), true);
 }
 
 TEST(UniqueVectorTest, Data) {
-    UniqueVector<int> unique_vec;
-    EXPECT_EQ(unique_vec.data(), nullptr);
+    UniqueVector<int, 4> unique_vec;
+    EXPECT_EQ(unique_vec.Data(), nullptr);
 
-    unique_vec.add(42);
-    EXPECT_EQ(unique_vec.data(), &unique_vec[0]);
-    EXPECT_EQ(*unique_vec.data(), 42);
+    unique_vec.Add(42);
+    EXPECT_EQ(unique_vec.Data(), &unique_vec[0]);
+    EXPECT_EQ(*unique_vec.Data(), 42);
 }
 
 }  // namespace

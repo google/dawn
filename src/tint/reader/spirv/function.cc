@@ -1303,7 +1303,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
                                     utils::Empty)));
 
     // Pipeline outputs are mapped to the return value.
-    if (ep_info_->outputs.empty()) {
+    if (ep_info_->outputs.IsEmpty()) {
         // There is nothing to return.
         return_type = ty_.Void()->Build(builder_);
     } else {

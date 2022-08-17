@@ -164,7 +164,7 @@ bool Resolver::ResolveInternal() {
         return false;
     }
 
-    if (!enabled_extensions_.contains(ast::Extension::kChromiumDisableUniformityAnalysis)) {
+    if (!enabled_extensions_.Contains(ast::Extension::kChromiumDisableUniformityAnalysis)) {
         if (!AnalyzeUniformity(builder_, dependencies_)) {
             // TODO(jrprice): Reject programs that fail uniformity analysis.
         }
@@ -194,7 +194,7 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
         [&](const ast::U32*) { return builder_->create<sem::U32>(); },
         [&](const ast::F16* t) -> sem::F16* {
             // Validate if f16 type is allowed.
-            if (!enabled_extensions_.contains(ast::Extension::kF16)) {
+            if (!enabled_extensions_.Contains(ast::Extension::kF16)) {
                 AddError("f16 used without 'f16' extension enabled", t->source);
                 return nullptr;
             }
@@ -2082,7 +2082,7 @@ sem::Expression* Resolver::Literal(const ast::LiteralExpression* literal) {
         return nullptr;
     }
 
-    if ((ty->Is<sem::F16>()) && (!enabled_extensions_.contains(tint::ast::Extension::kF16))) {
+    if ((ty->Is<sem::F16>()) && (!enabled_extensions_.Contains(tint::ast::Extension::kF16))) {
         AddError("f16 literal used without 'f16' extension enabled", literal->source);
         return nullptr;
     }
@@ -2442,7 +2442,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 }
 
 bool Resolver::Enable(const ast::Enable* enable) {
-    enabled_extensions_.add(enable->extension);
+    enabled_extensions_.Add(enable->extension);
     return true;
 }
 

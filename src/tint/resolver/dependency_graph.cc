@@ -491,7 +491,7 @@ struct DependencyAnalysis {
     bool Run(const ast::Module& module) {
         // Reserve container memory
         graph_.resolved_symbols.reserve(module.GlobalDeclarations().Length());
-        sorted_.reserve(module.GlobalDeclarations().Length());
+        sorted_.Reserve(module.GlobalDeclarations().Length());
 
         // Collect all the named globals from the AST module
         GatherGlobals(module);
@@ -505,7 +505,7 @@ struct DependencyAnalysis {
         // Dump the dependency graph if TINT_DUMP_DEPENDENCY_GRAPH is non-zero
         DumpDependencyGraph();
 
-        graph_.ordered_globals = std::move(sorted_);
+        graph_.ordered_globals = sorted_.Release();
 
         return !diagnostics_.contains_errors();
     }
@@ -632,7 +632,7 @@ struct DependencyAnalysis {
         // Make sure all 'enable' directives go before any other global declarations.
         for (auto* global : declaration_order_) {
             if (auto* enable = global->node->As<ast::Enable>()) {
-                sorted_.add(enable);
+                sorted_.Add(enable);
             }
         }
 
@@ -641,31 +641,31 @@ struct DependencyAnalysis {
                 // Skip 'enable' directives here, as they are already added.
                 continue;
             }
-            utils::UniqueVector<const Global*> stack;
+            utils::UniqueVector<const Global*, 8> stack;
             TraverseDependencies(
                 global,
                 [&](const Global* g) {  // Enter
-                    if (!stack.add(g)) {
-                        CyclicDependencyFound(g, stack);
+                    if (!stack.Add(g)) {
+                        CyclicDependencyFound(g, stack.Release());
                         return false;
                     }
-                    if (sorted_.contains(g->node)) {
+                    if (sorted_.Contains(g->node)) {
                         // Visited this global already.
                         // stack was pushed, but exit() will not be called when we return
                         // false, so pop here.
-                        stack.pop_back();
+                        stack.Pop();
                         return false;
                     }
                     return true;
                 },
                 [&](const Global* g) {  // Exit. Only called if Enter returned true.
-                    sorted_.add(g->node);
-                    stack.pop_back();
+                    sorted_.Add(g->node);
+                    stack.Pop();
                 });
 
-            sorted_.add(global->node);
+            sorted_.Add(global->node);
 
-            if (!stack.empty()) {
+            if (!stack.IsEmpty()) {
                 // Each stack.push() must have a corresponding stack.pop_back().
                 TINT_ICE(Resolver, diagnostics_)
                     << "stack not empty after returning from TraverseDependencies()";
@@ -691,12 +691,12 @@ struct DependencyAnalysis {
     /// @param root is the global that starts the cyclic dependency, which must be
     /// found in `stack`.
     /// @param stack is the global dependency stack that contains a loop.
-    void CyclicDependencyFound(const Global* root, const std::vector<const Global*>& stack) {
+    void CyclicDependencyFound(const Global* root, utils::VectorRef<const Global*> stack) {
         std::stringstream msg;
         msg << "cyclic dependency found: ";
         constexpr size_t kLoopNotStarted = ~0u;
         size_t loop_start = kLoopNotStarted;
-        for (size_t i = 0; i < stack.size(); i++) {
+        for (size_t i = 0; i < stack.Length(); i++) {
             auto* e = stack[i];
             if (loop_start == kLoopNotStarted && e == root) {
                 loop_start = i;
@@ -707,9 +707,9 @@ struct DependencyAnalysis {
         }
         msg << "'" << NameOf(root->node) << "'";
         AddError(diagnostics_, msg.str(), root->node->source);
-        for (size_t i = loop_start; i < stack.size(); i++) {
+        for (size_t i = loop_start; i < stack.Length(); i++) {
             auto* from = stack[i];
-            auto* to = (i + 1 < stack.size()) ? stack[i + 1] : stack[loop_start];
+            auto* to = (i + 1 < stack.Length()) ? stack[i + 1] : stack[loop_start];
             auto info = DepInfoFor(from, to);
             AddNote(diagnostics_,
                     KindOf(from->node) + " '" + NameOf(from->node) + "' " + info.action + " " +
@@ -764,7 +764,7 @@ struct DependencyAnalysis {
     std::vector<Global*> declaration_order_;
 
     /// Globals in sorted dependency order. Populated by SortGlobals().
-    utils::UniqueVector<const ast::Node*> sorted_;
+    utils::UniqueVector<const ast::Node*, 64> sorted_;
 };
 
 }  // namespace

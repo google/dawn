@@ -46,7 +46,7 @@ struct DependencyGraph {
                       DependencyGraph& output);
 
     /// All globals in dependency-sorted order.
-    std::vector<const ast::Node*> ordered_globals;
+    utils::Vector<const ast::Node*, 32> ordered_globals;
 
     /// Map of ast::IdentifierExpression or ast::TypeName to a type, function, or
     /// variable that declares the symbol.

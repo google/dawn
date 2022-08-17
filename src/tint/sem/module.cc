@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Module);
 
 namespace tint::sem {
 
-Module::Module(std::vector<const ast::Node*> dep_ordered_decls, ast::Extensions extensions)
+Module::Module(utils::VectorRef<const ast::Node*> dep_ordered_decls, ast::Extensions extensions)
     : dep_ordered_decls_(std::move(dep_ordered_decls)), extensions_(std::move(extensions)) {}
 
 Module::~Module() = default;

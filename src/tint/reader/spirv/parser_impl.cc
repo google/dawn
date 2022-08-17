@@ -878,17 +878,17 @@ bool ParserImpl::RegisterEntryPoints() {
         TINT_ASSERT(Reader, !inner_implementation_name.empty());
         TINT_ASSERT(Reader, ep_name != inner_implementation_name);
 
-        utils::UniqueVector<uint32_t> inputs;
-        utils::UniqueVector<uint32_t> outputs;
+        utils::UniqueVector<uint32_t, 8> inputs;
+        utils::UniqueVector<uint32_t, 8> outputs;
         for (unsigned iarg = 3; iarg < entry_point.NumInOperands(); iarg++) {
             const uint32_t var_id = entry_point.GetSingleWordInOperand(iarg);
             if (const auto* var_inst = def_use_mgr_->GetDef(var_id)) {
                 switch (SpvStorageClass(var_inst->GetSingleWordInOperand(0))) {
                     case SpvStorageClassInput:
-                        inputs.add(var_id);
+                        inputs.Add(var_id);
                         break;
                     case SpvStorageClassOutput:
-                        outputs.add(var_id);
+                        outputs.Add(var_id);
                         break;
                     default:
                         break;
@@ -896,9 +896,9 @@ bool ParserImpl::RegisterEntryPoints() {
             }
         }
         // Save the lists, in ID-sorted order.
-        std::vector<uint32_t> sorted_inputs(inputs);
+        utils::Vector<uint32_t, 8> sorted_inputs(inputs);
         std::sort(sorted_inputs.begin(), sorted_inputs.end());
-        std::vector<uint32_t> sorted_outputs(outputs);
+        utils::Vector<uint32_t, 8> sorted_outputs(outputs);
         std::sort(sorted_outputs.begin(), sorted_outputs.end());
 
         const auto ast_stage = enum_converter_.ToPipelineStage(stage);

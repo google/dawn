@@ -75,7 +75,7 @@ struct ZeroInitWorkgroupMemory::State {
     };
 
     /// A list of unique ArrayIndex
-    using ArrayIndices = utils::UniqueVector<ArrayIndex, ArrayIndex::Hasher>;
+    using ArrayIndices = utils::UniqueVector<ArrayIndex, 4, ArrayIndex::Hasher>;
 
     /// Expression holds information about an expression that is being built for a
     /// statement will zero workgroup values.
@@ -193,7 +193,7 @@ struct ZeroInitWorkgroupMemory::State {
             ArrayIndices array_indices;
             for (auto& s : stmts) {
                 for (auto& idx : s.array_indices) {
-                    array_indices.add(idx);
+                    array_indices.Add(idx);
                 }
             }
 
@@ -311,7 +311,7 @@ struct ZeroInitWorkgroupMemory::State {
                 auto division = num_values;
                 auto a = get_expr(modulo);
                 auto array_indices = a.array_indices;
-                array_indices.add(ArrayIndex{modulo, division});
+                array_indices.Add(ArrayIndex{modulo, division});
                 auto index = utils::GetOrCreate(array_index_names, ArrayIndex{modulo, division},
                                                 [&] { return b.Symbols().New("i"); });
                 return Expression{b.IndexAccessor(a.expr, index), a.num_iterations, array_indices};

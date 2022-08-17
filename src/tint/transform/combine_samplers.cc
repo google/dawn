@@ -167,7 +167,7 @@ struct CombineSamplers::State {
         ctx.ReplaceAll([&](const ast::Function* src) -> const ast::Function* {
             if (auto* func = sem.Get(src)) {
                 auto pairs = func->TextureSamplerPairs();
-                if (pairs.empty()) {
+                if (pairs.IsEmpty()) {
                     return nullptr;
                 }
                 utils::Vector<const ast::Parameter*, 8> params;

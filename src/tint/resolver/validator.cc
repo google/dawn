@@ -141,7 +141,7 @@ void TraverseCallChain(diag::List& diagnostics,
             callback(f);
             return;
         }
-        if (f->TransitivelyCalledFunctions().contains(to)) {
+        if (f->TransitivelyCalledFunctions().Contains(to)) {
             TraverseCallChain(diagnostics, f, to, callback);
             callback(f);
             return;
@@ -519,7 +519,7 @@ bool Validator::StorageClassLayout(const sem::Variable* var,
                                    const ast::Extensions& enabled_extensions,
                                    ValidTypeStorageLayouts& layouts) const {
     if (var->StorageClass() == ast::StorageClass::kPushConstant &&
-        !enabled_extensions.contains(ast::Extension::kChromiumExperimentalPushConstant) &&
+        !enabled_extensions.Contains(ast::Extension::kChromiumExperimentalPushConstant) &&
         IsValidationEnabled(var->Declaration()->attributes,
                             ast::DisabledValidation::kIgnoreStorageClass)) {
         AddError(
@@ -1723,7 +1723,7 @@ bool Validator::RequiredExtensionForBuiltinFunction(
         return true;
     }
 
-    if (!enabled_extensions.contains(extension)) {
+    if (!enabled_extensions.Contains(extension)) {
         AddError("cannot call built-in function '" + std::string(builtin->str()) +
                      "' without extension " + utils::ToString(extension),
                  call->Declaration()->source);

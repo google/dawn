@@ -122,7 +122,7 @@ class Inspector {
     /// @param entry_point name of the entry point to get information about.
     /// @returns vector of all of the sampler/texture sampling pairs that are used
     /// by that entry point.
-    std::vector<sem::SamplerTexturePair> GetSamplerTextureUses(const std::string& entry_point);
+    utils::Vector<sem::SamplerTexturePair, 4> GetSamplerTextureUses(const std::string& entry_point);
 
     /// @param entry_point name of the entry point to get information about.
     /// @param placeholder the sampler binding point to use for texture-only
@@ -153,7 +153,8 @@ class Inspector {
   private:
     const Program* program_;
     diag::List diagnostics_;
-    std::unique_ptr<std::unordered_map<std::string, utils::UniqueVector<sem::SamplerTexturePair>>>
+    std::unique_ptr<
+        std::unordered_map<std::string, utils::UniqueVector<sem::SamplerTexturePair, 4>>>
         sampler_targets_;
 
     /// @param name name of the entry point to find

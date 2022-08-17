@@ -50,7 +50,7 @@ std::ostream& operator<<(std::ostream& out, Extension value);
 Extension ParseExtension(std::string_view str);
 
 // A unique vector of extensions
-using Extensions = utils::UniqueVector<Extension>;
+using Extensions = utils::UniqueVector<Extension, 4>;
 
 }  // namespace tint::ast
 

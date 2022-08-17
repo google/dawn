@@ -28,7 +28,7 @@ DisableUniformityAnalysis::DisableUniformityAnalysis() = default;
 DisableUniformityAnalysis::~DisableUniformityAnalysis() = default;
 
 bool DisableUniformityAnalysis::ShouldRun(const Program* program, const DataMap&) const {
-    return !program->Sem().Module()->Extensions().contains(
+    return !program->Sem().Module()->Extensions().Contains(
         ast::Extension::kChromiumDisableUniformityAnalysis);
 }
 

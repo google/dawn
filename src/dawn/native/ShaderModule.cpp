@@ -806,9 +806,8 @@ ResultOrError<std::unique_ptr<EntryPointMetadata>> ReflectEntryPointUsingTint(
                         resource.binding, resource.bind_group);
     }
 
-    std::vector<tint::inspector::SamplerTexturePair> samplerTextureUses =
-        inspector->GetSamplerTextureUses(entryPoint.name);
-    metadata->samplerTexturePairs.reserve(samplerTextureUses.size());
+    auto samplerTextureUses = inspector->GetSamplerTextureUses(entryPoint.name);
+    metadata->samplerTexturePairs.reserve(samplerTextureUses.Length());
     std::transform(samplerTextureUses.begin(), samplerTextureUses.end(),
                    std::back_inserter(metadata->samplerTexturePairs),
                    [](const tint::inspector::SamplerTexturePair& pair) {

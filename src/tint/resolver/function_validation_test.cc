@@ -489,8 +489,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_ConstU32) {
     ASSERT_NE(sem_x, nullptr);
     ASSERT_NE(sem_y, nullptr);
 
-    EXPECT_TRUE(sem_func->DirectlyReferencedGlobals().contains(sem_x));
-    EXPECT_TRUE(sem_func->DirectlyReferencedGlobals().contains(sem_y));
+    EXPECT_TRUE(sem_func->DirectlyReferencedGlobals().Contains(sem_x));
+    EXPECT_TRUE(sem_func->DirectlyReferencedGlobals().Contains(sem_y));
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_I32) {

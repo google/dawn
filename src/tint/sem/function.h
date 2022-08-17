@@ -81,7 +81,7 @@ class Function final : public Castable<Function, CallTarget> {
     }
 
     /// @returns all directly referenced global variables
-    const utils::UniqueVector<const GlobalVariable*>& DirectlyReferencedGlobals() const {
+    const utils::UniqueVector<const GlobalVariable*, 4>& DirectlyReferencedGlobals() const {
         return directly_referenced_globals_;
     }
 
@@ -89,12 +89,12 @@ class Function final : public Castable<Function, CallTarget> {
     /// Note: Implicitly adds this global to the transtively-called globals.
     /// @param global the module-scope variable
     void AddDirectlyReferencedGlobal(const sem::GlobalVariable* global) {
-        directly_referenced_globals_.add(global);
-        transitively_referenced_globals_.add(global);
+        directly_referenced_globals_.Add(global);
+        transitively_referenced_globals_.Add(global);
     }
 
     /// @returns all transitively referenced global variables
-    const utils::UniqueVector<const GlobalVariable*>& TransitivelyReferencedGlobals() const {
+    const utils::UniqueVector<const GlobalVariable*, 8>& TransitivelyReferencedGlobals() const {
         return transitively_referenced_globals_;
     }
 
@@ -102,29 +102,29 @@ class Function final : public Castable<Function, CallTarget> {
     /// variable.
     /// @param global the module-scoped variable
     void AddTransitivelyReferencedGlobal(const sem::GlobalVariable* global) {
-        transitively_referenced_globals_.add(global);
+        transitively_referenced_globals_.Add(global);
     }
 
     /// @returns the list of functions that this function transitively calls.
-    const utils::UniqueVector<const Function*>& TransitivelyCalledFunctions() const {
+    const utils::UniqueVector<const Function*, 8>& TransitivelyCalledFunctions() const {
         return transitively_called_functions_;
     }
 
     /// Records that this function transitively calls `function`.
     /// @param function the function this function transitively calls
     void AddTransitivelyCalledFunction(const Function* function) {
-        transitively_called_functions_.add(function);
+        transitively_called_functions_.Add(function);
     }
 
     /// @returns the list of builtins that this function directly calls.
-    const utils::UniqueVector<const Builtin*>& DirectlyCalledBuiltins() const {
+    const utils::UniqueVector<const Builtin*, 4>& DirectlyCalledBuiltins() const {
         return directly_called_builtins_;
     }
 
     /// Records that this function transitively calls `builtin`.
     /// @param builtin the builtin this function directly calls
     void AddDirectlyCalledBuiltin(const Builtin* builtin) {
-        directly_called_builtins_.add(builtin);
+        directly_called_builtins_.Add(builtin);
     }
 
     /// Adds the given texture/sampler pair to the list of unique pairs
@@ -134,12 +134,14 @@ class Function final : public Castable<Function, CallTarget> {
     /// @param texture the texture (must be non-null)
     /// @param sampler the sampler (null indicates a texture-only reference)
     void AddTextureSamplerPair(const sem::Variable* texture, const sem::Variable* sampler) {
-        texture_sampler_pairs_.add(VariablePair(texture, sampler));
+        texture_sampler_pairs_.Add(VariablePair(texture, sampler));
     }
 
     /// @returns the list of texture/sampler pairs that this function uses
     /// (directly or indirectly).
-    const std::vector<VariablePair>& TextureSamplerPairs() const { return texture_sampler_pairs_; }
+    const utils::Vector<VariablePair, 8>& TextureSamplerPairs() const {
+        return texture_sampler_pairs_;
+    }
 
     /// @returns the list of direct calls to functions / builtins made by this
     /// function
@@ -253,17 +255,20 @@ class Function final : public Castable<Function, CallTarget> {
     sem::Behaviors& Behaviors() { return behaviors_; }
 
   private:
+    Function(const Function&) = delete;
+    Function(Function&&) = delete;
+
     VariableBindings TransitivelyReferencedSamplerVariablesImpl(ast::SamplerKind kind) const;
     VariableBindings TransitivelyReferencedSampledTextureVariablesImpl(bool multisampled) const;
 
     const ast::Function* const declaration_;
 
     sem::WorkgroupSize workgroup_size_;
-    utils::UniqueVector<const GlobalVariable*> directly_referenced_globals_;
-    utils::UniqueVector<const GlobalVariable*> transitively_referenced_globals_;
-    utils::UniqueVector<const Function*> transitively_called_functions_;
-    utils::UniqueVector<const Builtin*> directly_called_builtins_;
-    utils::UniqueVector<VariablePair> texture_sampler_pairs_;
+    utils::UniqueVector<const GlobalVariable*, 4> directly_referenced_globals_;
+    utils::UniqueVector<const GlobalVariable*, 8> transitively_referenced_globals_;
+    utils::UniqueVector<const Function*, 8> transitively_called_functions_;
+    utils::UniqueVector<const Builtin*, 4> directly_called_builtins_;
+    utils::UniqueVector<VariablePair, 8> texture_sampler_pairs_;
     std::vector<const Call*> direct_calls_;
     std::vector<const Call*> callsites_;
     std::vector<const Function*> ancestor_entry_points_;

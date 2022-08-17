@@ -3428,13 +3428,13 @@ TEST_F(SpvModuleScopeVarParserTest, RegisterInputOutputVars) {
 
     const auto& info_1000 = p->GetEntryPointInfo(1000);
     EXPECT_EQ(1u, info_1000.size());
-    EXPECT_TRUE(info_1000[0].inputs.empty());
-    EXPECT_TRUE(info_1000[0].outputs.empty());
+    EXPECT_TRUE(info_1000[0].inputs.IsEmpty());
+    EXPECT_TRUE(info_1000[0].outputs.IsEmpty());
 
     const auto& info_1100 = p->GetEntryPointInfo(1100);
     EXPECT_EQ(1u, info_1100.size());
     EXPECT_THAT(info_1100[0].inputs, ElementsAre(1));
-    EXPECT_TRUE(info_1100[0].outputs.empty());
+    EXPECT_TRUE(info_1100[0].outputs.IsEmpty());
 
     const auto& info_1200 = p->GetEntryPointInfo(1200);
     EXPECT_EQ(1u, info_1200.size());

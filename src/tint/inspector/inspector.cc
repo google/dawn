@@ -505,7 +505,7 @@ std::vector<ResourceBinding> Inspector::GetExternalTextureResourceBindings(
                                       ResourceBinding::ResourceType::kExternalTexture);
 }
 
-std::vector<sem::SamplerTexturePair> Inspector::GetSamplerTextureUses(
+utils::Vector<sem::SamplerTexturePair, 4> Inspector::GetSamplerTextureUses(
     const std::string& entry_point) {
     auto* func = FindEntryPointByName(entry_point);
     if (!func) {
@@ -570,7 +570,7 @@ uint32_t Inspector::GetWorkgroupStorageSize(const std::string& entry_point) {
 std::vector<std::string> Inspector::GetUsedExtensionNames() {
     auto& extensions = program_->Sem().Module()->Extensions();
     std::vector<std::string> out;
-    out.reserve(extensions.size());
+    out.reserve(extensions.Length());
     for (auto ext : extensions) {
         out.push_back(utils::ToString(ext));
     }
@@ -789,7 +789,7 @@ void Inspector::GenerateSamplerTargets() {
     }
 
     sampler_targets_ = std::make_unique<
-        std::unordered_map<std::string, utils::UniqueVector<sem::SamplerTexturePair>>>();
+        std::unordered_map<std::string, utils::UniqueVector<sem::SamplerTexturePair, 4>>>();
 
     auto& sem = program_->Sem();
 
@@ -849,7 +849,7 @@ void Inspector::GenerateSamplerTargets() {
                 for (auto* entry_point : entry_points) {
                     const auto& ep_name =
                         program_->Symbols().NameFor(entry_point->Declaration()->symbol);
-                    (*sampler_targets_)[ep_name].add(
+                    (*sampler_targets_)[ep_name].Add(
                         {sampler_binding_point, texture_binding_point});
                 }
             });
@@ -868,7 +868,7 @@ void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> ex
 
     std::array<const sem::GlobalVariable*, N> globals{};
     std::array<const sem::Parameter*, N> parameters{};
-    utils::UniqueVector<const ast::CallExpression*> callsites;
+    utils::UniqueVector<const ast::CallExpression*, 8> callsites;
 
     for (size_t i = 0; i < N; i++) {
         const sem::Variable* source_var = sem.Get(exprs[i])->SourceVariable();
@@ -882,7 +882,7 @@ void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> ex
                 return;
             }
             for (auto* call : func->CallSites()) {
-                callsites.add(call->Declaration());
+                callsites.Add(call->Declaration());
             }
             parameters[i] = param;
         } else {
@@ -893,7 +893,7 @@ void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> ex
         }
     }
 
-    if (callsites.size()) {
+    if (callsites.Length()) {
         for (auto* call_expr : callsites) {
             // Make a copy of the expressions for this callsite
             std::array<const ast::Expression*, N> call_exprs = exprs;

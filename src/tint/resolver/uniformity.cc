@@ -102,14 +102,14 @@ struct Node {
     uint32_t arg_index;
 
     /// The set of edges from this node to other nodes in the graph.
-    utils::UniqueVector<Node*> edges;
+    utils::UniqueVector<Node*, 4> edges;
 
     /// The node that this node was visited from, or nullptr if not visited.
     Node* visited_from = nullptr;
 
     /// Add an edge to the `to` node.
     /// @param to the destination node
-    void AddEdge(Node* to) { edges.add(to); }
+    void AddEdge(Node* to) { edges.Add(to); }
 };
 
 /// ParameterInfo holds information about the uniformity requirements and effects for a particular
@@ -337,13 +337,13 @@ class UniformityGraph {
 
         // Look at which nodes are reachable from "RequiredToBeUniform".
         {
-            utils::UniqueVector<Node*> reachable;
+            utils::UniqueVector<Node*, 4> reachable;
             Traverse(current_function_->required_to_be_uniform, &reachable);
-            if (reachable.contains(current_function_->may_be_non_uniform)) {
+            if (reachable.Contains(current_function_->may_be_non_uniform)) {
                 MakeError(*current_function_, current_function_->may_be_non_uniform);
                 return false;
             }
-            if (reachable.contains(current_function_->cf_start)) {
+            if (reachable.Contains(current_function_->cf_start)) {
                 current_function_->callsite_tag = CallSiteRequiredToBeUniform;
             }
 
@@ -351,7 +351,7 @@ class UniformityGraph {
             // was reachable.
             for (size_t i = 0; i < func->params.Length(); i++) {
                 auto* param = func->params[i];
-                if (reachable.contains(current_function_->variables.Get(sem_.Get(param)))) {
+                if (reachable.Contains(current_function_->variables.Get(sem_.Get(param)))) {
                     current_function_->parameters[i].tag = ParameterRequiredToBeUniform;
                 }
             }
@@ -359,9 +359,9 @@ class UniformityGraph {
 
         // Look at which nodes are reachable from "CF_return"
         {
-            utils::UniqueVector<Node*> reachable;
+            utils::UniqueVector<Node*, 4> reachable;
             Traverse(current_function_->cf_return, &reachable);
-            if (reachable.contains(current_function_->may_be_non_uniform)) {
+            if (reachable.Contains(current_function_->may_be_non_uniform)) {
                 current_function_->function_tag = SubsequentControlFlowMayBeNonUniform;
             }
 
@@ -369,7 +369,7 @@ class UniformityGraph {
             // each parameter node that was reachable.
             for (size_t i = 0; i < func->params.Length(); i++) {
                 auto* param = func->params[i];
-                if (reachable.contains(current_function_->variables.Get(sem_.Get(param)))) {
+                if (reachable.Contains(current_function_->variables.Get(sem_.Get(param)))) {
                     current_function_->parameters[i].tag =
                         ParameterRequiredToBeUniformForSubsequentControlFlow;
                 }
@@ -378,9 +378,9 @@ class UniformityGraph {
 
         // If "Value_return" exists, look at which nodes are reachable from it
         if (current_function_->value_return) {
-            utils::UniqueVector<Node*> reachable;
+            utils::UniqueVector<Node*, 4> reachable;
             Traverse(current_function_->value_return, &reachable);
-            if (reachable.contains(current_function_->may_be_non_uniform)) {
+            if (reachable.Contains(current_function_->may_be_non_uniform)) {
                 current_function_->function_tag = ReturnValueMayBeNonUniform;
             }
 
@@ -388,7 +388,7 @@ class UniformityGraph {
             // parameter node that was reachable.
             for (size_t i = 0; i < func->params.Length(); i++) {
                 auto* param = func->params[i];
-                if (reachable.contains(current_function_->variables.Get(sem_.Get(param)))) {
+                if (reachable.Contains(current_function_->variables.Get(sem_.Get(param)))) {
                     current_function_->parameters[i].tag =
                         ParameterRequiredToBeUniformForReturnValue;
                 }
@@ -404,16 +404,16 @@ class UniformityGraph {
             // Reset "visited" state for all nodes.
             current_function_->ResetVisited();
 
-            utils::UniqueVector<Node*> reachable;
+            utils::UniqueVector<Node*, 4> reachable;
             Traverse(current_function_->parameters[i].pointer_return_value, &reachable);
-            if (reachable.contains(current_function_->may_be_non_uniform)) {
+            if (reachable.Contains(current_function_->may_be_non_uniform)) {
                 current_function_->parameters[i].pointer_may_become_non_uniform = true;
             }
 
             // Check every other parameter to see if they feed into this parameter's final value.
             for (size_t j = 0; j < func->params.Length(); j++) {
                 auto* param_source = sem_.Get<sem::Parameter>(func->params[j]);
-                if (reachable.contains(current_function_->parameters[j].init_value)) {
+                if (reachable.Contains(current_function_->parameters[j].init_value)) {
                     current_function_->parameters[i].pointer_param_output_sources.push_back(
                         param_source);
                 }
@@ -1356,7 +1356,7 @@ class UniformityGraph {
     /// recording which node they were reached from.
     /// @param source the starting node
     /// @param reachable the set of reachable nodes to populate, if required
-    void Traverse(Node* source, utils::UniqueVector<Node*>* reachable = nullptr) {
+    void Traverse(Node* source, utils::UniqueVector<Node*, 4>* reachable = nullptr) {
         std::vector<Node*> to_visit{source};
 
         while (!to_visit.empty()) {
@@ -1364,7 +1364,7 @@ class UniformityGraph {
             to_visit.pop_back();
 
             if (reachable) {
-                reachable->add(node);
+                reachable->Add(node);
             }
             for (auto* to : node->edges) {
                 if (to->visited_from == nullptr) {
