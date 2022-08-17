@@ -350,7 +350,7 @@ inline std::optional<AInt> CheckedAdd(AInt a, AInt b) {
     }
 #else   // TINT_HAS_OVERFLOW_BUILTINS
     if (a.value >= 0) {
-        if (AInt::kHighestValue - a.value < b.value) {
+        if (b.value > AInt::kHighestValue - a.value) {
             return {};
         }
     } else {
@@ -366,6 +366,37 @@ inline std::optional<AInt> CheckedAdd(AInt a, AInt b) {
 /// @returns a + b, or an empty optional if the resulting value overflowed the AFloat
 inline std::optional<AFloat> CheckedAdd(AFloat a, AFloat b) {
     auto result = a.value + b.value;
+    if (!std::isfinite(result)) {
+        return {};
+    }
+    return AFloat{result};
+}
+
+/// @returns a - b, or an empty optional if the resulting value overflowed the AInt
+inline std::optional<AInt> CheckedSub(AInt a, AInt b) {
+    int64_t result;
+#ifdef TINT_HAS_OVERFLOW_BUILTINS
+    if (__builtin_sub_overflow(a.value, b.value, &result)) {
+        return {};
+    }
+#else   // TINT_HAS_OVERFLOW_BUILTINS
+    if (b.value >= 0) {
+        if (a.value < AInt::kLowestValue + b.value) {
+            return {};
+        }
+    } else {
+        if (a.value > AInt::kHighestValue + b.value) {
+            return {};
+        }
+    }
+    result = a.value - b.value;
+#endif  // TINT_HAS_OVERFLOW_BUILTINS
+    return AInt(result);
+}
+
+/// @returns a + b, or an empty optional if the resulting value overflowed the AFloat
+inline std::optional<AFloat> CheckedSub(AFloat a, AFloat b) {
+    auto result = a.value - b.value;
     if (!std::isfinite(result)) {
         return {};
     }

@@ -356,7 +356,9 @@ INSTANTIATE_TEST_SUITE_P(
         /////////////////////////////////////
     }));
 
+#ifdef OVERFLOW
 #undef OVERFLOW  // corecrt_math.h :(
+#endif
 #define OVERFLOW \
     {}
 
@@ -425,6 +427,67 @@ INSTANTIATE_TEST_SUITE_P(
         {AFloat::Lowest(), AFloat::Lowest(), AFloat(0)},
         {OVERFLOW, AFloat::Highest(), AFloat::Highest()},
         {OVERFLOW, AFloat::Lowest(), AFloat::Lowest()},
+        ////////////////////////////////////////////////////////////////////////
+    }));
+
+using CheckedSubTest_AInt = testing::TestWithParam<BinaryCheckedCase_AInt>;
+TEST_P(CheckedSubTest_AInt, Test) {
+    auto expect = std::get<0>(GetParam());
+    auto a = std::get<1>(GetParam());
+    auto b = std::get<2>(GetParam());
+    EXPECT_EQ(CheckedSub(a, b), expect) << std::hex << "0x" << a << " - 0x" << b;
+}
+INSTANTIATE_TEST_SUITE_P(
+    CheckedSubTest_AInt,
+    CheckedSubTest_AInt,
+    testing::ValuesIn(std::vector<BinaryCheckedCase_AInt>{
+        {AInt(0), AInt(0), AInt(0)},
+        {AInt(1), AInt(1), AInt(0)},
+        {AInt(0), AInt(1), AInt(1)},
+        {AInt(-2), AInt(-1), AInt(1)},
+        {AInt(1), AInt(2), AInt(1)},
+        {AInt(-3), AInt(-2), AInt(1)},
+        {AInt(0x100), AInt(0x300), AInt(0x200)},
+        {AInt(-0x300), AInt(-0x100), AInt(0x200)},
+        {AInt::Highest(), AInt(AInt::kHighestValue - 1), AInt(-1)},
+        {AInt::Lowest(), AInt(AInt::kLowestValue + 1), AInt(1)},
+        {AInt(0x00000000ffffffffll), AInt::Highest(), AInt(0x7fffffff00000000ll)},
+        {AInt::Highest(), AInt::Highest(), AInt(0)},
+        {AInt::Lowest(), AInt::Lowest(), AInt(0)},
+        {OVERFLOW, AInt::Lowest(), AInt(1)},
+        {OVERFLOW, AInt::Highest(), AInt(-1)},
+        {OVERFLOW, AInt::Lowest(), AInt(2)},
+        {OVERFLOW, AInt::Highest(), AInt(-2)},
+        {OVERFLOW, AInt::Lowest(), AInt(10000)},
+        {OVERFLOW, AInt::Highest(), AInt(-10000)},
+        {OVERFLOW, AInt::Lowest(), AInt::Highest()},
+        ////////////////////////////////////////////////////////////////////////
+    }));
+
+using CheckedSubTest_AFloat = testing::TestWithParam<BinaryCheckedCase_AFloat>;
+TEST_P(CheckedSubTest_AFloat, Test) {
+    auto expect = std::get<0>(GetParam());
+    auto a = std::get<1>(GetParam());
+    auto b = std::get<2>(GetParam());
+    EXPECT_EQ(CheckedSub(a, b), expect) << std::hex << "0x" << a << " - 0x" << b;
+}
+INSTANTIATE_TEST_SUITE_P(
+    CheckedSubTest_AFloat,
+    CheckedSubTest_AFloat,
+    testing::ValuesIn(std::vector<BinaryCheckedCase_AFloat>{
+        {AFloat(0), AFloat(0), AFloat(0)},
+        {AFloat(1), AFloat(1), AFloat(0)},
+        {AFloat(0), AFloat(1), AFloat(1)},
+        {AFloat(-2), AFloat(-1), AFloat(1)},
+        {AFloat(1), AFloat(2), AFloat(1)},
+        {AFloat(-3), AFloat(-2), AFloat(1)},
+        {AFloat(0x100), AFloat(0x300), AFloat(0x200)},
+        {AFloat(-0x300), AFloat(-0x100), AFloat(0x200)},
+        {AFloat::Highest(), AFloat(AFloat::kHighestValue - 1), AFloat(-1)},
+        {AFloat::Lowest(), AFloat(AFloat::kLowestValue + 1), AFloat(1)},
+        {AFloat::Highest(), AFloat::Highest(), AFloat(0)},
+        {AFloat::Lowest(), AFloat::Lowest(), AFloat(0)},
+        {OVERFLOW, AFloat::Lowest(), AFloat::Highest()},
         ////////////////////////////////////////////////////////////////////////
     }));
 
