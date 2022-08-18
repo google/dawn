@@ -85,6 +85,10 @@ if (build_with_chromium) {
       "tint_reader_writer_fuzzer.h",
       "transform_builder.h",
     ]
+
+    if (is_mac) {
+      sources += [ "//testing/libfuzzer/libfuzzer_exports.h" ]
+    }
   }
 
   source_set("tint_fuzzer_common_with_init_src") {
