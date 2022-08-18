@@ -44,9 +44,10 @@ const std::vector<uint32_t> kStencilValues = {0, 1, 38, 255};
 
 class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingTestParams> {
   protected:
-    enum class TestAspect {
-        Depth,
-        Stencil,
+    enum class TestAspectAndSamplerType {
+        DepthAsDepth,
+        DepthAsFloat,
+        StencilAsUint,
     };
 
     void SetUp() override {
@@ -74,7 +75,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         }
     }
 
-    void GenerateSamplingShader(const std::vector<TestAspect>& aspects,
+    void GenerateSamplingShader(const std::vector<TestAspectAndSamplerType>& aspectAndSamplerTypes,
                                 const std::vector<uint32_t> components,
                                 std::ostringstream& shaderSource,
                                 std::ostringstream& shaderBody) {
@@ -89,9 +90,9 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         shaderSource << "\n";
 
         uint32_t index = 0;
-        for (TestAspect aspect : aspects) {
-            switch (aspect) {
-                case TestAspect::Depth:
+        for (TestAspectAndSamplerType aspectAndSamplerType : aspectAndSamplerTypes) {
+            switch (aspectAndSamplerType) {
+                case TestAspectAndSamplerType::DepthAsDepth:
                     shaderSource << "@group(0) @binding(" << 2 * index << ") var tex" << index
                                  << " : texture_depth_2d;\n";
 
@@ -103,7 +104,19 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                     shaderBody << "\nresult" << index << ".value = textureLoad(tex" << index
                                << ", vec2<i32>(0, 0), 0);";
                     break;
-                case TestAspect::Stencil:
+                case TestAspectAndSamplerType::DepthAsFloat:
+                    shaderSource << "@group(0) @binding(" << 2 * index << ") var tex" << index
+                                 << " : texture_2d<f32>;\n";
+
+                    shaderSource << "@group(0) @binding(" << 2 * index + 1
+                                 << ") var<storage, read_write> result" << index
+                                 << " : DepthResult;\n";
+
+                    ASSERT(components.size() == 1 && components[0] == 0);
+                    shaderBody << "\nresult" << index << ".value = textureLoad(tex" << index
+                               << ", vec2<i32>(0, 0), 0)[0];";
+                    break;
+                case TestAspectAndSamplerType::StencilAsUint:
                     shaderSource << "@group(0) @binding(" << 2 * index << ") var tex" << index
                                  << " : texture_2d<u32>;\n";
 
@@ -125,8 +138,9 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         }
     }
 
-    wgpu::RenderPipeline CreateSamplingRenderPipeline(std::vector<TestAspect> aspects,
-                                                      std::vector<uint32_t> components) {
+    wgpu::RenderPipeline CreateSamplingRenderPipeline(
+        std::vector<TestAspectAndSamplerType> aspectAndSamplerTypes,
+        std::vector<uint32_t> components) {
         wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
             @vertex fn main() -> @builtin(position) vec4<f32> {
                 return vec4<f32>(0.0, 0.0, 0.0, 1.0);
@@ -138,7 +152,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         std::ostringstream shaderOutputStruct;
         std::ostringstream shaderBody;
 
-        GenerateSamplingShader(aspects, components, shaderSource, shaderBody);
+        GenerateSamplingShader(aspectAndSamplerTypes, components, shaderSource, shaderBody);
 
         shaderSource << "@fragment fn main() -> @location(0) vec4<f32> {\n";
         shaderSource << shaderBody.str() << "return vec4<f32>();\n }";
@@ -152,11 +166,12 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         return device.CreateRenderPipeline(&pipelineDescriptor);
     }
 
-    wgpu::ComputePipeline CreateSamplingComputePipeline(std::vector<TestAspect> aspects,
-                                                        std::vector<uint32_t> components) {
+    wgpu::ComputePipeline CreateSamplingComputePipeline(
+        std::vector<TestAspectAndSamplerType> aspectAndSamplerTypes,
+        std::vector<uint32_t> components) {
         std::ostringstream shaderSource;
         std::ostringstream shaderBody;
-        GenerateSamplingShader(aspects, components, shaderSource, shaderBody);
+        GenerateSamplingShader(aspectAndSamplerTypes, components, shaderSource, shaderBody);
 
         shaderSource << "@compute @workgroup_size(1) fn main() { " << shaderBody.str() << "\n}";
 
@@ -169,15 +184,17 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         return device.CreateComputePipeline(&pipelineDescriptor);
     }
 
-    wgpu::RenderPipeline CreateSamplingRenderPipeline(std::vector<TestAspect> aspects,
-                                                      uint32_t componentIndex) {
-        return CreateSamplingRenderPipeline(std::move(aspects),
+    wgpu::RenderPipeline CreateSamplingRenderPipeline(
+        std::vector<TestAspectAndSamplerType> aspectAndSamplerTypes,
+        uint32_t componentIndex) {
+        return CreateSamplingRenderPipeline(std::move(aspectAndSamplerTypes),
                                             std::vector<uint32_t>{componentIndex});
     }
 
-    wgpu::ComputePipeline CreateSamplingComputePipeline(std::vector<TestAspect> aspects,
-                                                        uint32_t componentIndex) {
-        return CreateSamplingComputePipeline(std::move(aspects),
+    wgpu::ComputePipeline CreateSamplingComputePipeline(
+        std::vector<TestAspectAndSamplerType> aspectAndSamplerTypes,
+        uint32_t componentIndex) {
+        return CreateSamplingComputePipeline(std::move(aspectAndSamplerTypes),
                                              std::vector<uint32_t>{componentIndex});
     }
 
@@ -283,7 +300,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
     }
 
     template <typename T, typename CheckBufferFn>
-    void DoSamplingTestImpl(TestAspect aspect,
+    void DoSamplingTestImpl(TestAspectAndSamplerType aspectAndSamplerType,
                             wgpu::RenderPipeline pipeline,
                             wgpu::TextureFormat format,
                             std::vector<T> textureValues,
@@ -291,11 +308,12 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                             CheckBufferFn CheckBuffer) {
         wgpu::Texture inputTexture = CreateInputTexture(format);
         wgpu::TextureViewDescriptor inputViewDesc = {};
-        switch (aspect) {
-            case TestAspect::Depth:
+        switch (aspectAndSamplerType) {
+            case TestAspectAndSamplerType::DepthAsDepth:
+            case TestAspectAndSamplerType::DepthAsFloat:
                 inputViewDesc.aspect = wgpu::TextureAspect::DepthOnly;
                 break;
-            case TestAspect::Stencil:
+            case TestAspectAndSamplerType::StencilAsUint:
                 inputViewDesc.aspect = wgpu::TextureAspect::StencilOnly;
                 break;
         }
@@ -309,11 +327,12 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         for (size_t i = 0; i < textureValues.size(); ++i) {
             // Set the input depth texture to the provided texture value
             wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-            switch (aspect) {
-                case TestAspect::Depth:
+            switch (aspectAndSamplerType) {
+                case TestAspectAndSamplerType::DepthAsDepth:
+                case TestAspectAndSamplerType::DepthAsFloat:
                     UpdateInputDepth(commandEncoder, inputTexture, format, textureValues[i]);
                     break;
-                case TestAspect::Stencil:
+                case TestAspectAndSamplerType::StencilAsUint:
                     UpdateInputStencil(commandEncoder, inputTexture, format, textureValues[i]);
                     break;
             }
@@ -338,7 +357,7 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
     }
 
     template <typename T, typename CheckBufferFn>
-    void DoSamplingTestImpl(TestAspect aspect,
+    void DoSamplingTestImpl(TestAspectAndSamplerType aspectAndSamplerType,
                             wgpu::ComputePipeline pipeline,
                             wgpu::TextureFormat format,
                             std::vector<T> textureValues,
@@ -346,11 +365,12 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
                             CheckBufferFn CheckBuffer) {
         wgpu::Texture inputTexture = CreateInputTexture(format);
         wgpu::TextureViewDescriptor inputViewDesc = {};
-        switch (aspect) {
-            case TestAspect::Depth:
+        switch (aspectAndSamplerType) {
+            case TestAspectAndSamplerType::DepthAsDepth:
+            case TestAspectAndSamplerType::DepthAsFloat:
                 inputViewDesc.aspect = wgpu::TextureAspect::DepthOnly;
                 break;
-            case TestAspect::Stencil:
+            case TestAspectAndSamplerType::StencilAsUint:
                 inputViewDesc.aspect = wgpu::TextureAspect::StencilOnly;
                 break;
         }
@@ -364,11 +384,12 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         for (size_t i = 0; i < textureValues.size(); ++i) {
             // Set the input depth texture to the provided texture value
             wgpu::CommandEncoder commandEncoder = device.CreateCommandEncoder();
-            switch (aspect) {
-                case TestAspect::Depth:
+            switch (aspectAndSamplerType) {
+                case TestAspectAndSamplerType::DepthAsDepth:
+                case TestAspectAndSamplerType::DepthAsFloat:
                     UpdateInputDepth(commandEncoder, inputTexture, format, textureValues[i]);
                     break;
-                case TestAspect::Stencil:
+                case TestAspectAndSamplerType::StencilAsUint:
                     UpdateInputStencil(commandEncoder, inputTexture, format, textureValues[i]);
                     break;
             }
@@ -390,12 +411,12 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
     }
 
     template <typename T>
-    void DoSamplingTest(TestAspect aspect,
+    void DoSamplingTest(TestAspectAndSamplerType aspectAndSamplerType,
                         wgpu::RenderPipeline pipeline,
                         wgpu::TextureFormat format,
                         std::vector<T> textureValues,
                         T tolerance = {}) {
-        DoSamplingTestImpl(aspect, pipeline, format, textureValues, 1,
+        DoSamplingTestImpl(aspectAndSamplerType, pipeline, format, textureValues, 1,
                            [this, tolerance](T expected, wgpu::Buffer buffer) {
                                EXPECT_BUFFER(buffer, 0, sizeof(T),
                                              new ::detail::ExpectEq<T>(expected, tolerance));
@@ -403,12 +424,12 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
     }
 
     template <typename T>
-    void DoSamplingTest(TestAspect aspect,
+    void DoSamplingTest(TestAspectAndSamplerType aspectAndSamplerType,
                         wgpu::ComputePipeline pipeline,
                         wgpu::TextureFormat format,
                         std::vector<T> textureValues,
                         T tolerance = {}) {
-        DoSamplingTestImpl(aspect, pipeline, format, textureValues, 1,
+        DoSamplingTestImpl(aspectAndSamplerType, pipeline, format, textureValues, 1,
                            [this, tolerance](T expected, wgpu::Buffer buffer) {
                                EXPECT_BUFFER(buffer, 0, sizeof(T),
                                              new ::detail::ExpectEq<T>(expected, tolerance));
@@ -447,22 +468,24 @@ class DepthStencilSamplingTest : public DawnTestWithParams<DepthStencilSamplingT
         uint32_t mExpected;
     };
 
-    void DoSamplingExtraStencilComponentsRenderTest(TestAspect aspect,
+    void DoSamplingExtraStencilComponentsRenderTest(TestAspectAndSamplerType aspectAndSamplerType,
                                                     wgpu::TextureFormat format,
                                                     std::vector<uint8_t> textureValues) {
-        DoSamplingTestImpl(aspect,
-                           CreateSamplingRenderPipeline({TestAspect::Stencil}, {0, 1, 2, 3}),
+        DoSamplingTestImpl(aspectAndSamplerType,
+                           CreateSamplingRenderPipeline({TestAspectAndSamplerType::StencilAsUint},
+                                                        {0, 1, 2, 3}),
                            format, textureValues, 4, [&](uint32_t expected, wgpu::Buffer buffer) {
                                EXPECT_BUFFER(buffer, 0, 4 * sizeof(uint32_t),
                                              new ExtraStencilComponentsExpectation(expected));
                            });
     }
 
-    void DoSamplingExtraStencilComponentsComputeTest(TestAspect aspect,
+    void DoSamplingExtraStencilComponentsComputeTest(TestAspectAndSamplerType aspectAndSamplerType,
                                                      wgpu::TextureFormat format,
                                                      std::vector<uint8_t> textureValues) {
-        DoSamplingTestImpl(aspect,
-                           CreateSamplingComputePipeline({TestAspect::Stencil}, {0, 1, 2, 3}),
+        DoSamplingTestImpl(aspectAndSamplerType,
+                           CreateSamplingComputePipeline({TestAspectAndSamplerType::StencilAsUint},
+                                                         {0, 1, 2, 3}),
                            format, textureValues, 4, [&](uint32_t expected, wgpu::Buffer buffer) {
                                EXPECT_BUFFER(buffer, 0, 4 * sizeof(uint32_t),
                                              new ExtraStencilComponentsExpectation(expected));
@@ -604,10 +627,10 @@ TEST_P(DepthStencilSamplingTest, SampleExtraComponents) {
 
     wgpu::TextureFormat format = GetParam().mTextureFormat;
 
-    DoSamplingExtraStencilComponentsRenderTest(TestAspect::Stencil, format,
+    DoSamplingExtraStencilComponentsRenderTest(TestAspectAndSamplerType::StencilAsUint, format,
                                                {uint8_t(42), uint8_t(37)});
 
-    DoSamplingExtraStencilComponentsComputeTest(TestAspect::Stencil, format,
+    DoSamplingExtraStencilComponentsComputeTest(TestAspectAndSamplerType::StencilAsUint, format,
                                                 {uint8_t(42), uint8_t(37)});
 }
 
@@ -628,8 +651,8 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
 
     // With render pipeline
     {
-        wgpu::RenderPipeline pipeline =
-            CreateSamplingRenderPipeline({TestAspect::Depth, TestAspect::Stencil}, 0);
+        wgpu::RenderPipeline pipeline = CreateSamplingRenderPipeline(
+            {TestAspectAndSamplerType::DepthAsDepth, TestAspectAndSamplerType::StencilAsUint}, 0);
 
         wgpu::Buffer depthOutput = CreateOutputBuffer();
         wgpu::Buffer stencilOutput = CreateOutputBuffer();
@@ -681,8 +704,8 @@ TEST_P(DepthStencilSamplingTest, SampleDepthAndStencilRender) {
 
     // With compute pipeline
     {
-        wgpu::ComputePipeline pipeline =
-            CreateSamplingComputePipeline({TestAspect::Depth, TestAspect::Stencil}, 0);
+        wgpu::ComputePipeline pipeline = CreateSamplingComputePipeline(
+            {TestAspectAndSamplerType::DepthAsDepth, TestAspectAndSamplerType::StencilAsUint}, 0);
 
         wgpu::Buffer depthOutput = CreateOutputBuffer();
         wgpu::Buffer stencilOutput = CreateOutputBuffer();
@@ -735,11 +758,19 @@ TEST_P(DepthSamplingTest, SampleDepthOnly) {
     float tolerance = format == wgpu::TextureFormat::Depth16Unorm ? 0.001f : 0.0f;
 
     // Test 0, between [0, 1], and 1.
-    DoSamplingTest(TestAspect::Depth, CreateSamplingRenderPipeline({TestAspect::Depth}, 0), format,
-                   kNormalizedTextureValues, tolerance);
+    DoSamplingTest(TestAspectAndSamplerType::DepthAsDepth,
+                   CreateSamplingRenderPipeline({TestAspectAndSamplerType::DepthAsDepth}, 0),
+                   format, kNormalizedTextureValues, tolerance);
+    DoSamplingTest(TestAspectAndSamplerType::DepthAsFloat,
+                   CreateSamplingRenderPipeline({TestAspectAndSamplerType::DepthAsFloat}, 0),
+                   format, kNormalizedTextureValues, tolerance);
 
-    DoSamplingTest(TestAspect::Depth, CreateSamplingComputePipeline({TestAspect::Depth}, 0), format,
-                   kNormalizedTextureValues, tolerance);
+    DoSamplingTest(TestAspectAndSamplerType::DepthAsDepth,
+                   CreateSamplingComputePipeline({TestAspectAndSamplerType::DepthAsDepth}, 0),
+                   format, kNormalizedTextureValues, tolerance);
+    DoSamplingTest(TestAspectAndSamplerType::DepthAsFloat,
+                   CreateSamplingComputePipeline({TestAspectAndSamplerType::DepthAsFloat}, 0),
+                   format, kNormalizedTextureValues, tolerance);
 }
 
 // Test that sampling in a render pipeline with all of the compare functions works.
@@ -771,10 +802,12 @@ TEST_P(StencilSamplingTest, SampleStencilOnly) {
 
     wgpu::TextureFormat format = GetParam().mTextureFormat;
 
-    DoSamplingTest(TestAspect::Stencil, CreateSamplingRenderPipeline({TestAspect::Stencil}, 0),
+    DoSamplingTest(TestAspectAndSamplerType::StencilAsUint,
+                   CreateSamplingRenderPipeline({TestAspectAndSamplerType::StencilAsUint}, 0),
                    format, kStencilValues);
 
-    DoSamplingTest(TestAspect::Stencil, CreateSamplingComputePipeline({TestAspect::Stencil}, 0),
+    DoSamplingTest(TestAspectAndSamplerType::StencilAsUint,
+                   CreateSamplingComputePipeline({TestAspectAndSamplerType::StencilAsUint}, 0),
                    format, kStencilValues);
 }
 

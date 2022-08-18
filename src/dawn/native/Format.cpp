@@ -245,7 +245,7 @@ FormatTable BuildFormatTable(const DeviceBase* device) {
         firstAspect->block.width = 1;
         firstAspect->block.height = 1;
         firstAspect->baseType = wgpu::TextureComponentType::Float;
-        firstAspect->supportedSampleTypes = SampleTypeBit::Depth;
+        firstAspect->supportedSampleTypes = SampleTypeBit::Depth | SampleTypeBit::UnfilterableFloat;
         firstAspect->format = format;
         AddFormat(internalFormat);
     };
