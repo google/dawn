@@ -224,6 +224,7 @@
             "DeviceCreateQuerySet",
             "DeviceCreateTexture",
             "DeviceCreateErrorTexture",
+            "DeviceGetAdapter",
             "DeviceGetQueue",
             "DeviceInjectError"
         ],

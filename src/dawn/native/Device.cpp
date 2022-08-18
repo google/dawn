@@ -1284,6 +1284,11 @@ MaybeError DeviceBase::Tick() {
     return {};
 }
 
+AdapterBase* DeviceBase::APIGetAdapter() {
+    mAdapter->Reference();
+    return mAdapter;
+}
+
 QueueBase* DeviceBase::APIGetQueue() {
     // Backends gave the primary queue during initialization.
     ASSERT(mQueue != nullptr);

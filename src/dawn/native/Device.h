@@ -269,6 +269,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     ExternalTextureBase* APICreateErrorExternalTexture();
     TextureBase* APICreateErrorTexture(const TextureDescriptor* desc);
 
+    AdapterBase* APIGetAdapter();
     QueueBase* APIGetQueue();
 
     bool APIGetLimits(SupportedLimits* limits) const;

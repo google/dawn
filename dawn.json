@@ -1142,6 +1142,11 @@
                 ]
             },
             {
+                "name": "get adapter",
+                "returns": "adapter",
+                "tags": ["dawn"]
+            },
+            {
                 "name": "get queue",
                 "returns": "queue"
             },

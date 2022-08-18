@@ -216,6 +216,12 @@ WGPUTexture Device::CreateErrorTexture(const WGPUTextureDescriptor* descriptor) 
     return Texture::CreateError(this, descriptor);
 }
 
+WGPUAdapter Device::GetAdapter() {
+    // Not implemented in the wire.
+    UNREACHABLE();
+    return nullptr;
+}
+
 WGPUQueue Device::GetQueue() {
     // The queue is lazily created because if a Device is created by
     // Reserve/Inject, we cannot send the GetQueue message until
