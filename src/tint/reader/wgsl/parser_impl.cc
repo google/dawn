@@ -2599,6 +2599,64 @@ Expect<ParserImpl::ExpressionList> ParserImpl::expect_argument_expression_list(
     });
 }
 
+// bitwise_expression.post.unary_expression
+//   : AND unary_expression (AND unary_expression)*
+//   | OR unary_expression (OR unary_expression)*
+//   | XOR unary_expression (XOR unary_expression)*
+Maybe<const ast::Expression*> ParserImpl::bitwise_expression_post_unary_expression(
+    const ast::Expression* lhs) {
+    auto& t = peek();
+    if (!t.Is(Token::Type::kAnd) && !t.Is(Token::Type::kOr) && !t.Is(Token::Type::kXor)) {
+        return Failure::kNoMatch;
+    }
+
+    ast::BinaryOp op = ast::BinaryOp::kXor;
+    if (t.Is(Token::Type::kAnd)) {
+        op = ast::BinaryOp::kAnd;
+    } else if (t.Is(Token::Type::kOr)) {
+        op = ast::BinaryOp::kOr;
+    }
+
+    while (continue_parsing()) {
+        auto& n = peek();
+        // Handle the case of `a & b &&c` where `&c` is a unary_expression
+        bool split = false;
+        if (op == ast::BinaryOp::kAnd && n.Is(Token::Type::kAndAnd)) {
+            next();
+            split_token(Token::Type::kAnd, Token::Type::kAnd);
+            split = true;
+        }
+
+        if (!n.Is(t.type())) {
+            if (n.Is(Token::Type::kAnd) || n.Is(Token::Type::kOr) || n.Is(Token::Type::kXor)) {
+                return add_error(n.source(), std::string("mixing '") + std::string(t.to_name()) +
+                                                 "' and '" + std::string(n.to_name()) +
+                                                 "' requires parenthesis");
+            }
+
+            return lhs;
+        }
+        // If forced to split an `&&` then we've already done the `next` above which consumes
+        // the `&`. The type check above will always fail because we only split if already consuming
+        // a `&` operator.
+        if (!split) {
+            next();
+        }
+
+        auto rhs = unary_expression();
+        if (rhs.errored) {
+            return Failure::kErrored;
+        }
+        if (!rhs.matched) {
+            return add_error(peek(), std::string("unable to parse right side of ") +
+                                         std::string(t.to_name()) + " expression");
+        }
+
+        lhs = create<ast::BinaryExpression>(t.source(), op, lhs, rhs.value);
+    }
+    return Failure::kErrored;
+}
+
 // unary_expression
 //   : singular_expression
 //   | MINUS unary_expression

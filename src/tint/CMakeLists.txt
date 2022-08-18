@@ -948,6 +948,7 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_and_expression_test.cc
       reader/wgsl/parser_impl_argument_expression_list_test.cc
       reader/wgsl/parser_impl_assignment_stmt_test.cc
+      reader/wgsl/parser_impl_bitwise_expression_test.cc
       reader/wgsl/parser_impl_break_stmt_test.cc
       reader/wgsl/parser_impl_bug_cases_test.cc
       reader/wgsl/parser_impl_call_stmt_test.cc

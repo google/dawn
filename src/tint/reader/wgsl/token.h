@@ -386,6 +386,9 @@ class Token {
     /// @returns the source information for this token
     Source source() const { return source_; }
 
+    /// @returns the type of the token
+    Type type() const { return type_; }
+
     /// Returns the string value of the token
     /// @return std::string
     std::string to_str() const;
