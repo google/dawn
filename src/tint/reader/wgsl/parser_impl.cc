@@ -2800,6 +2800,19 @@ Maybe<const ast::Expression*> ParserImpl::element_count_expression() {
     return math.value;
 }
 
+// shift_expression
+//   : unary_expression shift_expression.post.unary_expression
+Maybe<const ast::Expression*> ParserImpl::maybe_shift_expression() {
+    auto lhs = unary_expression();
+    if (lhs.errored) {
+        return Failure::kErrored;
+    }
+    if (!lhs.matched) {
+        return Failure::kNoMatch;
+    }
+    return expect_shift_expression_post_unary_expression(lhs.value);
+}
+
 // shift_expression.post.unary_expression
 //   : multiplicative_expression.post.unary_expression?
 //   | SHIFT_LEFT unary_expression
@@ -2833,6 +2846,66 @@ Expect<const ast::Expression*> ParserImpl::expect_shift_expression_post_unary_ex
     }
 
     return expect_multiplicative_expression_post_unary_expression(lhs);
+}
+
+// relational_expression
+//   : unary_expression relational_expression.post.unary_expression
+Maybe<const ast::Expression*> ParserImpl::maybe_relational_expression() {
+    auto lhs = unary_expression();
+    if (lhs.errored) {
+        return Failure::kErrored;
+    }
+    if (!lhs.matched) {
+        return Failure::kNoMatch;
+    }
+    return expect_relational_expression_post_unary_expression(lhs.value);
+}
+
+// relational_expression.post.unary_expression
+//   : shift_expression.post.unary_expression
+//   | shift_expression.post.unary_expression EQUAL_EQUAL shift_expression
+//   | shift_expression.post.unary_expression GREATER_THAN shift_expression
+//   | shift_expression.post.unary_expression GREATER_THAN_EQUAL shift_expression
+//   | shift_expression.post.unary_expression LESS_THAN shift_expression
+//   | shift_expression.post.unary_expression LESS_THAN_EQUAL shift_expression
+//   | shift_expression.post.unary_expression NOT_EQUAL shift_expression
+//
+// Note, a `shift_expression` element was added to simplify many of the right sides
+Expect<const ast::Expression*> ParserImpl::expect_relational_expression_post_unary_expression(
+    const ast::Expression* lhs) {
+    auto lhs_result = expect_shift_expression_post_unary_expression(lhs);
+    if (lhs_result.errored) {
+        return Failure::kErrored;
+    }
+    lhs = lhs_result.value;
+
+    auto& t = peek();
+    if (match(Token::Type::kEqualEqual) || match(Token::Type::kGreaterThan) ||
+        match(Token::Type::kGreaterThanEqual) || match(Token::Type::kLessThan) ||
+        match(Token::Type::kLessThanEqual) || match(Token::Type::kNotEqual)) {
+        ast::BinaryOp op = ast::BinaryOp::kNone;
+        if (t.Is(Token::Type::kLessThan)) {
+            op = ast::BinaryOp::kLessThan;
+        } else if (t.Is(Token::Type::kGreaterThan)) {
+            op = ast::BinaryOp::kGreaterThan;
+        } else if (t.Is(Token::Type::kLessThanEqual)) {
+            op = ast::BinaryOp::kLessThanEqual;
+        } else if (t.Is(Token::Type::kGreaterThanEqual)) {
+            op = ast::BinaryOp::kGreaterThanEqual;
+        }
+
+        auto& next = peek();
+        auto rhs = maybe_shift_expression();
+        if (rhs.errored) {
+            return Failure::kErrored;
+        }
+        if (!rhs.matched) {
+            return add_error(next, std::string("unable to parse right side of ") +
+                                       std::string(t.to_name()) + " expression");
+        }
+        lhs = create<ast::BinaryExpression>(t.source(), op, lhs, rhs.value);
+    }
+    return lhs;
 }
 
 // singular_expression
