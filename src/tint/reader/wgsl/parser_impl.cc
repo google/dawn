@@ -1533,7 +1533,7 @@ Expect<ParserImpl::ParameterList> ParserImpl::expect_param_list() {
 }
 
 // param
-//   : attribute_list* ident_with_type_decl
+//   : attribute_list* ident COLON type_decl
 Expect<ast::Parameter*> ParserImpl::expect_param() {
     auto attrs = attribute_list();
 
@@ -2563,20 +2563,6 @@ Maybe<const ast::Expression*> ParserImpl::postfix_expression(const ast::Expressi
     return Failure::kErrored;
 }
 
-// singular_expression
-//   : primary_expression postfix_expr
-Maybe<const ast::Expression*> ParserImpl::singular_expression() {
-    auto prefix = primary_expression();
-    if (prefix.errored) {
-        return Failure::kErrored;
-    }
-    if (!prefix.matched) {
-        return Failure::kNoMatch;
-    }
-
-    return postfix_expression(prefix.value);
-}
-
 // argument_expression_list
 //   : PAREN_LEFT ((expression COMMA)* expression COMMA?)? PAREN_RIGHT
 Expect<ParserImpl::ExpressionList> ParserImpl::expect_argument_expression_list(
@@ -2814,6 +2800,20 @@ Maybe<const ast::Expression*> ParserImpl::element_count_expression() {
     return math.value;
 }
 
+// singular_expression
+//   : primary_expression postfix_expr
+Maybe<const ast::Expression*> ParserImpl::singular_expression() {
+    auto prefix = primary_expression();
+    if (prefix.errored) {
+        return Failure::kErrored;
+    }
+    if (!prefix.matched) {
+        return Failure::kNoMatch;
+    }
+
+    return postfix_expression(prefix.value);
+}
+
 // unary_expression
 //   : singular_expression
 //   | MINUS unary_expression
@@ -2821,6 +2821,8 @@ Maybe<const ast::Expression*> ParserImpl::element_count_expression() {
 //   | TILDE unary_expression
 //   | STAR unary_expression
 //   | AND unary_expression
+//
+// The `primary_expression postfix_expression ?` is moved out into a `singular_expression`
 Maybe<const ast::Expression*> ParserImpl::unary_expression() {
     auto& t = peek();
 
