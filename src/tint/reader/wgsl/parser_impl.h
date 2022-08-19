@@ -667,6 +667,11 @@ class ParserImpl {
     /// Parses an `element_count_expression` grammar element
     /// @returns the parsed expression or nullptr
     Maybe<const ast::Expression*> element_count_expression();
+    /// Parses a `shift_expression.post.unary_expression` grammar element
+    /// @param lhs the left side of the expression
+    /// @returns the parsed expression or `lhs` if no match
+    Expect<const ast::Expression*> expect_shift_expression_post_unary_expression(
+        const ast::Expression* lhs);
     /// Parse the `additive_operator` grammar element
     /// @returns the parsed operator if successful
     Maybe<ast::BinaryOp> additive_operator();

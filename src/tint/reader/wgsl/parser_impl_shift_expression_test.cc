@@ -17,7 +17,7 @@
 namespace tint::reader::wgsl {
 namespace {
 
-TEST_F(ParserImplTest, ShiftExpression_Parses_ShiftLeft) {
+TEST_F(ParserImplTest, ShiftExpression_Orig_Parses_ShiftLeft) {
     auto p = parser("a << true");
     auto e = p->shift_expression();
     EXPECT_TRUE(e.matched);
@@ -42,7 +42,7 @@ TEST_F(ParserImplTest, ShiftExpression_Parses_ShiftLeft) {
     ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
 }
 
-TEST_F(ParserImplTest, ShiftExpression_Parses_ShiftRight) {
+TEST_F(ParserImplTest, ShiftExpression_Orig_Parses_ShiftRight) {
     auto p = parser("a >> true");
     auto e = p->shift_expression();
     EXPECT_TRUE(e.matched);
@@ -67,7 +67,7 @@ TEST_F(ParserImplTest, ShiftExpression_Parses_ShiftRight) {
     ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
 }
 
-TEST_F(ParserImplTest, ShiftExpression_InvalidSpaceLeft) {
+TEST_F(ParserImplTest, ShiftExpression_Orig_InvalidSpaceLeft) {
     auto p = parser("a < < true");
     auto e = p->shift_expression();
     EXPECT_TRUE(e.matched);
@@ -76,7 +76,7 @@ TEST_F(ParserImplTest, ShiftExpression_InvalidSpaceLeft) {
     EXPECT_FALSE(e.value->Is<ast::BinaryExpression>());
 }
 
-TEST_F(ParserImplTest, ShiftExpression_InvalidSpaceRight) {
+TEST_F(ParserImplTest, ShiftExpression_Orig_InvalidSpaceRight) {
     auto p = parser("a > > true");
     auto e = p->shift_expression();
     EXPECT_TRUE(e.matched);
@@ -85,7 +85,7 @@ TEST_F(ParserImplTest, ShiftExpression_InvalidSpaceRight) {
     EXPECT_FALSE(e.value->Is<ast::BinaryExpression>());
 }
 
-TEST_F(ParserImplTest, ShiftExpression_InvalidLHS) {
+TEST_F(ParserImplTest, ShiftExpression_Orig_InvalidLHS) {
     auto p = parser("if (a) {} << true");
     auto e = p->shift_expression();
     EXPECT_FALSE(e.matched);
@@ -94,7 +94,7 @@ TEST_F(ParserImplTest, ShiftExpression_InvalidLHS) {
     EXPECT_EQ(e.value, nullptr);
 }
 
-TEST_F(ParserImplTest, ShiftExpression_InvalidRHS) {
+TEST_F(ParserImplTest, ShiftExpression_Orig_InvalidRHS) {
     auto p = parser("true << if (a) {}");
     auto e = p->shift_expression();
     EXPECT_FALSE(e.matched);
@@ -104,7 +104,7 @@ TEST_F(ParserImplTest, ShiftExpression_InvalidRHS) {
     EXPECT_EQ(p->error(), "1:9: unable to parse right side of << expression");
 }
 
-TEST_F(ParserImplTest, ShiftExpression_NoOr_ReturnsLHS) {
+TEST_F(ParserImplTest, ShiftExpression_Orig_NoOr_ReturnsLHS) {
     auto p = parser("a true");
     auto e = p->shift_expression();
     EXPECT_TRUE(e.matched);
@@ -112,6 +112,115 @@ TEST_F(ParserImplTest, ShiftExpression_NoOr_ReturnsLHS) {
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::IdentifierExpression>());
+}
+
+TEST_F(ParserImplTest, ShiftExpression_Parses_ShiftLeft) {
+    auto p = parser("a << true");
+    auto lhs = p->unary_expression();
+    auto e = p->expect_shift_expression_post_unary_expression(lhs.value);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+
+    EXPECT_EQ(e->source.range.begin.line, 1u);
+    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.end.line, 1u);
+    EXPECT_EQ(e->source.range.end.column, 5u);
+
+    ASSERT_TRUE(e->Is<ast::BinaryExpression>());
+    auto* rel = e->As<ast::BinaryExpression>();
+    EXPECT_EQ(ast::BinaryOp::kShiftLeft, rel->op);
+
+    ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
+    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+
+    ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
+    ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
+}
+
+TEST_F(ParserImplTest, ShiftExpression_Parses_ShiftRight) {
+    auto p = parser("a >> true");
+    auto lhs = p->unary_expression();
+    auto e = p->expect_shift_expression_post_unary_expression(lhs.value);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+
+    EXPECT_EQ(e->source.range.begin.line, 1u);
+    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.end.line, 1u);
+    EXPECT_EQ(e->source.range.end.column, 5u);
+
+    ASSERT_TRUE(e->Is<ast::BinaryExpression>());
+    auto* rel = e->As<ast::BinaryExpression>();
+    EXPECT_EQ(ast::BinaryOp::kShiftRight, rel->op);
+
+    ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
+    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+
+    ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
+    ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
+}
+
+TEST_F(ParserImplTest, ShiftExpression_Parses_Multiplicative) {
+    auto p = parser("a * b");
+    auto lhs = p->unary_expression();
+    auto e = p->expect_shift_expression_post_unary_expression(lhs.value);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+
+    ASSERT_TRUE(e->Is<ast::BinaryExpression>());
+    auto* rel = e->As<ast::BinaryExpression>();
+    EXPECT_EQ(ast::BinaryOp::kMultiply, rel->op);
+
+    ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
+    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+
+    ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
+    ident = rel->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("b"));
+}
+
+TEST_F(ParserImplTest, ShiftExpression_InvalidSpaceLeft) {
+    auto p = parser("a < < true");
+    auto lhs = p->unary_expression();
+    auto e = p->expect_shift_expression_post_unary_expression(lhs.value);
+    EXPECT_FALSE(e.errored);
+    ASSERT_NE(e.value, nullptr);
+    EXPECT_FALSE(e.value->Is<ast::BinaryExpression>());
+}
+
+TEST_F(ParserImplTest, ShiftExpression_InvalidSpaceRight) {
+    auto p = parser("a > > true");
+    auto lhs = p->unary_expression();
+    auto e = p->expect_shift_expression_post_unary_expression(lhs.value);
+    EXPECT_FALSE(e.errored);
+    ASSERT_NE(e.value, nullptr);
+    EXPECT_FALSE(e.value->Is<ast::BinaryExpression>());
+}
+
+TEST_F(ParserImplTest, ShiftExpression_InvalidRHS) {
+    auto p = parser("a << if (a) {}");
+    auto lhs = p->unary_expression();
+    auto e = p->expect_shift_expression_post_unary_expression(lhs.value);
+    EXPECT_TRUE(e.errored);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:3: unable to parse right side of << expression");
+}
+
+TEST_F(ParserImplTest, ShiftExpression_NoOr_ReturnsLHS) {
+    auto p = parser("a true");
+    auto lhs = p->unary_expression();
+    auto e = p->expect_shift_expression_post_unary_expression(lhs.value);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_EQ(lhs.value, e.value);
 }
 
 }  // namespace

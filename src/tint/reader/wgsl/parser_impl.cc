@@ -2800,6 +2800,41 @@ Maybe<const ast::Expression*> ParserImpl::element_count_expression() {
     return math.value;
 }
 
+// shift_expression.post.unary_expression
+//   : multiplicative_expression.post.unary_expression?
+//   | SHIFT_LEFT unary_expression
+//   | SHIFT_RIGHT unary_expression
+//
+// Note, add the `multiplicative_expression.post.unary_expression` is added here to make
+// implementation simpler.
+Expect<const ast::Expression*> ParserImpl::expect_shift_expression_post_unary_expression(
+    const ast::Expression* lhs) {
+    auto& t = peek();
+    if (match(Token::Type::kShiftLeft) || match(Token::Type::kShiftRight)) {
+        std::string name;
+        ast::BinaryOp op = ast::BinaryOp::kNone;
+        if (t.Is(Token::Type::kShiftLeft)) {
+            op = ast::BinaryOp::kShiftLeft;
+            name = "<<";
+        } else if (t.Is(Token::Type::kShiftRight)) {
+            op = ast::BinaryOp::kShiftRight;
+            name = ">>";
+        }
+
+        auto rhs = unary_expression();
+        if (rhs.errored) {
+            return Failure::kErrored;
+        }
+        if (!rhs.matched) {
+            return add_error(t,
+                             std::string("unable to parse right side of ") + name + " expression");
+        }
+        return create<ast::BinaryExpression>(t.source(), op, lhs, rhs.value);
+    }
+
+    return expect_multiplicative_expression_post_unary_expression(lhs);
+}
+
 // singular_expression
 //   : primary_expression postfix_expr
 Maybe<const ast::Expression*> ParserImpl::singular_expression() {
