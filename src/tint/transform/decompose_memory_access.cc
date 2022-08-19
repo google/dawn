@@ -469,7 +469,7 @@ struct DecomposeMemoryAccess::State {
                     // }
                     auto load = LoadFunc(buf_ty, arr_ty->ElemType()->UnwrapRef(), var_user);
                     auto* arr = b.Var(b.Symbols().New("arr"), CreateASTTypeFor(ctx, arr_ty));
-                    auto* i = b.Var(b.Symbols().New("i"), nullptr, b.Expr(0_u));
+                    auto* i = b.Var(b.Symbols().New("i"), b.Expr(0_u));
                     auto* for_init = b.Decl(i);
                     auto* for_cond = b.create<ast::BinaryExpression>(
                         ast::BinaryOp::kLessThan, b.Expr(i), b.Expr(u32(arr_ty->Count())));
@@ -557,10 +557,10 @@ struct DecomposeMemoryAccess::State {
                             //   }
                             //   return arr;
                             // }
-                            auto* array = b.Var(b.Symbols().New("array"), nullptr, b.Expr("value"));
+                            auto* array = b.Var(b.Symbols().New("array"), b.Expr("value"));
                             auto store =
                                 StoreFunc(buf_ty, arr_ty->ElemType()->UnwrapRef(), var_user);
-                            auto* i = b.Var(b.Symbols().New("i"), nullptr, b.Expr(0_u));
+                            auto* i = b.Var(b.Symbols().New("i"), b.Expr(0_u));
                             auto* for_init = b.Decl(i);
                             auto* for_cond = b.create<ast::BinaryExpression>(
                                 ast::BinaryOp::kLessThan, b.Expr(i), b.Expr(u32(arr_ty->Count())));

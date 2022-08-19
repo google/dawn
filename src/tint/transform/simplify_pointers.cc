@@ -181,8 +181,7 @@ struct SimplifyPointers::State {
                         // Create a new variable
                         auto saved_name = ctx.dst->Symbols().New(
                             ctx.src->Symbols().NameFor(var->Declaration()->symbol) + "_save");
-                        auto* decl =
-                            ctx.dst->Decl(ctx.dst->Let(saved_name, nullptr, ctx.Clone(idx_expr)));
+                        auto* decl = ctx.dst->Decl(ctx.dst->Let(saved_name, ctx.Clone(idx_expr)));
                         saved.emplace_back(decl);
                         // Record the substitution of `idx_expr` to the saved variable
                         // with the symbol `saved_name`. This will be used by the

@@ -187,7 +187,7 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtInit) {
 
     auto* multi_stmt =
         create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
-    auto* f = For(Decl(Var("b", nullptr, multi_stmt)), nullptr, nullptr, Block(Return()));
+    auto* f = For(Decl(Var("b", multi_stmt)), nullptr, nullptr, Block(Return()));
     WrapInFunction(f);
 
     GeneratorImpl& gen = Build();
@@ -341,8 +341,8 @@ TEST_F(HlslGeneratorImplTest_Loop, Emit_ForLoopWithMultiStmtInitCondCont) {
     auto* multi_stmt_c =
         create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr(true), Expr(false));
 
-    auto* f = For(Decl(Var("i", nullptr, multi_stmt_a)), multi_stmt_b, Assign("i", multi_stmt_c),
-                  Block(Return()));
+    auto* f =
+        For(Decl(Var("i", multi_stmt_a)), multi_stmt_b, Assign("i", multi_stmt_c), Block(Return()));
     WrapInFunction(f);
 
     GeneratorImpl& gen = Build();

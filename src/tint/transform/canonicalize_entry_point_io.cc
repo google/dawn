@@ -544,8 +544,7 @@ struct CanonicalizeEntryPointIO::State {
             wrapper_body.Push(ctx.dst->CallStmt(call_inner));
         } else {
             // Capture the result of calling the original function.
-            auto* inner_result =
-                ctx.dst->Let(ctx.dst->Symbols().New("inner_result"), nullptr, call_inner);
+            auto* inner_result = ctx.dst->Let(ctx.dst->Symbols().New("inner_result"), call_inner);
             wrapper_body.Push(ctx.dst->Decl(inner_result));
 
             // Process the original return type to determine the outputs that the

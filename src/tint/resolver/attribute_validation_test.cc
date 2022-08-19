@@ -701,10 +701,10 @@ TEST_P(VariableAttributeTest, IsValid) {
     auto& params = GetParam();
 
     if (IsBindingAttribute(params.kind)) {
-        GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone, nullptr,
+        GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler),
                   createAttributes(Source{{12, 34}}, *this, params.kind));
     } else {
-        GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate, nullptr,
+        GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate,
                   createAttributes(Source{{12, 34}}, *this, params.kind));
     }
 
@@ -736,11 +736,8 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 
 TEST_F(VariableAttributeTest, DuplicateAttribute) {
     GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler),
-              utils::Vector{
-                  create<ast::BindingAttribute>(Source{{12, 34}}, 2u),
-                  create<ast::GroupAttribute>(2u),
-                  create<ast::BindingAttribute>(Source{{56, 78}}, 3u),
-              });
+              create<ast::BindingAttribute>(Source{{12, 34}}, 2u), create<ast::GroupAttribute>(2u),
+              create<ast::BindingAttribute>(Source{{56, 78}}, 3u));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1003,8 +1000,7 @@ TEST_F(ResourceAttributeTest, StorageBufferMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, TextureMissingBinding) {
-    GlobalVar(Source{{12, 34}}, "G", ty.depth_texture(ast::TextureDimension::k2d),
-              ast::StorageClass::kNone);
+    GlobalVar(Source{{12, 34}}, "G", ty.depth_texture(ast::TextureDimension::k2d));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1012,8 +1008,7 @@ TEST_F(ResourceAttributeTest, TextureMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, SamplerMissingBinding) {
-    GlobalVar(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler),
-              ast::StorageClass::kNone);
+    GlobalVar(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1021,11 +1016,7 @@ TEST_F(ResourceAttributeTest, SamplerMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPairMissingBinding) {
-    GlobalVar(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler),
-              ast::StorageClass::kNone,
-              utils::Vector{
-                  create<ast::GroupAttribute>(1u),
-              });
+    GlobalVar(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler), Group(1));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1033,11 +1024,7 @@ TEST_F(ResourceAttributeTest, BindingPairMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPairMissingGroup) {
-    GlobalVar(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler),
-              ast::StorageClass::kNone,
-              utils::Vector{
-                  create<ast::BindingAttribute>(1u),
-              });
+    GlobalVar(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler), Binding(1));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1046,24 +1033,14 @@ TEST_F(ResourceAttributeTest, BindingPairMissingGroup) {
 
 TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByEntryPoint) {
     GlobalVar(Source{{12, 34}}, "A", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-              ast::StorageClass::kNone,
-              utils::Vector{
-                  create<ast::BindingAttribute>(1u),
-                  create<ast::GroupAttribute>(2u),
-              });
+              Binding(1), Group(2));
     GlobalVar(Source{{56, 78}}, "B", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-              ast::StorageClass::kNone,
-              utils::Vector{
-                  create<ast::BindingAttribute>(1u),
-                  create<ast::GroupAttribute>(2u),
-              });
+              Binding(1), Group(2));
 
     Func("F", utils::Empty, ty.void_(),
          utils::Vector{
-             Decl(Var("a", ty.vec4<f32>(), ast::StorageClass::kNone,
-                      Call("textureLoad", "A", vec2<i32>(1_i, 2_i), 0_i))),
-             Decl(Var("b", ty.vec4<f32>(), ast::StorageClass::kNone,
-                      Call("textureLoad", "B", vec2<i32>(1_i, 2_i), 0_i))),
+             Decl(Var("a", ty.vec4<f32>(), Call("textureLoad", "A", vec2<i32>(1_i, 2_i), 0_i))),
+             Decl(Var("b", ty.vec4<f32>(), Call("textureLoad", "B", vec2<i32>(1_i, 2_i), 0_i))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -1078,30 +1055,20 @@ TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByEntryPoint) {
 
 TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByDifferentEntryPoints) {
     GlobalVar(Source{{12, 34}}, "A", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-              ast::StorageClass::kNone,
-              utils::Vector{
-                  create<ast::BindingAttribute>(1u),
-                  create<ast::GroupAttribute>(2u),
-              });
+              Binding(1), Group(2));
     GlobalVar(Source{{56, 78}}, "B", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-              ast::StorageClass::kNone,
-              utils::Vector{
-                  create<ast::BindingAttribute>(1u),
-                  create<ast::GroupAttribute>(2u),
-              });
+              Binding(1), Group(2));
 
     Func("F_A", utils::Empty, ty.void_(),
          utils::Vector{
-             Decl(Var("a", ty.vec4<f32>(), ast::StorageClass::kNone,
-                      Call("textureLoad", "A", vec2<i32>(1_i, 2_i), 0_i))),
+             Decl(Var("a", ty.vec4<f32>(), Call("textureLoad", "A", vec2<i32>(1_i, 2_i), 0_i))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
          });
     Func("F_B", utils::Empty, ty.void_(),
          utils::Vector{
-             Decl(Var("b", ty.vec4<f32>(), ast::StorageClass::kNone,
-                      Call("textureLoad", "B", vec2<i32>(1_i, 2_i), 0_i))),
+             Decl(Var("b", ty.vec4<f32>(), Call("textureLoad", "B", vec2<i32>(1_i, 2_i), 0_i))),
          },
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -1111,11 +1078,7 @@ TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByDifferentEntryPoints) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPointOnNonResource) {
-    GlobalVar(Source{{12, 34}}, "G", ty.f32(), ast::StorageClass::kPrivate,
-              utils::Vector{
-                  create<ast::BindingAttribute>(1u),
-                  create<ast::GroupAttribute>(2u),
-              });
+    GlobalVar(Source{{12, 34}}, "G", ty.f32(), ast::StorageClass::kPrivate, Binding(1), Group(2));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

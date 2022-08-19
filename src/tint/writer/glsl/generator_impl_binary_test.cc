@@ -760,7 +760,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Decl_WithLogical) {
     GlobalVar("d", ty.bool_(), ast::StorageClass::kPrivate);
 
     auto* var =
-        Var("a", ty.bool_(), ast::StorageClass::kNone,
+        Var("a", ty.bool_(),
             create<ast::BinaryExpression>(
                 ast::BinaryOp::kLogicalOr,
                 create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("b"), Expr("c")),

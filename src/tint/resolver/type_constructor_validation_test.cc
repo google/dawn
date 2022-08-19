@@ -59,8 +59,8 @@ constexpr Params ParamsFor() {
 TEST_F(ResolverTypeConstructorValidationTest, InferTypeTest_Simple) {
     // var a = 1i;
     // var b = a;
-    auto* a = Var("a", nullptr, ast::StorageClass::kNone, Expr(1_i));
-    auto* b = Var("b", nullptr, ast::StorageClass::kNone, Expr("a"));
+    auto* a = Var("a", Expr(1_i));
+    auto* b = Var("b", Expr("a"));
     auto* a_ident = Expr("a");
     auto* b_ident = Expr("b");
 
@@ -87,7 +87,7 @@ TEST_P(InferTypeTest_FromConstructorExpression, All) {
 
     auto* constructor_expr = params.create_rhs_ast_value(*this, 0);
 
-    auto* a = Var("a", nullptr, ast::StorageClass::kNone, constructor_expr);
+    auto* a = Var("a", constructor_expr);
     // Self-assign 'a' to force the expression to be resolved so we can test its
     // type below
     auto* a_ident = Expr("a");
@@ -141,7 +141,7 @@ TEST_P(InferTypeTest_FromArithmeticExpression, All) {
     auto* arith_rhs_expr = params.create_rhs_ast_value(*this, 3);
     auto* constructor_expr = Mul(arith_lhs_expr, arith_rhs_expr);
 
-    auto* a = Var("a", nullptr, constructor_expr);
+    auto* a = Var("a", constructor_expr);
     // Self-assign 'a' to force the expression to be resolved so we can test its
     // type below
     auto* a_ident = Expr("a");
@@ -189,7 +189,7 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
     Func("foo", utils::Empty, params.create_rhs_ast_type(*this),
          utils::Vector{Return(Construct(params.create_rhs_ast_type(*this)))}, {});
 
-    auto* a = Var("a", nullptr, Call("foo"));
+    auto* a = Var("a", Call("foo"));
     // Self-assign 'a' to force the expression to be resolved so we can test its
     // type below
     auto* a_ident = Expr("a");
@@ -355,7 +355,7 @@ TEST_P(ConversionConstructorValidTest, All) {
 
     auto* arg = Construct(rhs_type, rhs_value_expr);
     auto* tc = Construct(lhs_type2, arg);
-    auto* a = Var("a", lhs_type1, ast::StorageClass::kNone, tc);
+    auto* a = Var("a", lhs_type1, tc);
 
     // Self-assign 'a' to force the expression to be resolved so we can test its
     // type below
@@ -448,8 +448,7 @@ TEST_P(ConversionConstructorInvalidTest, All) {
 
     Enable(ast::Extension::kF16);
 
-    auto* a = Var("a", lhs_type1, ast::StorageClass::kNone,
-                  Construct(lhs_type2, Construct(rhs_type, rhs_value_expr)));
+    auto* a = Var("a", lhs_type1, Construct(lhs_type2, Construct(rhs_type, rhs_value_expr)));
 
     // Self-assign 'a' to force the expression to be resolved so we can test its
     // type below
@@ -464,8 +463,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeConstructorValidationTest,
                                           testing::ValuesIn(all_types)));
 
 TEST_F(ResolverTypeConstructorValidationTest, ConversionConstructorInvalid_TooManyInitializers) {
-    auto* a = Var("a", ty.f32(), ast::StorageClass::kNone,
-                  Construct(Source{{12, 34}}, ty.f32(), Expr(1_f), Expr(2_f)));
+    auto* a = Var("a", ty.f32(), Construct(Source{{12, 34}}, ty.f32(), Expr(1_f), Expr(2_f)));
     WrapInFunction(a);
 
     ASSERT_FALSE(r()->Resolve());
@@ -473,8 +471,8 @@ TEST_F(ResolverTypeConstructorValidationTest, ConversionConstructorInvalid_TooMa
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, ConversionConstructorInvalid_InvalidInitializer) {
-    auto* a = Var("a", ty.f32(), ast::StorageClass::kNone,
-                  Construct(Source{{12, 34}}, ty.f32(), Construct(ty.array<f32, 4>())));
+    auto* a =
+        Var("a", ty.f32(), Construct(Source{{12, 34}}, ty.f32(), Construct(ty.array<f32, 4>())));
     WrapInFunction(a);
 
     ASSERT_FALSE(r()->Resolve());
@@ -600,7 +598,7 @@ TEST_F(ResolverTypeConstructorValidationTest, ArrayU32_AIAIAI) {
 TEST_F(ResolverTypeConstructorValidationTest, InferredArray_AIAIAI) {
     // const c = array(0, 10, 20);
     auto* tc = array(Source{{12, 34}}, nullptr, nullptr, 0_a, 10_a, 20_a);
-    WrapInFunction(Decl(Const("C", nullptr, tc)));
+    WrapInFunction(Decl(Const("C", tc)));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 

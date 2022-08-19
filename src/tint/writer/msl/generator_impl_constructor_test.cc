@@ -181,7 +181,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_SingleScalar_F16_Literal) 
 }
 
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_SingleScalar_F32_Var) {
-    auto* var = Var("v", nullptr, Expr(2_f));
+    auto* var = Var("v", Expr(2_f));
     auto* cast = vec3<f32>(var);
     WrapInFunction(var, cast);
 
@@ -195,7 +195,7 @@ TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_SingleScalar_F32_Var) {
 TEST_F(MslGeneratorImplTest, EmitConstructor_Type_Vec_SingleScalar_F16_Var) {
     Enable(ast::Extension::kF16);
 
-    auto* var = Var("v", nullptr, Expr(2_h));
+    auto* var = Var("v", Expr(2_h));
     auto* cast = vec3<f16>(var);
     WrapInFunction(var, cast);
 

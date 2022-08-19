@@ -202,8 +202,8 @@ TEST_F(MslBinaryTest, ModVec3F16) {
 }
 
 TEST_F(MslBinaryTest, BoolAnd) {
-    auto* left = Var("left", nullptr, Expr(true));
-    auto* right = Var("right", nullptr, Expr(false));
+    auto* left = Var("left", Expr(true));
+    auto* right = Var("right", Expr(false));
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kAnd, Expr(left), Expr(right));
     WrapInFunction(left, right, expr);
 
@@ -215,8 +215,8 @@ TEST_F(MslBinaryTest, BoolAnd) {
 }
 
 TEST_F(MslBinaryTest, BoolOr) {
-    auto* left = Var("left", nullptr, Expr(true));
-    auto* right = Var("right", nullptr, Expr(false));
+    auto* left = Var("left", Expr(true));
+    auto* right = Var("right", Expr(false));
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kOr, Expr(left), Expr(right));
     WrapInFunction(left, right, expr);
 

@@ -304,7 +304,7 @@ TEST_F(BuilderTest, Loop_WithContinuing_BreakIf_ConditionIsVar) {
     //   }
     // }
 
-    auto* cond_var = Decl(Var("cond", nullptr, Expr(true)));
+    auto* cond_var = Decl(Var("cond", Expr(true)));
     auto* if_stmt = If(Expr("cond"), Block(Break()));
     auto* continuing = Block(cond_var, if_stmt);
     auto* loop = Loop(Block(), continuing);
@@ -342,7 +342,7 @@ TEST_F(BuilderTest, Loop_WithContinuing_BreakUnless_ConditionIsVar) {
     //     if (cond) {} else { break; }
     //   }
     // }
-    auto* cond_var = Decl(Var("cond", nullptr, Expr(true)));
+    auto* cond_var = Decl(Var("cond", Expr(true)));
     auto* if_stmt = If(Expr("cond"), Block(), Else(Block(Break())));
     auto* continuing = Block(cond_var, if_stmt);
     auto* loop = Loop(Block(), continuing);

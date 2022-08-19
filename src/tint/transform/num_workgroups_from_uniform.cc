@@ -148,7 +148,7 @@ void NumWorkgroupsFromUniform::Run(CloneContext& ctx, const DataMap& inputs, Dat
 
             num_workgroups_ubo = ctx.dst->GlobalVar(
                 ctx.dst->Sym(), ctx.dst->ty.Of(num_workgroups_struct), ast::StorageClass::kUniform,
-                ctx.dst->GroupAndBinding(group, binding));
+                ctx.dst->Group(group), ctx.dst->Binding(binding));
         }
         return num_workgroups_ubo;
     };

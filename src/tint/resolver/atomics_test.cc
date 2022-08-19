@@ -47,10 +47,7 @@ TEST_F(ResolverAtomicTest, GlobalWorkgroupU32) {
 TEST_F(ResolverAtomicTest, GlobalStorageStruct) {
     auto* s = Structure("s", utils::Vector{Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
     auto* g = GlobalVar("g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                        utils::Vector{
-                            create<ast::BindingAttribute>(0u),
-                            create<ast::GroupAttribute>(0u),
-                        });
+                        Binding(0), Group(0));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     ASSERT_TRUE(TypeOf(g)->Is<sem::Reference>());

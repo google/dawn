@@ -212,11 +212,8 @@ using ResolverBuiltinArrayTest = ResolverTest;
 TEST_F(ResolverBuiltinArrayTest, ArrayLength_Vector) {
     auto* ary = ty.array<i32>();
     auto* str = Structure("S", utils::Vector{Member("x", ary)});
-    GlobalVar("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead,
-              utils::Vector{
-                  create<ast::BindingAttribute>(0u),
-                  create<ast::GroupAttribute>(0u),
-              });
+    GlobalVar("a", ty.Of(str), ast::StorageClass::kStorage, ast::Access::kRead, Binding(0),
+              Group(0));
 
     auto* call = Call("arrayLength", AddressOf(MemberAccessor("a", "x")));
     WrapInFunction(call);
@@ -2146,11 +2143,7 @@ class ResolverBuiltinTest_TextureOperation : public ResolverTestWithParam<Textur
 
     void add_call_param(std::string name, const ast::Type* type, ExpressionList* call_params) {
         if (type->IsAnyOf<ast::Texture, ast::Sampler>()) {
-            GlobalVar(name, type,
-                      utils::Vector{
-                          create<ast::BindingAttribute>(0u),
-                          create<ast::GroupAttribute>(0u),
-                      });
+            GlobalVar(name, type, Binding(0), Group(0));
 
         } else {
             GlobalVar(name, type, ast::StorageClass::kPrivate);

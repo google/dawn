@@ -65,8 +65,8 @@ TEST_F(BuilderTest, GlobalConst) {
     // const c = 42;
     // var v = c;
 
-    auto* c = GlobalConst("c", nullptr, Expr(42_a));
-    GlobalVar("v", nullptr, ast::StorageClass::kPrivate, Expr(c));
+    auto* c = GlobalConst("c", Expr(42_a));
+    GlobalVar("v", ast::StorageClass::kPrivate, Expr(c));
 
     spirv::Builder& b = SanitizeAndBuild();
 
@@ -90,8 +90,8 @@ TEST_F(BuilderTest, GlobalConst_Vec_Constructor) {
     // const c = vec3<f32>(1f, 2f, 3f);
     // var v = c;
 
-    auto* c = GlobalConst("c", nullptr, vec3<f32>(1_f, 2_f, 3_f));
-    GlobalVar("v", nullptr, ast::StorageClass::kPrivate, Expr(c));
+    auto* c = GlobalConst("c", vec3<f32>(1_f, 2_f, 3_f));
+    GlobalVar("v", ast::StorageClass::kPrivate, Expr(c));
 
     spirv::Builder& b = SanitizeAndBuild();
 
@@ -120,8 +120,8 @@ TEST_F(BuilderTest, GlobalConst_Vec_F16_Constructor) {
     // var v = c;
     Enable(ast::Extension::kF16);
 
-    auto* c = GlobalConst("c", nullptr, vec3<f16>(1_h, 2_h, 3_h));
-    GlobalVar("v", nullptr, ast::StorageClass::kPrivate, Expr(c));
+    auto* c = GlobalConst("c", vec3<f16>(1_h, 2_h, 3_h));
+    GlobalVar("v", ast::StorageClass::kPrivate, Expr(c));
 
     spirv::Builder& b = SanitizeAndBuild();
 
@@ -149,8 +149,8 @@ TEST_F(BuilderTest, GlobalConst_Vec_AInt_Constructor) {
     // const c = vec3(1, 2, 3);
     // var v = c;
 
-    auto* c = GlobalConst("c", nullptr, Construct(ty.vec3(nullptr), 1_a, 2_a, 3_a));
-    GlobalVar("v", nullptr, ast::StorageClass::kPrivate, Expr(c));
+    auto* c = GlobalConst("c", Construct(ty.vec3(nullptr), 1_a, 2_a, 3_a));
+    GlobalVar("v", ast::StorageClass::kPrivate, Expr(c));
 
     spirv::Builder& b = SanitizeAndBuild();
 
@@ -178,8 +178,8 @@ TEST_F(BuilderTest, GlobalConst_Vec_AFloat_Constructor) {
     // const c = vec3(1.0, 2.0, 3.0);
     // var v = c;
 
-    auto* c = GlobalConst("c", nullptr, Construct(ty.vec3(nullptr), 1._a, 2._a, 3._a));
-    GlobalVar("v", nullptr, ast::StorageClass::kPrivate, Expr(c));
+    auto* c = GlobalConst("c", Construct(ty.vec3(nullptr), 1._a, 2._a, 3._a));
+    GlobalVar("v", ast::StorageClass::kPrivate, Expr(c));
 
     spirv::Builder& b = SanitizeAndBuild();
 
@@ -207,8 +207,8 @@ TEST_F(BuilderTest, GlobalConst_Nested_Vec_Constructor) {
     // const c = vec3<f32>(vec2<f32>(1f, 2f), 3f));
     // var v = c;
 
-    auto* c = GlobalConst("c", nullptr, vec3<f32>(vec2<f32>(1_f, 2_f), 3_f));
-    GlobalVar("v", nullptr, ast::StorageClass::kPrivate, Expr(c));
+    auto* c = GlobalConst("c", vec3<f32>(vec2<f32>(1_f, 2_f), 3_f));
+    GlobalVar("v", ast::StorageClass::kPrivate, Expr(c));
 
     spirv::Builder& b = SanitizeAndBuild();
 
@@ -233,12 +233,7 @@ TEST_F(BuilderTest, GlobalConst_Nested_Vec_Constructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_WithBindingAndGroup) {
-    auto* v =
-        GlobalVar("var", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone, nullptr,
-                  utils::Vector{
-                      create<ast::BindingAttribute>(2u),
-                      create<ast::GroupAttribute>(3u),
-                  });
+    auto* v = GlobalVar("var", ty.sampler(ast::SamplerKind::kSampler), Binding(2), Group(3));
 
     spirv::Builder& b = Build();
 
@@ -255,10 +250,7 @@ OpDecorate %1 DescriptorSet 3
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Bool) {
-    auto* v = Override("var", ty.bool_(), Expr(true),
-                       utils::Vector{
-                           Id(1200),
-                       });
+    auto* v = Override("var", ty.bool_(), Expr(true), Id(1200));
 
     spirv::Builder& b = Build();
 
@@ -273,10 +265,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Bool) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Bool_ZeroValue) {
-    auto* v = Override("var", ty.bool_(), Construct<bool>(),
-                       utils::Vector{
-                           Id(1200),
-                       });
+    auto* v = Override("var", ty.bool_(), Construct<bool>(), Id(1200));
 
     spirv::Builder& b = Build();
 
@@ -291,10 +280,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Bool_ZeroValue) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Bool_NoConstructor) {
-    auto* v = Override("var", ty.bool_(), nullptr,
-                       utils::Vector{
-                           Id(1200),
-                       });
+    auto* v = Override("var", ty.bool_(), Id(1200));
 
     spirv::Builder& b = Build();
 
@@ -309,10 +295,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Bool_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar) {
-    auto* v = Override("var", ty.f32(), Expr(2_f),
-                       utils::Vector{
-                           Id(0),
-                       });
+    auto* v = Override("var", ty.f32(), Expr(2_f), Id(0));
 
     spirv::Builder& b = Build();
 
@@ -327,10 +310,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar_ZeroValue) {
-    auto* v = Override("var", ty.f32(), Construct<f32>(),
-                       utils::Vector{
-                           Id(0),
-                       });
+    auto* v = Override("var", ty.f32(), Construct<f32>(), Id(0));
 
     spirv::Builder& b = Build();
 
@@ -345,10 +325,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_ZeroValue) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar_F32_NoConstructor) {
-    auto* v = Override("var", ty.f32(), nullptr,
-                       utils::Vector{
-                           Id(0),
-                       });
+    auto* v = Override("var", ty.f32(), Id(0));
 
     spirv::Builder& b = Build();
 
@@ -363,10 +340,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_F32_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar_I32_NoConstructor) {
-    auto* v = Override("var", ty.i32(), nullptr,
-                       utils::Vector{
-                           Id(0),
-                       });
+    auto* v = Override("var", ty.i32(), Id(0));
 
     spirv::Builder& b = Build();
 
@@ -381,10 +355,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_I32_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar_U32_NoConstructor) {
-    auto* v = Override("var", ty.u32(), nullptr,
-                       utils::Vector{
-                           Id(0),
-                       });
+    auto* v = Override("var", ty.u32(), Id(0));
 
     spirv::Builder& b = Build();
 
@@ -399,10 +370,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_U32_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_NoId) {
-    auto* var_a = Override("a", ty.bool_(), Expr(true),
-                           utils::Vector{
-                               Id(0),
-                           });
+    auto* var_a = Override("a", ty.bool_(), Expr(true), Id(0));
     auto* var_b = Override("b", ty.bool_(), Expr(false));
 
     spirv::Builder& b = Build();
@@ -479,11 +447,7 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
                                  Member("b", ty.i32()),
                              });
 
-    GlobalVar("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead,
-              utils::Vector{
-                  create<ast::BindingAttribute>(0u),
-                  create<ast::GroupAttribute>(0u),
-              });
+    GlobalVar("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead, Binding(0), Group(0));
 
     spirv::Builder& b = SanitizeAndBuild();
 
@@ -520,11 +484,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
 
     auto* A = Structure("A", utils::Vector{Member("a", ty.i32())});
     auto* B = Alias("B", ty.Of(A));
-    GlobalVar("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead,
-              utils::Vector{
-                  create<ast::BindingAttribute>(0u),
-                  create<ast::GroupAttribute>(0u),
-              });
+    GlobalVar("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead, Binding(0), Group(0));
 
     spirv::Builder& b = SanitizeAndBuild();
 
@@ -559,11 +519,7 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
     auto* A = Structure("A", utils::Vector{Member("a", ty.i32())});
     auto* B = Alias("B", ty.Of(A));
-    GlobalVar("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead,
-              utils::Vector{
-                  create<ast::BindingAttribute>(0u),
-                  create<ast::GroupAttribute>(0u),
-              });
+    GlobalVar("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead, Binding(0), Group(0));
 
     spirv::Builder& b = SanitizeAndBuild();
 
@@ -597,16 +553,9 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
     // var<storage, read_write> c : A
 
     auto* A = Structure("A", utils::Vector{Member("a", ty.i32())});
-    GlobalVar("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead,
-              utils::Vector{
-                  create<ast::GroupAttribute>(0u),
-                  create<ast::BindingAttribute>(0u),
-              });
-    GlobalVar("c", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-              utils::Vector{
-                  create<ast::GroupAttribute>(1u),
-                  create<ast::BindingAttribute>(0u),
-              });
+    GlobalVar("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead, Group(0), Binding(0));
+    GlobalVar("c", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kReadWrite, Group(1),
+              Binding(0));
 
     spirv::Builder& b = SanitizeAndBuild();
 
@@ -643,11 +592,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
     auto* type = ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
                                     ast::Access::kWrite);
 
-    auto* var_a = GlobalVar("a", type,
-                            utils::Vector{
-                                create<ast::BindingAttribute>(0u),
-                                create<ast::GroupAttribute>(0u),
-                            });
+    auto* var_a = GlobalVar("a", type, Binding(0), Group(0));
 
     spirv::Builder& b = Build();
 
@@ -674,19 +619,11 @@ TEST_F(BuilderTest, DISABLED_GlobalVar_TextureStorageWithDifferentAccess) {
 
     auto* type_a = ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
                                       ast::Access::kReadWrite);
-    auto* var_a = GlobalVar("a", type_a, ast::StorageClass::kNone,
-                            utils::Vector{
-                                create<ast::BindingAttribute>(0u),
-                                create<ast::GroupAttribute>(0u),
-                            });
+    auto* var_a = GlobalVar("a", type_a, Binding(0), Group(0));
 
     auto* type_b = ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
                                       ast::Access::kWrite);
-    auto* var_b = GlobalVar("b", type_b, ast::StorageClass::kNone,
-                            utils::Vector{
-                                create<ast::BindingAttribute>(1u),
-                                create<ast::GroupAttribute>(0u),
-                            });
+    auto* var_b = GlobalVar("b", type_b, Binding(1), Group(0));
 
     spirv::Builder& b = Build();
 

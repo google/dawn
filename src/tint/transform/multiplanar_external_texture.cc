@@ -132,11 +132,11 @@ struct MultiplanarExternalTexture::State {
             syms.plane_0 = ctx.Clone(global->symbol);
             syms.plane_1 = b.Symbols().New("ext_tex_plane_1");
             b.GlobalVar(syms.plane_1, b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32()),
-                        b.GroupAndBinding(bps.plane_1.group, bps.plane_1.binding));
+                        b.Group(bps.plane_1.group), b.Binding(bps.plane_1.binding));
             syms.params = b.Symbols().New("ext_tex_params");
             b.GlobalVar(syms.params, b.ty.type_name("ExternalTextureParams"),
-                        ast::StorageClass::kUniform,
-                        b.GroupAndBinding(bps.params.group, bps.params.binding));
+                        ast::StorageClass::kUniform, b.Group(bps.params.group),
+                        b.Binding(bps.params.binding));
 
             // Replace the original texture_external binding with a texture_2d<f32>
             // binding.
@@ -276,24 +276,22 @@ struct MultiplanarExternalTexture::State {
             b.ty.vec3<f32>(),
             utils::Vector{
                 // let cond = abs(v) < vec3(params.D);
-                b.Decl(b.Let(
-                    "cond", nullptr,
-                    b.LessThan(b.Call("abs", "v"), b.vec3<f32>(b.MemberAccessor("params", "D"))))),
+                b.Decl(b.Let("cond", b.LessThan(b.Call("abs", "v"),
+                                                b.vec3<f32>(b.MemberAccessor("params", "D"))))),
                 // let t = sign(v) * ((params.C * abs(v)) + params.F);
-                b.Decl(b.Let("t", nullptr,
+                b.Decl(b.Let("t",
                              b.Mul(b.Call("sign", "v"),
                                    b.Add(b.Mul(b.MemberAccessor("params", "C"), b.Call("abs", "v")),
                                          b.MemberAccessor("params", "F"))))),
                 // let f = (sign(v) * pow(((params.A * abs(v)) + params.B),
                 // vec3(params.G))) + params.E;
-                b.Decl(b.Let("f", nullptr,
-                             b.Mul(b.Call("sign", "v"),
-                                   b.Add(b.Call("pow",
-                                                b.Add(b.Mul(b.MemberAccessor("params", "A"),
-                                                            b.Call("abs", "v")),
-                                                      b.MemberAccessor("params", "B")),
-                                                b.vec3<f32>(b.MemberAccessor("params", "G"))),
-                                         b.MemberAccessor("params", "E"))))),
+                b.Decl(b.Let("f", b.Mul(b.Call("sign", "v"),
+                                        b.Add(b.Call("pow",
+                                                     b.Add(b.Mul(b.MemberAccessor("params", "A"),
+                                                                 b.Call("abs", "v")),
+                                                           b.MemberAccessor("params", "B")),
+                                                     b.vec3<f32>(b.MemberAccessor("params", "G"))),
+                                              b.MemberAccessor("params", "E"))))),
                 // return select(f, t, cond);
                 b.Return(b.Call("select", "f", "t", "cond")),
             });

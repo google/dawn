@@ -159,16 +159,8 @@ TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalArray) {
 
 TEST_F(ResolverStorageClassUseTest, StructMultipleStorageClassUses) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
-    GlobalVar("x", ty.Of(s), ast::StorageClass::kUniform,
-              utils::Vector{
-                  create<ast::BindingAttribute>(0u),
-                  create<ast::GroupAttribute>(0u),
-              });
-    GlobalVar("y", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-              utils::Vector{
-                  create<ast::BindingAttribute>(1u),
-                  create<ast::GroupAttribute>(0u),
-              });
+    GlobalVar("x", ty.Of(s), ast::StorageClass::kUniform, Binding(0), Group(0));
+    GlobalVar("y", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(1), Group(0));
     WrapInFunction(Var("g", ty.Of(s)));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();

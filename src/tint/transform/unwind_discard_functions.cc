@@ -141,7 +141,7 @@ class State {
 
         auto ip = utils::GetInsertionPoint(ctx, stmt);
         auto var_name = b.Sym();
-        auto* decl = b.Decl(b.Var(var_name, nullptr, ctx.Clone(expr)));
+        auto* decl = b.Decl(b.Var(var_name, ctx.Clone(expr)));
         ctx.InsertBefore(ip.first->Declaration()->statements, ip.second, decl);
 
         ctx.InsertBefore(ip.first->Declaration()->statements, ip.second, IfDiscardReturn(stmt));

@@ -35,7 +35,7 @@ TEST_F(HoistToDeclBeforeTest, VarInit) {
     // }
     ProgramBuilder b;
     auto* expr = b.Expr(1_i);
-    auto* var = b.Decl(b.Var("a", nullptr, expr));
+    auto* var = b.Decl(b.Var("a", expr));
     b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var});
 
     Program original(std::move(b));
@@ -67,7 +67,7 @@ TEST_F(HoistToDeclBeforeTest, ForLoopInit) {
     // }
     ProgramBuilder b;
     auto* expr = b.Expr(1_i);
-    auto* s = b.For(b.Decl(b.Var("a", nullptr, expr)), b.Expr(true), nullptr, b.Block());
+    auto* s = b.For(b.Decl(b.Var("a", expr)), b.Expr(true), nullptr, b.Block());
     b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{s});
 
     Program original(std::move(b));
@@ -141,7 +141,7 @@ TEST_F(HoistToDeclBeforeTest, ForLoopCont) {
     // }
     ProgramBuilder b;
     auto* expr = b.Expr(1_i);
-    auto* s = b.For(nullptr, b.Expr(true), b.Decl(b.Var("a", nullptr, expr)), b.Block());
+    auto* s = b.For(nullptr, b.Expr(true), b.Decl(b.Var("a", expr)), b.Block());
     b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{s});
 
     Program original(std::move(b));
@@ -269,7 +269,7 @@ TEST_F(HoistToDeclBeforeTest, Array1D) {
     ProgramBuilder b;
     auto* var1 = b.Decl(b.Var("a", b.ty.array<i32, 10>()));
     auto* expr = b.IndexAccessor("a", 0_i);
-    auto* var2 = b.Decl(b.Var("b", nullptr, expr));
+    auto* var2 = b.Decl(b.Var("b", expr));
     b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var1, var2});
 
     Program original(std::move(b));
@@ -304,7 +304,7 @@ TEST_F(HoistToDeclBeforeTest, Array2D) {
 
     auto* var1 = b.Decl(b.Var("a", b.ty.array(b.ty.array<i32, 10>(), 10_i)));
     auto* expr = b.IndexAccessor(b.IndexAccessor("a", 0_i), 0_i);
-    auto* var2 = b.Decl(b.Var("b", nullptr, expr));
+    auto* var2 = b.Decl(b.Var("b", expr));
     b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var1, var2});
 
     Program original(std::move(b));
@@ -377,7 +377,7 @@ TEST_F(HoistToDeclBeforeTest, Prepare_ForLoopCont) {
     // }
     ProgramBuilder b;
     auto* expr = b.Expr(1_i);
-    auto* s = b.For(nullptr, b.Expr(true), b.Decl(b.Var("a", nullptr, expr)), b.Block());
+    auto* s = b.For(nullptr, b.Expr(true), b.Decl(b.Var("a", expr)), b.Block());
     b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{s});
 
     Program original(std::move(b));
@@ -462,7 +462,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_Block) {
     // }
     ProgramBuilder b;
     b.Func("foo", utils::Empty, b.ty.void_(), utils::Empty);
-    auto* var = b.Decl(b.Var("a", nullptr, b.Expr(1_i)));
+    auto* var = b.Decl(b.Var("a", b.Expr(1_i)));
     b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var});
 
     Program original(std::move(b));
@@ -500,7 +500,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopInit) {
     // }
     ProgramBuilder b;
     b.Func("foo", utils::Empty, b.ty.void_(), utils::Empty);
-    auto* var = b.Decl(b.Var("a", nullptr, b.Expr(1_i)));
+    auto* var = b.Decl(b.Var("a", b.Expr(1_i)));
     auto* s = b.For(var, b.Expr(true), nullptr, b.Block());
     b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{s});
 
@@ -541,7 +541,7 @@ TEST_F(HoistToDeclBeforeTest, InsertBefore_ForLoopCont) {
     // }
     ProgramBuilder b;
     b.Func("foo", utils::Empty, b.ty.void_(), utils::Empty);
-    auto* var = b.Decl(b.Var("a", nullptr, b.Expr(1_i)));
+    auto* var = b.Decl(b.Var("a", b.Expr(1_i)));
     auto* cont = b.CompoundAssign("a", b.Expr(1_i), ast::BinaryOp::kAdd);
     auto* s = b.For(nullptr, b.Expr(true), cont, b.Block());
     b.Func("f", utils::Empty, b.ty.void_(), utils::Vector{var, s});

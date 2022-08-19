@@ -43,11 +43,8 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_StorageClass) {
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.i32())});
-    auto* v = GlobalVar("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
-                        utils::Vector{
-                            create<ast::BindingAttribute>(0u),
-                            create<ast::GroupAttribute>(0u),
-                        });
+    auto* v = GlobalVar("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(0),
+                        Group(0));
 
     GeneratorImpl& gen = Build();
 
@@ -59,10 +56,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_Read) {
 TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.i32())});
     auto* v = GlobalVar("a", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                        utils::Vector{
-                            create<ast::BindingAttribute>(0u),
-                            create<ast::GroupAttribute>(0u),
-                        });
+                        Binding(0), Group(0));
 
     GeneratorImpl& gen = Build();
 
@@ -72,12 +66,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Access_ReadWrite) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
-    auto* v =
-        GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler), ast::StorageClass::kNone, nullptr,
-                  utils::Vector{
-                      create<ast::GroupAttribute>(1u),
-                      create<ast::BindingAttribute>(2u),
-                  });
+    auto* v = GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler), Group(1), Binding(2));
 
     GeneratorImpl& gen = Build();
 
@@ -108,7 +97,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Let_Explicit) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Let_Inferred) {
-    auto* v = Let("a", nullptr, Expr(1_f));
+    auto* v = Let("a", Expr(1_f));
     WrapInFunction(v);
 
     GeneratorImpl& gen = Build();
@@ -130,7 +119,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Const_Explicit) {
 }
 
 TEST_F(WgslGeneratorImplTest, EmitVariable_Const_Inferred) {
-    auto* v = Const("a", nullptr, Expr(1_f));
+    auto* v = Const("a", Expr(1_f));
     WrapInFunction(v);
 
     GeneratorImpl& gen = Build();

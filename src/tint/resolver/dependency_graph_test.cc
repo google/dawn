@@ -970,7 +970,7 @@ TEST_F(ResolverDependencyGraphCyclicRefTest, Mixed_RecursiveDependencies) {
          utils::Vector{Return(Expr(Source{{1, 10}}, "Z"))});
     Alias(Source{{2, 1}}, "A", ty.type_name(Source{{2, 10}}, "S"));
     Structure(Source{{3, 1}}, "S", utils::Vector{Member("a", ty.type_name(Source{{3, 10}}, "A"))});
-    GlobalVar(Source{{4, 1}}, "Z", nullptr, Expr(Source{{4, 10}}, "L"));
+    GlobalVar(Source{{4, 1}}, "Z", Expr(Source{{4, 10}}, "L"));
     Alias(Source{{5, 1}}, "R", ty.type_name(Source{{5, 10}}, "A"));
     GlobalConst(Source{{6, 1}}, "L", ty.type_name(Source{{5, 5}}, "S"), Expr(Source{{5, 10}}, "Z"));
 
@@ -1092,9 +1092,9 @@ TEST_F(ResolverDependencyGraphOrderedGlobalsTest, EnableFirst) {
     // Although all enable directives in a valid WGSL program must go before any other global
     // declaration, a transform may produce such a AST tree that has some declarations before enable
     // nodes. DependencyGraph should deal with these cases.
-    auto* var_1 = GlobalVar("SYMBOL1", ty.i32(), nullptr);
+    auto* var_1 = GlobalVar("SYMBOL1", ty.i32());
     auto* enable_1 = Enable(ast::Extension::kF16);
-    auto* var_2 = GlobalVar("SYMBOL2", ty.f32(), nullptr);
+    auto* var_2 = GlobalVar("SYMBOL2", ty.f32());
     auto* enable_2 = Enable(ast::Extension::kF16);
 
     EXPECT_THAT(AST().GlobalDeclarations(), ElementsAre(var_1, enable_1, var_2, enable_2));
@@ -1298,10 +1298,10 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
 
 TEST_F(ResolverDependencyGraphTraversalTest, InferredType) {
     // Check that the nullptr of the var / const / let type doesn't make things explode
-    GlobalVar("a", nullptr, Expr(1_i));
-    GlobalConst("b", nullptr, Expr(1_i));
-    WrapInFunction(Var("c", nullptr, Expr(1_i)),  //
-                   Let("d", nullptr, Expr(1_i)));
+    GlobalVar("a", Expr(1_i));
+    GlobalConst("b", Expr(1_i));
+    WrapInFunction(Var("c", Expr(1_i)),  //
+                   Let("d", Expr(1_i)));
     Build();
 }
 

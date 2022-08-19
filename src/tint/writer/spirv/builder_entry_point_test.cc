@@ -51,7 +51,7 @@ TEST_F(BuilderTest, EntryPoint_Parameters) {
                            Location(1u),
                        });
     auto* mul = Mul(Expr(MemberAccessor("coord", "x")), Expr("loc1"));
-    auto* col = Var("col", ty.f32(), ast::StorageClass::kNone, mul);
+    auto* col = Var("col", ty.f32(), mul);
     Func("frag_main", utils::Vector{coord, loc1}, ty.void_(), utils::Vector{WrapInStatement(col)},
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),

@@ -73,10 +73,10 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 }
 
 TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
-    auto* a = Let("a", nullptr, Expr(3_f));
+    auto* a = Let("a", Expr(3_f));
     auto* init = vec2<f32>(1_f, Add(Expr("a"), 3_f));
 
-    auto* v = Var("var", ty.vec2<f32>(), ast::StorageClass::kNone, init);
+    auto* v = Var("var", ty.vec2<f32>(), init);
     WrapInFunction(a, v);
 
     spirv::Builder& b = Build();
@@ -109,9 +109,9 @@ TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
     // var v : f32 = 1.0;
     // var v2 : f32 = v; // Should generate the load and store automatically.
 
-    auto* v = Var("v", ty.f32(), ast::StorageClass::kNone, Expr(1_f));
+    auto* v = Var("v", ty.f32(), Expr(1_f));
 
-    auto* v2 = Var("v2", ty.f32(), ast::StorageClass::kNone, Expr("v"));
+    auto* v2 = Var("v2", ty.f32(), Expr("v"));
     WrapInFunction(v, v2);
 
     spirv::Builder& b = Build();
@@ -144,9 +144,9 @@ TEST_F(BuilderTest, FunctionVar_LetWithVarInitializer) {
     // var v : f32 = 1.0;
     // let v2 : f32 = v; // Should generate the load
 
-    auto* v = Var("v", ty.f32(), ast::StorageClass::kNone, Expr(1_f));
+    auto* v = Var("v", ty.f32(), Expr(1_f));
 
-    auto* v2 = Var("v2", ty.f32(), ast::StorageClass::kNone, Expr("v"));
+    auto* v2 = Var("v2", ty.f32(), Expr("v"));
     WrapInFunction(v, v2);
 
     spirv::Builder& b = Build();
@@ -181,7 +181,7 @@ TEST_F(BuilderTest, FunctionVar_ConstWithVarInitializer) {
 
     auto* v = Const("v", ty.f32(), Expr(1_f));
 
-    auto* v2 = Var("v2", ty.f32(), ast::StorageClass::kNone, Expr("v"));
+    auto* v2 = Var("v2", ty.f32(), Expr("v"));
     WrapInFunction(v, v2);
 
     spirv::Builder& b = Build();

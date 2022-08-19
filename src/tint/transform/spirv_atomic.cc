@@ -79,7 +79,7 @@ struct SpirvAtomic::State {
                         auto* block = call->Stmt()->Block()->Declaration();
                         auto old_value = b.Symbols().New("old_value");
                         auto old_value_decl = b.Decl(b.Let(
-                            old_value, nullptr,
+                            old_value,
                             b.MemberAccessor(b.Call(sem::str(stub->builtin), std::move(out_args)),
                                              b.Expr("old_value"))));
                         ctx.InsertBefore(block->statements, call->Stmt()->Declaration(),

@@ -3019,7 +3019,7 @@ TEST_P(ResolverConstEvalUnaryOpTest, Test) {
         [&](auto&& values) {
             using T = decltype(values.expect);
             auto* expr = create<ast::UnaryOpExpression>(op, Expr(values.input));
-            GlobalConst("C", nullptr, expr);
+            GlobalConst("C", expr);
 
             EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -3117,7 +3117,7 @@ INSTANTIATE_TEST_SUITE_P(Negation,
 // number.
 TEST_F(ResolverConstEvalTest, UnaryNegateLowestAbstract) {
     // const break_me = -(-9223372036854775808);
-    auto* c = GlobalConst("break_me", nullptr, Negation(Negation(Expr(9223372036854775808_a))));
+    auto* c = GlobalConst("break_me", Negation(Negation(Expr(9223372036854775808_a))));
     (void)c;
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     auto* sem = Sem().Get(c);
@@ -3171,7 +3171,7 @@ TEST_P(ResolverConstEvalBinaryOpTest, Test) {
             }
 
             auto* expr = create<ast::BinaryExpression>(op, Expr(lhs), Expr(rhs));
-            GlobalConst("C", nullptr, expr);
+            GlobalConst("C", expr);
 
             EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -3274,34 +3274,34 @@ INSTANTIATE_TEST_SUITE_P(Sub,
                                               OpSubFloatCases<f16>()))));
 
 TEST_F(ResolverConstEvalTest, BinaryAbstractAddOverflow_AInt) {
-    GlobalConst("c", nullptr, Add(Source{{1, 1}}, Expr(AInt::Highest()), 1_a));
+    GlobalConst("c", Add(Source{{1, 1}}, Expr(AInt::Highest()), 1_a));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "1:1 error: '-9223372036854775808' cannot be represented as 'abstract-int'");
 }
 
 TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AInt) {
-    GlobalConst("c", nullptr, Add(Source{{1, 1}}, Expr(AInt::Lowest()), -1_a));
+    GlobalConst("c", Add(Source{{1, 1}}, Expr(AInt::Lowest()), -1_a));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "1:1 error: '9223372036854775807' cannot be represented as 'abstract-int'");
 }
 
 TEST_F(ResolverConstEvalTest, BinaryAbstractAddOverflow_AFloat) {
-    GlobalConst("c", nullptr, Add(Source{{1, 1}}, Expr(AFloat::Highest()), AFloat::Highest()));
+    GlobalConst("c", Add(Source{{1, 1}}, Expr(AFloat::Highest()), AFloat::Highest()));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "1:1 error: 'inf' cannot be represented as 'abstract-float'");
 }
 
 TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AFloat) {
-    GlobalConst("c", nullptr, Add(Source{{1, 1}}, Expr(AFloat::Lowest()), AFloat::Lowest()));
+    GlobalConst("c", Add(Source{{1, 1}}, Expr(AFloat::Lowest()), AFloat::Lowest()));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "1:1 error: '-inf' cannot be represented as 'abstract-float'");
 }
 
 TEST_F(ResolverConstEvalTest, BinaryAbstractMixed_ScalarScalar) {
-    auto* a = Const("a", nullptr, Expr(1_a));    // AInt
-    auto* b = Const("b", nullptr, Expr(2.3_a));  // AFloat
+    auto* a = Const("a", Expr(1_a));    // AInt
+    auto* b = Const("b", Expr(2.3_a));  // AFloat
     auto* c = Add(Expr("a"), Expr("b"));
     WrapInFunction(a, b, c);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -3313,8 +3313,8 @@ TEST_F(ResolverConstEvalTest, BinaryAbstractMixed_ScalarScalar) {
 }
 
 TEST_F(ResolverConstEvalTest, BinaryAbstractMixed_ScalarVector) {
-    auto* a = Const("a", nullptr, Expr(1_a));                                   // AInt
-    auto* b = Const("b", nullptr, Construct(ty.vec(nullptr, 3), Expr(2.3_a)));  // AFloat
+    auto* a = Const("a", Expr(1_a));                                   // AInt
+    auto* b = Const("b", Construct(ty.vec(nullptr, 3), Expr(2.3_a)));  // AFloat
     auto* c = Add(Expr("a"), Expr("b"));
     WrapInFunction(a, b, c);
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -3372,7 +3372,7 @@ TEST_P(ResolverConstEvalBuiltinTest, Test) {
             using T = std::decay_t<decltype(result)>;
             auto* expr = Call(sem::str(builtin), std::move(args));
 
-            GlobalConst("C", nullptr, expr);
+            GlobalConst("C", expr);
 
             EXPECT_TRUE(r()->Resolve()) << r()->error();
 

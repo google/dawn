@@ -198,14 +198,11 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
 
     auto* s = Structure("Data", utils::Vector{Member("d", ty.f32())});
 
-    GlobalVar("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-              utils::Vector{
-                  create<ast::BindingAttribute>(0u),
-                  create<ast::GroupAttribute>(0u),
-              });
+    GlobalVar("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite, Binding(0),
+              Group(0));
 
     {
-        auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("data", "d"));
+        auto* var = Var("v", ty.f32(), MemberAccessor("data", "d"));
 
         Func("a", utils::Empty, ty.void_(),
              utils::Vector{
@@ -216,7 +213,7 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     }
 
     {
-        auto* var = Var("v", ty.f32(), ast::StorageClass::kNone, MemberAccessor("data", "d"));
+        auto* var = Var("v", ty.f32(), MemberAccessor("data", "d"));
 
         Func("b", utils::Empty, ty.void_(),
              utils::Vector{

@@ -260,11 +260,8 @@ struct State {
         for (uint32_t i = 0; i < cfg.vertex_state.size(); ++i) {
             // The decorated variable with struct type
             ctx.dst->GlobalVar(GetVertexBufferName(i), ctx.dst->ty.Of(struct_type),
-                               ast::StorageClass::kStorage, ast::Access::kRead,
-                               utils::Vector{
-                                   ctx.dst->create<ast::BindingAttribute>(i),
-                                   ctx.dst->create<ast::GroupAttribute>(cfg.pulling_group),
-                               });
+                               ast::StorageClass::kStorage, ast::Access::kRead, ctx.dst->Binding(i),
+                               ctx.dst->Group(cfg.pulling_group));
         }
     }
 
@@ -303,7 +300,7 @@ struct State {
             }
 
             // let pulling_offset_n = <attribute_offset>
-            stmts.Push(ctx.dst->Decl(ctx.dst->Let(buffer_array_base, nullptr, attribute_offset)));
+            stmts.Push(ctx.dst->Decl(ctx.dst->Let(buffer_array_base, attribute_offset)));
 
             for (const VertexAttributeDescriptor& attribute_desc : buffer_layout.attributes) {
                 auto it = location_info.find(attribute_desc.shader_location);

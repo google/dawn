@@ -37,7 +37,7 @@ TEST_F(WgslGeneratorImplTest, EmitExpression_MemberAccessor_OfDref) {
     auto* s = Structure("Data", utils::Vector{Member("mem", ty.f32())});
     GlobalVar("str", ty.Of(s), ast::StorageClass::kPrivate);
 
-    auto* p = Let("p", nullptr, AddressOf("str"));
+    auto* p = Let("p", AddressOf("str"));
     auto* expr = MemberAccessor(Deref("p"), "mem");
     WrapInFunction(p, expr);
 

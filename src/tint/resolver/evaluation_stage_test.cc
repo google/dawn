@@ -51,7 +51,7 @@ TEST_F(ResolverEvaluationStageTest, Vector_Ctor) {
 TEST_F(ResolverEvaluationStageTest, Vector_Ctor_Const_Const) {
     // const f = 1.f;
     // vec2<f32>(f, f);
-    auto* f = Const("f", nullptr, Expr(1_f));
+    auto* f = Const("f", Expr(1_f));
     auto* expr = vec2<f32>(f, f);
     WrapInFunction(f, expr);
 
@@ -63,7 +63,7 @@ TEST_F(ResolverEvaluationStageTest, Vector_Ctor_Const_Const) {
 TEST_F(ResolverEvaluationStageTest, Vector_Ctor_Runtime_Runtime) {
     // var f = 1.f;
     // vec2<f32>(f, f);
-    auto* f = Var("f", nullptr, Expr(1_f));
+    auto* f = Var("f", Expr(1_f));
     auto* expr = vec2<f32>(f, f);
     WrapInFunction(f, expr);
 
@@ -75,7 +75,7 @@ TEST_F(ResolverEvaluationStageTest, Vector_Ctor_Runtime_Runtime) {
 TEST_F(ResolverEvaluationStageTest, Vector_Conv_Const) {
     // const f = 1.f;
     // vec2<u32>(vec2<f32>(f));
-    auto* f = Const("f", nullptr, Expr(1_f));
+    auto* f = Const("f", Expr(1_f));
     auto* expr = vec2<u32>(vec2<f32>(f));
     WrapInFunction(f, expr);
 
@@ -87,7 +87,7 @@ TEST_F(ResolverEvaluationStageTest, Vector_Conv_Const) {
 TEST_F(ResolverEvaluationStageTest, Vector_Conv_Runtime) {
     // var f = 1.f;
     // vec2<u32>(vec2<f32>(f));
-    auto* f = Var("f", nullptr, Expr(1_f));
+    auto* f = Var("f", Expr(1_f));
     auto* expr = vec2<u32>(vec2<f32>(f));
     WrapInFunction(f, expr);
 
@@ -115,7 +115,7 @@ TEST_F(ResolverEvaluationStageTest, Array_Ctor) {
 TEST_F(ResolverEvaluationStageTest, Array_Ctor_Const_Const) {
     // const f = 1.f;
     // array<f32, 2>(f, f);
-    auto* f = Const("f", nullptr, Expr(1_f));
+    auto* f = Const("f", Expr(1_f));
     auto* expr = Construct(ty.array<f32, 2>(), f, f);
     WrapInFunction(f, expr);
 
@@ -128,8 +128,8 @@ TEST_F(ResolverEvaluationStageTest, Array_Ctor_Const_Override) {
     // const f1 = 1.f;
     // override f2 = 2.f;
     // array<f32, 2>(f1, f2);
-    auto* f1 = Const("f1", nullptr, Expr(1_f));
-    auto* f2 = Override("f2", nullptr, Expr(2_f));
+    auto* f1 = Const("f1", Expr(1_f));
+    auto* f2 = Override("f2", Expr(2_f));
     auto* expr = Construct(ty.array<f32, 2>(), f1, f2);
     WrapInFunction(f1, expr);
 
@@ -143,8 +143,8 @@ TEST_F(ResolverEvaluationStageTest, Array_Ctor_Override_Runtime) {
     // override f1 = 1.f;
     // var f2 = 2.f;
     // array<f32, 2>(f1, f2);
-    auto* f1 = Override("f1", nullptr, Expr(1_f));
-    auto* f2 = Var("f2", nullptr, Expr(2_f));
+    auto* f1 = Override("f1", Expr(1_f));
+    auto* f2 = Var("f2", Expr(2_f));
     auto* expr = Construct(ty.array<f32, 2>(), f1, f2);
     WrapInFunction(f2, expr);
 
@@ -158,8 +158,8 @@ TEST_F(ResolverEvaluationStageTest, Array_Ctor_Const_Runtime) {
     // const f1 = 1.f;
     // var f2 = 2.f;
     // array<f32, 2>(f1, f2);
-    auto* f1 = Const("f1", nullptr, Expr(1_f));
-    auto* f2 = Var("f2", nullptr, Expr(2_f));
+    auto* f1 = Const("f1", Expr(1_f));
+    auto* f2 = Var("f2", Expr(2_f));
     auto* expr = Construct(ty.array<f32, 2>(), f1, f2);
     WrapInFunction(f1, f2, expr);
 
@@ -172,7 +172,7 @@ TEST_F(ResolverEvaluationStageTest, Array_Ctor_Const_Runtime) {
 TEST_F(ResolverEvaluationStageTest, Array_Ctor_Runtime_Runtime) {
     // var f = 1.f;
     // array<f32, 2>(f, f);
-    auto* f = Var("f", nullptr, Expr(1_f));
+    auto* f = Var("f", Expr(1_f));
     auto* expr = Construct(ty.array<f32, 2>(), f, f);
     WrapInFunction(f, expr);
 
@@ -185,8 +185,8 @@ TEST_F(ResolverEvaluationStageTest, IndexAccessor_Const_Const) {
     // const vec = vec4<f32>();
     // const idx = 1_i;
     // vec[idx]
-    auto* vec = Const("vec", nullptr, vec4<f32>());
-    auto* idx = Const("idx", nullptr, Expr(1_i));
+    auto* vec = Const("vec", vec4<f32>());
+    auto* idx = Const("idx", Expr(1_i));
     auto* expr = IndexAccessor(vec, idx);
     WrapInFunction(vec, idx, expr);
 
@@ -200,8 +200,8 @@ TEST_F(ResolverEvaluationStageTest, IndexAccessor_Runtime_Const) {
     // var vec = vec4<f32>();
     // const idx = 1_i;
     // vec[idx]
-    auto* vec = Var("vec", nullptr, vec4<f32>());
-    auto* idx = Const("idx", nullptr, Expr(1_i));
+    auto* vec = Var("vec", vec4<f32>());
+    auto* idx = Const("idx", Expr(1_i));
     auto* expr = IndexAccessor(vec, idx);
     WrapInFunction(vec, idx, expr);
 
@@ -215,8 +215,8 @@ TEST_F(ResolverEvaluationStageTest, IndexAccessor_Const_Override) {
     // const vec = vec4<f32>();
     // override idx = 1_i;
     // vec[idx]
-    auto* vec = Const("vec", nullptr, vec4<f32>());
-    auto* idx = Override("idx", nullptr, Expr(1_i));
+    auto* vec = Const("vec", vec4<f32>());
+    auto* idx = Override("idx", Expr(1_i));
     auto* expr = IndexAccessor(vec, idx);
     WrapInFunction(vec, expr);
 
@@ -230,8 +230,8 @@ TEST_F(ResolverEvaluationStageTest, IndexAccessor_Const_Runtime) {
     // const vec = vec4<f32>();
     // let idx = 1_i;
     // vec[idx]
-    auto* vec = Const("vec", nullptr, vec4<f32>());
-    auto* idx = Let("idx", nullptr, Expr(1_i));
+    auto* vec = Const("vec", vec4<f32>());
+    auto* idx = Let("idx", Expr(1_i));
     auto* expr = IndexAccessor(vec, idx);
     WrapInFunction(vec, idx, expr);
 
@@ -244,7 +244,7 @@ TEST_F(ResolverEvaluationStageTest, IndexAccessor_Const_Runtime) {
 TEST_F(ResolverEvaluationStageTest, Swizzle_Const) {
     // const vec = S();
     // vec.m
-    auto* vec = Const("vec", nullptr, vec4<f32>());
+    auto* vec = Const("vec", vec4<f32>());
     auto* expr = MemberAccessor(vec, "xz");
     WrapInFunction(vec, expr);
 
@@ -256,7 +256,7 @@ TEST_F(ResolverEvaluationStageTest, Swizzle_Const) {
 TEST_F(ResolverEvaluationStageTest, Swizzle_Runtime) {
     // var vec = S();
     // vec.m
-    auto* vec = Var("vec", nullptr, vec4<f32>());
+    auto* vec = Var("vec", vec4<f32>());
     auto* expr = MemberAccessor(vec, "rg");
     WrapInFunction(vec, expr);
 
@@ -270,7 +270,7 @@ TEST_F(ResolverEvaluationStageTest, MemberAccessor_Const) {
     // const str = S();
     // str.m
     Structure("S", utils::Vector{Member("m", ty.i32())});
-    auto* str = Const("str", nullptr, Construct(ty.type_name("S")));
+    auto* str = Const("str", Construct(ty.type_name("S")));
     auto* expr = MemberAccessor(str, "m");
     WrapInFunction(str, expr);
 
@@ -284,7 +284,7 @@ TEST_F(ResolverEvaluationStageTest, MemberAccessor_Runtime) {
     // var str = S();
     // str.m
     Structure("S", utils::Vector{Member("m", ty.i32())});
-    auto* str = Var("str", nullptr, Construct(ty.type_name("S")));
+    auto* str = Var("str", Construct(ty.type_name("S")));
     auto* expr = MemberAccessor(str, "m");
     WrapInFunction(str, expr);
 

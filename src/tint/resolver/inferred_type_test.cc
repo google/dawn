@@ -82,7 +82,7 @@ TEST_P(ResolverInferredTypeParamTest, GlobalConst_Pass) {
 
     // const a = <type constructor>;
     auto* ctor_expr = params.create_value(*this, 0);
-    auto* a = GlobalConst("a", nullptr, ctor_expr);
+    auto* a = GlobalConst("a", ctor_expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     EXPECT_EQ(TypeOf(a), expected_type);
@@ -95,7 +95,7 @@ TEST_P(ResolverInferredTypeParamTest, GlobalVar_Pass) {
 
     // var a = <type constructor>;
     auto* ctor_expr = params.create_value(*this, 0);
-    auto* var = GlobalVar("a", nullptr, ast::StorageClass::kPrivate, ctor_expr);
+    auto* var = GlobalVar("a", ast::StorageClass::kPrivate, ctor_expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
     EXPECT_EQ(TypeOf(var)->UnwrapRef(), expected_type);
@@ -108,7 +108,7 @@ TEST_P(ResolverInferredTypeParamTest, LocalLet_Pass) {
 
     // let a = <type constructor>;
     auto* ctor_expr = params.create_value(*this, 0);
-    auto* var = Let("a", nullptr, ctor_expr);
+    auto* var = Let("a", ctor_expr);
     WrapInFunction(var);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -122,7 +122,7 @@ TEST_P(ResolverInferredTypeParamTest, LocalVar_Pass) {
 
     // var a = <type constructor>;
     auto* ctor_expr = params.create_value(*this, 0);
-    auto* var = Var("a", nullptr, ast::StorageClass::kFunction, ctor_expr);
+    auto* var = Var("a", ast::StorageClass::kFunction, ctor_expr);
     WrapInFunction(var);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -136,7 +136,7 @@ TEST_F(ResolverInferredTypeTest, InferArray_Pass) {
     auto* expected_type = create<sem::Array>(create<sem::U32>(), 10u, 4u, 4u * 10u, 4u, 4u);
 
     auto* ctor_expr = Construct(type);
-    auto* var = Var("a", nullptr, ast::StorageClass::kFunction, ctor_expr);
+    auto* var = Var("a", ast::StorageClass::kFunction, ctor_expr);
     WrapInFunction(var);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -155,7 +155,7 @@ TEST_F(ResolverInferredTypeTest, InferStruct_Pass) {
 
     auto* ctor_expr = Construct(ty.Of(str));
 
-    auto* var = Var("a", nullptr, ast::StorageClass::kFunction, ctor_expr);
+    auto* var = Var("a", ast::StorageClass::kFunction, ctor_expr);
     WrapInFunction(var);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

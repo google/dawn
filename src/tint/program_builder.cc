@@ -26,7 +26,10 @@ using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint {
 
-ProgramBuilder::VarOptionals::~VarOptionals() = default;
+ProgramBuilder::VarOptions::~VarOptions() = default;
+ProgramBuilder::LetOptions::~LetOptions() = default;
+ProgramBuilder::ConstOptions::~ConstOptions() = default;
+ProgramBuilder::OverrideOptions::~OverrideOptions() = default;
 
 ProgramBuilder::ProgramBuilder()
     : id_(ProgramID::New()),
@@ -118,7 +121,7 @@ ProgramBuilder::TypesBuilder::TypesBuilder(ProgramBuilder* pb) : builder(pb) {}
 
 const ast::Statement* ProgramBuilder::WrapInStatement(const ast::Expression* expr) {
     // Create a temporary variable of inferred type from expr.
-    return Decl(Let(symbols_.New(), nullptr, expr));
+    return Decl(Let(symbols_.New(), expr));
 }
 
 const ast::VariableDeclStatement* ProgramBuilder::WrapInStatement(const ast::Variable* v) {

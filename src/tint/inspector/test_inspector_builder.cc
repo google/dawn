@@ -126,11 +126,7 @@ void InspectorBuilder::AddUniformBuffer(const std::string& name,
                                         const ast::Type* type,
                                         uint32_t group,
                                         uint32_t binding) {
-    GlobalVar(name, type, ast::StorageClass::kUniform,
-              utils::Vector{
-                  create<ast::BindingAttribute>(binding),
-                  create<ast::GroupAttribute>(group),
-              });
+    GlobalVar(name, type, ast::StorageClass::kUniform, Binding(binding), Group(group));
 }
 
 void InspectorBuilder::AddWorkgroupStorage(const std::string& name, const ast::Type* type) {
@@ -142,11 +138,7 @@ void InspectorBuilder::AddStorageBuffer(const std::string& name,
                                         ast::Access access,
                                         uint32_t group,
                                         uint32_t binding) {
-    GlobalVar(name, type, ast::StorageClass::kStorage, access,
-              utils::Vector{
-                  create<ast::BindingAttribute>(binding),
-                  create<ast::GroupAttribute>(group),
-              });
+    GlobalVar(name, type, ast::StorageClass::kStorage, access, Binding(binding), Group(group));
 }
 
 void InspectorBuilder::MakeStructVariableReferenceBodyFunction(
@@ -178,32 +170,20 @@ void InspectorBuilder::MakeStructVariableReferenceBodyFunction(
 }
 
 void InspectorBuilder::AddSampler(const std::string& name, uint32_t group, uint32_t binding) {
-    GlobalVar(name, sampler_type(),
-              utils::Vector{
-                  create<ast::BindingAttribute>(binding),
-                  create<ast::GroupAttribute>(group),
-              });
+    GlobalVar(name, sampler_type(), Binding(binding), Group(group));
 }
 
 void InspectorBuilder::AddComparisonSampler(const std::string& name,
                                             uint32_t group,
                                             uint32_t binding) {
-    GlobalVar(name, comparison_sampler_type(),
-              utils::Vector{
-                  create<ast::BindingAttribute>(binding),
-                  create<ast::GroupAttribute>(group),
-              });
+    GlobalVar(name, comparison_sampler_type(), Binding(binding), Group(group));
 }
 
 void InspectorBuilder::AddResource(const std::string& name,
                                    const ast::Type* type,
                                    uint32_t group,
                                    uint32_t binding) {
-    GlobalVar(name, type,
-              utils::Vector{
-                  create<ast::BindingAttribute>(binding),
-                  create<ast::GroupAttribute>(group),
-              });
+    GlobalVar(name, type, Binding(binding), Group(group));
 }
 
 void InspectorBuilder::AddGlobalVariable(const std::string& name, const ast::Type* type) {
@@ -305,11 +285,7 @@ void InspectorBuilder::AddStorageTexture(const std::string& name,
                                          const ast::Type* type,
                                          uint32_t group,
                                          uint32_t binding) {
-    GlobalVar(name, type,
-              utils::Vector{
-                  create<ast::BindingAttribute>(binding),
-                  create<ast::GroupAttribute>(group),
-              });
+    GlobalVar(name, type, Binding(binding), Group(group));
 }
 
 const ast::Function* InspectorBuilder::MakeStorageTextureBodyFunction(

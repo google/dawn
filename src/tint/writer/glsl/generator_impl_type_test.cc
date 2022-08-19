@@ -312,11 +312,7 @@ TEST_P(GlslDepthTexturesTest, Emit) {
 
     auto* t = ty.depth_texture(params.dim);
 
-    GlobalVar("tex", t,
-              utils::Vector{
-                  create<ast::BindingAttribute>(1u),
-                  create<ast::GroupAttribute>(2u),
-              });
+    GlobalVar("tex", t, Binding(1), Group(2));
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
@@ -344,11 +340,7 @@ using GlslDepthMultisampledTexturesTest = TestHelper;
 TEST_F(GlslDepthMultisampledTexturesTest, Emit) {
     auto* t = ty.depth_multisampled_texture(ast::TextureDimension::k2d);
 
-    GlobalVar("tex", t,
-              utils::Vector{
-                  create<ast::BindingAttribute>(1u),
-                  create<ast::GroupAttribute>(2u),
-              });
+    GlobalVar("tex", t, Binding(1), Group(2));
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
@@ -392,11 +384,7 @@ TEST_P(GlslSampledTexturesTest, Emit) {
     }
     auto* t = ty.sampled_texture(params.dim, datatype);
 
-    GlobalVar("tex", t,
-              utils::Vector{
-                  create<ast::BindingAttribute>(1u),
-                  create<ast::GroupAttribute>(2u),
-              });
+    GlobalVar("tex", t, Binding(1), Group(2));
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
@@ -531,11 +519,7 @@ TEST_P(GlslStorageTexturesTest, Emit) {
 
     auto* t = ty.storage_texture(params.dim, params.imgfmt, ast::Access::kWrite);
 
-    GlobalVar("tex", t,
-              utils::Vector{
-                  create<ast::BindingAttribute>(1u),
-                  create<ast::GroupAttribute>(2u),
-              });
+    GlobalVar("tex", t, Binding(1), Group(2));
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{

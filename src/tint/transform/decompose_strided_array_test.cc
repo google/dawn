@@ -158,7 +158,7 @@ TEST_F(DecomposeStridedArrayTest, ReadUniformStridedArray) {
     // }
     ProgramBuilder b;
     auto* S = b.Structure("S", utils::Vector{b.Member("a", b.ty.array<f32, 4u>(32))});
-    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kUniform, b.GroupAndBinding(0, 0));
+    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kUniform, b.Group(0), b.Binding(0));
     b.Func("f", utils::Empty, b.ty.void_(),
            utils::Vector{
                b.Decl(b.Let("a", b.ty.array<f32, 4u>(32), b.MemberAccessor("s", "a"))),
@@ -206,7 +206,7 @@ TEST_F(DecomposeStridedArrayTest, ReadUniformDefaultStridedArray) {
     // }
     ProgramBuilder b;
     auto* S = b.Structure("S", utils::Vector{b.Member("a", b.ty.array(b.ty.vec4<f32>(), 4_u, 16))});
-    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kUniform, b.GroupAndBinding(0, 0));
+    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kUniform, b.Group(0), b.Binding(0));
     b.Func(
         "f", utils::Empty, b.ty.void_(),
         utils::Vector{
@@ -252,7 +252,7 @@ TEST_F(DecomposeStridedArrayTest, ReadStorageStridedArray) {
     // }
     ProgramBuilder b;
     auto* S = b.Structure("S", utils::Vector{b.Member("a", b.ty.array<f32, 4u>(32))});
-    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kStorage, b.GroupAndBinding(0, 0));
+    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kStorage, b.Group(0), b.Binding(0));
     b.Func("f", utils::Empty, b.ty.void_(),
            utils::Vector{
                b.Decl(b.Let("a", b.ty.array<f32, 4u>(32), b.MemberAccessor("s", "a"))),
@@ -300,7 +300,7 @@ TEST_F(DecomposeStridedArrayTest, ReadStorageDefaultStridedArray) {
     // }
     ProgramBuilder b;
     auto* S = b.Structure("S", utils::Vector{b.Member("a", b.ty.array<f32, 4u>(4))});
-    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kStorage, b.GroupAndBinding(0, 0));
+    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kStorage, b.Group(0), b.Binding(0));
     b.Func("f", utils::Empty, b.ty.void_(),
            utils::Vector{
                b.Decl(b.Let("a", b.ty.array<f32, 4u>(4), b.MemberAccessor("s", "a"))),
@@ -344,8 +344,8 @@ TEST_F(DecomposeStridedArrayTest, WriteStorageStridedArray) {
     // }
     ProgramBuilder b;
     auto* S = b.Structure("S", utils::Vector{b.Member("a", b.ty.array<f32, 4u>(32))});
-    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                b.GroupAndBinding(0, 0));
+    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kStorage, ast::Access::kReadWrite, b.Group(0),
+                b.Binding(0));
     b.Func("f", utils::Empty, b.ty.void_(),
            utils::Vector{
                b.Assign(b.MemberAccessor("s", "a"), b.Construct(b.ty.array<f32, 4u>(32))),
@@ -398,8 +398,8 @@ TEST_F(DecomposeStridedArrayTest, WriteStorageDefaultStridedArray) {
     // }
     ProgramBuilder b;
     auto* S = b.Structure("S", utils::Vector{b.Member("a", b.ty.array<f32, 4u>(4))});
-    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                b.GroupAndBinding(0, 0));
+    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kStorage, ast::Access::kReadWrite, b.Group(0),
+                b.Binding(0));
     b.Func("f", utils::Empty, b.ty.void_(),
            utils::Vector{
                b.Assign(b.MemberAccessor("s", "a"), b.Construct(b.ty.array<f32, 4u>(4))),
@@ -450,14 +450,14 @@ TEST_F(DecomposeStridedArrayTest, ReadWriteViaPointerLets) {
     // }
     ProgramBuilder b;
     auto* S = b.Structure("S", utils::Vector{b.Member("a", b.ty.array<f32, 4u>(32))});
-    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                b.GroupAndBinding(0, 0));
+    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kStorage, ast::Access::kReadWrite, b.Group(0),
+                b.Binding(0));
     b.Func("f", utils::Empty, b.ty.void_(),
            utils::Vector{
-               b.Decl(b.Let("a", nullptr, b.AddressOf(b.MemberAccessor("s", "a")))),
-               b.Decl(b.Let("b", nullptr, b.AddressOf(b.Deref(b.AddressOf(b.Deref("a")))))),
-               b.Decl(b.Let("c", nullptr, b.Deref("b"))),
-               b.Decl(b.Let("d", nullptr, b.IndexAccessor(b.Deref("b"), 1_i))),
+               b.Decl(b.Let("a", b.AddressOf(b.MemberAccessor("s", "a")))),
+               b.Decl(b.Let("b", b.AddressOf(b.Deref(b.AddressOf(b.Deref("a")))))),
+               b.Decl(b.Let("c", b.Deref("b"))),
+               b.Decl(b.Let("d", b.IndexAccessor(b.Deref("b"), 1_i))),
                b.Assign(b.Deref("b"), b.Construct(b.ty.array<f32, 4u>(32), 1_f, 2_f, 3_f, 4_f)),
                b.Assign(b.IndexAccessor(b.Deref("b"), 1_i), 5_f),
            },
@@ -511,8 +511,8 @@ TEST_F(DecomposeStridedArrayTest, PrivateAliasedStridedArray) {
     ProgramBuilder b;
     b.Alias("ARR", b.ty.array<f32, 4u>(32));
     auto* S = b.Structure("S", utils::Vector{b.Member("a", b.ty.type_name("ARR"))});
-    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                b.GroupAndBinding(0, 0));
+    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kStorage, ast::Access::kReadWrite, b.Group(0),
+                b.Binding(0));
     b.Func("f", utils::Empty, b.ty.void_(),
            utils::Vector{
                b.Decl(b.Let("a", b.ty.type_name("ARR"), b.MemberAccessor("s", "a"))),
@@ -581,8 +581,8 @@ TEST_F(DecomposeStridedArrayTest, PrivateNestedStridedArray) {
                 b.ty.array(b.ty.type_name("ARR_A"), 3_u, 16),  //
                 4_u, 128));
     auto* S = b.Structure("S", utils::Vector{b.Member("a", b.ty.type_name("ARR_B"))});
-    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                b.GroupAndBinding(0, 0));
+    b.GlobalVar("s", b.ty.Of(S), ast::StorageClass::kStorage, ast::Access::kReadWrite, b.Group(0),
+                b.Binding(0));
     b.Func("f", utils::Empty, b.ty.void_(),
            utils::Vector{
                b.Decl(b.Let("a", b.ty.type_name("ARR_B"), b.MemberAccessor("s", "a"))),

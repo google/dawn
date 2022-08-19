@@ -105,11 +105,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
-    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler),
-              utils::Vector{
-                  create<ast::GroupAttribute>(0u),
-                  create<ast::BindingAttribute>(0u),
-              });
+    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(0), Binding(0));
 
     GeneratorImpl& gen = Build();
 
@@ -121,11 +117,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
 
 TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
     auto* st = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
-    GlobalVar("t", st,
-              utils::Vector{
-                  create<ast::GroupAttribute>(0u),
-                  create<ast::BindingAttribute>(0u),
-              });
+    GlobalVar("t", st, Group(0), Binding(0));
 
     GeneratorImpl& gen = Build();
 
@@ -137,7 +129,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
 
 TEST_F(WgslGeneratorImplTest, Emit_GlobalConst) {
     GlobalConst("explicit", ty.f32(), Expr(1_f));
-    GlobalConst("inferred", nullptr, Expr(1_f));
+    GlobalConst("inferred", Expr(1_f));
 
     GeneratorImpl& gen = Build();
 
@@ -151,11 +143,8 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalConst) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_OverridableConstants) {
-    Override("a", ty.f32(), nullptr);
-    Override("b", ty.f32(), nullptr,
-             utils::Vector{
-                 Id(7u),
-             });
+    Override("a", ty.f32());
+    Override("b", ty.f32(), Id(7u));
 
     GeneratorImpl& gen = Build();
 

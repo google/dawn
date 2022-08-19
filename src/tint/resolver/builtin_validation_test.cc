@@ -305,7 +305,7 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalConst) {
     overload.BuildSamplerVariable(this);
 
     // Build the module-scope const 'G' with the offset value
-    GlobalConst("G", nullptr, expr({}, *this));
+    GlobalConst("G", expr({}, *this));
 
     auto args = overload.args(this);
     auto*& arg_to_replace = (param.position == Position::kFirst) ? args.Front() : args.Back();

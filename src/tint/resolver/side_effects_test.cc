@@ -174,32 +174,31 @@ TEST_P(SideEffectsBuiltinTest, Test) {
     GlobalVar("vb", ty.vec3<bool>(), ast::StorageClass::kPrivate);
     GlobalVar("m", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
     GlobalVar("arr", ty.array<f32, 10>(), ast::StorageClass::kPrivate);
-    GlobalVar("storage_arr", ty.array<f32>(), ast::StorageClass::kStorage,
-              GroupAndBinding(0, next_binding++));
+    GlobalVar("storage_arr", ty.array<f32>(), ast::StorageClass::kStorage, Group(0),
+              Binding(next_binding++));
     GlobalVar("a", ty.atomic(ty.i32()), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-              GroupAndBinding(0, next_binding++));
+              Group(0), Binding(next_binding++));
     if (c.pipeline_stage != ast::PipelineStage::kCompute) {
-        GlobalVar("t2d", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-                  GroupAndBinding(0, next_binding++));
-        GlobalVar("tdepth2d", ty.depth_texture(ast::TextureDimension::k2d),
-                  GroupAndBinding(0, next_binding++));
+        GlobalVar("t2d", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(0),
+                  Binding(next_binding++));
+        GlobalVar("tdepth2d", ty.depth_texture(ast::TextureDimension::k2d), Group(0),
+                  Binding(next_binding++));
         GlobalVar("t2d_arr", ty.sampled_texture(ast::TextureDimension::k2dArray, ty.f32()),
-                  GroupAndBinding(0, next_binding++));
+                  Group(0), Binding(next_binding++));
         GlobalVar("t2d_multi", ty.multisampled_texture(ast::TextureDimension::k2d, ty.f32()),
-                  GroupAndBinding(0, next_binding++));
+                  Group(0), Binding(next_binding++));
         GlobalVar("tstorage2d",
                   ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Float,
                                      ast::Access::kWrite),
-                  GroupAndBinding(0, next_binding++));
-        GlobalVar("s2d", ty.sampler(ast::SamplerKind::kSampler),
-                  GroupAndBinding(0, next_binding++));
-        GlobalVar("scomp", ty.sampler(ast::SamplerKind::kComparisonSampler),
-                  GroupAndBinding(0, next_binding++));
+                  Group(0), Binding(next_binding++));
+        GlobalVar("s2d", ty.sampler(ast::SamplerKind::kSampler), Group(0), Binding(next_binding++));
+        GlobalVar("scomp", ty.sampler(ast::SamplerKind::kComparisonSampler), Group(0),
+                  Binding(next_binding++));
     }
 
     utils::Vector<const ast::Statement*, 4> stmts;
-    stmts.Push(Decl(Let("pstorage_arr", nullptr, AddressOf("storage_arr"))));
-    stmts.Push(Decl(Let("pa", nullptr, AddressOf("a"))));
+    stmts.Push(Decl(Let("pstorage_arr", AddressOf("storage_arr"))));
+    stmts.Push(Decl(Let("pa", AddressOf("a"))));
 
     utils::Vector<const ast::Expression*, 5> args;
     for (auto& a : c.args) {

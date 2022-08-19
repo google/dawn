@@ -33,7 +33,7 @@ TEST_F(GetInsertionPointTest, Block) {
     // }
     ProgramBuilder b;
     auto* expr = b.Expr(1_i);
-    auto* var = b.Decl(b.Var("a", nullptr, expr));
+    auto* var = b.Decl(b.Var("a", expr));
     auto* block = b.Block(var);
     b.Func("f", tint::utils::Empty, b.ty.void_(), tint::utils::Vector{block});
 
@@ -55,7 +55,7 @@ TEST_F(GetInsertionPointTest, ForLoopInit) {
     // }
     ProgramBuilder b;
     auto* expr = b.Expr(1_i);
-    auto* var = b.Decl(b.Var("a", nullptr, expr));
+    auto* var = b.Decl(b.Var("a", expr));
     auto* fl = b.For(var, b.Expr(true), nullptr, b.Block());
     auto* func_block = b.Block(fl);
     b.Func("f", tint::utils::Empty, b.ty.void_(), tint::utils::Vector{func_block});
@@ -77,7 +77,7 @@ TEST_F(GetInsertionPointTest, ForLoopCont_Invalid) {
     // }
     ProgramBuilder b;
     auto* expr = b.Expr(1_i);
-    auto* var = b.Decl(b.Var("a", nullptr, expr));
+    auto* var = b.Decl(b.Var("a", expr));
     auto* s = b.For({}, b.Expr(true), var, b.Block());
     b.Func("f", tint::utils::Empty, b.ty.void_(), tint::utils::Vector{s});
 

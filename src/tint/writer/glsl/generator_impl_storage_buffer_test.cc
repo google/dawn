@@ -35,11 +35,8 @@ void TestAlign(ProgramBuilder* ctx) {
                        ctx->Member("dewey", ctx->ty.f32(), utils::Vector{ctx->MemberAlign(256)}),
                        ctx->Member("louie", ctx->ty.f32(), utils::Vector{ctx->MemberAlign(256)}),
                    });
-    ctx->GlobalVar("nephews", ctx->ty.Of(nephews), ast::StorageClass::kStorage,
-                   utils::Vector{
-                       ctx->create<ast::BindingAttribute>(0u),
-                       ctx->create<ast::GroupAttribute>(0u),
-                   });
+    ctx->GlobalVar("nephews", ctx->ty.Of(nephews), ast::StorageClass::kStorage, ctx->Binding(0),
+                   ctx->Group(0));
 }
 
 TEST_F(GlslGeneratorImplTest_StorageBuffer, Align) {

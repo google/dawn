@@ -26,8 +26,8 @@ TEST_F(BuilderTest, Let_IndexAccessor_Vector) {
     // let ary = vec3<i32>(1, 2, 3);
     // var x = ary[1i];
 
-    auto* ary = Let("ary", nullptr, vec3<i32>(1_i, 2_i, 3_i));
-    auto* x = Var("x", nullptr, IndexAccessor(ary, 1_i));
+    auto* ary = Let("ary", vec3<i32>(1_i, 2_i, 3_i));
+    auto* x = Var("x", IndexAccessor(ary, 1_i));
     WrapInFunction(ary, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -60,8 +60,8 @@ TEST_F(BuilderTest, Const_IndexAccessor_Vector) {
     // const ary = vec3<i32>(1, 2, 3);
     // var x = ary[1i];
 
-    auto* ary = Const("ary", nullptr, vec3<i32>(1_i, 2_i, 3_i));
-    auto* x = Var("x", nullptr, IndexAccessor(ary, 1_i));
+    auto* ary = Const("ary", vec3<i32>(1_i, 2_i, 3_i));
+    auto* x = Var("x", IndexAccessor(ary, 1_i));
     WrapInFunction(ary, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -90,7 +90,7 @@ TEST_F(BuilderTest, Runtime_IndexAccessor_Vector) {
     // var x = ary[1i];
 
     auto* ary = Var("ary", ty.vec3<u32>());
-    auto* x = Var("x", nullptr, IndexAccessor(ary, 1_i));
+    auto* x = Var("x", IndexAccessor(ary, 1_i));
     WrapInFunction(ary, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -127,7 +127,7 @@ TEST_F(BuilderTest, Dynamic_IndexAccessor_Vector) {
 
     auto* ary = Var("ary", ty.vec3<f32>());
     auto* idx = Var("idx", ty.i32());
-    auto* x = Var("x", nullptr, IndexAccessor(ary, idx));
+    auto* x = Var("x", IndexAccessor(ary, idx));
     WrapInFunction(ary, idx, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -164,8 +164,8 @@ TEST_F(BuilderTest, Const_IndexAccessor_Vector2) {
     // let ary : vec3<i32>(1, 2, 3);
     // var x = ary[1i + 1i];
 
-    auto* ary = Let("ary", nullptr, vec3<i32>(1_i, 2_i, 3_i));
-    auto* x = Var("x", nullptr, IndexAccessor(ary, Add(1_i, 1_i)));
+    auto* ary = Let("ary", vec3<i32>(1_i, 2_i, 3_i));
+    auto* x = Var("x", IndexAccessor(ary, Add(1_i, 1_i)));
     WrapInFunction(ary, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -199,7 +199,7 @@ TEST_F(BuilderTest, Runtime_IndexAccessor_Vector2) {
     // var x = ary[1i + 1i];
 
     auto* ary = Var("ary", ty.vec3<f32>());
-    auto* x = Var("x", nullptr, IndexAccessor(ary, Add(1_i, 1_i)));
+    auto* x = Var("x", IndexAccessor(ary, Add(1_i, 1_i)));
     WrapInFunction(ary, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -235,8 +235,8 @@ TEST_F(BuilderTest, Dynamic_IndexAccessor_Vector2) {
     // var x = ary[one + 2i];
 
     auto* ary = Var("ary", ty.vec3<f32>());
-    auto* one = Var("one", nullptr, Expr(1_i));
-    auto* x = Var("x", nullptr, IndexAccessor(ary, Add(one, 2_i)));
+    auto* one = Var("one", Expr(1_i));
+    auto* x = Var("x", IndexAccessor(ary, Add(one, 2_i)));
     WrapInFunction(ary, one, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -277,10 +277,9 @@ TEST_F(BuilderTest, Let_IndexAccessor_Array_MultiLevel) {
     // let ary = array<vec3<f32>, 2u>(vec3<f32>(1.0f, 2.0f, 3.0f), vec3<f32>(4.0f, 5.0f, 6.0f));
     // var x = ary[1i][2i];
 
-    auto* ary =
-        Let("ary", nullptr,
-            array(ty.vec3<f32>(), 2_u, vec3<f32>(1._f, 2._f, 3._f), vec3<f32>(4._f, 5._f, 6._f)));
-    auto* x = Var("x", nullptr, IndexAccessor(IndexAccessor(ary, 1_i), 2_i));
+    auto* ary = Let("ary", array(ty.vec3<f32>(), 2_u, vec3<f32>(1._f, 2._f, 3._f),
+                                 vec3<f32>(4._f, 5._f, 6._f)));
+    auto* x = Var("x", IndexAccessor(IndexAccessor(ary, 1_i), 2_i));
     WrapInFunction(ary, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -325,10 +324,9 @@ TEST_F(BuilderTest, Const_IndexAccessor_Array_MultiLevel) {
     // const ary = array<vec3<f32>, 2u>(vec3<f32>(1.0f, 2.0f, 3.0f), vec3<f32>(4.0f, 5.0f, 6.0f));
     // var x = ary[1i][2i];
 
-    auto* ary =
-        Const("ary", nullptr,
-              array(ty.vec3<f32>(), 2_u, vec3<f32>(1._f, 2._f, 3._f), vec3<f32>(4._f, 5._f, 6._f)));
-    auto* x = Var("x", nullptr, IndexAccessor(IndexAccessor(ary, 1_i), 2_i));
+    auto* ary = Const("ary", array(ty.vec3<f32>(), 2_u, vec3<f32>(1._f, 2._f, 3._f),
+                                   vec3<f32>(4._f, 5._f, 6._f)));
+    auto* x = Var("x", IndexAccessor(IndexAccessor(ary, 1_i), 2_i));
     WrapInFunction(ary, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -357,7 +355,7 @@ TEST_F(BuilderTest, Runtime_IndexAccessor_Array_MultiLevel) {
     // var x = ary[1i][2i];
 
     auto* ary = Var("ary", ty.array(ty.vec3<f32>(), 4_u));
-    auto* x = Var("x", nullptr, IndexAccessor(IndexAccessor(ary, 1_i), 2_i));
+    auto* x = Var("x", IndexAccessor(IndexAccessor(ary, 1_i), 2_i));
     WrapInFunction(ary, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -398,8 +396,8 @@ TEST_F(BuilderTest, Dynamic_IndexAccessor_Array_MultiLevel) {
     // var x = ary[one][2i];
 
     auto* ary = Var("ary", ty.array(ty.vec3<f32>(), 4_u));
-    auto* one = Var("one", nullptr, Expr(3_i));
-    auto* x = Var("x", nullptr, IndexAccessor(IndexAccessor(ary, one), 2_i));
+    auto* one = Var("one", Expr(3_i));
+    auto* x = Var("x", IndexAccessor(IndexAccessor(ary, one), 2_i));
     WrapInFunction(ary, one, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -442,10 +440,9 @@ TEST_F(BuilderTest, Const_IndexAccessor_Array_ArrayWithSwizzle) {
     // let ary = array<vec3<f32>, 2u>(vec3<f32>(1.0f, 2.0f, 3.0f), vec3<f32>(4.0f, 5.0f, 6.0f));
     // var x = a[1i].xy;
 
-    auto* ary =
-        Let("ary", nullptr,
-            array(ty.vec3<f32>(), 2_u, vec3<f32>(1._f, 2._f, 3._f), vec3<f32>(4._f, 5._f, 6._f)));
-    auto* x = Var("x", nullptr, MemberAccessor(IndexAccessor("ary", 1_i), "xy"));
+    auto* ary = Let("ary", array(ty.vec3<f32>(), 2_u, vec3<f32>(1._f, 2._f, 3._f),
+                                 vec3<f32>(4._f, 5._f, 6._f)));
+    auto* x = Var("x", MemberAccessor(IndexAccessor("ary", 1_i), "xy"));
     WrapInFunction(ary, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -491,7 +488,7 @@ TEST_F(BuilderTest, Runtime_IndexAccessor_Array_ArrayWithSwizzle) {
     // var x = ary[1i].xy;
 
     auto* ary = Var("ary", ty.array(ty.vec3<f32>(), 4_u));
-    auto* x = Var("x", nullptr, MemberAccessor(IndexAccessor("ary", 1_i), "xy"));
+    auto* x = Var("x", MemberAccessor(IndexAccessor("ary", 1_i), "xy"));
     WrapInFunction(ary, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -533,8 +530,8 @@ TEST_F(BuilderTest, Dynamic_IndexAccessor_Array_ArrayWithSwizzle) {
     // var x = ary[one].xy;
 
     auto* ary = Var("ary", ty.array(ty.vec3<f32>(), 4_u));
-    auto* one = Var("one", nullptr, Expr(1_i));
-    auto* x = Var("x", nullptr, MemberAccessor(IndexAccessor("ary", one), "xy"));
+    auto* one = Var("one", Expr(1_i));
+    auto* x = Var("x", MemberAccessor(IndexAccessor("ary", one), "xy"));
     WrapInFunction(ary, one, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -585,7 +582,7 @@ TEST_F(BuilderTest, Let_IndexAccessor_Nested_Array_f32) {
     auto* pos = Let("pos", ty.array(ty.vec2<f32>(), 3_u),
                     Construct(ty.array(ty.vec2<f32>(), 3_u), vec2<f32>(0_f, 0.5_f),
                               vec2<f32>(-0.5_f, -0.5_f), vec2<f32>(0.5_f, -0.5_f)));
-    auto* x = Var("x", nullptr, IndexAccessor(IndexAccessor(pos, 1_u), 0_u));
+    auto* x = Var("x", IndexAccessor(IndexAccessor(pos, 1_u), 0_u));
     WrapInFunction(pos, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -632,7 +629,7 @@ TEST_F(BuilderTest, Const_IndexAccessor_Nested_Array_f32) {
     auto* pos = Const("pos", ty.array(ty.vec2<f32>(), 3_u),
                       Construct(ty.array(ty.vec2<f32>(), 3_u), vec2<f32>(0_f, 0.5_f),
                                 vec2<f32>(-0.5_f, -0.5_f), vec2<f32>(0.5_f, -0.5_f)));
-    auto* x = Var("x", nullptr, IndexAccessor(IndexAccessor(pos, 1_u), 0_u));
+    auto* x = Var("x", IndexAccessor(IndexAccessor(pos, 1_u), 0_u));
     WrapInFunction(pos, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -661,7 +658,7 @@ TEST_F(BuilderTest, Runtime_IndexAccessor_Nested_Array_f32) {
     // var x = pos[1u][2u];
 
     auto* pos = Var("pos", ty.array(ty.vec2<f32>(), 3_u));
-    auto* x = Var("x", nullptr, IndexAccessor(IndexAccessor(pos, 1_u), 2_u));
+    auto* x = Var("x", IndexAccessor(IndexAccessor(pos, 1_u), 2_u));
     WrapInFunction(pos, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -701,8 +698,8 @@ TEST_F(BuilderTest, Dynamic_IndexAccessor_Nested_Array_f32) {
     // var x = pos[one][2u];
 
     auto* pos = Var("pos", ty.array(ty.vec2<f32>(), 3_u));
-    auto* one = Var("one", nullptr, Expr(2_u));
-    auto* x = Var("x", nullptr, IndexAccessor(IndexAccessor(pos, "one"), 2_u));
+    auto* one = Var("one", Expr(2_u));
+    auto* x = Var("x", IndexAccessor(IndexAccessor(pos, "one"), 2_u));
     WrapInFunction(pos, one, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -746,7 +743,7 @@ TEST_F(BuilderTest, Let_IndexAccessor_Matrix) {
     auto* a = Let("a", ty.mat2x2<f32>(),
                   Construct(ty.mat2x2<f32>(), Construct(ty.vec2<f32>(), 1_f, 2_f),
                             Construct(ty.vec2<f32>(), 3_f, 4_f)));
-    auto* x = Var("x", nullptr, IndexAccessor("a", 1_i));
+    auto* x = Var("x", IndexAccessor("a", 1_i));
     WrapInFunction(a, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -788,7 +785,7 @@ TEST_F(BuilderTest, Const_IndexAccessor_Matrix) {
     auto* a = Const("a", ty.mat2x2<f32>(),
                     Construct(ty.mat2x2<f32>(), Construct(ty.vec2<f32>(), 1_f, 2_f),
                               Construct(ty.vec2<f32>(), 3_f, 4_f)));
-    auto* x = Var("x", nullptr, IndexAccessor("a", 1_i));
+    auto* x = Var("x", IndexAccessor("a", 1_i));
     WrapInFunction(a, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -820,7 +817,7 @@ TEST_F(BuilderTest, Runtime_IndexAccessor_Matrix) {
     // var x = a[1i]
 
     auto* a = Var("a", ty.mat2x2<f32>());
-    auto* x = Var("x", nullptr, IndexAccessor("a", 1_i));
+    auto* x = Var("x", IndexAccessor("a", 1_i));
     WrapInFunction(a, x);
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -858,7 +855,7 @@ TEST_F(BuilderTest, Dynamic_IndexAccessor_Matrix) {
 
     auto* a = Var("a", ty.mat2x2<f32>());
     auto* idx = Var("idx", ty.i32());
-    auto* x = Var("x", nullptr, IndexAccessor("a", idx));
+    auto* x = Var("x", IndexAccessor("a", idx));
     WrapInFunction(a, idx, x);
 
     spirv::Builder& b = SanitizeAndBuild();

@@ -5289,7 +5289,7 @@ TEST_F(UniformityAnalysisTest, MaximumNumberOfPointerParameters) {
     for (int i = 1; i < 255; i++) {
         rhs_init = b.Add(rhs_init, b.Deref("p" + std::to_string(i)));
     }
-    foo_body.Push(b.Decl(b.Let("rhs", nullptr, rhs_init)));
+    foo_body.Push(b.Decl(b.Let("rhs", rhs_init)));
     for (int i = 0; i < 255; i++) {
         params.Push(
             b.Param("p" + std::to_string(i), ty.pointer(ty.i32(), ast::StorageClass::kFunction)));
@@ -6526,7 +6526,7 @@ TEST_F(UniformityAnalysisTest, StressGraphTraversalDepth) {
     std::string v_last = "v0";
     for (int i = 1; i < 100000; i++) {
         auto v = "v" + std::to_string(i);
-        foo_body.Push(b.Decl(b.Var(v, nullptr, b.Expr(v_last))));
+        foo_body.Push(b.Decl(b.Var(v, b.Expr(v_last))));
         v_last = v;
     }
     foo_body.Push(b.If(b.Equal(v_last, 0_i), b.Block(b.CallStmt(b.Call("workgroupBarrier")))));

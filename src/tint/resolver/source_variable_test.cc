@@ -48,7 +48,7 @@ TEST_F(ResolverSourceVariableTest, GlobalWorkgroupVar) {
 }
 
 TEST_F(ResolverSourceVariableTest, GlobalStorageVar) {
-    auto* a = GlobalVar("a", ty.f32(), ast::StorageClass::kStorage, GroupAndBinding(0, 0));
+    auto* a = GlobalVar("a", ty.f32(), ast::StorageClass::kStorage, Group(0), Binding(0));
     auto* expr = Expr(a);
     WrapInFunction(expr);
 
@@ -59,7 +59,7 @@ TEST_F(ResolverSourceVariableTest, GlobalStorageVar) {
 }
 
 TEST_F(ResolverSourceVariableTest, GlobalUniformVar) {
-    auto* a = GlobalVar("a", ty.f32(), ast::StorageClass::kUniform, GroupAndBinding(0, 0));
+    auto* a = GlobalVar("a", ty.f32(), ast::StorageClass::kUniform, Group(0), Binding(0));
     auto* expr = Expr(a);
     WrapInFunction(expr);
 
@@ -71,7 +71,7 @@ TEST_F(ResolverSourceVariableTest, GlobalUniformVar) {
 
 TEST_F(ResolverSourceVariableTest, GlobalTextureVar) {
     auto* a = GlobalVar("a", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-                        ast::StorageClass::kNone, GroupAndBinding(0, 0));
+                        ast::StorageClass::kNone, Group(0), Binding(0));
     auto* expr = Expr(a);
     WrapInFunction(Call("textureDimensions", expr));
 
@@ -104,7 +104,7 @@ TEST_F(ResolverSourceVariableTest, GlobalConst) {
 }
 
 TEST_F(ResolverSourceVariableTest, FunctionVar) {
-    auto* a = Var("a", ty.f32(), ast::StorageClass::kNone);
+    auto* a = Var("a", ty.f32());
     auto* expr = Expr(a);
     WrapInFunction(a, expr);
 
@@ -143,7 +143,7 @@ TEST_F(ResolverSourceVariableTest, PointerParameter) {
     // }
     auto* param = Param("a", ty.pointer(ty.f32(), ast::StorageClass::kFunction));
     auto* expr_param = Expr(param);
-    auto* let = Let("b", nullptr, expr_param);
+    auto* let = Let("b", expr_param);
     auto* expr_let = Expr("b");
     Func("foo", utils::Vector{param}, ty.void_(),
          utils::Vector{WrapInStatement(let), WrapInStatement(expr_let)});
@@ -160,9 +160,9 @@ TEST_F(ResolverSourceVariableTest, VarCopyVar) {
     //   var a : f32;
     //   var b = a;
     // }
-    auto* a = Var("a", ty.f32(), ast::StorageClass::kNone);
+    auto* a = Var("a", ty.f32());
     auto* expr_a = Expr(a);
-    auto* b = Var("b", ty.f32(), ast::StorageClass::kNone, expr_a);
+    auto* b = Var("b", ty.f32(), expr_a);
     auto* expr_b = Expr(b);
     WrapInFunction(a, b, expr_b);
 
@@ -179,7 +179,7 @@ TEST_F(ResolverSourceVariableTest, LetCopyVar) {
     //   var a : f32;
     //   let b = a;
     // }
-    auto* a = Var("a", ty.f32(), ast::StorageClass::kNone);
+    auto* a = Var("a", ty.f32());
     auto* expr_a = Expr(a);
     auto* b = Let("b", ty.f32(), expr_a);
     auto* expr_b = Expr(b);
@@ -235,10 +235,10 @@ TEST_F(ResolverSourceVariableTest, ThroughPointers) {
     auto* address_of_1 = AddressOf(a);
     auto* deref_1 = Deref(address_of_1);
     auto* address_of_2 = AddressOf(deref_1);
-    auto* a_ptr1 = Let("a_ptr1", nullptr, address_of_2);
+    auto* a_ptr1 = Let("a_ptr1", address_of_2);
     auto* deref_2 = Deref(a_ptr1);
     auto* address_of_3 = AddressOf(deref_2);
-    auto* a_ptr2 = Let("a_ptr2", nullptr, address_of_3);
+    auto* a_ptr2 = Let("a_ptr2", address_of_3);
     WrapInFunction(a_ptr1, a_ptr2);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -270,7 +270,7 @@ TEST_F(ResolverSourceVariableTest, FunctionReturnValue) {
 }
 
 TEST_F(ResolverSourceVariableTest, BinaryExpression) {
-    auto* a = Var("a", ty.f32(), ast::StorageClass::kNone);
+    auto* a = Var("a", ty.f32());
     auto* expr = Add(a, Expr(1_f));
     WrapInFunction(a, expr);
 
@@ -280,7 +280,7 @@ TEST_F(ResolverSourceVariableTest, BinaryExpression) {
 }
 
 TEST_F(ResolverSourceVariableTest, UnaryExpression) {
-    auto* a = Var("a", ty.f32(), ast::StorageClass::kNone);
+    auto* a = Var("a", ty.f32());
     auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(a));
     WrapInFunction(a, expr);
 

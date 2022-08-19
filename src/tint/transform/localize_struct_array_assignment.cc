@@ -158,8 +158,7 @@ class LocalizeStructArrayAssignment::State {
                 // Store the address of the member access into a let as we need to read
                 // the value twice e.g. let tint_symbol = &(s.a1);
                 auto mem_access_ptr = b.Sym();
-                s.insert_before_stmts.Push(
-                    b.Decl(b.Let(mem_access_ptr, nullptr, b.AddressOf(mem_access))));
+                s.insert_before_stmts.Push(b.Decl(b.Let(mem_access_ptr, b.AddressOf(mem_access))));
 
                 // Disable further transforms when cloning
                 TINT_SCOPED_ASSIGNMENT(s.process_nested_nodes, false);
@@ -167,8 +166,7 @@ class LocalizeStructArrayAssignment::State {
                 // Copy entire array out of struct into local temp var
                 // e.g. var tint_symbol_1 = *(tint_symbol);
                 auto tmp_var = b.Sym();
-                s.insert_before_stmts.Push(
-                    b.Decl(b.Var(tmp_var, nullptr, b.Deref(mem_access_ptr))));
+                s.insert_before_stmts.Push(b.Decl(b.Var(tmp_var, b.Deref(mem_access_ptr))));
 
                 // Replace input index_access with a clone of itself, but with its
                 // .object replaced by the new temp var. This is returned from this

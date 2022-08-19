@@ -23,14 +23,14 @@ namespace {
 using VariableDeclStatementTest = TestHelper;
 
 TEST_F(VariableDeclStatementTest, Creation) {
-    auto* var = Var("a", ty.f32(), StorageClass::kNone);
+    auto* var = Var("a", ty.f32());
 
     auto* stmt = create<VariableDeclStatement>(var);
     EXPECT_EQ(stmt->variable, var);
 }
 
 TEST_F(VariableDeclStatementTest, Creation_WithSource) {
-    auto* var = Var("a", ty.f32(), StorageClass::kNone);
+    auto* var = Var("a", ty.f32());
 
     auto* stmt = create<VariableDeclStatement>(Source{Source::Location{20, 2}}, var);
     auto src = stmt->source;
@@ -39,7 +39,7 @@ TEST_F(VariableDeclStatementTest, Creation_WithSource) {
 }
 
 TEST_F(VariableDeclStatementTest, IsVariableDecl) {
-    auto* var = Var("a", ty.f32(), StorageClass::kNone);
+    auto* var = Var("a", ty.f32());
 
     auto* stmt = create<VariableDeclStatement>(var);
     EXPECT_TRUE(stmt->Is<VariableDeclStatement>());
@@ -59,7 +59,7 @@ TEST_F(VariableDeclStatementTest, Assert_DifferentProgramID_Variable) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.create<VariableDeclStatement>(b2.Var("a", b2.ty.f32(), StorageClass::kNone));
+            b1.create<VariableDeclStatement>(b2.Var("a", b2.ty.f32()));
         },
         "internal compiler error");
 }

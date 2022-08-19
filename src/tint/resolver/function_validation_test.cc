@@ -51,7 +51,7 @@ TEST_F(ResolverFunctionValidationTest, LocalConflictsWithParameter) {
     // }
     Func("func", utils::Vector{Param(Source{{12, 34}}, "common_name", ty.f32())}, ty.void_(),
          utils::Vector{
-             Decl(Let(Source{{56, 78}}, "common_name", nullptr, Expr(1_i))),
+             Decl(Let(Source{{56, 78}}, "common_name", Expr(1_i))),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -67,7 +67,7 @@ TEST_F(ResolverFunctionValidationTest, NestedLocalMayShadowParameter) {
     // }
     Func("func", utils::Vector{Param(Source{{12, 34}}, "common_name", ty.f32())}, ty.void_(),
          utils::Vector{
-             Block(Decl(Let(Source{{56, 78}}, "common_name", nullptr, Expr(1_i)))),
+             Block(Decl(Let(Source{{56, 78}}, "common_name", Expr(1_i)))),
          });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -388,7 +388,7 @@ TEST_F(ResolverFunctionValidationTest, CannotCallFunctionAtModuleScope) {
          utils::Vector{
              Return(1_i),
          });
-    GlobalVar("x", nullptr, Call(Source{{12, 34}}, "F"), ast::StorageClass::kPrivate);
+    GlobalVar("x", Call(Source{{12, 34}}, "F"), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(12:34 error: functions cannot be called at module-scope)");

@@ -328,7 +328,7 @@ TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
             WrapInFunction(Decl(Let("a", target_ty(), abstract_expr)));
             break;
         case Method::kAssign:
-            WrapInFunction(Decl(Var("a", target_ty(), nullptr)), Assign("a", abstract_expr));
+            WrapInFunction(Decl(Var("a", target_ty())), Assign("a", abstract_expr));
             break;
         case Method::kPhonyAssign:
             WrapInFunction(Assign(Phony(), abstract_expr));
@@ -381,7 +381,7 @@ TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
                                Stage(ast::PipelineStage::kCompute)});
             break;
         case Method::kRuntimeIndex:
-            auto* runtime_index = Var("runtime_index", nullptr, Expr(1_i));
+            auto* runtime_index = Var("runtime_index", Expr(1_i));
             WrapInFunction(runtime_index, IndexAccessor(abstract_expr, runtime_index));
             break;
     }
@@ -872,10 +872,10 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
     };
     switch (method) {
         case Method::kVar:
-            WrapInFunction(Decl(Var("a", nullptr, abstract_expr())));
+            WrapInFunction(Decl(Var("a", abstract_expr())));
             break;
         case Method::kLet:
-            WrapInFunction(Decl(Let("a", nullptr, abstract_expr())));
+            WrapInFunction(Decl(Let("a", abstract_expr())));
             break;
         case Method::kBuiltinArg:
             WrapInFunction(CallStmt(Call("min", abstract_expr(), abstract_expr())));
@@ -904,7 +904,7 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
             WrapInFunction(IndexAccessor("arr", abstract_expr()));
             break;
         case Method::kRuntimeIndex:
-            auto* runtime_index = Var("runtime_index", nullptr, Expr(1_i));
+            auto* runtime_index = Var("runtime_index", Expr(1_i));
             WrapInFunction(runtime_index, IndexAccessor(abstract_expr(), runtime_index));
             break;
     }

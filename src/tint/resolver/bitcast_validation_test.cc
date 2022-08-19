@@ -113,7 +113,7 @@ TEST_P(ResolverBitcastValidationTestInvalidSrcTy, Test) {
     auto dst = std::get<1>(GetParam());
 
     auto* cast = Bitcast(dst.ast(*this), Expr(Source{{12, 34}}, "src"));
-    WrapInFunction(Let("src", nullptr, src.expr(*this, 0)), cast);
+    WrapInFunction(Let("src", src.expr(*this, 0)), cast);
 
     auto expected =
         "12:34 error: '" + src.sem(*this)->FriendlyName(Symbols()) + "' cannot be bitcast";

@@ -427,7 +427,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
         auto clone_maybe_hoisted = [&](const ast::Expression* e) -> const ast::Expression* {
             if (to_hoist.count(e)) {
                 auto name = b.Symbols().New();
-                auto* v = b.Let(name, nullptr, ctx.Clone(e));
+                auto* v = b.Let(name, ctx.Clone(e));
                 auto* decl = b.Decl(v);
                 curr_stmts->Push(decl);
                 return b.Expr(name);
@@ -476,7 +476,7 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
                 // let r = temp;
 
                 auto name = b.Sym();
-                curr_stmts->Push(b.Decl(b.Var(name, nullptr, decompose(bin_expr->lhs))));
+                curr_stmts->Push(b.Decl(b.Var(name, decompose(bin_expr->lhs))));
 
                 const ast::Expression* if_cond = nullptr;
                 if (bin_expr->IsLogicalOr()) {
