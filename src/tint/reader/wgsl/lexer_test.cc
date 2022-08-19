@@ -1028,7 +1028,6 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          TokenData{"%", Token::Type::kMod},
                                          TokenData{"!=", Token::Type::kNotEqual},
                                          TokenData{"-", Token::Type::kMinus},
-                                         TokenData{"--", Token::Type::kMinusMinus},
                                          TokenData{".", Token::Type::kPeriod},
                                          TokenData{"+", Token::Type::kPlus},
                                          TokenData{"++", Token::Type::kPlusPlus},
@@ -1088,6 +1087,7 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                          SplittablePunctuationTest,
                          testing::Values(TokenData{"&&", Token::Type::kAndAnd},
                                          TokenData{">=", Token::Type::kGreaterThanEqual},
+                                         TokenData{"--", Token::Type::kMinusMinus},
                                          TokenData{">>", Token::Type::kShiftRight}));
 
 using KeywordTest = testing::TestWithParam<TokenData>;

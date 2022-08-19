@@ -380,7 +380,7 @@ class Token {
     /// @returns true if the token can be split during parse into component tokens
     bool IsSplittable() const {
         return Is(Token::Type::kShiftRight) || Is(Token::Type::kGreaterThanEqual) ||
-               Is(Token::Type::kAndAnd);
+               Is(Token::Type::kAndAnd) || Is(Token::Type::kMinusMinus);
     }
 
     /// @returns the source information for this token

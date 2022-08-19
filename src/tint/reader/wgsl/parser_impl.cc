@@ -1066,7 +1066,7 @@ Maybe<const ast::Alias*> ParserImpl::type_alias_decl() {
 //   | VEC3 LESS_THAN type_decl GREATER_THAN
 //   | VEC4 LESS_THAN type_decl GREATER_THAN
 //   | PTR LESS_THAN storage_class, type_decl (COMMA access_mode)? GREATER_THAN
-//   | array_attribute_list* ARRAY LESS_THAN type_decl COMMA INT_LITERAL GREATER_THAN
+//   | array_attribute_list* ARRAY LESS_THAN type_decl COMMA element_count_expression GREATER_THAN
 //   | array_attribute_list* ARRAY LESS_THAN type_decl GREATER_THAN
 //   | MAT2x2 LESS_THAN type_decl GREATER_THAN
 //   | MAT2x3 LESS_THAN type_decl GREATER_THAN
@@ -1244,10 +1244,11 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_array(const Token& t) {
             return TypeAndSize{type.value, nullptr};
         }
 
-        auto size = primary_expression();
+        auto size = element_count_expression();
         if (size.errored) {
             return Failure::kErrored;
-        } else if (!size.matched) {
+        }
+        if (!size.matched) {
             return add_error(peek(), "expected array size expression");
         }
 
@@ -2655,6 +2656,162 @@ Maybe<const ast::Expression*> ParserImpl::bitwise_expression_post_unary_expressi
         lhs = create<ast::BinaryExpression>(t.source(), op, lhs, rhs.value);
     }
     return Failure::kErrored;
+}
+
+// multiplicative_operator
+//   : FORWARD_SLASH
+//   | MODULO
+//   | STAR
+Maybe<ast::BinaryOp> ParserImpl::multiplicative_operator() {
+    if (match(Token::Type::kForwardSlash)) {
+        return ast::BinaryOp::kDivide;
+    }
+    if (match(Token::Type::kMod)) {
+        return ast::BinaryOp::kModulo;
+    }
+    if (match(Token::Type::kStar)) {
+        return ast::BinaryOp::kMultiply;
+    }
+
+    return Failure::kNoMatch;
+}
+
+// multiplicative_expression.post.unary_expression
+//   : (multiplicative_operator unary_expression)*
+Expect<const ast::Expression*> ParserImpl::expect_multiplicative_expression_post_unary_expression(
+    const ast::Expression* lhs) {
+    while (continue_parsing()) {
+        auto& t = peek();
+
+        auto op = multiplicative_operator();
+        if (op.errored) {
+            return Failure::kErrored;
+        }
+        if (!op.matched) {
+            return lhs;
+        }
+
+        auto rhs = unary_expression();
+        if (rhs.errored) {
+            return Failure::kErrored;
+        }
+        if (!rhs.matched) {
+            return add_error(peek(), std::string("unable to parse right side of ") +
+                                         std::string(t.to_name()) + " expression");
+        }
+
+        lhs = create<ast::BinaryExpression>(t.source(), op.value, lhs, rhs.value);
+    }
+    return Failure::kErrored;
+}
+
+// additive_operator
+//   : MINUS
+//   | PLUS
+//
+// Note, this also splits a `--` token. This is currently safe as the only way to get into
+// here is through additive expression and rules for where `--` are allowed are very restrictive.
+Maybe<ast::BinaryOp> ParserImpl::additive_operator() {
+    if (match(Token::Type::kPlus)) {
+        return ast::BinaryOp::kAdd;
+    }
+
+    auto& t = peek();
+    if (t.Is(Token::Type::kMinusMinus)) {
+        next();
+        split_token(Token::Type::kMinus, Token::Type::kMinus);
+    } else if (t.Is(Token::Type::kMinus)) {
+        next();
+    } else {
+        return Failure::kNoMatch;
+    }
+
+    return ast::BinaryOp::kSubtract;
+}
+
+// additive_expression.pos.unary_expression
+//   : (additive_operator unary_expression expect_multiplicative_expression.post.unary_expression)*
+//
+// This is `( additive_operator unary_expression ( multiplicative_operator unary_expression )* )*`
+// split apart.
+Expect<const ast::Expression*> ParserImpl::expect_additive_expression_post_unary_expression(
+    const ast::Expression* lhs) {
+    while (continue_parsing()) {
+        auto& t = peek();
+
+        auto op = additive_operator();
+        if (op.errored) {
+            return Failure::kErrored;
+        }
+        if (!op.matched) {
+            return lhs;
+        }
+
+        auto unary = unary_expression();
+        if (unary.errored) {
+            return Failure::kErrored;
+        }
+        if (!unary.matched) {
+            return add_error(peek(), std::string("unable to parse right side of ") +
+                                         std::string(t.to_name()) + " expression");
+        }
+
+        // The multiplicative binds tigher, so pass the unary into that and build that expression
+        // before creating the additve expression.
+        auto rhs = expect_multiplicative_expression_post_unary_expression(unary.value);
+        if (rhs.errored) {
+            return Failure::kErrored;
+        }
+
+        lhs = create<ast::BinaryExpression>(t.source(), op.value, lhs, rhs.value);
+    }
+    return Failure::kErrored;
+}
+
+// math_expression.post.unary_expression
+//   : multiplicative_expression.post.unary_expression additive_expression.post.unary_expression
+//
+// This is `( multiplicative_operator unary_expression )* ( additive_operator unary_expression (
+// multiplicative_operator unary_expression )* )*` split apart.
+Expect<const ast::Expression*> ParserImpl::expect_math_expression_post_unary_expression(
+    const ast::Expression* lhs) {
+    auto rhs = expect_multiplicative_expression_post_unary_expression(lhs);
+    if (rhs.errored) {
+        return Failure::kErrored;
+    }
+
+    return expect_additive_expression_post_unary_expression(rhs.value);
+}
+
+// element_count_expression
+//   : unary_expression math_expression.post.unary_expression
+//   | unary_expression bitwise_expression.post.unary_expression
+//
+// Note, this moves the `( multiplicative_operator unary_expression )* ( additive_operator
+// unary_expression ( multiplicative_operator unary_expression )* )*` expression for the first
+// branch out into helper methods.
+Maybe<const ast::Expression*> ParserImpl::element_count_expression() {
+    auto lhs = unary_expression();
+    if (lhs.errored) {
+        return Failure::kErrored;
+    }
+    if (!lhs.matched) {
+        return Failure::kNoMatch;
+    }
+
+    auto bitwise = bitwise_expression_post_unary_expression(lhs.value);
+    if (bitwise.errored) {
+        return Failure::kErrored;
+    }
+    if (bitwise.matched) {
+        return bitwise.value;
+    }
+
+    auto math = expect_math_expression_post_unary_expression(lhs.value);
+    if (math.errored) {
+        return Failure::kErrored;
+    }
+    return math.value;
 }
 
 // unary_expression

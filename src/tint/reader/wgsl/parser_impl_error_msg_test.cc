@@ -937,9 +937,9 @@ var i : array<u32, >;
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarArrayInvalidSize) {
     EXPECT("var i : array<u32, !>;",
-           R"(test.wgsl:1:20 error: expected array size expression
+           R"(test.wgsl:1:21 error: unable to parse right side of ! expression
 var i : array<u32, !>;
-                   ^
+                    ^
 )");
 }
 
