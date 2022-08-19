@@ -859,3 +859,6 @@ crbug.com/dawn/0000 [ ubuntu webgpu-adapter-swiftshader ] webgpu:web_platform,ca
 crbug.com/dawn/0000 [ webgpu-adapter-default win10 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
 crbug.com/dawn/0000 [ webgpu-adapter-swiftshader win10 ] webgpu:web_platform,canvas,getCurrentTexture:multiple_frames:canvasType="onscreen" [ Failure ]
 crbug.com/dawn/0000 [ ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,getCurrentTexture:single_frames:* [ Failure ]
+crbug.com/dawn/0000 [ intel-gen-9 win10 release ] webgpu:shader,execution,expression,binary,f32_arithmetic:division:inputSource="uniform";vectorize=2 [ Failure ]
+crbug.com/dawn/0000 [ intel-gen-9 win10 release ] webgpu:shader,execution,expression,call,builtin,ldexp:f32:inputSource="uniform";vectorize="_undef_" [ Failure ]
+crbug.com/dawn/0000 [ intel-gen-9 win10 release ] webgpu:shader,execution,expression,call,builtin,step:f32:inputSource="uniform";vectorize="_undef_" [ Failure ]
