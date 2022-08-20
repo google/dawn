@@ -191,7 +191,7 @@ Instance::Instance(const WGPUInstanceDescriptor* desc)
 
 Instance::~Instance() {
     if (mImpl != nullptr) {
-        mImpl->Release();
+        mImpl->APIRelease();
         mImpl = nullptr;
     }
 }
@@ -254,6 +254,10 @@ size_t GetLazyClearCountForTesting(WGPUDevice device) {
 
 size_t GetDeprecationWarningCountForTesting(WGPUDevice device) {
     return FromAPI(device)->GetDeprecationWarningCountForTesting();
+}
+
+size_t GetAdapterCountForTesting(WGPUInstance instance) {
+    return FromAPI(instance)->GetAdapters().size();
 }
 
 bool IsTextureSubresourceInitialized(WGPUTexture texture,

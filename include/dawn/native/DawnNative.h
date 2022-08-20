@@ -190,6 +190,9 @@ DAWN_NATIVE_EXPORT size_t GetLazyClearCountForTesting(WGPUDevice device);
 // Backdoor to get the number of deprecation warnings for testing
 DAWN_NATIVE_EXPORT size_t GetDeprecationWarningCountForTesting(WGPUDevice device);
 
+// Backdoor to get the number of adapters an instance knows about for testing
+DAWN_NATIVE_EXPORT size_t GetAdapterCountForTesting(WGPUInstance instance);
+
 //  Query if texture has been initialized
 DAWN_NATIVE_EXPORT bool IsTextureSubresourceInitialized(
     WGPUTexture texture,

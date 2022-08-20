@@ -19,17 +19,23 @@
 #include "dawn/common/RefCounted.h"
 #include "dawn/native/ToBackend.h"
 
-// Make our own Base - Backend object pair, reusing the AdapterBase name
+// Make our own Base - Backend object pair, reusing the MyObjectBase name
 namespace dawn::native {
-class AdapterBase : public RefCounted {};
 
-class MyAdapter : public AdapterBase {};
+class MyObjectBase : public RefCounted {};
+
+class MyObject : public MyObjectBase {};
 
 struct MyBackendTraits {
-    using AdapterType = MyAdapter;
+    using MyObjectType = MyObject;
 };
 
-// Instanciate ToBackend for our "backend"
+template <typename BackendTraits>
+struct ToBackendTraits<MyObjectBase, BackendTraits> {
+    using BackendType = typename BackendTraits::MyObjectType;
+};
+
+// Instantiate ToBackend for our "backend"
 template <typename T>
 auto ToBackend(T&& common) -> decltype(ToBackendBase<MyBackendTraits>(common)) {
     return ToBackendBase<MyBackendTraits>(common);
@@ -38,49 +44,48 @@ auto ToBackend(T&& common) -> decltype(ToBackendBase<MyBackendTraits>(common)) {
 // Test that ToBackend correctly converts pointers to base classes.
 TEST(ToBackend, Pointers) {
     {
-        MyAdapter* adapter = new MyAdapter;
-        const AdapterBase* base = adapter;
+        MyObject* myObject = new MyObject;
+        const MyObjectBase* base = myObject;
 
         auto* backendAdapter = ToBackend(base);
-        static_assert(std::is_same<decltype(backendAdapter), const MyAdapter*>::value);
-        ASSERT_EQ(adapter, backendAdapter);
+        static_assert(std::is_same<decltype(backendAdapter), const MyObject*>::value);
+        ASSERT_EQ(myObject, backendAdapter);
 
-        adapter->Release();
+        myObject->Release();
     }
     {
-        MyAdapter* adapter = new MyAdapter;
-        AdapterBase* base = adapter;
+        MyObject* myObject = new MyObject;
+        MyObjectBase* base = myObject;
 
         auto* backendAdapter = ToBackend(base);
-        static_assert(std::is_same<decltype(backendAdapter), MyAdapter*>::value);
-        ASSERT_EQ(adapter, backendAdapter);
+        static_assert(std::is_same<decltype(backendAdapter), MyObject*>::value);
+        ASSERT_EQ(myObject, backendAdapter);
 
-        adapter->Release();
+        myObject->Release();
     }
 }
 
 // Test that ToBackend correctly converts Refs to base classes.
 TEST(ToBackend, Ref) {
     {
-        MyAdapter* adapter = new MyAdapter;
-        const Ref<AdapterBase> base(adapter);
+        MyObject* myObject = new MyObject;
+        const Ref<MyObjectBase> base(myObject);
 
         const auto& backendAdapter = ToBackend(base);
-        static_assert(std::is_same<decltype(ToBackend(base)), const Ref<MyAdapter>&>::value);
-        ASSERT_EQ(adapter, backendAdapter.Get());
+        static_assert(std::is_same<decltype(ToBackend(base)), const Ref<MyObject>&>::value);
+        ASSERT_EQ(myObject, backendAdapter.Get());
 
-        adapter->Release();
+        myObject->Release();
     }
     {
-        MyAdapter* adapter = new MyAdapter;
-        Ref<AdapterBase> base(adapter);
+        MyObject* myObject = new MyObject;
+        Ref<MyObjectBase> base(myObject);
 
         auto backendAdapter = ToBackend(base);
-        static_assert(std::is_same<decltype(ToBackend(base)), Ref<MyAdapter>&>::value);
-        ASSERT_EQ(adapter, backendAdapter.Get());
+        static_assert(std::is_same<decltype(ToBackend(base)), Ref<MyObject>&>::value);
+        ASSERT_EQ(myObject, backendAdapter.Get());
 
-        adapter->Release();
+        myObject->Release();
     }
 }
-
 }  // namespace dawn::native

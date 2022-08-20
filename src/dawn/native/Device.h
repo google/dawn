@@ -527,12 +527,7 @@ class DeviceBase : public RefCountedWithExternalCount {
 
     std::unique_ptr<ErrorScopeStack> mErrorScopeStack;
 
-    // The Device keeps a ref to the Instance so that any live Device keeps the Instance alive.
-    // The Instance shouldn't need to ref child objects so this shouldn't introduce ref cycles.
-    // The Device keeps a simple pointer to the Adapter because the Adapter is owned by the
-    // Instance.
-    Ref<InstanceBase> mInstance;
-    AdapterBase* mAdapter = nullptr;
+    Ref<AdapterBase> mAdapter;
 
     // The object caches aren't exposed in the header as they would require a lot of
     // additional includes.

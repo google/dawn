@@ -171,8 +171,8 @@ ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetRenderPipelineDescrip
 // DeviceBase
 
 DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
-    : mInstance(adapter->GetInstance()), mAdapter(adapter), mNextPipelineCompatibilityToken(1) {
-    mInstance->IncrementDeviceCountForTesting();
+    : mAdapter(adapter), mNextPipelineCompatibilityToken(1) {
+    mAdapter->GetInstance()->IncrementDeviceCountForTesting();
     ASSERT(descriptor != nullptr);
 
     AdapterProperties adapterProperties;
@@ -221,9 +221,9 @@ DeviceBase::~DeviceBase() {
     // We need to explicitly release the Queue before we complete the destructor so that the
     // Queue does not get destroyed after the Device.
     mQueue = nullptr;
-    // mInstance is not set for mock test devices.
-    if (mInstance != nullptr) {
-        mInstance->DecrementDeviceCountForTesting();
+    // mAdapter is not set for mock test devices.
+    if (mAdapter != nullptr) {
+        mAdapter->GetInstance()->DecrementDeviceCountForTesting();
     }
 }
 
@@ -628,7 +628,7 @@ BlobCache* DeviceBase::GetBlobCache() {
     // generate cache keys. We can lift the dependency once we also cache frontend parsing,
     // transformations, and reflection.
     if (IsToggleEnabled(Toggle::EnableBlobCache)) {
-        return mInstance->GetBlobCache();
+        return mAdapter->GetInstance()->GetBlobCache();
     }
 #endif
     return nullptr;
@@ -696,7 +696,7 @@ std::mutex* DeviceBase::GetObjectListMutex(ObjectType type) {
 }
 
 AdapterBase* DeviceBase::GetAdapter() const {
-    return mAdapter;
+    return mAdapter.Get();
 }
 
 dawn::platform::Platform* DeviceBase::GetPlatform() const {
@@ -1286,7 +1286,7 @@ MaybeError DeviceBase::Tick() {
 
 AdapterBase* DeviceBase::APIGetAdapter() {
     mAdapter->Reference();
-    return mAdapter;
+    return mAdapter.Get();
 }
 
 QueueBase* DeviceBase::APIGetQueue() {

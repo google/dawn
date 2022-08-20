@@ -27,6 +27,7 @@
 #include "dawn/native/BackendConnection.h"
 #include "dawn/native/BlobCache.h"
 #include "dawn/native/Features.h"
+#include "dawn/native/RefCountedWithExternalCount.h"
 #include "dawn/native/Toggles.h"
 #include "dawn/native/dawn_platform.h"
 
@@ -45,7 +46,7 @@ InstanceBase* APICreateInstance(const InstanceDescriptor* descriptor);
 
 // This is called InstanceBase for consistency across the frontend, even if the backends don't
 // specialize this class.
-class InstanceBase final : public RefCounted {
+class InstanceBase final : public RefCountedWithExternalCount {
   public:
     static Ref<InstanceBase> Create(const InstanceDescriptor* descriptor = nullptr);
 
@@ -109,6 +110,8 @@ class InstanceBase final : public RefCounted {
   private:
     InstanceBase();
     ~InstanceBase() override;
+
+    void WillDropLastExternalRef() override;
 
     InstanceBase(const InstanceBase& other) = delete;
     InstanceBase& operator=(const InstanceBase& other) = delete;

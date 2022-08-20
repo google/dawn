@@ -31,6 +31,8 @@ AdapterBase::AdapterBase(InstanceBase* instance, wgpu::BackendType backend)
     mSupportedFeatures.EnableFeature(Feature::DawnInternalUsages);
 }
 
+AdapterBase::~AdapterBase() = default;
+
 MaybeError AdapterBase::Initialize() {
     DAWN_TRY_CONTEXT(InitializeImpl(), "initializing adapter (backend=%s)", mBackend);
     InitializeVendorArchitectureImpl();
@@ -157,7 +159,7 @@ wgpu::BackendType AdapterBase::GetBackendType() const {
 }
 
 InstanceBase* AdapterBase::GetInstance() const {
-    return mInstance;
+    return mInstance.Get();
 }
 
 FeaturesSet AdapterBase::GetSupportedFeatures() const {

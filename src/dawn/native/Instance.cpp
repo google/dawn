@@ -125,6 +125,17 @@ InstanceBase::InstanceBase() = default;
 
 InstanceBase::~InstanceBase() = default;
 
+void InstanceBase::WillDropLastExternalRef() {
+    // InstanceBase uses RefCountedWithExternalCount to break refcycles.
+    //
+    // InstanceBase holds Refs to AdapterBases it has discovered, which hold Refs back to the
+    // InstanceBase.
+    // In order to break this cycle and prevent leaks, when the application drops the last external
+    // ref and WillDropLastExternalRef is called, the instance clears out any member refs to
+    // adapters that hold back-refs to the instance - thus breaking any reference cycles.
+    mAdapters.clear();
+}
+
 // TODO(crbug.com/dawn/832): make the platform an initialization parameter of the instance.
 MaybeError InstanceBase::Initialize(const InstanceDescriptor* descriptor) {
     DAWN_TRY(ValidateSingleSType(descriptor->nextInChain, wgpu::SType::DawnInstanceDescriptor));
