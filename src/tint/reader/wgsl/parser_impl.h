@@ -309,6 +309,14 @@ class ParserImpl {
         ast::Access access = ast::Access::kUndefined;
     };
 
+    /// MatrixDimensions contains the column and row information for a matrix
+    struct MatrixDimensions {
+        /// The number of columns
+        uint32_t columns = 0;
+        /// The number of rows
+        uint32_t rows = 0;
+    };
+
     /// Creates a new parser using the given file
     /// @param file the input source file to parse
     explicit ParserImpl(Source::File const* file);
@@ -435,6 +443,18 @@ class ParserImpl {
     /// Parses a `type_alias_decl` grammar element
     /// @returns the type alias or nullptr on error
     Maybe<const ast::Alias*> type_alias_decl();
+    /// Parses a `callable` grammar element
+    /// @returns the type or nullptr
+    Maybe<const ast::Type*> callable();
+    /// Parses a `vec_prefix` grammar element
+    /// @returns the vector size or nullptr
+    Maybe<uint32_t> vec_prefix();
+    /// Parses a `mat_prefix` grammar element
+    /// @returns the matrix dimensions or nullptr
+    Maybe<MatrixDimensions> mat_prefix();
+    /// Parses a `type_decl_without_ident` grammar element
+    /// @returns the parsed Type or nullptr if none matched.
+    Maybe<const ast::Type*> type_decl_without_ident();
     /// Parses a `type_decl` grammar element
     /// @returns the parsed Type or nullptr if none matched.
     Maybe<const ast::Type*> type_decl();
@@ -919,12 +939,17 @@ class ParserImpl {
     /// Used to ensure that all attributes are consumed.
     bool expect_attributes_consumed(utils::VectorRef<const ast::Attribute*> list);
 
+    Expect<const ast::Type*> expect_type_decl_pointer(const Source& s);
+    Expect<const ast::Type*> expect_type_decl_atomic(const Source& s);
+    Expect<const ast::Type*> expect_type_decl_vector(const Source& s, uint32_t count);
+    Expect<const ast::Type*> expect_type_decl_array(const Source& s);
+    Expect<const ast::Type*> expect_type_decl_matrix(const Source& s, const MatrixDimensions& dims);
+
     Expect<const ast::Type*> expect_type_decl_pointer(const Token& t);
     Expect<const ast::Type*> expect_type_decl_atomic(const Token& t);
     Expect<const ast::Type*> expect_type_decl_vector(const Token& t);
     Expect<const ast::Type*> expect_type_decl_array(const Token& t);
     Expect<const ast::Type*> expect_type_decl_matrix(const Token& t);
-
     Expect<const ast::Type*> expect_type(std::string_view use);
 
     Maybe<const ast::Statement*> non_block_statement();
