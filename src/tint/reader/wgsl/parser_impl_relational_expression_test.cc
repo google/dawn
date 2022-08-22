@@ -244,6 +244,56 @@ TEST_F(ParserImplTest, RelationalExpression_PostUnary_Parses_GreaterThanEqual) {
     ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
 }
 
+TEST_F(ParserImplTest, RelationalExpression_PostUnary_Parses_Equal) {
+    auto p = parser("a == true");
+    auto lhs = p->unary_expression();
+    auto e = p->expect_relational_expression_post_unary_expression(lhs.value);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+
+    EXPECT_EQ(e->source.range.begin.line, 1u);
+    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.end.line, 1u);
+    EXPECT_EQ(e->source.range.end.column, 5u);
+
+    ASSERT_TRUE(e->Is<ast::BinaryExpression>());
+    auto* rel = e->As<ast::BinaryExpression>();
+    EXPECT_EQ(ast::BinaryOp::kEqual, rel->op);
+
+    ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
+    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+
+    ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
+    ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
+}
+
+TEST_F(ParserImplTest, RelationalExpression_PostUnary_Parses_NotEqual) {
+    auto p = parser("a != true");
+    auto lhs = p->unary_expression();
+    auto e = p->expect_relational_expression_post_unary_expression(lhs.value);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+
+    EXPECT_EQ(e->source.range.begin.line, 1u);
+    EXPECT_EQ(e->source.range.begin.column, 3u);
+    EXPECT_EQ(e->source.range.end.line, 1u);
+    EXPECT_EQ(e->source.range.end.column, 5u);
+
+    ASSERT_TRUE(e->Is<ast::BinaryExpression>());
+    auto* rel = e->As<ast::BinaryExpression>();
+    EXPECT_EQ(ast::BinaryOp::kNotEqual, rel->op);
+
+    ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
+    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+
+    ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
+    ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
+}
+
 TEST_F(ParserImplTest, RelationalExpression_PostUnary_InvalidRHS) {
     auto p = parser("true < if (a) {}");
     auto lhs = p->unary_expression();

@@ -3174,6 +3174,10 @@ Expect<const ast::Expression*> ParserImpl::expect_relational_expression_post_una
             op = ast::BinaryOp::kLessThanEqual;
         } else if (t.Is(Token::Type::kGreaterThanEqual)) {
             op = ast::BinaryOp::kGreaterThanEqual;
+        } else if (t.Is(Token::Type::kEqualEqual)) {
+            op = ast::BinaryOp::kEqual;
+        } else if (t.Is(Token::Type::kNotEqual)) {
+            op = ast::BinaryOp::kNotEqual;
         }
 
         auto& next = peek();
