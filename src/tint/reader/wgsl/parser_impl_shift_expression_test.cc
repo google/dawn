@@ -164,6 +164,27 @@ TEST_F(ParserImplTest, ShiftExpression_PostUnary_Parses_ShiftRight) {
     ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
 }
 
+TEST_F(ParserImplTest, ShiftExpression_PostUnary_Parses_Additive) {
+    auto p = parser("a + b");
+    auto lhs = p->unary_expression();
+    auto e = p->expect_shift_expression_post_unary_expression(lhs.value);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+
+    ASSERT_TRUE(e->Is<ast::BinaryExpression>());
+    auto* rel = e->As<ast::BinaryExpression>();
+    EXPECT_EQ(ast::BinaryOp::kAdd, rel->op);
+
+    ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
+    auto* ident = rel->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("a"));
+
+    ASSERT_TRUE(rel->rhs->Is<ast::IdentifierExpression>());
+    ident = rel->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("b"));
+}
+
 TEST_F(ParserImplTest, ShiftExpression_PostUnary_Parses_Multiplicative) {
     auto p = parser("a * b");
     auto lhs = p->unary_expression();

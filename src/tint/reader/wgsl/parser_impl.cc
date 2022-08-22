@@ -679,6 +679,9 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(AttributeList& attr
 
 // variable_decl
 //   : VAR variable_qualifier? optionally_typed_ident
+//
+// Note, the `( LESS_THAN address_space ( COMMA access_mode )? GREATER_THAN ) is pulled out into
+// a `variable_qualifier` helper.
 Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
     Source source;
     if (!match(Token::Type::kVar, &source)) {
@@ -995,7 +998,7 @@ Expect<ast::Access> ParserImpl::expect_access_mode(std::string_view use) {
 }
 
 // variable_qualifier
-//   : LESS_THAN storage_class (COMMA access_mode)? GREATER_THAN
+//   : LESS_THAN address_spaces (COMMA access_mode)? GREATER_THAN
 Maybe<ParserImpl::VariableQualifier> ParserImpl::variable_qualifier() {
     if (!peek_is(Token::Type::kLessThan)) {
         return Failure::kNoMatch;
@@ -2814,11 +2817,11 @@ Maybe<const ast::Expression*> ParserImpl::maybe_shift_expression() {
 }
 
 // shift_expression.post.unary_expression
-//   : multiplicative_expression.post.unary_expression?
+//   : math_expression.post.unary_expression?
 //   | SHIFT_LEFT unary_expression
 //   | SHIFT_RIGHT unary_expression
 //
-// Note, add the `multiplicative_expression.post.unary_expression` is added here to make
+// Note, add the `math_expression.post.unary_expression` is added here to make
 // implementation simpler.
 Expect<const ast::Expression*> ParserImpl::expect_shift_expression_post_unary_expression(
     const ast::Expression* lhs) {
@@ -2845,7 +2848,7 @@ Expect<const ast::Expression*> ParserImpl::expect_shift_expression_post_unary_ex
         return create<ast::BinaryExpression>(t.source(), op, lhs, rhs.value);
     }
 
-    return expect_multiplicative_expression_post_unary_expression(lhs);
+    return expect_math_expression_post_unary_expression(lhs);
 }
 
 // relational_expression
