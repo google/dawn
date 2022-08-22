@@ -1182,26 +1182,7 @@ Maybe<const ast::Type*> ParserImpl::type_decl_without_ident() {
 
 // type_decl
 //   : IDENTIFIER
-//   | BOOL
-//   | FLOAT32
-//   | INT32
-//   | UINT32
-//   | VEC2 LESS_THAN type_decl GREATER_THAN
-//   | VEC3 LESS_THAN type_decl GREATER_THAN
-//   | VEC4 LESS_THAN type_decl GREATER_THAN
-//   | PTR LESS_THAN storage_class, type_decl (COMMA access_mode)? GREATER_THAN
-//   | array_attribute_list* ARRAY LESS_THAN type_decl COMMA element_count_expression GREATER_THAN
-//   | array_attribute_list* ARRAY LESS_THAN type_decl GREATER_THAN
-//   | MAT2x2 LESS_THAN type_decl GREATER_THAN
-//   | MAT2x3 LESS_THAN type_decl GREATER_THAN
-//   | MAT2x4 LESS_THAN type_decl GREATER_THAN
-//   | MAT3x2 LESS_THAN type_decl GREATER_THAN
-//   | MAT3x3 LESS_THAN type_decl GREATER_THAN
-//   | MAT3x4 LESS_THAN type_decl GREATER_THAN
-//   | MAT4x2 LESS_THAN type_decl GREATER_THAN
-//   | MAT4x3 LESS_THAN type_decl GREATER_THAN
-//   | MAT4x4 LESS_THAN type_decl GREATER_THAN
-//   | texture_and_sampler_types
+//   | type_decl_without_ident
 Maybe<const ast::Type*> ParserImpl::type_decl() {
     auto& t = peek();
     Source source;
@@ -1209,57 +1190,7 @@ Maybe<const ast::Type*> ParserImpl::type_decl() {
         return builder_.create<ast::TypeName>(source, builder_.Symbols().Register(t.to_str()));
     }
 
-    if (match(Token::Type::kBool, &source)) {
-        return builder_.ty.bool_(source);
-    }
-
-    if (match(Token::Type::kF16, &source)) {
-        return builder_.ty.f16(source);
-    }
-
-    if (match(Token::Type::kF32, &source)) {
-        return builder_.ty.f32(source);
-    }
-
-    if (match(Token::Type::kI32, &source)) {
-        return builder_.ty.i32(source);
-    }
-
-    if (match(Token::Type::kU32, &source)) {
-        return builder_.ty.u32(source);
-    }
-
-    if (t.IsVector()) {
-        next();  // Consume the peek
-        return expect_type_decl_vector(t);
-    }
-
-    if (match(Token::Type::kPtr)) {
-        return expect_type_decl_pointer(t);
-    }
-
-    if (match(Token::Type::kAtomic)) {
-        return expect_type_decl_atomic(t);
-    }
-
-    if (match(Token::Type::kArray, &source)) {
-        return expect_type_decl_array(t);
-    }
-
-    if (t.IsMatrix()) {
-        next();  // Consume the peek
-        return expect_type_decl_matrix(t);
-    }
-
-    auto texture_or_sampler = texture_and_sampler_types();
-    if (texture_or_sampler.errored) {
-        return Failure::kErrored;
-    }
-    if (texture_or_sampler.matched) {
-        return texture_or_sampler;
-    }
-
-    return Failure::kNoMatch;
+    return type_decl_without_ident();
 }
 
 Expect<const ast::Type*> ParserImpl::expect_type(std::string_view use) {
@@ -1314,47 +1245,6 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_pointer(const Source& s) {
     return builder_.ty.pointer(make_source_range_from(s), subtype.value, storage_class, access);
 }
 
-Expect<const ast::Type*> ParserImpl::expect_type_decl_pointer(const Token& t) {
-    const char* use = "ptr declaration";
-
-    auto storage_class = ast::StorageClass::kNone;
-    auto access = ast::Access::kUndefined;
-
-    auto subtype = expect_lt_gt_block(use, [&]() -> Expect<const ast::Type*> {
-        auto sc = expect_address_space(use);
-        if (sc.errored) {
-            return Failure::kErrored;
-        }
-        storage_class = sc.value;
-
-        if (!expect(use, Token::Type::kComma)) {
-            return Failure::kErrored;
-        }
-
-        auto type = expect_type(use);
-        if (type.errored) {
-            return Failure::kErrored;
-        }
-
-        if (match(Token::Type::kComma)) {
-            auto ac = expect_access_mode("access control");
-            if (ac.errored) {
-                return Failure::kErrored;
-            }
-            access = ac.value;
-        }
-
-        return type.value;
-    });
-
-    if (subtype.errored) {
-        return Failure::kErrored;
-    }
-
-    return builder_.ty.pointer(make_source_range_from(t.source()), subtype.value, storage_class,
-                               access);
-}
-
 // LESS_THAN type_decl GREATER_THAN
 Expect<const ast::Type*> ParserImpl::expect_type_decl_atomic(const Source& s) {
     const char* use = "atomic declaration";
@@ -1367,17 +1257,6 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_atomic(const Source& s) {
     return builder_.ty.atomic(make_source_range_from(s), subtype.value);
 }
 
-Expect<const ast::Type*> ParserImpl::expect_type_decl_atomic(const Token& t) {
-    const char* use = "atomic declaration";
-
-    auto subtype = expect_lt_gt_block(use, [&] { return expect_type(use); });
-    if (subtype.errored) {
-        return Failure::kErrored;
-    }
-
-    return builder_.ty.atomic(make_source_range_from(t.source()), subtype.value);
-}
-
 // LESS_THAN type_decl GREATER_THAN
 Expect<const ast::Type*> ParserImpl::expect_type_decl_vector(const Source& s, uint32_t count) {
     const char* use = "vector";
@@ -1387,27 +1266,6 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_vector(const Source& s, ui
     }
 
     return builder_.ty.vec(make_source_range_from(s), ty.value, count);
-}
-
-Expect<const ast::Type*> ParserImpl::expect_type_decl_vector(const Token& t) {
-    uint32_t count = 2;
-    if (t.Is(Token::Type::kVec3)) {
-        count = 3;
-    } else if (t.Is(Token::Type::kVec4)) {
-        count = 4;
-    }
-
-    const ast::Type* subtype = nullptr;
-    if (peek_is(Token::Type::kLessThan)) {
-        const char* use = "vector";
-        auto ty = expect_lt_gt_block(use, [&] { return expect_type(use); });
-        if (ty.errored) {
-            return Failure::kErrored;
-        }
-        subtype = ty.value;
-    }
-
-    return builder_.ty.vec(make_source_range_from(t.source()), subtype, count);
 }
 
 // LESS_THAN type_decl ( COMMA element_count_expression )? GREATER_THAN
@@ -1451,46 +1309,6 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_array(const Source& s) {
     return builder_.ty.array(make_source_range_from(s), type_size->type, type_size->size);
 }
 
-Expect<const ast::Type*> ParserImpl::expect_type_decl_array(const Token& t) {
-    const char* use = "array declaration";
-
-    struct TypeAndSize {
-        const ast::Type* type = nullptr;
-        const ast::Expression* size = nullptr;
-    };
-
-    if (!peek_is(Token::Type::kLessThan)) {
-        return builder_.ty.array(make_source_range_from(t.source()), nullptr, nullptr);
-    }
-
-    auto type_size = expect_lt_gt_block(use, [&]() -> Expect<TypeAndSize> {
-        auto type = expect_type(use);
-        if (type.errored) {
-            return Failure::kErrored;
-        }
-
-        if (!match(Token::Type::kComma)) {
-            return TypeAndSize{type.value, nullptr};
-        }
-
-        auto size = element_count_expression();
-        if (size.errored) {
-            return Failure::kErrored;
-        }
-        if (!size.matched) {
-            return add_error(peek(), "expected array size expression");
-        }
-
-        return TypeAndSize{type.value, size.value};
-    });
-
-    if (type_size.errored) {
-        return Failure::kErrored;
-    }
-
-    return builder_.ty.array(make_source_range_from(t.source()), type_size->type, type_size->size);
-}
-
 // LESS_THAN type_decl GREATER_THAN
 Expect<const ast::Type*> ParserImpl::expect_type_decl_matrix(const Source& s,
                                                              const MatrixDimensions& dims) {
@@ -1501,33 +1319,6 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_matrix(const Source& s,
     }
 
     return builder_.ty.mat(make_source_range_from(s), ty.value, dims.columns, dims.rows);
-}
-
-Expect<const ast::Type*> ParserImpl::expect_type_decl_matrix(const Token& t) {
-    uint32_t rows = 2;
-    uint32_t columns = 2;
-    if (t.IsMat3xN()) {
-        columns = 3;
-    } else if (t.IsMat4xN()) {
-        columns = 4;
-    }
-    if (t.IsMatNx3()) {
-        rows = 3;
-    } else if (t.IsMatNx4()) {
-        rows = 4;
-    }
-
-    const ast::Type* subtype = nullptr;
-    if (peek_is(Token::Type::kLessThan)) {
-        const char* use = "matrix";
-        auto ty = expect_lt_gt_block(use, [&] { return expect_type(use); });
-        if (ty.errored) {
-            return Failure::kErrored;
-        }
-        subtype = ty.value;
-    }
-
-    return builder_.ty.mat(make_source_range_from(t.source()), subtype, columns, rows);
 }
 
 // address_space
@@ -2129,7 +1920,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_statement() {
             return Failure::kErrored;
         }
 
-        auto initializer = expression();
+        auto initializer = maybe_expression();
         if (initializer.errored) {
             return Failure::kErrored;
         }
@@ -2156,7 +1947,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_statement() {
             return Failure::kErrored;
         }
 
-        auto initializer = expression();
+        auto initializer = maybe_expression();
         if (initializer.errored) {
             return Failure::kErrored;
         }
@@ -2183,7 +1974,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_statement() {
 
     const ast::Expression* initializer = nullptr;
     if (match(Token::Type::kEqual)) {
-        auto initializer_expr = expression();
+        auto initializer_expr = maybe_expression();
         if (initializer_expr.errored) {
             return Failure::kErrored;
         }
@@ -2718,30 +2509,19 @@ Maybe<const ast::Type*> ParserImpl::callable() {
 }
 
 // primary_expression
-//   : IDENT argument_expression_list?
-//   | type_decl argument_expression_list
+//   : BITCAST LESS_THAN type_decl GREATER_THAN paren_expression
+//   | callable argument_expression_list
 //   | const_literal
+//   | IDENT argument_expression_list?
 //   | paren_expression
-//   | BITCAST LESS_THAN type_decl GREATER_THAN paren_expression
+//
+// Note, PAREN_LEFT ( expression ( COMMA expression ) * COMMA? )? PAREN_RIGHT is replaced
+// with `argument_expression_list`.
+//
+// Note, this is matching the `callable` ident here instead of having to come from
+// callable so we can return a `type` from callable.
 Maybe<const ast::Expression*> ParserImpl::primary_expression() {
     auto& t = peek();
-
-    auto lit = const_literal();
-    if (lit.errored) {
-        return Failure::kErrored;
-    }
-    if (lit.matched) {
-        return lit.value;
-    }
-
-    if (t.Is(Token::Type::kParenLeft)) {
-        auto paren = expect_paren_expression();
-        if (paren.errored) {
-            return Failure::kErrored;
-        }
-
-        return paren.value;
-    }
 
     if (match(Token::Type::kBitcast)) {
         const char* use = "bitcast expression";
@@ -2757,6 +2537,27 @@ Maybe<const ast::Expression*> ParserImpl::primary_expression() {
         }
 
         return create<ast::BitcastExpression>(t.source(), type.value, params.value);
+    }
+
+    auto call = callable();
+    if (call.errored) {
+        return Failure::kErrored;
+    }
+    if (call.matched) {
+        auto params = expect_argument_expression_list("type constructor");
+        if (params.errored) {
+            return Failure::kErrored;
+        }
+
+        return builder_.Construct(t.source(), call.value, std::move(params.value));
+    }
+
+    auto lit = const_literal();
+    if (lit.errored) {
+        return Failure::kErrored;
+    }
+    if (lit.matched) {
+        return lit.value;
     }
 
     if (t.IsIdentifier()) {
@@ -2777,17 +2578,13 @@ Maybe<const ast::Expression*> ParserImpl::primary_expression() {
         return ident;
     }
 
-    auto type = type_decl();
-    if (type.errored) {
-        return Failure::kErrored;
-    }
-    if (type.matched) {
-        auto params = expect_argument_expression_list("type constructor");
-        if (params.errored) {
+    if (t.Is(Token::Type::kParenLeft)) {
+        auto paren = expect_paren_expression();
+        if (paren.errored) {
             return Failure::kErrored;
         }
 
-        return builder_.Construct(t.source(), type.value, std::move(params.value));
+        return paren.value;
     }
 
     return Failure::kNoMatch;

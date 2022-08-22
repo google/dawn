@@ -950,11 +950,6 @@ class ParserImpl {
     Expect<const ast::Type*> expect_type_decl_array(const Source& s);
     Expect<const ast::Type*> expect_type_decl_matrix(const Source& s, const MatrixDimensions& dims);
 
-    Expect<const ast::Type*> expect_type_decl_pointer(const Token& t);
-    Expect<const ast::Type*> expect_type_decl_atomic(const Token& t);
-    Expect<const ast::Type*> expect_type_decl_vector(const Token& t);
-    Expect<const ast::Type*> expect_type_decl_array(const Token& t);
-    Expect<const ast::Type*> expect_type_decl_matrix(const Token& t);
     Expect<const ast::Type*> expect_type(std::string_view use);
 
     Maybe<const ast::Statement*> non_block_statement();
