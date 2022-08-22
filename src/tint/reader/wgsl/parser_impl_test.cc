@@ -136,5 +136,66 @@ fn main() -> @location(0) vec4<f32> {
     EXPECT_EQ(p->error(), "5:3: unterminated block comment") << p->error();
 }
 
+TEST_F(ParserImplTest, Peek) {
+    auto p = parser("a == if");
+    EXPECT_TRUE(p->peek_is(Token::Type::kIdentifier));
+    EXPECT_TRUE(p->peek_is(Token::Type::kEqualEqual, 1));
+    EXPECT_TRUE(p->peek_is(Token::Type::kIf, 2));
+}
+
+TEST_F(ParserImplTest, Peek_Placeholder) {
+    auto p = parser(">> if");
+    EXPECT_TRUE(p->peek_is(Token::Type::kShiftRight));
+    EXPECT_TRUE(p->peek_is(Token::Type::kIf, 1));
+}
+
+TEST_F(ParserImplTest, Peek_PastPlaceholder) {
+    auto p = parser(">= vec2<u32>");
+    auto& n = p->next();
+    ASSERT_TRUE(n.Is(Token::Type::kGreaterThanEqual));
+    EXPECT_TRUE(p->peek_is(Token::Type::kVec2)) << "expected: vec2 got: " << p->peek().to_name();
+    EXPECT_TRUE(p->peek_is(Token::Type::kLessThan, 1))
+        << "expected: < got: " << p->peek(1).to_name();
+}
+
+TEST_F(ParserImplTest, Peek_MultiplePlaceholder) {
+    auto p = parser(">= >= vec2<u32>");
+    auto& n = p->next();
+    ASSERT_TRUE(n.Is(Token::Type::kGreaterThanEqual));
+    EXPECT_TRUE(p->peek_is(Token::Type::kGreaterThanEqual))
+        << "expected: <= got: " << p->peek().to_name();
+    EXPECT_TRUE(p->peek_is(Token::Type::kVec2, 1))
+        << "expected: vec2 got: " << p->peek(1).to_name();
+    EXPECT_TRUE(p->peek_is(Token::Type::kLessThan, 2))
+        << "expected: < got: " << p->peek(2).to_name();
+}
+
+TEST_F(ParserImplTest, Peek_PastEnd) {
+    auto p = parser(">");
+    EXPECT_TRUE(p->peek_is(Token::Type::kGreaterThan));
+    EXPECT_TRUE(p->peek_is(Token::Type::kEOF, 1));
+    EXPECT_TRUE(p->peek_is(Token::Type::kEOF, 2));
+}
+
+TEST_F(ParserImplTest, Peek_PastEnd_WalkingPlaceholders) {
+    auto p = parser(">= >=");
+    auto& n = p->next();
+    ASSERT_TRUE(n.Is(Token::Type::kGreaterThanEqual));
+    EXPECT_TRUE(p->peek_is(Token::Type::kGreaterThanEqual))
+        << "expected: <= got: " << p->peek().to_name();
+    EXPECT_TRUE(p->peek_is(Token::Type::kEOF, 1)) << "expected: EOF got: " << p->peek(1).to_name();
+}
+
+TEST_F(ParserImplTest, Peek_AfterSplit) {
+    auto p = parser(">= vec2<u32>");
+    auto& n = p->next();
+    ASSERT_TRUE(n.Is(Token::Type::kGreaterThanEqual));
+    EXPECT_TRUE(p->peek_is(Token::Type::kVec2)) << "expected: vec2 got: " << p->peek().to_name();
+
+    p->split_token(Token::Type::kGreaterThan, Token::Type::kEqual);
+    ASSERT_TRUE(n.Is(Token::Type::kGreaterThan));
+    EXPECT_TRUE(p->peek_is(Token::Type::kEqual)) << "expected: = got: " << p->peek().to_name();
+}
+
 }  // namespace
 }  // namespace tint::reader::wgsl

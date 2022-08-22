@@ -782,6 +782,11 @@ class ParserImpl {
     /// @return the parsed attribute, or nullptr on error.
     Expect<const ast::Attribute*> expect_attribute();
 
+    /// Splits a peekable token into to parts filling in the peekable fields.
+    /// @param lhs the token to set in the current position
+    /// @param rhs the token to set in the placeholder
+    void split_token(Token::Type lhs, Token::Type rhs);
+
   private:
     /// ReturnType resolves to the return type for the function or lambda F.
     template <typename F>
@@ -955,8 +960,6 @@ class ParserImpl {
     Maybe<const ast::Statement*> non_block_statement();
     Maybe<const ast::Statement*> for_header_initializer();
     Maybe<const ast::Statement*> for_header_continuing();
-
-    void split_token(Token::Type lhs, Token::Type rhs);
 
     class MultiTokenSource;
     MultiTokenSource make_source_range();

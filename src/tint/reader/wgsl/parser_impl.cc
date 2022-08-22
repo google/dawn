@@ -271,23 +271,18 @@ const Token& ParserImpl::next() {
     return tokens_[last_source_idx_];
 }
 
-const Token& ParserImpl::peek(size_t idx) {
-    if (next_token_idx_ + idx >= tokens_.size()) {
-        return tokens_[tokens_.size() - 1];
-    }
-
-    // Skip over any placeholder elements
-    while (true) {
-        if (!tokens_[next_token_idx_ + idx].IsPlaceholder()) {
-            break;
+const Token& ParserImpl::peek(size_t count) {
+    for (size_t idx = next_token_idx_; idx < tokens_.size(); idx++) {
+        if (tokens_[idx].IsPlaceholder()) {
+            continue;
         }
-        idx++;
+        if (count == 0) {
+            return tokens_[idx];
+        }
+        count--;
     }
-    if (next_token_idx_ + idx >= tokens_.size()) {
-        return tokens_[tokens_.size() - 1];
-    }
-
-    return tokens_[next_token_idx_ + idx];
+    // Walked off the end of the token list, return last token.
+    return tokens_[tokens_.size() - 1];
 }
 
 bool ParserImpl::peek_is(Token::Type tok, size_t idx) {
