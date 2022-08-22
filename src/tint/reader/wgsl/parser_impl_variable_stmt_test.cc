@@ -153,6 +153,32 @@ TEST_F(ParserImplTest, VariableStmt_Let) {
     ASSERT_EQ(e->source.range.end.column, 6u);
 }
 
+TEST_F(ParserImplTest, VariableStmt_Let_ComplexExpression) {
+    auto p = parser("let x = collide + collide_1;");
+    // Parse as `statement` to validate the `;` at the end so we know we parsed the whole expression
+    auto e = p->statement();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
+
+    auto* decl = e->As<ast::VariableDeclStatement>();
+    ASSERT_NE(decl->variable->constructor, nullptr);
+
+    ASSERT_TRUE(decl->variable->constructor->Is<ast::BinaryExpression>());
+    auto* expr = decl->variable->constructor->As<ast::BinaryExpression>();
+    EXPECT_EQ(expr->op, ast::BinaryOp::kAdd);
+
+    ASSERT_TRUE(expr->lhs->Is<ast::IdentifierExpression>());
+    auto* ident = expr->lhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("collide"));
+
+    ASSERT_TRUE(expr->rhs->Is<ast::IdentifierExpression>());
+    ident = expr->rhs->As<ast::IdentifierExpression>();
+    EXPECT_EQ(ident->symbol, p->builder().Symbols().Get("collide_1"));
+}
+
 TEST_F(ParserImplTest, VariableStmt_Let_MissingEqual) {
     auto p = parser("let a : i32 1");
     auto e = p->variable_statement();
