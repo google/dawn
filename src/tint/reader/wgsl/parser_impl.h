@@ -630,6 +630,9 @@ class ParserImpl {
     /// @param lhs the left side of the expression
     /// @returns the parsed expression or nullptr
     Expect<const ast::Expression*> expect_relational_expr(const ast::Expression* lhs);
+    /// Parses the `expression` grammar rule
+    /// @returns the parsed expression or nullptr
+    Maybe<const ast::Expression*> maybe_expression();
     /// Parses the `relational_expression` grammar element
     /// @returns the parsed expression or nullptr
     Maybe<const ast::Expression*> relational_expression();

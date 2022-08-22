@@ -2908,6 +2908,74 @@ Expect<const ast::Expression*> ParserImpl::expect_relational_expression_post_una
     return lhs;
 }
 
+// expression
+//   : unary_expression bitwise_expression.post.unary_expression
+//   | unary_expression relational_expression.post.unary_expression
+//   | unary_expression relational_expression.post.unary_expression and_and
+//        relational_expression ( and_and relational_expression )*
+//   | unary_expression relational_expression.post.unary_expression or_or
+//        relational_expression ( or_or relational_expression )*
+//
+// Note, a `relational_expression` element was added to simplify many of the right sides
+Maybe<const ast::Expression*> ParserImpl::maybe_expression() {
+    auto lhs = unary_expression();
+    if (lhs.errored) {
+        return Failure::kErrored;
+    }
+    if (!lhs.matched) {
+        return Failure::kNoMatch;
+    }
+
+    auto bitwise = bitwise_expression_post_unary_expression(lhs.value);
+    if (bitwise.errored) {
+        return Failure::kErrored;
+    }
+    if (bitwise.matched) {
+        return bitwise.value;
+    }
+
+    auto relational = expect_relational_expression_post_unary_expression(lhs.value);
+    if (relational.errored) {
+        return Failure::kErrored;
+    }
+    auto* ret = relational.value;
+
+    auto& t = peek();
+    if (t.Is(Token::Type::kAndAnd) || t.Is(Token::Type::kOrOr)) {
+        ast::BinaryOp op = ast::BinaryOp::kNone;
+        if (t.Is(Token::Type::kAndAnd)) {
+            op = ast::BinaryOp::kLogicalAnd;
+        } else if (t.Is(Token::Type::kOrOr)) {
+            op = ast::BinaryOp::kLogicalOr;
+        }
+
+        while (continue_parsing()) {
+            auto& n = peek();
+            if (!n.Is(t.type())) {
+                if (n.Is(Token::Type::kAndAnd) || n.Is(Token::Type::kOrOr)) {
+                    return add_error(
+                        n.source(), std::string("mixing '") + std::string(t.to_name()) + "' and '" +
+                                        std::string(n.to_name()) + "' requires parenthesis");
+                }
+                break;
+            }
+            next();
+
+            auto rhs = relational_expression();
+            if (rhs.errored) {
+                return Failure::kErrored;
+            }
+            if (!rhs.matched) {
+                return add_error(peek(), std::string("unable to parse right side of ") +
+                                             std::string(t.to_name()) + " expression");
+            }
+
+            ret = create<ast::BinaryExpression>(t.source(), op, ret, rhs.value);
+        }
+    }
+    return ret;
+}
+
 // singular_expression
 //   : primary_expression postfix_expr
 Maybe<const ast::Expression*> ParserImpl::singular_expression() {
