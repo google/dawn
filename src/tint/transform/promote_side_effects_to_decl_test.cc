@@ -1639,7 +1639,7 @@ fn f() {
   var b = true;
   var c = true;
   var d = true;
-  let r = b && a(0) || c && a(1) && c && d || a(2);
+  let r = (b && a(0)) || (c && a(1) && c && d) || a(2);
 }
 )";
 
@@ -1869,7 +1869,7 @@ fn a(i : i32) -> bool {
 
 fn f() {
   var b = true;
-  let r = bool(a(0)) && bool(a(1) && b) || bool(a(2) && a(3));
+  let r = (bool(a(0)) && bool(a(1) && b)) || bool(a(2) && a(3));
 }
 )";
 
@@ -1916,7 +1916,7 @@ fn a(i : i32) -> i32 {
 
 fn f() {
   var b = true;
-  let r = bool(a(0)) && bool(a(1)) || b;
+  let r = (bool(a(0)) && bool(a(1))) || b;
 }
 )";
 
@@ -1994,7 +1994,7 @@ fn a(i : i32) -> bool {
 
 fn f() {
   var b = true;
-  let r = all(a(0)) && all(a(1) && b) || all(a(2) && a(3));
+  let r = (all(a(0)) && all(a(1) && b)) || all(a(2) && a(3));
 }
 )";
 
