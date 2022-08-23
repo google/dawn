@@ -219,8 +219,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl_WithSymbolCollisions) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_StructAlignDecl) {
     auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.i32(), utils::Vector{MemberAlign(8)}),
-                                 Member("b", ty.f32(), utils::Vector{MemberAlign(16)}),
+                                 Member("a", ty.i32(), utils::Vector{MemberAlign(8_a)}),
+                                 Member("b", ty.f32(), utils::Vector{MemberAlign(16_a)}),
                              });
 
     GeneratorImpl& gen = Build();
@@ -256,7 +256,7 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructSizeDecl) {
 TEST_F(WgslGeneratorImplTest, EmitType_Struct_WithAttribute) {
     auto* s = Structure("S", utils::Vector{
                                  Member("a", ty.i32()),
-                                 Member("b", ty.f32(), utils::Vector{MemberAlign(8)}),
+                                 Member("b", ty.f32(), utils::Vector{MemberAlign(8_a)}),
                              });
 
     GeneratorImpl& gen = Build();

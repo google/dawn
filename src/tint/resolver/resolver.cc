@@ -2673,11 +2673,26 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                 align = 1;
                 has_offset_attr = true;
             } else if (auto* a = attr->As<ast::StructMemberAlignAttribute>()) {
-                if (a->align <= 0 || !utils::IsPowerOfTwo(a->align)) {
+                const auto* expr = Expression(a->align);
+                if (!expr) {
+                    return nullptr;
+                }
+                auto* materialized = Materialize(expr);
+                if (!materialized) {
+                    return nullptr;
+                }
+                auto const_value = materialized->ConstantValue();
+                if (!const_value) {
+                    AddError("'align' must be constant expression", a->align->source);
+                    return nullptr;
+                }
+                auto value = const_value->As<AInt>();
+
+                if (value <= 0 || !utils::IsPowerOfTwo(value)) {
                     AddError("align value must be a positive, power-of-two integer", a->source);
                     return nullptr;
                 }
-                align = a->align;
+                align = const_value->As<u32>();
                 has_align_attr = true;
             } else if (auto* s = attr->As<ast::StructMemberSizeAttribute>()) {
                 if (s->size < size) {

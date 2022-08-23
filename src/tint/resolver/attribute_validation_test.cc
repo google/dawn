@@ -89,7 +89,7 @@ static utils::Vector<const ast::Attribute*, 2> createAttributes(const Source& so
                                                                 AttributeKind kind) {
     switch (kind) {
         case AttributeKind::kAlign:
-            return {builder.create<ast::StructMemberAlignAttribute>(source, 4u)};
+            return {builder.MemberAlign(source, 4_u)};
         case AttributeKind::kBinding:
             return {builder.create<ast::BindingAttribute>(source, 1u)};
         case AttributeKind::kBuiltin:
@@ -625,14 +625,13 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                          TestParams{AttributeKind::kWorkgroup, false},
                                          TestParams{AttributeKind::kBindingAndGroup, false}));
 TEST_F(StructMemberAttributeTest, DuplicateAttribute) {
-    Structure("mystruct",
-              utils::Vector{
-                  Member("a", ty.i32(),
-                         utils::Vector{
-                             create<ast::StructMemberAlignAttribute>(Source{{12, 34}}, 4u),
-                             create<ast::StructMemberAlignAttribute>(Source{{56, 78}}, 8u),
-                         }),
-              });
+    Structure("mystruct", utils::Vector{
+                              Member("a", ty.i32(),
+                                     utils::Vector{
+                                         MemberAlign(Source{{12, 34}}, 4_u),
+                                         MemberAlign(Source{{56, 78}}, 8_u),
+                                     }),
+                          });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(56:78 error: duplicate align attribute

@@ -2274,17 +2274,19 @@ class ProgramBuilder {
 
     /// Creates a ast::StructMemberAlignAttribute
     /// @param source the source information
-    /// @param val the align value
+    /// @param val the align value expression
     /// @returns the align attribute pointer
-    const ast::StructMemberAlignAttribute* MemberAlign(const Source& source, uint32_t val) {
-        return create<ast::StructMemberAlignAttribute>(source, val);
+    template <typename EXPR>
+    const ast::StructMemberAlignAttribute* MemberAlign(const Source& source, EXPR&& val) {
+        return create<ast::StructMemberAlignAttribute>(source, Expr(std::forward<EXPR>(val)));
     }
 
     /// Creates a ast::StructMemberAlignAttribute
-    /// @param val the align value
+    /// @param val the align value expression
     /// @returns the align attribute pointer
-    const ast::StructMemberAlignAttribute* MemberAlign(uint32_t val) {
-        return create<ast::StructMemberAlignAttribute>(source_, val);
+    template <typename EXPR>
+    const ast::StructMemberAlignAttribute* MemberAlign(EXPR&& val) {
+        return create<ast::StructMemberAlignAttribute>(source_, Expr(std::forward<EXPR>(val)));
     }
 
     /// Creates the ast::GroupAttribute

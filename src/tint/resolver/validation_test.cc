@@ -1239,7 +1239,7 @@ TEST_F(ResolverValidationTest, StructMemberDuplicateNamePass) {
 
 TEST_F(ResolverValidationTest, NonPOTStructMemberAlignAttribute) {
     Structure("S", utils::Vector{
-                       Member("a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, 3)}),
+                       Member("a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, 3_u)}),
                    });
 
     EXPECT_FALSE(r()->Resolve());
@@ -1248,7 +1248,7 @@ TEST_F(ResolverValidationTest, NonPOTStructMemberAlignAttribute) {
 
 TEST_F(ResolverValidationTest, ZeroStructMemberAlignAttribute) {
     Structure("S", utils::Vector{
-                       Member("a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, 0)}),
+                       Member("a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, 0_u)}),
                    });
 
     EXPECT_FALSE(r()->Resolve());
@@ -1279,7 +1279,7 @@ TEST_F(ResolverValidationTest, OffsetAndSizeAttribute) {
 TEST_F(ResolverValidationTest, OffsetAndAlignAttribute) {
     Structure("S", utils::Vector{
                        Member(Source{{12, 34}}, "a", ty.f32(),
-                              utils::Vector{MemberOffset(0), MemberAlign(4)}),
+                              utils::Vector{MemberOffset(0), MemberAlign(4_u)}),
                    });
 
     EXPECT_FALSE(r()->Resolve());
@@ -1291,7 +1291,7 @@ TEST_F(ResolverValidationTest, OffsetAndAlignAttribute) {
 TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeAttribute) {
     Structure("S", utils::Vector{
                        Member(Source{{12, 34}}, "a", ty.f32(),
-                              utils::Vector{MemberOffset(0), MemberAlign(4), MemberSize(4)}),
+                              utils::Vector{MemberOffset(0), MemberAlign(4_u), MemberSize(4)}),
                    });
 
     EXPECT_FALSE(r()->Resolve());

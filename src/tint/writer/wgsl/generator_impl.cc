@@ -776,7 +776,11 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out,
                 return true;
             },
             [&](const ast::StructMemberAlignAttribute* align) {
-                out << "align(" << align->align << ")";
+                out << "align(";
+                if (!EmitExpression(out, align->align)) {
+                    return false;
+                }
+                out << ")";
                 return true;
             },
             [&](const ast::StrideAttribute* stride) {

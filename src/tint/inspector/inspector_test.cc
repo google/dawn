@@ -1811,7 +1811,7 @@ TEST_F(InspectorGetUniformBufferResourceBindingsTest, ContainingArray) {
         "foo_type",
         utils::Vector{
             Member("0i32", ty.i32()),
-            Member("b", ty.array(ty.u32(), 4_u, /*stride*/ 16), utils::Vector{MemberAlign(16)}),
+            Member("b", ty.array(ty.u32(), 4_u, /*stride*/ 16), utils::Vector{MemberAlign(16_u)}),
         });
 
     AddUniformBuffer("foo_ub", ty.Of(foo_struct_type), 0, 0);
@@ -3238,11 +3238,9 @@ TEST_F(InspectorGetWorkgroupStorageSizeTest, StructAlignment) {
     // of its last member, rounded up to the alignment of its largest member. So
     // here the struct is expected to occupy 1024 bytes of workgroup storage.
     const auto* wg_struct_type = MakeStructTypeFromMembers(
-        "WgStruct",
-        utils::Vector{
-            MakeStructMember(0, ty.f32(),
-                             utils::Vector{create<ast::StructMemberAlignAttribute>(1024u)}),
-        });
+        "WgStruct", utils::Vector{
+                        MakeStructMember(0, ty.f32(), utils::Vector{MemberAlign(1024_u)}),
+                    });
 
     AddWorkgroupStorage("wg_struct_var", ty.Of(wg_struct_type));
     MakeStructVariableReferenceBodyFunction("wg_struct_func", "wg_struct_var",

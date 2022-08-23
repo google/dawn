@@ -22,8 +22,10 @@ namespace {
 using StructMemberAlignAttributeTest = TestHelper;
 
 TEST_F(StructMemberAlignAttributeTest, Creation) {
-    auto* d = create<StructMemberAlignAttribute>(2u);
-    EXPECT_EQ(2u, d->align);
+    auto* val = Expr("ident");
+    auto* d = create<StructMemberAlignAttribute>(val);
+    EXPECT_EQ(val, d->align);
+    EXPECT_TRUE(d->align->Is<IdentifierExpression>());
 }
 
 }  // namespace
