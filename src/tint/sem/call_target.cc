@@ -70,7 +70,7 @@ std::size_t hash<tint::sem::CallTargetSignature>::operator()(
     const tint::sem::CallTargetSignature& sig) const {
     size_t hash = tint::utils::Hash(sig.parameters.Length());
     for (auto* p : sig.parameters) {
-        tint::utils::HashCombine(&hash, p->Type(), p->Usage());
+        hash = tint::utils::HashCombine(hash, p->Type(), p->Usage());
     }
     return tint::utils::Hash(hash, sig.return_type);
 }

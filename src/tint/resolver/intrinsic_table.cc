@@ -935,7 +935,7 @@ struct IntrinsicPrototype {
         inline std::size_t operator()(const IntrinsicPrototype& i) const {
             size_t hash = utils::Hash(i.parameters.Length());
             for (auto& p : i.parameters) {
-                utils::HashCombine(&hash, p.type, p.usage);
+                hash = utils::HashCombine(hash, p.type, p.usage);
             }
             return utils::Hash(hash, i.overload, i.return_type);
         }

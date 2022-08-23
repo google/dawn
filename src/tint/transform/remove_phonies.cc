@@ -33,33 +33,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::RemovePhonies);
 namespace tint::transform {
 namespace {
 
-struct SinkSignature {
-    std::vector<const sem::Type*> types;
-
-    bool operator==(const SinkSignature& other) const {
-        if (types.size() != other.types.size()) {
-            return false;
-        }
-        for (size_t i = 0; i < types.size(); i++) {
-            if (types[i] != other.types[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    struct Hasher {
-        /// @param sig the CallTargetSignature to hash
-        /// @return the hash value
-        std::size_t operator()(const SinkSignature& sig) const {
-            size_t hash = tint::utils::Hash(sig.types.size());
-            for (auto* ty : sig.types) {
-                tint::utils::HashCombine(&hash, ty);
-            }
-            return hash;
-        }
-    };
-};
+using SinkSignature = std::vector<const sem::Type*>;
 
 }  // namespace
 
@@ -84,7 +58,7 @@ bool RemovePhonies::ShouldRun(const Program* program, const DataMap&) const {
 void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
     auto& sem = ctx.src->Sem();
 
-    std::unordered_map<SinkSignature, Symbol, SinkSignature::Hasher> sinks;
+    std::unordered_map<SinkSignature, Symbol, utils::Hasher<SinkSignature>> sinks;
 
     for (auto* node : ctx.src->ASTNodes().Objects()) {
         Switch(
@@ -138,12 +112,12 @@ void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
                     ctx.Replace(stmt, [&, side_effects] {
                         SinkSignature sig;
                         for (auto* arg : side_effects) {
-                            sig.types.push_back(sem.Get(arg)->Type()->UnwrapRef());
+                            sig.push_back(sem.Get(arg)->Type()->UnwrapRef());
                         }
                         auto sink = utils::GetOrCreate(sinks, sig, [&] {
                             auto name = ctx.dst->Symbols().New("phony_sink");
                             utils::Vector<const ast::Parameter*, 8> params;
-                            for (auto* ty : sig.types) {
+                            for (auto* ty : sig) {
                                 auto* ast_ty = CreateASTTypeFor(ctx, ty);
                                 params.Push(
                                     ctx.dst->Param("p" + std::to_string(params.Length()), ast_ty));

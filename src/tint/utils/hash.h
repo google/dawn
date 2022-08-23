@@ -48,55 +48,96 @@ struct HashCombineOffset<8> {
 
 }  // namespace detail
 
-// Forward declaration
+/// Forward declarations (see below)
 template <typename... ARGS>
-size_t Hash(const ARGS&... args);
+size_t Hash(const ARGS&... values);
 
-/// HashCombine "hashes" together an existing hash and hashable values.
-template <typename T>
-void HashCombine(size_t* hash, const T& value) {
-    constexpr size_t offset = detail::HashCombineOffset<sizeof(size_t)>::value();
-    *hash ^= std::hash<T>()(value) + offset + (*hash << 6) + (*hash >> 2);
-}
+template <typename... ARGS>
+size_t HashCombine(size_t hash, const ARGS&... values);
 
-/// HashCombine "hashes" together an existing hash and hashable values.
+/// A STL-compatible hasher that does a more thorough job than most implementations of std::hash.
+/// Hasher has been optimized for a better quality hash at the expense of increased computation
+/// costs.
 template <typename T>
-void HashCombine(size_t* hash, const std::vector<T>& vector) {
-    HashCombine(hash, vector.size());
-    for (auto& el : vector) {
-        HashCombine(hash, el);
+struct Hasher {
+    /// @param value the value to hash
+    /// @returns a hash of the value
+    size_t operator()(const T& value) const { return std::hash<T>()(value); }
+};
+
+/// Hasher specialization for pointers
+/// std::hash<T*> typically uses a reinterpret of the pointer to a size_t.
+/// As most pointers a 4 or 16 byte aligned, this usually results in the LSBs of the hash being 0,
+/// resulting in bad hashes for hashtables. This implementation mixes up those LSBs.
+template <typename T>
+struct Hasher<T*> {
+    /// @param ptr the pointer to hash
+    /// @returns a hash of the pointer
+    size_t operator()(T* ptr) const {
+        auto hash = std::hash<T*>()(ptr);
+        return hash ^ (hash >> 4);
     }
-}
+};
 
-/// HashCombine "hashes" together an existing hash and hashable values.
+/// Hasher specialization for std::vector
+template <typename T>
+struct Hasher<std::vector<T>> {
+    /// @param vector the vector to hash
+    /// @returns a hash of the vector
+    size_t operator()(const std::vector<T>& vector) const {
+        auto hash = Hash(vector.size());
+        for (auto& el : vector) {
+            hash = HashCombine(hash, el);
+        }
+        return hash;
+    }
+};
+
+/// Hasher specialization for utils::vector
 template <typename T, size_t N>
-void HashCombine(size_t* hash, const utils::Vector<T, N>& list) {
-    HashCombine(hash, list.Length());
-    for (auto& el : list) {
-        HashCombine(hash, el);
+struct Hasher<utils::Vector<T, N>> {
+    /// @param vector the vector to hash
+    /// @returns a hash of the vector
+    size_t operator()(const utils::Vector<T, N>& vector) const {
+        auto hash = Hash(vector.Length());
+        for (auto& el : vector) {
+            hash = HashCombine(hash, el);
+        }
+        return hash;
     }
-}
+};
 
-/// HashCombine "hashes" together an existing hash and hashable values.
+/// Hasher specialization for std::tuple
 template <typename... TYPES>
-void HashCombine(size_t* hash, const std::tuple<TYPES...>& tuple) {
-    HashCombine(hash, sizeof...(TYPES));
-    HashCombine(hash, std::apply(Hash<TYPES...>, tuple));
-}
+struct Hasher<std::tuple<TYPES...>> {
+    /// @param tuple the tuple to hash
+    /// @returns a hash of the tuple
+    size_t operator()(const std::tuple<TYPES...>& tuple) const {
+        return std::apply(Hash<TYPES...>, tuple);
+    }
+};
 
-/// HashCombine "hashes" together an existing hash and hashable values.
-template <typename T, typename... ARGS>
-void HashCombine(size_t* hash, const T& value, const ARGS&... args) {
-    HashCombine(hash, value);
-    HashCombine(hash, args...);
-}
-
-/// @returns a hash of the combined arguments. The returned hash is dependent on
-/// the order of the arguments.
+/// @returns a hash of the variadic list of arguments.
+///          The returned hash is dependent on the order of the arguments.
 template <typename... ARGS>
 size_t Hash(const ARGS&... args) {
-    size_t hash = 102931;  // seed with an arbitrary prime
-    HashCombine(&hash, args...);
+    if constexpr (sizeof...(ARGS) == 0) {
+        return 0;
+    } else if constexpr (sizeof...(ARGS) == 1) {
+        using T = std::tuple_element_t<0, std::tuple<ARGS...>>;
+        return Hasher<T>()(args...);
+    } else {
+        size_t hash = 102931;  // seed with an arbitrary prime
+        return HashCombine(hash, args...);
+    }
+}
+
+/// @returns a hash of the variadic list of arguments.
+///          The returned hash is dependent on the order of the arguments.
+template <typename... ARGS>
+size_t HashCombine(size_t hash, const ARGS&... values) {
+    constexpr size_t offset = detail::HashCombineOffset<sizeof(size_t)>::value();
+    ((hash ^= Hash(values) + offset + (hash << 6) + (hash >> 2)), ...);
     return hash;
 }
 

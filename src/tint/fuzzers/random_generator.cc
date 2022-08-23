@@ -34,10 +34,9 @@ namespace {
 /// @param size - number of elements in buffer
 /// @returns hash of the data in the buffer
 size_t HashBuffer(const uint8_t* data, const size_t size) {
-    size_t hash = 102931;
-    utils::HashCombine(&hash, size);
+    size_t hash = utils::Hash(size);
     for (size_t i = 0; i < size; i++) {
-        utils::HashCombine(&hash, data[i]);
+        hash = utils::HashCombine(hash, data[i]);
     }
     return hash;
 }

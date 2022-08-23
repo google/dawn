@@ -323,7 +323,7 @@ struct Composite : Constant {
     size_t CalcHash() {
         auto h = utils::Hash(type, all_zero, any_zero);
         for (auto* el : elements) {
-            utils::HashCombine(&h, el->Hash());
+            h = utils::HashCombine(h, el->Hash());
         }
         return h;
     }
