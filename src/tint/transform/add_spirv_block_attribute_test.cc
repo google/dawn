@@ -163,7 +163,40 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(AddSpirvBlockAttributeTest, BasicStruct) {
+TEST_F(AddSpirvBlockAttributeTest, BasicStruct_AccessRoot) {
+    auto* src = R"(
+struct S {
+  f : f32,
+};
+
+@group(0) @binding(0)
+var<uniform> u : S;
+
+@fragment
+fn main() {
+  let f = u;
+}
+)";
+    auto* expect = R"(
+@internal(spirv_block)
+struct S {
+  f : f32,
+}
+
+@group(0) @binding(0) var<uniform> u : S;
+
+@fragment
+fn main() {
+  let f = u;
+}
+)";
+
+    auto got = Run<AddSpirvBlockAttribute>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(AddSpirvBlockAttributeTest, BasicStruct_AccessField) {
     auto* src = R"(
 struct S {
   f : f32,

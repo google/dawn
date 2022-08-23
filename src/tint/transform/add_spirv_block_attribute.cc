@@ -14,13 +14,12 @@
 
 #include "src/tint/transform/add_spirv_block_attribute.h"
 
-#include <unordered_map>
-#include <unordered_set>
 #include <utility>
 
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/variable.h"
-#include "src/tint/utils/map.h"
+#include "src/tint/utils/hashmap.h"
+#include "src/tint/utils/hashset.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::AddSpirvBlockAttribute);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::AddSpirvBlockAttribute::SpirvBlockAttribute);
@@ -35,59 +34,64 @@ void AddSpirvBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) co
     auto& sem = ctx.src->Sem();
 
     // Collect the set of structs that are nested in other types.
-    std::unordered_set<const sem::Struct*> nested_structs;
-    for (auto* node : ctx.src->ASTNodes().Objects()) {
-        if (auto* arr = sem.Get<sem::Array>(node->As<ast::Array>())) {
-            if (auto* nested_str = arr->ElemType()->As<sem::Struct>()) {
-                nested_structs.insert(nested_str);
-            }
-        } else if (auto* str = sem.Get<sem::Struct>(node->As<ast::Struct>())) {
-            for (auto* member : str->Members()) {
-                if (auto* nested_str = member->Type()->As<sem::Struct>()) {
-                    nested_structs.insert(nested_str);
+    utils::Hashset<const sem::Struct*, 8> nested_structs;
+    for (auto* ty : ctx.src->Types()) {
+        Switch(
+            ty,
+            [&](const sem::Array* arr) {
+                if (auto* nested_str = arr->ElemType()->As<sem::Struct>()) {
+                    nested_structs.Add(nested_str);
                 }
-            }
-        }
+            },
+            [&](const sem::Struct* str) {
+                for (auto* member : str->Members()) {
+                    if (auto* nested_str = member->Type()->As<sem::Struct>()) {
+                        nested_structs.Add(nested_str);
+                    }
+                }
+            });
     }
 
-    // A map from a type in the source program to a block-decorated wrapper that
-    // contains it in the destination program.
-    std::unordered_map<const sem::Type*, const ast::Struct*> wrapper_structs;
+    // A map from a type in the source program to a block-decorated wrapper that contains it in the
+    // destination program.
+    utils::Hashmap<const sem::Type*, const ast::Struct*, 8> wrapper_structs;
 
     // Process global 'var' declarations that are buffers.
-    for (auto* var : ctx.src->AST().Globals<ast::Var>()) {
-        auto* sem_var = sem.Get<sem::GlobalVariable>(var);
-        if (var->declared_storage_class != ast::StorageClass::kStorage &&
-            var->declared_storage_class != ast::StorageClass::kUniform &&
-            var->declared_storage_class != ast::StorageClass::kPushConstant) {
+    for (auto* global : ctx.src->AST().GlobalVariables()) {
+        auto* var = sem.Get(global);
+        if (!ast::IsHostShareable(var->StorageClass())) {
+            // Not declared in a host-sharable storage class
             continue;
         }
 
-        auto* ty = sem.Get(var->type);
+        auto* ty = var->Type()->UnwrapRef();
         auto* str = ty->As<sem::Struct>();
-        if (!str || nested_structs.count(str)) {
+        bool needs_wrapping = !str ||                        // Type is not a structure
+                              nested_structs.Contains(str);  // Structure is nested by another type
+
+        if (needs_wrapping) {
             const char* kMemberName = "inner";
 
             // This is a non-struct or a struct that is nested somewhere else, so we
             // need to wrap it first.
-            auto* wrapper = utils::GetOrCreate(wrapper_structs, ty, [&]() {
+            auto* wrapper = wrapper_structs.GetOrCreate(ty, [&] {
                 auto* block = ctx.dst->ASTNodes().Create<SpirvBlockAttribute>(
                     ctx.dst->ID(), ctx.dst->AllocateNodeID());
-                auto wrapper_name = ctx.src->Symbols().NameFor(var->symbol) + "_block";
+                auto wrapper_name = ctx.src->Symbols().NameFor(global->symbol) + "_block";
                 auto* ret = ctx.dst->create<ast::Struct>(
                     ctx.dst->Symbols().New(wrapper_name),
                     utils::Vector{ctx.dst->Member(kMemberName, CreateASTTypeFor(ctx, ty))},
                     utils::Vector{block});
-                ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), var, ret);
+                ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), global, ret);
                 return ret;
             });
-            ctx.Replace(var->type, ctx.dst->ty.Of(wrapper));
+            ctx.Replace(global->type, ctx.dst->ty.Of(wrapper));
 
             // Insert a member accessor to get the original type from the wrapper at
             // any usage of the original variable.
-            for (auto* user : sem_var->Users()) {
+            for (auto* user : var->Users()) {
                 ctx.Replace(user->Declaration(),
-                            ctx.dst->MemberAccessor(ctx.Clone(var->symbol), kMemberName));
+                            ctx.dst->MemberAccessor(ctx.Clone(global->symbol), kMemberName));
             }
         } else {
             // Add a block attribute to this struct directly.
