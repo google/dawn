@@ -19,6 +19,7 @@
 #include <optional>
 #include <utility>
 
+#include "src/tint/utils/hash.h"
 #include "src/tint/utils/hashset.h"
 
 namespace tint::utils {
@@ -31,7 +32,7 @@ namespace tint::utils {
 template <typename K,
           typename V,
           size_t N,
-          typename HASH = std::hash<K>,
+          typename HASH = Hasher<K>,
           typename EQUAL = std::equal_to<K>>
 class Hashmap {
     /// LazyCreator is a transient structure used to late-build the Entry::value, when inserted into

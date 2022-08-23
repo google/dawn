@@ -23,6 +23,7 @@
 #include <utility>
 
 #include "src/tint/debug.h"
+#include "src/tint/utils/hash.h"
 #include "src/tint/utils/vector.h"
 
 namespace tint::utils {
@@ -39,7 +40,7 @@ enum class AddAction {
 
 /// An unordered set that uses a robin-hood hashing algorithm.
 /// @see the fantastic tutorial: https://programming.guide/robin-hood-hashing.html
-template <typename T, size_t N, typename HASH = std::hash<T>, typename EQUAL = std::equal_to<T>>
+template <typename T, size_t N, typename HASH = Hasher<T>, typename EQUAL = std::equal_to<T>>
 class Hashset {
     /// A slot is a single entry in the underlying vector.
     /// A slot can either be empty or filled with a value. If the slot is empty, #hash and #distance
