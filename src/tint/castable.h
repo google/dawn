@@ -159,7 +159,7 @@ struct TypeInfo {
     }
 
     /// @returns a compile-time hashcode for the type `T`.
-    /// @note the returned hashcode will have at most 2 bits set, as the hashes
+    /// @note the returned hashcode will have exactly 2 bits set, as the hashes
     /// are expected to be used in bloom-filters which will quickly saturate when
     /// multiple hashcodes are bitwise-or'd together.
     template <typename T>
@@ -176,7 +176,8 @@ struct TypeInfo {
 #endif
         constexpr uint32_t bit_a = (crc & 63);
         constexpr uint32_t bit_b = ((crc >> 6) & 63);
-        return (static_cast<HashCode>(1) << bit_a) | (static_cast<HashCode>(1) << bit_b);
+        constexpr uint32_t bit_c = (bit_a == bit_b) ? ((bit_a + 1) & 63) : bit_b;
+        return (static_cast<HashCode>(1) << bit_a) | (static_cast<HashCode>(1) << bit_c);
     }
 
     /// @returns the hashcode of the given type, bitwise-or'd with the hashcodes
@@ -221,17 +222,16 @@ struct TypeInfo {
         if constexpr (kCount == 0) {
             return false;
         } else if constexpr (kCount == 1) {
-            return Is<std::tuple_element_t<0, TUPLE>>();
-        } else if constexpr (kCount == 2) {
-            return Is<std::tuple_element_t<0, TUPLE>>() || Is<std::tuple_element_t<1, TUPLE>>();
-        } else if constexpr (kCount == 3) {
-            return Is<std::tuple_element_t<0, TUPLE>>() || Is<std::tuple_element_t<1, TUPLE>>() ||
-                   Is<std::tuple_element_t<2, TUPLE>>();
+            return Is(&Of<std::tuple_element_t<0, TUPLE>>());
         } else {
-            // Optimization: Compare the object's hashcode to the bitwise-or of all
-            // the tested type's hashcodes. If there's no intersection of bits in
-            // the two masks, then we can guarantee that the type is not in `TO`.
-            if (full_hashcode & TypeInfo::CombinedHashCodeOfTuple<TUPLE>()) {
+            // Optimization: Compare the object's hashcode to the bitwise-or of all the tested
+            // type's hashcodes. If there's no intersection of bits in the two masks, then we can
+            // guarantee that the type is not in `TO`.
+            HashCode mask = full_hashcode & TypeInfo::CombinedHashCodeOfTuple<TUPLE>();
+            // HashCodeOf() ensures that two bits are always set for every hash, so we can quickly
+            // eliminate the bitmask where only one bit is set.
+            HashCode two_bits = mask & (mask - 1);
+            if (two_bits) {
                 // Possibly one of the types in `TUPLE`.
                 // Split the search in two, and scan each block.
                 static constexpr auto kMid = kCount / 2;
@@ -607,9 +607,14 @@ inline bool NonDefaultCases(T* object,
         return false;
     } else {
         // Multiple cases.
-        // Check the hashcode bits to see if there's any possibility of a case
-        // matching in these cases. If there isn't, we can skip all these cases.
-        if (type->full_hashcode & TypeInfo::CombinedHashCodeOf<SwitchCaseType<CASES>...>()) {
+        // Check the hashcode bits to see if there's any possibility of a case matching in these
+        // cases. If there isn't, we can skip all these cases.
+        TypeInfo::HashCode mask =
+            type->full_hashcode & TypeInfo::CombinedHashCodeOf<SwitchCaseType<CASES>...>();
+        // HashCodeOf() ensures that two bits are always set for every hash, so we can quickly
+        // eliminate the bitmask where only one bit is set.
+        TypeInfo::HashCode two_bits = mask & (mask - 1);
+        if (two_bits) {
             // There's a possibility. We need to scan further.
             // Split the cases into two, and recurse.
             constexpr size_t kMid = kNumCases / 2;
