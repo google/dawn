@@ -145,7 +145,7 @@ void FirstIndexOffset::Run(CloneContext& ctx, const DataMap& inputs, DataMap& ou
                     }
                 }
             }
-            // Not interested in this experssion. Just clone.
+            // Not interested in this expression. Just clone.
             return nullptr;
         });
     }

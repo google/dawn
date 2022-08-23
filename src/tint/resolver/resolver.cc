@@ -2183,121 +2183,124 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
     auto* object = sem_.Get(expr->structure);
     auto* source_var = object->SourceVariable();
 
-    const sem::Type* ret = nullptr;
-    utils::Vector<uint32_t, 4> swizzle;
+    const sem::Type* ty = nullptr;
 
     // Object may be a side-effecting expression (e.g. function call).
     bool has_side_effects = object && object->HasSideEffects();
 
-    if (auto* str = storage_ty->As<sem::Struct>()) {
-        Mark(expr->member);
-        auto symbol = expr->member->symbol;
+    return Switch(
+        storage_ty,  //
+        [&](const sem::Struct* str) -> sem::Expression* {
+            Mark(expr->member);
+            auto symbol = expr->member->symbol;
 
-        const sem::StructMember* member = nullptr;
-        for (auto* m : str->Members()) {
-            if (m->Name() == symbol) {
-                ret = m->Type();
-                member = m;
-                break;
-            }
-        }
-
-        if (ret == nullptr) {
-            AddError("struct member " + builder_->Symbols().NameFor(symbol) + " not found",
-                     expr->source);
-            return nullptr;
-        }
-
-        // If we're extracting from a reference, we return a reference.
-        if (auto* ref = structure->As<sem::Reference>()) {
-            ret = builder_->create<sem::Reference>(ret, ref->StorageClass(), ref->Access());
-        }
-
-        const sem::Constant* val = nullptr;
-        if (auto r = const_eval_.MemberAccess(object, member)) {
-            val = r.Get();
-        } else {
-            return nullptr;
-        }
-        return builder_->create<sem::StructMemberAccess>(expr, ret, current_statement_, val, object,
-                                                         member, has_side_effects, source_var);
-    }
-
-    if (auto* vec = storage_ty->As<sem::Vector>()) {
-        Mark(expr->member);
-        std::string s = builder_->Symbols().NameFor(expr->member->symbol);
-        auto size = s.size();
-        swizzle.Reserve(s.size());
-
-        for (auto c : s) {
-            switch (c) {
-                case 'x':
-                case 'r':
-                    swizzle.Push(0u);
+            const sem::StructMember* member = nullptr;
+            for (auto* m : str->Members()) {
+                if (m->Name() == symbol) {
+                    ty = m->Type();
+                    member = m;
                     break;
-                case 'y':
-                case 'g':
-                    swizzle.Push(1u);
-                    break;
-                case 'z':
-                case 'b':
-                    swizzle.Push(2u);
-                    break;
-                case 'w':
-                case 'a':
-                    swizzle.Push(3u);
-                    break;
-                default:
-                    AddError("invalid vector swizzle character",
-                             expr->member->source.Begin() + swizzle.Length());
-                    return nullptr;
+                }
             }
 
-            if (swizzle.Back() >= vec->Width()) {
-                AddError("invalid vector swizzle member", expr->member->source);
+            if (ty == nullptr) {
+                AddError("struct member " + builder_->Symbols().NameFor(symbol) + " not found",
+                         expr->source);
                 return nullptr;
             }
-        }
 
-        if (size < 1 || size > 4) {
-            AddError("invalid vector swizzle size", expr->member->source);
-            return nullptr;
-        }
-
-        // All characters are valid, check if they're being mixed
-        auto is_rgba = [](char c) { return c == 'r' || c == 'g' || c == 'b' || c == 'a'; };
-        auto is_xyzw = [](char c) { return c == 'x' || c == 'y' || c == 'z' || c == 'w'; };
-        if (!std::all_of(s.begin(), s.end(), is_rgba) &&
-            !std::all_of(s.begin(), s.end(), is_xyzw)) {
-            AddError("invalid mixing of vector swizzle characters rgba with xyzw",
-                     expr->member->source);
-            return nullptr;
-        }
-
-        if (size == 1) {
-            // A single element swizzle is just the type of the vector.
-            ret = vec->type();
             // If we're extracting from a reference, we return a reference.
             if (auto* ref = structure->As<sem::Reference>()) {
-                ret = builder_->create<sem::Reference>(ret, ref->StorageClass(), ref->Access());
+                ty = builder_->create<sem::Reference>(ty, ref->StorageClass(), ref->Access());
             }
-        } else {
-            // The vector will have a number of components equal to the length of
-            // the swizzle.
-            ret = builder_->create<sem::Vector>(vec->type(), static_cast<uint32_t>(size));
-        }
-        if (auto r = const_eval_.Swizzle(ret, object, swizzle)) {
-            auto* val = r.Get();
-            return builder_->create<sem::Swizzle>(expr, ret, current_statement_, val, object,
-                                                  std::move(swizzle), has_side_effects, source_var);
-        }
-        return nullptr;
-    }
 
-    AddError("invalid member accessor expression. Expected vector or struct, got '" +
-                 sem_.TypeNameOf(storage_ty) + "'",
-             expr->structure->source);
-    return nullptr;
+            auto val = const_eval_.MemberAccess(object, member);
+            if (!val) {
+                return nullptr;
+            }
+            return builder_->create<sem::StructMemberAccess>(expr, ty, current_statement_,
+                                                             val.Get(), object, member,
+                                                             has_side_effects, source_var);
+        },
+
+        [&](const sem::Vector* vec) -> sem::Expression* {
+            Mark(expr->member);
+            std::string s = builder_->Symbols().NameFor(expr->member->symbol);
+            auto size = s.size();
+            utils::Vector<uint32_t, 4> swizzle;
+            swizzle.Reserve(s.size());
+
+            for (auto c : s) {
+                switch (c) {
+                    case 'x':
+                    case 'r':
+                        swizzle.Push(0u);
+                        break;
+                    case 'y':
+                    case 'g':
+                        swizzle.Push(1u);
+                        break;
+                    case 'z':
+                    case 'b':
+                        swizzle.Push(2u);
+                        break;
+                    case 'w':
+                    case 'a':
+                        swizzle.Push(3u);
+                        break;
+                    default:
+                        AddError("invalid vector swizzle character",
+                                 expr->member->source.Begin() + swizzle.Length());
+                        return nullptr;
+                }
+
+                if (swizzle.Back() >= vec->Width()) {
+                    AddError("invalid vector swizzle member", expr->member->source);
+                    return nullptr;
+                }
+            }
+
+            if (size < 1 || size > 4) {
+                AddError("invalid vector swizzle size", expr->member->source);
+                return nullptr;
+            }
+
+            // All characters are valid, check if they're being mixed
+            auto is_rgba = [](char c) { return c == 'r' || c == 'g' || c == 'b' || c == 'a'; };
+            auto is_xyzw = [](char c) { return c == 'x' || c == 'y' || c == 'z' || c == 'w'; };
+            if (!std::all_of(s.begin(), s.end(), is_rgba) &&
+                !std::all_of(s.begin(), s.end(), is_xyzw)) {
+                AddError("invalid mixing of vector swizzle characters rgba with xyzw",
+                         expr->member->source);
+                return nullptr;
+            }
+
+            if (size == 1) {
+                // A single element swizzle is just the type of the vector.
+                ty = vec->type();
+                // If we're extracting from a reference, we return a reference.
+                if (auto* ref = structure->As<sem::Reference>()) {
+                    ty = builder_->create<sem::Reference>(ty, ref->StorageClass(), ref->Access());
+                }
+            } else {
+                // The vector will have a number of components equal to the length of
+                // the swizzle.
+                ty = builder_->create<sem::Vector>(vec->type(), static_cast<uint32_t>(size));
+            }
+            auto val = const_eval_.Swizzle(ty, object, swizzle);
+            if (!val) {
+                return nullptr;
+            }
+            return builder_->create<sem::Swizzle>(expr, ty, current_statement_, val.Get(), object,
+                                                  std::move(swizzle), has_side_effects, source_var);
+        },
+
+        [&](Default) {
+            AddError("invalid member accessor expression. Expected vector or struct, got '" +
+                         sem_.TypeNameOf(storage_ty) + "'",
+                     expr->structure->source);
+            return nullptr;
+        });
 }
 
 sem::Expression* Resolver::Binary(const ast::BinaryExpression* expr) {

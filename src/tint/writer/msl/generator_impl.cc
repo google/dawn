@@ -1764,36 +1764,20 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
 
 bool GeneratorImpl::EmitExpression(std::ostream& out, const ast::Expression* expr) {
     if (auto* sem = builder_.Sem().Get(expr)) {
-        if (auto constant = sem->ConstantValue()) {
+        if (auto* constant = sem->ConstantValue()) {
             return EmitConstant(out, constant);
         }
     }
     return Switch(
-        expr,
-        [&](const ast::IndexAccessorExpression* a) {  //
-            return EmitIndexAccessor(out, a);
-        },
-        [&](const ast::BinaryExpression* b) {  //
-            return EmitBinary(out, b);
-        },
-        [&](const ast::BitcastExpression* b) {  //
-            return EmitBitcast(out, b);
-        },
-        [&](const ast::CallExpression* c) {  //
-            return EmitCall(out, c);
-        },
-        [&](const ast::IdentifierExpression* i) {  //
-            return EmitIdentifier(out, i);
-        },
-        [&](const ast::LiteralExpression* l) {  //
-            return EmitLiteral(out, l);
-        },
-        [&](const ast::MemberAccessorExpression* m) {  //
-            return EmitMemberAccessor(out, m);
-        },
-        [&](const ast::UnaryOpExpression* u) {  //
-            return EmitUnaryOp(out, u);
-        },
+        expr,  //
+        [&](const ast::IndexAccessorExpression* a) { return EmitIndexAccessor(out, a); },
+        [&](const ast::BinaryExpression* b) { return EmitBinary(out, b); },
+        [&](const ast::BitcastExpression* b) { return EmitBitcast(out, b); },
+        [&](const ast::CallExpression* c) { return EmitCall(out, c); },
+        [&](const ast::IdentifierExpression* i) { return EmitIdentifier(out, i); },
+        [&](const ast::LiteralExpression* l) { return EmitLiteral(out, l); },
+        [&](const ast::MemberAccessorExpression* m) { return EmitMemberAccessor(out, m); },
+        [&](const ast::UnaryOpExpression* u) { return EmitUnaryOp(out, u); },
         [&](Default) {  //
             diagnostics_.add_error(diag::System::Writer, "unknown expression type: " +
                                                              std::string(expr->TypeInfo().name));
