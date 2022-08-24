@@ -188,7 +188,7 @@ TEST_F(ParserImplTest, RelationalExpression_PostUnary_NoMatch_ReturnsLHS) {
 
 TEST_F(ParserImplTest, RelationalExpression_Matches) {
     auto p = parser("a >= true");
-    auto e = p->maybe_relational_expression();
+    auto e = p->relational_expression();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -208,7 +208,7 @@ TEST_F(ParserImplTest, RelationalExpression_Matches) {
 
 TEST_F(ParserImplTest, RelationalExpression_InvalidLHS) {
     auto p = parser("if (a) {}< 3");
-    auto e = p->maybe_relational_expression();
+    auto e = p->relational_expression();
     ASSERT_FALSE(e.matched);
     EXPECT_FALSE(e.errored);
     ASSERT_FALSE(p->has_error()) << p->error();
@@ -217,7 +217,7 @@ TEST_F(ParserImplTest, RelationalExpression_InvalidLHS) {
 
 TEST_F(ParserImplTest, RelationalExpression_InvalidRHS) {
     auto p = parser("true < if (a) {}");
-    auto e = p->maybe_relational_expression();
+    auto e = p->relational_expression();
     ASSERT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     ASSERT_TRUE(p->has_error());
@@ -227,7 +227,7 @@ TEST_F(ParserImplTest, RelationalExpression_InvalidRHS) {
 
 TEST_F(ParserImplTest, RelationalExpression_Parses_Equal) {
     auto p = parser("a == true");
-    auto e = p->maybe_relational_expression();
+    auto e = p->relational_expression();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -252,7 +252,7 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_Equal) {
 
 TEST_F(ParserImplTest, RelationalExpression_Parses_NotEqual) {
     auto p = parser("a != true");
-    auto e = p->maybe_relational_expression();
+    auto e = p->relational_expression();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -277,7 +277,7 @@ TEST_F(ParserImplTest, RelationalExpression_Parses_NotEqual) {
 
 TEST_F(ParserImplTest, RelationalExpression_Equal_InvalidRHS) {
     auto p = parser("true == if (a) {}");
-    auto e = p->maybe_relational_expression();
+    auto e = p->relational_expression();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);

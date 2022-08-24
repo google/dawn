@@ -623,7 +623,7 @@ class ParserImpl {
     Maybe<const ast::Expression*> unary_expression();
     /// Parses the `expression` grammar rule
     /// @returns the parsed expression or nullptr
-    Maybe<const ast::Expression*> maybe_expression();
+    Maybe<const ast::Expression*> expression();
     /// Parses the `bitwise_expression.post.unary_expression` grammar element
     /// @param lhs the left side of the expression
     /// @returns the parsed expression or nullptr
@@ -652,7 +652,7 @@ class ParserImpl {
     Maybe<const ast::Expression*> element_count_expression();
     /// Parses a `unary_expression shift.post.unary_expression`
     /// @returns the parsed expression or nullptr
-    Maybe<const ast::Expression*> maybe_shift_expression();
+    Maybe<const ast::Expression*> shift_expression();
     /// Parses a `shift_expression.post.unary_expression` grammar element
     /// @param lhs the left side of the expression
     /// @returns the parsed expression or `lhs` if no match
@@ -660,7 +660,7 @@ class ParserImpl {
         const ast::Expression* lhs);
     /// Parses a `unary_expression relational_expression.post.unary_expression`
     /// @returns the parsed expression or nullptr
-    Maybe<const ast::Expression*> maybe_relational_expression();
+    Maybe<const ast::Expression*> relational_expression();
     /// Parses a `relational_expression.post.unary_expression` grammar element
     /// @param lhs the left side of the expression
     /// @returns the parsed expression or `lhs` if no match

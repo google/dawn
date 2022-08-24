@@ -19,7 +19,7 @@ namespace {
 
 TEST_F(ParserImplTest, Expression_InvalidLHS) {
     auto p = parser("if (a) {} || true");
-    auto e = p->maybe_expression();
+    auto e = p->expression();
     EXPECT_FALSE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -28,7 +28,7 @@ TEST_F(ParserImplTest, Expression_InvalidLHS) {
 
 TEST_F(ParserImplTest, Expression_Or_Parses) {
     auto p = parser("a || true");
-    auto e = p->maybe_expression();
+    auto e = p->expression();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -53,7 +53,7 @@ TEST_F(ParserImplTest, Expression_Or_Parses) {
 
 TEST_F(ParserImplTest, Expression_Or_Parses_Multiple) {
     auto p = parser("a || true || b");
-    auto e = p->maybe_expression();
+    auto e = p->expression();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -85,7 +85,7 @@ TEST_F(ParserImplTest, Expression_Or_Parses_Multiple) {
 
 TEST_F(ParserImplTest, Expression_Or_InvalidRHS) {
     auto p = parser("true || if (a) {}");
-    auto e = p->maybe_expression();
+    auto e = p->expression();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -95,7 +95,7 @@ TEST_F(ParserImplTest, Expression_Or_InvalidRHS) {
 
 TEST_F(ParserImplTest, Expression_And_Parses) {
     auto p = parser("a && true");
-    auto e = p->maybe_expression();
+    auto e = p->expression();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -120,7 +120,7 @@ TEST_F(ParserImplTest, Expression_And_Parses) {
 
 TEST_F(ParserImplTest, Expression_And_Parses_Multple) {
     auto p = parser("a && true && b");
-    auto e = p->maybe_expression();
+    auto e = p->expression();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -150,7 +150,7 @@ TEST_F(ParserImplTest, Expression_And_Parses_Multple) {
 
 TEST_F(ParserImplTest, Expression_And_InvalidRHS) {
     auto p = parser("true && if (a) {}");
-    auto e = p->maybe_expression();
+    auto e = p->expression();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -160,7 +160,7 @@ TEST_F(ParserImplTest, Expression_And_InvalidRHS) {
 
 TEST_F(ParserImplTest, Expression_Mixing_OrWithAnd) {
     auto p = parser("a && true || b");
-    auto e = p->maybe_expression();
+    auto e = p->expression();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -170,7 +170,7 @@ TEST_F(ParserImplTest, Expression_Mixing_OrWithAnd) {
 
 TEST_F(ParserImplTest, Expression_Mixing_AndWithOr) {
     auto p = parser("a || true && b");
-    auto e = p->maybe_expression();
+    auto e = p->expression();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -180,7 +180,7 @@ TEST_F(ParserImplTest, Expression_Mixing_AndWithOr) {
 
 TEST_F(ParserImplTest, Expression_Bitwise) {
     auto p = parser("a & b");
-    auto e = p->maybe_expression();
+    auto e = p->expression();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -201,7 +201,7 @@ TEST_F(ParserImplTest, Expression_Bitwise) {
 
 TEST_F(ParserImplTest, Expression_Relational) {
     auto p = parser("a <= b");
-    auto e = p->maybe_expression();
+    auto e = p->expression();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -222,7 +222,7 @@ TEST_F(ParserImplTest, Expression_Relational) {
 
 TEST_F(ParserImplTest, Expression_InvalidUnary) {
     auto p = parser("!if || true");
-    auto e = p->maybe_expression();
+    auto e = p->expression();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -232,7 +232,7 @@ TEST_F(ParserImplTest, Expression_InvalidUnary) {
 
 TEST_F(ParserImplTest, Expression_InvalidBitwise) {
     auto p = parser("a & if");
-    auto e = p->maybe_expression();
+    auto e = p->expression();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
@@ -242,7 +242,7 @@ TEST_F(ParserImplTest, Expression_InvalidBitwise) {
 
 TEST_F(ParserImplTest, Expression_InvalidRelational) {
     auto p = parser("a <= if");
-    auto e = p->maybe_expression();
+    auto e = p->expression();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);

@@ -149,7 +149,7 @@ TEST_F(ParserImplTest, ShiftExpression_PostUnary_NoOr_ReturnsLHS) {
 
 TEST_F(ParserImplTest, ShiftExpression_Parses) {
     auto p = parser("a << true");
-    auto e = p->maybe_shift_expression();
+    auto e = p->shift_expression();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -169,7 +169,7 @@ TEST_F(ParserImplTest, ShiftExpression_Parses) {
 
 TEST_F(ParserImplTest, ShiftExpression_Invalid_Unary) {
     auto p = parser("if >> true");
-    auto e = p->maybe_shift_expression();
+    auto e = p->shift_expression();
     EXPECT_FALSE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -178,7 +178,7 @@ TEST_F(ParserImplTest, ShiftExpression_Invalid_Unary) {
 
 TEST_F(ParserImplTest, ShiftExpression_Inavlid_ShiftExpressionPostUnary) {
     auto p = parser("a * if (a) {}");
-    auto e = p->maybe_shift_expression();
+    auto e = p->shift_expression();
     EXPECT_FALSE(e.matched);
     EXPECT_TRUE(e.errored);
     EXPECT_TRUE(p->has_error());
