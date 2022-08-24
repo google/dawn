@@ -2971,6 +2971,15 @@ class ProgramBuilder {
     /// Creates an ast::WorkgroupAttribute
     /// @param source the source information
     /// @param x the x dimension expression
+    /// @returns the workgroup attribute pointer
+    template <typename EXPR_X>
+    const ast::WorkgroupAttribute* WorkgroupSize(const Source& source, EXPR_X&& x) {
+        return WorkgroupSize(source, std::forward<EXPR_X>(x), nullptr, nullptr);
+    }
+
+    /// Creates an ast::WorkgroupAttribute
+    /// @param source the source information
+    /// @param x the x dimension expression
     /// @param y the y dimension expression
     /// @returns the workgroup attribute pointer
     template <typename EXPR_X, typename EXPR_Y>

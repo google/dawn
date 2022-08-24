@@ -965,7 +965,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
 
     for (size_t i = 0; i < 3; i++) {
         // Each argument to this attribute can either be a literal, an identifier for a module-scope
-        // constants, or nullptr if not specified.
+        // constants, a constant expression, or nullptr if not specified.
         auto* value = values[i];
         if (!value) {
             break;
@@ -1023,7 +1023,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
                 ws[i].value = 0;
                 continue;
             }
-        } else if (values[i]->Is<ast::LiteralExpression>()) {
+        } else if (values[i]->Is<ast::LiteralExpression>() || args[i]->ConstantValue()) {
             value = materialized->ConstantValue();
         } else {
             AddError(kErrBadExpr, values[i]->source);

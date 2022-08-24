@@ -545,6 +545,19 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_U32_AInt) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Expr) {
+    // @compute @workgroup_size(1 + 2)
+    // fn main() {}
+
+    Func("main", utils::Empty, ty.void_(), utils::Empty,
+         utils::Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(Source{{12, 34}}, Add(1_u, 2_u)),
+         });
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+}
+
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_MismatchType_U32) {
     // @compute @workgroup_size(1u, 2, 3_i)
     // fn main() {}
@@ -750,13 +763,43 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_NonConst) {
               "overridable of type abstract-integer, i32 or u32");
 }
 
-TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr) {
-    // @compute @workgroup_size(i32(1))
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_x) {
+    // @compute @workgroup_size(1 << 2 + 4)
     // fn main() {}
     Func("main", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize(Construct(Source{{12, 34}}, ty.i32(), 1_i)),
+             WorkgroupSize(Construct(Source{{12, 34}}, ty.i32(), Shr(1_i, Add(2_u, 4_u)))),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: workgroup_size argument must be either a literal, constant, or "
+              "overridable of type abstract-integer, i32 or u32");
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_y) {
+    // @compute @workgroup_size(1, 1 << 2 + 4)
+    // fn main() {}
+    Func("main", utils::Empty, ty.void_(), utils::Empty,
+         utils::Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(Construct(Source{{12, 34}}, ty.i32(), Shr(1_i, Add(2_u, 4_u)))),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: workgroup_size argument must be either a literal, constant, or "
+              "overridable of type abstract-integer, i32 or u32");
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_z) {
+    // @compute @workgroup_size(1, 1, 1 << 2 + 4)
+    // fn main() {}
+    Func("main", utils::Empty, ty.void_(), utils::Empty,
+         utils::Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(Construct(Source{{12, 34}}, ty.i32(), Shr(1_i, Add(2_u, 4_u)))),
          });
 
     EXPECT_FALSE(r()->Resolve());
