@@ -67,7 +67,7 @@ struct Foo {
     X(CacheKey::UnsafeUnkeyedValue<int*>, d) \
     X(CacheKey::UnsafeUnkeyedValue<Foo>, e)
 
-DAWN_MAKE_CACHE_REQUEST(CacheRequestForTesting, REQUEST_MEMBERS)
+DAWN_MAKE_CACHE_REQUEST(CacheRequestForTesting, REQUEST_MEMBERS);
 
 #undef REQUEST_MEMBERS
 

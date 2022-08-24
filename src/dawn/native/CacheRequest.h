@@ -184,7 +184,7 @@ class CacheRequestImpl {
         static constexpr char kName[] = #Request;                      \
         Request() = default;                                           \
         DAWN_VISITABLE_MEMBERS(MEMBERS)                                \
-    };
+    }
 
 // Helper macro for the common pattern of DAWN_TRY_ASSIGN around LoadOrRun.
 // Requires an #include of dawn/native/Error.h
