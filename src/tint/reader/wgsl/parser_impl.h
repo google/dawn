@@ -621,49 +621,9 @@ class ParserImpl {
     /// Parses a `unary_expression` grammar element
     /// @returns the parsed expression or nullptr
     Maybe<const ast::Expression*> unary_expression();
-    /// Parses the recursive part of the `multiplicative_expression`, erroring on
-    /// parse failure.
-    /// @param lhs the left side of the expression
-    /// @returns the parsed expression or nullptr
-    Expect<const ast::Expression*> expect_multiplicative_expr(const ast::Expression* lhs);
-    /// Parses the `multiplicative_expression` grammar element
-    /// @returns the parsed expression or nullptr
-    Maybe<const ast::Expression*> multiplicative_expression();
-    /// Parses the recursive part of the `additive_expression`, erroring on parse
-    /// failure.
-    /// @param lhs the left side of the expression
-    /// @returns the parsed expression or nullptr
-    Expect<const ast::Expression*> expect_additive_expr(const ast::Expression* lhs);
-    /// Parses the `additive_expression` grammar element
-    /// @returns the parsed expression or nullptr
-    Maybe<const ast::Expression*> additive_expression();
-    /// Parses the recursive part of the `shift_expression`, erroring on parse
-    /// failure.
-    /// @param lhs the left side of the expression
-    /// @returns the parsed expression or nullptr
-    Expect<const ast::Expression*> expect_shift_expr(const ast::Expression* lhs);
-    /// Parses the `shift_expression` grammar element
-    /// @returns the parsed expression or nullptr
-    Maybe<const ast::Expression*> shift_expression();
-    /// Parses the recursive part of the `relational_expression`, erroring on
-    /// parse failure.
-    /// @param lhs the left side of the expression
-    /// @returns the parsed expression or nullptr
-    Expect<const ast::Expression*> expect_relational_expr(const ast::Expression* lhs);
     /// Parses the `expression` grammar rule
     /// @returns the parsed expression or nullptr
     Maybe<const ast::Expression*> maybe_expression();
-    /// Parses the `relational_expression` grammar element
-    /// @returns the parsed expression or nullptr
-    Maybe<const ast::Expression*> relational_expression();
-    /// Parses the recursive part of the `equality_expression`, erroring on parse
-    /// failure.
-    /// @param lhs the left side of the expression
-    /// @returns the parsed expression or nullptr
-    Expect<const ast::Expression*> expect_equality_expr(const ast::Expression* lhs);
-    /// Parses the `equality_expression` grammar element
-    /// @returns the parsed expression or nullptr
-    Maybe<const ast::Expression*> equality_expression();
     /// Parses the `bitwise_expression.post.unary_expression` grammar element
     /// @param lhs the left side of the expression
     /// @returns the parsed expression or nullptr
@@ -709,49 +669,6 @@ class ParserImpl {
     /// Parse the `additive_operator` grammar element
     /// @returns the parsed operator if successful
     Maybe<ast::BinaryOp> additive_operator();
-    /// Parses the recursive part of the `and_expression`, erroring on parse
-    /// failure.
-    /// @param lhs the left side of the expression
-    /// @returns the parsed expression or nullptr
-    Expect<const ast::Expression*> expect_and_expr(const ast::Expression* lhs);
-    /// Parses the `and_expression` grammar element
-    /// @returns the parsed expression or nullptr
-    Maybe<const ast::Expression*> and_expression();
-    /// Parses the recursive part of the `exclusive_or_expression`, erroring on
-    /// parse failure.
-    /// @param lhs the left side of the expression
-    /// @returns the parsed expression or nullptr
-    Expect<const ast::Expression*> expect_exclusive_or_expr(const ast::Expression* lhs);
-    /// Parses the `exclusive_or_expression` grammar elememnt
-    /// @returns the parsed expression or nullptr
-    Maybe<const ast::Expression*> exclusive_or_expression();
-    /// Parses the recursive part of the `inclusive_or_expression`, erroring on
-    /// parse failure.
-    /// @param lhs the left side of the expression
-    /// @returns the parsed expression or nullptr
-    Expect<const ast::Expression*> expect_inclusive_or_expr(const ast::Expression* lhs);
-    /// Parses the `inclusive_or_expression` grammar element
-    /// @returns the parsed expression or nullptr
-    Maybe<const ast::Expression*> inclusive_or_expression();
-    /// Parses the recursive part of the `logical_and_expression`, erroring on
-    /// parse failure.
-    /// @param lhs the left side of the expression
-    /// @returns the parsed expression or nullptr
-    Expect<const ast::Expression*> expect_logical_and_expr(const ast::Expression* lhs);
-    /// Parses a `logical_and_expression` grammar element
-    /// @returns the parsed expression or nullptr
-    Maybe<const ast::Expression*> logical_and_expression();
-    /// Parses the recursive part of the `logical_or_expression`, erroring on
-    /// parse failure.
-    /// @param lhs the left side of the expression
-    /// @returns the parsed expression or nullptr
-    Expect<const ast::Expression*> expect_logical_or_expr(const ast::Expression* lhs);
-    /// Parses a `logical_or_expression` grammar element
-    /// @returns the parsed expression or nullptr
-    Maybe<const ast::Expression*> logical_or_expression();
-    /// Parses an `expression` grammar element
-    /// @returns the parsed expression or nullptr
-    Maybe<const ast::Expression*> expression();
     /// Parses a `compound_assignment_operator` grammar element
     /// @returns the parsed compound assignment operator
     Maybe<ast::BinaryOp> compound_assignment_operator();

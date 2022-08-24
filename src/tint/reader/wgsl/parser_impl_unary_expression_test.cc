@@ -86,7 +86,7 @@ TEST_F(ParserImplTest, UnaryExpression_Dereference) {
 
 TEST_F(ParserImplTest, UnaryExpression_AddressOf_Precedence) {
     auto p = parser("&x.y");
-    auto e = p->logical_or_expression();
+    auto e = p->unary_expression();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
@@ -100,7 +100,7 @@ TEST_F(ParserImplTest, UnaryExpression_AddressOf_Precedence) {
 
 TEST_F(ParserImplTest, UnaryExpression_Dereference_Precedence) {
     auto p = parser("*x.y");
-    auto e = p->logical_or_expression();
+    auto e = p->unary_expression();
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();

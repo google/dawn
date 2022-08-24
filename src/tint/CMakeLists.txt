@@ -945,7 +945,6 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/lexer_test.cc
       reader/wgsl/parser_test.cc
       reader/wgsl/parser_impl_additive_expression_test.cc
-      reader/wgsl/parser_impl_and_expression_test.cc
       reader/wgsl/parser_impl_argument_expression_list_test.cc
       reader/wgsl/parser_impl_assignment_stmt_test.cc
       reader/wgsl/parser_impl_bitwise_expression_test.cc
@@ -962,10 +961,8 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_depth_texture_test.cc
       reader/wgsl/parser_impl_element_count_expression_test.cc
       reader/wgsl/parser_impl_enable_directive_test.cc
-      reader/wgsl/parser_impl_equality_expression_test.cc
       reader/wgsl/parser_impl_error_msg_test.cc
       reader/wgsl/parser_impl_error_resync_test.cc
-      reader/wgsl/parser_impl_exclusive_or_expression_test.cc
       reader/wgsl/parser_impl_expression_test.cc
       reader/wgsl/parser_impl_external_texture_test.cc
       reader/wgsl/parser_impl_for_stmt_test.cc
@@ -977,11 +974,8 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_global_decl_test.cc
       reader/wgsl/parser_impl_global_variable_decl_test.cc
       reader/wgsl/parser_impl_if_stmt_test.cc
-      reader/wgsl/parser_impl_inclusive_or_expression_test.cc
       reader/wgsl/parser_impl_increment_decrement_stmt_test.cc
       reader/wgsl/parser_impl_lhs_expression_test.cc
-      reader/wgsl/parser_impl_logical_and_expression_test.cc
-      reader/wgsl/parser_impl_logical_or_expression_test.cc
       reader/wgsl/parser_impl_loop_stmt_test.cc
       reader/wgsl/parser_impl_math_expression_test.cc
       reader/wgsl/parser_impl_multiplicative_expression_test.cc
