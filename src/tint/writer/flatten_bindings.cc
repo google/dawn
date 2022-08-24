@@ -33,6 +33,7 @@ std::optional<Program> FlattenBindings(const Program* program) {
     auto entry_points = inspector.GetEntryPoints();
     for (auto& entry_point : entry_points) {
         auto bindings = inspector.GetResourceBindings(entry_point.name);
+
         for (auto& binding : bindings) {
             BindingPoint src = {binding.bind_group, binding.binding};
             if (binding_points.count(src)) {

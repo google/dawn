@@ -20,30 +20,18 @@
 
 #include "src/tint/ast/access.h"
 #include "src/tint/ast/attribute.h"
+#include "src/tint/ast/binding_attribute.h"
 #include "src/tint/ast/expression.h"
+#include "src/tint/ast/group_attribute.h"
 #include "src/tint/ast/storage_class.h"
 
 // Forward declarations
 namespace tint::ast {
-class BindingAttribute;
-class GroupAttribute;
 class LocationAttribute;
 class Type;
 }  // namespace tint::ast
 
 namespace tint::ast {
-
-/// VariableBindingPoint holds a group and binding attribute.
-struct VariableBindingPoint {
-    /// The `@group` part of the binding point
-    const GroupAttribute* group = nullptr;
-    /// The `@binding` part of the binding point
-    const BindingAttribute* binding = nullptr;
-
-    /// @returns true if the BindingPoint has a valid group and binding
-    /// attribute.
-    inline operator bool() const { return group && binding; }
-};
 
 /// Variable is the base class for Var, Let, Const, Override and Parameter.
 ///
@@ -75,9 +63,11 @@ class Variable : public Castable<Variable, Node> {
     /// Destructor
     ~Variable() override;
 
-    /// @returns the binding point information from the variable's attributes.
-    /// @note binding points should only be applied to Var and Parameter types.
-    VariableBindingPoint BindingPoint() const;
+    /// @returns true if the variable has both group and binding attributes
+    bool HasBindingPoint() const {
+        return ast::GetAttribute<ast::BindingAttribute>(attributes) != nullptr &&
+               ast::GetAttribute<ast::GroupAttribute>(attributes) != nullptr;
+    }
 
     /// @returns the kind of the variable, which can be used in diagnostics
     ///          e.g. "var", "let", "const", etc

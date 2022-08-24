@@ -72,10 +72,12 @@ Parameter::Parameter(const ast::Parameter* declaration,
                      const sem::Type* type,
                      ast::StorageClass storage_class,
                      ast::Access access,
-                     const ParameterUsage usage /* = ParameterUsage::kNone */)
+                     const ParameterUsage usage /* = ParameterUsage::kNone */,
+                     sem::BindingPoint binding_point /* = {} */)
     : Base(declaration, type, EvaluationStage::kRuntime, storage_class, access, nullptr),
       index_(index),
-      usage_(usage) {}
+      usage_(usage),
+      binding_point_(binding_point) {}
 
 Parameter::~Parameter() = default;
 

@@ -149,12 +149,14 @@ struct CombineSamplers::State {
         // Remove all texture and sampler global variables. These will be replaced
         // by combined samplers.
         for (auto* global : ctx.src->AST().GlobalVariables()) {
+            auto* global_sem = sem.Get(global)->As<sem::GlobalVariable>();
             auto* type = sem.Get(global->type);
             if (tint::IsAnyOf<sem::Texture, sem::Sampler>(type) &&
                 !type->Is<sem::StorageTexture>()) {
                 ctx.Remove(ctx.src->AST().GlobalDeclarations(), global);
-            } else if (auto binding_point = global->BindingPoint()) {
-                if (binding_point.group->value == 0 && binding_point.binding->value == 0) {
+            } else if (global->HasBindingPoint()) {
+                auto binding_point = global_sem->BindingPoint();
+                if (binding_point.group == 0 && binding_point.binding == 0) {
                     auto* attribute =
                         ctx.dst->Disable(ast::DisabledValidation::kBindingPointCollision);
                     ctx.InsertFront(global->attributes, attribute);

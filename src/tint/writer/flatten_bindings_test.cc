@@ -18,7 +18,6 @@
 
 #include "gtest/gtest.h"
 #include "src/tint/program_builder.h"
-#include "src/tint/resolver/resolver.h"
 #include "src/tint/sem/variable.h"
 
 namespace tint::writer {
@@ -28,9 +27,6 @@ class FlattenBindingsTest : public ::testing::Test {};
 
 TEST_F(FlattenBindingsTest, NoBindings) {
     ProgramBuilder b;
-
-    resolver::Resolver resolver(&b);
-
     Program program(std::move(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
@@ -43,8 +39,6 @@ TEST_F(FlattenBindingsTest, AlreadyFlat) {
     b.GlobalVar("a", b.ty.i32(), ast::StorageClass::kUniform, b.Group(0), b.Binding(0));
     b.GlobalVar("b", b.ty.i32(), ast::StorageClass::kUniform, b.Group(0), b.Binding(1));
     b.GlobalVar("c", b.ty.i32(), ast::StorageClass::kUniform, b.Group(0), b.Binding(2));
-
-    resolver::Resolver resolver(&b);
 
     Program program(std::move(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
@@ -60,8 +54,6 @@ TEST_F(FlattenBindingsTest, NotFlat_SingleNamespace) {
     b.GlobalVar("c", b.ty.i32(), ast::StorageClass::kUniform, b.Group(2), b.Binding(2));
     b.WrapInFunction(b.Expr("a"), b.Expr("b"), b.Expr("c"));
 
-    resolver::Resolver resolver(&b);
-
     Program program(std::move(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
@@ -69,12 +61,21 @@ TEST_F(FlattenBindingsTest, NotFlat_SingleNamespace) {
     EXPECT_TRUE(flattened);
 
     auto& vars = flattened->AST().GlobalVariables();
-    EXPECT_EQ(vars[0]->BindingPoint().group->value, 0u);
-    EXPECT_EQ(vars[0]->BindingPoint().binding->value, 0u);
-    EXPECT_EQ(vars[1]->BindingPoint().group->value, 0u);
-    EXPECT_EQ(vars[1]->BindingPoint().binding->value, 1u);
-    EXPECT_EQ(vars[2]->BindingPoint().group->value, 0u);
-    EXPECT_EQ(vars[2]->BindingPoint().binding->value, 2u);
+
+    auto* sem = flattened->Sem().Get<sem::GlobalVariable>(vars[0]);
+    ASSERT_NE(sem, nullptr);
+    EXPECT_EQ(sem->BindingPoint().group, 0u);
+    EXPECT_EQ(sem->BindingPoint().binding, 0u);
+
+    sem = flattened->Sem().Get<sem::GlobalVariable>(vars[1]);
+    ASSERT_NE(sem, nullptr);
+    EXPECT_EQ(sem->BindingPoint().group, 0u);
+    EXPECT_EQ(sem->BindingPoint().binding, 1u);
+
+    sem = flattened->Sem().Get<sem::GlobalVariable>(vars[2]);
+    ASSERT_NE(sem, nullptr);
+    EXPECT_EQ(sem->BindingPoint().group, 0u);
+    EXPECT_EQ(sem->BindingPoint().binding, 2u);
 }
 
 TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
@@ -113,8 +114,6 @@ TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
                      b.Assign(b.Phony(), "texture4"), b.Assign(b.Phony(), "texture5"),
                      b.Assign(b.Phony(), "texture6"));
 
-    resolver::Resolver resolver(&b);
-
     Program program(std::move(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
 
@@ -124,16 +123,22 @@ TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
     auto& vars = flattened->AST().GlobalVariables();
 
     for (size_t i = 0; i < num_buffers; ++i) {
-        EXPECT_EQ(vars[i]->BindingPoint().group->value, 0u);
-        EXPECT_EQ(vars[i]->BindingPoint().binding->value, i);
+        auto* sem = flattened->Sem().Get<sem::GlobalVariable>(vars[i]);
+        ASSERT_NE(sem, nullptr);
+        EXPECT_EQ(sem->BindingPoint().group, 0u);
+        EXPECT_EQ(sem->BindingPoint().binding, i);
     }
     for (size_t i = 0; i < num_samplers; ++i) {
-        EXPECT_EQ(vars[i + num_buffers]->BindingPoint().group->value, 0u);
-        EXPECT_EQ(vars[i + num_buffers]->BindingPoint().binding->value, i);
+        auto* sem = flattened->Sem().Get<sem::GlobalVariable>(vars[i + num_buffers]);
+        ASSERT_NE(sem, nullptr);
+        EXPECT_EQ(sem->BindingPoint().group, 0u);
+        EXPECT_EQ(sem->BindingPoint().binding, i);
     }
     for (size_t i = 0; i < num_textures; ++i) {
-        EXPECT_EQ(vars[i + num_buffers + num_samplers]->BindingPoint().group->value, 0u);
-        EXPECT_EQ(vars[i + num_buffers + num_samplers]->BindingPoint().binding->value, i);
+        auto* sem = flattened->Sem().Get<sem::GlobalVariable>(vars[i + num_buffers + num_samplers]);
+        ASSERT_NE(sem, nullptr);
+        EXPECT_EQ(sem->BindingPoint().group, 0u);
+        EXPECT_EQ(sem->BindingPoint().binding, i);
     }
 }
 

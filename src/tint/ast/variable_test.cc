@@ -105,36 +105,24 @@ TEST_F(VariableTest, WithAttributes) {
     EXPECT_EQ(1u, location->value);
 }
 
-TEST_F(VariableTest, BindingPoint) {
+TEST_F(VariableTest, HasBindingPoint_BothProvided) {
     auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, Binding(2), Group(1));
-    EXPECT_TRUE(var->BindingPoint());
-    ASSERT_NE(var->BindingPoint().binding, nullptr);
-    ASSERT_NE(var->BindingPoint().group, nullptr);
-    EXPECT_EQ(var->BindingPoint().binding->value, 2u);
-    EXPECT_EQ(var->BindingPoint().group->value, 1u);
+    EXPECT_TRUE(var->HasBindingPoint());
 }
 
-TEST_F(VariableTest, BindingPointAttributes) {
+TEST_F(VariableTest, HasBindingPoint_NeitherProvided) {
     auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, utils::Empty);
-    EXPECT_FALSE(var->BindingPoint());
-    EXPECT_EQ(var->BindingPoint().group, nullptr);
-    EXPECT_EQ(var->BindingPoint().binding, nullptr);
+    EXPECT_FALSE(var->HasBindingPoint());
 }
 
-TEST_F(VariableTest, BindingPointMissingGroupAttribute) {
+TEST_F(VariableTest, HasBindingPoint_MissingGroupAttribute) {
     auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, Binding(2));
-    EXPECT_FALSE(var->BindingPoint());
-    ASSERT_NE(var->BindingPoint().binding, nullptr);
-    EXPECT_EQ(var->BindingPoint().binding->value, 2u);
-    EXPECT_EQ(var->BindingPoint().group, nullptr);
+    EXPECT_FALSE(var->HasBindingPoint());
 }
 
-TEST_F(VariableTest, BindingPointMissingBindingAttribute) {
+TEST_F(VariableTest, HasBindingPoint_MissingBindingAttribute) {
     auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, Group(1));
-    EXPECT_FALSE(var->BindingPoint());
-    ASSERT_NE(var->BindingPoint().group, nullptr);
-    EXPECT_EQ(var->BindingPoint().group->value, 1u);
-    EXPECT_EQ(var->BindingPoint().binding, nullptr);
+    EXPECT_FALSE(var->HasBindingPoint());
 }
 
 }  // namespace

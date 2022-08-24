@@ -1914,18 +1914,19 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
     // attribute have a value of zero.
     const uint32_t kInvalidBindingIndex = std::numeric_limits<uint32_t>::max();
     auto get_binding_index = [&](const ast::Parameter* param) -> uint32_t {
-        auto bp = param->BindingPoint();
-        if (bp.group == nullptr || bp.binding == nullptr) {
+        if (!param->HasBindingPoint()) {
             TINT_ICE(Writer, diagnostics_)
                 << "missing binding attributes for entry point parameter";
             return kInvalidBindingIndex;
         }
-        if (bp.group->value != 0) {
+        auto* param_sem = program_->Sem().Get<sem::Parameter>(param);
+        auto bp = param_sem->BindingPoint();
+        if (bp.group != 0) {
             TINT_ICE(Writer, diagnostics_) << "encountered non-zero resource group index (use "
                                               "BindingRemapper to fix)";
             return kInvalidBindingIndex;
         }
-        return bp.binding->value;
+        return bp.binding;
     };
 
     {

@@ -87,7 +87,7 @@ struct MultiplanarExternalTexture::State {
         // represent the secondary plane and one uniform buffer for the
         // ExternalTextureParams struct).
         for (auto* global : ctx.src->AST().GlobalVariables()) {
-            auto* sem_var = sem.Get(global);
+            auto* sem_var = sem.Get<sem::GlobalVariable>(global);
             if (!sem_var->Type()->UnwrapRef()->Is<sem::ExternalTexture>()) {
                 continue;
             }
@@ -109,8 +109,7 @@ struct MultiplanarExternalTexture::State {
             // provided to this transform. We fetch the new binding points by
             // providing the original texture_external binding points into the
             // passed map.
-            BindingPoint bp = {global->BindingPoint().group->value,
-                               global->BindingPoint().binding->value};
+            BindingPoint bp = sem_var->BindingPoint();
 
             BindingsMap::const_iterator it = new_binding_points->bindings_map.find(bp);
             if (it == new_binding_points->bindings_map.end()) {

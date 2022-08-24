@@ -578,8 +578,21 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
     sem::Variable* sem = nullptr;
     if (is_global) {
         sem::BindingPoint binding_point;
-        if (auto bp = var->BindingPoint()) {
-            binding_point = {bp.group->value, bp.binding->value};
+        if (var->HasBindingPoint()) {
+            uint32_t binding = 0;
+            {
+                auto* attr = ast::GetAttribute<ast::BindingAttribute>(var->attributes);
+                // TODO(dsinclair): Materialize when binding attribute is an expression
+                binding = attr->value;
+            }
+
+            uint32_t group = 0;
+            {
+                auto* attr = ast::GetAttribute<ast::GroupAttribute>(var->attributes);
+                // TODO(dsinclair): Materialize when group attribute is an expression
+                group = attr->value;
+            }
+            binding_point = {group, binding};
         }
         sem = builder_->create<sem::GlobalVariable>(var, var_ty, sem::EvaluationStage::kRuntime,
                                                     storage_class, access,
@@ -629,8 +642,23 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
         }
     }
 
+    sem::BindingPoint binding_point;
+    if (param->HasBindingPoint()) {
+        {
+            auto* attr = ast::GetAttribute<ast::BindingAttribute>(param->attributes);
+            // TODO(dsinclair): Materialize the binding information
+            binding_point.binding = attr->value;
+        }
+        {
+            auto* attr = ast::GetAttribute<ast::GroupAttribute>(param->attributes);
+            // TODO(dsinclair): Materialize the group information
+            binding_point.group = attr->value;
+        }
+    }
+
     auto* sem = builder_->create<sem::Parameter>(param, index, ty, ast::StorageClass::kNone,
-                                                 ast::Access::kUndefined);
+                                                 ast::Access::kUndefined,
+                                                 sem::ParameterUsage::kNone, binding_point);
     builder_->Sem().Add(param, sem);
     return sem;
 }

@@ -188,12 +188,14 @@ class Parameter final : public Castable<Parameter, Variable> {
     /// @param storage_class the variable storage class
     /// @param access the variable access control type
     /// @param usage the semantic usage for the parameter
+    /// @param binding_point the optional resource binding point of the parameter
     Parameter(const ast::Parameter* declaration,
               uint32_t index,
               const sem::Type* type,
               ast::StorageClass storage_class,
               ast::Access access,
-              const ParameterUsage usage = ParameterUsage::kNone);
+              const ParameterUsage usage = ParameterUsage::kNone,
+              sem::BindingPoint binding_point = {});
 
     /// Destructor
     ~Parameter() override;
@@ -217,11 +219,15 @@ class Parameter final : public Castable<Parameter, Variable> {
     /// @param shadows the Type, Function or Variable that this variable shadows
     void SetShadows(const sem::Node* shadows) { shadows_ = shadows; }
 
+    /// @returns the resource binding point for the parameter
+    sem::BindingPoint BindingPoint() const { return binding_point_; }
+
   private:
     const uint32_t index_;
     const ParameterUsage usage_;
     CallTarget const* owner_ = nullptr;
     const sem::Node* shadows_ = nullptr;
+    const sem::BindingPoint binding_point_;
 };
 
 /// VariableUser holds the semantic information for an identifier expression

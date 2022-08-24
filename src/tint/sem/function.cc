@@ -70,8 +70,8 @@ Function::VariableBindings Function::TransitivelyReferencedUniformVariables() co
             continue;
         }
 
-        if (auto binding_point = global->Declaration()->BindingPoint()) {
-            ret.push_back({global, binding_point});
+        if (global->Declaration()->HasBindingPoint()) {
+            ret.push_back({global, global->BindingPoint()});
         }
     }
     return ret;
@@ -85,8 +85,8 @@ Function::VariableBindings Function::TransitivelyReferencedStorageBufferVariable
             continue;
         }
 
-        if (auto binding_point = global->Declaration()->BindingPoint()) {
-            ret.push_back({global, binding_point});
+        if (global->Declaration()->HasBindingPoint()) {
+            ret.push_back({global, global->BindingPoint()});
         }
     }
     return ret;
@@ -129,8 +129,8 @@ Function::VariableBindings Function::TransitivelyReferencedVariablesOfType(
     for (auto* global : TransitivelyReferencedGlobals()) {
         auto* unwrapped_type = global->Type()->UnwrapRef();
         if (unwrapped_type->TypeInfo().Is(type)) {
-            if (auto binding_point = global->Declaration()->BindingPoint()) {
-                ret.push_back({global, binding_point});
+            if (global->Declaration()->HasBindingPoint()) {
+                ret.push_back({global, global->BindingPoint()});
             }
         }
     }
@@ -157,8 +157,8 @@ Function::VariableBindings Function::TransitivelyReferencedSamplerVariablesImpl(
             continue;
         }
 
-        if (auto binding_point = global->Declaration()->BindingPoint()) {
-            ret.push_back({global, binding_point});
+        if (global->Declaration()->HasBindingPoint()) {
+            ret.push_back({global, global->BindingPoint()});
         }
     }
     return ret;
@@ -182,8 +182,8 @@ Function::VariableBindings Function::TransitivelyReferencedSampledTextureVariabl
             continue;
         }
 
-        if (auto binding_point = global->Declaration()->BindingPoint()) {
-            ret.push_back({global, binding_point});
+        if (global->Declaration()->HasBindingPoint()) {
+            ret.push_back({global, global->BindingPoint()});
         }
     }
 

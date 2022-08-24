@@ -37,16 +37,4 @@ Variable::Variable(Variable&&) = default;
 
 Variable::~Variable() = default;
 
-VariableBindingPoint Variable::BindingPoint() const {
-    const GroupAttribute* group = nullptr;
-    const BindingAttribute* binding = nullptr;
-    for (auto* attr : attributes) {
-        Switch(
-            attr,  //
-            [&](const GroupAttribute* a) { group = a; },
-            [&](const BindingAttribute* a) { binding = a; });
-    }
-    return VariableBindingPoint{group, binding};
-}
-
 }  // namespace tint::ast

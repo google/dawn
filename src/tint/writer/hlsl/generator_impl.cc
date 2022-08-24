@@ -136,15 +136,15 @@ bool PrintF16(std::ostream& out, float value) {
 // Helper for writing " : register(RX, spaceY)", where R is the register, X is
 // the binding point binding value, and Y is the binding point group value.
 struct RegisterAndSpace {
-    RegisterAndSpace(char r, ast::VariableBindingPoint bp) : reg(r), binding_point(bp) {}
+    RegisterAndSpace(char r, sem::BindingPoint bp) : reg(r), binding_point(bp) {}
 
     const char reg;
-    ast::VariableBindingPoint const binding_point;
+    sem::BindingPoint const binding_point;
 };
 
 std::ostream& operator<<(std::ostream& s, const RegisterAndSpace& rs) {
-    s << " : register(" << rs.reg << rs.binding_point.binding->value << ", space"
-      << rs.binding_point.group->value << ")";
+    s << " : register(" << rs.reg << rs.binding_point.binding << ", space" << rs.binding_point.group
+      << ")";
     return s;
 }
 
@@ -2861,7 +2861,7 @@ bool GeneratorImpl::EmitGlobalVariable(const ast::Variable* global) {
 }
 
 bool GeneratorImpl::EmitUniformVariable(const ast::Var* var, const sem::Variable* sem) {
-    auto binding_point = var->BindingPoint();
+    auto binding_point = sem->As<sem::GlobalVariable>()->BindingPoint();
     auto* type = sem->Type()->UnwrapRef();
     auto name = builder_.Symbols().NameFor(var->symbol);
     line() << "cbuffer cbuffer_" << name << RegisterAndSpace('b', binding_point) << " {";
@@ -2888,7 +2888,9 @@ bool GeneratorImpl::EmitStorageVariable(const ast::Var* var, const sem::Variable
         return false;
     }
 
-    out << RegisterAndSpace(sem->Access() == ast::Access::kRead ? 't' : 'u', var->BindingPoint())
+    auto* global_sem = sem->As<sem::GlobalVariable>();
+    out << RegisterAndSpace(sem->Access() == ast::Access::kRead ? 't' : 'u',
+                            global_sem->BindingPoint())
         << ";";
 
     return true;
@@ -2916,9 +2918,8 @@ bool GeneratorImpl::EmitHandleVariable(const ast::Var* var, const sem::Variable*
     }
 
     if (register_space) {
-        auto bp = var->BindingPoint();
-        out << " : register(" << register_space << bp.binding->value << ", space" << bp.group->value
-            << ")";
+        auto bp = sem->As<sem::GlobalVariable>()->BindingPoint();
+        out << " : register(" << register_space << bp.binding << ", space" << bp.group << ")";
     }
 
     out << ";";

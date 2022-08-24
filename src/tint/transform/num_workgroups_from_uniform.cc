@@ -136,9 +136,11 @@ void NumWorkgroupsFromUniform::Run(CloneContext& ctx, const DataMap& inputs, Dat
                 group = 0;
 
                 for (auto* global : ctx.src->AST().GlobalVariables()) {
-                    if (auto binding_point = global->BindingPoint()) {
-                        if (binding_point.group->value >= group) {
-                            group = binding_point.group->value + 1;
+                    if (global->HasBindingPoint()) {
+                        auto* global_sem = ctx.src->Sem().Get<sem::GlobalVariable>(global);
+                        auto binding_point = global_sem->BindingPoint();
+                        if (binding_point.group >= group) {
+                            group = binding_point.group + 1;
                         }
                     }
                 }

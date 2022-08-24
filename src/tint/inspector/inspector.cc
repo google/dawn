@@ -370,8 +370,8 @@ std::vector<ResourceBinding> Inspector::GetUniformBufferResourceBindings(
 
         ResourceBinding entry;
         entry.resource_type = ResourceBinding::ResourceType::kUniformBuffer;
-        entry.bind_group = binding_info.group->value;
-        entry.binding = binding_info.binding->value;
+        entry.bind_group = binding_info.group;
+        entry.binding = binding_info.binding;
         entry.size = unwrapped_type->Size();
         entry.size_no_padding = entry.size;
         if (auto* str = unwrapped_type->As<sem::Struct>()) {
@@ -410,8 +410,8 @@ std::vector<ResourceBinding> Inspector::GetSamplerResourceBindings(const std::st
 
         ResourceBinding entry;
         entry.resource_type = ResourceBinding::ResourceType::kSampler;
-        entry.bind_group = binding_info.group->value;
-        entry.binding = binding_info.binding->value;
+        entry.bind_group = binding_info.group;
+        entry.binding = binding_info.binding;
 
         result.push_back(entry);
     }
@@ -434,8 +434,8 @@ std::vector<ResourceBinding> Inspector::GetComparisonSamplerResourceBindings(
 
         ResourceBinding entry;
         entry.resource_type = ResourceBinding::ResourceType::kComparisonSampler;
-        entry.bind_group = binding_info.group->value;
-        entry.binding = binding_info.binding->value;
+        entry.bind_group = binding_info.group;
+        entry.binding = binding_info.binding;
 
         result.push_back(entry);
     }
@@ -475,8 +475,8 @@ std::vector<ResourceBinding> Inspector::GetTextureResourceBindings(
 
         ResourceBinding entry;
         entry.resource_type = resource_type;
-        entry.bind_group = binding_info.group->value;
-        entry.binding = binding_info.binding->value;
+        entry.bind_group = binding_info.group;
+        entry.binding = binding_info.binding;
 
         auto* tex = var->Type()->UnwrapRef()->As<sem::Texture>();
         entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(tex->dim());
@@ -692,8 +692,8 @@ std::vector<ResourceBinding> Inspector::GetStorageBufferResourceBindingsImpl(
         ResourceBinding entry;
         entry.resource_type = read_only ? ResourceBinding::ResourceType::kReadOnlyStorageBuffer
                                         : ResourceBinding::ResourceType::kStorageBuffer;
-        entry.bind_group = binding_info.group->value;
-        entry.binding = binding_info.binding->value;
+        entry.bind_group = binding_info.group;
+        entry.binding = binding_info.binding;
         entry.size = unwrapped_type->Size();
         if (auto* str = unwrapped_type->As<sem::Struct>()) {
             entry.size_no_padding = str->SizeNoPadding();
@@ -728,8 +728,8 @@ std::vector<ResourceBinding> Inspector::GetSampledTextureResourceBindingsImpl(
         entry.resource_type = multisampled_only
                                   ? ResourceBinding::ResourceType::kMultisampledTexture
                                   : ResourceBinding::ResourceType::kSampledTexture;
-        entry.bind_group = binding_info.group->value;
-        entry.binding = binding_info.binding->value;
+        entry.bind_group = binding_info.group;
+        entry.binding = binding_info.binding;
 
         auto* texture_type = var->Type()->UnwrapRef()->As<sem::Texture>();
         entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(texture_type->dim());
@@ -765,8 +765,8 @@ std::vector<ResourceBinding> Inspector::GetStorageTextureResourceBindingsImpl(
 
         ResourceBinding entry;
         entry.resource_type = ResourceBinding::ResourceType::kWriteOnlyStorageTexture;
-        entry.bind_group = binding_info.group->value;
-        entry.binding = binding_info.binding->value;
+        entry.bind_group = binding_info.group;
+        entry.binding = binding_info.binding;
 
         entry.dim = TypeTextureDimensionToResourceBindingTextureDimension(texture_type->dim());
 
@@ -838,13 +838,8 @@ void Inspector::GenerateSamplerTargets() {
         GetOriginatingResources(
             std::array<const ast::Expression*, 2>{t, s},
             [&](std::array<const sem::GlobalVariable*, 2> globals) {
-                auto* texture = globals[0]->Declaration()->As<ast::Var>();
-                sem::BindingPoint texture_binding_point = {texture->BindingPoint().group->value,
-                                                           texture->BindingPoint().binding->value};
-
-                auto* sampler = globals[1]->Declaration()->As<ast::Var>();
-                sem::BindingPoint sampler_binding_point = {sampler->BindingPoint().group->value,
-                                                           sampler->BindingPoint().binding->value};
+                auto texture_binding_point = globals[0]->BindingPoint();
+                auto sampler_binding_point = globals[1]->BindingPoint();
 
                 for (auto* entry_point : entry_points) {
                     const auto& ep_name =

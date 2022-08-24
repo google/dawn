@@ -664,7 +664,6 @@ bool Validator::GlobalVariable(
         return false;
     }
 
-    auto binding_point = decl->BindingPoint();
     switch (global->StorageClass()) {
         case ast::StorageClass::kUniform:
         case ast::StorageClass::kStorage:
@@ -672,20 +671,23 @@ bool Validator::GlobalVariable(
             // https://gpuweb.github.io/gpuweb/wgsl/#resource-interface
             // Each resource variable must be declared with both group and binding
             // attributes.
-            if (!binding_point) {
+            if (!decl->HasBindingPoint()) {
                 AddError("resource variables require @group and @binding attributes", decl->source);
                 return false;
             }
             break;
         }
-        default:
-            if (binding_point.binding || binding_point.group) {
+        default: {
+            auto* binding_attr = ast::GetAttribute<ast::BindingAttribute>(decl->attributes);
+            auto* group_attr = ast::GetAttribute<ast::GroupAttribute>(decl->attributes);
+            if (binding_attr || group_attr) {
                 // https://gpuweb.github.io/gpuweb/wgsl/#attribute-binding
                 // Must only be applied to a resource variable
                 AddError("non-resource variables must not have @group or @binding attributes",
                          decl->source);
                 return false;
             }
+        }
     }
 
     return true;
@@ -1351,7 +1353,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     std::unordered_map<sem::BindingPoint, const ast::Variable*> binding_points;
     for (auto* global : func->TransitivelyReferencedGlobals()) {
         auto* var_decl = global->Declaration()->As<ast::Var>();
-        if (!var_decl || !var_decl->BindingPoint()) {
+        if (!var_decl || !var_decl->HasBindingPoint()) {
             continue;
         }
         auto bp = global->BindingPoint();
