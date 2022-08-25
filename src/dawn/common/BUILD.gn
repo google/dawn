@@ -115,6 +115,7 @@ config("internal_config") {
       "-Wdeprecated-copy",
       "-Wdeprecated-copy-dtor",
       "-Wduplicate-enum",
+      "-Wextra-semi",
       "-Wextra-semi-stmt",
       "-Wimplicit-fallthrough",
       "-Winconsistent-missing-destructor-override",

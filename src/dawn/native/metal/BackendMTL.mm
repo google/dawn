@@ -406,7 +406,7 @@ class Adapter : public AdapterBase {
         if (mDeviceId != 0) {
             mArchitectureName = gpu_info::GetArchitectureName(mVendorId, mDeviceId);
         }
-    };
+    }
 
     enum class MTLGPUFamily {
         Apple1,
