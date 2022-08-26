@@ -52,6 +52,7 @@ tint::writer::glsl::Version::Standard ToTintGLStandard(opengl::OpenGLVersion::St
         case opengl::OpenGLVersion::Standard::ES:
             return tint::writer::glsl::Version::Standard::kES;
     }
+    UNREACHABLE();
 }
 
 using BindingMap = std::unordered_map<tint::sem::BindingPoint, tint::sem::BindingPoint>;
