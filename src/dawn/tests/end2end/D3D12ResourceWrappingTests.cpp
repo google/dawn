@@ -849,6 +849,28 @@ TEST_P(D3D12SharedHandleUsageTests, DisallowExternalImageAfterDestroyDevice) {
     EXPECT_EQ(texture, nullptr);
 }
 
+// Verify there is no error generated when we destroy an external image with CommandRecordingContext
+// open.
+TEST_P(D3D12SharedHandleUsageTests, CallWriteBufferBeforeDestroyingExternalImage) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+
+    wgpu::Texture texture;
+    ComPtr<ID3D11Texture2D> d3d11Texture;
+    std::unique_ptr<dawn::native::d3d12::ExternalImageDXGI> externalImage;
+    WrapSharedHandle(&baseDawnDescriptor, &baseD3dDescriptor, &texture, &d3d11Texture,
+                     &externalImage, /*fenceSignalValue=*/1);
+
+    // In utils::CreateBufferFromData() we will call queue.WriteBuffer(), which will make a
+    // recording context pending.
+    constexpr uint32_t kExpected = 1u;
+    wgpu::Buffer buffer = utils::CreateBufferFromData(
+        device, wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst, {kExpected});
+
+    externalImage = nullptr;
+
+    EXPECT_BUFFER_U32_EQ(kExpected, buffer, 0);
+}
+
 DAWN_INSTANTIATE_TEST_P(D3D12SharedHandleValidation,
                         {D3D12Backend()},
                         {SyncMode::kKeyedMutex, SyncMode::kFence});

@@ -64,6 +64,7 @@ void ExternalImageDXGIImpl::Destroy() {
         RemoveFromList();
 
         // Keep fence alive until any pending signal calls are done on the GPU.
+        mBackendDevice->ConsumedError(mBackendDevice->ExecutePendingCommandContext());
         mBackendDevice->ConsumedError(mBackendDevice->NextSerial());
         mBackendDevice->ReferenceUntilUnused(mD3D12Fence.Get());
         mBackendDevice = nullptr;
