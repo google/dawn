@@ -357,6 +357,8 @@ crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,tanh:f16:inp
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,transpose:f16:inputSource="const";* [ Skip ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,trunc:abstract_float:inputSource="const";* [ Skip ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,unary,f32_arithmetic:negation:inputSource="const";* [ Skip ]
+crbug.com/tint/1613 webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="const";* [ Skip ]
+
 
 ################################################################################
 # shader execution failures
@@ -387,6 +389,9 @@ crbug.com/dawn/0000 [ intel-gen-9 ubuntu ] webgpu:shader,execution,expression,ca
 crbug.com/dawn/0000 [ intel-gen-9 ubuntu ] webgpu:shader,execution,expression,call,builtin,countTrailingZeros:u32:inputSource="uniform";vectorize=2 [ Failure ]
 crbug.com/dawn/0000 [ intel-gen-9 ubuntu ] webgpu:shader,execution,expression,call,builtin,countTrailingZeros:u32:inputSource="uniform";vectorize=3 [ Failure ]
 crbug.com/dawn/0000 [ intel-gen-9 ubuntu ] webgpu:shader,execution,expression,call,builtin,countTrailingZeros:u32:inputSource="uniform";vectorize=4 [ Failure ]
+crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="storage_r";* [ Failure ]
+crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="storage_rw";* [ Failure ]
+crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,binary,f32_arithmetic:remainder:inputSource="uniform";* [ Failure ]
 crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,extractBits:i32:inputSource="storage_r";width=1 [ Failure ]
 crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,extractBits:i32:inputSource="storage_r";width=2 [ Failure ]
 crbug.com/dawn/0000 [ win10 ] webgpu:shader,execution,expression,call,builtin,extractBits:i32:inputSource="storage_r";width=3 [ Failure ]
@@ -496,6 +501,9 @@ crbug.com/tint/0000 webgpu:shader,validation,parse,identifiers:identifiers:* [ F
 ################################################################################
 # API validation failures
 ################################################################################
+crbug.com/dawn/1523 webgpu:api,validation,createBindGroupLayout:maximum_binding_limit:* [ Failure ]
+crbug.com/dawn/1524 webgpu:api,validation,image_copy,buffer_texture_copies:sample_count:copyType="CopyB2T" [ Failure ]
+crbug.com/dawn/1524 webgpu:api,validation,image_copy,buffer_texture_copies:sample_count:copyType="CopyT2B" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,input:isAsync=false;numScalarDelta=-3;useExtraBuiltinInputs=true [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,input:isAsync=false;numScalarDelta=0;useExtraBuiltinInputs=false [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,input:isAsync=true;numScalarDelta=-3;useExtraBuiltinInputs=true [ Failure ]

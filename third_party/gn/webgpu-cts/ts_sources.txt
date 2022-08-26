@@ -1,3 +1,4 @@
+src/common/framework/test_config.ts
 src/common/internal/version.ts
 src/common/internal/stack.ts
 src/common/internal/logging/log_message.ts
@@ -135,6 +136,7 @@ src/webgpu/api/operation/buffers/threading.spec.ts
 src/webgpu/api/operation/command_buffer/basic.spec.ts
 src/webgpu/api/operation/command_buffer/clearBuffer.spec.ts
 src/webgpu/api/operation/command_buffer/copyBufferToBuffer.spec.ts
+src/webgpu/util/texture/data_generation.ts
 src/webgpu/api/operation/command_buffer/copyTextureToTexture.spec.ts
 src/webgpu/api/operation/command_buffer/image_copy.spec.ts
 src/webgpu/api/operation/command_buffer/programmable/programmable_state_test.ts
