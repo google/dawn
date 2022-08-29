@@ -734,6 +734,9 @@ bool DeviceBase::IsDeviceIdle() {
     if (mAsyncTaskManager->HasPendingTasks()) {
         return false;
     }
+    if (!mCallbackTaskManager->IsEmpty()) {
+        return false;
+    }
 
     ExecutionSerial maxSerial = std::max(mLastSubmittedSerial, mFutureSerial);
     if (mCompletedSerial == maxSerial) {
