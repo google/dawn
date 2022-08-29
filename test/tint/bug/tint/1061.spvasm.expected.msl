@@ -1,0 +1,48 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct buf0 {
+  /* 0x0000 */ float4 ref;
+};
+
+void main_1(const constant buf0* const tint_symbol_3, thread float4* const tint_symbol_4) {
+  float f = 0.0f;
+  float4 v = 0.0f;
+  f = determinant(float3x3(float3(1.0f, 0.0f, 0.0f), float3(0.0f, 1.0f, 0.0f), float3(0.0f, 0.0f, 1.0f)));
+  float const x_33 = f;
+  float const x_35 = f;
+  float const x_37 = f;
+  float const x_39 = f;
+  v = float4(sin(x_33), cos(x_35), exp2(x_37), log(x_39));
+  float4 const x_42 = v;
+  float4 const x_44 = (*(tint_symbol_3)).ref;
+  if ((distance(x_42, x_44) < 0.100000001f)) {
+    *(tint_symbol_4) = float4(1.0f, 0.0f, 0.0f, 1.0f);
+  } else {
+    *(tint_symbol_4) = float4(0.0f);
+  }
+  return;
+}
+
+struct main_out {
+  float4 x_GLF_color_1;
+};
+
+struct tint_symbol_1 {
+  float4 x_GLF_color_1 [[color(0)]];
+};
+
+main_out tint_symbol_inner(const constant buf0* const tint_symbol_5, thread float4* const tint_symbol_6) {
+  main_1(tint_symbol_5, tint_symbol_6);
+  main_out const tint_symbol_2 = {.x_GLF_color_1=*(tint_symbol_6)};
+  return tint_symbol_2;
+}
+
+fragment tint_symbol_1 tint_symbol(const constant buf0* tint_symbol_7 [[buffer(0)]]) {
+  thread float4 tint_symbol_8 = 0.0f;
+  main_out const inner_result = tint_symbol_inner(tint_symbol_7, &(tint_symbol_8));
+  tint_symbol_1 wrapper_result = {};
+  wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
+  return wrapper_result;
+}
+

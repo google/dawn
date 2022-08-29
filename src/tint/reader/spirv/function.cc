@@ -315,6 +315,8 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
             return "cross";
         case GLSLstd450Degrees:
             return "degrees";
+        case GLSLstd450Determinant:
+            return "determinant";
         case GLSLstd450Distance:
             return "distance";
         case GLSLstd450Exp:
@@ -413,7 +415,6 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
         case GLSLstd450Acosh:
         case GLSLstd450Atanh:
 
-        case GLSLstd450Determinant:
         case GLSLstd450MatrixInverse:
 
         case GLSLstd450Modf:
@@ -3960,6 +3961,12 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
         // Some GLSLstd450 builtins have scalar forms not supported by WGSL.
         // Emulate them.
         switch (ext_opcode) {
+            case GLSLstd450Determinant: {
+                auto m = MakeOperand(inst, 2);
+                TINT_ASSERT(Reader, m.type->Is<Matrix>());
+                return {ty_.F32(), builder_.Call(Source{}, "determinant", m.expr)};
+            }
+
             case GLSLstd450Normalize:
                 // WGSL does not have scalar form of the normalize builtin.
                 // The answer would be 1 anyway, so return that directly.

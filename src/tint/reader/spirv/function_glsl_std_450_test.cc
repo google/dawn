@@ -52,6 +52,9 @@ std::string Preamble() {
   OpName %v3f2 "v3f2"
   OpName %v4f1 "v4f1"
   OpName %v4f2 "v4f2"
+  OpName %m2x2f1 "m2x2f1"
+  OpName %m3x3f1 "m3x3f1"
+  OpName %m4x4f1 "m4x4f1"
 
   %void = OpTypeVoid
   %voidfn = OpTypeFunction %void
@@ -75,6 +78,9 @@ std::string Preamble() {
   %v2float = OpTypeVector %float 2
   %v3float = OpTypeVector %float 3
   %v4float = OpTypeVector %float 4
+  %mat2v2float = OpTypeMatrix %v2float 2
+  %mat3v3float = OpTypeMatrix %v3float 3
+  %mat4v4float = OpTypeMatrix %v4float 4
 
   %v2uint_10_20 = OpConstantComposite %v2uint %uint_10 %uint_20
   %v2uint_20_10 = OpConstantComposite %v2uint %uint_20 %uint_10
@@ -90,6 +96,10 @@ std::string Preamble() {
   %v3float_60_70_50 = OpConstantComposite %v3float %float_60 %float_70 %float_50
 
   %v4float_50_50_50_50 = OpConstantComposite %v4float %float_50 %float_50 %float_50 %float_50
+
+  %mat2v2float_50_60 = OpConstantComposite %mat2v2float %v2float_50_60 %v2float_50_60
+  %mat3v3float_50_60_70 = OpConstantComposite %mat2v2float %v3float_50_60_70 %v3float_50_60_70 %v3float_50_60_70
+  %mat4v4float_50_50_50_50 = OpConstantComposite %mat2v2float %v4float_50_50_50_50 %v4float_50_50_50_50 %v4float_50_50_50_50 %v4float_50_50_50_50
 
   %100 = OpFunction %void None %voidfn
   %entry = OpLabel
@@ -123,6 +133,10 @@ std::string Preamble() {
 
   %v4f1 = OpCopyObject %v4float %v4float_50_50_50_50
   %v4f2 = OpCopyObject %v4float %v4f1
+
+  %m2x2f1 = OpCopyObject %mat2v2float %mat2v2float_50_60
+  %m3x3f1 = OpCopyObject %mat3v3float %mat3v3float_50_60_70
+  %m4x4f1 = OpCopyObject %mat4v4float %mat4v4float_50_50_50_50
 )";
 }
 
@@ -1121,6 +1135,28 @@ TEST_F(SpvParserTest, GlslStd450_Ldexp_Vector_Floatvec_Uintvec) {
 
     EXPECT_THAT(body, HasSubstr(expected)) << body;
 }
+
+using GlslStd450_Determinant = SpvParserTestBase<::testing::TestWithParam<std::string>>;
+TEST_P(GlslStd450_Determinant, Test) {
+    const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %float %glsl Determinant %)" +
+                          GetParam() + R"(
+     OpReturn
+     OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    std::string expected = "let x_1 : f32 = determinant(" + GetParam() + ");";
+
+    EXPECT_THAT(body, HasSubstr(expected)) << body;
+}
+INSTANTIATE_TEST_SUITE_P(Test,
+                         GlslStd450_Determinant,
+                         ::testing::Values("m2x2f1", "m3x3f1", "m4x4f1"));
 
 }  // namespace
 }  // namespace tint::reader::spirv
