@@ -408,7 +408,7 @@ TEST_P(DeviceLostTest, LoseDeviceForTestingOnce) {
                                  mDeviceLostCallback.MakeUserdata(device.Get()));
     EXPECT_CALL(mDeviceLostCallback, Call(WGPUDeviceLostReason_Undefined, testing::_, device.Get()))
         .Times(0);
-    device.LoseForTesting();
+    device.ForceLoss(wgpu::DeviceLostReason::Undefined, "Device lost for testing");
     FlushWire();
     testing::Mock::VerifyAndClearExpectations(&mDeviceLostCallback);
 }

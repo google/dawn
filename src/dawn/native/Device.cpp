@@ -479,7 +479,9 @@ void DeviceBase::APIDestroy() {
     Destroy();
 }
 
-void DeviceBase::HandleError(InternalErrorType type, const char* message) {
+void DeviceBase::HandleError(InternalErrorType type,
+                             const char* message,
+                             WGPUDeviceLostReason lost_reason) {
     if (type == InternalErrorType::DeviceLost) {
         mState = State::Disconnected;
 
@@ -519,7 +521,7 @@ void DeviceBase::HandleError(InternalErrorType type, const char* message) {
     if (type == InternalErrorType::DeviceLost) {
         // The device was lost, call the application callback.
         if (mDeviceLostCallback != nullptr) {
-            mDeviceLostCallback(WGPUDeviceLostReason_Undefined, message, mDeviceLostUserdata);
+            mDeviceLostCallback(lost_reason, message, mDeviceLostUserdata);
             mDeviceLostCallback = nullptr;
         }
 
@@ -668,12 +670,11 @@ MaybeError DeviceBase::ValidateIsAlive() const {
     return {};
 }
 
-void DeviceBase::APILoseForTesting() {
+void DeviceBase::APIForceLoss(wgpu::DeviceLostReason reason, const char* message) {
     if (mState != State::Alive) {
         return;
     }
-
-    HandleError(InternalErrorType::Internal, "Device lost for testing");
+    HandleError(InternalErrorType::Internal, message, ToAPI(reason));
 }
 
 DeviceBase::State DeviceBase::GetState() const {

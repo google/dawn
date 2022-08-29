@@ -996,7 +996,7 @@ void DawnTestBase::LoseDeviceForTesting(wgpu::Device device) {
     EXPECT_CALL(mDeviceLostCallback,
                 Call(WGPUDeviceLostReason_Undefined, testing::_, resolvedDevice.Get()))
         .Times(1);
-    resolvedDevice.LoseForTesting();
+    resolvedDevice.ForceLoss(wgpu::DeviceLostReason::Undefined, "Device lost for testing");
 }
 
 std::ostringstream& DawnTestBase::AddBufferExpectation(const char* file,

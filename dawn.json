@@ -1159,7 +1159,11 @@
                 "tags": ["dawn"]
             },
             {
-                "name": "lose for testing",
+                "name": "force loss",
+                "args": [
+                    {"name": "type", "type": "device lost reason"},
+                    {"name": "message", "type": "char", "annotation": "const*", "length": "strlen"}
+                ],
                 "tags": ["dawn"]
             },
             {

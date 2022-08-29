@@ -65,7 +65,13 @@ class DeviceBase : public RefCountedWithExternalCount {
     DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor);
     ~DeviceBase() override;
 
-    void HandleError(InternalErrorType type, const char* message);
+    // Handles the error, causing a device loss if applicable. Almost always when a device loss
+    // occurs because of an error, we want to call the device loss callback with an undefined
+    // reason, but the ForceLoss API allows for an injection of the reason, hence the default
+    // argument.
+    void HandleError(InternalErrorType type,
+                     const char* message,
+                     WGPUDeviceLostReason lost_reason = WGPUDeviceLostReason_Undefined);
 
     bool ConsumedError(MaybeError maybeError) {
         if (DAWN_UNLIKELY(maybeError.IsError())) {
@@ -343,7 +349,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     void EmitDeprecationWarning(const char* warning);
     void EmitLog(const char* message);
     void EmitLog(WGPULoggingType loggingType, const char* message);
-    void APILoseForTesting();
+    void APIForceLoss(wgpu::DeviceLostReason reason, const char* message);
     QueueBase* GetQueue() const;
 
     // AddFutureSerial is used to update the mFutureSerial with the max serial needed to be
