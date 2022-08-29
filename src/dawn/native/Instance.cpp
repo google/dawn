@@ -194,9 +194,9 @@ ResultOrError<Ref<AdapterBase>> InstanceBase::RequestAdapterInternal(
 
             MaybeError result = DiscoverAdaptersInternal(&vulkanOptions);
             if (result.IsError()) {
-                dawn::WarningLog()
-                    << "Skipping Vulkan Swiftshader adapter because initialization failed: "
-                    << result.AcquireError()->GetFormattedMessage();
+                dawn::WarningLog() << absl::StrFormat(
+                    "Skipping Vulkan Swiftshader adapter because initialization failed: %s",
+                    result.AcquireError()->GetFormattedMessage());
                 return Ref<AdapterBase>(nullptr);
             }
         }
@@ -297,9 +297,9 @@ bool InstanceBase::DiscoverAdapters(const AdapterDiscoveryOptionsBase* options) 
     MaybeError result = DiscoverAdaptersInternal(options);
 
     if (result.IsError()) {
-        dawn::WarningLog() << "Skipping " << options->backendType
-                           << " adapter because initialization failed: "
-                           << result.AcquireError()->GetFormattedMessage();
+        dawn::WarningLog() << absl::StrFormat(
+            "Skipping %s adapter because initialization failed: %s", FromAPI(options->backendType),
+            result.AcquireError()->GetFormattedMessage());
         return false;
     }
 
