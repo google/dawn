@@ -106,7 +106,7 @@ TEST_F(VariableTest, WithAttributes) {
 }
 
 TEST_F(VariableTest, HasBindingPoint_BothProvided) {
-    auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, Binding(2_a), Group(1));
+    auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, Binding(2_a), Group(1_a));
     EXPECT_TRUE(var->HasBindingPoint());
 }
 
@@ -121,7 +121,7 @@ TEST_F(VariableTest, HasBindingPoint_MissingGroupAttribute) {
 }
 
 TEST_F(VariableTest, HasBindingPoint_MissingBindingAttribute) {
-    auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, Group(1));
+    auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, Group(1_a));
     EXPECT_FALSE(var->HasBindingPoint());
 }
 

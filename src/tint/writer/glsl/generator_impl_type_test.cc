@@ -312,7 +312,7 @@ TEST_P(GlslDepthTexturesTest, Emit) {
 
     auto* t = ty.depth_texture(params.dim);
 
-    GlobalVar("tex", t, Binding(1_a), Group(2));
+    GlobalVar("tex", t, Binding(1_a), Group(2_a));
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
@@ -340,7 +340,7 @@ using GlslDepthMultisampledTexturesTest = TestHelper;
 TEST_F(GlslDepthMultisampledTexturesTest, Emit) {
     auto* t = ty.depth_multisampled_texture(ast::TextureDimension::k2d);
 
-    GlobalVar("tex", t, Binding(1_a), Group(2));
+    GlobalVar("tex", t, Binding(1_a), Group(2_a));
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
@@ -384,7 +384,7 @@ TEST_P(GlslSampledTexturesTest, Emit) {
     }
     auto* t = ty.sampled_texture(params.dim, datatype);
 
-    GlobalVar("tex", t, Binding(1_a), Group(2));
+    GlobalVar("tex", t, Binding(1_a), Group(2_a));
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
@@ -519,7 +519,7 @@ TEST_P(GlslStorageTexturesTest, Emit) {
 
     auto* t = ty.storage_texture(params.dim, params.imgfmt, ast::Access::kWrite);
 
-    GlobalVar("tex", t, Binding(1_a), Group(2));
+    GlobalVar("tex", t, Binding(1_a), Group(2_a));
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{

@@ -131,10 +131,10 @@ struct MultiplanarExternalTexture::State {
             syms.plane_0 = ctx.Clone(global->symbol);
             syms.plane_1 = b.Symbols().New("ext_tex_plane_1");
             b.GlobalVar(syms.plane_1, b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32()),
-                        b.Group(bps.plane_1.group), b.Binding(AInt(bps.plane_1.binding)));
+                        b.Group(AInt(bps.plane_1.group)), b.Binding(AInt(bps.plane_1.binding)));
             syms.params = b.Symbols().New("ext_tex_params");
             b.GlobalVar(syms.params, b.ty.type_name("ExternalTextureParams"),
-                        ast::StorageClass::kUniform, b.Group(bps.params.group),
+                        ast::StorageClass::kUniform, b.Group(AInt(bps.params.group)),
                         b.Binding(AInt(bps.params.binding)));
 
             // Replace the original texture_external binding with a texture_2d<f32>

@@ -81,7 +81,7 @@ struct CombineSamplers::State {
     /// Group 0 and binding 0 are used, with collisions disabled.
     /// @returns the newly-created attribute list
     auto Attributes() const {
-        utils::Vector<const ast::Attribute*, 3> attributes{ctx.dst->Group(0),
+        utils::Vector<const ast::Attribute*, 3> attributes{ctx.dst->Group(0_a),
                                                            ctx.dst->Binding(0_a)};
         attributes.Push(ctx.dst->Disable(ast::DisabledValidation::kBindingPointCollision));
         return attributes;

@@ -194,7 +194,7 @@ TEST_F(ResolverIncrementDecrementValidationTest, ReadOnlyBuffer) {
     //   a++;
     // }
     GlobalVar(Source{{12, 34}}, "a", ty.i32(), ast::StorageClass::kStorage, ast::Access::kRead,
-              Group(0), Binding(0_a));
+              Group(0_a), Binding(0_a));
     WrapInFunction(Increment(Source{{56, 78}}, "a"));
 
     EXPECT_FALSE(r()->Resolve());

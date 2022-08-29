@@ -43,8 +43,8 @@ TEST_F(BuiltinBuilderTest, Call_TextureSampleCompare_Twice) {
     auto* s = ty.sampler(ast::SamplerKind::kComparisonSampler);
     auto* t = ty.depth_texture(ast::TextureDimension::k2d);
 
-    auto* tex = GlobalVar("texture", t, Binding(0_a), Group(0));
-    auto* sampler = GlobalVar("sampler", s, Binding(1_a), Group(0));
+    auto* tex = GlobalVar("texture", t, Binding(0_a), Group(0_a));
+    auto* sampler = GlobalVar("sampler", s, Binding(1_a), Group(0_a));
 
     auto* expr1 = Call("textureSampleCompare", "texture", "sampler", vec2<f32>(1_f, 2_f), 2_f);
     auto* expr2 = Call("textureSampleCompare", "texture", "sampler", vec2<f32>(1_f, 2_f), 2_f);
@@ -278,7 +278,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength) {
                                          Member("a", ty.array<f32>(4)),
                                      });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(1_a),
-              Group(2));
+              Group(2_a));
     auto* expr = Call("arrayLength", AddressOf(MemberAccessor("b", "a")));
 
     Func("a_func", utils::Empty, ty.void_(),
@@ -322,7 +322,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_OtherMembersInStruct) {
                                          Member(4, "a", ty.array<f32>(4)),
                                      });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(1_a),
-              Group(2));
+              Group(2_a));
     auto* expr = Call("arrayLength", AddressOf(MemberAccessor("b", "a")));
 
     Func("a_func", utils::Empty, ty.void_(),
@@ -365,7 +365,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets) {
                                          Member("a", ty.array<f32>(4)),
                                      });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(1_a),
-              Group(2));
+              Group(2_a));
 
     auto* p = Let("p", AddressOf("b"));
     auto* p2 = Let("p2", AddressOf(MemberAccessor(Deref(p), "a")));
@@ -424,7 +424,7 @@ TEST_F(BuiltinBuilderTest, Call_ArrayLength_ViaLets_WithPtrNoise) {
                                          Member("a", ty.array<f32>(4)),
                                      });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(1_a),
-              Group(2));
+              Group(2_a));
 
     auto* p = Let("p", AddressOf(Deref(AddressOf("b"))));
     auto* p2 = Let("p2", AddressOf(Deref(p)));
@@ -3224,7 +3224,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicLoad) {
                                  Member("i", ty.atomic<i32>()),
                              });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite, Binding(1_a),
-              Group(2));
+              Group(2_a));
 
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -3287,7 +3287,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicStore) {
                                  Member("i", ty.atomic<i32>()),
                              });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite, Binding(1_a),
-              Group(2));
+              Group(2_a));
 
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -3358,7 +3358,7 @@ TEST_P(Builtin_Builder_AtomicRMW_i32, Test) {
                                  Member("v", ty.atomic<i32>()),
                              });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite, Binding(1_a),
-              Group(2));
+              Group(2_a));
 
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -3430,7 +3430,7 @@ TEST_P(Builtin_Builder_AtomicRMW_u32, Test) {
                                  Member("v", ty.atomic<u32>()),
                              });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite, Binding(1_a),
-              Group(2));
+              Group(2_a));
 
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -3504,7 +3504,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicExchange) {
                                  Member("i", ty.atomic<i32>()),
                              });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite, Binding(1_a),
-              Group(2));
+              Group(2_a));
 
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -3579,7 +3579,7 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
                                  Member("i", ty.atomic<i32>()),
                              });
     GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite, Binding(1_a),
-              Group(2));
+              Group(2_a));
 
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{

@@ -1690,7 +1690,7 @@ bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
                 return Fail() << "malformed DescriptorSet decoration on ID " << id
                               << ": has no operand";
             }
-            decorations->Push(builder_.Group(Source{}, deco[1]));
+            decorations->Push(builder_.Group(Source{}, AInt(deco[1])));
         }
         if (deco[0] == SpvDecorationBinding) {
             if (deco.size() == 1) {

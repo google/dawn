@@ -124,7 +124,7 @@ void FirstIndexOffset::Run(CloneContext& ctx, const DataMap& inputs, DataMap& ou
         ctx.dst->GlobalVar(buffer_name, ctx.dst->ty.Of(struct_), ast::StorageClass::kUniform,
                            utils::Vector{
                                ctx.dst->Binding(AInt(ub_binding)),
-                               ctx.dst->Group(ub_group),
+                               ctx.dst->Group(AInt(ub_group)),
                            });
 
         // Fix up all references to the builtins with the offsets

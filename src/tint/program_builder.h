@@ -2290,16 +2290,20 @@ class ProgramBuilder {
     }
 
     /// Creates the ast::GroupAttribute
-    /// @param value group attribute index
+    /// @param value group attribute index expresion
     /// @returns the group attribute pointer
-    const ast::GroupAttribute* Group(uint32_t value) { return create<ast::GroupAttribute>(value); }
+    template <typename EXPR>
+    const ast::GroupAttribute* Group(EXPR&& value) {
+        return create<ast::GroupAttribute>(Expr(std::forward<EXPR>(value)));
+    }
 
     /// Creates the ast::GroupAttribute
     /// @param source the source
-    /// @param value group attribute index
+    /// @param value group attribute index expression
     /// @returns the group attribute pointer
-    const ast::GroupAttribute* Group(const Source& source, uint32_t value) {
-        return create<ast::GroupAttribute>(source, value);
+    template <typename EXPR>
+    const ast::GroupAttribute* Group(const Source& source, EXPR&& value) {
+        return create<ast::GroupAttribute>(source, Expr(std::forward<EXPR>(value)));
     }
 
     /// Creates the ast::BindingAttribute

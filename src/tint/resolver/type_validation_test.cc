@@ -760,7 +760,7 @@ struct DimensionParams {
 using SampledTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
 TEST_P(SampledTextureDimensionTest, All) {
     auto& params = GetParam();
-    GlobalVar(Source{{12, 34}}, "a", ty.sampled_texture(params.dim, ty.i32()), Group(0),
+    GlobalVar(Source{{12, 34}}, "a", ty.sampled_texture(params.dim, ty.i32()), Group(0_a),
               Binding(0_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -778,7 +778,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
 using MultisampledTextureDimensionTest = ResolverTestWithParam<DimensionParams>;
 TEST_P(MultisampledTextureDimensionTest, All) {
     auto& params = GetParam();
-    GlobalVar("a", ty.multisampled_texture(Source{{12, 34}}, params.dim, ty.i32()), Group(0),
+    GlobalVar("a", ty.multisampled_texture(Source{{12, 34}}, params.dim, ty.i32()), Group(0_a),
               Binding(0_a));
 
     if (params.is_valid) {
@@ -832,7 +832,7 @@ TEST_P(SampledTextureTypeTest, All) {
     GlobalVar(
         "a",
         ty.sampled_texture(Source{{12, 34}}, ast::TextureDimension::k2d, params.type_func(*this)),
-        Group(0), Binding(0_a));
+        Group(0_a), Binding(0_a));
 
     if (params.is_valid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -851,7 +851,7 @@ TEST_P(MultisampledTextureTypeTest, All) {
     GlobalVar("a",
               ty.multisampled_texture(Source{{12, 34}}, ast::TextureDimension::k2d,
                                       params.type_func(*this)),
-              Group(0), Binding(0_a));
+              Group(0_a), Binding(0_a));
 
     if (params.is_valid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -890,7 +890,7 @@ TEST_P(StorageTextureDimensionTest, All) {
     auto* st = ty.storage_texture(Source{{12, 34}}, params.dim, ast::TexelFormat::kR32Uint,
                                   ast::Access::kWrite);
 
-    GlobalVar("a", st, Group(0), Binding(0_a));
+    GlobalVar("a", st, Group(0_a), Binding(0_a));
 
     if (params.is_valid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -940,17 +940,17 @@ TEST_P(StorageTextureFormatTest, All) {
 
     auto* st_a = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d, params.format,
                                     ast::Access::kWrite);
-    GlobalVar("a", st_a, Group(0), Binding(0_a));
+    GlobalVar("a", st_a, Group(0_a), Binding(0_a));
 
     auto* st_b = ty.storage_texture(ast::TextureDimension::k2d, params.format, ast::Access::kWrite);
-    GlobalVar("b", st_b, Group(0), Binding(1_a));
+    GlobalVar("b", st_b, Group(0_a), Binding(1_a));
 
     auto* st_c =
         ty.storage_texture(ast::TextureDimension::k2dArray, params.format, ast::Access::kWrite);
-    GlobalVar("c", st_c, Group(0), Binding(2_a));
+    GlobalVar("c", st_c, Group(0_a), Binding(2_a));
 
     auto* st_d = ty.storage_texture(ast::TextureDimension::k3d, params.format, ast::Access::kWrite);
-    GlobalVar("d", st_d, Group(0), Binding(3_a));
+    GlobalVar("d", st_d, Group(0_a), Binding(3_a));
 
     if (params.is_valid) {
         EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -974,7 +974,7 @@ TEST_F(StorageTextureAccessTest, MissingAccess_Fail) {
     auto* st = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d,
                                   ast::TexelFormat::kR32Uint, ast::Access::kUndefined);
 
-    GlobalVar("a", st, Group(0), Binding(0_a));
+    GlobalVar("a", st, Group(0_a), Binding(0_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: storage texture missing access control");
@@ -987,7 +987,7 @@ TEST_F(StorageTextureAccessTest, RWAccess_Fail) {
     auto* st = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d,
                                   ast::TexelFormat::kR32Uint, ast::Access::kReadWrite);
 
-    GlobalVar("a", st, Group(0), Binding(0_a));
+    GlobalVar("a", st, Group(0_a), Binding(0_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1001,7 +1001,7 @@ TEST_F(StorageTextureAccessTest, ReadOnlyAccess_Fail) {
     auto* st = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d,
                                   ast::TexelFormat::kR32Uint, ast::Access::kRead);
 
-    GlobalVar("a", st, Group(0), Binding(0_a));
+    GlobalVar("a", st, Group(0_a), Binding(0_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1015,7 +1015,7 @@ TEST_F(StorageTextureAccessTest, WriteOnlyAccess_Pass) {
     auto* st = ty.storage_texture(ast::TextureDimension::k1d, ast::TexelFormat::kR32Uint,
                                   ast::Access::kWrite);
 
-    GlobalVar("a", st, Group(0), Binding(0_a));
+    GlobalVar("a", st, Group(0_a), Binding(0_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }

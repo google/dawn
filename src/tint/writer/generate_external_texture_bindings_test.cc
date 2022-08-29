@@ -38,7 +38,7 @@ TEST_F(GenerateExternalTextureBindingsTest, None) {
 
 TEST_F(GenerateExternalTextureBindingsTest, One) {
     ProgramBuilder b;
-    b.GlobalVar("v0", b.ty.external_texture(), b.Group(0), b.Binding(0_a));
+    b.GlobalVar("v0", b.ty.external_texture(), b.Group(0_a), b.Binding(0_a));
 
     tint::Program program(std::move(b));
     ASSERT_TRUE(program.IsValid());
@@ -54,8 +54,8 @@ TEST_F(GenerateExternalTextureBindingsTest, One) {
 
 TEST_F(GenerateExternalTextureBindingsTest, Two_SameGroup) {
     ProgramBuilder b;
-    b.GlobalVar("v0", b.ty.external_texture(), b.Group(0), b.Binding(0_a));
-    b.GlobalVar("v1", b.ty.external_texture(), b.Group(0), b.Binding(1_a));
+    b.GlobalVar("v0", b.ty.external_texture(), b.Group(0_a), b.Binding(0_a));
+    b.GlobalVar("v1", b.ty.external_texture(), b.Group(0_a), b.Binding(1_a));
 
     tint::Program program(std::move(b));
     ASSERT_TRUE(program.IsValid());
@@ -77,8 +77,8 @@ TEST_F(GenerateExternalTextureBindingsTest, Two_SameGroup) {
 
 TEST_F(GenerateExternalTextureBindingsTest, Two_DifferentGroup) {
     ProgramBuilder b;
-    b.GlobalVar("v0", b.ty.external_texture(), b.Group(0), b.Binding(0_a));
-    b.GlobalVar("v1", b.ty.external_texture(), b.Group(1), b.Binding(0_a));
+    b.GlobalVar("v0", b.ty.external_texture(), b.Group(0_a), b.Binding(0_a));
+    b.GlobalVar("v1", b.ty.external_texture(), b.Group(1_a), b.Binding(0_a));
 
     tint::Program program(std::move(b));
     ASSERT_TRUE(program.IsValid());
@@ -100,11 +100,11 @@ TEST_F(GenerateExternalTextureBindingsTest, Two_DifferentGroup) {
 
 TEST_F(GenerateExternalTextureBindingsTest, Two_WithOtherBindingsInSameGroup) {
     ProgramBuilder b;
-    b.GlobalVar("v0", b.ty.i32(), b.Group(0), b.Binding(0_a), kUniform);
-    b.GlobalVar("v1", b.ty.external_texture(), b.Group(0), b.Binding(1_a));
-    b.GlobalVar("v2", b.ty.i32(), b.Group(0), b.Binding(2_a), kUniform);
-    b.GlobalVar("v3", b.ty.external_texture(), b.Group(0), b.Binding(3_a));
-    b.GlobalVar("v4", b.ty.i32(), b.Group(0), b.Binding(4_a), kUniform);
+    b.GlobalVar("v0", b.ty.i32(), b.Group(0_a), b.Binding(0_a), kUniform);
+    b.GlobalVar("v1", b.ty.external_texture(), b.Group(0_a), b.Binding(1_a));
+    b.GlobalVar("v2", b.ty.i32(), b.Group(0_a), b.Binding(2_a), kUniform);
+    b.GlobalVar("v3", b.ty.external_texture(), b.Group(0_a), b.Binding(3_a));
+    b.GlobalVar("v4", b.ty.i32(), b.Group(0_a), b.Binding(4_a), kUniform);
 
     tint::Program program(std::move(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();

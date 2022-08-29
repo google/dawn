@@ -64,9 +64,9 @@ TEST_F(ResolverPtrRefTest, DefaultPtrStorageClass) {
     auto* private_ = GlobalVar("p", ty.i32(), ast::StorageClass::kPrivate);
     auto* workgroup = GlobalVar("w", ty.i32(), ast::StorageClass::kWorkgroup);
     auto* uniform =
-        GlobalVar("ub", ty.Of(buf), ast::StorageClass::kUniform, Binding(0_a), Group(0));
+        GlobalVar("ub", ty.Of(buf), ast::StorageClass::kUniform, Binding(0_a), Group(0_a));
     auto* storage =
-        GlobalVar("sb", ty.Of(buf), ast::StorageClass::kStorage, Binding(1_a), Group(0));
+        GlobalVar("sb", ty.Of(buf), ast::StorageClass::kStorage, Binding(1_a), Group(0_a));
 
     auto* function_ptr =
         Let("f_ptr", ty.pointer(ty.i32(), ast::StorageClass::kFunction), AddressOf(function));

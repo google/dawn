@@ -17,11 +17,12 @@
 namespace tint::ast {
 namespace {
 
+using namespace tint::number_suffixes;  // NOLINT
 using GroupAttributeTest = TestHelper;
 
 TEST_F(GroupAttributeTest, Creation) {
-    auto* d = create<GroupAttribute>(2u);
-    EXPECT_EQ(2u, d->value);
+    auto* d = Group(2_a);
+    EXPECT_TRUE(d->value->Is<IntLiteralExpression>());
 }
 
 }  // namespace

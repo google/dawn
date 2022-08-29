@@ -123,7 +123,7 @@ TEST_F(ResolverVariableValidationTest, VarTypeNotConstructible) {
 TEST_F(ResolverVariableValidationTest, LetTypeNotConstructible) {
     // @group(0) @binding(0) var t1 : texture_2d<f32>;
     // let t2 : t1;
-    auto* t1 = GlobalVar("t1", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(0),
+    auto* t1 = GlobalVar("t1", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(0_a),
                          Binding(0_a));
     auto* t2 = Let(Source{{56, 78}}, "t2", Expr(t1));
     WrapInFunction(t2);
@@ -294,7 +294,8 @@ TEST_F(ResolverVariableValidationTest, InferredPtrStorageAccessMismatch) {
     auto* buf = Structure("S", utils::Vector{
                                    Member("inner", ty.Of(inner)),
                                });
-    auto* storage = GlobalVar("s", ty.Of(buf), ast::StorageClass::kStorage, Binding(0_a), Group(0));
+    auto* storage =
+        GlobalVar("s", ty.Of(buf), ast::StorageClass::kStorage, Binding(0_a), Group(0_a));
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 2_i);
     auto* ptr =
@@ -348,7 +349,7 @@ TEST_F(ResolverVariableValidationTest, NonConstructibleType_InferredType) {
     // fn foo() {
     //   var v = s;
     // }
-    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(0), Binding(0_a));
+    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(0_a), Binding(0_a));
     auto* v = Var(Source{{12, 34}}, "v", Expr("s"));
     WrapInFunction(v);
 

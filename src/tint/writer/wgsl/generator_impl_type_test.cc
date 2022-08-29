@@ -462,7 +462,7 @@ TEST_P(WgslGenerator_StorageTextureTest, EmitType_StorageTexture) {
     auto param = GetParam();
 
     auto* t = ty.storage_texture(param.dim, param.fmt, param.access);
-    GlobalVar("g", t, Binding(1_a), Group(2));
+    GlobalVar("g", t, Binding(1_a), Group(2_a));
 
     GeneratorImpl& gen = Build();
 

@@ -142,7 +142,7 @@ const ast::Type* TextureOverloadCase::BuildResultVectorComponentType(ProgramBuil
 
 const ast::Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b) const {
     utils::Vector attrs{
-        b->create<ast::GroupAttribute>(0u),
+        b->Group(0_u),
         b->Binding(0_a),
     };
     switch (texture_kind) {
@@ -175,7 +175,7 @@ const ast::Variable* TextureOverloadCase::BuildTextureVariable(ProgramBuilder* b
 }
 
 const ast::Variable* TextureOverloadCase::BuildSamplerVariable(ProgramBuilder* b) const {
-    utils::Vector attrs = {b->Group(0u), b->Binding(1_a)};
+    utils::Vector attrs = {b->Group(0_a), b->Binding(1_a)};
     return b->GlobalVar("sampler", b->ty.sampler(sampler_kind), attrs);
 }
 

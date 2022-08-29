@@ -105,7 +105,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalsInterleaved) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
-    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(0), Binding(0_a));
+    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(0_a), Binding(0_a));
 
     GeneratorImpl& gen = Build();
 
@@ -117,7 +117,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Global_Sampler) {
 
 TEST_F(WgslGeneratorImplTest, Emit_Global_Texture) {
     auto* st = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
-    GlobalVar("t", st, Group(0), Binding(0_a));
+    GlobalVar("t", st, Group(0_a), Binding(0_a));
 
     GeneratorImpl& gen = Build();
 

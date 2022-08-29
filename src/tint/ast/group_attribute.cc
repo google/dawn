@@ -22,7 +22,10 @@ TINT_INSTANTIATE_TYPEINFO(tint::ast::GroupAttribute);
 
 namespace tint::ast {
 
-GroupAttribute::GroupAttribute(ProgramID pid, NodeID nid, const Source& src, uint32_t val)
+GroupAttribute::GroupAttribute(ProgramID pid,
+                               NodeID nid,
+                               const Source& src,
+                               const ast::Expression* val)
     : Base(pid, nid, src), value(val) {}
 
 GroupAttribute::~GroupAttribute() = default;
@@ -34,7 +37,8 @@ std::string GroupAttribute::Name() const {
 const GroupAttribute* GroupAttribute::Clone(CloneContext* ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
     auto src = ctx->Clone(source);
-    return ctx->dst->create<GroupAttribute>(src, value);
+    auto* value_ = ctx->Clone(value);
+    return ctx->dst->create<GroupAttribute>(src, value_);
 }
 
 }  // namespace tint::ast

@@ -261,7 +261,7 @@ struct State {
             // The decorated variable with struct type
             ctx.dst->GlobalVar(GetVertexBufferName(i), ctx.dst->ty.Of(struct_type),
                                ast::StorageClass::kStorage, ast::Access::kRead,
-                               ctx.dst->Binding(AInt(i)), ctx.dst->Group(cfg.pulling_group));
+                               ctx.dst->Binding(AInt(i)), ctx.dst->Group(AInt(cfg.pulling_group)));
         }
     }
 
