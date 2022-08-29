@@ -92,7 +92,7 @@ class GlslGeneratorImplTest_MemberAccessorBase : public BASE {
         auto* s = b.Structure("Data", members);
 
         b.GlobalVar("data", b.ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                    b.Group(1), b.Binding(0));
+                    b.Group(1), b.Binding(0_a));
     }
 
     void SetupFunction(utils::VectorRef<const ast::Statement*> statements) {

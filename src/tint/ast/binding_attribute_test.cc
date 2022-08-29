@@ -17,11 +17,12 @@
 namespace tint::ast {
 namespace {
 
+using namespace tint::number_suffixes;  // NOLINT
 using BindingAttributeTest = TestHelper;
 
 TEST_F(BindingAttributeTest, Creation) {
-    auto* d = create<BindingAttribute>(2u);
-    EXPECT_EQ(2u, d->value);
+    auto* d = Binding(2_a);
+    EXPECT_TRUE(d->value->Is<IntLiteralExpression>());
 }
 
 }  // namespace

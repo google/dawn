@@ -740,7 +740,11 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out,
                 return true;
             },
             [&](const ast::BindingAttribute* binding) {
-                out << "binding(" << binding->value << ")";
+                out << "binding(";
+                if (!EmitExpression(out, binding->value)) {
+                    return false;
+                }
+                out << ")";
                 return true;
             },
             [&](const ast::GroupAttribute* group) {

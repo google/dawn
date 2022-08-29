@@ -2294,11 +2294,29 @@ class ProgramBuilder {
     /// @returns the group attribute pointer
     const ast::GroupAttribute* Group(uint32_t value) { return create<ast::GroupAttribute>(value); }
 
+    /// Creates the ast::GroupAttribute
+    /// @param source the source
+    /// @param value group attribute index
+    /// @returns the group attribute pointer
+    const ast::GroupAttribute* Group(const Source& source, uint32_t value) {
+        return create<ast::GroupAttribute>(source, value);
+    }
+
     /// Creates the ast::BindingAttribute
-    /// @param value the binding index
+    /// @param value the binding index expression
     /// @returns the binding deocration pointer
-    const ast::BindingAttribute* Binding(uint32_t value) {
-        return create<ast::BindingAttribute>(value);
+    template <typename EXPR>
+    const ast::BindingAttribute* Binding(EXPR&& value) {
+        return create<ast::BindingAttribute>(Expr(std::forward<EXPR>(value)));
+    }
+
+    /// Creates the ast::BindingAttribute
+    /// @param source the source
+    /// @param value the binding index expression
+    /// @returns the binding deocration pointer
+    template <typename EXPR>
+    const ast::BindingAttribute* Binding(const Source& source, EXPR&& value) {
+        return create<ast::BindingAttribute>(source, Expr(std::forward<EXPR>(value)));
     }
 
     /// Creates an ast::Function and registers it with the ast::Module.

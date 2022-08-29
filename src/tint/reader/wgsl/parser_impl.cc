@@ -3456,7 +3456,9 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
             }
             match(Token::Type::kComma);
 
-            return create<ast::BindingAttribute>(t.source(), val.value);
+            return create<ast::BindingAttribute>(
+                t.source(), create<ast::IntLiteralExpression>(
+                                val.value, ast::IntLiteralExpression::Suffix::kNone));
         });
     }
 

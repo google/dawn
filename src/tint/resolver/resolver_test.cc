@@ -777,7 +777,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
     auto* s = Structure("S", utils::Vector{Member("m", ty.u32())});
 
     auto* sb_var = GlobalVar("sb_var", ty.Of(s), ast::StorageClass::kStorage,
-                             ast::Access::kReadWrite, Binding(0), Group(0));
+                             ast::Access::kReadWrite, Binding(0_a), Group(0));
     auto* wg_var = GlobalVar("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
     auto* priv_var = GlobalVar("priv_var", ty.f32(), ast::StorageClass::kPrivate);
 
@@ -806,7 +806,7 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
     auto* s = Structure("S", utils::Vector{Member("m", ty.u32())});
 
     auto* sb_var = GlobalVar("sb_var", ty.Of(s), ast::StorageClass::kStorage,
-                             ast::Access::kReadWrite, Binding(0), Group(0));
+                             ast::Access::kReadWrite, Binding(0_a), Group(0));
     auto* wg_var = GlobalVar("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
     auto* priv_var = GlobalVar("priv_var", ty.f32(), ast::StorageClass::kPrivate);
 
@@ -1727,7 +1727,7 @@ TEST_F(ResolverTest, StorageClass_SetsIfMissing) {
 
 TEST_F(ResolverTest, StorageClass_SetForSampler) {
     auto* t = ty.sampler(ast::SamplerKind::kSampler);
-    auto* var = GlobalVar("var", t, Binding(0), Group(0));
+    auto* var = GlobalVar("var", t, Binding(0_a), Group(0));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1736,7 +1736,7 @@ TEST_F(ResolverTest, StorageClass_SetForSampler) {
 
 TEST_F(ResolverTest, StorageClass_SetForTexture) {
     auto* t = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
-    auto* var = GlobalVar("var", t, Binding(0), Group(0));
+    auto* var = GlobalVar("var", t, Binding(0_a), Group(0));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1757,8 +1757,8 @@ TEST_F(ResolverTest, Access_SetForStorageBuffer) {
     // struct S { x : i32 };
     // var<storage> g : S;
     auto* s = Structure("S", utils::Vector{Member(Source{{12, 34}}, "x", ty.i32())});
-    auto* var = GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage, Binding(0),
-                          Group(0));
+    auto* var = GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage,
+                          Binding(0_a), Group(0));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1768,8 +1768,8 @@ TEST_F(ResolverTest, Access_SetForStorageBuffer) {
 TEST_F(ResolverTest, BindingPoint_SetForResources) {
     // @group(1) @binding(2) var s1 : sampler;
     // @group(3) @binding(4) var s2 : sampler;
-    auto* s1 = GlobalVar(Sym(), ty.sampler(ast::SamplerKind::kSampler), Group(1), Binding(2));
-    auto* s2 = GlobalVar(Sym(), ty.sampler(ast::SamplerKind::kSampler), Group(3), Binding(4));
+    auto* s1 = GlobalVar(Sym(), ty.sampler(ast::SamplerKind::kSampler), Group(1), Binding(2_a));
+    auto* s2 = GlobalVar(Sym(), ty.sampler(ast::SamplerKind::kSampler), Group(3), Binding(4_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1972,8 +1972,9 @@ TEST_F(ResolverTest, UnaryOp_Negation) {
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureSample) {
-    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1), Binding(1));
-    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(1), Binding(2));
+    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1),
+              Binding(1_a));
+    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(1), Binding(2_a));
 
     auto* call = CallStmt(Call("textureSample", "t", "s", vec2<f32>(1_f, 2_f)));
     const ast::Function* f = Func("test_function", utils::Empty, ty.void_(), utils::Vector{call},
@@ -1989,8 +1990,9 @@ TEST_F(ResolverTest, TextureSampler_TextureSample) {
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureSampleInFunction) {
-    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1), Binding(1));
-    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(1), Binding(2));
+    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1),
+              Binding(1_a));
+    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(1), Binding(2_a));
 
     auto* inner_call = CallStmt(Call("textureSample", "t", "s", vec2<f32>(1_f, 2_f)));
     const ast::Function* inner_func =
@@ -2014,8 +2016,9 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleInFunction) {
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondSameVariables) {
-    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1), Binding(1));
-    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(1), Binding(2));
+    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1),
+              Binding(1_a));
+    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(1), Binding(2_a));
 
     auto* inner_call_1 = CallStmt(Call("textureSample", "t", "s", vec2<f32>(1_f, 2_f)));
     const ast::Function* inner_func_1 =
@@ -2048,9 +2051,11 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondSameVariables) {
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondDifferentVariables) {
-    GlobalVar("t1", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1), Binding(1));
-    GlobalVar("t2", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1), Binding(2));
-    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(1), Binding(3));
+    GlobalVar("t1", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1),
+              Binding(1_a));
+    GlobalVar("t2", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1),
+              Binding(2_a));
+    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(1), Binding(3_a));
 
     auto* inner_call_1 = CallStmt(Call("textureSample", "t1", "s", vec2<f32>(1_f, 2_f)));
     const ast::Function* inner_func_1 =
@@ -2085,7 +2090,8 @@ TEST_F(ResolverTest, TextureSampler_TextureSampleFunctionDiamondDifferentVariabl
 }
 
 TEST_F(ResolverTest, TextureSampler_TextureDimensions) {
-    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1), Binding(2));
+    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(1),
+              Binding(2_a));
 
     auto* call = Call("textureDimensions", "t");
     const ast::Function* f = WrapInFunction(call);

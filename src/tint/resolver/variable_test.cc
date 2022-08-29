@@ -18,10 +18,10 @@
 
 #include "gmock/gmock.h"
 
-using namespace tint::number_suffixes;  // NOLINT
-
 namespace tint::resolver {
 namespace {
+
+using namespace tint::number_suffixes;  // NOLINT
 
 struct ResolverVariableTest : public resolver::TestHelper, public testing::Test {};
 
@@ -471,7 +471,7 @@ TEST_F(ResolverVariableTest, LocalLet_InheritsAccessFromOriginatingVariable) {
     auto* inner = Structure("Inner", utils::Vector{Member("arr", ty.array<i32, 4>())});
     auto* buf = Structure("S", utils::Vector{Member("inner", ty.Of(inner))});
     auto* storage = GlobalVar("s", ty.Of(buf), ast::StorageClass::kStorage, ast::Access::kReadWrite,
-                              Binding(0), Group(0));
+                              Binding(0_a), Group(0));
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4_i);
     auto* ptr = Let("p", AddressOf(expr));
@@ -1036,10 +1036,12 @@ TEST_F(ResolverVariableTest, GlobalVar_StorageClass) {
     auto* buf = Structure("S", utils::Vector{Member("m", ty.i32())});
     auto* private_ = GlobalVar("p", ty.i32(), ast::StorageClass::kPrivate);
     auto* workgroup = GlobalVar("w", ty.i32(), ast::StorageClass::kWorkgroup);
-    auto* uniform = GlobalVar("ub", ty.Of(buf), ast::StorageClass::kUniform, Binding(0), Group(0));
-    auto* storage = GlobalVar("sb", ty.Of(buf), ast::StorageClass::kStorage, Binding(1), Group(0));
+    auto* uniform =
+        GlobalVar("ub", ty.Of(buf), ast::StorageClass::kUniform, Binding(0_a), Group(0));
+    auto* storage =
+        GlobalVar("sb", ty.Of(buf), ast::StorageClass::kStorage, Binding(1_a), Group(0));
     auto* handle =
-        GlobalVar("h", ty.depth_texture(ast::TextureDimension::k2d), Binding(2), Group(0));
+        GlobalVar("h", ty.depth_texture(ast::TextureDimension::k2d), Binding(2_a), Group(0));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -1061,7 +1063,7 @@ TEST_F(ResolverVariableTest, GlobalVar_ExplicitStorageClass) {
 
     auto* buf = Structure("S", utils::Vector{Member("m", ty.i32())});
     auto* storage = GlobalVar("sb", ty.Of(buf), ast::StorageClass::kStorage,
-                              ast::Access::kReadWrite, Binding(1), Group(0));
+                              ast::Access::kReadWrite, Binding(1_a), Group(0));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 

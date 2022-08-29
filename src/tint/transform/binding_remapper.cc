@@ -106,8 +106,8 @@ void BindingRemapper::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) co
             auto bp_it = remappings->binding_points.find(from);
             if (bp_it != remappings->binding_points.end()) {
                 BindingPoint to = bp_it->second;
-                auto* new_group = ctx.dst->create<ast::GroupAttribute>(to.group);
-                auto* new_binding = ctx.dst->create<ast::BindingAttribute>(to.binding);
+                auto* new_group = ctx.dst->Group(to.group);
+                auto* new_binding = ctx.dst->Binding(AInt(to.binding));
 
                 auto* old_group = ast::GetAttribute<ast::GroupAttribute>(var->attributes);
                 auto* old_binding = ast::GetAttribute<ast::BindingAttribute>(var->attributes);

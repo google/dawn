@@ -762,7 +762,12 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
         return true;
     }
 
-    auto* sem = builder_.Sem().Get(v);
+    auto* sem = builder_.Sem().Get<sem::GlobalVariable>(v);
+    if (!sem) {
+        TINT_ICE(Writer, builder_.Diagnostics())
+            << "attempted to generate a global from a non-global variable";
+        return false;
+    }
     auto* type = sem->Type()->UnwrapRef();
 
     uint32_t init_id = 0;
@@ -893,15 +898,17 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
                            {Operand(var_id), U32Operand(SpvDecorationInvariant)});
                 return true;
             },
-            [&](const ast::BindingAttribute* binding) {
+            [&](const ast::BindingAttribute*) {
+                auto bp = sem->BindingPoint();
                 push_annot(spv::Op::OpDecorate, {Operand(var_id), U32Operand(SpvDecorationBinding),
-                                                 Operand(binding->value)});
+                                                 Operand(bp.binding)});
                 return true;
             },
-            [&](const ast::GroupAttribute* group) {
-                push_annot(spv::Op::OpDecorate,
-                           {Operand(var_id), U32Operand(SpvDecorationDescriptorSet),
-                            Operand(group->value)});
+            [&](const ast::GroupAttribute*) {
+                auto bp = sem->BindingPoint();
+                push_annot(
+                    spv::Op::OpDecorate,
+                    {Operand(var_id), U32Operand(SpvDecorationDescriptorSet), Operand(bp.group)});
                 return true;
             },
             [&](const ast::IdAttribute*) {

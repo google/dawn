@@ -329,7 +329,7 @@ TEST_F(ResolverValidationTest, StorageClass_FunctionVariableI32) {
 
 TEST_F(ResolverValidationTest, StorageClass_SamplerExplicitStorageClass) {
     auto* t = ty.sampler(ast::SamplerKind::kSampler);
-    GlobalVar(Source{{12, 34}}, "var", t, ast::StorageClass::kHandle, Binding(0), Group(0));
+    GlobalVar(Source{{12, 34}}, "var", t, ast::StorageClass::kHandle, Binding(0_a), Group(0));
 
     EXPECT_FALSE(r()->Resolve());
 
@@ -339,7 +339,7 @@ TEST_F(ResolverValidationTest, StorageClass_SamplerExplicitStorageClass) {
 
 TEST_F(ResolverValidationTest, StorageClass_TextureExplicitStorageClass) {
     auto* t = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
-    GlobalVar(Source{{12, 34}}, "var", t, ast::StorageClass::kHandle, Binding(0), Group(0));
+    GlobalVar(Source{{12, 34}}, "var", t, ast::StorageClass::kHandle, Binding(0_a), Group(0));
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
 

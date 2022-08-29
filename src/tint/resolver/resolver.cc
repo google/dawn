@@ -582,8 +582,17 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
             uint32_t binding = 0;
             {
                 auto* attr = ast::GetAttribute<ast::BindingAttribute>(var->attributes);
-                // TODO(dsinclair): Materialize when binding attribute is an expression
-                binding = attr->value;
+                auto* materialize = Materialize(Expression(attr->value));
+                if (!materialize) {
+                    return nullptr;
+                }
+                auto* c = materialize->ConstantValue();
+                if (!c) {
+                    // TODO(crbug.com/tint/1633): Add error message about invalid materialization
+                    // when binding can be an expression.
+                    return nullptr;
+                }
+                binding = c->As<uint32_t>();
             }
 
             uint32_t group = 0;
@@ -646,8 +655,17 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
     if (param->HasBindingPoint()) {
         {
             auto* attr = ast::GetAttribute<ast::BindingAttribute>(param->attributes);
-            // TODO(dsinclair): Materialize the binding information
-            binding_point.binding = attr->value;
+            auto* materialize = Materialize(Expression(attr->value));
+            if (!materialize) {
+                return nullptr;
+            }
+            auto* c = materialize->ConstantValue();
+            if (!c) {
+                // TODO(crbug.com/tint/1633): Add error message about invalid materialization when
+                // binding can be an expression.
+                return nullptr;
+            }
+            binding_point.binding = c->As<uint32_t>();
         }
         {
             auto* attr = ast::GetAttribute<ast::GroupAttribute>(param->attributes);

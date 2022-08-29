@@ -343,7 +343,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_EntryPoint_With_RW_StorageBu
                                 });
 
     GlobalVar("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     auto* var = Var("v", ty.f32(), MemberAccessor("coord", "b"));
 
@@ -382,7 +382,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_EntryPoint_With_RO_StorageBu
                                 });
 
     GlobalVar("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     auto* var = Var("v", ty.f32(), MemberAccessor("coord", "b"));
 
@@ -416,7 +416,8 @@ fragment void frag_main(const device Data* tint_symbol [[buffer(0)]]) {
 
 TEST_F(MslGeneratorImplTest, Emit_Attribute_Called_By_EntryPoint_With_Uniform) {
     auto* ubo_ty = Structure("UBO", utils::Vector{Member("coord", ty.vec4<f32>())});
-    auto* ubo = GlobalVar("ubo", ty.Of(ubo_ty), ast::StorageClass::kUniform, Group(0), Binding(0));
+    auto* ubo =
+        GlobalVar("ubo", ty.Of(ubo_ty), ast::StorageClass::kUniform, Group(0), Binding(0_a));
 
     Func("sub_func",
          utils::Vector{
@@ -467,7 +468,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_Called_By_EntryPoint_With_RW
                                 });
 
     GlobalVar("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     Func("sub_func",
          utils::Vector{
@@ -519,7 +520,7 @@ TEST_F(MslGeneratorImplTest, Emit_FunctionAttribute_Called_By_EntryPoint_With_RO
                                 });
 
     GlobalVar("coord", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     Func("sub_func",
          utils::Vector{
@@ -657,7 +658,7 @@ TEST_F(MslGeneratorImplTest, Emit_Function_Multiple_EntryPoint_With_Same_ModuleV
     auto* s = Structure("Data", utils::Vector{Member("d", ty.f32())});
 
     GlobalVar("data", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     {
         auto* var = Var("v", ty.f32(), MemberAccessor("data", "d"));

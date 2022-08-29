@@ -21,6 +21,8 @@
 namespace tint::resolver {
 namespace {
 
+using namespace tint::number_suffixes;  // NOLINT
+
 struct ResolverPtrRefTest : public resolver::TestHelper, public testing::Test {};
 
 TEST_F(ResolverPtrRefTest, AddressOf) {
@@ -61,8 +63,10 @@ TEST_F(ResolverPtrRefTest, DefaultPtrStorageClass) {
     auto* function = Var("f", ty.i32());
     auto* private_ = GlobalVar("p", ty.i32(), ast::StorageClass::kPrivate);
     auto* workgroup = GlobalVar("w", ty.i32(), ast::StorageClass::kWorkgroup);
-    auto* uniform = GlobalVar("ub", ty.Of(buf), ast::StorageClass::kUniform, Binding(0), Group(0));
-    auto* storage = GlobalVar("sb", ty.Of(buf), ast::StorageClass::kStorage, Binding(1), Group(0));
+    auto* uniform =
+        GlobalVar("ub", ty.Of(buf), ast::StorageClass::kUniform, Binding(0_a), Group(0));
+    auto* storage =
+        GlobalVar("sb", ty.Of(buf), ast::StorageClass::kStorage, Binding(1_a), Group(0));
 
     auto* function_ptr =
         Let("f_ptr", ty.pointer(ty.i32(), ast::StorageClass::kFunction), AddressOf(function));

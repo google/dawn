@@ -703,7 +703,6 @@ TEST_F(BuilderTest, Binary_Multiply_ScalarVector_F16) {
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixScalar_F32) {
     auto* var = Var("mat", ty.mat3x3<f32>());
-
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), Expr(1_f));
 
     WrapInFunction(var, expr);
@@ -711,120 +710,7 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixScalar_F32) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-
-    EXPECT_EQ(b.GenerateBinaryExpression(expr), 8u) << b.error();
-    EXPECT_EQ(DumpInstructions(b.types()),
-              R"(%5 = OpTypeFloat 32
-%4 = OpTypeVector %5 3
-%3 = OpTypeMatrix %4 3
-%2 = OpTypePointer Function %3
-%1 = OpVariable %2 Function
-%7 = OpConstant %5 1
-)");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%6 = OpLoad %3 %1
-%8 = OpMatrixTimesScalar %3 %6 %7
-)");
-}
-
-TEST_F(BuilderTest, Binary_Multiply_MatrixScalar_F16) {
-    Enable(ast::Extension::kF16);
-
-    auto* var = Var("mat", ty.mat3x3<f16>());
-
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), Expr(1_h));
-
-    WrapInFunction(var, expr);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-
-    EXPECT_EQ(b.GenerateBinaryExpression(expr), 8u) << b.error();
-    EXPECT_EQ(DumpInstructions(b.types()),
-              R"(%5 = OpTypeFloat 16
-%4 = OpTypeVector %5 3
-%3 = OpTypeMatrix %4 3
-%2 = OpTypePointer Function %3
-%1 = OpVariable %2 Function
-%7 = OpConstant %5 0x1p+0
-)");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%6 = OpLoad %3 %1
-%8 = OpMatrixTimesScalar %3 %6 %7
-)");
-}
-
-TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix_F32) {
-    auto* var = Var("mat", ty.mat3x3<f32>());
-
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr(1_f), Expr("mat"));
-
-    WrapInFunction(var, expr);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-
-    EXPECT_EQ(b.GenerateBinaryExpression(expr), 8u) << b.error();
-    EXPECT_EQ(DumpInstructions(b.types()),
-              R"(%5 = OpTypeFloat 32
-%4 = OpTypeVector %5 3
-%3 = OpTypeMatrix %4 3
-%2 = OpTypePointer Function %3
-%1 = OpVariable %2 Function
-%6 = OpConstant %5 1
-)");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%7 = OpLoad %3 %1
-%8 = OpMatrixTimesScalar %3 %7 %6
-)");
-}
-
-TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix_F16) {
-    Enable(ast::Extension::kF16);
-
-    auto* var = Var("mat", ty.mat3x3<f16>());
-
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr(1_h), Expr("mat"));
-
-    WrapInFunction(var, expr);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-
-    EXPECT_EQ(b.GenerateBinaryExpression(expr), 8u) << b.error();
-    EXPECT_EQ(DumpInstructions(b.types()),
-              R"(%5 = OpTypeFloat 16
-%4 = OpTypeVector %5 3
-%3 = OpTypeMatrix %4 3
-%2 = OpTypePointer Function %3
-%1 = OpVariable %2 Function
-%6 = OpConstant %5 0x1p+0
-)");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%7 = OpLoad %3 %1
-%8 = OpMatrixTimesScalar %3 %7 %6
-)");
-}
-
-TEST_F(BuilderTest, Binary_Multiply_MatrixVector_F32) {
-    auto* var = Var("mat", ty.mat3x3<f32>());
-    auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
-
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), rhs);
-
-    WrapInFunction(var, expr);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
     EXPECT_EQ(b.GenerateBinaryExpression(expr), 9u) << b.error();
     EXPECT_EQ(DumpInstructions(b.types()),
@@ -832,13 +718,122 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector_F32) {
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 3
 %2 = OpTypePointer Function %3
-%1 = OpVariable %2 Function
-%7 = OpConstant %5 1
-%8 = OpConstantComposite %4 %7 %7 %7
+%6 = OpConstantNull %3
+%8 = OpConstant %5 1
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%6 = OpLoad %3 %1
-%9 = OpMatrixTimesVector %4 %6 %8
+              R"(%7 = OpLoad %3 %1
+%9 = OpMatrixTimesScalar %3 %7 %8
+)");
+}
+
+TEST_F(BuilderTest, Binary_Multiply_MatrixScalar_F16) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = Var("mat", ty.mat3x3<f16>());
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), Expr(1_h));
+
+    WrapInFunction(var, expr);
+
+    spirv::Builder& b = Build();
+
+    b.push_function(Function{});
+    ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
+
+    EXPECT_EQ(b.GenerateBinaryExpression(expr), 9u) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()),
+              R"(%5 = OpTypeFloat 16
+%4 = OpTypeVector %5 3
+%3 = OpTypeMatrix %4 3
+%2 = OpTypePointer Function %3
+%6 = OpConstantNull %3
+%8 = OpConstant %5 0x1p+0
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%7 = OpLoad %3 %1
+%9 = OpMatrixTimesScalar %3 %7 %8
+)");
+}
+
+TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix_F32) {
+    auto* var = Var("mat", ty.mat3x3<f32>());
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr(1_f), Expr("mat"));
+
+    WrapInFunction(var, expr);
+
+    spirv::Builder& b = Build();
+
+    b.push_function(Function{});
+    ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
+
+    EXPECT_EQ(b.GenerateBinaryExpression(expr), 9u) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()),
+              R"(%5 = OpTypeFloat 32
+%4 = OpTypeVector %5 3
+%3 = OpTypeMatrix %4 3
+%2 = OpTypePointer Function %3
+%6 = OpConstantNull %3
+%7 = OpConstant %5 1
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%8 = OpLoad %3 %1
+%9 = OpMatrixTimesScalar %3 %8 %7
+)");
+}
+
+TEST_F(BuilderTest, Binary_Multiply_ScalarMatrix_F16) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = Var("mat", ty.mat3x3<f16>());
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr(1_h), Expr("mat"));
+
+    WrapInFunction(var, expr);
+
+    spirv::Builder& b = Build();
+
+    b.push_function(Function{});
+    ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
+
+    EXPECT_EQ(b.GenerateBinaryExpression(expr), 9u) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()),
+              R"(%5 = OpTypeFloat 16
+%4 = OpTypeVector %5 3
+%3 = OpTypeMatrix %4 3
+%2 = OpTypePointer Function %3
+%6 = OpConstantNull %3
+%7 = OpConstant %5 0x1p+0
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%8 = OpLoad %3 %1
+%9 = OpMatrixTimesScalar %3 %8 %7
+)");
+}
+
+TEST_F(BuilderTest, Binary_Multiply_MatrixVector_F32) {
+    auto* var = Var("mat", ty.mat3x3<f32>());
+    auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
+    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), rhs);
+
+    WrapInFunction(var, expr);
+
+    spirv::Builder& b = Build();
+
+    b.push_function(Function{});
+    ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
+
+    EXPECT_EQ(b.GenerateBinaryExpression(expr), 10u) << b.error();
+    EXPECT_EQ(DumpInstructions(b.types()),
+              R"(%5 = OpTypeFloat 32
+%4 = OpTypeVector %5 3
+%3 = OpTypeMatrix %4 3
+%2 = OpTypePointer Function %3
+%6 = OpConstantNull %3
+%8 = OpConstant %5 1
+%9 = OpConstantComposite %4 %8 %8 %8
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%7 = OpLoad %3 %1
+%10 = OpMatrixTimesVector %4 %7 %9
 )");
 }
 
@@ -847,7 +842,6 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector_F16) {
 
     auto* var = Var("mat", ty.mat3x3<f16>());
     auto* rhs = vec3<f16>(1_h, 1_h, 1_h);
-
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), rhs);
 
     WrapInFunction(var, expr);
@@ -855,28 +849,27 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixVector_F16) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-    EXPECT_EQ(b.GenerateBinaryExpression(expr), 9u) << b.error();
+    EXPECT_EQ(b.GenerateBinaryExpression(expr), 10u) << b.error();
     EXPECT_EQ(DumpInstructions(b.types()),
               R"(%5 = OpTypeFloat 16
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 3
 %2 = OpTypePointer Function %3
-%1 = OpVariable %2 Function
-%7 = OpConstant %5 0x1p+0
-%8 = OpConstantComposite %4 %7 %7 %7
+%6 = OpConstantNull %3
+%8 = OpConstant %5 0x1p+0
+%9 = OpConstantComposite %4 %8 %8 %8
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%6 = OpLoad %3 %1
-%9 = OpMatrixTimesVector %4 %6 %8
+              R"(%7 = OpLoad %3 %1
+%10 = OpMatrixTimesVector %4 %7 %9
 )");
 }
 
 TEST_F(BuilderTest, Binary_Multiply_VectorMatrix_F32) {
     auto* var = Var("mat", ty.mat3x3<f32>());
     auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
-
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, Expr("mat"));
 
     WrapInFunction(var, expr);
@@ -884,21 +877,21 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix_F32) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-    EXPECT_EQ(b.GenerateBinaryExpression(expr), 9u) << b.error();
+    EXPECT_EQ(b.GenerateBinaryExpression(expr), 10u) << b.error();
     EXPECT_EQ(DumpInstructions(b.types()),
               R"(%5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 3
 %2 = OpTypePointer Function %3
-%1 = OpVariable %2 Function
-%6 = OpConstant %5 1
-%7 = OpConstantComposite %4 %6 %6 %6
+%6 = OpConstantNull %3
+%7 = OpConstant %5 1
+%8 = OpConstantComposite %4 %7 %7 %7
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%8 = OpLoad %3 %1
-%9 = OpVectorTimesMatrix %4 %7 %8
+              R"(%9 = OpLoad %3 %1
+%10 = OpVectorTimesMatrix %4 %8 %9
 )");
 }
 
@@ -915,27 +908,26 @@ TEST_F(BuilderTest, Binary_Multiply_VectorMatrix_F16) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-    EXPECT_EQ(b.GenerateBinaryExpression(expr), 9u) << b.error();
+    EXPECT_EQ(b.GenerateBinaryExpression(expr), 10u) << b.error();
     EXPECT_EQ(DumpInstructions(b.types()),
               R"(%5 = OpTypeFloat 16
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 3
 %2 = OpTypePointer Function %3
-%1 = OpVariable %2 Function
-%6 = OpConstant %5 0x1p+0
-%7 = OpConstantComposite %4 %6 %6 %6
+%6 = OpConstantNull %3
+%7 = OpConstant %5 0x1p+0
+%8 = OpConstantComposite %4 %7 %7 %7
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%8 = OpLoad %3 %1
-%9 = OpVectorTimesMatrix %4 %7 %8
+              R"(%9 = OpLoad %3 %1
+%10 = OpVectorTimesMatrix %4 %8 %9
 )");
 }
 
 TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix_F32) {
     auto* var = Var("mat", ty.mat3x3<f32>());
-
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), Expr("mat"));
 
     WrapInFunction(var, expr);
@@ -943,20 +935,20 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix_F32) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-    EXPECT_EQ(b.GenerateBinaryExpression(expr), 8u) << b.error();
+    EXPECT_EQ(b.GenerateBinaryExpression(expr), 9u) << b.error();
     EXPECT_EQ(DumpInstructions(b.types()),
               R"(%5 = OpTypeFloat 32
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 3
 %2 = OpTypePointer Function %3
-%1 = OpVariable %2 Function
+%6 = OpConstantNull %3
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%6 = OpLoad %3 %1
-%7 = OpLoad %3 %1
-%8 = OpMatrixTimesMatrix %3 %6 %7
+              R"(%7 = OpLoad %3 %1
+%8 = OpLoad %3 %1
+%9 = OpMatrixTimesMatrix %3 %7 %8
 )");
 }
 
@@ -964,7 +956,6 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = Var("mat", ty.mat3x3<f16>());
-
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, Expr("mat"), Expr("mat"));
 
     WrapInFunction(var, expr);
@@ -972,28 +963,26 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix_F16) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(var)) << b.error();
 
-    EXPECT_EQ(b.GenerateBinaryExpression(expr), 8u) << b.error();
+    EXPECT_EQ(b.GenerateBinaryExpression(expr), 9u) << b.error();
     EXPECT_EQ(DumpInstructions(b.types()),
               R"(%5 = OpTypeFloat 16
 %4 = OpTypeVector %5 3
 %3 = OpTypeMatrix %4 3
 %2 = OpTypePointer Function %3
-%1 = OpVariable %2 Function
+%6 = OpConstantNull %3
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%6 = OpLoad %3 %1
-%7 = OpLoad %3 %1
-%8 = OpMatrixTimesMatrix %3 %6 %7
+              R"(%7 = OpLoad %3 %1
+%8 = OpLoad %3 %1
+%9 = OpMatrixTimesMatrix %3 %7 %8
 )");
 }
 
 TEST_F(BuilderTest, Binary_LogicalAnd) {
     auto* lhs = create<ast::BinaryExpression>(ast::BinaryOp::kEqual, Expr(1_i), Expr(2_i));
-
     auto* rhs = create<ast::BinaryExpression>(ast::BinaryOp::kEqual, Expr(3_i), Expr(4_i));
-
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, lhs, rhs);
 
     WrapInFunction(expr);
@@ -1028,7 +1017,6 @@ OpBranch %7
 TEST_F(BuilderTest, Binary_LogicalAnd_WithLoads) {
     auto* a_var = GlobalVar("a", ty.bool_(), ast::StorageClass::kPrivate, Expr(true));
     auto* b_var = GlobalVar("b", ty.bool_(), ast::StorageClass::kPrivate, Expr(false));
-
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, Expr("a"), Expr("b"));
 
     WrapInFunction(expr);

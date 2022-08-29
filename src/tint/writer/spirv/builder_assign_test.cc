@@ -186,7 +186,7 @@ TEST_F(BuilderTest, Assign_StructMember) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+    EXPECT_TRUE(b.GenerateFunctionVariable(v)) << b.error();
     ASSERT_FALSE(b.has_error()) << b.error();
 
     EXPECT_TRUE(b.GenerateAssignStatement(assign)) << b.error();
@@ -195,16 +195,16 @@ TEST_F(BuilderTest, Assign_StructMember) {
     EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
 %3 = OpTypeStruct %4 %4
 %2 = OpTypePointer Function %3
-%1 = OpVariable %2 Function
-%5 = OpTypeInt 32 0
-%6 = OpConstant %5 1
-%7 = OpTypePointer Function %4
-%9 = OpConstant %4 4
+%5 = OpConstantNull %3
+%6 = OpTypeInt 32 0
+%7 = OpConstant %6 1
+%8 = OpTypePointer Function %4
+%10 = OpConstant %4 4
 )");
 
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%8 = OpAccessChain %7 %1 %6
-OpStore %8 %9
+              R"(%9 = OpAccessChain %8 %1 %7
+OpStore %9 %10
 )");
 }
 

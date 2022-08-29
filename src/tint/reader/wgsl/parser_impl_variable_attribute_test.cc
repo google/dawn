@@ -364,7 +364,11 @@ TEST_F(ParserImplTest, Attribute_Binding) {
     ASSERT_TRUE(var_attr->Is<ast::BindingAttribute>());
 
     auto* binding = var_attr->As<ast::BindingAttribute>();
-    EXPECT_EQ(binding->value, 4u);
+    ASSERT_TRUE(binding->value->Is<ast::IntLiteralExpression>());
+
+    auto* expr = binding->value->As<ast::IntLiteralExpression>();
+    EXPECT_EQ(expr->value, 4);
+    EXPECT_EQ(expr->suffix, ast::IntLiteralExpression::Suffix::kNone);
 }
 
 TEST_F(ParserImplTest, Attribute_Binding_TrailingComma) {
@@ -379,7 +383,11 @@ TEST_F(ParserImplTest, Attribute_Binding_TrailingComma) {
     ASSERT_TRUE(var_attr->Is<ast::BindingAttribute>());
 
     auto* binding = var_attr->As<ast::BindingAttribute>();
-    EXPECT_EQ(binding->value, 4u);
+    ASSERT_TRUE(binding->value->Is<ast::IntLiteralExpression>());
+
+    auto* expr = binding->value->As<ast::IntLiteralExpression>();
+    EXPECT_EQ(expr->value, 4);
+    EXPECT_EQ(expr->suffix, ast::IntLiteralExpression::Suffix::kNone);
 }
 
 TEST_F(ParserImplTest, Attribute_Binding_MissingLeftParen) {

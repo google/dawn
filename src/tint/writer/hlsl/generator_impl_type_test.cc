@@ -177,7 +177,7 @@ TEST_F(HlslGeneratorImplTest_Type, EmitType_StructDecl_OmittedIfStorageBuffer) {
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
-    GlobalVar("g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite, Binding(0),
+    GlobalVar("g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite, Binding(0_a),
               Group(0));
 
     GeneratorImpl& gen = Build();
@@ -308,7 +308,7 @@ TEST_P(HlslDepthTexturesTest, Emit) {
 
     auto* t = ty.depth_texture(params.dim);
 
-    GlobalVar("tex", t, Binding(1), Group(2));
+    GlobalVar("tex", t, Binding(1_a), Group(2));
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
@@ -339,7 +339,7 @@ using HlslDepthMultisampledTexturesTest = TestHelper;
 TEST_F(HlslDepthMultisampledTexturesTest, Emit) {
     auto* t = ty.depth_multisampled_texture(ast::TextureDimension::k2d);
 
-    GlobalVar("tex", t, Binding(1), Group(2));
+    GlobalVar("tex", t, Binding(1_a), Group(2));
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
@@ -383,7 +383,7 @@ TEST_P(HlslSampledTexturesTest, Emit) {
     }
     auto* t = ty.sampled_texture(params.dim, datatype);
 
-    GlobalVar("tex", t, Binding(1), Group(2));
+    GlobalVar("tex", t, Binding(1_a), Group(2));
 
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
@@ -522,7 +522,7 @@ TEST_P(HlslStorageTexturesTest, Emit) {
     GlobalVar("tex", t,
               utils::Vector{
                   Group(2),
-                  Binding(1),
+                  Binding(1_a),
               });
 
     Func("main", utils::Empty, ty.void_(),

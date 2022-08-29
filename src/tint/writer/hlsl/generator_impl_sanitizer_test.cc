@@ -26,7 +26,8 @@ using HlslSanitizerTest = TestHelper;
 
 TEST_F(HlslSanitizerTest, Call_ArrayLength) {
     auto* s = Structure("my_struct", utils::Vector{Member(0, "a", ty.array<f32>(4))});
-    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(1), Group(2));
+    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(1_a),
+              Group(2));
 
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -59,7 +60,8 @@ TEST_F(HlslSanitizerTest, Call_ArrayLength_OtherMembersInStruct) {
                                          Member(0, "z", ty.f32()),
                                          Member(4, "a", ty.array<f32>(4)),
                                      });
-    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(1), Group(2));
+    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(1_a),
+              Group(2));
 
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -90,7 +92,8 @@ void a_func() {
 
 TEST_F(HlslSanitizerTest, Call_ArrayLength_ViaLets) {
     auto* s = Structure("my_struct", utils::Vector{Member(0, "a", ty.array<f32>(4))});
-    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(1), Group(2));
+    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(1_a),
+              Group(2));
 
     auto* p = Let("p", AddressOf("b"));
     auto* p2 = Let("p2", AddressOf(MemberAccessor(Deref(p), "a")));
@@ -126,8 +129,10 @@ void a_func() {
 
 TEST_F(HlslSanitizerTest, Call_ArrayLength_ArrayLengthFromUniform) {
     auto* s = Structure("my_struct", utils::Vector{Member(0, "a", ty.array<f32>(4))});
-    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(1), Group(2));
-    GlobalVar("c", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(2), Group(2));
+    GlobalVar("b", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(1_a),
+              Group(2));
+    GlobalVar("c", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(2_a),
+              Group(2));
 
     Func("a_func", utils::Empty, ty.void_(),
          utils::Vector{

@@ -40,7 +40,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, StorageBuffer_UnalignedMember) 
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty.type_name("S"), ast::StorageClass::kStorage, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -70,7 +70,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, StorageBuffer_UnalignedMember_S
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty.type_name("S"), ast::StorageClass::kStorage, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -101,7 +101,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_S
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -146,7 +146,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -171,7 +171,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_A
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -205,7 +205,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_A
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -237,7 +237,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_MembersOffsetNotM
               });
 
     GlobalVar(Source{{22, 24}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -289,7 +289,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
               });
 
     GlobalVar(Source{{22, 24}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -337,7 +337,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
               });
 
     GlobalVar(Source{{22, 34}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -358,7 +358,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_Vec3MemberOffset_
                                          });
 
     GlobalVar(Source{{78, 90}}, "a", ty.type_name("ScalarPackedAtEndOfVec3"),
-              ast::StorageClass::kUniform, Group(0), Binding(0));
+              ast::StorageClass::kUniform, Group(0), Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -384,7 +384,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -418,7 +418,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -461,7 +461,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -479,7 +479,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
     // @group(0) @binding(0)
     // var<uniform> a : array<f32, 4u>;
     GlobalVar(Source{{78, 90}}, "a", ty.array(Source{{34, 56}}, ty.f32(), 4_u),
-              ast::StorageClass::kUniform, Group(0), Binding(0));
+              ast::StorageClass::kUniform, Group(0), Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -501,7 +501,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -534,7 +534,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
               });
 
     GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0),
-              Binding(0));
+              Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }

@@ -233,7 +233,7 @@ TEST_F(BuilderTest, GlobalConst_Nested_Vec_Constructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_WithBindingAndGroup) {
-    auto* v = GlobalVar("var", ty.sampler(ast::SamplerKind::kSampler), Binding(2), Group(3));
+    auto* v = GlobalVar("var", ty.sampler(ast::SamplerKind::kSampler), Binding(2_a), Group(3));
 
     spirv::Builder& b = Build();
 
@@ -447,7 +447,8 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
                                  Member("b", ty.i32()),
                              });
 
-    GlobalVar("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead, Binding(0), Group(0));
+    GlobalVar("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead, Binding(0_a),
+              Group(0));
 
     spirv::Builder& b = SanitizeAndBuild();
 
@@ -484,7 +485,8 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
 
     auto* A = Structure("A", utils::Vector{Member("a", ty.i32())});
     auto* B = Alias("B", ty.Of(A));
-    GlobalVar("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead, Binding(0), Group(0));
+    GlobalVar("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead, Binding(0_a),
+              Group(0));
 
     spirv::Builder& b = SanitizeAndBuild();
 
@@ -519,7 +521,8 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
     auto* A = Structure("A", utils::Vector{Member("a", ty.i32())});
     auto* B = Alias("B", ty.Of(A));
-    GlobalVar("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead, Binding(0), Group(0));
+    GlobalVar("b", ty.Of(B), ast::StorageClass::kStorage, ast::Access::kRead, Binding(0_a),
+              Group(0));
 
     spirv::Builder& b = SanitizeAndBuild();
 
@@ -553,9 +556,10 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
     // var<storage, read_write> c : A
 
     auto* A = Structure("A", utils::Vector{Member("a", ty.i32())});
-    GlobalVar("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead, Group(0), Binding(0));
+    GlobalVar("b", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kRead, Group(0),
+              Binding(0_a));
     GlobalVar("c", ty.Of(A), ast::StorageClass::kStorage, ast::Access::kReadWrite, Group(1),
-              Binding(0));
+              Binding(0_a));
 
     spirv::Builder& b = SanitizeAndBuild();
 
@@ -592,7 +596,7 @@ TEST_F(BuilderTest, GlobalVar_TextureStorageWriteOnly) {
     auto* type = ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
                                     ast::Access::kWrite);
 
-    auto* var_a = GlobalVar("a", type, Binding(0), Group(0));
+    auto* var_a = GlobalVar("a", type, Binding(0_a), Group(0));
 
     spirv::Builder& b = Build();
 
@@ -619,11 +623,11 @@ TEST_F(BuilderTest, DISABLED_GlobalVar_TextureStorageWithDifferentAccess) {
 
     auto* type_a = ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
                                       ast::Access::kReadWrite);
-    auto* var_a = GlobalVar("a", type_a, Binding(0), Group(0));
+    auto* var_a = GlobalVar("a", type_a, Binding(0_a), Group(0));
 
     auto* type_b = ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
                                       ast::Access::kWrite);
-    auto* var_b = GlobalVar("b", type_b, Binding(1), Group(0));
+    auto* var_b = GlobalVar("b", type_b, Binding(1_a), Group(0));
 
     spirv::Builder& b = Build();
 

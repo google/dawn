@@ -91,11 +91,11 @@ static utils::Vector<const ast::Attribute*, 2> createAttributes(const Source& so
         case AttributeKind::kAlign:
             return {builder.MemberAlign(source, 4_u)};
         case AttributeKind::kBinding:
-            return {builder.create<ast::BindingAttribute>(source, 1u)};
+            return {builder.Binding(source, 1_a)};
         case AttributeKind::kBuiltin:
             return {builder.Builtin(source, ast::BuiltinValue::kPosition)};
         case AttributeKind::kGroup:
-            return {builder.create<ast::GroupAttribute>(source, 1u)};
+            return {builder.Group(source, 1u)};
         case AttributeKind::kId:
             return {builder.create<ast::IdAttribute>(source, 0u)};
         case AttributeKind::kInterpolate:
@@ -116,8 +116,7 @@ static utils::Vector<const ast::Attribute*, 2> createAttributes(const Source& so
         case AttributeKind::kWorkgroup:
             return {builder.create<ast::WorkgroupAttribute>(source, builder.Expr(1_i))};
         case AttributeKind::kBindingAndGroup:
-            return {builder.create<ast::BindingAttribute>(source, 1_u),
-                    builder.create<ast::GroupAttribute>(source, 1_u)};
+            return {builder.Binding(source, 1_a), builder.Group(source, 1u)};
     }
     return {};
 }
@@ -509,8 +508,8 @@ TEST_F(EntryPointParameterAttributeTest, DuplicateAttribute) {
 TEST_F(EntryPointParameterAttributeTest, DuplicateInternalAttribute) {
     auto* s = Param("s", ty.sampler(ast::SamplerKind::kSampler),
                     utils::Vector{
-                        create<ast::BindingAttribute>(0u),
-                        create<ast::GroupAttribute>(0u),
+                        Binding(0_a),
+                        Group(0u),
                         Disable(ast::DisabledValidation::kBindingPointCollision),
                         Disable(ast::DisabledValidation::kEntryPointParameter),
                     });
@@ -734,9 +733,8 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
                                          TestParams{AttributeKind::kBindingAndGroup, true}));
 
 TEST_F(VariableAttributeTest, DuplicateAttribute) {
-    GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler),
-              create<ast::BindingAttribute>(Source{{12, 34}}, 2u), create<ast::GroupAttribute>(2u),
-              create<ast::BindingAttribute>(Source{{56, 78}}, 3u));
+    GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler), Binding(Source{{12, 34}}, 2_a),
+              Group(2u), Binding(Source{{56, 78}}, 3_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -745,10 +743,7 @@ TEST_F(VariableAttributeTest, DuplicateAttribute) {
 }
 
 TEST_F(VariableAttributeTest, LocalVariable) {
-    auto* v = Var("a", ty.f32(),
-                  utils::Vector{
-                      create<ast::BindingAttribute>(Source{{12, 34}}, 2u),
-                  });
+    auto* v = Var("a", ty.f32(), utils::Vector{Binding(Source{{12, 34}}, 2_a)});
 
     WrapInFunction(v);
 
@@ -1023,7 +1018,7 @@ TEST_F(ResourceAttributeTest, BindingPairMissingBinding) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPairMissingGroup) {
-    GlobalVar(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler), Binding(1));
+    GlobalVar(Source{{12, 34}}, "G", ty.sampler(ast::SamplerKind::kSampler), Binding(1_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1032,9 +1027,9 @@ TEST_F(ResourceAttributeTest, BindingPairMissingGroup) {
 
 TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByEntryPoint) {
     GlobalVar(Source{{12, 34}}, "A", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-              Binding(1), Group(2));
+              Binding(1_a), Group(2));
     GlobalVar(Source{{56, 78}}, "B", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-              Binding(1), Group(2));
+              Binding(1_a), Group(2));
 
     Func("F", utils::Empty, ty.void_(),
          utils::Vector{
@@ -1054,9 +1049,9 @@ TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByEntryPoint) {
 
 TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByDifferentEntryPoints) {
     GlobalVar(Source{{12, 34}}, "A", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-              Binding(1), Group(2));
+              Binding(1_a), Group(2));
     GlobalVar(Source{{56, 78}}, "B", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-              Binding(1), Group(2));
+              Binding(1_a), Group(2));
 
     Func("F_A", utils::Empty, ty.void_(),
          utils::Vector{
@@ -1077,7 +1072,7 @@ TEST_F(ResourceAttributeTest, BindingPointUsedTwiceByDifferentEntryPoints) {
 }
 
 TEST_F(ResourceAttributeTest, BindingPointOnNonResource) {
-    GlobalVar(Source{{12, 34}}, "G", ty.f32(), ast::StorageClass::kPrivate, Binding(1), Group(2));
+    GlobalVar(Source{{12, 34}}, "G", ty.f32(), ast::StorageClass::kPrivate, Binding(1_a), Group(2));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

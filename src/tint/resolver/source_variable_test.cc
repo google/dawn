@@ -48,7 +48,7 @@ TEST_F(ResolverSourceVariableTest, GlobalWorkgroupVar) {
 }
 
 TEST_F(ResolverSourceVariableTest, GlobalStorageVar) {
-    auto* a = GlobalVar("a", ty.f32(), ast::StorageClass::kStorage, Group(0), Binding(0));
+    auto* a = GlobalVar("a", ty.f32(), ast::StorageClass::kStorage, Group(0), Binding(0_a));
     auto* expr = Expr(a);
     WrapInFunction(expr);
 
@@ -59,7 +59,7 @@ TEST_F(ResolverSourceVariableTest, GlobalStorageVar) {
 }
 
 TEST_F(ResolverSourceVariableTest, GlobalUniformVar) {
-    auto* a = GlobalVar("a", ty.f32(), ast::StorageClass::kUniform, Group(0), Binding(0));
+    auto* a = GlobalVar("a", ty.f32(), ast::StorageClass::kUniform, Group(0), Binding(0_a));
     auto* expr = Expr(a);
     WrapInFunction(expr);
 
@@ -71,7 +71,7 @@ TEST_F(ResolverSourceVariableTest, GlobalUniformVar) {
 
 TEST_F(ResolverSourceVariableTest, GlobalTextureVar) {
     auto* a = GlobalVar("a", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-                        ast::StorageClass::kNone, Group(0), Binding(0));
+                        ast::StorageClass::kNone, Group(0), Binding(0_a));
     auto* expr = Expr(a);
     WrapInFunction(Call("textureDimensions", expr));
 
