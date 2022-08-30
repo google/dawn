@@ -177,9 +177,7 @@ MaybeError ValidatePrimitiveState(const DeviceBase* device, const PrimitiveState
 
 MaybeError ValidateDepthStencilState(const DeviceBase* device,
                                      const DepthStencilState* descriptor) {
-    if (descriptor->nextInChain != nullptr) {
-        return DAWN_VALIDATION_ERROR("nextInChain must be nullptr");
-    }
+    DAWN_INVALID_IF(descriptor->nextInChain != nullptr, "nextInChain is not nullptr.");
 
     DAWN_TRY(ValidateCompareFunction(descriptor->depthCompare));
     DAWN_TRY(ValidateCompareFunction(descriptor->stencilFront.compare));

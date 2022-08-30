@@ -604,7 +604,7 @@ TEST_F(TextureViewValidationTest, TextureViewDescriptorDefaultsInvalidAspect) {
 
     // Validation should catch the invalid aspect.
     ASSERT_DEVICE_ERROR(texture.CreateView(&viewDesc),
-                        testing::HasSubstr("Invalid value for WGPUTextureAspect"));
+                        testing::HasSubstr("is invalid for WGPUTextureAspect"));
 }
 
 // Test creating cube map texture view

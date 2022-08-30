@@ -335,8 +335,8 @@ MaybeError ShaderModule::CreateFunction(const char* entryPointName,
                                                                       error:&error]);
                 if (error != nullptr) {
                     if (error.code != MTLLibraryErrorCompileWarning) {
-                        return DAWN_VALIDATION_ERROR(std::string("Function compile error: ") +
-                                                     [error.localizedDescription UTF8String]);
+                        return DAWN_FORMAT_VALIDATION_ERROR(
+                            "Function compile error: %s", [error.localizedDescription UTF8String]);
                     }
                 }
                 ASSERT(out->function != nil);

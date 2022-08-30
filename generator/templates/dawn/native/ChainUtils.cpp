@@ -40,26 +40,25 @@ MaybeError ValidateSTypes(const ChainedStruct* chain,
                           std::vector<std::vector<{{namespace}}::SType>> oneOfConstraints) {
     std::unordered_set<{{namespace}}::SType> allSTypes;
     for (; chain; chain = chain->nextInChain) {
-        if (allSTypes.find(chain->sType) != allSTypes.end()) {
-            return DAWN_VALIDATION_ERROR("Chain cannot have duplicate sTypes");
-        }
+        DAWN_INVALID_IF(allSTypes.find(chain->sType) != allSTypes.end(),
+            "Extension chain has duplicate sType %s.", chain->sType);
         allSTypes.insert(chain->sType);
     }
+
     for (const auto& oneOfConstraint : oneOfConstraints) {
         bool satisfied = false;
         for ({{namespace}}::SType oneOfSType : oneOfConstraint) {
             if (allSTypes.find(oneOfSType) != allSTypes.end()) {
-                if (satisfied) {
-                    return DAWN_VALIDATION_ERROR("Unsupported sType combination");
-                }
+                DAWN_INVALID_IF(satisfied,
+                    "sType %s is part of a group of exclusive sTypes that is already present.",
+                    oneOfSType);
                 satisfied = true;
                 allSTypes.erase(oneOfSType);
             }
         }
     }
-    if (!allSTypes.empty()) {
-        return DAWN_VALIDATION_ERROR("Unsupported sType");
-    }
+
+    DAWN_INVALID_IF(!allSTypes.empty(), "Unsupported sType %s.", *allSTypes.begin());
     return {};
 }
 
