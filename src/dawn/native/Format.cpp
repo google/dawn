@@ -25,21 +25,6 @@ namespace dawn::native {
 
 // Format
 
-// TODO(dawn:527): Remove when unused.
-SampleTypeBit ToSampleTypeBit(wgpu::TextureComponentType type) {
-    switch (type) {
-        case wgpu::TextureComponentType::Float:
-            return SampleTypeBit::Float;
-        case wgpu::TextureComponentType::Sint:
-            return SampleTypeBit::Sint;
-        case wgpu::TextureComponentType::Uint:
-            return SampleTypeBit::Uint;
-        case wgpu::TextureComponentType::DepthComparison:
-            return SampleTypeBit::Depth;
-    }
-    UNREACHABLE();
-}
-
 SampleTypeBit SampleTypeToSampleTypeBit(wgpu::TextureSampleType sampleType) {
     switch (sampleType) {
         case wgpu::TextureSampleType::Float:

@@ -57,9 +57,7 @@ enum class SampleTypeBit : uint8_t {
     Uint = 0x10,
 };
 
-// Converts an wgpu::TextureComponentType to its bitmask representation.
-SampleTypeBit ToSampleTypeBit(wgpu::TextureComponentType type);
-// Converts an wgpu::TextureSampleType to its bitmask representation.
+// Converts a wgpu::TextureSampleType to its bitmask representation.
 SampleTypeBit SampleTypeToSampleTypeBit(wgpu::TextureSampleType sampleType);
 
 struct TexelBlockInfo {
