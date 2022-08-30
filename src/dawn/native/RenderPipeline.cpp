@@ -377,7 +377,6 @@ MaybeError ValidateInterStageMatching(DeviceBase* device,
         vertexMetadata.usedInterStageVariables != fragmentMetadata.usedInterStageVariables,
         "One or more fragment inputs and vertex outputs are not one-to-one matching");
 
-    // TODO(dawn:802): Validate interpolation types and interpolition sampling types
     for (size_t i : IterateBitSet(vertexMetadata.usedInterStageVariables)) {
         const auto& vertexOutputInfo = vertexMetadata.interStageVariables[i];
         const auto& fragmentInputInfo = fragmentMetadata.interStageVariables[i];
