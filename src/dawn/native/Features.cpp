@@ -233,23 +233,6 @@ Feature FeaturesInfo::FeatureNameToEnum(const char* featureName) const {
     if (iter != mFeatureNameToEnumMap.cend()) {
         return kFeatureNameAndInfoList[static_cast<size_t>(iter->second)].feature;
     }
-
-    // TODO(dawn:550): Remove this fallback logic when Chromium is updated.
-    constexpr std::array<std::pair<const char*, const char*>, 6> kReplacementsForDeprecatedNames = {
-        {
-            {"texture_compression_bc", "texture-compression-bc"},
-            {"depth_clamping", "depth-clamping"},
-            {"pipeline_statistics_query", "pipeline-statistics-query"},
-            {"shader_float16", "shader-float16"},
-            {"timestamp_query", "timestamp-query"},
-            {"multiplanar_formats", "multiplanar-formats"},
-        }};
-    for (const auto& [name, replacement] : kReplacementsForDeprecatedNames) {
-        if (strcmp(featureName, name) == 0) {
-            return FeatureNameToEnum(replacement);
-        }
-    }
-
     return Feature::InvalidEnum;
 }
 
