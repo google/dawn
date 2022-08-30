@@ -225,8 +225,7 @@ ResultOrError<VkSurfaceKHR> CreateVulkanSurface(Adapter* adapter, Surface* surfa
             break;
     }
 
-    return DAWN_FORMAT_VALIDATION_ERROR("Unsupported surface type (%s) for Vulkan.",
-                                        surface->GetType());
+    return DAWN_VALIDATION_ERROR("Unsupported surface type (%s) for Vulkan.", surface->GetType());
 }
 
 VkPresentModeKHR ToVulkanPresentMode(wgpu::PresentMode mode) {

@@ -282,8 +282,8 @@ ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const D3DBytecodeCompilationReq
         ComPtr<IDxcBlobEncoding> errors;
         DAWN_TRY(CheckHRESULT(result->GetErrorBuffer(&errors), "DXC get error buffer"));
 
-        return DAWN_FORMAT_VALIDATION_ERROR("DXC compile failed with: %s",
-                                            static_cast<char*>(errors->GetBufferPointer()));
+        return DAWN_VALIDATION_ERROR("DXC compile failed with: %s",
+                                     static_cast<char*>(errors->GetBufferPointer()));
     }
 
     ComPtr<IDxcBlob> compiledShader;
@@ -447,15 +447,14 @@ ResultOrError<std::string> TranslateToHLSL(
             *remappedEntryPointName = r.entryPointName;
         }
     } else {
-        return DAWN_FORMAT_VALIDATION_ERROR("Transform output missing renamer data.");
+        return DAWN_VALIDATION_ERROR("Transform output missing renamer data.");
     }
 
     if (r.stage == SingleShaderStage::Vertex) {
         if (auto* data = transformOutputs.Get<tint::transform::FirstIndexOffset::Data>()) {
             *usesVertexOrInstanceIndex = data->has_vertex_or_instance_index;
         } else {
-            return DAWN_FORMAT_VALIDATION_ERROR(
-                "Transform output missing first index offset data.");
+            return DAWN_VALIDATION_ERROR("Transform output missing first index offset data.");
         }
     }
 

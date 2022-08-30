@@ -197,7 +197,7 @@ ResultOrError<wgpu::TextureFormat> GetFormatEquivalentToIOSurfaceFormat(uint32_t
         case kCVPixelFormatType_420YpCbCr8BiPlanarVideoRange:
             return wgpu::TextureFormat::R8BG8Biplanar420Unorm;
         default:
-            return DAWN_FORMAT_VALIDATION_ERROR("Unsupported IOSurface format (%x).", format);
+            return DAWN_VALIDATION_ERROR("Unsupported IOSurface format (%x).", format);
     }
 }
 

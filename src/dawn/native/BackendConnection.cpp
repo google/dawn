@@ -29,7 +29,7 @@ InstanceBase* BackendConnection::GetInstance() const {
 
 ResultOrError<std::vector<Ref<AdapterBase>>> BackendConnection::DiscoverAdapters(
     const AdapterDiscoveryOptionsBase* options) {
-    return DAWN_FORMAT_VALIDATION_ERROR("DiscoverAdapters not implemented for this backend.");
+    return DAWN_VALIDATION_ERROR("DiscoverAdapters not implemented for this backend.");
 }
 
 }  // namespace dawn::native

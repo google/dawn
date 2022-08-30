@@ -69,7 +69,7 @@ ResultOrError<uint32_t> GetModifierPlaneCount(const VulkanFunctions& fn,
     if (GetFormatModifierProps(fn, physicalDevice, format, modifier, &props)) {
         return static_cast<uint32_t>(props.drmFormatModifierPlaneCount);
     }
-    return DAWN_FORMAT_VALIDATION_ERROR("DRM format modifier not supported.");
+    return DAWN_VALIDATION_ERROR("DRM format modifier not supported.");
 }
 
 bool IsMultiPlanarVkFormat(VkFormat format) {

@@ -22,7 +22,7 @@ namespace dawn::native {
 namespace {
 
 int placeholderSuccess = 0xbeef;
-const char* placeholderErrorMessage = "I am an error message :3";
+constexpr const char* placeholderErrorMessage = "I am an error message :3";
 
 // Check returning a success MaybeError with {};
 TEST(ErrorTests, Error_Success) {

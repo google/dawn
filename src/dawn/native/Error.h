@@ -43,7 +43,7 @@ using ResultOrError = Result<T, ErrorData>;
 //   return DAWN_MAKE_ERROR(errorType, "My error message");
 //
 // but shorthand version for specific error types are preferred:
-//   return DAWN_VALIDATION_ERROR("My error message");
+//   return DAWN_VALIDATION_ERROR("My error message with details %s", details);
 //
 // There are different types of errors that should be used for different purpose:
 //
@@ -71,11 +71,7 @@ using ResultOrError = Result<T, ErrorData>;
 #define DAWN_MAKE_ERROR(TYPE, MESSAGE) \
     ::dawn::native::ErrorData::Create(TYPE, MESSAGE, __FILE__, __func__, __LINE__)
 
-#define DAWN_VALIDATION_ERROR(MESSAGE) DAWN_MAKE_ERROR(InternalErrorType::Validation, MESSAGE)
-
-// TODO(dawn:563): Rename to DAWN_VALIDATION_ERROR once all message format strings have been
-// converted to constexpr.
-#define DAWN_FORMAT_VALIDATION_ERROR(...) \
+#define DAWN_VALIDATION_ERROR(...) \
     DAWN_MAKE_ERROR(InternalErrorType::Validation, absl::StrFormat(__VA_ARGS__))
 
 #define DAWN_INVALID_IF(EXPR, ...)                                                           \

@@ -54,7 +54,7 @@ MaybeError ValidateCanViewTextureAs(const DeviceBase* device,
         if (viewFormat.format == aspectFormat) {
             return {};
         } else {
-            return DAWN_FORMAT_VALIDATION_ERROR(
+            return DAWN_VALIDATION_ERROR(
                 "The view format (%s) is not compatible with %s of %s (%s).", viewFormat.format,
                 aspect, format.format, aspectFormat);
         }
@@ -78,7 +78,7 @@ MaybeError ValidateCanViewTextureAs(const DeviceBase* device,
         // The view format isn't compatible with the format at all. Return an error
         // that indicates this, in addition to reporting that it's missing from the
         // list.
-        return DAWN_FORMAT_VALIDATION_ERROR(
+        return DAWN_VALIDATION_ERROR(
             "The texture view format (%s) is not compatible with the "
             "texture format (%s)."
             "The formats must be compatible, and the view format "
@@ -86,7 +86,7 @@ MaybeError ValidateCanViewTextureAs(const DeviceBase* device,
             viewFormat.format, format.format);
     } else {
         // The view format is compatible, but not in the list.
-        return DAWN_FORMAT_VALIDATION_ERROR(
+        return DAWN_VALIDATION_ERROR(
             "%s was not created with the texture view format (%s) "
             "in the list of compatible view formats.",
             texture, viewFormat.format);

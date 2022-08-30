@@ -170,7 +170,7 @@ MaybeError ProgrammableEncoder::ValidateSetBindGroup(BindGroupIndex index,
                 static_cast<uint32_t>(i), dynamicOffsets[i], bufferBinding.buffer,
                 bufferBinding.buffer->GetSize(), bufferBinding.offset, bufferBinding.size);
 
-            return DAWN_FORMAT_VALIDATION_ERROR(
+            return DAWN_VALIDATION_ERROR(
                 "Dynamic Offset[%u] (%u) is out of bounds of "
                 "%s with a size of %u and a bound range of (offset: %u, size: %u).",
                 static_cast<uint32_t>(i), dynamicOffsets[i], bufferBinding.buffer,

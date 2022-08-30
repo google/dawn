@@ -46,8 +46,8 @@ MaybeError ValidateSamplerDescriptor(DeviceBase*, const SamplerDescriptor* descr
                         descriptor->magFilter, descriptor->minFilter, descriptor->mipmapFilter,
                         wgpu::FilterMode::Linear, descriptor->maxAnisotropy);
     } else if (descriptor->maxAnisotropy == 0u) {
-        return DAWN_FORMAT_VALIDATION_ERROR("Max anisotropy (%f) is less than 1.",
-                                            descriptor->maxAnisotropy);
+        return DAWN_VALIDATION_ERROR("Max anisotropy (%f) is less than 1.",
+                                     descriptor->maxAnisotropy);
     }
 
     DAWN_TRY(ValidateFilterMode(descriptor->minFilter));

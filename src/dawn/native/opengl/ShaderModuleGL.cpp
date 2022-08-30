@@ -264,8 +264,8 @@ ResultOrError<GLuint> ShaderModule::CompileShader(const OpenGLFunctions& gl,
             std::vector<char> buffer(infoLogLength);
             gl.GetShaderInfoLog(shader, infoLogLength, nullptr, &buffer[0]);
             gl.DeleteShader(shader);
-            return DAWN_FORMAT_VALIDATION_ERROR("%s\nProgram compilation failed:\n%s", source,
-                                                buffer.data());
+            return DAWN_VALIDATION_ERROR("%s\nProgram compilation failed:\n%s", source,
+                                         buffer.data());
         }
     }
 

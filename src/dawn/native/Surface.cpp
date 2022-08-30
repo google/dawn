@@ -162,7 +162,7 @@ MaybeError ValidateSurfaceDescriptor(const InstanceBase* instance,
     }
 #endif  // defined(DAWN_USE_X11)
 
-    return DAWN_FORMAT_VALIDATION_ERROR("Unsupported sType (%s)", descriptor->nextInChain->sType);
+    return DAWN_VALIDATION_ERROR("Unsupported sType (%s)", descriptor->nextInChain->sType);
 }
 
 // static

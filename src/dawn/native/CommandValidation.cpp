@@ -55,7 +55,7 @@ MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope) {
             bool readOnly = IsSubset(usage, kReadOnlyTextureUsages);
             bool singleUse = wgpu::HasZeroOrOneBits(usage);
             if (!readOnly && !singleUse && !error.IsError()) {
-                error = DAWN_FORMAT_VALIDATION_ERROR(
+                error = DAWN_VALIDATION_ERROR(
                     "%s usage (%s) includes writable usage and another usage in the same "
                     "synchronization scope.",
                     scope.textures[i], usage);
@@ -420,7 +420,7 @@ MaybeError ValidateTextureToTextureCopyCommonRestrictions(const ImageCopyTexture
         switch (src.texture->GetDimension()) {
             case wgpu::TextureDimension::e1D:
                 ASSERT(src.mipLevel == 0 && src.origin.z == 0 && dst.origin.z == 0);
-                return DAWN_FORMAT_VALIDATION_ERROR("Copy is from %s to itself.", src.texture);
+                return DAWN_VALIDATION_ERROR("Copy is from %s to itself.", src.texture);
 
             case wgpu::TextureDimension::e2D:
                 DAWN_INVALID_IF(

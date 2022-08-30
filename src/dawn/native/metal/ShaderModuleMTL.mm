@@ -227,7 +227,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(DeviceBase* device,
                     remappedEntryPointName = r.entryPointName;
                 }
             } else {
-                return DAWN_FORMAT_VALIDATION_ERROR("Transform output missing renamer data.");
+                return DAWN_VALIDATION_ERROR("Transform output missing renamer data.");
             }
 
             tint::writer::msl::Options options;
@@ -335,8 +335,8 @@ MaybeError ShaderModule::CreateFunction(const char* entryPointName,
                                                                       error:&error]);
                 if (error != nullptr) {
                     if (error.code != MTLLibraryErrorCompileWarning) {
-                        return DAWN_FORMAT_VALIDATION_ERROR(
-                            "Function compile error: %s", [error.localizedDescription UTF8String]);
+                        return DAWN_VALIDATION_ERROR("Function compile error: %s",
+                                                     [error.localizedDescription UTF8String]);
                     }
                 }
                 ASSERT(out->function != nil);

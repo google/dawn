@@ -88,7 +88,7 @@ MaybeError ValidateTextureDepthStencilToBufferCopyRestrictions(const ImageCopyTe
         switch (src.texture->GetFormat().format) {
             case wgpu::TextureFormat::Depth24Plus:
             case wgpu::TextureFormat::Depth24PlusStencil8:
-                return DAWN_FORMAT_VALIDATION_ERROR(
+                return DAWN_VALIDATION_ERROR(
                     "The depth aspect of %s format %s cannot be selected in a texture to "
                     "buffer copy.",
                     src.texture, src.texture->GetFormat().format);
@@ -734,7 +734,7 @@ CommandEncoder::CommandEncoder(DeviceBase* device, ObjectBase::ErrorTag tag)
     : ApiObjectBase(device, tag),
       mEncodingContext(device, this),
       mUsageValidationMode(UsageValidationMode::Default) {
-    mEncodingContext.HandleError(DAWN_FORMAT_VALIDATION_ERROR("%s is invalid.", this));
+    mEncodingContext.HandleError(DAWN_VALIDATION_ERROR("%s is invalid.", this));
 }
 
 ObjectType CommandEncoder::GetType() const {
@@ -1300,7 +1300,7 @@ void CommandEncoder::APIClearBuffer(BufferBase* buffer, uint64_t offset, uint64_
 
 void CommandEncoder::APIInjectValidationError(const char* message) {
     if (mEncodingContext.CheckCurrentEncoder(this)) {
-        mEncodingContext.HandleError(DAWN_VALIDATION_ERROR(message));
+        mEncodingContext.HandleError(DAWN_MAKE_ERROR(InternalErrorType::Validation, message));
     }
 }
 

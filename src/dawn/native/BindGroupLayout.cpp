@@ -48,8 +48,8 @@ MaybeError ValidateStorageTextureViewDimension(wgpu::TextureViewDimension dimens
     switch (dimension) {
         case wgpu::TextureViewDimension::Cube:
         case wgpu::TextureViewDimension::CubeArray:
-            return DAWN_FORMAT_VALIDATION_ERROR(
-                "%s texture views cannot be used as storage textures.", dimension);
+            return DAWN_VALIDATION_ERROR("%s texture views cannot be used as storage textures.",
+                                         dimension);
 
         case wgpu::TextureViewDimension::e1D:
         case wgpu::TextureViewDimension::e2D:

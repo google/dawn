@@ -299,13 +299,12 @@ ResultOrError<tint::Program> ParseWGSL(const tint::Source::File* file,
         outMessages->AddMessages(program.Diagnostics());
     }
     if (!program.IsValid()) {
-        return DAWN_FORMAT_VALIDATION_ERROR("Tint WGSL reader failure: %s\n",
-                                            program.Diagnostics().str());
+        return DAWN_VALIDATION_ERROR("Tint WGSL reader failure: %s\n", program.Diagnostics().str());
     }
 
     return std::move(program);
 #else
-    return DAWN_FORMAT_VALIDATION_ERROR("TINT_BUILD_WGSL_READER is not defined.");
+    return DAWN_VALIDATION_ERROR("TINT_BUILD_WGSL_READER is not defined.");
 #endif
 }
 
@@ -317,13 +316,13 @@ ResultOrError<tint::Program> ParseSPIRV(const std::vector<uint32_t>& spirv,
         outMessages->AddMessages(program.Diagnostics());
     }
     if (!program.IsValid()) {
-        return DAWN_FORMAT_VALIDATION_ERROR("Tint SPIR-V reader failure:\nParser: %s\n",
-                                            program.Diagnostics().str());
+        return DAWN_VALIDATION_ERROR("Tint SPIR-V reader failure:\nParser: %s\n",
+                                     program.Diagnostics().str());
     }
 
     return std::move(program);
 #else
-    return DAWN_FORMAT_VALIDATION_ERROR("TINT_BUILD_SPV_READER is not defined.");
+    return DAWN_VALIDATION_ERROR("TINT_BUILD_SPV_READER is not defined.");
 
 #endif
 }

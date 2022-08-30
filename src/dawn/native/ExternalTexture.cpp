@@ -91,7 +91,7 @@ MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
                 DAWN_TRY(ValidateExternalTexturePlane(descriptor->plane0));
                 break;
             default:
-                return DAWN_FORMAT_VALIDATION_ERROR(
+                return DAWN_VALIDATION_ERROR(
                     "The external texture plane (%s) format (%s) is not a supported format "
                     "(%s, %s, %s).",
                     descriptor->plane0, plane0Format, wgpu::TextureFormat::RGBA8Unorm,

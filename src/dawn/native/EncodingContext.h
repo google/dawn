@@ -80,18 +80,17 @@ class EncodingContext {
 
     inline bool CheckCurrentEncoder(const ApiObjectBase* encoder) {
         if (mDestroyed) {
-            HandleError(
-                DAWN_FORMAT_VALIDATION_ERROR("Recording in a destroyed %s.", mCurrentEncoder));
+            HandleError(DAWN_VALIDATION_ERROR("Recording in a destroyed %s.", mCurrentEncoder));
             return false;
         }
         if (DAWN_UNLIKELY(encoder != mCurrentEncoder)) {
             if (mCurrentEncoder != mTopLevelEncoder) {
                 // The top level encoder was used when a pass encoder was current.
-                HandleError(DAWN_FORMAT_VALIDATION_ERROR(
-                    "Command cannot be recorded while %s is active.", mCurrentEncoder));
+                HandleError(DAWN_VALIDATION_ERROR("Command cannot be recorded while %s is active.",
+                                                  mCurrentEncoder));
             } else {
-                HandleError(DAWN_FORMAT_VALIDATION_ERROR(
-                    "Recording in an error or already ended %s.", encoder));
+                HandleError(
+                    DAWN_VALIDATION_ERROR("Recording in an error or already ended %s.", encoder));
             }
             return false;
         }

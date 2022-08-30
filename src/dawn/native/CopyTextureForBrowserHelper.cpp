@@ -242,8 +242,7 @@ MaybeError ValidateCopyTextureFormatConversion(const wgpu::TextureFormat srcForm
         case wgpu::TextureFormat::RGBA16Float:
             break;
         default:
-            return DAWN_FORMAT_VALIDATION_ERROR("Source texture format (%s) is not supported.",
-                                                srcFormat);
+            return DAWN_VALIDATION_ERROR("Source texture format (%s) is not supported.", srcFormat);
     }
 
     switch (dstFormat) {
@@ -262,8 +261,8 @@ MaybeError ValidateCopyTextureFormatConversion(const wgpu::TextureFormat srcForm
         case wgpu::TextureFormat::RGBA32Float:
             break;
         default:
-            return DAWN_FORMAT_VALIDATION_ERROR("Destination texture format (%s) is not supported.",
-                                                dstFormat);
+            return DAWN_VALIDATION_ERROR("Destination texture format (%s) is not supported.",
+                                         dstFormat);
     }
 
     return {};

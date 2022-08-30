@@ -42,12 +42,12 @@ MaybeError ValidateProgrammableStage(DeviceBase* device,
     const EntryPointMetadata& metadata = module->GetEntryPoint(entryPoint);
 
     if (!metadata.infringedLimitErrors.empty()) {
-        std::ostringstream out;
-        out << "Entry point \"" << entryPoint << "\" infringes limits:\n";
+        std::ostringstream limitList;
         for (const std::string& limit : metadata.infringedLimitErrors) {
-            out << " - " << limit << "\n";
+            limitList << " - " << limit << "\n";
         }
-        return DAWN_VALIDATION_ERROR(out.str());
+        return DAWN_VALIDATION_ERROR("Entry point \"%s\" infringes limits:\n%s", entryPoint,
+                                     limitList.str());
     }
 
     DAWN_INVALID_IF(metadata.stage != stage,
@@ -81,7 +81,7 @@ MaybeError ValidateProgrammableStage(DeviceBase* device,
             stageInitializedConstantIdentifiers.insert(constants[i].key);
         } else {
             // There are duplicate initializations
-            return DAWN_FORMAT_VALIDATION_ERROR(
+            return DAWN_VALIDATION_ERROR(
                 "Pipeline overridable constants \"%s\" is set more than once in %s",
                 constants[i].key, module);
         }
@@ -104,7 +104,7 @@ MaybeError ValidateProgrammableStage(DeviceBase* device,
             uninitializedConstantsArray.append(identifier);
         }
 
-        return DAWN_FORMAT_VALIDATION_ERROR(
+        return DAWN_VALIDATION_ERROR(
             "There are uninitialized pipeline overridable constants in shader module %s, their "
             "identifiers:[%s]",
             module, uninitializedConstantsArray);

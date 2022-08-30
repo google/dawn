@@ -490,7 +490,7 @@ MaybeError ValidateD3D12VideoTextureCanBeShared(Device* device, DXGI_FORMAT text
             break;
     }
 
-    return DAWN_FORMAT_VALIDATION_ERROR("DXGI format does not support cross-API sharing.");
+    return DAWN_VALIDATION_ERROR("DXGI format does not support cross-API sharing.");
 }
 
 // static

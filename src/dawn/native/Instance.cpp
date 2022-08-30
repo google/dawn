@@ -385,7 +385,7 @@ MaybeError InstanceBase::DiscoverAdaptersInternal(const AdapterDiscoveryOptionsB
     DAWN_TRY(ValidateBackendType(backendType));
 
     if (!GetEnabledBackends()[backendType]) {
-        return DAWN_FORMAT_VALIDATION_ERROR("%s not supported.", backendType);
+        return DAWN_VALIDATION_ERROR("%s not supported.", backendType);
     }
 
     EnsureBackendConnection(backendType);

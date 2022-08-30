@@ -44,7 +44,7 @@ void EncodingContext::Destroy() {
     // If we weren't already finished, then we want to handle an error here so that any calls
     // to Finish after Destroy will return a meaningful error.
     if (!IsFinished()) {
-        HandleError(DAWN_FORMAT_VALIDATION_ERROR("Destroyed encoder cannot be finished."));
+        HandleError(DAWN_VALIDATION_ERROR("Destroyed encoder cannot be finished."));
     }
     mDestroyed = true;
     mCurrentEncoder = nullptr;
@@ -151,8 +151,8 @@ void EncodingContext::EnsurePassExited(const ApiObjectBase* passEncoder) {
     if (mCurrentEncoder != mTopLevelEncoder && mCurrentEncoder == passEncoder) {
         // The current pass encoder is being deleted. Implicitly end the pass with an error.
         mCurrentEncoder = mTopLevelEncoder;
-        HandleError(DAWN_FORMAT_VALIDATION_ERROR(
-            "Command buffer recording ended before %s was ended.", passEncoder));
+        HandleError(DAWN_VALIDATION_ERROR("Command buffer recording ended before %s was ended.",
+                                          passEncoder));
     }
 }
 
