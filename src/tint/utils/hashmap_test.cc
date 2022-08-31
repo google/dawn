@@ -69,6 +69,27 @@ TEST(Hashmap, ReplaceRemove) {
     EXPECT_FALSE(map.Contains("world"));
 }
 
+TEST(Hashmap, Generation) {
+    Hashmap<int, std::string, 8> map;
+    EXPECT_EQ(map.Generation(), 0u);
+    map.Add(1, "one");
+    EXPECT_EQ(map.Generation(), 1u);
+    map.Add(1, "uno");
+    EXPECT_EQ(map.Generation(), 1u);
+    map.Replace(1, "une");
+    EXPECT_EQ(map.Generation(), 2u);
+    map.Add(2, "dos");
+    EXPECT_EQ(map.Generation(), 3u);
+    map.Remove(1);
+    EXPECT_EQ(map.Generation(), 4u);
+    map.Clear();
+    EXPECT_EQ(map.Generation(), 5u);
+    map.Find(2);
+    EXPECT_EQ(map.Generation(), 5u);
+    map.Get(2);
+    EXPECT_EQ(map.Generation(), 5u);
+}
+
 TEST(Hashmap, Iterator) {
     using Map = Hashmap<int, std::string, 8>;
     using KV = typename Map::KeyValue;

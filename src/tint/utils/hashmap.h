@@ -288,6 +288,9 @@ class Hashmap {
     /// @returns the number of entries in the map.
     size_t Count() const { return set_.Count(); }
 
+    /// @returns a monotonic counter which is incremented whenever the map is mutated.
+    size_t Generation() const { return set_.Generation(); }
+
     /// @returns true if the map contains no entries.
     bool IsEmpty() const { return set_.IsEmpty(); }
 

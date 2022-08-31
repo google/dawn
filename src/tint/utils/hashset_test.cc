@@ -67,6 +67,27 @@ TEST(Hashset, AddMany) {
     }
 }
 
+TEST(Hashset, Generation) {
+    Hashset<int, 8> set;
+    EXPECT_EQ(set.Generation(), 0u);
+    set.Add(1);
+    EXPECT_EQ(set.Generation(), 1u);
+    set.Add(1);
+    EXPECT_EQ(set.Generation(), 1u);
+    set.Replace(1);
+    EXPECT_EQ(set.Generation(), 2u);
+    set.Add(2);
+    EXPECT_EQ(set.Generation(), 3u);
+    set.Remove(1);
+    EXPECT_EQ(set.Generation(), 4u);
+    set.Clear();
+    EXPECT_EQ(set.Generation(), 5u);
+    set.Find(2);
+    EXPECT_EQ(set.Generation(), 5u);
+    set.Get(2);
+    EXPECT_EQ(set.Generation(), 5u);
+}
+
 TEST(Hashset, Iterator) {
     Hashset<std::string, 8> set;
     set.Add("one");
