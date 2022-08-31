@@ -57,13 +57,13 @@ using alias3 = builder::alias3<T>;
 using ResolverCallTest = ResolverTest;
 
 struct Params {
-    builder::ast_expr_func_ptr create_value;
+    builder::ast_expr_from_double_func_ptr create_value;
     builder::ast_type_func_ptr create_type;
 };
 
 template <typename T>
 constexpr Params ParamsFor() {
-    return Params{DataType<T>::Expr, DataType<T>::AST};
+    return Params{DataType<T>::ExprFromDouble, DataType<T>::AST};
 }
 
 static constexpr Params all_param_types[] = {

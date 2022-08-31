@@ -25,12 +25,12 @@ struct Type {
     template <typename T>
     static constexpr Type Create() {
         return Type{builder::DataType<T>::AST, builder::DataType<T>::Sem,
-                    builder::DataType<T>::Expr};
+                    builder::DataType<T>::ExprFromDouble};
     }
 
     builder::ast_type_func_ptr ast;
     builder::sem_type_func_ptr sem;
-    builder::ast_expr_func_ptr expr;
+    builder::ast_expr_from_double_func_ptr expr;
 };
 
 static constexpr Type kNumericScalars[] = {

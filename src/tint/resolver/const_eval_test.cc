@@ -3155,29 +3155,127 @@ TEST_F(ResolverConstEvalTest, UnaryNegateLowestAbstract) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Binary op
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
 namespace binary_op {
 
-using Types = std::variant<AInt, AFloat, u32, i32, f32, f16>;
+using builder::IsValue;
+using builder::Mat;
+using builder::Val;
+using builder::Value;
+using builder::Vec;
+
+using Types = std::variant<Value<AInt>,
+                           Value<AFloat>,
+                           Value<u32>,
+                           Value<i32>,
+                           Value<f32>,
+                           Value<f16>,
+
+                           Value<builder::vec2<AInt>>,
+                           Value<builder::vec2<AFloat>>,
+                           Value<builder::vec2<u32>>,
+                           Value<builder::vec2<i32>>,
+                           Value<builder::vec2<f32>>,
+                           Value<builder::vec2<f16>>,
+
+                           Value<builder::vec3<AInt>>,
+                           Value<builder::vec3<AFloat>>,
+                           Value<builder::vec3<u32>>,
+                           Value<builder::vec3<i32>>,
+                           Value<builder::vec3<f32>>,
+                           Value<builder::vec3<f16>>,
+
+                           Value<builder::vec4<AInt>>,
+                           Value<builder::vec4<AFloat>>,
+                           Value<builder::vec4<u32>>,
+                           Value<builder::vec4<i32>>,
+                           Value<builder::vec4<f32>>,
+                           Value<builder::vec4<f16>>,
+
+                           Value<builder::mat2x2<AInt>>,
+                           Value<builder::mat2x2<AFloat>>,
+                           Value<builder::mat2x2<f32>>,
+                           Value<builder::mat2x2<f16>>,
+
+                           Value<builder::mat2x3<AInt>>,
+                           Value<builder::mat2x3<AFloat>>,
+                           Value<builder::mat2x3<f32>>,
+                           Value<builder::mat2x3<f16>>,
+
+                           Value<builder::mat3x2<AInt>>,
+                           Value<builder::mat3x2<AFloat>>,
+                           Value<builder::mat3x2<f32>>,
+                           Value<builder::mat3x2<f16>>
+                           //
+                           >;
 
 struct Case {
     Types lhs;
     Types rhs;
     Types expected;
-    bool is_overflow;
+    bool overflow;
 };
 
+/// Creates a Case with Values of any type
+template <typename T, typename U, typename V>
+Case C(Value<T> lhs, Value<U> rhs, Value<V> expected, bool overflow = false) {
+    return Case{std::move(lhs), std::move(rhs), std::move(expected), overflow};
+}
+
+/// Convenience overload to creates a Case with just scalars
+template <typename T, typename U, typename V, typename = std::enable_if_t<!IsValue<T>>>
+Case C(T lhs, U rhs, V expected, bool overflow = false) {
+    return Case{Val(lhs), Val(rhs), Val(expected), overflow};
+}
+
 static std::ostream& operator<<(std::ostream& o, const Case& c) {
-    std::visit(
-        [&](auto&& lhs, auto&& rhs, auto&& expected) {
-            o << "lhs: " << lhs << ", rhs: " << rhs << ", expected: " << expected;
-        },
-        c.lhs, c.rhs, c.expected);
+    auto print_value = [&](auto&& value) {
+        std::visit(
+            [&](auto&& v) {
+                using ValueType = std::decay_t<decltype(v)>;
+                o << ValueType::DataType::Name() << "(";
+                for (auto& a : v.args.values) {
+                    o << std::get<typename ValueType::ElementType>(a);
+                    if (&a != &v.args.values.Back()) {
+                        o << ", ";
+                    }
+                }
+                o << ")";
+            },
+            value);
+    };
+    o << "lhs: ";
+    print_value(c.lhs);
+    o << ", rhs: ";
+    print_value(c.rhs);
+    o << ", expected: ";
+    print_value(c.expected);
+    o << ", overflow: " << c.overflow;
     return o;
 }
 
-template <typename T, typename U, typename V>
-Case C(T lhs, U rhs, V expected, bool is_overflow = false) {
-    return Case{lhs, rhs, expected, is_overflow};
+// Calls `f` on deepest elements of both `a` and `b`. If function returns false, it stops
+// traversing, and return false, otherwise it continues and returns true.
+// TODO(amaiorano): Move to Constant.h?
+template <typename Func>
+bool ForEachElemPair(const sem::Constant* a, const sem::Constant* b, Func&& f) {
+    EXPECT_EQ(a->Type(), b->Type());
+    size_t i = 0;
+    while (true) {
+        auto* a_elem = a->Index(i);
+        if (!a_elem) {
+            break;
+        }
+        auto* b_elem = b->Index(i);
+        if (!ForEachElemPair(a_elem, b_elem, f)) {
+            return false;
+        }
+        i++;
+    }
+    if (i == 0) {
+        return f(a, b);
+    }
+    return true;
 }
 
 using ResolverConstEvalBinaryOpTest = ResolverTestWithParam<std::tuple<ast::BinaryOp, Case>>;
@@ -3185,19 +3283,26 @@ TEST_P(ResolverConstEvalBinaryOpTest, Test) {
     Enable(ast::Extension::kF16);
 
     auto op = std::get<0>(GetParam());
-    auto c = std::get<1>(GetParam());
-    std::visit(
-        [&](auto&& lhs, auto&& rhs, auto&& expected) {
-            using T = std::decay_t<decltype(expected)>;
+    auto& c = std::get<1>(GetParam());
 
+    std::visit(
+        [&](auto&& expected) {
+            using T = typename std::decay_t<decltype(expected)>::ElementType;
             if constexpr (std::is_same_v<T, AInt> || std::is_same_v<T, AFloat>) {
-                if (c.is_overflow) {
+                if (c.overflow) {
+                    // Overflow is not allowed for abstract types. This is tested separately.
                     return;
                 }
             }
 
-            auto* expr = create<ast::BinaryExpression>(op, Expr(lhs), Expr(rhs));
+            auto* lhs_expr = std::visit([&](auto&& value) { return value.Expr(*this); }, c.lhs);
+            auto* rhs_expr = std::visit([&](auto&& value) { return value.Expr(*this); }, c.rhs);
+            auto* expr = create<ast::BinaryExpression>(op, lhs_expr, rhs_expr);
+
             GlobalConst("C", expr);
+
+            auto* expected_expr = expected.Expr(*this);
+            GlobalConst("E", expected_expr);
 
             EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -3205,15 +3310,24 @@ TEST_P(ResolverConstEvalBinaryOpTest, Test) {
             const sem::Constant* value = sem->ConstantValue();
             ASSERT_NE(value, nullptr);
             EXPECT_TYPE(value->Type(), sem->Type());
-            EXPECT_EQ(value->As<T>(), expected);
 
-            if constexpr (IsInteger<UnwrapNumber<T>>) {
-                // Check that the constant's integer doesn't contain unexpected data in the MSBs
-                // that are outside of the bit-width of T.
-                EXPECT_EQ(value->As<AInt>(), AInt(expected));
-            }
+            auto* expected_sem = Sem().Get(expected_expr);
+            const sem::Constant* expected_value = expected_sem->ConstantValue();
+            ASSERT_NE(expected_value, nullptr);
+            EXPECT_TYPE(expected_value->Type(), expected_sem->Type());
+
+            ForEachElemPair(value, expected_value,
+                            [&](const sem::Constant* a, const sem::Constant* b) {
+                                EXPECT_EQ(a->As<T>(), b->As<T>());
+                                if constexpr (IsInteger<UnwrapNumber<T>>) {
+                                    // Check that the constant's integer doesn't contain unexpected
+                                    // data in the MSBs that are outside of the bit-width of T.
+                                    EXPECT_EQ(a->As<AInt>(), b->As<AInt>());
+                                }
+                                return !HasFailure();
+                            });
         },
-        c.lhs, c.rhs, c.expected);
+        c.expected);
 }
 
 INSTANTIATE_TEST_SUITE_P(MixedAbstractArgs,
@@ -3325,33 +3439,37 @@ TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AFloat) {
     EXPECT_EQ(r()->error(), "1:1 error: '-inf' cannot be represented as 'abstract-float'");
 }
 
-TEST_F(ResolverConstEvalTest, BinaryAbstractMixed_ScalarScalar) {
-    auto* a = Const("a", Expr(1_a));    // AInt
-    auto* b = Const("b", Expr(2.3_a));  // AFloat
-    auto* c = Add(Expr("a"), Expr("b"));
-    WrapInFunction(a, b, c);
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* sem = Sem().Get(c);
-    ASSERT_TRUE(sem);
-    ASSERT_TRUE(sem->ConstantValue());
-    auto result = sem->ConstantValue()->As<AFloat>();
-    EXPECT_EQ(result, 3.3f);
-}
-
-TEST_F(ResolverConstEvalTest, BinaryAbstractMixed_ScalarVector) {
-    auto* a = Const("a", Expr(1_a));                                   // AInt
-    auto* b = Const("b", Construct(ty.vec(nullptr, 3), Expr(2.3_a)));  // AFloat
-    auto* c = Add(Expr("a"), Expr("b"));
-    WrapInFunction(a, b, c);
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-    auto* sem = Sem().Get(c);
-    ASSERT_TRUE(sem);
-    ASSERT_TRUE(sem->ConstantValue());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<AFloat>(), 3.3f);
-    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<AFloat>(), 3.3f);
-    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<AFloat>(), 3.3f);
-}
-
+// Mixed AInt and AFloat args to test implicit conversion to AFloat
+INSTANTIATE_TEST_SUITE_P(
+    AbstractMixed,
+    ResolverConstEvalBinaryOpTest,
+    testing::Combine(
+        testing::Values(ast::BinaryOp::kAdd),
+        testing::Values(C(Val(1_a), Val(2.3_a), Val(3.3_a)),
+                        C(Val(2.3_a), Val(1_a), Val(3.3_a)),
+                        C(Val(1_a), Vec(2.3_a, 2.3_a, 2.3_a), Vec(3.3_a, 3.3_a, 3.3_a)),
+                        C(Vec(2.3_a, 2.3_a, 2.3_a), Val(1_a), Vec(3.3_a, 3.3_a, 3.3_a)),
+                        C(Vec(2.3_a, 2.3_a, 2.3_a), Val(1_a), Vec(3.3_a, 3.3_a, 3.3_a)),
+                        C(Val(1_a), Vec(2.3_a, 2.3_a, 2.3_a), Vec(3.3_a, 3.3_a, 3.3_a)),
+                        C(Mat({1_a, 2_a},        //
+                              {1_a, 2_a},        //
+                              {1_a, 2_a}),       //
+                          Mat({1.2_a, 2.3_a},    //
+                              {1.2_a, 2.3_a},    //
+                              {1.2_a, 2.3_a}),   //
+                          Mat({2.2_a, 4.3_a},    //
+                              {2.2_a, 4.3_a},    //
+                              {2.2_a, 4.3_a})),  //
+                        C(Mat({1.2_a, 2.3_a},    //
+                              {1.2_a, 2.3_a},    //
+                              {1.2_a, 2.3_a}),   //
+                          Mat({1_a, 2_a},        //
+                              {1_a, 2_a},        //
+                              {1_a, 2_a}),       //
+                          Mat({2.2_a, 4.3_a},    //
+                              {2.2_a, 4.3_a},    //
+                              {2.2_a, 4.3_a}))   //
+                        )));
 }  // namespace binary_op
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

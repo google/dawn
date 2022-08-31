@@ -47,13 +47,13 @@ class ResolverTypeConstructorValidationTest : public resolver::TestHelper, publi
 namespace InferTypeTest {
 struct Params {
     builder::ast_type_func_ptr create_rhs_ast_type;
-    builder::ast_expr_func_ptr create_rhs_ast_value;
+    builder::ast_expr_from_double_func_ptr create_rhs_ast_value;
     builder::sem_type_func_ptr create_rhs_sem_type;
 };
 
 template <typename T>
 constexpr Params ParamsFor() {
-    return Params{DataType<T>::AST, DataType<T>::Expr, DataType<T>::Sem};
+    return Params{DataType<T>::AST, DataType<T>::ExprFromDouble, DataType<T>::Sem};
 }
 
 TEST_F(ResolverTypeConstructorValidationTest, InferTypeTest_Simple) {
@@ -242,12 +242,13 @@ struct Params {
     Kind kind;
     builder::ast_type_func_ptr lhs_type;
     builder::ast_type_func_ptr rhs_type;
-    builder::ast_expr_func_ptr rhs_value_expr;
+    builder::ast_expr_from_double_func_ptr rhs_value_expr;
 };
 
 template <typename LhsType, typename RhsType>
 constexpr Params ParamsFor(Kind kind) {
-    return Params{kind, DataType<LhsType>::AST, DataType<RhsType>::AST, DataType<RhsType>::Expr};
+    return Params{kind, DataType<LhsType>::AST, DataType<RhsType>::AST,
+                  DataType<RhsType>::ExprFromDouble};
 }
 
 static constexpr Params valid_cases[] = {
@@ -426,7 +427,7 @@ TEST_P(ConversionConstructorInvalidTest, All) {
     // Skip test for valid cases
     for (auto& v : valid_cases) {
         if (v.lhs_type == lhs_params.ast && v.rhs_type == rhs_params.ast &&
-            v.rhs_value_expr == rhs_params.expr) {
+            v.rhs_value_expr == rhs_params.expr_from_double) {
             return;
         }
     }
@@ -439,7 +440,7 @@ TEST_P(ConversionConstructorInvalidTest, All) {
     auto* lhs_type1 = lhs_params.ast(*this);
     auto* lhs_type2 = lhs_params.ast(*this);
     auto* rhs_type = rhs_params.ast(*this);
-    auto* rhs_value_expr = rhs_params.expr(*this, 0);
+    auto* rhs_value_expr = rhs_params.expr_from_double(*this, 0);
 
     std::stringstream ss;
     ss << FriendlyName(lhs_type1) << " = " << FriendlyName(lhs_type2) << "("
@@ -2437,7 +2438,7 @@ struct MatrixParams {
     uint32_t columns;
     name_func_ptr get_element_type_name;
     builder::ast_type_func_ptr create_element_ast_type;
-    builder::ast_expr_func_ptr create_element_ast_value;
+    builder::ast_expr_from_double_func_ptr create_element_ast_value;
     builder::ast_type_func_ptr create_column_ast_type;
     builder::ast_type_func_ptr create_mat_ast_type;
 };
@@ -2449,7 +2450,7 @@ constexpr MatrixParams MatrixParamsFor() {
         C,
         DataType<T>::Name,
         DataType<T>::AST,
-        DataType<T>::Expr,
+        DataType<T>::ExprFromDouble,
         DataType<tint::resolver::builder::vec<R, T>>::AST,
         DataType<tint::resolver::builder::mat<C, R, T>>::AST,
     };
@@ -3058,7 +3059,7 @@ TEST_P(StructConstructorInputsTest, TooFew) {
         auto* struct_type = str_params.ast(*this);
         members.Push(Member("member_" + std::to_string(i), struct_type));
         if (i < N - 1) {
-            auto* ctor_value_expr = str_params.expr(*this, 0);
+            auto* ctor_value_expr = str_params.expr_from_double(*this, 0);
             values.Push(ctor_value_expr);
         }
     }
@@ -3084,7 +3085,7 @@ TEST_P(StructConstructorInputsTest, TooMany) {
             auto* struct_type = str_params.ast(*this);
             members.Push(Member("member_" + std::to_string(i), struct_type));
         }
-        auto* ctor_value_expr = str_params.expr(*this, 0);
+        auto* ctor_value_expr = str_params.expr_from_double(*this, 0);
         values.Push(ctor_value_expr);
     }
     auto* s = Structure("s", members);
@@ -3122,8 +3123,8 @@ TEST_P(StructConstructorTypeTest, AllTypes) {
         auto* struct_type = str_params.ast(*this);
         members.Push(Member("member_" + std::to_string(i), struct_type));
         auto* ctor_value_expr = (i == constructor_value_with_different_type)
-                                    ? ctor_params.expr(*this, 0)
-                                    : str_params.expr(*this, 0);
+                                    ? ctor_params.expr_from_double(*this, 0)
+                                    : str_params.expr_from_double(*this, 0);
         values.Push(ctor_value_expr);
     }
     auto* s = Structure("s", members);

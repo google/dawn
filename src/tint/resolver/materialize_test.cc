@@ -255,9 +255,9 @@ struct Data {
     std::string target_element_type_name;
     builder::ast_type_func_ptr target_ast_ty;
     builder::sem_type_func_ptr target_sem_ty;
-    builder::ast_expr_func_ptr target_expr;
+    builder::ast_expr_from_double_func_ptr target_expr;
     std::string abstract_type_name;
-    builder::ast_expr_func_ptr abstract_expr;
+    builder::ast_expr_from_double_func_ptr abstract_expr;
     std::variant<AInt, AFloat> materialized_value;
     double literal_value;
 };
@@ -268,13 +268,13 @@ Data Types(MATERIALIZED_TYPE materialized_value, double literal_value) {
     using AbstractDataType = builder::DataType<ABSTRACT_TYPE>;
     using TargetElementDataType = builder::DataType<typename TargetDataType::ElementType>;
     return {
-        TargetDataType::Name(),         // target_type_name
-        TargetElementDataType::Name(),  // target_element_type_name
-        TargetDataType::AST,            // target_ast_ty
-        TargetDataType::Sem,            // target_sem_ty
-        TargetDataType::Expr,           // target_expr
-        AbstractDataType::Name(),       // abstract_type_name
-        AbstractDataType::Expr,         // abstract_expr
+        TargetDataType::Name(),            // target_type_name
+        TargetElementDataType::Name(),     // target_element_type_name
+        TargetDataType::AST,               // target_ast_ty
+        TargetDataType::Sem,               // target_sem_ty
+        TargetDataType::ExprFromDouble,    // target_expr
+        AbstractDataType::Name(),          // abstract_type_name
+        AbstractDataType::ExprFromDouble,  // abstract_expr
         materialized_value,
         literal_value,
     };
@@ -286,13 +286,13 @@ Data Types() {
     using AbstractDataType = builder::DataType<ABSTRACT_TYPE>;
     using TargetElementDataType = builder::DataType<typename TargetDataType::ElementType>;
     return {
-        TargetDataType::Name(),         // target_type_name
-        TargetElementDataType::Name(),  // target_element_type_name
-        TargetDataType::AST,            // target_ast_ty
-        TargetDataType::Sem,            // target_sem_ty
-        TargetDataType::Expr,           // target_expr
-        AbstractDataType::Name(),       // abstract_type_name
-        AbstractDataType::Expr,         // abstract_expr
+        TargetDataType::Name(),            // target_type_name
+        TargetElementDataType::Name(),     // target_element_type_name
+        TargetDataType::AST,               // target_ast_ty
+        TargetDataType::Sem,               // target_sem_ty
+        TargetDataType::ExprFromDouble,    // target_expr
+        AbstractDataType::Name(),          // abstract_type_name
+        AbstractDataType::ExprFromDouble,  // abstract_expr
         0_a,
         0.0,
     };
@@ -826,7 +826,7 @@ struct Data {
     std::string expected_element_type_name;
     builder::sem_type_func_ptr expected_sem_ty;
     std::string abstract_type_name;
-    builder::ast_expr_func_ptr abstract_expr;
+    builder::ast_expr_from_double_func_ptr abstract_expr;
     std::variant<AInt, AFloat> materialized_value;
     double literal_value;
 };
@@ -837,11 +837,11 @@ Data Types(MATERIALIZED_TYPE materialized_value, double literal_value) {
     using AbstractDataType = builder::DataType<ABSTRACT_TYPE>;
     using TargetElementDataType = builder::DataType<typename ExpectedDataType::ElementType>;
     return {
-        ExpectedDataType::Name(),       // expected_type_name
-        TargetElementDataType::Name(),  // expected_element_type_name
-        ExpectedDataType::Sem,          // expected_sem_ty
-        AbstractDataType::Name(),       // abstract_type_name
-        AbstractDataType::Expr,         // abstract_expr
+        ExpectedDataType::Name(),          // expected_type_name
+        TargetElementDataType::Name(),     // expected_element_type_name
+        ExpectedDataType::Sem,             // expected_sem_ty
+        AbstractDataType::Name(),          // abstract_type_name
+        AbstractDataType::ExprFromDouble,  // abstract_expr
         materialized_value,
         literal_value,
     };

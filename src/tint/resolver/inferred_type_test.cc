@@ -43,13 +43,15 @@ using alias = builder::alias<T>;
 struct ResolverInferredTypeTest : public resolver::TestHelper, public testing::Test {};
 
 struct Params {
-    builder::ast_expr_func_ptr create_value;
+    // builder::ast_expr_func_ptr_default_arg create_value;
+    builder::ast_expr_from_double_func_ptr create_value;
     builder::sem_type_func_ptr create_expected_type;
 };
 
 template <typename T>
 constexpr Params ParamsFor() {
-    return Params{DataType<T>::Expr, DataType<T>::Sem};
+    // return Params{builder::CreateExprWithDefaultArg<T>(), DataType<T>::Sem};
+    return Params{DataType<T>::ExprFromDouble, DataType<T>::Sem};
 }
 
 Params all_cases[] = {
