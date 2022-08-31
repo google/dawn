@@ -35,28 +35,6 @@ template <typename K,
           typename HASH = Hasher<K>,
           typename EQUAL = std::equal_to<K>>
 class Hashmap {
-    /// LazyCreator is a transient structure used to late-build the Entry::value, when inserted into
-    /// the underlying Hashset.
-    ///
-    /// LazyCreator holds a #key, and a #create function used to build the final Entry::value.
-    /// The #create function must be of the signature `V()`.
-    ///
-    /// LazyCreator can be compared to Entry and hashed, allowing them to be passed to
-    /// Hashset::Insert(). If the set does not contain an existing entry with #key,
-    /// Hashset::Insert() will construct a new Entry passing the rvalue LazyCreator as the
-    /// constructor argument, which in turn calls the #create function to generate the entry value.
-    ///
-    /// @see Entry
-    /// @see Hasher
-    /// @see Equality
-    template <typename CREATE>
-    struct LazyCreator {
-        /// The key of the entry to insert into the map
-        const K& key;
-        /// The value creation function
-        CREATE create;
-    };
-
     /// Entry holds a key and value pair, and is used as the element type of the underlying Hashset.
     /// Entries are compared and hashed using only the #key.
     /// @see Hasher
@@ -71,23 +49,6 @@ class Hashmap {
         /// Move-constructor.
         Entry(Entry&&) = default;
 
-        /// Constructor from a LazyCreator.
-        /// The constructor invokes the LazyCreator::create function to build the #value.
-        /// @see LazyCreator
-        template <typename CREATE>
-        Entry(const LazyCreator<CREATE>& creator)  // NOLINT(runtime/explicit)
-            : key(creator.key), value(creator.create()) {}
-
-        /// Assignment operator from a LazyCreator.
-        /// The assignment invokes the LazyCreator::create function to build the #value.
-        /// @see LazyCreator
-        template <typename CREATE>
-        Entry& operator=(LazyCreator<CREATE>&& creator) {
-            key = std::move(creator.key);
-            value = creator.create();
-            return *this;
-        }
-
         /// Copy-assignment operator
         Entry& operator=(const Entry&) = default;
 
@@ -99,33 +60,23 @@ class Hashmap {
     };
 
     /// Hash provider for the underlying Hashset.
-    /// Provides hash functions for an Entry, K or LazyCreator.
+    /// Provides hash functions for an Entry or K.
     /// The hash functions only consider the key of an entry.
     struct Hasher {
         /// Calculates a hash from an Entry
         size_t operator()(const Entry& entry) const { return HASH()(entry.key); }
         /// Calculates a hash from a K
         size_t operator()(const K& key) const { return HASH()(key); }
-        /// Calculates a hash from a LazyCreator
-        template <typename CREATE>
-        size_t operator()(const LazyCreator<CREATE>& lc) const {
-            return HASH()(lc.key);
-        }
     };
 
     /// Equality provider for the underlying Hashset.
-    /// Provides equality functions for an Entry, K or LazyCreator to an Entry.
+    /// Provides equality functions for an Entry or K to an Entry.
     /// The equality functions only consider the key for equality.
     struct Equality {
         /// Compares an Entry to an Entry for equality.
         bool operator()(const Entry& a, const Entry& b) const { return EQUAL()(a.key, b.key); }
         /// Compares a K to an Entry for equality.
         bool operator()(const K& a, const Entry& b) const { return EQUAL()(a, b.key); }
-        /// Compares a LazyCreator to an Entry for equality.
-        template <typename CREATE>
-        bool operator()(const LazyCreator<CREATE>& lc, const Entry& b) const {
-            return EQUAL()(lc.key, b.key);
-        }
     };
 
     /// The underlying set
@@ -151,7 +102,8 @@ class Hashmap {
     /// Used by gmock for the `ElementsAre` checks.
     using value_type = KeyValue;
 
-    /// Iterator for the map
+    /// Iterator for the map.
+    /// Iterators are invalidated if the map is modified.
     class Iterator {
       public:
         /// @returns the key of the entry pointed to by this iterator
@@ -226,13 +178,29 @@ class Hashmap {
 
     /// Searches for an entry with the given key value, adding and returning the result of
     /// calling `create` if the entry was not found.
+    /// @note: Before calling `create`, the map will insert a zero-initialized value for the given
+    /// key, which will be replaced with the value returned by `create`. If `create` adds an entry
+    /// with `key` to this map, it will be replaced.
     /// @param key the entry's key value to search for.
     /// @param create the create function to call if the map does not contain the key.
     /// @returns the value of the entry.
     template <typename CREATE>
     V& GetOrCreate(const K& key, CREATE&& create) {
-        LazyCreator<CREATE> lc{key, std::forward<CREATE>(create)};
-        auto res = set_.Add(std::move(lc));
+        auto res = set_.Add(Entry{key, V{}});
+        if (res.action == AddAction::kAdded) {
+            // Store the set generation before calling create()
+            auto generation = set_.Generation();
+            // Call create(), which might modify this map.
+            auto value = create();
+            // Was this map mutated?
+            if (set_.Generation() == generation) {
+                // Calling create() did not touch the map. No need to lookup again.
+                res.entry->value = std::move(value);
+            } else {
+                // Calling create() modified the map. Need to insert again.
+                res = set_.Replace(Entry{key, std::move(value)});
+            }
+        }
         return res.entry->value;
     }
 
@@ -241,9 +209,7 @@ class Hashmap {
     /// @param key the entry's key value to search for.
     /// @returns the value of the entry.
     V& GetOrZero(const K& key) {
-        auto zero = [] { return V{}; };
-        LazyCreator<decltype(zero)> lc{key, zero};
-        auto res = set_.Add(std::move(lc));
+        auto res = set_.Add(Entry{key, V{}});
         return res.entry->value;
     }
 
