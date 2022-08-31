@@ -541,6 +541,8 @@ class CloneContext {
 
     /// VectorListTransforms is a map of utils::Vector pointer to transforms for that list
     struct VectorListTransforms {
+        using Map = utils::Hashmap<const void*, ListTransforms, 4>;
+
         /// An accessor to the VectorListTransforms map.
         /// Index caches the last map lookup, and will only re-search the map if the transform map
         /// was modified since the last lookup.
@@ -560,44 +562,36 @@ class CloneContext {
           private:
             friend VectorListTransforms;
 
-            Index(const void* list,
-                  VectorListTransforms& vlt,
-                  uint32_t generation,
-                  const ListTransforms* cached)
-                : list_(list), vlt_(vlt), generation_(generation), cached_(cached) {}
+            Index(const void* list, Map* map)
+                : list_(list),
+                  map_(map),
+                  generation_(map->Generation()),
+                  cached_(map_->Find(list)) {}
 
             void Update() {
-                if (vlt_.generation_ != generation_) {
-                    cached_ = vlt_.map_.Find(list_);
-                    generation_ = vlt_.generation_;
+                if (map_->Generation() != generation_) {
+                    cached_ = map_->Find(list_);
+                    generation_ = map_->Generation();
                 }
             }
 
             const void* list_;
-            VectorListTransforms& vlt_;
-            uint32_t generation_;
+            Map* map_;
+            uint64_t generation_;
             const ListTransforms* cached_;
         };
 
         /// Edit returns a reference to the ListTransforms for the given vector pointer and
         /// increments #list_transform_generation_ signalling that the list transforms have been
         /// modified.
-        inline ListTransforms& Edit(const void* list) {
-            generation_++;
-            return map_.GetOrZero(list);
-        }
+        inline ListTransforms& Edit(const void* list) { return map_.GetOrZero(list); }
 
         /// @returns an Index to the transforms for the given list.
-        inline Index Find(const void* list) {
-            return Index{list, *this, generation_, map_.Find(list)};
-        }
+        inline Index Find(const void* list) { return Index{list, &map_}; }
 
       private:
         /// The map of vector pointer to ListTransforms
-        utils::Hashmap<const void*, ListTransforms, 4> map_;
-
-        /// A counter that's incremented each time list transforms are modified.
-        uint32_t generation_ = 0;
+        Map map_;
     };
 
     /// A map of object in #src to functions that create their replacement in #dst
