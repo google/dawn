@@ -150,9 +150,9 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Const) {
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_OverridableConst) {
-    Override("width", ty.i32(), Construct(ty.i32(), 2_i), Id(7u));
-    Override("height", ty.i32(), Construct(ty.i32(), 3_i), Id(8u));
-    Override("depth", ty.i32(), Construct(ty.i32(), 4_i), Id(9u));
+    Override("width", ty.i32(), Construct(ty.i32(), 2_i), Id(7_u));
+    Override("height", ty.i32(), Construct(ty.i32(), 3_i), Id(8_u));
+    Override("depth", ty.i32(), Construct(ty.i32(), 4_i), Id(9_u));
     auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
                       utils::Vector{
                           WorkgroupSize("width", "height", "depth"),
@@ -180,7 +180,7 @@ OpDecorate %3 BuiltIn WorkgroupSize
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndConst) {
-    Override("height", ty.i32(), Construct(ty.i32(), 2_i), Id(7u));
+    Override("height", ty.i32(), Construct(ty.i32(), 2_i), Id(7_u));
     GlobalConst("depth", ty.i32(), Construct(ty.i32(), 3_i));
     auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
                       utils::Vector{

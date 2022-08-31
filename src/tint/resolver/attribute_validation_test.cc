@@ -97,7 +97,7 @@ static utils::Vector<const ast::Attribute*, 2> createAttributes(const Source& so
         case AttributeKind::kGroup:
             return {builder.Group(source, 1_a)};
         case AttributeKind::kId:
-            return {builder.create<ast::IdAttribute>(source, 0u)};
+            return {builder.Id(source, 0_a)};
         case AttributeKind::kInterpolate:
             return {builder.Interpolate(source, ast::InterpolationType::kLinear,
                                         ast::InterpolationSampling::kCenter)};
@@ -786,8 +786,8 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 TEST_F(ConstantAttributeTest, DuplicateAttribute) {
     GlobalConst("a", ty.f32(), Expr(1.23_f),
                 utils::Vector{
-                    create<ast::IdAttribute>(Source{{12, 34}}, 0u),
-                    create<ast::IdAttribute>(Source{{56, 78}}, 1u),
+                    Id(Source{{12, 34}}, 0_a),
+                    Id(Source{{56, 78}}, 1_a),
                 });
 
     EXPECT_FALSE(r()->Resolve());
@@ -829,8 +829,8 @@ INSTANTIATE_TEST_SUITE_P(ResolverAttributeValidationTest,
 TEST_F(OverrideAttributeTest, DuplicateAttribute) {
     Override("a", ty.f32(), Expr(1.23_f),
              utils::Vector{
-                 create<ast::IdAttribute>(Source{{12, 34}}, 0u),
-                 create<ast::IdAttribute>(Source{{56, 78}}, 1u),
+                 Id(Source{{12, 34}}, 0_a),
+                 Id(Source{{56, 78}}, 1_a),
              });
 
     EXPECT_FALSE(r()->Resolve());

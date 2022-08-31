@@ -19,11 +19,12 @@
 namespace tint::ast {
 namespace {
 
+using namespace tint::number_suffixes;  // NOLINT
 using IdAttributeTest = TestHelper;
 
 TEST_F(IdAttributeTest, Creation) {
-    auto* d = create<IdAttribute>(12u);
-    EXPECT_EQ(12u, d->value);
+    auto* d = Id(12_a);
+    EXPECT_TRUE(d->value->Is<ast::IntLiteralExpression>());
 }
 
 }  // namespace

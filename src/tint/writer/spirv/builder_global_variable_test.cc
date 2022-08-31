@@ -250,7 +250,7 @@ OpDecorate %1 DescriptorSet 3
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Bool) {
-    auto* v = Override("var", ty.bool_(), Expr(true), Id(1200));
+    auto* v = Override("var", ty.bool_(), Expr(true), Id(1200_a));
 
     spirv::Builder& b = Build();
 
@@ -265,7 +265,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Bool) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Bool_ZeroValue) {
-    auto* v = Override("var", ty.bool_(), Construct<bool>(), Id(1200));
+    auto* v = Override("var", ty.bool_(), Construct<bool>(), Id(1200_a));
 
     spirv::Builder& b = Build();
 
@@ -280,7 +280,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Bool_ZeroValue) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Bool_NoConstructor) {
-    auto* v = Override("var", ty.bool_(), Id(1200));
+    auto* v = Override("var", ty.bool_(), Id(1200_a));
 
     spirv::Builder& b = Build();
 
@@ -295,7 +295,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Bool_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar) {
-    auto* v = Override("var", ty.f32(), Expr(2_f), Id(0));
+    auto* v = Override("var", ty.f32(), Expr(2_f), Id(0_a));
 
     spirv::Builder& b = Build();
 
@@ -310,7 +310,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar_ZeroValue) {
-    auto* v = Override("var", ty.f32(), Construct<f32>(), Id(0));
+    auto* v = Override("var", ty.f32(), Construct<f32>(), Id(0_a));
 
     spirv::Builder& b = Build();
 
@@ -325,7 +325,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_ZeroValue) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar_F32_NoConstructor) {
-    auto* v = Override("var", ty.f32(), Id(0));
+    auto* v = Override("var", ty.f32(), Id(0_a));
 
     spirv::Builder& b = Build();
 
@@ -340,7 +340,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_F32_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar_I32_NoConstructor) {
-    auto* v = Override("var", ty.i32(), Id(0));
+    auto* v = Override("var", ty.i32(), Id(0_a));
 
     spirv::Builder& b = Build();
 
@@ -355,7 +355,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_I32_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_Scalar_U32_NoConstructor) {
-    auto* v = Override("var", ty.u32(), Id(0));
+    auto* v = Override("var", ty.u32(), Id(0_a));
 
     spirv::Builder& b = Build();
 
@@ -370,7 +370,7 @@ TEST_F(BuilderTest, GlobalVar_Override_Scalar_U32_NoConstructor) {
 }
 
 TEST_F(BuilderTest, GlobalVar_Override_NoId) {
-    auto* var_a = Override("a", ty.bool_(), Expr(true), Id(0));
+    auto* var_a = Override("a", ty.bool_(), Expr(true), Id(0_a));
     auto* var_b = Override("b", ty.bool_(), Expr(false));
 
     spirv::Builder& b = Build();

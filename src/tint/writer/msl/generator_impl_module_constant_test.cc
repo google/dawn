@@ -329,7 +329,7 @@ void f() {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Override) {
-    auto* var = Override("pos", ty.f32(), Expr(3_f), Id(23));
+    auto* var = Override("pos", ty.f32(), Expr(3_f), Id(23_a));
 
     GeneratorImpl& gen = Build();
 
@@ -338,7 +338,7 @@ TEST_F(MslGeneratorImplTest, Emit_Override) {
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Override_NoId) {
-    auto* var_a = Override("a", ty.f32(), Id(0));
+    auto* var_a = Override("a", ty.f32(), Id(0_a));
     auto* var_b = Override("b", ty.f32());
 
     GeneratorImpl& gen = Build();

@@ -697,8 +697,8 @@ TEST_F(InspectorGetEntryPointTest, OverrideReferencedByCallee) {
 }
 
 TEST_F(InspectorGetEntryPointTest, OverrideSomeReferenced) {
-    Override("foo", ty.f32(), Id(1));
-    Override("bar", ty.f32(), Id(2));
+    Override("foo", ty.f32(), Id(1_a));
+    Override("bar", ty.f32(), Id(2_a));
     MakePlainGlobalReferenceBodyFunction("callee_func", "foo", ty.f32(), utils::Empty);
     MakeCallerBodyFunction("ep_func", utils::Vector{std::string("callee_func")},
                            utils::Vector{
@@ -789,7 +789,7 @@ TEST_F(InspectorGetEntryPointTest, OverrideUninitialized) {
 
 TEST_F(InspectorGetEntryPointTest, OverrideNumericIDSpecified) {
     Override("foo_no_id", ty.f32());
-    Override("foo_id", ty.f32(), Id(1234));
+    Override("foo_id", ty.f32(), Id(1234_a));
 
     MakePlainGlobalReferenceBodyFunction("no_id_func", "foo_no_id", ty.f32(), utils::Empty);
     MakePlainGlobalReferenceBodyFunction("id_func", "foo_id", ty.f32(), utils::Empty);
@@ -1225,9 +1225,9 @@ INSTANTIATE_TEST_SUITE_P(
             InterpolationType::kFlat, InterpolationSampling::kNone}));
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, Bool) {
-    Override("foo", ty.bool_(), Id(1));
-    Override("bar", ty.bool_(), Expr(true), Id(20));
-    Override("baz", ty.bool_(), Expr(false), Id(300));
+    Override("foo", ty.bool_(), Id(1_a));
+    Override("bar", ty.bool_(), Expr(true), Id(20_a));
+    Override("baz", ty.bool_(), Expr(false), Id(300_a));
 
     Inspector& inspector = Build();
 
@@ -1247,8 +1247,8 @@ TEST_F(InspectorGetOverrideDefaultValuesTest, Bool) {
 }
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, U32) {
-    Override("foo", ty.u32(), Id(1));
-    Override("bar", ty.u32(), Expr(42_u), Id(20));
+    Override("foo", ty.u32(), Id(1_a));
+    Override("bar", ty.u32(), Expr(42_u), Id(20_a));
 
     Inspector& inspector = Build();
 
@@ -1264,9 +1264,9 @@ TEST_F(InspectorGetOverrideDefaultValuesTest, U32) {
 }
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, I32) {
-    Override("foo", ty.i32(), Id(1));
-    Override("bar", ty.i32(), Expr(-42_i), Id(20));
-    Override("baz", ty.i32(), Expr(42_i), Id(300));
+    Override("foo", ty.i32(), Id(1_a));
+    Override("bar", ty.i32(), Expr(-42_i), Id(20_a));
+    Override("baz", ty.i32(), Expr(42_i), Id(300_a));
 
     Inspector& inspector = Build();
 
@@ -1286,10 +1286,10 @@ TEST_F(InspectorGetOverrideDefaultValuesTest, I32) {
 }
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, Float) {
-    Override("foo", ty.f32(), Id(1));
-    Override("bar", ty.f32(), Expr(0_f), Id(20));
-    Override("baz", ty.f32(), Expr(-10_f), Id(300));
-    Override("x", ty.f32(), Expr(15_f), Id(4000));
+    Override("foo", ty.f32(), Id(1_a));
+    Override("bar", ty.f32(), Expr(0_f), Id(20_a));
+    Override("baz", ty.f32(), Expr(-10_f), Id(300_a));
+    Override("x", ty.f32(), Expr(15_f), Id(4000_a));
 
     Inspector& inspector = Build();
 
@@ -1313,9 +1313,9 @@ TEST_F(InspectorGetOverrideDefaultValuesTest, Float) {
 }
 
 TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {
-    Override("v1", ty.f32(), Id(1));
-    Override("v20", ty.f32(), Id(20));
-    Override("v300", ty.f32(), Id(300));
+    Override("v1", ty.f32(), Id(1_a));
+    Override("v20", ty.f32(), Id(20_a));
+    Override("v300", ty.f32(), Id(300_a));
     auto* a = Override("a", ty.f32());
     auto* b = Override("b", ty.f32());
     auto* c = Override("c", ty.f32());

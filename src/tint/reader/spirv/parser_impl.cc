@@ -1366,7 +1366,7 @@ bool ParserImpl::EmitScalarSpecConstants() {
                                          "between 0 and 65535: ID %"
                                       << inst.result_id() << " has SpecId " << id;
                     }
-                    auto* cid = create<ast::IdAttribute>(Source{}, id);
+                    auto* cid = builder_.Id(Source{}, AInt(id));
                     spec_id_decos.Push(cid);
                     break;
                 }

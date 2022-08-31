@@ -243,7 +243,7 @@ TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_GlobalConst_arr_vec2_bool) {
 }
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_Override) {
-    auto* var = Override("pos", ty.f32(), Expr(3_f), Id(23));
+    auto* var = Override("pos", ty.f32(), Expr(3_f), Id(23_a));
 
     GeneratorImpl& gen = Build();
 
@@ -256,7 +256,7 @@ static const float pos = WGSL_SPEC_CONSTANT_23;
 }
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_Override_NoConstructor) {
-    auto* var = Override("pos", ty.f32(), Id(23));
+    auto* var = Override("pos", ty.f32(), Id(23_a));
 
     GeneratorImpl& gen = Build();
 
@@ -269,7 +269,7 @@ static const float pos = WGSL_SPEC_CONSTANT_23;
 }
 
 TEST_F(HlslGeneratorImplTest_ModuleConstant, Emit_Override_NoId) {
-    auto* a = Override("a", ty.f32(), Expr(3_f), Id(0));
+    auto* a = Override("a", ty.f32(), Expr(3_f), Id(0_a));
     auto* b = Override("b", ty.f32(), Expr(2_f));
 
     GeneratorImpl& gen = Build();

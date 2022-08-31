@@ -776,7 +776,7 @@ bool Validator::Let(const sem::Variable* v) const {
 }
 
 bool Validator::Override(
-    const sem::Variable* v,
+    const sem::GlobalVariable* v,
     const std::unordered_map<OverrideId, const sem::Variable*>& override_ids) const {
     auto* decl = v->Declaration();
     auto* storage_ty = v->Type()->UnwrapRef();
@@ -788,20 +788,11 @@ bool Validator::Override(
     }
 
     for (auto* attr : decl->attributes) {
-        if (auto* id_attr = attr->As<ast::IdAttribute>()) {
-            uint32_t id = id_attr->value;
-            if (id > std::numeric_limits<decltype(OverrideId::value)>::max()) {
-                AddError(
-                    "override IDs must be between 0 and " +
-                        std::to_string(std::numeric_limits<decltype(OverrideId::value)>::max()),
-                    attr->source);
-                return false;
-            }
-            if (auto it =
-                    override_ids.find(OverrideId{static_cast<decltype(OverrideId::value)>(id)});
-                it != override_ids.end() && it->second != v) {
+        if (attr->Is<ast::IdAttribute>()) {
+            auto id = v->OverrideId();
+            if (auto it = override_ids.find(id); it != override_ids.end() && it->second != v) {
                 AddError("override IDs must be unique", attr->source);
-                AddNote("a override with an ID of " + std::to_string(id) +
+                AddNote("a override with an ID of " + std::to_string(id.value) +
                             " was previously declared here:",
                         ast::GetAttribute<ast::IdAttribute>(it->second->Declaration()->attributes)
                             ->source);

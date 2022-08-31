@@ -804,9 +804,9 @@ void main() {
 
 TEST_F(GlslGeneratorImplTest_Function,
        Emit_Attribute_EntryPoint_Compute_WithWorkgroup_OverridableConst) {
-    Override("width", ty.i32(), Construct(ty.i32(), 2_i), Id(7u));
-    Override("height", ty.i32(), Construct(ty.i32(), 3_i), Id(8u));
-    Override("depth", ty.i32(), Construct(ty.i32(), 4_i), Id(9u));
+    Override("width", ty.i32(), Construct(ty.i32(), 2_i), Id(7_u));
+    Override("height", ty.i32(), Construct(ty.i32(), 3_i), Id(8_u));
+    Override("depth", ty.i32(), Construct(ty.i32(), 4_i), Id(9_u));
     Func("main", utils::Empty, ty.void_(), {},
          utils::Vector{
              Stage(ast::PipelineStage::kCompute),

@@ -98,7 +98,7 @@ TEST_F(ResolverVariableValidationTest, OverrideExceedsIDLimit_LastReserved) {
     // ...
     // @id(N) override oN : i32;
     constexpr size_t kLimit = std::numeric_limits<decltype(OverrideId::value)>::max();
-    Override("reserved", ty.i32(), Id(kLimit));
+    Override("reserved", ty.i32(), Id(AInt(kLimit)));
     for (size_t i = 0; i < kLimit; i++) {
         Override("o" + std::to_string(i), ty.i32());
     }

@@ -2946,26 +2946,32 @@ class ProgramBuilder {
     /// @param id the id value
     /// @returns the override attribute pointer
     const ast::IdAttribute* Id(const Source& source, OverrideId id) {
-        return create<ast::IdAttribute>(source, id.value);
+        return create<ast::IdAttribute>(source, Expr(AInt(id.value)));
     }
 
     /// Creates an ast::IdAttribute with an override identifier
     /// @param id the optional id value
     /// @returns the override attribute pointer
-    const ast::IdAttribute* Id(OverrideId id) { return Id(source_, id); }
+    const ast::IdAttribute* Id(OverrideId id) {
+        return create<ast::IdAttribute>(Expr(AInt(id.value)));
+    }
 
     /// Creates an ast::IdAttribute
     /// @param source the source information
-    /// @param id the id value
+    /// @param id the id value expression
     /// @returns the override attribute pointer
-    const ast::IdAttribute* Id(const Source& source, uint32_t id) {
-        return create<ast::IdAttribute>(source, id);
+    template <typename EXPR>
+    const ast::IdAttribute* Id(const Source& source, EXPR&& id) {
+        return create<ast::IdAttribute>(source, Expr(std::forward<EXPR>(id)));
     }
 
     /// Creates an ast::IdAttribute with an override identifier
-    /// @param id the optional id value
+    /// @param id the optional id value expression
     /// @returns the override attribute pointer
-    const ast::IdAttribute* Id(uint32_t id) { return Id(source_, id); }
+    template <typename EXPR>
+    const ast::IdAttribute* Id(EXPR&& id) {
+        return create<ast::IdAttribute>(Expr(std::forward<EXPR>(id)));
+    }
 
     /// Creates an ast::StageAttribute
     /// @param source the source information

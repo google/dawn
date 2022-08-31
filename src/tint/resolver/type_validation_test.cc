@@ -75,7 +75,7 @@ TEST_F(ResolverTypeValidationTest, VariableDeclNoConstructor_Pass) {
 
 TEST_F(ResolverTypeValidationTest, GlobalOverrideNoConstructor_Pass) {
     // @id(0) override a :i32;
-    Override(Source{{12, 34}}, "a", ty.i32(), Id(0));
+    Override(Source{{12, 34}}, "a", ty.i32(), Id(0_u));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }

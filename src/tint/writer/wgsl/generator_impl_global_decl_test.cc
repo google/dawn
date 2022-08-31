@@ -144,7 +144,7 @@ TEST_F(WgslGeneratorImplTest, Emit_GlobalConst) {
 
 TEST_F(WgslGeneratorImplTest, Emit_OverridableConstants) {
     Override("a", ty.f32());
-    Override("b", ty.f32(), Id(7u));
+    Override("b", ty.f32(), Id(7_a));
 
     GeneratorImpl& gen = Build();
 

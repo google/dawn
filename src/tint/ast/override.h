@@ -62,12 +62,6 @@ class Override final : public Castable<Override, Variable> {
     /// @param ctx the clone context
     /// @return the newly cloned node
     const Override* Clone(CloneContext* ctx) const override;
-
-    /// @param symbols the symbol table to retrieve the name from
-    /// @returns the identifier string for the override. If the override has
-    /// an ID attribute, the string is the id-stringified. Otherwise, the ID
-    /// is the symbol.
-    std::string Identifier(const SymbolTable& symbols) const;
 };
 
 }  // namespace tint::ast

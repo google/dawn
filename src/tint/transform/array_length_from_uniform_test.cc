@@ -124,8 +124,9 @@ fn main() {
     auto got = Run<Unshadow, SimplifyPointers, ArrayLengthFromUniform>(src, data);
 
     EXPECT_EQ(expect, str(got));
-    EXPECT_EQ(std::unordered_set<uint32_t>({0}),
-              got.data.Get<ArrayLengthFromUniform::Result>()->used_size_indices);
+    auto* val = got.data.Get<ArrayLengthFromUniform::Result>();
+    ASSERT_NE(val, nullptr);
+    EXPECT_EQ(std::unordered_set<uint32_t>({0}), val->used_size_indices);
 }
 
 TEST_F(ArrayLengthFromUniformTest, BasicInStruct) {

@@ -776,7 +776,11 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out,
                 return true;
             },
             [&](const ast::IdAttribute* override_deco) {
-                out << "id(" << override_deco->value << ")";
+                out << "id(";
+                if (!EmitExpression(out, override_deco->value)) {
+                    return false;
+                }
+                out << ")";
                 return true;
             },
             [&](const ast::StructMemberSizeAttribute* size) {

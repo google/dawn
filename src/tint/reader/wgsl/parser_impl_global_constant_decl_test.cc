@@ -201,7 +201,7 @@ TEST_F(ParserImplTest, GlobalOverrideDecl_WithId) {
 
     auto* override_attr = ast::GetAttribute<ast::IdAttribute>(override->attributes);
     ASSERT_NE(override_attr, nullptr);
-    EXPECT_EQ(override_attr->value, 7u);
+    EXPECT_TRUE(override_attr->value->Is<ast::IntLiteralExpression>());
 }
 
 TEST_F(ParserImplTest, GlobalOverrideDecl_WithId_TrailingComma) {
@@ -231,7 +231,7 @@ TEST_F(ParserImplTest, GlobalOverrideDecl_WithId_TrailingComma) {
 
     auto* override_attr = ast::GetAttribute<ast::IdAttribute>(override->attributes);
     ASSERT_NE(override_attr, nullptr);
-    EXPECT_EQ(override_attr->value, 7u);
+    EXPECT_TRUE(override_attr->value->Is<ast::IntLiteralExpression>());
 }
 
 TEST_F(ParserImplTest, GlobalOverrideDecl_WithoutId) {
