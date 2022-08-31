@@ -1690,10 +1690,12 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         const sem::Constant* value = nullptr;
         auto stage = sem::EarliestStage(ctor_or_conv.target->Stage(), args_stage);
         if (stage == sem::EvaluationStage::kConstant) {
-            auto const_args =
-                utils::Transform(args, [](auto* arg) { return arg->ConstantValue(); });
+            auto const_args = ConvertArguments(args, ctor_or_conv.target);
+            if (!const_args) {
+                return nullptr;
+            }
             if (auto r = (const_eval_.*ctor_or_conv.const_eval_fn)(
-                    ctor_or_conv.target->ReturnType(), const_args, expr->source)) {
+                    ctor_or_conv.target->ReturnType(), const_args.Get(), expr->source)) {
                 value = r.Get();
             } else {
                 return nullptr;

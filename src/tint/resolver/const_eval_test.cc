@@ -2982,6 +2982,32 @@ TEST_F(ResolverConstEvalTest, MemberAccess) {
     EXPECT_EQ(i2->ConstantValue()->As<u32>(), 2_u);
 }
 
+TEST_F(ResolverConstEvalTest, Matrix_AFloat_Construct_From_AInt_Vectors) {
+    auto* c = Const("a", Construct(ty.mat(nullptr, 2, 2),  //
+                                   Construct(ty.vec(nullptr, 2), Expr(1_a), Expr(2_a)),
+                                   Construct(ty.vec(nullptr, 2), Expr(3_a), Expr(4_a))));
+    WrapInFunction(c);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(c);
+    ASSERT_NE(sem, nullptr);
+    EXPECT_TRUE(sem->Type()->Is<sem::Matrix>());
+    auto* cv = sem->ConstantValue();
+    EXPECT_TYPE(cv->Type(), sem->Type());
+    EXPECT_TRUE(cv->Index(0)->Type()->Is<sem::Vector>());
+    EXPECT_TRUE(cv->Index(0)->Index(0)->Type()->Is<sem::AbstractFloat>());
+    EXPECT_FALSE(cv->AllEqual());
+    EXPECT_FALSE(cv->AnyZero());
+    EXPECT_FALSE(cv->AllZero());
+    auto* c0 = cv->Index(0);
+    auto* c1 = cv->Index(1);
+    EXPECT_EQ(std::get<AFloat>(c0->Index(0)->Value()), 1.0);
+    EXPECT_EQ(std::get<AFloat>(c0->Index(1)->Value()), 2.0);
+    EXPECT_EQ(std::get<AFloat>(c1->Index(0)->Value()), 3.0);
+    EXPECT_EQ(std::get<AFloat>(c1->Index(1)->Value()), 4.0);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Unary op
 ////////////////////////////////////////////////////////////////////////////////////////////////////
