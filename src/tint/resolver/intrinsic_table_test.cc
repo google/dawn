@@ -767,6 +767,22 @@ TEST_F(IntrinsicTableTest, MismatchTypeConstructorExplicit) {
 )");
 }
 
+TEST_F(IntrinsicTableTest, MatchTypeConstructorImplicitMatFromVec) {
+    auto* af = create<sem::AbstractFloat>();
+    auto* vec2_ai = create<sem::Vector>(create<sem::AbstractInt>(), 2u);
+    auto* vec2_af = create<sem::Vector>(af, 2u);
+    auto* mat2x2_af = create<sem::Matrix>(vec2_af, 2u);
+    auto result = table->Lookup(CtorConvIntrinsic::kMat2x2, nullptr,
+                                utils::Vector{vec2_ai, vec2_ai}, Source{{12, 34}});
+    ASSERT_NE(result.target, nullptr);
+    EXPECT_TYPE(result.target->ReturnType(), mat2x2_af);
+    EXPECT_TRUE(result.target->Is<sem::TypeConstructor>());
+    ASSERT_EQ(result.target->Parameters().Length(), 2u);
+    EXPECT_TYPE(result.target->Parameters()[0]->Type(), vec2_af);
+    EXPECT_TYPE(result.target->Parameters()[1]->Type(), vec2_af);
+    EXPECT_NE(result.const_eval_fn, nullptr);
+}
+
 TEST_F(IntrinsicTableTest, MatchTypeConversion) {
     auto* i32 = create<sem::I32>();
     auto* vec3_i32 = create<sem::Vector>(i32, 3u);

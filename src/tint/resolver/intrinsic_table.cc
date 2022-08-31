@@ -349,7 +349,7 @@ const sem::AbstractFloat* build_fa(MatchState& state) {
 }
 
 bool match_fa(const sem::Type* ty) {
-    return ty->IsAnyOf<Any, sem::AbstractFloat>();
+    return ty->IsAnyOf<Any, sem::AbstractNumeric>();
 }
 
 const sem::AbstractInt* build_ia(MatchState& state) {

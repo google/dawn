@@ -48,34 +48,6 @@ std::string Bool::String(MatchState*) const {
   return "bool";
 }
 
-/// TypeMatcher for 'type fa'
-class Fa : public TypeMatcher {
- public:
-  /// Checks whether the given type matches the matcher rules.
-  /// Match may define and refine the template types and numbers in state.
-  /// @param state the MatchState
-  /// @param type the type to match
-  /// @returns the canonicalized type on match, otherwise nullptr
-  const sem::Type* Match(MatchState& state,
-                         const sem::Type* type) const override;
-  /// @param state the MatchState
-  /// @return a string representation of the matcher.
-  std::string String(MatchState* state) const override;
-};
-
-const sem::Type* Fa::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_fa(ty)) {
-    return nullptr;
-  }
-  return build_fa(state);
-}
-
-std::string Fa::String(MatchState*) const {
-  std::stringstream ss;
-  ss << "abstract-float";
-  return ss.str();
-}
-
 /// TypeMatcher for 'type ia'
 class Ia : public TypeMatcher {
  public:
@@ -101,6 +73,34 @@ const sem::Type* Ia::Match(MatchState& state, const sem::Type* ty) const {
 std::string Ia::String(MatchState*) const {
   std::stringstream ss;
   ss << "abstract-int";
+  return ss.str();
+}
+
+/// TypeMatcher for 'type fa'
+class Fa : public TypeMatcher {
+ public:
+  /// Checks whether the given type matches the matcher rules.
+  /// Match may define and refine the template types and numbers in state.
+  /// @param state the MatchState
+  /// @param type the type to match
+  /// @returns the canonicalized type on match, otherwise nullptr
+  const sem::Type* Match(MatchState& state,
+                         const sem::Type* type) const override;
+  /// @param state the MatchState
+  /// @return a string representation of the matcher.
+  std::string String(MatchState* state) const override;
+};
+
+const sem::Type* Fa::Match(MatchState& state, const sem::Type* ty) const {
+  if (!match_fa(ty)) {
+    return nullptr;
+  }
+  return build_fa(state);
+}
+
+std::string Fa::String(MatchState*) const {
+  std::stringstream ss;
+  ss << "abstract-float";
   return ss.str();
 }
 
@@ -1567,11 +1567,11 @@ class AbstractOrScalar : public TypeMatcher {
 };
 
 const sem::Type* AbstractOrScalar::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_fa(ty)) {
-    return build_fa(state);
-  }
   if (match_ia(ty)) {
     return build_ia(state);
+  }
+  if (match_fa(ty)) {
+    return build_fa(state);
   }
   if (match_i32(ty)) {
     return build_i32(state);
@@ -1859,11 +1859,11 @@ class FiaFiu32F16 : public TypeMatcher {
 };
 
 const sem::Type* FiaFiu32F16::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_fa(ty)) {
-    return build_fa(state);
-  }
   if (match_ia(ty)) {
     return build_ia(state);
+  }
+  if (match_fa(ty)) {
+    return build_fa(state);
   }
   if (match_i32(ty)) {
     return build_i32(state);
@@ -1905,11 +1905,11 @@ class FiaFi32F16 : public TypeMatcher {
 };
 
 const sem::Type* FiaFi32F16::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_fa(ty)) {
-    return build_fa(state);
-  }
   if (match_ia(ty)) {
     return build_ia(state);
+  }
+  if (match_fa(ty)) {
+    return build_fa(state);
   }
   if (match_i32(ty)) {
     return build_i32(state);
@@ -1948,11 +1948,11 @@ class FiaFiu32 : public TypeMatcher {
 };
 
 const sem::Type* FiaFiu32::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_fa(ty)) {
-    return build_fa(state);
-  }
   if (match_ia(ty)) {
     return build_ia(state);
+  }
+  if (match_fa(ty)) {
+    return build_fa(state);
   }
   if (match_i32(ty)) {
     return build_i32(state);
@@ -2533,8 +2533,8 @@ class Matchers {
   TemplateNumberMatcher template_number_1_{1};
   TemplateNumberMatcher template_number_2_{2};
   Bool Bool_;
-  Fa Fa_;
   Ia Ia_;
+  Fa Fa_;
   I32 I32_;
   U32 U32_;
   F32 F32_;
@@ -2619,8 +2619,8 @@ class Matchers {
     /* [0] */ &template_type_0_,
     /* [1] */ &template_type_1_,
     /* [2] */ &Bool_,
-    /* [3] */ &Fa_,
-    /* [4] */ &Ia_,
+    /* [3] */ &Ia_,
+    /* [4] */ &Fa_,
     /* [5] */ &I32_,
     /* [6] */ &U32_,
     /* [7] */ &F32_,

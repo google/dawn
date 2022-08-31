@@ -105,8 +105,8 @@ enum texel_format {
 
 // https://gpuweb.github.io/gpuweb/wgsl/#plain-types-section
 type bool
-@precedence(5) @display("abstract-float") type fa
-@precedence(4) @display("abstract-int")   type ia
+@precedence(5) @display("abstract-int")   type ia
+@precedence(4) @display("abstract-float") type fa
 @precedence(3) type i32
 @precedence(2) type u32
 @precedence(1) type f32
@@ -757,40 +757,40 @@ fn textureLoad(texture: texture_external, coords: vec2<i32>) -> vec4<f32>
 // Matrix constructors (scalar)
 @const("MatCtorS")
 ctor mat2x2<T: fa_f32_f16>(T, T,
-                          T, T) -> mat2x2<T>
+                           T, T) -> mat2x2<T>
 @const("MatCtorS")
 ctor mat2x3<T: fa_f32_f16>(T, T, T,
-                          T, T, T) -> mat2x3<T>
+                           T, T, T) -> mat2x3<T>
 @const("MatCtorS")
 ctor mat2x4<T: fa_f32_f16>(T, T, T, T,
-                          T, T, T, T) -> mat2x4<T>
+                           T, T, T, T) -> mat2x4<T>
 @const("MatCtorS")
 ctor mat3x2<T: fa_f32_f16>(T, T,
-                          T, T,
-                          T, T) -> mat3x2<T>
+                           T, T,
+                           T, T) -> mat3x2<T>
 @const("MatCtorS")
 ctor mat3x3<T: fa_f32_f16>(T, T, T,
-                          T, T, T,
-                          T, T, T) -> mat3x3<T>
+                           T, T, T,
+                           T, T, T) -> mat3x3<T>
 @const("MatCtorS")
 ctor mat3x4<T: fa_f32_f16>(T, T, T, T,
-                          T, T, T, T,
-                          T, T, T, T) -> mat3x4<T>
+                           T, T, T, T,
+                           T, T, T, T) -> mat3x4<T>
 @const("MatCtorS")
 ctor mat4x2<T: fa_f32_f16>(T, T,
-                          T, T,
-                          T, T,
-                          T, T) -> mat4x2<T>
+                           T, T,
+                           T, T,
+                           T, T) -> mat4x2<T>
 @const("MatCtorS")
 ctor mat4x3<T: fa_f32_f16>(T, T, T,
-                          T, T, T,
-                          T, T, T,
-                          T, T, T) -> mat4x3<T>
+                           T, T, T,
+                           T, T, T,
+                           T, T, T) -> mat4x3<T>
 @const("MatCtorS")
 ctor mat4x4<T: fa_f32_f16>(T, T, T, T,
-                          T, T, T, T,
-                          T, T, T, T,
-                          T, T, T, T) -> mat4x4<T>
+                           T, T, T, T,
+                           T, T, T, T,
+                           T, T, T, T) -> mat4x4<T>
 
 // Matrix constructors (column vectors)
 @const("MatCtorV")
