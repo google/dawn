@@ -43,18 +43,4 @@ using OperandListKey = utils::UnorderedKeyWrapper<OperandList>;
 
 }  // namespace tint::writer::spirv
 
-namespace std {
-
-/// Custom std::hash specialization for tint::writer::spirv::Operand
-template <>
-class hash<tint::writer::spirv::Operand> {
-  public:
-    /// @param o the Operand
-    /// @return the hash value
-    inline std::size_t operator()(const tint::writer::spirv::Operand& o) const {
-        return std::visit([](auto v) { return tint::utils::Hash(v); }, o);
-    }
-};
-
-}  // namespace std
 #endif  // SRC_TINT_WRITER_SPIRV_OPERAND_H_
