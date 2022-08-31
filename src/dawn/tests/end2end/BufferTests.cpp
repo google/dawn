@@ -821,6 +821,10 @@ TEST_P(BufferTests, CreateBufferOOM) {
 
 // Test that a very large buffer mappedAtCreation fails gracefully.
 TEST_P(BufferTests, BufferMappedAtCreationOOM) {
+    // TODO(crbug.com/dawn/1506): new (std::nothrow) crashes on OOM on Mac ARM64 because libunwind
+    // doesn't see the previous catchall try-catch.
+    DAWN_SUPPRESS_TEST_IF(DAWN_PLATFORM_IS(MACOS) && DAWN_PLATFORM_IS(ARM64));
+
     // TODO(http://crbug.com/dawn/749): Missing support.
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
