@@ -496,4 +496,19 @@ inline f16 operator""_h(unsigned long long int value) {  // NOLINT
 
 }  // namespace tint::number_suffixes
 
+namespace std {
+
+/// Custom std::hash specialization for tint::Number<T>
+template <typename T>
+class hash<tint::Number<T>> {
+  public:
+    /// @param n the Number
+    /// @return the hash value
+    inline std::size_t operator()(const tint::Number<T>& n) const {
+        return std::hash<decltype(n.value)>()(n.value);
+    }
+};
+
+}  // namespace std
+
 #endif  // SRC_TINT_NUMBER_H_

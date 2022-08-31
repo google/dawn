@@ -20,6 +20,7 @@
 #include <functional>
 #include <tuple>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "src/tint/utils/vector.h"
@@ -114,6 +115,16 @@ struct Hasher<std::tuple<TYPES...>> {
     /// @returns a hash of the tuple
     size_t operator()(const std::tuple<TYPES...>& tuple) const {
         return std::apply(Hash<TYPES...>, tuple);
+    }
+};
+
+/// Hasher specialization for std::tuple
+template <typename... TYPES>
+struct Hasher<std::variant<TYPES...>> {
+    /// @param variant the variant to hash
+    /// @returns a hash of the tuple
+    size_t operator()(const std::variant<TYPES...>& variant) const {
+        return std::visit([](auto&& val) { return Hash(val); }, variant);
     }
 };
 
