@@ -44,11 +44,6 @@ class PlatformTextureGbm : public VideoViewsTestBackend::PlatformTexture {
 
     // TODO(chromium:1258986): Add DISJOINT vkImage support for multi-plannar formats.
     bool CanWrapAsWGPUTexture() override {
-        // TODO(chromium:1258986): Figure out the failure incurred by the change to explicit vkImage
-        // create when importing.
-        if (gbm_bo_get_modifier(mGbmBo) == DRM_FORMAT_MOD_LINEAR) {
-            return false;
-        }
         ASSERT(mGbmBo != nullptr);
         // Checks if all plane handles of a multi-planar gbm_bo are same.
         gbm_bo_handle plane0Handle = gbm_bo_get_handle_for_plane(mGbmBo, 0);
@@ -161,7 +156,13 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
             EXPECT_NE(addr, nullptr);
             std::vector<uint8_t> initialData =
                 VideoViewsTests::GetTestTextureData(format, isCheckerboard);
-            std::memcpy(addr, initialData.data(), initialData.size());
+            uint8_t* srcBegin = initialData.data();
+            uint8_t* srcEnd = srcBegin + initialData.size();
+            uint8_t* dstBegin = static_cast<uint8_t*>(addr);
+            for (; srcBegin < srcEnd;
+                 srcBegin += VideoViewsTests::kYUVImageDataWidthInTexels, dstBegin += strideBytes) {
+                std::memcpy(dstBegin, srcBegin, VideoViewsTests::kYUVImageDataWidthInTexels);
+            }
 
             gbm_bo_unmap(gbmBo, mapHandle);
         }
