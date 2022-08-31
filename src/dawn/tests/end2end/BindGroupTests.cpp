@@ -1254,7 +1254,7 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
             color : vec4<f32>
         }
 
-        @group(0) @binding(953) var <uniform> ubo1 : Ubo;
+        @group(0) @binding(553) var <uniform> ubo1 : Ubo;
         @group(0) @binding(47) var <uniform> ubo2 : Ubo;
         @group(0) @binding(111) var <uniform> ubo3 : Ubo;
 
@@ -1295,7 +1295,7 @@ TEST_P(BindGroupTests, ArbitraryBindingNumbers) {
         };
 
         utils::BindingInitializationHelper bindings[] = {
-            {953, color1, 0, 4 * sizeof(float)},  //
+            {553, color1, 0, 4 * sizeof(float)},  //
             {47, color2, 0, 4 * sizeof(float)},   //
             {111, color3, 0, 4 * sizeof(float)},  //
         };

@@ -18,6 +18,7 @@
 #include <cstdint>
 
 static constexpr uint32_t kMaxBindGroups = 4u;
+static constexpr uint32_t kMaxBindingsPerBindGroup = 640u;
 static constexpr uint8_t kMaxVertexAttributes = 16u;
 static constexpr uint8_t kMaxVertexBuffers = 8u;
 static constexpr uint32_t kMaxVertexBufferArrayStride = 2048u;
@@ -61,8 +62,5 @@ static constexpr uint32_t kMaxQueryCount = 8192u;
 static constexpr uint8_t kSampledTexturesPerExternalTexture = 4u;
 static constexpr uint8_t kSamplersPerExternalTexture = 1u;
 static constexpr uint8_t kUniformsPerExternalTexture = 1u;
-
-// A spec defined constant but that doesn't have a name.
-static constexpr uint32_t kMaxBindingNumber = 65535;
 
 #endif  // SRC_DAWN_COMMON_CONSTANTS_H_
