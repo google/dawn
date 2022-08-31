@@ -189,6 +189,13 @@ crbug.com/dawn/1398 [ mac webgpu-adapter-default ] webgpu:web_platform,copyToTex
 crbug.com/dawn/1398 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Slow ]
 
 ################################################################################
+# Large and slow tests
+# KEEP
+################################################################################
+webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Slow ]
+webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Slow ]
+
+################################################################################
 # webgpu:shader,execution,robust_access
 # Slow tests - win
 # KEEP
@@ -619,9 +626,6 @@ crbug.com/dawn/0000 webgpu:api,validation,encoding,beginComputePass:timestampWri
 crbug.com/dawn/0000 webgpu:api,validation,encoding,beginComputePass:timestampWrites,same_location:locationA="end";locationB="end" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,encoding,beginComputePass:timestamp_query_set,device_mismatch:mismatched=true [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,encoding,beginRenderPass:timestamp_query_set,device_mismatch:mismatched=true [ Failure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 monterey ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Failure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 win10 ] webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Failure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 win10 ] webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 win10 ] webgpu:api,validation,image_copy,texture_related:origin_alignment:method="CopyB2T";format="bc2-rgba-unorm";depthOrArrayLayers=1;dimension="2d" [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 monterey ] webgpu:api,validation,image_copy,texture_related:origin_alignment:method="CopyB2T";format="bc5-rg-snorm";depthOrArrayLayers=1;dimension="2d" [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:api,validation,queue,copyToTexture,CopyExternalImageToTexture:destination_texture,dimension:dimension="1d" [ Failure ]
