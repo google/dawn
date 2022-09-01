@@ -445,6 +445,8 @@ set(TINT_LIB_SRCS
   transform/single_entry_point.h
   transform/spirv_atomic.cc
   transform/spirv_atomic.h
+  transform/std140.cc
+  transform/std140.h
   transform/substitute_override.cc
   transform/substitute_override.h
   transform/transform.cc
@@ -1128,6 +1130,7 @@ if(TINT_BUILD_TESTS)
       transform/simplify_pointers_test.cc
       transform/single_entry_point_test.cc
       transform/spirv_atomic_test.cc
+      transform/std140_test.cc
       transform/substitute_override_test.cc
       transform/test_helper.h
       transform/unshadow_test.cc

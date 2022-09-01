@@ -1,49 +1,50 @@
-SKIP: FAILED
-
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 67
+; Bound: 78
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
-               OpName %S "S"
-               OpMemberName %S 0 "a"
-               OpMemberName %S 1 "b"
-               OpMemberName %S 2 "c"
-               OpMemberName %S 3 "d"
-               OpMemberName %S 4 "e"
-               OpMemberName %S 5 "f"
-               OpMemberName %S 6 "g"
-               OpMemberName %S 7 "h"
-               OpMemberName %S 8 "i"
-               OpMemberName %S 9 "j"
-               OpMemberName %S 10 "k"
+               OpName %S_std140 "S_std140"
+               OpMemberName %S_std140 0 "a"
+               OpMemberName %S_std140 1 "b"
+               OpMemberName %S_std140 2 "c"
+               OpMemberName %S_std140 3 "d"
+               OpMemberName %S_std140 4 "e"
+               OpMemberName %S_std140 5 "f"
+               OpMemberName %S_std140 6 "g"
+               OpMemberName %S_std140 7 "h"
+               OpMemberName %S_std140 8 "i"
+               OpMemberName %S_std140 9 "j_0"
+               OpMemberName %S_std140 10 "j_1"
+               OpMemberName %S_std140 11 "j_2"
+               OpMemberName %S_std140 12 "k"
                OpName %Inner "Inner"
                OpMemberName %Inner 0 "x"
-               OpMemberName %S 11 "l"
+               OpMemberName %S_std140 13 "l"
                OpName %s "s"
+               OpName %load_s_j "load_s_j"
                OpName %main "main"
-               OpDecorate %S Block
-               OpMemberDecorate %S 0 Offset 0
-               OpMemberDecorate %S 1 Offset 12
-               OpMemberDecorate %S 2 Offset 16
-               OpMemberDecorate %S 3 Offset 28
-               OpMemberDecorate %S 4 Offset 32
-               OpMemberDecorate %S 5 Offset 44
-               OpMemberDecorate %S 6 Offset 48
-               OpMemberDecorate %S 7 Offset 56
-               OpMemberDecorate %S 8 Offset 64
-               OpMemberDecorate %S 8 ColMajor
-               OpMemberDecorate %S 8 MatrixStride 16
-               OpMemberDecorate %S 9 Offset 96
-               OpMemberDecorate %S 9 ColMajor
-               OpMemberDecorate %S 9 MatrixStride 8
-               OpMemberDecorate %S 10 Offset 128
+               OpDecorate %S_std140 Block
+               OpMemberDecorate %S_std140 0 Offset 0
+               OpMemberDecorate %S_std140 1 Offset 12
+               OpMemberDecorate %S_std140 2 Offset 16
+               OpMemberDecorate %S_std140 3 Offset 28
+               OpMemberDecorate %S_std140 4 Offset 32
+               OpMemberDecorate %S_std140 5 Offset 44
+               OpMemberDecorate %S_std140 6 Offset 48
+               OpMemberDecorate %S_std140 7 Offset 56
+               OpMemberDecorate %S_std140 8 Offset 64
+               OpMemberDecorate %S_std140 8 ColMajor
+               OpMemberDecorate %S_std140 8 MatrixStride 16
+               OpMemberDecorate %S_std140 9 Offset 96
+               OpMemberDecorate %S_std140 10 Offset 104
+               OpMemberDecorate %S_std140 11 Offset 112
+               OpMemberDecorate %S_std140 12 Offset 128
                OpMemberDecorate %Inner 0 Offset 0
-               OpMemberDecorate %S 11 Offset 144
+               OpMemberDecorate %S_std140 13 Offset 144
                OpDecorate %_arr_Inner_uint_4 ArrayStride 16
                OpDecorate %s NonWritable
                OpDecorate %s Binding 0
@@ -57,15 +58,20 @@ SKIP: FAILED
       %v2int = OpTypeVector %int 2
 %mat2v3float = OpTypeMatrix %v3float 2
     %v2float = OpTypeVector %float 2
-%mat3v2float = OpTypeMatrix %v2float 3
       %Inner = OpTypeStruct %int
      %uint_4 = OpConstant %uint 4
 %_arr_Inner_uint_4 = OpTypeArray %Inner %uint_4
-          %S = OpTypeStruct %v3int %int %v3uint %uint %v3float %float %v2int %v2int %mat2v3float %mat3v2float %Inner %_arr_Inner_uint_4
-%_ptr_Uniform_S = OpTypePointer Uniform %S
-          %s = OpVariable %_ptr_Uniform_S Uniform
+   %S_std140 = OpTypeStruct %v3int %int %v3uint %uint %v3float %float %v2int %v2int %mat2v3float %v2float %v2float %v2float %Inner %_arr_Inner_uint_4
+%_ptr_Uniform_S_std140 = OpTypePointer Uniform %S_std140
+          %s = OpVariable %_ptr_Uniform_S_std140 Uniform
+%mat3v2float = OpTypeMatrix %v2float 3
+         %16 = OpTypeFunction %mat3v2float
+     %uint_9 = OpConstant %uint 9
+%_ptr_Uniform_v2float = OpTypePointer Uniform %v2float
+    %uint_10 = OpConstant %uint 10
+    %uint_11 = OpConstant %uint 11
        %void = OpTypeVoid
-         %17 = OpTypeFunction %void
+         %31 = OpTypeFunction %void
      %uint_0 = OpConstant %uint 0
 %_ptr_Uniform_v3int = OpTypePointer Uniform %v3int
      %uint_1 = OpConstant %uint 1
@@ -82,40 +88,45 @@ SKIP: FAILED
      %uint_7 = OpConstant %uint 7
      %uint_8 = OpConstant %uint 8
 %_ptr_Uniform_mat2v3float = OpTypePointer Uniform %mat2v3float
-     %uint_9 = OpConstant %uint 9
-%_ptr_Uniform_mat3v2float = OpTypePointer Uniform %mat3v2float
-    %uint_10 = OpConstant %uint 10
+    %uint_12 = OpConstant %uint 12
 %_ptr_Uniform_Inner = OpTypePointer Uniform %Inner
-    %uint_11 = OpConstant %uint 11
+    %uint_13 = OpConstant %uint 13
 %_ptr_Uniform__arr_Inner_uint_4 = OpTypePointer Uniform %_arr_Inner_uint_4
-       %main = OpFunction %void None %17
-         %20 = OpLabel
-         %23 = OpAccessChain %_ptr_Uniform_v3int %s %uint_0
-         %24 = OpLoad %v3int %23
-         %27 = OpAccessChain %_ptr_Uniform_int %s %uint_1
-         %28 = OpLoad %int %27
-         %31 = OpAccessChain %_ptr_Uniform_v3uint %s %uint_2
-         %32 = OpLoad %v3uint %31
-         %35 = OpAccessChain %_ptr_Uniform_uint %s %uint_3
-         %36 = OpLoad %uint %35
-         %38 = OpAccessChain %_ptr_Uniform_v3float %s %uint_4
-         %39 = OpLoad %v3float %38
-         %42 = OpAccessChain %_ptr_Uniform_float %s %uint_5
-         %43 = OpLoad %float %42
-         %46 = OpAccessChain %_ptr_Uniform_v2int %s %uint_6
-         %47 = OpLoad %v2int %46
-         %49 = OpAccessChain %_ptr_Uniform_v2int %s %uint_7
-         %50 = OpLoad %v2int %49
-         %53 = OpAccessChain %_ptr_Uniform_mat2v3float %s %uint_8
-         %54 = OpLoad %mat2v3float %53
-         %57 = OpAccessChain %_ptr_Uniform_mat3v2float %s %uint_9
-         %58 = OpLoad %mat3v2float %57
-         %61 = OpAccessChain %_ptr_Uniform_Inner %s %uint_10
-         %62 = OpLoad %Inner %61
-         %65 = OpAccessChain %_ptr_Uniform__arr_Inner_uint_4 %s %uint_11
-         %66 = OpLoad %_arr_Inner_uint_4 %65
+   %load_s_j = OpFunction %mat3v2float None %16
+         %19 = OpLabel
+         %22 = OpAccessChain %_ptr_Uniform_v2float %s %uint_9
+         %23 = OpLoad %v2float %22
+         %25 = OpAccessChain %_ptr_Uniform_v2float %s %uint_10
+         %26 = OpLoad %v2float %25
+         %28 = OpAccessChain %_ptr_Uniform_v2float %s %uint_11
+         %29 = OpLoad %v2float %28
+         %30 = OpCompositeConstruct %mat3v2float %23 %26 %29
+               OpReturnValue %30
+               OpFunctionEnd
+       %main = OpFunction %void None %31
+         %34 = OpLabel
+         %37 = OpAccessChain %_ptr_Uniform_v3int %s %uint_0
+         %38 = OpLoad %v3int %37
+         %41 = OpAccessChain %_ptr_Uniform_int %s %uint_1
+         %42 = OpLoad %int %41
+         %45 = OpAccessChain %_ptr_Uniform_v3uint %s %uint_2
+         %46 = OpLoad %v3uint %45
+         %49 = OpAccessChain %_ptr_Uniform_uint %s %uint_3
+         %50 = OpLoad %uint %49
+         %52 = OpAccessChain %_ptr_Uniform_v3float %s %uint_4
+         %53 = OpLoad %v3float %52
+         %56 = OpAccessChain %_ptr_Uniform_float %s %uint_5
+         %57 = OpLoad %float %56
+         %60 = OpAccessChain %_ptr_Uniform_v2int %s %uint_6
+         %61 = OpLoad %v2int %60
+         %63 = OpAccessChain %_ptr_Uniform_v2int %s %uint_7
+         %64 = OpLoad %v2int %63
+         %67 = OpAccessChain %_ptr_Uniform_mat2v3float %s %uint_8
+         %68 = OpLoad %mat2v3float %67
+         %69 = OpFunctionCall %mat3v2float %load_s_j
+         %72 = OpAccessChain %_ptr_Uniform_Inner %s %uint_12
+         %73 = OpLoad %Inner %72
+         %76 = OpAccessChain %_ptr_Uniform__arr_Inner_uint_4 %s %uint_13
+         %77 = OpLoad %_arr_Inner_uint_4 %76
                OpReturn
                OpFunctionEnd
-1:1: Structure id 3 decorated as Block for variable in Uniform storage class must follow relaxed uniform buffer layout rules: member 9 is a matrix with stride 8 not satisfying alignment to 16
-  %S = OpTypeStruct %v3int %int %v3uint %uint %v3float %float %v2int %v2int %mat2v3float %mat3v2float %Inner %_arr_Inner_uint_4
-

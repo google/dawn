@@ -64,6 +64,7 @@
 #include "src/tint/transform/renamer.h"
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/transform/single_entry_point.h"
+#include "src/tint/transform/std140.h"
 #include "src/tint/transform/unshadow.h"
 #include "src/tint/transform/unwind_discard_functions.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
@@ -221,6 +222,7 @@ SanitizedResult Sanitize(const Program* in,
     manager.Add<transform::CanonicalizeEntryPointIO>();
     manager.Add<transform::ExpandCompoundAssignment>();
     manager.Add<transform::PromoteSideEffectsToDecl>();
+    manager.Add<transform::Std140>();  // Must come after PromoteSideEffectsToDecl
     manager.Add<transform::UnwindDiscardFunctions>();
     manager.Add<transform::SimplifyPointers>();
 

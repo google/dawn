@@ -29,6 +29,7 @@
 #include "src/tint/transform/remove_phonies.h"
 #include "src/tint/transform/remove_unreachable_statements.h"
 #include "src/tint/transform/simplify_pointers.h"
+#include "src/tint/transform/std140.h"
 #include "src/tint/transform/unshadow.h"
 #include "src/tint/transform/unwind_discard_functions.h"
 #include "src/tint/transform/var_for_dynamic_index.h"
@@ -75,6 +76,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     manager.Add<transform::RemoveUnreachableStatements>();
     manager.Add<transform::ExpandCompoundAssignment>();
     manager.Add<transform::PromoteSideEffectsToDecl>();
+    manager.Add<transform::Std140>();  // Must come after PromoteSideEffectsToDecl
     manager.Add<transform::UnwindDiscardFunctions>();
     manager.Add<transform::SimplifyPointers>();  // Required for arrayLength()
     manager.Add<transform::RemovePhonies>();

@@ -24,9 +24,9 @@ namespace tint::utils {
 /// @param substr the string to search for
 /// @param replacement the replacement string to use instead of `substr`
 /// @returns `str` with all occurrences of `substr` replaced with `replacement`
-inline std::string ReplaceAll(std::string str,
-                              const std::string& substr,
-                              const std::string& replacement) {
+[[nodiscard]] inline std::string ReplaceAll(std::string str,
+                                            const std::string& substr,
+                                            const std::string& replacement) {
     size_t pos = 0;
     while ((pos = str.find(substr, pos)) != std::string::npos) {
         str.replace(pos, substr.length(), replacement);
