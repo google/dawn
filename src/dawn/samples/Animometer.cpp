@@ -58,18 +58,18 @@ void init() {
 
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         struct Constants {
-            scale : f32;
-            time : f32;
-            offsetX : f32;
-            offsetY : f32;
-            scalar : f32;
-            scalarOffset : f32;
+            scale : f32,
+            time : f32,
+            offsetX : f32,
+            offsetY : f32,
+            scalar : f32,
+            scalarOffset : f32,
         };
         @group(0) @binding(0) var<uniform> c : Constants;
 
         struct VertexOut {
-            @location(0) v_color : vec4<f32>;
-            @builtin(position) Position : vec4<f32>;
+            @location(0) v_color : vec4<f32>,
+            @builtin(position) Position : vec4<f32>,
         };
 
         @vertex fn main(@builtin(vertex_index) VertexIndex : u32) -> VertexOut {

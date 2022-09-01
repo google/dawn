@@ -97,9 +97,9 @@ void initBuffers() {
 void initRender() {
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
         struct VertexIn {
-            @location(0) a_particlePos : vec2<f32>;
-            @location(1) a_particleVel : vec2<f32>;
-            @location(2) a_pos : vec2<f32>;
+            @location(0) a_particlePos : vec2<f32>,
+            @location(1) a_particleVel : vec2<f32>,
+            @location(2) a_pos : vec2<f32>,
         };
 
         @vertex
@@ -149,21 +149,21 @@ void initRender() {
 void initSim() {
     wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
         struct Particle {
-            pos : vec2<f32>;
-            vel : vec2<f32>;
+            pos : vec2<f32>,
+            vel : vec2<f32>,
         };
         struct SimParams {
-            deltaT : f32;
-            rule1Distance : f32;
-            rule2Distance : f32;
-            rule3Distance : f32;
-            rule1Scale : f32;
-            rule2Scale : f32;
-            rule3Scale : f32;
-            particleCount : u32;
+            deltaT : f32,
+            rule1Distance : f32,
+            rule2Distance : f32,
+            rule3Distance : f32,
+            rule1Scale : f32,
+            rule2Scale : f32,
+            rule3Scale : f32,
+            particleCount : u32,
         };
         struct Particles {
-            particles : array<Particle>;
+            particles : array<Particle>,
         };
         @binding(0) @group(0) var<uniform> params : SimParams;
         @binding(1) @group(0) var<storage, read_write> particlesA : Particles;
