@@ -52,6 +52,7 @@
      %result = OpVariable %_ptr_StorageBuffer_Result StorageBuffer
        %void = OpTypeVoid
          %17 = OpTypeFunction %void %v3uint
+     %uint_4 = OpConstant %uint 4
      %uint_2 = OpConstant %uint 2
 %_ptr_Function_uint = OpTypePointer Function %uint
          %33 = OpConstantNull %uint
@@ -74,12 +75,11 @@
   %flatIndex = OpVariable %_ptr_Function_uint Function %33
       %texel = OpVariable %_ptr_Function_v4float Function %51
           %i = OpVariable %_ptr_Function_uint Function %33
-         %23 = OpIMul %uint %uint_2 %uint_2
-         %24 = OpCompositeExtract %uint %GlobalInvocationID 2
-         %25 = OpIMul %uint %23 %24
+         %23 = OpCompositeExtract %uint %GlobalInvocationID 2
+         %24 = OpIMul %uint %uint_4 %23
          %26 = OpCompositeExtract %uint %GlobalInvocationID 1
          %27 = OpIMul %uint %uint_2 %26
-         %28 = OpIAdd %uint %25 %27
+         %28 = OpIAdd %uint %24 %27
          %29 = OpCompositeExtract %uint %GlobalInvocationID 0
          %30 = OpIAdd %uint %28 %29
                OpStore %flatIndex %30

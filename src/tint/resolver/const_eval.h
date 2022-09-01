@@ -230,6 +230,42 @@ class ConstEval {
                            utils::VectorRef<const sem::Constant*> args,
                            const Source& source);
 
+    /// Multiply operator '*' for the same type on the LHS and RHS
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    ConstantResult OpMultiply(const sem::Type* ty,
+                              utils::VectorRef<const sem::Constant*> args,
+                              const Source& source);
+
+    /// Multiply operator '*' for matCxR<T> * vecC<T>
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    ConstantResult OpMultiplyMatVec(const sem::Type* ty,
+                                    utils::VectorRef<const sem::Constant*> args,
+                                    const Source& source);
+
+    /// Multiply operator '*' for vecR<T> * matCxR<T>
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    ConstantResult OpMultiplyVecMat(const sem::Type* ty,
+                                    utils::VectorRef<const sem::Constant*> args,
+                                    const Source& source);
+
+    /// Multiply operator '*' for matKxR<T> * matCxK<T>
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    ConstantResult OpMultiplyMatMat(const sem::Type* ty,
+                                    utils::VectorRef<const sem::Constant*> args,
+                                    const Source& source);
+
     ////////////////////////////////////////////////////////////////////////////
     // Builtins
     ////////////////////////////////////////////////////////////////////////////
@@ -259,7 +295,97 @@ class ConstEval {
     /// Adds the given warning message to the diagnostics
     void AddWarning(const std::string& msg, const Source& source) const;
 
+    /// Adds two Number<T>s
+    /// @param a the lhs number
+    /// @param b the rhs number
+    /// @returns the result number on success, or logs an error and returns Failure
+    template <typename NumberT>
+    utils::Result<NumberT> Add(NumberT a, NumberT b);
+
+    /// Multiplies two Number<T>s
+    /// @param a the lhs number
+    /// @param b the rhs number
+    /// @returns the result number on success, or logs an error and returns Failure
+    template <typename NumberT>
+    utils::Result<NumberT> Mul(NumberT a, NumberT b);
+
+    /// Returns the dot product of (a1,a2) with (b1,b2)
+    /// @param a1 component 1 of lhs vector
+    /// @param a2 component 2 of lhs vector
+    /// @param b1 component 1 of rhs vector
+    /// @param b2 component 2 of rhs vector
+    /// @returns the result number on success, or logs an error and returns Failure
+    template <typename NumberT>
+    utils::Result<NumberT> Dot2(NumberT a1, NumberT a2, NumberT b1, NumberT b2);
+
+    /// Returns the dot product of (a1,a2,a3) with (b1,b2,b3)
+    /// @param a1 component 1 of lhs vector
+    /// @param a2 component 2 of lhs vector
+    /// @param a3 component 3 of lhs vector
+    /// @param b1 component 1 of rhs vector
+    /// @param b2 component 2 of rhs vector
+    /// @param b3 component 3 of rhs vector
+    /// @returns the result number on success, or logs an error and returns Failure
+    template <typename NumberT>
+    utils::Result<NumberT> Dot3(NumberT a1,
+                                NumberT a2,
+                                NumberT a3,
+                                NumberT b1,
+                                NumberT b2,
+                                NumberT b3);
+
+    /// Returns the dot product of (a1,b1,c1,d1) with (a2,b2,c2,d2)
+    /// @param a1 component 1 of lhs vector
+    /// @param a2 component 2 of lhs vector
+    /// @param a3 component 3 of lhs vector
+    /// @param a4 component 4 of lhs vector
+    /// @param b1 component 1 of rhs vector
+    /// @param b2 component 2 of rhs vector
+    /// @param b3 component 3 of rhs vector
+    /// @param b4 component 4 of rhs vector
+    /// @returns the result number on success, or logs an error and returns Failure
+    template <typename NumberT>
+    utils::Result<NumberT> Dot4(NumberT a1,
+                                NumberT a2,
+                                NumberT a3,
+                                NumberT a4,
+                                NumberT b1,
+                                NumberT b2,
+                                NumberT b3,
+                                NumberT b4);
+
+    /// Returns a callable that calls Add, and creates a Constant with its result of type `elem_ty`
+    /// if successful, or returns Failure otherwise.
+    /// @param elem_ty the element type of the Constant to create on success
+    /// @returns the callable function
+    auto AddFunc(const sem::Type* elem_ty);
+
+    /// Returns a callable that calls Mul, and creates a Constant with its result of type `elem_ty`
+    /// if successful, or returns Failure otherwise.
+    /// @param elem_ty the element type of the Constant to create on success
+    /// @returns the callable function
+    auto MulFunc(const sem::Type* elem_ty);
+
+    /// Returns a callable that calls Dot2, and creates a Constant with its result of type `elem_ty`
+    /// if successful, or returns Failure otherwise.
+    /// @param elem_ty the element type of the Constant to create on success
+    /// @returns the callable function
+    auto Dot2Func(const sem::Type* elem_ty);
+
+    /// Returns a callable that calls Dot3, and creates a Constant with its result of type `elem_ty`
+    /// if successful, or returns Failure otherwise.
+    /// @param elem_ty the element type of the Constant to create on success
+    /// @returns the callable function
+    auto Dot3Func(const sem::Type* elem_ty);
+
+    /// Returns a callable that calls Dot4, and creates a Constant with its result of type `elem_ty`
+    /// if successful, or returns Failure otherwise.
+    /// @param elem_ty the element type of the Constant to create on success
+    /// @returns the callable function
+    auto Dot4Func(const sem::Type* elem_ty);
+
     ProgramBuilder& builder;
+    const Source* current_source = nullptr;
 };
 
 }  // namespace tint::resolver

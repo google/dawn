@@ -10,7 +10,7 @@ struct tint_symbol_1 {
 };
 
 void main_inner(uint3 GlobalInvocationID) {
-  uint flatIndex = ((((2u * 2u) * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
+  uint flatIndex = (((4u * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
   flatIndex = (flatIndex * 1u);
   float4 texel = myTexture.Load(int4(int3(int2(GlobalInvocationID.xy), 0), 0));
   {

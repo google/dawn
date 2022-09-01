@@ -68,7 +68,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
   float ACached = 0.0f;
   float BCached[4] = (float[4])0;
   {
-    [loop] for(uint index = 0u; (index < (4u * 4u)); index = (index + 1u)) {
+    [loop] for(uint index = 0u; (index < 16u); index = (index + 1u)) {
       acc[index] = 0.0f;
     }
   }

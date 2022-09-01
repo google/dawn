@@ -151,7 +151,8 @@ INSTANTIATE_TEST_SUITE_P(
                     BinaryData{"(left % right)", ast::BinaryOp::kModulo}));
 
 TEST_F(GlslGeneratorImplTest_Binary, Multiply_VectorScalar_f32) {
-    auto* lhs = vec3<f32>(1_f, 1_f, 1_f);
+    GlobalVar("a", vec3<f32>(1_f, 1_f, 1_f), ast::StorageClass::kPrivate);
+    auto* lhs = Expr("a");
     auto* rhs = Expr(1_f);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
@@ -162,13 +163,14 @@ TEST_F(GlslGeneratorImplTest_Binary, Multiply_VectorScalar_f32) {
 
     std::stringstream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(), "(vec3(1.0f) * 1.0f)");
+    EXPECT_EQ(out.str(), "(a * 1.0f)");
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Multiply_VectorScalar_f16) {
     Enable(ast::Extension::kF16);
 
-    auto* lhs = vec3<f16>(1_h, 1_h, 1_h);
+    GlobalVar("a", vec3<f16>(1_h, 1_h, 1_h), ast::StorageClass::kPrivate);
+    auto* lhs = Expr("a");
     auto* rhs = Expr(1_h);
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
@@ -179,12 +181,13 @@ TEST_F(GlslGeneratorImplTest_Binary, Multiply_VectorScalar_f16) {
 
     std::stringstream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(), "(f16vec3(1.0hf) * 1.0hf)");
+    EXPECT_EQ(out.str(), "(a * 1.0hf)");
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Multiply_ScalarVector_f32) {
+    GlobalVar("a", vec3<f32>(1_f, 1_f, 1_f), ast::StorageClass::kPrivate);
     auto* lhs = Expr(1_f);
-    auto* rhs = vec3<f32>(1_f, 1_f, 1_f);
+    auto* rhs = Expr("a");
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
@@ -194,14 +197,15 @@ TEST_F(GlslGeneratorImplTest_Binary, Multiply_ScalarVector_f32) {
 
     std::stringstream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(), "(1.0f * vec3(1.0f))");
+    EXPECT_EQ(out.str(), "(1.0f * a)");
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Multiply_ScalarVector_f16) {
     Enable(ast::Extension::kF16);
 
+    GlobalVar("a", vec3<f16>(1_h, 1_h, 1_h), ast::StorageClass::kPrivate);
     auto* lhs = Expr(1_h);
-    auto* rhs = vec3<f16>(1_h, 1_h, 1_h);
+    auto* rhs = Expr("a");
 
     auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kMultiply, lhs, rhs);
 
@@ -211,7 +215,7 @@ TEST_F(GlslGeneratorImplTest_Binary, Multiply_ScalarVector_f16) {
 
     std::stringstream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(), "(1.0hf * f16vec3(1.0hf))");
+    EXPECT_EQ(out.str(), "(1.0hf * a)");
 }
 
 TEST_F(GlslGeneratorImplTest_Binary, Multiply_MatrixScalar_f32) {

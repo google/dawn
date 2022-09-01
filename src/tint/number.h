@@ -22,6 +22,7 @@
 #include <optional>
 #include <ostream>
 
+#include "src/tint/traits.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/result.h"
 
@@ -33,6 +34,14 @@ struct Number;
 }  // namespace tint
 
 namespace tint::detail {
+/// Base template for IsNumber
+template <typename T>
+struct IsNumber : std::false_type {};
+
+/// Specialization for IsNumber
+template <typename T>
+struct IsNumber<Number<T>> : std::true_type {};
+
 /// An empty structure used as a unique template type for Number when
 /// specializing for the f16 type.
 struct NumberKindF16 {};
@@ -67,6 +76,10 @@ constexpr bool IsInteger = std::is_integral_v<T>;
 /// Evaluates to true iff T is an integer type, floating-point type or is NumberKindF16.
 template <typename T>
 constexpr bool IsNumeric = IsInteger<T> || IsFloatingPoint<T>;
+
+/// Evaluates to true iff T is a Number
+template <typename T>
+constexpr bool IsNumber = detail::IsNumber<T>::value;
 
 /// Resolves to the underlying type for a Number.
 template <typename T>
@@ -235,6 +248,26 @@ using f32 = Number<float>;
 /// `f16` is a type alias to `Number<detail::NumberKindF16>`, which should be IEEE 754 binary16.
 /// However since C++ don't have native binary16 type, the value is stored as float.
 using f16 = Number<detail::NumberKindF16>;
+
+/// @returns the friendly name of Number type T
+template <typename T, typename = traits::EnableIf<IsNumber<T>>>
+const char* FriendlyName() {
+    if constexpr (std::is_same_v<T, AInt>) {
+        return "abstract-int";
+    } else if constexpr (std::is_same_v<T, AFloat>) {
+        return "abstract-float";
+    } else if constexpr (std::is_same_v<T, i32>) {
+        return "i32";
+    } else if constexpr (std::is_same_v<T, u32>) {
+        return "u32";
+    } else if constexpr (std::is_same_v<T, f32>) {
+        return "f32";
+    } else if constexpr (std::is_same_v<T, f16>) {
+        return "f16";
+    } else {
+        static_assert(!sizeof(T), "Unhandled type");
+    }
+}
 
 /// Enumerator of failure reasons when converting from one number to another.
 enum class ConversionFailure {
@@ -435,6 +468,15 @@ inline std::optional<AInt> CheckedMul(AInt a, AInt b) {
     result = a.value * b.value;
 #endif  // TINT_HAS_OVERFLOW_BUILTINS
     return AInt(result);
+}
+
+/// @returns a * b, or an empty optional if the resulting value overflowed the AFloat
+inline std::optional<AFloat> CheckedMul(AFloat a, AFloat b) {
+    auto result = a.value * b.value;
+    if (!std::isfinite(result)) {
+        return {};
+    }
+    return AFloat{result};
 }
 
 /// @returns a * b + c, or an empty optional if the value overflowed the AInt

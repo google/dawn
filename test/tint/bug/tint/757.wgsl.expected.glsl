@@ -9,7 +9,7 @@ layout(binding = 3, std430) buffer Result_1 {
 } result;
 uniform highp sampler2DArray myTexture_1;
 void tint_symbol(uvec3 GlobalInvocationID) {
-  uint flatIndex = ((((2u * 2u) * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
+  uint flatIndex = (((4u * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);
   flatIndex = (flatIndex * 1u);
   vec4 texel = texelFetch(myTexture_1, ivec3(ivec2(GlobalInvocationID.xy), 0), 0);
   {

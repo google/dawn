@@ -898,15 +898,15 @@ op ! <N: num> (vec<N, bool>) -> vec<N, bool>
 @const op - <T: fia_fiu32_f16, N: num> (T, vec<N, T>) -> vec<N, T>
 @const op - <T: fa_f32_f16, N: num, M: num> (mat<N, M, T>, mat<N, M, T>) -> mat<N, M, T>
 
-op * <T: fiu32_f16>(T, T) -> T
-op * <T: fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
-op * <T: fiu32_f16, N: num> (vec<N, T>, T) -> vec<N, T>
-op * <T: fiu32_f16, N: num> (T, vec<N, T>) -> vec<N, T>
-op * <T: f32_f16, N: num, M: num> (T, mat<N, M, T>) -> mat<N, M, T>
-op * <T: f32_f16, N: num, M: num> (mat<N, M, T>, T) -> mat<N, M, T>
-op * <T: f32_f16, C: num, R: num> (mat<C, R, T>, vec<C, T>) -> vec<R, T>
-op * <T: f32_f16, C: num, R: num> (vec<R, T>, mat<C, R, T>) -> vec<C, T>
-op * <T: f32_f16, K: num, C: num, R: num> (mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T>
+@const("Multiply") op * <T: fia_fiu32_f16>(T, T) -> T
+@const("Multiply") op * <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+@const("Multiply") op * <T: fia_fiu32_f16, N: num> (vec<N, T>, T) -> vec<N, T>
+@const("Multiply") op * <T: fia_fiu32_f16, N: num> (T, vec<N, T>) -> vec<N, T>
+@const("Multiply") op * <T: fa_f32_f16, N: num, M: num> (T, mat<N, M, T>) -> mat<N, M, T>
+@const("Multiply") op * <T: fa_f32_f16, N: num, M: num> (mat<N, M, T>, T) -> mat<N, M, T>
+@const("MultiplyMatVec") op * <T: fa_f32_f16, C: num, R: num> (mat<C, R, T>, vec<C, T>) -> vec<R, T>
+@const("MultiplyVecMat") op * <T: fa_f32_f16, C: num, R: num> (vec<R, T>, mat<C, R, T>) -> vec<C, T>
+@const("MultiplyMatMat") op * <T: fa_f32_f16, K: num, C: num, R: num> (mat<K, R, T>, mat<C, K, T>) -> mat<C, R, T>
 
 op / <T: fiu32_f16>(T, T) -> T
 op / <T: fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>

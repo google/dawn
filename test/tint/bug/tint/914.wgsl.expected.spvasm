@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 374
+; Bound: 373
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -127,7 +127,7 @@
 %_arr_float_uint_4 = OpTypeArray %float %uint_4
 %_ptr_Function__arr_float_uint_4 = OpTypePointer Function %_arr_float_uint_4
         %152 = OpConstantNull %_arr_float_uint_4
-        %367 = OpTypeFunction %void
+        %366 = OpTypeFunction %void
    %mm_readA = OpFunction %float None %24
         %row = OpFunctionParameter %uint
         %col = OpFunctionParameter %uint
@@ -287,334 +287,333 @@
                OpBranch %157
         %157 = OpLabel
         %159 = OpLoad %uint %index
-        %160 = OpIMul %uint %uint_4 %uint_4
-        %161 = OpULessThan %bool %159 %160
-        %158 = OpLogicalNot %bool %161
-               OpSelectionMerge %162 None
-               OpBranchConditional %158 %163 %162
-        %163 = OpLabel
-               OpBranch %155
+        %160 = OpULessThan %bool %159 %uint_16
+        %158 = OpLogicalNot %bool %160
+               OpSelectionMerge %161 None
+               OpBranchConditional %158 %162 %161
         %162 = OpLabel
-        %164 = OpLoad %uint %index
-        %165 = OpAccessChain %_ptr_Function_float %acc %164
-               OpStore %165 %51
+               OpBranch %155
+        %161 = OpLabel
+        %163 = OpLoad %uint %index
+        %164 = OpAccessChain %_ptr_Function_float %acc %163
+               OpStore %164 %51
                OpBranch %156
         %156 = OpLabel
-        %166 = OpLoad %uint %index
-        %167 = OpIAdd %uint %166 %uint_1
-               OpStore %index %167
+        %165 = OpLoad %uint %index
+        %166 = OpIAdd %uint %165 %uint_1
+               OpStore %index %166
                OpBranch %154
         %155 = OpLabel
-        %168 = OpUDiv %uint %uint_64 %uint_16
-        %169 = OpCompositeExtract %uint %local_id 0
-        %170 = OpIMul %uint %169 %168
-        %171 = OpUDiv %uint %uint_64 %uint_16
-        %172 = OpCompositeExtract %uint %local_id 1
-        %173 = OpIMul %uint %172 %171
+        %167 = OpUDiv %uint %uint_64 %uint_16
+        %168 = OpCompositeExtract %uint %local_id 0
+        %169 = OpIMul %uint %168 %167
+        %170 = OpUDiv %uint %uint_64 %uint_16
+        %171 = OpCompositeExtract %uint %local_id 1
+        %172 = OpIMul %uint %171 %170
                OpStore %t %105
-               OpBranch %175
-        %175 = OpLabel
-               OpLoopMerge %176 %177 None
-               OpBranch %178
-        %178 = OpLabel
-        %180 = OpLoad %uint %t
-        %181 = OpULessThan %bool %180 %141
-        %179 = OpLogicalNot %bool %181
-               OpSelectionMerge %182 None
-               OpBranchConditional %179 %183 %182
-        %183 = OpLabel
-               OpBranch %176
-        %182 = OpLabel
-               OpStore %innerRow %105
-               OpBranch %185
-        %185 = OpLabel
-               OpLoopMerge %186 %187 None
-               OpBranch %188
-        %188 = OpLabel
-        %190 = OpLoad %uint %innerRow
-        %191 = OpULessThan %bool %190 %uint_4
-        %189 = OpLogicalNot %bool %191
-               OpSelectionMerge %192 None
-               OpBranchConditional %189 %193 %192
-        %193 = OpLabel
-               OpBranch %186
-        %192 = OpLabel
-               OpStore %innerCol %105
-               OpBranch %195
-        %195 = OpLabel
-               OpLoopMerge %196 %197 None
-               OpBranch %198
-        %198 = OpLabel
-        %200 = OpLoad %uint %innerCol
-        %201 = OpULessThan %bool %200 %168
-        %199 = OpLogicalNot %bool %201
-               OpSelectionMerge %202 None
-               OpBranchConditional %199 %203 %202
-        %203 = OpLabel
-               OpBranch %196
-        %202 = OpLabel
-        %204 = OpLoad %uint %innerRow
-        %205 = OpIAdd %uint %130 %204
-        %206 = OpLoad %uint %innerCol
-        %207 = OpIAdd %uint %170 %206
-        %209 = OpLoad %uint %innerRow
-        %210 = OpIAdd %uint %134 %209
-        %211 = OpLoad %uint %t
-        %212 = OpIMul %uint %211 %uint_64
-        %213 = OpIAdd %uint %212 %207
-        %208 = OpFunctionCall %float %mm_readA %210 %213
-        %214 = OpAccessChain %_ptr_Workgroup_float %mm_Asub %205 %207
-               OpStore %214 %208
-               OpBranch %197
-        %197 = OpLabel
-        %215 = OpLoad %uint %innerCol
-        %216 = OpIAdd %uint %215 %uint_1
-               OpStore %innerCol %216
-               OpBranch %195
-        %196 = OpLabel
-               OpBranch %187
-        %187 = OpLabel
-        %217 = OpLoad %uint %innerRow
-        %218 = OpIAdd %uint %217 %uint_1
-               OpStore %innerRow %218
-               OpBranch %185
-        %186 = OpLabel
-               OpStore %innerRow_0 %105
-               OpBranch %220
-        %220 = OpLabel
-               OpLoopMerge %221 %222 None
-               OpBranch %223
-        %223 = OpLabel
-        %225 = OpLoad %uint %innerRow_0
-        %226 = OpULessThan %bool %225 %171
-        %224 = OpLogicalNot %bool %226
-               OpSelectionMerge %227 None
-               OpBranchConditional %224 %228 %227
-        %228 = OpLabel
-               OpBranch %221
-        %227 = OpLabel
-               OpStore %innerCol_0 %105
-               OpBranch %230
-        %230 = OpLabel
-               OpLoopMerge %231 %232 None
-               OpBranch %233
-        %233 = OpLabel
-        %235 = OpLoad %uint %innerCol_0
-        %236 = OpULessThan %bool %235 %uint_4
-        %234 = OpLogicalNot %bool %236
-               OpSelectionMerge %237 None
-               OpBranchConditional %234 %238 %237
-        %238 = OpLabel
-               OpBranch %231
-        %237 = OpLabel
-        %239 = OpLoad %uint %innerRow_0
-        %240 = OpIAdd %uint %173 %239
-        %241 = OpLoad %uint %innerCol_0
-        %242 = OpIAdd %uint %132 %241
-        %244 = OpLoad %uint %t
-        %245 = OpIMul %uint %244 %uint_64
-        %246 = OpIAdd %uint %245 %240
-        %247 = OpLoad %uint %innerCol_0
-        %248 = OpIAdd %uint %136 %247
-        %243 = OpFunctionCall %float %mm_readB %246 %248
-        %249 = OpLoad %uint %innerCol_0
-        %250 = OpAccessChain %_ptr_Workgroup_float %mm_Bsub %249 %242
-               OpStore %250 %243
-               OpBranch %232
-        %232 = OpLabel
-        %251 = OpLoad %uint %innerCol_0
-        %252 = OpIAdd %uint %251 %uint_1
-               OpStore %innerCol_0 %252
-               OpBranch %230
-        %231 = OpLabel
-               OpBranch %222
-        %222 = OpLabel
-        %253 = OpLoad %uint %innerRow_0
-        %254 = OpIAdd %uint %253 %uint_1
-               OpStore %innerRow_0 %254
-               OpBranch %220
-        %221 = OpLabel
-               OpControlBarrier %uint_2 %uint_2 %uint_264
-               OpStore %k %105
-               OpBranch %257
-        %257 = OpLabel
-               OpLoopMerge %258 %259 None
-               OpBranch %260
-        %260 = OpLabel
-        %262 = OpLoad %uint %k
-        %263 = OpULessThan %bool %262 %uint_64
-        %261 = OpLogicalNot %bool %263
-               OpSelectionMerge %264 None
-               OpBranchConditional %261 %265 %264
-        %265 = OpLabel
-               OpBranch %258
-        %264 = OpLabel
-               OpStore %inner %105
-               OpBranch %267
-        %267 = OpLabel
-               OpLoopMerge %268 %269 None
-               OpBranch %270
-        %270 = OpLabel
-        %272 = OpLoad %uint %inner
-        %273 = OpULessThan %bool %272 %uint_4
-        %271 = OpLogicalNot %bool %273
-               OpSelectionMerge %274 None
-               OpBranchConditional %271 %275 %274
-        %275 = OpLabel
-               OpBranch %268
-        %274 = OpLabel
-        %276 = OpLoad %uint %inner
-        %277 = OpAccessChain %_ptr_Function_float %BCached %276
-        %278 = OpLoad %uint %k
-        %279 = OpLoad %uint %inner
-        %280 = OpIAdd %uint %132 %279
-        %281 = OpAccessChain %_ptr_Workgroup_float %mm_Bsub %278 %280
-        %282 = OpLoad %float %281
-               OpStore %277 %282
-               OpBranch %269
-        %269 = OpLabel
-        %283 = OpLoad %uint %inner
-        %284 = OpIAdd %uint %283 %uint_1
-               OpStore %inner %284
-               OpBranch %267
-        %268 = OpLabel
-               OpStore %innerRow_1 %105
-               OpBranch %286
-        %286 = OpLabel
-               OpLoopMerge %287 %288 None
-               OpBranch %289
-        %289 = OpLabel
-        %291 = OpLoad %uint %innerRow_1
-        %292 = OpULessThan %bool %291 %uint_4
-        %290 = OpLogicalNot %bool %292
-               OpSelectionMerge %293 None
-               OpBranchConditional %290 %294 %293
-        %294 = OpLabel
-               OpBranch %287
-        %293 = OpLabel
-        %295 = OpLoad %uint %innerRow_1
-        %296 = OpIAdd %uint %130 %295
-        %297 = OpLoad %uint %k
-        %298 = OpAccessChain %_ptr_Workgroup_float %mm_Asub %296 %297
-        %299 = OpLoad %float %298
-               OpStore %ACached %299
-               OpStore %innerCol_1 %105
-               OpBranch %301
-        %301 = OpLabel
-               OpLoopMerge %302 %303 None
-               OpBranch %304
-        %304 = OpLabel
-        %306 = OpLoad %uint %innerCol_1
-        %307 = OpULessThan %bool %306 %uint_4
-        %305 = OpLogicalNot %bool %307
-               OpSelectionMerge %308 None
-               OpBranchConditional %305 %309 %308
-        %309 = OpLabel
-               OpBranch %302
-        %308 = OpLabel
-        %310 = OpLoad %uint %innerRow_1
-        %311 = OpIMul %uint %310 %uint_4
-        %312 = OpLoad %uint %innerCol_1
-        %313 = OpIAdd %uint %311 %312
-        %314 = OpAccessChain %_ptr_Function_float %acc %313
-        %315 = OpAccessChain %_ptr_Function_float %acc %313
-        %316 = OpLoad %float %315
-        %317 = OpLoad %float %ACached
-        %318 = OpLoad %uint %innerCol_1
-        %319 = OpAccessChain %_ptr_Function_float %BCached %318
-        %320 = OpLoad %float %319
-        %321 = OpFMul %float %317 %320
-        %322 = OpFAdd %float %316 %321
-               OpStore %314 %322
-               OpBranch %303
-        %303 = OpLabel
-        %323 = OpLoad %uint %innerCol_1
-        %324 = OpIAdd %uint %323 %uint_1
-               OpStore %innerCol_1 %324
-               OpBranch %301
-        %302 = OpLabel
-               OpBranch %288
-        %288 = OpLabel
-        %325 = OpLoad %uint %innerRow_1
-        %326 = OpIAdd %uint %325 %uint_1
-               OpStore %innerRow_1 %326
-               OpBranch %286
-        %287 = OpLabel
-               OpBranch %259
-        %259 = OpLabel
-        %327 = OpLoad %uint %k
-        %328 = OpIAdd %uint %327 %uint_1
-               OpStore %k %328
-               OpBranch %257
-        %258 = OpLabel
-               OpControlBarrier %uint_2 %uint_2 %uint_264
+               OpBranch %174
+        %174 = OpLabel
+               OpLoopMerge %175 %176 None
                OpBranch %177
         %177 = OpLabel
-        %330 = OpLoad %uint %t
-        %331 = OpIAdd %uint %330 %uint_1
-               OpStore %t %331
+        %179 = OpLoad %uint %t
+        %180 = OpULessThan %bool %179 %141
+        %178 = OpLogicalNot %bool %180
+               OpSelectionMerge %181 None
+               OpBranchConditional %178 %182 %181
+        %182 = OpLabel
                OpBranch %175
+        %181 = OpLabel
+               OpStore %innerRow %105
+               OpBranch %184
+        %184 = OpLabel
+               OpLoopMerge %185 %186 None
+               OpBranch %187
+        %187 = OpLabel
+        %189 = OpLoad %uint %innerRow
+        %190 = OpULessThan %bool %189 %uint_4
+        %188 = OpLogicalNot %bool %190
+               OpSelectionMerge %191 None
+               OpBranchConditional %188 %192 %191
+        %192 = OpLabel
+               OpBranch %185
+        %191 = OpLabel
+               OpStore %innerCol %105
+               OpBranch %194
+        %194 = OpLabel
+               OpLoopMerge %195 %196 None
+               OpBranch %197
+        %197 = OpLabel
+        %199 = OpLoad %uint %innerCol
+        %200 = OpULessThan %bool %199 %167
+        %198 = OpLogicalNot %bool %200
+               OpSelectionMerge %201 None
+               OpBranchConditional %198 %202 %201
+        %202 = OpLabel
+               OpBranch %195
+        %201 = OpLabel
+        %203 = OpLoad %uint %innerRow
+        %204 = OpIAdd %uint %130 %203
+        %205 = OpLoad %uint %innerCol
+        %206 = OpIAdd %uint %169 %205
+        %208 = OpLoad %uint %innerRow
+        %209 = OpIAdd %uint %134 %208
+        %210 = OpLoad %uint %t
+        %211 = OpIMul %uint %210 %uint_64
+        %212 = OpIAdd %uint %211 %206
+        %207 = OpFunctionCall %float %mm_readA %209 %212
+        %213 = OpAccessChain %_ptr_Workgroup_float %mm_Asub %204 %206
+               OpStore %213 %207
+               OpBranch %196
+        %196 = OpLabel
+        %214 = OpLoad %uint %innerCol
+        %215 = OpIAdd %uint %214 %uint_1
+               OpStore %innerCol %215
+               OpBranch %194
+        %195 = OpLabel
+               OpBranch %186
+        %186 = OpLabel
+        %216 = OpLoad %uint %innerRow
+        %217 = OpIAdd %uint %216 %uint_1
+               OpStore %innerRow %217
+               OpBranch %184
+        %185 = OpLabel
+               OpStore %innerRow_0 %105
+               OpBranch %219
+        %219 = OpLabel
+               OpLoopMerge %220 %221 None
+               OpBranch %222
+        %222 = OpLabel
+        %224 = OpLoad %uint %innerRow_0
+        %225 = OpULessThan %bool %224 %170
+        %223 = OpLogicalNot %bool %225
+               OpSelectionMerge %226 None
+               OpBranchConditional %223 %227 %226
+        %227 = OpLabel
+               OpBranch %220
+        %226 = OpLabel
+               OpStore %innerCol_0 %105
+               OpBranch %229
+        %229 = OpLabel
+               OpLoopMerge %230 %231 None
+               OpBranch %232
+        %232 = OpLabel
+        %234 = OpLoad %uint %innerCol_0
+        %235 = OpULessThan %bool %234 %uint_4
+        %233 = OpLogicalNot %bool %235
+               OpSelectionMerge %236 None
+               OpBranchConditional %233 %237 %236
+        %237 = OpLabel
+               OpBranch %230
+        %236 = OpLabel
+        %238 = OpLoad %uint %innerRow_0
+        %239 = OpIAdd %uint %172 %238
+        %240 = OpLoad %uint %innerCol_0
+        %241 = OpIAdd %uint %132 %240
+        %243 = OpLoad %uint %t
+        %244 = OpIMul %uint %243 %uint_64
+        %245 = OpIAdd %uint %244 %239
+        %246 = OpLoad %uint %innerCol_0
+        %247 = OpIAdd %uint %136 %246
+        %242 = OpFunctionCall %float %mm_readB %245 %247
+        %248 = OpLoad %uint %innerCol_0
+        %249 = OpAccessChain %_ptr_Workgroup_float %mm_Bsub %248 %241
+               OpStore %249 %242
+               OpBranch %231
+        %231 = OpLabel
+        %250 = OpLoad %uint %innerCol_0
+        %251 = OpIAdd %uint %250 %uint_1
+               OpStore %innerCol_0 %251
+               OpBranch %229
+        %230 = OpLabel
+               OpBranch %221
+        %221 = OpLabel
+        %252 = OpLoad %uint %innerRow_0
+        %253 = OpIAdd %uint %252 %uint_1
+               OpStore %innerRow_0 %253
+               OpBranch %219
+        %220 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+               OpStore %k %105
+               OpBranch %256
+        %256 = OpLabel
+               OpLoopMerge %257 %258 None
+               OpBranch %259
+        %259 = OpLabel
+        %261 = OpLoad %uint %k
+        %262 = OpULessThan %bool %261 %uint_64
+        %260 = OpLogicalNot %bool %262
+               OpSelectionMerge %263 None
+               OpBranchConditional %260 %264 %263
+        %264 = OpLabel
+               OpBranch %257
+        %263 = OpLabel
+               OpStore %inner %105
+               OpBranch %266
+        %266 = OpLabel
+               OpLoopMerge %267 %268 None
+               OpBranch %269
+        %269 = OpLabel
+        %271 = OpLoad %uint %inner
+        %272 = OpULessThan %bool %271 %uint_4
+        %270 = OpLogicalNot %bool %272
+               OpSelectionMerge %273 None
+               OpBranchConditional %270 %274 %273
+        %274 = OpLabel
+               OpBranch %267
+        %273 = OpLabel
+        %275 = OpLoad %uint %inner
+        %276 = OpAccessChain %_ptr_Function_float %BCached %275
+        %277 = OpLoad %uint %k
+        %278 = OpLoad %uint %inner
+        %279 = OpIAdd %uint %132 %278
+        %280 = OpAccessChain %_ptr_Workgroup_float %mm_Bsub %277 %279
+        %281 = OpLoad %float %280
+               OpStore %276 %281
+               OpBranch %268
+        %268 = OpLabel
+        %282 = OpLoad %uint %inner
+        %283 = OpIAdd %uint %282 %uint_1
+               OpStore %inner %283
+               OpBranch %266
+        %267 = OpLabel
+               OpStore %innerRow_1 %105
+               OpBranch %285
+        %285 = OpLabel
+               OpLoopMerge %286 %287 None
+               OpBranch %288
+        %288 = OpLabel
+        %290 = OpLoad %uint %innerRow_1
+        %291 = OpULessThan %bool %290 %uint_4
+        %289 = OpLogicalNot %bool %291
+               OpSelectionMerge %292 None
+               OpBranchConditional %289 %293 %292
+        %293 = OpLabel
+               OpBranch %286
+        %292 = OpLabel
+        %294 = OpLoad %uint %innerRow_1
+        %295 = OpIAdd %uint %130 %294
+        %296 = OpLoad %uint %k
+        %297 = OpAccessChain %_ptr_Workgroup_float %mm_Asub %295 %296
+        %298 = OpLoad %float %297
+               OpStore %ACached %298
+               OpStore %innerCol_1 %105
+               OpBranch %300
+        %300 = OpLabel
+               OpLoopMerge %301 %302 None
+               OpBranch %303
+        %303 = OpLabel
+        %305 = OpLoad %uint %innerCol_1
+        %306 = OpULessThan %bool %305 %uint_4
+        %304 = OpLogicalNot %bool %306
+               OpSelectionMerge %307 None
+               OpBranchConditional %304 %308 %307
+        %308 = OpLabel
+               OpBranch %301
+        %307 = OpLabel
+        %309 = OpLoad %uint %innerRow_1
+        %310 = OpIMul %uint %309 %uint_4
+        %311 = OpLoad %uint %innerCol_1
+        %312 = OpIAdd %uint %310 %311
+        %313 = OpAccessChain %_ptr_Function_float %acc %312
+        %314 = OpAccessChain %_ptr_Function_float %acc %312
+        %315 = OpLoad %float %314
+        %316 = OpLoad %float %ACached
+        %317 = OpLoad %uint %innerCol_1
+        %318 = OpAccessChain %_ptr_Function_float %BCached %317
+        %319 = OpLoad %float %318
+        %320 = OpFMul %float %316 %319
+        %321 = OpFAdd %float %315 %320
+               OpStore %313 %321
+               OpBranch %302
+        %302 = OpLabel
+        %322 = OpLoad %uint %innerCol_1
+        %323 = OpIAdd %uint %322 %uint_1
+               OpStore %innerCol_1 %323
+               OpBranch %300
+        %301 = OpLabel
+               OpBranch %287
+        %287 = OpLabel
+        %324 = OpLoad %uint %innerRow_1
+        %325 = OpIAdd %uint %324 %uint_1
+               OpStore %innerRow_1 %325
+               OpBranch %285
+        %286 = OpLabel
+               OpBranch %258
+        %258 = OpLabel
+        %326 = OpLoad %uint %k
+        %327 = OpIAdd %uint %326 %uint_1
+               OpStore %k %327
+               OpBranch %256
+        %257 = OpLabel
+               OpControlBarrier %uint_2 %uint_2 %uint_264
+               OpBranch %176
         %176 = OpLabel
+        %329 = OpLoad %uint %t
+        %330 = OpIAdd %uint %329 %uint_1
+               OpStore %t %330
+               OpBranch %174
+        %175 = OpLabel
                OpStore %innerRow_2 %105
-               OpBranch %333
-        %333 = OpLabel
-               OpLoopMerge %334 %335 None
-               OpBranch %336
-        %336 = OpLabel
-        %338 = OpLoad %uint %innerRow_2
-        %339 = OpULessThan %bool %338 %uint_4
-        %337 = OpLogicalNot %bool %339
-               OpSelectionMerge %340 None
-               OpBranchConditional %337 %341 %340
-        %341 = OpLabel
-               OpBranch %334
-        %340 = OpLabel
-               OpStore %innerCol_2 %105
-               OpBranch %343
-        %343 = OpLabel
-               OpLoopMerge %344 %345 None
-               OpBranch %346
-        %346 = OpLabel
-        %348 = OpLoad %uint %innerCol_2
-        %349 = OpULessThan %bool %348 %uint_4
-        %347 = OpLogicalNot %bool %349
-               OpSelectionMerge %350 None
-               OpBranchConditional %347 %351 %350
-        %351 = OpLabel
-               OpBranch %344
-        %350 = OpLabel
-        %352 = OpLoad %uint %innerRow_2
-        %353 = OpIMul %uint %352 %uint_4
-        %354 = OpLoad %uint %innerCol_2
-        %355 = OpIAdd %uint %353 %354
-        %357 = OpLoad %uint %innerRow_2
-        %358 = OpIAdd %uint %134 %357
-        %359 = OpLoad %uint %innerCol_2
-        %360 = OpIAdd %uint %136 %359
-        %361 = OpAccessChain %_ptr_Function_float %acc %355
-        %362 = OpLoad %float %361
-        %356 = OpFunctionCall %void %mm_write %358 %360 %362
-               OpBranch %345
-        %345 = OpLabel
-        %363 = OpLoad %uint %innerCol_2
-        %364 = OpIAdd %uint %363 %uint_1
-               OpStore %innerCol_2 %364
-               OpBranch %343
-        %344 = OpLabel
+               OpBranch %332
+        %332 = OpLabel
+               OpLoopMerge %333 %334 None
                OpBranch %335
         %335 = OpLabel
-        %365 = OpLoad %uint %innerRow_2
-        %366 = OpIAdd %uint %365 %uint_1
-               OpStore %innerRow_2 %366
+        %337 = OpLoad %uint %innerRow_2
+        %338 = OpULessThan %bool %337 %uint_4
+        %336 = OpLogicalNot %bool %338
+               OpSelectionMerge %339 None
+               OpBranchConditional %336 %340 %339
+        %340 = OpLabel
                OpBranch %333
+        %339 = OpLabel
+               OpStore %innerCol_2 %105
+               OpBranch %342
+        %342 = OpLabel
+               OpLoopMerge %343 %344 None
+               OpBranch %345
+        %345 = OpLabel
+        %347 = OpLoad %uint %innerCol_2
+        %348 = OpULessThan %bool %347 %uint_4
+        %346 = OpLogicalNot %bool %348
+               OpSelectionMerge %349 None
+               OpBranchConditional %346 %350 %349
+        %350 = OpLabel
+               OpBranch %343
+        %349 = OpLabel
+        %351 = OpLoad %uint %innerRow_2
+        %352 = OpIMul %uint %351 %uint_4
+        %353 = OpLoad %uint %innerCol_2
+        %354 = OpIAdd %uint %352 %353
+        %356 = OpLoad %uint %innerRow_2
+        %357 = OpIAdd %uint %134 %356
+        %358 = OpLoad %uint %innerCol_2
+        %359 = OpIAdd %uint %136 %358
+        %360 = OpAccessChain %_ptr_Function_float %acc %354
+        %361 = OpLoad %float %360
+        %355 = OpFunctionCall %void %mm_write %357 %359 %361
+               OpBranch %344
+        %344 = OpLabel
+        %362 = OpLoad %uint %innerCol_2
+        %363 = OpIAdd %uint %362 %uint_1
+               OpStore %innerCol_2 %363
+               OpBranch %342
+        %343 = OpLabel
+               OpBranch %334
         %334 = OpLabel
+        %364 = OpLoad %uint %innerRow_2
+        %365 = OpIAdd %uint %364 %uint_1
+               OpStore %innerRow_2 %365
+               OpBranch %332
+        %333 = OpLabel
                OpReturn
                OpFunctionEnd
-       %main = OpFunction %void None %367
-        %369 = OpLabel
-        %371 = OpLoad %v3uint %local_id_1
-        %372 = OpLoad %v3uint %global_id_1
-        %373 = OpLoad %uint %local_invocation_index_1
-        %370 = OpFunctionCall %void %main_inner %371 %372 %373
+       %main = OpFunction %void None %366
+        %368 = OpLabel
+        %370 = OpLoad %v3uint %local_id_1
+        %371 = OpLoad %v3uint %global_id_1
+        %372 = OpLoad %uint %local_invocation_index_1
+        %369 = OpFunctionCall %void %main_inner %370 %371 %372
                OpReturn
                OpFunctionEnd

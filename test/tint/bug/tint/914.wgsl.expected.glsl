@@ -77,7 +77,7 @@ void tint_symbol(uvec3 local_id, uvec3 global_id, uint local_invocation_index) {
   float ACached = 0.0f;
   float BCached[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);
   {
-    for(uint index = 0u; (index < (4u * 4u)); index = (index + 1u)) {
+    for(uint index = 0u; (index < 16u); index = (index + 1u)) {
       acc[index] = 0.0f;
     }
   }

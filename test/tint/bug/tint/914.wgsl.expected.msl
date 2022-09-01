@@ -63,7 +63,7 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint local_invocation_in
   tint_array<float, 16> acc = {};
   float ACached = 0.0f;
   tint_array<float, 4> BCached = {};
-  for(uint index = 0u; (index < (4u * 4u)); index = (index + 1u)) {
+  for(uint index = 0u; (index < 16u); index = (index + 1u)) {
     acc[index] = 0.0f;
   }
   uint const ColPerThreadA = (64u / 16u);

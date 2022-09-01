@@ -641,15 +641,15 @@ TEST_F(IntrinsicTableTest, MismatchBinaryOp) {
     EXPECT_EQ(Diagnostics().str(), R"(12:34 error: no matching overload for operator * (f32, bool)
 
 9 candidate operators:
-  operator * (T, T) -> T  where: T is f32, i32, u32 or f16
-  operator * (vecN<T>, T) -> vecN<T>  where: T is f32, i32, u32 or f16
-  operator * (T, vecN<T>) -> vecN<T>  where: T is f32, i32, u32 or f16
-  operator * (T, matNxM<T>) -> matNxM<T>  where: T is f32 or f16
-  operator * (matNxM<T>, T) -> matNxM<T>  where: T is f32 or f16
-  operator * (vecN<T>, vecN<T>) -> vecN<T>  where: T is f32, i32, u32 or f16
-  operator * (matCxR<T>, vecC<T>) -> vecR<T>  where: T is f32 or f16
-  operator * (vecR<T>, matCxR<T>) -> vecC<T>  where: T is f32 or f16
-  operator * (matKxR<T>, matCxK<T>) -> matCxR<T>  where: T is f32 or f16
+  operator * (T, T) -> T  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
+  operator * (vecN<T>, T) -> vecN<T>  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
+  operator * (T, vecN<T>) -> vecN<T>  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
+  operator * (T, matNxM<T>) -> matNxM<T>  where: T is abstract-float, f32 or f16
+  operator * (matNxM<T>, T) -> matNxM<T>  where: T is abstract-float, f32 or f16
+  operator * (vecN<T>, vecN<T>) -> vecN<T>  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
+  operator * (matCxR<T>, vecC<T>) -> vecR<T>  where: T is abstract-float, f32 or f16
+  operator * (vecR<T>, matCxR<T>) -> vecC<T>  where: T is abstract-float, f32 or f16
+  operator * (matKxR<T>, matCxK<T>) -> matCxR<T>  where: T is abstract-float, f32 or f16
 )");
 }
 
@@ -673,15 +673,15 @@ TEST_F(IntrinsicTableTest, MismatchCompoundOp) {
     EXPECT_EQ(Diagnostics().str(), R"(12:34 error: no matching overload for operator *= (f32, bool)
 
 9 candidate operators:
-  operator *= (T, T) -> T  where: T is f32, i32, u32 or f16
-  operator *= (vecN<T>, T) -> vecN<T>  where: T is f32, i32, u32 or f16
-  operator *= (T, vecN<T>) -> vecN<T>  where: T is f32, i32, u32 or f16
-  operator *= (T, matNxM<T>) -> matNxM<T>  where: T is f32 or f16
-  operator *= (matNxM<T>, T) -> matNxM<T>  where: T is f32 or f16
-  operator *= (vecN<T>, vecN<T>) -> vecN<T>  where: T is f32, i32, u32 or f16
-  operator *= (matCxR<T>, vecC<T>) -> vecR<T>  where: T is f32 or f16
-  operator *= (vecR<T>, matCxR<T>) -> vecC<T>  where: T is f32 or f16
-  operator *= (matKxR<T>, matCxK<T>) -> matCxR<T>  where: T is f32 or f16
+  operator *= (T, T) -> T  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
+  operator *= (vecN<T>, T) -> vecN<T>  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
+  operator *= (T, vecN<T>) -> vecN<T>  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
+  operator *= (T, matNxM<T>) -> matNxM<T>  where: T is abstract-float, f32 or f16
+  operator *= (matNxM<T>, T) -> matNxM<T>  where: T is abstract-float, f32 or f16
+  operator *= (vecN<T>, vecN<T>) -> vecN<T>  where: T is abstract-float, abstract-int, f32, i32, u32 or f16
+  operator *= (matCxR<T>, vecC<T>) -> vecR<T>  where: T is abstract-float, f32 or f16
+  operator *= (vecR<T>, matCxR<T>) -> vecC<T>  where: T is abstract-float, f32 or f16
+  operator *= (matKxR<T>, matCxK<T>) -> matCxR<T>  where: T is abstract-float, f32 or f16
 )");
 }
 

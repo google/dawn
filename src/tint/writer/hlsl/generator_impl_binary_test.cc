@@ -184,7 +184,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar_f32) {
 
     std::stringstream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(), "((1.0f).xxx * 1.0f)");
+    EXPECT_EQ(out.str(), "(1.0f).xxx");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar_f16) {
@@ -201,7 +201,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_VectorScalar_f16) {
 
     std::stringstream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(), "((float16_t(1.0h)).xxx * float16_t(1.0h))");
+    EXPECT_EQ(out.str(), "(float16_t(1.0h)).xxx");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector_f32) {
@@ -216,7 +216,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector_f32) {
 
     std::stringstream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(), "(1.0f * (1.0f).xxx)");
+    EXPECT_EQ(out.str(), "(1.0f).xxx");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector_f16) {
@@ -233,7 +233,7 @@ TEST_F(HlslGeneratorImplTest_Binary, Multiply_ScalarVector_f16) {
 
     std::stringstream out;
     EXPECT_TRUE(gen.EmitExpression(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(), "(float16_t(1.0h) * (float16_t(1.0h)).xxx)");
+    EXPECT_EQ(out.str(), "(float16_t(1.0h)).xxx");
 }
 
 TEST_F(HlslGeneratorImplTest_Binary, Multiply_MatrixScalar_f32) {
