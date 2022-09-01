@@ -16,9 +16,9 @@
 
 namespace tint::sem {
 
-Manager::Manager() = default;
-Manager::Manager(Manager&&) = default;
-Manager& Manager::operator=(Manager&& rhs) = default;
-Manager::~Manager() = default;
+TypeManager::TypeManager() = default;
+TypeManager::TypeManager(TypeManager&&) = default;
+TypeManager& TypeManager::operator=(TypeManager&& rhs) = default;
+TypeManager::~TypeManager() = default;
 
 }  // namespace tint::sem

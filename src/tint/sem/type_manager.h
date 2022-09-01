@@ -25,24 +25,24 @@
 namespace tint::sem {
 
 /// The type manager holds all the pointers to the known types.
-class Manager final : public utils::UniqueAllocator<Type> {
+class TypeManager final : public utils::UniqueAllocator<Type> {
   public:
     /// Iterator is the type returned by begin() and end()
     using Iterator = utils::BlockAllocator<Type>::ConstIterator;
 
     /// Constructor
-    Manager();
+    TypeManager();
 
     /// Move constructor
-    Manager(Manager&&);
+    TypeManager(TypeManager&&);
 
     /// Move assignment operator
     /// @param rhs the Manager to move
     /// @return this Manager
-    Manager& operator=(Manager&& rhs);
+    TypeManager& operator=(TypeManager&& rhs);
 
     /// Destructor
-    ~Manager();
+    ~TypeManager();
 
     /// Wrap returns a new Manager created with the types of `inner`.
     /// The Manager returned by Wrap is intended to temporarily extend the types
@@ -53,8 +53,8 @@ class Manager final : public utils::UniqueAllocator<Type> {
     /// function. See crbug.com/tint/460.
     /// @param inner the immutable Manager to extend
     /// @return the Manager that wraps `inner`
-    static Manager Wrap(const Manager& inner) {
-        Manager out;
+    static TypeManager Wrap(const TypeManager& inner) {
+        TypeManager out;
         out.items = inner.items;
         return out;
     }

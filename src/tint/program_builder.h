@@ -297,13 +297,13 @@ class ProgramBuilder {
     ProgramID ID() const { return id_; }
 
     /// @returns a reference to the program's types
-    sem::Manager& Types() {
+    sem::TypeManager& Types() {
         AssertNotMoved();
         return types_;
     }
 
     /// @returns a reference to the program's types
-    const sem::Manager& Types() const {
+    const sem::TypeManager& Types() const {
         AssertNotMoved();
         return types_;
     }
@@ -3169,7 +3169,7 @@ class ProgramBuilder {
   private:
     ProgramID id_;
     ast::NodeID last_ast_node_id_ = ast::NodeID{static_cast<decltype(ast::NodeID::value)>(0) - 1};
-    sem::Manager types_;
+    sem::TypeManager types_;
     ASTNodeAllocator ast_nodes_;
     SemNodeAllocator sem_nodes_;
     ConstantAllocator constant_nodes_;
