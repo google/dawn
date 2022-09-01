@@ -62,6 +62,14 @@ TEST_F(TypeManagerTest, GetDifferentTypeReturnsDifferentPtr) {
     EXPECT_TRUE(t2->Is<U32>());
 }
 
+TEST_F(TypeManagerTest, Find) {
+    Manager tm;
+    auto* created = tm.Get<I32>();
+
+    EXPECT_EQ(tm.Find<U32>(), nullptr);
+    EXPECT_EQ(tm.Find<I32>(), created);
+}
+
 TEST_F(TypeManagerTest, WrapDoesntAffectInner) {
     Manager inner;
     Manager outer = Manager::Wrap(inner);

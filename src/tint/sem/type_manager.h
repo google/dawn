@@ -59,6 +59,22 @@ class Manager final : public utils::UniqueAllocator<Type> {
         return out;
     }
 
+    /// @param args the arguments used to create the temporary type used for the search.
+    /// @return a pointer to an instance of `T` with the provided arguments, or nullptr if the type
+    ///         was not found.
+    template <typename TYPE, typename... ARGS>
+    TYPE* Find(ARGS&&... args) const {
+        // Create a temporary T instance on the stack so that we can hash it, and
+        // use it for equality lookup for the std::unordered_set.
+        TYPE key{args...};
+        auto hash = Hasher{}(key);
+        auto it = items.find(Entry{hash, &key});
+        if (it != items.end()) {
+            return static_cast<TYPE*>(it->ptr);
+        }
+        return nullptr;
+    }
+
     /// @returns an iterator to the beginning of the types
     Iterator begin() const { return allocator.Objects().begin(); }
     /// @returns an iterator to the end of the types

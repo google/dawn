@@ -39,7 +39,7 @@ class UniqueAllocator {
         // found in the set, then we create the persisted instance with the
         // allocator.
         TYPE key{args...};
-        auto hash = HASH{}(key);
+        auto hash = Hasher{}(key);
         auto it = items.find(Entry{hash, &key});
         if (it != items.end()) {
             return static_cast<TYPE*>(it->ptr);
@@ -50,6 +50,11 @@ class UniqueAllocator {
     }
 
   protected:
+    /// The hash function
+    using Hasher = HASH;
+    /// The equality function
+    using Equality = EQUAL;
+
     /// Entry is used as the entry to the unordered_set
     struct Entry {
         /// The pre-calculated hash of the entry
