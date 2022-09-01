@@ -1390,8 +1390,7 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(const sem::Call* call,
         auto* value_type = args[0]->Type()->UnwrapRef();
         if (auto* val_mat = value_type->As<sem::Matrix>()) {
             // Generate passthrough for matrices of the same type
-            can_cast_or_copy =
-                (res_mat->columns() == val_mat->columns()) && (res_mat->rows() == val_mat->rows());
+            can_cast_or_copy = res_mat == val_mat;
         }
     }
 
@@ -1578,13 +1577,19 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
     } else if ((from_type->is_float_scalar() && to_type->Is<sem::U32>()) ||
                (from_type->is_float_vector() && to_type->is_unsigned_integer_vector())) {
         op = spv::Op::OpConvertFToU;
-    } else if ((from_type->Is<sem::Bool>() && to_type->Is<sem::Bool>()) ||
-               (from_type->Is<sem::U32>() && to_type->Is<sem::U32>()) ||
-               (from_type->Is<sem::I32>() && to_type->Is<sem::I32>()) ||
-               (from_type->Is<sem::F32>() && to_type->Is<sem::F32>()) ||
-               (from_type->Is<sem::F16>() && to_type->Is<sem::F16>()) ||
-               (from_type->Is<sem::Vector>() && (from_type == to_type))) {
+    } else if (from_type
+                   ->IsAnyOf<sem::Bool, sem::F32, sem::I32, sem::U32, sem::F16, sem::Vector>() &&
+               from_type == to_type) {
+        // Identity constructor for scalar and vector types
         return val_id;
+    } else if ((from_type->is_float_scalar() && to_type->is_float_scalar()) ||
+               (from_type->is_float_vector() && to_type->is_float_vector() &&
+                from_type->As<sem::Vector>()->Width() == to_type->As<sem::Vector>()->Width())) {
+        // Convert between f32 and f16 types.
+        // OpFConvert requires the scalar component types to be different, and the case of from_type
+        // and to_type being the same floating point scalar or vector type, i.e. identity
+        // constructor, is already handled in the previous else-if clause.
+        op = spv::Op::OpFConvert;
     } else if ((from_type->Is<sem::I32>() && to_type->Is<sem::U32>()) ||
                (from_type->Is<sem::U32>() && to_type->Is<sem::I32>()) ||
                (from_type->is_signed_integer_vector() && to_type->is_unsigned_integer_vector()) ||
@@ -1644,8 +1649,18 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
         }
 
         return result_id;
-    } else if (from_type->Is<sem::Matrix>()) {
-        return val_id;
+    } else if (from_type->Is<sem::Matrix>() && to_type->Is<sem::Matrix>()) {
+        // SPIRV does not support matrix conversion, the only valid case is matrix identity
+        // constructor. Matrix conversion between f32 and f16 should be transformed into vector
+        // conversions for each column vectors by VectorizeMatrixConversions.
+        auto* from_mat = from_type->As<sem::Matrix>();
+        auto* to_mat = to_type->As<sem::Matrix>();
+        if (from_mat == to_mat) {
+            return val_id;
+        }
+        TINT_ICE(Writer, builder_.Diagnostics())
+            << "matrix conversion is not supported and should have been handled by "
+               "VectorizeMatrixConversions";
     } else {
         TINT_ICE(Writer, builder_.Diagnostics()) << "Invalid from_type";
     }

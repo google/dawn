@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+
+using namespace metal;
+bool3 m() {
+  thread bool tint_symbol_1 = false;
+  tint_symbol_1 = true;
+  return bool3(tint_symbol_1);
+}
+
+void f() {
+  bool3 const tint_symbol = m();
+  uint3 v = uint3(tint_symbol);
+}
+

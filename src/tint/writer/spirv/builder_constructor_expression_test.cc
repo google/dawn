@@ -3927,30 +3927,6 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_I32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_U32) {
-    auto* var = Decl(Var("x", ty.i32(), Expr(2_i)));
-    auto* cast = Construct<u32>("x");
-    WrapInFunction(var, cast);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
-%2 = OpConstant %1 2
-%4 = OpTypePointer Function %1
-%5 = OpConstantNull %1
-%7 = OpTypeInt 32 0
-)");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(OpStore %3 %2
-%8 = OpLoad %1 %3
-%6 = OpBitcast %7 %8
-)");
-}
-
 TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_I32) {
     auto* var = Decl(Var("x", ty.f32(), Expr(2.4_f)));
     auto* cast = Construct<i32>("x");
@@ -3998,6 +3974,30 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F16_To_I32) {
               R"(OpStore %3 %2
 %8 = OpLoad %1 %3
 %6 = OpConvertFToS %7 %8
+)");
+}
+
+TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_U32) {
+    auto* var = Decl(Var("x", ty.i32(), Expr(2_i)));
+    auto* cast = Construct<u32>("x");
+    WrapInFunction(var, cast);
+
+    spirv::Builder& b = Build();
+
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
+%2 = OpConstant %1 2
+%4 = OpTypePointer Function %1
+%5 = OpConstantNull %1
+%7 = OpTypeInt 32 0
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpStore %3 %2
+%8 = OpLoad %1 %3
+%6 = OpBitcast %7 %8
 )");
 }
 
@@ -4075,6 +4075,56 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_F32) {
 )");
 }
 
+TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F32) {
+    auto* var = Decl(Var("x", ty.u32(), Expr(2_u)));
+    auto* cast = Construct<f32>("x");
+    WrapInFunction(var, cast);
+
+    spirv::Builder& b = Build();
+
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 0
+%2 = OpConstant %1 2
+%4 = OpTypePointer Function %1
+%5 = OpConstantNull %1
+%7 = OpTypeFloat 32
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpStore %3 %2
+%8 = OpLoad %1 %3
+%6 = OpConvertUToF %7 %8
+)");
+}
+
+TEST_F(SpvBuilderConstructorTest, Type_Convert_F16_To_F32) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = Decl(Var("x", ty.f16(), Expr(2_h)));
+    auto* cast = Construct<f32>("x");
+    WrapInFunction(var, cast);
+
+    spirv::Builder& b = Build();
+
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 16
+%2 = OpConstant %1 0x1p+1
+%4 = OpTypePointer Function %1
+%5 = OpConstantNull %1
+%7 = OpTypeFloat 32
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpStore %3 %2
+%8 = OpLoad %1 %3
+%6 = OpFConvert %7 %8
+)");
+}
+
 TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_F16) {
     Enable(ast::Extension::kF16);
 
@@ -4101,30 +4151,6 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F32) {
-    auto* var = Decl(Var("x", ty.u32(), Expr(2_u)));
-    auto* cast = Construct<f32>("x");
-    WrapInFunction(var, cast);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 0
-%2 = OpConstant %1 2
-%4 = OpTypePointer Function %1
-%5 = OpConstantNull %1
-%7 = OpTypeFloat 32
-)");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(OpStore %3 %2
-%8 = OpLoad %1 %3
-%6 = OpConvertUToF %7 %8
-)");
-}
-
 TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F16) {
     Enable(ast::Extension::kF16);
 
@@ -4148,6 +4174,32 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F16) {
               R"(OpStore %3 %2
 %8 = OpLoad %1 %3
 %6 = OpConvertUToF %7 %8
+)");
+}
+
+TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_F16) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = Decl(Var("x", ty.f32(), Expr(2_f)));
+    auto* cast = Construct<f16>("x");
+    WrapInFunction(var, cast);
+
+    spirv::Builder& b = Build();
+
+    b.push_function(Function{});
+    EXPECT_TRUE(b.GenerateStatement(var)) << b.error();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
+%2 = OpConstant %1 2
+%4 = OpTypePointer Function %1
+%5 = OpConstantNull %1
+%7 = OpTypeFloat 16
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(OpStore %3 %2
+%8 = OpLoad %1 %3
+%6 = OpFConvert %7 %8
 )");
 }
 
@@ -4337,6 +4389,60 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F32) {
 )");
 }
 
+TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F32) {
+    auto* var = GlobalVar("i", ty.vec3<u32>(), ast::StorageClass::kPrivate);
+
+    auto* cast = vec3<f32>("i");
+    WrapInFunction(cast);
+
+    spirv::Builder& b = Build();
+
+    b.push_function(Function{});
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+%8 = OpTypeFloat 32
+%7 = OpTypeVector %8 3
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%9 = OpLoad %3 %1
+%6 = OpConvertUToF %7 %9
+)");
+}
+
+TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F16_to_F32) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = GlobalVar("i", ty.vec3<f16>(), ast::StorageClass::kPrivate);
+
+    auto* cast = vec3<f32>("i");
+    WrapInFunction(cast);
+
+    spirv::Builder& b = Build();
+
+    b.push_function(Function{});
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 16
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+%8 = OpTypeFloat 32
+%7 = OpTypeVector %8 3
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%9 = OpLoad %3 %1
+%6 = OpFConvert %7 %9
+)");
+}
+
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F16) {
     Enable(ast::Extension::kF16);
 
@@ -4365,32 +4471,6 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F32) {
-    auto* var = GlobalVar("i", ty.vec3<u32>(), ast::StorageClass::kPrivate);
-
-    auto* cast = vec3<f32>("i");
-    WrapInFunction(cast);
-
-    spirv::Builder& b = Build();
-
-    b.push_function(Function{});
-    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
-    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
-
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
-%3 = OpTypeVector %4 3
-%2 = OpTypePointer Private %3
-%5 = OpConstantNull %3
-%1 = OpVariable %2 Private %5
-%8 = OpTypeFloat 32
-%7 = OpTypeVector %8 3
-)");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
-              R"(%9 = OpLoad %3 %1
-%6 = OpConvertUToF %7 %9
-)");
-}
-
 TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F16) {
     Enable(ast::Extension::kF16);
 
@@ -4416,6 +4496,34 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F16) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
               R"(%9 = OpLoad %3 %1
 %6 = OpConvertUToF %7 %9
+)");
+}
+
+TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_F16) {
+    Enable(ast::Extension::kF16);
+
+    auto* var = GlobalVar("i", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+
+    auto* cast = vec3<f16>("i");
+    WrapInFunction(cast);
+
+    spirv::Builder& b = Build();
+
+    b.push_function(Function{});
+    ASSERT_TRUE(b.GenerateGlobalVariable(var)) << b.error();
+    EXPECT_EQ(b.GenerateExpression(cast), 6u) << b.error();
+
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeFloat 32
+%3 = OpTypeVector %4 3
+%2 = OpTypePointer Private %3
+%5 = OpConstantNull %3
+%1 = OpVariable %2 Private %5
+%8 = OpTypeFloat 16
+%7 = OpTypeVector %8 3
+)");
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
+              R"(%9 = OpLoad %3 %1
+%6 = OpFConvert %7 %9
 )");
 }
 

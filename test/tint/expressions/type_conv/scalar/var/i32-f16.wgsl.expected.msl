@@ -1,0 +1,8 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void f() {
+  thread int tint_symbol = 1;
+  half const v = half(tint_symbol);
+}
+

@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+
+using namespace metal;
+float4x2 m() {
+  thread float tint_symbol_1 = 0.0f;
+  tint_symbol_1 = (tint_symbol_1 + 1.0f);
+  return float4x2(float2(1.0f, 2.0f), float2(3.0f, 4.0f), float2(5.0f, 6.0f), float2(7.0f, 8.0f));
+}
+
+void f() {
+  float4x2 const tint_symbol = m();
+  half4x2 v = half4x2(tint_symbol);
+}
+

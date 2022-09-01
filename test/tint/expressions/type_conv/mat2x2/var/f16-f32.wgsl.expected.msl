@@ -1,0 +1,8 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void f() {
+  thread half2x2 tint_symbol = half2x2(half2(1.0h, 2.0h), half2(3.0h, 4.0h));
+  float2x2 v = float2x2(tint_symbol);
+}
+

@@ -1,0 +1,64 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 43
+; Schema: 0
+               OpCapability Shader
+               OpCapability Float16
+               OpCapability UniformAndStorageBuffer16BitAccess
+               OpCapability StorageBuffer16BitAccess
+               OpCapability StorageInputOutput16
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %unused_entry_point "unused_entry_point"
+               OpExecutionMode %unused_entry_point LocalSize 1 1 1
+               OpName %u "u"
+               OpName %unused_entry_point "unused_entry_point"
+               OpName %f "f"
+               OpName %v "v"
+       %half = OpTypeFloat 16
+     %v2half = OpTypeVector %half 2
+ %mat3v2half = OpTypeMatrix %v2half 3
+%half_0x1p_0 = OpConstant %half 0x1p+0
+%half_0x1p_1 = OpConstant %half 0x1p+1
+          %6 = OpConstantComposite %v2half %half_0x1p_0 %half_0x1p_1
+%half_0x1_8p_1 = OpConstant %half 0x1.8p+1
+%half_0x1p_2 = OpConstant %half 0x1p+2
+          %9 = OpConstantComposite %v2half %half_0x1_8p_1 %half_0x1p_2
+%half_0x1_4p_2 = OpConstant %half 0x1.4p+2
+%half_0x1_8p_2 = OpConstant %half 0x1.8p+2
+         %12 = OpConstantComposite %v2half %half_0x1_4p_2 %half_0x1_8p_2
+         %13 = OpConstantComposite %mat3v2half %6 %9 %12
+%_ptr_Private_mat3v2half = OpTypePointer Private %mat3v2half
+          %u = OpVariable %_ptr_Private_mat3v2half Private %13
+       %void = OpTypeVoid
+         %16 = OpTypeFunction %void
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+%mat3v2float = OpTypeMatrix %v2float 3
+        %int = OpTypeInt 32 1
+         %27 = OpConstantNull %int
+%_ptr_Private_v2half = OpTypePointer Private %v2half
+      %int_1 = OpConstant %int 1
+      %int_2 = OpConstant %int 2
+%_ptr_Function_mat3v2float = OpTypePointer Function %mat3v2float
+         %42 = OpConstantNull %mat3v2float
+%unused_entry_point = OpFunction %void None %16
+         %19 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %16
+         %21 = OpLabel
+          %v = OpVariable %_ptr_Function_mat3v2float Function %42
+         %29 = OpAccessChain %_ptr_Private_v2half %u %27
+         %30 = OpLoad %v2half %29
+         %25 = OpFConvert %v2float %30
+         %33 = OpAccessChain %_ptr_Private_v2half %u %int_1
+         %34 = OpLoad %v2half %33
+         %31 = OpFConvert %v2float %34
+         %37 = OpAccessChain %_ptr_Private_v2half %u %int_2
+         %38 = OpLoad %v2half %37
+         %35 = OpFConvert %v2float %38
+         %39 = OpCompositeConstruct %mat3v2float %25 %31 %35
+               OpStore %v %39
+               OpReturn
+               OpFunctionEnd

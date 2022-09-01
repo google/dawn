@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+
+using namespace metal;
+half m() {
+  thread half tint_symbol_1 = 0.0h;
+  tint_symbol_1 = 1.0h;
+  return half(tint_symbol_1);
+}
+
+void f() {
+  half const tint_symbol = m();
+  bool v = bool(tint_symbol);
+}
+

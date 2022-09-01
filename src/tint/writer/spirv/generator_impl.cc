@@ -32,6 +32,7 @@
 #include "src/tint/transform/unshadow.h"
 #include "src/tint/transform/unwind_discard_functions.h"
 #include "src/tint/transform/var_for_dynamic_index.h"
+#include "src/tint/transform/vectorize_matrix_conversions.h"
 #include "src/tint/transform/vectorize_scalar_matrix_constructors.h"
 #include "src/tint/transform/while_to_loop.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
@@ -78,6 +79,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     manager.Add<transform::SimplifyPointers>();  // Required for arrayLength()
     manager.Add<transform::RemovePhonies>();
     manager.Add<transform::VectorizeScalarMatrixConstructors>();
+    manager.Add<transform::VectorizeMatrixConversions>();
     manager.Add<transform::ForLoopToLoop>();  // Must come after
     manager.Add<transform::WhileToLoop>();    // ZeroInitWorkgroupMemory
     manager.Add<transform::CanonicalizeEntryPointIO>();

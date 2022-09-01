@@ -1,0 +1,8 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void f() {
+  thread uint4 tint_symbol = uint4(1u);
+  bool4 const v = bool4(tint_symbol);
+}
+
