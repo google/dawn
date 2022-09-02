@@ -17,6 +17,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/block_statement.h"
 #include "src/tint/sem/function.h"
+#include "src/tint/sem/materialize.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/utils/scoped_assignment.h"
@@ -26,6 +27,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::FoldTrivialSingleUseLets);
 namespace tint::transform {
 namespace {
 
+/// @returns a @p stmt cast to a ast::VariableDeclStatement iff the statement is a let declaration,
+/// with an initializer that's an identifier or literal expression.
 const ast::VariableDeclStatement* AsTrivialLetDecl(const ast::Statement* stmt) {
     auto* var_decl = stmt->As<ast::VariableDeclStatement>();
     if (!var_decl) {
@@ -50,10 +53,12 @@ FoldTrivialSingleUseLets::~FoldTrivialSingleUseLets() = default;
 
 void FoldTrivialSingleUseLets::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
     for (auto* node : ctx.src->ASTNodes().Objects()) {
+        // For each statement in each block of the entire program...
         if (auto* block = node->As<ast::BlockStatement>()) {
             auto& stmts = block->statements;
             for (size_t stmt_idx = 0; stmt_idx < stmts.Length(); stmt_idx++) {
                 auto* stmt = stmts[stmt_idx];
+                // Is the statement a trivial let declaration with a single user?
                 if (auto* let_decl = AsTrivialLetDecl(stmt)) {
                     auto* let = let_decl->variable;
                     auto* sem_let = ctx.src->Sem().Get(let);
@@ -65,11 +70,23 @@ void FoldTrivialSingleUseLets::Run(CloneContext& ctx, const DataMap&, DataMap&) 
                     auto* user = users[0];
                     auto* user_stmt = user->Stmt()->Declaration();
 
+                    // Scan forward to find the statement of use. If there's a statement between the
+                    // declaration and the use, then we cannot safely fold.
                     for (size_t i = stmt_idx; i < stmts.Length(); i++) {
                         if (user_stmt == stmts[i]) {
                             auto* user_expr = user->Declaration();
                             ctx.Remove(stmts, let_decl);
-                            ctx.Replace(user_expr, ctx.Clone(let->constructor));
+                            auto* initializer = ctx.Clone(let->constructor);
+                            if (auto* materialize =
+                                    sem_let->Constructor()->As<sem::Materialize>()) {
+                                // The let initializer was an abstract numeric that was implicitly
+                                // materialized to a concrete type. As we're inlining the
+                                // initializer into the use, we need to make this cast explicit,
+                                // otherwise we'll have a different type for the substitution.
+                                auto* concrete_ty = CreateASTTypeFor(ctx, materialize->Type());
+                                initializer = ctx.dst->Construct(concrete_ty, initializer);
+                            }
+                            ctx.Replace(user_expr, initializer);
                         }
                         if (!AsTrivialLetDecl(stmts[i])) {
                             // Stop if we hit a statement that isn't the single use of the

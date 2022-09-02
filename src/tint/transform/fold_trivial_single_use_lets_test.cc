@@ -30,7 +30,26 @@ TEST_F(FoldTrivialSingleUseLetsTest, EmptyModule) {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(FoldTrivialSingleUseLetsTest, Single) {
+TEST_F(FoldTrivialSingleUseLetsTest, Single_Concrete) {
+    auto* src = R"(
+fn f() {
+  let x = 1i;
+  _ = x;
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  _ = 1i;
+}
+)";
+
+    auto got = Run<FoldTrivialSingleUseLets>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(FoldTrivialSingleUseLetsTest, Single_Abstract) {
     auto* src = R"(
 fn f() {
   let x = 1;
@@ -40,7 +59,7 @@ fn f() {
 
     auto* expect = R"(
 fn f() {
-  _ = 1;
+  _ = i32(1);
 }
 )";
 
@@ -49,7 +68,28 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(FoldTrivialSingleUseLetsTest, Multiple) {
+TEST_F(FoldTrivialSingleUseLetsTest, Multiple_Concrete) {
+    auto* src = R"(
+fn f() {
+  let x = 1u;
+  let y = 2u;
+  let z = 3u;
+  _ = x + y + z;
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  _ = ((1u + 2u) + 3u);
+}
+)";
+
+    auto got = Run<FoldTrivialSingleUseLets>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(FoldTrivialSingleUseLetsTest, Multiple_Abstract) {
     auto* src = R"(
 fn f() {
   let x = 1;
@@ -61,7 +101,7 @@ fn f() {
 
     auto* expect = R"(
 fn f() {
-  _ = ((1 + 2) + 3);
+  _ = ((i32(1) + i32(2)) + i32(3));
 }
 )";
 
@@ -70,7 +110,28 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(FoldTrivialSingleUseLetsTest, Chained) {
+TEST_F(FoldTrivialSingleUseLetsTest, Chained_Concrete) {
+    auto* src = R"(
+fn f() {
+  let x = 1i;
+  let y = x;
+  let z = y;
+  _ = z;
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  _ = 1i;
+}
+)";
+
+    auto got = Run<FoldTrivialSingleUseLets>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(FoldTrivialSingleUseLetsTest, Chained_Abstract) {
     auto* src = R"(
 fn f() {
   let x = 1;
@@ -82,7 +143,7 @@ fn f() {
 
     auto* expect = R"(
 fn f() {
-  _ = 1;
+  _ = i32(1);
 }
 )";
 
@@ -93,13 +154,13 @@ fn f() {
 
 TEST_F(FoldTrivialSingleUseLetsTest, NoFold_NonTrivialLet) {
     auto* src = R"(
-fn function_with_posssible_side_effect() -> i32 {
+fn function_with_possible_side_effect() -> i32 {
   return 1;
 }
 
 fn f() {
   let x = 1;
-  let y = function_with_posssible_side_effect();
+  let y = function_with_possible_side_effect();
   _ = (x + y);
 }
 )";
@@ -115,11 +176,11 @@ TEST_F(FoldTrivialSingleUseLetsTest, NoFold_NonTrivialLet_OutOfOrder) {
     auto* src = R"(
 fn f() {
   let x = 1;
-  let y = function_with_posssible_side_effect();
+  let y = function_with_possible_side_effect();
   _ = (x + y);
 }
 
-fn function_with_posssible_side_effect() -> i32 {
+fn function_with_possible_side_effect() -> i32 {
   return 1;
 }
 )";
