@@ -2407,10 +2407,10 @@ INSTANTIATE_TEST_SUITE_P(ImageWrite_OptionalParams,
 INSTANTIATE_TEST_SUITE_P(
     // SPIR-V's texel parameter is a scalar or vector with at least as many
     // components as there are channels in the underlying format, and the
-    // componet type matches the sampled type (modulo signed/unsigned integer).
+    // component type matches the sampled type (modulo signed/unsigned integer).
     // WGSL's texel parameter is a 4-element vector scalar or vector, with
     // component type equal to the 32-bit form of the channel type.
-    ImageWrite_ConvertTexelOperand_Arity,
+    ImageWrite_ConvertTexelOperand_Arity_Float,
     SpvParserHandleTest_ImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         // Source 1 component
@@ -2447,6 +2447,86 @@ INSTANTIATE_TEST_SUITE_P(
          "@group(2) @binding(1) var x_20 : "
          "texture_storage_2d<rgba32float, write>;",
          "textureStore(x_20, vi12, vf1234);"}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    // As above, but unsigned integer.
+    ImageWrite_ConvertTexelOperand_Arity_Uint,
+    SpvParserHandleTest_ImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // Source 1 component
+        {"%uint 2D 0 0 0 2 R32ui", "OpImageWrite %im %vi12 %u1",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<r32uint, write>;)",
+         "textureStore(x_20, vi12, vec4<u32>(u1, 0u, 0u, 0u));"},
+        // Source 2 component, dest 1 component
+        {"%uint 2D 0 0 0 2 R32ui", "OpImageWrite %im %vi12 %vu12",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<r32uint, write>;)",
+         "textureStore(x_20, vi12, vec4<u32>(vu12, 0u, 0u));"},
+        // Source 3 component, dest 1 component
+        {"%uint 2D 0 0 0 2 R32ui", "OpImageWrite %im %vi12 %vu123",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<r32uint, write>;)",
+         "textureStore(x_20, vi12, vec4<u32>(vu123, 0u));"},
+        // Source 4 component, dest 1 component
+        {"%uint 2D 0 0 0 2 R32ui", "OpImageWrite %im %vi12 %vu1234",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<r32uint, write>;)",
+         "textureStore(x_20, vi12, vu1234);"},
+        // Source 2 component, dest 2 component
+        {"%uint 2D 0 0 0 2 Rg32ui", "OpImageWrite %im %vi12 %vu12",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rg32uint, write>;)",
+         "textureStore(x_20, vi12, vec4<u32>(vu12, 0u, 0u));"},
+        // Source 3 component, dest 2 component
+        {"%uint 2D 0 0 0 2 Rg32ui", "OpImageWrite %im %vi12 %vu123",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rg32uint, write>;)",
+         "textureStore(x_20, vi12, vec4<u32>(vu123, 0u));"},
+        // Source 4 component, dest 2 component
+        {"%uint 2D 0 0 0 2 Rg32ui", "OpImageWrite %im %vi12 %vu1234",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rg32uint, write>;)",
+         "textureStore(x_20, vi12, vu1234);"},
+        // WGSL does not support 3-component storage textures.
+        // Source 4 component, dest 4 component
+        {"%uint 2D 0 0 0 2 Rgba32ui", "OpImageWrite %im %vi12 %vu1234",
+         "@group(2) @binding(1) var x_20 : "
+         "texture_storage_2d<rgba32uint, write>;",
+         "textureStore(x_20, vi12, vu1234);"}}));
+
+INSTANTIATE_TEST_SUITE_P(
+    // As above, but signed integer.
+    ImageWrite_ConvertTexelOperand_Arity_Sint,
+    SpvParserHandleTest_ImageAccessTest,
+    ::testing::ValuesIn(std::vector<ImageAccessCase>{
+        // Source 1 component
+        {"%int 2D 0 0 0 2 R32i", "OpImageWrite %im %vi12 %i1",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<r32sint, write>;)",
+         "textureStore(x_20, vi12, vec4<i32>(i1, 0i, 0i, 0i));"},
+        // Source 2 component, dest 1 component
+        {"%int 2D 0 0 0 2 R32i", "OpImageWrite %im %vi12 %vi12",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<r32sint, write>;)",
+         "textureStore(x_20, vi12, vec4<i32>(vi12, 0i, 0i));"},
+        // Source 3 component, dest 1 component
+        {"%int 2D 0 0 0 2 R32i", "OpImageWrite %im %vi12 %vi123",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<r32sint, write>;)",
+         "textureStore(x_20, vi12, vec4<i32>(vi123, 0i));"},
+        // Source 4 component, dest 1 component
+        {"%int 2D 0 0 0 2 R32i", "OpImageWrite %im %vi12 %vi1234",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<r32sint, write>;)",
+         "textureStore(x_20, vi12, vi1234);"},
+        // Source 2 component, dest 2 component
+        {"%int 2D 0 0 0 2 Rg32i", "OpImageWrite %im %vi12 %vi12",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rg32sint, write>;)",
+         "textureStore(x_20, vi12, vec4<i32>(vi12, 0i, 0i));"},
+        // Source 3 component, dest 2 component
+        {"%int 2D 0 0 0 2 Rg32i", "OpImageWrite %im %vi12 %vi123",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rg32sint, write>;)",
+         "textureStore(x_20, vi12, vec4<i32>(vi123, 0i));"},
+        // Source 4 component, dest 2 component
+        {"%int 2D 0 0 0 2 Rg32i", "OpImageWrite %im %vi12 %vi1234",
+         R"(@group(2) @binding(1) var x_20 : texture_storage_2d<rg32sint, write>;)",
+         "textureStore(x_20, vi12, vi1234);"},
+        // WGSL does not support 3-component storage textures.
+        // Source 4 component, dest 4 component
+        {"%int 2D 0 0 0 2 Rgba32i", "OpImageWrite %im %vi12 %vi1234",
+         "@group(2) @binding(1) var x_20 : "
+         "texture_storage_2d<rgba32sint, write>;",
+         "textureStore(x_20, vi12, vi1234);"}}));
 
 TEST_F(SpvParserHandleTest, ImageWrite_TooFewSrcTexelComponents_1_vs_4) {
     const auto assembly = Preamble() + R"(

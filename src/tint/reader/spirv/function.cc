@@ -5740,8 +5740,8 @@ const ast::Expression* FunctionEmitter::ConvertTexelForStorage(
 
     // Component type must match floatness, or integral signedness.
     if ((src_type->IsFloatScalarOrVector() != dest_type->IsFloatVector()) ||
-        (src_type->IsUnsignedIntegerVector() != dest_type->IsUnsignedIntegerVector()) ||
-        (src_type->IsSignedIntegerVector() != dest_type->IsSignedIntegerVector())) {
+        (src_type->IsUnsignedScalarOrVector() != dest_type->IsUnsignedIntegerVector()) ||
+        (src_type->IsSignedScalarOrVector() != dest_type->IsSignedIntegerVector())) {
         Fail() << "invalid texel type for storage texture write: component must be "
                   "float, signed integer, or unsigned integer "
                   "to match the texture channel type: "
