@@ -5716,7 +5716,7 @@ const ast::Expression* FunctionEmitter::ConvertTexelForStorage(
     TypedExpression texel,
     const Texture* texture_type) {
     auto* storage_texture_type = As<StorageTexture>(texture_type);
-    auto* src_type = texel.type;
+    auto* src_type = texel.type->UnwrapRef();
     if (!storage_texture_type) {
         Fail() << "writing to other than storage texture: " << inst.PrettyPrint();
         return nullptr;
@@ -5764,14 +5764,14 @@ const ast::Expression* FunctionEmitter::ConvertTexelForStorage(
 
     if (src_count < dest_count) {
         // Expand the texel to a 4 element vector.
-        auto* component_type = texel.type->IsScalar() ? texel.type : texel.type->As<Vector>()->type;
-        texel.type = ty_.Vector(component_type, dest_count);
+        auto* component_type = src_type->IsScalar() ? src_type : src_type->As<Vector>()->type;
+        src_type = ty_.Vector(component_type, dest_count);
         ExpressionList exprs;
         exprs.Push(texel.expr);
         for (auto i = src_count; i < dest_count; i++) {
             exprs.Push(parser_impl_.MakeNullExpression(component_type).expr);
         }
-        texel.expr = builder_.Construct(Source{}, texel.type->Build(builder_), std::move(exprs));
+        texel.expr = builder_.Construct(Source{}, src_type->Build(builder_), std::move(exprs));
     }
 
     return texel.expr;

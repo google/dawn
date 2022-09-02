@@ -3840,5 +3840,94 @@ return;
     ASSERT_EQ(expect, got);
 }
 
+TEST_F(SpvParserHandleTest, TexelTypeWhenLoop) {
+    // Demonstrates fix for crbug.com/tint/1642
+    // The problem is the texel value for an image write
+    // can be given in 'var' declaration.
+    //
+    // The texel value handling has to unwrap the ref type first.
+    const auto assembly = Preamble() + R"(
+               OpCapability Shader
+               OpCapability StorageImageExtendedFormats
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %100 "main"
+               OpExecutionMode %100 LocalSize 8 8 1
+               OpSource HLSL 600
+               OpName %type_2d_image "type.2d.image"
+               OpName %Output2Texture2D "Output2Texture2D"
+               OpName %100 "main"
+               OpDecorate %Output2Texture2D DescriptorSet 0
+               OpDecorate %Output2Texture2D Binding 0
+      %float = OpTypeFloat 32
+    %float_0 = OpConstant %float 0
+    %v2float = OpTypeVector %float 2
+          %7 = OpConstantComposite %v2float %float_0 %float_0
+        %int = OpTypeInt 32 1
+      %int_0 = OpConstant %int 0
+      %int_2 = OpConstant %int 2
+    %float_1 = OpConstant %float 1
+         %12 = OpConstantComposite %v2float %float_1 %float_1
+      %int_1 = OpConstant %int 1
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+     %v2uint = OpTypeVector %uint 2
+         %17 = OpConstantComposite %v2uint %uint_1 %uint_1
+%type_2d_image = OpTypeImage %float 2D 2 0 0 2 Rg32f
+%_ptr_UniformConstant_type_2d_image = OpTypePointer UniformConstant %type_2d_image
+       %void = OpTypeVoid
+         %20 = OpTypeFunction %void
+       %bool = OpTypeBool
+%Output2Texture2D = OpVariable %_ptr_UniformConstant_type_2d_image UniformConstant
+        %100 = OpFunction %void None %20
+         %22 = OpLabel
+               OpBranch %23
+         %23 = OpLabel
+         %24 = OpPhi %v2float %7 %22 %12 %25
+         %26 = OpPhi %int %int_0 %22 %27 %25
+         %28 = OpSLessThan %bool %26 %int_2
+               OpLoopMerge %29 %25 None
+               OpBranchConditional %28 %25 %29
+         %25 = OpLabel
+         %27 = OpIAdd %int %26 %int_1
+               OpBranch %23
+         %29 = OpLabel
+         %30 = OpLoad %type_2d_image %Output2Texture2D
+               OpImageWrite %30 %17 %24 None
+               OpReturn
+               OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    EXPECT_TRUE(p->error().empty()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(var x_24 : vec2<f32>;
+var x_24_phi_1 : vec2<f32>;
+var x_26_phi_1 : i32;
+x_24_phi_1 = vec2<f32>(0.0f, 0.0f);
+x_26_phi_1 = 0i;
+loop {
+  var x_27 : i32;
+  x_24 = x_24_phi_1;
+  let x_26 : i32 = x_26_phi_1;
+  if ((x_26 < 2i)) {
+  } else {
+    break;
+  }
+
+  continuing {
+    x_27 = (x_26 + 1i);
+    x_24_phi_1 = vec2<f32>(1.0f, 1.0f);
+    x_26_phi_1 = x_27;
+  }
+}
+textureStore(Output2Texture2D, vec2<i32>(vec2<u32>(1u, 1u)), vec4<f32>(x_24, 0.0f, 0.0f));
+return;
+)";
+    ASSERT_EQ(expect, got);
+}
+
 }  // namespace
 }  // namespace tint::reader::spirv
