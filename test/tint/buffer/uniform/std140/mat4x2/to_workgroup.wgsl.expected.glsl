@@ -15,11 +15,7 @@ struct S_std140 {
   int after;
 };
 
-struct u_block {
-  S_std140 inner[4];
-};
-
-layout(binding = 0) uniform u_block_1 {
+layout(binding = 0) uniform u_block_ubo {
   S_std140 inner[4];
 } u;
 

@@ -6,31 +6,20 @@ struct LightData {
   float radius;
 };
 
-layout(binding = 0, std430) buffer LightsBuffer_1 {
+layout(binding = 0, std430) buffer LightsBuffer_ssbo {
   LightData lights[];
 } lightsBuffer;
+
 struct TileLightIdData {
   uint count;
   uint lightId[64];
 };
 
-struct Tiles {
-  TileLightIdData data[4];
-};
-
-layout(binding = 0, std430) buffer Tiles_1 {
+layout(binding = 0, std430) buffer Tiles_ssbo {
   TileLightIdData data[4];
 } tileLightId;
-struct Config {
-  uint numLights;
-  uint numTiles;
-  uint tileCountX;
-  uint tileCountY;
-  uint numTileLightSlot;
-  uint tileSize;
-};
 
-layout(binding = 0) uniform Config_1 {
+layout(binding = 0) uniform Config_ubo {
   uint numLights;
   uint numTiles;
   uint tileCountX;
@@ -39,15 +28,7 @@ layout(binding = 0) uniform Config_1 {
   uint tileSize;
 } config;
 
-struct Uniforms {
-  vec4 tint_symbol;
-  vec4 tint_symbol_1;
-  mat4 viewMatrix;
-  mat4 projectionMatrix;
-  vec4 fullScreenSize;
-};
-
-layout(binding = 0) uniform Uniforms_1 {
+layout(binding = 0) uniform Uniforms_ubo {
   vec4 tint_symbol;
   vec4 tint_symbol_1;
   mat4 viewMatrix;

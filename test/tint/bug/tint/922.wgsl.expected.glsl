@@ -25,35 +25,22 @@ struct Mat4x2_ {
   vec4 my;
 };
 
-struct ub_SceneParams {
-  Mat4x4_ u_Projection;
-};
-
-struct ub_MaterialParams {
-  Mat4x2_ u_TexMtx[1];
-  vec4 u_Misc0_;
-};
-
-struct ub_PacketParams {
-  Mat4x3_ u_PosMtx[32];
-};
-
 struct VertexOutput {
   vec4 v_Color;
   vec2 v_TexCoord;
   vec4 member;
 };
 
-layout(binding = 0) uniform ub_SceneParams_1 {
+layout(binding = 0) uniform ub_SceneParams_ubo {
   Mat4x4_ u_Projection;
 } global;
 
-layout(binding = 1) uniform ub_MaterialParams_1 {
+layout(binding = 1) uniform ub_MaterialParams_ubo {
   Mat4x2_ u_TexMtx[1];
   vec4 u_Misc0_;
 } global1;
 
-layout(binding = 2) uniform ub_PacketParams_1 {
+layout(binding = 2) uniform ub_PacketParams_ubo {
   Mat4x3_ u_PosMtx[32];
 } global2;
 

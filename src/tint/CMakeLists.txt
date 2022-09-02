@@ -384,8 +384,8 @@ set(TINT_LIB_SRCS
   traits.h
   transform/add_empty_entry_point.cc
   transform/add_empty_entry_point.h
-  transform/add_spirv_block_attribute.cc
-  transform/add_spirv_block_attribute.h
+  transform/add_block_attribute.cc
+  transform/add_block_attribute.h
   transform/array_length_from_uniform.cc
   transform/array_length_from_uniform.h
   transform/binding_remapper.cc
@@ -1102,7 +1102,7 @@ if(TINT_BUILD_TESTS)
   if(${TINT_BUILD_WGSL_READER} AND ${TINT_BUILD_WGSL_WRITER})
     list(APPEND TINT_TEST_SRCS
       transform/add_empty_entry_point_test.cc
-      transform/add_spirv_block_attribute_test.cc
+      transform/add_block_attribute_test.cc
       transform/array_length_from_uniform_test.cc
       transform/binding_remapper_test.cc
       transform/builtin_polyfill_test.cc

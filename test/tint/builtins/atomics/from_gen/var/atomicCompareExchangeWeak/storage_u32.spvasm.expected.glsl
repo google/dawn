@@ -7,10 +7,6 @@ struct atomic_compare_exchange_resultu32 {
 };
 
 
-struct SB_RW_atomic {
-  uint arg_0;
-};
-
 struct SB_RW {
   uint arg_0;
 };
@@ -20,9 +16,10 @@ struct x__atomic_compare_exchange_resultu32 {
   bool exchanged;
 };
 
-layout(binding = 0, std430) buffer SB_RW_atomic_1 {
+layout(binding = 0, std430) buffer SB_RW_atomic_ssbo {
   uint arg_0;
 } sb_rw;
+
 void atomicCompareExchangeWeak_63d8e6() {
   uint arg_1 = 0u;
   uint arg_2 = 0u;
@@ -62,10 +59,6 @@ struct atomic_compare_exchange_resultu32 {
 };
 
 
-struct SB_RW_atomic {
-  uint arg_0;
-};
-
 struct SB_RW {
   uint arg_0;
 };
@@ -75,9 +68,10 @@ struct x__atomic_compare_exchange_resultu32 {
   bool exchanged;
 };
 
-layout(binding = 0, std430) buffer SB_RW_atomic_1 {
+layout(binding = 0, std430) buffer SB_RW_atomic_ssbo {
   uint arg_0;
 } sb_rw;
+
 void atomicCompareExchangeWeak_63d8e6() {
   uint arg_1 = 0u;
   uint arg_2 = 0u;

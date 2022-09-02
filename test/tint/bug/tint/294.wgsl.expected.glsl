@@ -9,6 +9,7 @@ struct Light {
   vec3 colour;
 };
 
-layout(binding = 1, std430) buffer Lights_1 {
+layout(binding = 1, std430) buffer Lights_ssbo {
   Light light[];
 } lights;
+

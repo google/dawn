@@ -1,8 +1,9 @@
 #version 310 es
 
-layout(binding = 0, std430) buffer S_1 {
+layout(binding = 0, std430) buffer S_ssbo {
   int arr[];
 } s;
+
 void tint_symbol() {
 }
 

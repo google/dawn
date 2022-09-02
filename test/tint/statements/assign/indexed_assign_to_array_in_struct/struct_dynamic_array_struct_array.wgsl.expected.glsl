@@ -1,10 +1,5 @@
 #version 310 es
 
-struct Uniforms {
-  uint i;
-  uint j;
-};
-
 struct InnerS {
   int v;
 };
@@ -13,14 +8,15 @@ struct S1 {
   InnerS a2[8];
 };
 
-layout(binding = 4) uniform Uniforms_1 {
+layout(binding = 4) uniform Uniforms_ubo {
   uint i;
   uint j;
 } uniforms;
 
-layout(binding = 0, std430) buffer OuterS_1 {
+layout(binding = 0, std430) buffer OuterS_ssbo {
   S1 a1[];
 } s;
+
 void tint_symbol() {
   InnerS v = InnerS(0);
   s.a1[uniforms.i].a2[uniforms.j] = v;

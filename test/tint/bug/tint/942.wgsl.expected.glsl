@@ -1,21 +1,12 @@
 #version 310 es
 
-struct Params {
-  uint filterDim;
-  uint blockDim;
-};
-
-layout(binding = 1) uniform Params_1 {
+layout(binding = 1) uniform Params_ubo {
   uint filterDim;
   uint blockDim;
 } params;
 
 layout(rgba8) uniform highp writeonly image2D outputTex;
-struct Flip {
-  uint value;
-};
-
-layout(binding = 3) uniform Flip_1 {
+layout(binding = 3) uniform Flip_ubo {
   uint value;
 } flip;
 

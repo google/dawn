@@ -4,17 +4,12 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void unused_entry_point() {
   return;
 }
-struct S {
-  int a;
-  vec4 b;
-  mat2 c;
-};
-
-layout(binding = 0, std430) buffer S_1 {
+layout(binding = 0, std430) buffer S_ssbo {
   int a;
   vec4 b;
   mat2 c;
 } v;
+
 uint i = 0u;
 int idx1() {
   i = (i + 1u);

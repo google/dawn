@@ -1,8 +1,9 @@
 #version 310 es
 
-layout(binding = 1, std430) buffer data_block_1 {
+layout(binding = 1, std430) buffer data_block_ssbo {
   int inner[];
 } data;
+
 int foo() {
   return data.inner[0];
 }

@@ -6,15 +6,11 @@ vec3 Bad(uint index, vec3 rd) {
   return normalize(normal);
 }
 
-struct S {
-  vec3 v;
-  uint i;
-};
-
-layout(binding = 0, std430) buffer S_1 {
+layout(binding = 0, std430) buffer S_ssbo {
   vec3 v;
   uint i;
 } io;
+
 void tint_symbol(uint idx) {
   vec3 tint_symbol_1 = Bad(io.i, io.v);
   io.v = tint_symbol_1;

@@ -17,8 +17,8 @@
 #include <utility>
 #include <vector>
 
+#include "src/tint/transform/add_block_attribute.h"
 #include "src/tint/transform/add_empty_entry_point.h"
-#include "src/tint/transform/add_spirv_block_attribute.h"
 #include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/disable_uniformity_analysis.h"
@@ -86,7 +86,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     manager.Add<transform::WhileToLoop>();    // ZeroInitWorkgroupMemory
     manager.Add<transform::CanonicalizeEntryPointIO>();
     manager.Add<transform::AddEmptyEntryPoint>();
-    manager.Add<transform::AddSpirvBlockAttribute>();
+    manager.Add<transform::AddBlockAttribute>();
     manager.Add<transform::VarForDynamicIndex>();
 
     data.Add<transform::CanonicalizeEntryPointIO::Config>(

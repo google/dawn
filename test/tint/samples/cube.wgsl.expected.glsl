@@ -3,11 +3,7 @@
 layout(location = 0) in vec4 cur_position_1;
 layout(location = 1) in vec4 color_1;
 layout(location = 0) out vec4 vtxFragColor_1;
-struct Uniforms {
-  mat4 modelViewProjectionMatrix;
-};
-
-layout(binding = 0) uniform Uniforms_1 {
+layout(binding = 0) uniform Uniforms_ubo {
   mat4 modelViewProjectionMatrix;
 } uniforms;
 

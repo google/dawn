@@ -4,12 +4,14 @@ struct S {
   float f;
 };
 
-layout(binding = 0, std430) buffer tint_symbol_block_1 {
+layout(binding = 0, std430) buffer tint_symbol_block_ssbo {
   S inner[];
 } tint_symbol;
-layout(binding = 1, std430) buffer tint_symbol_block_2 {
+
+layout(binding = 1, std430) buffer tint_symbol_block_ssbo_1 {
   S inner[];
 } tint_symbol_1;
+
 void tint_symbol_2() {
   tint_symbol_1.inner[0] = tint_symbol.inner[0];
 }

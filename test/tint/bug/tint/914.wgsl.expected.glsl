@@ -1,21 +1,18 @@
 #version 310 es
 
-struct Uniforms {
-  uint dimAOuter;
-  uint dimInner;
-  uint dimBOuter;
-};
-
-layout(binding = 0, std430) buffer Matrix_1 {
+layout(binding = 0, std430) buffer Matrix_ssbo {
   float numbers[];
 } firstMatrix;
-layout(binding = 1, std430) buffer Matrix_2 {
+
+layout(binding = 1, std430) buffer Matrix_ssbo_1 {
   float numbers[];
 } secondMatrix;
-layout(binding = 2, std430) buffer Matrix_3 {
+
+layout(binding = 2, std430) buffer Matrix_ssbo_2 {
   float numbers[];
 } resultMatrix;
-layout(binding = 3) uniform Uniforms_1 {
+
+layout(binding = 3) uniform Uniforms_ubo {
   uint dimAOuter;
   uint dimInner;
   uint dimBOuter;

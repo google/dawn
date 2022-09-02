@@ -1,9 +1,5 @@
 #version 310 es
 
-struct Simulation {
-  uint i;
-};
-
 struct Particle {
   vec3 position[8];
   float lifetime;
@@ -11,10 +7,11 @@ struct Particle {
   vec3 velocity;
 };
 
-layout(binding = 3, std430) buffer Particles_1 {
+layout(binding = 3, std430) buffer Particles_ssbo {
   Particle p[];
 } particles;
-layout(binding = 4) uniform Simulation_1 {
+
+layout(binding = 4) uniform Simulation_ubo {
   uint i;
 } sim;
 

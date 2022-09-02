@@ -1,10 +1,6 @@
 #version 310 es
 
-struct u_block {
-  mat2 inner;
-};
-
-layout(binding = 0) uniform u_block_1 {
+layout(binding = 0) uniform u_block_ubo {
   mat2 inner;
 } u;
 

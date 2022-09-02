@@ -1,10 +1,6 @@
 #version 310 es
 
-struct UBO {
-  int dynamic_idx;
-};
-
-layout(binding = 0) uniform UBO_1 {
+layout(binding = 0) uniform UBO_ubo {
   int dynamic_idx;
 } ubo;
 
@@ -12,13 +8,10 @@ struct S {
   int data[64];
 };
 
-struct Result {
-  int tint_symbol;
-};
-
-layout(binding = 1, std430) buffer Result_1 {
+layout(binding = 1, std430) buffer Result_ssbo {
   int tint_symbol;
 } result;
+
 void f() {
   S s = S(int[64](0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
   result.tint_symbol = s.data[ubo.dynamic_idx];

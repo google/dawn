@@ -1,13 +1,10 @@
 #version 310 es
 precision mediump float;
 
-struct SB_RW {
-  int arg_0;
-};
-
-layout(binding = 0, std430) buffer SB_RW_1 {
+layout(binding = 0, std430) buffer SB_RW_ssbo {
   int arg_0;
 } sb_rw;
+
 void atomicStore_d1e9a6() {
   int arg_1 = 1;
   atomicExchange(sb_rw.arg_0, arg_1);
@@ -23,13 +20,10 @@ void main() {
 }
 #version 310 es
 
-struct SB_RW {
-  int arg_0;
-};
-
-layout(binding = 0, std430) buffer SB_RW_1 {
+layout(binding = 0, std430) buffer SB_RW_ssbo {
   int arg_0;
 } sb_rw;
+
 void atomicStore_d1e9a6() {
   int arg_1 = 1;
   atomicExchange(sb_rw.arg_0, arg_1);

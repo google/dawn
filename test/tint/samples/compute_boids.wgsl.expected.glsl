@@ -75,21 +75,7 @@ struct Particle {
   vec2 vel;
 };
 
-struct SimParams {
-  float deltaT;
-  float rule1Distance;
-  float rule2Distance;
-  float rule3Distance;
-  float rule1Scale;
-  float rule2Scale;
-  float rule3Scale;
-};
-
-struct Particles {
-  Particle particles[5];
-};
-
-layout(binding = 0) uniform SimParams_1 {
+layout(binding = 0) uniform SimParams_ubo {
   float deltaT;
   float rule1Distance;
   float rule2Distance;
@@ -99,12 +85,14 @@ layout(binding = 0) uniform SimParams_1 {
   float rule3Scale;
 } params;
 
-layout(binding = 1, std430) buffer Particles_1 {
+layout(binding = 1, std430) buffer Particles_ssbo {
   Particle particles[5];
 } particlesA;
-layout(binding = 2, std430) buffer Particles_2 {
+
+layout(binding = 2, std430) buffer Particles_ssbo_1 {
   Particle particles[5];
 } particlesB;
+
 void comp_main(uvec3 tint_symbol) {
   uint index = tint_symbol.x;
   if ((index >= 5u)) {

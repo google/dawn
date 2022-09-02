@@ -6,13 +6,9 @@ struct QuicksortObject {
   int numbers[10];
 };
 
-struct buf0 {
-  vec2 resolution;
-};
-
 QuicksortObject obj = QuicksortObject(int[10](0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
 vec4 tint_symbol = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-layout(binding = 0) uniform buf0_1 {
+layout(binding = 0) uniform buf0_ubo {
   vec2 resolution;
 } x_188;
 

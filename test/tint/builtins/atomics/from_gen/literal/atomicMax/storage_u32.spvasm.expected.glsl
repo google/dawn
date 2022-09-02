@@ -1,17 +1,14 @@
 #version 310 es
 precision mediump float;
 
-struct SB_RW_atomic {
-  uint arg_0;
-};
-
 struct SB_RW {
   uint arg_0;
 };
 
-layout(binding = 0, std430) buffer SB_RW_atomic_1 {
+layout(binding = 0, std430) buffer SB_RW_atomic_ssbo {
   uint arg_0;
 } sb_rw;
+
 void atomicMax_51b9be() {
   uint res = 0u;
   uint x_9 = atomicMax(sb_rw.arg_0, 1u);
@@ -34,17 +31,14 @@ void main() {
 }
 #version 310 es
 
-struct SB_RW_atomic {
-  uint arg_0;
-};
-
 struct SB_RW {
   uint arg_0;
 };
 
-layout(binding = 0, std430) buffer SB_RW_atomic_1 {
+layout(binding = 0, std430) buffer SB_RW_atomic_ssbo {
   uint arg_0;
 } sb_rw;
+
 void atomicMax_51b9be() {
   uint res = 0u;
   uint x_9 = atomicMax(sb_rw.arg_0, 1u);

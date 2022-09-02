@@ -19,11 +19,7 @@ struct Outer_std140 {
   Inner_std140 a[4];
 };
 
-struct a_block {
-  Outer_std140 inner[4];
-};
-
-layout(binding = 0) uniform a_block_1 {
+layout(binding = 0) uniform a_block_ubo {
   Outer_std140 inner[4];
 } a;
 

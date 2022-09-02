@@ -34,11 +34,7 @@ struct S {
   Inner arr[8];
 };
 
-struct S_std140 {
-  Inner_std140 arr[8];
-};
-
-layout(binding = 0) uniform S_std140_1 {
+layout(binding = 0) uniform S_std140_ubo {
   Inner_std140 arr[8];
 } s;
 

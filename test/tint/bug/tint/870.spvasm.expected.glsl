@@ -8,13 +8,10 @@ struct sspp962805860buildInformationS {
   int orientation[6];
 };
 
-struct x_B4_BuildInformation {
-  sspp962805860buildInformationS passthru;
-};
-
-layout(binding = 2, std430) buffer x_B4_BuildInformation_1 {
+layout(binding = 2, std430) buffer x_B4_BuildInformation_ssbo {
   sspp962805860buildInformationS passthru;
 } sspp962805860buildInformation;
+
 void main_1() {
   int orientation[6] = int[6](0, 0, 0, 0, 0, 0);
   int x_23[6] = sspp962805860buildInformation.passthru.orientation;

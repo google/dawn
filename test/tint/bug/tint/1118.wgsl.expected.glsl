@@ -16,29 +16,13 @@ precision mediump float;
 layout(location = 2) in float fClipDistance3_param_1;
 layout(location = 3) in float fClipDistance4_param_1;
 layout(location = 0) out vec4 glFragColor_1_1;
-struct Scene {
-  vec4 vEyePosition;
-};
-
-struct Material {
-  vec4 vDiffuseColor;
-  vec3 vAmbientColor;
-  float placeholder;
-  vec3 vEmissiveColor;
-  float placeholder2;
-};
-
-struct Mesh {
-  float visibility;
-};
-
 float fClipDistance3 = 0.0f;
 float fClipDistance4 = 0.0f;
-layout(binding = 0) uniform Scene_1 {
+layout(binding = 0) uniform Scene_ubo {
   vec4 vEyePosition;
 } x_29;
 
-layout(binding = 1) uniform Material_1 {
+layout(binding = 1) uniform Material_ubo {
   vec4 vDiffuseColor;
   vec3 vAmbientColor;
   float placeholder;
@@ -46,7 +30,7 @@ layout(binding = 1) uniform Material_1 {
   float placeholder2;
 } x_49;
 
-layout(binding = 2) uniform Mesh_1 {
+layout(binding = 2) uniform Mesh_ubo {
   float visibility;
 } x_137;
 

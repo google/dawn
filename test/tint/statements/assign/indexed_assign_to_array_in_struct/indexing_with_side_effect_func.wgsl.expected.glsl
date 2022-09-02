@@ -1,10 +1,5 @@
 #version 310 es
 
-struct Uniforms {
-  uint i;
-  uint j;
-};
-
 struct InnerS {
   int v;
 };
@@ -23,7 +18,7 @@ uint getNextIndex() {
   return nextIndex;
 }
 
-layout(binding = 4) uniform Uniforms_1 {
+layout(binding = 4) uniform Uniforms_ubo {
   uint i;
   uint j;
 } uniforms;

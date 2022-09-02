@@ -6,16 +6,14 @@ struct Inner {
   float f;
 };
 
-struct S {
-  Inner inner;
-};
-
-layout(binding = 0, std430) buffer S_1 {
+layout(binding = 0, std430) buffer S_ssbo {
   Inner inner;
 } tint_symbol;
-layout(binding = 1, std430) buffer S_2 {
+
+layout(binding = 1, std430) buffer S_ssbo_1 {
   Inner inner;
 } tint_symbol_1;
+
 void tint_symbol_2() {
   tint_symbol_1 = tint_symbol;
 }
@@ -26,8 +24,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:18: 'assign' :  cannot convert from 'layout( binding=0 column_major std430) buffer block{layout( column_major std430 offset=0) buffer structure{ global highp float f} inner}' to 'layout( binding=1 column_major std430) buffer block{layout( column_major std430 offset=0) buffer structure{ global highp float f} inner}'
-ERROR: 0:18: '' : compilation terminated 
+ERROR: 0:16: 'assign' :  cannot convert from 'layout( binding=0 column_major std430) buffer block{layout( column_major std430 offset=0) buffer structure{ global highp float f} inner}' to 'layout( binding=1 column_major std430) buffer block{layout( column_major std430 offset=0) buffer structure{ global highp float f} inner}'
+ERROR: 0:16: '' : compilation terminated
 ERROR: 2 compilation errors.  No code generated.
 
 

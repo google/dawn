@@ -14,21 +14,14 @@ struct S_std140 {
   int after;
 };
 
-struct u_block {
-  S_std140 inner[4];
-};
-
-layout(binding = 0) uniform u_block_1 {
+layout(binding = 0) uniform u_block_ubo {
   S_std140 inner[4];
 } u;
 
-struct s_block {
-  S inner[4];
-};
-
-layout(binding = 1, std430) buffer s_block_1 {
+layout(binding = 1, std430) buffer s_block_ssbo {
   S inner[4];
 } s;
+
 S conv_S(S_std140 val) {
   S tint_symbol = S(val.before, mat3x2(val.m_0, val.m_1, val.m_2), val.after);
   return tint_symbol;

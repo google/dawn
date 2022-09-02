@@ -8,13 +8,10 @@ struct strided_arr_1 {
   strided_arr el[3][2];
 };
 
-struct S {
-  strided_arr_1 a[4];
-};
-
-layout(binding = 0, std430) buffer S_1 {
+layout(binding = 0, std430) buffer S_ssbo {
   strided_arr_1 a[4];
 } s;
+
 void f_1() {
   strided_arr_1 x_19[4] = s.a;
   strided_arr x_24[3][2] = s.a[3].el;

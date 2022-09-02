@@ -1,12 +1,9 @@
 #version 310 es
 
-struct SSBO {
-  mat2 m;
-};
-
-layout(binding = 0, std430) buffer SSBO_1 {
+layout(binding = 0, std430) buffer SSBO_ssbo {
   mat2 m;
 } ssbo;
+
 void f() {
   mat2 v = ssbo.m;
   ssbo.m = v;

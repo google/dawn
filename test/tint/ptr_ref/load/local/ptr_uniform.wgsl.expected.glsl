@@ -1,10 +1,6 @@
 #version 310 es
 
-struct S {
-  int a;
-};
-
-layout(binding = 0) uniform S_1 {
+layout(binding = 0) uniform S_ubo {
   int a;
 } v;
 

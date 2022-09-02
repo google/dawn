@@ -15,7 +15,7 @@
 #include "src/tint/ast/disable_validation_attribute.h"
 #include "src/tint/resolver/resolver.h"
 #include "src/tint/resolver/resolver_test_helper.h"
-#include "src/tint/transform/add_spirv_block_attribute.h"
+#include "src/tint/transform/add_block_attribute.h"
 
 #include "gmock/gmock.h"
 
@@ -557,7 +557,7 @@ TEST_F(EntryPointReturnTypeAttributeTest, DuplicateInternalAttribute) {
 
 namespace StructAndStructMemberTests {
 using StructAttributeTest = TestWithParams;
-using SpirvBlockAttribute = transform::AddSpirvBlockAttribute::SpirvBlockAttribute;
+using SpirvBlockAttribute = transform::AddBlockAttribute::BlockAttribute;
 TEST_P(StructAttributeTest, IsValid) {
     auto& params = GetParam();
 

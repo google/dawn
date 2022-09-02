@@ -1,8 +1,9 @@
 #version 310 es
 
-layout(binding = 0, std430) buffer G_block_1 {
+layout(binding = 0, std430) buffer G_block_ssbo {
   int inner[];
 } G;
+
 void tint_symbol() {
   uint l1 = uint(G.inner.length());
 }

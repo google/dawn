@@ -8,23 +8,15 @@ struct strided_arr {
   float el;
 };
 
-struct buf1 {
-  strided_arr x_GLF_uniform_float_values[3];
-};
-
 struct strided_arr_1 {
   int el;
 };
 
-struct buf0 {
-  strided_arr_1 x_GLF_uniform_int_values[4];
-};
-
-layout(binding = 1) uniform buf1_1 {
+layout(binding = 1) uniform buf1_ubo {
   strided_arr x_GLF_uniform_float_values[3];
 } x_6;
 
-layout(binding = 0) uniform buf0_1 {
+layout(binding = 0) uniform buf0_ubo {
   strided_arr_1 x_GLF_uniform_int_values[4];
 } x_8;
 
@@ -115,9 +107,9 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:77: '[' :  matrix index out of range '4'
-ERROR: 0:77: '=' :  cannot convert from ' temp mediump 3-component vector of float' to ' temp mediump float'
-ERROR: 0:77: '' : compilation terminated 
+ERROR: 0:69: '[' :  matrix index out of range '4'
+ERROR: 0:69: '=' :  cannot convert from ' temp mediump 3-component vector of float' to ' temp mediump float'
+ERROR: 0:69: '' : compilation terminated
 ERROR: 3 compilation errors.  No code generated.
 
 

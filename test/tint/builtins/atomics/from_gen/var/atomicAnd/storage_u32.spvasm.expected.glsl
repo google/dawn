@@ -1,17 +1,14 @@
 #version 310 es
 precision mediump float;
 
-struct SB_RW_atomic {
-  uint arg_0;
-};
-
 struct SB_RW {
   uint arg_0;
 };
 
-layout(binding = 0, std430) buffer SB_RW_atomic_1 {
+layout(binding = 0, std430) buffer SB_RW_atomic_ssbo {
   uint arg_0;
 } sb_rw;
+
 void atomicAnd_85a8d9() {
   uint arg_1 = 0u;
   uint res = 0u;
@@ -36,17 +33,14 @@ void main() {
 }
 #version 310 es
 
-struct SB_RW_atomic {
-  uint arg_0;
-};
-
 struct SB_RW {
   uint arg_0;
 };
 
-layout(binding = 0, std430) buffer SB_RW_atomic_1 {
+layout(binding = 0, std430) buffer SB_RW_atomic_ssbo {
   uint arg_0;
 } sb_rw;
+
 void atomicAnd_85a8d9() {
   uint arg_1 = 0u;
   uint res = 0u;

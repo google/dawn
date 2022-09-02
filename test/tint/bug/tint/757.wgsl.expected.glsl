@@ -4,9 +4,10 @@ struct Constants {
   int level;
 };
 
-layout(binding = 3, std430) buffer Result_1 {
+layout(binding = 3, std430) buffer Result_ssbo {
   float values[];
 } result;
+
 uniform highp sampler2DArray myTexture_1;
 void tint_symbol(uvec3 GlobalInvocationID) {
   uint flatIndex = (((4u * GlobalInvocationID.z) + (2u * GlobalInvocationID.y)) + GlobalInvocationID.x);

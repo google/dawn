@@ -46,8 +46,8 @@
 #include "src/tint/sem/type_constructor.h"
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/variable.h"
+#include "src/tint/transform/add_block_attribute.h"
 #include "src/tint/transform/add_empty_entry_point.h"
-#include "src/tint/transform/add_spirv_block_attribute.h"
 #include "src/tint/transform/binding_remapper.h"
 #include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
@@ -244,7 +244,7 @@ SanitizedResult Sanitize(const Program* in,
 
     manager.Add<transform::PromoteInitializersToLet>();
     manager.Add<transform::AddEmptyEntryPoint>();
-    manager.Add<transform::AddSpirvBlockAttribute>();
+    manager.Add<transform::AddBlockAttribute>();
     data.Add<transform::CanonicalizeEntryPointIO::Config>(
         transform::CanonicalizeEntryPointIO::ShaderStyle::kGlsl);
 
@@ -284,18 +284,15 @@ bool GeneratorImpl::Generate() {
                 return false;
             }
         } else if (auto* str = decl->As<ast::Struct>()) {
-            // Skip emission if the struct contains a runtime-sized array, since its
-            // only use will be as the store-type of a buffer and we emit those
-            // elsewhere.
-            // TODO(crbug.com/tint/1339): We could also avoid emitting any other
-            // struct that is only used as a buffer store type.
-            const sem::Struct* sem_str = builder_.Sem().Get(str);
-            const auto& members = sem_str->Members();
-            TINT_ASSERT(Writer, members.size() > 0);
-            auto* last_member = members[members.size() - 1];
-            auto* arr = last_member->Type()->As<sem::Array>();
-            if (!arr || !arr->IsRuntimeSized()) {
-                if (!EmitStructType(current_buffer_, sem_str)) {
+            auto* sem = builder_.Sem().Get(str);
+            bool has_rt_arr = false;
+            if (auto* arr = sem->Members().back()->Type()->As<sem::Array>()) {
+                has_rt_arr = arr->IsRuntimeSized();
+            }
+            bool is_block =
+                ast::HasAttribute<transform::AddBlockAttribute::BlockAttribute>(str->attributes);
+            if (!has_rt_arr && !is_block) {
+                if (!EmitStructType(current_buffer_, sem)) {
                     return false;
                 }
             }
@@ -1915,7 +1912,7 @@ bool GeneratorImpl::EmitUniformVariable(const ast::Var* var, const sem::Variable
         if (version_.IsDesktop()) {
             out << ", std140";
         }
-        out << ") uniform " << UniqueIdentifier(StructName(str)) << " {";
+        out << ") uniform " << UniqueIdentifier(StructName(str) + "_ubo") << " {";
     }
     EmitStructMembers(current_buffer_, str, /* emit_offsets */ true);
     auto name = builder_.Symbols().NameFor(var->symbol);
@@ -1934,10 +1931,12 @@ bool GeneratorImpl::EmitStorageVariable(const ast::Var* var, const sem::Variable
     }
     auto bp = sem->As<sem::GlobalVariable>()->BindingPoint();
     line() << "layout(binding = " << bp.binding << ", std430) buffer "
-           << UniqueIdentifier(StructName(str)) << " {";
+           << UniqueIdentifier(StructName(str) + "_ssbo") << " {";
     EmitStructMembers(current_buffer_, str, /* emit_offsets */ true);
     auto name = builder_.Symbols().NameFor(var->symbol);
     line() << "} " << name << ";";
+    line();
+
     return true;
 }
 

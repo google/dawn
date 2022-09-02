@@ -1,63 +1,67 @@
 #version 310 es
 precision mediump float;
 
-struct S {
-  float a;
-};
-
-layout(binding = 0, std430) buffer S_1 {
+layout(binding = 0, std430) buffer S_ssbo {
   float a;
 } b0;
-layout(binding = 0, std430) buffer S_2 {
+
+layout(binding = 0, std430) buffer S_ssbo_1 {
   float a;
 } b1;
-layout(binding = 0, std430) buffer S_3 {
+
+layout(binding = 0, std430) buffer S_ssbo_2 {
   float a;
 } b2;
-layout(binding = 0, std430) buffer S_4 {
+
+layout(binding = 0, std430) buffer S_ssbo_3 {
   float a;
 } b3;
-layout(binding = 0, std430) buffer S_5 {
+
+layout(binding = 0, std430) buffer S_ssbo_4 {
   float a;
 } b4;
-layout(binding = 0, std430) buffer S_6 {
+
+layout(binding = 0, std430) buffer S_ssbo_5 {
   float a;
 } b5;
-layout(binding = 0, std430) buffer S_7 {
+
+layout(binding = 0, std430) buffer S_ssbo_6 {
   float a;
 } b6;
-layout(binding = 0, std430) buffer S_8 {
+
+layout(binding = 0, std430) buffer S_ssbo_7 {
   float a;
 } b7;
-layout(binding = 1) uniform S_9 {
+
+layout(binding = 1) uniform S_ubo {
   float a;
 } b8;
 
-layout(binding = 1) uniform S_10 {
+layout(binding = 1) uniform S_ubo_1 {
   float a;
 } b9;
 
-layout(binding = 1) uniform S_11 {
+layout(binding = 1) uniform S_ubo_2 {
   float a;
 } b10;
 
-layout(binding = 1) uniform S_12 {
+layout(binding = 1) uniform S_ubo_3 {
   float a;
 } b11;
 
-layout(binding = 1) uniform S_13 {
+layout(binding = 1) uniform S_ubo_4 {
   float a;
 } b12;
 
-layout(binding = 1) uniform S_14 {
+layout(binding = 1) uniform S_ubo_5 {
   float a;
 } b13;
 
-layout(binding = 1) uniform S_15 {
+layout(binding = 1) uniform S_ubo_6 {
   float a;
 } b14;
 
-layout(binding = 1) uniform S_16 {
+layout(binding = 1) uniform S_ubo_7 {
   float a;
 } b15;
 

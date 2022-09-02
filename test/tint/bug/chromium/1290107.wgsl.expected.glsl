@@ -4,9 +4,10 @@ struct S {
   float f;
 };
 
-layout(binding = 0, std430) buffer arr_block_1 {
+layout(binding = 0, std430) buffer arr_block_ssbo {
   S inner[];
 } arr;
+
 void tint_symbol() {
   uint len = uint(arr.inner.length());
 }

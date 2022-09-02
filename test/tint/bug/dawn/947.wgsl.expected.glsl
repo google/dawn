@@ -13,12 +13,7 @@ bug/dawn/947.wgsl:55:33 note: reading from user-defined input 'texcoord' may res
 #version 310 es
 
 layout(location = 0) out vec2 texcoords_1;
-struct Uniforms {
-  vec2 u_scale;
-  vec2 u_offset;
-};
-
-layout(binding = 0) uniform Uniforms_1 {
+layout(binding = 0) uniform Uniforms_ubo {
   vec2 u_scale;
   vec2 u_offset;
 } uniforms;

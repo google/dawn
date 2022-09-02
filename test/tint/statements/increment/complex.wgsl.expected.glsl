@@ -8,9 +8,10 @@ struct S {
   ivec4 a[4];
 };
 
-layout(binding = 0, std430) buffer tint_symbol_block_1 {
+layout(binding = 0, std430) buffer tint_symbol_block_ssbo {
   S inner[];
 } tint_symbol;
+
 uint v = 0u;
 int idx1() {
   v = (v + 1u);

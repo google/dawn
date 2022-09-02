@@ -1,21 +1,15 @@
 #version 310 es
 
-struct Uniforms {
-  float NAN;
-  int aShape;
-  int outShape;
-  int outShapeStrides;
-  int size;
-};
-
-layout(binding = 0, std430) buffer ssbOut_1 {
+layout(binding = 0, std430) buffer ssbOut_ssbo {
   float result[];
 } x_16;
-layout(binding = 1, std430) buffer ssbA_1 {
+
+layout(binding = 1, std430) buffer ssbA_ssbo {
   float A[];
 } x_20;
+
 uvec3 tint_symbol = uvec3(0u, 0u, 0u);
-layout(binding = 2) uniform Uniforms_1 {
+layout(binding = 2) uniform Uniforms_ubo {
   float NAN;
   int aShape;
   int outShape;

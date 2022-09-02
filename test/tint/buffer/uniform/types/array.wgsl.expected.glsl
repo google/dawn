@@ -1,10 +1,6 @@
 #version 310 es
 
-struct u_block {
-  vec4 inner[4];
-};
-
-layout(binding = 0) uniform u_block_1 {
+layout(binding = 0) uniform u_block_ubo {
   vec4 inner[4];
 } u;
 

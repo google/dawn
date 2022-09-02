@@ -23,32 +23,10 @@ struct lightingInfo {
   vec3 specular;
 };
 
-struct LeftOver {
-  mat4 u_World;
-  mat4 u_ViewProjection;
-  float u_bumpStrength;
-  uint padding;
-  vec3 u_cameraPosition;
-  float u_parallaxScale;
-  float textureInfoName;
-  uint padding_1;
-  vec2 tangentSpaceParameter0;
-};
-
-struct Light0 {
-  vec4 vLightData;
-  vec4 vLightDiffuse;
-  vec4 vLightSpecular;
-  vec3 vLightGround;
-  uint padding_2;
-  vec4 shadowsInfo;
-  vec2 depthValues;
-};
-
 float u_Float = 0.0f;
 vec3 u_Color = vec3(0.0f, 0.0f, 0.0f);
 vec2 vMainuv = vec2(0.0f, 0.0f);
-layout(binding = 6) uniform LeftOver_1 {
+layout(binding = 6) uniform LeftOver_ubo {
   mat4 u_World;
   mat4 u_ViewProjection;
   float u_bumpStrength;
@@ -64,7 +42,7 @@ vec4 v_output1 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 bool tint_symbol = false;
 vec2 v_uv = vec2(0.0f, 0.0f);
 vec4 v_output2 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-layout(binding = 5) uniform Light0_1 {
+layout(binding = 5) uniform Light0_ubo {
   vec4 vLightData;
   vec4 vLightDiffuse;
   vec4 vLightSpecular;

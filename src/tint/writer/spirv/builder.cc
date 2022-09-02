@@ -43,7 +43,7 @@
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/vector.h"
-#include "src/tint/transform/add_spirv_block_attribute.h"
+#include "src/tint/transform/add_block_attribute.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/writer/append_vector.h"
@@ -4059,8 +4059,7 @@ bool Builder::GenerateStructType(const sem::Struct* struct_type, const Operand& 
     ops.push_back(result);
 
     auto* decl = struct_type->Declaration();
-    if (decl && ast::HasAttribute<transform::AddSpirvBlockAttribute::SpirvBlockAttribute>(
-                    decl->attributes)) {
+    if (decl && ast::HasAttribute<transform::AddBlockAttribute::BlockAttribute>(decl->attributes)) {
         push_annot(spv::Op::OpDecorate, {Operand(struct_id), U32Operand(SpvDecorationBlock)});
     }
 

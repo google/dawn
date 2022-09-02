@@ -4,26 +4,16 @@ struct vertexUniformBuffer1 {
   mat2 transform1;
 };
 
-struct vertexUniformBuffer1_std140 {
-  vec2 transform1_0;
-  vec2 transform1_1;
-};
-
 struct vertexUniformBuffer2 {
   mat2 transform2;
 };
 
-struct vertexUniformBuffer2_std140 {
-  vec2 transform2_0;
-  vec2 transform2_1;
-};
-
-layout(binding = 0) uniform vertexUniformBuffer1_std140_1 {
+layout(binding = 0) uniform vertexUniformBuffer1_std140_ubo {
   vec2 transform1_0;
   vec2 transform1_1;
 } x_20;
 
-layout(binding = 0) uniform vertexUniformBuffer2_std140_1 {
+layout(binding = 0) uniform vertexUniformBuffer2_std140_ubo {
   vec2 transform2_0;
   vec2 transform2_1;
 } x_26;

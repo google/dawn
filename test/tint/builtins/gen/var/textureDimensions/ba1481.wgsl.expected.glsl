@@ -11,16 +11,7 @@ struct GammaTransferParams {
   uint padding;
 };
 
-struct ExternalTextureParams {
-  uint numPlanes;
-  uint doYuvToRgbConversionOnly;
-  mat3x4 yuvToRgbConversionMatrix;
-  GammaTransferParams gammaDecodeParams;
-  GammaTransferParams gammaEncodeParams;
-  mat3 gamutConversionMatrix;
-};
-
-layout(binding = 2) uniform ExternalTextureParams_1 {
+layout(binding = 2) uniform ExternalTextureParams_ubo {
   uint numPlanes;
   uint doYuvToRgbConversionOnly;
   mat3x4 yuvToRgbConversionMatrix;
@@ -61,16 +52,7 @@ struct GammaTransferParams {
   uint padding;
 };
 
-struct ExternalTextureParams {
-  uint numPlanes;
-  uint doYuvToRgbConversionOnly;
-  mat3x4 yuvToRgbConversionMatrix;
-  GammaTransferParams gammaDecodeParams;
-  GammaTransferParams gammaEncodeParams;
-  mat3 gamutConversionMatrix;
-};
-
-layout(binding = 2) uniform ExternalTextureParams_1 {
+layout(binding = 2) uniform ExternalTextureParams_ubo {
   uint numPlanes;
   uint doYuvToRgbConversionOnly;
   mat3x4 yuvToRgbConversionMatrix;
@@ -105,16 +87,7 @@ struct GammaTransferParams {
   uint padding;
 };
 
-struct ExternalTextureParams {
-  uint numPlanes;
-  uint doYuvToRgbConversionOnly;
-  mat3x4 yuvToRgbConversionMatrix;
-  GammaTransferParams gammaDecodeParams;
-  GammaTransferParams gammaEncodeParams;
-  mat3 gamutConversionMatrix;
-};
-
-layout(binding = 2) uniform ExternalTextureParams_1 {
+layout(binding = 2) uniform ExternalTextureParams_ubo {
   uint numPlanes;
   uint doYuvToRgbConversionOnly;
   mat3x4 yuvToRgbConversionMatrix;

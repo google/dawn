@@ -390,9 +390,9 @@ libtint_source_set("libtint_core_all_src") {
     "program_builder.h",
     "program_id.cc",
     "program_id.h",
-    "reflection.h",
     "reader/reader.cc",
     "reader/reader.h",
+    "reflection.h",
     "resolver/const_eval.cc",
     "resolver/const_eval.h",
     "resolver/ctor_conv_intrinsic.cc",
@@ -470,10 +470,10 @@ libtint_source_set("libtint_core_all_src") {
     "text/unicode.cc",
     "text/unicode.h",
     "traits.h",
+    "transform/add_block_attribute.cc",
+    "transform/add_block_attribute.h",
     "transform/add_empty_entry_point.cc",
     "transform/add_empty_entry_point.h",
-    "transform/add_spirv_block_attribute.cc",
-    "transform/add_spirv_block_attribute.h",
     "transform/array_length_from_uniform.cc",
     "transform/array_length_from_uniform.h",
     "transform/binding_remapper.cc",
@@ -1186,8 +1186,8 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_transform_src") {
     sources = [
+      "transform/add_block_attribute_test.cc",
       "transform/add_empty_entry_point_test.cc",
-      "transform/add_spirv_block_attribute_test.cc",
       "transform/array_length_from_uniform_test.cc",
       "transform/binding_remapper_test.cc",
       "transform/builtin_polyfill_test.cc",

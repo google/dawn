@@ -8,15 +8,8 @@ struct strided_arr {
   float el;
 };
 
-struct LeftOver {
-  mat4 worldViewProjection;
-  float time;
-  mat4 test2[2];
-  strided_arr test[4];
-};
-
 vec3 position = vec3(0.0f, 0.0f, 0.0f);
-layout(binding = 2) uniform LeftOver_1 {
+layout(binding = 2) uniform LeftOver_ubo {
   mat4 worldViewProjection;
   float time;
   mat4 test2[2];

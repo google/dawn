@@ -19,24 +19,7 @@ struct S {
   Inner l[4];
 };
 
-struct S_std140 {
-  ivec3 a;
-  int b;
-  uvec3 c;
-  uint d;
-  vec3 e;
-  float f;
-  ivec2 g;
-  ivec2 h;
-  mat2x3 i;
-  vec2 j_0;
-  vec2 j_1;
-  vec2 j_2;
-  Inner k;
-  Inner l[4];
-};
-
-layout(binding = 0) uniform S_std140_1 {
+layout(binding = 0) uniform S_std140_ubo {
   ivec3 a;
   int b;
   uvec3 c;

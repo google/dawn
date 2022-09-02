@@ -1,13 +1,10 @@
 #version 310 es
 precision mediump float;
 
-struct SB_RW {
-  uint arg_0;
-};
-
-layout(binding = 0, std430) buffer SB_RW_1 {
+layout(binding = 0, std430) buffer SB_RW_ssbo {
   uint arg_0;
 } sb_rw;
+
 void atomicLoad_fe6cc3() {
   uint res = atomicOr(sb_rw.arg_0, 0u);
 }
@@ -22,13 +19,10 @@ void main() {
 }
 #version 310 es
 
-struct SB_RW {
-  uint arg_0;
-};
-
-layout(binding = 0, std430) buffer SB_RW_1 {
+layout(binding = 0, std430) buffer SB_RW_ssbo {
   uint arg_0;
 } sb_rw;
+
 void atomicLoad_fe6cc3() {
   uint res = atomicOr(sb_rw.arg_0, 0u);
 }

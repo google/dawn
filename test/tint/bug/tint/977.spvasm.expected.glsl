@@ -7,9 +7,10 @@ struct Uniforms {
 };
 
 uvec3 tint_symbol = uvec3(0u, 0u, 0u);
-layout(binding = 2, std430) buffer ResultMatrix_1 {
+layout(binding = 2, std430) buffer ResultMatrix_ssbo {
   float numbers[];
 } resultMatrix;
+
 float binaryOperation_f1_f1_(inout float a, inout float b) {
   float x_26 = 0.0f;
   float x_13 = b;

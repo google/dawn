@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/transform/add_spirv_block_attribute.h"
+#include "src/tint/transform/add_block_attribute.h"
 
+#include <unordered_set>
 #include <utility>
 
 #include "src/tint/program_builder.h"
@@ -21,16 +22,29 @@
 #include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/hashset.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::AddSpirvBlockAttribute);
-TINT_INSTANTIATE_TYPEINFO(tint::transform::AddSpirvBlockAttribute::SpirvBlockAttribute);
+TINT_INSTANTIATE_TYPEINFO(tint::transform::AddBlockAttribute);
+TINT_INSTANTIATE_TYPEINFO(tint::transform::AddBlockAttribute::BlockAttribute);
 
 namespace tint::transform {
 
-AddSpirvBlockAttribute::AddSpirvBlockAttribute() = default;
+namespace {
 
-AddSpirvBlockAttribute::~AddSpirvBlockAttribute() = default;
+bool IsUsedAsNonBuffer(const std::unordered_set<tint::ast::StorageClass>& uses) {
+    for (auto use : uses) {
+        if (!ast::IsHostShareable(use)) {
+            return true;
+        }
+    }
+    return false;
+}
 
-void AddSpirvBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
+}  // namespace
+
+AddBlockAttribute::AddBlockAttribute() = default;
+
+AddBlockAttribute::~AddBlockAttribute() = default;
+
+void AddBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
     auto& sem = ctx.src->Sem();
 
     // Collect the set of structs that are nested in other types.
@@ -66,8 +80,10 @@ void AddSpirvBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) co
 
         auto* ty = var->Type()->UnwrapRef();
         auto* str = ty->As<sem::Struct>();
-        bool needs_wrapping = !str ||                        // Type is not a structure
-                              nested_structs.Contains(str);  // Structure is nested by another type
+        bool needs_wrapping =
+            !str ||                                       // Type is not a structure
+            nested_structs.Contains(str) ||               // Structure is nested by another type
+            IsUsedAsNonBuffer(str->StorageClassUsage());  // Structure is used as a non-buffer usage
 
         if (needs_wrapping) {
             const char* kMemberName = "inner";
@@ -75,8 +91,8 @@ void AddSpirvBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) co
             // This is a non-struct or a struct that is nested somewhere else, so we
             // need to wrap it first.
             auto* wrapper = wrapper_structs.GetOrCreate(ty, [&] {
-                auto* block = ctx.dst->ASTNodes().Create<SpirvBlockAttribute>(
-                    ctx.dst->ID(), ctx.dst->AllocateNodeID());
+                auto* block = ctx.dst->ASTNodes().Create<BlockAttribute>(ctx.dst->ID(),
+                                                                         ctx.dst->AllocateNodeID());
                 auto wrapper_name = ctx.src->Symbols().NameFor(global->symbol) + "_block";
                 auto* ret = ctx.dst->create<ast::Struct>(
                     ctx.dst->Symbols().New(wrapper_name),
@@ -95,8 +111,8 @@ void AddSpirvBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) co
             }
         } else {
             // Add a block attribute to this struct directly.
-            auto* block = ctx.dst->ASTNodes().Create<SpirvBlockAttribute>(
-                ctx.dst->ID(), ctx.dst->AllocateNodeID());
+            auto* block = ctx.dst->ASTNodes().Create<BlockAttribute>(ctx.dst->ID(),
+                                                                     ctx.dst->AllocateNodeID());
             ctx.InsertFront(str->Declaration()->attributes, block);
         }
     }
@@ -104,16 +120,16 @@ void AddSpirvBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) co
     ctx.Clone();
 }
 
-AddSpirvBlockAttribute::SpirvBlockAttribute::SpirvBlockAttribute(ProgramID pid, ast::NodeID nid)
+AddBlockAttribute::BlockAttribute::BlockAttribute(ProgramID pid, ast::NodeID nid)
     : Base(pid, nid) {}
-AddSpirvBlockAttribute::SpirvBlockAttribute::~SpirvBlockAttribute() = default;
-std::string AddSpirvBlockAttribute::SpirvBlockAttribute::InternalName() const {
-    return "spirv_block";
+AddBlockAttribute::BlockAttribute::~BlockAttribute() = default;
+std::string AddBlockAttribute::BlockAttribute::InternalName() const {
+    return "block";
 }
 
-const AddSpirvBlockAttribute::SpirvBlockAttribute*
-AddSpirvBlockAttribute::SpirvBlockAttribute::Clone(CloneContext* ctx) const {
-    return ctx->dst->ASTNodes().Create<AddSpirvBlockAttribute::SpirvBlockAttribute>(
+const AddBlockAttribute::BlockAttribute* AddBlockAttribute::BlockAttribute::Clone(
+    CloneContext* ctx) const {
+    return ctx->dst->ASTNodes().Create<AddBlockAttribute::BlockAttribute>(
         ctx->dst->ID(), ctx->dst->AllocateNodeID());
 }
 

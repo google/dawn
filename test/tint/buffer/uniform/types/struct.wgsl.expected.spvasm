@@ -1,19 +1,22 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 11
+; Bound: 16
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
+               OpName %u_block "u_block"
+               OpMemberName %u_block 0 "inner"
                OpName %S "S"
                OpMemberName %S 0 "inner"
                OpName %Inner "Inner"
                OpMemberName %Inner 0 "f"
                OpName %u "u"
                OpName %main "main"
-               OpDecorate %S Block
+               OpDecorate %u_block Block
+               OpMemberDecorate %u_block 0 Offset 0
                OpMemberDecorate %S 0 Offset 0
                OpMemberDecorate %Inner 0 Offset 0
                OpDecorate %u NonWritable
@@ -22,12 +25,17 @@
       %float = OpTypeFloat 32
       %Inner = OpTypeStruct %float
           %S = OpTypeStruct %Inner
-%_ptr_Uniform_S = OpTypePointer Uniform %S
-          %u = OpVariable %_ptr_Uniform_S Uniform
+    %u_block = OpTypeStruct %S
+%_ptr_Uniform_u_block = OpTypePointer Uniform %u_block
+          %u = OpVariable %_ptr_Uniform_u_block Uniform
        %void = OpTypeVoid
-          %6 = OpTypeFunction %void
-       %main = OpFunction %void None %6
-          %9 = OpLabel
-         %10 = OpLoad %S %u
+          %7 = OpTypeFunction %void
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Uniform_S = OpTypePointer Uniform %S
+       %main = OpFunction %void None %7
+         %10 = OpLabel
+         %14 = OpAccessChain %_ptr_Uniform_S %u %uint_0
+         %15 = OpLoad %S %14
                OpReturn
                OpFunctionEnd

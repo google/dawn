@@ -6,14 +6,7 @@ struct S {
   vec3 vector;
 };
 
-struct S_std140 {
-  vec2 matrix_0;
-  vec2 matrix_1;
-  vec2 matrix_2;
-  vec3 vector;
-};
-
-layout(binding = 0) uniform S_std140_1 {
+layout(binding = 0) uniform S_std140_ubo {
   vec2 matrix_0;
   vec2 matrix_1;
   vec2 matrix_2;

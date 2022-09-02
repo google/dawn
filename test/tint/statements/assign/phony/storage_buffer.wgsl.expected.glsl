@@ -1,12 +1,9 @@
 #version 310 es
 
-struct S {
-  int i;
-};
-
-layout(binding = 0, std430) buffer S_1 {
+layout(binding = 0, std430) buffer S_ssbo {
   int i;
 } s;
+
 void tint_symbol() {
 }
 

@@ -1,9 +1,5 @@
 #version 310 es
 
-struct Uniforms {
-  uint i;
-};
-
 struct InnerS {
   int v;
 };
@@ -16,7 +12,7 @@ struct OuterS {
   S1 s2;
 };
 
-layout(binding = 4) uniform Uniforms_1 {
+layout(binding = 4) uniform Uniforms_ubo {
   uint i;
 } uniforms;
 

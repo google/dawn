@@ -7,13 +7,7 @@ layout(location = 1) in vec4 color_1;
 layout(location = 2) in vec2 quad_pos_1;
 layout(location = 0) out vec4 color_2;
 layout(location = 1) out vec2 quad_pos_2;
-struct RenderParams {
-  mat4 modelViewProjectionMatrix;
-  vec3 right;
-  vec3 up;
-};
-
-layout(binding = 0) uniform RenderParams_1 {
+layout(binding = 0) uniform RenderParams_ubo {
   mat4 modelViewProjectionMatrix;
   vec3 right;
   vec3 up;
@@ -147,11 +141,6 @@ struct VertexOutput {
   vec2 quad_pos;
 };
 
-struct SimulationParams {
-  float deltaTime;
-  vec4 seed;
-};
-
 struct Particle {
   vec3 position;
   float lifetime;
@@ -159,14 +148,15 @@ struct Particle {
   vec3 velocity;
 };
 
-layout(binding = 0) uniform SimulationParams_1 {
+layout(binding = 0) uniform SimulationParams_ubo {
   float deltaTime;
   vec4 seed;
 } sim_params;
 
-layout(binding = 1, std430) buffer Particles_1 {
+layout(binding = 1, std430) buffer Particles_ssbo {
   Particle particles[];
 } data;
+
 struct UBO {
   uint width;
 };
@@ -214,8 +204,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:64: 'textureQueryLevels' : no matching overloaded function found 
-ERROR: 0:64: '' : compilation terminated 
+ERROR: 0:60: 'textureQueryLevels' : no matching overloaded function found
+ERROR: 0:60: '' : compilation terminated
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -252,20 +242,18 @@ struct Particle {
   vec3 velocity;
 };
 
-struct UBO {
-  uint width;
-};
-
-layout(binding = 3) uniform UBO_1 {
+layout(binding = 3) uniform UBO_ubo {
   uint width;
 } ubo;
 
-layout(binding = 4, std430) buffer Buffer_1 {
+layout(binding = 4, std430) buffer Buffer_ssbo {
   float weights[];
 } buf_in;
-layout(binding = 5, std430) buffer Buffer_2 {
+
+layout(binding = 5, std430) buffer Buffer_ssbo_1 {
   float weights[];
 } buf_out;
+
 uniform highp sampler2D tex_in_1;
 void import_level(uvec3 coord) {
   uint offset = (coord.x + (coord.y * ubo.width));
@@ -309,20 +297,18 @@ struct Particle {
   vec3 velocity;
 };
 
-struct UBO {
-  uint width;
-};
-
-layout(binding = 3) uniform UBO_1 {
+layout(binding = 3) uniform UBO_ubo {
   uint width;
 } ubo;
 
-layout(binding = 4, std430) buffer Buffer_1 {
+layout(binding = 4, std430) buffer Buffer_ssbo {
   float weights[];
 } buf_in;
-layout(binding = 5, std430) buffer Buffer_2 {
+
+layout(binding = 5, std430) buffer Buffer_ssbo_1 {
   float weights[];
 } buf_out;
+
 layout(rgba8) uniform highp writeonly image2D tex_out;
 void export_level(uvec3 coord) {
   if (all(lessThan(coord.xy, uvec2(imageSize(tex_out))))) {

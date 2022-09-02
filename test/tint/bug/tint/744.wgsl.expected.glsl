@@ -1,21 +1,18 @@
 #version 310 es
 
-struct Uniforms {
-  uvec2 aShape;
-  uvec2 bShape;
-  uvec2 outShape;
-};
-
-layout(binding = 0, std430) buffer Matrix_1 {
+layout(binding = 0, std430) buffer Matrix_ssbo {
   uint numbers[];
 } firstMatrix;
-layout(binding = 1, std430) buffer Matrix_2 {
+
+layout(binding = 1, std430) buffer Matrix_ssbo_1 {
   uint numbers[];
 } secondMatrix;
-layout(binding = 2, std430) buffer Matrix_3 {
+
+layout(binding = 2, std430) buffer Matrix_ssbo_2 {
   uint numbers[];
 } resultMatrix;
-layout(binding = 3) uniform Uniforms_1 {
+
+layout(binding = 3) uniform Uniforms_ubo {
   uvec2 aShape;
   uvec2 bShape;
   uvec2 outShape;

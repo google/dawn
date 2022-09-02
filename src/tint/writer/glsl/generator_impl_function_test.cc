@@ -384,7 +384,7 @@ struct UBO {
   vec4 coord;
 };
 
-layout(binding = 0) uniform UBO_1 {
+layout(binding = 0) uniform UBO_ubo {
   vec4 coord;
 } ubo;
 
@@ -425,7 +425,7 @@ struct Uniforms {
   vec4 coord;
 };
 
-layout(binding = 0) uniform Uniforms_1 {
+layout(binding = 0) uniform Uniforms_ubo {
   vec4 coord;
 } uniforms;
 
@@ -462,15 +462,11 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_RW_Storage
     EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
-struct Data {
-  int a;
-  float b;
-};
-
-layout(binding = 0, std430) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_ssbo {
   int a;
   float b;
 } coord;
+
 void frag_main() {
   float v = coord.b;
   return;
@@ -510,15 +506,11 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_RO_Storage
               R"(#version 310 es
 precision mediump float;
 
-struct Data {
-  int a;
-  float b;
-};
-
-layout(binding = 0, std430) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_ssbo {
   int a;
   float b;
 } coord;
+
 void frag_main() {
   float v = coord.b;
   return;
@@ -555,15 +547,11 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_WO_Storage
     EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
-struct Data {
-  int a;
-  float b;
-};
-
-layout(binding = 0, std430) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_ssbo {
   int a;
   float b;
 } coord;
+
 void frag_main() {
   coord.b = 2.0f;
   return;
@@ -600,15 +588,11 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_StorageBuf
     EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
-struct Data {
-  int a;
-  float b;
-};
-
-layout(binding = 0, std430) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_ssbo {
   int a;
   float b;
 } coord;
+
 void frag_main() {
   coord.b = 2.0f;
   return;
@@ -651,7 +635,7 @@ struct S {
   float x;
 };
 
-layout(binding = 0) uniform S_1 {
+layout(binding = 0) uniform S_ubo {
   float x;
 } coord;
 
@@ -694,13 +678,10 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_Called_By_EntryPoint_With_
               R"(#version 310 es
 precision mediump float;
 
-struct S {
-  float x;
-};
-
-layout(binding = 0, std430) buffer S_1 {
+layout(binding = 0, std430) buffer S_ssbo {
   float x;
 } coord;
+
 float sub_func(float param) {
   return coord.x;
 }
@@ -930,13 +911,10 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Multiple_EntryPoint_With_Same_Module
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
-struct Data {
-  float d;
-};
-
-layout(binding = 0, std430) buffer Data_1 {
+layout(binding = 0, std430) buffer Data_ssbo {
   float d;
 } data;
+
 void a() {
   float v = data.d;
   return;

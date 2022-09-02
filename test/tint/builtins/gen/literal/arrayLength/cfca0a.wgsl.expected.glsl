@@ -1,8 +1,9 @@
 #version 310 es
 
-layout(binding = 1, std430) buffer SB_RO_1 {
+layout(binding = 1, std430) buffer SB_RO_ssbo {
   uint arg_0[];
 } sb_ro;
+
 void arrayLength_cfca0a() {
   uint res = uint(sb_ro.arg_0.length());
 }
@@ -23,9 +24,10 @@ void main() {
 #version 310 es
 precision mediump float;
 
-layout(binding = 1, std430) buffer SB_RO_1 {
+layout(binding = 1, std430) buffer SB_RO_ssbo {
   uint arg_0[];
 } sb_ro;
+
 void arrayLength_cfca0a() {
   uint res = uint(sb_ro.arg_0.length());
 }
@@ -40,9 +42,10 @@ void main() {
 }
 #version 310 es
 
-layout(binding = 1, std430) buffer SB_RO_1 {
+layout(binding = 1, std430) buffer SB_RO_ssbo {
   uint arg_0[];
 } sb_ro;
+
 void arrayLength_cfca0a() {
   uint res = uint(sb_ro.arg_0.length());
 }

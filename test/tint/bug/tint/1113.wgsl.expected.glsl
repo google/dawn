@@ -1,30 +1,6 @@
 #version 310 es
 
-struct Uniforms {
-  uint numTriangles;
-  uint gridSize;
-  uint pad1;
-  uint pad2;
-  vec3 bbMin;
-  vec3 bbMax;
-};
-
-struct Dbg {
-  uint offsetCounter;
-  uint pad0;
-  uint pad1;
-  uint pad2;
-  uint value0;
-  uint value1;
-  uint value2;
-  uint value3;
-  float value_f32_0;
-  float value_f32_1;
-  float value_f32_2;
-  float value_f32_3;
-};
-
-layout(binding = 0) uniform Uniforms_1 {
+layout(binding = 0) uniform Uniforms_ubo {
   uint numTriangles;
   uint gridSize;
   uint pad1;
@@ -33,19 +9,23 @@ layout(binding = 0) uniform Uniforms_1 {
   vec3 bbMax;
 } uniforms;
 
-layout(binding = 10, std430) buffer U32s_1 {
+layout(binding = 10, std430) buffer U32s_ssbo {
   uint values[];
 } indices;
-layout(binding = 11, std430) buffer F32s_1 {
+
+layout(binding = 11, std430) buffer F32s_ssbo {
   float values[];
 } positions;
-layout(binding = 20, std430) buffer AU32s_1 {
+
+layout(binding = 20, std430) buffer AU32s_ssbo {
   uint values[];
 } counters;
-layout(binding = 21, std430) buffer AI32s_1 {
+
+layout(binding = 21, std430) buffer AI32s_ssbo {
   int values[];
 } LUT;
-layout(binding = 50, std430) buffer Dbg_1 {
+
+layout(binding = 50, std430) buffer Dbg_ssbo {
   uint offsetCounter;
   uint pad0;
   uint pad1;
@@ -59,6 +39,7 @@ layout(binding = 50, std430) buffer Dbg_1 {
   float value_f32_2;
   float value_f32_3;
 } dbg;
+
 vec3 toVoxelPos(vec3 position) {
   vec3 bbMin = vec3(uniforms.bbMin.x, uniforms.bbMin.y, uniforms.bbMin.z);
   vec3 bbMax = vec3(uniforms.bbMax.x, uniforms.bbMax.y, uniforms.bbMax.z);
@@ -121,31 +102,7 @@ void main() {
 }
 #version 310 es
 
-struct Uniforms {
-  uint numTriangles;
-  uint gridSize;
-  uint pad1;
-  uint pad2;
-  vec3 bbMin;
-  vec3 bbMax;
-};
-
-struct Dbg {
-  uint offsetCounter;
-  uint pad0;
-  uint pad1;
-  uint pad2;
-  uint value0;
-  uint value1;
-  uint value2;
-  uint value3;
-  float value_f32_0;
-  float value_f32_1;
-  float value_f32_2;
-  float value_f32_3;
-};
-
-layout(binding = 0) uniform Uniforms_1 {
+layout(binding = 0) uniform Uniforms_ubo {
   uint numTriangles;
   uint gridSize;
   uint pad1;
@@ -154,19 +111,23 @@ layout(binding = 0) uniform Uniforms_1 {
   vec3 bbMax;
 } uniforms;
 
-layout(binding = 10, std430) buffer U32s_1 {
+layout(binding = 10, std430) buffer U32s_ssbo {
   uint values[];
 } indices;
-layout(binding = 11, std430) buffer F32s_1 {
+
+layout(binding = 11, std430) buffer F32s_ssbo {
   float values[];
 } positions;
-layout(binding = 20, std430) buffer AU32s_1 {
+
+layout(binding = 20, std430) buffer AU32s_ssbo {
   uint values[];
 } counters;
-layout(binding = 21, std430) buffer AI32s_1 {
+
+layout(binding = 21, std430) buffer AI32s_ssbo {
   int values[];
 } LUT;
-layout(binding = 50, std430) buffer Dbg_1 {
+
+layout(binding = 50, std430) buffer Dbg_ssbo {
   uint offsetCounter;
   uint pad0;
   uint pad1;
@@ -180,6 +141,7 @@ layout(binding = 50, std430) buffer Dbg_1 {
   float value_f32_2;
   float value_f32_3;
 } dbg;
+
 void doIgnore() {
   uint g42 = uniforms.numTriangles;
   uint kj6 = dbg.value1;
@@ -212,31 +174,7 @@ void main() {
 }
 #version 310 es
 
-struct Uniforms {
-  uint numTriangles;
-  uint gridSize;
-  uint pad1;
-  uint pad2;
-  vec3 bbMin;
-  vec3 bbMax;
-};
-
-struct Dbg {
-  uint offsetCounter;
-  uint pad0;
-  uint pad1;
-  uint pad2;
-  uint value0;
-  uint value1;
-  uint value2;
-  uint value3;
-  float value_f32_0;
-  float value_f32_1;
-  float value_f32_2;
-  float value_f32_3;
-};
-
-layout(binding = 0) uniform Uniforms_1 {
+layout(binding = 0) uniform Uniforms_ubo {
   uint numTriangles;
   uint gridSize;
   uint pad1;
@@ -245,19 +183,23 @@ layout(binding = 0) uniform Uniforms_1 {
   vec3 bbMax;
 } uniforms;
 
-layout(binding = 10, std430) buffer U32s_1 {
+layout(binding = 10, std430) buffer U32s_ssbo {
   uint values[];
 } indices;
-layout(binding = 11, std430) buffer F32s_1 {
+
+layout(binding = 11, std430) buffer F32s_ssbo {
   float values[];
 } positions;
-layout(binding = 20, std430) buffer AU32s_1 {
+
+layout(binding = 20, std430) buffer AU32s_ssbo {
   uint values[];
 } counters;
-layout(binding = 21, std430) buffer AI32s_1 {
+
+layout(binding = 21, std430) buffer AI32s_ssbo {
   int values[];
 } LUT;
-layout(binding = 50, std430) buffer Dbg_1 {
+
+layout(binding = 50, std430) buffer Dbg_ssbo {
   uint offsetCounter;
   uint pad0;
   uint pad1;
@@ -271,6 +213,7 @@ layout(binding = 50, std430) buffer Dbg_1 {
   float value_f32_2;
   float value_f32_3;
 } dbg;
+
 vec3 toVoxelPos(vec3 position) {
   vec3 bbMin = vec3(uniforms.bbMin.x, uniforms.bbMin.y, uniforms.bbMin.z);
   vec3 bbMax = vec3(uniforms.bbMax.x, uniforms.bbMax.y, uniforms.bbMax.z);

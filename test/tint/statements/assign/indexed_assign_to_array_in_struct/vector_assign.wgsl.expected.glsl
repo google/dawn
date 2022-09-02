@@ -1,14 +1,10 @@
 #version 310 es
 
-struct Uniforms {
-  uint i;
-};
-
 struct OuterS {
   uint a1[8];
 };
 
-layout(binding = 4) uniform Uniforms_1 {
+layout(binding = 4) uniform Uniforms_ubo {
   uint i;
 } uniforms;
 

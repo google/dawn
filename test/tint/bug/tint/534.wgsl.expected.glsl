@@ -1,16 +1,10 @@
 #version 310 es
 
-struct Uniforms {
-  uint dstTextureFlipY;
-  uint isFloat16;
-  uint isRGB10A2Unorm;
-  uint channelCount;
-};
-
-layout(binding = 2, std430) buffer OutputBuf_1 {
+layout(binding = 2, std430) buffer OutputBuf_ssbo {
   uint result[];
 } tint_symbol;
-layout(binding = 3) uniform Uniforms_1 {
+
+layout(binding = 3) uniform Uniforms_ubo {
   uint dstTextureFlipY;
   uint isFloat16;
   uint isRGB10A2Unorm;

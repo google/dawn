@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_TRANSFORM_ADD_SPIRV_BLOCK_ATTRIBUTE_H_
-#define SRC_TINT_TRANSFORM_ADD_SPIRV_BLOCK_ATTRIBUTE_H_
+#ifndef SRC_TINT_TRANSFORM_ADD_BLOCK_ATTRIBUTE_H_
+#define SRC_TINT_TRANSFORM_ADD_BLOCK_ATTRIBUTE_H_
 
 #include <string>
 
@@ -22,23 +22,23 @@
 
 namespace tint::transform {
 
-/// AddSpirvBlockAttribute is a transform that adds an
-/// `@internal(spirv_block)` attribute to any structure that is used as the
+/// AddBlockAttribute is a transform that adds an
+/// `@internal(block)` attribute to any structure that is used as the
 /// store type of a buffer. If that structure is nested inside another structure
 /// or an array, then it is wrapped inside another structure which gets the
-/// `@internal(spirv_block)` attribute instead.
-class AddSpirvBlockAttribute final : public Castable<AddSpirvBlockAttribute, Transform> {
+/// `@internal(block)` attribute instead.
+class AddBlockAttribute final : public Castable<AddBlockAttribute, Transform> {
   public:
-    /// SpirvBlockAttribute is an InternalAttribute that is used to decorate a
-    // structure that needs a SPIR-V block attribute.
-    class SpirvBlockAttribute final : public Castable<SpirvBlockAttribute, ast::InternalAttribute> {
+    /// BlockAttribute is an InternalAttribute that is used to decorate a
+    // structure that is used as a buffer in SPIR-V or GLSL.
+    class BlockAttribute final : public Castable<BlockAttribute, ast::InternalAttribute> {
       public:
         /// Constructor
         /// @param program_id the identifier of the program that owns this node
         /// @param nid the unique node identifier
-        SpirvBlockAttribute(ProgramID program_id, ast::NodeID nid);
+        BlockAttribute(ProgramID program_id, ast::NodeID nid);
         /// Destructor
-        ~SpirvBlockAttribute() override;
+        ~BlockAttribute() override;
 
         /// @return a short description of the internal attribute which will be
         /// displayed as `@internal(<name>)`
@@ -47,14 +47,14 @@ class AddSpirvBlockAttribute final : public Castable<AddSpirvBlockAttribute, Tra
         /// Performs a deep clone of this object using the CloneContext `ctx`.
         /// @param ctx the clone context
         /// @return the newly cloned object
-        const SpirvBlockAttribute* Clone(CloneContext* ctx) const override;
+        const BlockAttribute* Clone(CloneContext* ctx) const override;
     };
 
     /// Constructor
-    AddSpirvBlockAttribute();
+    AddBlockAttribute();
 
     /// Destructor
-    ~AddSpirvBlockAttribute() override;
+    ~AddBlockAttribute() override;
 
   protected:
     /// Runs the transform using the CloneContext built for transforming a
@@ -68,4 +68,4 @@ class AddSpirvBlockAttribute final : public Castable<AddSpirvBlockAttribute, Tra
 
 }  // namespace tint::transform
 
-#endif  // SRC_TINT_TRANSFORM_ADD_SPIRV_BLOCK_ATTRIBUTE_H_
+#endif  // SRC_TINT_TRANSFORM_ADD_BLOCK_ATTRIBUTE_H_

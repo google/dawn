@@ -1,14 +1,10 @@
 #version 310 es
 
-struct Buf {
-  uint count;
-  uint data[50];
-};
-
-layout(binding = 0, std430) buffer Buf_1 {
+layout(binding = 0, std430) buffer Buf_ssbo {
   uint count;
   uint data[50];
 } b;
+
 void tint_symbol() {
   uint i = 0u;
   while (true) {

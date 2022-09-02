@@ -6,13 +6,10 @@ struct atomic_compare_exchange_resultu32 {
 };
 
 
-struct a_block {
-  uint inner;
-};
-
-layout(binding = 0, std430) buffer a_block_1 {
+layout(binding = 0, std430) buffer a_block_ssbo {
   uint inner;
 } a;
+
 void tint_symbol() {
   uint value = 42u;
   atomic_compare_exchange_resultu32 atomic_compare_result;

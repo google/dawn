@@ -1,12 +1,9 @@
 #version 310 es
 
-struct DrawIndirectArgs {
-  uint vertexCount;
-};
-
-layout(binding = 5, std430) buffer DrawIndirectArgs_1 {
+layout(binding = 5, std430) buffer DrawIndirectArgs_ssbo {
   uint vertexCount;
 } drawOut;
+
 uint cubeVerts = 0u;
 void computeMain(uvec3 global_id) {
   uint firstVertex = atomicAdd(drawOut.vertexCount, cubeVerts);
