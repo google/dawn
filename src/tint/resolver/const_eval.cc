@@ -140,6 +140,14 @@ inline bool IsPositiveZero(T value) {
     return Number<N>(value) == Number<N>(0);  // Considers sign bit
 }
 
+template <typename NumberT>
+std::string OverflowErrorMessage(NumberT lhs, const char* op, NumberT rhs) {
+    std::stringstream ss;
+    ss << "'" << lhs.value << " " << op << " " << rhs.value << "' cannot be represented as '"
+       << FriendlyName<NumberT>() << "'";
+    return ss.str();
+}
+
 /// Constant inherits from sem::Constant to add an private implementation method for conversion.
 struct Constant : public sem::Constant {
     /// Convert attempts to convert the constant value to the given type. On error, Convert()
@@ -515,28 +523,26 @@ ConstEval::ConstEval(ProgramBuilder& b) : builder(b) {}
 
 template <typename NumberT>
 utils::Result<NumberT> ConstEval::Add(NumberT a, NumberT b) {
-    using T = UnwrapNumber<NumberT>;
-    auto add_values = [](T lhs, T rhs) {
-        if constexpr (std::is_integral_v<T> && std::is_signed_v<T>) {
-            // Ensure no UB for signed overflow
-            using UT = std::make_unsigned_t<T>;
-            return static_cast<T>(static_cast<UT>(lhs) + static_cast<UT>(rhs));
-        } else {
-            return lhs + rhs;
-        }
-    };
     NumberT result;
     if constexpr (std::is_same_v<NumberT, AInt> || std::is_same_v<NumberT, AFloat>) {
         // Check for over/underflow for abstract values
         if (auto r = CheckedAdd(a, b)) {
             result = r->value;
         } else {
-            AddError("'" + std::to_string(add_values(a.value, b.value)) +
-                         "' cannot be represented as '" + FriendlyName<NumberT>() + "'",
-                     *current_source);
+            AddError(OverflowErrorMessage(a, "+", b), *current_source);
             return utils::Failure;
         }
     } else {
+        using T = UnwrapNumber<NumberT>;
+        auto add_values = [](T lhs, T rhs) {
+            if constexpr (std::is_integral_v<T> && std::is_signed_v<T>) {
+                // Ensure no UB for signed overflow
+                using UT = std::make_unsigned_t<T>;
+                return static_cast<T>(static_cast<UT>(lhs) + static_cast<UT>(rhs));
+            } else {
+                return lhs + rhs;
+            }
+        };
         result = add_values(a.value, b.value);
     }
     return result;
@@ -545,27 +551,25 @@ utils::Result<NumberT> ConstEval::Add(NumberT a, NumberT b) {
 template <typename NumberT>
 utils::Result<NumberT> ConstEval::Mul(NumberT a, NumberT b) {
     using T = UnwrapNumber<NumberT>;
-    auto mul_values = [](T lhs, T rhs) {  //
-        if constexpr (std::is_integral_v<T> && std::is_signed_v<T>) {
-            // For signed integrals, avoid C++ UB by multiplying as unsigned
-            using UT = std::make_unsigned_t<T>;
-            return static_cast<T>(static_cast<UT>(lhs) * static_cast<UT>(rhs));
-        } else {
-            return lhs * rhs;
-        }
-    };
     NumberT result;
     if constexpr (std::is_same_v<NumberT, AInt> || std::is_same_v<NumberT, AFloat>) {
         // Check for over/underflow for abstract values
         if (auto r = CheckedMul(a, b)) {
             result = r->value;
         } else {
-            AddError("'" + std::to_string(mul_values(a.value, b.value)) +
-                         "' cannot be represented as '" + FriendlyName<NumberT>() + "'",
-                     *current_source);
+            AddError(OverflowErrorMessage(a, "*", b), *current_source);
             return utils::Failure;
         }
     } else {
+        auto mul_values = [](T lhs, T rhs) {
+            if constexpr (std::is_integral_v<T> && std::is_signed_v<T>) {
+                // For signed integrals, avoid C++ UB by multiplying as unsigned
+                using UT = std::make_unsigned_t<T>;
+                return static_cast<T>(static_cast<UT>(lhs) * static_cast<UT>(rhs));
+            } else {
+                return lhs * rhs;
+            }
+        };
         result = mul_values(a.value, b.value);
     }
     return result;
@@ -966,37 +970,32 @@ ConstEval::ConstantResult ConstEval::OpPlus(const sem::Type*,
     return r;
 }
 
-ConstEval::ConstantResult ConstEval::OpMinus(const sem::Type* ty,
+ConstEval::ConstantResult ConstEval::OpMinus(const sem::Type*,
                                              utils::VectorRef<const sem::Constant*> args,
                                              const Source& source) {
     auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
         auto create = [&](auto i, auto j) -> const Constant* {
             using NumberT = decltype(i);
-            using T = UnwrapNumber<NumberT>;
-
-            auto subtract_values = [](T lhs, T rhs) {
-                if constexpr (std::is_integral_v<T> && std::is_signed_v<T>) {
-                    // Ensure no UB for signed underflow
-                    using UT = std::make_unsigned_t<T>;
-                    return static_cast<T>(static_cast<UT>(lhs) - static_cast<UT>(rhs));
-                } else {
-                    return lhs - rhs;
-                }
-            };
-
             NumberT result;
             if constexpr (std::is_same_v<NumberT, AInt> || std::is_same_v<NumberT, AFloat>) {
                 // Check for over/underflow for abstract values
                 if (auto r = CheckedSub(i, j)) {
                     result = r->value;
                 } else {
-                    AddError("'" + std::to_string(subtract_values(i.value, j.value)) +
-                                 "' cannot be represented as '" +
-                                 ty->FriendlyName(builder.Symbols()) + "'",
-                             source);
+                    AddError(OverflowErrorMessage(i, "-", j), source);
                     return nullptr;
                 }
             } else {
+                using T = UnwrapNumber<NumberT>;
+                auto subtract_values = [](T lhs, T rhs) {
+                    if constexpr (std::is_integral_v<T> && std::is_signed_v<T>) {
+                        // Ensure no UB for signed underflow
+                        using UT = std::make_unsigned_t<T>;
+                        return static_cast<T>(static_cast<UT>(lhs) - static_cast<UT>(rhs));
+                    } else {
+                        return lhs - rhs;
+                    }
+                };
                 result = subtract_values(i.value, j.value);
             }
             return CreateElement(builder, c0->Type(), result);

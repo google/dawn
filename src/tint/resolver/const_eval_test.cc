@@ -3515,7 +3515,6 @@ struct OverflowCase {
     ast::BinaryOp op;
     Types lhs;
     Types rhs;
-    std::string overflowed_result;
 };
 
 static std::ostream& operator<<(std::ostream& o, const OverflowCase& c) {
@@ -3539,35 +3538,32 @@ TEST_P(ResolverConstEvalBinaryOpTest_Overflow, Test) {
         },
         c.lhs);
 
-    EXPECT_THAT(r()->error(), HasSubstr("1:1 error: '" + c.overflowed_result +
-                                        "' cannot be represented as '" + type_name + "'"));
+    EXPECT_THAT(r()->error(), HasSubstr("1:1 error: '"));
+    EXPECT_THAT(r()->error(), HasSubstr("' cannot be represented as '" + type_name + "'"));
 }
 INSTANTIATE_TEST_SUITE_P(
     Test,
     ResolverConstEvalBinaryOpTest_Overflow,
-    testing::Values(  //
-                      // scalar-scalar add
-        OverflowCase{ast::BinaryOp::kAdd, Val(AInt::Highest()), Val(1_a), "-9223372036854775808"},
-        OverflowCase{ast::BinaryOp::kAdd, Val(AInt::Lowest()), Val(-1_a), "9223372036854775807"},
-        OverflowCase{ast::BinaryOp::kAdd, Val(AFloat::Highest()), Val(AFloat::Highest()), "inf"},
-        OverflowCase{ast::BinaryOp::kAdd, Val(AFloat::Lowest()), Val(AFloat::Lowest()), "-inf"},
+    testing::Values(
+
+        // scalar-scalar add
+        OverflowCase{ast::BinaryOp::kAdd, Val(AInt::Highest()), Val(1_a)},
+        OverflowCase{ast::BinaryOp::kAdd, Val(AInt::Lowest()), Val(-1_a)},
+        OverflowCase{ast::BinaryOp::kAdd, Val(AFloat::Highest()), Val(AFloat::Highest())},
+        OverflowCase{ast::BinaryOp::kAdd, Val(AFloat::Lowest()), Val(AFloat::Lowest())},
         // scalar-scalar subtract
-        OverflowCase{ast::BinaryOp::kSubtract, Val(AInt::Lowest()), Val(1_a),
-                     "9223372036854775807"},
-        OverflowCase{ast::BinaryOp::kSubtract, Val(AInt::Highest()), Val(-1_a),
-                     "-9223372036854775808"},
-        OverflowCase{ast::BinaryOp::kSubtract, Val(AFloat::Highest()), Val(AFloat::Lowest()),
-                     "inf"},
-        OverflowCase{ast::BinaryOp::kSubtract, Val(AFloat::Lowest()), Val(AFloat::Highest()),
-                     "-inf"},
+        OverflowCase{ast::BinaryOp::kSubtract, Val(AInt::Lowest()), Val(1_a)},
+        OverflowCase{ast::BinaryOp::kSubtract, Val(AInt::Highest()), Val(-1_a)},
+        OverflowCase{ast::BinaryOp::kSubtract, Val(AFloat::Highest()), Val(AFloat::Lowest())},
+        OverflowCase{ast::BinaryOp::kSubtract, Val(AFloat::Lowest()), Val(AFloat::Highest())},
 
         // scalar-scalar multiply
-        OverflowCase{ast::BinaryOp::kMultiply, Val(AInt::Highest()), Val(2_a), "-2"},
-        OverflowCase{ast::BinaryOp::kMultiply, Val(AInt::Lowest()), Val(-2_a), "0"},
+        OverflowCase{ast::BinaryOp::kMultiply, Val(AInt::Highest()), Val(2_a)},
+        OverflowCase{ast::BinaryOp::kMultiply, Val(AInt::Lowest()), Val(-2_a)},
 
         // scalar-vector multiply
-        OverflowCase{ast::BinaryOp::kMultiply, Val(AInt::Highest()), Vec(2_a, 1_a), "-2"},
-        OverflowCase{ast::BinaryOp::kMultiply, Val(AInt::Lowest()), Vec(-2_a, 1_a), "0"},
+        OverflowCase{ast::BinaryOp::kMultiply, Val(AInt::Highest()), Vec(2_a, 1_a)},
+        OverflowCase{ast::BinaryOp::kMultiply, Val(AInt::Lowest()), Vec(-2_a, 1_a)},
 
         // vector-matrix multiply
 
@@ -3577,8 +3573,7 @@ INSTANTIATE_TEST_SUITE_P(
         OverflowCase{ast::BinaryOp::kMultiply,       //
                      Vec(AFloat::Highest(), 1.0_a),  //
                      Mat({2.0_a, 1.0_a},             //
-                         {1.0_a, 1.0_a}),            //
-                     "inf"},
+                         {1.0_a, 1.0_a})},
 
         // Overflow from second multiplication of dot product of vector and matrix column 0
         // i.e. (v[0] * m[0][0] + v[1] * m[0][1])
@@ -3586,8 +3581,7 @@ INSTANTIATE_TEST_SUITE_P(
         OverflowCase{ast::BinaryOp::kMultiply,       //
                      Vec(1.0_a, AFloat::Highest()),  //
                      Mat({1.0_a, 2.0_a},             //
-                         {1.0_a, 1.0_a}),            //
-                     "inf"},
+                         {1.0_a, 1.0_a})},
 
         // Overflow from addition of dot product of vector and matrix column 0
         // i.e. (v[0] * m[0][0] + v[1] * m[0][1])
@@ -3595,8 +3589,7 @@ INSTANTIATE_TEST_SUITE_P(
         OverflowCase{ast::BinaryOp::kMultiply,                   //
                      Vec(AFloat::Highest(), AFloat::Highest()),  //
                      Mat({1.0_a, 1.0_a},                         //
-                         {1.0_a, 1.0_a}),                        //
-                     "inf"},
+                         {1.0_a, 1.0_a})},
 
         // matrix-matrix multiply
 
@@ -3607,8 +3600,7 @@ INSTANTIATE_TEST_SUITE_P(
                      Mat({AFloat::Highest(), 1.0_a},  //
                          {1.0_a, 1.0_a}),             //
                      Mat({2.0_a, 1.0_a},              //
-                         {1.0_a, 1.0_a}),             //
-                     "inf"},
+                         {1.0_a, 1.0_a})},
 
         // Overflow from second multiplication of dot product of lhs row 0 and rhs column 0
         // i.e. m1[0][0] * m2[0][0] + m1[0][1] * m[1][0]
@@ -3617,8 +3609,7 @@ INSTANTIATE_TEST_SUITE_P(
                      Mat({1.0_a, AFloat::Highest()},  //
                          {1.0_a, 1.0_a}),             //
                      Mat({1.0_a, 1.0_a},              //
-                         {2.0_a, 1.0_a}),             //
-                     "inf"},
+                         {2.0_a, 1.0_a})},
 
         // Overflow from addition of dot product of lhs row 0 and rhs column 0
         // i.e. m1[0][0] * m2[0][0] + m1[0][1] * m[1][0]
@@ -3627,8 +3618,7 @@ INSTANTIATE_TEST_SUITE_P(
                      Mat({AFloat::Highest(), 1.0_a},   //
                          {AFloat::Highest(), 1.0_a}),  //
                      Mat({1.0_a, 1.0_a},               //
-                         {1.0_a, 1.0_a}),              //
-                     "inf"}
+                         {1.0_a, 1.0_a})}
 
         ));
 
@@ -3636,26 +3626,29 @@ TEST_F(ResolverConstEvalTest, BinaryAbstractAddOverflow_AInt) {
     GlobalConst("c", Add(Source{{1, 1}}, Expr(AInt::Highest()), 1_a));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "1:1 error: '-9223372036854775808' cannot be represented as 'abstract-int'");
+              "1:1 error: '9223372036854775807 + 1' cannot be represented as 'abstract-int'");
 }
 
 TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AInt) {
     GlobalConst("c", Add(Source{{1, 1}}, Expr(AInt::Lowest()), -1_a));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "1:1 error: '9223372036854775807' cannot be represented as 'abstract-int'");
+              "1:1 error: '-9223372036854775808 + -1' cannot be represented as 'abstract-int'");
 }
 
 TEST_F(ResolverConstEvalTest, BinaryAbstractAddOverflow_AFloat) {
     GlobalConst("c", Add(Source{{1, 1}}, Expr(AFloat::Highest()), AFloat::Highest()));
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "1:1 error: 'inf' cannot be represented as 'abstract-float'");
+    EXPECT_EQ(r()->error(),
+              "1:1 error: '1.79769e+308 + 1.79769e+308' cannot be represented as 'abstract-float'");
 }
 
 TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AFloat) {
     GlobalConst("c", Add(Source{{1, 1}}, Expr(AFloat::Lowest()), AFloat::Lowest()));
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "1:1 error: '-inf' cannot be represented as 'abstract-float'");
+    EXPECT_EQ(
+        r()->error(),
+        "1:1 error: '-1.79769e+308 + -1.79769e+308' cannot be represented as 'abstract-float'");
 }
 
 // Mixed AInt and AFloat args to test implicit conversion to AFloat
