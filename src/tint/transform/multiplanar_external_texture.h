@@ -28,30 +28,33 @@ namespace tint::transform {
 /// BindingPoint is an alias to sem::BindingPoint
 using BindingPoint = sem::BindingPoint;
 
-/// This struct identifies the binding groups and locations for new bindings to
-/// use when transforming a texture_external instance.
-struct BindingPoints {
-    /// The desired binding location of the texture_2d representing plane #1 when
-    /// a texture_external binding is expanded.
-    BindingPoint plane_1;
-    /// The desired binding location of the ExternalTextureParams uniform when a
-    /// texture_external binding is expanded.
-    BindingPoint params;
-};
-
 /// Within the MultiplanarExternalTexture transform, each instance of a
 /// texture_external binding is unpacked into two texture_2d<f32> bindings
 /// representing two possible planes of a texture and a uniform buffer binding
 /// representing a struct of parameters. Calls to textureLoad or
 /// textureSampleLevel that contain a texture_external parameter will be
 /// transformed into a newly generated version of the function, which can
-/// perform the desired operation on a single RGBA plane or on seperate Y and UV
+/// perform the desired operation on a single RGBA plane or on separate Y and UV
 /// planes, and do colorspace conversions including yuv->rgb conversion, gamma
 /// decoding, gamut conversion, and gamma encoding steps. Specifically
 // for BT.709 to SRGB conversion, it takes the fast path only doing the yuv->rgb
 // step and skipping all other steps.
 class MultiplanarExternalTexture final : public Castable<MultiplanarExternalTexture, Transform> {
   public:
+    /// This struct identifies the binding groups and locations for new bindings to
+    /// use when transforming a texture_external instance.
+    struct BindingPoints {
+        /// The desired binding location of the texture_2d representing plane #1 when
+        /// a texture_external binding is expanded.
+        BindingPoint plane_1;
+        /// The desired binding location of the ExternalTextureParams uniform when a
+        /// texture_external binding is expanded.
+        BindingPoint params;
+
+        /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+        TINT_REFLECT(plane_1, params);
+    };
+
     /// BindingsMap is a map where the key is the binding location of a
     /// texture_external and the value is a struct containing the desired
     /// locations for new bindings expanded from the texture_external instance.

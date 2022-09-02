@@ -17,6 +17,7 @@
 
 #include <cassert>
 #include <functional>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -128,9 +129,24 @@ class DataBuilder {
         /// @returns a variable of type T filled with pseudo-random data
         static T impl(DataBuilder* b) {
             T out{};
-            b->build(&out, sizeof(T));
+            if constexpr (tint::HasReflection<T>) {
+                ForeachField(out, [&](auto& field) { b->build(field); });
+            } else if constexpr (std::is_pod_v<T>) {
+                b->build(&out, sizeof(T));
+            } else {
+                static_assert(sizeof(T) == 0, "cannot build type");
+            }
             return out;
         }
+    };
+
+    /// Specialization for bool
+    template <>
+    struct BuildImpl<bool> {
+        /// Generate a pseudo-random bool
+        /// @param b - data builder to use
+        /// @returns a boolean with even odds of being true or false
+        static bool impl(DataBuilder* b) { return b->generator_.GetBool(); }
     };
 
     /// Specialization for std::string
@@ -150,74 +166,17 @@ class DataBuilder {
         }
     };
 
-    /// Specialization for bool
-    template <>
-    struct BuildImpl<bool> {
-        /// Generate a pseudo-random bool
+    /// Specialization for std::optional
+    template <typename T>
+    struct BuildImpl<std::optional<T>> {
+        /// Generate a pseudo-random optional<T>
         /// @param b - data builder to use
-        /// @returns a boolean with even odds of being true or false
-        static bool impl(DataBuilder* b) { return b->generator_.GetBool(); }
-    };
-
-    /// Specialization for writer::msl::Options
-    template <>
-    struct BuildImpl<writer::msl::Options> {
-        /// Generate a pseudo-random writer::msl::Options struct
-        /// @param b - data builder to use
-        /// @returns writer::msl::Options filled with pseudo-random data
-        static writer::msl::Options impl(DataBuilder* b) {
-            writer::msl::Options out{};
-            b->build(out.buffer_size_ubo_index);
-            b->build(out.fixed_sample_mask);
-            b->build(out.emit_vertex_point_size);
-            b->build(out.disable_workgroup_init);
-            b->build(out.generate_external_texture_bindings);
-            b->build(out.array_length_from_uniform);
-            return out;
-        }
-    };
-
-    /// Specialization for writer::hlsl::Options
-    template <>
-    struct BuildImpl<writer::hlsl::Options> {
-        /// Generate a pseudo-random writer::hlsl::Options struct
-        /// @param b - data builder to use
-        /// @returns writer::hlsl::Options filled with pseudo-random data
-        static writer::hlsl::Options impl(DataBuilder* b) {
-            writer::hlsl::Options out{};
-            b->build(out.root_constant_binding_point);
-            b->build(out.disable_workgroup_init);
-            b->build(out.array_length_from_uniform);
-            return out;
-        }
-    };
-
-    /// Specialization for writer::spirv::Options
-    template <>
-    struct BuildImpl<writer::spirv::Options> {
-        /// Generate a pseudo-random writer::spirv::Options struct
-        /// @param b - data builder to use
-        /// @returns writer::spirv::Options filled with pseudo-random data
-        static writer::spirv::Options impl(DataBuilder* b) {
-            writer::spirv::Options out{};
-            b->build(out.emit_vertex_point_size);
-            b->build(out.disable_workgroup_init);
-            return out;
-        }
-    };
-
-    /// Specialization for writer::ArrayLengthFromUniformOptions
-    template <>
-    struct BuildImpl<writer::ArrayLengthFromUniformOptions> {
-        /// Generate a pseudo-random writer::ArrayLengthFromUniformOptions struct
-        /// @param b - data builder to use
-        /// @returns writer::ArrayLengthFromUniformOptions filled with pseudo-random
-        /// data
-        static writer::ArrayLengthFromUniformOptions impl(DataBuilder* b) {
-            writer::ArrayLengthFromUniformOptions out{};
-            b->build(out.ubo_binding);
-            b->build(out.bindpoint_to_size_index);
-            return out;
+        /// @returns a either a nullopt, or a randomly filled T
+        static std::optional<T> impl(DataBuilder* b) {
+            if (b->build<bool>()) {
+                return b->build<T>();
+            }
+            return std::nullopt;
         }
     };
 

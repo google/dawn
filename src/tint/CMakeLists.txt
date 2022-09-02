@@ -252,6 +252,7 @@ set(TINT_LIB_SRCS
   program_id.h
   program.cc
   program.h
+  reflection.h
   reader/reader.cc
   reader/reader.h
   resolver/const_eval.cc
@@ -478,6 +479,7 @@ set(TINT_LIB_SRCS
   utils/concat.h
   utils/crc32.h
   utils/enum_set.h
+  utils/foreach_macro.h
   utils/hash.h
   utils/hashmap.h
   utils/hashset.h
@@ -777,6 +779,7 @@ if(TINT_BUILD_TESTS)
     number_test.cc
     program_builder_test.cc
     program_test.cc
+    reflection_test.cc
     resolver/array_accessor_test.cc
     resolver/assignment_validation_test.cc
     resolver/atomics_test.cc

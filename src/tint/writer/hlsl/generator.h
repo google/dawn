@@ -23,6 +23,7 @@
 #include <vector>
 
 #include "src/tint/ast/pipeline_stage.h"
+#include "src/tint/reflection.h"
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/writer/array_length_from_uniform_options.h"
 #include "src/tint/writer/text.h"
@@ -56,8 +57,11 @@ struct Options {
     /// from which to load buffer sizes.
     ArrayLengthFromUniformOptions array_length_from_uniform = {};
 
-    // NOTE: Update src/tint/fuzzers/data_builder.h when adding or changing any
-    // struct members.
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(root_constant_binding_point,
+                 disable_workgroup_init,
+                 generate_external_texture_bindings,
+                 array_length_from_uniform);
 };
 
 /// The result produced when generating HLSL.

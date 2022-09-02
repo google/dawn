@@ -265,7 +265,7 @@ TEST(SerializeTests, TintSemBindingPoint) {
 
 // Test that ByteVectorSink serializes tint::transform::BindingPoints as expected.
 TEST(SerializeTests, TintTransformBindingPoints) {
-    tint::transform::BindingPoints points{
+    tint::transform::MultiplanarExternalTexture::BindingPoints points{
         tint::sem::BindingPoint{1, 4},
         tint::sem::BindingPoint{3, 7},
     };

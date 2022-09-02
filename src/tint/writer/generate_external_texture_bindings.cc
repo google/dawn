@@ -50,7 +50,8 @@ transform::MultiplanarExternalTexture::BindingsMap GenerateExternalTextureBindin
     for (auto bp : ext_tex_bps) {
         uint32_t g = bp.group;
         uint32_t& next_num = group_to_next_binding_number[g];
-        auto new_bps = transform::BindingPoints{{g, next_num++}, {g, next_num++}};
+        auto new_bps =
+            transform::MultiplanarExternalTexture::BindingPoints{{g, next_num++}, {g, next_num++}};
         new_bindings_map[bp] = new_bps;
     }
     return new_bindings_map;

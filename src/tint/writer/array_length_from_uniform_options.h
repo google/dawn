@@ -43,8 +43,8 @@ struct ArrayLengthFromUniformOptions {
     /// uniform buffer where the length of the buffer is stored.
     std::unordered_map<sem::BindingPoint, uint32_t> bindpoint_to_size_index;
 
-    // NOTE: Update src/tint/fuzzers/data_builder.h when adding or changing any
-    // struct members.
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(ubo_binding, bindpoint_to_size_index);
 };
 
 }  // namespace tint::writer

@@ -19,6 +19,15 @@
 
 namespace dawn::native {
 
+namespace {
+
+template <typename OBJECT>
+void StreamInTintObject(const OBJECT& object, stream::Sink* sink) {
+    tint::ForeachField(object, [&](auto& field) { StreamIn(sink, field); });
+}
+
+}  // namespace
+
 // static
 template <>
 void stream::Stream<tint::Program>::Write(stream::Sink* sink, const tint::Program& p) {
@@ -36,82 +45,48 @@ void stream::Stream<tint::Program>::Write(stream::Sink* sink, const tint::Progra
 // static
 template <>
 void stream::Stream<tint::sem::BindingPoint>::Write(stream::Sink* sink,
-                                                    const tint::sem::BindingPoint& p) {
-    static_assert(offsetof(tint::sem::BindingPoint, group) == 0,
-                  "Please update serialization for tint::sem::BindingPoint");
-    static_assert(offsetof(tint::sem::BindingPoint, binding) == 4,
-                  "Please update serialization for tint::sem::BindingPoint");
-    static_assert(sizeof(tint::sem::BindingPoint) == 8,
-                  "Please update serialization for tint::sem::BindingPoint");
-    StreamIn(sink, p.group, p.binding);
+                                                    const tint::sem::BindingPoint& point) {
+    StreamInTintObject(point, sink);
 }
 
 // static
 template <>
-void stream::Stream<tint::transform::BindingPoints>::Write(
+void stream::Stream<tint::transform::MultiplanarExternalTexture::BindingPoints>::Write(
     stream::Sink* sink,
-    const tint::transform::BindingPoints& points) {
-    static_assert(offsetof(tint::transform::BindingPoints, plane_1) == 0,
-                  "Please update serialization for tint::transform::BindingPoints");
-    static_assert(offsetof(tint::transform::BindingPoints, params) == 8,
-                  "Please update serialization for tint::transform::BindingPoints");
-    static_assert(sizeof(tint::transform::BindingPoints) == 16,
-                  "Please update serialization for tint::transform::BindingPoints");
-    StreamIn(sink, points.plane_1, points.params);
+    const tint::transform::MultiplanarExternalTexture::BindingPoints& points) {
+    StreamInTintObject(points, sink);
 }
 
+// static
 template <>
 void stream::Stream<tint::transform::VertexPulling::Config>::Write(
     stream::Sink* sink,
     const tint::transform::VertexPulling::Config& cfg) {
-    StreamIn(sink, cfg.entry_point_name, cfg.vertex_state, cfg.pulling_group);
+    StreamInTintObject(cfg, sink);
 }
 
+// static
 template <>
 void stream::Stream<tint::transform::VertexBufferLayoutDescriptor>::Write(
     stream::Sink* sink,
     const tint::transform::VertexBufferLayoutDescriptor& layout) {
-    using Layout = tint::transform::VertexBufferLayoutDescriptor;
-    static_assert(offsetof(Layout, array_stride) == 0,
-                  "Please update serialization for tint::transform::VertexBufferLayoutDescriptor");
-    static_assert(offsetof(Layout, step_mode) == 4,
-                  "Please update serialization for tint::transform::VertexBufferLayoutDescriptor");
-    static_assert(offsetof(Layout, attributes) == 8,
-                  "Please update serialization for tint::transform::VertexBufferLayoutDescriptor");
-    StreamIn(sink, layout.array_stride, layout.step_mode, layout.attributes);
+    StreamInTintObject(layout, sink);
 }
 
+// static
 template <>
 void stream::Stream<tint::transform::VertexAttributeDescriptor>::Write(
     stream::Sink* sink,
     const tint::transform::VertexAttributeDescriptor& attrib) {
-    using Attrib = tint::transform::VertexAttributeDescriptor;
-    static_assert(offsetof(Attrib, format) == 0,
-                  "Please update serialization for tint::transform::VertexAttributeDescriptor");
-    static_assert(offsetof(Attrib, offset) == 4,
-                  "Please update serialization for tint::transform::VertexAttributeDescriptor");
-    static_assert(offsetof(Attrib, shader_location) == 8,
-                  "Please update serialization for tint::transform::VertexAttributeDescriptor");
-    static_assert(sizeof(Attrib) == 12,
-                  "Please update serialization for tint::transform::VertexAttributeDescriptor");
-    StreamIn(sink, attrib.format, attrib.offset, attrib.shader_location);
+    StreamInTintObject(attrib, sink);
 }
 
 // static
 template <>
 void stream::Stream<tint::writer::ArrayLengthFromUniformOptions>::Write(
     stream::Sink* sink,
-    const tint::writer::ArrayLengthFromUniformOptions& o) {
-    static_assert(offsetof(tint::writer::ArrayLengthFromUniformOptions, ubo_binding) == 0,
-                  "Please update serialization for tint::writer::ArrayLengthFromUniformOptions");
-    static_assert(
-        offsetof(tint::writer::ArrayLengthFromUniformOptions, bindpoint_to_size_index) == 8,
-        "Please update serialization for tint::writer::ArrayLengthFromUniformOptions");
-    static_assert(
-        sizeof(tint::writer::ArrayLengthFromUniformOptions) ==
-            8 + sizeof(tint::writer::ArrayLengthFromUniformOptions::bindpoint_to_size_index),
-        "Please update serialization for tint::writer::ArrayLengthFromUniformOptions");
-    StreamIn(sink, o.ubo_binding, o.bindpoint_to_size_index);
+    const tint::writer::ArrayLengthFromUniformOptions& options) {
+    StreamInTintObject(options, sink);
 }
 
 }  // namespace dawn::native

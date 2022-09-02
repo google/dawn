@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include "src/tint/reflection.h"
 #include "src/tint/writer/writer.h"
 
 // Forward declarations
@@ -47,6 +48,12 @@ struct Options {
     /// Set to `true` to initialize workgroup memory with OpConstantNull when
     /// VK_KHR_zero_initialize_workgroup_memory is enabled.
     bool use_zero_initialize_workgroup_memory_extension = false;
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(emit_vertex_point_size,
+                 disable_workgroup_init,
+                 generate_external_texture_bindings,
+                 use_zero_initialize_workgroup_memory_extension);
 };
 
 /// The result produced when generating SPIR-V.

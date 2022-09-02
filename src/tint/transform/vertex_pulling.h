@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "src/tint/reflection.h"
 #include "src/tint/transform/transform.h"
 
 namespace tint::transform {
@@ -72,6 +73,9 @@ struct VertexAttributeDescriptor {
     uint32_t offset;
     /// The shader location used for the attribute
     uint32_t shader_location;
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(format, offset, shader_location);
 };
 
 /// Describes a buffer containing multiple vertex attributes
@@ -102,6 +106,9 @@ struct VertexBufferLayoutDescriptor {
     VertexStepMode step_mode = VertexStepMode::kVertex;
     /// The vertex attributes
     std::vector<VertexAttributeDescriptor> attributes;
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(array_stride, step_mode, attributes);
 };
 
 /// Describes vertex state, which consists of many buffers containing vertex
@@ -154,6 +161,9 @@ class VertexPulling final : public Castable<VertexPulling, Transform> {
         /// The "group" we will put all our vertex buffers into (as storage buffers)
         /// Default to 4 as it is past the limits of user-accessible groups
         uint32_t pulling_group = 4u;
+
+        /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+        TINT_REFLECT(entry_point_name, vertex_state, pulling_group);
     };
 
     /// Constructor

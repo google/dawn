@@ -19,6 +19,7 @@
 
 #include <functional>
 
+#include "src/tint/reflection.h"
 #include "src/tint/utils/hash.h"
 
 namespace tint::sem {
@@ -29,6 +30,9 @@ struct BindingPoint {
     uint32_t group = 0;
     /// The `@binding` part of the binding point
     uint32_t binding = 0;
+
+    /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+    TINT_REFLECT(group, binding);
 
     /// Equality operator
     /// @param rhs the BindingPoint to compare against
