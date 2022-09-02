@@ -3392,9 +3392,10 @@ INSTANTIATE_TEST_SUITE_P(Bad_Coordinate,
                              {"%float 1D 0 0 0 1 Unknown",
                               "%result = OpImageSampleImplicitLod "
                               // bad type for coordinate: not a number
-                              "%v4float %sampled_image %float_var",
+                              // %10 is the sampler variable
+                              "%v4float %sampled_image %10",
                               "bad or unsupported coordinate type for image access: %73 = "
-                              "OpImageSampleImplicitLod %42 %72 %1",
+                              "OpImageSampleImplicitLod %42 %72 %10",
                               {}},
                              {"%float 2D 0 0 0 1 Unknown",  // 2D
                               "%result = OpImageSampleImplicitLod "
@@ -3748,6 +3749,92 @@ TEST_F(SpvParserHandleTest, NeverGenerateConstDeclForHandle_UseVariableDirectly)
 let x_22 : vec4<f32> = textureSample(x_2, x_3, vec2<f32>());
 let x_26 : vec4<f32> = textureSample(x_2, x_3, vec2<f32>());
 var_1 = (x_22 + x_26);
+return;
+)";
+    ASSERT_EQ(expect, got);
+}
+
+TEST_F(SpvParserHandleTest, ImageCoordinateCanBeHoistedConstant) {
+    // Demonstrates fix for crbug.com/tint/1646
+    // The problem is the coordinate for an image operation
+    // can be a combinatorial value that has been hoisted out
+    // to a 'var' declaration.
+    //
+    // In this test (and the original case form the bug), the
+    // definition for the value is in an outer construct, and
+    // the image operation using it is in a doubly nested
+    // construct.
+    //
+    // The coordinate handling has to unwrap the ref type it
+    // made for the 'var' declaration.
+    const auto assembly = Preamble() + R"(
+
+OpEntryPoint Fragment %100 "main"
+OpExecutionMode %100 OriginUpperLeft
+OpDecorate %10 DescriptorSet 0
+OpDecorate %10 Binding 0
+OpDecorate %20 DescriptorSet 2
+OpDecorate %20 Binding 1
+
+%void = OpTypeVoid
+%voidfn = OpTypeFunction %void
+
+%bool = OpTypeBool
+%true = OpConstantTrue %bool
+%float = OpTypeFloat 32
+
+%v4float = OpTypeVector %float 4
+
+%float_null = OpConstantNull %float
+
+%sampler = OpTypeSampler
+%ptr_sampler = OpTypePointer UniformConstant %sampler
+%im_ty = OpTypeImage %float 1D 0 0 0 1 Unknown
+%ptr_im_ty = OpTypePointer UniformConstant %im_ty
+%si_ty = OpTypeSampledImage %im_ty
+
+%10 = OpVariable %ptr_sampler UniformConstant
+%20 = OpVariable %ptr_im_ty UniformConstant
+
+%100 = OpFunction %void None %voidfn
+%entry = OpLabel
+%900 = OpCopyObject %float %float_null        ; definition here
+OpSelectionMerge %99 None
+OpBranchConditional %true %40 %99
+
+  %40 = OpLabel
+  OpSelectionMerge %80 None
+  OpBranchConditional %true %50 %80
+
+    %50 = OpLabel
+    %sam = OpLoad %sampler %10
+    %im = OpLoad %im_ty %20
+    %sampled_image = OpSampledImage %si_ty %im %sam
+    %result = OpImageSampleImplicitLod %v4float %sampled_image %900 ; usage here
+    OpBranch %80
+
+  %80 = OpLabel
+  OpBranch %99
+
+%99 = OpLabel
+OpReturn
+OpFunctionEnd
+
+  )";
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    EXPECT_TRUE(p->error().empty()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(var x_900 : f32;
+x_900 = 0.0f;
+if (true) {
+  if (true) {
+    let x_18 : vec4<f32> = textureSample(x_20, x_10, x_900);
+  }
+}
 return;
 )";
     ASSERT_EQ(expect, got);

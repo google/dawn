@@ -5636,7 +5636,9 @@ FunctionEmitter::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageA
 
     const auto num_coords_required = num_axes + (is_arrayed ? 1 : 0) + (is_proj ? 1 : 0);
     uint32_t num_coords_supplied = 0;
-    auto* component_type = raw_coords.type;
+    // Get the component type.  The raw_coords might have been hoisted into
+    // a 'var' declaration, so unwrap the referenece if needed.
+    auto* component_type = raw_coords.type->UnwrapRef();
     if (component_type->IsFloatScalar() || component_type->IsIntegerScalar()) {
         num_coords_supplied = 1;
     } else if (auto* vec_type = As<Vector>(raw_coords.type)) {
