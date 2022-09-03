@@ -5000,7 +5000,7 @@ TypedExpression FunctionEmitter::MakeSimpleSelect(const spvtools::opt::Instructi
     // - true_value false_value, and result type to match.
     // - you can't select over pointers or pointer vectors, unless you also have
     //   a VariablePointers* capability, which is not allowed in by WebGPU.
-    auto* op_ty = true_value.type;
+    auto* op_ty = true_value.type->UnwrapRef();
     if (op_ty->Is<Vector>() || op_ty->IsFloatScalar() || op_ty->IsIntegerScalar() ||
         op_ty->Is<Bool>()) {
         ExpressionList params;

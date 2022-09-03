@@ -4009,5 +4009,82 @@ return;
     ASSERT_EQ(expect, got);
 }
 
+TEST_F(SpvParserHandleTest, SimpleSelectCanSelectFromHoistedConstant) {
+    // Demonstrates fix for crbug.com/tint/1642
+    // The problem is an operand to a simple select can be a value
+    // that is hoisted into a 'var' declaration.
+    //
+    // The selection-generation logic has to UnwrapRef if needed.
+    const auto assembly = Preamble() + R"(
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %100 "main" %gl_Position
+               OpSource HLSL 600
+               OpName %100 "main"
+               OpDecorate %gl_Position BuiltIn Position
+      %float = OpTypeFloat 32
+    %float_0 = OpConstant %float 0
+    %float_1 = OpConstant %float 1
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
+       %bool = OpTypeBool
+%gl_Position = OpVariable %_ptr_Output_v4float Output
+         %11 = OpUndef %float
+        %100 = OpFunction %void None %9
+         %12 = OpLabel
+               OpBranch %13
+         %13 = OpLabel
+         %14 = OpPhi %float %11 %12 %15 %16
+         %15 = OpPhi %float %float_0 %12 %17 %16
+         %18 = OpFOrdLessThan %bool %15 %float_1
+               OpLoopMerge %19 %16 None
+               OpBranchConditional %18 %16 %19
+         %16 = OpLabel
+         %17 = OpFAdd %float %15 %float_1
+               OpBranch %13
+         %19 = OpLabel
+         %20 = OpFOrdGreaterThan %bool %14 %float_1
+         %21 = OpSelect %float %20 %14 %float_0
+         %22 = OpCompositeConstruct %v4float %21 %21 %21 %21
+               OpStore %gl_Position %22
+               OpReturn
+               OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    EXPECT_TRUE(p->BuildAndParseInternalModule()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    EXPECT_TRUE(p->error().empty()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    auto* expect = R"(var x_14 : f32;
+var x_14_phi_1 : f32;
+var x_15_phi_1 : f32;
+x_14_phi_1 = 0.0f;
+x_15_phi_1 = 0.0f;
+loop {
+  var x_17 : f32;
+  x_14 = x_14_phi_1;
+  let x_15 : f32 = x_15_phi_1;
+  if ((x_15 < 1.0f)) {
+  } else {
+    break;
+  }
+
+  continuing {
+    x_17 = (x_15 + 1.0f);
+    x_14_phi_1 = x_15;
+    x_15_phi_1 = x_17;
+  }
+}
+let x_21 : f32 = select(0.0f, x_14, (x_14 > 1.0f));
+x_1 = vec4<f32>(x_21, x_21, x_21, x_21);
+return;
+)";
+    ASSERT_EQ(expect, got);
+}
+
 }  // namespace
 }  // namespace tint::reader::spirv
