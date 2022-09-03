@@ -4,7 +4,7 @@ precision mediump float;
 layout(location = 0) out vec4 out_var_SV_TARGET_1_1;
 vec4 out_var_SV_TARGET = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 void main_1() {
-  out_var_SV_TARGET = vec4(uintBitsToFloat(0xff800000u));
+  out_var_SV_TARGET = vec4(0.0f /* -inf */);
   return;
 }
 

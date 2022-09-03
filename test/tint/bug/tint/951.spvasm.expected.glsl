@@ -26,7 +26,7 @@ float getAAtOutCoords_() {
 float unaryOperation_f1_(inout float a) {
   float x_47 = a;
   if ((x_47 < 0.0f)) {
-    return uintBitsToFloat(0x7f800000u);
+    return 0.0f /* inf */;
   }
   float x_55 = a;
   return log(x_55);

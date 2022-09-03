@@ -1,7 +1,7 @@
 static float4 out_var_SV_TARGET = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 void main_1() {
-  out_var_SV_TARGET = (asfloat(0xff800000u)).xxxx;
+  out_var_SV_TARGET = (0.0f /* -inf */).xxxx;
   return;
 }
 

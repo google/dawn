@@ -150,25 +150,22 @@ const char* convert_texel_format_to_glsl(const ast::TexelFormat format) {
 }
 
 void PrintF32(std::ostream& out, float value) {
-    // Note: Currently inf and nan should not be constructable, but this is implemented for the day
-    // we support them.
     if (std::isinf(value)) {
-        out << (value >= 0 ? "uintBitsToFloat(0x7f800000u)" : "uintBitsToFloat(0xff800000u)");
+        out << "0.0f " << (value >= 0 ? "/* inf */" : "/* -inf */");
     } else if (std::isnan(value)) {
-        out << "uintBitsToFloat(0x7fc00000u)";
+        out << "0.0f /* nan */";
     } else {
         out << FloatToString(value) << "f";
     }
 }
 
-bool PrintF16(std::ostream& out, float value) {
-    // Note: Currently inf and nan should not be constructable, and there is no solid way to
-    // generate constant/literal f16 Inf or NaN.
-    if (std::isinf(value) || std::isnan(value)) {
-        return false;
+void PrintF16(std::ostream& out, float value) {
+    if (std::isinf(value)) {
+        out << "0.0hf " << (value >= 0 ? "/* inf */" : "/* -inf */");
+    } else if (std::isnan(value)) {
+        out << "0.0hf /* nan */";
     } else {
         out << FloatToString(value) << "hf";
-        return true;
     }
 }
 
@@ -2185,7 +2182,10 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
             PrintF32(out, constant->As<float>());
             return true;
         },
-        [&](const sem::F16*) { return PrintF16(out, constant->As<float>()); },
+        [&](const sem::F16*) {
+            PrintF16(out, constant->As<float>());
+            return true;
+        },
         [&](const sem::I32*) {
             out << constant->As<AInt>();
             return true;
@@ -2285,9 +2285,10 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
         },
         [&](const ast::FloatLiteralExpression* l) {
             if (l->suffix == ast::FloatLiteralExpression::Suffix::kH) {
-                return PrintF16(out, static_cast<float>(l->value));
+                PrintF16(out, static_cast<float>(l->value));
+            } else {
+                PrintF32(out, static_cast<float>(l->value));
             }
-            PrintF32(out, static_cast<float>(l->value));
             return true;
         },
         [&](const ast::IntLiteralExpression* l) {

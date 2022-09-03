@@ -112,24 +112,22 @@ const char* image_format_to_rwtexture_type(ast::TexelFormat image_format) {
 }
 
 void PrintF32(std::ostream& out, float value) {
-    // Note: Currently inf and nan should not be constructable, but this is implemented for the day
-    // we support them.
     if (std::isinf(value)) {
-        out << (value >= 0 ? "asfloat(0x7f800000u)" : "asfloat(0xff800000u)");
+        out << "0.0f " << (value >= 0 ? "/* inf */" : "/* -inf */");
     } else if (std::isnan(value)) {
-        out << "asfloat(0x7fc00000u)";
+        out << "0.0f /* nan */";
     } else {
         out << FloatToString(value) << "f";
     }
 }
 
-bool PrintF16(std::ostream& out, float value) {
-    // Note: Currently inf and nan should not be constructable, don't emit them.
-    if (std::isinf(value) || std::isnan(value)) {
-        return false;
+void PrintF16(std::ostream& out, float value) {
+    if (std::isinf(value)) {
+        out << "0.0h " << (value >= 0 ? "/* inf */" : "/* -inf */");
+    } else if (std::isnan(value)) {
+        out << "0.0h /* nan */";
     } else {
         out << FloatToString(value) << "h";
-        return true;
     }
 }
 
@@ -3127,9 +3125,9 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
         [&](const sem::F16*) {
             // emit a f16 scalar with explicit float16_t type declaration.
             out << "float16_t(";
-            bool valid = PrintF16(out, constant->As<float>());
+            PrintF16(out, constant->As<float>());
             out << ")";
-            return valid;
+            return true;
         },
         [&](const sem::I32*) {
             out << constant->As<AInt>();
@@ -3254,9 +3252,8 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
             if (l->suffix == ast::FloatLiteralExpression::Suffix::kH) {
                 // Emit f16 literal with explicit float16_t type declaration.
                 out << "float16_t(";
-                bool valid = PrintF16(out, static_cast<float>(l->value));
+                PrintF16(out, static_cast<float>(l->value));
                 out << ")";
-                return valid;
             }
             PrintF32(out, static_cast<float>(l->value));
             return true;

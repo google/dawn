@@ -14,7 +14,7 @@ float getAAtOutCoords_() {
 float unaryOperation_f1_(inout float a) {
   const float x_47 = a;
   if ((x_47 < 0.0f)) {
-    return asfloat(0x7f800000u);
+    return 0.0f /* inf */;
   }
   const float x_55 = a;
   return log(x_55);
