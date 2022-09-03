@@ -64,19 +64,6 @@ struct NumberUnwrapper<Number<T>> {
 
 namespace tint {
 
-/// Evaluates to true iff T is a floating-point type or is NumberKindF16.
-template <typename T>
-constexpr bool IsFloatingPoint =
-    std::is_floating_point_v<T> || std::is_same_v<T, detail::NumberKindF16>;
-
-/// Evaluates to true iff T is an integer type.
-template <typename T>
-constexpr bool IsInteger = std::is_integral_v<T>;
-
-/// Evaluates to true iff T is an integer type, floating-point type or is NumberKindF16.
-template <typename T>
-constexpr bool IsNumeric = IsInteger<T> || IsFloatingPoint<T>;
-
 /// Evaluates to true iff T is a Number
 template <typename T>
 constexpr bool IsNumber = detail::IsNumber<T>::value;
@@ -84,6 +71,27 @@ constexpr bool IsNumber = detail::IsNumber<T>::value;
 /// Resolves to the underlying type for a Number.
 template <typename T>
 using UnwrapNumber = typename detail::NumberUnwrapper<T>::type;
+
+/// Evaluates to true iff T or Number<T> is a floating-point type or is NumberKindF16.
+template <typename T, typename U = std::conditional_t<IsNumber<T>, UnwrapNumber<T>, T>>
+constexpr bool IsFloatingPoint =
+    std::is_floating_point_v<U> || std::is_same_v<T, detail::NumberKindF16>;
+
+/// Evaluates to true iff T or Number<T> is an integral type.
+template <typename T, typename U = std::conditional_t<IsNumber<T>, UnwrapNumber<T>, T>>
+constexpr bool IsIntegral = std::is_integral_v<U>;
+
+/// Evaluates to true iff T or Number<T> is a signed integer type.
+template <typename T, typename U = std::conditional_t<IsNumber<T>, UnwrapNumber<T>, T>>
+constexpr bool IsSignedIntegral = std::is_integral_v<U> && std::is_signed_v<U>;
+
+/// Evaluates to true iff T or Number<T> is an unsigned integer type.
+template <typename T, typename U = std::conditional_t<IsNumber<T>, UnwrapNumber<T>, T>>
+constexpr bool IsUnsignedIntegral = std::is_integral_v<U> && std::is_unsigned_v<U>;
+
+/// Evaluates to true iff T is an integer type, floating-point type or is NumberKindF16.
+template <typename T>
+constexpr bool IsNumeric = IsIntegral<T> || IsFloatingPoint<T>;
 
 /// NumberBase is a CRTP base class for Number<T>
 template <typename NumberT>

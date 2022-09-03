@@ -78,9 +78,9 @@ void tint_symbol(uvec3 local_id, uvec3 global_id, uint local_invocation_index) {
       acc[index] = 0.0f;
     }
   }
-  uint ColPerThreadA = (64u / 16u);
+  uint ColPerThreadA = 4u;
   uint tileColA = (local_id.x * ColPerThreadA);
-  uint RowPerThreadB = (64u / 16u);
+  uint RowPerThreadB = 4u;
   uint tileRowB = (local_id.y * RowPerThreadB);
   {
     for(uint t = 0u; (t < numTiles); t = (t + 1u)) {

@@ -99,6 +99,20 @@ template <typename Vec, typename... Vecs>
     return std::move(v1);
 }
 
+template <typename Vec, typename... Vecs>
+void ConcatInto(Vec& v1, Vecs&&... vs) {
+    auto total_size = v1.size() + (vs.size() + ...);
+    v1.reserve(total_size);
+    (std::move(vs.begin(), vs.end(), std::back_inserter(v1)), ...);
+}
+
+template <bool condition, typename Vec, typename... Vecs>
+void ConcatIntoIf([[maybe_unused]] Vec& v1, [[maybe_unused]] Vecs&&... vs) {
+    if constexpr (condition) {
+        ConcatInto(v1, std::forward<Vecs>(vs)...);
+    }
+}
+
 using ResolverConstEvalTest = ResolverTest;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3071,7 +3085,7 @@ TEST_P(ResolverConstEvalUnaryOpTest, Test) {
             EXPECT_TYPE(value->Type(), sem->Type());
             EXPECT_EQ(value->As<T>(), values.expect);
 
-            if constexpr (IsInteger<UnwrapNumber<T>>) {
+            if constexpr (IsIntegral<UnwrapNumber<T>>) {
                 // Check that the constant's integer doesn't contain unexpected data in the MSBs
                 // that are outside of the bit-width of T.
                 EXPECT_EQ(value->As<AInt>(), AInt(values.expect));
@@ -3329,7 +3343,7 @@ TEST_P(ResolverConstEvalBinaryOpTest, Test) {
             ForEachElemPair(value, expected_value,
                             [&](const sem::Constant* a, const sem::Constant* b) {
                                 EXPECT_EQ(a->As<T>(), b->As<T>());
-                                if constexpr (IsInteger<UnwrapNumber<T>>) {
+                                if constexpr (IsIntegral<UnwrapNumber<T>>) {
                                     // Check that the constant's integer doesn't contain unexpected
                                     // data in the MSBs that are outside of the bit-width of T.
                                     EXPECT_EQ(a->As<AInt>(), b->As<AInt>());
@@ -3351,7 +3365,7 @@ INSTANTIATE_TEST_SUITE_P(MixedAbstractArgs,
 
 template <typename T>
 std::vector<Case> OpAddIntCases() {
-    static_assert(IsInteger<UnwrapNumber<T>>);
+    static_assert(IsIntegral<UnwrapNumber<T>>);
     return {
         C(T{0}, T{0}, T{0}),
         C(T{1}, T{2}, T{3}),
@@ -3388,7 +3402,7 @@ INSTANTIATE_TEST_SUITE_P(Add,
 
 template <typename T>
 std::vector<Case> OpSubIntCases() {
-    static_assert(IsInteger<UnwrapNumber<T>>);
+    static_assert(IsIntegral<UnwrapNumber<T>>);
     return {
         C(T{0}, T{0}, T{0}),
         C(T{3}, T{2}, T{1}),
@@ -3510,6 +3524,64 @@ INSTANTIATE_TEST_SUITE_P(Mul,
                                  OpMulMatCases<f32>(),
                                  OpMulMatCases<f16>()))));
 
+template <typename T>
+std::vector<Case> OpDivIntCases() {
+    std::vector<Case> r = {
+        C(Val(T{0}), Val(T{1}), Val(T{0})),
+        C(Val(T{1}), Val(T{1}), Val(T{1})),
+        C(Val(T{1}), Val(T{1}), Val(T{1})),
+        C(Val(T{2}), Val(T{1}), Val(T{2})),
+        C(Val(T{4}), Val(T{2}), Val(T{2})),
+        C(Val(T::Highest()), Val(T{1}), Val(T::Highest())),
+        C(Val(T::Lowest()), Val(T{1}), Val(T::Lowest())),
+        C(Val(T::Highest()), Val(T::Highest()), Val(T{1})),
+        C(Val(T{0}), Val(T::Highest()), Val(T{0})),
+        C(Val(T{0}), Val(T::Lowest()), Val(T{0})),
+    };
+    ConcatIntoIf<IsIntegral<T>>(  //
+        r, std::vector<Case>{
+               // e1, when e2 is zero.
+               C(T{123}, T{0}, T{123}, true),
+           });
+    ConcatIntoIf<IsSignedIntegral<T>>(  //
+        r, std::vector<Case>{
+               // e1, when e1 is the most negative value in T, and e2 is -1.
+               C(T::Smallest(), T{-1}, T::Smallest(), true),
+           });
+    return r;
+}
+
+template <typename T>
+std::vector<Case> OpDivFloatCases() {
+    return {
+        C(Val(T{0}), Val(T{1}), Val(T{0})),
+        C(Val(T{1}), Val(T{1}), Val(T{1})),
+        C(Val(T{1}), Val(T{1}), Val(T{1})),
+        C(Val(T{2}), Val(T{1}), Val(T{2})),
+        C(Val(T{4}), Val(T{2}), Val(T{2})),
+        C(Val(T::Highest()), Val(T{1}), Val(T::Highest())),
+        C(Val(T::Lowest()), Val(T{1}), Val(T::Lowest())),
+        C(Val(T::Highest()), Val(T::Highest()), Val(T{1})),
+        C(Val(T{0}), Val(T::Highest()), Val(T{0})),
+        C(Val(T{0}), Val(T::Lowest()), Val(-T{0})),
+        C(T{123}, T{0}, T::Inf(), true),
+        C(T{-123}, -T{0}, T::Inf(), true),
+        C(T{-123}, T{0}, -T::Inf(), true),
+        C(T{123}, -T{0}, -T::Inf(), true),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(Div,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(  //
+                             testing::Values(ast::BinaryOp::kDivide),
+                             testing::ValuesIn(Concat(  //
+                                 OpDivIntCases<AInt>(),
+                                 OpDivIntCases<i32>(),
+                                 OpDivIntCases<u32>(),
+                                 OpDivFloatCases<AFloat>(),
+                                 OpDivFloatCases<f32>(),
+                                 OpDivFloatCases<f16>()))));
+
 // Tests for errors on overflow/underflow of binary operations with abstract numbers
 struct OverflowCase {
     ast::BinaryOp op;
@@ -3618,7 +3690,16 @@ INSTANTIATE_TEST_SUITE_P(
                      Mat({AFloat::Highest(), 1.0_a},   //
                          {AFloat::Highest(), 1.0_a}),  //
                      Mat({1.0_a, 1.0_a},               //
-                         {1.0_a, 1.0_a})}
+                         {1.0_a, 1.0_a})},
+
+        // Divide by zero
+        OverflowCase{ast::BinaryOp::kDivide, Val(123_a), Val(0_a)},
+        OverflowCase{ast::BinaryOp::kDivide, Val(-123_a), Val(-0_a)},
+        OverflowCase{ast::BinaryOp::kDivide, Val(-123_a), Val(0_a)},
+        OverflowCase{ast::BinaryOp::kDivide, Val(123_a), Val(-0_a)},
+
+        // Most negative value divided by -1
+        OverflowCase{ast::BinaryOp::kDivide, Val(AInt::Lowest()), Val(-1_a)}
 
         ));
 
@@ -3749,7 +3830,7 @@ TEST_P(ResolverConstEvalBuiltinTest, Test) {
                 EXPECT_EQ(c.result_pos_or_neg ? Abs(actual) : actual, result);
             }
 
-            if constexpr (IsInteger<UnwrapNumber<T>>) {
+            if constexpr (IsIntegral<UnwrapNumber<T>>) {
                 // Check that the constant's integer doesn't contain unexpected data in the MSBs
                 // that are outside of the bit-width of T.
                 EXPECT_EQ(value->As<AInt>(), AInt(result));

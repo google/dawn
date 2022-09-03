@@ -72,9 +72,9 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
       acc[index] = 0.0f;
     }
   }
-  const uint ColPerThreadA = (64u / 16u);
+  const uint ColPerThreadA = 4u;
   const uint tileColA = (local_id.x * ColPerThreadA);
-  const uint RowPerThreadB = (64u / 16u);
+  const uint RowPerThreadB = 4u;
   const uint tileRowB = (local_id.y * RowPerThreadB);
   {
     [loop] for(uint t = 0u; (t < numTiles); t = (t + 1u)) {

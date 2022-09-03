@@ -1196,6 +1196,54 @@ ConstEval::ConstantResult ConstEval::OpMultiplyMatMat(const sem::Type* ty,
     return CreateComposite(builder, ty, result_mat);
 }
 
+ConstEval::ConstantResult ConstEval::OpDivide(const sem::Type*,
+                                              utils::VectorRef<const sem::Constant*> args,
+                                              const Source& source) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        auto create = [&](auto i, auto j) -> const Constant* {
+            using NumberT = decltype(i);
+            NumberT result;
+            if constexpr (std::is_same_v<NumberT, AInt> || std::is_same_v<NumberT, AFloat>) {
+                // Check for over/underflow for abstract values
+                if (auto r = CheckedDiv(i, j)) {
+                    result = r->value;
+                } else {
+                    AddError(OverflowErrorMessage(i, "/", j), source);
+                    return nullptr;
+                }
+            } else {
+                using T = UnwrapNumber<NumberT>;
+                auto divide_values = [](T lhs, T rhs) {
+                    if constexpr (std::is_integral_v<T>) {
+                        // For integers, lhs / 0 returns lhs
+                        if (rhs == 0) {
+                            return lhs;
+                        }
+
+                        if constexpr (std::is_signed_v<T>) {
+                            // For signed integers, for lhs / -1, return lhs if lhs is the
+                            // most negative value
+                            if (rhs == -1 && lhs == std::numeric_limits<T>::min()) {
+                                return lhs;
+                            }
+                        }
+                    }
+                    return lhs / rhs;
+                };
+                result = divide_values(i.value, j.value);
+            }
+            return CreateElement(builder, c0->Type(), result);
+        };
+        return Dispatch_fia_fiu32_f16(create, c0, c1);
+    };
+
+    auto r = TransformBinaryElements(builder, transform, args[0], args[1]);
+    if (builder.Diagnostics().contains_errors()) {
+        return utils::Failure;
+    }
+    return r;
+}
+
 ConstEval::ConstantResult ConstEval::atan2(const sem::Type*,
                                            utils::VectorRef<const sem::Constant*> args,
                                            const Source&) {

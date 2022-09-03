@@ -66,9 +66,9 @@ void tint_symbol_inner(uint3 local_id, uint3 global_id, uint local_invocation_in
   for(uint index = 0u; (index < 16u); index = (index + 1u)) {
     acc[index] = 0.0f;
   }
-  uint const ColPerThreadA = (64u / 16u);
+  uint const ColPerThreadA = 4u;
   uint const tileColA = (local_id[0] * ColPerThreadA);
-  uint const RowPerThreadB = (64u / 16u);
+  uint const RowPerThreadB = 4u;
   uint const tileRowB = (local_id[1] * RowPerThreadB);
   for(uint t = 0u; (t < numTiles); t = (t + 1u)) {
     for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
