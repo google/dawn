@@ -537,6 +537,60 @@ INSTANTIATE_TEST_SUITE_P(
         ////////////////////////////////////////////////////////////////////////
     }));
 
+using CheckedDivTest_AInt = testing::TestWithParam<BinaryCheckedCase_AInt>;
+TEST_P(CheckedDivTest_AInt, Test) {
+    auto expect = std::get<0>(GetParam());
+    auto a = std::get<1>(GetParam());
+    auto b = std::get<2>(GetParam());
+    EXPECT_EQ(CheckedDiv(a, b), expect) << std::hex << "0x" << a << " - 0x" << b;
+}
+INSTANTIATE_TEST_SUITE_P(
+    CheckedDivTest_AInt,
+    CheckedDivTest_AInt,
+    testing::ValuesIn(std::vector<BinaryCheckedCase_AInt>{
+        {AInt(0), AInt(0), AInt(1)},
+        {AInt(1), AInt(1), AInt(1)},
+        {AInt(1), AInt(1), AInt(1)},
+        {AInt(2), AInt(2), AInt(1)},
+        {AInt(2), AInt(4), AInt(2)},
+        {AInt::Highest(), AInt::Highest(), AInt(1)},
+        {AInt::Lowest(), AInt::Lowest(), AInt(1)},
+        {AInt(1), AInt::Highest(), AInt::Highest()},
+        {AInt(0), AInt(0), AInt::Highest()},
+        {AInt(0), AInt(0), AInt::Lowest()},
+        {OVERFLOW, AInt(123), AInt(0)},
+        {OVERFLOW, AInt(-123), AInt(0)},
+        ////////////////////////////////////////////////////////////////////////
+    }));
+
+using CheckedDivTest_AFloat = testing::TestWithParam<BinaryCheckedCase_AFloat>;
+TEST_P(CheckedDivTest_AFloat, Test) {
+    auto expect = std::get<0>(GetParam());
+    auto a = std::get<1>(GetParam());
+    auto b = std::get<2>(GetParam());
+    EXPECT_EQ(CheckedDiv(a, b), expect) << std::hex << "0x" << a << " - 0x" << b;
+}
+INSTANTIATE_TEST_SUITE_P(
+    CheckedDivTest_AFloat,
+    CheckedDivTest_AFloat,
+    testing::ValuesIn(std::vector<BinaryCheckedCase_AFloat>{
+        {AFloat(0), AFloat(0), AFloat(1)},
+        {AFloat(1), AFloat(1), AFloat(1)},
+        {AFloat(1), AFloat(1), AFloat(1)},
+        {AFloat(2), AFloat(2), AFloat(1)},
+        {AFloat(2), AFloat(4), AFloat(2)},
+        {AFloat::Highest(), AFloat::Highest(), AFloat(1)},
+        {AFloat::Lowest(), AFloat::Lowest(), AFloat(1)},
+        {AFloat(1), AFloat::Highest(), AFloat::Highest()},
+        {AFloat(0), AFloat(0), AFloat::Highest()},
+        {-AFloat(0), AFloat(0), AFloat::Lowest()},
+        {OVERFLOW, AFloat(123), AFloat(0)},
+        {OVERFLOW, AFloat(123), AFloat(-0)},
+        {OVERFLOW, AFloat(-123), AFloat(0)},
+        {OVERFLOW, AFloat(-123), AFloat(-0)},
+        ////////////////////////////////////////////////////////////////////////
+    }));
+
 using TernaryCheckedCase = std::tuple<std::optional<AInt>, AInt, AInt, AInt>;
 
 using CheckedMaddTest_AInt = testing::TestWithParam<TernaryCheckedCase>;

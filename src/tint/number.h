@@ -479,6 +479,28 @@ inline std::optional<AFloat> CheckedMul(AFloat a, AFloat b) {
     return AFloat{result};
 }
 
+/// @returns a / b, or an empty optional if the resulting value overflowed the AInt
+inline std::optional<AInt> CheckedDiv(AInt a, AInt b) {
+    if (b == 0) {
+        return {};
+    }
+
+    if (b == -1 && a == AInt::Lowest()) {
+        return {};
+    }
+
+    return AInt{a.value / b.value};
+}
+
+/// @returns a / b, or an empty optional if the resulting value overflowed the AFloat
+inline std::optional<AFloat> CheckedDiv(AFloat a, AFloat b) {
+    auto result = a.value / b.value;
+    if (!std::isfinite(result)) {
+        return {};
+    }
+    return AFloat{result};
+}
+
 /// @returns a * b + c, or an empty optional if the value overflowed the AInt
 inline std::optional<AInt> CheckedMadd(AInt a, AInt b, AInt c) {
     // https://gcc.gnu.org/bugzilla/show_bug.cgi?id=80635
