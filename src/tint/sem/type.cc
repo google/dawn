@@ -105,7 +105,7 @@ bool Type::is_integer_scalar() const {
 }
 
 bool Type::is_signed_integer_scalar() const {
-    return Is<I32>();
+    return IsAnyOf<I32, AbstractInt>();
 }
 
 bool Type::is_unsigned_integer_scalar() const {
@@ -113,7 +113,7 @@ bool Type::is_unsigned_integer_scalar() const {
 }
 
 bool Type::is_signed_integer_vector() const {
-    return Is([](const Vector* v) { return v->type()->IsAnyOf<I32>(); });
+    return Is([](const Vector* v) { return v->type()->IsAnyOf<I32, AbstractInt>(); });
 }
 
 bool Type::is_unsigned_integer_vector() const {
@@ -125,7 +125,7 @@ bool Type::is_unsigned_scalar_or_vector() const {
 }
 
 bool Type::is_signed_scalar_or_vector() const {
-    return Is<I32>() || is_signed_integer_vector();
+    return IsAnyOf<I32, AbstractInt>() || is_signed_integer_vector();
 }
 
 bool Type::is_integer_scalar_or_vector() const {
