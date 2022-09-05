@@ -518,7 +518,7 @@ struct Std140::State {
             },
             [&](Default) {
                 TINT_ICE(Transform, b.Diagnostics())
-                    << "unhandled type for conversion name: " << b.FriendlyName(ty);
+                    << "unhandled type for conversion name: " << ctx.src->FriendlyName(ty);
                 return "";
             });
     }
@@ -600,7 +600,7 @@ struct Std140::State {
                 },
                 [&](Default) {
                     TINT_ICE(Transform, b.Diagnostics())
-                        << "unhandled type for conversion: " << b.FriendlyName(ty);
+                        << "unhandled type for conversion: " << ctx.src->FriendlyName(ty);
                 });
 
             // Generate the function
@@ -879,7 +879,7 @@ struct Std140::State {
                 },  //
                 [&](Default) -> ExprTypeName {
                     TINT_ICE(Transform, b.Diagnostics())
-                        << "unhandled type for access chain: " << b.FriendlyName(ty);
+                        << "unhandled type for access chain: " << ctx.src->FriendlyName(ty);
                     return {};
                 });
         }
@@ -900,7 +900,7 @@ struct Std140::State {
                 },  //
                 [&](Default) -> ExprTypeName {
                     TINT_ICE(Transform, b.Diagnostics())
-                        << "unhandled type for access chain: " << b.FriendlyName(ty);
+                        << "unhandled type for access chain: " << ctx.src->FriendlyName(ty);
                     return {};
                 });
         }
@@ -929,7 +929,7 @@ struct Std140::State {
             },  //
             [&](Default) -> ExprTypeName {
                 TINT_ICE(Transform, b.Diagnostics())
-                    << "unhandled type for access chain: " << b.FriendlyName(ty);
+                    << "unhandled type for access chain: " << ctx.src->FriendlyName(ty);
                 return {};
             });
     }

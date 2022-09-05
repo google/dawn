@@ -151,6 +151,21 @@ class Program {
     /// the type declaration has no resolved type.
     const sem::Type* TypeOf(const ast::TypeDecl* type_decl) const;
 
+    /// @param type a type
+    /// @returns the name for `type` that closely resembles how it would be
+    /// declared in WGSL.
+    std::string FriendlyName(const ast::Type* type) const;
+
+    /// @param type a type
+    /// @returns the name for `type` that closely resembles how it would be
+    /// declared in WGSL.
+    std::string FriendlyName(const sem::Type* type) const;
+
+    /// Overload of FriendlyName, which removes an ambiguity when passing nullptr.
+    /// Simplifies test code.
+    /// @returns "<null>"
+    std::string FriendlyName(std::nullptr_t) const;
+
     /// A function that can be used to print a program
     using Printer = std::string (*)(const Program*);
 
