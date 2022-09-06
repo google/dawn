@@ -54,7 +54,7 @@ struct Hasher<DynamicIndex> {
     /// The hash function for the DynamicIndex
     /// @param d the DynamicIndex to hash
     /// @return the hash for the given DynamicIndex
-    uint64_t operator()(const DynamicIndex& d) const { return utils::Hash(d.slot); }
+    size_t operator()(const DynamicIndex& d) const { return utils::Hash(d.slot); }
 };
 
 }  // namespace tint::utils
@@ -149,9 +149,7 @@ struct Std140::State {
         struct Hasher {
             /// @param fn the LoadFnKey to hash
             /// @return the hash for the given LoadFnKey
-            uint64_t operator()(const LoadFnKey& fn) const {
-                return utils::Hash(fn.var, fn.indices);
-            }
+            size_t operator()(const LoadFnKey& fn) const { return utils::Hash(fn.var, fn.indices); }
         };
 
         /// Equality operator
