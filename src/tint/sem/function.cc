@@ -40,10 +40,12 @@ utils::VectorRef<const Parameter*> SetOwner(utils::VectorRef<Parameter*> paramet
 
 Function::Function(const ast::Function* declaration,
                    Type* return_type,
+                   std::optional<uint32_t> return_location,
                    utils::VectorRef<Parameter*> parameters)
     : Base(return_type, SetOwner(std::move(parameters), this), EvaluationStage::kRuntime),
       declaration_(declaration),
-      workgroup_size_{WorkgroupDimension{1}, WorkgroupDimension{1}, WorkgroupDimension{1}} {}
+      workgroup_size_{WorkgroupDimension{1}, WorkgroupDimension{1}, WorkgroupDimension{1}},
+      return_location_(return_location) {}
 
 Function::~Function() = default;
 

@@ -802,6 +802,45 @@ TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
     EXPECT_EQ(vars[2]->Declaration(), priv_var);
 }
 
+TEST_F(ResolverTest, Function_ReturnType_Location) {
+    auto* func = Func("my_func", utils::Empty, ty.f32(),
+                      utils::Vector{
+                          Return(1_f),
+                      },
+                      utils::Vector{
+                          Stage(ast::PipelineStage::kFragment),
+                      },
+                      utils::Vector{
+                          Location(2),
+                      });
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(func);
+    ASSERT_NE(nullptr, sem);
+    EXPECT_EQ(2u, sem->ReturnLocation());
+}
+
+TEST_F(ResolverTest, Function_ReturnType_NoLocation) {
+    GlobalVar("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    auto* func = Func("my_func", utils::Empty, ty.vec4<f32>(),
+                      utils::Vector{
+                          Return("my_vec"),
+                      },
+                      utils::Vector{
+                          Stage(ast::PipelineStage::kVertex),
+                      },
+                      utils::Vector{
+                          Builtin(ast::BuiltinValue::kPosition),
+                      });
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(func);
+    ASSERT_NE(nullptr, sem);
+    EXPECT_FALSE(sem->ReturnLocation());
+}
+
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
     auto* s = Structure("S", utils::Vector{Member("m", ty.u32())});
 

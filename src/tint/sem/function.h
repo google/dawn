@@ -16,6 +16,7 @@
 #define SRC_TINT_SEM_FUNCTION_H_
 
 #include <array>
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -60,9 +61,11 @@ class Function final : public Castable<Function, CallTarget> {
     /// Constructor
     /// @param declaration the ast::Function
     /// @param return_type the return type of the function
+    /// @param return_location the location value for the return, if provided
     /// @param parameters the parameters to the function
     Function(const ast::Function* declaration,
              Type* return_type,
+             std::optional<uint32_t> return_location,
              utils::VectorRef<Parameter*> parameters);
 
     /// Destructor
@@ -254,6 +257,9 @@ class Function final : public Castable<Function, CallTarget> {
     /// @return the behaviors of this function
     sem::Behaviors& Behaviors() { return behaviors_; }
 
+    /// @return the location for the return, if provided
+    std::optional<uint32_t> ReturnLocation() const { return return_location_; }
+
   private:
     Function(const Function&) = delete;
     Function(Function&&) = delete;
@@ -274,6 +280,8 @@ class Function final : public Castable<Function, CallTarget> {
     std::vector<const Function*> ancestor_entry_points_;
     bool has_discard_ = false;
     sem::Behaviors behaviors_{sem::Behavior::kNext};
+
+    std::optional<uint32_t> return_location_;
 };
 
 }  // namespace tint::sem

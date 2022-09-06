@@ -906,6 +906,19 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
         return_type = builder_->create<sem::Void>();
     }
 
+    // Determine if the return type has a location
+    std::optional<uint32_t> return_location;
+    for (auto* attr : decl->return_type_attributes) {
+        Mark(attr);
+
+        if (auto* a = attr->As<ast::LocationAttribute>()) {
+            return_location = a->value;
+        }
+    }
+    if (!validator_.NoDuplicateAttributes(decl->attributes)) {
+        return nullptr;
+    }
+
     if (auto* str = return_type->As<sem::Struct>()) {
         if (!ApplyStorageClassUsageToType(ast::StorageClass::kNone, str, decl->source)) {
             AddNote(
@@ -929,7 +942,8 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
         }
     }
 
-    auto* func = builder_->create<sem::Function>(decl, return_type, std::move(parameters));
+    auto* func =
+        builder_->create<sem::Function>(decl, return_type, return_location, std::move(parameters));
     builder_->Sem().Add(decl, func);
 
     TINT_SCOPED_ASSIGNMENT(current_function_, func);
@@ -968,13 +982,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     for (auto* attr : decl->attributes) {
         Mark(attr);
     }
-    if (!validator_.NoDuplicateAttributes(decl->attributes)) {
-        return nullptr;
-    }
 
-    for (auto* attr : decl->return_type_attributes) {
-        Mark(attr);
-    }
     if (!validator_.NoDuplicateAttributes(decl->return_type_attributes)) {
         return nullptr;
     }
