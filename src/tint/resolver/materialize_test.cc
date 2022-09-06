@@ -954,14 +954,6 @@ constexpr Method kScalarMethods[] = {
     Method::kBitcastF32Arg,
 };
 
-/// Methods that support abstract-integer materialization
-/// Note: Doesn't contain kWorkgroupSize or kArrayLength as they have tighter constraints on the
-///       range of allowed integer values.
-constexpr Method kAIntMethods[] = {
-    Method::kSwitch,
-    Method::kIndex,
-};
-
 /// Methods that support vector materialization
 constexpr Method kVectorMethods[] = {
     Method::kLet,          Method::kVar, Method::kBuiltinArg, Method::kBitcastVec3F32Arg,
@@ -1039,11 +1031,36 @@ INSTANTIATE_TEST_SUITE_P(
             Types<f32M, AFloatM>(AFloat(-kSubnormalF32), -kSubnormalF32),                       //
         })));
 
+INSTANTIATE_TEST_SUITE_P(MaterializeAInt,
+                         MaterializeAbstractNumericToDefaultType,
+                         testing::Combine(testing::Values(Expectation::kMaterialize),
+                                          testing::Values(Method::kWorkgroupSize,
+                                                          Method::kArrayLength),
+                                          testing::ValuesIn(std::vector<Data>{
+                                              Types<i32, AInt>(1_a, 1.0),          //
+                                              Types<i32, AInt>(10_a, 10.0),        //
+                                              Types<i32, AInt>(100_a, 100.0),      //
+                                              Types<i32, AInt>(1000_a, 1000.0),    //
+                                              Types<i32, AInt>(10000_a, 10000.0),  //
+                                              Types<i32, AInt>(65535_a, 65535.0),  //
+                                          })));
+
+INSTANTIATE_TEST_SUITE_P(MaterializeAIntIndex,
+                         MaterializeAbstractNumericToDefaultType,
+                         testing::Combine(testing::Values(Expectation::kMaterialize),
+                                          testing::Values(Method::kIndex),
+                                          testing::ValuesIn(std::vector<Data>{
+                                              Types<i32, AInt>(0_a, 0.0),  //
+                                              Types<i32, AInt>(1_a, 1.0),  //
+                                              Types<i32, AInt>(2_a, 2.0),  //
+                                              Types<i32, AInt>(3_a, 3.0),  //
+                                          })));
+
 INSTANTIATE_TEST_SUITE_P(
-    MaterializeAInt,
+    MaterializeAIntSwitch,
     MaterializeAbstractNumericToDefaultType,
     testing::Combine(testing::Values(Expectation::kMaterialize),
-                     testing::ValuesIn(kAIntMethods),
+                     testing::Values(Method::kSwitch),
                      testing::ValuesIn(std::vector<Data>{
                          Types<i32, AInt>(0_a, 0.0),                              //
                          Types<i32, AInt>(10_a, 10.0),                            //
@@ -1133,7 +1150,10 @@ INSTANTIATE_TEST_SUITE_P(
     AIntValueCannotBeRepresented,
     MaterializeAbstractNumericToDefaultType,
     testing::Combine(testing::Values(Expectation::kValueCannotBeRepresented),
-                     testing::ValuesIn(kAIntMethods),
+                     testing::Values(Method::kWorkgroupSize,
+                                     Method::kArrayLength,
+                                     Method::kSwitch,
+                                     Method::kIndex),
                      testing::ValuesIn(std::vector<Data>{
                          Types<i32, AInt>(0_a, static_cast<double>(i32::kHighestValue) + 1),  //
                          Types<i32, AInt>(0_a, static_cast<double>(i32::kLowestValue) - 1),   //

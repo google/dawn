@@ -102,7 +102,7 @@ TEST_F(ResolverIndexAccessorTest, Matrix_BothDimension_Dynamic) {
 TEST_F(ResolverIndexAccessorTest, Matrix) {
     GlobalVar("my_var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
 
-    auto* acc = IndexAccessor("my_var", 2_i);
+    auto* acc = IndexAccessor("my_var", 1_i);
     WrapInFunction(acc);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -123,7 +123,7 @@ TEST_F(ResolverIndexAccessorTest, Matrix) {
 TEST_F(ResolverIndexAccessorTest, Matrix_BothDimensions) {
     GlobalVar("my_var", ty.mat2x3<f32>(), ast::StorageClass::kPrivate);
 
-    auto* acc = IndexAccessor(IndexAccessor("my_var", 2_i), 1_i);
+    auto* acc = IndexAccessor(IndexAccessor("my_var", 0_i), 1_i);
     WrapInFunction(acc);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

@@ -1584,7 +1584,7 @@ fn f() {
   let l_a_3_a_1       : Inner            = a[3].a[1];
   let l_a_0_a_2_m     : mat4x2<f32>      = a[0].a[2].m;
   let l_a_1_a_3_m_0   : vec2<f32>        = a[1].a[3].m[0];
-  let l_a_2_a_0_m_1_2 : f32              = a[2].a[0].m[1][2];
+  let l_a_2_a_0_m_1_0 : f32              = a[2].a[0].m[1][0];
 }
 )";
 
@@ -1647,7 +1647,7 @@ fn f() {
   let l_a_3_a_1 : Inner = conv_Inner(a[3u].a[1u]);
   let l_a_0_a_2_m : mat4x2<f32> = load_a_0_a_2_m();
   let l_a_1_a_3_m_0 : vec2<f32> = a[1u].a[3u].m_0;
-  let l_a_2_a_0_m_1_2 : f32 = a[2u].a[0u].m_1[2u];
+  let l_a_2_a_0_m_1_0 : f32 = a[2u].a[0u].m_1[0u];
 }
 )";
 
@@ -2029,7 +2029,7 @@ struct S {
 @group(0) @binding(0) var<uniform> u : S;
 
 fn f() {
-    for (var i = u32(u.m[0][1]); i < u32(u.m[i][2]); i += u32(u.m[1][i])) {
+    for (var i = u32(u.m[0][0]); i < u32(u.m[i][1]); i += u32(u.m[1][i])) {
     }
 }
 )";
@@ -2050,16 +2050,16 @@ struct S_std140 {
 
 @group(0) @binding(0) var<uniform> u : S_std140;
 
-fn load_u_m_p0_2(p0 : u32) -> f32 {
+fn load_u_m_p0_1(p0 : u32) -> f32 {
   switch(p0) {
     case 0u: {
-      return u.m_0[2u];
+      return u.m_0[1u];
     }
     case 1u: {
-      return u.m_1[2u];
+      return u.m_1[1u];
     }
     case 2u: {
-      return u.m_2[2u];
+      return u.m_2[1u];
     }
     default: {
       return f32();
@@ -2068,7 +2068,7 @@ fn load_u_m_p0_2(p0 : u32) -> f32 {
 }
 
 fn f() {
-  for(var i = u32(u.m_0[1u]); (i < u32(load_u_m_p0_2(u32(i)))); i += u32(u.m_1[i])) {
+  for(var i = u32(u.m_0[0u]); (i < u32(load_u_m_p0_1(u32(i)))); i += u32(u.m_1[i])) {
   }
 }
 )";

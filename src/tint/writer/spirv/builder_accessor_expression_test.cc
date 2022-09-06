@@ -653,11 +653,11 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(BuilderTest, Runtime_IndexAccessor_Nested_Array_f32) {
-    // var pos : array<array<f32, 2>, 3u>;
+TEST_F(BuilderTest, Runtime_IndexAccessor_Array_Vec3_f32) {
+    // var pos : array<vec3<f32>, 3u>;
     // var x = pos[1u][2u];
 
-    auto* pos = Var("pos", ty.array(ty.vec2<f32>(), 3_u));
+    auto* pos = Var("pos", ty.array(ty.vec3<f32>(), 3_a));
     auto* x = Var("x", IndexAccessor(IndexAccessor(pos, 1_u), 2_u));
     WrapInFunction(pos, x);
 
@@ -668,7 +668,7 @@ TEST_F(BuilderTest, Runtime_IndexAccessor_Nested_Array_f32) {
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %9 = OpTypeFloat 32
-%8 = OpTypeVector %9 2
+%8 = OpTypeVector %9 3
 %10 = OpTypeInt 32 0
 %11 = OpConstant %10 3
 %7 = OpTypeArray %8 %11
@@ -693,11 +693,11 @@ OpReturn
 }
 
 TEST_F(BuilderTest, Dynamic_IndexAccessor_Nested_Array_f32) {
-    // var pos : array<array<f32, 2>, 3u>;
+    // var pos : array<array<f32, 4>, 3u>;
     // var one = 1u;
     // var x = pos[one][2u];
 
-    auto* pos = Var("pos", ty.array(ty.vec2<f32>(), 3_u));
+    auto* pos = Var("pos", ty.array(ty.array<f32, 4>(), 3_u));
     auto* one = Var("one", Expr(2_u));
     auto* x = Var("x", IndexAccessor(IndexAccessor(pos, "one"), 2_u));
     WrapInFunction(pos, one, x);
@@ -709,27 +709,28 @@ TEST_F(BuilderTest, Dynamic_IndexAccessor_Nested_Array_f32) {
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeVoid
 %1 = OpTypeFunction %2
 %9 = OpTypeFloat 32
-%8 = OpTypeVector %9 2
 %10 = OpTypeInt 32 0
-%11 = OpConstant %10 3
-%7 = OpTypeArray %8 %11
+%11 = OpConstant %10 4
+%8 = OpTypeArray %9 %11
+%12 = OpConstant %10 3
+%7 = OpTypeArray %8 %12
 %6 = OpTypePointer Function %7
-%12 = OpConstantNull %7
-%13 = OpConstant %10 2
-%15 = OpTypePointer Function %10
-%16 = OpConstantNull %10
-%18 = OpTypePointer Function %9
-%22 = OpConstantNull %9
+%13 = OpConstantNull %7
+%14 = OpConstant %10 2
+%16 = OpTypePointer Function %10
+%17 = OpConstantNull %10
+%19 = OpTypePointer Function %9
+%23 = OpConstantNull %9
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"(%5 = OpVariable %6 Function %12
-%14 = OpVariable %15 Function %16
-%21 = OpVariable %18 Function %22
+    EXPECT_EQ(DumpInstructions(b.functions()[0].variables()), R"(%5 = OpVariable %6 Function %13
+%15 = OpVariable %16 Function %17
+%22 = OpVariable %19 Function %23
 )");
-    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %14 %13
-%17 = OpLoad %10 %14
-%19 = OpAccessChain %18 %5 %17 %13
-%20 = OpLoad %9 %19
-OpStore %21 %20
+    EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"(OpStore %15 %14
+%18 = OpLoad %10 %15
+%20 = OpAccessChain %19 %5 %18 %14
+%21 = OpLoad %9 %20
+OpStore %22 %21
 OpReturn
 )");
 

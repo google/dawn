@@ -466,14 +466,14 @@ TEST_F(ResolverVariableTest, LocalLet_InheritsAccessFromOriginatingVariable) {
     // }
     // @group(0) @binding(0) var<storage, read_write> s : S;
     // fn f() {
-    //   let p = &s.inner.arr[4];
+    //   let p = &s.inner.arr[3];
     // }
     auto* inner = Structure("Inner", utils::Vector{Member("arr", ty.array<i32, 4>())});
     auto* buf = Structure("S", utils::Vector{Member("inner", ty.Of(inner))});
     auto* storage = GlobalVar("s", ty.Of(buf), ast::StorageClass::kStorage, ast::Access::kReadWrite,
                               Binding(0_a), Group(0_a));
 
-    auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 4_i);
+    auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 3_i);
     auto* ptr = Let("p", AddressOf(expr));
 
     WrapInFunction(ptr);
