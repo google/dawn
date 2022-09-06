@@ -174,7 +174,6 @@ deps = {
   },
 
   'tools/golang': {
-    'condition': 'dawn_node',
     'packages': [{
       'package': 'infra/3pp/tools/go/${{platform}}',
       'version': Var('dawn_go_version'),
