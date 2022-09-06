@@ -99,6 +99,7 @@ template <typename Vec, typename... Vecs>
     return std::move(v1);
 }
 
+// Concats vectors `vs` into `v1`
 template <typename Vec, typename... Vecs>
 void ConcatInto(Vec& v1, Vecs&&... vs) {
     auto total_size = v1.size() + (vs.size() + ...);
@@ -106,6 +107,7 @@ void ConcatInto(Vec& v1, Vecs&&... vs) {
     (std::move(vs.begin(), vs.end(), std::back_inserter(v1)), ...);
 }
 
+// Concats vectors `vs` into `v1` iff `condition` is true
 template <bool condition, typename Vec, typename... Vecs>
 void ConcatIntoIf([[maybe_unused]] Vec& v1, [[maybe_unused]] Vecs&&... vs) {
     if constexpr (condition) {

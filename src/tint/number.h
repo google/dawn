@@ -78,16 +78,18 @@ constexpr bool IsFloatingPoint =
     std::is_floating_point_v<U> || std::is_same_v<T, detail::NumberKindF16>;
 
 /// Evaluates to true iff T or Number<T> is an integral type.
-template <typename T, typename U = std::conditional_t<IsNumber<T>, UnwrapNumber<T>, T>>
-constexpr bool IsIntegral = std::is_integral_v<U>;
+template <typename T>
+constexpr bool IsIntegral = std::is_integral_v<UnwrapNumber<T>>;
 
 /// Evaluates to true iff T or Number<T> is a signed integer type.
-template <typename T, typename U = std::conditional_t<IsNumber<T>, UnwrapNumber<T>, T>>
-constexpr bool IsSignedIntegral = std::is_integral_v<U> && std::is_signed_v<U>;
+template <typename T>
+constexpr bool IsSignedIntegral =
+    std::is_integral_v<UnwrapNumber<T>> && std::is_signed_v<UnwrapNumber<T>>;
 
 /// Evaluates to true iff T or Number<T> is an unsigned integer type.
-template <typename T, typename U = std::conditional_t<IsNumber<T>, UnwrapNumber<T>, T>>
-constexpr bool IsUnsignedIntegral = std::is_integral_v<U> && std::is_unsigned_v<U>;
+template <typename T>
+constexpr bool IsUnsignedIntegral =
+    std::is_integral_v<UnwrapNumber<T>> && std::is_unsigned_v<UnwrapNumber<T>>;
 
 /// Evaluates to true iff T is an integer type, floating-point type or is NumberKindF16.
 template <typename T>
