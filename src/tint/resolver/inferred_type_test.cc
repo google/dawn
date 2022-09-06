@@ -149,11 +149,11 @@ TEST_F(ResolverInferredTypeTest, InferStruct_Pass) {
     auto* member = Member("x", ty.i32());
     auto* str = Structure("S", utils::Vector{member});
 
-    auto* expected_type =
-        create<sem::Struct>(str, str->name,
-                            sem::StructMemberList{create<sem::StructMember>(
-                                member, member->symbol, create<sem::I32>(), 0u, 0u, 0u, 4u)},
-                            0u, 4u, 4u);
+    auto* expected_type = create<sem::Struct>(
+        str, str->name,
+        sem::StructMemberList{create<sem::StructMember>(member, member->symbol, create<sem::I32>(),
+                                                        0u, 0u, 0u, 4u, std::nullopt)},
+        0u, 4u, 4u);
 
     auto* ctor_expr = Construct(ty.Of(str));
 

@@ -17,6 +17,7 @@
 
 #include <stdint.h>
 
+#include <optional>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -180,13 +181,15 @@ class StructMember final : public Castable<StructMember, Node> {
     /// @param offset the byte offset from the base of the structure
     /// @param align the byte alignment of the member
     /// @param size the byte size of the member
+    /// @param location the location attribute, if present
     StructMember(const ast::StructMember* declaration,
                  Symbol name,
                  const sem::Type* type,
                  uint32_t index,
                  uint32_t offset,
                  uint32_t align,
-                 uint32_t size);
+                 uint32_t size,
+                 std::optional<uint32_t> location);
 
     /// Destructor
     ~StructMember() override;
@@ -219,6 +222,9 @@ class StructMember final : public Castable<StructMember, Node> {
     /// @returns byte size
     uint32_t Size() const { return size_; }
 
+    /// @returns the location, if set
+    std::optional<uint32_t> Location() const { return location_; }
+
   private:
     const ast::StructMember* const declaration_;
     const Symbol name_;
@@ -228,6 +234,7 @@ class StructMember final : public Castable<StructMember, Node> {
     const uint32_t offset_;
     const uint32_t align_;
     const uint32_t size_;
+    const std::optional<uint32_t> location_;
 };
 
 }  // namespace tint::sem

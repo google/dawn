@@ -161,14 +161,16 @@ StructMember::StructMember(const ast::StructMember* declaration,
                            uint32_t index,
                            uint32_t offset,
                            uint32_t align,
-                           uint32_t size)
+                           uint32_t size,
+                           std::optional<uint32_t> location)
     : declaration_(declaration),
       name_(name),
       type_(type),
       index_(index),
       offset_(offset),
       align_(align),
-      size_(size) {}
+      size_(size),
+      location_(location) {}
 
 StructMember::~StructMember() = default;
 

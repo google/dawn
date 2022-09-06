@@ -793,7 +793,8 @@ const sem::Struct* build_struct(MatchState& state,
             /* index */ static_cast<uint32_t>(members.size()),
             /* offset */ offset,
             /* align */ align,
-            /* size */ size));
+            /* size */ size,
+            /* location */ std::nullopt));
         offset += size;
     }
     uint32_t size_without_padding = offset;
