@@ -716,9 +716,14 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
         }
     }
 
-    auto* sem = builder_->create<sem::Parameter>(param, index, ty, ast::StorageClass::kNone,
-                                                 ast::Access::kUndefined,
-                                                 sem::ParameterUsage::kNone, binding_point);
+    std::optional<uint32_t> location;
+    if (auto* l = ast::GetAttribute<ast::LocationAttribute>(param->attributes)) {
+        location = l->value;
+    }
+
+    auto* sem = builder_->create<sem::Parameter>(
+        param, index, ty, ast::StorageClass::kNone, ast::Access::kUndefined,
+        sem::ParameterUsage::kNone, binding_point, location);
     builder_->Sem().Add(param, sem);
     return sem;
 }

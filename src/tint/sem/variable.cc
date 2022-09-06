@@ -73,11 +73,13 @@ Parameter::Parameter(const ast::Parameter* declaration,
                      ast::StorageClass storage_class,
                      ast::Access access,
                      const ParameterUsage usage /* = ParameterUsage::kNone */,
-                     sem::BindingPoint binding_point /* = {} */)
+                     sem::BindingPoint binding_point /* = {} */,
+                     std::optional<uint32_t> location /* = std::nullopt */)
     : Base(declaration, type, EvaluationStage::kRuntime, storage_class, access, nullptr),
       index_(index),
       usage_(usage),
-      binding_point_(binding_point) {}
+      binding_point_(binding_point),
+      location_(location) {}
 
 Parameter::~Parameter() = default;
 

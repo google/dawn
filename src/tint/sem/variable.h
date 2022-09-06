@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_SEM_VARIABLE_H_
 #define SRC_TINT_SEM_VARIABLE_H_
 
+#include <optional>
 #include <utility>
 #include <vector>
 
@@ -189,13 +190,15 @@ class Parameter final : public Castable<Parameter, Variable> {
     /// @param access the variable access control type
     /// @param usage the semantic usage for the parameter
     /// @param binding_point the optional resource binding point of the parameter
+    /// @param location the location value, if set
     Parameter(const ast::Parameter* declaration,
               uint32_t index,
               const sem::Type* type,
               ast::StorageClass storage_class,
               ast::Access access,
               const ParameterUsage usage = ParameterUsage::kNone,
-              sem::BindingPoint binding_point = {});
+              sem::BindingPoint binding_point = {},
+              std::optional<uint32_t> location = std::nullopt);
 
     /// Destructor
     ~Parameter() override;
@@ -222,12 +225,16 @@ class Parameter final : public Castable<Parameter, Variable> {
     /// @returns the resource binding point for the parameter
     sem::BindingPoint BindingPoint() const { return binding_point_; }
 
+    /// @returns the location value for the parameter, if set
+    std::optional<uint32_t> Location() const { return location_; }
+
   private:
     const uint32_t index_;
     const ParameterUsage usage_;
     CallTarget const* owner_ = nullptr;
     const sem::Node* shadows_ = nullptr;
     const sem::BindingPoint binding_point_;
+    const std::optional<uint32_t> location_;
 };
 
 /// VariableUser holds the semantic information for an identifier expression
