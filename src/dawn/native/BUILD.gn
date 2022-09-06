@@ -30,8 +30,7 @@ if (enable_vulkan_validation_layers) {
 use_angle = dawn_use_angle && defined(dawn_angle_dir)
 
 # Swiftshader is an optional dependency, only use it if the path has been set.
-use_swiftshader =
-    dawn_use_swiftshader && dawn_swiftshader_dir != "" && !is_android
+use_swiftshader = dawn_use_swiftshader && dawn_swiftshader_dir != ""
 if (use_swiftshader) {
   assert(dawn_enable_vulkan,
          "dawn_use_swiftshader requires dawn_enable_vulkan=true")

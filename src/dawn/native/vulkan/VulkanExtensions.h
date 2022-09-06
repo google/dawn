@@ -79,6 +79,7 @@ enum class DeviceExt {
     StorageBufferStorageClass,
     GetPhysicalDeviceProperties2,
     GetMemoryRequirements2,
+    DedicatedAllocation,
     ExternalMemoryCapabilities,
     ExternalSemaphoreCapabilities,
     ExternalMemory,
@@ -95,18 +96,20 @@ enum class DeviceExt {
     ShaderIntegerDotProduct,
     ZeroInitializeWorkgroupMemory,
 
-    // External* extensions
-    ExternalMemoryFD,
-    ExternalMemoryDmaBuf,
-    ExternalMemoryZirconHandle,
-    ExternalSemaphoreFD,
-    ExternalSemaphoreZirconHandle,
-
     // Others
     DepthClipEnable,
     ImageDrmFormatModifier,
     Swapchain,
     SubgroupSizeControl,
+    QueueFamilyForeign,
+
+    // External* extensions
+    ExternalMemoryAndroidHardwareBuffer,
+    ExternalMemoryFD,
+    ExternalMemoryDmaBuf,
+    ExternalMemoryZirconHandle,
+    ExternalSemaphoreFD,
+    ExternalSemaphoreZirconHandle,
 
     EnumCount,
 };
