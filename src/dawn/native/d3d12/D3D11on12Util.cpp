@@ -101,13 +101,15 @@ MaybeError D3D11on12ResourceCacheEntry::AcquireKeyedMutex() {
     return {};
 }
 
-void D3D11on12ResourceCacheEntry::ReleaseKeyedMutex() {
+MaybeError D3D11on12ResourceCacheEntry::ReleaseKeyedMutex() {
     ASSERT(mDXGIKeyedMutex != nullptr);
     ASSERT(mAcquireCount > 0);
     mAcquireCount--;
     if (mAcquireCount == 0) {
-        mDXGIKeyedMutex->ReleaseSync(kDXGIKeyedMutexAcquireReleaseKey);
+        DAWN_TRY(CheckHRESULT(mDXGIKeyedMutex->ReleaseSync(kDXGIKeyedMutexAcquireReleaseKey),
+                              "D3D12 releasing keyed mutex"));
     }
+    return {};
 }
 
 size_t D3D11on12ResourceCacheEntry::HashFunc::operator()(

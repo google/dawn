@@ -284,6 +284,8 @@ if (DAWN_ENABLE_D3D12)
         "d3d12/DeviceD3D12.h"
         "d3d12/ExternalImageDXGIImpl.cpp"
         "d3d12/ExternalImageDXGIImpl.h"
+        "d3d12/FenceD3D12.cpp"
+        "d3d12/FenceD3D12.h"
         "d3d12/Forward.h"
         "d3d12/GPUDescriptorHeapAllocationD3D12.cpp"
         "d3d12/GPUDescriptorHeapAllocationD3D12.h"

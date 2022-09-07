@@ -21,7 +21,12 @@
 
 #include "dawn/common/LinkedList.h"
 #include "dawn/dawn_wsi.h"
+#include "dawn/native/D3D12Backend.h"
+#include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
+#include "dawn/native/IntegerTypes.h"
+#include "dawn/native/d3d12/FenceD3D12.h"
+#include "dawn/webgpu_cpp.h"
 
 struct ID3D12Resource;
 struct ID3D12Fence;
@@ -30,15 +35,15 @@ namespace dawn::native::d3d12 {
 
 class D3D11on12ResourceCache;
 class Device;
-struct ExternalImageAccessDescriptorDXGISharedHandle;
+struct ExternalImageDXGIBeginAccessDescriptor;
 struct ExternalImageDescriptorDXGISharedHandle;
 
 class ExternalImageDXGIImpl : public LinkNode<ExternalImageDXGIImpl> {
   public:
     ExternalImageDXGIImpl(Device* backendDevice,
                           Microsoft::WRL::ComPtr<ID3D12Resource> d3d12Resource,
-                          Microsoft::WRL::ComPtr<ID3D12Fence> d3d12Fence,
-                          const WGPUTextureDescriptor* descriptor);
+                          const TextureDescriptor* textureDescriptor,
+                          bool useFenceSynchronization);
     ~ExternalImageDXGIImpl();
 
     ExternalImageDXGIImpl(const ExternalImageDXGIImpl&) = delete;
@@ -48,21 +53,22 @@ class ExternalImageDXGIImpl : public LinkNode<ExternalImageDXGIImpl> {
 
     bool IsValid() const;
 
-    WGPUTexture ProduceTexture(const ExternalImageAccessDescriptorDXGISharedHandle* descriptor);
+    WGPUTexture BeginAccess(const ExternalImageDXGIBeginAccessDescriptor* descriptor);
+
+    void EndAccess(WGPUTexture texture, ExternalImageDXGIFenceDescriptor* signalFence);
 
   private:
-    Device* mBackendDevice;
+    Device* mBackendDevice = nullptr;
     Microsoft::WRL::ComPtr<ID3D12Resource> mD3D12Resource;
-    Microsoft::WRL::ComPtr<ID3D12Fence> mD3D12Fence;
+    const bool mUseFenceSynchronization;
+
     std::unique_ptr<D3D11on12ResourceCache> mD3D11on12ResourceCache;
 
-    // Contents of WGPUTextureDescriptor are stored individually since the descriptor
-    // could outlive this image.
-    WGPUTextureUsageFlags mUsage;
-    WGPUTextureUsageFlags mUsageInternal = WGPUTextureUsage_None;
-    WGPUTextureDimension mDimension;
-    WGPUExtent3D mSize;
-    WGPUTextureFormat mFormat;
+    wgpu::TextureUsage mUsage;
+    wgpu::TextureUsage mUsageInternal = wgpu::TextureUsage::None;
+    wgpu::TextureDimension mDimension;
+    Extent3D mSize;
+    wgpu::TextureFormat mFormat;
     uint32_t mMipLevelCount;
     uint32_t mSampleCount;
 };

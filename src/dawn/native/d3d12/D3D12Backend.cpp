@@ -67,17 +67,26 @@ bool ExternalImageDXGI::IsValid() const {
 
 WGPUTexture ExternalImageDXGI::ProduceTexture(
     WGPUDevice device,
-    const ExternalImageAccessDescriptorDXGISharedHandle* descriptor) {
-    return ProduceTexture(descriptor);
+    const ExternalImageDXGIBeginAccessDescriptor* descriptor) {
+    return BeginAccess(descriptor);
 }
 
-WGPUTexture ExternalImageDXGI::ProduceTexture(
-    const ExternalImageAccessDescriptorDXGISharedHandle* descriptor) {
+WGPUTexture ExternalImageDXGI::BeginAccess(
+    const ExternalImageDXGIBeginAccessDescriptor* descriptor) {
     if (!IsValid()) {
-        dawn::ErrorLog() << "Cannot produce texture from external image after device destruction";
+        dawn::ErrorLog() << "Cannot use external image after device destruction";
         return nullptr;
     }
-    return mImpl->ProduceTexture(descriptor);
+    return mImpl->BeginAccess(descriptor);
+}
+
+void ExternalImageDXGI::EndAccess(WGPUTexture texture,
+                                  ExternalImageDXGIFenceDescriptor* signalFence) {
+    if (!IsValid()) {
+        dawn::ErrorLog() << "Cannot use external image after device destruction";
+        return;
+    }
+    mImpl->EndAccess(texture, signalFence);
 }
 
 // static

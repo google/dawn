@@ -237,12 +237,6 @@ struct DAWN_NATIVE_EXPORT ExternalImageDescriptor {
     ExternalImageType mType;
 };
 
-struct DAWN_NATIVE_EXPORT ExternalImageAccessDescriptor {
-  public:
-    bool isInitialized = false;  // Whether the texture is initialized on import
-    WGPUTextureUsageFlags usage = WGPUTextureUsage_None;
-};
-
 struct DAWN_NATIVE_EXPORT ExternalImageExportInfo {
   public:
     bool isInitialized = false;  // Whether the texture is initialized after export

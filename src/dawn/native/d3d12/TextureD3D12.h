@@ -15,13 +15,16 @@
 #ifndef SRC_DAWN_NATIVE_D3D12_TEXTURED3D12_H_
 #define SRC_DAWN_NATIVE_D3D12_TEXTURED3D12_H_
 
+#include <optional>
 #include <vector>
 
+#include "dawn/native/Error.h"
 #include "dawn/native/Texture.h"
 
 #include "dawn/native/DawnNative.h"
 #include "dawn/native/IntegerTypes.h"
 #include "dawn/native/PassResourceUsage.h"
+#include "dawn/native/d3d12/FenceD3D12.h"
 #include "dawn/native/d3d12/IntegerTypes.h"
 #include "dawn/native/d3d12/ResourceHeapAllocationD3D12.h"
 #include "dawn/native/d3d12/d3d12_platform.h"
@@ -45,15 +48,18 @@ class Texture final : public TextureBase {
         Device* device,
         const TextureDescriptor* descriptor,
         ComPtr<ID3D12Resource> d3d12Texture,
-        ComPtr<ID3D12Fence> d3d12Fence,
+        std::vector<Ref<Fence>> waitFences,
         Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
-        uint64_t fenceWaitValue,
-        uint64_t fenceSignalValue,
         bool isSwapChainTexture,
         bool isInitialized);
     static ResultOrError<Ref<Texture>> Create(Device* device,
                                               const TextureDescriptor* descriptor,
                                               ComPtr<ID3D12Resource> d3d12Texture);
+
+    // For external textures, returns the Device internal fence's value associated with the last
+    // ExecuteCommandLists that used this texture. If nullopt is returned, the texture wasn't used
+    // or keyed mutex is used instead of fences for synchronization.
+    ResultOrError<ExecutionSerial> EndAccess();
 
     DXGI_FORMAT GetD3D12Format() const;
     ID3D12Resource* GetD3D12Resource() const;
@@ -75,7 +81,7 @@ class Texture final : public TextureBase {
                                              const SubresourceRange& range);
 
     MaybeError SynchronizeImportedTextureBeforeUse();
-    void SynchronizeImportedTextureAfterUse();
+    MaybeError SynchronizeImportedTextureAfterUse();
 
     void TrackUsageAndGetResourceBarrierForPass(CommandRecordingContext* commandContext,
                                                 std::vector<D3D12_RESOURCE_BARRIER>* barrier,
@@ -102,10 +108,8 @@ class Texture final : public TextureBase {
 
     MaybeError InitializeAsInternalTexture();
     MaybeError InitializeAsExternalTexture(ComPtr<ID3D12Resource> d3d12Texture,
-                                           ComPtr<ID3D12Fence> d3d12Fence,
+                                           std::vector<Ref<Fence>> waitFences,
                                            Ref<D3D11on12ResourceCacheEntry> d3d11on12Resource,
-                                           uint64_t fenceWaitValue,
-                                           uint64_t fenceSignalValue,
                                            bool isSwapChainTexture);
     MaybeError InitializeAsSwapChainTexture(ComPtr<ID3D12Resource> d3d12Texture);
 
@@ -142,10 +146,9 @@ class Texture final : public TextureBase {
     ResourceHeapAllocation mResourceAllocation;
 
     // TODO(dawn:1460): Encapsulate imported image fields e.g. std::unique_ptr<ExternalImportInfo>.
-    ComPtr<ID3D12Fence> mD3D12Fence;
+    std::vector<Ref<Fence>> mWaitFences;
+    std::optional<ExecutionSerial> mSignalFenceValue;
     Ref<D3D11on12ResourceCacheEntry> mD3D11on12Resource;
-    uint64_t mFenceWaitValue = 0;
-    uint64_t mFenceSignalValue = 0;
     bool mSwapChainTexture = false;
 
     SubresourceStorage<StateAndDecay> mSubresourceStateAndDecay;

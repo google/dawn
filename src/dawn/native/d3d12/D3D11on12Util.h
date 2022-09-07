@@ -39,7 +39,7 @@ class D3D11on12ResourceCacheEntry : public RefCounted {
     ~D3D11on12ResourceCacheEntry() override;
 
     MaybeError AcquireKeyedMutex();
-    void ReleaseKeyedMutex();
+    MaybeError ReleaseKeyedMutex();
 
     // Functors necessary for the
     // unordered_set<D3D11on12ResourceCacheEntry&>-based cache.
