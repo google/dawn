@@ -217,7 +217,13 @@ fn comp_main2() {
 )";
 
     auto* expect = R"(
+const a : f32 = 1.0;
+
+const b : f32 = 1.0;
+
 const c : f32 = 1.0;
+
+const d : f32 = 1.0;
 
 @compute @workgroup_size(1)
 fn comp_main1() {
@@ -528,6 +534,29 @@ fn comp_main1() {
 )";
 
     SingleEntryPoint::Config cfg("comp_main1");
+
+    DataMap data;
+    data.Add<SingleEntryPoint::Config>(cfg);
+    auto got = Run<SingleEntryPoint>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(SingleEntryPointTest, GlobalConstUsedAsArraySize) {
+    // See crbug.com/tint/1598
+    auto* src = R"(
+const MY_SIZE = 5u;
+
+type Arr = array<i32, MY_SIZE>;
+
+@fragment
+fn main() {
+}
+)";
+
+    auto* expect = src;
+
+    SingleEntryPoint::Config cfg("main");
 
     DataMap data;
     data.Add<SingleEntryPoint::Config>(cfg);

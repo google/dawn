@@ -86,10 +86,16 @@ void SingleEntryPoint::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) c
                     ctx.dst->AST().AddGlobalVariable(ctx.Clone(override));
                 }
             },
-            [&](const ast::Variable* v) {  // var, let
-                if (referenced_vars.count(v)) {
-                    ctx.dst->AST().AddGlobalVariable(ctx.Clone(v));
+            [&](const ast::Var* var) {
+                if (referenced_vars.count(var)) {
+                    ctx.dst->AST().AddGlobalVariable(ctx.Clone(var));
                 }
+            },
+            [&](const ast::Const* c) {
+                // Always keep 'const' declarations, as these can be used by attributes and array
+                // sizes, which are not tracked as transitively used by functions. They also don't
+                // typically get emitted by the backend unless they're actually used.
+                ctx.dst->AST().AddGlobalVariable(ctx.Clone(c));
             },
             [&](const ast::Function* func) {
                 if (sem.Get(func)->HasAncestorEntryPoint(entry_point->symbol)) {
