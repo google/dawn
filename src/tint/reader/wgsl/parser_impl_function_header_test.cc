@@ -54,9 +54,12 @@ TEST_F(ParserImplTest, FunctionHeader_AttributeReturnType) {
     EXPECT_EQ(f->params.Length(), 0u);
     EXPECT_TRUE(f->return_type->Is<ast::F32>());
     ASSERT_EQ(f->return_type_attributes.Length(), 1u);
+
     auto* loc = f->return_type_attributes[0]->As<ast::LocationAttribute>();
     ASSERT_TRUE(loc != nullptr);
-    EXPECT_EQ(loc->value, 1u);
+    ASSERT_TRUE(loc->value->Is<ast::IntLiteralExpression>());
+    auto* exp = loc->value->As<ast::IntLiteralExpression>();
+    EXPECT_EQ(exp->value, 1u);
 }
 
 TEST_F(ParserImplTest, FunctionHeader_InvariantReturnType) {

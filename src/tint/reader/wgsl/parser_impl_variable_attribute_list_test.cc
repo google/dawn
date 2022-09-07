@@ -31,7 +31,13 @@ TEST_F(ParserImplTest, AttributeList_Parses) {
     ASSERT_NE(attr_1, nullptr);
 
     ASSERT_TRUE(attr_0->Is<ast::LocationAttribute>());
-    EXPECT_EQ(attr_0->As<ast::LocationAttribute>()->value, 4u);
+
+    auto* loc = attr_0->As<ast::LocationAttribute>();
+    ASSERT_TRUE(loc->value->Is<ast::IntLiteralExpression>());
+
+    auto* exp = loc->value->As<ast::IntLiteralExpression>();
+    EXPECT_EQ(exp->value, 4u);
+
     ASSERT_TRUE(attr_1->Is<ast::BuiltinAttribute>());
     EXPECT_EQ(attr_1->As<ast::BuiltinAttribute>()->builtin, ast::BuiltinValue::kPosition);
 }

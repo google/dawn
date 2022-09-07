@@ -128,7 +128,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_WithInOutVars) 
     // }
     Func("frag_main",
          utils::Vector{
-             Param("foo", ty.f32(), utils::Vector{Location(0)}),
+             Param("foo", ty.f32(), utils::Vector{Location(0_a)}),
          },
          ty.f32(),
          utils::Vector{
@@ -138,7 +138,7 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_WithInOutVars) 
              Stage(ast::PipelineStage::kFragment),
          },
          utils::Vector{
-             Location(1),
+             Location(1_a),
          });
 
     GeneratorImpl& gen = SanitizeAndBuild();
@@ -218,8 +218,8 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_SharedStruct_Di
         "Interface",
         utils::Vector{
             Member("pos", ty.vec4<f32>(), utils::Vector{Builtin(ast::BuiltinValue::kPosition)}),
-            Member("col1", ty.f32(), utils::Vector{Location(1)}),
-            Member("col2", ty.f32(), utils::Vector{Location(2)}),
+            Member("col1", ty.f32(), utils::Vector{Location(1_a)}),
+            Member("col2", ty.f32(), utils::Vector{Location(2_a)}),
         });
 
     Func("vert_main", utils::Empty, ty.Of(interface_struct),

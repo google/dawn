@@ -756,7 +756,11 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out,
                 return true;
             },
             [&](const ast::LocationAttribute* location) {
-                out << "location(" << location->value << ")";
+                out << "location(";
+                if (!EmitExpression(out, location->value)) {
+                    return false;
+                }
+                out << ")";
                 return true;
             },
             [&](const ast::BuiltinAttribute* builtin) {

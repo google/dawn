@@ -116,7 +116,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_Parameters) {
                         });
     auto* loc1 = Param("loc1", ty.f32(),
                        utils::Vector{
-                           Location(1u),
+                           Location(1_a),
                        });
     auto* func = Func("frag_main", utils::Vector{coord, loc1}, ty.void_(), utils::Empty,
                       utils::Vector{
@@ -143,7 +143,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Function_EntryPoint_ReturnValue) {
                           Stage(ast::PipelineStage::kFragment),
                       },
                       utils::Vector{
-                          Location(1u),
+                          Location(1_a),
                       });
 
     GeneratorImpl& gen = Build();

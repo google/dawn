@@ -92,7 +92,7 @@ TEST_F(VariableTest, Assert_DifferentProgramID_Constructor) {
 }
 
 TEST_F(VariableTest, WithAttributes) {
-    auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, Location(1u),
+    auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, Location(1_u),
                     Builtin(BuiltinValue::kPosition), Id(1200_u));
 
     auto& attributes = var->attributes;
@@ -102,7 +102,8 @@ TEST_F(VariableTest, WithAttributes) {
 
     auto* location = ast::GetAttribute<ast::LocationAttribute>(attributes);
     ASSERT_NE(nullptr, location);
-    EXPECT_EQ(1u, location->value);
+    ASSERT_NE(nullptr, location->value);
+    EXPECT_TRUE(location->value->Is<ast::IntLiteralExpression>());
 }
 
 TEST_F(VariableTest, HasBindingPoint_BothProvided) {

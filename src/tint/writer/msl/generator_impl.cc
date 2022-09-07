@@ -2785,24 +2785,25 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
                         out << " [[" << name << "]]";
                         return true;
                     },
-                    [&](const ast::LocationAttribute* loc) {
+                    [&](const ast::LocationAttribute*) {
                         auto& pipeline_stage_uses = str->PipelineStageUses();
                         if (pipeline_stage_uses.size() != 1) {
                             TINT_ICE(Writer, diagnostics_) << "invalid entry point IO struct uses";
                             return false;
                         }
 
+                        uint32_t loc = mem->Location().value();
                         if (pipeline_stage_uses.count(sem::PipelineStageUsage::kVertexInput)) {
-                            out << " [[attribute(" + std::to_string(loc->value) + ")]]";
+                            out << " [[attribute(" + std::to_string(loc) + ")]]";
                         } else if (pipeline_stage_uses.count(
                                        sem::PipelineStageUsage::kVertexOutput)) {
-                            out << " [[user(locn" + std::to_string(loc->value) + ")]]";
+                            out << " [[user(locn" + std::to_string(loc) + ")]]";
                         } else if (pipeline_stage_uses.count(
                                        sem::PipelineStageUsage::kFragmentInput)) {
-                            out << " [[user(locn" + std::to_string(loc->value) + ")]]";
+                            out << " [[user(locn" + std::to_string(loc) + ")]]";
                         } else if (pipeline_stage_uses.count(
                                        sem::PipelineStageUsage::kFragmentOutput)) {
-                            out << " [[color(" + std::to_string(loc->value) + ")]]";
+                            out << " [[color(" + std::to_string(loc) + ")]]";
                         } else {
                             TINT_ICE(Writer, diagnostics_) << "invalid use of location decoration";
                             return false;

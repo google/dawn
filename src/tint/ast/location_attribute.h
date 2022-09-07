@@ -18,6 +18,7 @@
 #include <string>
 
 #include "src/tint/ast/attribute.h"
+#include "src/tint/ast/expression.h"
 
 namespace tint::ast {
 
@@ -28,8 +29,8 @@ class LocationAttribute final : public Castable<LocationAttribute, Attribute> {
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
-    /// @param value the location value
-    LocationAttribute(ProgramID pid, NodeID nid, const Source& src, uint32_t value);
+    /// @param value the location value expression
+    LocationAttribute(ProgramID pid, NodeID nid, const Source& src, const ast::Expression* value);
     ~LocationAttribute() override;
 
     /// @returns the WGSL name for the attribute
@@ -42,7 +43,7 @@ class LocationAttribute final : public Castable<LocationAttribute, Attribute> {
     const LocationAttribute* Clone(CloneContext* ctx) const override;
 
     /// The location value
-    const uint32_t value;
+    const ast::Expression* const value;
 };
 
 }  // namespace tint::ast

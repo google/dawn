@@ -3947,23 +3947,24 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
             std::string pre, post;
             if (auto* decl = mem->Declaration()) {
                 for (auto* attr : decl->attributes) {
-                    if (auto* location = attr->As<ast::LocationAttribute>()) {
+                    if (attr->Is<ast::LocationAttribute>()) {
                         auto& pipeline_stage_uses = str->PipelineStageUses();
                         if (pipeline_stage_uses.size() != 1) {
                             TINT_ICE(Writer, diagnostics_) << "invalid entry point IO struct uses";
                         }
 
+                        auto loc = mem->Location().value();
                         if (pipeline_stage_uses.count(sem::PipelineStageUsage::kVertexInput)) {
-                            post += " : TEXCOORD" + std::to_string(location->value);
+                            post += " : TEXCOORD" + std::to_string(loc);
                         } else if (pipeline_stage_uses.count(
                                        sem::PipelineStageUsage::kVertexOutput)) {
-                            post += " : TEXCOORD" + std::to_string(location->value);
+                            post += " : TEXCOORD" + std::to_string(loc);
                         } else if (pipeline_stage_uses.count(
                                        sem::PipelineStageUsage::kFragmentInput)) {
-                            post += " : TEXCOORD" + std::to_string(location->value);
+                            post += " : TEXCOORD" + std::to_string(loc);
                         } else if (pipeline_stage_uses.count(
                                        sem::PipelineStageUsage::kFragmentOutput)) {
-                            post += " : SV_Target" + std::to_string(location->value);
+                            post += " : SV_Target" + std::to_string(loc);
                         } else {
                             TINT_ICE(Writer, diagnostics_) << "invalid use of location attribute";
                         }

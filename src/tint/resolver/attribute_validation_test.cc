@@ -104,7 +104,7 @@ static utils::Vector<const ast::Attribute*, 2> createAttributes(const Source& so
         case AttributeKind::kInvariant:
             return {builder.Invariant(source)};
         case AttributeKind::kLocation:
-            return {builder.Location(source, 1)};
+            return {builder.Location(source, 1_a)};
         case AttributeKind::kOffset:
             return {builder.create<ast::StructMemberOffsetAttribute>(source, 4u)};
         case AttributeKind::kSize:
@@ -286,7 +286,7 @@ TEST_P(VertexShaderParameterAttributeTest, IsValid) {
     auto& params = GetParam();
     auto attrs = createAttributes(Source{{12, 34}}, *this, params.kind);
     if (params.kind != AttributeKind::kLocation) {
-        attrs.Push(Location(Source{{34, 56}}, 2));
+        attrs.Push(Location(Source{{34, 56}}, 2_a));
     }
     auto* p = Param("a", ty.vec4<f32>(), attrs);
     Func("vertex_main", utils::Vector{p}, ty.vec4<f32>(),
@@ -388,7 +388,7 @@ using FragmentShaderReturnTypeAttributeTest = TestWithParams;
 TEST_P(FragmentShaderReturnTypeAttributeTest, IsValid) {
     auto& params = GetParam();
     auto attrs = createAttributes(Source{{12, 34}}, *this, params.kind);
-    attrs.Push(Location(Source{{34, 56}}, 2));
+    attrs.Push(Location(Source{{34, 56}}, 2_a));
     Func("frag_main", utils::Empty, ty.vec4<f32>(),
          utils::Vector{Return(Construct(ty.vec4<f32>()))},
          utils::Vector{
@@ -495,8 +495,8 @@ TEST_F(EntryPointParameterAttributeTest, DuplicateAttribute) {
              Stage(ast::PipelineStage::kFragment),
          },
          utils::Vector{
-             Location(Source{{12, 34}}, 2),
-             Location(Source{{56, 78}}, 3),
+             Location(Source{{12, 34}}, 2_a),
+             Location(Source{{56, 78}}, 3_a),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -531,8 +531,8 @@ TEST_F(EntryPointReturnTypeAttributeTest, DuplicateAttribute) {
              Stage(ast::PipelineStage::kFragment),
          },
          utils::Vector{
-             Location(Source{{12, 34}}, 2),
-             Location(Source{{56, 78}}, 3),
+             Location(Source{{12, 34}}, 2_a),
+             Location(Source{{56, 78}}, 3_a),
          });
 
     EXPECT_FALSE(r()->Resolve());
@@ -1101,7 +1101,7 @@ TEST_F(InvariantAttributeTests, InvariantWithPosition) {
              Stage(ast::PipelineStage::kFragment),
          },
          utils::Vector{
-             Location(0),
+             Location(0_a),
          });
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
@@ -1110,7 +1110,7 @@ TEST_F(InvariantAttributeTests, InvariantWithoutPosition) {
     auto* param = Param("p", ty.vec4<f32>(),
                         utils::Vector{
                             Invariant(Source{{12, 34}}),
-                            Location(0),
+                            Location(0_a),
                         });
     Func("main", utils::Vector{param}, ty.vec4<f32>(),
          utils::Vector{
@@ -1120,7 +1120,7 @@ TEST_F(InvariantAttributeTests, InvariantWithoutPosition) {
              Stage(ast::PipelineStage::kFragment),
          },
          utils::Vector{
-             Location(0),
+             Location(0_a),
          });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
@@ -1219,7 +1219,7 @@ TEST_P(InterpolateParameterTest, All) {
          utils::Vector{
              Param("a", ty.f32(),
                    utils::Vector{
-                       Location(0),
+                       Location(0_a),
                        Interpolate(Source{{12, 34}}, params.type, params.sampling),
                    }),
          },
@@ -1245,7 +1245,7 @@ TEST_P(InterpolateParameterTest, IntegerScalar) {
          utils::Vector{
              Param("a", ty.i32(),
                    utils::Vector{
-                       Location(0),
+                       Location(0_a),
                        Interpolate(Source{{12, 34}}, params.type, params.sampling),
                    }),
          },
@@ -1276,7 +1276,7 @@ TEST_P(InterpolateParameterTest, IntegerVector) {
          utils::Vector{
              Param("a", ty.vec4<u32>(),
                    utils::Vector{
-                       Location(0),
+                       Location(0_a),
                        Interpolate(Source{{12, 34}}, params.type, params.sampling),
                    }),
          },
@@ -1319,7 +1319,8 @@ INSTANTIATE_TEST_SUITE_P(
         Params{ast::InterpolationType::kFlat, ast::InterpolationSampling::kSample, false}));
 
 TEST_F(InterpolateTest, FragmentInput_Integer_MissingFlatInterpolation) {
-    Func("main", utils::Vector{Param(Source{{12, 34}}, "a", ty.i32(), utils::Vector{Location(0)})},
+    Func("main",
+         utils::Vector{Param(Source{{12, 34}}, "a", ty.i32(), utils::Vector{Location(0_a)})},
          ty.void_(), utils::Empty,
          utils::Vector{
              Stage(ast::PipelineStage::kFragment),
@@ -1336,7 +1337,7 @@ TEST_F(InterpolateTest, VertexOutput_Integer_MissingFlatInterpolation) {
         "S",
         utils::Vector{
             Member("pos", ty.vec4<f32>(), utils::Vector{Builtin(ast::BuiltinValue::kPosition)}),
-            Member(Source{{12, 34}}, "u", ty.u32(), utils::Vector{Location(0)}),
+            Member(Source{{12, 34}}, "u", ty.u32(), utils::Vector{Location(0_a)}),
         });
     Func("main", utils::Empty, ty.Of(s),
          utils::Vector{

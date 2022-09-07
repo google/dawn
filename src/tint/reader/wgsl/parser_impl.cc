@@ -3551,7 +3551,9 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
             }
             match(Token::Type::kComma);
 
-            return create<ast::LocationAttribute>(t.source(), val.value);
+            return builder_.Location(t.source(),
+                                     create<ast::IntLiteralExpression>(
+                                         val.value, ast::IntLiteralExpression::Suffix::kNone));
         });
     }
 

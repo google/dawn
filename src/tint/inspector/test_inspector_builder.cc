@@ -54,7 +54,7 @@ const ast::Struct* InspectorBuilder::MakeInOutStruct(std::string name,
         std::tie(member_name, location) = var;
         members.Push(Member(member_name, ty.u32(),
                             utils::Vector{
-                                Location(location),
+                                Location(AInt(location)),
                                 Flat(),
                             }));
     }

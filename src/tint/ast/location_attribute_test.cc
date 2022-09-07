@@ -17,11 +17,12 @@
 namespace tint::ast {
 namespace {
 
+using namespace tint::number_suffixes;  // NOLINT
 using LocationAttributeTest = TestHelper;
 
 TEST_F(LocationAttributeTest, Creation) {
-    auto* d = create<LocationAttribute>(2u);
-    EXPECT_EQ(2u, d->value);
+    auto* d = Location(2_a);
+    EXPECT_TRUE(d->value->Is<IntLiteralExpression>());
 }
 
 }  // namespace

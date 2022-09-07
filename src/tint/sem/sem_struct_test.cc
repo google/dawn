@@ -19,6 +19,7 @@
 namespace tint::sem {
 namespace {
 
+using namespace tint::number_suffixes;  // NOLINT
 using StructTest = TestHelper;
 
 TEST_F(StructTest, Creation) {
@@ -107,7 +108,7 @@ TEST_F(StructTest, Layout) {
 
 TEST_F(StructTest, Location) {
     auto* st = Structure("st", utils::Vector{
-                                   Member("a", ty.i32(), utils::Vector{Location(1u)}),
+                                   Member("a", ty.i32(), utils::Vector{Location(1_u)}),
                                    Member("b", ty.u32()),
                                });
 

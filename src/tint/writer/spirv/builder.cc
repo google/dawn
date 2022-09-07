@@ -884,9 +884,9 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
                             U32Operand(ConvertBuiltin(builtin->builtin, sem->StorageClass()))});
                 return true;
             },
-            [&](const ast::LocationAttribute* location) {
+            [&](const ast::LocationAttribute*) {
                 push_annot(spv::Op::OpDecorate, {Operand(var_id), U32Operand(SpvDecorationLocation),
-                                                 Operand(location->value)});
+                                                 Operand(sem->Location().value())});
                 return true;
             },
             [&](const ast::InterpolateAttribute* interpolate) {

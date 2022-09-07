@@ -2928,17 +2928,19 @@ class ProgramBuilder {
 
     /// Creates an ast::LocationAttribute
     /// @param source the source information
-    /// @param location the location value
+    /// @param location the location value expression
     /// @returns the location attribute pointer
-    const ast::LocationAttribute* Location(const Source& source, uint32_t location) {
-        return create<ast::LocationAttribute>(source, location);
+    template <typename EXPR>
+    const ast::LocationAttribute* Location(const Source& source, EXPR&& location) {
+        return create<ast::LocationAttribute>(source, Expr(std::forward<EXPR>(location)));
     }
 
     /// Creates an ast::LocationAttribute
-    /// @param location the location value
+    /// @param location the location value expression
     /// @returns the location attribute pointer
-    const ast::LocationAttribute* Location(uint32_t location) {
-        return create<ast::LocationAttribute>(source_, location);
+    template <typename EXPR>
+    const ast::LocationAttribute* Location(EXPR&& location) {
+        return create<ast::LocationAttribute>(source_, Expr(std::forward<EXPR>(location)));
     }
 
     /// Creates an ast::IdAttribute

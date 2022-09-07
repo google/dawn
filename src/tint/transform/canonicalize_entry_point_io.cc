@@ -37,21 +37,32 @@ CanonicalizeEntryPointIO::~CanonicalizeEntryPointIO() = default;
 
 namespace {
 
-// Comparison function used to reorder struct members such that all members with
-// location attributes appear first (ordered by location slot), followed by
-// those with builtin attributes.
-bool StructMemberComparator(const ast::StructMember* a, const ast::StructMember* b) {
-    auto* a_loc = ast::GetAttribute<ast::LocationAttribute>(a->attributes);
-    auto* b_loc = ast::GetAttribute<ast::LocationAttribute>(b->attributes);
-    auto* a_blt = ast::GetAttribute<ast::BuiltinAttribute>(a->attributes);
-    auto* b_blt = ast::GetAttribute<ast::BuiltinAttribute>(b->attributes);
+/// Info for a struct member
+struct MemberInfo {
+    /// The struct member item
+    const ast::StructMember* member;
+    /// The struct member location if provided
+    std::optional<uint32_t> location;
+};
+
+/// Comparison function used to reorder struct members such that all members with
+/// location attributes appear first (ordered by location slot), followed by
+/// those with builtin attributes.
+/// @param a a struct member
+/// @param b another struct member
+/// @returns true if a comes before b
+bool StructMemberComparator(const MemberInfo& a, const MemberInfo& b) {
+    auto* a_loc = ast::GetAttribute<ast::LocationAttribute>(a.member->attributes);
+    auto* b_loc = ast::GetAttribute<ast::LocationAttribute>(b.member->attributes);
+    auto* a_blt = ast::GetAttribute<ast::BuiltinAttribute>(a.member->attributes);
+    auto* b_blt = ast::GetAttribute<ast::BuiltinAttribute>(b.member->attributes);
     if (a_loc) {
         if (!b_loc) {
             // `a` has location attribute and `b` does not: `a` goes first.
             return true;
         }
         // Both have location attributes: smallest goes first.
-        return a_loc->value < b_loc->value;
+        return a.location < b.location;
     } else {
         if (b_loc) {
             // `b` has location attribute and `a` does not: `b` goes first.
@@ -88,6 +99,8 @@ struct CanonicalizeEntryPointIO::State {
         utils::Vector<const ast::Attribute*, 2> attributes;
         /// The value itself.
         const ast::Expression* value;
+        /// The output location.
+        std::optional<uint32_t> location;
     };
 
     /// The clone context.
@@ -101,14 +114,15 @@ struct CanonicalizeEntryPointIO::State {
 
     /// The new entry point wrapper function's parameters.
     utils::Vector<const ast::Parameter*, 8> wrapper_ep_parameters;
+
     /// The members of the wrapper function's struct parameter.
-    utils::Vector<const ast::StructMember*, 8> wrapper_struct_param_members;
+    utils::Vector<MemberInfo, 8> wrapper_struct_param_members;
     /// The name of the wrapper function's struct parameter.
     Symbol wrapper_struct_param_name;
     /// The parameters that will be passed to the original function.
     utils::Vector<const ast::Expression*, 8> inner_call_parameters;
     /// The members of the wrapper function's struct return type.
-    utils::Vector<const ast::StructMember*, 8> wrapper_struct_output_members;
+    utils::Vector<MemberInfo, 8> wrapper_struct_output_members;
     /// The wrapper function output values.
     utils::Vector<OutputValue, 8> wrapper_output_values;
     /// The body of the wrapper function.
@@ -153,10 +167,12 @@ struct CanonicalizeEntryPointIO::State {
     /// Add a shader input to the entry point.
     /// @param name the name of the shader input
     /// @param type the type of the shader input
+    /// @param location the location if provided
     /// @param attributes the attributes to apply to the shader input
     /// @returns an expression which evaluates to the value of the shader input
     const ast::Expression* AddInput(std::string name,
                                     const sem::Type* type,
+                                    std::optional<uint32_t> location,
                                     utils::Vector<const ast::Attribute*, 8> attributes) {
         auto* ast_type = CreateASTTypeFor(ctx, type);
         if (cfg.shader_style == ShaderStyle::kSpirv || cfg.shader_style == ShaderStyle::kGlsl) {
@@ -214,7 +230,7 @@ struct CanonicalizeEntryPointIO::State {
             Symbol symbol = input_names.emplace(name).second ? ctx.dst->Symbols().Register(name)
                                                              : ctx.dst->Symbols().New(name);
             wrapper_struct_param_members.Push(
-                ctx.dst->Member(symbol, ast_type, std::move(attributes)));
+                {ctx.dst->Member(symbol, ast_type, std::move(attributes)), location});
             return ctx.dst->MemberAccessor(InputStructSymbol(), symbol);
         }
     }
@@ -222,10 +238,12 @@ struct CanonicalizeEntryPointIO::State {
     /// Add a shader output to the entry point.
     /// @param name the name of the shader output
     /// @param type the type of the shader output
+    /// @param location the location if provided
     /// @param attributes the attributes to apply to the shader output
     /// @param value the value of the shader output
     void AddOutput(std::string name,
                    const sem::Type* type,
+                   std::optional<uint32_t> location,
                    utils::Vector<const ast::Attribute*, 8> attributes,
                    const ast::Expression* value) {
         // Vulkan requires that integer user-defined vertex outputs are always decorated with
@@ -256,6 +274,7 @@ struct CanonicalizeEntryPointIO::State {
         output.type = CreateASTTypeFor(ctx, type);
         output.attributes = std::move(attributes);
         output.value = value;
+        output.location = location;
         wrapper_output_values.Push(output);
     }
 
@@ -280,7 +299,7 @@ struct CanonicalizeEntryPointIO::State {
         }
 
         auto name = ctx.src->Symbols().NameFor(param->Declaration()->symbol);
-        auto* input_expr = AddInput(name, param->Type(), std::move(attributes));
+        auto* input_expr = AddInput(name, param->Type(), param->Location(), std::move(attributes));
         inner_call_parameters.Push(input_expr);
     }
 
@@ -308,7 +327,8 @@ struct CanonicalizeEntryPointIO::State {
             auto name = ctx.src->Symbols().NameFor(member_ast->symbol);
 
             auto attributes = CloneShaderIOAttributes(member_ast->attributes, do_interpolate);
-            auto* input_expr = AddInput(name, member->Type(), std::move(attributes));
+            auto* input_expr =
+                AddInput(name, member->Type(), member->Location(), std::move(attributes));
             inner_struct_values.Push(input_expr);
         }
 
@@ -337,7 +357,7 @@ struct CanonicalizeEntryPointIO::State {
                 auto attributes = CloneShaderIOAttributes(member_ast->attributes, do_interpolate);
 
                 // Extract the original structure member.
-                AddOutput(name, member->Type(), std::move(attributes),
+                AddOutput(name, member->Type(), member->Location(), std::move(attributes),
                           ctx.dst->MemberAccessor(original_result, name));
             }
         } else if (!inner_ret_type->Is<sem::Void>()) {
@@ -345,8 +365,8 @@ struct CanonicalizeEntryPointIO::State {
                 CloneShaderIOAttributes(func_ast->return_type_attributes, do_interpolate);
 
             // Propagate the non-struct return value as is.
-            AddOutput("value", func_sem->ReturnType(), std::move(attributes),
-                      ctx.dst->Expr(original_result));
+            AddOutput("value", func_sem->ReturnType(), func_sem->ReturnLocation(),
+                      std::move(attributes), ctx.dst->Expr(original_result));
         }
     }
 
@@ -365,7 +385,7 @@ struct CanonicalizeEntryPointIO::State {
 
         // No existing sample mask builtin was found, so create a new output value
         // using the fixed sample mask.
-        AddOutput("fixed_sample_mask", ctx.dst->create<sem::U32>(),
+        AddOutput("fixed_sample_mask", ctx.dst->create<sem::U32>(), std::nullopt,
                   {ctx.dst->Builtin(ast::BuiltinValue::kSampleMask)},
                   ctx.dst->Expr(u32(cfg.fixed_sample_mask)));
     }
@@ -373,7 +393,7 @@ struct CanonicalizeEntryPointIO::State {
     /// Add a point size builtin to the wrapper function output.
     void AddVertexPointSize() {
         // Create a new output value and assign it a literal 1.0 value.
-        AddOutput("vertex_point_size", ctx.dst->create<sem::F32>(),
+        AddOutput("vertex_point_size", ctx.dst->create<sem::F32>(), std::nullopt,
                   {ctx.dst->Builtin(ast::BuiltinValue::kPointSize)}, ctx.dst->Expr(1_f));
     }
 
@@ -392,10 +412,14 @@ struct CanonicalizeEntryPointIO::State {
         std::sort(wrapper_struct_param_members.begin(), wrapper_struct_param_members.end(),
                   StructMemberComparator);
 
+        utils::Vector<const ast::StructMember*, 8> members;
+        for (auto& mem : wrapper_struct_param_members) {
+            members.Push(mem.member);
+        }
+
         // Create the new struct type.
         auto struct_name = ctx.dst->Sym();
-        auto* in_struct =
-            ctx.dst->create<ast::Struct>(struct_name, wrapper_struct_param_members, utils::Empty);
+        auto* in_struct = ctx.dst->create<ast::Struct>(struct_name, members, utils::Empty);
         ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func_ast, in_struct);
 
         // Create a new function parameter using this struct type.
@@ -423,7 +447,8 @@ struct CanonicalizeEntryPointIO::State {
             member_names.insert(ctx.dst->Symbols().NameFor(name));
 
             wrapper_struct_output_members.Push(
-                ctx.dst->Member(name, outval.type, std::move(outval.attributes)));
+                {ctx.dst->Member(name, outval.type, std::move(outval.attributes)),
+                 outval.location});
             assignments.Push(
                 ctx.dst->Assign(ctx.dst->MemberAccessor(wrapper_result, name), outval.value));
         }
@@ -432,9 +457,13 @@ struct CanonicalizeEntryPointIO::State {
         std::sort(wrapper_struct_output_members.begin(), wrapper_struct_output_members.end(),
                   StructMemberComparator);
 
+        utils::Vector<const ast::StructMember*, 8> members;
+        for (auto& mem : wrapper_struct_output_members) {
+            members.Push(mem.member);
+        }
+
         // Create the new struct type.
-        auto* out_struct = ctx.dst->create<ast::Struct>(
-            ctx.dst->Sym(), wrapper_struct_output_members, utils::Empty);
+        auto* out_struct = ctx.dst->create<ast::Struct>(ctx.dst->Sym(), members, utils::Empty);
         ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), func_ast, out_struct);
 
         // Create the output struct object, assign its members, and return it.

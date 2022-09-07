@@ -291,7 +291,7 @@ TEST_P(InspectorGetEntryPointComponentAndCompositionTest, Test) {
 
     auto* in_var = Param("in_var", tint_type(),
                          utils::Vector{
-                             Location(0u),
+                             Location(0_u),
                              Flat(),
                          });
     Func("foo", utils::Vector{in_var}, tint_type(),
@@ -302,7 +302,7 @@ TEST_P(InspectorGetEntryPointComponentAndCompositionTest, Test) {
              Stage(ast::PipelineStage::kFragment),
          },
          utils::Vector{
-             Location(0u),
+             Location(0_u),
          });
     Inspector& inspector = Build();
 
@@ -336,17 +336,17 @@ INSTANTIATE_TEST_SUITE_P(InspectorGetEntryPointTest,
 TEST_F(InspectorGetEntryPointTest, MultipleInOutVariables) {
     auto* in_var0 = Param("in_var0", ty.u32(),
                           utils::Vector{
-                              Location(0u),
+                              Location(0_u),
                               Flat(),
                           });
     auto* in_var1 = Param("in_var1", ty.u32(),
                           utils::Vector{
-                              Location(1u),
+                              Location(1_u),
                               Flat(),
                           });
     auto* in_var4 = Param("in_var4", ty.u32(),
                           utils::Vector{
-                              Location(4u),
+                              Location(4_u),
                               Flat(),
                           });
     Func("foo", utils::Vector{in_var0, in_var1, in_var4}, ty.u32(),
@@ -357,7 +357,7 @@ TEST_F(InspectorGetEntryPointTest, MultipleInOutVariables) {
              Stage(ast::PipelineStage::kFragment),
          },
          utils::Vector{
-             Location(0u),
+             Location(0_u),
          });
     Inspector& inspector = Build();
 
@@ -393,7 +393,7 @@ TEST_F(InspectorGetEntryPointTest, MultipleInOutVariables) {
 TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
     auto* in_var_foo = Param("in_var_foo", ty.u32(),
                              utils::Vector{
-                                 Location(0u),
+                                 Location(0_u),
                                  Flat(),
                              });
     Func("foo", utils::Vector{in_var_foo}, ty.u32(),
@@ -404,12 +404,12 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
              Stage(ast::PipelineStage::kFragment),
          },
          utils::Vector{
-             Location(0u),
+             Location(0_u),
          });
 
     auto* in_var_bar = Param("in_var_bar", ty.u32(),
                              utils::Vector{
-                                 Location(0u),
+                                 Location(0_u),
                                  Flat(),
                              });
     Func("bar", utils::Vector{in_var_bar}, ty.u32(),
@@ -420,7 +420,7 @@ TEST_F(InspectorGetEntryPointTest, MultipleEntryPointsInOutVariables) {
              Stage(ast::PipelineStage::kFragment),
          },
          utils::Vector{
-             Location(1u),
+             Location(1_u),
          });
 
     Inspector& inspector = Build();
@@ -464,7 +464,7 @@ TEST_F(InspectorGetEntryPointTest, BuiltInsNotStageVariables) {
                           });
     auto* in_var1 = Param("in_var1", ty.f32(),
                           utils::Vector{
-                              Location(0u),
+                              Location(0_u),
                           });
     Func("foo", utils::Vector{in_var0, in_var1}, ty.f32(),
          utils::Vector{
@@ -596,8 +596,8 @@ TEST_F(InspectorGetEntryPointTest, MixInOutVariablesAndStruct) {
          utils::Vector{
              Param("param_a", ty.Of(struct_a)),
              Param("param_b", ty.Of(struct_b)),
-             Param("param_c", ty.f32(), utils::Vector{Location(3u)}),
-             Param("param_d", ty.f32(), utils::Vector{Location(4u)}),
+             Param("param_c", ty.f32(), utils::Vector{Location(3_u)}),
+             Param("param_d", ty.f32(), utils::Vector{Location(4_u)}),
          },
          ty.Of(struct_a),
          utils::Vector{
@@ -1136,7 +1136,7 @@ TEST_F(InspectorGetEntryPointTest, NumWorkgroupsStructReferenced) {
 
 TEST_F(InspectorGetEntryPointTest, ImplicitInterpolate) {
     Structure("in_struct", utils::Vector{
-                               Member("struct_inner", ty.f32(), utils::Vector{Location(0)}),
+                               Member("struct_inner", ty.f32(), utils::Vector{Location(0_a)}),
                            });
 
     Func("ep_func",
@@ -1167,7 +1167,7 @@ TEST_P(InspectorGetEntryPointInterpolateTest, Test) {
         "in_struct",
         utils::Vector{
             Member("struct_inner", ty.f32(),
-                   utils::Vector{Interpolate(params.in_type, params.in_sampling), Location(0)}),
+                   utils::Vector{Interpolate(params.in_type, params.in_sampling), Location(0_a)}),
         });
 
     Func("ep_func",

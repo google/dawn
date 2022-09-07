@@ -121,12 +121,13 @@ bool IsValidStorageTextureTexelFormat(ast::TexelFormat format) {
 }
 
 // Helper to stringify a pipeline IO attribute.
-std::string attr_to_str(const ast::Attribute* attr) {
+std::string attr_to_str(const ast::Attribute* attr,
+                        std::optional<uint32_t> location = std::nullopt) {
     std::stringstream str;
     if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
         str << "builtin(" << builtin->builtin << ")";
-    } else if (auto* location = attr->As<ast::LocationAttribute>()) {
-        str << "location(" << location->value << ")";
+    } else if (attr->Is<ast::LocationAttribute>()) {
+        str << "location(" << location.value() << ")";
     }
     return str.str();
 }
@@ -1123,7 +1124,8 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     auto validate_entry_point_attributes_inner = [&](utils::VectorRef<const ast::Attribute*> attrs,
                                                      const sem::Type* ty, Source source,
                                                      ParamOrRetType param_or_ret,
-                                                     bool is_struct_member) {
+                                                     bool is_struct_member,
+                                                     std::optional<uint32_t> location) {
         // Temporally forbid using f16 types in entry point IO.
         // TODO(tint:1473, tint:1502): Remove this error after f16 is supported in entry point
         // IO.
@@ -1143,7 +1145,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
             if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
                 if (pipeline_io_attribute) {
                     AddError("multiple entry point IO attributes", attr->source);
-                    AddNote("previously consumed " + attr_to_str(pipeline_io_attribute),
+                    AddNote("previously consumed " + attr_to_str(pipeline_io_attribute, location),
                             pipeline_io_attribute->source);
                     return false;
                 }
@@ -1162,7 +1164,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                     return false;
                 }
                 builtins.emplace(builtin->builtin);
-            } else if (auto* location = attr->As<ast::LocationAttribute>()) {
+            } else if (auto* loc_attr = attr->As<ast::LocationAttribute>()) {
                 if (pipeline_io_attribute) {
                     AddError("multiple entry point IO attributes", attr->source);
                     AddNote("previously consumed " + attr_to_str(pipeline_io_attribute),
@@ -1173,7 +1175,13 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
 
                 bool is_input = param_or_ret == ParamOrRetType::kParameter;
 
-                if (!LocationAttribute(location, ty, locations, stage, source, is_input)) {
+                if (!location.has_value()) {
+                    TINT_ICE(Resolver, diagnostics_) << "Location has no value";
+                    return false;
+                }
+
+                if (!LocationAttribute(loc_attr, location.value(), ty, locations, stage, source,
+                                       is_input)) {
                     return false;
                 }
             } else if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
@@ -1266,9 +1274,10 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     // Outer lambda for validating the entry point attributes for a type.
     auto validate_entry_point_attributes = [&](utils::VectorRef<const ast::Attribute*> attrs,
                                                const sem::Type* ty, Source source,
-                                               ParamOrRetType param_or_ret) {
+                                               ParamOrRetType param_or_ret,
+                                               std::optional<uint32_t> location) {
         if (!validate_entry_point_attributes_inner(attrs, ty, source, param_or_ret,
-                                                   /*is_struct_member*/ false)) {
+                                                   /*is_struct_member*/ false, location)) {
             return false;
         }
 
@@ -1277,7 +1286,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                 if (!validate_entry_point_attributes_inner(
                         member->Declaration()->attributes, member->Type(),
                         member->Declaration()->source, param_or_ret,
-                        /*is_struct_member*/ true)) {
+                        /*is_struct_member*/ true, member->Location())) {
                     AddNote("while analysing entry point '" + symbols_.NameFor(decl->symbol) + "'",
                             decl->source);
                     return false;
@@ -1291,7 +1300,8 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     for (auto* param : func->Parameters()) {
         auto* param_decl = param->Declaration();
         if (!validate_entry_point_attributes(param_decl->attributes, param->Type(),
-                                             param_decl->source, ParamOrRetType::kParameter)) {
+                                             param_decl->source, ParamOrRetType::kParameter,
+                                             param->Location())) {
             return false;
         }
     }
@@ -1304,7 +1314,8 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
 
     if (!func->ReturnType()->Is<sem::Void>()) {
         if (!validate_entry_point_attributes(decl->return_type_attributes, func->ReturnType(),
-                                             decl->source, ParamOrRetType::kReturnType)) {
+                                             decl->source, ParamOrRetType::kReturnType,
+                                             func->ReturnLocation())) {
             return false;
         }
     }
@@ -2177,8 +2188,9 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                 invariant_attribute = invariant;
             } else if (auto* location = attr->As<ast::LocationAttribute>()) {
                 has_location = true;
-                if (!LocationAttribute(location, member->Type(), locations, stage,
-                                       member->Declaration()->source)) {
+                TINT_ASSERT(Resolver, member->Location().has_value());
+                if (!LocationAttribute(location, member->Location().value(), member->Type(),
+                                       locations, stage, member->Declaration()->source)) {
                     return false;
                 }
             } else if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
@@ -2220,7 +2232,8 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
     return true;
 }
 
-bool Validator::LocationAttribute(const ast::LocationAttribute* location,
+bool Validator::LocationAttribute(const ast::LocationAttribute* loc_attr,
+                                  uint32_t location,
                                   const sem::Type* type,
                                   std::unordered_set<uint32_t>& locations,
                                   ast::PipelineStage stage,
@@ -2228,7 +2241,7 @@ bool Validator::LocationAttribute(const ast::LocationAttribute* location,
                                   const bool is_input) const {
     std::string inputs_or_output = is_input ? "inputs" : "output";
     if (stage == ast::PipelineStage::kCompute) {
-        AddError("attribute is not valid for compute shader " + inputs_or_output, location->source);
+        AddError("attribute is not valid for compute shader " + inputs_or_output, loc_attr->source);
         return false;
     }
 
@@ -2239,15 +2252,16 @@ bool Validator::LocationAttribute(const ast::LocationAttribute* location,
         AddNote(
             "'location' attribute must only be applied to declarations of "
             "numeric scalar or numeric vector type",
-            location->source);
+            loc_attr->source);
         return false;
     }
 
-    if (locations.count(location->value)) {
-        AddError(attr_to_str(location) + " attribute appears multiple times", location->source);
+    if (locations.count(location)) {
+        AddError(attr_to_str(loc_attr, location) + " attribute appears multiple times",
+                 loc_attr->source);
         return false;
     }
-    locations.emplace(location->value);
+    locations.emplace(location);
 
     return true;
 }

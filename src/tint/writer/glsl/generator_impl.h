@@ -324,7 +324,7 @@ class GeneratorImpl : public TextGenerator {
     /// Handles emitting a global variable with the input or output storage class
     /// @param var the global variable
     /// @returns true on success
-    bool EmitIOVariable(const sem::Variable* var);
+    bool EmitIOVariable(const sem::GlobalVariable* var);
 
     /// Handles emitting interpolation qualifiers
     /// @param out the output of the expression stream
@@ -333,9 +333,12 @@ class GeneratorImpl : public TextGenerator {
                                      utils::VectorRef<const ast::Attribute*> attrs);
     /// Handles emitting attributes
     /// @param out the output of the expression stream
+    /// @param var the global variable semantics
     /// @param attrs the attributes
     /// @returns true if the attributes were emitted
-    bool EmitAttributes(std::ostream& out, utils::VectorRef<const ast::Attribute*> attrs);
+    bool EmitAttributes(std::ostream& out,
+                        const sem::GlobalVariable* var,
+                        utils::VectorRef<const ast::Attribute*> attrs);
     /// Handles emitting the entry point function
     /// @param func the entry point
     /// @returns true if the entry point function was emitted

@@ -273,14 +273,16 @@ class Validator {
     bool LocalVariable(const sem::Variable* v) const;
 
     /// Validates a location attribute
-    /// @param location the location attribute to validate
+    /// @param loc_attr the location attribute to validate
+    /// @param location the location value
     /// @param type the variable type
     /// @param locations the set of locations in the module
     /// @param stage the current pipeline stage
     /// @param source the source of the attribute
     /// @param is_input true if this is an input variable
     /// @returns true on success, false otherwise.
-    bool LocationAttribute(const ast::LocationAttribute* location,
+    bool LocationAttribute(const ast::LocationAttribute* loc_attr,
+                           uint32_t location,
                            const sem::Type* type,
                            std::unordered_set<uint32_t>& locations,
                            ast::PipelineStage stage,

@@ -1723,25 +1723,22 @@ DecorationList ParserImpl::GetMemberPipelineDecorations(const Struct& struct_typ
     return result;
 }
 
-const ast::Attribute* ParserImpl::SetLocation(AttributeList* attributes,
-                                              const ast::Attribute* replacement) {
+void ParserImpl::SetLocation(AttributeList* attributes, const ast::Attribute* replacement) {
     if (!replacement) {
-        return nullptr;
+        return;
     }
     for (auto*& attribute : *attributes) {
         if (attribute->Is<ast::LocationAttribute>()) {
             // Replace this location attribute with the replacement.
             // The old one doesn't leak because it's kept in the builder's AST node
             // list.
-            const ast::Attribute* result = nullptr;
-            result = attribute;
             attribute = replacement;
-            return result;  // Assume there is only one such decoration.
+            return;  // Assume there is only one such decoration.
         }
     }
     // The list didn't have a location. Add it.
     attributes->Push(replacement);
-    return nullptr;
+    return;
 }
 
 bool ParserImpl::ConvertPipelineDecorations(const Type* store_type,
@@ -1759,7 +1756,7 @@ bool ParserImpl::ConvertPipelineDecorations(const Type* store_type,
                     return Fail() << "malformed Location decoration on ID requires one "
                                      "literal operand";
                 }
-                SetLocation(attributes, create<ast::LocationAttribute>(Source{}, deco[1]));
+                SetLocation(attributes, builder_.Location(AInt(deco[1])));
                 if (store_type->IsIntegerScalarOrVector()) {
                     // Default to flat interpolation for integral user-defined IO types.
                     type = ast::InterpolationType::kFlat;

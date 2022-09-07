@@ -280,9 +280,7 @@ class ParserImpl : Reader {
     /// Assumes the list contains at most one Location decoration.
     /// @param decos the attribute list to modify
     /// @param replacement the location decoration to place into the list
-    /// @returns the location decoration that was replaced, if one was replaced,
-    /// or null otherwise.
-    const ast::Attribute* SetLocation(AttributeList* decos, const ast::Attribute* replacement);
+    void SetLocation(AttributeList* decos, const ast::Attribute* replacement);
 
     /// Converts a SPIR-V struct member decoration into a number of AST
     /// decorations. If the decoration is recognized but deliberately dropped,

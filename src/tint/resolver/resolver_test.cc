@@ -774,9 +774,9 @@ TEST_F(ResolverTest, Function_Parameters) {
 }
 
 TEST_F(ResolverTest, Function_Parameters_Locations) {
-    auto* param_a = Param("a", ty.f32(), utils::Vector{Location(3)});
+    auto* param_a = Param("a", ty.f32(), utils::Vector{Location(3_a)});
     auto* param_b = Param("b", ty.u32(), utils::Vector{Builtin(ast::BuiltinValue::kVertexIndex)});
-    auto* param_c = Param("c", ty.u32(), utils::Vector{Location(1)});
+    auto* param_c = Param("c", ty.u32(), utils::Vector{Location(1_a)});
 
     GlobalVar("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
     auto* func = Func("my_func",
@@ -809,7 +809,7 @@ TEST_F(ResolverTest, Function_Parameters_Locations) {
 TEST_F(ResolverTest, Function_GlobalVariable_Location) {
     auto* var = GlobalVar(
         "my_vec", ty.vec4<f32>(), ast::StorageClass::kIn,
-        utils::Vector{Location(3), Disable(ast::DisabledValidation::kIgnoreStorageClass)});
+        utils::Vector{Location(3_a), Disable(ast::DisabledValidation::kIgnoreStorageClass)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -856,7 +856,7 @@ TEST_F(ResolverTest, Function_ReturnType_Location) {
                           Stage(ast::PipelineStage::kFragment),
                       },
                       utils::Vector{
-                          Location(2),
+                          Location(2_a),
                       });
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

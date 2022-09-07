@@ -48,7 +48,7 @@ TEST_F(BuilderTest, EntryPoint_Parameters) {
                         });
     auto* loc1 = Param("loc1", ty.f32(),
                        utils::Vector{
-                           Location(1u),
+                           Location(1_u),
                        });
     auto* mul = Mul(Expr(MemberAccessor("coord", "x")), Expr("loc1"));
     auto* col = Var("col", ty.f32(), mul);
@@ -120,7 +120,7 @@ TEST_F(BuilderTest, EntryPoint_ReturnValue) {
     // }
     auto* loc_in = Param("loc_in", ty.u32(),
                          utils::Vector{
-                             Location(0),
+                             Location(0_a),
                              Flat(),
                          });
     auto* cond =
@@ -134,7 +134,7 @@ TEST_F(BuilderTest, EntryPoint_ReturnValue) {
              Stage(ast::PipelineStage::kFragment),
          },
          utils::Vector{
-             Location(0),
+             Location(0_a),
          });
 
     spirv::Builder& b = SanitizeAndBuild();
@@ -211,7 +211,7 @@ TEST_F(BuilderTest, EntryPoint_SharedStruct) {
     auto* interface = Structure(
         "Interface",
         utils::Vector{
-            Member("value", ty.f32(), utils::Vector{Location(1u)}),
+            Member("value", ty.f32(), utils::Vector{Location(1_u)}),
             Member("pos", ty.vec4<f32>(), utils::Vector{Builtin(ast::BuiltinValue::kPosition)}),
         });
 

@@ -640,7 +640,17 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
 
         std::optional<uint32_t> location;
         if (auto* attr = ast::GetAttribute<ast::LocationAttribute>(var->attributes)) {
-            location = attr->value;
+            auto* materialize = Materialize(Expression(attr->value));
+            if (!materialize) {
+                return nullptr;
+            }
+            auto* c = materialize->ConstantValue();
+            if (!c) {
+                // TODO(crbug.com/tint/1633): Add error message about invalid materialization
+                // when location can be an expression.
+                return nullptr;
+            }
+            location = c->As<uint32_t>();
         }
 
         sem = builder_->create<sem::GlobalVariable>(
@@ -725,7 +735,17 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
 
     std::optional<uint32_t> location;
     if (auto* l = ast::GetAttribute<ast::LocationAttribute>(param->attributes)) {
-        location = l->value;
+        auto* materialize = Materialize(Expression(l->value));
+        if (!materialize) {
+            return nullptr;
+        }
+        auto* c = materialize->ConstantValue();
+        if (!c) {
+            // TODO(crbug.com/tint/1633): Add error message about invalid materialization when
+            // location can be an expression.
+            return nullptr;
+        }
+        location = c->As<uint32_t>();
     }
 
     auto* sem = builder_->create<sem::Parameter>(
@@ -924,7 +944,17 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
         Mark(attr);
 
         if (auto* a = attr->As<ast::LocationAttribute>()) {
-            return_location = a->value;
+            auto* materialize = Materialize(Expression(a->value));
+            if (!materialize) {
+                return nullptr;
+            }
+            auto* c = materialize->ConstantValue();
+            if (!c) {
+                // TODO(crbug.com/tint/1633): Add error message about invalid materialization when
+                // location can be an expression.
+                return nullptr;
+            }
+            return_location = c->As<uint32_t>();
         }
     }
     if (!validator_.NoDuplicateAttributes(decl->attributes)) {
@@ -2808,7 +2838,17 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                 size = s->size;
                 has_size_attr = true;
             } else if (auto* l = attr->As<ast::LocationAttribute>()) {
-                location = l->value;
+                auto* materialize = Materialize(Expression(l->value));
+                if (!materialize) {
+                    return nullptr;
+                }
+                auto* c = materialize->ConstantValue();
+                if (!c) {
+                    // TODO(crbug.com/tint/1633): Add error message about invalid materialization
+                    // when location can be an expression.
+                    return nullptr;
+                }
+                location = c->As<uint32_t>();
             }
         }
 

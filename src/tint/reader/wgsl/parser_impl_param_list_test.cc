@@ -117,8 +117,12 @@ TEST_F(ParserImplTest, ParamList_Attributes) {
     EXPECT_TRUE(e.value[1]->Is<ast::Parameter>());
     auto attrs_1 = e.value[1]->attributes;
     ASSERT_EQ(attrs_1.Length(), 1u);
-    EXPECT_TRUE(attrs_1[0]->Is<ast::LocationAttribute>());
-    EXPECT_EQ(attrs_1[0]->As<ast::LocationAttribute>()->value, 1u);
+
+    ASSERT_TRUE(attrs_1[0]->Is<ast::LocationAttribute>());
+    auto* attr = attrs_1[0]->As<ast::LocationAttribute>();
+    ASSERT_TRUE(attr->value->Is<ast::IntLiteralExpression>());
+    auto* loc = attr->value->As<ast::IntLiteralExpression>();
+    EXPECT_EQ(loc->value, 1u);
 
     EXPECT_EQ(e.value[1]->source.range.begin.line, 1u);
     EXPECT_EQ(e.value[1]->source.range.begin.column, 52u);

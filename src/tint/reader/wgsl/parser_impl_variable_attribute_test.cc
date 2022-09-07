@@ -29,7 +29,9 @@ TEST_F(ParserImplTest, Attribute_Location) {
     ASSERT_TRUE(var_attr->Is<ast::LocationAttribute>());
 
     auto* loc = var_attr->As<ast::LocationAttribute>();
-    EXPECT_EQ(loc->value, 4u);
+    ASSERT_TRUE(loc->value->Is<ast::IntLiteralExpression>());
+    auto* exp = loc->value->As<ast::IntLiteralExpression>();
+    EXPECT_EQ(exp->value, 4u);
 }
 
 TEST_F(ParserImplTest, Attribute_Location_TrailingComma) {
@@ -44,7 +46,9 @@ TEST_F(ParserImplTest, Attribute_Location_TrailingComma) {
     ASSERT_TRUE(var_attr->Is<ast::LocationAttribute>());
 
     auto* loc = var_attr->As<ast::LocationAttribute>();
-    EXPECT_EQ(loc->value, 4u);
+    ASSERT_TRUE(loc->value->Is<ast::IntLiteralExpression>());
+    auto* exp = loc->value->As<ast::IntLiteralExpression>();
+    EXPECT_EQ(exp->value, 4u);
 }
 
 TEST_F(ParserImplTest, Attribute_Location_MissingLeftParen) {

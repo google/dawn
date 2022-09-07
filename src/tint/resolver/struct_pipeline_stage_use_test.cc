@@ -29,7 +29,7 @@ namespace {
 using ResolverPipelineStageUseTest = ResolverTest;
 
 TEST_F(ResolverPipelineStageUseTest, UnusedStruct) {
-    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0)})});
+    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0_a)})});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -39,7 +39,7 @@ TEST_F(ResolverPipelineStageUseTest, UnusedStruct) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsNonEntryPointParam) {
-    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0)})});
+    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0_a)})});
 
     Func("foo", utils::Vector{Param("param", ty.Of(s))}, ty.void_(), utils::Empty, utils::Empty);
 
@@ -51,7 +51,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsNonEntryPointParam) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsNonEntryPointReturnType) {
-    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0)})});
+    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0_a)})});
 
     Func("foo", utils::Empty, ty.Of(s), utils::Vector{Return(Construct(ty.Of(s), Expr(0_f)))},
          utils::Empty);
@@ -64,7 +64,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsNonEntryPointReturnType) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderParam) {
-    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0)})});
+    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0_a)})});
 
     Func("main", utils::Vector{Param("param", ty.Of(s))}, ty.vec4<f32>(),
          utils::Vector{Return(Construct(ty.vec4<f32>()))},
@@ -96,7 +96,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsVertexShaderReturnType) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderParam) {
-    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0)})});
+    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0_a)})});
 
     Func("main", utils::Vector{Param("param", ty.Of(s))}, ty.void_(), utils::Empty,
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -110,7 +110,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderParam) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsFragmentShaderReturnType) {
-    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0)})});
+    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0_a)})});
 
     Func("main", utils::Empty, ty.Of(s), utils::Vector{Return(Construct(ty.Of(s), Expr(0_f)))},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -160,7 +160,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedMultipleStages) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderParamViaAlias) {
-    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0)})});
+    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0_a)})});
     auto* s_alias = Alias("S_alias", ty.Of(s));
 
     Func("main", utils::Vector{Param("param", ty.Of(s_alias))}, ty.void_(), utils::Empty,
@@ -175,7 +175,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderParamViaAlias) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderParamLocationSet) {
-    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(3)})});
+    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(3_a)})});
 
     Func("main", utils::Vector{Param("param", ty.Of(s))}, ty.void_(), utils::Empty,
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -189,7 +189,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderParamLocationSet) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderReturnTypeViaAlias) {
-    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0)})});
+    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(0_a)})});
     auto* s_alias = Alias("S_alias", ty.Of(s));
 
     Func("main", utils::Empty, ty.Of(s_alias),
@@ -205,7 +205,7 @@ TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderReturnTypeViaAlias) {
 }
 
 TEST_F(ResolverPipelineStageUseTest, StructUsedAsShaderReturnTypeLocationSet) {
-    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(3)})});
+    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{Location(3_a)})});
 
     Func("main", utils::Empty, ty.Of(s), utils::Vector{Return(Construct(ty.Of(s), Expr(0_f)))},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});

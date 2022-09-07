@@ -1856,7 +1856,7 @@ bool GeneratorImpl::EmitGlobalVariable(const ast::Variable* global) {
     return Switch(
         global,  //
         [&](const ast::Var* var) {
-            auto* sem = builder_.Sem().Get(global);
+            auto* sem = builder_.Sem().Get<sem::GlobalVariable>(global);
             switch (sem->StorageClass()) {
                 case ast::StorageClass::kUniform:
                     return EmitUniformVariable(var, sem);
@@ -2005,7 +2005,7 @@ bool GeneratorImpl::EmitWorkgroupVariable(const sem::Variable* var) {
     return true;
 }
 
-bool GeneratorImpl::EmitIOVariable(const sem::Variable* var) {
+bool GeneratorImpl::EmitIOVariable(const sem::GlobalVariable* var) {
     auto* decl = var->Declaration();
 
     if (auto* b = ast::GetAttribute<ast::BuiltinAttribute>(decl->attributes)) {
@@ -2018,7 +2018,7 @@ bool GeneratorImpl::EmitIOVariable(const sem::Variable* var) {
     }
 
     auto out = line();
-    EmitAttributes(out, decl->attributes);
+    EmitAttributes(out, var, decl->attributes);
     EmitInterpolationQualifiers(out, decl->attributes);
 
     auto name = builder_.Symbols().NameFor(decl->symbol);
@@ -2065,15 +2065,16 @@ void GeneratorImpl::EmitInterpolationQualifiers(
 }
 
 bool GeneratorImpl::EmitAttributes(std::ostream& out,
+                                   const sem::GlobalVariable* var,
                                    utils::VectorRef<const ast::Attribute*> attributes) {
     if (attributes.IsEmpty()) {
         return true;
     }
     bool first = true;
     for (auto* attr : attributes) {
-        if (auto* location = attr->As<ast::LocationAttribute>()) {
+        if (attr->As<ast::LocationAttribute>()) {
             out << (first ? "layout(" : ", ");
-            out << "location = " << std::to_string(location->value);
+            out << "location = " << std::to_string(var->Location().value());
             first = false;
         }
     }
