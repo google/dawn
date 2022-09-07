@@ -153,13 +153,18 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
     /// @param access the variable access control type
     /// @param constant_value the constant value for the variable. May be null
     /// @param binding_point the optional resource binding point of the variable
+    /// @param location the location value if provided
+    ///
+    /// Note, a GlobalVariable generally doesn't have a `location` in WGSL, as it isn't allowed by
+    /// the spec. The location maybe attached by transforms such as CanonicalizeEntryPointIO.
     GlobalVariable(const ast::Variable* declaration,
                    const sem::Type* type,
                    EvaluationStage stage,
                    ast::StorageClass storage_class,
                    ast::Access access,
                    const Constant* constant_value,
-                   sem::BindingPoint binding_point = {});
+                   sem::BindingPoint binding_point = {},
+                   std::optional<uint32_t> location = std::nullopt);
 
     /// Destructor
     ~GlobalVariable() override;
@@ -173,10 +178,14 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
     /// @returns the pipeline constant ID associated with the variable
     tint::OverrideId OverrideId() const { return override_id_; }
 
+    /// @returns the location value for the parameter, if set
+    std::optional<uint32_t> Location() const { return location_; }
+
   private:
     const sem::BindingPoint binding_point_;
 
     tint::OverrideId override_id_;
+    std::optional<uint32_t> location_;
 };
 
 /// Parameter is a function parameter

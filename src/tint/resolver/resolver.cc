@@ -382,7 +382,8 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
     if (is_global) {
         sem = builder_->create<sem::GlobalVariable>(
             v, ty, sem::EvaluationStage::kRuntime, ast::StorageClass::kNone,
-            ast::Access::kUndefined, /* constant_value */ nullptr, sem::BindingPoint{});
+            ast::Access::kUndefined, /* constant_value */ nullptr, sem::BindingPoint{},
+            std::nullopt);
     } else {
         sem = builder_->create<sem::LocalVariable>(v, ty, sem::EvaluationStage::kRuntime,
                                                    ast::StorageClass::kNone,
@@ -437,7 +438,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
 
     auto* sem = builder_->create<sem::GlobalVariable>(
         v, ty, sem::EvaluationStage::kOverride, ast::StorageClass::kNone, ast::Access::kUndefined,
-        /* constant_value */ nullptr, sem::BindingPoint{});
+        /* constant_value */ nullptr, sem::BindingPoint{}, std::nullopt);
     sem->SetConstructor(rhs);
 
     if (auto* id_attr = ast::GetAttribute<ast::IdAttribute>(v->attributes)) {
@@ -521,7 +522,7 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
 
     auto* sem = is_global ? static_cast<sem::Variable*>(builder_->create<sem::GlobalVariable>(
                                 c, ty, sem::EvaluationStage::kConstant, ast::StorageClass::kNone,
-                                ast::Access::kUndefined, value, sem::BindingPoint{}))
+                                ast::Access::kUndefined, value, sem::BindingPoint{}, std::nullopt))
                           : static_cast<sem::Variable*>(builder_->create<sem::LocalVariable>(
                                 c, ty, sem::EvaluationStage::kConstant, ast::StorageClass::kNone,
                                 ast::Access::kUndefined, current_statement_, value));
@@ -636,9 +637,15 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
             }
             binding_point = {group, binding};
         }
-        sem = builder_->create<sem::GlobalVariable>(var, var_ty, sem::EvaluationStage::kRuntime,
-                                                    storage_class, access,
-                                                    /* constant_value */ nullptr, binding_point);
+
+        std::optional<uint32_t> location;
+        if (auto* attr = ast::GetAttribute<ast::LocationAttribute>(var->attributes)) {
+            location = attr->value;
+        }
+
+        sem = builder_->create<sem::GlobalVariable>(
+            var, var_ty, sem::EvaluationStage::kRuntime, storage_class, access,
+            /* constant_value */ nullptr, binding_point, location);
 
     } else {
         sem = builder_->create<sem::LocalVariable>(var, var_ty, sem::EvaluationStage::kRuntime,

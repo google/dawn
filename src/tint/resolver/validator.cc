@@ -601,7 +601,8 @@ bool Validator::GlobalVariable(
                 if (!attr->IsAnyOf<ast::BindingAttribute, ast::GroupAttribute,
                                    ast::InternalAttribute>() &&
                     (!is_shader_io_attribute || !has_io_storage_class)) {
-                    AddError("attribute is not valid for module-scope 'var'", attr->source);
+                    AddError("attribute '" + attr->Name() + "' is not valid for module-scope 'var'",
+                             attr->source);
                     return false;
                 }
             }

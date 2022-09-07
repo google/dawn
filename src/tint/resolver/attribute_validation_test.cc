@@ -698,12 +698,12 @@ using VariableAttributeTest = TestWithParams;
 TEST_P(VariableAttributeTest, IsValid) {
     auto& params = GetParam();
 
+    auto attrs = createAttributes(Source{{12, 34}}, *this, params.kind);
+    auto* attr = attrs[0];
     if (IsBindingAttribute(params.kind)) {
-        GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler),
-                  createAttributes(Source{{12, 34}}, *this, params.kind));
+        GlobalVar("a", ty.sampler(ast::SamplerKind::kSampler), attrs);
     } else {
-        GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate,
-                  createAttributes(Source{{12, 34}}, *this, params.kind));
+        GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate, attrs);
     }
 
     if (params.should_pass) {
@@ -711,7 +711,8 @@ TEST_P(VariableAttributeTest, IsValid) {
     } else {
         EXPECT_FALSE(r()->Resolve());
         if (!IsBindingAttribute(params.kind)) {
-            EXPECT_EQ(r()->error(), "12:34 error: attribute is not valid for module-scope 'var'");
+            EXPECT_EQ(r()->error(), "12:34 error: attribute '" + attr->Name() +
+                                        "' is not valid for module-scope 'var'");
         }
     }
 }

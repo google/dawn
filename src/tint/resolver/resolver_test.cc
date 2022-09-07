@@ -806,6 +806,18 @@ TEST_F(ResolverTest, Function_Parameters_Locations) {
     EXPECT_EQ(1u, func_sem->Parameters()[2]->Location());
 }
 
+TEST_F(ResolverTest, Function_GlobalVariable_Location) {
+    auto* var = GlobalVar(
+        "my_vec", ty.vec4<f32>(), ast::StorageClass::kIn,
+        utils::Vector{Location(3), Disable(ast::DisabledValidation::kIgnoreStorageClass)});
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get<sem::GlobalVariable>(var);
+    ASSERT_NE(sem, nullptr);
+    EXPECT_EQ(3u, sem->Location());
+}
+
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
     auto* s = Structure("S", utils::Vector{Member("m", ty.u32())});
 
