@@ -260,7 +260,7 @@ using f32 = Number<float>;
 using f16 = Number<detail::NumberKindF16>;
 
 /// @returns the friendly name of Number type T
-template <typename T, typename = traits::EnableIf<IsNumber<T>>>
+template <typename T, traits::EnableIf<IsNumber<T>>* = nullptr>
 const char* FriendlyName() {
     if constexpr (std::is_same_v<T, AInt>) {
         return "abstract-int";
@@ -277,6 +277,12 @@ const char* FriendlyName() {
     } else {
         static_assert(!sizeof(T), "Unhandled type");
     }
+}
+
+/// @returns the friendly name of T when T is bool
+template <typename T, traits::EnableIf<std::is_same_v<T, bool>>* = nullptr>
+const char* FriendlyName() {
+    return "bool";
 }
 
 /// Enumerator of failure reasons when converting from one number to another.

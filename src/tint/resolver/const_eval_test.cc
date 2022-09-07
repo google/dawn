@@ -3202,6 +3202,7 @@ using Types = std::variant<Value<AInt>,
                            Value<i32>,
                            Value<f32>,
                            Value<f16>,
+                           Value<bool>,
 
                            Value<builder::vec2<AInt>>,
                            Value<builder::vec2<AFloat>>,
@@ -3209,6 +3210,7 @@ using Types = std::variant<Value<AInt>,
                            Value<builder::vec2<i32>>,
                            Value<builder::vec2<f32>>,
                            Value<builder::vec2<f16>>,
+                           Value<builder::vec2<bool>>,
 
                            Value<builder::vec3<AInt>>,
                            Value<builder::vec3<AFloat>>,
@@ -3584,6 +3586,115 @@ INSTANTIATE_TEST_SUITE_P(Div,
                                  OpDivFloatCases<f32>(),
                                  OpDivFloatCases<f16>()))));
 
+template <typename T, bool equals>
+std::vector<Case> OpEqualCases() {
+    return {
+        C(Val(T{0}), Val(T{0}), Val(true == equals)),
+        C(Val(T{0}), Val(T{1}), Val(false == equals)),
+        C(Val(T{1}), Val(T{0}), Val(false == equals)),
+        C(Val(T{1}), Val(T{1}), Val(true == equals)),
+        C(Vec(T{0}, T{0}), Vec(T{0}, T{0}), Vec(true == equals, true == equals)),
+        C(Vec(T{1}, T{0}), Vec(T{0}, T{1}), Vec(false == equals, false == equals)),
+        C(Vec(T{1}, T{1}), Vec(T{0}, T{1}), Vec(false == equals, true == equals)),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(Equal,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(  //
+                             testing::Values(ast::BinaryOp::kEqual),
+                             testing::ValuesIn(Concat(  //
+                                 OpEqualCases<AInt, true>(),
+                                 OpEqualCases<i32, true>(),
+                                 OpEqualCases<u32, true>(),
+                                 OpEqualCases<AFloat, true>(),
+                                 OpEqualCases<f32, true>(),
+                                 OpEqualCases<f16, true>(),
+                                 OpEqualCases<bool, true>()))));
+INSTANTIATE_TEST_SUITE_P(NotEqual,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(  //
+                             testing::Values(ast::BinaryOp::kNotEqual),
+                             testing::ValuesIn(Concat(  //
+                                 OpEqualCases<AInt, false>(),
+                                 OpEqualCases<i32, false>(),
+                                 OpEqualCases<u32, false>(),
+                                 OpEqualCases<AFloat, false>(),
+                                 OpEqualCases<f32, false>(),
+                                 OpEqualCases<f16, false>(),
+                                 OpEqualCases<bool, false>()))));
+
+template <typename T, bool less_than>
+std::vector<Case> OpLessThanCases() {
+    return {
+        C(Val(T{0}), Val(T{0}), Val(false == less_than)),
+        C(Val(T{0}), Val(T{1}), Val(true == less_than)),
+        C(Val(T{1}), Val(T{0}), Val(false == less_than)),
+        C(Val(T{1}), Val(T{1}), Val(false == less_than)),
+        C(Vec(T{0}, T{0}), Vec(T{0}, T{0}), Vec(false == less_than, false == less_than)),
+        C(Vec(T{0}, T{0}), Vec(T{1}, T{1}), Vec(true == less_than, true == less_than)),
+        C(Vec(T{1}, T{1}), Vec(T{0}, T{0}), Vec(false == less_than, false == less_than)),
+        C(Vec(T{1}, T{0}), Vec(T{0}, T{1}), Vec(false == less_than, true == less_than)),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(LessThan,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(  //
+                             testing::Values(ast::BinaryOp::kLessThan),
+                             testing::ValuesIn(Concat(  //
+                                 OpLessThanCases<AInt, true>(),
+                                 OpLessThanCases<i32, true>(),
+                                 OpLessThanCases<u32, true>(),
+                                 OpLessThanCases<AFloat, true>(),
+                                 OpLessThanCases<f32, true>(),
+                                 OpLessThanCases<f16, true>()))));
+INSTANTIATE_TEST_SUITE_P(GreaterThanEqual,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(  //
+                             testing::Values(ast::BinaryOp::kGreaterThanEqual),
+                             testing::ValuesIn(Concat(  //
+                                 OpLessThanCases<AInt, false>(),
+                                 OpLessThanCases<i32, false>(),
+                                 OpLessThanCases<u32, false>(),
+                                 OpLessThanCases<AFloat, false>(),
+                                 OpLessThanCases<f32, false>(),
+                                 OpLessThanCases<f16, false>()))));
+
+template <typename T, bool greater_than>
+std::vector<Case> OpGreaterThanCases() {
+    return {
+        C(Val(T{0}), Val(T{0}), Val(false == greater_than)),
+        C(Val(T{0}), Val(T{1}), Val(false == greater_than)),
+        C(Val(T{1}), Val(T{0}), Val(true == greater_than)),
+        C(Val(T{1}), Val(T{1}), Val(false == greater_than)),
+        C(Vec(T{0}, T{0}), Vec(T{0}, T{0}), Vec(false == greater_than, false == greater_than)),
+        C(Vec(T{1}, T{1}), Vec(T{0}, T{0}), Vec(true == greater_than, true == greater_than)),
+        C(Vec(T{0}, T{0}), Vec(T{1}, T{1}), Vec(false == greater_than, false == greater_than)),
+        C(Vec(T{1}, T{0}), Vec(T{0}, T{1}), Vec(true == greater_than, false == greater_than)),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(GreaterThan,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(  //
+                             testing::Values(ast::BinaryOp::kGreaterThan),
+                             testing::ValuesIn(Concat(  //
+                                 OpGreaterThanCases<AInt, true>(),
+                                 OpGreaterThanCases<i32, true>(),
+                                 OpGreaterThanCases<u32, true>(),
+                                 OpGreaterThanCases<AFloat, true>(),
+                                 OpGreaterThanCases<f32, true>(),
+                                 OpGreaterThanCases<f16, true>()))));
+INSTANTIATE_TEST_SUITE_P(LessThanEqual,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(  //
+                             testing::Values(ast::BinaryOp::kLessThanEqual),
+                             testing::ValuesIn(Concat(  //
+                                 OpGreaterThanCases<AInt, false>(),
+                                 OpGreaterThanCases<i32, false>(),
+                                 OpGreaterThanCases<u32, false>(),
+                                 OpGreaterThanCases<AFloat, false>(),
+                                 OpGreaterThanCases<f32, false>(),
+                                 OpGreaterThanCases<f16, false>()))));
+
 // Tests for errors on overflow/underflow of binary operations with abstract numbers
 struct OverflowCase {
     ast::BinaryOp op;
@@ -3608,7 +3719,7 @@ TEST_P(ResolverConstEvalBinaryOpTest_Overflow, Test) {
     std::string type_name = std::visit(
         [&](auto&& value) {
             using ValueType = std::decay_t<decltype(value)>;
-            return tint::FriendlyName<typename ValueType::ElementType>();
+            return builder::FriendlyName<ValueType>();
         },
         c.lhs);
 

@@ -1,7 +1,7 @@
 #version 310 es
 
 void tint_symbol() {
-  if ((0u == 2u)) {
+  if (false) {
   }
 }
 

@@ -94,6 +94,21 @@ auto Dispatch_fia_fiu32_f16(F&& f, CONSTANTS&&... cs) {
 /// Helper that calls `f` passing in the value of all `cs`.
 /// Assumes all `cs` are of the same type.
 template <typename F, typename... CONSTANTS>
+auto Dispatch_fia_fiu32_f16_bool(F&& f, CONSTANTS&&... cs) {
+    return Switch(
+        First(cs...)->Type(),  //
+        [&](const sem::AbstractInt*) { return f(cs->template As<AInt>()...); },
+        [&](const sem::AbstractFloat*) { return f(cs->template As<AFloat>()...); },
+        [&](const sem::F32*) { return f(cs->template As<f32>()...); },
+        [&](const sem::I32*) { return f(cs->template As<i32>()...); },
+        [&](const sem::U32*) { return f(cs->template As<u32>()...); },
+        [&](const sem::F16*) { return f(cs->template As<f16>()...); },
+        [&](const sem::Bool*) { return f(cs->template As<bool>()...); });
+}
+
+/// Helper that calls `f` passing in the value of all `cs`.
+/// Assumes all `cs` are of the same type.
+template <typename F, typename... CONSTANTS>
 auto Dispatch_fa_f32_f16(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
@@ -466,10 +481,14 @@ const Constant* CreateComposite(ProgramBuilder& builder,
     }
 }
 
-/// TransformElements constructs a new constant by applying the transformation function 'f' on each
-/// of the most deeply nested elements of 'cs'. Assumes that all constants are the same type.
+/// TransformElements constructs a new constant of type `composite_ty` by applying the
+/// transformation function 'f' on each of the most deeply nested elements of 'cs'. Assumes that all
+/// input constants `cs` are of the same type.
 template <typename F, typename... CONSTANTS>
-const Constant* TransformElements(ProgramBuilder& builder, F&& f, CONSTANTS&&... cs) {
+const Constant* TransformElements(ProgramBuilder& builder,
+                                  const sem::Type* composite_ty,
+                                  F&& f,
+                                  CONSTANTS&&... cs) {
     uint32_t n = 0;
     auto* ty = First(cs...)->Type();
     auto* el_ty = sem::Type::ElementOf(ty, &n);
@@ -479,16 +498,19 @@ const Constant* TransformElements(ProgramBuilder& builder, F&& f, CONSTANTS&&...
     utils::Vector<const sem::Constant*, 8> els;
     els.Reserve(n);
     for (uint32_t i = 0; i < n; i++) {
-        els.Push(TransformElements(builder, std::forward<F>(f), cs->Index(i)...));
+        els.Push(TransformElements(builder, sem::Type::ElementOf(composite_ty), std::forward<F>(f),
+                                   cs->Index(i)...));
     }
-    return CreateComposite(builder, ty, std::move(els));
+    return CreateComposite(builder, composite_ty, std::move(els));
 }
 
-/// TransformBinaryElements constructs a new constant by applying the transformation function 'f' on
-/// each of the most deeply nested elements of both `c0` and `c1`. Unlike TransformElements, this
-/// function handles the constants being of different types, e.g. vector-scalar, scalar-vector.
+/// TransformBinaryElements constructs a new constant of type `composite_ty` by applying the
+/// transformation function 'f' on each of the most deeply nested elements of both `c0` and `c1`.
+/// Unlike TransformElements, this function handles the constants being of different types, e.g.
+/// vector-scalar, scalar-vector.
 template <typename F>
 const Constant* TransformBinaryElements(ProgramBuilder& builder,
+                                        const sem::Type* composite_ty,
                                         F&& f,
                                         const sem::Constant* c0,
                                         const sem::Constant* c1) {
@@ -510,12 +532,11 @@ const Constant* TransformBinaryElements(ProgramBuilder& builder,
             }
             return c->Index(i);
         };
-        els.Push(TransformBinaryElements(builder, std::forward<F>(f), nested_or_self(c0, n0),
+        els.Push(TransformBinaryElements(builder, sem::Type::ElementOf(composite_ty),
+                                         std::forward<F>(f), nested_or_self(c0, n0),
                                          nested_or_self(c1, n1)));
     }
-    // Use larger type
-    auto* ty = n0 > n1 ? c0->Type() : c1->Type();
-    return CreateComposite(builder, ty, std::move(els));
+    return CreateComposite(builder, composite_ty, std::move(els));
 }
 }  // namespace
 
@@ -915,7 +936,7 @@ ConstEval::ConstantResult ConstEval::Bitcast(const sem::Type*, const sem::Expres
     return nullptr;
 }
 
-ConstEval::ConstantResult ConstEval::OpComplement(const sem::Type*,
+ConstEval::ConstantResult ConstEval::OpComplement(const sem::Type* ty,
                                                   utils::VectorRef<const sem::Constant*> args,
                                                   const Source&) {
     auto transform = [&](const sem::Constant* c) {
@@ -924,10 +945,10 @@ ConstEval::ConstantResult ConstEval::OpComplement(const sem::Type*,
         };
         return Dispatch_ia_iu32(create, c);
     };
-    return TransformElements(builder, transform, args[0]);
+    return TransformElements(builder, ty, transform, args[0]);
 }
 
-ConstEval::ConstantResult ConstEval::OpUnaryMinus(const sem::Type*,
+ConstEval::ConstantResult ConstEval::OpUnaryMinus(const sem::Type* ty,
                                                   utils::VectorRef<const sem::Constant*> args,
                                                   const Source&) {
     auto transform = [&](const sem::Constant* c) {
@@ -949,10 +970,10 @@ ConstEval::ConstantResult ConstEval::OpUnaryMinus(const sem::Type*,
         };
         return Dispatch_fia_fi32_f16(create, c);
     };
-    return TransformElements(builder, transform, args[0]);
+    return TransformElements(builder, ty, transform, args[0]);
 }
 
-ConstEval::ConstantResult ConstEval::OpPlus(const sem::Type*,
+ConstEval::ConstantResult ConstEval::OpPlus(const sem::Type* ty,
                                             utils::VectorRef<const sem::Constant*> args,
                                             const Source& source) {
     TINT_SCOPED_ASSIGNMENT(current_source, &source);
@@ -963,14 +984,14 @@ ConstEval::ConstantResult ConstEval::OpPlus(const sem::Type*,
         return nullptr;
     };
 
-    auto r = TransformBinaryElements(builder, transform, args[0], args[1]);
+    auto r = TransformBinaryElements(builder, ty, transform, args[0], args[1]);
     if (builder.Diagnostics().contains_errors()) {
         return utils::Failure;
     }
     return r;
 }
 
-ConstEval::ConstantResult ConstEval::OpMinus(const sem::Type*,
+ConstEval::ConstantResult ConstEval::OpMinus(const sem::Type* ty,
                                              utils::VectorRef<const sem::Constant*> args,
                                              const Source& source) {
     auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
@@ -1003,14 +1024,14 @@ ConstEval::ConstantResult ConstEval::OpMinus(const sem::Type*,
         return Dispatch_fia_fiu32_f16(create, c0, c1);
     };
 
-    auto r = TransformBinaryElements(builder, transform, args[0], args[1]);
+    auto r = TransformBinaryElements(builder, ty, transform, args[0], args[1]);
     if (builder.Diagnostics().contains_errors()) {
         return utils::Failure;
     }
     return r;
 }
 
-ConstEval::ConstantResult ConstEval::OpMultiply(const sem::Type* /*ty*/,
+ConstEval::ConstantResult ConstEval::OpMultiply(const sem::Type* ty,
                                                 utils::VectorRef<const sem::Constant*> args,
                                                 const Source& source) {
     TINT_SCOPED_ASSIGNMENT(current_source, &source);
@@ -1021,7 +1042,7 @@ ConstEval::ConstantResult ConstEval::OpMultiply(const sem::Type* /*ty*/,
         return nullptr;
     };
 
-    auto r = TransformBinaryElements(builder, transform, args[0], args[1]);
+    auto r = TransformBinaryElements(builder, ty, transform, args[0], args[1]);
     if (builder.Diagnostics().contains_errors()) {
         return utils::Failure;
     }
@@ -1196,7 +1217,7 @@ ConstEval::ConstantResult ConstEval::OpMultiplyMatMat(const sem::Type* ty,
     return CreateComposite(builder, ty, result_mat);
 }
 
-ConstEval::ConstantResult ConstEval::OpDivide(const sem::Type*,
+ConstEval::ConstantResult ConstEval::OpDivide(const sem::Type* ty,
                                               utils::VectorRef<const sem::Constant*> args,
                                               const Source& source) {
     auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
@@ -1237,14 +1258,116 @@ ConstEval::ConstantResult ConstEval::OpDivide(const sem::Type*,
         return Dispatch_fia_fiu32_f16(create, c0, c1);
     };
 
-    auto r = TransformBinaryElements(builder, transform, args[0], args[1]);
+    auto r = TransformBinaryElements(builder, ty, transform, args[0], args[1]);
     if (builder.Diagnostics().contains_errors()) {
         return utils::Failure;
     }
     return r;
 }
 
-ConstEval::ConstantResult ConstEval::atan2(const sem::Type*,
+ConstEval::ConstantResult ConstEval::OpEqual(const sem::Type* ty,
+                                             utils::VectorRef<const sem::Constant*> args,
+                                             const Source&) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        auto create = [&](auto i, auto j) -> const Constant* {
+            return CreateElement(builder, sem::Type::DeepestElementOf(ty), i == j);
+        };
+        return Dispatch_fia_fiu32_f16_bool(create, c0, c1);
+    };
+
+    auto r = TransformElements(builder, ty, transform, args[0], args[1]);
+    if (builder.Diagnostics().contains_errors()) {
+        return utils::Failure;
+    }
+    return r;
+}
+
+ConstEval::ConstantResult ConstEval::OpNotEqual(const sem::Type* ty,
+                                                utils::VectorRef<const sem::Constant*> args,
+                                                const Source&) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        auto create = [&](auto i, auto j) -> const Constant* {
+            return CreateElement(builder, sem::Type::DeepestElementOf(ty), i != j);
+        };
+        return Dispatch_fia_fiu32_f16_bool(create, c0, c1);
+    };
+
+    auto r = TransformElements(builder, ty, transform, args[0], args[1]);
+    if (builder.Diagnostics().contains_errors()) {
+        return utils::Failure;
+    }
+    return r;
+}
+
+ConstEval::ConstantResult ConstEval::OpLessThan(const sem::Type* ty,
+                                                utils::VectorRef<const sem::Constant*> args,
+                                                const Source&) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        auto create = [&](auto i, auto j) -> const Constant* {
+            return CreateElement(builder, sem::Type::DeepestElementOf(ty), i < j);
+        };
+        return Dispatch_fia_fiu32_f16(create, c0, c1);
+    };
+
+    auto r = TransformElements(builder, ty, transform, args[0], args[1]);
+    if (builder.Diagnostics().contains_errors()) {
+        return utils::Failure;
+    }
+    return r;
+}
+
+ConstEval::ConstantResult ConstEval::OpGreaterThan(const sem::Type* ty,
+                                                   utils::VectorRef<const sem::Constant*> args,
+                                                   const Source&) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        auto create = [&](auto i, auto j) -> const Constant* {
+            return CreateElement(builder, sem::Type::DeepestElementOf(ty), i > j);
+        };
+        return Dispatch_fia_fiu32_f16(create, c0, c1);
+    };
+
+    auto r = TransformElements(builder, ty, transform, args[0], args[1]);
+    if (builder.Diagnostics().contains_errors()) {
+        return utils::Failure;
+    }
+    return r;
+}
+
+ConstEval::ConstantResult ConstEval::OpLessThanEqual(const sem::Type* ty,
+                                                     utils::VectorRef<const sem::Constant*> args,
+                                                     const Source&) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        auto create = [&](auto i, auto j) -> const Constant* {
+            return CreateElement(builder, sem::Type::DeepestElementOf(ty), i <= j);
+        };
+        return Dispatch_fia_fiu32_f16(create, c0, c1);
+    };
+
+    auto r = TransformElements(builder, ty, transform, args[0], args[1]);
+    if (builder.Diagnostics().contains_errors()) {
+        return utils::Failure;
+    }
+    return r;
+}
+
+ConstEval::ConstantResult ConstEval::OpGreaterThanEqual(const sem::Type* ty,
+                                                        utils::VectorRef<const sem::Constant*> args,
+                                                        const Source&) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        auto create = [&](auto i, auto j) -> const Constant* {
+            return CreateElement(builder, sem::Type::DeepestElementOf(ty), i >= j);
+        };
+        return Dispatch_fia_fiu32_f16(create, c0, c1);
+    };
+
+    auto r = TransformElements(builder, ty, transform, args[0], args[1]);
+    if (builder.Diagnostics().contains_errors()) {
+        return utils::Failure;
+    }
+    return r;
+}
+
+ConstEval::ConstantResult ConstEval::atan2(const sem::Type* ty,
                                            utils::VectorRef<const sem::Constant*> args,
                                            const Source&) {
     auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
@@ -1253,10 +1376,10 @@ ConstEval::ConstantResult ConstEval::atan2(const sem::Type*,
         };
         return Dispatch_fa_f32_f16(create, c0, c1);
     };
-    return TransformElements(builder, transform, args[0], args[1]);
+    return TransformElements(builder, ty, transform, args[0], args[1]);
 }
 
-ConstEval::ConstantResult ConstEval::clamp(const sem::Type*,
+ConstEval::ConstantResult ConstEval::clamp(const sem::Type* ty,
                                            utils::VectorRef<const sem::Constant*> args,
                                            const Source&) {
     auto transform = [&](const sem::Constant* c0, const sem::Constant* c1,
@@ -1267,7 +1390,7 @@ ConstEval::ConstantResult ConstEval::clamp(const sem::Type*,
         };
         return Dispatch_fia_fiu32_f16(create, c0, c1, c2);
     };
-    return TransformElements(builder, transform, args[0], args[1], args[2]);
+    return TransformElements(builder, ty, transform, args[0], args[1], args[2]);
 }
 
 utils::Result<const sem::Constant*> ConstEval::Convert(const sem::Type* target_ty,

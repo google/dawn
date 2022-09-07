@@ -934,23 +934,23 @@ op | <T: iu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
 op && (bool, bool) -> bool
 op || (bool, bool) -> bool
 
-op == <T: scalar>(T, T) -> bool
-op == <T: scalar, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+@const op == <T: abstract_or_scalar>(T, T) -> bool
+@const op == <T: abstract_or_scalar, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
 
-op != <T: scalar>(T, T) -> bool
-op != <T: scalar, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+@const op != <T: abstract_or_scalar>(T, T) -> bool
+@const op != <T: abstract_or_scalar, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
 
-op < <T: fiu32_f16>(T, T) -> bool
-op < <T: fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+@const op < <T: fia_fiu32_f16>(T, T) -> bool
+@const op < <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
 
-op > <T: fiu32_f16>(T, T) -> bool
-op > <T: fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+@const op > <T: fia_fiu32_f16>(T, T) -> bool
+@const op > <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
 
-op <= <T: fiu32_f16>(T, T) -> bool
-op <= <T: fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+@const op <= <T: fia_fiu32_f16>(T, T) -> bool
+@const op <= <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
 
-op >= <T: fiu32_f16>(T, T) -> bool
-op >= <T: fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+@const op >= <T: fia_fiu32_f16>(T, T) -> bool
+@const op >= <T: fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
 
 op << <T: iu32>(T, u32) -> T
 op << <T: iu32, N: num> (vec<N, T>, vec<N, u32>) -> vec<N, T>

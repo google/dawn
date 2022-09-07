@@ -275,6 +275,60 @@ class ConstEval {
                             utils::VectorRef<const sem::Constant*> args,
                             const Source& source);
 
+    /// Equality operator '=='
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    ConstantResult OpEqual(const sem::Type* ty,
+                           utils::VectorRef<const sem::Constant*> args,
+                           const Source& source);
+
+    /// Inequality operator '!='
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    ConstantResult OpNotEqual(const sem::Type* ty,
+                              utils::VectorRef<const sem::Constant*> args,
+                              const Source& source);
+
+    /// Less than operator '<'
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    ConstantResult OpLessThan(const sem::Type* ty,
+                              utils::VectorRef<const sem::Constant*> args,
+                              const Source& source);
+
+    /// Greater than operator '>'
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    ConstantResult OpGreaterThan(const sem::Type* ty,
+                                 utils::VectorRef<const sem::Constant*> args,
+                                 const Source& source);
+
+    /// Less than or equal operator '<='
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    ConstantResult OpLessThanEqual(const sem::Type* ty,
+                                   utils::VectorRef<const sem::Constant*> args,
+                                   const Source& source);
+
+    /// Greater than or equal operator '>='
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    ConstantResult OpGreaterThanEqual(const sem::Type* ty,
+                                      utils::VectorRef<const sem::Constant*> args,
+                                      const Source& source);
+
     ////////////////////////////////////////////////////////////////////////////
     // Builtins
     ////////////////////////////////////////////////////////////////////////////

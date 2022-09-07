@@ -1,7 +1,7 @@
 #version 310 es
 
 void tint_symbol() {
-  if ((0.0f == 1.0f)) {
+  if (false) {
   }
 }
 

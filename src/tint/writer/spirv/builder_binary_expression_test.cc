@@ -981,36 +981,52 @@ TEST_F(BuilderTest, Binary_Multiply_MatrixMatrix_F16) {
 }
 
 TEST_F(BuilderTest, Binary_LogicalAnd) {
-    auto* lhs = create<ast::BinaryExpression>(ast::BinaryOp::kEqual, Expr(1_i), Expr(2_i));
-    auto* rhs = create<ast::BinaryExpression>(ast::BinaryOp::kEqual, Expr(3_i), Expr(4_i));
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalAnd, lhs, rhs);
+    auto* v0 = Var("a", Expr(1_i));
+    auto* v1 = Var("b", Expr(2_i));
+    auto* v2 = Var("c", Expr(3_i));
+    auto* v3 = Var("d", Expr(4_i));
+    auto* expr = LogicalAnd(Equal("a", "b"), Equal("c", "d"));
 
-    WrapInFunction(expr);
+    WrapInFunction(v0, v1, v2, v3, expr);
 
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
     b.GenerateLabel(b.next_id());
+    ASSERT_TRUE(b.GenerateFunctionVariable(v0)) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(v1)) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(v2)) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(v3)) << b.error();
 
-    EXPECT_EQ(b.GenerateBinaryExpression(expr), 12u) << b.error();
+    EXPECT_EQ(b.GenerateBinaryExpression(expr), 22u) << b.error();
     EXPECT_EQ(DumpInstructions(b.types()),
               R"(%2 = OpTypeInt 32 1
 %3 = OpConstant %2 1
-%4 = OpConstant %2 2
-%6 = OpTypeBool
+%5 = OpTypePointer Function %2
+%6 = OpConstantNull %2
+%7 = OpConstant %2 2
 %9 = OpConstant %2 3
-%10 = OpConstant %2 4
+%11 = OpConstant %2 4
+%16 = OpTypeBool
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
               R"(%1 = OpLabel
-%5 = OpIEqual %6 %3 %4
-OpSelectionMerge %7 None
-OpBranchConditional %5 %8 %7
-%8 = OpLabel
-%11 = OpIEqual %6 %9 %10
-OpBranch %7
-%7 = OpLabel
-%12 = OpPhi %6 %5 %1 %11 %8
+OpStore %4 %3
+OpStore %8 %7
+OpStore %10 %9
+OpStore %12 %11
+%13 = OpLoad %2 %4
+%14 = OpLoad %2 %8
+%15 = OpIEqual %16 %13 %14
+OpSelectionMerge %17 None
+OpBranchConditional %15 %18 %17
+%18 = OpLabel
+%19 = OpLoad %2 %10
+%20 = OpLoad %2 %12
+%21 = OpIEqual %16 %19 %20
+OpBranch %17
+%17 = OpLabel
+%22 = OpPhi %16 %15 %1 %21 %18
 )");
 }
 
@@ -1131,38 +1147,52 @@ OpBranch %4
 }
 
 TEST_F(BuilderTest, Binary_LogicalOr) {
-    auto* lhs = create<ast::BinaryExpression>(ast::BinaryOp::kEqual, Expr(1_i), Expr(2_i));
+    auto* v0 = Var("a", Expr(1_i));
+    auto* v1 = Var("b", Expr(2_i));
+    auto* v2 = Var("c", Expr(3_i));
+    auto* v3 = Var("d", Expr(4_i));
+    auto* expr = LogicalOr(Equal("a", "b"), Equal("c", "d"));
 
-    auto* rhs = create<ast::BinaryExpression>(ast::BinaryOp::kEqual, Expr(3_i), Expr(4_i));
-
-    auto* expr = create<ast::BinaryExpression>(ast::BinaryOp::kLogicalOr, lhs, rhs);
-
-    WrapInFunction(expr);
+    WrapInFunction(v0, v1, v2, v3, expr);
 
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
     b.GenerateLabel(b.next_id());
+    ASSERT_TRUE(b.GenerateFunctionVariable(v0)) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(v1)) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(v2)) << b.error();
+    ASSERT_TRUE(b.GenerateFunctionVariable(v3)) << b.error();
 
-    EXPECT_EQ(b.GenerateBinaryExpression(expr), 12u) << b.error();
+    EXPECT_EQ(b.GenerateBinaryExpression(expr), 22u) << b.error();
     EXPECT_EQ(DumpInstructions(b.types()),
               R"(%2 = OpTypeInt 32 1
 %3 = OpConstant %2 1
-%4 = OpConstant %2 2
-%6 = OpTypeBool
+%5 = OpTypePointer Function %2
+%6 = OpConstantNull %2
+%7 = OpConstant %2 2
 %9 = OpConstant %2 3
-%10 = OpConstant %2 4
+%11 = OpConstant %2 4
+%16 = OpTypeBool
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
               R"(%1 = OpLabel
-%5 = OpIEqual %6 %3 %4
-OpSelectionMerge %7 None
-OpBranchConditional %5 %7 %8
-%8 = OpLabel
-%11 = OpIEqual %6 %9 %10
-OpBranch %7
-%7 = OpLabel
-%12 = OpPhi %6 %5 %1 %11 %8
+OpStore %4 %3
+OpStore %8 %7
+OpStore %10 %9
+OpStore %12 %11
+%13 = OpLoad %2 %4
+%14 = OpLoad %2 %8
+%15 = OpIEqual %16 %13 %14
+OpSelectionMerge %17 None
+OpBranchConditional %15 %17 %18
+%18 = OpLabel
+%19 = OpLoad %2 %10
+%20 = OpLoad %2 %12
+%21 = OpIEqual %16 %19 %20
+OpBranch %17
+%17 = OpLabel
+%22 = OpPhi %16 %15 %1 %21 %18
 )");
 }
 
