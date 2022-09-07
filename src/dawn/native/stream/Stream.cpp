@@ -16,6 +16,8 @@
 
 #include <string>
 
+#include "dawn/native/Limits.h"
+
 namespace dawn::native::stream {
 
 template <>

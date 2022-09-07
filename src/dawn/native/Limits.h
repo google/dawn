@@ -16,6 +16,7 @@
 #define SRC_DAWN_NATIVE_LIMITS_H_
 
 #include "dawn/native/Error.h"
+#include "dawn/native/VisitableMembers.h"
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
@@ -37,6 +38,20 @@ MaybeError ValidateLimits(const Limits& supportedLimits, const Limits& requiredL
 
 // Returns a copy of |limits| where limit tiers are applied.
 Limits ApplyLimitTiers(Limits limits);
+
+// If there are new limit member needed at shader compilation time
+// Simply append a new X(type, name) here.
+#define LIMITS_FOR_COMPILATION_REQUEST_MEMBERS(X)  \
+    X(uint32_t, maxComputeWorkgroupSizeX)          \
+    X(uint32_t, maxComputeWorkgroupSizeY)          \
+    X(uint32_t, maxComputeWorkgroupSizeZ)          \
+    X(uint32_t, maxComputeInvocationsPerWorkgroup) \
+    X(uint32_t, maxComputeWorkgroupStorageSize)
+
+struct LimitsForCompilationRequest {
+    static LimitsForCompilationRequest Create(const Limits& limits);
+    DAWN_VISITABLE_MEMBERS(LIMITS_FOR_COMPILATION_REQUEST_MEMBERS)
+};
 
 }  // namespace dawn::native
 

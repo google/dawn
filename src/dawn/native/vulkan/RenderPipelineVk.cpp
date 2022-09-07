@@ -341,9 +341,6 @@ MaybeError RenderPipeline::Initialize() {
 
     // There are at most 2 shader stages in render pipeline, i.e. vertex and fragment
     std::array<VkPipelineShaderStageCreateInfo, 2> shaderStages;
-    std::array<std::vector<OverrideScalar>, 2> specializationDataEntriesPerStages;
-    std::array<std::vector<VkSpecializationMapEntry>, 2> specializationMapEntriesPerStages;
-    std::array<VkSpecializationInfo, 2> specializationInfoPerStages;
     uint32_t stageCount = 0;
 
     for (auto stage : IterateStages(this->GetStageMask())) {
@@ -354,7 +351,7 @@ MaybeError RenderPipeline::Initialize() {
 
         ShaderModule::ModuleAndSpirv moduleAndSpirv;
         DAWN_TRY_ASSIGN(moduleAndSpirv,
-                        module->GetHandleAndSpirv(programmableStage.entryPoint.c_str(), layout));
+                        module->GetHandleAndSpirv(stage, programmableStage, layout));
 
         shaderStage.module = moduleAndSpirv.module;
         shaderStage.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -378,11 +375,6 @@ MaybeError RenderPipeline::Initialize() {
                 break;
             }
         }
-
-        shaderStage.pSpecializationInfo =
-            GetVkSpecializationInfo(programmableStage, &specializationInfoPerStages[stageCount],
-                                    &specializationDataEntriesPerStages[stageCount],
-                                    &specializationMapEntriesPerStages[stageCount]);
 
         DAWN_ASSERT(stageCount < 2);
         shaderStages[stageCount] = shaderStage;

@@ -25,6 +25,10 @@
 
 #import <Metal/Metal.h>
 
+namespace dawn::native {
+struct ProgrammableStage;
+}
+
 namespace dawn::native::metal {
 
 class Device;
@@ -42,15 +46,13 @@ class ShaderModule final : public ShaderModuleBase {
         NSPRef<id<MTLFunction>> function;
         bool needsStorageBufferLength;
         std::vector<uint32_t> workgroupAllocations;
+        MTLSize localWorkgroupSize;
     };
 
-    // MTLFunctionConstantValues needs @available tag to compile
-    // Use id (like void*) in function signature as workaround and do static cast inside
-    MaybeError CreateFunction(const char* entryPointName,
-                              SingleShaderStage stage,
+    MaybeError CreateFunction(SingleShaderStage stage,
+                              const ProgrammableStage& programmableStage,
                               const PipelineLayout* layout,
                               MetalFunctionData* out,
-                              id constantValues = nil,
                               uint32_t sampleMask = 0xFFFFFFFF,
                               const RenderPipeline* renderPipeline = nullptr);
 

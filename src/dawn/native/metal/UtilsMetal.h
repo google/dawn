@@ -68,15 +68,6 @@ void EnsureDestinationTextureInitialized(CommandRecordingContext* commandContext
 
 MTLBlitOption ComputeMTLBlitOption(const Format& format, Aspect aspect);
 
-// Helper function to create function with constant values wrapped in
-// if available branch
-MaybeError CreateMTLFunction(const ProgrammableStage& programmableStage,
-                             SingleShaderStage singleShaderStage,
-                             PipelineLayout* pipelineLayout,
-                             ShaderModule::MetalFunctionData* functionData,
-                             uint32_t sampleMask = 0xFFFFFFFF,
-                             const RenderPipeline* renderPipeline = nullptr);
-
 // Allow use MTLStoreActionStoreAndMultismapleResolve because the logic in the backend is
 // first to compute what the "best" Metal render pass descriptor is, then fix it up if we
 // are not on macOS 10.12 (i.e. the EmulateStoreAndMSAAResolve toggle is on).

@@ -471,6 +471,127 @@ struct Buf {
     EXPECT_BUFFER_U32_RANGE_EQ(expected.data(), buffer, 0, kCount);
 }
 
+// Test one shader shared by two pipelines with different constants overridden
+TEST_P(ShaderTests, OverridableConstantsSharedShader) {
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
+
+    std::vector<uint32_t> expected1{1};
+    wgpu::Buffer buffer1 = CreateBuffer(expected1.size());
+    std::vector<uint32_t> expected2{2};
+    wgpu::Buffer buffer2 = CreateBuffer(expected2.size());
+
+    std::string shader = R"(
+override a: u32;
+
+struct Buf {
+    data : array<u32, 1>
+}
+
+@group(0) @binding(0) var<storage, read_write> buf : Buf;
+
+@compute @workgroup_size(1) fn main() {
+    buf.data[0] = a;
+})";
+
+    std::vector<wgpu::ConstantEntry> constants1;
+    constants1.push_back({nullptr, "a", 1});
+    std::vector<wgpu::ConstantEntry> constants2;
+    constants2.push_back({nullptr, "a", 2});
+
+    wgpu::ComputePipeline pipeline1 = CreateComputePipeline(shader, "main", &constants1);
+    wgpu::ComputePipeline pipeline2 = CreateComputePipeline(shader, "main", &constants2);
+
+    wgpu::BindGroup bindGroup1 =
+        utils::MakeBindGroup(device, pipeline1.GetBindGroupLayout(0), {{0, buffer1}});
+    wgpu::BindGroup bindGroup2 =
+        utils::MakeBindGroup(device, pipeline2.GetBindGroupLayout(0), {{0, buffer2}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline1);
+        pass.SetBindGroup(0, bindGroup1);
+        pass.DispatchWorkgroups(1);
+        pass.SetPipeline(pipeline2);
+        pass.SetBindGroup(0, bindGroup2);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_RANGE_EQ(expected1.data(), buffer1, 0, expected1.size());
+    EXPECT_BUFFER_U32_RANGE_EQ(expected2.data(), buffer2, 0, expected2.size());
+}
+
+// Test overridable constants work with workgroup size
+TEST_P(ShaderTests, OverridableConstantsWorkgroupSize) {
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
+    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
+
+    std::string shader = R"(
+override x: u32;
+
+struct Buf {
+    data : array<u32, 1>
+}
+
+@group(0) @binding(0) var<storage, read_write> buf : Buf;
+
+@compute @workgroup_size(x) fn main(
+    @builtin(local_invocation_id) local_invocation_id : vec3<u32>
+) {
+    if (local_invocation_id.x >= x - 1) {
+        buf.data[0] = local_invocation_id.x + 1;
+    }
+})";
+
+    const uint32_t workgroup_size_x_1 = 16u;
+    const uint32_t workgroup_size_x_2 = 64u;
+
+    std::vector<uint32_t> expected1{workgroup_size_x_1};
+    wgpu::Buffer buffer1 = CreateBuffer(expected1.size());
+    std::vector<uint32_t> expected2{workgroup_size_x_2};
+    wgpu::Buffer buffer2 = CreateBuffer(expected2.size());
+
+    std::vector<wgpu::ConstantEntry> constants1;
+    constants1.push_back({nullptr, "x", static_cast<double>(workgroup_size_x_1)});
+    std::vector<wgpu::ConstantEntry> constants2;
+    constants2.push_back({nullptr, "x", static_cast<double>(workgroup_size_x_2)});
+
+    wgpu::ComputePipeline pipeline1 = CreateComputePipeline(shader, "main", &constants1);
+    wgpu::ComputePipeline pipeline2 = CreateComputePipeline(shader, "main", &constants2);
+
+    wgpu::BindGroup bindGroup1 =
+        utils::MakeBindGroup(device, pipeline1.GetBindGroupLayout(0), {{0, buffer1}});
+    wgpu::BindGroup bindGroup2 =
+        utils::MakeBindGroup(device, pipeline2.GetBindGroupLayout(0), {{0, buffer2}});
+
+    wgpu::CommandBuffer commands;
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline1);
+        pass.SetBindGroup(0, bindGroup1);
+        pass.DispatchWorkgroups(1);
+        pass.SetPipeline(pipeline2);
+        pass.SetBindGroup(0, bindGroup2);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+
+        commands = encoder.Finish();
+    }
+
+    queue.Submit(1, &commands);
+
+    EXPECT_BUFFER_U32_RANGE_EQ(expected1.data(), buffer1, 0, expected1.size());
+    EXPECT_BUFFER_U32_RANGE_EQ(expected2.data(), buffer2, 0, expected2.size());
+}
+
 // Test overridable constants with numeric identifiers
 TEST_P(ShaderTests, OverridableConstantsNumericIdentifiers) {
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
@@ -596,6 +717,7 @@ TEST_P(ShaderTests, OverridableConstantsMultipleEntryPoints) {
     std::string shader = R"(
 @id(1001) override c1: u32;
 @id(1002) override c2: u32;
+@id(1003) override c3: u32;
 
 struct Buf {
     data : array<u32, 1>
@@ -611,7 +733,7 @@ struct Buf {
     buf.data[0] = c2;
 }
 
-@compute @workgroup_size(1) fn main3() {
+@compute @workgroup_size(c3) fn main3() {
     buf.data[0] = 3u;
 }
 )";
@@ -620,6 +742,8 @@ struct Buf {
     constants1.push_back({nullptr, "1001", 1});
     std::vector<wgpu::ConstantEntry> constants2;
     constants2.push_back({nullptr, "1002", 2});
+    std::vector<wgpu::ConstantEntry> constants3;
+    constants3.push_back({nullptr, "1003", 1});
 
     wgpu::ShaderModule shaderModule = utils::CreateShaderModule(device, shader.c_str());
 
@@ -640,6 +764,8 @@ struct Buf {
     wgpu::ComputePipelineDescriptor csDesc3;
     csDesc3.compute.module = shaderModule;
     csDesc3.compute.entryPoint = "main3";
+    csDesc3.compute.constants = constants3.data();
+    csDesc3.compute.constantCount = constants3.size();
     wgpu::ComputePipeline pipeline3 = device.CreateComputePipeline(&csDesc3);
 
     wgpu::BindGroup bindGroup1 =
@@ -764,8 +890,6 @@ TEST_P(ShaderTests, ConflictingBindingsDueToTransformOrder) {
 
     device.CreateRenderPipeline(&desc);
 }
-
-// TODO(tint:1155): Test overridable constants used for workgroup size
 
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D12Backend(),

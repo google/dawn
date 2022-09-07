@@ -55,6 +55,10 @@ class Inspector {
     /// @returns vector of entry point information
     std::vector<EntryPoint> GetEntryPoints();
 
+    /// @param entry_point name of the entry point to get information about
+    /// @returns the entry point information
+    EntryPoint GetEntryPoint(const std::string& entry_point);
+
     /// @returns map of override identifier to initial value
     std::map<OverrideId, Scalar> GetOverrideDefaultValues();
 
@@ -230,6 +234,10 @@ class Inspector {
     /// whenever a set of expressions are resolved to globals.
     template <size_t N, typename F>
     void GetOriginatingResources(std::array<const ast::Expression*, N> exprs, F&& cb);
+
+    /// @param func the function of the entry point. Must be non-nullptr and true for IsEntryPoint()
+    /// @returns the entry point information
+    EntryPoint GetEntryPoint(const tint::ast::Function* func);
 };
 
 }  // namespace tint::inspector

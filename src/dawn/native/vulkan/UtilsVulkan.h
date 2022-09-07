@@ -144,15 +144,6 @@ void SetDebugName(Device* device,
 std::string GetNextDeviceDebugPrefix();
 std::string GetDeviceDebugPrefixFromDebugName(const char* debugName);
 
-// Returns nullptr or &specializationInfo
-// specializationInfo, specializationDataEntries, specializationMapEntries needs to
-// be alive at least until VkSpecializationInfo is passed into Vulkan Create*Pipelines
-VkSpecializationInfo* GetVkSpecializationInfo(
-    const ProgrammableStage& programmableStage,
-    VkSpecializationInfo* specializationInfo,
-    std::vector<OverrideScalar>* specializationDataEntries,
-    std::vector<VkSpecializationMapEntry>* specializationMapEntries);
-
 }  // namespace dawn::native::vulkan
 
 #endif  // SRC_DAWN_NATIVE_VULKAN_UTILSVULKAN_H_

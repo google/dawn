@@ -60,13 +60,35 @@ class ShaderModule::Spirv : private Blob {
 
 namespace dawn::native::vulkan {
 
+bool TransformedShaderModuleCacheKey::operator==(
+    const TransformedShaderModuleCacheKey& other) const {
+    if (layout != other.layout || entryPoint != other.entryPoint ||
+        constants.size() != other.constants.size()) {
+        return false;
+    }
+    if (!std::equal(constants.begin(), constants.end(), other.constants.begin())) {
+        return false;
+    }
+    return true;
+}
+
+size_t TransformedShaderModuleCacheKeyHashFunc::operator()(
+    const TransformedShaderModuleCacheKey& key) const {
+    size_t hash = 0;
+    HashCombine(&hash, key.layout, key.entryPoint);
+    for (const auto& entry : key.constants) {
+        HashCombine(&hash, entry.first, entry.second);
+    }
+    return hash;
+}
+
 class ShaderModule::ConcurrentTransformedShaderModuleCache {
   public:
     explicit ConcurrentTransformedShaderModuleCache(Device* device);
     ~ConcurrentTransformedShaderModuleCache();
 
-    std::optional<ModuleAndSpirv> Find(const PipelineLayoutEntryPointPair& key);
-    ModuleAndSpirv AddOrGet(const PipelineLayoutEntryPointPair& key,
+    std::optional<ModuleAndSpirv> Find(const TransformedShaderModuleCacheKey& key);
+    ModuleAndSpirv AddOrGet(const TransformedShaderModuleCacheKey& key,
                             VkShaderModule module,
                             Spirv&& spirv);
 
@@ -75,7 +97,9 @@ class ShaderModule::ConcurrentTransformedShaderModuleCache {
 
     Device* mDevice;
     std::mutex mMutex;
-    std::unordered_map<PipelineLayoutEntryPointPair, Entry, PipelineLayoutEntryPointPairHashFunc>
+    std::unordered_map<TransformedShaderModuleCacheKey,
+                       Entry,
+                       TransformedShaderModuleCacheKeyHashFunc>
         mTransformedShaderModuleCache;
 };
 
@@ -92,7 +116,7 @@ ShaderModule::ConcurrentTransformedShaderModuleCache::~ConcurrentTransformedShad
 
 std::optional<ShaderModule::ModuleAndSpirv>
 ShaderModule::ConcurrentTransformedShaderModuleCache::Find(
-    const PipelineLayoutEntryPointPair& key) {
+    const TransformedShaderModuleCacheKey& key) {
     std::lock_guard<std::mutex> lock(mMutex);
     auto iter = mTransformedShaderModuleCache.find(key);
     if (iter != mTransformedShaderModuleCache.end()) {
@@ -106,7 +130,7 @@ ShaderModule::ConcurrentTransformedShaderModuleCache::Find(
 }
 
 ShaderModule::ModuleAndSpirv ShaderModule::ConcurrentTransformedShaderModuleCache::AddOrGet(
-    const PipelineLayoutEntryPointPair& key,
+    const TransformedShaderModuleCacheKey& key,
     VkShaderModule module,
     Spirv&& spirv) {
     ASSERT(module != VK_NULL_HANDLE);
@@ -168,20 +192,24 @@ void ShaderModule::DestroyImpl() {
 
 ShaderModule::~ShaderModule() = default;
 
-#define SPIRV_COMPILATION_REQUEST_MEMBERS(X)                                    \
-    X(const tint::Program*, inputProgram)                                       \
-    X(tint::transform::BindingRemapper::BindingPoints, bindingPoints)           \
-    X(tint::transform::MultiplanarExternalTexture::BindingsMap, newBindingsMap) \
-    X(std::string_view, entryPointName)                                         \
-    X(bool, disableWorkgroupInit)                                               \
-    X(bool, useZeroInitializeWorkgroupMemoryExtension)                          \
+#define SPIRV_COMPILATION_REQUEST_MEMBERS(X)                                                \
+    X(SingleShaderStage, stage)                                                             \
+    X(const tint::Program*, inputProgram)                                                   \
+    X(tint::transform::BindingRemapper::BindingPoints, bindingPoints)                       \
+    X(tint::transform::MultiplanarExternalTexture::BindingsMap, newBindingsMap)             \
+    X(std::optional<tint::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
+    X(LimitsForCompilationRequest, limits)                                                  \
+    X(std::string_view, entryPointName)                                                     \
+    X(bool, disableWorkgroupInit)                                                           \
+    X(bool, useZeroInitializeWorkgroupMemoryExtension)                                      \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, tracePlatform)
 
 DAWN_MAKE_CACHE_REQUEST(SpirvCompilationRequest, SPIRV_COMPILATION_REQUEST_MEMBERS);
 #undef SPIRV_COMPILATION_REQUEST_MEMBERS
 
 ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
-    const char* entryPointName,
+    SingleShaderStage stage,
+    const ProgrammableStage& programmableStage,
     const PipelineLayout* layout) {
     TRACE_EVENT0(GetDevice()->GetPlatform(), General, "ShaderModuleVk::GetHandleAndSpirv");
 
@@ -191,7 +219,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     ScopedTintICEHandler scopedICEHandler(GetDevice());
 
     // Check to see if we have the handle and spirv cached already.
-    auto cacheKey = std::make_pair(layout, entryPointName);
+    auto cacheKey = TransformedShaderModuleCacheKey{layout, programmableStage.entryPoint.c_str(),
+                                                    programmableStage.constants};
     auto handleAndSpirv = mTransformedShaderModuleCache->Find(cacheKey);
     if (handleAndSpirv.has_value()) {
         return std::move(*handleAndSpirv);
@@ -204,7 +233,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     using BindingPoint = tint::transform::BindingPoint;
     BindingRemapper::BindingPoints bindingPoints;
 
-    const BindingInfoArray& moduleBindingInfo = GetEntryPoint(entryPointName).bindings;
+    const BindingInfoArray& moduleBindingInfo =
+        GetEntryPoint(programmableStage.entryPoint.c_str()).bindings;
 
     for (BindGroupIndex group : IterateBitSet(layout->GetBindGroupLayoutsMask())) {
         const BindGroupLayout* bgl = ToBackend(layout->GetBindGroupLayout(group));
@@ -238,16 +268,26 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         }
     }
 
+    std::optional<tint::transform::SubstituteOverride::Config> substituteOverrideConfig;
+    if (!programmableStage.metadata->overrides.empty()) {
+        substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
+    }
+
 #if TINT_BUILD_SPV_WRITER
     SpirvCompilationRequest req = {};
+    req.stage = stage;
     req.inputProgram = GetTintProgram();
     req.bindingPoints = std::move(bindingPoints);
     req.newBindingsMap = std::move(newBindingsMap);
-    req.entryPointName = entryPointName;
+    req.entryPointName = programmableStage.entryPoint;
     req.disableWorkgroupInit = GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
     req.useZeroInitializeWorkgroupMemoryExtension =
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension);
     req.tracePlatform = UnsafeUnkeyedValue(GetDevice()->GetPlatform());
+    req.substituteOverrideConfig = std::move(substituteOverrideConfig);
+
+    const CombinedLimits& limits = GetDevice()->GetLimits();
+    req.limits = LimitsForCompilationRequest::Create(limits.v1);
 
     CacheResult<Spirv> spirv;
     DAWN_TRY_LOAD_OR_RUN(
@@ -270,12 +310,27 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                 transformInputs.Add<tint::transform::MultiplanarExternalTexture::NewBindingPoints>(
                     r.newBindingsMap);
             }
+            if (r.substituteOverrideConfig) {
+                // This needs to run after SingleEntryPoint transform to get rid of overrides not
+                // used for the current entry point.
+                transformManager.Add<tint::transform::SubstituteOverride>();
+                transformInputs.Add<tint::transform::SubstituteOverride::Config>(
+                    std::move(r.substituteOverrideConfig).value());
+            }
             tint::Program program;
             {
                 TRACE_EVENT0(r.tracePlatform.UnsafeGetValue(), General, "RunTransforms");
                 DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, r.inputProgram,
                                                        transformInputs, nullptr, nullptr));
             }
+
+            if (r.stage == SingleShaderStage::Compute) {
+                // Validate workgroup size after program runs transforms.
+                Extent3D _;
+                DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
+                                       program, r.entryPointName.data(), r.limits));
+            }
+
             tint::writer::spirv::Options options;
             options.emit_vertex_point_size = true;
             options.disable_workgroup_init = r.disableWorkgroupInit;

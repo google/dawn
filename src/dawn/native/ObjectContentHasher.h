@@ -15,7 +15,9 @@
 #ifndef SRC_DAWN_NATIVE_OBJECTCONTENTHASHER_H_
 #define SRC_DAWN_NATIVE_OBJECTCONTENTHASHER_H_
 
+#include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "dawn/common/HashUtils.h"
@@ -60,12 +62,27 @@ class ObjectContentHasher {
         }
     };
 
+    template <typename T, typename E>
+    struct RecordImpl<std::map<T, E>> {
+        static constexpr void Call(ObjectContentHasher* recorder, const std::map<T, E>& map) {
+            recorder->RecordIterable<std::map<T, E>>(map);
+        }
+    };
+
     template <typename IteratorT>
     constexpr void RecordIterable(const IteratorT& iterable) {
         for (auto it = iterable.begin(); it != iterable.end(); ++it) {
             Record(*it);
         }
     }
+
+    template <typename T, typename E>
+    struct RecordImpl<std::pair<T, E>> {
+        static constexpr void Call(ObjectContentHasher* recorder, const std::pair<T, E>& pair) {
+            recorder->Record(pair.first);
+            recorder->Record(pair.second);
+        }
+    };
 
     size_t mContentHash = 0;
 };

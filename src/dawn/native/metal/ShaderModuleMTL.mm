@@ -35,17 +35,20 @@ namespace {
 
 using OptionalVertexPullingTransformConfig = std::optional<tint::transform::VertexPulling::Config>;
 
-#define MSL_COMPILATION_REQUEST_MEMBERS(X)                                               \
-    X(const tint::Program*, inputProgram)                                                \
-    X(tint::transform::BindingRemapper::BindingPoints, bindingPoints)                    \
-    X(tint::transform::MultiplanarExternalTexture::BindingsMap, externalTextureBindings) \
-    X(OptionalVertexPullingTransformConfig, vertexPullingTransformConfig)                \
-    X(std::string, entryPointName)                                                       \
-    X(uint32_t, sampleMask)                                                              \
-    X(bool, emitVertexPointSize)                                                         \
-    X(bool, isRobustnessEnabled)                                                         \
-    X(bool, disableSymbolRenaming)                                                       \
-    X(bool, disableWorkgroupInit)                                                        \
+#define MSL_COMPILATION_REQUEST_MEMBERS(X)                                                  \
+    X(SingleShaderStage, stage)                                                             \
+    X(const tint::Program*, inputProgram)                                                   \
+    X(tint::transform::BindingRemapper::BindingPoints, bindingPoints)                       \
+    X(tint::transform::MultiplanarExternalTexture::BindingsMap, externalTextureBindings)    \
+    X(OptionalVertexPullingTransformConfig, vertexPullingTransformConfig)                   \
+    X(std::optional<tint::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
+    X(LimitsForCompilationRequest, limits)                                                  \
+    X(std::string, entryPointName)                                                          \
+    X(uint32_t, sampleMask)                                                                 \
+    X(bool, emitVertexPointSize)                                                            \
+    X(bool, isRobustnessEnabled)                                                            \
+    X(bool, disableSymbolRenaming)                                                          \
+    X(bool, disableWorkgroupInit)                                                           \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, tracePlatform)
 
 DAWN_MAKE_CACHE_REQUEST(MslCompilationRequest, MSL_COMPILATION_REQUEST_MEMBERS);
@@ -53,12 +56,13 @@ DAWN_MAKE_CACHE_REQUEST(MslCompilationRequest, MSL_COMPILATION_REQUEST_MEMBERS);
 
 using WorkgroupAllocations = std::vector<uint32_t>;
 
-#define MSL_COMPILATION_MEMBERS(X)         \
-    X(std::string, msl)                    \
-    X(std::string, remappedEntryPointName) \
-    X(bool, needsStorageBufferLength)      \
-    X(bool, hasInvariantAttribute)         \
-    X(WorkgroupAllocations, workgroupAllocations)
+#define MSL_COMPILATION_MEMBERS(X)                \
+    X(std::string, msl)                           \
+    X(std::string, remappedEntryPointName)        \
+    X(bool, needsStorageBufferLength)             \
+    X(bool, hasInvariantAttribute)                \
+    X(WorkgroupAllocations, workgroupAllocations) \
+    X(Extent3D, localWorkgroupSize)
 
 DAWN_SERIALIZABLE(struct, MslCompilation, MSL_COMPILATION_MEMBERS){};
 #undef MSL_COMPILATION_MEMBERS
@@ -92,13 +96,14 @@ MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult,
 
 namespace {
 
-ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(DeviceBase* device,
-                                                          const tint::Program* inputProgram,
-                                                          const char* entryPointName,
-                                                          SingleShaderStage stage,
-                                                          const PipelineLayout* layout,
-                                                          uint32_t sampleMask,
-                                                          const RenderPipeline* renderPipeline) {
+ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
+    DeviceBase* device,
+    const ProgrammableStage& programmableStage,
+    SingleShaderStage stage,
+    const PipelineLayout* layout,
+    ShaderModule::MetalFunctionData* out,
+    uint32_t sampleMask,
+    const RenderPipeline* renderPipeline) {
     ScopedTintICEHandler scopedICEHandler(device);
 
     std::ostringstream errorStream;
@@ -137,7 +142,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(DeviceBase* device,
     if (stage == SingleShaderStage::Vertex &&
         device->IsToggleEnabled(Toggle::MetalEnableVertexPulling)) {
         vertexPullingTransformConfig = BuildVertexPullingTransformConfig(
-            *renderPipeline, entryPointName, kPullingBufferBindingSet);
+            *renderPipeline, programmableStage.entryPoint.c_str(), kPullingBufferBindingSet);
 
         for (VertexBufferSlot slot : IterateBitSet(renderPipeline->GetVertexBufferSlotsUsed())) {
             uint32_t metalIndex = renderPipeline->GetMtlVertexBufferIndex(slot);
@@ -152,12 +157,19 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(DeviceBase* device,
         }
     }
 
+    std::optional<tint::transform::SubstituteOverride::Config> substituteOverrideConfig;
+    if (!programmableStage.metadata->overrides.empty()) {
+        substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
+    }
+
     MslCompilationRequest req = {};
-    req.inputProgram = inputProgram;
+    req.stage = stage;
+    req.inputProgram = programmableStage.module->GetTintProgram();
     req.bindingPoints = std::move(bindingPoints);
     req.externalTextureBindings = std::move(externalTextureBindings);
     req.vertexPullingTransformConfig = std::move(vertexPullingTransformConfig);
-    req.entryPointName = entryPointName;
+    req.substituteOverrideConfig = std::move(substituteOverrideConfig);
+    req.entryPointName = programmableStage.entryPoint.c_str();
     req.sampleMask = sampleMask;
     req.emitVertexPointSize =
         stage == SingleShaderStage::Vertex &&
@@ -165,6 +177,9 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(DeviceBase* device,
     req.isRobustnessEnabled = device->IsRobustnessEnabled();
     req.disableSymbolRenaming = device->IsToggleEnabled(Toggle::DisableSymbolRenaming);
     req.tracePlatform = UnsafeUnkeyedValue(device->GetPlatform());
+
+    const CombinedLimits& limits = device->GetLimits();
+    req.limits = LimitsForCompilationRequest::Create(limits.v1);
 
     CacheResult<MslCompilation> mslCompilation;
     DAWN_TRY_LOAD_OR_RUN(
@@ -188,6 +203,14 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(DeviceBase* device,
                 transformManager.Add<tint::transform::VertexPulling>();
                 transformInputs.Add<tint::transform::VertexPulling::Config>(
                     std::move(r.vertexPullingTransformConfig).value());
+            }
+
+            if (r.substituteOverrideConfig) {
+                // This needs to run after SingleEntryPoint transform to get rid of overrides not
+                // used for the current entry point.
+                transformManager.Add<tint::transform::SubstituteOverride>();
+                transformInputs.Add<tint::transform::SubstituteOverride::Config>(
+                    std::move(r.substituteOverrideConfig).value());
             }
 
             if (r.isRobustnessEnabled) {
@@ -230,6 +253,13 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(DeviceBase* device,
                 return DAWN_VALIDATION_ERROR("Transform output missing renamer data.");
             }
 
+            Extent3D localSize{0, 0, 0};
+            if (r.stage == SingleShaderStage::Compute) {
+                // Validate workgroup size after program runs transforms.
+                DAWN_TRY_ASSIGN(localSize, ValidateComputeStageWorkgroupSize(
+                                               program, remappedEntryPointName.data(), r.limits));
+            }
+
             tint::writer::msl::Options options;
             options.buffer_size_ubo_index = kBufferLengthBufferSlot;
             options.fixed_sample_mask = r.sampleMask;
@@ -258,6 +288,7 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(DeviceBase* device,
                 result.needs_storage_buffer_sizes,
                 result.has_invariant_attribute,
                 std::move(workgroupAllocations),
+                localSize,
             }};
         });
 
@@ -272,11 +303,10 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(DeviceBase* device,
 
 }  // namespace
 
-MaybeError ShaderModule::CreateFunction(const char* entryPointName,
-                                        SingleShaderStage stage,
+MaybeError ShaderModule::CreateFunction(SingleShaderStage stage,
+                                        const ProgrammableStage& programmableStage,
                                         const PipelineLayout* layout,
                                         ShaderModule::MetalFunctionData* out,
-                                        id constantValuesPointer,
                                         uint32_t sampleMask,
                                         const RenderPipeline* renderPipeline) {
     TRACE_EVENT0(GetDevice()->GetPlatform(), General, "ShaderModuleMTL::CreateFunction");
@@ -284,16 +314,21 @@ MaybeError ShaderModule::CreateFunction(const char* entryPointName,
     ASSERT(!IsError());
     ASSERT(out);
 
+    const char* entryPointName = programmableStage.entryPoint.c_str();
+
     // Vertex stages must specify a renderPipeline
     if (stage == SingleShaderStage::Vertex) {
         ASSERT(renderPipeline != nullptr);
     }
 
     CacheResult<MslCompilation> mslCompilation;
-    DAWN_TRY_ASSIGN(mslCompilation, TranslateToMSL(GetDevice(), GetTintProgram(), entryPointName,
-                                                   stage, layout, sampleMask, renderPipeline));
+    DAWN_TRY_ASSIGN(mslCompilation, TranslateToMSL(GetDevice(), programmableStage, stage, layout,
+                                                   out, sampleMask, renderPipeline));
     out->needsStorageBufferLength = mslCompilation->needsStorageBufferLength;
     out->workgroupAllocations = std::move(mslCompilation->workgroupAllocations);
+    out->localWorkgroupSize = MTLSizeMake(mslCompilation->localWorkgroupSize.width,
+                                          mslCompilation->localWorkgroupSize.height,
+                                          mslCompilation->localWorkgroupSize.depthOrArrayLayers);
 
     NSRef<NSString> mslSource =
         AcquireNSRef([[NSString alloc] initWithUTF8String:mslCompilation->msl.c_str()]);
@@ -327,25 +362,7 @@ MaybeError ShaderModule::CreateFunction(const char* entryPointName,
 
     {
         TRACE_EVENT0(GetDevice()->GetPlatform(), General, "MTLLibrary::newFunctionWithName");
-        if (constantValuesPointer != nil) {
-            if (@available(macOS 10.12, *)) {
-                MTLFunctionConstantValues* constantValues = constantValuesPointer;
-                out->function = AcquireNSPRef([*library newFunctionWithName:name.Get()
-                                                             constantValues:constantValues
-                                                                      error:&error]);
-                if (error != nullptr) {
-                    if (error.code != MTLLibraryErrorCompileWarning) {
-                        return DAWN_VALIDATION_ERROR("Function compile error: %s",
-                                                     [error.localizedDescription UTF8String]);
-                    }
-                }
-                ASSERT(out->function != nil);
-            } else {
-                UNREACHABLE();
-            }
-        } else {
-            out->function = AcquireNSPRef([*library newFunctionWithName:name.Get()]);
-        }
+        out->function = AcquireNSPRef([*library newFunctionWithName:name.Get()]);
     }
 
     if (BlobCache* cache = GetDevice()->GetBlobCache()) {

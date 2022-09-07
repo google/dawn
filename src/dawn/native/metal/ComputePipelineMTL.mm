@@ -40,8 +40,9 @@ MaybeError ComputePipeline::Initialize() {
     const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
     ShaderModule::MetalFunctionData computeData;
 
-    DAWN_TRY(CreateMTLFunction(computeStage, SingleShaderStage::Compute, ToBackend(GetLayout()),
-                               &computeData));
+    DAWN_TRY(ToBackend(computeStage.module.Get())
+                 ->CreateFunction(SingleShaderStage::Compute, computeStage, ToBackend(GetLayout()),
+                                  &computeData));
 
     NSError* error = nullptr;
     mMtlComputePipelineState.Acquire(
@@ -53,8 +54,7 @@ MaybeError ComputePipeline::Initialize() {
     ASSERT(mMtlComputePipelineState != nil);
 
     // Copy over the local workgroup size as it is passed to dispatch explicitly in Metal
-    Origin3D localSize = GetStage(SingleShaderStage::Compute).metadata->localWorkgroupSize;
-    mLocalWorkgroupSize = MTLSizeMake(localSize.x, localSize.y, localSize.z);
+    mLocalWorkgroupSize = computeData.localWorkgroupSize;
 
     mRequiresStorageBufferLength = computeData.needsStorageBufferLength;
     mWorkgroupAllocations = std::move(computeData.workgroupAllocations);

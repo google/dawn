@@ -16,6 +16,7 @@
 
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/Pipeline.h"
 #include "dawn/native/PipelineLayout.h"
 #include "dawn/native/RenderPipeline.h"
 
@@ -180,6 +181,21 @@ tint::transform::VertexPulling::Config BuildVertexPullingTransformConfig(
         uint8_t vertexBufferSlot = static_cast<uint8_t>(dawnInfo.vertexBufferSlot);
         cfg.vertex_state[vertexBufferSlot].attributes.push_back(tintInfo);
     }
+    return cfg;
+}
+
+tint::transform::SubstituteOverride::Config BuildSubstituteOverridesTransformConfig(
+    const ProgrammableStage& stage) {
+    const EntryPointMetadata& metadata = *stage.metadata;
+    const auto& constants = stage.constants;
+
+    tint::transform::SubstituteOverride::Config cfg;
+
+    for (const auto& [key, value] : constants) {
+        const auto& o = metadata.overrides.at(key);
+        cfg.map.insert({o.id, value});
+    }
+
     return cfg;
 }
 

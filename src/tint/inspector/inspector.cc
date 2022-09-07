@@ -133,6 +133,110 @@ Inspector::Inspector(const Program* program) : program_(program) {}
 
 Inspector::~Inspector() = default;
 
+EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
+    EntryPoint entry_point;
+    TINT_ASSERT(Inspector, func != nullptr);
+    TINT_ASSERT(Inspector, func->IsEntryPoint());
+
+    auto* sem = program_->Sem().Get(func);
+
+    entry_point.name = program_->Symbols().NameFor(func->symbol);
+    entry_point.remapped_name = program_->Symbols().NameFor(func->symbol);
+
+    switch (func->PipelineStage()) {
+        case ast::PipelineStage::kCompute: {
+            entry_point.stage = PipelineStage::kCompute;
+
+            auto wgsize = sem->WorkgroupSize();
+            if (!wgsize[0].overridable_const && !wgsize[1].overridable_const &&
+                !wgsize[2].overridable_const) {
+                entry_point.workgroup_size = {wgsize[0].value, wgsize[1].value, wgsize[2].value};
+            }
+            break;
+        }
+        case ast::PipelineStage::kFragment: {
+            entry_point.stage = PipelineStage::kFragment;
+            break;
+        }
+        case ast::PipelineStage::kVertex: {
+            entry_point.stage = PipelineStage::kVertex;
+            break;
+        }
+        default: {
+            TINT_UNREACHABLE(Inspector, diagnostics_)
+                << "invalid pipeline stage for entry point '" << entry_point.name << "'";
+            break;
+        }
+    }
+
+    for (auto* param : sem->Parameters()) {
+        AddEntryPointInOutVariables(program_->Symbols().NameFor(param->Declaration()->symbol),
+                                    param->Type(), param->Declaration()->attributes,
+                                    entry_point.input_variables);
+
+        entry_point.input_position_used |= ContainsBuiltin(
+            ast::BuiltinValue::kPosition, param->Type(), param->Declaration()->attributes);
+        entry_point.front_facing_used |= ContainsBuiltin(
+            ast::BuiltinValue::kFrontFacing, param->Type(), param->Declaration()->attributes);
+        entry_point.sample_index_used |= ContainsBuiltin(
+            ast::BuiltinValue::kSampleIndex, param->Type(), param->Declaration()->attributes);
+        entry_point.input_sample_mask_used |= ContainsBuiltin(
+            ast::BuiltinValue::kSampleMask, param->Type(), param->Declaration()->attributes);
+        entry_point.num_workgroups_used |= ContainsBuiltin(
+            ast::BuiltinValue::kNumWorkgroups, param->Type(), param->Declaration()->attributes);
+    }
+
+    if (!sem->ReturnType()->Is<sem::Void>()) {
+        AddEntryPointInOutVariables("<retval>", sem->ReturnType(), func->return_type_attributes,
+                                    entry_point.output_variables);
+
+        entry_point.output_sample_mask_used = ContainsBuiltin(
+            ast::BuiltinValue::kSampleMask, sem->ReturnType(), func->return_type_attributes);
+    }
+
+    for (auto* var : sem->TransitivelyReferencedGlobals()) {
+        auto* decl = var->Declaration();
+
+        auto name = program_->Symbols().NameFor(decl->symbol);
+
+        auto* global = var->As<sem::GlobalVariable>();
+        if (global && global->Declaration()->Is<ast::Override>()) {
+            Override override;
+            override.name = name;
+            override.id = global->OverrideId();
+            auto* type = var->Type();
+            TINT_ASSERT(Inspector, type->is_scalar());
+            if (type->is_bool_scalar_or_vector()) {
+                override.type = Override::Type::kBool;
+            } else if (type->is_float_scalar()) {
+                override.type = Override::Type::kFloat32;
+            } else if (type->is_signed_integer_scalar()) {
+                override.type = Override::Type::kInt32;
+            } else if (type->is_unsigned_integer_scalar()) {
+                override.type = Override::Type::kUint32;
+            } else {
+                TINT_UNREACHABLE(Inspector, diagnostics_);
+            }
+
+            override.is_initialized = global->Declaration()->constructor;
+            override.is_id_specified =
+                ast::HasAttribute<ast::IdAttribute>(global->Declaration()->attributes);
+
+            entry_point.overrides.push_back(override);
+        }
+    }
+
+    return entry_point;
+}
+
+EntryPoint Inspector::GetEntryPoint(const std::string& entry_point_name) {
+    auto* func = FindEntryPointByName(entry_point_name);
+    if (!func) {
+        return EntryPoint();
+    }
+    return GetEntryPoint(func);
+}
+
 std::vector<EntryPoint> Inspector::GetEntryPoints() {
     std::vector<EntryPoint> result;
 
@@ -141,97 +245,7 @@ std::vector<EntryPoint> Inspector::GetEntryPoints() {
             continue;
         }
 
-        auto* sem = program_->Sem().Get(func);
-
-        EntryPoint entry_point;
-        entry_point.name = program_->Symbols().NameFor(func->symbol);
-        entry_point.remapped_name = program_->Symbols().NameFor(func->symbol);
-
-        switch (func->PipelineStage()) {
-            case ast::PipelineStage::kCompute: {
-                entry_point.stage = PipelineStage::kCompute;
-
-                auto wgsize = sem->WorkgroupSize();
-                if (!wgsize[0].overridable_const && !wgsize[1].overridable_const &&
-                    !wgsize[2].overridable_const) {
-                    entry_point.workgroup_size = {wgsize[0].value, wgsize[1].value,
-                                                  wgsize[2].value};
-                }
-                break;
-            }
-            case ast::PipelineStage::kFragment: {
-                entry_point.stage = PipelineStage::kFragment;
-                break;
-            }
-            case ast::PipelineStage::kVertex: {
-                entry_point.stage = PipelineStage::kVertex;
-                break;
-            }
-            default: {
-                TINT_UNREACHABLE(Inspector, diagnostics_)
-                    << "invalid pipeline stage for entry point '" << entry_point.name << "'";
-                break;
-            }
-        }
-
-        for (auto* param : sem->Parameters()) {
-            AddEntryPointInOutVariables(program_->Symbols().NameFor(param->Declaration()->symbol),
-                                        param->Type(), param->Declaration()->attributes,
-                                        entry_point.input_variables);
-
-            entry_point.input_position_used |= ContainsBuiltin(
-                ast::BuiltinValue::kPosition, param->Type(), param->Declaration()->attributes);
-            entry_point.front_facing_used |= ContainsBuiltin(
-                ast::BuiltinValue::kFrontFacing, param->Type(), param->Declaration()->attributes);
-            entry_point.sample_index_used |= ContainsBuiltin(
-                ast::BuiltinValue::kSampleIndex, param->Type(), param->Declaration()->attributes);
-            entry_point.input_sample_mask_used |= ContainsBuiltin(
-                ast::BuiltinValue::kSampleMask, param->Type(), param->Declaration()->attributes);
-            entry_point.num_workgroups_used |= ContainsBuiltin(
-                ast::BuiltinValue::kNumWorkgroups, param->Type(), param->Declaration()->attributes);
-        }
-
-        if (!sem->ReturnType()->Is<sem::Void>()) {
-            AddEntryPointInOutVariables("<retval>", sem->ReturnType(), func->return_type_attributes,
-                                        entry_point.output_variables);
-
-            entry_point.output_sample_mask_used = ContainsBuiltin(
-                ast::BuiltinValue::kSampleMask, sem->ReturnType(), func->return_type_attributes);
-        }
-
-        for (auto* var : sem->TransitivelyReferencedGlobals()) {
-            auto* decl = var->Declaration();
-
-            auto name = program_->Symbols().NameFor(decl->symbol);
-
-            auto* global = var->As<sem::GlobalVariable>();
-            if (global && global->Declaration()->Is<ast::Override>()) {
-                Override override;
-                override.name = name;
-                override.id = global->OverrideId();
-                auto* type = var->Type();
-                TINT_ASSERT(Inspector, type->is_scalar());
-                if (type->is_bool_scalar_or_vector()) {
-                    override.type = Override::Type::kBool;
-                } else if (type->is_float_scalar()) {
-                    override.type = Override::Type::kFloat32;
-                } else if (type->is_signed_integer_scalar()) {
-                    override.type = Override::Type::kInt32;
-                } else if (type->is_unsigned_integer_scalar()) {
-                    override.type = Override::Type::kUint32;
-                } else {
-                    TINT_UNREACHABLE(Inspector, diagnostics_);
-                }
-
-                override.is_initialized = global->Declaration()->constructor;
-                override.is_id_specified =
-                    ast::HasAttribute<ast::IdAttribute>(global->Declaration()->attributes);
-
-                entry_point.overrides.push_back(override);
-            }
-        }
-
-        result.push_back(std::move(entry_point));
+        result.push_back(GetEntryPoint(func));
     }
 
     return result;

@@ -18,14 +18,32 @@
 #include <memory>
 #include <mutex>
 #include <optional>
+#include <string>
 #include <unordered_map>
 #include <utility>
 
+#include "dawn/common/HashUtils.h"
 #include "dawn/common/vulkan_platform.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/ShaderModule.h"
 
-namespace dawn::native::vulkan {
+namespace dawn::native {
+
+struct ProgrammableStage;
+
+namespace vulkan {
+
+struct TransformedShaderModuleCacheKey {
+    const PipelineLayoutBase* layout;
+    std::string entryPoint;
+    PipelineConstantEntries constants;
+
+    bool operator==(const TransformedShaderModuleCacheKey& other) const;
+};
+
+struct TransformedShaderModuleCacheKeyHashFunc {
+    size_t operator()(const TransformedShaderModuleCacheKey& key) const;
+};
 
 class Device;
 class PipelineLayout;
@@ -44,7 +62,8 @@ class ShaderModule final : public ShaderModuleBase {
                                                    ShaderModuleParseResult* parseResult,
                                                    OwnedCompilationMessages* compilationMessages);
 
-    ResultOrError<ModuleAndSpirv> GetHandleAndSpirv(const char* entryPointName,
+    ResultOrError<ModuleAndSpirv> GetHandleAndSpirv(SingleShaderStage stage,
+                                                    const ProgrammableStage& programmableStage,
                                                     const PipelineLayout* layout);
 
   private:
@@ -59,6 +78,8 @@ class ShaderModule final : public ShaderModuleBase {
     std::unique_ptr<ConcurrentTransformedShaderModuleCache> mTransformedShaderModuleCache;
 };
 
-}  // namespace dawn::native::vulkan
+}  // namespace vulkan
+
+}  // namespace dawn::native
 
 #endif  // SRC_DAWN_NATIVE_VULKAN_SHADERMODULEVK_H_

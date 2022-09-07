@@ -25,7 +25,15 @@
 namespace {{native_namespace}} {
 
 //
-// Cache key writers for wgpu structures used in caching.
+// Streaming readers for wgpu structures.
+//
+{% macro render_reader(member) %}
+    {%- set name = member.name.camelCase() -%}
+    DAWN_TRY(StreamOut(source, &t->{{name}}));
+{% endmacro %}
+
+//
+// Streaming writers for wgpu structures.
 //
 {% macro render_writer(member) %}
     {%- set name = member.name.camelCase() -%}
@@ -38,31 +46,50 @@ namespace {{native_namespace}} {
     {% endif %}
 {% endmacro %}
 
-{# Helper macro to render writers. Should be used in a call block to provide additional custom
+{# Helper macro to render readers and writers. Should be used in a call block to provide additional custom
    handling when necessary. The optional `omit` field can be used to omit fields that are either
    handled in the custom code, or unnecessary in the serialized output.
    Example:
-       {% call render_cache_key_writer("struct name", omits=["omit field"]) %}
+       {% call render_streaming_impl("struct name", writer=true, reader=false, omits=["omit field"]) %}
            // Custom C++ code to handle special types/members that are hard to generate code for
        {% endcall %}
+   One day we should probably make the generator smart enough to generate everything it can
+   instead of manually adding streaming implementations here.
 #}
-{% macro render_cache_key_writer(json_type, omits=[]) %}
+{% macro render_streaming_impl(json_type, writer, reader, omits=[]) %}
     {%- set cpp_type = types[json_type].name.CamelCase() -%}
-    template <>
-    void stream::Stream<{{cpp_type}}>::Write(stream::Sink* sink, const {{cpp_type}}& t) {
-    {{ caller() }}
-    {% for member in types[json_type].members %}
-        {%- if not member.name.get() in omits %}
-                {{render_writer(member)}}
-        {%- endif %}
-    {% endfor %}
-    }
+    {% if reader %}
+        template <>
+        MaybeError stream::Stream<{{cpp_type}}>::Read(stream::Source* source, {{cpp_type}}* t) {
+        {{ caller() }}
+        {% for member in types[json_type].members %}
+            {% if not member.name.get() in omits %}
+                    {{render_reader(member)}}
+            {% endif %}
+        {% endfor %}
+            return {};
+        }
+    {% endif %}
+    {% if writer %}
+        template <>
+        void stream::Stream<{{cpp_type}}>::Write(stream::Sink* sink, const {{cpp_type}}& t) {
+        {{ caller() }}
+        {% for member in types[json_type].members %}
+            {% if not member.name.get() in omits %}
+                    {{render_writer(member)}}
+            {% endif %}
+        {% endfor %}
+        }
+    {% endif %}
 {% endmacro %}
 
-{% call render_cache_key_writer("adapter properties") %}
+{% call render_streaming_impl("adapter properties", true, false) %}
 {% endcall %}
 
-{% call render_cache_key_writer("dawn cache device descriptor") %}
+{% call render_streaming_impl("dawn cache device descriptor", true, false) %}
+{% endcall %}
+
+{% call render_streaming_impl("extent 3D", true, true) %}
 {% endcall %}
 
 } // namespace {{native_namespace}}

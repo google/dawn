@@ -215,4 +215,22 @@ Limits ApplyLimitTiers(Limits limits) {
     return limits;
 }
 
+#define DAWN_INTERNAL_LIMITS_MEMBER_ASSIGNMENT(type, name) \
+    { result.name = limits.name; }
+#define DAWN_INTERNAL_LIMITS_FOREACH_MEMBER_ASSIGNMENT(MEMBERS) \
+    MEMBERS(DAWN_INTERNAL_LIMITS_MEMBER_ASSIGNMENT)
+LimitsForCompilationRequest LimitsForCompilationRequest::Create(const Limits& limits) {
+    LimitsForCompilationRequest result;
+    DAWN_INTERNAL_LIMITS_FOREACH_MEMBER_ASSIGNMENT(LIMITS_FOR_COMPILATION_REQUEST_MEMBERS)
+    return result;
+}
+#undef DAWN_INTERNAL_LIMITS_FOREACH_MEMBER_ASSIGNMENT
+#undef DAWN_INTERNAL_LIMITS_MEMBER_ASSIGNMENT
+
+template <>
+void stream::Stream<LimitsForCompilationRequest>::Write(Sink* s,
+                                                        const LimitsForCompilationRequest& t) {
+    t.VisitAll([&](const auto&... members) { StreamIn(s, members...); });
+}
+
 }  // namespace dawn::native

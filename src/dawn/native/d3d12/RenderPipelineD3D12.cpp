@@ -351,8 +351,6 @@ MaybeError RenderPipeline::Initialize() {
 
     D3D12_GRAPHICS_PIPELINE_STATE_DESC descriptorD3D12 = {};
 
-    PerStage<ProgrammableStage> pipelineStages = GetAllStages();
-
     PerStage<D3D12_SHADER_BYTECODE*> shaders;
     shaders[SingleShaderStage::Vertex] = &descriptorD3D12.VS;
     shaders[SingleShaderStage::Fragment] = &descriptorD3D12.PS;
@@ -360,8 +358,9 @@ MaybeError RenderPipeline::Initialize() {
     PerStage<CompiledShader> compiledShader;
 
     for (auto stage : IterateStages(GetStageMask())) {
-        DAWN_TRY_ASSIGN(compiledShader[stage], ToBackend(pipelineStages[stage].module)
-                                                   ->Compile(pipelineStages[stage], stage,
+        const ProgrammableStage& programmableStage = GetStage(stage);
+        DAWN_TRY_ASSIGN(compiledShader[stage], ToBackend(programmableStage.module)
+                                                   ->Compile(programmableStage, stage,
                                                              ToBackend(GetLayout()), compileFlags));
         *shaders[stage] = compiledShader[stage].GetD3D12ShaderBytecode();
     }

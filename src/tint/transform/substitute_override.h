@@ -20,6 +20,7 @@
 
 #include "tint/override_id.h"
 
+#include "src/tint/reflection.h"
 #include "src/tint/transform/transform.h"
 
 namespace tint::transform {
@@ -63,6 +64,9 @@ class SubstituteOverride final : public Castable<SubstituteOverride, Transform> 
         /// The value is always a double coming into the transform and will be
         /// converted to the correct type through and initializer.
         std::unordered_map<OverrideId, double> map;
+
+        /// Reflect the fields of this class so that it can be used by tint::ForeachField()
+        TINT_REFLECT(map);
     };
 
     /// Constructor

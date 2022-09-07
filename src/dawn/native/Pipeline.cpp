@@ -58,12 +58,6 @@ MaybeError ValidateProgrammableStage(DeviceBase* device,
         DAWN_TRY(ValidateCompatibilityWithPipelineLayout(device, metadata, layout));
     }
 
-    if (constantCount > 0u && device->IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
-        return DAWN_VALIDATION_ERROR(
-            "Pipeline overridable constants are disallowed because they are partially "
-            "implemented.");
-    }
-
     // Validate if overridable constants exist in shader module
     // pipelineBase is not yet constructed at this moment so iterate constants from descriptor
     size_t numUninitializedConstants = metadata.uninitializedOverrides.size();
@@ -233,6 +227,7 @@ size_t PipelineBase::ComputeContentHash() {
     for (SingleShaderStage stage : IterateStages(mStageMask)) {
         recorder.Record(mStages[stage].module->GetContentHash());
         recorder.Record(mStages[stage].entryPoint);
+        recorder.Record(mStages[stage].constants);
     }
 
     return recorder.GetContentHash();
@@ -248,7 +243,14 @@ bool PipelineBase::EqualForCache(const PipelineBase* a, const PipelineBase* b) {
     for (SingleShaderStage stage : IterateStages(a->mStageMask)) {
         // The module is deduplicated so it can be compared by pointer.
         if (a->mStages[stage].module.Get() != b->mStages[stage].module.Get() ||
-            a->mStages[stage].entryPoint != b->mStages[stage].entryPoint) {
+            a->mStages[stage].entryPoint != b->mStages[stage].entryPoint ||
+            a->mStages[stage].constants.size() != b->mStages[stage].constants.size()) {
+            return false;
+        }
+
+        // If the constants.size are the same, we still need to compare the key and value.
+        if (!std::equal(a->mStages[stage].constants.begin(), a->mStages[stage].constants.end(),
+                        b->mStages[stage].constants.begin())) {
             return false;
         }
     }

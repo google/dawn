@@ -61,16 +61,12 @@ MaybeError ComputePipeline::Initialize() {
 
     ShaderModule::ModuleAndSpirv moduleAndSpirv;
     DAWN_TRY_ASSIGN(moduleAndSpirv,
-                    module->GetHandleAndSpirv(computeStage.entryPoint.c_str(), layout));
+                    module->GetHandleAndSpirv(SingleShaderStage::Compute, computeStage, layout));
 
     createInfo.stage.module = moduleAndSpirv.module;
     createInfo.stage.pName = computeStage.entryPoint.c_str();
 
-    std::vector<OverrideScalar> specializationDataEntries;
-    std::vector<VkSpecializationMapEntry> specializationMapEntries;
-    VkSpecializationInfo specializationInfo{};
-    createInfo.stage.pSpecializationInfo = GetVkSpecializationInfo(
-        computeStage, &specializationInfo, &specializationDataEntries, &specializationMapEntries);
+    createInfo.stage.pSpecializationInfo = nullptr;
 
     PNextChainBuilder stageExtChain(&createInfo.stage);
 

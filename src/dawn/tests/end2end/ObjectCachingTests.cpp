@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <vector>
+
 #include "dawn/tests/DawnTest.h"
 
 #include "dawn/utils/ComboRenderPipelineDescriptor.h"
@@ -158,6 +160,46 @@ TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnShaderModule) {
     EXPECT_EQ(pipeline.Get() == samePipeline.Get(), !UsesWire());
 }
 
+// Test that ComputePipeline are correctly deduplicated wrt. their constants override values
+TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnOverrides) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        override x: u32 = 1u;
+        var<workgroup> i : u32;
+        @compute @workgroup_size(x) fn main() {
+            i = 0u;
+        })");
+
+    wgpu::PipelineLayout layout = utils::MakeBasicPipelineLayout(device, nullptr);
+
+    wgpu::ComputePipelineDescriptor desc;
+    desc.compute.entryPoint = "main";
+    desc.layout = layout;
+    desc.compute.module = module;
+
+    std::vector<wgpu::ConstantEntry> constants{{nullptr, "x", 16}};
+    desc.compute.constantCount = constants.size();
+    desc.compute.constants = constants.data();
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&desc);
+
+    std::vector<wgpu::ConstantEntry> sameConstants{{nullptr, "x", 16}};
+    desc.compute.constantCount = sameConstants.size();
+    desc.compute.constants = sameConstants.data();
+    wgpu::ComputePipeline samePipeline = device.CreateComputePipeline(&desc);
+
+    desc.compute.constantCount = 0;
+    desc.compute.constants = nullptr;
+    wgpu::ComputePipeline otherPipeline1 = device.CreateComputePipeline(&desc);
+
+    std::vector<wgpu::ConstantEntry> otherConstants{{nullptr, "x", 4}};
+    desc.compute.constantCount = otherConstants.size();
+    desc.compute.constants = otherConstants.data();
+    wgpu::ComputePipeline otherPipeline2 = device.CreateComputePipeline(&desc);
+
+    EXPECT_NE(pipeline.Get(), otherPipeline1.Get());
+    EXPECT_NE(pipeline.Get(), otherPipeline2.Get());
+    EXPECT_EQ(pipeline.Get() == samePipeline.Get(), !UsesWire());
+}
+
 // Test that ComputePipeline are correctly deduplicated wrt. their layout
 TEST_P(ObjectCachingTest, ComputePipelineDeduplicationOnLayout) {
     wgpu::BindGroupLayout bgl = utils::MakeBindGroupLayout(
@@ -300,6 +342,48 @@ TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnFragmentModule) {
     wgpu::RenderPipeline otherPipeline = device.CreateRenderPipeline(&desc);
 
     EXPECT_NE(pipeline.Get(), otherPipeline.Get());
+    EXPECT_EQ(pipeline.Get() == samePipeline.Get(), !UsesWire());
+}
+
+// Test that Renderpipelines are correctly deduplicated wrt. their constants override values
+TEST_P(ObjectCachingTest, RenderPipelineDeduplicationOnOverrides) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        override a: f32 = 1.0;
+        @vertex fn vertexMain() -> @builtin(position) vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, 0.0);
+        }
+        @fragment fn fragmentMain() -> @location(0) vec4<f32> {
+            return vec4<f32>(0.0, 0.0, 0.0, a);
+        })");
+
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = module;
+    desc.vertex.entryPoint = "vertexMain";
+    desc.cFragment.module = module;
+    desc.cFragment.entryPoint = "fragmentMain";
+    desc.cTargets[0].writeMask = wgpu::ColorWriteMask::None;
+
+    std::vector<wgpu::ConstantEntry> constants{{nullptr, "a", 0.5}};
+    desc.cFragment.constantCount = constants.size();
+    desc.cFragment.constants = constants.data();
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+
+    std::vector<wgpu::ConstantEntry> sameConstants{{nullptr, "a", 0.5}};
+    desc.cFragment.constantCount = sameConstants.size();
+    desc.cFragment.constants = sameConstants.data();
+    wgpu::RenderPipeline samePipeline = device.CreateRenderPipeline(&desc);
+
+    std::vector<wgpu::ConstantEntry> otherConstants{{nullptr, "a", 1.0}};
+    desc.cFragment.constantCount = otherConstants.size();
+    desc.cFragment.constants = otherConstants.data();
+    wgpu::RenderPipeline otherPipeline1 = device.CreateRenderPipeline(&desc);
+
+    desc.cFragment.constantCount = 0;
+    desc.cFragment.constants = nullptr;
+    wgpu::RenderPipeline otherPipeline2 = device.CreateRenderPipeline(&desc);
+
+    EXPECT_NE(pipeline.Get(), otherPipeline1.Get());
+    EXPECT_NE(pipeline.Get(), otherPipeline2.Get());
     EXPECT_EQ(pipeline.Get() == samePipeline.Get(), !UsesWire());
 }
 
