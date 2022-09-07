@@ -1302,7 +1302,8 @@
         "category": "enum",
         "values": [
             {"value": 0, "name": "validation"},
-            {"value": 1, "name": "out of memory"}
+            {"value": 1, "name": "out of memory"},
+            {"value": 2, "name": "internal"}
         ]
     },
     "error type": {
@@ -1312,8 +1313,9 @@
             {"value": 0, "name": "no error"},
             {"value": 1, "name": "validation"},
             {"value": 2, "name": "out of memory"},
-            {"value": 3, "name": "unknown"},
-            {"value": 4, "name": "device lost"}
+            {"value": 3, "name": "internal"},
+            {"value": 4, "name": "unknown"},
+            {"value": 5, "name": "device lost"}
         ]
     },
     "logging type": {

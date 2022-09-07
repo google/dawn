@@ -28,6 +28,8 @@ wgpu::ErrorType ErrorFilterToErrorType(wgpu::ErrorFilter filter) {
             return wgpu::ErrorType::Validation;
         case wgpu::ErrorFilter::OutOfMemory:
             return wgpu::ErrorType::OutOfMemory;
+        case wgpu::ErrorFilter::Internal:
+            return wgpu::ErrorType::Internal;
     }
     UNREACHABLE();
 }

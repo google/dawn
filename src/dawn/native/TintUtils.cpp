@@ -29,7 +29,7 @@ thread_local DeviceBase* tlDevice = nullptr;
 
 void TintICEReporter(const tint::diag::List& diagnostics) {
     if (tlDevice) {
-        tlDevice->HandleError(InternalErrorType::Validation, diagnostics.str().c_str());
+        tlDevice->HandleError(InternalErrorType::Internal, diagnostics.str().c_str());
     }
 }
 
