@@ -51,9 +51,8 @@ TEST_F(ParserImplTest, StructMember_ParsesWithAlignAttribute) {
     EXPECT_TRUE(m->attributes[0]->Is<ast::StructMemberAlignAttribute>());
 
     auto* attr = m->attributes[0]->As<ast::StructMemberAlignAttribute>();
-    ASSERT_TRUE(attr->align->Is<ast::IntLiteralExpression>());
-
-    auto* expr = attr->align->As<ast::IntLiteralExpression>();
+    ASSERT_TRUE(attr->expr->Is<ast::IntLiteralExpression>());
+    auto* expr = attr->expr->As<ast::IntLiteralExpression>();
     EXPECT_EQ(expr->value, 2);
     EXPECT_EQ(expr->suffix, ast::IntLiteralExpression::Suffix::kNone);
 
@@ -101,8 +100,8 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleattributes) {
     ASSERT_TRUE(m->attributes[1]->Is<ast::StructMemberAlignAttribute>());
     auto* attr = m->attributes[1]->As<ast::StructMemberAlignAttribute>();
 
-    ASSERT_TRUE(attr->align->Is<ast::IntLiteralExpression>());
-    auto* expr = attr->align->As<ast::IntLiteralExpression>();
+    ASSERT_TRUE(attr->expr->Is<ast::IntLiteralExpression>());
+    auto* expr = attr->expr->As<ast::IntLiteralExpression>();
     EXPECT_EQ(expr->value, 4);
     EXPECT_EQ(expr->suffix, ast::IntLiteralExpression::Suffix::kNone);
 

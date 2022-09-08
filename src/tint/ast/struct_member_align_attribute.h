@@ -30,7 +30,7 @@ class StructMemberAlignAttribute final : public Castable<StructMemberAlignAttrib
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
-    /// @param align the align value expression
+    /// @param align the align expression
     StructMemberAlignAttribute(ProgramID pid,
                                NodeID nid,
                                const Source& src,
@@ -46,8 +46,8 @@ class StructMemberAlignAttribute final : public Castable<StructMemberAlignAttrib
     /// @return the newly cloned node
     const StructMemberAlignAttribute* Clone(CloneContext* ctx) const override;
 
-    /// The align value expression
-    const ast::Expression* const align;
+    /// The align expression
+    const ast::Expression* const expr;
 };
 
 }  // namespace tint::ast

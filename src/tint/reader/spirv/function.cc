@@ -1110,8 +1110,7 @@ void FunctionEmitter::IncrementLocation(AttributeList* attributes) {
             // The old one doesn't leak because it's kept in the builder's AST node
             // list.
             attr = builder_.Location(
-                loc_attr->source,
-                AInt(loc_attr->value->As<ast::IntLiteralExpression>()->value + 1));
+                loc_attr->source, AInt(loc_attr->expr->As<ast::IntLiteralExpression>()->value + 1));
         }
     }
 }

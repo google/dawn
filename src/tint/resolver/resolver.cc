@@ -442,7 +442,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
     sem->SetConstructor(rhs);
 
     if (auto* id_attr = ast::GetAttribute<ast::IdAttribute>(v->attributes)) {
-        auto* materialize = Materialize(Expression(id_attr->value));
+        auto* materialize = Materialize(Expression(id_attr->expr));
         if (!materialize) {
             return nullptr;
         }
@@ -607,7 +607,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
             uint32_t binding = 0;
             {
                 auto* attr = ast::GetAttribute<ast::BindingAttribute>(var->attributes);
-                auto* materialize = Materialize(Expression(attr->value));
+                auto* materialize = Materialize(Expression(attr->expr));
                 if (!materialize) {
                     return nullptr;
                 }
@@ -623,7 +623,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
             uint32_t group = 0;
             {
                 auto* attr = ast::GetAttribute<ast::GroupAttribute>(var->attributes);
-                auto* materialize = Materialize(Expression(attr->value));
+                auto* materialize = Materialize(Expression(attr->expr));
                 if (!materialize) {
                     return nullptr;
                 }
@@ -640,7 +640,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
 
         std::optional<uint32_t> location;
         if (auto* attr = ast::GetAttribute<ast::LocationAttribute>(var->attributes)) {
-            auto* materialize = Materialize(Expression(attr->value));
+            auto* materialize = Materialize(Expression(attr->expr));
             if (!materialize) {
                 return nullptr;
             }
@@ -705,7 +705,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
     if (param->HasBindingPoint()) {
         {
             auto* attr = ast::GetAttribute<ast::BindingAttribute>(param->attributes);
-            auto* materialize = Materialize(Expression(attr->value));
+            auto* materialize = Materialize(Expression(attr->expr));
             if (!materialize) {
                 return nullptr;
             }
@@ -719,7 +719,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
         }
         {
             auto* attr = ast::GetAttribute<ast::GroupAttribute>(param->attributes);
-            auto* materialize = Materialize(Expression(attr->value));
+            auto* materialize = Materialize(Expression(attr->expr));
             if (!materialize) {
                 return nullptr;
             }
@@ -735,7 +735,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
 
     std::optional<uint32_t> location;
     if (auto* l = ast::GetAttribute<ast::LocationAttribute>(param->attributes)) {
-        auto* materialize = Materialize(Expression(l->value));
+        auto* materialize = Materialize(Expression(l->expr));
         if (!materialize) {
             return nullptr;
         }
@@ -944,7 +944,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
         Mark(attr);
 
         if (auto* a = attr->As<ast::LocationAttribute>()) {
-            auto* materialize = Materialize(Expression(a->value));
+            auto* materialize = Materialize(Expression(a->expr));
             if (!materialize) {
                 return nullptr;
             }
@@ -2811,13 +2811,13 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                 align = 1;
                 has_offset_attr = true;
             } else if (auto* a = attr->As<ast::StructMemberAlignAttribute>()) {
-                auto* materialized = Materialize(Expression(a->align));
+                auto* materialized = Materialize(Expression(a->expr));
                 if (!materialized) {
                     return nullptr;
                 }
                 auto const_value = materialized->ConstantValue();
                 if (!const_value) {
-                    AddError("'align' must be constant expression", a->align->source);
+                    AddError("'align' must be constant expression", a->expr->source);
                     return nullptr;
                 }
                 auto value = const_value->As<AInt>();
@@ -2838,7 +2838,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                 size = s->size;
                 has_size_attr = true;
             } else if (auto* l = attr->As<ast::LocationAttribute>()) {
-                auto* materialize = Materialize(Expression(l->value));
+                auto* materialize = Materialize(Expression(l->expr));
                 if (!materialize) {
                     return nullptr;
                 }

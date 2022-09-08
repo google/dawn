@@ -256,9 +256,9 @@ TEST_F(ParserImplTest, FunctionDecl_ReturnTypeAttributeList) {
     ASSERT_EQ(ret_type_attributes.Length(), 1u);
     auto* loc = ret_type_attributes[0]->As<ast::LocationAttribute>();
     ASSERT_TRUE(loc != nullptr);
-    EXPECT_TRUE(loc->value->Is<ast::IntLiteralExpression>());
+    EXPECT_TRUE(loc->expr->Is<ast::IntLiteralExpression>());
 
-    auto* exp = loc->value->As<ast::IntLiteralExpression>();
+    auto* exp = loc->expr->As<ast::IntLiteralExpression>();
     EXPECT_EQ(1u, exp->value);
 
     auto* body = f->body;

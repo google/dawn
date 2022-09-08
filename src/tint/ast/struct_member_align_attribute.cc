@@ -27,7 +27,7 @@ StructMemberAlignAttribute::StructMemberAlignAttribute(ProgramID pid,
                                                        NodeID nid,
                                                        const Source& src,
                                                        const ast::Expression* a)
-    : Base(pid, nid, src), align(a) {}
+    : Base(pid, nid, src), expr(a) {}
 
 StructMemberAlignAttribute::~StructMemberAlignAttribute() = default;
 
@@ -38,8 +38,8 @@ std::string StructMemberAlignAttribute::Name() const {
 const StructMemberAlignAttribute* StructMemberAlignAttribute::Clone(CloneContext* ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
     auto src = ctx->Clone(source);
-    auto* align_ = ctx->Clone(align);
-    return ctx->dst->create<StructMemberAlignAttribute>(src, align_);
+    auto* expr_ = ctx->Clone(expr);
+    return ctx->dst->create<StructMemberAlignAttribute>(src, expr_);
 }
 
 }  // namespace tint::ast

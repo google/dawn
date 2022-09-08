@@ -57,8 +57,8 @@ TEST_F(ParserImplTest, FunctionHeader_AttributeReturnType) {
 
     auto* loc = f->return_type_attributes[0]->As<ast::LocationAttribute>();
     ASSERT_TRUE(loc != nullptr);
-    ASSERT_TRUE(loc->value->Is<ast::IntLiteralExpression>());
-    auto* exp = loc->value->As<ast::IntLiteralExpression>();
+    ASSERT_TRUE(loc->expr->Is<ast::IntLiteralExpression>());
+    auto* exp = loc->expr->As<ast::IntLiteralExpression>();
     EXPECT_EQ(exp->value, 1u);
 }
 

@@ -22,7 +22,7 @@ using GroupAttributeTest = TestHelper;
 
 TEST_F(GroupAttributeTest, Creation) {
     auto* d = Group(2_a);
-    EXPECT_TRUE(d->value->Is<IntLiteralExpression>());
+    EXPECT_TRUE(d->expr->Is<IntLiteralExpression>());
 }
 
 }  // namespace

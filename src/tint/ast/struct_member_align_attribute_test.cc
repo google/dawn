@@ -24,8 +24,8 @@ using StructMemberAlignAttributeTest = TestHelper;
 TEST_F(StructMemberAlignAttributeTest, Creation) {
     auto* val = Expr("ident");
     auto* d = create<StructMemberAlignAttribute>(val);
-    EXPECT_EQ(val, d->align);
-    EXPECT_TRUE(d->align->Is<IdentifierExpression>());
+    EXPECT_EQ(val, d->expr);
+    EXPECT_TRUE(d->expr->Is<IdentifierExpression>());
 }
 
 }  // namespace

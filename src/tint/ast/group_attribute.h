@@ -29,8 +29,8 @@ class GroupAttribute final : public Castable<GroupAttribute, Attribute> {
     /// @param pid the identifier of the program that owns this node
     /// @param nid the unique node identifier
     /// @param src the source of this node
-    /// @param value the group value expression
-    GroupAttribute(ProgramID pid, NodeID nid, const Source& src, const ast::Expression* value);
+    /// @param expr the group expression
+    GroupAttribute(ProgramID pid, NodeID nid, const Source& src, const ast::Expression* expr);
     ~GroupAttribute() override;
 
     /// @returns the WGSL name for the attribute
@@ -42,8 +42,8 @@ class GroupAttribute final : public Castable<GroupAttribute, Attribute> {
     /// @return the newly cloned node
     const GroupAttribute* Clone(CloneContext* ctx) const override;
 
-    /// The group value expression
-    const ast::Expression* const value;
+    /// The group expression
+    const ast::Expression* const expr;
 };
 
 }  // namespace tint::ast

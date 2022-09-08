@@ -102,8 +102,8 @@ TEST_F(VariableTest, WithAttributes) {
 
     auto* location = ast::GetAttribute<ast::LocationAttribute>(attributes);
     ASSERT_NE(nullptr, location);
-    ASSERT_NE(nullptr, location->value);
-    EXPECT_TRUE(location->value->Is<ast::IntLiteralExpression>());
+    ASSERT_NE(nullptr, location->expr);
+    EXPECT_TRUE(location->expr->Is<ast::IntLiteralExpression>());
 }
 
 TEST_F(VariableTest, HasBindingPoint_BothProvided) {

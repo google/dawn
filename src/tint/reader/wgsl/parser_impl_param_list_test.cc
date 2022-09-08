@@ -120,8 +120,8 @@ TEST_F(ParserImplTest, ParamList_Attributes) {
 
     ASSERT_TRUE(attrs_1[0]->Is<ast::LocationAttribute>());
     auto* attr = attrs_1[0]->As<ast::LocationAttribute>();
-    ASSERT_TRUE(attr->value->Is<ast::IntLiteralExpression>());
-    auto* loc = attr->value->As<ast::IntLiteralExpression>();
+    ASSERT_TRUE(attr->expr->Is<ast::IntLiteralExpression>());
+    auto* loc = attr->expr->As<ast::IntLiteralExpression>();
     EXPECT_EQ(loc->value, 1u);
 
     EXPECT_EQ(e.value[1]->source.range.begin.line, 1u);
