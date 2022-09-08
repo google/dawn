@@ -253,6 +253,12 @@ crbug.com/dawn/0000 webgpu:api,validation,buffer,create:createBuffer_invalid_and
 crbug.com/tint/1524 webgpu:shader,execution,expression,call,builtin,atan2:f32:* [ Skip ]
 
 ################################################################################
+# Vulkan Validation Layer error does to LoadOp::Clear on ReadOnly DepthStencil
+# KEEP
+################################################################################
+crbug.com/dawn/1512 [ linux dawn-backend-validation ] webgpu:api,validation,render_pass,attachment_compatibility:render_pass_or_bundle_and_pipeline,depth_stencil_read_only_write_state:* [ Failure ]
+
+################################################################################
 # slow shader execution 'const' tests
 # KEEP
 ################################################################################
