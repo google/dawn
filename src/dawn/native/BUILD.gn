@@ -690,6 +690,12 @@ source_set("sources") {
         "vulkan/external_memory/MemoryServiceZirconHandle.cpp",
         "vulkan/external_semaphore/SemaphoreServiceZirconHandle.cpp",
       ]
+    } else if (is_android) {
+      sources += [
+        "vulkan/external_memory/MemoryServiceAHardwareBuffer.cpp",
+        "vulkan/external_semaphore/SemaphoreServiceFD.cpp",
+      ]
+      defines += [ "DAWN_USE_SYNC_FDS" ]
     } else {
       sources += [
         "vulkan/external_memory/MemoryServiceNull.cpp",

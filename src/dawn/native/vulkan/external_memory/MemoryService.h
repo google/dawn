@@ -57,6 +57,9 @@ class Service {
         const ExternalImageDescriptor* descriptor,
         VkImage image);
 
+    // Returns the index of the queue memory from this services should be exported with.
+    uint32_t GetQueueFamilyIndex();
+
     // Given an external handle pointing to memory, import it into a VkDeviceMemory
     ResultOrError<VkDeviceMemory> ImportMemory(ExternalMemoryHandle handle,
                                                const MemoryImportParams& importParams,

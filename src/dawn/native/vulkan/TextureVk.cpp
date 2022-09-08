@@ -732,6 +732,7 @@ MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptorVk* desc
     }
 
     mExternalState = ExternalState::PendingAcquire;
+    mExportQueueFamilyIndex = externalMemoryService->GetQueueFamilyIndex();
 
     mPendingAcquireOldLayout = descriptor->releasedOldLayout;
     mPendingAcquireNewLayout = descriptor->releasedNewLayout;
@@ -829,7 +830,7 @@ void Texture::TransitionEagerlyForExport(CommandRecordingContext* recordingConte
 
     Device* device = ToBackend(GetDevice());
     barrier.srcQueueFamilyIndex = device->GetGraphicsQueueFamily();
-    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL_KHR;
+    barrier.dstQueueFamilyIndex = mExportQueueFamilyIndex;
 
     // We don't know when the importing queue will need the texture, so pass
     // VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT to ensure the barrier happens-before any usage in the
@@ -950,7 +951,7 @@ void Texture::TweakTransitionForExternalUsage(CommandRecordingContext* recording
 
         VkImageMemoryBarrier* barrier = &(*barriers)[transitionBarrierStart];
         // Transfer texture from external queue to graphics queue
-        barrier->srcQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL_KHR;
+        barrier->srcQueueFamilyIndex = mExportQueueFamilyIndex;
         barrier->dstQueueFamilyIndex = ToBackend(GetDevice())->GetGraphicsQueueFamily();
 
         // srcAccessMask means nothing when importing. Queue transfers require a barrier on

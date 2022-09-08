@@ -176,6 +176,7 @@ class Texture final : public TextureBase {
     };
     ExternalState mExternalState = ExternalState::InternalOnly;
     ExternalState mLastExternalState = ExternalState::InternalOnly;
+    uint32_t mExportQueueFamilyIndex = VK_QUEUE_FAMILY_EXTERNAL_KHR;
 
     VkImageLayout mPendingAcquireOldLayout;
     VkImageLayout mPendingAcquireNewLayout;

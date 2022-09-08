@@ -1,4 +1,4 @@
-// Copyright 2019 The Dawn Authors
+// Copyright 2022 The Dawn Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ Service::~Service() = default;
 
 // static
 bool Service::CheckSupport(const VulkanDeviceInfo& deviceInfo) {
-    return deviceInfo.HasExt(DeviceExt::ExternalMemoryFD);
+    return deviceInfo.HasExt(DeviceExt::ExternalMemoryAndroidHardwareBuffer);
 }
 
 bool Service::SupportsImportMemory(VkFormat format,
@@ -43,27 +43,34 @@ bool Service::SupportsImportMemory(VkFormat format,
         return false;
     }
 
-    VkPhysicalDeviceExternalImageFormatInfo externalFormatInfo;
-    externalFormatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO_KHR;
-    externalFormatInfo.pNext = nullptr;
-    externalFormatInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
+    VkPhysicalDeviceImageFormatInfo2 formatInfo = {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2_KHR,
+        .pNext = nullptr,
+        .format = format,
+        .type = type,
+        .tiling = tiling,
+        .usage = usage,
+        .flags = flags,
+    };
 
-    VkPhysicalDeviceImageFormatInfo2 formatInfo;
-    formatInfo.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_IMAGE_FORMAT_INFO_2_KHR;
-    formatInfo.pNext = &externalFormatInfo;
-    formatInfo.format = format;
-    formatInfo.type = type;
-    formatInfo.tiling = tiling;
-    formatInfo.usage = usage;
-    formatInfo.flags = flags;
+    PNextChainBuilder formatInfoChain(&formatInfo);
+
+    VkPhysicalDeviceExternalImageFormatInfo externalFormatInfo = {
+        .handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID,
+    };
+    formatInfoChain.Add(&externalFormatInfo,
+                        VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTERNAL_IMAGE_FORMAT_INFO_KHR);
+
+    VkImageFormatProperties2 formatProperties = {
+        .sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2_KHR,
+        .pNext = nullptr,
+    };
+
+    PNextChainBuilder formatPropertiesChain(&formatProperties);
 
     VkExternalImageFormatProperties externalFormatProperties;
-    externalFormatProperties.sType = VK_STRUCTURE_TYPE_EXTERNAL_IMAGE_FORMAT_PROPERTIES_KHR;
-    externalFormatProperties.pNext = nullptr;
-
-    VkImageFormatProperties2 formatProperties;
-    formatProperties.sType = VK_STRUCTURE_TYPE_IMAGE_FORMAT_PROPERTIES_2_KHR;
-    formatProperties.pNext = &externalFormatProperties;
+    formatPropertiesChain.Add(&externalFormatProperties,
+                              VK_STRUCTURE_TYPE_EXTERNAL_IMAGE_FORMAT_PROPERTIES_KHR);
 
     VkResult result = VkResult::WrapUnsafe(mDevice->fn.GetPhysicalDeviceImageFormatProperties2(
         ToBackend(mDevice->GetAdapter())->GetPhysicalDevice(), &formatInfo, &formatProperties));
@@ -89,25 +96,40 @@ bool Service::SupportsCreateImage(const ExternalImageDescriptor* descriptor,
 ResultOrError<MemoryImportParams> Service::GetMemoryImportParams(
     const ExternalImageDescriptor* descriptor,
     VkImage image) {
-    DAWN_INVALID_IF(descriptor->GetType() != ExternalImageType::OpaqueFD,
-                    "ExternalImageDescriptor is not an OpaqueFD descriptor.");
+    DAWN_INVALID_IF(descriptor->GetType() != ExternalImageType::AHardwareBuffer,
+                    "ExternalImageDescriptor is not an AHardwareBuffer descriptor.");
 
-    const ExternalImageDescriptorOpaqueFD* opaqueFDDescriptor =
-        static_cast<const ExternalImageDescriptorOpaqueFD*>(descriptor);
+    const ExternalImageDescriptorAHardwareBuffer* aHardwareBufferDescriptor =
+        static_cast<const ExternalImageDescriptorAHardwareBuffer*>(descriptor);
 
-    MemoryImportParams params = {opaqueFDDescriptor->allocationSize,
-                                 opaqueFDDescriptor->memoryTypeIndex};
+    VkAndroidHardwareBufferPropertiesANDROID bufferProperties = {
+        .sType = VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_PROPERTIES_ANDROID,
+        .pNext = nullptr,
+    };
+
+    PNextChainBuilder bufferPropertiesChain(&bufferProperties);
+
+    VkAndroidHardwareBufferFormatPropertiesANDROID bufferFormatProperties;
+    bufferPropertiesChain.Add(&bufferFormatProperties,
+                              VK_STRUCTURE_TYPE_ANDROID_HARDWARE_BUFFER_FORMAT_PROPERTIES_ANDROID);
+
+    DAWN_TRY(CheckVkSuccess(
+        mDevice->fn.GetAndroidHardwareBufferPropertiesANDROID(
+            mDevice->GetVkDevice(), aHardwareBufferDescriptor->handle, &bufferProperties),
+        "vkGetAndroidHardwareBufferPropertiesANDROID"));
+
+    MemoryImportParams params = {bufferProperties.allocationSize, bufferProperties.memoryTypeBits};
     return params;
 }
 
 uint32_t Service::GetQueueFamilyIndex() {
-    return VK_QUEUE_FAMILY_EXTERNAL_KHR;
+    return VK_QUEUE_FAMILY_FOREIGN_EXT;
 }
 
 ResultOrError<VkDeviceMemory> Service::ImportMemory(ExternalMemoryHandle handle,
                                                     const MemoryImportParams& importParams,
                                                     VkImage image) {
-    DAWN_INVALID_IF(handle < 0, "Importing memory with an invalid handle.");
+    DAWN_INVALID_IF(handle == nullptr, "Importing memory with an invalid handle.");
 
     VkMemoryRequirements requirements;
     mDevice->fn.GetImageMemoryRequirements(mDevice->GetVkDevice(), image, &requirements);
@@ -115,17 +137,20 @@ ResultOrError<VkDeviceMemory> Service::ImportMemory(ExternalMemoryHandle handle,
                     "Requested allocation size (%u) is smaller than the image requires (%u).",
                     importParams.allocationSize, requirements.size);
 
-    VkImportMemoryFdInfoKHR importMemoryFdInfo;
-    importMemoryFdInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR;
-    importMemoryFdInfo.pNext = nullptr;
-    importMemoryFdInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
-    importMemoryFdInfo.fd = handle;
+    VkMemoryAllocateInfo allocateInfo = {
+        .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
+        .pNext = nullptr,
+        .allocationSize = importParams.allocationSize,
+        .memoryTypeIndex = importParams.memoryTypeIndex,
+    };
 
-    VkMemoryAllocateInfo allocateInfo;
-    allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocateInfo.pNext = &importMemoryFdInfo;
-    allocateInfo.allocationSize = importParams.allocationSize;
-    allocateInfo.memoryTypeIndex = importParams.memoryTypeIndex;
+    PNextChainBuilder allocateInfoChain(&allocateInfo);
+
+    VkImportAndroidHardwareBufferInfoANDROID importMemoryAHBInfo = {
+        .buffer = handle,
+    };
+    allocateInfoChain.Add(&importMemoryAHBInfo,
+                          VK_STRUCTURE_TYPE_IMPORT_ANDROID_HARDWARE_BUFFER_INFO_ANDROID);
 
     VkDeviceMemory allocatedMemory = VK_NULL_HANDLE;
     DAWN_TRY(CheckVkSuccess(mDevice->fn.AllocateMemory(mDevice->GetVkDevice(), &allocateInfo,
@@ -141,12 +166,11 @@ ResultOrError<VkImage> Service::CreateImage(const ExternalImageDescriptor* descr
     createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
     createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 
-    VkExternalMemoryImageCreateInfo externalMemoryImageCreateInfo;
-    externalMemoryImageCreateInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO;
-    externalMemoryImageCreateInfo.pNext = nullptr;
-    externalMemoryImageCreateInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
-
     PNextChainBuilder createInfoChain(&createInfo);
+
+    VkExternalMemoryImageCreateInfo externalMemoryImageCreateInfo = {
+        .handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_ANDROID_HARDWARE_BUFFER_BIT_ANDROID,
+    };
     createInfoChain.Add(&externalMemoryImageCreateInfo,
                         VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO);
 

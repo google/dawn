@@ -100,6 +100,10 @@ ResultOrError<MemoryImportParams> Service::GetMemoryImportParams(
     return params;
 }
 
+uint32_t Service::GetQueueFamilyIndex() {
+    return VK_QUEUE_FAMILY_EXTERNAL_KHR;
+}
+
 ResultOrError<VkDeviceMemory> Service::ImportMemory(ExternalMemoryHandle handle,
                                                     const MemoryImportParams& importParams,
                                                     VkImage image) {

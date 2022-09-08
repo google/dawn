@@ -386,6 +386,13 @@ MaybeError VulkanFunctions::LoadDeviceProcs(VkDevice device, const VulkanDeviceI
     }
 #endif
 
+#if DAWN_PLATFORM_IS(ANDROID)
+    if (deviceInfo.HasExt(DeviceExt::ExternalMemoryAndroidHardwareBuffer)) {
+        GET_DEVICE_PROC(GetAndroidHardwareBufferPropertiesANDROID);
+        GET_DEVICE_PROC(GetMemoryAndroidHardwareBufferANDROID);
+    }
+#endif  // DAWN_PLATFORM_IS(ANDROID)
+
     return {};
 }
 

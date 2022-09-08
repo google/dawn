@@ -51,6 +51,10 @@ ResultOrError<MemoryImportParams> Service::GetMemoryImportParams(
     return DAWN_UNIMPLEMENTED_ERROR("Using null memory service to interop inside Vulkan");
 }
 
+uint32_t Service::GetQueueFamilyIndex() {
+    return VK_QUEUE_FAMILY_EXTERNAL_KHR;
+}
+
 ResultOrError<VkDeviceMemory> Service::ImportMemory(ExternalMemoryHandle handle,
                                                     const MemoryImportParams& importParams,
                                                     VkImage image) {

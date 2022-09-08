@@ -74,9 +74,26 @@ ExternalImageExportInfoDmaBuf::ExternalImageExportInfoDmaBuf()
     : ExternalImageExportInfoFD(ExternalImageType::DmaBuf) {}
 #endif  // DAWN_PLATFORM_IS(LINUX)
 
+#if DAWN_PLATFORM_IS(ANDROID)
+ExternalImageDescriptorAHardwareBuffer::ExternalImageDescriptorAHardwareBuffer()
+    : ExternalImageDescriptorVk(ExternalImageType::AHardwareBuffer) {}
+
+ExternalImageExportInfoAHardwareBuffer::ExternalImageExportInfoAHardwareBuffer()
+    : ExternalImageExportInfoFD(ExternalImageType::AHardwareBuffer) {}
+#endif
+
 WGPUTexture WrapVulkanImage(WGPUDevice device, const ExternalImageDescriptorVk* descriptor) {
-#if DAWN_PLATFORM_IS(LINUX)
     switch (descriptor->GetType()) {
+#if DAWN_PLATFORM_IS(ANDROID)
+        case ExternalImageType::AHardwareBuffer: {
+            Device* backendDevice = ToBackend(FromAPI(device));
+            const ExternalImageDescriptorAHardwareBuffer* ahbDescriptor =
+                static_cast<const ExternalImageDescriptorAHardwareBuffer*>(descriptor);
+
+            return ToAPI(backendDevice->CreateTextureWrappingVulkanImage(
+                ahbDescriptor, ahbDescriptor->handle, ahbDescriptor->waitFDs));
+        }
+#elif DAWN_PLATFORM_IS(LINUX)
         case ExternalImageType::OpaqueFD:
         case ExternalImageType::DmaBuf: {
             Device* backendDevice = ToBackend(FromAPI(device));
@@ -86,12 +103,11 @@ WGPUTexture WrapVulkanImage(WGPUDevice device, const ExternalImageDescriptorVk* 
             return ToAPI(backendDevice->CreateTextureWrappingVulkanImage(
                 fdDescriptor, fdDescriptor->memoryFD, fdDescriptor->waitFDs));
         }
+#endif  // DAWN_PLATFORM_IS(LINUX)
+
         default:
             return nullptr;
     }
-#else
-    return nullptr;
-#endif  // DAWN_PLATFORM_IS(LINUX)
 }
 
 bool ExportVulkanImage(WGPUTexture texture,
@@ -100,8 +116,9 @@ bool ExportVulkanImage(WGPUTexture texture,
     if (texture == nullptr) {
         return false;
     }
-#if DAWN_PLATFORM_IS(LINUX)
+#if DAWN_PLATFORM_IS(ANDROID) || DAWN_PLATFORM_IS(LINUX)
     switch (info->GetType()) {
+        case ExternalImageType::AHardwareBuffer:
         case ExternalImageType::OpaqueFD:
         case ExternalImageType::DmaBuf: {
             Texture* backendTexture = ToBackend(FromAPI(texture));

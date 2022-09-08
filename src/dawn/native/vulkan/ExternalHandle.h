@@ -19,7 +19,13 @@
 
 namespace dawn::native::vulkan {
 
-#if DAWN_PLATFORM_IS(LINUX)
+#if DAWN_PLATFORM_IS(ANDROID)
+// AHardwareBuffer
+using ExternalMemoryHandle = struct AHardwareBuffer*;
+// File descriptor
+using ExternalSemaphoreHandle = int;
+const ExternalSemaphoreHandle kNullExternalSemaphoreHandle = -1;
+#elif DAWN_PLATFORM_IS(LINUX)
 // File descriptor
 using ExternalMemoryHandle = int;
 // File descriptor
