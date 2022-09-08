@@ -27,7 +27,7 @@ struct D3D12DeviceInfo {
     bool isUMA;
     uint32_t resourceHeapTier;
     bool supportsRenderPass;
-    bool supportsShaderFloat16;
+    bool supportsShaderF16;
     // shaderModel indicates the maximum supported shader model, for example, the value 62
     // indicates that current driver supports the maximum shader model is shader model 6.2.
     uint32_t shaderModel;

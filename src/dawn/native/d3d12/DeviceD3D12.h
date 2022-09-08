@@ -46,7 +46,9 @@ class StagingDescriptorAllocator;
 // Definition of backend types
 class Device final : public DeviceBase {
   public:
-    static ResultOrError<Ref<Device>> Create(Adapter* adapter, const DeviceDescriptor* descriptor);
+    static ResultOrError<Ref<Device>> Create(Adapter* adapter,
+                                             const DeviceDescriptor* descriptor,
+                                             const TripleStateTogglesSet& userProvidedToggles);
     ~Device() override;
 
     MaybeError Initialize(const DeviceDescriptor* descriptor);
@@ -159,8 +161,6 @@ class Device final : public DeviceBase {
 
     bool ShouldDuplicateParametersForDrawIndirect(
         const RenderPipelineBase* renderPipelineBase) const override;
-
-    bool IsFeatureEnabled(Feature feature) const override;
 
     uint64_t GetBufferCopyOffsetAlignmentForDepthStencil() const override;
 

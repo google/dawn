@@ -65,8 +65,16 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     return {};
 }
 
-ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {
-    return Device::Create(this, descriptor);
+ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(
+    const DeviceDescriptor* descriptor,
+    const TripleStateTogglesSet& userProvidedToggles) {
+    return Device::Create(this, descriptor, userProvidedToggles);
+}
+
+MaybeError Adapter::ValidateFeatureSupportedWithTogglesImpl(
+    wgpu::FeatureName feature,
+    const TripleStateTogglesSet& userProvidedToggles) {
+    return {};
 }
 
 class Backend : public BackendConnection {
@@ -103,8 +111,10 @@ struct CopyFromStagingToBufferOperation : PendingOperation {
 // Device
 
 // static
-ResultOrError<Ref<Device>> Device::Create(Adapter* adapter, const DeviceDescriptor* descriptor) {
-    Ref<Device> device = AcquireRef(new Device(adapter, descriptor));
+ResultOrError<Ref<Device>> Device::Create(Adapter* adapter,
+                                          const DeviceDescriptor* descriptor,
+                                          const TripleStateTogglesSet& userProvidedToggles) {
+    Ref<Device> device = AcquireRef(new Device(adapter, descriptor, userProvidedToggles));
     DAWN_TRY(device->Initialize(descriptor));
     return device;
 }

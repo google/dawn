@@ -77,6 +77,14 @@ TEST_F(FeatureTests, GetEnabledFeatures) {
         deviceDescriptor.requiredFeatures = &featureName;
         deviceDescriptor.requiredFeaturesCount = 1;
 
+        // Some features may require DisallowUnsafeApis toggle disabled, otherwise CreateDevice may
+        // failed.
+        const char* const disableToggles[] = {"disallow_unsafe_apis"};
+        wgpu::DawnTogglesDeviceDescriptor toggleDesc;
+        toggleDesc.forceDisabledToggles = disableToggles;
+        toggleDesc.forceDisabledTogglesCount = 1;
+        deviceDescriptor.nextInChain = &toggleDesc;
+
         dawn::native::DeviceBase* deviceBase = dawn::native::FromAPI(
             adapter.CreateDevice(reinterpret_cast<const WGPUDeviceDescriptor*>(&deviceDescriptor)));
 

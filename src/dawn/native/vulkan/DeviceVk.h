@@ -43,7 +43,9 @@ class ResourceMemoryAllocator;
 
 class Device final : public DeviceBase {
   public:
-    static ResultOrError<Ref<Device>> Create(Adapter* adapter, const DeviceDescriptor* descriptor);
+    static ResultOrError<Ref<Device>> Create(Adapter* adapter,
+                                             const DeviceDescriptor* descriptor,
+                                             const TripleStateTogglesSet& userProvidedToggles);
     ~Device() override;
 
     MaybeError Initialize(const DeviceDescriptor* descriptor);
@@ -113,7 +115,9 @@ class Device final : public DeviceBase {
     const char* GetDebugPrefix() { return mDebugPrefix.c_str(); }
 
   private:
-    Device(Adapter* adapter, const DeviceDescriptor* descriptor);
+    Device(Adapter* adapter,
+           const DeviceDescriptor* descriptor,
+           const TripleStateTogglesSet& userProvidedToggles);
 
     ResultOrError<Ref<BindGroupBase>> CreateBindGroupImpl(
         const BindGroupDescriptor* descriptor) override;

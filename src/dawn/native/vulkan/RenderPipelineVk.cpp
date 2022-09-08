@@ -436,7 +436,7 @@ MaybeError RenderPipeline::Initialize() {
     PNextChainBuilder rasterizationChain(&rasterization);
     VkPipelineRasterizationDepthClipStateCreateInfoEXT depthClipState;
     if (HasUnclippedDepth()) {
-        ASSERT(device->IsFeatureEnabled(Feature::DepthClipControl));
+        ASSERT(device->HasFeature(Feature::DepthClipControl));
         depthClipState.pNext = nullptr;
         depthClipState.depthClipEnable = VK_FALSE;
         depthClipState.flags = 0;

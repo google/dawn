@@ -364,7 +364,7 @@ MaybeError ValidateCopyTextureForBrowser(DeviceBase* device,
         source->texture->GetSampleCount(), destination->texture->GetSampleCount());
 
     DAWN_INVALID_IF(
-        options->internalUsage && !device->IsFeatureEnabled(Feature::DawnInternalUsages),
+        options->internalUsage && !device->HasFeature(Feature::DawnInternalUsages),
         "The internalUsage is true while the dawn-internal-usages feature is not enabled.");
     UsageValidationMode mode =
         options->internalUsage ? UsageValidationMode::Internal : UsageValidationMode::Default;

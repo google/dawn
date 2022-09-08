@@ -121,7 +121,7 @@ ResultOrError<D3D12DeviceInfo> GatherDeviceInfo(const Adapter& adapter) {
     info.shaderProfiles[SingleShaderStage::Fragment] = L"p" + profileSuffix;
     info.shaderProfiles[SingleShaderStage::Compute] = L"c" + profileSuffix;
 
-    info.supportsShaderFloat16 =
+    info.supportsShaderF16 =
         driverShaderModel >= D3D_SHADER_MODEL_6_2 && featureOptions4.Native16BitShaderOpsSupported;
 
     info.supportsDP4a = driverShaderModel >= D3D_SHADER_MODEL_6_4;

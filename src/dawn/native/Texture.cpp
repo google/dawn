@@ -339,7 +339,7 @@ MaybeError ValidateTextureDescriptor(const DeviceBase* device,
     FindInChain(descriptor->nextInChain, &internalUsageDesc);
 
     DAWN_INVALID_IF(
-        internalUsageDesc != nullptr && !device->IsFeatureEnabled(Feature::DawnInternalUsages),
+        internalUsageDesc != nullptr && !device->HasFeature(Feature::DawnInternalUsages),
         "The internalUsageDesc is not empty while the dawn-internal-usages feature is not enabled");
 
     const Format* format;

@@ -43,7 +43,8 @@ class Device final : public DeviceBase {
     static ResultOrError<Ref<Device>> Create(AdapterBase* adapter,
                                              const DeviceDescriptor* descriptor,
                                              const OpenGLFunctions& functions,
-                                             std::unique_ptr<Context> context);
+                                             std::unique_ptr<Context> context,
+                                             const TripleStateTogglesSet& userProvidedToggles);
     ~Device() override;
 
     MaybeError Initialize(const DeviceDescriptor* descriptor);
@@ -93,7 +94,8 @@ class Device final : public DeviceBase {
     Device(AdapterBase* adapter,
            const DeviceDescriptor* descriptor,
            const OpenGLFunctions& functions,
-           std::unique_ptr<Context> context);
+           std::unique_ptr<Context> context,
+           const TripleStateTogglesSet& userProvidedToggles);
 
     ResultOrError<Ref<BindGroupBase>> CreateBindGroupImpl(
         const BindGroupDescriptor* descriptor) override;

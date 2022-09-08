@@ -141,6 +141,11 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
         mSupportedFeatures.EnableFeature(Feature::IndirectFirstInstance);
     }
 
+    // ShaderF16
+    if (mFunctions.IsGLExtensionSupported("GL_AMD_gpu_shader_half_float")) {
+        mSupportedFeatures.EnableFeature(Feature::ShaderF16);
+    }
+
     return {};
 }
 
@@ -149,12 +154,20 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     return {};
 }
 
-ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {
+ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(
+    const DeviceDescriptor* descriptor,
+    const TripleStateTogglesSet& userProvidedToggles) {
     EGLenum api =
         GetBackendType() == wgpu::BackendType::OpenGL ? EGL_OPENGL_API : EGL_OPENGL_ES_API;
     std::unique_ptr<Device::Context> context;
     DAWN_TRY_ASSIGN(context, ContextEGL::Create(mEGLFunctions, api));
-    return Device::Create(this, descriptor, mFunctions, std::move(context));
+    return Device::Create(this, descriptor, mFunctions, std::move(context), userProvidedToggles);
+}
+
+MaybeError Adapter::ValidateFeatureSupportedWithTogglesImpl(
+    wgpu::FeatureName feature,
+    const TripleStateTogglesSet& userProvidedToggles) {
+    return {};
 }
 
 }  // namespace dawn::native::opengl

@@ -30,13 +30,13 @@ enum class Feature {
     TextureCompressionBC,
     TextureCompressionETC2,
     TextureCompressionASTC,
-    ShaderFloat16,
     PipelineStatisticsQuery,
     TimestampQuery,
     DepthClipControl,
     Depth32FloatStencil8,
     ChromiumExperimentalDp4a,
     IndirectFirstInstance,
+    ShaderF16,
 
     // Dawn-specific
     DawnInternalUsages,

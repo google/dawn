@@ -78,14 +78,19 @@ class ScopedSignalSemaphore : public NonMovable {
 }  // namespace
 
 // static
-ResultOrError<Ref<Device>> Device::Create(Adapter* adapter, const DeviceDescriptor* descriptor) {
-    Ref<Device> device = AcquireRef(new Device(adapter, descriptor));
+ResultOrError<Ref<Device>> Device::Create(Adapter* adapter,
+                                          const DeviceDescriptor* descriptor,
+                                          const TripleStateTogglesSet& userProvidedToggles) {
+    Ref<Device> device = AcquireRef(new Device(adapter, descriptor, userProvidedToggles));
     DAWN_TRY(device->Initialize(descriptor));
     return device;
 }
 
-Device::Device(Adapter* adapter, const DeviceDescriptor* descriptor)
-    : DeviceBase(adapter, descriptor), mDebugPrefix(GetNextDeviceDebugPrefix()) {
+Device::Device(Adapter* adapter,
+               const DeviceDescriptor* descriptor,
+               const TripleStateTogglesSet& userProvidedToggles)
+    : DeviceBase(adapter, descriptor, userProvidedToggles),
+      mDebugPrefix(GetNextDeviceDebugPrefix()) {
     InitTogglesFromDriver();
 }
 
@@ -449,29 +454,29 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice physicalD
         usedKnobs.features.samplerAnisotropy = VK_TRUE;
     }
 
-    if (IsFeatureEnabled(Feature::TextureCompressionBC)) {
+    if (HasFeature(Feature::TextureCompressionBC)) {
         ASSERT(ToBackend(GetAdapter())->GetDeviceInfo().features.textureCompressionBC == VK_TRUE);
         usedKnobs.features.textureCompressionBC = VK_TRUE;
     }
 
-    if (IsFeatureEnabled(Feature::TextureCompressionETC2)) {
+    if (HasFeature(Feature::TextureCompressionETC2)) {
         ASSERT(ToBackend(GetAdapter())->GetDeviceInfo().features.textureCompressionETC2 == VK_TRUE);
         usedKnobs.features.textureCompressionETC2 = VK_TRUE;
     }
 
-    if (IsFeatureEnabled(Feature::TextureCompressionASTC)) {
+    if (HasFeature(Feature::TextureCompressionASTC)) {
         ASSERT(ToBackend(GetAdapter())->GetDeviceInfo().features.textureCompressionASTC_LDR ==
                VK_TRUE);
         usedKnobs.features.textureCompressionASTC_LDR = VK_TRUE;
     }
 
-    if (IsFeatureEnabled(Feature::PipelineStatisticsQuery)) {
+    if (HasFeature(Feature::PipelineStatisticsQuery)) {
         ASSERT(ToBackend(GetAdapter())->GetDeviceInfo().features.pipelineStatisticsQuery ==
                VK_TRUE);
         usedKnobs.features.pipelineStatisticsQuery = VK_TRUE;
     }
 
-    if (IsFeatureEnabled(Feature::DepthClipControl)) {
+    if (HasFeature(Feature::DepthClipControl)) {
         const VulkanDeviceInfo& deviceInfo = ToBackend(GetAdapter())->GetDeviceInfo();
         ASSERT(deviceInfo.HasExt(DeviceExt::DepthClipEnable) &&
                deviceInfo.depthClipEnableFeatures.depthClipEnable == VK_TRUE);
@@ -481,16 +486,20 @@ ResultOrError<VulkanDeviceKnobs> Device::CreateDevice(VkPhysicalDevice physicalD
                           VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEPTH_CLIP_ENABLE_FEATURES_EXT);
     }
 
-    if (IsFeatureEnabled(Feature::ShaderFloat16)) {
+    // TODO(dawn:1510, tint:1473): After implementing a transform to handle the pipeline input /
+    // output if necessary, relax the requirement of storageInputOutput16.
+    if (HasFeature(Feature::ShaderF16)) {
         const VulkanDeviceInfo& deviceInfo = ToBackend(GetAdapter())->GetDeviceInfo();
         ASSERT(deviceInfo.HasExt(DeviceExt::ShaderFloat16Int8) &&
                deviceInfo.shaderFloat16Int8Features.shaderFloat16 == VK_TRUE &&
                deviceInfo.HasExt(DeviceExt::_16BitStorage) &&
                deviceInfo._16BitStorageFeatures.storageBuffer16BitAccess == VK_TRUE &&
+               deviceInfo._16BitStorageFeatures.storageInputOutput16 == VK_TRUE &&
                deviceInfo._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess == VK_TRUE);
 
         usedKnobs.shaderFloat16Int8Features.shaderFloat16 = VK_TRUE;
         usedKnobs._16BitStorageFeatures.storageBuffer16BitAccess = VK_TRUE;
+        usedKnobs._16BitStorageFeatures.storageInputOutput16 = VK_TRUE;
         usedKnobs._16BitStorageFeatures.uniformAndStorageBuffer16BitAccess = VK_TRUE;
 
         featuresChain.Add(&usedKnobs.shaderFloat16Int8Features,

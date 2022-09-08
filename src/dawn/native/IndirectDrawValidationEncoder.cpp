@@ -338,7 +338,7 @@ MaybeError EncodeIndirectDrawValidationCommands(DeviceBase* device,
             if (device->IsValidationEnabled()) {
                 newPass.flags |= kValidationEnabled;
             }
-            if (device->IsFeatureEnabled(Feature::IndirectFirstInstance)) {
+            if (device->HasFeature(Feature::IndirectFirstInstance)) {
                 newPass.flags |= kIndirectFirstInstanceEnabled;
             }
             passes.push_back(std::move(newPass));

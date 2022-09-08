@@ -15,19 +15,20 @@
 #include <vector>
 
 #include "dawn/tests/DawnTest.h"
+#include "dawn/utils/ComboRenderPipelineDescriptor.h"
 #include "dawn/utils/WGPUHelpers.h"
 
 namespace {
-using RequestDP4aExtension = bool;
-DAWN_TEST_PARAM_STRUCT(ExperimentalDP4aTestsParams, RequestDP4aExtension);
+using RequireShaderF16Feature = bool;
+DAWN_TEST_PARAM_STRUCT(ShaderF16TestsParams, RequireShaderF16Feature);
 
 }  // anonymous namespace
 
-class ExperimentalDP4aTests : public DawnTestWithParams<ExperimentalDP4aTestsParams> {
+class ShaderF16Tests : public DawnTestWithParams<ShaderF16TestsParams> {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
-        mIsDP4aSupportedOnAdapter = SupportsFeatures({wgpu::FeatureName::ChromiumExperimentalDp4a});
-        if (!mIsDP4aSupportedOnAdapter) {
+        mIsShaderF16SupportedOnAdapter = SupportsFeatures({wgpu::FeatureName::ShaderF16});
+        if (!mIsShaderF16SupportedOnAdapter) {
             return {};
         }
 
@@ -42,71 +43,61 @@ class ExperimentalDP4aTests : public DawnTestWithParams<ExperimentalDP4aTestsPar
             }
         }
 
-        if (GetParam().mRequestDP4aExtension && mUseDxcEnabledOrNonD3D12) {
-            return {wgpu::FeatureName::ChromiumExperimentalDp4a};
+        if (GetParam().mRequireShaderF16Feature && mUseDxcEnabledOrNonD3D12) {
+            return {wgpu::FeatureName::ShaderF16};
         }
 
         return {};
     }
 
-    bool IsDP4aSupportedOnAdapter() const { return mIsDP4aSupportedOnAdapter; }
+    bool IsShaderF16SupportedOnAdapter() const { return mIsShaderF16SupportedOnAdapter; }
     bool UseDxcEnabledOrNonD3D12() const { return mUseDxcEnabledOrNonD3D12; }
 
   private:
-    bool mIsDP4aSupportedOnAdapter = false;
+    bool mIsShaderF16SupportedOnAdapter = false;
     bool mUseDxcEnabledOrNonD3D12 = false;
 };
 
-TEST_P(ExperimentalDP4aTests, BasicDP4aFeaturesTest) {
+TEST_P(ShaderF16Tests, BasicShaderF16FeaturesTest) {
     const char* computeShader = R"(
-        enable chromium_experimental_dp4a;
+        enable f16;
 
         struct Buf {
-            data1 : i32,
-            data2 : u32,
-            data3 : i32,
-            data4 : u32,
+            v : f32,
         }
         @group(0) @binding(0) var<storage, read_write> buf : Buf;
 
         @compute @workgroup_size(1)
-        fn main() {
-            var a = 0xFFFFFFFFu;
-            var b = 0xFFFFFFFEu;
-            var c = 0x01020304u;
-            buf.data1 = dot4I8Packed(a, b);
-            buf.data2 = dot4U8Packed(a, b);
-            buf.data3 = dot4I8Packed(a, c);
-            buf.data4 = dot4U8Packed(a, c);
+        fn CSMain() {
+            let a : f16 = f16(buf.v) + 1.0h;
+            buf.v = f32(a);
         }
-)";
-    const bool shouldDP4AFeatureSupportedByDevice =
+    )";
+
+    const bool shouldShaderF16FeatureSupportedByDevice =
         // Required when creating device
-        GetParam().mRequestDP4aExtension &&
+        GetParam().mRequireShaderF16Feature &&
         // Adapter support the feature
-        IsDP4aSupportedOnAdapter() &&
+        IsShaderF16SupportedOnAdapter() &&
         // Proper toggle, disallow_unsafe_apis and use_dxc if d3d12
         // Note that "disallow_unsafe_apis" is always disabled in DawnTestBase::CreateDeviceImpl.
         !HasToggleEnabled("disallow_unsafe_apis") && UseDxcEnabledOrNonD3D12();
-    const bool deviceSupportDP4AFeature =
-        device.HasFeature(wgpu::FeatureName::ChromiumExperimentalDp4a);
-    EXPECT_EQ(deviceSupportDP4AFeature, shouldDP4AFeatureSupportedByDevice);
+    const bool deviceSupportShaderF16Feature = device.HasFeature(wgpu::FeatureName::ShaderF16);
+    EXPECT_EQ(deviceSupportShaderF16Feature, shouldShaderF16FeatureSupportedByDevice);
 
-    if (!deviceSupportDP4AFeature) {
+    if (!deviceSupportShaderF16Feature) {
         ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, computeShader));
         return;
     }
 
-    utils::CreateShaderModule(device, computeShader);
-
     wgpu::BufferDescriptor bufferDesc;
-    bufferDesc.size = 4 * sizeof(uint32_t);
+    bufferDesc.size = 4u;
     bufferDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
     wgpu::Buffer bufferOut = device.CreateBuffer(&bufferDesc);
 
     wgpu::ComputePipelineDescriptor csDesc;
     csDesc.compute.module = utils::CreateShaderModule(device, computeShader);
-    csDesc.compute.entryPoint = "main";
+    csDesc.compute.entryPoint = "CSMain";
     wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&csDesc);
 
     wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0),
@@ -123,15 +114,18 @@ TEST_P(ExperimentalDP4aTests, BasicDP4aFeaturesTest) {
     wgpu::CommandBuffer commands = encoder.Finish();
     queue.Submit(1, &commands);
 
-    uint32_t expected[] = {5, 259845, static_cast<uint32_t>(-10), 2550};
-    EXPECT_BUFFER_U32_RANGE_EQ(expected, bufferOut, 0, 4);
+    uint32_t expected[] = {0x3f800000};  // 1.0f
+    EXPECT_BUFFER_U32_RANGE_EQ(expected, bufferOut, 0, 1);
 }
 
 // DawnTestBase::CreateDeviceImpl always disable disallow_unsafe_apis toggle.
-DAWN_INSTANTIATE_TEST_P(ExperimentalDP4aTests,
+DAWN_INSTANTIATE_TEST_P(ShaderF16Tests,
                         {
                             D3D12Backend(),
-                            D3D12Backend({"use_dxc"}, {}),
+                            D3D12Backend({"use_dxc"}),
                             VulkanBackend(),
+                            MetalBackend(),
+                            OpenGLBackend(),
+                            OpenGLESBackend(),
                         },
                         {true, false});

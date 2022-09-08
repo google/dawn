@@ -97,7 +97,7 @@ enum class Compiler { FXC, DXC };
     X(bool, dumpShaders)
 
 #define D3D_BYTECODE_COMPILATION_REQUEST_MEMBERS(X) \
-    X(bool, hasShaderFloat16Feature)                \
+    X(bool, hasShaderF16Feature)                    \
     X(uint32_t, compileFlags)                       \
     X(Compiler, compiler)                           \
     X(uint64_t, compilerVersion)                    \
@@ -186,8 +186,7 @@ ResultOrError<ComPtr<IDxcBlob>> CompileShaderDXC(const D3DBytecodeCompilationReq
     std::wstring entryPointW;
     DAWN_TRY_ASSIGN(entryPointW, ConvertStringToWstring(entryPointName));
 
-    std::vector<const wchar_t*> arguments =
-        GetDXCArguments(r.compileFlags, r.hasShaderFloat16Feature);
+    std::vector<const wchar_t*> arguments = GetDXCArguments(r.compileFlags, r.hasShaderF16Feature);
 
     ComPtr<IDxcOperationResult> result;
     DAWN_TRY(CheckHRESULT(r.dxcCompiler->Compile(sourceBlob.Get(), nullptr, entryPointW.c_str(),
@@ -475,7 +474,7 @@ ResultOrError<CompiledShader> ShaderModule::Compile(const ProgrammableStage& pro
     req.hlsl.disableWorkgroupInit = device->IsToggleEnabled(Toggle::DisableWorkgroupInit);
     req.hlsl.dumpShaders = device->IsToggleEnabled(Toggle::DumpShaders);
 
-    req.bytecode.hasShaderFloat16Feature = device->IsFeatureEnabled(Feature::ShaderFloat16);
+    req.bytecode.hasShaderF16Feature = device->HasFeature(Feature::ShaderF16);
     req.bytecode.compileFlags = compileFlags;
 
     if (device->IsToggleEnabled(Toggle::UseDXC)) {

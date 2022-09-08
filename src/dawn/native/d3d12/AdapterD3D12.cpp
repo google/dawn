@@ -147,6 +147,9 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
             dxcVersion >= MakeDXCVersion(kLeastMajorVersionForDP4a, kLeastMinorVersionForDP4a)) {
             mSupportedFeatures.EnableFeature(Feature::ChromiumExperimentalDp4a);
         }
+        if (mDeviceInfo.supportsShaderF16) {
+            mSupportedFeatures.EnableFeature(Feature::ShaderF16);
+        }
     }
 
     return {};
@@ -312,6 +315,20 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     return {};
 }
 
+MaybeError Adapter::ValidateFeatureSupportedWithTogglesImpl(
+    wgpu::FeatureName feature,
+    const TripleStateTogglesSet& userProvidedToggles) {
+    // shader-f16 feature and chromium-experimental-dp4a feature require DXC for D3D12.
+    if (feature == wgpu::FeatureName::ShaderF16 ||
+        feature == wgpu::FeatureName::ChromiumExperimentalDp4a) {
+        DAWN_INVALID_IF(!(userProvidedToggles.IsEnabled(Toggle::UseDXC) &&
+                          mBackend->GetFunctions()->IsDXCAvailable()),
+                        "Feature %s requires DXC for D3D12.",
+                        GetInstance()->GetFeatureInfo(feature)->name);
+    }
+    return {};
+}
+
 MaybeError Adapter::InitializeDebugLayerFilters() {
     if (!GetInstance()->IsBackendValidationEnabled()) {
         return {};
@@ -418,8 +435,10 @@ void Adapter::CleanUpDebugLayerFilters() {
     infoQueue->PopStorageFilter();
 }
 
-ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(const DeviceDescriptor* descriptor) {
-    return Device::Create(this, descriptor);
+ResultOrError<Ref<DeviceBase>> Adapter::CreateDeviceImpl(
+    const DeviceDescriptor* descriptor,
+    const TripleStateTogglesSet& userProvidedToggles) {
+    return Device::Create(this, descriptor, userProvidedToggles);
 }
 
 // Resets the backend device and creates a new one. If any D3D12 objects belonging to the

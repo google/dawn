@@ -40,7 +40,9 @@ class Adapter : public AdapterBase {
     const gpu_info::D3DDriverVersion& GetDriverVersion() const;
 
   private:
-    ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(const DeviceDescriptor* descriptor) override;
+    ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
+        const DeviceDescriptor* descriptor,
+        const TripleStateTogglesSet& userProvidedToggles) override;
     MaybeError ResetInternalDeviceForTestingImpl() override;
 
     bool AreTimestampQueriesSupported() const;
@@ -48,6 +50,10 @@ class Adapter : public AdapterBase {
     MaybeError InitializeImpl() override;
     MaybeError InitializeSupportedFeaturesImpl() override;
     MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) override;
+
+    MaybeError ValidateFeatureSupportedWithTogglesImpl(
+        wgpu::FeatureName feature,
+        const TripleStateTogglesSet& userProvidedToggles) override;
 
     MaybeError InitializeDebugLayerFilters();
     void CleanUpDebugLayerFilters();

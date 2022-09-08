@@ -24,6 +24,7 @@
 #include "dawn/native/Error.h"
 #include "dawn/native/Features.h"
 #include "dawn/native/Limits.h"
+#include "dawn/native/Toggles.h"
 #include "dawn/native/dawn_platform.h"
 
 namespace dawn::native {
@@ -72,20 +73,34 @@ class AdapterBase : public RefCounted {
     std::string mName;
     wgpu::AdapterType mAdapterType = wgpu::AdapterType::Unknown;
     std::string mDriverDescription;
+
+    // Features set that CAN be supported by devices of this adapter. Some features in this set may
+    // be guarded by toggles, and creating a device with these features required may result in a
+    // validation error if proper toggles are not enabled/disabled.
     FeaturesSet mSupportedFeatures;
+    // Check if a feature os supported by this adapter AND suitable with given toggles.
+    MaybeError ValidateFeatureSupportedWithToggles(
+        wgpu::FeatureName feature,
+        const TripleStateTogglesSet& userProvidedToggles);
 
   private:
-    virtual ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(const DeviceDescriptor* descriptor) = 0;
+    virtual ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
+        const DeviceDescriptor* descriptor,
+        const TripleStateTogglesSet& userProvidedToggles) = 0;
 
     virtual MaybeError InitializeImpl() = 0;
 
-    // Check base WebGPU features and discover supported featurees.
+    // Check base WebGPU features and discover supported features.
     virtual MaybeError InitializeSupportedFeaturesImpl() = 0;
 
     // Check base WebGPU limits and populate supported limits.
     virtual MaybeError InitializeSupportedLimitsImpl(CombinedLimits* limits) = 0;
 
     virtual void InitializeVendorArchitectureImpl();
+
+    virtual MaybeError ValidateFeatureSupportedWithTogglesImpl(
+        wgpu::FeatureName feature,
+        const TripleStateTogglesSet& userProvidedToggles) = 0;
 
     ResultOrError<Ref<DeviceBase>> CreateDeviceInternal(const DeviceDescriptor* descriptor);
 

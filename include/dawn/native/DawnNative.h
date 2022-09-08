@@ -61,7 +61,15 @@ struct ToggleInfo {
 // A struct to record the information of a feature. A feature is a GPU feature that is not
 // required to be supported by all Dawn backends and can only be used when it is enabled on the
 // creation of device.
-using FeatureInfo = ToggleInfo;
+struct FeatureInfo {
+    const char* name;
+    const char* description;
+    const char* url;
+    // The enum of feature state, could be stable or experimental. Using an experimental feature
+    // requires DisallowUnsafeAPIs toggle being disabled.
+    enum class FeatureState { Stable = 0, Experimental };
+    FeatureState featureState;
+};
 
 // An adapter is an object that represent on possibility of creating devices in the system.
 // Most of the time it will represent a combination of a physical GPU and an API. Not that the

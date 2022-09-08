@@ -156,7 +156,7 @@ MaybeError ValidatePrimitiveState(const DeviceBase* device, const PrimitiveState
     DAWN_TRY(ValidateSingleSType(descriptor->nextInChain, wgpu::SType::PrimitiveDepthClipControl));
     const PrimitiveDepthClipControl* depthClipControl = nullptr;
     FindInChain(descriptor->nextInChain, &depthClipControl);
-    DAWN_INVALID_IF(depthClipControl && !device->IsFeatureEnabled(Feature::DepthClipControl),
+    DAWN_INVALID_IF(depthClipControl && !device->HasFeature(Feature::DepthClipControl),
                     "%s is not supported", wgpu::FeatureName::DepthClipControl);
     DAWN_TRY(ValidatePrimitiveTopology(descriptor->topology));
     DAWN_TRY(ValidateIndexFormat(descriptor->stripIndexFormat));

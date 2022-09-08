@@ -107,16 +107,21 @@ void API_AVAILABLE(macos(10.15), ios(14)) UpdateTimestampPeriod(id<MTLDevice> de
 // static
 ResultOrError<Ref<Device>> Device::Create(AdapterBase* adapter,
                                           NSPRef<id<MTLDevice>> mtlDevice,
-                                          const DeviceDescriptor* descriptor) {
-    Ref<Device> device = AcquireRef(new Device(adapter, std::move(mtlDevice), descriptor));
+                                          const DeviceDescriptor* descriptor,
+                                          const TripleStateTogglesSet& userProvidedToggles) {
+    Ref<Device> device =
+        AcquireRef(new Device(adapter, std::move(mtlDevice), descriptor, userProvidedToggles));
     DAWN_TRY(device->Initialize(descriptor));
     return device;
 }
 
 Device::Device(AdapterBase* adapter,
                NSPRef<id<MTLDevice>> mtlDevice,
-               const DeviceDescriptor* descriptor)
-    : DeviceBase(adapter, descriptor), mMtlDevice(std::move(mtlDevice)), mCompletedSerial(0) {}
+               const DeviceDescriptor* descriptor,
+               const TripleStateTogglesSet& userProvidedToggles)
+    : DeviceBase(adapter, descriptor, userProvidedToggles),
+      mMtlDevice(std::move(mtlDevice)),
+      mCompletedSerial(0) {}
 
 Device::~Device() {
     Destroy();
@@ -132,7 +137,7 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
 
     DAWN_TRY(mCommandContext.PrepareNextCommandBuffer(*mCommandQueue));
 
-    if (IsFeatureEnabled(Feature::TimestampQuery) &&
+    if (HasFeature(Feature::TimestampQuery) &&
         !IsToggleEnabled(Toggle::DisableTimestampQueryConversion)) {
         // Make a best guess of timestamp period based on device vendor info, and converge it to
         // an accurate value by the following calculations.
@@ -322,7 +327,7 @@ MaybeError Device::TickImpl() {
     DAWN_TRY(SubmitPendingCommandBuffer());
 
     // Just run timestamp period calculation when timestamp feature is enabled.
-    if (IsFeatureEnabled(Feature::TimestampQuery)) {
+    if (HasFeature(Feature::TimestampQuery)) {
         if (@available(macos 10.15, iOS 14.0, *)) {
             UpdateTimestampPeriod(GetMTLDevice(), mKalmanInfo.get(), &mCpuTimestamp, &mGpuTimestamp,
                                   &mTimestampPeriod);

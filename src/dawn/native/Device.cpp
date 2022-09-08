@@ -170,19 +170,18 @@ ResultOrError<Ref<PipelineLayoutBase>> ValidateLayoutAndGetRenderPipelineDescrip
 
 // DeviceBase
 
-DeviceBase::DeviceBase(AdapterBase* adapter, const DeviceDescriptor* descriptor)
-    : mAdapter(adapter), mNextPipelineCompatibilityToken(1) {
+DeviceBase::DeviceBase(AdapterBase* adapter,
+                       const DeviceDescriptor* descriptor,
+                       const TripleStateTogglesSet& userProvidedToggles)
+    : mAdapter(adapter),
+      mEnabledToggles(userProvidedToggles.providedTogglesEnabled),
+      mOverridenToggles(userProvidedToggles.togglesIsProvided),
+      mNextPipelineCompatibilityToken(1) {
     mAdapter->GetInstance()->IncrementDeviceCountForTesting();
     ASSERT(descriptor != nullptr);
 
     AdapterProperties adapterProperties;
     adapter->APIGetProperties(&adapterProperties);
-
-    const DawnTogglesDeviceDescriptor* togglesDesc = nullptr;
-    FindInChain(descriptor->nextInChain, &togglesDesc);
-    if (togglesDesc != nullptr) {
-        ApplyToggleOverrides(togglesDesc);
-    }
 
     SetDefaultToggles();
     ApplyFeatures(descriptor);
@@ -1323,16 +1322,18 @@ void DeviceBase::ApplyFeatures(const DeviceDescriptor* deviceDescriptor) {
     }
 }
 
-bool DeviceBase::IsFeatureEnabled(Feature feature) const {
+bool DeviceBase::HasFeature(Feature feature) const {
     return mEnabledFeatures.IsEnabled(feature);
 }
 
 void DeviceBase::SetWGSLExtensionAllowList() {
     // Set the WGSL extensions allow list based on device's enabled features and other
-    // propority. For example:
-    //     mWGSLExtensionAllowList.insert("InternalExtensionForTesting");
-    if (IsFeatureEnabled(Feature::ChromiumExperimentalDp4a)) {
+    // propority.
+    if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalDp4a)) {
         mWGSLExtensionAllowList.insert("chromium_experimental_dp4a");
+    }
+    if (mEnabledFeatures.IsEnabled(Feature::ShaderF16)) {
+        mWGSLExtensionAllowList.insert("f16");
     }
 }
 
@@ -1798,27 +1799,6 @@ void DeviceBase::ForceSetToggle(Toggle toggle, bool isEnabled) {
 void DeviceBase::SetDefaultToggles() {
     SetToggle(Toggle::LazyClearResourceOnFirstUse, true);
     SetToggle(Toggle::DisallowUnsafeAPIs, true);
-}
-
-void DeviceBase::ApplyToggleOverrides(const DawnTogglesDeviceDescriptor* togglesDescriptor) {
-    ASSERT(togglesDescriptor != nullptr);
-
-    for (uint32_t i = 0; i < togglesDescriptor->forceEnabledTogglesCount; ++i) {
-        Toggle toggle = GetAdapter()->GetInstance()->ToggleNameToEnum(
-            togglesDescriptor->forceEnabledToggles[i]);
-        if (toggle != Toggle::InvalidEnum) {
-            mEnabledToggles.Set(toggle, true);
-            mOverridenToggles.Set(toggle, true);
-        }
-    }
-    for (uint32_t i = 0; i < togglesDescriptor->forceDisabledTogglesCount; ++i) {
-        Toggle toggle = GetAdapter()->GetInstance()->ToggleNameToEnum(
-            togglesDescriptor->forceDisabledToggles[i]);
-        if (toggle != Toggle::InvalidEnum) {
-            mEnabledToggles.Set(toggle, false);
-            mOverridenToggles.Set(toggle, true);
-        }
-    }
 }
 
 void DeviceBase::FlushCallbackTaskQueue() {

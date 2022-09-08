@@ -299,8 +299,10 @@ class Adapter : public AdapterBase {
     }
 
   private:
-    ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(const DeviceDescriptor* descriptor) override {
-        return Device::Create(this, mDevice, descriptor);
+    ResultOrError<Ref<DeviceBase>> CreateDeviceImpl(
+        const DeviceDescriptor* descriptor,
+        const TripleStateTogglesSet& userProvidedToggles) override {
+        return Device::Create(this, mDevice, descriptor, userProvidedToggles);
     }
 
     MaybeError InitializeImpl() override { return {}; }
@@ -377,6 +379,8 @@ class Adapter : public AdapterBase {
         }
 
         mSupportedFeatures.EnableFeature(Feature::IndirectFirstInstance);
+
+        mSupportedFeatures.EnableFeature(Feature::ShaderF16);
 
         return {};
     }
@@ -617,6 +621,12 @@ class Adapter : public AdapterBase {
         // TODO(crbug.com/dawn/1448):
         // - maxInterStageShaderVariables
 
+        return {};
+    }
+
+    MaybeError ValidateFeatureSupportedWithTogglesImpl(
+        wgpu::FeatureName feature,
+        const TripleStateTogglesSet& userProvidedToggles) override {
         return {};
     }
 

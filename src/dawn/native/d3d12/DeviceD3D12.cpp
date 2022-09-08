@@ -63,8 +63,10 @@ static constexpr uint64_t kZeroBufferSize = 1024 * 1024 * 4;  // 4 Mb
 static constexpr uint64_t kMaxDebugMessagesToPrint = 5;
 
 // static
-ResultOrError<Ref<Device>> Device::Create(Adapter* adapter, const DeviceDescriptor* descriptor) {
-    Ref<Device> device = AcquireRef(new Device(adapter, descriptor));
+ResultOrError<Ref<Device>> Device::Create(Adapter* adapter,
+                                          const DeviceDescriptor* descriptor,
+                                          const TripleStateTogglesSet& userProvidedToggles) {
+    Ref<Device> device = AcquireRef(new Device(adapter, descriptor, userProvidedToggles));
     DAWN_TRY(device->Initialize(descriptor));
     return device;
 }
@@ -84,7 +86,7 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
         CheckHRESULT(mD3d12Device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&mCommandQueue)),
                      "D3D12 create command queue"));
 
-    if (IsFeatureEnabled(Feature::TimestampQuery) &&
+    if (HasFeature(Feature::TimestampQuery) &&
         !IsToggleEnabled(Toggle::DisableTimestampQueryConversion)) {
         // Get GPU timestamp counter frequency (in ticks/second). This fails if the specified
         // command queue doesn't support timestamps. D3D12_COMMAND_LIST_TYPE_DIRECT queues
@@ -874,17 +876,6 @@ float Device::GetTimestampPeriodInNS() const {
 bool Device::ShouldDuplicateNumWorkgroupsForDispatchIndirect(
     ComputePipelineBase* computePipeline) const {
     return ToBackend(computePipeline)->UsesNumWorkgroups();
-}
-
-bool Device::IsFeatureEnabled(Feature feature) const {
-    // Currently we can only use DXC to compile HLSL shaders using float16, and
-    // ChromiumExperimentalDp4a is an experimental feature which can only be enabled with toggle
-    // "use_dxc".
-    if ((feature == Feature::ChromiumExperimentalDp4a || feature == Feature::ShaderFloat16) &&
-        !IsToggleEnabled(Toggle::UseDXC)) {
-        return false;
-    }
-    return DeviceBase::IsFeatureEnabled(feature);
 }
 
 void Device::SetLabelImpl() {

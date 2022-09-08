@@ -23,6 +23,7 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_Undefined:
         case WGPUFeatureName_Force32:
         case WGPUFeatureName_DawnNative:
+        case WGPUFeatureName_DawnShaderFloat16:  // Deprecated
             return false;
         case WGPUFeatureName_Depth32FloatStencil8:
         case WGPUFeatureName_TimestampQuery:
@@ -32,10 +33,10 @@ bool IsFeatureSupported(WGPUFeatureName feature) {
         case WGPUFeatureName_TextureCompressionASTC:
         case WGPUFeatureName_IndirectFirstInstance:
         case WGPUFeatureName_DepthClipControl:
-        case WGPUFeatureName_DawnShaderFloat16:
         case WGPUFeatureName_DawnInternalUsages:
         case WGPUFeatureName_DawnMultiPlanarFormats:
         case WGPUFeatureName_ChromiumExperimentalDp4a:
+        case WGPUFeatureName_ShaderF16:
             return true;
     }
 
