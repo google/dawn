@@ -72,26 +72,12 @@ crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,tex
 
 ################################################################################
 # webgpu:web_platform,copyToTexture,ImageBitmap flakes on Windows Intel with rgba32float and rg32float formats
-#
-# Conflicts:
-#   - Kept:
-#       crbug.com/1344876 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ Skip ]
-#   - Removed:
-#       crbug.com/1343969 [ intel-gen-9 webgpu-adapter-swiftshader win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="flipY";srcDoFlipYDuringCopy=false;dstColorFormat="rgba32float";* [ Failure ]
-#       crbug.com/1343969 [ intel-gen-9 webgpu-adapter-swiftshader win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="flipY";srcDoFlipYDuringCopy=true;dstColorFormat="rgba32float";* [ Failure ]
-#       crbug.com/1343969 [ intel-gen-9 webgpu-adapter-swiftshader win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";srcDoFlipYDuringCopy=false;dstColorFormat="rg32float";* [ Failure ]
-#       crbug.com/1343969 [ intel-gen-9 webgpu-adapter-swiftshader win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";srcDoFlipYDuringCopy=true;dstColorFormat="rg32float";* [ Failure ]
+# and general test slowness because of https://github.com/gpuweb/cts/issues/1162 (crbug.com/dawn/1398)
 #
 # KEEP
 ################################################################################
-crbug.com/1343969 [ intel-gen-9 win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="flipY";srcDoFlipYDuringCopy=false;dstColorFormat="rgba32float";* [ RetryOnFailure ]
-crbug.com/1343969 [ intel-gen-9 win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="flipY";srcDoFlipYDuringCopy=true;dstColorFormat="rgba32float";* [ RetryOnFailure ]
-crbug.com/1343969 [ intel-gen-9 win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";srcDoFlipYDuringCopy=false;dstColorFormat="rg32float";* [ RetryOnFailure ]
-crbug.com/1343969 [ intel-gen-9 win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:alpha="premultiply";orientation="none";srcDoFlipYDuringCopy=true;dstColorFormat="rg32float";* [ RetryOnFailure ]
-crbug.com/1343969 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="flipY";srcDoFlipYDuringCopy=false;dstColorFormat="rgba32float";* [ RetryOnFailure ]
-crbug.com/1343969 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="flipY";srcDoFlipYDuringCopy=true;dstColorFormat="rgba32float";* [ RetryOnFailure ]
-crbug.com/1343969 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";srcDoFlipYDuringCopy=false;dstColorFormat="rg32float";* [ RetryOnFailure ]
-crbug.com/1343969 [ intel-gen-9 webgpu-adapter-default win10 ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:orientation="none";srcDoFlipYDuringCopy=true;dstColorFormat="rg32float";* [ RetryOnFailure ]
+crbug.com/dawn/1398 [ win ] webgpu:web_platform,copyToTexture,ImageBitmap:* [ Slow RetryOnFailure ]
+crbug.com/dawn/1398 [ win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ Slow RetryOnFailure ]
 
 ################################################################################
 # copyToTexture failures on Linux
@@ -176,8 +162,6 @@ crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextur
 # General test slowness because of https://github.com/gpuweb/cts/issues/1162
 # KEEP
 ################################################################################
-crbug.com/dawn/1398 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,ImageBitmap:* [ Slow ]
-crbug.com/dawn/1398 [ webgpu-adapter-swiftshader win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ Slow ]
 crbug.com/dawn/1398 [ ubuntu webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ Slow ]
 crbug.com/dawn/1398 [ mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Slow ]
 crbug.com/dawn/1398 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Slow ]
