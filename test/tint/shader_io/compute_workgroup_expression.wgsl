@@ -1,3 +1,5 @@
+// flags: --transform substitute_override
+
 @id(0) override x_dim = 2;
 
 @compute

@@ -767,7 +767,7 @@ func invoke(wd, exe string, args ...string) (ok bool, output string) {
 	return true, str
 }
 
-var reFlags = regexp.MustCompile(` *\/\/ *flags:(.*)\n`)
+var reFlags = regexp.MustCompile(`^ *(?:\/\/|;) *flags:(.*) *\n`)
 
 // parseFlags looks for a `// flags:` header at the start of the file with the
 // given path, returning each of the space delimited tokens that follow for the
