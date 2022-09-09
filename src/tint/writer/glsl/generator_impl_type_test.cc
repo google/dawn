@@ -212,8 +212,8 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_Struct_WithOffsetAttributes) {
     auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.i32(), utils::Vector{MemberOffset(0)}),
-                                 Member("b", ty.f32(), utils::Vector{MemberOffset(8)}),
+                                 Member("a", ty.i32(), utils::Vector{MemberOffset(0_a)}),
+                                 Member("b", ty.f32(), utils::Vector{MemberOffset(8_a)}),
                              });
     GlobalVar("g", ty.Of(s), ast::StorageClass::kPrivate);
 

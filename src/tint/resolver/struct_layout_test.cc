@@ -460,15 +460,15 @@ TEST_F(ResolverStructLayoutTest, NestedStruct) {
 
 TEST_F(ResolverStructLayoutTest, SizeAttributes) {
     auto* inner = Structure("Inner", utils::Vector{
-                                         Member("a", ty.f32(), utils::Vector{MemberSize(8)}),
-                                         Member("b", ty.f32(), utils::Vector{MemberSize(16)}),
-                                         Member("c", ty.f32(), utils::Vector{MemberSize(8)}),
+                                         Member("a", ty.f32(), utils::Vector{MemberSize(8_a)}),
+                                         Member("b", ty.f32(), utils::Vector{MemberSize(16_a)}),
+                                         Member("c", ty.f32(), utils::Vector{MemberSize(8_a)}),
                                      });
     auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.f32(), utils::Vector{MemberSize(4)}),
-                                 Member("b", ty.u32(), utils::Vector{MemberSize(8)}),
+                                 Member("a", ty.f32(), utils::Vector{MemberSize(4_a)}),
+                                 Member("b", ty.u32(), utils::Vector{MemberSize(8_a)}),
                                  Member("c", ty.Of(inner)),
-                                 Member("d", ty.i32(), utils::Vector{MemberSize(32)}),
+                                 Member("d", ty.i32(), utils::Vector{MemberSize(32_a)}),
                              });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();

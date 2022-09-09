@@ -2803,11 +2803,22 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
             if (auto* o = attr->As<ast::StructMemberOffsetAttribute>()) {
                 // Offset attributes are not part of the WGSL spec, but are emitted
                 // by the SPIR-V reader.
-                if (o->offset < struct_size) {
+
+                auto* materialized = Materialize(Expression(o->expr));
+                if (!materialized) {
+                    return nullptr;
+                }
+                auto const_value = materialized->ConstantValue();
+                if (!const_value) {
+                    AddError("'offset' must be constant expression", o->expr->source);
+                    return nullptr;
+                }
+                offset = const_value->As<uint64_t>();
+
+                if (offset < struct_size) {
                     AddError("offsets must be in ascending order", o->source);
                     return nullptr;
                 }
-                offset = o->offset;
                 align = 1;
                 has_offset_attr = true;
             } else if (auto* a = attr->As<ast::StructMemberAlignAttribute>()) {
@@ -2829,13 +2840,24 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                 align = const_value->As<u32>();
                 has_align_attr = true;
             } else if (auto* s = attr->As<ast::StructMemberSizeAttribute>()) {
-                if (s->size < size) {
+                auto* materialized = Materialize(Expression(s->expr));
+                if (!materialized) {
+                    return nullptr;
+                }
+                auto const_value = materialized->ConstantValue();
+                if (!const_value) {
+                    AddError("'size' must be constant expression", s->expr->source);
+                    return nullptr;
+                }
+                auto value = const_value->As<uint64_t>();
+
+                if (value < size) {
                     AddError("size must be at least as big as the type's size (" +
                                  std::to_string(size) + ")",
                              s->source);
                     return nullptr;
                 }
-                size = s->size;
+                size = const_value->As<u32>();
                 has_size_attr = true;
             } else if (auto* l = attr->As<ast::LocationAttribute>()) {
                 auto* materialize = Materialize(Expression(l->expr));

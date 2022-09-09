@@ -71,7 +71,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix) {
         "S", utils::Vector{
                  b.Member("m", b.ty.mat2x2<f32>(),
                           utils::Vector{
-                              b.create<ast::StructMemberOffsetAttribute>(16u),
+                              b.MemberOffset(16_u),
                               b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
@@ -127,7 +127,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformColumn) {
         "S", utils::Vector{
                  b.Member("m", b.ty.mat2x2<f32>(),
                           utils::Vector{
-                              b.create<ast::StructMemberOffsetAttribute>(16u),
+                              b.MemberOffset(16_u),
                               b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
@@ -180,7 +180,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadUniformMatrix_DefaultStride) {
         "S", utils::Vector{
                  b.Member("m", b.ty.mat2x2<f32>(),
                           utils::Vector{
-                              b.create<ast::StructMemberOffsetAttribute>(16u),
+                              b.MemberOffset(16_u),
                               b.create<ast::StrideAttribute>(8u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
@@ -233,7 +233,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageMatrix) {
         "S", utils::Vector{
                  b.Member("m", b.ty.mat2x2<f32>(),
                           utils::Vector{
-                              b.create<ast::StructMemberOffsetAttribute>(8u),
+                              b.MemberOffset(8_u),
                               b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
@@ -290,7 +290,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadStorageColumn) {
         "S", utils::Vector{
                  b.Member("m", b.ty.mat2x2<f32>(),
                           utils::Vector{
-                              b.create<ast::StructMemberOffsetAttribute>(16u),
+                              b.MemberOffset(16_u),
                               b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
@@ -344,7 +344,7 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageMatrix) {
         "S", utils::Vector{
                  b.Member("m", b.ty.mat2x2<f32>(),
                           utils::Vector{
-                              b.create<ast::StructMemberOffsetAttribute>(8u),
+                              b.MemberOffset(8_u),
                               b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
@@ -402,7 +402,7 @@ TEST_F(DecomposeStridedMatrixTest, WriteStorageColumn) {
         "S", utils::Vector{
                  b.Member("m", b.ty.mat2x2<f32>(),
                           utils::Vector{
-                              b.create<ast::StructMemberOffsetAttribute>(8u),
+                              b.MemberOffset(8_u),
                               b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
@@ -461,7 +461,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadWriteViaPointerLets) {
         "S", utils::Vector{
                  b.Member("m", b.ty.mat2x2<f32>(),
                           utils::Vector{
-                              b.create<ast::StructMemberOffsetAttribute>(8u),
+                              b.MemberOffset(8_u),
                               b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
@@ -532,7 +532,7 @@ TEST_F(DecomposeStridedMatrixTest, ReadPrivateMatrix) {
         "S", utils::Vector{
                  b.Member("m", b.ty.mat2x2<f32>(),
                           utils::Vector{
-                              b.create<ast::StructMemberOffsetAttribute>(8u),
+                              b.MemberOffset(8_u),
                               b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),
@@ -585,7 +585,7 @@ TEST_F(DecomposeStridedMatrixTest, WritePrivateMatrix) {
         "S", utils::Vector{
                  b.Member("m", b.ty.mat2x2<f32>(),
                           utils::Vector{
-                              b.create<ast::StructMemberOffsetAttribute>(8u),
+                              b.MemberOffset(8_u),
                               b.create<ast::StrideAttribute>(32u),
                               b.Disable(ast::DisabledValidation::kIgnoreStrideAttribute),
                           }),

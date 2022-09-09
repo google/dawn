@@ -106,9 +106,9 @@ static utils::Vector<const ast::Attribute*, 2> createAttributes(const Source& so
         case AttributeKind::kLocation:
             return {builder.Location(source, 1_a)};
         case AttributeKind::kOffset:
-            return {builder.create<ast::StructMemberOffsetAttribute>(source, 4u)};
+            return {builder.MemberOffset(source, 4_a)};
         case AttributeKind::kSize:
-            return {builder.create<ast::StructMemberSizeAttribute>(source, 16u)};
+            return {builder.MemberSize(source, 16_a)};
         case AttributeKind::kStage:
             return {builder.Stage(source, ast::PipelineStage::kCompute)};
         case AttributeKind::kStride:

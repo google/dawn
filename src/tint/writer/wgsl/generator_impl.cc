@@ -788,7 +788,11 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out,
                 return true;
             },
             [&](const ast::StructMemberSizeAttribute* size) {
-                out << "size(" << size->size << ")";
+                out << "size(";
+                if (!EmitExpression(out, size->expr)) {
+                    return false;
+                }
+                out << ")";
                 return true;
             },
             [&](const ast::StructMemberAlignAttribute* align) {

@@ -26,8 +26,8 @@ namespace tint::ast {
 StructMemberSizeAttribute::StructMemberSizeAttribute(ProgramID pid,
                                                      NodeID nid,
                                                      const Source& src,
-                                                     uint32_t sz)
-    : Base(pid, nid, src), size(sz) {}
+                                                     const ast::Expression* exp)
+    : Base(pid, nid, src), expr(exp) {}
 
 StructMemberSizeAttribute::~StructMemberSizeAttribute() = default;
 
@@ -38,7 +38,8 @@ std::string StructMemberSizeAttribute::Name() const {
 const StructMemberSizeAttribute* StructMemberSizeAttribute::Clone(CloneContext* ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
     auto src = ctx->Clone(source);
-    return ctx->dst->create<StructMemberSizeAttribute>(src, size);
+    auto expr_ = ctx->Clone(expr);
+    return ctx->dst->create<StructMemberSizeAttribute>(src, expr_);
 }
 
 }  // namespace tint::ast

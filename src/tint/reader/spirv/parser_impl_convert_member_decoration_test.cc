@@ -54,7 +54,8 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Offset) {
     EXPECT_TRUE(result[0]->Is<ast::StructMemberOffsetAttribute>());
     auto* offset_deco = result[0]->As<ast::StructMemberOffsetAttribute>();
     ASSERT_NE(offset_deco, nullptr);
-    EXPECT_EQ(offset_deco->offset, 8u);
+    ASSERT_TRUE(offset_deco->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(offset_deco->expr->As<ast::IntLiteralExpression>()->value, 8u);
     EXPECT_TRUE(p->error().empty());
 }
 

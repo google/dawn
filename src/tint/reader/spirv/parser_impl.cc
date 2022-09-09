@@ -464,7 +464,7 @@ ParserImpl::AttributeList ParserImpl::ConvertMemberDecoration(uint32_t struct_ty
                 return {};
             }
             return {
-                create<ast::StructMemberOffsetAttribute>(Source{}, decoration[1]),
+                builder_.MemberOffset(Source{}, AInt(decoration[1])),
             };
         case SpvDecorationNonReadable:
             // WGSL doesn't have a member decoration for this.  Silently drop it.

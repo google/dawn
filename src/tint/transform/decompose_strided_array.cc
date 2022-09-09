@@ -73,7 +73,7 @@ void DecomposeStridedArray::Run(CloneContext& ctx, const DataMap&, DataMap&) con
                     auto* member_ty = ctx.Clone(ast->type);
                     auto* member = ctx.dst->Member(kMemberName, member_ty,
                                                    utils::Vector{
-                                                       ctx.dst->MemberSize(arr->Stride()),
+                                                       ctx.dst->MemberSize(AInt(arr->Stride())),
                                                    });
                     ctx.dst->Structure(name, utils::Vector{member});
                     return name;

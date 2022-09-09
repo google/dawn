@@ -400,7 +400,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferArrayF16_TemporallyBan) 
     Enable(ast::Extension::kF16);
 
     auto* s = Structure(
-        "S", utils::Vector{Member("a", ty.f16(Source{{56, 78}}), utils::Vector{MemberSize(16)})});
+        "S", utils::Vector{Member("a", ty.f16(Source{{56, 78}}), utils::Vector{MemberSize(16_a)})});
     auto* a = ty.array(ty.Of(s), 3_u);
     GlobalVar("g", a, ast::StorageClass::kUniform, Binding(0_a), Group(0_a));
 
@@ -474,7 +474,7 @@ TEST_F(ResolverStorageClassValidationTest, UniformBufferArrayF32) {
     //   @size(16) f : f32;
     // }
     // var<uniform> g : array<S, 3u>;
-    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(16)})});
+    auto* s = Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(16_a)})});
     auto* a = ty.array(ty.Of(s), 3_u);
     GlobalVar(Source{{56, 78}}, "g", a, ast::StorageClass::kUniform, Binding(0_a), Group(0_a));
 

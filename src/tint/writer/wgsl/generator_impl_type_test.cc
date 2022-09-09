@@ -178,8 +178,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_Struct) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl) {
     auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.i32(), utils::Vector{MemberOffset(8)}),
-                                 Member("b", ty.f32(), utils::Vector{MemberOffset(16)}),
+                                 Member("a", ty.i32(), utils::Vector{MemberOffset(8_a)}),
+                                 Member("b", ty.f32(), utils::Vector{MemberOffset(16_a)}),
                              });
 
     GeneratorImpl& gen = Build();
@@ -199,8 +199,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl) {
 TEST_F(WgslGeneratorImplTest, EmitType_StructOffsetDecl_WithSymbolCollisions) {
     auto* s =
         Structure("S", utils::Vector{
-                           Member("tint_0_padding", ty.i32(), utils::Vector{MemberOffset(8)}),
-                           Member("tint_2_padding", ty.f32(), utils::Vector{MemberOffset(16)}),
+                           Member("tint_0_padding", ty.i32(), utils::Vector{MemberOffset(8_a)}),
+                           Member("tint_2_padding", ty.f32(), utils::Vector{MemberOffset(16_a)}),
                        });
 
     GeneratorImpl& gen = Build();
@@ -237,8 +237,8 @@ TEST_F(WgslGeneratorImplTest, EmitType_StructAlignDecl) {
 
 TEST_F(WgslGeneratorImplTest, EmitType_StructSizeDecl) {
     auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.i32(), utils::Vector{MemberSize(16)}),
-                                 Member("b", ty.f32(), utils::Vector{MemberSize(32)}),
+                                 Member("a", ty.i32(), utils::Vector{MemberSize(16_a)}),
+                                 Member("b", ty.f32(), utils::Vector{MemberSize(32_a)}),
                              });
 
     GeneratorImpl& gen = Build();

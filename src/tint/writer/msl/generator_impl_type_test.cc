@@ -254,8 +254,8 @@ TEST_F(MslGeneratorImplTest, EmitType_StructDecl) {
 TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
     auto* s = Structure(
         "S", utils::Vector{
-                 Member("a", ty.i32(), utils::Vector{MemberSize(32)}),
-                 Member("b", ty.f32(), utils::Vector{MemberAlign(128_u), MemberSize(128)}),
+                 Member("a", ty.i32(), utils::Vector{MemberSize(32_a)}),
+                 Member("b", ty.f32(), utils::Vector{MemberAlign(128_u), MemberSize(128_a)}),
                  Member("c", ty.vec2<f32>()),
                  Member("d", ty.u32()),
                  Member("e", ty.vec3<f32>()),
@@ -376,10 +376,11 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
                              });
 
     // inner_y: size(516), align(4)
-    auto* inner_y = Structure("inner_y", utils::Vector{
-                                             Member("a", ty.i32(), utils::Vector{MemberSize(512)}),
-                                             Member("b", ty.f32()),
-                                         });
+    auto* inner_y =
+        Structure("inner_y", utils::Vector{
+                                 Member("a", ty.i32(), utils::Vector{MemberSize(512_a)}),
+                                 Member("b", ty.f32()),
+                             });
 
     auto* s = Structure("S", utils::Vector{
                                  Member("a", ty.i32()),
@@ -595,7 +596,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayVec3DefaultStride) {
 TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
     auto* s = Structure("S", utils::Vector{
                                  // uses symbols tint_pad_[0..9] and tint_pad_[20..35]
-                                 Member("tint_pad_2", ty.i32(), utils::Vector{MemberSize(32)}),
+                                 Member("tint_pad_2", ty.i32(), utils::Vector{MemberSize(32_a)}),
                                  Member("tint_pad_20", ty.f32(),
                                         utils::Vector{MemberAlign(128_u), MemberSize(128_u)}),
                                  Member("tint_pad_33", ty.vec2<f32>()),

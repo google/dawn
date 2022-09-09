@@ -73,8 +73,11 @@ TEST_F(ParserImplTest, StructMember_ParsesWithSizeAttribute) {
     EXPECT_EQ(m->symbol, builder.Symbols().Get("a"));
     EXPECT_TRUE(m->type->Is<ast::I32>());
     EXPECT_EQ(m->attributes.Length(), 1u);
-    EXPECT_TRUE(m->attributes[0]->Is<ast::StructMemberSizeAttribute>());
-    EXPECT_EQ(m->attributes[0]->As<ast::StructMemberSizeAttribute>()->size, 2u);
+    ASSERT_TRUE(m->attributes[0]->Is<ast::StructMemberSizeAttribute>());
+    auto* s = m->attributes[0]->As<ast::StructMemberSizeAttribute>();
+
+    ASSERT_TRUE(s->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(s->expr->As<ast::IntLiteralExpression>()->value, 2u);
 
     EXPECT_EQ(m->source.range, (Source::Range{{1u, 10u}, {1u, 11u}}));
     EXPECT_EQ(m->type->source.range, (Source::Range{{1u, 14u}, {1u, 17u}}));
@@ -95,7 +98,9 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleattributes) {
     EXPECT_TRUE(m->type->Is<ast::I32>());
     EXPECT_EQ(m->attributes.Length(), 2u);
     ASSERT_TRUE(m->attributes[0]->Is<ast::StructMemberSizeAttribute>());
-    EXPECT_EQ(m->attributes[0]->As<ast::StructMemberSizeAttribute>()->size, 2u);
+    auto* size_attr = m->attributes[0]->As<ast::StructMemberSizeAttribute>();
+    ASSERT_TRUE(size_attr->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(size_attr->expr->As<ast::IntLiteralExpression>()->value, 2u);
 
     ASSERT_TRUE(m->attributes[1]->Is<ast::StructMemberAlignAttribute>());
     auto* attr = m->attributes[1]->As<ast::StructMemberAlignAttribute>();

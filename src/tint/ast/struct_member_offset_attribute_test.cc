@@ -17,11 +17,13 @@
 namespace tint::ast {
 namespace {
 
+using namespace tint::number_suffixes;  // NOLINT
 using StructMemberOffsetAttributeTest = TestHelper;
 
 TEST_F(StructMemberOffsetAttributeTest, Creation) {
-    auto* d = create<StructMemberOffsetAttribute>(2u);
-    EXPECT_EQ(2u, d->offset);
+    auto* d = MemberOffset(2_u);
+    ASSERT_TRUE(d->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(2u, d->expr->As<ast::IntLiteralExpression>()->value);
 }
 
 }  // namespace

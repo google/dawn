@@ -2251,25 +2251,37 @@ class ProgramBuilder {
     }
 
     /// Creates a ast::StructMemberOffsetAttribute
-    /// @param val the offset value
+    /// @param val the offset expression
     /// @returns the offset attribute pointer
-    const ast::StructMemberOffsetAttribute* MemberOffset(uint32_t val) {
-        return create<ast::StructMemberOffsetAttribute>(source_, val);
+    template <typename EXPR>
+    const ast::StructMemberOffsetAttribute* MemberOffset(EXPR&& val) {
+        return create<ast::StructMemberOffsetAttribute>(source_, Expr(std::forward<EXPR>(val)));
+    }
+
+    /// Creates a ast::StructMemberOffsetAttribute
+    /// @param source the source information
+    /// @param val the offset expression
+    /// @returns the offset attribute pointer
+    template <typename EXPR>
+    const ast::StructMemberOffsetAttribute* MemberOffset(const Source& source, EXPR&& val) {
+        return create<ast::StructMemberOffsetAttribute>(source, Expr(std::forward<EXPR>(val)));
     }
 
     /// Creates a ast::StructMemberSizeAttribute
     /// @param source the source information
     /// @param val the size value
     /// @returns the size attribute pointer
-    const ast::StructMemberSizeAttribute* MemberSize(const Source& source, uint32_t val) {
-        return create<ast::StructMemberSizeAttribute>(source, val);
+    template <typename EXPR>
+    const ast::StructMemberSizeAttribute* MemberSize(const Source& source, EXPR&& val) {
+        return create<ast::StructMemberSizeAttribute>(source, Expr(std::forward<EXPR>(val)));
     }
 
     /// Creates a ast::StructMemberSizeAttribute
     /// @param val the size value
     /// @returns the size attribute pointer
-    const ast::StructMemberSizeAttribute* MemberSize(uint32_t val) {
-        return create<ast::StructMemberSizeAttribute>(source_, val);
+    template <typename EXPR>
+    const ast::StructMemberSizeAttribute* MemberSize(EXPR&& val) {
+        return create<ast::StructMemberSizeAttribute>(source_, Expr(std::forward<EXPR>(val)));
     }
 
     /// Creates a ast::StructMemberAlignAttribute
@@ -2525,7 +2537,7 @@ class ProgramBuilder {
     const ast::StructMember* Member(uint32_t offset, NAME&& name, const ast::Type* type) {
         return create<ast::StructMember>(source_, Sym(std::forward<NAME>(name)), type,
                                          utils::Vector<const ast::Attribute*, 1>{
-                                             create<ast::StructMemberOffsetAttribute>(offset),
+                                             MemberOffset(AInt(offset)),
                                          });
     }
 

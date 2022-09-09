@@ -19,11 +19,13 @@
 namespace tint::ast {
 namespace {
 
+using namespace tint::number_suffixes;  // NOLINT
 using StructMemberSizeAttributeTest = TestHelper;
 
 TEST_F(StructMemberSizeAttributeTest, Creation) {
-    auto* d = create<StructMemberSizeAttribute>(2u);
-    EXPECT_EQ(2u, d->size);
+    auto* d = MemberSize(2_u);
+    ASSERT_TRUE(d->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(2u, d->expr->As<ast::IntLiteralExpression>()->value);
 }
 
 }  // namespace

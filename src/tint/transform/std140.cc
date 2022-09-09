@@ -246,9 +246,9 @@ struct Std140::State {
                                     // The matrix was @size() annotated with a larger size than the
                                     // natural size for the matrix. This extra padding needs to be
                                     // applied to the last column vector.
-                                    attributes.Push(
-                                        b.MemberSize(member->Size() - mat->ColumnType()->Size() *
-                                                                          (num_columns - 1)));
+                                    attributes.Push(b.MemberSize(
+                                        AInt(member->Size() -
+                                             mat->ColumnType()->Size() * (num_columns - 1))));
                                 }
 
                                 // Build the member

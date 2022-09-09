@@ -35,7 +35,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, StorageBuffer_UnalignedMember) 
 
     Structure(Source{{12, 34}}, "S",
               utils::Vector{
-                  Member("a", ty.f32(), utils::Vector{MemberSize(5)}),
+                  Member("a", ty.f32(), utils::Vector{MemberSize(5_a)}),
                   Member(Source{{34, 56}}, "b", ty.f32(), utils::Vector{MemberAlign(1_u)}),
               });
 
@@ -65,7 +65,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, StorageBuffer_UnalignedMember_S
 
     Structure(Source{{12, 34}}, "S",
               utils::Vector{
-                  Member("a", ty.f32(), utils::Vector{MemberSize(5)}),
+                  Member("a", ty.f32(), utils::Vector{MemberSize(5_a)}),
                   Member(Source{{34, 56}}, "b", ty.f32(), utils::Vector{MemberAlign(4_u)}),
               });
 
@@ -227,7 +227,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_MembersOffsetNotM
 
     Structure(Source{{12, 34}}, "Inner",
               utils::Vector{
-                  Member("scalar", ty.i32(), utils::Vector{MemberAlign(1_u), MemberSize(5)}),
+                  Member("scalar", ty.i32(), utils::Vector{MemberAlign(1_u), MemberSize(5_a)}),
               });
 
     Structure(Source{{34, 56}}, "Outer",
@@ -279,7 +279,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
                   Member("a", ty.i32()),
                   Member("b", ty.i32()),
                   Member("c", ty.i32()),
-                  Member("scalar", ty.i32(), utils::Vector{MemberAlign(1_u), MemberSize(5)}),
+                  Member("scalar", ty.i32(), utils::Vector{MemberAlign(1_u), MemberSize(5_a)}),
               });
 
     Structure(Source{{34, 56}}, "Outer",
@@ -327,7 +327,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
 
     Structure(Source{{12, 34}}, "Inner",
               utils::Vector{
-                  Member("scalar", ty.i32(), utils::Vector{MemberAlign(1_u), MemberSize(5)}),
+                  Member("scalar", ty.i32(), utils::Vector{MemberAlign(1_u), MemberSize(5_a)}),
               });
 
     Structure(Source{{34, 56}}, "Outer",
@@ -550,7 +550,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, PushConstant_UnalignedMember) {
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
     Structure(
         Source{{12, 34}}, "S",
-        utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(5)}),
+        utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(5_a)}),
                       Member(Source{{34, 56}}, "b", ty.f32(), utils::Vector{MemberAlign(1_u)})});
     GlobalVar(Source{{78, 90}}, "a", ty.type_name("S"), ast::StorageClass::kPushConstant);
 
@@ -575,7 +575,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, PushConstant_Aligned) {
     // };
     // var<push_constant> a : S;
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
-    Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(5)}),
+    Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(5_a)}),
                                  Member("b", ty.f32(), utils::Vector{MemberAlign(4_u)})});
     GlobalVar("a", ty.type_name("S"), ast::StorageClass::kPushConstant);
 

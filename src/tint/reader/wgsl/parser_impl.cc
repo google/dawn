@@ -3566,7 +3566,7 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
             }
             match(Token::Type::kComma);
 
-            return create<ast::StructMemberSizeAttribute>(t.source(), val.value);
+            return builder_.MemberSize(t.source(), AInt(val.value));
         });
     }
 
