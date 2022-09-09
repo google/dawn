@@ -457,10 +457,6 @@ class GeneratorImpl : public TextGenerator {
     /// @param let the 'let' to emit
     /// @returns true if the variable was emitted
     bool EmitProgramConstVariable(const ast::Variable* let);
-    /// Handles generating a module-scope 'override' declaration
-    /// @param override the 'override' to emit
-    /// @returns true if the variable was emitted
-    bool EmitOverride(const ast::Override* override);
     /// Handles generating a builtin method name
     /// @param builtin the semantic info for the builtin
     /// @returns the name or "" if not valid

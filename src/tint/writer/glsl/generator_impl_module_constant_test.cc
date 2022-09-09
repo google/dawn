@@ -345,50 +345,5 @@ void f() {
 )");
 }
 
-TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_Override) {
-    auto* var = Override("pos", ty.f32(), Expr(3_f), Id(23_a));
-
-    GeneratorImpl& gen = Build();
-
-    ASSERT_TRUE(gen.EmitOverride(var)) << gen.error();
-    EXPECT_EQ(gen.result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
-#define WGSL_SPEC_CONSTANT_23 3.0f
-#endif
-const float pos = WGSL_SPEC_CONSTANT_23;
-)");
-}
-
-TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_Override_NoConstructor) {
-    auto* var = Override("pos", ty.f32(), Id(23_a));
-
-    GeneratorImpl& gen = Build();
-
-    ASSERT_TRUE(gen.EmitOverride(var)) << gen.error();
-    EXPECT_EQ(gen.result(), R"(#ifndef WGSL_SPEC_CONSTANT_23
-#error spec constant required for constant id 23
-#endif
-const float pos = WGSL_SPEC_CONSTANT_23;
-)");
-}
-
-TEST_F(GlslGeneratorImplTest_ModuleConstant, Emit_Override_NoId) {
-    auto* a = Override("a", ty.f32(), Expr(3_f), Id(0_a));
-    auto* b = Override("b", ty.f32(), Expr(2_f));
-
-    GeneratorImpl& gen = Build();
-
-    ASSERT_TRUE(gen.EmitOverride(a)) << gen.error();
-    ASSERT_TRUE(gen.EmitOverride(b)) << gen.error();
-    EXPECT_EQ(gen.result(), R"(#ifndef WGSL_SPEC_CONSTANT_0
-#define WGSL_SPEC_CONSTANT_0 3.0f
-#endif
-const float a = WGSL_SPEC_CONSTANT_0;
-#ifndef WGSL_SPEC_CONSTANT_1
-#define WGSL_SPEC_CONSTANT_1 2.0f
-#endif
-const float b = WGSL_SPEC_CONSTANT_1;
-)");
-}
-
 }  // namespace
 }  // namespace tint::writer::glsl
