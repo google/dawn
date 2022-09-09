@@ -72,11 +72,14 @@ crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,tex
 
 ################################################################################
 # webgpu:web_platform,copyToTexture,ImageBitmap flakes on Windows Intel with rgba32float and rg32float formats
-# and general test slowness because of https://github.com/gpuweb/cts/issues/1162 (crbug.com/dawn/1398)
-#
+# and general test slowness because of https://github.com/gpuweb/cts/issues/1162 (crbug.com/dawn/1398).
+# Very flaky failures on Windows Intel (crbug.com/1343969).
+# Flaky failures using SwiftShader (crbug.com/1344876).
 # KEEP
 ################################################################################
-crbug.com/dawn/1398 [ win ] webgpu:web_platform,copyToTexture,ImageBitmap:* [ RetryOnFailure Slow ]
+crbug.com/1343969 [ win ] webgpu:web_platform,copyToTexture,ImageBitmap:* [ RetryOnFailure Slow ]
+crbug.com/1344876 [ ubuntu webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure Slow ]
+crbug.com/1359106 [ ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
 
 ################################################################################
 # copyToTexture failures on Linux
@@ -161,9 +164,8 @@ crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextur
 # General test slowness because of https://github.com/gpuweb/cts/issues/1162
 # KEEP
 ################################################################################
-crbug.com/dawn/1398 [ ubuntu webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ Slow ]
 crbug.com/dawn/1398 [ mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Slow ]
-crbug.com/dawn/1398 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Slow ]
+crbug.com/dawn/1398 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ RetryOnFailure Slow ]
 crbug.com/dawn/1398 [ mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Slow ]
 crbug.com/dawn/1398 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Slow ]
 crbug.com/dawn/1398 [ mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Slow ]
@@ -255,7 +257,7 @@ crbug.com/tint/1524 webgpu:shader,execution,expression,call,builtin,atan2:f32:* 
 # Vulkan Validation Layer error does to LoadOp::Clear on ReadOnly DepthStencil
 # KEEP
 ################################################################################
-crbug.com/dawn/1512 [ linux dawn-backend-validation ] webgpu:api,validation,render_pass,attachment_compatibility:render_pass_or_bundle_and_pipeline,depth_stencil_read_only_write_state:* [ Failure ]
+crbug.com/dawn/1512 [ dawn-backend-validation linux ] webgpu:api,validation,render_pass,attachment_compatibility:render_pass_or_bundle_and_pipeline,depth_stencil_read_only_write_state:* [ Failure ]
 
 ################################################################################
 # slow shader execution 'const' tests
@@ -571,6 +573,12 @@ crbug.com/dawn/1083 [ intel monterey ] webgpu:api,operation,command_buffer,image
 crbug.com/dawn/1083 [ intel monterey ] webgpu:api,operation,command_buffer,image_copy:rowsPerImage_and_bytesPerRow_depth_stencil:format="stencil8";* [ Failure ]
 crbug.com/dawn/1083 [ intel monterey ] webgpu:api,operation,render_pass,storeOp:render_pass_store_op,depth_stencil_attachment_only:depthStencilFormat="stencil8";* [ Failure ]
 
+############################################################################
+# Flaky on Intel Mac
+# KEEP
+################################################################################
+crbug.com/dawn/1500 [ intel-gen-9 monterey ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod="WriteTexture";checkMethod="PartialCopyT2B";* [ RetryOnFailure ]
+
 ################################################################################
 # webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero
 # Failures on Mac Intel, likely also due to crbug.com/dawn/1083
@@ -601,8 +609,6 @@ crbug.com/dawn/0000 [ win ] webgpu:shader,execution,expression,binary,f32_logica
 
 # New failures. Please triage:
 crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="rgba32uint";dimension="2d" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="rgba32sint";dimension="3d" [ Failure ]
-crbug.com/dawn/0000 [ intel-gen-9 monterey ] webgpu:api,operation,command_buffer,image_copy:origins_and_extents:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="rgba32uint";dimension="3d" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,createBindGroup:multisampled_validation:* [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,createBindGroupLayout:maximum_binding_limit: [ Failure ]
 crbug.com/dawn/0000 [ intel-gen-9 monterey ] webgpu:api,validation,createBindGroupLayout:storage_texture,* [ Failure ]
@@ -667,3 +673,5 @@ crbug.com/dawn/0000 [ nvidia-0x2184 ubuntu webgpu-adapter-default ] webgpu:web_p
 crbug.com/dawn/0000 [ amd-0x6821 monterey webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,getCurrentTexture:* [ Failure ]
 crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-default ] webgpu:web_platform,canvas,getCurrentTexture:* [ Failure ]
 crbug.com/dawn/0000 [ intel-gen-9 monterey webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,getCurrentTexture:* [ Failure ]
+crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 win10 ] worker_webgpu:api,validation,buffer,mapping:getMappedRange,offsetAndSizeAlignment,mappedAtCreation: [ Failure ]
+crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 win10 ] worker_webgpu:api,validation,buffer,mapping:mapAsync,offsetAndSizeAlignment: [ Failure ]
