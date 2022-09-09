@@ -712,40 +712,6 @@ void main() {
 )");
 }
 
-TEST_F(HlslGeneratorImplTest_Function,
-       Emit_Attribute_EntryPoint_Compute_WithWorkgroup_OverridableConst) {
-    Override("width", ty.i32(), Construct(ty.i32(), 2_i), Id(7_u));
-    Override("height", ty.i32(), Construct(ty.i32(), 3_i), Id(8_u));
-    Override("depth", ty.i32(), Construct(ty.i32(), 4_i), Id(9_u));
-    Func("main", utils::Empty, ty.void_(), utils::Empty,
-         utils::Vector{
-             Stage(ast::PipelineStage::kCompute),
-             WorkgroupSize("width", "height", "depth"),
-         });
-
-    GeneratorImpl& gen = Build();
-
-    ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_EQ(gen.result(), R"(#ifndef WGSL_SPEC_CONSTANT_7
-#define WGSL_SPEC_CONSTANT_7 2
-#endif
-static const int width = WGSL_SPEC_CONSTANT_7;
-#ifndef WGSL_SPEC_CONSTANT_8
-#define WGSL_SPEC_CONSTANT_8 3
-#endif
-static const int height = WGSL_SPEC_CONSTANT_8;
-#ifndef WGSL_SPEC_CONSTANT_9
-#define WGSL_SPEC_CONSTANT_9 4
-#endif
-static const int depth = WGSL_SPEC_CONSTANT_9;
-
-[numthreads(WGSL_SPEC_CONSTANT_7, WGSL_SPEC_CONSTANT_8, WGSL_SPEC_CONSTANT_9)]
-void main() {
-  return;
-}
-)");
-}
-
 TEST_F(HlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
     Func("my_func",
          utils::Vector{

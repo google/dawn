@@ -449,10 +449,6 @@ class GeneratorImpl : public TextGenerator {
     /// @param let the variable to generate
     /// @returns true if the variable was emitted
     bool EmitLet(const ast::Let* let);
-    /// Handles generating a module-scope 'override' declaration
-    /// @param override the 'override' to emit
-    /// @returns true if the variable was emitted
-    bool EmitOverride(const ast::Override* override);
     /// Emits call to a helper vector assignment function for the input assignment
     /// statement and vector type. This is used to work around FXC issues where
     /// assignments to vectors with dynamic indices cause compilation failures.
