@@ -395,9 +395,6 @@ fn main(@location(0) pos : vec4<f32>) -> @builtin(position) vec4<f32> {
 
 // Test overridable constants without numeric identifiers
 TEST_P(ShaderTests, OverridableConstants) {
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     uint32_t const kCount = 11;
     std::vector<uint32_t> expected(kCount);
     std::iota(expected.begin(), expected.end(), 0);
@@ -473,9 +470,6 @@ struct Buf {
 
 // Test one shader shared by two pipelines with different constants overridden
 TEST_P(ShaderTests, OverridableConstantsSharedShader) {
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     std::vector<uint32_t> expected1{1};
     wgpu::Buffer buffer1 = CreateBuffer(expected1.size());
     std::vector<uint32_t> expected2{2};
@@ -530,9 +524,6 @@ struct Buf {
 
 // Test overridable constants work with workgroup size
 TEST_P(ShaderTests, OverridableConstantsWorkgroupSize) {
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     std::string shader = R"(
 override x: u32;
 
@@ -594,9 +585,6 @@ struct Buf {
 
 // Test overridable constants with numeric identifiers
 TEST_P(ShaderTests, OverridableConstantsNumericIdentifiers) {
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     uint32_t const kCount = 4;
     std::vector<uint32_t> expected{1u, 2u, 3u, 0u};
     wgpu::Buffer buffer = CreateBuffer(kCount);
@@ -651,9 +639,6 @@ struct Buf {
 // Test overridable constants precision
 // D3D12 HLSL shader uses defines so we want float number to have enough precision
 TEST_P(ShaderTests, OverridableConstantsPrecision) {
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     uint32_t const kCount = 2;
     float const kValue1 = 3.14159;
     float const kValue2 = 3.141592653589793238;
@@ -702,9 +687,6 @@ struct Buf {
 
 // Test overridable constants for different entry points
 TEST_P(ShaderTests, OverridableConstantsMultipleEntryPoints) {
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     uint32_t const kCount = 1;
     std::vector<uint32_t> expected1{1u};
     std::vector<uint32_t> expected2{2u};
@@ -807,9 +789,6 @@ struct Buf {
 // Draw a triangle covering the render target, with vertex position and color values from
 // overridable constants
 TEST_P(ShaderTests, OverridableConstantsRenderPipeline) {
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
-    DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
-
     wgpu::ShaderModule vsModule = utils::CreateShaderModule(device, R"(
 @id(1111) override xright: f32;
 @id(2222) override ytop: f32;

@@ -57,13 +57,16 @@ tint::writer::glsl::Version::Standard ToTintGLStandard(opengl::OpenGLVersion::St
 
 using BindingMap = std::unordered_map<tint::sem::BindingPoint, tint::sem::BindingPoint>;
 
-#define GLSL_COMPILATION_REQUEST_MEMBERS(X)                                              \
-    X(const tint::Program*, inputProgram)                                                \
-    X(std::string, entryPointName)                                                       \
-    X(tint::transform::MultiplanarExternalTexture::BindingsMap, externalTextureBindings) \
-    X(BindingMap, glBindings)                                                            \
-    X(opengl::OpenGLVersion::Standard, glVersionStandard)                                \
-    X(uint32_t, glVersionMajor)                                                          \
+#define GLSL_COMPILATION_REQUEST_MEMBERS(X)                                                 \
+    X(const tint::Program*, inputProgram)                                                   \
+    X(std::string, entryPointName)                                                          \
+    X(SingleShaderStage, stage)                                                             \
+    X(tint::transform::MultiplanarExternalTexture::BindingsMap, externalTextureBindings)    \
+    X(BindingMap, glBindings)                                                               \
+    X(std::optional<tint::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
+    X(LimitsForCompilationRequest, limits)                                                  \
+    X(opengl::OpenGLVersion::Standard, glVersionStandard)                                   \
+    X(uint32_t, glVersionMajor)                                                             \
     X(uint32_t, glVersionMinor)
 
 DAWN_MAKE_CACHE_REQUEST(GLSLCompilationRequest, GLSL_COMPILATION_REQUEST_MEMBERS);
@@ -168,11 +171,21 @@ ResultOrError<GLuint> ShaderModule::CompileShader(const OpenGLFunctions& gl,
         }
     }
 
+    std::optional<tint::transform::SubstituteOverride::Config> substituteOverrideConfig;
+    if (!programmableStage.metadata->overrides.empty()) {
+        substituteOverrideConfig = BuildSubstituteOverridesTransformConfig(programmableStage);
+    }
+
+    const CombinedLimits& limits = GetDevice()->GetLimits();
+
     GLSLCompilationRequest req = {};
     req.inputProgram = GetTintProgram();
+    req.stage = stage;
     req.entryPointName = programmableStage.entryPoint;
     req.externalTextureBindings = BuildExternalTextureTransformBindings(layout);
     req.glBindings = std::move(glBindings);
+    req.substituteOverrideConfig = std::move(substituteOverrideConfig);
+    req.limits = LimitsForCompilationRequest::Create(limits.v1);
     req.glVersionStandard = version.GetStandard();
     req.glVersionMajor = version.GetMajor();
     req.glVersionMinor = version.GetMinor();
@@ -190,9 +203,26 @@ ResultOrError<GLuint> ShaderModule::CompileShader(const OpenGLFunctions& gl,
                     std::move(r.externalTextureBindings));
             }
 
+            if (r.substituteOverrideConfig) {
+                transformManager.Add<tint::transform::SingleEntryPoint>();
+                transformInputs.Add<tint::transform::SingleEntryPoint::Config>(r.entryPointName);
+                // This needs to run after SingleEntryPoint transform which removes unused overrides
+                // for current entry point.
+                transformManager.Add<tint::transform::SubstituteOverride>();
+                transformInputs.Add<tint::transform::SubstituteOverride::Config>(
+                    std::move(r.substituteOverrideConfig).value());
+            }
+
             tint::Program program;
             DAWN_TRY_ASSIGN(program, RunTransforms(&transformManager, r.inputProgram,
                                                    transformInputs, nullptr, nullptr));
+
+            if (r.stage == SingleShaderStage::Compute) {
+                // Validate workgroup size after program runs transforms.
+                Extent3D _;
+                DAWN_TRY_ASSIGN(_, ValidateComputeStageWorkgroupSize(
+                                       program, r.entryPointName.c_str(), r.limits));
+            }
 
             tint::writer::glsl::Options tintOptions;
             tintOptions.version = tint::writer::glsl::Version(ToTintGLStandard(r.glVersionStandard),

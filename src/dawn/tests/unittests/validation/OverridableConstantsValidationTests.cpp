@@ -120,6 +120,11 @@ TEST_F(ComputePipelineOverridableConstantsValidationTest, ConstantsIdentifierLoo
         TestCreatePipeline(constants);
     }
     {
+        // Error: c10 already has a constant numeric id specified
+        std::vector<wgpu::ConstantEntry> constants{{nullptr, "c10", 0}};
+        ASSERT_DEVICE_ERROR(TestCreatePipeline(constants));
+    }
+    {
         // Error: constant numeric id not specified
         std::vector<wgpu::ConstantEntry> constants{{nullptr, "9999", 0}};
         ASSERT_DEVICE_ERROR(TestCreatePipeline(constants));

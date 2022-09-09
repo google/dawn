@@ -22,6 +22,9 @@
 #include "dawn/native/ErrorData.h"
 #include "dawn/native/Instance.h"
 #include "dawn/native/Surface.h"
+#include "dawn/native/TintUtils.h"
+
+#include "tint/tint.h"
 
 namespace dawn::native::null {
 
@@ -383,6 +386,40 @@ MaybeError Queue::WriteBufferImpl(BufferBase* buffer,
 
 // ComputePipeline
 MaybeError ComputePipeline::Initialize() {
+    const ProgrammableStage& computeStage = GetStage(SingleShaderStage::Compute);
+
+    tint::Program transformedProgram;
+    const tint::Program* program;
+    if (!computeStage.metadata->overrides.empty()) {
+        tint::transform::Manager transformManager;
+        tint::transform::DataMap transformInputs;
+
+        transformManager.Add<tint::transform::SingleEntryPoint>();
+        transformInputs.Add<tint::transform::SingleEntryPoint::Config>(
+            computeStage.entryPoint.c_str());
+
+        // This needs to run after SingleEntryPoint transform which removes unused overrides for
+        // current entry point.
+        transformManager.Add<tint::transform::SubstituteOverride>();
+        transformInputs.Add<tint::transform::SubstituteOverride::Config>(
+            BuildSubstituteOverridesTransformConfig(computeStage));
+
+        DAWN_TRY_ASSIGN(transformedProgram,
+                        RunTransforms(&transformManager, computeStage.module->GetTintProgram(),
+                                      transformInputs, nullptr, nullptr));
+
+        program = &transformedProgram;
+    } else {
+        program = computeStage.module->GetTintProgram();
+    }
+
+    // Do the workgroup size validation as it is actually backend agnostic.
+    const CombinedLimits& limits = GetDevice()->GetLimits();
+    Extent3D _;
+    DAWN_TRY_ASSIGN(
+        _, ValidateComputeStageWorkgroupSize(*program, computeStage.entryPoint.c_str(),
+                                             LimitsForCompilationRequest::Create(limits.v1)));
+
     return {};
 }
 

@@ -392,4 +392,10 @@ TEST_P(WorkgroupSizeValidationTest, DISABLED_ValidationAfterOverrideStorageSize)
     CheckPipelineWithWorkgroupStorage(false, 0, maxMat4Count + 1);
 }
 
-DAWN_INSTANTIATE_TEST(WorkgroupSizeValidationTest, D3D12Backend(), MetalBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(WorkgroupSizeValidationTest,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      NullBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());

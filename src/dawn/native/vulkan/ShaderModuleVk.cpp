@@ -311,8 +311,8 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
                     r.newBindingsMap);
             }
             if (r.substituteOverrideConfig) {
-                // This needs to run after SingleEntryPoint transform to get rid of overrides not
-                // used for the current entry point.
+                // This needs to run after SingleEntryPoint transform which removes unused overrides
+                // for current entry point.
                 transformManager.Add<tint::transform::SubstituteOverride>();
                 transformInputs.Add<tint::transform::SubstituteOverride::Config>(
                     std::move(r.substituteOverrideConfig).value());
