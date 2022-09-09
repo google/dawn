@@ -630,7 +630,7 @@ TEST_P(MultisampledRenderingTest, ResolveInto2DTextureWithEmptyFinalSampleMask) 
 // mask.
 TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithSampleMask) {
     // TODO(crbug.com/dawn/1462): Re-enable on Mac Intel 12.4.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(12, 4));
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && (IsMacOS(12, 4) || IsMacOS(12, 5)));
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
@@ -790,7 +790,7 @@ TEST_P(MultisampledRenderingTest, ResolveIntoMultipleResolveTargetsWithShaderOut
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_sample_variables"));
 
     // TODO(crbug.com/dawn/1462): Re-enable on Mac Intel 12.4.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && IsMacOS(12, 4));
+    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && (IsMacOS(12, 4) || IsMacOS(12, 5)));
 
     wgpu::TextureView multisampledColorView2 =
         CreateTextureForRenderAttachment(kColorFormat, kSampleCount).CreateView();
