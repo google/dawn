@@ -271,9 +271,11 @@ bool GeneratorImpl::Generate() {
             [&](const ast::Const*) {
                 return true;  // Constants are embedded at their use
             },
-            [&](const ast::Override* override) {
-                TINT_DEFER(line());
-                return EmitOverride(override);
+            [&](const ast::Override*) {
+                // Override is removed with SubstituteOverride
+                TINT_ICE(Writer, diagnostics_)
+                    << "Override should have been removed by the substitute_override transform.";
+                return false;
             },
             [&](const ast::Function* func) {
                 TINT_DEFER(line());
@@ -3034,22 +3036,6 @@ bool GeneratorImpl::EmitLet(const ast::Let* let) {
         return false;
     }
     out << ";";
-
-    return true;
-}
-
-bool GeneratorImpl::EmitOverride(const ast::Override* override) {
-    auto* global = program_->Sem().Get<sem::GlobalVariable>(override);
-    auto* type = global->Type();
-
-    auto out = line();
-    out << "constant ";
-    if (!EmitType(out, type, program_->Symbols().NameFor(override->symbol))) {
-        return false;
-    }
-    out << " " << program_->Symbols().NameFor(override->symbol);
-
-    out << " [[function_constant(" << global->OverrideId().value << ")]];";
 
     return true;
 }

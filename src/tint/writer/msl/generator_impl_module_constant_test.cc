@@ -328,27 +328,5 @@ void f() {
 )");
 }
 
-TEST_F(MslGeneratorImplTest, Emit_Override) {
-    auto* var = Override("pos", ty.f32(), Expr(3_f), Id(23_a));
-
-    GeneratorImpl& gen = Build();
-
-    ASSERT_TRUE(gen.EmitOverride(var)) << gen.error();
-    EXPECT_EQ(gen.result(), "constant float pos [[function_constant(23)]];\n");
-}
-
-TEST_F(MslGeneratorImplTest, Emit_Override_NoId) {
-    auto* var_a = Override("a", ty.f32(), Id(0_a));
-    auto* var_b = Override("b", ty.f32());
-
-    GeneratorImpl& gen = Build();
-
-    ASSERT_TRUE(gen.EmitOverride(var_a)) << gen.error();
-    ASSERT_TRUE(gen.EmitOverride(var_b)) << gen.error();
-    EXPECT_EQ(gen.result(), R"(constant float a [[function_constant(0)]];
-constant float b [[function_constant(1)]];
-)");
-}
-
 }  // namespace
 }  // namespace tint::writer::msl
