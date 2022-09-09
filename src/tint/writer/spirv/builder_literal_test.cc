@@ -27,7 +27,7 @@ TEST_F(BuilderTest, Literal_Bool_True) {
 
     spirv::Builder& b = Build();
 
-    auto id = b.GenerateLiteralIfNeeded(nullptr, b_true);
+    auto id = b.GenerateLiteralIfNeeded(b_true);
     ASSERT_FALSE(b.has_error()) << b.error();
     EXPECT_EQ(2u, id);
 
@@ -42,7 +42,7 @@ TEST_F(BuilderTest, Literal_Bool_False) {
 
     spirv::Builder& b = Build();
 
-    auto id = b.GenerateLiteralIfNeeded(nullptr, b_false);
+    auto id = b.GenerateLiteralIfNeeded(b_false);
     ASSERT_FALSE(b.has_error()) << b.error();
     EXPECT_EQ(2u, id);
 
@@ -58,11 +58,11 @@ TEST_F(BuilderTest, Literal_Bool_Dedup) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, b_true), 0u);
+    ASSERT_NE(b.GenerateLiteralIfNeeded(b_true), 0u);
     ASSERT_FALSE(b.has_error()) << b.error();
-    ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, b_false), 0u);
+    ASSERT_NE(b.GenerateLiteralIfNeeded(b_false), 0u);
     ASSERT_FALSE(b.has_error()) << b.error();
-    ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, b_true), 0u);
+    ASSERT_NE(b.GenerateLiteralIfNeeded(b_true), 0u);
     ASSERT_FALSE(b.has_error()) << b.error();
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeBool
@@ -76,7 +76,7 @@ TEST_F(BuilderTest, Literal_I32) {
     WrapInFunction(i);
     spirv::Builder& b = Build();
 
-    auto id = b.GenerateLiteralIfNeeded(nullptr, i);
+    auto id = b.GenerateLiteralIfNeeded(i);
     ASSERT_FALSE(b.has_error()) << b.error();
     EXPECT_EQ(2u, id);
 
@@ -92,8 +92,8 @@ TEST_F(BuilderTest, Literal_I32_Dedup) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, i1), 0u);
-    ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, i2), 0u);
+    ASSERT_NE(b.GenerateLiteralIfNeeded(i1), 0u);
+    ASSERT_NE(b.GenerateLiteralIfNeeded(i2), 0u);
     ASSERT_FALSE(b.has_error()) << b.error();
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 1
@@ -107,7 +107,7 @@ TEST_F(BuilderTest, Literal_U32) {
 
     spirv::Builder& b = Build();
 
-    auto id = b.GenerateLiteralIfNeeded(nullptr, i);
+    auto id = b.GenerateLiteralIfNeeded(i);
     ASSERT_FALSE(b.has_error()) << b.error();
     EXPECT_EQ(2u, id);
 
@@ -123,8 +123,8 @@ TEST_F(BuilderTest, Literal_U32_Dedup) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, i1), 0u);
-    ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, i2), 0u);
+    ASSERT_NE(b.GenerateLiteralIfNeeded(i1), 0u);
+    ASSERT_NE(b.GenerateLiteralIfNeeded(i2), 0u);
     ASSERT_FALSE(b.has_error()) << b.error();
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeInt 32 0
@@ -138,7 +138,7 @@ TEST_F(BuilderTest, Literal_F32) {
 
     spirv::Builder& b = Build();
 
-    auto id = b.GenerateLiteralIfNeeded(nullptr, i);
+    auto id = b.GenerateLiteralIfNeeded(i);
     ASSERT_FALSE(b.has_error()) << b.error();
     EXPECT_EQ(2u, id);
 
@@ -154,8 +154,8 @@ TEST_F(BuilderTest, Literal_F32_Dedup) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, i1), 0u);
-    ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, i2), 0u);
+    ASSERT_NE(b.GenerateLiteralIfNeeded(i1), 0u);
+    ASSERT_NE(b.GenerateLiteralIfNeeded(i2), 0u);
     ASSERT_FALSE(b.has_error()) << b.error();
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
@@ -171,7 +171,7 @@ TEST_F(BuilderTest, Literal_F16) {
 
     spirv::Builder& b = Build();
 
-    auto id = b.GenerateLiteralIfNeeded(nullptr, i);
+    auto id = b.GenerateLiteralIfNeeded(i);
     ASSERT_FALSE(b.has_error()) << b.error();
     EXPECT_EQ(2u, id);
 
@@ -189,8 +189,8 @@ TEST_F(BuilderTest, Literal_F16_Dedup) {
 
     spirv::Builder& b = Build();
 
-    ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, i1), 0u);
-    ASSERT_NE(b.GenerateLiteralIfNeeded(nullptr, i2), 0u);
+    ASSERT_NE(b.GenerateLiteralIfNeeded(i1), 0u);
+    ASSERT_NE(b.GenerateLiteralIfNeeded(i2), 0u);
     ASSERT_FALSE(b.has_error()) << b.error();
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 16

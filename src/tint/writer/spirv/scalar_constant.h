@@ -111,8 +111,7 @@ struct ScalarConstant {
     /// @param rhs the ScalarConstant to compare against
     /// @returns true if this ScalarConstant is equal to `rhs`
     inline bool operator==(const ScalarConstant& rhs) const {
-        return value.u64 == rhs.value.u64 && kind == rhs.kind && is_spec_op == rhs.is_spec_op &&
-               constant_id == rhs.constant_id;
+        return value.u64 == rhs.value.u64 && kind == rhs.kind;
     }
 
     /// Inequality operator
@@ -120,24 +119,10 @@ struct ScalarConstant {
     /// @returns true if this ScalarConstant is not equal to `rhs`
     inline bool operator!=(const ScalarConstant& rhs) const { return !(*this == rhs); }
 
-    /// @returns this ScalarConstant as a specialization op with the given
-    /// specialization constant identifier
-    /// @param id the constant identifier
-    ScalarConstant AsSpecOp(uint32_t id) const {
-        auto ret = *this;
-        ret.is_spec_op = true;
-        ret.constant_id = id;
-        return ret;
-    }
-
     /// The constant value
     Value value;
     /// The constant value kind
     Kind kind = Kind::kBool;
-    /// True if the constant is a specialization op
-    bool is_spec_op = false;
-    /// The identifier if a specialization op
-    uint32_t constant_id = 0;
 };
 
 }  // namespace tint::writer::spirv

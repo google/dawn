@@ -333,10 +333,9 @@ class Builder {
     /// @returns the ID of the expression or 0 on failure.
     uint32_t GenerateConstructorExpression(const ast::Variable* var, const ast::Expression* expr);
     /// Generates a literal constant if needed
-    /// @param var the variable generated for, nullptr if no variable associated.
     /// @param lit the literal to generate
     /// @returns the ID on success or 0 on failure
-    uint32_t GenerateLiteralIfNeeded(const ast::Variable* var, const ast::LiteralExpression* lit);
+    uint32_t GenerateLiteralIfNeeded(const ast::LiteralExpression* lit);
     /// Generates a binary expression
     /// @param expr the expression to generate
     /// @returns the expression ID on success or 0 otherwise
@@ -625,7 +624,6 @@ class Builder {
     std::vector<uint32_t> merge_stack_;
     std::vector<uint32_t> continue_stack_;
     std::unordered_set<uint32_t> capability_set_;
-    bool has_overridable_workgroup_size_ = false;
     bool zero_initialize_workgroup_memory_ = false;
 
     struct ContinuingInfo {

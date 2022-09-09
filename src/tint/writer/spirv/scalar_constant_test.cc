@@ -34,16 +34,6 @@ TEST_F(SpirvScalarConstantTest, Equality) {
     EXPECT_NE(a, b);
     b.value.b = true;
     EXPECT_EQ(a, b);
-
-    a.is_spec_op = true;
-    EXPECT_NE(a, b);
-    b.is_spec_op = true;
-    EXPECT_EQ(a, b);
-
-    a.constant_id = 3;
-    EXPECT_NE(a, b);
-    b.constant_id = 3;
-    EXPECT_EQ(a, b);
 }
 
 TEST_F(SpirvScalarConstantTest, U32) {

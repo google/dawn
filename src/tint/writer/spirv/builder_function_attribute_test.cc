@@ -149,63 +149,6 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Const) {
 )");
 }
 
-TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_OverridableConst) {
-    Override("width", ty.i32(), Construct(ty.i32(), 2_i), Id(7_u));
-    Override("height", ty.i32(), Construct(ty.i32(), 3_i), Id(8_u));
-    Override("depth", ty.i32(), Construct(ty.i32(), 4_i), Id(9_u));
-    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
-                      utils::Vector{
-                          WorkgroupSize("width", "height", "depth"),
-                          Stage(ast::PipelineStage::kCompute),
-                      });
-
-    spirv::Builder& b = Build();
-
-    ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.execution_modes()), "");
-    EXPECT_EQ(DumpInstructions(b.types()),
-              R"(%2 = OpTypeInt 32 0
-%1 = OpTypeVector %2 3
-%4 = OpSpecConstant %2 2
-%5 = OpSpecConstant %2 3
-%6 = OpSpecConstant %2 4
-%3 = OpSpecConstantComposite %1 %4 %5 %6
-)");
-    EXPECT_EQ(DumpInstructions(b.annots()),
-              R"(OpDecorate %4 SpecId 7
-OpDecorate %5 SpecId 8
-OpDecorate %6 SpecId 9
-OpDecorate %3 BuiltIn WorkgroupSize
-)");
-}
-
-TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndConst) {
-    Override("height", ty.i32(), Construct(ty.i32(), 2_i), Id(7_u));
-    GlobalConst("depth", ty.i32(), Construct(ty.i32(), 3_i));
-    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
-                      utils::Vector{
-                          WorkgroupSize(4_i, "height", "depth"),
-                          Stage(ast::PipelineStage::kCompute),
-                      });
-
-    spirv::Builder& b = Build();
-
-    ASSERT_TRUE(b.GenerateExecutionModes(func, 3)) << b.error();
-    EXPECT_EQ(DumpInstructions(b.execution_modes()), "");
-    EXPECT_EQ(DumpInstructions(b.types()),
-              R"(%2 = OpTypeInt 32 0
-%1 = OpTypeVector %2 3
-%4 = OpConstant %2 4
-%5 = OpSpecConstant %2 2
-%6 = OpConstant %2 3
-%3 = OpSpecConstantComposite %1 %4 %5 %6
-)");
-    EXPECT_EQ(DumpInstructions(b.annots()),
-              R"(OpDecorate %5 SpecId 7
-OpDecorate %3 BuiltIn WorkgroupSize
-)");
-}
-
 TEST_F(BuilderTest, Decoration_ExecutionMode_MultipleFragment) {
     auto* func1 = Func("main1", utils::Empty, ty.void_(), utils::Empty,
                        utils::Vector{
