@@ -547,5 +547,37 @@ struct SB2 {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(CalculateArrayLengthTest, CallStatement) {
+    auto* src = R"(
+struct SB {
+  arr : array<i32>,
+}
+
+@group(0) @binding(0) var<storage, read> a : SB;
+
+@compute @workgroup_size(1)
+fn main() {
+  arrayLength(&a.arr);
+}
+)";
+
+    auto* expect =
+        R"(
+struct SB {
+  arr : array<i32>,
+}
+
+@group(0) @binding(0) var<storage, read> a : SB;
+
+@compute @workgroup_size(1)
+fn main() {
+}
+)";
+
+    auto got = Run<Unshadow, SimplifyPointers, CalculateArrayLength>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::transform

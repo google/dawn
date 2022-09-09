@@ -21,6 +21,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/function.h"
+#include "src/tint/sem/statement.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/transform/simplify_pointers.h"
 
@@ -33,65 +34,79 @@ namespace tint::transform {
 ArrayLengthFromUniform::ArrayLengthFromUniform() = default;
 ArrayLengthFromUniform::~ArrayLengthFromUniform() = default;
 
-/// Iterate over all arrayLength() builtins that operate on
-/// storage buffer variables.
-/// @param ctx the CloneContext.
-/// @param functor of type void(const ast::CallExpression*, const
-/// sem::VariableUser, const sem::GlobalVariable*). It takes in an
-/// ast::CallExpression of the arrayLength call expression node, a
-/// sem::VariableUser of the used storage buffer variable, and the
-/// sem::GlobalVariable for the storage buffer.
-template <typename F>
-static void IterateArrayLengthOnStorageVar(CloneContext& ctx, F&& functor) {
-    auto& sem = ctx.src->Sem();
+/// The PIMPL state for this transform
+struct ArrayLengthFromUniform::State {
+    /// The clone context
+    CloneContext& ctx;
 
-    // Find all calls to the arrayLength() builtin.
-    for (auto* node : ctx.src->ASTNodes().Objects()) {
-        auto* call_expr = node->As<ast::CallExpression>();
-        if (!call_expr) {
-            continue;
-        }
+    /// Iterate over all arrayLength() builtins that operate on
+    /// storage buffer variables.
+    /// @param functor of type void(const ast::CallExpression*, const
+    /// sem::VariableUser, const sem::GlobalVariable*). It takes in an
+    /// ast::CallExpression of the arrayLength call expression node, a
+    /// sem::VariableUser of the used storage buffer variable, and the
+    /// sem::GlobalVariable for the storage buffer.
+    template <typename F>
+    void IterateArrayLengthOnStorageVar(F&& functor) {
+        auto& sem = ctx.src->Sem();
 
-        auto* call = sem.Get(call_expr)->UnwrapMaterialize()->As<sem::Call>();
-        auto* builtin = call->Target()->As<sem::Builtin>();
-        if (!builtin || builtin->Type() != sem::BuiltinType::kArrayLength) {
-            continue;
-        }
+        // Find all calls to the arrayLength() builtin.
+        for (auto* node : ctx.src->ASTNodes().Objects()) {
+            auto* call_expr = node->As<ast::CallExpression>();
+            if (!call_expr) {
+                continue;
+            }
 
-        // Get the storage buffer that contains the runtime array.
-        // Since we require SimplifyPointers, we can assume that the arrayLength()
-        // call has one of two forms:
-        //   arrayLength(&struct_var.array_member)
-        //   arrayLength(&array_var)
-        auto* param = call_expr->args[0]->As<ast::UnaryOpExpression>();
-        if (!param || param->op != ast::UnaryOp::kAddressOf) {
-            TINT_ICE(Transform, ctx.dst->Diagnostics())
-                << "expected form of arrayLength argument to be &array_var or "
-                   "&struct_var.array_member";
-            break;
-        }
-        auto* storage_buffer_expr = param->expr;
-        if (auto* accessor = param->expr->As<ast::MemberAccessorExpression>()) {
-            storage_buffer_expr = accessor->structure;
-        }
-        auto* storage_buffer_sem = sem.Get<sem::VariableUser>(storage_buffer_expr);
-        if (!storage_buffer_sem) {
-            TINT_ICE(Transform, ctx.dst->Diagnostics())
-                << "expected form of arrayLength argument to be &array_var or "
-                   "&struct_var.array_member";
-            break;
-        }
+            auto* call = sem.Get(call_expr)->UnwrapMaterialize()->As<sem::Call>();
+            auto* builtin = call->Target()->As<sem::Builtin>();
+            if (!builtin || builtin->Type() != sem::BuiltinType::kArrayLength) {
+                continue;
+            }
 
-        // Get the index to use for the buffer size array.
-        auto* var = tint::As<sem::GlobalVariable>(storage_buffer_sem->Variable());
-        if (!var) {
-            TINT_ICE(Transform, ctx.dst->Diagnostics())
-                << "storage buffer is not a global variable";
-            break;
+            if (auto* call_stmt = call->Stmt()->Declaration()->As<ast::CallStatement>()) {
+                if (call_stmt->expr == call_expr) {
+                    // arrayLength() is used as a statement.
+                    // The argument expression must be side-effect free, so just drop the statement.
+                    RemoveStatement(ctx, call_stmt);
+                    continue;
+                }
+            }
+
+            // Get the storage buffer that contains the runtime array.
+            // Since we require SimplifyPointers, we can assume that the arrayLength()
+            // call has one of two forms:
+            //   arrayLength(&struct_var.array_member)
+            //   arrayLength(&array_var)
+            auto* param = call_expr->args[0]->As<ast::UnaryOpExpression>();
+            if (!param || param->op != ast::UnaryOp::kAddressOf) {
+                TINT_ICE(Transform, ctx.dst->Diagnostics())
+                    << "expected form of arrayLength argument to be &array_var or "
+                       "&struct_var.array_member";
+                break;
+            }
+            auto* storage_buffer_expr = param->expr;
+            if (auto* accessor = param->expr->As<ast::MemberAccessorExpression>()) {
+                storage_buffer_expr = accessor->structure;
+            }
+            auto* storage_buffer_sem = sem.Get<sem::VariableUser>(storage_buffer_expr);
+            if (!storage_buffer_sem) {
+                TINT_ICE(Transform, ctx.dst->Diagnostics())
+                    << "expected form of arrayLength argument to be &array_var or "
+                       "&struct_var.array_member";
+                break;
+            }
+
+            // Get the index to use for the buffer size array.
+            auto* var = tint::As<sem::GlobalVariable>(storage_buffer_sem->Variable());
+            if (!var) {
+                TINT_ICE(Transform, ctx.dst->Diagnostics())
+                    << "storage buffer is not a global variable";
+                break;
+            }
+            functor(call_expr, storage_buffer_sem, var);
         }
-        functor(call_expr, storage_buffer_sem, var);
     }
-}
+};
 
 bool ArrayLengthFromUniform::ShouldRun(const Program* program, const DataMap&) const {
     for (auto* fn : program->AST().Functions()) {
@@ -119,17 +134,17 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx, const DataMap& inputs, DataM
     // Determine the size of the buffer size array.
     uint32_t max_buffer_size_index = 0;
 
-    IterateArrayLengthOnStorageVar(ctx, [&](const ast::CallExpression*, const sem::VariableUser*,
-                                            const sem::GlobalVariable* var) {
-        auto binding = var->BindingPoint();
-        auto idx_itr = cfg->bindpoint_to_size_index.find(binding);
-        if (idx_itr == cfg->bindpoint_to_size_index.end()) {
-            return;
-        }
-        if (idx_itr->second > max_buffer_size_index) {
-            max_buffer_size_index = idx_itr->second;
-        }
-    });
+    State{ctx}.IterateArrayLengthOnStorageVar(
+        [&](const ast::CallExpression*, const sem::VariableUser*, const sem::GlobalVariable* var) {
+            auto binding = var->BindingPoint();
+            auto idx_itr = cfg->bindpoint_to_size_index.find(binding);
+            if (idx_itr == cfg->bindpoint_to_size_index.end()) {
+                return;
+            }
+            if (idx_itr->second > max_buffer_size_index) {
+                max_buffer_size_index = idx_itr->second;
+            }
+        });
 
     // Get (or create, on first call) the uniform buffer that will receive the
     // size of each storage buffer in the module.
@@ -156,9 +171,9 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx, const DataMap& inputs, DataM
 
     std::unordered_set<uint32_t> used_size_indices;
 
-    IterateArrayLengthOnStorageVar(ctx, [&](const ast::CallExpression* call_expr,
-                                            const sem::VariableUser* storage_buffer_sem,
-                                            const sem::GlobalVariable* var) {
+    State{ctx}.IterateArrayLengthOnStorageVar([&](const ast::CallExpression* call_expr,
+                                                  const sem::VariableUser* storage_buffer_sem,
+                                                  const sem::GlobalVariable* var) {
         auto binding = var->BindingPoint();
         auto idx_itr = cfg->bindpoint_to_size_index.find(binding);
         if (idx_itr == cfg->bindpoint_to_size_index.end()) {

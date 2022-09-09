@@ -130,6 +130,16 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) cons
                 if (builtin->Type() == sem::BuiltinType::kArrayLength) {
                     // We're dealing with an arrayLength() call
 
+                    if (auto* call_stmt = call->Stmt()->Declaration()->As<ast::CallStatement>()) {
+                        if (call_stmt->expr == call_expr) {
+                            // arrayLength() is used as a statement.
+                            // The argument expression must be side-effect free, so just drop the
+                            // statement.
+                            RemoveStatement(ctx, call_stmt);
+                            continue;
+                        }
+                    }
+
                     // A runtime-sized array can only appear as the store type of a variable, or the
                     // last element of a structure (which cannot itself be nested). Given that we
                     // require SimplifyPointers, we can assume that the arrayLength() call has one
