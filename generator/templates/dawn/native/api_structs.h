@@ -49,9 +49,15 @@ namespace {{native_namespace}} {
         {{namespace}}::SType sType = {{namespace}}::SType::Invalid;
     };
 
+    struct ChainedStructOut {
+        ChainedStructOut * nextInChain = nullptr;
+        {{namespace}}::SType sType = {{namespace}}::SType::Invalid;
+    };
+
     {% for type in by_category["structure"] %}
         {% if type.chained %}
-            struct {{as_cppType(type.name)}} : ChainedStruct {
+            {% set chainedStructType = "ChainedStructOut" if type.chained == "out" else "ChainedStruct" %}
+            struct {{as_cppType(type.name)}} : {{chainedStructType}} {
                 {{as_cppType(type.name)}}() {
                     sType = {{namespace}}::SType::{{type.name.CamelCase()}};
                 }
@@ -59,7 +65,8 @@ namespace {{native_namespace}} {
             struct {{as_cppType(type.name)}} {
         {% endif %}
             {% if type.extensible %}
-                ChainedStruct const * nextInChain = nullptr;
+                {% set chainedStructType = "ChainedStructOut" if type.output else "ChainedStruct const" %}
+                {{chainedStructType}} * nextInChain = nullptr;
             {% endif %}
             {% for member in type.members %}
                 {% set member_declaration = as_annotated_frontendType(member) + render_cpp_default_value(member) %}
