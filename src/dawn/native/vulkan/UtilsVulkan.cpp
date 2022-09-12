@@ -209,28 +209,7 @@ void SetDebugNameInternal(Device* device,
                           uint64_t objectHandle,
                           const char* prefix,
                           std::string label) {
-    if (!objectHandle) {
-        return;
-    }
-
-    if (device->GetGlobalInfo().HasExt(InstanceExt::DebugUtils)) {
-        VkDebugUtilsObjectNameInfoEXT objectNameInfo;
-        objectNameInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT;
-        objectNameInfo.pNext = nullptr;
-        objectNameInfo.objectType = objectType;
-        objectNameInfo.objectHandle = objectHandle;
-
-        std::ostringstream objectNameStream;
-        // Prefix with the device's message ID so that if this label appears in a validation
-        // message it can be parsed out and the message can be associated with the right device.
-        objectNameStream << device->GetDebugPrefix() << kDeviceDebugSeparator << prefix;
-        if (!label.empty() && device->IsToggleEnabled(Toggle::UseUserDefinedLabelsInBackend)) {
-            objectNameStream << "_" << label;
-        }
-        std::string objectName = objectNameStream.str();
-        objectNameInfo.pObjectName = objectName.c_str();
-        device->fn.SetDebugUtilsObjectNameEXT(device->GetVkDevice(), &objectNameInfo);
-    }
+    // Implementation removed due to crbug.com/dawn/1539.
 }
 
 std::string GetNextDeviceDebugPrefix() {
