@@ -338,6 +338,24 @@ class ConstEval {
                                       utils::VectorRef<const sem::Constant*> args,
                                       const Source& source);
 
+    /// Bitwise and operator '&'
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    ConstantResult OpAnd(const sem::Type* ty,
+                         utils::VectorRef<const sem::Constant*> args,
+                         const Source& source);
+
+    /// Bitwise or operator '|'
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    ConstantResult OpOr(const sem::Type* ty,
+                        utils::VectorRef<const sem::Constant*> args,
+                        const Source& source);
+
     ////////////////////////////////////////////////////////////////////////////
     // Builtins
     ////////////////////////////////////////////////////////////////////////////

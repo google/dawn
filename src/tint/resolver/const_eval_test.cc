@@ -3135,6 +3135,17 @@ bool ForEachElemPair(const sem::Constant* a, const sem::Constant* b, Func&& f) {
     return true;
 }
 
+template <typename T>
+struct BitValues {
+    using UT = UnwrapNumber<T>;
+    static constexpr size_t NumBits = sizeof(UT) * 8;
+    static inline const T All = T{~T{0}};
+    static inline const T LeftMost = T{T{1} << (NumBits - 1u)};
+    static inline const T AllButLeftMost = T{~LeftMost};
+    static inline const T RightMost = T{1};
+    static inline const T AllButRightMost = T{~RightMost};
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Unary op
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3721,6 +3732,136 @@ INSTANTIATE_TEST_SUITE_P(LessThanEqual,
                                  OpGreaterThanCases<AFloat, false>(),
                                  OpGreaterThanCases<f32, false>(),
                                  OpGreaterThanCases<f16, false>()))));
+
+static std::vector<Case> OpAndBoolCases() {
+    return {
+        C(true, true, true),
+        C(true, false, false),
+        C(false, true, false),
+        C(false, false, false),
+        C(Vec(true, true), Vec(true, false), Vec(true, false)),
+        C(Vec(true, true), Vec(false, true), Vec(false, true)),
+        C(Vec(true, false), Vec(true, false), Vec(true, false)),
+        C(Vec(false, true), Vec(true, false), Vec(false, false)),
+        C(Vec(false, false), Vec(true, false), Vec(false, false)),
+    };
+}
+template <typename T>
+std::vector<Case> OpAndIntCases() {
+    using B = BitValues<T>;
+    return {
+        C(T{0b1010}, T{0b1111}, T{0b1010}),
+        C(T{0b1010}, T{0b0000}, T{0b0000}),
+        C(T{0b1010}, T{0b0011}, T{0b0010}),
+        C(T{0b1010}, T{0b1100}, T{0b1000}),
+        C(T{0b1010}, T{0b0101}, T{0b0000}),
+        C(B::All, B::All, B::All),
+        C(B::LeftMost, B::LeftMost, B::LeftMost),
+        C(B::RightMost, B::RightMost, B::RightMost),
+        C(B::All, T{0}, T{0}),
+        C(T{0}, B::All, T{0}),
+        C(B::LeftMost, B::AllButLeftMost, T{0}),
+        C(B::AllButLeftMost, B::LeftMost, T{0}),
+        C(B::RightMost, B::AllButRightMost, T{0}),
+        C(B::AllButRightMost, B::RightMost, T{0}),
+        C(Vec(B::All, B::LeftMost, B::RightMost),      //
+          Vec(B::All, B::All, B::All),                 //
+          Vec(B::All, B::LeftMost, B::RightMost)),     //
+        C(Vec(B::All, B::LeftMost, B::RightMost),      //
+          Vec(T{0}, T{0}, T{0}),                       //
+          Vec(T{0}, T{0}, T{0})),                      //
+        C(Vec(B::LeftMost, B::RightMost),              //
+          Vec(B::AllButLeftMost, B::AllButRightMost),  //
+          Vec(T{0}, T{0})),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(And,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(  //
+                             testing::Values(ast::BinaryOp::kAnd),
+                             testing::ValuesIn(            //
+                                 Concat(OpAndBoolCases(),  //
+                                        OpAndIntCases<AInt>(),
+                                        OpAndIntCases<i32>(),
+                                        OpAndIntCases<u32>()))));
+
+static std::vector<Case> OpOrBoolCases() {
+    return {
+        C(true, true, true),
+        C(true, false, true),
+        C(false, true, true),
+        C(false, false, false),
+        C(Vec(true, true), Vec(true, false), Vec(true, true)),
+        C(Vec(true, true), Vec(false, true), Vec(true, true)),
+        C(Vec(true, false), Vec(true, false), Vec(true, false)),
+        C(Vec(false, true), Vec(true, false), Vec(true, true)),
+        C(Vec(false, false), Vec(true, false), Vec(true, false)),
+    };
+}
+template <typename T>
+std::vector<Case> OpOrIntCases() {
+    using B = BitValues<T>;
+    return {
+        C(T{0b1010}, T{0b1111}, T{0b1111}),
+        C(T{0b1010}, T{0b0000}, T{0b1010}),
+        C(T{0b1010}, T{0b0011}, T{0b1011}),
+        C(T{0b1010}, T{0b1100}, T{0b1110}),
+        C(T{0b1010}, T{0b0101}, T{0b1111}),
+        C(B::All, B::All, B::All),
+        C(B::LeftMost, B::LeftMost, B::LeftMost),
+        C(B::RightMost, B::RightMost, B::RightMost),
+        C(B::All, T{0}, B::All),
+        C(T{0}, B::All, B::All),
+        C(B::LeftMost, B::AllButLeftMost, B::All),
+        C(B::AllButLeftMost, B::LeftMost, B::All),
+        C(B::RightMost, B::AllButRightMost, B::All),
+        C(B::AllButRightMost, B::RightMost, B::All),
+        C(Vec(B::All, B::LeftMost, B::RightMost),      //
+          Vec(B::All, B::All, B::All),                 //
+          Vec(B::All, B::All, B::All)),                //
+        C(Vec(B::All, B::LeftMost, B::RightMost),      //
+          Vec(T{0}, T{0}, T{0}),                       //
+          Vec(B::All, B::LeftMost, B::RightMost)),     //
+        C(Vec(B::LeftMost, B::RightMost),              //
+          Vec(B::AllButLeftMost, B::AllButRightMost),  //
+          Vec(B::All, B::All)),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(Or,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(  //
+                             testing::Values(ast::BinaryOp::kOr),
+                             testing::ValuesIn(Concat(OpOrBoolCases(),
+                                                      OpOrIntCases<AInt>(),
+                                                      OpOrIntCases<i32>(),
+                                                      OpOrIntCases<u32>()))));
+
+TEST_F(ResolverConstEvalTest, NotAndOrOfVecs) {
+    // const C = !((vec2(true, true) & vec2(true, false)) | vec2(false, true));
+    auto v1 = Vec(true, true).Expr(*this);
+    auto v2 = Vec(true, false).Expr(*this);
+    auto v3 = Vec(false, true).Expr(*this);
+    auto expr = Not(Or(And(v1, v2), v3));
+    GlobalConst("C", expr);
+    auto expected_expr = Vec(false, false).Expr(*this);
+    GlobalConst("E", expected_expr);
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(expr);
+    const sem::Constant* value = sem->ConstantValue();
+    ASSERT_NE(value, nullptr);
+    EXPECT_TYPE(value->Type(), sem->Type());
+
+    auto* expected_sem = Sem().Get(expected_expr);
+    const sem::Constant* expected_value = expected_sem->ConstantValue();
+    ASSERT_NE(expected_value, nullptr);
+    EXPECT_TYPE(expected_value->Type(), expected_sem->Type());
+
+    ForEachElemPair(value, expected_value, [&](const sem::Constant* a, const sem::Constant* b) {
+        EXPECT_EQ(a->As<bool>(), b->As<bool>());
+        return !HasFailure();
+    });
+}
 
 // Tests for errors on overflow/underflow of binary operations with abstract numbers
 struct OverflowCase {

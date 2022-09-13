@@ -1,5 +1,6 @@
 @compute
 @workgroup_size(1)
 fn main() {
-    var v = select(true & true, true, false);
+    let a = true;
+    var v = select(a & true, true, false);
 }

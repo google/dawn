@@ -921,15 +921,15 @@ op % <T: fiu32_f16, N: num> (T, vec<N, T>) -> vec<N, T>
 op ^ <T: iu32>(T, T) -> T
 op ^ <T: iu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
 
-op & (bool, bool) -> bool
-op & <N: num> (vec<N, bool>, vec<N, bool>) -> vec<N, bool>
-op & <T: iu32>(T, T) -> T
-op & <T: iu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+@const op & (bool, bool) -> bool
+@const op & <N: num> (vec<N, bool>, vec<N, bool>) -> vec<N, bool>
+@const op & <T: ia_iu32>(T, T) -> T
+@const op & <T: ia_iu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
 
-op | (bool, bool) -> bool
-op | <N: num> (vec<N, bool>, vec<N, bool>) -> vec<N, bool>
-op | <T: iu32>(T, T) -> T
-op | <T: iu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
+@const op | (bool, bool) -> bool
+@const op | <N: num> (vec<N, bool>, vec<N, bool>) -> vec<N, bool>
+@const op | <T: ia_iu32>(T, T) -> T
+@const op | <T: ia_iu32, N: num> (vec<N, T>, vec<N, T>) -> vec<N, T>
 
 op && (bool, bool) -> bool
 op || (bool, bool) -> bool

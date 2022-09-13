@@ -765,7 +765,7 @@ auto Val(T v) {
 
 /// Creates a `Value<vec<N, T>>` from N scalar `args`
 template <typename... T>
-auto Vec(T&&... args) {
+auto Vec(T... args) {
     constexpr size_t N = sizeof...(args);
     using FirstT = std::tuple_element_t<0, std::tuple<T...>>;
     utils::Vector v{args...};

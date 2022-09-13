@@ -12,14 +12,14 @@
        %void = OpTypeVoid
           %1 = OpTypeFunction %void
        %bool = OpTypeBool
-          %7 = OpConstantNull %bool
        %true = OpConstantTrue %bool
+          %8 = OpConstantNull %bool
 %_ptr_Function_bool = OpTypePointer Function %bool
        %main = OpFunction %void None %1
           %4 = OpLabel
-          %v = OpVariable %_ptr_Function_bool Function %7
+          %v = OpVariable %_ptr_Function_bool Function %8
           %9 = OpLogicalAnd %bool %true %true
-          %5 = OpSelect %bool %7 %true %9
-               OpStore %v %5
+          %7 = OpSelect %bool %8 %true %9
+               OpStore %v %7
                OpReturn
                OpFunctionEnd

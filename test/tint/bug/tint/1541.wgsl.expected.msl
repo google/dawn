@@ -2,7 +2,8 @@
 
 using namespace metal;
 kernel void tint_symbol() {
-  bool v = select(bool(true & true), true, false);
+  bool const a = true;
+  bool v = select(bool(a & true), true, false);
   return;
 }
 
