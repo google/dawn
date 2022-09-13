@@ -899,27 +899,28 @@ ConstEval::ConstantResult ConstEval::MatCtorV(const sem::Type* ty,
 
 ConstEval::ConstantResult ConstEval::Index(const sem::Expression* obj_expr,
                                            const sem::Expression* idx_expr) {
-    auto obj_val = obj_expr->ConstantValue();
-    if (!obj_val) {
-        return nullptr;
-    }
-
     auto idx_val = idx_expr->ConstantValue();
     if (!idx_val) {
         return nullptr;
     }
 
     uint32_t el_count = 0;
-    sem::Type::ElementOf(obj_val->Type(), &el_count);
+    sem::Type::ElementOf(obj_expr->Type()->UnwrapRef(), &el_count);
 
     AInt idx = idx_val->As<AInt>();
-    if (idx < 0 || idx >= el_count) {
-        auto clamped = std::min<AInt::type>(std::max<AInt::type>(idx, 0), el_count - 1);
-        AddWarning("index " + std::to_string(idx) + " out of bounds [0.." +
-                       std::to_string(el_count - 1) + "]. Clamping index to " +
-                       std::to_string(clamped),
-                   idx_expr->Declaration()->source);
-        idx = clamped;
+    if (idx < 0 || (el_count > 0 && idx >= el_count)) {
+        std::string range;
+        if (el_count > 0) {
+            range = " [0.." + std::to_string(el_count - 1) + "]";
+        }
+        AddError("index " + std::to_string(idx) + " out of bounds" + range,
+                 idx_expr->Declaration()->source);
+        return utils::Failure;
+    }
+
+    auto obj_val = obj_expr->ConstantValue();
+    if (!obj_val) {
+        return nullptr;
     }
 
     return obj_val->Index(static_cast<size_t>(idx));

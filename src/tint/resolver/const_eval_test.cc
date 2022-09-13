@@ -2498,34 +2498,16 @@ TEST_F(ResolverConstEvalTest, Vec3_Index_OOB_High) {
     auto* expr = IndexAccessor(vec3<i32>(1_i, 2_i, 3_i), Expr(Source{{12, 34}}, 3_i));
     WrapInFunction(expr);
 
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(r()->error(), "12:34 warning: index 3 out of bounds [0..2]. Clamping index to 2");
-
-    auto* sem = Sem().Get(expr);
-    ASSERT_NE(sem, nullptr);
-    ASSERT_TRUE(sem->Type()->Is<sem::I32>());
-    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
-    EXPECT_TRUE(sem->ConstantValue()->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->As<i32>(), 3_i);
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), "12:34 error: index 3 out of bounds [0..2]");
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Index_OOB_Low) {
     auto* expr = IndexAccessor(vec3<i32>(1_i, 2_i, 3_i), Expr(Source{{12, 34}}, -3_i));
     WrapInFunction(expr);
 
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(r()->error(), "12:34 warning: index -3 out of bounds [0..2]. Clamping index to 0");
-
-    auto* sem = Sem().Get(expr);
-    ASSERT_NE(sem, nullptr);
-    ASSERT_TRUE(sem->Type()->Is<sem::I32>());
-    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
-    EXPECT_TRUE(sem->ConstantValue()->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->As<i32>(), 1_i);
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), "12:34 error: index -3 out of bounds [0..2]");
 }
 
 TEST_F(ResolverConstEvalTest, Vec3_Swizzle_Scalar) {
@@ -2616,25 +2598,8 @@ TEST_F(ResolverConstEvalTest, Mat3x2_Index_OOB_High) {
         Expr(Source{{12, 34}}, 3_i));
     WrapInFunction(expr);
 
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(r()->error(), "12:34 warning: index 3 out of bounds [0..2]. Clamping index to 2");
-
-    auto* sem = Sem().Get(expr);
-    ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<sem::Vector>();
-    ASSERT_NE(vec, nullptr);
-    EXPECT_EQ(vec->Width(), 2u);
-    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
-
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<f32>(), 5._a);
-
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<f32>(), 6._a);
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), "12:34 error: index 3 out of bounds [0..2]");
 }
 
 TEST_F(ResolverConstEvalTest, Mat3x2_Index_OOB_Low) {
@@ -2643,25 +2608,8 @@ TEST_F(ResolverConstEvalTest, Mat3x2_Index_OOB_Low) {
         Expr(Source{{12, 34}}, -3_i));
     WrapInFunction(expr);
 
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(r()->error(), "12:34 warning: index -3 out of bounds [0..2]. Clamping index to 0");
-
-    auto* sem = Sem().Get(expr);
-    ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<sem::Vector>();
-    ASSERT_NE(vec, nullptr);
-    EXPECT_EQ(vec->Width(), 2u);
-    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
-
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<f32>(), 1._a);
-
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<f32>(), 2._a);
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), "12:34 error: index -3 out of bounds [0..2]");
 }
 
 TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index) {
@@ -2702,31 +2650,8 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index_OOB_High) {
                                Expr(Source{{12, 34}}, 2_i));
     WrapInFunction(expr);
 
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(r()->error(), "12:34 warning: index 2 out of bounds [0..1]. Clamping index to 1");
-
-    auto* sem = Sem().Get(expr);
-    ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<sem::Vector>();
-    ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<sem::F32>());
-    EXPECT_EQ(vec->Width(), 3u);
-    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
-
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<f32>(), 4_f);
-
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<f32>(), 5_f);
-
-    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<f32>(), 6_f);
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), "12:34 error: index 2 out of bounds [0..1]");
 }
 
 TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index_OOB_Low) {
@@ -2735,34 +2660,18 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Index_OOB_Low) {
                                Expr(Source{{12, 34}}, -2_i));
     WrapInFunction(expr);
 
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(r()->error(), "12:34 warning: index -2 out of bounds [0..1]. Clamping index to 0");
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), "12:34 error: index -2 out of bounds [0..1]");
+}
 
-    auto* sem = Sem().Get(expr);
-    ASSERT_NE(sem, nullptr);
-    auto* vec = sem->Type()->As<sem::Vector>();
-    ASSERT_NE(vec, nullptr);
-    EXPECT_TRUE(vec->type()->Is<sem::F32>());
-    EXPECT_EQ(vec->Width(), 3u);
-    EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
-    EXPECT_FALSE(sem->ConstantValue()->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->AllZero());
+TEST_F(ResolverConstEvalTest, RuntimeArray_vec3_f32_Index_OOB_Low) {
+    auto* sb = GlobalVar("sb", ty.array(ty.vec3<f32>()), Group(0_a), Binding(0_a),
+                         ast::StorageClass::kStorage);
+    auto* expr = IndexAccessor(sb, Expr(Source{{12, 34}}, -2_i));
+    WrapInFunction(expr);
 
-    EXPECT_TRUE(sem->ConstantValue()->Index(0)->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(0)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(0)->As<f32>(), 1_f);
-
-    EXPECT_TRUE(sem->ConstantValue()->Index(1)->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(1)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(1)->As<f32>(), 2_f);
-
-    EXPECT_TRUE(sem->ConstantValue()->Index(2)->AllEqual());
-    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AnyZero());
-    EXPECT_FALSE(sem->ConstantValue()->Index(2)->AllZero());
-    EXPECT_EQ(sem->ConstantValue()->Index(2)->As<f32>(), 3_f);
+    EXPECT_FALSE(r()->Resolve()) << r()->error();
+    EXPECT_EQ(r()->error(), "12:34 error: index -2 out of bounds");
 }
 
 TEST_F(ResolverConstEvalTest, ChainedIndex) {
@@ -2858,105 +2767,6 @@ TEST_F(ResolverConstEvalTest, ChainedIndex) {
         EXPECT_FALSE(f->ConstantValue()->AnyZero());
         EXPECT_FALSE(f->ConstantValue()->AllZero());
         EXPECT_EQ(f->ConstantValue()->As<f32>(), 9_f);
-    }
-}
-
-TEST_F(ResolverConstEvalTest, ChainedIndex_OOB) {
-    auto* arr_expr = Construct(ty.array(ty.mat2x3<f32>(), 2_u),        // array<mat2x3<f32>, 2u>
-                               mat2x3<f32>(vec3<f32>(1_f, 2_f, 3_f),   //
-                                           vec3<f32>(4_f, 5_f, 6_f)),  //
-                               mat2x3<f32>(vec3<f32>(7_f, 8_f, 9_f),   //
-                                           vec3<f32>(10_f, 11_f, 12_f)));
-
-    auto* mat_expr = IndexAccessor(arr_expr, Expr(Source{{1, 2}}, -3_i));  // arr[3]
-    auto* vec_expr = IndexAccessor(mat_expr, Expr(Source{{3, 4}}, -2_i));  // arr[3][-2]
-    auto* f32_expr = IndexAccessor(vec_expr, Expr(Source{{5, 6}}, 4_i));   // arr[3][-2][4]
-    WrapInFunction(f32_expr);
-
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
-    EXPECT_EQ(r()->error(), R"(1:2 warning: index -3 out of bounds [0..1]. Clamping index to 0
-3:4 warning: index -2 out of bounds [0..1]. Clamping index to 0
-5:6 warning: index 4 out of bounds [0..2]. Clamping index to 2)");
-
-    {
-        auto* mat = Sem().Get(mat_expr);
-        EXPECT_NE(mat, nullptr);
-        auto* ty = mat->Type()->As<sem::Matrix>();
-        ASSERT_NE(mat->Type(), nullptr);
-        EXPECT_TRUE(ty->ColumnType()->Is<sem::Vector>());
-        EXPECT_EQ(ty->columns(), 2u);
-        EXPECT_EQ(ty->rows(), 3u);
-        EXPECT_EQ(mat->ConstantValue()->Type(), mat->Type());
-        EXPECT_FALSE(mat->ConstantValue()->AllEqual());
-        EXPECT_FALSE(mat->ConstantValue()->AnyZero());
-        EXPECT_FALSE(mat->ConstantValue()->AllZero());
-
-        EXPECT_TRUE(mat->ConstantValue()->Index(0)->Index(0)->AllEqual());
-        EXPECT_FALSE(mat->ConstantValue()->Index(0)->Index(0)->AnyZero());
-        EXPECT_FALSE(mat->ConstantValue()->Index(0)->Index(0)->AllZero());
-        EXPECT_EQ(mat->ConstantValue()->Index(0)->Index(0)->As<f32>(), 1_f);
-
-        EXPECT_TRUE(mat->ConstantValue()->Index(0)->Index(1)->AllEqual());
-        EXPECT_FALSE(mat->ConstantValue()->Index(0)->Index(1)->AnyZero());
-        EXPECT_FALSE(mat->ConstantValue()->Index(0)->Index(1)->AllZero());
-        EXPECT_EQ(mat->ConstantValue()->Index(0)->Index(1)->As<f32>(), 2_f);
-
-        EXPECT_TRUE(mat->ConstantValue()->Index(0)->Index(2)->AllEqual());
-        EXPECT_FALSE(mat->ConstantValue()->Index(0)->Index(2)->AnyZero());
-        EXPECT_FALSE(mat->ConstantValue()->Index(0)->Index(2)->AllZero());
-        EXPECT_EQ(mat->ConstantValue()->Index(0)->Index(2)->As<f32>(), 3_f);
-
-        EXPECT_TRUE(mat->ConstantValue()->Index(1)->Index(0)->AllEqual());
-        EXPECT_FALSE(mat->ConstantValue()->Index(1)->Index(0)->AnyZero());
-        EXPECT_FALSE(mat->ConstantValue()->Index(1)->Index(0)->AllZero());
-        EXPECT_EQ(mat->ConstantValue()->Index(1)->Index(0)->As<f32>(), 4_f);
-
-        EXPECT_TRUE(mat->ConstantValue()->Index(1)->Index(1)->AllEqual());
-        EXPECT_FALSE(mat->ConstantValue()->Index(1)->Index(1)->AnyZero());
-        EXPECT_FALSE(mat->ConstantValue()->Index(1)->Index(1)->AllZero());
-        EXPECT_EQ(mat->ConstantValue()->Index(1)->Index(1)->As<f32>(), 5_f);
-
-        EXPECT_TRUE(mat->ConstantValue()->Index(1)->Index(2)->AllEqual());
-        EXPECT_FALSE(mat->ConstantValue()->Index(1)->Index(2)->AnyZero());
-        EXPECT_FALSE(mat->ConstantValue()->Index(1)->Index(2)->AllZero());
-        EXPECT_EQ(mat->ConstantValue()->Index(1)->Index(2)->As<f32>(), 6_f);
-    }
-    {
-        auto* vec = Sem().Get(vec_expr);
-        EXPECT_NE(vec, nullptr);
-        auto* ty = vec->Type()->As<sem::Vector>();
-        ASSERT_NE(vec->Type(), nullptr);
-        EXPECT_TRUE(ty->type()->Is<sem::F32>());
-        EXPECT_EQ(ty->Width(), 3u);
-        EXPECT_EQ(vec->ConstantValue()->Type(), vec->Type());
-        EXPECT_FALSE(vec->ConstantValue()->AllEqual());
-        EXPECT_FALSE(vec->ConstantValue()->AnyZero());
-        EXPECT_FALSE(vec->ConstantValue()->AllZero());
-
-        EXPECT_TRUE(vec->ConstantValue()->Index(0)->AllEqual());
-        EXPECT_FALSE(vec->ConstantValue()->Index(0)->AnyZero());
-        EXPECT_FALSE(vec->ConstantValue()->Index(0)->AllZero());
-        EXPECT_EQ(vec->ConstantValue()->Index(0)->As<f32>(), 1_f);
-
-        EXPECT_TRUE(vec->ConstantValue()->Index(1)->AllEqual());
-        EXPECT_FALSE(vec->ConstantValue()->Index(1)->AnyZero());
-        EXPECT_FALSE(vec->ConstantValue()->Index(1)->AllZero());
-        EXPECT_EQ(vec->ConstantValue()->Index(1)->As<f32>(), 2_f);
-
-        EXPECT_TRUE(vec->ConstantValue()->Index(2)->AllEqual());
-        EXPECT_FALSE(vec->ConstantValue()->Index(2)->AnyZero());
-        EXPECT_FALSE(vec->ConstantValue()->Index(2)->AllZero());
-        EXPECT_EQ(vec->ConstantValue()->Index(2)->As<f32>(), 3_f);
-    }
-    {
-        auto* f = Sem().Get(f32_expr);
-        EXPECT_NE(f, nullptr);
-        EXPECT_TRUE(f->Type()->Is<sem::F32>());
-        EXPECT_EQ(f->ConstantValue()->Type(), f->Type());
-        EXPECT_TRUE(f->ConstantValue()->AllEqual());
-        EXPECT_FALSE(f->ConstantValue()->AnyZero());
-        EXPECT_FALSE(f->ConstantValue()->AllZero());
-        EXPECT_EQ(f->ConstantValue()->As<f32>(), 3_f);
     }
 }
 
