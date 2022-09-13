@@ -3111,11 +3111,13 @@ std::ostream& operator<<(std::ostream& o, const Types& types) {
     return o;
 }
 
-// Calls `f` on deepest elements of both `a` and `b`. If function returns false, it stops
-// traversing, and return false, otherwise it continues and returns true.
+// Calls `f` on deepest elements of both `a` and `b`. If function returns Action::kStop, it stops
+// traversing, and return Action::kStop; if the function returns Action::kContinue, it continues and
+// returns Action::kContinue when done.
 // TODO(amaiorano): Move to Constant.h?
+enum class Action { kStop, kContinue };
 template <typename Func>
-bool ForEachElemPair(const sem::Constant* a, const sem::Constant* b, Func&& f) {
+Action ForEachElemPair(const sem::Constant* a, const sem::Constant* b, Func&& f) {
     EXPECT_EQ(a->Type(), b->Type());
     size_t i = 0;
     while (true) {
@@ -3124,15 +3126,15 @@ bool ForEachElemPair(const sem::Constant* a, const sem::Constant* b, Func&& f) {
             break;
         }
         auto* b_elem = b->Index(i);
-        if (!ForEachElemPair(a_elem, b_elem, f)) {
-            return false;
+        if (ForEachElemPair(a_elem, b_elem, f) == Action::kStop) {
+            return Action::kStop;
         }
         i++;
     }
     if (i == 0) {
         return f(a, b);
     }
-    return true;
+    return Action::kContinue;
 }
 
 template <typename T>
@@ -3209,7 +3211,7 @@ TEST_P(ResolverConstEvalUnaryOpTest, Test) {
                                     // data in the MSBs that are outside of the bit-width of T.
                                     EXPECT_EQ(a->As<AInt>(), b->As<AInt>());
                                 }
-                                return !HasFailure();
+                                return HasFailure() ? Action::kStop : Action::kContinue;
                             });
         },
         c.expected);
@@ -3390,7 +3392,7 @@ TEST_P(ResolverConstEvalBinaryOpTest, Test) {
                                     // data in the MSBs that are outside of the bit-width of T.
                                     EXPECT_EQ(a->As<AInt>(), b->As<AInt>());
                                 }
-                                return !HasFailure();
+                                return HasFailure() ? Action::kStop : Action::kContinue;
                             });
         },
         c.expected);
@@ -3859,7 +3861,7 @@ TEST_F(ResolverConstEvalTest, NotAndOrOfVecs) {
 
     ForEachElemPair(value, expected_value, [&](const sem::Constant* a, const sem::Constant* b) {
         EXPECT_EQ(a->As<bool>(), b->As<bool>());
-        return !HasFailure();
+        return HasFailure() ? Action::kStop : Action::kContinue;
     });
 }
 
