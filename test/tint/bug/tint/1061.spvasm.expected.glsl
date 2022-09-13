@@ -2,7 +2,7 @@
 precision mediump float;
 
 layout(location = 0) out vec4 x_GLF_color_1_1;
-layout(binding = 0) uniform buf0_ubo {
+layout(binding = 0, std140) uniform buf0_ubo {
   vec4 ref;
 } x_7;
 

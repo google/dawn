@@ -1,7 +1,10 @@
 #version 310 es
 
-layout(binding = 0) uniform UBO_ubo {
+layout(binding = 0, std140) uniform UBO_ubo {
   int dynamic_idx;
+  uint pad;
+  uint pad_1;
+  uint pad_2;
 } ubo;
 
 layout(binding = 2, std430) buffer Result_ssbo {

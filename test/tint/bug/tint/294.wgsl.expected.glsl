@@ -6,7 +6,9 @@ void unused_entry_point() {
 }
 struct Light {
   vec3 position;
+  uint pad;
   vec3 colour;
+  uint pad_1;
 };
 
 layout(binding = 1, std430) buffer Lights_ssbo {

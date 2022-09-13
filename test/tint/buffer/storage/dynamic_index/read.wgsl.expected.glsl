@@ -9,6 +9,8 @@ struct Inner {
   float f;
   mat2x3 g;
   mat3x2 h;
+  uint pad;
+  uint pad_1;
   ivec4 i[4];
 };
 

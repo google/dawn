@@ -2,6 +2,8 @@
 
 struct strided_arr {
   vec2 el;
+  uint pad;
+  uint pad_1;
 };
 
 layout(binding = 0, std430) buffer SSBO_ssbo {
@@ -13,8 +15,8 @@ mat2 arr_to_mat2x2_stride_16(strided_arr arr[2]) {
 }
 
 strided_arr[2] mat2x2_stride_16_to_arr(mat2 m) {
-  strided_arr tint_symbol_1 = strided_arr(m[0u]);
-  strided_arr tint_symbol_2 = strided_arr(m[1u]);
+  strided_arr tint_symbol_1 = strided_arr(m[0u], 0u, 0u);
+  strided_arr tint_symbol_2 = strided_arr(m[1u], 0u, 0u);
   strided_arr tint_symbol_3[2] = strided_arr[2](tint_symbol_1, tint_symbol_2);
   return tint_symbol_3;
 }

@@ -279,6 +279,9 @@ precision mediump float;
 
 layout(binding = 0, std430) buffer Data_ssbo {
   int a;
+  uint pad;
+  uint pad_1;
+  uint pad_2;
   mat2x3 b;
 } data;
 
@@ -320,6 +323,9 @@ precision mediump float;
 
 layout(binding = 0, std430) buffer Data_ssbo {
   float z;
+  uint pad;
+  uint pad_1;
+  uint pad_2;
   mat4x3 a;
 } data;
 
@@ -497,7 +503,9 @@ precision mediump float;
 
 struct Inner {
   vec3 a;
+  uint pad;
   vec3 b;
+  uint pad_1;
 };
 
 layout(binding = 0, std430) buffer Data_ssbo {
@@ -552,7 +560,9 @@ precision mediump float;
 
 struct Inner {
   vec3 a;
+  uint pad;
   vec3 b;
+  uint pad_1;
 };
 
 layout(binding = 0, std430) buffer Data_ssbo {
@@ -608,7 +618,9 @@ precision mediump float;
 
 struct Inner {
   vec3 a;
+  uint pad;
   vec3 b;
+  uint pad_1;
 };
 
 layout(binding = 0, std430) buffer Data_ssbo {
@@ -663,7 +675,9 @@ precision mediump float;
 
 struct Inner {
   vec3 a;
+  uint pad;
   vec3 b;
+  uint pad_1;
 };
 
 layout(binding = 0, std430) buffer Data_ssbo {
@@ -717,7 +731,9 @@ precision mediump float;
 
 struct Inner {
   vec3 a;
+  uint pad;
   vec3 b;
+  uint pad_1;
 };
 
 layout(binding = 0, std430) buffer Data_ssbo {
@@ -772,7 +788,9 @@ precision mediump float;
 
 struct Inner {
   ivec3 a;
+  uint pad;
   vec3 b;
+  uint pad_1;
 };
 
 layout(binding = 0, std430) buffer Data_ssbo {

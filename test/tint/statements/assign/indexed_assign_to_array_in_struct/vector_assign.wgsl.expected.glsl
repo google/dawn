@@ -4,8 +4,11 @@ struct OuterS {
   uint a1[8];
 };
 
-layout(binding = 4) uniform Uniforms_ubo {
+layout(binding = 4, std140) uniform Uniforms_ubo {
   uint i;
+  uint pad;
+  uint pad_1;
+  uint pad_2;
 } uniforms;
 
 uint f(uint i) {

@@ -1,8 +1,10 @@
 #version 310 es
 
-layout(binding = 4) uniform Uniforms_ubo {
+layout(binding = 4, std140) uniform Uniforms_ubo {
   uint i;
   uint j;
+  uint pad;
+  uint pad_1;
 } uniforms;
 
 mat2x4 m1 = mat2x4(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);

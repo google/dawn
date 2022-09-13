@@ -7,10 +7,12 @@ layout(location = 1) in vec4 color_1;
 layout(location = 2) in vec2 quad_pos_1;
 layout(location = 0) out vec4 color_2;
 layout(location = 1) out vec2 quad_pos_2;
-layout(binding = 0) uniform RenderParams_ubo {
+layout(binding = 0, std140) uniform RenderParams_ubo {
   mat4 modelViewProjectionMatrix;
   vec3 right;
+  uint pad;
   vec3 up;
+  uint pad_1;
 } render_params;
 
 struct VertexInput {
@@ -146,10 +148,14 @@ struct Particle {
   float lifetime;
   vec4 color;
   vec3 velocity;
+  uint pad_3;
 };
 
-layout(binding = 0) uniform SimulationParams_ubo {
+layout(binding = 0, std140) uniform SimulationParams_ubo {
   float deltaTime;
+  uint pad;
+  uint pad_1;
+  uint pad_2;
   vec4 seed;
 } sim_params;
 
@@ -204,8 +210,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:60: 'textureQueryLevels' : no matching overloaded function found
-ERROR: 0:60: '' : compilation terminated
+ERROR: 0:64: 'textureQueryLevels' : no matching overloaded function found
+ERROR: 0:64: '' : compilation terminated
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -242,8 +248,11 @@ struct Particle {
   vec3 velocity;
 };
 
-layout(binding = 3) uniform UBO_ubo {
+layout(binding = 3, std140) uniform UBO_ubo {
   uint width;
+  uint pad;
+  uint pad_1;
+  uint pad_2;
 } ubo;
 
 layout(binding = 4, std430) buffer Buffer_ssbo {
@@ -297,8 +306,11 @@ struct Particle {
   vec3 velocity;
 };
 
-layout(binding = 3) uniform UBO_ubo {
+layout(binding = 3, std140) uniform UBO_ubo {
   uint width;
+  uint pad;
+  uint pad_1;
+  uint pad_2;
 } ubo;
 
 layout(binding = 4, std430) buffer Buffer_ssbo {

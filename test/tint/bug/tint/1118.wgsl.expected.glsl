@@ -18,11 +18,11 @@ layout(location = 3) in float fClipDistance4_param_1;
 layout(location = 0) out vec4 glFragColor_1_1;
 float fClipDistance3 = 0.0f;
 float fClipDistance4 = 0.0f;
-layout(binding = 0) uniform Scene_ubo {
+layout(binding = 0, std140) uniform Scene_ubo {
   vec4 vEyePosition;
 } x_29;
 
-layout(binding = 1) uniform Material_ubo {
+layout(binding = 1, std140) uniform Material_ubo {
   vec4 vDiffuseColor;
   vec3 vAmbientColor;
   float placeholder;
@@ -30,8 +30,11 @@ layout(binding = 1) uniform Material_ubo {
   float placeholder2;
 } x_49;
 
-layout(binding = 2) uniform Mesh_ubo {
+layout(binding = 2, std140) uniform Mesh_ubo {
   float visibility;
+  uint pad;
+  uint pad_1;
+  uint pad_2;
 } x_137;
 
 vec4 glFragColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);

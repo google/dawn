@@ -27,6 +27,8 @@ struct Inner_std140 {
   vec2 j_0;
   vec2 j_1;
   vec2 j_2;
+  uint pad;
+  uint pad_1;
   ivec4 k[4];
 };
 
@@ -34,7 +36,7 @@ struct S {
   Inner arr[8];
 };
 
-layout(binding = 0) uniform S_std140_ubo {
+layout(binding = 0, std140) uniform S_std140_ubo {
   Inner_std140 arr[8];
 } s;
 

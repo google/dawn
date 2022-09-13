@@ -82,8 +82,8 @@ struct Nephews {
 
 layout(binding = 0, std430) buffer Nephews_ssbo {
   float huey;
-  layout(offset=256) float dewey;
-  layout(offset=512) float louie;
+  float dewey;
+  float louie;
 } nephews;
 
 )");

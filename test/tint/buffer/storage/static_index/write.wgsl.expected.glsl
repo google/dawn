@@ -15,6 +15,7 @@ layout(binding = 0, std430) buffer S_ssbo {
   mat3x2 h;
   Inner i;
   Inner j[4];
+  uint pad;
 } s;
 
 void tint_symbol() {

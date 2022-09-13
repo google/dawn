@@ -4,7 +4,7 @@ layout(binding = 2, std430) buffer OutputBuf_ssbo {
   uint result[];
 } tint_symbol;
 
-layout(binding = 3) uniform Uniforms_ubo {
+layout(binding = 3, std140) uniform Uniforms_ubo {
   uint dstTextureFlipY;
   uint channelCount;
   uvec2 srcCopyOrigin;

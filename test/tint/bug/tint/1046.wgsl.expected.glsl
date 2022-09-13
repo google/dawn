@@ -10,11 +10,13 @@ struct PointLight {
   vec4 position;
 };
 
-layout(binding = 0) uniform Uniforms_ubo {
+layout(binding = 0, std140) uniform Uniforms_ubo {
   mat4 worldView;
   mat4 proj;
   uint numPointLights;
   uint color_source;
+  uint pad;
+  uint pad_1;
   vec4 color;
 } uniforms;
 

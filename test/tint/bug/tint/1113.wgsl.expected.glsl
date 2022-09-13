@@ -1,12 +1,14 @@
 #version 310 es
 
-layout(binding = 0) uniform Uniforms_ubo {
+layout(binding = 0, std140) uniform Uniforms_ubo {
   uint numTriangles;
   uint gridSize;
   uint pad1;
   uint pad2;
   vec3 bbMin;
+  uint pad;
   vec3 bbMax;
+  uint pad_1;
 } uniforms;
 
 layout(binding = 10, std430) buffer U32s_ssbo {
@@ -102,13 +104,15 @@ void main() {
 }
 #version 310 es
 
-layout(binding = 0) uniform Uniforms_ubo {
+layout(binding = 0, std140) uniform Uniforms_ubo {
   uint numTriangles;
   uint gridSize;
   uint pad1;
   uint pad2;
   vec3 bbMin;
+  uint pad;
   vec3 bbMax;
+  uint pad_1;
 } uniforms;
 
 layout(binding = 10, std430) buffer U32s_ssbo {
@@ -174,13 +178,15 @@ void main() {
 }
 #version 310 es
 
-layout(binding = 0) uniform Uniforms_ubo {
+layout(binding = 0, std140) uniform Uniforms_ubo {
   uint numTriangles;
   uint gridSize;
   uint pad1;
   uint pad2;
   vec3 bbMin;
+  uint pad;
   vec3 bbMax;
+  uint pad_1;
 } uniforms;
 
 layout(binding = 10, std430) buffer U32s_ssbo {

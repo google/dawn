@@ -3,8 +3,15 @@ precision mediump float;
 
 layout(location = 0) in vec4 vcolor_S0_param_1;
 layout(location = 0) out vec4 sk_FragColor_1_1;
-layout(binding = 0) uniform UniformBuffer_ubo {
+layout(binding = 0, std140) uniform UniformBuffer_ubo {
+  uint pad;
+  uint pad_1;
+  uint pad_2;
+  uint pad_3;
   float unknownInput_S1_c0;
+  uint pad_4;
+  uint pad_5;
+  uint pad_6;
   vec4 ucolorRed_S1_c0;
   vec4 ucolorGreen_S1_c0;
   mat3 umatrix_S1;

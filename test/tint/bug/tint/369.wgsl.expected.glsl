@@ -8,7 +8,7 @@ layout(binding = 0, std430) buffer S_ssbo {
   mat2 m;
 } SSBO;
 
-layout(binding = 0) uniform S_std140_ubo {
+layout(binding = 0, std140) uniform S_std140_ubo {
   vec2 m_0;
   vec2 m_1;
 } UBO;

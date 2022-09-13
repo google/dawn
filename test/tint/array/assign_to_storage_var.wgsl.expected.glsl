@@ -10,7 +10,7 @@ struct S {
 
 ivec4 src_private[4] = ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
 shared ivec4 src_workgroup[4];
-layout(binding = 0) uniform src_uniform_block_ubo {
+layout(binding = 0, std140) uniform src_uniform_block_ubo {
   S inner;
 } src_uniform;
 

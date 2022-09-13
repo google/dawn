@@ -8,9 +8,11 @@ struct OuterS {
   InnerS a1[8][8];
 };
 
-layout(binding = 4) uniform Uniforms_ubo {
+layout(binding = 4, std140) uniform Uniforms_ubo {
   uint i;
   uint j;
+  uint pad;
+  uint pad_1;
 } uniforms;
 
 void tint_symbol() {

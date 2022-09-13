@@ -20,7 +20,7 @@ struct ExternalTextureParams {
   mat3 gamutConversionMatrix;
 };
 
-layout(binding = 3) uniform ext_tex_params_block_ubo {
+layout(binding = 3, std140) uniform ext_tex_params_block_ubo {
   ExternalTextureParams inner;
 } ext_tex_params;
 
@@ -90,7 +90,7 @@ struct ExternalTextureParams {
   mat3 gamutConversionMatrix;
 };
 
-layout(binding = 3) uniform ext_tex_params_block_ubo {
+layout(binding = 3, std140) uniform ext_tex_params_block_ubo {
   ExternalTextureParams inner;
 } ext_tex_params;
 
@@ -154,7 +154,7 @@ struct ExternalTextureParams {
   mat3 gamutConversionMatrix;
 };
 
-layout(binding = 3) uniform ext_tex_params_block_ubo {
+layout(binding = 3, std140) uniform ext_tex_params_block_ubo {
   ExternalTextureParams inner;
 } ext_tex_params;
 

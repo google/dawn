@@ -75,7 +75,7 @@ struct Particle {
   vec2 vel;
 };
 
-layout(binding = 0) uniform SimParams_ubo {
+layout(binding = 0, std140) uniform SimParams_ubo {
   float deltaT;
   float rule1Distance;
   float rule2Distance;
@@ -83,6 +83,7 @@ layout(binding = 0) uniform SimParams_ubo {
   float rule1Scale;
   float rule2Scale;
   float rule3Scale;
+  uint pad;
 } params;
 
 layout(binding = 1, std430) buffer Particles_ssbo {

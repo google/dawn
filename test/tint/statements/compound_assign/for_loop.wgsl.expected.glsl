@@ -6,6 +6,9 @@ void unused_entry_point() {
 }
 layout(binding = 0, std430) buffer S_ssbo {
   int a;
+  uint pad;
+  uint pad_1;
+  uint pad_2;
   vec4 b;
   mat2 c;
 } v;

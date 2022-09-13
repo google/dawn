@@ -26,11 +26,13 @@ struct lightingInfo {
 float u_Float = 0.0f;
 vec3 u_Color = vec3(0.0f, 0.0f, 0.0f);
 vec2 vMainuv = vec2(0.0f, 0.0f);
-layout(binding = 6) uniform LeftOver_ubo {
+layout(binding = 6, std140) uniform LeftOver_ubo {
   mat4 u_World;
   mat4 u_ViewProjection;
   float u_bumpStrength;
   uint padding;
+  uint pad;
+  uint pad_1;
   vec3 u_cameraPosition;
   float u_parallaxScale;
   float textureInfoName;
@@ -42,7 +44,7 @@ vec4 v_output1 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
 bool tint_symbol = false;
 vec2 v_uv = vec2(0.0f, 0.0f);
 vec4 v_output2 = vec4(0.0f, 0.0f, 0.0f, 0.0f);
-layout(binding = 5) uniform Light0_ubo {
+layout(binding = 5, std140) uniform Light0_ubo {
   vec4 vLightData;
   vec4 vLightDiffuse;
   vec4 vLightSpecular;
@@ -50,6 +52,8 @@ layout(binding = 5) uniform Light0_ubo {
   uint padding_2;
   vec4 shadowsInfo;
   vec2 depthValues;
+  uint pad_2;
+  uint pad_3;
 } light0;
 
 vec4 glFragColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);

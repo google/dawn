@@ -12,10 +12,12 @@ layout(binding = 2, std430) buffer Matrix_ssbo_2 {
   uint numbers[];
 } resultMatrix;
 
-layout(binding = 3) uniform Uniforms_ubo {
+layout(binding = 3, std140) uniform Uniforms_ubo {
   uvec2 aShape;
   uvec2 bShape;
   uvec2 outShape;
+  uint pad;
+  uint pad_1;
 } uniforms;
 
 void tint_symbol(uvec3 global_id) {

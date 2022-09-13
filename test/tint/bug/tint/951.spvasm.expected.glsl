@@ -9,12 +9,15 @@ layout(binding = 1, std430) buffer ssbA_ssbo {
 } x_20;
 
 uvec3 tint_symbol = uvec3(0u, 0u, 0u);
-layout(binding = 2) uniform Uniforms_ubo {
+layout(binding = 2, std140) uniform Uniforms_ubo {
   float NAN;
   int aShape;
   int outShape;
   int outShapeStrides;
   int size;
+  uint pad;
+  uint pad_1;
+  uint pad_2;
 } x_24;
 
 float getAAtOutCoords_() {

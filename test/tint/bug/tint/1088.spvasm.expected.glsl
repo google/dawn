@@ -6,12 +6,18 @@ layout(location = 1) in vec3 normal_param_1;
 layout(location = 0) out vec2 vUV_1_1;
 struct strided_arr {
   float el;
+  uint pad;
+  uint pad_1;
+  uint pad_2;
 };
 
 vec3 position = vec3(0.0f, 0.0f, 0.0f);
-layout(binding = 2) uniform LeftOver_ubo {
+layout(binding = 2, std140) uniform LeftOver_ubo {
   mat4 worldViewProjection;
   float time;
+  uint pad_3;
+  uint pad_4;
+  uint pad_5;
   mat4 test2[2];
   strided_arr test[4];
 } x_14;

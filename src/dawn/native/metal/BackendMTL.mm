@@ -671,8 +671,7 @@ ResultOrError<std::vector<Ref<AdapterBase>>> Backend::DiscoverAdapters(
 
     // iOS only has a single device so MTLCopyAllDevices doesn't exist there.
 #if defined(DAWN_PLATFORM_IOS)
-    Ref<Adapter> adapter =
-        AcquireRef(new Adapter(GetInstance(), MTLCreateSystemDefaultDevice()));
+    Ref<Adapter> adapter = AcquireRef(new Adapter(GetInstance(), MTLCreateSystemDefaultDevice()));
     if (!GetInstance()->ConsumedError(adapter->Initialize())) {
         adapters.push_back(std::move(adapter));
     }

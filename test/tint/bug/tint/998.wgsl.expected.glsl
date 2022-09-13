@@ -1,7 +1,10 @@
 #version 310 es
 
-layout(binding = 0) uniform Constants_ubo {
+layout(binding = 0, std140) uniform Constants_ubo {
   uint zero;
+  uint pad;
+  uint pad_1;
+  uint pad_2;
 } constants;
 
 struct Result {
