@@ -29,7 +29,7 @@
 #include "src/tint/writer/spirv/generator.h"
 #include "src/tint/writer/wgsl/generator.h"
 
-static constexpr size_t kNumThreads = 32;
+static constexpr size_t kNumThreads = 8;
 
 [[noreturn]] void TintInternalCompilerErrorReporter(const tint::diag::List& diagnostics) {
     auto printer = tint::diag::Printer::create(stderr, true);
