@@ -3040,30 +3040,121 @@ TEST_F(ResolverConstEvalTest, Matrix_AFloat_Construct_From_AInt_Vectors) {
     EXPECT_EQ(std::get<AFloat>(c1->Index(1)->Value()), 4.0);
 }
 
+using builder::IsValue;
+using builder::Mat;
+using builder::Val;
+using builder::Value;
+using builder::Vec;
+
+using Types = std::variant<  //
+    Value<AInt>,
+    Value<AFloat>,
+    Value<u32>,
+    Value<i32>,
+    Value<f32>,
+    Value<f16>,
+    Value<bool>,
+
+    Value<builder::vec2<AInt>>,
+    Value<builder::vec2<AFloat>>,
+    Value<builder::vec2<u32>>,
+    Value<builder::vec2<i32>>,
+    Value<builder::vec2<f32>>,
+    Value<builder::vec2<f16>>,
+    Value<builder::vec2<bool>>,
+
+    Value<builder::vec3<AInt>>,
+    Value<builder::vec3<AFloat>>,
+    Value<builder::vec3<u32>>,
+    Value<builder::vec3<i32>>,
+    Value<builder::vec3<f32>>,
+    Value<builder::vec3<f16>>,
+
+    Value<builder::vec4<AInt>>,
+    Value<builder::vec4<AFloat>>,
+    Value<builder::vec4<u32>>,
+    Value<builder::vec4<i32>>,
+    Value<builder::vec4<f32>>,
+    Value<builder::vec4<f16>>,
+
+    Value<builder::mat2x2<AInt>>,
+    Value<builder::mat2x2<AFloat>>,
+    Value<builder::mat2x2<f32>>,
+    Value<builder::mat2x2<f16>>,
+
+    Value<builder::mat2x3<AInt>>,
+    Value<builder::mat2x3<AFloat>>,
+    Value<builder::mat2x3<f32>>,
+    Value<builder::mat2x3<f16>>,
+
+    Value<builder::mat3x2<AInt>>,
+    Value<builder::mat3x2<AFloat>>,
+    Value<builder::mat3x2<f32>>,
+    Value<builder::mat3x2<f16>>
+    //
+    >;
+
+std::ostream& operator<<(std::ostream& o, const Types& types) {
+    std::visit(
+        [&](auto&& v) {
+            using ValueType = std::decay_t<decltype(v)>;
+            o << ValueType::DataType::Name() << "(";
+            for (auto& a : v.args.values) {
+                o << std::get<typename ValueType::ElementType>(a);
+                if (&a != &v.args.values.Back()) {
+                    o << ", ";
+                }
+            }
+            o << ")";
+        },
+        types);
+    return o;
+}
+
+// Calls `f` on deepest elements of both `a` and `b`. If function returns false, it stops
+// traversing, and return false, otherwise it continues and returns true.
+// TODO(amaiorano): Move to Constant.h?
+template <typename Func>
+bool ForEachElemPair(const sem::Constant* a, const sem::Constant* b, Func&& f) {
+    EXPECT_EQ(a->Type(), b->Type());
+    size_t i = 0;
+    while (true) {
+        auto* a_elem = a->Index(i);
+        if (!a_elem) {
+            break;
+        }
+        auto* b_elem = b->Index(i);
+        if (!ForEachElemPair(a_elem, b_elem, f)) {
+            return false;
+        }
+        i++;
+    }
+    if (i == 0) {
+        return f(a, b);
+    }
+    return true;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Unary op
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 namespace unary_op {
-
-template <typename T>
-struct Values {
-    T input;
-    T expect;
-};
+using resolver::operator<<;
 
 struct Case {
-    std::variant<Values<AInt>, Values<AFloat>, Values<u32>, Values<i32>, Values<f32>, Values<f16>>
-        values;
+    Types input;
+    Types expected;
 };
 
 static std::ostream& operator<<(std::ostream& o, const Case& c) {
-    std::visit([&](auto&& v) { o << v.input; }, c.values);
+    o << "input: " << c.input << ", expected: " << c.expected;
     return o;
 }
 
-template <typename T>
-Case C(T input, T expect) {
-    return Case{Values<T>{input, expect}};
+/// Convenience overload to creates a Case with just scalars
+template <typename T, typename U, typename = std::enable_if_t<!IsValue<T>>>
+Case C(T input, U expected) {
+    return Case{Val(input), Val(expected)};
 }
 
 using ResolverConstEvalUnaryOpTest = ResolverTestWithParam<std::tuple<ast::UnaryOp, Case>>;
@@ -3072,28 +3163,39 @@ TEST_P(ResolverConstEvalUnaryOpTest, Test) {
     Enable(ast::Extension::kF16);
 
     auto op = std::get<0>(GetParam());
-    auto c = std::get<1>(GetParam());
+    auto& c = std::get<1>(GetParam());
     std::visit(
-        [&](auto&& values) {
-            using T = decltype(values.expect);
-            auto* expr = create<ast::UnaryOpExpression>(op, Expr(values.input));
-            GlobalConst("C", expr);
+        [&](auto&& expected) {
+            using T = typename std::decay_t<decltype(expected)>::ElementType;
+
+            auto* input_expr = std::visit([&](auto&& value) { return value.Expr(*this); }, c.input);
+            auto* expected_expr = create<ast::UnaryOpExpression>(op, input_expr);
+            GlobalConst("C", expected_expr);
 
             EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-            auto* sem = Sem().Get(expr);
+            auto* sem = Sem().Get(expected_expr);
             const sem::Constant* value = sem->ConstantValue();
             ASSERT_NE(value, nullptr);
             EXPECT_TYPE(value->Type(), sem->Type());
-            EXPECT_EQ(value->As<T>(), values.expect);
 
-            if constexpr (IsIntegral<UnwrapNumber<T>>) {
-                // Check that the constant's integer doesn't contain unexpected data in the MSBs
-                // that are outside of the bit-width of T.
-                EXPECT_EQ(value->As<AInt>(), AInt(values.expect));
-            }
+            auto* expected_sem = Sem().Get(expected_expr);
+            const sem::Constant* expected_value = expected_sem->ConstantValue();
+            ASSERT_NE(expected_value, nullptr);
+            EXPECT_TYPE(expected_value->Type(), expected_sem->Type());
+
+            ForEachElemPair(value, expected_value,
+                            [&](const sem::Constant* a, const sem::Constant* b) {
+                                EXPECT_EQ(a->As<T>(), b->As<T>());
+                                if constexpr (IsIntegral<UnwrapNumber<T>>) {
+                                    // Check that the constant's integer doesn't contain unexpected
+                                    // data in the MSBs that are outside of the bit-width of T.
+                                    EXPECT_EQ(a->As<AInt>(), b->As<AInt>());
+                                }
+                                return !HasFailure();
+                            });
         },
-        c.values);
+        c.expected);
 }
 INSTANTIATE_TEST_SUITE_P(Complement,
                          ResolverConstEvalUnaryOpTest,
@@ -3189,59 +3291,7 @@ TEST_F(ResolverConstEvalTest, UnaryNegateLowestAbstract) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 namespace binary_op {
-
-using builder::IsValue;
-using builder::Mat;
-using builder::Val;
-using builder::Value;
-using builder::Vec;
-
-using Types = std::variant<Value<AInt>,
-                           Value<AFloat>,
-                           Value<u32>,
-                           Value<i32>,
-                           Value<f32>,
-                           Value<f16>,
-                           Value<bool>,
-
-                           Value<builder::vec2<AInt>>,
-                           Value<builder::vec2<AFloat>>,
-                           Value<builder::vec2<u32>>,
-                           Value<builder::vec2<i32>>,
-                           Value<builder::vec2<f32>>,
-                           Value<builder::vec2<f16>>,
-                           Value<builder::vec2<bool>>,
-
-                           Value<builder::vec3<AInt>>,
-                           Value<builder::vec3<AFloat>>,
-                           Value<builder::vec3<u32>>,
-                           Value<builder::vec3<i32>>,
-                           Value<builder::vec3<f32>>,
-                           Value<builder::vec3<f16>>,
-
-                           Value<builder::vec4<AInt>>,
-                           Value<builder::vec4<AFloat>>,
-                           Value<builder::vec4<u32>>,
-                           Value<builder::vec4<i32>>,
-                           Value<builder::vec4<f32>>,
-                           Value<builder::vec4<f16>>,
-
-                           Value<builder::mat2x2<AInt>>,
-                           Value<builder::mat2x2<AFloat>>,
-                           Value<builder::mat2x2<f32>>,
-                           Value<builder::mat2x2<f16>>,
-
-                           Value<builder::mat2x3<AInt>>,
-                           Value<builder::mat2x3<AFloat>>,
-                           Value<builder::mat2x3<f32>>,
-                           Value<builder::mat2x3<f16>>,
-
-                           Value<builder::mat3x2<AInt>>,
-                           Value<builder::mat3x2<AFloat>>,
-                           Value<builder::mat3x2<f32>>,
-                           Value<builder::mat3x2<f16>>
-                           //
-                           >;
+using resolver::operator<<;
 
 struct Case {
     Types lhs;
@@ -3262,51 +3312,10 @@ Case C(T lhs, U rhs, V expected, bool overflow = false) {
     return Case{Val(lhs), Val(rhs), Val(expected), overflow};
 }
 
-static std::ostream& operator<<(std::ostream& o, const Types& types) {
-    std::visit(
-        [&](auto&& v) {
-            using ValueType = std::decay_t<decltype(v)>;
-            o << ValueType::DataType::Name() << "(";
-            for (auto& a : v.args.values) {
-                o << std::get<typename ValueType::ElementType>(a);
-                if (&a != &v.args.values.Back()) {
-                    o << ", ";
-                }
-            }
-            o << ")";
-        },
-        types);
-    return o;
-}
-
 static std::ostream& operator<<(std::ostream& o, const Case& c) {
     o << "lhs: " << c.lhs << ", rhs: " << c.rhs << ", expected: " << c.expected
       << ", overflow: " << c.overflow;
     return o;
-}
-
-// Calls `f` on deepest elements of both `a` and `b`. If function returns false, it stops
-// traversing, and return false, otherwise it continues and returns true.
-// TODO(amaiorano): Move to Constant.h?
-template <typename Func>
-bool ForEachElemPair(const sem::Constant* a, const sem::Constant* b, Func&& f) {
-    EXPECT_EQ(a->Type(), b->Type());
-    size_t i = 0;
-    while (true) {
-        auto* a_elem = a->Index(i);
-        if (!a_elem) {
-            break;
-        }
-        auto* b_elem = b->Index(i);
-        if (!ForEachElemPair(a_elem, b_elem, f)) {
-            return false;
-        }
-        i++;
-    }
-    if (i == 0) {
-        return f(a, b);
-    }
-    return true;
 }
 
 using ResolverConstEvalBinaryOpTest = ResolverTestWithParam<std::tuple<ast::BinaryOp, Case>>;
