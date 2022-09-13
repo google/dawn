@@ -76,3 +76,8 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+FXC validation failure:
+C:\src\dawn\test\tint\Shader@0x000002A24C785290(27,18-29): warning X3557: loop doesn't seem to do anything, consider removing [loop]
+C:\src\dawn\test\tint\Shader@0x000002A24C785290(27,18-29): warning X3551: infinite loop detected - loop writes no values
+C:\src\dawn\test\tint\Shader@0x000002A24C785290(27,25-28): error X3696: infinite loop detected - loop never exits
+

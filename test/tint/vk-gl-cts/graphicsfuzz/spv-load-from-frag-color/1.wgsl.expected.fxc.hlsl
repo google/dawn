@@ -596,7 +596,7 @@ void main_1() {
     const int x_357 = x_357_phi;
     x_360 = x_360_phi;
     const int x_362 = x_362_phi;
-    const int x_365 = (6 - 15);
+    const int x_365 = -9;
     if ((x_362 < 20)) {
     } else {
       break;
@@ -624,7 +624,7 @@ void main_1() {
           x_393_phi = true;
           break;
         }
-        const float x_389 = x_GLF_color[((3u <= 3u) ? 3u : 3u)];
+        const float x_389 = x_GLF_color[(true ? 3u : 3u)];
         {
           x_374_phi = (!((x_362 <= x_382)) ? x_385 : x_383);
         }
@@ -709,3 +709,17 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+FXC validation failure:
+C:\src\dawn\test\tint\Shader@0x000001EB80E00940(79,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x000001EB80E00940(22,12-23): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
+C:\src\dawn\test\tint\Shader@0x000001EB80E00940(142,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x000001EB80E00940(205,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x000001EB80E00940(268,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x000001EB80E00940(331,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x000001EB80E00940(394,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x000001EB80E00940(457,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x000001EB80E00940(520,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x000001EB80E00940(583,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x000001EB80E00940(637,7-19): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+internal error: compilation aborted unexpectedly
+

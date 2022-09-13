@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: FAILED - TIMEOUT
 
 static int x_GLF_global_loop_count = 0;
 cbuffer cbuffer_x_7 : register(b0, space0) {

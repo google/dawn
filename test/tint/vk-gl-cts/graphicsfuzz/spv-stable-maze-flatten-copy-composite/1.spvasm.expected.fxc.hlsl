@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: FAILED - TIMEOUT
 
 static float4 gl_FragCoord = float4(0.0f, 0.0f, 0.0f, 0.0f);
 cbuffer cbuffer_x_7 : register(b0, space0) {

@@ -45,3 +45,6 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+FXC validation failure:
+C:\src\dawn\test\tint\Shader@0x0000028D946187E0(14,19-22): error X3696: infinite loop detected - loop never exits
+

@@ -253,3 +253,7 @@ tint_symbol_2 main(tint_symbol_1 tint_symbol) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+FXC validation failure:
+C:\src\dawn\test\tint\Shader@0x000002251BE22900(26,10-21): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
+internal error: compilation aborted unexpectedly
+

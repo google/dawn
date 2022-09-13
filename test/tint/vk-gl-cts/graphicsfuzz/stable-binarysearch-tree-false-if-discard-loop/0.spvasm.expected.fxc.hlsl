@@ -707,3 +707,17 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+FXC validation failure:
+C:\src\dawn\test\tint\Shader@0x0000011F088F06C0(79,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x0000011F088F06C0(22,12-23): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
+C:\src\dawn\test\tint\Shader@0x0000011F088F06C0(142,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x0000011F088F06C0(205,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x0000011F088F06C0(268,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x0000011F088F06C0(331,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x0000011F088F06C0(394,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x0000011F088F06C0(457,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x0000011F088F06C0(520,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x0000011F088F06C0(583,5-17): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+C:\src\dawn\test\tint\Shader@0x0000011F088F06C0(635,7-19): warning X3557: loop only executes for 1 iteration(s), forcing loop to unroll
+internal error: compilation aborted unexpectedly
+

@@ -6,26 +6,21 @@ cbuffer cbuffer_x_5 : register(b0, space0) {
 };
 
 void main_1() {
-  const uint scalar_offset = ((16u * 0u)) / 4;
-  const int x_22 = asint(x_5[scalar_offset / 4][scalar_offset % 4]);
+  const int x_22 = asint(x_5[0].x);
   const int x_25 = asint(x_5[1].x);
   const int x_28 = asint(x_5[1].x);
-  const uint scalar_offset_1 = ((16u * 0u)) / 4;
-  const int x_31 = asint(x_5[scalar_offset_1 / 4][scalar_offset_1 % 4]);
+  const int x_31 = asint(x_5[0].x);
   x_GLF_color = float4(float(x_22), float(x_25), float(x_28), float(x_31));
   const int x_35 = asint(x_5[1].x);
-  const uint scalar_offset_2 = ((16u * 0u)) / 4;
-  const int x_37 = asint(x_5[scalar_offset_2 / 4][scalar_offset_2 % 4]);
+  const int x_37 = asint(x_5[0].x);
   if ((x_35 > x_37)) {
     [loop] while (true) {
-      const uint scalar_offset_3 = ((16u * 0u)) / 4;
-      const int x_46 = asint(x_5[scalar_offset_3 / 4][scalar_offset_3 % 4]);
+      const int x_46 = asint(x_5[0].x);
       const float x_47 = float(x_46);
       x_GLF_color = float4(x_47, x_47, x_47, x_47);
       {
         const int x_50 = asint(x_5[1].x);
-        const uint scalar_offset_4 = ((16u * 0u)) / 4;
-        const int x_52 = asint(x_5[scalar_offset_4 / 4][scalar_offset_4 % 4]);
+        const int x_52 = asint(x_5[0].x);
         if ((x_50 > x_52)) {
         } else {
           break;
@@ -56,3 +51,6 @@ tint_symbol main() {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+FXC validation failure:
+C:\src\dawn\test\tint\Shader@0x000002846F515BE0(15,19-22): error X3696: infinite loop detected - loop never exits
+

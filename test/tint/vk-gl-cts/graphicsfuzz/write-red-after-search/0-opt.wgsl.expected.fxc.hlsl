@@ -372,3 +372,8 @@ tint_symbol_6 main(tint_symbol_5 tint_symbol_4) {
   wrapper_result.x_GLF_color_1 = inner_result.x_GLF_color_1;
   return wrapper_result;
 }
+FXC validation failure:
+C:\src\dawn\test\tint\Shader@0x0000022A4FE263C0(35,10-21): warning X3557: loop only executes for 0 iteration(s), consider removing [loop]
+C:\src\dawn\test\tint\Shader@0x0000022A4FE263C0(145,3): warning X4000: use of potentially uninitialized variable (makeFrame_f1_)
+internal error: compilation aborted unexpectedly
+

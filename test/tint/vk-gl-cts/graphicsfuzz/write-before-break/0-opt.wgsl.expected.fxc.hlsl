@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: FAILED - TIMEOUT
 
 void set_scalar_float4x3(inout float4x3 mat, int col, int row, float val) {
   switch (col) {
