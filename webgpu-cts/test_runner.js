@@ -37,9 +37,8 @@ function rateLimited(fn, intervalMs) {
   let last = undefined;
   let timer = undefined;
   const wrappedFn = (...args) => {
-    if (timer !== undefined || last === undefined) {
-      // If there is already a fn call scheduled, or the function is
-      // not enabled, return.
+    if (last === undefined) {
+      // If the function is not enabled, return.
       return;
     }
     // Get the current time as a number.
