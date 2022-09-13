@@ -131,6 +131,7 @@ wrapPromiseWithHeartbeat(GPUBuffer.prototype, 'mapAsync');
 wrapPromiseWithHeartbeat(GPUShaderModule.prototype, 'compilationInfo');
 
 globalTestConfig.testHeartbeatCallback = sendHeartbeat;
+globalTestConfig.noRaceWithRejectOnTimeout = true;
 
 async function runCtsTest(query, use_worker) {
   const workerEnabled = use_worker;
