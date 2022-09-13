@@ -495,6 +495,23 @@ struct BuiltinPolyfill::State {
         return name;
     }
 
+    /// Builds the polyfill function for the `saturate` builtin
+    /// @param ty the parameter and return type for the function
+    /// @return the polyfill function name
+    Symbol saturate(const sem::Type* ty) {
+        auto name = b.Symbols().New("tint_saturate");
+        auto body = utils::Vector{
+            b.Return(b.Call("clamp", "v", b.Construct(T(ty), 0_a), b.Construct(T(ty), 1_a))),
+        };
+        b.Func(name,
+               utils::Vector{
+                   b.Param("v", T(ty)),
+               },
+               T(ty), body);
+
+        return name;
+    }
+
   private:
     /// @returns the AST type for the given sem type
     const ast::Type* T(const sem::Type* ty) const { return CreateASTTypeFor(ctx, ty); }
@@ -572,6 +589,11 @@ bool BuiltinPolyfill::ShouldRun(const Program* program, const DataMap& data) con
                             break;
                         case sem::BuiltinType::kInsertBits:
                             if (builtins.insert_bits != Level::kNone) {
+                                return true;
+                            }
+                            break;
+                        case sem::BuiltinType::kSaturate:
+                            if (builtins.saturate) {
                                 return true;
                             }
                             break;
@@ -658,6 +680,13 @@ void BuiltinPolyfill::Run(CloneContext& ctx, const DataMap& data, DataMap&) cons
                         if (builtins.insert_bits != Level::kNone) {
                             polyfill = utils::GetOrCreate(polyfills, builtin, [&] {
                                 return s.insertBits(builtin->ReturnType());
+                            });
+                        }
+                        break;
+                    case sem::BuiltinType::kSaturate:
+                        if (builtins.saturate) {
+                            polyfill = utils::GetOrCreate(polyfills, builtin, [&] {
+                                return s.saturate(builtin->ReturnType());
                             });
                         }
                         break;

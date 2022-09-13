@@ -225,6 +225,9 @@ BuiltinType ParseBuiltinType(const std::string& name) {
     if (name == "round") {
         return BuiltinType::kRound;
     }
+    if (name == "saturate") {
+        return BuiltinType::kSaturate;
+    }
     if (name == "select") {
         return BuiltinType::kSelect;
     }
@@ -493,6 +496,8 @@ const char* str(BuiltinType i) {
             return "reverseBits";
         case BuiltinType::kRound:
             return "round";
+        case BuiltinType::kSaturate:
+            return "saturate";
         case BuiltinType::kSelect:
             return "select";
         case BuiltinType::kSign:

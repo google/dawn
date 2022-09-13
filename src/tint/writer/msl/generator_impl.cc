@@ -1400,6 +1400,7 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
         case sem::BuiltinType::kPow:
         case sem::BuiltinType::kReflect:
         case sem::BuiltinType::kRefract:
+        case sem::BuiltinType::kSaturate:
         case sem::BuiltinType::kSelect:
         case sem::BuiltinType::kSin:
         case sem::BuiltinType::kSinh:

@@ -97,6 +97,7 @@ enum class BuiltinType {
     kRefract,
     kReverseBits,
     kRound,
+    kSaturate,
     kSelect,
     kSign,
     kSin,

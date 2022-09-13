@@ -57,6 +57,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         polyfills.first_leading_bit = true;
         polyfills.first_trailing_bit = true;
         polyfills.insert_bits = transform::BuiltinPolyfill::Level::kClampParameters;
+        polyfills.saturate = true;
         data.Add<transform::BuiltinPolyfill::Config>(polyfills);
         manager.Add<transform::BuiltinPolyfill>();
     }
