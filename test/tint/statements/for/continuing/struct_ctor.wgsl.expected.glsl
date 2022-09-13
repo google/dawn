@@ -12,7 +12,7 @@ void f() {
   {
     int i = 0;
     while (true) {
-      if (!(false)) {
+      if (true) {
         break;
       }
       {

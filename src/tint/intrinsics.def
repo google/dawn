@@ -874,8 +874,8 @@ ctor mat4x4<T: fa_f32_f16>(vec4<T>, vec4<T>, vec4<T>, vec4<T>) -> mat4x4<T>
 ////////////////////////////////////////////////////////////////////////////////
 // Unary Operators                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-op ! (bool) -> bool
-op ! <N: num> (vec<N, bool>) -> vec<N, bool>
+@const op ! (bool) -> bool
+@const op ! <N: num> (vec<N, bool>) -> vec<N, bool>
 
 @const op ~ <T: ia_iu32>(T) -> T
 @const op ~ <T: ia_iu32, N: num> (vec<N, T>) -> vec<N, T>

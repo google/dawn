@@ -3151,6 +3151,12 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
     return o;
 }
 
+/// Creates a Case with Values of any type
+template <typename T, typename U>
+Case C(Value<T> input, Value<U> expected) {
+    return Case{std::move(input), std::move(expected)};
+}
+
 /// Convenience overload to creates a Case with just scalars
 template <typename T, typename U, typename = std::enable_if_t<!IsValue<T>>>
 Case C(T input, U expected) {
@@ -3283,6 +3289,18 @@ TEST_F(ResolverConstEvalTest, UnaryNegateLowestAbstract) {
     auto* sem = Sem().Get(c);
     EXPECT_EQ(sem->ConstantValue()->As<AInt>(), 9223372036854775808_a);
 }
+
+INSTANTIATE_TEST_SUITE_P(Not,
+                         ResolverConstEvalUnaryOpTest,
+                         testing::Combine(testing::Values(ast::UnaryOp::kNot),
+                                          testing::ValuesIn({
+                                              C(true, false),
+                                              C(false, true),
+                                              C(Vec(true, true), Vec(false, false)),
+                                              C(Vec(true, false), Vec(false, true)),
+                                              C(Vec(false, true), Vec(true, false)),
+                                              C(Vec(false, false), Vec(true, true)),
+                                          })));
 
 }  // namespace unary_op
 

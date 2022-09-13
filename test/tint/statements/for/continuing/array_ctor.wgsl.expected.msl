@@ -17,7 +17,7 @@ struct tint_array {
 void f() {
   int i = 0;
   while (true) {
-    if (!(false)) {
+    if (true) {
       break;
     }
     {

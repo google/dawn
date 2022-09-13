@@ -117,6 +117,13 @@ auto Dispatch_fa_f32_f16(F&& f, CONSTANTS&&... cs) {
         [&](const sem::F16*) { return f(cs->template As<f16>()...); });
 }
 
+/// Helper that calls `f` passing in the value of all `cs`.
+/// Assumes all `cs` are of the same type.
+template <typename F, typename... CONSTANTS>
+auto Dispatch_bool(F&& f, CONSTANTS&&... cs) {
+    return f(cs->template As<bool>()...);
+}
+
 /// ZeroTypeDispatch is a helper for calling the function `f`, passing a single zero-value argument
 /// of the C++ type that corresponds to the sem::Type `type`. For example, calling
 /// `ZeroTypeDispatch()` with a type of `sem::I32*` will call the function f with a single argument
@@ -969,6 +976,16 @@ ConstEval::ConstantResult ConstEval::OpUnaryMinus(const sem::Type* ty,
             }
         };
         return Dispatch_fia_fi32_f16(create, c);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
+ConstEval::ConstantResult ConstEval::OpNot(const sem::Type* ty,
+                                           utils::VectorRef<const sem::Constant*> args,
+                                           const Source&) {
+    auto transform = [&](const sem::Constant* c) {
+        auto create = [&](auto i) { return CreateElement(builder, c->Type(), decltype(i)(!i)); };
+        return Dispatch_bool(create, c);
     };
     return TransformElements(builder, ty, transform, args[0]);
 }

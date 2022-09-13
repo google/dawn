@@ -7,7 +7,7 @@ void unused_entry_point() {
 void f() {
   int i = 0;
   while (true) {
-    if (!(false)) {
+    if (true) {
       break;
     }
     {

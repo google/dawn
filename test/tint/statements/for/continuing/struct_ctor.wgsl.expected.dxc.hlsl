@@ -11,7 +11,7 @@ void f() {
   {
     int i = 0;
     [loop] while (true) {
-      if (!(false)) {
+      if (true) {
         break;
       }
       {
