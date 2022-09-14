@@ -102,18 +102,18 @@ class Pipe {
 
 /// Queries whether the file at the given path is an executable or DLL.
 bool ExecutableExists(const std::string& path) {
-    auto file = Handle(CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING,
-                                   FILE_ATTRIBUTE_READONLY, NULL));
+    auto file = Handle(CreateFileA(path.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr,
+                                   OPEN_EXISTING, FILE_ATTRIBUTE_READONLY, nullptr));
     if (!file) {
         return false;
     }
 
-    auto map = Handle(CreateFileMappingA(file, NULL, PAGE_READONLY, 0, 0, NULL));
+    auto map = Handle(CreateFileMappingA(file, nullptr, PAGE_READONLY, 0, 0, nullptr));
     if (map == INVALID_HANDLE_VALUE) {
         return false;
     }
 
-    void* addr_header = MapViewOfFileEx(map, FILE_MAP_READ, 0, 0, 0, NULL);
+    void* addr_header = MapViewOfFileEx(map, FILE_MAP_READ, 0, 0, 0, nullptr);
 
     // Dynamically obtain the address of, and call ImageNtHeader. This is done to avoid tint.exe
     // needing to statically link Dbghelp.lib.

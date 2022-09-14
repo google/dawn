@@ -160,19 +160,19 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
     programDesc.NumArgumentDescs = 1;
     programDesc.pArgumentDescs = &argumentDesc;
 
-    GetD3D12Device()->CreateCommandSignature(&programDesc, NULL,
+    GetD3D12Device()->CreateCommandSignature(&programDesc, nullptr,
                                              IID_PPV_ARGS(&mDispatchIndirectSignature));
 
     argumentDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW;
     programDesc.ByteStride = 4 * sizeof(uint32_t);
 
-    GetD3D12Device()->CreateCommandSignature(&programDesc, NULL,
+    GetD3D12Device()->CreateCommandSignature(&programDesc, nullptr,
                                              IID_PPV_ARGS(&mDrawIndirectSignature));
 
     argumentDesc.Type = D3D12_INDIRECT_ARGUMENT_TYPE_DRAW_INDEXED;
     programDesc.ByteStride = 5 * sizeof(uint32_t);
 
-    GetD3D12Device()->CreateCommandSignature(&programDesc, NULL,
+    GetD3D12Device()->CreateCommandSignature(&programDesc, nullptr,
                                              IID_PPV_ARGS(&mDrawIndexedIndirectSignature));
 
     DAWN_TRY(DeviceBase::Initialize(Queue::Create(this, &descriptor->defaultQueue)));

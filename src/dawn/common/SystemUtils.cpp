@@ -158,7 +158,7 @@ std::optional<std::string> GetModulePath() {
     }
 
     std::array<char, PATH_MAX> absolutePath;
-    if (realpath(dlInfo.dli_fname, absolutePath.data()) == NULL) {
+    if (realpath(dlInfo.dli_fname, absolutePath.data()) == nullptr) {
         return {};
     }
     return absolutePath.data();
