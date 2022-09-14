@@ -137,12 +137,16 @@ ShaderModule::ModuleAndSpirv ShaderModule::ConcurrentTransformedShaderModuleCach
     std::lock_guard<std::mutex> lock(mMutex);
     auto iter = mTransformedShaderModuleCache.find(key);
     if (iter == mTransformedShaderModuleCache.end()) {
-        mTransformedShaderModuleCache.emplace(key, std::make_pair(module, std::move(spirv)));
+        bool added = false;
+        std::tie(iter, added) =
+            mTransformedShaderModuleCache.emplace(key, std::make_pair(module, std::move(spirv)));
+        ASSERT(added);
     } else {
-        mDevice->GetFencedDeleter()->DeleteWhenUnused(module);
+        // No need to use FencedDeleter since this shader module was just created and does
+        // not need to wait for queue operations to complete.
+        // Also, use of fenced deleter here is not thread safe.
+        mDevice->fn.DestroyShaderModule(mDevice->GetVkDevice(), module, nullptr);
     }
-    // Now the key should exist in the map, so find it again and return it.
-    iter = mTransformedShaderModuleCache.find(key);
     return ModuleAndSpirv{
         iter->second.first,
         iter->second.second.Code(),
@@ -371,11 +375,12 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         if (BlobCache* cache = device->GetBlobCache()) {
             cache->EnsureStored(spirv);
         }
+        // Set the label on `newHandle` now, and not on `moduleAndSpirv.module` later
+        // since `moduleAndSpirv.module` may be in use by multiple threads.
+        SetDebugName(ToBackend(GetDevice()), newHandle, "Dawn_ShaderModule", GetLabel());
         moduleAndSpirv =
             mTransformedShaderModuleCache->AddOrGet(cacheKey, newHandle, spirv.Acquire());
     }
-
-    SetDebugName(ToBackend(GetDevice()), moduleAndSpirv.module, "Dawn_ShaderModule", GetLabel());
 
     return std::move(moduleAndSpirv);
 #else
