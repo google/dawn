@@ -40,28 +40,31 @@ func TestStringAndParse(t *testing.T) {
 	for _, test := range []Test{
 		{
 			result.Result{
-				Query:    Q(`a`),
-				Status:   result.Failure,
-				Duration: time.Second * 42,
+				Query:        Q(`a`),
+				Status:       result.Failure,
+				Duration:     time.Second * 42,
+				MayExonerate: false,
 			},
-			`a Failure 42s`,
+			`a Failure 42s false`,
 		}, {
 			result.Result{
-				Query:    Q(`a:b,c,*`),
-				Tags:     T("x"),
-				Status:   result.Pass,
-				Duration: time.Second * 42,
+				Query:        Q(`a:b,c,*`),
+				Tags:         T("x"),
+				Status:       result.Pass,
+				Duration:     time.Second * 42,
+				MayExonerate: true,
 			},
-			`a:b,c,* x Pass 42s`,
+			`a:b,c,* x Pass 42s true`,
 		},
 		{
 			result.Result{
-				Query:    Q(`a:b,c:d,*`),
-				Tags:     T("zzz", "x", "yy"),
-				Status:   result.Failure,
-				Duration: time.Second * 42,
+				Query:        Q(`a:b,c:d,*`),
+				Tags:         T("zzz", "x", "yy"),
+				Status:       result.Failure,
+				Duration:     time.Second * 42,
+				MayExonerate: false,
 			},
-			`a:b,c:d,* x,yy,zzz Failure 42s`,
+			`a:b,c:d,* x,yy,zzz Failure 42s false`,
 		},
 	} {
 		if diff := cmp.Diff(test.result.String(), test.expect); diff != "" {
@@ -85,7 +88,8 @@ func TestParseError(t *testing.T) {
 	}{
 		{``, `unable to parse result ''`},
 		{`a`, `unable to parse result 'a'`},
-		{`a b c d`, `unable to parse result 'a b c d': time: invalid duration "d"`},
+		{`a b c d e`, `unable to parse result 'a b c d e': time: invalid duration "d"`},
+		{`a b c 10s e`, `unable to parse result 'a b c 10s e': strconv.ParseBool: parsing "e": invalid syntax`},
 	} {
 		_, err := result.Parse(test.in)
 		got := ""
@@ -376,6 +380,31 @@ func TestReplaceDuplicates(t *testing.T) {
 			expect: result.List{
 				result.Result{Query: Q(`a`), Status: result.Abort},
 				result.Result{Query: Q(`b`), Status: result.Pass},
+			},
+		},
+		{ //////////////////////////////////////////////////////////////////////
+			location: utils.ThisLine(),
+			results: result.List{
+				result.Result{Query: Q(`a`), Status: result.Failure, Duration: 1, MayExonerate: true},
+				result.Result{Query: Q(`a`), Status: result.Failure, Duration: 3, MayExonerate: true},
+				result.Result{Query: Q(`b`), Status: result.Failure, Duration: 1, MayExonerate: false},
+				result.Result{Query: Q(`b`), Status: result.Failure, Duration: 3, MayExonerate: false},
+				result.Result{Query: Q(`c`), Status: result.Pass, Duration: 1, MayExonerate: false},
+				result.Result{Query: Q(`c`), Status: result.Pass, Duration: 3, MayExonerate: false},
+				result.Result{Query: Q(`d`), Status: result.Failure, Duration: 1, MayExonerate: true},
+				result.Result{Query: Q(`d`), Status: result.Pass, Duration: 3, MayExonerate: false},
+				result.Result{Query: Q(`e`), Status: result.Failure, Duration: 1, MayExonerate: false},
+				result.Result{Query: Q(`e`), Status: result.Pass, Duration: 3, MayExonerate: true},
+			},
+			fn: func(result.Statuses) result.Status {
+				return result.Abort
+			},
+			expect: result.List{
+				result.Result{Query: Q(`a`), Status: result.Failure, Duration: 2, MayExonerate: true},
+				result.Result{Query: Q(`b`), Status: result.Failure, Duration: 2, MayExonerate: false},
+				result.Result{Query: Q(`c`), Status: result.Pass, Duration: 2, MayExonerate: false},
+				result.Result{Query: Q(`d`), Status: result.Pass, Duration: 3, MayExonerate: false},
+				result.Result{Query: Q(`e`), Status: result.Failure, Duration: 1, MayExonerate: false},
 			},
 		},
 	} {

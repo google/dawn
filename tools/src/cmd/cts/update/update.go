@@ -21,6 +21,7 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
 	"dawn.googlesource.com/dawn/tools/src/cts/expectations"
+	"dawn.googlesource.com/dawn/tools/src/cts/result"
 	"go.chromium.org/luci/auth/client/authcli"
 )
 
@@ -64,6 +65,9 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	if err != nil {
 		return err
 	}
+
+	// Merge to remove duplicates
+	results = result.Merge(results)
 
 	// Load the expectations file
 	ex, err := expectations.Load(c.flags.expectations)

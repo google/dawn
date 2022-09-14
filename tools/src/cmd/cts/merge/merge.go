@@ -53,11 +53,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 			return fmt.Errorf("while reading '%v': %w", path, err)
 		}
 		// Combine and merge
-		if len(results) > 0 {
-			results = result.Merge(results, r)
-		} else {
-			results = r
-		}
+		results = result.Merge(results, r)
 	}
 
 	// Open output file

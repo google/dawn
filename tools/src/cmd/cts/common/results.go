@@ -219,6 +219,7 @@ func GetResults(
 		tags := result.NewTags()
 
 		duration := rpb.GetDuration().AsDuration()
+		mayExonerate := false
 
 		for _, sp := range rpb.Tags {
 			if sp.Key == "typ_tag" {
@@ -230,6 +231,12 @@ func GetResults(
 					return err
 				}
 			}
+			if sp.Key == "may_exonerate" {
+				var err error
+				if mayExonerate, err = strconv.ParseBool(sp.Value); err != nil {
+					return err
+				}
+			}
 		}
 
 		if status == result.Pass && duration > cfg.Test.SlowThreshold {
@@ -237,10 +244,11 @@ func GetResults(
 		}
 
 		results = append(results, result.Result{
-			Query:    query.Parse(testName),
-			Status:   status,
-			Tags:     tags,
-			Duration: duration,
+			Query:        query.Parse(testName),
+			Status:       status,
+			Tags:         tags,
+			Duration:     duration,
+			MayExonerate: mayExonerate,
 		})
 
 		return nil
