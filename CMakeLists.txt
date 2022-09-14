@@ -329,6 +329,10 @@ function(common_compile_options TARGET)
       target_link_options(${TARGET} PUBLIC -fsanitize=undefined)
     endif()
   endif(COMPILER_IS_LIKE_GNU)
+
+  if(MSVC)
+      target_compile_options(${TARGET} PUBLIC /utf-8)
+  endif()
 endfunction()
 
 if (${DAWN_ENABLE_TSAN})
