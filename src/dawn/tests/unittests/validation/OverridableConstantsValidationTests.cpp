@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <limits>
 #include <vector>
 
 #include "dawn/common/Constants.h"
@@ -215,5 +216,38 @@ TEST_F(ComputePipelineOverridableConstantsValidationTest, ConstantsIdentifierUni
         // Error: constant with numeric id cannot be referenced with variable name
         std::vector<wgpu::ConstantEntry> constants{{nullptr, "c10", 0}};
         ASSERT_DEVICE_ERROR(TestCreatePipeline(constants));
+    }
+}
+
+// Test that values like NaN and Inf are treated as invalid.
+TEST_F(ComputePipelineOverridableConstantsValidationTest, InvalidValue) {
+    SetUpShadersWithDefaultValueConstants();
+    {
+        // Error:: NaN
+        std::vector<wgpu::ConstantEntry> constants{{nullptr, "c3", std::nan("")}};
+        ASSERT_DEVICE_ERROR(TestCreatePipeline(constants));
+    }
+    {
+        // Error:: -NaN
+        std::vector<wgpu::ConstantEntry> constants{{nullptr, "c3", -std::nan("")}};
+        ASSERT_DEVICE_ERROR(TestCreatePipeline(constants));
+    }
+    {
+        // Error:: Inf
+        std::vector<wgpu::ConstantEntry> constants{
+            {nullptr, "c3", std::numeric_limits<double>::infinity()}};
+        ASSERT_DEVICE_ERROR(TestCreatePipeline(constants));
+    }
+    {
+        // Error:: -Inf
+        std::vector<wgpu::ConstantEntry> constants{
+            {nullptr, "c3", -std::numeric_limits<double>::infinity()}};
+        ASSERT_DEVICE_ERROR(TestCreatePipeline(constants));
+    }
+    {
+        // Valid:: Max
+        std::vector<wgpu::ConstantEntry> constants{
+            {nullptr, "c3", std::numeric_limits<double>::max()}};
+        TestCreatePipeline(constants);
     }
 }
