@@ -481,7 +481,7 @@ BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device,
                                          const BindGroupLayoutDescriptor* descriptor,
                                          PipelineCompatibilityToken pipelineCompatibilityToken)
     : BindGroupLayoutBase(device, descriptor, pipelineCompatibilityToken, kUntrackedByDevice) {
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)
@@ -489,7 +489,7 @@ BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device, ObjectBase::ErrorTa
 
 BindGroupLayoutBase::BindGroupLayoutBase(DeviceBase* device)
     : ApiObjectBase(device, kLabelNotImplemented) {
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 BindGroupLayoutBase::~BindGroupLayoutBase() = default;

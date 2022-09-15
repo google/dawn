@@ -114,7 +114,7 @@ ComputePassEncoder::ComputePassEncoder(DeviceBase* device,
                                        EncodingContext* encodingContext)
     : ProgrammableEncoder(device, descriptor->label, encodingContext),
       mCommandEncoder(commandEncoder) {
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 // static

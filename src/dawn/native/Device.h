@@ -333,8 +333,7 @@ class DeviceBase : public RefCountedWithExternalCount {
     };
     State GetState() const;
     bool IsLost() const;
-    void TrackObject(ApiObjectBase* object);
-    std::mutex* GetObjectListMutex(ObjectType type);
+    ApiObjectList* GetObjectTrackingList(ObjectType type);
 
     std::vector<const char*> GetTogglesUsed() const;
     WGSLExtensionSet GetWGSLExtensionAllowList() const;
@@ -548,12 +547,6 @@ class DeviceBase : public RefCountedWithExternalCount {
 
     State mState = State::BeingCreated;
 
-    // Encompasses the mutex and the actual list that contains all live objects "owned" by the
-    // device.
-    struct ApiObjectList {
-        std::mutex mutex;
-        LinkedList<ApiObjectBase> objects;
-    };
     PerObjectType<ApiObjectList> mObjectLists;
 
     FormatTable mFormatTable;

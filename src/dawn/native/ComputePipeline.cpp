@@ -47,14 +47,14 @@ ComputePipelineBase::ComputePipelineBase(DeviceBase* device,
           {{SingleShaderStage::Compute, descriptor->compute.module, descriptor->compute.entryPoint,
             descriptor->compute.constantCount, descriptor->compute.constants}}) {
     SetContentHash(ComputeContentHash());
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 
     // Initialize the cache key to include the cache type and device information.
     StreamIn(&mCacheKey, CacheKey::Type::ComputePipeline, device->GetCacheKey());
 }
 
 ComputePipelineBase::ComputePipelineBase(DeviceBase* device) : PipelineBase(device) {
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 ComputePipelineBase::ComputePipelineBase(DeviceBase* device, ObjectBase::ErrorTag tag)

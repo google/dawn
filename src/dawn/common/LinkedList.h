@@ -185,6 +185,9 @@ class LinkedList {
     // Appends |e| to the end of the linked list.
     void Append(LinkNode<T>* e) { e->InsertBefore(&root_); }
 
+    // Prepends |e| to the front og the linked list.
+    void Prepend(LinkNode<T>* e) { e->InsertAfter(&root_); }
+
     // Moves all elements (in order) of the list and appends them into |l| leaving the list empty.
     void MoveInto(LinkedList<T>* l) {
         if (empty()) {

@@ -552,7 +552,7 @@ TextureBase::TextureBase(DeviceBase* device,
     if (internalUsageDesc != nullptr) {
         mInternalUsage |= internalUsageDesc->internalUsage;
     }
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 TextureBase::~TextureBase() = default;
@@ -561,7 +561,7 @@ static constexpr Format kUnusedFormat;
 
 TextureBase::TextureBase(DeviceBase* device, TextureState state)
     : ApiObjectBase(device, kLabelNotImplemented), mFormat(kUnusedFormat), mState(state) {
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 TextureBase::TextureBase(DeviceBase* device,
@@ -578,6 +578,9 @@ TextureBase::TextureBase(DeviceBase* device,
 
 void TextureBase::DestroyImpl() {
     mState = TextureState::Destroyed;
+
+    // Destroy all of the views associated with the texture as well.
+    mTextureViews.Destroy();
 }
 
 // static
@@ -766,6 +769,10 @@ ResultOrError<Ref<TextureViewBase>> TextureBase::CreateView(
     return GetDevice()->CreateTextureView(this, descriptor);
 }
 
+ApiObjectList* TextureBase::GetViewTrackingList() {
+    return &mTextureViews;
+}
+
 TextureViewBase* TextureBase::APICreateView(const TextureViewDescriptor* descriptor) {
     DeviceBase* device = GetDevice();
 
@@ -831,14 +838,14 @@ TextureViewBase::TextureViewBase(TextureBase* texture, const TextureViewDescript
       mRange({ConvertViewAspect(mFormat, descriptor->aspect),
               {descriptor->baseArrayLayer, descriptor->arrayLayerCount},
               {descriptor->baseMipLevel, descriptor->mipLevelCount}}) {
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 TextureViewBase::TextureViewBase(TextureBase* texture)
     : ApiObjectBase(texture->GetDevice(), kLabelNotImplemented),
       mTexture(texture),
       mFormat(kUnusedFormat) {
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 TextureViewBase::TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag)
@@ -905,6 +912,11 @@ uint32_t TextureViewBase::GetLayerCount() const {
 const SubresourceRange& TextureViewBase::GetSubresourceRange() const {
     ASSERT(!IsError());
     return mRange;
+}
+
+ApiObjectList* TextureViewBase::GetObjectTrackingList() {
+    ASSERT(!IsError());
+    return mTexture->GetViewTrackingList();
 }
 
 }  // namespace dawn::native

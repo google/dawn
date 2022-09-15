@@ -450,11 +450,11 @@ BindGroupBase::BindGroupBase(DeviceBase* device,
         }
     }
 
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 BindGroupBase::BindGroupBase(DeviceBase* device) : ApiObjectBase(device, kLabelNotImplemented) {
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 BindGroupBase::~BindGroupBase() = default;

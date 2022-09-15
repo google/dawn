@@ -1089,12 +1089,12 @@ ShaderModuleBase::ShaderModuleBase(DeviceBase* device,
 
 ShaderModuleBase::ShaderModuleBase(DeviceBase* device, const ShaderModuleDescriptor* descriptor)
     : ShaderModuleBase(device, descriptor, kUntrackedByDevice) {
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 ShaderModuleBase::ShaderModuleBase(DeviceBase* device)
     : ApiObjectBase(device, kLabelNotImplemented) {
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 ShaderModuleBase::ShaderModuleBase(DeviceBase* device, ObjectBase::ErrorTag tag)

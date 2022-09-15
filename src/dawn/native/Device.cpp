@@ -338,7 +338,7 @@ void DeviceBase::DestroyObjects() {
     // can destroy the frontend cache.
 
     // clang-format off
-        static constexpr std::array<ObjectType, 19> kObjectTypeDependencyOrder = {
+        static constexpr std::array<ObjectType, 18> kObjectTypeDependencyOrder = {
             ObjectType::ComputePassEncoder,
             ObjectType::RenderPassEncoder,
             ObjectType::RenderBundleEncoder,
@@ -353,26 +353,15 @@ void DeviceBase::DestroyObjects() {
             ObjectType::BindGroupLayout,
             ObjectType::ShaderModule,
             ObjectType::ExternalTexture,
-            ObjectType::TextureView,
-            ObjectType::Texture,
+            ObjectType::Texture,  // Note that Textures own the TextureViews.
             ObjectType::QuerySet,
             ObjectType::Sampler,
             ObjectType::Buffer,
         };
     // clang-format on
 
-    // We first move all objects out from the tracking list into a separate list so that we can
-    // avoid locking the same mutex twice. We can then iterate across the separate list to call
-    // the actual destroy function.
-    LinkedList<ApiObjectBase> objects;
     for (ObjectType type : kObjectTypeDependencyOrder) {
-        ApiObjectList& objList = mObjectLists[type];
-        const std::lock_guard<std::mutex> lock(objList.mutex);
-        objList.objects.MoveInto(&objects);
-    }
-    while (!objects.empty()) {
-        // The destroy call should also remove the object from the list.
-        objects.head()->value()->Destroy();
+        mObjectLists[type].Destroy();
     }
 }
 
@@ -685,14 +674,8 @@ bool DeviceBase::IsLost() const {
     return mState != State::Alive;
 }
 
-void DeviceBase::TrackObject(ApiObjectBase* object) {
-    ApiObjectList& objectList = mObjectLists[object->GetType()];
-    std::lock_guard<std::mutex> lock(objectList.mutex);
-    object->InsertBefore(objectList.objects.head());
-}
-
-std::mutex* DeviceBase::GetObjectListMutex(ObjectType type) {
-    return &mObjectLists[type].mutex;
+ApiObjectList* DeviceBase::GetObjectTrackingList(ObjectType type) {
+    return &mObjectLists[type];
 }
 
 AdapterBase* DeviceBase::GetAdapter() const {

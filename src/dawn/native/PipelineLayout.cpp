@@ -71,12 +71,12 @@ PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
 PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device,
                                        const PipelineLayoutDescriptor* descriptor)
     : PipelineLayoutBase(device, descriptor, kUntrackedByDevice) {
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device)
     : ApiObjectBase(device, kLabelNotImplemented) {
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 PipelineLayoutBase::PipelineLayoutBase(DeviceBase* device, ObjectBase::ErrorTag tag)

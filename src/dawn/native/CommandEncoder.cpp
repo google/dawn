@@ -718,7 +718,7 @@ CommandEncoder* CommandEncoder::MakeError(DeviceBase* device) {
 
 CommandEncoder::CommandEncoder(DeviceBase* device, const CommandEncoderDescriptor* descriptor)
     : ApiObjectBase(device, descriptor->label), mEncodingContext(device, this) {
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 
     const DawnEncoderInternalUsageDescriptor* internalUsageDesc = nullptr;
     FindInChain(descriptor->nextInChain, &internalUsageDesc);

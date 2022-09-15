@@ -92,6 +92,7 @@ class TextureBase : public ApiObjectBase {
 
     ResultOrError<Ref<TextureViewBase>> CreateView(
         const TextureViewDescriptor* descriptor = nullptr);
+    ApiObjectList* GetViewTrackingList();
 
     // Dawn API
     TextureViewBase* APICreateView(const TextureViewDescriptor* descriptor = nullptr);
@@ -129,6 +130,10 @@ class TextureBase : public ApiObjectBase {
     TextureState mState;
     wgpu::TextureFormat mFormatEnumForReflection;
 
+    // Textures track texture views created from them so that they can be destroyed when the texture
+    // is destroyed.
+    ApiObjectList mTextureViews;
+
     // TODO(crbug.com/dawn/845): Use a more optimized data structure to save space
     std::vector<bool> mIsSubresourceContentInitializedAtIndex;
 };
@@ -161,6 +166,8 @@ class TextureViewBase : public ApiObjectBase {
 
   private:
     TextureViewBase(DeviceBase* device, ObjectBase::ErrorTag tag);
+
+    ApiObjectList* GetObjectTrackingList() override;
 
     Ref<TextureBase> mTexture;
 

@@ -117,7 +117,7 @@ TextureDescriptor GetSwapChainBaseTextureDescriptor(NewSwapChainBase* swapChain)
 // SwapChainBase
 
 SwapChainBase::SwapChainBase(DeviceBase* device) : ApiObjectBase(device, kLabelNotImplemented) {
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 SwapChainBase::SwapChainBase(DeviceBase* device, ObjectBase::ErrorTag tag)

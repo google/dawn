@@ -107,11 +107,11 @@ QuerySetBase::QuerySetBase(DeviceBase* device, const QuerySetDescriptor* descrip
     }
 
     mQueryAvailability.resize(descriptor->count);
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 QuerySetBase::QuerySetBase(DeviceBase* device) : ApiObjectBase(device, kLabelNotImplemented) {
-    TrackInDevice();
+    GetObjectTrackingList()->Track(this);
 }
 
 QuerySetBase::QuerySetBase(DeviceBase* device,
