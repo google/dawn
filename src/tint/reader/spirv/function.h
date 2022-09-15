@@ -804,6 +804,11 @@ class FunctionEmitter {
     /// @returns an AST expression for the instruction, or nullptr.
     TypedExpression EmitGlslStd450ExtInst(const spvtools::opt::Instruction& inst);
 
+    /// Creates an expression for the GLSL.std.450 matrix `inverse` extended instruction.
+    /// @param inst a SPIR-V OpExtInst instruction from GLSL.std.450
+    /// @returns an AST expression for the instruction, or nullptr.
+    TypedExpression EmitGlslStd450MatrixInverse(const spvtools::opt::Instruction& inst);
+
     /// Creates an expression for OpCompositeExtract
     /// @param inst an OpCompositeExtract instruction.
     /// @returns an AST expression for the instruction, or nullptr.

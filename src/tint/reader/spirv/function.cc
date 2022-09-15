@@ -415,8 +415,6 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
         case GLSLstd450Acosh:
         case GLSLstd450Atanh:
 
-        case GLSLstd450MatrixInverse:
-
         case GLSLstd450Modf:
         case GLSLstd450ModfStruct:
         case GLSLstd450IMix:
@@ -4043,6 +4041,11 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
             default:
                 break;
         }
+    } else {
+        switch (ext_opcode) {
+            case GLSLstd450MatrixInverse:
+                return EmitGlslStd450MatrixInverse(inst);
+        }
     }
 
     const auto name = GetGlslStd450FuncName(ext_opcode);
@@ -4065,6 +4068,196 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
     auto* call = create<ast::CallExpression>(Source{}, func, std::move(operands));
     TypedExpression call_expr{result_type, call};
     return parser_impl_.RectifyForcedResultType(call_expr, inst, first_operand_type);
+}
+
+TypedExpression FunctionEmitter::EmitGlslStd450MatrixInverse(
+    const spvtools::opt::Instruction& inst) {
+    auto mat = MakeOperand(inst, 2);
+    auto* mat_ty = mat.type->As<Matrix>();
+    TINT_ASSERT(Reader, mat_ty);
+    TINT_ASSERT(Reader, mat_ty->columns == mat_ty->rows);
+    auto& pb = builder_;
+
+    auto idx = [&](size_t row, size_t col) {
+        return pb.IndexAccessor(pb.IndexAccessor(mat.expr, u32(row)), u32(col));
+    };
+
+    // Compute and save determinant to a let
+    auto* det = pb.Div(1.0_f, pb.Call(Source{}, "determinant", mat.expr));
+    auto s = pb.Symbols().New("s");
+    AddStatement(pb.Decl(pb.Let(s, det)));
+
+    // Returns (a * b) - (c * d)
+    auto sub_mul2 = [&](auto* a, auto* b, auto* c, auto* d) {
+        return pb.Sub(pb.Mul(a, b), pb.Mul(c, d));
+    };
+
+    // Returns (a * b) - (c * d) + (e * f)
+    auto sub_add_mul3 = [&](auto* a, auto* b, auto* c, auto* d, auto* e, auto* f) {
+        return pb.Add(pb.Sub(pb.Mul(a, b), pb.Mul(c, d)), pb.Mul(e, f));
+    };
+
+    // Returns (a * b) + (c * d) - (e * f)
+    auto add_sub_mul3 = [&](auto* a, auto* b, auto* c, auto* d, auto* e, auto* f) {
+        return pb.Sub(pb.Add(pb.Mul(a, b), pb.Mul(c, d)), pb.Mul(e, f));
+    };
+
+    // Returns -a
+    auto neg = [&](auto&& a) { return pb.Negation(a); };
+
+    switch (mat_ty->columns) {
+        case 2: {
+            // a, b
+            // c, d
+            auto* a = idx(0, 0);
+            auto* b = idx(0, 1);
+            auto* c = idx(1, 0);
+            auto* d = idx(1, 1);
+
+            // s * d, -s * b, -s * c, s * a
+            auto* r = pb.mat2x2<f32>(  //
+                pb.vec2<f32>(pb.Mul(s, d), pb.Mul(neg(s), b)),
+                pb.vec2<f32>(pb.Mul(neg(s), c), pb.Mul(s, a)));
+            return {mat.type, r};
+        }
+
+        case 3: {
+            // a, b, c,
+            // d, e, f,
+            // g, h, i
+            auto* a = idx(0, 0);
+            auto* b = idx(0, 1);
+            auto* c = idx(0, 2);
+            auto* d = idx(1, 0);
+            auto* e = idx(1, 1);
+            auto* f = idx(1, 2);
+            auto* g = idx(2, 0);
+            auto* h = idx(2, 1);
+            auto* i = idx(2, 2);
+
+            auto r = pb.Mul(s,               //
+                            pb.mat3x3<f32>(  //
+                                pb.vec3<f32>(
+                                    // e * i - f * h
+                                    sub_mul2(e, i, f, h),
+                                    // c * h - b * i
+                                    sub_mul2(c, h, b, i),
+                                    // b * f - c * e
+                                    sub_mul2(b, f, c, e)),
+                                pb.vec3<f32>(
+                                    // f * g - d * i
+                                    sub_mul2(f, g, d, i),
+                                    // a * i - c * g
+                                    sub_mul2(a, i, c, g),
+                                    // c * d - a * f
+                                    sub_mul2(c, d, a, f)),
+                                pb.vec3<f32>(
+                                    // d * h - e * g
+                                    sub_mul2(d, h, e, g),
+                                    // b * g - a * h
+                                    sub_mul2(b, g, a, h),
+                                    // a * e - b * d
+                                    sub_mul2(a, e, b, d))));
+            return {mat.type, r};
+        }
+
+        case 4: {
+            // a, b, c, d,
+            // e, f, g, h,
+            // i, j, k, l,
+            // m, n, o, p
+            auto* a = idx(0, 0);
+            auto* b = idx(0, 1);
+            auto* c = idx(0, 2);
+            auto* d = idx(0, 3);
+            auto* e = idx(1, 0);
+            auto* f = idx(1, 1);
+            auto* g = idx(1, 2);
+            auto* h = idx(1, 3);
+            auto* i = idx(2, 0);
+            auto* j = idx(2, 1);
+            auto* k = idx(2, 2);
+            auto* l = idx(2, 3);
+            auto* m = idx(3, 0);
+            auto* n = idx(3, 1);
+            auto* o = idx(3, 2);
+            auto* p = idx(3, 3);
+
+            // kplo = k * p - l * o, jpln = j * p - l * n, jokn = j * o - k * n;
+            auto* kplo = sub_mul2(k, p, l, o);
+            auto* jpln = sub_mul2(j, p, l, n);
+            auto* jokn = sub_mul2(j, o, k, n);
+
+            // gpho = g * p - h * o, fphn = f * p - h * n, fogn = f * o - g * n;
+            auto* gpho = sub_mul2(g, p, h, o);
+            auto* fphn = sub_mul2(f, p, h, n);
+            auto* fogn = sub_mul2(f, o, g, n);
+
+            // glhk = g * l - h * k, flhj = f * l - h * j, fkgj = f * k - g * j;
+            auto* glhk = sub_mul2(g, l, h, k);
+            auto* flhj = sub_mul2(f, l, h, j);
+            auto* fkgj = sub_mul2(f, k, g, j);
+
+            // iplm = i * p - l * m, iokm = i * o - k * m, ephm = e * p - h * m;
+            auto* iplm = sub_mul2(i, p, l, m);
+            auto* iokm = sub_mul2(i, o, k, m);
+            auto* ephm = sub_mul2(e, p, h, m);
+
+            // eogm = e * o - g * m, elhi = e * l - h * i, ekgi = e * k - g * i;
+            auto* eogm = sub_mul2(e, o, g, m);
+            auto* elhi = sub_mul2(e, l, h, i);
+            auto* ekgi = sub_mul2(e, k, g, i);
+
+            // injm = i * n - j * m, enfm = e * n - f * m, ejfi = e * j - f * i;
+            auto* injm = sub_mul2(i, n, j, m);
+            auto* enfm = sub_mul2(e, n, f, m);
+            auto* ejfi = sub_mul2(e, j, f, i);
+
+            auto r = pb.Mul(s,               //
+                            pb.mat4x4<f32>(  //
+                                pb.vec4<f32>(
+                                    // f * kplo - g * jpln + h * jokn
+                                    sub_add_mul3(f, kplo, g, jpln, h, jokn),
+                                    // -b * kplo + c * jpln - d * jokn
+                                    add_sub_mul3(neg(b), kplo, c, jpln, d, jokn),
+                                    // b * gpho - c * fphn + d * fogn
+                                    sub_add_mul3(b, gpho, c, fphn, d, fogn),
+                                    // -b * glhk + c * flhj - d * fkgj
+                                    add_sub_mul3(neg(b), glhk, c, flhj, d, fkgj)),
+                                pb.vec4<f32>(
+                                    // -e * kplo + g * iplm - h * iokm
+                                    add_sub_mul3(neg(e), kplo, g, iplm, h, iokm),
+                                    // a * kplo - c * iplm + d * iokm
+                                    sub_add_mul3(a, kplo, c, iplm, d, iokm),
+                                    // -a * gpho + c * ephm - d * eogm
+                                    add_sub_mul3(neg(a), gpho, c, ephm, d, eogm),
+                                    // a * glhk - c * elhi + d * ekgi
+                                    sub_add_mul3(a, glhk, c, elhi, d, ekgi)),
+                                pb.vec4<f32>(
+                                    // e * jpln - f * iplm + h * injm
+                                    sub_add_mul3(e, jpln, f, iplm, h, injm),
+                                    // -a * jpln + b * iplm - d * injm
+                                    add_sub_mul3(neg(a), jpln, b, iplm, d, injm),
+                                    // a * fphn - b * ephm + d * enfm
+                                    sub_add_mul3(a, fphn, b, ephm, d, enfm),
+                                    // -a * flhj + b * elhi - d * ejfi
+                                    add_sub_mul3(neg(a), flhj, b, elhi, d, ejfi)),
+                                pb.vec4<f32>(
+                                    // -e * jokn + f * iokm - g * injm
+                                    add_sub_mul3(neg(e), jokn, f, iokm, g, injm),
+                                    // a * jokn - b * iokm + c * injm
+                                    sub_add_mul3(a, jokn, b, iokm, c, injm),
+                                    // -a * fogn + b * eogm - c * enfm
+                                    add_sub_mul3(neg(a), fogn, b, eogm, c, enfm),
+                                    // a * fkgj - b * ekgi + c * ejfi
+                                    sub_add_mul3(a, fkgj, b, ekgi, c, ejfi))));
+            return {mat.type, r};
+        }
+    }
+
+    const auto ext_opcode = inst.GetSingleWordInOperand(1);
+    Fail() << "invalid matrix size for " << GetGlslStd450FuncName(ext_opcode);
+    return {};
 }
 
 ast::IdentifierExpression* FunctionEmitter::Swizzle(uint32_t i) {
