@@ -113,6 +113,11 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
         DAWN_INVALID_IF(texture.multisampled && viewDimension != wgpu::TextureViewDimension::e2D,
                         "View dimension (%s) for a multisampled texture bindings was not %s.",
                         viewDimension, wgpu::TextureViewDimension::e2D);
+
+        DAWN_INVALID_IF(
+            texture.multisampled && texture.sampleType == wgpu::TextureSampleType::Float,
+            "Sample type for multisampled texture bindings must not be %s.",
+            wgpu::TextureSampleType::Float);
     }
 
     if (entry.storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
