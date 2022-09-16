@@ -781,7 +781,7 @@ TEST_F(BindGroupValidationTest, BufferOffsetAlignment) {
 // Tests constraints on the texture for MultisampledTexture bindings
 TEST_F(BindGroupValidationTest, MultisampledTexture) {
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
-        device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::Float,
+        device, {{0, wgpu::ShaderStage::Fragment, wgpu::TextureSampleType::UnfilterableFloat,
                   wgpu::TextureViewDimension::e2D, true}});
 
     wgpu::BindGroupEntry binding;
@@ -1420,63 +1420,70 @@ TEST_F(BindGroupLayoutValidationTest, DynamicBufferNumberLimit) {
 // Test that multisampled textures must be 2D sampled textures
 TEST_F(BindGroupLayoutValidationTest, MultisampledTextureViewDimension) {
     // Multisampled 2D texture works.
-    utils::MakeBindGroupLayout(device,
-                               {
-                                   {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float,
-                                    wgpu::TextureViewDimension::e2D, true},
-                               });
+    utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::UnfilterableFloat,
+                     wgpu::TextureViewDimension::e2D, true},
+                });
 
     // Multisampled 2D (defaulted) texture works.
-    utils::MakeBindGroupLayout(device,
-                               {
-                                   {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float,
-                                    wgpu::TextureViewDimension::Undefined, true},
-                               });
+    utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::UnfilterableFloat,
+                     wgpu::TextureViewDimension::Undefined, true},
+                });
 
     // Multisampled 2D array texture is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float,
+                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::UnfilterableFloat,
                      wgpu::TextureViewDimension::e2DArray, true},
                 }));
 
     // Multisampled cube texture is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float,
+                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::UnfilterableFloat,
                      wgpu::TextureViewDimension::Cube, true},
                 }));
 
     // Multisampled cube array texture is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float,
+                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::UnfilterableFloat,
                      wgpu::TextureViewDimension::CubeArray, true},
                 }));
 
     // Multisampled 3D texture is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float,
+                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::UnfilterableFloat,
                      wgpu::TextureViewDimension::e3D, true},
                 }));
 
     // Multisampled 1D texture is invalid.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroupLayout(
         device, {
-                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float,
+                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::UnfilterableFloat,
                      wgpu::TextureViewDimension::e1D, true},
                 }));
 }
 
 // Test that multisampled texture bindings are valid
 TEST_F(BindGroupLayoutValidationTest, MultisampledTextureSampleType) {
-    // Multisampled float sample type works.
-    utils::MakeBindGroupLayout(device,
-                               {
-                                   {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float,
-                                    wgpu::TextureViewDimension::e2D, true},
-                               });
+    // Multisampled float sample type deprecated.
+    EXPECT_DEPRECATION_WARNING(utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::Float,
+                     wgpu::TextureViewDimension::e2D, true},
+                }));
+
+    // Multisampled unfilterable float sample type works.
+    utils::MakeBindGroupLayout(
+        device, {
+                    {0, wgpu::ShaderStage::Compute, wgpu::TextureSampleType::UnfilterableFloat,
+                     wgpu::TextureViewDimension::e2D, true},
+                });
 
     // Multisampled uint sample type works.
     utils::MakeBindGroupLayout(device,

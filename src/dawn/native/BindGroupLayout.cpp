@@ -113,6 +113,14 @@ MaybeError ValidateBindGroupLayoutEntry(DeviceBase* device,
         DAWN_INVALID_IF(texture.multisampled && viewDimension != wgpu::TextureViewDimension::e2D,
                         "View dimension (%s) for a multisampled texture bindings was not %s.",
                         viewDimension, wgpu::TextureViewDimension::e2D);
+
+        if (texture.multisampled && texture.sampleType == wgpu::TextureSampleType::Float) {
+            std::string warning = absl::StrFormat(
+                "Sample type %s for multisampled texture bindings is deprecated "
+                "and will be invalid in a future version.",
+                wgpu::TextureSampleType::Float);
+            device->EmitDeprecationWarning(warning.c_str());
+        }
     }
 
     if (entry.storageTexture.access != wgpu::StorageTextureAccess::Undefined) {
