@@ -64,13 +64,10 @@
         {%- set Optional = "Optional" if member.optional else "" -%}
         WIRE_TRY(provider.Get{{Optional}}Id({{in}}, &{{out}}));
     {%- elif member.type.category == "structure" -%}
-        {%- if member.type.is_wire_transparent -%}
-            static_assert(sizeof({{out}}) == sizeof({{in}}), "Serialize memcpy size must match.");
-            memcpy(&{{out}}, &{{in}}, {{member_transfer_sizeof(member)}});
-        {%- else -%}
-            {%- set Provider = ", provider" if member.type.may_have_dawn_object else "" -%}
-            WIRE_TRY({{as_cType(member.type.name)}}Serialize({{in}}, &{{out}}, buffer{{Provider}}));
-        {%- endif -%}
+        //* Do not memcpy or we may serialize padding bytes which can leak information across a
+        //* trusted boundary.
+        {%- set Provider = ", provider" if member.type.may_have_dawn_object else "" -%}
+        WIRE_TRY({{as_cType(member.type.name)}}Serialize({{in}}, &{{out}}, buffer{{Provider}}));
     {%- else -%}
         {{out}} = {{in}};
     {%- endif -%}
