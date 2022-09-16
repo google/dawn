@@ -1445,6 +1445,23 @@ ConstEval::ConstantResult ConstEval::OpOr(const sem::Type* ty,
     return r;
 }
 
+ConstEval::ConstantResult ConstEval::OpXor(const sem::Type* ty,
+                                           utils::VectorRef<const sem::Constant*> args,
+                                           const Source&) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        auto create = [&](auto i, auto j) -> const Constant* {
+            return CreateElement(builder, sem::Type::DeepestElementOf(ty), decltype(i){i ^ j});
+        };
+        return Dispatch_ia_iu32(create, c0, c1);
+    };
+
+    auto r = TransformElements(builder, ty, transform, args[0], args[1]);
+    if (builder.Diagnostics().contains_errors()) {
+        return utils::Failure;
+    }
+    return r;
+}
+
 ConstEval::ConstantResult ConstEval::atan2(const sem::Type* ty,
                                            utils::VectorRef<const sem::Constant*> args,
                                            const Source&) {

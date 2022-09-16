@@ -3675,6 +3675,43 @@ TEST_F(ResolverConstEvalTest, NotAndOrOfVecs) {
     });
 }
 
+template <typename T>
+std::vector<Case> XorCases() {
+    using B = BitValues<T>;
+    return {
+        C(T{0b1010}, T{0b1111}, T{0b0101}),
+        C(T{0b1010}, T{0b0000}, T{0b1010}),
+        C(T{0b1010}, T{0b0011}, T{0b1001}),
+        C(T{0b1010}, T{0b1100}, T{0b0110}),
+        C(T{0b1010}, T{0b0101}, T{0b1111}),
+        C(B::All, B::All, T{0}),
+        C(B::LeftMost, B::LeftMost, T{0}),
+        C(B::RightMost, B::RightMost, T{0}),
+        C(B::All, T{0}, B::All),
+        C(T{0}, B::All, B::All),
+        C(B::LeftMost, B::AllButLeftMost, B::All),
+        C(B::AllButLeftMost, B::LeftMost, B::All),
+        C(B::RightMost, B::AllButRightMost, B::All),
+        C(B::AllButRightMost, B::RightMost, B::All),
+        C(Vec(B::All, B::LeftMost, B::RightMost),             //
+          Vec(B::All, B::All, B::All),                        //
+          Vec(T{0}, B::AllButLeftMost, B::AllButRightMost)),  //
+        C(Vec(B::All, B::LeftMost, B::RightMost),             //
+          Vec(T{0}, T{0}, T{0}),                              //
+          Vec(B::All, B::LeftMost, B::RightMost)),            //
+        C(Vec(B::LeftMost, B::RightMost),                     //
+          Vec(B::AllButLeftMost, B::AllButRightMost),         //
+          Vec(B::All, B::All)),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(Xor,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(  //
+                             testing::Values(ast::BinaryOp::kXor),
+                             testing::ValuesIn(Concat(XorCases<AInt>(),  //
+                                                      XorCases<i32>(),   //
+                                                      XorCases<u32>()))));
+
 // Tests for errors on overflow/underflow of binary operations with abstract numbers
 struct OverflowCase {
     ast::BinaryOp op;
