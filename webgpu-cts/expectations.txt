@@ -542,16 +542,6 @@ crbug.com/tint/0000 webgpu:shader,validation,parse,identifiers:identifiers:* [ F
 ################################################################################
 # API validation failures
 ################################################################################
-crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,input:isAsync=false;numScalarDelta=-3;useExtraBuiltinInputs=true [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,input:isAsync=false;numScalarDelta=0;useExtraBuiltinInputs=false [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,input:isAsync=true;numScalarDelta=-3;useExtraBuiltinInputs=true [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,input:isAsync=true;numScalarDelta=0;useExtraBuiltinInputs=false [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,output:isAsync=false;numScalarDelta=-1;topology="point-list" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,output:isAsync=false;numScalarDelta=0;topology="triangle-list" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,output:isAsync=true;numScalarDelta=-1;topology="point-list" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:max_components_count,output:isAsync=true;numScalarDelta=0;topology="triangle-list" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:max_shader_variable_location:isAsync=false;locationDelta=-1 [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,render_pipeline,inter_stage:max_shader_variable_location:isAsync=true;locationDelta=-1 [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,shader_module,entry_point:compute:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,shader_module,entry_point:compute:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,shader_module,entry_point:compute:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]

@@ -288,21 +288,21 @@ TEST_F(ShaderModuleValidationTest, MaximumShaderIOLocations) {
         }
     };
 
-    constexpr uint32_t kMaxInterShaderIOLocation = kMaxInterStageShaderComponents / 4 - 1;
+    // It is allowed to create a shader module with the maximum active vertex output location ==
+    // (kMaxInterStageShaderVariables - 1);
+    CheckTestPipeline(true, kMaxInterStageShaderVariables - 1, wgpu::ShaderStage::Vertex);
 
-    // It is allowed to create a shader module with the maximum active vertex output location == 14;
-    CheckTestPipeline(true, kMaxInterShaderIOLocation, wgpu::ShaderStage::Vertex);
-
-    // It isn't allowed to create a shader module with the maximum active vertex output location >
-    // 14;
-    CheckTestPipeline(false, kMaxInterShaderIOLocation + 1, wgpu::ShaderStage::Vertex);
+    // It isn't allowed to create a shader module with the maximum active vertex output location ==
+    // kMaxInterStageShaderVariables;
+    CheckTestPipeline(false, kMaxInterStageShaderVariables, wgpu::ShaderStage::Vertex);
 
     // It is allowed to create a shader module with the maximum active fragment input location ==
-    // 14;
-    CheckTestPipeline(true, kMaxInterShaderIOLocation, wgpu::ShaderStage::Fragment);
+    // (kMaxInterStageShaderVariables - 1);
+    CheckTestPipeline(true, kMaxInterStageShaderVariables - 1, wgpu::ShaderStage::Fragment);
 
-    // It is allowed to create a shader module with the maximum active vertex output location > 14;
-    CheckTestPipeline(false, kMaxInterShaderIOLocation + 1, wgpu::ShaderStage::Fragment);
+    // It isn't allowed to create a shader module with the maximum active vertex output location ==
+    // kMaxInterStageShaderVariables;
+    CheckTestPipeline(false, kMaxInterStageShaderVariables, wgpu::ShaderStage::Fragment);
 }
 
 // Validate the maximum number of total inter-stage user-defined variable component count and
@@ -311,7 +311,8 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
     auto CheckTestPipeline = [&](bool success,
                                  uint32_t totalUserDefinedInterStageShaderComponentCount,
                                  wgpu::ShaderStage failingShaderStage,
-                                 const char* extraBuiltInDeclarations = "") {
+                                 const char* extraBuiltInDeclarations = "",
+                                 bool usePointListAsPrimitiveType = false) {
         // Build the ShaderIO struct containing totalUserDefinedInterStageShaderComponentCount
         // components. Components are added in two parts, a bunch of vec4s, then one additional
         // variable for the remaining components.
@@ -347,11 +348,20 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
         // string "failingVertex" or "failingFragment" in the error message.
         utils::ComboRenderPipelineDescriptor pDesc;
         pDesc.cTargets[0].format = wgpu::TextureFormat::RGBA8Unorm;
+        if (usePointListAsPrimitiveType) {
+            pDesc.primitive.topology = wgpu::PrimitiveTopology::PointList;
+        } else {
+            pDesc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+        }
 
         const char* errorMatcher = nullptr;
         switch (failingShaderStage) {
             case wgpu::ShaderStage::Vertex: {
-                errorMatcher = "failingVertex";
+                if (usePointListAsPrimitiveType) {
+                    errorMatcher = "PointList";
+                } else {
+                    errorMatcher = "failingVertex";
+                }
                 pDesc.vertex.entryPoint = "failingVertex";
                 pDesc.vertex.module = utils::CreateShaderModule(device, (ioStruct + R"(
                     @vertex fn failingVertex() -> ShaderIO {
@@ -408,20 +418,28 @@ TEST_F(ShaderModuleValidationTest, MaximumInterStageShaderComponents) {
         CheckTestPipeline(false, kMaxInterStageShaderComponents + 1, wgpu::ShaderStage::Fragment);
     }
 
-    // @builtin(position) should be counted into the maximum inter-stage component count.
-    // Note that in vertex shader we always have @position so we don't need to specify it
-    // again in the parameter "builtInDeclarations" of generateShaderForTest().
+    // Verify the total user-defined vertex output component count must be less than
+    // kMaxInterStageShaderComponents.
     {
-        CheckTestPipeline(true, kMaxInterStageShaderComponents - 4, wgpu::ShaderStage::Vertex);
-        CheckTestPipeline(false, kMaxInterStageShaderComponents - 3, wgpu::ShaderStage::Vertex);
+        CheckTestPipeline(true, kMaxInterStageShaderComponents, wgpu::ShaderStage::Vertex);
+        CheckTestPipeline(false, kMaxInterStageShaderComponents + 1, wgpu::ShaderStage::Vertex);
     }
 
-    // @builtin(position) in fragment shaders should be counted into the maximum inter-stage
+    // Verify the total user-defined vertex output component count must be less than
+    // (kMaxInterStageShaderComponents - 1) when the primitive topology is PointList.
+    {
+        constexpr bool kUsePointListAsPrimitiveTopology = true;
+        const char* kExtraBuiltins = "";
+        CheckTestPipeline(true, kMaxInterStageShaderComponents - 1, wgpu::ShaderStage::Vertex,
+                          kExtraBuiltins, kUsePointListAsPrimitiveTopology);
+        CheckTestPipeline(false, kMaxInterStageShaderComponents, wgpu::ShaderStage::Vertex,
+                          kExtraBuiltins, kUsePointListAsPrimitiveTopology);
+    }
+
+    // @builtin(position) in fragment shaders shouldn't be counted into the maximum inter-stage
     // component count.
     {
-        CheckTestPipeline(true, kMaxInterStageShaderComponents - 4, wgpu::ShaderStage::Fragment,
-                          "@builtin(position) fragCoord : vec4<f32>,");
-        CheckTestPipeline(false, kMaxInterStageShaderComponents - 3, wgpu::ShaderStage::Fragment,
+        CheckTestPipeline(true, kMaxInterStageShaderComponents, wgpu::ShaderStage::Fragment,
                           "@builtin(position) fragCoord : vec4<f32>,");
     }
 

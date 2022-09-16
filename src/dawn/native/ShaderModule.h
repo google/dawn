@@ -210,6 +210,7 @@ struct EntryPointMetadata {
     // inputs and outputs in one shader stage.
     std::bitset<kMaxInterStageShaderVariables> usedInterStageVariables;
     std::array<InterStageVariableInfo, kMaxInterStageShaderVariables> interStageVariables;
+    uint32_t totalInterStageShaderComponents;
 
     // The shader stage for this binding.
     SingleShaderStage stage;

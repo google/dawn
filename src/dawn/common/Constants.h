@@ -25,7 +25,7 @@ static constexpr uint32_t kNumStages = 3;
 static constexpr uint8_t kMaxColorAttachments = 8u;
 static constexpr uint32_t kTextureBytesPerRowAlignment = 256u;
 static constexpr uint32_t kMaxInterStageShaderComponents = 60u;
-static constexpr uint32_t kMaxInterStageShaderVariables = kMaxInterStageShaderComponents / 4;
+static constexpr uint32_t kMaxInterStageShaderVariables = 16u;
 
 // Per stage limits
 static constexpr uint32_t kMaxSampledTexturesPerShaderStage = 16;
