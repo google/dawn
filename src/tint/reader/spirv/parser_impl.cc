@@ -2053,7 +2053,8 @@ TypedExpression ParserImpl::RectifyOperandSignedness(const spvtools::opt::Instru
         Fail() << "internal error: RectifyOperandSignedness given a null expr\n";
         return {};
     }
-    auto* type = expr.type;
+    // TODO(crbug.com/tint/1669) should this unpack aliases too?
+    auto* type = expr.type->UnwrapRef();
     if (!type) {
         Fail() << "internal error: unmapped type for: " << expr.expr->TypeInfo().name << "\n";
         return {};
@@ -2078,12 +2079,12 @@ TypedExpression ParserImpl::RectifyOperandSignedness(const spvtools::opt::Instru
 TypedExpression ParserImpl::RectifySecondOperandSignedness(const spvtools::opt::Instruction& inst,
                                                            const Type* first_operand_type,
                                                            TypedExpression&& second_operand_expr) {
-    if ((first_operand_type != second_operand_expr.type) &&
+    const Type* target_type = first_operand_type->UnwrapRef();
+    if ((target_type != second_operand_expr.type->UnwrapRef()) &&
         AssumesSecondOperandSignednessMatchesFirstOperand(inst.opcode())) {
         // Conversion is required.
-        return {first_operand_type,
-                create<ast::BitcastExpression>(Source{}, first_operand_type->Build(builder_),
-                                               second_operand_expr.expr)};
+        return {target_type, create<ast::BitcastExpression>(Source{}, target_type->Build(builder_),
+                                                            second_operand_expr.expr)};
     }
     // No conversion necessary.
     return std::move(second_operand_expr);
@@ -2091,6 +2092,7 @@ TypedExpression ParserImpl::RectifySecondOperandSignedness(const spvtools::opt::
 
 const Type* ParserImpl::ForcedResultType(const spvtools::opt::Instruction& inst,
                                          const Type* first_operand_type) {
+    first_operand_type = first_operand_type->UnwrapRef();
     const auto opcode = inst.opcode();
     if (AssumesResultSignednessMatchesFirstOperand(opcode)) {
         return first_operand_type;

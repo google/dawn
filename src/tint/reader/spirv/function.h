@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_READER_SPIRV_FUNCTION_H_
 #define SRC_TINT_READER_SPIRV_FUNCTION_H_
 
+#include <limits>
 #include <memory>
 #include <optional>
 #include <string>
@@ -166,8 +167,8 @@ struct BlockInfo {
     struct PhiAssignment {
         /// The ID of an OpPhi receiving a value from this basic block.
         uint32_t phi_id;
-        /// The the value carried to the given OpPhi.
-        uint32_t value;
+        /// The ID of the value carried to the given OpPhi.
+        uint32_t value_id;
     };
     /// If this basic block branches to a visited basic block containing phis,
     /// then this is the list of writes to the variables associated those phis.
@@ -258,10 +259,9 @@ struct DefInfo {
     /// True if the definition of this ID is inside the function.
     const bool locally_defined = true;
 
-    /// The position of the first block in which this ID is visible, in function
-    /// block order.  For IDs defined outside of the function, it is 0.
-    /// For IDs defined in the function, it is the position of the block
-    /// containing the definition of the ID.
+    /// For IDs defined in the function, this is the position of the block
+    /// containing the definition of the ID, in function block order.
+    /// For IDs defined outside of the function, it is 0.
     /// See method `FunctionEmitter::ComputeBlockOrderAndPositions`
     const uint32_t block_pos = 0;
 
@@ -272,8 +272,17 @@ struct DefInfo {
     /// The number of uses of this ID.
     uint32_t num_uses = 0;
 
+    /// The block position of the first use of this ID, or MAX_UINT if it is not
+    /// used at all.  The "first" ordering is determined by the function block
+    /// order.  The first use of an ID might be in an OpPhi that precedes the
+    /// definition of the ID.
+    /// The ID defined by an OpPhi is counted as being "used" in each of its
+    /// parent blocks.
+    uint32_t first_use_pos = std::numeric_limits<uint32_t>::max();
     /// The block position of the last use of this ID, or 0 if it is not used
     /// at all.  The "last" ordering is determined by the function block order.
+    /// The ID defined by an OpPhi is counted as being "used" in each of its
+    /// parent blocks.
     uint32_t last_use_pos = 0;
 
     /// Is this value used in a construct other than the one in which it was
@@ -288,8 +297,8 @@ struct DefInfo {
     /// corresponding position of the ID definition in SPIR-V.  This compensates
     /// for the difference between dominance and scoping. An SSA definition can
     /// dominate all its uses, but the construct where it is defined does not
-    /// enclose all the uses, and so if it were declared as a WGSL constant
-    /// definition at the point of its SPIR-V definition, then the WGSL name
+    /// enclose all the uses, and so if it were declared as a WGSL let-
+    /// declaration at the point of its SPIR-V definition, then the WGSL name
     /// would go out of scope too early. Fix that by creating a variable at the
     /// top of the smallest construct that encloses both the definition and all
     /// its uses. Then the original SPIR-V definition maps to a WGSL assignment
@@ -299,10 +308,8 @@ struct DefInfo {
     /// example, pointers. crbug.com/tint/98
     bool requires_hoisted_def = false;
 
-    /// If the definition is an OpPhi, then `phi_var` is the name of the
-    /// variable that stores the value carried from parent basic blocks into
-    /// the basic block containing the OpPhi. Otherwise this is the empty string.
-    std::string phi_var;
+    /// Is this ID an OpPhi?
+    bool is_phi = false;
 
     /// The storage class to use for this value, if it is of pointer type.
     /// This is required to carry a storage class override from a storage
@@ -332,11 +339,11 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
       << " inst.result_id: " << di.inst.result_id()
       << " locally_defined: " << (di.locally_defined ? "true" : "false")
       << " block_pos: " << di.block_pos << " num_uses: " << di.num_uses
-      << " last_use_pos: " << di.last_use_pos
+      << " first_use_pos: " << di.first_use_pos << " last_use_pos: " << di.last_use_pos
       << " used_in_another_construct: " << (di.used_in_another_construct ? "true" : "false")
       << " requires_named_const_def: " << (di.requires_named_const_def ? "true" : "false")
-      << " requires_hoisted_def: " << (di.requires_hoisted_def ? "true" : "false") << " phi_var: '"
-      << di.phi_var << "'";
+      << " requires_hoisted_def: " << (di.requires_hoisted_def ? "true" : "false")
+      << " is_phi: " << (di.is_phi ? "true" : "false") << "";
     if (di.storage_class != ast::StorageClass::kNone) {
         o << " sc:" << int(di.storage_class);
     }
@@ -603,7 +610,7 @@ class FunctionEmitter {
     /// @returns an possibly updated type
     const Type* RemapStorageClass(const Type* type, uint32_t result_id);
 
-    /// Marks locally defined values when they should get a 'const'
+    /// Marks locally defined values when they should get a 'let'
     /// definition in WGSL, or a 'var' definition at an outer scope.
     /// This occurs in several cases:
     ///  - When a SPIR-V instruction might use the dynamically computed value

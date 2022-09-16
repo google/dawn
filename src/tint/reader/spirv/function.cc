@@ -37,6 +37,8 @@
 #include "src/tint/sem/depth_texture.h"
 #include "src/tint/sem/sampled_texture.h"
 #include "src/tint/transform/spirv_atomic.h"
+#include "src/tint/utils/hashmap.h"
+#include "src/tint/utils/hashset.h"
 
 // Terms:
 //    CFG: the control flow graph of the function, where basic blocks are the
@@ -3356,16 +3358,6 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
         auto* type = ty_.Reference(storage_type, ast::StorageClass::kNone);
         identifier_types_.emplace(id, type);
     }
-    // Emit declarations of phi state variables, in index order.
-    for (auto id : sorted_by_index(block_info.phis_needing_state_vars)) {
-        const auto* def_inst = def_use_mgr_->GetDef(id);
-        TINT_ASSERT(Reader, def_inst);
-        const auto phi_var_name = GetDefInfo(id)->phi_var;
-        TINT_ASSERT(Reader, !phi_var_name.empty());
-        auto* var = builder_.Var(phi_var_name,
-                                 parser_impl_.ConvertType(def_inst->type_id())->Build(builder_));
-        AddStatement(create<ast::VariableDeclStatement>(Source{}, var));
-    }
 
     // Emit regular statements.
     const spvtools::opt::BasicBlock& bb = *(block_info.basic_block);
@@ -3384,22 +3376,55 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     // Emit assignments to carry values to phi nodes in potential destinations.
     // Do it in index order.
     if (!block_info.phi_assignments.IsEmpty()) {
-        auto sorted = block_info.phi_assignments;
+        // Keep only the phis that are used.
+        utils::Vector<BlockInfo::PhiAssignment, 4> worklist;
+        worklist.Reserve(block_info.phi_assignments.Length());
+        for (const auto assignment : block_info.phi_assignments) {
+            if (GetDefInfo(assignment.phi_id)->num_uses > 0) {
+                worklist.Push(assignment);
+            }
+        }
+        // Sort them.
         std::stable_sort(
-            sorted.begin(), sorted.end(),
+            worklist.begin(), worklist.end(),
             [this](const BlockInfo::PhiAssignment& lhs, const BlockInfo::PhiAssignment& rhs) {
                 return GetDefInfo(lhs.phi_id)->index < GetDefInfo(rhs.phi_id)->index;
             });
-        for (auto assignment : block_info.phi_assignments) {
-            const auto var_name = GetDefInfo(assignment.phi_id)->phi_var;
-            auto expr = MakeExpression(assignment.value);
-            if (!expr) {
-                return false;
+
+        // Generate assignments to the phi variables being fed by this
+        // block.  It must act as a parallel assignment. So first capture the
+        // current value of any value that will be overwritten, then generate
+        // the assignments.
+
+        // The set of IDs that are read  by the assignments.
+        utils::Hashset<uint32_t, 8> read_set;
+        for (const auto assignment : worklist) {
+            read_set.Add(assignment.value_id);
+        }
+        // Generate a let-declaration to capture the current value of each phi
+        // that will be both read and written.
+        utils::Hashmap<uint32_t, Symbol, 8> copied_phis;
+        for (const auto assignment : worklist) {
+            const auto phi_id = assignment.phi_id;
+            if (read_set.Find(phi_id)) {
+                auto copy_name = namer_.MakeDerivedName(namer_.Name(phi_id) + "_c" +
+                                                        std::to_string(block_info.id));
+                auto copy_sym = builder_.Symbols().Register(copy_name);
+                copied_phis.GetOrCreate(phi_id, [copy_sym]() { return copy_sym; });
+                AddStatement(builder_.WrapInStatement(
+                    builder_.Let(copy_sym, builder_.Expr(namer_.Name(phi_id)))));
             }
-            AddStatement(create<ast::AssignmentStatement>(
-                Source{},
-                create<ast::IdentifierExpression>(Source{}, builder_.Symbols().Register(var_name)),
-                expr.expr));
+        }
+
+        // Generate assignments to the phi vars.
+        for (const auto assignment : worklist) {
+            const auto phi_id = assignment.phi_id;
+            auto* const lhs_expr = builder_.Expr(namer_.Name(phi_id));
+            // If RHS value is actually a phi we just cpatured, then use it.
+            auto* const copy_sym = copied_phis.Find(assignment.value_id);
+            auto* const rhs_expr =
+                copy_sym ? builder_.Expr(*copy_sym) : MakeExpression(assignment.value_id).expr;
+            AddStatement(builder_.Assign(lhs_expr, rhs_expr));
         }
     }
 
@@ -3692,11 +3717,8 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
         }
 
         case SpvOpPhi: {
-            // Emit a read from the associated state variable.
-            TypedExpression expr{parser_impl_.ConvertType(inst.type_id()),
-                                 create<ast::IdentifierExpression>(
-                                     Source{}, builder_.Symbols().Register(def_info->phi_var))};
-            return EmitConstDefOrWriteToHoistedVar(inst, expr);
+            // The value will be in scope, available for reading from the phi ID.
+            return true;
         }
 
         case SpvOpOuterProduct:
@@ -4884,60 +4906,80 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
         }
     }
 
-    // Scan uses of locally defined IDs, in function block order.
+    // Scan uses of locally defined IDs, finding their first and last uses, in
+    // block order.
+
+    // Updates the span of block positions that this value is used in.
+    // Ignores values defined outside this function.
+    auto record_value_use = [this](uint32_t id, const BlockInfo* block_info) {
+        if (auto* def_info = GetDefInfo(id)) {
+            // Update usage count.
+            def_info->num_uses++;
+            // Update usage span.
+            def_info->first_use_pos = std::min(def_info->first_use_pos, block_info->pos);
+            def_info->last_use_pos = std::max(def_info->last_use_pos, block_info->pos);
+
+            // Determine whether this ID is defined in a different construct
+            // from this use.
+            const auto defining_block = block_order_[def_info->block_pos];
+            const auto* def_in_construct = GetBlockInfo(defining_block)->construct;
+            if (def_in_construct != block_info->construct) {
+                def_info->used_in_another_construct = true;
+            }
+        }
+    };
     for (auto block_id : block_order_) {
         const auto* block_info = GetBlockInfo(block_id);
-        const auto block_pos = block_info->pos;
         for (const auto& inst : *(block_info->basic_block)) {
             // Update bookkeeping for locally-defined IDs used by this instruction.
-            inst.ForEachInId([this, block_pos, block_info](const uint32_t* id_ptr) {
-                auto* def_info = GetDefInfo(*id_ptr);
-                if (def_info) {
-                    // Update usage count.
-                    def_info->num_uses++;
-                    // Update usage span.
-                    def_info->last_use_pos = std::max(def_info->last_use_pos, block_pos);
-
-                    // Determine whether this ID is defined in a different construct
-                    // from this use.
-                    const auto defining_block = block_order_[def_info->block_pos];
-                    const auto* def_in_construct = GetBlockInfo(defining_block)->construct;
-                    if (def_in_construct != block_info->construct) {
-                        def_info->used_in_another_construct = true;
-                    }
-                }
-            });
-
             if (inst.opcode() == SpvOpPhi) {
-                // Declare a name for the variable used to carry values to a phi.
+                // For an OpPhi defining value P, an incoming value V from parent block B is
+                // counted as being "used" at block B, not at the block containing the Phi.
+                // That's because we will create a variable PHI_P to hold the phi value, and
+                // in the code generated for block B, create assignment `PHI_P = V`.
+                // To make the WGSL scopes work, both P and V are counted as being "used"
+                // in the parent block B.
+
                 const auto phi_id = inst.result_id();
                 auto* phi_def_info = GetDefInfo(phi_id);
-                phi_def_info->phi_var = namer_.MakeDerivedName(namer_.Name(phi_id) + "_phi");
+                phi_def_info->is_phi = true;
+
                 // Track all the places where we need to mention the variable,
                 // so we can place its declaration.  First, record the location of
                 // the read from the variable.
-                uint32_t first_pos = block_pos;
-                uint32_t last_pos = block_pos;
                 // Record the assignments that will propagate values from predecessor
                 // blocks.
                 for (uint32_t i = 0; i + 1 < inst.NumInOperands(); i += 2) {
-                    const uint32_t value_id = inst.GetSingleWordInOperand(i);
+                    const uint32_t incoming_value_id = inst.GetSingleWordInOperand(i);
                     const uint32_t pred_block_id = inst.GetSingleWordInOperand(i + 1);
                     auto* pred_block_info = GetBlockInfo(pred_block_id);
                     // The predecessor might not be in the block order at all, so we
                     // need this guard.
                     if (IsInBlockOrder(pred_block_info)) {
+                        // Track where the incoming value needs to be in scope.
+                        record_value_use(incoming_value_id, block_info);
+
+                        // Track where P needs to be in scope.  It's not an ordinary use, so don't
+                        // count it as one.
+                        const auto pred_pos = pred_block_info->pos;
+                        phi_def_info->first_use_pos =
+                            std::min(phi_def_info->first_use_pos, pred_pos);
+                        phi_def_info->last_use_pos = std::max(phi_def_info->last_use_pos, pred_pos);
+
                         // Record the assignment that needs to occur at the end
                         // of the predecessor block.
-                        pred_block_info->phi_assignments.Push({phi_id, value_id});
-                        first_pos = std::min(first_pos, pred_block_info->pos);
-                        last_pos = std::max(last_pos, pred_block_info->pos);
+                        pred_block_info->phi_assignments.Push({phi_id, incoming_value_id});
                     }
                 }
 
                 // Schedule the declaration of the state variable.
-                const auto* enclosing_construct = GetEnclosingScope(first_pos, last_pos);
+                const auto* enclosing_construct =
+                    GetEnclosingScope(phi_def_info->first_use_pos, phi_def_info->last_use_pos);
                 GetBlockInfo(enclosing_construct->begin_id)->phis_needing_state_vars.Push(phi_id);
+            } else {
+                inst.ForEachInId([block_info, &record_value_use](const uint32_t* id_ptr) {
+                    record_value_use(*id_ptr, block_info);
+                });
             }
         }
     }
@@ -4967,41 +5009,47 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
             continue;
         }
 
-        // The first use must be the at the SSA definition, because block order
-        // respects dominance.
-        const auto first_pos = def_info->block_pos;
-        const auto last_use_pos = def_info->last_use_pos;
-
-        const auto* def_in_construct = GetBlockInfo(block_order_[first_pos])->construct;
+        const auto* def_in_construct = GetBlockInfo(block_order_[def_info->block_pos])->construct;
         // A definition in the first block of an kIfSelection or kSwitchSelection
         // occurs before the branch, and so that definition should count as
         // having been defined at the scope of the parent construct.
-        if (first_pos == def_in_construct->begin_pos) {
+        if (def_info->block_pos == def_in_construct->begin_pos) {
             if ((def_in_construct->kind == Construct::kIfSelection) ||
                 (def_in_construct->kind == Construct::kSwitchSelection)) {
                 def_in_construct = def_in_construct->parent;
             }
         }
 
-        bool should_hoist = false;
-        if (!def_in_construct->ContainsPos(last_use_pos)) {
+        // We care about the earliest between the place of definition, and the first
+        // use of the value.
+        const auto first_pos = std::min(def_info->block_pos, def_info->first_use_pos);
+        const auto last_use_pos = def_info->last_use_pos;
+
+        bool should_hoist_to_let = false;
+        bool should_hoist_to_var = false;
+        if (def_info->is_phi) {
+            // We need to generate a variable, and assignments to that variable in
+            // all the phi parent blocks.
+            should_hoist_to_var = true;
+        } else if (!def_in_construct->ContainsPos(first_pos) ||
+                   !def_in_construct->ContainsPos(last_use_pos)) {
             // To satisfy scoping, we have to hoist the definition out to an enclosing
             // construct.
-            should_hoist = true;
+            should_hoist_to_var = true;
         } else {
             // Avoid moving combinatorial values across constructs.  This is a
             // simple heuristic to avoid changing the cost of an operation
             // by moving it into or out of a loop, for example.
             if ((def_info->storage_class == ast::StorageClass::kInvalid) &&
                 def_info->used_in_another_construct) {
-                should_hoist = true;
+                should_hoist_to_let = true;
             }
         }
 
-        if (should_hoist) {
+        if (should_hoist_to_var || should_hoist_to_let) {
             const auto* enclosing_construct = GetEnclosingScope(first_pos, last_use_pos);
-            if (enclosing_construct == def_in_construct) {
-                // We can use a plain 'const' definition.
+            if (should_hoist_to_let && (enclosing_construct == def_in_construct)) {
+                // We can use a plain 'let' declaration.
                 def_info->requires_named_const_def = true;
             } else {
                 // We need to make a hoisted variable definition.

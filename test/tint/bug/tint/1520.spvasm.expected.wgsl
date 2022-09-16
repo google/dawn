@@ -22,21 +22,20 @@ fn test_int_S1_c0_b() -> bool {
   var ok : bool;
   var val : vec4<i32>;
   var x_40 : bool;
+  var x_41 : bool;
   var x_54 : bool;
+  var x_55 : bool;
   var x_65 : bool;
-  var x_41_phi : bool;
-  var x_55_phi : bool;
-  var x_66_phi : bool;
+  var x_66 : bool;
   let x_26 : f32 = x_4.unknownInput_S1_c0;
   let x_27 : i32 = i32(x_26);
   unknown = x_27;
   ok = true;
-  x_41_phi = false;
+  x_41 = false;
   if (true) {
     x_40 = all(((vec4<i32>(0i, 0i, 0i, 0i) / vec4<i32>(x_27, x_27, x_27, x_27)) == vec4<i32>(0i, 0i, 0i, 0i)));
-    x_41_phi = x_40;
+    x_41 = x_40;
   }
-  let x_41 : bool = x_41_phi;
   ok = x_41;
   let x_44 : vec4<i32> = vec4<i32>(x_27, x_27, x_27, x_27);
   val = x_44;
@@ -48,12 +47,11 @@ fn test_int_S1_c0_b() -> bool {
   val = x_49;
   let x_50 : vec4<i32> = (x_49 - vec4<i32>(1i, 1i, 1i, 1i));
   val = x_50;
-  x_55_phi = false;
+  x_55 = false;
   if (x_41) {
     x_54 = all((x_50 == x_44));
-    x_55_phi = x_54;
+    x_55 = x_54;
   }
-  let x_55 : bool = x_55_phi;
   ok = x_55;
   let x_58 : vec4<i32> = (x_50 * vec4<i32>(2i, 2i, 2i, 2i));
   val = x_58;
@@ -63,12 +61,11 @@ fn test_int_S1_c0_b() -> bool {
   val = x_60;
   let x_61 : vec4<i32> = (x_60 / vec4<i32>(2i, 2i, 2i, 2i));
   val = x_61;
-  x_66_phi = false;
+  x_66 = false;
   if (x_55) {
     x_65 = all((x_61 == x_44));
-    x_66_phi = x_65;
+    x_66 = x_65;
   }
-  let x_66 : bool = x_66_phi;
   ok = x_66;
   return x_66;
 }
@@ -81,24 +78,23 @@ fn main_1() {
   var x_10_val : vec4<f32>;
   var x_116 : vec4<f32>;
   var x_86 : bool;
+  var x_87 : bool;
   var x_99 : bool;
+  var x_100 : bool;
   var x_110 : bool;
+  var x_111 : bool;
   var x_114 : bool;
-  var x_87_phi : bool;
-  var x_100_phi : bool;
-  var x_111_phi : bool;
-  var x_115_phi : bool;
+  var x_115 : bool;
   let x_72 : vec4<f32> = vcolor_S0;
   outputColor_S0 = x_72;
   let x_77 : f32 = x_4.unknownInput_S1_c0;
   x_8_unknown = x_77;
   x_9_ok = true;
-  x_87_phi = false;
+  x_87 = false;
   if (true) {
     x_86 = all(((vec4<f32>(0.0f, 0.0f, 0.0f, 0.0f) / vec4<f32>(x_77, x_77, x_77, x_77)) == vec4<f32>(0.0f, 0.0f, 0.0f, 0.0f)));
-    x_87_phi = x_86;
+    x_87 = x_86;
   }
-  let x_87 : bool = x_87_phi;
   x_9_ok = x_87;
   let x_89 : vec4<f32> = vec4<f32>(x_77, x_77, x_77, x_77);
   x_10_val = x_89;
@@ -110,12 +106,11 @@ fn main_1() {
   x_10_val = x_94;
   let x_95 : vec4<f32> = (x_94 - vec4<f32>(1.0f, 1.0f, 1.0f, 1.0f));
   x_10_val = x_95;
-  x_100_phi = false;
+  x_100 = false;
   if (x_87) {
     x_99 = all((x_95 == x_89));
-    x_100_phi = x_99;
+    x_100 = x_99;
   }
-  let x_100 : bool = x_100_phi;
   x_9_ok = x_100;
   let x_103 : vec4<f32> = (x_95 * vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f));
   x_10_val = x_103;
@@ -125,19 +120,17 @@ fn main_1() {
   x_10_val = x_105;
   let x_106 : vec4<f32> = (x_105 / vec4<f32>(2.0f, 2.0f, 2.0f, 2.0f));
   x_10_val = x_106;
-  x_111_phi = false;
+  x_111 = false;
   if (x_100) {
     x_110 = all((x_106 == x_89));
-    x_111_phi = x_110;
+    x_111 = x_110;
   }
-  let x_111 : bool = x_111_phi;
   x_9_ok = x_111;
-  x_115_phi = false;
+  x_115 = false;
   if (x_111) {
     x_114 = test_int_S1_c0_b();
-    x_115_phi = x_114;
+    x_115 = x_114;
   }
-  let x_115 : bool = x_115_phi;
   if (x_115) {
     let x_122 : vec4<f32> = x_4.ucolorGreen_S1_c0;
     x_116 = x_122;

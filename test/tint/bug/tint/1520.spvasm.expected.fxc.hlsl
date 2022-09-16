@@ -14,21 +14,20 @@ bool test_int_S1_c0_b() {
   bool ok = false;
   int4 val = int4(0, 0, 0, 0);
   bool x_40 = false;
+  bool x_41 = false;
   bool x_54 = false;
+  bool x_55 = false;
   bool x_65 = false;
-  bool x_41_phi = false;
-  bool x_55_phi = false;
-  bool x_66_phi = false;
+  bool x_66 = false;
   const float x_26 = asfloat(x_4[1].x);
   const int x_27 = int(x_26);
   unknown = x_27;
   ok = true;
-  x_41_phi = false;
+  x_41 = false;
   if (true) {
     x_40 = all((((0).xxxx / value_or_one_if_zero_int4(int4(x_27, x_27, x_27, x_27))) == (0).xxxx));
-    x_41_phi = x_40;
+    x_41 = x_40;
   }
-  const bool x_41 = x_41_phi;
   ok = x_41;
   const int4 x_44 = int4(x_27, x_27, x_27, x_27);
   val = x_44;
@@ -40,12 +39,11 @@ bool test_int_S1_c0_b() {
   val = x_49;
   const int4 x_50 = (x_49 - (1).xxxx);
   val = x_50;
-  x_55_phi = false;
+  x_55 = false;
   if (x_41) {
     x_54 = all((x_50 == x_44));
-    x_55_phi = x_54;
+    x_55 = x_54;
   }
-  const bool x_55 = x_55_phi;
   ok = x_55;
   const int4 x_58 = (x_50 * (2).xxxx);
   val = x_58;
@@ -55,12 +53,11 @@ bool test_int_S1_c0_b() {
   val = x_60;
   const int4 x_61 = (x_60 / (2).xxxx);
   val = x_61;
-  x_66_phi = false;
+  x_66 = false;
   if (x_55) {
     x_65 = all((x_61 == x_44));
-    x_66_phi = x_65;
+    x_66 = x_65;
   }
-  const bool x_66 = x_66_phi;
   ok = x_66;
   return x_66;
 }
@@ -73,23 +70,22 @@ void main_1() {
   float4 x_10_val = float4(0.0f, 0.0f, 0.0f, 0.0f);
   float4 x_116 = float4(0.0f, 0.0f, 0.0f, 0.0f);
   bool x_86 = false;
+  bool x_87 = false;
   bool x_99 = false;
+  bool x_100 = false;
   bool x_110 = false;
+  bool x_111 = false;
   bool x_114 = false;
-  bool x_87_phi = false;
-  bool x_100_phi = false;
-  bool x_111_phi = false;
-  bool x_115_phi = false;
+  bool x_115 = false;
   outputColor_S0 = vcolor_S0;
   const float x_77 = asfloat(x_4[1].x);
   x_8_unknown = x_77;
   x_9_ok = true;
-  x_87_phi = false;
+  x_87 = false;
   if (true) {
     x_86 = all((((0.0f).xxxx / float4(x_77, x_77, x_77, x_77)) == (0.0f).xxxx));
-    x_87_phi = x_86;
+    x_87 = x_86;
   }
-  const bool x_87 = x_87_phi;
   x_9_ok = x_87;
   const float4 x_89 = float4(x_77, x_77, x_77, x_77);
   x_10_val = x_89;
@@ -101,12 +97,11 @@ void main_1() {
   x_10_val = x_94;
   const float4 x_95 = (x_94 - (1.0f).xxxx);
   x_10_val = x_95;
-  x_100_phi = false;
+  x_100 = false;
   if (x_87) {
     x_99 = all((x_95 == x_89));
-    x_100_phi = x_99;
+    x_100 = x_99;
   }
-  const bool x_100 = x_100_phi;
   x_9_ok = x_100;
   const float4 x_103 = (x_95 * (2.0f).xxxx);
   x_10_val = x_103;
@@ -116,19 +111,18 @@ void main_1() {
   x_10_val = x_105;
   const float4 x_106 = (x_105 / (2.0f).xxxx);
   x_10_val = x_106;
-  x_111_phi = false;
+  x_111 = false;
   if (x_100) {
     x_110 = all((x_106 == x_89));
-    x_111_phi = x_110;
+    x_111 = x_110;
   }
-  const bool x_111 = x_111_phi;
   x_9_ok = x_111;
-  x_115_phi = false;
+  x_115 = false;
   if (x_111) {
     x_114 = test_int_S1_c0_b();
-    x_115_phi = x_114;
+    x_115 = x_114;
   }
-  if (x_115_phi) {
+  if (x_115) {
     const float4 x_122 = asfloat(x_4[3]);
     x_116 = x_122;
   } else {

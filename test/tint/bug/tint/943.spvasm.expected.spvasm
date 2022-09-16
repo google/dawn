@@ -41,7 +41,7 @@ note: reading from module-scope private variable 'dimInner_1' may result in a no
                OpName %coord "coord"
                OpName %shape "shape"
                OpName %x_87 "x_87"
-               OpName %x_88_phi "x_88_phi"
+               OpName %x_88 "x_88"
                OpName %mm_readA_i1_i1_ "mm_readA_i1_i1_"
                OpName %row "row"
                OpName %col "col"
@@ -118,7 +118,7 @@ note: reading from module-scope private variable 'dimInner_1' may result in a no
                OpName %param_8 "param_8"
                OpName %param_9 "param_9"
                OpName %x_393 "x_393"
-               OpName %x_394_phi "x_394_phi"
+               OpName %x_394 "x_394"
                OpName %main_1 "main_1"
                OpName %param_18 "param_18"
                OpName %param_19 "param_19"
@@ -250,11 +250,11 @@ note: reading from module-scope private variable 'dimInner_1' may result in a no
       %shape = OpFunctionParameter %_ptr_Function_v2int
          %51 = OpLabel
        %x_87 = OpVariable %_ptr_Function_bool Function %54
-   %x_88_phi = OpVariable %_ptr_Function_bool Function %54
+       %x_88 = OpVariable %_ptr_Function_bool Function %54
          %57 = OpLoad %v2int %coord
          %60 = OpSGreaterThanEqual %v2bool %57 %59
          %58 = OpAll %bool %60
-               OpStore %x_88_phi %58
+               OpStore %x_88 %58
                OpSelectionMerge %62 None
                OpBranchConditional %58 %63 %62
          %63 = OpLabel
@@ -264,10 +264,10 @@ note: reading from module-scope private variable 'dimInner_1' may result in a no
          %68 = OpAll %bool %69
                OpStore %x_87 %68
          %70 = OpLoad %bool %x_87
-               OpStore %x_88_phi %70
+               OpStore %x_88 %70
                OpBranch %62
          %62 = OpLabel
-         %71 = OpLoad %bool %x_88_phi
+         %71 = OpLoad %bool %x_88
                OpReturnValue %71
                OpFunctionEnd
 %mm_readA_i1_i1_ = OpFunction %float None %72
@@ -477,7 +477,7 @@ note: reading from module-scope private variable 'dimInner_1' may result in a no
     %param_8 = OpVariable %_ptr_Function_int Function %11
     %param_9 = OpVariable %_ptr_Function_float Function %83
       %x_393 = OpVariable %_ptr_Function_bool Function %54
-  %x_394_phi = OpVariable %_ptr_Function_bool Function %54
+      %x_394 = OpVariable %_ptr_Function_bool Function %54
         %294 = OpAccessChain %_ptr_Private_uint %gl_LocalInvocationID %uint_1
         %295 = OpLoad %uint %294
         %296 = OpBitcast %int %295
@@ -869,7 +869,7 @@ note: reading from module-scope private variable 'dimInner_1' may result in a no
         %539 = OpLoad %int %dimBOuter
         %540 = OpIAdd %int %536 %537
         %541 = OpSLessThan %bool %540 %539
-               OpStore %x_394_phi %541
+               OpStore %x_394 %541
                OpSelectionMerge %542 None
                OpBranchConditional %541 %543 %542
         %543 = OpLabel
@@ -880,10 +880,10 @@ note: reading from module-scope private variable 'dimInner_1' may result in a no
         %549 = OpSLessThan %bool %548 %547
                OpStore %x_393 %549
         %550 = OpLoad %bool %x_393
-               OpStore %x_394_phi %550
+               OpStore %x_394 %550
                OpBranch %542
         %542 = OpLabel
-        %551 = OpLoad %bool %x_394_phi
+        %551 = OpLoad %bool %x_394
                OpSelectionMerge %552 None
                OpBranchConditional %551 %553 %552
         %553 = OpLabel

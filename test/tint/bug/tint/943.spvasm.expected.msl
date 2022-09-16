@@ -43,17 +43,16 @@ struct ssbB {
 
 bool coordsInBounds_vi2_vi2_(thread int2* const coord, thread int2* const shape) {
   bool x_87 = false;
-  bool x_88_phi = false;
+  bool x_88 = false;
   int2 const x_76 = *(coord);
   bool const x_81 = all((x_76 >= int2(0)));
-  x_88_phi = x_81;
+  x_88 = x_81;
   if (x_81) {
     int2 const x_84 = *(coord);
     int2 const x_85 = *(shape);
     x_87 = all((x_84 < x_85));
-    x_88_phi = x_87;
+    x_88 = x_87;
   }
-  bool const x_88 = x_88_phi;
   return x_88;
 }
 
@@ -419,7 +418,7 @@ void mm_matMul_i1_i1_i1_(thread int* const dimAOuter, thread int* const dimInner
     innerCol_4 = 0;
     while (true) {
       bool x_393 = false;
-      bool x_394_phi = false;
+      bool x_394 = false;
       int const x_380 = innerCol_4;
       if ((x_380 < 1)) {
       } else {
@@ -429,15 +428,14 @@ void mm_matMul_i1_i1_i1_(thread int* const dimAOuter, thread int* const dimInner
       int const x_383 = innerCol_4;
       int const x_385 = *(dimBOuter);
       bool const x_386 = (as_type<int>((as_type<uint>(x_382) + as_type<uint>(x_383))) < x_385);
-      x_394_phi = x_386;
+      x_394 = x_386;
       if (x_386) {
         int const x_389 = globalRow;
         int const x_390 = innerRow_4;
         int const x_392 = *(dimAOuter);
         x_393 = (as_type<int>((as_type<uint>(x_389) + as_type<uint>(x_390))) < x_392);
-        x_394_phi = x_393;
+        x_394 = x_393;
       }
-      bool const x_394 = x_394_phi;
       if (x_394) {
         int const x_397 = globalRow;
         int const x_398 = innerRow_4;

@@ -3984,14 +3984,11 @@ TEST_F(SpvParserHandleTest, TexelTypeWhenLoop) {
     auto ast_body = fe.ast_body();
     const auto got = test::ToString(p->program(), ast_body);
     auto* expect = R"(var x_24 : vec2<f32>;
-var x_24_phi_1 : vec2<f32>;
-var x_26_phi_1 : i32;
-x_24_phi_1 = vec2<f32>(0.0f, 0.0f);
-x_26_phi_1 = 0i;
+var x_26 : i32;
+x_24 = vec2<f32>(0.0f, 0.0f);
+x_26 = 0i;
 loop {
   var x_27 : i32;
-  x_24 = x_24_phi_1;
-  let x_26 : i32 = x_26_phi_1;
   if ((x_26 < 2i)) {
   } else {
     break;
@@ -3999,8 +3996,8 @@ loop {
 
   continuing {
     x_27 = (x_26 + 1i);
-    x_24_phi_1 = vec2<f32>(1.0f, 1.0f);
-    x_26_phi_1 = x_27;
+    x_24 = vec2<f32>(1.0f, 1.0f);
+    x_26 = x_27;
   }
 }
 textureStore(Output2Texture2D, vec2<i32>(vec2<u32>(1u, 1u)), vec4<f32>(x_24, 0.0f, 0.0f));
@@ -4060,14 +4057,11 @@ TEST_F(SpvParserHandleTest, SimpleSelectCanSelectFromHoistedConstant) {
     auto ast_body = fe.ast_body();
     const auto got = test::ToString(p->program(), ast_body);
     auto* expect = R"(var x_14 : f32;
-var x_14_phi_1 : f32;
-var x_15_phi_1 : f32;
-x_14_phi_1 = 0.0f;
-x_15_phi_1 = 0.0f;
+var x_15 : f32;
+x_14 = 0.0f;
+x_15 = 0.0f;
 loop {
   var x_17 : f32;
-  x_14 = x_14_phi_1;
-  let x_15 : f32 = x_15_phi_1;
   if ((x_15 < 1.0f)) {
   } else {
     break;
@@ -4075,8 +4069,9 @@ loop {
 
   continuing {
     x_17 = (x_15 + 1.0f);
-    x_14_phi_1 = x_15;
-    x_15_phi_1 = x_17;
+    let x_15_c16_1 = x_15;
+    x_14 = x_15_c16_1;
+    x_15 = x_17;
   }
 }
 let x_21 : f32 = select(0.0f, x_14, (x_14 > 1.0f));

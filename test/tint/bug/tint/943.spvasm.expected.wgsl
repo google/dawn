@@ -61,17 +61,16 @@ var<private> batch : i32;
 
 fn coordsInBounds_vi2_vi2_(coord : ptr<function, vec2<i32>>, shape : ptr<function, vec2<i32>>) -> bool {
   var x_87 : bool;
-  var x_88_phi : bool;
+  var x_88 : bool;
   let x_76 : vec2<i32> = *(coord);
   let x_81 : bool = all((x_76 >= vec2<i32>(0i, 0i)));
-  x_88_phi = x_81;
+  x_88 = x_81;
   if (x_81) {
     let x_84 : vec2<i32> = *(coord);
     let x_85 : vec2<i32> = *(shape);
     x_87 = all((x_84 < x_85));
-    x_88_phi = x_87;
+    x_88 = x_87;
   }
-  let x_88 : bool = x_88_phi;
   return x_88;
 }
 
@@ -448,7 +447,7 @@ fn mm_matMul_i1_i1_i1_(dimAOuter : ptr<function, i32>, dimInner : ptr<function, 
     innerCol_4 = 0i;
     loop {
       var x_393 : bool;
-      var x_394_phi : bool;
+      var x_394 : bool;
       let x_380 : i32 = innerCol_4;
       if ((x_380 < 1i)) {
       } else {
@@ -458,15 +457,14 @@ fn mm_matMul_i1_i1_i1_(dimAOuter : ptr<function, i32>, dimInner : ptr<function, 
       let x_383 : i32 = innerCol_4;
       let x_385 : i32 = *(dimBOuter);
       let x_386 : bool = ((x_382 + x_383) < x_385);
-      x_394_phi = x_386;
+      x_394 = x_386;
       if (x_386) {
         let x_389 : i32 = globalRow;
         let x_390 : i32 = innerRow_4;
         let x_392 : i32 = *(dimAOuter);
         x_393 = ((x_389 + x_390) < x_392);
-        x_394_phi = x_393;
+        x_394 = x_393;
       }
-      let x_394 : bool = x_394_phi;
       if (x_394) {
         let x_397 : i32 = globalRow;
         let x_398 : i32 = innerRow_4;

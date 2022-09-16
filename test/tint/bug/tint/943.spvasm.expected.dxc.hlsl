@@ -18,17 +18,17 @@ ByteAddressBuffer x_185 : register(t2, space0);
 
 bool coordsInBounds_vi2_vi2_(inout int2 coord, inout int2 shape) {
   bool x_87 = false;
-  bool x_88_phi = false;
+  bool x_88 = false;
   const int2 x_76 = coord;
   const bool x_81 = all((x_76 >= (0).xx));
-  x_88_phi = x_81;
+  x_88 = x_81;
   if (x_81) {
     const int2 x_84 = coord;
     const int2 x_85 = shape;
     x_87 = all((x_84 < x_85));
-    x_88_phi = x_87;
+    x_88 = x_87;
   }
-  return x_88_phi;
+  return x_88;
 }
 
 float mm_readA_i1_i1_(inout int row, inout int col) {
@@ -286,7 +286,7 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
       innerCol_4 = 0;
       [loop] while (true) {
         bool x_393 = false;
-        bool x_394_phi = false;
+        bool x_394 = false;
         if ((innerCol_4 < 1)) {
         } else {
           break;
@@ -295,15 +295,15 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
         const int x_383 = innerCol_4;
         const int x_385 = dimBOuter;
         const bool x_386 = ((x_382 + x_383) < x_385);
-        x_394_phi = x_386;
+        x_394 = x_386;
         if (x_386) {
           const int x_389 = globalRow;
           const int x_390 = innerRow_4;
           const int x_392 = dimAOuter;
           x_393 = ((x_389 + x_390) < x_392);
-          x_394_phi = x_393;
+          x_394 = x_393;
         }
-        if (x_394_phi) {
+        if (x_394) {
           const int x_400 = globalCol;
           const int x_401 = innerCol_4;
           const int x_403 = innerRow_4;
