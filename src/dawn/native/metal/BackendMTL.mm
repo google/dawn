@@ -24,6 +24,7 @@
 #include "dawn/native/MetalBackend.h"
 #include "dawn/native/metal/BufferMTL.h"
 #include "dawn/native/metal/DeviceMTL.h"
+#include "dawn/native/metal/UtilsMetal.h"
 
 #if DAWN_PLATFORM_IS(MACOS)
 #import <IOKit/IOKitLib.h>
@@ -170,18 +171,6 @@ MaybeError GetDevicePCIInfo(id<MTLDevice> device, PCIIDs* ids) {
 #error "Unsupported Apple platform."
 #endif
 
-DAWN_NOINLINE bool IsCounterSamplingBoundarySupport(id<MTLDevice> device)
-    API_AVAILABLE(macos(11.0), ios(14.0)) {
-    bool isBlitBoundarySupported =
-        [device supportsCounterSampling:MTLCounterSamplingPointAtBlitBoundary];
-    bool isDispatchBoundarySupported =
-        [device supportsCounterSampling:MTLCounterSamplingPointAtDispatchBoundary];
-    bool isDrawBoundarySupported =
-        [device supportsCounterSampling:MTLCounterSamplingPointAtDrawBoundary];
-
-    return isBlitBoundarySupported && isDispatchBoundarySupported && isDrawBoundarySupported;
-}
-
 // This method has seen hard-to-debug crashes. See crbug.com/dawn/1102.
 // For now, it is written defensively, with many potentially unnecessary guards until
 // we narrow down the cause of the problem.
@@ -246,11 +235,13 @@ DAWN_NOINLINE bool IsGPUCounterSupported(id<MTLDevice> device,
     }
 
     if (@available(macOS 11.0, iOS 14.0, *)) {
-        // Check whether it can read GPU counters at the specified command boundary. Apple
-        // family GPUs do not support sampling between different Metal commands, because
-        // they defer fragment processing until after the GPU processes all the primitives
-        // in the render pass.
-        if (!IsCounterSamplingBoundarySupport(device)) {
+        // Check whether it can read GPU counters at the specified command boundary or stage
+        // boundary. Apple family GPUs do not support sampling between different Metal commands,
+        // because they defer fragment processing until after the GPU processes all the primitives
+        // in the render pass. GPU counters are only available if sampling at least one of the
+        // command or stage boundaries is supported.
+        if (!SupportCounterSamplingAtCommandBoundary(device) &&
+            !SupportCounterSamplingAtStageBoundary(device)) {
             return false;
         }
     }

@@ -328,7 +328,8 @@ MaybeError EncodeMetalRenderPass(Device* device,
                                  MTLRenderPassDescriptor* mtlRenderPass,
                                  uint32_t width,
                                  uint32_t height,
-                                 EncodeInsideRenderPass encodeInside) {
+                                 EncodeInsideRenderPass encodeInside,
+                                 BeginRenderPassCmd* renderPassCmd) {
     // This function handles multiple workarounds. Because some cases requires multiple
     // workarounds to happen at the same time, it handles workarounds one by one and calls
     // itself recursively to handle the next workaround if needed.
@@ -359,7 +360,7 @@ MaybeError EncodeMetalRenderPass(Device* device,
         // resolve back to the true resolve targets.
         if (workaroundUsed) {
             DAWN_TRY(EncodeMetalRenderPass(device, commandContext, mtlRenderPass, width, height,
-                                           std::move(encodeInside)));
+                                           std::move(encodeInside), renderPassCmd));
 
             for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
                 if (trueResolveAttachments[i].texture == nullptr) {
@@ -403,7 +404,7 @@ MaybeError EncodeMetalRenderPass(Device* device,
 
         if (workaroundUsed) {
             DAWN_TRY(EncodeMetalRenderPass(device, commandContext, mtlRenderPass, width, height,
-                                           std::move(encodeInside)));
+                                           std::move(encodeInside), renderPassCmd));
 
             for (uint32_t i = 0; i < kMaxColorAttachments; ++i) {
                 if (originalAttachments[i].texture == nullptr) {
@@ -439,7 +440,7 @@ MaybeError EncodeMetalRenderPass(Device* device,
         // If we found a store + MSAA resolve we need to resolve in a different render pass.
         if (hasStoreAndMSAAResolve) {
             DAWN_TRY(EncodeMetalRenderPass(device, commandContext, mtlRenderPass, width, height,
-                                           std::move(encodeInside)));
+                                           std::move(encodeInside), renderPassCmd));
 
             ResolveInAnotherRenderPass(commandContext, mtlRenderPass, resolveTextures);
             return {};
@@ -448,7 +449,7 @@ MaybeError EncodeMetalRenderPass(Device* device,
 
     // No (more) workarounds needed! We can finally encode the actual render pass.
     commandContext->EndBlit();
-    DAWN_TRY(encodeInside(commandContext->BeginRender(mtlRenderPass)));
+    DAWN_TRY(encodeInside(commandContext->BeginRender(mtlRenderPass), renderPassCmd));
     commandContext->EndRender();
     return {};
 }
@@ -457,8 +458,26 @@ MaybeError EncodeEmptyMetalRenderPass(Device* device,
                                       CommandRecordingContext* commandContext,
                                       MTLRenderPassDescriptor* mtlRenderPass,
                                       Extent3D size) {
-    return EncodeMetalRenderPass(device, commandContext, mtlRenderPass, size.width, size.height,
-                                 [&](id<MTLRenderCommandEncoder>) -> MaybeError { return {}; });
+    return EncodeMetalRenderPass(
+        device, commandContext, mtlRenderPass, size.width, size.height,
+        [&](id<MTLRenderCommandEncoder>, BeginRenderPassCmd*) -> MaybeError { return {}; });
+}
+
+DAWN_NOINLINE bool SupportCounterSamplingAtCommandBoundary(id<MTLDevice> device)
+    API_AVAILABLE(macos(11.0), ios(14.0)) {
+    bool isBlitBoundarySupported =
+        [device supportsCounterSampling:MTLCounterSamplingPointAtBlitBoundary];
+    bool isDispatchBoundarySupported =
+        [device supportsCounterSampling:MTLCounterSamplingPointAtDispatchBoundary];
+    bool isDrawBoundarySupported =
+        [device supportsCounterSampling:MTLCounterSamplingPointAtDrawBoundary];
+
+    return isBlitBoundarySupported && isDispatchBoundarySupported && isDrawBoundarySupported;
+}
+
+DAWN_NOINLINE bool SupportCounterSamplingAtStageBoundary(id<MTLDevice> device)
+    API_AVAILABLE(macos(11.0), ios(14.0)) {
+    return [device supportsCounterSampling:MTLCounterSamplingPointAtStageBoundary];
 }
 
 }  // namespace dawn::native::metal

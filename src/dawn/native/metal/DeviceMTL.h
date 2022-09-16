@@ -72,6 +72,13 @@ class Device final : public DeviceBase {
 
     float GetTimestampPeriodInNS() const override;
 
+    bool UseCounterSamplingAtCommandBoundary() const;
+    bool UseCounterSamplingAtStageBoundary() const;
+
+    // Get a MTLBuffer that can be used as a dummy in a no-op blit encoder based on filling this
+    // single-byte buffer
+    id<MTLBuffer> GetDummyBlitMtlBuffer();
+
   private:
     Device(AdapterBase* adapter,
            NSPRef<id<MTLDevice>> mtlDevice,
@@ -144,6 +151,13 @@ class Device final : public DeviceBase {
     MTLTimestamp mGpuTimestamp API_AVAILABLE(macos(10.15), ios(14.0)) = 0;
     // The parameters for kalman filter
     std::unique_ptr<KalmanInfo> mKalmanInfo;
+
+    // Support counter sampling between blit commands, dispatches and draw calls
+    bool mCounterSamplingAtCommandBoundary;
+    // Support counter sampling at the begin and end of blit pass, compute pass and render pass's
+    // vertex/fragement stage
+    bool mCounterSamplingAtStageBoundary;
+    NSPRef<id<MTLBuffer>> mDummyBlitMtlBuffer;
 };
 
 }  // namespace dawn::native::metal

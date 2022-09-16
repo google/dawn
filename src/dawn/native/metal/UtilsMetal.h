@@ -23,6 +23,7 @@
 #import <Metal/Metal.h>
 
 namespace dawn::native {
+struct BeginRenderPassCmd;
 struct ProgrammableStage;
 struct EntryPointMetadata;
 enum class SingleShaderStage;
@@ -81,18 +82,25 @@ constexpr MTLStoreAction kMTLStoreActionStoreAndMultisampleResolve =
 // happen at the render pass start and end. Because workarounds wrap the encoding of the render
 // pass, the encoding must be entirely done by the `encodeInside` callback.
 // At the end of this function, `commandContext` will have no encoder open.
-using EncodeInsideRenderPass = std::function<MaybeError(id<MTLRenderCommandEncoder>)>;
+using EncodeInsideRenderPass =
+    std::function<MaybeError(id<MTLRenderCommandEncoder>, BeginRenderPassCmd* renderPassCmd)>;
 MaybeError EncodeMetalRenderPass(Device* device,
                                  CommandRecordingContext* commandContext,
                                  MTLRenderPassDescriptor* mtlRenderPass,
                                  uint32_t width,
                                  uint32_t height,
-                                 EncodeInsideRenderPass encodeInside);
+                                 EncodeInsideRenderPass encodeInside,
+                                 BeginRenderPassCmd* renderPassCmd = nullptr);
 
 MaybeError EncodeEmptyMetalRenderPass(Device* device,
                                       CommandRecordingContext* commandContext,
                                       MTLRenderPassDescriptor* mtlRenderPass,
                                       Extent3D size);
+
+bool SupportCounterSamplingAtCommandBoundary(id<MTLDevice> device)
+    API_AVAILABLE(macos(11.0), ios(14.0));
+bool SupportCounterSamplingAtStageBoundary(id<MTLDevice> device)
+    API_AVAILABLE(macos(11.0), ios(14.0));
 
 }  // namespace dawn::native::metal
 

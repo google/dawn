@@ -306,6 +306,12 @@ static constexpr ToggleEnumAndInfoList kToggleNameAndInfoList = {{
       "integer that is greater than 2^24 or smaller than -2^24). This toggle is also enabled on "
       "Intel GPUs on Metal backend due to a driver issue on Intel Metal driver.",
       "https://crbug.com/dawn/537"}},
+    {Toggle::MetalUseDummyBlitEncoderForWriteTimestamp,
+     {"metal_use_dummy_blit_encoder_for_write_timestamp",
+      "Add dummy blit command to blit encoder when encoding writeTimestamp as workaround on Metal."
+      "This toggle is enabled by default on Metal backend where GPU counters cannot be stored to"
+      "sampleBufferAttachments on empty blit encoder.",
+      "https://crbug.com/dawn/1473"}},
     // Comment to separate the }} so it is clearer what to copy-paste to add a toggle.
 }};
 }  // anonymous namespace

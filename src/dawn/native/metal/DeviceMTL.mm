@@ -121,7 +121,18 @@ Device::Device(AdapterBase* adapter,
                const TripleStateTogglesSet& userProvidedToggles)
     : DeviceBase(adapter, descriptor, userProvidedToggles),
       mMtlDevice(std::move(mtlDevice)),
-      mCompletedSerial(0) {}
+      mCompletedSerial(0) {
+    // On macOS < 11.0, we only can check whether counter sampling is supported, and the counter
+    // only can be sampled between command boundary using sampleCountersInBuffer API if it's
+    // supported.
+    if (@available(macOS 11.0, iOS 14.0, *)) {
+        mCounterSamplingAtCommandBoundary = SupportCounterSamplingAtCommandBoundary(GetMTLDevice());
+        mCounterSamplingAtStageBoundary = SupportCounterSamplingAtStageBoundary(GetMTLDevice());
+    } else {
+        mCounterSamplingAtCommandBoundary = true;
+        mCounterSamplingAtStageBoundary = false;
+    }
+}
 
 Device::~Device() {
     Destroy();
@@ -233,6 +244,14 @@ void Device::InitTogglesFromDriver() {
     // https://crbug.com/dawn/1463 for more details.
     if (gpu_info::IsIntel(vendorId)) {
         SetToggle(Toggle::ApplyClearBigIntegerColorValueWithDraw, true);
+    }
+
+    // TODO(dawn:1473): Metal fails to store GPU counters to sampleBufferAttachments on empty
+    // encoders on macOS 11.0+, we need to add dummy blit command to blit encoder when encoding
+    // writeTimestamp as workaround by enabling the toggle
+    // "metal_use_dummy_blit_encoder_for_write_timestamp".
+    if (@available(macos 11.0, iOS 14.0, *)) {
+        SetToggle(Toggle::MetalUseDummyBlitEncoderForWriteTimestamp, true);
     }
 }
 
@@ -498,6 +517,7 @@ void Device::DestroyImpl() {
 
     mCommandQueue = nullptr;
     mMtlDevice = nullptr;
+    mDummyBlitMtlBuffer = nullptr;
 }
 
 uint32_t Device::GetOptimalBytesPerRowAlignment() const {
@@ -510,6 +530,23 @@ uint64_t Device::GetOptimalBufferToTextureCopyOffsetAlignment() const {
 
 float Device::GetTimestampPeriodInNS() const {
     return mTimestampPeriod;
+}
+
+bool Device::UseCounterSamplingAtCommandBoundary() const {
+    return mCounterSamplingAtCommandBoundary;
+}
+
+bool Device::UseCounterSamplingAtStageBoundary() const {
+    return mCounterSamplingAtStageBoundary;
+}
+
+id<MTLBuffer> Device::GetDummyBlitMtlBuffer() {
+    if (mDummyBlitMtlBuffer == nullptr) {
+        mDummyBlitMtlBuffer.Acquire(
+            [GetMTLDevice() newBufferWithLength:1 options:MTLResourceStorageModePrivate]);
+    }
+
+    return mDummyBlitMtlBuffer.Get();
 }
 
 }  // namespace dawn::native::metal
