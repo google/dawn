@@ -34,6 +34,7 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/cts/expectations"
+	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
 	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/gerrit"
@@ -246,6 +247,16 @@ func (r *roller) roll(ctx context.Context) error {
 		return err
 	}
 
+	// Pull out the test list from the generated files
+	testlist := func() []query.Query {
+		lines := strings.Split(generatedFiles[testListRelPath], "\n")
+		list := make([]query.Query, len(lines))
+		for i, line := range lines {
+			list[i] = query.Parse(line)
+		}
+		return list
+	}()
+
 	deletedFiles := []string{}
 	if currentWebTestFiles, err := r.dawn.ListFiles(ctx, dawnHash, webTestsPath); err != nil {
 		// If there's an error, allow NotFound. It means the directory did not exist, so no files
@@ -348,7 +359,7 @@ func (r *roller) roll(ctx context.Context) error {
 		// Note: The new expectations are not used if the last attempt didn't
 		// fail, but we always want to post the diagnostics
 		newExpectations := ex.Clone()
-		diags, err := newExpectations.Update(results)
+		diags, err := newExpectations.Update(results, testlist)
 		if err != nil {
 			return err
 		}

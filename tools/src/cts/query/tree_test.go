@@ -238,7 +238,6 @@ func TestNewSingle(t *testing.T) {
 			t.Errorf("NewTree(%v) tree was not as expected:\n%v", test.in, diff)
 		}
 	}
-
 }
 
 func TestNewMultiple(t *testing.T) {
@@ -348,6 +347,223 @@ func TestNewWithCollision(t *testing.T) {
 	}
 	if diff := cmp.Diff(got, expect); diff != "" {
 		t.Errorf("NewTree() was not as expected:\n%v", diff)
+	}
+}
+
+func TestSplit(t *testing.T) {
+	type Tree = query.Tree[string]
+	type Node = query.TreeNode[string]
+	type QueryData = query.QueryData[string]
+	type Children = query.TreeNodeChildren[string]
+
+	type Test struct {
+		in   QueryData
+		pre  Tree
+		post Tree
+	}
+	for _, test := range []Test{
+		{ /////////////////////////////////////////////////////////////////////
+			in: QueryData{
+				Query: Q(`suite:*`),
+				Data:  pass,
+			},
+			post: Tree{
+				TreeNode: Node{
+					Children: Children{
+						query.TreeNodeChildKey{`suite`, query.Suite}: {
+							Query: Q(`suite`),
+							Children: Children{
+								query.TreeNodeChildKey{`*`, query.Files}: {
+									Query: Q(`suite:*`),
+									Data:  &pass,
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{ /////////////////////////////////////////////////////////////////////
+			in: QueryData{
+				Query: Q(`suite:a,b:*`),
+				Data:  pass,
+			},
+			pre: Tree{
+				TreeNode: Node{
+					Children: Children{
+						query.TreeNodeChildKey{`suite`, query.Suite}: {
+							Query: Q(`suite`),
+							Children: Children{
+								query.TreeNodeChildKey{`a`, query.Files}: {
+									Query: Q(`suite:a`),
+									Children: Children{
+										query.TreeNodeChildKey{`*`, query.Files}: {
+											Query: Q(`suite:a,*`),
+											Data:  &pass,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			post: Tree{
+				TreeNode: Node{
+					Children: Children{
+						query.TreeNodeChildKey{`suite`, query.Suite}: {
+							Query: Q(`suite`),
+							Children: Children{
+								query.TreeNodeChildKey{`a`, query.Files}: {
+									Query: Q(`suite:a`),
+									Children: Children{
+										query.TreeNodeChildKey{`b`, query.Files}: {
+											Query: Q(`suite:a,b`),
+											Children: Children{
+												query.TreeNodeChildKey{`*`, query.Tests}: {
+													Query: Q(`suite:a,b:*`),
+													Data:  &pass,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{ /////////////////////////////////////////////////////////////////////
+			in: QueryData{
+				Query: Q(`suite:a:*`),
+				Data:  pass,
+			},
+			pre: Tree{
+				TreeNode: Node{
+					Children: Children{
+						query.TreeNodeChildKey{`suite`, query.Suite}: {
+							Query: Q(`suite`),
+							Children: Children{
+								query.TreeNodeChildKey{`a`, query.Files}: {
+									Query: Q(`suite:a`),
+									Children: Children{
+										query.TreeNodeChildKey{`b`, query.Files}: {
+											Query: Q(`suite:a,b`),
+											Children: Children{
+												query.TreeNodeChildKey{`*`, query.Files}: {
+													Query: Q(`suite:a,b,*`),
+													Data:  &pass,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			post: Tree{
+				TreeNode: Node{
+					Children: Children{
+						query.TreeNodeChildKey{`suite`, query.Suite}: {
+							Query: Q(`suite`),
+							Children: Children{
+								query.TreeNodeChildKey{`a`, query.Files}: {
+									Query: Q(`suite:a`),
+									Children: Children{
+										query.TreeNodeChildKey{`*`, query.Tests}: {
+											Query: Q(`suite:a:*`),
+											Data:  &pass,
+										},
+										query.TreeNodeChildKey{`b`, query.Files}: {
+											Query: Q(`suite:a,b`),
+											Children: Children{
+												query.TreeNodeChildKey{`*`, query.Files}: {
+													Query: Q(`suite:a,b,*`),
+													Data:  &pass,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		{ /////////////////////////////////////////////////////////////////////
+			in: QueryData{
+				Query: Q(`suite:a,b:c:*`),
+				Data:  pass,
+			},
+			pre: Tree{
+				TreeNode: Node{
+					Children: Children{
+						query.TreeNodeChildKey{`suite`, query.Suite}: {
+							Query: Q(`suite`),
+							Children: Children{
+								query.TreeNodeChildKey{`a`, query.Files}: {
+									Query: Q(`suite:a`),
+									Children: Children{
+										query.TreeNodeChildKey{`b`, query.Files}: {
+											Query: Q(`suite:a,b`),
+											Children: Children{
+												query.TreeNodeChildKey{`*`, query.Tests}: {
+													Query: Q(`suite:a,b:*`),
+													Data:  &pass,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			post: Tree{
+				TreeNode: Node{
+					Children: Children{
+						query.TreeNodeChildKey{`suite`, query.Suite}: {
+							Query: Q(`suite`),
+							Children: Children{
+								query.TreeNodeChildKey{`a`, query.Files}: {
+									Query: Q(`suite:a`),
+									Children: Children{
+										query.TreeNodeChildKey{`b`, query.Files}: {
+											Query: Q(`suite:a,b`),
+											Children: Children{
+												query.TreeNodeChildKey{`c`, query.Tests}: {
+													Query: Q(`suite:a,b:c`),
+													Children: Children{
+														query.TreeNodeChildKey{`*`, query.Cases}: {
+															Query: Q(`suite:a,b:c:*`),
+															Data:  &pass,
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	} {
+		tree := test.pre
+		if err := tree.Split(test.in.Query, test.in.Data); err != nil {
+			t.Errorf("NewTree(%v): %v", test.in, err)
+			continue
+		}
+		if diff := cmp.Diff(tree, test.post); diff != "" {
+			t.Errorf("Split(%v) tree was not as expected:\n%v", test.in, diff)
+		}
 	}
 }
 

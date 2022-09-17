@@ -18,6 +18,7 @@ import (
 	"strings"
 	"testing"
 
+	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/cts/expectations"
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
@@ -41,7 +42,7 @@ func TestUpdate(t *testing.T) {
 		expectations string
 		results      result.List
 		updated      string
-		diagnostics  []expectations.Diagnostic
+		diagnostics  expectations.Diagnostics
 		err          string
 	}
 	for _, test := range []Test{
@@ -73,7 +74,7 @@ some:other,test:* [ Failure ]
 			updated: `
 some:other,test:* [ Failure ]
 `,
-			diagnostics: []expectations.Diagnostic{
+			diagnostics: expectations.Diagnostics{
 				{
 					Severity: expectations.Warning,
 					Line:     headerLines + 2,
@@ -109,60 +110,11 @@ some:other,test:* [ Failure ]
 			updated: `
 some:other,test:* [ Failure ]
 `,
-			diagnostics: []expectations.Diagnostic{
+			diagnostics: expectations.Diagnostics{
 				{
 					Severity: expectations.Warning,
 					Line:     headerLines + 3,
 					Message:  "no results found for 'a:missing,test,result:*'",
-				},
-			},
-		},
-		{ //////////////////////////////////////////////////////////////////////
-			name: "no results found Skip",
-			expectations: `
-crbug.com/a/123 a:missing,test,result:* [ Skip ]
-
-some:other,test:* [ Failure ]
-`,
-			results: result.List{
-				result.Result{
-					Query:  Q("some:other,test:*"),
-					Tags:   result.NewTags("os-a", "gpu-a"),
-					Status: result.Failure,
-				},
-				result.Result{
-					Query:  Q("some:other,test:*"),
-					Tags:   result.NewTags("os-b", "gpu-b"),
-					Status: result.Failure,
-				},
-			},
-			updated: `
-crbug.com/a/123 a:missing,test,result:* [ Skip ]
-
-some:other,test:* [ Failure ]
-`,
-		},
-		{ //////////////////////////////////////////////////////////////////////
-			name: "simple expectation collision",
-			expectations: `
-a:b,c:* [ Failure ]
-a:b,c:* [ Failure ]
-`,
-			results: result.List{
-				result.Result{
-					Query:  Q("a:b,c:d"),
-					Tags:   result.NewTags("os-a", "os-c", "gpu-b"),
-					Status: result.Failure,
-				},
-			},
-			updated: `
-a:b,c:* [ Failure ]
-`,
-			diagnostics: []expectations.Diagnostic{
-				{
-					Severity: expectations.Error,
-					Line:     headerLines + 3,
-					Message:  "a:b,c:* collides with expectation at line 8",
 				},
 			},
 		},
@@ -182,100 +134,6 @@ a:b,c:* [ Failure ]
 			updated: `
 a:b,c:* [ Failure ]
 `,
-			diagnostics: []expectations.Diagnostic{
-				{
-					Severity: expectations.Error,
-					Line:     headerLines + 3,
-					Message:  "[gpu-b] a:b,c:* collides with expectation at line 8",
-				},
-			},
-		},
-		{ //////////////////////////////////////////////////////////////////////
-			name: "simple expectation collision KEEP",
-			expectations: `
-# KEEP
-a:b,c:* [ Failure ]
-a:b,c:* [ Failure ]
-`,
-			results: result.List{
-				result.Result{
-					Query:  Q("a:b,c:d"),
-					Tags:   result.NewTags("os-a", "os-c", "gpu-b"),
-					Status: result.Failure,
-				},
-			},
-			updated: `
-# KEEP
-a:b,c:* [ Failure ]
-`,
-			diagnostics: []expectations.Diagnostic{
-				{
-					Severity: expectations.Error,
-					Line:     headerLines + 4,
-					Message:  "a:b,c:* collides with expectation at line 9",
-				},
-			},
-		},
-		{ //////////////////////////////////////////////////////////////////////
-			name: "collision with child-expectation",
-			expectations: `
-a:b:x:* [ Failure ]
-a:b:* [ Failure ]
-`,
-			results: result.List{
-				result.Result{
-					Query:  Q("a:b:x:*"),
-					Tags:   result.NewTags("os-a", "os-c", "gpu-b"),
-					Status: result.Failure,
-				},
-				result.Result{
-					Query:  Q("a:b:y:*"),
-					Tags:   result.NewTags("os-a", "os-c", "gpu-b"),
-					Status: result.Failure,
-				},
-			},
-			updated: `
-a:b:x:* [ Failure ]
-
-# New failures. Please triage:
-crbug.com/dawn/0000 a:b:y:* [ Failure ]
-`,
-			diagnostics: []expectations.Diagnostic{
-				{
-					Severity: expectations.Error,
-					Line:     headerLines + 3,
-					Message:  "a:b:* collides with expectation at line 8",
-				},
-			},
-		},
-		{ //////////////////////////////////////////////////////////////////////
-			name: "collision with parent-expectation",
-			expectations: `
-a:b:* [ Failure ]
-a:b:x:* [ Failure ]
-`,
-			results: result.List{
-				result.Result{
-					Query:  Q("a:b:x:*"),
-					Tags:   result.NewTags("os-a", "os-c", "gpu-b"),
-					Status: result.Failure,
-				},
-				result.Result{
-					Query:  Q("a:b:y:*"),
-					Tags:   result.NewTags("os-a", "os-c", "gpu-b"),
-					Status: result.Failure,
-				},
-			},
-			updated: `
-a:b:* [ Failure ]
-`,
-			diagnostics: []expectations.Diagnostic{
-				{
-					Severity: expectations.Error,
-					Line:     headerLines + 3,
-					Message:  "a:b:x:* collides with expectation at line 8",
-				},
-			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
 			name: "expectation test now passes",
@@ -345,7 +203,7 @@ crbug.com/a/123 [ gpu-b os-b ] a:b,c:d [ Failure ]
 crbug.com/a/123 [ gpu-a os-a ] a:b,c:d [ Failure ]
 crbug.com/a/123 [ gpu-b os-b ] a:b,c:d [ Failure ]
 `,
-			diagnostics: []expectations.Diagnostic{
+			diagnostics: expectations.Diagnostics{
 				{
 					Severity: expectations.Note,
 					Line:     headerLines + 3,
@@ -369,7 +227,7 @@ crbug.com/a/123 a:b,c:d:* [ Failure ]
 # KEEP
 crbug.com/a/123 a:b,c:d:* [ Failure ]
 `,
-			diagnostics: []expectations.Diagnostic{
+			diagnostics: expectations.Diagnostics{
 				{
 					Severity: expectations.Note,
 					Line:     headerLines + 3,
@@ -393,6 +251,11 @@ crbug.com/a/123 a:b,c:d:* [ Failure ]
 				},
 				result.Result{
 					Query:  Q("suite:dir_a,dir_b:test_c:case=4;*"),
+					Tags:   result.NewTags("os-a", "gpu-a"),
+					Status: result.Crash,
+				},
+				result.Result{
+					Query:  Q("suite:dir_a,dir_b:test_c:case=4;*"),
 					Tags:   result.NewTags("os-b", "gpu-b"),
 					Status: result.Crash,
 				},
@@ -402,22 +265,22 @@ crbug.com/a/123 a:b,c:d:* [ Failure ]
 					Status: result.RetryOnFailure,
 				},
 				result.Result{
-					Query:  Q("suite:dir_a,dir_b:test_b;case=5;*"),
+					Query:  Q("suite:dir_a,dir_b:test_b:case=5;*"),
 					Tags:   result.NewTags("os-b", "gpu-b"),
 					Status: result.Pass,
 				},
 				result.Result{
-					Query:  Q("suite:dir_a,dir_b:test_b:*"),
+					Query:  Q("suite:dir_a,dir_b:test_b:case=6;*"),
 					Tags:   result.NewTags("os-a", "gpu-a"),
 					Status: result.Slow,
 				},
 				result.Result{
-					Query:  Q("suite:dir_a,dir_b:test_b:*"),
+					Query:  Q("suite:dir_a,dir_b:test_b:case=6;*"),
 					Tags:   result.NewTags("os-b", "gpu-a"),
 					Status: result.Pass,
 				},
 				result.Result{
-					Query:  Q("suite:dir_a,dir_b:test_c:*"),
+					Query:  Q("suite:dir_a,dir_b:test_c:case=6;*"),
 					Tags:   result.NewTags("os-a", "gpu-a"),
 					Status: result.RetryOnFailure,
 				},
@@ -425,14 +288,13 @@ crbug.com/a/123 a:b,c:d:* [ Failure ]
 			updated: `# A comment
 
 # New flakes. Please triage:
-crbug.com/dawn/0000 [ gpu-a os-a ] suite:dir_a,dir_b:test_c:* [ RetryOnFailure ]
-crbug.com/dawn/0000 [ gpu-b os-b ] suite:dir_a,dir_b:test_c:case=5;* [ RetryOnFailure ]
+crbug.com/dawn/0000 suite:dir_a,dir_b:test_c:case=5;* [ RetryOnFailure ]
+crbug.com/dawn/0000 suite:dir_a,dir_b:test_c:case=6;* [ RetryOnFailure ]
 
 # New failures. Please triage:
-crbug.com/dawn/0000 [ gpu-b os-a ] suite:* [ Failure ]
-crbug.com/dawn/0000 [ gpu-a os-a ] suite:dir_a,dir_b:test_a:* [ Failure ]
+crbug.com/dawn/0000 suite:dir_a,dir_b:test_a:* [ Failure ]
 crbug.com/dawn/0000 [ gpu-a os-a ] suite:dir_a,dir_b:test_b:* [ Slow ]
-crbug.com/dawn/0000 [ gpu-b os-b ] suite:dir_a,dir_b:test_c:case=4;* [ Failure ]
+crbug.com/dawn/0000 suite:dir_a,dir_b:test_c:case=4;* [ Failure ]
 `,
 		},
 		{ //////////////////////////////////////////////////////////////////////
@@ -650,8 +512,13 @@ crbug.com/dawn/0000 a:b,c:t29:* [ Failure ]
 			t.Fatalf("'%v': expectations.Parse():\n%v", test.name, err)
 		}
 
+		testList := container.NewMap[string, query.Query]()
+		for _, r := range test.results {
+			testList.Add(r.Query.String(), r.Query)
+		}
+
 		errMsg := ""
-		diagnostics, err := ex.Update(test.results)
+		diagnostics, err := ex.Update(test.results, testList.Values())
 		if err != nil {
 			errMsg = err.Error()
 		}

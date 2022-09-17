@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package format
+package validate
 
 import (
 	"context"
 	"flag"
+	"fmt"
+	"os"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
 	"dawn.googlesource.com/dawn/tools/src/cts/expectations"
@@ -33,11 +35,11 @@ type cmd struct {
 }
 
 func (cmd) Name() string {
-	return "format"
+	return "validate"
 }
 
 func (cmd) Desc() string {
-	return "formats a WebGPU expectations.txt file"
+	return "validates a WebGPU expectations.txt file"
 }
 
 func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, error) {
@@ -51,11 +53,14 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	if err != nil {
 		return err
 	}
+	diags := ex.Validate()
 
-	// Sort the expectations in each chunk.
-	for _, chunk := range ex.Chunks {
-		chunk.Expectations.Sort()
+	// Print any diagnostics
+	diags.Print(os.Stdout, c.flags.expectations)
+	if numErrs := diags.NumErrors(); numErrs > 0 {
+		return fmt.Errorf("%v errors found", numErrs)
 	}
 
-	return ex.Save(c.flags.expectations)
+	fmt.Println("no issues found")
+	return nil
 }

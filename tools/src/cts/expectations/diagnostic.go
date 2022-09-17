@@ -16,6 +16,7 @@ package expectations
 
 import (
 	"fmt"
+	"io"
 	"strings"
 )
 
@@ -54,3 +55,24 @@ func (e Diagnostic) String() string {
 
 // Error implements the 'error' interface.
 func (e Diagnostic) Error() string { return e.String() }
+
+// Diagnostics is a list of diagnostic
+type Diagnostics []Diagnostic
+
+// NumErrors returns number of errors in the diagnostics
+func (l Diagnostics) NumErrors() int {
+	count := 0
+	for _, d := range l {
+		if d.Severity == Error {
+			count++
+		}
+	}
+	return count
+}
+
+// Print prints the list of diagnostics to 'w'
+func (l Diagnostics) Print(w io.Writer, path string) {
+	for _, d := range l {
+		fmt.Fprintf(w, "%v:%v %v\n", path, d.Line, d.Message)
+	}
+}

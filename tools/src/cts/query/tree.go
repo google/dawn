@@ -252,7 +252,7 @@ func NewTree[Data any](entries ...QueryData[Data]) (Tree[Data], error) {
 }
 
 // Add adds a new data to the tree.
-// Returns ErrDuplicateData if the tree already contains a data for the given
+// Returns ErrDuplicateData if the tree already contains a data for the given node at query
 func (t *Tree[Data]) Add(q Query, d Data) error {
 	node := &t.TreeNode
 	q.Walk(func(q Query, t Target, n string) error {
@@ -264,6 +264,37 @@ func (t *Tree[Data]) Add(q Query, d Data) error {
 	}
 	node.Data = &d
 	return nil
+}
+
+// Split adds a new data to the tree, clearing any ancestor node's data.
+// Returns ErrDuplicateData if the tree already contains a data for the given node at query
+func (t *Tree[Data]) Split(q Query, d Data) error {
+	node := &t.TreeNode
+	q.Walk(func(q Query, t Target, n string) error {
+		delete(node.Children, TreeNodeChildKey{Name: "*", Target: t})
+		node.Data = nil
+		node = node.getOrCreateChild(TreeNodeChildKey{n, t})
+		return nil
+	})
+	if node.Data != nil {
+		return ErrDuplicateData{node.Query}
+	}
+	node.Data = &d
+	return nil
+}
+
+// GetOrCreate returns existing, or adds a new data to the tree.
+func (t *Tree[Data]) GetOrCreate(q Query, create func() Data) *Data {
+	node := &t.TreeNode
+	q.Walk(func(q Query, t Target, n string) error {
+		node = node.getOrCreateChild(TreeNodeChildKey{n, t})
+		return nil
+	})
+	if node.Data == nil {
+		data := create()
+		node.Data = &data
+	}
+	return node.Data
 }
 
 // Reduce reduces the tree using the Merger function f.

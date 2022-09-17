@@ -18,9 +18,13 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
 	"dawn.googlesource.com/dawn/tools/src/cts/expectations"
+	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
 	"go.chromium.org/luci/auth/client/authcli"
 )
@@ -53,6 +57,19 @@ func (c *cmd) RegisterFlags(ctx context.Context, cfg common.Config) ([]string, e
 	return nil, nil
 }
 
+func loadTestList(path string) ([]query.Query, error) {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load test list: %w", err)
+	}
+	lines := strings.Split(string(data), "\n")
+	out := make([]query.Query, len(lines))
+	for i, l := range lines {
+		out[i] = query.Parse(l)
+	}
+	return out, nil
+}
+
 func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	// Validate command line arguments
 	auth, err := c.flags.auth.Options()
@@ -75,16 +92,24 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 		return err
 	}
 
+	testlist, err := loadTestList(common.DefaultTestListPath())
+	if err != nil {
+		return err
+	}
+
+	if diag := ex.Validate(); diag.NumErrors() > 0 {
+		diag.Print(os.Stdout, c.flags.expectations)
+		return fmt.Errorf("validation failed")
+	}
+
 	// Update the expectations file with the results
-	msgs, err := ex.Update(results)
+	diag, err := ex.Update(results, testlist)
 	if err != nil {
 		return err
 	}
 
 	// Print any diagnostics
-	for _, msg := range msgs {
-		fmt.Printf("%v:%v %v\n", c.flags.expectations, msg.Line, msg.Message)
-	}
+	diag.Print(os.Stdout, c.flags.expectations)
 
 	// Save the updated expectations file
 	return ex.Save(c.flags.expectations)
