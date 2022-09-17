@@ -1,0 +1,100 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 65
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpName %u_block_std140 "u_block_std140"
+               OpMemberName %u_block_std140 0 "inner_0"
+               OpMemberName %u_block_std140 1 "inner_1"
+               OpMemberName %u_block_std140 2 "inner_2"
+               OpMemberName %u_block_std140 3 "inner_3"
+               OpName %u "u"
+               OpName %a "a"
+               OpName %m "m"
+               OpName %b "b"
+               OpName %v "v"
+               OpName %c "c"
+               OpName %f_1 "f_1"
+               OpName %load_u_inner "load_u_inner"
+               OpName %f "f"
+               OpDecorate %u_block_std140 Block
+               OpMemberDecorate %u_block_std140 0 Offset 0
+               OpMemberDecorate %u_block_std140 1 Offset 8
+               OpMemberDecorate %u_block_std140 2 Offset 16
+               OpMemberDecorate %u_block_std140 3 Offset 24
+               OpDecorate %u NonWritable
+               OpDecorate %u DescriptorSet 0
+               OpDecorate %u Binding 0
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+%u_block_std140 = OpTypeStruct %v2float %v2float %v2float %v2float
+%_ptr_Uniform_u_block_std140 = OpTypePointer Uniform %u_block_std140
+          %u = OpVariable %_ptr_Uniform_u_block_std140 Uniform
+       %void = OpTypeVoid
+%mat4v2float = OpTypeMatrix %v2float 4
+          %6 = OpTypeFunction %void %mat4v2float
+         %12 = OpTypeFunction %void %v2float
+         %16 = OpTypeFunction %void %float
+         %20 = OpTypeFunction %mat4v2float
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Uniform_v2float = OpTypePointer Uniform %v2float
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+     %uint_3 = OpConstant %uint 3
+         %43 = OpTypeFunction %void
+         %56 = OpConstantNull %uint
+%_ptr_Uniform_float = OpTypePointer Uniform %float
+          %a = OpFunction %void None %6
+          %m = OpFunctionParameter %mat4v2float
+         %11 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %b = OpFunction %void None %12
+          %v = OpFunctionParameter %v2float
+         %15 = OpLabel
+               OpReturn
+               OpFunctionEnd
+          %c = OpFunction %void None %16
+        %f_1 = OpFunctionParameter %float
+         %19 = OpLabel
+               OpReturn
+               OpFunctionEnd
+%load_u_inner = OpFunction %mat4v2float None %20
+         %22 = OpLabel
+         %28 = OpAccessChain %_ptr_Uniform_v2float %u %uint_0
+         %29 = OpLoad %v2float %28
+         %32 = OpAccessChain %_ptr_Uniform_v2float %u %uint_1
+         %33 = OpLoad %v2float %32
+         %36 = OpAccessChain %_ptr_Uniform_v2float %u %uint_2
+         %37 = OpLoad %v2float %36
+         %40 = OpAccessChain %_ptr_Uniform_v2float %u %uint_3
+         %41 = OpLoad %v2float %40
+         %42 = OpCompositeConstruct %mat4v2float %29 %33 %37 %41
+               OpReturnValue %42
+               OpFunctionEnd
+          %f = OpFunction %void None %43
+         %45 = OpLabel
+         %47 = OpFunctionCall %mat4v2float %load_u_inner
+         %46 = OpFunctionCall %void %a %47
+         %49 = OpAccessChain %_ptr_Uniform_v2float %u %uint_1
+         %50 = OpLoad %v2float %49
+         %48 = OpFunctionCall %void %b %50
+         %52 = OpAccessChain %_ptr_Uniform_v2float %u %uint_1
+         %53 = OpLoad %v2float %52
+         %54 = OpVectorShuffle %v2float %53 %53 1 0
+         %51 = OpFunctionCall %void %b %54
+         %58 = OpAccessChain %_ptr_Uniform_float %u %uint_1 %56
+         %59 = OpLoad %float %58
+         %55 = OpFunctionCall %void %c %59
+         %61 = OpAccessChain %_ptr_Uniform_v2float %u %uint_1
+         %62 = OpLoad %v2float %61
+         %63 = OpVectorShuffle %v2float %62 %62 1 0
+         %64 = OpCompositeExtract %float %63 0
+         %60 = OpFunctionCall %void %c %64
+               OpReturn
+               OpFunctionEnd

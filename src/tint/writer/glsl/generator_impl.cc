@@ -221,10 +221,8 @@ SanitizedResult Sanitize(const Program* in,
     manager.Add<transform::CanonicalizeEntryPointIO>();
     manager.Add<transform::ExpandCompoundAssignment>();
     manager.Add<transform::PromoteSideEffectsToDecl>();
-    manager.Add<transform::Std140>();  // Must come after PromoteSideEffectsToDecl
     manager.Add<transform::PadStructs>();
     manager.Add<transform::UnwindDiscardFunctions>();
-    manager.Add<transform::SimplifyPointers>();
 
     manager.Add<transform::RemovePhonies>();
 
@@ -245,6 +243,13 @@ SanitizedResult Sanitize(const Program* in,
     manager.Add<transform::PromoteInitializersToLet>();
     manager.Add<transform::AddEmptyEntryPoint>();
     manager.Add<transform::AddBlockAttribute>();
+
+    // Std140 must come after PromoteSideEffectsToDecl and AddBlockAttribute
+    // Std140 must come before SimplifyPointers.
+    manager.Add<transform::Std140>();
+
+    manager.Add<transform::SimplifyPointers>();
+
     data.Add<transform::CanonicalizeEntryPointIO::Config>(
         transform::CanonicalizeEntryPointIO::ShaderStyle::kGlsl);
 

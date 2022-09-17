@@ -1,11 +1,6 @@
 #version 310 es
 precision mediump float;
 
-struct S {
-  mat3x2 matrix;
-  vec3 vector;
-};
-
 layout(binding = 0, std140) uniform S_std140_ubo {
   vec2 matrix_0;
   vec2 matrix_1;

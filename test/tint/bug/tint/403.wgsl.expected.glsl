@@ -1,13 +1,5 @@
 #version 310 es
 
-struct vertexUniformBuffer1 {
-  mat2 transform1;
-};
-
-struct vertexUniformBuffer2 {
-  mat2 transform2;
-};
-
 layout(binding = 0, std140) uniform vertexUniformBuffer1_std140_ubo {
   vec2 transform1_0;
   vec2 transform1_1;

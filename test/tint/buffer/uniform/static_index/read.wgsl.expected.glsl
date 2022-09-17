@@ -7,21 +7,6 @@ struct Inner {
   uint pad_2;
 };
 
-struct S {
-  ivec3 a;
-  int b;
-  uvec3 c;
-  uint d;
-  vec3 e;
-  float f;
-  ivec2 g;
-  ivec2 h;
-  mat2x3 i;
-  mat3x2 j;
-  Inner k;
-  Inner l[4];
-};
-
 layout(binding = 0, std140) uniform S_std140_ubo {
   ivec3 a;
   int b;

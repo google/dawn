@@ -1,0 +1,93 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 57
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpName %u_block_std140 "u_block_std140"
+               OpMemberName %u_block_std140 0 "inner_0"
+               OpMemberName %u_block_std140 1 "inner_1"
+               OpMemberName %u_block_std140 2 "inner_2"
+               OpMemberName %u_block_std140 3 "inner_3"
+               OpName %u "u"
+               OpName %u_block "u_block"
+               OpMemberName %u_block 0 "inner"
+               OpName %s "s"
+               OpName %load_u_inner "load_u_inner"
+               OpName %f "f"
+               OpDecorate %u_block_std140 Block
+               OpMemberDecorate %u_block_std140 0 Offset 0
+               OpMemberDecorate %u_block_std140 1 Offset 8
+               OpMemberDecorate %u_block_std140 2 Offset 16
+               OpMemberDecorate %u_block_std140 3 Offset 24
+               OpDecorate %u NonWritable
+               OpDecorate %u DescriptorSet 0
+               OpDecorate %u Binding 0
+               OpDecorate %u_block Block
+               OpMemberDecorate %u_block 0 Offset 0
+               OpMemberDecorate %u_block 0 ColMajor
+               OpMemberDecorate %u_block 0 MatrixStride 8
+               OpDecorate %s DescriptorSet 0
+               OpDecorate %s Binding 1
+      %float = OpTypeFloat 32
+    %v2float = OpTypeVector %float 2
+%u_block_std140 = OpTypeStruct %v2float %v2float %v2float %v2float
+%_ptr_Uniform_u_block_std140 = OpTypePointer Uniform %u_block_std140
+          %u = OpVariable %_ptr_Uniform_u_block_std140 Uniform
+%mat4v2float = OpTypeMatrix %v2float 4
+    %u_block = OpTypeStruct %mat4v2float
+%_ptr_StorageBuffer_u_block = OpTypePointer StorageBuffer %u_block
+          %s = OpVariable %_ptr_StorageBuffer_u_block StorageBuffer
+         %10 = OpTypeFunction %mat4v2float
+       %uint = OpTypeInt 32 0
+     %uint_0 = OpConstant %uint 0
+%_ptr_Uniform_v2float = OpTypePointer Uniform %v2float
+     %uint_1 = OpConstant %uint 1
+     %uint_2 = OpConstant %uint 2
+     %uint_3 = OpConstant %uint 3
+       %void = OpTypeVoid
+         %33 = OpTypeFunction %void
+%_ptr_StorageBuffer_mat4v2float = OpTypePointer StorageBuffer %mat4v2float
+        %int = OpTypeInt 32 1
+      %int_1 = OpConstant %int 1
+%_ptr_StorageBuffer_v2float = OpTypePointer StorageBuffer %v2float
+         %50 = OpConstantNull %int
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+         %53 = OpConstantNull %uint
+%_ptr_Uniform_float = OpTypePointer Uniform %float
+%load_u_inner = OpFunction %mat4v2float None %10
+         %12 = OpLabel
+         %18 = OpAccessChain %_ptr_Uniform_v2float %u %uint_0
+         %19 = OpLoad %v2float %18
+         %22 = OpAccessChain %_ptr_Uniform_v2float %u %uint_1
+         %23 = OpLoad %v2float %22
+         %26 = OpAccessChain %_ptr_Uniform_v2float %u %uint_2
+         %27 = OpLoad %v2float %26
+         %30 = OpAccessChain %_ptr_Uniform_v2float %u %uint_3
+         %31 = OpLoad %v2float %30
+         %32 = OpCompositeConstruct %mat4v2float %19 %23 %27 %31
+               OpReturnValue %32
+               OpFunctionEnd
+          %f = OpFunction %void None %33
+         %36 = OpLabel
+         %38 = OpAccessChain %_ptr_StorageBuffer_mat4v2float %s %uint_0
+         %39 = OpFunctionCall %mat4v2float %load_u_inner
+               OpStore %38 %39
+         %43 = OpAccessChain %_ptr_StorageBuffer_v2float %s %uint_0 %int_1
+         %44 = OpAccessChain %_ptr_Uniform_v2float %u %uint_0
+         %45 = OpLoad %v2float %44
+               OpStore %43 %45
+         %46 = OpAccessChain %_ptr_StorageBuffer_v2float %s %uint_0 %int_1
+         %47 = OpAccessChain %_ptr_Uniform_v2float %u %uint_0
+         %48 = OpLoad %v2float %47
+         %49 = OpVectorShuffle %v2float %48 %48 1 0
+               OpStore %46 %49
+         %52 = OpAccessChain %_ptr_StorageBuffer_float %s %uint_0 %50 %int_1
+         %55 = OpAccessChain %_ptr_Uniform_float %u %uint_1 %53
+         %56 = OpLoad %float %55
+               OpStore %52 %56
+               OpReturn
+               OpFunctionEnd

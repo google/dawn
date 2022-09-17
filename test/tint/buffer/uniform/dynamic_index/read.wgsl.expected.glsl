@@ -11,6 +11,8 @@ struct Inner {
   ivec2 h;
   mat2x3 i;
   mat3x2 j;
+  uint pad;
+  uint pad_1;
   ivec4 k[4];
 };
 
@@ -30,10 +32,6 @@ struct Inner_std140 {
   uint pad;
   uint pad_1;
   ivec4 k[4];
-};
-
-struct S {
-  Inner arr[8];
 };
 
 layout(binding = 0, std140) uniform S_std140_ubo {

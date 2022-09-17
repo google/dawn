@@ -77,18 +77,24 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     manager.Add<transform::RemoveUnreachableStatements>();
     manager.Add<transform::ExpandCompoundAssignment>();
     manager.Add<transform::PromoteSideEffectsToDecl>();
-    manager.Add<transform::Std140>();  // Must come after PromoteSideEffectsToDecl
     manager.Add<transform::UnwindDiscardFunctions>();
     manager.Add<transform::SimplifyPointers>();  // Required for arrayLength()
     manager.Add<transform::RemovePhonies>();
     manager.Add<transform::VectorizeScalarMatrixConstructors>();
     manager.Add<transform::VectorizeMatrixConversions>();
-    manager.Add<transform::ForLoopToLoop>();  // Must come after
-    manager.Add<transform::WhileToLoop>();    // ZeroInitWorkgroupMemory
+    manager.Add<transform::WhileToLoop>();  // ZeroInitWorkgroupMemory
     manager.Add<transform::CanonicalizeEntryPointIO>();
     manager.Add<transform::AddEmptyEntryPoint>();
     manager.Add<transform::AddBlockAttribute>();
+
+    // Std140 must come after PromoteSideEffectsToDecl, AddBlockAttribute
+    manager.Add<transform::Std140>();
+
+    // VarForDynamicIndex must come after Std140
     manager.Add<transform::VarForDynamicIndex>();
+
+    // ForLoopToLoop must come after Std140, ZeroInitWorkgroupMemory
+    manager.Add<transform::ForLoopToLoop>();
 
     data.Add<transform::CanonicalizeEntryPointIO::Config>(
         transform::CanonicalizeEntryPointIO::Config(

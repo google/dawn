@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 33
+; Bound: 37
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -37,25 +37,25 @@
      %uint_1 = OpConstant %uint 1
      %uint_2 = OpConstant %uint 2
        %void = OpTypeVoid
-         %23 = OpTypeFunction %void
+         %27 = OpTypeFunction %void
      %uint_3 = OpConstant %uint 3
 %_ptr_Uniform_v3float = OpTypePointer Uniform %v3float
 %load_data_matrix = OpFunction %mat3v2float None %7
          %10 = OpLabel
-         %14 = OpAccessChain %_ptr_Uniform_v2float %data %uint_0
-         %15 = OpLoad %v2float %14
-         %17 = OpAccessChain %_ptr_Uniform_v2float %data %uint_1
-         %18 = OpLoad %v2float %17
-         %20 = OpAccessChain %_ptr_Uniform_v2float %data %uint_2
+         %16 = OpAccessChain %_ptr_Uniform_v2float %data %uint_0
+         %17 = OpLoad %v2float %16
+         %20 = OpAccessChain %_ptr_Uniform_v2float %data %uint_1
          %21 = OpLoad %v2float %20
-         %22 = OpCompositeConstruct %mat3v2float %15 %18 %21
-               OpReturnValue %22
+         %24 = OpAccessChain %_ptr_Uniform_v2float %data %uint_2
+         %25 = OpLoad %v2float %24
+         %26 = OpCompositeConstruct %mat3v2float %17 %21 %25
+               OpReturnValue %26
                OpFunctionEnd
-       %main = OpFunction %void None %23
-         %26 = OpLabel
-         %27 = OpFunctionCall %mat3v2float %load_data_matrix
-         %30 = OpAccessChain %_ptr_Uniform_v3float %data %uint_3
-         %31 = OpLoad %v3float %30
-         %32 = OpMatrixTimesVector %v2float %27 %31
+       %main = OpFunction %void None %27
+         %30 = OpLabel
+         %31 = OpFunctionCall %mat3v2float %load_data_matrix
+         %34 = OpAccessChain %_ptr_Uniform_v3float %data %uint_3
+         %35 = OpLoad %v3float %34
+         %36 = OpMatrixTimesVector %v2float %31 %35
                OpReturn
                OpFunctionEnd
