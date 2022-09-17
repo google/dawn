@@ -244,8 +244,7 @@ SanitizedResult Sanitize(const Program* in,
     manager.Add<transform::AddEmptyEntryPoint>();
     manager.Add<transform::AddBlockAttribute>();
 
-    // Std140 must come after PromoteSideEffectsToDecl and AddBlockAttribute
-    // Std140 must come before SimplifyPointers.
+    // Std140 must come after PromoteSideEffectsToDecl and before SimplifyPointers.
     manager.Add<transform::Std140>();
 
     manager.Add<transform::SimplifyPointers>();

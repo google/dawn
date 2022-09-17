@@ -109,7 +109,7 @@ TEST_P(Std140TestShouldRun, ArrayUniform) {
 
     src = utils::ReplaceAll(src, "${mat}", GetParam().Mat());
 
-    EXPECT_FALSE(ShouldRun<Std140>(src));
+    EXPECT_EQ(ShouldRun<Std140>(src), GetParam().should_run);
 }
 
 INSTANTIATE_TEST_SUITE_P(Std140TestShouldRun,
@@ -129,7 +129,7 @@ INSTANTIATE_TEST_SUITE_P(Std140TestShouldRun,
 TEST_F(Std140Test, EmptyModule) {
     auto* src = R"()";
 
-    auto* expect = R"()";
+    auto* expect = src;
 
     auto got = Run<Std140>(src);
 
@@ -1037,7 +1037,7 @@ fn conv_S(val : S_std140) -> S {
   return S(mat3x2<f32>(val.m_0, val.m_1, val.m_2));
 }
 
-fn conv_arr_3_S(val : array<S_std140, 3u>) -> array<S, 3u> {
+fn conv_arr3_S(val : array<S_std140, 3u>) -> array<S, 3u> {
   var arr : array<S, 3u>;
   for(var i : u32; (i < 3u); i = (i + 1)) {
     arr[i] = conv_S(val[i]);
@@ -1046,7 +1046,7 @@ fn conv_arr_3_S(val : array<S_std140, 3u>) -> array<S, 3u> {
 }
 
 fn f() {
-  let l = conv_arr_3_S(a);
+  let l = conv_arr3_S(a);
 }
 )";
 
@@ -1563,6 +1563,1330 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(Std140Test, Mat4x2Uniform_LoadMatrix) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> m : mat4x2<f32>;
+
+fn f() {
+  let l = m;
+}
+)";
+
+    auto* expect = R"(
+struct mat4x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+  col3 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> m : mat4x2_f32;
+
+fn conv_mat4x2_f32(val : mat4x2_f32) -> mat4x2<f32> {
+  return mat4x2<f32>(val.col0, val.col1, val.col2, val.col3);
+}
+
+fn f() {
+  let l = conv_mat4x2_f32(m);
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, Mat2x2Uniform_LoadColumn0) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : mat2x2<f32>;
+
+fn f() {
+  let l = a[0];
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : mat2x2_f32;
+
+fn f() {
+  let l = a.col0;
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, Mat4x2Uniform_LoadColumn1) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : mat4x2<f32>;
+
+fn f() {
+  let l = a[1];
+}
+)";
+
+    auto* expect = R"(
+struct mat4x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+  col3 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : mat4x2_f32;
+
+fn f() {
+  let l = a.col1;
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, Mat2x2Uniform_LoadColumnI) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : mat2x2<f32>;
+
+fn f() {
+  let I = 1;
+
+  let l = a[I];
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : mat2x2_f32;
+
+fn load_a_p0(p0 : u32) -> vec2<f32> {
+  switch(p0) {
+    case 0u: {
+      return a.col0;
+    }
+    case 1u: {
+      return a.col1;
+    }
+    default: {
+      return vec2<f32>();
+    }
+  }
+}
+
+fn f() {
+  let I = 1;
+  let l = load_a_p0(u32(I));
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, Mat2x2Uniform_LoadColumn1Swizzle) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : mat2x2<f32>;
+
+fn f() {
+  let l = a[1].yx;
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : mat2x2_f32;
+
+fn f() {
+  let l = a.col1.yx;
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, Mat4x2Uniform_LoadColumnISwizzle) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : mat4x2<f32>;
+
+fn f() {
+  let I = 1;
+
+  let l = a[I].yx;
+}
+)";
+
+    auto* expect = R"(
+struct mat4x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+  col3 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : mat4x2_f32;
+
+fn load_a_p0_yx(p0 : u32) -> vec2<f32> {
+  switch(p0) {
+    case 0u: {
+      return a.col0.yx;
+    }
+    case 1u: {
+      return a.col1.yx;
+    }
+    case 2u: {
+      return a.col2.yx;
+    }
+    case 3u: {
+      return a.col3.yx;
+    }
+    default: {
+      return vec2<f32>();
+    }
+  }
+}
+
+fn f() {
+  let I = 1;
+  let l = load_a_p0_yx(u32(I));
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, Mat2x2Uniform_LoadColumn1Element1) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : mat2x2<f32>;
+
+fn f() {
+  let l = a[1][1];
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : mat2x2_f32;
+
+fn f() {
+  let l = a.col1[1u];
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, Mat4x2Uniform_LoadColumnIElementI) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : mat4x2<f32>;
+
+fn f() {
+  let I = 1;
+
+  let l = a[I][I];
+}
+)";
+
+    auto* expect = R"(
+struct mat4x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+  col3 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : mat4x2_f32;
+
+fn load_a_p0_p1(p0 : u32, p1 : u32) -> f32 {
+  switch(p0) {
+    case 0u: {
+      return a.col0[p1];
+    }
+    case 1u: {
+      return a.col1[p1];
+    }
+    case 2u: {
+      return a.col2[p1];
+    }
+    case 3u: {
+      return a.col3[p1];
+    }
+    default: {
+      return f32();
+    }
+  }
+}
+
+fn f() {
+  let I = 1;
+  let l = load_a_p0_p1(u32(I), u32(I));
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, ArrayMat2x2Uniform_LoadArray) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<mat2x2<f32>, 3>;
+
+fn f() {
+  let l = a;
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<mat2x2_f32, 3u>;
+
+fn conv_mat2x2_f32(val : mat2x2_f32) -> mat2x2<f32> {
+  return mat2x2<f32>(val.col0, val.col1);
+}
+
+fn conv_arr3_mat2x2_f32(val : array<mat2x2_f32, 3u>) -> array<mat2x2<f32>, 3u> {
+  var arr : array<mat2x2<f32>, 3u>;
+  for(var i : u32; (i < 3u); i = (i + 1)) {
+    arr[i] = conv_mat2x2_f32(val[i]);
+  }
+  return arr;
+}
+
+fn f() {
+  let l = conv_arr3_mat2x2_f32(a);
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, ArrayMat4x2Uniform_LoadMatrix0) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<mat4x2<f32>, 3>;
+
+fn f() {
+  let l = a[0];
+}
+)";
+
+    auto* expect = R"(
+struct mat4x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+  col3 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<mat4x2_f32, 3u>;
+
+fn conv_mat4x2_f32(val : mat4x2_f32) -> mat4x2<f32> {
+  return mat4x2<f32>(val.col0, val.col1, val.col2, val.col3);
+}
+
+fn f() {
+  let l = conv_mat4x2_f32(a[0u]);
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, ArrayMat2x2Uniform_LoadMatrix1) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<mat2x2<f32>, 3>;
+
+fn f() {
+  let l = a[1];
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<mat2x2_f32, 3u>;
+
+fn conv_mat2x2_f32(val : mat2x2_f32) -> mat2x2<f32> {
+  return mat2x2<f32>(val.col0, val.col1);
+}
+
+fn f() {
+  let l = conv_mat2x2_f32(a[1u]);
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, ArrayMat4x2Uniform_LoadMatrixI) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<mat4x2<f32>, 3>;
+
+fn f() {
+  let I = 1;
+  let l = a[I];
+}
+)";
+
+    auto* expect = R"(
+struct mat4x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+  col3 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<mat4x2_f32, 3u>;
+
+fn conv_mat4x2_f32(val : mat4x2_f32) -> mat4x2<f32> {
+  return mat4x2<f32>(val.col0, val.col1, val.col2, val.col3);
+}
+
+fn f() {
+  let I = 1;
+  let l = conv_mat4x2_f32(a[I]);
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, ArrayMat2x2Uniform_LoadMatrix1Column0) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<mat2x2<f32>, 3>;
+
+fn f() {
+  let l = a[1][0];
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<mat2x2_f32, 3u>;
+
+fn f() {
+  let l = a[1u].col0;
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, ArrayMat4x2Uniform_LoadMatrix0Column1) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<mat4x2<f32>, 3>;
+
+fn f() {
+  let l = a[0][1];
+}
+)";
+
+    auto* expect = R"(
+struct mat4x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+  col3 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<mat4x2_f32, 3u>;
+
+fn f() {
+  let l = a[0u].col1;
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, ArrayMat2x2Uniform_LoadMatrixIColumn1) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<mat2x2<f32>, 3>;
+
+fn f() {
+  let I = 1;
+  let l = a[I][1];
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<mat2x2_f32, 3u>;
+
+fn f() {
+  let I = 1;
+  let l = a[I].col1;
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, ArrayMat4x2Uniform_LoadMatrix1ColumnI) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<mat4x2<f32>, 3>;
+
+fn f() {
+  let I = 1;
+  let l = a[1][I];
+}
+)";
+
+    auto* expect = R"(
+struct mat4x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+  col3 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<mat4x2_f32, 3u>;
+
+fn load_a_1_p0(p0 : u32) -> vec2<f32> {
+  switch(p0) {
+    case 0u: {
+      return a[1u].col0;
+    }
+    case 1u: {
+      return a[1u].col1;
+    }
+    case 2u: {
+      return a[1u].col2;
+    }
+    case 3u: {
+      return a[1u].col3;
+    }
+    default: {
+      return vec2<f32>();
+    }
+  }
+}
+
+fn f() {
+  let I = 1;
+  let l = load_a_1_p0(u32(I));
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, ArrayArrayMat2x2Uniform_LoadArrays) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<array<mat2x2<f32>, 3>, 4>;
+
+fn f() {
+  let l = a;
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<array<mat2x2_f32, 3u>, 4u>;
+
+fn conv_mat2x2_f32(val : mat2x2_f32) -> mat2x2<f32> {
+  return mat2x2<f32>(val.col0, val.col1);
+}
+
+fn conv_arr3_mat2x2_f32(val : array<mat2x2_f32, 3u>) -> array<mat2x2<f32>, 3u> {
+  var arr : array<mat2x2<f32>, 3u>;
+  for(var i : u32; (i < 3u); i = (i + 1)) {
+    arr[i] = conv_mat2x2_f32(val[i]);
+  }
+  return arr;
+}
+
+fn conv_arr4_arr3_mat2x2_f32(val : array<array<mat2x2_f32, 3u>, 4u>) -> array<array<mat2x2<f32>, 3u>, 4u> {
+  var arr : array<array<mat2x2<f32>, 3u>, 4u>;
+  for(var i : u32; (i < 4u); i = (i + 1)) {
+    arr[i] = conv_arr3_mat2x2_f32(val[i]);
+  }
+  return arr;
+}
+
+fn f() {
+  let l = conv_arr4_arr3_mat2x2_f32(a);
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, ArrayArrayMat4x2Uniform_LoadArray0) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<array<mat4x2<f32>, 3>, 4>;
+
+fn f() {
+  let l = a[0];
+}
+)";
+
+    auto* expect = R"(
+struct mat4x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+  col3 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<array<mat4x2_f32, 3u>, 4u>;
+
+fn conv_mat4x2_f32(val : mat4x2_f32) -> mat4x2<f32> {
+  return mat4x2<f32>(val.col0, val.col1, val.col2, val.col3);
+}
+
+fn conv_arr3_mat4x2_f32(val : array<mat4x2_f32, 3u>) -> array<mat4x2<f32>, 3u> {
+  var arr : array<mat4x2<f32>, 3u>;
+  for(var i : u32; (i < 3u); i = (i + 1)) {
+    arr[i] = conv_mat4x2_f32(val[i]);
+  }
+  return arr;
+}
+
+fn f() {
+  let l = conv_arr3_mat4x2_f32(a[0u]);
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, ArrayArrayMat2x2Uniform_LoadArray1) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<array<mat2x2<f32>, 3>,4>;
+
+fn f() {
+  let l = a[1];
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<array<mat2x2_f32, 3u>, 4u>;
+
+fn conv_mat2x2_f32(val : mat2x2_f32) -> mat2x2<f32> {
+  return mat2x2<f32>(val.col0, val.col1);
+}
+
+fn conv_arr3_mat2x2_f32(val : array<mat2x2_f32, 3u>) -> array<mat2x2<f32>, 3u> {
+  var arr : array<mat2x2<f32>, 3u>;
+  for(var i : u32; (i < 3u); i = (i + 1)) {
+    arr[i] = conv_mat2x2_f32(val[i]);
+  }
+  return arr;
+}
+
+fn f() {
+  let l = conv_arr3_mat2x2_f32(a[1u]);
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, ArrayArrayMat2x2Uniform_LoadArrayI) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<array<mat2x2<f32>, 3>,4>;
+
+fn f() {
+  let I = 1;
+  let l = a[I];
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<array<mat2x2_f32, 3u>, 4u>;
+
+fn conv_mat2x2_f32(val : mat2x2_f32) -> mat2x2<f32> {
+  return mat2x2<f32>(val.col0, val.col1);
+}
+
+fn conv_arr3_mat2x2_f32(val : array<mat2x2_f32, 3u>) -> array<mat2x2<f32>, 3u> {
+  var arr : array<mat2x2<f32>, 3u>;
+  for(var i : u32; (i < 3u); i = (i + 1)) {
+    arr[i] = conv_mat2x2_f32(val[i]);
+  }
+  return arr;
+}
+
+fn f() {
+  let I = 1;
+  let l = conv_arr3_mat2x2_f32(a[I]);
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+TEST_F(Std140Test, ArrayArrayMat2x2Uniform_LoadMatrix12Column0) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<array<mat2x2<f32>, 3>, 4>;
+
+fn f() {
+  let l = a[1][2][0];
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<array<mat2x2_f32, 3u>, 4u>;
+
+fn f() {
+  let l = a[1u][2u].col0;
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, ArrayArrayMat4x2Uniform_LoadMatrix2IColumn1) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<array<mat4x2<f32>, 3>, 4>;
+
+fn f() {
+  let I = 1;
+  let l = a[2][I][1];
+}
+)";
+
+    auto* expect = R"(
+struct mat4x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+  col3 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<array<mat4x2_f32, 3u>, 4u>;
+
+fn f() {
+  let I = 1;
+  let l = a[2u][I].col1;
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, ArrayArrayMat2x2Uniform_LoadMatrixI2Column1) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<array<mat2x2<f32>, 3>, 4>;
+
+fn f() {
+  let I = 1;
+  let l = a[I][2][1];
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<array<mat2x2_f32, 3u>, 4u>;
+
+fn f() {
+  let I = 1;
+  let l = a[I][2u].col1;
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, ArrayArrayMat2x2Uniform_LoadMatrixIIColumn1) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<array<mat2x2<f32>, 3>, 4>;
+
+fn f() {
+  let I = 1;
+  let l = a[I][I][1];
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<array<mat2x2_f32, 3u>, 4u>;
+
+fn f() {
+  let I = 1;
+  let l = a[I][I].col1;
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, ArrayArrayMat4x2Uniform_LoadMatrix12ColumnI) {
+    auto* src = R"(
+@group(0) @binding(0) var<uniform> a : array<array<mat4x2<f32>, 3>, 4>;
+
+fn f() {
+  let I = 1;
+  let l = a[1][2][I];
+}
+)";
+
+    auto* expect = R"(
+struct mat4x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+  col3 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> a : array<array<mat4x2_f32, 3u>, 4u>;
+
+fn load_a_1_2_p0(p0 : u32) -> vec2<f32> {
+  switch(p0) {
+    case 0u: {
+      return a[1u][2u].col0;
+    }
+    case 1u: {
+      return a[1u][2u].col1;
+    }
+    case 2u: {
+      return a[1u][2u].col2;
+    }
+    case 3u: {
+      return a[1u][2u].col3;
+    }
+    default: {
+      return vec2<f32>();
+    }
+  }
+}
+
+fn f() {
+  let I = 1;
+  let l = load_a_1_2_p0(u32(I));
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, StructArrayMat2x2Uniform_LoadStruct) {
+    auto* src = R"(
+struct S {
+  a : array<mat2x2<f32>, 3>,
+};
+
+@group(0) @binding(0) var<uniform> s : S;
+
+fn f() {
+  let l = s;
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+struct S {
+  a : array<mat2x2<f32>, 3>,
+}
+
+struct S_std140 {
+  a : array<mat2x2_f32, 3u>,
+}
+
+@group(0) @binding(0) var<uniform> s : S_std140;
+
+fn conv_mat2x2_f32(val : mat2x2_f32) -> mat2x2<f32> {
+  return mat2x2<f32>(val.col0, val.col1);
+}
+
+fn conv_arr3_mat2x2_f32(val : array<mat2x2_f32, 3u>) -> array<mat2x2<f32>, 3u> {
+  var arr : array<mat2x2<f32>, 3u>;
+  for(var i : u32; (i < 3u); i = (i + 1)) {
+    arr[i] = conv_mat2x2_f32(val[i]);
+  }
+  return arr;
+}
+
+fn conv_S(val : S_std140) -> S {
+  return S(conv_arr3_mat2x2_f32(val.a));
+}
+
+fn f() {
+  let l = conv_S(s);
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, StructArrayMat2x2Uniform_LoadArray) {
+    auto* src = R"(
+struct S {
+  a : array<mat2x2<f32>, 3>,
+};
+
+@group(0) @binding(0) var<uniform> s : S;
+
+fn f() {
+  let l = s.a;
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+struct S {
+  a : array<mat2x2<f32>, 3>,
+}
+
+struct S_std140 {
+  a : array<mat2x2_f32, 3u>,
+}
+
+@group(0) @binding(0) var<uniform> s : S_std140;
+
+fn conv_mat2x2_f32(val : mat2x2_f32) -> mat2x2<f32> {
+  return mat2x2<f32>(val.col0, val.col1);
+}
+
+fn conv_arr3_mat2x2_f32(val : array<mat2x2_f32, 3u>) -> array<mat2x2<f32>, 3u> {
+  var arr : array<mat2x2<f32>, 3u>;
+  for(var i : u32; (i < 3u); i = (i + 1)) {
+    arr[i] = conv_mat2x2_f32(val[i]);
+  }
+  return arr;
+}
+
+fn f() {
+  let l = conv_arr3_mat2x2_f32(s.a);
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, StructArrayMat4x2Uniform_LoadMatrix0) {
+    auto* src = R"(
+struct S {
+  a : array<mat4x2<f32>, 3>,
+};
+
+@group(0) @binding(0) var<uniform> s : S;
+
+fn f() {
+  let l = s.a[0];
+}
+)";
+
+    auto* expect = R"(
+struct mat4x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+  col3 : vec2<f32>,
+}
+
+struct S {
+  a : array<mat4x2<f32>, 3>,
+}
+
+struct S_std140 {
+  a : array<mat4x2_f32, 3u>,
+}
+
+@group(0) @binding(0) var<uniform> s : S_std140;
+
+fn conv_mat4x2_f32(val : mat4x2_f32) -> mat4x2<f32> {
+  return mat4x2<f32>(val.col0, val.col1, val.col2, val.col3);
+}
+
+fn f() {
+  let l = conv_mat4x2_f32(s.a[0u]);
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, StructArrayMat2x2Uniform_LoadMatrix1) {
+    auto* src = R"(
+struct S {
+  a : array<mat2x2<f32>, 3>,
+};
+
+@group(0) @binding(0) var<uniform> s : S;
+
+fn f() {
+  let l = s.a[1];
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+struct S {
+  a : array<mat2x2<f32>, 3>,
+}
+
+struct S_std140 {
+  a : array<mat2x2_f32, 3u>,
+}
+
+@group(0) @binding(0) var<uniform> s : S_std140;
+
+fn conv_mat2x2_f32(val : mat2x2_f32) -> mat2x2<f32> {
+  return mat2x2<f32>(val.col0, val.col1);
+}
+
+fn f() {
+  let l = conv_mat2x2_f32(s.a[1u]);
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, StructArrayMat4x2Uniform_LoadMatrixI) {
+    auto* src = R"(
+struct S {
+  a : array<mat4x2<f32>, 3>,
+};
+
+@group(0) @binding(0) var<uniform> s : S;
+
+fn f() {
+  let I = 1;
+  let l = s.a[I];
+}
+)";
+
+    auto* expect = R"(
+struct mat4x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+  col3 : vec2<f32>,
+}
+
+struct S {
+  a : array<mat4x2<f32>, 3>,
+}
+
+struct S_std140 {
+  a : array<mat4x2_f32, 3u>,
+}
+
+@group(0) @binding(0) var<uniform> s : S_std140;
+
+fn conv_mat4x2_f32(val : mat4x2_f32) -> mat4x2<f32> {
+  return mat4x2<f32>(val.col0, val.col1, val.col2, val.col3);
+}
+
+fn f() {
+  let I = 1;
+  let l = conv_mat4x2_f32(s.a[I]);
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, StructArrayMat2x2Uniform_LoadMatrix1Column0) {
+    auto* src = R"(
+struct S {
+  a : array<mat2x2<f32>, 3>,
+};
+
+@group(0) @binding(0) var<uniform> s : S;
+
+fn f() {
+  let l = s.a[1][0];
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+struct S {
+  a : array<mat2x2<f32>, 3>,
+}
+
+struct S_std140 {
+  a : array<mat2x2_f32, 3u>,
+}
+
+@group(0) @binding(0) var<uniform> s : S_std140;
+
+fn f() {
+  let l = s.a[1u].col0;
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, StructArrayMat4x2Uniform_LoadMatrix0Column1) {
+    auto* src = R"(
+struct S {
+  a : array<mat4x2<f32>, 3>,
+};
+
+@group(0) @binding(0) var<uniform> s : S;
+
+fn f() {
+  let l = s.a[0][1];
+}
+)";
+
+    auto* expect = R"(
+struct mat4x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+  col3 : vec2<f32>,
+}
+
+struct S {
+  a : array<mat4x2<f32>, 3>,
+}
+
+struct S_std140 {
+  a : array<mat4x2_f32, 3u>,
+}
+
+@group(0) @binding(0) var<uniform> s : S_std140;
+
+fn f() {
+  let l = s.a[0u].col1;
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, StructArrayMat2x2Uniform_LoadMatrixIColumn1) {
+    auto* src = R"(
+struct S {
+  a : array<mat2x2<f32>, 3>,
+};
+
+@group(0) @binding(0) var<uniform> s : S;
+
+fn f() {
+  let I = 1;
+  let l = s.a[I][1];
+}
+)";
+
+    auto* expect = R"(
+struct mat2x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+}
+
+struct S {
+  a : array<mat2x2<f32>, 3>,
+}
+
+struct S_std140 {
+  a : array<mat2x2_f32, 3u>,
+}
+
+@group(0) @binding(0) var<uniform> s : S_std140;
+
+fn f() {
+  let I = 1;
+  let l = s.a[I].col1;
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(Std140Test, StructArrayMat4x2Uniform_LoadMatrix1ColumnI) {
+    auto* src = R"(
+struct S {
+  a : array<mat4x2<f32>, 3>,
+};
+
+@group(0) @binding(0) var<uniform> s : S;
+
+fn f() {
+  let I = 1;
+  let l = s.a[1][I];
+}
+)";
+
+    auto* expect = R"(
+struct mat4x2_f32 {
+  col0 : vec2<f32>,
+  col1 : vec2<f32>,
+  col2 : vec2<f32>,
+  col3 : vec2<f32>,
+}
+
+struct S {
+  a : array<mat4x2<f32>, 3>,
+}
+
+struct S_std140 {
+  a : array<mat4x2_f32, 3u>,
+}
+
+@group(0) @binding(0) var<uniform> s : S_std140;
+
+fn load_s_a_1_p0(p0 : u32) -> vec2<f32> {
+  switch(p0) {
+    case 0u: {
+      return s.a[1u].col0;
+    }
+    case 1u: {
+      return s.a[1u].col1;
+    }
+    case 2u: {
+      return s.a[1u].col2;
+    }
+    case 3u: {
+      return s.a[1u].col3;
+    }
+    default: {
+      return vec2<f32>();
+    }
+  }
+}
+
+fn f() {
+  let I = 1;
+  let l = load_s_a_1_p0(u32(I));
+}
+)";
+
+    auto got = Run<Std140>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 TEST_F(Std140Test, ArrayStructArrayStructMat4x2Uniform_Loads) {
     auto* src = R"(
 struct Inner {
@@ -1614,7 +2938,7 @@ fn conv_Inner(val : Inner_std140) -> Inner {
   return Inner(mat4x2<f32>(val.m_0, val.m_1, val.m_2, val.m_3));
 }
 
-fn conv_arr_4_Inner(val : array<Inner_std140, 4u>) -> array<Inner, 4u> {
+fn conv_arr4_Inner(val : array<Inner_std140, 4u>) -> array<Inner, 4u> {
   var arr : array<Inner, 4u>;
   for(var i : u32; (i < 4u); i = (i + 1)) {
     arr[i] = conv_Inner(val[i]);
@@ -1623,10 +2947,10 @@ fn conv_arr_4_Inner(val : array<Inner_std140, 4u>) -> array<Inner, 4u> {
 }
 
 fn conv_Outer(val : Outer_std140) -> Outer {
-  return Outer(conv_arr_4_Inner(val.a));
+  return Outer(conv_arr4_Inner(val.a));
 }
 
-fn conv_arr_4_Outer(val : array<Outer_std140, 4u>) -> array<Outer, 4u> {
+fn conv_arr4_Outer(val : array<Outer_std140, 4u>) -> array<Outer, 4u> {
   var arr : array<Outer, 4u>;
   for(var i : u32; (i < 4u); i = (i + 1)) {
     arr[i] = conv_Outer(val[i]);
@@ -1641,9 +2965,9 @@ fn load_a_0_a_2_m() -> mat4x2<f32> {
 
 fn f() {
   let I = 1;
-  let l_a : array<Outer, 4> = conv_arr_4_Outer(a);
+  let l_a : array<Outer, 4> = conv_arr4_Outer(a);
   let l_a_1 : Outer = conv_Outer(a[1u]);
-  let l_a_2_a : array<Inner, 4> = conv_arr_4_Inner(a[2u].a);
+  let l_a_2_a : array<Inner, 4> = conv_arr4_Inner(a[2u].a);
   let l_a_3_a_1 : Inner = conv_Inner(a[3u].a[1u]);
   let l_a_0_a_2_m : mat4x2<f32> = load_a_0_a_2_m();
   let l_a_1_a_3_m_0 : vec2<f32> = a[1u].a[3u].m_0;
@@ -1717,7 +3041,7 @@ fn conv_Inner(val : Inner_std140) -> Inner {
   return Inner(mat4x2<f32>(val.m_0, val.m_1, val.m_2, val.m_3));
 }
 
-fn conv_arr_4_Inner(val : array<Inner_std140, 4u>) -> array<Inner, 4u> {
+fn conv_arr4_Inner(val : array<Inner_std140, 4u>) -> array<Inner, 4u> {
   var arr : array<Inner, 4u>;
   for(var i : u32; (i < 4u); i = (i + 1)) {
     arr[i] = conv_Inner(val[i]);
@@ -1726,10 +3050,10 @@ fn conv_arr_4_Inner(val : array<Inner_std140, 4u>) -> array<Inner, 4u> {
 }
 
 fn conv_Outer(val : Outer_std140) -> Outer {
-  return Outer(conv_arr_4_Inner(val.a));
+  return Outer(conv_arr4_Inner(val.a));
 }
 
-fn conv_arr_4_Outer(val : array<Outer_std140, 4u>) -> array<Outer, 4u> {
+fn conv_arr4_Outer(val : array<Outer_std140, 4u>) -> array<Outer, 4u> {
   var arr : array<Outer, 4u>;
   for(var i : u32; (i < 4u); i = (i + 1)) {
     arr[i] = conv_Outer(val[i]);
@@ -1744,15 +3068,15 @@ fn load_a_3_a_2_m() -> mat4x2<f32> {
 
 fn f() {
   let I = 1;
-  let p_a = conv_arr_4_Outer(a);
+  let p_a = conv_arr4_Outer(a);
   let p_a_3 = conv_Outer(a[3u]);
-  let p_a_3_a = conv_arr_4_Inner(a[3u].a);
+  let p_a_3_a = conv_arr4_Inner(a[3u].a);
   let p_a_3_a_2 = conv_Inner(a[3u].a[2u]);
   let p_a_3_a_2_m = load_a_3_a_2_m();
   let p_a_3_a_2_m_1 = a[3u].a[2u].m_1;
-  let l_a : array<Outer, 4> = conv_arr_4_Outer(a);
+  let l_a : array<Outer, 4> = conv_arr4_Outer(a);
   let l_a_3 : Outer = conv_Outer(a[3u]);
-  let l_a_3_a : array<Inner, 4> = conv_arr_4_Inner(a[3u].a);
+  let l_a_3_a : array<Inner, 4> = conv_arr4_Inner(a[3u].a);
   let l_a_3_a_2 : Inner = conv_Inner(a[3u].a[2u]);
   let l_a_3_a_2_m : mat4x2<f32> = load_a_3_a_2_m();
   let l_a_3_a_2_m_1 : vec2<f32> = a[3u].a[2u].m_1;
@@ -1801,7 +3125,7 @@ fn conv_S(val : S_std140) -> S {
   return S(mat3x2<f32>(val.m_0, val.m_1, val.m_2));
 }
 
-fn conv_arr_4_S(val : array<S_std140, 4u>) -> array<S, 4u> {
+fn conv_arr4_S(val : array<S_std140, 4u>) -> array<S, 4u> {
   var arr : array<S, 4u>;
   for(var i : u32; (i < 4u); i = (i + 1)) {
     arr[i] = conv_S(val[i]);
@@ -1810,7 +3134,7 @@ fn conv_arr_4_S(val : array<S_std140, 4u>) -> array<S, 4u> {
 }
 
 fn f() {
-  s = conv_arr_4_S(u);
+  s = conv_arr4_S(u);
 }
 )";
 
@@ -1827,7 +3151,7 @@ struct S {
 }
 
 @group(0) @binding(0) var<uniform> u : array<S, 4>;
-@group(0) @binding(1) var<workgroup> w : array<S, 4>;
+var<workgroup> w : array<S, 4>;
 
 fn f() {
     w[0] = u[1];
@@ -1835,9 +3159,32 @@ fn f() {
 )";
 
     auto* expect =
-        R"(test:8:38 error: non-resource variables must not have @group or @binding attributes
-@group(0) @binding(1) var<workgroup> w : array<S, 4>;
-                                     ^
+        R"(
+struct S {
+  v : vec4<i32>,
+  @size(64)
+  m : mat3x2<f32>,
+}
+
+struct S_std140 {
+  v : vec4<i32>,
+  m_0 : vec2<f32>,
+  m_1 : vec2<f32>,
+  @size(48)
+  m_2 : vec2<f32>,
+}
+
+@group(0) @binding(0) var<uniform> u : array<S_std140, 4u>;
+
+var<workgroup> w : array<S, 4>;
+
+fn conv_S(val : S_std140) -> S {
+  return S(val.v, mat3x2<f32>(val.m_0, val.m_1, val.m_2));
+}
+
+fn f() {
+  w[0] = conv_S(u[1u]);
+}
 )";
 
     auto got = Run<Std140>(src);

@@ -46,7 +46,7 @@ Inner conv_Inner(Inner_std140 val) {
   return Inner(mat3x2(val.m_0, val.m_1, val.m_2), val.pad, val.pad_1, val.pad_2, val.pad_3, val.pad_4, val.pad_5, val.pad_6, val.pad_7, val.pad_8, val.pad_9);
 }
 
-Inner[4] conv_arr_4_Inner(Inner_std140 val[4]) {
+Inner[4] conv_arr4_Inner(Inner_std140 val[4]) {
   Inner arr[4] = Inner[4](Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u));
   {
     for(uint i = 0u; (i < 4u); i = (i + 1u)) {
@@ -57,10 +57,10 @@ Inner[4] conv_arr_4_Inner(Inner_std140 val[4]) {
 }
 
 Outer conv_Outer(Outer_std140 val) {
-  return Outer(conv_arr_4_Inner(val.a));
+  return Outer(conv_arr4_Inner(val.a));
 }
 
-Outer[4] conv_arr_4_Outer(Outer_std140 val[4]) {
+Outer[4] conv_arr4_Outer(Outer_std140 val[4]) {
   Outer arr[4] = Outer[4](Outer(Inner[4](Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u))), Outer(Inner[4](Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u))), Outer(Inner[4](Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u))), Outer(Inner[4](Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u), Inner(mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u))));
   {
     for(uint i = 0u; (i < 4u); i = (i + 1u)) {
@@ -75,15 +75,15 @@ mat3x2 load_a_inner_3_a_2_m() {
 }
 
 void f() {
-  Outer p_a[4] = conv_arr_4_Outer(a.inner);
+  Outer p_a[4] = conv_arr4_Outer(a.inner);
   Outer p_a_3 = conv_Outer(a.inner[3u]);
-  Inner p_a_3_a[4] = conv_arr_4_Inner(a.inner[3u].a);
+  Inner p_a_3_a[4] = conv_arr4_Inner(a.inner[3u].a);
   Inner p_a_3_a_2 = conv_Inner(a.inner[3u].a[2u]);
   mat3x2 p_a_3_a_2_m = load_a_inner_3_a_2_m();
   vec2 p_a_3_a_2_m_1 = a.inner[3u].a[2u].m_1;
-  Outer l_a[4] = conv_arr_4_Outer(a.inner);
+  Outer l_a[4] = conv_arr4_Outer(a.inner);
   Outer l_a_3 = conv_Outer(a.inner[3u]);
-  Inner l_a_3_a[4] = conv_arr_4_Inner(a.inner[3u].a);
+  Inner l_a_3_a[4] = conv_arr4_Inner(a.inner[3u].a);
   Inner l_a_3_a_2 = conv_Inner(a.inner[3u].a[2u]);
   mat3x2 l_a_3_a_2_m = load_a_inner_3_a_2_m();
   vec2 l_a_3_a_2_m_1 = a.inner[3u].a[2u].m_1;

@@ -87,7 +87,8 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     manager.Add<transform::AddEmptyEntryPoint>();
     manager.Add<transform::AddBlockAttribute>();
 
-    // Std140 must come after PromoteSideEffectsToDecl, AddBlockAttribute
+    // Std140 must come after PromoteSideEffectsToDecl.
+    // Std140 must come before VarForDynamicIndex and ForLoopToLoop.
     manager.Add<transform::Std140>();
 
     // VarForDynamicIndex must come after Std140

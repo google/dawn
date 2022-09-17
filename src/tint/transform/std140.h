@@ -19,13 +19,12 @@
 
 namespace tint::transform {
 
-/// Std140 is a transform that forks structures used in the uniform storage class that contain
-/// `matNx2<f32>` matrices into `N`x`vec2<f32>` column vectors. Structure types that transitively
-/// use these forked structures as members are also forked. `var<uniform>` variables will use these
-/// forked structures, and expressions loading from these variables will do appropriate conversions
-/// to the regular WGSL types. As `matNx2<f32>` matrices are the only type that violate
-/// std140-layout, this transformation is sufficient to have any WGSL structure be std140-layout
-/// conformant.
+/// Std140 is a transform that forks types used in the uniform storage class that contain
+/// `matNx2<f32>` matrices into `N`x`vec2<f32>` column vectors. Types that transitively use these
+/// forked types are also forked. `var<uniform>` variables will use these forked types, and
+/// expressions loading from these variables will do appropriate conversions to the regular WGSL
+/// types. As `matNx2<f32>` matrices are the only type that violate std140-layout, this
+/// transformation is sufficient to have any WGSL structure be std140-layout conformant.
 ///
 /// @note This transform requires the PromoteSideEffectsToDecl transform to have been run first.
 class Std140 final : public Castable<Std140, Transform> {

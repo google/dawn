@@ -22,7 +22,7 @@
                OpName %p "p"
                OpName %conv_S "conv_S"
                OpName %val "val"
-               OpName %conv_arr_4_S "conv_arr_4_S"
+               OpName %conv_arr4_S "conv_arr4_S"
                OpName %val_0 "val"
                OpName %arr "arr"
                OpName %i "i"
@@ -97,7 +97,7 @@
          %26 = OpCompositeConstruct %S %21 %24 %25
                OpReturnValue %26
                OpFunctionEnd
-%conv_arr_4_S = OpFunction %_arr_S_uint_4 None %27
+%conv_arr4_S = OpFunction %_arr_S_uint_4 None %27
       %val_0 = OpFunctionParameter %_arr_S_std140_uint_4
          %30 = OpLabel
         %arr = OpVariable %_ptr_Function__arr_S_uint_4 Function %16
@@ -148,7 +148,7 @@
          %80 = OpLabel
          %83 = OpAccessChain %_ptr_Uniform__arr_S_std140_uint_4 %u %uint_0
          %84 = OpLoad %_arr_S_std140_uint_4 %83
-         %81 = OpFunctionCall %_arr_S_uint_4 %conv_arr_4_S %84
+         %81 = OpFunctionCall %_arr_S_uint_4 %conv_arr4_S %84
                OpStore %p %81
          %87 = OpAccessChain %_ptr_Private_S %p %int_1
          %89 = OpAccessChain %_ptr_Uniform_S_std140 %u %uint_0 %uint_2

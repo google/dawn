@@ -22,7 +22,7 @@
                OpMemberName %Inner 0 "m"
                OpName %conv_Inner "conv_Inner"
                OpName %val "val"
-               OpName %conv_arr_4_Inner "conv_arr_4_Inner"
+               OpName %conv_arr4_Inner "conv_arr4_Inner"
                OpName %val_0 "val"
                OpName %arr "arr"
                OpName %i_0 "i"
@@ -31,7 +31,7 @@
                OpMemberName %Outer 0 "a"
                OpName %conv_Outer "conv_Outer"
                OpName %val_1 "val"
-               OpName %conv_arr_4_Outer "conv_arr_4_Outer"
+               OpName %conv_arr4_Outer "conv_arr4_Outer"
                OpName %val_2 "val"
                OpName %arr_0 "arr"
                OpName %i_1 "i"
@@ -141,7 +141,7 @@
          %33 = OpCompositeConstruct %Inner %32
                OpReturnValue %33
                OpFunctionEnd
-%conv_arr_4_Inner = OpFunction %_arr_Inner_uint_4 None %34
+%conv_arr4_Inner = OpFunction %_arr_Inner_uint_4 None %34
       %val_0 = OpFunctionParameter %_arr_Inner_std140_uint_4
          %38 = OpLabel
         %arr = OpVariable %_ptr_Function__arr_Inner_uint_4 Function %41
@@ -182,11 +182,11 @@
       %val_1 = OpFunctionParameter %Outer_std140
          %74 = OpLabel
          %76 = OpCompositeExtract %_arr_Inner_std140_uint_4 %val_1 0
-         %75 = OpFunctionCall %_arr_Inner_uint_4 %conv_arr_4_Inner %76
+         %75 = OpFunctionCall %_arr_Inner_uint_4 %conv_arr4_Inner %76
          %77 = OpCompositeConstruct %Outer %75
                OpReturnValue %77
                OpFunctionEnd
-%conv_arr_4_Outer = OpFunction %_arr_Outer_uint_4 None %78
+%conv_arr4_Outer = OpFunction %_arr_Outer_uint_4 None %78
       %val_2 = OpFunctionParameter %_arr_Outer_std140_uint_4
          %82 = OpLabel
       %arr_0 = OpVariable %_ptr_Function__arr_Outer_uint_4 Function %85
@@ -293,13 +293,13 @@
         %175 = OpFunctionCall %int %i
         %178 = OpAccessChain %_ptr_Uniform__arr_Outer_std140_uint_4 %a %uint_0
         %179 = OpLoad %_arr_Outer_std140_uint_4 %178
-        %176 = OpFunctionCall %_arr_Outer_uint_4 %conv_arr_4_Outer %179
+        %176 = OpFunctionCall %_arr_Outer_uint_4 %conv_arr4_Outer %179
         %182 = OpAccessChain %_ptr_Uniform_Outer_std140 %a %uint_0 %173
         %183 = OpLoad %Outer_std140 %182
         %180 = OpFunctionCall %Outer %conv_Outer %183
         %186 = OpAccessChain %_ptr_Uniform__arr_Inner_std140_uint_4 %a %uint_0 %173 %uint_0
         %187 = OpLoad %_arr_Inner_std140_uint_4 %186
-        %184 = OpFunctionCall %_arr_Inner_uint_4 %conv_arr_4_Inner %187
+        %184 = OpFunctionCall %_arr_Inner_uint_4 %conv_arr4_Inner %187
         %189 = OpAccessChain %_ptr_Uniform_Inner_std140 %a %uint_0 %173 %uint_0 %174
         %190 = OpLoad %Inner_std140 %189
         %188 = OpFunctionCall %Inner %conv_Inner %190

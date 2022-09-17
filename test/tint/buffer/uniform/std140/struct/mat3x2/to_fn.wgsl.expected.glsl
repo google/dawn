@@ -61,7 +61,7 @@ S conv_S(S_std140 val) {
   return S(val.before, val.pad, mat3x2(val.m_0, val.m_1, val.m_2), val.pad_1, val.pad_2, val.pad_3, val.pad_4, val.pad_5, val.pad_6, val.pad_7, val.pad_8, val.pad_9, val.pad_10, val.after, val.pad_11);
 }
 
-S[4] conv_arr_4_S(S_std140 val[4]) {
+S[4] conv_arr4_S(S_std140 val[4]) {
   S arr[4] = S[4](S(0, 0u, mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u), S(0, 0u, mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u), S(0, 0u, mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u), S(0, 0u, mat3x2(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f), 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0u, 0, 0u));
   {
     for(uint i = 0u; (i < 4u); i = (i + 1u)) {
@@ -76,7 +76,7 @@ mat3x2 load_u_inner_2_m() {
 }
 
 void f() {
-  a(conv_arr_4_S(u.inner));
+  a(conv_arr4_S(u.inner));
   b(conv_S(u.inner[2u]));
   c(load_u_inner_2_m());
   d(u.inner[0u].m_1.yx);
