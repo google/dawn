@@ -9,7 +9,8 @@ void tint_atomicStore(RWByteAddressBuffer buffer, uint offset, uint value) {
 void atomicStore_cdc29e() {
   uint arg_1 = 0u;
   arg_1 = 1u;
-  tint_atomicStore(sb_rw, 0u, arg_1);
+  const uint x_18 = arg_1;
+  tint_atomicStore(sb_rw, 0u, x_18);
   return;
 }
 

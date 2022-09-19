@@ -55,9 +55,11 @@ void main_1() {
   if ((x_63 < x_70)) {
     float x_75 = getAAtOutCoords_();
     a_1 = x_75;
-    param = a_1;
+    float x_77 = a_1;
+    param = x_77;
     float x_78 = unaryOperation_f1_(param);
-    param_1 = index;
+    int x_80 = index;
+    param_1 = x_80;
     param_2 = x_78;
     setOutput_i1_f1_(param_1, param_2);
   }

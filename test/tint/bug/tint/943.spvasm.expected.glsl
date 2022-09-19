@@ -80,7 +80,8 @@ float mm_readA_i1_i1_(inout int row, inout int col) {
   } else {
     x_430 = 0.0f;
   }
-  return x_430;
+  float x_450 = x_430;
+  return x_450;
 }
 
 float mm_readB_i1_i1_(inout int row_1, inout int col_1) {
@@ -109,7 +110,8 @@ float mm_readB_i1_i1_(inout int row_1, inout int col_1) {
   } else {
     x_468 = 0.0f;
   }
-  return x_468;
+  float x_487 = x_468;
+  return x_487;
 }
 
 int getOutputFlatIndex_vi3_(inout ivec3 coords) {
@@ -137,7 +139,8 @@ void setOutput_i1_i1_i1_f1_(inout int d0, inout int d1, inout int d2, inout floa
   param = ivec3(x_115, x_116, x_117);
   int x_120 = getOutputFlatIndex_vi3_(param);
   flatIndex_1 = x_120;
-  param_1 = flatIndex_1;
+  int x_122 = flatIndex_1;
+  param_1 = x_122;
   float x_124 = value_1;
   param_2 = x_124;
   setOutput_i1_f1_(param_1, param_2);
@@ -154,7 +157,8 @@ void mm_write_i1_i1_f1_(inout int row_2, inout int col_2, inout float value_2) {
   int x_492 = row_2;
   int x_493 = col_2;
   outCoord = ivec3(x_491, x_492, x_493);
-  param_14 = batch;
+  int x_496 = batch;
+  param_14 = x_496;
   int x_498 = row_2;
   param_15 = x_498;
   int x_500 = col_2;
@@ -211,14 +215,30 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
   int x_152 = dimInner;
   numTiles = (((x_152 - 1) / 64) + 1);
   innerRow = 0;
-  {
-    for(; (innerRow < 1); innerRow = (innerRow + 1)) {
-      innerCol = 0;
-      {
-        for(; (innerCol < 1); innerCol = (innerCol + 1)) {
-          acc[innerRow][innerCol] = 0.0f;
-        }
+  while (true) {
+    int x_163 = innerRow;
+    if ((x_163 < 1)) {
+    } else {
+      break;
+    }
+    innerCol = 0;
+    while (true) {
+      int x_171 = innerCol;
+      if ((x_171 < 1)) {
+      } else {
+        break;
       }
+      int x_177 = innerRow;
+      int x_178 = innerCol;
+      acc[x_177][x_178] = 0.0f;
+      {
+        int x_181 = innerCol;
+        innerCol = (x_181 + 1);
+      }
+    }
+    {
+      int x_183 = innerRow;
+      innerRow = (x_183 + 1);
     }
   }
   uint x_187 = tint_symbol.x;
@@ -226,121 +246,215 @@ void mm_matMul_i1_i1_i1_(inout int dimAOuter, inout int dimInner, inout int dimB
   uint x_192 = tint_symbol.y;
   tileRowB = (int(x_192) * 1);
   t = 0;
-  {
-    for(; (t < numTiles); t = (t + 1)) {
-      innerRow_1 = 0;
-      {
-        for(; (innerRow_1 < 1); innerRow_1 = (innerRow_1 + 1)) {
-          innerCol_1 = 0;
-          {
-            for(; (innerCol_1 < 64); innerCol_1 = (innerCol_1 + 1)) {
-              inputRow = (tileRow + innerRow_1);
-              inputCol = (tileColA + innerCol_1);
-              int x_233 = inputRow;
-              int x_234 = inputCol;
-              int x_238 = t;
-              int x_240 = inputCol;
-              param_3 = (globalRow + innerRow_1);
-              param_4 = ((x_238 * 64) + x_240);
-              float x_244 = mm_readA_i1_i1_(param_3, param_4);
-              mm_Asub[x_233][x_234] = x_244;
-            }
-          }
-        }
-      }
-      innerRow_2 = 0;
-      {
-        for(; (innerRow_2 < 1); innerRow_2 = (innerRow_2 + 1)) {
-          innerCol_2 = 0;
-          {
-            for(; (innerCol_2 < 1); innerCol_2 = (innerCol_2 + 1)) {
-              inputRow_1 = (tileRowB + innerRow_2);
-              inputCol_1 = (tileCol + innerCol_2);
-              int x_278 = inputRow_1;
-              int x_279 = inputCol_1;
-              int x_284 = globalCol;
-              int x_285 = innerCol_2;
-              param_5 = ((t * 64) + inputRow_1);
-              param_6 = (x_284 + x_285);
-              float x_289 = mm_readB_i1_i1_(param_5, param_6);
-              mm_Bsub[x_278][x_279] = x_289;
-            }
-          }
-        }
-      }
-      barrier();
-      k = 0;
-      {
-        for(; (k < 64); k = (k + 1)) {
-          inner = 0;
-          {
-            for(; (inner < 1); inner = (inner + 1)) {
-              int x_314 = inner;
-              float x_320 = mm_Bsub[k][(tileCol + inner)];
-              BCached[x_314] = x_320;
-            }
-          }
-          innerRow_3 = 0;
-          {
-            for(; (innerRow_3 < 1); innerRow_3 = (innerRow_3 + 1)) {
-              float x_338 = mm_Asub[(tileRow + innerRow_3)][k];
-              ACached = x_338;
-              innerCol_3 = 0;
-              {
-                for(; (innerCol_3 < 1); innerCol_3 = (innerCol_3 + 1)) {
-                  int x_347 = innerRow_3;
-                  int x_348 = innerCol_3;
-                  float x_349 = ACached;
-                  float x_352 = BCached[innerCol_3];
-                  float x_355 = acc[x_347][x_348];
-                  acc[x_347][x_348] = (x_355 + (x_349 * x_352));
-                }
-              }
-            }
-          }
-        }
-      }
-      barrier();
+  while (true) {
+    int x_201 = t;
+    int x_202 = numTiles;
+    if ((x_201 < x_202)) {
+    } else {
+      break;
     }
-  }
-  innerRow_4 = 0;
-  {
-    for(; (innerRow_4 < 1); innerRow_4 = (innerRow_4 + 1)) {
-      innerCol_4 = 0;
+    innerRow_1 = 0;
+    while (true) {
+      int x_210 = innerRow_1;
+      if ((x_210 < 1)) {
+      } else {
+        break;
+      }
+      innerCol_1 = 0;
       while (true) {
-        bool x_393 = false;
-        bool x_394 = false;
-        if ((innerCol_4 < 1)) {
+        int x_218 = innerCol_1;
+        if ((x_218 < 64)) {
         } else {
           break;
         }
-        int x_382 = globalCol;
-        int x_383 = innerCol_4;
-        int x_385 = dimBOuter;
-        bool x_386 = ((x_382 + x_383) < x_385);
-        x_394 = x_386;
-        if (x_386) {
-          int x_389 = globalRow;
-          int x_390 = innerRow_4;
-          int x_392 = dimAOuter;
-          x_393 = ((x_389 + x_390) < x_392);
-          x_394 = x_393;
-        }
-        if (x_394) {
-          int x_400 = globalCol;
-          int x_401 = innerCol_4;
-          int x_403 = innerRow_4;
-          int x_404 = innerCol_4;
-          param_7 = (globalRow + innerRow_4);
-          param_8 = (x_400 + x_401);
-          float x_409 = acc[x_403][x_404];
-          param_9 = x_409;
-          mm_write_i1_i1_f1_(param_7, param_8, param_9);
-        }
+        int x_221 = tileRow;
+        int x_222 = innerRow_1;
+        inputRow = (x_221 + x_222);
+        int x_225 = tileColA;
+        int x_226 = innerCol_1;
+        inputCol = (x_225 + x_226);
+        int x_233 = inputRow;
+        int x_234 = inputCol;
+        int x_235 = globalRow;
+        int x_236 = innerRow_1;
+        int x_238 = t;
+        int x_240 = inputCol;
+        param_3 = (x_235 + x_236);
+        param_4 = ((x_238 * 64) + x_240);
+        float x_244 = mm_readA_i1_i1_(param_3, param_4);
+        mm_Asub[x_233][x_234] = x_244;
         {
-          innerCol_4 = (innerCol_4 + 1);
+          int x_247 = innerCol_1;
+          innerCol_1 = (x_247 + 1);
         }
       }
+      {
+        int x_249 = innerRow_1;
+        innerRow_1 = (x_249 + 1);
+      }
+    }
+    innerRow_2 = 0;
+    while (true) {
+      int x_257 = innerRow_2;
+      if ((x_257 < 1)) {
+      } else {
+        break;
+      }
+      innerCol_2 = 0;
+      while (true) {
+        int x_265 = innerCol_2;
+        if ((x_265 < 1)) {
+        } else {
+          break;
+        }
+        int x_268 = tileRowB;
+        int x_269 = innerRow_2;
+        inputRow_1 = (x_268 + x_269);
+        int x_272 = tileCol;
+        int x_273 = innerCol_2;
+        inputCol_1 = (x_272 + x_273);
+        int x_278 = inputRow_1;
+        int x_279 = inputCol_1;
+        int x_280 = t;
+        int x_282 = inputRow_1;
+        int x_284 = globalCol;
+        int x_285 = innerCol_2;
+        param_5 = ((x_280 * 64) + x_282);
+        param_6 = (x_284 + x_285);
+        float x_289 = mm_readB_i1_i1_(param_5, param_6);
+        mm_Bsub[x_278][x_279] = x_289;
+        {
+          int x_291 = innerCol_2;
+          innerCol_2 = (x_291 + 1);
+        }
+      }
+      {
+        int x_293 = innerRow_2;
+        innerRow_2 = (x_293 + 1);
+      }
+    }
+    barrier();
+    k = 0;
+    while (true) {
+      int x_302 = k;
+      if ((x_302 < 64)) {
+      } else {
+        break;
+      }
+      inner = 0;
+      while (true) {
+        int x_310 = inner;
+        if ((x_310 < 1)) {
+        } else {
+          break;
+        }
+        int x_314 = inner;
+        int x_315 = k;
+        int x_316 = tileCol;
+        int x_317 = inner;
+        float x_320 = mm_Bsub[x_315][(x_316 + x_317)];
+        BCached[x_314] = x_320;
+        {
+          int x_322 = inner;
+          inner = (x_322 + 1);
+        }
+      }
+      innerRow_3 = 0;
+      while (true) {
+        int x_330 = innerRow_3;
+        if ((x_330 < 1)) {
+        } else {
+          break;
+        }
+        int x_333 = tileRow;
+        int x_334 = innerRow_3;
+        int x_336 = k;
+        float x_338 = mm_Asub[(x_333 + x_334)][x_336];
+        ACached = x_338;
+        innerCol_3 = 0;
+        while (true) {
+          int x_345 = innerCol_3;
+          if ((x_345 < 1)) {
+          } else {
+            break;
+          }
+          int x_347 = innerRow_3;
+          int x_348 = innerCol_3;
+          float x_349 = ACached;
+          int x_350 = innerCol_3;
+          float x_352 = BCached[x_350];
+          float x_355 = acc[x_347][x_348];
+          acc[x_347][x_348] = (x_355 + (x_349 * x_352));
+          {
+            int x_358 = innerCol_3;
+            innerCol_3 = (x_358 + 1);
+          }
+        }
+        {
+          int x_360 = innerRow_3;
+          innerRow_3 = (x_360 + 1);
+        }
+      }
+      {
+        int x_362 = k;
+        k = (x_362 + 1);
+      }
+    }
+    barrier();
+    {
+      int x_364 = t;
+      t = (x_364 + 1);
+    }
+  }
+  innerRow_4 = 0;
+  while (true) {
+    int x_372 = innerRow_4;
+    if ((x_372 < 1)) {
+    } else {
+      break;
+    }
+    innerCol_4 = 0;
+    while (true) {
+      bool x_393 = false;
+      bool x_394 = false;
+      int x_380 = innerCol_4;
+      if ((x_380 < 1)) {
+      } else {
+        break;
+      }
+      int x_382 = globalCol;
+      int x_383 = innerCol_4;
+      int x_385 = dimBOuter;
+      bool x_386 = ((x_382 + x_383) < x_385);
+      x_394 = x_386;
+      if (x_386) {
+        int x_389 = globalRow;
+        int x_390 = innerRow_4;
+        int x_392 = dimAOuter;
+        x_393 = ((x_389 + x_390) < x_392);
+        x_394 = x_393;
+      }
+      if (x_394) {
+        int x_397 = globalRow;
+        int x_398 = innerRow_4;
+        int x_400 = globalCol;
+        int x_401 = innerCol_4;
+        int x_403 = innerRow_4;
+        int x_404 = innerCol_4;
+        param_7 = (x_397 + x_398);
+        param_8 = (x_400 + x_401);
+        float x_409 = acc[x_403][x_404];
+        param_9 = x_409;
+        mm_write_i1_i1_f1_(param_7, param_8, param_9);
+      }
+      {
+        int x_411 = innerCol_4;
+        innerCol_4 = (x_411 + 1);
+      }
+    }
+    {
+      int x_413 = innerRow_4;
+      innerRow_4 = (x_413 + 1);
     }
   }
   return;
@@ -358,9 +472,12 @@ void main_1() {
   dimBOuter_1 = x_75;
   uint x_505 = tint_symbol_1.z;
   batch = int(x_505);
-  param_18 = dimAOuter_1;
-  param_19 = dimInner_1;
-  param_20 = dimBOuter_1;
+  int x_508 = dimAOuter_1;
+  param_18 = x_508;
+  int x_510 = dimInner_1;
+  param_19 = x_510;
+  int x_512 = dimBOuter_1;
+  param_20 = x_512;
   mm_matMul_i1_i1_i1_(param_18, param_19, param_20);
   return;
 }

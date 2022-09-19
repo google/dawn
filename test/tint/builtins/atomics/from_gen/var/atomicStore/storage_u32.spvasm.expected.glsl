@@ -12,7 +12,8 @@ layout(binding = 0, std430) buffer SB_RW_atomic_ssbo {
 void atomicStore_cdc29e() {
   uint arg_1 = 0u;
   arg_1 = 1u;
-  atomicExchange(sb_rw.arg_0, arg_1);
+  uint x_18 = arg_1;
+  atomicExchange(sb_rw.arg_0, x_18);
   return;
 }
 
@@ -42,7 +43,8 @@ layout(binding = 0, std430) buffer SB_RW_atomic_ssbo {
 void atomicStore_cdc29e() {
   uint arg_1 = 0u;
   arg_1 = 1u;
-  atomicExchange(sb_rw.arg_0, arg_1);
+  uint x_18 = arg_1;
+  atomicExchange(sb_rw.arg_0, x_18);
   return;
 }
 

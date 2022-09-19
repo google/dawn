@@ -6,7 +6,8 @@ void unused_entry_point() {
 }
 void f() {
   int a = 1;
+  int _a = a;
   int b = a;
-  int _b = a;
+  int _b = _a;
 }
 

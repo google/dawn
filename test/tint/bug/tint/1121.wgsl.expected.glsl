@@ -61,8 +61,9 @@ void tint_symbol_2(uvec3 GlobalInvocationID) {
   frustumPlanes[5] = vec4(0.0f, 0.0f, 1.0f, -(viewFar));
   int TILE_SIZE = 16;
   int TILE_COUNT_X = 2;
+  int TILE_COUNT_Y = 2;
   {
-    for(int y_1 = 0; (y_1 < 2); y_1 = (y_1 + 1)) {
+    for(int y_1 = 0; (y_1 < TILE_COUNT_Y); y_1 = (y_1 + 1)) {
       {
         for(int x_1 = 0; (x_1 < TILE_COUNT_X); x_1 = (x_1 + 1)) {
           ivec2 tilePixel0Idx = ivec2((x_1 * TILE_SIZE), (y_1 * TILE_SIZE));

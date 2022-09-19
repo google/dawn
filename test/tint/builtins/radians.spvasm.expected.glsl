@@ -9,7 +9,8 @@ void main_1() {
   float a = 0.0f;
   float b = 0.0f;
   a = 42.0f;
-  b = tint_radians(a);
+  float x_11 = a;
+  b = tint_radians(x_11);
   return;
 }
 

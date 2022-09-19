@@ -1,5 +1,6 @@
 [numthreads(1, 1, 1)]
 void f() {
-  const int b = asint(1.0f);
+  const float a = 1.0f;
+  const int b = asint(a);
   return;
 }

@@ -44,7 +44,8 @@ void main_1() {
   mat4 x_69 = x_14.worldViewProjection;
   vec3 x_70 = p;
   tint_symbol = (x_69 * vec4(x_70.x, x_70.y, x_70.z, 1.0f));
-  vUV = uv;
+  vec2 x_83 = uv;
+  vUV = x_83;
   float x_87 = tint_symbol.y;
   tint_symbol.y = (x_87 * -1.0f);
   return;

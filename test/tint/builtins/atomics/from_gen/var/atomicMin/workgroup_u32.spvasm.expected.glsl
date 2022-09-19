@@ -6,7 +6,8 @@ void atomicMin_69d383() {
   uint arg_1 = 0u;
   uint res = 0u;
   arg_1 = 1u;
-  uint x_14 = atomicMin(arg_0, arg_1);
+  uint x_18 = arg_1;
+  uint x_14 = atomicMin(arg_0, x_18);
   res = x_14;
   return;
 }
@@ -19,7 +20,8 @@ void compute_main_inner(uint local_invocation_index) {
 }
 
 void compute_main_1() {
-  compute_main_inner(local_invocation_index_1);
+  uint x_32 = local_invocation_index_1;
+  compute_main_inner(x_32);
   return;
 }
 

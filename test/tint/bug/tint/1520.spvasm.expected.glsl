@@ -88,7 +88,8 @@ void main_1() {
   bool x_111 = false;
   bool x_114 = false;
   bool x_115 = false;
-  outputColor_S0 = vcolor_S0;
+  vec4 x_72 = vcolor_S0;
+  outputColor_S0 = x_72;
   float x_77 = x_4.unknownInput_S1_c0;
   x_8_unknown = x_77;
   x_9_ok = true;

@@ -52,8 +52,9 @@ void main_inner(uint3 GlobalInvocationID) {
   frustumPlanes[5] = float4(0.0f, 0.0f, 1.0f, -(viewFar));
   const int TILE_SIZE = 16;
   const int TILE_COUNT_X = 2;
+  const int TILE_COUNT_Y = 2;
   {
-    [loop] for(int y_1 = 0; (y_1 < 2); y_1 = (y_1 + 1)) {
+    [loop] for(int y_1 = 0; (y_1 < TILE_COUNT_Y); y_1 = (y_1 + 1)) {
       {
         [loop] for(int x_1 = 0; (x_1 < TILE_COUNT_X); x_1 = (x_1 + 1)) {
           int2 tilePixel0Idx = int2((x_1 * TILE_SIZE), (y_1 * TILE_SIZE));

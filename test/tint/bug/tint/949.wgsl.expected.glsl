@@ -79,7 +79,8 @@ mat3 cotangent_frame_vf3_vf3_vf2_vf2_(inout vec3 normal_1, inout vec3 p, inout v
   vec3 x_146 = normal_1;
   dp2perp = cross(x_145, x_146);
   vec3 x_149 = normal_1;
-  dp1perp = cross(x_149, dp1);
+  vec3 x_150 = dp1;
+  dp1perp = cross(x_149, x_150);
   vec3 x_153 = dp2perp;
   float x_155 = duv1.x;
   vec3 x_157 = dp1perp;
@@ -91,12 +92,22 @@ mat3 cotangent_frame_vf3_vf3_vf2_vf2_(inout vec3 normal_1, inout vec3 p, inout v
   float x_169 = duv2.y;
   bitangent = ((x_163 * x_165) + (x_167 * x_169));
   float x_173 = tangentSpaceParams.x;
-  tangent = (tangent * x_173);
+  vec3 x_174 = tangent;
+  tangent = (x_174 * x_173);
   float x_177 = tangentSpaceParams.y;
-  bitangent = (bitangent * x_177);
-  invmax = inversesqrt(max(dot(tangent, tangent), dot(bitangent, bitangent)));
-  vec3 x_191 = (tangent * invmax);
-  vec3 x_194 = (bitangent * invmax);
+  vec3 x_178 = bitangent;
+  bitangent = (x_178 * x_177);
+  vec3 x_181 = tangent;
+  vec3 x_182 = tangent;
+  vec3 x_184 = bitangent;
+  vec3 x_185 = bitangent;
+  invmax = inversesqrt(max(dot(x_181, x_182), dot(x_184, x_185)));
+  vec3 x_189 = tangent;
+  float x_190 = invmax;
+  vec3 x_191 = (x_189 * x_190);
+  vec3 x_192 = bitangent;
+  float x_193 = invmax;
+  vec3 x_194 = (x_192 * x_193);
   vec3 x_195 = normal_1;
   return mat3(vec3(x_191.x, x_191.y, x_191.z), vec3(x_194.x, x_194.y, x_194.z), vec3(x_195.x, x_195.y, x_195.z));
 }
@@ -125,7 +136,8 @@ mat3 transposeMat3_mf33_(inout mat3 inMatrix) {
   float x_93 = i2.z;
   vec3 x_94 = vec3(x_89, x_91, x_93);
   outMatrix = mat3(vec3(x_78.x, x_78.y, x_78.z), vec3(x_86.x, x_86.y, x_86.z), vec3(x_94.x, x_94.y, x_94.z));
-  return outMatrix;
+  mat3 x_110 = outMatrix;
+  return x_110;
 }
 
 vec3 perturbNormalBase_mf33_vf3_f1_(inout mat3 cotangentFrame, inout vec3 normal, inout float scale) {
@@ -164,14 +176,16 @@ lightingInfo computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_(inout vec3 v
   vec4 x_228 = lightData;
   angleW = normalize((x_227 + vec3(x_228.x, x_228.y, x_228.z)));
   vec3 x_233 = vNormal;
-  specComp = max(0.0f, dot(x_233, angleW));
+  vec3 x_234 = angleW;
+  specComp = max(0.0f, dot(x_233, x_234));
   float x_237 = specComp;
   float x_238 = glossiness;
   specComp = pow(x_237, max(1.0f, x_238));
   float x_241 = specComp;
   vec3 x_242 = specularColor;
   result.specular = (x_242 * x_241);
-  return result;
+  lightingInfo x_245 = result;
+  return x_245;
 }
 
 uniform highp sampler2D TextureSamplerTexture_TextureSamplerSampler;
@@ -233,7 +247,8 @@ void main_1() {
   vec3 output3 = vec3(0.0f, 0.0f, 0.0f);
   u_Float = 100.0f;
   u_Color = vec3(0.5f);
-  vec4 x_262 = texture(TextureSamplerTexture_TextureSamplerSampler, vMainuv);
+  vec2 x_261 = vMainuv;
+  vec4 x_262 = texture(TextureSamplerTexture_TextureSamplerSampler, x_261);
   tempTextureRead = x_262;
   vec4 x_264 = tempTextureRead;
   float x_273 = x_269.textureInfoName;
@@ -245,69 +260,128 @@ void main_1() {
   uvOffset = vec2(0.0f);
   float x_292 = x_269.u_bumpStrength;
   normalScale = (1.0f / x_292);
-  if (tint_symbol) {
-    x_299 = v_uv;
+  bool x_298 = tint_symbol;
+  if (x_298) {
+    vec2 x_303 = v_uv;
+    x_299 = x_303;
   } else {
-    x_299 = -(v_uv);
+    vec2 x_305 = v_uv;
+    x_299 = -(x_305);
   }
-  TBNUV = x_299;
+  vec2 x_307 = x_299;
+  TBNUV = x_307;
   vec4 x_310 = v_output2;
-  param_3 = (vec3(x_310.x, x_310.y, x_310.z) * normalScale);
+  float x_312 = normalScale;
+  param_3 = (vec3(x_310.x, x_310.y, x_310.z) * x_312);
   vec4 x_317 = v_output1;
   param_4 = vec3(x_317.x, x_317.y, x_317.z);
-  param_5 = TBNUV;
+  vec2 x_320 = TBNUV;
+  param_5 = x_320;
   vec2 x_324 = x_269.tangentSpaceParameter0;
   param_6 = x_324;
   mat3 x_325 = cotangent_frame_vf3_vf3_vf2_vf2_(param_3, param_4, param_5, param_6);
   TBN = x_325;
-  param_7 = TBN;
+  mat3 x_328 = TBN;
+  param_7 = x_328;
   mat3 x_329 = transposeMat3_mf33_(param_7);
   invTBN = x_329;
-  vec3 x_334 = (invTBN * -(output5));
-  parallaxLimit = (length(vec2(x_334.x, x_334.y)) / (invTBN * -(output5)).z);
+  mat3 x_331 = invTBN;
+  vec3 x_332 = output5;
+  vec3 x_334 = (x_331 * -(x_332));
+  mat3 x_337 = invTBN;
+  vec3 x_338 = output5;
+  parallaxLimit = (length(vec2(x_334.x, x_334.y)) / (x_337 * -(x_338)).z);
   float x_345 = x_269.u_parallaxScale;
-  parallaxLimit = (parallaxLimit * x_345);
-  vec3 x_352 = (invTBN * -(output5));
+  float x_346 = parallaxLimit;
+  parallaxLimit = (x_346 * x_345);
+  mat3 x_349 = invTBN;
+  vec3 x_350 = output5;
+  vec3 x_352 = (x_349 * -(x_350));
   vOffsetDir = normalize(vec2(x_352.x, x_352.y));
-  vMaxOffset = (vOffsetDir * parallaxLimit);
+  vec2 x_356 = vOffsetDir;
+  float x_357 = parallaxLimit;
+  vMaxOffset = (x_356 * x_357);
+  mat3 x_361 = invTBN;
+  vec3 x_362 = output5;
+  mat3 x_365 = invTBN;
   vec4 x_366 = v_output2;
-  numSamples = (15.0f + (dot((invTBN * -(output5)), (invTBN * vec3(x_366.x, x_366.y, x_366.z))) * -11.0f));
-  stepSize = (1.0f / numSamples);
+  numSamples = (15.0f + (dot((x_361 * -(x_362)), (x_365 * vec3(x_366.x, x_366.y, x_366.z))) * -11.0f));
+  float x_374 = numSamples;
+  stepSize = (1.0f / x_374);
   currRayHeight = 1.0f;
   vCurrOffset = vec2(0.0f);
   vLastOffset = vec2(0.0f);
   lastSampledHeight = 1.0f;
   currSampledHeight = 1.0f;
   i = 0;
-  {
-    for(; (i < 15); i = (i + 1)) {
-      vec4 x_397 = texture(TextureSamplerTexture_TextureSamplerSampler, (v_uv + vCurrOffset));
-      currSampledHeight = x_397.w;
-      if ((currSampledHeight > currRayHeight)) {
-        delta1 = (currSampledHeight - currRayHeight);
-        delta2 = ((currRayHeight + stepSize) - lastSampledHeight);
-        ratio = (delta1 / (delta1 + delta2));
-        vCurrOffset = ((vLastOffset * ratio) + (vCurrOffset * (1.0f - ratio)));
-        break;
-      } else {
-        currRayHeight = (currRayHeight - stepSize);
-        vLastOffset = vCurrOffset;
-        vCurrOffset = (vCurrOffset + (vMaxOffset * stepSize));
-        lastSampledHeight = currSampledHeight;
-      }
+  while (true) {
+    int x_388 = i;
+    if ((x_388 < 15)) {
+    } else {
+      break;
+    }
+    vec2 x_394 = v_uv;
+    vec2 x_395 = vCurrOffset;
+    vec4 x_397 = texture(TextureSamplerTexture_TextureSamplerSampler, (x_394 + x_395));
+    currSampledHeight = x_397.w;
+    float x_400 = currSampledHeight;
+    float x_401 = currRayHeight;
+    if ((x_400 > x_401)) {
+      float x_406 = currSampledHeight;
+      float x_407 = currRayHeight;
+      delta1 = (x_406 - x_407);
+      float x_410 = currRayHeight;
+      float x_411 = stepSize;
+      float x_413 = lastSampledHeight;
+      delta2 = ((x_410 + x_411) - x_413);
+      float x_416 = delta1;
+      float x_417 = delta1;
+      float x_418 = delta2;
+      ratio = (x_416 / (x_417 + x_418));
+      float x_421 = ratio;
+      vec2 x_422 = vLastOffset;
+      float x_424 = ratio;
+      vec2 x_426 = vCurrOffset;
+      vCurrOffset = ((x_422 * x_421) + (x_426 * (1.0f - x_424)));
+      break;
+    } else {
+      float x_431 = stepSize;
+      float x_432 = currRayHeight;
+      currRayHeight = (x_432 - x_431);
+      vec2 x_434 = vCurrOffset;
+      vLastOffset = x_434;
+      float x_435 = stepSize;
+      vec2 x_436 = vMaxOffset;
+      vec2 x_438 = vCurrOffset;
+      vCurrOffset = (x_438 + (x_436 * x_435));
+      float x_440 = currSampledHeight;
+      lastSampledHeight = x_440;
+    }
+    {
+      int x_441 = i;
+      i = (x_441 + 1);
     }
   }
-  parallaxOcclusion_0 = vCurrOffset;
-  uvOffset = parallaxOcclusion_0;
-  vec4 x_452 = texture(TextureSamplerTexture_TextureSamplerSampler, (v_uv + uvOffset));
+  vec2 x_444 = vCurrOffset;
+  parallaxOcclusion_0 = x_444;
+  vec2 x_445 = parallaxOcclusion_0;
+  uvOffset = x_445;
+  vec2 x_449 = v_uv;
+  vec2 x_450 = uvOffset;
+  vec4 x_452 = texture(TextureSamplerTexture_TextureSamplerSampler, (x_449 + x_450));
   float x_454 = x_269.u_bumpStrength;
-  param_8 = TBN;
+  mat3 x_457 = TBN;
+  param_8 = x_457;
   param_9 = vec3(x_452.x, x_452.y, x_452.z);
   param_10 = (1.0f / x_454);
   vec3 x_461 = perturbNormal_mf33_vf3_f1_(param_8, param_9, param_10);
-  output4 = vec4(x_461.x, x_461.y, x_461.z, output4.w);
-  output6 = (v_uv + uvOffset);
-  vec4 x_475 = texture(TextureSampler1Texture_TextureSampler1Sampler, output6);
+  vec4 x_462 = output4;
+  output4 = vec4(x_461.x, x_461.y, x_461.z, x_462.w);
+  vec2 x_465 = v_uv;
+  vec2 x_466 = uvOffset;
+  output6 = (x_465 + x_466);
+  vec2 x_474 = output6;
+  vec4 x_475 = texture(TextureSampler1Texture_TextureSampler1Sampler, x_474);
   tempTextureRead1 = x_475;
   vec4 x_477 = tempTextureRead1;
   rgb1 = vec3(x_477.x, x_477.y, x_477.z);
@@ -315,13 +389,16 @@ void main_1() {
   vec4 x_482 = v_output1;
   viewDirectionW_1 = normalize((x_481 - vec3(x_482.x, x_482.y, x_482.z)));
   shadow = 1.0f;
-  glossiness_1 = (1.0f * u_Float);
+  float x_488 = u_Float;
+  glossiness_1 = (1.0f * x_488);
   diffuseBase = vec3(0.0f);
   specularBase = vec3(0.0f);
   vec4 x_494 = output4;
   normalW = vec3(x_494.x, x_494.y, x_494.z);
-  param_11 = viewDirectionW_1;
-  param_12 = normalW;
+  vec3 x_501 = viewDirectionW_1;
+  param_11 = x_501;
+  vec3 x_503 = normalW;
+  param_12 = x_503;
   vec4 x_507 = light0.vLightData;
   param_13 = x_507;
   vec4 x_510 = light0.vLightDiffuse;
@@ -330,17 +407,28 @@ void main_1() {
   param_15 = vec3(x_514.x, x_514.y, x_514.z);
   vec3 x_518 = light0.vLightGround;
   param_16 = x_518;
-  param_17 = glossiness_1;
+  float x_520 = glossiness_1;
+  param_17 = x_520;
   lightingInfo x_521 = computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_(param_11, param_12, param_13, param_14, param_15, param_16, param_17);
   info = x_521;
   shadow = 1.0f;
   vec3 x_523 = info.diffuse;
-  diffuseBase = (diffuseBase + (x_523 * shadow));
+  float x_524 = shadow;
+  vec3 x_526 = diffuseBase;
+  diffuseBase = (x_526 + (x_523 * x_524));
   vec3 x_529 = info.specular;
-  specularBase = (specularBase + (x_529 * shadow));
-  diffuseOutput = (diffuseBase * rgb1);
-  specularOutput = (specularBase * u_Color);
-  output3 = (diffuseOutput + specularOutput);
+  float x_530 = shadow;
+  vec3 x_532 = specularBase;
+  specularBase = (x_532 + (x_529 * x_530));
+  vec3 x_535 = diffuseBase;
+  vec3 x_536 = rgb1;
+  diffuseOutput = (x_535 * x_536);
+  vec3 x_539 = specularBase;
+  vec3 x_540 = u_Color;
+  specularOutput = (x_539 * x_540);
+  vec3 x_543 = diffuseOutput;
+  vec3 x_544 = specularOutput;
+  output3 = (x_543 + x_544);
   vec3 x_548 = output3;
   glFragColor = vec4(x_548.x, x_548.y, x_548.z, 1.0f);
   return;

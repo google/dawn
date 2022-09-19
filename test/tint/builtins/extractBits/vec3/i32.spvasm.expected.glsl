@@ -10,7 +10,10 @@ void f_1() {
   ivec3 v = ivec3(0);
   uint offset_1 = 0u;
   uint count = 0u;
-  ivec3 x_15 = tint_extract_bits(v, offset_1, count);
+  ivec3 x_17 = v;
+  uint x_18 = offset_1;
+  uint x_19 = count;
+  ivec3 x_15 = tint_extract_bits(x_17, x_18, x_19);
   return;
 }
 

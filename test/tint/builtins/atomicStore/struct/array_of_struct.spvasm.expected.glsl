@@ -17,12 +17,18 @@ shared S_atomic wg[10];
 void compute_main_inner(uint local_invocation_index) {
   uint idx = 0u;
   idx = local_invocation_index;
-  {
-    for(; !(!((idx < 10u))); idx = (idx + 1u)) {
-      uint x_28 = idx;
-      wg[x_28].x = 0;
-      atomicExchange(wg[x_28].a, 0u);
-      wg[x_28].y = 0u;
+  while (true) {
+    uint x_23 = idx;
+    if (!((x_23 < 10u))) {
+      break;
+    }
+    uint x_28 = idx;
+    wg[x_28].x = 0;
+    atomicExchange(wg[x_28].a, 0u);
+    wg[x_28].y = 0u;
+    {
+      uint x_41 = idx;
+      idx = (x_41 + 1u);
     }
   }
   barrier();
@@ -31,7 +37,8 @@ void compute_main_inner(uint local_invocation_index) {
 }
 
 void compute_main_1() {
-  compute_main_inner(local_invocation_index_1);
+  uint x_53 = local_invocation_index_1;
+  compute_main_inner(x_53);
   return;
 }
 

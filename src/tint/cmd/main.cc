@@ -1025,11 +1025,6 @@ int main(int argc, const char** argv) {
              m.Add<tint::transform::FirstIndexOffset>();
              return true;
          }},
-        {"fold_trivial_single_use_lets",
-         [](tint::inspector::Inspector&, tint::transform::Manager& m, tint::transform::DataMap&) {
-             m.Add<tint::transform::FoldTrivialSingleUseLets>();
-             return true;
-         }},
         {"renamer",
          [](tint::inspector::Inspector&, tint::transform::Manager& m, tint::transform::DataMap&) {
              m.Add<tint::transform::Renamer>();

@@ -17,8 +17,9 @@ void atomicCompareExchangeWeak_83580d() {
   arg_1 = 1u;
   arg_2 = 1u;
   const uint x_21 = arg_2;
+  const uint x_22 = arg_1;
   atomic_compare_exchange_resultu32 atomic_result = (atomic_compare_exchange_resultu32)0;
-  uint atomic_compare_value = arg_1;
+  uint atomic_compare_value = x_22;
   InterlockedCompareExchange(arg_0, atomic_compare_value, x_21, atomic_result.old_value);
   atomic_result.exchanged = atomic_result.old_value == atomic_compare_value;
   const atomic_compare_exchange_resultu32 tint_symbol_2 = atomic_result;
@@ -38,7 +39,8 @@ void compute_main_inner(uint local_invocation_index) {
 }
 
 void compute_main_1() {
-  compute_main_inner(local_invocation_index_1);
+  const uint x_40 = local_invocation_index_1;
+  compute_main_inner(x_40);
   return;
 }
 

@@ -36,9 +36,12 @@ float4x4 getFrameData_f1_(inout float frameID) {
   const float x_15 = frameID;
   const float x_25 = asfloat(x_20[6].w);
   fX = (x_15 / x_25);
-  const float4 x_40 = frameMapTexture.SampleBias(frameMapSampler, float2(fX, 0.0f), 0.0f);
-  const float4 x_47 = frameMapTexture.SampleBias(frameMapSampler, float2(fX, 0.25f), 0.0f);
-  const float4 x_54 = frameMapTexture.SampleBias(frameMapSampler, float2(fX, 0.5f), 0.0f);
+  const float x_37 = fX;
+  const float4 x_40 = frameMapTexture.SampleBias(frameMapSampler, float2(x_37, 0.0f), 0.0f);
+  const float x_44 = fX;
+  const float4 x_47 = frameMapTexture.SampleBias(frameMapSampler, float2(x_44, 0.25f), 0.0f);
+  const float x_51 = fX;
+  const float4 x_54 = frameMapTexture.SampleBias(frameMapSampler, float2(x_51, 0.5f), 0.0f);
   return float4x4(float4(x_40.x, x_40.y, x_40.z, x_40.w), float4(x_47.x, x_47.y, x_47.z, x_47.w), float4(x_54.x, x_54.y, x_54.z, x_54.w), (0.0f).xxxx);
 }
 
@@ -62,10 +65,12 @@ void main_1() {
   float alpha = 0.0f;
   float3 mixed = float3(0.0f, 0.0f, 0.0f);
   color = (0.0f).xxxx;
-  tileUV = frac(tUV);
+  const float2 x_86 = tUV;
+  tileUV = frac(x_86);
   const float x_91 = tileUV.y;
   tileUV.y = (1.0f - x_91);
-  tileID = floor(tUV);
+  const float2 x_95 = tUV;
+  tileID = floor(x_95);
   const float2 x_101 = asfloat(x_20[6].xy);
   sheetUnits = ((1.0f).xx / x_101);
   const float x_106 = asfloat(x_20[6].w);
@@ -73,91 +78,120 @@ void main_1() {
   const float2 x_111 = asfloat(x_20[5].zw);
   stageUnits = ((1.0f).xx / x_111);
   i = 0;
-  {
-    [loop] for(; (i < 2); i = (i + 1)) {
-      switch(i) {
-        case 1: {
-          const float2 x_150 = tileID;
-          const float2 x_154 = asfloat(x_20[5].zw);
-          const float4 x_156 = tileMapsTexture1.SampleBias(tileMapsSampler, ((x_150 + (0.5f).xx) / x_154), 0.0f);
-          frameID_1 = x_156.x;
-          break;
-        }
-        case 0: {
-          const float2 x_136 = tileID;
-          const float2 x_140 = asfloat(x_20[5].zw);
-          const float4 x_142 = tileMapsTexture0.SampleBias(tileMapsSampler, ((x_136 + (0.5f).xx) / x_140), 0.0f);
-          frameID_1 = x_142.x;
-          break;
-        }
-        default: {
-          break;
-        }
+  [loop] while (true) {
+    const int x_122 = i;
+    if ((x_122 < 2)) {
+    } else {
+      break;
+    }
+    const int x_126 = i;
+    switch(x_126) {
+      case 1: {
+        const float2 x_150 = tileID;
+        const float2 x_154 = asfloat(x_20[5].zw);
+        const float4 x_156 = tileMapsTexture1.SampleBias(tileMapsSampler, ((x_150 + (0.5f).xx) / x_154), 0.0f);
+        frameID_1 = x_156.x;
+        break;
       }
-      const float x_166 = frameID_1;
-      const float x_169 = asfloat(x_20[6].w);
-      const float4 x_172 = animationMapTexture.SampleBias(animationMapSampler, float2(((x_166 + 0.5f) / x_169), 0.0f), 0.0f);
-      animationData = x_172;
-      const float x_174 = animationData.y;
-      if ((x_174 > 0.0f)) {
-        const float x_181 = asfloat(x_20[0].x);
-        const float x_184 = animationData.z;
-        mt = ((x_181 * x_184) % 1.0f);
-        f = 0.0f;
+      case 0: {
+        const float2 x_136 = tileID;
+        const float2 x_140 = asfloat(x_20[5].zw);
+        const float4 x_142 = tileMapsTexture0.SampleBias(tileMapsSampler, ((x_136 + (0.5f).xx) / x_140), 0.0f);
+        frameID_1 = x_142.x;
+        break;
+      }
+      default: {
+        break;
+      }
+    }
+    const float x_166 = frameID_1;
+    const float x_169 = asfloat(x_20[6].w);
+    const float4 x_172 = animationMapTexture.SampleBias(animationMapSampler, float2(((x_166 + 0.5f) / x_169), 0.0f), 0.0f);
+    animationData = x_172;
+    const float x_174 = animationData.y;
+    if ((x_174 > 0.0f)) {
+      const float x_181 = asfloat(x_20[0].x);
+      const float x_184 = animationData.z;
+      mt = ((x_181 * x_184) % 1.0f);
+      f = 0.0f;
+      [loop] while (true) {
+        const float x_193 = f;
+        if ((x_193 < 8.0f)) {
+        } else {
+          break;
+        }
+        const float x_197 = animationData.y;
+        const float x_198 = mt;
+        if ((x_197 > x_198)) {
+          const float x_203 = animationData.x;
+          frameID_1 = x_203;
+          break;
+        }
+        const float x_208 = frameID_1;
+        const float x_211 = asfloat(x_20[6].w);
+        const float x_214 = f;
+        const float4 x_217 = animationMapTexture.SampleBias(animationMapSampler, float2(((x_208 + 0.5f) / x_211), (0.125f * x_214)), 0.0f);
+        animationData = x_217;
         {
-          [loop] for(; (f < 8.0f); f = (f + 1.0f)) {
-            const float x_197 = animationData.y;
-            if ((x_197 > mt)) {
-              const float x_203 = animationData.x;
-              frameID_1 = x_203;
-              break;
-            }
-            const float x_208 = frameID_1;
-            const float x_211 = asfloat(x_20[6].w);
-            const float4 x_217 = animationMapTexture.SampleBias(animationMapSampler, float2(((x_208 + 0.5f) / x_211), (0.125f * f)), 0.0f);
-            animationData = x_217;
-          }
+          const float x_218 = f;
+          f = (x_218 + 1.0f);
         }
       }
-      param = (frameID_1 + 0.5f);
-      const float4x4 x_225 = getFrameData_f1_(param);
-      frameData = x_225;
-      const float4 x_228 = frameData[0];
-      const float2 x_231 = asfloat(x_20[6].xy);
-      frameSize = (float2(x_228.w, x_228.z) / x_231);
-      const float4 x_235 = frameData[0];
-      offset_1 = (float2(x_235.x, x_235.y) * sheetUnits);
-      const float4 x_241 = frameData[2];
-      const float4 x_244 = frameData[0];
-      ratio = (float2(x_241.x, x_241.y) / float2(x_244.w, x_244.z));
-      const float x_248 = frameData[2].z;
-      if ((x_248 == 1.0f)) {
-        const float2 x_252 = tileUV;
-        tileUV = float2(x_252.y, x_252.x);
-      }
-      if ((i == 0)) {
-        const float4 x_268 = spriteSheetTexture.Sample(spriteSheetSampler, ((tileUV * frameSize) + offset_1));
-        color = x_268;
-      } else {
-        const float4 x_279 = spriteSheetTexture.Sample(spriteSheetSampler, ((tileUV * frameSize) + offset_1));
-        nc = x_279;
-        const float x_283 = color.w;
-        const float x_285 = nc.w;
-        alpha = min((x_283 + x_285), 1.0f);
-        const float4 x_290 = color;
-        const float4 x_292 = nc;
-        const float x_295 = nc.w;
-        mixed = lerp(float3(x_290.x, x_290.y, x_290.z), float3(x_292.x, x_292.y, x_292.z), float3(x_295, x_295, x_295));
-        const float3 x_298 = mixed;
-        color = float4(x_298.x, x_298.y, x_298.z, alpha);
-      }
+    }
+    const float x_222 = frameID_1;
+    param = (x_222 + 0.5f);
+    const float4x4 x_225 = getFrameData_f1_(param);
+    frameData = x_225;
+    const float4 x_228 = frameData[0];
+    const float2 x_231 = asfloat(x_20[6].xy);
+    frameSize = (float2(x_228.w, x_228.z) / x_231);
+    const float4 x_235 = frameData[0];
+    const float2 x_237 = sheetUnits;
+    offset_1 = (float2(x_235.x, x_235.y) * x_237);
+    const float4 x_241 = frameData[2];
+    const float4 x_244 = frameData[0];
+    ratio = (float2(x_241.x, x_241.y) / float2(x_244.w, x_244.z));
+    const float x_248 = frameData[2].z;
+    if ((x_248 == 1.0f)) {
+      const float2 x_252 = tileUV;
+      tileUV = float2(x_252.y, x_252.x);
+    }
+    const int x_254 = i;
+    if ((x_254 == 0)) {
+      const float2 x_263 = tileUV;
+      const float2 x_264 = frameSize;
+      const float2 x_266 = offset_1;
+      const float4 x_268 = spriteSheetTexture.Sample(spriteSheetSampler, ((x_263 * x_264) + x_266));
+      color = x_268;
+    } else {
+      const float2 x_274 = tileUV;
+      const float2 x_275 = frameSize;
+      const float2 x_277 = offset_1;
+      const float4 x_279 = spriteSheetTexture.Sample(spriteSheetSampler, ((x_274 * x_275) + x_277));
+      nc = x_279;
+      const float x_283 = color.w;
+      const float x_285 = nc.w;
+      alpha = min((x_283 + x_285), 1.0f);
+      const float4 x_290 = color;
+      const float4 x_292 = nc;
+      const float x_295 = nc.w;
+      mixed = lerp(float3(x_290.x, x_290.y, x_290.z), float3(x_292.x, x_292.y, x_292.z), float3(x_295, x_295, x_295));
+      const float3 x_298 = mixed;
+      const float x_299 = alpha;
+      color = float4(x_298.x, x_298.y, x_298.z, x_299);
+    }
+    {
+      const int x_304 = i;
+      i = (x_304 + 1);
     }
   }
   const float3 x_310 = asfloat(x_20[7].xyz);
   const float4 x_311 = color;
   const float3 x_313 = (float3(x_311.x, x_311.y, x_311.z) * x_310);
-  color = float4(x_313.x, x_313.y, x_313.z, color.w);
-  glFragColor = color;
+  const float4 x_314 = color;
+  color = float4(x_313.x, x_313.y, x_313.z, x_314.w);
+  const float4 x_318 = color;
+  glFragColor = x_318;
   return;
 }
 

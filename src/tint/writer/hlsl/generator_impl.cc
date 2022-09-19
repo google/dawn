@@ -55,9 +55,7 @@
 #include "src/tint/transform/decompose_memory_access.h"
 #include "src/tint/transform/disable_uniformity_analysis.h"
 #include "src/tint/transform/expand_compound_assignment.h"
-#include "src/tint/transform/fold_trivial_single_use_lets.h"
 #include "src/tint/transform/localize_struct_array_assignment.h"
-#include "src/tint/transform/loop_to_for_loop.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/transform/num_workgroups_from_uniform.h"
 #include "src/tint/transform/promote_initializers_to_let.h"
@@ -205,11 +203,6 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     // LocalizeStructArrayAssignment introduces pointers.
     manager.Add<transform::SimplifyPointers>();
     manager.Add<transform::LocalizeStructArrayAssignment>();
-
-    // Attempt to convert `loop`s into for-loops. This is to try and massage the
-    // output into something that will not cause FXC to choke or misbehave.
-    manager.Add<transform::FoldTrivialSingleUseLets>();
-    manager.Add<transform::LoopToForLoop>();
 
     if (!options.disable_workgroup_init) {
         // ZeroInitWorkgroupMemory must come before CanonicalizeEntryPointIO as

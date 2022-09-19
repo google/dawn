@@ -5,6 +5,7 @@ void unused_entry_point() {
 
 void f() {
   const int a = 1;
+  const int a__ = a;
   const int b = a;
-  const int b__ = a;
+  const int b__ = a__;
 }

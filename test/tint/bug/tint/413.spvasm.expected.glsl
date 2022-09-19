@@ -8,7 +8,8 @@ void main_1() {
   srcValue = x_18;
   uint x_22 = srcValue.x;
   srcValue.x = (x_22 + uint(1));
-  imageStore(Dst, ivec2(0), srcValue);
+  uvec4 x_27 = srcValue;
+  imageStore(Dst, ivec2(0), x_27);
   return;
 }
 

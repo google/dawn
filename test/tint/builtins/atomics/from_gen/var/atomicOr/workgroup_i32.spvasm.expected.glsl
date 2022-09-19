@@ -6,7 +6,8 @@ void atomicOr_d09248() {
   int arg_1 = 0;
   int res = 0;
   arg_1 = 1;
-  int x_15 = atomicOr(arg_0, arg_1);
+  int x_19 = arg_1;
+  int x_15 = atomicOr(arg_0, x_19);
   res = x_15;
   return;
 }
@@ -19,7 +20,8 @@ void compute_main_inner(uint local_invocation_index) {
 }
 
 void compute_main_1() {
-  compute_main_inner(local_invocation_index_1);
+  uint x_33 = local_invocation_index_1;
+  compute_main_inner(x_33);
   return;
 }
 

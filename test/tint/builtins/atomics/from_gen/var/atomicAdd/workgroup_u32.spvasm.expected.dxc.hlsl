@@ -5,8 +5,9 @@ void atomicAdd_d5db1d() {
   uint arg_1 = 0u;
   uint res = 0u;
   arg_1 = 1u;
+  const uint x_18 = arg_1;
   uint atomic_result = 0u;
-  InterlockedAdd(arg_0, arg_1, atomic_result);
+  InterlockedAdd(arg_0, x_18, atomic_result);
   const uint x_14 = atomic_result;
   res = x_14;
   return;
@@ -21,7 +22,8 @@ void compute_main_inner(uint local_invocation_index) {
 }
 
 void compute_main_1() {
-  compute_main_inner(local_invocation_index_1);
+  const uint x_32 = local_invocation_index_1;
+  compute_main_inner(x_32);
   return;
 }
 

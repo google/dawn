@@ -9,6 +9,7 @@ void a() {
     int a_1 = 1;
     int b = a_1;
   }
-  int b = 1;
+  int a_2 = 1;
+  int b = a_2;
 }
 

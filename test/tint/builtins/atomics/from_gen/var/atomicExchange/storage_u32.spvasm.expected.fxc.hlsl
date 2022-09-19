@@ -11,7 +11,8 @@ void atomicExchange_d59712() {
   uint arg_1 = 0u;
   uint res = 0u;
   arg_1 = 1u;
-  const uint x_13 = tint_atomicExchange(sb_rw, 0u, arg_1);
+  const uint x_18 = arg_1;
+  const uint x_13 = tint_atomicExchange(sb_rw, 0u, x_18);
   res = x_13;
   return;
 }

@@ -4,8 +4,9 @@ groupshared uint arg_0;
 void atomicStore_726882() {
   uint arg_1 = 0u;
   arg_1 = 1u;
+  const uint x_18 = arg_1;
   uint atomic_result = 0u;
-  InterlockedExchange(arg_0, arg_1, atomic_result);
+  InterlockedExchange(arg_0, x_18, atomic_result);
   return;
 }
 
@@ -18,7 +19,8 @@ void compute_main_inner(uint local_invocation_index) {
 }
 
 void compute_main_1() {
-  compute_main_inner(local_invocation_index_1);
+  const uint x_31 = local_invocation_index_1;
+  compute_main_inner(x_31);
   return;
 }
 

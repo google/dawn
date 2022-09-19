@@ -13,7 +13,8 @@ void atomicOr_5e95d4() {
   uint arg_1 = 0u;
   uint res = 0u;
   arg_1 = 1u;
-  uint x_13 = atomicOr(sb_rw.arg_0, arg_1);
+  uint x_18 = arg_1;
+  uint x_13 = atomicOr(sb_rw.arg_0, x_18);
   res = x_13;
   return;
 }
@@ -45,7 +46,8 @@ void atomicOr_5e95d4() {
   uint arg_1 = 0u;
   uint res = 0u;
   arg_1 = 1u;
-  uint x_13 = atomicOr(sb_rw.arg_0, arg_1);
+  uint x_18 = arg_1;
+  uint x_13 = atomicOr(sb_rw.arg_0, x_18);
   res = x_13;
   return;
 }

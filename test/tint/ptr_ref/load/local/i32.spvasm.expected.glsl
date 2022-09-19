@@ -3,7 +3,8 @@
 void main_1() {
   int i = 0;
   i = 123;
-  int x_12 = (i + 1);
+  int x_10 = i;
+  int x_12 = (x_10 + 1);
   return;
 }
 

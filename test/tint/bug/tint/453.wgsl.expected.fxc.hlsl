@@ -8,6 +8,7 @@ void main() {
   srcValue = x_22;
   const uint x_24 = srcValue.x;
   const uint x_25 = (x_24 + 1u);
-  Dst[(0).xx] = srcValue.xxxx;
+  const uint4 x_27 = srcValue;
+  Dst[(0).xx] = x_27.xxxx;
   return;
 }

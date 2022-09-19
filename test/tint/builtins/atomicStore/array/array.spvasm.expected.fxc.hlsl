@@ -4,10 +4,17 @@ groupshared uint wg[4];
 void compute_main_inner(uint local_invocation_index) {
   uint idx = 0u;
   idx = local_invocation_index;
-  {
-    [loop] for(; !(!((idx < 4u))); idx = (idx + 1u)) {
-      uint atomic_result = 0u;
-      InterlockedExchange(wg[idx], 0u, atomic_result);
+  [loop] while (true) {
+    const uint x_21 = idx;
+    if (!((x_21 < 4u))) {
+      break;
+    }
+    const uint x_26 = idx;
+    uint atomic_result = 0u;
+    InterlockedExchange(wg[x_26], 0u, atomic_result);
+    {
+      const uint x_33 = idx;
+      idx = (x_33 + 1u);
     }
   }
   GroupMemoryBarrierWithGroupSync();
@@ -17,7 +24,8 @@ void compute_main_inner(uint local_invocation_index) {
 }
 
 void compute_main_1() {
-  compute_main_inner(local_invocation_index_1);
+  const uint x_47 = local_invocation_index_1;
+  compute_main_inner(x_47);
   return;
 }
 

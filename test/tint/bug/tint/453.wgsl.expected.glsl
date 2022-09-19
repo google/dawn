@@ -8,7 +8,8 @@ void tint_symbol() {
   srcValue = x_22;
   uint x_24 = srcValue.x;
   uint x_25 = (x_24 + 1u);
-  imageStore(Dst, ivec2(0), srcValue.xxxx);
+  uvec4 x_27 = srcValue;
+  imageStore(Dst, ivec2(0), x_27.xxxx);
   return;
 }
 

@@ -34,7 +34,8 @@ void compute_main_inner(uint local_invocation_index) {
 }
 
 void compute_main_1() {
-  compute_main_inner(local_invocation_index_1);
+  uint x_35 = local_invocation_index_1;
+  compute_main_inner(x_35);
   return;
 }
 

@@ -6,7 +6,9 @@ float tint_float_modulo(float lhs, float rhs) {
 
 
 void f() {
-  float r = tint_float_modulo(1.0f, 0.0f);
+  float a = 1.0f;
+  float b = 0.0f;
+  float r = tint_float_modulo(a, b);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

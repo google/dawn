@@ -1,5 +1,6 @@
 [numthreads(1, 1, 1)]
 void main() {
-  bool v = (false ? true : true);
+  const bool a = true;
+  bool v = (false ? true : (a & true));
   return;
 }

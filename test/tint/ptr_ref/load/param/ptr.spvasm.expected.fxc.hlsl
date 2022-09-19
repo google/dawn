@@ -6,7 +6,8 @@ int func(int value, inout int pointer) {
 void main_1() {
   int i = 0;
   i = 123;
-  const int x_18 = func(i, i);
+  const int x_19 = i;
+  const int x_18 = func(x_19, i);
   return;
 }
 

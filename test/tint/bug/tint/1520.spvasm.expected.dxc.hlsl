@@ -77,7 +77,8 @@ void main_1() {
   bool x_111 = false;
   bool x_114 = false;
   bool x_115 = false;
-  outputColor_S0 = vcolor_S0;
+  const float4 x_72 = vcolor_S0;
+  outputColor_S0 = x_72;
   const float x_77 = asfloat(x_4[1].x);
   x_8_unknown = x_77;
   x_9_ok = true;

@@ -20,9 +20,10 @@ void atomicCompareExchangeWeak_e88938() {
   arg_1 = 1;
   arg_2 = 1;
   int x_22 = arg_2;
+  int x_23 = arg_1;
   atomic_compare_exchange_resulti32 atomic_compare_result;
-  atomic_compare_result.old_value = atomicCompSwap(arg_0, arg_1, x_22);
-  atomic_compare_result.exchanged = atomic_compare_result.old_value == arg_1;
+  atomic_compare_result.old_value = atomicCompSwap(arg_0, x_23, x_22);
+  atomic_compare_result.exchanged = atomic_compare_result.old_value == x_23;
   atomic_compare_exchange_resulti32 tint_symbol = atomic_compare_result;
   int old_value_1 = tint_symbol.old_value;
   int x_24 = old_value_1;
@@ -39,7 +40,8 @@ void compute_main_inner(uint local_invocation_index) {
 }
 
 void compute_main_1() {
-  compute_main_inner(local_invocation_index_1);
+  uint x_41 = local_invocation_index_1;
+  compute_main_inner(x_41);
   return;
 }
 

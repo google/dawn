@@ -25,7 +25,8 @@ void atomicCompareExchangeWeak_1bd40a() {
   arg_1 = 1;
   arg_2 = 1;
   const int x_23 = arg_2;
-  const atomic_compare_exchange_weak_ret_type tint_symbol = tint_atomicCompareExchangeWeak(sb_rw, 0u, arg_1, x_23);
+  const int x_24 = arg_1;
+  const atomic_compare_exchange_weak_ret_type tint_symbol = tint_atomicCompareExchangeWeak(sb_rw, 0u, x_24, x_23);
   const int old_value_1 = tint_symbol.old_value;
   const int x_25 = old_value_1;
   const x__atomic_compare_exchange_resulti32 tint_symbol_1 = {x_25, (x_25 == x_23)};

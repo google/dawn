@@ -58,7 +58,8 @@ float3x3 cotangent_frame_vf3_vf3_vf2_vf2_(inout float3 normal_1, inout float3 p,
   const float3 x_146 = normal_1;
   dp2perp = cross(x_145, x_146);
   const float3 x_149 = normal_1;
-  dp1perp = cross(x_149, dp1);
+  const float3 x_150 = dp1;
+  dp1perp = cross(x_149, x_150);
   const float3 x_153 = dp2perp;
   const float x_155 = duv1.x;
   const float3 x_157 = dp1perp;
@@ -70,12 +71,22 @@ float3x3 cotangent_frame_vf3_vf3_vf2_vf2_(inout float3 normal_1, inout float3 p,
   const float x_169 = duv2.y;
   bitangent = ((x_163 * x_165) + (x_167 * x_169));
   const float x_173 = tangentSpaceParams.x;
-  tangent = (tangent * x_173);
+  const float3 x_174 = tangent;
+  tangent = (x_174 * x_173);
   const float x_177 = tangentSpaceParams.y;
-  bitangent = (bitangent * x_177);
-  invmax = rsqrt(max(dot(tangent, tangent), dot(bitangent, bitangent)));
-  const float3 x_191 = (tangent * invmax);
-  const float3 x_194 = (bitangent * invmax);
+  const float3 x_178 = bitangent;
+  bitangent = (x_178 * x_177);
+  const float3 x_181 = tangent;
+  const float3 x_182 = tangent;
+  const float3 x_184 = bitangent;
+  const float3 x_185 = bitangent;
+  invmax = rsqrt(max(dot(x_181, x_182), dot(x_184, x_185)));
+  const float3 x_189 = tangent;
+  const float x_190 = invmax;
+  const float3 x_191 = (x_189 * x_190);
+  const float3 x_192 = bitangent;
+  const float x_193 = invmax;
+  const float3 x_194 = (x_192 * x_193);
   const float3 x_195 = normal_1;
   return float3x3(float3(x_191.x, x_191.y, x_191.z), float3(x_194.x, x_194.y, x_194.z), float3(x_195.x, x_195.y, x_195.z));
 }
@@ -104,7 +115,8 @@ float3x3 transposeMat3_mf33_(inout float3x3 inMatrix) {
   const float x_93 = i2.z;
   const float3 x_94 = float3(x_89, x_91, x_93);
   outMatrix = float3x3(float3(x_78.x, x_78.y, x_78.z), float3(x_86.x, x_86.y, x_86.z), float3(x_94.x, x_94.y, x_94.z));
-  return outMatrix;
+  const float3x3 x_110 = outMatrix;
+  return x_110;
 }
 
 float3 perturbNormalBase_mf33_vf3_f1_(inout float3x3 cotangentFrame, inout float3 normal, inout float scale) {
@@ -143,14 +155,16 @@ lightingInfo computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_(inout float3
   const float4 x_228 = lightData;
   angleW = normalize((x_227 + float3(x_228.x, x_228.y, x_228.z)));
   const float3 x_233 = vNormal;
-  specComp = max(0.0f, dot(x_233, angleW));
+  const float3 x_234 = angleW;
+  specComp = max(0.0f, dot(x_233, x_234));
   const float x_237 = specComp;
   const float x_238 = glossiness;
   specComp = pow(x_237, max(1.0f, x_238));
   const float x_241 = specComp;
   const float3 x_242 = specularColor;
   result.specular = (x_242 * x_241);
-  return result;
+  const lightingInfo x_245 = result;
+  return x_245;
 }
 
 void main_1() {
@@ -209,7 +223,8 @@ void main_1() {
   float3 output3 = float3(0.0f, 0.0f, 0.0f);
   u_Float = 100.0f;
   u_Color = (0.5f).xxx;
-  const float4 x_262 = TextureSamplerTexture.Sample(TextureSamplerSampler, vMainuv);
+  const float2 x_261 = vMainuv;
+  const float4 x_262 = TextureSamplerTexture.Sample(TextureSamplerSampler, x_261);
   tempTextureRead = x_262;
   const float4 x_264 = tempTextureRead;
   const float x_273 = asfloat(x_269[10].x);
@@ -221,69 +236,128 @@ void main_1() {
   uvOffset = (0.0f).xx;
   const float x_292 = asfloat(x_269[8].x);
   normalScale = (1.0f / x_292);
-  if (gl_FrontFacing) {
-    x_299 = v_uv;
+  const bool x_298 = gl_FrontFacing;
+  if (x_298) {
+    const float2 x_303 = v_uv;
+    x_299 = x_303;
   } else {
-    x_299 = -(v_uv);
+    const float2 x_305 = v_uv;
+    x_299 = -(x_305);
   }
-  TBNUV = x_299;
+  const float2 x_307 = x_299;
+  TBNUV = x_307;
   const float4 x_310 = v_output2;
-  param_3 = (float3(x_310.x, x_310.y, x_310.z) * normalScale);
+  const float x_312 = normalScale;
+  param_3 = (float3(x_310.x, x_310.y, x_310.z) * x_312);
   const float4 x_317 = v_output1;
   param_4 = float3(x_317.x, x_317.y, x_317.z);
-  param_5 = TBNUV;
+  const float2 x_320 = TBNUV;
+  param_5 = x_320;
   const float2 x_324 = asfloat(x_269[10].zw);
   param_6 = x_324;
   const float3x3 x_325 = cotangent_frame_vf3_vf3_vf2_vf2_(param_3, param_4, param_5, param_6);
   TBN = x_325;
-  param_7 = TBN;
+  const float3x3 x_328 = TBN;
+  param_7 = x_328;
   const float3x3 x_329 = transposeMat3_mf33_(param_7);
   invTBN = x_329;
-  const float3 x_334 = mul(-(output5), invTBN);
-  parallaxLimit = (length(float2(x_334.x, x_334.y)) / mul(-(output5), invTBN).z);
+  const float3x3 x_331 = invTBN;
+  const float3 x_332 = output5;
+  const float3 x_334 = mul(-(x_332), x_331);
+  const float3x3 x_337 = invTBN;
+  const float3 x_338 = output5;
+  parallaxLimit = (length(float2(x_334.x, x_334.y)) / mul(-(x_338), x_337).z);
   const float x_345 = asfloat(x_269[9].w);
-  parallaxLimit = (parallaxLimit * x_345);
-  const float3 x_352 = mul(-(output5), invTBN);
+  const float x_346 = parallaxLimit;
+  parallaxLimit = (x_346 * x_345);
+  const float3x3 x_349 = invTBN;
+  const float3 x_350 = output5;
+  const float3 x_352 = mul(-(x_350), x_349);
   vOffsetDir = normalize(float2(x_352.x, x_352.y));
-  vMaxOffset = (vOffsetDir * parallaxLimit);
+  const float2 x_356 = vOffsetDir;
+  const float x_357 = parallaxLimit;
+  vMaxOffset = (x_356 * x_357);
+  const float3x3 x_361 = invTBN;
+  const float3 x_362 = output5;
+  const float3x3 x_365 = invTBN;
   const float4 x_366 = v_output2;
-  numSamples = (15.0f + (dot(mul(-(output5), invTBN), mul(float3(x_366.x, x_366.y, x_366.z), invTBN)) * -11.0f));
-  stepSize = (1.0f / numSamples);
+  numSamples = (15.0f + (dot(mul(-(x_362), x_361), mul(float3(x_366.x, x_366.y, x_366.z), x_365)) * -11.0f));
+  const float x_374 = numSamples;
+  stepSize = (1.0f / x_374);
   currRayHeight = 1.0f;
   vCurrOffset = (0.0f).xx;
   vLastOffset = (0.0f).xx;
   lastSampledHeight = 1.0f;
   currSampledHeight = 1.0f;
   i = 0;
-  {
-    [loop] for(; (i < 15); i = (i + 1)) {
-      const float4 x_397 = TextureSamplerTexture.Sample(TextureSamplerSampler, (v_uv + vCurrOffset));
-      currSampledHeight = x_397.w;
-      if ((currSampledHeight > currRayHeight)) {
-        delta1 = (currSampledHeight - currRayHeight);
-        delta2 = ((currRayHeight + stepSize) - lastSampledHeight);
-        ratio = (delta1 / (delta1 + delta2));
-        vCurrOffset = ((vLastOffset * ratio) + (vCurrOffset * (1.0f - ratio)));
-        break;
-      } else {
-        currRayHeight = (currRayHeight - stepSize);
-        vLastOffset = vCurrOffset;
-        vCurrOffset = (vCurrOffset + (vMaxOffset * stepSize));
-        lastSampledHeight = currSampledHeight;
-      }
+  [loop] while (true) {
+    const int x_388 = i;
+    if ((x_388 < 15)) {
+    } else {
+      break;
+    }
+    const float2 x_394 = v_uv;
+    const float2 x_395 = vCurrOffset;
+    const float4 x_397 = TextureSamplerTexture.Sample(TextureSamplerSampler, (x_394 + x_395));
+    currSampledHeight = x_397.w;
+    const float x_400 = currSampledHeight;
+    const float x_401 = currRayHeight;
+    if ((x_400 > x_401)) {
+      const float x_406 = currSampledHeight;
+      const float x_407 = currRayHeight;
+      delta1 = (x_406 - x_407);
+      const float x_410 = currRayHeight;
+      const float x_411 = stepSize;
+      const float x_413 = lastSampledHeight;
+      delta2 = ((x_410 + x_411) - x_413);
+      const float x_416 = delta1;
+      const float x_417 = delta1;
+      const float x_418 = delta2;
+      ratio = (x_416 / (x_417 + x_418));
+      const float x_421 = ratio;
+      const float2 x_422 = vLastOffset;
+      const float x_424 = ratio;
+      const float2 x_426 = vCurrOffset;
+      vCurrOffset = ((x_422 * x_421) + (x_426 * (1.0f - x_424)));
+      break;
+    } else {
+      const float x_431 = stepSize;
+      const float x_432 = currRayHeight;
+      currRayHeight = (x_432 - x_431);
+      const float2 x_434 = vCurrOffset;
+      vLastOffset = x_434;
+      const float x_435 = stepSize;
+      const float2 x_436 = vMaxOffset;
+      const float2 x_438 = vCurrOffset;
+      vCurrOffset = (x_438 + (x_436 * x_435));
+      const float x_440 = currSampledHeight;
+      lastSampledHeight = x_440;
+    }
+    {
+      const int x_441 = i;
+      i = (x_441 + 1);
     }
   }
-  parallaxOcclusion_0 = vCurrOffset;
-  uvOffset = parallaxOcclusion_0;
-  const float4 x_452 = TextureSamplerTexture.Sample(TextureSamplerSampler, (v_uv + uvOffset));
+  const float2 x_444 = vCurrOffset;
+  parallaxOcclusion_0 = x_444;
+  const float2 x_445 = parallaxOcclusion_0;
+  uvOffset = x_445;
+  const float2 x_449 = v_uv;
+  const float2 x_450 = uvOffset;
+  const float4 x_452 = TextureSamplerTexture.Sample(TextureSamplerSampler, (x_449 + x_450));
   const float x_454 = asfloat(x_269[8].x);
-  param_8 = TBN;
+  const float3x3 x_457 = TBN;
+  param_8 = x_457;
   param_9 = float3(x_452.x, x_452.y, x_452.z);
   param_10 = (1.0f / x_454);
   const float3 x_461 = perturbNormal_mf33_vf3_f1_(param_8, param_9, param_10);
-  output4 = float4(x_461.x, x_461.y, x_461.z, output4.w);
-  output6 = (v_uv + uvOffset);
-  const float4 x_475 = TextureSampler1Texture.Sample(TextureSampler1Sampler, output6);
+  const float4 x_462 = output4;
+  output4 = float4(x_461.x, x_461.y, x_461.z, x_462.w);
+  const float2 x_465 = v_uv;
+  const float2 x_466 = uvOffset;
+  output6 = (x_465 + x_466);
+  const float2 x_474 = output6;
+  const float4 x_475 = TextureSampler1Texture.Sample(TextureSampler1Sampler, x_474);
   tempTextureRead1 = x_475;
   const float4 x_477 = tempTextureRead1;
   rgb1 = float3(x_477.x, x_477.y, x_477.z);
@@ -291,13 +365,16 @@ void main_1() {
   const float4 x_482 = v_output1;
   viewDirectionW_1 = normalize((x_481 - float3(x_482.x, x_482.y, x_482.z)));
   shadow = 1.0f;
-  glossiness_1 = (1.0f * u_Float);
+  const float x_488 = u_Float;
+  glossiness_1 = (1.0f * x_488);
   diffuseBase = (0.0f).xxx;
   specularBase = (0.0f).xxx;
   const float4 x_494 = output4;
   normalW = float3(x_494.x, x_494.y, x_494.z);
-  param_11 = viewDirectionW_1;
-  param_12 = normalW;
+  const float3 x_501 = viewDirectionW_1;
+  param_11 = x_501;
+  const float3 x_503 = normalW;
+  param_12 = x_503;
   const float4 x_507 = asfloat(light0[0]);
   param_13 = x_507;
   const float4 x_510 = asfloat(light0[1]);
@@ -306,17 +383,28 @@ void main_1() {
   param_15 = float3(x_514.x, x_514.y, x_514.z);
   const float3 x_518 = asfloat(light0[3].xyz);
   param_16 = x_518;
-  param_17 = glossiness_1;
+  const float x_520 = glossiness_1;
+  param_17 = x_520;
   const lightingInfo x_521 = computeHemisphericLighting_vf3_vf3_vf4_vf3_vf3_vf3_f1_(param_11, param_12, param_13, param_14, param_15, param_16, param_17);
   info = x_521;
   shadow = 1.0f;
   const float3 x_523 = info.diffuse;
-  diffuseBase = (diffuseBase + (x_523 * shadow));
+  const float x_524 = shadow;
+  const float3 x_526 = diffuseBase;
+  diffuseBase = (x_526 + (x_523 * x_524));
   const float3 x_529 = info.specular;
-  specularBase = (specularBase + (x_529 * shadow));
-  diffuseOutput = (diffuseBase * rgb1);
-  specularOutput = (specularBase * u_Color);
-  output3 = (diffuseOutput + specularOutput);
+  const float x_530 = shadow;
+  const float3 x_532 = specularBase;
+  specularBase = (x_532 + (x_529 * x_530));
+  const float3 x_535 = diffuseBase;
+  const float3 x_536 = rgb1;
+  diffuseOutput = (x_535 * x_536);
+  const float3 x_539 = specularBase;
+  const float3 x_540 = u_Color;
+  specularOutput = (x_539 * x_540);
+  const float3 x_543 = diffuseOutput;
+  const float3 x_544 = specularOutput;
+  output3 = (x_543 + x_544);
   const float3 x_548 = output3;
   glFragColor = float4(x_548.x, x_548.y, x_548.z, 1.0f);
   return;

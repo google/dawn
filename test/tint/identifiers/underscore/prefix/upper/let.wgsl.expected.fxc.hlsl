@@ -4,6 +4,8 @@ void unused_entry_point() {
 }
 
 void f() {
-  const int B = 1;
-  const int _B = 2;
+  const int A = 1;
+  const int _A = 2;
+  const int B = A;
+  const int _B = _A;
 }

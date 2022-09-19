@@ -25,7 +25,6 @@
 #include "src/tint/sem/type_manager.h"
 #include "src/tint/transform/binding_remapper.h"
 #include "src/tint/transform/first_index_offset.h"
-#include "src/tint/transform/fold_trivial_single_use_lets.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/transform/multiplanar_external_texture.h"
 #include "src/tint/transform/renamer.h"

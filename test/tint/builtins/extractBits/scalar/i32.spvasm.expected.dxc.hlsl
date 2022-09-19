@@ -10,7 +10,10 @@ void f_1() {
   int v = 0;
   uint offset_1 = 0u;
   uint count = 0u;
-  const int x_14 = tint_extract_bits(v, offset_1, count);
+  const int x_16 = v;
+  const uint x_17 = offset_1;
+  const uint x_18 = count;
+  const int x_14 = tint_extract_bits(x_16, x_17, x_18);
   return;
 }
 

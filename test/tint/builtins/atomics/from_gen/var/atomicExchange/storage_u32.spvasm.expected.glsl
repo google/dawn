@@ -13,7 +13,8 @@ void atomicExchange_d59712() {
   uint arg_1 = 0u;
   uint res = 0u;
   arg_1 = 1u;
-  uint x_13 = atomicExchange(sb_rw.arg_0, arg_1);
+  uint x_18 = arg_1;
+  uint x_13 = atomicExchange(sb_rw.arg_0, x_18);
   res = x_13;
   return;
 }
@@ -45,7 +46,8 @@ void atomicExchange_d59712() {
   uint arg_1 = 0u;
   uint res = 0u;
   arg_1 = 1u;
-  uint x_13 = atomicExchange(sb_rw.arg_0, arg_1);
+  uint x_18 = arg_1;
+  uint x_13 = atomicExchange(sb_rw.arg_0, x_18);
   res = x_13;
   return;
 }

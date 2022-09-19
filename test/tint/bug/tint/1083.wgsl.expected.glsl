@@ -1,7 +1,9 @@
 #version 310 es
 
 void f() {
-  int c = 1;
+  int a = 1;
+  int b = 0;
+  int c = (a / b);
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

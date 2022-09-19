@@ -27,9 +27,10 @@ void atomicCompareExchangeWeak_1bd40a() {
   arg_1 = 1;
   arg_2 = 1;
   int x_23 = arg_2;
+  int x_24 = arg_1;
   atomic_compare_exchange_resulti32 atomic_compare_result;
-  atomic_compare_result.old_value = atomicCompSwap(sb_rw.arg_0, arg_1, x_23);
-  atomic_compare_result.exchanged = atomic_compare_result.old_value == arg_1;
+  atomic_compare_result.old_value = atomicCompSwap(sb_rw.arg_0, x_24, x_23);
+  atomic_compare_result.exchanged = atomic_compare_result.old_value == x_24;
   atomic_compare_exchange_resulti32 tint_symbol = atomic_compare_result;
   int old_value_1 = tint_symbol.old_value;
   int x_25 = old_value_1;
@@ -79,9 +80,10 @@ void atomicCompareExchangeWeak_1bd40a() {
   arg_1 = 1;
   arg_2 = 1;
   int x_23 = arg_2;
+  int x_24 = arg_1;
   atomic_compare_exchange_resulti32 atomic_compare_result;
-  atomic_compare_result.old_value = atomicCompSwap(sb_rw.arg_0, arg_1, x_23);
-  atomic_compare_result.exchanged = atomic_compare_result.old_value == arg_1;
+  atomic_compare_result.old_value = atomicCompSwap(sb_rw.arg_0, x_24, x_23);
+  atomic_compare_result.exchanged = atomic_compare_result.old_value == x_24;
   atomic_compare_exchange_resulti32 tint_symbol = atomic_compare_result;
   int old_value_1 = tint_symbol.old_value;
   int x_25 = old_value_1;

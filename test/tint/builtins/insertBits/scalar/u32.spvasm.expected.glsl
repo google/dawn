@@ -11,7 +11,11 @@ void f_1() {
   uint n = 0u;
   uint offset_1 = 0u;
   uint count = 0u;
-  uint x_12 = tint_insert_bits(v, n, offset_1, count);
+  uint x_14 = v;
+  uint x_15 = n;
+  uint x_16 = offset_1;
+  uint x_17 = count;
+  uint x_12 = tint_insert_bits(x_14, x_15, x_16, x_17);
   return;
 }
 

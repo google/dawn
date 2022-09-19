@@ -1,5 +1,6 @@
 [numthreads(1, 1, 1)]
 void f() {
-  const int b = asint(1u);
+  const uint a = 1u;
+  const int b = asint(a);
   return;
 }

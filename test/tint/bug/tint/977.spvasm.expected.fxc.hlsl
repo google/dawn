@@ -23,7 +23,8 @@ float binaryOperation_f1_f1_(inout float a, inout float b) {
     const float x_38 = b;
     x_26 = (sign(x_34) * pow(abs(x_36), x_38));
   }
-  return x_26;
+  const float x_41 = x_26;
+  return x_41;
 }
 
 void main_1() {
