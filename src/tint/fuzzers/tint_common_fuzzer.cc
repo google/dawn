@@ -197,8 +197,7 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
     RunInspector(&program);
     diagnostics_ = program.Diagnostics();
 
-    if (transform_manager_) {
-        auto out = transform_manager_->Run(&program, *transform_inputs_);
+    auto validate_program = [&](auto& out) {
         if (!out.program.IsValid()) {
             // Transforms can produce error messages for bad input.
             // Catch ICEs and errors from non transform systems.
@@ -214,6 +213,45 @@ int CommonFuzzer::Run(const uint8_t* data, size_t size) {
 
         program = std::move(out.program);
         RunInspector(&program);
+
+        return 1;
+    };
+
+    if (transform_manager_) {
+        auto out = transform_manager_->Run(&program, *transform_inputs_);
+        if (!validate_program(out)) {
+            return 0;
+        }
+    }
+
+    {
+        // Run SubstituteOverride if required
+
+        transform::SubstituteOverride::Config cfg;
+        inspector::Inspector inspector(&program);
+        auto default_values = inspector.GetOverrideDefaultValues();
+        for (const auto& [override_id, scalar] : default_values) {
+            // If the override is not null, then it has a default value, we can just let it use the
+            // provided default instead of overriding.
+            if (!scalar.IsNull()) {
+                continue;
+            }
+
+            cfg.map.insert({override_id, 0.0});
+        }
+
+        if (!cfg.map.empty()) {
+            transform::DataMap override_data;
+            override_data.Add<transform::SubstituteOverride::Config>(cfg);
+
+            transform::Manager mgr;
+            mgr.append(std::make_unique<transform::SubstituteOverride>());
+
+            auto out = mgr.Run(&program, override_data);
+            if (!validate_program(out)) {
+                return 0;
+            }
+        }
     }
 
     switch (output_) {
