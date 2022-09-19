@@ -463,9 +463,9 @@ std::optional<std::pair<uint32_t, uint32_t>> WgslMutator::FindOperatorOccurrence
         // case where search has reached the end of the code string.
         char first_character = wgsl_code[current_index];
         char second_character =
-            current_index == wgsl_code.size() - 1 ? '\0' : wgsl_code[current_index + 1];
+            current_index + 1 == wgsl_code.size() ? '\0' : wgsl_code[current_index + 1];
         char third_character =
-            current_index >= wgsl_code.size() - 2 ? '\0' : wgsl_code[current_index + 2];
+            current_index + 2 >= wgsl_code.size() ? '\0' : wgsl_code[current_index + 2];
 
         // This uses the extracted characters to match for the various WGSL operators.
         switch (first_character) {

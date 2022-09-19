@@ -545,6 +545,14 @@ d %= e;
     }
 }
 
+TEST(TestReplaceOperator, TestFindOperatorOccurrenceOnSmallStrings) {
+    RandomGenerator generator(0);
+    WgslMutatorTest mutator(generator);
+    ASSERT_FALSE(mutator.FindOperatorOccurrence("", 0).has_value());
+    ASSERT_FALSE(mutator.FindOperatorOccurrence(" ", 0).has_value());
+    ASSERT_FALSE(mutator.FindOperatorOccurrence("  ", 0).has_value());
+}
+
 TEST(TestInsertBreakOrContinue, TestLoopPositions1) {
     RandomGenerator generator(0);
     WgslMutatorTest mutator(generator);
