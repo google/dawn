@@ -71,8 +71,8 @@ void ComputeSharedMemoryTests::BasicTest(const char* shader) {
 // Basic shared memory test
 TEST_P(ComputeSharedMemoryTests, Basic) {
     BasicTest(R"(
-        let kTileSize : u32 = 4u;
-        let kInstances : u32 = 11u;
+        const kTileSize : u32 = 4u;
+        const kInstances : u32 = 11u;
 
         struct Dst {
             x : u32
