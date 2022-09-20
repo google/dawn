@@ -57,17 +57,11 @@ class ScopedSignalSemaphore : public NonMovable {
         : mDevice(device), mSemaphore(semaphore) {}
     ~ScopedSignalSemaphore() {
         if (mSemaphore != VK_NULL_HANDLE) {
-            ASSERT(mDevice);
-            mDevice->fn.DestroySemaphore(mDevice->GetVkDevice(), mSemaphore, nullptr);
+            mDevice->GetFencedDeleter()->DeleteWhenUnused(mSemaphore);
         }
     }
 
     VkSemaphore Get() { return mSemaphore; }
-    VkSemaphore Detach() {
-        VkSemaphore semaphore = mSemaphore;
-        mSemaphore = VK_NULL_HANDLE;
-        return semaphore;
-    }
     VkSemaphore* InitializeInto() { return &mSemaphore; }
 
   private:
@@ -357,8 +351,7 @@ MaybeError Device::SubmitPendingCommands() {
         ExternalSemaphoreHandle semaphoreHandle;
         DAWN_TRY_ASSIGN(semaphoreHandle,
                         mExternalSemaphoreService->ExportSemaphore(scopedSignalSemaphore.Get()));
-        // The ownership of signal semaphore has been transferred, we no longer need to track it.
-        scopedSignalSemaphore.Detach();
+
         // Update all external textures, eagerly transitioned in the submit, with the exported
         // handle, and the duplicated handles.
         bool first = true;
