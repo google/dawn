@@ -17,6 +17,7 @@
 
 #include <ostream>
 #include <variant>
+
 #include "src/tint/debug.h"
 
 namespace tint::utils {
@@ -49,6 +50,20 @@ struct [[nodiscard]] Result {
     /// @param failure the failure result
     Result(const FAILURE_TYPE& failure)  // NOLINT(runtime/explicit):
         : value{failure} {}
+
+    /// Copy constructor with success / failure casting
+    /// @param other the Result to copy
+    template <typename S,
+              typename F,
+              typename = std::void_t<decltype(SUCCESS_TYPE{std::declval<S>()}),
+                                     decltype(FAILURE_TYPE{std::declval<F>()})>>
+    Result(const Result<S, F>& other) {  // NOLINT(runtime/explicit):
+        if (other) {
+            value = SUCCESS_TYPE{other.Get()};
+        } else {
+            value = FAILURE_TYPE{other.Failure()};
+        }
+    }
 
     /// @returns true if the result was a success
     operator bool() const {

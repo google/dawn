@@ -51,5 +51,17 @@ TEST(ResultTest, CustomFailure) {
     EXPECT_EQ(r.Failure(), "oh noes!");
 }
 
+TEST(ResultTest, ValueCast) {
+    struct X {};
+    struct Y : X {};
+
+    Y* y = nullptr;
+    auto r_y = Result<Y*>{y};
+    auto r_x = Result<X*>{r_y};
+
+    (void)r_x;
+    (void)r_y;
+}
+
 }  // namespace
 }  // namespace tint::utils
