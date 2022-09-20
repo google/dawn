@@ -86,6 +86,11 @@ constexpr SkippedMessage kSkippedMessages[] = {
     // http://anglebug.com/7513
     {"VUID-VkGraphicsPipelineCreateInfo-pStages-06896",
      "contains fragment shader state, but stages"},
+
+    // A warning that's generated on valid usage of the WebGPU API where a fragment output doesn't
+    // have a corresponding attachment
+    {"UNASSIGNED-CoreValidation-Shader-OutputNotConsumed",
+     "fragment shader writes to output location 0 with no matching attachment"},
 };
 
 namespace dawn::native::vulkan {
