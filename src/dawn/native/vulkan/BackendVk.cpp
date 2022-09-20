@@ -73,12 +73,12 @@ constexpr SkippedMessage kSkippedMessages[] = {
     // considers the image read-only and produces a hazard. Dawn can't rely on storeOp=NONE and
     // so this is not expected to be worked around.
     // See http://crbug.com/dawn/1225 for more details.
-    {"SYNC-HAZARD-WRITE_AFTER_READ",
+    {"SYNC-HAZARD-WRITE-AFTER-READ",
      "depth aspect during store with storeOp VK_ATTACHMENT_STORE_OP_STORE. Access info (usage: "
      "SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
      "SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ, read_barriers: VK_PIPELINE_STAGE_2_NONE"},
 
-    {"SYNC-HAZARD-WRITE_AFTER_READ",
+    {"SYNC-HAZARD-WRITE-AFTER-READ",
      "stencil aspect during store with stencilStoreOp VK_ATTACHMENT_STORE_OP_STORE. Access info "
      "(usage: SYNC_LATE_FRAGMENT_TESTS_DEPTH_STENCIL_ATTACHMENT_WRITE, prior_usage: "
      "SYNC_FRAGMENT_SHADER_SHADER_STORAGE_READ, read_barriers: VK_PIPELINE_STAGE_2_NONE"},
