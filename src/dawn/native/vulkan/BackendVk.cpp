@@ -125,33 +125,37 @@ OnDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                      VkDebugUtilsMessageTypeFlagsEXT /* messageTypes */,
                      const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                      void* pUserData) {
-    if (ShouldReportDebugMessage(pCallbackData->pMessageIdName, pCallbackData->pMessage)) {
-        if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
-            dawn::ErrorLog() << pCallbackData->pMessage;
+    if (!ShouldReportDebugMessage(pCallbackData->pMessageIdName, pCallbackData->pMessage)) {
+        return VK_FALSE;
+    }
 
-            if (pUserData != nullptr) {
-                // Look through all the object labels attached to the debug message and try to parse
-                // a device debug prefix out of one of them. If a debug prefix is found and matches
-                // a registered device, forward the message on to it.
-                for (uint32_t i = 0; i < pCallbackData->objectCount; ++i) {
-                    const VkDebugUtilsObjectNameInfoEXT& object = pCallbackData->pObjects[i];
-                    std::string deviceDebugPrefix =
-                        GetDeviceDebugPrefixFromDebugName(object.pObjectName);
-                    if (deviceDebugPrefix.empty()) {
-                        continue;
-                    }
+    if (!(messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)) {
+        dawn::WarningLog() << pCallbackData->pMessage;
+        return VK_FALSE;
+    }
 
-                    VulkanInstance* instance = reinterpret_cast<VulkanInstance*>(pUserData);
-                    if (instance->HandleDeviceMessage(std::move(deviceDebugPrefix),
-                                                      pCallbackData->pMessage)) {
-                        return VK_FALSE;
-                    }
-                }
-            }
-        } else {
-            dawn::WarningLog() << pCallbackData->pMessage;
+    dawn::ErrorLog() << pCallbackData->pMessage;
+
+    if (pUserData == nullptr) {
+        return VK_FALSE;
+    }
+
+    // Look through all the object labels attached to the debug message and try to parse
+    // a device debug prefix out of one of them. If a debug prefix is found and matches
+    // a registered device, forward the message on to it.
+    for (uint32_t i = 0; i < pCallbackData->objectCount; ++i) {
+        const VkDebugUtilsObjectNameInfoEXT& object = pCallbackData->pObjects[i];
+        std::string deviceDebugPrefix = GetDeviceDebugPrefixFromDebugName(object.pObjectName);
+        if (deviceDebugPrefix.empty()) {
+            continue;
+        }
+
+        VulkanInstance* instance = reinterpret_cast<VulkanInstance*>(pUserData);
+        if (instance->HandleDeviceMessage(std::move(deviceDebugPrefix), pCallbackData->pMessage)) {
+            break;
         }
     }
+
     return VK_FALSE;
 }
 
