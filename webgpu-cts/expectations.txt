@@ -79,9 +79,9 @@ crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,tex
 # Flaky failures using SwiftShader (crbug.com/1344876).
 # KEEP
 ################################################################################
-crbug.com/1343969 [ win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure Slow ]
-crbug.com/1343969 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ RetryOnFailure Slow ]
-crbug.com/1344876 [ ubuntu webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure Slow ]
+crbug.com/1343969 [ win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
+crbug.com/1343969 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ RetryOnFailure ]
+crbug.com/1344876 [ ubuntu webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
 crbug.com/1359106 [ ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
 
 ################################################################################
@@ -167,14 +167,7 @@ crbug.com/dawn/1319 [ intel win ] webgpu:api,operation,command_buffer,copyTextur
 # General test slowness because of https://github.com/gpuweb/cts/issues/1162
 # KEEP
 ################################################################################
-crbug.com/dawn/1398 [ mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ Slow ]
-crbug.com/dawn/1398 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ RetryOnFailure Slow ]
-crbug.com/dawn/1398 [ mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Slow ]
-crbug.com/dawn/1398 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_2d_context_canvas:* [ Slow ]
-crbug.com/dawn/1398 [ mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Slow ]
-crbug.com/dawn/1398 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gl_context_canvas:* [ Slow ]
-crbug.com/dawn/1398 [ mac webgpu-adapter-default ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Slow ]
-crbug.com/dawn/1398 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,canvas:copy_contents_from_gpu_context_canvas:* [ Slow ]
+crbug.com/dawn/1398 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,canvas:color_space_conversion:* [ RetryOnFailure ]
 
 ################################################################################
 # Large and slow tests
@@ -182,22 +175,6 @@ crbug.com/dawn/1398 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTex
 ################################################################################
 webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stackDepth=100000 [ Slow ]
 webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Slow ]
-
-################################################################################
-# webgpu:shader,execution,robust_access
-# Slow tests - win
-# KEEP
-################################################################################
-crbug.com/dawn/0000 [ win ] webgpu:shader,execution,robust_access:linear_memory:storageClass="storage";storageMode="read";access="read";dynamicOffset=false;containerType="matrix";isAtomic=false [ Slow ]
-crbug.com/dawn/0000 [ win ] webgpu:shader,execution,robust_access:linear_memory:storageClass="storage";storageMode="read";access="read";dynamicOffset=false;containerType="vector";isAtomic=false [ Slow ]
-crbug.com/dawn/0000 [ win ] webgpu:shader,execution,robust_access:linear_memory:storageClass="storage";storageMode="read";access="read";dynamicOffset=true;containerType="matrix";isAtomic=false [ Slow ]
-crbug.com/dawn/0000 [ win ] webgpu:shader,execution,robust_access:linear_memory:storageClass="storage";storageMode="read";access="read";dynamicOffset=true;containerType="vector";isAtomic=false [ Slow ]
-crbug.com/dawn/0000 [ win ] webgpu:shader,execution,robust_access:linear_memory:storageClass="storage";storageMode="read_write";access="read";dynamicOffset=false;containerType="matrix";isAtomic=false [ Slow ]
-crbug.com/dawn/0000 [ win ] webgpu:shader,execution,robust_access:linear_memory:storageClass="storage";storageMode="read_write";access="read";dynamicOffset=false;containerType="vector";isAtomic=false [ Slow ]
-crbug.com/dawn/0000 [ win ] webgpu:shader,execution,robust_access:linear_memory:storageClass="storage";storageMode="read_write";access="read";dynamicOffset=true;containerType="matrix";isAtomic=false [ Slow ]
-crbug.com/dawn/0000 [ win ] webgpu:shader,execution,robust_access:linear_memory:storageClass="storage";storageMode="read_write";access="read";dynamicOffset=true;containerType="vector";isAtomic=false [ Slow ]
-crbug.com/dawn/0000 [ win ] webgpu:shader,execution,robust_access:linear_memory:storageClass="uniform";access="read";dynamicOffset=false;containerType="matrix";isAtomic=false [ Slow ]
-crbug.com/dawn/0000 [ win ] webgpu:shader,execution,robust_access:linear_memory:storageClass="uniform";access="read";dynamicOffset=true;containerType="matrix";isAtomic=false [ Slow ]
 
 ################################################################################
 # entry_point_name_must_match failures
@@ -540,8 +517,6 @@ crbug.com/dawn/0000 webgpu:shader,execution,expression,call,builtin,smoothstep:f
 # Flakes / slow tests
 # KEEP
 ################################################################################
-crbug.com/dawn/0000 [ linux ] webgpu:shader,execution,memory_model,* [ Slow ]
-crbug.com/dawn/0000 [ mac ] webgpu:shader,execution,memory_model,* [ Slow ]
 crbug.com/dawn/0000 [ win ] webgpu:shader,execution,memory_model,* [ Failure ]
 
 ################################################################################
