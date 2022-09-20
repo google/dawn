@@ -759,16 +759,21 @@ BlockInfo::BlockInfo(const spvtools::opt::BasicBlock& bb) : basic_block(&bb), id
 
 BlockInfo::~BlockInfo() = default;
 
-DefInfo::DefInfo(const spvtools::opt::Instruction& def_inst,
-                 bool the_locally_defined,
-                 uint32_t the_block_pos,
-                 size_t the_index)
-    : inst(def_inst),
-      locally_defined(the_locally_defined),
-      block_pos(the_block_pos),
-      index(the_index) {}
+DefInfo::DefInfo(size_t the_index,
+                 const spvtools::opt::Instruction& def_inst,
+                 uint32_t the_block_pos)
+    : index(the_index), inst(def_inst), local(DefInfo::Local(the_block_pos)) {}
+
+DefInfo::DefInfo(size_t the_index, const spvtools::opt::Instruction& def_inst)
+    : index(the_index), inst(def_inst) {}
 
 DefInfo::~DefInfo() = default;
+
+DefInfo::Local::Local(uint32_t the_block_pos) : block_pos(the_block_pos) {}
+
+DefInfo::Local::Local(const Local& other) = default;
+
+DefInfo::Local::~Local() = default;
 
 ast::Node* StatementBuilder::Clone(CloneContext*) const {
     return nullptr;
@@ -3380,7 +3385,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
         utils::Vector<BlockInfo::PhiAssignment, 4> worklist;
         worklist.Reserve(block_info.phi_assignments.Length());
         for (const auto assignment : block_info.phi_assignments) {
-            if (GetDefInfo(assignment.phi_id)->num_uses > 0) {
+            if (GetDefInfo(assignment.phi_id)->local->num_uses > 0) {
                 worklist.Push(assignment);
             }
         }
@@ -3462,7 +3467,7 @@ bool FunctionEmitter::WriteIfHoistedVar(const spvtools::opt::Instruction& inst,
                                         TypedExpression expr) {
     const auto result_id = inst.result_id();
     const auto* def_info = GetDefInfo(result_id);
-    if (def_info && def_info->requires_hoisted_def) {
+    if (def_info && def_info->requires_hoisted_var_def) {
         auto name = namer_.Name(result_id);
         // Emit an assignment of the expression to the hoisted variable.
         AddStatement(create<ast::AssignmentStatement>(
@@ -3512,8 +3517,11 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
         }
 
         if (combinatorial_expr.expr != nullptr) {
-            if (def_info->requires_hoisted_def || def_info->requires_named_const_def ||
-                def_info->num_uses != 1) {
+            // If the expression is combinatorial, then it's not a direct access
+            // of a builtin variable.
+            TINT_ASSERT(Reader, def_info->local.has_value());
+            if (def_info->requires_hoisted_var_def || def_info->requires_named_let_def ||
+                def_info->local->num_uses != 1) {
                 // Generate a const definition or an assignment to a hoisted definition
                 // now and later use the const or variable name at the uses of this
                 // value.
@@ -4739,7 +4747,7 @@ bool FunctionEmitter::RegisterSpecialBuiltInVariables() {
         const auto id = special_var.first;
         const auto builtin = special_var.second;
         const auto* var = def_use_mgr_->GetDef(id);
-        def_info_[id] = std::make_unique<DefInfo>(*var, false, 0, index);
+        def_info_[id] = std::make_unique<DefInfo>(index, *var);
         ++index;
         auto& def = def_info_[id];
         // Builtins are always defined outside the function.
@@ -4787,7 +4795,7 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
             if ((result_id == 0) || inst.opcode() == SpvOpLabel) {
                 continue;
             }
-            def_info_[result_id] = std::make_unique<DefInfo>(inst, true, block_pos, index);
+            def_info_[result_id] = std::make_unique<DefInfo>(index, inst, block_pos);
             ++index;
             auto& info = def_info_[result_id];
 
@@ -4876,7 +4884,7 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
         const auto id = inst.GetSingleWordInOperand(static_cast<uint32_t>(in_operand_index));
         auto* const operand_def = GetDefInfo(id);
         if (operand_def) {
-            operand_def->requires_named_const_def = true;
+            operand_def->requires_named_let_def = true;
         }
     };
     for (auto& id_def_info_pair : def_info_) {
@@ -4913,18 +4921,21 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
     // Ignores values defined outside this function.
     auto record_value_use = [this](uint32_t id, const BlockInfo* block_info) {
         if (auto* def_info = GetDefInfo(id)) {
-            // Update usage count.
-            def_info->num_uses++;
-            // Update usage span.
-            def_info->first_use_pos = std::min(def_info->first_use_pos, block_info->pos);
-            def_info->last_use_pos = std::max(def_info->last_use_pos, block_info->pos);
+            if (def_info->local.has_value()) {
+                auto& local_def = def_info->local.value();
+                // Update usage count.
+                local_def.num_uses++;
+                // Update usage span.
+                local_def.first_use_pos = std::min(local_def.first_use_pos, block_info->pos);
+                local_def.last_use_pos = std::max(local_def.last_use_pos, block_info->pos);
 
-            // Determine whether this ID is defined in a different construct
-            // from this use.
-            const auto defining_block = block_order_[def_info->block_pos];
-            const auto* def_in_construct = GetBlockInfo(defining_block)->construct;
-            if (def_in_construct != block_info->construct) {
-                def_info->used_in_another_construct = true;
+                // Determine whether this ID is defined in a different construct
+                // from this use.
+                const auto defining_block = block_order_[local_def.block_pos];
+                const auto* def_in_construct = GetBlockInfo(defining_block)->construct;
+                if (def_in_construct != block_info->construct) {
+                    local_def.used_in_another_construct = true;
+                }
             }
         }
     };
@@ -4941,8 +4952,8 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
                 // in the parent block B.
 
                 const auto phi_id = inst.result_id();
-                auto* phi_def_info = GetDefInfo(phi_id);
-                phi_def_info->is_phi = true;
+                auto& phi_local_def = GetDefInfo(phi_id)->local.value();
+                phi_local_def.is_phi = true;
 
                 // Track all the places where we need to mention the variable,
                 // so we can place its declaration.  First, record the location of
@@ -4962,9 +4973,9 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
                         // Track where P needs to be in scope.  It's not an ordinary use, so don't
                         // count it as one.
                         const auto pred_pos = pred_block_info->pos;
-                        phi_def_info->first_use_pos =
-                            std::min(phi_def_info->first_use_pos, pred_pos);
-                        phi_def_info->last_use_pos = std::max(phi_def_info->last_use_pos, pred_pos);
+                        phi_local_def.first_use_pos =
+                            std::min(phi_local_def.first_use_pos, pred_pos);
+                        phi_local_def.last_use_pos = std::max(phi_local_def.last_use_pos, pred_pos);
 
                         // Record the assignment that needs to occur at the end
                         // of the predecessor block.
@@ -4974,7 +4985,7 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
 
                 // Schedule the declaration of the state variable.
                 const auto* enclosing_construct =
-                    GetEnclosingScope(phi_def_info->first_use_pos, phi_def_info->last_use_pos);
+                    GetEnclosingScope(phi_local_def.first_use_pos, phi_local_def.last_use_pos);
                 GetBlockInfo(enclosing_construct->begin_id)->phis_needing_state_vars.Push(phi_id);
             } else {
                 inst.ForEachInId([block_info, &record_value_use](const uint32_t* id_ptr) {
@@ -4998,22 +5009,24 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
     for (auto& id_def_info_pair : def_info_) {
         const auto def_id = id_def_info_pair.first;
         auto* def_info = id_def_info_pair.second.get();
-        if (def_info->num_uses == 0) {
-            // There is no need to adjust the location of the declaration.
-            continue;
-        }
-        if (!def_info->locally_defined) {
+        if (!def_info->local.has_value()) {
             // Never hoist a variable declared at module scope.
             // This occurs for builtin variables, which are mapped to module-scope
             // private variables.
             continue;
         }
+        auto& local_def = def_info->local.value();
 
-        const auto* def_in_construct = GetBlockInfo(block_order_[def_info->block_pos])->construct;
+        if (local_def.num_uses == 0) {
+            // There is no need to adjust the location of the declaration.
+            continue;
+        }
+
+        const auto* def_in_construct = GetBlockInfo(block_order_[local_def.block_pos])->construct;
         // A definition in the first block of an kIfSelection or kSwitchSelection
         // occurs before the branch, and so that definition should count as
         // having been defined at the scope of the parent construct.
-        if (def_info->block_pos == def_in_construct->begin_pos) {
+        if (local_def.block_pos == def_in_construct->begin_pos) {
             if ((def_in_construct->kind == Construct::kIfSelection) ||
                 (def_in_construct->kind == Construct::kSwitchSelection)) {
                 def_in_construct = def_in_construct->parent;
@@ -5022,12 +5035,12 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
 
         // We care about the earliest between the place of definition, and the first
         // use of the value.
-        const auto first_pos = std::min(def_info->block_pos, def_info->first_use_pos);
-        const auto last_use_pos = def_info->last_use_pos;
+        const auto first_pos = std::min(local_def.block_pos, local_def.first_use_pos);
+        const auto last_use_pos = local_def.last_use_pos;
 
         bool should_hoist_to_let = false;
         bool should_hoist_to_var = false;
-        if (def_info->is_phi) {
+        if (local_def.is_phi) {
             // We need to generate a variable, and assignments to that variable in
             // all the phi parent blocks.
             should_hoist_to_var = true;
@@ -5041,7 +5054,7 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
             // simple heuristic to avoid changing the cost of an operation
             // by moving it into or out of a loop, for example.
             if ((def_info->storage_class == ast::StorageClass::kInvalid) &&
-                def_info->used_in_another_construct) {
+                local_def.used_in_another_construct) {
                 should_hoist_to_let = true;
             }
         }
@@ -5050,11 +5063,11 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
             const auto* enclosing_construct = GetEnclosingScope(first_pos, last_use_pos);
             if (should_hoist_to_let && (enclosing_construct == def_in_construct)) {
                 // We can use a plain 'let' declaration.
-                def_info->requires_named_const_def = true;
+                def_info->requires_named_let_def = true;
             } else {
                 // We need to make a hoisted variable definition.
                 // TODO(dneto): Handle non-storable types, particularly pointers.
-                def_info->requires_hoisted_def = true;
+                def_info->requires_hoisted_var_def = true;
                 auto* hoist_to_block = GetBlockInfo(enclosing_construct->begin_id);
                 hoist_to_block->hoisted_ids.Push(def_id);
             }

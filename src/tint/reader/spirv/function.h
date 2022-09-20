@@ -159,7 +159,7 @@ struct BlockInfo {
 
     /// The result IDs that this block is responsible for declaring as a
     /// hoisted variable.
-    /// @see DefInfo#requires_hoisted_def
+    /// @see DefInfo#requires_hoisted_var_def
     utils::Vector<uint32_t, 4> hoisted_ids;
 
     /// A PhiAssignment represents the assignment of a value to the state
@@ -241,57 +241,74 @@ enum class SkipReason {
 ///    function.
 /// - certain module-scope builtin variables.
 struct DefInfo {
-    /// Constructor.
+    /// Constructor for a locally defined value.
+    /// @param index an ordering index for uniqueness.
     /// @param def_inst the SPIR-V instruction defining the ID
-    /// @param locally_defined true if the defining instruction is in the function
-    /// @param block_pos the position of the basic block where the ID is defined
-    /// @param index an ordering index for this local definition
-    DefInfo(const spvtools::opt::Instruction& def_inst,
-            bool locally_defined,
-            uint32_t block_pos,
-            size_t index);
+    /// @param block_pos the position of the first basic block dominated by the
+    ///   definition
+    DefInfo(size_t index, const spvtools::opt::Instruction& def_inst, uint32_t block_pos);
+    /// Constructor for a value defined at module scope.
+    /// @param index an ordering index for uniqueness.
+    /// @param def_inst the SPIR-V instruction defining the ID
+    DefInfo(size_t index, const spvtools::opt::Instruction& def_inst);
+
     /// Destructor.
     ~DefInfo();
-
-    /// The SPIR-V instruction that defines the ID.
-    const spvtools::opt::Instruction& inst;
-
-    /// True if the definition of this ID is inside the function.
-    const bool locally_defined = true;
-
-    /// For IDs defined in the function, this is the position of the block
-    /// containing the definition of the ID, in function block order.
-    /// For IDs defined outside of the function, it is 0.
-    /// See method `FunctionEmitter::ComputeBlockOrderAndPositions`
-    const uint32_t block_pos = 0;
 
     /// An index for uniquely and deterministically ordering all DefInfo records
     /// in a function.
     const size_t index = 0;
 
-    /// The number of uses of this ID.
-    uint32_t num_uses = 0;
+    /// The SPIR-V instruction that defines the ID.
+    const spvtools::opt::Instruction& inst;
 
-    /// The block position of the first use of this ID, or MAX_UINT if it is not
-    /// used at all.  The "first" ordering is determined by the function block
-    /// order.  The first use of an ID might be in an OpPhi that precedes the
-    /// definition of the ID.
-    /// The ID defined by an OpPhi is counted as being "used" in each of its
-    /// parent blocks.
-    uint32_t first_use_pos = std::numeric_limits<uint32_t>::max();
-    /// The block position of the last use of this ID, or 0 if it is not used
-    /// at all.  The "last" ordering is determined by the function block order.
-    /// The ID defined by an OpPhi is counted as being "used" in each of its
-    /// parent blocks.
-    uint32_t last_use_pos = 0;
+    /// Information about a definition created inside a function.
+    struct Local {
+        /// Constructor.
+        /// @param block_pos the position of the basic block defining the value.
+        explicit Local(uint32_t block_pos);
+        /// Copy constructor.
+        /// @param other the original object to copy from.
+        Local(const Local& other);
+        /// Destructor.
+        ~Local();
 
-    /// Is this value used in a construct other than the one in which it was
-    /// defined?
-    bool used_in_another_construct = false;
+        /// The position of the basic block defininig the value, in function
+        /// block order.
+        /// See method `FunctionEmitter::ComputeBlockOrderAndPositions` for block
+        /// ordering.
+        const uint32_t block_pos = 0;
 
-    /// True if this ID requires a WGSL 'const' definition, due to context. It
+        /// The number of uses of this ID.
+        uint32_t num_uses = 0;
+
+        /// The block position of the first use of this ID, or MAX_UINT if it is not
+        /// used at all.  The "first" ordering is determined by the function block
+        /// order.  The first use of an ID might be in an OpPhi that precedes the
+        /// definition of the ID.
+        /// The ID defined by an OpPhi is counted as being "used" in each of its
+        /// parent blocks.
+        uint32_t first_use_pos = std::numeric_limits<uint32_t>::max();
+        /// The block position of the last use of this ID, or 0 if it is not used
+        /// at all.  The "last" ordering is determined by the function block order.
+        /// The ID defined by an OpPhi is counted as being "used" in each of its
+        /// parent blocks.
+        uint32_t last_use_pos = 0;
+
+        /// Is this value used in a construct other than the one in which it was
+        /// defined?
+        bool used_in_another_construct = false;
+        /// Is this ID an OpPhi?
+        bool is_phi = false;
+    };
+
+    /// Information about a definition inside the function. Populated if and only
+    /// if the definition actually is inside the function.
+    std::optional<Local> local;
+
+    /// True if this ID requires a WGSL 'let' definition, due to context. It
     /// might get one anyway (so this is *not* an if-and-only-if condition).
-    bool requires_named_const_def = false;
+    bool requires_named_let_def = false;
 
     /// True if this ID must map to a WGSL variable declaration before the
     /// corresponding position of the ID definition in SPIR-V.  This compensates
@@ -306,10 +323,7 @@ struct DefInfo {
     /// variable.
     /// TODO(dneto): This works for constants of storable type, but not, for
     /// example, pointers. crbug.com/tint/98
-    bool requires_hoisted_def = false;
-
-    /// Is this ID an OpPhi?
-    bool is_phi = false;
+    bool requires_hoisted_var_def = false;
 
     /// The storage class to use for this value, if it is of pointer type.
     /// This is required to carry a storage class override from a storage
@@ -336,14 +350,16 @@ struct DefInfo {
 /// @returns the ostream so calls can be chained
 inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
     o << "DefInfo{"
-      << " inst.result_id: " << di.inst.result_id()
-      << " locally_defined: " << (di.locally_defined ? "true" : "false")
-      << " block_pos: " << di.block_pos << " num_uses: " << di.num_uses
-      << " first_use_pos: " << di.first_use_pos << " last_use_pos: " << di.last_use_pos
-      << " used_in_another_construct: " << (di.used_in_another_construct ? "true" : "false")
-      << " requires_named_const_def: " << (di.requires_named_const_def ? "true" : "false")
-      << " requires_hoisted_def: " << (di.requires_hoisted_def ? "true" : "false")
-      << " is_phi: " << (di.is_phi ? "true" : "false") << "";
+      << " inst.result_id: " << di.inst.result_id();
+    if (di.local.has_value()) {
+        const auto& dil = di.local.value();
+        o << " block_pos: " << dil.block_pos << " num_uses: " << dil.num_uses
+          << " first_use_pos: " << dil.first_use_pos << " last_use_pos: " << dil.last_use_pos
+          << " used_in_another_construct: " << (dil.used_in_another_construct ? "true" : "false")
+          << " is_phi: " << (dil.is_phi ? "true" : "false") << "";
+    }
+    o << " requires_named_let_def: " << (di.requires_named_let_def ? "true" : "false")
+      << " requires_hoisted_var_def: " << (di.requires_hoisted_var_def ? "true" : "false");
     if (di.storage_class != ast::StorageClass::kNone) {
         o << " sc:" << int(di.storage_class);
     }
@@ -616,14 +632,14 @@ class FunctionEmitter {
     ///  - When a SPIR-V instruction might use the dynamically computed value
     ///    only once, but the WGSL code might reference it multiple times.
     ///    For example, this occurs for the vector operands of OpVectorShuffle.
-    ///    In this case the definition's DefInfo#requires_named_const_def property
+    ///    In this case the definition's DefInfo#requires_named_let_def property
     ///    is set to true.
     ///  - When a definition and at least one of its uses are not in the
     ///    same structured construct.
-    ///    In this case the definition's DefInfo#requires_named_const_def property
+    ///    In this case the definition's DefInfo#requires_named_let_def property
     ///    is set to true.
     ///  - When a definition is in a construct that does not enclose all the
-    ///    uses.  In this case the definition's DefInfo#requires_hoisted_def
+    ///    uses.  In this case the definition's DefInfo#requires_hoisted_var_def
     ///    property is set to true.
     /// Updates the `def_info_` mapping.
     void FindValuesNeedingNamedOrHoistedDefinition();
