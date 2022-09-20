@@ -23,7 +23,6 @@ if (build_with_chromium) {
     sources = [ "protobufs/tint_ast_fuzzer.proto" ]
     generate_python = false
     use_protobuf_full = true
-    deps = [ "${dawn_root}/generator:remove_stale_autogen_files" ]
   }
 
   source_set("tint_ast_fuzzer") {
