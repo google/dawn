@@ -191,8 +191,8 @@ std::vector<BindGroupLayoutEntry> ExtractAndExpandBglEntries(
     std::vector<BindGroupLayoutEntry> expandedOutput;
 
     // When new bgl entries are created, we use binding numbers larger than
-    // kMaxBindingNumber to ensure there are no collisions.
-    uint32_t nextOpenBindingNumberForNewEntry = kMaxBindingNumber + 1;
+    // kMaxBindingsPerBindGroup to ensure there are no collisions.
+    uint32_t nextOpenBindingNumberForNewEntry = kMaxBindingsPerBindGroup;
     for (uint32_t i = 0; i < descriptor->entryCount; i++) {
         const BindGroupLayoutEntry& entry = descriptor->entries[i];
         const ExternalTextureBindingLayout* externalTextureBindingLayout = nullptr;
@@ -258,9 +258,9 @@ MaybeError ValidateBindGroupLayoutDescriptor(DeviceBase* device,
         const BindGroupLayoutEntry& entry = descriptor->entries[i];
         BindingNumber bindingNumber = BindingNumber(entry.binding);
 
-        DAWN_INVALID_IF(bindingNumber > kMaxBindingNumberTyped,
-                        "Binding number (%u) exceeds the maximum binding number (%u).",
-                        uint32_t(bindingNumber), uint32_t(kMaxBindingNumberTyped));
+        DAWN_INVALID_IF(bindingNumber >= kMaxBindingsPerBindGroupTyped,
+                        "Binding number (%u) exceeds the maxBindingsPerBindGroup limit (%u).",
+                        uint32_t(bindingNumber), kMaxBindingsPerBindGroup);
         DAWN_INVALID_IF(bindingsSet.count(bindingNumber) != 0,
                         "On entries[%u]: binding index (%u) was specified by a previous entry.", i,
                         entry.binding);
