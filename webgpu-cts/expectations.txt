@@ -81,8 +81,6 @@ crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,tex
 ################################################################################
 crbug.com/1343969 [ win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
 crbug.com/1343969 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ RetryOnFailure ]
-crbug.com/1344876 [ ubuntu webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
-crbug.com/1359106 [ ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
 
 ################################################################################
 # copyToTexture failures on Linux
@@ -233,26 +231,6 @@ crbug.com/dawn/1357 webgpu:api,operation,shader_module,compilation_info:offset_a
 # createBuffer_invalid_and_oom failures
 ################################################################################
 crbug.com/dawn/0000 webgpu:api,validation,buffer,create:createBuffer_invalid_and_oom: [ Failure ]
-
-################################################################################
-# timestampWrites not implemented yet
-################################################################################
-crbug.com/dawn/1250 webgpu:api,validation,encoding,beginComputePass:timestampWrites,query_index_count:queryIndex=2 [ Failure ]
-crbug.com/dawn/1250 webgpu:api,validation,encoding,beginComputePass:timestampWrites,query_index_count:queryIndex=3 [ Failure ]
-crbug.com/dawn/1250 webgpu:api,validation,encoding,beginComputePass:timestampWrites,query_set_type:queryTypeA="occlusion";queryTypeB="occlusion" [ Failure ]
-crbug.com/dawn/1250 webgpu:api,validation,encoding,beginComputePass:timestampWrites,query_set_type:queryTypeA="occlusion";queryTypeB="timestamp" [ Failure ]
-crbug.com/dawn/1250 webgpu:api,validation,encoding,beginComputePass:timestampWrites,query_set_type:queryTypeA="timestamp";queryTypeB="occlusion" [ Failure ]
-crbug.com/dawn/1250 webgpu:api,validation,encoding,beginComputePass:timestampWrites,same_location:locationA="beginning";locationB="beginning" [ Failure ]
-crbug.com/dawn/1250 webgpu:api,validation,encoding,beginComputePass:timestampWrites,same_location:locationA="end";locationB="end" [ Failure ]
-crbug.com/dawn/1250 webgpu:api,validation,render_pass,render_pass_descriptor:timestampWrites,query_set_type:queryTypeA="occlusion";queryTypeB="occlusion" [ Failure ]
-crbug.com/dawn/1250 webgpu:api,validation,render_pass,render_pass_descriptor:timestampWrites,query_set_type:queryTypeA="occlusion";queryTypeB="timestamp" [ Failure ]
-crbug.com/dawn/1250 webgpu:api,validation,render_pass,render_pass_descriptor:timestampWrites,query_set_type:queryTypeA="timestamp";queryTypeB="occlusion" [ Failure ]
-crbug.com/dawn/1250 webgpu:api,validation,render_pass,render_pass_descriptor:timestampWrite,query_index:queryIndex=2 [ Failure ]
-crbug.com/dawn/1250 webgpu:api,validation,render_pass,render_pass_descriptor:timestampWrite,query_index:queryIndex=3 [ Failure ]
-crbug.com/dawn/1250 webgpu:api,validation,render_pass,render_pass_descriptor:timestampWrite,same_query_index:queryIndexA=0;queryIndexB=0 [ Failure ]
-crbug.com/dawn/1250 webgpu:api,validation,render_pass,render_pass_descriptor:timestampWrite,same_query_index:queryIndexA=1;queryIndexB=1 [ Failure ]
-crbug.com/dawn/1250 webgpu:api,validation,render_pass,render_pass_descriptor:timestamp_writes_location:locationA="beginning";locationB="beginning" [ Failure ]
-crbug.com/dawn/1250 webgpu:api,validation,render_pass,render_pass_descriptor:timestamp_writes_location:locationA="end";locationB="end" [ Failure ]
 
 ################################################################################
 # atan2 shader execution failures
