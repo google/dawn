@@ -347,11 +347,7 @@ auto GenerateParams() {
             D3D12Backend(),
             MetalBackend(),
             VulkanBackend(),
-            // TODO(crbug.com/dawn/942)
-            // There was a compiler error: Buffer block cannot be expressed as any of std430,
-            // std140, scalar, even with enhanced layouts. You can try flattening this block to
-            // support a more flexible layout.
-            // OpenGLBackend(),
+            OpenGLBackend(),
             OpenGLESBackend(),
         },
         {StorageClass::Storage, StorageClass::Uniform},
