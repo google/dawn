@@ -273,8 +273,9 @@ bool GeneratorImpl::Generate() {
             },
             [&](const ast::Override*) {
                 // Override is removed with SubstituteOverride
-                TINT_ICE(Writer, diagnostics_)
-                    << "Override should have been removed by the substitute_override transform.";
+                diagnostics_.add_error(diag::System::Writer,
+                                       "override expressions should have been removed with the "
+                                       "SubstituteOverride transform.");
                 return false;
             },
             [&](const ast::Function* func) {

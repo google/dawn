@@ -783,6 +783,25 @@ void main() {
 )");
 }
 
+TEST_F(GlslGeneratorImplTest_Function,
+       Emit_Attribute_EntryPoint_Compute_WithWorkgroup_OverridableConst) {
+    Override("width", ty.i32(), Construct(ty.i32(), 2_i), Id(7_u));
+    Override("height", ty.i32(), Construct(ty.i32(), 3_i), Id(8_u));
+    Override("depth", ty.i32(), Construct(ty.i32(), 4_i), Id(9_u));
+    Func("main", utils::Empty, ty.void_(), {},
+         utils::Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize("width", "height", "depth"),
+         });
+
+    GeneratorImpl& gen = Build();
+
+    EXPECT_FALSE(gen.Generate()) << gen.error();
+    EXPECT_EQ(
+        gen.error(),
+        R"(error: override expressions should have been removed with the SubstituteOverride transform)");
+}
+
 TEST_F(GlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {
     Func("my_func", utils::Vector{Param("a", ty.array<f32, 5>())}, ty.void_(),
          utils::Vector{

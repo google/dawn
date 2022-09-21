@@ -102,7 +102,6 @@ namespace tint::writer::glsl {
 namespace {
 
 const char kTempNamePrefix[] = "tint_tmp";
-const char kSpecConstantPrefix[] = "WGSL_SPEC_CONSTANT_";
 
 bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
     return IsAnyOf<ast::BreakStatement, ast::FallthroughStatement>(stmts->Last());
@@ -1886,8 +1885,9 @@ bool GeneratorImpl::EmitGlobalVariable(const ast::Variable* global) {
         [&](const ast::Let* let) { return EmitProgramConstVariable(let); },
         [&](const ast::Override*) {
             // Override is removed with SubstituteOverride
-            TINT_ICE(Writer, diagnostics_)
-                << "Override should have been removed by the substitute_override transform.";
+            diagnostics_.add_error(diag::System::Writer,
+                                   "override expressions should have been removed with the "
+                                   "SubstituteOverride transform");
             return false;
         },
         [&](const ast::Const*) {
@@ -2104,16 +2104,14 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
             }
             out << "local_size_" << (i == 0 ? "x" : i == 1 ? "y" : "z") << " = ";
 
-            if (wgsize[i].overridable_const) {
-                auto* global = builder_.Sem().Get<sem::GlobalVariable>(wgsize[i].overridable_const);
-                if (!global->Declaration()->Is<ast::Override>()) {
-                    TINT_ICE(Writer, builder_.Diagnostics())
-                        << "expected a pipeline-overridable constant";
-                }
-                out << kSpecConstantPrefix << global->OverrideId().value;
-            } else {
-                out << std::to_string(wgsize[i].value);
+            if (!wgsize[i].has_value()) {
+                diagnostics_.add_error(
+                    diag::System::Writer,
+                    "override expressions should have been removed with the SubstituteOverride "
+                    "transform");
+                return false;
             }
+            out << std::to_string(wgsize[i].value());
         }
         out << ") in;";
     }

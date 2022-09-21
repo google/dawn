@@ -149,6 +149,41 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_Const) {
 )");
 }
 
+TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_OverridableConst) {
+    Override("width", ty.i32(), Construct(ty.i32(), 2_i), Id(7_u));
+    Override("height", ty.i32(), Construct(ty.i32(), 3_i), Id(8_u));
+    Override("depth", ty.i32(), Construct(ty.i32(), 4_i), Id(9_u));
+    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
+                      utils::Vector{
+                          WorkgroupSize("width", "height", "depth"),
+                          Stage(ast::PipelineStage::kCompute),
+                      });
+
+    spirv::Builder& b = Build();
+
+    EXPECT_FALSE(b.GenerateExecutionModes(func, 3)) << b.error();
+    EXPECT_EQ(
+        b.error(),
+        R"(override expressions should have been removed with the SubstituteOverride transform)");
+}
+
+TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndConst) {
+    Override("height", ty.i32(), Construct(ty.i32(), 2_i), Id(7_u));
+    GlobalConst("depth", ty.i32(), Construct(ty.i32(), 3_i));
+    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
+                      utils::Vector{
+                          WorkgroupSize(4_i, "height", "depth"),
+                          Stage(ast::PipelineStage::kCompute),
+                      });
+
+    spirv::Builder& b = Build();
+
+    EXPECT_FALSE(b.GenerateExecutionModes(func, 3)) << b.error();
+    EXPECT_EQ(
+        b.error(),
+        R"(override expressions should have been removed with the SubstituteOverride transform)");
+}
+
 TEST_F(BuilderTest, Decoration_ExecutionMode_MultipleFragment) {
     auto* func1 = Func("main1", utils::Empty, ty.void_(), utils::Empty,
                        utils::Vector{

@@ -506,13 +506,17 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
     } else if (func->PipelineStage() == ast::PipelineStage::kCompute) {
         auto& wgsize = func_sem->WorkgroupSize();
 
-        // SubstituteOverride replaced all overrides with constants.
-        uint32_t x = wgsize[0].value;
-        uint32_t y = wgsize[1].value;
-        uint32_t z = wgsize[2].value;
-        push_execution_mode(spv::Op::OpExecutionMode,
-                            {Operand(id), U32Operand(SpvExecutionModeLocalSize), Operand(x),
-                             Operand(y), Operand(z)});
+        // Check if the workgroup_size uses pipeline-overridable constants.
+        if (!wgsize[0].has_value() || !wgsize[1].has_value() || !wgsize[2].has_value()) {
+            error_ =
+                "override expressions should have been removed with the SubstituteOverride "
+                "transform";
+            return false;
+        }
+        push_execution_mode(
+            spv::Op::OpExecutionMode,
+            {Operand(id), U32Operand(SpvExecutionModeLocalSize),  //
+             Operand(wgsize[0].value()), Operand(wgsize[1].value()), Operand(wgsize[2].value())});
     }
 
     for (auto builtin : func_sem->TransitivelyReferencedBuiltinVariables()) {

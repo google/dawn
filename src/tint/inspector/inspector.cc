@@ -148,9 +148,9 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
             entry_point.stage = PipelineStage::kCompute;
 
             auto wgsize = sem->WorkgroupSize();
-            if (!wgsize[0].overridable_const && !wgsize[1].overridable_const &&
-                !wgsize[2].overridable_const) {
-                entry_point.workgroup_size = {wgsize[0].value, wgsize[1].value, wgsize[2].value};
+            if (wgsize[0].has_value() && wgsize[1].has_value() && wgsize[2].has_value()) {
+                entry_point.workgroup_size = {wgsize[0].value(), wgsize[1].value(),
+                                              wgsize[2].value()};
             }
             break;
         }
@@ -849,19 +849,18 @@ void Inspector::GenerateSamplerTargets() {
         auto* t = c->args[static_cast<size_t>(texture_index)];
         auto* s = c->args[static_cast<size_t>(sampler_index)];
 
-        GetOriginatingResources(
-            std::array<const ast::Expression*, 2>{t, s},
-            [&](std::array<const sem::GlobalVariable*, 2> globals) {
-                auto texture_binding_point = globals[0]->BindingPoint();
-                auto sampler_binding_point = globals[1]->BindingPoint();
+        GetOriginatingResources(std::array<const ast::Expression*, 2>{t, s},
+                                [&](std::array<const sem::GlobalVariable*, 2> globals) {
+                                    auto texture_binding_point = globals[0]->BindingPoint();
+                                    auto sampler_binding_point = globals[1]->BindingPoint();
 
-                for (auto* entry_point : entry_points) {
-                    const auto& ep_name =
-                        program_->Symbols().NameFor(entry_point->Declaration()->symbol);
-                    (*sampler_targets_)[ep_name].Add(
-                        {sampler_binding_point, texture_binding_point});
-                }
-            });
+                                    for (auto* entry_point : entry_points) {
+                                        const auto& ep_name = program_->Symbols().NameFor(
+                                            entry_point->Declaration()->symbol);
+                                        (*sampler_targets_)[ep_name].Add(
+                                            {sampler_binding_point, texture_binding_point});
+                                    }
+                                });
     }
 }
 

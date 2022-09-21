@@ -39,18 +39,10 @@ class Variable;
 
 namespace tint::sem {
 
-/// WorkgroupDimension describes the size of a single dimension of an entry
-/// point's workgroup size.
-struct WorkgroupDimension {
-    /// The size of this dimension.
-    uint32_t value;
-    /// A pipeline-overridable constant that overrides the size, or nullptr if
-    /// this dimension is not overridable.
-    const ast::Variable* overridable_const = nullptr;
-};
-
 /// WorkgroupSize is a three-dimensional array of WorkgroupDimensions.
-using WorkgroupSize = std::array<WorkgroupDimension, 3>;
+/// Each dimension is a std::optional as a workgroup size can be a constant or override expression.
+/// Override expressions are not known at compilation time, so these will be std::nullopt.
+using WorkgroupSize = std::array<std::optional<uint32_t>, 3>;
 
 /// Function holds the semantic information for function nodes.
 class Function final : public Castable<Function, CallTarget> {

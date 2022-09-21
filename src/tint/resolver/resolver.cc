@@ -1050,8 +1050,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
     // Set work-group size defaults.
     sem::WorkgroupSize ws;
     for (size_t i = 0; i < 3; i++) {
-        ws[i].value = 1;
-        ws[i].overridable_const = nullptr;
+        ws[i] = 1;
     }
 
     auto* attr = ast::GetAttribute<ast::WorkgroupAttribute>(func->attributes);
@@ -1064,7 +1063,7 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
     utils::Vector<const sem::Type*, 3> arg_tys;
 
     constexpr const char* kErrBadExpr =
-        "workgroup_size argument must be either a literal, constant, or overridable of type "
+        "workgroup_size argument must be a constant or override expression of type "
         "abstract-integer, i32 or u32";
 
     for (size_t i = 0; i < 3; i++) {
@@ -1080,6 +1079,12 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
         }
         auto* ty = expr->Type();
         if (!ty->IsAnyOf<sem::I32, sem::U32, sem::AbstractInt>()) {
+            AddError(kErrBadExpr, value->source);
+            return false;
+        }
+
+        if (expr->Stage() != sem::EvaluationStage::kConstant &&
+            expr->Stage() != sem::EvaluationStage::kOverride) {
             AddError(kErrBadExpr, value->source);
             return false;
         }
@@ -1105,47 +1110,15 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
         if (!materialized) {
             return false;
         }
-
-        const sem::Constant* value = nullptr;
-
-        if (auto* user = args[i]->As<sem::VariableUser>()) {
-            // We have an variable of a module-scope constant.
-            auto* decl = user->Variable()->Declaration();
-            if (!decl->IsAnyOf<ast::Const, ast::Override>()) {
-                AddError(kErrBadExpr, values[i]->source);
+        if (auto* value = materialized->ConstantValue()) {
+            if (value->As<AInt>() < 1) {
+                AddError("workgroup_size argument must be at least 1", values[i]->source);
                 return false;
             }
-            // Capture the constant if it is pipeline-overridable.
-            if (decl->Is<ast::Override>()) {
-                ws[i].overridable_const = decl;
-            }
-
-            if (decl->constructor) {
-                value = sem_.Get(decl->constructor)->ConstantValue();
-            } else {
-                // No constructor means this value must be overriden by the user.
-                ws[i].value = 0;
-                continue;
-            }
-        } else if (values[i]->Is<ast::LiteralExpression>() || args[i]->ConstantValue()) {
-            value = materialized->ConstantValue();
+            ws[i] = value->As<uint32_t>();
         } else {
-            AddError(kErrBadExpr, values[i]->source);
-            return false;
+            ws[i] = std::nullopt;
         }
-
-        if (!value) {
-            TINT_ICE(Resolver, diagnostics_)
-                << "could not resolve constant workgroup_size constant value";
-            continue;
-        }
-        // validator_.Validate and set the default value for this dimension.
-        if (value->As<AInt>() < 1) {
-            AddError("workgroup_size argument must be at least 1", values[i]->source);
-            return false;
-        }
-
-        ws[i].value = value->As<uint32_t>();
     }
 
     current_function_->SetWorkgroupSize(std::move(ws));

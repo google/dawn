@@ -468,7 +468,7 @@ TEST_F(ResolverFunctionValidationTest, FunctionParamsConst) {
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_ConstU32) {
     // const x = 4u;
-    // const x = 8u;
+    // const y = 8u;
     // @compute @workgroup_size(x, y, 16u)
     // fn main() {}
     auto* x = GlobalConst("x", ty.u32(), Expr(4_u));
@@ -489,8 +489,27 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_ConstU32) {
     ASSERT_NE(sem_x, nullptr);
     ASSERT_NE(sem_y, nullptr);
 
+    EXPECT_EQ(sem_func->WorkgroupSize(), (sem::WorkgroupSize{4u, 8u, 16u}));
+
     EXPECT_TRUE(sem_func->DirectlyReferencedGlobals().Contains(sem_x));
     EXPECT_TRUE(sem_func->DirectlyReferencedGlobals().Contains(sem_y));
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Cast) {
+    // @compute @workgroup_size(i32(5))
+    // fn main() {}
+    auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
+                      utils::Vector{
+                          Stage(ast::PipelineStage::kCompute),
+                          WorkgroupSize(Construct(Source{{12, 34}}, ty.i32(), 5_a)),
+                      });
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem_func = Sem().Get(func);
+
+    ASSERT_NE(sem_func, nullptr);
+    EXPECT_EQ(sem_func->WorkgroupSize(), (sem::WorkgroupSize{5u, 1u, 1u}));
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_GoodType_I32) {
@@ -651,9 +670,10 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_BadType) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size argument must be either a literal, constant, or "
-              "overridable of type abstract-integer, i32 or u32");
+    EXPECT_EQ(
+        r()->error(),
+        "12:34 error: workgroup_size argument must be a constant or override expression of type "
+        "abstract-integer, i32 or u32");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_Negative) {
@@ -696,9 +716,10 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_BadType) {
          });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size argument must be either a literal, constant, or "
-              "overridable of type abstract-integer, i32 or u32");
+    EXPECT_EQ(
+        r()->error(),
+        "12:34 error: workgroup_size argument must be a constant or override expression of type "
+        "abstract-integer, i32 or u32");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_Negative) {
@@ -759,8 +780,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_NonConst) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size argument must be either a literal, constant, or "
-              "overridable of type abstract-integer, i32 or u32");
+              "12:34 error: workgroup_size argument must be a constant or override expression of "
+              "type abstract-integer, i32 or u32");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_x) {
@@ -774,8 +795,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_x) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size argument must be either a literal, constant, or "
-              "overridable of type abstract-integer, i32 or u32");
+              "12:34 error: workgroup_size argument must be a constant or override expression of "
+              "type abstract-integer, i32 or u32");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_y) {
@@ -789,8 +810,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_y) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size argument must be either a literal, constant, or "
-              "overridable of type abstract-integer, i32 or u32");
+              "12:34 error: workgroup_size argument must be a constant or override expression of "
+              "type abstract-integer, i32 or u32");
 }
 
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_z) {
@@ -804,8 +825,8 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_z) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size argument must be either a literal, constant, or "
-              "overridable of type abstract-integer, i32 or u32");
+              "12:34 error: workgroup_size argument must be a constant or override expression of "
+              "type abstract-integer, i32 or u32");
 }
 
 TEST_F(ResolverFunctionValidationTest, ReturnIsConstructible_NonPlain) {

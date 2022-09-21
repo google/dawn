@@ -993,12 +993,9 @@ TEST_F(ResolverTest, Function_WorkgroupSize_NotSet) {
     auto* func_sem = Sem().Get(func);
     ASSERT_NE(func_sem, nullptr);
 
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 1u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 1u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 1u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, nullptr);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, nullptr);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, nullptr);
+    EXPECT_EQ(func_sem->WorkgroupSize()[0], 1u);
+    EXPECT_EQ(func_sem->WorkgroupSize()[1], 1u);
+    EXPECT_EQ(func_sem->WorkgroupSize()[2], 1u);
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_Literals) {
@@ -1015,12 +1012,9 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Literals) {
     auto* func_sem = Sem().Get(func);
     ASSERT_NE(func_sem, nullptr);
 
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 8u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 2u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 3u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, nullptr);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, nullptr);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, nullptr);
+    EXPECT_EQ(func_sem->WorkgroupSize()[0], 8u);
+    EXPECT_EQ(func_sem->WorkgroupSize()[1], 2u);
+    EXPECT_EQ(func_sem->WorkgroupSize()[2], 3u);
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_ViaConst) {
@@ -1043,12 +1037,9 @@ TEST_F(ResolverTest, Function_WorkgroupSize_ViaConst) {
     auto* func_sem = Sem().Get(func);
     ASSERT_NE(func_sem, nullptr);
 
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 16u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 8u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 2u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, nullptr);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, nullptr);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, nullptr);
+    EXPECT_EQ(func_sem->WorkgroupSize()[0], 16u);
+    EXPECT_EQ(func_sem->WorkgroupSize()[1], 8u);
+    EXPECT_EQ(func_sem->WorkgroupSize()[2], 2u);
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_ViaConst_NestedInitializer) {
@@ -1071,12 +1062,9 @@ TEST_F(ResolverTest, Function_WorkgroupSize_ViaConst_NestedInitializer) {
     auto* func_sem = Sem().Get(func);
     ASSERT_NE(func_sem, nullptr);
 
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 8u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 4u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 1u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, nullptr);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, nullptr);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, nullptr);
+    EXPECT_EQ(func_sem->WorkgroupSize()[0], 8u);
+    EXPECT_EQ(func_sem->WorkgroupSize()[1], 4u);
+    EXPECT_EQ(func_sem->WorkgroupSize()[2], 1u);
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts) {
@@ -1085,9 +1073,9 @@ TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts) {
     // @id(2) override depth = 2i;
     // @compute @workgroup_size(width, height, depth)
     // fn main() {}
-    auto* width = Override("width", ty.i32(), Expr(16_i), Id(0_a));
-    auto* height = Override("height", ty.i32(), Expr(8_i), Id(1_a));
-    auto* depth = Override("depth", ty.i32(), Expr(2_i), Id(2_a));
+    Override("width", ty.i32(), Expr(16_i), Id(0_a));
+    Override("height", ty.i32(), Expr(8_i), Id(1_a));
+    Override("depth", ty.i32(), Expr(2_i), Id(2_a));
     auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
                       utils::Vector{
                           Stage(ast::PipelineStage::kCompute),
@@ -1099,12 +1087,9 @@ TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts) {
     auto* func_sem = Sem().Get(func);
     ASSERT_NE(func_sem, nullptr);
 
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 16u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 8u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 2u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, width);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, height);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, depth);
+    EXPECT_EQ(func_sem->WorkgroupSize()[0], std::nullopt);
+    EXPECT_EQ(func_sem->WorkgroupSize()[1], std::nullopt);
+    EXPECT_EQ(func_sem->WorkgroupSize()[2], std::nullopt);
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts_NoInit) {
@@ -1113,9 +1098,9 @@ TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts_NoInit) {
     // @id(2) override depth : i32;
     // @compute @workgroup_size(width, height, depth)
     // fn main() {}
-    auto* width = Override("width", ty.i32(), Id(0_a));
-    auto* height = Override("height", ty.i32(), Id(1_a));
-    auto* depth = Override("depth", ty.i32(), Id(2_a));
+    Override("width", ty.i32(), Id(0_a));
+    Override("height", ty.i32(), Id(1_a));
+    Override("depth", ty.i32(), Id(2_a));
     auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
                       utils::Vector{
                           Stage(ast::PipelineStage::kCompute),
@@ -1127,12 +1112,9 @@ TEST_F(ResolverTest, Function_WorkgroupSize_OverridableConsts_NoInit) {
     auto* func_sem = Sem().Get(func);
     ASSERT_NE(func_sem, nullptr);
 
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 0u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 0u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 0u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, width);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, height);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, depth);
+    EXPECT_EQ(func_sem->WorkgroupSize()[0], std::nullopt);
+    EXPECT_EQ(func_sem->WorkgroupSize()[1], std::nullopt);
+    EXPECT_EQ(func_sem->WorkgroupSize()[2], std::nullopt);
 }
 
 TEST_F(ResolverTest, Function_WorkgroupSize_Mixed) {
@@ -1140,7 +1122,7 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Mixed) {
     // const depth = 3i;
     // @compute @workgroup_size(8, height, depth)
     // fn main() {}
-    auto* height = Override("height", ty.i32(), Expr(2_i), Id(0_a));
+    Override("height", ty.i32(), Expr(2_i), Id(0_a));
     GlobalConst("depth", ty.i32(), Expr(3_i));
     auto* func = Func("main", utils::Empty, ty.void_(), utils::Empty,
                       utils::Vector{
@@ -1153,12 +1135,9 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Mixed) {
     auto* func_sem = Sem().Get(func);
     ASSERT_NE(func_sem, nullptr);
 
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].value, 8u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].value, 2u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].value, 3u);
-    EXPECT_EQ(func_sem->WorkgroupSize()[0].overridable_const, nullptr);
-    EXPECT_EQ(func_sem->WorkgroupSize()[1].overridable_const, height);
-    EXPECT_EQ(func_sem->WorkgroupSize()[2].overridable_const, nullptr);
+    EXPECT_EQ(func_sem->WorkgroupSize()[0], 8u);
+    EXPECT_EQ(func_sem->WorkgroupSize()[1], std::nullopt);
+    EXPECT_EQ(func_sem->WorkgroupSize()[2], 3u);
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
