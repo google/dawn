@@ -32,7 +32,12 @@ if (build_with_chromium) {
 dawn_is_winuwp = is_win && target_os == "winuwp"
 
 declare_args() {
-  dawn_use_angle = true
+  # TODO(dawn:1545): Re-enable dawn_use_angle on Android. In non-component
+  # builds, this is adding a dependency on ANGLE's libEGL.so and
+  # libGLESv2.so, apparently without regard for the use_static_angle=true
+  # GN variable. Chromium's linker on Android disallows production of more
+  # than one shared object per target (?).
+  dawn_use_angle = !is_android
 
   # Enables SwiftShader as the fallback adapter. Requires dawn_swiftshader_dir
   # to be set to take effect.
