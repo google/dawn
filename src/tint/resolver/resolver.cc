@@ -2280,7 +2280,7 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
             // Note: The spec is currently vague around the rules here. See
             // https://github.com/gpuweb/gpuweb/issues/3081. Remove this comment when resolved.
             std::string desc = "var '" + builder_->Symbols().NameFor(symbol) + "' ";
-            AddError(desc + "cannot not be referenced at module-scope", expr->source);
+            AddError(desc + "cannot be referenced at module-scope", expr->source);
             AddNote(desc + "declared here", variable->Declaration()->source);
             return nullptr;
         }

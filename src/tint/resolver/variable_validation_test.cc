@@ -65,7 +65,7 @@ TEST_F(ResolverVariableValidationTest, GlobalVarUsedAtModuleScope) {
     GlobalVar("b", ty.i32(), ast::StorageClass::kPrivate, Expr(Source{{56, 78}}, "a"));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(56:78 error: var 'a' cannot not be referenced at module-scope
+    EXPECT_EQ(r()->error(), R"(56:78 error: var 'a' cannot be referenced at module-scope
 12:34 note: var 'a' declared here)");
 }
 

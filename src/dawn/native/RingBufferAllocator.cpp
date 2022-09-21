@@ -99,7 +99,7 @@ uint64_t RingBufferAllocator::Allocate(uint64_t allocationSize, ExecutionSerial 
             mCurrentRequestSize += allocationSize;
         } else if (allocationSize <= mUsedStartOffset) {  // Try to sub-alloc at front.
             // Count the space at the end so that a subsequent
-            // sub-alloc cannot not succeed when the buffer is full.
+            // sub-alloc cannot fail when the buffer is full.
             const uint64_t requestSize = (mMaxBlockSize - mUsedEndOffset) + allocationSize;
 
             startOffset = 0;
