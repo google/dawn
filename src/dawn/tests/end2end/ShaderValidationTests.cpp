@@ -37,17 +37,6 @@ override z: u32 = 1u;
 })");
     }
 
-    wgpu::ShaderModule SetUpShaderWithZeroDefaultValueConstants() {
-        return utils::CreateShaderModule(device, R"(
-override x: u32 = 0u;
-override y: u32 = 0u;
-override z: u32 = 0u;
-
-@compute @workgroup_size(x, y, z) fn main() {
-    _ = 0u;
-})");
-    }
-
     wgpu::ShaderModule SetUpShaderWithOutOfLimitsDefaultValueConstants() {
         return utils::CreateShaderModule(device, R"(
 override x: u32 = 1u;
@@ -235,12 +224,6 @@ TEST_P(WorkgroupSizeValidationTest, OverridesWithValidDefault) {
         // Valid
         TestInitializedWithValidValue(module);
     }
-}
-
-// Test workgroup size validation with zero as the overrides default values.
-TEST_P(WorkgroupSizeValidationTest, OverridesWithZeroDefault) {
-    // Error: zero is detected as invalid at shader creation time
-    ASSERT_DEVICE_ERROR(SetUpShaderWithZeroDefaultValueConstants());
 }
 
 // Test workgroup size validation with out-of-limits overrides default values.
