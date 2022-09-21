@@ -267,6 +267,9 @@ bool IsTextureSubresourceInitialized(WGPUTexture texture,
                                      uint32_t layerCount,
                                      WGPUTextureAspect cAspect) {
     TextureBase* textureBase = FromAPI(texture);
+    if (textureBase->IsError()) {
+        return false;
+    }
 
     Aspect aspect =
         ConvertAspect(textureBase->GetFormat(), static_cast<wgpu::TextureAspect>(cAspect));

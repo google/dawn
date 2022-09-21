@@ -1703,6 +1703,24 @@ TEST_P(TextureZeroInitTest, WriteTextureHalfAtMipLevel) {
                       kMipLevel);
 }
 
+// Test that error textures are always considered uninitialized.
+TEST_P(TextureZeroInitTest, ErrorTextureIsUninitialized) {
+    wgpu::TextureDescriptor descriptor =
+        CreateTextureDescriptor(1, 1, wgpu::TextureUsage::CopyDst, kColorFormat);
+
+    // Test CreateErrorTexture.
+    wgpu::Texture texture = device.CreateErrorTexture(&descriptor);
+    EXPECT_FALSE(dawn::native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, 0, 1));
+
+    // Test CreateTexture with an error descriptor.
+    if (!HasToggleEnabled("skip_validation")) {
+        descriptor = CreateTextureDescriptor(1, 1, wgpu::TextureUsage::CopyDst,
+                                             static_cast<wgpu::TextureFormat>(-4));
+        ASSERT_DEVICE_ERROR(texture = device.CreateTexture(&descriptor));
+        EXPECT_FALSE(dawn::native::IsTextureSubresourceInitialized(texture.Get(), 0, 1, 0, 1));
+    }
+}
+
 DAWN_INSTANTIATE_TEST(TextureZeroInitTest,
                       D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"}),
                       D3D12Backend({"nonzero_clear_resources_on_creation_for_testing"},
