@@ -9,13 +9,14 @@ require (
 	github.com/google/go-cmp v0.5.6
 	github.com/mattn/go-colorable v0.1.9
 	github.com/mattn/go-isatty v0.0.14
-	github.com/sergi/go-diff v1.2.0
+	github.com/sergi/go-diff v1.1.0
 	github.com/shirou/gopsutil v3.21.11+incompatible
 	github.com/tidwall/jsonc v0.3.2
 	go.chromium.org/luci v0.0.0-20220412023008-ab2409fe739a
 	golang.org/x/net v0.0.0-20220403103023-749bd193bc2b
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	google.golang.org/api v0.63.0
+	google.golang.org/grpc v1.44.0
 	google.golang.org/protobuf v1.28.0
 )
 
@@ -44,5 +45,6 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20220216160803-4663080d8bc8 // indirect
-	google.golang.org/grpc v1.44.0 // indirect
 )
+
+exclude github.com/sergi/go-diff v1.2.0
