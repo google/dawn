@@ -1,0 +1,49 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
+struct tint_symbol_3 {
+  /* 0x0000 */ tint_array<float, 1> arr;
+};
+
+void vector() {
+  int const idx = 3;
+  int const x = int2(1, 2)[idx];
+}
+
+void tint_symbol() {
+  int const idx = 4;
+  float2 const x = float2x2(float2(1.0f, 2.0f), float2(3.0f, 4.0f))[idx];
+}
+
+void fixed_size_array() {
+  tint_array<int, 2> const arr = tint_array<int, 2>{1, 2};
+  int const idx = 3;
+  int const x = arr[idx];
+}
+
+void runtime_size_array(const device tint_array<float, 1>* const tint_symbol_1) {
+  int const idx = -1;
+  float const x = (*(tint_symbol_1))[idx];
+}
+
+kernel void f(const device tint_symbol_3* tint_symbol_2 [[buffer(0)]]) {
+  vector();
+  tint_symbol();
+  fixed_size_array();
+  runtime_size_array(&((*(tint_symbol_2)).arr));
+  return;
+}
+

@@ -1,0 +1,97 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 60
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %f "f"
+               OpExecutionMode %f LocalSize 1 1 1
+               OpName %rarr_block "rarr_block"
+               OpMemberName %rarr_block 0 "inner"
+               OpName %rarr "rarr"
+               OpName %vector "vector"
+               OpName %matrix "matrix"
+               OpName %var_for_index "var_for_index"
+               OpName %fixed_size_array "fixed_size_array"
+               OpName %var_for_index_1 "var_for_index_1"
+               OpName %runtime_size_array "runtime_size_array"
+               OpName %f "f"
+               OpDecorate %rarr_block Block
+               OpMemberDecorate %rarr_block 0 Offset 0
+               OpDecorate %_runtimearr_float ArrayStride 4
+               OpDecorate %rarr NonWritable
+               OpDecorate %rarr DescriptorSet 0
+               OpDecorate %rarr Binding 0
+               OpDecorate %_arr_int_uint_2 ArrayStride 4
+      %float = OpTypeFloat 32
+%_runtimearr_float = OpTypeRuntimeArray %float
+ %rarr_block = OpTypeStruct %_runtimearr_float
+%_ptr_StorageBuffer_rarr_block = OpTypePointer StorageBuffer %rarr_block
+       %rarr = OpVariable %_ptr_StorageBuffer_rarr_block StorageBuffer
+       %void = OpTypeVoid
+          %6 = OpTypeFunction %void
+        %int = OpTypeInt 32 1
+      %int_3 = OpConstant %int 3
+      %v2int = OpTypeVector %int 2
+      %int_1 = OpConstant %int 1
+      %int_2 = OpConstant %int 2
+         %15 = OpConstantComposite %v2int %int_1 %int_2
+      %int_4 = OpConstant %int 4
+    %v2float = OpTypeVector %float 2
+%mat2v2float = OpTypeMatrix %v2float 2
+    %float_1 = OpConstant %float 1
+    %float_2 = OpConstant %float 2
+         %24 = OpConstantComposite %v2float %float_1 %float_2
+    %float_3 = OpConstant %float 3
+    %float_4 = OpConstant %float 4
+         %27 = OpConstantComposite %v2float %float_3 %float_4
+         %28 = OpConstantComposite %mat2v2float %24 %27
+%_ptr_Function_mat2v2float = OpTypePointer Function %mat2v2float
+         %31 = OpConstantNull %mat2v2float
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+       %uint = OpTypeInt 32 0
+     %uint_2 = OpConstant %uint 2
+%_arr_int_uint_2 = OpTypeArray %int %uint_2
+         %40 = OpConstantComposite %_arr_int_uint_2 %int_1 %int_2
+%_ptr_Function__arr_int_uint_2 = OpTypePointer Function %_arr_int_uint_2
+         %43 = OpConstantNull %_arr_int_uint_2
+%_ptr_Function_int = OpTypePointer Function %int
+     %int_n1 = OpConstant %int -1
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
+     %vector = OpFunction %void None %6
+          %9 = OpLabel
+         %16 = OpVectorExtractDynamic %int %15 %int_3
+               OpReturn
+               OpFunctionEnd
+     %matrix = OpFunction %void None %6
+         %18 = OpLabel
+%var_for_index = OpVariable %_ptr_Function_mat2v2float Function %31
+               OpStore %var_for_index %28
+         %33 = OpAccessChain %_ptr_Function_v2float %var_for_index %int_4
+         %34 = OpLoad %v2float %33
+               OpReturn
+               OpFunctionEnd
+%fixed_size_array = OpFunction %void None %6
+         %36 = OpLabel
+%var_for_index_1 = OpVariable %_ptr_Function__arr_int_uint_2 Function %43
+               OpStore %var_for_index_1 %40
+         %45 = OpAccessChain %_ptr_Function_int %var_for_index_1 %int_3
+         %46 = OpLoad %int %45
+               OpReturn
+               OpFunctionEnd
+%runtime_size_array = OpFunction %void None %6
+         %48 = OpLabel
+         %52 = OpAccessChain %_ptr_StorageBuffer_float %rarr %uint_0 %int_n1
+         %53 = OpLoad %float %52
+               OpReturn
+               OpFunctionEnd
+          %f = OpFunction %void None %6
+         %55 = OpLabel
+         %56 = OpFunctionCall %void %vector
+         %57 = OpFunctionCall %void %matrix
+         %58 = OpFunctionCall %void %fixed_size_array
+         %59 = OpFunctionCall %void %runtime_size_array
+               OpReturn
+               OpFunctionEnd
