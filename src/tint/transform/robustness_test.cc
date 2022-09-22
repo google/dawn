@@ -1316,5 +1316,23 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(RobustnessTest, WorkgroupOverrideCount) {
+    auto* src = R"(
+override N = 123;
+var<workgroup> w : array<f32, N>;
+
+fn f() {
+  var b : f32 = w[1i];
+}
+)";
+
+    auto* expect = R"(error: array size is an override-expression, when expected a constant-expression.
+Was the SubstituteOverride transform run?)";
+
+    auto got = Run<Robustness>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::transform

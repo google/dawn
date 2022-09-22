@@ -65,7 +65,8 @@ TEST_F(CreateASTTypeForTest, Vector) {
 
 TEST_F(CreateASTTypeForTest, ArrayImplicitStride) {
     auto* arr = create([](ProgramBuilder& b) {
-        return b.create<sem::Array>(b.create<sem::F32>(), 2u, 4u, 4u, 32u, 32u);
+        return b.create<sem::Array>(b.create<sem::F32>(), sem::ConstantArrayCount{2u}, 4u, 4u, 32u,
+                                    32u);
     });
     ASSERT_TRUE(arr->Is<ast::Array>());
     ASSERT_TRUE(arr->As<ast::Array>()->type->Is<ast::F32>());
@@ -78,7 +79,8 @@ TEST_F(CreateASTTypeForTest, ArrayImplicitStride) {
 
 TEST_F(CreateASTTypeForTest, ArrayNonImplicitStride) {
     auto* arr = create([](ProgramBuilder& b) {
-        return b.create<sem::Array>(b.create<sem::F32>(), 2u, 4u, 4u, 64u, 32u);
+        return b.create<sem::Array>(b.create<sem::F32>(), sem::ConstantArrayCount{2u}, 4u, 4u, 64u,
+                                    32u);
     });
     ASSERT_TRUE(arr->Is<ast::Array>());
     ASSERT_TRUE(arr->As<ast::Array>()->type->Is<ast::F32>());

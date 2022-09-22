@@ -432,7 +432,7 @@ TEST_F(ResolverTest, ArraySize_UnsignedLiteral) {
     auto* ref = TypeOf(a)->As<sem::Reference>();
     ASSERT_NE(ref, nullptr);
     auto* ary = ref->StoreType()->As<sem::Array>();
-    EXPECT_EQ(ary->Count(), 10u);
+    EXPECT_EQ(ary->Count(), sem::ConstantArrayCount{10u});
 }
 
 TEST_F(ResolverTest, ArraySize_SignedLiteral) {
@@ -445,7 +445,7 @@ TEST_F(ResolverTest, ArraySize_SignedLiteral) {
     auto* ref = TypeOf(a)->As<sem::Reference>();
     ASSERT_NE(ref, nullptr);
     auto* ary = ref->StoreType()->As<sem::Array>();
-    EXPECT_EQ(ary->Count(), 10u);
+    EXPECT_EQ(ary->Count(), sem::ConstantArrayCount{10u});
 }
 
 TEST_F(ResolverTest, ArraySize_UnsignedConst) {
@@ -460,7 +460,7 @@ TEST_F(ResolverTest, ArraySize_UnsignedConst) {
     auto* ref = TypeOf(a)->As<sem::Reference>();
     ASSERT_NE(ref, nullptr);
     auto* ary = ref->StoreType()->As<sem::Array>();
-    EXPECT_EQ(ary->Count(), 10u);
+    EXPECT_EQ(ary->Count(), sem::ConstantArrayCount{10u});
 }
 
 TEST_F(ResolverTest, ArraySize_SignedConst) {
@@ -475,7 +475,51 @@ TEST_F(ResolverTest, ArraySize_SignedConst) {
     auto* ref = TypeOf(a)->As<sem::Reference>();
     ASSERT_NE(ref, nullptr);
     auto* ary = ref->StoreType()->As<sem::Array>();
-    EXPECT_EQ(ary->Count(), 10u);
+    EXPECT_EQ(ary->Count(), sem::ConstantArrayCount{10u});
+}
+
+TEST_F(ResolverTest, ArraySize_Override) {
+    // override size = 0;
+    // var<workgroup> a : array<f32, size>;
+    auto* override = Override("size", Expr(10_i));
+    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kWorkgroup);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(a), nullptr);
+    auto* ref = TypeOf(a)->As<sem::Reference>();
+    ASSERT_NE(ref, nullptr);
+    auto* ary = ref->StoreType()->As<sem::Array>();
+    auto* sem_override = Sem().Get<sem::GlobalVariable>(override);
+    ASSERT_NE(sem_override, nullptr);
+    EXPECT_EQ(ary->Count(), sem::OverrideArrayCount{sem_override});
+}
+
+TEST_F(ResolverTest, ArraySize_Override_Equivalence) {
+    // override size = 0;
+    // var<workgroup> a : array<f32, size>;
+    // var<workgroup> b : array<f32, size>;
+    auto* override = Override("size", Expr(10_i));
+    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kWorkgroup);
+    auto* b = GlobalVar("b", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kWorkgroup);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(a), nullptr);
+    auto* ref_a = TypeOf(a)->As<sem::Reference>();
+    ASSERT_NE(ref_a, nullptr);
+    auto* ary_a = ref_a->StoreType()->As<sem::Array>();
+
+    ASSERT_NE(TypeOf(b), nullptr);
+    auto* ref_b = TypeOf(b)->As<sem::Reference>();
+    ASSERT_NE(ref_b, nullptr);
+    auto* ary_b = ref_b->StoreType()->As<sem::Array>();
+
+    auto* sem_override = Sem().Get<sem::GlobalVariable>(override);
+    ASSERT_NE(sem_override, nullptr);
+    EXPECT_EQ(ary_a->Count(), sem::OverrideArrayCount{sem_override});
+    EXPECT_EQ(ary_b->Count(), sem::OverrideArrayCount{sem_override});
+    EXPECT_EQ(ary_a, ary_b);
 }
 
 TEST_F(ResolverTest, Expr_Bitcast) {

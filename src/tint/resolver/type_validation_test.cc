@@ -310,7 +310,8 @@ TEST_F(ResolverTypeValidationTest, ArraySize_IVecConst) {
 
 TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
     // var<private> a : array<f32, 0x40000000u>;
-    GlobalVar("a", ty.array(Source{{12, 34}}, ty.f32(), 0x40000000_u), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0x40000000_u)),
+              ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array size (0x100000000) must not exceed 0xffffffff bytes");
@@ -318,21 +319,157 @@ TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
 
 TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ExplicitStride) {
     // var<private> a : @stride(8) array<f32, 0x20000000u>;
-    GlobalVar("a", ty.array(Source{{12, 34}}, ty.f32(), 0x20000000_u, 8),
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0x20000000_u), 8),
               ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: array size (0x100000000) must not exceed 0xffffffff bytes");
 }
 
-TEST_F(ResolverTypeValidationTest, ArraySize_Overridable) {
+TEST_F(ResolverTypeValidationTest, ArraySize_Override_PrivateVar) {
     // override size = 10i;
     // var<private> a : array<f32, size>;
     Override("size", Expr(10_i));
-    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.array(Source{{12, 34}}, ty.f32(), "size"), ast::StorageClass::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array size must evaluate to a constant integer expression");
+              "12:34 error: array with an 'override' element count can only be used as the store "
+              "type of a 'var<workgroup>'");
+}
+
+TEST_F(ResolverTypeValidationTest, ArraySize_Override_ComplexExpr) {
+    // override size = 10i;
+    // var<workgroup> a : array<f32, size + 1>;
+    Override("size", Expr(10_i));
+    GlobalVar("a", ty.array(ty.f32(), Add(Source{{12, 34}}, "size", 1_i)),
+              ast::StorageClass::kWorkgroup);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: array size must evaluate to a constant integer expression or override "
+              "variable");
+}
+
+TEST_F(ResolverTypeValidationTest, ArraySize_Override_InArray) {
+    // override size = 10i;
+    // var<workgroup> a : array<array<f32, size>, 4>;
+    Override("size", Expr(10_i));
+    GlobalVar("a", ty.array(ty.array(Source{{12, 34}}, ty.f32(), "size"), 4_a),
+              ast::StorageClass::kWorkgroup);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: array with an 'override' element count can only be used as the store "
+              "type of a 'var<workgroup>'");
+}
+
+TEST_F(ResolverTypeValidationTest, ArraySize_Override_InStruct) {
+    // override size = 10i;
+    // struct S {
+    //   a : array<f32, size>
+    // };
+    Override("size", Expr(10_i));
+    Structure("S", utils::Vector{Member("a", ty.array(Source{{12, 34}}, ty.f32(), "size"))});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: array with an 'override' element count can only be used as the store "
+              "type of a 'var<workgroup>'");
+}
+
+TEST_F(ResolverTypeValidationTest, ArraySize_Override_FunctionVar_Explicit) {
+    // override size = 10i;
+    // fn f() {
+    //   var a : array<f32, size>;
+    // }
+    Override("size", Expr(10_i));
+    Func("f", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(Var("a", ty.array(Source{{12, 34}}, ty.f32(), "size"))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: array with an 'override' element count can only be used as the store "
+              "type of a 'var<workgroup>'");
+}
+
+TEST_F(ResolverTypeValidationTest, ArraySize_Override_FunctionLet_Explicit) {
+    // override size = 10i;
+    // fn f() {
+    //   var a : array<f32, size>;
+    // }
+    Override("size", Expr(10_i));
+    Func("f", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(Var("a", ty.array(Source{{12, 34}}, ty.f32(), "size"))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: array with an 'override' element count can only be used as the store "
+              "type of a 'var<workgroup>'");
+}
+
+TEST_F(ResolverTypeValidationTest, ArraySize_Override_FunctionVar_Implicit) {
+    // override size = 10i;
+    // var<workgroup> w : array<f32, size>;
+    // fn f() {
+    //   var a = w;
+    // }
+    Override("size", Expr(10_i));
+    GlobalVar("w", ty.array(ty.f32(), "size"), ast::StorageClass::kWorkgroup);
+    Func("f", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(Var("a", Expr(Source{{12, 34}}, "w"))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: array with an 'override' element count can only be used as the store "
+              "type of a 'var<workgroup>'");
+}
+
+TEST_F(ResolverTypeValidationTest, ArraySize_Override_FunctionLet_Implicit) {
+    // override size = 10i;
+    // var<workgroup> w : array<f32, size>;
+    // fn f() {
+    //   let a = w;
+    // }
+    Override("size", Expr(10_i));
+    GlobalVar("w", ty.array(ty.f32(), "size"), ast::StorageClass::kWorkgroup);
+    Func("f", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(Let("a", Expr(Source{{12, 34}}, "w"))),
+         });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: array with an 'override' element count can only be used as the store "
+              "type of a 'var<workgroup>'");
+}
+
+TEST_F(ResolverTypeValidationTest, ArraySize_Override_Param) {
+    // override size = 10i;
+    // fn f(a : array<f32, size>) {
+    // }
+    Override("size", Expr(10_i));
+    Func("f", utils::Vector{Param("a", ty.array(Source{{12, 34}}, ty.f32(), "size"))}, ty.void_(),
+         utils::Empty);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: type of function parameter must be constructible");
+}
+
+TEST_F(ResolverTypeValidationTest, ArraySize_Override_ReturnType) {
+    // override size = 10i;
+    // fn f() -> array<f32, size> {
+    // }
+    Override("size", Expr(10_i));
+    Func("f", utils::Empty, ty.array(Source{{12, 34}}, ty.f32(), "size"), utils::Empty);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: function return type must be a constructible type");
+}
+
+TEST_F(ResolverTypeValidationTest, ArraySize_Workgroup_Overridable) {
+    // override size = 10i;
+    // var<workgroup> a : array<f32, size>;
+    Override("size", Expr(10_i));
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")),
+              ast::StorageClass::kWorkgroup);
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_ModuleVar) {
@@ -367,7 +504,8 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FunctionLet) {
     WrapInFunction(size, a);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array size must evaluate to a constant integer expression");
+              "12:34 error: array size must evaluate to a constant integer expression or override "
+              "variable");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_ComplexExpr) {
@@ -477,7 +615,7 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInArray) {
     // };
 
     Structure("Foo", utils::Vector{
-                         Member("rt", ty.array(Source{{12, 34}}, ty.array<f32>(), 4_u)),
+                         Member("rt", ty.array(ty.array(Source{{12, 34}}, ty.f32()), 4_u)),
                      });
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
@@ -491,10 +629,9 @@ TEST_F(ResolverTypeValidationTest, RuntimeArrayInStructInArray) {
     // };
     // var<private> a : array<Foo, 4>;
 
-    auto* foo = Structure("Foo", utils::Vector{
-                                     Member("rt", ty.array<f32>()),
-                                 });
-    GlobalVar("v", ty.array(Source{{12, 34}}, ty.Of(foo), 4_u), ast::StorageClass::kPrivate);
+    Structure("Foo", utils::Vector{Member("rt", ty.array<f32>())});
+    GlobalVar("v", ty.array(ty.type_name(Source{{12, 34}}, "Foo"), 4_u),
+              ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(),
@@ -636,8 +773,8 @@ TEST_F(ResolverTypeValidationTest, AliasRuntimeArrayIsLast_Pass) {
 }
 
 TEST_F(ResolverTypeValidationTest, ArrayOfNonStorableType) {
-    auto* tex_ty = ty.sampled_texture(ast::TextureDimension::k2d, ty.f32());
-    GlobalVar("arr", ty.array(Source{{12, 34}}, tex_ty, 4_i), ast::StorageClass::kPrivate);
+    auto* tex_ty = ty.sampled_texture(Source{{12, 34}}, ast::TextureDimension::k2d, ty.f32());
+    GlobalVar("arr", ty.array(tex_ty, 4_i), ast::StorageClass::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),

@@ -1690,7 +1690,13 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
                 return true;
             }
 
-            for (size_t i = 0; i < a->Count(); i++) {
+            auto count = a->ConstantCount();
+            if (!count) {
+                diagnostics_.add_error(diag::System::Writer, sem::Array::kErrExpectedConstantCount);
+                return false;
+            }
+
+            for (size_t i = 0; i < count; i++) {
                 if (i > 0) {
                     out << ", ";
                 }
@@ -2481,7 +2487,20 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             if (!EmitType(out, arr->ElemType(), "")) {
                 return false;
             }
-            out << ", " << (arr->IsRuntimeSized() ? 1u : arr->Count()) << ">";
+            out << ", ";
+            if (arr->IsRuntimeSized()) {
+                out << "1";
+            } else {
+                auto count = arr->ConstantCount();
+                if (!count) {
+                    diagnostics_.add_error(diag::System::Writer,
+                                           sem::Array::kErrExpectedConstantCount);
+                    return false;
+                }
+
+                out << count.value();
+            }
+            out << ">";
             return true;
         },
         [&](const sem::Bool*) {
@@ -3133,8 +3152,14 @@ GeneratorImpl::SizeAndAlign GeneratorImpl::MslPackedTypeSizeAndAlign(const sem::
                     << "arrays with explicit strides should not exist past the SPIR-V reader";
                 return SizeAndAlign{};
             }
-            auto num_els = std::max<uint32_t>(arr->Count(), 1);
-            return SizeAndAlign{arr->Stride() * num_els, arr->Align()};
+            if (arr->IsRuntimeSized()) {
+                return SizeAndAlign{arr->Stride(), arr->Align()};
+            }
+            if (auto count = arr->ConstantCount()) {
+                return SizeAndAlign{arr->Stride() * count.value(), arr->Align()};
+            }
+            diagnostics_.add_error(diag::System::Writer, sem::Array::kErrExpectedConstantCount);
+            return SizeAndAlign{};
         },
 
         [&](const sem::Struct* str) {

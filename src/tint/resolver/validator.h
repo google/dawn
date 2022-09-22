@@ -128,9 +128,10 @@ class Validator {
 
     /// Validates the array
     /// @param arr the array to validate
-    /// @param source the source of the array
+    /// @param el_source the source of the array element, or the array if the array does not have a
+    ///        locally-declared element AST node.
     /// @returns true on success, false otherwise.
-    bool Array(const sem::Array* arr, const Source& source) const;
+    bool Array(const sem::Array* arr, const Source& el_source) const;
 
     /// Validates an array stride attribute
     /// @param attr the stride attribute to validate
@@ -463,6 +464,16 @@ class Validator {
                              ast::DisabledValidation validation) const;
 
   private:
+    /// @param ty the type to check
+    /// @returns true if @p ty is an array with an `override` expression element count, otherwise
+    ///          false.
+    bool IsArrayWithOverrideCount(const sem::Type* ty) const;
+
+    /// Raises an error about an array type using an `override` expression element count, outside
+    /// the single allowed use of a `var<workgroup>`.
+    /// @param source the source for the error
+    void RaiseArrayWithOverrideCountError(const Source& source) const;
+
     /// Searches the current statement and up through parents of the current
     /// statement looking for a loop or for-loop continuing statement.
     /// @returns the closest continuing statement to the current statement that

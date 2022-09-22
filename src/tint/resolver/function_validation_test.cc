@@ -877,7 +877,7 @@ TEST_F(ResolverFunctionValidationTest, ParameterStoreType_NonAtomicFree) {
                        Member("m", ty.atomic(ty.i32())),
                    });
     auto* ret_type = ty.type_name(Source{{12, 34}}, "S");
-    auto* bar = Param(Source{{12, 34}}, "bar", ret_type);
+    auto* bar = Param("bar", ret_type);
     Func("f", utils::Vector{bar}, ty.void_(), utils::Empty);
 
     EXPECT_FALSE(r()->Resolve());

@@ -513,7 +513,7 @@ bool match_array(const sem::Type* ty, const sem::Type*& T) {
     }
 
     if (auto* a = ty->As<sem::Array>()) {
-        if (a->Count() == 0) {
+        if (a->IsRuntimeSized()) {
             T = a->ElemType();
             return true;
         }
@@ -523,7 +523,7 @@ bool match_array(const sem::Type* ty, const sem::Type*& T) {
 
 const sem::Array* build_array(MatchState& state, const sem::Type* el) {
     return state.builder.create<sem::Array>(el,
-                                            /* count */ 0u,
+                                            /* count */ sem::RuntimeArrayCount{},
                                             /* align */ 0u,
                                             /* size */ 0u,
                                             /* stride */ 0u,

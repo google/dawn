@@ -307,7 +307,13 @@ struct ZeroInitWorkgroupMemory::State {
                 //      `num_values * arr->Count()`
                 // The index for this array is:
                 //      `(idx % modulo) / division`
-                auto modulo = num_values * arr->Count();
+                auto count = arr->ConstantCount();
+                if (!count) {
+                    ctx.dst->Diagnostics().add_error(diag::System::Transform,
+                                                     sem::Array::kErrExpectedConstantCount);
+                    return Expression{};
+                }
+                auto modulo = num_values * count.value();
                 auto division = num_values;
                 auto a = get_expr(modulo);
                 auto array_indices = a.array_indices;

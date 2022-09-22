@@ -471,8 +471,18 @@ struct DecomposeMemoryAccess::State {
                     auto* arr = b.Var(b.Symbols().New("arr"), CreateASTTypeFor(ctx, arr_ty));
                     auto* i = b.Var(b.Symbols().New("i"), b.Expr(0_u));
                     auto* for_init = b.Decl(i);
+                    auto arr_cnt = arr_ty->ConstantCount();
+                    if (!arr_cnt) {
+                        // Non-constant counts should not be possible:
+                        // * Override-expression counts can only be applied to workgroup arrays, and
+                        //   this method only handles storage and uniform.
+                        // * Runtime-sized arrays are not loadable.
+                        TINT_ICE(Transform, ctx.dst->Diagnostics())
+                            << "unexpected non-constant array count";
+                        arr_cnt = 1;
+                    }
                     auto* for_cond = b.create<ast::BinaryExpression>(
-                        ast::BinaryOp::kLessThan, b.Expr(i), b.Expr(u32(arr_ty->Count())));
+                        ast::BinaryOp::kLessThan, b.Expr(i), b.Expr(u32(arr_cnt.value())));
                     auto* for_cont = b.Assign(i, b.Add(i, 1_u));
                     auto* arr_el = b.IndexAccessor(arr, i);
                     auto* el_offset = b.Add(b.Expr("offset"), b.Mul(i, u32(arr_ty->Stride())));
@@ -562,8 +572,18 @@ struct DecomposeMemoryAccess::State {
                                 StoreFunc(buf_ty, arr_ty->ElemType()->UnwrapRef(), var_user);
                             auto* i = b.Var(b.Symbols().New("i"), b.Expr(0_u));
                             auto* for_init = b.Decl(i);
+                            auto arr_cnt = arr_ty->ConstantCount();
+                            if (!arr_cnt) {
+                                // Non-constant counts should not be possible:
+                                // * Override-expression counts can only be applied to workgroup
+                                //   arrays, and this method only handles storage and uniform.
+                                // * Runtime-sized arrays are not storable.
+                                TINT_ICE(Transform, ctx.dst->Diagnostics())
+                                    << "unexpected non-constant array count";
+                                arr_cnt = 1;
+                            }
                             auto* for_cond = b.create<ast::BinaryExpression>(
-                                ast::BinaryOp::kLessThan, b.Expr(i), b.Expr(u32(arr_ty->Count())));
+                                ast::BinaryOp::kLessThan, b.Expr(i), b.Expr(u32(arr_cnt.value())));
                             auto* for_cont = b.Assign(i, b.Add(i, 1_u));
                             auto* arr_el = b.IndexAccessor(array, i);
                             auto* el_offset =

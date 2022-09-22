@@ -24,6 +24,7 @@
 #include "src/tint/sem/for_loop_statement.h"
 #include "src/tint/sem/reference.h"
 #include "src/tint/sem/sampler.h"
+#include "src/tint/sem/variable.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Transform);
 TINT_INSTANTIATE_TYPEINFO(tint::transform::Data);
@@ -112,9 +113,16 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const sem::Type*
         }
         if (a->IsRuntimeSized()) {
             return ctx.dst->ty.array(el, nullptr, std::move(attrs));
-        } else {
-            return ctx.dst->ty.array(el, u32(a->Count()), std::move(attrs));
         }
+        if (auto* override = std::get_if<sem::OverrideArrayCount>(&a->Count())) {
+            auto* count = ctx.Clone(override->variable->Declaration());
+            return ctx.dst->ty.array(el, count, std::move(attrs));
+        }
+        if (auto count = a->ConstantCount()) {
+            return ctx.dst->ty.array(el, u32(count.value()), std::move(attrs));
+        }
+        TINT_ICE(Transform, ctx.dst->Diagnostics()) << sem::Array::kErrExpectedConstantCount;
+        return ctx.dst->ty.array(el, u32(1), std::move(attrs));
     }
     if (auto* s = ty->As<sem::Struct>()) {
         return ctx.dst->create<ast::TypeName>(ctx.Clone(s->Declaration()->name));

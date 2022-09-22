@@ -16,15 +16,22 @@
 
 #include <string>
 
+#include "src/tint/ast/variable.h"
 #include "src/tint/debug.h"
+#include "src/tint/sem/variable.h"
+#include "src/tint/symbol_table.h"
 #include "src/tint/utils/hash.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::Array);
 
 namespace tint::sem {
 
+const char* Array::kErrExpectedConstantCount =
+    "array size is an override-expression, when expected a constant-expression.\n"
+    "Was the SubstituteOverride transform run?";
+
 Array::Array(const Type* element,
-             uint32_t count,
+             ArrayCount count,
              uint32_t align,
              uint32_t size,
              uint32_t stride,
@@ -35,8 +42,9 @@ Array::Array(const Type* element,
       size_(size),
       stride_(stride),
       implicit_stride_(implicit_stride),
-      constructible_(count > 0  // Runtime-sized arrays are not constructible
-                     && element->IsConstructible()) {
+      // Only constant-expression sized arrays are constructible
+      constructible_(std::holds_alternative<ConstantArrayCount>(count) &&
+                     element->IsConstructible()) {
     TINT_ASSERT(Semantic, element_);
 }
 
@@ -64,8 +72,10 @@ std::string Array::FriendlyName(const SymbolTable& symbols) const {
         out << "@stride(" << stride_ << ") ";
     }
     out << "array<" << element_->FriendlyName(symbols);
-    if (!IsRuntimeSized()) {
-        out << ", " << count_;
+    if (auto* const_count = std::get_if<ConstantArrayCount>(&count_)) {
+        out << ", " << const_count->value;
+    } else if (auto* override_count = std::get_if<OverrideArrayCount>(&count_)) {
+        out << ", " << symbols.NameFor(override_count->variable->Declaration()->symbol);
     }
     out << ">";
     return out.str();

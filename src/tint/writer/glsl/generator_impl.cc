@@ -2240,7 +2240,13 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
 
             ScopedParen sp(out);
 
-            for (size_t i = 0; i < a->Count(); i++) {
+            auto count = a->ConstantCount();
+            if (!count) {
+                diagnostics_.add_error(diag::System::Writer, sem::Array::kErrExpectedConstantCount);
+                return false;
+            }
+
+            for (size_t i = 0; i < count; i++) {
                 if (i > 0) {
                     out << ", ";
                 }
@@ -2356,16 +2362,23 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
             }
             EmitZeroValue(out, member->Type());
         }
-    } else if (auto* array = type->As<sem::Array>()) {
+    } else if (auto* arr = type->As<sem::Array>()) {
         if (!EmitType(out, type, ast::StorageClass::kNone, ast::Access::kUndefined, "")) {
             return false;
         }
         ScopedParen sp(out);
-        for (uint32_t i = 0; i < array->Count(); i++) {
+
+        auto count = arr->ConstantCount();
+        if (!count) {
+            diagnostics_.add_error(diag::System::Writer, sem::Array::kErrExpectedConstantCount);
+            return false;
+        }
+
+        for (uint32_t i = 0; i < count; i++) {
             if (i != 0) {
                 out << ", ";
             }
-            EmitZeroValue(out, array->ElemType());
+            EmitZeroValue(out, arr->ElemType());
         }
     } else {
         diagnostics_.add_error(diag::System::Writer, "Invalid type for zero emission: " +
@@ -2697,7 +2710,18 @@ bool GeneratorImpl::EmitType(std::ostream& out,
         const sem::Type* base_type = ary;
         std::vector<uint32_t> sizes;
         while (auto* arr = base_type->As<sem::Array>()) {
-            sizes.push_back(arr->Count());
+            if (arr->IsRuntimeSized()) {
+                sizes.push_back(0);
+            } else {
+                auto count = arr->ConstantCount();
+                if (!count) {
+                    diagnostics_.add_error(diag::System::Writer,
+                                           sem::Array::kErrExpectedConstantCount);
+                    return false;
+                }
+                sizes.push_back(count.value());
+            }
+
             base_type = arr->ElemType();
         }
         if (!EmitType(out, base_type, storage_class, access, "")) {

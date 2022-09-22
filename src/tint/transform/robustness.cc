@@ -99,14 +99,21 @@ struct Robustness::State {
                     // Must clamp, even if the index is constant.
                     auto* arr_ptr = b.AddressOf(ctx.Clone(expr->object));
                     max = b.Sub(b.Call("arrayLength", arr_ptr), 1_u);
-                } else {
+                } else if (auto count = arr->ConstantCount()) {
                     if (sem->Index()->ConstantValue()) {
                         // Index and size is constant.
                         // Validation will have rejected any OOB accesses.
                         return nullptr;
                     }
-                    max = b.Expr(u32(arr->Count() - 1u));
+                    max = b.Expr(u32(count.value() - 1u));
+                } else {
+                    // Note: Don't be tempted to use the array override variable as an expression
+                    // here, the name might be shadowed!
+                    ctx.dst->Diagnostics().add_error(diag::System::Transform,
+                                                     sem::Array::kErrExpectedConstantCount);
+                    return nullptr;
                 }
+
                 return b.Call("min", idx(), max);
             },
             [&](Default) {

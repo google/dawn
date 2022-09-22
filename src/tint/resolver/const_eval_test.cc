@@ -1700,7 +1700,7 @@ TEST_F(ResolverConstEvalTest, Array_i32_Zero) {
     auto* arr = sem->Type()->As<sem::Array>();
     ASSERT_NE(arr, nullptr);
     EXPECT_TRUE(arr->ElemType()->Is<sem::I32>());
-    EXPECT_EQ(arr->Count(), 4u);
+    EXPECT_EQ(arr->Count(), sem::ConstantArrayCount{4u});
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AllEqual());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -1738,7 +1738,7 @@ TEST_F(ResolverConstEvalTest, Array_f32_Zero) {
     auto* arr = sem->Type()->As<sem::Array>();
     ASSERT_NE(arr, nullptr);
     EXPECT_TRUE(arr->ElemType()->Is<sem::F32>());
-    EXPECT_EQ(arr->Count(), 4u);
+    EXPECT_EQ(arr->Count(), sem::ConstantArrayCount{4u});
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AllEqual());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -1776,7 +1776,7 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Zero) {
     auto* arr = sem->Type()->As<sem::Array>();
     ASSERT_NE(arr, nullptr);
     EXPECT_TRUE(arr->ElemType()->Is<sem::Vector>());
-    EXPECT_EQ(arr->Count(), 2u);
+    EXPECT_EQ(arr->Count(), sem::ConstantArrayCount{2u});
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AllEqual());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -1828,7 +1828,7 @@ TEST_F(ResolverConstEvalTest, Array_Struct_f32_Zero) {
     auto* arr = sem->Type()->As<sem::Array>();
     ASSERT_NE(arr, nullptr);
     EXPECT_TRUE(arr->ElemType()->Is<sem::Struct>());
-    EXPECT_EQ(arr->Count(), 2u);
+    EXPECT_EQ(arr->Count(), sem::ConstantArrayCount{2u});
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_TRUE(sem->ConstantValue()->AllEqual());
     EXPECT_TRUE(sem->ConstantValue()->AnyZero());
@@ -1866,7 +1866,7 @@ TEST_F(ResolverConstEvalTest, Array_i32_Elements) {
     auto* arr = sem->Type()->As<sem::Array>();
     ASSERT_NE(arr, nullptr);
     EXPECT_TRUE(arr->ElemType()->Is<sem::I32>());
-    EXPECT_EQ(arr->Count(), 4u);
+    EXPECT_EQ(arr->Count(), sem::ConstantArrayCount{4u});
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -1904,7 +1904,7 @@ TEST_F(ResolverConstEvalTest, Array_f32_Elements) {
     auto* arr = sem->Type()->As<sem::Array>();
     ASSERT_NE(arr, nullptr);
     EXPECT_TRUE(arr->ElemType()->Is<sem::F32>());
-    EXPECT_EQ(arr->Count(), 4u);
+    EXPECT_EQ(arr->Count(), sem::ConstantArrayCount{4u});
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -1943,7 +1943,7 @@ TEST_F(ResolverConstEvalTest, Array_vec3_f32_Elements) {
     auto* arr = sem->Type()->As<sem::Array>();
     ASSERT_NE(arr, nullptr);
     EXPECT_TRUE(arr->ElemType()->Is<sem::Vector>());
-    EXPECT_EQ(arr->Count(), 2u);
+    EXPECT_EQ(arr->Count(), sem::ConstantArrayCount{2u});
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());
@@ -1973,7 +1973,7 @@ TEST_F(ResolverConstEvalTest, Array_Struct_f32_Elements) {
     auto* arr = sem->Type()->As<sem::Array>();
     ASSERT_NE(arr, nullptr);
     EXPECT_TRUE(arr->ElemType()->Is<sem::Struct>());
-    EXPECT_EQ(arr->Count(), 2u);
+    EXPECT_EQ(arr->Count(), sem::ConstantArrayCount{2u});
     EXPECT_TYPE(sem->ConstantValue()->Type(), sem->Type());
     EXPECT_FALSE(sem->ConstantValue()->AllEqual());
     EXPECT_FALSE(sem->ConstantValue()->AnyZero());

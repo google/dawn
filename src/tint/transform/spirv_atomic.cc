@@ -35,6 +35,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::SpirvAtomic::Stub);
 
 namespace tint::transform {
 
+using namespace tint::number_suffixes;  // NOLINT
+
 /// Private implementation of transform
 struct SpirvAtomic::State {
   private:
@@ -189,10 +191,19 @@ struct SpirvAtomic::State {
             [&](const sem::I32*) { return b.ty.atomic(CreateASTTypeFor(ctx, ty)); },
             [&](const sem::U32*) { return b.ty.atomic(CreateASTTypeFor(ctx, ty)); },
             [&](const sem::Struct* str) { return b.ty.type_name(Fork(str->Declaration()).name); },
-            [&](const sem::Array* arr) {
-                return arr->IsRuntimeSized()
-                           ? b.ty.array(AtomicTypeFor(arr->ElemType()))
-                           : b.ty.array(AtomicTypeFor(arr->ElemType()), u32(arr->Count()));
+            [&](const sem::Array* arr) -> const ast::Type* {
+                if (arr->IsRuntimeSized()) {
+                    return b.ty.array(AtomicTypeFor(arr->ElemType()));
+                }
+                auto count = arr->ConstantCount();
+                if (!count) {
+                    ctx.dst->Diagnostics().add_error(
+                        diag::System::Transform,
+                        "the SpirvAtomic transform does not currently support array counts that "
+                        "use override values");
+                    count = 1;
+                }
+                return b.ty.array(AtomicTypeFor(arr->ElemType()), u32(count.value()));
             },
             [&](const sem::Pointer* ptr) {
                 return b.ty.pointer(AtomicTypeFor(ptr->StoreType()), ptr->StorageClass(),

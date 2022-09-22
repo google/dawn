@@ -302,7 +302,7 @@ class Resolver {
     /// Resolves and validates the expression used as the count parameter of an array.
     /// @param count_expr the expression used as the second template parameter to an array<>.
     /// @returns the number of elements in the array.
-    utils::Result<uint32_t> ArrayCount(const ast::Expression* count_expr);
+    utils::Result<sem::ArrayCount> ArrayCount(const ast::Expression* count_expr);
 
     /// Resolves and validates the attributes on an array.
     /// @param attributes the attributes on the array type.
@@ -315,13 +315,17 @@ class Resolver {
 
     /// Builds and returns the semantic information for an array.
     /// @returns the semantic Array information, or nullptr if an error is raised.
-    /// @param source the source of the array declaration
+    /// @param el_source the source of the array element, or the array if the array does not have a
+    ///        locally-declared element AST node.
+    /// @param count_source the source of the array count, or the array if the array does not have a
+    ///        locally-declared element AST node.
     /// @param el_ty the Array element type
-    /// @param el_count the number of elements in the array. Zero means runtime-sized.
+    /// @param el_count the number of elements in the array.
     /// @param explicit_stride the explicit byte stride of the array. Zero means implicit stride.
-    sem::Array* Array(const Source& source,
+    sem::Array* Array(const Source& el_source,
+                      const Source& count_source,
                       const sem::Type* el_ty,
-                      uint32_t el_count,
+                      sem::ArrayCount el_count,
                       uint32_t explicit_stride);
 
     /// Builds and returns the semantic information for the alias `alias`.

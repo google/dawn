@@ -1489,7 +1489,7 @@ const sem::Type* Resolver::ConcreteType(const sem::Type* ty,
                 target_el_ty = target_arr_ty->ElemType();
             }
             if (auto* el_ty = ConcreteType(a->ElemType(), target_el_ty, source)) {
-                return Array(source, el_ty, a->Count(), /* explicit_stride */ 0);
+                return Array(source, source, el_ty, a->Count(), /* explicit_stride */ 0);
             }
             return nullptr;
         });
@@ -1879,7 +1879,8 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
             [&](const ast::Array* a) -> sem::Call* {
                 Mark(a);
                 // array element type must be inferred if it was not specified.
-                auto el_count = static_cast<uint32_t>(args.Length());
+                sem::ArrayCount el_count =
+                    sem::ConstantArrayCount{static_cast<uint32_t>(args.Length())};
                 const sem::Type* el_ty = nullptr;
                 if (a->type) {
                     el_ty = Type(a->type);
@@ -1921,7 +1922,9 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                     return nullptr;
                 }
 
-                auto* arr = Array(a->source, el_ty, el_count, explicit_stride);
+                auto* arr = Array(a->type ? a->type->source : a->source,
+                                  a->count ? a->count->source : a->source,  //
+                                  el_ty, el_count, explicit_stride);
                 if (!arr) {
                     return nullptr;
                 }
@@ -2591,7 +2594,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
         return nullptr;
     }
 
-    uint32_t el_count = 0;  // sem::Array uses a size of 0 for a runtime-sized array.
+    sem::ArrayCount el_count = sem::RuntimeArrayCount{};
 
     // Evaluate the constant array size expression.
     if (auto* count_expr = arr->count) {
@@ -2602,7 +2605,9 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
         }
     }
 
-    auto* out = Array(arr->source, el_ty, el_count, explicit_stride);
+    auto* out = Array(arr->type->source,                              //
+                      arr->count ? arr->count->source : arr->source,  //
+                      el_ty, el_count, explicit_stride);
     if (out == nullptr) {
         return nullptr;
     }
@@ -2619,16 +2624,27 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
     return out;
 }
 
-utils::Result<uint32_t> Resolver::ArrayCount(const ast::Expression* count_expr) {
+utils::Result<sem::ArrayCount> Resolver::ArrayCount(const ast::Expression* count_expr) {
     // Evaluate the constant array size expression.
     const auto* count_sem = Materialize(Expression(count_expr));
     if (!count_sem) {
         return utils::Failure;
     }
 
+    // Note: If the array count is an 'override', but not a identifier expression, we do not return
+    // here, but instead continue to the ConstantValue() check below.
+    if (auto* user = count_sem->UnwrapMaterialize()->As<sem::VariableUser>()) {
+        if (auto* global = user->Variable()->As<sem::GlobalVariable>()) {
+            if (global->Declaration()->Is<ast::Override>()) {
+                return sem::ArrayCount{sem::OverrideArrayCount{global}};
+            }
+        }
+    }
+
     auto* count_val = count_sem->ConstantValue();
     if (!count_val) {
-        AddError("array size must evaluate to a constant integer expression", count_expr->source);
+        AddError("array size must evaluate to a constant integer expression or override variable",
+                 count_expr->source);
         return utils::Failure;
     }
 
@@ -2646,7 +2662,7 @@ utils::Result<uint32_t> Resolver::ArrayCount(const ast::Expression* count_expr) 
         return utils::Failure;
     }
 
-    return static_cast<uint32_t>(count);
+    return sem::ArrayCount{sem::ConstantArrayCount{static_cast<uint32_t>(count)}};
 }
 
 bool Resolver::ArrayAttributes(utils::VectorRef<const ast::Attribute*> attributes,
@@ -2673,27 +2689,33 @@ bool Resolver::ArrayAttributes(utils::VectorRef<const ast::Attribute*> attribute
     return true;
 }
 
-sem::Array* Resolver::Array(const Source& source,
+sem::Array* Resolver::Array(const Source& el_source,
+                            const Source& count_source,
                             const sem::Type* el_ty,
-                            uint32_t el_count,
+                            sem::ArrayCount el_count,
                             uint32_t explicit_stride) {
     uint32_t el_align = el_ty->Align();
     uint32_t el_size = el_ty->Size();
     uint64_t implicit_stride = el_size ? utils::RoundUp<uint64_t>(el_align, el_size) : 0;
     uint64_t stride = explicit_stride ? explicit_stride : implicit_stride;
+    uint64_t size = 0;
 
-    auto size = std::max<uint64_t>(el_count, 1u) * stride;
-    if (size > std::numeric_limits<uint32_t>::max()) {
-        std::stringstream msg;
-        msg << "array size (0x" << std::hex << size << ") must not exceed 0xffffffff bytes";
-        AddError(msg.str(), source);
-        return nullptr;
+    if (auto const_count = std::get_if<sem::ConstantArrayCount>(&el_count)) {
+        size = const_count->value * stride;
+        if (size > std::numeric_limits<uint32_t>::max()) {
+            std::stringstream msg;
+            msg << "array size (0x" << std::hex << size << ") must not exceed 0xffffffff bytes";
+            AddError(msg.str(), count_source);
+            return nullptr;
+        }
+    } else if (std::holds_alternative<sem::RuntimeArrayCount>(el_count)) {
+        size = stride;
     }
     auto* out = builder_->create<sem::Array>(el_ty, el_count, el_align, static_cast<uint32_t>(size),
                                              static_cast<uint32_t>(stride),
                                              static_cast<uint32_t>(implicit_stride));
 
-    if (!validator_.Array(out, source)) {
+    if (!validator_.Array(out, el_source)) {
         return nullptr;
     }
 

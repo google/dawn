@@ -548,23 +548,28 @@ bool Validator::StorageClassLayout(const sem::Variable* var,
     return true;
 }
 
-bool Validator::LocalVariable(const sem::Variable* v) const {
-    auto* decl = v->Declaration();
+bool Validator::LocalVariable(const sem::Variable* local) const {
+    auto* decl = local->Declaration();
+    if (IsArrayWithOverrideCount(local->Type())) {
+        RaiseArrayWithOverrideCountError(decl->type ? decl->type->source
+                                                    : decl->constructor->source);
+        return false;
+    }
     return Switch(
         decl,  //
         [&](const ast::Var* var) {
             if (IsValidationEnabled(var->attributes,
                                     ast::DisabledValidation::kIgnoreStorageClass)) {
-                if (!v->Type()->UnwrapRef()->IsConstructible()) {
+                if (!local->Type()->UnwrapRef()->IsConstructible()) {
                     AddError("function-scope 'var' must have a constructible type",
                              var->type ? var->type->source : var->source);
                     return false;
                 }
             }
-            return Var(v);
-        },                                        //
-        [&](const ast::Let*) { return Let(v); },  //
-        [&](const ast::Const*) { return true; },  //
+            return Var(local);
+        },                                            //
+        [&](const ast::Let*) { return Let(local); },  //
+        [&](const ast::Const*) { return true; },      //
         [&](Default) {
             TINT_ICE(Resolver, diagnostics_)
                 << "Validator::Variable() called with a unknown variable type: "
@@ -578,6 +583,12 @@ bool Validator::GlobalVariable(
     const std::unordered_map<OverrideId, const sem::Variable*>& override_ids,
     const std::unordered_map<const sem::Type*, const Source&>& atomic_composite_info) const {
     auto* decl = global->Declaration();
+    if (global->StorageClass() != ast::StorageClass::kWorkgroup &&
+        IsArrayWithOverrideCount(global->Type())) {
+        RaiseArrayWithOverrideCountError(decl->type ? decl->type->source
+                                                    : decl->constructor->source);
+        return false;
+    }
     bool ok = Switch(
         decl,  //
         [&](const ast::Var* var) {
@@ -875,7 +886,7 @@ bool Validator::Parameter(const ast::Function* func, const sem::Variable* var) c
 
     if (IsPlain(var->Type())) {
         if (!var->Type()->IsConstructible()) {
-            AddError("type of function parameter must be constructible", decl->source);
+            AddError("type of function parameter must be constructible", decl->type->source);
             return false;
         }
     } else if (!var->Type()->IsAnyOf<sem::Texture, sem::Sampler, sem::Pointer>()) {
@@ -1898,20 +1909,23 @@ bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
     if (array_type->IsRuntimeSized()) {
         AddError("cannot construct a runtime-sized array", ctor->source);
         return false;
-    } else if (!elem_ty->IsConstructible()) {
+    }
+
+    if (array_type->IsOverrideSized()) {
+        AddError("cannot construct an array that has an override expression count", ctor->source);
+        return false;
+    }
+
+    if (!elem_ty->IsConstructible()) {
         AddError("array constructor has non-constructible element type", ctor->source);
         return false;
-    } else if (!values.IsEmpty() && (values.Length() != array_type->Count())) {
-        std::string fm = values.Length() < array_type->Count() ? "few" : "many";
+    }
+
+    const auto count = std::get<sem::ConstantArrayCount>(array_type->Count()).value;
+    if (!values.IsEmpty() && (values.Length() != count)) {
+        std::string fm = values.Length() < count ? "few" : "many";
         AddError("array constructor has too " + fm + " elements: expected " +
-                     std::to_string(array_type->Count()) + ", found " +
-                     std::to_string(values.Length()),
-                 ctor->source);
-        return false;
-    } else if (values.Length() > array_type->Count()) {
-        AddError("array constructor has too many elements: expected " +
-                     std::to_string(array_type->Count()) + ", found " +
-                     std::to_string(values.Length()),
+                     std::to_string(count) + ", found " + std::to_string(values.Length()),
                  ctor->source);
         return false;
     }
@@ -2086,18 +2100,25 @@ bool Validator::PushConstants(const std::vector<sem::Function*>& entry_points) c
     return true;
 }
 
-bool Validator::Array(const sem::Array* arr, const Source& source) const {
+bool Validator::Array(const sem::Array* arr, const Source& el_source) const {
     auto* el_ty = arr->ElemType();
 
     if (!IsPlain(el_ty)) {
-        AddError(sem_.TypeNameOf(el_ty) + " cannot be used as an element type of an array", source);
+        AddError(sem_.TypeNameOf(el_ty) + " cannot be used as an element type of an array",
+                 el_source);
         return false;
     }
 
     if (!IsFixedFootprint(el_ty)) {
-        AddError("an array element type cannot contain a runtime-sized array", source);
+        AddError("an array element type cannot contain a runtime-sized array", el_source);
         return false;
     }
+
+    if (IsArrayWithOverrideCount(el_ty)) {
+        RaiseArrayWithOverrideCountError(el_source);
+        return false;
+    }
+
     return true;
 }
 
@@ -2153,6 +2174,11 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
                              member->Declaration()->source);
                     return false;
                 }
+            }
+
+            if (IsArrayWithOverrideCount(member->Type())) {
+                RaiseArrayWithOverrideCountError(member->Declaration()->type->source);
+                return false;
             }
         } else if (!IsFixedFootprint(member->Type())) {
             AddError(
@@ -2486,6 +2512,22 @@ bool Validator::IsValidationDisabled(utils::VectorRef<const ast::Attribute*> att
 bool Validator::IsValidationEnabled(utils::VectorRef<const ast::Attribute*> attributes,
                                     ast::DisabledValidation validation) const {
     return !IsValidationDisabled(attributes, validation);
+}
+
+bool Validator::IsArrayWithOverrideCount(const sem::Type* ty) const {
+    if (auto* arr = ty->UnwrapRef()->As<sem::Array>()) {
+        if (arr->IsOverrideSized()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Validator::RaiseArrayWithOverrideCountError(const Source& source) const {
+    AddError(
+        "array with an 'override' element count can only be used as the store type of a "
+        "'var<workgroup>'",
+        source);
 }
 
 std::string Validator::VectorPretty(uint32_t size, const sem::Type* element_type) const {

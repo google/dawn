@@ -82,7 +82,7 @@ void PadStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
                 // std140 structs should be padded out to 16 bytes.
                 size = utils::RoundUp(16u, size);
             } else if (auto* array_ty = ty->As<sem::Array>()) {
-                if (array_ty->Count() == 0) {
+                if (array_ty->IsRuntimeSized()) {
                     has_runtime_sized_array = true;
                 }
             }

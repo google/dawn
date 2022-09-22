@@ -654,9 +654,13 @@ struct DataType<array<N, T>> {
     /// @return the semantic array type
     static inline const sem::Type* Sem(ProgramBuilder& b) {
         auto* el = DataType<T>::Sem(b);
+        sem::ArrayCount count = sem::ConstantArrayCount{N};
+        if (N == 0) {
+            count = sem::RuntimeArrayCount{};
+        }
         return b.create<sem::Array>(
             /* element */ el,
-            /* count */ N,
+            /* count */ count,
             /* align */ el->Align(),
             /* size */ N * el->Size(),
             /* stride */ el->Align(),
