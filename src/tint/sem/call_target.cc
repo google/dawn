@@ -34,7 +34,7 @@ CallTarget::CallTarget(const CallTarget&) = default;
 CallTarget::~CallTarget() = default;
 
 CallTargetSignature::CallTargetSignature(const sem::Type* ret_ty,
-                                         utils::VectorRef<const Parameter*> params)
+                                         utils::VectorRef<const sem::Parameter*> params)
     : return_type(ret_ty), parameters(std::move(params)) {}
 CallTargetSignature::CallTargetSignature(const CallTargetSignature&) = default;
 CallTargetSignature::~CallTargetSignature() = default;

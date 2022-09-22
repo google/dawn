@@ -57,11 +57,17 @@ bool IsDerivativeBuiltin(BuiltinType i) {
 }
 
 bool IsTextureBuiltin(BuiltinType i) {
-    return IsImageQueryBuiltin(i) || i == BuiltinType::kTextureLoad ||
-           i == BuiltinType::kTextureGather || i == BuiltinType::kTextureGatherCompare ||
-           i == BuiltinType::kTextureSample || i == BuiltinType::kTextureSampleLevel ||
-           i == BuiltinType::kTextureSampleBias || i == BuiltinType::kTextureSampleCompare ||
-           i == BuiltinType::kTextureSampleCompareLevel || i == BuiltinType::kTextureSampleGrad ||
+    return IsImageQueryBuiltin(i) ||                           //
+           i == BuiltinType::kTextureGather ||                 //
+           i == BuiltinType::kTextureGatherCompare ||          //
+           i == BuiltinType::kTextureLoad ||                   //
+           i == BuiltinType::kTextureSample ||                 //
+           i == BuiltinType::kTextureSampleBaseClampToEdge ||  //
+           i == BuiltinType::kTextureSampleBias ||             //
+           i == BuiltinType::kTextureSampleCompare ||          //
+           i == BuiltinType::kTextureSampleCompareLevel ||     //
+           i == BuiltinType::kTextureSampleGrad ||             //
+           i == BuiltinType::kTextureSampleLevel ||            //
            i == BuiltinType::kTextureStore;
 }
 

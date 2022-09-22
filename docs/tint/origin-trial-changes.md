@@ -1,5 +1,15 @@
 # Tint changes during Origin Trial
 
+## Changes for M108
+
+### New features
+
+* `textureSampleBaseClampToEdge()` has been implemented. [tint:1671](crbug.com/tint/1671)
+
+### Deprecated Features
+
+* The `external_texture` overload of `textureSampleLevel()` has been deprecated. Use `textureSampleBaseClampToEdge()` instead. [tint:1671](crbug.com/tint/1671)
+
 ## Changes for M107
 
 ### New features

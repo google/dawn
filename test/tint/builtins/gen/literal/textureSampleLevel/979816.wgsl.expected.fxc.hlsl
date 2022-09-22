@@ -1,3 +1,7 @@
+builtins/gen/literal/textureSampleLevel/979816.wgsl:28:24 warning: use of deprecated builtin
+  var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, vec2<f32>());
+                       ^^^^^^^^^^^^^^^^^^
+
 struct GammaTransferParams {
   float G;
   float A;

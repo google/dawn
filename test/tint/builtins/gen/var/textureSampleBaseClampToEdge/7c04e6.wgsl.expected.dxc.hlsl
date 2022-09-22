@@ -1,7 +1,3 @@
-builtins/gen/literal/textureSampleLevel/979816.wgsl:28:24 warning: use of deprecated builtin
-  var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, vec2<f32>());
-                       ^^^^^^^^^^^^^^^^^^
-
 struct GammaTransferParams {
   float G;
   float A;
@@ -36,11 +32,21 @@ float3 gammaCorrection(float3 v, GammaTransferParams params) {
 }
 
 float4 textureSampleExternal(Texture2D<float4> plane0, Texture2D<float4> plane1, SamplerState smp, float2 coord, ExternalTextureParams params) {
+  int3 tint_tmp;
+  plane0.GetDimensions(0, tint_tmp.x, tint_tmp.y, tint_tmp.z);
+  const float2 plane0_dims = float2(tint_tmp.xy);
+  const float2 plane0_half_texel = ((0.5f).xx / plane0_dims);
+  const float2 plane0_clamped = clamp(coord, plane0_half_texel, (1.0f - plane0_half_texel));
+  int3 tint_tmp_1;
+  plane1.GetDimensions(0, tint_tmp_1.x, tint_tmp_1.y, tint_tmp_1.z);
+  const float2 plane1_dims = float2(tint_tmp_1.xy);
+  const float2 plane1_half_texel = ((0.5f).xx / plane1_dims);
+  const float2 plane1_clamped = clamp(coord, plane1_half_texel, (1.0f - plane1_half_texel));
   float3 color = float3(0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {
-    color = plane0.SampleLevel(smp, coord, 0.0f).rgb;
+    color = plane0.SampleLevel(smp, plane0_clamped, 0.0f).rgb;
   } else {
-    color = mul(params.yuvToRgbConversionMatrix, float4(plane0.SampleLevel(smp, coord, 0.0f).r, plane1.SampleLevel(smp, coord, 0.0f).rg, 1.0f));
+    color = mul(params.yuvToRgbConversionMatrix, float4(plane0.SampleLevel(smp, plane0_clamped, 0.0f).r, plane1.SampleLevel(smp, plane1_clamped, 0.0f).rg, 1.0f));
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
     color = gammaCorrection(color, params.gammaDecodeParams);
@@ -84,8 +90,9 @@ ExternalTextureParams tint_symbol_1(uint4 buffer[11], uint offset) {
   return tint_symbol_10;
 }
 
-void textureSampleLevel_979816() {
-  float4 res = textureSampleExternal(arg_0, ext_tex_plane_1, arg_1, (0.0f).xx, tint_symbol_1(ext_tex_params, 0u));
+void textureSampleBaseClampToEdge_7c04e6() {
+  float2 arg_2 = (0.0f).xx;
+  float4 res = textureSampleExternal(arg_0, ext_tex_plane_1, arg_1, arg_2, tint_symbol_1(ext_tex_params, 0u));
 }
 
 struct tint_symbol {
@@ -93,7 +100,7 @@ struct tint_symbol {
 };
 
 float4 vertex_main_inner() {
-  textureSampleLevel_979816();
+  textureSampleBaseClampToEdge_7c04e6();
   return (0.0f).xxxx;
 }
 
@@ -105,12 +112,12 @@ tint_symbol vertex_main() {
 }
 
 void fragment_main() {
-  textureSampleLevel_979816();
+  textureSampleBaseClampToEdge_7c04e6();
   return;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  textureSampleLevel_979816();
+  textureSampleBaseClampToEdge_7c04e6();
   return;
 }

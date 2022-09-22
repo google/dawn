@@ -512,6 +512,29 @@ struct BuiltinPolyfill::State {
         return name;
     }
 
+    /// Builds the polyfill function for the `textureSampleBaseClampToEdge` builtin, when the
+    /// texture type is texture_2d<f32>.
+    /// @return the polyfill function name
+    Symbol textureSampleBaseClampToEdge_2d_f32() {
+        auto name = b.Symbols().New("tint_textureSampleBaseClampToEdge");
+        auto body = utils::Vector{
+            b.Decl(b.Let("dims",
+                         b.Construct(b.ty.vec2<f32>(), b.Call("textureDimensions", "t", 0_a)))),
+            b.Decl(b.Let("half_texel", b.Div(b.vec2<f32>(0.5_a), "dims"))),
+            b.Decl(
+                b.Let("clamped", b.Call("clamp", "coord", "half_texel", b.Sub(1_a, "half_texel")))),
+            b.Return(b.Call("textureSampleLevel", "t", "s", "clamped", 0_a)),
+        };
+        b.Func(name,
+               utils::Vector{
+                   b.Param("t", b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32())),
+                   b.Param("s", b.ty.sampler(ast::SamplerKind::kSampler)),
+                   b.Param("coord", b.ty.vec2<f32>()),
+               },
+               b.ty.vec4<f32>(), body);
+        return name;
+    }
+
   private:
     /// @returns the AST type for the given sem type
     const ast::Type* T(const sem::Type* ty) const { return CreateASTTypeFor(ctx, ty); }
@@ -595,6 +618,15 @@ bool BuiltinPolyfill::ShouldRun(const Program* program, const DataMap& data) con
                         case sem::BuiltinType::kSaturate:
                             if (builtins.saturate) {
                                 return true;
+                            }
+                            break;
+                        case sem::BuiltinType::kTextureSampleBaseClampToEdge:
+                            if (builtins.texture_sample_base_clamp_to_edge_2d_f32) {
+                                auto& sig = builtin->Signature();
+                                auto* tex = sig.Parameter(sem::ParameterUsage::kTexture);
+                                if (auto* stex = tex->Type()->As<sem::SampledTexture>()) {
+                                    return stex->type()->Is<sem::F32>();
+                                }
                             }
                             break;
                         default:
@@ -688,6 +720,19 @@ void BuiltinPolyfill::Run(CloneContext& ctx, const DataMap& data, DataMap&) cons
                             polyfill = utils::GetOrCreate(polyfills, builtin, [&] {
                                 return s.saturate(builtin->ReturnType());
                             });
+                        }
+                        break;
+                    case sem::BuiltinType::kTextureSampleBaseClampToEdge:
+                        if (builtins.texture_sample_base_clamp_to_edge_2d_f32) {
+                            auto& sig = builtin->Signature();
+                            auto* tex = sig.Parameter(sem::ParameterUsage::kTexture);
+                            if (auto* stex = tex->Type()->As<sem::SampledTexture>()) {
+                                if (stex->type()->Is<sem::F32>()) {
+                                    polyfill = utils::GetOrCreate(polyfills, builtin, [&] {
+                                        return s.textureSampleBaseClampToEdge_2d_f32();
+                                    });
+                                }
+                            }
                         }
                         break;
                     default:

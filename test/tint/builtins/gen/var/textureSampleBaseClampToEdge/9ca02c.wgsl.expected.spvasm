@@ -1,0 +1,114 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 65
+; Schema: 0
+               OpCapability Shader
+               OpCapability ImageQuery
+         %31 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Vertex %vertex_main "vertex_main" %value %vertex_point_size
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpEntryPoint GLCompute %compute_main "compute_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpExecutionMode %compute_main LocalSize 1 1 1
+               OpName %value "value"
+               OpName %vertex_point_size "vertex_point_size"
+               OpName %arg_0 "arg_0"
+               OpName %arg_1 "arg_1"
+               OpName %tint_textureSampleBaseClampToEdge "tint_textureSampleBaseClampToEdge"
+               OpName %t "t"
+               OpName %s "s"
+               OpName %coord "coord"
+               OpName %textureSampleBaseClampToEdge_9ca02c "textureSampleBaseClampToEdge_9ca02c"
+               OpName %arg_2 "arg_2"
+               OpName %res "res"
+               OpName %vertex_main_inner "vertex_main_inner"
+               OpName %vertex_main "vertex_main"
+               OpName %fragment_main "fragment_main"
+               OpName %compute_main "compute_main"
+               OpDecorate %value BuiltIn Position
+               OpDecorate %vertex_point_size BuiltIn PointSize
+               OpDecorate %arg_0 DescriptorSet 1
+               OpDecorate %arg_0 Binding 0
+               OpDecorate %arg_1 DescriptorSet 1
+               OpDecorate %arg_1 Binding 1
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+      %value = OpVariable %_ptr_Output_v4float Output %5
+%_ptr_Output_float = OpTypePointer Output %float
+          %8 = OpConstantNull %float
+%vertex_point_size = OpVariable %_ptr_Output_float Output %8
+         %11 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
+      %arg_0 = OpVariable %_ptr_UniformConstant_11 UniformConstant
+         %14 = OpTypeSampler
+%_ptr_UniformConstant_14 = OpTypePointer UniformConstant %14
+      %arg_1 = OpVariable %_ptr_UniformConstant_14 UniformConstant
+    %v2float = OpTypeVector %float 2
+         %15 = OpTypeFunction %v4float %11 %14 %v2float
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+         %26 = OpConstantNull %int
+  %float_0_5 = OpConstant %float 0.5
+         %28 = OpConstantComposite %v2float %float_0_5 %float_0_5
+    %float_1 = OpConstant %float 1
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+         %36 = OpConstantNull %v2float
+         %39 = OpTypeSampledImage %11
+       %void = OpTypeVoid
+         %41 = OpTypeFunction %void
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+         %52 = OpTypeFunction %v4float
+%tint_textureSampleBaseClampToEdge = OpFunction %v4float None %15
+          %t = OpFunctionParameter %11
+          %s = OpFunctionParameter %14
+      %coord = OpFunctionParameter %v2float
+         %21 = OpLabel
+         %34 = OpVariable %_ptr_Function_v2float Function %36
+         %23 = OpImageQuerySizeLod %v2int %t %26
+         %22 = OpConvertSToF %v2float %23
+         %29 = OpFDiv %v2float %28 %22
+         %37 = OpCompositeConstruct %v2float %float_1 %float_1
+         %33 = OpFSub %v2float %37 %29
+         %30 = OpExtInst %v2float %31 NClamp %coord %29 %33
+         %40 = OpSampledImage %39 %t %s
+         %38 = OpImageSampleExplicitLod %v4float %40 %30 Lod %8
+               OpReturnValue %38
+               OpFunctionEnd
+%textureSampleBaseClampToEdge_9ca02c = OpFunction %void None %41
+         %44 = OpLabel
+      %arg_2 = OpVariable %_ptr_Function_v2float Function %36
+        %res = OpVariable %_ptr_Function_v4float Function %5
+               OpStore %arg_2 %36
+         %47 = OpLoad %11 %arg_0
+         %48 = OpLoad %14 %arg_1
+         %49 = OpLoad %v2float %arg_2
+         %46 = OpFunctionCall %v4float %tint_textureSampleBaseClampToEdge %47 %48 %49
+               OpStore %res %46
+               OpReturn
+               OpFunctionEnd
+%vertex_main_inner = OpFunction %v4float None %52
+         %54 = OpLabel
+         %55 = OpFunctionCall %void %textureSampleBaseClampToEdge_9ca02c
+               OpReturnValue %5
+               OpFunctionEnd
+%vertex_main = OpFunction %void None %41
+         %57 = OpLabel
+         %58 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %58
+               OpStore %vertex_point_size %float_1
+               OpReturn
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %41
+         %60 = OpLabel
+         %61 = OpFunctionCall %void %textureSampleBaseClampToEdge_9ca02c
+               OpReturn
+               OpFunctionEnd
+%compute_main = OpFunction %void None %41
+         %63 = OpLabel
+         %64 = OpFunctionCall %void %textureSampleBaseClampToEdge_9ca02c
+               OpReturn
+               OpFunctionEnd

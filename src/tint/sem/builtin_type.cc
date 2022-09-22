@@ -318,6 +318,9 @@ BuiltinType ParseBuiltinType(const std::string& name) {
     if (name == "textureSampleLevel") {
         return BuiltinType::kTextureSampleLevel;
     }
+    if (name == "textureSampleBaseClampToEdge") {
+        return BuiltinType::kTextureSampleBaseClampToEdge;
+    }
     if (name == "textureStore") {
         return BuiltinType::kTextureStore;
     }
@@ -558,6 +561,8 @@ const char* str(BuiltinType i) {
             return "textureSampleGrad";
         case BuiltinType::kTextureSampleLevel:
             return "textureSampleLevel";
+        case BuiltinType::kTextureSampleBaseClampToEdge:
+            return "textureSampleBaseClampToEdge";
         case BuiltinType::kTextureStore:
             return "textureStore";
         case BuiltinType::kTextureLoad:

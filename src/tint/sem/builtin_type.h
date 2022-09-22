@@ -128,6 +128,7 @@ enum class BuiltinType {
     kTextureSampleCompareLevel,
     kTextureSampleGrad,
     kTextureSampleLevel,
+    kTextureSampleBaseClampToEdge,
     kTextureStore,
     kTextureLoad,
     kAtomicLoad,

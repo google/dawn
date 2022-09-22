@@ -1,3 +1,7 @@
+builtins/gen/var/textureSampleLevel/979816.wgsl:29:24 warning: use of deprecated builtin
+  var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, arg_2);
+                       ^^^^^^^^^^^^^^^^^^
+
 @group(1) @binding(0) var arg_0 : texture_external;
 
 @group(1) @binding(1) var arg_1 : sampler;
