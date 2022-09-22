@@ -181,6 +181,16 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
         mSupportedFeatures.EnableFeature(Feature::DepthClipControl);
     }
 
+    VkFormatProperties properties;
+    mVulkanInstance->GetFunctions().GetPhysicalDeviceFormatProperties(
+        mPhysicalDevice, VK_FORMAT_B10G11R11_UFLOAT_PACK32, &properties);
+
+    if (IsSubset(static_cast<VkFormatFeatureFlags>(VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BIT |
+                                                   VK_FORMAT_FEATURE_COLOR_ATTACHMENT_BLEND_BIT),
+                 properties.optimalTilingFeatures)) {
+        mSupportedFeatures.EnableFeature(Feature::RG11B10UfloatRenderable);
+    }
+
 #if defined(DAWN_USE_SYNC_FDS)
     // TODO(chromium:1258986): Precisely enable the feature by querying the device's format
     // features.

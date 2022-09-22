@@ -111,6 +111,83 @@ class ExpectFloat16 : public detail::Expectation {
     std::vector<uint16_t> mExpected;
 };
 
+// An expectation for RG11B10Ufloat buffer content that can correctly compare different NaN values
+class ExpectRG11B10Ufloat : public detail::Expectation {
+  public:
+    explicit ExpectRG11B10Ufloat(std::vector<uint32_t> expected) : mExpected(std::move(expected)) {}
+
+    testing::AssertionResult Check(const void* data, size_t size) override {
+        ASSERT(size == sizeof(uint32_t) * mExpected.size());
+
+        const uint32_t* actual = static_cast<const uint32_t*>(data);
+
+        for (size_t i = 0; i < mExpected.size(); ++i) {
+            uint32_t expectedValue = mExpected[i];
+            uint32_t actualValue = actual[i];
+
+            if (!RG11B10UfloatMatch(expectedValue, actualValue)) {
+                testing::AssertionResult result = testing::AssertionFailure()
+                                                  << "Expected data[" << i << "] to be "
+                                                  << expectedValue << ", actual " << actualValue
+                                                  << std::endl;
+                return result;
+            }
+        }
+        return testing::AssertionSuccess();
+    }
+
+  private:
+    bool RG11B10UfloatMatch(uint32_t expected, uint32_t actual) {
+        const uint32_t expectedR = expected & 0x7FF;
+        const uint32_t expectedG = (expected >> 11) & 0x7FF;
+        const uint32_t expectedB = (expected >> 22) & 0x3FF;
+
+        const uint32_t actualR = actual & 0x7FF;
+        const uint32_t actualG = (actual >> 11) & 0x7FF;
+        const uint32_t actualB = (actual >> 22) & 0x3FF;
+
+        return Float11Match(expectedR, actualR) && Float11Match(expectedG, actualG) &&
+               Float10Match(expectedB, actualB);
+    }
+
+    bool Float11Match(uint32_t expected, uint32_t actual) {
+        ASSERT((expected & ~0x7FF) == 0);
+        ASSERT((actual & ~0x7FF) == 0);
+
+        if (IsFloat11NaN(expected)) {
+            return IsFloat11NaN(actual);
+        }
+
+        return expected == actual;
+    }
+
+    bool Float10Match(uint32_t expected, uint32_t actual) {
+        ASSERT((expected & ~0x3FF) == 0);
+        ASSERT((actual & ~0x3FF) == 0);
+
+        if (IsFloat10NaN(expected)) {
+            return IsFloat10NaN(actual);
+        }
+
+        return expected == actual;
+    }
+
+    // The number is NaN if exponent bits are all 1 and mantissa is non-zero
+    bool IsFloat11NaN(uint32_t value) {
+        ASSERT((value & ~0x7FF) == 0);
+
+        return ((value & 0x7C0) == 0x7C0) && ((value & 0x3F) != 0);
+    }
+
+    bool IsFloat10NaN(uint32_t value) {
+        ASSERT((value & ~0x3FF) == 0);
+
+        return ((value & 0x3E0) == 0x3E0) && ((value & 0x1F) != 0);
+    }
+
+    std::vector<uint32_t> mExpected;
+};
+
 class TextureFormatTest : public DawnTest {
   protected:
     // Structure containing all the information that tests need to know about the format.
@@ -436,6 +513,22 @@ class TextureFormatTest : public DawnTest {
         DoFormatRenderingTest(formatInfo, uncompressedData, textureData,
                               new ExpectFloat16(textureData));
     }
+
+    // For "rg11b10ufloat-renderable" feature test
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        if (SupportsFeatures({wgpu::FeatureName::RG11B10UfloatRenderable})) {
+            mIsRG11B10UfloatRenderableSupported = true;
+            return {wgpu::FeatureName::RG11B10UfloatRenderable};
+        } else {
+            mIsRG11B10UfloatRenderableSupported = false;
+            return {};
+        }
+    }
+
+    bool IsRG11B10UfloatRenderableSupported() { return mIsRG11B10UfloatRenderableSupported; }
+
+  private:
+    bool mIsRG11B10UfloatRenderableSupported = false;
 };
 
 // Test the R8Unorm format
@@ -740,7 +833,20 @@ TEST_P(TextureFormatTest, RG11B10Ufloat) {
     DoFloatFormatSamplingTest(
         {wgpu::TextureFormat::RG11B10Ufloat, 4, wgpu::TextureComponentType::Float, 4}, textureData,
         uncompressedData);
-    // This format is not renderable.
+
+    // This format is renderable if "rg11b10ufloat-renderable" feature is enabled
+    if (IsRG11B10UfloatRenderableSupported()) {
+        // TODO(https://crbug.com/swiftshader/147) Rendering INFINITY and NaN isn't handled
+        // correctly by swiftshader
+        if ((IsVulkan() && IsSwiftshader()) || IsANGLE()) {
+            dawn::WarningLog() << "Skip Rendering test because Swiftshader doesn't render INFINITY "
+                                  "and NaN correctly for RG11B10Ufloat texture format.";
+        } else {
+            DoFormatRenderingTest(
+                {wgpu::TextureFormat::RG11B10Ufloat, 4, wgpu::TextureComponentType::Float, 4},
+                uncompressedData, textureData, new ExpectRG11B10Ufloat(textureData));
+        }
+    }
 }
 
 // Test the RGB9E5Ufloat format

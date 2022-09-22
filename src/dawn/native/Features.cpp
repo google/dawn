@@ -68,6 +68,11 @@ static constexpr FeatureEnumAndInfoList kFeatureNameAndInfoList = {{
      {"shader-f16", "Supports the \"enable f16;\" directive in WGSL",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=1510",
       FeatureInfo::FeatureState::Experimental}},
+    {Feature::RG11B10UfloatRenderable,
+     {"rg11b10ufloat-renderable",
+      "Allows the RENDER_ATTACHMENT usage on textures with format \"rg11b10ufloat\", and also "
+      "allows textures of that format to be multisampled.",
+      "https://bugs.chromium.org/p/dawn/issues/detail?id=1518", FeatureInfo::FeatureState::Stable}},
     {Feature::DawnInternalUsages,
      {"dawn-internal-usages",
       "Add internal usages to resources to affect how the texture is allocated, but not "
@@ -119,6 +124,8 @@ Feature FromAPIFeature(wgpu::FeatureName feature) {
             return Feature::ChromiumExperimentalDp4a;
         case wgpu::FeatureName::ShaderF16:
             return Feature::ShaderF16;
+        case wgpu::FeatureName::RG11B10UfloatRenderable:
+            return Feature::RG11B10UfloatRenderable;
     }
     return Feature::InvalidEnum;
 }
@@ -151,6 +158,8 @@ wgpu::FeatureName ToAPIFeature(Feature feature) {
             return wgpu::FeatureName::ChromiumExperimentalDp4a;
         case Feature::ShaderF16:
             return wgpu::FeatureName::ShaderF16;
+        case Feature::RG11B10UfloatRenderable:
+            return wgpu::FeatureName::RG11B10UfloatRenderable;
 
         case Feature::EnumCount:
             break;

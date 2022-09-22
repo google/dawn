@@ -37,6 +37,7 @@ enum class Feature {
     ChromiumExperimentalDp4a,
     IndirectFirstInstance,
     ShaderF16,
+    RG11B10UfloatRenderable,
 
     // Dawn-specific
     DawnInternalUsages,

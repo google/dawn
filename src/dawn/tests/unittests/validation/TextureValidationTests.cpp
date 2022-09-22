@@ -885,6 +885,29 @@ TEST_F(CompressedTextureFormatsValidationTests, TextureSize) {
     }
 }
 
+class RG11B10UfloatTextureFormatsValidationTests : public TextureValidationTest {
+  protected:
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
+        wgpu::DeviceDescriptor descriptor;
+        wgpu::FeatureName requiredFeatures[1] = {wgpu::FeatureName::RG11B10UfloatRenderable};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 1;
+        return dawnAdapter.CreateDevice(&descriptor);
+    }
+};
+
+// Test that RG11B10Ufloat format is valid as render attachment and also it allows
+// multisampling if "rg11b10ufloat-renderable" feature is enabled
+TEST_F(RG11B10UfloatTextureFormatsValidationTests, RenderableFeature) {
+    wgpu::TextureDescriptor descriptor;
+    descriptor.size = {1, 1, 1};
+    descriptor.usage = wgpu::TextureUsage::RenderAttachment;
+
+    descriptor.format = wgpu::TextureFormat::RG11B10Ufloat;
+    descriptor.sampleCount = 4;
+    device.CreateTexture(&descriptor);
+}
+
 static void CheckTextureMatchesDescriptor(const wgpu::Texture& tex,
                                           const wgpu::TextureDescriptor& desc) {
     EXPECT_EQ(desc.size.width, tex.GetWidth());
