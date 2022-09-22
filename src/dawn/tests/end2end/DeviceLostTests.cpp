@@ -475,6 +475,37 @@ TEST_P(DeviceLostTest, FreeBindGroupAfterDeviceLossWithPendingCommands) {
     bg = nullptr;
 }
 
+// This is a regression test for crbug.com/1365011 where ending a render pass with an indirect draw
+// in it after the device is lost would cause render commands to be leaked.
+TEST_P(DeviceLostTest, DeviceLostInRenderPassWithDrawIndirect) {
+    utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 4u, 4u);
+    utils::ComboRenderPipelineDescriptor desc;
+    desc.vertex.module = utils::CreateShaderModule(device, R"(
+        @vertex fn main(@builtin(vertex_index) i : u32) -> @builtin(position) vec4<f32> {
+            var pos = array<vec2<f32>, 3>(
+                vec2<f32>(-1.0, -1.0),
+                vec2<f32>(3.0, -1.0),
+                vec2<f32>(-1.0, 3.0));
+            return vec4<f32>(pos[i], 0.0, 1.0);
+        }
+    )");
+    desc.cFragment.module = utils::CreateShaderModule(device, R"(
+        @fragment fn main() -> @location(0) vec4<f32> {
+            return vec4<f32>(0.0, 1.0, 0.0, 1.0);
+        }
+    )");
+    desc.cTargets[0].format = renderPass.colorFormat;
+    wgpu::Buffer indirectBuffer =
+        utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Indirect, {3, 1, 0, 0});
+    wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&desc);
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+    pass.SetPipeline(pipeline);
+    pass.DrawIndirect(indirectBuffer, 0);
+    LoseDeviceForTesting();
+    pass.End();
+}
+
 // Attempting to set an object label after device loss should not cause an error.
 TEST_P(DeviceLostTest, SetLabelAfterDeviceLoss) {
     DAWN_TEST_UNSUPPORTED_IF(UsesWire());

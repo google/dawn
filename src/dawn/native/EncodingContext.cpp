@@ -127,9 +127,12 @@ MaybeError EncodingContext::ExitRenderPass(const ApiObjectBase* passEncoder,
         // mPendingCommands contains only the commands from BeginRenderPassCmd to
         // EndRenderPassCmd, inclusive. Now we swap out this allocator with a fresh one to give
         // the validation encoder a chance to insert its commands first.
+        // Note: If encoding validation commands fails, no commands should be in mPendingCommands,
+        //       so swap back the renderCommands to ensure that they are not leaked.
         CommandAllocator renderCommands = std::move(mPendingCommands);
-        DAWN_TRY(EncodeIndirectDrawValidationCommands(mDevice, commandEncoder, &usageTracker,
-                                                      &indirectDrawMetadata));
+        DAWN_TRY_WITH_CLEANUP(EncodeIndirectDrawValidationCommands(
+                                  mDevice, commandEncoder, &usageTracker, &indirectDrawMetadata),
+                              { mPendingCommands = std::move(renderCommands); });
         CommitCommands(std::move(mPendingCommands));
         CommitCommands(std::move(renderCommands));
     }
