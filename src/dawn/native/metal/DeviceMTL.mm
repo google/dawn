@@ -464,7 +464,9 @@ MaybeError Device::CopyFromStagingToTexture(const StagingBufferBase* source,
 Ref<Texture> Device::CreateTextureWrappingIOSurface(const ExternalImageDescriptor* descriptor,
                                                     IOSurfaceRef ioSurface) {
     const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
-
+    if (ConsumedError(ValidateIsAlive())) {
+        return nullptr;
+    }
     if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor))) {
         return nullptr;
     }

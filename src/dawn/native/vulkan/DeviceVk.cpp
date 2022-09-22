@@ -904,6 +904,9 @@ TextureBase* Device::CreateTextureWrappingVulkanImage(
     const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
 
     // Initial validation
+    if (ConsumedError(ValidateIsAlive())) {
+        return nullptr;
+    }
     if (ConsumedError(ValidateTextureDescriptor(this, textureDescriptor))) {
         return nullptr;
     }
