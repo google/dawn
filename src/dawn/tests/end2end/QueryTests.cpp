@@ -1182,6 +1182,10 @@ TEST_P(TimestampQueryTests, ResolveTwiceToSameBuffer) {
     // the issue is fixed.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
 
+    // TODO(dawn:1546): Intel D3D driver regression on Gen12 GPUs. The compute shader in two
+    // ResolveQuerySet execute wrong.
+    DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsIntelGen12());
+
     constexpr uint32_t kQueryCount = kMinCount + 2;
 
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);

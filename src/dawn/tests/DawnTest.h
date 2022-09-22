@@ -235,6 +235,8 @@ class DawnTestBase {
     bool IsANGLE() const;
     bool IsWARP() const;
 
+    bool IsIntelGen12() const;
+
     bool IsWindows() const;
     bool IsLinux() const;
     bool IsMacOS(int32_t majorVersion = -1, int32_t minorVersion = -1) const;
