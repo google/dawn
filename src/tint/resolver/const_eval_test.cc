@@ -2947,15 +2947,34 @@ Action ForEachElemPair(const sem::Constant* a, const sem::Constant* b, Func&& f)
     return Action::kContinue;
 }
 
-template <typename T>
+template <typename NumberT>
 struct BitValues {
-    using UT = UnwrapNumber<T>;
-    static constexpr size_t NumBits = sizeof(UT) * 8;
-    static inline const T All = T{~T{0}};
-    static inline const T LeftMost = T{T{1} << (NumBits - 1u)};
-    static inline const T AllButLeftMost = T{~LeftMost};
-    static inline const T RightMost = T{1};
-    static inline const T AllButRightMost = T{~RightMost};
+    using T = UnwrapNumber<NumberT>;
+    struct detail {
+        using UT = std::make_unsigned_t<T>;
+        static constexpr size_t NumBits = sizeof(T) * 8;
+        static constexpr T All = T{~T{0}};
+        static constexpr T LeftMost = static_cast<T>(UT{1} << (NumBits - 1u));
+        static constexpr T AllButLeftMost = T{~LeftMost};
+        static constexpr T TwoLeftMost = static_cast<T>(UT{0b11} << (NumBits - 2u));
+        static constexpr T AllButTwoLeftMost = T{~TwoLeftMost};
+        static constexpr T RightMost = T{1};
+        static constexpr T AllButRightMost = T{~RightMost};
+    };
+
+    static inline const size_t NumBits = detail::NumBits;
+    static inline const NumberT All = NumberT{detail::All};
+    static inline const NumberT LeftMost = NumberT{detail::LeftMost};
+    static inline const NumberT AllButLeftMost = NumberT{detail::AllButLeftMost};
+    static inline const NumberT TwoLeftMost = NumberT{detail::TwoLeftMost};
+    static inline const NumberT AllButTwoLeftMost = NumberT{detail::AllButTwoLeftMost};
+    static inline const NumberT RightMost = NumberT{detail::RightMost};
+    static inline const NumberT AllButRightMost = NumberT{detail::AllButRightMost};
+
+    template <typename U, typename V>
+    static constexpr NumberT Lsh(U val, V shiftBy) {
+        return NumberT{T{val} << T{shiftBy}};
+    }
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -3182,7 +3201,7 @@ TEST_P(ResolverConstEvalBinaryOpTest, Test) {
             GlobalConst("C", expr);
             auto* expected_expr = expected.Expr(*this);
             GlobalConst("E", expected_expr);
-            EXPECT_TRUE(r()->Resolve()) << r()->error();
+            ASSERT_TRUE(r()->Resolve()) << r()->error();
 
             auto* sem = Sem().Get(expr);
             const sem::Constant* value = sem->ConstantValue();
@@ -3712,6 +3731,48 @@ INSTANTIATE_TEST_SUITE_P(Xor,
                                                       XorCases<i32>(),   //
                                                       XorCases<u32>()))));
 
+template <typename T>
+std::vector<Case> ShiftLeftCases() {
+    // Shift type is u32 for non-abstract
+    using ST = std::conditional_t<IsAbstract<T>, T, u32>;
+    using B = BitValues<T>;
+    return {
+        C(T{0b1010}, ST{0}, T{0b0000'0000'1010}),    //
+        C(T{0b1010}, ST{1}, T{0b0000'0001'0100}),    //
+        C(T{0b1010}, ST{2}, T{0b0000'0010'1000}),    //
+        C(T{0b1010}, ST{3}, T{0b0000'0101'0000}),    //
+        C(T{0b1010}, ST{4}, T{0b0000'1010'0000}),    //
+        C(T{0b1010}, ST{5}, T{0b0001'0100'0000}),    //
+        C(T{0b1010}, ST{6}, T{0b0010'1000'0000}),    //
+        C(T{0b1010}, ST{7}, T{0b0101'0000'0000}),    //
+        C(T{0b1010}, ST{8}, T{0b1010'0000'0000}),    //
+        C(B::LeftMost, ST{0}, B::LeftMost),          //
+        C(B::TwoLeftMost, ST{1}, B::LeftMost),       // No overflow
+        C(B::All, ST{1}, B::AllButRightMost),        // No overflow
+        C(B::All, ST{B::NumBits - 1}, B::LeftMost),  // No overflow
+
+        C(Vec(T{0b1010}, T{0b1010}),                                            //
+          Vec(ST{0}, ST{1}),                                                    //
+          Vec(T{0b0000'0000'1010}, T{0b0000'0001'0100})),                       //
+        C(Vec(T{0b1010}, T{0b1010}),                                            //
+          Vec(ST{2}, ST{3}),                                                    //
+          Vec(T{0b0000'0010'1000}, T{0b0000'0101'0000})),                       //
+        C(Vec(T{0b1010}, T{0b1010}),                                            //
+          Vec(ST{4}, ST{5}),                                                    //
+          Vec(T{0b0000'1010'0000}, T{0b0001'0100'0000})),                       //
+        C(Vec(T{0b1010}, T{0b1010}, T{0b1010}),                                 //
+          Vec(ST{6}, ST{7}, ST{8}),                                             //
+          Vec(T{0b0010'1000'0000}, T{0b0101'0000'0000}, T{0b1010'0000'0000})),  //
+    };
+}
+INSTANTIATE_TEST_SUITE_P(ShiftLeft,
+                         ResolverConstEvalBinaryOpTest,
+                         testing::Combine(  //
+                             testing::Values(ast::BinaryOp::kShiftLeft),
+                             testing::ValuesIn(Concat(ShiftLeftCases<AInt>(),  //
+                                                      ShiftLeftCases<i32>(),   //
+                                                      ShiftLeftCases<u32>()))));
+
 // Tests for errors on overflow/underflow of binary operations with abstract numbers
 struct OverflowCase {
     ast::BinaryOp op;
@@ -3829,7 +3890,25 @@ INSTANTIATE_TEST_SUITE_P(
         OverflowCase{ast::BinaryOp::kDivide, Val(123_a), Val(-0_a)},
 
         // Most negative value divided by -1
-        OverflowCase{ast::BinaryOp::kDivide, Val(AInt::Lowest()), Val(-1_a)}
+        OverflowCase{ast::BinaryOp::kDivide, Val(AInt::Lowest()), Val(-1_a)},
+
+        // ShiftLeft of AInts that result in values not representable as AInts.
+        // Note that for i32/u32, these would error because shift value is larger than 32.
+        OverflowCase{ast::BinaryOp::kShiftLeft,                   //
+                     Val(AInt{BitValues<AInt>::All}),             //
+                     Val(AInt{BitValues<AInt>::NumBits})},        //
+        OverflowCase{ast::BinaryOp::kShiftLeft,                   //
+                     Val(AInt{BitValues<AInt>::RightMost}),       //
+                     Val(AInt{BitValues<AInt>::NumBits})},        //
+        OverflowCase{ast::BinaryOp::kShiftLeft,                   //
+                     Val(AInt{BitValues<AInt>::AllButLeftMost}),  //
+                     Val(AInt{BitValues<AInt>::NumBits})},        //
+        OverflowCase{ast::BinaryOp::kShiftLeft,                   //
+                     Val(AInt{BitValues<AInt>::AllButLeftMost}),  //
+                     Val(AInt{BitValues<AInt>::NumBits + 1})},    //
+        OverflowCase{ast::BinaryOp::kShiftLeft,                   //
+                     Val(AInt{BitValues<AInt>::AllButLeftMost}),  //
+                     Val(AInt{BitValues<AInt>::NumBits + 1000})}
 
         ));
 
@@ -3893,6 +3972,78 @@ INSTANTIATE_TEST_SUITE_P(
                               {2.2_a, 4.3_a},    //
                               {2.2_a, 4.3_a}))   //
                         )));
+
+// AInt left shift negative value -> error
+TEST_F(ResolverConstEvalTest, BinaryAbstractShiftLeftByNegativeValue_Error) {
+    GlobalConst("c", Shl(Source{{1, 1}}, Expr(1_a), Expr(-1_a)));
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "1:1 error: cannot shift left by a negative value");
+}
+
+// i32/u32 left shift by >= 32 -> error
+using ResolverConstEvalShiftLeftConcreteGeqBitWidthError =
+    ResolverTestWithParam<std::tuple<Types, Types>>;
+TEST_P(ResolverConstEvalShiftLeftConcreteGeqBitWidthError, Test) {
+    auto* lhs_expr =
+        std::visit([&](auto&& value) { return value.Expr(*this); }, std::get<0>(GetParam()));
+    auto* rhs_expr =
+        std::visit([&](auto&& value) { return value.Expr(*this); }, std::get<1>(GetParam()));
+    GlobalConst("c", Shl(Source{{1, 1}}, lhs_expr, rhs_expr));
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        "1:1 error: shift left value must be less than the bit width of the lhs, which is 32");
+}
+INSTANTIATE_TEST_SUITE_P(Test,
+                         ResolverConstEvalShiftLeftConcreteGeqBitWidthError,
+                         testing::Values(                                 //
+                             std::make_tuple(Val(1_i), Val(32_u)),        //
+                             std::make_tuple(Val(1_i), Val(33_u)),        //
+                             std::make_tuple(Val(1_i), Val(34_u)),        //
+                             std::make_tuple(Val(1_i), Val(99999999_u)),  //
+                             std::make_tuple(Val(1_u), Val(32_u)),        //
+                             std::make_tuple(Val(1_u), Val(33_u)),        //
+                             std::make_tuple(Val(1_u), Val(34_u)),        //
+                             std::make_tuple(Val(1_u), Val(99999999_u))   //
+                             ));
+
+// AInt left shift results in sign change error
+using ResolverConstEvalShiftLeftSignChangeError = ResolverTestWithParam<std::tuple<Types, Types>>;
+TEST_P(ResolverConstEvalShiftLeftSignChangeError, Test) {
+    auto* lhs_expr =
+        std::visit([&](auto&& value) { return value.Expr(*this); }, std::get<0>(GetParam()));
+    auto* rhs_expr =
+        std::visit([&](auto&& value) { return value.Expr(*this); }, std::get<1>(GetParam()));
+    GlobalConst("c", Shl(Source{{1, 1}}, lhs_expr, rhs_expr));
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "1:1 error: shift left operation results in sign change");
+}
+template <typename T>
+std::vector<std::tuple<Types, Types>> ShiftLeftSignChangeErrorCases() {
+    // Shift type is u32 for non-abstract
+    using ST = std::conditional_t<IsAbstract<T>, T, u32>;
+    using B = BitValues<T>;
+    return {
+        {Val(T{0b0001}), Val(ST{B::NumBits - 1})},
+        {Val(T{0b0010}), Val(ST{B::NumBits - 2})},
+        {Val(T{0b0100}), Val(ST{B::NumBits - 3})},
+        {Val(T{0b1000}), Val(ST{B::NumBits - 4})},
+        {Val(T{0b0011}), Val(ST{B::NumBits - 2})},
+        {Val(T{0b0110}), Val(ST{B::NumBits - 3})},
+        {Val(T{0b1100}), Val(ST{B::NumBits - 4})},
+        {Val(B::AllButLeftMost), Val(ST{1})},
+        {Val(B::AllButLeftMost), Val(ST{B::NumBits - 1})},
+        {Val(B::LeftMost), Val(ST{1})},
+        {Val(B::LeftMost), Val(ST{B::NumBits - 1})},
+    };
+}
+INSTANTIATE_TEST_SUITE_P(Test,
+                         ResolverConstEvalShiftLeftSignChangeError,
+                         testing::ValuesIn(Concat(  //
+                             ShiftLeftSignChangeErrorCases<AInt>(),
+                             ShiftLeftSignChangeErrorCases<i32>(),
+                             ShiftLeftSignChangeErrorCases<u32>())));
+
 }  // namespace binary_op
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

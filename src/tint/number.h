@@ -95,6 +95,10 @@ constexpr bool IsUnsignedIntegral =
 template <typename T>
 constexpr bool IsNumeric = IsIntegral<T> || IsFloatingPoint<T>;
 
+/// Returns the bit width of T
+template <typename T>
+constexpr size_t BitWidth = sizeof(UnwrapNumber<T>) * 8;
+
 /// NumberBase is a CRTP base class for Number<T>
 template <typename NumberT>
 struct NumberBase {
@@ -258,6 +262,10 @@ using f32 = Number<float>;
 /// `f16` is a type alias to `Number<detail::NumberKindF16>`, which should be IEEE 754 binary16.
 /// However since C++ don't have native binary16 type, the value is stored as float.
 using f16 = Number<detail::NumberKindF16>;
+
+/// True iff T is an abstract number type
+template <typename T>
+constexpr bool IsAbstract = std::is_same_v<T, AInt> || std::is_same_v<T, AFloat>;
 
 /// @returns the friendly name of Number type T
 template <typename T, traits::EnableIf<IsNumber<T>>* = nullptr>

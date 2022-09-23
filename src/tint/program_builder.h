@@ -2125,6 +2125,17 @@ class ProgramBuilder {
             ast::BinaryOp::kShiftLeft, Expr(std::forward<LHS>(lhs)), Expr(std::forward<RHS>(rhs)));
     }
 
+    /// @param source the source information
+    /// @param lhs the left hand argument to the bit shift left operation
+    /// @param rhs the right hand argument to the bit shift left operation
+    /// @returns a `ast::BinaryExpression` bit shifting left `lhs` by `rhs`
+    template <typename LHS, typename RHS>
+    const ast::BinaryExpression* Shl(const Source& source, LHS&& lhs, RHS&& rhs) {
+        return create<ast::BinaryExpression>(source, ast::BinaryOp::kShiftLeft,
+                                             Expr(std::forward<LHS>(lhs)),
+                                             Expr(std::forward<RHS>(rhs)));
+    }
+
     /// @param lhs the left hand argument to the xor operation
     /// @param rhs the right hand argument to the xor operation
     /// @returns a `ast::BinaryExpression` bitwise xor-ing `lhs` and `rhs`
