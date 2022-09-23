@@ -216,6 +216,31 @@ void FillVulkanCreateInfoSizesAndType(const Texture& texture, VkImageCreateInfo*
     }
 }
 
+Aspect ComputeCombinedAspect(Device* device, const Format& format) {
+    // In early Vulkan versions it is not possible to transition depth and stencil separetely so
+    // textures with Depth|Stencil will be promoted to a single CombinedDepthStencil aspect
+    // internally.
+    if (format.aspects == (Aspect::Depth | Aspect::Stencil)) {
+        return Aspect::CombinedDepthStencil;
+    }
+    // Same thing for Stencil8 if it is emulated with a depth-stencil format and not directly S8.
+    if (format.format == wgpu::TextureFormat::Stencil8 &&
+        !device->IsToggleEnabled(Toggle::VulkanUseS8)) {
+        return Aspect::CombinedDepthStencil;
+    }
+
+    // Some multiplanar images cannot have planes transitioned separately and instead Vulkan
+    // requires that the "Color" aspect be used for barriers, so Plane0|Plane1 is promoted to just
+    // Color. The Vulkan spec requires: "If image has a single-plane color format or is not
+    // disjoint, then the aspectMask member of subresourceRange must be VK_IMAGE_ASPECT_COLOR_BIT.".
+    if (format.aspects == (Aspect::Plane0 | Aspect::Plane1)) {
+        return Aspect::Color;
+    }
+
+    // No need to combine aspects.
+    return Aspect::None;
+}
+
 }  // namespace
 
 // Converts Dawn texture format to Vulkan formats.
@@ -631,14 +656,14 @@ Ref<Texture> Texture::CreateForSwapChain(Device* device,
 
 Texture::Texture(Device* device, const TextureDescriptor* descriptor, TextureState state)
     : TextureBase(device, descriptor, state),
+      mCombinedAspect(ComputeCombinedAspect(device, GetFormat())),
       // A usage of none will make sure the texture is transitioned before its first use as
       // required by the Vulkan spec.
-      mSubresourceLastUsages(std::make_unique<SubresourceStorage<wgpu::TextureUsage>>(
-          (ShouldCombineDepthStencilBarriers() ? Aspect::CombinedDepthStencil
-                                               : GetFormat().aspects),
+      mSubresourceLastUsages(
+          mCombinedAspect != Aspect::None ? mCombinedAspect : GetFormat().aspects,
           GetArrayLayers(),
           GetNumMipLevels(),
-          wgpu::TextureUsage::None)) {}
+          wgpu::TextureUsage::None) {}
 
 MaybeError Texture::InitializeAsInternalTexture(VkImageUsageFlags extraUsages) {
     Device* device = ToBackend(GetDevice());
@@ -720,16 +745,17 @@ MaybeError Texture::InitializeFromExternal(const ExternalImageDescriptorVk* desc
     Device* device = ToBackend(GetDevice());
     VkFormat format = VulkanImageFormat(device, GetFormat().format);
     VkImageUsageFlags usage = VulkanImageUsage(GetInternalUsage(), GetFormat());
-    DAWN_INVALID_IF(!externalMemoryService->SupportsCreateImage(descriptor, format, usage,
-                                                                &mSupportsDisjointVkImage),
-                    "Creating an image from external memory is not supported.");
-    // mSubresourceLastUsages was initialized with Plane0/Plane1 in the constructor for
-    // multiplanar formats, so we need to correct it to Color here.
-    if (ShouldCombineMultiPlaneBarriers()) {
-        mSubresourceLastUsages = std::make_unique<SubresourceStorage<wgpu::TextureUsage>>(
-            ComputeAspectsForSubresourceStorage(), GetArrayLayers(), GetNumMipLevels(),
-            wgpu::TextureUsage::None);
-    }
+
+    bool supportsDisjoint;
+    DAWN_INVALID_IF(
+        !externalMemoryService->SupportsCreateImage(descriptor, format, usage, &supportsDisjoint),
+        "Creating an image from external memory is not supported.");
+    // The creation of mSubresourceLastUsage assumes that multi-planar are always disjoint and sets
+    // the combined aspect without checking for disjoint support.
+    // TODO(dawn:1548): Support multi-planar images with the DISJOINT feature and potentially allow
+    // acting on planes individually? Always using Color is valid even for disjoint images.
+    DAWN_UNUSED(supportsDisjoint);
+    ASSERT(!GetFormat().IsMultiPlanar() || mCombinedAspect == Aspect::Color);
 
     mExternalState = ExternalState::PendingAcquire;
     mExportQueueFamilyIndex = externalMemoryService->GetQueueFamilyIndex();
@@ -805,11 +831,11 @@ MaybeError Texture::BindExternalMemory(const ExternalImageDescriptorVk* descript
 void Texture::TransitionEagerlyForExport(CommandRecordingContext* recordingContext) {
     mExternalState = ExternalState::EagerlyTransitioned;
 
-    Aspect aspects = ComputeAspectsForSubresourceStorage();
+    // Get any usage, ideally the last one to do nothing
     ASSERT(GetNumMipLevels() == 1 && GetArrayLayers() == 1);
-    SubresourceRange range = {aspects, {0, 1}, {0, 1}};
+    SubresourceRange range = {GetAllVulkanAspects(), {0, 1}, {0, 1}};
 
-    wgpu::TextureUsage usage = mSubresourceLastUsages->Get(aspects, 0, 0);
+    wgpu::TextureUsage usage = mSubresourceLastUsages.Get(range.aspects, 0, 0);
 
     std::vector<VkImageMemoryBarrier> barriers;
     VkPipelineStageFlags srcStages = 0;
@@ -855,9 +881,8 @@ MaybeError Texture::ExportExternalTexture(VkImageLayout desiredLayout,
     // Release the texture
     mExternalState = ExternalState::Released;
 
-    Aspect aspects = ComputeAspectsForSubresourceStorage();
     ASSERT(GetNumMipLevels() == 1 && GetArrayLayers() == 1);
-    wgpu::TextureUsage usage = mSubresourceLastUsages->Get(aspects, 0, 0);
+    wgpu::TextureUsage usage = mSubresourceLastUsages.Get(GetAllVulkanAspects(), 0, 0);
 
     VkImageLayout layout = VulkanImageLayout(this, usage);
 
@@ -946,7 +971,7 @@ void Texture::TweakTransitionForExternalUsage(CommandRecordingContext* recording
         if (barriers->size() == transitionBarrierStart) {
             barriers->push_back(BuildMemoryBarrier(
                 this, wgpu::TextureUsage::None, wgpu::TextureUsage::None,
-                SubresourceRange::SingleMipAndLayer(0, 0, ComputeAspectsForSubresourceStorage())));
+                SubresourceRange::SingleMipAndLayer(0, 0, GetAllVulkanAspects())));
         }
 
         VkImageMemoryBarrier* barrier = &(*barriers)[transitionBarrierStart];
@@ -1029,53 +1054,17 @@ bool Texture::CanReuseWithoutBarrier(wgpu::TextureUsage lastUsage, wgpu::Texture
     return false;
 }
 
-// Base Vulkan doesn't support transitioning depth and stencil separately. We work around
-// this limitation by combining the usages in the two planes of `textureUsages` into a
-// single plane in a new SubresourceStorage<TextureUsage>. The barriers will be produced
-// for DEPTH | STENCIL since the SubresourceRange uses Aspect::CombinedDepthStencil.
-bool Texture::ShouldCombineDepthStencilBarriers() const {
-    // If the Stencil8 format is being emulated then memory barriers also need to include
-    // the depth aspect. (See: crbug.com/dawn/1331)
-    if (GetFormat().format == wgpu::TextureFormat::Stencil8 &&
-        !GetDevice()->IsToggleEnabled(Toggle::VulkanUseS8)) {
-        return true;
-    }
-    return GetFormat().aspects == (Aspect::Depth | Aspect::Stencil);
-}
-
-// The Vulkan spec requires:
-// "If image has a single-plane color format or is not disjoint, then the aspectMask member of
-// subresourceRange must be VK_IMAGE_ASPECT_COLOR_BIT.".
-// For multi-planar formats, we currently only support import them in non-disjoint way.
-bool Texture::ShouldCombineMultiPlaneBarriers() const {
-    // TODO(chromium:1258986): Figure out how to support disjoint vkImage.
-    ASSERT(!mSupportsDisjointVkImage);
-    return GetFormat().aspects == (Aspect::Plane0 | Aspect::Plane1);
-}
-
-Aspect Texture::ComputeAspectsForSubresourceStorage() const {
-    if (ShouldCombineDepthStencilBarriers()) {
-        return Aspect::CombinedDepthStencil;
-    }
-    // Force to use Aspect::Color for Aspect::Plane0/1.
-    if (ShouldCombineMultiPlaneBarriers()) {
-        return Aspect::Color;
-    }
-    return GetFormat().aspects;
-}
-
 void Texture::TransitionUsageForPass(CommandRecordingContext* recordingContext,
                                      const TextureSubresourceUsage& textureUsages,
                                      std::vector<VkImageMemoryBarrier>* imageBarriers,
                                      VkPipelineStageFlags* srcStages,
                                      VkPipelineStageFlags* dstStages) {
-    if (ShouldCombineBarriers()) {
-        Aspect combinedAspect = ComputeAspectsForSubresourceStorage();
-        SubresourceStorage<wgpu::TextureUsage> combinedUsages(combinedAspect, GetArrayLayers(),
+    if (UseCombinedAspects()) {
+        SubresourceStorage<wgpu::TextureUsage> combinedUsages(mCombinedAspect, GetArrayLayers(),
                                                               GetNumMipLevels());
         textureUsages.Iterate([&](const SubresourceRange& range, wgpu::TextureUsage usage) {
             SubresourceRange updateRange = range;
-            updateRange.aspects = combinedAspect;
+            updateRange.aspects = mCombinedAspect;
 
             combinedUsages.Update(updateRange,
                                   [&](const SubresourceRange&, wgpu::TextureUsage* combinedUsage) {
@@ -1103,9 +1092,9 @@ void Texture::TransitionUsageForPassImpl(
     wgpu::TextureUsage allUsages = wgpu::TextureUsage::None;
     wgpu::TextureUsage allLastUsages = wgpu::TextureUsage::None;
 
-    mSubresourceLastUsages->Merge(subresourceUsages, [&](const SubresourceRange& range,
-                                                         wgpu::TextureUsage* lastUsage,
-                                                         const wgpu::TextureUsage& newUsage) {
+    mSubresourceLastUsages.Merge(subresourceUsages, [&](const SubresourceRange& range,
+                                                        wgpu::TextureUsage* lastUsage,
+                                                        const wgpu::TextureUsage& newUsage) {
         if (newUsage == wgpu::TextureUsage::None || CanReuseWithoutBarrier(*lastUsage, newUsage)) {
             return;
         }
@@ -1153,9 +1142,9 @@ void Texture::TransitionUsageAndGetResourceBarrier(wgpu::TextureUsage usage,
                                                    std::vector<VkImageMemoryBarrier>* imageBarriers,
                                                    VkPipelineStageFlags* srcStages,
                                                    VkPipelineStageFlags* dstStages) {
-    if (ShouldCombineBarriers()) {
+    if (UseCombinedAspects()) {
         SubresourceRange updatedRange = range;
-        updatedRange.aspects = ComputeAspectsForSubresourceStorage();
+        updatedRange.aspects = mCombinedAspect;
         TransitionUsageAndGetResourceBarrierImpl(usage, updatedRange, imageBarriers, srcStages,
                                                  dstStages);
     } else {
@@ -1173,7 +1162,7 @@ void Texture::TransitionUsageAndGetResourceBarrierImpl(
     const Format& format = GetFormat();
 
     wgpu::TextureUsage allLastUsages = wgpu::TextureUsage::None;
-    mSubresourceLastUsages->Update(
+    mSubresourceLastUsages.Update(
         range, [&](const SubresourceRange& range, wgpu::TextureUsage* lastUsage) {
             if (CanReuseWithoutBarrier(*lastUsage, usage)) {
                 return;
@@ -1352,7 +1341,18 @@ void Texture::UpdateExternalSemaphoreHandle(ExternalSemaphoreHandle handle) {
 
 VkImageLayout Texture::GetCurrentLayoutForSwapChain() const {
     ASSERT(GetFormat().aspects == Aspect::Color);
-    return VulkanImageLayout(this, mSubresourceLastUsages->Get(Aspect::Color, 0, 0));
+    return VulkanImageLayout(this, mSubresourceLastUsages.Get(Aspect::Color, 0, 0));
+}
+
+bool Texture::UseCombinedAspects() const {
+    return mCombinedAspect != Aspect::None;
+}
+
+Aspect Texture::GetAllVulkanAspects() const {
+    if (UseCombinedAspects()) {
+        return mCombinedAspect;
+    }
+    return GetFormat().aspects;
 }
 
 // static
