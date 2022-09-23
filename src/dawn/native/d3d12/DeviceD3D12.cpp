@@ -687,10 +687,10 @@ void Device::InitTogglesFromDriver() {
     // on the platforms where UnrestrictedBufferTextureCopyPitchSupported is true.
     SetToggle(Toggle::D3D12SplitBufferTextureCopyForRowsPerImagePaddings, true);
 
-    // This workaround is only needed on Intel Gen12LP with driver prior to 30.0.101.1960.
+    // This workaround is only needed on Intel Gen12LP with driver prior to 30.0.101.1692.
     // See http://crbug.com/dawn/949 for more information.
     if (gpu_info::IsIntelGen12LP(vendorId, deviceId)) {
-        const gpu_info::D3DDriverVersion version = {30, 0, 101, 1960};
+        const gpu_info::D3DDriverVersion version = {30, 0, 101, 1692};
         if (gpu_info::CompareD3DDriverVersion(vendorId, ToBackend(GetAdapter())->GetDriverVersion(),
                                               version) == -1) {
             SetToggle(Toggle::D3D12AllocateExtraMemoryFor2DArrayTexture, true);
