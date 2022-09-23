@@ -691,19 +691,19 @@ ResultOrError<ExecutionSerial> Texture::EndAccess() {
         // Needed to ensure that command allocator doesn't get destroyed before pending commands
         // are submitted due to calling NextSerial(). No-op if there are no pending commands.
         DAWN_TRY(ToBackend(GetDevice())->ExecutePendingCommandContext());
-
         // If there were pending commands that used this texture mSignalFenceValue will be set,
         // but if it's still not set, generate a signal fence after waiting on wait fences.
         if (!mSignalFenceValue.has_value()) {
             DAWN_TRY(SynchronizeImportedTextureBeforeUse());
-            DAWN_TRY(ToBackend(GetDevice())->NextSerial());
             DAWN_TRY(SynchronizeImportedTextureAfterUse());
-            ASSERT(mSignalFenceValue.has_value());
         }
+        DAWN_TRY(ToBackend(GetDevice())->NextSerial());
+        ASSERT(mSignalFenceValue.has_value());
     }
 
-    // Explicitly call reset() since std::move() on optional doesn't make it std::nullopt.
     ExecutionSerial ret = mSignalFenceValue.value();
+    ASSERT(ret <= GetDevice()->GetLastSubmittedCommandSerial());
+    // Explicitly call reset() since std::move() on optional doesn't make it std::nullopt.
     mSignalFenceValue.reset();
     return ret;
 }
@@ -760,8 +760,8 @@ MaybeError Texture::SynchronizeImportedTextureAfterUse() {
     if (mD3D11on12Resource != nullptr) {
         DAWN_TRY(mD3D11on12Resource->ReleaseKeyedMutex());
     } else {
-        // CommandRecordingContext will call NextSerial() to increment the fence before this call.
-        mSignalFenceValue = ToBackend(GetDevice())->GetLastSubmittedCommandSerial();
+        // NextSerial() will be called after this - this is also checked in EndAccess().
+        mSignalFenceValue = ToBackend(GetDevice())->GetPendingCommandSerial();
     }
     return {};
 }

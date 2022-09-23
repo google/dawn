@@ -338,8 +338,8 @@ MaybeError Device::TickImpl() {
     mUsedComObjectRefs.ClearUpTo(completedSerial);
 
     if (mPendingCommands.IsOpen()) {
-        // CommandRecordingContext::ExecuteCommandList() calls NextSerial().
         DAWN_TRY(ExecutePendingCommandContext());
+        DAWN_TRY(NextSerial());
     }
 
     DAWN_TRY(CheckDebugLayerAndGenerateErrors());

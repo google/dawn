@@ -123,8 +123,6 @@ MaybeError CommandRecordingContext::ExecuteCommandList(Device* device) {
         ID3D12CommandList* d3d12CommandList = GetCommandList();
         device->GetCommandQueue()->ExecuteCommandLists(1, &d3d12CommandList);
 
-        DAWN_TRY(device->NextSerial());
-
         for (Texture* texture : mSharedTextures) {
             DAWN_TRY(texture->SynchronizeImportedTextureAfterUse());
         }

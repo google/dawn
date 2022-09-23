@@ -91,7 +91,6 @@ class Device final : public DeviceBase {
 
     void ReferenceUntilUnused(ComPtr<IUnknown> object);
 
-    // Execute pending CommandRecordingContext, and increment last submitted serial if needed.
     MaybeError ExecutePendingCommandContext();
 
     ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
