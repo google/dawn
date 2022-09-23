@@ -2526,7 +2526,8 @@
             {"value": 1002, "name": "dawn toggles device descriptor", "tags": ["dawn", "native"]},
             {"value": 1003, "name": "dawn encoder internal usage descriptor", "tags": ["dawn"]},
             {"value": 1004, "name": "dawn instance descriptor", "tags": ["dawn", "native"]},
-            {"value": 1005, "name": "dawn cache device descriptor", "tags": ["dawn", "native"]}
+            {"value": 1005, "name": "dawn cache device descriptor", "tags": ["dawn", "native"]},
+            {"value": 1006, "name": "dawn adapter properties power preference", "tags": ["dawn", "native"]}
         ]
     },
     "texture": {
@@ -2928,6 +2929,15 @@
         "tags": ["dawn"],
         "members": [
             {"name": "use internal usages", "type": "bool", "default": "false"}
+        ]
+    },
+    "dawn adapter properties power preference": {
+        "category": "structure",
+        "chained": "out",
+        "chain roots": ["adapter properties"],
+        "tags": ["dawn"],
+        "members": [
+            {"name": "power preference", "type": "power preference", "default": "undefined"}
         ]
     }
 }

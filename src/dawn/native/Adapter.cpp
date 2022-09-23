@@ -86,6 +86,19 @@ bool AdapterBase::APIGetLimits(SupportedLimits* limits) const {
 }
 
 void AdapterBase::APIGetProperties(AdapterProperties* properties) const {
+    MaybeError result = ValidateSingleSType(properties->nextInChain,
+                                            wgpu::SType::DawnAdapterPropertiesPowerPreference);
+    if (result.IsError()) {
+        mInstance->ConsumedError(result.AcquireError());
+        return;
+    }
+
+    DawnAdapterPropertiesPowerPreference* powerPreferenceDesc = nullptr;
+    FindInChain(properties->nextInChain, &powerPreferenceDesc);
+    if (powerPreferenceDesc != nullptr) {
+        powerPreferenceDesc->powerPreference = wgpu::PowerPreference::Undefined;
+    }
+
     properties->vendorID = mVendorId;
     properties->vendorName = mVendorName.c_str();
     properties->architecture = mArchitectureName.c_str();
