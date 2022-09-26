@@ -1,4 +1,4 @@
-SKIP: FAILED - f16 not supported with FXC
+SKIP: FAILED
 
 void saturate_e8df56() {
   float16_t arg_0 = float16_t(0.0h);
@@ -31,3 +31,7 @@ void compute_main() {
   saturate_e8df56();
   return;
 }
+FXC validation failure:
+C:\src\dawn\test\tint\Shader@0x000001DB75B70300(2,3-11): error X3000: unrecognized identifier 'float16_t'
+C:\src\dawn\test\tint\Shader@0x000001DB75B70300(2,13-17): error X3000: unrecognized identifier 'arg_0'
+
