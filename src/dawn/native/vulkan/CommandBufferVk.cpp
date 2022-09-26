@@ -687,9 +687,9 @@ MaybeError CommandBuffer::RecordCommands(CommandRecordingContext* recordingConte
                 if (!copyUsingTemporaryBuffer) {
                     VkImage srcImage = ToBackend(src.texture)->GetHandle();
                     VkImage dstImage = ToBackend(dst.texture)->GetHandle();
+                    Aspect aspects = ToBackend(src.texture)->GetDisjointVulkanAspects();
 
-                    for (Aspect aspect : IterateEnumMask(src.texture->GetFormat().aspects)) {
-                        ASSERT(dst.texture->GetFormat().aspects & aspect);
+                    for (Aspect aspect : IterateEnumMask(aspects)) {
                         VkImageCopy region =
                             ComputeImageCopyRegion(src, dst, copy->copySize, aspect);
 

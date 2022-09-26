@@ -833,7 +833,7 @@ void Texture::TransitionEagerlyForExport(CommandRecordingContext* recordingConte
 
     // Get any usage, ideally the last one to do nothing
     ASSERT(GetNumMipLevels() == 1 && GetArrayLayers() == 1);
-    SubresourceRange range = {GetAllVulkanAspects(), {0, 1}, {0, 1}};
+    SubresourceRange range = {GetDisjointVulkanAspects(), {0, 1}, {0, 1}};
 
     wgpu::TextureUsage usage = mSubresourceLastUsages.Get(range.aspects, 0, 0);
 
@@ -882,7 +882,7 @@ MaybeError Texture::ExportExternalTexture(VkImageLayout desiredLayout,
     mExternalState = ExternalState::Released;
 
     ASSERT(GetNumMipLevels() == 1 && GetArrayLayers() == 1);
-    wgpu::TextureUsage usage = mSubresourceLastUsages.Get(GetAllVulkanAspects(), 0, 0);
+    wgpu::TextureUsage usage = mSubresourceLastUsages.Get(GetDisjointVulkanAspects(), 0, 0);
 
     VkImageLayout layout = VulkanImageLayout(this, usage);
 
@@ -971,7 +971,7 @@ void Texture::TweakTransitionForExternalUsage(CommandRecordingContext* recording
         if (barriers->size() == transitionBarrierStart) {
             barriers->push_back(BuildMemoryBarrier(
                 this, wgpu::TextureUsage::None, wgpu::TextureUsage::None,
-                SubresourceRange::SingleMipAndLayer(0, 0, GetAllVulkanAspects())));
+                SubresourceRange::SingleMipAndLayer(0, 0, GetDisjointVulkanAspects())));
         }
 
         VkImageMemoryBarrier* barrier = &(*barriers)[transitionBarrierStart];
@@ -1348,7 +1348,7 @@ bool Texture::UseCombinedAspects() const {
     return mCombinedAspect != Aspect::None;
 }
 
-Aspect Texture::GetAllVulkanAspects() const {
+Aspect Texture::GetDisjointVulkanAspects() const {
     if (UseCombinedAspects()) {
         return mCombinedAspect;
     }

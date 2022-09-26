@@ -65,6 +65,8 @@ class Texture final : public TextureBase {
                                            VkImage nativeImage);
 
     VkImage GetHandle() const;
+    // Returns the aspects used for tracking of Vulkan state. These can be the combined aspects.
+    Aspect GetDisjointVulkanAspects() const;
 
     // Transitions the texture to be used as `usage`, recording any necessary barrier in
     // `commands`.
@@ -183,7 +185,6 @@ class Texture final : public TextureBase {
     SubresourceStorage<wgpu::TextureUsage> mSubresourceLastUsages;
 
     bool UseCombinedAspects() const;
-    Aspect GetAllVulkanAspects() const;
 };
 
 class TextureView final : public TextureViewBase {
