@@ -110,13 +110,39 @@ TEST_F(ParserImplTest, Attribute_Align) {
               ast::IntLiteralExpression::Suffix::kNone);
 }
 
+TEST_F(ParserImplTest, Attribute_Align_Expression) {
+    auto p = parser("align(4 + 5)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(attr.value, nullptr);
+
+    auto* member_attr = attr.value->As<ast::Attribute>();
+    ASSERT_NE(member_attr, nullptr);
+    ASSERT_TRUE(member_attr->Is<ast::StructMemberAlignAttribute>());
+
+    auto* o = member_attr->As<ast::StructMemberAlignAttribute>();
+    ASSERT_TRUE(o->expr->Is<ast::BinaryExpression>());
+    auto* expr = o->expr->As<ast::BinaryExpression>();
+
+    EXPECT_EQ(ast::BinaryOp::kAdd, expr->op);
+    auto* v = expr->lhs->As<ast::IntLiteralExpression>();
+    ASSERT_NE(nullptr, v);
+    EXPECT_EQ(v->value, 4u);
+
+    v = expr->rhs->As<ast::IntLiteralExpression>();
+    ASSERT_NE(nullptr, v);
+    EXPECT_EQ(v->value, 5u);
+}
+
 TEST_F(ParserImplTest, Attribute_Align_TrailingComma) {
     auto p = parser("align(4,)");
     auto attr = p->attribute();
     EXPECT_TRUE(attr.matched);
     EXPECT_FALSE(attr.errored);
     ASSERT_NE(attr.value, nullptr);
-    ASSERT_FALSE(p->has_error());
+    ASSERT_FALSE(p->has_error()) << p->error();
 
     auto* member_attr = attr.value->As<ast::Attribute>();
     ASSERT_NE(member_attr, nullptr);
@@ -157,17 +183,18 @@ TEST_F(ParserImplTest, Attribute_Align_MissingValue) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:7: expected signed integer literal for align attribute");
+    EXPECT_EQ(p->error(), "1:7: expected align expression");
 }
 
-TEST_F(ParserImplTest, Attribute_Align_MissingInvalid) {
-    auto p = parser("align(nan)");
+TEST_F(ParserImplTest, Attribute_Align_ExpressionInvalid) {
+    auto p = parser("align(4 + 5 << 6)");
     auto attr = p->attribute();
     EXPECT_FALSE(attr.matched);
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:7: expected signed integer literal for align attribute");
+
+    EXPECT_EQ(p->error(), "1:13: expected ')' for align attribute");
 }
 
 }  // namespace

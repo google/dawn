@@ -336,7 +336,7 @@ OpMemberName %1 0 "a"
 TEST_F(BuilderTest_Type, GenerateStruct_DecoratedMembers) {
     auto* s = Structure("S", utils::Vector{
                                  Member("a", ty.f32()),
-                                 Member("b", ty.f32(), utils::Vector{MemberAlign(8_u)}),
+                                 Member("b", ty.f32(), utils::Vector{MemberAlign(8_i)}),
                              });
 
     spirv::Builder& b = Build();

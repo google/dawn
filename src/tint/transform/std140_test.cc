@@ -200,7 +200,7 @@ struct S {
 
 struct S_std140 {
   before : i32,
-  @align(128u)
+  @align(128i)
   m_0 : vec2<f32>,
   m_1 : vec2<f32>,
   m_2 : vec2<f32>,
@@ -272,7 +272,7 @@ struct S {
 
 struct S_std140 {
   before : i32,
-  @align(128u)
+  @align(128i)
   m_0 : vec2<f32>,
   m_1 : vec2<f32>,
   @size(112)

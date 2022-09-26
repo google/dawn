@@ -460,7 +460,7 @@ struct Std140::State {
                 // The matrix was @align() annotated with a larger alignment
                 // than the natural alignment for the matrix. This extra padding
                 // needs to be applied to the first column vector.
-                attributes.Push(b.MemberAlign(u32(align)));
+                attributes.Push(b.MemberAlign(i32(align)));
             }
             if ((i == num_columns - 1) && mat->Size() != size) {
                 // The matrix was @size() annotated with a larger size than the

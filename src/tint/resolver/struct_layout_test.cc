@@ -498,15 +498,15 @@ TEST_F(ResolverStructLayoutTest, SizeAttributes) {
 
 TEST_F(ResolverStructLayoutTest, AlignAttributes) {
     auto* inner = Structure("Inner", utils::Vector{
-                                         Member("a", ty.f32(), utils::Vector{MemberAlign(8_u)}),
-                                         Member("b", ty.f32(), utils::Vector{MemberAlign(16_u)}),
-                                         Member("c", ty.f32(), utils::Vector{MemberAlign(4_u)}),
+                                         Member("a", ty.f32(), utils::Vector{MemberAlign(8_i)}),
+                                         Member("b", ty.f32(), utils::Vector{MemberAlign(16_i)}),
+                                         Member("c", ty.f32(), utils::Vector{MemberAlign(4_i)}),
                                      });
     auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.f32(), utils::Vector{MemberAlign(4_u)}),
-                                 Member("b", ty.u32(), utils::Vector{MemberAlign(8_u)}),
+                                 Member("a", ty.f32(), utils::Vector{MemberAlign(4_i)}),
+                                 Member("b", ty.u32(), utils::Vector{MemberAlign(8_i)}),
                                  Member("c", ty.Of(inner)),
-                                 Member("d", ty.i32(), utils::Vector{MemberAlign(32_u)}),
+                                 Member("d", ty.i32(), utils::Vector{MemberAlign(32_i)}),
                              });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -536,7 +536,7 @@ TEST_F(ResolverStructLayoutTest, AlignAttributes) {
 
 TEST_F(ResolverStructLayoutTest, StructWithLotsOfPadding) {
     auto* s = Structure("S", utils::Vector{
-                                 Member("a", ty.i32(), utils::Vector{MemberAlign(1024_u)}),
+                                 Member("a", ty.i32(), utils::Vector{MemberAlign(1024_i)}),
                              });
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();

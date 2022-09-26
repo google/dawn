@@ -89,7 +89,7 @@ static utils::Vector<const ast::Attribute*, 2> createAttributes(const Source& so
                                                                 AttributeKind kind) {
     switch (kind) {
         case AttributeKind::kAlign:
-            return {builder.MemberAlign(source, 4_u)};
+            return {builder.MemberAlign(source, 4_i)};
         case AttributeKind::kBinding:
             return {builder.Binding(source, 1_a)};
         case AttributeKind::kBuiltin:
@@ -627,8 +627,8 @@ TEST_F(StructMemberAttributeTest, DuplicateAttribute) {
     Structure("mystruct", utils::Vector{
                               Member("a", ty.i32(),
                                      utils::Vector{
-                                         MemberAlign(Source{{12, 34}}, 4_u),
-                                         MemberAlign(Source{{56, 78}}, 8_u),
+                                         MemberAlign(Source{{12, 34}}, 4_i),
+                                         MemberAlign(Source{{56, 78}}, 8_i),
                                      }),
                           });
     EXPECT_FALSE(r()->Resolve());
@@ -657,6 +657,89 @@ TEST_F(StructMemberAttributeTest, InvariantAttributeWithoutPosition) {
     EXPECT_EQ(r()->error(),
               "12:34 error: invariant attribute must only be applied to a "
               "position builtin");
+}
+
+TEST_F(StructMemberAttributeTest, Align_Attribute_Const) {
+    GlobalConst("val", ty.i32(), Expr(1_i));
+
+    Structure("mystruct", utils::Vector{Member("a", ty.f32(), utils::Vector{MemberAlign("val")})});
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(StructMemberAttributeTest, Align_Attribute_ConstNegative) {
+    GlobalConst("val", ty.i32(), Expr(-2_i));
+
+    Structure("mystruct", utils::Vector{Member(
+                              "a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, "val")})});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: 'align' value must be a positive, power-of-two integer)");
+}
+
+TEST_F(StructMemberAttributeTest, Align_Attribute_ConstPowerOfTwo) {
+    GlobalConst("val", ty.i32(), Expr(3_i));
+
+    Structure("mystruct", utils::Vector{Member(
+                              "a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, "val")})});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: 'align' value must be a positive, power-of-two integer)");
+}
+
+TEST_F(StructMemberAttributeTest, Align_Attribute_ConstF32) {
+    GlobalConst("val", ty.f32(), Expr(1.23_f));
+
+    Structure("mystruct", utils::Vector{Member(
+                              "a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, "val")})});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'align' must be an i32 value)");
+}
+
+TEST_F(StructMemberAttributeTest, Align_Attribute_ConstU32) {
+    GlobalConst("val", ty.u32(), Expr(2_u));
+
+    Structure("mystruct", utils::Vector{Member(
+                              "a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, "val")})});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'align' must be an i32 value)");
+}
+
+TEST_F(StructMemberAttributeTest, Align_Attribute_ConstAInt) {
+    GlobalConst("val", Expr(2_a));
+
+    Structure("mystruct", utils::Vector{Member(
+                              "a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, "val")})});
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(StructMemberAttributeTest, Align_Attribute_ConstAFloat) {
+    GlobalConst("val", Expr(2.0_a));
+
+    Structure("mystruct", utils::Vector{Member(
+                              "a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, "val")})});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'align' must be an i32 value)");
+}
+
+TEST_F(StructMemberAttributeTest, Align_Attribute_Var) {
+    GlobalVar(Source{{1, 2}}, "val", ty.f32(), ast::StorageClass::kPrivate, ast::Access::kUndefined,
+              Expr(1.23_f));
+
+    Structure(Source{{6, 4}}, "mystruct",
+              utils::Vector{Member(Source{{12, 5}}, "a", ty.f32(),
+                                   utils::Vector{MemberAlign(Expr(Source{{12, 35}}, "val"))})});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:35 error: var 'val' cannot be referenced at module-scope
+1:2 note: var 'val' declared here)");
+}
+
+TEST_F(StructMemberAttributeTest, Align_Attribute_Override) {
+    Override("val", ty.f32(), Expr(1.23_f));
+
+    Structure("mystruct", utils::Vector{Member(
+                              "a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, "val")})});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'align' must be an i32 value)");
 }
 
 }  // namespace StructAndStructMemberTests

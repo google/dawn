@@ -851,17 +851,9 @@ struct S { 1 : i32, };
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberAlignInvaldValue) {
-    EXPECT("struct S { @align(x) i : i32, };",
-           R"(test.wgsl:1:19 error: expected signed integer literal for align attribute
-struct S { @align(x) i : i32, };
-                  ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclStructMemberAlignNegativeValue) {
-    EXPECT("struct S { @align(-2) i : i32, };",
-           R"(test.wgsl:1:19 error: align attribute must be positive
-struct S { @align(-2) i : i32, };
+    EXPECT("struct S { @align(fn) i : i32, };",
+           R"(test.wgsl:1:19 error: expected align expression
+struct S { @align(fn) i : i32, };
                   ^^
 )");
 }

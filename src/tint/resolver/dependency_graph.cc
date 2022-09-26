@@ -182,6 +182,7 @@ class DependencyScanner {
             [&](const ast::Struct* str) {
                 Declare(str->name, str);
                 for (auto* member : str->members) {
+                    TraverseAttributes(member->attributes);
                     TraverseType(member->type);
                 }
             },
@@ -421,11 +422,16 @@ class DependencyScanner {
             TraverseExpression(wg->z);
             return;
         }
+        if (auto* align = attr->As<ast::StructMemberAlignAttribute>()) {
+            TraverseExpression(align->expr);
+            return;
+        }
+
         if (attr->IsAnyOf<ast::BindingAttribute, ast::BuiltinAttribute, ast::GroupAttribute,
                           ast::IdAttribute, ast::InternalAttribute, ast::InterpolateAttribute,
                           ast::InvariantAttribute, ast::LocationAttribute, ast::StageAttribute,
-                          ast::StrideAttribute, ast::StructMemberAlignAttribute,
-                          ast::StructMemberOffsetAttribute, ast::StructMemberSizeAttribute>()) {
+                          ast::StrideAttribute, ast::StructMemberOffsetAttribute,
+                          ast::StructMemberSizeAttribute>()) {
             return;
         }
 

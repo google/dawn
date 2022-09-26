@@ -1237,22 +1237,31 @@ TEST_F(ResolverValidationTest, StructMemberDuplicateNamePass) {
     EXPECT_TRUE(r()->Resolve());
 }
 
-TEST_F(ResolverValidationTest, NonPOTStructMemberAlignAttribute) {
+TEST_F(ResolverValidationTest, NegativeStructMemberAlignAttribute) {
     Structure("S", utils::Vector{
-                       Member("a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, 3_u)}),
+                       Member("a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, -2_i)}),
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: align value must be a positive, power-of-two integer");
+    EXPECT_EQ(r()->error(), "12:34 error: 'align' value must be a positive, power-of-two integer");
+}
+
+TEST_F(ResolverValidationTest, NonPOTStructMemberAlignAttribute) {
+    Structure("S", utils::Vector{
+                       Member("a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, 3_i)}),
+                   });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: 'align' value must be a positive, power-of-two integer");
 }
 
 TEST_F(ResolverValidationTest, ZeroStructMemberAlignAttribute) {
     Structure("S", utils::Vector{
-                       Member("a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, 0_u)}),
+                       Member("a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, 0_i)}),
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: align value must be a positive, power-of-two integer");
+    EXPECT_EQ(r()->error(), "12:34 error: 'align' value must be a positive, power-of-two integer");
 }
 
 TEST_F(ResolverValidationTest, ZeroStructMemberSizeAttribute) {
@@ -1279,7 +1288,7 @@ TEST_F(ResolverValidationTest, OffsetAndSizeAttribute) {
 TEST_F(ResolverValidationTest, OffsetAndAlignAttribute) {
     Structure("S", utils::Vector{
                        Member(Source{{12, 34}}, "a", ty.f32(),
-                              utils::Vector{MemberOffset(0_a), MemberAlign(4_u)}),
+                              utils::Vector{MemberOffset(0_a), MemberAlign(4_i)}),
                    });
 
     EXPECT_FALSE(r()->Resolve());
@@ -1291,7 +1300,7 @@ TEST_F(ResolverValidationTest, OffsetAndAlignAttribute) {
 TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeAttribute) {
     Structure("S", utils::Vector{
                        Member(Source{{12, 34}}, "a", ty.f32(),
-                              utils::Vector{MemberOffset(0_a), MemberAlign(4_u), MemberSize(4_a)}),
+                              utils::Vector{MemberOffset(0_a), MemberAlign(4_i), MemberSize(4_a)}),
                    });
 
     EXPECT_FALSE(r()->Resolve());

@@ -1229,7 +1229,10 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
 #define F add_use(func_decl, Expr(func_sym), __LINE__, "F()")
 
     Alias(Sym(), T);
-    Structure(Sym(), utils::Vector{Member(Sym(), T)});
+    Structure(Sym(),  //
+              utils::Vector{
+                  Member(Sym(), T, utils::Vector{MemberAlign(V)})  //
+              });
     GlobalVar(Sym(), T, V);
     GlobalConst(Sym(), T, V);
     Func(Sym(),                           //

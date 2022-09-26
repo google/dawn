@@ -255,7 +255,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
     auto* s = Structure(
         "S", utils::Vector{
                  Member("a", ty.i32(), utils::Vector{MemberSize(32_a)}),
-                 Member("b", ty.f32(), utils::Vector{MemberAlign(128_u), MemberSize(128_a)}),
+                 Member("b", ty.f32(), utils::Vector{MemberAlign(128_i), MemberSize(128_a)}),
                  Member("c", ty.vec2<f32>()),
                  Member("d", ty.u32()),
                  Member("e", ty.vec3<f32>()),
@@ -372,7 +372,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_Structures) {
     auto* inner_x =
         Structure("inner_x", utils::Vector{
                                  Member("a", ty.i32()),
-                                 Member("b", ty.f32(), utils::Vector{MemberAlign(512_u)}),
+                                 Member("b", ty.f32(), utils::Vector{MemberAlign(512_i)}),
                              });
 
     // inner_y: size(516), align(4)
@@ -460,7 +460,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_ArrayDefaultStride) {
     // inner: size(1024), align(512)
     auto* inner = Structure("inner", utils::Vector{
                                          Member("a", ty.i32()),
-                                         Member("b", ty.f32(), utils::Vector{MemberAlign(512_u)}),
+                                         Member("b", ty.f32(), utils::Vector{MemberAlign(512_i)}),
                                      });
 
     // array_x: size(28), align(4)
@@ -598,7 +598,7 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
                                  // uses symbols tint_pad_[0..9] and tint_pad_[20..35]
                                  Member("tint_pad_2", ty.i32(), utils::Vector{MemberSize(32_a)}),
                                  Member("tint_pad_20", ty.f32(),
-                                        utils::Vector{MemberAlign(128_u), MemberSize(128_u)}),
+                                        utils::Vector{MemberAlign(128_i), MemberSize(128_u)}),
                                  Member("tint_pad_33", ty.vec2<f32>()),
                                  Member("tint_pad_1", ty.u32()),
                                  Member("tint_pad_3", ty.vec3<f32>()),
