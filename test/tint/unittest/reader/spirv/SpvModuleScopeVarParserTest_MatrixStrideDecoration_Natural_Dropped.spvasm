@@ -14,6 +14,7 @@ OpDecorate %myvar Binding 0
 OpDecorate %_struct_3 Block
 OpMemberDecorate %_struct_3 0 MatrixStride 8
 OpMemberDecorate %_struct_3 0 Offset 0
+OpMemberDecorate %_struct_3 0 ColMajor
 %void = OpTypeVoid
 %5 = OpTypeFunction %void
 %float = OpTypeFloat 32
