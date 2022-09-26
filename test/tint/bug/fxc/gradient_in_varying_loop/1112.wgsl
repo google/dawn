@@ -20,7 +20,9 @@ fn main(@location(0) vUV : vec2<f32>) -> @location(0) vec4<f32> {
             continue;
         }
 
-        let sampleDepth : f32 = textureSample(depthTexture, Sampler, offset.xy).r;
+        // Violates uniformity analysis:
+        // let sampleDepth : f32 = textureSample(depthTexture, Sampler, offset.xy).r;
+        let sampleDepth : f32 = 0;
         i = i + 1;
     }
 

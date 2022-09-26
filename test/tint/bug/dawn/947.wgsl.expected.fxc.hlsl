@@ -1,15 +1,3 @@
-bug/dawn/947.wgsl:59:20 warning: 'textureSample' must only be called from uniform control flow
-    var srcColor = textureSample(myTexture, mySampler, texcoord);
-                   ^^^^^^^^^^^^^
-
-bug/dawn/947.wgsl:55:5 note: control flow depends on non-uniform value
-    if (!all(clampedTexcoord == texcoord)) {
-    ^^
-
-bug/dawn/947.wgsl:55:33 note: reading from user-defined input 'texcoord' may result in a non-uniform value
-    if (!all(clampedTexcoord == texcoord)) {
-                                ^^^^^^^^
-
 cbuffer cbuffer_uniforms : register(b0, space0) {
   uint4 uniforms[1];
 };
@@ -65,7 +53,7 @@ float4 fs_main_inner(float2 texcoord) {
     tint_discard = true;
     return (0.0f).xxxx;
   }
-  float4 srcColor = myTexture.Sample(mySampler, texcoord);
+  float4 srcColor = (0.0f).xxxx;
   return srcColor;
 }
 

@@ -1,19 +1,7 @@
-bug/dawn/947.wgsl:59:20 warning: 'textureSample' must only be called from uniform control flow
-    var srcColor = textureSample(myTexture, mySampler, texcoord);
-                   ^^^^^^^^^^^^^
-
-bug/dawn/947.wgsl:55:5 note: control flow depends on non-uniform value
-    if (!all(clampedTexcoord == texcoord)) {
-    ^^
-
-bug/dawn/947.wgsl:55:33 note: reading from user-defined input 'texcoord' may result in a non-uniform value
-    if (!all(clampedTexcoord == texcoord)) {
-                                ^^^^^^^^
-
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 138
+; Bound: 133
 ; Schema: 0
                OpCapability Shader
         %117 = OpExtInstImport "GLSL.std.450"
@@ -128,7 +116,6 @@ bug/dawn/947.wgsl:55:33 note: reading from user-defined input 'texcoord' may res
         %102 = OpTypeFunction %void
         %112 = OpTypeFunction %v4float %v2float
      %v2bool = OpTypeVector %bool 2
-        %130 = OpTypeSampledImage %27
 %vs_main_inner = OpFunction %VertexOutputs None %28
 %VertexIndex = OpFunctionParameter %uint
          %32 = OpLabel
@@ -216,18 +203,14 @@ bug/dawn/947.wgsl:55:33 note: reading from user-defined input 'texcoord' may res
         %126 = OpFunctionCall %void %tint_discard_func
                OpReturnValue %12
         %124 = OpLabel
-        %128 = OpLoad %24 %mySampler
-        %129 = OpLoad %27 %myTexture
-        %131 = OpSampledImage %130 %129 %128
-        %127 = OpImageSampleImplicitLod %v4float %131 %texcoord_0
-               OpStore %srcColor %127
-        %133 = OpLoad %v4float %srcColor
-               OpReturnValue %133
+               OpStore %srcColor %12
+        %128 = OpLoad %v4float %srcColor
+               OpReturnValue %128
                OpFunctionEnd
     %fs_main = OpFunction %void None %102
-        %135 = OpLabel
-        %137 = OpLoad %v2float %texcoord_1
-        %136 = OpFunctionCall %v4float %fs_main_inner %137
-               OpStore %value %136
+        %130 = OpLabel
+        %132 = OpLoad %v2float %texcoord_1
+        %131 = OpFunctionCall %v4float %fs_main_inner %132
+               OpStore %value %131
                OpReturn
                OpFunctionEnd

@@ -143,7 +143,9 @@ fn main_1() {
         let x_208 : f32 = frameID_1;
         let x_211 : f32 = x_20.spriteCount;
         let x_214 : f32 = f;
-        let x_217 : vec4<f32> = textureSampleBias(animationMapTexture, animationMapSampler, vec2<f32>(((x_208 + 0.5) / x_211), (0.125 * x_214)), 0.0);
+        // Violates uniformity analysis:
+        // let x_217 : vec4<f32> = textureSampleBias(animationMapTexture, animationMapSampler, vec2<f32>(((x_208 + 0.5) / x_211), (0.125 * x_214)), 0.0);
+        let x_217 : vec4<f32> = vec4<f32>(0);
         animationData = x_217;
 
         continuing {

@@ -56,7 +56,9 @@ struct VertexOutputs {
         discard;
     }
 
-    var srcColor = textureSample(myTexture, mySampler, texcoord);
+    // Violates uniformity analysis:
+    // var srcColor = textureSample(myTexture, mySampler, texcoord);
+    var srcColor = vec4<f32>(0);
     // Swizzling of texture formats when sampling / rendering is handled by the
     // hardware so we don't need special logic in this shader. This is covered by tests.
     return srcColor;

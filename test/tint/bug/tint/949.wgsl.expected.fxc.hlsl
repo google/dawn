@@ -1,15 +1,3 @@
-bug/tint/949.wgsl:326:29 warning: 'textureSample' must only be called from uniform control flow
-    let x_397 : vec4<f32> = textureSample(TextureSamplerTexture, TextureSamplerSampler, (x_394 + x_395));
-                            ^^^^^^^^^^^^^
-
-bug/tint/949.wgsl:330:5 note: control flow depends on non-uniform value
-    if ((x_400 > x_401)) {
-    ^^
-
-bug/tint/949.wgsl:308:27 note: reading from module-scope private variable 'v_output2' may result in a non-uniform value
-  let x_366 : vec4<f32> = v_output2;
-                          ^^^^^^^^^
-
 struct lightingInfo {
   float3 diffuse;
   float3 specular;
@@ -298,7 +286,7 @@ void main_1() {
     }
     const float2 x_394 = v_uv;
     const float2 x_395 = vCurrOffset;
-    const float4 x_397 = TextureSamplerTexture.Sample(TextureSamplerSampler, (x_394 + x_395));
+    const float4 x_397 = (0.0f).xxxx;
     currSampledHeight = x_397.w;
     const float x_400 = currSampledHeight;
     const float x_401 = currRayHeight;

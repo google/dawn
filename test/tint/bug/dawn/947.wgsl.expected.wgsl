@@ -1,15 +1,3 @@
-bug/dawn/947.wgsl:59:20 warning: 'textureSample' must only be called from uniform control flow
-    var srcColor = textureSample(myTexture, mySampler, texcoord);
-                   ^^^^^^^^^^^^^
-
-bug/dawn/947.wgsl:55:5 note: control flow depends on non-uniform value
-    if (!all(clampedTexcoord == texcoord)) {
-    ^^
-
-bug/dawn/947.wgsl:55:33 note: reading from user-defined input 'texcoord' may result in a non-uniform value
-    if (!all(clampedTexcoord == texcoord)) {
-                                ^^^^^^^^
-
 struct Uniforms {
   u_scale : vec2<f32>,
   u_offset : vec2<f32>,
@@ -48,6 +36,6 @@ fn fs_main(@location(0) texcoord : vec2<f32>) -> @location(0) vec4<f32> {
   if (!(all((clampedTexcoord == texcoord)))) {
     discard;
   }
-  var srcColor = textureSample(myTexture, mySampler, texcoord);
+  var srcColor = vec4<f32>(0);
   return srcColor;
 }

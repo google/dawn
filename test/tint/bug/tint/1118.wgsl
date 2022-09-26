@@ -61,7 +61,8 @@ fn main_1() {
   alpha = x_60;
   let x_62 : vec3<f32> = vec3<f32>(0., 0., 0.);
   let x_64 : vec3<f32> = vec3<f32>(0., 0., 0.);
-  normalW = normalize(-(cross(dpdx(x_62), dpdy(x_64))));
+  // Violates uniformity analysis:
+  // normalW = normalize(-(cross(dpdx(x_62), dpdy(x_64))));
   uvOffset = vec2<f32>(0.0, 0.0);
   let x_74 : vec4<f32> = vec4<f32>(0., 0., 0., 0.);
   let x_76 : vec4<f32> = baseColor;

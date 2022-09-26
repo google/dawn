@@ -1,15 +1,3 @@
-bug/tint/948.wgsl:146:33 warning: 'textureSampleBias' must only be called from uniform control flow
-        let x_217 : vec4<f32> = textureSampleBias(animationMapTexture, animationMapSampler, vec2<f32>(((x_208 + 0.5) / x_211), (0.125 * x_214)), 0.0);
-                                ^^^^^^^^^^^^^^^^^
-
-bug/tint/948.wgsl:138:9 note: control flow depends on non-uniform value
-        if ((x_197 > x_198)) {
-        ^^
-
-bug/tint/948.wgsl:137:27 note: reading from module-scope private variable 'mt' may result in a non-uniform value
-        let x_198 : f32 = mt;
-                          ^^
-
 #version 310 es
 precision mediump float;
 
@@ -153,7 +141,7 @@ void main_1() {
         float x_208 = frameID_1;
         float x_211 = x_20.spriteCount;
         float x_214 = f;
-        vec4 x_217 = texture(animationMapTexture_animationMapSampler, vec2(((x_208 + 0.5f) / x_211), (0.125f * x_214)), 0.0f);
+        vec4 x_217 = vec4(0.0f);
         animationData = x_217;
         {
           float x_218 = f;

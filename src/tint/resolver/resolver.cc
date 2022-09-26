@@ -167,7 +167,7 @@ bool Resolver::ResolveInternal() {
 
     if (!enabled_extensions_.Contains(ast::Extension::kChromiumDisableUniformityAnalysis)) {
         if (!AnalyzeUniformity(builder_, dependencies_)) {
-            // TODO(jrprice): Reject programs that fail uniformity analysis.
+            return false;
         }
     }
 

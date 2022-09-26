@@ -18,6 +18,7 @@
 
 ### Breaking changes
 
+* Uniformity analysis failures are now an error [tint:880](crbug.com/tint/880)
 * Indexing an array, vector or matrix with a compile-time expression that's out-of-bounds is now an error [tint:1665](crbug.com/tint/1665)
 
 ## Changes for M106

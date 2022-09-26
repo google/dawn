@@ -1,15 +1,3 @@
-bug/dawn/947.wgsl:59:20 warning: 'textureSample' must only be called from uniform control flow
-    var srcColor = textureSample(myTexture, mySampler, texcoord);
-                   ^^^^^^^^^^^^^
-
-bug/dawn/947.wgsl:55:5 note: control flow depends on non-uniform value
-    if (!all(clampedTexcoord == texcoord)) {
-    ^^
-
-bug/dawn/947.wgsl:55:33 note: reading from user-defined input 'texcoord' may result in a non-uniform value
-    if (!all(clampedTexcoord == texcoord)) {
-                                ^^^^^^^^
-
 #include <metal_stdlib>
 
 using namespace metal;
@@ -70,13 +58,13 @@ struct tint_symbol_3 {
   float4 value [[color(0)]];
 };
 
-float4 fs_main_inner(float2 texcoord, thread bool* const tint_symbol_7, texture2d<float, access::sample> tint_symbol_8, sampler tint_symbol_9) {
+float4 fs_main_inner(float2 texcoord, thread bool* const tint_symbol_7) {
   float2 clampedTexcoord = clamp(texcoord, float2(0.0f), float2(1.0f));
   if (!(all((clampedTexcoord == texcoord)))) {
     *(tint_symbol_7) = true;
     return float4(0.0f);
   }
-  float4 srcColor = tint_symbol_8.sample(tint_symbol_9, texcoord);
+  float4 srcColor = float4(0.0f);
   return srcColor;
 }
 
@@ -84,10 +72,10 @@ void tint_discard_func() {
   discard_fragment();
 }
 
-fragment tint_symbol_3 fs_main(texture2d<float, access::sample> tint_symbol_11 [[texture(0)]], sampler tint_symbol_12 [[sampler(0)]], tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  thread bool tint_symbol_10 = false;
-  float4 const inner_result_1 = fs_main_inner(tint_symbol_1.texcoord, &(tint_symbol_10), tint_symbol_11, tint_symbol_12);
-  if (tint_symbol_10) {
+fragment tint_symbol_3 fs_main(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  thread bool tint_symbol_8 = false;
+  float4 const inner_result_1 = fs_main_inner(tint_symbol_1.texcoord, &(tint_symbol_8));
+  if (tint_symbol_8) {
     tint_discard_func();
     tint_symbol_3 const tint_symbol_4 = tint_symbol_3{};
     return tint_symbol_4;

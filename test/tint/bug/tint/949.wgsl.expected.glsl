@@ -1,15 +1,3 @@
-bug/tint/949.wgsl:326:29 warning: 'textureSample' must only be called from uniform control flow
-    let x_397 : vec4<f32> = textureSample(TextureSamplerTexture, TextureSamplerSampler, (x_394 + x_395));
-                            ^^^^^^^^^^^^^
-
-bug/tint/949.wgsl:330:5 note: control flow depends on non-uniform value
-    if ((x_400 > x_401)) {
-    ^^
-
-bug/tint/949.wgsl:308:27 note: reading from module-scope private variable 'v_output2' may result in a non-uniform value
-  let x_366 : vec4<f32> = v_output2;
-                          ^^^^^^^^^
-
 #version 310 es
 precision mediump float;
 
@@ -322,7 +310,7 @@ void main_1() {
     }
     vec2 x_394 = v_uv;
     vec2 x_395 = vCurrOffset;
-    vec4 x_397 = texture(TextureSamplerTexture_TextureSamplerSampler, (x_394 + x_395));
+    vec4 x_397 = vec4(0.0f);
     currSampledHeight = x_397.w;
     float x_400 = currSampledHeight;
     float x_401 = currRayHeight;

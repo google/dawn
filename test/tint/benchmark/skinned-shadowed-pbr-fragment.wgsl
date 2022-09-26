@@ -229,7 +229,8 @@ fn GetSurfaceInfo(input : VertexOutput) -> SurfaceInfo {
   let baseColorMap = textureSample(baseColorTexture, baseColorSampler, input.texcoord);
   surface.baseColor = ((input.color * material.baseColorFactor) * baseColorMap);
   if ((surface.baseColor.a < material.alphaCutoff)) {
-    discard;
+    // Violates uniformity analysis:
+    // discard;
   }
   surface.albedo = surface.baseColor.rgb;
   let metallicRoughnessMap = textureSample(metallicRoughnessTexture, metallicRoughnessSampler, input.texcoord);

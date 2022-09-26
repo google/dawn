@@ -1,15 +1,3 @@
-bug/fxc/gradient_in_varying_loop/1112.wgsl:23:33 warning: 'textureSample' must only be called from uniform control flow
-        let sampleDepth : f32 = textureSample(depthTexture, Sampler, offset.xy).r;
-                                ^^^^^^^^^^^^^
-
-bug/fxc/gradient_in_varying_loop/1112.wgsl:18:28 note: control flow depends on non-uniform value
-        if (offset.x < 0.0 || offset.y < 0.0 || offset.x > 1.0 || offset.y > 1.0) {
-                           ^^
-
-bug/fxc/gradient_in_varying_loop/1112.wgsl:8:29 note: return value of 'textureSample' may be non-uniform
-    let random: vec3<f32> = textureSample(randomTexture, Sampler, vUV).rgb;
-                            ^^^^^^^^^^^^^
-
 SamplerState tint_symbol : register(s0, space0);
 Texture2D<float4> randomTexture : register(t1, space0);
 Texture2D<float4> depthTexture : register(t2, space0);
@@ -46,7 +34,7 @@ float4 main_inner(float2 vUV) {
       i = (i + 1);
       continue;
     }
-    const float sampleDepth = depthTexture.Sample(tint_symbol, offset.xy).r;
+    const float sampleDepth = 0.0f;
     i = (i + 1);
   }
   return (1.0f).xxxx;

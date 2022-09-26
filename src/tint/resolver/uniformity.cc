@@ -1548,9 +1548,8 @@ class UniformityGraph {
         // Helper to produce a diagnostic message with the severity required by this invocation of
         // the `MakeError` function.
         auto report = [&](Source source, std::string msg) {
-            // TODO(jrprice): Switch to error instead of warning when feedback has settled.
             diag::Diagnostic error{};
-            error.severity = note ? diag::Severity::Note : diag::Severity::Warning;
+            error.severity = note ? diag::Severity::Note : diag::Severity::Error;
             error.system = diag::System::Resolver;
             error.source = source;
             error.message = msg;

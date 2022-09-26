@@ -1,15 +1,3 @@
-bug/tint/1118.wgsl:64:31 warning: 'dpdx' must only be called from uniform control flow
-  normalW = normalize(-(cross(dpdx(x_62), dpdy(x_64))));
-                              ^^^^
-
-bug/tint/1118.wgsl:47:3 note: control flow depends on non-uniform value
-  if ((x_9 > 0.0)) {
-  ^^
-
-bug/tint/1118.wgsl:46:19 note: reading from module-scope private variable 'fClipDistance3' may result in a non-uniform value
-  let x_9 : f32 = fClipDistance3;
-                  ^^^^^^^^^^^^^^
-
 #version 310 es
 precision mediump float;
 
@@ -76,7 +64,6 @@ void main_1() {
   alpha = x_60;
   vec3 x_62 = vec3(0.0f);
   vec3 x_64 = vec3(0.0f);
-  normalW = normalize(-(cross(dFdx(x_62), dFdy(x_64))));
   uvOffset = vec2(0.0f);
   vec4 x_74 = vec4(0.0f);
   vec4 x_76 = baseColor;

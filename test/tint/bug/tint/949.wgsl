@@ -323,7 +323,9 @@ fn main_1() {
     }
     let x_394 : vec2<f32> = v_uv;
     let x_395 : vec2<f32> = vCurrOffset;
-    let x_397 : vec4<f32> = textureSample(TextureSamplerTexture, TextureSamplerSampler, (x_394 + x_395));
+    // Violates uniformity analysis:
+    // let x_397 : vec4<f32> = textureSample(TextureSamplerTexture, TextureSamplerSampler, (x_394 + x_395));
+    let x_397 : vec4<f32> = vec4<f32>();
     currSampledHeight = x_397.w;
     let x_400 : f32 = currSampledHeight;
     let x_401 : f32 = currRayHeight;

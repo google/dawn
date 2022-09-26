@@ -1,15 +1,3 @@
-bug/tint/1118.wgsl:64:31 warning: 'dpdx' must only be called from uniform control flow
-  normalW = normalize(-(cross(dpdx(x_62), dpdy(x_64))));
-                              ^^^^
-
-bug/tint/1118.wgsl:47:3 note: control flow depends on non-uniform value
-  if ((x_9 > 0.0)) {
-  ^^
-
-bug/tint/1118.wgsl:46:19 note: reading from module-scope private variable 'fClipDistance3' may result in a non-uniform value
-  let x_9 : f32 = fClipDistance3;
-                  ^^^^^^^^^^^^^^
-
 struct Scene {
   vEyePosition : vec4<f32>,
 }
@@ -73,7 +61,6 @@ fn main_1() {
   alpha = x_60;
   let x_62 : vec3<f32> = vec3<f32>(0.0, 0.0, 0.0);
   let x_64 : vec3<f32> = vec3<f32>(0.0, 0.0, 0.0);
-  normalW = normalize(-(cross(dpdx(x_62), dpdy(x_64))));
   uvOffset = vec2<f32>(0.0, 0.0);
   let x_74 : vec4<f32> = vec4<f32>(0.0, 0.0, 0.0, 0.0);
   let x_76 : vec4<f32> = baseColor;
