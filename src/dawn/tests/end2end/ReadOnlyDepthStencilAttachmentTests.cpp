@@ -256,6 +256,37 @@ TEST_P(ReadOnlyDepthAttachmentTests, NotSampleFromAttachment) {
                       {kSize, kSize / 2});
 }
 
+// Regression test for crbug.com/dawn/1512 where having aspectReadOnly for an unused aspect of a
+// depth-stencil texture would cause the attachment to be considered read-only, causing layout
+// mismatch issues.
+TEST_P(ReadOnlyDepthAttachmentTests, UnusedAspectWithReadOnly) {
+    wgpu::TextureFormat format = GetParam().mTextureFormat;
+    wgpu::Texture depthStencilTexture = CreateTexture(format, wgpu::TextureUsage::RenderAttachment);
+
+    utils::ComboRenderPassDescriptor passDescriptor({}, depthStencilTexture.CreateView());
+    if (utils::IsStencilOnlyFormat(format)) {
+        passDescriptor.cDepthStencilAttachmentInfo.depthReadOnly = true;
+        passDescriptor.cDepthStencilAttachmentInfo.depthLoadOp = wgpu::LoadOp::Undefined;
+        passDescriptor.cDepthStencilAttachmentInfo.depthStoreOp = wgpu::StoreOp::Undefined;
+    } else {
+        passDescriptor.cDepthStencilAttachmentInfo.depthReadOnly = false;
+    }
+    if (utils::IsDepthOnlyFormat(format)) {
+        passDescriptor.cDepthStencilAttachmentInfo.stencilReadOnly = true;
+        passDescriptor.cDepthStencilAttachmentInfo.stencilLoadOp = wgpu::LoadOp::Undefined;
+        passDescriptor.cDepthStencilAttachmentInfo.stencilStoreOp = wgpu::StoreOp::Undefined;
+    } else {
+        passDescriptor.cDepthStencilAttachmentInfo.stencilReadOnly = false;
+    }
+
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&passDescriptor);
+    pass.End();
+    wgpu::CommandBuffer commands = encoder.Finish();
+
+    queue.Submit(1, &commands);
+}
+
 class ReadOnlyStencilAttachmentTests : public ReadOnlyDepthStencilAttachmentTests {
   protected:
     void SetUp() override {

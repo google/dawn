@@ -911,7 +911,38 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
                     cmd->depthStencilAttachment.clearStencil =
                         descriptor->depthStencilAttachment->stencilClearValue;
                 }
+
+                // Copy parameters for the depth, reyifing the values when it is not present or
+                // readonly.
+                cmd->depthStencilAttachment.depthReadOnly = false;
+                cmd->depthStencilAttachment.depthLoadOp = wgpu::LoadOp::Load;
+                cmd->depthStencilAttachment.depthStoreOp = wgpu::StoreOp::Store;
+                if (view->GetFormat().HasDepth()) {
+                    cmd->depthStencilAttachment.depthReadOnly =
+                        descriptor->depthStencilAttachment->depthReadOnly;
+                    if (!cmd->depthStencilAttachment.depthReadOnly) {
+                        cmd->depthStencilAttachment.depthLoadOp =
+                            descriptor->depthStencilAttachment->depthLoadOp;
+                        cmd->depthStencilAttachment.depthStoreOp =
+                            descriptor->depthStencilAttachment->depthStoreOp;
+                    }
+                }
+
+                // Copy parameters for the stencil, reyifing the values when it is not present or
+                // readonly.
+                cmd->depthStencilAttachment.stencilReadOnly = false;
+                cmd->depthStencilAttachment.stencilLoadOp = wgpu::LoadOp::Load;
+                cmd->depthStencilAttachment.stencilStoreOp = wgpu::StoreOp::Store;
                 if (view->GetFormat().HasStencil()) {
+                    cmd->depthStencilAttachment.stencilReadOnly =
+                        descriptor->depthStencilAttachment->stencilReadOnly;
+                    if (!cmd->depthStencilAttachment.stencilReadOnly) {
+                        cmd->depthStencilAttachment.stencilLoadOp =
+                            descriptor->depthStencilAttachment->stencilLoadOp;
+                        cmd->depthStencilAttachment.stencilStoreOp =
+                            descriptor->depthStencilAttachment->stencilStoreOp;
+                    }
+
                     // GPURenderPassDepthStencilAttachment.stencilClearValue will be converted to
                     // the type of the stencil aspect of view by taking the same number of LSBs as
                     // the number of bits in the stencil aspect of one texel block of view.
@@ -919,35 +950,6 @@ Ref<RenderPassEncoder> CommandEncoder::BeginRenderPass(const RenderPassDescripto
                                .GetAspectInfo(dawn::native::Aspect::Stencil)
                                .block.byteSize == 1u);
                     cmd->depthStencilAttachment.clearStencil &= 0xFF;
-                }
-
-                cmd->depthStencilAttachment.depthReadOnly =
-                    descriptor->depthStencilAttachment->depthReadOnly;
-                cmd->depthStencilAttachment.stencilReadOnly =
-                    descriptor->depthStencilAttachment->stencilReadOnly;
-
-                if (descriptor->depthStencilAttachment->depthReadOnly ||
-                    !IsSubset(Aspect::Depth,
-                              descriptor->depthStencilAttachment->view->GetAspects())) {
-                    cmd->depthStencilAttachment.depthLoadOp = wgpu::LoadOp::Load;
-                    cmd->depthStencilAttachment.depthStoreOp = wgpu::StoreOp::Store;
-                } else {
-                    cmd->depthStencilAttachment.depthLoadOp =
-                        descriptor->depthStencilAttachment->depthLoadOp;
-                    cmd->depthStencilAttachment.depthStoreOp =
-                        descriptor->depthStencilAttachment->depthStoreOp;
-                }
-
-                if (descriptor->depthStencilAttachment->stencilReadOnly ||
-                    !IsSubset(Aspect::Stencil,
-                              descriptor->depthStencilAttachment->view->GetAspects())) {
-                    cmd->depthStencilAttachment.stencilLoadOp = wgpu::LoadOp::Load;
-                    cmd->depthStencilAttachment.stencilStoreOp = wgpu::StoreOp::Store;
-                } else {
-                    cmd->depthStencilAttachment.stencilLoadOp =
-                        descriptor->depthStencilAttachment->stencilLoadOp;
-                    cmd->depthStencilAttachment.stencilStoreOp =
-                        descriptor->depthStencilAttachment->stencilStoreOp;
                 }
 
                 if (IsReadOnlyDepthStencilAttachment(descriptor->depthStencilAttachment)) {
