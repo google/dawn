@@ -192,7 +192,7 @@ TEST_F(TypeTest, ElementOf) {
     EXPECT_TYPE(Type::ElementOf(mat2x4_f32), vec4_f32);
     EXPECT_TYPE(Type::ElementOf(mat4x2_f32), vec2_f32);
     EXPECT_TYPE(Type::ElementOf(mat4x3_f16), vec3_f16);
-    EXPECT_TYPE(Type::ElementOf(str), nullptr);
+    EXPECT_TYPE(Type::ElementOf(str), str);
     EXPECT_TYPE(Type::ElementOf(arr_i32), i32);
     EXPECT_TYPE(Type::ElementOf(arr_vec3_i32), vec3_i32);
     EXPECT_TYPE(Type::ElementOf(arr_mat4x3_f16), mat4x3_f16);
@@ -237,8 +237,8 @@ TEST_F(TypeTest, ElementOf) {
     EXPECT_TYPE(Type::ElementOf(mat4x3_f16, &count), vec3_f16);
     EXPECT_EQ(count, 4u);
     count = 42;
-    EXPECT_TYPE(Type::ElementOf(str, &count), nullptr);
-    EXPECT_EQ(count, 0u);
+    EXPECT_TYPE(Type::ElementOf(str, &count), str);
+    EXPECT_EQ(count, 1u);
     count = 42;
     EXPECT_TYPE(Type::ElementOf(arr_i32, &count), i32);
     EXPECT_EQ(count, 5u);
@@ -270,12 +270,12 @@ TEST_F(TypeTest, DeepestElementOf) {
     EXPECT_TYPE(Type::DeepestElementOf(mat2x4_f32), f32);
     EXPECT_TYPE(Type::DeepestElementOf(mat4x2_f32), f32);
     EXPECT_TYPE(Type::DeepestElementOf(mat4x3_f16), f16);
-    EXPECT_TYPE(Type::DeepestElementOf(str), nullptr);
+    EXPECT_TYPE(Type::DeepestElementOf(str), str);
     EXPECT_TYPE(Type::DeepestElementOf(arr_i32), i32);
     EXPECT_TYPE(Type::DeepestElementOf(arr_vec3_i32), i32);
     EXPECT_TYPE(Type::DeepestElementOf(arr_mat4x3_f16), f16);
     EXPECT_TYPE(Type::DeepestElementOf(arr_mat4x3_af), af);
-    EXPECT_TYPE(Type::DeepestElementOf(arr_str), nullptr);
+    EXPECT_TYPE(Type::DeepestElementOf(arr_str), str);
 
     // With count
     uint32_t count = 42;
@@ -315,8 +315,8 @@ TEST_F(TypeTest, DeepestElementOf) {
     EXPECT_TYPE(Type::DeepestElementOf(mat4x3_f16, &count), f16);
     EXPECT_EQ(count, 12u);
     count = 42;
-    EXPECT_TYPE(Type::DeepestElementOf(str, &count), nullptr);
-    EXPECT_EQ(count, 0u);
+    EXPECT_TYPE(Type::DeepestElementOf(str, &count), str);
+    EXPECT_EQ(count, 1u);
     count = 42;
     EXPECT_TYPE(Type::DeepestElementOf(arr_i32, &count), i32);
     EXPECT_EQ(count, 5u);
@@ -330,8 +330,8 @@ TEST_F(TypeTest, DeepestElementOf) {
     EXPECT_TYPE(Type::DeepestElementOf(arr_mat4x3_af, &count), af);
     EXPECT_EQ(count, 60u);
     count = 42;
-    EXPECT_TYPE(Type::DeepestElementOf(arr_str, &count), nullptr);
-    EXPECT_EQ(count, 0u);
+    EXPECT_TYPE(Type::DeepestElementOf(arr_str, &count), str);
+    EXPECT_EQ(count, 5u);
 }
 
 TEST_F(TypeTest, Common2) {

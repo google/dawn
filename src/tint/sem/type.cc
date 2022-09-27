@@ -254,9 +254,9 @@ const Type* Type::ElementOf(const Type* ty, uint32_t* count /* = nullptr */) {
         },
         [&](Default) {
             if (count) {
-                *count = 0;
+                *count = 1;
             }
-            return nullptr;
+            return ty;
         });
 }
 
