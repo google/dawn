@@ -1,0 +1,39 @@
+#include <metal_stdlib>
+
+using namespace metal;
+int f() {
+  return 0;
+}
+
+void g() {
+  int j = 0;
+  while (true) {
+    if ((j >= 1)) {
+      break;
+    }
+    j = as_type<int>((as_type<uint>(j) + as_type<uint>(1)));
+    int k = f();
+  }
+}
+
+kernel void tint_symbol(const constant int* tint_symbol_1 [[buffer(0)]]) {
+  switch(*(tint_symbol_1)) {
+    case 0: {
+      switch(*(tint_symbol_1)) {
+        case 0: {
+          break;
+        }
+        default: {
+          g();
+          break;
+        }
+      }
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+  return;
+}
+
