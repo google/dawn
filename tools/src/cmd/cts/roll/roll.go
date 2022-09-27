@@ -491,6 +491,7 @@ func (r *roller) rollCommitMessage(
 		}
 		msg.WriteString("\n")
 	}
+	msg.WriteString("Include-Ci-Only-Tests: true\n")
 	if changeID != "" {
 		msg.WriteString("Change-Id: ")
 		msg.WriteString(changeID)
