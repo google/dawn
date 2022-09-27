@@ -1,0 +1,82 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 41
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %main "main"
+               OpExecutionMode %main LocalSize 1 1 1
+               OpName %buf_block "buf_block"
+               OpMemberName %buf_block 0 "inner"
+               OpName %buf "buf"
+               OpName %g "g"
+               OpName %f "f"
+               OpName %main "main"
+               OpName %s "s"
+               OpDecorate %buf_block Block
+               OpMemberDecorate %buf_block 0 Offset 0
+               OpDecorate %_arr_uint_uint_1 ArrayStride 4
+               OpDecorate %buf DescriptorSet 0
+               OpDecorate %buf Binding 1
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+%_arr_uint_uint_1 = OpTypeArray %uint %uint_1
+  %buf_block = OpTypeStruct %_arr_uint_uint_1
+%_ptr_StorageBuffer_buf_block = OpTypePointer StorageBuffer %buf_block
+        %buf = OpVariable %_ptr_StorageBuffer_buf_block StorageBuffer
+        %int = OpTypeInt 32 1
+          %7 = OpTypeFunction %int
+         %11 = OpConstantNull %int
+       %void = OpTypeVoid
+         %20 = OpTypeFunction %void
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+         %32 = OpConstantNull %uint
+       %bool = OpTypeBool
+%_ptr_Function_int = OpTypePointer Function %int
+          %g = OpFunction %int None %7
+         %10 = OpLabel
+               OpReturnValue %11
+               OpFunctionEnd
+          %f = OpFunction %int None %7
+         %13 = OpLabel
+               OpBranch %14
+         %14 = OpLabel
+               OpLoopMerge %15 %16 None
+               OpBranch %17
+         %17 = OpLabel
+         %18 = OpFunctionCall %int %g
+               OpBranch %15
+         %16 = OpLabel
+               OpBranch %14
+         %15 = OpLabel
+         %19 = OpFunctionCall %int %g
+               OpReturnValue %11
+               OpFunctionEnd
+       %main = OpFunction %void None %20
+         %23 = OpLabel
+          %s = OpVariable %_ptr_Function_int Function %11
+               OpBranch %24
+         %24 = OpLabel
+               OpLoopMerge %25 %26 None
+               OpBranch %27
+         %27 = OpLabel
+         %30 = OpAccessChain %_ptr_StorageBuffer_uint %buf %uint_0 %11
+         %31 = OpLoad %uint %30
+         %33 = OpIEqual %bool %31 %32
+               OpSelectionMerge %35 None
+               OpBranchConditional %33 %36 %35
+         %36 = OpLabel
+               OpBranch %25
+         %35 = OpLabel
+         %37 = OpFunctionCall %int %f
+               OpStore %s %37
+         %40 = OpAccessChain %_ptr_StorageBuffer_uint %buf %uint_0 %11
+               OpStore %40 %32
+               OpBranch %26
+         %26 = OpLabel
+               OpBranch %24
+         %25 = OpLabel
+               OpReturn
+               OpFunctionEnd

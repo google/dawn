@@ -1,4 +1,4 @@
-SKIP: FAILED
+SKIP: FAILED - crbug.com/tint/1666
 
 void tint_symbol() {
   const int idx = 3;
