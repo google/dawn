@@ -367,6 +367,75 @@ void f() {
 )");
 }
 
+TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const_arr_f32_zero) {
+    auto* C = Const("C", Construct(ty.array<f32, 2>()));
+    Func("f", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(C),
+             Decl(Let("l", Expr(C))),
+         });
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+
+void f() {
+  float l[2] = float[2](0.0f, 0.0f);
+}
+
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const_arr_arr_f32_zero) {
+    auto* C = Const("C", Construct(ty.array(ty.array<f32, 2>(), 3_i)));
+    Func("f", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(C),
+             Decl(Let("l", Expr(C))),
+         });
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+
+void f() {
+  float l[3][2] = float[3][2](float[2](0.0f, 0.0f), float[2](0.0f, 0.0f), float[2](0.0f, 0.0f));
+}
+
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const_arr_struct_zero) {
+    Structure("S", utils::Vector{Member("a", ty.i32()), Member("b", ty.f32())});
+    auto* C = Const("C", Construct(ty.array(ty.type_name("S"), 2_i)));
+    Func("f", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(C),
+             Decl(Let("l", Expr(C))),
+         });
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+
+struct S {
+  int a;
+  float b;
+};
+
+void f() {
+  S l[2] = S[2](S(0, 0.0f), S(0, 0.0f));
+}
+
+)");
+}
+
 TEST_F(GlslGeneratorImplTest_VariableDecl, Emit_VariableDeclStatement_Const_arr_vec2_bool) {
     auto* C = Const("C", Construct(ty.array(ty.vec2<bool>(), 3_u),  //
                                    vec2<bool>(true, false),         //
