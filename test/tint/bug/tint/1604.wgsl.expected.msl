@@ -1,0 +1,18 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void tint_symbol(const constant int* tint_symbol_1 [[buffer(0)]]) {
+  switch(*(tint_symbol_1)) {
+    case 0: {
+      while (true) {
+        return;
+      }
+      break;
+    }
+    default: {
+      break;
+    }
+  }
+  return;
+}
+
