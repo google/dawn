@@ -220,7 +220,7 @@
             {"name": "binding", "type": "uint32_t"},
             {"name": "buffer", "type": "buffer", "optional": true},
             {"name": "offset", "type": "uint64_t", "default": "0"},
-            {"name": "size", "type": "uint64_t"},
+            {"name": "size", "type": "uint64_t", "default": "WGPU_WHOLE_SIZE"},
             {"name": "sampler", "type": "sampler", "optional": true},
             {"name": "texture view", "type": "texture view", "optional": true}
         ]

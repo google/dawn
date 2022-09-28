@@ -819,6 +819,125 @@ TEST_F(BindGroupValidationTest, MultisampledTexture) {
     binding.textureView = nullptr;
 }
 
+// Tests dafault offset and size of bind group entry work as expected
+TEST_F(BindGroupValidationTest, BufferBindingDefaultOffsetAndSize) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 768;  // 768 = 256 x 3
+    descriptor.usage = wgpu::BufferUsage::Uniform;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    descriptor.size = 260;
+    wgpu::Buffer bufferSized260 = device.CreateBuffer(&descriptor);
+    descriptor.size = 256;
+    wgpu::Buffer bufferSized256 = device.CreateBuffer(&descriptor);
+
+    // Create a layout requiring minimium buffer binding size of 260
+    wgpu::BufferBindingLayout bufferBindingLayout;
+    bufferBindingLayout.type = wgpu::BufferBindingType::Uniform;
+    bufferBindingLayout.hasDynamicOffset = false;
+    bufferBindingLayout.minBindingSize = 260;
+
+    wgpu::BindGroupLayoutEntry bindGroupLayoutEntry;
+    bindGroupLayoutEntry.binding = 0;
+    bindGroupLayoutEntry.visibility = wgpu::ShaderStage::Vertex;
+    bindGroupLayoutEntry.buffer = bufferBindingLayout;
+
+    wgpu::BindGroupLayoutDescriptor bindGroupLayoutDescriptor;
+    bindGroupLayoutDescriptor.entryCount = 1;
+    bindGroupLayoutDescriptor.entries = &bindGroupLayoutEntry;
+    wgpu::BindGroupLayout layout = device.CreateBindGroupLayout(&bindGroupLayoutDescriptor);
+
+    // Default offset should be 0
+    {
+        wgpu::BindGroupEntry binding;
+        binding.binding = 0;
+        binding.sampler = nullptr;
+        binding.textureView = nullptr;
+        binding.buffer = buffer;
+        // binding.offset omitted.
+        binding.size = 768;
+
+        wgpu::BindGroupDescriptor descriptor;
+        descriptor.layout = layout;
+        descriptor.entryCount = 1;
+        descriptor.entries = &binding;
+
+        // Offset 0 and size 768 should work.
+        device.CreateBindGroup(&descriptor);
+
+        // Offset 0 and size 260 should work.
+        binding.size = 260;
+        device.CreateBindGroup(&descriptor);
+
+        // Offset 0 and size 256 go smaller than minBindingSize and validation error.
+        binding.size = 256;
+        ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+
+        // Offset 0 and size 769 should be OOB and validation error.
+        binding.size = 769;
+        ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+    }
+
+    // Default size should be whole size - offset
+    {
+        wgpu::BindGroupEntry binding;
+        binding.binding = 0;
+        binding.sampler = nullptr;
+        binding.textureView = nullptr;
+        binding.buffer = buffer;
+        binding.offset = 0;
+        // binding.size omitted
+
+        wgpu::BindGroupDescriptor descriptor;
+        descriptor.layout = layout;
+        descriptor.entryCount = 1;
+        descriptor.entries = &binding;
+
+        // Offset 0 and default size = 768 should work.
+        device.CreateBindGroup(&descriptor);
+
+        // Offset 256 and default size = 512 should work.
+        binding.offset = 256;
+        device.CreateBindGroup(&descriptor);
+
+        // Offset 512 and default size = 256 go smaller than minBindingSize and validation error.
+        binding.offset = 512;
+        ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+
+        // Offset 1024 should be OOB and validation error.
+        binding.offset = 1024;
+        ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+    }
+
+    // Both offset and size are default, should be offset = 0 and size = whole size
+    {
+        wgpu::BindGroupEntry binding;
+        binding.binding = 0;
+        binding.sampler = nullptr;
+        binding.textureView = nullptr;
+        binding.buffer = buffer;
+        // binding.offset omitted
+        // binding.size omitted
+
+        wgpu::BindGroupDescriptor descriptor;
+        descriptor.layout = layout;
+        descriptor.entryCount = 1;
+        descriptor.entries = &binding;
+
+        // Offset 0 and default size = 768 should work.
+        device.CreateBindGroup(&descriptor);
+
+        // Use a buffer with size 260, offset 0 and default size = 260 should work.
+        binding.buffer = bufferSized260;
+        device.CreateBindGroup(&descriptor);
+
+        // Use a buffer with size 256, offset 0 and default size = 256 go smaller than
+        // minBindingSize and validation error.
+        binding.buffer = bufferSized256;
+        ASSERT_DEVICE_ERROR(device.CreateBindGroup(&descriptor));
+    }
+}
+
 // Tests constraints to be sure the buffer binding fits in the buffer
 TEST_F(BindGroupValidationTest, BufferBindingOOB) {
     wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
