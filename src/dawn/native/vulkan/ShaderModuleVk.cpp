@@ -172,19 +172,7 @@ ShaderModule::ShaderModule(Device* device, const ShaderModuleDescriptor* descrip
 
 MaybeError ShaderModule::Initialize(ShaderModuleParseResult* parseResult,
                                     OwnedCompilationMessages* compilationMessages) {
-    if (GetDevice()->IsRobustnessEnabled()) {
-        ScopedTintICEHandler scopedICEHandler(GetDevice());
-
-        tint::transform::Robustness robustness;
-        tint::transform::DataMap transformInputs;
-
-        tint::Program program;
-        DAWN_TRY_ASSIGN(program, RunTransforms(&robustness, parseResult->tintProgram.get(),
-                                               transformInputs, nullptr, nullptr));
-        // Rather than use a new ParseResult object, we just reuse the original parseResult
-        parseResult->tintProgram = std::make_unique<tint::Program>(std::move(program));
-    }
-
+    ScopedTintICEHandler scopedICEHandler(GetDevice());
     return InitializeBase(parseResult, compilationMessages);
 }
 
@@ -204,6 +192,7 @@ ShaderModule::~ShaderModule() = default;
     X(std::optional<tint::transform::SubstituteOverride::Config>, substituteOverrideConfig) \
     X(LimitsForCompilationRequest, limits)                                                  \
     X(std::string_view, entryPointName)                                                     \
+    X(bool, isRobustnessEnabled)                                                            \
     X(bool, disableWorkgroupInit)                                                           \
     X(bool, useZeroInitializeWorkgroupMemoryExtension)                                      \
     X(CacheKey::UnsafeUnkeyedValue<dawn::platform::Platform*>, tracePlatform)
@@ -284,6 +273,7 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
     req.bindingPoints = std::move(bindingPoints);
     req.newBindingsMap = std::move(newBindingsMap);
     req.entryPointName = programmableStage.entryPoint;
+    req.isRobustnessEnabled = GetDevice()->IsRobustnessEnabled();
     req.disableWorkgroupInit = GetDevice()->IsToggleEnabled(Toggle::DisableWorkgroupInit);
     req.useZeroInitializeWorkgroupMemoryExtension =
         GetDevice()->IsToggleEnabled(Toggle::VulkanUseZeroInitializeWorkgroupMemoryExtension);
@@ -298,6 +288,9 @@ ResultOrError<ShaderModule::ModuleAndSpirv> ShaderModule::GetHandleAndSpirv(
         spirv, GetDevice(), std::move(req), Spirv::FromBlob,
         [](SpirvCompilationRequest r) -> ResultOrError<Spirv> {
             tint::transform::Manager transformManager;
+            if (r.isRobustnessEnabled) {
+                transformManager.append(std::make_unique<tint::transform::Robustness>());
+            }
             // Many Vulkan drivers can't handle multi-entrypoint shader modules.
             transformManager.append(std::make_unique<tint::transform::SingleEntryPoint>());
             // Run the binding remapper after SingleEntryPoint to avoid collisions with

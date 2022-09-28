@@ -390,10 +390,12 @@ MaybeError ComputePipeline::Initialize() {
 
     tint::Program transformedProgram;
     const tint::Program* program;
-    if (!computeStage.metadata->overrides.empty()) {
-        tint::transform::Manager transformManager;
-        tint::transform::DataMap transformInputs;
+    tint::transform::Manager transformManager;
+    tint::transform::DataMap transformInputs;
 
+    transformManager.Add<tint::transform::Robustness>();
+
+    if (!computeStage.metadata->overrides.empty()) {
         transformManager.Add<tint::transform::SingleEntryPoint>();
         transformInputs.Add<tint::transform::SingleEntryPoint::Config>(
             computeStage.entryPoint.c_str());
@@ -403,15 +405,13 @@ MaybeError ComputePipeline::Initialize() {
         transformManager.Add<tint::transform::SubstituteOverride>();
         transformInputs.Add<tint::transform::SubstituteOverride::Config>(
             BuildSubstituteOverridesTransformConfig(computeStage));
-
-        DAWN_TRY_ASSIGN(transformedProgram,
-                        RunTransforms(&transformManager, computeStage.module->GetTintProgram(),
-                                      transformInputs, nullptr, nullptr));
-
-        program = &transformedProgram;
-    } else {
-        program = computeStage.module->GetTintProgram();
     }
+
+    DAWN_TRY_ASSIGN(transformedProgram,
+                    RunTransforms(&transformManager, computeStage.module->GetTintProgram(),
+                                  transformInputs, nullptr, nullptr));
+
+    program = &transformedProgram;
 
     // Do the workgroup size validation as it is actually backend agnostic.
     const CombinedLimits& limits = GetDevice()->GetLimits();

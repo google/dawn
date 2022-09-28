@@ -330,8 +330,7 @@ TEST_P(WorkgroupSizeValidationTest, ValidationAfterOverride) {
 
 // Test workgroup size validation after being overrided with invalid values (storage size limits
 // validation).
-// TODO(tint:1660): re-enable after override can be used as array size.
-TEST_P(WorkgroupSizeValidationTest, DISABLED_ValidationAfterOverrideStorageSize) {
+TEST_P(WorkgroupSizeValidationTest, ValidationAfterOverrideStorageSize) {
     wgpu::Limits supportedLimits = GetSupportedLimits().limits;
 
     constexpr uint32_t kVec4Size = 16;
@@ -347,11 +346,11 @@ TEST_P(WorkgroupSizeValidationTest, DISABLED_ValidationAfterOverrideStorageSize)
         ss << "override b: u32;";
         if (vec4_count > 0) {
             ss << "var<workgroup> vec4_data: array<vec4<f32>, a>;";
-            body << "_ = vec4_data;";
+            body << "_ = vec4_data[0];";
         }
         if (mat4_count > 0) {
             ss << "var<workgroup> mat4_data: array<mat4x4<f32>, b>;";
-            body << "_ = mat4_data;";
+            body << "_ = mat4_data[0];";
         }
         ss << "@compute @workgroup_size(1) fn main() { " << body.str() << " }";
 
