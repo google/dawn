@@ -1311,12 +1311,15 @@ bool DeviceBase::HasFeature(Feature feature) const {
 
 void DeviceBase::SetWGSLExtensionAllowList() {
     // Set the WGSL extensions allow list based on device's enabled features and other
-    // propority.
+    // properties.
     if (mEnabledFeatures.IsEnabled(Feature::ChromiumExperimentalDp4a)) {
         mWGSLExtensionAllowList.insert("chromium_experimental_dp4a");
     }
     if (mEnabledFeatures.IsEnabled(Feature::ShaderF16)) {
         mWGSLExtensionAllowList.insert("f16");
+    }
+    if (!IsToggleEnabled(Toggle::DisallowUnsafeAPIs)) {
+        mWGSLExtensionAllowList.insert("chromium_disable_uniformity_analysis");
     }
 }
 

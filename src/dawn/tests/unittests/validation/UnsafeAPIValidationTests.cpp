@@ -95,3 +95,18 @@ TEST_F(UnsafeQueryAPIValidationTest, TimestampQueryDisallowed) {
         ASSERT_DEVICE_ERROR(device.CreateQuerySet(&descriptor));
     }
 }
+
+// Check chromium_disable_uniformity_analysis is an unsafe API.
+TEST_F(UnsafeAPIValidationTest, chromium_disable_uniformity_analysis) {
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+        enable chromium_disable_uniformity_analysis;
+
+        @compute @workgroup_size(8) fn uniformity_error(
+            @builtin(local_invocation_id) local_invocation_id : vec3<u32>
+        ) {
+            if (local_invocation_id.x == 0u) {
+                workgroupBarrier();
+            }
+        }
+    )"));
+}

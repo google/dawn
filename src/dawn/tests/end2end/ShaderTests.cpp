@@ -870,6 +870,31 @@ TEST_P(ShaderTests, ConflictingBindingsDueToTransformOrder) {
     device.CreateRenderPipeline(&desc);
 }
 
+// Check that chromium_disable_uniformity_analysis can be used. It is normally disallowed as unsafe
+// but DawnTests allow all unsafe APIs by default.
+TEST_P(ShaderTests, CheckUsageOf_chromium_disable_uniformity_analysis) {
+    wgpu::ShaderModule module = utils::CreateShaderModule(device, R"(
+        enable chromium_disable_uniformity_analysis;
+
+        @compute @workgroup_size(8) fn uniformity_error(
+            @builtin(local_invocation_id) local_invocation_id : vec3<u32>
+        ) {
+            if (local_invocation_id.x == 0u) {
+                workgroupBarrier();
+            }
+        }
+    )");
+    ASSERT_DEVICE_ERROR(utils::CreateShaderModule(device, R"(
+        @compute @workgroup_size(8) fn uniformity_error(
+            @builtin(local_invocation_id) local_invocation_id : vec3<u32>
+        ) {
+            if (local_invocation_id.x == 0u) {
+                workgroupBarrier();
+            }
+        }
+    )"));
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D12Backend(),
                       MetalBackend(),
