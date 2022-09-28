@@ -2821,8 +2821,8 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                 if (!materialized) {
                     return nullptr;
                 }
-                if (!materialized->Type()->Is<sem::I32>()) {
-                    AddError("'align' must be an i32 value", a->source);
+                if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
+                    AddError("'align' must be an i32 or u32 value", a->source);
                     return nullptr;
                 }
 

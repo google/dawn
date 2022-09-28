@@ -692,7 +692,7 @@ TEST_F(StructMemberAttributeTest, Align_Attribute_ConstF32) {
     Structure("mystruct", utils::Vector{Member(
                               "a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, "val")})});
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'align' must be an i32 value)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'align' must be an i32 or u32 value)");
 }
 
 TEST_F(StructMemberAttributeTest, Align_Attribute_ConstU32) {
@@ -700,8 +700,7 @@ TEST_F(StructMemberAttributeTest, Align_Attribute_ConstU32) {
 
     Structure("mystruct", utils::Vector{Member(
                               "a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, "val")})});
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'align' must be an i32 value)");
+    EXPECT_TRUE(r()->Resolve());
 }
 
 TEST_F(StructMemberAttributeTest, Align_Attribute_ConstAInt) {
@@ -718,7 +717,7 @@ TEST_F(StructMemberAttributeTest, Align_Attribute_ConstAFloat) {
     Structure("mystruct", utils::Vector{Member(
                               "a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, "val")})});
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'align' must be an i32 value)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'align' must be an i32 or u32 value)");
 }
 
 TEST_F(StructMemberAttributeTest, Align_Attribute_Var) {
@@ -739,7 +738,7 @@ TEST_F(StructMemberAttributeTest, Align_Attribute_Override) {
     Structure("mystruct", utils::Vector{Member(
                               "a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, "val")})});
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'align' must be an i32 value)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'align' must be an i32 or u32 value)");
 }
 
 }  // namespace StructAndStructMemberTests
