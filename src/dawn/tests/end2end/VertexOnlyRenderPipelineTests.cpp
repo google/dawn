@@ -27,6 +27,9 @@ class VertexOnlyRenderPipelineTest : public DawnTest {
     void SetUp() override {
         DawnTest::SetUp();
 
+        // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
         vertexBuffer =
             utils::CreateBufferFromData<float>(device, wgpu::BufferUsage::Vertex,
                                                {// The middle back line

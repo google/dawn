@@ -176,6 +176,9 @@ TEST_P(ViewportTest, DefaultViewportDepth) {
     // depth.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_read"));
 
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
     TestViewportDepth(0.0, 1.0, false);
 }
 
@@ -184,6 +187,9 @@ TEST_P(ViewportTest, ViewportDepth) {
     // TODO(crbug.com/dawn/667): Work around the fact that some platforms do not support reading
     // depth.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_read"));
+
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
 
     TestViewportDepth(0.0, 0.5);
     TestViewportDepth(0.5, 1.0);

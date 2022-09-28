@@ -156,6 +156,9 @@ TEST_P(SubresourceRenderAttachmentTest, DepthTexture) {
     // depth.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_read"));
 
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
     DoTest(Type::Depth);
 }
 

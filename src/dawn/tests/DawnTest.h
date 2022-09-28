@@ -240,6 +240,7 @@ class DawnTestBase {
     bool IsWindows() const;
     bool IsLinux() const;
     bool IsMacOS(int32_t majorVersion = -1, int32_t minorVersion = -1) const;
+    bool IsAndroid() const;
 
     bool UsesWire() const;
     bool IsBackendValidationEnabled() const;

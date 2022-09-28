@@ -347,6 +347,9 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonRenderableNonZeroMipStenc
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepth) {
     DAWN_TEST_UNSUPPORTED_IF(!IsValidDepthCopyTextureFormat());
 
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
 
@@ -366,6 +369,9 @@ TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyDepth) {
 // Test copying both aspects in a T2T copy, then copying only depth at a nonzero mip.
 TEST_P(DepthStencilCopyTests, T2TBothAspectsThenCopyNonZeroMipDepth) {
     DAWN_TEST_UNSUPPORTED_IF(!IsValidDepthCopyTextureFormat());
+
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
 
     wgpu::Texture texture = CreateInitializeDepthStencilTextureAndCopyT2T(
         0.1f, 0.3f, 1u, 3u, 8, 8, wgpu::TextureUsage::RenderAttachment, 1);
@@ -533,6 +539,9 @@ class DepthCopyTests : public DepthStencilCopyTests {
 
 // Test copying the depth-only aspect into a buffer.
 TEST_P(DepthCopyTests, FromDepthAspect) {
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
     constexpr float kInitDepth = 0.2f;
     constexpr uint32_t kBufferCopyOffset = 0;
     constexpr uint32_t kWidth = 4;
@@ -543,6 +552,9 @@ TEST_P(DepthCopyTests, FromDepthAspect) {
 
 // Test copying the depth-only aspect into a buffer at a non-zero offset.
 TEST_P(DepthCopyTests, FromDepthAspectToBufferAtNonZeroOffset) {
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
     constexpr float kInitDepth = 0.2f;
     constexpr uint32_t kWidth = 4;
     constexpr uint32_t kHeight = 4;
@@ -555,6 +567,9 @@ TEST_P(DepthCopyTests, FromDepthAspectToBufferAtNonZeroOffset) {
 
 // Test copying the non-zero mip, depth-only aspect into a buffer.
 TEST_P(DepthCopyTests, FromNonZeroMipDepthAspect) {
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
     constexpr float kInitDepth = 0.2f;
     constexpr uint32_t kBufferCopyOffset = 0;
     constexpr uint32_t kWidth = 9;
@@ -731,6 +746,9 @@ class StencilCopyTests : public DepthStencilCopyTests {
 
         // TODO(crbug.com/dawn/1273): Fails on Win11 with D3D12 debug layer and full validation
         DAWN_SUPPRESS_TEST_IF(IsD3D12() && IsBackendValidationEnabled());
+
+        // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
 
         // Create a stencil texture
         constexpr uint32_t kWidth = 4;

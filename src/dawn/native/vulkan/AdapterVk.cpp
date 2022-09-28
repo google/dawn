@@ -135,11 +135,13 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
         mSupportedFeatures.EnableFeature(Feature::TextureCompressionBC);
     }
 
-    if (mDeviceInfo.features.textureCompressionETC2 == VK_TRUE) {
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    if (mDeviceInfo.features.textureCompressionETC2 == VK_TRUE && !IsAndroidQualcomm()) {
         mSupportedFeatures.EnableFeature(Feature::TextureCompressionETC2);
     }
 
-    if (mDeviceInfo.features.textureCompressionASTC_LDR == VK_TRUE) {
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    if (mDeviceInfo.features.textureCompressionASTC_LDR == VK_TRUE && !IsAndroidQualcomm()) {
         mSupportedFeatures.EnableFeature(Feature::TextureCompressionASTC);
     }
 
@@ -383,6 +385,15 @@ MaybeError Adapter::ValidateFeatureSupportedWithTogglesImpl(
     wgpu::FeatureName feature,
     const TripleStateTogglesSet& userProvidedToggles) {
     return {};
+}
+
+// Android devices with Qualcomm GPUs have a myriad of known issues. (dawn:1549)
+bool Adapter::IsAndroidQualcomm() {
+#if DAWN_PLATFORM_IS(ANDROID)
+    return gpu_info::IsQualcomm(GetVendorId());
+#else
+    return false;
+#endif
 }
 
 }  // namespace dawn::native::vulkan

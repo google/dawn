@@ -627,6 +627,11 @@ void Device::ApplyDepthStencilFormatToggles() {
     if (!supportsS8) {
         ForceSetToggle(Toggle::VulkanUseS8, false);
     }
+
+    // TODO(dawn:1549) Depth/Stencil reads are failing on Qualcomm-based Android devices.
+    if (ToBackend(GetAdapter())->IsAndroidQualcomm()) {
+        SetToggle(Toggle::DisableDepthStencilRead, true);
+    }
 }
 
 void Device::ApplyUseZeroInitializeWorkgroupMemoryExtensionToggle() {

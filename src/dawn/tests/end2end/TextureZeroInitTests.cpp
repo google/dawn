@@ -604,6 +604,9 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilLoadAfterDiscard) {
     // on some Intel drivers.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
     wgpu::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
         1, 1, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,
         kDepthStencilFormat);
@@ -766,6 +769,9 @@ TEST_P(TextureZeroInitTest, IndependentDepthStencilCopyAfterDiscard) {
 
     // TODO(enga): Figure out why this fails on Metal Intel.
     DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
+
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
 
     wgpu::TextureDescriptor depthStencilDescriptor = CreateTextureDescriptor(
         1, 1, wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc,

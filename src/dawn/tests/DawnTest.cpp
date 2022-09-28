@@ -742,6 +742,14 @@ bool DawnTestBase::IsMacOS(int32_t majorVersion, int32_t minorVersion) const {
 #endif
 }
 
+bool DawnTestBase::IsAndroid() const {
+#if DAWN_PLATFORM_IS(ANDROID)
+    return true;
+#else
+    return false;
+#endif
+}
+
 bool DawnTestBase::UsesWire() const {
     return gTestEnv->UsesWire();
 }

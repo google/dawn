@@ -718,6 +718,9 @@ TEST_P(VertexFormatTest, Float16x4) {
 }
 
 TEST_P(VertexFormatTest, Float32) {
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
     std::vector<float> vertexData = {1.3f, +0.0f, -0.0f};
 
     DoVertexFormatTest(wgpu::VertexFormat::Float32, vertexData, vertexData);
@@ -730,6 +733,9 @@ TEST_P(VertexFormatTest, Float32) {
 TEST_P(VertexFormatTest, Float32x2) {
     // Fails on NVIDIA's Vulkan drivers on CQ but passes locally.
     DAWN_SUPPRESS_TEST_IF(IsVulkan() && IsNvidia());
+
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
 
     std::vector<float> vertexData = {18.23f, -0.0f, +0.0f, +1.0f, 1.3f, -1.0f};
 

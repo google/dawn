@@ -111,6 +111,9 @@ TEST_P(MaxLimitTests, MaxBufferBindingSize) {
     // TODO(crbug.com/dawn/1217): Remove this suppression.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsNvidia());
 
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
     for (wgpu::BufferUsage usage : {wgpu::BufferUsage::Storage, wgpu::BufferUsage::Uniform}) {
         uint64_t maxBufferBindingSize;
         std::string shader;

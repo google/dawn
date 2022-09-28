@@ -1029,6 +1029,9 @@ TEST_P(CopyTests_T2B, CopyOneRowWithDepth32Float) {
     // depth.
     DAWN_TEST_UNSUPPORTED_IF(HasToggleEnabled("disable_depth_read"));
 
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
     constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::Depth32Float;
     constexpr uint32_t kPixelsPerRow = 4u;
 

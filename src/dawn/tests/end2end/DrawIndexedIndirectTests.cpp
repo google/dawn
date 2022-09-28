@@ -308,6 +308,9 @@ TEST_P(DrawIndexedIndirectTest, ValidateMultipleDraws) {
     // the offsets that Tint/GLSL produces.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
 
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
     // It doesn't make sense to test invalid inputs when validation is disabled.
     DAWN_SUPPRESS_TEST_IF(HasToggleEnabled("skip_validation"));
 

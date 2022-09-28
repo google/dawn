@@ -207,6 +207,9 @@ class ReadOnlyDepthAttachmentTests : public ReadOnlyDepthStencilAttachmentTests 
     void SetUp() override {
         ReadOnlyDepthStencilAttachmentTests::SetUp();
         DAWN_TEST_UNSUPPORTED_IF(!IsFormatSupported());
+
+        // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+        DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
     }
 };
 
@@ -296,6 +299,9 @@ class ReadOnlyStencilAttachmentTests : public ReadOnlyDepthStencilAttachmentTest
 };
 
 TEST_P(ReadOnlyStencilAttachmentTests, SampleFromAttachment) {
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
     wgpu::Texture colorTexture =
         CreateTexture(wgpu::TextureFormat::RGBA8Unorm,
                       wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);
@@ -320,6 +326,9 @@ TEST_P(ReadOnlyStencilAttachmentTests, SampleFromAttachment) {
 }
 
 TEST_P(ReadOnlyStencilAttachmentTests, NotSampleFromAttachment) {
+    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
+    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
+
     wgpu::Texture colorTexture =
         CreateTexture(wgpu::TextureFormat::RGBA8Unorm,
                       wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc);
