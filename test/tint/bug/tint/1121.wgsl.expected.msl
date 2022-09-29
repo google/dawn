@@ -88,7 +88,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, const constant Config* const ti
     for(int x_1 = 0; (x_1 < TILE_COUNT_X); x_1 = as_type<int>((as_type<uint>(x_1) + as_type<uint>(1)))) {
       int2 tilePixel0Idx = int2(as_type<int>((as_type<uint>(x_1) * as_type<uint>(TILE_SIZE))), as_type<int>((as_type<uint>(y_1) * as_type<uint>(TILE_SIZE))));
       float2 floorCoord = (((2.0f * float2(tilePixel0Idx)) / float4((*(tint_symbol_3)).fullScreenSize).xy) - float2(1.0f));
-      float2 ceilCoord = (((2.0f * float2(as_type<int2>((as_type<uint2>(tilePixel0Idx) + as_type<uint2>(int2(TILE_SIZE)))))) / float4((*(tint_symbol_3)).fullScreenSize).xy) - float2(1.0f));
+      float2 ceilCoord = (((2.0f * float2(as_type<int2>((as_type<uint2>(as_type<int2>(tilePixel0Idx)) + as_type<uint2>(as_type<int2>(int2(TILE_SIZE))))))) / float4((*(tint_symbol_3)).fullScreenSize).xy) - float2(1.0f));
       float2 viewFloorCoord = float2((((-(viewNear) * floorCoord[0]) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * floorCoord[1]) - (M[2][1] * viewNear)) / M[1][1]));
       float2 viewCeilCoord = float2((((-(viewNear) * ceilCoord[0]) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * ceilCoord[1]) - (M[2][1] * viewNear)) / M[1][1]));
       frustumPlanes[0] = float4(1.0f, 0.0f, (-(viewFloorCoord[0]) / viewNear), 0.0f);

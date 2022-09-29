@@ -517,8 +517,18 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
         ScopedParen sp(out);
         {
             ScopedBitCast lhs_uint_cast(this, out, lhs_type, unsigned_type_of(target_type));
-            if (!EmitExpression(out, expr->lhs)) {
-                return false;
+
+            // In case the type is packed, cast to our own type in order to remove the packing.
+            // Otherwise, this just casts to itself.
+            if (lhs_type->is_signed_integer_vector()) {
+                ScopedBitCast lhs_self_cast(this, out, lhs_type, lhs_type);
+                if (!EmitExpression(out, expr->lhs)) {
+                    return false;
+                }
+            } else {
+                if (!EmitExpression(out, expr->lhs)) {
+                    return false;
+                }
             }
         }
         if (!emit_op()) {
@@ -526,8 +536,18 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
         }
         {
             ScopedBitCast rhs_uint_cast(this, out, rhs_type, unsigned_type_of(target_type));
-            if (!EmitExpression(out, expr->rhs)) {
-                return false;
+
+            // In case the type is packed, cast to our own type in order to remove the packing.
+            // Otherwise, this just casts to itself.
+            if (rhs_type->is_signed_integer_vector()) {
+                ScopedBitCast rhs_self_cast(this, out, rhs_type, rhs_type);
+                if (!EmitExpression(out, expr->rhs)) {
+                    return false;
+                }
+            } else {
+                if (!EmitExpression(out, expr->rhs)) {
+                    return false;
+                }
             }
         }
         return true;
