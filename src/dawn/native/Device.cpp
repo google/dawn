@@ -1432,6 +1432,14 @@ ResultOrError<Ref<BufferBase>> DeviceBase::CreateBuffer(const BufferDescriptor* 
     DAWN_TRY(ValidateIsAlive());
     if (IsValidationEnabled()) {
         DAWN_TRY_CONTEXT(ValidateBufferDescriptor(this, descriptor), "validating %s", descriptor);
+
+        // TODO(dawn:1525): Change to validation error after the deprecation period.
+        if (descriptor->size > mLimits.v1.maxBufferSize) {
+            std::string warning =
+                absl::StrFormat("Buffer size (%u) exceeds the max buffer size limit (%u).",
+                                descriptor->size, mLimits.v1.maxBufferSize);
+            EmitDeprecationWarning(warning.c_str());
+        }
     }
 
     Ref<BufferBase> buffer;

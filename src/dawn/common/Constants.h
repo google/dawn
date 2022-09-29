@@ -27,6 +27,8 @@ static constexpr uint8_t kMaxColorAttachments = 8u;
 static constexpr uint32_t kTextureBytesPerRowAlignment = 256u;
 static constexpr uint32_t kMaxInterStageShaderComponents = 60u;
 static constexpr uint32_t kMaxInterStageShaderVariables = 16u;
+static constexpr uint64_t kAssumedMaxBufferSize =
+    0x80000000u;  // Use 2 GB when the limit is unavailable
 
 // Per stage limits
 static constexpr uint32_t kMaxSampledTexturesPerShaderStage = 16;

@@ -992,8 +992,9 @@ TEST_F(BufferValidationTest, CreationParameterReflectionForOOMBuffer) {
     desc.size = kAmazinglyLargeSize;
 
     // OOM!
+    // TODO(dawn:1525): remove warning expectation after the deprecation period.
     wgpu::Buffer buf;
-    ASSERT_DEVICE_ERROR(buf = device.CreateBuffer(&desc));
+    ASSERT_DEVICE_ERROR(EXPECT_DEPRECATION_WARNING(buf = device.CreateBuffer(&desc)));
 
     // Reflection data is still exactly what was in the descriptor.
     EXPECT_EQ(wgpu::BufferUsage::Storage, buf.GetUsage());

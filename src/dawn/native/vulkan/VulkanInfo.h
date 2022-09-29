@@ -61,6 +61,7 @@ struct VulkanDeviceKnobs {
 
 struct VulkanDeviceInfo : VulkanDeviceKnobs {
     VkPhysicalDeviceProperties properties;
+    VkPhysicalDeviceMaintenance3Properties propertiesMaintenance3;
     VkPhysicalDeviceDriverProperties driverProperties;
     VkPhysicalDeviceSubgroupSizeControlPropertiesEXT subgroupSizeControlProperties;
     VkPhysicalDeviceShaderIntegerDotProductPropertiesKHR shaderIntegerDotProductProperties;

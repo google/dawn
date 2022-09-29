@@ -304,6 +304,8 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
     limits->v1.maxUniformBufferBindingSize = D3D12_REQ_CONSTANT_BUFFER_ELEMENT_COUNT * 16;
     // D3D12 has no documented limit on the size of a storage buffer binding.
     limits->v1.maxStorageBufferBindingSize = 4294967295;
+    // D3D12 has no documented limit on the buffer size.
+    limits->v1.maxBufferSize = kAssumedMaxBufferSize;
 
     // Using base limits for:
     // TODO(crbug.com/dawn/685):

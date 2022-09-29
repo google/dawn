@@ -28,47 +28,54 @@
 #define LIMITS_STORAGE_BUFFER_BINDING_SIZE(X)                                             \
     X(Maximum, maxStorageBufferBindingSize, 134217728, 1073741824, 2147483647, 4294967295)
 
+// Tiers are 256Mb, 1Gb, 2Gb.
+#define LIMITS_MAX_BUFFER_SIZE(X)                                             \
+    X(Maximum, maxBufferSize, 0x10000000, 0x40000000, 0x80000000)
+
 // TODO(crbug.com/dawn/685):
 // These limits don't have tiers yet. Define two tiers with the same values since the macros
 // in this file expect more than one tier.
-#define LIMITS_OTHER(X)                                                   \
-    X(Maximum,                       maxTextureDimension1D,  8192,  8192) \
-    X(Maximum,                       maxTextureDimension2D,  8192,  8192) \
-    X(Maximum,                       maxTextureDimension3D,  2048,  2048) \
-    X(Maximum,                       maxTextureArrayLayers,   256,   256) \
-    X(Maximum,                               maxBindGroups,     4,     4) \
-    X(Maximum,                     maxBindingsPerBindGroup,   640,   640) \
-    X(Maximum,   maxDynamicUniformBuffersPerPipelineLayout,     8,     8) \
-    X(Maximum,   maxDynamicStorageBuffersPerPipelineLayout,     4,     4) \
-    X(Maximum,            maxSampledTexturesPerShaderStage,    16,    16) \
-    X(Maximum,                   maxSamplersPerShaderStage,    16,    16) \
-    X(Maximum,             maxStorageBuffersPerShaderStage,     8,     8) \
-    X(Maximum,            maxStorageTexturesPerShaderStage,     4,     4) \
-    X(Maximum,             maxUniformBuffersPerShaderStage,    12,    12) \
-    X(Maximum,                 maxUniformBufferBindingSize, 65536, 65536) \
-    X(Alignment,           minUniformBufferOffsetAlignment,   256,   256) \
-    X(Alignment,           minStorageBufferOffsetAlignment,   256,   256) \
-    X(Maximum,                            maxVertexBuffers,     8,     8) \
-    X(Maximum,                         maxVertexAttributes,    16,    16) \
-    X(Maximum,                  maxVertexBufferArrayStride,  2048,  2048) \
-    X(Maximum,               maxInterStageShaderComponents,    60,    60) \
-    X(Maximum,               maxInterStageShaderVariables,     16,    16) \
-    X(Maximum,                         maxColorAttachments,     8,     8) \
-    X(Maximum,           maxComputeInvocationsPerWorkgroup,   256,   256) \
-    X(Maximum,                    maxComputeWorkgroupSizeX,   256,   256) \
-    X(Maximum,                    maxComputeWorkgroupSizeY,   256,   256) \
-    X(Maximum,                    maxComputeWorkgroupSizeZ,    64,    64) \
-    X(Maximum,            maxComputeWorkgroupsPerDimension, 65535, 65535)
+#define LIMITS_OTHER(X)                                                            \
+    X(Maximum,                       maxTextureDimension1D,      8192,       8192) \
+    X(Maximum,                       maxTextureDimension2D,      8192,       8192) \
+    X(Maximum,                       maxTextureDimension3D,      2048,       2048) \
+    X(Maximum,                       maxTextureArrayLayers,       256,        256) \
+    X(Maximum,                               maxBindGroups,         4,          4) \
+    X(Maximum,                     maxBindingsPerBindGroup,       640,        640) \
+    X(Maximum,   maxDynamicUniformBuffersPerPipelineLayout,         8,          8) \
+    X(Maximum,   maxDynamicStorageBuffersPerPipelineLayout,         4,          4) \
+    X(Maximum,            maxSampledTexturesPerShaderStage,        16,         16) \
+    X(Maximum,                   maxSamplersPerShaderStage,        16,         16) \
+    X(Maximum,             maxStorageBuffersPerShaderStage,         8,          8) \
+    X(Maximum,            maxStorageTexturesPerShaderStage,         4,          4) \
+    X(Maximum,             maxUniformBuffersPerShaderStage,        12,         12) \
+    X(Maximum,                 maxUniformBufferBindingSize,     65536,      65536) \
+    X(Alignment,           minUniformBufferOffsetAlignment,       256,        256) \
+    X(Alignment,           minStorageBufferOffsetAlignment,       256,        256) \
+    X(Maximum,                            maxVertexBuffers,         8,          8) \
+    X(Maximum,                               maxBufferSize, 268435456,  268435456) \
+    X(Maximum,                         maxVertexAttributes,        16,         16) \
+    X(Maximum,                  maxVertexBufferArrayStride,      2048,       2048) \
+    X(Maximum,               maxInterStageShaderComponents,        60,         60) \
+    X(Maximum,               maxInterStageShaderVariables,         16,         16) \
+    X(Maximum,                         maxColorAttachments,         8,          8) \
+    X(Maximum,           maxComputeInvocationsPerWorkgroup,       256,        256) \
+    X(Maximum,                    maxComputeWorkgroupSizeX,       256,        256) \
+    X(Maximum,                    maxComputeWorkgroupSizeY,       256,        256) \
+    X(Maximum,                    maxComputeWorkgroupSizeZ,        64,         64) \
+    X(Maximum,            maxComputeWorkgroupsPerDimension,     65535,      65535)
 // clang-format on
 
 #define LIMITS_EACH_GROUP(X)              \
     X(LIMITS_WORKGROUP_STORAGE_SIZE)      \
     X(LIMITS_STORAGE_BUFFER_BINDING_SIZE) \
+    X(LIMITS_MAX_BUFFER_SIZE)             \
     X(LIMITS_OTHER)
 
 #define LIMITS(X)                         \
     LIMITS_WORKGROUP_STORAGE_SIZE(X)      \
     LIMITS_STORAGE_BUFFER_BINDING_SIZE(X) \
+    LIMITS_MAX_BUFFER_SIZE(X)             \
     LIMITS_OTHER(X)
 
 namespace dawn::native {

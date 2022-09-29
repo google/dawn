@@ -309,6 +309,16 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
         return DAWN_INTERNAL_ERROR("Insufficient Vulkan limits for framebufferDepthSampleCounts");
     }
 
+    if (mDeviceInfo.HasExt(DeviceExt::Maintenance3)) {
+        limits->v1.maxBufferSize = mDeviceInfo.propertiesMaintenance3.maxMemoryAllocationSize;
+        if (mDeviceInfo.propertiesMaintenance3.maxMemoryAllocationSize <
+            baseLimits.v1.maxBufferSize) {
+            return DAWN_INTERNAL_ERROR("Insufficient Vulkan maxBufferSize limit");
+        }
+    } else {
+        limits->v1.maxBufferSize = kAssumedMaxBufferSize;
+    }
+
     // Only check maxFragmentCombinedOutputResources on mobile GPUs. Desktop GPUs drivers seem
     // to put incorrect values for this limit with things like 8 or 16 when they can do bindless
     // storage buffers. Mesa llvmpipe driver also puts 8 here.

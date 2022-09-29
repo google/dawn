@@ -49,7 +49,8 @@ MaybeError AdapterBase::Initialize() {
         "backend=%s type=%s)",
         mName, mDriverDescription, mVendorId, mDeviceId, mBackend, mAdapterType);
 
-    // Enforce internal Dawn constants.
+    // Enforce internal Dawn constants for some limits to ensure they don't go over fixed-size
+    // arrays in Dawn's internal code.
     mLimits.v1.maxVertexBufferArrayStride =
         std::min(mLimits.v1.maxVertexBufferArrayStride, kMaxVertexBufferArrayStride);
     mLimits.v1.maxColorAttachments =

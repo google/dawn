@@ -598,6 +598,7 @@ class Adapter : public AdapterBase {
         limits->v1.minStorageBufferOffsetAlignment = mtlLimits.minBufferOffsetAlignment;
 
         uint64_t maxBufferSize = Buffer::QueryMaxBufferLength(*mDevice);
+        limits->v1.maxBufferSize = maxBufferSize;
 
         // Metal has no documented limit on the size of a binding. Use the maximum
         // buffer size.
