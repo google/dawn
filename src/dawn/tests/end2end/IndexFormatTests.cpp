@@ -294,6 +294,9 @@ TEST_P(TriangleStripPrimitiveRestartTests, Uint32PrimitiveRestart) {
 // Same as the above test, but uses an OOB index to emulate primitive restart being disabled,
 // causing point C to be written to.
 TEST_P(TriangleStripPrimitiveRestartTests, Uint32WithoutPrimitiveRestart) {
+    // TODO(crbug.com/dawn/1557): Remove suppression once ANGLE bug is fixed
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLESwiftShader());
+
     wgpu::RenderPipeline pipeline = MakeTestPipeline(wgpu::IndexFormat::Uint32);
     wgpu::Buffer indexBuffer =
         utils::CreateBufferFromData<uint32_t>(device, wgpu::BufferUsage::Index,
@@ -419,6 +422,9 @@ TEST_P(LineStripPrimitiveRestartTests, Uint32PrimitiveRestart) {
 // Same as the above test, but uses an OOB index to emulate primitive restart being disabled,
 // causing point A to be written to.
 TEST_P(LineStripPrimitiveRestartTests, Uint32WithoutPrimitiveRestart) {
+    // TODO(crbug.com/dawn/1557): Remove suppression once ANGLE bug is fixed
+    DAWN_SUPPRESS_TEST_IF(IsOpenGLES() && IsANGLESwiftShader());
+
     wgpu::RenderPipeline pipeline =
         MakeTestPipeline(wgpu::IndexFormat::Uint32, wgpu::PrimitiveTopology::LineStrip);
 
