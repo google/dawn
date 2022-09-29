@@ -177,272 +177,272 @@ void main_1() {
   m43 = float4x3((0.0f).xxx, (0.0f).xxx, (0.0f).xxx, (0.0f).xxx);
   m44 = float4x4((0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx, (0.0f).xxxx);
   i = 0;
-  [loop] while (true) {
+  while (true) {
     const int x_105 = i;
     if ((x_105 < 1)) {
     } else {
       break;
     }
     i_1 = 0;
-    [loop] while (true) {
+    while (true) {
       const int x_112 = i_1;
       if ((x_112 < 1)) {
       } else {
         break;
       }
       i_2 = 0;
-      [loop] while (true) {
+      while (true) {
         const int x_119 = i_2;
         if ((x_119 < 1)) {
         } else {
           break;
         }
         i_3 = 0;
-        [loop] while (true) {
+        while (true) {
           const int x_126 = i_3;
           if ((x_126 < 1)) {
           } else {
             break;
           }
           i_4 = 0;
-          [loop] while (true) {
+          while (true) {
             const int x_133 = i_4;
             if ((x_133 < 1)) {
             } else {
               break;
             }
             i_5 = 0;
-            [loop] while (true) {
+            while (true) {
               const int x_140 = i_5;
               if ((x_140 < 1)) {
               } else {
                 break;
               }
               i_6 = 0;
-              [loop] while (true) {
+              while (true) {
                 const int x_147 = i_6;
                 if ((x_147 < 1)) {
                 } else {
                   break;
                 }
                 i_7 = 0;
-                [loop] while (true) {
+                while (true) {
                   const int x_154 = i_7;
                   if ((x_154 < 1)) {
                   } else {
                     break;
                   }
                   i_8 = 0;
-                  [loop] while (true) {
+                  while (true) {
                     const int x_161 = i_8;
                     if ((x_161 < 1)) {
                     } else {
                       break;
                     }
                     i_9 = 0;
-                    [loop] while (true) {
+                    while (true) {
                       const int x_168 = i_9;
                       if ((x_168 < 1)) {
                       } else {
                         break;
                       }
                       i_10 = 0;
-                      [loop] while (true) {
+                      while (true) {
                         const int x_175 = i_10;
                         if ((x_175 < 1)) {
                         } else {
                           break;
                         }
                         i_11 = 0;
-                        [loop] while (true) {
+                        while (true) {
                           const int x_182 = i_11;
                           if ((x_182 < 1)) {
                           } else {
                             break;
                           }
                           i_12 = 0;
-                          [loop] while (true) {
+                          while (true) {
                             const int x_189 = i_12;
                             if ((x_189 < 1)) {
                             } else {
                               break;
                             }
                             i_13 = 0;
-                            [loop] while (true) {
+                            while (true) {
                               const int x_196 = i_13;
                               if ((x_196 < 1)) {
                               } else {
                                 break;
                               }
                               i_14 = 0;
-                              [loop] while (true) {
+                              while (true) {
                                 const int x_203 = i_14;
                                 if ((x_203 < 1)) {
                                 } else {
                                   break;
                                 }
                                 i_15 = 0;
-                                [loop] while (true) {
+                                while (true) {
                                   const int x_210 = i_15;
                                   if ((x_210 < 1)) {
                                   } else {
                                     break;
                                   }
                                   i_16 = 0;
-                                  [loop] while (true) {
+                                  while (true) {
                                     const int x_217 = i_16;
                                     if ((x_217 < 1)) {
                                     } else {
                                       break;
                                     }
                                     i_17 = 0;
-                                    [loop] while (true) {
+                                    while (true) {
                                       const int x_224 = i_17;
                                       if ((x_224 < 1)) {
                                       } else {
                                         break;
                                       }
                                       i_18 = 0;
-                                      [loop] while (true) {
+                                      while (true) {
                                         const int x_231 = i_18;
                                         if ((x_231 < 1)) {
                                         } else {
                                           break;
                                         }
                                         i_19 = 0;
-                                        [loop] while (true) {
+                                        while (true) {
                                           const int x_238 = i_19;
                                           if ((x_238 < 1)) {
                                           } else {
                                             break;
                                           }
                                           i_20 = 0;
-                                          [loop] while (true) {
+                                          while (true) {
                                             const int x_245 = i_20;
                                             if ((x_245 < 1)) {
                                             } else {
                                               break;
                                             }
                                             i_21 = 0;
-                                            [loop] while (true) {
+                                            while (true) {
                                               const int x_252 = i_21;
                                               if ((x_252 < 1)) {
                                               } else {
                                                 break;
                                               }
                                               i_22 = 0;
-                                              [loop] while (true) {
+                                              while (true) {
                                                 const int x_259 = i_22;
                                                 if ((x_259 < 1)) {
                                                 } else {
                                                   break;
                                                 }
                                                 i_23 = 0;
-                                                [loop] while (true) {
+                                                while (true) {
                                                   const int x_266 = i_23;
                                                   if ((x_266 < 1)) {
                                                   } else {
                                                     break;
                                                   }
                                                   i_24 = 0;
-                                                  [loop] while (true) {
+                                                  while (true) {
                                                     const int x_273 = i_24;
                                                     if ((x_273 < 1)) {
                                                     } else {
                                                       break;
                                                     }
                                                     i_25 = 0;
-                                                    [loop] while (true) {
+                                                    while (true) {
                                                       const int x_280 = i_25;
                                                       if ((x_280 < 1)) {
                                                       } else {
                                                         break;
                                                       }
                                                       i_26 = 0;
-                                                      [loop] while (true) {
+                                                      while (true) {
                                                         const int x_287 = i_26;
                                                         if ((x_287 < 1)) {
                                                         } else {
                                                           break;
                                                         }
                                                         i_27 = 0;
-                                                        [loop] while (true) {
+                                                        while (true) {
                                                           const int x_294 = i_27;
                                                           if ((x_294 < 1)) {
                                                           } else {
                                                             break;
                                                           }
                                                           i_28 = 0;
-                                                          [loop] while (true) {
+                                                          while (true) {
                                                             const int x_301 = i_28;
                                                             if ((x_301 < 1)) {
                                                             } else {
                                                               break;
                                                             }
                                                             i_29 = 0;
-                                                            [loop] while (true) {
+                                                            while (true) {
                                                               const int x_308 = i_29;
                                                               if ((x_308 < 1)) {
                                                               } else {
                                                                 break;
                                                               }
                                                               i_30 = 0;
-                                                              [loop] while (true) {
+                                                              while (true) {
                                                                 const int x_315 = i_30;
                                                                 if ((x_315 < 1)) {
                                                                 } else {
                                                                   break;
                                                                 }
                                                                 i_31 = 0;
-                                                                [loop] while (true) {
+                                                                while (true) {
                                                                   const int x_322 = i_31;
                                                                   if ((x_322 < 1)) {
                                                                   } else {
                                                                     break;
                                                                   }
                                                                   i_32 = 0;
-                                                                  [loop] while (true) {
+                                                                  while (true) {
                                                                     const int x_329 = i_32;
                                                                     if ((x_329 < 1)) {
                                                                     } else {
                                                                       break;
                                                                     }
                                                                     i_33 = 0;
-                                                                    [loop] while (true) {
+                                                                    while (true) {
                                                                       const int x_336 = i_33;
                                                                       if ((x_336 < 1)) {
                                                                       } else {
                                                                         break;
                                                                       }
                                                                       i_34 = 0;
-                                                                      [loop] while (true) {
+                                                                      while (true) {
                                                                         const int x_343 = i_34;
                                                                         if ((x_343 < 1)) {
                                                                         } else {
                                                                           break;
                                                                         }
                                                                         i_35 = 0;
-                                                                        [loop] while (true) {
+                                                                        while (true) {
                                                                           const int x_350 = i_35;
                                                                           if ((x_350 < 1)) {
                                                                           } else {
                                                                             break;
                                                                           }
                                                                           i_36 = 0;
-                                                                          [loop] while (true) {
+                                                                          while (true) {
                                                                             const int x_357 = i_36;
                                                                             if ((x_357 < 1)) {
                                                                             } else {
                                                                               break;
                                                                             }
                                                                             i_37 = 0;
-                                                                            [loop] while (true) {
+                                                                            while (true) {
                                                                               const int x_364 = i_37;
                                                                               if ((x_364 < 1)) {
                                                                               } else {
                                                                                 break;
                                                                               }
-                                                                              [loop] while (true) {
+                                                                              while (true) {
                                                                                 const int x_371 = x_GLF_global_loop_count;
                                                                                 x_GLF_global_loop_count = (x_371 + 1);
                                                                                 {
@@ -669,7 +669,7 @@ void main_1() {
   }
   sum = 0.0f;
   r = 0;
-  [loop] while (true) {
+  while (true) {
     const int x_479 = x_GLF_global_loop_count;
     if ((x_479 < 100)) {
     } else {

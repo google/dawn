@@ -9,7 +9,7 @@ struct S {
 
 void f() {
   int i = 0;
-  [loop] while (true) {
+  while (true) {
     const S tint_symbol = {1};
     if (!((i < tint_symbol.i))) {
       break;

@@ -27,7 +27,7 @@ void foo() {
   const int tint_symbol_save = tint_symbol_2;
   {
     a[tint_symbol_save] = (a[tint_symbol_save] * 2.0f);
-    [loop] while (true) {
+    while (true) {
       const int tint_symbol_3 = idx2();
       if (!((a[tint_symbol_3] < 10.0f))) {
         break;

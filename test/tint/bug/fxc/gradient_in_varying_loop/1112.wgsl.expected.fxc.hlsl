@@ -12,7 +12,7 @@ struct tint_symbol_3 {
 float4 main_inner(float2 vUV) {
   const float3 random = randomTexture.Sample(tint_symbol, vUV).rgb;
   int i = 0;
-  [loop] while (true) {
+  while (true) {
     if ((i < 1)) {
     } else {
       break;

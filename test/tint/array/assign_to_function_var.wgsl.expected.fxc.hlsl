@@ -29,7 +29,7 @@ typedef int4 tint_symbol_2_ret[4];
 tint_symbol_2_ret tint_symbol_2(uint4 buffer[4], uint offset) {
   int4 arr_1[4] = (int4[4])0;
   {
-    [loop] for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
       const uint scalar_offset = ((offset + (i * 16u))) / 4;
       arr_1[i] = asint(buffer[scalar_offset / 4]);
     }
@@ -41,7 +41,7 @@ typedef int4 tint_symbol_4_ret[4];
 tint_symbol_4_ret tint_symbol_4(RWByteAddressBuffer buffer, uint offset) {
   int4 arr_2[4] = (int4[4])0;
   {
-    [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
       arr_2[i_1] = asint(buffer.Load4((offset + (i_1 * 16u))));
     }
   }

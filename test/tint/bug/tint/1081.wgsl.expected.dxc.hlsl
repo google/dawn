@@ -17,7 +17,7 @@ struct tint_symbol_2 {
 
 int main_inner(int3 x) {
   int y = x.x;
-  [loop] while (true) {
+  while (true) {
     const int r = f(y);
     if (tint_discard) {
       return 0;

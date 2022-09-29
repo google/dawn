@@ -10,7 +10,7 @@ void f() {
   int j = 0;
   {
     int i = 0;
-    [loop] while (true) {
+    while (true) {
       bool tint_tmp = (i < 5);
       if (tint_tmp) {
         tint_tmp = (j < 10);

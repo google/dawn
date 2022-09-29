@@ -14,7 +14,7 @@ typedef float3 tint_symbol_3_ret[8];
 tint_symbol_3_ret tint_symbol_3(ByteAddressBuffer buffer, uint offset) {
   float3 arr[8] = (float3[8])0;
   {
-    [loop] for(uint i_1 = 0u; (i_1 < 8u); i_1 = (i_1 + 1u)) {
+    for(uint i_1 = 0u; (i_1 < 8u); i_1 = (i_1 + 1u)) {
       arr[i_1] = asfloat(buffer.Load3((offset + (i_1 * 16u))));
     }
   }

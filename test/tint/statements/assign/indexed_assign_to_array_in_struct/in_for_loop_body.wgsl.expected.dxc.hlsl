@@ -14,7 +14,7 @@ void main() {
   InnerS v = (InnerS)0;
   OuterS s1 = (OuterS)0;
   {
-    [loop] for(int i = 0; (i < 4); i = (i + 1)) {
+    for(int i = 0; (i < 4); i = (i + 1)) {
       {
         InnerS tint_symbol_1[8] = s1.a1;
         tint_symbol_1[uniforms[0].x] = v;

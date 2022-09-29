@@ -11,7 +11,7 @@ void main_1() {
   const float x_30 = asfloat(x_5[0].x);
   const float x_32 = asfloat(x_5[0].y);
   if ((x_30 > x_32)) {
-    [loop] while (true) {
+    while (true) {
       {
         if (false) {
         } else {
@@ -20,7 +20,7 @@ void main_1() {
       }
     }
     m = 1;
-    [loop] while (true) {
+    while (true) {
       if (true) {
       } else {
         break;

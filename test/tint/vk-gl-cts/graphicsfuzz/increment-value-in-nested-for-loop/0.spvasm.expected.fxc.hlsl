@@ -7,7 +7,7 @@ cbuffer cbuffer_x_6 : register(b0, space0) {
 static float4 x_GLF_color = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
 void main_1() {
-  [loop] while (true) {
+  while (true) {
     bool x_45 = false;
     int x_48 = 0;
     int x_49 = 0;
@@ -30,7 +30,7 @@ void main_1() {
     x_48_phi = 0;
     x_50_phi = 0;
     x_52_phi = 0;
-    [loop] while (true) {
+    while (true) {
       int x_62 = 0;
       int x_65 = 0;
       int x_66 = 0;
@@ -56,7 +56,7 @@ void main_1() {
       x_62_phi = x_48;
       x_65_phi = x_50;
       x_67_phi = 0;
-      [loop] while (true) {
+      while (true) {
         int x_97 = 0;
         int x_68 = 0;
         int x_66_phi = 0;
@@ -70,7 +70,7 @@ void main_1() {
         } else {
           break;
         }
-        [loop] while (true) {
+        while (true) {
           bool x_78 = false;
           int x_86_phi = 0;
           int x_97_phi = 0;
@@ -83,7 +83,7 @@ void main_1() {
               break;
             }
             x_86_phi = 1;
-            [loop] while (true) {
+            while (true) {
               int x_87 = 0;
               const int x_86 = x_86_phi;
               x_97_phi = x_65;
@@ -122,7 +122,7 @@ void main_1() {
         x_66 = x_66_phi;
         x_63 = asint((x_62 + x_66));
         if (x_41) {
-          [loop] while (true) {
+          while (true) {
             if (x_41) {
             } else {
               break;
@@ -172,7 +172,7 @@ void main_1() {
     x_115_phi = x_111;
     x_118_phi = 0;
     x_120_phi = 0;
-    [loop] while (true) {
+    while (true) {
       int x_154 = 0;
       int x_121 = 0;
       int x_119_phi = 0;
@@ -185,7 +185,7 @@ void main_1() {
       } else {
         break;
       }
-      [loop] while (true) {
+      while (true) {
         bool x_135 = false;
         int x_143_phi = 0;
         int x_154_phi = 0;
@@ -198,7 +198,7 @@ void main_1() {
             break;
           }
           x_143_phi = 1;
-          [loop] while (true) {
+          while (true) {
             int x_144 = 0;
             const int x_143 = x_143_phi;
             x_154_phi = x_118;

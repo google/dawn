@@ -4,7 +4,7 @@ groupshared uint wg[3][2][1];
 void compute_main_inner(uint local_invocation_index) {
   uint idx = 0u;
   idx = local_invocation_index;
-  [loop] while (true) {
+  while (true) {
     const uint x_25 = idx;
     if (!((x_25 < 6u))) {
       break;
@@ -37,7 +37,7 @@ struct tint_symbol_1 {
 
 void compute_main_inner_1(uint local_invocation_index_1_param) {
   {
-    [loop] for(uint idx_1 = local_invocation_index_1_param; (idx_1 < 6u); idx_1 = (idx_1 + 1u)) {
+    for(uint idx_1 = local_invocation_index_1_param; (idx_1 < 6u); idx_1 = (idx_1 + 1u)) {
       const uint i = (idx_1 / 2u);
       const uint i_1 = (idx_1 % 2u);
       const uint i_2 = (idx_1 % 1u);

@@ -29,7 +29,7 @@ TEST_F(HlslGeneratorImplTest_Continue, Emit_Continue) {
     gen.increment_indent();
 
     ASSERT_TRUE(gen.EmitStatement(loop)) << gen.error();
-    EXPECT_EQ(gen.result(), R"(  [loop] while (true) {
+    EXPECT_EQ(gen.result(), R"(  while (true) {
     if (false) {
       break;
     }

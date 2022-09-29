@@ -143,13 +143,6 @@ std::ostream& operator<<(std::ostream& s, const RegisterAndSpace& rs) {
     return s;
 }
 
-const char* LoopAttribute() {
-    // Force loops not to be unrolled to work around FXC compilation issues when
-    // it attempts and fails to unroll loops when it contains gradient operations.
-    // https://docs.microsoft.com/en-us/windows/win32/direct3dhlsl/dx-graphics-hlsl-while
-    return "[loop] ";
-}
-
 }  // namespace
 
 SanitizedResult::SanitizedResult() = default;
@@ -3365,7 +3358,7 @@ bool GeneratorImpl::EmitLoop(const ast::LoopStatement* stmt) {
     };
 
     TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
-    line() << LoopAttribute() << "while (true) {";
+    line() << "while (true) {";
     {
         ScopedIndent si(this);
         if (!EmitStatements(stmt->body->statements)) {
@@ -3435,7 +3428,7 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
         };
 
         TINT_SCOPED_ASSIGNMENT(emit_continuing_, emit_continuing);
-        line() << LoopAttribute() << "while (true) {";
+        line() << "while (true) {";
         increment_indent();
         TINT_DEFER({
             decrement_indent();
@@ -3458,7 +3451,7 @@ bool GeneratorImpl::EmitForLoop(const ast::ForLoopStatement* stmt) {
         // For-loop can be generated.
         {
             auto out = line();
-            out << LoopAttribute() << "for";
+            out << "for";
             {
                 ScopedParen sp(out);
 
@@ -3507,7 +3500,7 @@ bool GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
     // as a regular while in HLSL. Instead we need to generate a `while(true)` loop.
     bool emit_as_loop = cond_pre.lines.size() > 0;
     if (emit_as_loop) {
-        line() << LoopAttribute() << "while (true) {";
+        line() << "while (true) {";
         increment_indent();
         TINT_DEFER({
             decrement_indent();
@@ -3523,7 +3516,7 @@ bool GeneratorImpl::EmitWhile(const ast::WhileStatement* stmt) {
         // While can be generated.
         {
             auto out = line();
-            out << LoopAttribute() << "while";
+            out << "while";
             {
                 ScopedParen sp(out);
                 out << cond_buf.str();

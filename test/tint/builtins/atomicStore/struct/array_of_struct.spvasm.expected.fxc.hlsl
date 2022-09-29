@@ -10,7 +10,7 @@ groupshared S_atomic wg[10];
 void compute_main_inner(uint local_invocation_index) {
   uint idx = 0u;
   idx = local_invocation_index;
-  [loop] while (true) {
+  while (true) {
     const uint x_23 = idx;
     if (!((x_23 < 10u))) {
       break;
@@ -43,7 +43,7 @@ struct tint_symbol_1 {
 
 void compute_main_inner_1(uint local_invocation_index_1_param) {
   {
-    [loop] for(uint idx_1 = local_invocation_index_1_param; (idx_1 < 10u); idx_1 = (idx_1 + 1u)) {
+    for(uint idx_1 = local_invocation_index_1_param; (idx_1 < 10u); idx_1 = (idx_1 + 1u)) {
       const uint i = idx_1;
       wg[i].x = 0;
       uint atomic_result_2 = 0u;

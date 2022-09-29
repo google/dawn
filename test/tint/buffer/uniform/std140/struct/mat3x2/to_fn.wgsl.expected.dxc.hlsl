@@ -44,7 +44,7 @@ typedef S tint_symbol_ret[4];
 tint_symbol_ret tint_symbol(uint4 buffer[20], uint offset) {
   S arr[4] = (S[4])0;
   {
-    [loop] for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
       arr[i] = tint_symbol_1(buffer, (offset + (i * 80u)));
     }
   }

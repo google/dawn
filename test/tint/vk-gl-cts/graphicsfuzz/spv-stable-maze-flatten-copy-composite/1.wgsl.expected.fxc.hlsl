@@ -25,14 +25,14 @@ void main_1() {
   ipos = int2(int((x_65 * 16.0f)), int((x_69 * 16.0f)));
   i = 0;
   {
-    [loop] for(; (i < 256); i = (i + 1)) {
+    for(; (i < 256); i = (i + 1)) {
       map[i] = 0;
     }
   }
   p = (0).xx;
   canwalk = true;
   v = 0;
-  [loop] while (true) {
+  while (true) {
     bool x_104 = false;
     bool x_124 = false;
     bool x_144 = false;
@@ -125,10 +125,10 @@ void main_1() {
       canwalk = false;
       i = 0;
       {
-        [loop] for(; (i < 8); i = (i + 1)) {
+        for(; (i < 8); i = (i + 1)) {
           j = 0;
           {
-            [loop] for(; (j < 8); j = (j + 1)) {
+            for(; (j < 8); j = (j + 1)) {
               const int x_196 = map[((j * 2) + ((i * 2) * 16))];
               if ((x_196 == 0)) {
                 p.x = (j * 2);

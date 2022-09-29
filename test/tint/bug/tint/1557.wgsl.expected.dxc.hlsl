@@ -8,7 +8,7 @@ int f() {
 
 void g() {
   int j = 0;
-  [loop] while (true) {
+  while (true) {
     if ((j >= 1)) {
       break;
     }

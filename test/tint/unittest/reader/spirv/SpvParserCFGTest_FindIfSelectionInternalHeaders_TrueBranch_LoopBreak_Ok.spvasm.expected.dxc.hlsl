@@ -3,7 +3,7 @@ SKIP: FAILED
 static uint var_1 = 0u;
 
 void main_1() {
-  [loop] while (true) {
+  while (true) {
     if (false) {
       break;
     }

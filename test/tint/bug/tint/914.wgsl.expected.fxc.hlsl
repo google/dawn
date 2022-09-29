@@ -51,7 +51,7 @@ struct tint_symbol_1 {
 
 void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
   {
-    [loop] for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 256u)) {
+    for(uint idx = local_invocation_index; (idx < 4096u); idx = (idx + 256u)) {
       const uint i = (idx / 64u);
       const uint i_1 = (idx % 64u);
       mm_Asub[i][i_1] = 0.0f;
@@ -68,7 +68,7 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
   float ACached = 0.0f;
   float BCached[4] = (float[4])0;
   {
-    [loop] for(uint index = 0u; (index < 16u); index = (index + 1u)) {
+    for(uint index = 0u; (index < 16u); index = (index + 1u)) {
       acc[index] = 0.0f;
     }
   }
@@ -77,11 +77,11 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
   const uint RowPerThreadB = 4u;
   const uint tileRowB = (local_id.y * RowPerThreadB);
   {
-    [loop] for(uint t = 0u; (t < numTiles); t = (t + 1u)) {
+    for(uint t = 0u; (t < numTiles); t = (t + 1u)) {
       {
-        [loop] for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
+        for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
           {
-            [loop] for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
+            for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
               const uint inputRow = (tileRow + innerRow);
               const uint inputCol = (tileColA + innerCol);
               const float tint_symbol_2 = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol));
@@ -91,9 +91,9 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
         }
       }
       {
-        [loop] for(uint innerRow = 0u; (innerRow < RowPerThreadB); innerRow = (innerRow + 1u)) {
+        for(uint innerRow = 0u; (innerRow < RowPerThreadB); innerRow = (innerRow + 1u)) {
           {
-            [loop] for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
+            for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
               const uint inputRow = (tileRowB + innerRow);
               const uint inputCol = (tileCol + innerCol);
               const float tint_symbol_3 = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
@@ -104,17 +104,17 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
       }
       GroupMemoryBarrierWithGroupSync();
       {
-        [loop] for(uint k = 0u; (k < 64u); k = (k + 1u)) {
+        for(uint k = 0u; (k < 64u); k = (k + 1u)) {
           {
-            [loop] for(uint inner = 0u; (inner < 4u); inner = (inner + 1u)) {
+            for(uint inner = 0u; (inner < 4u); inner = (inner + 1u)) {
               BCached[inner] = mm_Bsub[k][(tileCol + inner)];
             }
           }
           {
-            [loop] for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
+            for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
               ACached = mm_Asub[(tileRow + innerRow)][k];
               {
-                [loop] for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
+                for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
                   const uint index = ((innerRow * 4u) + innerCol);
                   acc[index] = (acc[index] + (ACached * BCached[innerCol]));
                 }
@@ -127,9 +127,9 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
     }
   }
   {
-    [loop] for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
+    for(uint innerRow = 0u; (innerRow < 4u); innerRow = (innerRow + 1u)) {
       {
-        [loop] for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
+        for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
           const uint index = ((innerRow * 4u) + innerCol);
           mm_write((globalRow + innerRow), (globalCol + innerCol), acc[index]);
         }

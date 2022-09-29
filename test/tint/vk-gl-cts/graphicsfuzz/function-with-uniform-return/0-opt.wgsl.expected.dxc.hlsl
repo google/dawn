@@ -12,7 +12,7 @@ float fx_() {
     const float x_55 = asfloat(x_7[0].y);
     return x_55;
   }
-  [loop] while (true) {
+  while (true) {
     if (true) {
     } else {
       break;
@@ -30,7 +30,7 @@ void main_1() {
   B = 1.0f;
   const float x_34 = fx_();
   x_GLF_color = float4(x_34, 0.0f, 0.0f, 1.0f);
-  [loop] while (true) {
+  while (true) {
     if ((x2 > 2.0f)) {
     } else {
       break;

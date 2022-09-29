@@ -5,7 +5,7 @@ int g() {
 }
 
 int f() {
-  [loop] while (true) {
+  while (true) {
     g();
     break;
   }
@@ -15,7 +15,7 @@ int f() {
 
 [numthreads(1, 1, 1)]
 void main() {
-  [loop] while (true) {
+  while (true) {
     if ((buf.Load(0u) == 0u)) {
       break;
     }

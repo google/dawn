@@ -34,7 +34,7 @@ typedef S tint_symbol_2_ret[4];
 tint_symbol_2_ret tint_symbol_2(uint4 buffer[20], uint offset) {
   S arr[4] = (S[4])0;
   {
-    [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
       arr[i_1] = tint_symbol_3(buffer, (offset + (i_1 * 80u)));
     }
   }
@@ -43,7 +43,7 @@ tint_symbol_2_ret tint_symbol_2(uint4 buffer[20], uint offset) {
 
 void f_inner(uint local_invocation_index) {
   {
-    [loop] for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
+    for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
       const uint i = idx;
       const S tint_symbol_7 = (S)0;
       w[i] = tint_symbol_7;

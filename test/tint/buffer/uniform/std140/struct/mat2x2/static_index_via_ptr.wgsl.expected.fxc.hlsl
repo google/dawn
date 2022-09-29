@@ -26,7 +26,7 @@ typedef Inner tint_symbol_2_ret[4];
 tint_symbol_2_ret tint_symbol_2(uint4 buffer[16], uint offset) {
   Inner arr[4] = (Inner[4])0;
   {
-    [loop] for(uint i = 0u; (i < 4u); i = (i + 1u)) {
+    for(uint i = 0u; (i < 4u); i = (i + 1u)) {
       arr[i] = tint_symbol_3(buffer, (offset + (i * 16u)));
     }
   }
@@ -42,7 +42,7 @@ typedef Outer tint_symbol_ret[4];
 tint_symbol_ret tint_symbol(uint4 buffer[16], uint offset) {
   Outer arr_1[4] = (Outer[4])0;
   {
-    [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
       arr_1[i_1] = tint_symbol_1(buffer, (offset + (i_1 * 64u)));
     }
   }

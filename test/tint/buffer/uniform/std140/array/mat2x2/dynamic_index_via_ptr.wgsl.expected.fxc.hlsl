@@ -20,7 +20,7 @@ typedef float2x2 tint_symbol_ret[4];
 tint_symbol_ret tint_symbol(uint4 buffer[4], uint offset) {
   float2x2 arr[4] = (float2x2[4])0;
   {
-    [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
       arr[i_1] = tint_symbol_1(buffer, (offset + (i_1 * 16u)));
     }
   }

@@ -30,7 +30,7 @@ void foo() {
 [numthreads(1, 1, 1)]
 void main() {
   {
-    [loop] for(int i = 0; (i < 2); i = (i + 1)) {
+    for(int i = 0; (i < 2); i = (i + 1)) {
       foo();
     }
   }

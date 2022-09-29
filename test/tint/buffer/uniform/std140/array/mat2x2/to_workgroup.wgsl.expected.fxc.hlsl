@@ -19,7 +19,7 @@ typedef float2x2 tint_symbol_2_ret[4];
 tint_symbol_2_ret tint_symbol_2(uint4 buffer[4], uint offset) {
   float2x2 arr[4] = (float2x2[4])0;
   {
-    [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
       arr[i_1] = tint_symbol_3(buffer, (offset + (i_1 * 16u)));
     }
   }
@@ -28,7 +28,7 @@ tint_symbol_2_ret tint_symbol_2(uint4 buffer[4], uint offset) {
 
 void f_inner(uint local_invocation_index) {
   {
-    [loop] for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
+    for(uint idx = local_invocation_index; (idx < 4u); idx = (idx + 1u)) {
       const uint i = idx;
       w[i] = float2x2((0.0f).xx, (0.0f).xx);
     }

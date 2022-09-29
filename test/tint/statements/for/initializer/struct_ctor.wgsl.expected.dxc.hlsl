@@ -10,7 +10,7 @@ struct S {
 void f() {
   const S tint_symbol = {1};
   {
-    [loop] for(int i = tint_symbol.i; false; ) {
+    for(int i = tint_symbol.i; false; ) {
     }
   }
 }

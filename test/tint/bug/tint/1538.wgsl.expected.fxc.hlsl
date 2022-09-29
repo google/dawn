@@ -1,5 +1,3 @@
-SKIP: FAILED
-
 RWByteAddressBuffer buf : register(u1, space0);
 
 int g() {
@@ -7,7 +5,7 @@ int g() {
 }
 
 int f() {
-  [loop] while (true) {
+  while (true) {
     g();
     break;
   }
@@ -17,7 +15,7 @@ int f() {
 
 [numthreads(1, 1, 1)]
 void main() {
-  [loop] while (true) {
+  while (true) {
     if ((buf.Load(0u) == 0u)) {
       break;
     }
@@ -26,6 +24,3 @@ void main() {
   }
   return;
 }
-FXC validation failure:
-C:\src\dawn\test\tint\Shader@0x0000025FB94834E0(8,10-21): error X3531: can't unroll loops marked with loop attribute
-

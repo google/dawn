@@ -18,7 +18,7 @@ struct tint_symbol_1 {
 
 void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_invocation_index) {
   {
-    [loop] for(uint idx = local_invocation_index; (idx < 1024u); idx = (idx + 64u)) {
+    for(uint idx = local_invocation_index; (idx < 1024u); idx = (idx + 64u)) {
       const uint i_1 = (idx / 256u);
       const uint i_2 = (idx % 256u);
       tile[i_1][i_2] = (0.0f).xxx;
@@ -31,9 +31,9 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_invocatio
   const int2 dims = tint_tmp.xy;
   const int2 baseIndex = (int2(((WorkGroupID.xy * uint2(params[0].y, 4u)) + (LocalInvocationID.xy * uint2(4u, 1u)))) - int2(int(filterOffset), 0));
   {
-    [loop] for(uint r = 0u; (r < 4u); r = (r + 1u)) {
+    for(uint r = 0u; (r < 4u); r = (r + 1u)) {
       {
-        [loop] for(uint c = 0u; (c < 4u); c = (c + 1u)) {
+        for(uint c = 0u; (c < 4u); c = (c + 1u)) {
           int2 loadIndex = (baseIndex + int2(int(c), int(r)));
           if ((flip[0].x != 0u)) {
             loadIndex = loadIndex.yx;
@@ -45,9 +45,9 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_invocatio
   }
   GroupMemoryBarrierWithGroupSync();
   {
-    [loop] for(uint r = 0u; (r < 4u); r = (r + 1u)) {
+    for(uint r = 0u; (r < 4u); r = (r + 1u)) {
       {
-        [loop] for(uint c = 0u; (c < 4u); c = (c + 1u)) {
+        for(uint c = 0u; (c < 4u); c = (c + 1u)) {
           int2 writeIndex = (baseIndex + int2(int(c), int(r)));
           if ((flip[0].x != 0u)) {
             writeIndex = writeIndex.yx;
@@ -64,7 +64,7 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_invocatio
           if ((tint_tmp_1)) {
             float3 acc = (0.0f).xxx;
             {
-              [loop] for(uint f = 0u; (f < params[0].x); f = (f + 1u)) {
+              for(uint f = 0u; (f < params[0].x); f = (f + 1u)) {
                 uint i = ((center + f) - filterOffset);
                 acc = (acc + ((1.0f / float(params[0].x)) * tile[r][i]));
               }

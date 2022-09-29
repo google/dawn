@@ -22,7 +22,7 @@ void tint_symbol_9(RWByteAddressBuffer buffer, uint offset, Inner value) {
 void tint_symbol_10(RWByteAddressBuffer buffer, uint offset, Inner value[4]) {
   Inner array[4] = value;
   {
-    [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
       tint_symbol_9(buffer, (offset + (i_1 * 4u)), array[i_1]);
     }
   }

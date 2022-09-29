@@ -15,7 +15,7 @@ void main() {
   OuterS s1 = (OuterS)0;
   {
     int i = 0;
-    [loop] while (true) {
+    while (true) {
       if (!((i < 4))) { break; }
       i = (i + 1);
       {

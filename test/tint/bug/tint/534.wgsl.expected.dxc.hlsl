@@ -32,7 +32,7 @@ void main_inner(uint3 GlobalInvocationID) {
   uint4 srcColorBits = uint4(0u, 0u, 0u, 0u);
   uint4 dstColorBits = uint4(dstColor);
   {
-    [loop] for(uint i = 0u; (i < uniforms[0].w); i = (i + 1u)) {
+    for(uint i = 0u; (i < uniforms[0].w); i = (i + 1u)) {
       const uint tint_symbol_3 = ConvertToFp16FloatValue(srcColor[i]);
       set_uint4(srcColorBits, i, tint_symbol_3);
       bool tint_tmp_1 = success;

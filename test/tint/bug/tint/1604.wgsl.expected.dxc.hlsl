@@ -6,7 +6,7 @@ cbuffer cbuffer_x : register(b0, space0) {
 void main() {
   switch(asint(x[0].x)) {
     case 0: {
-      [loop] while (true) {
+      while (true) {
         return;
       }
       break;

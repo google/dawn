@@ -54,9 +54,9 @@ void main_inner(uint3 GlobalInvocationID) {
   const int TILE_COUNT_X = 2;
   const int TILE_COUNT_Y = 2;
   {
-    [loop] for(int y_1 = 0; (y_1 < TILE_COUNT_Y); y_1 = (y_1 + 1)) {
+    for(int y_1 = 0; (y_1 < TILE_COUNT_Y); y_1 = (y_1 + 1)) {
       {
-        [loop] for(int x_1 = 0; (x_1 < TILE_COUNT_X); x_1 = (x_1 + 1)) {
+        for(int x_1 = 0; (x_1 < TILE_COUNT_X); x_1 = (x_1 + 1)) {
           int2 tilePixel0Idx = int2((x_1 * TILE_SIZE), (y_1 * TILE_SIZE));
           float2 floorCoord = (((2.0f * float2(tilePixel0Idx)) / asfloat(uniforms[10]).xy) - (1.0f).xx);
           float2 ceilCoord = (((2.0f * float2((tilePixel0Idx + int2((TILE_SIZE).xx)))) / asfloat(uniforms[10]).xy) - (1.0f).xx);
@@ -68,7 +68,7 @@ void main_inner(uint3 GlobalInvocationID) {
           frustumPlanes[3] = float4(0.0f, -1.0f, (viewCeilCoord.y / viewNear), 0.0f);
           float dp = 0.0f;
           {
-            [loop] for(uint i = 0u; (i < 6u); i = (i + 1u)) {
+            for(uint i = 0u; (i < 6u); i = (i + 1u)) {
               float4 p = float4(0.0f, 0.0f, 0.0f, 0.0f);
               if ((frustumPlanes[i].x > 0.0f)) {
                 p.x = boxMax.x;

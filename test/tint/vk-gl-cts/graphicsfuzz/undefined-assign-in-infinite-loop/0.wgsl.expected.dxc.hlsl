@@ -13,7 +13,7 @@ void main_1() {
   GLF_dead6index = 0;
   const float x_34 = asfloat(x_6[0].y);
   if ((x_34 < 0.0f)) {
-    [loop] while (true) {
+    while (true) {
       if (true) {
       } else {
         break;

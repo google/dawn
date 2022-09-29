@@ -17,13 +17,13 @@ void main_1() {
   i = (int(x_55) % 3);
   c = 0;
   {
-    [loop] for(; (c < 3); c = (c + 1)) {
+    for(; (c < 3); c = (c + 1)) {
       array0[c] = 0.0f;
       array1[c] = 0.0f;
       const float x_65 = asfloat(x_11[0].x);
       switch((int(x_65) + q)) {
         case 51: {
-          [loop] while (true) {
+          while (true) {
             if (true) {
             } else {
               break;

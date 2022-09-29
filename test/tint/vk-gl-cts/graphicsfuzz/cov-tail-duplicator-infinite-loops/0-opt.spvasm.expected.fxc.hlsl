@@ -18,7 +18,7 @@ void main_1() {
   const float x_41 = asfloat(x_7[0].x);
   const float x_43 = asfloat(x_5[0].x);
   if ((x_41 > x_43)) {
-    [loop] while (true) {
+    while (true) {
       const float x_53 = asfloat(x_5[1].x);
       x_GLF_color = float4(x_53, x_53, x_53, x_53);
       {
@@ -29,15 +29,15 @@ void main_1() {
       }
     }
   } else {
-    [loop] while (true) {
-      [loop] while (true) {
+    while (true) {
+      while (true) {
         if (true) {
         } else {
           break;
         }
         const int x_13 = asint(x_10[1].x);
         i = x_13;
-        [loop] while (true) {
+        while (true) {
           const int x_14 = i;
           const int x_15 = asint(x_10[0].x);
           if ((x_14 < x_15)) {

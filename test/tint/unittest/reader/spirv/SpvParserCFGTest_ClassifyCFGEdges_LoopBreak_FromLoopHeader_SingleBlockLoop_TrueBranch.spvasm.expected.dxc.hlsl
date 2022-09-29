@@ -4,7 +4,7 @@ static uint var_1 = 0u;
 
 void main_1() {
   {
-    [loop] for(; !(false); ) {
+    for(; !(false); ) {
     }
   }
   return;

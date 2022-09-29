@@ -21,7 +21,7 @@ typedef Inner tint_symbol_10_ret[4];
 tint_symbol_10_ret tint_symbol_10(ByteAddressBuffer buffer, uint offset) {
   Inner arr[4] = (Inner[4])0;
   {
-    [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
       arr[i_1] = tint_symbol_9(buffer, (offset + (i_1 * 4u)));
     }
   }

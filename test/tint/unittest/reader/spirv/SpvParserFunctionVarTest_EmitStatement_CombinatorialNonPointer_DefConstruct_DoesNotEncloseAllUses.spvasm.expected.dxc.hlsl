@@ -4,7 +4,7 @@ static uint x_1 = 0u;
 
 void main_1() {
   x_1 = 0u;
-  [loop] while (true) {
+  while (true) {
     uint x_2 = 0u;
     x_1 = 1u;
     if (false) {

@@ -66,7 +66,7 @@ void main_1() {
   const float2 x_111 = asfloat(x_20[5].zw);
   stageUnits = ((1.0f).xx / x_111);
   i = 0;
-  [loop] while (true) {
+  while (true) {
     const int x_122 = i;
     if ((x_122 < 2)) {
     } else {
@@ -102,7 +102,7 @@ void main_1() {
       const float x_184 = animationData.z;
       mt = ((x_181 * x_184) % 1.0f);
       f = 0.0f;
-      [loop] while (true) {
+      while (true) {
         const float x_193 = f;
         if ((x_193 < 8.0f)) {
         } else {

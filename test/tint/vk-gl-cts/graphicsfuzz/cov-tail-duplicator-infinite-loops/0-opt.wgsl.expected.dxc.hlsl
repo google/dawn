@@ -20,7 +20,7 @@ void main_1() {
   const uint scalar_offset_1 = ((16u * 0u)) / 4;
   const float x_43 = asfloat(x_5[scalar_offset_1 / 4][scalar_offset_1 % 4]);
   if ((x_41 > x_43)) {
-    [loop] while (true) {
+    while (true) {
       const float x_53 = asfloat(x_5[1].x);
       x_GLF_color = float4(x_53, x_53, x_53, x_53);
       {
@@ -31,15 +31,15 @@ void main_1() {
       }
     }
   } else {
-    [loop] while (true) {
-      [loop] while (true) {
+    while (true) {
+      while (true) {
         if (true) {
         } else {
           break;
         }
         const int x_13 = asint(x_10[1].x);
         i = x_13;
-        [loop] while (true) {
+        while (true) {
           const int x_14 = i;
           const uint scalar_offset_2 = ((16u * 0u)) / 4;
           const int x_15 = asint(x_10[scalar_offset_2 / 4][scalar_offset_2 % 4]);

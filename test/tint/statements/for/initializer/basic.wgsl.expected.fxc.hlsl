@@ -5,7 +5,7 @@ void unused_entry_point() {
 
 void f() {
   {
-    [loop] for(int i = 0; false; ) {
+    for(int i = 0; false; ) {
     }
   }
 }

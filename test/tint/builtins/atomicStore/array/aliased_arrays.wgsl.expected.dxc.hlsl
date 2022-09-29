@@ -6,7 +6,7 @@ struct tint_symbol_1 {
 
 void compute_main_inner(uint local_invocation_index) {
   {
-    [loop] for(uint idx = local_invocation_index; (idx < 6u); idx = (idx + 1u)) {
+    for(uint idx = local_invocation_index; (idx < 6u); idx = (idx + 1u)) {
       const uint i = (idx / 2u);
       const uint i_1 = (idx % 2u);
       const uint i_2 = (idx % 1u);

@@ -16,7 +16,7 @@ typedef int4 tint_symbol_11_ret[4];
 tint_symbol_11_ret tint_symbol_11(ByteAddressBuffer buffer, uint offset) {
   int4 arr_1[4] = (int4[4])0;
   {
-    [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
       arr_1[i_1] = asint(buffer.Load4((offset + (i_1 * 16u))));
     }
   }

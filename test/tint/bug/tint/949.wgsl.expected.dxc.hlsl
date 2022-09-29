@@ -278,7 +278,7 @@ void main_1() {
   lastSampledHeight = 1.0f;
   currSampledHeight = 1.0f;
   i = 0;
-  [loop] while (true) {
+  while (true) {
     const int x_388 = i;
     if ((x_388 < 15)) {
     } else {

@@ -20,7 +20,7 @@ void main() {
       tint_symbol_1[uniforms[0].x] = v;
       s1.a1 = tint_symbol_1;
     }
-    [loop] for(; (i < 4); i = (i + 1)) {
+    for(; (i < 4); i = (i + 1)) {
     }
   }
   return;

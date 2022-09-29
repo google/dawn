@@ -16,7 +16,7 @@ typedef strided_arr tint_symbol_3_ret[2];
 tint_symbol_3_ret tint_symbol_3(RWByteAddressBuffer buffer, uint offset) {
   strided_arr arr[2] = (strided_arr[2])0;
   {
-    [loop] for(uint i = 0u; (i < 2u); i = (i + 1u)) {
+    for(uint i = 0u; (i < 2u); i = (i + 1u)) {
       arr[i] = tint_symbol_4(buffer, (offset + (i * 8u)));
     }
   }
@@ -27,7 +27,7 @@ typedef strided_arr tint_symbol_2_ret[3][2];
 tint_symbol_2_ret tint_symbol_2(RWByteAddressBuffer buffer, uint offset) {
   strided_arr arr_1[3][2] = (strided_arr[3][2])0;
   {
-    [loop] for(uint i_1 = 0u; (i_1 < 3u); i_1 = (i_1 + 1u)) {
+    for(uint i_1 = 0u; (i_1 < 3u); i_1 = (i_1 + 1u)) {
       arr_1[i_1] = tint_symbol_3(buffer, (offset + (i_1 * 16u)));
     }
   }
@@ -43,7 +43,7 @@ typedef strided_arr_1 tint_symbol_ret[4];
 tint_symbol_ret tint_symbol(RWByteAddressBuffer buffer, uint offset) {
   strided_arr_1 arr_2[4] = (strided_arr_1[4])0;
   {
-    [loop] for(uint i_2 = 0u; (i_2 < 4u); i_2 = (i_2 + 1u)) {
+    for(uint i_2 = 0u; (i_2 < 4u); i_2 = (i_2 + 1u)) {
       arr_2[i_2] = tint_symbol_1(buffer, (offset + (i_2 * 128u)));
     }
   }
@@ -57,7 +57,7 @@ void tint_symbol_10(RWByteAddressBuffer buffer, uint offset, strided_arr value) 
 void tint_symbol_9(RWByteAddressBuffer buffer, uint offset, strided_arr value[2]) {
   strided_arr array_2[2] = value;
   {
-    [loop] for(uint i_3 = 0u; (i_3 < 2u); i_3 = (i_3 + 1u)) {
+    for(uint i_3 = 0u; (i_3 < 2u); i_3 = (i_3 + 1u)) {
       tint_symbol_10(buffer, (offset + (i_3 * 8u)), array_2[i_3]);
     }
   }
@@ -66,7 +66,7 @@ void tint_symbol_9(RWByteAddressBuffer buffer, uint offset, strided_arr value[2]
 void tint_symbol_8(RWByteAddressBuffer buffer, uint offset, strided_arr value[3][2]) {
   strided_arr array_1[3][2] = value;
   {
-    [loop] for(uint i_4 = 0u; (i_4 < 3u); i_4 = (i_4 + 1u)) {
+    for(uint i_4 = 0u; (i_4 < 3u); i_4 = (i_4 + 1u)) {
       tint_symbol_9(buffer, (offset + (i_4 * 16u)), array_1[i_4]);
     }
   }
@@ -79,7 +79,7 @@ void tint_symbol_7(RWByteAddressBuffer buffer, uint offset, strided_arr_1 value)
 void tint_symbol_6(RWByteAddressBuffer buffer, uint offset, strided_arr_1 value[4]) {
   strided_arr_1 array[4] = value;
   {
-    [loop] for(uint i_5 = 0u; (i_5 < 4u); i_5 = (i_5 + 1u)) {
+    for(uint i_5 = 0u; (i_5 < 4u); i_5 = (i_5 + 1u)) {
       tint_symbol_7(buffer, (offset + (i_5 * 128u)), array[i_5]);
     }
   }

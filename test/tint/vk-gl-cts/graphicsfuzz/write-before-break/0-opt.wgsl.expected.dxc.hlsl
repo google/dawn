@@ -39,7 +39,7 @@ void main_1() {
   m43 = float4x3(float3(1.0f, 0.0f, 0.0f), float3(0.0f, 1.0f, 0.0f), float3(0.0f, 0.0f, 1.0f), (0.0f).xxx);
   ll_1 = 0;
   GLF_live6rows = 2;
-  [loop] while (true) {
+  while (true) {
     const int x_18 = ll_1;
     const int x_19 = asint(x_9[0].x);
     if ((x_18 >= x_19)) {
@@ -52,7 +52,7 @@ void main_1() {
     ll_2 = 0;
     ctr = 0;
     {
-      [loop] for(; (ctr < 1); ctr = (ctr + 1)) {
+      for(; (ctr < 1); ctr = (ctr + 1)) {
         const int x_24 = ll_2;
         const int x_25 = asint(x_9[0].x);
         if ((x_24 >= x_25)) {
@@ -63,7 +63,7 @@ void main_1() {
         ll_3 = 0;
         c = 0;
         {
-          [loop] for(; (1 < z); c = (c + 1)) {
+          for(; (1 < z); c = (c + 1)) {
             d = 0;
             set_scalar_float4x3(tempm43, (((d >= 0) & (d < 3)) ? d : 0), (((c >= 0) & (c < 4)) ? c : 0), 1.0f);
           }

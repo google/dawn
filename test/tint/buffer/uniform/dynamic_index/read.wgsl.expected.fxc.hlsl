@@ -26,7 +26,7 @@ typedef int4 tint_symbol_12_ret[4];
 tint_symbol_12_ret tint_symbol_12(uint4 buffer[96], uint offset) {
   int4 arr_1[4] = (int4[4])0;
   {
-    [loop] for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
+    for(uint i_1 = 0u; (i_1 < 4u); i_1 = (i_1 + 1u)) {
       const uint scalar_offset_5 = ((offset + (i_1 * 16u))) / 4;
       arr_1[i_1] = asint(buffer[scalar_offset_5 / 4]);
     }

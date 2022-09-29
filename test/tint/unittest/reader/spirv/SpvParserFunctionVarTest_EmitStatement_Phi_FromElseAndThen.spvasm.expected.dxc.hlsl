@@ -7,7 +7,7 @@ static bool x_8 = false;
 void main_1() {
   const bool x_101 = x_7;
   const bool x_102 = x_8;
-  [loop] while (true) {
+  while (true) {
     uint x_2_phi = 0u;
     if (x_101) {
       break;
