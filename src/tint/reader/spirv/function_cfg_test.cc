@@ -13028,8 +13028,8 @@ TEST_F(SpvParserCFGTest, EmitBody_ContinueFromSingleBlockLoopToOuterLoop_IsError
     auto p = parser(test::Assemble(assembly));
     EXPECT_FALSE(p->Parse());
     EXPECT_FALSE(p->success());
-    EXPECT_THAT(p->error(), HasSubstr("block <ID> 20[%20] exits the continue headed by <ID> "
-                                      "20[%20], but not via a structured exit"))
+    EXPECT_THAT(p->error(), HasSubstr("block <ID> '20[%20]' exits the continue headed by <ID> "
+                                      "'20[%20]', but not via a structured exit"))
         << p->error();
 }
 
