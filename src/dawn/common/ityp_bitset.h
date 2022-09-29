@@ -58,7 +58,7 @@ class bitset : private std::bitset<N> {
     }
 
     bool operator!=(const bitset& other) const noexcept {
-        return Base::operator!=(static_cast<const Base&>(other));
+        return !Base::operator==(static_cast<const Base&>(other));
     }
 
     bitset& operator&=(const bitset& other) noexcept {
