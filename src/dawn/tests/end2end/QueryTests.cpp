@@ -750,9 +750,6 @@ TEST_P(TimestampQueryTests, TimestampOnRenderPass) {
     // devices
     DAWN_TEST_UNSUPPORTED_IF(IsMacOS() && IsMetal() && IsApple());
 
-    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
-
     constexpr uint32_t kQueryCount = 2;
 
     // Write timestamp with different query indexes
@@ -1035,9 +1032,6 @@ TEST_P(TimestampQueryTests, TimestampWritesOnRenderPassWithNoPipline) {
     // the issue is fixed.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
 
-    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
-
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(2);
     TestTimestampWritesOnRenderPass({{querySet, 0, wgpu::RenderPassTimestampLocation::Beginning},
                                      {querySet, 1, wgpu::RenderPassTimestampLocation::End}},
@@ -1052,9 +1046,6 @@ TEST_P(TimestampQueryTests, TimestampWritesOnRenderPassWithOnlyVertexStage) {
     // vkCmdFillBuffer and vkCmdCopyQueryPoolResults are not executed in order, skip it until
     // the issue is fixed.
     DAWN_SUPPRESS_TEST_IF(IsWindows() && IsVulkan() && IsIntel());
-
-    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
-    DAWN_SUPPRESS_TEST_IF(IsAndroid() && IsQualcomm());
 
     wgpu::QuerySet querySet = CreateQuerySetForTimestamp(2);
     TestTimestampWritesOnRenderPass({{querySet, 0, wgpu::RenderPassTimestampLocation::Beginning},

@@ -149,7 +149,10 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
         mSupportedFeatures.EnableFeature(Feature::PipelineStatisticsQuery);
     }
 
-    if (mDeviceInfo.properties.limits.timestampComputeAndGraphics == VK_TRUE) {
+    // TODO(dawn:1559) Resolving timestamp queries after a render pass is failing on Qualcomm-based
+    // Android devices.
+    if (mDeviceInfo.properties.limits.timestampComputeAndGraphics == VK_TRUE &&
+        !IsAndroidQualcomm()) {
         mSupportedFeatures.EnableFeature(Feature::TimestampQuery);
     }
 
