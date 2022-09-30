@@ -1301,6 +1301,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration_Natural_Dropped) {
      OpDecorate %s Block
      OpMemberDecorate %s 0 MatrixStride 8
      OpMemberDecorate %s 0 Offset 0
+     OpMemberDecorate %s 0 ColMajor
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %float = OpTypeFloat 32
@@ -1330,6 +1331,7 @@ TEST_F(SpvModuleScopeVarParserTest, MatrixStrideDecoration) {
      OpDecorate %s Block
      OpMemberDecorate %s 0 MatrixStride 64
      OpMemberDecorate %s 0 Offset 0
+     OpMemberDecorate %s 0 ColMajor
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %float = OpTypeFloat 32
