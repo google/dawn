@@ -1977,8 +1977,8 @@
             {
               "name": "execute bundles",
               "args": [
-                  {"name": "bundles count", "type": "uint32_t"},
-                  {"name": "bundles", "type": "render bundle", "annotation": "const*", "length": "bundles count"}
+                  {"name": "bundle count", "type": "uint32_t"},
+                  {"name": "bundles", "type": "render bundle", "annotation": "const*", "length": "bundle count"}
               ]
             },
             {
