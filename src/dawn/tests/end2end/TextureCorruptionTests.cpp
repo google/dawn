@@ -28,6 +28,7 @@ constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
 
 namespace {
 enum class WriteType {
+    ClearTexture,
     WriteTexture,    // Write the tested texture via writeTexture API
     B2TCopy,         // Write the tested texture via B2T copy
     RenderConstant,  // Write the tested texture via rendering the whole rectangle with solid color
@@ -40,6 +41,9 @@ enum class WriteType {
 
 std::ostream& operator<<(std::ostream& o, WriteType writeType) {
     switch (writeType) {
+        case WriteType::ClearTexture:
+            o << "ClearTexture";
+            break;
         case WriteType::WriteTexture:
             o << "WriteTexture";
             break;
@@ -109,7 +113,7 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
                     // lead to precision loss or rendering a solid color is easier to implement and
                     // compare.
                     data[i * elementNumPerRow + j] = 0xFFFFFFFF;
-                } else {
+                } else if (type != WriteType::ClearTexture) {
                     data[i * elementNumPerRow + j] = srcValue;
                     srcValue++;
                 }
@@ -275,5 +279,6 @@ DAWN_INSTANTIATE_TEST_P(TextureCorruptionTests,
                         {D3D12Backend()},
                         {100u, 200u, 300u, 400u, 500u, 600u, 700u, 800u, 900u, 1000u, 1200u},
                         {100u, 200u},
-                        {WriteType::WriteTexture, WriteType::B2TCopy, WriteType::RenderConstant,
-                         WriteType::RenderFromTextureSample, WriteType::RenderFromTextureLoad});
+                        {WriteType::ClearTexture, WriteType::WriteTexture, WriteType::B2TCopy,
+                         WriteType::RenderConstant, WriteType::RenderFromTextureSample,
+                         WriteType::RenderFromTextureLoad});

@@ -63,7 +63,8 @@ class ResourceAllocatorManager {
     ResultOrError<ResourceHeapAllocation> AllocateMemory(
         D3D12_HEAP_TYPE heapType,
         const D3D12_RESOURCE_DESC& resourceDescriptor,
-        D3D12_RESOURCE_STATES initialUsage);
+        D3D12_RESOURCE_STATES initialUsage,
+        uint32_t formatBytesPerBlock);
 
     void DeallocateMemory(ResourceHeapAllocation& allocation);
 

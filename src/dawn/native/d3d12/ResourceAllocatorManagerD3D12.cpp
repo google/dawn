@@ -14,6 +14,7 @@
 
 #include "dawn/native/d3d12/ResourceAllocatorManagerD3D12.h"
 
+#include <algorithm>
 #include <limits>
 #include <utility>
 
@@ -177,6 +178,113 @@ bool IsClearValueOptimizable(DeviceBase* device, const D3D12_RESOURCE_DESC& reso
                                         D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL)) != 0;
 }
 
+uint32_t GetColumnPitch(uint32_t baseHeight, uint32_t mipLevelCount) {
+    // This function returns the number of rows of block for a single layer with all mipmaps.
+    //
+    // Below is a simple diagram about texture memory layout for one single layer of a mipmap
+    // texture. For details about texture memory layout on Intel Gen12 GPU, read page 78 at
+    // https://01.org/sites/default/files/documentation/intel-gfx-prm-osrc-tgl-vol05-memory_data_formats.pdf.
+    //     ----------------------------------------------        ---
+    //     |                                            |         |
+    //     |                                            |
+    //     |                                            |
+    //     |                                            |
+    //     |                  LOD 0                     |
+    //     |                                            |
+    //     |                                            |
+    //     |                                            |     column pitch (aka QPitch)
+    //     |                                            |
+    //     |                                            |
+    //     ----------------------------------------------
+    //     |                    |        |
+    //     |                    |  LOD2  |
+    //     |     LOD 1          |---------
+    //     |                    | LOD3 |
+    //     |                    |-------
+    //     |                    |   .
+    //     ----------------------   .                              |
+    //                              .                             ---
+
+    uint32_t level1Height = 0;
+    uint32_t level2ToTailHeight = 0;
+    if (mipLevelCount >= 2) {
+        level1Height = std::max(baseHeight >> 1, 1u);
+
+        for (uint32_t level = 2; level < mipLevelCount; ++level) {
+            level2ToTailHeight += std::max(baseHeight >> level, 1u);
+        }
+    }
+    // The height of level 2 to tail (or max) can be greater than the height of level 1. For
+    // example, if the single layer's dimension is 16x4 and it has full mipmaps, then there are 5
+    // levels: 16x4, 8x2, 4x1, 2x1, 1x1. So level1Height is 2, while level2ToTailHeight is 1+1+1
+    // = 3.
+    uint32_t columnPitch = baseHeight + std::max(level1Height, level2ToTailHeight);
+
+    // The number of rows of block for a texture must be a multiple of 4.
+    return Align(columnPitch, 4);
+}
+
+uint32_t ComputeExtraArraySizeForIntelGen12(uint32_t width,
+                                            uint32_t height,
+                                            uint32_t arrayLayerCount,
+                                            uint32_t mipLevelCount,
+                                            uint32_t sampleCount,
+                                            uint32_t formatBytesPerBlock) {
+    // For details about texture memory layout on Intel Gen12 GPU, read
+    // https://01.org/sites/default/files/documentation/intel-gfx-prm-osrc-tgl-vol05-memory_data_formats.pdf.
+    //   - Texture memory layout: from <Surface Memory Organizations> to
+    //     <Surface Padding Requirement>.
+    //   - Tile-based memory: the entire section of <Address Tiling Function Introduction>.
+    constexpr uint32_t kPageSize = 4 * 1024;
+    constexpr uint32_t kTileSize = 16 * kPageSize;
+    constexpr uint32_t kTileHeight = 128;
+    constexpr uint32_t kTileWidth = kTileSize / kTileHeight;
+    constexpr uint32_t kLinearAlignment = 4 * kPageSize;
+
+    uint64_t layerxSamples = arrayLayerCount * sampleCount;
+
+    if (layerxSamples <= 1) {
+        return 0;
+    }
+
+    uint32_t columnPitch = GetColumnPitch(height, mipLevelCount);
+
+    uint64_t totalWidth = width * formatBytesPerBlock;
+    uint64_t totalHeight = columnPitch * layerxSamples;
+
+    // Texture should be aligned on both tile width (512 bytes) and tile height (128 rows) on Intel
+    // Gen12 GPU
+    uint32_t mainTileCols = Align(totalWidth, kTileWidth) / kTileWidth;
+    uint32_t mainTileRows = Align(totalHeight, kTileHeight) / kTileHeight;
+    uint64_t mainTileCount = mainTileCols * mainTileRows;
+
+    // There is a bug in Intel old drivers to compute the auxiliary memory size (auxSize) of the
+    // texture, which is calculated from the main memory size (mainSize) of the texture. Note that
+    // memory allocation for mainSize itself is correct. But during memory allocation for auxSize,
+    // it re-caculated mainSize and did it in a wrong way. The incorrect algorithm doesn't respect
+    // alignment requirements from tile-based texture memory layout. It just simple aligned to a
+    // constant value (16K) for each sample and layer.
+    uint64_t expectedMainSize = mainTileCount * kTileSize;
+    uint64_t actualMainSize = Align(columnPitch * totalWidth, kLinearAlignment) * layerxSamples;
+
+    // If the incorrect mainSize calculation lead to less-than-expected auxSize, texture corruption
+    // is very likely to happen for any texture access like texture copy, rendering, sampling, etc.
+    // So we have to allocate a few more extra layers to offset the less-than-expected auxSize.
+    // However, it is fine if the incorrect mainSize calculation doesn't introduce less auxSize. For
+    // example, if correct mainSize is 3.8M, it requires 4 pages of auxSize (16K). Any incorrect
+    // mainSize between 3.0+ M and 4.0M also requires 16K auxSize according to the calculation:
+    // auxSize = Align(mainSize >> 8, kPageSize). And greater auxSize is also fine. But if mainSize
+    // is less than 3.0M, its auxSize will be less than 16K and hence texture corruption is caused.
+    uint64_t expectedAuxSize = Align(expectedMainSize >> 8, kPageSize);
+    uint64_t actualAuxSize = Align(actualMainSize >> 8, kPageSize);
+    if (actualAuxSize < expectedAuxSize) {
+        uint64_t actualMainSizePerLayer = actualMainSize / arrayLayerCount;
+        return (expectedMainSize - actualMainSize + actualMainSizePerLayer - 1) /
+               actualMainSizePerLayer;
+    }
+    return 0;
+}
+
 }  // namespace
 
 ResourceAllocatorManager::ResourceAllocatorManager(Device* device) : mDevice(device) {
@@ -199,7 +307,8 @@ ResourceAllocatorManager::ResourceAllocatorManager(Device* device) : mDevice(dev
 ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
     D3D12_HEAP_TYPE heapType,
     const D3D12_RESOURCE_DESC& resourceDescriptor,
-    D3D12_RESOURCE_STATES initialUsage) {
+    D3D12_RESOURCE_STATES initialUsage,
+    uint32_t formatBytesPerBlock) {
     // In order to suppress a warning in the D3D12 debug layer, we need to specify an
     // optimized clear value. As there are no negative consequences when picking a mismatched
     // clear value, we use zero as the optimized clear value. This also enables fast clears on
@@ -211,6 +320,18 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
         optimizedClearValue = &zero;
     }
 
+    // If we are allocating memory for a 2D array texture on D3D12 backend, we need to allocate
+    // extra layers on some Intel Gen12 devices, see crbug.com/dawn/949 for details.
+    D3D12_RESOURCE_DESC revisedDescriptor = resourceDescriptor;
+    if (mDevice->IsToggleEnabled(Toggle::D3D12AllocateExtraMemoryFor2DArrayTexture) &&
+        resourceDescriptor.Dimension == D3D12_RESOURCE_DIMENSION_TEXTURE2D &&
+        resourceDescriptor.DepthOrArraySize > 1) {
+        revisedDescriptor.DepthOrArraySize += ComputeExtraArraySizeForIntelGen12(
+            resourceDescriptor.Width, resourceDescriptor.Height,
+            resourceDescriptor.DepthOrArraySize, resourceDescriptor.MipLevels,
+            resourceDescriptor.SampleDesc.Count, formatBytesPerBlock);
+    }
+
     // TODO(crbug.com/dawn/849): Conditionally disable sub-allocation.
     // For very large resources, there is no benefit to suballocate.
     // For very small resources, it is inefficent to suballocate given the min. heap
@@ -218,7 +339,7 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
     // Attempt to satisfy the request using sub-allocation (placed resource in a heap).
     if (!mDevice->IsToggleEnabled(Toggle::DisableResourceSuballocation)) {
         ResourceHeapAllocation subAllocation;
-        DAWN_TRY_ASSIGN(subAllocation, CreatePlacedResource(heapType, resourceDescriptor,
+        DAWN_TRY_ASSIGN(subAllocation, CreatePlacedResource(heapType, revisedDescriptor,
                                                             optimizedClearValue, initialUsage));
         if (subAllocation.GetInfo().mMethod != AllocationMethod::kInvalid) {
             return std::move(subAllocation);
@@ -227,7 +348,7 @@ ResultOrError<ResourceHeapAllocation> ResourceAllocatorManager::AllocateMemory(
 
     // If sub-allocation fails, fall-back to direct allocation (committed resource).
     ResourceHeapAllocation directAllocation;
-    DAWN_TRY_ASSIGN(directAllocation, CreateCommittedResource(heapType, resourceDescriptor,
+    DAWN_TRY_ASSIGN(directAllocation, CreateCommittedResource(heapType, revisedDescriptor,
                                                               optimizedClearValue, initialUsage));
     if (directAllocation.GetInfo().mMethod != AllocationMethod::kInvalid) {
         return std::move(directAllocation);

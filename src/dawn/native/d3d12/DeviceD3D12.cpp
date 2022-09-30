@@ -541,8 +541,11 @@ void Device::DeallocateMemory(ResourceHeapAllocation& allocation) {
 ResultOrError<ResourceHeapAllocation> Device::AllocateMemory(
     D3D12_HEAP_TYPE heapType,
     const D3D12_RESOURCE_DESC& resourceDescriptor,
-    D3D12_RESOURCE_STATES initialUsage) {
-    return mResourceAllocatorManager->AllocateMemory(heapType, resourceDescriptor, initialUsage);
+    D3D12_RESOURCE_STATES initialUsage,
+    uint32_t formatBytesPerBlock) {
+    // formatBytesPerBlock is needed only for color non-compressed formats for a workaround.
+    return mResourceAllocatorManager->AllocateMemory(heapType, resourceDescriptor, initialUsage,
+                                                     formatBytesPerBlock);
 }
 
 std::unique_ptr<ExternalImageDXGIImpl> Device::CreateExternalImageDXGIImpl(

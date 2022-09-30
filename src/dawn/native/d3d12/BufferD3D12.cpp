@@ -155,7 +155,7 @@ MaybeError Buffer::Initialize(bool mappedAtCreation) {
 
     DAWN_TRY_ASSIGN(
         mResourceAllocation,
-        ToBackend(GetDevice())->AllocateMemory(heapType, resourceDescriptor, bufferUsage));
+        ToBackend(GetDevice())->AllocateMemory(heapType, resourceDescriptor, bufferUsage, 0));
 
     SetLabelImpl();
 
