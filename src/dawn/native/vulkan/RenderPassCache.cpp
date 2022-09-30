@@ -188,6 +188,7 @@ ResultOrError<VkRenderPass> RenderPassCache::CreateRenderPassForQuery(
         attachmentCount++;
     }
 
+    uint32_t resolveAttachmentCount = 0;
     for (ColorAttachmentIndex i : IterateBitSet(query.resolveTargetMask)) {
         auto& attachmentRef = resolveAttachmentRefs[i];
         auto& attachmentDesc = attachmentDescs[attachmentCount];
@@ -204,6 +205,7 @@ ResultOrError<VkRenderPass> RenderPassCache::CreateRenderPassForQuery(
         attachmentDesc.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
         attachmentCount++;
+        resolveAttachmentCount++;
     }
 
     // Create the VkSubpassDescription that will be chained in the VkRenderPassCreateInfo
@@ -214,7 +216,15 @@ ResultOrError<VkRenderPass> RenderPassCache::CreateRenderPassForQuery(
     subpassDesc.pInputAttachments = nullptr;
     subpassDesc.colorAttachmentCount = static_cast<uint8_t>(highestColorAttachmentIndexPlusOne);
     subpassDesc.pColorAttachments = colorAttachmentRefs.data();
-    subpassDesc.pResolveAttachments = resolveAttachmentRefs.data();
+
+    // Qualcomm GPUs have a driver bug on some devices where passing a zero-length array to the
+    // resolveAttachments causes a VK_ERROR_OUT_OF_HOST_MEMORY. nullptr must be passed instead.
+    if (resolveAttachmentCount) {
+        subpassDesc.pResolveAttachments = resolveAttachmentRefs.data();
+    } else {
+        subpassDesc.pResolveAttachments = nullptr;
+    }
+
     subpassDesc.pDepthStencilAttachment = depthStencilAttachment;
     subpassDesc.preserveAttachmentCount = 0;
     subpassDesc.pPreserveAttachments = nullptr;
