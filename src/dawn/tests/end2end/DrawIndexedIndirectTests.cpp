@@ -158,10 +158,6 @@ TEST_P(DrawIndexedIndirectTest, BaseVertex) {
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGL());
     DAWN_TEST_UNSUPPORTED_IF(IsOpenGLES());
 
-    // TODO(crbug.com/dawn/966): Fails on Metal Intel, likely because @builtin(vertex_index)
-    // doesn't take into account BaseVertex, which breaks programmable vertex pulling.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
-
     // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
     // the offsets that Tint/GLSL produces.
     DAWN_SUPPRESS_TEST_IF(IsIntel() && IsOpenGL() && IsLinux());
@@ -190,10 +186,6 @@ TEST_P(DrawIndexedIndirectTest, BaseVertex) {
 TEST_P(DrawIndexedIndirectTest, IndirectOffset) {
     // TODO(crbug.com/dawn/789): Test is failing after a roll on SwANGLE on Windows only.
     DAWN_SUPPRESS_TEST_IF(IsANGLE() && IsWindows());
-
-    // TODO(crbug.com/dawn/966): Fails on Metal Intel, likely because @builtin(vertex_index)
-    // doesn't take into account BaseVertex, which breaks programmable vertex pulling.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
 
     // TODO(crbug.com/dawn/1292): Some Intel OpenGL drivers don't seem to like
     // the offsets that Tint/GLSL produces.
