@@ -2655,48 +2655,6 @@ TEST_F(InspectorGetMultisampledArrayTextureResourceBindingsTest, Empty) {
     EXPECT_EQ(0u, result.size());
 }
 
-TEST_P(InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam, DISABLED_textureSample) {
-    auto* multisampled_texture_type =
-        ty.multisampled_texture(GetParam().type_dim, GetBaseType(GetParam().sampled_kind));
-    AddResource("foo_texture", multisampled_texture_type, 0, 0);
-    AddSampler("foo_sampler", 0, 1);
-    auto* coord_type = GetCoordsType(GetParam().type_dim, ty.f32());
-    AddGlobalVariable("foo_coords", coord_type);
-    AddGlobalVariable("foo_array_index", ty.i32());
-
-    MakeSamplerReferenceBodyFunction("ep", "foo_texture", "foo_sampler", "foo_coords",
-                                     "foo_array_index", GetBaseType(GetParam().sampled_kind),
-                                     utils::Vector{
-                                         Stage(ast::PipelineStage::kFragment),
-                                     });
-
-    Inspector& inspector = Build();
-
-    auto result = inspector.GetMultisampledTextureResourceBindings("ep");
-    ASSERT_FALSE(inspector.has_error()) << inspector.error();
-    ASSERT_EQ(1u, result.size());
-
-    EXPECT_EQ(ResourceBinding::ResourceType::kMultisampledTexture, result[0].resource_type);
-    EXPECT_EQ(0u, result[0].bind_group);
-    EXPECT_EQ(0u, result[0].binding);
-    EXPECT_EQ(GetParam().inspector_dim, result[0].dim);
-    EXPECT_EQ(GetParam().sampled_kind, result[0].sampled_kind);
-}
-
-INSTANTIATE_TEST_SUITE_P(
-    InspectorGetMultisampledArrayTextureResourceBindingsTest,
-    InspectorGetMultisampledArrayTextureResourceBindingsTestWithParam,
-    testing::Values(
-        GetMultisampledTextureTestParams{ast::TextureDimension::k2dArray,
-                                         inspector::ResourceBinding::TextureDimension::k2dArray,
-                                         inspector::ResourceBinding::SampledKind::kFloat},
-        GetMultisampledTextureTestParams{ast::TextureDimension::k2dArray,
-                                         inspector::ResourceBinding::TextureDimension::k2dArray,
-                                         inspector::ResourceBinding::SampledKind::kSInt},
-        GetMultisampledTextureTestParams{ast::TextureDimension::k2dArray,
-                                         inspector::ResourceBinding::TextureDimension::k2dArray,
-                                         inspector::ResourceBinding::SampledKind::kUInt}));
-
 TEST_F(InspectorGetStorageTextureResourceBindingsTest, Empty) {
     MakeEmptyBodyFunction("ep", utils::Vector{
                                     Stage(ast::PipelineStage::kFragment),
