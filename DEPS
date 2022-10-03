@@ -17,6 +17,9 @@ vars = {
   'dawn_cmake_version': 'version:2@3.23.3',
   'dawn_cmake_win32_sha1': 'b106d66bcdc8a71ea2cdf5446091327bfdb1bcd7',
   'dawn_gn_version': 'git_revision:bd99dbf98cbdefe18a4128189665c5761263bcfb',
+  # ninja CIPD package version.
+  # https://chrome-infra-packages.appspot.com/p/infra/3pp/tools/ninja
+  'dawn_ninja_version': 'version:2@1.8.2.chromium.3',
   'dawn_go_version': 'version:2@1.18.4',
 
   'node_darwin_arm64_sha': '31859fc1fa0994a95f44f09c367d6ff63607cfde',
@@ -187,6 +190,16 @@ deps = {
       'package': 'infra/3pp/tools/cmake/${{platform}}',
       'version': Var('dawn_cmake_version'),
     }],
+    'dep_type': 'cipd',
+  },
+
+  'third_party/ninja': {
+    'packages': [
+      {
+        'package': 'infra/3pp/tools/ninja/${{platform}}',
+        'version': Var('dawn_ninja_version'),
+      }
+    ],
     'dep_type': 'cipd',
   },
 

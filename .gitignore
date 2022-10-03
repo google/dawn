@@ -22,6 +22,7 @@
 /third_party/jsoncpp
 /third_party/llvm-build
 /third_party/markupsafe
+/third_party/ninja
 /third_party/node
 /third_party/node-addon-api
 /third_party/node-api-headers
