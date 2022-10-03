@@ -884,26 +884,38 @@ MaybeError Texture::ExportExternalTexture(VkImageLayout desiredLayout,
     ASSERT(GetNumMipLevels() == 1 && GetArrayLayers() == 1);
     wgpu::TextureUsage usage = mSubresourceLastUsages.Get(GetDisjointVulkanAspects(), 0, 0);
 
-    VkImageLayout layout = VulkanImageLayout(this, usage);
+    // Compute the layouts for the queue transition for export. desiredLayout == UNDEFINED is a tag
+    // value used to export with whatever the current layout is. However queue transitioning to the
+    // UNDEFINED layout is disallowed so we handle the case where currentLayout is UNDEFINED by
+    // promoting to GENERAL.
+    VkImageLayout currentLayout = VulkanImageLayout(this, usage);
+    VkImageLayout targetLayout;
+    if (desiredLayout != VK_IMAGE_LAYOUT_UNDEFINED) {
+        targetLayout = desiredLayout;
+    } else if (currentLayout != VK_IMAGE_LAYOUT_UNDEFINED) {
+        targetLayout = currentLayout;
+    } else {
+        targetLayout = VK_IMAGE_LAYOUT_GENERAL;
+    }
 
-    // Write out the layouts and signal semaphore
-    *releasedOldLayout = layout;
-    *releasedNewLayout = (desiredLayout == VK_IMAGE_LAYOUT_UNDEFINED ? layout : desiredLayout);
-
-    mDesiredExportLayout = desiredLayout;
-
-    // We have to manually trigger a transition if the texture hasn't been actually used, or the
-    // desired layout is not VK_IMAGE_LAYOUT_UNDEFINED.
+    // We have to manually trigger a transition if the texture hasn't been actually used or if we
+    // need a layout transition.
     // TODO(dawn:1509): Avoid the empty submit.
-    if (mExternalSemaphoreHandle == kNullExternalSemaphoreHandle ||
-        desiredLayout != VK_IMAGE_LAYOUT_UNDEFINED) {
+    if (mExternalSemaphoreHandle == kNullExternalSemaphoreHandle || targetLayout != currentLayout) {
+        mDesiredExportLayout = targetLayout;
+
         Device* device = ToBackend(GetDevice());
         CommandRecordingContext* recordingContext = device->GetPendingRecordingContext();
         recordingContext->externalTexturesForEagerTransition.insert(this);
         DAWN_TRY(device->SubmitPendingCommands());
+
+        currentLayout = targetLayout;
     }
     ASSERT(mExternalSemaphoreHandle != kNullExternalSemaphoreHandle);
 
+    // Write out the layouts and signal semaphore
+    *releasedOldLayout = currentLayout;
+    *releasedNewLayout = targetLayout;
     *handle = mExternalSemaphoreHandle;
     mExternalSemaphoreHandle = kNullExternalSemaphoreHandle;
 
