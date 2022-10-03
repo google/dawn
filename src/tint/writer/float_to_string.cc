@@ -15,6 +15,7 @@
 #include "src/tint/writer/float_to_string.h"
 
 #include <cmath>
+#include <cstdlib>
 #include <cstring>
 #include <functional>
 #include <iomanip>
@@ -35,7 +36,7 @@ std::string FloatToString(float f) {
 
     // If this string can be parsed without loss of information, use it
     auto float_equal_no_warning = std::equal_to<float>();
-    if (float_equal_no_warning(std::stof(fixed.str()), f)) {
+    if (float_equal_no_warning(std::strtof(fixed.str().c_str(), nullptr), f)) {
         auto str = fixed.str();
         while (str.length() >= 2 && str[str.size() - 1] == '0' && str[str.size() - 2] != '.') {
             str.pop_back();
