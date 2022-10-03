@@ -237,10 +237,6 @@ INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                                          HlslImportData{"clamp", "clamp"},
                                          HlslImportData{"smoothstep", "smoothstep"}));
 
-TEST_F(HlslGeneratorImplTest_Import, DISABLED_HlslImportData_FMix) {
-    FAIL();
-}
-
 using HlslImportData_TripleParam_Int_Test = TestParamHelper<HlslImportData>;
 TEST_P(HlslImportData_TripleParam_Int_Test, IntScalar) {
     auto param = GetParam();

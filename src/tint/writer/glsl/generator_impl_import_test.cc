@@ -234,10 +234,6 @@ INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_Import,
                                          GlslImportData{"clamp", "clamp"},
                                          GlslImportData{"smoothstep", "smoothstep"}));
 
-TEST_F(GlslGeneratorImplTest_Import, DISABLED_GlslImportData_FMix) {
-    FAIL();
-}
-
 using GlslImportData_TripleParam_Int_Test = TestParamHelper<GlslImportData>;
 TEST_P(GlslImportData_TripleParam_Int_Test, IntScalar) {
     auto param = GetParam();
