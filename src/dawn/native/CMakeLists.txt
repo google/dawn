@@ -552,6 +552,7 @@ if (DAWN_ENABLE_VULKAN)
         "vulkan/VulkanFunctions.h"
         "vulkan/VulkanInfo.cpp"
         "vulkan/VulkanInfo.h"
+        "vulkan/external_memory/MemoryService.cpp"
         "vulkan/external_memory/MemoryService.h"
         "vulkan/external_semaphore/SemaphoreService.h"
     )

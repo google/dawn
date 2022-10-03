@@ -14,7 +14,6 @@
 
 #include "dawn/native/vulkan/DeviceVk.h"
 
-#include "dawn/common/Log.h"
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/Platform.h"
 #include "dawn/native/BackendConnection.h"

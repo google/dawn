@@ -73,7 +73,6 @@ bool Service::SupportsImportMemory(VkFormat format,
         return false;
     }
 
-    // TODO(http://crbug.com/dawn/206): Investigate dedicated only images
     VkFlags memoryFlags = externalFormatProperties.externalMemoryProperties.externalMemoryFeatures;
     return (memoryFlags & VK_EXTERNAL_MEMORY_FEATURE_IMPORTABLE_BIT_KHR) != 0;
 }
@@ -95,8 +94,10 @@ ResultOrError<MemoryImportParams> Service::GetMemoryImportParams(
     const ExternalImageDescriptorOpaqueFD* opaqueFDDescriptor =
         static_cast<const ExternalImageDescriptorOpaqueFD*>(descriptor);
 
-    MemoryImportParams params = {opaqueFDDescriptor->allocationSize,
-                                 opaqueFDDescriptor->memoryTypeIndex};
+    MemoryImportParams params;
+    params.allocationSize = opaqueFDDescriptor->allocationSize;
+    params.memoryTypeIndex = opaqueFDDescriptor->memoryTypeIndex;
+    params.dedicatedAllocation = RequiresDedicatedAllocation(opaqueFDDescriptor, image);
     return params;
 }
 
@@ -115,17 +116,25 @@ ResultOrError<VkDeviceMemory> Service::ImportMemory(ExternalMemoryHandle handle,
                     "Requested allocation size (%u) is smaller than the image requires (%u).",
                     importParams.allocationSize, requirements.size);
 
-    VkImportMemoryFdInfoKHR importMemoryFdInfo;
-    importMemoryFdInfo.sType = VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR;
-    importMemoryFdInfo.pNext = nullptr;
-    importMemoryFdInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
-    importMemoryFdInfo.fd = handle;
-
     VkMemoryAllocateInfo allocateInfo;
     allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-    allocateInfo.pNext = &importMemoryFdInfo;
+    allocateInfo.pNext = nullptr;
     allocateInfo.allocationSize = importParams.allocationSize;
     allocateInfo.memoryTypeIndex = importParams.memoryTypeIndex;
+    PNextChainBuilder allocateInfoChain(&allocateInfo);
+
+    VkImportMemoryFdInfoKHR importMemoryFdInfo;
+    importMemoryFdInfo.handleType = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT;
+    importMemoryFdInfo.fd = handle;
+    allocateInfoChain.Add(&importMemoryFdInfo, VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR);
+
+    VkMemoryDedicatedAllocateInfo dedicatedAllocateInfo;
+    if (importParams.dedicatedAllocation) {
+        dedicatedAllocateInfo.image = image;
+        dedicatedAllocateInfo.buffer = VkBuffer{};
+        allocateInfoChain.Add(&dedicatedAllocateInfo,
+                              VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO);
+    }
 
     VkDeviceMemory allocatedMemory = VK_NULL_HANDLE;
     DAWN_TRY(CheckVkSuccess(mDevice->fn.AllocateMemory(mDevice->GetVkDevice(), &allocateInfo,

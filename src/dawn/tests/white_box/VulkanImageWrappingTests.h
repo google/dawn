@@ -45,6 +45,17 @@ class VulkanImageWrappingTestBackend {
         virtual ~ExternalSemaphore() = default;
     };
 
+    // Test parameters passed from the wrapping tests so that they can be used by the test
+    // backends. The DAWN_TEST_PARAM_STRUCT is not declared here because it is unnecessary but also
+    // because it declares a bunch of functions that would cause ODR violations.
+    struct TestParams {
+        bool useDedicatedAllocation = false;
+        bool detectDedicatedAllocation = false;
+    };
+    void SetParam(const TestParams& params);
+    const TestParams& GetParam() const;
+    virtual bool SupportsTestParams(const TestParams& params) const = 0;
+
     virtual std::unique_ptr<ExternalTexture> CreateTexture(uint32_t width,
                                                            uint32_t height,
                                                            wgpu::TextureFormat format,
@@ -57,6 +68,9 @@ class VulkanImageWrappingTestBackend {
     virtual bool ExportImage(const wgpu::Texture& texture,
                              VkImageLayout layout,
                              ExternalImageExportInfoVkForTesting* exportInfo) = 0;
+
+  private:
+    TestParams mParams;
 };
 
 struct ExternalImageDescriptorVkForTesting : public ExternalImageDescriptorVk {

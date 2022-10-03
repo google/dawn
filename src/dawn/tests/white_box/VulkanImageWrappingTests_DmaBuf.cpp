@@ -22,6 +22,7 @@
 #include <utility>
 #include <vector>
 
+#include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/tests/white_box/VulkanImageWrappingTests.h"
 
 namespace dawn::native::vulkan {
@@ -80,13 +81,23 @@ class ExternalTextureDmaBuf : public VulkanImageWrappingTestBackend::ExternalTex
 
 class VulkanImageWrappingTestBackendDmaBuf : public VulkanImageWrappingTestBackend {
   public:
-    explicit VulkanImageWrappingTestBackendDmaBuf(const wgpu::Device& device) {}
+    explicit VulkanImageWrappingTestBackendDmaBuf(const wgpu::Device& device) {
+        mDeviceVk = dawn::native::vulkan::ToBackend(dawn::native::FromAPI(device.Get()));
+    }
 
     ~VulkanImageWrappingTestBackendDmaBuf() {
         if (mGbmDevice != nullptr) {
             gbm_device_destroy(mGbmDevice);
             mGbmDevice = nullptr;
         }
+    }
+
+    bool SupportsTestParams(const TestParams& params) const override {
+        // Even though this backend doesn't decide on creation whether the image should use
+        // dedicated allocation, it still supports all options of NeedsDedicatedAllocation so we
+        // test them.
+        return !params.useDedicatedAllocation ||
+               mDeviceVk->GetDeviceInfo().HasExt(DeviceExt::DedicatedAllocation);
     }
 
     std::unique_ptr<ExternalTexture> CreateTexture(uint32_t width,
@@ -186,6 +197,7 @@ class VulkanImageWrappingTestBackendDmaBuf : public VulkanImageWrappingTestBacke
     }
 
     gbm_device* mGbmDevice = nullptr;
+    dawn::native::vulkan::Device* mDeviceVk;
 };
 
 // static
@@ -195,4 +207,5 @@ std::unique_ptr<VulkanImageWrappingTestBackend> VulkanImageWrappingTestBackend::
     backend->CreateGbmDevice();
     return backend;
 }
+
 }  // namespace dawn::native::vulkan

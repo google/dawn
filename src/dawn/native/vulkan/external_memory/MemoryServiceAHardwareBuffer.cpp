@@ -118,7 +118,10 @@ ResultOrError<MemoryImportParams> Service::GetMemoryImportParams(
             mDevice->GetVkDevice(), aHardwareBufferDescriptor->handle, &bufferProperties),
         "vkGetAndroidHardwareBufferPropertiesANDROID"));
 
-    MemoryImportParams params = {bufferProperties.allocationSize, bufferProperties.memoryTypeBits};
+    MemoryImportParams params;
+    params.allocationSize = bufferProperties.allocationSize;
+    params.memoryTypeIndex = bufferProperties.memoryTypeBits;
+    params.dedicatedAllocation = RequiresDedicatedAllocation(aHardwareBufferDescriptor, image);
     return params;
 }
 
@@ -151,6 +154,14 @@ ResultOrError<VkDeviceMemory> Service::ImportMemory(ExternalMemoryHandle handle,
     };
     allocateInfoChain.Add(&importMemoryAHBInfo,
                           VK_STRUCTURE_TYPE_IMPORT_ANDROID_HARDWARE_BUFFER_INFO_ANDROID);
+
+    VkMemoryDedicatedAllocateInfo dedicatedAllocateInfo;
+    if (importParams.dedicatedAllocation) {
+        dedicatedAllocateInfo.image = image;
+        dedicatedAllocateInfo.buffer = VkBuffer{};
+        allocateInfoChain.Add(&dedicatedAllocateInfo,
+                              VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO);
+    }
 
     VkDeviceMemory allocatedMemory = VK_NULL_HANDLE;
     DAWN_TRY(CheckVkSuccess(mDevice->fn.AllocateMemory(mDevice->GetVkDevice(), &allocateInfo,

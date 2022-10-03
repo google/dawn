@@ -30,6 +30,7 @@ namespace dawn::native::vulkan::external_memory {
 struct MemoryImportParams {
     VkDeviceSize allocationSize;
     uint32_t memoryTypeIndex;
+    bool dedicatedAllocation = false;
 };
 
 class Service {
@@ -70,6 +71,8 @@ class Service {
                                        const VkImageCreateInfo& baseCreateInfo);
 
   private:
+    bool RequiresDedicatedAllocation(const ExternalImageDescriptorVk* descriptor, VkImage image);
+
     Device* mDevice = nullptr;
 
     // True if early checks pass that determine if the service is supported

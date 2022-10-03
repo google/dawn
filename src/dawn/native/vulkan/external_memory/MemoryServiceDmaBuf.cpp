@@ -252,7 +252,10 @@ ResultOrError<MemoryImportParams> Service::GetMemoryImportParams(
         memoryRequirements, MemoryKind::Opaque);
     DAWN_INVALID_IF(memoryTypeIndex == -1, "Unable to find an appropriate memory type for import.");
 
-    MemoryImportParams params = {memoryRequirements.size, static_cast<uint32_t>(memoryTypeIndex)};
+    MemoryImportParams params;
+    params.allocationSize = memoryRequirements.size;
+    params.memoryTypeIndex = static_cast<uint32_t>(memoryTypeIndex);
+    params.dedicatedAllocation = RequiresDedicatedAllocation(dmaBufDescriptor, image);
     return params;
 }
 
@@ -277,10 +280,12 @@ ResultOrError<VkDeviceMemory> Service::ImportMemory(ExternalMemoryHandle handle,
     memoryAllocateInfoChain.Add(&importMemoryFdInfo, VK_STRUCTURE_TYPE_IMPORT_MEMORY_FD_INFO_KHR);
 
     VkMemoryDedicatedAllocateInfo memoryDedicatedAllocateInfo;
-    memoryDedicatedAllocateInfo.image = image;
-    memoryDedicatedAllocateInfo.buffer = VkBuffer{};
-    memoryAllocateInfoChain.Add(&memoryDedicatedAllocateInfo,
-                                VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO);
+    if (importParams.dedicatedAllocation) {
+        memoryDedicatedAllocateInfo.image = image;
+        memoryDedicatedAllocateInfo.buffer = VkBuffer{};
+        memoryAllocateInfoChain.Add(&memoryDedicatedAllocateInfo,
+                                    VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO);
+    }
 
     VkDeviceMemory allocatedMemory = VK_NULL_HANDLE;
     DAWN_TRY(CheckVkSuccess(mDevice->fn.AllocateMemory(mDevice->GetVkDevice(), &memoryAllocateInfo,

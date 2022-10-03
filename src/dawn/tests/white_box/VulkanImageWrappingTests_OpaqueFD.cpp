@@ -21,6 +21,7 @@
 #include "dawn/native/vulkan/DeviceVk.h"
 #include "dawn/native/vulkan/FencedDeleter.h"
 #include "dawn/native/vulkan/ResourceMemoryAllocatorVk.h"
+#include "dawn/native/vulkan/UtilsVulkan.h"
 #include "dawn/tests/white_box/VulkanImageWrappingTests.h"
 #include "gtest/gtest.h"
 
@@ -95,6 +96,11 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
         mDeviceVk = dawn::native::vulkan::ToBackend(dawn::native::FromAPI(device.Get()));
     }
 
+    bool SupportsTestParams(const TestParams& params) const override {
+        return !params.useDedicatedAllocation ||
+               mDeviceVk->GetDeviceInfo().HasExt(DeviceExt::DedicatedAllocation);
+    }
+
     std::unique_ptr<ExternalTexture> CreateTexture(uint32_t width,
                                                    uint32_t height,
                                                    wgpu::TextureFormat format,
@@ -141,6 +147,14 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
         descriptorOpaqueFD.memoryTypeIndex = textureOpaqueFD->memoryTypeIndex;
         descriptorOpaqueFD.waitFDs = std::move(waitFDs);
 
+        if (GetParam().detectDedicatedAllocation) {
+            descriptorOpaqueFD.dedicatedAllocation = NeedsDedicatedAllocation::Detect;
+        } else if (GetParam().useDedicatedAllocation) {
+            descriptorOpaqueFD.dedicatedAllocation = NeedsDedicatedAllocation::Yes;
+        } else {
+            descriptorOpaqueFD.dedicatedAllocation = NeedsDedicatedAllocation::No;
+        }
+
         return wgpu::Texture::Acquire(
             dawn::native::vulkan::WrapVulkanImage(device.Get(), &descriptorOpaqueFD));
     }
@@ -167,17 +181,12 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
                            uint32_t height,
                            VkFormat format,
                            VkImage* image) {
-        VkExternalMemoryImageCreateInfoKHR externalInfo;
-        externalInfo.sType = VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO_KHR;
-        externalInfo.pNext = nullptr;
-        externalInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
-
         auto usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT |
                      VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
         VkImageCreateInfo createInfo;
         createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-        createInfo.pNext = &externalInfo;
+        createInfo.pNext = nullptr;
         createInfo.flags = VK_IMAGE_CREATE_ALIAS_BIT_KHR;
         createInfo.imageType = VK_IMAGE_TYPE_2D;
         createInfo.format = format;
@@ -191,6 +200,11 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
         createInfo.queueFamilyIndexCount = 0;
         createInfo.pQueueFamilyIndices = nullptr;
         createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        PNextChainBuilder createChain(&createInfo);
+
+        VkExternalMemoryImageCreateInfoKHR externalInfo;
+        externalInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
+        createChain.Add(&externalInfo, VK_STRUCTURE_TYPE_EXTERNAL_MEMORY_IMAGE_CREATE_INFO_KHR);
 
         return deviceVk->fn.CreateImage(deviceVk->GetVkDevice(), &createInfo, nullptr, &**image);
     }
@@ -205,19 +219,28 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
         VkMemoryRequirements requirements;
         deviceVk->fn.GetImageMemoryRequirements(deviceVk->GetVkDevice(), handle, &requirements);
 
-        // Import memory from file descriptor
-        VkExportMemoryAllocateInfoKHR externalInfo;
-        externalInfo.sType = VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO_KHR;
-        externalInfo.pNext = nullptr;
-        externalInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
-
         int bestType = deviceVk->GetResourceMemoryAllocator()->FindBestTypeIndex(
             requirements, MemoryKind::Opaque);
+
         VkMemoryAllocateInfo allocateInfo;
         allocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
-        allocateInfo.pNext = &externalInfo;
+        allocateInfo.pNext = nullptr;
         allocateInfo.allocationSize = requirements.size;
         allocateInfo.memoryTypeIndex = static_cast<uint32_t>(bestType);
+        PNextChainBuilder allocateChain(&allocateInfo);
+
+        // Import memory from file descriptor
+        VkExportMemoryAllocateInfoKHR externalInfo;
+        externalInfo.handleTypes = VK_EXTERNAL_MEMORY_HANDLE_TYPE_OPAQUE_FD_BIT_KHR;
+        allocateChain.Add(&externalInfo, VK_STRUCTURE_TYPE_EXPORT_MEMORY_ALLOCATE_INFO_KHR);
+
+        // Use a dedicated memory allocation if testing that path.
+        VkMemoryDedicatedAllocateInfo dedicatedInfo;
+        if (GetParam().useDedicatedAllocation) {
+            dedicatedInfo.image = handle;
+            dedicatedInfo.buffer = VkBuffer{};
+            allocateChain.Add(&dedicatedInfo, VK_STRUCTURE_TYPE_MEMORY_DEDICATED_ALLOCATE_INFO);
+        }
 
         *allocationSize = allocateInfo.allocationSize;
         *memoryTypeIndex = allocateInfo.memoryTypeIndex;

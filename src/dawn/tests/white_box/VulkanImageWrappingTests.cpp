@@ -27,9 +27,22 @@ namespace dawn::native::vulkan {
 using ExternalTexture = VulkanImageWrappingTestBackend::ExternalTexture;
 using ExternalSemaphore = VulkanImageWrappingTestBackend::ExternalSemaphore;
 
+void VulkanImageWrappingTestBackend::SetParam(
+    const VulkanImageWrappingTestBackend::TestParams& params) {
+    mParams = params;
+}
+
+const VulkanImageWrappingTestBackend::TestParams& VulkanImageWrappingTestBackend::GetParam() const {
+    return mParams;
+}
+
 namespace {
 
-class VulkanImageWrappingTestBase : public DawnTest {
+using UseDedicatedAllocation = bool;
+using DetectDedicatedAllocation = bool;
+DAWN_TEST_PARAM_STRUCT(ImageWrappingParams, UseDedicatedAllocation, DetectDedicatedAllocation);
+
+class VulkanImageWrappingTestBase : public DawnTestWithParams<ImageWrappingParams> {
   protected:
     std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
         return {wgpu::FeatureName::DawnInternalUsages};
@@ -37,10 +50,21 @@ class VulkanImageWrappingTestBase : public DawnTest {
 
   public:
     void SetUp() override {
-        DawnTest::SetUp();
+        DawnTestWithParams::SetUp();
         DAWN_TEST_UNSUPPORTED_IF(UsesWire());
 
+        // TODO(dawn:1552): Nvidia doesn't seem to correctly reflect whether an import requires a
+        // dedicated allocation.
+        DAWN_SUPPRESS_TEST_IF(IsLinux() && IsNvidia() && GetParam().mUseDedicatedAllocation &&
+                              GetParam().mDetectDedicatedAllocation);
+
         mBackend = VulkanImageWrappingTestBackend::Create(device);
+
+        VulkanImageWrappingTestBackend::TestParams params;
+        params.useDedicatedAllocation = GetParam().mUseDedicatedAllocation;
+        params.detectDedicatedAllocation = GetParam().mDetectDedicatedAllocation;
+        DAWN_TEST_UNSUPPORTED_IF(!mBackend->SupportsTestParams(params));
+        mBackend->SetParam(params);
 
         defaultDescriptor.dimension = wgpu::TextureDimension::e2D;
         defaultDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
@@ -56,13 +80,13 @@ class VulkanImageWrappingTestBase : public DawnTest {
 
     void TearDown() override {
         if (UsesWire()) {
-            DawnTest::TearDown();
+            DawnTestWithParams::TearDown();
             return;
         }
 
         defaultTexture = nullptr;
         mBackend = nullptr;
-        DawnTest::TearDown();
+        DawnTestWithParams::TearDown();
     }
 
     wgpu::Texture WrapVulkanImage(wgpu::Device dawnDevice,
@@ -868,7 +892,15 @@ TEST_P(VulkanImageWrappingUsageTests, SRGBReinterpretation) {
     IgnoreSignalSemaphore(texture);
 }
 
-DAWN_INSTANTIATE_TEST(VulkanImageWrappingValidationTests, VulkanBackend());
-DAWN_INSTANTIATE_TEST(VulkanImageWrappingUsageTests, VulkanBackend());
+DAWN_INSTANTIATE_TEST_P(VulkanImageWrappingValidationTests,
+                        {VulkanBackend()},
+                        {true, false},  // UseDedicatedAllocation
+                        {true, false}   // DetectDedicatedAllocation
+);
+DAWN_INSTANTIATE_TEST_P(VulkanImageWrappingUsageTests,
+                        {VulkanBackend()},
+                        {true, false},  // UseDedicatedAllocation
+                        {true, false}   // DetectDedicatedAllocation
+);
 
 }  // namespace dawn::native::vulkan

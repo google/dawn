@@ -40,6 +40,13 @@ struct DAWN_NATIVE_EXPORT AdapterDiscoveryOptions : public AdapterDiscoveryOptio
     bool forceSwiftShader = false;
 };
 
+enum class NeedsDedicatedAllocation {
+    Yes,
+    No,
+    // Use Vulkan reflection to detect whether a dedicated allocation is needed.
+    Detect,
+};
+
 struct DAWN_NATIVE_EXPORT ExternalImageDescriptorVk : ExternalImageDescriptor {
   public:
     // The following members may be ignored if |ExternalImageDescriptor::isInitialized| is false
@@ -53,6 +60,11 @@ struct DAWN_NATIVE_EXPORT ExternalImageDescriptorVk : ExternalImageDescriptor {
     // desired usage.
     VkImageLayout releasedOldLayout = VK_IMAGE_LAYOUT_GENERAL;
     VkImageLayout releasedNewLayout = VK_IMAGE_LAYOUT_GENERAL;
+
+    // Try to detect the need to use a dedicated allocation for imported images by default but let
+    // the application override this as drivers have bugs and forget to require a dedicated
+    // allocation.
+    NeedsDedicatedAllocation dedicatedAllocation = NeedsDedicatedAllocation::Detect;
 
   protected:
     using ExternalImageDescriptor::ExternalImageDescriptor;
