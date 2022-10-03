@@ -1014,9 +1014,8 @@ TEST_F(ResolverVariableTest, LocalConst_PropagateConstValue) {
     EXPECT_EQ(Sem().Get(c)->ConstantValue()->As<i32>(), 42_i);
 }
 
-// Enable when we have @const operators implemented
-TEST_F(ResolverVariableTest, DISABLED_LocalConst_ConstEval) {
-    auto* c = Const("c", Div(Mul(Add(1_i, 2_i), 3_i), 2_i));
+TEST_F(ResolverVariableTest, LocalConst_ConstEval) {
+    auto* c = Const("c", Div(Mul(Add(1_i, 2_i), 3_i), 3_i));
 
     WrapInFunction(c);
 
@@ -1182,9 +1181,8 @@ TEST_F(ResolverVariableTest, GlobalConst_PropagateConstValue) {
     EXPECT_EQ(Sem().Get(c)->ConstantValue()->As<i32>(), 42_i);
 }
 
-// Enable when we have @const operators implemented
-TEST_F(ResolverVariableTest, DISABLED_GlobalConst_ConstEval) {
-    auto* c = GlobalConst("c", Div(Mul(Add(1_i, 2_i), 3_i), 2_i));
+TEST_F(ResolverVariableTest, GlobalConst_ConstEval) {
+    auto* c = GlobalConst("c", Div(Mul(Add(1_i, 2_i), 3_i), 3_i));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
