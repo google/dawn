@@ -701,44 +701,95 @@ var<private> a : mat3x2<f32>;
 )";
 
     auto got = Run<Robustness>(src);
-
     EXPECT_EQ(expect, str(got));
 }
 
-// TODO(dsinclair): Implement when constant_id exists
-TEST_F(RobustnessTest, DISABLED_Vector_Constant_Id_Clamps) {
-    // @id(1300) override idx : i32;
-    // var a : vec3<f32>
-    // var b : f32 = a[idx]
-    //
-    // ->var b : f32 = a[min(u32(idx), 2)]
+TEST_F(RobustnessTest, Vector_Constant_Id_Clamps) {
+    auto* src = R"(
+@id(1300) override idx : i32;
+fn f() {
+  var a : vec3<f32>;
+  var b : f32 = a[idx];
+}
+)";
+
+    auto* expect = R"(
+@id(1300) override idx : i32;
+
+fn f() {
+  var a : vec3<f32>;
+  var b : f32 = a[min(u32(idx), 2u)];
+}
+)";
+
+    auto got = Run<Robustness>(src);
+    EXPECT_EQ(expect, str(got));
 }
 
-// TODO(dsinclair): Implement when constant_id exists
-TEST_F(RobustnessTest, DISABLED_Array_Constant_Id_Clamps) {
-    // @id(1300) override idx : i32;
-    // var a : array<f32, 4>
-    // var b : f32 = a[idx]
-    //
-    // -> var b : f32 = a[min(u32(idx), 3)]
+TEST_F(RobustnessTest, Array_Constant_Id_Clamps) {
+    auto* src = R"(
+@id(1300) override idx : i32;
+fn f() {
+  var a : array<f32, 4>;
+  var b : f32 = a[idx];
+}
+)";
+
+    auto* expect = R"(
+@id(1300) override idx : i32;
+
+fn f() {
+  var a : array<f32, 4>;
+  var b : f32 = a[min(u32(idx), 3u)];
+}
+)";
+
+    auto got = Run<Robustness>(src);
+    EXPECT_EQ(expect, str(got));
 }
 
-// TODO(dsinclair): Implement when constant_id exists
-TEST_F(RobustnessTest, DISABLED_Matrix_Column_Constant_Id_Clamps) {
-    // @id(1300) override idx : i32;
-    // var a : mat3x2<f32>
-    // var b : f32 = a[idx][1]
-    //
-    // -> var b : f32 = a[min(u32(idx), 2)][1]
+TEST_F(RobustnessTest, Matrix_Column_Constant_Id_Clamps) {
+    auto* src = R"(
+@id(1300) override idx : i32;
+fn f() {
+  var a : mat3x2<f32>;
+  var b : f32 = a[idx][1];
+}
+)";
+
+    auto* expect = R"(
+@id(1300) override idx : i32;
+
+fn f() {
+  var a : mat3x2<f32>;
+  var b : f32 = a[min(u32(idx), 2u)][1];
+}
+)";
+
+    auto got = Run<Robustness>(src);
+    EXPECT_EQ(expect, str(got));
 }
 
-// TODO(dsinclair): Implement when constant_id exists
-TEST_F(RobustnessTest, DISABLED_Matrix_Row_Constant_Id_Clamps) {
-    // @id(1300) override idx : i32;
-    // var a : mat3x2<f32>
-    // var b : f32 = a[1][idx]
-    //
-    // -> var b : f32 = a[1][min(u32(idx), 0, 1)]
+TEST_F(RobustnessTest, Matrix_Row_Constant_Id_Clamps) {
+    auto* src = R"(
+@id(1300) override idx : i32;
+fn f() {
+  var a : mat3x2<f32>;
+  var b : f32 = a[1][idx];
+}
+)";
+
+    auto* expect = R"(
+@id(1300) override idx : i32;
+
+fn f() {
+  var a : mat3x2<f32>;
+  var b : f32 = a[1][min(u32(idx), 1u)];
+}
+)";
+
+    auto got = Run<Robustness>(src);
+    EXPECT_EQ(expect, str(got));
 }
 
 TEST_F(RobustnessTest, RuntimeArray_Clamps) {
@@ -1019,19 +1070,33 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-// TODO(dsinclair): Test for scoped variables when shadowing is implemented
-TEST_F(RobustnessTest, DISABLED_Shadowed_Variable) {
-    // var a : array<f32, 3>;
-    // var i : u32;
-    // {
-    //    var a : array<f32, 5>;
-    //    var b : f32 = a[i];
-    // }
-    // var c : f32 = a[i];
-    //
-    // -> var b : f32 = a[min(u32(i), 4)];
-    //    var c : f32 = a[min(u32(i), 2)];
-    FAIL();
+TEST_F(RobustnessTest, Shadowed_Variable) {
+    auto* src = R"(
+fn f() {
+  var a : array<f32, 3>;
+  var i : u32;
+  {
+     var a : array<f32, 5>;
+     var b : f32 = a[i];
+  }
+  var c : f32 = a[i];
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  var a : array<f32, 3>;
+  var i : u32;
+  {
+    var a : array<f32, 5>;
+    var b : f32 = a[min(i, 4u)];
+  }
+  var c : f32 = a[min(i, 2u)];
+}
+)";
+
+    auto got = Run<Robustness>(src);
+    EXPECT_EQ(expect, str(got));
 }
 
 // Check that existing use of min() and arrayLength() do not get renamed.
