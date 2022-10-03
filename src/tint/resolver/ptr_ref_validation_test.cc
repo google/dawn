@@ -62,7 +62,7 @@ TEST_F(ResolverPtrRefValidationTest, AddressOfHandle) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: cannot take the address of expression in handle "
-              "storage class");
+              "address space");
 }
 
 TEST_F(ResolverPtrRefValidationTest, AddressOfVectorComponent_MemberAccessor) {
@@ -102,7 +102,7 @@ TEST_F(ResolverPtrRefValidationTest, IndirectOfAddressOfHandle) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: cannot take the address of expression in handle "
-              "storage class");
+              "address space");
 }
 
 TEST_F(ResolverPtrRefValidationTest, DerefOfLiteral) {
@@ -143,12 +143,12 @@ TEST_F(ResolverPtrRefValidationTest, InferredPtrAccessMismatch) {
     // }
     auto* inner = Structure("Inner", utils::Vector{Member("arr", ty.array<i32, 4>())});
     auto* buf = Structure("S", utils::Vector{Member("inner", ty.Of(inner))});
-    auto* storage = GlobalVar("s", ty.Of(buf), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+    auto* storage = GlobalVar("s", ty.Of(buf), ast::AddressSpace::kStorage, ast::Access::kReadWrite,
                               Binding(0_a), Group(0_a));
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 2_i);
     auto* ptr =
-        Let(Source{{12, 34}}, "p", ty.pointer<i32>(ast::StorageClass::kStorage), AddressOf(expr));
+        Let(Source{{12, 34}}, "p", ty.pointer<i32>(ast::AddressSpace::kStorage), AddressOf(expr));
 
     WrapInFunction(ptr);
 

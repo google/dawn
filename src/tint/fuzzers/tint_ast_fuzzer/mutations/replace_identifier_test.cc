@@ -272,7 +272,7 @@ fn f(b: i32) {
 
 TEST(ReplaceIdentifierTest, NotApplicable5) {
     // Can't replace `a` with `b` since the latter has a wrong access mode
-    // (`read` for uniform storage class).
+    // (`read` for uniform address space).
     std::string shader = R"(
 struct S {
   a: i32
@@ -343,7 +343,7 @@ fn f() {
 
 TEST(ReplaceIdentifierTest, NotApplicable8) {
     // Can't replace `ptr_b` with `c` since the latter has a wrong access mode and
-    // storage class.
+    // address space.
     std::string shader = R"(
 struct S {
   a: i32
@@ -451,7 +451,7 @@ fn f() {
 }
 
 TEST(ReplaceIdentifierTest, Applicable1) {
-    // Can replace `a` with `b` (same storage class).
+    // Can replace `a` with `b` (same address space).
     std::string shader = R"(
 fn f() {
   var b : vec2<u32>;
@@ -611,7 +611,7 @@ fn f() {
 
 TEST(ReplaceIdentifierTest, NotApplicable14) {
     // Can't replace `ptr_a` with `ptr_b` (both are pointers with different
-    // storage class).
+    // address space).
     std::string shader = R"(
 var<private> b: vec2<u32>;
 fn f() {

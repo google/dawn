@@ -119,7 +119,7 @@ TEST_F(SpvModuleScopeVarParserTest, NoVar) {
     EXPECT_THAT(module_ast, Not(HasSubstr("Variable"))) << module_ast;
 }
 
-TEST_F(SpvModuleScopeVarParserTest, BadStorageClass_NotAWebGPUStorageClass) {
+TEST_F(SpvModuleScopeVarParserTest, BadAddressSpace_NotAWebGPUAddressSpace) {
     auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
     %float = OpTypeFloat 32
     %ptr = OpTypePointer CrossWorkgroup %float
@@ -135,7 +135,7 @@ TEST_F(SpvModuleScopeVarParserTest, BadStorageClass_NotAWebGPUStorageClass) {
     EXPECT_THAT(p->error(), HasSubstr("unknown SPIR-V storage class: 5"));
 }
 
-TEST_F(SpvModuleScopeVarParserTest, BadStorageClass_Function) {
+TEST_F(SpvModuleScopeVarParserTest, BadAddressSpace_Function) {
     auto p = parser(test::Assemble(Preamble() + FragMain() + R"(
     %float = OpTypeFloat 32
     %ptr = OpTypePointer Function %float

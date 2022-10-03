@@ -31,7 +31,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
 
     EXPECT_EQ(var->symbol, p->builder().Symbols().Get("a"));
     EXPECT_TRUE(var->type->Is<ast::F32>());
-    EXPECT_EQ(var->declared_storage_class, ast::StorageClass::kPrivate);
+    EXPECT_EQ(var->declared_address_space, ast::AddressSpace::kPrivate);
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
     EXPECT_EQ(var->source.range.begin.column, 14u);
@@ -55,7 +55,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
 
     EXPECT_EQ(var->symbol, p->builder().Symbols().Get("a"));
     EXPECT_TRUE(var->type->Is<ast::F32>());
-    EXPECT_EQ(var->declared_storage_class, ast::StorageClass::kPrivate);
+    EXPECT_EQ(var->declared_address_space, ast::AddressSpace::kPrivate);
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
     EXPECT_EQ(var->source.range.begin.column, 14u);
@@ -81,7 +81,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute) {
     EXPECT_EQ(var->symbol, p->builder().Symbols().Get("a"));
     ASSERT_NE(var->type, nullptr);
     EXPECT_TRUE(var->type->Is<ast::F32>());
-    EXPECT_EQ(var->declared_storage_class, ast::StorageClass::kUniform);
+    EXPECT_EQ(var->declared_address_space, ast::AddressSpace::kUniform);
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
     EXPECT_EQ(var->source.range.begin.column, 36u);
@@ -112,7 +112,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute_MulitpleGroups) {
     EXPECT_EQ(var->symbol, p->builder().Symbols().Get("a"));
     ASSERT_NE(var->type, nullptr);
     EXPECT_TRUE(var->type->Is<ast::F32>());
-    EXPECT_EQ(var->declared_storage_class, ast::StorageClass::kUniform);
+    EXPECT_EQ(var->declared_address_space, ast::AddressSpace::kUniform);
 
     EXPECT_EQ(var->source.range.begin.line, 1u);
     EXPECT_EQ(var->source.range.begin.column, 36u);
@@ -165,7 +165,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidVariableDecl) {
     EXPECT_TRUE(e.errored);
     EXPECT_FALSE(e.matched);
     EXPECT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:5: invalid storage class for variable declaration");
+    EXPECT_EQ(p->error(), "1:5: invalid address space for variable declaration");
 }
 
 }  // namespace

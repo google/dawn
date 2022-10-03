@@ -15,12 +15,12 @@
 #include <memory>
 
 #include "gtest/gtest.h"
+#include "src/tint/ast/address_space.h"
 #include "src/tint/ast/builtin_attribute.h"
 #include "src/tint/ast/builtin_value.h"
 #include "src/tint/ast/location_attribute.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/stage_attribute.h"
-#include "src/tint/ast/storage_class.h"
 #include "src/tint/ast/variable.h"
 #include "src/tint/program.h"
 #include "src/tint/sem/f32.h"
@@ -62,7 +62,7 @@ TEST_F(BuilderTest, EntryPoint_Parameters) {
     ASSERT_TRUE(b.Build());
 
     // Test that "coord" and "loc1" get hoisted out to global variables with the
-    // Input storage class, retaining their decorations.
+    // Input address space, retaining their decorations.
     EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
 OpEntryPoint Fragment %19 "frag_main" %1 %5
@@ -142,7 +142,7 @@ TEST_F(BuilderTest, EntryPoint_ReturnValue) {
     ASSERT_TRUE(b.Build());
 
     // Test that the return value gets hoisted out to a global variable with the
-    // Output storage class, and the return statements are replaced with stores.
+    // Output address space, and the return statements are replaced with stores.
     EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
 OpEntryPoint Fragment %21 "frag_main" %1 %4

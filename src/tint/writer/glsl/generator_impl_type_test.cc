@@ -33,12 +33,12 @@ using GlslGeneratorImplTest_Type = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_Array) {
     auto* arr = ty.array<bool, 4>();
-    GlobalVar("G", arr, ast::StorageClass::kPrivate);
+    GlobalVar("G", arr, ast::AddressSpace::kPrivate);
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::AddressSpace::kNone,
                              ast::Access::kReadWrite, "ary"))
         << gen.error();
     EXPECT_EQ(out.str(), "bool ary[4]");
@@ -46,12 +46,12 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Array) {
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
     auto* arr = ty.array(ty.array<bool, 4>(), 5_u);
-    GlobalVar("G", arr, ast::StorageClass::kPrivate);
+    GlobalVar("G", arr, ast::AddressSpace::kPrivate);
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::AddressSpace::kNone,
                              ast::Access::kReadWrite, "ary"))
         << gen.error();
     EXPECT_EQ(out.str(), "bool ary[5][4]");
@@ -59,12 +59,12 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_ArrayOfArray) {
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
     auto* arr = ty.array(ty.array(ty.array<bool, 4>(), 5_u), 6_u);
-    GlobalVar("G", arr, ast::StorageClass::kPrivate);
+    GlobalVar("G", arr, ast::AddressSpace::kPrivate);
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::AddressSpace::kNone,
                              ast::Access::kReadWrite, "ary"))
         << gen.error();
     EXPECT_EQ(out.str(), "bool ary[6][5][4]");
@@ -72,12 +72,12 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_ArrayOfArrayOfArray) {
 
 TEST_F(GlslGeneratorImplTest_Type, EmitType_Array_WithoutName) {
     auto* arr = ty.array<bool, 4>();
-    GlobalVar("G", arr, ast::StorageClass::kPrivate);
+    GlobalVar("G", arr, ast::AddressSpace::kPrivate);
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::StorageClass::kNone,
+    ASSERT_TRUE(gen.EmitType(out, program->TypeOf(arr), ast::AddressSpace::kNone,
                              ast::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "bool[4]");
@@ -89,7 +89,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Bool) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, bool_, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, bool_, ast::AddressSpace::kNone, ast::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "bool");
 }
@@ -100,7 +100,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_F32) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, f32, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, f32, ast::AddressSpace::kNone, ast::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "float");
 }
@@ -113,7 +113,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_F16) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, f16, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, f16, ast::AddressSpace::kNone, ast::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "float16_t");
 }
@@ -124,7 +124,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_I32) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, i32, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, i32, ast::AddressSpace::kNone, ast::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "int");
 }
@@ -137,7 +137,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Matrix_F32) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, mat2x3, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, mat2x3, ast::AddressSpace::kNone, ast::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "mat2x3");
 }
@@ -152,7 +152,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Matrix_F16) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, mat2x3, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, mat2x3, ast::AddressSpace::kNone, ast::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "f16mat2x3");
 }
@@ -162,7 +162,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_StructDecl) {
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
-    GlobalVar("g", ty.Of(s), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(s), ast::AddressSpace::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -182,13 +182,13 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Struct) {
                                  Member("a", ty.i32()),
                                  Member("b", ty.f32()),
                              });
-    GlobalVar("g", ty.Of(s), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(s), ast::AddressSpace::kPrivate);
 
     GeneratorImpl& gen = Build();
 
     auto* sem_s = program->TypeOf(s)->As<sem::Struct>();
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, sem_s, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, sem_s, ast::AddressSpace::kNone, ast::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "S");
 }
@@ -198,7 +198,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Struct_NameCollision) {
                                  Member("double", ty.i32()),
                                  Member("float", ty.f32()),
                              });
-    GlobalVar("g", ty.Of(s), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(s), ast::AddressSpace::kPrivate);
 
     GeneratorImpl& gen = SanitizeAndBuild();
 
@@ -215,7 +215,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Struct_WithOffsetAttributes) {
                                  Member("a", ty.i32(), utils::Vector{MemberOffset(0_a)}),
                                  Member("b", ty.f32(), utils::Vector{MemberOffset(8_a)}),
                              });
-    GlobalVar("g", ty.Of(s), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(s), ast::AddressSpace::kPrivate);
 
     GeneratorImpl& gen = Build();
 
@@ -236,7 +236,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_U32) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, u32, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, u32, ast::AddressSpace::kNone, ast::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "uint");
 }
@@ -248,7 +248,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Vector_F32) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, vec3, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, vec3, ast::AddressSpace::kNone, ast::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "vec3");
 }
@@ -262,7 +262,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Vector_F16) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, vec3, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, vec3, ast::AddressSpace::kNone, ast::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "f16vec3");
 }
@@ -273,7 +273,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitType_Void) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, void_, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, void_, ast::AddressSpace::kNone, ast::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "void");
 }
@@ -284,7 +284,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitSampler) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_FALSE(gen.EmitType(out, sampler, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+    ASSERT_FALSE(gen.EmitType(out, sampler, ast::AddressSpace::kNone, ast::Access::kReadWrite, ""))
         << gen.error();
 }
 
@@ -294,7 +294,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitSamplerComparison) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_FALSE(gen.EmitType(out, sampler, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+    ASSERT_FALSE(gen.EmitType(out, sampler, ast::AddressSpace::kNone, ast::Access::kReadWrite, ""))
         << gen.error();
 }
 
@@ -500,7 +500,7 @@ TEST_F(GlslGeneratorImplTest_Type, EmitMultisampledTexture) {
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
-    ASSERT_TRUE(gen.EmitType(out, s, ast::StorageClass::kNone, ast::Access::kReadWrite, ""))
+    ASSERT_TRUE(gen.EmitType(out, s, ast::AddressSpace::kNone, ast::Access::kReadWrite, ""))
         << gen.error();
     EXPECT_EQ(out.str(), "highp sampler2DMS");
 }

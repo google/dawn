@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-expressions/binary/mul/mat3x2-vec3/f16.wgsl:3:14 error: using f16 types in 'uniform' storage class is not implemented yet
+expressions/binary/mul/mat3x2-vec3/f16.wgsl:3:14 error: using f16 types in 'uniform' address space is not implemented yet
     matrix : mat3x2<f16>,
              ^^^^^^^^^^^
 

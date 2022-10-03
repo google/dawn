@@ -113,7 +113,7 @@ TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConst) {
 }
 
 TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVar) {
-    GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), ast::StorageClass::kPrivate);
+    GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), ast::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(

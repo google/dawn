@@ -902,7 +902,7 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
                 utils::Vector{WorkgroupSize(abstract_expr()), Stage(ast::PipelineStage::kCompute)});
             break;
         case Method::kIndex:
-            GlobalVar("arr", ty.array<i32, 4>(), ast::StorageClass::kPrivate);
+            GlobalVar("arr", ty.array<i32, 4>(), ast::AddressSpace::kPrivate);
             WrapInFunction(IndexAccessor("arr", abstract_expr()));
             break;
         case Method::kRuntimeIndex:

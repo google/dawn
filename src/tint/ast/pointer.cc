@@ -24,15 +24,15 @@ Pointer::Pointer(ProgramID pid,
                  NodeID nid,
                  const Source& src,
                  const Type* const subtype,
-                 ast::StorageClass sc,
+                 ast::AddressSpace addr_space,
                  ast::Access ac)
-    : Base(pid, nid, src), type(subtype), storage_class(sc), access(ac) {}
+    : Base(pid, nid, src), type(subtype), address_space(addr_space), access(ac) {}
 
 std::string Pointer::FriendlyName(const SymbolTable& symbols) const {
     std::ostringstream out;
     out << "ptr<";
-    if (storage_class != ast::StorageClass::kNone) {
-        out << storage_class << ", ";
+    if (address_space != ast::AddressSpace::kNone) {
+        out << address_space << ", ";
     }
     out << type->FriendlyName(symbols);
     if (access != ast::Access::kUndefined) {
@@ -50,7 +50,7 @@ const Pointer* Pointer::Clone(CloneContext* ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering
     auto src = ctx->Clone(source);
     auto* ty = ctx->Clone(type);
-    return ctx->dst->create<Pointer>(src, ty, storage_class, access);
+    return ctx->dst->create<Pointer>(src, ty, address_space, access);
 }
 
 }  // namespace tint::ast

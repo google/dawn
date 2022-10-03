@@ -25,10 +25,10 @@ namespace {
 using VariableTest = TestHelper;
 
 TEST_F(VariableTest, Creation) {
-    auto* v = Var("my_var", ty.i32(), StorageClass::kFunction);
+    auto* v = Var("my_var", ty.i32(), AddressSpace::kFunction);
 
     EXPECT_EQ(v->symbol, Symbol(1, ID()));
-    EXPECT_EQ(v->declared_storage_class, StorageClass::kFunction);
+    EXPECT_EQ(v->declared_address_space, AddressSpace::kFunction);
     EXPECT_TRUE(v->type->Is<ast::I32>());
     EXPECT_EQ(v->source.range.begin.line, 0u);
     EXPECT_EQ(v->source.range.begin.column, 0u);
@@ -38,10 +38,10 @@ TEST_F(VariableTest, Creation) {
 
 TEST_F(VariableTest, CreationWithSource) {
     auto* v = Var(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 5}}}, "i",
-                  ty.f32(), StorageClass::kPrivate, utils::Empty);
+                  ty.f32(), AddressSpace::kPrivate, utils::Empty);
 
     EXPECT_EQ(v->symbol, Symbol(1, ID()));
-    EXPECT_EQ(v->declared_storage_class, StorageClass::kPrivate);
+    EXPECT_EQ(v->declared_address_space, AddressSpace::kPrivate);
     EXPECT_TRUE(v->type->Is<ast::F32>());
     EXPECT_EQ(v->source.range.begin.line, 27u);
     EXPECT_EQ(v->source.range.begin.column, 4u);
@@ -51,10 +51,10 @@ TEST_F(VariableTest, CreationWithSource) {
 
 TEST_F(VariableTest, CreationEmpty) {
     auto* v = Var(Source{Source::Range{Source::Location{27, 4}, Source::Location{27, 7}}}, "a_var",
-                  ty.i32(), StorageClass::kWorkgroup, utils::Empty);
+                  ty.i32(), AddressSpace::kWorkgroup, utils::Empty);
 
     EXPECT_EQ(v->symbol, Symbol(1, ID()));
-    EXPECT_EQ(v->declared_storage_class, StorageClass::kWorkgroup);
+    EXPECT_EQ(v->declared_address_space, AddressSpace::kWorkgroup);
     EXPECT_TRUE(v->type->Is<ast::I32>());
     EXPECT_EQ(v->source.range.begin.line, 27u);
     EXPECT_EQ(v->source.range.begin.column, 4u);
@@ -92,7 +92,7 @@ TEST_F(VariableTest, Assert_DifferentProgramID_Constructor) {
 }
 
 TEST_F(VariableTest, WithAttributes) {
-    auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, Location(1_u),
+    auto* var = Var("my_var", ty.i32(), AddressSpace::kFunction, Location(1_u),
                     Builtin(BuiltinValue::kPosition), Id(1200_u));
 
     auto& attributes = var->attributes;
@@ -107,22 +107,22 @@ TEST_F(VariableTest, WithAttributes) {
 }
 
 TEST_F(VariableTest, HasBindingPoint_BothProvided) {
-    auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, Binding(2_a), Group(1_a));
+    auto* var = Var("my_var", ty.i32(), AddressSpace::kFunction, Binding(2_a), Group(1_a));
     EXPECT_TRUE(var->HasBindingPoint());
 }
 
 TEST_F(VariableTest, HasBindingPoint_NeitherProvided) {
-    auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, utils::Empty);
+    auto* var = Var("my_var", ty.i32(), AddressSpace::kFunction, utils::Empty);
     EXPECT_FALSE(var->HasBindingPoint());
 }
 
 TEST_F(VariableTest, HasBindingPoint_MissingGroupAttribute) {
-    auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, Binding(2_a));
+    auto* var = Var("my_var", ty.i32(), AddressSpace::kFunction, Binding(2_a));
     EXPECT_FALSE(var->HasBindingPoint());
 }
 
 TEST_F(VariableTest, HasBindingPoint_MissingBindingAttribute) {
-    auto* var = Var("my_var", ty.i32(), StorageClass::kFunction, Group(1_a));
+    auto* var = Var("my_var", ty.i32(), AddressSpace::kFunction, Group(1_a));
     EXPECT_FALSE(var->HasBindingPoint());
 }
 

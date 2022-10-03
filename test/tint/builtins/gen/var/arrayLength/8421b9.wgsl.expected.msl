@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-gen/var/arrayLength/8421b9.wgsl:26:10 error: using f16 types in 'storage' storage class is not implemented yet
+gen/var/arrayLength/8421b9.wgsl:26:10 error: using f16 types in 'storage' address space is not implemented yet
   arg_0: array<f16>,
          ^^^^^^^^^^
 

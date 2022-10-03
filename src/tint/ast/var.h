@@ -28,11 +28,11 @@ namespace tint::ast {
 ///
 /// ```
 ///  // Declared outside a function, i.e. at module scope, requires
-///  // a storage class.
+///  // a address space.
 ///  var<workgroup> width : i32;     // no initializer
 ///  var<private> height : i32 = 3;  // with initializer
 ///
-///  // A variable declared inside a function doesn't take a storage class,
+///  // A variable declared inside a function doesn't take a address space,
 ///  // and maps to SPIR-V Function storage.
 ///  var computed_depth : i32;
 ///  var area : i32 = compute_area(width, height);
@@ -47,7 +47,7 @@ class Var final : public Castable<Var, Variable> {
     /// @param source the variable source
     /// @param sym the variable symbol
     /// @param type the declared variable type
-    /// @param declared_storage_class the declared storage class
+    /// @param declared_address_space the declared address space
     /// @param declared_access the declared access control
     /// @param constructor the constructor expression
     /// @param attributes the variable attributes
@@ -56,7 +56,7 @@ class Var final : public Castable<Var, Variable> {
         const Source& source,
         const Symbol& sym,
         const ast::Type* type,
-        StorageClass declared_storage_class,
+        AddressSpace declared_address_space,
         Access declared_access,
         const Expression* constructor,
         utils::VectorRef<const Attribute*> attributes);
@@ -76,8 +76,8 @@ class Var final : public Castable<Var, Variable> {
     /// @return the newly cloned node
     const Var* Clone(CloneContext* ctx) const override;
 
-    /// The declared storage class
-    const StorageClass declared_storage_class;
+    /// The declared address space
+    const AddressSpace declared_address_space;
 
     /// The declared access control
     const Access declared_access;

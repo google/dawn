@@ -22,7 +22,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "src/tint/ast/storage_class.h"
+#include "src/tint/ast/address_space.h"
 #include "src/tint/ast/struct.h"
 #include "src/tint/sem/node.h"
 #include "src/tint/sem/type.h"
@@ -109,23 +109,23 @@ class Struct final : public Castable<Struct, Type> {
     /// alignment padding
     uint32_t SizeNoPadding() const { return size_no_padding_; }
 
-    /// Adds the StorageClass usage to the structure.
+    /// Adds the AddressSpace usage to the structure.
     /// @param usage the storage usage
-    void AddUsage(ast::StorageClass usage) { storage_class_usage_.emplace(usage); }
+    void AddUsage(ast::AddressSpace usage) { address_space_usage_.emplace(usage); }
 
-    /// @returns the set of storage class uses of this structure
-    const std::unordered_set<ast::StorageClass>& StorageClassUsage() const {
-        return storage_class_usage_;
+    /// @returns the set of address space uses of this structure
+    const std::unordered_set<ast::AddressSpace>& AddressSpaceUsage() const {
+        return address_space_usage_;
     }
 
-    /// @param usage the ast::StorageClass usage type to query
-    /// @returns true iff this structure has been used as the given storage class
-    bool UsedAs(ast::StorageClass usage) const { return storage_class_usage_.count(usage) > 0; }
+    /// @param usage the ast::AddressSpace usage type to query
+    /// @returns true iff this structure has been used as the given address space
+    bool UsedAs(ast::AddressSpace usage) const { return address_space_usage_.count(usage) > 0; }
 
-    /// @returns true iff this structure has been used by storage class that's
+    /// @returns true iff this structure has been used by address space that's
     /// host-shareable.
     bool IsHostShareable() const {
-        for (auto sc : storage_class_usage_) {
+        for (auto sc : address_space_usage_) {
             if (ast::IsHostShareable(sc)) {
                 return true;
             }
@@ -165,7 +165,7 @@ class Struct final : public Castable<Struct, Type> {
     const uint32_t align_;
     const uint32_t size_;
     const uint32_t size_no_padding_;
-    std::unordered_set<ast::StorageClass> storage_class_usage_;
+    std::unordered_set<ast::AddressSpace> address_space_usage_;
     std::unordered_set<PipelineStageUsage> pipeline_stage_uses_;
     bool constructible_;
 };

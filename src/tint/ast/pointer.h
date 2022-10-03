@@ -18,7 +18,7 @@
 #include <string>
 
 #include "src/tint/ast/access.h"
-#include "src/tint/ast/storage_class.h"
+#include "src/tint/ast/address_space.h"
 #include "src/tint/ast/type.h"
 
 namespace tint::ast {
@@ -31,13 +31,13 @@ class Pointer final : public Castable<Pointer, Type> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param subtype the pointee type
-    /// @param storage_class the storage class of the pointer
+    /// @param address_space the address space of the pointer
     /// @param access the access control of the pointer
     Pointer(ProgramID pid,
             NodeID nid,
             const Source& src,
             const Type* const subtype,
-            ast::StorageClass storage_class,
+            ast::AddressSpace address_space,
             ast::Access access);
     /// Move constructor
     Pointer(Pointer&&);
@@ -56,8 +56,8 @@ class Pointer final : public Castable<Pointer, Type> {
     /// The pointee type
     const Type* const type;
 
-    /// The storage class of the pointer
-    ast::StorageClass const storage_class;
+    /// The address space of the pointer
+    ast::AddressSpace const address_space;
 
     /// The access control of the pointer
     ast::Access const access;

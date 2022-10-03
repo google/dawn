@@ -40,12 +40,12 @@ fn foo(src_param : ArrayType) {
   let src_let : ArrayType = ArrayType();
   dst.arr = src_let;
 
-  // Assign from var, various storage classes.
+  // Assign from var, various address spaces.
   dst.arr = src_function;
   dst.arr = src_private;
   dst.arr = src_workgroup;
 
-  // Assign from struct.arr, various storage classes.
+  // Assign from struct.arr, various address spaces.
   dst.arr = ret_struct_arr().arr;
   dst.arr = src_uniform.arr;
   dst.arr = src_storage.arr;

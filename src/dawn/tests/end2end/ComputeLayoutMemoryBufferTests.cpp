@@ -34,18 +34,18 @@ std::string ReplaceAll(std::string str, const std::string& substr, const std::st
     return str;
 }
 
-// StorageClass is an enumerator of storage classes used by ComputeLayoutMemoryBufferTests.Fields
-enum class StorageClass {
+// AddressSpace is an enumerator of address spaces used by ComputeLayoutMemoryBufferTests.Fields
+enum class AddressSpace {
     Uniform,
     Storage,
 };
 
-std::ostream& operator<<(std::ostream& o, StorageClass storageClass) {
-    switch (storageClass) {
-        case StorageClass::Uniform:
+std::ostream& operator<<(std::ostream& o, AddressSpace addressSpace) {
+    switch (addressSpace) {
+        case AddressSpace::Uniform:
             o << "uniform";
             break;
-        case StorageClass::Storage:
+        case AddressSpace::Storage:
             o << "storage";
             break;
     }
@@ -441,7 +441,7 @@ void RunComputeShaderWithBuffers(const wgpu::Device& device,
     queue.Submit(1, &commands);
 }
 
-DAWN_TEST_PARAM_STRUCT(ComputeLayoutMemoryBufferTestParams, StorageClass, Field);
+DAWN_TEST_PARAM_STRUCT(ComputeLayoutMemoryBufferTestParams, AddressSpace, Field);
 
 class ComputeLayoutMemoryBufferTests
     : public DawnTestWithParams<ComputeLayoutMemoryBufferTestParams> {
@@ -472,7 +472,7 @@ TEST_P(ComputeLayoutMemoryBufferTests, StructMember) {
 
     const Field& field = GetParam().mField;
 
-    const bool isUniform = GetParam().mStorageClass == StorageClass::Uniform;
+    const bool isUniform = GetParam().mAddressSpace == AddressSpace::Uniform;
 
     std::string shader = R"(
 struct Data {
@@ -619,7 +619,7 @@ TEST_P(ComputeLayoutMemoryBufferTests, NonStructMember) {
         return;
     }
 
-    const bool isUniform = GetParam().mStorageClass == StorageClass::Uniform;
+    const bool isUniform = GetParam().mAddressSpace == AddressSpace::Uniform;
 
     std::string shader = R"(
 @group(0) @binding(0) var<{input_qualifiers}> input : {field_type};
@@ -685,7 +685,7 @@ auto GenerateParams() {
             OpenGLBackend(),
             OpenGLESBackend(),
         },
-        {StorageClass::Storage, StorageClass::Uniform},
+        {AddressSpace::Storage, AddressSpace::Uniform},
         {
             // See https://www.w3.org/TR/WGSL/#alignment-and-size
             // Scalar types with no custom alignment or size
@@ -851,7 +851,7 @@ auto GenerateParams() {
 
     std::vector<ComputeLayoutMemoryBufferTestParams> filtered;
     for (auto param : params) {
-        if (param.mStorageClass != StorageClass::Storage && param.mField.IsStorageBufferOnly()) {
+        if (param.mAddressSpace != AddressSpace::Storage && param.mField.IsStorageBufferOnly()) {
             continue;
         }
         filtered.emplace_back(param);

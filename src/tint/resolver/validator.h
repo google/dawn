@@ -72,7 +72,7 @@ namespace tint::resolver {
 class Validator {
   public:
     /// The valid type storage layouts typedef
-    using ValidTypeStorageLayouts = std::set<std::pair<const sem::Type*, ast::StorageClass>>;
+    using ValidTypeStorageLayouts = std::set<std::pair<const sem::Type*, ast::AddressSpace>>;
 
     /// Constructor
     /// @param builder the program builder
@@ -389,12 +389,12 @@ class Validator {
 
     /// Validates a variable initializer
     /// @param v the variable to validate
-    /// @param storage_class the storage class of the variable
+    /// @param address_space the address space of the variable
     /// @param storage_type the type of the storage
     /// @param initializer the RHS initializer expression
     /// @returns true on succes, false otherwise
     bool VariableInitializer(const ast::Variable* v,
-                             ast::StorageClass storage_class,
+                             ast::AddressSpace address_space,
                              const sem::Type* storage_type,
                              const sem::Expression* initializer) const;
 
@@ -427,23 +427,23 @@ class Validator {
     /// @returns true on success, false otherwise.
     bool NoDuplicateAttributes(utils::VectorRef<const ast::Attribute*> attributes) const;
 
-    /// Validates a storage class layout
+    /// Validates a address space layout
     /// @param type the type to validate
-    /// @param sc the storage class
+    /// @param sc the address space
     /// @param source the source of the type
     /// @param layouts previously validated storage layouts
     /// @returns true on success, false otherwise
-    bool StorageClassLayout(const sem::Type* type,
-                            ast::StorageClass sc,
+    bool AddressSpaceLayout(const sem::Type* type,
+                            ast::AddressSpace sc,
                             Source source,
                             ValidTypeStorageLayouts& layouts) const;
 
-    /// Validates a storage class layout
+    /// Validates a address space layout
     /// @param var the variable to validate
     /// @param layouts previously validated storage layouts
     /// @param enabled_extensions all the extensions declared in current module
     /// @returns true on success, false otherwise.
-    bool StorageClassLayout(const sem::Variable* var,
+    bool AddressSpaceLayout(const sem::Variable* var,
                             const ast::Extensions& enabled_extensions,
                             ValidTypeStorageLayouts& layouts) const;
 

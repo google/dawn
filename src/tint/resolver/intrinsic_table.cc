@@ -321,7 +321,7 @@ class TemplateNumberMatcher : public NumberMatcher {
 ////////////////////////////////////////////////////////////////////////////////
 using TexelFormat = ast::TexelFormat;
 using Access = ast::Access;
-using StorageClass = ast::StorageClass;
+using AddressSpace = ast::AddressSpace;
 using ParameterUsage = sem::ParameterUsage;
 using PipelineStage = ast::PipelineStage;
 
@@ -539,7 +539,7 @@ bool match_ptr(const sem::Type* ty, Number& S, const sem::Type*& T, Number& A) {
     }
 
     if (auto* p = ty->As<sem::Pointer>()) {
-        S = Number(static_cast<uint32_t>(p->StorageClass()));
+        S = Number(static_cast<uint32_t>(p->AddressSpace()));
         T = p->StoreType();
         A = Number(static_cast<uint32_t>(p->Access()));
         return true;
@@ -548,7 +548,7 @@ bool match_ptr(const sem::Type* ty, Number& S, const sem::Type*& T, Number& A) {
 }
 
 const sem::Pointer* build_ptr(MatchState& state, Number S, const sem::Type* T, Number& A) {
-    return state.builder.create<sem::Pointer>(T, static_cast<ast::StorageClass>(S.Value()),
+    return state.builder.create<sem::Pointer>(T, static_cast<ast::AddressSpace>(S.Value()),
                                               static_cast<ast::Access>(A.Value()));
 }
 
@@ -1158,7 +1158,7 @@ Impl::Builtin Impl::Lookup(sem::BuiltinType builtin_type,
         params.Reserve(match.parameters.Length());
         for (auto& p : match.parameters) {
             params.Push(builder.create<sem::Parameter>(
-                nullptr, static_cast<uint32_t>(params.Length()), p.type, ast::StorageClass::kNone,
+                nullptr, static_cast<uint32_t>(params.Length()), p.type, ast::AddressSpace::kNone,
                 ast::Access::kUndefined, p.usage));
         }
         sem::PipelineStageSet supported_stages;
@@ -1356,7 +1356,7 @@ IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
         params.Reserve(match.parameters.Length());
         for (auto& p : match.parameters) {
             params.Push(builder.create<sem::Parameter>(
-                nullptr, static_cast<uint32_t>(params.Length()), p.type, ast::StorageClass::kNone,
+                nullptr, static_cast<uint32_t>(params.Length()), p.type, ast::AddressSpace::kNone,
                 ast::Access::kUndefined, p.usage));
         }
         auto eval_stage = match.overload->const_eval_fn ? sem::EvaluationStage::kConstant
@@ -1371,7 +1371,7 @@ IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
     // Conversion.
     auto* target = utils::GetOrCreate(converters, match, [&]() {
         auto param = builder.create<sem::Parameter>(
-            nullptr, 0u, match.parameters[0].type, ast::StorageClass::kNone,
+            nullptr, 0u, match.parameters[0].type, ast::AddressSpace::kNone,
             ast::Access::kUndefined, match.parameters[0].usage);
         auto eval_stage = match.overload->const_eval_fn ? sem::EvaluationStage::kConstant
                                                         : sem::EvaluationStage::kRuntime;

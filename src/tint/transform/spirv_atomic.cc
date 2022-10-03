@@ -206,7 +206,7 @@ struct SpirvAtomic::State {
                 return b.ty.array(AtomicTypeFor(arr->ElemType()), u32(count.value()));
             },
             [&](const sem::Pointer* ptr) {
-                return b.ty.pointer(AtomicTypeFor(ptr->StoreType()), ptr->StorageClass(),
+                return b.ty.pointer(AtomicTypeFor(ptr->StoreType()), ptr->AddressSpace(),
                                     ptr->Access());
             },
             [&](const sem::Reference* ref) { return AtomicTypeFor(ref->StoreType()); },

@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-swizzle/write/packed_vec3/f16.wgsl:3:8 error: using f16 types in 'storage' storage class is not implemented yet
+swizzle/write/packed_vec3/f16.wgsl:3:8 error: using f16 types in 'storage' address space is not implemented yet
     v: vec3<f16>,
        ^^^^^^^^^
 

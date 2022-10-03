@@ -57,7 +57,7 @@ struct Unshadow::State {
             return Switch(
                 decl,  //
                 [&](const ast::Var* var) {
-                    return ctx.dst->Var(source, symbol, type, var->declared_storage_class,
+                    return ctx.dst->Var(source, symbol, type, var->declared_address_space,
                                         var->declared_access, constructor, attributes);
                 },
                 [&](const ast::Let*) {

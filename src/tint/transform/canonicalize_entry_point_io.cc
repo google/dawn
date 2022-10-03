@@ -190,15 +190,15 @@ struct CanonicalizeEntryPointIO::State {
                                                      ast::InterpolationSampling::kNone));
             }
 
-            // Disable validation for use of the `input` storage class.
-            attributes.Push(ctx.dst->Disable(ast::DisabledValidation::kIgnoreStorageClass));
+            // Disable validation for use of the `input` address space.
+            attributes.Push(ctx.dst->Disable(ast::DisabledValidation::kIgnoreAddressSpace));
 
             // In GLSL, if it's a builtin, override the name with the
             // corresponding gl_ builtin name
             auto* builtin = ast::GetAttribute<ast::BuiltinAttribute>(attributes);
             if (cfg.shader_style == ShaderStyle::kGlsl && builtin) {
                 name = GLSLBuiltinToString(builtin->builtin, func_ast->PipelineStage(),
-                                           ast::StorageClass::kIn);
+                                           ast::AddressSpace::kIn);
             }
             auto symbol = ctx.dst->Symbols().New(name);
 
@@ -215,7 +215,7 @@ struct CanonicalizeEntryPointIO::State {
                     value = ctx.dst->IndexAccessor(value, 0_i);
                 }
             }
-            ctx.dst->GlobalVar(symbol, ast_type, ast::StorageClass::kIn, std::move(attributes));
+            ctx.dst->GlobalVar(symbol, ast_type, ast::AddressSpace::kIn, std::move(attributes));
             return value;
         } else if (cfg.shader_style == ShaderStyle::kMsl &&
                    ast::HasAttribute<ast::BuiltinAttribute>(attributes)) {
@@ -264,7 +264,7 @@ struct CanonicalizeEntryPointIO::State {
         if (cfg.shader_style == ShaderStyle::kGlsl) {
             if (auto* b = ast::GetAttribute<ast::BuiltinAttribute>(attributes)) {
                 name = GLSLBuiltinToString(b->builtin, func_ast->PipelineStage(),
-                                           ast::StorageClass::kOut);
+                                           ast::AddressSpace::kOut);
                 value = ToGLSLBuiltin(b->builtin, value, type);
             }
         }
@@ -480,9 +480,9 @@ struct CanonicalizeEntryPointIO::State {
     /// Create and assign the wrapper function's output variables.
     void CreateGlobalOutputVariables() {
         for (auto& outval : wrapper_output_values) {
-            // Disable validation for use of the `output` storage class.
+            // Disable validation for use of the `output` address space.
             utils::Vector<const ast::Attribute*, 8> attributes = std::move(outval.attributes);
-            attributes.Push(ctx.dst->Disable(ast::DisabledValidation::kIgnoreStorageClass));
+            attributes.Push(ctx.dst->Disable(ast::DisabledValidation::kIgnoreAddressSpace));
 
             // Create the global variable and assign it the output value.
             auto name = ctx.dst->Symbols().New(outval.name);
@@ -494,7 +494,7 @@ struct CanonicalizeEntryPointIO::State {
                 type = ctx.dst->ty.array(type, 1_u);
                 lhs = ctx.dst->IndexAccessor(lhs, 0_i);
             }
-            ctx.dst->GlobalVar(name, type, ast::StorageClass::kOut, std::move(attributes));
+            ctx.dst->GlobalVar(name, type, ast::AddressSpace::kOut, std::move(attributes));
             wrapper_body.Push(ctx.dst->Assign(lhs, outval.value));
         }
     }
@@ -634,11 +634,11 @@ struct CanonicalizeEntryPointIO::State {
     /// Retrieve the gl_ string corresponding to a builtin.
     /// @param builtin the builtin
     /// @param stage the current pipeline stage
-    /// @param storage_class the storage class (input or output)
+    /// @param address_space the address space (input or output)
     /// @returns the gl_ string corresponding to that builtin
     const char* GLSLBuiltinToString(ast::BuiltinValue builtin,
                                     ast::PipelineStage stage,
-                                    ast::StorageClass storage_class) {
+                                    ast::AddressSpace address_space) {
         switch (builtin) {
             case ast::BuiltinValue::kPosition:
                 switch (stage) {
@@ -670,7 +670,7 @@ struct CanonicalizeEntryPointIO::State {
             case ast::BuiltinValue::kSampleIndex:
                 return "gl_SampleID";
             case ast::BuiltinValue::kSampleMask:
-                if (storage_class == ast::StorageClass::kIn) {
+                if (address_space == ast::AddressSpace::kIn) {
                     return "gl_SampleMaskIn";
                 } else {
                     return "gl_SampleMask";

@@ -278,12 +278,12 @@ class ParserImpl {
         /// Constructor
         /// @param source_in variable declaration source
         /// @param name_in variable name
-        /// @param storage_class_in variable storage class
+        /// @param address_space_in variable address space
         /// @param access_in variable access control
         /// @param type_in variable type
         VarDeclInfo(Source source_in,
                     std::string name_in,
-                    ast::StorageClass storage_class_in,
+                    ast::AddressSpace address_space_in,
                     ast::Access access_in,
                     const ast::Type* type_in);
         /// Destructor
@@ -293,8 +293,8 @@ class ParserImpl {
         Source source;
         /// Variable name
         std::string name;
-        /// Variable storage class
-        ast::StorageClass storage_class = ast::StorageClass::kNone;
+        /// Variable address space
+        ast::AddressSpace address_space = ast::AddressSpace::kNone;
         /// Variable access control
         ast::Access access = ast::Access::kUndefined;
         /// Variable type
@@ -303,8 +303,8 @@ class ParserImpl {
 
     /// VariableQualifier contains the parsed information for a variable qualifier
     struct VariableQualifier {
-        /// The variable's storage class
-        ast::StorageClass storage_class = ast::StorageClass::kNone;
+        /// The variable's address space
+        ast::AddressSpace address_space = ast::AddressSpace::kNone;
         /// The variable's access control
         ast::Access access = ast::Access::kUndefined;
     };
@@ -460,8 +460,8 @@ class ParserImpl {
     Maybe<const ast::Type*> type_decl();
     /// Parses an `address_space` grammar element, erroring on parse failure.
     /// @param use a description of what was being parsed if an error was raised.
-    /// @returns the address space or StorageClass::kNone if none matched
-    Expect<ast::StorageClass> expect_address_space(std::string_view use);
+    /// @returns the address space or ast::AddressSpace::kNone if none matched
+    Expect<ast::AddressSpace> expect_address_space(std::string_view use);
     /// Parses a `struct_decl` grammar element.
     /// @returns the struct type or nullptr on error
     Maybe<const ast::Struct*> struct_decl();

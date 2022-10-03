@@ -103,11 +103,11 @@ void CalculateArrayLength::Run(CloneContext& ctx, const DataMap&, DataMap&) cons
                 name,
                 utils::Vector{
                     ctx.dst->Param("buffer",
-                                   ctx.dst->ty.pointer(type, buffer_type->StorageClass(),
+                                   ctx.dst->ty.pointer(type, buffer_type->AddressSpace(),
                                                        buffer_type->Access()),
                                    utils::Vector{disable_validation}),
                     ctx.dst->Param("result", ctx.dst->ty.pointer(ctx.dst->ty.u32(),
-                                                                 ast::StorageClass::kFunction)),
+                                                                 ast::AddressSpace::kFunction)),
                 },
                 ctx.dst->ty.void_(), nullptr,
                 utils::Vector{

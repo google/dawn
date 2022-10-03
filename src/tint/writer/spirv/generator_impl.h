@@ -42,7 +42,7 @@ class GeneratorImpl {
     /// Constructor
     /// @param program the program to generate
     /// @param zero_initialize_workgroup_memory `true` to initialize all the
-    /// variables in the Workgroup storage class with OpConstantNull
+    /// variables in the Workgroup address space with OpConstantNull
     GeneratorImpl(const Program* program, bool zero_initialize_workgroup_memory);
 
     /// @returns true on successful generation; false otherwise

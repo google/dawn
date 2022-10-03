@@ -61,8 +61,8 @@ TEST_F(ResolverVariableValidationTest, GlobalVarInitializerNoReturnValueBuiltin)
 TEST_F(ResolverVariableValidationTest, GlobalVarUsedAtModuleScope) {
     // var<private> a : i32;
     // var<private> b : i32 = a;
-    GlobalVar(Source{{12, 34}}, "a", ty.i32(), ast::StorageClass::kPrivate);
-    GlobalVar("b", ty.i32(), ast::StorageClass::kPrivate, Expr(Source{{56, 78}}, "a"));
+    GlobalVar(Source{{12, 34}}, "a", ty.i32(), ast::AddressSpace::kPrivate);
+    GlobalVar("b", ty.i32(), ast::AddressSpace::kPrivate, Expr(Source{{56, 78}}, "a"));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(56:78 error: var 'a' cannot be referenced at module-scope
@@ -112,8 +112,8 @@ TEST_F(ResolverVariableValidationTest, VarTypeNotConstructible) {
     // var i : i32;
     // var p : pointer<function, i32> = &v;
     auto* i = Var("i", ty.i32());
-    auto* p = Var("a", ty.pointer<i32>(Source{{56, 78}}, ast::StorageClass::kFunction),
-                  ast::StorageClass::kNone, AddressOf(Source{{12, 34}}, "i"));
+    auto* p = Var("a", ty.pointer<i32>(Source{{56, 78}}, ast::AddressSpace::kFunction),
+                  ast::AddressSpace::kNone, AddressOf(Source{{12, 34}}, "i"));
     WrapInFunction(i, p);
 
     EXPECT_FALSE(r()->Resolve());
@@ -205,7 +205,7 @@ TEST_F(ResolverVariableValidationTest, VarConstructorWrongTypeViaAlias) {
 TEST_F(ResolverVariableValidationTest, LetOfPtrConstructedWithRef) {
     // var a : f32;
     // let b : ptr<function,f32> = a;
-    const auto priv = ast::StorageClass::kFunction;
+    const auto priv = ast::AddressSpace::kFunction;
     auto* var_a = Var("a", ty.f32(), priv);
     auto* var_b = Let(Source{{12, 34}}, "b", ty.pointer<f32>(priv), Expr("a"));
     WrapInFunction(var_a, var_b);
@@ -236,7 +236,7 @@ TEST_F(ResolverVariableValidationTest, GlobalVarRedeclaredAsLocal) {
     //   return 0;
     // }
 
-    GlobalVar("v", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1_f));
+    GlobalVar("v", ty.f32(), ast::AddressSpace::kPrivate, Expr(2.1_f));
 
     WrapInFunction(Var(Source{{12, 34}}, "v", ty.f32(), Expr(2_f)));
 
@@ -295,12 +295,12 @@ TEST_F(ResolverVariableValidationTest, InferredPtrStorageAccessMismatch) {
                                    Member("inner", ty.Of(inner)),
                                });
     auto* storage =
-        GlobalVar("s", ty.Of(buf), ast::StorageClass::kStorage, Binding(0_a), Group(0_a));
+        GlobalVar("s", ty.Of(buf), ast::AddressSpace::kStorage, Binding(0_a), Group(0_a));
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 2_i);
     auto* ptr =
         Let(Source{{12, 34}}, "p",
-            ty.pointer<i32>(ast::StorageClass::kStorage, ast::Access::kReadWrite), AddressOf(expr));
+            ty.pointer<i32>(ast::AddressSpace::kStorage, ast::Access::kReadWrite), AddressOf(expr));
 
     WrapInFunction(ptr);
 
@@ -328,7 +328,7 @@ TEST_F(ResolverVariableValidationTest, NonConstructibleType_RuntimeArray) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: runtime-sized arrays can only be used in the <storage> storage class
+              R"(12:34 error: runtime-sized arrays can only be used in the <storage> address space
 56:78 note: while analysing structure member S.m
 12:34 note: while instantiating 'var' v)");
 }
@@ -357,15 +357,15 @@ TEST_F(ResolverVariableValidationTest, NonConstructibleType_InferredType) {
     EXPECT_EQ(r()->error(), "12:34 error: function-scope 'var' must have a constructible type");
 }
 
-TEST_F(ResolverVariableValidationTest, InvalidStorageClassForInitializer) {
+TEST_F(ResolverVariableValidationTest, InvalidAddressSpaceForInitializer) {
     // var<workgroup> v : f32 = 1.23;
-    GlobalVar(Source{{12, 34}}, "v", ty.f32(), ast::StorageClass::kWorkgroup, Expr(1.23_f));
+    GlobalVar(Source{{12, 34}}, "v", ty.f32(), ast::AddressSpace::kWorkgroup, Expr(1.23_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: var of storage class 'workgroup' cannot have "
+              "12:34 error: var of address space 'workgroup' cannot have "
               "an initializer. var initializers are only supported for the "
-              "storage classes 'private' and 'function'");
+              "address spacees 'private' and 'function'");
 }
 
 TEST_F(ResolverVariableValidationTest, VectorConstNoType) {

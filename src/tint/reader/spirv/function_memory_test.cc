@@ -818,11 +818,11 @@ fn main() {
     EXPECT_EQ(got, expected) << got;
 }
 
-TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_InferFunctionStorageClass) {
+TEST_F(SpvParserMemoryTest, EmitStatement_AccessChain_InferFunctionAddressSpace) {
     // An access chain can have no indices. When the base is a Function variable,
-    // the reference type has no explicit storage class in the AST representation.
+    // the reference type has no explicit address space in the AST representation.
     // But the pointer type for the let declaration must have an explicit
-    // 'function' storage class. From crbug.com/tint/807
+    // 'function' address space. From crbug.com/tint/807
     const std::string assembly = R"(
 OpCapability Shader
 OpMemoryModel Logical Simple
@@ -993,7 +993,7 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughAccessChain_Cascaded) {
 
 TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughCopyObject_WithoutHoisting) {
     // Generates a const declaration directly.
-    // We have to do a bunch of storage class tracking for locally
+    // We have to do a bunch of address space tracking for locally
     // defined values in order to get the right pointer-to-storage-buffer
     // value type for the const declration.
     const auto assembly = OldStorageBufferPreamble() + R"(

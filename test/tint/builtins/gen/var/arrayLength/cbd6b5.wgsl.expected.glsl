@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-builtins/gen/var/arrayLength/cbd6b5.wgsl:26:10 error: using f16 types in 'storage' storage class is not implemented yet
+builtins/gen/var/arrayLength/cbd6b5.wgsl:26:10 error: using f16 types in 'storage' address space is not implemented yet
   arg_0: array<f16>,
          ^^^^^^^^^^
 

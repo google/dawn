@@ -1,6 +1,6 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/src/cmd/gen to generate storage_class_bench.cc
+Template file for use with tools/src/cmd/gen to generate address_space_bench.cc
 
 To update the generated file, run:
     ./tools/run gen
@@ -12,9 +12,9 @@ See:
 */ -}}
 
 {{- Import "src/tint/templates/enums.tmpl.inc" -}}
-{{- $enum := (Sem.Enum "storage_class") -}}
+{{- $enum := (Sem.Enum "address_space") -}}
 
-#include "src/tint/ast/storage_class.h"
+#include "src/tint/ast/address_space.h"
 
 #include <array>
 

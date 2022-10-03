@@ -340,10 +340,10 @@ func validate(fqn sem.FullyQualifiedName, uses *sem.StageUses) bool {
 			return false // Abstract types are not typeable
 		}
 	case "ptr":
-		// https://gpuweb.github.io/gpuweb/wgsl/#storage-class
+		// https://gpuweb.github.io/gpuweb/wgsl/#address-space
 		access := fqn.TemplateArguments[2].(sem.FullyQualifiedName).Target.(*sem.EnumEntry).Name
-		storageClass := fqn.TemplateArguments[0].(sem.FullyQualifiedName).Target.(*sem.EnumEntry).Name
-		switch storageClass {
+		addressSpace := fqn.TemplateArguments[0].(sem.FullyQualifiedName).Target.(*sem.EnumEntry).Name
+		switch addressSpace {
 		case "function", "private":
 			if access != "read_write" {
 				return false

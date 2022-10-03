@@ -141,7 +141,7 @@ TODO(dsinclair): Nested if's
 ## SPIR-V
 TODO(dsinclair): Nested if's
 
-# Storage classes
+# Address spaces
 TODO(dsinclair): do ...
 
 # Storage buffers
@@ -155,7 +155,7 @@ TODO(dsinclair): Rewrite with bools
 ## MSL
 TODO(dsinclair): Rewrite with bools
 
-# Input / Output storage class
+# Input / Output address spaces
 ## HLSL
 TODO(dsinclair): Structs and params
 

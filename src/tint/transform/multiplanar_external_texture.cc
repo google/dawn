@@ -133,7 +133,7 @@ struct MultiplanarExternalTexture::State {
                         b.Group(AInt(bps.plane_1.group)), b.Binding(AInt(bps.plane_1.binding)));
             syms.params = b.Symbols().New("ext_tex_params");
             b.GlobalVar(syms.params, b.ty.type_name("ExternalTextureParams"),
-                        ast::StorageClass::kUniform, b.Group(AInt(bps.params.group)),
+                        ast::AddressSpace::kUniform, b.Group(AInt(bps.params.group)),
                         b.Binding(AInt(bps.params.binding)));
 
             // Replace the original texture_external binding with a texture_2d<f32> binding.

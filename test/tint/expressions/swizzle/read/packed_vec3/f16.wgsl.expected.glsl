@@ -1,6 +1,6 @@
 SKIP: FAILED
 
-expressions/swizzle/read/packed_vec3/f16.wgsl:3:8 error: using f16 types in 'uniform' storage class is not implemented yet
+expressions/swizzle/read/packed_vec3/f16.wgsl:3:8 error: using f16 types in 'uniform' address space is not implemented yet
     v: vec3<f16>,
        ^^^^^^^^^
 

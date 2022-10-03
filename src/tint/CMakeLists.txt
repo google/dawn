@@ -182,8 +182,8 @@ set(TINT_LIB_SRCS
   ast/statement.h
   ast/static_assert.cc
   ast/static_assert.h
-  ast/storage_class.cc
-  ast/storage_class.h
+  ast/address_space.cc
+  ast/address_space.h
   ast/storage_texture.cc
   ast/storage_texture.h
   ast/stride_attribute.cc
@@ -747,7 +747,7 @@ if(TINT_BUILD_TESTS)
     ast/sampler_test.cc
     ast/stage_attribute_test.cc
     ast/static_assert_test.cc
-    ast/storage_class_test.cc
+    ast/address_space_test.cc
     ast/storage_texture_test.cc
     ast/stride_attribute_test.cc
     ast/struct_member_align_attribute_test.cc
@@ -814,11 +814,11 @@ if(TINT_BUILD_TESTS)
     resolver/side_effects_test.cc
     resolver/static_assert_test.cc
     resolver/source_variable_test.cc
-    resolver/storage_class_layout_validation_test.cc
-    resolver/storage_class_validation_test.cc
+    resolver/address_space_layout_validation_test.cc
+    resolver/address_space_validation_test.cc
     resolver/struct_layout_test.cc
     resolver/struct_pipeline_stage_use_test.cc
-    resolver/struct_storage_class_use_test.cc
+    resolver/struct_address_space_use_test.cc
     resolver/type_constructor_validation_test.cc
     resolver/type_validation_test.cc
     resolver/validation_test.cc
@@ -992,7 +992,7 @@ if(TINT_BUILD_TESTS)
       reader/wgsl/parser_impl_singular_expression_test.cc
       reader/wgsl/parser_impl_statement_test.cc
       reader/wgsl/parser_impl_statements_test.cc
-      reader/wgsl/parser_impl_storage_class_test.cc
+      reader/wgsl/parser_impl_address_space_test.cc
       reader/wgsl/parser_impl_storage_texture_test.cc
       reader/wgsl/parser_impl_struct_body_decl_test.cc
       reader/wgsl/parser_impl_struct_decl_test.cc
@@ -1300,7 +1300,7 @@ if(TINT_BUILD_BENCHMARKS)
   set(TINT_BENCHMARK_SRC
     "castable_bench.cc"
     "ast/extension_bench.cc"
-    "ast/storage_class_bench.cc"
+    "ast/address_space_bench.cc"
     "ast/texel_format_bench.cc"
     "bench/benchmark.cc"
     "reader/wgsl/parser_bench.cc"

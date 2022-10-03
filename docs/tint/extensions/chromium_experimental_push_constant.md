@@ -12,7 +12,7 @@ Specification work in the WebGPU group hasn't started.
 
 ## Pseudo-specification
 
-This extension adds a new `push_constant` storage class that's only allowed on global variable declarations.
+This extension adds a new `push_constant` address space that's only allowed on global variable declarations.
 Push constant variables must only contain 32bit data types (or aggregates of such types).
 Push constant variable declarations must not have an initializer.
 It is an error for a entry point to statically use more than one `push_constant` variable.

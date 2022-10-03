@@ -29,9 +29,9 @@ enum class DisabledValidation {
     /// When applied to a module-scoped variable, the validator will not complain if two resource
     /// variables have the same binding points.
     kBindingPointCollision,
-    /// When applied to a variable, the validator will not complain about the declared storage
-    /// class.
-    kIgnoreStorageClass,
+    /// When applied to a variable, the validator will not complain about the declared address
+    /// space.
+    kIgnoreAddressSpace,
     /// When applied to an entry-point function parameter, the validator will not check for entry IO
     /// attributes.
     kEntryPointParameter,

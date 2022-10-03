@@ -69,10 +69,10 @@ TEST_F(ResolverTypeConstructorValidationTest, InferTypeTest_Simple) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     ASSERT_TRUE(TypeOf(a_ident)->Is<sem::Reference>());
     EXPECT_TRUE(TypeOf(a_ident)->As<sem::Reference>()->StoreType()->Is<sem::I32>());
-    EXPECT_EQ(TypeOf(a_ident)->As<sem::Reference>()->StorageClass(), ast::StorageClass::kFunction);
+    EXPECT_EQ(TypeOf(a_ident)->As<sem::Reference>()->AddressSpace(), ast::AddressSpace::kFunction);
     ASSERT_TRUE(TypeOf(b_ident)->Is<sem::Reference>());
     EXPECT_TRUE(TypeOf(b_ident)->As<sem::Reference>()->StoreType()->Is<sem::I32>());
-    EXPECT_EQ(TypeOf(b_ident)->As<sem::Reference>()->StorageClass(), ast::StorageClass::kFunction);
+    EXPECT_EQ(TypeOf(b_ident)->As<sem::Reference>()->AddressSpace(), ast::AddressSpace::kFunction);
 }
 
 using InferTypeTest_FromConstructorExpression = ResolverTestWithParam<Params>;
@@ -96,7 +96,7 @@ TEST_P(InferTypeTest_FromConstructorExpression, All) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* got = TypeOf(a_ident);
     auto* expected = create<sem::Reference>(params.create_rhs_sem_type(*this),
-                                            ast::StorageClass::kFunction, ast::Access::kReadWrite);
+                                            ast::AddressSpace::kFunction, ast::Access::kReadWrite);
     ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                              << "expected: " << FriendlyName(expected) << "\n";
 }
@@ -150,7 +150,7 @@ TEST_P(InferTypeTest_FromArithmeticExpression, All) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* got = TypeOf(a_ident);
     auto* expected = create<sem::Reference>(params.create_rhs_sem_type(*this),
-                                            ast::StorageClass::kFunction, ast::Access::kReadWrite);
+                                            ast::AddressSpace::kFunction, ast::Access::kReadWrite);
     ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                              << "expected: " << FriendlyName(expected) << "\n";
 }
@@ -198,7 +198,7 @@ TEST_P(InferTypeTest_FromCallExpression, All) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     auto* got = TypeOf(a_ident);
     auto* expected = create<sem::Reference>(params.create_rhs_sem_type(*this),
-                                            ast::StorageClass::kFunction, ast::Access::kReadWrite);
+                                            ast::AddressSpace::kFunction, ast::Access::kReadWrite);
     ASSERT_EQ(got, expected) << "got:      " << FriendlyName(got) << "\n"
                              << "expected: " << FriendlyName(expected) << "\n";
 }
@@ -1968,7 +1968,7 @@ TEST_F(ResolverTypeConstructorValidationTest, NestedVectorConstructors_Success) 
 
 TEST_F(ResolverTypeConstructorValidationTest, Vector_Alias_Argument_Error) {
     auto* alias = Alias("UnsignedInt", ty.u32());
-    GlobalVar("uint_var", ty.Of(alias), ast::StorageClass::kPrivate);
+    GlobalVar("uint_var", ty.Of(alias), ast::AddressSpace::kPrivate);
 
     auto* tc = vec2<f32>(Source{{12, 34}}, "uint_var");
     WrapInFunction(tc);
@@ -1980,8 +1980,8 @@ TEST_F(ResolverTypeConstructorValidationTest, Vector_Alias_Argument_Error) {
 TEST_F(ResolverTypeConstructorValidationTest, Vector_Alias_Argument_Success) {
     auto* f32_alias = Alias("Float32", ty.f32());
     auto* vec2_alias = Alias("VectorFloat2", ty.vec2<f32>());
-    GlobalVar("my_f32", ty.Of(f32_alias), ast::StorageClass::kPrivate);
-    GlobalVar("my_vec2", ty.Of(vec2_alias), ast::StorageClass::kPrivate);
+    GlobalVar("my_f32", ty.Of(f32_alias), ast::AddressSpace::kPrivate);
+    GlobalVar("my_vec2", ty.Of(vec2_alias), ast::AddressSpace::kPrivate);
 
     auto* tc = vec3<f32>("my_vec2", "my_f32");
     WrapInFunction(tc);

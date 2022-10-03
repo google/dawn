@@ -40,4 +40,4 @@ fn main3() {
 fn main4() {
 }
 
-Failed to generate: error: unhandled storage class push_constant
+Failed to generate: error: unhandled address space push_constant

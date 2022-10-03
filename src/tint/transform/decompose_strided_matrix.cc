@@ -71,8 +71,8 @@ void GatherCustomStrideMatrixMembers(const Program* program, F&& callback) {
     for (auto* node : program->ASTNodes().Objects()) {
         if (auto* str = node->As<ast::Struct>()) {
             auto* str_ty = program->Sem().Get(str);
-            if (!str_ty->UsedAs(ast::StorageClass::kUniform) &&
-                !str_ty->UsedAs(ast::StorageClass::kStorage)) {
+            if (!str_ty->UsedAs(ast::AddressSpace::kUniform) &&
+                !str_ty->UsedAs(ast::AddressSpace::kStorage)) {
                 continue;
             }
             for (auto* member : str_ty->Members()) {

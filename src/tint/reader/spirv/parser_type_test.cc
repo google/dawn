@@ -28,8 +28,8 @@ TEST(SpvParserTypeTest, SameArgumentsGivesSamePointer) {
     EXPECT_EQ(ty.U32(), ty.U32());
     EXPECT_EQ(ty.F32(), ty.F32());
     EXPECT_EQ(ty.I32(), ty.I32());
-    EXPECT_EQ(ty.Pointer(ty.I32(), ast::StorageClass::kNone),
-              ty.Pointer(ty.I32(), ast::StorageClass::kNone));
+    EXPECT_EQ(ty.Pointer(ty.I32(), ast::AddressSpace::kNone),
+              ty.Pointer(ty.I32(), ast::AddressSpace::kNone));
     EXPECT_EQ(ty.Vector(ty.I32(), 3), ty.Vector(ty.I32(), 3));
     EXPECT_EQ(ty.Matrix(ty.I32(), 3, 2), ty.Matrix(ty.I32(), 3, 2));
     EXPECT_EQ(ty.Array(ty.I32(), 3, 2), ty.Array(ty.I32(), 3, 2));
@@ -53,10 +53,10 @@ TEST(SpvParserTypeTest, DifferentArgumentsGivesDifferentPointer) {
     Symbol sym_b(Symbol(2, {}));
 
     TypeManager ty;
-    EXPECT_NE(ty.Pointer(ty.I32(), ast::StorageClass::kNone),
-              ty.Pointer(ty.U32(), ast::StorageClass::kNone));
-    EXPECT_NE(ty.Pointer(ty.I32(), ast::StorageClass::kNone),
-              ty.Pointer(ty.I32(), ast::StorageClass::kIn));
+    EXPECT_NE(ty.Pointer(ty.I32(), ast::AddressSpace::kNone),
+              ty.Pointer(ty.U32(), ast::AddressSpace::kNone));
+    EXPECT_NE(ty.Pointer(ty.I32(), ast::AddressSpace::kNone),
+              ty.Pointer(ty.I32(), ast::AddressSpace::kIn));
     EXPECT_NE(ty.Vector(ty.I32(), 3), ty.Vector(ty.U32(), 3));
     EXPECT_NE(ty.Vector(ty.I32(), 3), ty.Vector(ty.I32(), 2));
     EXPECT_NE(ty.Matrix(ty.I32(), 3, 2), ty.Matrix(ty.U32(), 3, 2));

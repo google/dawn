@@ -22,7 +22,7 @@
 #include "tint/override_id.h"
 
 #include "src/tint/ast/access.h"
-#include "src/tint/ast/storage_class.h"
+#include "src/tint/ast/address_space.h"
 #include "src/tint/sem/binding_point.h"
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/parameter_usage.h"
@@ -49,13 +49,13 @@ class Variable : public Castable<Variable, Node> {
     /// @param declaration the AST declaration node
     /// @param type the variable type
     /// @param stage the evaluation stage for an expression of this variable type
-    /// @param storage_class the variable storage class
+    /// @param address_space the variable address space
     /// @param access the variable access control type
     /// @param constant_value the constant value for the variable. May be null
     Variable(const ast::Variable* declaration,
              const sem::Type* type,
              EvaluationStage stage,
-             ast::StorageClass storage_class,
+             ast::AddressSpace address_space,
              ast::Access access,
              const Constant* constant_value);
 
@@ -71,8 +71,8 @@ class Variable : public Castable<Variable, Node> {
     /// @returns the evaluation stage for an expression of this variable type
     EvaluationStage Stage() const { return stage_; }
 
-    /// @returns the storage class for the variable
-    ast::StorageClass StorageClass() const { return storage_class_; }
+    /// @returns the address space for the variable
+    ast::AddressSpace AddressSpace() const { return address_space_; }
 
     /// @returns the access control for the variable
     ast::Access Access() const { return access_; }
@@ -98,7 +98,7 @@ class Variable : public Castable<Variable, Node> {
     const ast::Variable* const declaration_;
     const sem::Type* const type_;
     const EvaluationStage stage_;
-    const ast::StorageClass storage_class_;
+    const ast::AddressSpace address_space_;
     const ast::Access access_;
     const Constant* constant_value_;
     const Expression* constructor_ = nullptr;
@@ -112,14 +112,14 @@ class LocalVariable final : public Castable<LocalVariable, Variable> {
     /// @param declaration the AST declaration node
     /// @param type the variable type
     /// @param stage the evaluation stage for an expression of this variable type
-    /// @param storage_class the variable storage class
+    /// @param address_space the variable address space
     /// @param access the variable access control type
     /// @param statement the statement that declared this local variable
     /// @param constant_value the constant value for the variable. May be null
     LocalVariable(const ast::Variable* declaration,
                   const sem::Type* type,
                   EvaluationStage stage,
-                  ast::StorageClass storage_class,
+                  ast::AddressSpace address_space,
                   ast::Access access,
                   const sem::Statement* statement,
                   const Constant* constant_value);
@@ -149,7 +149,7 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
     /// @param declaration the AST declaration node
     /// @param type the variable type
     /// @param stage the evaluation stage for an expression of this variable type
-    /// @param storage_class the variable storage class
+    /// @param address_space the variable address space
     /// @param access the variable access control type
     /// @param constant_value the constant value for the variable. May be null
     /// @param binding_point the optional resource binding point of the variable
@@ -160,7 +160,7 @@ class GlobalVariable final : public Castable<GlobalVariable, Variable> {
     GlobalVariable(const ast::Variable* declaration,
                    const sem::Type* type,
                    EvaluationStage stage,
-                   ast::StorageClass storage_class,
+                   ast::AddressSpace address_space,
                    ast::Access access,
                    const Constant* constant_value,
                    sem::BindingPoint binding_point = {},
@@ -195,7 +195,7 @@ class Parameter final : public Castable<Parameter, Variable> {
     /// @param declaration the AST declaration node
     /// @param index the index of the parmeter in the function
     /// @param type the variable type
-    /// @param storage_class the variable storage class
+    /// @param address_space the variable address space
     /// @param access the variable access control type
     /// @param usage the semantic usage for the parameter
     /// @param binding_point the optional resource binding point of the parameter
@@ -203,7 +203,7 @@ class Parameter final : public Castable<Parameter, Variable> {
     Parameter(const ast::Parameter* declaration,
               uint32_t index,
               const sem::Type* type,
-              ast::StorageClass storage_class,
+              ast::AddressSpace address_space,
               ast::Access access,
               const ParameterUsage usage = ParameterUsage::kNone,
               sem::BindingPoint binding_point = {},

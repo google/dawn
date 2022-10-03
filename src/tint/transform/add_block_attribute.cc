@@ -29,7 +29,7 @@ namespace tint::transform {
 
 namespace {
 
-bool IsUsedAsNonBuffer(const std::unordered_set<tint::ast::StorageClass>& uses) {
+bool IsUsedAsNonBuffer(const std::unordered_set<tint::ast::AddressSpace>& uses) {
     for (auto use : uses) {
         if (!ast::IsHostShareable(use)) {
             return true;
@@ -73,8 +73,8 @@ void AddBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
     // Process global 'var' declarations that are buffers.
     for (auto* global : ctx.src->AST().GlobalVariables()) {
         auto* var = sem.Get(global);
-        if (!ast::IsHostShareable(var->StorageClass())) {
-            // Not declared in a host-sharable storage class
+        if (!ast::IsHostShareable(var->AddressSpace())) {
+            // Not declared in a host-sharable address space
             continue;
         }
 
@@ -83,7 +83,7 @@ void AddBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
         bool needs_wrapping =
             !str ||                                       // Type is not a structure
             nested_structs.Contains(str) ||               // Structure is nested by another type
-            IsUsedAsNonBuffer(str->StorageClassUsage());  // Structure is used as a non-buffer usage
+            IsUsedAsNonBuffer(str->AddressSpaceUsage());  // Structure is used as a non-buffer usage
 
         if (needs_wrapping) {
             const char* kMemberName = "inner";

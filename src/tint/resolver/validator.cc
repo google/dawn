@@ -322,7 +322,7 @@ bool Validator::Materialize(const sem::Type* to,
 }
 
 bool Validator::VariableInitializer(const ast::Variable* v,
-                                    ast::StorageClass storage_class,
+                                    ast::AddressSpace address_space,
                                     const sem::Type* storage_ty,
                                     const sem::Expression* initializer) const {
     auto* initializer_ty = initializer->Type();
@@ -338,17 +338,17 @@ bool Validator::VariableInitializer(const ast::Variable* v,
     }
 
     if (v->Is<ast::Var>()) {
-        switch (storage_class) {
-            case ast::StorageClass::kPrivate:
-            case ast::StorageClass::kFunction:
+        switch (address_space) {
+            case ast::AddressSpace::kPrivate:
+            case ast::AddressSpace::kFunction:
                 break;  // Allowed an initializer
             default:
                 // https://gpuweb.github.io/gpuweb/wgsl/#var-and-let
                 // Optionally has an initializer expression, if the variable is in the
-                // private or function storage classes.
-                AddError("var of storage class '" + utils::ToString(storage_class) +
+                // private or function address spacees.
+                AddError("var of address space '" + utils::ToString(address_space) +
                              "' cannot have an initializer. var initializers are only "
-                             "supported for the storage classes "
+                             "supported for the address spacees "
                              "'private' and 'function'",
                          v->source);
                 return false;
@@ -358,18 +358,19 @@ bool Validator::VariableInitializer(const ast::Variable* v,
     return true;
 }
 
-bool Validator::StorageClassLayout(const sem::Type* store_ty,
-                                   ast::StorageClass sc,
+bool Validator::AddressSpaceLayout(const sem::Type* store_ty,
+                                   ast::AddressSpace address_space,
                                    Source source,
                                    ValidTypeStorageLayouts& layouts) const {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class-layout-constraints
 
-    auto is_uniform_struct_or_array = [sc](const sem::Type* ty) {
-        return sc == ast::StorageClass::kUniform && ty->IsAnyOf<sem::Array, sem::Struct>();
+    auto is_uniform_struct_or_array = [address_space](const sem::Type* ty) {
+        return address_space == ast::AddressSpace::kUniform &&
+               ty->IsAnyOf<sem::Array, sem::Struct>();
     };
 
-    auto is_uniform_struct = [sc](const sem::Type* ty) {
-        return sc == ast::StorageClass::kUniform && ty->Is<sem::Struct>();
+    auto is_uniform_struct = [address_space](const sem::Type* ty) {
+        return address_space == ast::AddressSpace::kUniform && ty->Is<sem::Struct>();
     };
 
     auto required_alignment_of = [&](const sem::Type* ty) {
@@ -385,22 +386,22 @@ bool Validator::StorageClassLayout(const sem::Type* store_ty,
         return symbols_.NameFor(sm->Declaration()->symbol);
     };
 
-    // Cache result of type + storage class pair.
-    if (!layouts.emplace(store_ty, sc).second) {
+    // Cache result of type + address space pair.
+    if (!layouts.emplace(store_ty, address_space).second) {
         return true;
     }
 
-    if (!ast::IsHostShareable(sc)) {
+    if (!ast::IsHostShareable(address_space)) {
         return true;
     }
 
-    // Temporally forbid using f16 types in "uniform" and "storage" storage class.
+    // Temporally forbid using f16 types in "uniform" and "storage" address space.
     // TODO(tint:1473, tint:1502): Remove this error after f16 is supported in "uniform" and
-    // "storage" storage class but keep for "push_constant" storage class.
+    // "storage" address space but keep for "push_constant" address space.
     if (Is<sem::F16>(sem::Type::DeepestElementOf(store_ty))) {
-        AddError(
-            "using f16 types in '" + utils::ToString(sc) + "' storage class is not implemented yet",
-            source);
+        AddError("using f16 types in '" + utils::ToString(address_space) +
+                     "' address space is not implemented yet",
+                 source);
         return false;
     }
 
@@ -410,7 +411,8 @@ bool Validator::StorageClassLayout(const sem::Type* store_ty,
             uint32_t required_align = required_alignment_of(m->Type());
 
             // Recurse into the member type.
-            if (!StorageClassLayout(m->Type(), sc, m->Declaration()->type->source, layouts)) {
+            if (!AddressSpaceLayout(m->Type(), address_space, m->Declaration()->type->source,
+                                    layouts)) {
                 AddNote("see layout of struct:\n" + str->Layout(symbols_),
                         str->Declaration()->source);
                 return false;
@@ -420,7 +422,7 @@ bool Validator::StorageClassLayout(const sem::Type* store_ty,
             if (m->Offset() % required_align != 0) {
                 AddError("the offset of a struct member of type '" +
                              m->Type()->UnwrapRef()->FriendlyName(symbols_) +
-                             "' in storage class '" + utils::ToString(sc) +
+                             "' in address space '" + utils::ToString(address_space) +
                              "' must be a multiple of " + std::to_string(required_align) +
                              " bytes, but '" + member_name_of(m) + "' is currently at offset " +
                              std::to_string(m->Offset()) + ". Consider setting @align(" +
@@ -474,11 +476,11 @@ bool Validator::StorageClassLayout(const sem::Type* store_ty,
         // TODO(crbug.com/tint/1388): Ideally we'd pass the source for nested
         // element type here, but we can't easily get that from the semantic node.
         // We should consider recursing through the AST type nodes instead.
-        if (!StorageClassLayout(arr->ElemType(), sc, source, layouts)) {
+        if (!AddressSpaceLayout(arr->ElemType(), address_space, source, layouts)) {
             return false;
         }
 
-        if (sc == ast::StorageClass::kUniform) {
+        if (address_space == ast::AddressSpace::kUniform) {
             // We already validated that this array member is itself aligned to 16
             // bytes above, so we only need to validate that stride is a multiple
             // of 16 bytes.
@@ -516,22 +518,22 @@ bool Validator::StorageClassLayout(const sem::Type* store_ty,
     return true;
 }
 
-bool Validator::StorageClassLayout(const sem::Variable* var,
+bool Validator::AddressSpaceLayout(const sem::Variable* var,
                                    const ast::Extensions& enabled_extensions,
                                    ValidTypeStorageLayouts& layouts) const {
-    if (var->StorageClass() == ast::StorageClass::kPushConstant &&
+    if (var->AddressSpace() == ast::AddressSpace::kPushConstant &&
         !enabled_extensions.Contains(ast::Extension::kChromiumExperimentalPushConstant) &&
         IsValidationEnabled(var->Declaration()->attributes,
-                            ast::DisabledValidation::kIgnoreStorageClass)) {
+                            ast::DisabledValidation::kIgnoreAddressSpace)) {
         AddError(
-            "use of variable storage class 'push_constant' requires enabling extension "
+            "use of variable address space 'push_constant' requires enabling extension "
             "'chromium_experimental_push_constant'",
             var->Declaration()->source);
         return false;
     }
 
     if (auto* str = var->Type()->UnwrapRef()->As<sem::Struct>()) {
-        if (!StorageClassLayout(str, var->StorageClass(), str->Declaration()->source, layouts)) {
+        if (!AddressSpaceLayout(str, var->AddressSpace(), str->Declaration()->source, layouts)) {
             AddNote("see declaration of variable", var->Declaration()->source);
             return false;
         }
@@ -540,7 +542,7 @@ bool Validator::StorageClassLayout(const sem::Variable* var,
         if (var->Declaration()->type) {
             source = var->Declaration()->type->source;
         }
-        if (!StorageClassLayout(var->Type()->UnwrapRef(), var->StorageClass(), source, layouts)) {
+        if (!AddressSpaceLayout(var->Type()->UnwrapRef(), var->AddressSpace(), source, layouts)) {
             return false;
         }
     }
@@ -559,7 +561,7 @@ bool Validator::LocalVariable(const sem::Variable* local) const {
         decl,  //
         [&](const ast::Var* var) {
             if (IsValidationEnabled(var->attributes,
-                                    ast::DisabledValidation::kIgnoreStorageClass)) {
+                                    ast::DisabledValidation::kIgnoreAddressSpace)) {
                 if (!local->Type()->UnwrapRef()->IsConstructible()) {
                     AddError("function-scope 'var' must have a constructible type",
                              var->type ? var->type->source : var->source);
@@ -583,7 +585,7 @@ bool Validator::GlobalVariable(
     const std::unordered_map<OverrideId, const sem::Variable*>& override_ids,
     const std::unordered_map<const sem::Type*, const Source&>& atomic_composite_info) const {
     auto* decl = global->Declaration();
-    if (global->StorageClass() != ast::StorageClass::kWorkgroup &&
+    if (global->AddressSpace() != ast::AddressSpace::kWorkgroup &&
         IsArrayWithOverrideCount(global->Type())) {
         RaiseArrayWithOverrideCountError(decl->type ? decl->type->source
                                                     : decl->constructor->source);
@@ -599,8 +601,8 @@ bool Validator::GlobalVariable(
                 return false;
             }
 
-            if (global->StorageClass() == ast::StorageClass::kNone) {
-                AddError("module-scope 'var' declaration must have a storage class", decl->source);
+            if (global->AddressSpace() == ast::AddressSpace::kNone) {
+                AddError("module-scope 'var' declaration must have a address space", decl->source);
                 return false;
             }
 
@@ -608,11 +610,11 @@ bool Validator::GlobalVariable(
                 bool is_shader_io_attribute =
                     attr->IsAnyOf<ast::BuiltinAttribute, ast::InterpolateAttribute,
                                   ast::InvariantAttribute, ast::LocationAttribute>();
-                bool has_io_storage_class = global->StorageClass() == ast::StorageClass::kIn ||
-                                            global->StorageClass() == ast::StorageClass::kOut;
+                bool has_io_address_space = global->AddressSpace() == ast::AddressSpace::kIn ||
+                                            global->AddressSpace() == ast::AddressSpace::kOut;
                 if (!attr->IsAnyOf<ast::BindingAttribute, ast::GroupAttribute,
                                    ast::InternalAttribute>() &&
-                    (!is_shader_io_attribute || !has_io_storage_class)) {
+                    (!is_shader_io_attribute || !has_io_address_space)) {
                     AddError("attribute '" + attr->Name() + "' is not valid for module-scope 'var'",
                              attr->source);
                     return false;
@@ -621,9 +623,9 @@ bool Validator::GlobalVariable(
 
             // https://gpuweb.github.io/gpuweb/wgsl/#variable-declaration
             // The access mode always has a default, and except for variables in the
-            // storage storage class, must not be written.
+            // storage address space, must not be written.
             if (var->declared_access != ast::Access::kUndefined) {
-                if (global->StorageClass() == ast::StorageClass::kStorage) {
+                if (global->AddressSpace() == ast::AddressSpace::kStorage) {
                     // The access mode for the storage address space can only be 'read' or
                     // 'read_write'.
                     if (var->declared_access == ast::Access::kWrite) {
@@ -632,7 +634,7 @@ bool Validator::GlobalVariable(
                         return false;
                     }
                 } else {
-                    AddError("only variables in <storage> storage class may declare an access mode",
+                    AddError("only variables in <storage> address space may declare an access mode",
                              decl->source);
                     return false;
                 }
@@ -672,15 +674,15 @@ bool Validator::GlobalVariable(
         return false;
     }
 
-    if (global->StorageClass() == ast::StorageClass::kFunction) {
-        AddError("module-scope 'var' must not use storage class 'function'", decl->source);
+    if (global->AddressSpace() == ast::AddressSpace::kFunction) {
+        AddError("module-scope 'var' must not use address space 'function'", decl->source);
         return false;
     }
 
-    switch (global->StorageClass()) {
-        case ast::StorageClass::kUniform:
-        case ast::StorageClass::kStorage:
-        case ast::StorageClass::kHandle: {
+    switch (global->AddressSpace()) {
+        case ast::AddressSpace::kUniform:
+        case ast::AddressSpace::kStorage:
+        case ast::AddressSpace::kHandle: {
             // https://gpuweb.github.io/gpuweb/wgsl/#resource-interface
             // Each resource variable must be declared with both group and binding
             // attributes.
@@ -712,29 +714,32 @@ bool Validator::GlobalVariable(
 bool Validator::AtomicVariable(
     const sem::Variable* var,
     std::unordered_map<const sem::Type*, const Source&> atomic_composite_info) const {
-    auto sc = var->StorageClass();
+    auto address_space = var->AddressSpace();
     auto* decl = var->Declaration();
     auto access = var->Access();
     auto* type = var->Type()->UnwrapRef();
     auto source = decl->type ? decl->type->source : decl->source;
 
     if (type->Is<sem::Atomic>()) {
-        if (sc != ast::StorageClass::kWorkgroup && sc != ast::StorageClass::kStorage) {
-            AddError("atomic variables must have <storage> or <workgroup> storage class", source);
+        if (address_space != ast::AddressSpace::kWorkgroup &&
+            address_space != ast::AddressSpace::kStorage) {
+            AddError("atomic variables must have <storage> or <workgroup> address space", source);
             return false;
         }
     } else if (type->IsAnyOf<sem::Struct, sem::Array>()) {
         auto found = atomic_composite_info.find(type);
         if (found != atomic_composite_info.end()) {
-            if (sc != ast::StorageClass::kStorage && sc != ast::StorageClass::kWorkgroup) {
-                AddError("atomic variables must have <storage> or <workgroup> storage class",
+            if (address_space != ast::AddressSpace::kStorage &&
+                address_space != ast::AddressSpace::kWorkgroup) {
+                AddError("atomic variables must have <storage> or <workgroup> address space",
                          source);
                 AddNote("atomic sub-type of '" + sem_.TypeNameOf(type) + "' is declared here",
                         found->second);
                 return false;
-            } else if (sc == ast::StorageClass::kStorage && access != ast::Access::kReadWrite) {
+            } else if (address_space == ast::AddressSpace::kStorage &&
+                       access != ast::Access::kReadWrite) {
                 AddError(
-                    "atomic variables in <storage> storage class must have read_write "
+                    "atomic variables in <storage> address space must have read_write "
                     "access mode",
                     source);
                 AddNote("atomic sub-type of '" + sem_.TypeNameOf(type) + "' is declared here",
@@ -756,21 +761,21 @@ bool Validator::Var(const sem::Variable* v) const {
         return false;
     }
 
-    if (storage_ty->is_handle() && var->declared_storage_class != ast::StorageClass::kNone) {
+    if (storage_ty->is_handle() && var->declared_address_space != ast::AddressSpace::kNone) {
         // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
         // If the store type is a texture type or a sampler type, then the
-        // variable declaration must not have a storage class attribute. The
-        // storage class will always be handle.
+        // variable declaration must not have a address space attribute. The
+        // address space will always be handle.
         AddError(
-            "variables of type '" + sem_.TypeNameOf(storage_ty) + "' must not have a storage class",
+            "variables of type '" + sem_.TypeNameOf(storage_ty) + "' must not have a address space",
             var->source);
         return false;
     }
 
-    if (IsValidationEnabled(var->attributes, ast::DisabledValidation::kIgnoreStorageClass) &&
-        (var->declared_storage_class == ast::StorageClass::kIn ||
-         var->declared_storage_class == ast::StorageClass::kOut)) {
-        AddError("invalid use of input/output storage class", var->source);
+    if (IsValidationEnabled(var->attributes, ast::DisabledValidation::kIgnoreAddressSpace) &&
+        (var->declared_address_space == ast::AddressSpace::kIn ||
+         var->declared_address_space == ast::AddressSpace::kOut)) {
+        AddError("invalid use of input/output address space", var->source);
         return false;
     }
     return true;
@@ -873,12 +878,14 @@ bool Validator::Parameter(const ast::Function* func, const sem::Variable* var) c
     }
 
     if (auto* ref = var->Type()->As<sem::Pointer>()) {
-        auto sc = ref->StorageClass();
-        if (!(sc == ast::StorageClass::kFunction || sc == ast::StorageClass::kPrivate ||
-              sc == ast::StorageClass::kWorkgroup) &&
-            IsValidationEnabled(decl->attributes, ast::DisabledValidation::kIgnoreStorageClass)) {
+        auto address_space = ref->AddressSpace();
+        if (!(address_space == ast::AddressSpace::kFunction ||
+              address_space == ast::AddressSpace::kPrivate ||
+              address_space == ast::AddressSpace::kWorkgroup) &&
+            IsValidationEnabled(decl->attributes, ast::DisabledValidation::kIgnoreAddressSpace)) {
             std::stringstream ss;
-            ss << "function parameter of pointer type cannot be in '" << sc << "' storage class";
+            ss << "function parameter of pointer type cannot be in '" << address_space
+               << "' address space";
             AddError(ss.str(), decl->source);
             return false;
         }
@@ -1954,7 +1961,7 @@ bool Validator::PipelineStages(const std::vector<sem::Function*>& entry_points) 
         auto stage = entry_point->Declaration()->PipelineStage();
         if (stage != ast::PipelineStage::kCompute) {
             for (auto* var : func->DirectlyReferencedGlobals()) {
-                if (var->StorageClass() == ast::StorageClass::kWorkgroup) {
+                if (var->AddressSpace() == ast::AddressSpace::kWorkgroup) {
                     std::stringstream stage_name;
                     stage_name << stage;
                     for (auto* user : var->Users()) {
@@ -2042,7 +2049,7 @@ bool Validator::PushConstants(const std::vector<sem::Function*>& entry_points) c
 
         auto check_push_constant = [&](const sem::Function* func, const sem::Function* ep) {
             for (auto* var : func->DirectlyReferencedGlobals()) {
-                if (var->StorageClass() != ast::StorageClass::kPushConstant ||
+                if (var->AddressSpace() != ast::AddressSpace::kPushConstant ||
                     var == push_constant_var) {
                     continue;
                 }

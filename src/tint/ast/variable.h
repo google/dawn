@@ -19,11 +19,11 @@
 #include <vector>
 
 #include "src/tint/ast/access.h"
+#include "src/tint/ast/address_space.h"
 #include "src/tint/ast/attribute.h"
 #include "src/tint/ast/binding_attribute.h"
 #include "src/tint/ast/expression.h"
 #include "src/tint/ast/group_attribute.h"
-#include "src/tint/ast/storage_class.h"
 
 // Forward declarations
 namespace tint::ast {

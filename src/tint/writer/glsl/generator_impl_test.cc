@@ -60,9 +60,9 @@ TEST_F(GlslGeneratorImplTest, GenerateSampleIndexES) {
     GlobalVar("gl_SampleID", ty.i32(),
               utils::Vector{
                   Builtin(ast::BuiltinValue::kSampleIndex),
-                  Disable(ast::DisabledValidation::kIgnoreStorageClass),
+                  Disable(ast::DisabledValidation::kIgnoreAddressSpace),
               },
-              ast::StorageClass::kIn);
+              ast::AddressSpace::kIn);
     Func("my_func", utils::Empty, ty.i32(),
          utils::Vector{
              Return(Expr("gl_SampleID")),
@@ -85,9 +85,9 @@ TEST_F(GlslGeneratorImplTest, GenerateSampleIndexDesktop) {
     GlobalVar("gl_SampleID", ty.i32(),
               utils::Vector{
                   Builtin(ast::BuiltinValue::kSampleIndex),
-                  Disable(ast::DisabledValidation::kIgnoreStorageClass),
+                  Disable(ast::DisabledValidation::kIgnoreAddressSpace),
               },
-              ast::StorageClass::kIn);
+              ast::AddressSpace::kIn);
     Func("my_func", utils::Empty, ty.i32(),
          utils::Vector{
              Return(Expr("gl_SampleID")),

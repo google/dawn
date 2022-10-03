@@ -72,7 +72,7 @@ TEST_F(ParserImplTest, VariableDecl_MissingVar) {
     ASSERT_TRUE(t.IsIdentifier());
 }
 
-TEST_F(ParserImplTest, VariableDecl_WithStorageClass) {
+TEST_F(ParserImplTest, VariableDecl_WithAddressSpace) {
     auto p = parser("var<private> my_var : f32");
     auto v = p->variable_decl();
     EXPECT_TRUE(v.matched);
@@ -80,7 +80,7 @@ TEST_F(ParserImplTest, VariableDecl_WithStorageClass) {
     EXPECT_FALSE(p->has_error());
     EXPECT_EQ(v->name, "my_var");
     EXPECT_TRUE(v->type->Is<ast::F32>());
-    EXPECT_EQ(v->storage_class, ast::StorageClass::kPrivate);
+    EXPECT_EQ(v->address_space, ast::AddressSpace::kPrivate);
 
     EXPECT_EQ(v->source.range.begin.line, 1u);
     EXPECT_EQ(v->source.range.begin.column, 14u);
@@ -96,16 +96,16 @@ TEST_F(ParserImplTest, VariableDecl_WithPushConstant) {
     EXPECT_FALSE(p->has_error());
     EXPECT_EQ(v->name, "my_var");
     EXPECT_TRUE(v->type->Is<ast::F32>());
-    EXPECT_EQ(v->storage_class, ast::StorageClass::kPushConstant);
+    EXPECT_EQ(v->address_space, ast::AddressSpace::kPushConstant);
 }
 
-TEST_F(ParserImplTest, VariableDecl_InvalidStorageClass) {
+TEST_F(ParserImplTest, VariableDecl_InvalidAddressSpace) {
     auto p = parser("var<unknown> my_var : f32");
     auto v = p->variable_decl();
     EXPECT_FALSE(v.matched);
     EXPECT_TRUE(v.errored);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:5: invalid storage class for variable declaration");
+    EXPECT_EQ(p->error(), "1:5: invalid address space for variable declaration");
 }
 
 }  // namespace

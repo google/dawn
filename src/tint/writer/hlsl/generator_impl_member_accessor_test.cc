@@ -90,7 +90,7 @@ class HlslGeneratorImplTest_MemberAccessorBase : public BASE {
         ProgramBuilder& b = *this;
         auto* s = b.Structure("Data", members);
 
-        b.GlobalVar("data", b.ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+        b.GlobalVar("data", b.ty.Of(s), ast::AddressSpace::kStorage, ast::Access::kReadWrite,
                     b.Group(1_a), b.Binding(0_a));
     }
 
@@ -111,7 +111,7 @@ using HlslGeneratorImplTest_MemberAccessorWithParam =
 
 TEST_F(HlslGeneratorImplTest_MemberAccessor, EmitExpression_MemberAccessor) {
     auto* s = Structure("Data", utils::Vector{Member("mem", ty.f32())});
-    GlobalVar("str", ty.Of(s), ast::StorageClass::kPrivate);
+    GlobalVar("str", ty.Of(s), ast::AddressSpace::kPrivate);
 
     auto* expr = MemberAccessor("str", "mem");
     WrapInFunction(Var("expr", ty.f32(), expr));

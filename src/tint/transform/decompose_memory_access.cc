@@ -97,17 +97,17 @@ struct OffsetBinOp : Offset {
 
 /// LoadStoreKey is the unordered map key to a load or store intrinsic.
 struct LoadStoreKey {
-    ast::StorageClass const storage_class;  // buffer storage class
+    ast::AddressSpace const address_space;  // buffer address space
     ast::Access const access;               // buffer access
     sem::Type const* buf_ty = nullptr;      // buffer type
     sem::Type const* el_ty = nullptr;       // element type
     bool operator==(const LoadStoreKey& rhs) const {
-        return storage_class == rhs.storage_class && access == rhs.access && buf_ty == rhs.buf_ty &&
+        return address_space == rhs.address_space && access == rhs.access && buf_ty == rhs.buf_ty &&
                el_ty == rhs.el_ty;
     }
     struct Hasher {
         inline std::size_t operator()(const LoadStoreKey& u) const {
-            return utils::Hash(u.storage_class, u.access, u.buf_ty, u.el_ty);
+            return utils::Hash(u.address_space, u.access, u.buf_ty, u.el_ty);
         }
     };
 };
@@ -195,7 +195,7 @@ bool IntrinsicDataTypeFor(const sem::Type* ty, DecomposeMemoryAccess::Intrinsic:
 /// @returns a DecomposeMemoryAccess::Intrinsic attribute that can be applied
 /// to a stub function to load the type `ty`.
 DecomposeMemoryAccess::Intrinsic* IntrinsicLoadFor(ProgramBuilder* builder,
-                                                   ast::StorageClass storage_class,
+                                                   ast::AddressSpace address_space,
                                                    const sem::Type* ty) {
     DecomposeMemoryAccess::Intrinsic::DataType type;
     if (!IntrinsicDataTypeFor(ty, type)) {
@@ -203,13 +203,13 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicLoadFor(ProgramBuilder* builder,
     }
     return builder->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
         builder->ID(), builder->AllocateNodeID(), DecomposeMemoryAccess::Intrinsic::Op::kLoad,
-        storage_class, type);
+        address_space, type);
 }
 
 /// @returns a DecomposeMemoryAccess::Intrinsic attribute that can be applied
 /// to a stub function to store the type `ty`.
 DecomposeMemoryAccess::Intrinsic* IntrinsicStoreFor(ProgramBuilder* builder,
-                                                    ast::StorageClass storage_class,
+                                                    ast::AddressSpace address_space,
                                                     const sem::Type* ty) {
     DecomposeMemoryAccess::Intrinsic::DataType type;
     if (!IntrinsicDataTypeFor(ty, type)) {
@@ -217,7 +217,7 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicStoreFor(ProgramBuilder* builder,
     }
     return builder->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
         builder->ID(), builder->AllocateNodeID(), DecomposeMemoryAccess::Intrinsic::Op::kStore,
-        storage_class, type);
+        address_space, type);
 }
 
 /// @returns a DecomposeMemoryAccess::Intrinsic attribute that can be applied
@@ -272,7 +272,7 @@ DecomposeMemoryAccess::Intrinsic* IntrinsicAtomicFor(ProgramBuilder* builder,
         return nullptr;
     }
     return builder->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
-        builder->ID(), builder->AllocateNodeID(), op, ast::StorageClass::kStorage, type);
+        builder->ID(), builder->AllocateNodeID(), op, ast::AddressSpace::kStorage, type);
 }
 
 /// BufferAccess describes a single storage or uniform buffer access
@@ -436,20 +436,20 @@ struct DecomposeMemoryAccess::State {
     Symbol LoadFunc(const sem::Type* buf_ty,
                     const sem::Type* el_ty,
                     const sem::VariableUser* var_user) {
-        auto storage_class = var_user->Variable()->StorageClass();
+        auto address_space = var_user->Variable()->AddressSpace();
         auto access = var_user->Variable()->Access();
         return utils::GetOrCreate(
-            load_funcs, LoadStoreKey{storage_class, access, buf_ty, el_ty}, [&] {
+            load_funcs, LoadStoreKey{address_space, access, buf_ty, el_ty}, [&] {
                 utils::Vector params{
                     b.Param("buffer",
-                            b.ty.pointer(CreateASTTypeFor(ctx, buf_ty), storage_class, access),
+                            b.ty.pointer(CreateASTTypeFor(ctx, buf_ty), address_space, access),
                             utils::Vector{b.Disable(ast::DisabledValidation::kFunctionParameter)}),
                     b.Param("offset", b.ty.u32()),
                 };
 
                 auto name = b.Sym();
 
-                if (auto* intrinsic = IntrinsicLoadFor(ctx.dst, storage_class, el_ty)) {
+                if (auto* intrinsic = IntrinsicLoadFor(ctx.dst, address_space, el_ty)) {
                     auto* el_ast_ty = CreateASTTypeFor(ctx, el_ty);
                     auto* func = b.create<ast::Function>(
                         name, params, el_ast_ty, nullptr,
@@ -532,13 +532,13 @@ struct DecomposeMemoryAccess::State {
     Symbol StoreFunc(const sem::Type* buf_ty,
                      const sem::Type* el_ty,
                      const sem::VariableUser* var_user) {
-        auto storage_class = var_user->Variable()->StorageClass();
+        auto address_space = var_user->Variable()->AddressSpace();
         auto access = var_user->Variable()->Access();
         return utils::GetOrCreate(
-            store_funcs, LoadStoreKey{storage_class, access, buf_ty, el_ty}, [&] {
+            store_funcs, LoadStoreKey{address_space, access, buf_ty, el_ty}, [&] {
                 utils::Vector params{
                     b.Param("buffer",
-                            b.ty.pointer(CreateASTTypeFor(ctx, buf_ty), storage_class, access),
+                            b.ty.pointer(CreateASTTypeFor(ctx, buf_ty), address_space, access),
                             utils::Vector{b.Disable(ast::DisabledValidation::kFunctionParameter)}),
                     b.Param("offset", b.ty.u32()),
                     b.Param("value", CreateASTTypeFor(ctx, el_ty)),
@@ -546,7 +546,7 @@ struct DecomposeMemoryAccess::State {
 
                 auto name = b.Sym();
 
-                if (auto* intrinsic = IntrinsicStoreFor(ctx.dst, storage_class, el_ty)) {
+                if (auto* intrinsic = IntrinsicStoreFor(ctx.dst, address_space, el_ty)) {
                     auto* func = b.create<ast::Function>(
                         name, params, b.ty.void_(), nullptr,
                         utils::Vector{
@@ -648,7 +648,7 @@ struct DecomposeMemoryAccess::State {
             // atomic. This is replaced with two parameters: the buffer and offset.
             utils::Vector params{
                 b.Param("buffer",
-                        b.ty.pointer(CreateASTTypeFor(ctx, buf_ty), ast::StorageClass::kStorage,
+                        b.ty.pointer(CreateASTTypeFor(ctx, buf_ty), ast::AddressSpace::kStorage,
                                      access),
                         utils::Vector{b.Disable(ast::DisabledValidation::kFunctionParameter)}),
                 b.Param("offset", b.ty.u32()),
@@ -706,9 +706,9 @@ struct DecomposeMemoryAccess::State {
 DecomposeMemoryAccess::Intrinsic::Intrinsic(ProgramID pid,
                                             ast::NodeID nid,
                                             Op o,
-                                            ast::StorageClass sc,
+                                            ast::AddressSpace sc,
                                             DataType ty)
-    : Base(pid, nid), op(o), storage_class(sc), type(ty) {}
+    : Base(pid, nid), op(o), address_space(sc), type(ty) {}
 DecomposeMemoryAccess::Intrinsic::~Intrinsic() = default;
 std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
     std::stringstream ss;
@@ -753,7 +753,7 @@ std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
             ss << "intrinsic_atomic_compare_exchange_weak_";
             break;
     }
-    ss << storage_class << "_";
+    ss << address_space << "_";
     switch (type) {
         case DataType::kU32:
             ss << "u32";
@@ -798,7 +798,7 @@ std::string DecomposeMemoryAccess::Intrinsic::InternalName() const {
 const DecomposeMemoryAccess::Intrinsic* DecomposeMemoryAccess::Intrinsic::Clone(
     CloneContext* ctx) const {
     return ctx->dst->ASTNodes().Create<DecomposeMemoryAccess::Intrinsic>(
-        ctx->dst->ID(), ctx->dst->AllocateNodeID(), op, storage_class, type);
+        ctx->dst->ID(), ctx->dst->AllocateNodeID(), op, address_space, type);
 }
 
 bool DecomposeMemoryAccess::Intrinsic::IsAtomic() const {
@@ -811,8 +811,8 @@ DecomposeMemoryAccess::~DecomposeMemoryAccess() = default;
 bool DecomposeMemoryAccess::ShouldRun(const Program* program, const DataMap&) const {
     for (auto* decl : program->AST().GlobalDeclarations()) {
         if (auto* var = program->Sem().Get<sem::Variable>(decl)) {
-            if (var->StorageClass() == ast::StorageClass::kStorage ||
-                var->StorageClass() == ast::StorageClass::kUniform) {
+            if (var->AddressSpace() == ast::AddressSpace::kStorage ||
+                var->AddressSpace() == ast::AddressSpace::kUniform) {
                 return true;
             }
         }
@@ -837,8 +837,8 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) con
         if (auto* ident = node->As<ast::IdentifierExpression>()) {
             // X
             if (auto* var = sem.Get<sem::VariableUser>(ident)) {
-                if (var->Variable()->StorageClass() == ast::StorageClass::kStorage ||
-                    var->Variable()->StorageClass() == ast::StorageClass::kUniform) {
+                if (var->Variable()->AddressSpace() == ast::AddressSpace::kStorage ||
+                    var->Variable()->AddressSpace() == ast::AddressSpace::kUniform) {
                     // Variable to a storage or uniform buffer
                     state.AddAccess(ident, {
                                                var,

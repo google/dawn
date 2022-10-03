@@ -42,7 +42,7 @@ ResultOrError<ComputePipelineBase*> GetOrCreateIndirectDispatchValidationPipelin
 
     // TODO(https://crbug.com/dawn/1108): Propagate validation feedback from this
     // shader in various failure modes.
-    // Type 'bool' cannot be used in storage class 'uniform' as it is non-host-shareable.
+    // Type 'bool' cannot be used in address space 'uniform' as it is non-host-shareable.
     Ref<ShaderModuleBase> shaderModule;
     DAWN_TRY_ASSIGN(shaderModule, utils::CreateShaderModule(device, R"(
                 struct UniformParams {
@@ -258,7 +258,7 @@ ComputePassEncoder::TransformIndirectDispatchBuffer(Ref<BufferBase> indirectBuff
         kDispatchIndirectSize + clientOffsetFromAlignedBoundary;
 
     // Neither 'enableValidation' nor 'duplicateNumWorkgroups' can be declared as 'bool' as
-    // currently in WGSL type 'bool' cannot be used in storage class 'uniform' as 'it is
+    // currently in WGSL type 'bool' cannot be used in address space 'uniform' as 'it is
     // non-host-shareable'.
     struct UniformParams {
         uint32_t maxComputeWorkgroupsPerDimension;

@@ -21,19 +21,19 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Reference);
 
 namespace tint::sem {
 
-Reference::Reference(const Type* subtype, ast::StorageClass storage_class, ast::Access access)
-    : subtype_(subtype), storage_class_(storage_class), access_(access) {
+Reference::Reference(const Type* subtype, ast::AddressSpace address_space, ast::Access access)
+    : subtype_(subtype), address_space_(address_space), access_(access) {
     TINT_ASSERT(Semantic, !subtype->Is<Reference>());
     TINT_ASSERT(Semantic, access != ast::Access::kUndefined);
 }
 
 size_t Reference::Hash() const {
-    return utils::Hash(TypeInfo::Of<Reference>().full_hashcode, storage_class_, subtype_, access_);
+    return utils::Hash(TypeInfo::Of<Reference>().full_hashcode, address_space_, subtype_, access_);
 }
 
 bool Reference::Equals(const sem::Type& other) const {
     if (auto* o = other.As<Reference>()) {
-        return o->storage_class_ == storage_class_ && o->subtype_ == subtype_ &&
+        return o->address_space_ == address_space_ && o->subtype_ == subtype_ &&
                o->access_ == access_;
     }
     return false;
@@ -42,8 +42,8 @@ bool Reference::Equals(const sem::Type& other) const {
 std::string Reference::FriendlyName(const SymbolTable& symbols) const {
     std::ostringstream out;
     out << "ref<";
-    if (storage_class_ != ast::StorageClass::kNone) {
-        out << storage_class_ << ", ";
+    if (address_space_ != ast::AddressSpace::kNone) {
+        out << address_space_ << ", ";
     }
     out << subtype_->FriendlyName(symbols) << ", " << access_;
     out << ">";

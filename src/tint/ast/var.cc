@@ -25,12 +25,12 @@ Var::Var(ProgramID pid,
          const Source& src,
          const Symbol& sym,
          const ast::Type* ty,
-         StorageClass storage_class,
+         AddressSpace address_space,
          Access access,
          const Expression* ctor,
          utils::VectorRef<const Attribute*> attrs)
     : Base(pid, nid, src, sym, ty, ctor, std::move(attrs)),
-      declared_storage_class(storage_class),
+      declared_address_space(address_space),
       declared_access(access) {}
 
 Var::Var(Var&&) = default;
@@ -47,7 +47,7 @@ const Var* Var::Clone(CloneContext* ctx) const {
     auto* ty = ctx->Clone(type);
     auto* ctor = ctx->Clone(constructor);
     auto attrs = ctx->Clone(attributes);
-    return ctx->dst->create<Var>(src, sym, ty, declared_storage_class, declared_access, ctor,
+    return ctx->dst->create<Var>(src, sym, ty, declared_address_space, declared_access, ctor,
                                  std::move(attrs));
 }
 

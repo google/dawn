@@ -22,7 +22,7 @@ namespace {
 using HlslGeneratorImplTest_Expression = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Expression, IndexAccessor) {
-    GlobalVar("ary", ty.array<i32, 10>(), ast::StorageClass::kPrivate);
+    GlobalVar("ary", ty.array<i32, 10>(), ast::AddressSpace::kPrivate);
     auto* expr = IndexAccessor("ary", 5_i);
     WrapInFunction(expr);
 

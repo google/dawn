@@ -33,8 +33,8 @@ namespace tint::transform {
 /// (array length - 1).
 class Robustness final : public Castable<Robustness, Transform> {
   public:
-    /// Storage class to be skipped in the transform
-    enum class StorageClass {
+    /// Address space to be skipped in the transform
+    enum class AddressSpace {
         kUniform,
         kStorage,
     };
@@ -54,9 +54,9 @@ class Robustness final : public Castable<Robustness, Transform> {
         /// @returns this Config
         Config& operator=(const Config&);
 
-        /// Storage classes to omit from apply the transform to.
+        /// Address spacees to omit from apply the transform to.
         /// This allows for optimizing on hardware that provide safe accesses.
-        std::unordered_set<StorageClass> omitted_classes;
+        std::unordered_set<AddressSpace> omitted_classes;
     };
 
     /// Constructor

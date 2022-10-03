@@ -2457,10 +2457,10 @@ class FunctionPrivateWorkgroup : public NumberMatcher {
 };
 
 Number FunctionPrivateWorkgroup::Match(MatchState&, Number number) const {
-  switch (static_cast<StorageClass>(number.Value())) {
-    case StorageClass::kFunction:
-    case StorageClass::kPrivate:
-    case StorageClass::kWorkgroup:
+  switch (static_cast<AddressSpace>(number.Value())) {
+    case AddressSpace::kFunction:
+    case AddressSpace::kPrivate:
+    case AddressSpace::kWorkgroup:
       return number;
     default:
       return Number::invalid;
@@ -2486,9 +2486,9 @@ class WorkgroupOrStorage : public NumberMatcher {
 };
 
 Number WorkgroupOrStorage::Match(MatchState&, Number number) const {
-  switch (static_cast<StorageClass>(number.Value())) {
-    case StorageClass::kWorkgroup:
-    case StorageClass::kStorage:
+  switch (static_cast<AddressSpace>(number.Value())) {
+    case AddressSpace::kWorkgroup:
+    case AddressSpace::kStorage:
       return number;
     default:
       return Number::invalid;
@@ -2514,8 +2514,8 @@ class Storage : public NumberMatcher {
 };
 
 Number Storage::Match(MatchState&, Number number) const {
-  if (number.IsAny() || number.Value() == static_cast<uint32_t>(StorageClass::kStorage)) {
-    return Number(static_cast<uint32_t>(StorageClass::kStorage));
+  if (number.IsAny() || number.Value() == static_cast<uint32_t>(AddressSpace::kStorage)) {
+    return Number(static_cast<uint32_t>(AddressSpace::kStorage));
   }
   return Number::invalid;
 }

@@ -137,7 +137,7 @@ struct Std140::State {
         // Scan structures for members that need forking
         for (auto* ty : program->Types()) {
             if (auto* str = ty->As<sem::Struct>()) {
-                if (str->UsedAs(ast::StorageClass::kUniform)) {
+                if (str->UsedAs(ast::AddressSpace::kUniform)) {
                     for (auto* member : str->Members()) {
                         if (needs_fork(member->Type())) {
                             return true;
@@ -150,7 +150,7 @@ struct Std140::State {
         // Scan uniform variables that have types that need forking
         for (auto* decl : program->AST().GlobalVariables()) {
             auto* global = program->Sem().Get(decl);
-            if (global->StorageClass() == ast::StorageClass::kUniform) {
+            if (global->AddressSpace() == ast::AddressSpace::kUniform) {
                 if (needs_fork(global->Type()->UnwrapRef())) {
                     return true;
                 }
@@ -269,7 +269,7 @@ struct Std140::State {
         for (auto* global : ctx.src->Sem().Module()->DependencyOrderedDeclarations()) {
             // Check to see if this is a structure used by a uniform buffer...
             auto* str = sem.Get<sem::Struct>(global);
-            if (str && str->UsedAs(ast::StorageClass::kUniform)) {
+            if (str && str->UsedAs(ast::AddressSpace::kUniform)) {
                 // Should this uniform buffer be forked for std140 usage?
                 bool fork_std140 = false;
                 utils::Vector<const ast::StructMember*, 8> members;
@@ -339,7 +339,7 @@ struct Std140::State {
     void ReplaceUniformVarTypes() {
         for (auto* global : ctx.src->AST().GlobalVariables()) {
             if (auto* var = global->As<ast::Var>()) {
-                if (var->declared_storage_class == ast::StorageClass::kUniform) {
+                if (var->declared_address_space == ast::AddressSpace::kUniform) {
                     auto* v = sem.Get(var);
                     if (auto* std140_ty = Std140Type(v->Type()->UnwrapRef())) {
                         ctx.Replace(global->type, std140_ty);

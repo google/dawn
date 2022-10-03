@@ -26,7 +26,7 @@ using GlslGeneratorImplTest_UniformBuffer = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_UniformBuffer, Simple) {
     auto* simple = Structure("Simple", utils::Vector{Member("member", ty.f32())});
-    GlobalVar("simple", ty.Of(simple), ast::StorageClass::kUniform, Group(0_a), Binding(0_a));
+    GlobalVar("simple", ty.Of(simple), ast::AddressSpace::kUniform, Group(0_a), Binding(0_a));
 
     GeneratorImpl& gen = Build();
 
@@ -46,7 +46,7 @@ layout(binding = 0, std140) uniform Simple_ubo {
 
 TEST_F(GlslGeneratorImplTest_UniformBuffer, Simple_Desktop) {
     auto* simple = Structure("Simple", utils::Vector{Member("member", ty.f32())});
-    GlobalVar("simple", ty.Of(simple), ast::StorageClass::kUniform, Group(0_a), Binding(0_a));
+    GlobalVar("simple", ty.Of(simple), ast::AddressSpace::kUniform, Group(0_a), Binding(0_a));
 
     GeneratorImpl& gen = Build(Version(Version::Standard::kDesktop, 4, 4));
 

@@ -28,14 +28,14 @@ using ResolverHostShareableValidationTest = ResolverTest;
 TEST_F(ResolverHostShareableValidationTest, BoolMember) {
     auto* s = Structure("S", utils::Vector{Member(Source{{12, 34}}, "x", ty.bool_())});
 
-    GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::AddressSpace::kStorage, ast::Access::kRead,
               Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
 
     EXPECT_EQ(
         r()->error(),
-        R"(56:78 error: Type 'bool' cannot be used in storage class 'storage' as it is non-host-shareable
+        R"(56:78 error: Type 'bool' cannot be used in address space 'storage' as it is non-host-shareable
 12:34 note: while analysing structure member S.x
 56:78 note: while instantiating 'var' g)");
 }
@@ -43,14 +43,14 @@ TEST_F(ResolverHostShareableValidationTest, BoolMember) {
 TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
     auto* s = Structure("S", utils::Vector{Member(Source{{12, 34}}, "x", ty.vec3<bool>())});
 
-    GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::AddressSpace::kStorage, ast::Access::kRead,
               Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
 
     EXPECT_EQ(
         r()->error(),
-        R"(56:78 error: Type 'vec3<bool>' cannot be used in storage class 'storage' as it is non-host-shareable
+        R"(56:78 error: Type 'vec3<bool>' cannot be used in address space 'storage' as it is non-host-shareable
 12:34 note: while analysing structure member S.x
 56:78 note: while instantiating 'var' g)");
 }
@@ -59,14 +59,14 @@ TEST_F(ResolverHostShareableValidationTest, Aliases) {
     auto* a1 = Alias("a1", ty.bool_());
     auto* s = Structure("S", utils::Vector{Member(Source{{12, 34}}, "x", ty.Of(a1))});
     auto* a2 = Alias("a2", ty.Of(s));
-    GlobalVar(Source{{56, 78}}, "g", ty.Of(a2), ast::StorageClass::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{56, 78}}, "g", ty.Of(a2), ast::AddressSpace::kStorage, ast::Access::kRead,
               Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
 
     EXPECT_EQ(
         r()->error(),
-        R"(56:78 error: Type 'bool' cannot be used in storage class 'storage' as it is non-host-shareable
+        R"(56:78 error: Type 'bool' cannot be used in address space 'storage' as it is non-host-shareable
 12:34 note: while analysing structure member S.x
 56:78 note: while instantiating 'var' g)");
 }
@@ -78,14 +78,14 @@ TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
 
     auto* s = Structure("S", utils::Vector{Member(Source{{7, 8}}, "m", ty.Of(i3))});
 
-    GlobalVar(Source{{9, 10}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{9, 10}}, "g", ty.Of(s), ast::AddressSpace::kStorage, ast::Access::kRead,
               Binding(0_a), Group(0_a));
 
     ASSERT_FALSE(r()->Resolve());
 
     EXPECT_EQ(
         r()->error(),
-        R"(9:10 error: Type 'bool' cannot be used in storage class 'storage' as it is non-host-shareable
+        R"(9:10 error: Type 'bool' cannot be used in address space 'storage' as it is non-host-shareable
 1:2 note: while analysing structure member I1.x
 3:4 note: while analysing structure member I2.y
 5:6 note: while analysing structure member I3.z
@@ -117,7 +117,7 @@ TEST_F(ResolverHostShareableValidationTest, NoError) {
 
     auto* s = Structure("S", utils::Vector{Member(Source{{7, 8}}, "m", ty.Of(i3))});
 
-    GlobalVar(Source{{9, 10}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{9, 10}}, "g", ty.Of(s), ast::AddressSpace::kStorage, ast::Access::kRead,
               Binding(0_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();

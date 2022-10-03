@@ -2500,11 +2500,11 @@ bool FunctionEmitter::EmitFunctionVariables() {
                 return false;
             }
         }
-        auto* var = parser_impl_.MakeVar(inst.result_id(), ast::StorageClass::kNone, var_store_type,
+        auto* var = parser_impl_.MakeVar(inst.result_id(), ast::AddressSpace::kNone, var_store_type,
                                          constructor, AttributeList{});
         auto* var_decl_stmt = create<ast::VariableDeclStatement>(Source{}, var);
         AddStatement(var_decl_stmt);
-        auto* var_type = ty_.Reference(var_store_type, ast::StorageClass::kNone);
+        auto* var_type = ty_.Reference(var_store_type, ast::AddressSpace::kNone);
         identifier_types_.emplace(inst.result_id(), var_type);
     }
     return success();
@@ -3356,11 +3356,11 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     for (auto id : sorted_by_index(block_info.hoisted_ids)) {
         const auto* def_inst = def_use_mgr_->GetDef(id);
         TINT_ASSERT(Reader, def_inst);
-        auto* storage_type = RemapStorageClass(parser_impl_.ConvertType(def_inst->type_id()), id);
+        auto* storage_type = RemapAddressSpace(parser_impl_.ConvertType(def_inst->type_id()), id);
         AddStatement(create<ast::VariableDeclStatement>(
-            Source{}, parser_impl_.MakeVar(id, ast::StorageClass::kNone, storage_type, nullptr,
+            Source{}, parser_impl_.MakeVar(id, ast::AddressSpace::kNone, storage_type, nullptr,
                                            AttributeList{})));
-        auto* type = ty_.Reference(storage_type, ast::StorageClass::kNone);
+        auto* type = ty_.Reference(storage_type, ast::AddressSpace::kNone);
         identifier_types_.emplace(id, type);
     }
 
@@ -3720,7 +3720,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
             if (!expr) {
                 return false;
             }
-            expr.type = RemapStorageClass(expr.type, result_id);
+            expr.type = RemapAddressSpace(expr.type, result_id);
             return EmitConstDefOrWriteToHoistedVar(inst, expr);
         }
 
@@ -3777,15 +3777,15 @@ TypedExpression FunctionEmitter::MakeOperand(const spvtools::opt::Instruction& i
     return parser_impl_.RectifyOperandSignedness(inst, std::move(expr));
 }
 
-TypedExpression FunctionEmitter::InferFunctionStorageClass(TypedExpression expr) {
+TypedExpression FunctionEmitter::InferFunctionAddressSpace(TypedExpression expr) {
     TypedExpression result(expr);
     if (const auto* ref = expr.type->UnwrapAlias()->As<Reference>()) {
-        if (ref->storage_class == ast::StorageClass::kNone) {
-            expr.type = ty_.Reference(ref->type, ast::StorageClass::kFunction);
+        if (ref->address_space == ast::AddressSpace::kNone) {
+            expr.type = ty_.Reference(ref->type, ast::AddressSpace::kFunction);
         }
     } else if (const auto* ptr = expr.type->UnwrapAlias()->As<Pointer>()) {
-        if (ptr->storage_class == ast::StorageClass::kNone) {
-            expr.type = ty_.Pointer(ptr->type, ast::StorageClass::kFunction);
+        if (ptr->address_space == ast::AddressSpace::kNone) {
+            expr.type = ty_.Pointer(ptr->type, ast::AddressSpace::kFunction);
         }
     }
     return expr;
@@ -4418,7 +4418,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(const spvtools::opt::Instructio
     // ever-deeper nested indexing expressions. Start off with an expression
     // for the base, and then bury that inside nested indexing expressions.
     if (!current_expr) {
-        current_expr = InferFunctionStorageClass(MakeOperand(inst, 0));
+        current_expr = InferFunctionAddressSpace(MakeOperand(inst, 0));
         if (current_expr.type->Is<Pointer>()) {
             current_expr = Dereference(current_expr);
         }
@@ -4430,7 +4430,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(const spvtools::opt::Instructio
         Fail() << "Access chain %" << inst.result_id() << " base pointer is not of pointer type";
         return {};
     }
-    SpvStorageClass storage_class =
+    SpvStorageClass address_space =
         static_cast<SpvStorageClass>(ptr_type_inst->GetSingleWordInOperand(0));
     uint32_t pointee_type_id = ptr_type_inst->GetSingleWordInOperand(1);
 
@@ -4521,7 +4521,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(const spvtools::opt::Instructio
                        << ": " << pointee_type_inst->PrettyPrint();
                 return {};
         }
-        const auto pointer_type_id = type_mgr_->FindPointerToType(pointee_type_id, storage_class);
+        const auto pointer_type_id = type_mgr_->FindPointerToType(pointee_type_id, address_space);
         auto* type = parser_impl_.ConvertType(pointer_type_id, PtrAs::Ref);
         TINT_ASSERT(Reader, type && type->Is<Reference>());
         current_expr = TypedExpression{type, next_expr};
@@ -4799,8 +4799,8 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
             ++index;
             auto& info = def_info_[result_id];
 
-            // Determine storage class for pointer values. Do this in order because
-            // we might rely on the storage class for a previously-visited definition.
+            // Determine address space for pointer values. Do this in order because
+            // we might rely on the address space for a previously-visited definition.
             // Logical pointers can't be transmitted through OpPhi, so remaining
             // pointer definitions are SSA values, and their definitions must be
             // visited before their uses.
@@ -4809,7 +4809,7 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
                 if (type->AsPointer()) {
                     if (auto* ast_type = parser_impl_.ConvertType(inst.type_id())) {
                         if (auto* ptr = ast_type->As<Pointer>()) {
-                            info->storage_class = ptr->storage_class;
+                            info->address_space = ptr->address_space;
                         }
                     }
                     switch (inst.opcode()) {
@@ -4823,8 +4823,8 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
                         case SpvOpCopyObject:
                             // Inherit from the first operand. We need this so we can pick up
                             // a remapped storage buffer.
-                            info->storage_class =
-                                GetStorageClassForPointerValue(inst.GetSingleWordInOperand(0));
+                            info->address_space =
+                                GetAddressSpaceForPointerValue(inst.GetSingleWordInOperand(0));
                             break;
                         default:
                             return Fail() << "pointer defined in function from unknown opcode: "
@@ -4846,11 +4846,11 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
     return true;
 }
 
-ast::StorageClass FunctionEmitter::GetStorageClassForPointerValue(uint32_t id) {
+ast::AddressSpace FunctionEmitter::GetAddressSpaceForPointerValue(uint32_t id) {
     auto where = def_info_.find(id);
     if (where != def_info_.end()) {
-        auto candidate = where->second.get()->storage_class;
-        if (candidate != ast::StorageClass::kInvalid) {
+        auto candidate = where->second.get()->address_space;
+        if (candidate != ast::AddressSpace::kInvalid) {
             return candidate;
         }
     }
@@ -4858,19 +4858,19 @@ ast::StorageClass FunctionEmitter::GetStorageClassForPointerValue(uint32_t id) {
     if (type_id) {
         auto* ast_type = parser_impl_.ConvertType(type_id);
         if (auto* ptr = As<Pointer>(ast_type)) {
-            return ptr->storage_class;
+            return ptr->address_space;
         }
     }
-    return ast::StorageClass::kInvalid;
+    return ast::AddressSpace::kInvalid;
 }
 
-const Type* FunctionEmitter::RemapStorageClass(const Type* type, uint32_t result_id) {
+const Type* FunctionEmitter::RemapAddressSpace(const Type* type, uint32_t result_id) {
     if (auto* ast_ptr_type = As<Pointer>(type)) {
         // Remap an old-style storage buffer pointer to a new-style storage
         // buffer pointer.
-        const auto sc = GetStorageClassForPointerValue(result_id);
-        if (ast_ptr_type->storage_class != sc) {
-            return ty_.Pointer(ast_ptr_type->type, sc);
+        const auto addr_space = GetAddressSpaceForPointerValue(result_id);
+        if (ast_ptr_type->address_space != addr_space) {
+            return ty_.Pointer(ast_ptr_type->type, addr_space);
         }
     }
     return type;
@@ -5053,7 +5053,7 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
             // Avoid moving combinatorial values across constructs.  This is a
             // simple heuristic to avoid changing the cost of an operation
             // by moving it into or out of a loop, for example.
-            if ((def_info->storage_class == ast::StorageClass::kInvalid) &&
+            if ((def_info->address_space == ast::AddressSpace::kInvalid) &&
                 local_def.used_in_another_construct) {
                 should_hoist_to_let = true;
             }
@@ -6170,7 +6170,7 @@ bool FunctionEmitter::MakeVectorInsertDynamic(const spvtools::opt::Instruction& 
         // API in parser_impl_.
         var_name = namer_.MakeDerivedName(original_value_name);
 
-        auto* temp_var = builder_.Var(var_name, type->Build(builder_), ast::StorageClass::kNone,
+        auto* temp_var = builder_.Var(var_name, type->Build(builder_), ast::AddressSpace::kNone,
                                       src_vector.expr);
 
         AddStatement(builder_.Decl({}, temp_var));
@@ -6240,7 +6240,7 @@ bool FunctionEmitter::MakeCompositeInsert(const spvtools::opt::Instruction& inst
         // It doesn't correspond to a SPIR-V ID, so we don't use the ordinary
         // API in parser_impl_.
         var_name = namer_.MakeDerivedName(original_value_name);
-        auto* temp_var = builder_.Var(var_name, type->Build(builder_), ast::StorageClass::kNone,
+        auto* temp_var = builder_.Var(var_name, type->Build(builder_), ast::AddressSpace::kNone,
                                       src_composite.expr);
         AddStatement(builder_.Decl({}, temp_var));
     }
@@ -6271,7 +6271,7 @@ TypedExpression FunctionEmitter::AddressOf(TypedExpression expr) {
         return {};
     }
     return {
-        ty_.Pointer(ref->type, ref->storage_class),
+        ty_.Pointer(ref->type, ref->address_space),
         create<ast::UnaryOpExpression>(Source{}, ast::UnaryOp::kAddressOf, expr.expr),
     };
 }

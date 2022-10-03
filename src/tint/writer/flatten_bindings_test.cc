@@ -38,9 +38,9 @@ TEST_F(FlattenBindingsTest, NoBindings) {
 
 TEST_F(FlattenBindingsTest, AlreadyFlat) {
     ProgramBuilder b;
-    b.GlobalVar("a", b.ty.i32(), ast::StorageClass::kUniform, b.Group(0_a), b.Binding(0_a));
-    b.GlobalVar("b", b.ty.i32(), ast::StorageClass::kUniform, b.Group(0_a), b.Binding(1_a));
-    b.GlobalVar("c", b.ty.i32(), ast::StorageClass::kUniform, b.Group(0_a), b.Binding(2_a));
+    b.GlobalVar("a", b.ty.i32(), ast::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
+    b.GlobalVar("b", b.ty.i32(), ast::AddressSpace::kUniform, b.Group(0_a), b.Binding(1_a));
+    b.GlobalVar("c", b.ty.i32(), ast::AddressSpace::kUniform, b.Group(0_a), b.Binding(2_a));
 
     Program program(std::move(b));
     ASSERT_TRUE(program.IsValid()) << program.Diagnostics().str();
@@ -51,9 +51,9 @@ TEST_F(FlattenBindingsTest, AlreadyFlat) {
 
 TEST_F(FlattenBindingsTest, NotFlat_SingleNamespace) {
     ProgramBuilder b;
-    b.GlobalVar("a", b.ty.i32(), ast::StorageClass::kUniform, b.Group(0_a), b.Binding(0_a));
-    b.GlobalVar("b", b.ty.i32(), ast::StorageClass::kUniform, b.Group(1_a), b.Binding(1_a));
-    b.GlobalVar("c", b.ty.i32(), ast::StorageClass::kUniform, b.Group(2_a), b.Binding(2_a));
+    b.GlobalVar("a", b.ty.i32(), ast::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
+    b.GlobalVar("b", b.ty.i32(), ast::AddressSpace::kUniform, b.Group(1_a), b.Binding(1_a));
+    b.GlobalVar("c", b.ty.i32(), ast::AddressSpace::kUniform, b.Group(2_a), b.Binding(2_a));
     b.WrapInFunction(b.Expr("a"), b.Expr("b"), b.Expr("c"));
 
     Program program(std::move(b));
@@ -84,9 +84,9 @@ TEST_F(FlattenBindingsTest, NotFlat_MultipleNamespaces) {
     ProgramBuilder b;
 
     const size_t num_buffers = 3;
-    b.GlobalVar("buffer1", b.ty.i32(), ast::StorageClass::kUniform, b.Group(0_a), b.Binding(0_a));
-    b.GlobalVar("buffer2", b.ty.i32(), ast::StorageClass::kStorage, b.Group(1_a), b.Binding(1_a));
-    b.GlobalVar("buffer3", b.ty.i32(), ast::StorageClass::kStorage, ast::Access::kRead,
+    b.GlobalVar("buffer1", b.ty.i32(), ast::AddressSpace::kUniform, b.Group(0_a), b.Binding(0_a));
+    b.GlobalVar("buffer2", b.ty.i32(), ast::AddressSpace::kStorage, b.Group(1_a), b.Binding(1_a));
+    b.GlobalVar("buffer3", b.ty.i32(), ast::AddressSpace::kStorage, ast::Access::kRead,
                 b.Group(2_a), b.Binding(2_a));
 
     const size_t num_samplers = 2;

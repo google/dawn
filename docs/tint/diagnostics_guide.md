@@ -63,7 +63,7 @@ Quoting single word identifiers or keywords from the source is not discouraged.
 **Don't:**
 
 ```
-shader.wgsl:5:11 error: type cannot be used in storage class 'storage' as it is non-host-shareable
+shader.wgsl:5:11 error: type cannot be used in address space 'storage' as it is non-host-shareable
 
     cond : bool;
            ^^^^
@@ -72,7 +72,7 @@ shader.wgsl:5:11 error: type cannot be used in storage class 'storage' as it is 
 **Do:**
 
 ```
-shader.wgsl:5:11 error: type cannot be used in storage class 'storage' as it is non-host-shareable
+shader.wgsl:5:11 error: type cannot be used in address space 'storage' as it is non-host-shareable
 
     cond : bool;
            ^^^^

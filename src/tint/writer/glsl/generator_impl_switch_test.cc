@@ -22,7 +22,7 @@ namespace {
 using GlslGeneratorImplTest_Switch = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_Switch, Emit_Switch) {
-    GlobalVar("cond", ty.i32(), ast::StorageClass::kPrivate);
+    GlobalVar("cond", ty.i32(), ast::AddressSpace::kPrivate);
 
     auto* def_body = Block(create<ast::BreakStatement>());
     auto* def = create<ast::CaseStatement>(utils::Empty, def_body);

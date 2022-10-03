@@ -103,7 +103,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_VariableIdentExpr) {
     //   var z: i32 = 1i;
     //   foo(&z);
     // }
-    auto* param = Param("p", ty.pointer<i32>(ast::StorageClass::kFunction));
+    auto* param = Param("p", ty.pointer<i32>(ast::AddressSpace::kFunction));
     Func("foo", utils::Vector{param}, ty.void_(), utils::Empty);
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
@@ -120,7 +120,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_ConstIdentExpr) {
     //   let z: i32 = 1i;
     //   foo(&z);
     // }
-    auto* param = Param("p", ty.pointer<i32>(ast::StorageClass::kFunction));
+    auto* param = Param("p", ty.pointer<i32>(ast::AddressSpace::kFunction));
     Func("foo", utils::Vector{param}, ty.void_(), utils::Empty);
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
@@ -142,7 +142,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_NotIdentExprVar) {
     auto* S = Structure("S", utils::Vector{
                                  Member("m", ty.i32()),
                              });
-    auto* param = Param("p", ty.pointer<i32>(ast::StorageClass::kFunction));
+    auto* param = Param("p", ty.pointer<i32>(ast::AddressSpace::kFunction));
     Func("foo", utils::Vector{param}, ty.void_(), utils::Empty);
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
@@ -166,7 +166,7 @@ TEST_F(ResolverCallValidationTest, PointerArgument_AddressOfMemberAccessor) {
     auto* S = Structure("S", utils::Vector{
                                  Member("m", ty.i32()),
                              });
-    auto* param = Param("p", ty.pointer<i32>(ast::StorageClass::kFunction));
+    auto* param = Param("p", ty.pointer<i32>(ast::AddressSpace::kFunction));
     Func("foo", utils::Vector{param}, ty.void_(), utils::Empty);
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
@@ -185,12 +185,12 @@ TEST_F(ResolverCallValidationTest, PointerArgument_FunctionParam) {
     // }
     Func("foo",
          utils::Vector{
-             Param("p", ty.pointer<i32>(ast::StorageClass::kFunction)),
+             Param("p", ty.pointer<i32>(ast::AddressSpace::kFunction)),
          },
          ty.void_(), utils::Empty);
     Func("bar",
          utils::Vector{
-             Param("p", ty.pointer<i32>(ast::StorageClass::kFunction)),
+             Param("p", ty.pointer<i32>(ast::AddressSpace::kFunction)),
          },
          ty.void_(),
          utils::Vector{
@@ -212,12 +212,12 @@ TEST_F(ResolverCallValidationTest, PointerArgument_FunctionParamWithMain) {
     // }
     Func("foo",
          utils::Vector{
-             Param("p", ty.pointer<i32>(ast::StorageClass::kFunction)),
+             Param("p", ty.pointer<i32>(ast::AddressSpace::kFunction)),
          },
          ty.void_(), utils::Empty);
     Func("bar",
          utils::Vector{
-             Param("p", ty.pointer<i32>(ast::StorageClass::kFunction)),
+             Param("p", ty.pointer<i32>(ast::AddressSpace::kFunction)),
          },
          ty.void_(),
          utils::Vector{
@@ -245,11 +245,11 @@ TEST_F(ResolverCallValidationTest, LetPointer) {
     // }
     Func("x",
          utils::Vector{
-             Param("p", ty.pointer<i32>(ast::StorageClass::kFunction)),
+             Param("p", ty.pointer<i32>(ast::AddressSpace::kFunction)),
          },
          ty.void_(), utils::Empty);
     auto* v = Var("v", ty.i32());
-    auto* p = Let("p", ty.pointer(ty.i32(), ast::StorageClass::kFunction), AddressOf(v));
+    auto* p = Let("p", ty.pointer(ty.i32(), ast::AddressSpace::kFunction), AddressOf(v));
     auto* c = Var("c", ty.i32(), Call("x", Expr(Source{{12, 34}}, p)));
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
@@ -276,11 +276,11 @@ TEST_F(ResolverCallValidationTest, LetPointerPrivate) {
     // }
     Func("foo",
          utils::Vector{
-             Param("p", ty.pointer<i32>(ast::StorageClass::kPrivate)),
+             Param("p", ty.pointer<i32>(ast::AddressSpace::kPrivate)),
          },
          ty.void_(), utils::Empty);
-    auto* v = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
-    auto* p = Let("p", ty.pointer(ty.i32(), ast::StorageClass::kPrivate), AddressOf(v));
+    auto* v = GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate);
+    auto* p = Let("p", ty.pointer(ty.i32(), ast::AddressSpace::kPrivate), AddressOf(v));
     auto* c = Var("c", ty.i32(), Call("foo", Expr(Source{{12, 34}}, p)));
     Func("main", utils::Empty, ty.void_(),
          utils::Vector{
@@ -301,7 +301,7 @@ TEST_F(ResolverCallValidationTest, CallVariable) {
     // fn f() {
     //   v();
     // }
-    GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
+    GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate);
     Func("f", utils::Empty, ty.void_(),
          utils::Vector{
              CallStmt(Call(Source{{12, 34}}, "v")),

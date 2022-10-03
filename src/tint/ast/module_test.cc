@@ -72,7 +72,7 @@ TEST_F(ModuleTest, Assert_DifferentProgramID_GlobalVariable) {
         {
             ProgramBuilder b1;
             ProgramBuilder b2;
-            b1.AST().AddGlobalVariable(b2.Var("var", b2.ty.i32(), ast::StorageClass::kPrivate));
+            b1.AST().AddGlobalVariable(b2.Var("var", b2.ty.i32(), ast::AddressSpace::kPrivate));
         },
         "internal compiler error");
 }
@@ -92,7 +92,7 @@ TEST_F(ModuleTest, CloneOrder) {
         ProgramBuilder b;
         b.Func("F", {}, b.ty.void_(), {});
         b.Alias("A", b.ty.u32());
-        b.GlobalVar("V", b.ty.i32(), ast::StorageClass::kPrivate);
+        b.GlobalVar("V", b.ty.i32(), ast::AddressSpace::kPrivate);
         return Program(std::move(b));
     }();
 

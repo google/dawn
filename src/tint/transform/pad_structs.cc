@@ -78,7 +78,7 @@ void PadStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
             new_members.Push(ctx.dst->Member(name, type));
 
             uint32_t size = ty->Size();
-            if (ty->Is<sem::Struct>() && str->UsedAs(ast::StorageClass::kUniform)) {
+            if (ty->Is<sem::Struct>() && str->UsedAs(ast::AddressSpace::kUniform)) {
                 // std140 structs should be padded out to 16 bytes.
                 size = utils::RoundUp(16u, size);
             } else if (auto* array_ty = ty->As<sem::Array>()) {
@@ -91,7 +91,7 @@ void PadStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
 
         // Add any required padding after the last member, if it's not a runtime-sized array.
         uint32_t struct_size = str->Size();
-        if (str->UsedAs(ast::StorageClass::kUniform)) {
+        if (str->UsedAs(ast::AddressSpace::kUniform)) {
             struct_size = utils::RoundUp(16u, struct_size);
         }
         if (offset < struct_size && !has_runtime_sized_array) {

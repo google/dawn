@@ -162,7 +162,7 @@ void ArrayLengthFromUniform::Run(CloneContext& ctx, const DataMap& inputs, DataM
                                                       u32((max_buffer_size_index / 4) + 1))),
                 });
             buffer_size_ubo = ctx.dst->GlobalVar(ctx.dst->Sym(), ctx.dst->ty.Of(buffer_size_struct),
-                                                 ast::StorageClass::kUniform,
+                                                 ast::AddressSpace::kUniform,
                                                  ctx.dst->Group(AInt(cfg->ubo_binding.group)),
                                                  ctx.dst->Binding(AInt(cfg->ubo_binding.binding)));
         }

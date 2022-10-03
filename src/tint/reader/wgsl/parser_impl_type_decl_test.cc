@@ -176,7 +176,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr) {
 
     auto* ptr = t.value->As<ast::Pointer>();
     ASSERT_TRUE(ptr->type->Is<ast::F32>());
-    ASSERT_EQ(ptr->storage_class, ast::StorageClass::kFunction);
+    ASSERT_EQ(ptr->address_space, ast::AddressSpace::kFunction);
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 19u}}));
 }
 
@@ -191,7 +191,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_WithAccess) {
 
     auto* ptr = t.value->As<ast::Pointer>();
     ASSERT_TRUE(ptr->type->Is<ast::F32>());
-    ASSERT_EQ(ptr->storage_class, ast::StorageClass::kFunction);
+    ASSERT_EQ(ptr->address_space, ast::AddressSpace::kFunction);
     ASSERT_EQ(ptr->access, ast::Access::kRead);
     EXPECT_EQ(t.value->source.range, (Source::Range{{1u, 1u}, {1u, 25u}}));
 }
@@ -207,7 +207,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
 
     auto* ptr = t.value->As<ast::Pointer>();
     ASSERT_TRUE(ptr->type->Is<ast::Vector>());
-    ASSERT_EQ(ptr->storage_class, ast::StorageClass::kFunction);
+    ASSERT_EQ(ptr->address_space, ast::AddressSpace::kFunction);
 
     auto* vec = ptr->type->As<ast::Vector>();
     ASSERT_EQ(vec->width, 2u);
@@ -245,7 +245,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThanAfterAccess) {
     ASSERT_EQ(p->error(), "1:24: expected '>' for ptr declaration");
 }
 
-TEST_F(ParserImplTest, TypeDecl_Ptr_MissingCommaAfterStorageClass) {
+TEST_F(ParserImplTest, TypeDecl_Ptr_MissingCommaAfterAddressSpace) {
     auto p = parser("ptr<function f32>");
     auto t = p->type_decl();
     EXPECT_TRUE(t.errored);
@@ -265,14 +265,14 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingCommaAfterAccess) {
     ASSERT_EQ(p->error(), "1:19: expected '>' for ptr declaration");
 }
 
-TEST_F(ParserImplTest, TypeDecl_Ptr_MissingStorageClass) {
+TEST_F(ParserImplTest, TypeDecl_Ptr_MissingAddressSpace) {
     auto p = parser("ptr<, f32>");
     auto t = p->type_decl();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:5: expected identifier for storage class");
+    ASSERT_EQ(p->error(), "1:5: expected identifier for address space");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingType) {
@@ -302,17 +302,17 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingParams) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:5: expected identifier for storage class");
+    ASSERT_EQ(p->error(), "1:5: expected identifier for address space");
 }
 
-TEST_F(ParserImplTest, TypeDecl_Ptr_BadStorageClass) {
+TEST_F(ParserImplTest, TypeDecl_Ptr_BadAddressSpace) {
     auto p = parser("ptr<unknown, f32>");
     auto t = p->type_decl();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:5: invalid storage class for ptr declaration");
+    ASSERT_EQ(p->error(), "1:5: invalid address space for ptr declaration");
 }
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_BadAccess) {

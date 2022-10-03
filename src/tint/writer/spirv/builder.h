@@ -76,7 +76,7 @@ class Builder {
     /// Constructor
     /// @param program the program
     /// @param zero_initialize_workgroup_memory `true` to initialize all the
-    /// variables in the Workgroup storage class with OpConstantNull
+    /// variables in the Workgroup address space with OpConstantNull
     explicit Builder(const Program* program, bool zero_initialize_workgroup_memory = false);
     ~Builder();
 
@@ -203,15 +203,15 @@ class Builder {
     /// inside a basic block.
     bool InsideBasicBlock() const;
 
-    /// Converts a storage class to a SPIR-V storage class.
-    /// @param klass the storage class to convert
-    /// @returns the SPIR-V storage class or SpvStorageClassMax on error.
-    SpvStorageClass ConvertStorageClass(ast::StorageClass klass) const;
+    /// Converts a address space to a SPIR-V address space.
+    /// @param klass the address space to convert
+    /// @returns the SPIR-V address space or SpvStorageClassMax on error.
+    SpvStorageClass ConvertAddressSpace(ast::AddressSpace klass) const;
     /// Converts a builtin to a SPIR-V builtin and pushes a capability if needed.
     /// @param builtin the builtin to convert
-    /// @param storage the storage class that this builtin is being used with
+    /// @param storage the address space that this builtin is being used with
     /// @returns the SPIR-V builtin or SpvBuiltInMax on error.
-    SpvBuiltIn ConvertBuiltin(ast::BuiltinValue builtin, ast::StorageClass storage);
+    SpvBuiltIn ConvertBuiltin(ast::BuiltinValue builtin, ast::AddressSpace storage);
 
     /// Converts an interpolate attribute to SPIR-V decorations and pushes a
     /// capability if needed.

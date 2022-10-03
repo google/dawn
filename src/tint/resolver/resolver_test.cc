@@ -316,7 +316,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_Alias) {
 
 TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScope) {
     auto* init = Expr(2_i);
-    GlobalVar("my_var", ty.i32(), ast::StorageClass::kPrivate, init);
+    GlobalVar("my_var", ty.i32(), ast::AddressSpace::kPrivate, init);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -396,7 +396,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
     Func("func_i32", utils::Empty, ty.void_(), utils::Vector{fn_i32_decl});
 
     // Declare f32 "foo" at module scope
-    auto* mod_f32 = Var("foo", ty.f32(), ast::StorageClass::kPrivate, Expr(2_f));
+    auto* mod_f32 = Var("foo", ty.f32(), ast::AddressSpace::kPrivate, Expr(2_f));
     auto* mod_init = mod_f32->constructor;
     AST().AddGlobalVariable(mod_f32);
 
@@ -424,7 +424,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
 
 TEST_F(ResolverTest, ArraySize_UnsignedLiteral) {
     // var<private> a : array<f32, 10u>;
-    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr(10_u)), ast::StorageClass::kPrivate);
+    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr(10_u)), ast::AddressSpace::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -437,7 +437,7 @@ TEST_F(ResolverTest, ArraySize_UnsignedLiteral) {
 
 TEST_F(ResolverTest, ArraySize_SignedLiteral) {
     // var<private> a : array<f32, 10i>;
-    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr(10_i)), ast::StorageClass::kPrivate);
+    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr(10_i)), ast::AddressSpace::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -452,7 +452,7 @@ TEST_F(ResolverTest, ArraySize_UnsignedConst) {
     // const size = 10u;
     // var<private> a : array<f32, size>;
     GlobalConst("size", Expr(10_u));
-    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kPrivate);
+    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr("size")), ast::AddressSpace::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -467,7 +467,7 @@ TEST_F(ResolverTest, ArraySize_SignedConst) {
     // const size = 0;
     // var<private> a : array<f32, size>;
     GlobalConst("size", Expr(10_i));
-    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kPrivate);
+    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr("size")), ast::AddressSpace::kPrivate);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -482,7 +482,7 @@ TEST_F(ResolverTest, ArraySize_Override) {
     // override size = 0;
     // var<workgroup> a : array<f32, size>;
     auto* override = Override("size", Expr(10_i));
-    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kWorkgroup);
+    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr("size")), ast::AddressSpace::kWorkgroup);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -500,8 +500,8 @@ TEST_F(ResolverTest, ArraySize_Override_Equivalence) {
     // var<workgroup> a : array<f32, size>;
     // var<workgroup> b : array<f32, size>;
     auto* override = Override("size", Expr(10_i));
-    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kWorkgroup);
-    auto* b = GlobalVar("b", ty.array(ty.f32(), Expr("size")), ast::StorageClass::kWorkgroup);
+    auto* a = GlobalVar("a", ty.array(ty.f32(), Expr("size")), ast::AddressSpace::kWorkgroup);
+    auto* b = GlobalVar("b", ty.array(ty.f32(), Expr("size")), ast::AddressSpace::kWorkgroup);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -523,7 +523,7 @@ TEST_F(ResolverTest, ArraySize_Override_Equivalence) {
 }
 
 TEST_F(ResolverTest, Expr_Bitcast) {
-    GlobalVar("name", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("name", ty.f32(), ast::AddressSpace::kPrivate);
 
     auto* bitcast = create<ast::BitcastExpression>(ty.f32(), Expr("name"));
     WrapInFunction(bitcast);
@@ -586,7 +586,7 @@ TEST_F(ResolverTest, Expr_Call_Builtin) {
 }
 
 TEST_F(ResolverTest, Expr_Cast) {
-    GlobalVar("name", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("name", ty.f32(), ast::AddressSpace::kPrivate);
 
     auto* cast = Construct(ty.f32(), "name");
     WrapInFunction(cast);
@@ -644,7 +644,7 @@ TEST_F(ResolverTest, Expr_Constructor_Type_Vec4) {
 }
 
 TEST_F(ResolverTest, Expr_Identifier_GlobalVariable) {
-    auto* my_var = GlobalVar("my_var", ty.f32(), ast::StorageClass::kPrivate);
+    auto* my_var = GlobalVar("my_var", ty.f32(), ast::AddressSpace::kPrivate);
 
     auto* ident = Expr("my_var");
     WrapInFunction(ident);
@@ -747,7 +747,7 @@ TEST_F(ResolverTest, Expr_Identifier_Function_Ptr) {
     auto* v = Expr("v");
     auto* p = Expr("p");
     auto* v_decl = Decl(Var("v", ty.f32()));
-    auto* p_decl = Decl(Let("p", ty.pointer<f32>(ast::StorageClass::kFunction), AddressOf(v)));
+    auto* p_decl = Decl(Let("p", ty.pointer<f32>(ast::AddressSpace::kFunction), AddressOf(v)));
     auto* assign = Assign(Deref(p), 1.23_f);
     Func("my_func", utils::Empty, ty.void_(),
          utils::Vector{
@@ -822,7 +822,7 @@ TEST_F(ResolverTest, Function_Parameters_Locations) {
     auto* param_b = Param("b", ty.u32(), utils::Vector{Builtin(ast::BuiltinValue::kVertexIndex)});
     auto* param_c = Param("c", ty.u32(), utils::Vector{Location(1_a)});
 
-    GlobalVar("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_vec", ty.vec4<f32>(), ast::AddressSpace::kPrivate);
     auto* func = Func("my_func",
                       utils::Vector{
                           param_a,
@@ -852,8 +852,8 @@ TEST_F(ResolverTest, Function_Parameters_Locations) {
 
 TEST_F(ResolverTest, Function_GlobalVariable_Location) {
     auto* var = GlobalVar(
-        "my_vec", ty.vec4<f32>(), ast::StorageClass::kIn,
-        utils::Vector{Location(3_a), Disable(ast::DisabledValidation::kIgnoreStorageClass)});
+        "my_vec", ty.vec4<f32>(), ast::AddressSpace::kIn,
+        utils::Vector{Location(3_a), Disable(ast::DisabledValidation::kIgnoreAddressSpace)});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
@@ -865,10 +865,10 @@ TEST_F(ResolverTest, Function_GlobalVariable_Location) {
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables) {
     auto* s = Structure("S", utils::Vector{Member("m", ty.u32())});
 
-    auto* sb_var = GlobalVar("sb_var", ty.Of(s), ast::StorageClass::kStorage,
+    auto* sb_var = GlobalVar("sb_var", ty.Of(s), ast::AddressSpace::kStorage,
                              ast::Access::kReadWrite, Binding(0_a), Group(0_a));
-    auto* wg_var = GlobalVar("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
-    auto* priv_var = GlobalVar("priv_var", ty.f32(), ast::StorageClass::kPrivate);
+    auto* wg_var = GlobalVar("wg_var", ty.f32(), ast::AddressSpace::kWorkgroup);
+    auto* priv_var = GlobalVar("priv_var", ty.f32(), ast::AddressSpace::kPrivate);
 
     auto* func = Func("my_func", utils::Empty, ty.void_(),
                       utils::Vector{
@@ -911,7 +911,7 @@ TEST_F(ResolverTest, Function_ReturnType_Location) {
 }
 
 TEST_F(ResolverTest, Function_ReturnType_NoLocation) {
-    GlobalVar("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_vec", ty.vec4<f32>(), ast::AddressSpace::kPrivate);
     auto* func = Func("my_func", utils::Empty, ty.vec4<f32>(),
                       utils::Vector{
                           Return("my_vec"),
@@ -933,10 +933,10 @@ TEST_F(ResolverTest, Function_ReturnType_NoLocation) {
 TEST_F(ResolverTest, Function_RegisterInputOutputVariables_SubFunction) {
     auto* s = Structure("S", utils::Vector{Member("m", ty.u32())});
 
-    auto* sb_var = GlobalVar("sb_var", ty.Of(s), ast::StorageClass::kStorage,
+    auto* sb_var = GlobalVar("sb_var", ty.Of(s), ast::AddressSpace::kStorage,
                              ast::Access::kReadWrite, Binding(0_a), Group(0_a));
-    auto* wg_var = GlobalVar("wg_var", ty.f32(), ast::StorageClass::kWorkgroup);
-    auto* priv_var = GlobalVar("priv_var", ty.f32(), ast::StorageClass::kPrivate);
+    auto* wg_var = GlobalVar("wg_var", ty.f32(), ast::AddressSpace::kWorkgroup);
+    auto* priv_var = GlobalVar("priv_var", ty.f32(), ast::AddressSpace::kPrivate);
 
     Func("my_func", utils::Empty, ty.f32(),
          utils::Vector{Assign("wg_var", "wg_var"), Assign("sb_var", "sb_var"),
@@ -1187,7 +1187,7 @@ TEST_F(ResolverTest, Function_WorkgroupSize_Mixed) {
 TEST_F(ResolverTest, Expr_MemberAccessor_Struct) {
     auto* st = Structure(
         "S", utils::Vector{Member("first_member", ty.i32()), Member("second_member", ty.f32())});
-    GlobalVar("my_struct", ty.Of(st), ast::StorageClass::kPrivate);
+    GlobalVar("my_struct", ty.Of(st), ast::AddressSpace::kPrivate);
 
     auto* mem = MemberAccessor("my_struct", "second_member");
     WrapInFunction(mem);
@@ -1211,7 +1211,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
     auto* st = Structure(
         "S", utils::Vector{Member("first_member", ty.i32()), Member("second_member", ty.f32())});
     auto* alias = Alias("alias", ty.Of(st));
-    GlobalVar("my_struct", ty.Of(alias), ast::StorageClass::kPrivate);
+    GlobalVar("my_struct", ty.Of(alias), ast::AddressSpace::kPrivate);
 
     auto* mem = MemberAccessor("my_struct", "second_member");
     WrapInFunction(mem);
@@ -1231,7 +1231,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_Struct_Alias) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
-    GlobalVar("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_vec", ty.vec4<f32>(), ast::AddressSpace::kPrivate);
 
     auto* mem = MemberAccessor("my_vec", "xzyw");
     WrapInFunction(mem);
@@ -1249,7 +1249,7 @@ TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle) {
 }
 
 TEST_F(ResolverTest, Expr_MemberAccessor_VectorSwizzle_SingleElement) {
-    GlobalVar("my_vec", ty.vec3<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_vec", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
 
     auto* mem = MemberAccessor("my_vec", "b");
     WrapInFunction(mem);
@@ -1285,7 +1285,7 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
 
     auto* stB = Structure("B", utils::Vector{Member("foo", ty.vec4<f32>())});
     auto* stA = Structure("A", utils::Vector{Member("mem", ty.array(ty.Of(stB), 3_i))});
-    GlobalVar("c", ty.Of(stA), ast::StorageClass::kPrivate);
+    GlobalVar("c", ty.Of(stA), ast::AddressSpace::kPrivate);
 
     auto* mem =
         MemberAccessor(MemberAccessor(IndexAccessor(MemberAccessor("c", "mem"), 0_i), "foo"), "yx");
@@ -1303,7 +1303,7 @@ TEST_F(ResolverTest, Expr_Accessor_MultiLevel) {
 TEST_F(ResolverTest, Expr_MemberAccessor_InBinaryOp) {
     auto* st = Structure(
         "S", utils::Vector{Member("first_member", ty.f32()), Member("second_member", ty.f32())});
-    GlobalVar("my_struct", ty.Of(st), ast::StorageClass::kPrivate);
+    GlobalVar("my_struct", ty.Of(st), ast::AddressSpace::kPrivate);
 
     auto* expr = Add(MemberAccessor("my_struct", "first_member"),
                      MemberAccessor("my_struct", "second_member"));
@@ -1606,8 +1606,8 @@ TEST_P(Expr_Binary_Test_Valid, All) {
     ss << FriendlyName(lhs_type) << " " << params.op << " " << FriendlyName(rhs_type);
     SCOPED_TRACE(ss.str());
 
-    GlobalVar("lhs", lhs_type, ast::StorageClass::kPrivate);
-    GlobalVar("rhs", rhs_type, ast::StorageClass::kPrivate);
+    GlobalVar("lhs", lhs_type, ast::AddressSpace::kPrivate);
+    GlobalVar("rhs", rhs_type, ast::AddressSpace::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(params.op, Expr("lhs"), Expr("rhs"));
     WrapInFunction(expr);
@@ -1641,8 +1641,8 @@ TEST_P(Expr_Binary_Test_WithAlias_Valid, All) {
        << FriendlyName(rhs_type);
     SCOPED_TRACE(ss.str());
 
-    GlobalVar("lhs", lhs_type, ast::StorageClass::kPrivate);
-    GlobalVar("rhs", rhs_type, ast::StorageClass::kPrivate);
+    GlobalVar("lhs", lhs_type, ast::AddressSpace::kPrivate);
+    GlobalVar("rhs", rhs_type, ast::AddressSpace::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(params.op, Expr("lhs"), Expr("rhs"));
     WrapInFunction(expr);
@@ -1687,8 +1687,8 @@ TEST_P(Expr_Binary_Test_Invalid, All) {
     ss << FriendlyName(lhs_type) << " " << op << " " << FriendlyName(rhs_type);
     SCOPED_TRACE(ss.str());
 
-    GlobalVar("lhs", lhs_type, ast::StorageClass::kPrivate);
-    GlobalVar("rhs", rhs_type, ast::StorageClass::kPrivate);
+    GlobalVar("lhs", lhs_type, ast::AddressSpace::kPrivate);
+    GlobalVar("rhs", rhs_type, ast::AddressSpace::kPrivate);
 
     auto* expr = create<ast::BinaryExpression>(Source{{12, 34}}, op, Expr("lhs"), Expr("rhs"));
     WrapInFunction(expr);
@@ -1727,8 +1727,8 @@ TEST_P(Expr_Binary_Test_Invalid_VectorMatrixMultiply, All) {
         is_valid_expr = vec_size == mat_cols;
     }
 
-    GlobalVar("lhs", lhs_type, ast::StorageClass::kPrivate);
-    GlobalVar("rhs", rhs_type, ast::StorageClass::kPrivate);
+    GlobalVar("lhs", lhs_type, ast::AddressSpace::kPrivate);
+    GlobalVar("rhs", rhs_type, ast::AddressSpace::kPrivate);
 
     auto* expr = Mul(Source{{12, 34}}, Expr("lhs"), Expr("rhs"));
     WrapInFunction(expr);
@@ -1764,8 +1764,8 @@ TEST_P(Expr_Binary_Test_Invalid_MatrixMatrixMultiply, All) {
     auto* col = create<sem::Vector>(f32, lhs_mat_rows);
     auto* result_type = create<sem::Matrix>(col, rhs_mat_cols);
 
-    GlobalVar("lhs", lhs_type, ast::StorageClass::kPrivate);
-    GlobalVar("rhs", rhs_type, ast::StorageClass::kPrivate);
+    GlobalVar("lhs", lhs_type, ast::AddressSpace::kPrivate);
+    GlobalVar("rhs", rhs_type, ast::AddressSpace::kPrivate);
 
     auto* expr = Mul(Source{{12, 34}}, Expr("lhs"), Expr("rhs"));
     WrapInFunction(expr);
@@ -1793,11 +1793,11 @@ TEST_P(UnaryOpExpressionTest, Expr_UnaryOp) {
     auto op = GetParam();
 
     if (op == ast::UnaryOp::kNot) {
-        GlobalVar("ident", ty.vec4<bool>(), ast::StorageClass::kPrivate);
+        GlobalVar("ident", ty.vec4<bool>(), ast::AddressSpace::kPrivate);
     } else if (op == ast::UnaryOp::kNegation || op == ast::UnaryOp::kComplement) {
-        GlobalVar("ident", ty.vec4<i32>(), ast::StorageClass::kPrivate);
+        GlobalVar("ident", ty.vec4<i32>(), ast::AddressSpace::kPrivate);
     } else {
-        GlobalVar("ident", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+        GlobalVar("ident", ty.vec4<f32>(), ast::AddressSpace::kPrivate);
     }
     auto* der = create<ast::UnaryOpExpression>(op, Expr("ident"));
     WrapInFunction(der);
@@ -1821,7 +1821,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTest,
                                          ast::UnaryOp::kNegation,
                                          ast::UnaryOp::kNot));
 
-TEST_F(ResolverTest, StorageClass_SetsIfMissing) {
+TEST_F(ResolverTest, AddressSpace_SetsIfMissing) {
     auto* var = Var("var", ty.i32());
 
     auto* stmt = Decl(var);
@@ -1829,42 +1829,42 @@ TEST_F(ResolverTest, StorageClass_SetsIfMissing) {
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    EXPECT_EQ(Sem().Get(var)->StorageClass(), ast::StorageClass::kFunction);
+    EXPECT_EQ(Sem().Get(var)->AddressSpace(), ast::AddressSpace::kFunction);
 }
 
-TEST_F(ResolverTest, StorageClass_SetForSampler) {
+TEST_F(ResolverTest, AddressSpace_SetForSampler) {
     auto* t = ty.sampler(ast::SamplerKind::kSampler);
     auto* var = GlobalVar("var", t, Binding(0_a), Group(0_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    EXPECT_EQ(Sem().Get(var)->StorageClass(), ast::StorageClass::kHandle);
+    EXPECT_EQ(Sem().Get(var)->AddressSpace(), ast::AddressSpace::kHandle);
 }
 
-TEST_F(ResolverTest, StorageClass_SetForTexture) {
+TEST_F(ResolverTest, AddressSpace_SetForTexture) {
     auto* t = ty.sampled_texture(ast::TextureDimension::k1d, ty.f32());
     auto* var = GlobalVar("var", t, Binding(0_a), Group(0_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    EXPECT_EQ(Sem().Get(var)->StorageClass(), ast::StorageClass::kHandle);
+    EXPECT_EQ(Sem().Get(var)->AddressSpace(), ast::AddressSpace::kHandle);
 }
 
-TEST_F(ResolverTest, StorageClass_DoesNotSetOnConst) {
+TEST_F(ResolverTest, AddressSpace_DoesNotSetOnConst) {
     auto* var = Let("var", ty.i32(), Construct(ty.i32()));
     auto* stmt = Decl(var);
     Func("func", utils::Empty, ty.void_(), utils::Vector{stmt});
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    EXPECT_EQ(Sem().Get(var)->StorageClass(), ast::StorageClass::kNone);
+    EXPECT_EQ(Sem().Get(var)->AddressSpace(), ast::AddressSpace::kNone);
 }
 
 TEST_F(ResolverTest, Access_SetForStorageBuffer) {
     // struct S { x : i32 };
     // var<storage> g : S;
     auto* s = Structure("S", utils::Vector{Member(Source{{12, 34}}, "x", ty.i32())});
-    auto* var = GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage,
+    auto* var = GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::AddressSpace::kStorage,
                           Binding(0_a), Group(0_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -1897,11 +1897,11 @@ TEST_F(ResolverTest, Function_EntryPoints_StageAttribute) {
     // ep_1 -> {}
     // ep_2 -> {}
 
-    GlobalVar("first", ty.f32(), ast::StorageClass::kPrivate);
-    GlobalVar("second", ty.f32(), ast::StorageClass::kPrivate);
-    GlobalVar("call_a", ty.f32(), ast::StorageClass::kPrivate);
-    GlobalVar("call_b", ty.f32(), ast::StorageClass::kPrivate);
-    GlobalVar("call_c", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("first", ty.f32(), ast::AddressSpace::kPrivate);
+    GlobalVar("second", ty.f32(), ast::AddressSpace::kPrivate);
+    GlobalVar("call_a", ty.f32(), ast::AddressSpace::kPrivate);
+    GlobalVar("call_b", ty.f32(), ast::AddressSpace::kPrivate);
+    GlobalVar("call_c", ty.f32(), ast::AddressSpace::kPrivate);
 
     auto* func_b = Func("b", utils::Empty, ty.f32(),
                         utils::Vector{
@@ -2041,8 +2041,8 @@ TEST_F(ResolverTest, ASTNodeReachedTwice) {
         {
             ProgramBuilder b;
             auto* expr = b.Expr(1_i);
-            b.GlobalVar("a", b.ty.i32(), ast::StorageClass::kPrivate, expr);
-            b.GlobalVar("b", b.ty.i32(), ast::StorageClass::kPrivate, expr);
+            b.GlobalVar("a", b.ty.i32(), ast::AddressSpace::kPrivate, expr);
+            b.GlobalVar("b", b.ty.i32(), ast::AddressSpace::kPrivate, expr);
             Resolver(&b).Resolve();
         },
         "internal compiler error: AST node 'tint::ast::IntLiteralExpression' was encountered twice "
@@ -2050,7 +2050,7 @@ TEST_F(ResolverTest, ASTNodeReachedTwice) {
 }
 
 TEST_F(ResolverTest, UnaryOp_Not) {
-    GlobalVar("ident", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("ident", ty.vec4<f32>(), ast::AddressSpace::kPrivate);
     auto* der = create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, Expr(Source{{12, 34}}, "ident"));
     WrapInFunction(der);
 
@@ -2059,7 +2059,7 @@ TEST_F(ResolverTest, UnaryOp_Not) {
 }
 
 TEST_F(ResolverTest, UnaryOp_Complement) {
-    GlobalVar("ident", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("ident", ty.vec4<f32>(), ast::AddressSpace::kPrivate);
     auto* der =
         create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement, Expr(Source{{12, 34}}, "ident"));
     WrapInFunction(der);
@@ -2069,7 +2069,7 @@ TEST_F(ResolverTest, UnaryOp_Complement) {
 }
 
 TEST_F(ResolverTest, UnaryOp_Negation) {
-    GlobalVar("ident", ty.u32(), ast::StorageClass::kPrivate);
+    GlobalVar("ident", ty.u32(), ast::AddressSpace::kPrivate);
     auto* der =
         create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(Source{{12, 34}}, "ident"));
     WrapInFunction(der);
@@ -2214,15 +2214,15 @@ TEST_F(ResolverTest, TextureSampler_TextureDimensions) {
 
 TEST_F(ResolverTest, ModuleDependencyOrderedDeclarations) {
     auto* f0 = Func("f0", utils::Empty, ty.void_(), utils::Empty);
-    auto* v0 = GlobalVar("v0", ty.i32(), ast::StorageClass::kPrivate);
+    auto* v0 = GlobalVar("v0", ty.i32(), ast::AddressSpace::kPrivate);
     auto* a0 = Alias("a0", ty.i32());
     auto* s0 = Structure("s0", utils::Vector{Member("m", ty.i32())});
     auto* f1 = Func("f1", utils::Empty, ty.void_(), utils::Empty);
-    auto* v1 = GlobalVar("v1", ty.i32(), ast::StorageClass::kPrivate);
+    auto* v1 = GlobalVar("v1", ty.i32(), ast::AddressSpace::kPrivate);
     auto* a1 = Alias("a1", ty.i32());
     auto* s1 = Structure("s1", utils::Vector{Member("m", ty.i32())});
     auto* f2 = Func("f2", utils::Empty, ty.void_(), utils::Empty);
-    auto* v2 = GlobalVar("v2", ty.i32(), ast::StorageClass::kPrivate);
+    auto* v2 = GlobalVar("v2", ty.i32(), ast::AddressSpace::kPrivate);
     auto* a2 = Alias("a2", ty.i32());
     auto* s2 = Structure("s2", utils::Vector{Member("m", ty.i32())});
 

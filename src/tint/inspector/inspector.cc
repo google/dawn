@@ -565,7 +565,7 @@ uint32_t Inspector::GetWorkgroupStorageSize(const std::string& entry_point) {
     uint32_t total_size = 0;
     auto* func_sem = program_->Sem().Get(func);
     for (const sem::Variable* var : func_sem->TransitivelyReferencedGlobals()) {
-        if (var->StorageClass() == ast::StorageClass::kWorkgroup) {
+        if (var->AddressSpace() == ast::AddressSpace::kWorkgroup) {
             auto* ty = var->Type()->UnwrapRef();
             uint32_t align = ty->Align();
             uint32_t size = ty->Size();

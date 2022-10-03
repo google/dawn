@@ -19,7 +19,7 @@
 
 namespace tint::transform {
 
-/// Std140 is a transform that forks types used in the uniform storage class that contain
+/// Std140 is a transform that forks types used in the uniform address space that contain
 /// `matNx2<f32>` matrices into `N`x`vec2<f32>` column vectors. Types that transitively use these
 /// forked types are also forked. `var<uniform>` variables will use these forked types, and
 /// expressions loading from these variables will do appropriate conversions to the regular WGSL

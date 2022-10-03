@@ -216,7 +216,7 @@ TEST_F(IntrinsicTableTest, MatchPointer) {
     auto* i32 = create<sem::I32>();
     auto* atomicI32 = create<sem::Atomic>(i32);
     auto* ptr =
-        create<sem::Pointer>(atomicI32, ast::StorageClass::kWorkgroup, ast::Access::kReadWrite);
+        create<sem::Pointer>(atomicI32, ast::AddressSpace::kWorkgroup, ast::Access::kReadWrite);
     auto result = table->Lookup(BuiltinType::kAtomicLoad, utils::Vector{ptr}, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();
     ASSERT_EQ(Diagnostics().str(), "");
@@ -236,7 +236,7 @@ TEST_F(IntrinsicTableTest, MismatchPointer) {
 
 TEST_F(IntrinsicTableTest, MatchArray) {
     auto* arr = create<sem::Array>(create<sem::U32>(), sem::RuntimeArrayCount{}, 4u, 4u, 4u, 4u);
-    auto* arr_ptr = create<sem::Pointer>(arr, ast::StorageClass::kStorage, ast::Access::kReadWrite);
+    auto* arr_ptr = create<sem::Pointer>(arr, ast::AddressSpace::kStorage, ast::Access::kReadWrite);
     auto result = table->Lookup(BuiltinType::kArrayLength, utils::Vector{arr_ptr}, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();
     ASSERT_EQ(Diagnostics().str(), "");
@@ -424,7 +424,7 @@ TEST_F(IntrinsicTableTest, ImplicitLoadOnReference) {
     auto result = table->Lookup(
         BuiltinType::kCos,
         utils::Vector{
-            create<sem::Reference>(f32, ast::StorageClass::kFunction, ast::Access::kReadWrite),
+            create<sem::Reference>(f32, ast::AddressSpace::kFunction, ast::Access::kReadWrite),
         },
         Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();

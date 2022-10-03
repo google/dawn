@@ -26,64 +26,64 @@ namespace {
 
 struct ResolverAtomicValidationTest : public resolver::TestHelper, public testing::Test {};
 
-TEST_F(ResolverAtomicValidationTest, StorageClass_WorkGroup) {
-    GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.i32()), ast::StorageClass::kWorkgroup);
+TEST_F(ResolverAtomicValidationTest, AddressSpace_WorkGroup) {
+    GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.i32()), ast::AddressSpace::kWorkgroup);
 
     EXPECT_TRUE(r()->Resolve());
 }
 
-TEST_F(ResolverAtomicValidationTest, StorageClass_Storage) {
-    GlobalVar("g", ty.atomic(Source{{12, 34}}, ty.i32()), ast::StorageClass::kStorage,
+TEST_F(ResolverAtomicValidationTest, AddressSpace_Storage) {
+    GlobalVar("g", ty.atomic(Source{{12, 34}}, ty.i32()), ast::AddressSpace::kStorage,
               ast::Access::kReadWrite, Group(0_a), Binding(0_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
-TEST_F(ResolverAtomicValidationTest, StorageClass_Storage_Struct) {
+TEST_F(ResolverAtomicValidationTest, AddressSpace_Storage_Struct) {
     auto* s = Structure("s", utils::Vector{Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
-    GlobalVar("g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kReadWrite, Group(0_a),
+    GlobalVar("g", ty.Of(s), ast::AddressSpace::kStorage, ast::Access::kReadWrite, Group(0_a),
               Binding(0_a));
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverAtomicValidationTest, InvalidType) {
-    GlobalVar("a", ty.atomic(ty.f32(Source{{12, 34}})), ast::StorageClass::kWorkgroup);
+    GlobalVar("a", ty.atomic(ty.f32(Source{{12, 34}})), ast::AddressSpace::kWorkgroup);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: atomic only supports i32 or u32 types");
 }
 
-TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_Simple) {
-    GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.i32()), ast::StorageClass::kPrivate);
+TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_Simple) {
+    GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.i32()), ast::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: atomic variables must have <storage> or <workgroup> "
-              "storage class");
+              "address space");
 }
 
-TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_Array) {
-    GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.i32()), ast::StorageClass::kPrivate);
+TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_Array) {
+    GlobalVar("a", ty.atomic(Source{{12, 34}}, ty.i32()), ast::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: atomic variables must have <storage> or <workgroup> "
-              "storage class");
+              "address space");
 }
 
-TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_Struct) {
+TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_Struct) {
     auto* s = Structure("s", utils::Vector{Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
-    GlobalVar("g", ty.Of(s), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(s), ast::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "error: atomic variables must have <storage> or <workgroup> "
-              "storage class\n"
+              "address space\n"
               "note: atomic sub-type of 's' is declared here");
 }
 
-TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_StructOfStruct) {
+TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_StructOfStruct) {
     // struct Inner { m : atomic<i32>; };
     // struct Outer { m : array<Inner, 4>; };
     // var<private> g : Outer;
@@ -91,16 +91,16 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_StructOfStruct) {
     auto* Inner =
         Structure("Inner", utils::Vector{Member("m", ty.atomic(Source{{12, 34}}, ty.i32()))});
     auto* Outer = Structure("Outer", utils::Vector{Member("m", ty.Of(Inner))});
-    GlobalVar("g", ty.Of(Outer), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(Outer), ast::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "error: atomic variables must have <storage> or <workgroup> "
-              "storage class\n"
+              "address space\n"
               "note: atomic sub-type of 'Outer' is declared here");
 }
 
-TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_StructOfStructOfArray) {
+TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_StructOfStructOfArray) {
     // struct Inner { m : array<atomic<i32>, 4>; };
     // struct Outer { m : array<Inner, 4>; };
     // var<private> g : Outer;
@@ -108,46 +108,46 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_StructOfStructOfArray) 
     auto* Inner =
         Structure("Inner", utils::Vector{Member(Source{{12, 34}}, "m", ty.atomic(ty.i32()))});
     auto* Outer = Structure("Outer", utils::Vector{Member("m", ty.Of(Inner))});
-    GlobalVar("g", ty.Of(Outer), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(Outer), ast::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "error: atomic variables must have <storage> or <workgroup> "
-              "storage class\n"
+              "address space\n"
               "12:34 note: atomic sub-type of 'Outer' is declared here");
 }
 
-TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_ArrayOfArray) {
+TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_ArrayOfArray) {
     // type AtomicArray = array<atomic<i32>, 5>;
     // var<private> v: array<s, 5>;
 
     auto* atomic_array =
         Alias(Source{{12, 34}}, "AtomicArray", ty.atomic(Source{{12, 34}}, ty.i32()));
-    GlobalVar(Source{{56, 78}}, "v", ty.Of(atomic_array), ast::StorageClass::kPrivate);
+    GlobalVar(Source{{56, 78}}, "v", ty.Of(atomic_array), ast::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "error: atomic variables must have <storage> or <workgroup> "
-              "storage class");
+              "address space");
 }
 
-TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_ArrayOfStruct) {
+TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_ArrayOfStruct) {
     // struct S{
     //   m: atomic<u32>;
     // };
     // var<private> v: array<S, 5u>;
 
     auto* s = Structure("S", utils::Vector{Member("m", ty.atomic<u32>())});
-    GlobalVar(Source{{56, 78}}, "v", ty.array(ty.Of(s), 5_u), ast::StorageClass::kPrivate);
+    GlobalVar(Source{{56, 78}}, "v", ty.array(ty.Of(s), 5_u), ast::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "error: atomic variables must have <storage> or <workgroup> "
-              "storage class\n"
+              "address space\n"
               "note: atomic sub-type of 'array<S, 5>' is declared here");
 }
 
-TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_ArrayOfStructOfArray) {
+TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_ArrayOfStructOfArray) {
     // type AtomicArray = array<atomic<i32>, 5u>;
     // struct S{
     //   m: AtomicArray;
@@ -157,16 +157,16 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_ArrayOfStructOfArray) {
     auto* atomic_array =
         Alias(Source{{12, 34}}, "AtomicArray", ty.atomic(Source{{12, 34}}, ty.i32()));
     auto* s = Structure("S", utils::Vector{Member("m", ty.Of(atomic_array))});
-    GlobalVar(Source{{56, 78}}, "v", ty.array(ty.Of(s), 5_u), ast::StorageClass::kPrivate);
+    GlobalVar(Source{{56, 78}}, "v", ty.array(ty.Of(s), 5_u), ast::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "error: atomic variables must have <storage> or <workgroup> "
-              "storage class\n"
+              "address space\n"
               "note: atomic sub-type of 'array<S, 5>' is declared here");
 }
 
-TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_Complex) {
+TEST_F(ResolverAtomicValidationTest, InvalidAddressSpace_Complex) {
     // type AtomicArray = array<atomic<i32>, 5u>;
     // struct S6 { x: array<i32, 4>; };
     // struct S5 { x: S6;
@@ -198,35 +198,35 @@ TEST_F(ResolverAtomicValidationTest, InvalidStorageClass_Complex) {
     auto* s2 = Structure("S2", utils::Vector{Member("x", ty.Of(s3))});
     auto* s1 = Structure("S1", utils::Vector{Member("x", ty.Of(s2))});
     auto* s0 = Structure("S0", utils::Vector{Member("x", ty.Of(s1))});
-    GlobalVar(Source{{56, 78}}, "g", ty.Of(s0), ast::StorageClass::kPrivate);
+    GlobalVar(Source{{56, 78}}, "g", ty.Of(s0), ast::AddressSpace::kPrivate);
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "error: atomic variables must have <storage> or <workgroup> "
-              "storage class\n"
+              "address space\n"
               "note: atomic sub-type of 'S0' is declared here");
 }
 
 TEST_F(ResolverAtomicValidationTest, Struct_AccessMode_Read) {
     auto* s = Structure("s", utils::Vector{Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
-    GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::AddressSpace::kStorage, ast::Access::kRead,
               Group(0_a), Binding(0_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "error: atomic variables in <storage> storage class must have read_write "
+              "error: atomic variables in <storage> address space must have read_write "
               "access mode\n"
               "note: atomic sub-type of 's' is declared here");
 }
 
 TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_Struct) {
     auto* s = Structure("s", utils::Vector{Member("a", ty.atomic(Source{{12, 34}}, ty.i32()))});
-    GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{56, 78}}, "g", ty.Of(s), ast::AddressSpace::kStorage, ast::Access::kRead,
               Group(0_a), Binding(0_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "error: atomic variables in <storage> storage class must have read_write "
+              "error: atomic variables in <storage> address space must have read_write "
               "access mode\n"
               "note: atomic sub-type of 's' is declared here");
 }
@@ -239,12 +239,12 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_StructOfStruct) {
     auto* Inner =
         Structure("Inner", utils::Vector{Member("m", ty.atomic(Source{{12, 34}}, ty.i32()))});
     auto* Outer = Structure("Outer", utils::Vector{Member("m", ty.Of(Inner))});
-    GlobalVar(Source{{56, 78}}, "g", ty.Of(Outer), ast::StorageClass::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{56, 78}}, "g", ty.Of(Outer), ast::AddressSpace::kStorage, ast::Access::kRead,
               Group(0_a), Binding(0_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "error: atomic variables in <storage> storage class must have read_write "
+              "error: atomic variables in <storage> address space must have read_write "
               "access mode\n"
               "note: atomic sub-type of 'Outer' is declared here");
 }
@@ -257,12 +257,12 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_StructOfStructOfArray) {
     auto* Inner =
         Structure("Inner", utils::Vector{Member(Source{{12, 34}}, "m", ty.atomic(ty.i32()))});
     auto* Outer = Structure("Outer", utils::Vector{Member("m", ty.Of(Inner))});
-    GlobalVar(Source{{56, 78}}, "g", ty.Of(Outer), ast::StorageClass::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{56, 78}}, "g", ty.Of(Outer), ast::AddressSpace::kStorage, ast::Access::kRead,
               Group(0_a), Binding(0_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "error: atomic variables in <storage> storage class must have "
+              "error: atomic variables in <storage> address space must have "
               "read_write access mode\n"
               "12:34 note: atomic sub-type of 'Outer' is declared here");
 }
@@ -299,12 +299,12 @@ TEST_F(ResolverAtomicValidationTest, InvalidAccessMode_Complex) {
     auto* s2 = Structure("S2", utils::Vector{Member("x", ty.Of(s3))});
     auto* s1 = Structure("S1", utils::Vector{Member("x", ty.Of(s2))});
     auto* s0 = Structure("S0", utils::Vector{Member("x", ty.Of(s1))});
-    GlobalVar(Source{{56, 78}}, "g", ty.Of(s0), ast::StorageClass::kStorage, ast::Access::kRead,
+    GlobalVar(Source{{56, 78}}, "g", ty.Of(s0), ast::AddressSpace::kStorage, ast::Access::kRead,
               Group(0_a), Binding(0_a));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "error: atomic variables in <storage> storage class must have "
+              "error: atomic variables in <storage> address space must have "
               "read_write access mode\n"
               "note: atomic sub-type of 'S0' is declared here");
 }

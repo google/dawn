@@ -62,10 +62,10 @@ class LocalizeStructArrayAssignment::State {
         return result;
     }
 
-    // Returns the type and storage class of the originating variable of the lhs
+    // Returns the type and address space of the originating variable of the lhs
     // of the assignment statement.
     // See https://www.w3.org/TR/WGSL/#originating-variable-section
-    std::pair<const sem::Type*, ast::StorageClass> GetOriginatingTypeAndStorageClass(
+    std::pair<const sem::Type*, ast::AddressSpace> GetOriginatingTypeAndAddressSpace(
         const ast::AssignmentStatement* assign_stmt) {
         auto* source_var = ctx.src->Sem().Get(assign_stmt->lhs)->SourceVariable();
         if (!source_var) {
@@ -77,9 +77,9 @@ class LocalizeStructArrayAssignment::State {
 
         auto* type = source_var->Type();
         if (auto* ref = type->As<sem::Reference>()) {
-            return {ref->StoreType(), ref->StorageClass()};
+            return {ref->StoreType(), ref->AddressSpace()};
         } else if (auto* ptr = type->As<sem::Pointer>()) {
-            return {ptr->StoreType(), ptr->StorageClass()};
+            return {ptr->StoreType(), ptr->AddressSpace()};
         }
 
         TINT_ICE(Transform, b.Diagnostics())
@@ -111,9 +111,9 @@ class LocalizeStructArrayAssignment::State {
             if (!ContainsStructArrayIndex(assign_stmt->lhs)) {
                 return nullptr;
             }
-            auto og = GetOriginatingTypeAndStorageClass(assign_stmt);
-            if (!(og.first->Is<sem::Struct>() && (og.second == ast::StorageClass::kFunction ||
-                                                  og.second == ast::StorageClass::kPrivate))) {
+            auto og = GetOriginatingTypeAndAddressSpace(assign_stmt);
+            if (!(og.first->Is<sem::Struct>() && (og.second == ast::AddressSpace::kFunction ||
+                                                  og.second == ast::AddressSpace::kPrivate))) {
                 return nullptr;
             }
 

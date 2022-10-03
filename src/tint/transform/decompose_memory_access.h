@@ -75,9 +75,9 @@ class DecomposeMemoryAccess final : public Castable<DecomposeMemoryAccess, Trans
         /// @param pid the identifier of the program that owns this node
         /// @param nid the unique node identifier
         /// @param o the op of the intrinsic
-        /// @param sc the storage class of the buffer
+        /// @param sc the address space of the buffer
         /// @param ty the data type of the intrinsic
-        Intrinsic(ProgramID pid, ast::NodeID nid, Op o, ast::StorageClass sc, DataType ty);
+        Intrinsic(ProgramID pid, ast::NodeID nid, Op o, ast::AddressSpace sc, DataType ty);
         /// Destructor
         ~Intrinsic() override;
 
@@ -96,8 +96,8 @@ class DecomposeMemoryAccess final : public Castable<DecomposeMemoryAccess, Trans
         /// The op of the intrinsic
         const Op op;
 
-        /// The storage class of the buffer this intrinsic operates on
-        ast::StorageClass const storage_class;
+        /// The address space of the buffer this intrinsic operates on
+        ast::AddressSpace const address_space;
 
         /// The type of the intrinsic
         const DataType type;

@@ -57,8 +57,8 @@ TEST_F(BuilderTest, Switch_WithCase) {
     //   default: {}
     // }
 
-    auto* v = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
-    auto* a = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
+    auto* v = GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate);
+    auto* a = GlobalVar("a", ty.i32(), ast::AddressSpace::kPrivate);
 
     auto* func = Func("a_func", utils::Empty, ty.void_(),
                       utils::Vector{
@@ -114,8 +114,8 @@ TEST_F(BuilderTest, Switch_WithCase_Unsigned) {
     //   default: {}
     // }
 
-    auto* v = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
-    auto* a = GlobalVar("a", ty.u32(), ast::StorageClass::kPrivate);
+    auto* v = GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate);
+    auto* a = GlobalVar("a", ty.u32(), ast::AddressSpace::kPrivate);
 
     auto* func = Func("a_func", utils::Empty, ty.void_(),
                       utils::Vector{
@@ -171,8 +171,8 @@ TEST_F(BuilderTest, Switch_WithDefault) {
     //     v = 1i;
     //  }
 
-    auto* v = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
-    auto* a = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
+    auto* v = GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate);
+    auto* a = GlobalVar("a", ty.i32(), ast::AddressSpace::kPrivate);
 
     auto* func = Func("a_func", utils::Empty, ty.void_(),
                       utils::Vector{
@@ -221,8 +221,8 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
     //      v = 3i;
     //  }
 
-    auto* v = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
-    auto* a = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
+    auto* v = GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate);
+    auto* a = GlobalVar("a", ty.i32(), ast::AddressSpace::kPrivate);
 
     auto* func = Func("a_func", utils::Empty, ty.void_(),
                       utils::Vector{
@@ -284,8 +284,8 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
     //      v = 3i;
     //  }
 
-    auto* v = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
-    auto* a = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
+    auto* v = GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate);
+    auto* a = GlobalVar("a", ty.i32(), ast::AddressSpace::kPrivate);
 
     auto* func = Func("a_func", utils::Empty, ty.void_(),
                       utils::Vector{
@@ -346,8 +346,8 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
     //   default: {}
     // }
 
-    auto* v = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
-    auto* a = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
+    auto* v = GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate);
+    auto* a = GlobalVar("a", ty.i32(), ast::AddressSpace::kPrivate);
 
     auto* func = Func("a_func", utils::Empty, ty.void_(),
                       utils::Vector{

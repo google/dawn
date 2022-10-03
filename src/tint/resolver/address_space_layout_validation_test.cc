@@ -22,10 +22,10 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::resolver {
 namespace {
 
-using ResolverStorageClassLayoutValidationTest = ResolverTest;
+using ResolverAddressSpaceLayoutValidationTest = ResolverTest;
 
 // Detect unaligned member for storage buffers
-TEST_F(ResolverStorageClassLayoutValidationTest, StorageBuffer_UnalignedMember) {
+TEST_F(ResolverAddressSpaceLayoutValidationTest, StorageBuffer_UnalignedMember) {
     // struct S {
     //     @size(5) a : f32;
     //     @align(1) b : f32;
@@ -39,13 +39,13 @@ TEST_F(ResolverStorageClassLayoutValidationTest, StorageBuffer_UnalignedMember) 
                   Member(Source{{34, 56}}, "b", ty.f32(), utils::Vector{MemberAlign(1_i)}),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("S"), ast::StorageClass::kStorage, Group(0_a),
+    GlobalVar(Source{{78, 90}}, "a", ty.type_name("S"), ast::AddressSpace::kStorage, Group(0_a),
               Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(34:56 error: the offset of a struct member of type 'f32' in storage class 'storage' must be a multiple of 4 bytes, but 'b' is currently at offset 5. Consider setting @align(4) on this member
+        R"(34:56 error: the offset of a struct member of type 'f32' in address space 'storage' must be a multiple of 4 bytes, but 'b' is currently at offset 5. Consider setting @align(4) on this member
 12:34 note: see layout of struct:
 /*           align(4) size(12) */ struct S {
 /* offset(0) align(4) size( 5) */   a : f32;
@@ -55,7 +55,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, StorageBuffer_UnalignedMember) 
 78:90 note: see declaration of variable)");
 }
 
-TEST_F(ResolverStorageClassLayoutValidationTest, StorageBuffer_UnalignedMember_SuggestedFix) {
+TEST_F(ResolverAddressSpaceLayoutValidationTest, StorageBuffer_UnalignedMember_SuggestedFix) {
     // struct S {
     //     @size(5) a : f32;
     //     @align(4) b : f32;
@@ -69,14 +69,14 @@ TEST_F(ResolverStorageClassLayoutValidationTest, StorageBuffer_UnalignedMember_S
                   Member(Source{{34, 56}}, "b", ty.f32(), utils::Vector{MemberAlign(4_i)}),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("S"), ast::StorageClass::kStorage, Group(0_a),
+    GlobalVar(Source{{78, 90}}, "a", ty.type_name("S"), ast::AddressSpace::kStorage, Group(0_a),
               Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 // Detect unaligned struct member for uniform buffers
-TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_Struct) {
+TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_Struct) {
     // struct Inner {
     //   scalar : i32;
     // };
@@ -100,13 +100,13 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_S
                   Member(Source{{56, 78}}, "inner", ty.type_name("Inner")),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0_a),
+    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::AddressSpace::kUniform, Group(0_a),
               Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(56:78 error: the offset of a struct member of type 'Inner' in storage class 'uniform' must be a multiple of 16 bytes, but 'inner' is currently at offset 4. Consider setting @align(16) on this member
+        R"(56:78 error: the offset of a struct member of type 'Inner' in address space 'uniform' must be a multiple of 16 bytes, but 'inner' is currently at offset 4. Consider setting @align(16) on this member
 34:56 note: see layout of struct:
 /*           align(4) size(8) */ struct Outer {
 /* offset(0) align(4) size(4) */   scalar : f32;
@@ -119,7 +119,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_S
 78:90 note: see declaration of variable)");
 }
 
-TEST_F(ResolverStorageClassLayoutValidationTest,
+TEST_F(ResolverAddressSpaceLayoutValidationTest,
        UniformBuffer_UnalignedMember_Struct_SuggestedFix) {
     // struct Inner {
     //   scalar : i32;
@@ -145,14 +145,14 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
                          utils::Vector{MemberAlign(16_i)}),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0_a),
+    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::AddressSpace::kUniform, Group(0_a),
               Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 // Detect unaligned array member for uniform buffers
-TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_Array) {
+TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_Array) {
     // type Inner = @stride(16) array<f32, 10u>;
     //
     // struct Outer {
@@ -170,13 +170,13 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_A
                   Member(Source{{56, 78}}, "inner", ty.type_name("Inner")),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0_a),
+    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::AddressSpace::kUniform, Group(0_a),
               Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(56:78 error: the offset of a struct member of type '@stride(16) array<f32, 10>' in storage class 'uniform' must be a multiple of 16 bytes, but 'inner' is currently at offset 4. Consider setting @align(16) on this member
+        R"(56:78 error: the offset of a struct member of type '@stride(16) array<f32, 10>' in address space 'uniform' must be a multiple of 16 bytes, but 'inner' is currently at offset 4. Consider setting @align(16) on this member
 12:34 note: see layout of struct:
 /*             align(4) size(164) */ struct Outer {
 /* offset(  0) align(4) size(  4) */   scalar : f32;
@@ -185,7 +185,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_A
 78:90 note: see declaration of variable)");
 }
 
-TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_Array_SuggestedFix) {
+TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_UnalignedMember_Array_SuggestedFix) {
     // type Inner = @stride(16) array<f32, 10u>;
     //
     // struct Outer {
@@ -204,7 +204,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_A
                          utils::Vector{MemberAlign(16_i)}),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0_a),
+    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::AddressSpace::kUniform, Group(0_a),
               Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -212,7 +212,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_UnalignedMember_A
 
 // Detect uniform buffers with byte offset between 2 members that is not a
 // multiple of 16 bytes
-TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_MembersOffsetNotMultipleOf16) {
+TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_MembersOffsetNotMultipleOf16) {
     // struct Inner {
     //   @align(1) @size(5) scalar : i32;
     // };
@@ -236,7 +236,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_MembersOffsetNotM
                   Member(Source{{78, 90}}, "scalar", ty.i32()),
               });
 
-    GlobalVar(Source{{22, 24}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0_a),
+    GlobalVar(Source{{22, 24}}, "a", ty.type_name("Outer"), ast::AddressSpace::kUniform, Group(0_a),
               Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -257,7 +257,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_MembersOffsetNotM
 }
 
 // See https://crbug.com/tint/1344
-TEST_F(ResolverStorageClassLayoutValidationTest,
+TEST_F(ResolverAddressSpaceLayoutValidationTest,
        UniformBuffer_MembersOffsetNotMultipleOf16_InnerMoreMembersThanOuter) {
     // struct Inner {
     //   a : i32;
@@ -288,7 +288,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
                   Member(Source{{78, 90}}, "scalar", ty.i32()),
               });
 
-    GlobalVar(Source{{22, 24}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0_a),
+    GlobalVar(Source{{22, 24}}, "a", ty.type_name("Outer"), ast::AddressSpace::kUniform, Group(0_a),
               Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -311,7 +311,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
 22:24 note: see declaration of variable)");
 }
 
-TEST_F(ResolverStorageClassLayoutValidationTest,
+TEST_F(ResolverAddressSpaceLayoutValidationTest,
        UniformBuffer_MembersOffsetNotMultipleOf16_SuggestedFix) {
     // struct Inner {
     //   @align(1) @size(5) scalar : i32;
@@ -336,7 +336,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
                   Member(Source{{78, 90}}, "scalar", ty.i32(), utils::Vector{MemberAlign(16_i)}),
               });
 
-    GlobalVar(Source{{22, 34}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0_a),
+    GlobalVar(Source{{22, 34}}, "a", ty.type_name("Outer"), ast::AddressSpace::kUniform, Group(0_a),
               Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -344,7 +344,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest,
 
 // Make sure that this doesn't fail validation because vec3's align is 16, but
 // size is 12. 's' should be at offset 12, which is okay here.
-TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_Vec3MemberOffset_NoFail) {
+TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_Vec3MemberOffset_NoFail) {
     // struct ScalarPackedAtEndOfVec3 {
     //     v : vec3<f32>;
     //     s : f32;
@@ -358,13 +358,13 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_Vec3MemberOffset_
                                          });
 
     GlobalVar(Source{{78, 90}}, "a", ty.type_name("ScalarPackedAtEndOfVec3"),
-              ast::StorageClass::kUniform, Group(0_a), Binding(0_a));
+              ast::AddressSpace::kUniform, Group(0_a), Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 // Detect array stride must be a multiple of 16 bytes for uniform buffers
-TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStride_Scalar) {
+TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStride_Scalar) {
     // type Inner = array<f32, 10u>;
     //
     // struct Outer {
@@ -383,7 +383,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
                   Member("scalar", ty.i32()),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0_a),
+    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::AddressSpace::kUniform, Group(0_a),
               Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -398,7 +398,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 78:90 note: see declaration of variable)");
 }
 
-TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStride_Vector) {
+TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStride_Vector) {
     // type Inner = array<vec2<f32>, 10u>;
     //
     // struct Outer {
@@ -417,7 +417,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
                   Member("scalar", ty.i32()),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0_a),
+    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::AddressSpace::kUniform, Group(0_a),
               Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -433,7 +433,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 78:90 note: see declaration of variable)");
 }
 
-TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStride_Struct) {
+TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStride_Struct) {
     // struct ArrayElem {
     //   a : f32;
     //   b : i32;
@@ -460,7 +460,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
                   Member("scalar", ty.i32()),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0_a),
+    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::AddressSpace::kUniform, Group(0_a),
               Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -475,11 +475,11 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 78:90 note: see declaration of variable)");
 }
 
-TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStride_TopLevelArray) {
+TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStride_TopLevelArray) {
     // @group(0) @binding(0)
     // var<uniform> a : array<f32, 4u>;
     GlobalVar(Source{{78, 90}}, "a", ty.array(Source{{34, 56}}, ty.f32(), 4_u),
-              ast::StorageClass::kUniform, Group(0_a), Binding(0_a));
+              ast::AddressSpace::kUniform, Group(0_a), Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -487,7 +487,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
         R"(34:56 error: uniform storage requires that array elements be aligned to 16 bytes, but array element alignment is currently 4. Consider using a vector or struct as the element type instead.)");
 }
 
-TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStride_NestedArray) {
+TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStride_NestedArray) {
     // struct Outer {
     //   inner : array<array<f32, 4u>, 4u>
     // };
@@ -500,7 +500,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
                   Member("inner", ty.array(Source{{34, 56}}, ty.array(ty.f32(), 4_u), 4_u)),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0_a),
+    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::AddressSpace::kUniform, Group(0_a),
               Binding(0_a));
 
     ASSERT_FALSE(r()->Resolve());
@@ -514,7 +514,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
 78:90 note: see declaration of variable)");
 }
 
-TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStride_SuggestedFix) {
+TEST_F(ResolverAddressSpaceLayoutValidationTest, UniformBuffer_InvalidArrayStride_SuggestedFix) {
     // type Inner = @stride(16) array<f32, 10u>;
     //
     // struct Outer {
@@ -533,14 +533,14 @@ TEST_F(ResolverStorageClassLayoutValidationTest, UniformBuffer_InvalidArrayStrid
                   Member("scalar", ty.i32()),
               });
 
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::StorageClass::kUniform, Group(0_a),
+    GlobalVar(Source{{78, 90}}, "a", ty.type_name("Outer"), ast::AddressSpace::kUniform, Group(0_a),
               Binding(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
 // Detect unaligned member for push constants buffers
-TEST_F(ResolverStorageClassLayoutValidationTest, PushConstant_UnalignedMember) {
+TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_UnalignedMember) {
     // enable chromium_experimental_push_constant;
     // struct S {
     //     @size(5) a : f32;
@@ -552,12 +552,12 @@ TEST_F(ResolverStorageClassLayoutValidationTest, PushConstant_UnalignedMember) {
         Source{{12, 34}}, "S",
         utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(5_a)}),
                       Member(Source{{34, 56}}, "b", ty.f32(), utils::Vector{MemberAlign(1_i)})});
-    GlobalVar(Source{{78, 90}}, "a", ty.type_name("S"), ast::StorageClass::kPushConstant);
+    GlobalVar(Source{{78, 90}}, "a", ty.type_name("S"), ast::AddressSpace::kPushConstant);
 
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(34:56 error: the offset of a struct member of type 'f32' in storage class 'push_constant' must be a multiple of 4 bytes, but 'b' is currently at offset 5. Consider setting @align(4) on this member
+        R"(34:56 error: the offset of a struct member of type 'f32' in address space 'push_constant' must be a multiple of 4 bytes, but 'b' is currently at offset 5. Consider setting @align(4) on this member
 12:34 note: see layout of struct:
 /*           align(4) size(12) */ struct S {
 /* offset(0) align(4) size( 5) */   a : f32;
@@ -567,7 +567,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, PushConstant_UnalignedMember) {
 78:90 note: see declaration of variable)");
 }
 
-TEST_F(ResolverStorageClassLayoutValidationTest, PushConstant_Aligned) {
+TEST_F(ResolverAddressSpaceLayoutValidationTest, PushConstant_Aligned) {
     // enable chromium_experimental_push_constant;
     // struct S {
     //     @size(5) a : f32;
@@ -577,7 +577,7 @@ TEST_F(ResolverStorageClassLayoutValidationTest, PushConstant_Aligned) {
     Enable(ast::Extension::kChromiumExperimentalPushConstant);
     Structure("S", utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize(5_a)}),
                                  Member("b", ty.f32(), utils::Vector{MemberAlign(4_i)})});
-    GlobalVar("a", ty.type_name("S"), ast::StorageClass::kPushConstant);
+    GlobalVar("a", ty.type_name("S"), ast::AddressSpace::kPushConstant);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }

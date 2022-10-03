@@ -387,20 +387,20 @@ class Resolver {
     /// @param index the index of the parameter
     sem::Parameter* Parameter(const ast::Parameter* param, uint32_t index);
 
-    /// Records the storage class usage for the given type, and any transient
+    /// Records the address space usage for the given type, and any transient
     /// dependencies of the type. Validates that the type can be used for the
-    /// given storage class, erroring if it cannot.
-    /// @param sc the storage class to apply to the type and transitent types
-    /// @param ty the type to apply the storage class on
+    /// given address space, erroring if it cannot.
+    /// @param sc the address space to apply to the type and transitent types
+    /// @param ty the type to apply the address space on
     /// @param usage the Source of the root variable declaration that uses the
-    /// given type and storage class. Used for generating sensible error
+    /// given type and address space. Used for generating sensible error
     /// messages.
     /// @returns true on success, false on error
-    bool ApplyStorageClassUsageToType(ast::StorageClass sc, sem::Type* ty, const Source& usage);
+    bool ApplyAddressSpaceUsageToType(ast::AddressSpace sc, sem::Type* ty, const Source& usage);
 
-    /// @param storage_class the storage class
-    /// @returns the default access control for the given storage class
-    ast::Access DefaultAccessForStorageClass(ast::StorageClass storage_class);
+    /// @param address_space the address space
+    /// @returns the default access control for the given address space
+    ast::Access DefaultAccessForAddressSpace(ast::AddressSpace address_space);
 
     /// Allocate constant IDs for pipeline-overridable constants.
     /// @returns true on success, false on error

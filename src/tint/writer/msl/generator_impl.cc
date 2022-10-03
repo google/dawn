@@ -193,7 +193,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         // Use the SSBO binding numbers as the indices for the buffer size lookups.
         for (auto* var : in->AST().GlobalVariables()) {
             auto* global = in->Sem().Get<sem::GlobalVariable>(var);
-            if (global && global->StorageClass() == ast::StorageClass::kStorage) {
+            if (global && global->AddressSpace() == ast::AddressSpace::kStorage) {
                 array_length_from_uniform_cfg.bindpoint_to_size_index.emplace(
                     global->BindingPoint(), global->BindingPoint().binding);
             }
@@ -880,7 +880,7 @@ bool GeneratorImpl::EmitAtomicCall(std::ostream& out,
 
         case sem::BuiltinType::kAtomicCompareExchangeWeak: {
             auto* ptr_ty = TypeOf(expr->args[0])->UnwrapRef()->As<sem::Pointer>();
-            auto sc = ptr_ty->StorageClass();
+            auto sc = ptr_ty->AddressSpace();
             auto* str = builtin->ReturnType()->As<sem::Struct>();
 
             auto func = utils::GetOrCreate(
@@ -2002,12 +2002,12 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
                     return false;
                 }
             } else if (auto* ptr = param->type->As<ast::Pointer>()) {
-                auto sc = ptr->storage_class;
-                if (sc == ast::StorageClass::kWorkgroup) {
+                auto sc = ptr->address_space;
+                if (sc == ast::AddressSpace::kWorkgroup) {
                     auto& allocations = workgroup_allocations_[func_name];
                     out << " [[threadgroup(" << allocations.size() << ")]]";
                     allocations.push_back(program_->Sem().Get(ptr->type)->Size());
-                } else if (sc == ast::StorageClass::kStorage || sc == ast::StorageClass::kUniform) {
+                } else if (sc == ast::AddressSpace::kStorage || sc == ast::AddressSpace::kUniform) {
                     uint32_t binding = get_binding_index(param);
                     if (binding == kInvalidBindingIndex) {
                         return false;
@@ -2015,7 +2015,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
                     out << " [[buffer(" << binding << ")]]";
                 } else {
                     TINT_ICE(Writer, diagnostics_)
-                        << "invalid pointer storage class for entry point parameter";
+                        << "invalid pointer address space for entry point parameter";
                     return false;
                 }
             } else {
@@ -2551,7 +2551,7 @@ bool GeneratorImpl::EmitType(std::ostream& out,
             if (ptr->Access() == ast::Access::kRead) {
                 out << "const ";
             }
-            if (!EmitStorageClass(out, ptr->StorageClass())) {
+            if (!EmitAddressSpace(out, ptr->AddressSpace())) {
                 return false;
             }
             out << " ";
@@ -2698,26 +2698,26 @@ bool GeneratorImpl::EmitTypeAndName(std::ostream& out,
     return true;
 }
 
-bool GeneratorImpl::EmitStorageClass(std::ostream& out, ast::StorageClass sc) {
+bool GeneratorImpl::EmitAddressSpace(std::ostream& out, ast::AddressSpace sc) {
     switch (sc) {
-        case ast::StorageClass::kFunction:
-        case ast::StorageClass::kPrivate:
-        case ast::StorageClass::kHandle:
+        case ast::AddressSpace::kFunction:
+        case ast::AddressSpace::kPrivate:
+        case ast::AddressSpace::kHandle:
             out << "thread";
             return true;
-        case ast::StorageClass::kWorkgroup:
+        case ast::AddressSpace::kWorkgroup:
             out << "threadgroup";
             return true;
-        case ast::StorageClass::kStorage:
+        case ast::AddressSpace::kStorage:
             out << "device";
             return true;
-        case ast::StorageClass::kUniform:
+        case ast::AddressSpace::kUniform:
             out << "constant";
             return true;
         default:
             break;
     }
-    TINT_ICE(Writer, diagnostics_) << "unhandled storage class: " << sc;
+    TINT_ICE(Writer, diagnostics_) << "unhandled address space: " << sc;
     return false;
 }
 
@@ -2998,19 +2998,19 @@ bool GeneratorImpl::EmitVar(const ast::Var* var) {
 
     auto out = line();
 
-    switch (sem->StorageClass()) {
-        case ast::StorageClass::kFunction:
-        case ast::StorageClass::kHandle:
-        case ast::StorageClass::kNone:
+    switch (sem->AddressSpace()) {
+        case ast::AddressSpace::kFunction:
+        case ast::AddressSpace::kHandle:
+        case ast::AddressSpace::kNone:
             break;
-        case ast::StorageClass::kPrivate:
+        case ast::AddressSpace::kPrivate:
             out << "thread ";
             break;
-        case ast::StorageClass::kWorkgroup:
+        case ast::AddressSpace::kWorkgroup:
             out << "threadgroup ";
             break;
         default:
-            TINT_ICE(Writer, diagnostics_) << "unhandled variable storage class";
+            TINT_ICE(Writer, diagnostics_) << "unhandled variable address space";
             return false;
     }
 
@@ -3028,9 +3028,9 @@ bool GeneratorImpl::EmitVar(const ast::Var* var) {
         if (!EmitExpression(out, var->constructor)) {
             return false;
         }
-    } else if (sem->StorageClass() == ast::StorageClass::kPrivate ||
-               sem->StorageClass() == ast::StorageClass::kFunction ||
-               sem->StorageClass() == ast::StorageClass::kNone) {
+    } else if (sem->AddressSpace() == ast::AddressSpace::kPrivate ||
+               sem->AddressSpace() == ast::AddressSpace::kFunction ||
+               sem->AddressSpace() == ast::AddressSpace::kNone) {
         out << " = ";
         if (!EmitZeroValue(out, type)) {
             return false;
@@ -3047,19 +3047,19 @@ bool GeneratorImpl::EmitLet(const ast::Let* let) {
 
     auto out = line();
 
-    switch (sem->StorageClass()) {
-        case ast::StorageClass::kFunction:
-        case ast::StorageClass::kHandle:
-        case ast::StorageClass::kNone:
+    switch (sem->AddressSpace()) {
+        case ast::AddressSpace::kFunction:
+        case ast::AddressSpace::kHandle:
+        case ast::AddressSpace::kNone:
             break;
-        case ast::StorageClass::kPrivate:
+        case ast::AddressSpace::kPrivate:
             out << "thread ";
             break;
-        case ast::StorageClass::kWorkgroup:
+        case ast::AddressSpace::kWorkgroup:
             out << "threadgroup ";
             break;
         default:
-            TINT_ICE(Writer, diagnostics_) << "unhandled variable storage class";
+            TINT_ICE(Writer, diagnostics_) << "unhandled variable address space";
             return false;
     }
 

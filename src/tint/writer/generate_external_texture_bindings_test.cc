@@ -23,7 +23,7 @@ namespace {
 
 using namespace tint::number_suffixes;  // NOLINT
 
-constexpr auto kUniform = ast::StorageClass::kUniform;
+constexpr auto kUniform = ast::AddressSpace::kUniform;
 
 class GenerateExternalTextureBindingsTest : public ::testing::Test {};
 

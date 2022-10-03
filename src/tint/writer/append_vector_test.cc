@@ -250,7 +250,7 @@ TEST_F(AppendVectorTest, Vec3i32_i32) {
 
 // AppendVector(vec_12, 3) -> vec3<i32>(vec_12, 3)
 TEST_F(AppendVectorTest, Vec2i32Var_i32) {
-    GlobalVar("vec_12", ty.vec2<i32>(), ast::StorageClass::kPrivate);
+    GlobalVar("vec_12", ty.vec2<i32>(), ast::AddressSpace::kPrivate);
     auto* vec_12 = Expr("vec_12");
     auto* scalar_3 = Expr(3_i);
     WrapInFunction(vec_12, scalar_3);
@@ -286,7 +286,7 @@ TEST_F(AppendVectorTest, Vec2i32Var_i32) {
 
 // AppendVector(1, 2, scalar_3) -> vec3<i32>(1, 2, scalar_3)
 TEST_F(AppendVectorTest, Vec2i32_i32Var) {
-    GlobalVar("scalar_3", ty.i32(), ast::StorageClass::kPrivate);
+    GlobalVar("scalar_3", ty.i32(), ast::AddressSpace::kPrivate);
     auto* scalar_1 = Expr(1_i);
     auto* scalar_2 = Expr(2_i);
     auto* scalar_3 = Expr("scalar_3");
@@ -327,8 +327,8 @@ TEST_F(AppendVectorTest, Vec2i32_i32Var) {
 
 // AppendVector(vec_12, scalar_3) -> vec3<i32>(vec_12, scalar_3)
 TEST_F(AppendVectorTest, Vec2i32Var_i32Var) {
-    GlobalVar("vec_12", ty.vec2<i32>(), ast::StorageClass::kPrivate);
-    GlobalVar("scalar_3", ty.i32(), ast::StorageClass::kPrivate);
+    GlobalVar("vec_12", ty.vec2<i32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("scalar_3", ty.i32(), ast::AddressSpace::kPrivate);
     auto* vec_12 = Expr("vec_12");
     auto* scalar_3 = Expr("scalar_3");
     WrapInFunction(vec_12, scalar_3);
@@ -364,8 +364,8 @@ TEST_F(AppendVectorTest, Vec2i32Var_i32Var) {
 
 // AppendVector(vec_12, scalar_3) -> vec3<i32>(vec_12, i32(scalar_3))
 TEST_F(AppendVectorTest, Vec2i32Var_f32Var) {
-    GlobalVar("vec_12", ty.vec2<i32>(), ast::StorageClass::kPrivate);
-    GlobalVar("scalar_3", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("vec_12", ty.vec2<i32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("scalar_3", ty.f32(), ast::AddressSpace::kPrivate);
     auto* vec_12 = Expr("vec_12");
     auto* scalar_3 = Expr("scalar_3");
     WrapInFunction(vec_12, scalar_3);
@@ -405,8 +405,8 @@ TEST_F(AppendVectorTest, Vec2i32Var_f32Var) {
 
 // AppendVector(vec_12, scalar_3) -> vec3<bool>(vec_12, scalar_3)
 TEST_F(AppendVectorTest, Vec2boolVar_boolVar) {
-    GlobalVar("vec_12", ty.vec2<bool>(), ast::StorageClass::kPrivate);
-    GlobalVar("scalar_3", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("vec_12", ty.vec2<bool>(), ast::AddressSpace::kPrivate);
+    GlobalVar("scalar_3", ty.bool_(), ast::AddressSpace::kPrivate);
     auto* vec_12 = Expr("vec_12");
     auto* scalar_3 = Expr("scalar_3");
     WrapInFunction(vec_12, scalar_3);

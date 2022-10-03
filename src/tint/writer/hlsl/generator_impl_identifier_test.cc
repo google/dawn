@@ -20,7 +20,7 @@ namespace {
 using HlslGeneratorImplTest_Identifier = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Identifier, EmitIdentifierExpression) {
-    GlobalVar("foo", ty.i32(), ast::StorageClass::kPrivate);
+    GlobalVar("foo", ty.i32(), ast::AddressSpace::kPrivate);
 
     auto* i = Expr("foo");
     WrapInFunction(i);

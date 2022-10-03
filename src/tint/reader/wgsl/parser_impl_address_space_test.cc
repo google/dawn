@@ -17,18 +17,18 @@
 namespace tint::reader::wgsl {
 namespace {
 
-struct StorageClassData {
+struct AddressSpaceData {
     const char* input;
-    ast::StorageClass result;
+    ast::AddressSpace result;
 };
-inline std::ostream& operator<<(std::ostream& out, StorageClassData data) {
+inline std::ostream& operator<<(std::ostream& out, AddressSpaceData data) {
     out << std::string(data.input);
     return out;
 }
 
-class ParserStorageClassTest : public ParserImplTestWithParam<StorageClassData> {};
+class ParserAddressSpaceTest : public ParserImplTestWithParam<AddressSpaceData> {};
 
-TEST_P(ParserStorageClassTest, Parses) {
+TEST_P(ParserAddressSpaceTest, Parses) {
     auto params = GetParam();
     auto p = parser(params.input);
 
@@ -42,19 +42,19 @@ TEST_P(ParserStorageClassTest, Parses) {
 }
 INSTANTIATE_TEST_SUITE_P(
     ParserImplTest,
-    ParserStorageClassTest,
-    testing::Values(StorageClassData{"uniform", ast::StorageClass::kUniform},
-                    StorageClassData{"workgroup", ast::StorageClass::kWorkgroup},
-                    StorageClassData{"storage", ast::StorageClass::kStorage},
-                    StorageClassData{"private", ast::StorageClass::kPrivate},
-                    StorageClassData{"function", ast::StorageClass::kFunction}));
+    ParserAddressSpaceTest,
+    testing::Values(AddressSpaceData{"uniform", ast::AddressSpace::kUniform},
+                    AddressSpaceData{"workgroup", ast::AddressSpace::kWorkgroup},
+                    AddressSpaceData{"storage", ast::AddressSpace::kStorage},
+                    AddressSpaceData{"private", ast::AddressSpace::kPrivate},
+                    AddressSpaceData{"function", ast::AddressSpace::kFunction}));
 
-TEST_F(ParserImplTest, StorageClass_NoMatch) {
-    auto p = parser("not-a-storage-class");
+TEST_F(ParserImplTest, AddressSpace_NoMatch) {
+    auto p = parser("not-a-address-space");
     auto sc = p->expect_address_space("test");
     EXPECT_EQ(sc.errored, true);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:1: invalid storage class for test");
+    EXPECT_EQ(p->error(), "1:1: invalid address space for test");
 }
 
 }  // namespace

@@ -43,7 +43,7 @@ struct TypeTest : public TestHelper {
     const sem::Matrix* mat4x3_f16 = create<Matrix>(vec3_f16, 4u);
     const sem::Matrix* mat4x3_af = create<Matrix>(vec3_af, 4u);
     const sem::Reference* ref_u32 =
-        create<Reference>(u32, ast::StorageClass::kPrivate, ast::Access::kReadWrite);
+        create<Reference>(u32, ast::AddressSpace::kPrivate, ast::Access::kReadWrite);
     const sem::Struct* str = create<Struct>(nullptr,
                                             Sym("s"),
                                             StructMemberList{

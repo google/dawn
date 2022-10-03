@@ -21,7 +21,7 @@ using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
     GlobalVar("str", ty.Of(Structure("my_str", utils::Vector{Member("mem", ty.f32())})),
-              ast::StorageClass::kPrivate);
+              ast::AddressSpace::kPrivate);
     auto* expr = MemberAccessor("str", "mem");
     WrapInFunction(expr);
 
@@ -33,7 +33,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_xyz) {
-    GlobalVar("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_vec", ty.vec4<f32>(), ast::AddressSpace::kPrivate);
 
     auto* expr = MemberAccessor("my_vec", "xyz");
     WrapInFunction(expr);
@@ -45,7 +45,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_xyz) {
 }
 
 TEST_F(MslGeneratorImplTest, EmitExpression_MemberAccessor_Swizzle_gbr) {
-    GlobalVar("my_vec", ty.vec4<f32>(), ast::StorageClass::kPrivate);
+    GlobalVar("my_vec", ty.vec4<f32>(), ast::AddressSpace::kPrivate);
 
     auto* expr = MemberAccessor("my_vec", "gbr");
     WrapInFunction(expr);

@@ -325,12 +325,12 @@ struct DefInfo {
     /// example, pointers. crbug.com/tint/98
     bool requires_hoisted_var_def = false;
 
-    /// The storage class to use for this value, if it is of pointer type.
-    /// This is required to carry a storage class override from a storage
-    /// buffer expressed in the old style (with Uniform storage class)
-    /// that needs to be remapped to StorageBuffer storage class.
+    /// The address space to use for this value, if it is of pointer type.
+    /// This is required to carry an address space override from a storage
+    /// buffer expressed in the old style (with Uniform address space)
+    /// that needs to be remapped to StorageBuffer address space.
     /// This is kInvalid for non-pointers.
-    ast::StorageClass storage_class = ast::StorageClass::kInvalid;
+    ast::AddressSpace address_space = ast::AddressSpace::kInvalid;
 
     /// The expression to use when sinking pointers into their use.
     /// When encountering a use of this instruction, we will emit this expression
@@ -360,8 +360,8 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
     }
     o << " requires_named_let_def: " << (di.requires_named_let_def ? "true" : "false")
       << " requires_hoisted_var_def: " << (di.requires_hoisted_var_def ? "true" : "false");
-    if (di.storage_class != ast::StorageClass::kNone) {
-        o << " sc:" << int(di.storage_class);
+    if (di.address_space != ast::AddressSpace::kNone) {
+        o << " sc:" << int(di.address_space);
     }
     switch (di.skip) {
         case SkipReason::kDontSkip:
@@ -470,7 +470,7 @@ class FunctionEmitter {
     /// by the `index_prefix`, which successively indexes into the variable.
     /// Also generates the assignment statements that copy the input parameter
     /// to the corresponding part of the variable.  Assumes the variable
-    /// has already been created in the Private storage class.
+    /// has already been created in the Private address space.
     /// @param var_name The name of the variable
     /// @param var_type The store type of the variable
     /// @param decos The variable's decorations
@@ -496,8 +496,7 @@ class FunctionEmitter {
     /// expressions that compute the value they contribute to the entry point
     /// return value.  The part of the output variable is specfied
     /// by the `index_prefix`, which successively indexes into the variable.
-    /// Assumes the variable has already been created in the Private storage
-    /// class.
+    /// Assumes the variable has already been created in the Private address space
     /// @param var_name The name of the variable
     /// @param var_type The store type of the variable
     /// @param decos The variable's decorations
@@ -612,19 +611,19 @@ class FunctionEmitter {
     /// @returns false on failure
     bool RegisterLocallyDefinedValues();
 
-    /// Returns the Tint storage class for the given SPIR-V ID that is a
+    /// Returns the Tint address space for the given SPIR-V ID that is a
     /// pointer value.
     /// @param id a SPIR-V ID for a pointer value
-    /// @returns the storage class
-    ast::StorageClass GetStorageClassForPointerValue(uint32_t id);
+    /// @returns the address space
+    ast::AddressSpace GetAddressSpaceForPointerValue(uint32_t id);
 
-    /// Remaps the storage class for the type of a locally-defined value,
-    /// if necessary. If it's not a pointer type, or if its storage class
+    /// Remaps the address space for the type of a locally-defined value,
+    /// if necessary. If it's not a pointer type, or if its address space
     /// already matches, then the result is a copy of the `type` argument.
     /// @param type the AST type
     /// @param result_id the SPIR-V ID for the locally defined value
     /// @returns an possibly updated type
-    const Type* RemapStorageClass(const Type* type, uint32_t result_id);
+    const Type* RemapAddressSpace(const Type* type, uint32_t result_id);
 
     /// Marks locally defined values when they should get a 'let'
     /// definition in WGSL, or a 'var' definition at an outer scope.
@@ -1005,11 +1004,11 @@ class FunctionEmitter {
     TypedExpression MakeOperand(const spvtools::opt::Instruction& inst, uint32_t operand_index);
 
     /// Copies a typed expression to the result, but when the type is a pointer
-    /// or reference type, ensures the storage class is not defaulted.  That is,
-    /// it changes a storage class of "none" to "function".
+    /// or reference type, ensures the address space is not defaulted.  That is,
+    /// it changes a address space of "none" to "function".
     /// @param expr a typed expression
     /// @results a copy of the expression, with possibly updated type
-    TypedExpression InferFunctionStorageClass(TypedExpression expr);
+    TypedExpression InferFunctionAddressSpace(TypedExpression expr);
 
     /// Returns an expression for a SPIR-V OpFMod instruction.
     /// @param inst the SPIR-V instruction

@@ -50,11 +50,11 @@ namespace tint::reader::spirv {
 
 namespace {
 struct PointerHasher {
-    size_t operator()(const Pointer& t) const { return utils::Hash(t.type, t.storage_class); }
+    size_t operator()(const Pointer& t) const { return utils::Hash(t.type, t.address_space); }
 };
 
 struct ReferenceHasher {
-    size_t operator()(const Reference& t) const { return utils::Hash(t.type, t.storage_class); }
+    size_t operator()(const Reference& t) const { return utils::Hash(t.type, t.address_space); }
 };
 
 struct VectorHasher {
@@ -107,10 +107,10 @@ struct StorageTextureHasher {
 // Equality operators
 //! @cond Doxygen_Suppress
 static bool operator==(const Pointer& a, const Pointer& b) {
-    return a.type == b.type && a.storage_class == b.storage_class;
+    return a.type == b.type && a.address_space == b.address_space;
 }
 static bool operator==(const Reference& a, const Reference& b) {
-    return a.type == b.type && a.storage_class == b.storage_class;
+    return a.type == b.type && a.address_space == b.address_space;
 }
 static bool operator==(const Vector& a, const Vector& b) {
     return a.type == b.type && a.size == b.size;
@@ -170,14 +170,14 @@ Type::~Type() = default;
 
 Texture::~Texture() = default;
 
-Pointer::Pointer(const Type* t, ast::StorageClass s) : type(t), storage_class(s) {}
+Pointer::Pointer(const Type* t, ast::AddressSpace s) : type(t), address_space(s) {}
 Pointer::Pointer(const Pointer&) = default;
 
 const ast::Type* Pointer::Build(ProgramBuilder& b) const {
-    return b.ty.pointer(type->Build(b), storage_class);
+    return b.ty.pointer(type->Build(b), address_space);
 }
 
-Reference::Reference(const Type* t, ast::StorageClass s) : type(t), storage_class(s) {}
+Reference::Reference(const Type* t, ast::AddressSpace s) : type(t), address_space(s) {}
 Reference::Reference(const Reference&) = default;
 
 const ast::Type* Reference::Build(ProgramBuilder& b) const {
@@ -438,12 +438,12 @@ const spirv::I32* TypeManager::I32() {
     return state->i32_;
 }
 
-const spirv::Pointer* TypeManager::Pointer(const Type* el, ast::StorageClass sc) {
-    return state->pointers_.Get(el, sc);
+const spirv::Pointer* TypeManager::Pointer(const Type* el, ast::AddressSpace address_space) {
+    return state->pointers_.Get(el, address_space);
 }
 
-const spirv::Reference* TypeManager::Reference(const Type* el, ast::StorageClass sc) {
-    return state->references_.Get(el, sc);
+const spirv::Reference* TypeManager::Reference(const Type* el, ast::AddressSpace address_space) {
+    return state->references_.Get(el, address_space);
 }
 
 const spirv::Vector* TypeManager::Vector(const Type* el, uint32_t size) {
@@ -519,13 +519,13 @@ std::string I32::String() const {
 
 std::string Pointer::String() const {
     std::stringstream ss;
-    ss << "ptr<" << utils::ToString(storage_class) << ", " << type->String() + ">";
+    ss << "ptr<" << utils::ToString(address_space) << ", " << type->String() + ">";
     return ss.str();
 }
 
 std::string Reference::String() const {
     std::stringstream ss;
-    ss << "ref<" + utils::ToString(storage_class) << ", " << type->String() << ">";
+    ss << "ref<" + utils::ToString(address_space) << ", " << type->String() << ">";
     return ss.str();
 }
 

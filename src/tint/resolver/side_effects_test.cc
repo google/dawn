@@ -30,7 +30,7 @@ struct SideEffectsTest : ResolverTest {
     template <typename T>
     void MakeSideEffectFunc(const char* name) {
         auto global = Sym();
-        GlobalVar(global, ty.Of<T>(), ast::StorageClass::kPrivate);
+        GlobalVar(global, ty.Of<T>(), ast::AddressSpace::kPrivate);
         auto local = Sym();
         Func(name, utils::Empty, ty.Of<T>(),
              utils::Vector{
@@ -43,7 +43,7 @@ struct SideEffectsTest : ResolverTest {
     template <typename MAKE_TYPE_FUNC>
     void MakeSideEffectFunc(const char* name, MAKE_TYPE_FUNC make_type) {
         auto global = Sym();
-        GlobalVar(global, make_type(), ast::StorageClass::kPrivate);
+        GlobalVar(global, make_type(), ast::AddressSpace::kPrivate);
         auto local = Sym();
         Func(name, utils::Empty, make_type(),
              utils::Vector{
@@ -88,7 +88,7 @@ TEST_F(SideEffectsTest, VariableUser) {
 }
 
 TEST_F(SideEffectsTest, Call_Builtin_NoSE) {
-    GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("a", ty.f32(), ast::AddressSpace::kPrivate);
     auto* expr = Call("dpdx", "a");
     Func("f", utils::Empty, ty.void_(), utils::Vector{Ignore(expr)},
          utils::Vector{create<ast::StageAttribute>(ast::PipelineStage::kFragment)});
@@ -114,7 +114,7 @@ TEST_F(SideEffectsTest, Call_Builtin_NoSE_WithSEArg) {
 }
 
 TEST_F(SideEffectsTest, Call_Builtin_SE) {
-    GlobalVar("a", ty.atomic(ty.i32()), ast::StorageClass::kWorkgroup);
+    GlobalVar("a", ty.atomic(ty.i32()), ast::AddressSpace::kWorkgroup);
     auto* expr = Call("atomicAdd", AddressOf("a"), 1_i);
     WrapInFunction(expr);
 
@@ -163,20 +163,20 @@ TEST_P(SideEffectsBuiltinTest, Test) {
     auto& c = GetParam();
 
     uint32_t next_binding = 0;
-    GlobalVar("f", ty.f32(), ast::StorageClass::kPrivate);
-    GlobalVar("i", ty.i32(), ast::StorageClass::kPrivate);
-    GlobalVar("u", ty.u32(), ast::StorageClass::kPrivate);
-    GlobalVar("b", ty.bool_(), ast::StorageClass::kPrivate);
-    GlobalVar("vf", ty.vec3<f32>(), ast::StorageClass::kPrivate);
-    GlobalVar("vf2", ty.vec2<f32>(), ast::StorageClass::kPrivate);
-    GlobalVar("vi2", ty.vec2<i32>(), ast::StorageClass::kPrivate);
-    GlobalVar("vf4", ty.vec4<f32>(), ast::StorageClass::kPrivate);
-    GlobalVar("vb", ty.vec3<bool>(), ast::StorageClass::kPrivate);
-    GlobalVar("m", ty.mat3x3<f32>(), ast::StorageClass::kPrivate);
-    GlobalVar("arr", ty.array<f32, 10>(), ast::StorageClass::kPrivate);
-    GlobalVar("storage_arr", ty.array<f32>(), ast::StorageClass::kStorage, Group(0_a),
+    GlobalVar("f", ty.f32(), ast::AddressSpace::kPrivate);
+    GlobalVar("i", ty.i32(), ast::AddressSpace::kPrivate);
+    GlobalVar("u", ty.u32(), ast::AddressSpace::kPrivate);
+    GlobalVar("b", ty.bool_(), ast::AddressSpace::kPrivate);
+    GlobalVar("vf", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("vf2", ty.vec2<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("vi2", ty.vec2<i32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("vf4", ty.vec4<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("vb", ty.vec3<bool>(), ast::AddressSpace::kPrivate);
+    GlobalVar("m", ty.mat3x3<f32>(), ast::AddressSpace::kPrivate);
+    GlobalVar("arr", ty.array<f32, 10>(), ast::AddressSpace::kPrivate);
+    GlobalVar("storage_arr", ty.array<f32>(), ast::AddressSpace::kStorage, Group(0_a),
               Binding(AInt(next_binding++)));
-    GlobalVar("a", ty.atomic(ty.i32()), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+    GlobalVar("a", ty.atomic(ty.i32()), ast::AddressSpace::kStorage, ast::Access::kReadWrite,
               Group(0_a), Binding(AInt(next_binding++)));
     if (c.pipeline_stage != ast::PipelineStage::kCompute) {
         GlobalVar("t2d", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(0_a),

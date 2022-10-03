@@ -68,7 +68,7 @@ TEST_F(BuilderTest, If_WithStatements) {
     //   v = 2;
     // }
 
-    auto* var = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate);
     auto* body = Block(Assign("v", 2_i));
     auto* expr = If(true, body);
     WrapInFunction(expr);
@@ -104,7 +104,7 @@ TEST_F(BuilderTest, If_WithElse) {
     //   v = 3i;
     // }
 
-    auto* var = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate);
     auto* body = Block(Assign("v", 2_i));
     auto* else_body = Block(Assign("v", 3_i));
 
@@ -146,7 +146,7 @@ TEST_F(BuilderTest, If_WithElseIf) {
     //   v = 3i;
     // }
 
-    auto* var = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate);
     auto* body = Block(Assign("v", 2_i));
     auto* else_body = Block(Assign("v", 3_i));
 
@@ -197,7 +197,7 @@ TEST_F(BuilderTest, If_WithMultiple) {
     //   v = 5i;
     // }
 
-    auto* var = GlobalVar("v", ty.i32(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate);
     auto* body = Block(Assign("v", 2_i));
     auto* elseif_1_body = Block(Assign("v", 3_i));
     auto* elseif_2_body = Block(Assign("v", 4_i));
@@ -562,7 +562,7 @@ TEST_F(BuilderTest, If_WithLoad_Bug327) {
     // if (a) {
     // }
 
-    auto* var = GlobalVar("a", ty.bool_(), ast::StorageClass::kPrivate);
+    auto* var = GlobalVar("a", ty.bool_(), ast::AddressSpace::kPrivate);
     auto* fn = Func("f", utils::Empty, ty.void_(),
                     utils::Vector{
                         If("a", Block()),

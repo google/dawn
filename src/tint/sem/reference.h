@@ -18,7 +18,7 @@
 #include <string>
 
 #include "src/tint/ast/access.h"
-#include "src/tint/ast/storage_class.h"
+#include "src/tint/ast/address_space.h"
 #include "src/tint/sem/type.h"
 
 namespace tint::sem {
@@ -28,9 +28,9 @@ class Reference final : public Castable<Reference, Type> {
   public:
     /// Constructor
     /// @param subtype the pointee type
-    /// @param storage_class the storage class of the reference
+    /// @param address_space the address space of the reference
     /// @param access the resolved access control of the reference
-    Reference(const Type* subtype, ast::StorageClass storage_class, ast::Access access);
+    Reference(const Type* subtype, ast::AddressSpace address_space, ast::Access access);
 
     /// Move constructor
     Reference(Reference&&);
@@ -46,8 +46,8 @@ class Reference final : public Castable<Reference, Type> {
     /// @returns the pointee type
     const Type* StoreType() const { return subtype_; }
 
-    /// @returns the storage class of the reference
-    ast::StorageClass StorageClass() const { return storage_class_; }
+    /// @returns the address space of the reference
+    ast::AddressSpace AddressSpace() const { return address_space_; }
 
     /// @returns the resolved access control of the reference.
     ast::Access Access() const { return access_; }
@@ -59,7 +59,7 @@ class Reference final : public Castable<Reference, Type> {
 
   private:
     Type const* const subtype_;
-    ast::StorageClass const storage_class_;
+    ast::AddressSpace const address_space_;
     ast::Access const access_;
 };
 

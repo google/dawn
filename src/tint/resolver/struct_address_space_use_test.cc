@@ -25,19 +25,19 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::resolver {
 namespace {
 
-using ResolverStorageClassUseTest = ResolverTest;
+using ResolverAddressSpaceUseTest = ResolverTest;
 
-TEST_F(ResolverStorageClassUseTest, UnreachableStruct) {
+TEST_F(ResolverAddressSpaceUseTest, UnreachableStruct) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_TRUE(sem->StorageClassUsage().empty());
+    EXPECT_TRUE(sem->AddressSpaceUsage().empty());
 }
 
-TEST_F(ResolverStorageClassUseTest, StructReachableFromParameter) {
+TEST_F(ResolverAddressSpaceUseTest, StructReachableFromParameter) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
 
     Func("f", utils::Vector{Param("param", ty.Of(s))}, ty.void_(), utils::Empty, utils::Empty);
@@ -46,10 +46,10 @@ TEST_F(ResolverStorageClassUseTest, StructReachableFromParameter) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kNone));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(ast::AddressSpace::kNone));
 }
 
-TEST_F(ResolverStorageClassUseTest, StructReachableFromReturnType) {
+TEST_F(ResolverAddressSpaceUseTest, StructReachableFromReturnType) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
 
     Func("f", utils::Empty, ty.Of(s), utils::Vector{Return(Construct(ty.Of(s)))}, utils::Empty);
@@ -58,58 +58,58 @@ TEST_F(ResolverStorageClassUseTest, StructReachableFromReturnType) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kNone));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(ast::AddressSpace::kNone));
 }
 
-TEST_F(ResolverStorageClassUseTest, StructReachableFromGlobal) {
+TEST_F(ResolverAddressSpaceUseTest, StructReachableFromGlobal) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
 
-    GlobalVar("g", ty.Of(s), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(s), ast::AddressSpace::kPrivate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kPrivate));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(ast::AddressSpace::kPrivate));
 }
 
-TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalAlias) {
+TEST_F(ResolverAddressSpaceUseTest, StructReachableViaGlobalAlias) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
     auto* a = Alias("A", ty.Of(s));
-    GlobalVar("g", ty.Of(a), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(a), ast::AddressSpace::kPrivate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kPrivate));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(ast::AddressSpace::kPrivate));
 }
 
-TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalStruct) {
+TEST_F(ResolverAddressSpaceUseTest, StructReachableViaGlobalStruct) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
     auto* o = Structure("O", utils::Vector{Member("a", ty.Of(s))});
-    GlobalVar("g", ty.Of(o), ast::StorageClass::kPrivate);
+    GlobalVar("g", ty.Of(o), ast::AddressSpace::kPrivate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kPrivate));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(ast::AddressSpace::kPrivate));
 }
 
-TEST_F(ResolverStorageClassUseTest, StructReachableViaGlobalArray) {
+TEST_F(ResolverAddressSpaceUseTest, StructReachableViaGlobalArray) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
     auto* a = ty.array(ty.Of(s), 3_u);
-    GlobalVar("g", a, ast::StorageClass::kPrivate);
+    GlobalVar("g", a, ast::AddressSpace::kPrivate);
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kPrivate));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(ast::AddressSpace::kPrivate));
 }
 
-TEST_F(ResolverStorageClassUseTest, StructReachableFromLocal) {
+TEST_F(ResolverAddressSpaceUseTest, StructReachableFromLocal) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
 
     WrapInFunction(Var("g", ty.Of(s)));
@@ -118,10 +118,10 @@ TEST_F(ResolverStorageClassUseTest, StructReachableFromLocal) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kFunction));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(ast::AddressSpace::kFunction));
 }
 
-TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalAlias) {
+TEST_F(ResolverAddressSpaceUseTest, StructReachableViaLocalAlias) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
     auto* a = Alias("A", ty.Of(s));
     WrapInFunction(Var("g", ty.Of(a)));
@@ -130,10 +130,10 @@ TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalAlias) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kFunction));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(ast::AddressSpace::kFunction));
 }
 
-TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalStruct) {
+TEST_F(ResolverAddressSpaceUseTest, StructReachableViaLocalStruct) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
     auto* o = Structure("O", utils::Vector{Member("a", ty.Of(s))});
     WrapInFunction(Var("g", ty.Of(o)));
@@ -142,10 +142,10 @@ TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalStruct) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kFunction));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(ast::AddressSpace::kFunction));
 }
 
-TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalArray) {
+TEST_F(ResolverAddressSpaceUseTest, StructReachableViaLocalArray) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
     auto* a = ty.array(ty.Of(s), 3_u);
     WrapInFunction(Var("g", a));
@@ -154,13 +154,13 @@ TEST_F(ResolverStorageClassUseTest, StructReachableViaLocalArray) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->StorageClassUsage(), UnorderedElementsAre(ast::StorageClass::kFunction));
+    EXPECT_THAT(sem->AddressSpaceUsage(), UnorderedElementsAre(ast::AddressSpace::kFunction));
 }
 
-TEST_F(ResolverStorageClassUseTest, StructMultipleStorageClassUses) {
+TEST_F(ResolverAddressSpaceUseTest, StructMultipleAddressSpaceUses) {
     auto* s = Structure("S", utils::Vector{Member("a", ty.f32())});
-    GlobalVar("x", ty.Of(s), ast::StorageClass::kUniform, Binding(0_a), Group(0_a));
-    GlobalVar("y", ty.Of(s), ast::StorageClass::kStorage, ast::Access::kRead, Binding(1_a),
+    GlobalVar("x", ty.Of(s), ast::AddressSpace::kUniform, Binding(0_a), Group(0_a));
+    GlobalVar("y", ty.Of(s), ast::AddressSpace::kStorage, ast::Access::kRead, Binding(1_a),
               Group(0_a));
     WrapInFunction(Var("g", ty.Of(s)));
 
@@ -168,9 +168,9 @@ TEST_F(ResolverStorageClassUseTest, StructMultipleStorageClassUses) {
 
     auto* sem = TypeOf(s)->As<sem::Struct>();
     ASSERT_NE(sem, nullptr);
-    EXPECT_THAT(sem->StorageClassUsage(),
-                UnorderedElementsAre(ast::StorageClass::kUniform, ast::StorageClass::kStorage,
-                                     ast::StorageClass::kFunction));
+    EXPECT_THAT(sem->AddressSpaceUsage(),
+                UnorderedElementsAre(ast::AddressSpace::kUniform, ast::AddressSpace::kStorage,
+                                     ast::AddressSpace::kFunction));
 }
 
 }  // namespace

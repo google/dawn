@@ -425,7 +425,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolDeclKind kind, Symbol symbol, Sourc
     auto& b = *builder;
     switch (kind) {
         case SymbolDeclKind::GlobalVar:
-            return b.GlobalVar(source, symbol, b.ty.i32(), ast::StorageClass::kPrivate);
+            return b.GlobalVar(source, symbol, b.ty.i32(), ast::AddressSpace::kPrivate);
         case SymbolDeclKind::GlobalConst:
             return b.GlobalConst(source, symbol, b.ty.i32(), b.Expr(1_i));
         case SymbolDeclKind::Alias:
@@ -468,27 +468,27 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
     switch (kind) {
         case SymbolUseKind::GlobalVarType: {
             auto* node = b.ty.type_name(source, symbol);
-            b.GlobalVar(b.Sym(), node, ast::StorageClass::kPrivate);
+            b.GlobalVar(b.Sym(), node, ast::AddressSpace::kPrivate);
             return node;
         }
         case SymbolUseKind::GlobalVarArrayElemType: {
             auto* node = b.ty.type_name(source, symbol);
-            b.GlobalVar(b.Sym(), b.ty.array(node, 4_i), ast::StorageClass::kPrivate);
+            b.GlobalVar(b.Sym(), b.ty.array(node, 4_i), ast::AddressSpace::kPrivate);
             return node;
         }
         case SymbolUseKind::GlobalVarArraySizeValue: {
             auto* node = b.Expr(source, symbol);
-            b.GlobalVar(b.Sym(), b.ty.array(b.ty.i32(), node), ast::StorageClass::kPrivate);
+            b.GlobalVar(b.Sym(), b.ty.array(b.ty.i32(), node), ast::AddressSpace::kPrivate);
             return node;
         }
         case SymbolUseKind::GlobalVarVectorElemType: {
             auto* node = b.ty.type_name(source, symbol);
-            b.GlobalVar(b.Sym(), b.ty.vec3(node), ast::StorageClass::kPrivate);
+            b.GlobalVar(b.Sym(), b.ty.vec3(node), ast::AddressSpace::kPrivate);
             return node;
         }
         case SymbolUseKind::GlobalVarMatrixElemType: {
             auto* node = b.ty.type_name(source, symbol);
-            b.GlobalVar(b.Sym(), b.ty.mat3x4(node), ast::StorageClass::kPrivate);
+            b.GlobalVar(b.Sym(), b.ty.mat3x4(node), ast::AddressSpace::kPrivate);
             return node;
         }
         case SymbolUseKind::GlobalVarSampledTexElemType: {
@@ -503,7 +503,7 @@ const ast::Node* SymbolTestHelper::Add(SymbolUseKind kind, Symbol symbol, Source
         }
         case SymbolUseKind::GlobalVarValue: {
             auto* node = b.Expr(source, symbol);
-            b.GlobalVar(b.Sym(), b.ty.i32(), ast::StorageClass::kPrivate, node);
+            b.GlobalVar(b.Sym(), b.ty.i32(), ast::AddressSpace::kPrivate, node);
             return node;
         }
         case SymbolUseKind::GlobalConstType: {
@@ -724,7 +724,7 @@ TEST_F(ResolverDependencyGraphUsedBeforeDeclTest, VarUsed) {
              Block(Assign(Expr(Source{{12, 34}}, "G"), 3.14_f)),
          });
 
-    GlobalVar(Source{{56, 78}}, "G", ty.f32(), ast::StorageClass::kPrivate, Expr(2.1_f));
+    GlobalVar(Source{{56, 78}}, "G", ty.f32(), ast::AddressSpace::kPrivate, Expr(2.1_f));
 
     Build();
 }
@@ -1207,7 +1207,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
     const auto type_sym = Sym("TYPE");
     const auto func_sym = Sym("FUNC");
 
-    const auto* value_decl = GlobalVar(value_sym, ty.i32(), ast::StorageClass::kPrivate);
+    const auto* value_decl = GlobalVar(value_sym, ty.i32(), ast::AddressSpace::kPrivate);
     const auto* type_decl = Alias(type_sym, ty.i32());
     const auto* func_decl = Func(func_sym, utils::Empty, ty.void_(), utils::Empty);
 
@@ -1278,7 +1278,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
     GlobalVar(Sym(), ty.array(T, V, 4));
     GlobalVar(Sym(), ty.vec3(T));
     GlobalVar(Sym(), ty.mat3x2(T));
-    GlobalVar(Sym(), ty.pointer(T, ast::StorageClass::kPrivate));
+    GlobalVar(Sym(), ty.pointer(T, ast::AddressSpace::kPrivate));
     GlobalVar(Sym(), ty.sampled_texture(ast::TextureDimension::k2d, T));
     GlobalVar(Sym(), ty.depth_texture(ast::TextureDimension::k2d));
     GlobalVar(Sym(), ty.depth_multisampled_texture(ast::TextureDimension::k2d));

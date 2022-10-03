@@ -27,7 +27,7 @@ namespace {
 using GlslGeneratorImplTest_WorkgroupVar = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_WorkgroupVar, Basic) {
-    GlobalVar("wg", ty.f32(), ast::StorageClass::kWorkgroup);
+    GlobalVar("wg", ty.f32(), ast::AddressSpace::kWorkgroup);
 
     Func("main", utils::Empty, ty.void_(), utils::Vector{Assign("wg", 1.2_f)},
          utils::Vector{
@@ -43,7 +43,7 @@ TEST_F(GlslGeneratorImplTest_WorkgroupVar, Basic) {
 TEST_F(GlslGeneratorImplTest_WorkgroupVar, Aliased) {
     auto* alias = Alias("F32", ty.f32());
 
-    GlobalVar("wg", ty.Of(alias), ast::StorageClass::kWorkgroup);
+    GlobalVar("wg", ty.Of(alias), ast::AddressSpace::kWorkgroup);
 
     Func("main", utils::Empty, ty.void_(), utils::Vector{Assign("wg", 1.2_f)},
          utils::Vector{

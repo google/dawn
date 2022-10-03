@@ -27,7 +27,7 @@ namespace tint::transform {
 /// then passes them as pointer parameters to any function that references them.
 ///
 /// Since WGSL does not allow entry point parameters or function-scope variables
-/// to have these storage classes, we annotate the new variable declarations
+/// to have these address spaces, we annotate the new variable declarations
 /// with an attribute that bypasses that validation rule.
 ///
 /// Before:

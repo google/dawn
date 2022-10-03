@@ -128,18 +128,18 @@ void BindingRemapper::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) co
                     return;
                 }
                 auto* sem = ctx.src->Sem().Get(var);
-                if (sem->StorageClass() != ast::StorageClass::kStorage) {
+                if (sem->AddressSpace() != ast::AddressSpace::kStorage) {
                     ctx.dst->Diagnostics().add_error(
                         diag::System::Transform,
-                        "cannot apply access control to variable with storage class " +
-                            std::string(utils::ToString(sem->StorageClass())));
+                        "cannot apply access control to variable with address space " +
+                            std::string(utils::ToString(sem->AddressSpace())));
                     return;
                 }
                 auto* ty = sem->Type()->UnwrapRef();
                 const ast::Type* inner_ty = CreateASTTypeFor(ctx, ty);
                 auto* new_var =
                     ctx.dst->Var(ctx.Clone(var->source), ctx.Clone(var->symbol), inner_ty,
-                                 var->declared_storage_class, ac, ctx.Clone(var->constructor),
+                                 var->declared_address_space, ac, ctx.Clone(var->constructor),
                                  ctx.Clone(var->attributes));
                 ctx.Replace(var, new_var);
             }

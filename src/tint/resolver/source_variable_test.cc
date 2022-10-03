@@ -26,7 +26,7 @@ namespace {
 class ResolverSourceVariableTest : public ResolverTest {};
 
 TEST_F(ResolverSourceVariableTest, GlobalPrivateVar) {
-    auto* a = GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate);
+    auto* a = GlobalVar("a", ty.f32(), ast::AddressSpace::kPrivate);
     auto* expr = Expr(a);
     WrapInFunction(expr);
 
@@ -37,7 +37,7 @@ TEST_F(ResolverSourceVariableTest, GlobalPrivateVar) {
 }
 
 TEST_F(ResolverSourceVariableTest, GlobalWorkgroupVar) {
-    auto* a = GlobalVar("a", ty.f32(), ast::StorageClass::kWorkgroup);
+    auto* a = GlobalVar("a", ty.f32(), ast::AddressSpace::kWorkgroup);
     auto* expr = Expr(a);
     WrapInFunction(expr);
 
@@ -48,7 +48,7 @@ TEST_F(ResolverSourceVariableTest, GlobalWorkgroupVar) {
 }
 
 TEST_F(ResolverSourceVariableTest, GlobalStorageVar) {
-    auto* a = GlobalVar("a", ty.f32(), ast::StorageClass::kStorage, Group(0_a), Binding(0_a));
+    auto* a = GlobalVar("a", ty.f32(), ast::AddressSpace::kStorage, Group(0_a), Binding(0_a));
     auto* expr = Expr(a);
     WrapInFunction(expr);
 
@@ -59,7 +59,7 @@ TEST_F(ResolverSourceVariableTest, GlobalStorageVar) {
 }
 
 TEST_F(ResolverSourceVariableTest, GlobalUniformVar) {
-    auto* a = GlobalVar("a", ty.f32(), ast::StorageClass::kUniform, Group(0_a), Binding(0_a));
+    auto* a = GlobalVar("a", ty.f32(), ast::AddressSpace::kUniform, Group(0_a), Binding(0_a));
     auto* expr = Expr(a);
     WrapInFunction(expr);
 
@@ -71,7 +71,7 @@ TEST_F(ResolverSourceVariableTest, GlobalUniformVar) {
 
 TEST_F(ResolverSourceVariableTest, GlobalTextureVar) {
     auto* a = GlobalVar("a", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
-                        ast::StorageClass::kNone, Group(0_a), Binding(0_a));
+                        ast::AddressSpace::kNone, Group(0_a), Binding(0_a));
     auto* expr = Expr(a);
     WrapInFunction(Call("textureDimensions", expr));
 
@@ -141,7 +141,7 @@ TEST_F(ResolverSourceVariableTest, PointerParameter) {
     // {
     //   let b = a;
     // }
-    auto* param = Param("a", ty.pointer(ty.f32(), ast::StorageClass::kFunction));
+    auto* param = Param("a", ty.pointer(ty.f32(), ast::AddressSpace::kFunction));
     auto* expr_param = Expr(param);
     auto* let = Let("b", expr_param);
     auto* expr_let = Expr("b");
@@ -198,7 +198,7 @@ TEST_F(ResolverSourceVariableTest, ThroughIndexAccessor) {
     // {
     //   a[2i]
     // }
-    auto* a = GlobalVar("a", ty.array(ty.f32(), 4_u), ast::StorageClass::kPrivate);
+    auto* a = GlobalVar("a", ty.array(ty.f32(), 4_u), ast::AddressSpace::kPrivate);
     auto* expr = IndexAccessor(a, 2_i);
     WrapInFunction(expr);
 
@@ -215,7 +215,7 @@ TEST_F(ResolverSourceVariableTest, ThroughMemberAccessor) {
     //   a.f
     // }
     auto* S = Structure("S", utils::Vector{Member("f", ty.f32())});
-    auto* a = GlobalVar("a", ty.Of(S), ast::StorageClass::kPrivate);
+    auto* a = GlobalVar("a", ty.Of(S), ast::AddressSpace::kPrivate);
     auto* expr = MemberAccessor(a, "f");
     WrapInFunction(expr);
 
@@ -231,7 +231,7 @@ TEST_F(ResolverSourceVariableTest, ThroughPointers) {
     //   let a_ptr1 = &*&a;
     //   let a_ptr2 = &*a_ptr1;
     // }
-    auto* a = GlobalVar("a", ty.f32(), ast::StorageClass::kPrivate);
+    auto* a = GlobalVar("a", ty.f32(), ast::AddressSpace::kPrivate);
     auto* address_of_1 = AddressOf(a);
     auto* deref_1 = Deref(address_of_1);
     auto* address_of_2 = AddressOf(deref_1);

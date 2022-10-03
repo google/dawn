@@ -22,17 +22,17 @@ using ReferenceTest = TestHelper;
 
 TEST_F(ReferenceTest, Creation) {
     auto* a =
-        create<Reference>(create<I32>(), ast::StorageClass::kStorage, ast::Access::kReadWrite);
+        create<Reference>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
     auto* b =
-        create<Reference>(create<I32>(), ast::StorageClass::kStorage, ast::Access::kReadWrite);
+        create<Reference>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
     auto* c =
-        create<Reference>(create<F32>(), ast::StorageClass::kStorage, ast::Access::kReadWrite);
+        create<Reference>(create<F32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
     auto* d =
-        create<Reference>(create<I32>(), ast::StorageClass::kPrivate, ast::Access::kReadWrite);
-    auto* e = create<Reference>(create<I32>(), ast::StorageClass::kStorage, ast::Access::kRead);
+        create<Reference>(create<I32>(), ast::AddressSpace::kPrivate, ast::Access::kReadWrite);
+    auto* e = create<Reference>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kRead);
 
     EXPECT_TRUE(a->StoreType()->Is<sem::I32>());
-    EXPECT_EQ(a->StorageClass(), ast::StorageClass::kStorage);
+    EXPECT_EQ(a->AddressSpace(), ast::AddressSpace::kStorage);
     EXPECT_EQ(a->Access(), ast::Access::kReadWrite);
 
     EXPECT_EQ(a, b);
@@ -43,14 +43,14 @@ TEST_F(ReferenceTest, Creation) {
 
 TEST_F(ReferenceTest, Hash) {
     auto* a =
-        create<Reference>(create<I32>(), ast::StorageClass::kStorage, ast::Access::kReadWrite);
+        create<Reference>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
     auto* b =
-        create<Reference>(create<I32>(), ast::StorageClass::kStorage, ast::Access::kReadWrite);
+        create<Reference>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
     auto* c =
-        create<Reference>(create<F32>(), ast::StorageClass::kStorage, ast::Access::kReadWrite);
+        create<Reference>(create<F32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
     auto* d =
-        create<Reference>(create<I32>(), ast::StorageClass::kPrivate, ast::Access::kReadWrite);
-    auto* e = create<Reference>(create<I32>(), ast::StorageClass::kStorage, ast::Access::kRead);
+        create<Reference>(create<I32>(), ast::AddressSpace::kPrivate, ast::Access::kReadWrite);
+    auto* e = create<Reference>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kRead);
 
     EXPECT_EQ(a->Hash(), b->Hash());
     EXPECT_NE(a->Hash(), c->Hash());
@@ -60,14 +60,14 @@ TEST_F(ReferenceTest, Hash) {
 
 TEST_F(ReferenceTest, Equals) {
     auto* a =
-        create<Reference>(create<I32>(), ast::StorageClass::kStorage, ast::Access::kReadWrite);
+        create<Reference>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
     auto* b =
-        create<Reference>(create<I32>(), ast::StorageClass::kStorage, ast::Access::kReadWrite);
+        create<Reference>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
     auto* c =
-        create<Reference>(create<F32>(), ast::StorageClass::kStorage, ast::Access::kReadWrite);
+        create<Reference>(create<F32>(), ast::AddressSpace::kStorage, ast::Access::kReadWrite);
     auto* d =
-        create<Reference>(create<I32>(), ast::StorageClass::kPrivate, ast::Access::kReadWrite);
-    auto* e = create<Reference>(create<I32>(), ast::StorageClass::kStorage, ast::Access::kRead);
+        create<Reference>(create<I32>(), ast::AddressSpace::kPrivate, ast::Access::kReadWrite);
+    auto* e = create<Reference>(create<I32>(), ast::AddressSpace::kStorage, ast::Access::kRead);
 
     EXPECT_TRUE(a->Equals(*b));
     EXPECT_FALSE(a->Equals(*c));
@@ -77,12 +77,12 @@ TEST_F(ReferenceTest, Equals) {
 }
 
 TEST_F(ReferenceTest, FriendlyName) {
-    auto* r = create<Reference>(create<I32>(), ast::StorageClass::kNone, ast::Access::kRead);
+    auto* r = create<Reference>(create<I32>(), ast::AddressSpace::kNone, ast::Access::kRead);
     EXPECT_EQ(r->FriendlyName(Symbols()), "ref<i32, read>");
 }
 
-TEST_F(ReferenceTest, FriendlyNameWithStorageClass) {
-    auto* r = create<Reference>(create<I32>(), ast::StorageClass::kWorkgroup, ast::Access::kRead);
+TEST_F(ReferenceTest, FriendlyNameWithAddressSpace) {
+    auto* r = create<Reference>(create<I32>(), ast::AddressSpace::kWorkgroup, ast::Access::kRead);
     EXPECT_EQ(r->FriendlyName(Symbols()), "ref<workgroup, i32, read>");
 }
 

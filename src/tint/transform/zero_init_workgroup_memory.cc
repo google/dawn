@@ -122,7 +122,7 @@ struct ZeroInitWorkgroupMemory::State {
         // workgroup storage variables used by `fn`. This will populate #statements.
         auto* func = sem.Get(fn);
         for (auto* var : func->TransitivelyReferencedGlobals()) {
-            if (var->StorageClass() == ast::StorageClass::kWorkgroup) {
+            if (var->AddressSpace() == ast::AddressSpace::kWorkgroup) {
                 BuildZeroingStatements(var->Type()->UnwrapRef(), [&](uint32_t num_values) {
                     auto var_name = ctx.Clone(var->Declaration()->symbol);
                     return Expression{b.Expr(var_name), num_values, ArrayIndices{}};
@@ -427,7 +427,7 @@ ZeroInitWorkgroupMemory::~ZeroInitWorkgroupMemory() = default;
 bool ZeroInitWorkgroupMemory::ShouldRun(const Program* program, const DataMap&) const {
     for (auto* global : program->AST().GlobalVariables()) {
         if (auto* var = global->As<ast::Var>()) {
-            if (var->declared_storage_class == ast::StorageClass::kWorkgroup) {
+            if (var->declared_address_space == ast::AddressSpace::kWorkgroup) {
                 return true;
             }
         }

@@ -31,13 +31,13 @@ namespace tint::sem {
 Variable::Variable(const ast::Variable* declaration,
                    const sem::Type* type,
                    EvaluationStage stage,
-                   ast::StorageClass storage_class,
+                   ast::AddressSpace address_space,
                    ast::Access access,
                    const Constant* constant_value)
     : declaration_(declaration),
       type_(type),
       stage_(stage),
-      storage_class_(storage_class),
+      address_space_(address_space),
       access_(access),
       constant_value_(constant_value) {}
 
@@ -46,11 +46,11 @@ Variable::~Variable() = default;
 LocalVariable::LocalVariable(const ast::Variable* declaration,
                              const sem::Type* type,
                              EvaluationStage stage,
-                             ast::StorageClass storage_class,
+                             ast::AddressSpace address_space,
                              ast::Access access,
                              const sem::Statement* statement,
                              const Constant* constant_value)
-    : Base(declaration, type, stage, storage_class, access, constant_value),
+    : Base(declaration, type, stage, address_space, access, constant_value),
       statement_(statement) {}
 
 LocalVariable::~LocalVariable() = default;
@@ -58,12 +58,12 @@ LocalVariable::~LocalVariable() = default;
 GlobalVariable::GlobalVariable(const ast::Variable* declaration,
                                const sem::Type* type,
                                EvaluationStage stage,
-                               ast::StorageClass storage_class,
+                               ast::AddressSpace address_space,
                                ast::Access access,
                                const Constant* constant_value,
                                sem::BindingPoint binding_point,
                                std::optional<uint32_t> location)
-    : Base(declaration, type, stage, storage_class, access, constant_value),
+    : Base(declaration, type, stage, address_space, access, constant_value),
       binding_point_(binding_point),
       location_(location) {}
 
@@ -72,12 +72,12 @@ GlobalVariable::~GlobalVariable() = default;
 Parameter::Parameter(const ast::Parameter* declaration,
                      uint32_t index,
                      const sem::Type* type,
-                     ast::StorageClass storage_class,
+                     ast::AddressSpace address_space,
                      ast::Access access,
                      const ParameterUsage usage /* = ParameterUsage::kNone */,
                      sem::BindingPoint binding_point /* = {} */,
                      std::optional<uint32_t> location /* = std::nullopt */)
-    : Base(declaration, type, EvaluationStage::kRuntime, storage_class, access, nullptr),
+    : Base(declaration, type, EvaluationStage::kRuntime, address_space, access, nullptr),
       index_(index),
       usage_(usage),
       binding_point_(binding_point),

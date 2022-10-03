@@ -206,12 +206,12 @@ ParserImpl::VarDeclInfo::VarDeclInfo(const VarDeclInfo&) = default;
 
 ParserImpl::VarDeclInfo::VarDeclInfo(Source source_in,
                                      std::string name_in,
-                                     ast::StorageClass storage_class_in,
+                                     ast::AddressSpace address_space_in,
                                      ast::Access access_in,
                                      const ast::Type* type_in)
     : source(std::move(source_in)),
       name(std::move(name_in)),
-      storage_class(storage_class_in),
+      address_space(address_space_in),
       access(access_in),
       type(type_in) {}
 
@@ -594,7 +594,7 @@ Maybe<const ast::Variable*> ParserImpl::global_variable_decl(AttributeList& attr
     return create<ast::Var>(decl->source,                             // source
                             builder_.Symbols().Register(decl->name),  // symbol
                             decl->type,                               // type
-                            decl->storage_class,                      // storage class
+                            decl->address_space,                      // address space
                             decl->access,                             // access control
                             initializer,                              // initializer
                             std::move(attrs));                        // attributes
@@ -697,7 +697,7 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
         return Failure::kErrored;
     }
 
-    return VarDeclInfo{decl->source, decl->name, vq.storage_class, vq.access, decl->type};
+    return VarDeclInfo{decl->source, decl->name, vq.address_space, vq.access, decl->type};
 }
 
 // texture_and_sampler_types
@@ -1208,7 +1208,7 @@ Expect<const ast::Type*> ParserImpl::expect_type(std::string_view use) {
 Expect<const ast::Type*> ParserImpl::expect_type_decl_pointer(const Source& s) {
     const char* use = "ptr declaration";
 
-    auto storage_class = ast::StorageClass::kNone;
+    auto address_space = ast::AddressSpace::kNone;
     auto access = ast::Access::kUndefined;
 
     auto subtype = expect_lt_gt_block(use, [&]() -> Expect<const ast::Type*> {
@@ -1216,7 +1216,7 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_pointer(const Source& s) {
         if (sc.errored) {
             return Failure::kErrored;
         }
-        storage_class = sc.value;
+        address_space = sc.value;
 
         if (!expect(use, Token::Type::kComma)) {
             return Failure::kErrored;
@@ -1242,7 +1242,7 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_pointer(const Source& s) {
         return Failure::kErrored;
     }
 
-    return builder_.ty.pointer(make_source_range_from(s), subtype.value, storage_class, access);
+    return builder_.ty.pointer(make_source_range_from(s), subtype.value, address_space, access);
 }
 
 // LESS_THAN type_decl GREATER_THAN
@@ -1329,19 +1329,19 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_matrix(const Source& s,
 //   | 'storage'
 //
 // Note, we also parse `push_constant` from the experimental extension
-Expect<ast::StorageClass> ParserImpl::expect_address_space(std::string_view use) {
+Expect<ast::AddressSpace> ParserImpl::expect_address_space(std::string_view use) {
     auto& t = peek();
-    auto ident = expect_ident("storage class");
+    auto ident = expect_ident("address space");
     if (ident.errored) {
         return Failure::kErrored;
     }
 
-    auto storage_class = ast::ParseStorageClass(ident.value);
-    if (storage_class == ast::StorageClass::kInvalid) {
-        return add_error(t.source(), "invalid storage class", use);
+    auto address_space = ast::ParseAddressSpace(ident.value);
+    if (address_space == ast::AddressSpace::kInvalid) {
+        return add_error(t.source(), "invalid address space", use);
     }
 
-    return {storage_class, t.source()};
+    return {address_space, t.source()};
 }
 
 // struct_decl
@@ -1988,7 +1988,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_statement() {
     auto* var = create<ast::Var>(decl->source,                             // source
                                  builder_.Symbols().Register(decl->name),  // symbol
                                  decl->type,                               // type
-                                 decl->storage_class,                      // storage class
+                                 decl->address_space,                      // address space
                                  decl->access,                             // access control
                                  initializer,                              // initializer
                                  utils::Empty);                            // attributes

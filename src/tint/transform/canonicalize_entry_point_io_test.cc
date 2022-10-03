@@ -67,11 +67,11 @@ fn frag_main(@location(1) loc1 : f32,
 )";
 
     auto* expect = R"(
-@location(1) @internal(disable_validation__ignore_storage_class) var<in> loc1_1 : f32;
+@location(1) @internal(disable_validation__ignore_address_space) var<in> loc1_1 : f32;
 
-@location(2) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> loc2_1 : vec4<u32>;
+@location(2) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<in> loc2_1 : vec4<u32>;
 
-@builtin(position) @internal(disable_validation__ignore_storage_class) var<in> coord_1 : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_address_space) var<in> coord_1 : vec4<f32>;
 
 fn frag_main_inner(loc1 : f32, loc2 : vec4<u32>, coord : vec4<f32>) {
   var col : f32 = (coord.x * loc1);
@@ -251,13 +251,13 @@ fn frag_main(@location(0) loc0 : f32,
 )";
 
     auto* expect = R"(
-@location(0) @internal(disable_validation__ignore_storage_class) var<in> loc0_1 : f32;
+@location(0) @internal(disable_validation__ignore_address_space) var<in> loc0_1 : f32;
 
-@location(1) @internal(disable_validation__ignore_storage_class) var<in> loc1_1 : f32;
+@location(1) @internal(disable_validation__ignore_address_space) var<in> loc1_1 : f32;
 
-@location(2) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> loc2_1 : vec4<u32>;
+@location(2) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<in> loc2_1 : vec4<u32>;
 
-@builtin(position) @internal(disable_validation__ignore_storage_class) var<in> coord_1 : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_address_space) var<in> coord_1 : vec4<f32>;
 
 struct FragBuiltins {
   coord : vec4<f32>,
@@ -304,13 +304,13 @@ struct FragLocations {
 )";
 
     auto* expect = R"(
-@location(0) @internal(disable_validation__ignore_storage_class) var<in> loc0_1 : f32;
+@location(0) @internal(disable_validation__ignore_address_space) var<in> loc0_1 : f32;
 
-@location(1) @internal(disable_validation__ignore_storage_class) var<in> loc1_1 : f32;
+@location(1) @internal(disable_validation__ignore_address_space) var<in> loc1_1 : f32;
 
-@location(2) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> loc2_1 : vec4<u32>;
+@location(2) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<in> loc2_1 : vec4<u32>;
 
-@builtin(position) @internal(disable_validation__ignore_storage_class) var<in> coord_1 : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_address_space) var<in> coord_1 : vec4<f32>;
 
 fn frag_main_inner(loc0 : f32, locations : FragLocations, builtins : FragBuiltins) {
   var col : f32 = ((builtins.coord.x * locations.loc1) + loc0);
@@ -567,7 +567,7 @@ fn frag_main() -> @builtin(frag_depth) f32 {
 )";
 
     auto* expect = R"(
-@builtin(frag_depth) @internal(disable_validation__ignore_storage_class) var<out> value : f32;
+@builtin(frag_depth) @internal(disable_validation__ignore_address_space) var<out> value : f32;
 
 fn frag_main_inner() -> f32 {
   return 1.0;
@@ -674,11 +674,11 @@ fn frag_main() -> FragOutput {
 )";
 
     auto* expect = R"(
-@location(0) @internal(disable_validation__ignore_storage_class) var<out> color_1 : vec4<f32>;
+@location(0) @internal(disable_validation__ignore_address_space) var<out> color_1 : vec4<f32>;
 
-@builtin(frag_depth) @internal(disable_validation__ignore_storage_class) var<out> depth_1 : f32;
+@builtin(frag_depth) @internal(disable_validation__ignore_address_space) var<out> depth_1 : f32;
 
-@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> mask_1 : array<u32, 1u>;
+@builtin(sample_mask) @internal(disable_validation__ignore_address_space) var<out> mask_1 : array<u32, 1u>;
 
 struct FragOutput {
   color : vec4<f32>,
@@ -729,11 +729,11 @@ struct FragOutput {
 )";
 
     auto* expect = R"(
-@location(0) @internal(disable_validation__ignore_storage_class) var<out> color_1 : vec4<f32>;
+@location(0) @internal(disable_validation__ignore_address_space) var<out> color_1 : vec4<f32>;
 
-@builtin(frag_depth) @internal(disable_validation__ignore_storage_class) var<out> depth_1 : f32;
+@builtin(frag_depth) @internal(disable_validation__ignore_address_space) var<out> depth_1 : f32;
 
-@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> mask_1 : array<u32, 1u>;
+@builtin(sample_mask) @internal(disable_validation__ignore_address_space) var<out> mask_1 : array<u32, 1u>;
 
 fn frag_main_inner() -> FragOutput {
   var output : FragOutput;
@@ -1028,13 +1028,13 @@ fn frag_main2(inputs : FragmentInput) {
 )";
 
     auto* expect = R"(
-@location(0) @internal(disable_validation__ignore_storage_class) var<in> value_1 : f32;
+@location(0) @internal(disable_validation__ignore_address_space) var<in> value_1 : f32;
 
-@location(1) @internal(disable_validation__ignore_storage_class) var<in> mul_1 : f32;
+@location(1) @internal(disable_validation__ignore_address_space) var<in> mul_1 : f32;
 
-@location(0) @internal(disable_validation__ignore_storage_class) var<in> value_2 : f32;
+@location(0) @internal(disable_validation__ignore_address_space) var<in> value_2 : f32;
 
-@location(1) @internal(disable_validation__ignore_storage_class) var<in> mul_2 : f32;
+@location(1) @internal(disable_validation__ignore_address_space) var<in> mul_2 : f32;
 
 struct FragmentInput {
   value : f32,
@@ -1094,13 +1094,13 @@ struct FragmentInput {
 )";
 
     auto* expect = R"(
-@location(0) @internal(disable_validation__ignore_storage_class) var<in> value_1 : f32;
+@location(0) @internal(disable_validation__ignore_address_space) var<in> value_1 : f32;
 
-@location(1) @internal(disable_validation__ignore_storage_class) var<in> mul_1 : f32;
+@location(1) @internal(disable_validation__ignore_address_space) var<in> mul_1 : f32;
 
-@location(0) @internal(disable_validation__ignore_storage_class) var<in> value_2 : f32;
+@location(0) @internal(disable_validation__ignore_address_space) var<in> value_2 : f32;
 
-@location(1) @internal(disable_validation__ignore_storage_class) var<in> mul_2 : f32;
+@location(1) @internal(disable_validation__ignore_address_space) var<in> mul_2 : f32;
 
 fn frag_main1_inner(inputs : FragmentInput) {
   var x : f32 = foo(inputs);
@@ -1952,39 +1952,39 @@ fn frag_main(inputs : FragmentInterface) -> FragmentInterface {
 
     auto* expect =
         R"(
-@location(0) @internal(disable_validation__ignore_storage_class) var<in> i_1 : i32;
+@location(0) @internal(disable_validation__ignore_address_space) var<in> i_1 : i32;
 
-@location(1) @internal(disable_validation__ignore_storage_class) var<in> u_1 : u32;
+@location(1) @internal(disable_validation__ignore_address_space) var<in> u_1 : u32;
 
-@location(2) @internal(disable_validation__ignore_storage_class) var<in> vi_1 : vec4<i32>;
+@location(2) @internal(disable_validation__ignore_address_space) var<in> vi_1 : vec4<i32>;
 
-@location(3) @internal(disable_validation__ignore_storage_class) var<in> vu_1 : vec4<u32>;
+@location(3) @internal(disable_validation__ignore_address_space) var<in> vu_1 : vec4<u32>;
 
-@location(0) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> i_2 : i32;
+@location(0) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<out> i_2 : i32;
 
-@location(1) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> u_2 : u32;
+@location(1) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<out> u_2 : u32;
 
-@location(2) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> vi_2 : vec4<i32>;
+@location(2) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<out> vi_2 : vec4<i32>;
 
-@location(3) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> vu_2 : vec4<u32>;
+@location(3) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<out> vu_2 : vec4<u32>;
 
-@builtin(position) @internal(disable_validation__ignore_storage_class) var<out> pos_1 : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_address_space) var<out> pos_1 : vec4<f32>;
 
-@location(0) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> i_3 : i32;
+@location(0) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<in> i_3 : i32;
 
-@location(1) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> u_3 : u32;
+@location(1) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<in> u_3 : u32;
 
-@location(2) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> vi_3 : vec4<i32>;
+@location(2) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<in> vi_3 : vec4<i32>;
 
-@location(3) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> vu_3 : vec4<u32>;
+@location(3) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<in> vu_3 : vec4<u32>;
 
-@location(0) @internal(disable_validation__ignore_storage_class) var<out> i_4 : i32;
+@location(0) @internal(disable_validation__ignore_address_space) var<out> i_4 : i32;
 
-@location(1) @internal(disable_validation__ignore_storage_class) var<out> u_4 : u32;
+@location(1) @internal(disable_validation__ignore_address_space) var<out> u_4 : u32;
 
-@location(2) @internal(disable_validation__ignore_storage_class) var<out> vi_4 : vec4<i32>;
+@location(2) @internal(disable_validation__ignore_address_space) var<out> vi_4 : vec4<i32>;
 
-@location(3) @internal(disable_validation__ignore_storage_class) var<out> vu_4 : vec4<u32>;
+@location(3) @internal(disable_validation__ignore_address_space) var<out> vu_4 : vec4<u32>;
 
 struct VertexIn {
   i : i32,
@@ -2082,39 +2082,39 @@ struct FragmentInterface {
 
     auto* expect =
         R"(
-@location(0) @internal(disable_validation__ignore_storage_class) var<in> i_1 : i32;
+@location(0) @internal(disable_validation__ignore_address_space) var<in> i_1 : i32;
 
-@location(1) @internal(disable_validation__ignore_storage_class) var<in> u_1 : u32;
+@location(1) @internal(disable_validation__ignore_address_space) var<in> u_1 : u32;
 
-@location(2) @internal(disable_validation__ignore_storage_class) var<in> vi_1 : vec4<i32>;
+@location(2) @internal(disable_validation__ignore_address_space) var<in> vi_1 : vec4<i32>;
 
-@location(3) @internal(disable_validation__ignore_storage_class) var<in> vu_1 : vec4<u32>;
+@location(3) @internal(disable_validation__ignore_address_space) var<in> vu_1 : vec4<u32>;
 
-@location(0) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> i_2 : i32;
+@location(0) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<out> i_2 : i32;
 
-@location(1) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> u_2 : u32;
+@location(1) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<out> u_2 : u32;
 
-@location(2) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> vi_2 : vec4<i32>;
+@location(2) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<out> vi_2 : vec4<i32>;
 
-@location(3) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<out> vu_2 : vec4<u32>;
+@location(3) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<out> vu_2 : vec4<u32>;
 
-@builtin(position) @internal(disable_validation__ignore_storage_class) var<out> pos_1 : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_address_space) var<out> pos_1 : vec4<f32>;
 
-@location(0) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> i_3 : i32;
+@location(0) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<in> i_3 : i32;
 
-@location(1) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> u_3 : u32;
+@location(1) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<in> u_3 : u32;
 
-@location(2) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> vi_3 : vec4<i32>;
+@location(2) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<in> vi_3 : vec4<i32>;
 
-@location(3) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> vu_3 : vec4<u32>;
+@location(3) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<in> vu_3 : vec4<u32>;
 
-@location(0) @internal(disable_validation__ignore_storage_class) var<out> i_4 : i32;
+@location(0) @internal(disable_validation__ignore_address_space) var<out> i_4 : i32;
 
-@location(1) @internal(disable_validation__ignore_storage_class) var<out> u_4 : u32;
+@location(1) @internal(disable_validation__ignore_address_space) var<out> u_4 : u32;
 
-@location(2) @internal(disable_validation__ignore_storage_class) var<out> vi_4 : vec4<i32>;
+@location(2) @internal(disable_validation__ignore_address_space) var<out> vi_4 : vec4<i32>;
 
-@location(3) @internal(disable_validation__ignore_storage_class) var<out> vu_4 : vec4<u32>;
+@location(3) @internal(disable_validation__ignore_address_space) var<out> vu_4 : vec4<u32>;
 
 fn vert_main_inner(in : VertexIn) -> VertexOut {
   return VertexOut(in.i, in.u, in.vi, in.vu, vec4<f32>());
@@ -3161,9 +3161,9 @@ fn vert_main() -> @builtin(position) vec4<f32> {
 )";
 
     auto* expect = R"(
-@builtin(position) @internal(disable_validation__ignore_storage_class) var<out> value : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_address_space) var<out> value : vec4<f32>;
 
-@builtin(point_size) @internal(disable_validation__ignore_storage_class) var<out> vertex_point_size : f32;
+@builtin(point_size) @internal(disable_validation__ignore_address_space) var<out> vertex_point_size : f32;
 
 fn vert_main_inner() -> vec4<f32> {
   return vec4<f32>();
@@ -3236,9 +3236,9 @@ fn vert_main() -> VertOut {
 )";
 
     auto* expect = R"(
-@builtin(position) @internal(disable_validation__ignore_storage_class) var<out> pos_1 : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_address_space) var<out> pos_1 : vec4<f32>;
 
-@builtin(point_size) @internal(disable_validation__ignore_storage_class) var<out> vertex_point_size : f32;
+@builtin(point_size) @internal(disable_validation__ignore_address_space) var<out> vertex_point_size : f32;
 
 struct VertOut {
   pos : vec4<f32>,
@@ -3277,9 +3277,9 @@ struct VertOut {
 )";
 
     auto* expect = R"(
-@builtin(position) @internal(disable_validation__ignore_storage_class) var<out> pos_1 : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_address_space) var<out> pos_1 : vec4<f32>;
 
-@builtin(point_size) @internal(disable_validation__ignore_storage_class) var<out> vertex_point_size : f32;
+@builtin(point_size) @internal(disable_validation__ignore_address_space) var<out> vertex_point_size : f32;
 
 fn vert_main_inner() -> VertOut {
   return VertOut();
@@ -3424,15 +3424,15 @@ fn vert_main(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
 )";
 
     auto* expect = R"(
-@location(0) @internal(disable_validation__ignore_storage_class) var<in> collide_2 : f32;
+@location(0) @internal(disable_validation__ignore_address_space) var<in> collide_2 : f32;
 
-@location(1) @internal(disable_validation__ignore_storage_class) var<in> collide_3 : f32;
+@location(1) @internal(disable_validation__ignore_address_space) var<in> collide_3 : f32;
 
-@location(0) @internal(disable_validation__ignore_storage_class) var<out> vertex_point_size_3 : f32;
+@location(0) @internal(disable_validation__ignore_address_space) var<out> vertex_point_size_3 : f32;
 
-@builtin(position) @internal(disable_validation__ignore_storage_class) var<out> vertex_point_size_1_1 : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_address_space) var<out> vertex_point_size_1_1 : vec4<f32>;
 
-@builtin(point_size) @internal(disable_validation__ignore_storage_class) var<out> vertex_point_size_4 : f32;
+@builtin(point_size) @internal(disable_validation__ignore_address_space) var<out> vertex_point_size_4 : f32;
 
 var<private> vertex_point_size : f32;
 
@@ -3502,15 +3502,15 @@ struct VertOut {
 )";
 
     auto* expect = R"(
-@location(0) @internal(disable_validation__ignore_storage_class) var<in> collide_2 : f32;
+@location(0) @internal(disable_validation__ignore_address_space) var<in> collide_2 : f32;
 
-@location(1) @internal(disable_validation__ignore_storage_class) var<in> collide_3 : f32;
+@location(1) @internal(disable_validation__ignore_address_space) var<in> collide_3 : f32;
 
-@location(0) @internal(disable_validation__ignore_storage_class) var<out> vertex_point_size_3 : f32;
+@location(0) @internal(disable_validation__ignore_address_space) var<out> vertex_point_size_3 : f32;
 
-@builtin(position) @internal(disable_validation__ignore_storage_class) var<out> vertex_point_size_1_1 : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_address_space) var<out> vertex_point_size_1_1 : vec4<f32>;
 
-@builtin(point_size) @internal(disable_validation__ignore_storage_class) var<out> vertex_point_size_4 : f32;
+@builtin(point_size) @internal(disable_validation__ignore_address_space) var<out> vertex_point_size_4 : f32;
 
 fn vert_main_inner(collide : VertIn1, collide_1 : VertIn2) -> VertOut {
   let x = (collide.collide + collide_1.collide);
@@ -3868,11 +3868,11 @@ fn main(@builtin(sample_index) sample_index : u32,
 )";
 
     auto* expect = R"(
-@builtin(sample_index) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> sample_index_1 : u32;
+@builtin(sample_index) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<in> sample_index_1 : u32;
 
-@builtin(sample_mask) @interpolate(flat) @internal(disable_validation__ignore_storage_class) var<in> mask_in_1 : array<u32, 1u>;
+@builtin(sample_mask) @interpolate(flat) @internal(disable_validation__ignore_address_space) var<in> mask_in_1 : array<u32, 1u>;
 
-@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> value : array<u32, 1u>;
+@builtin(sample_mask) @internal(disable_validation__ignore_address_space) var<out> value : array<u32, 1u>;
 
 fn main_inner(sample_index : u32, mask_in : u32) -> u32 {
   return mask_in;
@@ -3903,11 +3903,11 @@ fn fragment_main(@builtin(sample_index) sample_index : u32,
 )";
 
     auto* expect = R"(
-@builtin(sample_index) @internal(disable_validation__ignore_storage_class) var<in> gl_SampleID : i32;
+@builtin(sample_index) @internal(disable_validation__ignore_address_space) var<in> gl_SampleID : i32;
 
-@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<in> gl_SampleMaskIn : array<i32, 1u>;
+@builtin(sample_mask) @internal(disable_validation__ignore_address_space) var<in> gl_SampleMaskIn : array<i32, 1u>;
 
-@builtin(sample_mask) @internal(disable_validation__ignore_storage_class) var<out> gl_SampleMask : array<i32, 1u>;
+@builtin(sample_mask) @internal(disable_validation__ignore_address_space) var<out> gl_SampleMask : array<i32, 1u>;
 
 fn fragment_main(sample_index : u32, mask_in : u32) -> u32 {
   return mask_in;
@@ -3938,11 +3938,11 @@ fn vertex_main(@builtin(vertex_index) vertexID : u32,
 )";
 
     auto* expect = R"(
-@builtin(vertex_index) @internal(disable_validation__ignore_storage_class) var<in> gl_VertexID : i32;
+@builtin(vertex_index) @internal(disable_validation__ignore_address_space) var<in> gl_VertexID : i32;
 
-@builtin(instance_index) @internal(disable_validation__ignore_storage_class) var<in> gl_InstanceID : i32;
+@builtin(instance_index) @internal(disable_validation__ignore_address_space) var<in> gl_InstanceID : i32;
 
-@builtin(position) @internal(disable_validation__ignore_storage_class) var<out> gl_Position : vec4<f32>;
+@builtin(position) @internal(disable_validation__ignore_address_space) var<out> gl_Position : vec4<f32>;
 
 fn vertex_main(vertexID : u32, instanceID : u32) -> vec4<f32> {
   return vec4<f32>((f32(vertexID) + f32(instanceID)));

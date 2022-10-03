@@ -172,14 +172,14 @@ class ProgramBuilder {
         ~VarOptions();
 
         const ast::Type* type = nullptr;
-        ast::StorageClass storage = ast::StorageClass::kNone;
+        ast::AddressSpace address_space = ast::AddressSpace::kNone;
         ast::Access access = ast::Access::kUndefined;
         const ast::Expression* constructor = nullptr;
         utils::Vector<const ast::Attribute*, 4> attributes;
 
       private:
         void Set(const ast::Type* t) { type = t; }
-        void Set(ast::StorageClass sc) { storage = sc; }
+        void Set(ast::AddressSpace addr_space) { address_space = addr_space; }
         void Set(ast::Access ac) { access = ac; }
         void Set(const ast::Expression* c) { constructor = c; }
         void Set(utils::VectorRef<const ast::Attribute*> l) { attributes = std::move(l); }
@@ -902,45 +902,45 @@ class ProgramBuilder {
         }
 
         /// @param type the type of the pointer
-        /// @param storage_class the storage class of the pointer
+        /// @param address_space the address space of the pointer
         /// @param access the optional access control of the pointer
-        /// @return the pointer to `type` with the given ast::StorageClass
+        /// @return the pointer to `type` with the given ast::AddressSpace
         const ast::Pointer* pointer(const ast::Type* type,
-                                    ast::StorageClass storage_class,
+                                    ast::AddressSpace address_space,
                                     ast::Access access = ast::Access::kUndefined) const {
-            return builder->create<ast::Pointer>(type, storage_class, access);
+            return builder->create<ast::Pointer>(type, address_space, access);
         }
 
         /// @param source the Source of the node
         /// @param type the type of the pointer
-        /// @param storage_class the storage class of the pointer
+        /// @param address_space the address space of the pointer
         /// @param access the optional access control of the pointer
-        /// @return the pointer to `type` with the given ast::StorageClass
+        /// @return the pointer to `type` with the given ast::AddressSpace
         const ast::Pointer* pointer(const Source& source,
                                     const ast::Type* type,
-                                    ast::StorageClass storage_class,
+                                    ast::AddressSpace address_space,
                                     ast::Access access = ast::Access::kUndefined) const {
-            return builder->create<ast::Pointer>(source, type, storage_class, access);
+            return builder->create<ast::Pointer>(source, type, address_space, access);
         }
 
-        /// @param storage_class the storage class of the pointer
+        /// @param address_space the address space of the pointer
         /// @param access the optional access control of the pointer
-        /// @return the pointer to type `T` with the given ast::StorageClass.
+        /// @return the pointer to type `T` with the given ast::AddressSpace.
         template <typename T>
-        const ast::Pointer* pointer(ast::StorageClass storage_class,
+        const ast::Pointer* pointer(ast::AddressSpace address_space,
                                     ast::Access access = ast::Access::kUndefined) const {
-            return pointer(Of<T>(), storage_class, access);
+            return pointer(Of<T>(), address_space, access);
         }
 
         /// @param source the Source of the node
-        /// @param storage_class the storage class of the pointer
+        /// @param address_space the address space of the pointer
         /// @param access the optional access control of the pointer
-        /// @return the pointer to type `T` with the given ast::StorageClass.
+        /// @return the pointer to type `T` with the given ast::AddressSpace.
         template <typename T>
         const ast::Pointer* pointer(const Source& source,
-                                    ast::StorageClass storage_class,
+                                    ast::AddressSpace address_space,
                                     ast::Access access = ast::Access::kUndefined) const {
-            return pointer(source, Of<T>(), storage_class, access);
+            return pointer(source, Of<T>(), address_space, access);
         }
 
         /// @param source the Source of the node
@@ -1651,7 +1651,7 @@ class ProgramBuilder {
     /// @param options the extra options passed to the ast::Var constructor
     /// Can be any of the following, in any order:
     ///   * ast::Type*          - specifies the variable type
-    ///   * ast::StorageClass   - specifies the variable storage class
+    ///   * ast::AddressSpace   - specifies the variable address space
     ///   * ast::Access         - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
@@ -1661,8 +1661,8 @@ class ProgramBuilder {
     template <typename NAME, typename... OPTIONS, typename = DisableIfSource<NAME>>
     const ast::Var* Var(NAME&& name, OPTIONS&&... options) {
         VarOptions opts(std::forward<OPTIONS>(options)...);
-        return create<ast::Var>(Sym(std::forward<NAME>(name)), opts.type, opts.storage, opts.access,
-                                opts.constructor, std::move(opts.attributes));
+        return create<ast::Var>(Sym(std::forward<NAME>(name)), opts.type, opts.address_space,
+                                opts.access, opts.constructor, std::move(opts.attributes));
     }
 
     /// @param source the variable source
@@ -1670,17 +1670,18 @@ class ProgramBuilder {
     /// @param options the extra options passed to the ast::Var constructor
     /// Can be any of the following, in any order:
     ///   * ast::Type*          - specifies the variable type
-    ///   * ast::StorageClass   - specifies the variable storage class
+    ///   * ast::AddressSpace   - specifies the variable address space
     ///   * ast::Access         - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
     /// Note that non-repeatable arguments of the same type will use the last argument's value.
-    /// @returns a `ast::Var` with the given name, storage and type
+    /// @returns a `ast::Var` with the given name, address_space and type
     template <typename NAME, typename... OPTIONS>
     const ast::Var* Var(const Source& source, NAME&& name, OPTIONS&&... options) {
         VarOptions opts(std::forward<OPTIONS>(options)...);
-        return create<ast::Var>(source, Sym(std::forward<NAME>(name)), opts.type, opts.storage,
-                                opts.access, opts.constructor, std::move(opts.attributes));
+        return create<ast::Var>(source, Sym(std::forward<NAME>(name)), opts.type,
+                                opts.address_space, opts.access, opts.constructor,
+                                std::move(opts.attributes));
     }
 
     /// @param name the variable name
@@ -1773,7 +1774,7 @@ class ProgramBuilder {
     /// @param options the extra options passed to the ast::Var constructor
     /// Can be any of the following, in any order:
     ///   * ast::Type*          - specifies the variable type
-    ///   * ast::StorageClass   - specifies the variable storage class
+    ///   * ast::AddressSpace   - specifies the variable address space
     ///   * ast::Access         - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*     - specifies the variable's attributes (repeatable, or vector)
@@ -1792,7 +1793,7 @@ class ProgramBuilder {
     /// @param options the extra options passed to the ast::Var constructor
     /// Can be any of the following, in any order:
     ///   * ast::Type*          - specifies the variable type
-    ///   * ast::StorageClass   - specifies the variable storage class
+    ///   * ast::AddressSpace   - specifies the variable address space
     ///   * ast::Access         - specifies the variable's access control
     ///   * ast::Expression*    - specifies the variable's initializer expression
     ///   * ast::Attribute*    - specifies the variable's attributes (repeatable, or vector)

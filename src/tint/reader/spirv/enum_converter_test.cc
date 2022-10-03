@@ -84,7 +84,7 @@ INSTANTIATE_TEST_SUITE_P(EnumConverterBad,
 struct StorageClassCase {
     SpvStorageClass sc;
     bool expect_success;
-    ast::StorageClass expected;
+    ast::AddressSpace expected;
 };
 inline std::ostream& operator<<(std::ostream& out, StorageClassCase scc) {
     out << "StorageClassCase{ SpvStorageClass:" << int(scc.sc)
@@ -110,7 +110,7 @@ class SpvStorageClassTest : public testing::TestWithParam<StorageClassCase> {
 TEST_P(SpvStorageClassTest, Samples) {
     const auto params = GetParam();
 
-    const auto result = converter_.ToStorageClass(params.sc);
+    const auto result = converter_.ToAddressSpace(params.sc);
     EXPECT_EQ(success_, params.expect_success);
     if (params.expect_success) {
         EXPECT_EQ(result, params.expected);
@@ -125,19 +125,19 @@ INSTANTIATE_TEST_SUITE_P(
     EnumConverterGood,
     SpvStorageClassTest,
     testing::Values(
-        StorageClassCase{SpvStorageClassInput, true, ast::StorageClass::kIn},
-        StorageClassCase{SpvStorageClassOutput, true, ast::StorageClass::kOut},
-        StorageClassCase{SpvStorageClassUniform, true, ast::StorageClass::kUniform},
-        StorageClassCase{SpvStorageClassWorkgroup, true, ast::StorageClass::kWorkgroup},
-        StorageClassCase{SpvStorageClassUniformConstant, true, ast::StorageClass::kNone},
-        StorageClassCase{SpvStorageClassStorageBuffer, true, ast::StorageClass::kStorage},
-        StorageClassCase{SpvStorageClassPrivate, true, ast::StorageClass::kPrivate},
-        StorageClassCase{SpvStorageClassFunction, true, ast::StorageClass::kFunction}));
+        StorageClassCase{SpvStorageClassInput, true, ast::AddressSpace::kIn},
+        StorageClassCase{SpvStorageClassOutput, true, ast::AddressSpace::kOut},
+        StorageClassCase{SpvStorageClassUniform, true, ast::AddressSpace::kUniform},
+        StorageClassCase{SpvStorageClassWorkgroup, true, ast::AddressSpace::kWorkgroup},
+        StorageClassCase{SpvStorageClassUniformConstant, true, ast::AddressSpace::kNone},
+        StorageClassCase{SpvStorageClassStorageBuffer, true, ast::AddressSpace::kStorage},
+        StorageClassCase{SpvStorageClassPrivate, true, ast::AddressSpace::kPrivate},
+        StorageClassCase{SpvStorageClassFunction, true, ast::AddressSpace::kFunction}));
 
 INSTANTIATE_TEST_SUITE_P(EnumConverterBad,
                          SpvStorageClassTest,
                          testing::Values(StorageClassCase{static_cast<SpvStorageClass>(9999), false,
-                                                          ast::StorageClass::kInvalid}));
+                                                          ast::AddressSpace::kInvalid}));
 
 // Builtin
 

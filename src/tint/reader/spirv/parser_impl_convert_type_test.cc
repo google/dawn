@@ -709,11 +709,11 @@ OpFunctionEnd
     EXPECT_THAT(p->error(), Eq("SPIR-V pointer type with ID 3 has invalid pointee type 42"));
 }
 
-TEST_F(SpvParserTest, DISABLED_ConvertType_InvalidStorageClass) {
-    // Disallow invalid storage class
+TEST_F(SpvParserTest, DISABLED_ConvertType_InvalidAddressSpace) {
+    // Disallow invalid address space
     auto p = parser(test::Assemble(Preamble() + R"(
   %1 = OpTypeFloat 32
-  %3 = OpTypePointer !999 %1   ; Special syntax to inject 999 as the storage class
+  %3 = OpTypePointer !999 %1   ; Special syntax to inject 999 as the address space
   )" + MainBody()));
     // TODO(dneto): I can't get it past module building.
     EXPECT_FALSE(p->BuildInternalModule()) << p->error();
@@ -731,7 +731,7 @@ TEST_F(SpvParserTest, ConvertType_PointerInput) {
     auto* ptr_ty = type->As<Pointer>();
     EXPECT_NE(ptr_ty, nullptr);
     EXPECT_TRUE(ptr_ty->type->Is<F32>());
-    EXPECT_EQ(ptr_ty->storage_class, ast::StorageClass::kPrivate);
+    EXPECT_EQ(ptr_ty->address_space, ast::AddressSpace::kPrivate);
     EXPECT_TRUE(p->error().empty());
 }
 
@@ -747,7 +747,7 @@ TEST_F(SpvParserTest, ConvertType_PointerOutput) {
     auto* ptr_ty = type->As<Pointer>();
     EXPECT_NE(ptr_ty, nullptr);
     EXPECT_TRUE(ptr_ty->type->Is<F32>());
-    EXPECT_EQ(ptr_ty->storage_class, ast::StorageClass::kPrivate);
+    EXPECT_EQ(ptr_ty->address_space, ast::AddressSpace::kPrivate);
     EXPECT_TRUE(p->error().empty());
 }
 
@@ -763,7 +763,7 @@ TEST_F(SpvParserTest, ConvertType_PointerUniform) {
     auto* ptr_ty = type->As<Pointer>();
     EXPECT_NE(ptr_ty, nullptr);
     EXPECT_TRUE(ptr_ty->type->Is<F32>());
-    EXPECT_EQ(ptr_ty->storage_class, ast::StorageClass::kUniform);
+    EXPECT_EQ(ptr_ty->address_space, ast::AddressSpace::kUniform);
     EXPECT_TRUE(p->error().empty());
 }
 
@@ -779,7 +779,7 @@ TEST_F(SpvParserTest, ConvertType_PointerWorkgroup) {
     auto* ptr_ty = type->As<Pointer>();
     EXPECT_NE(ptr_ty, nullptr);
     EXPECT_TRUE(ptr_ty->type->Is<F32>());
-    EXPECT_EQ(ptr_ty->storage_class, ast::StorageClass::kWorkgroup);
+    EXPECT_EQ(ptr_ty->address_space, ast::AddressSpace::kWorkgroup);
     EXPECT_TRUE(p->error().empty());
 }
 
@@ -795,7 +795,7 @@ TEST_F(SpvParserTest, ConvertType_PointerUniformConstant) {
     auto* ptr_ty = type->As<Pointer>();
     EXPECT_NE(ptr_ty, nullptr);
     EXPECT_TRUE(ptr_ty->type->Is<F32>());
-    EXPECT_EQ(ptr_ty->storage_class, ast::StorageClass::kNone);
+    EXPECT_EQ(ptr_ty->address_space, ast::AddressSpace::kNone);
     EXPECT_TRUE(p->error().empty());
 }
 
@@ -811,7 +811,7 @@ TEST_F(SpvParserTest, ConvertType_PointerStorageBuffer) {
     auto* ptr_ty = type->As<Pointer>();
     EXPECT_NE(ptr_ty, nullptr);
     EXPECT_TRUE(ptr_ty->type->Is<F32>());
-    EXPECT_EQ(ptr_ty->storage_class, ast::StorageClass::kStorage);
+    EXPECT_EQ(ptr_ty->address_space, ast::AddressSpace::kStorage);
     EXPECT_TRUE(p->error().empty());
 }
 
@@ -827,7 +827,7 @@ TEST_F(SpvParserTest, ConvertType_PointerPrivate) {
     auto* ptr_ty = type->As<Pointer>();
     EXPECT_NE(ptr_ty, nullptr);
     EXPECT_TRUE(ptr_ty->type->Is<F32>());
-    EXPECT_EQ(ptr_ty->storage_class, ast::StorageClass::kPrivate);
+    EXPECT_EQ(ptr_ty->address_space, ast::AddressSpace::kPrivate);
     EXPECT_TRUE(p->error().empty());
 }
 
@@ -843,7 +843,7 @@ TEST_F(SpvParserTest, ConvertType_PointerFunction) {
     auto* ptr_ty = type->As<Pointer>();
     EXPECT_NE(ptr_ty, nullptr);
     EXPECT_TRUE(ptr_ty->type->Is<F32>());
-    EXPECT_EQ(ptr_ty->storage_class, ast::StorageClass::kFunction);
+    EXPECT_EQ(ptr_ty->address_space, ast::AddressSpace::kFunction);
     EXPECT_TRUE(p->error().empty());
 }
 
@@ -862,12 +862,12 @@ TEST_F(SpvParserTest, ConvertType_PointerToPointer) {
 
     auto* ptr_ty = type->As<Pointer>();
     EXPECT_NE(ptr_ty, nullptr);
-    EXPECT_EQ(ptr_ty->storage_class, ast::StorageClass::kPrivate);
+    EXPECT_EQ(ptr_ty->address_space, ast::AddressSpace::kPrivate);
     EXPECT_TRUE(ptr_ty->type->Is<Pointer>());
 
     auto* ptr_ptr_ty = ptr_ty->type->As<Pointer>();
     EXPECT_NE(ptr_ptr_ty, nullptr);
-    EXPECT_EQ(ptr_ptr_ty->storage_class, ast::StorageClass::kPrivate);
+    EXPECT_EQ(ptr_ptr_ty->address_space, ast::AddressSpace::kPrivate);
     EXPECT_TRUE(ptr_ptr_ty->type->Is<F32>());
 
     EXPECT_TRUE(p->error().empty());

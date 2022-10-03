@@ -20,8 +20,8 @@
 #include <vector>
 
 #include "src/tint/ast/access.h"
+#include "src/tint/ast/address_space.h"
 #include "src/tint/ast/sampler.h"
-#include "src/tint/ast/storage_class.h"
 #include "src/tint/ast/storage_texture.h"
 #include "src/tint/ast/texture.h"
 #include "src/tint/castable.h"
@@ -161,8 +161,8 @@ struct I32 final : public Castable<I32, Type> {
 struct Pointer final : public Castable<Pointer, Type> {
     /// Constructor
     /// @param ty the store type
-    /// @param sc the pointer storage class
-    Pointer(const Type* ty, ast::StorageClass sc);
+    /// @param sc the pointer address space
+    Pointer(const Type* ty, ast::AddressSpace sc);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -179,8 +179,8 @@ struct Pointer final : public Castable<Pointer, Type> {
 
     /// the store type
     Type const* const type;
-    /// the pointer storage class
-    ast::StorageClass const storage_class;
+    /// the pointer address space
+    ast::AddressSpace const address_space;
 };
 
 /// `ref<SC, T>` type
@@ -189,8 +189,8 @@ struct Pointer final : public Castable<Pointer, Type> {
 struct Reference final : public Castable<Reference, Type> {
     /// Constructor
     /// @param ty the referenced type
-    /// @param sc the reference storage class
-    Reference(const Type* ty, ast::StorageClass sc);
+    /// @param sc the reference address space
+    Reference(const Type* ty, ast::AddressSpace sc);
 
     /// Copy constructor
     /// @param other the other type to copy
@@ -207,8 +207,8 @@ struct Reference final : public Castable<Reference, Type> {
 
     /// the store type
     Type const* const type;
-    /// the pointer storage class
-    ast::StorageClass const storage_class;
+    /// the pointer address space
+    ast::AddressSpace const address_space;
 };
 
 /// `vecN<T>` type
@@ -534,15 +534,15 @@ class TypeManager {
     /// @return a I32 type. Repeated calls will return the same pointer.
     const spirv::I32* I32();
     /// @param ty the store type
-    /// @param sc the pointer storage class
+    /// @param address_space the pointer address space
     /// @return a Pointer type. Repeated calls with the same arguments will return
     /// the same pointer.
-    const spirv::Pointer* Pointer(const Type* ty, ast::StorageClass sc);
+    const spirv::Pointer* Pointer(const Type* ty, ast::AddressSpace address_space);
     /// @param ty the referenced type
-    /// @param sc the reference storage class
+    /// @param address_space the reference address space
     /// @return a Reference type. Repeated calls with the same arguments will
     /// return the same pointer.
-    const spirv::Reference* Reference(const Type* ty, ast::StorageClass sc);
+    const spirv::Reference* Reference(const Type* ty, ast::AddressSpace address_space);
     /// @param ty the element type
     /// @param sz the number of elements in the vector
     /// @return a Vector type. Repeated calls with the same arguments will return

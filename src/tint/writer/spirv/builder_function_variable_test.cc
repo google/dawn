@@ -22,8 +22,8 @@ namespace {
 
 using BuilderTest = TestHelper;
 
-TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
-    auto* v = Var("var", ty.f32(), ast::StorageClass::kFunction);
+TEST_F(BuilderTest, FunctionVar_NoAddressSpace) {
+    auto* v = Var("var", ty.f32(), ast::AddressSpace::kFunction);
     WrapInFunction(v);
 
     spirv::Builder& b = Build();
@@ -45,7 +45,7 @@ TEST_F(BuilderTest, FunctionVar_NoStorageClass) {
 
 TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
     auto* init = vec3<f32>(1_f, 1_f, 3_f);
-    auto* v = Var("var", ty.vec3<f32>(), ast::StorageClass::kFunction, init);
+    auto* v = Var("var", ty.vec3<f32>(), ast::AddressSpace::kFunction, init);
     WrapInFunction(v);
 
     spirv::Builder& b = Build();

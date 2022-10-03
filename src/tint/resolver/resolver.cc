@@ -247,9 +247,9 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
             if (auto* el = Type(t->type)) {
                 auto access = t->access;
                 if (access == ast::kUndefined) {
-                    access = DefaultAccessForStorageClass(t->storage_class);
+                    access = DefaultAccessForAddressSpace(t->address_space);
                 }
-                return builder_->create<sem::Pointer>(el, t->storage_class, access);
+                return builder_->create<sem::Pointer>(el, t->address_space, access);
             }
             return nullptr;
         },
@@ -368,11 +368,11 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
         ty = rhs->Type()->UnwrapRef();  // Implicit load of RHS
     }
 
-    if (rhs && !validator_.VariableInitializer(v, ast::StorageClass::kNone, ty, rhs)) {
+    if (rhs && !validator_.VariableInitializer(v, ast::AddressSpace::kNone, ty, rhs)) {
         return nullptr;
     }
 
-    if (!ApplyStorageClassUsageToType(ast::StorageClass::kNone, const_cast<sem::Type*>(ty),
+    if (!ApplyAddressSpaceUsageToType(ast::AddressSpace::kNone, const_cast<sem::Type*>(ty),
                                       v->source)) {
         AddNote("while instantiating 'let' " + builder_->Symbols().NameFor(v->symbol), v->source);
         return nullptr;
@@ -381,12 +381,12 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
     sem::Variable* sem = nullptr;
     if (is_global) {
         sem = builder_->create<sem::GlobalVariable>(
-            v, ty, sem::EvaluationStage::kRuntime, ast::StorageClass::kNone,
+            v, ty, sem::EvaluationStage::kRuntime, ast::AddressSpace::kNone,
             ast::Access::kUndefined, /* constant_value */ nullptr, sem::BindingPoint{},
             std::nullopt);
     } else {
         sem = builder_->create<sem::LocalVariable>(v, ty, sem::EvaluationStage::kRuntime,
-                                                   ast::StorageClass::kNone,
+                                                   ast::AddressSpace::kNone,
                                                    ast::Access::kUndefined, current_statement_,
                                                    /* constant_value */ nullptr);
     }
@@ -425,11 +425,11 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
         return nullptr;
     }
 
-    if (rhs && !validator_.VariableInitializer(v, ast::StorageClass::kNone, ty, rhs)) {
+    if (rhs && !validator_.VariableInitializer(v, ast::AddressSpace::kNone, ty, rhs)) {
         return nullptr;
     }
 
-    if (!ApplyStorageClassUsageToType(ast::StorageClass::kNone, const_cast<sem::Type*>(ty),
+    if (!ApplyAddressSpaceUsageToType(ast::AddressSpace::kNone, const_cast<sem::Type*>(ty),
                                       v->source)) {
         AddNote("while instantiating 'override' " + builder_->Symbols().NameFor(v->symbol),
                 v->source);
@@ -437,7 +437,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
     }
 
     auto* sem = builder_->create<sem::GlobalVariable>(
-        v, ty, sem::EvaluationStage::kOverride, ast::StorageClass::kNone, ast::Access::kUndefined,
+        v, ty, sem::EvaluationStage::kOverride, ast::AddressSpace::kNone, ast::Access::kUndefined,
         /* constant_value */ nullptr, sem::BindingPoint{}, std::nullopt);
     sem->SetConstructor(rhs);
 
@@ -510,21 +510,21 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
         return nullptr;
     }
 
-    if (!validator_.VariableInitializer(c, ast::StorageClass::kNone, ty, rhs)) {
+    if (!validator_.VariableInitializer(c, ast::AddressSpace::kNone, ty, rhs)) {
         return nullptr;
     }
 
-    if (!ApplyStorageClassUsageToType(ast::StorageClass::kNone, const_cast<sem::Type*>(ty),
+    if (!ApplyAddressSpaceUsageToType(ast::AddressSpace::kNone, const_cast<sem::Type*>(ty),
                                       c->source)) {
         AddNote("while instantiating 'const' " + builder_->Symbols().NameFor(c->symbol), c->source);
         return nullptr;
     }
 
     auto* sem = is_global ? static_cast<sem::Variable*>(builder_->create<sem::GlobalVariable>(
-                                c, ty, sem::EvaluationStage::kConstant, ast::StorageClass::kNone,
+                                c, ty, sem::EvaluationStage::kConstant, ast::AddressSpace::kNone,
                                 ast::Access::kUndefined, value, sem::BindingPoint{}, std::nullopt))
                           : static_cast<sem::Variable*>(builder_->create<sem::LocalVariable>(
-                                c, ty, sem::EvaluationStage::kConstant, ast::StorageClass::kNone,
+                                c, ty, sem::EvaluationStage::kConstant, ast::AddressSpace::kNone,
                                 ast::Access::kUndefined, current_statement_, value));
 
     sem->SetConstructor(rhs);
@@ -562,39 +562,39 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         return nullptr;
     }
 
-    auto storage_class = var->declared_storage_class;
-    if (storage_class == ast::StorageClass::kNone) {
-        // No declared storage class. Infer from usage / type.
+    auto address_space = var->declared_address_space;
+    if (address_space == ast::AddressSpace::kNone) {
+        // No declared address space. Infer from usage / type.
         if (!is_global) {
-            storage_class = ast::StorageClass::kFunction;
+            address_space = ast::AddressSpace::kFunction;
         } else if (storage_ty->UnwrapRef()->is_handle()) {
             // https://gpuweb.github.io/gpuweb/wgsl/#module-scope-variables
             // If the store type is a texture type or a sampler type, then the
-            // variable declaration must not have a storage class attribute. The
-            // storage class will always be handle.
-            storage_class = ast::StorageClass::kHandle;
+            // variable declaration must not have a address space attribute. The
+            // address space will always be handle.
+            address_space = ast::AddressSpace::kHandle;
         }
     }
 
-    if (!is_global && storage_class != ast::StorageClass::kFunction &&
+    if (!is_global && address_space != ast::AddressSpace::kFunction &&
         validator_.IsValidationEnabled(var->attributes,
-                                       ast::DisabledValidation::kIgnoreStorageClass)) {
-        AddError("function-scope 'var' declaration must use 'function' storage class", var->source);
+                                       ast::DisabledValidation::kIgnoreAddressSpace)) {
+        AddError("function-scope 'var' declaration must use 'function' address space", var->source);
         return nullptr;
     }
 
     auto access = var->declared_access;
     if (access == ast::Access::kUndefined) {
-        access = DefaultAccessForStorageClass(storage_class);
+        access = DefaultAccessForAddressSpace(address_space);
     }
 
-    if (rhs && !validator_.VariableInitializer(var, storage_class, storage_ty, rhs)) {
+    if (rhs && !validator_.VariableInitializer(var, address_space, storage_ty, rhs)) {
         return nullptr;
     }
 
-    auto* var_ty = builder_->create<sem::Reference>(storage_ty, storage_class, access);
+    auto* var_ty = builder_->create<sem::Reference>(storage_ty, address_space, access);
 
-    if (!ApplyStorageClassUsageToType(storage_class, var_ty, var->source)) {
+    if (!ApplyAddressSpaceUsageToType(address_space, var_ty, var->source)) {
         AddNote("while instantiating 'var' " + builder_->Symbols().NameFor(var->symbol),
                 var->source);
         return nullptr;
@@ -654,12 +654,12 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         }
 
         sem = builder_->create<sem::GlobalVariable>(
-            var, var_ty, sem::EvaluationStage::kRuntime, storage_class, access,
+            var, var_ty, sem::EvaluationStage::kRuntime, address_space, access,
             /* constant_value */ nullptr, binding_point, location);
 
     } else {
         sem = builder_->create<sem::LocalVariable>(var, var_ty, sem::EvaluationStage::kRuntime,
-                                                   storage_class, access, current_statement_,
+                                                   address_space, access, current_statement_,
                                                    /* constant_value */ nullptr);
     }
 
@@ -686,7 +686,7 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
         return nullptr;
     }
 
-    if (!ApplyStorageClassUsageToType(ast::StorageClass::kNone, ty, param->source)) {
+    if (!ApplyAddressSpaceUsageToType(ast::AddressSpace::kNone, ty, param->source)) {
         add_note();
         return nullptr;
     }
@@ -694,8 +694,8 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
     if (auto* ptr = ty->As<sem::Pointer>()) {
         // For MSL, we push module-scope variables into the entry point as pointer
         // parameters, so we also need to handle their store type.
-        if (!ApplyStorageClassUsageToType(
-                ptr->StorageClass(), const_cast<sem::Type*>(ptr->StoreType()), param->source)) {
+        if (!ApplyAddressSpaceUsageToType(
+                ptr->AddressSpace(), const_cast<sem::Type*>(ptr->StoreType()), param->source)) {
             add_note();
             return nullptr;
         }
@@ -749,18 +749,18 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
     }
 
     auto* sem = builder_->create<sem::Parameter>(
-        param, index, ty, ast::StorageClass::kNone, ast::Access::kUndefined,
+        param, index, ty, ast::AddressSpace::kNone, ast::Access::kUndefined,
         sem::ParameterUsage::kNone, binding_point, location);
     builder_->Sem().Add(param, sem);
     return sem;
 }
 
-ast::Access Resolver::DefaultAccessForStorageClass(ast::StorageClass storage_class) {
+ast::Access Resolver::DefaultAccessForAddressSpace(ast::AddressSpace address_space) {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
-    switch (storage_class) {
-        case ast::StorageClass::kStorage:
-        case ast::StorageClass::kUniform:
-        case ast::StorageClass::kHandle:
+    switch (address_space) {
+        case ast::AddressSpace::kStorage:
+        case ast::AddressSpace::kUniform:
+        case ast::AddressSpace::kHandle:
             return ast::Access::kRead;
         default:
             break;
@@ -845,7 +845,7 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
 
     // TODO(bclayton): Call this at the end of resolve on all uniform and storage
     // referenced structs
-    if (!validator_.StorageClassLayout(sem, enabled_extensions_, valid_type_storage_layouts_)) {
+    if (!validator_.AddressSpaceLayout(sem, enabled_extensions_, valid_type_storage_layouts_)) {
         return nullptr;
     }
 
@@ -962,7 +962,7 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     }
 
     if (auto* str = return_type->As<sem::Struct>()) {
-        if (!ApplyStorageClassUsageToType(ast::StorageClass::kNone, str, decl->source)) {
+        if (!ApplyAddressSpaceUsageToType(ast::AddressSpace::kNone, str, decl->source)) {
             AddNote(
                 "while instantiating return type for " + builder_->Symbols().NameFor(decl->symbol),
                 decl->source);
@@ -1625,7 +1625,7 @@ sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* exp
 
     // If we're extracting from a reference, we return a reference.
     if (auto* ref = obj_raw_ty->As<sem::Reference>()) {
-        ty = builder_->create<sem::Reference>(ty, ref->StorageClass(), ref->Access());
+        ty = builder_->create<sem::Reference>(ty, ref->AddressSpace(), ref->Access());
     }
 
     auto stage = sem::EarliestStage(obj->Stage(), idx->Stage());
@@ -1783,7 +1783,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                                 nullptr,                   // declaration
                                 static_cast<uint32_t>(i),  // index
                                 arr->ElemType(),           // type
-                                ast::StorageClass::kNone,  // storage_class
+                                ast::AddressSpace::kNone,  // address_space
                                 ast::Access::kUndefined);
                         });
                         return builder_->create<sem::TypeConstructor>(arr, std::move(params),
@@ -1812,7 +1812,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                                 nullptr,                    // declaration
                                 static_cast<uint32_t>(i),   // index
                                 str->Members()[i]->Type(),  // type
-                                ast::StorageClass::kNone,   // storage_class
+                                ast::AddressSpace::kNone,   // address_space
                                 ast::Access::kUndefined);   // access
                         }
                         return builder_->create<sem::TypeConstructor>(str, std::move(params),
@@ -2321,7 +2321,7 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
 
             // If we're extracting from a reference, we return a reference.
             if (auto* ref = structure->As<sem::Reference>()) {
-                ty = builder_->create<sem::Reference>(ty, ref->StorageClass(), ref->Access());
+                ty = builder_->create<sem::Reference>(ty, ref->AddressSpace(), ref->Access());
             }
 
             auto val = const_eval_.MemberAccess(object, member);
@@ -2390,7 +2390,7 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
                 ty = vec->type();
                 // If we're extracting from a reference, we return a reference.
                 if (auto* ref = structure->As<sem::Reference>()) {
-                    ty = builder_->create<sem::Reference>(ty, ref->StorageClass(), ref->Access());
+                    ty = builder_->create<sem::Reference>(ty, ref->AddressSpace(), ref->Access());
                 }
             } else {
                 // The vector will have a number of components equal to the length of
@@ -2483,7 +2483,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
         case ast::UnaryOp::kAddressOf:
             if (auto* ref = expr_ty->As<sem::Reference>()) {
                 if (ref->StoreType()->UnwrapRef()->is_handle()) {
-                    AddError("cannot take the address of expression in handle storage class",
+                    AddError("cannot take the address of expression in handle address space",
                              unary->expr->source);
                     return nullptr;
                 }
@@ -2496,7 +2496,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
                     return nullptr;
                 }
 
-                ty = builder_->create<sem::Pointer>(ref->StoreType(), ref->StorageClass(),
+                ty = builder_->create<sem::Pointer>(ref->StoreType(), ref->AddressSpace(),
                                                     ref->Access());
 
                 source_var = expr->SourceVariable();
@@ -2508,7 +2508,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
 
         case ast::UnaryOp::kIndirection:
             if (auto* ptr = expr_ty->As<sem::Pointer>()) {
-                ty = builder_->create<sem::Reference>(ptr->StoreType(), ptr->StorageClass(),
+                ty = builder_->create<sem::Reference>(ptr->StoreType(), ptr->AddressSpace(),
                                                       ptr->Access());
                 source_var = expr->SourceVariable();
             } else {
@@ -3205,20 +3205,20 @@ sem::Statement* Resolver::IncrementDecrementStatement(
     });
 }
 
-bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
+bool Resolver::ApplyAddressSpaceUsageToType(ast::AddressSpace sc,
                                             sem::Type* ty,
                                             const Source& usage) {
     ty = const_cast<sem::Type*>(ty->UnwrapRef());
 
     if (auto* str = ty->As<sem::Struct>()) {
-        if (str->StorageClassUsage().count(sc)) {
+        if (str->AddressSpaceUsage().count(sc)) {
             return true;  // Already applied
         }
 
         str->AddUsage(sc);
 
         for (auto* member : str->Members()) {
-            if (!ApplyStorageClassUsageToType(sc, const_cast<sem::Type*>(member->Type()), usage)) {
+            if (!ApplyAddressSpaceUsageToType(sc, const_cast<sem::Type*>(member->Type()), usage)) {
                 std::stringstream err;
                 err << "while analysing structure member " << sem_.TypeNameOf(str) << "."
                     << builder_->Symbols().NameFor(member->Declaration()->symbol);
@@ -3230,20 +3230,20 @@ bool Resolver::ApplyStorageClassUsageToType(ast::StorageClass sc,
     }
 
     if (auto* arr = ty->As<sem::Array>()) {
-        if (arr->IsRuntimeSized() && sc != ast::StorageClass::kStorage) {
+        if (arr->IsRuntimeSized() && sc != ast::AddressSpace::kStorage) {
             AddError(
-                "runtime-sized arrays can only be used in the <storage> storage "
-                "class",
+                "runtime-sized arrays can only be used in the <storage> address "
+                "space",
                 usage);
             return false;
         }
 
-        return ApplyStorageClassUsageToType(sc, const_cast<sem::Type*>(arr->ElemType()), usage);
+        return ApplyAddressSpaceUsageToType(sc, const_cast<sem::Type*>(arr->ElemType()), usage);
     }
 
     if (ast::IsHostShareable(sc) && !validator_.IsHostShareable(ty)) {
         std::stringstream err;
-        err << "Type '" << sem_.TypeNameOf(ty) << "' cannot be used in storage class '" << sc
+        err << "Type '" << sem_.TypeNameOf(ty) << "' cannot be used in address space '" << sc
             << "' as it is non-host-shareable";
         AddError(err.str(), usage);
         return false;

@@ -238,7 +238,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsGlobalVar) {
     //   var a = a;
     // }
 
-    auto* g = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("a", ty.i32(), ast::AddressSpace::kPrivate);
     auto* v = Var("a", Expr("a"));
     Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(v)});
 
@@ -419,7 +419,7 @@ TEST_F(ResolverVariableTest, LocalLet) {
     auto* b = Let("b", ty.bool_(), b_c);
     auto* s = Let("s", ty.Of(S), s_c);
     auto* a = Let("a", ty.Of(A), a_c);
-    auto* p = Let("p", ty.pointer<i32>(ast::StorageClass::kFunction), p_c);
+    auto* p = Let("p", ty.pointer<i32>(ast::AddressSpace::kFunction), p_c);
 
     Func("F", utils::Empty, ty.void_(),
          utils::Vector{
@@ -470,7 +470,7 @@ TEST_F(ResolverVariableTest, LocalLet_InheritsAccessFromOriginatingVariable) {
     // }
     auto* inner = Structure("Inner", utils::Vector{Member("arr", ty.array<i32, 4>())});
     auto* buf = Structure("S", utils::Vector{Member("inner", ty.Of(inner))});
-    auto* storage = GlobalVar("s", ty.Of(buf), ast::StorageClass::kStorage, ast::Access::kReadWrite,
+    auto* storage = GlobalVar("s", ty.Of(buf), ast::AddressSpace::kStorage, ast::Access::kReadWrite,
                               Binding(0_a), Group(0_a));
 
     auto* expr = IndexAccessor(MemberAccessor(MemberAccessor(storage, "inner"), "arr"), 3_i);
@@ -552,7 +552,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsGlobalVar) {
     //   let a = a;
     // }
 
-    auto* g = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("a", ty.i32(), ast::AddressSpace::kPrivate);
     auto* l = Let("a", Expr("a"));
     Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(l)});
 
@@ -762,7 +762,7 @@ TEST_F(ResolverVariableTest, LocalConst_ShadowsGlobalVar) {
     //   const a = 1i;
     // }
 
-    auto* g = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("a", ty.i32(), ast::AddressSpace::kPrivate);
     auto* c = Const("a", Expr(1_i));
     Func("F", utils::Empty, ty.void_(), utils::Vector{Decl(c)});
 
@@ -1030,16 +1030,16 @@ TEST_F(ResolverVariableTest, DISABLED_LocalConst_ConstEval) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Module-scope 'var'
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-TEST_F(ResolverVariableTest, GlobalVar_StorageClass) {
+TEST_F(ResolverVariableTest, GlobalVar_AddressSpace) {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
     auto* buf = Structure("S", utils::Vector{Member("m", ty.i32())});
-    auto* private_ = GlobalVar("p", ty.i32(), ast::StorageClass::kPrivate);
-    auto* workgroup = GlobalVar("w", ty.i32(), ast::StorageClass::kWorkgroup);
+    auto* private_ = GlobalVar("p", ty.i32(), ast::AddressSpace::kPrivate);
+    auto* workgroup = GlobalVar("w", ty.i32(), ast::AddressSpace::kWorkgroup);
     auto* uniform =
-        GlobalVar("ub", ty.Of(buf), ast::StorageClass::kUniform, Binding(0_a), Group(0_a));
+        GlobalVar("ub", ty.Of(buf), ast::AddressSpace::kUniform, Binding(0_a), Group(0_a));
     auto* storage =
-        GlobalVar("sb", ty.Of(buf), ast::StorageClass::kStorage, Binding(1_a), Group(0_a));
+        GlobalVar("sb", ty.Of(buf), ast::AddressSpace::kStorage, Binding(1_a), Group(0_a));
     auto* handle =
         GlobalVar("h", ty.depth_texture(ast::TextureDimension::k2d), Binding(2_a), Group(0_a));
 
@@ -1058,11 +1058,11 @@ TEST_F(ResolverVariableTest, GlobalVar_StorageClass) {
     EXPECT_EQ(TypeOf(handle)->As<sem::Reference>()->Access(), ast::Access::kRead);
 }
 
-TEST_F(ResolverVariableTest, GlobalVar_ExplicitStorageClass) {
+TEST_F(ResolverVariableTest, GlobalVar_ExplicitAddressSpace) {
     // https://gpuweb.github.io/gpuweb/wgsl/#storage-class
 
     auto* buf = Structure("S", utils::Vector{Member("m", ty.i32())});
-    auto* storage = GlobalVar("sb", ty.Of(buf), ast::StorageClass::kStorage,
+    auto* storage = GlobalVar("sb", ty.Of(buf), ast::AddressSpace::kStorage,
                               ast::Access::kReadWrite, Binding(1_a), Group(0_a));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -1220,7 +1220,7 @@ TEST_F(ResolverVariableTest, Param_ShadowsGlobalVar) {
     // fn F(a : bool) {
     // }
 
-    auto* g = GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
+    auto* g = GlobalVar("a", ty.i32(), ast::AddressSpace::kPrivate);
     auto* p = Param("a", ty.bool_());
     Func("F", utils::Vector{p}, ty.void_(), utils::Empty);
 

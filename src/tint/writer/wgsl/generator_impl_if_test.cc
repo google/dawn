@@ -20,7 +20,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_If) {
-    GlobalVar("cond", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("cond", ty.bool_(), ast::AddressSpace::kPrivate);
 
     auto* cond = Expr("cond");
     auto* body = Block(Return());
@@ -39,8 +39,8 @@ TEST_F(WgslGeneratorImplTest, Emit_If) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
-    GlobalVar("cond", ty.bool_(), ast::StorageClass::kPrivate);
-    GlobalVar("else_cond", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("cond", ty.bool_(), ast::AddressSpace::kPrivate);
+    GlobalVar("else_cond", ty.bool_(), ast::AddressSpace::kPrivate);
 
     auto* else_cond = Expr("else_cond");
     auto* else_body = Block(Return());
@@ -64,7 +64,7 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElseIf) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
-    GlobalVar("cond", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("cond", ty.bool_(), ast::AddressSpace::kPrivate);
 
     auto* else_body = Block(Return());
 
@@ -87,8 +87,8 @@ TEST_F(WgslGeneratorImplTest, Emit_IfWithElse) {
 }
 
 TEST_F(WgslGeneratorImplTest, Emit_IfWithMultiple) {
-    GlobalVar("cond", ty.bool_(), ast::StorageClass::kPrivate);
-    GlobalVar("else_cond", ty.bool_(), ast::StorageClass::kPrivate);
+    GlobalVar("cond", ty.bool_(), ast::AddressSpace::kPrivate);
+    GlobalVar("else_cond", ty.bool_(), ast::AddressSpace::kPrivate);
 
     auto* else_cond = Expr("else_cond");
 

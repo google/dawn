@@ -22,7 +22,7 @@ namespace {
 using HlslGeneratorImplTest_Switch = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
-    GlobalVar("cond", ty.i32(), ast::StorageClass::kPrivate);
+    GlobalVar("cond", ty.i32(), ast::AddressSpace::kPrivate);
     auto* s = Switch(                     //
         Expr("cond"),                     //
         Case(Expr(5_i), Block(Break())),  //
@@ -46,8 +46,8 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
 }
 
 TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch_OnlyDefaultCase) {
-    GlobalVar("cond", ty.i32(), ast::StorageClass::kPrivate);
-    GlobalVar("a", ty.i32(), ast::StorageClass::kPrivate);
+    GlobalVar("cond", ty.i32(), ast::AddressSpace::kPrivate);
+    GlobalVar("a", ty.i32(), ast::AddressSpace::kPrivate);
     auto* s = Switch(  //
         Expr("cond"),  //
         DefaultCase(Block(Assign(Expr("a"), Expr(42_i)))));

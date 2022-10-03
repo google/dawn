@@ -16,9 +16,9 @@
 #define SRC_TINT_READER_SPIRV_ENUM_CONVERTER_H_
 
 #include "spirv/unified1/spirv.h"
+#include "src/tint/ast/address_space.h"
 #include "src/tint/ast/builtin_value.h"
 #include "src/tint/ast/pipeline_stage.h"
-#include "src/tint/ast/storage_class.h"
 #include "src/tint/reader/spirv/fail_stream.h"
 #include "src/tint/sem/storage_texture.h"
 
@@ -39,11 +39,11 @@ class EnumConverter {
     /// @returns a Tint AST pipeline stage
     ast::PipelineStage ToPipelineStage(SpvExecutionModel model);
 
-    /// Converts a SPIR-V storage class to a Tint storage class.
+    /// Converts a SPIR-V storage class to a Tint address space.
     /// On failure, logs an error and returns kNone
     /// @param sc the SPIR-V storage class
-    /// @returns a Tint AST storage class
-    ast::StorageClass ToStorageClass(const SpvStorageClass sc);
+    /// @returns a Tint AST address space
+    ast::AddressSpace ToAddressSpace(const SpvStorageClass sc);
 
     /// Converts a SPIR-V Builtin value a Tint Builtin.
     /// On failure, logs an error and returns kNone

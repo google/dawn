@@ -1468,14 +1468,14 @@ class UniformityGraph {
             [&](const ast::IdentifierExpression* ident) {
                 std::string var_type = "";
                 auto* var = sem_.Get<sem::VariableUser>(ident)->Variable();
-                switch (var->StorageClass()) {
-                    case ast::StorageClass::kStorage:
+                switch (var->AddressSpace()) {
+                    case ast::AddressSpace::kStorage:
                         var_type = "read_write storage buffer ";
                         break;
-                    case ast::StorageClass::kWorkgroup:
+                    case ast::AddressSpace::kWorkgroup:
                         var_type = "workgroup storage variable ";
                         break;
-                    case ast::StorageClass::kPrivate:
+                    case ast::AddressSpace::kPrivate:
                         var_type = "module-scope private variable ";
                         break;
                     default:

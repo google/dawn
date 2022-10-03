@@ -121,7 +121,7 @@ void FirstIndexOffset::Run(CloneContext& ctx, const DataMap& inputs, DataMap& ou
 
         // Create a global to hold the uniform buffer
         Symbol buffer_name = ctx.dst->Sym();
-        ctx.dst->GlobalVar(buffer_name, ctx.dst->ty.Of(struct_), ast::StorageClass::kUniform,
+        ctx.dst->GlobalVar(buffer_name, ctx.dst->ty.Of(struct_), ast::AddressSpace::kUniform,
                            utils::Vector{
                                ctx.dst->Binding(AInt(ub_binding)),
                                ctx.dst->Group(AInt(ub_group)),

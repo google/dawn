@@ -429,7 +429,7 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
             return true;
         },
         [&](const ast::Pointer* ptr) {
-            out << "ptr<" << ptr->storage_class << ", ";
+            out << "ptr<" << ptr->address_space << ", ";
             if (!EmitType(out, ptr->type)) {
                 return false;
             }
@@ -654,10 +654,10 @@ bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* v) {
         v,  //
         [&](const ast::Var* var) {
             out << "var";
-            auto sc = var->declared_storage_class;
+            auto address_space = var->declared_address_space;
             auto ac = var->declared_access;
-            if (sc != ast::StorageClass::kNone || ac != ast::Access::kUndefined) {
-                out << "<" << sc;
+            if (address_space != ast::AddressSpace::kNone || ac != ast::Access::kUndefined) {
+                out << "<" << address_space;
                 if (ac != ast::Access::kUndefined) {
                     out << ", ";
                     if (!EmitAccess(out, ac)) {

@@ -64,8 +64,8 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
 TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
     Func("a_statement", {}, ty.void_(), utils::Empty);
 
-    GlobalVar("lhs", ty.f32(), ast::StorageClass::kPrivate);
-    GlobalVar("rhs", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("lhs", ty.f32(), ast::AddressSpace::kPrivate);
+    GlobalVar("rhs", ty.f32(), ast::AddressSpace::kPrivate);
 
     auto* body = Block(create<ast::DiscardStatement>());
     auto* continuing = Block(CallStmt(Call("a_statement")));
@@ -107,7 +107,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithVarUsedInContinuing) {
     // }
     //
 
-    GlobalVar("rhs", ty.f32(), ast::StorageClass::kPrivate);
+    GlobalVar("rhs", ty.f32(), ast::AddressSpace::kPrivate);
 
     auto* body = Block(Decl(Var("lhs", ty.f32(), Expr(2.4_f))),  //
                        Decl(Var("other", ty.f32())),             //
@@ -184,7 +184,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInit) {
     Func("f", utils::Vector{Param("i", ty.i32())}, ty.void_(), utils::Empty);
     auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
 
-    GlobalVar("a", ty.atomic<i32>(), ast::StorageClass::kWorkgroup);
+    GlobalVar("a", ty.atomic<i32>(), ast::AddressSpace::kWorkgroup);
     auto* multi_stmt = Block(f(1_i), f(2_i));
     auto* loop = For(multi_stmt, nullptr, nullptr,  //
                      Block(Return()));
@@ -260,7 +260,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtCont) {
     Func("f", utils::Vector{Param("i", ty.i32())}, ty.void_(), utils::Empty);
     auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
 
-    GlobalVar("a", ty.atomic<i32>(), ast::StorageClass::kWorkgroup);
+    GlobalVar("a", ty.atomic<i32>(), ast::AddressSpace::kWorkgroup);
     auto* multi_stmt = Block(f(1_i), f(2_i));
     auto* loop = For(nullptr, nullptr, multi_stmt,  //
                      Block(Return()));
@@ -315,7 +315,7 @@ TEST_F(MslGeneratorImplTest, Emit_ForLoopWithMultiStmtInitCondCont) {
     Func("f", utils::Vector{Param("i", ty.i32())}, ty.void_(), utils::Empty);
     auto f = [&](auto&& expr) { return CallStmt(Call("f", expr)); };
 
-    GlobalVar("a", ty.atomic<i32>(), ast::StorageClass::kWorkgroup);
+    GlobalVar("a", ty.atomic<i32>(), ast::AddressSpace::kWorkgroup);
     auto* multi_stmt_a = Block(f(1_i), f(2_i));
     auto* multi_stmt_b = Block(f(3_i), f(4_i));
     auto* loop = For(multi_stmt_a, Expr(true), multi_stmt_b,  //
