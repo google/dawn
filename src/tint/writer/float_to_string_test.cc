@@ -186,25 +186,5 @@ TEST(FloatToBitPreservingStringTest, Infinity) {
     EXPECT_EQ(FloatToBitPreservingString(MakeFloat(1, 255, 0)), "-0x1p+128");
 }
 
-// TODO(dneto): It's unclear how Infinity and NaN should be handled.
-// https://github.com/gpuweb/gpuweb/issues/1769
-// Windows x86-64 sets the high mantissa bit on NaNs.
-// Disable NaN tests for now.
-
-TEST(FloatToBitPreservingStringTest, DISABLED_NaN_MsbOnly) {
-    EXPECT_EQ(FloatToBitPreservingString(MakeFloat(0, 255, 0x400000)), "0x1.8p+128");
-    EXPECT_EQ(FloatToBitPreservingString(MakeFloat(1, 255, 0x400000)), "-0x1.8p+128");
-}
-
-TEST(FloatToBitPreservingStringTest, DISABLED_NaN_LsbOnly) {
-    EXPECT_EQ(FloatToBitPreservingString(MakeFloat(0, 255, 0x1)), "0x1.000002p+128");
-    EXPECT_EQ(FloatToBitPreservingString(MakeFloat(1, 255, 0x1)), "-0x1.000002p+128");
-}
-
-TEST(FloatToBitPreservingStringTest, DISABLED_NaN_NonMsb) {
-    EXPECT_EQ(FloatToBitPreservingString(MakeFloat(0, 255, 0x20101f)), "0x1.40203ep+128");
-    EXPECT_EQ(FloatToBitPreservingString(MakeFloat(1, 255, 0x20101f)), "-0x1.40203ep+128");
-}
-
 }  // namespace
 }  // namespace tint::writer
