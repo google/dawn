@@ -2210,9 +2210,7 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Body_Switch_CaseContinues) {
     EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 45, 40, 49, 50, 99)) << assembly;
 }
 
-// TODO(crbug.com/tint/1406): Re-enable with the typo fix (preceeded->preceded)
-// once that typo fix is rolled in Tint's SPIRV-Tools.
-TEST_F(SpvParserCFGTest, DISABLED_ComputeBlockOrder_Loop_BodyHasSwitchContinueBreak) {
+TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_BodyHasSwitchContinueBreak) {
     auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -2227,9 +2225,6 @@ TEST_F(SpvParserCFGTest, DISABLED_ComputeBlockOrder_Loop_BodyHasSwitchContinueBr
      ; OpSwitch must be preceded by a selection merge
      OpSwitch %selector %99 50 %50 ; default is break, 50 is continue
 
-     %40 = OpLabel
-     OpBranch %50
-
      %50 = OpLabel
      OpBranch %20
 
@@ -2241,7 +2236,7 @@ TEST_F(SpvParserCFGTest, DISABLED_ComputeBlockOrder_Loop_BodyHasSwitchContinueBr
     auto p = parser(test::Assemble(assembly));
     EXPECT_FALSE(p->Parse());
     EXPECT_FALSE(p->success());
-    EXPECT_THAT(p->error(), HasSubstr("OpSwitch must be preceeded by an OpSelectionMerge"));
+    EXPECT_THAT(p->error(), HasSubstr("OpSwitch must be preceded by an OpSelectionMerge"));
 }
 
 TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Continue_Sequence) {
@@ -2381,9 +2376,7 @@ TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Continue_HasBreakUnless) {
     EXPECT_THAT(fe.block_order(), ElementsAre(10, 20, 30, 50, 99));
 }
 
-// TODO(crbug.com/tint/1406): Re-enable with the typo fix (preceeded->preceded)
-// once that typo fix is rolled in Tint's SPIRV-Tools.
-TEST_F(SpvParserCFGTest, DISABLED_ComputeBlockOrder_Loop_Continue_SwitchBreak) {
+TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Continue_SwitchBreak) {
     auto assembly = CommonTypes() + R"(
      %100 = OpFunction %void None %voidfn
 
@@ -2410,7 +2403,7 @@ TEST_F(SpvParserCFGTest, DISABLED_ComputeBlockOrder_Loop_Continue_SwitchBreak) {
     auto p = parser(test::Assemble(assembly));
     EXPECT_FALSE(p->Parse());
     EXPECT_FALSE(p->success());
-    EXPECT_THAT(p->error(), HasSubstr("OpSwitch must be preceeded by an OpSelectionMerge"));
+    EXPECT_THAT(p->error(), HasSubstr("OpSwitch must be preceded by an OpSelectionMerge"));
 }
 
 TEST_F(SpvParserCFGTest, ComputeBlockOrder_Loop_Loop) {
