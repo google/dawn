@@ -2679,7 +2679,7 @@ bool FunctionEmitter::EmitBasicBlock(const BlockInfo& block_info) {
     // - A kContinue can contain a kContinue
     //   This is possible in Vulkan SPIR-V, but Tint disallows this by the rule
     //   that a block can be continue target for at most one header block. See
-    //   test DISABLED_BlockIsContinueForMoreThanOneHeader. If we generalize this,
+    //   test BlockIsContinueForMoreThanOneHeader. If we generalize this,
     //   then by a dominance argument, the inner loop continue target can only be
     //   a single-block loop.
     // TODO(dneto): Handle this case.
