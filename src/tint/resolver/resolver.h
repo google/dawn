@@ -113,12 +113,6 @@ class Resolver {
   private:
     Validator::ValidTypeStorageLayouts valid_type_storage_layouts_;
 
-    // Structure holding information for a TypeDecl
-    struct TypeDeclInfo {
-        ast::TypeDecl const* const ast;
-        sem::Type* const sem;
-    };
-
     /// Resolves the program, without creating final the semantic nodes.
     /// @returns true on success, false on error
     bool ResolveInternal();
