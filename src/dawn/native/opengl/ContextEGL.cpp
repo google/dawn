@@ -19,6 +19,10 @@
 
 #include "dawn/native/opengl/UtilsEGL.h"
 
+#ifndef EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT
+#define EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT 0x30BF
+#endif
+
 namespace dawn::native::opengl {
 
 ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions& egl,
@@ -61,8 +65,21 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions
         major = 4;
         minor = 4;
     }
+
+    const char* extensions = egl.QueryString(display, EGL_EXTENSIONS);
+    if (strstr(extensions, "EGL_EXT_create_context_robustness") == nullptr) {
+        return DAWN_INTERNAL_ERROR("EGL_EXT_create_context_robustness must be supported");
+    }
+
     EGLint attrib_list[] = {
-        EGL_CONTEXT_MAJOR_VERSION, major, EGL_CONTEXT_MINOR_VERSION, minor, EGL_NONE, EGL_NONE,
+        EGL_CONTEXT_MAJOR_VERSION,
+        major,
+        EGL_CONTEXT_MINOR_VERSION,
+        minor,
+        EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT,
+        EGL_TRUE,
+        EGL_NONE,
+        EGL_NONE,
     };
     EGLContext context = egl.CreateContext(display, config, EGL_NO_CONTEXT, attrib_list);
     DAWN_TRY(CheckEGL(egl, context != EGL_NO_CONTEXT, "eglCreateContext"));

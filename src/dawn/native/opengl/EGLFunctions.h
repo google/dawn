@@ -36,6 +36,7 @@ struct EGLFunctions {
     PFNEGLGETPROCADDRESSPROC GetProcAddress;
     PFNEGLINITIALIZEPROC Initialize;
     PFNEGLMAKECURRENTPROC MakeCurrent;
+    PFNEGLQUERYSTRINGPROC QueryString;
 };
 
 }  // namespace dawn::native::opengl

@@ -38,6 +38,7 @@ void EGLFunctions::Init(void* (*getProc)(const char*)) {
     GetError = reinterpret_cast<PFNEGLGETERRORPROC>(GetProcAddress("eglGetError"));
     Initialize = reinterpret_cast<PFNEGLINITIALIZEPROC>(GetProcAddress("eglInitialize"));
     MakeCurrent = reinterpret_cast<PFNEGLMAKECURRENTPROC>(GetProcAddress("eglMakeCurrent"));
+    QueryString = reinterpret_cast<PFNEGLQUERYSTRINGPROC>(GetProcAddress("eglQueryString"));
 }
 
 }  // namespace dawn::native::opengl
