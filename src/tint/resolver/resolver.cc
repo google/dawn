@@ -89,6 +89,11 @@
 #include "src/tint/utils/vector.h"
 
 namespace tint::resolver {
+namespace {
+
+constexpr int64_t kMaxArrayElementCount = 65536;
+
+}  // namespace
 
 Resolver::Resolver(ProgramBuilder* builder)
     : builder_(builder),
@@ -2704,7 +2709,8 @@ sem::Array* Resolver::Array(const Source& el_source,
         size = const_count->value * stride;
         if (size > std::numeric_limits<uint32_t>::max()) {
             std::stringstream msg;
-            msg << "array size (0x" << std::hex << size << ") must not exceed 0xffffffff bytes";
+            msg << "array byte size (0x" << std::hex << size
+                << ") must not exceed 0xffffffff bytes";
             AddError(msg.str(), count_source);
             return nullptr;
         }
@@ -3205,20 +3211,21 @@ sem::Statement* Resolver::IncrementDecrementStatement(
     });
 }
 
-bool Resolver::ApplyAddressSpaceUsageToType(ast::AddressSpace sc,
+bool Resolver::ApplyAddressSpaceUsageToType(ast::AddressSpace address_space,
                                             sem::Type* ty,
                                             const Source& usage) {
     ty = const_cast<sem::Type*>(ty->UnwrapRef());
 
     if (auto* str = ty->As<sem::Struct>()) {
-        if (str->AddressSpaceUsage().count(sc)) {
+        if (str->AddressSpaceUsage().count(address_space)) {
             return true;  // Already applied
         }
 
-        str->AddUsage(sc);
+        str->AddUsage(address_space);
 
         for (auto* member : str->Members()) {
-            if (!ApplyAddressSpaceUsageToType(sc, const_cast<sem::Type*>(member->Type()), usage)) {
+            if (!ApplyAddressSpaceUsageToType(address_space, const_cast<sem::Type*>(member->Type()),
+                                              usage)) {
                 std::stringstream err;
                 err << "while analysing structure member " << sem_.TypeNameOf(str) << "."
                     << builder_->Symbols().NameFor(member->Declaration()->symbol);
@@ -3230,21 +3237,29 @@ bool Resolver::ApplyAddressSpaceUsageToType(ast::AddressSpace sc,
     }
 
     if (auto* arr = ty->As<sem::Array>()) {
-        if (arr->IsRuntimeSized() && sc != ast::AddressSpace::kStorage) {
-            AddError(
-                "runtime-sized arrays can only be used in the <storage> address "
-                "space",
-                usage);
-            return false;
-        }
+        if (address_space != ast::AddressSpace::kStorage) {
+            if (arr->IsRuntimeSized()) {
+                AddError("runtime-sized arrays can only be used in the <storage> address space",
+                         usage);
+                return false;
+            }
 
-        return ApplyAddressSpaceUsageToType(sc, const_cast<sem::Type*>(arr->ElemType()), usage);
+            auto count = arr->ConstantCount();
+            if (count.has_value() && count.value() >= kMaxArrayElementCount) {
+                AddError("array size (" + std::to_string(count.value()) + ") must be less than " +
+                             std::to_string(kMaxArrayElementCount),
+                         usage);
+                return false;
+            }
+        }
+        return ApplyAddressSpaceUsageToType(address_space, const_cast<sem::Type*>(arr->ElemType()),
+                                            usage);
     }
 
-    if (ast::IsHostShareable(sc) && !validator_.IsHostShareable(ty)) {
+    if (ast::IsHostShareable(address_space) && !validator_.IsHostShareable(ty)) {
         std::stringstream err;
-        err << "Type '" << sem_.TypeNameOf(ty) << "' cannot be used in address space '" << sc
-            << "' as it is non-host-shareable";
+        err << "Type '" << sem_.TypeNameOf(ty) << "' cannot be used in address space '"
+            << address_space << "' as it is non-host-shareable";
         AddError(err.str(), usage);
         return false;
     }

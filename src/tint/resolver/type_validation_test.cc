@@ -308,22 +308,63 @@ TEST_F(ResolverTypeValidationTest, ArraySize_IVecConst) {
               "'vec2<i32>'");
 }
 
+TEST_F(ResolverTypeValidationTest, ArraySize_UnderElementCountLimit) {
+    // var<private> a : array<f32, 65535>;
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 65535_a)),
+              ast::AddressSpace::kPrivate);
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverTypeValidationTest, ArraySize_OverElementCountLimit) {
+    // var<private> a : array<f32, 65536>;
+    GlobalVar(Source{{1, 2}}, "a",
+              ty.array(Source{{12, 34}}, ty.f32(), Expr(Source{{12, 34}}, 65536_a)),
+              ast::AddressSpace::kPrivate);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(1:2 error: array size (65536) must be less than 65536
+1:2 note: while instantiating 'var' a)");
+}
+
+TEST_F(ResolverTypeValidationTest, ArraySize_StorageBufferLargeArray) {
+    // var<storage> a : array<f32, 65536>;
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 65536_a)), ast::AddressSpace::kStorage,
+              utils::Vector{Binding(0_u), Group(0_u)});
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(ResolverTypeValidationTest, ArraySize_NestedStorageBufferLargeArray) {
+    // Struct S {
+    //  a : array<f32, 65536>,
+    // }
+    // var<storage> a : S;
+    Structure("S", utils::Vector{Member(Source{{12, 34}}, "a",
+                                        ty.array(Source{{12, 20}}, ty.f32(), 65536_a))});
+    GlobalVar("a", ty.type_name(Source{{12, 30}}, "S"), ast::AddressSpace::kStorage,
+              utils::Vector{Binding(0_u), Group(0_u)});
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
 TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ImplicitStride) {
-    // var<private> a : array<f32, 0x40000000u>;
-    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0x40000000_u)),
+    // struct S {
+    //   @offset(800000) a : f32
+    // }
+    // var<private> a : array<S, 65535>;
+    Structure("S", utils::Vector{Member(Source{{12, 34}}, "a", ty.f32(),
+                                        utils::Vector{MemberOffset(800000_a)})});
+    GlobalVar("a", ty.array(ty.type_name(Source{{12, 30}}, "S"), Expr(Source{{12, 34}}, 65535_a)),
               ast::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array size (0x100000000) must not exceed 0xffffffff bytes");
+              "12:34 error: array byte size (0xc34f7cafc) must not exceed 0xffffffff bytes");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ExplicitStride) {
-    // var<private> a : @stride(8) array<f32, 0x20000000u>;
-    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0x20000000_u), 8),
+    // var<private> a : @stride(8000000) array<f32, 65535>;
+    GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 65535_a), 8000000),
               ast::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array size (0x100000000) must not exceed 0xffffffff bytes");
+              "12:34 error: array byte size (0x7a1185ee00) must not exceed 0xffffffff bytes");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_Override_PrivateVar) {
@@ -561,33 +602,38 @@ TEST_F(ResolverTypeValidationTest, Struct_Member_MatrixNoType) {
 }
 
 TEST_F(ResolverTypeValidationTest, Struct_TooBig) {
+    // Struct Bar {
+    //   a: array<f32, 10000>;
+    // }
     // struct Foo {
-    //   a: array<f32, 0x20000000>;
-    //   b: array<f32, 0x20000000>;
-    // };
+    //   a: array<Bar, 65535>;
+    //   b: array<Bar, 65535>;
+    // }
 
+    Structure(Source{{10, 34}}, "Bar", utils::Vector{Member("a", ty.array<f32, 10000>())});
     Structure(Source{{12, 34}}, "Foo",
-              utils::Vector{
-                  Member("a", ty.array<f32, 0x20000000>()),
-                  Member("b", ty.array<f32, 0x20000000>()),
-              });
+              utils::Vector{Member("a", ty.array(ty.type_name(Source{{12, 30}}, "Bar"),
+                                                 Expr(Source{{12, 34}}, 65535_a))),
+                            Member("b", ty.array(ty.type_name(Source{{12, 30}}, "Bar"),
+                                                 Expr(Source{{12, 34}}, 65535_a)))});
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: struct size (0x100000000) must not exceed 0xffffffff bytes");
+              "12:34 error: struct size (0x1387ec780) must not exceed 0xffffffff bytes");
 }
 
 TEST_F(ResolverTypeValidationTest, Struct_MemberOffset_TooBig) {
     // struct Foo {
-    //   a: array<f32, 0x3fffffff>;
+    //   @size(2147483647) a: array<f32, 65535>;
     //   b: f32;
     //   c: f32;
     // };
 
     Structure("Foo", utils::Vector{
-                         Member("a", ty.array<f32, 0x3fffffff>()),
-                         Member("b", ty.f32()),
-                         Member(Source{{12, 34}}, "c", ty.f32()),
+                         Member("z", ty.f32(), utils::Vector{MemberSize(2147483647_a)}),
+                         Member("y", ty.f32(), utils::Vector{MemberSize(2147483647_a)}),
+                         Member(Source{{12, 34}}, "a", ty.array<f32, 65535>()),
+                         Member("c", ty.f32()),
                      });
 
     EXPECT_FALSE(r()->Resolve());
