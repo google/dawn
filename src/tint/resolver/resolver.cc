@@ -2601,7 +2601,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
 
     sem::ArrayCount el_count = sem::RuntimeArrayCount{};
 
-    // Evaluate the constant array size expression.
+    // Evaluate the constant array count expression.
     if (auto* count_expr = arr->count) {
         if (auto count = ArrayCount(count_expr)) {
             el_count = count.Get();
@@ -2630,7 +2630,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
 }
 
 utils::Result<sem::ArrayCount> Resolver::ArrayCount(const ast::Expression* count_expr) {
-    // Evaluate the constant array size expression.
+    // Evaluate the constant array count expression.
     const auto* count_sem = Materialize(Expression(count_expr));
     if (!count_sem) {
         return utils::Failure;
@@ -2648,13 +2648,13 @@ utils::Result<sem::ArrayCount> Resolver::ArrayCount(const ast::Expression* count
 
     auto* count_val = count_sem->ConstantValue();
     if (!count_val) {
-        AddError("array size must evaluate to a constant integer expression or override variable",
+        AddError("array count must evaluate to a constant integer expression or override variable",
                  count_expr->source);
         return utils::Failure;
     }
 
     if (auto* ty = count_val->Type(); !ty->is_integer_scalar()) {
-        AddError("array size must evaluate to a constant integer expression, but is type '" +
+        AddError("array count must evaluate to a constant integer expression, but is type '" +
                      builder_->FriendlyName(ty) + "'",
                  count_expr->source);
         return utils::Failure;
@@ -2662,7 +2662,7 @@ utils::Result<sem::ArrayCount> Resolver::ArrayCount(const ast::Expression* count
 
     int64_t count = count_val->As<AInt>();
     if (count < 1) {
-        AddError("array size (" + std::to_string(count) + ") must be greater than 0",
+        AddError("array count (" + std::to_string(count) + ") must be greater than 0",
                  count_expr->source);
         return utils::Failure;
     }
@@ -3246,7 +3246,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(ast::AddressSpace address_space,
 
             auto count = arr->ConstantCount();
             if (count.has_value() && count.value() >= kMaxArrayElementCount) {
-                AddError("array size (" + std::to_string(count.value()) + ") must be less than " +
+                AddError("array count (" + std::to_string(count.value()) + ") must be less than " +
                              std::to_string(kMaxArrayElementCount),
                          usage);
                 return false;

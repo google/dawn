@@ -216,28 +216,28 @@ TEST_F(ResolverTypeValidationTest, ArraySize_AIntLiteral_Zero) {
     // var<private> a : array<f32, 0>;
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_a)), ast::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
+    EXPECT_EQ(r()->error(), "12:34 error: array count (0) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedLiteral_Zero) {
     // var<private> a : array<f32, 0u>;
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_u)), ast::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
+    EXPECT_EQ(r()->error(), "12:34 error: array count (0) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Zero) {
     // var<private> a : array<f32, 0i>;
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 0_i)), ast::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
+    EXPECT_EQ(r()->error(), "12:34 error: array count (0) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedLiteral_Negative) {
     // var<private> a : array<f32, -10i>;
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, -10_i)), ast::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size (-10) must be greater than 0");
+    EXPECT_EQ(r()->error(), "12:34 error: array count (-10) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedConst_Zero) {
@@ -246,7 +246,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_UnsignedConst_Zero) {
     GlobalConst("size", Expr(0_u));
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
+    EXPECT_EQ(r()->error(), "12:34 error: array count (0) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedConst_Zero) {
@@ -255,7 +255,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedConst_Zero) {
     GlobalConst("size", Expr(0_i));
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size (0) must be greater than 0");
+    EXPECT_EQ(r()->error(), "12:34 error: array count (0) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_SignedConst_Negative) {
@@ -264,16 +264,17 @@ TEST_F(ResolverTypeValidationTest, ArraySize_SignedConst_Negative) {
     GlobalConst("size", Expr(-10_i));
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: array size (-10) must be greater than 0");
+    EXPECT_EQ(r()->error(), "12:34 error: array count (-10) must be greater than 0");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_FloatLiteral) {
     // var<private> a : array<f32, 10.0>;
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, 10_f)), ast::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: array size must evaluate to a constant integer expression, but is type "
-              "'f32'");
+    EXPECT_EQ(
+        r()->error(),
+        "12:34 error: array count must evaluate to a constant integer expression, but is type "
+        "'f32'");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_IVecLiteral) {
@@ -281,9 +282,10 @@ TEST_F(ResolverTypeValidationTest, ArraySize_IVecLiteral) {
     GlobalVar("a", ty.array(ty.f32(), Construct(Source{{12, 34}}, ty.vec2<i32>(), 10_i, 10_i)),
               ast::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: array size must evaluate to a constant integer expression, but is type "
-              "'vec2<i32>'");
+    EXPECT_EQ(
+        r()->error(),
+        "12:34 error: array count must evaluate to a constant integer expression, but is type "
+        "'vec2<i32>'");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_FloatConst) {
@@ -292,9 +294,10 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FloatConst) {
     GlobalConst("size", Expr(10_f));
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: array size must evaluate to a constant integer expression, but is type "
-              "'f32'");
+    EXPECT_EQ(
+        r()->error(),
+        "12:34 error: array count must evaluate to a constant integer expression, but is type "
+        "'f32'");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_IVecConst) {
@@ -303,9 +306,10 @@ TEST_F(ResolverTypeValidationTest, ArraySize_IVecConst) {
     GlobalConst("size", Construct(ty.vec2<i32>(), 100_i, 100_i));
     GlobalVar("a", ty.array(ty.f32(), Expr(Source{{12, 34}}, "size")), ast::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: array size must evaluate to a constant integer expression, but is type "
-              "'vec2<i32>'");
+    EXPECT_EQ(
+        r()->error(),
+        "12:34 error: array count must evaluate to a constant integer expression, but is type "
+        "'vec2<i32>'");
 }
 
 TEST_F(ResolverTypeValidationTest, ArraySize_UnderElementCountLimit) {
@@ -321,7 +325,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_OverElementCountLimit) {
               ty.array(Source{{12, 34}}, ty.f32(), Expr(Source{{12, 34}}, 65536_a)),
               ast::AddressSpace::kPrivate);
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(1:2 error: array size (65536) must be less than 65536
+    EXPECT_EQ(r()->error(), R"(1:2 error: array count (65536) must be less than 65536
 1:2 note: while instantiating 'var' a)");
 }
 
@@ -386,7 +390,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_Override_ComplexExpr) {
               ast::AddressSpace::kWorkgroup);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array size must evaluate to a constant integer expression or override "
+              "12:34 error: array count must evaluate to a constant integer expression or override "
               "variable");
 }
 
@@ -545,7 +549,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_FunctionLet) {
     WrapInFunction(size, a);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: array size must evaluate to a constant integer expression or override "
+              "12:34 error: array count must evaluate to a constant integer expression or override "
               "variable");
 }
 
