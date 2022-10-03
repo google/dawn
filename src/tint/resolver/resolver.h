@@ -113,39 +113,6 @@ class Resolver {
   private:
     Validator::ValidTypeStorageLayouts valid_type_storage_layouts_;
 
-    /// Structure holding semantic information about a block (i.e. scope), such as
-    /// parent block and variables declared in the block.
-    /// Used to validate variable scoping rules.
-    struct BlockInfo {
-        enum class Type { kGeneric, kLoop, kLoopContinuing, kSwitchCase };
-
-        BlockInfo(const ast::BlockStatement* block, Type type, BlockInfo* parent);
-        ~BlockInfo();
-
-        template <typename Pred>
-        BlockInfo* FindFirstParent(Pred&& pred) {
-            BlockInfo* curr = this;
-            while (curr && !pred(curr)) {
-                curr = curr->parent;
-            }
-            return curr;
-        }
-
-        BlockInfo* FindFirstParent(BlockInfo::Type ty) {
-            return FindFirstParent([ty](auto* block_info) { return block_info->type == ty; });
-        }
-
-        ast::BlockStatement const* const block;
-        const Type type;
-        BlockInfo* const parent;
-        std::vector<const ast::Variable*> decls;
-
-        // first_continue is set to the index of the first variable in decls
-        // declared after the first continue statement in a loop block, if any.
-        constexpr static size_t kNoContinue = size_t(~0);
-        size_t first_continue = kNoContinue;
-    };
-
     // Structure holding information for a TypeDecl
     struct TypeDeclInfo {
         ast::TypeDecl const* const ast;
