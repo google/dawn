@@ -166,6 +166,7 @@ class Device final : public DeviceBase {
 
     MaybeError CheckDebugLayerAndGenerateErrors();
     void AppendDebugLayerMessages(ErrorData* error) override;
+    void CheckDebugMessagesAfterDestruction() const;
 
     void DestroyImpl() override;
     MaybeError WaitForIdleForDestruction() override;

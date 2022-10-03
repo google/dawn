@@ -134,11 +134,10 @@ OnDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
         return VK_FALSE;
     }
 
-    dawn::ErrorLog() << pCallbackData->pMessage;
-
     if (pUserData == nullptr) {
         return VK_FALSE;
     }
+    VulkanInstance* instance = reinterpret_cast<VulkanInstance*>(pUserData);
 
     // Look through all the object labels attached to the debug message and try to parse
     // a device debug prefix out of one of them. If a debug prefix is found and matches
@@ -150,11 +149,15 @@ OnDebugUtilsCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
             continue;
         }
 
-        VulkanInstance* instance = reinterpret_cast<VulkanInstance*>(pUserData);
         if (instance->HandleDeviceMessage(std::move(deviceDebugPrefix), pCallbackData->pMessage)) {
-            break;
+            return VK_FALSE;
         }
     }
+
+    // We get to this line if no device was associated with the message. Crash so that the failure
+    // is loud and makes tests fail in Debug.
+    dawn::ErrorLog() << pCallbackData->pMessage;
+    UNREACHABLE();
 
     return VK_FALSE;
 }

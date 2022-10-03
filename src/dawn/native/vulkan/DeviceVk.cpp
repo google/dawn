@@ -14,6 +14,7 @@
 
 #include "dawn/native/vulkan/DeviceVk.h"
 
+#include "dawn/common/Log.h"
 #include "dawn/common/NonCopyable.h"
 #include "dawn/common/Platform.h"
 #include "dawn/native/BackendConnection.h"
@@ -978,6 +979,21 @@ void Device::AppendDebugLayerMessages(ErrorData* error) {
     }
 }
 
+void Device::CheckDebugMessagesAfterDestruction() const {
+    if (!GetAdapter()->GetInstance()->IsBackendValidationEnabled() || mDebugMessages.empty()) {
+        return;
+    }
+
+    dawn::ErrorLog()
+        << "Some VVL messages were not handled before dawn::native::vulkan::Device destruction:";
+    for (const auto& message : mDebugMessages) {
+        dawn::ErrorLog() << " - " << message;
+    }
+
+    // Crash in debug
+    UNREACHABLE();
+}
+
 MaybeError Device::WaitForIdleForDestruction() {
     // Immediately tag the recording context as unused so we don't try to submit it in Tick.
     // Move the mRecordingContext.used to mUnusedCommands so it can be cleaned up in
@@ -1127,6 +1143,11 @@ void Device::DestroyImpl() {
     ASSERT(mVkDevice != VK_NULL_HANDLE);
     fn.DestroyDevice(mVkDevice, nullptr);
     mVkDevice = VK_NULL_HANDLE;
+
+    // No additonal Vulkan commands should be done by this device after this function. Check for any
+    // remaining Vulkan Validation Layer messages that may have been added during destruction or not
+    // handled prior to destruction.
+    CheckDebugMessagesAfterDestruction();
 }
 
 uint32_t Device::GetOptimalBytesPerRowAlignment() const {
