@@ -48,14 +48,12 @@ TEST_F(ResolverStaticAssertTest, Global_Const_Fail) {
     EXPECT_EQ(r()->error(), "12:34 error: static assertion failed");
 }
 
-// TODO(crbug.com/tint/1581): Enable once the '<' operator is implemented for constant evaluation.
-TEST_F(ResolverStaticAssertTest, DISABLED_Global_LessThan_Pass) {
+TEST_F(ResolverStaticAssertTest, Global_LessThan_Pass) {
     GlobalStaticAssert(LessThan(2_i, 3_i));
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-// TODO(crbug.com/tint/1581): Enable once the '<' operator is implemented for constant evaluation.
-TEST_F(ResolverStaticAssertTest, DISABLED_Global_LessThan_Fail) {
+TEST_F(ResolverStaticAssertTest, Global_LessThan_Fail) {
     GlobalStaticAssert(Source{{12, 34}}, LessThan(4_i, 3_i));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: static assertion failed");
@@ -93,14 +91,12 @@ TEST_F(ResolverStaticAssertTest, Local_NonConst) {
               "12:34 error: static assertion condition must be a constant expression");
 }
 
-// TODO(crbug.com/tint/1581): Enable once the '<' operator is implemented for constant evaluation.
-TEST_F(ResolverStaticAssertTest, DISABLED_Local_LessThan_Pass) {
+TEST_F(ResolverStaticAssertTest, Local_LessThan_Pass) {
     WrapInFunction(StaticAssert(LessThan(2_i, 3_i)));
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 }
 
-// TODO(crbug.com/tint/1581): Enable once the '<' operator is implemented for constant evaluation.
-TEST_F(ResolverStaticAssertTest, DISABLED_Local_LessThan_Fail) {
+TEST_F(ResolverStaticAssertTest, Local_LessThan_Fail) {
     WrapInFunction(StaticAssert(Source{{12, 34}}, LessThan(4_i, 3_i)));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "12:34 error: static assertion failed");
