@@ -73,9 +73,9 @@ template <typename T>
 using UnwrapNumber = typename detail::NumberUnwrapper<T>::type;
 
 /// Evaluates to true iff T or Number<T> is a floating-point type or is NumberKindF16.
-template <typename T, typename U = std::conditional_t<IsNumber<T>, UnwrapNumber<T>, T>>
-constexpr bool IsFloatingPoint =
-    std::is_floating_point_v<U> || std::is_same_v<T, detail::NumberKindF16>;
+template <typename T>
+constexpr bool IsFloatingPoint = std::is_floating_point_v<UnwrapNumber<T>> ||
+                                 std::is_same_v<UnwrapNumber<T>, detail::NumberKindF16>;
 
 /// Evaluates to true iff T or Number<T> is an integral type.
 template <typename T>
