@@ -58,7 +58,7 @@ class ExternalImageDXGIImpl : public LinkNode<ExternalImageDXGIImpl> {
     void EndAccess(WGPUTexture texture, ExternalImageDXGIFenceDescriptor* signalFence);
 
   private:
-    Device* mBackendDevice = nullptr;
+    Ref<Device> mBackendDevice;
     Microsoft::WRL::ComPtr<ID3D12Resource> mD3D12Resource;
     const bool mUseFenceSynchronization;
 

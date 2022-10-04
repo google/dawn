@@ -111,7 +111,7 @@ WGPUTexture ExternalImageDXGIImpl::BeginAccess(
         }
     } else {
         d3d11on12Resource = mD3D11on12ResourceCache->GetOrCreateD3D11on12Resource(
-            mBackendDevice, mD3D12Resource.Get());
+            mBackendDevice.Get(), mD3D12Resource.Get());
         if (d3d11on12Resource == nullptr) {
             dawn::ErrorLog() << "Unable to create 11on12 resource for external image";
             return nullptr;
