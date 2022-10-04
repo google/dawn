@@ -137,6 +137,7 @@ ExternalSemaphoreHandle Service::DuplicateHandle(ExternalSemaphoreHandle handle)
     return out_handle;
 }
 
+// static
 void Service::CloseHandle(ExternalSemaphoreHandle handle) {
     zx_status_t status = zx_handle_close(handle);
     ASSERT(status == ZX_OK);

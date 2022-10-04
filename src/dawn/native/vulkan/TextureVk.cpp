@@ -928,7 +928,12 @@ MaybeError Texture::ExportExternalTexture(VkImageLayout desiredLayout,
     return {};
 }
 
-Texture::~Texture() {}
+Texture::~Texture() {
+    if (mExternalSemaphoreHandle != kNullExternalSemaphoreHandle) {
+        external_semaphore::Service::CloseHandle(mExternalSemaphoreHandle);
+    }
+    mExternalSemaphoreHandle = kNullExternalSemaphoreHandle;
+}
 
 void Texture::SetLabelHelper(const char* prefix) {
     SetDebugName(ToBackend(GetDevice()), mHandle, prefix, GetLabel());
@@ -956,11 +961,6 @@ void Texture::DestroyImpl() {
 
         mHandle = VK_NULL_HANDLE;
         mExternalAllocation = VK_NULL_HANDLE;
-
-        if (mExternalSemaphoreHandle != kNullExternalSemaphoreHandle) {
-            device->GetExternalSemaphoreService()->CloseHandle(mExternalSemaphoreHandle);
-        }
-        mExternalSemaphoreHandle = kNullExternalSemaphoreHandle;
     }
     // For Vulkan, we currently run the base destruction code after the internal changes because
     // of the dependency on the texture state which the base code overwrites too early.
@@ -1345,8 +1345,7 @@ void Texture::EnsureSubresourceContentInitialized(CommandRecordingContext* recor
 
 void Texture::UpdateExternalSemaphoreHandle(ExternalSemaphoreHandle handle) {
     if (mExternalSemaphoreHandle != kNullExternalSemaphoreHandle) {
-        Device* device = ToBackend(GetDevice());
-        device->GetExternalSemaphoreService()->CloseHandle(mExternalSemaphoreHandle);
+        external_semaphore::Service::CloseHandle(mExternalSemaphoreHandle);
     }
     mExternalSemaphoreHandle = handle;
 }

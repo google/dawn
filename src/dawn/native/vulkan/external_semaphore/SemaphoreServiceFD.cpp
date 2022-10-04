@@ -142,6 +142,7 @@ ExternalSemaphoreHandle Service::DuplicateHandle(ExternalSemaphoreHandle handle)
     return fd;
 }
 
+// static
 void Service::CloseHandle(ExternalSemaphoreHandle handle) {
     int ret = close(handle);
     ASSERT(ret == 0);

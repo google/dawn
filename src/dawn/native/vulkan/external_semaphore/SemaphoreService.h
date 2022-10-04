@@ -52,7 +52,7 @@ class Service {
     ExternalSemaphoreHandle DuplicateHandle(ExternalSemaphoreHandle handle);
 
     // Close an external handle.
-    void CloseHandle(ExternalSemaphoreHandle handle);
+    static void CloseHandle(ExternalSemaphoreHandle handle);
 
   private:
     Device* mDevice = nullptr;
