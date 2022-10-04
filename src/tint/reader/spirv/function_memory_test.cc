@@ -1070,13 +1070,6 @@ return;
     p->SkipDumpingPending("crbug.com/tint/98");
 }
 
-TEST_F(SpvParserMemoryTest, DISABLED_RemapStorageBuffer_ThroughFunctionCall) {
-    // WGSL does not support pointer-to-storage-buffer as function parameter
-}
-TEST_F(SpvParserMemoryTest, DISABLED_RemapStorageBuffer_ThroughFunctionParameter) {
-    // WGSL does not support pointer-to-storage-buffer as function parameter
-}
-
 std::string RuntimeArrayPreamble() {
     return R"(
      OpCapability Shader

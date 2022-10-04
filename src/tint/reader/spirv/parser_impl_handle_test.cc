@@ -1484,10 +1484,6 @@ TEST_P(SpvParserHandleTest_SampledImageAccessTest, Variable) {
     }
 }
 
-// TODO(dneto): Test variable declaration and texture builtins provoked by
-// use of an image access instruction inside helper function.
-TEST_P(SpvParserHandleTest_RegisterHandleUsage_SampledImage, DISABLED_FunctionParam) {}
-
 INSTANTIATE_TEST_SUITE_P(
     ImageGather,
     SpvParserHandleTest_SampledImageAccessTest,

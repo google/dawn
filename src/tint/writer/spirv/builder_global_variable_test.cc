@@ -473,45 +473,6 @@ OpDecorate %1 DescriptorSet 0
 )");
 }
 
-// Check that multiple texture_storage types with different access modifiers
-// only produces a single OpTypeImage.
-// Test disabled as storage textures currently only support 'write' access. In
-// the future we'll likely support read_write.
-TEST_F(BuilderTest, DISABLED_GlobalVar_TextureStorageWithDifferentAccess) {
-    // var<uniform_constant> a : texture_storage_2d<r32uint, read_write>;
-    // var<uniform_constant> b : texture_storage_2d<r32uint, write>;
-
-    auto* type_a = ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
-                                      ast::Access::kReadWrite);
-    auto* var_a = GlobalVar("a", type_a, Binding(0_a), Group(0_a));
-
-    auto* type_b = ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint,
-                                      ast::Access::kWrite);
-    auto* var_b = GlobalVar("b", type_b, Binding(1_a), Group(0_a));
-
-    spirv::Builder& b = Build();
-
-    EXPECT_TRUE(b.GenerateGlobalVariable(var_a)) << b.error();
-    EXPECT_TRUE(b.GenerateGlobalVariable(var_b)) << b.error();
-
-    EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %1 NonWritable
-OpDecorate %1 Binding 0
-OpDecorate %1 DescriptorSet 0
-OpDecorate %5 NonReadable
-OpDecorate %5 Binding 1
-OpDecorate %5 DescriptorSet 0
-)");
-    // There must only be one OpTypeImage declaration with the same
-    // arguments
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 0
-%3 = OpTypeImage %4 2D 0 0 0 2 R32ui
-%2 = OpTypePointer UniformConstant %3
-%1 = OpVariable %2 UniformConstant
-%6 = OpTypePointer UniformConstant %3
-%5 = OpVariable %6 UniformConstant
-)");
-}
-
 TEST_F(BuilderTest, GlobalVar_WorkgroupWithZeroInit) {
     auto* type_scalar = ty.i32();
     auto* var_scalar = GlobalVar("a", type_scalar, ast::AddressSpace::kWorkgroup);

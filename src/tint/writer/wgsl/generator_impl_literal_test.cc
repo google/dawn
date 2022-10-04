@@ -152,34 +152,6 @@ INSTANTIATE_TEST_SUITE_P(Infinity,
                              {MakeF32(0, 255, 0), "0x1p+128f"},
                              {MakeF32(1, 255, 0), "-0x1p+128f"}}));
 
-INSTANTIATE_TEST_SUITE_P(
-    // TODO(dneto): It's unclear how Infinity and NaN should be handled.
-    // https://github.com/gpuweb/gpuweb/issues/1769
-    // This test fails on Windows x86-64 because the machine sets the high
-    // mantissa bit on NaNs.
-    DISABLED_NaN,
-    // In the NaN case, the top bit in the mantissa is often used to encode
-    // whether the NaN is signalling or quiet, but no agreement between
-    // different machine architectures on whether 1 means signalling or
-    // if 1 means quiet.
-    WgslGenerator_F32LiteralTest,
-    ::testing::ValuesIn(std::vector<F32Data>{
-        // LSB only.  Smallest mantissa.
-        {MakeF32(0, 255, 1), "0x1.000002p+128f"},  // Smallest mantissa
-        {MakeF32(1, 255, 1), "-0x1.000002p+128f"},
-        // MSB only.
-        {MakeF32(0, 255, 0x400000), "0x1.8p+128f"},
-        {MakeF32(1, 255, 0x400000), "-0x1.8p+128f"},
-        // All 1s in the mantissa.
-        {MakeF32(0, 255, 0x7fffff), "0x1.fffffep+128f"},
-        {MakeF32(1, 255, 0x7fffff), "-0x1.fffffep+128f"},
-        // Scattered bits, with 0 in top mantissa bit.
-        {MakeF32(0, 255, 0x20101f), "0x1.40203ep+128f"},
-        {MakeF32(1, 255, 0x20101f), "-0x1.40203ep+128f"},
-        // Scattered bits, with 1 in top mantissa bit.
-        {MakeF32(0, 255, 0x40101f), "0x1.80203ep+128f"},
-        {MakeF32(1, 255, 0x40101f), "-0x1.80203ep+128f"}}));
-
 using WgslGenerator_F16LiteralTest = TestParamHelper<F16Data>;
 
 TEST_P(WgslGenerator_F16LiteralTest, Emit) {
@@ -221,36 +193,6 @@ INSTANTIATE_TEST_SUITE_P(Subnormal,
                              {MakeF16(0, 0, 0x2c7u), "4.23789024e-05h"},   // Scattered bits
                              {MakeF16(1, 0, 0x2c7u), "-4.23789024e-05h"},  // Scattered bits
                          }));
-
-INSTANTIATE_TEST_SUITE_P(
-    // Currently Inf is impossible to be spelled out in literal.
-    // https://github.com/gpuweb/gpuweb/issues/1769
-    DISABLED_Infinity,
-    WgslGenerator_F16LiteralTest,
-    ::testing::ValuesIn(std::vector<F16Data>{{MakeF16(0, 31, 0), "0x1p+128h"},
-                                             {MakeF16(1, 31, 0), "-0x1p+128h"}}));
-
-INSTANTIATE_TEST_SUITE_P(
-    // Currently NaN is impossible to be spelled out in literal.
-    // https://github.com/gpuweb/gpuweb/issues/1769
-    DISABLED_NaN,
-    WgslGenerator_F16LiteralTest,
-    ::testing::ValuesIn(std::vector<F16Data>{
-        // LSB only.  Smallest mantissa.
-        {MakeF16(0, 31, 1), "0x1.004p+128h"},  // Smallest mantissa
-        {MakeF16(1, 31, 1), "-0x1.004p+128h"},
-        // MSB only.
-        {MakeF16(0, 31, 0x200u), "0x1.8p+128h"},
-        {MakeF16(1, 31, 0x200u), "-0x1.8p+128h"},
-        // All 1s in the mantissa.
-        {MakeF16(0, 31, 0x3ffu), "0x1.ffcp+128h"},
-        {MakeF16(1, 31, 0x3ffu), "-0x1.ffcp+128h"},
-        // Scattered bits, with 0 in top mantissa bit.
-        {MakeF16(0, 31, 0x11fu), "0x1.47cp+128h"},
-        {MakeF16(1, 31, 0x11fu), "-0x1.47cp+128h"},
-        // Scattered bits, with 1 in top mantissa bit.
-        {MakeF16(0, 31, 0x23fu), "0x1.8fcp+128h"},
-        {MakeF16(1, 31, 0x23fu), "-0x1.8fcp+128h"}}));
 
 }  // namespace
 }  // namespace tint::writer::wgsl
