@@ -882,6 +882,9 @@ MaybeError Texture::ExportExternalTexture(VkImageLayout desiredLayout,
                     "Can't export a signal semaphore from destroyed or non-external texture %s.",
                     this);
 
+    DAWN_INVALID_IF(desiredLayout != VK_IMAGE_LAYOUT_UNDEFINED,
+                    "desiredLayout (%d) was not VK_IMAGE_LAYOUT_UNDEFINED", desiredLayout);
+
     // Release the texture
     mExternalState = ExternalState::Released;
 
@@ -894,9 +897,7 @@ MaybeError Texture::ExportExternalTexture(VkImageLayout desiredLayout,
     // promoting to GENERAL.
     VkImageLayout currentLayout = VulkanImageLayout(this, usage);
     VkImageLayout targetLayout;
-    if (desiredLayout != VK_IMAGE_LAYOUT_UNDEFINED) {
-        targetLayout = desiredLayout;
-    } else if (currentLayout != VK_IMAGE_LAYOUT_UNDEFINED) {
+    if (currentLayout != VK_IMAGE_LAYOUT_UNDEFINED) {
         targetLayout = currentLayout;
     } else {
         targetLayout = VK_IMAGE_LAYOUT_GENERAL;

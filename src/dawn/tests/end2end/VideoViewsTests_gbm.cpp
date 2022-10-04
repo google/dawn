@@ -204,7 +204,7 @@ class VideoViewsTestBackendGbm : public VideoViewsTestBackend {
         // Exports the signal and ignores it.
         dawn::native::vulkan::ExternalImageExportInfoDmaBuf exportInfo;
         dawn::native::vulkan::ExportVulkanImage(platformTexture->wgpuTexture.Get(),
-                                                VK_IMAGE_LAYOUT_GENERAL, &exportInfo);
+                                                VK_IMAGE_LAYOUT_UNDEFINED, &exportInfo);
         for (int fd : exportInfo.semaphoreHandles) {
             ASSERT_NE(fd, -1);
             close(fd);

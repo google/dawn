@@ -160,10 +160,9 @@ class VulkanImageWrappingTestBackendOpaqueFD : public VulkanImageWrappingTestBac
     }
 
     bool ExportImage(const wgpu::Texture& texture,
-                     VkImageLayout layout,
                      ExternalImageExportInfoVkForTesting* exportInfo) override {
         ExternalImageExportInfoOpaqueFD infoOpaqueFD;
-        bool success = ExportVulkanImage(texture.Get(), layout, &infoOpaqueFD);
+        bool success = ExportVulkanImage(texture.Get(), VK_IMAGE_LAYOUT_UNDEFINED, &infoOpaqueFD);
 
         *static_cast<ExternalImageExportInfoVk*>(exportInfo) = infoOpaqueFD;
         for (int fd : infoOpaqueFD.semaphoreHandles) {

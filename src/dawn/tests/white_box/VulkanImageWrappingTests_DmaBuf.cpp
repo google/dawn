@@ -143,10 +143,9 @@ class VulkanImageWrappingTestBackendDmaBuf : public VulkanImageWrappingTestBacke
     }
 
     bool ExportImage(const wgpu::Texture& texture,
-                     VkImageLayout layout,
                      ExternalImageExportInfoVkForTesting* exportInfo) override {
         ExternalImageExportInfoDmaBuf infoDmaBuf;
-        bool success = ExportVulkanImage(texture.Get(), layout, &infoDmaBuf);
+        bool success = ExportVulkanImage(texture.Get(), VK_IMAGE_LAYOUT_UNDEFINED, &infoDmaBuf);
 
         *static_cast<ExternalImageExportInfoVk*>(exportInfo) = infoDmaBuf;
         for (int fd : infoDmaBuf.semaphoreHandles) {

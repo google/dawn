@@ -66,7 +66,6 @@ class VulkanImageWrappingTestBackend {
                                     std::vector<std::unique_ptr<ExternalSemaphore>> semaphores) = 0;
 
     virtual bool ExportImage(const wgpu::Texture& texture,
-                             VkImageLayout layout,
                              ExternalImageExportInfoVkForTesting* exportInfo) = 0;
 
   private:

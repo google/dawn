@@ -136,4 +136,8 @@ bool ExportVulkanImage(WGPUTexture texture,
 #endif  // DAWN_PLATFORM_IS(LINUX)
 }
 
+bool ExportVulkanImage(WGPUTexture texture, ExternalImageExportInfoVk* info) {
+    return ExportVulkanImage(texture, VK_IMAGE_LAYOUT_UNDEFINED, info);
+}
+
 }  // namespace dawn::native::vulkan

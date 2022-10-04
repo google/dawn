@@ -174,6 +174,8 @@ DAWN_NATIVE_EXPORT WGPUTexture WrapVulkanImage(WGPUDevice device,
 DAWN_NATIVE_EXPORT bool ExportVulkanImage(WGPUTexture texture,
                                           VkImageLayout desiredLayout,
                                           ExternalImageExportInfoVk* info);
+// |ExportVulkanImage| with default desiredLayout of VK_IMAGE_LAYOUT_UNDEFINED.
+DAWN_NATIVE_EXPORT bool ExportVulkanImage(WGPUTexture texture, ExternalImageExportInfoVk* info);
 
 }  // namespace dawn::native::vulkan
 
