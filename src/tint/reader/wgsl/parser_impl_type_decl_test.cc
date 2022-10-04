@@ -24,7 +24,7 @@ namespace {
 
 TEST_F(ParserImplTest, TypeDecl_Invalid) {
     auto p = parser("1234");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_EQ(t.errored, false);
     EXPECT_EQ(t.matched, false);
     EXPECT_EQ(t.value, nullptr);
@@ -34,7 +34,7 @@ TEST_F(ParserImplTest, TypeDecl_Invalid) {
 TEST_F(ParserImplTest, TypeDecl_Identifier) {
     auto p = parser("A");
 
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -47,7 +47,7 @@ TEST_F(ParserImplTest, TypeDecl_Identifier) {
 TEST_F(ParserImplTest, TypeDecl_Bool) {
     auto p = parser("bool");
 
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -58,7 +58,7 @@ TEST_F(ParserImplTest, TypeDecl_Bool) {
 TEST_F(ParserImplTest, TypeDecl_F16) {
     auto p = parser("f16");
 
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -69,7 +69,7 @@ TEST_F(ParserImplTest, TypeDecl_F16) {
 TEST_F(ParserImplTest, TypeDecl_F32) {
     auto p = parser("f32");
 
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -80,7 +80,7 @@ TEST_F(ParserImplTest, TypeDecl_F32) {
 TEST_F(ParserImplTest, TypeDecl_I32) {
     auto p = parser("i32");
 
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -91,7 +91,7 @@ TEST_F(ParserImplTest, TypeDecl_I32) {
 TEST_F(ParserImplTest, TypeDecl_U32) {
     auto p = parser("u32");
 
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -114,7 +114,7 @@ class VecTest : public ParserImplTestWithParam<VecData> {};
 TEST_P(VecTest, Parse) {
     auto params = GetParam();
     auto p = parser(params.input);
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -134,7 +134,7 @@ class VecMissingGreaterThanTest : public ParserImplTestWithParam<VecData> {};
 TEST_P(VecMissingGreaterThanTest, Handles_Missing_GreaterThan) {
     auto params = GetParam();
     auto p = parser(params.input);
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -152,7 +152,7 @@ class VecMissingType : public ParserImplTestWithParam<VecData> {};
 TEST_P(VecMissingType, Handles_Missing_Type) {
     auto params = GetParam();
     auto p = parser(params.input);
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -167,7 +167,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
 
 TEST_F(ParserImplTest, TypeDecl_Ptr) {
     auto p = parser("ptr<function, f32>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -182,7 +182,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_WithAccess) {
     auto p = parser("ptr<function, f32, read>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -198,7 +198,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_WithAccess) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
     auto p = parser("ptr<function, vec2<f32>>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -217,7 +217,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_ToVec) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingLessThan) {
     auto p = parser("ptr private, f32>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -227,7 +227,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingLessThan) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThanAfterType) {
     auto p = parser("ptr<function, f32");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -237,7 +237,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThanAfterType) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThanAfterAccess) {
     auto p = parser("ptr<function, f32, read");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -247,7 +247,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingGreaterThanAfterAccess) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingCommaAfterAddressSpace) {
     auto p = parser("ptr<function f32>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -257,7 +257,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingCommaAfterAddressSpace) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingCommaAfterAccess) {
     auto p = parser("ptr<function, f32 read>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -267,7 +267,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingCommaAfterAccess) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingAddressSpace) {
     auto p = parser("ptr<, f32>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -277,7 +277,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingAddressSpace) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingType) {
     auto p = parser("ptr<function,>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -287,7 +287,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingType) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingAccess) {
     auto p = parser("ptr<function, i32, >");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -297,7 +297,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingAccess) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_MissingParams) {
     auto p = parser("ptr<>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -307,7 +307,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_MissingParams) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_BadAddressSpace) {
     auto p = parser("ptr<unknown, f32>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -317,7 +317,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_BadAddressSpace) {
 
 TEST_F(ParserImplTest, TypeDecl_Ptr_BadAccess) {
     auto p = parser("ptr<function, i32, unknown>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -327,7 +327,7 @@ TEST_F(ParserImplTest, TypeDecl_Ptr_BadAccess) {
 
 TEST_F(ParserImplTest, TypeDecl_Atomic) {
     auto p = parser("atomic<f32>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -341,7 +341,7 @@ TEST_F(ParserImplTest, TypeDecl_Atomic) {
 
 TEST_F(ParserImplTest, TypeDecl_Atomic_ToVec) {
     auto p = parser("atomic<vec2<f32>>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -359,7 +359,7 @@ TEST_F(ParserImplTest, TypeDecl_Atomic_ToVec) {
 
 TEST_F(ParserImplTest, TypeDecl_Atomic_MissingLessThan) {
     auto p = parser("atomic f32>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -369,7 +369,7 @@ TEST_F(ParserImplTest, TypeDecl_Atomic_MissingLessThan) {
 
 TEST_F(ParserImplTest, TypeDecl_Atomic_MissingGreaterThan) {
     auto p = parser("atomic<f32");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -379,7 +379,7 @@ TEST_F(ParserImplTest, TypeDecl_Atomic_MissingGreaterThan) {
 
 TEST_F(ParserImplTest, TypeDecl_Atomic_MissingType) {
     auto p = parser("atomic<>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -389,7 +389,7 @@ TEST_F(ParserImplTest, TypeDecl_Atomic_MissingType) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_AbstractIntLiteralSize) {
     auto p = parser("array<f32, 5>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -410,7 +410,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_AbstractIntLiteralSize) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_SintLiteralSize) {
     auto p = parser("array<f32, 5i>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -431,7 +431,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_SintLiteralSize) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_UintLiteralSize) {
     auto p = parser("array<f32, 5u>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -451,7 +451,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_UintLiteralSize) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_ConstantSize) {
     auto p = parser("array<f32, size>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -471,7 +471,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_ConstantSize) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_ExpressionSize) {
     auto p = parser("array<f32, size + 2>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -498,7 +498,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_ExpressionSize) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_Runtime) {
     auto p = parser("array<u32>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -513,7 +513,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Vec) {
     auto p = parser("array<vec4<u32>>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -530,7 +530,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_Runtime_Vec) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_BadSize) {
     auto p = parser("array<f32, !>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -540,7 +540,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_BadSize) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_MissingSize) {
     auto p = parser("array<f32,>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -550,7 +550,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_MissingSize) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_MissingGreaterThan) {
     auto p = parser("array<f32");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -560,7 +560,7 @@ TEST_F(ParserImplTest, TypeDecl_Array_MissingGreaterThan) {
 
 TEST_F(ParserImplTest, TypeDecl_Array_MissingComma) {
     auto p = parser("array<f32 3>");
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -584,7 +584,7 @@ class MatrixTest : public ParserImplTestWithParam<MatrixData> {};
 TEST_P(MatrixTest, Parse) {
     auto params = GetParam();
     auto p = parser(params.input);
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -612,7 +612,7 @@ class MatrixMissingGreaterThanTest : public ParserImplTestWithParam<MatrixData> 
 TEST_P(MatrixMissingGreaterThanTest, Handles_Missing_GreaterThan) {
     auto params = GetParam();
     auto p = parser(params.input);
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -636,7 +636,7 @@ class MatrixMissingType : public ParserImplTestWithParam<MatrixData> {};
 TEST_P(MatrixMissingType, Handles_Missing_Type) {
     auto params = GetParam();
     auto p = parser(params.input);
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.errored);
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
@@ -658,7 +658,7 @@ INSTANTIATE_TEST_SUITE_P(ParserImplTest,
 TEST_F(ParserImplTest, TypeDecl_Sampler) {
     auto p = parser("sampler");
 
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr) << p->error();
@@ -670,7 +670,7 @@ TEST_F(ParserImplTest, TypeDecl_Sampler) {
 TEST_F(ParserImplTest, TypeDecl_Texture) {
     auto p = parser("texture_cube<f32>");
 
-    auto t = p->type_decl();
+    auto t = p->type_specifier();
     EXPECT_TRUE(t.matched);
     EXPECT_FALSE(t.errored);
     ASSERT_NE(t.value, nullptr);

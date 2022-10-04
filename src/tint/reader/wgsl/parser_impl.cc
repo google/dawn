@@ -703,8 +703,8 @@ Maybe<ParserImpl::VarDeclInfo> ParserImpl::variable_decl() {
 // texture_and_sampler_types
 //  : sampler_type
 //  | depth_texture_type
-//  | sampled_texture_type LESS_THAN type_decl GREATER_THAN
-//  | multisampled_texture_type LESS_THAN type_decl GREATER_THAN
+//  | sampled_texture_type LESS_THAN type_specifier GREATER_THAN
+//  | multisampled_texture_type LESS_THAN type_specifier GREATER_THAN
 //  | storage_texture_type LESS_THAN texel_format
 //                         COMMA access_mode GREATER_THAN
 Maybe<const ast::Type*> ParserImpl::texture_and_sampler_types() {
@@ -928,7 +928,7 @@ Expect<ast::TexelFormat> ParserImpl::expect_texel_format(std::string_view use) {
     return fmt;
 }
 
-Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_with_optional_type_decl(
+Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_with_optional_type_specifier(
     std::string_view use,
     bool allow_inferred) {
     auto ident = expect_ident(use);
@@ -945,7 +945,7 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_with_optional_type_
     }
 
     auto& t = peek();
-    auto type = type_decl();
+    auto type = type_specifier();
     if (type.errored) {
         return Failure::kErrored;
     }
@@ -960,13 +960,14 @@ Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_with_optional_type_
 //   : ident ( COLON typed_decl ) ?
 Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_optionally_typed_ident(
     std::string_view use) {
-    return expect_ident_with_optional_type_decl(use, true);
+    return expect_ident_with_optional_type_specifier(use, /* allow_inferred */ true);
 }
 
-// ident_with_type_decl
-//   : IDENT COLON type_decl
-Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_with_type_decl(std::string_view use) {
-    return expect_ident_with_optional_type_decl(use, false);
+// ident_with_type_specifier
+//   : IDENT COLON type_specifier
+Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_with_type_specifier(
+    std::string_view use) {
+    return expect_ident_with_optional_type_specifier(use, /* allow_inferred */ false);
 }
 
 // access_mode
@@ -1025,7 +1026,7 @@ Maybe<ParserImpl::VariableQualifier> ParserImpl::variable_qualifier() {
 }
 
 // type_alias_decl
-//   : TYPE IDENT EQUAL type_decl
+//   : TYPE IDENT EQUAL type_specifier
 Maybe<const ast::Alias*> ParserImpl::type_alias_decl() {
     if (!peek_is(Token::Type::kType)) {
         return Failure::kNoMatch;
@@ -1043,7 +1044,7 @@ Maybe<const ast::Alias*> ParserImpl::type_alias_decl() {
         return Failure::kErrored;
     }
 
-    auto type = type_decl();
+    auto type = type_specifier();
     if (type.errored) {
         return Failure::kErrored;
     }
@@ -1106,19 +1107,19 @@ Maybe<ParserImpl::MatrixDimensions> ParserImpl::mat_prefix() {
     return MatrixDimensions{columns, 2};
 }
 
-// type_decl_without_ident:
+// type_specifier_without_ident:
 //   : BOOL
 //   | F16
 //   | F32
 //   | I32
 //   | U32
-//   | ARRAY LESS_THAN type_decl ( COMMA element_count_expression )? GREATER_THAN
-//   | ATOMIC LESS_THAN type_decl GREATER_THAN
-//   | PTR LESS_THAN address_space COMMA type_decl ( COMMA access_mode )? GREATER_THAN
-//   | mat_prefix LESS_THAN type_decl GREATER_THAN
-//   | vec_prefix LESS_THAN type_decl GREATER_THAN
+//   | ARRAY LESS_THAN type_specifier ( COMMA element_count_expression )? GREATER_THAN
+//   | ATOMIC LESS_THAN type_specifier GREATER_THAN
+//   | PTR LESS_THAN address_space COMMA type_specifier ( COMMA access_mode )? GREATER_THAN
+//   | mat_prefix LESS_THAN type_specifier GREATER_THAN
+//   | vec_prefix LESS_THAN type_specifier GREATER_THAN
 //   | texture_and_sampler_types
-Maybe<const ast::Type*> ParserImpl::type_decl_without_ident() {
+Maybe<const ast::Type*> ParserImpl::type_specifier_without_ident() {
     auto& t = peek();
 
     if (match(Token::Type::kBool)) {
@@ -1143,29 +1144,29 @@ Maybe<const ast::Type*> ParserImpl::type_decl_without_ident() {
 
     if (t.Is(Token::Type::kArray) && peek_is(Token::Type::kLessThan, 1)) {
         if (match(Token::Type::kArray)) {
-            return expect_type_decl_array(t.source());
+            return expect_type_specifier_array(t.source());
         }
     }
 
     if (match(Token::Type::kAtomic)) {
-        return expect_type_decl_atomic(t.source());
+        return expect_type_specifier_atomic(t.source());
     }
 
     if (match(Token::Type::kPtr)) {
-        return expect_type_decl_pointer(t.source());
+        return expect_type_specifier_pointer(t.source());
     }
 
     if (t.IsMatrix() && peek_is(Token::Type::kLessThan, 1)) {
         auto mat = mat_prefix();
         if (mat.matched) {
-            return expect_type_decl_matrix(t.source(), mat.value);
+            return expect_type_specifier_matrix(t.source(), mat.value);
         }
     }
 
     if (t.IsVector() && peek_is(Token::Type::kLessThan, 1)) {
         auto vec = vec_prefix();
         if (vec.matched) {
-            return expect_type_decl_vector(t.source(), vec.value);
+            return expect_type_specifier_vector(t.source(), vec.value);
         }
     }
 
@@ -1180,21 +1181,21 @@ Maybe<const ast::Type*> ParserImpl::type_decl_without_ident() {
     return Failure::kNoMatch;
 }
 
-// type_decl
+// type_specifier
 //   : IDENTIFIER
-//   | type_decl_without_ident
-Maybe<const ast::Type*> ParserImpl::type_decl() {
+//   | type_specifier_without_ident
+Maybe<const ast::Type*> ParserImpl::type_specifier() {
     auto& t = peek();
     Source source;
     if (match(Token::Type::kIdentifier, &source)) {
         return builder_.create<ast::TypeName>(source, builder_.Symbols().Register(t.to_str()));
     }
 
-    return type_decl_without_ident();
+    return type_specifier_without_ident();
 }
 
 Expect<const ast::Type*> ParserImpl::expect_type(std::string_view use) {
-    auto type = type_decl();
+    auto type = type_specifier();
     if (type.errored) {
         return Failure::kErrored;
     }
@@ -1204,8 +1205,8 @@ Expect<const ast::Type*> ParserImpl::expect_type(std::string_view use) {
     return type.value;
 }
 
-// LESS_THAN address_space COMMA type_decl ( COMMA access_mode )? GREATER_THAN
-Expect<const ast::Type*> ParserImpl::expect_type_decl_pointer(const Source& s) {
+// LESS_THAN address_space COMMA type_specifier ( COMMA access_mode )? GREATER_THAN
+Expect<const ast::Type*> ParserImpl::expect_type_specifier_pointer(const Source& s) {
     const char* use = "ptr declaration";
 
     auto address_space = ast::AddressSpace::kNone;
@@ -1245,8 +1246,8 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_pointer(const Source& s) {
     return builder_.ty.pointer(make_source_range_from(s), subtype.value, address_space, access);
 }
 
-// LESS_THAN type_decl GREATER_THAN
-Expect<const ast::Type*> ParserImpl::expect_type_decl_atomic(const Source& s) {
+// LESS_THAN type_specifier GREATER_THAN
+Expect<const ast::Type*> ParserImpl::expect_type_specifier_atomic(const Source& s) {
     const char* use = "atomic declaration";
 
     auto subtype = expect_lt_gt_block(use, [&] { return expect_type(use); });
@@ -1257,8 +1258,8 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_atomic(const Source& s) {
     return builder_.ty.atomic(make_source_range_from(s), subtype.value);
 }
 
-// LESS_THAN type_decl GREATER_THAN
-Expect<const ast::Type*> ParserImpl::expect_type_decl_vector(const Source& s, uint32_t count) {
+// LESS_THAN type_specifier GREATER_THAN
+Expect<const ast::Type*> ParserImpl::expect_type_specifier_vector(const Source& s, uint32_t count) {
     const char* use = "vector";
     auto ty = expect_lt_gt_block(use, [&] { return expect_type(use); });
     if (ty.errored) {
@@ -1268,8 +1269,8 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_vector(const Source& s, ui
     return builder_.ty.vec(make_source_range_from(s), ty.value, count);
 }
 
-// LESS_THAN type_decl ( COMMA element_count_expression )? GREATER_THAN
-Expect<const ast::Type*> ParserImpl::expect_type_decl_array(const Source& s) {
+// LESS_THAN type_specifier ( COMMA element_count_expression )? GREATER_THAN
+Expect<const ast::Type*> ParserImpl::expect_type_specifier_array(const Source& s) {
     const char* use = "array declaration";
 
     struct TypeAndSize {
@@ -1309,9 +1310,9 @@ Expect<const ast::Type*> ParserImpl::expect_type_decl_array(const Source& s) {
     return builder_.ty.array(make_source_range_from(s), type_size->type, type_size->size);
 }
 
-// LESS_THAN type_decl GREATER_THAN
-Expect<const ast::Type*> ParserImpl::expect_type_decl_matrix(const Source& s,
-                                                             const MatrixDimensions& dims) {
+// LESS_THAN type_specifier GREATER_THAN
+Expect<const ast::Type*> ParserImpl::expect_type_specifier_matrix(const Source& s,
+                                                                  const MatrixDimensions& dims) {
     const char* use = "matrix";
     auto ty = expect_lt_gt_block(use, [&] { return expect_type(use); });
     if (ty.errored) {
@@ -1402,14 +1403,14 @@ Expect<ParserImpl::StructMemberList> ParserImpl::expect_struct_body_decl() {
 }
 
 // struct_member
-//   : attribute* ident_with_type_decl
+//   : attribute* ident_with_type_specifier
 Expect<ast::StructMember*> ParserImpl::expect_struct_member() {
     auto attrs = attribute_list();
     if (attrs.errored) {
         return Failure::kErrored;
     }
 
-    auto decl = expect_ident_with_type_decl("struct member");
+    auto decl = expect_ident_with_type_specifier("struct member");
     if (decl.errored) {
         return Failure::kErrored;
     }
@@ -1477,10 +1478,10 @@ Maybe<const ast::Function*> ParserImpl::function_decl(AttributeList& attrs) {
 }
 
 // function_header
-//   : FN IDENT PAREN_LEFT param_list PAREN_RIGHT return_type_decl_optional
-// return_type_decl_optional
+//   : FN IDENT PAREN_LEFT param_list PAREN_RIGHT return_type_specifier_optional
+// return_type_specifier_optional
 //   :
-//   | ARROW attribute_list* type_decl
+//   | ARROW attribute_list* type_specifier
 Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
     Source source;
     if (!match(Token::Type::kFn, &source)) {
@@ -1516,7 +1517,7 @@ Maybe<ParserImpl::FunctionHeader> ParserImpl::function_header() {
         }
         return_attributes = attrs.value;
 
-        auto type = type_decl();
+        auto type = type_specifier();
         if (type.errored) {
             errored = true;
         } else if (!type.matched) {
@@ -1565,11 +1566,11 @@ Expect<ParserImpl::ParameterList> ParserImpl::expect_param_list() {
 }
 
 // param
-//   : attribute_list* ident COLON type_decl
+//   : attribute_list* ident COLON type_specifier
 Expect<ast::Parameter*> ParserImpl::expect_param() {
     auto attrs = attribute_list();
 
-    auto decl = expect_ident_with_type_decl("parameter");
+    auto decl = expect_ident_with_type_specifier("parameter");
     if (decl.errored) {
         return Failure::kErrored;
     }
@@ -2468,7 +2469,7 @@ Maybe<const ast::BlockStatement*> ParserImpl::continuing_statement() {
 }
 
 // callable
-//   : type_decl_without_ident
+//   : type_specifier_without_ident
 //   | ARRAY
 //   | mat_prefix
 //   | vec_prefix
@@ -2479,10 +2480,10 @@ Maybe<const ast::BlockStatement*> ParserImpl::continuing_statement() {
 Maybe<const ast::Type*> ParserImpl::callable() {
     auto& t = peek();
 
-    //  This _must_ match `type_decl_without_ident` before any of the other types as they're all
-    //  prefixes of the types and we want to match the longer `vec3<f32>` then the shorter
+    //  This _must_ match `type_specifier_without_ident` before any of the other types as they're
+    //  all prefixes of the types and we want to match the longer `vec3<f32>` then the shorter
     //  prefix match of `vec3`.
-    auto ty = type_decl_without_ident();
+    auto ty = type_specifier_without_ident();
     if (ty.errored) {
         return Failure::kErrored;
     }
@@ -2509,7 +2510,7 @@ Maybe<const ast::Type*> ParserImpl::callable() {
 }
 
 // primary_expression
-//   : BITCAST LESS_THAN type_decl GREATER_THAN paren_expression
+//   : BITCAST LESS_THAN type_specifier GREATER_THAN paren_expression
 //   | callable argument_expression_list
 //   | const_literal
 //   | IDENT argument_expression_list?

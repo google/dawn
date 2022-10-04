@@ -427,8 +427,8 @@ class ParserImpl {
     /// @param use a description of what was being parsed if an error was raised.
     /// @param allow_inferred allow the identifier to be parsed without a type
     /// @returns the parsed identifier, and possibly type, or empty otherwise
-    Expect<TypedIdentifier> expect_ident_with_optional_type_decl(std::string_view use,
-                                                                 bool allow_inferred);
+    Expect<TypedIdentifier> expect_ident_with_optional_type_specifier(std::string_view use,
+                                                                      bool allow_inferred);
     /// Parses a `ident` or a `variable_ident_decl` grammar element, erroring on parse failure.
     /// @param use a description of what was being parsed if an error was raised.
     /// @returns the identifier or empty otherwise.
@@ -436,7 +436,7 @@ class ParserImpl {
     /// Parses a `variable_ident_decl` grammar element, erroring on parse failure.
     /// @param use a description of what was being parsed if an error was raised.
     /// @returns the identifier and type parsed or empty otherwise
-    Expect<TypedIdentifier> expect_ident_with_type_decl(std::string_view use);
+    Expect<TypedIdentifier> expect_ident_with_type_specifier(std::string_view use);
     /// Parses a `variable_qualifier` grammar element
     /// @returns the variable qualifier information
     Maybe<VariableQualifier> variable_qualifier();
@@ -452,12 +452,12 @@ class ParserImpl {
     /// Parses a `mat_prefix` grammar element
     /// @returns the matrix dimensions or nullptr
     Maybe<MatrixDimensions> mat_prefix();
-    /// Parses a `type_decl_without_ident` grammar element
+    /// Parses a `type_specifier_without_ident` grammar element
     /// @returns the parsed Type or nullptr if none matched.
-    Maybe<const ast::Type*> type_decl_without_ident();
-    /// Parses a `type_decl` grammar element
+    Maybe<const ast::Type*> type_specifier_without_ident();
+    /// Parses a `type_specifier` grammar element
     /// @returns the parsed Type or nullptr if none matched.
-    Maybe<const ast::Type*> type_decl();
+    Maybe<const ast::Type*> type_specifier();
     /// Parses an `address_space` grammar element, erroring on parse failure.
     /// @param use a description of what was being parsed if an error was raised.
     /// @returns the address space or ast::AddressSpace::kNone if none matched
@@ -861,11 +861,12 @@ class ParserImpl {
     /// Used to ensure that all attributes are consumed.
     bool expect_attributes_consumed(utils::VectorRef<const ast::Attribute*> list);
 
-    Expect<const ast::Type*> expect_type_decl_pointer(const Source& s);
-    Expect<const ast::Type*> expect_type_decl_atomic(const Source& s);
-    Expect<const ast::Type*> expect_type_decl_vector(const Source& s, uint32_t count);
-    Expect<const ast::Type*> expect_type_decl_array(const Source& s);
-    Expect<const ast::Type*> expect_type_decl_matrix(const Source& s, const MatrixDimensions& dims);
+    Expect<const ast::Type*> expect_type_specifier_pointer(const Source& s);
+    Expect<const ast::Type*> expect_type_specifier_atomic(const Source& s);
+    Expect<const ast::Type*> expect_type_specifier_vector(const Source& s, uint32_t count);
+    Expect<const ast::Type*> expect_type_specifier_array(const Source& s);
+    Expect<const ast::Type*> expect_type_specifier_matrix(const Source& s,
+                                                          const MatrixDimensions& dims);
 
     Expect<const ast::Type*> expect_type(std::string_view use);
 
