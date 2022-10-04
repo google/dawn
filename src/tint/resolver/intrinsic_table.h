@@ -84,10 +84,17 @@ class IntrinsicTable {
     /// if the builtin was not found.
     /// @param type the builtin type
     /// @param args the argument types passed to the builtin function
+    /// @param earliest_eval_stage the the earliest evaluation stage that a call to
+    ///        the builtin can be made. This can alter the overloads considered.
+    ///        For example, if the earliest evaluation stage is
+    ///        `sem::EvaluationStage::kRuntime`, then only concrete argument types
+    ///        will be considered, as all abstract-numerics will have been materialized
+    ///        after shader creation time (sem::EvaluationStage::kConstant).
     /// @param source the source of the builtin call
     /// @return the semantic builtin if found, otherwise nullptr
     virtual Builtin Lookup(sem::BuiltinType type,
                            utils::VectorRef<const sem::Type*> args,
+                           sem::EvaluationStage earliest_eval_stage,
                            const Source& source) = 0;
 
     /// Lookup looks for the unary op overload with the given signature, raising an error

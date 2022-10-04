@@ -1999,10 +1999,15 @@ template <size_t N>
 sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
                                  sem::BuiltinType builtin_type,
                                  utils::Vector<const sem::Expression*, N>& args) {
+    auto arg_stage = sem::EvaluationStage::kConstant;
+    for (auto* arg : args) {
+        arg_stage = sem::EarliestStage(arg_stage, arg->Stage());
+    }
+
     IntrinsicTable::Builtin builtin;
     {
         auto arg_tys = utils::Transform(args, [](auto* arg) { return arg->Type(); });
-        builtin = intrinsic_table_->Lookup(builtin_type, arg_tys, expr->source);
+        builtin = intrinsic_table_->Lookup(builtin_type, arg_tys, arg_stage, expr->source);
         if (!builtin.sem) {
             return nullptr;
         }
@@ -2016,19 +2021,8 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         AddWarning("use of deprecated builtin", expr->source);
     }
 
-    auto stage = builtin.sem->Stage();
-    if (stage == sem::EvaluationStage::kConstant) {  // <-- Optimization
-        // If the builtin is not annotated with @const, then it can only be evaluated
-        // at runtime, in which case there's no point checking the evaluation stage of the
-        // arguments.
-
-        // The builtin is @const annotated. Check all arguments are also constant.
-        for (auto* arg : args) {
-            stage = sem::EarliestStage(stage, arg->Stage());
-        }
-    }
-
     // If the builtin is @const, and all arguments have constant values, evaluate the builtin now.
+    auto stage = sem::EarliestStage(arg_stage, builtin.sem->Stage());
     const sem::Constant* value = nullptr;
     if (stage == sem::EvaluationStage::kConstant) {
         auto const_args = ConvertArguments(args, builtin.sem);

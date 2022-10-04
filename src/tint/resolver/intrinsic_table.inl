@@ -38,7 +38,7 @@ class Bool : public TypeMatcher {
 };
 
 const sem::Type* Bool::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_bool(ty)) {
+  if (!match_bool(state, ty)) {
     return nullptr;
   }
   return build_bool(state);
@@ -64,7 +64,7 @@ class Ia : public TypeMatcher {
 };
 
 const sem::Type* Ia::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_ia(ty)) {
+  if (!match_ia(state, ty)) {
     return nullptr;
   }
   return build_ia(state);
@@ -92,7 +92,7 @@ class Fa : public TypeMatcher {
 };
 
 const sem::Type* Fa::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_fa(ty)) {
+  if (!match_fa(state, ty)) {
     return nullptr;
   }
   return build_fa(state);
@@ -120,7 +120,7 @@ class I32 : public TypeMatcher {
 };
 
 const sem::Type* I32::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_i32(ty)) {
+  if (!match_i32(state, ty)) {
     return nullptr;
   }
   return build_i32(state);
@@ -146,7 +146,7 @@ class U32 : public TypeMatcher {
 };
 
 const sem::Type* U32::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_u32(ty)) {
+  if (!match_u32(state, ty)) {
     return nullptr;
   }
   return build_u32(state);
@@ -172,7 +172,7 @@ class F32 : public TypeMatcher {
 };
 
 const sem::Type* F32::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_f32(ty)) {
+  if (!match_f32(state, ty)) {
     return nullptr;
   }
   return build_f32(state);
@@ -198,7 +198,7 @@ class F16 : public TypeMatcher {
 };
 
 const sem::Type* F16::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_f16(ty)) {
+  if (!match_f16(state, ty)) {
     return nullptr;
   }
   return build_f16(state);
@@ -225,7 +225,7 @@ class Vec2 : public TypeMatcher {
 
 const sem::Type* Vec2::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_vec2(ty, T)) {
+  if (!match_vec2(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -257,7 +257,7 @@ class Vec3 : public TypeMatcher {
 
 const sem::Type* Vec3::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_vec3(ty, T)) {
+  if (!match_vec3(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -289,7 +289,7 @@ class Vec4 : public TypeMatcher {
 
 const sem::Type* Vec4::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_vec4(ty, T)) {
+  if (!match_vec4(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -321,7 +321,7 @@ class Mat2X2 : public TypeMatcher {
 
 const sem::Type* Mat2X2::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_mat2x2(ty, T)) {
+  if (!match_mat2x2(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -353,7 +353,7 @@ class Mat2X3 : public TypeMatcher {
 
 const sem::Type* Mat2X3::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_mat2x3(ty, T)) {
+  if (!match_mat2x3(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -385,7 +385,7 @@ class Mat2X4 : public TypeMatcher {
 
 const sem::Type* Mat2X4::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_mat2x4(ty, T)) {
+  if (!match_mat2x4(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -417,7 +417,7 @@ class Mat3X2 : public TypeMatcher {
 
 const sem::Type* Mat3X2::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_mat3x2(ty, T)) {
+  if (!match_mat3x2(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -449,7 +449,7 @@ class Mat3X3 : public TypeMatcher {
 
 const sem::Type* Mat3X3::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_mat3x3(ty, T)) {
+  if (!match_mat3x3(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -481,7 +481,7 @@ class Mat3X4 : public TypeMatcher {
 
 const sem::Type* Mat3X4::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_mat3x4(ty, T)) {
+  if (!match_mat3x4(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -513,7 +513,7 @@ class Mat4X2 : public TypeMatcher {
 
 const sem::Type* Mat4X2::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_mat4x2(ty, T)) {
+  if (!match_mat4x2(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -545,7 +545,7 @@ class Mat4X3 : public TypeMatcher {
 
 const sem::Type* Mat4X3::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_mat4x3(ty, T)) {
+  if (!match_mat4x3(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -577,7 +577,7 @@ class Mat4X4 : public TypeMatcher {
 
 const sem::Type* Mat4X4::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_mat4x4(ty, T)) {
+  if (!match_mat4x4(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -610,7 +610,7 @@ class Vec : public TypeMatcher {
 const sem::Type* Vec::Match(MatchState& state, const sem::Type* ty) const {
   Number N = Number::invalid;
   const sem::Type* T = nullptr;
-  if (!match_vec(ty, N, T)) {
+  if (!match_vec(state, ty, N, T)) {
     return nullptr;
   }
   N = state.Num(N);
@@ -651,7 +651,7 @@ const sem::Type* Mat::Match(MatchState& state, const sem::Type* ty) const {
   Number N = Number::invalid;
   Number M = Number::invalid;
   const sem::Type* T = nullptr;
-  if (!match_mat(ty, N, M, T)) {
+  if (!match_mat(state, ty, N, M, T)) {
     return nullptr;
   }
   N = state.Num(N);
@@ -697,7 +697,7 @@ const sem::Type* Ptr::Match(MatchState& state, const sem::Type* ty) const {
   Number S = Number::invalid;
   const sem::Type* T = nullptr;
   Number A = Number::invalid;
-  if (!match_ptr(ty, S, T, A)) {
+  if (!match_ptr(state, ty, S, T, A)) {
     return nullptr;
   }
   S = state.Num(S);
@@ -739,7 +739,7 @@ class Atomic : public TypeMatcher {
 
 const sem::Type* Atomic::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_atomic(ty, T)) {
+  if (!match_atomic(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -771,7 +771,7 @@ class Array : public TypeMatcher {
 
 const sem::Type* Array::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_array(ty, T)) {
+  if (!match_array(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -802,7 +802,7 @@ class Sampler : public TypeMatcher {
 };
 
 const sem::Type* Sampler::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_sampler(ty)) {
+  if (!match_sampler(state, ty)) {
     return nullptr;
   }
   return build_sampler(state);
@@ -828,7 +828,7 @@ class SamplerComparison : public TypeMatcher {
 };
 
 const sem::Type* SamplerComparison::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_sampler_comparison(ty)) {
+  if (!match_sampler_comparison(state, ty)) {
     return nullptr;
   }
   return build_sampler_comparison(state);
@@ -855,7 +855,7 @@ class Texture1D : public TypeMatcher {
 
 const sem::Type* Texture1D::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_texture_1d(ty, T)) {
+  if (!match_texture_1d(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -887,7 +887,7 @@ class Texture2D : public TypeMatcher {
 
 const sem::Type* Texture2D::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_texture_2d(ty, T)) {
+  if (!match_texture_2d(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -919,7 +919,7 @@ class Texture2DArray : public TypeMatcher {
 
 const sem::Type* Texture2DArray::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_texture_2d_array(ty, T)) {
+  if (!match_texture_2d_array(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -951,7 +951,7 @@ class Texture3D : public TypeMatcher {
 
 const sem::Type* Texture3D::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_texture_3d(ty, T)) {
+  if (!match_texture_3d(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -983,7 +983,7 @@ class TextureCube : public TypeMatcher {
 
 const sem::Type* TextureCube::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_texture_cube(ty, T)) {
+  if (!match_texture_cube(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -1015,7 +1015,7 @@ class TextureCubeArray : public TypeMatcher {
 
 const sem::Type* TextureCubeArray::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_texture_cube_array(ty, T)) {
+  if (!match_texture_cube_array(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -1047,7 +1047,7 @@ class TextureMultisampled2D : public TypeMatcher {
 
 const sem::Type* TextureMultisampled2D::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_texture_multisampled_2d(ty, T)) {
+  if (!match_texture_multisampled_2d(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -1078,7 +1078,7 @@ class TextureDepth2D : public TypeMatcher {
 };
 
 const sem::Type* TextureDepth2D::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_texture_depth_2d(ty)) {
+  if (!match_texture_depth_2d(state, ty)) {
     return nullptr;
   }
   return build_texture_depth_2d(state);
@@ -1104,7 +1104,7 @@ class TextureDepth2DArray : public TypeMatcher {
 };
 
 const sem::Type* TextureDepth2DArray::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_texture_depth_2d_array(ty)) {
+  if (!match_texture_depth_2d_array(state, ty)) {
     return nullptr;
   }
   return build_texture_depth_2d_array(state);
@@ -1130,7 +1130,7 @@ class TextureDepthCube : public TypeMatcher {
 };
 
 const sem::Type* TextureDepthCube::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_texture_depth_cube(ty)) {
+  if (!match_texture_depth_cube(state, ty)) {
     return nullptr;
   }
   return build_texture_depth_cube(state);
@@ -1156,7 +1156,7 @@ class TextureDepthCubeArray : public TypeMatcher {
 };
 
 const sem::Type* TextureDepthCubeArray::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_texture_depth_cube_array(ty)) {
+  if (!match_texture_depth_cube_array(state, ty)) {
     return nullptr;
   }
   return build_texture_depth_cube_array(state);
@@ -1182,7 +1182,7 @@ class TextureDepthMultisampled2D : public TypeMatcher {
 };
 
 const sem::Type* TextureDepthMultisampled2D::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_texture_depth_multisampled_2d(ty)) {
+  if (!match_texture_depth_multisampled_2d(state, ty)) {
     return nullptr;
   }
   return build_texture_depth_multisampled_2d(state);
@@ -1210,7 +1210,7 @@ class TextureStorage1D : public TypeMatcher {
 const sem::Type* TextureStorage1D::Match(MatchState& state, const sem::Type* ty) const {
   Number F = Number::invalid;
   Number A = Number::invalid;
-  if (!match_texture_storage_1d(ty, F, A)) {
+  if (!match_texture_storage_1d(state, ty, F, A)) {
     return nullptr;
   }
   F = state.Num(F);
@@ -1248,7 +1248,7 @@ class TextureStorage2D : public TypeMatcher {
 const sem::Type* TextureStorage2D::Match(MatchState& state, const sem::Type* ty) const {
   Number F = Number::invalid;
   Number A = Number::invalid;
-  if (!match_texture_storage_2d(ty, F, A)) {
+  if (!match_texture_storage_2d(state, ty, F, A)) {
     return nullptr;
   }
   F = state.Num(F);
@@ -1286,7 +1286,7 @@ class TextureStorage2DArray : public TypeMatcher {
 const sem::Type* TextureStorage2DArray::Match(MatchState& state, const sem::Type* ty) const {
   Number F = Number::invalid;
   Number A = Number::invalid;
-  if (!match_texture_storage_2d_array(ty, F, A)) {
+  if (!match_texture_storage_2d_array(state, ty, F, A)) {
     return nullptr;
   }
   F = state.Num(F);
@@ -1324,7 +1324,7 @@ class TextureStorage3D : public TypeMatcher {
 const sem::Type* TextureStorage3D::Match(MatchState& state, const sem::Type* ty) const {
   Number F = Number::invalid;
   Number A = Number::invalid;
-  if (!match_texture_storage_3d(ty, F, A)) {
+  if (!match_texture_storage_3d(state, ty, F, A)) {
     return nullptr;
   }
   F = state.Num(F);
@@ -1360,7 +1360,7 @@ class TextureExternal : public TypeMatcher {
 };
 
 const sem::Type* TextureExternal::Match(MatchState& state, const sem::Type* ty) const {
-  if (!match_texture_external(ty)) {
+  if (!match_texture_external(state, ty)) {
     return nullptr;
   }
   return build_texture_external(state);
@@ -1387,7 +1387,7 @@ class ModfResult : public TypeMatcher {
 
 const sem::Type* ModfResult::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_modf_result(ty, T)) {
+  if (!match_modf_result(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -1422,7 +1422,7 @@ class ModfResultVec : public TypeMatcher {
 const sem::Type* ModfResultVec::Match(MatchState& state, const sem::Type* ty) const {
   Number N = Number::invalid;
   const sem::Type* T = nullptr;
-  if (!match_modf_result_vec(ty, N, T)) {
+  if (!match_modf_result_vec(state, ty, N, T)) {
     return nullptr;
   }
   N = state.Num(N);
@@ -1461,7 +1461,7 @@ class FrexpResult : public TypeMatcher {
 
 const sem::Type* FrexpResult::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_frexp_result(ty, T)) {
+  if (!match_frexp_result(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -1496,7 +1496,7 @@ class FrexpResultVec : public TypeMatcher {
 const sem::Type* FrexpResultVec::Match(MatchState& state, const sem::Type* ty) const {
   Number N = Number::invalid;
   const sem::Type* T = nullptr;
-  if (!match_frexp_result_vec(ty, N, T)) {
+  if (!match_frexp_result_vec(state, ty, N, T)) {
     return nullptr;
   }
   N = state.Num(N);
@@ -1535,7 +1535,7 @@ class AtomicCompareExchangeResult : public TypeMatcher {
 
 const sem::Type* AtomicCompareExchangeResult::Match(MatchState& state, const sem::Type* ty) const {
   const sem::Type* T = nullptr;
-  if (!match_atomic_compare_exchange_result(ty, T)) {
+  if (!match_atomic_compare_exchange_result(state, ty, T)) {
     return nullptr;
   }
   T = state.Type(T);
@@ -1567,25 +1567,25 @@ class AbstractOrScalar : public TypeMatcher {
 };
 
 const sem::Type* AbstractOrScalar::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_ia(ty)) {
+  if (match_ia(state, ty)) {
     return build_ia(state);
   }
-  if (match_fa(ty)) {
+  if (match_fa(state, ty)) {
     return build_fa(state);
   }
-  if (match_i32(ty)) {
+  if (match_i32(state, ty)) {
     return build_i32(state);
   }
-  if (match_u32(ty)) {
+  if (match_u32(state, ty)) {
     return build_u32(state);
   }
-  if (match_f32(ty)) {
+  if (match_f32(state, ty)) {
     return build_f32(state);
   }
-  if (match_f16(ty)) {
+  if (match_f16(state, ty)) {
     return build_f16(state);
   }
-  if (match_bool(ty)) {
+  if (match_bool(state, ty)) {
     return build_bool(state);
   }
   return nullptr;
@@ -1616,19 +1616,19 @@ class Scalar : public TypeMatcher {
 };
 
 const sem::Type* Scalar::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_i32(ty)) {
+  if (match_i32(state, ty)) {
     return build_i32(state);
   }
-  if (match_u32(ty)) {
+  if (match_u32(state, ty)) {
     return build_u32(state);
   }
-  if (match_f32(ty)) {
+  if (match_f32(state, ty)) {
     return build_f32(state);
   }
-  if (match_f16(ty)) {
+  if (match_f16(state, ty)) {
     return build_f16(state);
   }
-  if (match_bool(ty)) {
+  if (match_bool(state, ty)) {
     return build_bool(state);
   }
   return nullptr;
@@ -1659,16 +1659,16 @@ class ScalarNoF32 : public TypeMatcher {
 };
 
 const sem::Type* ScalarNoF32::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_i32(ty)) {
+  if (match_i32(state, ty)) {
     return build_i32(state);
   }
-  if (match_u32(ty)) {
+  if (match_u32(state, ty)) {
     return build_u32(state);
   }
-  if (match_f16(ty)) {
+  if (match_f16(state, ty)) {
     return build_f16(state);
   }
-  if (match_bool(ty)) {
+  if (match_bool(state, ty)) {
     return build_bool(state);
   }
   return nullptr;
@@ -1699,16 +1699,16 @@ class ScalarNoF16 : public TypeMatcher {
 };
 
 const sem::Type* ScalarNoF16::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_i32(ty)) {
+  if (match_i32(state, ty)) {
     return build_i32(state);
   }
-  if (match_u32(ty)) {
+  if (match_u32(state, ty)) {
     return build_u32(state);
   }
-  if (match_f32(ty)) {
+  if (match_f32(state, ty)) {
     return build_f32(state);
   }
-  if (match_bool(ty)) {
+  if (match_bool(state, ty)) {
     return build_bool(state);
   }
   return nullptr;
@@ -1739,16 +1739,16 @@ class ScalarNoI32 : public TypeMatcher {
 };
 
 const sem::Type* ScalarNoI32::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_u32(ty)) {
+  if (match_u32(state, ty)) {
     return build_u32(state);
   }
-  if (match_f32(ty)) {
+  if (match_f32(state, ty)) {
     return build_f32(state);
   }
-  if (match_f16(ty)) {
+  if (match_f16(state, ty)) {
     return build_f16(state);
   }
-  if (match_bool(ty)) {
+  if (match_bool(state, ty)) {
     return build_bool(state);
   }
   return nullptr;
@@ -1779,16 +1779,16 @@ class ScalarNoU32 : public TypeMatcher {
 };
 
 const sem::Type* ScalarNoU32::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_i32(ty)) {
+  if (match_i32(state, ty)) {
     return build_i32(state);
   }
-  if (match_f32(ty)) {
+  if (match_f32(state, ty)) {
     return build_f32(state);
   }
-  if (match_f16(ty)) {
+  if (match_f16(state, ty)) {
     return build_f16(state);
   }
-  if (match_bool(ty)) {
+  if (match_bool(state, ty)) {
     return build_bool(state);
   }
   return nullptr;
@@ -1819,16 +1819,16 @@ class ScalarNoBool : public TypeMatcher {
 };
 
 const sem::Type* ScalarNoBool::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_i32(ty)) {
+  if (match_i32(state, ty)) {
     return build_i32(state);
   }
-  if (match_u32(ty)) {
+  if (match_u32(state, ty)) {
     return build_u32(state);
   }
-  if (match_f32(ty)) {
+  if (match_f32(state, ty)) {
     return build_f32(state);
   }
-  if (match_f16(ty)) {
+  if (match_f16(state, ty)) {
     return build_f16(state);
   }
   return nullptr;
@@ -1859,22 +1859,22 @@ class FiaFiu32F16 : public TypeMatcher {
 };
 
 const sem::Type* FiaFiu32F16::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_ia(ty)) {
+  if (match_ia(state, ty)) {
     return build_ia(state);
   }
-  if (match_fa(ty)) {
+  if (match_fa(state, ty)) {
     return build_fa(state);
   }
-  if (match_i32(ty)) {
+  if (match_i32(state, ty)) {
     return build_i32(state);
   }
-  if (match_u32(ty)) {
+  if (match_u32(state, ty)) {
     return build_u32(state);
   }
-  if (match_f32(ty)) {
+  if (match_f32(state, ty)) {
     return build_f32(state);
   }
-  if (match_f16(ty)) {
+  if (match_f16(state, ty)) {
     return build_f16(state);
   }
   return nullptr;
@@ -1905,19 +1905,19 @@ class FiaFi32F16 : public TypeMatcher {
 };
 
 const sem::Type* FiaFi32F16::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_ia(ty)) {
+  if (match_ia(state, ty)) {
     return build_ia(state);
   }
-  if (match_fa(ty)) {
+  if (match_fa(state, ty)) {
     return build_fa(state);
   }
-  if (match_i32(ty)) {
+  if (match_i32(state, ty)) {
     return build_i32(state);
   }
-  if (match_f32(ty)) {
+  if (match_f32(state, ty)) {
     return build_f32(state);
   }
-  if (match_f16(ty)) {
+  if (match_f16(state, ty)) {
     return build_f16(state);
   }
   return nullptr;
@@ -1948,19 +1948,19 @@ class FiaFiu32 : public TypeMatcher {
 };
 
 const sem::Type* FiaFiu32::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_ia(ty)) {
+  if (match_ia(state, ty)) {
     return build_ia(state);
   }
-  if (match_fa(ty)) {
+  if (match_fa(state, ty)) {
     return build_fa(state);
   }
-  if (match_i32(ty)) {
+  if (match_i32(state, ty)) {
     return build_i32(state);
   }
-  if (match_u32(ty)) {
+  if (match_u32(state, ty)) {
     return build_u32(state);
   }
-  if (match_f32(ty)) {
+  if (match_f32(state, ty)) {
     return build_f32(state);
   }
   return nullptr;
@@ -1991,10 +1991,10 @@ class FaF32 : public TypeMatcher {
 };
 
 const sem::Type* FaF32::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_fa(ty)) {
+  if (match_fa(state, ty)) {
     return build_fa(state);
   }
-  if (match_f32(ty)) {
+  if (match_f32(state, ty)) {
     return build_f32(state);
   }
   return nullptr;
@@ -2025,13 +2025,13 @@ class FaF32F16 : public TypeMatcher {
 };
 
 const sem::Type* FaF32F16::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_fa(ty)) {
+  if (match_fa(state, ty)) {
     return build_fa(state);
   }
-  if (match_f32(ty)) {
+  if (match_f32(state, ty)) {
     return build_f32(state);
   }
-  if (match_f16(ty)) {
+  if (match_f16(state, ty)) {
     return build_f16(state);
   }
   return nullptr;
@@ -2062,13 +2062,13 @@ class IaIu32 : public TypeMatcher {
 };
 
 const sem::Type* IaIu32::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_ia(ty)) {
+  if (match_ia(state, ty)) {
     return build_ia(state);
   }
-  if (match_i32(ty)) {
+  if (match_i32(state, ty)) {
     return build_i32(state);
   }
-  if (match_u32(ty)) {
+  if (match_u32(state, ty)) {
     return build_u32(state);
   }
   return nullptr;
@@ -2099,16 +2099,16 @@ class Fiu32F16 : public TypeMatcher {
 };
 
 const sem::Type* Fiu32F16::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_i32(ty)) {
+  if (match_i32(state, ty)) {
     return build_i32(state);
   }
-  if (match_u32(ty)) {
+  if (match_u32(state, ty)) {
     return build_u32(state);
   }
-  if (match_f32(ty)) {
+  if (match_f32(state, ty)) {
     return build_f32(state);
   }
-  if (match_f16(ty)) {
+  if (match_f16(state, ty)) {
     return build_f16(state);
   }
   return nullptr;
@@ -2139,13 +2139,13 @@ class Fiu32 : public TypeMatcher {
 };
 
 const sem::Type* Fiu32::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_i32(ty)) {
+  if (match_i32(state, ty)) {
     return build_i32(state);
   }
-  if (match_u32(ty)) {
+  if (match_u32(state, ty)) {
     return build_u32(state);
   }
-  if (match_f32(ty)) {
+  if (match_f32(state, ty)) {
     return build_f32(state);
   }
   return nullptr;
@@ -2176,13 +2176,13 @@ class Fi32F16 : public TypeMatcher {
 };
 
 const sem::Type* Fi32F16::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_i32(ty)) {
+  if (match_i32(state, ty)) {
     return build_i32(state);
   }
-  if (match_f32(ty)) {
+  if (match_f32(state, ty)) {
     return build_f32(state);
   }
-  if (match_f16(ty)) {
+  if (match_f16(state, ty)) {
     return build_f16(state);
   }
   return nullptr;
@@ -2213,10 +2213,10 @@ class Fi32 : public TypeMatcher {
 };
 
 const sem::Type* Fi32::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_i32(ty)) {
+  if (match_i32(state, ty)) {
     return build_i32(state);
   }
-  if (match_f32(ty)) {
+  if (match_f32(state, ty)) {
     return build_f32(state);
   }
   return nullptr;
@@ -2247,10 +2247,10 @@ class F32F16 : public TypeMatcher {
 };
 
 const sem::Type* F32F16::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_f32(ty)) {
+  if (match_f32(state, ty)) {
     return build_f32(state);
   }
-  if (match_f16(ty)) {
+  if (match_f16(state, ty)) {
     return build_f16(state);
   }
   return nullptr;
@@ -2281,10 +2281,10 @@ class Iu32 : public TypeMatcher {
 };
 
 const sem::Type* Iu32::Match(MatchState& state, const sem::Type* ty) const {
-  if (match_i32(ty)) {
+  if (match_i32(state, ty)) {
     return build_i32(state);
   }
-  if (match_u32(ty)) {
+  if (match_u32(state, ty)) {
     return build_u32(state);
   }
   return nullptr;
