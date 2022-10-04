@@ -41,11 +41,11 @@ See:
 {{- template "EnableDirectives" $overload -}}
 
 {{- /* Generate RW storage buffer parameters */ -}}
-{{-   $sb_rw_fields := Eval "EmitBufferFields" "overload"    $overload
-                                               "var_name"    "sb_rw"
-                                               "storage"     "storage"
-                                               "access"      "read_write"
-                                               "args"        $args -}}
+{{-   $sb_rw_fields := Eval "EmitBufferFields" "overload"          $overload
+                                               "var_name"          "sb_rw"
+                                               "address_space"     "storage"
+                                               "access"            "read_write"
+                                               "args"              $args -}}
 {{-   if $sb_rw_fields -}}
 struct SB_RW {
 {{- $sb_rw_fields -}}
@@ -54,11 +54,11 @@ struct SB_RW {
 {{    end -}}
 
 {{- /* Generate RO storage buffer parameters */ -}}
-{{-   $sb_ro_fields := Eval "EmitBufferFields" "overload"    $overload
-                                               "var_name"    "sb_ro"
-                                               "storage"     "storage"
-                                               "access"      "read"
-                                               "args"        $args -}}
+{{-   $sb_ro_fields := Eval "EmitBufferFields" "overload"          $overload
+                                               "var_name"          "sb_ro"
+                                               "address_space"     "storage"
+                                               "access"            "read"
+                                               "args"              $args -}}
 {{-   if $sb_ro_fields -}}
 struct SB_RO {
 {{- $sb_ro_fields -}}
@@ -67,11 +67,11 @@ struct SB_RO {
 {{    end -}}
 
 {{- /* Generate uniform buffer parameters */ -}}
-{{-   $ub_fields := Eval "EmitBufferFields" "overload"    $overload
-                                            "var_name"    "ub"
-                                            "storage"     "uniform"
-                                            "access"      "read"
-                                            "args"        $args -}}
+{{-   $ub_fields := Eval "EmitBufferFields" "overload"          $overload
+                                            "var_name"          "ub"
+                                            "address_space"     "uniform"
+                                            "access"            "read"
+                                            "args"              $args -}}
 {{-   if $ub_fields -}}
 struct UB {
 {{- $ub_fields -}}
@@ -196,21 +196,21 @@ enable f16;
 {{- /* Emits a struct with the fields that match the given address space  */ -}}
 {{- /* and access.                                                        */ -}}
 {{- /* Argument is a map with the following expected keys:                */ -}}
-{{- /*  'overload' - the current overload                                 */ -}}
-{{- /*  'var_name' - name of the variable of the structure type           */ -}}
-{{- /*  'storage'  - filtered address space                               */ -}}
-{{- /*  'access'   - filtered access                                      */ -}}
-{{- /*  'args'     - argument map that's populated with the fields        */ -}}
+{{- /*  'overload'       - the current overload                           */ -}}
+{{- /*  'var_name'       - name of the variable of the structure type     */ -}}
+{{- /*  'address_space'  - filtered address space                         */ -}}
+{{- /*  'access'         - filtered access                                */ -}}
+{{- /*  'args'           - argument map that's populated with the fields  */ -}}
 {{- /* ------------------------------------------------------------------ */ -}}
-{{- $overload       := .Get "overload" -}}
-{{- $var_name       := .Get "var_name" -}}
-{{- $filter_storage := .Get "storage"  -}}
-{{- $filter_access  := .Get "access"   -}}
-{{- $args           := .Get "args"     -}}
+{{- $overload             := .Get "overload" -}}
+{{- $var_name             := .Get "var_name" -}}
+{{- $filter_address_space := .Get "address_space"  -}}
+{{- $filter_access        := .Get "access"   -}}
+{{- $args                 := .Get "args"     -}}
 {{-   range $i, $p := $overload.Parameters  }}
 {{-     $address_space := Eval "AddressSpace" $p.Type -}}
 {{-     $access  := Eval "Access"       $p.Type -}}
-{{-     if and (eq $filter_storage $address_space) (eq $filter_access $access) }}
+{{-     if and (eq $filter_address_space $address_space) (eq $filter_access $access) }}
 {{-       if eq "ptr" $p.Type.Target.Name  }}
   arg_{{$i}}: {{template "Type" (index $p.Type.TemplateArguments 1)}},
 {{          $args.Put $i (printf "&%v.arg_%v" $var_name $i) -}}
@@ -245,7 +245,7 @@ enable f16;
 {{-   if eq $name "ptr"     -}}{{(index .TemplateArguments 2).Target.Name}}
 {{-   else -}}
 {{- /*  Emit the default for the address space */ -}}
-{{- /*  https://gpuweb.github.io/gpuweb/wgsl/#storage-class */ -}}
+{{- /*  https://gpuweb.github.io/gpuweb/wgsl/#address-space */ -}}
 {{-     $address_space := Eval "AddressSpace" . -}}
 {{-          if eq $address_space "function"  -}}read_write
 {{-     else if eq $address_space "private"   -}}read_write
