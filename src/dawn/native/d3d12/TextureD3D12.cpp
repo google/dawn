@@ -739,6 +739,8 @@ MaybeError Texture::SynchronizeImportedTextureBeforeUse() {
         DAWN_TRY(CheckHRESULT(device->GetCommandQueue()->Wait(fence->GetD3D12Fence(),
                                                               fence->GetFenceValue()),
                               "D3D12 fence wait"););
+        // Keep D3D12 fence alive since we'll clear the waitFences list below.
+        device->ReferenceUntilUnused(fence->GetD3D12Fence());
     }
     mWaitFences.clear();
     return {};
