@@ -82,6 +82,7 @@ class Texture final : public TextureBase {
 
     // Eagerly transition the texture for export.
     void TransitionEagerlyForExport(CommandRecordingContext* recordingContext);
+    std::vector<VkSemaphore> AcquireWaitRequirements();
 
     void EnsureSubresourceContentInitialized(CommandRecordingContext* recordingContext,
                                              const SubresourceRange& range);

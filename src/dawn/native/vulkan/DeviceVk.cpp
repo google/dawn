@@ -304,6 +304,9 @@ MaybeError Device::SubmitPendingCommands() {
     // Transition eagerly all used external textures for export.
     for (auto* texture : mRecordingContext.externalTexturesForEagerTransition) {
         texture->TransitionEagerlyForExport(&mRecordingContext);
+        std::vector<VkSemaphore> waitRequirements = texture->AcquireWaitRequirements();
+        mRecordingContext.waitSemaphores.insert(mRecordingContext.waitSemaphores.end(),
+                                                waitRequirements.begin(), waitRequirements.end());
     }
 
     DAWN_TRY(

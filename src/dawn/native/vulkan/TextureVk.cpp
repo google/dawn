@@ -867,6 +867,10 @@ void Texture::TransitionEagerlyForExport(CommandRecordingContext* recordingConte
                                   nullptr, 0, nullptr, 1, &barrier);
 }
 
+std::vector<VkSemaphore> Texture::AcquireWaitRequirements() {
+    return std::move(mWaitRequirements);
+}
+
 MaybeError Texture::ExportExternalTexture(VkImageLayout desiredLayout,
                                           ExternalSemaphoreHandle* handle,
                                           VkImageLayout* releasedOldLayout,
@@ -1051,10 +1055,6 @@ void Texture::TweakTransitionForExternalUsage(CommandRecordingContext* recording
     }
 
     mLastExternalState = mExternalState;
-
-    recordingContext->waitSemaphores.insert(recordingContext->waitSemaphores.end(),
-                                            mWaitRequirements.begin(), mWaitRequirements.end());
-    mWaitRequirements.clear();
 }
 
 bool Texture::CanReuseWithoutBarrier(wgpu::TextureUsage lastUsage, wgpu::TextureUsage usage) {
