@@ -30,13 +30,19 @@ std::string FloatToString(float f) {
     // precision
     std::stringstream fixed;
     fixed.flags(fixed.flags() | std::ios_base::showpoint | std::ios_base::fixed);
+    fixed.imbue(std::locale::classic());
     fixed.precision(9);
     fixed << f;
+    std::string str = fixed.str();
 
-    // If this string can be parsed without loss of information, use it
+    // If this string can be parsed without loss of information, use it.
+    // (Use double here to dodge a bug in older libc++ versions which
+    // would incorrectly read back FLT_MAX as INF.)
+    double roundtripped;
+    fixed >> roundtripped;
+
     auto float_equal_no_warning = std::equal_to<float>();
-    if (float_equal_no_warning(std::stof(fixed.str()), f)) {
-        auto str = fixed.str();
+    if (float_equal_no_warning(f, static_cast<float>(roundtripped))) {
         while (str.length() >= 2 && str[str.size() - 1] == '0' && str[str.size() - 2] != '.') {
             str.pop_back();
         }
@@ -47,6 +53,7 @@ std::string FloatToString(float f) {
     // Resort to scientific, with the minimum precision needed to preserve the
     // whole float
     std::stringstream sci;
+    sci.imbue(std::locale::classic());
     sci.precision(std::numeric_limits<float>::max_digits10);
     sci << f;
     return sci.str();
