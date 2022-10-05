@@ -6,6 +6,6 @@ struct S {
 };
 
 void foo(device S* const tint_symbol) {
-  (*(tint_symbol)).a = as_type<int4>((as_type<uint4>(as_type<int4>((*(tint_symbol)).a)) * as_type<uint4>(as_type<int4>(int4(2)))));
+  (*(tint_symbol)).a = as_type<int4>((as_type<uint4>(int4((*(tint_symbol)).a)) * as_type<uint4>(int4(int4(2)))));
 }
 

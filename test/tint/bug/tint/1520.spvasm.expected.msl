@@ -45,13 +45,13 @@ bool test_int_S1_c0_b(const constant UniformBuffer* const tint_symbol_5) {
   ok = x_41;
   int4 const x_44 = int4(x_27, x_27, x_27, x_27);
   val = x_44;
-  int4 const x_47 = as_type<int4>((as_type<uint4>(as_type<int4>(x_44)) + as_type<uint4>(as_type<int4>(int4(1)))));
+  int4 const x_47 = as_type<int4>((as_type<uint4>(int4(x_44)) + as_type<uint4>(int4(int4(1)))));
   val = x_47;
-  int4 const x_48 = as_type<int4>((as_type<uint4>(as_type<int4>(x_47)) - as_type<uint4>(as_type<int4>(int4(1)))));
+  int4 const x_48 = as_type<int4>((as_type<uint4>(int4(x_47)) - as_type<uint4>(int4(int4(1)))));
   val = x_48;
-  int4 const x_49 = as_type<int4>((as_type<uint4>(as_type<int4>(x_48)) + as_type<uint4>(as_type<int4>(int4(1)))));
+  int4 const x_49 = as_type<int4>((as_type<uint4>(int4(x_48)) + as_type<uint4>(int4(int4(1)))));
   val = x_49;
-  int4 const x_50 = as_type<int4>((as_type<uint4>(as_type<int4>(x_49)) - as_type<uint4>(as_type<int4>(int4(1)))));
+  int4 const x_50 = as_type<int4>((as_type<uint4>(int4(x_49)) - as_type<uint4>(int4(int4(1)))));
   val = x_50;
   x_55 = false;
   if (x_41) {
@@ -59,11 +59,11 @@ bool test_int_S1_c0_b(const constant UniformBuffer* const tint_symbol_5) {
     x_55 = x_54;
   }
   ok = x_55;
-  int4 const x_58 = as_type<int4>((as_type<uint4>(as_type<int4>(x_50)) * as_type<uint4>(as_type<int4>(int4(2)))));
+  int4 const x_58 = as_type<int4>((as_type<uint4>(int4(x_50)) * as_type<uint4>(int4(int4(2)))));
   val = x_58;
   int4 const x_59 = (x_58 / int4(2));
   val = x_59;
-  int4 const x_60 = as_type<int4>((as_type<uint4>(as_type<int4>(x_59)) * as_type<uint4>(as_type<int4>(int4(2)))));
+  int4 const x_60 = as_type<int4>((as_type<uint4>(int4(x_59)) * as_type<uint4>(int4(int4(2)))));
   val = x_60;
   int4 const x_61 = (x_60 / int4(2));
   val = x_61;

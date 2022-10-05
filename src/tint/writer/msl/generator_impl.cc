@@ -152,6 +152,32 @@ class ScopedBitCast {
     std::ostream& s;
 };
 
+class ScopedCast {
+  public:
+    ScopedCast(GeneratorImpl* generator,
+               std::ostream& stream,
+               const sem::Type* curr_type,
+               const sem::Type* target_type)
+        : s(stream) {
+        auto* target_vec_type = target_type->As<sem::Vector>();
+
+        // If we need to promote from scalar to vector, cast the scalar to the
+        // vector element type.
+        if (curr_type->is_scalar() && target_vec_type) {
+            target_type = target_vec_type->type();
+        }
+
+        // Cast
+        generator->EmitType(s, target_type, "");
+        s << "(";
+    }
+
+    ~ScopedCast() { s << ")"; }
+
+  private:
+    std::ostream& s;
+};
+
 }  // namespace
 
 SanitizedResult::SanitizedResult() = default;
@@ -521,7 +547,7 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
             // In case the type is packed, cast to our own type in order to remove the packing.
             // Otherwise, this just casts to itself.
             if (lhs_type->is_signed_integer_vector()) {
-                ScopedBitCast lhs_self_cast(this, out, lhs_type, lhs_type);
+                ScopedCast lhs_self_cast(this, out, lhs_type, lhs_type);
                 if (!EmitExpression(out, expr->lhs)) {
                     return false;
                 }
@@ -540,7 +566,7 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
             // In case the type is packed, cast to our own type in order to remove the packing.
             // Otherwise, this just casts to itself.
             if (rhs_type->is_signed_integer_vector()) {
-                ScopedBitCast rhs_self_cast(this, out, rhs_type, rhs_type);
+                ScopedCast rhs_self_cast(this, out, rhs_type, rhs_type);
                 if (!EmitExpression(out, expr->rhs)) {
                     return false;
                 }
