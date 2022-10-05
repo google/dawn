@@ -1582,6 +1582,20 @@ testing::AssertionResult CheckImpl(const T& expected, const U& actual, const T& 
 }
 
 template <>
+testing::AssertionResult CheckImpl<utils::RGBA8>(const utils::RGBA8& expected,
+                                                 const utils::RGBA8& actual,
+                                                 const utils::RGBA8& tolerance) {
+    if (abs(expected.r - actual.r) > tolerance.r || abs(expected.g - actual.g) > tolerance.g ||
+        abs(expected.b - actual.b) > tolerance.b || abs(expected.a - actual.a) > tolerance.a) {
+        return tolerance == utils::RGBA8{}
+                   ? testing::AssertionFailure() << expected << ", actual " << actual
+                   : testing::AssertionFailure()
+                         << "within " << tolerance << " of " << expected << ", actual " << actual;
+    }
+    return testing::AssertionSuccess();
+}
+
+template <>
 testing::AssertionResult CheckImpl<float>(const float& expected,
                                           const float& actual,
                                           const float& tolerance) {

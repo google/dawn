@@ -219,8 +219,13 @@ class CompressedTextureFormatTest : public DawnTestWithParams<CompressedTextureF
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
 
+        // Some mobile chipsets decode the compressed texture values with a lower precision, leading
+        // to color channels that are off by one from the expected result. This check is given a
+        // little bit of tolerance to account for it. See dawn:1562.
         EXPECT_TEXTURE_EQ(expected.data(), renderPass.color, {expectedOrigin.x, expectedOrigin.y},
-                          {expectedExtent.width, expectedExtent.height});
+                          {expectedExtent.width, expectedExtent.height},
+                          /* level */ 0, /* aspect */ wgpu::TextureAspect::All,
+                          /* bytesPerRow */ 0, /* Tolerance */ utils::RGBA8(1, 1, 1, 1));
     }
 
     // Run the tests that copies pre-prepared format data into a texture and verifies if we can

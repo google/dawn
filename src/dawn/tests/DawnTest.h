@@ -360,10 +360,11 @@ class DawnTestBase {
                                               wgpu::Extent3D extent,
                                               uint32_t level = 0,
                                               wgpu::TextureAspect aspect = wgpu::TextureAspect::All,
-                                              uint32_t bytesPerRow = 0) {
+                                              uint32_t bytesPerRow = 0,
+                                              T tolerance = {}) {
         // No device passed explicitly. Default it, and forward the rest of the args.
         return AddTextureExpectation<T, U>(file, line, this->device, expectedData, texture, origin,
-                                           extent, level, aspect, bytesPerRow);
+                                           extent, level, aspect, bytesPerRow, tolerance);
     }
 
     template <typename T, typename U = T>
@@ -376,11 +377,12 @@ class DawnTestBase {
                                               wgpu::Extent3D extent,
                                               uint32_t level = 0,
                                               wgpu::TextureAspect aspect = wgpu::TextureAspect::All,
-                                              uint32_t bytesPerRow = 0) {
+                                              uint32_t bytesPerRow = 0,
+                                              T tolerance = {}) {
         return AddTextureExpectationImpl(
             file, line, std::move(targetDevice),
-            new detail::ExpectEq<T, U>(expectedData,
-                                       extent.width * extent.height * extent.depthOrArrayLayers),
+            new detail::ExpectEq<T, U>(
+                expectedData, extent.width * extent.height * extent.depthOrArrayLayers, tolerance),
             texture, origin, extent, level, aspect, sizeof(U), bytesPerRow);
     }
 

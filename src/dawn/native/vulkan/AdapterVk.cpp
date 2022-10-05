@@ -135,13 +135,11 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
         mSupportedFeatures.EnableFeature(Feature::TextureCompressionBC);
     }
 
-    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
-    if (mDeviceInfo.features.textureCompressionETC2 == VK_TRUE && !IsAndroidQualcomm()) {
+    if (mDeviceInfo.features.textureCompressionETC2 == VK_TRUE) {
         mSupportedFeatures.EnableFeature(Feature::TextureCompressionETC2);
     }
 
-    // TODO(dawn:1549) Fails on Qualcomm-based Android devices.
-    if (mDeviceInfo.features.textureCompressionASTC_LDR == VK_TRUE && !IsAndroidQualcomm()) {
+    if (mDeviceInfo.features.textureCompressionASTC_LDR == VK_TRUE) {
         mSupportedFeatures.EnableFeature(Feature::TextureCompressionASTC);
     }
 
