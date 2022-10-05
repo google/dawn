@@ -1460,7 +1460,7 @@ ConstEval::Result ConstEval::OpShiftLeft(const sem::Type* ty,
                 // Check sign change only if e2 is less than bit width of e1. If e1 is larger
                 // than bit width, we check for non-representable value below.
                 if (e2u < bit_width) {
-                    size_t must_match_msb = e2u + 1;
+                    UT must_match_msb = e2u + 1;
                     UT mask = ~UT{0} << (bit_width - must_match_msb);
                     if ((e1u & mask) != 0 && (e1u & mask) != mask) {
                         AddError("shift left operation results in sign change", source);
