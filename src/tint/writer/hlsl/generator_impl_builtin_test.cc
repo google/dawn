@@ -356,25 +356,29 @@ TEST_F(HlslGeneratorImplTest_Builtin, Builtin_Call) {
 }
 
 TEST_F(HlslGeneratorImplTest_Builtin, Select_Scalar) {
-    auto* call = Call("select", 1_f, 2_f, true);
+    GlobalVar("a", Expr(1_f), ast::AddressSpace::kPrivate);
+    GlobalVar("b", Expr(2_f), ast::AddressSpace::kPrivate);
+    auto* call = Call("select", "a", "b", true);
     WrapInFunction(CallStmt(call));
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
     std::stringstream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-    EXPECT_EQ(out.str(), "(true ? 2.0f : 1.0f)");
+    EXPECT_EQ(out.str(), "(true ? b : a)");
 }
 
 TEST_F(HlslGeneratorImplTest_Builtin, Select_Vector) {
-    auto* call = Call("select", vec2<i32>(1_i, 2_i), vec2<i32>(3_i, 4_i), vec2<bool>(true, false));
+    GlobalVar("a", vec2<i32>(1_i, 2_i), ast::AddressSpace::kPrivate);
+    GlobalVar("b", vec2<i32>(3_i, 4_i), ast::AddressSpace::kPrivate);
+    auto* call = Call("select", "a", "b", vec2<bool>(true, false));
     WrapInFunction(CallStmt(call));
     GeneratorImpl& gen = Build();
 
     gen.increment_indent();
     std::stringstream out;
     ASSERT_TRUE(gen.EmitExpression(out, call)) << gen.error();
-    EXPECT_EQ(out.str(), "(bool2(true, false) ? int2(3, 4) : int2(1, 2))");
+    EXPECT_EQ(out.str(), "(bool2(true, false) ? b : a)");
 }
 
 TEST_F(HlslGeneratorImplTest_Builtin, Modf_Scalar_f32) {

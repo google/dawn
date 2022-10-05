@@ -395,6 +395,24 @@ class ConstEval {
                  utils::VectorRef<const sem::Constant*> args,
                  const Source& source);
 
+    /// select builtin with single bool third arg
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result select_bool(const sem::Type* ty,
+                       utils::VectorRef<const sem::Constant*> args,
+                       const Source& source);
+
+    /// select builtin with vector of bool third arg
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result select_boolvec(const sem::Type* ty,
+                          utils::VectorRef<const sem::Constant*> args,
+                          const Source& source);
+
   private:
     /// Adds the given error message to the diagnostics
     void AddError(const std::string& msg, const Source& source) const;

@@ -73,15 +73,24 @@ struct SignatureOf<R (C::*)(ARGS...) const> {
 
 /// SignatureOfT is an alias to `typename SignatureOf<F>::type`.
 template <typename F>
-using SignatureOfT = typename SignatureOf<F>::type;
+using SignatureOfT = typename SignatureOf<Decay<F>>::type;
 
 /// ParameterType is an alias to `typename SignatureOf<F>::type::parameter<N>`.
 template <typename F, std::size_t N>
-using ParameterType = typename SignatureOfT<F>::template parameter<N>;
+using ParameterType = typename SignatureOfT<Decay<F>>::template parameter<N>;
+
+/// LastParameterType returns the type of the last parameter of `F`. `F` must have at least one
+/// parameter.
+template <typename F>
+using LastParameterType = ParameterType<F, SignatureOfT<Decay<F>>::parameter_count - 1>;
 
 /// ReturnType is an alias to `typename SignatureOf<F>::type::ret`.
 template <typename F>
-using ReturnType = typename SignatureOfT<F>::ret;
+using ReturnType = typename SignatureOfT<Decay<F>>::ret;
+
+/// Returns true iff decayed T and decayed U are the same.
+template <typename T, typename U>
+static constexpr bool IsType = std::is_same<Decay<T>, Decay<U>>::value;
 
 /// IsTypeOrDerived<T, BASE> is true iff `T` is of type `BASE`, or derives from
 /// `BASE`.

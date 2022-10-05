@@ -1,5 +1,5 @@
 void select_28a27e() {
-  uint3 res = ((true).xxx ? (1u).xxx : (1u).xxx);
+  uint3 res = (1u).xxx;
 }
 
 struct tint_symbol {

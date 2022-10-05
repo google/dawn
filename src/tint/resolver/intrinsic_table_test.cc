@@ -527,8 +527,7 @@ TEST_F(IntrinsicTableTest, MismatchOpenSizeMatrix) {
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));
 }
 
-// TODO(amaiorano): Enable this test when constexpr `select` is implemented.
-TEST_F(IntrinsicTableTest, DISABLED_MatchDifferentArgsElementType_ConstantEval) {
+TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_ConstantEval) {
     auto* af = create<sem::AbstractFloat>();
     auto* bool_ = create<sem::Bool>();
     auto result = table->Lookup(BuiltinType::kSelect, utils::Vector{af, af, bool_},

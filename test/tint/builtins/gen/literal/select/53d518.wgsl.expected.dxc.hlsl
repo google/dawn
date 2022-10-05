@@ -1,5 +1,5 @@
 void select_53d518() {
-  vector<float16_t, 3> res = ((true).xxx ? (float16_t(0.0h)).xxx : (float16_t(0.0h)).xxx);
+  vector<float16_t, 3> res = (float16_t(0.0h)).xxx;
 }
 
 struct tint_symbol {

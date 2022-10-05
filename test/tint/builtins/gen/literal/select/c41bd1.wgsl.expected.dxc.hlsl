@@ -1,5 +1,5 @@
 void select_c41bd1() {
-  bool4 res = (true ? (true).xxxx : (true).xxxx);
+  bool4 res = (true).xxxx;
 }
 
 struct tint_symbol {

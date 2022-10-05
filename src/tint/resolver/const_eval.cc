@@ -503,25 +503,30 @@ const ImplConstant* CreateComposite(ProgramBuilder& builder,
     }
 }
 
-/// TransformElements constructs a new constant of type `composite_ty` by applying the
-/// transformation function 'f' on each of the most deeply nested elements of 'cs'. Assumes that all
-/// input constants `cs` are of the same type.
+namespace detail {
+/// Implementation of TransformElements
 template <typename F, typename... CONSTANTS>
 ImplResult TransformElements(ProgramBuilder& builder,
                              const sem::Type* composite_ty,
                              F&& f,
+                             size_t index,
                              CONSTANTS&&... cs) {
     uint32_t n = 0;
     auto* ty = First(cs...)->Type();
     auto* el_ty = sem::Type::ElementOf(ty, &n);
     if (el_ty == ty) {
-        return f(cs...);
+        constexpr bool kHasIndexParam = traits::IsType<size_t, traits::LastParameterType<F>>;
+        if constexpr (kHasIndexParam) {
+            return f(cs..., index);
+        } else {
+            return f(cs...);
+        }
     }
     utils::Vector<const sem::Constant*, 8> els;
     els.Reserve(n);
     for (uint32_t i = 0; i < n; i++) {
-        if (auto el = TransformElements(builder, sem::Type::ElementOf(composite_ty),
-                                        std::forward<F>(f), cs->Index(i)...)) {
+        if (auto el = detail::TransformElements(builder, sem::Type::ElementOf(composite_ty),
+                                                std::forward<F>(f), index + i, cs->Index(i)...)) {
             els.Push(el.Get());
 
         } else {
@@ -530,10 +535,24 @@ ImplResult TransformElements(ProgramBuilder& builder,
     }
     return CreateComposite(builder, composite_ty, std::move(els));
 }
+}  // namespace detail
+
+/// TransformElements constructs a new constant of type `composite_ty` by applying the
+/// transformation function `f` on each of the most deeply nested elements of 'cs'. Assumes that all
+/// input constants `cs` are of the same arity (all scalars or all vectors of the same size).
+/// If `f`'s last argument is a `size_t`, then the index of the most deeply nested element inside
+/// the most deeply nested aggregate type will be passed in.
+template <typename F, typename... CONSTANTS>
+ImplResult TransformElements(ProgramBuilder& builder,
+                             const sem::Type* composite_ty,
+                             F&& f,
+                             CONSTANTS&&... cs) {
+    return detail::TransformElements(builder, composite_ty, f, 0, cs...);
+}
 
 /// TransformBinaryElements constructs a new constant of type `composite_ty` by applying the
 /// transformation function 'f' on each of the most deeply nested elements of both `c0` and `c1`.
-/// Unlike TransformElements, this function handles the constants being of different types, e.g.
+/// Unlike TransformElements, this function handles the constants being of different arity, e.g.
 /// vector-scalar, scalar-vector.
 template <typename F>
 ImplResult TransformBinaryElements(ProgramBuilder& builder,
@@ -1514,6 +1533,35 @@ ConstEval::Result ConstEval::clamp(const sem::Type* ty,
         return Dispatch_fia_fiu32_f16(create, c0, c1, c2);
     };
     return TransformElements(builder, ty, transform, args[0], args[1], args[2]);
+}
+
+ConstEval::Result ConstEval::select_bool(const sem::Type* ty,
+                                         utils::VectorRef<const sem::Constant*> args,
+                                         const Source&) {
+    auto cond = args[2]->As<bool>();
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        auto create = [&](auto f, auto t) -> ImplResult {
+            return CreateElement(builder, sem::Type::DeepestElementOf(ty), cond ? t : f);
+        };
+        return Dispatch_fia_fiu32_f16_bool(create, c0, c1);
+    };
+
+    return TransformElements(builder, ty, transform, args[0], args[1]);
+}
+
+ConstEval::Result ConstEval::select_boolvec(const sem::Type* ty,
+                                            utils::VectorRef<const sem::Constant*> args,
+                                            const Source&) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1, size_t index) {
+        auto create = [&](auto f, auto t) -> ImplResult {
+            // Get corresponding bool value at the current vector value index
+            auto cond = args[2]->Index(index)->As<bool>();
+            return CreateElement(builder, sem::Type::DeepestElementOf(ty), cond ? t : f);
+        };
+        return Dispatch_fia_fiu32_f16_bool(create, c0, c1);
+    };
+
+    return TransformElements(builder, ty, transform, args[0], args[1]);
 }
 
 ConstEval::Result ConstEval::Convert(const sem::Type* target_ty,

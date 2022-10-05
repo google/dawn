@@ -2879,6 +2879,7 @@ using Types = std::variant<  //
     Value<builder::vec3<i32>>,
     Value<builder::vec3<f32>>,
     Value<builder::vec3<f16>>,
+    Value<builder::vec3<bool>>,
 
     Value<builder::vec4<AInt>>,
     Value<builder::vec4<AFloat>>,
@@ -2886,6 +2887,7 @@ using Types = std::variant<  //
     Value<builder::vec4<i32>>,
     Value<builder::vec4<f32>>,
     Value<builder::vec4<f16>>,
+    Value<builder::vec4<bool>>,
 
     Value<builder::mat2x2<AInt>>,
     Value<builder::mat2x2<AFloat>>,
@@ -4088,7 +4090,6 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
 }
 
 /// Creates a Case with Values for args and result
-// template <typename T>
 static Case C(std::initializer_list<Types> args, Types result) {
     return Case{utils::Vector<Types, 8>{args}, std::move(result)};
 }
@@ -4286,6 +4287,52 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               ClampCases<AFloat>(),
                                               ClampCases<f32>(),
                                               ClampCases<f16>()))));
+
+template <typename T>
+std::vector<Case> SelectCases() {
+    return {
+        C({Val(T{1}), Val(T{2}), Val(false)}, Val(T{1})),
+        C({Val(T{1}), Val(T{2}), Val(true)}, Val(T{2})),
+
+        C({Val(T{2}), Val(T{1}), Val(false)}, Val(T{2})),
+        C({Val(T{2}), Val(T{1}), Val(true)}, Val(T{1})),
+
+        C({Vec(T{1}, T{2}), Vec(T{3}, T{4}), Vec(false, false)}, Vec(T{1}, T{2})),
+        C({Vec(T{1}, T{2}), Vec(T{3}, T{4}), Vec(false, true)}, Vec(T{1}, T{4})),
+        C({Vec(T{1}, T{2}), Vec(T{3}, T{4}), Vec(true, false)}, Vec(T{3}, T{2})),
+        C({Vec(T{1}, T{2}), Vec(T{3}, T{4}), Vec(true, true)}, Vec(T{3}, T{4})),
+
+        C({Vec(T{1}, T{1}, T{2}, T{2}),     //
+           Vec(T{2}, T{2}, T{1}, T{1}),     //
+           Vec(false, true, false, true)},  //
+          Vec(T{1}, T{2}, T{2}, T{1})),     //
+    };
+}
+static std::vector<Case> SelectBoolCases() {
+    return {
+        C({Val(true), Val(false), Val(false)}, Val(true)),
+        C({Val(true), Val(false), Val(true)}, Val(false)),
+
+        C({Val(false), Val(true), Val(true)}, Val(true)),
+        C({Val(false), Val(true), Val(false)}, Val(false)),
+
+        C({Vec(true, true, false, false),   //
+           Vec(false, false, true, true),   //
+           Vec(false, true, true, false)},  //
+          Vec(true, false, true, false)),   //
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Select,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kSelect),
+                     testing::ValuesIn(Concat(SelectCases<AInt>(),  //
+                                              SelectCases<i32>(),
+                                              SelectCases<u32>(),
+                                              SelectCases<AFloat>(),
+                                              SelectCases<f32>(),
+                                              SelectCases<f16>(),
+                                              SelectBoolCases()))));
 
 }  // namespace builtin
 

@@ -1,5 +1,5 @@
 void select_ed8a15() {
-  int res = (true ? 1 : 1);
+  int res = 1;
 }
 
 struct tint_symbol {

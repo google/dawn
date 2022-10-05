@@ -510,9 +510,9 @@ fn round<T: f32_f16>(T) -> T
 fn round<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn saturate<T: f32_f16>(T) -> T
 fn saturate<T: f32_f16, N: num>(vec<N, T>) -> vec<N, T>
-fn select<T: scalar>(T, T, bool) -> T
-fn select<T: scalar, N: num>(vec<N, T>, vec<N, T>, bool) -> vec<N, T>
-fn select<N: num, T: scalar>(vec<N, T>, vec<N, T>, vec<N, bool>) -> vec<N, T>
+@const("select_bool") fn select<T: abstract_or_scalar>(T, T, bool) -> T
+@const("select_bool") fn select<T: abstract_or_scalar, N: num>(vec<N, T>, vec<N, T>, bool) -> vec<N, T>
+@const("select_boolvec") fn select<N: num, T: abstract_or_scalar>(vec<N, T>, vec<N, T>, vec<N, bool>) -> vec<N, T>
 fn sign<T: f32_f16>(T) -> T
 fn sign<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn sin<T: f32_f16>(T) -> T

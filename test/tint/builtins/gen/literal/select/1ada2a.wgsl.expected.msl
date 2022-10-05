@@ -2,7 +2,7 @@
 
 using namespace metal;
 void select_1ada2a() {
-  half3 res = select(half3(0.0h), half3(0.0h), true);
+  half3 res = half3(0.0h);
 }
 
 struct tint_symbol {
