@@ -4809,7 +4809,7 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
                 if (type->AsPointer()) {
                     if (auto* ast_type = parser_impl_.ConvertType(inst.type_id())) {
                         if (auto* ptr = ast_type->As<Pointer>()) {
-                            info->address_space = ptr->address_space;
+                            info->pointer.address_space = ptr->address_space;
                         }
                     }
                     switch (inst.opcode()) {
@@ -4823,7 +4823,7 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
                         case SpvOpCopyObject:
                             // Inherit from the first operand. We need this so we can pick up
                             // a remapped storage buffer.
-                            info->address_space =
+                            info->pointer.address_space =
                                 GetAddressSpaceForPointerValue(inst.GetSingleWordInOperand(0));
                             break;
                         default:
@@ -4849,7 +4849,7 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
 ast::AddressSpace FunctionEmitter::GetAddressSpaceForPointerValue(uint32_t id) {
     auto where = def_info_.find(id);
     if (where != def_info_.end()) {
-        auto candidate = where->second.get()->address_space;
+        auto candidate = where->second.get()->pointer.address_space;
         if (candidate != ast::AddressSpace::kInvalid) {
             return candidate;
         }
@@ -5053,7 +5053,7 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
             // Avoid moving combinatorial values across constructs.  This is a
             // simple heuristic to avoid changing the cost of an operation
             // by moving it into or out of a loop, for example.
-            if ((def_info->address_space == ast::AddressSpace::kInvalid) &&
+            if ((def_info->pointer.address_space == ast::AddressSpace::kInvalid) &&
                 local_def.used_in_another_construct) {
                 should_hoist_to_let = true;
             }

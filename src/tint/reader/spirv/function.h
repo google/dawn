@@ -325,17 +325,25 @@ struct DefInfo {
     /// example, pointers. crbug.com/tint/98
     bool requires_hoisted_var_def = false;
 
-    /// The address space to use for this value, if it is of pointer type.
-    /// This is required to carry an address space override from a storage
-    /// buffer expressed in the old style (with Uniform address space)
-    /// that needs to be remapped to StorageBuffer address space.
-    /// This is kInvalid for non-pointers.
-    ast::AddressSpace address_space = ast::AddressSpace::kInvalid;
+    /// Information about a pointer value, used to construct its WGSL type.
+    struct Pointer {
+        /// The address space to use for this value, if it is of pointer type.
+        /// This is required to carry an address space override from a storage
+        /// buffer expressed in the old style (with Uniform address space)
+        /// that needs to be remapped to StorageBuffer address space.
+        /// This is kInvalid for non-pointers.
+        ast::AddressSpace address_space = ast::AddressSpace::kInvalid;
+
+        // TODO(crbug.com/tint/1041) track access mode.
+    };
 
     /// The expression to use when sinking pointers into their use.
     /// When encountering a use of this instruction, we will emit this expression
     /// instead.
     TypedExpression sink_pointer_source_expr = {};
+
+    /// Collected information about a pointer value.
+    Pointer pointer;
 
     /// The reason, if any, that this value should be ignored.
     /// Normally no values are ignored.  This field can be updated while
@@ -360,8 +368,8 @@ inline std::ostream& operator<<(std::ostream& o, const DefInfo& di) {
     }
     o << " requires_named_let_def: " << (di.requires_named_let_def ? "true" : "false")
       << " requires_hoisted_var_def: " << (di.requires_hoisted_var_def ? "true" : "false");
-    if (di.address_space != ast::AddressSpace::kNone) {
-        o << " sc:" << int(di.address_space);
+    if (di.pointer.address_space != ast::AddressSpace::kNone) {
+        o << " sc:" << int(di.pointer.address_space);
     }
     switch (di.skip) {
         case SkipReason::kDontSkip:
