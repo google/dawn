@@ -1653,29 +1653,29 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
             return "inversesqrt";
         case sem::BuiltinType::kMix:
             return "mix";
-        case sem::BuiltinType::kPack2x16float:
+        case sem::BuiltinType::kPack2X16Float:
             return "packHalf2x16";
-        case sem::BuiltinType::kPack2x16snorm:
+        case sem::BuiltinType::kPack2X16Snorm:
             return "packSnorm2x16";
-        case sem::BuiltinType::kPack2x16unorm:
+        case sem::BuiltinType::kPack2X16Unorm:
             return "packUnorm2x16";
-        case sem::BuiltinType::kPack4x8snorm:
+        case sem::BuiltinType::kPack4X8Snorm:
             return "packSnorm4x8";
-        case sem::BuiltinType::kPack4x8unorm:
+        case sem::BuiltinType::kPack4X8Unorm:
             return "packUnorm4x8";
         case sem::BuiltinType::kReverseBits:
             return "bitfieldReverse";
         case sem::BuiltinType::kSmoothstep:
             return "smoothstep";
-        case sem::BuiltinType::kUnpack2x16float:
+        case sem::BuiltinType::kUnpack2X16Float:
             return "unpackHalf2x16";
-        case sem::BuiltinType::kUnpack2x16snorm:
+        case sem::BuiltinType::kUnpack2X16Snorm:
             return "unpackSnorm2x16";
-        case sem::BuiltinType::kUnpack2x16unorm:
+        case sem::BuiltinType::kUnpack2X16Unorm:
             return "unpackUnorm2x16";
-        case sem::BuiltinType::kUnpack4x8snorm:
+        case sem::BuiltinType::kUnpack4X8Snorm:
             return "unpackSnorm4x8";
-        case sem::BuiltinType::kUnpack4x8unorm:
+        case sem::BuiltinType::kUnpack4X8Unorm:
             return "unpackUnorm4x8";
         default:
             diagnostics_.add_error(diag::System::Writer,

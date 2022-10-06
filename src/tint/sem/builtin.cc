@@ -77,15 +77,15 @@ bool IsImageQueryBuiltin(BuiltinType i) {
 }
 
 bool IsDataPackingBuiltin(BuiltinType i) {
-    return i == BuiltinType::kPack4x8snorm || i == BuiltinType::kPack4x8unorm ||
-           i == BuiltinType::kPack2x16snorm || i == BuiltinType::kPack2x16unorm ||
-           i == BuiltinType::kPack2x16float;
+    return i == BuiltinType::kPack4X8Snorm || i == BuiltinType::kPack4X8Unorm ||
+           i == BuiltinType::kPack2X16Snorm || i == BuiltinType::kPack2X16Unorm ||
+           i == BuiltinType::kPack2X16Float;
 }
 
 bool IsDataUnpackingBuiltin(BuiltinType i) {
-    return i == BuiltinType::kUnpack4x8snorm || i == BuiltinType::kUnpack4x8unorm ||
-           i == BuiltinType::kUnpack2x16snorm || i == BuiltinType::kUnpack2x16unorm ||
-           i == BuiltinType::kUnpack2x16float;
+    return i == BuiltinType::kUnpack4X8Snorm || i == BuiltinType::kUnpack4X8Unorm ||
+           i == BuiltinType::kUnpack2X16Snorm || i == BuiltinType::kUnpack2X16Unorm ||
+           i == BuiltinType::kUnpack2X16Float;
 }
 
 bool IsBarrierBuiltin(BuiltinType i) {

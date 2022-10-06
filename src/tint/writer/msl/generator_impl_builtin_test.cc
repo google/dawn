@@ -184,16 +184,16 @@ const ast::CallExpression* GenerateCall(BuiltinType builtin,
             } else {
                 return builder->Call(str.str(), "m2x2");
             }
-        case BuiltinType::kPack2x16snorm:
-        case BuiltinType::kPack2x16unorm:
+        case BuiltinType::kPack2X16Snorm:
+        case BuiltinType::kPack2X16Unorm:
             return builder->Call(str.str(), "f2");
-        case BuiltinType::kPack4x8snorm:
-        case BuiltinType::kPack4x8unorm:
+        case BuiltinType::kPack4X8Snorm:
+        case BuiltinType::kPack4X8Unorm:
             return builder->Call(str.str(), "f4");
-        case BuiltinType::kUnpack4x8snorm:
-        case BuiltinType::kUnpack4x8unorm:
-        case BuiltinType::kUnpack2x16snorm:
-        case BuiltinType::kUnpack2x16unorm:
+        case BuiltinType::kUnpack4X8Snorm:
+        case BuiltinType::kUnpack4X8Unorm:
+        case BuiltinType::kUnpack2X16Snorm:
+        case BuiltinType::kUnpack2X16Unorm:
             return builder->Call(str.str(), "u1");
         case BuiltinType::kWorkgroupBarrier:
             return builder->Call(str.str());
@@ -357,16 +357,16 @@ INSTANTIATE_TEST_SUITE_P(
         BuiltinData{BuiltinType::kFwidthCoarse, CallParamType::kF32, "fwidth"},
         BuiltinData{BuiltinType::kFwidthFine, CallParamType::kF32, "fwidth"},
         /* Data packing builtin */
-        BuiltinData{BuiltinType::kPack4x8snorm, CallParamType::kF32, "pack_float_to_snorm4x8"},
-        BuiltinData{BuiltinType::kPack4x8unorm, CallParamType::kF32, "pack_float_to_unorm4x8"},
-        BuiltinData{BuiltinType::kPack2x16snorm, CallParamType::kF32, "pack_float_to_snorm2x16"},
-        BuiltinData{BuiltinType::kPack2x16unorm, CallParamType::kF32, "pack_float_to_unorm2x16"},
+        BuiltinData{BuiltinType::kPack4X8Snorm, CallParamType::kF32, "pack_float_to_snorm4x8"},
+        BuiltinData{BuiltinType::kPack4X8Unorm, CallParamType::kF32, "pack_float_to_unorm4x8"},
+        BuiltinData{BuiltinType::kPack2X16Snorm, CallParamType::kF32, "pack_float_to_snorm2x16"},
+        BuiltinData{BuiltinType::kPack2X16Unorm, CallParamType::kF32, "pack_float_to_unorm2x16"},
         /* Data unpacking builtin */
-        BuiltinData{BuiltinType::kUnpack4x8snorm, CallParamType::kU32, "unpack_snorm4x8_to_float"},
-        BuiltinData{BuiltinType::kUnpack4x8unorm, CallParamType::kU32, "unpack_unorm4x8_to_float"},
-        BuiltinData{BuiltinType::kUnpack2x16snorm, CallParamType::kU32,
+        BuiltinData{BuiltinType::kUnpack4X8Snorm, CallParamType::kU32, "unpack_snorm4x8_to_float"},
+        BuiltinData{BuiltinType::kUnpack4X8Unorm, CallParamType::kU32, "unpack_unorm4x8_to_float"},
+        BuiltinData{BuiltinType::kUnpack2X16Snorm, CallParamType::kU32,
                     "unpack_snorm2x16_to_float"},
-        BuiltinData{BuiltinType::kUnpack2x16unorm, CallParamType::kU32,
+        BuiltinData{BuiltinType::kUnpack2X16Unorm, CallParamType::kU32,
                     "unpack_unorm2x16_to_float"}));
 
 TEST_F(MslGeneratorImplTest, Builtin_Call) {

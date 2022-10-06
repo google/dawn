@@ -23,7 +23,7 @@ namespace tint::sem {
 enum class BuiltinType {
     kNone = -1,
 {{- range Sem.Builtins }}
-    k{{Title .Name}},
+    k{{PascalCase .Name}},
 {{- end }}
 };
 

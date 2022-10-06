@@ -20,7 +20,7 @@ namespace tint::sem {
 BuiltinType ParseBuiltinType(const std::string& name) {
 {{- range Sem.Builtins  }}
     if (name == "{{.Name}}") {
-        return BuiltinType::k{{Title .Name}};
+        return BuiltinType::k{{PascalCase .Name}};
     }
 {{- end  }}
     return BuiltinType::kNone;
@@ -31,7 +31,7 @@ const char* str(BuiltinType i) {
         case BuiltinType::kNone:
             return "<none>";
 {{- range Sem.Builtins  }}
-        case BuiltinType::k{{Title .Name}}:
+        case BuiltinType::k{{PascalCase .Name}}:
             return "{{.Name}}";
 {{- end  }}
     }

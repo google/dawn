@@ -700,9 +700,9 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
         case sem::BuiltinType::kRadians:
             return EmitRadiansCall(out, expr, builtin);
 
-        case sem::BuiltinType::kPack2x16float:
-        case sem::BuiltinType::kUnpack2x16float: {
-            if (builtin->Type() == sem::BuiltinType::kPack2x16float) {
+        case sem::BuiltinType::kPack2X16Float:
+        case sem::BuiltinType::kUnpack2X16Float: {
+            if (builtin->Type() == sem::BuiltinType::kPack2X16Float) {
                 out << "as_type<uint>(half2(";
             } else {
                 out << "float2(as_type<half2>(";
@@ -1516,16 +1516,16 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
         case sem::BuiltinType::kFaceForward:
             out += "faceforward";
             break;
-        case sem::BuiltinType::kPack4x8snorm:
+        case sem::BuiltinType::kPack4X8Snorm:
             out += "pack_float_to_snorm4x8";
             break;
-        case sem::BuiltinType::kPack4x8unorm:
+        case sem::BuiltinType::kPack4X8Unorm:
             out += "pack_float_to_unorm4x8";
             break;
-        case sem::BuiltinType::kPack2x16snorm:
+        case sem::BuiltinType::kPack2X16Snorm:
             out += "pack_float_to_snorm2x16";
             break;
-        case sem::BuiltinType::kPack2x16unorm:
+        case sem::BuiltinType::kPack2X16Unorm:
             out += "pack_float_to_unorm2x16";
             break;
         case sem::BuiltinType::kReverseBits:
@@ -1540,16 +1540,16 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
         case sem::BuiltinType::kInverseSqrt:
             out += "rsqrt";
             break;
-        case sem::BuiltinType::kUnpack4x8snorm:
+        case sem::BuiltinType::kUnpack4X8Snorm:
             out += "unpack_snorm4x8_to_float";
             break;
-        case sem::BuiltinType::kUnpack4x8unorm:
+        case sem::BuiltinType::kUnpack4X8Unorm:
             out += "unpack_unorm4x8_to_float";
             break;
-        case sem::BuiltinType::kUnpack2x16snorm:
+        case sem::BuiltinType::kUnpack2X16Snorm:
             out += "unpack_snorm2x16_to_float";
             break;
-        case sem::BuiltinType::kUnpack2x16unorm:
+        case sem::BuiltinType::kUnpack2X16Unorm:
             out += "unpack_unorm2x16_to_float";
             break;
         case sem::BuiltinType::kArrayLength:

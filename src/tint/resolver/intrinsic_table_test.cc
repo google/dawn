@@ -75,11 +75,11 @@ TEST_F(IntrinsicTableTest, MatchU32) {
     auto* f32 = create<sem::F32>();
     auto* u32 = create<sem::U32>();
     auto* vec2_f32 = create<sem::Vector>(f32, 2u);
-    auto result = table->Lookup(BuiltinType::kUnpack2x16float, utils::Vector{u32},
+    auto result = table->Lookup(BuiltinType::kUnpack2X16Float, utils::Vector{u32},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_NE(result.sem, nullptr) << Diagnostics().str();
     ASSERT_EQ(Diagnostics().str(), "");
-    EXPECT_EQ(result.sem->Type(), BuiltinType::kUnpack2x16float);
+    EXPECT_EQ(result.sem->Type(), BuiltinType::kUnpack2X16Float);
     EXPECT_EQ(result.sem->ReturnType(), vec2_f32);
     ASSERT_EQ(result.sem->Parameters().Length(), 1u);
     EXPECT_EQ(result.sem->Parameters()[0]->Type(), u32);
@@ -87,7 +87,7 @@ TEST_F(IntrinsicTableTest, MatchU32) {
 
 TEST_F(IntrinsicTableTest, MismatchU32) {
     auto* f32 = create<sem::F32>();
-    auto result = table->Lookup(BuiltinType::kUnpack2x16float, utils::Vector{f32},
+    auto result = table->Lookup(BuiltinType::kUnpack2X16Float, utils::Vector{f32},
                                 sem::EvaluationStage::kConstant, Source{});
     ASSERT_EQ(result.sem, nullptr);
     ASSERT_THAT(Diagnostics().str(), HasSubstr("no matching call"));

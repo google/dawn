@@ -1924,21 +1924,21 @@ bool GeneratorImpl::EmitDataPackingCall(std::ostream& out,
             uint32_t dims = 2;
             bool is_signed = false;
             uint32_t scale = 65535;
-            if (builtin->Type() == sem::BuiltinType::kPack4x8snorm ||
-                builtin->Type() == sem::BuiltinType::kPack4x8unorm) {
+            if (builtin->Type() == sem::BuiltinType::kPack4X8Snorm ||
+                builtin->Type() == sem::BuiltinType::kPack4X8Unorm) {
                 dims = 4;
                 scale = 255;
             }
-            if (builtin->Type() == sem::BuiltinType::kPack4x8snorm ||
-                builtin->Type() == sem::BuiltinType::kPack2x16snorm) {
+            if (builtin->Type() == sem::BuiltinType::kPack4X8Snorm ||
+                builtin->Type() == sem::BuiltinType::kPack2X16Snorm) {
                 is_signed = true;
                 scale = (scale - 1) / 2;
             }
             switch (builtin->Type()) {
-                case sem::BuiltinType::kPack4x8snorm:
-                case sem::BuiltinType::kPack4x8unorm:
-                case sem::BuiltinType::kPack2x16snorm:
-                case sem::BuiltinType::kPack2x16unorm: {
+                case sem::BuiltinType::kPack4X8Snorm:
+                case sem::BuiltinType::kPack4X8Unorm:
+                case sem::BuiltinType::kPack2X16Snorm:
+                case sem::BuiltinType::kPack2X16Unorm: {
                     {
                         auto l = line(b);
                         l << (is_signed ? "" : "u") << "int" << dims
@@ -1964,7 +1964,7 @@ bool GeneratorImpl::EmitDataPackingCall(std::ostream& out,
                     }
                     break;
                 }
-                case sem::BuiltinType::kPack2x16float: {
+                case sem::BuiltinType::kPack2X16Float: {
                     line(b) << "uint2 i = f32tof16(" << params[0] << ");";
                     line(b) << "return i.x | (i.y << 16);";
                     break;
@@ -1987,19 +1987,19 @@ bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& out,
             uint32_t dims = 2;
             bool is_signed = false;
             uint32_t scale = 65535;
-            if (builtin->Type() == sem::BuiltinType::kUnpack4x8snorm ||
-                builtin->Type() == sem::BuiltinType::kUnpack4x8unorm) {
+            if (builtin->Type() == sem::BuiltinType::kUnpack4X8Snorm ||
+                builtin->Type() == sem::BuiltinType::kUnpack4X8Unorm) {
                 dims = 4;
                 scale = 255;
             }
-            if (builtin->Type() == sem::BuiltinType::kUnpack4x8snorm ||
-                builtin->Type() == sem::BuiltinType::kUnpack2x16snorm) {
+            if (builtin->Type() == sem::BuiltinType::kUnpack4X8Snorm ||
+                builtin->Type() == sem::BuiltinType::kUnpack2X16Snorm) {
                 is_signed = true;
                 scale = (scale - 1) / 2;
             }
             switch (builtin->Type()) {
-                case sem::BuiltinType::kUnpack4x8snorm:
-                case sem::BuiltinType::kUnpack2x16snorm: {
+                case sem::BuiltinType::kUnpack4X8Snorm:
+                case sem::BuiltinType::kUnpack2X16Snorm: {
                     line(b) << "int j = int(" << params[0] << ");";
                     {  // Perform sign extension on the converted values.
                         auto l = line(b);
@@ -2015,8 +2015,8 @@ bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& out,
                             << (is_signed ? "-1.0" : "0.0") << ", 1.0);";
                     break;
                 }
-                case sem::BuiltinType::kUnpack4x8unorm:
-                case sem::BuiltinType::kUnpack2x16unorm: {
+                case sem::BuiltinType::kUnpack4X8Unorm:
+                case sem::BuiltinType::kUnpack2X16Unorm: {
                     line(b) << "uint j = " << params[0] << ";";
                     {
                         auto l = line(b);
@@ -2032,7 +2032,7 @@ bool GeneratorImpl::EmitDataUnpackingCall(std::ostream& out,
                     line(b) << "return float" << dims << "(i) / " << scale << ".0;";
                     break;
                 }
-                case sem::BuiltinType::kUnpack2x16float:
+                case sem::BuiltinType::kUnpack2X16Float:
                     line(b) << "uint i = " << params[0] << ";";
                     line(b) << "return f16tof32(uint2(i & 0xffff, i >> 16));";
                     break;

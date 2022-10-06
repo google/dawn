@@ -2572,7 +2572,7 @@ TEST_P(ResolverBuiltinTest_DataPacking, InferType) {
     auto param = GetParam();
 
     bool pack4 =
-        param.builtin == BuiltinType::kPack4x8snorm || param.builtin == BuiltinType::kPack4x8unorm;
+        param.builtin == BuiltinType::kPack4X8Snorm || param.builtin == BuiltinType::kPack4X8Unorm;
 
     auto* call = pack4 ? Call(param.name, vec4<f32>(1_f, 2_f, 3_f, 4_f))
                        : Call(param.name, vec2<f32>(1_f, 2_f));
@@ -2587,7 +2587,7 @@ TEST_P(ResolverBuiltinTest_DataPacking, Error_IncorrectParamType) {
     auto param = GetParam();
 
     bool pack4 =
-        param.builtin == BuiltinType::kPack4x8snorm || param.builtin == BuiltinType::kPack4x8unorm;
+        param.builtin == BuiltinType::kPack4X8Snorm || param.builtin == BuiltinType::kPack4X8Unorm;
 
     auto* call = pack4 ? Call(param.name, vec4<i32>(1_i, 2_i, 3_i, 4_i))
                        : Call(param.name, vec2<i32>(1_i, 2_i));
@@ -2613,7 +2613,7 @@ TEST_P(ResolverBuiltinTest_DataPacking, Error_TooManyParams) {
     auto param = GetParam();
 
     bool pack4 =
-        param.builtin == BuiltinType::kPack4x8snorm || param.builtin == BuiltinType::kPack4x8unorm;
+        param.builtin == BuiltinType::kPack4X8Snorm || param.builtin == BuiltinType::kPack4X8Unorm;
 
     auto* call = pack4 ? Call(param.name, vec4<f32>(1_f, 2_f, 3_f, 4_f), 1_f)
                        : Call(param.name, vec2<f32>(1_f, 2_f), 1_f);
@@ -2626,12 +2626,12 @@ TEST_P(ResolverBuiltinTest_DataPacking, Error_TooManyParams) {
 
 INSTANTIATE_TEST_SUITE_P(ResolverTest,
                          ResolverBuiltinTest_DataPacking,
-                         testing::Values(BuiltinData{"pack4x8snorm", BuiltinType::kPack4x8snorm},
-                                         BuiltinData{"pack4x8unorm", BuiltinType::kPack4x8unorm},
-                                         BuiltinData{"pack2x16snorm", BuiltinType::kPack2x16snorm},
-                                         BuiltinData{"pack2x16unorm", BuiltinType::kPack2x16unorm},
+                         testing::Values(BuiltinData{"pack4x8snorm", BuiltinType::kPack4X8Snorm},
+                                         BuiltinData{"pack4x8unorm", BuiltinType::kPack4X8Unorm},
+                                         BuiltinData{"pack2x16snorm", BuiltinType::kPack2X16Snorm},
+                                         BuiltinData{"pack2x16unorm", BuiltinType::kPack2X16Unorm},
                                          BuiltinData{"pack2x16float",
-                                                     BuiltinType::kPack2x16float}));
+                                                     BuiltinType::kPack2X16Float}));
 
 }  // namespace data_packing_builtin_tests
 
@@ -2642,8 +2642,8 @@ using ResolverBuiltinTest_DataUnpacking = ResolverTestWithParam<BuiltinData>;
 TEST_P(ResolverBuiltinTest_DataUnpacking, InferType) {
     auto param = GetParam();
 
-    bool pack4 = param.builtin == BuiltinType::kUnpack4x8snorm ||
-                 param.builtin == BuiltinType::kUnpack4x8unorm;
+    bool pack4 = param.builtin == BuiltinType::kUnpack4X8Snorm ||
+                 param.builtin == BuiltinType::kUnpack4X8Unorm;
 
     auto* call = Call(param.name, 1_u);
     WrapInFunction(call);
@@ -2661,11 +2661,11 @@ TEST_P(ResolverBuiltinTest_DataUnpacking, InferType) {
 INSTANTIATE_TEST_SUITE_P(
     ResolverTest,
     ResolverBuiltinTest_DataUnpacking,
-    testing::Values(BuiltinData{"unpack4x8snorm", BuiltinType::kUnpack4x8snorm},
-                    BuiltinData{"unpack4x8unorm", BuiltinType::kUnpack4x8unorm},
-                    BuiltinData{"unpack2x16snorm", BuiltinType::kUnpack2x16snorm},
-                    BuiltinData{"unpack2x16unorm", BuiltinType::kUnpack2x16unorm},
-                    BuiltinData{"unpack2x16float", BuiltinType::kUnpack2x16float}));
+    testing::Values(BuiltinData{"unpack4x8snorm", BuiltinType::kUnpack4X8Snorm},
+                    BuiltinData{"unpack4x8unorm", BuiltinType::kUnpack4X8Unorm},
+                    BuiltinData{"unpack2x16snorm", BuiltinType::kUnpack2X16Snorm},
+                    BuiltinData{"unpack2x16unorm", BuiltinType::kUnpack2X16Unorm},
+                    BuiltinData{"unpack2x16float", BuiltinType::kUnpack2X16Float}));
 
 }  // namespace data_unpacking_builtin_tests
 

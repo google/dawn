@@ -111,11 +111,11 @@ INSTANTIATE_TEST_SUITE_P(
                     BuiltinData{"textureSampleGrad", BuiltinType::kTextureSampleGrad},
                     BuiltinData{"textureSampleLevel", BuiltinType::kTextureSampleLevel},
                     BuiltinData{"trunc", BuiltinType::kTrunc},
-                    BuiltinData{"unpack2x16float", BuiltinType::kUnpack2x16float},
-                    BuiltinData{"unpack2x16snorm", BuiltinType::kUnpack2x16snorm},
-                    BuiltinData{"unpack2x16unorm", BuiltinType::kUnpack2x16unorm},
-                    BuiltinData{"unpack4x8snorm", BuiltinType::kUnpack4x8snorm},
-                    BuiltinData{"unpack4x8unorm", BuiltinType::kUnpack4x8unorm},
+                    BuiltinData{"unpack2x16float", BuiltinType::kUnpack2X16Float},
+                    BuiltinData{"unpack2x16snorm", BuiltinType::kUnpack2X16Snorm},
+                    BuiltinData{"unpack2x16unorm", BuiltinType::kUnpack2X16Unorm},
+                    BuiltinData{"unpack4x8snorm", BuiltinType::kUnpack4X8Snorm},
+                    BuiltinData{"unpack4x8unorm", BuiltinType::kUnpack4X8Unorm},
                     BuiltinData{"workgroupBarrier", BuiltinType::kWorkgroupBarrier}));
 
 TEST_F(BuiltinTypeTest, ParseNoMatch) {

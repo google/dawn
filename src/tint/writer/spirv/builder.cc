@@ -183,15 +183,15 @@ uint32_t builtin_to_glsl_method(const sem::Builtin* builtin) {
             return GLSLstd450ModfStruct;
         case BuiltinType::kNormalize:
             return GLSLstd450Normalize;
-        case BuiltinType::kPack4x8snorm:
+        case BuiltinType::kPack4X8Snorm:
             return GLSLstd450PackSnorm4x8;
-        case BuiltinType::kPack4x8unorm:
+        case BuiltinType::kPack4X8Unorm:
             return GLSLstd450PackUnorm4x8;
-        case BuiltinType::kPack2x16snorm:
+        case BuiltinType::kPack2X16Snorm:
             return GLSLstd450PackSnorm2x16;
-        case BuiltinType::kPack2x16unorm:
+        case BuiltinType::kPack2X16Unorm:
             return GLSLstd450PackUnorm2x16;
-        case BuiltinType::kPack2x16float:
+        case BuiltinType::kPack2X16Float:
             return GLSLstd450PackHalf2x16;
         case BuiltinType::kPow:
             return GLSLstd450Pow;
@@ -221,15 +221,15 @@ uint32_t builtin_to_glsl_method(const sem::Builtin* builtin) {
             return GLSLstd450Tanh;
         case BuiltinType::kTrunc:
             return GLSLstd450Trunc;
-        case BuiltinType::kUnpack4x8snorm:
+        case BuiltinType::kUnpack4X8Snorm:
             return GLSLstd450UnpackSnorm4x8;
-        case BuiltinType::kUnpack4x8unorm:
+        case BuiltinType::kUnpack4X8Unorm:
             return GLSLstd450UnpackUnorm4x8;
-        case BuiltinType::kUnpack2x16snorm:
+        case BuiltinType::kUnpack2X16Snorm:
             return GLSLstd450UnpackSnorm2x16;
-        case BuiltinType::kUnpack2x16unorm:
+        case BuiltinType::kUnpack2X16Unorm:
             return GLSLstd450UnpackUnorm2x16;
-        case BuiltinType::kUnpack2x16float:
+        case BuiltinType::kUnpack2X16Float:
             return GLSLstd450UnpackHalf2x16;
         default:
             break;
