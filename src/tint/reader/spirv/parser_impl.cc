@@ -1494,6 +1494,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
         // TODO(dneto): initializers (a.k.a. constructor expression)
         if (ast_var) {
             builder_.AST().AddGlobalVariable(ast_var);
+            module_variable_.GetOrCreate(var.result_id(), [ast_var] { return ast_var; });
         }
     }
 
@@ -1526,6 +1527,8 @@ bool ParserImpl::EmitModuleScopeVariables() {
                     ConvertType(builtin_position_.position_member_type_id), ast_constructor, {});
 
         builder_.AST().AddGlobalVariable(ast_var);
+        module_variable_.GetOrCreate(builtin_position_.per_vertex_var_id,
+                                     [ast_var] { return ast_var; });
     }
     return success_;
 }
