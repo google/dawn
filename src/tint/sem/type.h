@@ -123,6 +123,10 @@ class Type : public Castable<Type, Node> {
     /// @returns true if this type is a handle type
     bool is_handle() const;
 
+    /// @returns true if this type is an abstract-numeric or if the type holds an element that is an
+    /// abstract-numeric.
+    bool HoldsAbstract() const;
+
     /// kNoConversion is returned from ConversionRank() when the implicit conversion is not
     /// permitted.
     static constexpr uint32_t kNoConversion = 0xffffffffu;
