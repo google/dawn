@@ -1546,8 +1546,8 @@ const sem::Expression* Resolver::Materialize(const sem::Expression* expr,
 }
 
 template <size_t N>
-bool Resolver::MaterializeArguments(utils::Vector<const sem::Expression*, N>& args,
-                                    const sem::CallTarget* target) {
+bool Resolver::MaybeMaterializeArguments(utils::Vector<const sem::Expression*, N>& args,
+                                         const sem::CallTarget* target) {
     for (size_t i = 0, n = std::min(args.Length(), target->Parameters().Length()); i < n; i++) {
         const auto* param_ty = target->Parameters()[i]->Type();
         if (ShouldMaterializeArgument(param_ty)) {
@@ -1712,7 +1712,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
         if (!ctor_or_conv.target) {
             return nullptr;
         }
-        if (!MaterializeArguments(args, ctor_or_conv.target)) {
+        if (!MaybeMaterializeArguments(args, ctor_or_conv.target)) {
             return nullptr;
         }
         const sem::Constant* value = nullptr;
@@ -1737,7 +1737,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
     // constructor call target.
     auto arr_or_str_ctor = [&](const sem::Type* ty,
                                const sem::CallTarget* call_target) -> sem::Call* {
-        if (!MaterializeArguments(args, call_target)) {
+        if (!MaybeMaterializeArguments(args, call_target)) {
             return nullptr;
         }
 
@@ -2013,8 +2013,16 @@ sem::Call* Resolver::BuiltinCall(const ast::CallExpression* expr,
         }
     }
 
-    if (!MaterializeArguments(args, builtin.sem)) {
-        return nullptr;
+    if (builtin_type == sem::BuiltinType::kTintMaterialize) {
+        args[0] = Materialize(args[0]);
+        if (!args[0]) {
+            return nullptr;
+        }
+    } else {
+        // Materialize arguments if the parameter type is not abstract
+        if (!MaybeMaterializeArguments(args, builtin.sem)) {
+            return nullptr;
+        }
     }
 
     if (builtin.sem->IsDeprecated()) {
@@ -2093,7 +2101,7 @@ sem::Call* Resolver::FunctionCall(const ast::CallExpression* expr,
     auto sym = expr->target.name->symbol;
     auto name = builder_->Symbols().NameFor(sym);
 
-    if (!MaterializeArguments(args, target)) {
+    if (!MaybeMaterializeArguments(args, target)) {
         return nullptr;
     }
 

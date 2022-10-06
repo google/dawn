@@ -142,6 +142,7 @@ enum class BuiltinType {
     kAtomicXor,
     kAtomicExchange,
     kAtomicCompareExchangeWeak,
+    kTintMaterialize,
 };
 
 /// Matches the BuiltinType by name

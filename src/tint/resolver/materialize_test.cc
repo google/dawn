@@ -795,6 +795,9 @@ enum class Method {
 
     // abstract_expr[runtime-index]
     kRuntimeIndex,
+
+    // _tint_materialize()
+    kTintMaterializeBuiltin,
 };
 
 static std::ostream& operator<<(std::ostream& o, Method m) {
@@ -819,6 +822,8 @@ static std::ostream& operator<<(std::ostream& o, Method m) {
             return o << "index";
         case Method::kRuntimeIndex:
             return o << "runtime-index";
+        case Method::kTintMaterializeBuiltin:
+            return o << "_tint_materialize";
     }
     return o << "<unknown>";
 }
@@ -873,42 +878,57 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
         return expr;
     };
     switch (method) {
-        case Method::kVar:
+        case Method::kVar: {
             WrapInFunction(Decl(Var("a", abstract_expr())));
             break;
-        case Method::kLet:
+        }
+        case Method::kLet: {
             WrapInFunction(Decl(Let("a", abstract_expr())));
             break;
-        case Method::kBuiltinArg:
+        }
+        case Method::kBuiltinArg: {
             WrapInFunction(CallStmt(Call("min", abstract_expr(), abstract_expr())));
             break;
-        case Method::kBitcastF32Arg:
+        }
+        case Method::kBitcastF32Arg: {
             WrapInFunction(Bitcast<f32>(abstract_expr()));
             break;
-        case Method::kBitcastVec3F32Arg:
+        }
+        case Method::kBitcastVec3F32Arg: {
             WrapInFunction(Bitcast(ty.vec3<f32>(), abstract_expr()));
             break;
-        case Method::kArrayLength:
+        }
+        case Method::kArrayLength: {
             WrapInFunction(Construct(ty.array(ty.i32(), abstract_expr())));
             break;
-        case Method::kSwitch:
+        }
+        case Method::kSwitch: {
             WrapInFunction(Switch(abstract_expr(),
                                   Case(abstract_expr()->As<ast::IntLiteralExpression>()),
                                   DefaultCase()));
             break;
-        case Method::kWorkgroupSize:
+        }
+        case Method::kWorkgroupSize: {
             Func(
                 "f", utils::Empty, ty.void_(), utils::Empty,
                 utils::Vector{WorkgroupSize(abstract_expr()), Stage(ast::PipelineStage::kCompute)});
             break;
-        case Method::kIndex:
+        }
+        case Method::kIndex: {
             GlobalVar("arr", ty.array<i32, 4>(), ast::AddressSpace::kPrivate);
             WrapInFunction(IndexAccessor("arr", abstract_expr()));
             break;
-        case Method::kRuntimeIndex:
+        }
+        case Method::kRuntimeIndex: {
             auto* runtime_index = Var("runtime_index", Expr(1_i));
             WrapInFunction(runtime_index, IndexAccessor(abstract_expr(), runtime_index));
             break;
+        }
+        case Method::kTintMaterializeBuiltin: {
+            auto* call = Call(sem::str(sem::BuiltinType::kTintMaterialize), abstract_expr());
+            WrapInFunction(Decl(Const("c", call)));
+            break;
+        }
     }
 
     switch (expectation) {
@@ -954,24 +974,28 @@ constexpr Method kScalarMethods[] = {
     Method::kVar,
     Method::kBuiltinArg,
     Method::kBitcastF32Arg,
+    Method::kTintMaterializeBuiltin,
 };
 
 /// Methods that support vector materialization
 constexpr Method kVectorMethods[] = {
-    Method::kLet,          Method::kVar, Method::kBuiltinArg, Method::kBitcastVec3F32Arg,
-    Method::kRuntimeIndex,
+    Method::kLet,          Method::kVar,
+    Method::kBuiltinArg,   Method::kBitcastVec3F32Arg,
+    Method::kRuntimeIndex, Method::kTintMaterializeBuiltin,
 };
 
 /// Methods that support matrix materialization
 constexpr Method kMatrixMethods[] = {
     Method::kLet,
     Method::kVar,
+    Method::kTintMaterializeBuiltin,
 };
 
 /// Methods that support array materialization
 constexpr Method kArrayMethods[] = {
     Method::kLet,
     Method::kVar,
+    Method::kTintMaterializeBuiltin,
 };
 
 INSTANTIATE_TEST_SUITE_P(

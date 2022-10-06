@@ -360,6 +360,9 @@ BuiltinType ParseBuiltinType(const std::string& name) {
     if (name == "atomicCompareExchangeWeak") {
         return BuiltinType::kAtomicCompareExchangeWeak;
     }
+    if (name == "_tint_materialize") {
+        return BuiltinType::kTintMaterialize;
+    }
     return BuiltinType::kNone;
 }
 
@@ -589,6 +592,8 @@ const char* str(BuiltinType i) {
             return "atomicExchange";
         case BuiltinType::kAtomicCompareExchangeWeak:
             return "atomicCompareExchangeWeak";
+        case BuiltinType::kTintMaterialize:
+            return "_tint_materialize";
     }
     return "<unknown>";
 }
