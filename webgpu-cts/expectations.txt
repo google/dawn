@@ -189,6 +189,11 @@ crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsy
 crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
 crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:vertex:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
 
+crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:compute:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:compute:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:compute:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
+crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:compute:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
+
 ################################################################################
 # external_texture failures
 # KEEP
@@ -240,12 +245,6 @@ crbug.com/dawn/0000 webgpu:api,validation,buffer,create:createBuffer_invalid_and
 # KEEP
 ################################################################################
 crbug.com/tint/1524 webgpu:shader,execution,expression,call,builtin,atan2:f32:* [ Skip ]
-
-################################################################################
-# Vulkan Validation Layer error does to LoadOp::Clear on ReadOnly DepthStencil
-# KEEP
-################################################################################
-crbug.com/dawn/1512 [ dawn-backend-validation linux ] webgpu:api,validation,render_pass,attachment_compatibility:render_pass_or_bundle_and_pipeline,depth_stencil_read_only_write_state:* [ Failure ]
 
 ################################################################################
 # shader execution failures
@@ -708,14 +707,6 @@ crbug.com/dawn/0000 [ win ] webgpu:shader,execution,memory_model,* [ Failure ]
 crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="comment" [ Failure ]
 crbug.com/tint/0000 webgpu:shader,validation,parse,blankspace:null_characters:contains_null=true;placement="eol" [ Failure ]
 crbug.com/tint/0000 webgpu:shader,validation,parse,identifiers:identifiers:* [ Failure ]
-
-################################################################################
-# API validation failures
-################################################################################
-crbug.com/dawn/0000 webgpu:api,validation,shader_module,entry_point:compute:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,shader_module,entry_point:compute:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,shader_module,entry_point:compute:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
-crbug.com/dawn/0000 webgpu:api,validation,shader_module,entry_point:compute:isAsync=true;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000a" [ Failure ]
 
 ################################################################################
 # API operation failures
