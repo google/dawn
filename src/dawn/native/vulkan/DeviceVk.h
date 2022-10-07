@@ -66,6 +66,7 @@ class Device final : public DeviceBase {
     external_semaphore::Service* GetExternalSemaphoreService() const;
 
     CommandRecordingContext* GetPendingRecordingContext();
+    MaybeError SplitRecordingContext(CommandRecordingContext* recordingContext);
     MaybeError SubmitPendingCommands();
 
     void EnqueueDeferredDeallocation(DescriptorSetAllocator* allocator);
@@ -205,13 +206,15 @@ class Device final : public DeviceBase {
     const std::string mDebugPrefix;
     std::vector<std::string> mDebugMessages;
 
-    MaybeError PrepareRecordingContext();
-    void RecycleCompletedCommands();
-
     struct CommandPoolAndBuffer {
         VkCommandPool pool = VK_NULL_HANDLE;
         VkCommandBuffer commandBuffer = VK_NULL_HANDLE;
     };
+
+    MaybeError PrepareRecordingContext();
+    ResultOrError<CommandPoolAndBuffer> BeginVkCommandBuffer();
+    void RecycleCompletedCommands();
+
     SerialQueue<ExecutionSerial, CommandPoolAndBuffer> mCommandsInFlight;
     // Command pools in the unused list haven't been reset yet.
     std::vector<CommandPoolAndBuffer> mUnusedCommands;

@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_NATIVE_VULKAN_COMMANDBUFFERVK_H_
 #define SRC_DAWN_NATIVE_VULKAN_COMMANDBUFFERVK_H_
 
+#include <set>
+
 #include "dawn/native/CommandBuffer.h"
 #include "dawn/native/Error.h"
 
@@ -50,6 +52,10 @@ class CommandBuffer final : public CommandBufferBase {
                                                   const TextureCopy& srcCopy,
                                                   const TextureCopy& dstCopy,
                                                   const Extent3D& copySize);
+
+    // Need to track depth/stencil textures used by render passes if the
+    // VulkanSplitCommandBufferOnDepthStencilComputeSampleAfterRenderPass toggle is enabled.
+    std::set<TextureBase*> mRenderPassDepthStencilAttachments;
 };
 
 }  // namespace dawn::native::vulkan

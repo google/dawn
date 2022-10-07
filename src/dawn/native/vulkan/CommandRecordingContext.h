@@ -41,6 +41,13 @@ struct CommandRecordingContext {
     // For Device state tracking only.
     VkCommandPool commandPool = VK_NULL_HANDLE;
     bool used = false;
+
+    // In some cases command buffer will need to be split to accomodate driver bug workarounds.
+    // See the VulkanSplitCommandBufferOnDepthStencilComputeSampleAfterRenderPass toggle as an
+    // example. This tracks the list of all command buffers used for this recording context,
+    // with commandBuffer always being the last element.
+    std::vector<VkCommandBuffer> commandBufferList;
+    std::vector<VkCommandPool> commandPoolList;
 };
 
 }  // namespace dawn::native::vulkan

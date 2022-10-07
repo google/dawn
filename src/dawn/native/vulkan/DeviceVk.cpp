@@ -321,8 +321,8 @@ MaybeError Device::SubmitPendingCommands() {
     submitInfo.waitSemaphoreCount = static_cast<uint32_t>(mRecordingContext.waitSemaphores.size());
     submitInfo.pWaitSemaphores = AsVkArray(mRecordingContext.waitSemaphores.data());
     submitInfo.pWaitDstStageMask = dstStageMasks.data();
-    submitInfo.commandBufferCount = 1;
-    submitInfo.pCommandBuffers = &mRecordingContext.commandBuffer;
+    submitInfo.commandBufferCount = mRecordingContext.commandBufferList.size();
+    submitInfo.pCommandBuffers = mRecordingContext.commandBufferList.data();
     submitInfo.signalSemaphoreCount = (scopedSignalSemaphore.Get() == VK_NULL_HANDLE ? 0 : 1);
     submitInfo.pSignalSemaphores = AsVkArray(scopedSignalSemaphore.InitializeInto());
 
@@ -345,9 +345,11 @@ MaybeError Device::SubmitPendingCommands() {
     ExecutionSerial lastSubmittedSerial = GetLastSubmittedCommandSerial();
     mFencesInFlight.emplace(fence, lastSubmittedSerial);
 
-    CommandPoolAndBuffer submittedCommands = {mRecordingContext.commandPool,
-                                              mRecordingContext.commandBuffer};
-    mCommandsInFlight.Enqueue(submittedCommands, lastSubmittedSerial);
+    for (size_t i = 0; i < mRecordingContext.commandBufferList.size(); ++i) {
+        CommandPoolAndBuffer submittedCommands = {mRecordingContext.commandPoolList[i],
+                                                  mRecordingContext.commandBufferList[i]};
+        mCommandsInFlight.Enqueue(submittedCommands, lastSubmittedSerial);
+    }
 
     if (mRecordingContext.externalTexturesForEagerTransition.size() > 0) {
         // Export the signal semaphore.
@@ -610,6 +612,14 @@ void Device::InitTogglesFromDriver() {
 
     // By default try to use S8 if available.
     SetToggle(Toggle::VulkanUseS8, true);
+
+    // dawn:1564: Clearing a depth/stencil buffer in a render pass and then sampling it in a
+    // compute pass in the same command buffer causes a crash on Qualcomm GPUs. To work around that
+    // bug, split the command buffer any time we can detect that situation.
+    if (ToBackend(GetAdapter())->IsAndroidQualcomm()) {
+        ForceSetToggle(Toggle::VulkanSplitCommandBufferOnDepthStencilComputeSampleAfterRenderPass,
+                       true);
+    }
 }
 
 void Device::ApplyDepthStencilFormatToggles() {
@@ -695,9 +705,43 @@ MaybeError Device::PrepareRecordingContext() {
     ASSERT(mRecordingContext.commandBuffer == VK_NULL_HANDLE);
     ASSERT(mRecordingContext.commandPool == VK_NULL_HANDLE);
 
+    CommandPoolAndBuffer commands;
+    DAWN_TRY_ASSIGN(commands, BeginVkCommandBuffer());
+
+    mRecordingContext.commandBuffer = commands.commandBuffer;
+    mRecordingContext.commandPool = commands.pool;
+    mRecordingContext.commandBufferList.push_back(commands.commandBuffer);
+    mRecordingContext.commandPoolList.push_back(commands.pool);
+
+    return {};
+}
+
+// Splits the recording context, ending the current command buffer and beginning a new one.
+// This should not be necessary in most cases, and is provided only to work around driver issues
+// on some hardware.
+MaybeError Device::SplitRecordingContext(CommandRecordingContext* recordingContext) {
+    ASSERT(recordingContext->used);
+
+    DAWN_TRY(
+        CheckVkSuccess(fn.EndCommandBuffer(recordingContext->commandBuffer), "vkEndCommandBuffer"));
+
+    CommandPoolAndBuffer commands;
+    DAWN_TRY_ASSIGN(commands, BeginVkCommandBuffer());
+
+    recordingContext->commandBuffer = commands.commandBuffer;
+    recordingContext->commandPool = commands.pool;
+    recordingContext->commandBufferList.push_back(commands.commandBuffer);
+    recordingContext->commandPoolList.push_back(commands.pool);
+
+    return {};
+}
+
+ResultOrError<Device::CommandPoolAndBuffer> Device::BeginVkCommandBuffer() {
+    CommandPoolAndBuffer commands;
+
     // First try to recycle unused command pools.
     if (!mUnusedCommands.empty()) {
-        CommandPoolAndBuffer commands = mUnusedCommands.back();
+        commands = mUnusedCommands.back();
         mUnusedCommands.pop_back();
         DAWN_TRY_WITH_CLEANUP(
             CheckVkSuccess(fn.ResetCommandPool(mVkDevice, commands.pool, 0), "vkResetCommandPool"),
@@ -714,9 +758,6 @@ MaybeError Device::PrepareRecordingContext() {
                 fn.FreeCommandBuffers(mVkDevice, commands.pool, 1, &commands.commandBuffer);
                 fn.DestroyCommandPool(mVkDevice, commands.pool, nullptr);
             });
-
-        mRecordingContext.commandBuffer = commands.commandBuffer;
-        mRecordingContext.commandPool = commands.pool;
     } else {
         // Create a new command pool for our commands and allocate the command buffer.
         VkCommandPoolCreateInfo createInfo;
@@ -725,19 +766,19 @@ MaybeError Device::PrepareRecordingContext() {
         createInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT;
         createInfo.queueFamilyIndex = mQueueFamily;
 
-        DAWN_TRY(CheckVkSuccess(
-            fn.CreateCommandPool(mVkDevice, &createInfo, nullptr, &*mRecordingContext.commandPool),
-            "vkCreateCommandPool"));
+        DAWN_TRY(
+            CheckVkSuccess(fn.CreateCommandPool(mVkDevice, &createInfo, nullptr, &*commands.pool),
+                           "vkCreateCommandPool"));
 
         VkCommandBufferAllocateInfo allocateInfo;
         allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocateInfo.pNext = nullptr;
-        allocateInfo.commandPool = mRecordingContext.commandPool;
+        allocateInfo.commandPool = commands.pool;
         allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
         allocateInfo.commandBufferCount = 1;
 
         DAWN_TRY(CheckVkSuccess(
-            fn.AllocateCommandBuffers(mVkDevice, &allocateInfo, &mRecordingContext.commandBuffer),
+            fn.AllocateCommandBuffers(mVkDevice, &allocateInfo, &commands.commandBuffer),
             "vkAllocateCommandBuffers"));
     }
 
@@ -748,8 +789,10 @@ MaybeError Device::PrepareRecordingContext() {
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
     beginInfo.pInheritanceInfo = nullptr;
 
-    return CheckVkSuccess(fn.BeginCommandBuffer(mRecordingContext.commandBuffer, &beginInfo),
-                          "vkBeginCommandBuffer");
+    DAWN_TRY(CheckVkSuccess(fn.BeginCommandBuffer(commands.commandBuffer, &beginInfo),
+                            "vkBeginCommandBuffer"));
+
+    return commands;
 }
 
 void Device::RecycleCompletedCommands() {

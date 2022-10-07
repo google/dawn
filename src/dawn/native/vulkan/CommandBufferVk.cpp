@@ -24,6 +24,7 @@
 #include "dawn/native/DynamicUploader.h"
 #include "dawn/native/EnumMaskIterator.h"
 #include "dawn/native/RenderBundle.h"
+#include "dawn/native/vulkan/AdapterVk.h"
 #include "dawn/native/vulkan/BindGroupVk.h"
 #include "dawn/native/vulkan/BufferVk.h"
 #include "dawn/native/vulkan/CommandRecordingContext.h"
@@ -887,6 +888,24 @@ MaybeError CommandBuffer::RecordComputePass(CommandRecordingContext* recordingCo
                                             const ComputePassResourceUsage& resourceUsages) {
     Device* device = ToBackend(GetDevice());
 
+    // If required, split the command buffer any time we detect a dpeth/stencil attachment is
+    // used in a compute pass after being used as a render pass attachment in the same command
+    // buffer.
+    if (device->IsToggleEnabled(
+            Toggle::VulkanSplitCommandBufferOnDepthStencilComputeSampleAfterRenderPass) &&
+        !mRenderPassDepthStencilAttachments.empty()) {
+        for (auto texture : resourceUsages.referencedTextures) {
+            if (texture->GetFormat().HasDepthOrStencil() &&
+                mRenderPassDepthStencilAttachments.find(texture) !=
+                    mRenderPassDepthStencilAttachments.end()) {
+                // Identified a potential crash case, split the command buffer.
+                DAWN_TRY(device->SplitRecordingContext(recordingContext));
+                mRenderPassDepthStencilAttachments.clear();
+                break;
+            }
+        }
+    }
+
     // Write timestamp at the beginning of compute pass if it's set
     if (computePassCmd->beginTimestamp.querySet.Get() != nullptr) {
         RecordWriteTimestampCmd(recordingContext, device,
@@ -1037,6 +1056,14 @@ MaybeError CommandBuffer::RecordRenderPass(CommandRecordingContext* recordingCon
     VkCommandBuffer commands = recordingContext->commandBuffer;
 
     DAWN_TRY(RecordBeginRenderPass(recordingContext, device, renderPassCmd));
+
+    // If required, track depth/stencil textures used as render pass attachments.
+    if (device->IsToggleEnabled(
+            Toggle::VulkanSplitCommandBufferOnDepthStencilComputeSampleAfterRenderPass) &&
+        renderPassCmd->attachmentState->HasDepthStencilAttachment()) {
+        mRenderPassDepthStencilAttachments.insert(
+            renderPassCmd->depthStencilAttachment.view->GetTexture());
+    }
 
     // Write timestamp at the beginning of render pass if it's set.
     if (renderPassCmd->beginTimestamp.querySet.Get() != nullptr) {

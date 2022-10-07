@@ -80,6 +80,7 @@ enum class Toggle {
     D3D12UseTempBufferInDepthStencilTextureAndBufferCopyWithNonZeroBufferOffset,
     ApplyClearBigIntegerColorValueWithDraw,
     MetalUseDummyBlitEncoderForWriteTimestamp,
+    VulkanSplitCommandBufferOnDepthStencilComputeSampleAfterRenderPass,
 
     EnumCount,
     InvalidEnum = EnumCount,
