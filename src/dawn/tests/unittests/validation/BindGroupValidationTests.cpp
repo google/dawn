@@ -2062,6 +2062,51 @@ TEST_F(SetBindGroupValidationTest, ErrorBindGroup) {
     TestComputePassBindGroup(bindGroup, nullptr, 0, false);
 }
 
+// Test that a pipeline with empty bindgroups layouts requires empty bindgroups to be set.
+TEST_F(SetBindGroupValidationTest, EmptyBindGroupsAreRequired) {
+    wgpu::BindGroupLayout emptyBGL = utils::MakeBindGroupLayout(device, {});
+    wgpu::PipelineLayout pl =
+        utils::MakePipelineLayout(device, {emptyBGL, emptyBGL, emptyBGL, emptyBGL});
+
+    wgpu::ComputePipelineDescriptor pipelineDesc;
+    pipelineDesc.layout = pl;
+    pipelineDesc.compute.entryPoint = "main";
+    pipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
+        @compute @workgroup_size(1) fn main() {
+        }
+    )");
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+
+    wgpu::BindGroup emptyBindGroup = utils::MakeBindGroup(device, emptyBGL, {});
+
+    // Control case, setting 4 empty bindgroups works.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, emptyBindGroup);
+        pass.SetBindGroup(1, emptyBindGroup);
+        pass.SetBindGroup(2, emptyBindGroup);
+        pass.SetBindGroup(3, emptyBindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        encoder.Finish();
+    }
+
+    // Error case, setting only the first three empty bindgroups.
+    {
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.SetPipeline(pipeline);
+        pass.SetBindGroup(0, emptyBindGroup);
+        pass.SetBindGroup(1, emptyBindGroup);
+        pass.SetBindGroup(2, emptyBindGroup);
+        pass.DispatchWorkgroups(1);
+        pass.End();
+        ASSERT_DEVICE_ERROR(encoder.Finish());
+    }
+}
+
 class SetBindGroupPersistenceValidationTest : public ValidationTest {
   protected:
     void SetUp() override {

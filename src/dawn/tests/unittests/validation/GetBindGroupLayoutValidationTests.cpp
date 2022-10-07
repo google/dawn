@@ -980,7 +980,8 @@ TEST_F(GetBindGroupLayoutTests, OutOfRangeIndex) {
                             .GetBindGroupLayout(kMaxBindGroups + 1));
 }
 
-// Test that unused indices return the empty bind group layout.
+// Test that unused indices return the empty bind group layout if before the last used index, an
+// error otherwise.
 TEST_F(GetBindGroupLayoutTests, UnusedIndex) {
     // This test works assuming Dawn Native's object deduplication.
     // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
@@ -1011,8 +1012,7 @@ TEST_F(GetBindGroupLayoutTests, UnusedIndex) {
         pipeline.GetBindGroupLayout(1).Get(), emptyBindGroupLayout.Get()));  // Not Used.
     EXPECT_FALSE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
         pipeline.GetBindGroupLayout(2).Get(), emptyBindGroupLayout.Get()));  // Used.
-    EXPECT_TRUE(dawn::native::BindGroupLayoutBindingsEqualForTesting(
-        pipeline.GetBindGroupLayout(3).Get(), emptyBindGroupLayout.Get()));  // Not used
+    ASSERT_DEVICE_ERROR(pipeline.GetBindGroupLayout(3));  // Past last defined BGL, error!
 }
 
 // Test that after explicitly creating a pipeline with a pipeline layout, calling
@@ -1064,19 +1064,6 @@ TEST_F(GetBindGroupLayoutTests, Reflection) {
     wgpu::RenderPipeline pipeline = device.CreateRenderPipeline(&pipelineDesc);
 
     EXPECT_EQ(pipeline.GetBindGroupLayout(0).Get(), bindGroupLayout.Get());
-
-    {
-        wgpu::BindGroupLayoutDescriptor emptyDesc = {};
-        emptyDesc.entryCount = 0;
-        emptyDesc.entries = nullptr;
-
-        wgpu::BindGroupLayout emptyBindGroupLayout = device.CreateBindGroupLayout(&emptyDesc);
-
-        // Check that the rest of the bind group layouts reflect the empty one.
-        EXPECT_EQ(pipeline.GetBindGroupLayout(1).Get(), emptyBindGroupLayout.Get());
-        EXPECT_EQ(pipeline.GetBindGroupLayout(2).Get(), emptyBindGroupLayout.Get());
-        EXPECT_EQ(pipeline.GetBindGroupLayout(3).Get(), emptyBindGroupLayout.Get());
-    }
 }
 
 // Test that fragment output validation is for the correct entryPoint
@@ -1122,4 +1109,30 @@ TEST_F(GetBindGroupLayoutTests, FromCorrectEntryPoint) {
     // Error case, the BGL doesn't match the descriptor for the bindgroup.
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl0, {{1, buffer}}));
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, bgl1, {{0, buffer}}));
+}
+
+// Test that a pipeline full of explicitly empty BGLs correctly reflects them.
+TEST_F(GetBindGroupLayoutTests, FullOfEmptyBGLs) {
+    // This test works assuming Dawn Native's object deduplication.
+    // Getting the same pointer to equivalent bind group layouts is an implementation detail of Dawn
+    // Native.
+    DAWN_SKIP_TEST_IF(UsesWire());
+
+    wgpu::BindGroupLayout emptyBGL = utils::MakeBindGroupLayout(device, {});
+    wgpu::PipelineLayout pl =
+        utils::MakePipelineLayout(device, {emptyBGL, emptyBGL, emptyBGL, emptyBGL});
+
+    wgpu::ComputePipelineDescriptor pipelineDesc;
+    pipelineDesc.layout = pl;
+    pipelineDesc.compute.entryPoint = "main";
+    pipelineDesc.compute.module = utils::CreateShaderModule(device, R"(
+        @compute @workgroup_size(1) fn main() {
+        }
+    )");
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&pipelineDesc);
+
+    EXPECT_EQ(pipeline.GetBindGroupLayout(0).Get(), emptyBGL.Get());
+    EXPECT_EQ(pipeline.GetBindGroupLayout(1).Get(), emptyBGL.Get());
+    EXPECT_EQ(pipeline.GetBindGroupLayout(2).Get(), emptyBGL.Get());
+    EXPECT_EQ(pipeline.GetBindGroupLayout(3).Get(), emptyBGL.Get());
 }

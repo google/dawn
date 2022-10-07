@@ -191,25 +191,25 @@ wgpu::ShaderStage PipelineBase::GetStageMask() const {
     return mStageMask;
 }
 
-MaybeError PipelineBase::ValidateGetBindGroupLayout(uint32_t groupIndex) {
+MaybeError PipelineBase::ValidateGetBindGroupLayout(BindGroupIndex groupIndex) {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
     DAWN_TRY(GetDevice()->ValidateObject(this));
     DAWN_TRY(GetDevice()->ValidateObject(mLayout.Get()));
-    DAWN_INVALID_IF(groupIndex >= kMaxBindGroups,
+    DAWN_INVALID_IF(groupIndex >= kMaxBindGroupsTyped,
                     "Bind group layout index (%u) exceeds the maximum number of bind groups (%u).",
-                    groupIndex, kMaxBindGroups);
+                    static_cast<uint32_t>(groupIndex), kMaxBindGroups);
+    DAWN_INVALID_IF(
+        !mLayout->GetBindGroupLayoutsMask()[groupIndex],
+        "Bind group layout index (%u) doesn't correspond to a bind group for this pipeline.",
+        static_cast<uint32_t>(groupIndex));
     return {};
 }
 
 ResultOrError<Ref<BindGroupLayoutBase>> PipelineBase::GetBindGroupLayout(uint32_t groupIndexIn) {
-    DAWN_TRY(ValidateGetBindGroupLayout(groupIndexIn));
-
     BindGroupIndex groupIndex(groupIndexIn);
-    if (!mLayout->GetBindGroupLayoutsMask()[groupIndex]) {
-        return Ref<BindGroupLayoutBase>(GetDevice()->GetEmptyBindGroupLayout());
-    } else {
-        return Ref<BindGroupLayoutBase>(mLayout->GetBindGroupLayout(groupIndex));
-    }
+
+    DAWN_TRY(ValidateGetBindGroupLayout(groupIndex));
+    return Ref<BindGroupLayoutBase>(mLayout->GetBindGroupLayout(groupIndex));
 }
 
 BindGroupLayoutBase* PipelineBase::APIGetBindGroupLayout(uint32_t groupIndexIn) {

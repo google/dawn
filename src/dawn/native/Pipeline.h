@@ -84,7 +84,7 @@ class PipelineBase : public ApiObjectBase, public CachedObject {
     explicit PipelineBase(DeviceBase* device);
 
   private:
-    MaybeError ValidateGetBindGroupLayout(uint32_t group);
+    MaybeError ValidateGetBindGroupLayout(BindGroupIndex group);
 
     wgpu::ShaderStage mStageMask = wgpu::ShaderStage::None;
     PerStage<ProgrammableStage> mStages;
