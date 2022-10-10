@@ -145,6 +145,8 @@ struct Stream {
                 }
                 size -= n;
                 buf += n;
+            } else {
+                error = "Socket::Read() failed";
             }
         }
         return error.empty();
@@ -238,13 +240,15 @@ std::enable_if_t<std::is_base_of<Message, MESSAGE>::value, Stream>& operator>>(S
                                                                                MESSAGE& m) {
     Message::Type ty;
     s >> ty;
-    if (ty == m.type) {
-        m.Serialize([&s](auto& value) { s >> value; });
-    } else {
-        std::stringstream ss;
-        ss << "expected message type " << static_cast<int>(m.type) << ", got "
-           << static_cast<int>(ty);
-        s.error = ss.str();
+    if (s.error.empty()) {
+        if (ty == m.type) {
+            m.Serialize([&s](auto& value) { s >> value; });
+        } else {
+            std::stringstream ss;
+            ss << "expected message type " << static_cast<int>(m.type) << ", got "
+               << static_cast<int>(ty);
+            s.error = ss.str();
+        }
     }
     return s;
 }
@@ -291,8 +295,7 @@ int main(int argc, char* argv[]) {
             continue;
         }
 
-        // xcrun flags are ignored so this executable can be used as a replacement
-        // for xcrun.
+        // xcrun flags are ignored so this executable can be used as a replacement for xcrun.
         if ((arg == "-x" || arg == "-sdk") && (i < argc - 1)) {
             i++;
             continue;
@@ -357,7 +360,7 @@ bool RunServer(std::string port) {
                 ConnectionRequest req;
                 stream >> req;
                 if (!stream.error.empty()) {
-                    printf("%s\n", stream.error.c_str());
+                    DEBUG("%s", stream.error.c_str());
                     return;
                 }
                 ConnectionResponse resp;
@@ -374,7 +377,7 @@ bool RunServer(std::string port) {
                 CompileRequest req;
                 stream >> req;
                 if (!stream.error.empty()) {
-                    printf("%s\n", stream.error.c_str());
+                    DEBUG("%s\n", stream.error.c_str());
                     return;
                 }
 #ifdef TINT_ENABLE_MSL_COMPILATION_USING_METAL_API

@@ -29,56 +29,56 @@ class RWMutex {
   public:
     inline RWMutex() = default;
 
-    /// lockReader() locks the mutex for reading.
+    /// LockReader() locks the mutex for reading.
     /// Multiple read locks can be held while there are no writer locks.
-    inline void lockReader();
+    inline void LockReader();
 
-    /// unlockReader() unlocks the mutex for reading.
-    inline void unlockReader();
+    /// UnlockReader() unlocks the mutex for reading.
+    inline void UnlockReader();
 
-    /// lockWriter() locks the mutex for writing.
-    /// If the lock is already locked for reading or writing, lockWriter blocks
+    /// LockWriter() locks the mutex for writing.
+    /// If the lock is already locked for reading or writing, LockWriter blocks
     /// until the lock is available.
-    inline void lockWriter();
+    inline void LockWriter();
 
-    /// unlockWriter() unlocks the mutex for writing.
-    inline void unlockWriter();
+    /// UnlockWriter() unlocks the mutex for writing.
+    inline void UnlockWriter();
 
   private:
     RWMutex(const RWMutex&) = delete;
     RWMutex& operator=(const RWMutex&) = delete;
 
-    int readLocks = 0;
-    int pendingWriteLocks = 0;
+    int read_locks = 0;
+    int pending_write_locks = 0;
     std::mutex mutex;
     std::condition_variable cv;
 };
 
-void RWMutex::lockReader() {
+void RWMutex::LockReader() {
     std::unique_lock<std::mutex> lock(mutex);
-    readLocks++;
+    read_locks++;
 }
 
-void RWMutex::unlockReader() {
+void RWMutex::UnlockReader() {
     std::unique_lock<std::mutex> lock(mutex);
-    readLocks--;
-    if (readLocks == 0 && pendingWriteLocks > 0) {
+    read_locks--;
+    if (read_locks == 0 && pending_write_locks > 0) {
         cv.notify_one();
     }
 }
 
-void RWMutex::lockWriter() {
+void RWMutex::LockWriter() {
     std::unique_lock<std::mutex> lock(mutex);
-    if (readLocks > 0) {
-        pendingWriteLocks++;
-        cv.wait(lock, [&] { return readLocks == 0; });
-        pendingWriteLocks--;
+    if (read_locks > 0) {
+        pending_write_locks++;
+        cv.wait(lock, [&] { return read_locks == 0; });
+        pending_write_locks--;
     }
     lock.release();  // Keep lock held
 }
 
-void RWMutex::unlockWriter() {
-    if (pendingWriteLocks > 0) {
+void RWMutex::UnlockWriter() {
+    if (pending_write_locks > 0) {
         cv.notify_one();
     }
     mutex.unlock();
@@ -115,12 +115,12 @@ class RLock {
 };
 
 RLock::RLock(RWMutex& mutex) : m(&mutex) {
-    m->lockReader();
+    m->LockReader();
 }
 
 RLock::~RLock() {
     if (m != nullptr) {
-        m->unlockReader();
+        m->UnlockReader();
     }
 }
 
@@ -167,12 +167,12 @@ class WLock {
 };
 
 WLock::WLock(RWMutex& mutex) : m(&mutex) {
-    m->lockWriter();
+    m->LockWriter();
 }
 
 WLock::~WLock() {
     if (m != nullptr) {
-        m->unlockWriter();
+        m->UnlockWriter();
     }
 }
 

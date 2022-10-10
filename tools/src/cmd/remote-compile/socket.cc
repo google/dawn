@@ -32,7 +32,7 @@
 #if defined(_WIN32)
 #include <atomic>
 namespace {
-std::atomic<int> wsaInitCount = {0};
+std::atomic<int> wsa_init_count = {0};
 }  // anonymous namespace
 #else
 #include <fcntl.h>
@@ -43,24 +43,24 @@ using SOCKET = int;
 
 namespace {
 constexpr SOCKET InvalidSocket = static_cast<SOCKET>(-1);
-void init() {
+void Init() {
 #if defined(_WIN32)
-    if (wsaInitCount++ == 0) {
-        WSADATA winsockData;
-        (void)WSAStartup(MAKEWORD(2, 2), &winsockData);
+    if (wsa_init_count++ == 0) {
+        WSADATA winsock_data;
+        (void)WSAStartup(MAKEWORD(2, 2), &winsock_data);
     }
 #endif
 }
 
-void term() {
+void Term() {
 #if defined(_WIN32)
-    if (--wsaInitCount == 0) {
+    if (--wsa_init_count == 0) {
         WSACleanup();
     }
 #endif
 }
 
-bool setBlocking(SOCKET s, bool blocking) {
+bool SetBlocking(SOCKET s, bool blocking) {
 #if defined(_WIN32)
     u_long mode = blocking ? 0 : 1;
     return ioctlsocket(s, FIONBIO, &mode) == NO_ERROR;
@@ -74,7 +74,7 @@ bool setBlocking(SOCKET s, bool blocking) {
 #endif
 }
 
-bool errored(SOCKET s) {
+bool Errored(SOCKET s) {
     if (s == InvalidSocket) {
         return true;
     }
@@ -87,7 +87,7 @@ bool errored(SOCKET s) {
 class Impl : public Socket {
   public:
     static std::shared_ptr<Impl> create(const char* address, const char* port) {
-        init();
+        Init();
 
         addrinfo hints = {};
         hints.ai_family = AF_INET;
@@ -106,12 +106,12 @@ class Impl : public Socket {
         if (info) {
             auto socket = ::socket(info->ai_family, info->ai_socktype, info->ai_protocol);
             auto out = std::make_shared<Impl>(info, socket);
-            out->setOptions();
+            out->SetOptions();
             return out;
         }
 
         freeaddrinfo(info);
-        term();
+        Term();
         return nullptr;
     }
 
@@ -121,16 +121,16 @@ class Impl : public Socket {
     ~Impl() {
         freeaddrinfo(info);
         Close();
-        term();
+        Term();
     }
 
     template <typename FUNCTION>
-    void lock(FUNCTION&& f) {
+    void Lock(FUNCTION&& f) {
         RLock l(mutex);
         f(s, info);
     }
 
-    void setOptions() {
+    void SetOptions() {
         RLock l(mutex);
         if (s == InvalidSocket) {
             return;
@@ -157,7 +157,7 @@ class Impl : public Socket {
     bool IsOpen() override {
         {
             RLock l(mutex);
-            if ((s != InvalidSocket) && !errored(s)) {
+            if ((s != InvalidSocket) && !Errored(s)) {
                 return true;
             }
         }
@@ -188,12 +188,20 @@ class Impl : public Socket {
     }
 
     size_t Read(void* buffer, size_t bytes) override {
-        RLock lock(mutex);
-        if (s == InvalidSocket) {
-            return 0;
+        {
+            RLock lock(mutex);
+            if (s == InvalidSocket) {
+                return 0;
+            }
+            size_t len = recv(s, reinterpret_cast<char*>(buffer), static_cast<int>(bytes), 0);
+            if (len > 0) {
+                return len;
+            }
         }
-        auto len = recv(s, reinterpret_cast<char*>(buffer), static_cast<int>(bytes), 0);
-        return (len < 0) ? 0 : len;
+        // Socket closed or errored
+        WLock lock(mutex);
+        s = InvalidSocket;
+        return 0;
     }
 
     bool Write(const void* buffer, size_t bytes) override {
@@ -209,11 +217,13 @@ class Impl : public Socket {
 
     std::shared_ptr<Socket> Accept() override {
         std::shared_ptr<Impl> out;
-        lock([&](SOCKET socket, const addrinfo*) {
+        Lock([&](SOCKET socket, const addrinfo*) {
             if (socket != InvalidSocket) {
-                init();
-                out = std::make_shared<Impl>(::accept(socket, 0, 0));
-                out->setOptions();
+                Init();
+                if (auto s = ::accept(socket, 0, 0); s >= 0) {
+                    out = std::make_shared<Impl>(s);
+                    out->SetOptions();
+                }
             }
         });
         return out;
@@ -232,7 +242,7 @@ std::shared_ptr<Socket> Socket::Listen(const char* address, const char* port) {
     if (!impl) {
         return nullptr;
     }
-    impl->lock([&](SOCKET socket, const addrinfo* info) {
+    impl->Lock([&](SOCKET socket, const addrinfo* info) {
         if (bind(socket, info->ai_addr, static_cast<int>(info->ai_addrlen)) != 0) {
             impl.reset();
             return;
@@ -248,46 +258,46 @@ std::shared_ptr<Socket> Socket::Listen(const char* address, const char* port) {
 
 std::shared_ptr<Socket> Socket::Connect(const char* address,
                                         const char* port,
-                                        uint32_t timeoutMillis) {
+                                        uint32_t timeout_ms) {
     auto impl = Impl::create(address, port);
     if (!impl) {
         return nullptr;
     }
 
     std::shared_ptr<Socket> out;
-    impl->lock([&](SOCKET socket, const addrinfo* info) {
+    impl->Lock([&](SOCKET socket, const addrinfo* info) {
         if (socket == InvalidSocket) {
             return;
         }
 
-        if (timeoutMillis == 0) {
+        if (timeout_ms == 0) {
             if (::connect(socket, info->ai_addr, static_cast<int>(info->ai_addrlen)) == 0) {
                 out = impl;
             }
             return;
         }
 
-        if (!setBlocking(socket, false)) {
+        if (!SetBlocking(socket, false)) {
             return;
         }
 
         auto res = ::connect(socket, info->ai_addr, static_cast<int>(info->ai_addrlen));
         if (res == 0) {
-            if (setBlocking(socket, true)) {
+            if (SetBlocking(socket, true)) {
                 out = impl;
             }
         } else {
-            const auto microseconds = timeoutMillis * 1000;
+            const auto timeout_us = timeout_ms * 1000;
 
             fd_set fdset;
             FD_ZERO(&fdset);
             FD_SET(socket, &fdset);
 
             timeval tv;
-            tv.tv_sec = microseconds / 1000000;
-            tv.tv_usec = microseconds - static_cast<uint32_t>(tv.tv_sec * 1000000);
+            tv.tv_sec = timeout_us / 1000000;
+            tv.tv_usec = timeout_us - static_cast<uint32_t>(tv.tv_sec * 1000000);
             res = select(static_cast<int>(socket + 1), nullptr, &fdset, nullptr, &tv);
-            if (res > 0 && !errored(socket) && setBlocking(socket, true)) {
+            if (res > 0 && !Errored(socket) && SetBlocking(socket, true)) {
                 out = impl;
             }
         }
