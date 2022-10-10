@@ -19,10 +19,10 @@
 
 /// The return structure of a compile function
 struct CompileResult {
-  /// True if shader compiled
-  bool success = false;
-  /// Output of the compiler
-  std::string output;
+    /// True if shader compiled
+    bool success = false;
+    /// Output of the compiler
+    std::string output;
 };
 
 CompileResult CompileMslUsingMetalAPI(const std::string& src);
