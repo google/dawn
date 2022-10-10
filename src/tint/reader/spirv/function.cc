@@ -2557,6 +2557,8 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
     }
     auto type_it = identifier_types_.find(id);
     if (type_it != identifier_types_.end()) {
+        // We have a local named definition: function parameter, let, or var
+        // declaration.
         auto name = namer_.Name(id);
         auto* type = type_it->second;
         return TypedExpression{
@@ -2585,10 +2587,13 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
     switch (inst->opcode()) {
         case SpvOpVariable: {
             // This occurs for module-scope variables.
-            auto name = namer_.Name(inst->result_id());
-            return TypedExpression{
-                parser_impl_.ConvertType(inst->type_id(), PtrAs::Ref),
-                create<ast::IdentifierExpression>(Source{}, builder_.Symbols().Register(name))};
+            auto name = namer_.Name(id);
+            // Construct the reference type, mapping storage class correctly.
+            const auto* type =
+                RemapPointerProperties(parser_impl_.ConvertType(inst->type_id(), PtrAs::Ref), id);
+            // TODO(crbug.com/tint/1041): Fix access mode
+            return TypedExpression{type, create<ast::IdentifierExpression>(
+                                             Source{}, builder_.Symbols().Register(name))};
         }
         case SpvOpUndef:
             // Substitute a null value for undef.
@@ -3356,11 +3361,13 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     for (auto id : sorted_by_index(block_info.hoisted_ids)) {
         const auto* def_inst = def_use_mgr_->GetDef(id);
         TINT_ASSERT(Reader, def_inst);
-        auto* storage_type = RemapAddressSpace(parser_impl_.ConvertType(def_inst->type_id()), id);
+        // Compute the store type.  Pointers are not storable, so there is
+        // no need to remap pointer properties.
+        auto* store_type = parser_impl_.ConvertType(def_inst->type_id());
         AddStatement(create<ast::VariableDeclStatement>(
-            Source{}, parser_impl_.MakeVar(id, ast::AddressSpace::kNone, storage_type, nullptr,
+            Source{}, parser_impl_.MakeVar(id, ast::AddressSpace::kNone, store_type, nullptr,
                                            AttributeList{})));
-        auto* type = ty_.Reference(storage_type, ast::AddressSpace::kNone);
+        auto* type = ty_.Reference(store_type, ast::AddressSpace::kNone);
         identifier_types_.emplace(id, type);
     }
 
@@ -3449,6 +3456,7 @@ bool FunctionEmitter::EmitConstDefinition(const spvtools::opt::Instruction& inst
     }
 
     expr = AddressOfIfNeeded(expr, &inst);
+    expr.type = RemapPointerProperties(expr.type, inst.result_id());
     auto* let = parser_impl_.MakeLet(inst.result_id(), expr.type, expr.expr);
     if (!let) {
         return false;
@@ -3720,7 +3728,6 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
             if (!expr) {
                 return false;
             }
-            expr.type = RemapAddressSpace(expr.type, result_id);
             return EmitConstDefOrWriteToHoistedVar(inst, expr);
         }
 
@@ -3775,20 +3782,6 @@ TypedExpression FunctionEmitter::MakeOperand(const spvtools::opt::Instruction& i
         return {};
     }
     return parser_impl_.RectifyOperandSignedness(inst, std::move(expr));
-}
-
-TypedExpression FunctionEmitter::InferFunctionAddressSpace(TypedExpression expr) {
-    TypedExpression result(expr);
-    if (const auto* ref = expr.type->UnwrapAlias()->As<Reference>()) {
-        if (ref->address_space == ast::AddressSpace::kNone) {
-            expr.type = ty_.Reference(ref->type, ast::AddressSpace::kFunction);
-        }
-    } else if (const auto* ptr = expr.type->UnwrapAlias()->As<Pointer>()) {
-        if (ptr->address_space == ast::AddressSpace::kNone) {
-            expr.type = ty_.Pointer(ptr->type, ast::AddressSpace::kFunction);
-        }
-    }
-    return expr;
 }
 
 TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
@@ -4350,6 +4343,10 @@ TypedExpression FunctionEmitter::MakeAccessChain(const spvtools::opt::Instructio
     const auto num_in_operands = inst.NumInOperands();
 
     bool sink_pointer = false;
+    // The current WGSL expression for the pointer, starting with the base
+    // pointer and updated as each index is incorported.  The important part
+    // is the pointee (or "store type").  The address space and access mode will
+    // be patched as needed at the very end, via RemapPointerProperties.
     TypedExpression current_expr;
 
     // If the variable was originally gl_PerVertex, then in the AST we
@@ -4418,7 +4415,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(const spvtools::opt::Instructio
     // ever-deeper nested indexing expressions. Start off with an expression
     // for the base, and then bury that inside nested indexing expressions.
     if (!current_expr) {
-        current_expr = InferFunctionAddressSpace(MakeOperand(inst, 0));
+        current_expr = MakeOperand(inst, 0);
         if (current_expr.type->Is<Pointer>()) {
             current_expr = Dereference(current_expr);
         }
@@ -4533,6 +4530,7 @@ TypedExpression FunctionEmitter::MakeAccessChain(const spvtools::opt::Instructio
         GetDefInfo(inst.result_id())->sink_pointer_source_expr = current_expr;
     }
 
+    current_expr.type = RemapPointerProperties(current_expr.type, inst.result_id());
     return current_expr;
 }
 
@@ -4799,32 +4797,27 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
             ++index;
             auto& info = def_info_[result_id];
 
-            // Determine address space for pointer values. Do this in order because
-            // we might rely on the address space for a previously-visited definition.
-            // Logical pointers can't be transmitted through OpPhi, so remaining
-            // pointer definitions are SSA values, and their definitions must be
-            // visited before their uses.
             const auto* type = type_mgr_->GetType(inst.type_id());
             if (type) {
+                // Determine address space and access mode for pointer values. Do this in
+                // order because we might rely on the storage class for a previously-visited
+                // definition.
+                // Logical pointers can't be transmitted through OpPhi, so remaining
+                // pointer definitions are SSA values, and their definitions must be
+                // visited before their uses.
                 if (type->AsPointer()) {
-                    if (auto* ast_type = parser_impl_.ConvertType(inst.type_id())) {
-                        if (auto* ptr = ast_type->As<Pointer>()) {
-                            info->pointer.address_space = ptr->address_space;
-                        }
-                    }
                     switch (inst.opcode()) {
                         case SpvOpUndef:
                             return Fail() << "undef pointer is not valid: " << inst.PrettyPrint();
                         case SpvOpVariable:
-                            // Keep the default decision based on the result type.
+                            info->pointer = GetPointerInfo(result_id);
                             break;
                         case SpvOpAccessChain:
                         case SpvOpInBoundsAccessChain:
                         case SpvOpCopyObject:
                             // Inherit from the first operand. We need this so we can pick up
                             // a remapped storage buffer.
-                            info->pointer.address_space =
-                                GetAddressSpaceForPointerValue(inst.GetSingleWordInOperand(0));
+                            info->pointer = GetPointerInfo(inst.GetSingleWordInOperand(0));
                             break;
                         default:
                             return Fail() << "pointer defined in function from unknown opcode: "
@@ -4846,32 +4839,71 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
     return true;
 }
 
-ast::AddressSpace FunctionEmitter::GetAddressSpaceForPointerValue(uint32_t id) {
+DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
+    // Compute the result from first principles, for a variable.
+    auto get_from_root_identifier =
+        [&](const spvtools::opt::Instruction& inst) -> DefInfo::Pointer {
+        // WGSL root identifiers (or SPIR-V "memory object declarations") are
+        // either variables or function parameters.
+        switch (inst.opcode()) {
+            case SpvOpVariable: {
+                if (const auto* module_var = parser_impl_.GetModuleVariable(id)) {
+                    return DefInfo::Pointer{module_var->declared_address_space,
+                                            module_var->declared_access};
+                }
+                // Local variables are always Function storage class, with default
+                // access mode.
+                return DefInfo::Pointer{ast::AddressSpace::kFunction, ast::Access::kUndefined};
+            }
+            case SpvOpFunctionParameter: {
+                const auto* type = As<Pointer>(parser_impl_.ConvertType(inst.type_id()));
+                // TODO(crbug.com/tint/1041): Add access mode.
+                // Using kUndefined is ok for now, since the only non-default access mode
+                // on a pointer would be for a storage buffer, and baseline SPIR-V doesn't
+                // allow passing pointers to buffers as function parameters.
+                return DefInfo::Pointer{type->address_space, ast::Access::kUndefined};
+            }
+            default:
+                break;
+        }
+        TINT_ASSERT(Reader, false && "expected a memory object declaration");
+        return {};
+    };
+
     auto where = def_info_.find(id);
     if (where != def_info_.end()) {
-        auto candidate = where->second.get()->pointer.address_space;
-        if (candidate != ast::AddressSpace::kInvalid) {
-            return candidate;
+        const auto& info = where->second;
+        if (info->inst.opcode() == SpvOpVariable) {
+            // Ignore the cache in this case and compute it from scratch.
+            // That's because for a function-scope OpVariable is a
+            // locally-defined value.  So its cache entry has been created
+            // with a default PointerInfo object, which has invalid data.
+            //
+            // Instead, you might think that we could forget this weirdness
+            // and instead have more standard cache-like behaviour. But then
+            // for non-function-scope variables we look up information
+            // from a saved ast::Var. But some builtins don't correspond
+            // to a declared ast::Var. This is simpler and more reliable.
+            return get_from_root_identifier(info->inst);
         }
+        // Use the cached value.
+        return info->pointer;
     }
-    const auto type_id = def_use_mgr_->GetDef(id)->type_id();
-    if (type_id) {
-        auto* ast_type = parser_impl_.ConvertType(type_id);
-        if (auto* ptr = As<Pointer>(ast_type)) {
-            return ptr->address_space;
-        }
-    }
-    return ast::AddressSpace::kInvalid;
+    const auto* inst = def_use_mgr_->GetDef(id);
+    TINT_ASSERT(Reader, inst);
+    return get_from_root_identifier(*inst);
 }
 
-const Type* FunctionEmitter::RemapAddressSpace(const Type* type, uint32_t result_id) {
+const Type* FunctionEmitter::RemapPointerProperties(const Type* type, uint32_t result_id) {
     if (auto* ast_ptr_type = As<Pointer>(type)) {
-        // Remap an old-style storage buffer pointer to a new-style storage
-        // buffer pointer.
-        const auto addr_space = GetAddressSpaceForPointerValue(result_id);
-        if (ast_ptr_type->address_space != addr_space) {
-            return ty_.Pointer(ast_ptr_type->type, addr_space);
-        }
+        const auto pi = GetPointerInfo(result_id);
+        // TODO(crbug.com/tin/t1041): also do access mode
+        return ty_.Pointer(ast_ptr_type->type, pi.address_space);
+    }
+    if (auto* ast_ptr_type = As<Reference>(type)) {
+        const auto pi = GetPointerInfo(result_id);
+        // TODO(crbug.com/tin/t1041): also do access mode
+        return ty_.Reference(ast_ptr_type->type, pi.address_space);
     }
     return type;
 }

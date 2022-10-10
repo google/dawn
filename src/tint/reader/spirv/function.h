@@ -334,7 +334,8 @@ struct DefInfo {
         /// This is kInvalid for non-pointers.
         ast::AddressSpace address_space = ast::AddressSpace::kInvalid;
 
-        // TODO(crbug.com/tint/1041) track access mode.
+        /// The declared access mode.
+        ast::Access access = ast::kUndefined;
     };
 
     /// The expression to use when sinking pointers into their use.
@@ -619,19 +620,23 @@ class FunctionEmitter {
     /// @returns false on failure
     bool RegisterLocallyDefinedValues();
 
-    /// Returns the Tint address space for the given SPIR-V ID that is a
-    /// pointer value.
+    /// Returns the pointer information needed for the given SPIR-V ID.
+    /// Assumes the given ID yields a value of pointer type.  For IDs
+    /// corresponding to WGSL root identifiers (i.e. OpVariable or
+    /// OpFunctionParameter), the info is computed from scratch.
+    /// Otherwise, this looks up pointer info from a base pointer whose
+    /// data is cached in def_info_.
     /// @param id a SPIR-V ID for a pointer value
-    /// @returns the address space
-    ast::AddressSpace GetAddressSpaceForPointerValue(uint32_t id);
+    /// @returns the associated Pointer info
+    DefInfo::Pointer GetPointerInfo(uint32_t id);
 
-    /// Remaps the address space for the type of a locally-defined value,
-    /// if necessary. If it's not a pointer type, or if its address space
-    /// already matches, then the result is a copy of the `type` argument.
+    /// Remaps the address space and access mode for the type of a
+    /// locally-defined value, if necessary. If it's not a pointer or reference
+    /// type, then the result is a copy of the `type` argument.
     /// @param type the AST type
     /// @param result_id the SPIR-V ID for the locally defined value
     /// @returns an possibly updated type
-    const Type* RemapAddressSpace(const Type* type, uint32_t result_id);
+    const Type* RemapPointerProperties(const Type* type, uint32_t result_id);
 
     /// Marks locally defined values when they should get a 'let'
     /// definition in WGSL, or a 'var' definition at an outer scope.
@@ -1010,13 +1015,6 @@ class FunctionEmitter {
     /// input operand
     /// @returns a new expression node
     TypedExpression MakeOperand(const spvtools::opt::Instruction& inst, uint32_t operand_index);
-
-    /// Copies a typed expression to the result, but when the type is a pointer
-    /// or reference type, ensures the address space is not defaulted.  That is,
-    /// it changes a address space of "none" to "function".
-    /// @param expr a typed expression
-    /// @results a copy of the expression, with possibly updated type
-    TypedExpression InferFunctionAddressSpace(TypedExpression expr);
 
     /// Returns an expression for a SPIR-V OpFMod instruction.
     /// @param inst the SPIR-V instruction

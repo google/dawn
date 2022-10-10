@@ -938,6 +938,43 @@ myvar.field1[1u] = 0u;
 )"));
 }
 
+TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded_UsedTwice) {
+    // Use the pointer value twice, which provokes the spirv-reader
+    // to make a let declaration for the pointer.  The storage class
+    // must be 'storage', not 'uniform'.
+    const auto assembly = OldStorageBufferPreamble() + R"(
+  %100 = OpFunction %void None %voidfn
+  %entry = OpLabel
+
+  ; the scalar element
+  %1 = OpAccessChain %ptr_uint %myvar %uint_0
+  OpStore %1 %uint_0
+  OpStore %1 %uint_0
+
+  ; element in the runtime array
+  %2 = OpAccessChain %ptr_uint %myvar %uint_1 %uint_1
+  ; Use the pointer twice
+  %3 = OpLoad %uint %2
+  OpStore %2 %uint_0
+
+  OpReturn
+  OpFunctionEnd
+)";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(got, HasSubstr(R"(let x_1 : ptr<storage, u32> = &(myvar.field0);
+*(x_1) = 0u;
+*(x_1) = 0u;
+let x_2 : ptr<storage, u32> = &(myvar.field1[1u]);
+let x_3 : u32 = *(x_2);
+*(x_2) = 0u;
+)"));
+}
+
 TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded_InBoundsAccessChain) {
     // Like the previous test, but using OpInBoundsAccessChain.
     const auto assembly = OldStorageBufferPreamble() + R"(
@@ -1018,56 +1055,6 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughCopyObject_WithoutHoisting
 )")) << p->error();
 
     p->SkipDumpingPending("crbug.com/tint/1041 track access mode in spirv-reader parser type");
-}
-
-TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughCopyObject_WithHoisting) {
-    // TODO(dneto): Hoisting non-storable values (pointers) is not yet supported.
-    // It's debatable whether this test should run at all.
-    // crbug.com/tint/98
-
-    // Like the previous test, but the declaration for the copy-object
-    // has its declaration hoisted.
-    const auto assembly = OldStorageBufferPreamble() + R"(
-  %bool = OpTypeBool
-  %cond = OpConstantTrue %bool
-
-  %100 = OpFunction %void None %voidfn
-
-  %entry = OpLabel
-  OpSelectionMerge %99 None
-  OpBranchConditional %cond %20 %30
-
-  %20 = OpLabel
-  %1 = OpAccessChain %ptr_uint %myvar %uint_1 %uint_1
-  ; this definintion dominates the use in %99
-  %2 = OpCopyObject %ptr_uint %1
-  OpBranch %99
-
-  %30 = OpLabel
-  OpReturn
-
-  %99 = OpLabel
-  OpStore %2 %uint_0
-  OpReturn
-
-  OpFunctionEnd
-)";
-    auto p = parser(test::Assemble(assembly));
-    ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
-    auto fe = p->function_emitter(100);
-    EXPECT_TRUE(fe.EmitBody()) << p->error();
-    auto ast_body = fe.ast_body();
-    EXPECT_EQ(test::ToString(p->program(), ast_body),
-              R"(var x_2 : ptr<storage, u32>;
-if (true) {
-  x_2 = &(myvar.field1[1u]);
-} else {
-  return;
-}
-x_2 = 0u;
-return;
-)") << p->error();
-    p->SkipDumpingPending("crbug.com/tint/98");
 }
 
 std::string RuntimeArrayPreamble() {
