@@ -287,7 +287,7 @@ bool Validator::StorageTexture(const ast::StorageTexture* t) const {
 }
 
 bool Validator::SampledTexture(const sem::SampledTexture* t, const Source& source) const {
-    if (!t->type()->UnwrapRef()->is_numeric_scalar()) {
+    if (!t->type()->UnwrapRef()->IsAnyOf<sem::F32, sem::I32, sem::U32>()) {
         AddError("texture_2d<type>: type must be f32, i32 or u32", source);
         return false;
     }
@@ -301,7 +301,7 @@ bool Validator::MultisampledTexture(const sem::MultisampledTexture* t, const Sou
         return false;
     }
 
-    if (!t->type()->UnwrapRef()->is_numeric_scalar()) {
+    if (!t->type()->UnwrapRef()->IsAnyOf<sem::F32, sem::I32, sem::U32>()) {
         AddError("texture_multisampled_2d<type>: type must be f32, i32 or u32", source);
         return false;
     }

@@ -1000,22 +1000,27 @@ static constexpr TypeParams type_cases[] = {
     TypeParamsFor<i32>(true),
     TypeParamsFor<u32>(true),
     TypeParamsFor<f32>(true),
+    TypeParamsFor<f16>(false),
 
     TypeParamsFor<alias<bool>>(false),
     TypeParamsFor<alias<i32>>(true),
     TypeParamsFor<alias<u32>>(true),
     TypeParamsFor<alias<f32>>(true),
+    TypeParamsFor<alias<f16>>(false),
 
     TypeParamsFor<vec3<f32>>(false),
     TypeParamsFor<mat3x3<f32>>(false),
+    TypeParamsFor<mat3x3<f16>>(false),
 
     TypeParamsFor<alias<vec3<f32>>>(false),
     TypeParamsFor<alias<mat3x3<f32>>>(false),
+    TypeParamsFor<alias<mat3x3<f16>>>(false),
 };
 
 using SampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
 TEST_P(SampledTextureTypeTest, All) {
     auto& params = GetParam();
+    Enable(ast::Extension::kF16);
     GlobalVar(
         "a",
         ty.sampled_texture(Source{{12, 34}}, ast::TextureDimension::k2d, params.type_func(*this)),
@@ -1035,6 +1040,7 @@ INSTANTIATE_TEST_SUITE_P(ResolverTypeValidationTest,
 using MultisampledTextureTypeTest = ResolverTestWithParam<TypeParams>;
 TEST_P(MultisampledTextureTypeTest, All) {
     auto& params = GetParam();
+    Enable(ast::Extension::kF16);
     GlobalVar("a",
               ty.multisampled_texture(Source{{12, 34}}, ast::TextureDimension::k2d,
                                       params.type_func(*this)),
