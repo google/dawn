@@ -163,13 +163,16 @@ if (build_with_chromium) {
       seed_corpus_deps = [ ":tint_generate_wgsl_corpus" ]
     }
 
-    fuzzer_test("tint_concurrency_fuzzer") {
-      sources = [ "tint_concurrency_fuzzer.cc" ]
-      deps = [ ":tint_fuzzer_common_with_init_src" ]
-      dict = "dictionary.txt"
-      libfuzzer_options = tint_fuzzer_common_libfuzzer_options
-      seed_corpus = fuzzer_corpus_wgsl_dir
-      seed_corpus_deps = [ ":tint_generate_wgsl_corpus" ]
+    # Disable this fuzzer on windows + ASAN. See crbug.com/1357188.
+    if (!(is_win && is_asan)) {
+      fuzzer_test("tint_concurrency_fuzzer") {
+        sources = [ "tint_concurrency_fuzzer.cc" ]
+        deps = [ ":tint_fuzzer_common_with_init_src" ]
+        dict = "dictionary.txt"
+        libfuzzer_options = tint_fuzzer_common_libfuzzer_options
+        seed_corpus = fuzzer_corpus_wgsl_dir
+        seed_corpus_deps = [ ":tint_generate_wgsl_corpus" ]
+      }
     }
 
     fuzzer_test("tint_first_index_offset_fuzzer") {
