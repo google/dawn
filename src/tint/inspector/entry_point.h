@@ -84,17 +84,6 @@ struct StageVariable {
     InterpolationSampling interpolation_sampling = InterpolationSampling::kUnknown;
 };
 
-/// Convert from internal ast::InterpolationType to public ::InterpolationType.
-/// @param ast_type internal value to convert from
-/// @returns the publicly visible equivalent
-InterpolationType ASTToInspectorInterpolationType(ast::InterpolationType ast_type);
-
-/// Convert from internal ast::InterpolationSampling to public
-/// ::InterpolationSampling
-/// @param sampling internal value to convert from
-/// @returns the publicly visible equivalent
-InterpolationSampling ASTToInspectorInterpolationSampling(ast::InterpolationSampling sampling);
-
 /// Reflection data about an override variable referenced by an entry point
 struct Override {
     /// Name of the override

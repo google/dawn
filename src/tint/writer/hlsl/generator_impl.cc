@@ -3010,6 +3010,8 @@ std::string GeneratorImpl::interpolation_to_modifiers(ast::InterpolationType typ
         case ast::InterpolationType::kFlat:
             modifiers += "nointerpolation ";
             break;
+        case ast::InterpolationType::kInvalid:
+            break;
     }
     switch (sampling) {
         case ast::InterpolationSampling::kCentroid:
@@ -3019,7 +3021,7 @@ std::string GeneratorImpl::interpolation_to_modifiers(ast::InterpolationType typ
             modifiers += "sample ";
             break;
         case ast::InterpolationSampling::kCenter:
-        case ast::InterpolationSampling::kNone:
+        case ast::InterpolationSampling::kInvalid:
             break;
     }
     return modifiers;

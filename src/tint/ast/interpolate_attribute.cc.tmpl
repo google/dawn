@@ -1,0 +1,50 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/src/cmd/gen to generate builtin_value.cc
+
+See:
+* tools/src/cmd/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+{{- Import "src/tint/templates/enums.tmpl.inc" -}}
+
+#include "src/tint/ast/interpolate_attribute.h"
+
+#include <string>
+
+#include "src/tint/program_builder.h"
+
+TINT_INSTANTIATE_TYPEINFO(tint::ast::InterpolateAttribute);
+
+namespace tint::ast {
+
+InterpolateAttribute::InterpolateAttribute(ProgramID pid,
+                                           NodeID nid,
+                                           const Source& src,
+                                           InterpolationType ty,
+                                           InterpolationSampling smpl)
+    : Base(pid, nid, src), type(ty), sampling(smpl) {}
+
+InterpolateAttribute::~InterpolateAttribute() = default;
+
+std::string InterpolateAttribute::Name() const {
+    return "interpolate";
+}
+
+const InterpolateAttribute* InterpolateAttribute::Clone(CloneContext* ctx) const {
+    // Clone arguments outside of create() call to have deterministic ordering
+    auto src = ctx->Clone(source);
+    return ctx->dst->create<InterpolateAttribute>(src, type, sampling);
+}
+
+{{ Eval "ParseEnum" (Sem.Enum "interpolation_type")}}
+
+{{ Eval "EnumOStream" (Sem.Enum "interpolation_type")}}
+
+{{ Eval "ParseEnum" (Sem.Enum "interpolation_sampling")}}
+
+{{ Eval "EnumOStream" (Sem.Enum "interpolation_sampling")}}
+
+}  // namespace tint::ast

@@ -27,7 +27,7 @@
 
 namespace tint::ast {
 
-/// Storage class of a given pointer.
+/// Builtin value defined with `@builtin(<name>)`.
 enum class BuiltinValue {
     kInvalid,
     kFragDepth,

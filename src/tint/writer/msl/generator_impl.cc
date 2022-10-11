@@ -1947,7 +1947,7 @@ std::string GeneratorImpl::interpolation_to_attribute(ast::InterpolationType typ
         case ast::InterpolationSampling::kSample:
             attr = "sample_";
             break;
-        case ast::InterpolationSampling::kNone:
+        case ast::InterpolationSampling::kInvalid:
             break;
     }
     switch (type) {
@@ -1959,6 +1959,8 @@ std::string GeneratorImpl::interpolation_to_attribute(ast::InterpolationType typ
             break;
         case ast::InterpolationType::kFlat:
             attr += "flat";
+            break;
+        case ast::InterpolationType::kInvalid:
             break;
     }
     return attr;

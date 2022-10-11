@@ -3554,7 +3554,7 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
                 return Failure::kErrored;
             }
 
-            ast::InterpolationSampling sampling = ast::InterpolationSampling::kNone;
+            ast::InterpolationSampling sampling = ast::InterpolationSampling::kInvalid;
             if (match(Token::Type::kComma)) {
                 if (!peek_is(Token::Type::kParenRight)) {
                     auto sample = expect_interpolation_sample_name();

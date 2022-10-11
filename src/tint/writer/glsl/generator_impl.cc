@@ -2049,6 +2049,7 @@ void GeneratorImpl::EmitInterpolationQualifiers(
             switch (interpolate->type) {
                 case ast::InterpolationType::kPerspective:
                 case ast::InterpolationType::kLinear:
+                case ast::InterpolationType::kInvalid:
                     break;
                 case ast::InterpolationType::kFlat:
                     out << "flat ";
@@ -2060,7 +2061,7 @@ void GeneratorImpl::EmitInterpolationQualifiers(
                     break;
                 case ast::InterpolationSampling::kSample:
                 case ast::InterpolationSampling::kCenter:
-                case ast::InterpolationSampling::kNone:
+                case ast::InterpolationSampling::kInvalid:
                     break;
             }
         }

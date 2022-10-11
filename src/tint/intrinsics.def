@@ -94,6 +94,20 @@ enum texel_format {
   rgba32float
 }
 
+// https://www.w3.org/TR/WGSL/#interpolation
+enum interpolation_type {
+  perspective
+  linear
+  flat
+}
+
+// https://www.w3.org/TR/WGSL/#interpolation
+enum interpolation_sampling {
+  center
+  centroid
+  sample
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 // WGSL primitive types                                                       //
 // Types may be decorated with @precedence(N) to prioritize which type        //

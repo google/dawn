@@ -1250,7 +1250,7 @@ INSTANTIATE_TEST_SUITE_P(
             ast::InterpolationType::kPerspective, ast::InterpolationSampling::kSample,
             InterpolationType::kPerspective, InterpolationSampling::kSample},
         InspectorGetEntryPointInterpolateTestParams{
-            ast::InterpolationType::kPerspective, ast::InterpolationSampling::kNone,
+            ast::InterpolationType::kPerspective, ast::InterpolationSampling::kInvalid,
             InterpolationType::kPerspective, InterpolationSampling::kCenter},
         InspectorGetEntryPointInterpolateTestParams{
             ast::InterpolationType::kLinear, ast::InterpolationSampling::kCenter,
@@ -1262,10 +1262,10 @@ INSTANTIATE_TEST_SUITE_P(
             ast::InterpolationType::kLinear, ast::InterpolationSampling::kSample,
             InterpolationType::kLinear, InterpolationSampling::kSample},
         InspectorGetEntryPointInterpolateTestParams{
-            ast::InterpolationType::kLinear, ast::InterpolationSampling::kNone,
+            ast::InterpolationType::kLinear, ast::InterpolationSampling::kInvalid,
             InterpolationType::kLinear, InterpolationSampling::kCenter},
         InspectorGetEntryPointInterpolateTestParams{
-            ast::InterpolationType::kFlat, ast::InterpolationSampling::kNone,
+            ast::InterpolationType::kFlat, ast::InterpolationSampling::kInvalid,
             InterpolationType::kFlat, InterpolationSampling::kNone}));
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, Bool) {

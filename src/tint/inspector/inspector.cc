@@ -117,14 +117,45 @@ std::tuple<InterpolationType, InterpolationSampling> CalculateInterpolationData(
         return {InterpolationType::kPerspective, InterpolationSampling::kCenter};
     }
 
-    auto interpolation_type = interpolation_attribute->type;
-    auto sampling = interpolation_attribute->sampling;
-    if (interpolation_type != ast::InterpolationType::kFlat &&
-        sampling == ast::InterpolationSampling::kNone) {
-        sampling = ast::InterpolationSampling::kCenter;
+    auto ast_interpolation_type = interpolation_attribute->type;
+    auto ast_sampling_type = interpolation_attribute->sampling;
+    if (ast_interpolation_type != ast::InterpolationType::kFlat &&
+        ast_sampling_type == ast::InterpolationSampling::kInvalid) {
+        ast_sampling_type = ast::InterpolationSampling::kCenter;
     }
-    return {ASTToInspectorInterpolationType(interpolation_type),
-            ASTToInspectorInterpolationSampling(sampling)};
+
+    auto interpolation_type = InterpolationType::kUnknown;
+    switch (ast_interpolation_type) {
+        case ast::InterpolationType::kPerspective:
+            interpolation_type = InterpolationType::kPerspective;
+            break;
+        case ast::InterpolationType::kLinear:
+            interpolation_type = InterpolationType::kLinear;
+            break;
+        case ast::InterpolationType::kFlat:
+            interpolation_type = InterpolationType::kFlat;
+            break;
+        case ast::InterpolationType::kInvalid:
+            break;
+    }
+
+    auto sampling_type = InterpolationSampling::kUnknown;
+    switch (ast_sampling_type) {
+        case ast::InterpolationSampling::kInvalid:
+            sampling_type = InterpolationSampling::kNone;
+            break;
+        case ast::InterpolationSampling::kCenter:
+            sampling_type = InterpolationSampling::kCenter;
+            break;
+        case ast::InterpolationSampling::kCentroid:
+            sampling_type = InterpolationSampling::kCentroid;
+            break;
+        case ast::InterpolationSampling::kSample:
+            sampling_type = InterpolationSampling::kSample;
+            break;
+    }
+
+    return {interpolation_type, sampling_type};
 }
 
 }  // namespace

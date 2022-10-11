@@ -2909,7 +2909,7 @@ class ProgramBuilder {
     const ast::InterpolateAttribute* Interpolate(
         const Source& source,
         ast::InterpolationType type,
-        ast::InterpolationSampling sampling = ast::InterpolationSampling::kNone) {
+        ast::InterpolationSampling sampling = ast::InterpolationSampling::kInvalid) {
         return create<ast::InterpolateAttribute>(source, type, sampling);
     }
 
@@ -2919,7 +2919,7 @@ class ProgramBuilder {
     /// @returns the interpolate attribute pointer
     const ast::InterpolateAttribute* Interpolate(
         ast::InterpolationType type,
-        ast::InterpolationSampling sampling = ast::InterpolationSampling::kNone) {
+        ast::InterpolationSampling sampling = ast::InterpolationSampling::kInvalid) {
         return create<ast::InterpolateAttribute>(source_, type, sampling);
     }
 

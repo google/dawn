@@ -4088,6 +4088,7 @@ void Builder::AddInterpolationDecorations(uint32_t id,
             push_annot(spv::Op::OpDecorate, {Operand(id), U32Operand(SpvDecorationFlat)});
             break;
         case ast::InterpolationType::kPerspective:
+        case ast::InterpolationType::kInvalid:
             break;
     }
     switch (sampling) {
@@ -4099,7 +4100,7 @@ void Builder::AddInterpolationDecorations(uint32_t id,
             push_annot(spv::Op::OpDecorate, {Operand(id), U32Operand(SpvDecorationSample)});
             break;
         case ast::InterpolationSampling::kCenter:
-        case ast::InterpolationSampling::kNone:
+        case ast::InterpolationSampling::kInvalid:
             break;
     }
 }
