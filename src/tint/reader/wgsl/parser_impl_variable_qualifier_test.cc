@@ -63,7 +63,8 @@ TEST_F(ParserImplTest, VariableQualifier_NoMatch) {
     EXPECT_TRUE(p->has_error());
     EXPECT_TRUE(sc.errored);
     EXPECT_FALSE(sc.matched);
-    EXPECT_EQ(p->error(), "1:2: invalid address space for variable declaration");
+    EXPECT_EQ(p->error(), R"(1:2: expected address space for variable declaration
+Possible values: 'function', 'private', 'push_constant', 'storage', 'uniform', 'workgroup')");
 }
 
 TEST_F(ParserImplTest, VariableQualifier_Empty) {
@@ -72,7 +73,8 @@ TEST_F(ParserImplTest, VariableQualifier_Empty) {
     EXPECT_TRUE(p->has_error());
     EXPECT_TRUE(sc.errored);
     EXPECT_FALSE(sc.matched);
-    EXPECT_EQ(p->error(), "1:2: expected identifier for address space");
+    EXPECT_EQ(p->error(), R"(1:2: expected address space for variable declaration
+Possible values: 'function', 'private', 'push_constant', 'storage', 'uniform', 'workgroup')");
 }
 
 TEST_F(ParserImplTest, VariableQualifier_MissingLessThan) {

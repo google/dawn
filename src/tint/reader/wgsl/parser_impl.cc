@@ -1383,18 +1383,7 @@ Expect<const ast::Type*> ParserImpl::expect_type_specifier_matrix(const Source& 
 //
 // Note, we also parse `push_constant` from the experimental extension
 Expect<ast::AddressSpace> ParserImpl::expect_address_space(std::string_view use) {
-    auto& t = peek();
-    auto ident = expect_ident("address space");
-    if (ident.errored) {
-        return Failure::kErrored;
-    }
-
-    auto address_space = ast::ParseAddressSpace(ident.value);
-    if (address_space == ast::AddressSpace::kInvalid) {
-        return add_error(t.source(), "invalid address space", use);
-    }
-
-    return {address_space, t.source()};
+    return expect_enum("address space", ast::ParseAddressSpace, ast::kAddressSpaceStrings, use);
 }
 
 // struct_decl

@@ -165,7 +165,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_InvalidVariableDecl) {
     EXPECT_TRUE(e.errored);
     EXPECT_FALSE(e.matched);
     EXPECT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:5: invalid address space for variable declaration");
+    EXPECT_EQ(p->error(), R"(1:5: expected address space for variable declaration
+Possible values: 'function', 'private', 'push_constant', 'storage', 'uniform', 'workgroup')");
 }
 
 }  // namespace

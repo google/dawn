@@ -1112,7 +1112,8 @@ var i : ptr<private u32>;
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarPtrMissingAddressSpace) {
     EXPECT("var i : ptr<meow, u32>;",
-           R"(test.wgsl:1:13 error: invalid address space for ptr declaration
+           R"(test.wgsl:1:13 error: expected address space for ptr declaration
+Possible values: 'function', 'private', 'push_constant', 'storage', 'uniform', 'workgroup'
 var i : ptr<meow, u32>;
             ^^^^
 )");
@@ -1144,7 +1145,8 @@ var i : atomic<u32 x;
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarStorageDeclInvalidClass) {
     EXPECT("var<fish> i : i32",
-           R"(test.wgsl:1:5 error: invalid address space for variable declaration
+           R"(test.wgsl:1:5 error: expected address space for variable declaration
+Possible values: 'function', 'private', 'push_constant', 'storage', 'uniform', 'workgroup'
 var<fish> i : i32
     ^^^^
 )");

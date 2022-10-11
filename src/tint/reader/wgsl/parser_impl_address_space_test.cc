@@ -54,7 +54,8 @@ TEST_F(ParserImplTest, AddressSpace_NoMatch) {
     auto sc = p->expect_address_space("test");
     EXPECT_EQ(sc.errored, true);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:1: invalid address space for test");
+    EXPECT_EQ(p->error(), R"(1:1: expected address space for test
+Possible values: 'function', 'private', 'push_constant', 'storage', 'uniform', 'workgroup')");
 }
 
 }  // namespace
