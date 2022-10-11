@@ -3280,12 +3280,14 @@ TEST_P(ResolverConstEvalUnaryOpTest, Test) {
             using T = typename std::decay_t<decltype(expected)>::ElementType;
 
             auto* input_expr = std::visit([&](auto&& value) { return value.Expr(*this); }, c.input);
-            auto* expected_expr = create<ast::UnaryOpExpression>(op, input_expr);
-            GlobalConst("C", expected_expr);
+            auto* expr = create<ast::UnaryOpExpression>(op, input_expr);
 
-            EXPECT_TRUE(r()->Resolve()) << r()->error();
+            GlobalConst("C", expr);
+            auto* expected_expr = expected.Expr(*this);
+            GlobalConst("E", expected_expr);
+            ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-            auto* sem = Sem().Get(expected_expr);
+            auto* sem = Sem().Get(expr);
             const sem::Constant* value = sem->ConstantValue();
             ASSERT_NE(value, nullptr);
             EXPECT_TYPE(value->Type(), sem->Type());
