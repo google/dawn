@@ -1130,6 +1130,7 @@ if(TINT_BUILD_TESTS)
       transform/simplify_pointers_test.cc
       transform/single_entry_point_test.cc
       transform/spirv_atomic_test.cc
+      transform/std140_exhaustive_test.cc
       transform/std140_test.cc
       transform/substitute_override_test.cc
       transform/test_helper.h
