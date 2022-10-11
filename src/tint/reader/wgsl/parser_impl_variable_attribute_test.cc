@@ -177,7 +177,8 @@ TEST_F(ParserImplTest, Attribute_Builtin_MissingValue) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:9: expected identifier for builtin");
+    EXPECT_EQ(p->error(), R"(1:9: expected builtin
+Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id')");
 }
 
 TEST_F(ParserImplTest, Attribute_Builtin_InvalidValue) {
@@ -187,7 +188,19 @@ TEST_F(ParserImplTest, Attribute_Builtin_InvalidValue) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:9: invalid value for builtin attribute");
+    EXPECT_EQ(p->error(), R"(1:9: expected builtin
+Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id')");
+}
+
+TEST_F(ParserImplTest, Attribute_Builtin_InvalidValueSuggest) {
+    auto p = parser("builtin(front_face)");
+    auto attr = p->attribute();
+    EXPECT_FALSE(attr.matched);
+    EXPECT_TRUE(attr.errored);
+    EXPECT_EQ(attr.value, nullptr);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), R"(1:9: expected builtin. Did you mean 'front_facing'?
+Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id')");
 }
 
 TEST_F(ParserImplTest, Attribute_Builtin_MissingInvalid) {
@@ -197,7 +210,8 @@ TEST_F(ParserImplTest, Attribute_Builtin_MissingInvalid) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:9: expected identifier for builtin");
+    EXPECT_EQ(p->error(), R"(1:9: expected builtin
+Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id')");
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_Flat) {

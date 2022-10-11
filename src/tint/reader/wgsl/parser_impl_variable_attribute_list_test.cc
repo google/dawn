@@ -58,8 +58,19 @@ TEST_F(ParserImplTest, AttributeList_InvalidValue) {
     EXPECT_TRUE(attrs.errored);
     EXPECT_FALSE(attrs.matched);
     EXPECT_TRUE(attrs.value.IsEmpty());
-    EXPECT_EQ(p->error(), "1:10: invalid value for builtin attribute");
+    EXPECT_EQ(p->error(), R"(1:10: expected builtin
+Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id')");
 }
 
+TEST_F(ParserImplTest, AttributeList_InvalidValueSuggest) {
+    auto p = parser("@builtin(instanceindex)");
+    auto attrs = p->attribute_list();
+    EXPECT_TRUE(p->has_error());
+    EXPECT_TRUE(attrs.errored);
+    EXPECT_FALSE(attrs.matched);
+    EXPECT_TRUE(attrs.value.IsEmpty());
+    EXPECT_EQ(p->error(), R"(1:10: expected builtin. Did you mean 'instance_index'?
+Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id')");
+}
 }  // namespace
 }  // namespace tint::reader::wgsl

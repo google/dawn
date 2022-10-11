@@ -43,6 +43,7 @@
 #include "src/tint/sem/external_texture.h"
 #include "src/tint/sem/multisampled_texture.h"
 #include "src/tint/sem/sampled_texture.h"
+#include "src/tint/utils/string.h"
 
 namespace tint::reader::wgsl {
 namespace {
@@ -1194,6 +1195,66 @@ Maybe<const ast::Type*> ParserImpl::type_specifier() {
     return type_specifier_without_ident();
 }
 
+template <typename ENUM, size_t N>
+Expect<ENUM> ParserImpl::expect_enum(std::string_view name,
+                                     ENUM (*parse)(std::string_view str),
+                                     const char* const (&strings)[N],
+                                     std::string_view use) {
+    auto& t = peek();
+    if (t.IsIdentifier()) {
+        auto val = parse(t.to_str());
+        if (val != ENUM::kInvalid) {
+            synchronized_ = true;
+            next();
+            return {val, t.source()};
+        }
+    }
+
+    // Was the token itself an error?
+    if (handle_error(t)) {
+        return Failure::kErrored;
+    }
+
+    /// Create a sensible error message
+    std::stringstream err;
+    err << "expected " << name;
+
+    if (!use.empty()) {
+        err << " for " << use;
+    }
+
+    // If the string typed was within kSuggestionDistance of one of the possible enum values,
+    // suggest that. Don't bother with suggestions if the string was extremely long.
+    constexpr size_t kSuggestionDistance = 5;
+    constexpr size_t kSuggestionMaxLength = 64;
+    if (auto got = t.to_str(); !got.empty() && got.size() < kSuggestionMaxLength) {
+        size_t candidate_dist = kSuggestionDistance;
+        const char* candidate = nullptr;
+        for (auto* str : strings) {
+            auto dist = utils::Distance(str, got);
+            if (dist < candidate_dist) {
+                candidate = str;
+                candidate_dist = dist;
+            }
+        }
+        if (candidate) {
+            err << ". Did you mean '" << candidate << "'?";
+        }
+    }
+
+    // List all the possible enumerator values
+    err << "\nPossible values: ";
+    for (auto* str : strings) {
+        if (str != strings[0]) {
+            err << ", ";
+        }
+        err << "'" << str << "'";
+    }
+
+    synchronized_ = false;
+    return add_error(t.source(), err.str());
+}
+
 Expect<const ast::Type*> ParserImpl::expect_type(std::string_view use) {
     auto type = type_specifier();
     if (type.errored) {
@@ -1663,17 +1724,7 @@ Expect<ast::InterpolationType> ParserImpl::expect_interpolation_type_name() {
 //   | vertex_index
 //   | workgroup_id
 Expect<ast::BuiltinValue> ParserImpl::expect_builtin() {
-    auto ident = expect_ident("builtin");
-    if (ident.errored) {
-        return Failure::kErrored;
-    }
-
-    ast::BuiltinValue builtin = ast::ParseBuiltinValue(ident.value);
-    if (builtin == ast::BuiltinValue::kInvalid) {
-        return add_error(ident.source, "invalid value for builtin attribute");
-    }
-
-    return {builtin, ident.source};
+    return expect_enum("builtin", ast::ParseBuiltinValue, ast::kBuiltinValueStrings);
 }
 
 // compound_statement

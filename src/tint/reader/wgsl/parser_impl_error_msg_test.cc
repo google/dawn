@@ -765,7 +765,8 @@ type T = i32;
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStaticAssertMissingLParen) {
-    EXPECT("static_assert true);", R"(test.wgsl:1:19 error: expected ';' for static assertion declaration
+    EXPECT("static_assert true);",
+           R"(test.wgsl:1:19 error: expected ';' for static assertion declaration
 static_assert true);
                   ^
 )");
@@ -989,17 +990,19 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBuiltinMissingRParen) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBuiltinInvalidIdentifer) {
     EXPECT("@builtin(1) var i : i32;",
-           R"(test.wgsl:1:10 error: expected identifier for builtin
+           R"(test.wgsl:1:10 error: expected builtin
+Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id'
 @builtin(1) var i : i32;
          ^
 )");
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBuiltinInvalidValue) {
-    EXPECT("@builtin(x) var i : i32;",
-           R"(test.wgsl:1:10 error: invalid value for builtin attribute
-@builtin(x) var i : i32;
-         ^
+    EXPECT("@builtin(frag_d3pth) var i : i32;",
+           R"(test.wgsl:1:10 error: expected builtin. Did you mean 'frag_depth'?
+Possible values: 'frag_depth', 'front_facing', 'global_invocation_id', 'instance_index', 'local_invocation_id', 'local_invocation_index', 'num_workgroups', 'position', 'sample_index', 'sample_mask', 'vertex_index', 'workgroup_id'
+@builtin(frag_d3pth) var i : i32;
+         ^^^^^^^^^^
 )");
 }
 

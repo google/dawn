@@ -868,6 +868,18 @@ class ParserImpl {
     Expect<const ast::Type*> expect_type_specifier_matrix(const Source& s,
                                                           const MatrixDimensions& dims);
 
+    /// Parses the given enum, providing sensible error messages if the next token does not match
+    /// any of the enum values.
+    /// @param name the name of the enumerator
+    /// @param parse the optimized function used to parse the enum
+    /// @param strings the list of possible strings in the enum
+    /// @param use an optional description of what was being parsed if an error was raised.
+    template <typename ENUM, size_t N>
+    Expect<ENUM> expect_enum(std::string_view name,
+                             ENUM (*parse)(std::string_view str),
+                             const char* const (&strings)[N],
+                             std::string_view use = "");
+
     Expect<const ast::Type*> expect_type(std::string_view use);
 
     Maybe<const ast::Statement*> non_block_statement();
