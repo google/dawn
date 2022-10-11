@@ -221,6 +221,7 @@ bool AssumesResultSignednessMatchesFirstOperand(GLSLstd450 extended_opcode) {
         case GLSLstd450UMin:
         case GLSLstd450UMax:
         case GLSLstd450UClamp:
+        case GLSLstd450FindILsb:
             // TODO(dneto): FindSMsb?
             // TODO(dneto): FindUMsb?
             return true;

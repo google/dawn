@@ -179,6 +179,8 @@ using SpvParserTest_GlslStd450_Inting_IntingInting =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 using SpvParserTest_GlslStd450_Inting_IntingIntingInting =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
+using SpvParserTest_GlslStd450_Uinting_Uinting =
+    SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 using SpvParserTest_GlslStd450_Uinting_UintingUinting =
     SpvParserTestBase<::testing::TestWithParam<GlslStd450Case>>;
 using SpvParserTest_GlslStd450_Uinting_UintingUintingUinting =
@@ -580,7 +582,8 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Vector) {
 
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Inting_Inting,
-                         ::testing::Values(GlslStd450Case{"SAbs", "abs"}));
+                         ::testing::Values(GlslStd450Case{"SAbs", "abs"},
+                                           GlslStd450Case{"FindILsb", "firstTrailingBit"}));
 
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Inting_IntingInting,
@@ -590,6 +593,41 @@ INSTANTIATE_TEST_SUITE_P(Samples,
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Inting_IntingIntingInting,
                          ::testing::Values(GlslStd450Case{"SClamp", "clamp"}));
+
+TEST_P(SpvParserTest_GlslStd450_Uinting_Uinting, Scalar) {
+    const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %uint %glsl )" +
+                          GetParam().opcode +
+                          R"( %u1
+     OpReturn
+     OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : u32 = " + GetParam().wgsl_func + "(u1);")) << body;
+}
+
+TEST_P(SpvParserTest_GlslStd450_Uinting_Uinting, Vector) {
+    const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %v2uint %glsl )" +
+                          GetParam().opcode +
+                          R"( %v2u1
+     OpReturn
+     OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr("let x_1 : vec2<u32> = " + GetParam().wgsl_func + "(v2u1);"))
+        << body;
+}
 
 TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUinting, Scalar) {
     const auto assembly = Preamble() + R"(
@@ -660,6 +698,10 @@ TEST_P(SpvParserTest_GlslStd450_Uinting_UintingUintingUinting, Vector) {
                 HasSubstr("let x_1 : vec2<u32> = " + GetParam().wgsl_func + "(v2u1, v2u2, v2u3);"))
         << body;
 }
+
+INSTANTIATE_TEST_SUITE_P(Samples,
+                         SpvParserTest_GlslStd450_Uinting_Uinting,
+                         ::testing::Values(GlslStd450Case{"FindILsb", "firstTrailingBit"}));
 
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Uinting_UintingUinting,
@@ -904,6 +946,34 @@ TEST_F(SpvParserTest, RectifyOperandsAndResult_UClamp) {
         body,
         HasSubstr(
             R"(let x_2 : vec2<i32> = bitcast<vec2<i32>>(clamp(bitcast<vec2<u32>>(v2i1), v2u2, bitcast<vec2<u32>>(v2i3)));)"))
+        << body;
+}
+
+TEST_F(SpvParserTest, RectifyOperandsAndResult_FindILsb) {
+    // Check conversion of:
+    //   signed results to unsigned result to match first arg.
+    //   unsigned results to signed result to match first arg.
+    // This is the first extended instruction we've supported which goes both
+    // ways.
+    const auto assembly = Preamble() + R"(
+     %1 = OpExtInst %uint %glsl FindILsb %i1
+     %2 = OpExtInst %v2uint %glsl FindILsb %v2i1
+     %3 = OpExtInst %int %glsl FindILsb %u1
+     %4 = OpExtInst %v2int %glsl FindILsb %v2u1
+     OpReturn
+     OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr(R"(
+let x_1 : u32 = bitcast<u32>(firstTrailingBit(i1));
+let x_2 : vec2<u32> = bitcast<vec2<u32>>(firstTrailingBit(v2i1));
+let x_3 : i32 = bitcast<i32>(firstTrailingBit(u1));
+let x_4 : vec2<i32> = bitcast<vec2<i32>>(firstTrailingBit(v2u1));)"))
         << body;
 }
 
