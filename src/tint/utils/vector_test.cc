@@ -2060,6 +2060,15 @@ TEST(TintVectorRefTest, ConstBeginEnd) {
     EXPECT_EQ(vec_ref.end(), &vec[0] + 3);
 }
 
+TEST(TintVectorTest, Equality) {
+    EXPECT_EQ((Vector<int, 2>{1, 2}), (Vector<int, 2>{1, 2}));
+    EXPECT_EQ((Vector<int, 1>{1, 2}), (Vector<int, 3>{1, 2}));
+    EXPECT_NE((Vector{1, 2}), (Vector{1}));
+    EXPECT_NE((Vector{1}), (Vector{1, 2}));
+    EXPECT_NE((Vector{1, 2}), (Vector{2, 1}));
+    EXPECT_NE((Vector{2, 1}), (Vector{1, 2}));
+}
+
 }  // namespace
 }  // namespace tint::utils
 

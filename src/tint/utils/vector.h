@@ -463,13 +463,15 @@ class Vector {
     /// Equality operator
     /// @param other the other vector
     /// @returns true if this vector is the same length as `other`, and all elements are equal.
-    bool operator==(const Vector& other) const {
+    template <typename T2, size_t N2>
+    bool operator==(const Vector<T2, N2>& other) const {
         const size_t len = Length();
-        if (len == other.Length()) {
-            for (size_t i = 0; i < len; i++) {
-                if ((*this)[i] != other[i]) {
-                    return false;
-                }
+        if (len != other.Length()) {
+            return false;
+        }
+        for (size_t i = 0; i < len; i++) {
+            if ((*this)[i] != other[i]) {
+                return false;
             }
         }
         return true;
@@ -479,7 +481,10 @@ class Vector {
     /// @param other the other vector
     /// @returns true if this vector is not the same length as `other`, or all elements are not
     ///          equal.
-    bool operator!=(const Vector& other) const { return !(*this == other); }
+    template <typename T2, size_t N2>
+    bool operator!=(const Vector<T2, N2>& other) const {
+        return !(*this == other);
+    }
 
   private:
     /// Friend class (differing specializations of this class)
