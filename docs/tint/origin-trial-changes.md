@@ -10,6 +10,10 @@
 
 * The `external_texture` overload of `textureSampleLevel()` has been deprecated. Use `textureSampleBaseClampToEdge()` instead. [tint:1671](crbug.com/tint/1671)
 
+### Fixes
+
+* Constant evaluation of type conversions where the value exceeds the limits of the target type have been fixed. [tint:1707](crbug.com/tint/1707)
+
 ## Changes for M107
 
 ### New features

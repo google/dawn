@@ -1550,8 +1550,8 @@ std::string AtomicCompareExchangeResult::String(MatchState* state) const {
   return "__atomic_compare_exchange_result<" + T + ">";
 }
 
-/// TypeMatcher for 'match abstract_or_scalar'
-class AbstractOrScalar : public TypeMatcher {
+/// TypeMatcher for 'match scalar'
+class Scalar : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
   /// expected, canonicalized type on success.
@@ -1566,7 +1566,7 @@ class AbstractOrScalar : public TypeMatcher {
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* AbstractOrScalar::Match(MatchState& state, const sem::Type* ty) const {
+const sem::Type* Scalar::Match(MatchState& state, const sem::Type* ty) const {
   if (match_ia(state, ty)) {
     return build_ia(state);
   }
@@ -1591,7 +1591,7 @@ const sem::Type* AbstractOrScalar::Match(MatchState& state, const sem::Type* ty)
   return nullptr;
 }
 
-std::string AbstractOrScalar::String(MatchState*) const {
+std::string Scalar::String(MatchState*) const {
   std::stringstream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
@@ -1599,8 +1599,8 @@ std::string AbstractOrScalar::String(MatchState*) const {
   return ss.str();
 }
 
-/// TypeMatcher for 'match scalar'
-class Scalar : public TypeMatcher {
+/// TypeMatcher for 'match concrete_scalar'
+class ConcreteScalar : public TypeMatcher {
  public:
   /// Checks whether the given type matches the matcher rules, and returns the
   /// expected, canonicalized type on success.
@@ -1615,7 +1615,7 @@ class Scalar : public TypeMatcher {
   std::string String(MatchState* state) const override;
 };
 
-const sem::Type* Scalar::Match(MatchState& state, const sem::Type* ty) const {
+const sem::Type* ConcreteScalar::Match(MatchState& state, const sem::Type* ty) const {
   if (match_i32(state, ty)) {
     return build_i32(state);
   }
@@ -1634,7 +1634,7 @@ const sem::Type* Scalar::Match(MatchState& state, const sem::Type* ty) const {
   return nullptr;
 }
 
-std::string Scalar::String(MatchState*) const {
+std::string ConcreteScalar::String(MatchState*) const {
   std::stringstream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
@@ -1659,6 +1659,12 @@ class ScalarNoF32 : public TypeMatcher {
 };
 
 const sem::Type* ScalarNoF32::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_ia(state, ty)) {
+    return build_ia(state);
+  }
+  if (match_fa(state, ty)) {
+    return build_fa(state);
+  }
   if (match_i32(state, ty)) {
     return build_i32(state);
   }
@@ -1678,7 +1684,7 @@ std::string ScalarNoF32::String(MatchState*) const {
   std::stringstream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss << I32().String(nullptr) << ", " << F16().String(nullptr) << ", " << U32().String(nullptr) << " or " << Bool().String(nullptr);
+  ss << Ia().String(nullptr) << ", " << Fa().String(nullptr) << ", " << I32().String(nullptr) << ", " << F16().String(nullptr) << ", " << U32().String(nullptr) << " or " << Bool().String(nullptr);
   return ss.str();
 }
 
@@ -1699,6 +1705,12 @@ class ScalarNoF16 : public TypeMatcher {
 };
 
 const sem::Type* ScalarNoF16::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_ia(state, ty)) {
+    return build_ia(state);
+  }
+  if (match_fa(state, ty)) {
+    return build_fa(state);
+  }
   if (match_i32(state, ty)) {
     return build_i32(state);
   }
@@ -1718,7 +1730,7 @@ std::string ScalarNoF16::String(MatchState*) const {
   std::stringstream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss << F32().String(nullptr) << ", " << I32().String(nullptr) << ", " << U32().String(nullptr) << " or " << Bool().String(nullptr);
+  ss << Ia().String(nullptr) << ", " << Fa().String(nullptr) << ", " << F32().String(nullptr) << ", " << I32().String(nullptr) << ", " << U32().String(nullptr) << " or " << Bool().String(nullptr);
   return ss.str();
 }
 
@@ -1739,6 +1751,12 @@ class ScalarNoI32 : public TypeMatcher {
 };
 
 const sem::Type* ScalarNoI32::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_ia(state, ty)) {
+    return build_ia(state);
+  }
+  if (match_fa(state, ty)) {
+    return build_fa(state);
+  }
   if (match_u32(state, ty)) {
     return build_u32(state);
   }
@@ -1758,7 +1776,7 @@ std::string ScalarNoI32::String(MatchState*) const {
   std::stringstream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss << F32().String(nullptr) << ", " << F16().String(nullptr) << ", " << U32().String(nullptr) << " or " << Bool().String(nullptr);
+  ss << Ia().String(nullptr) << ", " << Fa().String(nullptr) << ", " << F32().String(nullptr) << ", " << F16().String(nullptr) << ", " << U32().String(nullptr) << " or " << Bool().String(nullptr);
   return ss.str();
 }
 
@@ -1779,6 +1797,12 @@ class ScalarNoU32 : public TypeMatcher {
 };
 
 const sem::Type* ScalarNoU32::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_ia(state, ty)) {
+    return build_ia(state);
+  }
+  if (match_fa(state, ty)) {
+    return build_fa(state);
+  }
   if (match_i32(state, ty)) {
     return build_i32(state);
   }
@@ -1798,7 +1822,7 @@ std::string ScalarNoU32::String(MatchState*) const {
   std::stringstream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss << F32().String(nullptr) << ", " << F16().String(nullptr) << ", " << I32().String(nullptr) << " or " << Bool().String(nullptr);
+  ss << Ia().String(nullptr) << ", " << Fa().String(nullptr) << ", " << F32().String(nullptr) << ", " << F16().String(nullptr) << ", " << I32().String(nullptr) << " or " << Bool().String(nullptr);
   return ss.str();
 }
 
@@ -1819,6 +1843,12 @@ class ScalarNoBool : public TypeMatcher {
 };
 
 const sem::Type* ScalarNoBool::Match(MatchState& state, const sem::Type* ty) const {
+  if (match_ia(state, ty)) {
+    return build_ia(state);
+  }
+  if (match_fa(state, ty)) {
+    return build_fa(state);
+  }
   if (match_i32(state, ty)) {
     return build_i32(state);
   }
@@ -1838,7 +1868,7 @@ std::string ScalarNoBool::String(MatchState*) const {
   std::stringstream ss;
   // Note: We pass nullptr to the TypeMatcher::String() functions, as 'matcher's do not support
   // template arguments, nor can they match sub-types. As such, they have no use for the MatchState.
-  ss << F32().String(nullptr) << ", " << F16().String(nullptr) << ", " << I32().String(nullptr) << " or " << U32().String(nullptr);
+  ss << Ia().String(nullptr) << ", " << Fa().String(nullptr) << ", " << F32().String(nullptr) << ", " << F16().String(nullptr) << ", " << I32().String(nullptr) << " or " << U32().String(nullptr);
   return ss.str();
 }
 
@@ -2580,8 +2610,8 @@ class Matchers {
   FrexpResult FrexpResult_;
   FrexpResultVec FrexpResultVec_;
   AtomicCompareExchangeResult AtomicCompareExchangeResult_;
-  AbstractOrScalar AbstractOrScalar_;
   Scalar Scalar_;
+  ConcreteScalar ConcreteScalar_;
   ScalarNoF32 ScalarNoF32_;
   ScalarNoF16 ScalarNoF16_;
   ScalarNoI32 ScalarNoI32_;
@@ -2666,8 +2696,8 @@ class Matchers {
     /* [47] */ &FrexpResult_,
     /* [48] */ &FrexpResultVec_,
     /* [49] */ &AtomicCompareExchangeResult_,
-    /* [50] */ &AbstractOrScalar_,
-    /* [51] */ &Scalar_,
+    /* [50] */ &Scalar_,
+    /* [51] */ &ConcreteScalar_,
     /* [52] */ &ScalarNoF32_,
     /* [53] */ &ScalarNoF16_,
     /* [54] */ &ScalarNoI32_,
@@ -14348,9 +14378,9 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [67] */
-    /* fn select<T : abstract_or_scalar>(T, T, bool) -> T */
-    /* fn select<T : abstract_or_scalar, N : num>(vec<N, T>, vec<N, T>, bool) -> vec<N, T> */
-    /* fn select<N : num, T : abstract_or_scalar>(vec<N, T>, vec<N, T>, vec<N, bool>) -> vec<N, T> */
+    /* fn select<T : scalar>(T, T, bool) -> T */
+    /* fn select<T : scalar, N : num>(vec<N, T>, vec<N, T>, bool) -> vec<N, T> */
+    /* fn select<N : num, T : scalar>(vec<N, T>, vec<N, T>, vec<N, bool>) -> vec<N, T> */
     /* num overloads */ 3,
     /* overloads */ &kOverloads[276],
   },
@@ -14876,15 +14906,15 @@ constexpr IntrinsicInfo kBinaryOperators[] = {
   },
   {
     /* [10] */
-    /* op ==<T : abstract_or_scalar>(T, T) -> bool */
-    /* op ==<T : abstract_or_scalar, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
+    /* op ==<T : scalar>(T, T) -> bool */
+    /* op ==<T : scalar, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[408],
   },
   {
     /* [11] */
-    /* op !=<T : abstract_or_scalar>(T, T) -> bool */
-    /* op !=<T : abstract_or_scalar, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
+    /* op !=<T : scalar>(T, T) -> bool */
+    /* op !=<T : scalar, N : num>(vec<N, T>, vec<N, T>) -> vec<N, bool> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[394],
   },
@@ -14995,10 +15025,10 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
   },
   {
     /* [5] */
-    /* ctor vec2<T : scalar>() -> vec2<T> */
-    /* ctor vec2<T : scalar>(vec2<T>) -> vec2<T> */
-    /* ctor vec2<T : abstract_or_scalar>(T) -> vec2<T> */
-    /* ctor vec2<T : abstract_or_scalar>(x: T, y: T) -> vec2<T> */
+    /* ctor vec2<T : concrete_scalar>() -> vec2<T> */
+    /* ctor vec2<T : concrete_scalar>(vec2<T>) -> vec2<T> */
+    /* ctor vec2<T : scalar>(T) -> vec2<T> */
+    /* ctor vec2<T : scalar>(x: T, y: T) -> vec2<T> */
     /* conv vec2<T : f32, U : scalar_no_f32>(vec2<U>) -> vec2<f32> */
     /* conv vec2<T : f16, U : scalar_no_f16>(vec2<U>) -> vec2<f16> */
     /* conv vec2<T : i32, U : scalar_no_i32>(vec2<U>) -> vec2<i32> */
@@ -15009,12 +15039,12 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
   },
   {
     /* [6] */
-    /* ctor vec3<T : scalar>() -> vec3<T> */
-    /* ctor vec3<T : scalar>(vec3<T>) -> vec3<T> */
-    /* ctor vec3<T : abstract_or_scalar>(T) -> vec3<T> */
-    /* ctor vec3<T : abstract_or_scalar>(x: T, y: T, z: T) -> vec3<T> */
-    /* ctor vec3<T : abstract_or_scalar>(xy: vec2<T>, z: T) -> vec3<T> */
-    /* ctor vec3<T : abstract_or_scalar>(x: T, yz: vec2<T>) -> vec3<T> */
+    /* ctor vec3<T : concrete_scalar>() -> vec3<T> */
+    /* ctor vec3<T : concrete_scalar>(vec3<T>) -> vec3<T> */
+    /* ctor vec3<T : scalar>(T) -> vec3<T> */
+    /* ctor vec3<T : scalar>(x: T, y: T, z: T) -> vec3<T> */
+    /* ctor vec3<T : scalar>(xy: vec2<T>, z: T) -> vec3<T> */
+    /* ctor vec3<T : scalar>(x: T, yz: vec2<T>) -> vec3<T> */
     /* conv vec3<T : f32, U : scalar_no_f32>(vec3<U>) -> vec3<f32> */
     /* conv vec3<T : f16, U : scalar_no_f16>(vec3<U>) -> vec3<f16> */
     /* conv vec3<T : i32, U : scalar_no_i32>(vec3<U>) -> vec3<i32> */
@@ -15025,16 +15055,16 @@ constexpr IntrinsicInfo kConstructorsAndConverters[] = {
   },
   {
     /* [7] */
-    /* ctor vec4<T : scalar>() -> vec4<T> */
-    /* ctor vec4<T : scalar>(vec4<T>) -> vec4<T> */
-    /* ctor vec4<T : abstract_or_scalar>(T) -> vec4<T> */
-    /* ctor vec4<T : abstract_or_scalar>(x: T, y: T, z: T, w: T) -> vec4<T> */
-    /* ctor vec4<T : abstract_or_scalar>(xy: vec2<T>, z: T, w: T) -> vec4<T> */
-    /* ctor vec4<T : abstract_or_scalar>(x: T, yz: vec2<T>, w: T) -> vec4<T> */
-    /* ctor vec4<T : abstract_or_scalar>(x: T, y: T, zw: vec2<T>) -> vec4<T> */
-    /* ctor vec4<T : abstract_or_scalar>(xy: vec2<T>, zw: vec2<T>) -> vec4<T> */
-    /* ctor vec4<T : abstract_or_scalar>(xyz: vec3<T>, w: T) -> vec4<T> */
-    /* ctor vec4<T : abstract_or_scalar>(x: T, zyw: vec3<T>) -> vec4<T> */
+    /* ctor vec4<T : concrete_scalar>() -> vec4<T> */
+    /* ctor vec4<T : concrete_scalar>(vec4<T>) -> vec4<T> */
+    /* ctor vec4<T : scalar>(T) -> vec4<T> */
+    /* ctor vec4<T : scalar>(x: T, y: T, z: T, w: T) -> vec4<T> */
+    /* ctor vec4<T : scalar>(xy: vec2<T>, z: T, w: T) -> vec4<T> */
+    /* ctor vec4<T : scalar>(x: T, yz: vec2<T>, w: T) -> vec4<T> */
+    /* ctor vec4<T : scalar>(x: T, y: T, zw: vec2<T>) -> vec4<T> */
+    /* ctor vec4<T : scalar>(xy: vec2<T>, zw: vec2<T>) -> vec4<T> */
+    /* ctor vec4<T : scalar>(xyz: vec3<T>, w: T) -> vec4<T> */
+    /* ctor vec4<T : scalar>(x: T, zyw: vec3<T>) -> vec4<T> */
     /* conv vec4<T : f32, U : scalar_no_f32>(vec4<U>) -> vec4<f32> */
     /* conv vec4<T : f16, U : scalar_no_f16>(vec4<U>) -> vec4<f16> */
     /* conv vec4<T : i32, U : scalar_no_i32>(vec4<U>) -> vec4<i32> */

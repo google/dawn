@@ -231,27 +231,29 @@ struct Element : ImplConstant {
             return this;
         }
         return ZeroTypeDispatch(target_ty, [&](auto zero_to) -> ImplResult {
-            // `T` is the source type, `value` is the source value.
+            // `value` is the source value.
+            // `FROM` is the source type.
             // `TO` is the target type.
             using TO = std::decay_t<decltype(zero_to)>;
+            using FROM = T;
             if constexpr (std::is_same_v<TO, bool>) {
                 // [x -> bool]
                 return builder.create<Element<TO>>(target_ty, !IsPositiveZero(value));
-            } else if constexpr (std::is_same_v<T, bool>) {
+            } else if constexpr (std::is_same_v<FROM, bool>) {
                 // [bool -> x]
                 return builder.create<Element<TO>>(target_ty, TO(value ? 1 : 0));
             } else if (auto conv = CheckedConvert<TO>(value)) {
                 // Conversion success
                 return builder.create<Element<TO>>(target_ty, conv.Get());
                 // --- Below this point are the failure cases ---
-            } else if constexpr (IsAbstract<T>) {
+            } else if constexpr (IsAbstract<FROM>) {
                 // [abstract-numeric -> x] - materialization failure
                 std::stringstream ss;
                 ss << "value " << value << " cannot be represented as ";
                 ss << "'" << builder.FriendlyName(target_ty) << "'";
                 builder.Diagnostics().add_error(tint::diag::System::Resolver, ss.str(), source);
                 return utils::Failure;
-            } else if constexpr (IsFloatingPoint<UnwrapNumber<TO>>) {
+            } else if constexpr (IsFloatingPoint<TO>) {
                 // [x -> floating-point] - number not exactly representable
                 // https://www.w3.org/TR/WGSL/#floating-point-conversion
                 switch (conv.Failure()) {
@@ -260,8 +262,8 @@ struct Element : ImplConstant {
                     case ConversionFailure::kExceedsPositiveLimit:
                         return builder.create<Element<TO>>(target_ty, TO::Inf());
                 }
-            } else {
-                // [x -> integer] - number not exactly representable
+            } else if constexpr (IsFloatingPoint<FROM>) {
+                // [floating-point -> integer] - number not exactly representable
                 // https://www.w3.org/TR/WGSL/#floating-point-conversion
                 switch (conv.Failure()) {
                     case ConversionFailure::kExceedsNegativeLimit:
@@ -269,6 +271,10 @@ struct Element : ImplConstant {
                     case ConversionFailure::kExceedsPositiveLimit:
                         return builder.create<Element<TO>>(target_ty, TO::Highest());
                 }
+            } else if constexpr (IsIntegral<FROM>) {
+                // [integer -> integer] - number not exactly representable
+                // Static cast
+                return builder.create<Element<TO>>(target_ty, static_cast<TO>(value));
             }
             return nullptr;  // Expression is not constant.
         });
@@ -842,11 +848,7 @@ ConstEval::Result ConstEval::Conv(const sem::Type* ty,
         return nullptr;  // Single argument is not constant.
     }
 
-    if (auto conv = Convert(ty, args[0], source)) {
-        return conv.Get();
-    }
-
-    return nullptr;
+    return Convert(ty, args[0], source);
 }
 
 ConstEval::Result ConstEval::Zero(const sem::Type* ty,

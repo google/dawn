@@ -51,7 +51,7 @@ TEST_F(MslGeneratorImplTest, EmitExpression_Cast_IntMin) {
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitExpression(out, cast)) << gen.error();
-    EXPECT_EQ(out.str(), "0u");
+    EXPECT_EQ(out.str(), "2147483648u");
 }
 
 }  // namespace

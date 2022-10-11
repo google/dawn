@@ -175,13 +175,13 @@ type __atomic_compare_exchange_result<T>
 // A type matcher that can match one or more types.                           //
 ////////////////////////////////////////////////////////////////////////////////
 
-match abstract_or_scalar: ia | fa | f32 | f16 | i32 | u32 | bool
-match scalar: f32 | f16 | i32 | u32 | bool
-match scalar_no_f32: i32 | f16 | u32 | bool
-match scalar_no_f16: f32 | i32 | u32 | bool
-match scalar_no_i32: f32 | f16 | u32 | bool
-match scalar_no_u32: f32 | f16 | i32 | bool
-match scalar_no_bool: f32 | f16 | i32 | u32
+match scalar: ia | fa | f32 | f16 | i32 | u32 | bool
+match concrete_scalar: f32 | f16 | i32 | u32 | bool
+match scalar_no_f32: ia | fa | i32 | f16 | u32 | bool
+match scalar_no_f16: ia | fa | f32 | i32 | u32 | bool
+match scalar_no_i32: ia | fa | f32 | f16 | u32 | bool
+match scalar_no_u32: ia | fa | f32 | f16 | i32 | bool
+match scalar_no_bool: ia | fa | f32 | f16 | i32 | u32
 match fia_fiu32_f16: fa | ia | f32 | i32 | u32 | f16
 match fia_fi32_f16: fa | ia | f32 | i32 | f16
 match fia_fiu32: fa | ia | f32 | i32 | u32
@@ -524,9 +524,9 @@ fn round<T: f32_f16>(T) -> T
 fn round<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn saturate<T: f32_f16>(T) -> T
 fn saturate<T: f32_f16, N: num>(vec<N, T>) -> vec<N, T>
-@const("select_bool") fn select<T: abstract_or_scalar>(T, T, bool) -> T
-@const("select_bool") fn select<T: abstract_or_scalar, N: num>(vec<N, T>, vec<N, T>, bool) -> vec<N, T>
-@const("select_boolvec") fn select<N: num, T: abstract_or_scalar>(vec<N, T>, vec<N, T>, vec<N, bool>) -> vec<N, T>
+@const("select_bool") fn select<T: scalar>(T, T, bool) -> T
+@const("select_bool") fn select<T: scalar, N: num>(vec<N, T>, vec<N, T>, bool) -> vec<N, T>
+@const("select_boolvec") fn select<N: num, T: scalar>(vec<N, T>, vec<N, T>, vec<N, bool>) -> vec<N, T>
 fn sign<T: f32_f16>(T) -> T
 fn sign<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn sin<T: f32_f16>(T) -> T
@@ -720,9 +720,9 @@ fn textureLoad(texture: texture_external, coords: vec2<i32>) -> vec4<f32>
 @const("Zero") ctor f32() -> f32
 @const("Zero") ctor f16() -> f16
 @const("Zero") ctor bool() -> bool
-@const("Zero") ctor vec2<T: scalar>() -> vec2<T>
-@const("Zero") ctor vec3<T: scalar>() -> vec3<T>
-@const("Zero") ctor vec4<T: scalar>() -> vec4<T>
+@const("Zero") ctor vec2<T: concrete_scalar>() -> vec2<T>
+@const("Zero") ctor vec3<T: concrete_scalar>() -> vec3<T>
+@const("Zero") ctor vec4<T: concrete_scalar>() -> vec4<T>
 @const("Zero") ctor mat2x2<T: f32_f16>() -> mat2x2<T>
 @const("Zero") ctor mat2x3<T: f32_f16>() -> mat2x3<T>
 @const("Zero") ctor mat2x4<T: f32_f16>() -> mat2x4<T>
@@ -739,9 +739,9 @@ fn textureLoad(texture: texture_external, coords: vec2<i32>) -> vec4<f32>
 @const("Identity") ctor f32(f32) -> f32
 @const("Identity") ctor f16(f16) -> f16
 @const("Identity") ctor bool(bool) -> bool
-@const("Identity") ctor vec2<T: scalar>(vec2<T>) -> vec2<T>
-@const("Identity") ctor vec3<T: scalar>(vec3<T>) -> vec3<T>
-@const("Identity") ctor vec4<T: scalar>(vec4<T>) -> vec4<T>
+@const("Identity") ctor vec2<T: concrete_scalar>(vec2<T>) -> vec2<T>
+@const("Identity") ctor vec3<T: concrete_scalar>(vec3<T>) -> vec3<T>
+@const("Identity") ctor vec4<T: concrete_scalar>(vec4<T>) -> vec4<T>
 @const("Identity") ctor mat2x2<T: f32_f16>(mat2x2<T>) -> mat2x2<T>
 @const("Identity") ctor mat2x3<T: f32_f16>(mat2x3<T>) -> mat2x3<T>
 @const("Identity") ctor mat2x4<T: f32_f16>(mat2x4<T>) -> mat2x4<T>
@@ -753,24 +753,24 @@ fn textureLoad(texture: texture_external, coords: vec2<i32>) -> vec4<f32>
 @const("Identity") ctor mat4x4<T: f32_f16>(mat4x4<T>) -> mat4x4<T>
 
 // Vector constructors (splat)
-@const("VecSplat") ctor vec2<T: abstract_or_scalar>(T) -> vec2<T>
-@const("VecSplat") ctor vec3<T: abstract_or_scalar>(T) -> vec3<T>
-@const("VecSplat") ctor vec4<T: abstract_or_scalar>(T) -> vec4<T>
+@const("VecSplat") ctor vec2<T: scalar>(T) -> vec2<T>
+@const("VecSplat") ctor vec3<T: scalar>(T) -> vec3<T>
+@const("VecSplat") ctor vec4<T: scalar>(T) -> vec4<T>
 
 // Vector constructors (scalar)
-@const("VecCtorS") ctor vec2<T: abstract_or_scalar>(x: T, y: T) -> vec2<T>
-@const("VecCtorS") ctor vec3<T: abstract_or_scalar>(x: T, y: T, z: T) -> vec3<T>
-@const("VecCtorS") ctor vec4<T: abstract_or_scalar>(x: T, y: T, z: T, w: T) -> vec4<T>
+@const("VecCtorS") ctor vec2<T: scalar>(x: T, y: T) -> vec2<T>
+@const("VecCtorS") ctor vec3<T: scalar>(x: T, y: T, z: T) -> vec3<T>
+@const("VecCtorS") ctor vec4<T: scalar>(x: T, y: T, z: T, w: T) -> vec4<T>
 
 // Vector constructors (mixed)
-@const("VecCtorM") ctor vec3<T: abstract_or_scalar>(xy: vec2<T>, z: T) -> vec3<T>
-@const("VecCtorM") ctor vec3<T: abstract_or_scalar>(x: T, yz: vec2<T>) -> vec3<T>
-@const("VecCtorM") ctor vec4<T: abstract_or_scalar>(xy: vec2<T>, z: T, w: T) -> vec4<T>
-@const("VecCtorM") ctor vec4<T: abstract_or_scalar>(x: T, yz: vec2<T>, w: T) -> vec4<T>
-@const("VecCtorM") ctor vec4<T: abstract_or_scalar>(x: T, y: T, zw: vec2<T>) -> vec4<T>
-@const("VecCtorM") ctor vec4<T: abstract_or_scalar>(xy: vec2<T>, zw: vec2<T>) -> vec4<T>
-@const("VecCtorM") ctor vec4<T: abstract_or_scalar>(xyz: vec3<T>, w: T) -> vec4<T>
-@const("VecCtorM") ctor vec4<T: abstract_or_scalar>(x: T, zyw: vec3<T>) -> vec4<T>
+@const("VecCtorM") ctor vec3<T: scalar>(xy: vec2<T>, z: T) -> vec3<T>
+@const("VecCtorM") ctor vec3<T: scalar>(x: T, yz: vec2<T>) -> vec3<T>
+@const("VecCtorM") ctor vec4<T: scalar>(xy: vec2<T>, z: T, w: T) -> vec4<T>
+@const("VecCtorM") ctor vec4<T: scalar>(x: T, yz: vec2<T>, w: T) -> vec4<T>
+@const("VecCtorM") ctor vec4<T: scalar>(x: T, y: T, zw: vec2<T>) -> vec4<T>
+@const("VecCtorM") ctor vec4<T: scalar>(xy: vec2<T>, zw: vec2<T>) -> vec4<T>
+@const("VecCtorM") ctor vec4<T: scalar>(xyz: vec3<T>, w: T) -> vec4<T>
+@const("VecCtorM") ctor vec4<T: scalar>(x: T, zyw: vec3<T>) -> vec4<T>
 
 // Matrix constructors (scalar)
 @const("MatCtorS")
@@ -952,11 +952,11 @@ op % <T: fiu32_f16, N: num> (T, vec<N, T>) -> vec<N, T>
 op && (bool, bool) -> bool
 op || (bool, bool) -> bool
 
-@const op == <T: abstract_or_scalar>(T, T) -> bool
-@const op == <T: abstract_or_scalar, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+@const op == <T: scalar>(T, T) -> bool
+@const op == <T: scalar, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
 
-@const op != <T: abstract_or_scalar>(T, T) -> bool
-@const op != <T: abstract_or_scalar, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
+@const op != <T: scalar>(T, T) -> bool
+@const op != <T: scalar, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
 
 @const op < <T: fia_fiu32_f16>(T, T) -> bool
 @const op < <T: fia_fiu32_f16, N: num> (vec<N, T>, vec<N, T>) -> vec<N, bool>
