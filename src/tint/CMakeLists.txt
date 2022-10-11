@@ -394,6 +394,8 @@ set(TINT_LIB_SRCS
   transform/builtin_polyfill.h
   transform/calculate_array_length.cc
   transform/calculate_array_length.h
+  transform/clamp_frag_depth.cc
+  transform/clamp_frag_depth.h
   transform/canonicalize_entry_point_io.cc
   transform/canonicalize_entry_point_io.h
   transform/combine_samplers.cc
@@ -1105,6 +1107,7 @@ if(TINT_BUILD_TESTS)
       transform/binding_remapper_test.cc
       transform/builtin_polyfill_test.cc
       transform/calculate_array_length_test.cc
+      transform/clamp_frag_depth_test.cc
       transform/canonicalize_entry_point_io_test.cc
       transform/combine_samplers_test.cc
       transform/decompose_memory_access_test.cc
