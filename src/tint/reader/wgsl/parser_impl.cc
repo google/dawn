@@ -1646,25 +1646,12 @@ Expect<ast::PipelineStage> ParserImpl::expect_pipeline_stage() {
 }
 
 // interpolation_sample_name
-//   :  'center'
+//   : 'center'
 //   | 'centroid'
 //   | 'sample'
 Expect<ast::InterpolationSampling> ParserImpl::expect_interpolation_sample_name() {
-    auto ident = expect_ident("interpolation sample name");
-    if (ident.errored) {
-        return Failure::kErrored;
-    }
-
-    if (ident.value == "center") {
-        return {ast::InterpolationSampling::kCenter, ident.source};
-    }
-    if (ident.value == "centroid") {
-        return {ast::InterpolationSampling::kCentroid, ident.source};
-    }
-    if (ident.value == "sample") {
-        return {ast::InterpolationSampling::kSample, ident.source};
-    }
-    return add_error(ident.source, "invalid interpolation sampling");
+    return expect_enum("interpolation sampling", ast::ParseInterpolationSampling,
+                       ast::kInterpolationSamplingStrings);
 }
 
 // interpolation_type_name
@@ -1672,22 +1659,8 @@ Expect<ast::InterpolationSampling> ParserImpl::expect_interpolation_sample_name(
 //   | 'linear'
 //   | 'flat'
 Expect<ast::InterpolationType> ParserImpl::expect_interpolation_type_name() {
-    auto ident = expect_ident("interpolation type name");
-    if (ident.errored) {
-        return Failure::kErrored;
-    }
-
-    if (ident.value == "perspective") {
-        return {ast::InterpolationType::kPerspective, ident.source};
-    }
-    if (ident.value == "linear") {
-        return {ast::InterpolationType::kLinear, ident.source};
-    }
-    if (ident.value == "flat") {
-        return {ast::InterpolationType::kFlat, ident.source};
-    }
-
-    return add_error(ident.source, "invalid interpolation type");
+    return expect_enum("interpolation type", ast::ParseInterpolationType,
+                       ast::kInterpolationTypeStrings);
 }
 
 // builtin_value_name

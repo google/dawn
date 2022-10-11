@@ -253,7 +253,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Single_DoubleTrailingComma) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:18: expected identifier for interpolation sample name");
+    EXPECT_EQ(p->error(), R"(1:18: expected interpolation sampling
+Possible values: 'center', 'centroid', 'sample')");
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_Perspective_Center) {
@@ -347,7 +348,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_MissingFirstValue) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:13: expected identifier for interpolation type name");
+    EXPECT_EQ(p->error(), R"(1:13: expected interpolation type
+Possible values: 'flat', 'linear', 'perspective')");
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_InvalidFirstValue) {
@@ -357,7 +359,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_InvalidFirstValue) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:13: invalid interpolation type");
+    EXPECT_EQ(p->error(), R"(1:13: expected interpolation type
+Possible values: 'flat', 'linear', 'perspective')");
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_InvalidSecondValue) {
@@ -367,7 +370,8 @@ TEST_F(ParserImplTest, Attribute_Interpolate_InvalidSecondValue) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:26: invalid interpolation sampling");
+    EXPECT_EQ(p->error(), R"(1:26: expected interpolation sampling. Did you mean 'sample'?
+Possible values: 'center', 'centroid', 'sample')");
 }
 
 TEST_F(ParserImplTest, Attribute_Binding) {
