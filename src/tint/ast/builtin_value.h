@@ -30,19 +30,19 @@ namespace tint::ast {
 /// Storage class of a given pointer.
 enum class BuiltinValue {
     kInvalid,
-    kPosition,
-    kVertexIndex,
-    kInstanceIndex,
-    kFrontFacing,
     kFragDepth,
+    kFrontFacing,
+    kGlobalInvocationId,
+    kInstanceIndex,
     kLocalInvocationId,
     kLocalInvocationIndex,
-    kGlobalInvocationId,
-    kWorkgroupId,
     kNumWorkgroups,
+    kPointSize,  // Tint-internal enum entry - not parsed
+    kPosition,
     kSampleIndex,
     kSampleMask,
-    kPointSize,  // Tint-internal enum entry - not parsed
+    kVertexIndex,
+    kWorkgroupId,
 };
 
 /// @param out the std::ostream to write to

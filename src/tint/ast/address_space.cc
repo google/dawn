@@ -34,17 +34,17 @@ AddressSpace ParseAddressSpace(std::string_view str) {
     if (str == "private") {
         return AddressSpace::kPrivate;
     }
-    if (str == "workgroup") {
-        return AddressSpace::kWorkgroup;
-    }
-    if (str == "uniform") {
-        return AddressSpace::kUniform;
+    if (str == "push_constant") {
+        return AddressSpace::kPushConstant;
     }
     if (str == "storage") {
         return AddressSpace::kStorage;
     }
-    if (str == "push_constant") {
-        return AddressSpace::kPushConstant;
+    if (str == "uniform") {
+        return AddressSpace::kUniform;
+    }
+    if (str == "workgroup") {
+        return AddressSpace::kWorkgroup;
     }
     return AddressSpace::kInvalid;
 }
@@ -53,26 +53,26 @@ std::ostream& operator<<(std::ostream& out, AddressSpace value) {
     switch (value) {
         case AddressSpace::kInvalid:
             return out << "invalid";
-        case AddressSpace::kNone:
-            return out << "none";
         case AddressSpace::kFunction:
             return out << "function";
-        case AddressSpace::kPrivate:
-            return out << "private";
-        case AddressSpace::kWorkgroup:
-            return out << "workgroup";
-        case AddressSpace::kUniform:
-            return out << "uniform";
-        case AddressSpace::kStorage:
-            return out << "storage";
-        case AddressSpace::kPushConstant:
-            return out << "push_constant";
         case AddressSpace::kHandle:
             return out << "handle";
         case AddressSpace::kIn:
             return out << "in";
+        case AddressSpace::kNone:
+            return out << "none";
         case AddressSpace::kOut:
             return out << "out";
+        case AddressSpace::kPrivate:
+            return out << "private";
+        case AddressSpace::kPushConstant:
+            return out << "push_constant";
+        case AddressSpace::kStorage:
+            return out << "storage";
+        case AddressSpace::kUniform:
+            return out << "uniform";
+        case AddressSpace::kWorkgroup:
+            return out << "workgroup";
     }
     return out << "<unknown>";
 }

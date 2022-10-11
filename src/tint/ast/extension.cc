@@ -28,17 +28,17 @@ namespace tint::ast {
 /// @param str the string to parse
 /// @returns the parsed enum, or Extension::kInvalid if the string could not be parsed.
 Extension ParseExtension(std::string_view str) {
-    if (str == "f16") {
-        return Extension::kF16;
+    if (str == "chromium_disable_uniformity_analysis") {
+        return Extension::kChromiumDisableUniformityAnalysis;
     }
     if (str == "chromium_experimental_dp4a") {
         return Extension::kChromiumExperimentalDp4A;
     }
-    if (str == "chromium_disable_uniformity_analysis") {
-        return Extension::kChromiumDisableUniformityAnalysis;
-    }
     if (str == "chromium_experimental_push_constant") {
         return Extension::kChromiumExperimentalPushConstant;
+    }
+    if (str == "f16") {
+        return Extension::kF16;
     }
     return Extension::kInvalid;
 }
@@ -47,14 +47,14 @@ std::ostream& operator<<(std::ostream& out, Extension value) {
     switch (value) {
         case Extension::kInvalid:
             return out << "invalid";
-        case Extension::kF16:
-            return out << "f16";
-        case Extension::kChromiumExperimentalDp4A:
-            return out << "chromium_experimental_dp4a";
         case Extension::kChromiumDisableUniformityAnalysis:
             return out << "chromium_disable_uniformity_analysis";
+        case Extension::kChromiumExperimentalDp4A:
+            return out << "chromium_experimental_dp4a";
         case Extension::kChromiumExperimentalPushConstant:
             return out << "chromium_experimental_push_constant";
+        case Extension::kF16:
+            return out << "f16";
     }
     return out << "<unknown>";
 }

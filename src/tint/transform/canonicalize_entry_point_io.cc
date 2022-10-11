@@ -45,6 +45,42 @@ struct MemberInfo {
     std::optional<uint32_t> location;
 };
 
+/// FXC is sensitive to field order in structures, this is used by StructMemberComparator to ensure
+/// that FXC is happy with the order of emitted fields.
+uint32_t BuiltinOrder(ast::BuiltinValue builtin) {
+    switch (builtin) {
+        case ast::BuiltinValue::kPosition:
+            return 1;
+        case ast::BuiltinValue::kVertexIndex:
+            return 2;
+        case ast::BuiltinValue::kInstanceIndex:
+            return 3;
+        case ast::BuiltinValue::kFrontFacing:
+            return 4;
+        case ast::BuiltinValue::kFragDepth:
+            return 5;
+        case ast::BuiltinValue::kLocalInvocationId:
+            return 6;
+        case ast::BuiltinValue::kLocalInvocationIndex:
+            return 7;
+        case ast::BuiltinValue::kGlobalInvocationId:
+            return 8;
+        case ast::BuiltinValue::kWorkgroupId:
+            return 9;
+        case ast::BuiltinValue::kNumWorkgroups:
+            return 10;
+        case ast::BuiltinValue::kSampleIndex:
+            return 11;
+        case ast::BuiltinValue::kSampleMask:
+            return 12;
+        case ast::BuiltinValue::kPointSize:
+            return 13;
+        default:
+            break;
+    }
+    return 0;
+}
+
 /// Comparison function used to reorder struct members such that all members with
 /// location attributes appear first (ordered by location slot), followed by
 /// those with builtin attributes.
@@ -68,8 +104,8 @@ bool StructMemberComparator(const MemberInfo& a, const MemberInfo& b) {
             // `b` has location attribute and `a` does not: `b` goes first.
             return false;
         }
-        // Both are builtins: order doesn't matter, just use enum value.
-        return a_blt->builtin < b_blt->builtin;
+        // Both are builtins: order matters for FXC.
+        return BuiltinOrder(a_blt->builtin) < BuiltinOrder(b_blt->builtin);
     }
 }
 

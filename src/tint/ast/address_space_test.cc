@@ -42,21 +42,24 @@ inline std::ostream& operator<<(std::ostream& out, Case c) {
 }
 
 static constexpr Case kValidCases[] = {
-    {"function", AddressSpace::kFunction},   {"private", AddressSpace::kPrivate},
-    {"workgroup", AddressSpace::kWorkgroup}, {"uniform", AddressSpace::kUniform},
-    {"storage", AddressSpace::kStorage},     {"push_constant", AddressSpace::kPushConstant},
+    {"function", AddressSpace::kFunction},
+    {"private", AddressSpace::kPrivate},
+    {"push_constant", AddressSpace::kPushConstant},
+    {"storage", AddressSpace::kStorage},
+    {"uniform", AddressSpace::kUniform},
+    {"workgroup", AddressSpace::kWorkgroup},
 };
 
 static constexpr Case kInvalidCases[] = {
-    {"fccnctin", AddressSpace::kInvalid},       {"ucti3", AddressSpace::kInvalid},
-    {"functVon", AddressSpace::kInvalid},       {"priv1te", AddressSpace::kInvalid},
-    {"pqiJate", AddressSpace::kInvalid},        {"privat7ll", AddressSpace::kInvalid},
-    {"workroppqHH", AddressSpace::kInvalid},    {"workru", AddressSpace::kInvalid},
-    {"wbkgGoup", AddressSpace::kInvalid},       {"unifiivm", AddressSpace::kInvalid},
-    {"8WWiform", AddressSpace::kInvalid},       {"uxxform", AddressSpace::kInvalid},
-    {"sXraggg", AddressSpace::kInvalid},        {"traXe", AddressSpace::kInvalid},
-    {"stor3ge", AddressSpace::kInvalid},        {"push_constanE", AddressSpace::kInvalid},
-    {"push_TTPnstant", AddressSpace::kInvalid}, {"puxxdh_constan", AddressSpace::kInvalid},
+    {"fccnctin", AddressSpace::kInvalid},        {"ucti3", AddressSpace::kInvalid},
+    {"functVon", AddressSpace::kInvalid},        {"priv1te", AddressSpace::kInvalid},
+    {"pqiJate", AddressSpace::kInvalid},         {"privat7ll", AddressSpace::kInvalid},
+    {"pqqsh_pponstHnt", AddressSpace::kInvalid}, {"pus_cnstat", AddressSpace::kInvalid},
+    {"bus_Gonstant", AddressSpace::kInvalid},    {"storiive", AddressSpace::kInvalid},
+    {"8WWorage", AddressSpace::kInvalid},        {"sxxrage", AddressSpace::kInvalid},
+    {"uXforgg", AddressSpace::kInvalid},         {"nfoXm", AddressSpace::kInvalid},
+    {"unif3rm", AddressSpace::kInvalid},         {"workgroEp", AddressSpace::kInvalid},
+    {"woTTPkroup", AddressSpace::kInvalid},      {"ddorkroxxp", AddressSpace::kInvalid},
 };
 
 using AddressSpaceParseTest = testing::TestWithParam<Case>;

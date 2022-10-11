@@ -30,16 +30,16 @@ namespace tint::ast {
 /// Address space of a given pointer.
 enum class AddressSpace {
     kInvalid,
-    kNone,  // Tint-internal enum entry - not parsed
     kFunction,
-    kPrivate,
-    kWorkgroup,
-    kUniform,
-    kStorage,
-    kPushConstant,
     kHandle,  // Tint-internal enum entry - not parsed
     kIn,      // Tint-internal enum entry - not parsed
+    kNone,    // Tint-internal enum entry - not parsed
     kOut,     // Tint-internal enum entry - not parsed
+    kPrivate,
+    kPushConstant,
+    kStorage,
+    kUniform,
+    kWorkgroup,
 };
 
 /// @param out the std::ostream to write to

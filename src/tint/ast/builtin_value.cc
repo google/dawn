@@ -28,20 +28,17 @@ namespace tint::ast {
 /// @param str the string to parse
 /// @returns the parsed enum, or BuiltinValue::kInvalid if the string could not be parsed.
 BuiltinValue ParseBuiltinValue(std::string_view str) {
-    if (str == "position") {
-        return BuiltinValue::kPosition;
-    }
-    if (str == "vertex_index") {
-        return BuiltinValue::kVertexIndex;
-    }
-    if (str == "instance_index") {
-        return BuiltinValue::kInstanceIndex;
+    if (str == "frag_depth") {
+        return BuiltinValue::kFragDepth;
     }
     if (str == "front_facing") {
         return BuiltinValue::kFrontFacing;
     }
-    if (str == "frag_depth") {
-        return BuiltinValue::kFragDepth;
+    if (str == "global_invocation_id") {
+        return BuiltinValue::kGlobalInvocationId;
+    }
+    if (str == "instance_index") {
+        return BuiltinValue::kInstanceIndex;
     }
     if (str == "local_invocation_id") {
         return BuiltinValue::kLocalInvocationId;
@@ -49,20 +46,23 @@ BuiltinValue ParseBuiltinValue(std::string_view str) {
     if (str == "local_invocation_index") {
         return BuiltinValue::kLocalInvocationIndex;
     }
-    if (str == "global_invocation_id") {
-        return BuiltinValue::kGlobalInvocationId;
-    }
-    if (str == "workgroup_id") {
-        return BuiltinValue::kWorkgroupId;
-    }
     if (str == "num_workgroups") {
         return BuiltinValue::kNumWorkgroups;
+    }
+    if (str == "position") {
+        return BuiltinValue::kPosition;
     }
     if (str == "sample_index") {
         return BuiltinValue::kSampleIndex;
     }
     if (str == "sample_mask") {
         return BuiltinValue::kSampleMask;
+    }
+    if (str == "vertex_index") {
+        return BuiltinValue::kVertexIndex;
+    }
+    if (str == "workgroup_id") {
+        return BuiltinValue::kWorkgroupId;
     }
     return BuiltinValue::kInvalid;
 }
@@ -71,32 +71,32 @@ std::ostream& operator<<(std::ostream& out, BuiltinValue value) {
     switch (value) {
         case BuiltinValue::kInvalid:
             return out << "invalid";
-        case BuiltinValue::kPosition:
-            return out << "position";
-        case BuiltinValue::kVertexIndex:
-            return out << "vertex_index";
-        case BuiltinValue::kInstanceIndex:
-            return out << "instance_index";
-        case BuiltinValue::kFrontFacing:
-            return out << "front_facing";
         case BuiltinValue::kFragDepth:
             return out << "frag_depth";
+        case BuiltinValue::kFrontFacing:
+            return out << "front_facing";
+        case BuiltinValue::kGlobalInvocationId:
+            return out << "global_invocation_id";
+        case BuiltinValue::kInstanceIndex:
+            return out << "instance_index";
         case BuiltinValue::kLocalInvocationId:
             return out << "local_invocation_id";
         case BuiltinValue::kLocalInvocationIndex:
             return out << "local_invocation_index";
-        case BuiltinValue::kGlobalInvocationId:
-            return out << "global_invocation_id";
-        case BuiltinValue::kWorkgroupId:
-            return out << "workgroup_id";
         case BuiltinValue::kNumWorkgroups:
             return out << "num_workgroups";
+        case BuiltinValue::kPointSize:
+            return out << "point_size";
+        case BuiltinValue::kPosition:
+            return out << "position";
         case BuiltinValue::kSampleIndex:
             return out << "sample_index";
         case BuiltinValue::kSampleMask:
             return out << "sample_mask";
-        case BuiltinValue::kPointSize:
-            return out << "point_size";
+        case BuiltinValue::kVertexIndex:
+            return out << "vertex_index";
+        case BuiltinValue::kWorkgroupId:
+            return out << "workgroup_id";
     }
     return out << "<unknown>";
 }

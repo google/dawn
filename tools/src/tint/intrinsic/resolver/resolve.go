@@ -148,6 +148,9 @@ func (r *resolver) enum(e ast.EnumDecl) error {
 		names.Add(ast.Name)
 	}
 
+	// Sort the enum entries into lexicographic order
+	sort.Slice(s.Entries, func(i, j int) bool { return s.Entries[i].Name < s.Entries[j].Name })
+
 	return nil
 }
 

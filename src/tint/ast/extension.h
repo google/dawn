@@ -33,10 +33,10 @@ namespace tint::ast {
 /// @see src/tint/intrinsics.def for extension descriptions
 enum class Extension {
     kInvalid,
-    kF16,
-    kChromiumExperimentalDp4A,
     kChromiumDisableUniformityAnalysis,
+    kChromiumExperimentalDp4A,
     kChromiumExperimentalPushConstant,
+    kF16,
 };
 
 /// @param out the std::ostream to write to
