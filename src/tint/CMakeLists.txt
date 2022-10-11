@@ -486,6 +486,7 @@ set(TINT_LIB_SRCS
   utils/map.h
   utils/math.h
   utils/scoped_assignment.h
+  utils/string.cc
   utils/string.h
   utils/unique_allocator.h
   utils/unique_vector.h

@@ -44,6 +44,11 @@ std::string ToString(const T& value) {
     return s.str();
 }
 
+/// @param a the first string
+/// @param b the second string
+/// @returns the Levenshtein distance between @p a and @p b
+size_t Distance(const std::string& a, const std::string& b);
+
 }  // namespace tint::utils
 
 #endif  // SRC_TINT_UTILS_STRING_H_
