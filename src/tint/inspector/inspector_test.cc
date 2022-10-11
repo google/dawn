@@ -852,6 +852,7 @@ TEST_F(InspectorGetEntryPointTest, BuiltinNotReferenced) {
     EXPECT_FALSE(result[0].front_facing_used);
     EXPECT_FALSE(result[0].sample_index_used);
     EXPECT_FALSE(result[0].num_workgroups_used);
+    EXPECT_FALSE(result[0].frag_depth_used);
 }
 
 TEST_F(InspectorGetEntryPointTest, InputSampleMaskSimpleReferenced) {
@@ -1132,6 +1133,49 @@ TEST_F(InspectorGetEntryPointTest, NumWorkgroupsStructReferenced) {
 
     ASSERT_EQ(1u, result.size());
     EXPECT_TRUE(result[0].num_workgroups_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, FragDepthSimpleReferenced) {
+    Func("ep_func", {}, ty.f32(),
+         utils::Vector{
+             Return(Expr(0_f)),
+         },
+         utils::Vector{
+             Stage(ast::PipelineStage::kFragment),
+         },
+         utils::Vector{
+             Builtin(ast::BuiltinValue::kFragDepth),
+         });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].frag_depth_used);
+}
+
+TEST_F(InspectorGetEntryPointTest, FragDepthStructReferenced) {
+    Structure("out_struct", utils::Vector{
+                                Member("inner_frag_depth", ty.f32(),
+                                       utils::Vector{Builtin(ast::BuiltinValue::kFragDepth)}),
+                            });
+
+    Func("ep_func", utils::Empty, ty.type_name("out_struct"),
+         utils::Vector{
+             Decl(Var("out_var", ty.type_name("out_struct"))),
+             Return("out_var"),
+         },
+         utils::Vector{
+             Stage(ast::PipelineStage::kFragment),
+         });
+
+    Inspector& inspector = Build();
+
+    auto result = inspector.GetEntryPoints();
+
+    ASSERT_EQ(1u, result.size());
+    EXPECT_TRUE(result[0].frag_depth_used);
 }
 
 TEST_F(InspectorGetEntryPointTest, ImplicitInterpolate) {

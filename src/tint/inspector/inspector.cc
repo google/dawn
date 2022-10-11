@@ -192,6 +192,8 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
 
         entry_point.output_sample_mask_used = ContainsBuiltin(
             ast::BuiltinValue::kSampleMask, sem->ReturnType(), func->return_type_attributes);
+        entry_point.frag_depth_used = ContainsBuiltin(
+            ast::BuiltinValue::kFragDepth, sem->ReturnType(), func->return_type_attributes);
     }
 
     for (auto* var : sem->TransitivelyReferencedGlobals()) {

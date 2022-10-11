@@ -175,6 +175,8 @@ struct EntryPoint {
     bool sample_index_used = false;
     /// Does the entry point use the num_workgroups builtin
     bool num_workgroups_used = false;
+    /// Does the entry point use the frag_depth builtin
+    bool frag_depth_used = false;
 };
 
 }  // namespace tint::inspector
