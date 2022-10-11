@@ -917,12 +917,7 @@ Maybe<const ast::Type*> ParserImpl::depth_texture_type() {
 //  | 'rgba32sint'
 //  | 'rgba32float'
 Expect<ast::TexelFormat> ParserImpl::expect_texel_format(std::string_view use) {
-    auto& t = next();
-    auto fmt = ast::ParseTexelFormat(t.to_str());
-    if (fmt == ast::TexelFormat::kInvalid) {
-        return add_error(t.source(), "invalid format", use);
-    }
-    return fmt;
+    return expect_enum("texel format", ast::ParseTexelFormat, ast::kTexelFormatStrings, use);
 }
 
 Expect<ParserImpl::TypedIdentifier> ParserImpl::expect_ident_with_optional_type_specifier(

@@ -218,7 +218,18 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidType) {
     EXPECT_EQ(t.value, nullptr);
     EXPECT_FALSE(t.matched);
     EXPECT_TRUE(t.errored);
-    EXPECT_EQ(p->error(), "1:20: invalid format for storage texture type");
+    EXPECT_EQ(p->error(), R"(1:20: expected texel format for storage texture type
+Possible values: 'r32float', 'r32sint', 'r32uint', 'rg32float', 'rg32sint', 'rg32uint', 'rgba16float', 'rgba16sint', 'rgba16uint', 'rgba32float', 'rgba32sint', 'rgba32uint', 'rgba8sint', 'rgba8snorm', 'rgba8uint', 'rgba8unorm')");
+}
+
+TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidTypeSuggest) {
+    auto p = parser("texture_storage_1d<rg32_float, read>");
+    auto t = p->texture_and_sampler_types();
+    EXPECT_EQ(t.value, nullptr);
+    EXPECT_FALSE(t.matched);
+    EXPECT_TRUE(t.errored);
+    EXPECT_EQ(p->error(), R"(1:20: expected texel format for storage texture type. Did you mean 'rg32float'?
+Possible values: 'r32float', 'r32sint', 'r32uint', 'rg32float', 'rg32sint', 'rg32uint', 'rgba16float', 'rgba16sint', 'rgba16uint', 'rgba32float', 'rgba32sint', 'rgba32uint', 'rgba8sint', 'rgba8snorm', 'rgba8uint', 'rgba8unorm')");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidAccess) {
@@ -236,7 +247,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingType) {
     EXPECT_EQ(t.value, nullptr);
     EXPECT_FALSE(t.matched);
     EXPECT_TRUE(t.errored);
-    EXPECT_EQ(p->error(), "1:20: invalid format for storage texture type");
+    EXPECT_EQ(p->error(), R"(1:20: expected texel format for storage texture type
+Possible values: 'r32float', 'r32sint', 'r32uint', 'rg32float', 'rg32sint', 'rg32uint', 'rgba16float', 'rgba16sint', 'rgba16uint', 'rgba32float', 'rgba32sint', 'rgba32uint', 'rgba8sint', 'rgba8snorm', 'rgba8uint', 'rgba8unorm')");
 }
 
 TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_MissingLessThan) {

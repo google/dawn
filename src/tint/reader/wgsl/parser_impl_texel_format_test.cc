@@ -17,15 +17,16 @@
 namespace tint::reader::wgsl {
 namespace {
 
-TEST_F(ParserImplTest, ImageStorageType_Invalid) {
+TEST_F(ParserImplTest, TexelFormat_Invalid) {
     auto p = parser("1234");
     auto t = p->expect_texel_format("test");
     EXPECT_TRUE(t.errored);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:1: invalid format for test");
+    EXPECT_EQ(p->error(), R"(1:1: expected texel format for test
+Possible values: 'r32float', 'r32sint', 'r32uint', 'rg32float', 'rg32sint', 'rg32uint', 'rgba16float', 'rgba16sint', 'rgba16uint', 'rgba32float', 'rgba32sint', 'rgba32uint', 'rgba8sint', 'rgba8snorm', 'rgba8uint', 'rgba8unorm')");
 }
 
-TEST_F(ParserImplTest, ImageStorageType_R32Uint) {
+TEST_F(ParserImplTest, TexelFormat_R32Uint) {
     auto p = parser("r32uint");
     auto t = p->expect_texel_format("test");
     EXPECT_FALSE(t.errored);
@@ -33,7 +34,7 @@ TEST_F(ParserImplTest, ImageStorageType_R32Uint) {
     EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, ImageStorageType_R32Sint) {
+TEST_F(ParserImplTest, TexelFormat_R32Sint) {
     auto p = parser("r32sint");
     auto t = p->expect_texel_format("test");
     EXPECT_FALSE(t.errored);
@@ -41,7 +42,7 @@ TEST_F(ParserImplTest, ImageStorageType_R32Sint) {
     EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, ImageStorageType_R32Float) {
+TEST_F(ParserImplTest, TexelFormat_R32Float) {
     auto p = parser("r32float");
     auto t = p->expect_texel_format("test");
     EXPECT_FALSE(t.errored);
@@ -49,7 +50,7 @@ TEST_F(ParserImplTest, ImageStorageType_R32Float) {
     EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, ImageStorageType_Rgba8Unorm) {
+TEST_F(ParserImplTest, TexelFormat_Rgba8Unorm) {
     auto p = parser("rgba8unorm");
     auto t = p->expect_texel_format("test");
     EXPECT_FALSE(t.errored);
@@ -57,7 +58,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba8Unorm) {
     EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, ImageStorageType_Rgba8Snorm) {
+TEST_F(ParserImplTest, TexelFormat_Rgba8Snorm) {
     auto p = parser("rgba8snorm");
     auto t = p->expect_texel_format("test");
     EXPECT_FALSE(t.errored);
@@ -65,7 +66,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba8Snorm) {
     EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, ImageStorageType_Rgba8Uint) {
+TEST_F(ParserImplTest, TexelFormat_Rgba8Uint) {
     auto p = parser("rgba8uint");
     auto t = p->expect_texel_format("test");
     EXPECT_FALSE(t.errored);
@@ -73,7 +74,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba8Uint) {
     EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, ImageStorageType_Rgba8Sint) {
+TEST_F(ParserImplTest, TexelFormat_Rgba8Sint) {
     auto p = parser("rgba8sint");
     auto t = p->expect_texel_format("test");
     EXPECT_FALSE(t.errored);
@@ -81,7 +82,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba8Sint) {
     EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, ImageStorageType_Rg32Uint) {
+TEST_F(ParserImplTest, TexelFormat_Rg32Uint) {
     auto p = parser("rg32uint");
     auto t = p->expect_texel_format("test");
     EXPECT_FALSE(t.errored);
@@ -89,7 +90,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rg32Uint) {
     EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, ImageStorageType_Rg32Sint) {
+TEST_F(ParserImplTest, TexelFormat_Rg32Sint) {
     auto p = parser("rg32sint");
     auto t = p->expect_texel_format("test");
     EXPECT_FALSE(t.errored);
@@ -97,7 +98,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rg32Sint) {
     EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, ImageStorageType_Rg32Float) {
+TEST_F(ParserImplTest, TexelFormat_Rg32Float) {
     auto p = parser("rg32float");
     auto t = p->expect_texel_format("test");
     EXPECT_FALSE(t.errored);
@@ -105,7 +106,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rg32Float) {
     EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, ImageStorageType_Rgba16Uint) {
+TEST_F(ParserImplTest, TexelFormat_Rgba16Uint) {
     auto p = parser("rgba16uint");
     auto t = p->expect_texel_format("test");
     EXPECT_FALSE(t.errored);
@@ -113,7 +114,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba16Uint) {
     EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, ImageStorageType_Rgba16Sint) {
+TEST_F(ParserImplTest, TexelFormat_Rgba16Sint) {
     auto p = parser("rgba16sint");
     auto t = p->expect_texel_format("test");
     EXPECT_FALSE(t.errored);
@@ -121,7 +122,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba16Sint) {
     EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, ImageStorageType_Rgba16Float) {
+TEST_F(ParserImplTest, TexelFormat_Rgba16Float) {
     auto p = parser("rgba16float");
     auto t = p->expect_texel_format("test");
     EXPECT_FALSE(t.errored);
@@ -129,7 +130,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba16Float) {
     EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, ImageStorageType_Rgba32Uint) {
+TEST_F(ParserImplTest, TexelFormat_Rgba32Uint) {
     auto p = parser("rgba32uint");
     auto t = p->expect_texel_format("test");
     EXPECT_FALSE(t.errored);
@@ -137,7 +138,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba32Uint) {
     EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, ImageStorageType_Rgba32Sint) {
+TEST_F(ParserImplTest, TexelFormat_Rgba32Sint) {
     auto p = parser("rgba32sint");
     auto t = p->expect_texel_format("test");
     EXPECT_FALSE(t.errored);
@@ -145,7 +146,7 @@ TEST_F(ParserImplTest, ImageStorageType_Rgba32Sint) {
     EXPECT_FALSE(p->has_error());
 }
 
-TEST_F(ParserImplTest, ImageStorageType_Rgba32Float) {
+TEST_F(ParserImplTest, TexelFormat_Rgba32Float) {
     auto p = parser("rgba32float");
     auto t = p->expect_texel_format("test");
     EXPECT_FALSE(t.errored);
