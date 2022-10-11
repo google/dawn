@@ -371,40 +371,36 @@ Maybe<Void> ParserImpl::enable_directive() {
         }
 
         // Match the extension name.
-        Expect<std::string> name = {""};
         auto& t = peek();
-        if (t.IsIdentifier()) {
-            synchronized_ = true;
-            next();
-            name = {t.to_str(), t.source()};
-        } else if (t.Is(Token::Type::kF16)) {
-            // `f16` is a valid extension name and also a keyword
-            synchronized_ = true;
-            next();
-            name = {"f16", t.source()};
-        } else if (t.Is(Token::Type::kParenLeft)) {
+        if (handle_error(t)) {
+            // The token might itself be an error.
+            return Failure::kErrored;
+        }
+
+        if (t.Is(Token::Type::kParenLeft)) {
             // A common error case is writing `enable(foo);` instead of `enable foo;`.
             synchronized_ = false;
             return add_error(t.source(), "enable directives don't take parenthesis");
-        } else if (handle_error(t)) {
-            // The token might itself be an error.
-            return Failure::kErrored;
+        }
+
+        auto extension = ast::Extension::kInvalid;
+        if (t.Is(Token::Type::kF16)) {
+            // `f16` is a valid extension name and also a keyword
+            synchronized_ = true;
+            next();
+            extension = ast::Extension::kF16;
         } else {
-            // Failed to match an extension name.
-            synchronized_ = false;
-            return add_error(t.source(), "invalid extension name");
+            auto ext = expect_enum("extension", ast::ParseExtension, ast::kExtensionStrings);
+            if (ext.errored) {
+                return Failure::kErrored;
+            }
+            extension = ext.value;
         }
 
         if (!expect("enable directive", Token::Type::kSemicolon)) {
             return Failure::kErrored;
         }
-
-        auto extension = ast::ParseExtension(name.value);
-        if (extension == ast::Extension::kInvalid) {
-            return add_error(name.source, "unsupported extension: '" + name.value + "'");
-        }
-        builder_.AST().AddEnable(create<ast::Enable>(name.source, extension));
-
+        builder_.AST().AddEnable(create<ast::Enable>(t.source(), extension));
         return kSuccess;
     });
 

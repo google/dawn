@@ -61,7 +61,21 @@ TEST_F(EnableDirectiveTest, InvalidIdentifier) {
     p->enable_directive();
     // Error when unknown extension found
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:8: unsupported extension: 'NotAValidExtensionName'");
+    EXPECT_EQ(p->error(), R"(1:8: expected extension
+Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_dp4a', 'chromium_experimental_push_constant', 'f16')");
+    auto program = p->program();
+    auto& ast = program.AST();
+    EXPECT_EQ(ast.Enables().Length(), 0u);
+    EXPECT_EQ(ast.GlobalDeclarations().Length(), 0u);
+}
+
+TEST_F(EnableDirectiveTest, InvalidIdentifierSuggest) {
+    auto p = parser("enable f15;");
+    p->enable_directive();
+    // Error when unknown extension found
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(p->error(), R"(1:8: expected extension. Did you mean 'f16'?
+Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_dp4a', 'chromium_experimental_push_constant', 'f16')");
     auto program = p->program();
     auto& ast = program.AST();
     EXPECT_EQ(ast.Enables().Length(), 0u);
@@ -108,7 +122,8 @@ TEST_F(EnableDirectiveTest, InvalidTokens) {
         auto p = parser("enable <f16;");
         p->translation_unit();
         EXPECT_TRUE(p->has_error());
-        EXPECT_EQ(p->error(), "1:8: invalid extension name");
+        EXPECT_EQ(p->error(), R"(1:8: expected extension
+Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_dp4a', 'chromium_experimental_push_constant', 'f16')");
         auto program = p->program();
         auto& ast = program.AST();
         EXPECT_EQ(ast.Enables().Length(), 0u);
@@ -118,7 +133,8 @@ TEST_F(EnableDirectiveTest, InvalidTokens) {
         auto p = parser("enable =;");
         p->translation_unit();
         EXPECT_TRUE(p->has_error());
-        EXPECT_EQ(p->error(), "1:8: invalid extension name");
+        EXPECT_EQ(p->error(), R"(1:8: expected extension
+Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_dp4a', 'chromium_experimental_push_constant', 'f16')");
         auto program = p->program();
         auto& ast = program.AST();
         EXPECT_EQ(ast.Enables().Length(), 0u);
@@ -128,7 +144,8 @@ TEST_F(EnableDirectiveTest, InvalidTokens) {
         auto p = parser("enable vec4;");
         p->translation_unit();
         EXPECT_TRUE(p->has_error());
-        EXPECT_EQ(p->error(), "1:8: invalid extension name");
+        EXPECT_EQ(p->error(), R"(1:8: expected extension
+Possible values: 'chromium_disable_uniformity_analysis', 'chromium_experimental_dp4a', 'chromium_experimental_push_constant', 'f16')");
         auto program = p->program();
         auto& ast = program.AST();
         EXPECT_EQ(ast.Enables().Length(), 0u);
