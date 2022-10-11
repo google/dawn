@@ -55,7 +55,7 @@ class IfStatement final : public Castable<IfStatement, Statement> {
     const BlockStatement* const body;
 
     /// The optional else statement, or nullptr
-    const Statement* else_statement;
+    const Statement* const else_statement;
 };
 
 }  // namespace tint::ast
