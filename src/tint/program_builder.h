@@ -478,11 +478,6 @@ class ProgramBuilder {
     /// returned`Type` will also be destructed.
     /// Types are unique (de-aliased), and so calling create() for the same `T`
     /// and arguments will return the same pointer.
-    /// @warning Use this method to acquire a type only if all of its type
-    /// information is provided in the constructor arguments `args`.<br>
-    /// If the type requires additional configuration after construction that
-    /// affect its fundamental type, build the type with `std::make_unique`, make
-    /// any necessary alterations and then call unique_type() instead.
     /// @param args the arguments to pass to the type constructor
     /// @returns the de-aliased type pointer
     template <typename T, typename... ARGS>
