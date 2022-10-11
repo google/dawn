@@ -52,6 +52,10 @@ std::ostream& operator<<(std::ostream& out, AddressSpace value);
 /// @returns the parsed enum, or AddressSpace::kInvalid if the string could not be parsed.
 AddressSpace ParseAddressSpace(std::string_view str);
 
+constexpr const char* kAddressSpaceStrings[] = {
+    "function", "private", "push_constant", "storage", "uniform", "workgroup",
+};
+
 /// @returns true if the AddressSpace is host-shareable
 /// @param address_space the AddressSpace
 /// @see https://gpuweb.github.io/gpuweb/wgsl.html#host-shareable

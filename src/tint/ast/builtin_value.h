@@ -55,6 +55,15 @@ std::ostream& operator<<(std::ostream& out, BuiltinValue value);
 /// @returns the parsed enum, or BuiltinValue::kInvalid if the string could not be parsed.
 BuiltinValue ParseBuiltinValue(std::string_view str);
 
+constexpr const char* kBuiltinValueStrings[] = {
+    "frag_depth",           "front_facing",
+    "global_invocation_id", "instance_index",
+    "local_invocation_id",  "local_invocation_index",
+    "num_workgroups",       "position",
+    "sample_index",         "sample_mask",
+    "vertex_index",         "workgroup_id",
+};
+
 }  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_BUILTIN_VALUE_H_

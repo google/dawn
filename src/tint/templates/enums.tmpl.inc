@@ -28,6 +28,14 @@ std::ostream& operator<<(std::ostream& out, {{$enum}} value);
 /// @returns the parsed enum, or {{$enum}}::kInvalid if the string could not be parsed.
 {{$enum}} Parse{{$enum}}(std::string_view str);
 
+constexpr const char* k{{$enum}}Strings[] = {
+{{-   range $entry := $.Entries }}
+{{-     if not $entry.IsInternal}}
+    "{{$entry.Name}}",
+{{-     end }}
+{{-   end }}
+};
+
 {{- end -}}
 
 

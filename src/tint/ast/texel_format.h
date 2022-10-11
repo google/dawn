@@ -58,6 +58,12 @@ std::ostream& operator<<(std::ostream& out, TexelFormat value);
 /// @returns the parsed enum, or TexelFormat::kInvalid if the string could not be parsed.
 TexelFormat ParseTexelFormat(std::string_view str);
 
+constexpr const char* kTexelFormatStrings[] = {
+    "r32float",    "r32sint",    "r32uint",    "rg32float",   "rg32sint",   "rg32uint",
+    "rgba16float", "rgba16sint", "rgba16uint", "rgba32float", "rgba32sint", "rgba32uint",
+    "rgba8sint",   "rgba8snorm", "rgba8uint",  "rgba8unorm",
+};
+
 }  // namespace tint::ast
 
 #endif  // SRC_TINT_AST_TEXEL_FORMAT_H_

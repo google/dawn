@@ -49,6 +49,13 @@ std::ostream& operator<<(std::ostream& out, Extension value);
 /// @returns the parsed enum, or Extension::kInvalid if the string could not be parsed.
 Extension ParseExtension(std::string_view str);
 
+constexpr const char* kExtensionStrings[] = {
+    "chromium_disable_uniformity_analysis",
+    "chromium_experimental_dp4a",
+    "chromium_experimental_push_constant",
+    "f16",
+};
+
 // A unique vector of extensions
 using Extensions = utils::UniqueVector<Extension, 4>;
 
