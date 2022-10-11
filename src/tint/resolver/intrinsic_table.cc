@@ -1643,7 +1643,13 @@ void Impl::PrintOverload(std::ostream& ss,
 
     auto earliest_eval_stage = sem::EvaluationStage::kConstant;
 
-    ss << intrinsic_name << "(";
+    ss << intrinsic_name;
+    if (overload->flags.Contains(OverloadFlag::kIsConverter) && overload->template_types) {
+        ss << "<";
+        ss << overload->template_types[0].name;
+        ss << ">";
+    }
+    ss << "(";
     for (size_t p = 0; p < overload->num_parameters; p++) {
         auto& parameter = overload->parameters[p];
         if (p > 0) {
