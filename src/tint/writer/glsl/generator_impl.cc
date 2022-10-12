@@ -509,20 +509,20 @@ bool GeneratorImpl::EmitFloatModulo(std::ostream& out, const ast::BinaryExpressi
                                 {
                                     auto decl = line(&b);
                                     if (!EmitTypeAndName(decl, ret_ty, ast::AddressSpace::kNone,
-                                                         ast::Access::kUndefined, fn_name)) {
+                                                         ast::Access::kInvalid, fn_name)) {
                                         return "";
                                     }
                                     {
                                         ScopedParen sp(decl);
                                         const auto* ty = TypeOf(expr->lhs)->UnwrapRef();
                                         if (!EmitTypeAndName(decl, ty, ast::AddressSpace::kNone,
-                                                             ast::Access::kUndefined, "lhs")) {
+                                                             ast::Access::kInvalid, "lhs")) {
                                             return "";
                                         }
                                         decl << ", ";
                                         ty = TypeOf(expr->rhs)->UnwrapRef();
                                         if (!EmitTypeAndName(decl, ty, ast::AddressSpace::kNone,
-                                                             ast::Access::kUndefined, "rhs")) {
+                                                             ast::Access::kInvalid, "rhs")) {
                                             return "";
                                         }
                                     }
@@ -935,7 +935,7 @@ bool GeneratorImpl::EmitWorkgroupAtomicCall(std::ostream& out,
             {
                 auto pre = line();
                 if (!EmitTypeAndName(pre, builtin->ReturnType(), ast::AddressSpace::kNone,
-                                     ast::Access::kUndefined, result)) {
+                                     ast::Access::kInvalid, result)) {
                     return false;
                 }
                 pre << ";";
@@ -1213,7 +1213,7 @@ bool GeneratorImpl::EmitModfCall(std::ostream& out,
             {
                 auto l = line(b);
                 if (!EmitType(l, builtin->ReturnType(), ast::AddressSpace::kNone,
-                              ast::Access::kUndefined, "")) {
+                              ast::Access::kInvalid, "")) {
                     return false;
                 }
                 l << " result;";
@@ -1239,7 +1239,7 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
             {
                 auto l = line(b);
                 if (!EmitType(l, builtin->ReturnType(), ast::AddressSpace::kNone,
-                              ast::Access::kUndefined, "")) {
+                              ast::Access::kInvalid, "")) {
                     return false;
                 }
                 l << " result;";
@@ -2198,7 +2198,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
             return true;
         },
         [&](const sem::Vector* v) {
-            if (!EmitType(out, v, ast::AddressSpace::kNone, ast::Access::kUndefined, "")) {
+            if (!EmitType(out, v, ast::AddressSpace::kNone, ast::Access::kInvalid, "")) {
                 return false;
             }
 
@@ -2219,7 +2219,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
             return true;
         },
         [&](const sem::Matrix* m) {
-            if (!EmitType(out, m, ast::AddressSpace::kNone, ast::Access::kUndefined, "")) {
+            if (!EmitType(out, m, ast::AddressSpace::kNone, ast::Access::kInvalid, "")) {
                 return false;
             }
 
@@ -2236,7 +2236,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
             return true;
         },
         [&](const sem::Array* a) {
-            if (!EmitType(out, a, ast::AddressSpace::kNone, ast::Access::kUndefined, "")) {
+            if (!EmitType(out, a, ast::AddressSpace::kNone, ast::Access::kInvalid, "")) {
                 return false;
             }
 
@@ -2260,7 +2260,7 @@ bool GeneratorImpl::EmitConstant(std::ostream& out, const sem::Constant* constan
             return true;
         },
         [&](const sem::Struct* s) {
-            if (!EmitType(out, s, ast::AddressSpace::kNone, ast::Access::kUndefined, "")) {
+            if (!EmitType(out, s, ast::AddressSpace::kNone, ast::Access::kInvalid, "")) {
                 return false;
             }
 
@@ -2351,7 +2351,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
             }
         }
     } else if (auto* str = type->As<sem::Struct>()) {
-        if (!EmitType(out, type, ast::AddressSpace::kNone, ast::Access::kUndefined, "")) {
+        if (!EmitType(out, type, ast::AddressSpace::kNone, ast::Access::kInvalid, "")) {
             return false;
         }
         bool first = true;
@@ -2365,7 +2365,7 @@ bool GeneratorImpl::EmitZeroValue(std::ostream& out, const sem::Type* type) {
             EmitZeroValue(out, member->Type());
         }
     } else if (auto* arr = type->As<sem::Array>()) {
-        if (!EmitType(out, type, ast::AddressSpace::kNone, ast::Access::kUndefined, "")) {
+        if (!EmitType(out, type, ast::AddressSpace::kNone, ast::Access::kInvalid, "")) {
             return false;
         }
         ScopedParen sp(out);
@@ -2972,7 +2972,7 @@ bool GeneratorImpl::EmitLet(const ast::Let* let) {
 
     auto out = line();
     // TODO(senorblanco): handle const
-    if (!EmitTypeAndName(out, type, ast::AddressSpace::kNone, ast::Access::kUndefined,
+    if (!EmitTypeAndName(out, type, ast::AddressSpace::kNone, ast::Access::kInvalid,
                          builder_.Symbols().NameFor(let->symbol))) {
         return false;
     }
@@ -2994,7 +2994,7 @@ bool GeneratorImpl::EmitProgramConstVariable(const ast::Variable* var) {
 
     auto out = line();
     out << "const ";
-    if (!EmitTypeAndName(out, type, ast::AddressSpace::kNone, ast::Access::kUndefined,
+    if (!EmitTypeAndName(out, type, ast::AddressSpace::kNone, ast::Access::kInvalid,
                          builder_.Symbols().NameFor(var->symbol))) {
         return false;
     }
@@ -3022,7 +3022,7 @@ bool GeneratorImpl::CallBuiltinHelper(std::ostream& out,
         {
             auto decl = line(&b);
             if (!EmitTypeAndName(decl, builtin->ReturnType(), ast::AddressSpace::kNone,
-                                 ast::Access::kUndefined, fn_name)) {
+                                 ast::Access::kInvalid, fn_name)) {
                 return "";
             }
             {
@@ -3037,8 +3037,8 @@ bool GeneratorImpl::CallBuiltinHelper(std::ostream& out,
                         decl << "inout ";
                         ty = ptr->StoreType();
                     }
-                    if (!EmitTypeAndName(decl, ty, ast::AddressSpace::kNone,
-                                         ast::Access::kUndefined, param_name)) {
+                    if (!EmitTypeAndName(decl, ty, ast::AddressSpace::kNone, ast::Access::kInvalid,
+                                         param_name)) {
                         return "";
                     }
                     parameter_names.emplace_back(std::move(param_name));

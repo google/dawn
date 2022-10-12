@@ -121,7 +121,7 @@ void BindingRemapper::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) co
             auto ac_it = remappings->access_controls.find(from);
             if (ac_it != remappings->access_controls.end()) {
                 ast::Access ac = ac_it->second;
-                if (ac > ast::Access::kLastValid) {
+                if (ac == ast::Access::kInvalid) {
                     ctx.dst->Diagnostics().add_error(
                         diag::System::Transform,
                         "invalid access mode (" + std::to_string(static_cast<uint32_t>(ac)) + ")");

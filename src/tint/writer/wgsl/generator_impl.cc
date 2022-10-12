@@ -433,7 +433,7 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
             if (!EmitType(out, ptr->type)) {
                 return false;
             }
-            if (ptr->access != ast::Access::kUndefined) {
+            if (ptr->access != ast::Access::kInvalid) {
                 out << ", ";
                 if (!EmitAccess(out, ptr->access)) {
                     return false;
@@ -656,9 +656,9 @@ bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* v) {
             out << "var";
             auto address_space = var->declared_address_space;
             auto ac = var->declared_access;
-            if (address_space != ast::AddressSpace::kNone || ac != ast::Access::kUndefined) {
+            if (address_space != ast::AddressSpace::kNone || ac != ast::Access::kInvalid) {
                 out << "<" << address_space;
-                if (ac != ast::Access::kUndefined) {
+                if (ac != ast::Access::kInvalid) {
                     out << ", ";
                     if (!EmitAccess(out, ac)) {
                         return false;

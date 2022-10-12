@@ -173,7 +173,7 @@ class ProgramBuilder {
 
         const ast::Type* type = nullptr;
         ast::AddressSpace address_space = ast::AddressSpace::kNone;
-        ast::Access access = ast::Access::kUndefined;
+        ast::Access access = ast::Access::kInvalid;
         const ast::Expression* constructor = nullptr;
         utils::Vector<const ast::Attribute*, 4> attributes;
 
@@ -902,7 +902,7 @@ class ProgramBuilder {
         /// @return the pointer to `type` with the given ast::AddressSpace
         const ast::Pointer* pointer(const ast::Type* type,
                                     ast::AddressSpace address_space,
-                                    ast::Access access = ast::Access::kUndefined) const {
+                                    ast::Access access = ast::Access::kInvalid) const {
             return builder->create<ast::Pointer>(type, address_space, access);
         }
 
@@ -914,7 +914,7 @@ class ProgramBuilder {
         const ast::Pointer* pointer(const Source& source,
                                     const ast::Type* type,
                                     ast::AddressSpace address_space,
-                                    ast::Access access = ast::Access::kUndefined) const {
+                                    ast::Access access = ast::Access::kInvalid) const {
             return builder->create<ast::Pointer>(source, type, address_space, access);
         }
 
@@ -923,7 +923,7 @@ class ProgramBuilder {
         /// @return the pointer to type `T` with the given ast::AddressSpace.
         template <typename T>
         const ast::Pointer* pointer(ast::AddressSpace address_space,
-                                    ast::Access access = ast::Access::kUndefined) const {
+                                    ast::Access access = ast::Access::kInvalid) const {
             return pointer(Of<T>(), address_space, access);
         }
 
@@ -934,7 +934,7 @@ class ProgramBuilder {
         template <typename T>
         const ast::Pointer* pointer(const Source& source,
                                     ast::AddressSpace address_space,
-                                    ast::Access access = ast::Access::kUndefined) const {
+                                    ast::Access access = ast::Access::kInvalid) const {
             return pointer(source, Of<T>(), address_space, access);
         }
 

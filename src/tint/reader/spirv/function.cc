@@ -4854,7 +4854,7 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
                 }
                 // Local variables are always Function storage class, with default
                 // access mode.
-                return DefInfo::Pointer{ast::AddressSpace::kFunction, ast::Access::kUndefined};
+                return DefInfo::Pointer{ast::AddressSpace::kFunction, ast::Access::kInvalid};
             }
             case SpvOpFunctionParameter: {
                 const auto* type = As<Pointer>(parser_impl_.ConvertType(inst.type_id()));
@@ -4862,7 +4862,7 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
                 // Using kUndefined is ok for now, since the only non-default access mode
                 // on a pointer would be for a storage buffer, and baseline SPIR-V doesn't
                 // allow passing pointers to buffers as function parameters.
-                return DefInfo::Pointer{type->address_space, ast::Access::kUndefined};
+                return DefInfo::Pointer{type->address_space, ast::Access::kInvalid};
             }
             default:
                 break;

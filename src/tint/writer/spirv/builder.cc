@@ -766,7 +766,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
                     push_annot(spv::Op::OpDecorate,
                                {Operand(var_id), U32Operand(SpvDecorationNonWritable)});
                     break;
-                case ast::Access::kUndefined:
+                case ast::Access::kInvalid:
                 case ast::Access::kReadWrite:
                     break;
             }
@@ -3684,11 +3684,11 @@ uint32_t Builder::GenerateTypeIfNeeded(const sem::Type* type) {
     // references are not legal in WGSL, so only considering the top-level type is
     // fine.
     if (auto* ptr = type->As<sem::Pointer>()) {
-        type =
-            builder_.create<sem::Pointer>(ptr->StoreType(), ptr->AddressSpace(), ast::kReadWrite);
+        type = builder_.create<sem::Pointer>(ptr->StoreType(), ptr->AddressSpace(),
+                                             ast::Access::kReadWrite);
     } else if (auto* ref = type->As<sem::Reference>()) {
-        type =
-            builder_.create<sem::Pointer>(ref->StoreType(), ref->AddressSpace(), ast::kReadWrite);
+        type = builder_.create<sem::Pointer>(ref->StoreType(), ref->AddressSpace(),
+                                             ast::Access::kReadWrite);
     }
 
     return utils::GetOrCreate(type_to_id_, type, [&]() -> uint32_t {

@@ -1006,7 +1006,7 @@ Maybe<ParserImpl::VariableQualifier> ParserImpl::variable_qualifier() {
             }
             return VariableQualifier{sc.value, ac.value};
         }
-        return Expect<VariableQualifier>{VariableQualifier{sc.value, ast::Access::kUndefined},
+        return Expect<VariableQualifier>{VariableQualifier{sc.value, ast::Access::kInvalid},
                                          source};
     });
 
@@ -1262,7 +1262,7 @@ Expect<const ast::Type*> ParserImpl::expect_type_specifier_pointer(const Source&
     const char* use = "ptr declaration";
 
     auto address_space = ast::AddressSpace::kNone;
-    auto access = ast::Access::kUndefined;
+    auto access = ast::Access::kInvalid;
 
     auto subtype = expect_lt_gt_block(use, [&]() -> Expect<const ast::Type*> {
         auto sc = expect_address_space(use);

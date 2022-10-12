@@ -1186,7 +1186,7 @@ Impl::Builtin Impl::Lookup(sem::BuiltinType builtin_type,
         for (auto& p : match.parameters) {
             params.Push(builder.create<sem::Parameter>(
                 nullptr, static_cast<uint32_t>(params.Length()), p.type, ast::AddressSpace::kNone,
-                ast::Access::kUndefined, p.usage));
+                ast::Access::kInvalid, p.usage));
         }
         sem::PipelineStageSet supported_stages;
         if (match.overload->flags.Contains(OverloadFlag::kSupportsVertexPipeline)) {
@@ -1384,7 +1384,7 @@ IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
         for (auto& p : match.parameters) {
             params.Push(builder.create<sem::Parameter>(
                 nullptr, static_cast<uint32_t>(params.Length()), p.type, ast::AddressSpace::kNone,
-                ast::Access::kUndefined, p.usage));
+                ast::Access::kInvalid, p.usage));
         }
         auto eval_stage = match.overload->const_eval_fn ? sem::EvaluationStage::kConstant
                                                         : sem::EvaluationStage::kRuntime;
@@ -1397,9 +1397,9 @@ IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
 
     // Conversion.
     auto* target = utils::GetOrCreate(converters, match, [&]() {
-        auto param = builder.create<sem::Parameter>(
-            nullptr, 0u, match.parameters[0].type, ast::AddressSpace::kNone,
-            ast::Access::kUndefined, match.parameters[0].usage);
+        auto param = builder.create<sem::Parameter>(nullptr, 0u, match.parameters[0].type,
+                                                    ast::AddressSpace::kNone, ast::Access::kInvalid,
+                                                    match.parameters[0].usage);
         auto eval_stage = match.overload->const_eval_fn ? sem::EvaluationStage::kConstant
                                                         : sem::EvaluationStage::kRuntime;
         return builder.create<sem::TypeConversion>(match.return_type, param, eval_stage);

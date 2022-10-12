@@ -296,7 +296,7 @@ class ParserImpl {
         /// Variable address space
         ast::AddressSpace address_space = ast::AddressSpace::kNone;
         /// Variable access control
-        ast::Access access = ast::Access::kUndefined;
+        ast::Access access = ast::Access::kInvalid;
         /// Variable type
         const ast::Type* type = nullptr;
     };
@@ -306,7 +306,7 @@ class ParserImpl {
         /// The variable's address space
         ast::AddressSpace address_space = ast::AddressSpace::kNone;
         /// The variable's access control
-        ast::Access access = ast::Access::kUndefined;
+        ast::Access access = ast::Access::kInvalid;
     };
 
     /// MatrixDimensions contains the column and row information for a matrix

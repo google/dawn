@@ -32,7 +32,7 @@ TEST_F(AstPointerTest, Creation) {
 
 TEST_F(AstPointerTest, FriendlyName) {
     auto* i32 = create<I32>();
-    auto* p = create<Pointer>(i32, ast::AddressSpace::kWorkgroup, Access::kUndefined);
+    auto* p = create<Pointer>(i32, ast::AddressSpace::kWorkgroup, Access::kInvalid);
     EXPECT_EQ(p->FriendlyName(Symbols()), "ptr<workgroup, i32>");
 }
 

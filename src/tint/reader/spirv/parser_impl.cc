@@ -1567,7 +1567,7 @@ ast::Var* ParserImpl::MakeVar(uint32_t id,
         return nullptr;
     }
 
-    ast::Access access = ast::Access::kUndefined;
+    ast::Access access = ast::Access::kInvalid;
     if (address_space == ast::AddressSpace::kStorage) {
         bool read_only = false;
         if (auto* tn = storage_type->As<Named>()) {

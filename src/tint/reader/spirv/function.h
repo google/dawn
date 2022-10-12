@@ -335,7 +335,7 @@ struct DefInfo {
         ast::AddressSpace address_space = ast::AddressSpace::kInvalid;
 
         /// The declared access mode.
-        ast::Access access = ast::kUndefined;
+        ast::Access access = ast::Access::kInvalid;
     };
 
     /// The expression to use when sinking pointers into their use.

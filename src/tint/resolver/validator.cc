@@ -263,7 +263,7 @@ bool Validator::StorageTexture(const ast::StorageTexture* t) const {
     switch (t->access) {
         case ast::Access::kWrite:
             break;
-        case ast::Access::kUndefined:
+        case ast::Access::kInvalid:
             AddError("storage texture missing access control", t->source);
             return false;
         default:
@@ -621,7 +621,7 @@ bool Validator::GlobalVariable(
             // https://gpuweb.github.io/gpuweb/wgsl/#variable-declaration
             // The access mode always has a default, and except for variables in the storage address
             // space, must not be written.
-            if (var->declared_access != ast::Access::kUndefined) {
+            if (var->declared_access != ast::Access::kInvalid) {
                 if (global->AddressSpace() == ast::AddressSpace::kStorage) {
                     // The access mode for the storage address space can only be 'read' or
                     // 'read_write'.
