@@ -284,7 +284,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Ptr_MissingAccess) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:20: expected identifier for access control");
+    ASSERT_EQ(p->error(), R"(1:20: expected access control for ptr declaration
+Possible values: 'read', 'read_write', 'write')");
 }
 
 TEST_F(ParserImplTest, TypeDeclWithoutIdent_Ptr_MissingParams) {
@@ -317,7 +318,8 @@ TEST_F(ParserImplTest, TypeDeclWithoutIdent_Ptr_BadAccess) {
     EXPECT_FALSE(t.matched);
     ASSERT_EQ(t.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    ASSERT_EQ(p->error(), "1:20: invalid value for access control");
+    ASSERT_EQ(p->error(), R"(1:20: expected access control for ptr declaration
+Possible values: 'read', 'read_write', 'write')");
 }
 
 TEST_F(ParserImplTest, TypeDeclWithoutIdent_Atomic) {
