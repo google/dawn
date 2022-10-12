@@ -329,6 +329,8 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
             return "faceForward";
         case GLSLstd450FindILsb:
             return "firstTrailingBit";
+        case GLSLstd450FindUMsb:
+            return "firstLeadingBit";
         case GLSLstd450Floor:
             return "floor";
         case GLSLstd450Fma:
@@ -430,7 +432,6 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
         case GLSLstd450UnpackDouble2x32:
 
         case GLSLstd450FindSMsb:
-        case GLSLstd450FindUMsb:
 
         case GLSLstd450InterpolateAtCentroid:
         case GLSLstd450InterpolateAtSample:

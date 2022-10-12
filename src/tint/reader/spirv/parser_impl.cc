@@ -150,6 +150,7 @@ bool AssumesUnsignedOperands(GLSLstd450 extended_opcode) {
         case GLSLstd450UMin:
         case GLSLstd450UMax:
         case GLSLstd450UClamp:
+        case GLSLstd450FindUMsb:
             return true;
         default:
             break;
@@ -222,8 +223,8 @@ bool AssumesResultSignednessMatchesFirstOperand(GLSLstd450 extended_opcode) {
         case GLSLstd450UMax:
         case GLSLstd450UClamp:
         case GLSLstd450FindILsb:
+        case GLSLstd450FindUMsb:
             // TODO(dneto): FindSMsb?
-            // TODO(dneto): FindUMsb?
             return true;
         default:
             break;
