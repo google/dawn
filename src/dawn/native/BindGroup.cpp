@@ -49,30 +49,6 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
 
     ASSERT(bindingInfo.bindingType == BindingInfoType::Buffer);
 
-    wgpu::BufferUsage requiredUsage;
-    uint64_t maxBindingSize;
-    uint64_t requiredBindingAlignment;
-    switch (bindingInfo.buffer.type) {
-        case wgpu::BufferBindingType::Uniform:
-            requiredUsage = wgpu::BufferUsage::Uniform;
-            maxBindingSize = device->GetLimits().v1.maxUniformBufferBindingSize;
-            requiredBindingAlignment = device->GetLimits().v1.minUniformBufferOffsetAlignment;
-            break;
-        case wgpu::BufferBindingType::Storage:
-        case wgpu::BufferBindingType::ReadOnlyStorage:
-            requiredUsage = wgpu::BufferUsage::Storage;
-            maxBindingSize = device->GetLimits().v1.maxStorageBufferBindingSize;
-            requiredBindingAlignment = device->GetLimits().v1.minStorageBufferOffsetAlignment;
-            break;
-        case kInternalStorageBufferBinding:
-            requiredUsage = kInternalStorageBuffer;
-            maxBindingSize = device->GetLimits().v1.maxStorageBufferBindingSize;
-            requiredBindingAlignment = device->GetLimits().v1.minStorageBufferOffsetAlignment;
-            break;
-        case wgpu::BufferBindingType::Undefined:
-            UNREACHABLE();
-    }
-
     uint64_t bufferSize = entry.buffer->GetSize();
 
     // Handle wgpu::WholeSize, avoiding overflows.
@@ -94,6 +70,33 @@ MaybeError ValidateBufferBinding(const DeviceBase* device,
     DAWN_INVALID_IF(entry.offset > bufferSize - bindingSize,
                     "Binding range (offset: %u, size: %u) doesn't fit in the size (%u) of %s.",
                     entry.offset, bufferSize, bindingSize, entry.buffer);
+
+    wgpu::BufferUsage requiredUsage;
+    uint64_t maxBindingSize;
+    uint64_t requiredBindingAlignment;
+    switch (bindingInfo.buffer.type) {
+        case wgpu::BufferBindingType::Uniform:
+            requiredUsage = wgpu::BufferUsage::Uniform;
+            maxBindingSize = device->GetLimits().v1.maxUniformBufferBindingSize;
+            requiredBindingAlignment = device->GetLimits().v1.minUniformBufferOffsetAlignment;
+            break;
+        case wgpu::BufferBindingType::Storage:
+        case wgpu::BufferBindingType::ReadOnlyStorage:
+            requiredUsage = wgpu::BufferUsage::Storage;
+            maxBindingSize = device->GetLimits().v1.maxStorageBufferBindingSize;
+            requiredBindingAlignment = device->GetLimits().v1.minStorageBufferOffsetAlignment;
+            DAWN_INVALID_IF(bindingSize % 4 != 0,
+                            "Binding size (%u) isn't a multiple of 4 when binding type is (%s).",
+                            bindingSize, bindingInfo.buffer.type);
+            break;
+        case kInternalStorageBufferBinding:
+            requiredUsage = kInternalStorageBuffer;
+            maxBindingSize = device->GetLimits().v1.maxStorageBufferBindingSize;
+            requiredBindingAlignment = device->GetLimits().v1.minStorageBufferOffsetAlignment;
+            break;
+        case wgpu::BufferBindingType::Undefined:
+            UNREACHABLE();
+    }
 
     DAWN_INVALID_IF(!IsAligned(entry.offset, requiredBindingAlignment),
                     "Offset (%u) does not satisfy the minimum %s alignment (%u).", entry.offset,

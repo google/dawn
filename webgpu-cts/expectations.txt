@@ -770,6 +770,16 @@ crbug.com/1357206 [ nvidia-0x2184 win10 ] worker_webgpu:api,validation,buffer,ma
 crbug.com/dawn/1539 [ ubuntu ] webgpu:api,validation,render_pipeline,fragment_state:pipeline_output_targets:isAsync=true;* [ Failure ]
 
 ################################################################################
+# storage buffer binding size failures
+################################################################################
+crbug.com/dawn/1542 webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
+crbug.com/dawn/1542 webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
+crbug.com/dawn/1542 webgpu:api,validation,createBindGroup:minBindingSize: [ Failure ]
+crbug.com/dawn/1542 webgpu:api,validation,encoding,cmds,setBindGroup:buffer_dynamic_offsets:type="read-only-storage";* [ Failure ]
+crbug.com/dawn/1542 webgpu:api,validation,encoding,cmds,setBindGroup:buffer_dynamic_offsets:type="storage";* [ Failure ]
+crbug.com/dawn/1542 webgpu:api,validation,encoding,cmds,setBindGroup:dynamic_offsets_match_expectations_in_pass_encoder:* [ Failure ]
+
+################################################################################
 # untriaged failures
 # KEEP
 ################################################################################
@@ -788,8 +798,6 @@ crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 win10 
 # New failures. Please triage:
 crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="rgba32uint";dimension="2d" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,compute_pipeline:overrides,workgroup_size,limits,* [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
-crbug.com/dawn/0000 [ win10 ] webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="storage" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,createBindGroupLayout:multisampled_validation:viewDimension="2d" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,createBindGroupLayout:multisampled_validation:viewDimension="_undef_" [ Failure ]
 crbug.com/dawn/0000 [ nvidia-0x2184 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":1,"y":1,"z":1} [ Failure ]

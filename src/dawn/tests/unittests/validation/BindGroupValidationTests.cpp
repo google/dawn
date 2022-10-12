@@ -1041,7 +1041,7 @@ TEST_F(BindGroupValidationTest, MaxStorageBufferBindingSize) {
 
     // Success case, this is one less than the limit (check it is not an alignment constraint)
     utils::MakeBindGroup(device, uniformLayout,
-                         {{0, buffer, 0, supportedLimits.maxStorageBufferBindingSize - 1}});
+                         {{0, buffer, 0, supportedLimits.maxStorageBufferBindingSize - 4}});
 
     wgpu::BindGroupLayout doubleUniformLayout = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Fragment, wgpu::BufferBindingType::Storage},
@@ -1055,7 +1055,51 @@ TEST_F(BindGroupValidationTest, MaxStorageBufferBindingSize) {
 
     // Error case, this is above the limit
     ASSERT_DEVICE_ERROR(utils::MakeBindGroup(
-        device, uniformLayout, {{0, buffer, 0, supportedLimits.maxStorageBufferBindingSize + 1}}));
+        device, uniformLayout, {{0, buffer, 0, supportedLimits.maxStorageBufferBindingSize + 4}}));
+}
+
+// Test constraints to be sure the effective storage and read-only storage buffer binding size must
+// be a multiple of 4.
+TEST_F(BindGroupValidationTest, EffectiveStorageBufferBindingSize) {
+    wgpu::BufferDescriptor descriptor;
+    descriptor.size = 262;
+    descriptor.usage = wgpu::BufferUsage::Storage;
+    wgpu::Buffer buffer = device.CreateBuffer(&descriptor);
+
+    constexpr std::array<wgpu::BufferBindingType, 2> kStorageBufferBindingTypes = {
+        {wgpu::BufferBindingType::Storage, wgpu::BufferBindingType::ReadOnlyStorage}};
+
+    for (wgpu::BufferBindingType bufferBindingType : kStorageBufferBindingTypes) {
+        wgpu::BindGroupLayout layout = utils::MakeBindGroupLayout(
+            device, {{0, wgpu::ShaderStage::Compute, bufferBindingType}});
+
+        // Error case, as the effective buffer binding size (262) isn't a multiple of 4.
+        {
+            constexpr uint32_t kOffset = 0;
+            ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, kOffset}}));
+        }
+
+        // Error case, as the effective buffer binding size (6) isn't a multiple of 4.
+        {
+            constexpr uint32_t kOffset = 256;
+            ASSERT_DEVICE_ERROR(utils::MakeBindGroup(device, layout, {{0, buffer, kOffset}}));
+        }
+
+        // Error case, as the effective buffer binding size (2) isn't a multiple of 4.
+        {
+            constexpr uint32_t kOffset = 0;
+            constexpr uint32_t kBindingSize = 2;
+            ASSERT_DEVICE_ERROR(
+                utils::MakeBindGroup(device, layout, {{0, buffer, kOffset, kBindingSize}}));
+        }
+
+        // Success case, as the effective buffer binding size (4) is a multiple of 4.
+        {
+            constexpr uint32_t kOffset = 0;
+            constexpr uint32_t kBindingSize = 4;
+            utils::MakeBindGroup(device, layout, {{0, buffer, kOffset, kBindingSize}});
+        }
+    }
 }
 
 // Test what happens when the layout is an error.
@@ -1626,7 +1670,7 @@ TEST_F(BindGroupLayoutValidationTest, MultisampledTextureSampleType) {
                                });
 }
 
-constexpr uint32_t kBindingSize = 9;
+constexpr uint32_t kBindingSize = 8;
 
 class SetBindGroupValidationTest : public ValidationTest {
   public:
@@ -1919,17 +1963,19 @@ TEST_F(SetBindGroupValidationTest, OffsetOutOfBoundDynamicStorageBuffer) {
 
 // Test cases that test dynamic uniform buffer out of bound situation because of binding size.
 TEST_F(SetBindGroupValidationTest, BindingSizeOutOfBoundDynamicUniformBuffer) {
-    // Set up bind group, but binding size is larger than
+    // Set up bind group, but binding size is larger than (mBufferSize - DynamicOffset).
     wgpu::Buffer uniformBuffer = CreateBuffer(mBufferSize, wgpu::BufferUsage::Uniform);
     wgpu::Buffer storageBuffer = CreateBuffer(mBufferSize, wgpu::BufferUsage::Storage);
     wgpu::Buffer readonlyStorageBuffer = CreateBuffer(mBufferSize, wgpu::BufferUsage::Storage);
-    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, mBindGroupLayout,
-                                                     {{0, uniformBuffer, 0, kBindingSize},
-                                                      {1, uniformBuffer, 0, kBindingSize},
-                                                      {2, storageBuffer, 0, kBindingSize},
-                                                      {3, readonlyStorageBuffer, 0, kBindingSize}});
+    constexpr uint32_t kLargeBindingSize = kBindingSize + 4u;
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, mBindGroupLayout,
+                             {{0, uniformBuffer, 0, kLargeBindingSize},
+                              {1, uniformBuffer, 0, kLargeBindingSize},
+                              {2, storageBuffer, 0, kLargeBindingSize},
+                              {3, readonlyStorageBuffer, 0, kLargeBindingSize}});
 
-    // Dynamic offset + offset isn't larger than buffer size.
+    // c + offset isn't larger than buffer size.
     // But with binding size, it will trigger OOB error.
     std::array<uint32_t, 3> offsets = {768, 256, 0};
 
@@ -1943,11 +1989,13 @@ TEST_F(SetBindGroupValidationTest, BindingSizeOutOfBoundDynamicStorageBuffer) {
     wgpu::Buffer uniformBuffer = CreateBuffer(mBufferSize, wgpu::BufferUsage::Uniform);
     wgpu::Buffer storageBuffer = CreateBuffer(mBufferSize, wgpu::BufferUsage::Storage);
     wgpu::Buffer readonlyStorageBuffer = CreateBuffer(mBufferSize, wgpu::BufferUsage::Storage);
-    wgpu::BindGroup bindGroup = utils::MakeBindGroup(device, mBindGroupLayout,
-                                                     {{0, uniformBuffer, 0, kBindingSize},
-                                                      {1, uniformBuffer, 0, kBindingSize},
-                                                      {2, storageBuffer, 0, kBindingSize},
-                                                      {3, readonlyStorageBuffer, 0, kBindingSize}});
+    constexpr uint32_t kLargeBindingSize = kBindingSize + 4u;
+    wgpu::BindGroup bindGroup =
+        utils::MakeBindGroup(device, mBindGroupLayout,
+                             {{0, uniformBuffer, 0, kLargeBindingSize},
+                              {1, uniformBuffer, 0, kLargeBindingSize},
+                              {2, storageBuffer, 0, kLargeBindingSize},
+                              {3, readonlyStorageBuffer, 0, kLargeBindingSize}});
     // Dynamic offset + offset isn't larger than buffer size.
     // But with binding size, it will trigger OOB error.
     std::array<uint32_t, 3> offsets = {0, 256, 768};
@@ -2593,7 +2641,7 @@ TEST_F(BindingsValidationTest, PipelineLayoutWithMoreBindingsThanPipeline) {
 
 // Test that it is invalid to set a pipeline layout that doesn't have all necessary bindings
 // required by the pipeline.
-TEST_F(BindingsValidationTest, PipelineLayoutWithLessBindingsThanPipeline) {
+TEST_F(BindingsValidationTest, PipelineLayoutWithFewerBindingsThanPipeline) {
     // Set up bind group layout.
     wgpu::BindGroupLayout bgl0 = utils::MakeBindGroupLayout(
         device, {{0, wgpu::ShaderStage::Compute | wgpu::ShaderStage::Fragment,
@@ -2672,7 +2720,7 @@ TEST_F(BindingsValidationTest, BindGroupsWithMoreBindingsThanPipelineLayout) {
 // Test that it is invalid to set bind groups that don't have all necessary bindings required
 // by the pipeline layout. Note that both pipeline layout and bind group have enough bindings for
 // pipeline in the following test.
-TEST_F(BindingsValidationTest, BindGroupsWithLessBindingsThanPipelineLayout) {
+TEST_F(BindingsValidationTest, BindGroupsWithFewerBindingsThanPipelineLayout) {
     // Set up bind group layouts, buffers, bind groups, pipeline layouts and pipelines.
     std::array<wgpu::BindGroupLayout, kBindingNum> bgl;
     std::array<wgpu::BindGroup, kBindingNum> bg;
