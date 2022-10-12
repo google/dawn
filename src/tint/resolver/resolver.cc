@@ -1125,6 +1125,15 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
         }
     }
 
+    uint64_t total_size = static_cast<uint64_t>(ws[0].value_or(1));
+    for (size_t i = 1; i < 3; i++) {
+        total_size *= static_cast<uint64_t>(ws[i].value_or(1));
+        if (total_size > 0xffffffff) {
+            AddError("total workgroup grid size cannot exceed 0xffffffff", values[i]->source);
+            return false;
+        }
+    }
+
     current_function_->SetWorkgroupSize(std::move(ws));
     return true;
 }

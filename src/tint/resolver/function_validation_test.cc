@@ -767,6 +767,77 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_NestedZeroValueConstr
     EXPECT_EQ(r()->error(), "12:34 error: workgroup_size argument must be at least 1");
 }
 
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_OverflowsU32_0x10000_0x100_0x100) {
+    // @compute @workgroup_size(0x10000, 0x100, 0x100)
+    // fn main() {}
+    Func("main", utils::Empty, ty.void_(), utils::Empty,
+         utils::Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(0x10000_a, 0x100_a, Expr(Source{{12, 34}}, 0x100_a)),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: total workgroup grid size cannot exceed 0xffffffff");
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_OverflowsU32_0x10000_0x10000) {
+    // @compute @workgroup_size(0x10000, 0x10000)
+    // fn main() {}
+    Func("main", utils::Empty, ty.void_(), utils::Empty,
+         utils::Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(0x10000_a, Expr(Source{{12, 34}}, 0x10000_a)),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: total workgroup grid size cannot exceed 0xffffffff");
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_OverflowsU32_0x10000_C_0x10000) {
+    // const C = 1;
+    // @compute @workgroup_size(0x10000, C, 0x10000)
+    // fn main() {}
+    GlobalConst("C", ty.u32(), Expr(1_a));
+    Func("main", utils::Empty, ty.void_(), utils::Empty,
+         utils::Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(0x10000_a, "C", Expr(Source{{12, 34}}, 0x10000_a)),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: total workgroup grid size cannot exceed 0xffffffff");
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_OverflowsU32_0x10000_C) {
+    // const C = 0x10000;
+    // @compute @workgroup_size(0x10000, C)
+    // fn main() {}
+    GlobalConst("C", ty.u32(), Expr(0x10000_a));
+    Func("main", utils::Empty, ty.void_(), utils::Empty,
+         utils::Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(0x10000_a, Expr(Source{{12, 34}}, "C")),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: total workgroup grid size cannot exceed 0xffffffff");
+}
+
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_OverflowsU32_0x10000_O_0x10000) {
+    // override O = 0;
+    // @compute @workgroup_size(0x10000, O, 0x10000)
+    // fn main() {}
+    Override("O", ty.u32(), Expr(0_a));
+    Func("main", utils::Empty, ty.void_(), utils::Empty,
+         utils::Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(0x10000_a, "O", Expr(Source{{12, 34}}, 0x10000_a)),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:34 error: total workgroup grid size cannot exceed 0xffffffff");
+}
+
 TEST_F(ResolverFunctionValidationTest, WorkgroupSize_NonConst) {
     // var<private> x = 64i;
     // @compute @workgroup_size(x)
