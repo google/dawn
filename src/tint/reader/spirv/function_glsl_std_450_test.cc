@@ -583,7 +583,8 @@ TEST_P(SpvParserTest_GlslStd450_Inting_IntingIntingInting, Vector) {
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Inting_Inting,
                          ::testing::Values(GlslStd450Case{"SAbs", "abs"},
-                                           GlslStd450Case{"FindILsb", "firstTrailingBit"}));
+                                           GlslStd450Case{"FindILsb", "firstTrailingBit"},
+                                           GlslStd450Case{"FindSMsb", "firstLeadingBit"}));
 
 INSTANTIATE_TEST_SUITE_P(Samples,
                          SpvParserTest_GlslStd450_Inting_IntingInting,
@@ -976,6 +977,56 @@ let x_2 : vec2<u32> = bitcast<vec2<u32>>(firstTrailingBit(v2i1));
 let x_3 : i32 = bitcast<i32>(firstTrailingBit(u1));
 let x_4 : vec2<i32> = bitcast<vec2<i32>>(firstTrailingBit(v2u1));)"))
         << body;
+}
+
+TEST_F(SpvParserTest, RectifyOperandsAndResult_FindSMsb) {
+    // Check signedness conversion of arguments and results.
+    //   SPIR-V signed arg -> keep it
+    //      signed result -> keep it
+    //      unsigned result -> cast result to unsigned
+    //
+    //   SPIR-V unsigned arg -> cast it to signed
+    //      signed result -> keept it
+    //      unsigned result -> cast result to unsigned
+    const auto assembly = Preamble() + R"(
+     ; signed arg
+     ;    signed result
+     %1 = OpExtInst %int %glsl FindSMsb %i1
+     %2 = OpExtInst %v2int %glsl FindSMsb %v2i1
+
+     ; signed arg
+     ;    unsigned result
+     %3 = OpExtInst %uint %glsl FindSMsb %i1
+     %4 = OpExtInst %v2uint %glsl FindSMsb %v2i1
+
+     ; unsigned arg
+     ;    signed result
+     %5 = OpExtInst %int %glsl FindSMsb %u1
+     %6 = OpExtInst %v2int %glsl FindSMsb %v2u1
+
+     ; unsigned arg
+     ;    unsigned result
+     %7 = OpExtInst %uint %glsl FindSMsb %u1
+     %8 = OpExtInst %v2uint %glsl FindSMsb %v2u1
+     OpReturn
+     OpFunctionEnd
+  )";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto body = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(body, HasSubstr(R"(
+let x_1 : i32 = firstLeadingBit(i1);
+let x_2 : vec2<i32> = firstLeadingBit(v2i1);
+let x_3 : u32 = bitcast<u32>(firstLeadingBit(i1));
+let x_4 : vec2<u32> = bitcast<vec2<u32>>(firstLeadingBit(v2i1));
+let x_5 : i32 = firstLeadingBit(bitcast<i32>(u1));
+let x_6 : vec2<i32> = firstLeadingBit(bitcast<vec2<i32>>(v2u1));
+let x_7 : u32 = bitcast<u32>(firstLeadingBit(bitcast<i32>(u1)));
+let x_8 : vec2<u32> = bitcast<vec2<u32>>(firstLeadingBit(bitcast<vec2<i32>>(v2u1)));
+)")) << body;
 }
 
 TEST_F(SpvParserTest, RectifyOperandsAndResult_FindUMsb) {

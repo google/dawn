@@ -117,6 +117,7 @@ bool AssumesSignedOperands(GLSLstd450 extended_opcode) {
         case GLSLstd450SMin:
         case GLSLstd450SMax:
         case GLSLstd450SClamp:
+        case GLSLstd450FindSMsb:
             return true;
         default:
             break;
@@ -223,8 +224,8 @@ bool AssumesResultSignednessMatchesFirstOperand(GLSLstd450 extended_opcode) {
         case GLSLstd450UMax:
         case GLSLstd450UClamp:
         case GLSLstd450FindILsb:
+        case GLSLstd450FindSMsb:
         case GLSLstd450FindUMsb:
-            // TODO(dneto): FindSMsb?
             return true;
         default:
             break;
