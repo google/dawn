@@ -858,7 +858,52 @@ fn main() {
     EXPECT_EQ(got, expected) << got;
 }
 
-std::string OldStorageBufferPreamble() {
+std::string NewStorageBufferPreamble(bool nonwritable = false) {
+    // Declare a buffer with
+    //  StorageBuffer storage class
+    //  Block struct decoration
+    return std::string(R"(
+     OpCapability Shader
+     OpExtension "SPV_KHR_storage_buffer_storage_class"
+     OpMemoryModel Logical Simple
+     OpEntryPoint Fragment %100 "main"
+     OpExecutionMode %100 OriginUpperLeft
+     OpName %myvar "myvar"
+
+     OpDecorate %myvar DescriptorSet 0
+     OpDecorate %myvar Binding 0
+
+     OpDecorate %struct Block
+     OpMemberDecorate %struct 0 Offset 0
+     OpMemberDecorate %struct 1 Offset 4
+     OpDecorate %arr ArrayStride 4
+     )") +
+           (nonwritable ? R"(
+     OpMemberDecorate %struct 0 NonWritable
+     OpMemberDecorate %struct 1 NonWritable)"
+                        : "") +
+           R"(
+     %void = OpTypeVoid
+     %voidfn = OpTypeFunction %void
+     %uint = OpTypeInt 32 0
+
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+
+     %arr = OpTypeRuntimeArray %uint
+     %struct = OpTypeStruct %uint %arr
+     %ptr_struct = OpTypePointer StorageBuffer %struct
+     %ptr_uint = OpTypePointer StorageBuffer %uint
+
+     %myvar = OpVariable %ptr_struct StorageBuffer
+  )";
+}
+
+std::string OldStorageBufferPreamble(bool nonwritable = false) {
+    // Declare a buffer with
+    //  Unifrom storage class
+    //  BufferBlock struct decoration
+    // This is the deprecated way to declare a storage buffer.
     return Preamble() + R"(
      OpName %myvar "myvar"
 
@@ -869,7 +914,12 @@ std::string OldStorageBufferPreamble() {
      OpMemberDecorate %struct 0 Offset 0
      OpMemberDecorate %struct 1 Offset 4
      OpDecorate %arr ArrayStride 4
-
+     )" +
+           (nonwritable ? R"(
+     OpMemberDecorate %struct 0 NonWritable
+     OpMemberDecorate %struct 1 NonWritable)"
+                        : "") +
+           R"(
      %void = OpTypeVoid
      %voidfn = OpTypeFunction %void
      %uint = OpTypeInt 32 0
@@ -938,7 +988,7 @@ myvar.field1[1u] = 0u;
 )"));
 }
 
-TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded_UsedTwice) {
+TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded_UsedTwice_ReadWrite) {
     // Use the pointer value twice, which provokes the spirv-reader
     // to make a let declaration for the pointer.  The storage class
     // must be 'storage', not 'uniform'.
@@ -966,13 +1016,128 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded_Us
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto got = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(got, HasSubstr(R"(let x_1 : ptr<storage, u32> = &(myvar.field0);
+    EXPECT_THAT(got, HasSubstr(R"(let x_1 : ptr<storage, u32, read_write> = &(myvar.field0);
 *(x_1) = 0u;
 *(x_1) = 0u;
-let x_2 : ptr<storage, u32> = &(myvar.field1[1u]);
+let x_2 : ptr<storage, u32, read_write> = &(myvar.field1[1u]);
 let x_3 : u32 = *(x_2);
 *(x_2) = 0u;
 )"));
+}
+
+TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded_UsedTwice_ReadOnly) {
+    // Like the previous test, but make the storage buffer read_only.
+    // The pointer type must also be read-only.
+    const auto assembly = OldStorageBufferPreamble(true) + R"(
+  %100 = OpFunction %void None %voidfn
+  %entry = OpLabel
+
+  ; the scalar element
+  %1 = OpAccessChain %ptr_uint %myvar %uint_0
+  OpStore %1 %uint_0
+  OpStore %1 %uint_0
+
+  ; element in the runtime array
+  %2 = OpAccessChain %ptr_uint %myvar %uint_1 %uint_1
+  ; Use the pointer twice
+  %3 = OpLoad %uint %2
+  OpStore %2 %uint_0
+
+  OpReturn
+  OpFunctionEnd
+)";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(got, HasSubstr(R"(let x_1 : ptr<storage, u32, read> = &(myvar.field0);
+*(x_1) = 0u;
+*(x_1) = 0u;
+let x_2 : ptr<storage, u32, read> = &(myvar.field1[1u]);
+let x_3 : u32 = *(x_2);
+*(x_2) = 0u;
+)")) << got
+     << assembly;
+}
+
+TEST_F(SpvParserMemoryTest, StorageBuffer_ThroughAccessChain_NonCascaded_UsedTwice_ReadWrite) {
+    // Use new style storage buffer declaration:
+    //   StorageBuffer storage class,
+    //   Block decoration
+    // The pointer type must use 'storage' address space, and should use defaulted access
+    const auto assembly = NewStorageBufferPreamble() + R"(
+  %100 = OpFunction %void None %voidfn
+  %entry = OpLabel
+
+  ; the scalar element
+  %1 = OpAccessChain %ptr_uint %myvar %uint_0
+  OpStore %1 %uint_0
+  OpStore %1 %uint_0
+
+  ; element in the runtime array
+  %2 = OpAccessChain %ptr_uint %myvar %uint_1 %uint_1
+  ; Use the pointer twice
+  %3 = OpLoad %uint %2
+  OpStore %2 %uint_0
+
+  OpReturn
+  OpFunctionEnd
+)";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(got, HasSubstr(R"(let x_1 : ptr<storage, u32, read_write> = &(myvar.field0);
+*(x_1) = 0u;
+*(x_1) = 0u;
+let x_2 : ptr<storage, u32, read_write> = &(myvar.field1[1u]);
+let x_3 : u32 = *(x_2);
+*(x_2) = 0u;
+)")) << got;
+}
+
+TEST_F(SpvParserMemoryTest, StorageBuffer_ThroughAccessChain_NonCascaded_UsedTwice_ReadOnly) {
+    // Like the previous test, but make the storage buffer read_only.
+    // Use new style storage buffer declaration:
+    //   StorageBuffer storage class,
+    //   Block decoration
+    // The pointer type must use 'storage' address space, and must use read_only
+    // access
+    const auto assembly = NewStorageBufferPreamble(true) + R"(
+  %100 = OpFunction %void None %voidfn
+  %entry = OpLabel
+
+  ; the scalar element
+  %1 = OpAccessChain %ptr_uint %myvar %uint_0
+  OpStore %1 %uint_0
+  OpStore %1 %uint_0
+
+  ; element in the runtime array
+  %2 = OpAccessChain %ptr_uint %myvar %uint_1 %uint_1
+  ; Use the pointer twice
+  %3 = OpLoad %uint %2
+  OpStore %2 %uint_0
+
+  OpReturn
+  OpFunctionEnd
+)";
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModule()) << assembly << p->error();
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    auto ast_body = fe.ast_body();
+    const auto got = test::ToString(p->program(), ast_body);
+    EXPECT_THAT(got, HasSubstr(R"(let x_1 : ptr<storage, u32, read> = &(myvar.field0);
+*(x_1) = 0u;
+*(x_1) = 0u;
+let x_2 : ptr<storage, u32, read> = &(myvar.field1[1u]);
+let x_3 : u32 = *(x_2);
+*(x_2) = 0u;
+)")) << got;
 }
 
 TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughAccessChain_NonCascaded_InBoundsAccessChain) {
@@ -1050,7 +1215,7 @@ TEST_F(SpvParserMemoryTest, RemapStorageBuffer_ThroughCopyObject_WithoutHoisting
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     EXPECT_THAT(test::ToString(p->program(), ast_body),
-                HasSubstr(R"(let x_2 : ptr<storage, u32> = &(myvar.field1[1u]);
+                HasSubstr(R"(let x_2 : ptr<storage, u32, read_write> = &(myvar.field1[1u]);
 *(x_2) = 0u;
 )")) << p->error();
 
@@ -1128,7 +1293,7 @@ TEST_F(SpvParserMemoryTest, ArrayLength_FromCopyObject) {
     EXPECT_TRUE(fe.EmitBody()) << p->error();
     auto ast_body = fe.ast_body();
     const auto body_str = test::ToString(p->program(), ast_body);
-    EXPECT_THAT(body_str, HasSubstr(R"(let x_2 : ptr<storage, S> = &(myvar);
+    EXPECT_THAT(body_str, HasSubstr(R"(let x_2 : ptr<storage, S, read_write> = &(myvar);
 let x_1 : u32 = arrayLength(&((*(x_2)).rtarr));
 )")) << body_str;
 

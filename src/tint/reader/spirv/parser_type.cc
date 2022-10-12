@@ -50,11 +50,15 @@ namespace tint::reader::spirv {
 
 namespace {
 struct PointerHasher {
-    size_t operator()(const Pointer& t) const { return utils::Hash(t.type, t.address_space); }
+    size_t operator()(const Pointer& t) const {
+        return utils::Hash(t.type, t.address_space, t.access);
+    }
 };
 
 struct ReferenceHasher {
-    size_t operator()(const Reference& t) const { return utils::Hash(t.type, t.address_space); }
+    size_t operator()(const Reference& t) const {
+        return utils::Hash(t.type, t.address_space, t.access);
+    }
 };
 
 struct VectorHasher {
@@ -107,10 +111,10 @@ struct StorageTextureHasher {
 // Equality operators
 //! @cond Doxygen_Suppress
 static bool operator==(const Pointer& a, const Pointer& b) {
-    return a.type == b.type && a.address_space == b.address_space;
+    return a.type == b.type && a.address_space == b.address_space && a.access == b.access;
 }
 static bool operator==(const Reference& a, const Reference& b) {
-    return a.type == b.type && a.address_space == b.address_space;
+    return a.type == b.type && a.address_space == b.address_space && a.access == b.access;
 }
 static bool operator==(const Vector& a, const Vector& b) {
     return a.type == b.type && a.size == b.size;
@@ -170,14 +174,16 @@ Type::~Type() = default;
 
 Texture::~Texture() = default;
 
-Pointer::Pointer(const Type* t, ast::AddressSpace s) : type(t), address_space(s) {}
+Pointer::Pointer(const Type* t, ast::AddressSpace s, ast::Access a)
+    : type(t), address_space(s), access(a) {}
 Pointer::Pointer(const Pointer&) = default;
 
 const ast::Type* Pointer::Build(ProgramBuilder& b) const {
-    return b.ty.pointer(type->Build(b), address_space);
+    return b.ty.pointer(type->Build(b), address_space, access);
 }
 
-Reference::Reference(const Type* t, ast::AddressSpace s) : type(t), address_space(s) {}
+Reference::Reference(const Type* t, ast::AddressSpace s, ast::Access a)
+    : type(t), address_space(s), access(a) {}
 Reference::Reference(const Reference&) = default;
 
 const ast::Type* Reference::Build(ProgramBuilder& b) const {
@@ -438,12 +444,16 @@ const spirv::I32* TypeManager::I32() {
     return state->i32_;
 }
 
-const spirv::Pointer* TypeManager::Pointer(const Type* el, ast::AddressSpace address_space) {
-    return state->pointers_.Get(el, address_space);
+const spirv::Pointer* TypeManager::Pointer(const Type* el,
+                                           ast::AddressSpace address_space,
+                                           ast::Access access) {
+    return state->pointers_.Get(el, address_space, access);
 }
 
-const spirv::Reference* TypeManager::Reference(const Type* el, ast::AddressSpace address_space) {
-    return state->references_.Get(el, address_space);
+const spirv::Reference* TypeManager::Reference(const Type* el,
+                                               ast::AddressSpace address_space,
+                                               ast::Access access) {
+    return state->references_.Get(el, address_space, access);
 }
 
 const spirv::Vector* TypeManager::Vector(const Type* el, uint32_t size) {
