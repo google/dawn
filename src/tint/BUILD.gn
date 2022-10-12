@@ -482,7 +482,6 @@ libtint_source_set("libtint_core_all_src") {
     "transform/builtin_polyfill.h",
     "transform/calculate_array_length.cc",
     "transform/calculate_array_length.h",
-    "transform/calculate_array_length.h",
     "transform/canonicalize_entry_point_io.cc",
     "transform/canonicalize_entry_point_io.h",
     "transform/clamp_frag_depth.cc",
