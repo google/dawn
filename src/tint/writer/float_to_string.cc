@@ -25,9 +25,34 @@
 
 namespace tint::writer {
 
-std::string FloatToString(float f) {
-    // Try printing the float in fixed point, with a smallish limit on the
-    // precision
+namespace {
+
+template <typename T>
+struct Traits;
+
+template <>
+struct Traits<float> {
+    using uint_t = uint32_t;
+    static constexpr int kExponentBias = 127;
+    static constexpr uint_t kExponentMask = 0x7f800000;
+    static constexpr uint_t kMantissaMask = 0x007fffff;
+    static constexpr uint_t kSignMask = 0x80000000;
+    static constexpr int kMantissaBits = 23;
+};
+
+template <>
+struct Traits<double> {
+    using uint_t = uint64_t;
+    static constexpr int kExponentBias = 1023;
+    static constexpr uint_t kExponentMask = 0x7ff0000000000000;
+    static constexpr uint_t kMantissaMask = 0x000fffffffffffff;
+    static constexpr uint_t kSignMask = 0x8000000000000000;
+    static constexpr int kMantissaBits = 52;
+};
+
+template <typename F>
+std::string ToString(F f) {
+    // Try printing the float in fixed point, with a smallish limit on the precision
     std::stringstream fixed;
     fixed.flags(fixed.flags() | std::ios_base::showpoint | std::ios_base::fixed);
     fixed.imbue(std::locale::classic());
@@ -36,13 +61,13 @@ std::string FloatToString(float f) {
     std::string str = fixed.str();
 
     // If this string can be parsed without loss of information, use it.
-    // (Use double here to dodge a bug in older libc++ versions which
-    // would incorrectly read back FLT_MAX as INF.)
+    // (Use double here to dodge a bug in older libc++ versions which would incorrectly read back
+    // FLT_MAX as INF.)
     double roundtripped;
     fixed >> roundtripped;
 
-    auto float_equal_no_warning = std::equal_to<float>();
-    if (float_equal_no_warning(f, static_cast<float>(roundtripped))) {
+    auto float_equal_no_warning = std::equal_to<F>();
+    if (float_equal_no_warning(f, static_cast<F>(roundtripped))) {
         while (str.length() >= 2 && str[str.size() - 1] == '0' && str[str.size() - 2] != '.') {
             str.pop_back();
         }
@@ -50,38 +75,41 @@ std::string FloatToString(float f) {
         return str;
     }
 
-    // Resort to scientific, with the minimum precision needed to preserve the
-    // whole float
+    // Resort to scientific, with the minimum precision needed to preserve the whole float
     std::stringstream sci;
     sci.imbue(std::locale::classic());
-    sci.precision(std::numeric_limits<float>::max_digits10);
+    sci.precision(std::numeric_limits<F>::max_digits10);
     sci << f;
     return sci.str();
 }
 
-std::string FloatToBitPreservingString(float f) {
+template <typename F>
+std::string ToBitPreservingString(F f) {
+    using T = Traits<F>;
+    using uint_t = typename T::uint_t;
+
     // For the NaN case, avoid handling the number as a floating point value.
     // Some machines will modify the top bit in the mantissa of a NaN.
 
     std::stringstream ss;
 
-    uint32_t float_bits = 0u;
+    typename T::uint_t float_bits = 0u;
+    static_assert(sizeof(float_bits) == sizeof(f));
     std::memcpy(&float_bits, &f, sizeof(float_bits));
 
     // Handle the sign.
-    const uint32_t kSignMask = 1u << 31;
-    if (float_bits & kSignMask) {
+    if (float_bits & T::kSignMask) {
         // If `f` is -0.0 print -0.0.
         ss << '-';
         // Strip sign bit.
-        float_bits = float_bits & (~kSignMask);
+        float_bits = float_bits & (~T::kSignMask);
     }
 
     switch (std::fpclassify(f)) {
         case FP_ZERO:
         case FP_NORMAL:
             std::memcpy(&f, &float_bits, sizeof(float_bits));
-            ss << FloatToString(f);
+            ss << ToString(f);
             break;
 
         default: {
@@ -89,46 +117,39 @@ std::string FloatToBitPreservingString(float f) {
             // TODO(dneto): It's unclear how Infinity and NaN should be handled.
             // See https://github.com/gpuweb/gpuweb/issues/1769
 
-            // std::hexfloat prints 'nan' and 'inf' instead of an
-            // explicit representation like we want. Split it out
-            // manually.
-            const int kExponentBias = 127;
-            const int kExponentMask = 0x7f800000;
-            const int kMantissaMask = 0x007fffff;
-            const int kMantissaBits = 23;
-
-            int mantissaNibbles = (kMantissaBits + 3) / 4;
+            // std::hexfloat prints 'nan' and 'inf' instead of an explicit representation like we
+            // want. Split it out manually.
+            int mantissa_nibbles = (T::kMantissaBits + 3) / 4;
 
             const int biased_exponent =
-                static_cast<int>((float_bits & kExponentMask) >> kMantissaBits);
-            int exponent = biased_exponent - kExponentBias;
-            uint32_t mantissa = float_bits & kMantissaMask;
+                static_cast<int>((float_bits & T::kExponentMask) >> T::kMantissaBits);
+            int exponent = biased_exponent - T::kExponentBias;
+            uint_t mantissa = float_bits & T::kMantissaMask;
 
             ss << "0x";
 
-            if (exponent == 128) {
+            if (exponent == T::kExponentBias + 1) {
                 if (mantissa == 0) {
                     //  Infinity case.
-                    ss << "1p+128";
+                    ss << "1p+" << exponent;
                 } else {
-                    //  NaN case.
-                    //  Emit the mantissa bits as if they are left-justified after the
-                    //  binary point.  This is what SPIRV-Tools hex float emitter does,
-                    //  and it's a justifiable choice independent of the bit width
-                    //  of the mantissa.
-                    mantissa <<= (4 - (kMantissaBits % 4));
-                    // Remove trailing zeroes, for tidyness.
+                    // NaN case.
+                    // Emit the mantissa bits as if they are left-justified after the binary point.
+                    // This is what SPIRV-Tools hex float emitter does, and it's a justifiable
+                    // choice independent of the bit width of the mantissa.
+                    mantissa <<= (4 - (T::kMantissaBits % 4));
+                    // Remove trailing zeroes, for tidiness.
                     while (0 == (0xf & mantissa)) {
                         mantissa >>= 4;
-                        mantissaNibbles--;
+                        mantissa_nibbles--;
                     }
-                    ss << "1." << std::hex << std::setfill('0') << std::setw(mantissaNibbles)
-                       << mantissa << "p+128";
+                    ss << "1." << std::hex << std::setfill('0') << std::setw(mantissa_nibbles)
+                       << mantissa << "p+" << std::dec << exponent;
                 }
             } else {
                 // Subnormal, and not zero.
                 TINT_ASSERT(Writer, mantissa != 0);
-                const int kTopBit = (1 << kMantissaBits);
+                const auto kTopBit = static_cast<uint_t>(1u) << T::kMantissaBits;
 
                 // Shift left until we get 1.x
                 while (0 == (kTopBit & mantissa)) {
@@ -138,17 +159,19 @@ std::string FloatToBitPreservingString(float f) {
                 // Emit the leading 1, and remove it from the mantissa.
                 ss << "1";
                 mantissa = mantissa ^ kTopBit;
-                mantissa <<= 1;
                 exponent++;
+
+                // Left-justify mantissa to whole nibble.
+                mantissa <<= (4 - (T::kMantissaBits % 4));
 
                 // Emit the fractional part.
                 if (mantissa) {
-                    // Remove trailing zeroes, for tidyness
+                    // Remove trailing zeroes, for tidiness
                     while (0 == (0xf & mantissa)) {
                         mantissa >>= 4;
-                        mantissaNibbles--;
+                        mantissa_nibbles--;
                     }
-                    ss << "." << std::hex << std::setfill('0') << std::setw(mantissaNibbles)
+                    ss << "." << std::hex << std::setfill('0') << std::setw(mantissa_nibbles)
                        << mantissa;
                 }
                 // Emit the exponent
@@ -157,6 +180,24 @@ std::string FloatToBitPreservingString(float f) {
         }
     }
     return ss.str();
+}
+
+}  // namespace
+
+std::string FloatToString(float f) {
+    return ToString(f);
+}
+
+std::string FloatToBitPreservingString(float f) {
+    return ToBitPreservingString(f);
+}
+
+std::string DoubleToString(double f) {
+    return ToString(f);
+}
+
+std::string DoubleToBitPreservingString(double f) {
+    return ToBitPreservingString(f);
 }
 
 }  // namespace tint::writer

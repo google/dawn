@@ -48,7 +48,7 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
   if ((index >= config.numLights)) {
     return;
   }
-  lightsBuffer.lights[index].position.y = ((lightsBuffer.lights[index].position.y - 0.100000001) + (0.001 * (f32(index) - (64.0 * floor((f32(index) / 64.0))))));
+  lightsBuffer.lights[index].position.y = ((lightsBuffer.lights[index].position.y - 0.1) + (0.001 * (f32(index) - (64.0 * floor((f32(index) / 64.0))))));
   if ((lightsBuffer.lights[index].position.y < uniforms.min.y)) {
     lightsBuffer.lights[index].position.y = uniforms.max.y;
   }

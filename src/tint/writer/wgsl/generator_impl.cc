@@ -263,7 +263,11 @@ bool GeneratorImpl::EmitLiteral(std::ostream& out, const ast::LiteralExpression*
             // Note that all normal and subnormal f16 values are normal f32 values, and since NaN
             // and Inf are not allowed to be spelled in literal, it should be fine to emit f16
             // literals in this way.
-            out << FloatToBitPreservingString(static_cast<float>(l->value)) << l->suffix;
+            if (l->suffix == ast::FloatLiteralExpression::Suffix::kNone) {
+                out << DoubleToBitPreservingString(l->value);
+            } else {
+                out << FloatToBitPreservingString(static_cast<float>(l->value)) << l->suffix;
+            }
             return true;
         },
         [&](const ast::IntLiteralExpression* l) {  //

@@ -27,10 +27,23 @@ namespace tint::writer {
 /// @return the float f formatted to a string
 std::string FloatToString(float f);
 
+/// Converts the double `f` to a string using fixed-point notation (not
+/// scientific). The double will be printed with the full precision required to
+/// describe the double. All trailing `0`s will be omitted after the last
+/// non-zero fractional number, unless the fractional is zero, in which case the
+/// number will end with `.0`.
+/// @return the double f formatted to a string
+std::string DoubleToString(double f);
+
 /// Converts the float `f` to a string, using hex float notation for infinities,
 /// NaNs, or subnormal numbers. Otherwise behaves as FloatToString.
 /// @return the float f formatted to a string
 std::string FloatToBitPreservingString(float f);
+
+/// Converts the double `f` to a string, using hex double notation for infinities,
+/// NaNs, or subnormal numbers. Otherwise behaves as FloatToString.
+/// @return the double f formatted to a string
+std::string DoubleToBitPreservingString(double f);
 
 }  // namespace tint::writer
 
