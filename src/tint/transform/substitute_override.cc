@@ -17,6 +17,8 @@
 #include <functional>
 
 #include "src/tint/program_builder.h"
+#include "src/tint/sem/builtin.h"
+#include "src/tint/sem/index_accessor_expression.h"
 #include "src/tint/sem/variable.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::SubstituteOverride);
@@ -81,6 +83,25 @@ void SubstituteOverride::Run(CloneContext& ctx, const DataMap& config, DataMap&)
 
         return ctx.dst->Const(src, sym, ty, ctor);
     });
+
+    // Ensure that objects that are indexed with an override-expression are materialized.
+    // If the object is not materialized, and the 'override' variable is turned to a 'const', the
+    // resulting type of the index may change. See: crbug.com/tint/1697.
+    ctx.ReplaceAll(
+        [&](const ast::IndexAccessorExpression* expr) -> const ast::IndexAccessorExpression* {
+            if (auto* sem = ctx.src->Sem().Get(expr)) {
+                if (auto* access = sem->UnwrapMaterialize()->As<sem::IndexAccessorExpression>()) {
+                    if (access->Object()->UnwrapMaterialize()->Type()->HoldsAbstract() &&
+                        access->Index()->Stage() == sem::EvaluationStage::kOverride) {
+                        auto& b = *ctx.dst;
+                        auto* obj = b.Call(sem::str(sem::BuiltinType::kTintMaterialize),
+                                           ctx.Clone(expr->object));
+                        return b.IndexAccessor(obj, ctx.Clone(expr->index));
+                    }
+                }
+            }
+            return nullptr;
+        });
 
     ctx.Clone();
 }

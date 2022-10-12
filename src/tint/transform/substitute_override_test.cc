@@ -238,5 +238,46 @@ fn main() -> @builtin(position) vec4<f32> {
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(SubstituteOverrideTest, IndexMaterialization) {
+    auto* src = R"(
+override O = 0; // Try switching to 'const'
+
+fn f() {
+  const smaller_than_any_f32 = 1e-50;
+  const large_float = 1e27;
+  // When O is an override, the outer index value is not constant, so the
+  // value is not calculated at shader-creation time, and does not error.
+  //
+  // When O is a const, and 'smaller_than_any_f32' *is not* materialized, the
+  // outer index value will evaluate to 10000, resulting in an out-of-bounds
+  // error.
+  //
+  // When O is a const, and 'smaller_than_any_f32' *is* materialized, the
+  // materialization of 'smaller_than_any_f32' to f32 will evaluate to zero,
+  // and so the outer index value will be zero, and we get no error.
+  _ = vec2(0)[i32(vec2(smaller_than_any_f32)[O]*large_float*large_float)];
+}
+)";
+
+    auto* expect = R"(
+const O = 0i;
+
+fn f() {
+  const smaller_than_any_f32 = 1e-50;
+  const large_float = 1000000000000000013287555072.0;
+  _ = _tint_materialize(vec2(0))[i32(((_tint_materialize(vec2(smaller_than_any_f32))[O] * large_float) * large_float))];
+}
+)";
+
+    SubstituteOverride::Config cfg;
+    cfg.map.insert({OverrideId{0}, 0.0});
+
+    DataMap data;
+    data.Add<SubstituteOverride::Config>(cfg);
+    auto got = Run<SubstituteOverride>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::transform
