@@ -12,7 +12,7 @@
 {{- /* ------------------------------------------------------------------ */ -}}
 {{- $enum    := PascalCase $.Name -}}
 enum class {{$enum}} {
-    kInvalid,
+    kUndefined,
 {{-   range $entry := $.Entries }}
     k{{PascalCase $entry.Name}},{{if $entry.IsInternal}}  // Tint-internal enum entry - not parsed{{end}}
 {{-   end }}
@@ -25,7 +25,7 @@ std::ostream& operator<<(std::ostream& out, {{$enum}} value);
 
 /// Parse{{$enum}} parses a {{$enum}} from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or {{$enum}}::kInvalid if the string could not be parsed.
+/// @returns the parsed enum, or {{$enum}}::kUndefined if the string could not be parsed.
 {{$enum}} Parse{{$enum}}(std::string_view str);
 
 constexpr const char* k{{$enum}}Strings[] = {
@@ -47,14 +47,14 @@ constexpr const char* k{{$enum}}Strings[] = {
 {{- $enum    := PascalCase $.Name -}}
 /// Parse{{$enum}} parses a {{$enum}} from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or {{$enum}}::kInvalid if the string could not be parsed.
+/// @returns the parsed enum, or {{$enum}}::kUndefined if the string could not be parsed.
 {{$enum}} Parse{{$enum}}(std::string_view str) {
 {{-   range $entry := $.PublicEntries }}
     if (str == "{{$entry.Name}}") {
         return {{template "EnumCase" $entry}};
     }
 {{-   end }}
-    return {{$enum}}::kInvalid;
+    return {{$enum}}::kUndefined;
 }
 {{- end -}}
 
@@ -67,8 +67,8 @@ constexpr const char* k{{$enum}}Strings[] = {
 {{- $enum    := PascalCase $.Name -}}
 std::ostream& operator<<(std::ostream& out, {{$enum}} value) {
     switch (value) {
-        case {{$enum}}::kInvalid:
-            return out << "invalid";
+        case {{$enum}}::kUndefined:
+            return out << "undefined";
 {{-   range $entry := $.Entries }}
         case {{template "EnumCase" $entry}}:
             return out << "{{$entry.Name}}";
@@ -105,9 +105,9 @@ static constexpr Case kValidCases[] = {
 static constexpr Case kInvalidCases[] = {
 {{-   $exclude := $.NameSet -}}
 {{-   range $entry := $.PublicEntries }}
-    {"{{Scramble $entry.Name $exclude}}", {{$enum}}::kInvalid},
-    {"{{Scramble $entry.Name $exclude}}", {{$enum}}::kInvalid},
-    {"{{Scramble $entry.Name $exclude}}", {{$enum}}::kInvalid},
+    {"{{Scramble $entry.Name $exclude}}", {{$enum}}::kUndefined},
+    {"{{Scramble $entry.Name $exclude}}", {{$enum}}::kUndefined},
+    {"{{Scramble $entry.Name $exclude}}", {{$enum}}::kUndefined},
 {{-   end }}
 };
 

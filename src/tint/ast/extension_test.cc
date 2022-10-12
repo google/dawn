@@ -49,18 +49,18 @@ static constexpr Case kValidCases[] = {
 };
 
 static constexpr Case kInvalidCases[] = {
-    {"chromium_disableuniformiccy_analysis", Extension::kInvalid},
-    {"chromil3_disable_unifority_analss", Extension::kInvalid},
-    {"chromium_disable_Vniformity_analysis", Extension::kInvalid},
-    {"chro1ium_experimental_dp4a", Extension::kInvalid},
-    {"chrJmium_experiqqetal_dp4a", Extension::kInvalid},
-    {"chromium_experimenll77l_dp4a", Extension::kInvalid},
-    {"cppromium_experiHHenal_qqush_constant", Extension::kInvalid},
-    {"chromium_xpericental_sh_vonstant", Extension::kInvalid},
-    {"chromium_experimental_Gsh_cbnstant", Extension::kInvalid},
-    {"f1vi", Extension::kInvalid},
-    {"f8WW", Extension::kInvalid},
-    {"fxx", Extension::kInvalid},
+    {"chromium_disableuniformiccy_analysis", Extension::kUndefined},
+    {"chromil3_disable_unifority_analss", Extension::kUndefined},
+    {"chromium_disable_Vniformity_analysis", Extension::kUndefined},
+    {"chro1ium_experimental_dp4a", Extension::kUndefined},
+    {"chrJmium_experiqqetal_dp4a", Extension::kUndefined},
+    {"chromium_experimenll77l_dp4a", Extension::kUndefined},
+    {"cppromium_experiHHenal_qqush_constant", Extension::kUndefined},
+    {"chromium_xpericental_sh_vonstant", Extension::kUndefined},
+    {"chromium_experimental_Gsh_cbnstant", Extension::kUndefined},
+    {"f1vi", Extension::kUndefined},
+    {"f8WW", Extension::kUndefined},
+    {"fxx", Extension::kUndefined},
 };
 
 using ExtensionParseTest = testing::TestWithParam<Case>;

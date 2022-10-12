@@ -26,7 +26,7 @@ namespace tint::ast {
 
 /// ParseBuiltinValue parses a BuiltinValue from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or BuiltinValue::kInvalid if the string could not be parsed.
+/// @returns the parsed enum, or BuiltinValue::kUndefined if the string could not be parsed.
 BuiltinValue ParseBuiltinValue(std::string_view str) {
     if (str == "frag_depth") {
         return BuiltinValue::kFragDepth;
@@ -64,13 +64,13 @@ BuiltinValue ParseBuiltinValue(std::string_view str) {
     if (str == "workgroup_id") {
         return BuiltinValue::kWorkgroupId;
     }
-    return BuiltinValue::kInvalid;
+    return BuiltinValue::kUndefined;
 }
 
 std::ostream& operator<<(std::ostream& out, BuiltinValue value) {
     switch (value) {
-        case BuiltinValue::kInvalid:
-            return out << "invalid";
+        case BuiltinValue::kUndefined:
+            return out << "undefined";
         case BuiltinValue::kFragDepth:
             return out << "frag_depth";
         case BuiltinValue::kFrontFacing:

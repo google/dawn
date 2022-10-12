@@ -51,7 +51,7 @@ const InterpolateAttribute* InterpolateAttribute::Clone(CloneContext* ctx) const
 
 /// ParseInterpolationType parses a InterpolationType from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or InterpolationType::kInvalid if the string could not be parsed.
+/// @returns the parsed enum, or InterpolationType::kUndefined if the string could not be parsed.
 InterpolationType ParseInterpolationType(std::string_view str) {
     if (str == "flat") {
         return InterpolationType::kFlat;
@@ -62,13 +62,13 @@ InterpolationType ParseInterpolationType(std::string_view str) {
     if (str == "perspective") {
         return InterpolationType::kPerspective;
     }
-    return InterpolationType::kInvalid;
+    return InterpolationType::kUndefined;
 }
 
 std::ostream& operator<<(std::ostream& out, InterpolationType value) {
     switch (value) {
-        case InterpolationType::kInvalid:
-            return out << "invalid";
+        case InterpolationType::kUndefined:
+            return out << "undefined";
         case InterpolationType::kFlat:
             return out << "flat";
         case InterpolationType::kLinear:
@@ -81,7 +81,8 @@ std::ostream& operator<<(std::ostream& out, InterpolationType value) {
 
 /// ParseInterpolationSampling parses a InterpolationSampling from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or InterpolationSampling::kInvalid if the string could not be parsed.
+/// @returns the parsed enum, or InterpolationSampling::kUndefined if the string could not be
+/// parsed.
 InterpolationSampling ParseInterpolationSampling(std::string_view str) {
     if (str == "center") {
         return InterpolationSampling::kCenter;
@@ -92,13 +93,13 @@ InterpolationSampling ParseInterpolationSampling(std::string_view str) {
     if (str == "sample") {
         return InterpolationSampling::kSample;
     }
-    return InterpolationSampling::kInvalid;
+    return InterpolationSampling::kUndefined;
 }
 
 std::ostream& operator<<(std::ostream& out, InterpolationSampling value) {
     switch (value) {
-        case InterpolationSampling::kInvalid:
-            return out << "invalid";
+        case InterpolationSampling::kUndefined:
+            return out << "undefined";
         case InterpolationSampling::kCenter:
             return out << "center";
         case InterpolationSampling::kCentroid:

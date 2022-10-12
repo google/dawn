@@ -26,7 +26,7 @@ namespace tint::ast {
 
 /// ParseTexelFormat parses a TexelFormat from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or TexelFormat::kInvalid if the string could not be parsed.
+/// @returns the parsed enum, or TexelFormat::kUndefined if the string could not be parsed.
 TexelFormat ParseTexelFormat(std::string_view str) {
     if (str == "r32float") {
         return TexelFormat::kR32Float;
@@ -76,13 +76,13 @@ TexelFormat ParseTexelFormat(std::string_view str) {
     if (str == "rgba8unorm") {
         return TexelFormat::kRgba8Unorm;
     }
-    return TexelFormat::kInvalid;
+    return TexelFormat::kUndefined;
 }
 
 std::ostream& operator<<(std::ostream& out, TexelFormat value) {
     switch (value) {
-        case TexelFormat::kInvalid:
-            return out << "invalid";
+        case TexelFormat::kUndefined:
+            return out << "undefined";
         case TexelFormat::kR32Float:
             return out << "r32float";
         case TexelFormat::kR32Sint:

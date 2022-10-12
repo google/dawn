@@ -1207,7 +1207,7 @@ const Type* ParserImpl::ConvertType(uint32_t type_id,
     }
 
     auto ast_address_space = enum_converter_.ToAddressSpace(storage_class);
-    if (ast_address_space == ast::AddressSpace::kInvalid) {
+    if (ast_address_space == ast::AddressSpace::kUndefined) {
         Fail() << "SPIR-V pointer type with ID " << type_id << " has invalid storage class "
                << static_cast<uint32_t>(storage_class);
         return nullptr;
@@ -1567,7 +1567,7 @@ ast::Var* ParserImpl::MakeVar(uint32_t id,
         return nullptr;
     }
 
-    ast::Access access = ast::Access::kInvalid;
+    ast::Access access = ast::Access::kUndefined;
     if (address_space == ast::AddressSpace::kStorage) {
         bool read_only = false;
         if (auto* tn = storage_type->As<Named>()) {
@@ -1678,7 +1678,7 @@ bool ParserImpl::ConvertDecorationsForVariable(uint32_t id,
                     break;
             }
             auto ast_builtin = enum_converter_.ToBuiltin(spv_builtin);
-            if (ast_builtin == ast::BuiltinValue::kInvalid) {
+            if (ast_builtin == ast::BuiltinValue::kUndefined) {
                 // A diagnostic has already been emitted.
                 return false;
             }
@@ -1750,7 +1750,7 @@ bool ParserImpl::ConvertPipelineDecorations(const Type* store_type,
                                             AttributeList* attributes) {
     // Vulkan defaults to perspective-correct interpolation.
     ast::InterpolationType type = ast::InterpolationType::kPerspective;
-    ast::InterpolationSampling sampling = ast::InterpolationSampling::kInvalid;
+    ast::InterpolationSampling sampling = ast::InterpolationSampling::kUndefined;
 
     for (const auto& deco : decorations) {
         TINT_ASSERT(Reader, deco.size() > 0);
@@ -1805,7 +1805,7 @@ bool ParserImpl::ConvertPipelineDecorations(const Type* store_type,
 
     // Apply interpolation.
     if (type == ast::InterpolationType::kPerspective &&
-        sampling == ast::InterpolationSampling::kInvalid) {
+        sampling == ast::InterpolationSampling::kUndefined) {
         // This is the default. Don't add a decoration.
     } else {
         attributes->Push(create<ast::InterpolateAttribute>(type, sampling));
@@ -2477,7 +2477,7 @@ const Pointer* ParserImpl::GetTypeForHandleVar(const spvtools::opt::Instruction&
         } else {
             const auto access = ast::Access::kWrite;
             const auto format = enum_converter_.ToTexelFormat(image_type->format());
-            if (format == ast::TexelFormat::kInvalid) {
+            if (format == ast::TexelFormat::kUndefined) {
                 return nullptr;
             }
             ast_store_type = ty_.StorageTexture(dim, format, access);

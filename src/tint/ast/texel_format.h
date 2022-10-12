@@ -29,7 +29,7 @@ namespace tint::ast {
 
 /// Enumerator of texel formats
 enum class TexelFormat {
-    kInvalid,
+    kUndefined,
     kR32Float,
     kR32Sint,
     kR32Uint,
@@ -55,7 +55,7 @@ std::ostream& operator<<(std::ostream& out, TexelFormat value);
 
 /// ParseTexelFormat parses a TexelFormat from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or TexelFormat::kInvalid if the string could not be parsed.
+/// @returns the parsed enum, or TexelFormat::kUndefined if the string could not be parsed.
 TexelFormat ParseTexelFormat(std::string_view str);
 
 constexpr const char* kTexelFormatStrings[] = {

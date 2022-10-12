@@ -26,7 +26,7 @@ namespace tint::ast {
 
 /// ParseAddressSpace parses a AddressSpace from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or AddressSpace::kInvalid if the string could not be parsed.
+/// @returns the parsed enum, or AddressSpace::kUndefined if the string could not be parsed.
 AddressSpace ParseAddressSpace(std::string_view str) {
     if (str == "function") {
         return AddressSpace::kFunction;
@@ -46,13 +46,13 @@ AddressSpace ParseAddressSpace(std::string_view str) {
     if (str == "workgroup") {
         return AddressSpace::kWorkgroup;
     }
-    return AddressSpace::kInvalid;
+    return AddressSpace::kUndefined;
 }
 
 std::ostream& operator<<(std::ostream& out, AddressSpace value) {
     switch (value) {
-        case AddressSpace::kInvalid:
-            return out << "invalid";
+        case AddressSpace::kUndefined:
+            return out << "undefined";
         case AddressSpace::kFunction:
             return out << "function";
         case AddressSpace::kHandle:

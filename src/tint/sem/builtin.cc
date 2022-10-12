@@ -182,7 +182,7 @@ ast::Extension Builtin::RequiredExtension() const {
     if (IsDP4a()) {
         return ast::Extension::kChromiumExperimentalDp4A;
     }
-    return ast::Extension::kInvalid;
+    return ast::Extension::kUndefined;
 }
 
 }  // namespace tint::sem

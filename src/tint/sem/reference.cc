@@ -24,7 +24,7 @@ namespace tint::sem {
 Reference::Reference(const Type* subtype, ast::AddressSpace address_space, ast::Access access)
     : subtype_(subtype), address_space_(address_space), access_(access) {
     TINT_ASSERT(Semantic, !subtype->Is<Reference>());
-    TINT_ASSERT(Semantic, access != ast::Access::kInvalid);
+    TINT_ASSERT(Semantic, access != ast::Access::kUndefined);
 }
 
 size_t Reference::Hash() const {

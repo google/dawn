@@ -75,7 +75,7 @@ sem::Type* StorageTexture::SubtypeFor(ast::TexelFormat format, sem::TypeManager&
             return type_mgr.Get<sem::F32>();
         }
 
-        case ast::TexelFormat::kInvalid:
+        case ast::TexelFormat::kUndefined:
             break;
     }
 

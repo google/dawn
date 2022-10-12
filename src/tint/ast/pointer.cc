@@ -35,7 +35,7 @@ std::string Pointer::FriendlyName(const SymbolTable& symbols) const {
         out << address_space << ", ";
     }
     out << type->FriendlyName(symbols);
-    if (access != ast::Access::kInvalid) {
+    if (access != ast::Access::kUndefined) {
         out << ", " << access;
     }
     out << ">";

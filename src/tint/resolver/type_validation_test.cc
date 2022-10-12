@@ -1165,7 +1165,7 @@ TEST_F(StorageTextureAccessTest, MissingAccess_Fail) {
     // var a : texture_storage_1d<ru32int>;
 
     auto* st = ty.storage_texture(Source{{12, 34}}, ast::TextureDimension::k1d,
-                                  ast::TexelFormat::kR32Uint, ast::Access::kInvalid);
+                                  ast::TexelFormat::kR32Uint, ast::Access::kUndefined);
 
     GlobalVar("a", st, Group(0_a), Binding(0_a));
 

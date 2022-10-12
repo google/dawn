@@ -76,7 +76,7 @@ Type* StorageTexture::SubtypeFor(TexelFormat format, ProgramBuilder& builder) {
             return builder.create<F32>();
         }
 
-        case TexelFormat::kInvalid:
+        case TexelFormat::kUndefined:
             break;
     }
 

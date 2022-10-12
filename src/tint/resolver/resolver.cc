@@ -251,7 +251,7 @@ sem::Type* Resolver::Type(const ast::Type* ty) {
         [&](const ast::Pointer* t) -> sem::Pointer* {
             if (auto* el = Type(t->type)) {
                 auto access = t->access;
-                if (access == ast::Access::kInvalid) {
+                if (access == ast::Access::kUndefined) {
                     access = DefaultAccessForAddressSpace(t->address_space);
                 }
                 return builder_->create<sem::Pointer>(el, t->address_space, access);
@@ -386,12 +386,13 @@ sem::Variable* Resolver::Let(const ast::Let* v, bool is_global) {
     sem::Variable* sem = nullptr;
     if (is_global) {
         sem = builder_->create<sem::GlobalVariable>(
-            v, ty, sem::EvaluationStage::kRuntime, ast::AddressSpace::kNone, ast::Access::kInvalid,
+            v, ty, sem::EvaluationStage::kRuntime, ast::AddressSpace::kNone,
+            ast::Access::kUndefined,
             /* constant_value */ nullptr, sem::BindingPoint{}, std::nullopt);
     } else {
         sem = builder_->create<sem::LocalVariable>(v, ty, sem::EvaluationStage::kRuntime,
-                                                   ast::AddressSpace::kNone, ast::Access::kInvalid,
-                                                   current_statement_,
+                                                   ast::AddressSpace::kNone,
+                                                   ast::Access::kUndefined, current_statement_,
                                                    /* constant_value */ nullptr);
     }
 
@@ -441,7 +442,7 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
     }
 
     auto* sem = builder_->create<sem::GlobalVariable>(
-        v, ty, sem::EvaluationStage::kOverride, ast::AddressSpace::kNone, ast::Access::kInvalid,
+        v, ty, sem::EvaluationStage::kOverride, ast::AddressSpace::kNone, ast::Access::kUndefined,
         /* constant_value */ nullptr, sem::BindingPoint{}, std::nullopt);
     sem->SetConstructor(rhs);
 
@@ -526,10 +527,10 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
 
     auto* sem = is_global ? static_cast<sem::Variable*>(builder_->create<sem::GlobalVariable>(
                                 c, ty, sem::EvaluationStage::kConstant, ast::AddressSpace::kNone,
-                                ast::Access::kInvalid, value, sem::BindingPoint{}, std::nullopt))
+                                ast::Access::kUndefined, value, sem::BindingPoint{}, std::nullopt))
                           : static_cast<sem::Variable*>(builder_->create<sem::LocalVariable>(
                                 c, ty, sem::EvaluationStage::kConstant, ast::AddressSpace::kNone,
-                                ast::Access::kInvalid, current_statement_, value));
+                                ast::Access::kUndefined, current_statement_, value));
 
     sem->SetConstructor(rhs);
     builder_->Sem().Add(c, sem);
@@ -588,7 +589,7 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
     }
 
     auto access = var->declared_access;
-    if (access == ast::Access::kInvalid) {
+    if (access == ast::Access::kUndefined) {
         access = DefaultAccessForAddressSpace(address_space);
     }
 
@@ -752,9 +753,9 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
         location = c->As<uint32_t>();
     }
 
-    auto* sem = builder_->create<sem::Parameter>(param, index, ty, ast::AddressSpace::kNone,
-                                                 ast::Access::kInvalid, sem::ParameterUsage::kNone,
-                                                 binding_point, location);
+    auto* sem = builder_->create<sem::Parameter>(
+        param, index, ty, ast::AddressSpace::kNone, ast::Access::kUndefined,
+        sem::ParameterUsage::kNone, binding_point, location);
     builder_->Sem().Add(param, sem);
     return sem;
 }
@@ -1797,7 +1798,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                                 static_cast<uint32_t>(i),  // index
                                 arr->ElemType(),           // type
                                 ast::AddressSpace::kNone,  // address_space
-                                ast::Access::kInvalid);
+                                ast::Access::kUndefined);
                         });
                         return builder_->create<sem::TypeConstructor>(arr, std::move(params),
                                                                       args_stage);
@@ -1826,7 +1827,7 @@ sem::Call* Resolver::Call(const ast::CallExpression* expr) {
                                 static_cast<uint32_t>(i),   // index
                                 str->Members()[i]->Type(),  // type
                                 ast::AddressSpace::kNone,   // address_space
-                                ast::Access::kInvalid);     // access
+                                ast::Access::kUndefined);   // access
                         }
                         return builder_->create<sem::TypeConstructor>(str, std::move(params),
                                                                       args_stage);

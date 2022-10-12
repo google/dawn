@@ -383,7 +383,7 @@ Maybe<Void> ParserImpl::enable_directive() {
             return add_error(t.source(), "enable directives don't take parenthesis");
         }
 
-        auto extension = ast::Extension::kInvalid;
+        auto extension = ast::Extension::kUndefined;
         if (t.Is(Token::Type::kF16)) {
             // `f16` is a valid extension name and also a keyword
             synchronized_ = true;
@@ -991,7 +991,7 @@ Maybe<ParserImpl::VariableQualifier> ParserImpl::variable_qualifier() {
             }
             return VariableQualifier{sc.value, ac.value};
         }
-        return Expect<VariableQualifier>{VariableQualifier{sc.value, ast::Access::kInvalid},
+        return Expect<VariableQualifier>{VariableQualifier{sc.value, ast::Access::kUndefined},
                                          source};
     });
 
@@ -1179,7 +1179,7 @@ Expect<ENUM> ParserImpl::expect_enum(std::string_view name,
     auto& t = peek();
     if (t.IsIdentifier()) {
         auto val = parse(t.to_str());
-        if (val != ENUM::kInvalid) {
+        if (val != ENUM::kUndefined) {
             synchronized_ = true;
             next();
             return {val, t.source()};
@@ -1247,7 +1247,7 @@ Expect<const ast::Type*> ParserImpl::expect_type_specifier_pointer(const Source&
     const char* use = "ptr declaration";
 
     auto address_space = ast::AddressSpace::kNone;
-    auto access = ast::Access::kInvalid;
+    auto access = ast::Access::kUndefined;
 
     auto subtype = expect_lt_gt_block(use, [&]() -> Expect<const ast::Type*> {
         auto sc = expect_address_space(use);
@@ -3512,7 +3512,7 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
                 return Failure::kErrored;
             }
 
-            ast::InterpolationSampling sampling = ast::InterpolationSampling::kInvalid;
+            ast::InterpolationSampling sampling = ast::InterpolationSampling::kUndefined;
             if (match(Token::Type::kComma)) {
                 if (!peek_is(Token::Type::kParenRight)) {
                     auto sample = expect_interpolation_sample_name();

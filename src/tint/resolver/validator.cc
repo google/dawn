@@ -263,7 +263,7 @@ bool Validator::StorageTexture(const ast::StorageTexture* t) const {
     switch (t->access) {
         case ast::Access::kWrite:
             break;
-        case ast::Access::kInvalid:
+        case ast::Access::kUndefined:
             AddError("storage texture missing access control", t->source);
             return false;
         default:
@@ -621,7 +621,7 @@ bool Validator::GlobalVariable(
             // https://gpuweb.github.io/gpuweb/wgsl/#variable-declaration
             // The access mode always has a default, and except for variables in the storage address
             // space, must not be written.
-            if (var->declared_access != ast::Access::kInvalid) {
+            if (var->declared_access != ast::Access::kUndefined) {
                 if (global->AddressSpace() == ast::AddressSpace::kStorage) {
                     // The access mode for the storage address space can only be 'read' or
                     // 'read_write'.
@@ -1021,7 +1021,7 @@ bool Validator::InterpolateAttribute(const ast::InterpolateAttribute* attr,
     }
 
     if (attr->type == ast::InterpolationType::kFlat &&
-        attr->sampling != ast::InterpolationSampling::kInvalid) {
+        attr->sampling != ast::InterpolationSampling::kUndefined) {
         AddError("flat interpolation attribute must not have a sampling parameter", attr->source);
         return false;
     }
@@ -1726,7 +1726,7 @@ bool Validator::RequiredExtensionForBuiltinFunction(
     }
 
     const auto extension = builtin->RequiredExtension();
-    if (extension == ast::Extension::kInvalid) {
+    if (extension == ast::Extension::kUndefined) {
         return true;
     }
 

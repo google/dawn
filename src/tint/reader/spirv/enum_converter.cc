@@ -59,7 +59,7 @@ ast::AddressSpace EnumConverter::ToAddressSpace(const SpvStorageClass sc) {
     }
 
     Fail() << "unknown SPIR-V storage class: " << uint32_t(sc);
-    return ast::AddressSpace::kInvalid;
+    return ast::AddressSpace::kUndefined;
 }
 
 ast::BuiltinValue EnumConverter::ToBuiltin(SpvBuiltIn b) {
@@ -93,7 +93,7 @@ ast::BuiltinValue EnumConverter::ToBuiltin(SpvBuiltIn b) {
     }
 
     Fail() << "unknown SPIR-V builtin: " << uint32_t(b);
-    return ast::BuiltinValue::kInvalid;
+    return ast::BuiltinValue::kUndefined;
 }
 
 ast::TextureDimension EnumConverter::ToDim(SpvDim dim, bool arrayed) {
@@ -129,7 +129,7 @@ ast::TextureDimension EnumConverter::ToDim(SpvDim dim, bool arrayed) {
 ast::TexelFormat EnumConverter::ToTexelFormat(SpvImageFormat fmt) {
     switch (fmt) {
         case SpvImageFormatUnknown:
-            return ast::TexelFormat::kInvalid;
+            return ast::TexelFormat::kUndefined;
 
         // 8 bit channels
         case SpvImageFormatRgba8:
@@ -172,7 +172,7 @@ ast::TexelFormat EnumConverter::ToTexelFormat(SpvImageFormat fmt) {
             break;
     }
     Fail() << "invalid image format: " << int(fmt);
-    return ast::TexelFormat::kInvalid;
+    return ast::TexelFormat::kUndefined;
 }
 
 }  // namespace tint::reader::spirv

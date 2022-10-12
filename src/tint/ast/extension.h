@@ -32,7 +32,7 @@ namespace tint::ast {
 /// An enumerator of WGSL extensions
 /// @see src/tint/intrinsics.def for extension descriptions
 enum class Extension {
-    kInvalid,
+    kUndefined,
     kChromiumDisableUniformityAnalysis,
     kChromiumExperimentalDp4A,
     kChromiumExperimentalPushConstant,
@@ -46,7 +46,7 @@ std::ostream& operator<<(std::ostream& out, Extension value);
 
 /// ParseExtension parses a Extension from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or Extension::kInvalid if the string could not be parsed.
+/// @returns the parsed enum, or Extension::kUndefined if the string could not be parsed.
 Extension ParseExtension(std::string_view str);
 
 constexpr const char* kExtensionStrings[] = {

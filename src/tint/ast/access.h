@@ -29,7 +29,7 @@ namespace tint::ast {
 
 /// Address space of a given pointer.
 enum class Access {
-    kInvalid,
+    kUndefined,
     kRead,
     kReadWrite,
     kWrite,
@@ -42,7 +42,7 @@ std::ostream& operator<<(std::ostream& out, Access value);
 
 /// ParseAccess parses a Access from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or Access::kInvalid if the string could not be parsed.
+/// @returns the parsed enum, or Access::kUndefined if the string could not be parsed.
 Access ParseAccess(std::string_view str);
 
 constexpr const char* kAccessStrings[] = {

@@ -4854,7 +4854,7 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
                 }
                 // Local variables are always Function storage class, with default
                 // access mode.
-                return DefInfo::Pointer{ast::AddressSpace::kFunction, ast::Access::kInvalid};
+                return DefInfo::Pointer{ast::AddressSpace::kFunction, ast::Access::kUndefined};
             }
             case SpvOpFunctionParameter: {
                 const auto* type = As<Pointer>(parser_impl_.ConvertType(inst.type_id()));
@@ -4862,7 +4862,7 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
                 // Using kUndefined is ok for now, since the only non-default access mode
                 // on a pointer would be for a storage buffer, and baseline SPIR-V doesn't
                 // allow passing pointers to buffers as function parameters.
-                return DefInfo::Pointer{type->address_space, ast::Access::kInvalid};
+                return DefInfo::Pointer{type->address_space, ast::Access::kUndefined};
             }
             default:
                 break;
@@ -5086,7 +5086,7 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
             // Avoid moving combinatorial values across constructs.  This is a
             // simple heuristic to avoid changing the cost of an operation
             // by moving it into or out of a loop, for example.
-            if ((def_info->pointer.address_space == ast::AddressSpace::kInvalid) &&
+            if ((def_info->pointer.address_space == ast::AddressSpace::kUndefined) &&
                 local_def.used_in_another_construct) {
                 should_hoist_to_let = true;
             }

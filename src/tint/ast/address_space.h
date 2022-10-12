@@ -29,7 +29,7 @@ namespace tint::ast {
 
 /// Address space of a given pointer.
 enum class AddressSpace {
-    kInvalid,
+    kUndefined,
     kFunction,
     kHandle,  // Tint-internal enum entry - not parsed
     kIn,      // Tint-internal enum entry - not parsed
@@ -49,7 +49,7 @@ std::ostream& operator<<(std::ostream& out, AddressSpace value);
 
 /// ParseAddressSpace parses a AddressSpace from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or AddressSpace::kInvalid if the string could not be parsed.
+/// @returns the parsed enum, or AddressSpace::kUndefined if the string could not be parsed.
 AddressSpace ParseAddressSpace(std::string_view str);
 
 constexpr const char* kAddressSpaceStrings[] = {

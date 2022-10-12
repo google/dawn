@@ -227,7 +227,7 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Flat) {
 
     auto* interp = var_attr->As<ast::InterpolateAttribute>();
     EXPECT_EQ(interp->type, ast::InterpolationType::kFlat);
-    EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kInvalid);
+    EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kUndefined);
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_Single_TrailingComma) {
@@ -243,7 +243,7 @@ TEST_F(ParserImplTest, Attribute_Interpolate_Single_TrailingComma) {
 
     auto* interp = var_attr->As<ast::InterpolateAttribute>();
     EXPECT_EQ(interp->type, ast::InterpolationType::kFlat);
-    EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kInvalid);
+    EXPECT_EQ(interp->sampling, ast::InterpolationSampling::kUndefined);
 }
 
 TEST_F(ParserImplTest, Attribute_Interpolate_Single_DoubleTrailingComma) {

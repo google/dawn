@@ -120,7 +120,7 @@ std::tuple<InterpolationType, InterpolationSampling> CalculateInterpolationData(
     auto ast_interpolation_type = interpolation_attribute->type;
     auto ast_sampling_type = interpolation_attribute->sampling;
     if (ast_interpolation_type != ast::InterpolationType::kFlat &&
-        ast_sampling_type == ast::InterpolationSampling::kInvalid) {
+        ast_sampling_type == ast::InterpolationSampling::kUndefined) {
         ast_sampling_type = ast::InterpolationSampling::kCenter;
     }
 
@@ -135,13 +135,13 @@ std::tuple<InterpolationType, InterpolationSampling> CalculateInterpolationData(
         case ast::InterpolationType::kFlat:
             interpolation_type = InterpolationType::kFlat;
             break;
-        case ast::InterpolationType::kInvalid:
+        case ast::InterpolationType::kUndefined:
             break;
     }
 
     auto sampling_type = InterpolationSampling::kUnknown;
     switch (ast_sampling_type) {
-        case ast::InterpolationSampling::kInvalid:
+        case ast::InterpolationSampling::kUndefined:
             sampling_type = InterpolationSampling::kNone;
             break;
         case ast::InterpolationSampling::kCenter:

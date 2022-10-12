@@ -346,7 +346,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
 
 bool GeneratorImpl::EmitImageFormat(std::ostream& out, const ast::TexelFormat fmt) {
     switch (fmt) {
-        case ast::TexelFormat::kInvalid:
+        case ast::TexelFormat::kUndefined:
             diagnostics_.add_error(diag::System::Writer, "unknown image format");
             return false;
         default:
@@ -433,7 +433,7 @@ bool GeneratorImpl::EmitType(std::ostream& out, const ast::Type* ty) {
             if (!EmitType(out, ptr->type)) {
                 return false;
             }
-            if (ptr->access != ast::Access::kInvalid) {
+            if (ptr->access != ast::Access::kUndefined) {
                 out << ", ";
                 if (!EmitAccess(out, ptr->access)) {
                     return false;
@@ -656,9 +656,9 @@ bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* v) {
             out << "var";
             auto address_space = var->declared_address_space;
             auto ac = var->declared_access;
-            if (address_space != ast::AddressSpace::kNone || ac != ast::Access::kInvalid) {
+            if (address_space != ast::AddressSpace::kNone || ac != ast::Access::kUndefined) {
                 out << "<" << address_space;
-                if (ac != ast::Access::kInvalid) {
+                if (ac != ast::Access::kUndefined) {
                     out << ", ";
                     if (!EmitAccess(out, ac)) {
                         return false;
@@ -769,7 +769,7 @@ bool GeneratorImpl::EmitAttributes(std::ostream& out,
             },
             [&](const ast::InterpolateAttribute* interpolate) {
                 out << "interpolate(" << interpolate->type;
-                if (interpolate->sampling != ast::InterpolationSampling::kInvalid) {
+                if (interpolate->sampling != ast::InterpolationSampling::kUndefined) {
                     out << ", " << interpolate->sampling;
                 }
                 out << ")";

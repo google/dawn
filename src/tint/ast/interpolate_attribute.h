@@ -32,7 +32,7 @@ namespace tint::ast {
 
 /// The interpolation type.
 enum class InterpolationType {
-    kInvalid,
+    kUndefined,
     kFlat,
     kLinear,
     kPerspective,
@@ -45,7 +45,7 @@ std::ostream& operator<<(std::ostream& out, InterpolationType value);
 
 /// ParseInterpolationType parses a InterpolationType from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or InterpolationType::kInvalid if the string could not be parsed.
+/// @returns the parsed enum, or InterpolationType::kUndefined if the string could not be parsed.
 InterpolationType ParseInterpolationType(std::string_view str);
 
 constexpr const char* kInterpolationTypeStrings[] = {
@@ -56,7 +56,7 @@ constexpr const char* kInterpolationTypeStrings[] = {
 
 /// The interpolation sampling.
 enum class InterpolationSampling {
-    kInvalid,
+    kUndefined,
     kCenter,
     kCentroid,
     kSample,
@@ -69,7 +69,8 @@ std::ostream& operator<<(std::ostream& out, InterpolationSampling value);
 
 /// ParseInterpolationSampling parses a InterpolationSampling from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or InterpolationSampling::kInvalid if the string could not be parsed.
+/// @returns the parsed enum, or InterpolationSampling::kUndefined if the string could not be
+/// parsed.
 InterpolationSampling ParseInterpolationSampling(std::string_view str);
 
 constexpr const char* kInterpolationSamplingStrings[] = {

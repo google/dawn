@@ -137,7 +137,7 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(EnumConverterBad,
                          SpvStorageClassTest,
                          testing::Values(StorageClassCase{static_cast<SpvStorageClass>(9999), false,
-                                                          ast::AddressSpace::kInvalid}));
+                                                          ast::AddressSpace::kUndefined}));
 
 // Builtin
 
@@ -202,12 +202,14 @@ INSTANTIATE_TEST_SUITE_P(
                     BuiltinCase{SpvBuiltInFragDepth, true, ast::BuiltinValue::kFragDepth},
                     BuiltinCase{SpvBuiltInSampleMask, true, ast::BuiltinValue::kSampleMask}));
 
-INSTANTIATE_TEST_SUITE_P(
-    EnumConverterBad,
-    SpvBuiltinTest,
-    testing::Values(BuiltinCase{static_cast<SpvBuiltIn>(9999), false, ast::BuiltinValue::kInvalid},
-                    BuiltinCase{static_cast<SpvBuiltIn>(9999), false, ast::BuiltinValue::kInvalid},
-                    BuiltinCase{SpvBuiltInNumWorkgroups, false, ast::BuiltinValue::kInvalid}));
+INSTANTIATE_TEST_SUITE_P(EnumConverterBad,
+                         SpvBuiltinTest,
+                         testing::Values(BuiltinCase{static_cast<SpvBuiltIn>(9999), false,
+                                                     ast::BuiltinValue::kUndefined},
+                                         BuiltinCase{static_cast<SpvBuiltIn>(9999), false,
+                                                     ast::BuiltinValue::kUndefined},
+                                         BuiltinCase{SpvBuiltInNumWorkgroups, false,
+                                                     ast::BuiltinValue::kUndefined}));
 
 // Dim
 
@@ -326,7 +328,7 @@ INSTANTIATE_TEST_SUITE_P(
     SpvImageFormatTest,
     testing::Values(
         // Unknown.  This is used for sampled images.
-        TexelFormatCase{SpvImageFormatUnknown, true, ast::TexelFormat::kInvalid},
+        TexelFormatCase{SpvImageFormatUnknown, true, ast::TexelFormat::kUndefined},
         // 8 bit channels
         TexelFormatCase{SpvImageFormatRgba8, true, ast::TexelFormat::kRgba8Unorm},
         TexelFormatCase{SpvImageFormatRgba8Snorm, true, ast::TexelFormat::kRgba8Snorm},
@@ -355,23 +357,23 @@ INSTANTIATE_TEST_SUITE_P(
     SpvImageFormatTest,
     testing::Values(
         // Scanning in order from the SPIR-V spec.
-        TexelFormatCase{SpvImageFormatRg16f, false, ast::TexelFormat::kInvalid},
-        TexelFormatCase{SpvImageFormatR11fG11fB10f, false, ast::TexelFormat::kInvalid},
-        TexelFormatCase{SpvImageFormatR16f, false, ast::TexelFormat::kInvalid},
-        TexelFormatCase{SpvImageFormatRgb10A2, false, ast::TexelFormat::kInvalid},
-        TexelFormatCase{SpvImageFormatRg16, false, ast::TexelFormat::kInvalid},
-        TexelFormatCase{SpvImageFormatRg8, false, ast::TexelFormat::kInvalid},
-        TexelFormatCase{SpvImageFormatR16, false, ast::TexelFormat::kInvalid},
-        TexelFormatCase{SpvImageFormatR8, false, ast::TexelFormat::kInvalid},
-        TexelFormatCase{SpvImageFormatRgba16Snorm, false, ast::TexelFormat::kInvalid},
-        TexelFormatCase{SpvImageFormatRg16Snorm, false, ast::TexelFormat::kInvalid},
-        TexelFormatCase{SpvImageFormatRg8Snorm, false, ast::TexelFormat::kInvalid},
-        TexelFormatCase{SpvImageFormatRg16i, false, ast::TexelFormat::kInvalid},
-        TexelFormatCase{SpvImageFormatRg8i, false, ast::TexelFormat::kInvalid},
-        TexelFormatCase{SpvImageFormatR8i, false, ast::TexelFormat::kInvalid},
-        TexelFormatCase{SpvImageFormatRgb10a2ui, false, ast::TexelFormat::kInvalid},
-        TexelFormatCase{SpvImageFormatRg16ui, false, ast::TexelFormat::kInvalid},
-        TexelFormatCase{SpvImageFormatRg8ui, false, ast::TexelFormat::kInvalid}));
+        TexelFormatCase{SpvImageFormatRg16f, false, ast::TexelFormat::kUndefined},
+        TexelFormatCase{SpvImageFormatR11fG11fB10f, false, ast::TexelFormat::kUndefined},
+        TexelFormatCase{SpvImageFormatR16f, false, ast::TexelFormat::kUndefined},
+        TexelFormatCase{SpvImageFormatRgb10A2, false, ast::TexelFormat::kUndefined},
+        TexelFormatCase{SpvImageFormatRg16, false, ast::TexelFormat::kUndefined},
+        TexelFormatCase{SpvImageFormatRg8, false, ast::TexelFormat::kUndefined},
+        TexelFormatCase{SpvImageFormatR16, false, ast::TexelFormat::kUndefined},
+        TexelFormatCase{SpvImageFormatR8, false, ast::TexelFormat::kUndefined},
+        TexelFormatCase{SpvImageFormatRgba16Snorm, false, ast::TexelFormat::kUndefined},
+        TexelFormatCase{SpvImageFormatRg16Snorm, false, ast::TexelFormat::kUndefined},
+        TexelFormatCase{SpvImageFormatRg8Snorm, false, ast::TexelFormat::kUndefined},
+        TexelFormatCase{SpvImageFormatRg16i, false, ast::TexelFormat::kUndefined},
+        TexelFormatCase{SpvImageFormatRg8i, false, ast::TexelFormat::kUndefined},
+        TexelFormatCase{SpvImageFormatR8i, false, ast::TexelFormat::kUndefined},
+        TexelFormatCase{SpvImageFormatRgb10a2ui, false, ast::TexelFormat::kUndefined},
+        TexelFormatCase{SpvImageFormatRg16ui, false, ast::TexelFormat::kUndefined},
+        TexelFormatCase{SpvImageFormatRg8ui, false, ast::TexelFormat::kUndefined}));
 
 }  // namespace
 }  // namespace tint::reader::spirv

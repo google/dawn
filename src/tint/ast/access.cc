@@ -26,7 +26,7 @@ namespace tint::ast {
 
 /// ParseAccess parses a Access from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or Access::kInvalid if the string could not be parsed.
+/// @returns the parsed enum, or Access::kUndefined if the string could not be parsed.
 Access ParseAccess(std::string_view str) {
     if (str == "read") {
         return Access::kRead;
@@ -37,13 +37,13 @@ Access ParseAccess(std::string_view str) {
     if (str == "write") {
         return Access::kWrite;
     }
-    return Access::kInvalid;
+    return Access::kUndefined;
 }
 
 std::ostream& operator<<(std::ostream& out, Access value) {
     switch (value) {
-        case Access::kInvalid:
-            return out << "invalid";
+        case Access::kUndefined:
+            return out << "undefined";
         case Access::kRead:
             return out << "read";
         case Access::kReadWrite:

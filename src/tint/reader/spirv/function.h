@@ -332,10 +332,10 @@ struct DefInfo {
         /// buffer expressed in the old style (with Uniform address space)
         /// that needs to be remapped to StorageBuffer address space.
         /// This is kInvalid for non-pointers.
-        ast::AddressSpace address_space = ast::AddressSpace::kInvalid;
+        ast::AddressSpace address_space = ast::AddressSpace::kUndefined;
 
         /// The declared access mode.
-        ast::Access access = ast::Access::kInvalid;
+        ast::Access access = ast::Access::kUndefined;
     };
 
     /// The expression to use when sinking pointers into their use.

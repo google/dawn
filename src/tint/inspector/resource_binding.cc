@@ -104,7 +104,7 @@ ResourceBinding::TexelFormat TypeTexelFormatToResourceBindingTexelFormat(
             return ResourceBinding::TexelFormat::kRgba32Sint;
         case ast::TexelFormat::kRgba32Float:
             return ResourceBinding::TexelFormat::kRgba32Float;
-        case ast::TexelFormat::kInvalid:
+        case ast::TexelFormat::kUndefined:
             return ResourceBinding::TexelFormat::kNone;
     }
     return ResourceBinding::TexelFormat::kNone;

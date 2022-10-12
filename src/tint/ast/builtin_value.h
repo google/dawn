@@ -29,7 +29,7 @@ namespace tint::ast {
 
 /// Builtin value defined with `@builtin(<name>)`.
 enum class BuiltinValue {
-    kInvalid,
+    kUndefined,
     kFragDepth,
     kFrontFacing,
     kGlobalInvocationId,
@@ -52,7 +52,7 @@ std::ostream& operator<<(std::ostream& out, BuiltinValue value);
 
 /// ParseBuiltinValue parses a BuiltinValue from a string.
 /// @param str the string to parse
-/// @returns the parsed enum, or BuiltinValue::kInvalid if the string could not be parsed.
+/// @returns the parsed enum, or BuiltinValue::kUndefined if the string could not be parsed.
 BuiltinValue ParseBuiltinValue(std::string_view str);
 
 constexpr const char* kBuiltinValueStrings[] = {

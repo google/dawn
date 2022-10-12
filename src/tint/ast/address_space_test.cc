@@ -51,15 +51,15 @@ static constexpr Case kValidCases[] = {
 };
 
 static constexpr Case kInvalidCases[] = {
-    {"fccnctin", AddressSpace::kInvalid},        {"ucti3", AddressSpace::kInvalid},
-    {"functVon", AddressSpace::kInvalid},        {"priv1te", AddressSpace::kInvalid},
-    {"pqiJate", AddressSpace::kInvalid},         {"privat7ll", AddressSpace::kInvalid},
-    {"pqqsh_pponstHnt", AddressSpace::kInvalid}, {"pus_cnstat", AddressSpace::kInvalid},
-    {"bus_Gonstant", AddressSpace::kInvalid},    {"storiive", AddressSpace::kInvalid},
-    {"8WWorage", AddressSpace::kInvalid},        {"sxxrage", AddressSpace::kInvalid},
-    {"uXforgg", AddressSpace::kInvalid},         {"nfoXm", AddressSpace::kInvalid},
-    {"unif3rm", AddressSpace::kInvalid},         {"workgroEp", AddressSpace::kInvalid},
-    {"woTTPkroup", AddressSpace::kInvalid},      {"ddorkroxxp", AddressSpace::kInvalid},
+    {"fccnctin", AddressSpace::kUndefined},        {"ucti3", AddressSpace::kUndefined},
+    {"functVon", AddressSpace::kUndefined},        {"priv1te", AddressSpace::kUndefined},
+    {"pqiJate", AddressSpace::kUndefined},         {"privat7ll", AddressSpace::kUndefined},
+    {"pqqsh_pponstHnt", AddressSpace::kUndefined}, {"pus_cnstat", AddressSpace::kUndefined},
+    {"bus_Gonstant", AddressSpace::kUndefined},    {"storiive", AddressSpace::kUndefined},
+    {"8WWorage", AddressSpace::kUndefined},        {"sxxrage", AddressSpace::kUndefined},
+    {"uXforgg", AddressSpace::kUndefined},         {"nfoXm", AddressSpace::kUndefined},
+    {"unif3rm", AddressSpace::kUndefined},         {"workgroEp", AddressSpace::kUndefined},
+    {"woTTPkroup", AddressSpace::kUndefined},      {"ddorkroxxp", AddressSpace::kUndefined},
 };
 
 using AddressSpaceParseTest = testing::TestWithParam<Case>;
