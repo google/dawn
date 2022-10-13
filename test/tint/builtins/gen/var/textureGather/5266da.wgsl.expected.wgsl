@@ -3,8 +3,9 @@
 @group(1) @binding(2) var arg_2 : sampler;
 
 fn textureGather_5266da() {
+  const arg_0 = 1;
   var arg_3 = vec2<f32>();
-  var res : vec4<f32> = textureGather(1, arg_1, arg_2, arg_3);
+  var res : vec4<f32> = textureGather(arg_0, arg_1, arg_2, arg_3);
 }
 
 @vertex

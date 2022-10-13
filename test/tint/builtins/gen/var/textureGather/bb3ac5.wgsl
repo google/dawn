@@ -25,8 +25,9 @@
 
 // fn textureGather(@const component: i32, texture: texture_2d<i32>, sampler: sampler, coords: vec2<f32>) -> vec4<i32>
 fn textureGather_bb3ac5() {
+  const arg_0 = 1;
   var arg_3 = vec2<f32>();
-  var res: vec4<i32> = textureGather(1, arg_1, arg_2, arg_3);
+  var res: vec4<i32> = textureGather(arg_0, arg_1, arg_2, arg_3);
 }
 
 @vertex

@@ -124,10 +124,10 @@ fn {{$permutation}}() {
 {{template "Type" index $p.Type.TemplateArguments 1}};
 {{- /*indent*/}}  var arg_{{$i}}: {{template "Type" index $p.Type.TemplateArguments 1}};
 {{          $args.Put $i (printf "&arg_%v" $i) -}}
-{{-       else if and (not $p.IsConst) (eq "var" $mode) -}}
-{{-         if $is_abstract }}  const arg_{{$i}} = {{Eval "ArgumentValue" $p}};
-{{          else            }}  var arg_{{$i}} = {{Eval "ArgumentValue" $p}};
-{{          end             }}
+{{-       else if eq "var" $mode -}}
+{{-         if or $is_abstract $p.IsConst }}  const arg_{{$i}} = {{Eval "ArgumentValue" $p}};
+{{          else                          }}  var arg_{{$i}} = {{Eval "ArgumentValue" $p}};
+{{          end                           }}
 {{-         $args.Put $i (printf "arg_%v" $i) -}}
 {{-       else -}}
 {{-         $args.Put $i (Eval "ArgumentValue" $p) -}}

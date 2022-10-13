@@ -4,7 +4,8 @@
 
 fn textureGather_1f7f6b() {
   var arg_2 = vec2<f32>();
-  var res : vec4<f32> = textureGather(arg_0, arg_1, arg_2, vec2<i32>());
+  const arg_3 = vec2<i32>();
+  var res : vec4<f32> = textureGather(arg_0, arg_1, arg_2, arg_3);
 }
 
 @vertex

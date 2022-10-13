@@ -1663,50 +1663,29 @@ bool Validator::TextureBuiltinFunction(const sem::Call* call) const {
         std::string name = sem::str(usage);
         auto* arg = call->Arguments()[index];
         if (auto values = arg->ConstantValue()) {
-            // Assert that the constant values are of the expected type.
-            if (!values->Type()->is_integer_scalar_or_vector()) {
-                TINT_ICE(Resolver, diagnostics_)
-                    << "failed to resolve '" + func_name + "' " << name << " parameter type";
-                return false;
-            }
-
-            // Currently const_expr is restricted to literals and type constructors.
-            // Check that that's all we have for the parameter.
-            bool is_const_expr = true;
-            ast::TraverseExpressions(
-                arg->Declaration(), diagnostics_, [&](const ast::Expression* e) {
-                    if (e->IsAnyOf<ast::LiteralExpression, ast::CallExpression>()) {
-                        return ast::TraverseAction::Descend;
-                    }
-                    is_const_expr = false;
-                    return ast::TraverseAction::Stop;
-                });
-            if (is_const_expr) {
-                if (auto* vector = builtin->Parameters()[index]->Type()->As<sem::Vector>()) {
-                    for (size_t i = 0; i < vector->Width(); i++) {
-                        auto value = values->Index(i)->As<AInt>();
-                        if (value < min || value > max) {
-                            AddError("each component of the " + name +
-                                         " argument must be at least " + std::to_string(min) +
-                                         " and at most " + std::to_string(max) + ". " + name +
-                                         " component " + std::to_string(i) + " is " +
-                                         std::to_string(value),
-                                     arg->Declaration()->source);
-                            return false;
-                        }
-                    }
-                } else {
-                    auto value = values->As<AInt>();
+            if (auto* vector = values->Type()->As<sem::Vector>()) {
+                for (size_t i = 0; i < vector->Width(); i++) {
+                    auto value = values->Index(i)->As<AInt>();
                     if (value < min || value > max) {
-                        AddError("the " + name + " argument must be at least " +
+                        AddError("each component of the " + name + " argument must be at least " +
                                      std::to_string(min) + " and at most " + std::to_string(max) +
-                                     ". " + name + " is " + std::to_string(value),
+                                     ". " + name + " component " + std::to_string(i) + " is " +
+                                     std::to_string(value),
                                  arg->Declaration()->source);
                         return false;
                     }
                 }
-                return true;
+            } else {
+                auto value = values->As<AInt>();
+                if (value < min || value > max) {
+                    AddError("the " + name + " argument must be at least " + std::to_string(min) +
+                                 " and at most " + std::to_string(max) + ". " + name + " is " +
+                                 std::to_string(value),
+                             arg->Declaration()->source);
+                    return false;
+                }
             }
+            return true;
         }
         AddError("the " + name + " argument must be a const-expression",
                  arg->Declaration()->source);

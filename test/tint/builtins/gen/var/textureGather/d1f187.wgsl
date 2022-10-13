@@ -25,9 +25,11 @@
 
 // fn textureGather(@const component: i32, texture: texture_2d_array<u32>, sampler: sampler, coords: vec2<f32>, array_index: i32, @const offset: vec2<i32>) -> vec4<u32>
 fn textureGather_d1f187() {
+  const arg_0 = 1;
   var arg_3 = vec2<f32>();
   var arg_4 = 1;
-  var res: vec4<u32> = textureGather(1, arg_1, arg_2, arg_3, arg_4, vec2<i32>());
+  const arg_5 = vec2<i32>();
+  var res: vec4<u32> = textureGather(arg_0, arg_1, arg_2, arg_3, arg_4, arg_5);
 }
 
 @vertex
