@@ -2091,14 +2091,16 @@ void Resolver::CollectTextureSamplerPairs(const sem::Builtin* builtin,
     if (texture_index == -1) {
         TINT_ICE(Resolver, diagnostics_) << "texture builtin without texture parameter";
     }
-    auto* texture = args[static_cast<size_t>(texture_index)]->As<sem::VariableUser>()->Variable();
-    if (!texture->Type()->UnwrapRef()->Is<sem::StorageTexture>()) {
-        int sampler_index = signature.IndexOf(sem::ParameterUsage::kSampler);
-        const sem::Variable* sampler =
-            sampler_index != -1
-                ? args[static_cast<size_t>(sampler_index)]->As<sem::VariableUser>()->Variable()
-                : nullptr;
-        current_function_->AddTextureSamplerPair(texture, sampler);
+    if (auto* user = args[static_cast<size_t>(texture_index)]->As<sem::VariableUser>()) {
+        auto* texture = user->Variable();
+        if (!texture->Type()->UnwrapRef()->Is<sem::StorageTexture>()) {
+            int sampler_index = signature.IndexOf(sem::ParameterUsage::kSampler);
+            const sem::Variable* sampler =
+                sampler_index != -1
+                    ? args[static_cast<size_t>(sampler_index)]->As<sem::VariableUser>()->Variable()
+                    : nullptr;
+            current_function_->AddTextureSamplerPair(texture, sampler);
+        }
     }
 }
 

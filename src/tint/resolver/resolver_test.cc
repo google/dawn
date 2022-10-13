@@ -2212,6 +2212,51 @@ TEST_F(ResolverTest, TextureSampler_TextureDimensions) {
     EXPECT_TRUE(pairs[0].second == nullptr);
 }
 
+TEST_F(ResolverTest, TextureSampler_Bug1715) {  // crbug.com/tint/1715
+    // @binding(0) @group(0) var s: sampler;
+    // @binding(1) @group(0) var t: texture_2d<f32>;
+    // @binding(2) @group(0) var<uniform> c: vec2<f32>;
+    //
+    // @fragment
+    // fn main() -> @location(0) vec4<f32> {
+    //     return helper(&s, &t);
+    // }
+    //
+    // fn helper(sl: ptr<function, sampler>, tl: ptr<function, texture_2d<f32>>) -> vec4<f32> {
+    //     return textureSampleLevel(*tl, *sl, c, 0.0);
+    // }
+    GlobalVar("s", ty.sampler(ast::SamplerKind::kSampler), Group(0_a), Binding(0_a));
+    GlobalVar("t", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Group(0_a),
+              Binding(1_a));
+    GlobalVar("c", ty.vec2<f32>(), ast::AddressSpace::kUniform, Group(0_a), Binding(2_a));
+
+    Func("main", utils::Empty, ty.vec4<f32>(),
+         utils::Vector{
+             Return(Call("helper", AddressOf("s"), AddressOf("t"))),
+         },
+         utils::Vector{
+             Stage(ast::PipelineStage::kFragment),
+         },
+         utils::Vector{
+             Location(0_u),
+         });
+
+    Func("helper",
+         utils::Vector{
+             Param("sl", ty.pointer(ty.sampler(ast::SamplerKind::kSampler),
+                                    ast::AddressSpace::kFunction)),
+             Param("tl", ty.pointer(ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+                                    ast::AddressSpace::kFunction)),
+         },
+         ty.vec4<f32>(),
+         utils::Vector{
+             Return(Call("textureSampleLevel", Deref("tl"), Deref("sl"), "c", 0.0_a)),
+         });
+
+    ASSERT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "error: cannot take the address of expression in handle address space");
+}
+
 TEST_F(ResolverTest, ModuleDependencyOrderedDeclarations) {
     auto* f0 = Func("f0", utils::Empty, ty.void_(), utils::Empty);
     auto* v0 = GlobalVar("v0", ty.i32(), ast::AddressSpace::kPrivate);
