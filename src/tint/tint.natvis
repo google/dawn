@@ -16,6 +16,11 @@
 -->
 
 <AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+
+	<!--=================================================================-->
+	<!-- utils -->
+	<!--=================================================================-->
+
 	<Type Name="tint::utils::Slice&lt;*&gt;">
 		<DisplayString>{{ length={len}, capacity={cap} }}</DisplayString>
 		<Expand>
@@ -29,10 +34,15 @@
 	</Type>
 
 	<Type Name="tint::utils::Vector&lt;*,*&gt;">
+		<Intrinsic Name="Length" Expression="(size_t)(impl_.slice.len)" />
 		<Expand>
 			<Item Name="[heap]">impl_.slice.cap > (int)$T2</Item>
-			<ExpandedItem>impl_.slice</ExpandedItem>
+			<!--<ExpandedItem>impl_.slice</ExpandedItem>-->
 			<!--<Item Name="[slice]">impl_.slice</Item>-->
+			<ArrayItems>
+				<Size>Length()</Size>
+				<ValuePointer>impl_.slice.data</ValuePointer>
+			</ArrayItems>
 		</Expand>
 	</Type>
 
@@ -49,6 +59,10 @@
 		<DisplayString Optional="true">{debug_name_,sb}</DisplayString>
 	</Type>
 
+	<!--=================================================================-->
+	<!-- ast -->
+	<!--=================================================================-->
+	
 	<Type Name="tint::ast::AssignmentStatement">
 		<DisplayString>{*lhs} = {*rhs};</DisplayString>
 		<Expand>
@@ -58,11 +72,8 @@
 	</Type>
 
 	<Type Name="tint::ast::IfStatement">
-		<DisplayString Condition="else_statements.size() == 0">if ({*condition}) {*body}</DisplayString>
-		<DisplayString Condition="else_statements.size() == 1">if ({*condition}) {*body} {*else_statements[0]} </DisplayString>
-		<DisplayString Condition="else_statements.size() == 2">if ({*condition}) {*body} {*else_statements[0]} {*else_statements[1]} </DisplayString>
-		<DisplayString Condition="else_statements.size() == 3">if ({*condition}) {*body} {*else_statements[0]} {*else_statements[1]} {*else_statements[2]}</DisplayString>
-		<DisplayString Condition="else_statements.size()  > 3">if ({*condition}) {*body} {*else_statements[0]} {*else_statements[1]} {*else_statements[2]} else {else_statements.size()-3} more...</DisplayString>
+		<DisplayString Condition="!else_statement">if ({*condition}) {*body}</DisplayString>
+		<DisplayString Condition="else_statement">if ({*condition}) {*body} else { *else_statement }</DisplayString>
 	</Type>
 
 	<Type Name="tint::ast::ElseStatement">
@@ -71,10 +82,10 @@
 	</Type>
 
 	<Type Name="tint::ast::BlockStatement">
-		<DisplayString Condition="statements.size() == 1">{{ {*statements[0]} }} </DisplayString>
-		<DisplayString Condition="statements.size() == 2">{{ {*statements[0]} {*statements[1]} }} </DisplayString>
-		<DisplayString Condition="statements.size() == 3">{{ {*statements[0]} {*statements[1]} {*statements[2]} }} </DisplayString>
-		<DisplayString Condition="statements.size()  > 3">{{ {*statements[0]} {*statements[1]} {*statements[2]} {statements.size()-3} more... }} </DisplayString>
+		<DisplayString Condition="statements.Length() == 1">{{ {*statements[0]} }} </DisplayString>
+		<DisplayString Condition="statements.Length() == 2">{{ {*statements[0]} {*statements[1]} }} </DisplayString>
+		<DisplayString Condition="statements.Length() == 3">{{ {*statements[0]} {*statements[1]} {*statements[2]} }} </DisplayString>
+		<DisplayString Condition="statements.Length()  > 3">{{ {*statements[0]} {*statements[1]} {*statements[2]} {statements.Length()-3} more... }} </DisplayString>
 	</Type>
 
 	<Type Name="tint::ast::ReturnStatement">
@@ -114,15 +125,16 @@
 		</Expand>
 	</Type>
 
-	<Type Name="tint::ast::Variable">
-		<!-- Hack: we can deduce that this variable is a parameter if it's const with a type but no constructor, which is illegal for a let  -->
-		<DisplayString Condition=" is_const &amp; !!type &amp;  !constructor">{symbol} : {*type}</DisplayString>
+	<Type Name="tint::ast::Let">
+		<DisplayString Condition="!!type">let {symbol} : {*type} = {*constructor}</DisplayString>
+		<DisplayString Condition=" !type">let {symbol} = {*constructor}</DisplayString>
+	</Type>
 
-		<DisplayString Condition=" is_const &amp; !!type &amp; !!constructor">let {symbol} : {*type} = {*constructor}</DisplayString>
-		<DisplayString Condition=" is_const &amp;  !type &amp;  !constructor">let {symbol} = {*constructor}</DisplayString>
-		<DisplayString Condition="!is_const &amp; !!type &amp; !!constructor">var {symbol} : {*type} = {*constructor}</DisplayString>
-		<DisplayString Condition="!is_const &amp;  !type &amp; !!constructor">var {symbol} = {*constructor}</DisplayString>
-		<DisplayString Condition="!is_const &amp; !!type &amp;  !constructor">var {symbol}</DisplayString>
+	<Type Name="tint::ast::Variable">
+		<DisplayString Condition="!!type &amp; !!constructor">var {symbol} : {*type} = {*constructor}</DisplayString>
+		<DisplayString Condition="!!type &amp;  !constructor">var {symbol} : {*type}</DisplayString>
+		<DisplayString Condition=" !type &amp; !!constructor">var {symbol} = {*constructor}</DisplayString>
+		<DisplayString Condition=" !type &amp;  !constructor">var {symbol}</DisplayString>
 	</Type>
 
 	<Type Name="tint::ast::VariableDeclStatement">
@@ -142,11 +154,11 @@
 	</Type>
 
 	<Type Name="tint::ast::UnaryOpExpression">
-		<DisplayString Condition="op==tint::ast::UnaryOp::kAddressOf">&amp;({expr})</DisplayString>
-		<DisplayString Condition="op==tint::ast::UnaryOp::kComplement">~({expr})</DisplayString>
-		<DisplayString Condition="op==tint::ast::UnaryOp::kIndirection">*({expr})</DisplayString>
-		<DisplayString Condition="op==tint::ast::UnaryOp::kNegation">-({expr})</DisplayString>
-		<DisplayString Condition="op==tint::ast::UnaryOp::kNot">!({expr})</DisplayString>
+		<DisplayString Condition="op==tint::ast::UnaryOp::kAddressOf">&amp;({*expr})</DisplayString>
+		<DisplayString Condition="op==tint::ast::UnaryOp::kComplement">~({*expr})</DisplayString>
+		<DisplayString Condition="op==tint::ast::UnaryOp::kIndirection">*({*expr})</DisplayString>
+		<DisplayString Condition="op==tint::ast::UnaryOp::kNegation">-({*expr})</DisplayString>
+		<DisplayString Condition="op==tint::ast::UnaryOp::kNot">!({*expr})</DisplayString>
 	</Type>
 
 	<Type Name="tint::ast::BinaryExpression">
@@ -172,11 +184,12 @@
 	</Type>
 
 	<Type Name="tint::ast::CallExpression">
-		<DisplayString Condition="args.size() == 0">{target}()</DisplayString>
-		<DisplayString Condition="args.size() == 1">{target}({*args[0]})</DisplayString>
-		<DisplayString Condition="args.size() == 2">{target}({*args[0]}, {*args[1]})</DisplayString>
-		<DisplayString Condition="args.size() == 3">{target}({*args[0]}, {*args[1]}, {*args[2]})</DisplayString>
-		<DisplayString Condition="args.size()  > 3">{target}({*args[0]}, {*args[1]}, {*args[2]}, {args.size()-3} more...)</DisplayString>
+		<DisplayString Condition="args.Length() == 0">{target}()</DisplayString>
+		<DisplayString Condition="args.Length() == 1">{target}({*args[0]})</DisplayString>
+		<DisplayString Condition="args.Length() == 2">{target}({*args[0]}, {*args[1]})</DisplayString>
+		<DisplayString Condition="args.Length() == 3">{target}({*args[0]}, {*args[1]}, {*args[2]})</DisplayString>
+		<DisplayString Condition="args.Length() == 4">{target}({*args[0]}, {*args[1]}, {*args[2]}, {*args[3]})</DisplayString>
+		<DisplayString Condition="args.Length()  > 4">{target}({*args[0]}, {*args[1]}, {*args[2]}, {args.Length()-3} more...)</DisplayString>
 		<!-- TODO: add more overloads -->
 	</Type>
 
@@ -188,6 +201,15 @@
 	<Type Name="tint::ast::Array">
 		<DisplayString Condition="count != nullptr">array&lt;{*type},{*count}&gt;</DisplayString>
 		<DisplayString Condition="count == nullptr">array&lt;{*type}&gt;</DisplayString>
+	</Type>
+
+	<Type Name="tint::ast::Vector">
+		<DisplayString Condition="width==2 &amp; !type">vec2</DisplayString>
+		<DisplayString Condition="width==3 &amp; !type">vec3</DisplayString>
+		<DisplayString Condition="width==4 &amp; !type">vec4</DisplayString>
+		<DisplayString Condition="width==2 &amp; !!type">vec2&lt;{*type}&gt;</DisplayString>
+		<DisplayString Condition="width==3 &amp; !!type">vec3&lt;{*type}&gt;</DisplayString>
+		<DisplayString Condition="width==4 &amp; !!type">vec4&lt;{*type}&gt;</DisplayString>
 	</Type>
 
 	<Type Name="tint::ast::TypeName">
@@ -208,6 +230,38 @@
 
 	<Type Name="tint::ast::F32">
 		<DisplayString>f32</DisplayString>
+	</Type>
+
+	<!--=================================================================-->
+	<!-- sem -->
+	<!--=================================================================-->
+
+	<Type Name="tint::sem::AbstractInt">
+		<DisplayString>AbstractInt</DisplayString>
+	</Type>
+
+	<Type Name="tint::sem::AbstractFloat">
+		<DisplayString>AbstractFloat</DisplayString>
+	</Type>
+
+	<Type Name="tint::sem::Bool">
+		<DisplayString>bool</DisplayString>
+	</Type>
+
+	<Type Name="tint::sem::F32">
+		<DisplayString>f32</DisplayString>
+	</Type>
+
+	<Type Name="tint::sem::Vector">
+		<DisplayString>vec{width_}&lt;{*subtype_}&gt;</DisplayString>
+	</Type>
+
+	<Type Name="tint::sem::Constant">
+		<DisplayString>Type={*Type()} Value={Value()}</DisplayString>
+	</Type>
+
+	<Type Name="tint::sem::Expression">
+		<DisplayString>Decl={*declaration_}</DisplayString>
 	</Type>
 
 </AutoVisualizer>
