@@ -188,14 +188,6 @@ TEST_P(DepthStencilLoadOpTests, ClearMip0) {
 
 // Check that clearing a non-zero mip level works at all.
 TEST_P(DepthStencilLoadOpTests, ClearMip1) {
-    // TODO(crbug.com/dawn/838): Sampling from the non-zero mip does not work.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && GetParam().mCheck == Check::SampleDepth);
-
-    // TODO(crbug.com/dawn/838): Copying from the non-zero mip here sometimes returns uninitialized
-    // data! (from mip 0 of a previous test run).
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && GetParam().mCheck == Check::CopyDepth);
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && GetParam().mCheck == Check::CopyStencil);
-
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.BeginRenderPass(&renderPassDescriptors[1]).End();
     wgpu::CommandBuffer commandBuffer = encoder.Finish();
@@ -221,9 +213,6 @@ TEST_P(DepthStencilLoadOpTests, ClearBothMip0Then1) {
 
 // Clear second mip then the first mip. Check both mip levels.
 TEST_P(DepthStencilLoadOpTests, ClearBothMip1Then0) {
-    // TODO(crbug.com/dawn/838): Sampling from the non-zero mip does not work.
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel() && GetParam().mCheck == Check::SampleDepth);
-
     wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
     encoder.BeginRenderPass(&renderPassDescriptors[1]).End();
     encoder.BeginRenderPass(&renderPassDescriptors[0]).End();
