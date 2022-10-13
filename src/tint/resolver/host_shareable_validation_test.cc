@@ -36,7 +36,7 @@ TEST_F(ResolverHostShareableValidationTest, BoolMember) {
     EXPECT_EQ(
         r()->error(),
         R"(56:78 error: Type 'bool' cannot be used in address space 'storage' as it is non-host-shareable
-12:34 note: while analysing structure member S.x
+12:34 note: while analyzing structure member S.x
 56:78 note: while instantiating 'var' g)");
 }
 
@@ -51,7 +51,7 @@ TEST_F(ResolverHostShareableValidationTest, BoolVectorMember) {
     EXPECT_EQ(
         r()->error(),
         R"(56:78 error: Type 'vec3<bool>' cannot be used in address space 'storage' as it is non-host-shareable
-12:34 note: while analysing structure member S.x
+12:34 note: while analyzing structure member S.x
 56:78 note: while instantiating 'var' g)");
 }
 
@@ -67,7 +67,7 @@ TEST_F(ResolverHostShareableValidationTest, Aliases) {
     EXPECT_EQ(
         r()->error(),
         R"(56:78 error: Type 'bool' cannot be used in address space 'storage' as it is non-host-shareable
-12:34 note: while analysing structure member S.x
+12:34 note: while analyzing structure member S.x
 56:78 note: while instantiating 'var' g)");
 }
 
@@ -86,10 +86,10 @@ TEST_F(ResolverHostShareableValidationTest, NestedStructures) {
     EXPECT_EQ(
         r()->error(),
         R"(9:10 error: Type 'bool' cannot be used in address space 'storage' as it is non-host-shareable
-1:2 note: while analysing structure member I1.x
-3:4 note: while analysing structure member I2.y
-5:6 note: while analysing structure member I3.z
-7:8 note: while analysing structure member S.m
+1:2 note: while analyzing structure member I1.x
+3:4 note: while analyzing structure member I2.y
+5:6 note: while analyzing structure member I3.z
+7:8 note: while analyzing structure member S.m
 9:10 note: while instantiating 'var' g)");
 }
 

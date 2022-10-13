@@ -329,7 +329,7 @@ TEST_F(ResolverVariableValidationTest, NonConstructibleType_RuntimeArray) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(12:34 error: runtime-sized arrays can only be used in the <storage> address space
-56:78 note: while analysing structure member S.m
+56:78 note: while analyzing structure member S.m
 12:34 note: while instantiating 'var' v)");
 }
 

@@ -170,7 +170,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_MemberMultipleAttribu
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(14:52 error: multiple entry point IO attributes
 13:43 note: previously consumed location(0)
-12:34 note: while analysing entry point 'main')");
+12:34 note: while analyzing entry point 'main')");
 }
 
 TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_MemberMissingAttribute) {
@@ -198,7 +198,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_MemberMissingAttribut
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(14:52 error: missing entry point IO attribute
-12:34 note: while analysing entry point 'main')");
+12:34 note: while analyzing entry point 'main')");
 }
 
 TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateBuiltins) {
@@ -227,7 +227,7 @@ TEST_F(ResolverEntryPointValidationTest, ReturnType_Struct_DuplicateBuiltins) {
     EXPECT_EQ(
         r()->error(),
         R"(12:34 error: builtin(frag_depth) attribute appears multiple times as pipeline output
-12:34 note: while analysing entry point 'main')");
+12:34 note: while analyzing entry point 'main')");
 }
 
 TEST_F(ResolverEntryPointValidationTest, ParameterAttribute_Location) {
@@ -339,7 +339,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_MemberMultipleAttribut
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(14:52 error: multiple entry point IO attributes
 13:43 note: previously consumed location(0)
-12:34 note: while analysing entry point 'main')");
+12:34 note: while analyzing entry point 'main')");
 }
 
 TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_MemberMissingAttribute) {
@@ -366,7 +366,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_MemberMissingAttribute
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), R"(14:52 error: missing entry point IO attribute
-12:34 note: while analysing entry point 'main')");
+12:34 note: while analyzing entry point 'main')");
 }
 
 TEST_F(ResolverEntryPointValidationTest, Parameter_DuplicateBuiltins) {
@@ -432,7 +432,7 @@ TEST_F(ResolverEntryPointValidationTest, Parameter_Struct_DuplicateBuiltins) {
     EXPECT_EQ(
         r()->error(),
         R"(12:34 error: builtin(sample_index) attribute appears multiple times as pipeline input
-12:34 note: while analysing entry point 'main')");
+12:34 note: while analyzing entry point 'main')");
 }
 
 TEST_F(ResolverEntryPointValidationTest, VertexShaderMustReturnPosition) {
@@ -873,7 +873,7 @@ TEST_F(LocationAttributeTests, BadType_Input_Struct_NestedStruct) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "14:52 error: nested structures cannot be used for entry point IO\n"
-              "12:34 note: while analysing entry point 'main'");
+              "12:34 note: while analyzing entry point 'main'");
 }
 
 TEST_F(LocationAttributeTests, BadType_Input_Struct_RuntimeArray) {
@@ -1059,7 +1059,7 @@ TEST_F(LocationAttributeTests, ReturnType_Struct_NestedStruct) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "14:52 error: nested structures cannot be used for entry point IO\n"
-              "12:34 note: while analysing entry point 'main'");
+              "12:34 note: while analyzing entry point 'main'");
 }
 
 TEST_F(LocationAttributeTests, ReturnType_Struct_RuntimeArray) {
@@ -1140,7 +1140,7 @@ TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Output) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: attribute is not valid for compute shader output\n"
-              "56:78 note: while analysing entry point 'main'");
+              "56:78 note: while analyzing entry point 'main'");
 }
 
 TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Input) {
@@ -1159,7 +1159,7 @@ TEST_F(LocationAttributeTests, ComputeShaderLocationStructMember_Input) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "12:34 error: attribute is not valid for compute shader inputs\n"
-              "56:78 note: while analysing entry point 'main'");
+              "56:78 note: while analyzing entry point 'main'");
 }
 
 TEST_F(LocationAttributeTests, Duplicate_input) {
@@ -1219,7 +1219,7 @@ TEST_F(LocationAttributeTests, Duplicate_struct) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               "34:56 error: location(1) attribute appears multiple times\n"
-              "12:34 note: while analysing entry point 'main'");
+              "12:34 note: while analyzing entry point 'main'");
 }
 
 }  // namespace

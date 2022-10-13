@@ -1433,7 +1433,7 @@ TEST_F(InterpolateTest, VertexOutput_Integer_MissingFlatInterpolation) {
     EXPECT_EQ(
         r()->error(),
         R"(12:34 error: integral user-defined vertex outputs must have a flat interpolation attribute
-note: while analysing entry point 'main')");
+note: while analyzing entry point 'main')");
 }
 
 TEST_F(InterpolateTest, MissingLocationAttribute_Parameter) {

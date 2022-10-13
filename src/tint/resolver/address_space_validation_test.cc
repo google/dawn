@@ -61,7 +61,7 @@ TEST_F(ResolverAddressSpaceValidationTest, Private_RuntimeArrayInStruct) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(12:34 error: runtime-sized arrays can only be used in the <storage> address space
-note: while analysing structure member S.m
+note: while analyzing structure member S.m
 12:34 note: while instantiating 'var' v)");
 }
 
@@ -81,7 +81,7 @@ TEST_F(ResolverAddressSpaceValidationTest, Workgroup_RuntimeArrayInStruct) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(12:34 error: runtime-sized arrays can only be used in the <storage> address space
-note: while analysing structure member S.m
+note: while analyzing structure member S.m
 12:34 note: while instantiating 'var' v)");
 }
 
@@ -317,7 +317,7 @@ TEST_F(ResolverAddressSpaceValidationTest, UniformBuffer_Struct_Runtime) {
     ASSERT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
               R"(56:78 error: runtime-sized arrays can only be used in the <storage> address space
-note: while analysing structure member S.m
+note: while analyzing structure member S.m
 56:78 note: while instantiating 'var' svar)");
 }
 

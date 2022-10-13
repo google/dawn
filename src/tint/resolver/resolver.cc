@@ -2768,7 +2768,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
     // For alignment, use the alignment attribute if provided, otherwise use the
     // default alignment for the member type.
     // Diagnostic errors are raised if a basic rule is violated.
-    // Validation of storage-class rules requires analysing the actual variable
+    // Validation of storage-class rules requires analyzing the actual variable
     // usage of the structure, and so is performed as part of the variable
     // validation.
     uint64_t struct_size = 0;
@@ -3238,7 +3238,7 @@ bool Resolver::ApplyAddressSpaceUsageToType(ast::AddressSpace address_space,
             if (!ApplyAddressSpaceUsageToType(address_space, const_cast<sem::Type*>(member->Type()),
                                               usage)) {
                 std::stringstream err;
-                err << "while analysing structure member " << sem_.TypeNameOf(str) << "."
+                err << "while analyzing structure member " << sem_.TypeNameOf(str) << "."
                     << builder_->Symbols().NameFor(member->Declaration()->symbol);
                 AddNote(err.str(), member->Declaration()->source);
                 return false;

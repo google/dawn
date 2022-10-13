@@ -1299,7 +1299,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                         member->Declaration()->attributes, member->Type(),
                         member->Declaration()->source, param_or_ret,
                         /*is_struct_member*/ true, member->Location())) {
-                    AddNote("while analysing entry point '" + symbols_.NameFor(decl->symbol) + "'",
+                    AddNote("while analyzing entry point '" + symbols_.NameFor(decl->symbol) + "'",
                             decl->source);
                     return false;
                 }

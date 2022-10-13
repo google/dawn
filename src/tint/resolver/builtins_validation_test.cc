@@ -204,7 +204,7 @@ TEST_F(ResolverBuiltinsValidationTest, FragDepthIsInputStruct_Fail) {
     EXPECT_EQ(r()->error(),
               "12:34 error: builtin(frag_depth) cannot be used in input of "
               "fragment pipeline stage\n"
-              "note: while analysing entry point 'fragShader'");
+              "note: while analyzing entry point 'fragShader'");
 }
 
 TEST_F(ResolverBuiltinsValidationTest, StructBuiltinInsideEntryPoint_Ignored) {
