@@ -799,7 +799,7 @@ TEST_F(GlslGeneratorImplTest_Function,
     EXPECT_FALSE(gen.Generate()) << gen.error();
     EXPECT_EQ(
         gen.error(),
-        R"(error: override expressions should have been removed with the SubstituteOverride transform)");
+        R"(error: override-expressions should have been removed with the SubstituteOverride transform)");
 }
 
 TEST_F(GlslGeneratorImplTest_Function, Emit_Function_WithArrayParams) {

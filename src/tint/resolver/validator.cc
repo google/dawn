@@ -593,7 +593,7 @@ bool Validator::GlobalVariable(
         [&](const ast::Var* var) {
             if (auto* init = global->Constructor();
                 init && init->Stage() > sem::EvaluationStage::kOverride) {
-                AddError("module-scope 'var' initializer must be a constant or override expression",
+                AddError("module-scope 'var' initializer must be a constant or override-expression",
                          init->Declaration()->source);
                 return false;
             }
@@ -795,7 +795,7 @@ bool Validator::Override(
     auto* storage_ty = v->Type()->UnwrapRef();
 
     if (auto* init = v->Constructor(); init && init->Stage() > sem::EvaluationStage::kOverride) {
-        AddError("'override' initializer must be an override expression",
+        AddError("'override' initializer must be an override-expression",
                  init->Declaration()->source);
         return false;
     }
@@ -1708,7 +1708,7 @@ bool Validator::TextureBuiltinFunction(const sem::Call* call) const {
                 return true;
             }
         }
-        AddError("the " + name + " argument must be a const_expression",
+        AddError("the " + name + " argument must be a const-expression",
                  arg->Declaration()->source);
         return false;
     };
@@ -1902,7 +1902,7 @@ bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
     }
 
     if (array_type->IsOverrideSized()) {
-        AddError("cannot construct an array that has an override expression count", ctor->source);
+        AddError("cannot construct an array that has an override-expression count", ctor->source);
         return false;
     }
 

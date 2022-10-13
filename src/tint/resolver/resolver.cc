@@ -511,7 +511,7 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
 
     const auto value = rhs->ConstantValue();
     if (!value) {
-        AddError("'const' initializer must be constant expression", c->constructor->source);
+        AddError("'const' initializer must be const-expression", c->constructor->source);
         return nullptr;
     }
 
@@ -864,7 +864,7 @@ sem::Statement* Resolver::StaticAssert(const ast::StaticAssert* assertion) {
     }
     auto* cond = expr->ConstantValue();
     if (!cond) {
-        AddError("static assertion condition must be a constant expression",
+        AddError("static assertion condition must be a const-expression",
                  assertion->condition->source);
         return nullptr;
     }
@@ -1068,12 +1068,12 @@ bool Resolver::WorkgroupSize(const ast::Function* func) {
     utils::Vector<const sem::Type*, 3> arg_tys;
 
     constexpr const char* kErrBadExpr =
-        "workgroup_size argument must be a constant or override expression of type "
+        "workgroup_size argument must be a constant or override-expression of type "
         "abstract-integer, i32 or u32";
 
     for (size_t i = 0; i < 3; i++) {
         // Each argument to this attribute can either be a literal, an identifier for a module-scope
-        // constants, a constant expression, or nullptr if not specified.
+        // constants, a const-expression, or nullptr if not specified.
         auto* value = values[i];
         if (!value) {
             break;
@@ -2824,7 +2824,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                 }
                 auto const_value = materialized->ConstantValue();
                 if (!const_value) {
-                    AddError("'offset' must be constant expression", o->expr->source);
+                    AddError("'offset' must be const-expression", o->expr->source);
                     return nullptr;
                 }
                 offset = const_value->As<uint64_t>();
@@ -2847,7 +2847,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
 
                 auto const_value = materialized->ConstantValue();
                 if (!const_value) {
-                    AddError("'align' must be constant expression", a->source);
+                    AddError("'align' must be const-expression", a->source);
                     return nullptr;
                 }
                 auto value = const_value->As<AInt>();
@@ -2865,7 +2865,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                 }
                 auto const_value = materialized->ConstantValue();
                 if (!const_value) {
-                    AddError("'size' must be constant expression", s->expr->source);
+                    AddError("'size' must be const-expression", s->expr->source);
                     return nullptr;
                 }
                 auto value = const_value->As<uint64_t>();

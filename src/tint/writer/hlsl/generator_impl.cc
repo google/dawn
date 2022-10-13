@@ -2837,7 +2837,7 @@ bool GeneratorImpl::EmitGlobalVariable(const ast::Variable* global) {
         [&](const ast::Override*) {
             // Override is removed with SubstituteOverride
             diagnostics_.add_error(diag::System::Writer,
-                                   "override expressions should have been removed with the "
+                                   "override-expressions should have been removed with the "
                                    "SubstituteOverride transform");
             return false;
         },
@@ -3044,7 +3044,7 @@ bool GeneratorImpl::EmitEntryPointFunction(const ast::Function* func) {
                 if (!wgsize[i].has_value()) {
                     diagnostics_.add_error(
                         diag::System::Writer,
-                        "override expressions should have been removed with the SubstituteOverride "
+                        "override-expressions should have been removed with the SubstituteOverride "
                         "transform");
                     return false;
                 }

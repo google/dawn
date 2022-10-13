@@ -509,7 +509,7 @@ bool Builder::GenerateExecutionModes(const ast::Function* func, uint32_t id) {
         // Check if the workgroup_size uses pipeline-overridable constants.
         if (!wgsize[0].has_value() || !wgsize[1].has_value() || !wgsize[2].has_value()) {
             error_ =
-                "override expressions should have been removed with the SubstituteOverride "
+                "override-expressions should have been removed with the SubstituteOverride "
                 "transform";
             return false;
         }

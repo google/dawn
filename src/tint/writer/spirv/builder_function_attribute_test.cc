@@ -164,7 +164,7 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_OverridableConst) {
     EXPECT_FALSE(b.GenerateExecutionModes(func, 3)) << b.error();
     EXPECT_EQ(
         b.error(),
-        R"(override expressions should have been removed with the SubstituteOverride transform)");
+        R"(override-expressions should have been removed with the SubstituteOverride transform)");
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndConst) {
@@ -181,7 +181,7 @@ TEST_F(BuilderTest, Decoration_ExecutionMode_WorkgroupSize_LiteralAndConst) {
     EXPECT_FALSE(b.GenerateExecutionModes(func, 3)) << b.error();
     EXPECT_EQ(
         b.error(),
-        R"(override expressions should have been removed with the SubstituteOverride transform)");
+        R"(override-expressions should have been removed with the SubstituteOverride transform)");
 }
 
 TEST_F(BuilderTest, Decoration_ExecutionMode_MultipleFragment) {

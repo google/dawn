@@ -301,7 +301,7 @@ bool GeneratorImpl::Generate() {
             [&](const ast::Override*) {
                 // Override is removed with SubstituteOverride
                 diagnostics_.add_error(diag::System::Writer,
-                                       "override expressions should have been removed with the "
+                                       "override-expressions should have been removed with the "
                                        "SubstituteOverride transform.");
                 return false;
             },

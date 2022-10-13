@@ -423,7 +423,7 @@ TEST_F(ResolverVariableValidationTest, ConstInitWithVar) {
     WrapInFunction(v, c);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be constant expression)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be const-expression)");
 }
 
 TEST_F(ResolverVariableValidationTest, ConstInitWithOverride) {
@@ -432,7 +432,7 @@ TEST_F(ResolverVariableValidationTest, ConstInitWithOverride) {
     WrapInFunction(c);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be constant expression)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be const-expression)");
 }
 
 TEST_F(ResolverVariableValidationTest, ConstInitWithLet) {
@@ -441,7 +441,7 @@ TEST_F(ResolverVariableValidationTest, ConstInitWithLet) {
     WrapInFunction(l, c);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be constant expression)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be const-expression)");
 }
 
 }  // namespace

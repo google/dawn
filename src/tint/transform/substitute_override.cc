@@ -77,7 +77,7 @@ void SubstituteOverride::Run(CloneContext& ctx, const DataMap& config, DataMap&)
 
         if (!ctor) {
             ctx.dst->Diagnostics().add_error(diag::System::Transform,
-                                             "Failed to create override expression");
+                                             "Failed to create override-expression");
             return nullptr;
         }
 

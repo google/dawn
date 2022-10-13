@@ -38,7 +38,7 @@ class Type;
 
 namespace tint::resolver {
 
-/// ConstEval performs shader creation-time (constant expression) expression evaluation.
+/// ConstEval performs shader creation-time (const-expression) expression evaluation.
 /// Methods are called from the resolver, either directly or via member-function pointers indexed by
 /// the IntrinsicTable. All child-expression nodes are guaranteed to have been already resolved
 /// before calling a method to evaluate an expression's value.

@@ -672,7 +672,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Literal_BadType) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        "12:34 error: workgroup_size argument must be a constant or override expression of type "
+        "12:34 error: workgroup_size argument must be a constant or override-expression of type "
         "abstract-integer, i32 or u32");
 }
 
@@ -718,7 +718,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_BadType) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        "12:34 error: workgroup_size argument must be a constant or override expression of type "
+        "12:34 error: workgroup_size argument must be a constant or override-expression of type "
         "abstract-integer, i32 or u32");
 }
 
@@ -851,7 +851,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_NonConst) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size argument must be a constant or override expression of "
+              "12:34 error: workgroup_size argument must be a constant or override-expression of "
               "type abstract-integer, i32 or u32");
 }
 
@@ -866,7 +866,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_x) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size argument must be a constant or override expression of "
+              "12:34 error: workgroup_size argument must be a constant or override-expression of "
               "type abstract-integer, i32 or u32");
 }
 
@@ -881,7 +881,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_y) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size argument must be a constant or override expression of "
+              "12:34 error: workgroup_size argument must be a constant or override-expression of "
               "type abstract-integer, i32 or u32");
 }
 
@@ -896,7 +896,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_InvalidExpr_z) {
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: workgroup_size argument must be a constant or override expression of "
+              "12:34 error: workgroup_size argument must be a constant or override-expression of "
               "type abstract-integer, i32 or u32");
 }
 

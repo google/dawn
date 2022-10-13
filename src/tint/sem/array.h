@@ -31,7 +31,7 @@ class GlobalVariable;
 
 namespace tint::sem {
 
-/// The variant of an ArrayCount when the array is a constant expression.
+/// The variant of an ArrayCount when the array is a const-expression.
 /// Example:
 /// ```
 /// const N = 123;
@@ -144,7 +144,7 @@ class Array final : public Castable<Array, Type> {
     /// @returns the number of elements in the array.
     const ArrayCount& Count() const { return count_; }
 
-    /// @returns the array count if the count is a constant expression, otherwise returns nullopt.
+    /// @returns the array count if the count is a const-expression, otherwise returns nullopt.
     inline std::optional<uint32_t> ConstantCount() const {
         if (auto* count = std::get_if<ConstantArrayCount>(&count_)) {
             return count->value;
@@ -175,7 +175,7 @@ class Array final : public Castable<Array, Type> {
     /// natural stride
     bool IsStrideImplicit() const { return stride_ == implicit_stride_; }
 
-    /// @returns true if this array is sized using an constant expression
+    /// @returns true if this array is sized using an const-expression
     bool IsConstantSized() const { return std::holds_alternative<ConstantArrayCount>(count_); }
 
     /// @returns true if this array is sized using an override variable

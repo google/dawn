@@ -88,7 +88,7 @@ TEST_F(ResolverStaticAssertTest, Local_NonConst) {
     WrapInFunction(StaticAssert(Expr(Source{{12, 34}}, "V")));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:34 error: static assertion condition must be a constant expression");
+              "12:34 error: static assertion condition must be a const-expression");
 }
 
 TEST_F(ResolverStaticAssertTest, Local_LessThan_Pass) {

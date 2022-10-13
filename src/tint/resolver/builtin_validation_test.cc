@@ -327,7 +327,7 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalConst) {
 
     EXPECT_FALSE(r()->Resolve());
     std::stringstream err;
-    err << "12:34 error: the " << param.name << " argument must be a const_expression";
+    err << "12:34 error: the " << param.name << " argument must be a const-expression";
     EXPECT_EQ(r()->error(), err.str());
 }
 INSTANTIATE_TEST_SUITE_P(
