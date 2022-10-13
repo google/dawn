@@ -25,6 +25,7 @@
 #include "src/tint/ast/pipeline_stage.h"
 #include "src/tint/program_builder.h"
 #include "src/tint/resolver/sem_helper.h"
+#include "src/tint/sem/evaluation_stage.h"
 #include "src/tint/source.h"
 
 // Forward declarations
@@ -208,6 +209,15 @@ class Validator {
     /// @param stage the pipeline stage for the entry point
     /// @returns true on success, false otherwise
     bool EntryPoint(const sem::Function* func, ast::PipelineStage stage) const;
+
+    /// Validates that the expression must not be evaluated any later than @p latest_stage
+    /// @param expr the expression to check
+    /// @param latest_stage the latest evaluation stage that the expression can be evaluated
+    /// @param constraint the 'thing' that is imposing the contraint. e.g. "var declaration"
+    /// @returns true if @p expr is evaluated in or before @p latest_stage, false otherwise
+    bool EvaluationStage(const sem::Expression* expr,
+                         sem::EvaluationStage latest_stage,
+                         std::string_view constraint) const;
 
     /// Validates a for loop
     /// @param stmt the for loop statement to validate

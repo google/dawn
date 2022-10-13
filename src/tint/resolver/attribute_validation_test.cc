@@ -738,7 +738,9 @@ TEST_F(StructMemberAttributeTest, Align_Attribute_Override) {
     Structure("mystruct", utils::Vector{Member(
                               "a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, "val")})});
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'align' must be an i32 or u32 value)");
+    EXPECT_EQ(
+        r()->error(),
+        R"(error: @align requires a const-expression, but expression is an override-expression)");
 }
 
 }  // namespace StructAndStructMemberTests

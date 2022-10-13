@@ -423,7 +423,9 @@ TEST_F(ResolverVariableValidationTest, ConstInitWithVar) {
     WrapInFunction(v, c);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be const-expression)");
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: const initializer requires a const-expression, but expression is a runtime-expression)");
 }
 
 TEST_F(ResolverVariableValidationTest, ConstInitWithOverride) {
@@ -432,7 +434,9 @@ TEST_F(ResolverVariableValidationTest, ConstInitWithOverride) {
     WrapInFunction(c);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be const-expression)");
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: const initializer requires a const-expression, but expression is an override-expression)");
 }
 
 TEST_F(ResolverVariableValidationTest, ConstInitWithLet) {
@@ -441,7 +445,30 @@ TEST_F(ResolverVariableValidationTest, ConstInitWithLet) {
     WrapInFunction(l, c);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be const-expression)");
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: const initializer requires a const-expression, but expression is a runtime-expression)");
+}
+
+TEST_F(ResolverVariableValidationTest, ConstInitWithRuntimeExpr) {
+    // const c = clamp(2, dpdx(0.5), 3);
+    WrapInFunction(Const("c", Call("clamp", 2_a, Call(Source{{12, 34}}, "dpdx", 0.5_a), 3_a)));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: const initializer requires a const-expression, but expression is a runtime-expression)");
+}
+
+TEST_F(ResolverVariableValidationTest, ConstInitWithOverrideExpr) {
+    auto* o = Override("v", Expr(1_i));
+    auto* c = Const("c", Add(10_a, Expr(Source{{12, 34}}, o)));
+    WrapInFunction(c);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: const initializer requires a const-expression, but expression is an override-expression)");
 }
 
 }  // namespace

@@ -1311,7 +1311,8 @@ fn f() {
 }
 )";
 
-    auto* expect = R"(error: array size is an override-expression, when expected a constant-expression.
+    auto* expect =
+        R"(error: array size is an override-expression, when expected a constant-expression.
 Was the SubstituteOverride transform run?)";
 
     auto got = Run<Robustness>(src);

@@ -239,7 +239,8 @@ TEST_F(ParserImplTest, TextureSamplerTypes_StorageTexture_InvalidAccess) {
     EXPECT_EQ(t.value, nullptr);
     EXPECT_FALSE(t.matched);
     EXPECT_TRUE(t.errored);
-    EXPECT_EQ(p->error(), R"(1:30: expected access control for storage texture type. Did you mean 'read'?
+    EXPECT_EQ(p->error(),
+              R"(1:30: expected access control for storage texture type. Did you mean 'read'?
 Possible values: 'read', 'read_write', 'write')");
 }
 

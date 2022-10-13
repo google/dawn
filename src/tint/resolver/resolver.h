@@ -414,6 +414,15 @@ class Resolver {
     using StructConstructorSig =
         utils::UnorderedKeyWrapper<std::tuple<const sem::Struct*, size_t, sem::EvaluationStage>>;
 
+    /// ExprEvalStageConstraint describes a constraint on when expressions can be evaluated.
+    struct ExprEvalStageConstraint {
+        /// The latest stage that the expression can be evaluated
+        sem::EvaluationStage stage = sem::EvaluationStage::kRuntime;
+        /// The 'thing' that is imposing the contraint. e.g. "var declaration"
+        /// If nullptr, then there is no constraint
+        const char* constraint = nullptr;
+    };
+
     ProgramBuilder* const builder_;
     diag::List& diagnostics_;
     ConstEval const_eval_;
@@ -425,10 +434,10 @@ class Resolver {
     std::vector<sem::Function*> entry_points_;
     std::unordered_map<const sem::Type*, const Source&> atomic_composite_info_;
     utils::Bitset<0> marked_;
+    ExprEvalStageConstraint expr_eval_stage_constraint_;
     std::unordered_map<OverrideId, const sem::Variable*> override_ids_;
     std::unordered_map<ArrayConstructorSig, sem::CallTarget*> array_ctors_;
     std::unordered_map<StructConstructorSig, sem::CallTarget*> struct_ctors_;
-
     sem::Function* current_function_ = nullptr;
     sem::Statement* current_statement_ = nullptr;
     sem::CompoundStatement* current_compound_statement_ = nullptr;

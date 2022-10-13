@@ -416,6 +416,8 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
 
     // Does the variable have a constructor?
     if (v->constructor) {
+        ExprEvalStageConstraint constraint{sem::EvaluationStage::kOverride, "override initializer"};
+        TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
         rhs = Materialize(Expression(v->constructor), ty);
         if (!rhs) {
             return nullptr;
@@ -453,8 +455,8 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
         }
         auto* c = materialize->ConstantValue();
         if (!c) {
-            // TODO(crbug.com/tint/1633): Handle invalid materialization when expressions
-            // are supported.
+            // TODO(crbug.com/tint/1633): Handle invalid materialization when expressions are
+            // supported.
             return nullptr;
         }
 
@@ -493,9 +495,14 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
         return nullptr;
     }
 
-    const auto* rhs = Expression(c->constructor);
-    if (!rhs) {
-        return nullptr;
+    const sem::Expression* rhs = nullptr;
+    {
+        ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "const initializer"};
+        TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+        rhs = Expression(c->constructor);
+        if (!rhs) {
+            return nullptr;
+        }
     }
 
     if (ty) {
@@ -509,12 +516,6 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
         ty = rhs->Type();
     }
 
-    const auto value = rhs->ConstantValue();
-    if (!value) {
-        AddError("'const' initializer must be const-expression", c->constructor->source);
-        return nullptr;
-    }
-
     if (!validator_.VariableInitializer(c, ast::AddressSpace::kNone, ty, rhs)) {
         return nullptr;
     }
@@ -525,6 +526,7 @@ sem::Variable* Resolver::Const(const ast::Const* c, bool is_global) {
         return nullptr;
     }
 
+    const auto value = rhs->ConstantValue();
     auto* sem = is_global ? static_cast<sem::Variable*>(builder_->create<sem::GlobalVariable>(
                                 c, ty, sem::EvaluationStage::kConstant, ast::AddressSpace::kNone,
                                 ast::Access::kUndefined, value, sem::BindingPoint{}, std::nullopt))
@@ -552,6 +554,12 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
 
     // Does the variable have a constructor?
     if (var->constructor) {
+        ExprEvalStageConstraint constraint{
+            is_global ? sem::EvaluationStage::kOverride : sem::EvaluationStage::kRuntime,
+            "var initializer",
+        };
+        TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+
         rhs = Materialize(Expression(var->constructor), storage_ty);
         if (!rhs) {
             return nullptr;
@@ -858,16 +866,13 @@ sem::GlobalVariable* Resolver::GlobalVariable(const ast::Variable* v) {
 }
 
 sem::Statement* Resolver::StaticAssert(const ast::StaticAssert* assertion) {
+    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "static assertion"};
+    TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
     auto* expr = Expression(assertion->condition);
     if (!expr) {
         return nullptr;
     }
     auto* cond = expr->ConstantValue();
-    if (!cond) {
-        AddError("static assertion condition must be a const-expression",
-                 assertion->condition->source);
-        return nullptr;
-    }
     if (auto* ty = cond->Type(); !ty->Is<sem::Bool>()) {
         AddError(
             "static assertion condition must be a bool, got '" + builder_->FriendlyName(ty) + "'",
@@ -1456,6 +1461,13 @@ sem::Expression* Resolver::Expression(const ast::Expression* root) {
             });
         if (!sem_expr) {
             return nullptr;
+        }
+
+        if (auto* constraint = expr_eval_stage_constraint_.constraint) {
+            if (!validator_.EvaluationStage(sem_expr, expr_eval_stage_constraint_.stage,
+                                            constraint)) {
+                return nullptr;
+            }
         }
 
         builder_->Sem().Add(expr, sem_expr);
@@ -2818,13 +2830,17 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                 // Offset attributes are not part of the WGSL spec, but are emitted
                 // by the SPIR-V reader.
 
+                ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant,
+                                                   "@offset value"};
+                TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+
                 auto* materialized = Materialize(Expression(o->expr));
                 if (!materialized) {
                     return nullptr;
                 }
                 auto const_value = materialized->ConstantValue();
                 if (!const_value) {
-                    AddError("'offset' must be const-expression", o->expr->source);
+                    AddError("'offset' must be constant expression", o->expr->source);
                     return nullptr;
                 }
                 offset = const_value->As<uint64_t>();
@@ -2836,6 +2852,9 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                 align = 1;
                 has_offset_attr = true;
             } else if (auto* a = attr->As<ast::StructMemberAlignAttribute>()) {
+                ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@align"};
+                TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+
                 auto* materialized = Materialize(Expression(a->expr));
                 if (!materialized) {
                     return nullptr;
@@ -2847,7 +2866,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
 
                 auto const_value = materialized->ConstantValue();
                 if (!const_value) {
-                    AddError("'align' must be const-expression", a->source);
+                    AddError("'align' must be constant expression", a->source);
                     return nullptr;
                 }
                 auto value = const_value->As<AInt>();
@@ -2856,16 +2875,19 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     AddError("'align' value must be a positive, power-of-two integer", a->source);
                     return nullptr;
                 }
-                align = const_value->As<u32>();
+                align = u32(value);
                 has_align_attr = true;
             } else if (auto* s = attr->As<ast::StructMemberSizeAttribute>()) {
+                ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@size"};
+                TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+
                 auto* materialized = Materialize(Expression(s->expr));
                 if (!materialized) {
                     return nullptr;
                 }
                 auto const_value = materialized->ConstantValue();
                 if (!const_value) {
-                    AddError("'size' must be const-expression", s->expr->source);
+                    AddError("'size' must be constant expression", s->expr->source);
                     return nullptr;
                 }
                 auto value = const_value->As<uint64_t>();
@@ -2876,9 +2898,12 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                              s->source);
                     return nullptr;
                 }
-                size = const_value->As<u32>();
+                size = u32(value);
                 has_size_attr = true;
             } else if (auto* l = attr->As<ast::LocationAttribute>()) {
+                ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@location"};
+                TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+
                 auto* materialize = Materialize(Expression(l->expr));
                 if (!materialize) {
                     return nullptr;

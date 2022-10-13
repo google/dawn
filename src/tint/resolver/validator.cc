@@ -1391,6 +1391,30 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     return true;
 }
 
+bool Validator::EvaluationStage(const sem::Expression* expr,
+                                sem::EvaluationStage latest_stage,
+                                std::string_view constraint) const {
+    if (expr->Stage() > latest_stage) {
+        auto stage_name = [](sem::EvaluationStage stage) -> std::string {
+            switch (stage) {
+                case sem::EvaluationStage::kRuntime:
+                    return "a runtime-expression";
+                case sem::EvaluationStage::kOverride:
+                    return "an override-expression";
+                case sem::EvaluationStage::kConstant:
+                    return "a const-expression";
+            }
+            return "<unknown>";
+        };
+
+        AddError(std::string(constraint) + " requires " + stage_name(latest_stage) +
+                     ", but expression is " + stage_name(expr->Stage()),
+                 expr->Declaration()->source);
+        return false;
+    }
+    return true;
+}
+
 bool Validator::Statements(utils::VectorRef<const ast::Statement*> stmts) const {
     for (auto* stmt : stmts) {
         if (!sem_.Get(stmt)->IsReachable()) {

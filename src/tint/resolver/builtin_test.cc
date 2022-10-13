@@ -67,7 +67,9 @@ TEST_F(ResolverBuiltinTest, ModuleScopeUsage) {
 
     // TODO(crbug.com/tint/1581): Once 'abs' is implemented as @const, this will no longer be an
     // error.
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'const' initializer must be const-expression)");
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: const initializer requires a const-expression, but expression is a runtime-expression)");
 }
 
 // Tests for Logical builtins
