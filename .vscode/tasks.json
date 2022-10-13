@@ -80,6 +80,7 @@
                 "args": [
                     "gn",
                     "${input:buildType}",
+                    "${input:buildArch}",
                 ],
             },
             "osx": {
@@ -87,6 +88,7 @@
                 "args": [
                     "gn",
                     "${input:buildType}",
+                    "${input:buildArch}",
                 ],
             },
             "windows": {
@@ -113,6 +115,7 @@
                 "args": [
                     "cmake",
                     "${input:buildType}",
+                    "${input:buildArch}",
                 ],
             },
             "osx": {
@@ -120,6 +123,7 @@
                 "args": [
                     "cmake",
                     "${input:buildType}",
+                    "${input:buildArch}",
                 ],
             },
             "windows": {
@@ -199,6 +203,16 @@
             ],
             "default": "Debug",
             "description": "The type of build",
+        },
+        {
+            "id": "buildArch",
+            "type": "pickString",
+            "options": [
+                "native",
+                "x86",
+            ],
+            "default": "native",
+            "description": "The build architecture",
         },
     ]
 }
