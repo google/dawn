@@ -81,8 +81,6 @@ crbug.com/dawn/1487 [ intel-gen-9 win10 ] webgpu:api,operation,resource_init,tex
 ################################################################################
 crbug.com/1343969 [ win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
 crbug.com/1343969 [ webgpu-adapter-default win ] webgpu:web_platform,copyToTexture,ImageBitmap:from_canvas:* [ RetryOnFailure ]
-crbug.com/1344876 [ ubuntu webgpu-adapter-swiftshader ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
-crbug.com/1359106 [ ubuntu webgpu-adapter-default ] webgpu:web_platform,copyToTexture,ImageBitmap:from_ImageData:* [ RetryOnFailure ]
 
 ################################################################################
 # copyToTexture failures on Linux
@@ -764,12 +762,6 @@ crbug.com/1357206 [ nvidia-0x2184 win10 ] worker_webgpu:api,validation,buffer,ma
 crbug.com/1357206 [ nvidia-0x2184 win10 ] worker_webgpu:api,validation,buffer,mapping:mapAsync,offsetAndSizeAlignment: [ Failure ]
 
 ################################################################################
-# Flaky crashes in PartitionAlloc for async pipeline creation
-# KEEP
-################################################################################
-crbug.com/dawn/1539 [ ubuntu ] webgpu:api,validation,render_pipeline,fragment_state:pipeline_output_targets:isAsync=true;* [ Failure ]
-
-################################################################################
 # storage buffer binding size failures
 ################################################################################
 crbug.com/dawn/1542 webgpu:api,validation,createBindGroup:buffer,resource_binding_size:type="read-only-storage" [ Failure ]
@@ -779,6 +771,13 @@ crbug.com/dawn/1542 webgpu:api,validation,encoding,cmds,setBindGroup:buffer_dyna
 crbug.com/dawn/1542 webgpu:api,validation,encoding,cmds,setBindGroup:buffer_dynamic_offsets:type="storage";* [ Failure ]
 crbug.com/dawn/1542 webgpu:api,validation,encoding,cmds,setBindGroup:dynamic_offsets_match_expectations_in_pass_encoder:* [ Failure ]
 
+# New flakes. Please triage:
+crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-32 ] webgpu:api,validation,texture,destroy:submit_a_destroyed_texture_as_attachment:depthStencilTextureAspect="all";colorTextureState="destroyedBeforeEncode";depthStencilTextureState="destroyedBeforeEncode" [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-32 ] webgpu:examples:gpu,with_texture_compression,etc2:textureCompressionETC2=false [ RetryOnFailure ]
+crbug.com/dawn/0000 [ intel-gen-9 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,expression,call,builtin,cosh:f32:inputSource="uniform";vectorize=4 [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-64 win10 ] worker_webgpu:api,operation,rendering,basic:large_draw:indexed=false;indirect=true [ RetryOnFailure ]
+crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 win10 ] worker_webgpu:api,validation,buffer,mapping:mapAsync,offsetAndSizeOOB: [ RetryOnFailure ]
+
 ################################################################################
 # untriaged failures
 # KEEP
@@ -787,13 +786,6 @@ crbug.com/dawn/0000 [ win ] webgpu:api,operation,render_pass,resolve:* [ Failure
 crbug.com/dawn/0000 [ win ] webgpu:api,operation,render_pipeline,pipeline_output_targets:color,component_count,blend:format="rg8unorm" [ Failure ]
 crbug.com/dawn/0000 [ mac ] webgpu:web_platform,canvas,readbackFromWebGPUCanvas:* [ Failure ]
 crbug.com/dawn/0000 [ mac ] worker_webgpu:api,operation,render_pass,storeOp:render_pass_store_op,depth_stencil_attachment_only:depthStencilFormat="stencil8";* [ Failure ]
-
-# New flakes. Please triage:
-crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-32 ] webgpu:api,validation,texture,destroy:submit_a_destroyed_texture_as_attachment:depthStencilTextureAspect="all";colorTextureState="destroyedBeforeEncode";depthStencilTextureState="destroyedBeforeEncode" [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-32 ] webgpu:examples:gpu,with_texture_compression,etc2:textureCompressionETC2=false [ RetryOnFailure ]
-crbug.com/dawn/0000 [ intel-gen-9 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,expression,call,builtin,cosh:f32:inputSource="uniform";vectorize=4 [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation target-cpu-64 win10 ] worker_webgpu:api,operation,rendering,basic:large_draw:indexed=false;indirect=true [ RetryOnFailure ]
-crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-64 win10 ] worker_webgpu:api,validation,buffer,mapping:mapAsync,offsetAndSizeOOB: [ RetryOnFailure ]
 
 # New failures. Please triage:
 crbug.com/dawn/0000 [ intel-gen-9 win10 ] webgpu:api,operation,command_buffer,image_copy:mip_levels:initMethod="WriteTexture";checkMethod="PartialCopyT2B";format="rgba32uint";dimension="2d" [ Failure ]
