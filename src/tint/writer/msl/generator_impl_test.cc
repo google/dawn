@@ -31,6 +31,15 @@ TEST_F(MslGeneratorImplTest, InvalidProgram) {
     EXPECT_EQ(result.error, "input program is not valid");
 }
 
+TEST_F(MslGeneratorImplTest, UnsupportedExtension) {
+    Enable(Source{{12, 34}}, ast::Extension::kUndefined);
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_FALSE(gen.Generate());
+    EXPECT_EQ(gen.error(), R"(12:34 error: MSL backend does not support extension 'undefined')");
+}
+
 TEST_F(MslGeneratorImplTest, Generate) {
     Func("my_func", utils::Empty, ty.void_(), utils::Empty,
          utils::Vector{

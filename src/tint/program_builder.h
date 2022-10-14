@@ -1642,6 +1642,16 @@ class ProgramBuilder {
         return enable;
     }
 
+    /// Adds the extension to the list of enable directives at the top of the module.
+    /// @param source the enable source
+    /// @param ext the extension to enable
+    /// @return an `ast::Enable` enabling the given extension.
+    const ast::Enable* Enable(const Source& source, ast::Extension ext) {
+        auto* enable = create<ast::Enable>(source, ext);
+        AST().AddEnable(enable);
+        return enable;
+    }
+
     /// @param name the variable name
     /// @param options the extra options passed to the ast::Var constructor
     /// Can be any of the following, in any order:

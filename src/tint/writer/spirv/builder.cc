@@ -47,6 +47,7 @@
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/writer/append_vector.h"
+#include "src/tint/writer/check_supported_extensions.h"
 
 namespace tint::writer::spirv {
 namespace {
@@ -259,6 +260,17 @@ Builder::Builder(const Program* program, bool zero_initialize_workgroup_memory)
 Builder::~Builder() = default;
 
 bool Builder::Build() {
+    if (!CheckSupportedExtensions("SPIR-V", builder_.AST(), builder_.Diagnostics(),
+                                  utils::Vector{
+                                      ast::Extension::kChromiumDisableUniformityAnalysis,
+                                      ast::Extension::kChromiumExperimentalDp4A,
+                                      ast::Extension::kChromiumExperimentalPushConstant,
+                                      ast::Extension::kF16,
+                                  })) {
+        error_ = builder_.Diagnostics().str();
+        return false;
+    }
+
     push_capability(SpvCapabilityShader);
 
     push_memory_model(spv::Op::OpMemoryModel,

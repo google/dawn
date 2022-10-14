@@ -29,6 +29,15 @@ TEST_F(BuilderTest, InvalidProgram) {
     EXPECT_EQ(result.error, "input program is not valid");
 }
 
+TEST_F(BuilderTest, UnsupportedExtension) {
+    Enable(Source{{12, 34}}, ast::Extension::kUndefined);
+
+    auto program = std::make_unique<Program>(std::move(*this));
+    auto result = Generate(program.get(), Options{});
+    EXPECT_EQ(result.error,
+              R"(12:34 error: SPIR-V backend does not support extension 'undefined')");
+}
+
 TEST_F(BuilderTest, TracksIdBounds) {
     spirv::Builder& b = Build();
 

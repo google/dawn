@@ -28,6 +28,15 @@ TEST_F(HlslGeneratorImplTest, InvalidProgram) {
     EXPECT_EQ(result.error, "input program is not valid");
 }
 
+TEST_F(HlslGeneratorImplTest, UnsupportedExtension) {
+    Enable(Source{{12, 34}}, ast::Extension::kUndefined);
+
+    GeneratorImpl& gen = Build();
+
+    ASSERT_FALSE(gen.Generate());
+    EXPECT_EQ(gen.error(), R"(12:34 error: HLSL backend does not support extension 'undefined')");
+}
+
 TEST_F(HlslGeneratorImplTest, Generate) {
     Func("my_func", {}, ty.void_(), {});
 

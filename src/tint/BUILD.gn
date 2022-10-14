@@ -585,6 +585,8 @@ libtint_source_set("libtint_core_all_src") {
     "writer/append_vector.h",
     "writer/array_length_from_uniform_options.cc",
     "writer/array_length_from_uniform_options.h",
+    "writer/check_supported_extensions.cc",
+    "writer/check_supported_extensions.h",
     "writer/flatten_bindings.cc",
     "writer/flatten_bindings.h",
     "writer/float_to_string.cc",
@@ -1271,6 +1273,7 @@ if (tint_build_unittests) {
   tint_unittests_source_set("tint_unittests_writer_src") {
     sources = [
       "writer/append_vector_test.cc",
+      "writer/check_supported_extensions_test.cc",
       "writer/flatten_bindings_test.cc",
       "writer/float_to_string_test.cc",
       "writer/generate_external_texture_bindings_test.cc",
