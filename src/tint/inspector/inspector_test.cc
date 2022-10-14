@@ -1269,14 +1269,17 @@ INSTANTIATE_TEST_SUITE_P(
             InterpolationType::kFlat, InterpolationSampling::kNone}));
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, Bool) {
-    Override("foo", ty.bool_(), Id(1_a));
-    Override("bar", ty.bool_(), Expr(true), Id(20_a));
-    Override("baz", ty.bool_(), Expr(false), Id(300_a));
+    GlobalConst("C", Expr(true));
+    Override("a", ty.bool_(), Id(1_a));
+    Override("b", ty.bool_(), Expr(true), Id(20_a));
+    Override("c", Expr(false), Id(300_a));
+    Override("d", Or(true, false), Id(400_a));
+    Override("e", Expr("C"), Id(500_a));
 
     Inspector& inspector = Build();
 
     auto result = inspector.GetOverrideDefaultValues();
-    ASSERT_EQ(3u, result.size());
+    ASSERT_EQ(5u, result.size());
 
     ASSERT_TRUE(result.find(OverrideId{1}) != result.end());
     EXPECT_TRUE(result[OverrideId{1}].IsNull());
@@ -1288,16 +1291,29 @@ TEST_F(InspectorGetOverrideDefaultValuesTest, Bool) {
     ASSERT_TRUE(result.find(OverrideId{300}) != result.end());
     EXPECT_TRUE(result[OverrideId{300}].IsBool());
     EXPECT_FALSE(result[OverrideId{300}].AsBool());
+
+    ASSERT_TRUE(result.find(OverrideId{400}) != result.end());
+    EXPECT_TRUE(result[OverrideId{400}].IsBool());
+    EXPECT_TRUE(result[OverrideId{400}].AsBool());
+
+    ASSERT_TRUE(result.find(OverrideId{500}) != result.end());
+    EXPECT_TRUE(result[OverrideId{500}].IsBool());
+    EXPECT_TRUE(result[OverrideId{500}].AsBool());
 }
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, U32) {
-    Override("foo", ty.u32(), Id(1_a));
-    Override("bar", ty.u32(), Expr(42_u), Id(20_a));
+    GlobalConst("C", Expr(100_u));
+    Override("a", ty.u32(), Id(1_a));
+    Override("b", ty.u32(), Expr(42_u), Id(20_a));
+    Override("c", ty.u32(), Expr(42_a), Id(30_a));
+    Override("d", ty.u32(), Add(42_a, 10_a), Id(40_a));
+    Override("e", Add(42_a, 10_u), Id(50_a));
+    Override("f", Expr("C"), Id(60_a));
 
     Inspector& inspector = Build();
 
     auto result = inspector.GetOverrideDefaultValues();
-    ASSERT_EQ(2u, result.size());
+    ASSERT_EQ(6u, result.size());
 
     ASSERT_TRUE(result.find(OverrideId{1}) != result.end());
     EXPECT_TRUE(result[OverrideId{1}].IsNull());
@@ -1305,17 +1321,37 @@ TEST_F(InspectorGetOverrideDefaultValuesTest, U32) {
     ASSERT_TRUE(result.find(OverrideId{20}) != result.end());
     EXPECT_TRUE(result[OverrideId{20}].IsU32());
     EXPECT_EQ(42u, result[OverrideId{20}].AsU32());
+
+    ASSERT_TRUE(result.find(OverrideId{30}) != result.end());
+    EXPECT_TRUE(result[OverrideId{30}].IsU32());
+    EXPECT_EQ(42u, result[OverrideId{30}].AsU32());
+
+    ASSERT_TRUE(result.find(OverrideId{40}) != result.end());
+    EXPECT_TRUE(result[OverrideId{40}].IsU32());
+    EXPECT_EQ(52u, result[OverrideId{40}].AsU32());
+
+    ASSERT_TRUE(result.find(OverrideId{50}) != result.end());
+    EXPECT_TRUE(result[OverrideId{50}].IsU32());
+    EXPECT_EQ(52u, result[OverrideId{50}].AsU32());
+
+    ASSERT_TRUE(result.find(OverrideId{60}) != result.end());
+    EXPECT_TRUE(result[OverrideId{60}].IsU32());
+    EXPECT_EQ(100u, result[OverrideId{60}].AsU32());
 }
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, I32) {
-    Override("foo", ty.i32(), Id(1_a));
-    Override("bar", ty.i32(), Expr(-42_i), Id(20_a));
-    Override("baz", ty.i32(), Expr(42_i), Id(300_a));
+    GlobalConst("C", Expr(100_a));
+    Override("a", ty.i32(), Id(1_a));
+    Override("b", ty.i32(), Expr(-42_i), Id(20_a));
+    Override("c", ty.i32(), Expr(42_i), Id(300_a));
+    Override("d", Expr(42_a), Id(400_a));
+    Override("e", Add(42_a, 7_a), Id(500_a));
+    Override("f", Expr("C"), Id(6000_a));
 
     Inspector& inspector = Build();
 
     auto result = inspector.GetOverrideDefaultValues();
-    ASSERT_EQ(3u, result.size());
+    ASSERT_EQ(6u, result.size());
 
     ASSERT_TRUE(result.find(OverrideId{1}) != result.end());
     EXPECT_TRUE(result[OverrideId{1}].IsNull());
@@ -1327,18 +1363,32 @@ TEST_F(InspectorGetOverrideDefaultValuesTest, I32) {
     ASSERT_TRUE(result.find(OverrideId{300}) != result.end());
     EXPECT_TRUE(result[OverrideId{300}].IsI32());
     EXPECT_EQ(42, result[OverrideId{300}].AsI32());
+
+    ASSERT_TRUE(result.find(OverrideId{400}) != result.end());
+    EXPECT_TRUE(result[OverrideId{400}].IsI32());
+    EXPECT_EQ(42, result[OverrideId{400}].AsI32());
+
+    ASSERT_TRUE(result.find(OverrideId{500}) != result.end());
+    EXPECT_TRUE(result[OverrideId{500}].IsI32());
+    EXPECT_EQ(49, result[OverrideId{500}].AsI32());
+
+    ASSERT_TRUE(result.find(OverrideId{6000}) != result.end());
+    EXPECT_TRUE(result[OverrideId{6000}].IsI32());
+    EXPECT_EQ(100, result[OverrideId{6000}].AsI32());
 }
 
 TEST_F(InspectorGetOverrideDefaultValuesTest, Float) {
-    Override("foo", ty.f32(), Id(1_a));
-    Override("bar", ty.f32(), Expr(0_f), Id(20_a));
-    Override("baz", ty.f32(), Expr(-10_f), Id(300_a));
-    Override("x", ty.f32(), Expr(15_f), Id(4000_a));
+    Override("a", ty.f32(), Id(1_a));
+    Override("b", ty.f32(), Expr(0_f), Id(20_a));
+    Override("c", ty.f32(), Expr(-10_f), Id(300_a));
+    Override("d", Expr(15_f), Id(4000_a));
+    Override("3", Expr(42.0_a), Id(5000_a));
+    Override("e", ty.f32(), Mul(15_f, 10_a), Id(6000_a));
 
     Inspector& inspector = Build();
 
     auto result = inspector.GetOverrideDefaultValues();
-    ASSERT_EQ(4u, result.size());
+    ASSERT_EQ(6u, result.size());
 
     ASSERT_TRUE(result.find(OverrideId{1}) != result.end());
     EXPECT_TRUE(result[OverrideId{1}].IsNull());
@@ -1354,6 +1404,14 @@ TEST_F(InspectorGetOverrideDefaultValuesTest, Float) {
     ASSERT_TRUE(result.find(OverrideId{4000}) != result.end());
     EXPECT_TRUE(result[OverrideId{4000}].IsFloat());
     EXPECT_FLOAT_EQ(15.0f, result[OverrideId{4000}].AsFloat());
+
+    ASSERT_TRUE(result.find(OverrideId{5000}) != result.end());
+    EXPECT_TRUE(result[OverrideId{5000}].IsFloat());
+    EXPECT_FLOAT_EQ(42.0f, result[OverrideId{5000}].AsFloat());
+
+    ASSERT_TRUE(result.find(OverrideId{6000}) != result.end());
+    EXPECT_TRUE(result[OverrideId{6000}].IsFloat());
+    EXPECT_FLOAT_EQ(150.0f, result[OverrideId{6000}].AsFloat());
 }
 
 TEST_F(InspectorGetConstantNameToIdMapTest, WithAndWithoutIds) {

@@ -29,6 +29,7 @@
 #include "src/tint/ast/override.h"
 #include "src/tint/ast/var.h"
 #include "src/tint/sem/array.h"
+#include "src/tint/sem/bool.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/depth_multisampled_texture.h"
 #include "src/tint/sem/depth_texture.h"
@@ -301,40 +302,19 @@ std::map<OverrideId, Scalar> Inspector::GetOverrideDefaultValues() {
             continue;
         }
 
-        if (!var->constructor) {
-            result[override_id] = Scalar();
-            continue;
-        }
-
-        auto* literal = var->constructor->As<ast::LiteralExpression>();
-        if (!literal) {
-            // This is invalid WGSL, but handling gracefully.
-            result[override_id] = Scalar();
-            continue;
-        }
-
-        if (auto* l = literal->As<ast::BoolLiteralExpression>()) {
-            result[override_id] = Scalar(l->value);
-            continue;
-        }
-
-        if (auto* l = literal->As<ast::IntLiteralExpression>()) {
-            switch (l->suffix) {
-                case ast::IntLiteralExpression::Suffix::kNone:
-                case ast::IntLiteralExpression::Suffix::kI:
-                    result[override_id] = Scalar(static_cast<int32_t>(l->value));
-                    continue;
-                case ast::IntLiteralExpression::Suffix::kU:
-                    result[override_id] = Scalar(static_cast<uint32_t>(l->value));
-                    continue;
+        if (global->Constructor()) {
+            if (auto* value = global->Constructor()->ConstantValue()) {
+                result[override_id] = Switch(
+                    value->Type(),  //
+                    [&](const sem::I32*) { return Scalar(value->As<i32>()); },
+                    [&](const sem::U32*) { return Scalar(value->As<u32>()); },
+                    [&](const sem::F32*) { return Scalar(value->As<f32>()); },
+                    [&](const sem::Bool*) { return Scalar(value->As<bool>()); });
+                continue;
             }
         }
 
-        if (auto* l = literal->As<ast::FloatLiteralExpression>()) {
-            result[override_id] = Scalar(static_cast<float>(l->value));
-            continue;
-        }
-
+        // No const-expression initializer for the override
         result[override_id] = Scalar();
     }
 
