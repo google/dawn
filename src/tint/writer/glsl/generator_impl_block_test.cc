@@ -20,7 +20,7 @@ namespace {
 using GlslGeneratorImplTest_Block = TestHelper;
 
 TEST_F(GlslGeneratorImplTest_Block, Emit_Block) {
-    auto* b = Block(create<ast::DiscardStatement>());
+    auto* b = Block(Return());
     WrapInFunction(b);
 
     GeneratorImpl& gen = Build();
@@ -29,7 +29,7 @@ TEST_F(GlslGeneratorImplTest_Block, Emit_Block) {
 
     ASSERT_TRUE(gen.EmitStatement(b)) << gen.error();
     EXPECT_EQ(gen.result(), R"(  {
-    discard;
+    return;
   }
 )");
 }

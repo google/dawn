@@ -26,7 +26,9 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
     auto* body = Block(create<ast::DiscardStatement>());
     auto* continuing = Block();
     auto* l = Loop(body, continuing);
-    WrapInFunction(l);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{l},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     GeneratorImpl& gen = Build();
 
@@ -45,7 +47,9 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
     auto* body = Block(create<ast::DiscardStatement>());
     auto* continuing = Block(CallStmt(Call("a_statement")));
     auto* l = Loop(body, continuing);
-    WrapInFunction(l);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{l},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     GeneratorImpl& gen = Build();
 
@@ -76,7 +80,9 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
     continuing = Block(Assign("lhs", "rhs"));
 
     auto* outer = Loop(body, continuing);
-    WrapInFunction(outer);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{outer},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     GeneratorImpl& gen = Build();
 

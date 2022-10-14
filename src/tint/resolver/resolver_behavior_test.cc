@@ -43,7 +43,9 @@ class ResolverBehaviorTest : public ResolverTest {
 
 TEST_F(ResolverBehaviorTest, ExprBinaryOp_LHS) {
     auto* stmt = Decl(Var("lhs", ty.i32(), Add(Call("DiscardOrNext"), 1_i)));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -53,7 +55,9 @@ TEST_F(ResolverBehaviorTest, ExprBinaryOp_LHS) {
 
 TEST_F(ResolverBehaviorTest, ExprBinaryOp_RHS) {
     auto* stmt = Decl(Var("lhs", ty.i32(), Add(1_i, Call("DiscardOrNext"))));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -63,7 +67,9 @@ TEST_F(ResolverBehaviorTest, ExprBinaryOp_RHS) {
 
 TEST_F(ResolverBehaviorTest, ExprBitcastOp) {
     auto* stmt = Decl(Var("lhs", ty.u32(), Bitcast<u32>(Call("DiscardOrNext"))));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -79,7 +85,9 @@ TEST_F(ResolverBehaviorTest, ExprIndex_Arr) {
          });
 
     auto* stmt = Decl(Var("lhs", ty.i32(), IndexAccessor(Call("ArrayDiscardOrNext"), 1_i)));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -89,8 +97,13 @@ TEST_F(ResolverBehaviorTest, ExprIndex_Arr) {
 
 TEST_F(ResolverBehaviorTest, ExprIndex_Idx) {
     auto* stmt = Decl(Var("lhs", ty.i32(), IndexAccessor("arr", Call("DiscardOrNext"))));
-    WrapInFunction(Decl(Var("arr", ty.array<i32, 4>())),  //
-                   stmt);
+
+    Func("F", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(Var("arr", ty.array<i32, 4>())),  //
+             stmt,
+         },
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -102,7 +115,9 @@ TEST_F(ResolverBehaviorTest, ExprUnaryOp) {
     auto* stmt =
         Decl(Var("lhs", ty.i32(),
                  create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement, Call("DiscardOrNext"))));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -124,8 +139,13 @@ TEST_F(ResolverBehaviorTest, StmtAssign) {
 
 TEST_F(ResolverBehaviorTest, StmtAssign_LHSDiscardOrNext) {
     auto* stmt = Assign(IndexAccessor("lhs", Call("DiscardOrNext")), 1_i);
-    WrapInFunction(Decl(Var("lhs", ty.array<i32, 4>())),  //
-                   stmt);
+
+    Func("F", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(Var("lhs", ty.array<i32, 4>())),  //
+             stmt,
+         },
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -135,8 +155,13 @@ TEST_F(ResolverBehaviorTest, StmtAssign_LHSDiscardOrNext) {
 
 TEST_F(ResolverBehaviorTest, StmtAssign_RHSDiscardOrNext) {
     auto* stmt = Assign("lhs", Call("DiscardOrNext"));
-    WrapInFunction(Decl(Var("lhs", ty.i32())),  //
-                   stmt);
+
+    Func("F", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(Var("lhs", ty.i32())),  //
+             stmt,
+         },
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -156,7 +181,9 @@ TEST_F(ResolverBehaviorTest, StmtBlockEmpty) {
 
 TEST_F(ResolverBehaviorTest, StmtBlockSingleStmt) {
     auto* stmt = Block(Discard());
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -178,7 +205,9 @@ TEST_F(ResolverBehaviorTest, StmtCallReturn) {
 TEST_F(ResolverBehaviorTest, StmtCallFuncDiscard) {
     Func("f", utils::Empty, ty.void_(), utils::Vector{Discard()});
     auto* stmt = CallStmt(Call("f"));
-    WrapInFunction(stmt);
+
+    Func("g", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -189,7 +218,9 @@ TEST_F(ResolverBehaviorTest, StmtCallFuncDiscard) {
 TEST_F(ResolverBehaviorTest, StmtCallFuncMayDiscard) {
     auto* stmt =
         For(Decl(Var("v", ty.i32(), Call("DiscardOrNext"))), nullptr, nullptr, Block(Break()));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -220,7 +251,9 @@ TEST_F(ResolverBehaviorTest, StmtContinue) {
 
 TEST_F(ResolverBehaviorTest, StmtDiscard) {
     auto* stmt = Discard();
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -256,7 +289,9 @@ TEST_F(ResolverBehaviorTest, StmtForLoopContinue_NoExit) {
 
 TEST_F(ResolverBehaviorTest, StmtForLoopDiscard) {
     auto* stmt = For(nullptr, nullptr, nullptr, Block(Discard()));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -277,7 +312,9 @@ TEST_F(ResolverBehaviorTest, StmtForLoopReturn) {
 TEST_F(ResolverBehaviorTest, StmtForLoopBreak_InitCallFuncMayDiscard) {
     auto* stmt =
         For(Decl(Var("v", ty.i32(), Call("DiscardOrNext"))), nullptr, nullptr, Block(Break()));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -287,7 +324,9 @@ TEST_F(ResolverBehaviorTest, StmtForLoopBreak_InitCallFuncMayDiscard) {
 
 TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_InitCallFuncMayDiscard) {
     auto* stmt = For(Decl(Var("v", ty.i32(), Call("DiscardOrNext"))), nullptr, nullptr, Block());
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -307,7 +346,9 @@ TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_CondTrue) {
 
 TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_CondCallFuncMayDiscard) {
     auto* stmt = For(nullptr, Equal(Call("DiscardOrNext"), 1_i), nullptr, Block());
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -327,7 +368,9 @@ TEST_F(ResolverBehaviorTest, StmtWhileBreak) {
 
 TEST_F(ResolverBehaviorTest, StmtWhileDiscard) {
     auto* stmt = While(Expr(true), Block(Discard()));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -357,7 +400,9 @@ TEST_F(ResolverBehaviorTest, StmtWhileEmpty_CondTrue) {
 
 TEST_F(ResolverBehaviorTest, StmtWhileEmpty_CondCallFuncMayDiscard) {
     auto* stmt = While(Equal(Call("DiscardOrNext"), 1_i), Block());
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -377,7 +422,9 @@ TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenEmptyBlock) {
 
 TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenDiscard) {
     auto* stmt = If(true, Block(Discard()));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -387,7 +434,9 @@ TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenDiscard) {
 
 TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenEmptyBlock_ElseDiscard) {
     auto* stmt = If(true, Block(), Else(Block(Discard())));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -397,7 +446,9 @@ TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenEmptyBlock_ElseDiscard) {
 
 TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenDiscard_ElseDiscard) {
     auto* stmt = If(true, Block(Discard()), Else(Block(Discard())));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -407,7 +458,9 @@ TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenDiscard_ElseDiscard) {
 
 TEST_F(ResolverBehaviorTest, StmtIfCallFuncMayDiscard_ThenEmptyBlock) {
     auto* stmt = If(Equal(Call("DiscardOrNext"), 1_i), Block());
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -418,7 +471,9 @@ TEST_F(ResolverBehaviorTest, StmtIfCallFuncMayDiscard_ThenEmptyBlock) {
 TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenEmptyBlock_ElseCallFuncMayDiscard) {
     auto* stmt = If(true, Block(),  //
                     Else(If(Equal(Call("DiscardOrNext"), 1_i), Block())));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -438,7 +493,9 @@ TEST_F(ResolverBehaviorTest, StmtLetDecl) {
 
 TEST_F(ResolverBehaviorTest, StmtLetDecl_RHSDiscardOrNext) {
     auto* stmt = Decl(Let("lhs", ty.i32(), Call("DiscardOrNext")));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -474,7 +531,9 @@ TEST_F(ResolverBehaviorTest, StmtLoopContinue_NoExit) {
 
 TEST_F(ResolverBehaviorTest, StmtLoopDiscard) {
     auto* stmt = Loop(Block(Discard()));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -522,6 +581,7 @@ TEST_F(ResolverBehaviorTest, StmtReturn) {
 
 TEST_F(ResolverBehaviorTest, StmtReturn_DiscardOrNext) {
     auto* stmt = Return(Call("DiscardOrNext"));
+
     Func("F", utils::Empty, ty.i32(), utils::Vector{stmt});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -552,7 +612,9 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_DefaultEmpty) {
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_DefaultDiscard) {
     auto* stmt = Switch(1_i, DefaultCase(Block(Discard())));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -582,7 +644,9 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Empty_DefaultEmpty) {
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Empty_DefaultDiscard) {
     auto* stmt = Switch(1_i, Case(Expr(0_i), Block()), DefaultCase(Block(Discard())));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -602,7 +666,9 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Empty_DefaultReturn) {
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_DefaultEmpty) {
     auto* stmt = Switch(1_i, Case(Expr(0_i), Block(Discard())), DefaultCase(Block()));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -612,7 +678,9 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_DefaultEmpty) {
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_DefaultDiscard) {
     auto* stmt = Switch(1_i, Case(Expr(0_i), Block(Discard())), DefaultCase(Block(Discard())));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -622,7 +690,9 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_DefaultDiscard)
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_DefaultReturn) {
     auto* stmt = Switch(1_i, Case(Expr(0_i), Block(Discard())), DefaultCase(Block(Return())));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -635,7 +705,9 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_Case1Return_Def
                         Case(Expr(0_i), Block(Discard())),  //
                         Case(Expr(1_i), Block(Return())),   //
                         DefaultCase(Block()));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -646,7 +718,9 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_Case1Return_Def
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondCallFuncMayDiscard_DefaultEmpty) {
     auto* stmt = Switch(Call("DiscardOrNext"), DefaultCase(Block()));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
@@ -666,7 +740,9 @@ TEST_F(ResolverBehaviorTest, StmtVarDecl) {
 
 TEST_F(ResolverBehaviorTest, StmtVarDecl_RHSDiscardOrNext) {
     auto* stmt = Decl(Var("lhs", ty.i32(), Call("DiscardOrNext")));
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 

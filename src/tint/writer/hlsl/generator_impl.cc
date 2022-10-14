@@ -2767,7 +2767,7 @@ bool GeneratorImpl::EmitFunction(const ast::Function* func) {
         out << ") {";
     }
 
-    if (sem->HasDiscard() && !sem->ReturnType()->Is<sem::Void>()) {
+    if (sem->DiscardStatement() && !sem->ReturnType()->Is<sem::Void>()) {
         // BUG(crbug.com/tint/1081): work around non-void functions with discard
         // failing compilation sometimes
         if (!EmitFunctionBodyWithDiscard(func)) {
@@ -2791,7 +2791,7 @@ bool GeneratorImpl::EmitFunctionBodyWithDiscard(const ast::Function* func) {
     // there is always an (unused) return statement.
 
     auto* sem = builder_.Sem().Get(func);
-    TINT_ASSERT(Writer, sem->HasDiscard() && !sem->ReturnType()->Is<sem::Void>());
+    TINT_ASSERT(Writer, sem->DiscardStatement() && !sem->ReturnType()->Is<sem::Void>());
 
     ScopedIndent si(this);
     line() << "if (true) {";

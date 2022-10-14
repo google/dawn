@@ -1942,6 +1942,18 @@ bool Validator::Matrix(const sem::Matrix* ty, const Source& source) const {
 }
 
 bool Validator::PipelineStages(const std::vector<sem::Function*>& entry_points) const {
+    auto backtrace = [&](const sem::Function* func, const sem::Function* entry_point) {
+        if (func != entry_point) {
+            TraverseCallChain(diagnostics_, entry_point, func, [&](const sem::Function* f) {
+                AddNote("called by function '" + symbols_.NameFor(f->Declaration()->symbol) + "'",
+                        f->Declaration()->source);
+            });
+            AddNote("called by entry point '" +
+                        symbols_.NameFor(entry_point->Declaration()->symbol) + "'",
+                    entry_point->Declaration()->source);
+        }
+    };
+
     auto check_workgroup_storage = [&](const sem::Function* func,
                                        const sem::Function* entry_point) {
         auto stage = entry_point->Declaration()->PipelineStage();
@@ -1959,34 +1971,13 @@ bool Validator::PipelineStages(const std::vector<sem::Function*>& entry_points) 
                         }
                     }
                     AddNote("variable is declared here", var->Declaration()->source);
-                    if (func != entry_point) {
-                        TraverseCallChain(
-                            diagnostics_, entry_point, func, [&](const sem::Function* f) {
-                                AddNote("called by function '" +
-                                            symbols_.NameFor(f->Declaration()->symbol) + "'",
-                                        f->Declaration()->source);
-                            });
-                        AddNote("called by entry point '" +
-                                    symbols_.NameFor(entry_point->Declaration()->symbol) + "'",
-                                entry_point->Declaration()->source);
-                    }
+                    backtrace(func, entry_point);
                     return false;
                 }
             }
         }
         return true;
     };
-
-    for (auto* entry_point : entry_points) {
-        if (!check_workgroup_storage(entry_point, entry_point)) {
-            return false;
-        }
-        for (auto* func : entry_point->TransitivelyCalledFunctions()) {
-            if (!check_workgroup_storage(func, entry_point)) {
-                return false;
-            }
-        }
-    }
 
     auto check_builtin_calls = [&](const sem::Function* func, const sem::Function* entry_point) {
         auto stage = entry_point->Declaration()->PipelineStage();
@@ -1997,16 +1988,34 @@ bool Validator::PipelineStages(const std::vector<sem::Function*>& entry_points) 
                 err << "built-in cannot be used by " << stage << " pipeline stage";
                 AddError(err.str(),
                          call ? call->Declaration()->source : func->Declaration()->source);
-                if (func != entry_point) {
-                    TraverseCallChain(diagnostics_, entry_point, func, [&](const sem::Function* f) {
-                        AddNote("called by function '" +
-                                    symbols_.NameFor(f->Declaration()->symbol) + "'",
-                                f->Declaration()->source);
-                    });
-                    AddNote("called by entry point '" +
-                                symbols_.NameFor(entry_point->Declaration()->symbol) + "'",
-                            entry_point->Declaration()->source);
-                }
+                backtrace(func, entry_point);
+                return false;
+            }
+        }
+        return true;
+    };
+
+    auto check_no_discards = [&](const sem::Function* func, const sem::Function* entry_point) {
+        if (auto* discard = func->DiscardStatement()) {
+            auto stage = entry_point->Declaration()->PipelineStage();
+            std::stringstream err;
+            err << "discard statement cannot be used in " << stage << " pipeline stage";
+            AddError(err.str(), discard->Declaration()->source);
+            backtrace(func, entry_point);
+            return false;
+        }
+        return true;
+    };
+
+    auto check_func = [&](const sem::Function* func, const sem::Function* entry_point) {
+        if (!check_workgroup_storage(func, entry_point)) {
+            return false;
+        }
+        if (!check_builtin_calls(func, entry_point)) {
+            return false;
+        }
+        if (entry_point->Declaration()->PipelineStage() != ast::PipelineStage::kFragment) {
+            if (!check_no_discards(func, entry_point)) {
                 return false;
             }
         }
@@ -2014,15 +2023,16 @@ bool Validator::PipelineStages(const std::vector<sem::Function*>& entry_points) 
     };
 
     for (auto* entry_point : entry_points) {
-        if (!check_builtin_calls(entry_point, entry_point)) {
+        if (!check_func(entry_point, entry_point)) {
             return false;
         }
         for (auto* func : entry_point->TransitivelyCalledFunctions()) {
-            if (!check_builtin_calls(func, entry_point)) {
+            if (!check_func(func, entry_point)) {
                 return false;
             }
         }
     }
+
     return true;
 }
 

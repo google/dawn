@@ -21,7 +21,9 @@ using HlslGeneratorImplTest_Discard = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Discard, Emit_Discard) {
     auto* stmt = create<ast::DiscardStatement>();
-    WrapInFunction(stmt);
+
+    Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
+         utils::Vector{Stage(ast::PipelineStage::kFragment)});
 
     GeneratorImpl& gen = Build();
 

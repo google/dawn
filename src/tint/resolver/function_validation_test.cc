@@ -143,7 +143,7 @@ TEST_F(ResolverFunctionValidationTest, UnreachableCode_return) {
 TEST_F(ResolverFunctionValidationTest, UnreachableCode_return_InBlocks) {
     // fn func() -> {
     //  var a : i32;
-    // utils::Vector  {{{return;}}}
+    //  {{{return;}}}
     //  a = 2i;
     //}
 
@@ -184,7 +184,7 @@ TEST_F(ResolverFunctionValidationTest, UnreachableCode_discard) {
 TEST_F(ResolverFunctionValidationTest, UnreachableCode_discard_InBlocks) {
     // fn func() -> {
     //  var a : i32;
-    // utils::Vector  {{{discard;}}}
+    //  {{{discard;}}}
     //  a = 2i;
     //}
 
@@ -200,6 +200,59 @@ TEST_F(ResolverFunctionValidationTest, UnreachableCode_discard_InBlocks) {
     EXPECT_TRUE(Sem().Get(decl_a)->IsReachable());
     EXPECT_TRUE(Sem().Get(discard)->IsReachable());
     EXPECT_FALSE(Sem().Get(assign_a)->IsReachable());
+}
+
+TEST_F(ResolverFunctionValidationTest, DiscardCalledDirectlyFromVertexEntryPoint) {
+    // @vertex() fn func() -> @position(0) vec4<f32> { discard; }
+    Func(Source{{1, 2}}, "func", utils::Empty, ty.vec4<f32>(),
+         utils::Vector{
+             Discard(Source{{12, 34}}),
+         },
+         utils::Vector{Stage(ast::PipelineStage::kVertex)},
+         utils::Vector{Builtin(ast::BuiltinValue::kPosition)});
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: discard statement cannot be used in vertex pipeline stage");
+}
+
+TEST_F(ResolverFunctionValidationTest, DiscardCalledIndirectlyFromComputeEntryPoint) {
+    // fn f0 { discard; }
+    // fn f1 { f0(); }
+    // fn f2 { f1(); }
+    // @compute @workgroup_size(1) fn main { return f2(); }
+
+    Func(Source{{1, 2}}, "f0", utils::Empty, ty.void_(),
+         utils::Vector{
+             Discard(Source{{12, 34}}),
+         });
+
+    Func(Source{{3, 4}}, "f1", utils::Empty, ty.void_(),
+         utils::Vector{
+             CallStmt(Call("f0")),
+         });
+
+    Func(Source{{5, 6}}, "f2", utils::Empty, ty.void_(),
+         utils::Vector{
+             CallStmt(Call("f1")),
+         });
+
+    Func(Source{{7, 8}}, "main", utils::Empty, ty.void_(),
+         utils::Vector{
+             CallStmt(Call("f2")),
+         },
+         utils::Vector{
+             Stage(ast::PipelineStage::kCompute),
+             WorkgroupSize(1_i),
+         });
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              R"(12:34 error: discard statement cannot be used in compute pipeline stage
+1:2 note: called by function 'f0'
+3:4 note: called by function 'f1'
+5:6 note: called by function 'f2'
+7:8 note: called by entry point 'main')");
 }
 
 TEST_F(ResolverFunctionValidationTest, FunctionEndWithoutReturnStatement_Fail) {

@@ -20,7 +20,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Block) {
-    auto* b = Block(create<ast::DiscardStatement>());
+    auto* b = Block(Return());
     WrapInFunction(b);
 
     GeneratorImpl& gen = Build();
@@ -29,13 +29,13 @@ TEST_F(MslGeneratorImplTest, Emit_Block) {
 
     ASSERT_TRUE(gen.EmitStatement(b)) << gen.error();
     EXPECT_EQ(gen.result(), R"(  {
-    discard_fragment();
+    return;
   }
 )");
 }
 
 TEST_F(MslGeneratorImplTest, Emit_Block_WithoutNewline) {
-    auto* b = Block(create<ast::DiscardStatement>());
+    auto* b = Block(Return());
     WrapInFunction(b);
 
     GeneratorImpl& gen = Build();
@@ -44,7 +44,7 @@ TEST_F(MslGeneratorImplTest, Emit_Block_WithoutNewline) {
 
     ASSERT_TRUE(gen.EmitBlock(b)) << gen.error();
     EXPECT_EQ(gen.result(), R"(  {
-    discard_fragment();
+    return;
   }
 )");
 }
