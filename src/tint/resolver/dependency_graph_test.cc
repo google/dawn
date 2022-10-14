@@ -1289,6 +1289,9 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
     GlobalVar(Sym(), ty.storage_texture(ast::TextureDimension::k2d, ast::TexelFormat::kR32Float,
                                         ast::Access::kRead));  //
     GlobalVar(Sym(), ty.sampler(ast::SamplerKind::kSampler));
+
+    GlobalVar(Sym(), ty.i32(), utils::Vector{Binding(V), Group(V)});
+
     Func(Sym(), utils::Empty, ty.void_(), utils::Empty);
 #undef V
 #undef T

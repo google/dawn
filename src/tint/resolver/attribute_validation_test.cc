@@ -1562,6 +1562,83 @@ TEST_F(InterpolateTest, MissingLocationAttribute_Struct) {
               R"(12:34 error: interpolate attribute must only be used with @location)");
 }
 
+using GroupAndBindingTest = ResolverTest;
+
+TEST_F(GroupAndBindingTest, Const_I32) {
+    GlobalConst("b", Expr(4_i));
+    GlobalConst("g", Expr(2_i));
+    GlobalVar("val", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Binding("b"),
+              Group("g"));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(GroupAndBindingTest, Const_U32) {
+    GlobalConst("b", Expr(4_u));
+    GlobalConst("g", Expr(2_u));
+    GlobalVar("val", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Binding("b"),
+              Group("g"));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(GroupAndBindingTest, Const_AInt) {
+    GlobalConst("b", Expr(4_a));
+    GlobalConst("g", Expr(2_a));
+    GlobalVar("val", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Binding("b"),
+              Group("g"));
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(GroupAndBindingTest, Binding_Negative) {
+    GlobalVar("val", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+              Binding(Source{{12, 34}}, -2_i), Group(1_i));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'binding' value must be non-negative)");
+}
+
+TEST_F(GroupAndBindingTest, Binding_F32) {
+    GlobalVar("val", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+              Binding(Source{{12, 34}}, 2.0_f), Group(1_u));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'binding' must be an i32 or u32 value)");
+}
+
+TEST_F(GroupAndBindingTest, Binding_AFloat) {
+    GlobalVar("val", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+              Binding(Source{{12, 34}}, 2.0_a), Group(1_u));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'binding' must be an i32 or u32 value)");
+}
+
+TEST_F(GroupAndBindingTest, Group_Negative) {
+    GlobalVar("val", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Binding(2_u),
+              Group(Source{{12, 34}}, -1_i));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'group' value must be non-negative)");
+}
+
+TEST_F(GroupAndBindingTest, Group_F32) {
+    GlobalVar("val", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Binding(2_u),
+              Group(Source{{12, 34}}, 1.0_f));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'group' must be an i32 or u32 value)");
+}
+
+TEST_F(GroupAndBindingTest, Group_AFloat) {
+    GlobalVar("val", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Binding(2_u),
+              Group(Source{{12, 34}}, 1.0_a));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'group' must be an i32 or u32 value)");
+}
+
 }  // namespace
 }  // namespace InterpolateTests
 

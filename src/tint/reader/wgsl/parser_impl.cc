@@ -3441,15 +3441,16 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
     if (t == "binding") {
         const char* use = "binding attribute";
         return expect_paren_block(use, [&]() -> Result {
-            auto val = expect_positive_sint(use);
-            if (val.errored) {
+            auto expr = expression();
+            if (expr.errored) {
                 return Failure::kErrored;
+            }
+            if (!expr.matched) {
+                return add_error(peek(), "expected binding expression");
             }
             match(Token::Type::kComma);
 
-            return create<ast::BindingAttribute>(
-                t.source(), create<ast::IntLiteralExpression>(
-                                val.value, ast::IntLiteralExpression::Suffix::kNone));
+            return create<ast::BindingAttribute>(t.source(), expr.value);
         });
     }
 
@@ -3478,15 +3479,16 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
     if (t == "group") {
         const char* use = "group attribute";
         return expect_paren_block(use, [&]() -> Result {
-            auto val = expect_positive_sint(use);
-            if (val.errored) {
+            auto expr = expression();
+            if (expr.errored) {
                 return Failure::kErrored;
+            }
+            if (!expr.matched) {
+                return add_error(peek(), "expected group expression");
             }
             match(Token::Type::kComma);
 
-            return create<ast::GroupAttribute>(
-                t.source(), create<ast::IntLiteralExpression>(
-                                val.value, ast::IntLiteralExpression::Suffix::kNone));
+            return create<ast::GroupAttribute>(t.source(), expr.value);
         });
     }
 

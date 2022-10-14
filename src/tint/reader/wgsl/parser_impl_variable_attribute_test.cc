@@ -392,6 +392,31 @@ TEST_F(ParserImplTest, Attribute_Binding) {
     EXPECT_EQ(expr->suffix, ast::IntLiteralExpression::Suffix::kNone);
 }
 
+TEST_F(ParserImplTest, Attribute_Binding_Expression) {
+    auto p = parser("binding(4 + 5)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    auto* var_attr = attr.value->As<ast::Attribute>();
+    ASSERT_NE(var_attr, nullptr);
+    ASSERT_FALSE(p->has_error());
+    ASSERT_TRUE(var_attr->Is<ast::BindingAttribute>());
+
+    auto* binding = var_attr->As<ast::BindingAttribute>();
+    ASSERT_TRUE(binding->expr->Is<ast::BinaryExpression>());
+    auto* expr = binding->expr->As<ast::BinaryExpression>();
+
+    EXPECT_EQ(ast::BinaryOp::kAdd, expr->op);
+    auto* v = expr->lhs->As<ast::IntLiteralExpression>();
+    ASSERT_NE(nullptr, v);
+    EXPECT_EQ(v->value, 4u);
+
+    v = expr->rhs->As<ast::IntLiteralExpression>();
+    ASSERT_NE(nullptr, v);
+    EXPECT_EQ(v->value, 5u);
+}
+
 TEST_F(ParserImplTest, Attribute_Binding_TrailingComma) {
     auto p = parser("binding(4,)");
     auto attr = p->attribute();
@@ -437,17 +462,17 @@ TEST_F(ParserImplTest, Attribute_Binding_MissingValue) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:9: expected signed integer literal for binding attribute");
+    EXPECT_EQ(p->error(), "1:9: expected binding expression");
 }
 
 TEST_F(ParserImplTest, Attribute_Binding_MissingInvalid) {
-    auto p = parser("binding(nan)");
+    auto p = parser("binding(if)");
     auto attr = p->attribute();
     EXPECT_FALSE(attr.matched);
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:9: expected signed integer literal for binding attribute");
+    EXPECT_EQ(p->error(), "1:9: expected binding expression");
 }
 
 TEST_F(ParserImplTest, Attribute_group) {
@@ -466,6 +491,31 @@ TEST_F(ParserImplTest, Attribute_group) {
     auto* expr = group->expr->As<ast::IntLiteralExpression>();
     EXPECT_EQ(expr->value, 4);
     EXPECT_EQ(expr->suffix, ast::IntLiteralExpression::Suffix::kNone);
+}
+
+TEST_F(ParserImplTest, Attribute_group_expression) {
+    auto p = parser("group(4 + 5)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    auto* var_attr = attr.value->As<ast::Attribute>();
+    ASSERT_FALSE(p->has_error());
+    ASSERT_NE(var_attr, nullptr);
+    ASSERT_TRUE(var_attr->Is<ast::GroupAttribute>());
+
+    auto* group = var_attr->As<ast::GroupAttribute>();
+    ASSERT_TRUE(group->expr->Is<ast::BinaryExpression>());
+    auto* expr = group->expr->As<ast::BinaryExpression>();
+
+    EXPECT_EQ(ast::BinaryOp::kAdd, expr->op);
+    auto* v = expr->lhs->As<ast::IntLiteralExpression>();
+    ASSERT_NE(nullptr, v);
+    EXPECT_EQ(v->value, 4u);
+
+    v = expr->rhs->As<ast::IntLiteralExpression>();
+    ASSERT_NE(nullptr, v);
+    EXPECT_EQ(v->value, 5u);
 }
 
 TEST_F(ParserImplTest, Attribute_group_TrailingComma) {
@@ -513,17 +563,17 @@ TEST_F(ParserImplTest, Attribute_Group_MissingValue) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:7: expected signed integer literal for group attribute");
+    EXPECT_EQ(p->error(), "1:7: expected group expression");
 }
 
 TEST_F(ParserImplTest, Attribute_Group_MissingInvalid) {
-    auto p = parser("group(nan)");
+    auto p = parser("group(if)");
     auto attr = p->attribute();
     EXPECT_FALSE(attr.matched);
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:7: expected signed integer literal for group attribute");
+    EXPECT_EQ(p->error(), "1:7: expected group expression");
 }
 
 }  // namespace

@@ -198,6 +198,7 @@ class DependencyScanner {
             [&](const ast::Variable* var) {
                 Declare(var->symbol, var);
                 TraverseType(var->type);
+                TraverseAttributes(var->attributes);
                 if (var->constructor) {
                     TraverseExpression(var->constructor);
                 }
@@ -416,25 +417,38 @@ class DependencyScanner {
     /// Traverses the attribute, performing symbol resolution and determining
     /// global dependencies.
     void TraverseAttribute(const ast::Attribute* attr) {
-        if (auto* wg = attr->As<ast::WorkgroupAttribute>()) {
-            TraverseExpression(wg->x);
-            TraverseExpression(wg->y);
-            TraverseExpression(wg->z);
-            return;
-        }
-        if (auto* align = attr->As<ast::StructMemberAlignAttribute>()) {
-            TraverseExpression(align->expr);
-            return;
-        }
-        if (auto* size = attr->As<ast::StructMemberSizeAttribute>()) {
-            TraverseExpression(size->expr);
+        bool handled = Switch(
+            attr,
+            [&](const ast::BindingAttribute* binding) {
+                TraverseExpression(binding->expr);
+                return true;
+            },
+            [&](const ast::GroupAttribute* group) {
+                TraverseExpression(group->expr);
+                return true;
+            },
+            [&](const ast::StructMemberAlignAttribute* align) {
+                TraverseExpression(align->expr);
+                return true;
+            },
+            [&](const ast::StructMemberSizeAttribute* size) {
+                TraverseExpression(size->expr);
+                return true;
+            },
+            [&](const ast::WorkgroupAttribute* wg) {
+                TraverseExpression(wg->x);
+                TraverseExpression(wg->y);
+                TraverseExpression(wg->z);
+                return true;
+            });
+        if (handled) {
             return;
         }
 
-        if (attr->IsAnyOf<ast::BindingAttribute, ast::BuiltinAttribute, ast::GroupAttribute,
-                          ast::IdAttribute, ast::InternalAttribute, ast::InterpolateAttribute,
-                          ast::InvariantAttribute, ast::LocationAttribute, ast::StageAttribute,
-                          ast::StrideAttribute, ast::StructMemberOffsetAttribute>()) {
+        if (attr->IsAnyOf<ast::BuiltinAttribute, ast::IdAttribute, ast::InternalAttribute,
+                          ast::InterpolateAttribute, ast::InvariantAttribute,
+                          ast::LocationAttribute, ast::StageAttribute, ast::StrideAttribute,
+                          ast::StructMemberOffsetAttribute>()) {
             return;
         }
 

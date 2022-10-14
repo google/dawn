@@ -1017,10 +1017,10 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBindingMissingRParen) {
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBindingInvalidValue) {
-    EXPECT("@binding(x) var i : i32;",
-           R"(test.wgsl:1:10 error: expected signed integer literal for binding attribute
-@binding(x) var i : i32;
-         ^
+    EXPECT("@binding(if) var i : i32;",
+           R"(test.wgsl:1:10 error: expected binding expression
+@binding(if) var i : i32;
+         ^^
 )");
 }
 
@@ -1041,10 +1041,10 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarAttrGroupMissingRParen) {
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarAttrBindingGroupValue) {
-    EXPECT("@group(x) var i : i32;",
-           R"(test.wgsl:1:8 error: expected signed integer literal for group attribute
-@group(x) var i : i32;
-       ^
+    EXPECT("@group(if) var i : i32;",
+           R"(test.wgsl:1:8 error: expected group expression
+@group(if) var i : i32;
+       ^^
 )");
 }
 

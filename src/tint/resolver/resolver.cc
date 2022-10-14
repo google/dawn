@@ -619,34 +619,50 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
         if (var->HasBindingPoint()) {
             uint32_t binding = 0;
             {
+                ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@binding"};
+                TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+
                 auto* attr = ast::GetAttribute<ast::BindingAttribute>(var->attributes);
-                auto* materialize = Materialize(Expression(attr->expr));
-                if (!materialize) {
+                auto* materialized = Materialize(Expression(attr->expr));
+                if (!materialized) {
                     return nullptr;
                 }
-                auto* c = materialize->ConstantValue();
-                if (!c) {
-                    // TODO(crbug.com/tint/1633): Add error message about invalid materialization
-                    // when binding can be an expression.
+                if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
+                    AddError("'binding' must be an i32 or u32 value", attr->source);
                     return nullptr;
                 }
-                binding = c->As<uint32_t>();
+
+                auto const_value = materialized->ConstantValue();
+                auto value = const_value->As<AInt>();
+                if (value < 0) {
+                    AddError("'binding' value must be non-negative", attr->source);
+                    return nullptr;
+                }
+                binding = u32(value);
             }
 
             uint32_t group = 0;
             {
+                ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@group"};
+                TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+
                 auto* attr = ast::GetAttribute<ast::GroupAttribute>(var->attributes);
-                auto* materialize = Materialize(Expression(attr->expr));
-                if (!materialize) {
+                auto* materialized = Materialize(Expression(attr->expr));
+                if (!materialized) {
                     return nullptr;
                 }
-                auto* c = materialize->ConstantValue();
-                if (!c) {
-                    // TODO(crbug.com/tint/1633): Add error message about invalid materialization
-                    // when binding can be an expression.
+                if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
+                    AddError("'group' must be an i32 or u32 value", attr->source);
                     return nullptr;
                 }
-                group = c->As<uint32_t>();
+
+                auto const_value = materialized->ConstantValue();
+                auto value = const_value->As<AInt>();
+                if (value < 0) {
+                    AddError("'group' value must be non-negative", attr->source);
+                    return nullptr;
+                }
+                group = u32(value);
             }
             binding_point = {group, binding};
         }
