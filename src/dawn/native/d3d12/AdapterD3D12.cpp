@@ -138,6 +138,7 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
     mSupportedFeatures.EnableFeature(Feature::Depth32FloatStencil8);
     mSupportedFeatures.EnableFeature(Feature::IndirectFirstInstance);
     mSupportedFeatures.EnableFeature(Feature::RG11B10UfloatRenderable);
+    mSupportedFeatures.EnableFeature(Feature::DepthClipControl);
 
     if (GetBackend()->GetFunctions()->IsDXCAvailable()) {
         uint64_t dxcVersion = 0;
