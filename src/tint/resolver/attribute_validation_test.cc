@@ -743,6 +743,78 @@ TEST_F(StructMemberAttributeTest, Align_Attribute_Override) {
         R"(error: @align requires a const-expression, but expression is an override-expression)");
 }
 
+TEST_F(StructMemberAttributeTest, Size_Attribute_Const) {
+    GlobalConst("val", ty.i32(), Expr(4_i));
+
+    Structure("mystruct", utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize("val")})});
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(StructMemberAttributeTest, Size_Attribute_ConstNegative) {
+    GlobalConst("val", ty.i32(), Expr(-2_i));
+
+    Structure("mystruct", utils::Vector{Member(
+                              "a", ty.f32(), utils::Vector{MemberSize(Source{{12, 34}}, "val")})});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'size' attribute must be positive)");
+}
+
+TEST_F(StructMemberAttributeTest, Size_Attribute_ConstF32) {
+    GlobalConst("val", ty.f32(), Expr(1.23_f));
+
+    Structure("mystruct", utils::Vector{Member(
+                              "a", ty.f32(), utils::Vector{MemberSize(Source{{12, 34}}, "val")})});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'size' must be an i32 or u32 value)");
+}
+
+TEST_F(StructMemberAttributeTest, Size_Attribute_ConstU32) {
+    GlobalConst("val", ty.u32(), Expr(4_u));
+
+    Structure("mystruct", utils::Vector{Member(
+                              "a", ty.f32(), utils::Vector{MemberSize(Source{{12, 34}}, "val")})});
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(StructMemberAttributeTest, Size_Attribute_ConstAInt) {
+    GlobalConst("val", Expr(4_a));
+
+    Structure("mystruct", utils::Vector{Member(
+                              "a", ty.f32(), utils::Vector{MemberSize(Source{{12, 34}}, "val")})});
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(StructMemberAttributeTest, Size_Attribute_ConstAFloat) {
+    GlobalConst("val", Expr(2.0_a));
+
+    Structure("mystruct", utils::Vector{Member(
+                              "a", ty.f32(), utils::Vector{MemberSize(Source{{12, 34}}, "val")})});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'size' must be an i32 or u32 value)");
+}
+
+TEST_F(StructMemberAttributeTest, Size_Attribute_Var) {
+    GlobalVar(Source{{1, 2}}, "val", ty.f32(), ast::AddressSpace::kPrivate, ast::Access::kUndefined,
+              Expr(1.23_f));
+
+    Structure(Source{{6, 4}}, "mystruct",
+              utils::Vector{Member(Source{{12, 5}}, "a", ty.f32(),
+                                   utils::Vector{MemberSize(Expr(Source{{12, 35}}, "val"))})});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:35 error: var 'val' cannot be referenced at module-scope
+1:2 note: var 'val' declared here)");
+}
+
+TEST_F(StructMemberAttributeTest, Size_Attribute_Override) {
+    Override("val", ty.f32(), Expr(1.23_f));
+
+    Structure("mystruct", utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize("val")})});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(error: @size requires a const-expression, but expression is an override-expression)");
+}
+
 }  // namespace StructAndStructMemberTests
 
 using ArrayAttributeTest = TestWithParams;

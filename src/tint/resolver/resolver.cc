@@ -2885,15 +2885,26 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                 if (!materialized) {
                     return nullptr;
                 }
+                if (!materialized->Type()->IsAnyOf<sem::U32, sem::I32>()) {
+                    AddError("'size' must be an i32 or u32 value", s->source);
+                    return nullptr;
+                }
+
                 auto const_value = materialized->ConstantValue();
                 if (!const_value) {
                     AddError("'size' must be constant expression", s->expr->source);
                     return nullptr;
                 }
+                {
+                    auto value = const_value->As<AInt>();
+                    if (value <= 0) {
+                        AddError("'size' attribute must be positive", s->source);
+                        return nullptr;
+                    }
+                }
                 auto value = const_value->As<uint64_t>();
-
                 if (value < size) {
-                    AddError("size must be at least as big as the type's size (" +
+                    AddError("'size' must be at least as big as the type's size (" +
                                  std::to_string(size) + ")",
                              s->source);
                     return nullptr;

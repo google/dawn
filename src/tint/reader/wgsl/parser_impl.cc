@@ -3551,13 +3551,16 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
     if (t == "size") {
         const char* use = "size attribute";
         return expect_paren_block(use, [&]() -> Result {
-            auto val = expect_positive_sint(use);
-            if (val.errored) {
+            auto expr = expression();
+            if (expr.errored) {
                 return Failure::kErrored;
+            }
+            if (!expr.matched) {
+                return add_error(peek(), "expected size expression");
             }
             match(Token::Type::kComma);
 
-            return builder_.MemberSize(t.source(), AInt(val.value));
+            return builder_.MemberSize(t.source(), expr.value);
         });
     }
 

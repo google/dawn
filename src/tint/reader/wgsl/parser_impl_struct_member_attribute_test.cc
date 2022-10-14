@@ -23,7 +23,7 @@ TEST_F(ParserImplTest, Attribute_Size) {
     EXPECT_TRUE(attr.matched);
     EXPECT_FALSE(attr.errored);
     ASSERT_NE(attr.value, nullptr);
-    ASSERT_FALSE(p->has_error());
+    ASSERT_FALSE(p->has_error()) << p->error();
 
     auto* member_attr = attr.value->As<ast::Attribute>();
     ASSERT_NE(member_attr, nullptr);
@@ -34,13 +34,39 @@ TEST_F(ParserImplTest, Attribute_Size) {
     EXPECT_EQ(o->expr->As<ast::IntLiteralExpression>()->value, 4u);
 }
 
+TEST_F(ParserImplTest, Attribute_Size_Expression) {
+    auto p = parser("size(4 + 5)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    ASSERT_FALSE(p->has_error()) << p->error();
+
+    auto* member_attr = attr.value->As<ast::Attribute>();
+    ASSERT_NE(member_attr, nullptr);
+    ASSERT_TRUE(member_attr->Is<ast::StructMemberSizeAttribute>());
+
+    auto* o = member_attr->As<ast::StructMemberSizeAttribute>();
+    ASSERT_TRUE(o->expr->Is<ast::BinaryExpression>());
+    auto* expr = o->expr->As<ast::BinaryExpression>();
+
+    EXPECT_EQ(ast::BinaryOp::kAdd, expr->op);
+    auto* v = expr->lhs->As<ast::IntLiteralExpression>();
+    ASSERT_NE(nullptr, v);
+    EXPECT_EQ(v->value, 4u);
+
+    v = expr->rhs->As<ast::IntLiteralExpression>();
+    ASSERT_NE(nullptr, v);
+    EXPECT_EQ(v->value, 5u);
+}
+
 TEST_F(ParserImplTest, Attribute_Size_TrailingComma) {
     auto p = parser("size(4,)");
     auto attr = p->attribute();
     EXPECT_TRUE(attr.matched);
     EXPECT_FALSE(attr.errored);
     ASSERT_NE(attr.value, nullptr);
-    ASSERT_FALSE(p->has_error());
+    ASSERT_FALSE(p->has_error()) << p->error();
 
     auto* member_attr = attr.value->As<ast::Attribute>();
     ASSERT_NE(member_attr, nullptr);
@@ -78,17 +104,17 @@ TEST_F(ParserImplTest, Attribute_Size_MissingValue) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:6: expected signed integer literal for size attribute");
+    EXPECT_EQ(p->error(), "1:6: expected size expression");
 }
 
 TEST_F(ParserImplTest, Attribute_Size_MissingInvalid) {
-    auto p = parser("size(nan)");
+    auto p = parser("size(if)");
     auto attr = p->attribute();
     EXPECT_FALSE(attr.matched);
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:6: expected signed integer literal for size attribute");
+    EXPECT_EQ(p->error(), "1:6: expected size expression");
 }
 
 TEST_F(ParserImplTest, Attribute_Align) {

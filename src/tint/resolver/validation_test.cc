@@ -1266,11 +1266,11 @@ TEST_F(ResolverValidationTest, ZeroStructMemberAlignAttribute) {
 
 TEST_F(ResolverValidationTest, ZeroStructMemberSizeAttribute) {
     Structure("S", utils::Vector{
-                       Member("a", ty.f32(), utils::Vector{MemberSize(Source{{12, 34}}, 0_a)}),
+                       Member("a", ty.f32(), utils::Vector{MemberSize(Source{{12, 34}}, 1_a)}),
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: size must be at least as big as the type's size (4)");
+    EXPECT_EQ(r()->error(), "12:34 error: 'size' must be at least as big as the type's size (4)");
 }
 
 TEST_F(ResolverValidationTest, OffsetAndSizeAttribute) {

@@ -115,14 +115,14 @@ TEST_F(ParserImplTest, StructMember_ParsesWithMultipleattributes) {
 }
 
 TEST_F(ParserImplTest, StructMember_InvalidAttribute) {
-    auto p = parser("@size(nan) a : i32,");
+    auto p = parser("@size(if) a : i32,");
 
     auto m = p->expect_struct_member();
     ASSERT_TRUE(m.errored);
     ASSERT_EQ(m.value, nullptr);
 
     ASSERT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:7: expected signed integer literal for size attribute");
+    EXPECT_EQ(p->error(), "1:7: expected size expression");
 }
 
 }  // namespace

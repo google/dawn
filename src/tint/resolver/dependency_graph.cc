@@ -426,12 +426,15 @@ class DependencyScanner {
             TraverseExpression(align->expr);
             return;
         }
+        if (auto* size = attr->As<ast::StructMemberSizeAttribute>()) {
+            TraverseExpression(size->expr);
+            return;
+        }
 
         if (attr->IsAnyOf<ast::BindingAttribute, ast::BuiltinAttribute, ast::GroupAttribute,
                           ast::IdAttribute, ast::InternalAttribute, ast::InterpolateAttribute,
                           ast::InvariantAttribute, ast::LocationAttribute, ast::StageAttribute,
-                          ast::StrideAttribute, ast::StructMemberOffsetAttribute,
-                          ast::StructMemberSizeAttribute>()) {
+                          ast::StrideAttribute, ast::StructMemberOffsetAttribute>()) {
             return;
         }
 

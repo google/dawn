@@ -862,17 +862,9 @@ struct S { @align(fn) i : i32, };
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclStructMemberSizeInvaldValue) {
-    EXPECT("struct S { @size(x) i : i32, };",
-           R"(test.wgsl:1:18 error: expected signed integer literal for size attribute
-struct S { @size(x) i : i32, };
-                 ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclStructMemberSizeNegativeValue) {
-    EXPECT("struct S { @size(-2) i : i32, };",
-           R"(test.wgsl:1:18 error: size attribute must be positive
-struct S { @size(-2) i : i32, };
+    EXPECT("struct S { @size(if) i : i32, };",
+           R"(test.wgsl:1:18 error: expected size expression
+struct S { @size(if) i : i32, };
                  ^^
 )");
 }

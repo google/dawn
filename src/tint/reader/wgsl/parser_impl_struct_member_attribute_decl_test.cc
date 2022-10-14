@@ -39,12 +39,12 @@ TEST_F(ParserImplTest, AttributeDecl_Single) {
 }
 
 TEST_F(ParserImplTest, AttributeDecl_InvalidAttribute) {
-    auto p = parser("@size(nan)");
+    auto p = parser("@size(if)");
     auto attrs = p->attribute_list();
     EXPECT_TRUE(p->has_error()) << p->error();
     EXPECT_TRUE(attrs.errored);
     EXPECT_FALSE(attrs.matched);
-    EXPECT_EQ(p->error(), "1:7: expected signed integer literal for size attribute");
+    EXPECT_EQ(p->error(), "1:7: expected size expression");
 }
 
 }  // namespace
