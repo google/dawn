@@ -1,0 +1,15 @@
+#include <metal_stdlib>
+
+using namespace metal;
+kernel void tint_symbol() {
+  while(true) {
+    if (true) {
+      break;
+    } else {
+      return;
+    }
+  }
+  int const x = 5;
+  return;
+}
+
