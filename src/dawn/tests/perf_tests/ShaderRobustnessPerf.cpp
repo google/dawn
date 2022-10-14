@@ -62,11 +62,11 @@ const std::string& kMatMulFloatHeader = R"(
             }
         }
 
-        let RowPerThread : u32 = 4u;
-        let ColPerThread : u32 = 4u;
-        let TileAOuter : u32 = 32u;
-        let TileBOuter : u32 = 32u;
-        let TileInner : u32 = 32u;)";
+        const RowPerThread : u32 = 4u;
+        const ColPerThread : u32 = 4u;
+        const TileAOuter : u32 = 32u;
+        const TileBOuter : u32 = 32u;
+        const TileInner : u32 = 32u;)";
 
 const std::string& kMatMulFloatSharedArray1D = R"(
         var<workgroup> mm_Asub : array<f32, 1024>;
@@ -229,10 +229,10 @@ const std::string& kMatMulVec4Header = R"(
             }
         }
 
-        let RowPerThread : u32 = 4u;
-        let ColPerThread : u32 = 4u;
-        let TileOuter : u32 = 32u;
-        let TileInner : u32 = 32u;)";
+        const RowPerThread : u32 = 4u;
+        const ColPerThread : u32 = 4u;
+        const TileOuter : u32 = 32u;
+        const TileInner : u32 = 32u;)";
 const std::string& kMatMulVec4SharedArray1D = R"(
         var<workgroup> mm_Asub : array<vec4<f32>, 256>;
         var<workgroup> mm_Bsub : array<vec4<f32>, 256>;)";
