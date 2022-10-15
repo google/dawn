@@ -735,12 +735,13 @@ TEST_F(StructMemberAttributeTest, Align_Attribute_Var) {
 TEST_F(StructMemberAttributeTest, Align_Attribute_Override) {
     Override("val", ty.f32(), Expr(1.23_f));
 
-    Structure("mystruct", utils::Vector{Member(
-                              "a", ty.f32(), utils::Vector{MemberAlign(Source{{12, 34}}, "val")})});
+    Structure("mystruct",
+              utils::Vector{Member("a", ty.f32(),
+                                   utils::Vector{MemberAlign(Expr(Source{{12, 34}}, "val"))})});
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(error: @align requires a const-expression, but expression is an override-expression)");
+        R"(12:34 error: @align requires a const-expression, but expression is an override-expression)");
 }
 
 TEST_F(StructMemberAttributeTest, Size_Attribute_Const) {
