@@ -389,7 +389,6 @@ TEST_P(TextureViewSamplingTest, Texture2DViewOn2DArrayTexture) {
 
 // Test sampling from a 2D array texture view created on a 2D array texture.
 TEST_P(TextureViewSamplingTest, Texture2DArrayViewOn2DArrayTexture) {
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
     Texture2DArrayViewTest(6, 1, 2, 0);
 }
 
@@ -432,7 +431,6 @@ TEST_P(TextureViewSamplingTest, Texture2DViewOnOneLevelOf2DArrayTexture) {
 
 // Test sampling from a 2D array texture view created on a mipmap level of a 2D array texture.
 TEST_P(TextureViewSamplingTest, Texture2DArrayViewOnOneLevelOf2DArrayTexture) {
-    DAWN_SUPPRESS_TEST_IF(IsMetal() && IsIntel());
     Texture2DArrayViewTest(6, 6, 2, 4);
 }
 
