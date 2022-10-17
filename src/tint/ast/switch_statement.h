@@ -38,9 +38,6 @@ class SwitchStatement final : public Castable<SwitchStatement, Statement> {
     SwitchStatement(SwitchStatement&&);
     ~SwitchStatement() override;
 
-    /// @returns true if this is a default statement
-    bool IsDefault() const { return condition == nullptr; }
-
     /// Clones this node and all transitive child nodes using the `CloneContext`
     /// `ctx`.
     /// @param ctx the clone context
