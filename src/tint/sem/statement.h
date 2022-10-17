@@ -17,6 +17,8 @@
 
 #include "src/tint/sem/behavior.h"
 #include "src/tint/sem/node.h"
+#include "src/tint/symbol.h"
+#include "src/tint/utils/hashmap.h"
 
 // Forward declarations
 namespace tint::ast {
@@ -26,6 +28,7 @@ namespace tint::sem {
 class BlockStatement;
 class CompoundStatement;
 class Function;
+class LocalVariable;
 }  // namespace tint::sem
 
 namespace tint::sem {
@@ -128,6 +131,25 @@ class CompoundStatement : public Castable<Statement, Statement> {
 
     /// Destructor
     ~CompoundStatement() override;
+
+    /// OrderedLocalVariable describes a local variable declaration, and order of declaration.
+    struct OrderedLocalVariable {
+        /// The 0-based declaration order index of the variable
+        size_t order;
+        /// The variable
+        const LocalVariable* variable;
+    };
+
+    /// @returns a map of variable name to variable declarations associated with this block
+    const utils::Hashmap<Symbol, OrderedLocalVariable, 4>& Decls() const { return decls_; }
+
+    /// Associates a declaration with this block.
+    /// @note this method must be called in variable declaration order
+    /// @param var a variable declaration to be added to the block
+    void AddDecl(const LocalVariable* var);
+
+  private:
+    utils::Hashmap<Symbol, OrderedLocalVariable, 4> decls_;
 };
 
 template <typename Pred>

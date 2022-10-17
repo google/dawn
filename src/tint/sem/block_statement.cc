@@ -35,10 +35,6 @@ const ast::BlockStatement* BlockStatement::Declaration() const {
     return Base::Declaration()->As<ast::BlockStatement>();
 }
 
-void BlockStatement::AddDecl(const ast::Variable* var) {
-    decls_.push_back(var);
-}
-
 FunctionBlockStatement::FunctionBlockStatement(const sem::Function* function)
     : Base(function->Declaration()->body, nullptr, function) {
     TINT_ASSERT(Semantic, function);

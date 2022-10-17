@@ -375,11 +375,8 @@ class Resolver {
     /// * Assigns `sem` to #current_statement_
     /// * Assigns `sem` to #current_compound_statement_ if `sem` derives from
     ///   sem::CompoundStatement.
-    /// * Assigns `sem` to #current_block_ if `sem` derives from
-    ///   sem::BlockStatement.
     /// * Then calls `callback`.
-    /// * Before returning #current_statement_, #current_compound_statement_, and
-    ///   #current_block_ are restored to their original values.
+    /// * Before returning #current_statement_ and #current_compound_statement_ are restored to their original values.
     /// @returns `sem` if `callback` returns true, otherwise `nullptr`.
     template <typename SEM, typename F>
     SEM* StatementScope(const ast::Statement* ast, SEM* sem, F&& callback);
@@ -441,7 +438,6 @@ class Resolver {
     sem::Function* current_function_ = nullptr;
     sem::Statement* current_statement_ = nullptr;
     sem::CompoundStatement* current_compound_statement_ = nullptr;
-    sem::BlockStatement* current_block_ = nullptr;
 };
 
 }  // namespace tint::resolver

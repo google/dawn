@@ -481,8 +481,8 @@ class UniformityGraph {
                 }
 
                 // Remove any variables declared in this scope from the set of in-scope variables.
-                for (auto* d : sem_.Get<sem::BlockStatement>(b)->Decls()) {
-                    current_function_->local_var_decls.erase(sem_.Get<sem::LocalVariable>(d));
+                for (auto decl : sem_.Get<sem::BlockStatement>(b)->Decls()) {
+                    current_function_->local_var_decls.erase(decl.value.variable);
                 }
 
                 return cf;

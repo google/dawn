@@ -47,16 +47,6 @@ class BlockStatement : public Castable<BlockStatement, CompoundStatement> {
     /// @returns the AST block statement associated with this semantic block
     /// statement
     const ast::BlockStatement* Declaration() const;
-
-    /// @returns the declarations associated with this block
-    const std::vector<const ast::Variable*>& Decls() const { return decls_; }
-
-    /// Associates a declaration with this block.
-    /// @param var a variable declaration to be added to the block
-    void AddDecl(const ast::Variable* var);
-
-  private:
-    std::vector<const ast::Variable*> decls_;
 };
 
 /// The root block statement for a function

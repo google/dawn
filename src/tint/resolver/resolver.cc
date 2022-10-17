@@ -2268,21 +2268,16 @@ sem::Expression* Resolver::Identifier(const ast::IdentifierExpression* expr) {
                     current_statement_->FindFirstParent<sem::LoopContinuingBlockStatement>()) {
                 auto* loop_block = continuing_block->FindFirstParent<sem::LoopBlockStatement>();
                 if (loop_block->FirstContinue()) {
-                    auto& decls = loop_block->Decls();
                     // If our identifier is in loop_block->decls, make sure its index is
                     // less than first_continue
-                    auto iter = std::find_if(decls.begin(), decls.end(),
-                                             [&symbol](auto* v) { return v->symbol == symbol; });
-                    if (iter != decls.end()) {
-                        auto var_decl_index =
-                            static_cast<size_t>(std::distance(decls.begin(), iter));
-                        if (var_decl_index >= loop_block->NumDeclsAtFirstContinue()) {
+                    if (auto* decl = loop_block->Decls().Find(symbol)) {
+                        if (decl->order >= loop_block->NumDeclsAtFirstContinue()) {
                             AddError("continue statement bypasses declaration of '" +
                                          builder_->Symbols().NameFor(symbol) + "'",
                                      loop_block->FirstContinue()->source);
                             AddNote("identifier '" + builder_->Symbols().NameFor(symbol) +
                                         "' declared here",
-                                    (*iter)->source);
+                                    decl->variable->Declaration()->source);
                             AddNote("identifier '" + builder_->Symbols().NameFor(symbol) +
                                         "' referenced in continuing block here",
                                     expr->source);
@@ -3128,9 +3123,7 @@ sem::Statement* Resolver::VariableDeclStatement(const ast::VariableDeclStatement
             }
         }
 
-        if (current_block_) {  // Not all statements are inside a block
-            current_block_->AddDecl(stmt->variable);
-        }
+        current_compound_statement_->AddDecl(variable->As<sem::LocalVariable>());
 
         if (auto* ctor = variable->Constructor()) {
             sem->Behaviors() = ctor->Behaviors();
@@ -3232,7 +3225,7 @@ sem::Statement* Resolver::ContinueStatement(const ast::ContinueStatement* stmt) 
         if (auto* block = sem->FindFirstParent<sem::LoopBlockStatement>()) {
             if (!block->FirstContinue()) {
                 const_cast<sem::LoopBlockStatement*>(block)->SetFirstContinue(
-                    stmt, block->Decls().size());
+                    stmt, block->Decls().Count());
             }
         }
 
@@ -3337,12 +3330,10 @@ SEM* Resolver::StatementScope(const ast::Statement* ast, SEM* sem, F&& callback)
     builder_->Sem().Add(ast, sem);
 
     auto* as_compound = As<sem::CompoundStatement, CastFlags::kDontErrorOnImpossibleCast>(sem);
-    auto* as_block = As<sem::BlockStatement, CastFlags::kDontErrorOnImpossibleCast>(sem);
 
     TINT_SCOPED_ASSIGNMENT(current_statement_, sem);
     TINT_SCOPED_ASSIGNMENT(current_compound_statement_,
                            as_compound ? as_compound : current_compound_statement_);
-    TINT_SCOPED_ASSIGNMENT(current_block_, as_block ? as_block : current_block_);
 
     if (!callback()) {
         return nullptr;
