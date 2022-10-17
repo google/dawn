@@ -1163,6 +1163,7 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_sem_src") {
     sources = [
+      "sem/array_test.cc",
       "sem/atomic_test.cc",
       "sem/bool_test.cc",
       "sem/builtin_test.cc",
@@ -1179,9 +1180,8 @@ if (tint_build_unittests) {
       "sem/reference_test.cc",
       "sem/sampled_texture_test.cc",
       "sem/sampler_test.cc",
-      "sem/sem_array_test.cc",
-      "sem/sem_struct_test.cc",
       "sem/storage_texture_test.cc",
+      "sem/struct_test.cc",
       "sem/texture_test.cc",
       "sem/type_manager_test.cc",
       "sem/type_test.cc",

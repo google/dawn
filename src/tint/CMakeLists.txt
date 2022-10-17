@@ -838,6 +838,7 @@ if(TINT_BUILD_TESTS)
     resolver/variable_test.cc
     resolver/variable_validation_test.cc
     scope_stack_test.cc
+    sem/array_test.cc
     sem/atomic.cc
     sem/bool_test.cc
     sem/builtin_test.cc
@@ -854,9 +855,8 @@ if(TINT_BUILD_TESTS)
     sem/reference_test.cc
     sem/sampled_texture_test.cc
     sem/sampler_test.cc
-    sem/sem_array_test.cc
-    sem/sem_struct_test.cc
     sem/storage_texture_test.cc
+    sem/struct_test.cc
     sem/texture_test.cc
     sem/type_manager_test.cc
     sem/type_test.cc
