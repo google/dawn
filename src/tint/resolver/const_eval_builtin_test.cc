@@ -83,54 +83,57 @@ TEST_P(ResolverConstEvalBuiltinTest, Test) {
         std::visit([&](auto&& v) { args.Push(v.Expr(*this)); }, a);
     }
 
-    std::visit(
-        [&](auto&& expected) {
-            using T = typename std::decay_t<decltype(expected)>::ElementType;
-            auto* expr = Call(sem::str(builtin), std::move(args));
+    auto* expected = ToValueBase(c.expected);
+    auto* expr = Call(sem::str(builtin), std::move(args));
 
-            GlobalConst("C", expr);
-            auto* expected_expr = expected.Expr(*this);
-            GlobalConst("E", expected_expr);
+    GlobalConst("C", expr);
+    auto* expected_expr = expected->Expr(*this);
+    GlobalConst("E", expected_expr);
 
-            EXPECT_TRUE(r()->Resolve()) << r()->error();
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-            auto* sem = Sem().Get(expr);
-            const sem::Constant* value = sem->ConstantValue();
-            ASSERT_NE(value, nullptr);
-            EXPECT_TYPE(value->Type(), sem->Type());
+    auto* sem = Sem().Get(expr);
+    const sem::Constant* value = sem->ConstantValue();
+    ASSERT_NE(value, nullptr);
+    EXPECT_TYPE(value->Type(), sem->Type());
 
-            auto* expected_sem = Sem().Get(expected_expr);
-            const sem::Constant* expected_value = expected_sem->ConstantValue();
-            ASSERT_NE(expected_value, nullptr);
-            EXPECT_TYPE(expected_value->Type(), expected_sem->Type());
+    auto* expected_sem = Sem().Get(expected_expr);
+    const sem::Constant* expected_value = expected_sem->ConstantValue();
+    ASSERT_NE(expected_value, nullptr);
+    EXPECT_TYPE(expected_value->Type(), expected_sem->Type());
 
-            ForEachElemPair(value, expected_value,
-                            [&](const sem::Constant* a, const sem::Constant* b) {
-                                auto v = a->As<T>();
-                                auto e = b->As<T>();
-                                if constexpr (std::is_same_v<bool, T>) {
-                                    EXPECT_EQ(v, e);
-                                } else if constexpr (IsFloatingPoint<T>) {
-                                    if (std::isnan(e)) {
-                                        EXPECT_TRUE(std::isnan(v));
-                                    } else {
-                                        auto vf = (c.expected_pos_or_neg ? Abs(v) : v);
-                                        if (c.float_compare) {
-                                            EXPECT_FLOAT_EQ(vf, e);
-                                        } else {
-                                            EXPECT_EQ(vf, e);
-                                        }
-                                    }
-                                } else {
-                                    EXPECT_EQ((c.expected_pos_or_neg ? Abs(v) : v), e);
-                                    // Check that the constant's integer doesn't contain unexpected
-                                    // data in the MSBs that are outside of the bit-width of T.
-                                    EXPECT_EQ(a->As<AInt>(), b->As<AInt>());
-                                }
-                                return HasFailure() ? Action::kStop : Action::kContinue;
-                            });
-        },
-        c.expected);
+    // @TODO(amaiorano): Rewrite using ScalarArgsFrom()
+    ForEachElemPair(value, expected_value, [&](const sem::Constant* a, const sem::Constant* b) {
+        std::visit(
+            [&](auto&& ct_expected) {
+                using T = typename std::decay_t<decltype(ct_expected)>::ElementType;
+
+                auto v = a->As<T>();
+                auto e = b->As<T>();
+                if constexpr (std::is_same_v<bool, T>) {
+                    EXPECT_EQ(v, e);
+                } else if constexpr (IsFloatingPoint<T>) {
+                    if (std::isnan(e)) {
+                        EXPECT_TRUE(std::isnan(v));
+                    } else {
+                        auto vf = (c.expected_pos_or_neg ? Abs(v) : v);
+                        if (c.float_compare) {
+                            EXPECT_FLOAT_EQ(vf, e);
+                        } else {
+                            EXPECT_EQ(vf, e);
+                        }
+                    }
+                } else {
+                    EXPECT_EQ((c.expected_pos_or_neg ? Abs(v) : v), e);
+                    // Check that the constant's integer doesn't contain unexpected
+                    // data in the MSBs that are outside of the bit-width of T.
+                    EXPECT_EQ(a->As<AInt>(), b->As<AInt>());
+                }
+            },
+            c.expected);
+
+        return HasFailure() ? Action::kStop : Action::kContinue;
+    });
 }
 
 INSTANTIATE_TEST_SUITE_P(  //

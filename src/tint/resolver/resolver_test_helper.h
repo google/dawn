@@ -206,6 +206,12 @@ struct ScalarArgs {
     utils::Vector<Storage, 16> values;
 };
 
+/// Returns current variant value in `s` cast to type `T`
+template <typename T>
+T As(ScalarArgs::Storage& s) {
+    return std::visit([](auto&& v) { return static_cast<T>(v); }, s);
+}
+
 /// @param o the std::ostream to write to
 /// @param args the ScalarArgs
 /// @return the std::ostream so calls can be chained
@@ -750,10 +756,45 @@ constexpr CreatePtrs CreatePtrsFor() {
             DataType<T>::Name};
 }
 
+/// Base class for Value<T>
+struct ValueBase {
+    /// Constructor
+    ValueBase() = default;
+    /// Destructor
+    virtual ~ValueBase() = default;
+    /// Move constructor
+    ValueBase(ValueBase&&) = default;
+    /// Copy constructor
+    ValueBase(const ValueBase&) = default;
+    /// Copy assignment operator
+    /// @returns this instance
+    ValueBase& operator=(const ValueBase&) = default;
+    /// Creates an `ast::Expression` for the type T passing in previously stored args
+    /// @param b the ProgramBuilder
+    /// @returns an expression node
+    virtual const ast::Expression* Expr(ProgramBuilder& b) const = 0;
+    /// @returns args used to create expression via `Expr`
+    virtual const ScalarArgs& Args() const = 0;
+    /// @returns true if element type is abstract
+    virtual bool IsAbstract() const = 0;
+    /// @returns true if element type is an integral
+    virtual bool IsIntegral() const = 0;
+    /// @returns element type name
+    virtual std::string TypeName() const = 0;
+    /// Prints this value to the output stream
+    /// @param o the output stream
+    /// @returns input argument `o`
+    virtual std::ostream& Print(std::ostream& o) const = 0;
+};
+
 /// Value<T> is an instance of a value of type DataType<T>. Useful for storing values to create
 /// expressions with.
 template <typename T>
-struct Value {
+struct Value : ValueBase {
+    /// Constructor
+    /// @param a the scalar args
+    explicit Value(ScalarArgs a) : args(std::move(a)) {}
+
     /// Alias to T
     using Type = T;
     /// Alias to DataType<T>
@@ -764,15 +805,43 @@ struct Value {
     /// Creates a Value<T> with `args`
     /// @param args the args that will be passed to the expression
     /// @returns a Value<T>
-    static Value Create(ScalarArgs args) { return Value{CreatePtrsFor<T>(), std::move(args)}; }
+    static Value Create(ScalarArgs args) { return Value{std::move(args)}; }
 
     /// Creates an `ast::Expression` for the type T passing in previously stored args
     /// @param b the ProgramBuilder
     /// @returns an expression node
-    const ast::Expression* Expr(ProgramBuilder& b) const { return (*create.expr)(b, args); }
+    const ast::Expression* Expr(ProgramBuilder& b) const override {
+        auto create = CreatePtrsFor<T>();
+        return (*create.expr)(b, args);
+    }
 
-    /// functions to create values / types of the value
-    CreatePtrs create;
+    /// @returns args used to create expression via `Expr`
+    const ScalarArgs& Args() const override { return args; }
+
+    /// @returns true if element type is abstract
+    bool IsAbstract() const override { return tint::IsAbstract<ElementType>; }
+
+    /// @returns true if element type is an integral
+    bool IsIntegral() const override { return tint::IsIntegral<ElementType>; }
+
+    /// @returns element type name
+    std::string TypeName() const override { return tint::FriendlyName<ElementType>(); }
+
+    /// Prints this value to the output stream
+    /// @param o the output stream
+    /// @returns input argument `o`
+    std::ostream& Print(std::ostream& o) const override {
+        o << TypeName() << "(";
+        for (auto& a : args.values) {
+            o << std::get<ElementType>(a);
+            if (&a != &args.values.Back()) {
+                o << ", ";
+            }
+        }
+        o << ")";
+        return o;
+    }
+
     /// args to create expression with
     ScalarArgs args;
 };

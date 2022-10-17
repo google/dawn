@@ -29,20 +29,7 @@ using Scalar = std::variant<  //
     builder::Value<bool>>;
 
 static std::ostream& operator<<(std::ostream& o, const Scalar& scalar) {
-    std::visit(
-        [&](auto&& v) {
-            using ValueType = std::decay_t<decltype(v)>;
-            o << ValueType::DataType::Name() << "(";
-            for (auto& a : v.args.values) {
-                o << std::get<typename ValueType::ElementType>(a);
-                if (&a != &v.args.values.Back()) {
-                    o << ", ";
-                }
-            }
-            o << ")";
-        },
-        scalar);
-    return o;
+    return ToValueBase(scalar)->Print(o);
 }
 
 enum class Kind {
@@ -96,7 +83,7 @@ TEST_P(ResolverConstEvalConvTest, Test) {
     const auto& type = std::get<1>(GetParam()).type;
     const auto unrepresentable = std::get<1>(GetParam()).unrepresentable;
 
-    auto* input_val = std::visit([&](auto val) { return val.Expr(*this); }, input);
+    auto* input_val = ToValueBase(input)->Expr(*this);
     auto* expr = Construct(type.ast(*this), input_val);
     if (kind == Kind::kVector) {
         expr = Construct(ty.vec(nullptr, 3), expr);
@@ -120,7 +107,7 @@ TEST_P(ResolverConstEvalConvTest, Test) {
         ASSERT_NE(sem->ConstantValue(), nullptr);
         EXPECT_TYPE(sem->ConstantValue()->Type(), target_sem_ty);
 
-        auto expected_values = std::visit([&](auto&& val) { return val.args; }, expected);
+        auto expected_values = ToValueBase(expected)->Args();
         if (kind == Kind::kVector) {
             expected_values.values.Push(expected_values.values[0]);
             expected_values.values.Push(expected_values.values[0]);

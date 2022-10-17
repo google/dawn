@@ -51,40 +51,34 @@ TEST_P(ResolverConstEvalUnaryOpTest, Test) {
 
     auto op = std::get<0>(GetParam());
     auto& c = std::get<1>(GetParam());
-    std::visit(
-        [&](auto&& expected) {
-            using T = typename std::decay_t<decltype(expected)>::ElementType;
 
-            auto* input_expr = std::visit([&](auto&& value) { return value.Expr(*this); }, c.input);
-            auto* expr = create<ast::UnaryOpExpression>(op, input_expr);
+    auto* expected = ToValueBase(c.expected);
+    auto* input = ToValueBase(c.input);
 
-            GlobalConst("C", expr);
-            auto* expected_expr = expected.Expr(*this);
-            GlobalConst("E", expected_expr);
-            ASSERT_TRUE(r()->Resolve()) << r()->error();
+    auto* input_expr = input->Expr(*this);
+    auto* expr = create<ast::UnaryOpExpression>(op, input_expr);
 
-            auto* sem = Sem().Get(expr);
-            const sem::Constant* value = sem->ConstantValue();
-            ASSERT_NE(value, nullptr);
-            EXPECT_TYPE(value->Type(), sem->Type());
+    GlobalConst("C", expr);
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-            auto* expected_sem = Sem().Get(expected_expr);
-            const sem::Constant* expected_value = expected_sem->ConstantValue();
-            ASSERT_NE(expected_value, nullptr);
-            EXPECT_TYPE(expected_value->Type(), expected_sem->Type());
+    auto* sem = Sem().Get(expr);
+    const sem::Constant* value = sem->ConstantValue();
+    ASSERT_NE(value, nullptr);
+    EXPECT_TYPE(value->Type(), sem->Type());
 
-            ForEachElemPair(value, expected_value,
-                            [&](const sem::Constant* a, const sem::Constant* b) {
-                                EXPECT_EQ(a->As<T>(), b->As<T>());
-                                if constexpr (IsIntegral<T>) {
-                                    // Check that the constant's integer doesn't contain unexpected
-                                    // data in the MSBs that are outside of the bit-width of T.
-                                    EXPECT_EQ(a->As<AInt>(), b->As<AInt>());
-                                }
-                                return HasFailure() ? Action::kStop : Action::kContinue;
-                            });
-        },
-        c.expected);
+    auto values_flat = ScalarArgsFrom(value);
+    auto expected_values_flat = expected->Args();
+    ASSERT_EQ(values_flat.values.Length(), expected_values_flat.values.Length());
+    for (size_t i = 0; i < values_flat.values.Length(); ++i) {
+        auto& a = values_flat.values[i];
+        auto& b = expected_values_flat.values[i];
+        EXPECT_EQ(a, b);
+        if (expected->IsIntegral()) {
+            // Check that the constant's integer doesn't contain unexpected
+            // data in the MSBs that are outside of the bit-width of T.
+            EXPECT_EQ(builder::As<AInt>(a), builder::As<AInt>(b));
+        }
+    }
 }
 INSTANTIATE_TEST_SUITE_P(Complement,
                          ResolverConstEvalUnaryOpTest,

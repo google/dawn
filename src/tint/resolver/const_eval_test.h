@@ -41,6 +41,8 @@ inline const auto k3PiOver4 = T(UnwrapNumber<T>(2.356194490192344928846));
 inline void CollectScalarArgs(const sem::Constant* c, builder::ScalarArgs& args) {
     Switch(
         c->Type(),  //
+        [&](const sem::AbstractInt*) { args.values.Push(c->As<AInt>()); },
+        [&](const sem::AbstractFloat*) { args.values.Push(c->As<AFloat>()); },
         [&](const sem::Bool*) { args.values.Push(c->As<bool>()); },
         [&](const sem::I32*) { args.values.Push(c->As<i32>()); },
         [&](const sem::U32*) { args.values.Push(c->As<u32>()); },
@@ -136,6 +138,7 @@ using builder::IsValue;
 using builder::Mat;
 using builder::Val;
 using builder::Value;
+using builder::ValueBase;
 using builder::Vec;
 
 using Types = std::variant<  //
@@ -188,21 +191,18 @@ using Types = std::variant<  //
     //
     >;
 
+/// Returns the current Value<T> in the `types` variant as a `ValueBase` pointer to use the
+/// polymorphic API. This trades longer compile times using std::variant for longer runtime via
+/// virtual function calls.
+template <typename ValueVariant>
+inline const ValueBase* ToValueBase(const ValueVariant& types) {
+    return std::visit(
+        [](auto&& t) -> const ValueBase* { return static_cast<const ValueBase*>(&t); }, types);
+}
+
+/// Prints Types to ostream
 inline std::ostream& operator<<(std::ostream& o, const Types& types) {
-    std::visit(
-        [&](auto&& v) {
-            using ValueType = std::decay_t<decltype(v)>;
-            o << ValueType::DataType::Name() << "(";
-            for (auto& a : v.args.values) {
-                o << std::get<typename ValueType::ElementType>(a);
-                if (&a != &v.args.values.Back()) {
-                    o << ", ";
-                }
-            }
-            o << ")";
-        },
-        types);
-    return o;
+    return ToValueBase(types)->Print(o);
 }
 
 // Calls `f` on deepest elements of both `a` and `b`. If function returns Action::kStop, it stops
