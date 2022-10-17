@@ -1,0 +1,23 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void foo_member_initialize(thread float4* const tint_symbol, const constant float* const tint_symbol_1, texture2d<float, access::sample> tint_symbol_2, sampler tint_symbol_3) {
+  bool2 vb2 = false;
+  vb2[0] = ((*(tint_symbol))[2] != 0.0f);
+  vb2[0] = (*(tint_symbol_1) == -1.0f);
+  vb2 = bool2((*(tint_symbol_1) == -1.0f), false);
+  if (vb2[0]) {
+    float4 const r = tint_symbol_2.sample(tint_symbol_3, float2(0.0f), bias(0.0f));
+  }
+}
+
+void foo_default_initialize(thread float4* const tint_symbol_4, const constant float* const tint_symbol_5, texture2d<float, access::sample> tint_symbol_6, sampler tint_symbol_7) {
+  bool2 vb2 = false;
+  vb2[0] = ((*(tint_symbol_4))[2] != 0.0f);
+  vb2[0] = (*(tint_symbol_5) == -1.0f);
+  vb2 = bool2(false);
+  if (vb2[0]) {
+    float4 const r = tint_symbol_6.sample(tint_symbol_7, float2(0.0f), bias(0.0f));
+  }
+}
+
