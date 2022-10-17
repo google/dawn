@@ -46,7 +46,7 @@ TEST_F(ParserImplTest, AttributeDecl_MissingValue) {
     EXPECT_TRUE(attrs.errored);
     EXPECT_FALSE(attrs.matched);
     EXPECT_TRUE(attrs.value.IsEmpty());
-    EXPECT_EQ(p->error(), "1:11: expected signed integer literal for location attribute");
+    EXPECT_EQ(p->error(), "1:11: expected location expression");
 }
 
 TEST_F(ParserImplTest, AttributeDecl_MissingParenRight) {

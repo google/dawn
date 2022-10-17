@@ -431,6 +431,10 @@ class DependencyScanner {
                 TraverseExpression(id->expr);
                 return true;
             },
+            [&](const ast::LocationAttribute* loc) {
+                TraverseExpression(loc->expr);
+                return true;
+            },
             [&](const ast::StructMemberAlignAttribute* align) {
                 TraverseExpression(align->expr);
                 return true;
@@ -450,8 +454,8 @@ class DependencyScanner {
         }
 
         if (attr->IsAnyOf<ast::BuiltinAttribute, ast::InternalAttribute, ast::InterpolateAttribute,
-                          ast::InvariantAttribute, ast::LocationAttribute, ast::StageAttribute,
-                          ast::StrideAttribute, ast::StructMemberOffsetAttribute>()) {
+                          ast::InvariantAttribute, ast::StageAttribute, ast::StrideAttribute,
+                          ast::StructMemberOffsetAttribute>()) {
             return;
         }
 

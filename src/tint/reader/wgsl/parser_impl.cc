@@ -3539,15 +3539,16 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
     if (t == "location") {
         const char* use = "location attribute";
         return expect_paren_block(use, [&]() -> Result {
-            auto val = expect_positive_sint(use);
-            if (val.errored) {
+            auto expr = expression();
+            if (expr.errored) {
                 return Failure::kErrored;
+            }
+            if (!expr.matched) {
+                return add_error(peek(), "expected location expression");
             }
             match(Token::Type::kComma);
 
-            return builder_.Location(t.source(),
-                                     create<ast::IntLiteralExpression>(
-                                         val.value, ast::IntLiteralExpression::Suffix::kNone));
+            return builder_.Location(t.source(), expr.value);
         });
     }
 

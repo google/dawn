@@ -959,10 +959,10 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarAttrLocationMissingRParen) {
 }
 
 TEST_F(ParserImplErrorTest, GlobalDeclVarAttrLocationInvalidValue) {
-    EXPECT("@location(x) var i : i32;",
-           R"(test.wgsl:1:11 error: expected signed integer literal for location attribute
-@location(x) var i : i32;
-          ^
+    EXPECT("@location(if) var i : i32;",
+           R"(test.wgsl:1:11 error: expected location expression
+@location(if) var i : i32;
+          ^^
 )");
 }
 

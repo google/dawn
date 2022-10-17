@@ -133,6 +133,31 @@ TEST_F(ParserImplTest, Attribute_Location) {
     EXPECT_EQ(exp->value, 4u);
 }
 
+TEST_F(ParserImplTest, Attribute_Location_Expression) {
+    auto p = parser("location(4 + 5)");
+    auto attr = p->attribute();
+    EXPECT_TRUE(attr.matched);
+    EXPECT_FALSE(attr.errored);
+    ASSERT_NE(attr.value, nullptr);
+    auto* var_attr = attr.value->As<ast::Attribute>();
+    ASSERT_NE(var_attr, nullptr);
+    ASSERT_FALSE(p->has_error());
+    ASSERT_TRUE(var_attr->Is<ast::LocationAttribute>());
+
+    auto* loc = var_attr->As<ast::LocationAttribute>();
+    ASSERT_TRUE(loc->expr->Is<ast::BinaryExpression>());
+    auto* expr = loc->expr->As<ast::BinaryExpression>();
+
+    EXPECT_EQ(ast::BinaryOp::kAdd, expr->op);
+    auto* v = expr->lhs->As<ast::IntLiteralExpression>();
+    ASSERT_NE(nullptr, v);
+    EXPECT_EQ(v->value, 4u);
+
+    v = expr->rhs->As<ast::IntLiteralExpression>();
+    ASSERT_NE(nullptr, v);
+    EXPECT_EQ(v->value, 5u);
+}
+
 TEST_F(ParserImplTest, Attribute_Location_TrailingComma) {
     auto p = parser("location(4,)");
     auto attr = p->attribute();
@@ -177,17 +202,17 @@ TEST_F(ParserImplTest, Attribute_Location_MissingValue) {
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:10: expected signed integer literal for location attribute");
+    EXPECT_EQ(p->error(), "1:10: expected location expression");
 }
 
 TEST_F(ParserImplTest, Attribute_Location_MissingInvalid) {
-    auto p = parser("location(nan)");
+    auto p = parser("location(if)");
     auto attr = p->attribute();
     EXPECT_FALSE(attr.matched);
     EXPECT_TRUE(attr.errored);
     EXPECT_EQ(attr.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:10: expected signed integer literal for location attribute");
+    EXPECT_EQ(p->error(), "1:10: expected location expression");
 }
 
 struct BuiltinData {

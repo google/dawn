@@ -675,17 +675,22 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
 
         std::optional<uint32_t> location;
         if (auto* attr = ast::GetAttribute<ast::LocationAttribute>(var->attributes)) {
-            auto* materialize = Materialize(Expression(attr->expr));
-            if (!materialize) {
+            auto* materialized = Materialize(Expression(attr->expr));
+            if (!materialized) {
                 return nullptr;
             }
-            auto* c = materialize->ConstantValue();
-            if (!c) {
-                // TODO(crbug.com/tint/1633): Add error message about invalid materialization
-                // when location can be an expression.
+            if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
+                AddError("'location' must be an i32 or u32 value", attr->source);
                 return nullptr;
             }
-            location = c->As<uint32_t>();
+
+            auto const_value = materialized->ConstantValue();
+            auto value = const_value->As<AInt>();
+            if (value < 0) {
+                AddError("'location' value must be non-negative", attr->source);
+                return nullptr;
+            }
+            location = u32(value);
         }
 
         sem = builder_->create<sem::GlobalVariable>(
