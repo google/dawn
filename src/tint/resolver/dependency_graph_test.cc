@@ -1291,6 +1291,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
     GlobalVar(Sym(), ty.sampler(ast::SamplerKind::kSampler));
 
     GlobalVar(Sym(), ty.i32(), utils::Vector{Binding(V), Group(V)});
+    Override(Sym(), ty.i32(), utils::Vector{Id(V)});
 
     Func(Sym(), utils::Empty, ty.void_(), utils::Empty);
 #undef V

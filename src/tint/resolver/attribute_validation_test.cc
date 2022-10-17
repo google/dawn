@@ -1640,6 +1640,41 @@ TEST_F(GroupAndBindingTest, Group_AFloat) {
     EXPECT_EQ(r()->error(), R"(12:34 error: 'group' must be an i32 or u32 value)");
 }
 
+using IdTest = ResolverTest;
+
+TEST_F(IdTest, Const_I32) {
+    Override("val", ty.f32(), utils::Vector{Id(1_i)});
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(IdTest, Const_U32) {
+    Override("val", ty.f32(), utils::Vector{Id(1_u)});
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(IdTest, Const_AInt) {
+    Override("val", ty.f32(), utils::Vector{Id(1_a)});
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_F(IdTest, Negative) {
+    Override("val", ty.f32(), utils::Vector{Id(Source{{12, 34}}, -1_i)});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'id' value must be non-negative)");
+}
+
+TEST_F(IdTest, F32) {
+    Override("val", ty.f32(), utils::Vector{Id(Source{{12, 34}}, 1_f)});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'id' must be an i32 or u32 value)");
+}
+
+TEST_F(IdTest, AFloat) {
+    Override("val", ty.f32(), utils::Vector{Id(Source{{12, 34}}, 1.0_a)});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: 'id' must be an i32 or u32 value)");
+}
+
 }  // namespace
 }  // namespace InterpolateTests
 

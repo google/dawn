@@ -930,7 +930,7 @@ var i : array<u32, !>;
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclVarAttrListMissingComma) {
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrListMissingAt) {
     EXPECT("@location(1) group(2) var i : i32;",
            R"(test.wgsl:1:14 error: expected declaration after attributes
 @location(1) group(2) var i : i32;
@@ -963,6 +963,30 @@ TEST_F(ParserImplErrorTest, GlobalDeclVarAttrLocationInvalidValue) {
            R"(test.wgsl:1:11 error: expected signed integer literal for location attribute
 @location(x) var i : i32;
           ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrIdMissingLParen) {
+    EXPECT("@id 1) var i : i32;",
+           R"(test.wgsl:1:5 error: expected '(' for id attribute
+@id 1) var i : i32;
+    ^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrIdMissingRParen) {
+    EXPECT("@id (1 var i : i32;",
+           R"(test.wgsl:1:8 error: expected ')' for id attribute
+@id (1 var i : i32;
+       ^^^
+)");
+}
+
+TEST_F(ParserImplErrorTest, GlobalDeclVarAttrIdInvalidValue) {
+    EXPECT("@id(if) var i : i32;",
+           R"(test.wgsl:1:5 error: expected id expression
+@id(if) var i : i32;
+    ^^
 )");
 }
 

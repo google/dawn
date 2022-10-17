@@ -449,18 +449,24 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
     sem->SetConstructor(rhs);
 
     if (auto* id_attr = ast::GetAttribute<ast::IdAttribute>(v->attributes)) {
-        auto* materialize = Materialize(Expression(id_attr->expr));
-        if (!materialize) {
+        ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@id"};
+        TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+
+        auto* materialized = Materialize(Expression(id_attr->expr));
+        if (!materialized) {
             return nullptr;
         }
-        auto* c = materialize->ConstantValue();
-        if (!c) {
-            // TODO(crbug.com/tint/1633): Handle invalid materialization when expressions are
-            // supported.
+        if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
+            AddError("'id' must be an i32 or u32 value", id_attr->source);
             return nullptr;
         }
 
-        auto value = c->As<uint32_t>();
+        auto const_value = materialized->ConstantValue();
+        auto value = const_value->As<AInt>();
+        if (value < 0) {
+            AddError("'id' value must be non-negative", id_attr->source);
+            return nullptr;
+        }
         if (value > std::numeric_limits<decltype(OverrideId::value)>::max()) {
             AddError("override IDs must be between 0 and " +
                          std::to_string(std::numeric_limits<decltype(OverrideId::value)>::max()),
