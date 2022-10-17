@@ -26,7 +26,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Array);
 
 namespace tint::sem {
 
-const char* Array::kErrExpectedConstantCount =
+const char* const Array::kErrExpectedConstantCount =
     "array size is an override-expression, when expected a constant-expression.\n"
     "Was the SubstituteOverride transform run?";
 

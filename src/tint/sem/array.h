@@ -111,7 +111,7 @@ class Array final : public Castable<Array, Type> {
   public:
     /// An error message string stating that the array count was expected to be a constant
     /// expression. Used by multiple writers and transforms.
-    static const char* kErrExpectedConstantCount;
+    static const char* const kErrExpectedConstantCount;
 
     /// Constructor
     /// @param element the array element type
