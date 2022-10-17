@@ -1243,7 +1243,7 @@ TEST_F(ResolverValidationTest, NegativeStructMemberAlignAttribute) {
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: 'align' value must be a positive, power-of-two integer");
+    EXPECT_EQ(r()->error(), "12:34 error: @align value must be a positive, power-of-two integer");
 }
 
 TEST_F(ResolverValidationTest, NonPOTStructMemberAlignAttribute) {
@@ -1252,7 +1252,7 @@ TEST_F(ResolverValidationTest, NonPOTStructMemberAlignAttribute) {
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: 'align' value must be a positive, power-of-two integer");
+    EXPECT_EQ(r()->error(), "12:34 error: @align value must be a positive, power-of-two integer");
 }
 
 TEST_F(ResolverValidationTest, ZeroStructMemberAlignAttribute) {
@@ -1261,7 +1261,7 @@ TEST_F(ResolverValidationTest, ZeroStructMemberAlignAttribute) {
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: 'align' value must be a positive, power-of-two integer");
+    EXPECT_EQ(r()->error(), "12:34 error: @align value must be a positive, power-of-two integer");
 }
 
 TEST_F(ResolverValidationTest, ZeroStructMemberSizeAttribute) {
@@ -1270,7 +1270,7 @@ TEST_F(ResolverValidationTest, ZeroStructMemberSizeAttribute) {
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: 'size' must be at least as big as the type's size (4)");
+    EXPECT_EQ(r()->error(), "12:34 error: @size must be at least as big as the type's size (4)");
 }
 
 TEST_F(ResolverValidationTest, OffsetAndSizeAttribute) {
@@ -1280,9 +1280,7 @@ TEST_F(ResolverValidationTest, OffsetAndSizeAttribute) {
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: offset attributes cannot be used with align or size "
-              "attributes");
+    EXPECT_EQ(r()->error(), "12:34 error: @offset cannot be used with @align or @size");
 }
 
 TEST_F(ResolverValidationTest, OffsetAndAlignAttribute) {
@@ -1292,9 +1290,7 @@ TEST_F(ResolverValidationTest, OffsetAndAlignAttribute) {
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: offset attributes cannot be used with align or size "
-              "attributes");
+    EXPECT_EQ(r()->error(), "12:34 error: @offset cannot be used with @align or @size");
 }
 
 TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeAttribute) {
@@ -1304,9 +1300,7 @@ TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeAttribute) {
                    });
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: offset attributes cannot be used with align or size "
-              "attributes");
+    EXPECT_EQ(r()->error(), "12:34 error: @offset cannot be used with @align or @size");
 }
 
 TEST_F(ResolverTest, Expr_Constructor_Cast_Pointer) {
