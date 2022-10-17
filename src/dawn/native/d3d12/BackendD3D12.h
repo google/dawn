@@ -42,6 +42,10 @@ class Backend : public BackendConnection {
     ComPtr<IDxcValidator> GetDxcValidator() const;
     ResultOrError<uint64_t> GetDXCompilerVersion();
 
+    // Return true if and only if DXC binary is avaliable, and the DXC version is validated to
+    // be no older than given minimium version.
+    bool IsDXCAvailable(uint64_t minimumMajorVersion, uint64_t minimumMinorVersion);
+
     const PlatformFunctions* GetFunctions() const;
 
     std::vector<Ref<AdapterBase>> DiscoverDefaultAdapters() override;

@@ -157,6 +157,22 @@ ResultOrError<uint64_t> Backend::GetDXCompilerVersion() {
     return MakeDXCVersion(compilerMajor, compilerMinor);
 }
 
+// Return true if and only if DXC binary is avaliable, and the DXC version is validated to
+// be no older than given minimum version.
+bool Backend::IsDXCAvailable(uint64_t minimumMajorVersion, uint64_t minimumMinorVersion) {
+    if (mFunctions->IsDXCBinaryAvailable()) {
+        auto versionOrError = GetDXCompilerVersion();
+        if (versionOrError.IsSuccess()) {
+            // Validate the DXC version
+            auto version = versionOrError.AcquireSuccess();
+            if (version >= MakeDXCVersion(minimumMajorVersion, minimumMinorVersion)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 const PlatformFunctions* Backend::GetFunctions() const {
     return mFunctions.get();
 }

@@ -235,7 +235,9 @@ ComPtr<IDXGIFactory4> Device::GetFactory() const {
 }
 
 MaybeError Device::ApplyUseDxcToggle() {
-    if (!ToBackend(GetAdapter())->GetBackend()->GetFunctions()->IsDXCAvailable()) {
+    // Require DXC version 1.4 or higher to enable using DXC, as DXC 1.2 have some known issues when
+    // compiling Tint generated HLSL program. Please refer to crbug.com/tint/1719.
+    if (!ToBackend(GetAdapter())->GetBackend()->IsDXCAvailable(1, 4)) {
         ForceSetToggle(Toggle::UseDXC, false);
     }
 

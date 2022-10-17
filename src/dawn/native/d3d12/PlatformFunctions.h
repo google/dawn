@@ -36,7 +36,7 @@ class PlatformFunctions {
 
     MaybeError LoadFunctions();
     bool IsPIXEventRuntimeLoaded() const;
-    bool IsDXCAvailable() const;
+    bool IsDXCBinaryAvailable() const;
 
     // Functions from d3d12.dll
     PFN_D3D12_CREATE_DEVICE d3d12CreateDevice = nullptr;

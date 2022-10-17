@@ -140,13 +140,9 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
     mSupportedFeatures.EnableFeature(Feature::RG11B10UfloatRenderable);
     mSupportedFeatures.EnableFeature(Feature::DepthClipControl);
 
-    if (GetBackend()->GetFunctions()->IsDXCAvailable()) {
-        uint64_t dxcVersion = 0;
-        DAWN_TRY_ASSIGN(dxcVersion, GetBackend()->GetDXCompilerVersion());
-        constexpr uint64_t kLeastMajorVersionForDP4a = 1;
-        constexpr uint64_t kLeastMinorVersionForDP4a = 4;
-        if (mDeviceInfo.supportsDP4a &&
-            dxcVersion >= MakeDXCVersion(kLeastMajorVersionForDP4a, kLeastMinorVersionForDP4a)) {
+    // Both Dp4a and ShaderF16 features require DXC version being 1.4 or higher
+    if (GetBackend()->IsDXCAvailable(1, 4)) {
+        if (mDeviceInfo.supportsDP4a) {
             mSupportedFeatures.EnableFeature(Feature::ChromiumExperimentalDp4a);
         }
         if (mDeviceInfo.supportsShaderF16) {
@@ -322,13 +318,13 @@ MaybeError Adapter::InitializeSupportedLimitsImpl(CombinedLimits* limits) {
 MaybeError Adapter::ValidateFeatureSupportedWithTogglesImpl(
     wgpu::FeatureName feature,
     const TripleStateTogglesSet& userProvidedToggles) {
-    // shader-f16 feature and chromium-experimental-dp4a feature require DXC for D3D12.
+    // shader-f16 feature and chromium-experimental-dp4a feature require DXC 1.4 or higher for
+    // D3D12.
     if (feature == wgpu::FeatureName::ShaderF16 ||
         feature == wgpu::FeatureName::ChromiumExperimentalDp4a) {
-        DAWN_INVALID_IF(!(userProvidedToggles.IsEnabled(Toggle::UseDXC) &&
-                          mBackend->GetFunctions()->IsDXCAvailable()),
-                        "Feature %s requires DXC for D3D12.",
-                        GetInstance()->GetFeatureInfo(feature)->name);
+        DAWN_INVALID_IF(
+            !(userProvidedToggles.IsEnabled(Toggle::UseDXC) && mBackend->IsDXCAvailable(1, 4)),
+            "Feature %s requires DXC for D3D12.", GetInstance()->GetFeatureInfo(feature)->name);
     }
     return {};
 }
