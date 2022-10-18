@@ -2662,43 +2662,24 @@ Expect<ParserImpl::ExpressionList> ParserImpl::expect_argument_expression_list(
 Maybe<const ast::Expression*> ParserImpl::bitwise_expression_post_unary_expression(
     const ast::Expression* lhs) {
     auto& t = peek();
-    if (!t.Is(Token::Type::kAnd) && !t.Is(Token::Type::kOr) && !t.Is(Token::Type::kXor)) {
-        return Failure::kNoMatch;
-    }
 
     ast::BinaryOp op = ast::BinaryOp::kXor;
-    if (t.Is(Token::Type::kAnd)) {
-        op = ast::BinaryOp::kAnd;
-    } else if (t.Is(Token::Type::kOr)) {
-        op = ast::BinaryOp::kOr;
+    switch (t.type()) {
+        case Token::Type::kAnd:
+            op = ast::BinaryOp::kAnd;
+            break;
+        case Token::Type::kOr:
+            op = ast::BinaryOp::kOr;
+            break;
+        case Token::Type::kXor:
+            op = ast::BinaryOp::kXor;
+            break;
+        default:
+            return Failure::kNoMatch;
     }
+    next();  // Consume t
 
     while (continue_parsing()) {
-        auto& n = peek();
-        // Handle the case of `a & b &&c` where `&c` is a unary_expression
-        bool split = false;
-        if (op == ast::BinaryOp::kAnd && n.Is(Token::Type::kAndAnd)) {
-            next();
-            split_token(Token::Type::kAnd, Token::Type::kAnd);
-            split = true;
-        }
-
-        if (!n.Is(t.type())) {
-            if (n.Is(Token::Type::kAnd) || n.Is(Token::Type::kOr) || n.Is(Token::Type::kXor)) {
-                return add_error(n.source(), std::string("mixing '") + std::string(t.to_name()) +
-                                                 "' and '" + std::string(n.to_name()) +
-                                                 "' requires parenthesis");
-            }
-
-            return lhs;
-        }
-        // If forced to split an `&&` then we've already done the `next` above which consumes
-        // the `&`. The type check above will always fail because we only split if already consuming
-        // a `&` operator.
-        if (!split) {
-            next();
-        }
-
         auto rhs = unary_expression();
         if (rhs.errored) {
             return Failure::kErrored;
@@ -2709,6 +2690,10 @@ Maybe<const ast::Expression*> ParserImpl::bitwise_expression_post_unary_expressi
         }
 
         lhs = create<ast::BinaryExpression>(t.source(), op, lhs, rhs.value);
+
+        if (!match(t.type())) {
+            return lhs;
+        }
     }
     return Failure::kErrored;
 }
@@ -2949,37 +2934,45 @@ Expect<const ast::Expression*> ParserImpl::expect_relational_expression_post_una
     }
     lhs = lhs_result.value;
 
-    auto& t = peek();
-    if (match(Token::Type::kEqualEqual) || match(Token::Type::kGreaterThan) ||
-        match(Token::Type::kGreaterThanEqual) || match(Token::Type::kLessThan) ||
-        match(Token::Type::kLessThanEqual) || match(Token::Type::kNotEqual)) {
-        ast::BinaryOp op = ast::BinaryOp::kNone;
-        if (t.Is(Token::Type::kLessThan)) {
-            op = ast::BinaryOp::kLessThan;
-        } else if (t.Is(Token::Type::kGreaterThan)) {
-            op = ast::BinaryOp::kGreaterThan;
-        } else if (t.Is(Token::Type::kLessThanEqual)) {
-            op = ast::BinaryOp::kLessThanEqual;
-        } else if (t.Is(Token::Type::kGreaterThanEqual)) {
-            op = ast::BinaryOp::kGreaterThanEqual;
-        } else if (t.Is(Token::Type::kEqualEqual)) {
-            op = ast::BinaryOp::kEqual;
-        } else if (t.Is(Token::Type::kNotEqual)) {
-            op = ast::BinaryOp::kNotEqual;
-        }
+    auto& tok_op = peek();
 
-        auto& next = peek();
-        auto rhs = shift_expression();
-        if (rhs.errored) {
-            return Failure::kErrored;
-        }
-        if (!rhs.matched) {
-            return add_error(next, std::string("unable to parse right side of ") +
-                                       std::string(t.to_name()) + " expression");
-        }
-        lhs = create<ast::BinaryExpression>(t.source(), op, lhs, rhs.value);
+    ast::BinaryOp op = ast::BinaryOp::kNone;
+    switch (tok_op.type()) {
+        case Token::Type::kLessThan:
+            op = ast::BinaryOp::kLessThan;
+            break;
+        case Token::Type::kGreaterThan:
+            op = ast::BinaryOp::kGreaterThan;
+            break;
+        case Token::Type::kLessThanEqual:
+            op = ast::BinaryOp::kLessThanEqual;
+            break;
+        case Token::Type::kGreaterThanEqual:
+            op = ast::BinaryOp::kGreaterThanEqual;
+            break;
+        case Token::Type::kEqualEqual:
+            op = ast::BinaryOp::kEqual;
+            break;
+        case Token::Type::kNotEqual:
+            op = ast::BinaryOp::kNotEqual;
+            break;
+        default:
+            return lhs;
     }
-    return lhs;
+
+    next();  // consume tok_op
+
+    auto& tok_rhs = peek();
+    auto rhs = shift_expression();
+    if (rhs.errored) {
+        return Failure::kErrored;
+    }
+    if (!rhs.matched) {
+        return add_error(tok_rhs, std::string("unable to parse right side of ") +
+                                      std::string(tok_op.to_name()) + " expression");
+    }
+
+    return create<ast::BinaryExpression>(tok_op.source(), op, lhs, rhs.value);
 }
 
 // expression
@@ -2992,62 +2985,75 @@ Expect<const ast::Expression*> ParserImpl::expect_relational_expression_post_una
 //
 // Note, a `relational_expression` element was added to simplify many of the right sides
 Maybe<const ast::Expression*> ParserImpl::expression() {
-    auto lhs = unary_expression();
-    if (lhs.errored) {
-        return Failure::kErrored;
-    }
-    if (!lhs.matched) {
-        return Failure::kNoMatch;
-    }
-
-    auto bitwise = bitwise_expression_post_unary_expression(lhs.value);
-    if (bitwise.errored) {
-        return Failure::kErrored;
-    }
-    if (bitwise.matched) {
-        return bitwise.value;
-    }
-
-    auto relational = expect_relational_expression_post_unary_expression(lhs.value);
-    if (relational.errored) {
-        return Failure::kErrored;
-    }
-    auto* ret = relational.value;
-
-    auto& t = peek();
-    if (t.Is(Token::Type::kAndAnd) || t.Is(Token::Type::kOrOr)) {
-        ast::BinaryOp op = ast::BinaryOp::kNone;
-        if (t.Is(Token::Type::kAndAnd)) {
-            op = ast::BinaryOp::kLogicalAnd;
-        } else if (t.Is(Token::Type::kOrOr)) {
-            op = ast::BinaryOp::kLogicalOr;
+    auto expr = [&]() -> Maybe<const ast::Expression*> {
+        auto lhs = unary_expression();
+        if (lhs.errored) {
+            return Failure::kErrored;
+        }
+        if (!lhs.matched) {
+            return Failure::kNoMatch;
         }
 
-        while (continue_parsing()) {
-            auto& n = peek();
-            if (!n.Is(t.type())) {
-                if (n.Is(Token::Type::kAndAnd) || n.Is(Token::Type::kOrOr)) {
-                    return add_error(
-                        n.source(), std::string("mixing '") + std::string(t.to_name()) + "' and '" +
-                                        std::string(n.to_name()) + "' requires parenthesis");
-                }
-                break;
-            }
-            next();
+        auto bitwise = bitwise_expression_post_unary_expression(lhs.value);
+        if (bitwise.errored) {
+            return Failure::kErrored;
+        }
+        if (bitwise.matched) {
+            return bitwise.value;
+        }
 
-            auto rhs = relational_expression();
-            if (rhs.errored) {
+        auto relational = expect_relational_expression_post_unary_expression(lhs.value);
+        if (relational.errored) {
+            return Failure::kErrored;
+        }
+        auto* ret = relational.value;
+
+        auto& t = peek();
+        if (t.Is(Token::Type::kAndAnd) || t.Is(Token::Type::kOrOr)) {
+            ast::BinaryOp op = ast::BinaryOp::kNone;
+            if (t.Is(Token::Type::kAndAnd)) {
+                op = ast::BinaryOp::kLogicalAnd;
+            } else if (t.Is(Token::Type::kOrOr)) {
+                op = ast::BinaryOp::kLogicalOr;
+            }
+
+            while (continue_parsing()) {
+                auto& n = peek();
+                if (!n.Is(t.type())) {
+                    break;
+                }
+                next();
+
+                auto rhs = relational_expression();
+                if (rhs.errored) {
+                    return Failure::kErrored;
+                }
+                if (!rhs.matched) {
+                    return add_error(peek(), std::string("unable to parse right side of ") +
+                                                 std::string(t.to_name()) + " expression");
+                }
+
+                ret = create<ast::BinaryExpression>(t.source(), op, ret, rhs.value);
+            }
+        }
+        return ret;
+    }();
+
+    if (expr.matched) {
+        // Note, expression is greedy an will consume all the operators of the same type
+        // so, `a & a & a` would all be consumed above. If you see any binary operator
+        // after this then it _must_ be a different one, and hence an error.
+        if (auto* lhs = expr->As<ast::BinaryExpression>()) {
+            if (auto& n = peek(); n.IsBinaryOperator()) {
+                auto source = Source::Combine(expr->source, n.source());
+                add_error(source, std::string("mixing '") + ast::Operator(lhs->op) + "' and '" +
+                                      std::string(n.to_name()) + "' requires parenthesis");
                 return Failure::kErrored;
             }
-            if (!rhs.matched) {
-                return add_error(peek(), std::string("unable to parse right side of ") +
-                                             std::string(t.to_name()) + " expression");
-            }
-
-            ret = create<ast::BinaryExpression>(t.source(), op, ret, rhs.value);
         }
     }
-    return ret;
+
+    return expr;
 }
 
 // singular_expression

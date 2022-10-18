@@ -248,7 +248,53 @@ constexpr const char* FriendlyName(BinaryOp op) {
         case BinaryOp::kModulo:
             return "modulo";
     }
-    return "INVALID";
+    return "<invalid>";
+}
+
+/// @returns the WGSL operator of the BinaryOp
+/// @param op the BinaryOp
+constexpr const char* Operator(BinaryOp op) {
+    switch (op) {
+        case BinaryOp::kAnd:
+            return "&";
+        case BinaryOp::kOr:
+            return "|";
+        case BinaryOp::kXor:
+            return "^";
+        case BinaryOp::kLogicalAnd:
+            return "&&";
+        case BinaryOp::kLogicalOr:
+            return "||";
+        case BinaryOp::kEqual:
+            return "==";
+        case BinaryOp::kNotEqual:
+            return "!=";
+        case BinaryOp::kLessThan:
+            return "<";
+        case BinaryOp::kGreaterThan:
+            return ">";
+        case BinaryOp::kLessThanEqual:
+            return "<=";
+        case BinaryOp::kGreaterThanEqual:
+            return ">=";
+        case BinaryOp::kShiftLeft:
+            return "<<";
+        case BinaryOp::kShiftRight:
+            return ">>";
+        case BinaryOp::kAdd:
+            return "+";
+        case BinaryOp::kSubtract:
+            return "-";
+        case BinaryOp::kMultiply:
+            return "*";
+        case BinaryOp::kDivide:
+            return "/";
+        case BinaryOp::kModulo:
+            return "%";
+        default:
+            break;
+    }
+    return "<invalid>";
 }
 
 /// @param out the std::ostream to write to

@@ -87,28 +87,6 @@ TEST_F(ParserImplTest, BitwiseExpr_Or_Parses_Multiple) {
     ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
 }
 
-TEST_F(ParserImplTest, BitwiseExpr_Or_MixedWithAnd_Invalid) {
-    auto p = parser("a | b & c");
-    auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
-    EXPECT_FALSE(e.matched);
-    EXPECT_TRUE(e.errored);
-    EXPECT_EQ(e.value, nullptr);
-    EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:7: mixing '|' and '&' requires parenthesis");
-}
-
-TEST_F(ParserImplTest, BitwiseExpr_Or_MixedWithXor_Invalid) {
-    auto p = parser("a | b ^ c");
-    auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
-    EXPECT_FALSE(e.matched);
-    EXPECT_TRUE(e.errored);
-    EXPECT_EQ(e.value, nullptr);
-    EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:7: mixing '|' and '^' requires parenthesis");
-}
-
 TEST_F(ParserImplTest, BitwiseExpr_Or_InvalidRHS) {
     auto p = parser("true | if (a) {}");
     auto lhs = p->unary_expression();
@@ -177,28 +155,6 @@ TEST_F(ParserImplTest, BitwiseExpr_Xor_Parses_Multiple) {
 
     ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
     ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
-}
-
-TEST_F(ParserImplTest, BitwiseExpr_Xor_MixedWithOr_Invalid) {
-    auto p = parser("a ^ b | c");
-    auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
-    EXPECT_FALSE(e.matched);
-    EXPECT_TRUE(e.errored);
-    EXPECT_EQ(e.value, nullptr);
-    EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:7: mixing '^' and '|' requires parenthesis");
-}
-
-TEST_F(ParserImplTest, BitwiseExpr_Xor_MixedWithAnd_Invalid) {
-    auto p = parser("a ^ b & c");
-    auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
-    EXPECT_FALSE(e.matched);
-    EXPECT_TRUE(e.errored);
-    EXPECT_EQ(e.value, nullptr);
-    EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:7: mixing '^' and '&' requires parenthesis");
 }
 
 TEST_F(ParserImplTest, BitwiseExpr_Xor_InvalidRHS) {
@@ -275,59 +231,21 @@ TEST_F(ParserImplTest, BitwiseExpr_And_Parses_AndAnd) {
     auto p = parser("a & true &&b");
     auto lhs = p->unary_expression();
     auto e = p->bitwise_expression_post_unary_expression(lhs.value);
+    // bitwise_expression_post_unary_expression returns before parsing '&&'
+
     EXPECT_TRUE(e.matched);
     EXPECT_FALSE(e.errored);
     EXPECT_FALSE(p->has_error()) << p->error();
     ASSERT_NE(e.value, nullptr);
 
-    // lhs: (a & true)
-    // rhs: &b
+    // lhs: a
+    // rhs: true
     ASSERT_TRUE(e->Is<ast::BinaryExpression>());
     auto* rel = e->As<ast::BinaryExpression>();
     EXPECT_EQ(ast::BinaryOp::kAnd, rel->op);
 
-    ASSERT_TRUE(rel->rhs->Is<ast::UnaryOpExpression>());
-    auto* unary = rel->rhs->As<ast::UnaryOpExpression>();
-    EXPECT_EQ(ast::UnaryOp::kAddressOf, unary->op);
-
-    ASSERT_TRUE(unary->expr->Is<ast::IdentifierExpression>());
-    auto* ident = unary->expr->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Register("b"));
-
-    ASSERT_TRUE(rel->lhs->Is<ast::BinaryExpression>());
-
-    // lhs: a
-    // rhs: true
-    rel = rel->lhs->As<ast::BinaryExpression>();
-
     ASSERT_TRUE(rel->lhs->Is<ast::IdentifierExpression>());
-    ident = rel->lhs->As<ast::IdentifierExpression>();
-    EXPECT_EQ(ident->symbol, p->builder().Symbols().Register("a"));
-
     ASSERT_TRUE(rel->rhs->Is<ast::BoolLiteralExpression>());
-    ASSERT_TRUE(rel->rhs->As<ast::BoolLiteralExpression>()->value);
-}
-
-TEST_F(ParserImplTest, BitwiseExpr_And_MixedWithOr_Invalid) {
-    auto p = parser("a & b | c");
-    auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
-    EXPECT_FALSE(e.matched);
-    EXPECT_TRUE(e.errored);
-    EXPECT_EQ(e.value, nullptr);
-    EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:7: mixing '&' and '|' requires parenthesis");
-}
-
-TEST_F(ParserImplTest, BitwiseExpr_And_MixedWithXor_Invalid) {
-    auto p = parser("a & b ^ c");
-    auto lhs = p->unary_expression();
-    auto e = p->bitwise_expression_post_unary_expression(lhs.value);
-    EXPECT_FALSE(e.matched);
-    EXPECT_TRUE(e.errored);
-    EXPECT_EQ(e.value, nullptr);
-    EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:7: mixing '&' and '^' requires parenthesis");
 }
 
 TEST_F(ParserImplTest, BitwiseExpr_And_InvalidRHS) {

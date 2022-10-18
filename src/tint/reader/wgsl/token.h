@@ -379,8 +379,35 @@ class Token {
 
     /// @returns true if the token can be split during parse into component tokens
     bool IsSplittable() const {
-        return Is(Token::Type::kShiftRight) || Is(Token::Type::kGreaterThanEqual) ||
-               Is(Token::Type::kAndAnd) || Is(Token::Type::kMinusMinus);
+        return Is(Type::kShiftRight) || Is(Type::kGreaterThanEqual) || Is(Type::kAndAnd) ||
+               Is(Type::kMinusMinus);
+    }
+
+    /// @returns true if the token is a binary operator
+    bool IsBinaryOperator() const {
+        switch (type_) {
+            case Type::kAnd:
+            case Type::kAndAnd:
+            case Type::kEqualEqual:
+            case Type::kForwardSlash:
+            case Type::kGreaterThan:
+            case Type::kGreaterThanEqual:
+            case Type::kLessThan:
+            case Type::kLessThanEqual:
+            case Type::kMinus:
+            case Type::kMod:
+            case Type::kNotEqual:
+            case Type::kOr:
+            case Type::kOrOr:
+            case Type::kPlus:
+            case Type::kShiftLeft:
+            case Type::kShiftRight:
+            case Type::kStar:
+            case Type::kXor:
+                return true;
+            default:
+                return false;
+        }
     }
 
     /// @returns the source information for this token
