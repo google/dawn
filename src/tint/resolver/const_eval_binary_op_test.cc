@@ -598,7 +598,7 @@ std::vector<Case> ShiftLeftCases() {
     // Shift type is u32 for non-abstract
     using ST = std::conditional_t<IsAbstract<T>, T, u32>;
     using B = BitValues<T>;
-    return {
+    auto r = std::vector<Case>{
         C(T{0b1010}, ST{0}, T{0b0000'0000'1010}),    //
         C(T{0b1010}, ST{1}, T{0b0000'0001'0100}),    //
         C(T{0b1010}, ST{2}, T{0b0000'0010'1000}),    //
@@ -626,6 +626,25 @@ std::vector<Case> ShiftLeftCases() {
           Vec(ST{6}, ST{7}, ST{8}),                                             //
           Vec(T{0b0010'1000'0000}, T{0b0101'0000'0000}, T{0b1010'0000'0000})),  //
     };
+
+    // Only abstract 0 can be shifted left as much as we like. For concrete 0 (and any number), it
+    // cannot be shifted equal or more than the number of bits of the lhs (see
+    // ResolverConstEvalShiftLeftConcreteGeqBitWidthError)
+    ConcatIntoIf<IsAbstract<T>>(  //
+        r, std::vector<Case>{
+               C(T{0}, ST{64}, T{0}),
+               C(T{0}, ST{65}, T{0}),
+               C(T{0}, ST{65}, T{0}),
+               C(T{0}, ST{10000}, T{0}),
+               C(T{0}, T::Highest(), T{0}),
+               C(Negate(T{0}), ST{64}, Negate(T{0})),
+               C(Negate(T{0}), ST{65}, Negate(T{0})),
+               C(Negate(T{0}), ST{65}, Negate(T{0})),
+               C(Negate(T{0}), ST{10000}, Negate(T{0})),
+               C(Negate(T{0}), T::Highest(), Negate(T{0})),
+           });
+
+    return r;
 }
 INSTANTIATE_TEST_SUITE_P(ShiftLeft,
                          ResolverConstEvalBinaryOpTest,
@@ -850,15 +869,37 @@ TEST_P(ResolverConstEvalShiftLeftConcreteGeqBitWidthError, Test) {
 }
 INSTANTIATE_TEST_SUITE_P(Test,
                          ResolverConstEvalShiftLeftConcreteGeqBitWidthError,
-                         testing::Values(                                 //
-                             std::make_tuple(Val(1_i), Val(32_u)),        //
-                             std::make_tuple(Val(1_i), Val(33_u)),        //
-                             std::make_tuple(Val(1_i), Val(34_u)),        //
-                             std::make_tuple(Val(1_i), Val(99999999_u)),  //
-                             std::make_tuple(Val(1_u), Val(32_u)),        //
-                             std::make_tuple(Val(1_u), Val(33_u)),        //
-                             std::make_tuple(Val(1_u), Val(34_u)),        //
-                             std::make_tuple(Val(1_u), Val(99999999_u))   //
+                         testing::Values(                                             //
+                             std::make_tuple(Val(0_u), Val(32_u)),                    //
+                             std::make_tuple(Val(0_u), Val(33_u)),                    //
+                             std::make_tuple(Val(0_u), Val(34_u)),                    //
+                             std::make_tuple(Val(0_u), Val(10000_u)),                 //
+                             std::make_tuple(Val(0_u), Val(u32::Highest())),          //
+                             std::make_tuple(Val(0_i), Val(32_u)),                    //
+                             std::make_tuple(Val(0_i), Val(33_u)),                    //
+                             std::make_tuple(Val(0_i), Val(34_u)),                    //
+                             std::make_tuple(Val(0_i), Val(10000_u)),                 //
+                             std::make_tuple(Val(0_i), Val(u32::Highest())),          //
+                             std::make_tuple(Val(Negate(0_u)), Val(32_u)),            //
+                             std::make_tuple(Val(Negate(0_u)), Val(33_u)),            //
+                             std::make_tuple(Val(Negate(0_u)), Val(34_u)),            //
+                             std::make_tuple(Val(Negate(0_u)), Val(10000_u)),         //
+                             std::make_tuple(Val(Negate(0_u)), Val(u32::Highest())),  //
+                             std::make_tuple(Val(Negate(0_i)), Val(32_u)),            //
+                             std::make_tuple(Val(Negate(0_i)), Val(33_u)),            //
+                             std::make_tuple(Val(Negate(0_i)), Val(34_u)),            //
+                             std::make_tuple(Val(Negate(0_i)), Val(10000_u)),         //
+                             std::make_tuple(Val(Negate(0_i)), Val(u32::Highest())),  //
+                             std::make_tuple(Val(1_i), Val(32_u)),                    //
+                             std::make_tuple(Val(1_i), Val(33_u)),                    //
+                             std::make_tuple(Val(1_i), Val(34_u)),                    //
+                             std::make_tuple(Val(1_i), Val(10000_u)),                 //
+                             std::make_tuple(Val(1_i), Val(u32::Highest())),          //
+                             std::make_tuple(Val(1_u), Val(32_u)),                    //
+                             std::make_tuple(Val(1_u), Val(33_u)),                    //
+                             std::make_tuple(Val(1_u), Val(34_u)),                    //
+                             std::make_tuple(Val(1_u), Val(10000_u)),                 //
+                             std::make_tuple(Val(1_u), Val(u32::Highest()))           //
                              ));
 
 // AInt left shift results in sign change error

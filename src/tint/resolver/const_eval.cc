@@ -1474,6 +1474,10 @@ ConstEval::Result ConstEval::OpShiftLeft(const sem::Type* ty,
                         AddError(OverflowErrorMessage(e1, "<<", e2), source);
                         return nullptr;
                     }
+
+                    // It's UB in C++ to shift by greater or equal to the bit width (even if the lhs
+                    // is 0), so we make sure to avoid this by setting the shift value to 0.
+                    e2 = 0;
                 }
             } else {
                 if (static_cast<size_t>(e2) >= bit_width) {
