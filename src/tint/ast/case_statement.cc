@@ -25,10 +25,11 @@ namespace tint::ast {
 CaseStatement::CaseStatement(ProgramID pid,
                              NodeID nid,
                              const Source& src,
-                             utils::VectorRef<const Expression*> s,
+                             utils::VectorRef<const CaseSelector*> s,
                              const BlockStatement* b)
     : Base(pid, nid, src), selectors(std::move(s)), body(b) {
     TINT_ASSERT(AST, body);
+    TINT_ASSERT(AST, !selectors.IsEmpty());
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, body, program_id);
     for (auto* selector : selectors) {
         TINT_ASSERT(AST, selector);
@@ -39,6 +40,15 @@ CaseStatement::CaseStatement(ProgramID pid,
 CaseStatement::CaseStatement(CaseStatement&&) = default;
 
 CaseStatement::~CaseStatement() = default;
+
+bool CaseStatement::ContainsDefault() const {
+    for (const auto* sel : selectors) {
+        if (sel->IsDefault()) {
+            return true;
+        }
+    }
+    return false;
+}
 
 const CaseStatement* CaseStatement::Clone(CloneContext* ctx) const {
     // Clone arguments outside of create() call to have deterministic ordering

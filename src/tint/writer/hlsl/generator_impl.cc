@@ -2562,20 +2562,20 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
 
 bool GeneratorImpl::EmitCase(const ast::SwitchStatement* s, size_t case_idx) {
     auto* stmt = s->body[case_idx];
-    if (stmt->IsDefault()) {
-        line() << "default: {";
-    } else {
-        auto* sem = builder_.Sem().Get<sem::CaseStatement>(stmt);
-        for (auto* selector : sem->Selectors()) {
-            auto out = line();
+    auto* sem = builder_.Sem().Get<sem::CaseStatement>(stmt);
+    for (auto* selector : sem->Selectors()) {
+        auto out = line();
+        if (selector->IsDefault()) {
+            out << "default";
+        } else {
             out << "case ";
-            if (!EmitConstant(out, selector)) {
+            if (!EmitConstant(out, selector->Value())) {
                 return false;
             }
-            out << ":";
-            if (selector == sem->Selectors().back()) {
-                out << " {";
-            }
+        }
+        out << ":";
+        if (selector == sem->Selectors().back()) {
+            out << " {";
         }
     }
 
@@ -3652,7 +3652,7 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
 }
 
 bool GeneratorImpl::EmitDefaultOnlySwitch(const ast::SwitchStatement* stmt) {
-    TINT_ASSERT(Writer, stmt->body.Length() == 1 && stmt->body[0]->IsDefault());
+    TINT_ASSERT(Writer, stmt->body.Length() == 1 && stmt->body[0]->ContainsDefault());
 
     // FXC fails to compile a switch with just a default case, ignoring the
     // default case body. We work around this here by emitting the default case
@@ -3685,7 +3685,8 @@ bool GeneratorImpl::EmitDefaultOnlySwitch(const ast::SwitchStatement* stmt) {
 
 bool GeneratorImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
     // BUG(crbug.com/tint/1188): work around default-only switches
-    if (stmt->body.Length() == 1 && stmt->body[0]->IsDefault()) {
+    if (stmt->body.Length() == 1 && stmt->body[0]->selectors.Length() == 1 &&
+        stmt->body[0]->ContainsDefault()) {
         return EmitDefaultOnlySwitch(stmt);
     }
 

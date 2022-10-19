@@ -9349,10 +9349,7 @@ switch(42u) {
   case 20u: {
     var_1 = 20u;
   }
-  default: {
-    fallthrough;
-  }
-  case 30u: {
+  case 30u, default: {
     var_1 = 30u;
   }
 }

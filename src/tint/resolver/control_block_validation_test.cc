@@ -70,7 +70,7 @@ TEST_F(ResolverControlBlockValidationTest, SwitchWithoutDefault_Fail) {
 
     auto* block = Block(Decl(var),                     //
                         Switch(Source{{12, 34}}, "a",  //
-                               Case(Expr(1_i))));
+                               Case(CaseSelector(1_i))));
 
     WrapInFunction(block);
 
@@ -87,16 +87,79 @@ TEST_F(ResolverControlBlockValidationTest, SwitchWithTwoDefault_Fail) {
     // }
     auto* var = Var("a", ty.i32(), Expr(2_i));
 
-    auto* block = Block(Decl(var),               //
-                        Switch("a",              //
-                               DefaultCase(),    //
-                               Case(Expr(1_i)),  //
+    auto* block = Block(Decl(var),                           //
+                        Switch("a",                          //
+                               DefaultCase(Source{{9, 2}}),  //
+                               Case(CaseSelector(1_i)),      //
                                DefaultCase(Source{{12, 34}})));
 
     WrapInFunction(block);
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 error: switch statement must have exactly one default clause");
+    EXPECT_EQ(r()->error(), R"(12:34 error: switch statement must have exactly one default clause
+9:2 note: previous default case)");
+}
+
+TEST_F(ResolverControlBlockValidationTest, SwitchWithTwoDefault_OneInCase_Fail) {
+    // var a : i32 = 2;
+    // switch (a) {
+    //   case 1, default: {}
+    //   default: {}
+    // }
+    auto* var = Var("a", ty.i32(), Expr(2_i));
+
+    auto* block = Block(
+        Decl(var),                                                                           //
+        Switch("a",                                                                          //
+               Case(utils::Vector{CaseSelector(1_i), DefaultCaseSelector(Source{{9, 2}})}),  //
+               DefaultCase(Source{{12, 34}})));
+
+    WrapInFunction(block);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: switch statement must have exactly one default clause
+9:2 note: previous default case)");
+}
+
+TEST_F(ResolverControlBlockValidationTest, SwitchWithTwoDefault_SameCase) {
+    // var a : i32 = 2;
+    // switch (a) {
+    //   case default, 1, default: {}
+    // }
+    auto* var = Var("a", ty.i32(), Expr(2_i));
+
+    auto* block =
+        Block(Decl(var),   //
+              Switch("a",  //
+                     Case(utils::Vector{DefaultCaseSelector(Source{{9, 2}}), CaseSelector(1_i),
+                                        DefaultCaseSelector(Source{{12, 34}})})));
+
+    WrapInFunction(block);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: switch statement must have exactly one default clause
+9:2 note: previous default case)");
+}
+
+TEST_F(ResolverControlBlockValidationTest, SwitchWithTwoDefault_DifferentMultiCase) {
+    // var a : i32 = 2;
+    // switch (a) {
+    //   case 1, default: {}
+    //   case default, 2: {}
+    // }
+    auto* var = Var("a", ty.i32(), Expr(2_i));
+
+    auto* block = Block(
+        Decl(var),   //
+        Switch("a",  //
+               Case(utils::Vector{CaseSelector(1_i), DefaultCaseSelector(Source{{9, 2}})}),
+               Case(utils::Vector{DefaultCaseSelector(Source{{12, 34}}), CaseSelector(2_i)})));
+
+    WrapInFunction(block);
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: switch statement must have exactly one default clause
+9:2 note: previous default case)");
 }
 
 TEST_F(ResolverControlBlockValidationTest, UnreachableCode_Loop_continue) {
@@ -187,9 +250,9 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_break) {
     auto* decl_z = Decl(Var("z", ty.i32()));
     auto* brk = Break();
     auto* assign_z = Assign(Source{{12, 34}}, "z", 1_i);
-    WrapInFunction(                                                  //
-        Block(Switch(1_i,                                            //
-                     Case(Expr(1_i), Block(decl_z, brk, assign_z)),  //
+    WrapInFunction(                                                          //
+        Block(Switch(1_i,                                                    //
+                     Case(CaseSelector(1_i), Block(decl_z, brk, assign_z)),  //
                      DefaultCase())));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -210,11 +273,11 @@ TEST_F(ResolverControlBlockValidationTest, UnreachableCode_break_InBlocks) {
     auto* decl_z = Decl(Var("z", ty.i32()));
     auto* brk = Break();
     auto* assign_z = Assign(Source{{12, 34}}, "z", 1_i);
-    WrapInFunction(
-        Loop(Block(Switch(1_i,  //
-                          Case(Expr(1_i), Block(decl_z, Block(Block(Block(brk))), assign_z)),
-                          DefaultCase()),  //
-                   Break())));
+    WrapInFunction(Loop(
+        Block(Switch(1_i,  //
+                     Case(CaseSelector(1_i), Block(decl_z, Block(Block(Block(brk))), assign_z)),
+                     DefaultCase()),  //
+              Break())));
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
     EXPECT_EQ(r()->error(), "12:34 warning: code is unreachable");
@@ -231,8 +294,8 @@ TEST_F(ResolverControlBlockValidationTest, SwitchConditionTypeMustMatchSelectorT
     // }
     auto* var = Var("a", ty.i32(), Expr(2_i));
 
-    auto* block = Block(Decl(var), Switch("a",                                //
-                                          Case(Expr(Source{{12, 34}}, 1_u)),  //
+    auto* block = Block(Decl(var), Switch("a",                                        //
+                                          Case(CaseSelector(Source{{12, 34}}, 1_u)),  //
                                           DefaultCase()));
     WrapInFunction(block);
 
@@ -250,9 +313,9 @@ TEST_F(ResolverControlBlockValidationTest, SwitchConditionTypeMustMatchSelectorT
     // }
     auto* var = Var("a", ty.u32(), Expr(2_u));
 
-    auto* block = Block(Decl(var),                                                 //
-                        Switch("a",                                                //
-                               Case(utils::Vector{Expr(Source{{12, 34}}, -1_i)}),  //
+    auto* block = Block(Decl(var),                                          //
+                        Switch("a",                                         //
+                               Case(CaseSelector(Source{{12, 34}}, -1_i)),  //
                                DefaultCase()));
     WrapInFunction(block);
 
@@ -273,11 +336,11 @@ TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorValueUint_Fail) 
 
     auto* block = Block(Decl(var),   //
                         Switch("a",  //
-                               Case(Expr(0_u)),
+                               Case(CaseSelector(0_u)),
                                Case(utils::Vector{
-                                   Expr(Source{{12, 34}}, 2_u),
-                                   Expr(3_u),
-                                   Expr(Source{{56, 78}}, 2_u),
+                                   CaseSelector(Source{{12, 34}}, 2_u),
+                                   CaseSelector(3_u),
+                                   CaseSelector(Source{{56, 78}}, 2_u),
                                }),
                                DefaultCase()));
     WrapInFunction(block);
@@ -299,12 +362,12 @@ TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorValueSint_Fail) 
 
     auto* block = Block(Decl(var),   //
                         Switch("a",  //
-                               Case(Expr(Source{{12, 34}}, -10_i)),
+                               Case(CaseSelector(Source{{12, 34}}, -10_i)),
                                Case(utils::Vector{
-                                   Expr(0_i),
-                                   Expr(1_i),
-                                   Expr(2_i),
-                                   Expr(Source{{56, 78}}, -10_i),
+                                   CaseSelector(0_i),
+                                   CaseSelector(1_i),
+                                   CaseSelector(2_i),
+                                   CaseSelector(Source{{56, 78}}, -10_i),
                                }),
                                DefaultCase()));
     WrapInFunction(block);
@@ -344,7 +407,7 @@ TEST_F(ResolverControlBlockValidationTest, SwitchCase_Pass) {
     auto* block = Block(Decl(var),                             //
                         Switch("a",                            //
                                DefaultCase(Source{{12, 34}}),  //
-                               Case(Expr(5_i))));
+                               Case(CaseSelector(5_i))));
     WrapInFunction(block);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -361,7 +424,7 @@ TEST_F(ResolverControlBlockValidationTest, SwitchCase_Expression_Pass) {
     auto* block = Block(Decl(var),                             //
                         Switch("a",                            //
                                DefaultCase(Source{{12, 34}}),  //
-                               Case(Add(5_i, 6_i))));
+                               Case(CaseSelector(Add(5_i, 6_i)))));
     WrapInFunction(block);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -378,7 +441,7 @@ TEST_F(ResolverControlBlockValidationTest, SwitchCase_Expression_MixI32_Abstract
     auto* block = Block(Decl(var),                             //
                         Switch("a",                            //
                                DefaultCase(Source{{12, 34}}),  //
-                               Case(Add(5_i, 6_i))));
+                               Case(CaseSelector(Add(5_i, 6_i)))));
     WrapInFunction(block);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -395,7 +458,7 @@ TEST_F(ResolverControlBlockValidationTest, SwitchCase_Expression_MixU32_Abstract
     auto* block = Block(Decl(var),                             //
                         Switch("a",                            //
                                DefaultCase(Source{{12, 34}}),  //
-                               Case(Add(5_a, 6_a))));
+                               Case(CaseSelector(Add(5_a, 6_a)))));
     WrapInFunction(block);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -409,10 +472,12 @@ TEST_F(ResolverControlBlockValidationTest, SwitchCase_Expression_Multiple) {
     // }
     auto* var = Var("a", Expr(2_u));
 
-    auto* block = Block(Decl(var),                             //
-                        Switch("a",                            //
-                               DefaultCase(Source{{12, 34}}),  //
-                               Case(utils::Vector{Add(5_u, 6_u), Add(7_u, 9_u), Mul(2_u, 4_u)})));
+    auto* block =
+        Block(Decl(var),                             //
+              Switch("a",                            //
+                     DefaultCase(Source{{12, 34}}),  //
+                     Case(utils::Vector{CaseSelector(Add(5_u, 6_u)), CaseSelector(Add(7_u, 9_u)),
+                                        CaseSelector(Mul(2_u, 4_u))})));
     WrapInFunction(block);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
@@ -446,8 +511,8 @@ TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelector_Expression_Fail
 
     auto* block = Block(Decl(var),   //
                         Switch("a",  //
-                               Case(Expr(Source{{12, 34}}, 10_i)),
-                               Case(Add(Source{{56, 78}}, 5_i, 5_i)), DefaultCase()));
+                               Case(CaseSelector(Source{{12, 34}}, 10_i)),
+                               Case(CaseSelector(Source{{56, 78}}, Add(5_i, 5_i))), DefaultCase()));
     WrapInFunction(block);
 
     EXPECT_FALSE(r()->Resolve());
@@ -466,8 +531,8 @@ TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorSameCase_BothExp
 
     auto* block = Block(Decl(var),   //
                         Switch("a",  //
-                               Case(utils::Vector{Add(Source{{56, 78}}, 5_i, 5_i),
-                                                  Add(Source{{12, 34}}, 6_i, 4_i)}),
+                               Case(utils::Vector{CaseSelector(Source{{56, 78}}, Add(5_i, 5_i)),
+                                                  CaseSelector(Source{{12, 34}}, Add(6_i, 4_i))}),
                                DefaultCase()));
     WrapInFunction(block);
 
@@ -485,11 +550,11 @@ TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorSame_Case_Expres
     // }
     auto* var = Var("a", ty.i32(), Expr(2_i));
 
-    auto* block = Block(
-        Decl(var),   //
-        Switch("a",  //
-               Case(utils::Vector{Add(Source{{56, 78}}, 5_i, 5_i), Expr(Source{{12, 34}}, 10_i)}),
-               DefaultCase()));
+    auto* block = Block(Decl(var),   //
+                        Switch("a",  //
+                               Case(utils::Vector{CaseSelector(Source{{56, 78}}, Add(5_i, 5_i)),
+                                                  CaseSelector(Source{{12, 34}}, 10_i)}),
+                               DefaultCase()));
     WrapInFunction(block);
 
     EXPECT_FALSE(r()->Resolve());
@@ -508,7 +573,7 @@ TEST_F(ResolverControlBlockValidationTest, Switch_OverrideCondition_Fail) {
 
     auto* block = Block(Decl(var),   //
                         Switch("a",  //
-                               Case(Expr(Source{{12, 34}}, "b")), DefaultCase()));
+                               Case(CaseSelector(Source{{12, 34}}, "b")), DefaultCase()));
     WrapInFunction(block);
 
     EXPECT_FALSE(r()->Resolve());

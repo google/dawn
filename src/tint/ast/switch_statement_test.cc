@@ -25,7 +25,7 @@ namespace {
 using SwitchStatementTest = TestHelper;
 
 TEST_F(SwitchStatementTest, Creation) {
-    auto* case_stmt = create<CaseStatement>(utils::Vector{Expr(1_u)}, Block());
+    auto* case_stmt = create<CaseStatement>(utils::Vector{CaseSelector(1_u)}, Block());
     auto* ident = Expr("ident");
     utils::Vector body{case_stmt};
 
@@ -44,7 +44,7 @@ TEST_F(SwitchStatementTest, Creation_WithSource) {
 }
 
 TEST_F(SwitchStatementTest, IsSwitch) {
-    utils::Vector lit{Expr(2_i)};
+    utils::Vector lit{CaseSelector(2_i)};
     auto* ident = Expr("ident");
     utils::Vector body{create<CaseStatement>(lit, Block())};
 
@@ -58,7 +58,8 @@ TEST_F(SwitchStatementTest, Assert_Null_Condition) {
         {
             ProgramBuilder b;
             CaseStatementList cases;
-            cases.Push(b.create<CaseStatement>(utils::Vector{b.Expr(1_i)}, b.Block()));
+            cases.Push(
+                b.create<CaseStatement>(utils::Vector{b.CaseSelector(b.Expr(1_i))}, b.Block()));
             b.create<SwitchStatement>(nullptr, cases);
         },
         "internal compiler error");
@@ -82,7 +83,7 @@ TEST_F(SwitchStatementTest, Assert_DifferentProgramID_Condition) {
             b1.create<SwitchStatement>(b2.Expr(true), utils::Vector{
                                                           b1.create<CaseStatement>(
                                                               utils::Vector{
-                                                                  b1.Expr(1_i),
+                                                                  b1.CaseSelector(b1.Expr(1_i)),
                                                               },
                                                               b1.Block()),
                                                       });
@@ -98,7 +99,7 @@ TEST_F(SwitchStatementTest, Assert_DifferentProgramID_CaseStatement) {
             b1.create<SwitchStatement>(b1.Expr(true), utils::Vector{
                                                           b2.create<CaseStatement>(
                                                               utils::Vector{
-                                                                  b2.Expr(1_i),
+                                                                  b2.CaseSelector(b2.Expr(1_i)),
                                                               },
                                                               b2.Block()),
                                                       });

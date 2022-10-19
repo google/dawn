@@ -83,6 +83,8 @@ set(TINT_LIB_SRCS
   ast/call_expression.h
   ast/call_statement.cc
   ast/call_statement.h
+  ast/case_selector.cc
+  ast/case_selector.h
   ast/case_statement.cc
   ast/case_statement.h
   ast/compound_assignment_statement.cc
@@ -713,6 +715,7 @@ if(TINT_BUILD_TESTS)
     ast/builtin_value_test.cc
     ast/call_expression_test.cc
     ast/call_statement_test.cc
+    ast/case_selector_test.cc
     ast/case_statement_test.cc
     ast/compound_assignment_statement_test.cc
     ast/continue_statement_test.cc

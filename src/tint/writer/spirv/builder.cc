@@ -3456,19 +3456,26 @@ bool Builder::GenerateSwitchStatement(const ast::SwitchStatement* stmt) {
 
     std::vector<uint32_t> case_ids;
     for (const auto* item : stmt->body) {
-        if (item->IsDefault()) {
-            case_ids.push_back(default_block_id);
+        auto block_id = default_block_id;
+        if (!item->ContainsDefault()) {
+            auto block = result_op();
+            block_id = std::get<uint32_t>(block);
+        }
+        case_ids.push_back(block_id);
+
+        // If this case statement is only a default selector skip adding the block
+        // as it will be done below.
+        if (item->selectors.Length() == 1 && item->ContainsDefault()) {
             continue;
         }
 
-        auto block = result_op();
-        auto block_id = std::get<uint32_t>(block);
-
-        case_ids.push_back(block_id);
-
         auto* sem = builder_.Sem().Get<sem::CaseStatement>(item);
         for (auto* selector : sem->Selectors()) {
-            params.push_back(Operand(selector->As<uint32_t>()));
+            if (selector->IsDefault()) {
+                continue;
+            }
+
+            params.push_back(Operand(selector->Value()->As<uint32_t>()));
             params.push_back(Operand(block_id));
         }
     }
@@ -3490,7 +3497,7 @@ bool Builder::GenerateSwitchStatement(const ast::SwitchStatement* stmt) {
     for (uint32_t i = 0; i < body.Length(); i++) {
         auto* item = body[i];
 
-        if (item->IsDefault()) {
+        if (item->ContainsDefault()) {
             generated_default = true;
         }
 

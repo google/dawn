@@ -17,6 +17,7 @@
 #include "src/tint/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::sem::CaseStatement);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::CaseSelector);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::SwitchStatement);
 
 namespace tint::sem {
@@ -46,6 +47,15 @@ CaseStatement::~CaseStatement() = default;
 
 const ast::CaseStatement* CaseStatement::Declaration() const {
     return static_cast<const ast::CaseStatement*>(Base::Declaration());
+}
+
+CaseSelector::CaseSelector(const ast::CaseSelector* decl, const Constant* val)
+    : Base(), decl_(decl), val_(val) {}
+
+CaseSelector::~CaseSelector() = default;
+
+const ast::CaseSelector* CaseSelector::Declaration() const {
+    return decl_;
 }
 
 }  // namespace tint::sem

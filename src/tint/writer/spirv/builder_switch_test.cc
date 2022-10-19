@@ -62,9 +62,9 @@ TEST_F(BuilderTest, Switch_WithCase) {
 
     auto* func = Func("a_func", utils::Empty, ty.void_(),
                       utils::Vector{
-                          Switch("a",                                       //
-                                 Case(Expr(1_i), Block(Assign("v", 1_i))),  //
-                                 Case(Expr(2_i), Block(Assign("v", 2_i))),  //
+                          Switch("a",                                               //
+                                 Case(CaseSelector(1_i), Block(Assign("v", 1_i))),  //
+                                 Case(CaseSelector(2_i), Block(Assign("v", 2_i))),  //
                                  DefaultCase()),
                       });
 
@@ -119,9 +119,9 @@ TEST_F(BuilderTest, Switch_WithCase_Unsigned) {
 
     auto* func = Func("a_func", utils::Empty, ty.void_(),
                       utils::Vector{
-                          Switch("a",                                       //
-                                 Case(Expr(1_u), Block(Assign("v", 1_i))),  //
-                                 Case(Expr(2_u), Block(Assign("v", 2_i))),  //
+                          Switch("a",                                               //
+                                 Case(CaseSelector(1_u), Block(Assign("v", 1_i))),  //
+                                 Case(CaseSelector(2_u), Block(Assign("v", 2_i))),  //
                                  DefaultCase()),
                       });
 
@@ -226,11 +226,11 @@ TEST_F(BuilderTest, Switch_WithCaseAndDefault) {
 
     auto* func = Func("a_func", utils::Empty, ty.void_(),
                       utils::Vector{
-                          Switch(Expr("a"),                                 //
-                                 Case(Expr(1_i),                            //
-                                      Block(Assign("v", 1_i))),             //
-                                 Case(utils::Vector{Expr(2_i), Expr(3_i)},  //
-                                      Block(Assign("v", 2_i))),             //
+                          Switch(Expr("a"),                                                 //
+                                 Case(CaseSelector(1_i),                                    //
+                                      Block(Assign("v", 1_i))),                             //
+                                 Case(utils::Vector{CaseSelector(2_i), CaseSelector(3_i)},  //
+                                      Block(Assign("v", 2_i))),                             //
                                  DefaultCase(Block(Assign("v", 3_i)))),
                       });
 
@@ -273,6 +273,61 @@ OpFunctionEnd
 )");
 }
 
+TEST_F(BuilderTest, Switch_WithCaseAndMixedDefault) {
+    // switch(a) {
+    //   case 1i:
+    //      v = 1i;
+    //   case 2i, 3i, default:
+    //      v = 2i;
+    //  }
+
+    auto* v = GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate);
+    auto* a = GlobalVar("a", ty.i32(), ast::AddressSpace::kPrivate);
+
+    auto* func = Func("a_func", utils::Empty, ty.void_(),
+                      utils::Vector{Switch(Expr("a"),                      //
+                                           Case(CaseSelector(1_i),         //
+                                                Block(Assign("v", 1_i))),  //
+                                           Case(utils::Vector{CaseSelector(2_i), CaseSelector(3_i),
+                                                              DefaultCaseSelector()},  //
+                                                Block(Assign("v", 2_i)))               //
+                                           )});
+
+    spirv::Builder& b = Build();
+
+    ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
+    ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
+    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
+
+    EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
+OpName %5 "a"
+OpName %8 "a_func"
+%3 = OpTypeInt 32 1
+%2 = OpTypePointer Private %3
+%4 = OpConstantNull %3
+%1 = OpVariable %2 Private %4
+%5 = OpVariable %2 Private %4
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%14 = OpConstant %3 1
+%15 = OpConstant %3 2
+%8 = OpFunction %7 None %6
+%9 = OpLabel
+%11 = OpLoad %3 %5
+OpSelectionMerge %10 None
+OpSwitch %11 %12 1 %13 2 %12 3 %12
+%13 = OpLabel
+OpStore %1 %14
+OpBranch %10
+%12 = OpLabel
+OpStore %1 %15
+OpBranch %10
+%10 = OpLabel
+OpReturn
+OpFunctionEnd
+)");
+}
+
 TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
     // switch(a) {
     //   case 1i:
@@ -290,9 +345,9 @@ TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
     auto* func = Func("a_func", utils::Empty, ty.void_(),
                       utils::Vector{
                           Switch(Expr("a"),                                     //
-                                 Case(Expr(1_i),                                //
+                                 Case(CaseSelector(1_i),                        //
                                       Block(Assign("v", 1_i), Fallthrough())),  //
-                                 Case(Expr(2_i),                                //
+                                 Case(CaseSelector(2_i),                        //
                                       Block(Assign("v", 2_i))),                 //
                                  DefaultCase(Block(Assign("v", 3_i)))),
                       });
@@ -351,9 +406,9 @@ TEST_F(BuilderTest, Switch_WithNestedBreak) {
 
     auto* func = Func("a_func", utils::Empty, ty.void_(),
                       utils::Vector{
-                          Switch("a",             //
-                                 Case(Expr(1_i),  //
-                                      Block(      //
+                          Switch("a",                     //
+                                 Case(CaseSelector(1_i),  //
+                                      Block(              //
                                           If(Expr(true), Block(create<ast::BreakStatement>())),
                                           Assign("v", 1_i))),
                                  DefaultCase()),
@@ -414,9 +469,9 @@ TEST_F(BuilderTest, Switch_AllReturn) {
 
     auto* fn = Func("f", utils::Empty, ty.i32(),
                     utils::Vector{
-                        Switch(1_i,                                    //
-                               Case(Expr(1_i), Block(Return(1_i))),    //
-                               Case(Expr(2_i), Block(Fallthrough())),  //
+                        Switch(1_i,                                            //
+                               Case(CaseSelector(1_i), Block(Return(1_i))),    //
+                               Case(CaseSelector(2_i), Block(Fallthrough())),  //
                                DefaultCase(Block(Return(3_i)))),
                     });
 

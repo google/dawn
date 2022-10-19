@@ -143,7 +143,7 @@ TEST_F(ParserImplTest, Statement_Switch_Invalid) {
     EXPECT_TRUE(e.errored);
     EXPECT_FALSE(e.matched);
     EXPECT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:18: unable to parse case selectors");
+    EXPECT_EQ(p->error(), "1:18: expected case selector expression or `default`");
 }
 
 TEST_F(ParserImplTest, Statement_Loop) {

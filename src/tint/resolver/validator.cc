@@ -2324,54 +2324,50 @@ bool Validator::SwitchStatement(const ast::SwitchStatement* s) {
         return false;
     }
 
-    bool has_default = false;
+    const sem::CaseSelector* default_selector = nullptr;
     std::unordered_map<int64_t, Source> selectors;
 
     for (auto* case_stmt : s->body) {
-        if (case_stmt->IsDefault()) {
-            if (has_default) {
-                // More than one default clause
-                AddError("switch statement must have exactly one default clause",
-                         case_stmt->source);
-                return false;
-            }
-            has_default = true;
-        }
-
         auto* case_sem = sem_.Get<sem::CaseStatement>(case_stmt);
+        for (auto* selector : case_sem->Selectors()) {
+            if (selector->IsDefault()) {
+                if (default_selector != nullptr) {
+                    // More than one default clause
+                    AddError("switch statement must have exactly one default clause",
+                             selector->Declaration()->source);
 
-        auto& case_selectors = case_stmt->selectors;
-        auto& selector_values = case_sem->Selectors();
-        TINT_ASSERT(Resolver, case_selectors.Length() == selector_values.size());
-        for (size_t i = 0; i < case_sem->Selectors().size(); ++i) {
-            auto* selector = selector_values[i];
-            if (cond_ty != selector->Type()) {
+                    AddNote("previous default case", default_selector->Declaration()->source);
+                    return false;
+                }
+                default_selector = selector;
+                continue;
+            }
+
+            auto* decl_ty = selector->Value()->Type();
+            if (cond_ty != decl_ty) {
                 AddError(
                     "the case selector values must have the same type as the selector expression.",
-                    case_selectors[i]->source);
+                    selector->Declaration()->source);
                 return false;
             }
 
-            auto value = selector->As<uint32_t>();
+            auto value = selector->Value()->As<uint32_t>();
             auto it = selectors.find(value);
             if (it != selectors.end()) {
-                std::string err = "duplicate switch case '";
-                if (selector->Type()->Is<sem::I32>()) {
-                    err += std::to_string(selector->As<int32_t>());
-                } else {
-                    err += std::to_string(value);
-                }
-                err += "'";
-
-                AddError(err, case_selectors[i]->source);
+                AddError("duplicate switch case '" +
+                             (decl_ty->IsAnyOf<sem::I32, sem::AbstractNumeric>()
+                                  ? std::to_string(i32(value))
+                                  : std::to_string(value)) +
+                             "'",
+                         selector->Declaration()->source);
                 AddNote("previous case declared here", it->second);
                 return false;
             }
-            selectors.emplace(value, case_selectors[i]->source);
+            selectors.emplace(value, selector->Declaration()->source);
         }
     }
 
-    if (!has_default) {
+    if (default_selector == nullptr) {
         // No default clause
         AddError("switch statement must have a default clause", s->source);
         return false;

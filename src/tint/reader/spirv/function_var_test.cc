@@ -1393,10 +1393,7 @@ TEST_F(SpvParserFunctionVarTest, EmitStatement_Phi_InMerge_PredecessorsDominatdB
     auto got = test::ToString(p->program(), ast_body);
     auto* expect = R"(var x_41 : u32;
 switch(1u) {
-  default: {
-    fallthrough;
-  }
-  case 0u: {
+  case 0u, default: {
     fallthrough;
   }
   case 1u: {

@@ -1039,11 +1039,11 @@ TEST_F(ResolverValidationTest, Stmt_BreakInLoop) {
 }
 
 TEST_F(ResolverValidationTest, Stmt_BreakInSwitch) {
-    WrapInFunction(Loop(Block(Switch(Expr(1_i),             //
-                                     Case(Expr(1_i),        //
-                                          Block(Break())),  //
-                                     DefaultCase()),        //
-                              Break())));                   //
+    WrapInFunction(Loop(Block(Switch(Expr(1_i),               //
+                                     Case(CaseSelector(1_i),  //
+                                          Block(Break())),    //
+                                     DefaultCase()),          //
+                              Break())));                     //
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 

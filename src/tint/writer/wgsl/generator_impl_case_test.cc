@@ -22,7 +22,8 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Case) {
-    auto* s = Switch(1_i, Case(Expr(5_i), Block(create<ast::BreakStatement>())), DefaultCase());
+    auto* s =
+        Switch(1_i, Case(CaseSelector(5_i), Block(create<ast::BreakStatement>())), DefaultCase());
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();
@@ -40,8 +41,8 @@ TEST_F(WgslGeneratorImplTest, Emit_Case_MultipleSelectors) {
     auto* s = Switch(1_i,
                      Case(
                          utils::Vector{
-                             Expr(5_i),
-                             Expr(6_i),
+                             CaseSelector(5_i),
+                             CaseSelector(6_i),
                          },
                          Block(create<ast::BreakStatement>())),
                      DefaultCase());

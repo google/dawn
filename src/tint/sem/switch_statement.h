@@ -22,10 +22,12 @@
 // Forward declarations
 namespace tint::ast {
 class CaseStatement;
+class CaseSelector;
 class SwitchStatement;
 }  // namespace tint::ast
 namespace tint::sem {
 class CaseStatement;
+class CaseSelector;
 class Constant;
 class Expression;
 }  // namespace tint::sem
@@ -83,14 +85,39 @@ class CaseStatement final : public Castable<CaseStatement, CompoundStatement> {
     const BlockStatement* Body() const { return body_; }
 
     /// @returns the selectors for the case
-    std::vector<const Constant*>& Selectors() { return selectors_; }
+    std::vector<const CaseSelector*>& Selectors() { return selectors_; }
 
     /// @returns the selectors for the case
-    const std::vector<const Constant*>& Selectors() const { return selectors_; }
+    const std::vector<const CaseSelector*>& Selectors() const { return selectors_; }
 
   private:
     const BlockStatement* body_ = nullptr;
-    std::vector<const Constant*> selectors_;
+    std::vector<const CaseSelector*> selectors_;
+};
+
+/// Holds semantic information about a switch case selector
+class CaseSelector final : public Castable<CaseSelector, Node> {
+  public:
+    /// Constructor
+    /// @param decl the selector declaration
+    /// @param val the case selector value, nullptr for a default selector
+    explicit CaseSelector(const ast::CaseSelector* decl, const Constant* val = nullptr);
+
+    /// Destructor
+    ~CaseSelector() override;
+
+    /// @returns true if this is a default selector
+    bool IsDefault() const { return val_ == nullptr; }
+
+    /// @returns the case selector declaration
+    const ast::CaseSelector* Declaration() const;
+
+    /// @returns the selector constant value, or nullptr if this is the default selector
+    const Constant* Value() const { return val_; }
+
+  private:
+    const ast::CaseSelector* const decl_;
+    const Constant* const val_;
 };
 
 }  // namespace tint::sem

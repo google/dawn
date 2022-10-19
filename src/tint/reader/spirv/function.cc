@@ -3024,7 +3024,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
     for (size_t i = last_clause_index;; --i) {
         // Create a list of integer literals for the selector values leading to
         // this case clause.
-        utils::Vector<const ast::Expression*, 4> selectors;
+        utils::Vector<const ast::CaseSelector*, 4> selectors;
         const bool has_selectors = clause_heads[i]->case_values.has_value();
         if (has_selectors) {
             auto values = clause_heads[i]->case_values.value();
@@ -3034,15 +3034,26 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
                 // The Tint AST handles 32-bit values.
                 const uint32_t value32 = uint32_t(value & 0xFFFFFFFF);
                 if (selector.type->IsUnsignedScalarOrVector()) {
-                    selectors.Push(create<ast::IntLiteralExpression>(
-                        Source{}, value32, ast::IntLiteralExpression::Suffix::kU));
+                    selectors.Push(create<ast::CaseSelector>(
+                        Source{}, create<ast::IntLiteralExpression>(
+                                      Source{}, value32, ast::IntLiteralExpression::Suffix::kU)));
                 } else {
-                    selectors.Push(
+                    selectors.Push(create<ast::CaseSelector>(
+                        Source{},
                         create<ast::IntLiteralExpression>(Source{}, static_cast<int32_t>(value32),
-                                                          ast::IntLiteralExpression::Suffix::kI));
+                                                          ast::IntLiteralExpression::Suffix::kI)));
                 }
             }
+
+            if ((default_info == clause_heads[i]) && construct->ContainsPos(default_info->pos)) {
+                // Generate a default selector
+                selectors.Push(create<ast::CaseSelector>(Source{}));
+            }
+        } else {
+            // Generate a default selector
+            selectors.Push(create<ast::CaseSelector>(Source{}));
         }
+        TINT_ASSERT(Reader, !selectors.IsEmpty());
 
         // Where does this clause end?
         const auto end_id =
@@ -3056,17 +3067,6 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
             auto* body = create<ast::BlockStatement>(Source{}, stmts);
             swch->cases[case_idx] = create<ast::CaseStatement>(Source{}, selectors, body);
         });
-
-        if ((default_info == clause_heads[i]) && has_selectors &&
-            construct->ContainsPos(default_info->pos)) {
-            // Generate a default clause with a just fallthrough.
-            auto* stmts = create<ast::BlockStatement>(
-                Source{}, StatementList{
-                              create<ast::FallthroughStatement>(Source{}),
-                          });
-            auto* case_stmt = create<ast::CaseStatement>(Source{}, utils::Empty, stmts);
-            swch->cases.Push(case_stmt);
-        }
 
         if (i == 0) {
             break;

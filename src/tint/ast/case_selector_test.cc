@@ -1,4 +1,4 @@
-// Copyright 2020 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,28 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/writer/wgsl/test_helper.h"
+#include "src/tint/ast/case_selector.h"
+
+#include "gtest/gtest-spi.h"
+#include "src/tint/ast/test_helper.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
-namespace tint::writer::wgsl {
+namespace tint::ast {
 namespace {
 
-using WgslGeneratorImplTest = TestHelper;
+using CaseSelectorTest = TestHelper;
 
-TEST_F(WgslGeneratorImplTest, Emit_Fallthrough) {
-    auto* f = create<ast::FallthroughStatement>();
-    WrapInFunction(Switch(1_i,                                //
-                          Case(CaseSelector(1_i), Block(f)),  //
-                          DefaultCase()));
+TEST_F(CaseSelectorTest, NonDefault) {
+    auto* e = Expr(2_i);
+    auto* c = CaseSelector(e);
+    EXPECT_FALSE(c->IsDefault());
+    EXPECT_EQ(e, c->expr);
+}
 
-    GeneratorImpl& gen = Build();
-
-    gen.increment_indent();
-
-    ASSERT_TRUE(gen.EmitStatement(f)) << gen.error();
-    EXPECT_EQ(gen.result(), "  fallthrough;\n");
+TEST_F(CaseSelectorTest, Default) {
+    auto* c = DefaultCaseSelector();
+    EXPECT_TRUE(c->IsDefault());
 }
 
 }  // namespace
-}  // namespace tint::writer::wgsl
+}  // namespace tint::ast

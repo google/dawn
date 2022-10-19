@@ -25,21 +25,13 @@ TEST_F(GlslGeneratorImplTest_Switch, Emit_Switch) {
     GlobalVar("cond", ty.i32(), ast::AddressSpace::kPrivate);
 
     auto* def_body = Block(create<ast::BreakStatement>());
-    auto* def = create<ast::CaseStatement>(utils::Empty, def_body);
-
-    utils::Vector case_val{Expr(5_i)};
+    auto* def = create<ast::CaseStatement>(utils::Vector{DefaultCaseSelector()}, def_body);
 
     auto* case_body = Block(create<ast::BreakStatement>());
-
-    auto* case_stmt = create<ast::CaseStatement>(case_val, case_body);
-
-    utils::Vector body{
-        case_stmt,
-        def,
-    };
+    auto* case_stmt = create<ast::CaseStatement>(utils::Vector{CaseSelector(5_i)}, case_body);
 
     auto* cond = Expr("cond");
-    auto* s = create<ast::SwitchStatement>(cond, body);
+    auto* s = create<ast::SwitchStatement>(cond, utils::Vector{case_stmt, def});
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();
@@ -51,6 +43,31 @@ TEST_F(GlslGeneratorImplTest_Switch, Emit_Switch) {
     case 5: {
       break;
     }
+    default: {
+      break;
+    }
+  }
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_Switch, Emit_Switch_MixedDefault) {
+    GlobalVar("cond", ty.i32(), ast::AddressSpace::kPrivate);
+
+    auto* def_body = Block(create<ast::BreakStatement>());
+    auto* def = create<ast::CaseStatement>(utils::Vector{CaseSelector(5_i), DefaultCaseSelector()},
+                                           def_body);
+
+    auto* cond = Expr("cond");
+    auto* s = create<ast::SwitchStatement>(cond, utils::Vector{def});
+    WrapInFunction(s);
+
+    GeneratorImpl& gen = Build();
+
+    gen.increment_indent();
+
+    ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  switch(cond) {
+    case 5:
     default: {
       break;
     }

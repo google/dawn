@@ -356,26 +356,30 @@ TEST_P(MaterializeAbstractNumericToConcreteType, Test) {
             WrapInFunction(Add(target_expr(), abstract_expr));
             break;
         case Method::kSwitchCond:
-            WrapInFunction(Switch(abstract_expr,                                         //
-                                  Case(target_expr()->As<ast::IntLiteralExpression>()),  //
-                                  DefaultCase()));
+            WrapInFunction(
+                Switch(abstract_expr,                                                       //
+                       Case(CaseSelector(target_expr()->As<ast::IntLiteralExpression>())),  //
+                       DefaultCase()));
             break;
         case Method::kSwitchCase:
-            WrapInFunction(Switch(target_expr(),                                         //
-                                  Case(abstract_expr->As<ast::IntLiteralExpression>()),  //
-                                  DefaultCase()));
+            WrapInFunction(
+                Switch(target_expr(),                                                       //
+                       Case(CaseSelector(abstract_expr->As<ast::IntLiteralExpression>())),  //
+                       DefaultCase()));
             break;
         case Method::kSwitchCondWithAbstractCase:
-            WrapInFunction(Switch(abstract_expr,                                         //
-                                  Case(Expr(123_a)),                                     //
-                                  Case(target_expr()->As<ast::IntLiteralExpression>()),  //
-                                  DefaultCase()));
+            WrapInFunction(
+                Switch(abstract_expr,                                                       //
+                       Case(CaseSelector(123_a)),                                           //
+                       Case(CaseSelector(target_expr()->As<ast::IntLiteralExpression>())),  //
+                       DefaultCase()));
             break;
         case Method::kSwitchCaseWithAbstractCase:
-            WrapInFunction(Switch(target_expr(),                                         //
-                                  Case(Expr(123_a)),                                     //
-                                  Case(abstract_expr->As<ast::IntLiteralExpression>()),  //
-                                  DefaultCase()));
+            WrapInFunction(
+                Switch(target_expr(),                                                       //
+                       Case(CaseSelector(123_a)),                                           //
+                       Case(CaseSelector(abstract_expr->As<ast::IntLiteralExpression>())),  //
+                       DefaultCase()));
             break;
         case Method::kWorkgroupSize:
             Func("f", utils::Empty, ty.void_(), utils::Empty,
@@ -903,9 +907,10 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
             break;
         }
         case Method::kSwitch: {
-            WrapInFunction(Switch(abstract_expr(),
-                                  Case(abstract_expr()->As<ast::IntLiteralExpression>()),
-                                  DefaultCase()));
+            WrapInFunction(
+                Switch(abstract_expr(),
+                       Case(CaseSelector(abstract_expr()->As<ast::IntLiteralExpression>())),
+                       DefaultCase()));
             break;
         }
         case Method::kWorkgroupSize: {

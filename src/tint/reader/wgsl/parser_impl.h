@@ -74,7 +74,7 @@ class ParserImpl {
     /// Pre-determined small vector sizes for AST pointers
     //! @cond Doxygen_Suppress
     using AttributeList = utils::Vector<const ast::Attribute*, 4>;
-    using CaseSelectorList = utils::Vector<const ast::Expression*, 4>;
+    using CaseSelectorList = utils::Vector<const ast::CaseSelector*, 4>;
     using CaseStatementList = utils::Vector<const ast::CaseStatement*, 4>;
     using ExpressionList = utils::Vector<const ast::Expression*, 8>;
     using ParameterList = utils::Vector<const ast::Parameter*, 8>;
@@ -573,6 +573,9 @@ class ParserImpl {
     /// Parses a `case_selectors` grammar element
     /// @returns the list of literals
     Expect<CaseSelectorList> expect_case_selectors();
+    /// Parses a `case_selector` grammar element
+    /// @returns the selector
+    Maybe<const ast::CaseSelector*> case_selector();
     /// Parses a `case_body` grammar element
     /// @returns the parsed statements
     Maybe<const ast::BlockStatement*> case_body();

@@ -299,7 +299,7 @@ class DependencyScanner {
                 TraverseExpression(s->condition);
                 for (auto* c : s->body) {
                     for (auto* sel : c->selectors) {
-                        TraverseExpression(sel);
+                        TraverseExpression(sel->expr);
                     }
                     TraverseStatement(c->body);
                 }

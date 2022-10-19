@@ -23,7 +23,8 @@ namespace {
 using HlslGeneratorImplTest_Case = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case) {
-    auto* s = Switch(1_i, Case(Expr(5_i), Block(create<ast::BreakStatement>())), DefaultCase());
+    auto* s =
+        Switch(1_i, Case(CaseSelector(5_i), Block(create<ast::BreakStatement>())), DefaultCase());
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();
@@ -38,7 +39,7 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case) {
 }
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
-    auto* s = Switch(1_i, Case(Expr(5_i), Block()), DefaultCase());
+    auto* s = Switch(1_i, Case(CaseSelector(5_i), Block()), DefaultCase());
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();
@@ -53,9 +54,9 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
 }
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
-    auto* s = Switch(1_i,                                                          //
-                     Case(Expr(4_i), Block(create<ast::FallthroughStatement>())),  //
-                     Case(Expr(5_i), Block(create<ast::ReturnStatement>())),       //
+    auto* s = Switch(1_i,                                                                  //
+                     Case(CaseSelector(4_i), Block(create<ast::FallthroughStatement>())),  //
+                     Case(CaseSelector(5_i), Block(create<ast::ReturnStatement>())),       //
                      DefaultCase());
     WrapInFunction(s);
 
@@ -75,9 +76,10 @@ TEST_F(HlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
 }
 
 TEST_F(HlslGeneratorImplTest_Case, Emit_Case_MultipleSelectors) {
-    auto* s =
-        Switch(1_i, Case(utils::Vector{Expr(5_i), Expr(6_i)}, Block(create<ast::BreakStatement>())),
-               DefaultCase());
+    auto* s = Switch(1_i,
+                     Case(utils::Vector{CaseSelector(5_i), CaseSelector(6_i)},
+                          Block(create<ast::BreakStatement>())),
+                     DefaultCase());
     WrapInFunction(s);
 
     GeneratorImpl& gen = Build();

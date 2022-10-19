@@ -112,7 +112,7 @@ TEST_F(ResolverTest, Stmt_Case) {
 
     auto* assign = Assign(lhs, rhs);
     auto* block = Block(assign);
-    auto* sel = Expr(3_i);
+    auto* sel = CaseSelector(3_i);
     auto* cse = Case(sel, block);
     auto* def = DefaultCase();
     auto* cond_var = Var("c", ty.i32());
@@ -132,7 +132,7 @@ TEST_F(ResolverTest, Stmt_Case) {
     ASSERT_EQ(sem->Cases().size(), 2u);
     EXPECT_EQ(sem->Cases()[0]->Declaration(), cse);
     ASSERT_EQ(sem->Cases()[0]->Selectors().size(), 1u);
-    EXPECT_EQ(sem->Cases()[1]->Selectors().size(), 0u);
+    EXPECT_EQ(sem->Cases()[1]->Selectors().size(), 1u);
 }
 
 TEST_F(ResolverTest, Stmt_Block) {
@@ -251,7 +251,7 @@ TEST_F(ResolverTest, Stmt_Switch) {
     auto* lhs = Expr("v");
     auto* rhs = Expr(2.3_f);
     auto* case_block = Block(Assign(lhs, rhs));
-    auto* stmt = Switch(Expr(2_i), Case(Expr(3_i), case_block), DefaultCase());
+    auto* stmt = Switch(Expr(2_i), Case(CaseSelector(3_i), case_block), DefaultCase());
     WrapInFunction(v, stmt);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();

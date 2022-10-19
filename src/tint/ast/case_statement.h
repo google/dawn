@@ -18,7 +18,7 @@
 #include <vector>
 
 #include "src/tint/ast/block_statement.h"
-#include "src/tint/ast/expression.h"
+#include "src/tint/ast/case_selector.h"
 
 namespace tint::ast {
 
@@ -34,14 +34,11 @@ class CaseStatement final : public Castable<CaseStatement, Statement> {
     CaseStatement(ProgramID pid,
                   NodeID nid,
                   const Source& src,
-                  utils::VectorRef<const Expression*> selectors,
+                  utils::VectorRef<const CaseSelector*> selectors,
                   const BlockStatement* body);
     /// Move constructor
     CaseStatement(CaseStatement&&);
     ~CaseStatement() override;
-
-    /// @returns true if this is a default statement
-    bool IsDefault() const { return selectors.IsEmpty(); }
 
     /// Clones this node and all transitive child nodes using the `CloneContext`
     /// `ctx`.
@@ -49,8 +46,11 @@ class CaseStatement final : public Castable<CaseStatement, Statement> {
     /// @return the newly cloned node
     const CaseStatement* Clone(CloneContext* ctx) const override;
 
+    /// @returns true if this item contains a default selector
+    bool ContainsDefault() const;
+
     /// The case selectors, empty if none set
-    const utils::Vector<const Expression*, 4> selectors;
+    const utils::Vector<const CaseSelector*, 4> selectors;
 
     /// The case body
     const BlockStatement* const body;

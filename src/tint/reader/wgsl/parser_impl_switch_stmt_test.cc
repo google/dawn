@@ -29,8 +29,8 @@ TEST_F(ParserImplTest, SwitchStmt_WithoutDefault) {
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::SwitchStatement>());
     ASSERT_EQ(e->body.Length(), 2u);
-    EXPECT_FALSE(e->body[0]->IsDefault());
-    EXPECT_FALSE(e->body[1]->IsDefault());
+    EXPECT_FALSE(e->body[0]->ContainsDefault());
+    EXPECT_FALSE(e->body[1]->ContainsDefault());
 }
 
 TEST_F(ParserImplTest, SwitchStmt_Empty) {
@@ -58,9 +58,24 @@ TEST_F(ParserImplTest, SwitchStmt_DefaultInMiddle) {
     ASSERT_TRUE(e->Is<ast::SwitchStatement>());
 
     ASSERT_EQ(e->body.Length(), 3u);
-    ASSERT_FALSE(e->body[0]->IsDefault());
-    ASSERT_TRUE(e->body[1]->IsDefault());
-    ASSERT_FALSE(e->body[2]->IsDefault());
+    ASSERT_FALSE(e->body[0]->ContainsDefault());
+    ASSERT_TRUE(e->body[1]->ContainsDefault());
+    ASSERT_FALSE(e->body[2]->ContainsDefault());
+}
+
+TEST_F(ParserImplTest, SwitchStmt_Default_Mixed) {
+    auto p = parser(R"(switch a {
+  case 1, default, 2: {}
+})");
+    auto e = p->switch_statement();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::SwitchStatement>());
+
+    ASSERT_EQ(e->body.Length(), 1u);
+    ASSERT_TRUE(e->body[0]->ContainsDefault());
 }
 
 TEST_F(ParserImplTest, SwitchStmt_WithParens) {
@@ -123,7 +138,7 @@ TEST_F(ParserImplTest, SwitchStmt_InvalidBody) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     EXPECT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "2:7: unable to parse case selectors");
+    EXPECT_EQ(p->error(), "2:7: expected case selector expression or `default`");
 }
 
 }  // namespace

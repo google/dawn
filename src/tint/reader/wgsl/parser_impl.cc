@@ -2129,6 +2129,9 @@ Maybe<const ast::CaseStatement*> ParserImpl::switch_body() {
         }
 
         selector_list = std::move(selectors.value);
+    } else {
+        // Push the default case selector
+        selector_list.Push(create<ast::CaseSelector>(t.source()));
     }
 
     // Consume the optional colon if present.
@@ -2148,12 +2151,12 @@ Maybe<const ast::CaseStatement*> ParserImpl::switch_body() {
 }
 
 // case_selectors
-//   : expression (COMMA expression)* COMMA?
+//   : case_selector (COMMA case_selector)* COMMA?
 Expect<ParserImpl::CaseSelectorList> ParserImpl::expect_case_selectors() {
     CaseSelectorList selectors;
 
     while (continue_parsing()) {
-        auto expr = expression();
+        auto expr = case_selector();
         if (expr.errored) {
             return Failure::kErrored;
         }
@@ -2168,10 +2171,30 @@ Expect<ParserImpl::CaseSelectorList> ParserImpl::expect_case_selectors() {
     }
 
     if (selectors.IsEmpty()) {
-        return add_error(peek(), "unable to parse case selectors");
+        return add_error(peek(), "expected case selector expression or `default`");
     }
 
     return selectors;
+}
+
+// case_selector
+//   : DEFAULT
+//   | expression
+Maybe<const ast::CaseSelector*> ParserImpl::case_selector() {
+    auto& p = peek();
+
+    if (match(Token::Type::kDefault)) {
+        return create<ast::CaseSelector>(p.source());
+    }
+
+    auto expr = expression();
+    if (expr.errored) {
+        return Failure::kErrored;
+    }
+    if (!expr.matched) {
+        return Failure::kNoMatch;
+    }
+    return create<ast::CaseSelector>(p.source(), expr.value);
 }
 
 // case_body

@@ -1687,20 +1687,21 @@ std::string GeneratorImpl::generate_builtin_name(const sem::Builtin* builtin) {
 }
 
 bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
-    if (stmt->IsDefault()) {
-        line() << "default: {";
-    } else {
-        auto* sem = builder_.Sem().Get<sem::CaseStatement>(stmt);
-        for (auto* selector : sem->Selectors()) {
-            auto out = line();
+    auto* sem = builder_.Sem().Get<sem::CaseStatement>(stmt);
+    for (auto* selector : sem->Selectors()) {
+        auto out = line();
+
+        if (selector->IsDefault()) {
+            out << "default";
+        } else {
             out << "case ";
-            if (!EmitConstant(out, selector)) {
+            if (!EmitConstant(out, selector->Value())) {
                 return false;
             }
-            out << ":";
-            if (selector == sem->Selectors().back()) {
-                out << " {";
-            }
+        }
+        out << ":";
+        if (selector == sem->Selectors().back()) {
+            out << " {";
         }
     }
 

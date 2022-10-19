@@ -23,9 +23,9 @@ using HlslGeneratorImplTest_Switch = TestHelper;
 
 TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
     GlobalVar("cond", ty.i32(), ast::AddressSpace::kPrivate);
-    auto* s = Switch(                     //
-        Expr("cond"),                     //
-        Case(Expr(5_i), Block(Break())),  //
+    auto* s = Switch(                             //
+        Expr("cond"),                             //
+        Case(CaseSelector(5_i), Block(Break())),  //
         DefaultCase());
     WrapInFunction(s);
 
@@ -38,6 +38,27 @@ TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch) {
     case 5: {
       break;
     }
+    default: {
+      break;
+    }
+  }
+)");
+}
+
+TEST_F(HlslGeneratorImplTest_Switch, Emit_Switch_MixedDefault) {
+    GlobalVar("cond", ty.i32(), ast::AddressSpace::kPrivate);
+    auto* s = Switch(  //
+        Expr("cond"),  //
+        Case(utils::Vector{CaseSelector(5_i), DefaultCaseSelector()}, Block(Break())));
+    WrapInFunction(s);
+
+    GeneratorImpl& gen = Build();
+
+    gen.increment_indent();
+
+    ASSERT_TRUE(gen.EmitStatement(s)) << gen.error();
+    EXPECT_EQ(gen.result(), R"(  switch(cond) {
+    case 5:
     default: {
       break;
     }

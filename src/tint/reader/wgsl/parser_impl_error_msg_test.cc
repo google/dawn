@@ -1333,7 +1333,7 @@ fn f() { switch(1) {
 
 TEST_F(ParserImplErrorTest, SwitchStmtInvalidCase) {
     EXPECT("fn f() { switch(1) { case ^: } }",
-           R"(test.wgsl:1:27 error: unable to parse case selectors
+           R"(test.wgsl:1:27 error: expected case selector expression or `default`
 fn f() { switch(1) { case ^: } }
                           ^
 )");

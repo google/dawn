@@ -1024,26 +1024,28 @@ bool GeneratorImpl::EmitBreak(const ast::BreakStatement*) {
 }
 
 bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
-    if (stmt->IsDefault()) {
+    if (stmt->selectors.Length() == 1 && stmt->ContainsDefault()) {
         line() << "default: {";
     } else {
         auto out = line();
         out << "case ";
 
         bool first = true;
-        for (auto* expr : stmt->selectors) {
+        for (auto* sel : stmt->selectors) {
             if (!first) {
                 out << ", ";
             }
 
             first = false;
-            if (!EmitExpression(out, expr)) {
+
+            if (sel->IsDefault()) {
+                out << "default";
+            } else if (!EmitExpression(out, sel->expr)) {
                 return false;
             }
         }
         out << ": {";
     }
-
     if (!EmitStatementsWithIndent(stmt->body->statements)) {
         return false;
     }

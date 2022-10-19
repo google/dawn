@@ -1240,26 +1240,31 @@ sem::CaseStatement* Resolver::CaseStatement(const ast::CaseStatement* stmt, cons
     return StatementScope(stmt, sem, [&] {
         sem->Selectors().reserve(stmt->selectors.Length());
         for (auto* sel : stmt->selectors) {
+            Mark(sel);
+
             ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "case selector"};
             TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
 
-            // The sem statement is created in the switch when attempting to determine the common
-            // type.
-            auto* materialized = Materialize(sem_.Get(sel), ty);
-            if (!materialized) {
-                return false;
-            }
-            if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
-                AddError("case selector must be an i32 or u32 value", sel->source);
-                return false;
-            }
-            auto const_value = materialized->ConstantValue();
-            if (!const_value) {
-                AddError("case selector must be a constant expression", sel->source);
-                return false;
+            const sem::Constant* const_value = nullptr;
+            if (!sel->IsDefault()) {
+                // The sem statement was created in the switch when attempting to determine the
+                // common type.
+                auto* materialized = Materialize(sem_.Get(sel->expr), ty);
+                if (!materialized) {
+                    return false;
+                }
+                if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
+                    AddError("case selector must be an i32 or u32 value", sel->source);
+                    return false;
+                }
+                const_value = materialized->ConstantValue();
+                if (!const_value) {
+                    AddError("case selector must be a constant expression", sel->source);
+                    return false;
+                }
             }
 
-            sem->Selectors().emplace_back(const_value);
+            sem->Selectors().emplace_back(builder_->create<sem::CaseSelector>(sel, const_value));
         }
 
         Mark(stmt->body);
@@ -3103,8 +3108,11 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
         utils::Vector<const sem::Type*, 8> types;
         types.Push(cond_ty);
         for (auto* case_stmt : stmt->body) {
-            for (auto* expr : case_stmt->selectors) {
-                auto* sem_expr = Expression(expr);
+            for (auto* sel : case_stmt->selectors) {
+                if (sel->IsDefault()) {
+                    continue;
+                }
+                auto* sem_expr = Expression(sel->expr);
                 types.Push(sem_expr->Type()->UnwrapRef());
             }
         }
@@ -3126,9 +3134,6 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
             auto* c = CaseStatement(case_stmt, common_ty);
             if (!c) {
                 return false;
-            }
-            for (auto* expr : c->Selectors()) {
-                types.Push(expr->Type()->UnwrapRef());
             }
             cases.Push(c);
             behaviors.Add(c->Behaviors());
