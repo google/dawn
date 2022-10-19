@@ -3024,7 +3024,7 @@ bool FunctionEmitter::EmitSwitchStart(const BlockInfo& block_info) {
     for (size_t i = last_clause_index;; --i) {
         // Create a list of integer literals for the selector values leading to
         // this case clause.
-        utils::Vector<const ast::IntLiteralExpression*, 4> selectors;
+        utils::Vector<const ast::Expression*, 4> selectors;
         const bool has_selectors = clause_heads[i]->case_values.has_value();
         if (has_selectors) {
             auto values = clause_heads[i]->case_values.value();

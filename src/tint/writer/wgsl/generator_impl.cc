@@ -50,6 +50,7 @@
 #include "src/tint/ast/void.h"
 #include "src/tint/ast/workgroup_attribute.h"
 #include "src/tint/sem/struct.h"
+#include "src/tint/sem/switch_statement.h"
 #include "src/tint/utils/math.h"
 #include "src/tint/utils/scoped_assignment.h"
 #include "src/tint/writer/float_to_string.h"
@@ -1030,13 +1031,13 @@ bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
         out << "case ";
 
         bool first = true;
-        for (auto* selector : stmt->selectors) {
+        for (auto* expr : stmt->selectors) {
             if (!first) {
                 out << ", ";
             }
 
             first = false;
-            if (!EmitLiteral(out, selector)) {
+            if (!EmitExpression(out, expr)) {
                 return false;
             }
         }

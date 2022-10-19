@@ -25,7 +25,7 @@ namespace tint::ast {
 CaseStatement::CaseStatement(ProgramID pid,
                              NodeID nid,
                              const Source& src,
-                             utils::VectorRef<const IntLiteralExpression*> s,
+                             utils::VectorRef<const Expression*> s,
                              const BlockStatement* b)
     : Base(pid, nid, src), selectors(std::move(s)), body(b) {
     TINT_ASSERT(AST, body);

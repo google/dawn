@@ -43,6 +43,7 @@
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/storage_texture.h"
 #include "src/tint/sem/struct.h"
+#include "src/tint/sem/switch_statement.h"
 #include "src/tint/sem/type_constructor.h"
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/variable.h"
@@ -1689,14 +1690,15 @@ bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
     if (stmt->IsDefault()) {
         line() << "default: {";
     } else {
-        for (auto* selector : stmt->selectors) {
+        auto* sem = builder_.Sem().Get<sem::CaseStatement>(stmt);
+        for (auto* selector : sem->Selectors()) {
             auto out = line();
             out << "case ";
-            if (!EmitLiteral(out, selector)) {
+            if (!EmitConstant(out, selector)) {
                 return false;
             }
             out << ":";
-            if (selector == stmt->selectors.Back()) {
+            if (selector == sem->Selectors().back()) {
                 out << " {";
             }
         }

@@ -132,8 +132,6 @@ TEST_F(ResolverTest, Stmt_Case) {
     ASSERT_EQ(sem->Cases().size(), 2u);
     EXPECT_EQ(sem->Cases()[0]->Declaration(), cse);
     ASSERT_EQ(sem->Cases()[0]->Selectors().size(), 1u);
-    EXPECT_EQ(sem->Cases()[0]->Selectors()[0]->Declaration(), sel);
-    EXPECT_EQ(sem->Cases()[1]->Declaration(), def);
     EXPECT_EQ(sem->Cases()[1]->Selectors().size(), 0u);
 }
 

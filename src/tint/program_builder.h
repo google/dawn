@@ -54,6 +54,7 @@
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/increment_decrement_statement.h"
 #include "src/tint/ast/index_accessor_expression.h"
+#include "src/tint/ast/int_literal_expression.h"
 #include "src/tint/ast/interpolate_attribute.h"
 #include "src/tint/ast/invariant_attribute.h"
 #include "src/tint/ast/let.h"
@@ -2846,7 +2847,7 @@ class ProgramBuilder {
     /// @param body the case body
     /// @returns the case statement pointer
     const ast::CaseStatement* Case(const Source& source,
-                                   utils::VectorRef<const ast::IntLiteralExpression*> selectors,
+                                   utils::VectorRef<const ast::Expression*> selectors,
                                    const ast::BlockStatement* body = nullptr) {
         return create<ast::CaseStatement>(source, std::move(selectors), body ? body : Block());
     }
@@ -2855,7 +2856,7 @@ class ProgramBuilder {
     /// @param selectors list of selectors
     /// @param body the case body
     /// @returns the case statement pointer
-    const ast::CaseStatement* Case(utils::VectorRef<const ast::IntLiteralExpression*> selectors,
+    const ast::CaseStatement* Case(utils::VectorRef<const ast::Expression*> selectors,
                                    const ast::BlockStatement* body = nullptr) {
         return create<ast::CaseStatement>(std::move(selectors), body ? body : Block());
     }
@@ -2864,7 +2865,7 @@ class ProgramBuilder {
     /// @param selector a single case selector
     /// @param body the case body
     /// @returns the case statement pointer
-    const ast::CaseStatement* Case(const ast::IntLiteralExpression* selector,
+    const ast::CaseStatement* Case(const ast::Expression* selector,
                                    const ast::BlockStatement* body = nullptr) {
         return Case(utils::Vector{selector}, body);
     }

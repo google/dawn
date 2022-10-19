@@ -39,6 +39,7 @@
 #include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
+#include "src/tint/sem/switch_statement.h"
 #include "src/tint/sem/type_constructor.h"
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/variable.h"
@@ -3464,14 +3465,10 @@ bool Builder::GenerateSwitchStatement(const ast::SwitchStatement* stmt) {
         auto block_id = std::get<uint32_t>(block);
 
         case_ids.push_back(block_id);
-        for (auto* selector : item->selectors) {
-            auto* int_literal = selector->As<ast::IntLiteralExpression>();
-            if (!int_literal) {
-                error_ = "expected integer literal for switch case label";
-                return false;
-            }
 
-            params.push_back(Operand(static_cast<uint32_t>(int_literal->value)));
+        auto* sem = builder_.Sem().Get<sem::CaseStatement>(item);
+        for (auto* selector : sem->Selectors()) {
+            params.push_back(Operand(selector->As<uint32_t>()));
             params.push_back(Operand(block_id));
         }
     }

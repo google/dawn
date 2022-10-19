@@ -1339,14 +1339,6 @@ fn f() { switch(1) { case ^: } }
 )");
 }
 
-TEST_F(ParserImplErrorTest, SwitchStmtInvalidCase2) {
-    EXPECT("fn f() { switch(1) { case false: } }",
-           R"(test.wgsl:1:27 error: invalid case selector must be an integer value
-fn f() { switch(1) { case false: } }
-                          ^^^^^
-)");
-}
-
 TEST_F(ParserImplErrorTest, SwitchStmtCaseMissingLBrace) {
     EXPECT("fn f() { switch(1) { case 1: } }",
            R"(test.wgsl:1:30 error: expected '{' for case statement

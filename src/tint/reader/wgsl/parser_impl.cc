@@ -2148,21 +2148,19 @@ Maybe<const ast::CaseStatement*> ParserImpl::switch_body() {
 }
 
 // case_selectors
-//   : const_literal (COMMA const_literal)* COMMA?
+//   : expression (COMMA expression)* COMMA?
 Expect<ParserImpl::CaseSelectorList> ParserImpl::expect_case_selectors() {
     CaseSelectorList selectors;
 
     while (continue_parsing()) {
-        auto cond = const_literal();
-        if (cond.errored) {
+        auto expr = expression();
+        if (expr.errored) {
             return Failure::kErrored;
-        } else if (!cond.matched) {
-            break;
-        } else if (!cond->Is<ast::IntLiteralExpression>()) {
-            return add_error(cond.value->source, "invalid case selector must be an integer value");
         }
-
-        selectors.Push(cond.value->As<ast::IntLiteralExpression>());
+        if (!expr.matched) {
+            break;
+        }
+        selectors.Push(expr.value);
 
         if (!match(Token::Type::kComma)) {
             break;

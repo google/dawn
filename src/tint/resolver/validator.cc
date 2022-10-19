@@ -2338,22 +2338,36 @@ bool Validator::SwitchStatement(const ast::SwitchStatement* s) {
             has_default = true;
         }
 
-        for (auto* selector : case_stmt->selectors) {
-            if (cond_ty != sem_.TypeOf(selector)) {
+        auto* case_sem = sem_.Get<sem::CaseStatement>(case_stmt);
+
+        auto& case_selectors = case_stmt->selectors;
+        auto& selector_values = case_sem->Selectors();
+        TINT_ASSERT(Resolver, case_selectors.Length() == selector_values.size());
+        for (size_t i = 0; i < case_sem->Selectors().size(); ++i) {
+            auto* selector = selector_values[i];
+            if (cond_ty != selector->Type()) {
                 AddError(
                     "the case selector values must have the same type as the selector expression.",
-                    case_stmt->source);
+                    case_selectors[i]->source);
                 return false;
             }
 
-            auto it = selectors.find(selector->value);
+            auto value = selector->As<uint32_t>();
+            auto it = selectors.find(value);
             if (it != selectors.end()) {
-                auto val = std::to_string(selector->value);
-                AddError("duplicate switch case '" + val + "'", selector->source);
+                std::string err = "duplicate switch case '";
+                if (selector->Type()->Is<sem::I32>()) {
+                    err += std::to_string(selector->As<int32_t>());
+                } else {
+                    err += std::to_string(value);
+                }
+                err += "'";
+
+                AddError(err, case_selectors[i]->source);
                 AddNote("previous case declared here", it->second);
                 return false;
             }
-            selectors.emplace(selector->value, selector->source);
+            selectors.emplace(value, case_selectors[i]->source);
         }
     }
 

@@ -26,6 +26,7 @@ class SwitchStatement;
 }  // namespace tint::ast
 namespace tint::sem {
 class CaseStatement;
+class Constant;
 class Expression;
 }  // namespace tint::sem
 
@@ -82,14 +83,14 @@ class CaseStatement final : public Castable<CaseStatement, CompoundStatement> {
     const BlockStatement* Body() const { return body_; }
 
     /// @returns the selectors for the case
-    std::vector<const Expression*>& Selectors() { return selectors_; }
+    std::vector<const Constant*>& Selectors() { return selectors_; }
 
     /// @returns the selectors for the case
-    const std::vector<const Expression*>& Selectors() const { return selectors_; }
+    const std::vector<const Constant*>& Selectors() const { return selectors_; }
 
   private:
     const BlockStatement* body_ = nullptr;
-    std::vector<const Expression*> selectors_;
+    std::vector<const Constant*> selectors_;
 };
 
 }  // namespace tint::sem

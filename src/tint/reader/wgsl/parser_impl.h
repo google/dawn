@@ -74,7 +74,7 @@ class ParserImpl {
     /// Pre-determined small vector sizes for AST pointers
     //! @cond Doxygen_Suppress
     using AttributeList = utils::Vector<const ast::Attribute*, 4>;
-    using CaseSelectorList = utils::Vector<const ast::IntLiteralExpression*, 4>;
+    using CaseSelectorList = utils::Vector<const ast::Expression*, 4>;
     using CaseStatementList = utils::Vector<const ast::CaseStatement*, 4>;
     using ExpressionList = utils::Vector<const ast::Expression*, 8>;
     using ParameterList = utils::Vector<const ast::Parameter*, 8>;

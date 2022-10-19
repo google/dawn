@@ -18,7 +18,7 @@
 #include <vector>
 
 #include "src/tint/ast/block_statement.h"
-#include "src/tint/ast/int_literal_expression.h"
+#include "src/tint/ast/expression.h"
 
 namespace tint::ast {
 
@@ -34,7 +34,7 @@ class CaseStatement final : public Castable<CaseStatement, Statement> {
     CaseStatement(ProgramID pid,
                   NodeID nid,
                   const Source& src,
-                  utils::VectorRef<const IntLiteralExpression*> selectors,
+                  utils::VectorRef<const Expression*> selectors,
                   const BlockStatement* body);
     /// Move constructor
     CaseStatement(CaseStatement&&);
@@ -50,7 +50,7 @@ class CaseStatement final : public Castable<CaseStatement, Statement> {
     const CaseStatement* Clone(CloneContext* ctx) const override;
 
     /// The case selectors, empty if none set
-    const utils::Vector<const IntLiteralExpression*, 4> selectors;
+    const utils::Vector<const Expression*, 4> selectors;
 
     /// The case body
     const BlockStatement* const body;
