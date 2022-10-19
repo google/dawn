@@ -281,7 +281,7 @@ struct BitValues {
     /// @returns the shifted value
     template <typename U, typename V>
     static constexpr NumberT Lsh(U val, V shiftBy) {
-        return NumberT{T{val} << T{shiftBy}};
+        return NumberT{static_cast<T>(val) << static_cast<T>(shiftBy)};
     }
 };
 

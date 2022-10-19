@@ -611,19 +611,16 @@ std::vector<Case> ShiftLeftCases() {
     using ST = std::conditional_t<IsAbstract<T>, T, u32>;
     using B = BitValues<T>;
     auto r = std::vector<Case>{
-        C(T{0b1010}, ST{0}, T{0b0000'0000'1010}),    //
-        C(T{0b1010}, ST{1}, T{0b0000'0001'0100}),    //
-        C(T{0b1010}, ST{2}, T{0b0000'0010'1000}),    //
-        C(T{0b1010}, ST{3}, T{0b0000'0101'0000}),    //
-        C(T{0b1010}, ST{4}, T{0b0000'1010'0000}),    //
-        C(T{0b1010}, ST{5}, T{0b0001'0100'0000}),    //
-        C(T{0b1010}, ST{6}, T{0b0010'1000'0000}),    //
-        C(T{0b1010}, ST{7}, T{0b0101'0000'0000}),    //
-        C(T{0b1010}, ST{8}, T{0b1010'0000'0000}),    //
-        C(B::LeftMost, ST{0}, B::LeftMost),          //
-        C(B::TwoLeftMost, ST{1}, B::LeftMost),       // No overflow
-        C(B::All, ST{1}, B::AllButRightMost),        // No overflow
-        C(B::All, ST{B::NumBits - 1}, B::LeftMost),  // No overflow
+        C(T{0b1010}, ST{0}, T{0b0000'0000'1010}),  //
+        C(T{0b1010}, ST{1}, T{0b0000'0001'0100}),  //
+        C(T{0b1010}, ST{2}, T{0b0000'0010'1000}),  //
+        C(T{0b1010}, ST{3}, T{0b0000'0101'0000}),  //
+        C(T{0b1010}, ST{4}, T{0b0000'1010'0000}),  //
+        C(T{0b1010}, ST{5}, T{0b0001'0100'0000}),  //
+        C(T{0b1010}, ST{6}, T{0b0010'1000'0000}),  //
+        C(T{0b1010}, ST{7}, T{0b0101'0000'0000}),  //
+        C(T{0b1010}, ST{8}, T{0b1010'0000'0000}),  //
+        C(B::LeftMost, ST{0}, B::LeftMost),        //
 
         C(Vec(T{0b1010}, T{0b1010}),                                            //
           Vec(ST{0}, ST{1}),                                                    //
@@ -641,7 +638,7 @@ std::vector<Case> ShiftLeftCases() {
 
     // Only abstract 0 can be shifted left as much as we like. For concrete 0 (and any number), it
     // cannot be shifted equal or more than the number of bits of the lhs (see
-    // ResolverConstEvalShiftLeftConcreteGeqBitWidthError)
+    // ResolverConstEvalShiftLeftConcreteGeqBitWidthError for negative tests)
     ConcatIntoIf<IsAbstract<T>>(  //
         r, std::vector<Case>{
                C(T{0}, ST{64}, T{0}),
@@ -654,6 +651,31 @@ std::vector<Case> ShiftLeftCases() {
                C(Negate(T{0}), ST{65}, Negate(T{0})),
                C(Negate(T{0}), ST{10000}, Negate(T{0})),
                C(Negate(T{0}), T::Highest(), Negate(T{0})),
+           });
+
+    // Cases that are fine for signed values (no sign change), but would overflow unsigned values.
+    // See ResolverConstEvalBinaryOpTest_Overflow for negative tests.
+    ConcatIntoIf<IsSignedIntegral<T>>(  //
+        r, std::vector<Case>{
+               C(B::TwoLeftMost, ST{1}, B::LeftMost),      //
+               C(B::All, ST{1}, B::AllButRightMost),       //
+               C(B::All, ST{B::NumBits - 1}, B::LeftMost)  //
+           });
+
+    // Cases that are fine for unsigned values, but would overflow (sign change) signed
+    // values. See ShiftLeftSignChangeErrorCases() for negative tests.
+    ConcatIntoIf<IsUnsignedIntegral<T>>(  //
+        r, std::vector<Case>{
+               C(T{0b0001}, ST{B::NumBits - 1}, B::Lsh(0b0001, B::NumBits - 1)),
+               C(T{0b0010}, ST{B::NumBits - 2}, B::Lsh(0b0010, B::NumBits - 2)),
+               C(T{0b0100}, ST{B::NumBits - 3}, B::Lsh(0b0100, B::NumBits - 3)),
+               C(T{0b1000}, ST{B::NumBits - 4}, B::Lsh(0b1000, B::NumBits - 4)),
+
+               C(T{0b0011}, ST{B::NumBits - 2}, B::Lsh(0b0011, B::NumBits - 2)),
+               C(T{0b0110}, ST{B::NumBits - 3}, B::Lsh(0b0110, B::NumBits - 3)),
+               C(T{0b1100}, ST{B::NumBits - 4}, B::Lsh(0b1100, B::NumBits - 4)),
+
+               C(B::AllButLeftMost, ST{1}, B::AllButRightMost),
            });
 
     return r;
@@ -795,7 +817,21 @@ INSTANTIATE_TEST_SUITE_P(
                      Val(AInt{BitValues<AInt>::NumBits + 1})},    //
         OverflowCase{ast::BinaryOp::kShiftLeft,                   //
                      Val(AInt{BitValues<AInt>::AllButLeftMost}),  //
-                     Val(AInt{BitValues<AInt>::NumBits + 1000})}
+                     Val(AInt{BitValues<AInt>::NumBits + 1000})},
+
+        // ShiftLeft of u32s that overflow (non-zero bits get shifted out)
+        OverflowCase{ast::BinaryOp::kShiftLeft, Val(0b00010_u), Val(31_u)},
+        OverflowCase{ast::BinaryOp::kShiftLeft, Val(0b00100_u), Val(30_u)},
+        OverflowCase{ast::BinaryOp::kShiftLeft, Val(0b01000_u), Val(29_u)},
+        OverflowCase{ast::BinaryOp::kShiftLeft, Val(0b10000_u), Val(28_u)},
+        // ...
+        OverflowCase{ast::BinaryOp::kShiftLeft, Val(u32(1u << 28)), Val(4_u)},
+        OverflowCase{ast::BinaryOp::kShiftLeft, Val(u32(1u << 29)), Val(3_u)},
+        OverflowCase{ast::BinaryOp::kShiftLeft, Val(u32(1u << 30)), Val(2_u)},
+        OverflowCase{ast::BinaryOp::kShiftLeft, Val(u32(1u << 31)), Val(1_u)},
+        // And some more
+        OverflowCase{ast::BinaryOp::kShiftLeft, Val(BitValues<u32>::All), Val(1_u)},
+        OverflowCase{ast::BinaryOp::kShiftLeft, Val(BitValues<u32>::AllButLeftMost), Val(2_u)}
 
         ));
 
@@ -945,8 +981,7 @@ INSTANTIATE_TEST_SUITE_P(Test,
                          ResolverConstEvalShiftLeftSignChangeError,
                          testing::ValuesIn(Concat(  //
                              ShiftLeftSignChangeErrorCases<AInt>(),
-                             ShiftLeftSignChangeErrorCases<i32>(),
-                             ShiftLeftSignChangeErrorCases<u32>())));
+                             ShiftLeftSignChangeErrorCases<i32>())));
 
 }  // namespace
 }  // namespace tint::resolver

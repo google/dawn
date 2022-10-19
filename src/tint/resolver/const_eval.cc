@@ -1491,13 +1491,25 @@ ConstEval::Result ConstEval::OpShiftLeft(const sem::Type* ty,
                     return nullptr;
                 }
 
-                // The e2 + 1 most significant bits of e1 must have the same bit value, otherwise
-                // sign change (overflow) would occur.
-                size_t must_match_msb = e2u + 1;
-                UT mask = ~UT{0} << (bit_width - must_match_msb);
-                if ((e1u & mask) != 0 && (e1u & mask) != mask) {
-                    AddError("shift left operation results in sign change", source);
-                    return nullptr;
+                if constexpr (std::is_signed_v<T>) {
+                    // If T is a signed integer type, and the e2+1 most significant bits of e1 do
+                    // not have the same bit value, then error.
+                    size_t must_match_msb = e2u + 1;
+                    UT mask = ~UT{0} << (bit_width - must_match_msb);
+                    if ((e1u & mask) != 0 && (e1u & mask) != mask) {
+                        AddError("shift left operation results in sign change", source);
+                        return nullptr;
+                    }
+                } else {
+                    // If T is an unsigned integer type, and any of the e2 most significant bits of
+                    // e1 are 1, then error.
+                    if (e2u > 0) {
+                        size_t must_be_zero_msb = e2u;
+                        UT mask = ~UT{0} << (bit_width - must_be_zero_msb);
+                        if ((e1u & mask) != 0) {
+                            AddError(OverflowErrorMessage(e1, "<<", e2), source);
+                        }
+                    }
                 }
             }
 
