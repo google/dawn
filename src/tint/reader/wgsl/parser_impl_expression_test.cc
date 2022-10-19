@@ -250,6 +250,25 @@ TEST_F(ParserImplTest, Expression_InvalidRelational) {
     EXPECT_EQ(p->error(), "1:6: unable to parse right side of <= expression");
 }
 
+TEST_F(ParserImplTest, Expression_Associativity) {
+    auto p = parser("1 < 2 || 2 < 3");
+    auto e = p->expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+}
+
+TEST_F(ParserImplTest, Expression_InvalidAssociativity) {
+    auto p = parser("1 < 2 && 2 < 3 || 3 < 4");
+    auto e = p->expression();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), R"(1:7: mixing '&&' and '||' requires parenthesis)");
+}
+
 namespace mixing_binary_ops {
 
 struct BinaryOperatorInfo {
