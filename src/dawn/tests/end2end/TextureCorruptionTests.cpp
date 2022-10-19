@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <algorithm>
 #include <vector>
 
 #include "dawn/common/Math.h"
@@ -23,8 +24,6 @@
 // 2d-array textures with different dimensions, and test them one by one. For each sub-test, the
 // tested texture is written via different methods, then read back from the texture and verify the
 // data.
-
-constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
 
 namespace {
 enum class WriteType {
@@ -38,6 +37,12 @@ enum class WriteType {
     RenderFromTextureLoad     // Write the tested texture via textureLoad() from a temp texture and
                               // writing the loaded data
 };
+
+constexpr wgpu::TextureFormat kDefaultFormat = wgpu::TextureFormat::RGBA8Unorm;
+constexpr uint32_t kDefaultHeight = 100u;
+constexpr uint32_t kDefaultArrayLayerCount = 2u;
+constexpr uint32_t kDefaultMipLevelCount = 1u;
+constexpr WriteType kDefaultWriteType = WriteType::B2TCopy;
 
 std::ostream& operator<<(std::ostream& o, WriteType writeType) {
     switch (writeType) {
@@ -66,20 +71,35 @@ std::ostream& operator<<(std::ostream& o, WriteType writeType) {
 using TextureFormat = wgpu::TextureFormat;
 using TextureWidth = uint32_t;
 using TextureHeight = uint32_t;
+using ArrayLayerCount = uint32_t;
+using MipLevelCount = uint32_t;
 
-DAWN_TEST_PARAM_STRUCT(TextureCorruptionTestsParams, TextureWidth, TextureHeight, WriteType);
+DAWN_TEST_PARAM_STRUCT(TextureCorruptionTestsParams,
+                       TextureFormat,
+                       TextureWidth,
+                       TextureHeight,
+                       ArrayLayerCount,
+                       MipLevelCount,
+                       WriteType);
 
 }  // namespace
 
 class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsParams> {
   protected:
-    std::ostringstream& DoTest(wgpu::Texture texture,
-                               const wgpu::Extent3D textureSize,
-                               uint32_t depthOrArrayLayer,
-                               uint32_t srcValue) {
-        uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(kFormat);
-        uint32_t bytesPerRow = Align(textureSize.width * bytesPerTexel, 256);
-        uint64_t bufferSize = bytesPerRow * textureSize.height;
+    std::ostringstream& DoSingleTest(wgpu::Texture texture,
+                                     const wgpu::Extent3D textureSize,
+                                     uint32_t depthOrArrayLayer,
+                                     uint32_t mipLevel,
+                                     uint32_t srcValue,
+                                     wgpu::TextureFormat format) {
+        wgpu::Extent3D levelSize = textureSize;
+        if (mipLevel > 0) {
+            levelSize.width = std::max(textureSize.width >> mipLevel, 1u);
+            levelSize.height = std::max(textureSize.height >> mipLevel, 1u);
+        }
+        uint32_t bytesPerTexel = utils::GetTexelBlockSizeInBytes(format);
+        uint32_t bytesPerRow = Align(levelSize.width * bytesPerTexel, 256);
+        uint64_t bufferSize = bytesPerRow * levelSize.height;
         wgpu::BufferDescriptor descriptor;
         descriptor.size = bufferSize;
         descriptor.usage = wgpu::BufferUsage::CopySrc | wgpu::BufferUsage::CopyDst;
@@ -87,7 +107,7 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
         wgpu::Buffer resultBuffer = device.CreateBuffer(&descriptor);
 
         wgpu::ImageCopyTexture imageCopyTexture =
-            utils::CreateImageCopyTexture(texture, 0, {0, 0, depthOrArrayLayer});
+            utils::CreateImageCopyTexture(texture, mipLevel, {0, 0, depthOrArrayLayer});
         wgpu::ImageCopyBuffer imageCopyBuffer =
             utils::CreateImageCopyBuffer(buffer, 0, bytesPerRow);
         wgpu::ImageCopyBuffer imageCopyResult =
@@ -96,26 +116,36 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
         WriteType type = GetParam().mWriteType;
 
         // Fill data into a buffer
-        wgpu::Extent3D copySize = {textureSize.width, textureSize.height, 1};
+        wgpu::Extent3D copySize = {levelSize.width, levelSize.height, 1};
 
         // Data is stored in a uint32_t vector, so a single texel may require multiple vector
-        // elements for some formats
-        ASSERT(bytesPerTexel = sizeof(uint32_t));
+        // elements for some formats or multiple texels may be combined into one vector element.
+        uint32_t elementNumPerTexel = 1;
+        uint32_t copyWidth = copySize.width;
+        if (bytesPerTexel >= sizeof(uint32_t)) {
+            elementNumPerTexel = bytesPerTexel / sizeof(uint32_t);
+        } else {
+            copyWidth = copyWidth * bytesPerTexel / sizeof(uint32_t);
+        }
+
         uint32_t elementNumPerRow = bytesPerRow / sizeof(uint32_t);
         uint32_t elementNumInTotal = bufferSize / sizeof(uint32_t);
         std::vector<uint32_t> data(elementNumInTotal, 0);
         for (uint32_t i = 0; i < copySize.height; ++i) {
-            for (uint32_t j = 0; j < copySize.width; ++j) {
-                if (type == WriteType::RenderFromTextureSample ||
-                    type == WriteType::RenderConstant) {
-                    // Fill a simple and constant value (0xFFFFFFFF) in the whole buffer for
-                    // texture sampling and rendering because either sampling operation will
-                    // lead to precision loss or rendering a solid color is easier to implement and
-                    // compare.
-                    data[i * elementNumPerRow + j] = 0xFFFFFFFF;
-                } else if (type != WriteType::ClearTexture) {
-                    data[i * elementNumPerRow + j] = srcValue;
-                    srcValue++;
+            for (uint32_t j = 0; j < copyWidth; ++j) {
+                for (uint32_t k = 0; k < elementNumPerTexel; ++k) {
+                    if (type == WriteType::RenderFromTextureSample ||
+                        type == WriteType::RenderConstant) {
+                        // Fill a simple and constant value (0xFFFFFFFF) in the whole buffer for
+                        // texture sampling and rendering because either sampling operation will
+                        // lead to precision loss or rendering a solid color is easier to implement
+                        // and compare.
+                        ASSERT(elementNumPerTexel == 1);
+                        data[i * elementNumPerRow + j] = 0xFFFFFFFF;
+                    } else if (type != WriteType::ClearTexture) {
+                        data[i * elementNumPerRow + j * elementNumPerTexel + k] = srcValue;
+                        srcValue++;
+                    }
                 }
             }
         }
@@ -139,9 +169,10 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
             case WriteType::RenderFromTextureSample:
             case WriteType::RenderFromTextureLoad: {
                 // Write data into a single layer temp texture and read from this texture if needed
+                ASSERT(format == wgpu::TextureFormat::RGBA8Unorm);
                 wgpu::TextureView tempView;
                 if (type != WriteType::RenderConstant) {
-                    wgpu::Texture tempTexture = Create2DTexture(copySize);
+                    wgpu::Texture tempTexture = Create2DTexture(copySize, format, 1);
                     wgpu::ImageCopyTexture imageCopyTempTexture =
                         utils::CreateImageCopyTexture(tempTexture, 0, {0, 0, 0});
                     wgpu::TextureDataLayout textureDataLayout =
@@ -153,13 +184,14 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
 
                 // Write into the specified layer of a 2D array texture
                 wgpu::TextureViewDescriptor viewDesc;
-                viewDesc.format = kFormat;
+                viewDesc.format = format;
                 viewDesc.dimension = wgpu::TextureViewDimension::e2D;
                 viewDesc.baseMipLevel = 0;
                 viewDesc.mipLevelCount = 1;
                 viewDesc.baseArrayLayer = depthOrArrayLayer;
                 viewDesc.arrayLayerCount = 1;
-                CreatePipelineAndRender(texture.CreateView(&viewDesc), tempView, encoder, type);
+                CreatePipelineAndRender(texture.CreateView(&viewDesc), tempView, encoder, type,
+                                        format);
                 break;
             }
             default:
@@ -176,9 +208,10 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
     void CreatePipelineAndRender(wgpu::TextureView renderView,
                                  wgpu::TextureView samplerView,
                                  wgpu::CommandEncoder encoder,
-                                 WriteType type) {
+                                 WriteType type,
+                                 wgpu::TextureFormat format) {
         utils::ComboRenderPipelineDescriptor pipelineDescriptor;
-        pipelineDescriptor.cTargets[0].format = kFormat;
+        pipelineDescriptor.cTargets[0].format = format;
 
         // Draw the whole texture (a rectangle) via two triangles
         pipelineDescriptor.vertex.module = utils::CreateShaderModule(device, R"(
@@ -239,46 +272,138 @@ class TextureCorruptionTests : public DawnTestWithParams<TextureCorruptionTestsP
         pass.End();
     }
 
-    wgpu::Texture Create2DTexture(const wgpu::Extent3D size) {
+    wgpu::Texture Create2DTexture(const wgpu::Extent3D size,
+                                  wgpu::TextureFormat format,
+                                  uint32_t mipLevelCount) {
         wgpu::TextureDescriptor texDesc = {};
         texDesc.dimension = wgpu::TextureDimension::e2D;
         texDesc.size = size;
-        texDesc.mipLevelCount = 1;
-        texDesc.format = kFormat;
+        texDesc.mipLevelCount = mipLevelCount;
+        texDesc.format = format;
         texDesc.usage = wgpu::TextureUsage::CopyDst | wgpu::TextureUsage::CopySrc |
                         wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::TextureBinding;
         return device.CreateTexture(&texDesc);
     }
-};
 
-TEST_P(TextureCorruptionTests, Tests) {
-    DAWN_SUPPRESS_TEST_IF(IsWARP());
-    uint32_t width = GetParam().mTextureWidth;
-    uint32_t height = GetParam().mTextureHeight;
-    uint32_t depthOrArrayLayerCount = 2;
-    wgpu::Extent3D textureSize = {width, height, depthOrArrayLayerCount};
+    void DoTest() {
+        DAWN_SUPPRESS_TEST_IF(IsWARP());
+        uint32_t width = GetParam().mTextureWidth;
+        uint32_t height = GetParam().mTextureHeight;
+        uint32_t depthOrArrayLayerCount = GetParam().mArrayLayerCount;
+        uint32_t mipLevelCount = GetParam().mMipLevelCount;
+        wgpu::Extent3D textureSize = {width, height, depthOrArrayLayerCount};
 
-    // Pre-allocate textures. The incorrect write type may corrupt neighboring textures or layers.
-    std::vector<wgpu::Texture> textures;
-    uint32_t texNum = 2;
-    for (uint32_t i = 0; i < texNum; ++i) {
-        textures.push_back(Create2DTexture(textureSize));
-    }
+        // Pre-allocate textures. The incorrect write type may corrupt neighboring textures or
+        // layers.
+        std::vector<wgpu::Texture> textures;
+        wgpu::TextureFormat format = GetParam().mTextureFormat;
+        uint32_t texNum = 2;
+        for (uint32_t i = 0; i < texNum; ++i) {
+            textures.push_back(Create2DTexture(textureSize, format, mipLevelCount));
+        }
 
-    // Write data and verify the result one by one for every layer of every texture
-    uint32_t srcValue = 100000000;
-    for (uint32_t i = 0; i < texNum; ++i) {
-        for (uint32_t j = 0; j < depthOrArrayLayerCount; ++j) {
-            DoTest(textures[i], textureSize, j, srcValue) << "texNum: " << i << ", layer: " << j;
-            srcValue += 100000000;
+        // Most 2d-array textures being tested have only 2 layers. But if the texture has a lot of
+        // layers, select a few layers to test.
+        std::vector<uint32_t> testedLayers = {0, 1};
+        if (depthOrArrayLayerCount > 2) {
+            uint32_t divider = 4;
+            for (uint32_t i = 1; i <= divider; ++i) {
+                int32_t testedLayer = depthOrArrayLayerCount * i / divider - 1;
+                if (testedLayer > 1) {
+                    testedLayers.push_back(testedLayer);
+                }
+            }
+        }
+
+        // Write data and verify the result one by one for every layer of every texture
+        uint32_t srcValue = 100000000;
+        for (uint32_t i = 0; i < texNum; ++i) {
+            for (uint32_t j = 0; j < testedLayers.size(); ++j) {
+                for (uint32_t k = 0; k < mipLevelCount; ++k) {
+                    DoSingleTest(textures[i], textureSize, testedLayers[j], k, srcValue, format)
+                        << "texNum: " << i << ", layer: " << j << ", mip level: " << k;
+                    srcValue += 100000000;
+                }
+            }
         }
     }
+};
+
+class TextureCorruptionTests_Format : public TextureCorruptionTests {};
+
+TEST_P(TextureCorruptionTests_Format, Tests) {
+    DoTest();
 }
 
-DAWN_INSTANTIATE_TEST_P(TextureCorruptionTests,
+DAWN_INSTANTIATE_TEST_P(TextureCorruptionTests_Format,
                         {D3D12Backend()},
+                        {wgpu::TextureFormat::R8Unorm, wgpu::TextureFormat::RG8Unorm,
+                         wgpu::TextureFormat::RGBA8Unorm, wgpu::TextureFormat::RGBA16Uint,
+                         wgpu::TextureFormat::RGBA32Uint},
+                        {100u, 600u, 1200u, 2400u, 4800u},
+                        {kDefaultHeight},
+                        {kDefaultArrayLayerCount},
+                        {kDefaultMipLevelCount},
+                        {kDefaultWriteType});
+
+class TextureCorruptionTests_WidthAndHeight : public TextureCorruptionTests {};
+
+TEST_P(TextureCorruptionTests_WidthAndHeight, Tests) {
+    DoTest();
+}
+
+DAWN_INSTANTIATE_TEST_P(TextureCorruptionTests_WidthAndHeight,
+                        {D3D12Backend()},
+                        {kDefaultFormat},
                         {100u, 200u, 300u, 400u, 500u, 600u, 700u, 800u, 900u, 1000u, 1200u},
                         {100u, 200u},
+                        {kDefaultArrayLayerCount},
+                        {kDefaultMipLevelCount},
+                        {kDefaultWriteType});
+
+class TextureCorruptionTests_ArrayLayer : public TextureCorruptionTests {};
+
+TEST_P(TextureCorruptionTests_ArrayLayer, Tests) {
+    DoTest();
+}
+
+DAWN_INSTANTIATE_TEST_P(TextureCorruptionTests_ArrayLayer,
+                        {D3D12Backend()},
+                        {kDefaultFormat},
+                        {100u, 600u, 1200u},
+                        {kDefaultHeight},
+                        {6u, 12u, 40u, 256u},
+                        {kDefaultMipLevelCount},
+                        {kDefaultWriteType});
+
+class TextureCorruptionTests_Mipmap : public TextureCorruptionTests {};
+
+TEST_P(TextureCorruptionTests_Mipmap, Tests) {
+    DoTest();
+}
+
+DAWN_INSTANTIATE_TEST_P(TextureCorruptionTests_Mipmap,
+                        {D3D12Backend()},
+                        {kDefaultFormat},
+                        {100u, 600u, 1200u},
+                        {kDefaultHeight},
+                        {kDefaultArrayLayerCount},
+                        {2u, 6u},
+                        {kDefaultWriteType});
+
+class TextureCorruptionTests_WriteType : public TextureCorruptionTests {};
+
+TEST_P(TextureCorruptionTests_WriteType, Tests) {
+    DoTest();
+}
+
+DAWN_INSTANTIATE_TEST_P(TextureCorruptionTests_WriteType,
+                        {D3D12Backend()},
+                        {kDefaultFormat},
+                        {100u, 600u, 1200u},
+                        {kDefaultHeight},
+                        {kDefaultArrayLayerCount},
+                        {kDefaultMipLevelCount},
                         {WriteType::ClearTexture, WriteType::WriteTexture, WriteType::B2TCopy,
                          WriteType::RenderConstant, WriteType::RenderFromTextureSample,
                          WriteType::RenderFromTextureLoad});

@@ -236,10 +236,31 @@ uint32_t ComputeExtraArraySizeForIntelGen12(uint32_t width,
     //     <Surface Padding Requirement>.
     //   - Tile-based memory: the entire section of <Address Tiling Function Introduction>.
     constexpr uint32_t kPageSize = 4 * 1024;
-    constexpr uint32_t kTileSize = 16 * kPageSize;
-    constexpr uint32_t kTileHeight = 128;
-    constexpr uint32_t kTileWidth = kTileSize / kTileHeight;
     constexpr uint32_t kLinearAlignment = 4 * kPageSize;
+
+    // There are two tile modes: TileYS (64KB per tile) and TileYf (4KB per tile). TileYS is used
+    // here because it may have more paddings and therefore requires more extra layers to work
+    // around the bug.
+    constexpr uint32_t kTileSize = 16 * kPageSize;
+
+    // Tile's width and height vary according to format bit-wise (formatBytesPerBlock)
+    uint32_t tileHeight = 0;
+    switch (formatBytesPerBlock) {
+        case 1:
+            tileHeight = 256;
+            break;
+        case 2:
+        case 4:
+            tileHeight = 128;
+            break;
+        case 8:
+        case 16:
+            tileHeight = 64;
+            break;
+        default:
+            UNREACHABLE();
+    }
+    uint32_t tileWidth = kTileSize / tileHeight;
 
     uint64_t layerxSamples = arrayLayerCount * sampleCount;
 
@@ -254,8 +275,8 @@ uint32_t ComputeExtraArraySizeForIntelGen12(uint32_t width,
 
     // Texture should be aligned on both tile width (512 bytes) and tile height (128 rows) on Intel
     // Gen12 GPU
-    uint32_t mainTileCols = Align(totalWidth, kTileWidth) / kTileWidth;
-    uint32_t mainTileRows = Align(totalHeight, kTileHeight) / kTileHeight;
+    uint32_t mainTileCols = Align(totalWidth, tileWidth) / tileWidth;
+    uint32_t mainTileRows = Align(totalHeight, tileHeight) / tileHeight;
     uint64_t mainTileCount = mainTileCols * mainTileRows;
 
     // There is a bug in Intel old drivers to compute the auxiliary memory size (auxSize) of the
