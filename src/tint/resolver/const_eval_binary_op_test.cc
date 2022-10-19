@@ -30,6 +30,11 @@ struct Case {
     bool overflow;
 };
 
+struct ErrorCase {
+    Types lhs;
+    Types rhs;
+};
+
 /// Creates a Case with Values of any type
 template <typename T, typename U, typename V>
 Case C(Value<T> lhs, Value<U> rhs, Value<V> expected, bool overflow = false) {
@@ -42,9 +47,16 @@ Case C(T lhs, U rhs, V expected, bool overflow = false) {
     return Case{Val(lhs), Val(rhs), Val(expected), overflow};
 }
 
+/// Prints Case to ostream
 static std::ostream& operator<<(std::ostream& o, const Case& c) {
     o << "lhs: " << c.lhs << ", rhs: " << c.rhs << ", expected: " << c.expected
       << ", overflow: " << c.overflow;
+    return o;
+}
+
+/// Prints ErrorCase to ostream
+std::ostream& operator<<(std::ostream& o, const ErrorCase& c) {
+    o << c.lhs << ", " << c.rhs;
     return o;
 }
 
@@ -856,11 +868,10 @@ TEST_F(ResolverConstEvalTest, BinaryAbstractShiftLeftByNegativeValue_Error) {
 }
 
 // i32/u32 left shift by >= 32 -> error
-using ResolverConstEvalShiftLeftConcreteGeqBitWidthError =
-    ResolverTestWithParam<std::tuple<Types, Types>>;
+using ResolverConstEvalShiftLeftConcreteGeqBitWidthError = ResolverTestWithParam<ErrorCase>;
 TEST_P(ResolverConstEvalShiftLeftConcreteGeqBitWidthError, Test) {
-    auto* lhs_expr = ToValueBase(std::get<0>(GetParam()))->Expr(*this);
-    auto* rhs_expr = ToValueBase(std::get<1>(GetParam()))->Expr(*this);
+    auto* lhs_expr = ToValueBase(GetParam().lhs)->Expr(*this);
+    auto* rhs_expr = ToValueBase(GetParam().rhs)->Expr(*this);
     GlobalConst("c", Shl(Source{{1, 1}}, lhs_expr, rhs_expr));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
@@ -869,50 +880,50 @@ TEST_P(ResolverConstEvalShiftLeftConcreteGeqBitWidthError, Test) {
 }
 INSTANTIATE_TEST_SUITE_P(Test,
                          ResolverConstEvalShiftLeftConcreteGeqBitWidthError,
-                         testing::Values(                                             //
-                             std::make_tuple(Val(0_u), Val(32_u)),                    //
-                             std::make_tuple(Val(0_u), Val(33_u)),                    //
-                             std::make_tuple(Val(0_u), Val(34_u)),                    //
-                             std::make_tuple(Val(0_u), Val(10000_u)),                 //
-                             std::make_tuple(Val(0_u), Val(u32::Highest())),          //
-                             std::make_tuple(Val(0_i), Val(32_u)),                    //
-                             std::make_tuple(Val(0_i), Val(33_u)),                    //
-                             std::make_tuple(Val(0_i), Val(34_u)),                    //
-                             std::make_tuple(Val(0_i), Val(10000_u)),                 //
-                             std::make_tuple(Val(0_i), Val(u32::Highest())),          //
-                             std::make_tuple(Val(Negate(0_u)), Val(32_u)),            //
-                             std::make_tuple(Val(Negate(0_u)), Val(33_u)),            //
-                             std::make_tuple(Val(Negate(0_u)), Val(34_u)),            //
-                             std::make_tuple(Val(Negate(0_u)), Val(10000_u)),         //
-                             std::make_tuple(Val(Negate(0_u)), Val(u32::Highest())),  //
-                             std::make_tuple(Val(Negate(0_i)), Val(32_u)),            //
-                             std::make_tuple(Val(Negate(0_i)), Val(33_u)),            //
-                             std::make_tuple(Val(Negate(0_i)), Val(34_u)),            //
-                             std::make_tuple(Val(Negate(0_i)), Val(10000_u)),         //
-                             std::make_tuple(Val(Negate(0_i)), Val(u32::Highest())),  //
-                             std::make_tuple(Val(1_i), Val(32_u)),                    //
-                             std::make_tuple(Val(1_i), Val(33_u)),                    //
-                             std::make_tuple(Val(1_i), Val(34_u)),                    //
-                             std::make_tuple(Val(1_i), Val(10000_u)),                 //
-                             std::make_tuple(Val(1_i), Val(u32::Highest())),          //
-                             std::make_tuple(Val(1_u), Val(32_u)),                    //
-                             std::make_tuple(Val(1_u), Val(33_u)),                    //
-                             std::make_tuple(Val(1_u), Val(34_u)),                    //
-                             std::make_tuple(Val(1_u), Val(10000_u)),                 //
-                             std::make_tuple(Val(1_u), Val(u32::Highest()))           //
+                         testing::Values(                                       //
+                             ErrorCase{Val(0_u), Val(32_u)},                    //
+                             ErrorCase{Val(0_u), Val(33_u)},                    //
+                             ErrorCase{Val(0_u), Val(34_u)},                    //
+                             ErrorCase{Val(0_u), Val(10000_u)},                 //
+                             ErrorCase{Val(0_u), Val(u32::Highest())},          //
+                             ErrorCase{Val(0_i), Val(32_u)},                    //
+                             ErrorCase{Val(0_i), Val(33_u)},                    //
+                             ErrorCase{Val(0_i), Val(34_u)},                    //
+                             ErrorCase{Val(0_i), Val(10000_u)},                 //
+                             ErrorCase{Val(0_i), Val(u32::Highest())},          //
+                             ErrorCase{Val(Negate(0_u)), Val(32_u)},            //
+                             ErrorCase{Val(Negate(0_u)), Val(33_u)},            //
+                             ErrorCase{Val(Negate(0_u)), Val(34_u)},            //
+                             ErrorCase{Val(Negate(0_u)), Val(10000_u)},         //
+                             ErrorCase{Val(Negate(0_u)), Val(u32::Highest())},  //
+                             ErrorCase{Val(Negate(0_i)), Val(32_u)},            //
+                             ErrorCase{Val(Negate(0_i)), Val(33_u)},            //
+                             ErrorCase{Val(Negate(0_i)), Val(34_u)},            //
+                             ErrorCase{Val(Negate(0_i)), Val(10000_u)},         //
+                             ErrorCase{Val(Negate(0_i)), Val(u32::Highest())},  //
+                             ErrorCase{Val(1_i), Val(32_u)},                    //
+                             ErrorCase{Val(1_i), Val(33_u)},                    //
+                             ErrorCase{Val(1_i), Val(34_u)},                    //
+                             ErrorCase{Val(1_i), Val(10000_u)},                 //
+                             ErrorCase{Val(1_i), Val(u32::Highest())},          //
+                             ErrorCase{Val(1_u), Val(32_u)},                    //
+                             ErrorCase{Val(1_u), Val(33_u)},                    //
+                             ErrorCase{Val(1_u), Val(34_u)},                    //
+                             ErrorCase{Val(1_u), Val(10000_u)},                 //
+                             ErrorCase{Val(1_u), Val(u32::Highest())}           //
                              ));
 
 // AInt left shift results in sign change error
-using ResolverConstEvalShiftLeftSignChangeError = ResolverTestWithParam<std::tuple<Types, Types>>;
+using ResolverConstEvalShiftLeftSignChangeError = ResolverTestWithParam<ErrorCase>;
 TEST_P(ResolverConstEvalShiftLeftSignChangeError, Test) {
-    auto* lhs_expr = ToValueBase(std::get<0>(GetParam()))->Expr(*this);
-    auto* rhs_expr = ToValueBase(std::get<1>(GetParam()))->Expr(*this);
+    auto* lhs_expr = ToValueBase(GetParam().lhs)->Expr(*this);
+    auto* rhs_expr = ToValueBase(GetParam().rhs)->Expr(*this);
     GlobalConst("c", Shl(Source{{1, 1}}, lhs_expr, rhs_expr));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(), "1:1 error: shift left operation results in sign change");
 }
 template <typename T>
-std::vector<std::tuple<Types, Types>> ShiftLeftSignChangeErrorCases() {
+std::vector<ErrorCase> ShiftLeftSignChangeErrorCases() {
     // Shift type is u32 for non-abstract
     using ST = std::conditional_t<IsAbstract<T>, T, u32>;
     using B = BitValues<T>;
