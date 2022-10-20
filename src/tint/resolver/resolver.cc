@@ -3113,6 +3113,9 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
                     continue;
                 }
                 auto* sem_expr = Expression(sel->expr);
+                if (!sem_expr) {
+                    return false;
+                }
                 types.Push(sem_expr->Type()->UnwrapRef());
             }
         }

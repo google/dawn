@@ -135,6 +135,14 @@ TEST_F(ResolverTest, Stmt_Case) {
     EXPECT_EQ(sem->Cases()[1]->Selectors().size(), 1u);
 }
 
+TEST_F(ResolverTest, Stmt_Case_AddressOf_Invalid) {
+    auto* cond_var = Var("i", ty.i32());
+    WrapInFunction(cond_var, Switch("i", Case(CaseSelector(AddressOf(1_a)), Block())));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "error: cannot take the address of expression");
+}
+
 TEST_F(ResolverTest, Stmt_Block) {
     auto* v = Var("v", ty.f32());
     auto* lhs = Expr("v");
