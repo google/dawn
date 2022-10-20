@@ -21,7 +21,7 @@
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/ast/unary_op.h"
 #include "src/tint/resolver/const_eval.h"
-#include "src/tint/resolver/ctor_conv_intrinsic.h"
+#include "src/tint/resolver/init_conv_intrinsic.h"
 #include "src/tint/sem/builtin.h"
 #include "src/tint/utils/vector.h"
 
@@ -72,9 +72,9 @@ class IntrinsicTable {
         ConstEval::Function const_eval_fn = nullptr;
     };
 
-    /// CtorOrConv describes a resolved type constructor or type conversion
-    struct CtorOrConv {
-        /// The result type of the type constructor or type conversion
+    /// InitOrConv describes a resolved type initializer or type conversion
+    struct InitOrConv {
+        /// The result type of the type initializer or type conversion
         const sem::CallTarget* target = nullptr;
         /// The constant evaluation function
         ConstEval::Function const_eval_fn = nullptr;
@@ -121,14 +121,14 @@ class IntrinsicTable {
                                   const Source& source,
                                   bool is_compound) = 0;
 
-    /// Lookup looks for the type constructor or conversion overload for the given
-    /// CtorConvIntrinsic.
+    /// Lookup looks for the type initializer or conversion overload for the given
+    /// InitConvIntrinsic.
     /// @param type the type being constructed or converted
     /// @param template_arg the optional template argument
-    /// @param args the argument types passed to the constructor / conversion call
+    /// @param args the argument types passed to the initializer / conversion call
     /// @param source the source of the call
-    /// @return a sem::TypeConstructor, sem::TypeConversion or nullptr if nothing matched
-    virtual CtorOrConv Lookup(CtorConvIntrinsic type,
+    /// @return a sem::TypeInitializer, sem::TypeConversion or nullptr if nothing matched
+    virtual InitOrConv Lookup(InitConvIntrinsic type,
                               const sem::Type* template_arg,
                               utils::VectorRef<const sem::Type*> args,
                               const Source& source) = 0;

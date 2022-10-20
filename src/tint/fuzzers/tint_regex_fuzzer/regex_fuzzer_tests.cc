@@ -36,7 +36,7 @@ class WgslMutatorTest : public WgslMutator {
     using WgslMutator::GetIntLiterals;
     using WgslMutator::GetLoopBodyPositions;
     using WgslMutator::GetSwizzles;
-    using WgslMutator::GetVectorConstructors;
+    using WgslMutator::GetVectorInitializers;
     using WgslMutator::ReplaceRegion;
     using WgslMutator::SwapIntervals;
 };
@@ -660,7 +660,7 @@ u.rgba.rrg.b)";
     ASSERT_EQ(ground_truth, swizzles);
 }
 
-TEST(TestAddSwizzle, FindVectorConstructors) {
+TEST(TestAddSwizzle, FindVectorInitializers) {
     RandomGenerator generator(0);
     WgslMutatorTest mutator(generator);
     std::string code = R"(
@@ -668,7 +668,7 @@ vec4<f32>(vec2<f32>(1, 2), vec2<f32>(3))
 
 vec2<i32>(1, abs(abs(2)))
 )";
-    std::vector<std::pair<size_t, size_t>> swizzles = mutator.GetVectorConstructors(code);
+    std::vector<std::pair<size_t, size_t>> swizzles = mutator.GetVectorInitializers(code);
     std::vector<std::pair<size_t, size_t>> ground_truth{{1, 40}, {11, 15}, {28, 12}, {43, 25}};
     ASSERT_EQ(ground_truth, swizzles);
 }

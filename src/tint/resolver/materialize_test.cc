@@ -1215,7 +1215,7 @@ namespace materialize_abstract_numeric_to_unrelated_type {
 
 using MaterializeAbstractNumericToUnrelatedType = resolver::ResolverTest;
 
-TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructVarCtor) {
+TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructVarInit) {
     Structure("S", utils::Vector{Member("a", ty.i32())});
     WrapInFunction(Decl(Var("v", ty.type_name("S"), Expr(Source{{12, 34}}, 1_a))));
     EXPECT_FALSE(r()->Resolve());
@@ -1224,7 +1224,7 @@ TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructVarCtor) {
         testing::HasSubstr("error: cannot convert value of type 'abstract-int' to type 'S'"));
 }
 
-TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructLetCtor) {
+TEST_F(MaterializeAbstractNumericToUnrelatedType, AIntToStructLetInit) {
     Structure("S", utils::Vector{Member("a", ty.i32())});
     WrapInFunction(Decl(Let("v", ty.type_name("S"), Expr(Source{{12, 34}}, 1_a))));
     EXPECT_FALSE(r()->Resolve());

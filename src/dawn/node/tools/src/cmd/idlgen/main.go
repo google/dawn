@@ -115,7 +115,7 @@ func run() error {
 		"HasAnnotation":              hasAnnotation,
 		"Include":                    g.include,
 		"IsBasicLiteral":             is(ast.BasicLiteral{}),
-		"IsConstructor":              isConstructor,
+		"IsInitializer":              isInitializer,
 		"IsDefaultDictionaryLiteral": is(ast.DefaultDictionaryLiteral{}),
 		"IsDictionary":               is(ast.Dictionary{}),
 		"IsEnum":                     is(ast.Enum{}),
@@ -489,8 +489,8 @@ func is(prototypes ...interface{}) func(interface{}) bool {
 	}
 }
 
-// isConstructor returns true if the object is a constructor ast.Member.
-func isConstructor(v interface{}) bool {
+// isInitializer returns true if the object is a constructor ast.Member.
+func isInitializer(v interface{}) bool {
 	if member, ok := v.(*ast.Member); ok {
 		if ty, ok := member.Type.(*ast.TypeName); ok {
 			return ty.Name == "constructor"
@@ -555,7 +555,7 @@ func methodsOf(obj interface{}) []*Method {
 	out := []*Method{}
 	for _, member := range iface.Members {
 		member := member.(*ast.Member)
-		if !member.Const && !member.Attribute && !isConstructor(member) {
+		if !member.Const && !member.Attribute && !isInitializer(member) {
 			if method, ok := byName[member.Name]; ok {
 				method.Overloads = append(method.Overloads, member)
 			} else {

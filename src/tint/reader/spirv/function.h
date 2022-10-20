@@ -957,7 +957,7 @@ class FunctionEmitter {
         const spvtools::opt::Instruction& image_access);
 
     /// Returns the given value as an I32.  If it's already an I32 then this
-    /// return the given value.  Otherwise, wrap the value in a TypeConstructor
+    /// return the given value.  Otherwise, wrap the value in a TypeInitializer
     /// expression.
     /// @param value the value to pass through or convert
     /// @returns the value as an I32 value.
@@ -965,7 +965,7 @@ class FunctionEmitter {
 
     /// Returns the given value as a signed integer type of the same shape
     /// if the value is unsigned scalar or vector, by wrapping the value
-    /// with a TypeConstructor expression.  Returns the value itself if the
+    /// with a TypeInitializer expression.  Returns the value itself if the
     /// value otherwise.
     /// @param value the value to pass through or convert
     /// @returns the value itself, or converted to signed integral
@@ -1277,7 +1277,7 @@ class FunctionEmitter {
     TypedExpression Dereference(TypedExpression expr);
 
     /// Creates a new `ast::Node` owned by the ProgramBuilder.
-    /// @param args the arguments to pass to the type constructor
+    /// @param args the arguments to pass to the type initializer
     /// @returns the node pointer
     template <typename T, typename... ARGS>
     T* create(ARGS&&... args) const {

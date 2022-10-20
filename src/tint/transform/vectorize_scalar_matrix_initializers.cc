@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/transform/vectorize_scalar_matrix_constructors.h"
+#include "src/tint/transform/vectorize_scalar_matrix_initializers.h"
 
 #include <unordered_map>
 #include <utility>
@@ -21,21 +21,21 @@
 #include "src/tint/sem/abstract_numeric.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/expression.h"
-#include "src/tint/sem/type_constructor.h"
+#include "src/tint/sem/type_initializer.h"
 #include "src/tint/utils/map.h"
 
-TINT_INSTANTIATE_TYPEINFO(tint::transform::VectorizeScalarMatrixConstructors);
+TINT_INSTANTIATE_TYPEINFO(tint::transform::VectorizeScalarMatrixInitializers);
 
 namespace tint::transform {
 
-VectorizeScalarMatrixConstructors::VectorizeScalarMatrixConstructors() = default;
+VectorizeScalarMatrixInitializers::VectorizeScalarMatrixInitializers() = default;
 
-VectorizeScalarMatrixConstructors::~VectorizeScalarMatrixConstructors() = default;
+VectorizeScalarMatrixInitializers::~VectorizeScalarMatrixInitializers() = default;
 
-bool VectorizeScalarMatrixConstructors::ShouldRun(const Program* program, const DataMap&) const {
+bool VectorizeScalarMatrixInitializers::ShouldRun(const Program* program, const DataMap&) const {
     for (auto* node : program->ASTNodes().Objects()) {
         if (auto* call = program->Sem().Get<sem::Call>(node)) {
-            if (call->Target()->Is<sem::TypeConstructor>() && call->Type()->Is<sem::Matrix>()) {
+            if (call->Target()->Is<sem::TypeInitializer>() && call->Type()->Is<sem::Matrix>()) {
                 auto& args = call->Arguments();
                 if (!args.IsEmpty() && args[0]->Type()->UnwrapRef()->is_scalar()) {
                     return true;
@@ -46,13 +46,13 @@ bool VectorizeScalarMatrixConstructors::ShouldRun(const Program* program, const 
     return false;
 }
 
-void VectorizeScalarMatrixConstructors::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    std::unordered_map<const sem::Matrix*, Symbol> scalar_ctors;
+void VectorizeScalarMatrixInitializers::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
+    std::unordered_map<const sem::Matrix*, Symbol> scalar_inits;
 
     ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::CallExpression* {
         auto* call = ctx.src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
-        auto* ty_ctor = call->Target()->As<sem::TypeConstructor>();
-        if (!ty_ctor) {
+        auto* ty_init = call->Target()->As<sem::TypeInitializer>();
+        if (!ty_init) {
             return nullptr;
         }
         auto* mat_type = call->Type()->As<sem::Matrix>();
@@ -65,7 +65,7 @@ void VectorizeScalarMatrixConstructors::Run(CloneContext& ctx, const DataMap&, D
             return nullptr;
         }
 
-        // If the argument type is a matrix, then this is an identity / conversion constructor.
+        // If the argument type is a matrix, then this is an identity / conversion initializer.
         // If the argument type is a vector, then we're already column vectors.
         // If the argument type is abstract, then we're const-expression and there's no need to
         // adjust this, as it'll be constant folded by the backend.
@@ -97,7 +97,7 @@ void VectorizeScalarMatrixConstructors::Run(CloneContext& ctx, const DataMap&, D
             // Generate a helper function for constructing the matrix.
             // This is done to ensure that the single argument value is only evaluated once, and
             // with the correct expression evaluation order.
-            auto fn = utils::GetOrCreate(scalar_ctors, mat_type, [&] {
+            auto fn = utils::GetOrCreate(scalar_inits, mat_type, [&] {
                 auto name =
                     ctx.dst->Symbols().New("build_mat" + std::to_string(mat_type->columns()) + "x" +
                                            std::to_string(mat_type->rows()));
@@ -124,7 +124,7 @@ void VectorizeScalarMatrixConstructors::Run(CloneContext& ctx, const DataMap&, D
         }
 
         TINT_ICE(Transform, ctx.dst->Diagnostics())
-            << "matrix constructor has unexpected number of arguments";
+            << "matrix initializer has unexpected number of arguments";
         return nullptr;
     });
 

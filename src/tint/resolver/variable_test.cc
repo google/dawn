@@ -28,7 +28,7 @@ struct ResolverVariableTest : public resolver::TestHelper, public testing::Test 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Function-scope 'var'
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-TEST_F(ResolverVariableTest, LocalVar_NoConstructor) {
+TEST_F(ResolverVariableTest, LocalVar_NoInitializer) {
     // struct S { i : i32; }
     // alias A = S;
     // fn F(){
@@ -84,16 +84,16 @@ TEST_F(ResolverVariableTest, LocalVar_NoConstructor) {
     EXPECT_TRUE(TypeOf(s)->As<sem::Reference>()->StoreType()->Is<sem::Struct>());
     EXPECT_TRUE(TypeOf(a)->As<sem::Reference>()->StoreType()->Is<sem::Struct>());
 
-    EXPECT_EQ(Sem().Get(i)->Constructor(), nullptr);
-    EXPECT_EQ(Sem().Get(u)->Constructor(), nullptr);
-    EXPECT_EQ(Sem().Get(f)->Constructor(), nullptr);
-    EXPECT_EQ(Sem().Get(h)->Constructor(), nullptr);
-    EXPECT_EQ(Sem().Get(b)->Constructor(), nullptr);
-    EXPECT_EQ(Sem().Get(s)->Constructor(), nullptr);
-    EXPECT_EQ(Sem().Get(a)->Constructor(), nullptr);
+    EXPECT_EQ(Sem().Get(i)->Initializer(), nullptr);
+    EXPECT_EQ(Sem().Get(u)->Initializer(), nullptr);
+    EXPECT_EQ(Sem().Get(f)->Initializer(), nullptr);
+    EXPECT_EQ(Sem().Get(h)->Initializer(), nullptr);
+    EXPECT_EQ(Sem().Get(b)->Initializer(), nullptr);
+    EXPECT_EQ(Sem().Get(s)->Initializer(), nullptr);
+    EXPECT_EQ(Sem().Get(a)->Initializer(), nullptr);
 }
 
-TEST_F(ResolverVariableTest, LocalVar_WithConstructor) {
+TEST_F(ResolverVariableTest, LocalVar_WithInitializer) {
     // struct S { i : i32; }
     // alias A = S;
     // fn F(){
@@ -164,13 +164,13 @@ TEST_F(ResolverVariableTest, LocalVar_WithConstructor) {
     EXPECT_TRUE(TypeOf(s)->As<sem::Reference>()->StoreType()->Is<sem::Struct>());
     EXPECT_TRUE(TypeOf(a)->As<sem::Reference>()->StoreType()->Is<sem::Struct>());
 
-    EXPECT_EQ(Sem().Get(i)->Constructor()->Declaration(), i_c);
-    EXPECT_EQ(Sem().Get(u)->Constructor()->Declaration(), u_c);
-    EXPECT_EQ(Sem().Get(f)->Constructor()->Declaration(), f_c);
-    EXPECT_EQ(Sem().Get(h)->Constructor()->Declaration(), h_c);
-    EXPECT_EQ(Sem().Get(b)->Constructor()->Declaration(), b_c);
-    EXPECT_EQ(Sem().Get(s)->Constructor()->Declaration(), s_c);
-    EXPECT_EQ(Sem().Get(a)->Constructor()->Declaration(), a_c);
+    EXPECT_EQ(Sem().Get(i)->Initializer()->Declaration(), i_c);
+    EXPECT_EQ(Sem().Get(u)->Initializer()->Declaration(), u_c);
+    EXPECT_EQ(Sem().Get(f)->Initializer()->Declaration(), f_c);
+    EXPECT_EQ(Sem().Get(h)->Initializer()->Declaration(), h_c);
+    EXPECT_EQ(Sem().Get(b)->Initializer()->Declaration(), b_c);
+    EXPECT_EQ(Sem().Get(s)->Initializer()->Declaration(), s_c);
+    EXPECT_EQ(Sem().Get(a)->Initializer()->Declaration(), a_c);
 }
 
 TEST_F(ResolverVariableTest, LocalVar_ShadowsAlias) {
@@ -249,7 +249,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsGlobalVar) {
     ASSERT_NE(local, nullptr);
     EXPECT_EQ(local->Shadows(), global);
 
-    auto* user_v = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
+    auto* user_v = Sem().Get<sem::VariableUser>(local->Declaration()->initializer);
     ASSERT_NE(user_v, nullptr);
     EXPECT_EQ(user_v->Variable(), global);
 }
@@ -272,7 +272,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsGlobalConst) {
     ASSERT_NE(local, nullptr);
     EXPECT_EQ(local->Shadows(), global);
 
-    auto* user_v = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
+    auto* user_v = Sem().Get<sem::VariableUser>(local->Declaration()->initializer);
     ASSERT_NE(user_v, nullptr);
     EXPECT_EQ(user_v->Variable(), global);
 }
@@ -298,7 +298,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsLocalVar) {
     ASSERT_NE(local_y, nullptr);
     EXPECT_EQ(local_y->Shadows(), local_x);
 
-    auto* user_y = Sem().Get<sem::VariableUser>(local_y->Declaration()->constructor);
+    auto* user_y = Sem().Get<sem::VariableUser>(local_y->Declaration()->initializer);
     ASSERT_NE(user_y, nullptr);
     EXPECT_EQ(user_y->Variable(), local_x);
 }
@@ -324,7 +324,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsLocalConst) {
     ASSERT_NE(local_v, nullptr);
     EXPECT_EQ(local_v->Shadows(), local_c);
 
-    auto* user_v = Sem().Get<sem::VariableUser>(local_v->Declaration()->constructor);
+    auto* user_v = Sem().Get<sem::VariableUser>(local_v->Declaration()->initializer);
     ASSERT_NE(user_v, nullptr);
     EXPECT_EQ(user_v->Variable(), local_c);
 }
@@ -350,7 +350,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsLocalLet) {
     ASSERT_NE(local_v, nullptr);
     EXPECT_EQ(local_v->Shadows(), local_l);
 
-    auto* user_v = Sem().Get<sem::VariableUser>(local_v->Declaration()->constructor);
+    auto* user_v = Sem().Get<sem::VariableUser>(local_v->Declaration()->initializer);
     ASSERT_NE(user_v, nullptr);
     EXPECT_EQ(user_v->Variable(), local_l);
 }
@@ -375,7 +375,7 @@ TEST_F(ResolverVariableTest, LocalVar_ShadowsParam) {
     ASSERT_NE(local, nullptr);
     EXPECT_EQ(local->Shadows(), param);
 
-    auto* user_v = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
+    auto* user_v = Sem().Get<sem::VariableUser>(local->Declaration()->initializer);
     ASSERT_NE(user_v, nullptr);
     EXPECT_EQ(user_v->Variable(), param);
 }
@@ -447,14 +447,14 @@ TEST_F(ResolverVariableTest, LocalLet) {
     ASSERT_TRUE(TypeOf(p)->Is<sem::Pointer>());
     ASSERT_TRUE(TypeOf(p)->As<sem::Pointer>()->StoreType()->Is<sem::I32>());
 
-    EXPECT_EQ(Sem().Get(i)->Constructor()->Declaration(), i_c);
-    EXPECT_EQ(Sem().Get(u)->Constructor()->Declaration(), u_c);
-    EXPECT_EQ(Sem().Get(f)->Constructor()->Declaration(), f_c);
-    EXPECT_EQ(Sem().Get(h)->Constructor()->Declaration(), h_c);
-    EXPECT_EQ(Sem().Get(b)->Constructor()->Declaration(), b_c);
-    EXPECT_EQ(Sem().Get(s)->Constructor()->Declaration(), s_c);
-    EXPECT_EQ(Sem().Get(a)->Constructor()->Declaration(), a_c);
-    EXPECT_EQ(Sem().Get(p)->Constructor()->Declaration(), p_c);
+    EXPECT_EQ(Sem().Get(i)->Initializer()->Declaration(), i_c);
+    EXPECT_EQ(Sem().Get(u)->Initializer()->Declaration(), u_c);
+    EXPECT_EQ(Sem().Get(f)->Initializer()->Declaration(), f_c);
+    EXPECT_EQ(Sem().Get(h)->Initializer()->Declaration(), h_c);
+    EXPECT_EQ(Sem().Get(b)->Initializer()->Declaration(), b_c);
+    EXPECT_EQ(Sem().Get(s)->Initializer()->Declaration(), s_c);
+    EXPECT_EQ(Sem().Get(a)->Initializer()->Declaration(), a_c);
+    EXPECT_EQ(Sem().Get(p)->Initializer()->Declaration(), p_c);
 }
 
 TEST_F(ResolverVariableTest, LocalLet_InheritsAccessFromOriginatingVariable) {
@@ -563,7 +563,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsGlobalVar) {
     ASSERT_NE(local, nullptr);
     EXPECT_EQ(local->Shadows(), global);
 
-    auto* user = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
+    auto* user = Sem().Get<sem::VariableUser>(local->Declaration()->initializer);
     ASSERT_NE(user, nullptr);
     EXPECT_EQ(user->Variable(), global);
 }
@@ -586,7 +586,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsGlobalConst) {
     ASSERT_NE(local, nullptr);
     EXPECT_EQ(local->Shadows(), global);
 
-    auto* user = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
+    auto* user = Sem().Get<sem::VariableUser>(local->Declaration()->initializer);
     ASSERT_NE(user, nullptr);
     EXPECT_EQ(user->Variable(), global);
 }
@@ -612,7 +612,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsLocalVar) {
     ASSERT_NE(local_l, nullptr);
     EXPECT_EQ(local_l->Shadows(), local_v);
 
-    auto* user = Sem().Get<sem::VariableUser>(local_l->Declaration()->constructor);
+    auto* user = Sem().Get<sem::VariableUser>(local_l->Declaration()->initializer);
     ASSERT_NE(user, nullptr);
     EXPECT_EQ(user->Variable(), local_v);
 }
@@ -638,7 +638,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsLocalConst) {
     ASSERT_NE(local_y, nullptr);
     EXPECT_EQ(local_y->Shadows(), local_x);
 
-    auto* user = Sem().Get<sem::VariableUser>(local_y->Declaration()->constructor);
+    auto* user = Sem().Get<sem::VariableUser>(local_y->Declaration()->initializer);
     ASSERT_NE(user, nullptr);
     EXPECT_EQ(user->Variable(), local_x);
 }
@@ -664,7 +664,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsLocalLet) {
     ASSERT_NE(local_y, nullptr);
     EXPECT_EQ(local_y->Shadows(), local_x);
 
-    auto* user = Sem().Get<sem::VariableUser>(local_y->Declaration()->constructor);
+    auto* user = Sem().Get<sem::VariableUser>(local_y->Declaration()->initializer);
     ASSERT_NE(user, nullptr);
     EXPECT_EQ(user->Variable(), local_x);
 }
@@ -689,7 +689,7 @@ TEST_F(ResolverVariableTest, LocalLet_ShadowsParam) {
     ASSERT_NE(local, nullptr);
     EXPECT_EQ(local->Shadows(), param);
 
-    auto* user = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
+    auto* user = Sem().Get<sem::VariableUser>(local->Declaration()->initializer);
     ASSERT_NE(user, nullptr);
     EXPECT_EQ(user->Variable(), param);
 }
@@ -792,7 +792,7 @@ TEST_F(ResolverVariableTest, LocalConst_ShadowsGlobalConst) {
     ASSERT_NE(local, nullptr);
     EXPECT_EQ(local->Shadows(), global);
 
-    auto* user = Sem().Get<sem::VariableUser>(local->Declaration()->constructor);
+    auto* user = Sem().Get<sem::VariableUser>(local->Declaration()->initializer);
     ASSERT_NE(user, nullptr);
     EXPECT_EQ(user->Variable(), global);
 }
@@ -840,7 +840,7 @@ TEST_F(ResolverVariableTest, LocalConst_ShadowsLocalConst) {
     ASSERT_NE(local_y, nullptr);
     EXPECT_EQ(local_y->Shadows(), local_x);
 
-    auto* user = Sem().Get<sem::VariableUser>(local_y->Declaration()->constructor);
+    auto* user = Sem().Get<sem::VariableUser>(local_y->Declaration()->initializer);
     ASSERT_NE(user, nullptr);
     EXPECT_EQ(user->Variable(), local_x);
 }

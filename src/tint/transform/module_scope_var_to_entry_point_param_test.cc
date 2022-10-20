@@ -213,7 +213,7 @@ fn zoo(@internal(disable_validation__ignore_address_space) @internal(disable_val
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ModuleScopeVarToEntryPointParamTest, Constructors) {
+TEST_F(ModuleScopeVarToEntryPointParamTest, Initializers) {
     auto* src = R"(
 var<private> a : f32 = 1.0;
 var<private> b : f32 = f32();
@@ -238,7 +238,7 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ModuleScopeVarToEntryPointParamTest, Constructors_OutOfOrder) {
+TEST_F(ModuleScopeVarToEntryPointParamTest, Initializers_OutOfOrder) {
     auto* src = R"(
 @compute @workgroup_size(1)
 fn main() {

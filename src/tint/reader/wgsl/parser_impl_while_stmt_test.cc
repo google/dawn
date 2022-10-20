@@ -94,7 +94,7 @@ class WhileStmtErrorTest : public ParserImplTest {
 // Test a while loop with missing left parenthesis is invalid.
 TEST_F(WhileStmtErrorTest, MissingLeftParen) {
     std::string while_str = "while bool) { }";
-    std::string error_str = "1:11: expected '(' for type constructor";
+    std::string error_str = "1:11: expected '(' for type initializer";
 
     TestWhileWithError(while_str, error_str);
 }

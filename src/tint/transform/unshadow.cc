@@ -52,19 +52,19 @@ struct Unshadow::State {
 
             auto source = ctx.Clone(decl->source);
             auto* type = ctx.Clone(decl->type);
-            auto* constructor = ctx.Clone(decl->constructor);
+            auto* initializer = ctx.Clone(decl->initializer);
             auto attributes = ctx.Clone(decl->attributes);
             return Switch(
                 decl,  //
                 [&](const ast::Var* var) {
                     return ctx.dst->Var(source, symbol, type, var->declared_address_space,
-                                        var->declared_access, constructor, attributes);
+                                        var->declared_access, initializer, attributes);
                 },
                 [&](const ast::Let*) {
-                    return ctx.dst->Let(source, symbol, type, constructor, attributes);
+                    return ctx.dst->Let(source, symbol, type, initializer, attributes);
                 },
                 [&](const ast::Const*) {
-                    return ctx.dst->Const(source, symbol, type, constructor, attributes);
+                    return ctx.dst->Const(source, symbol, type, initializer, attributes);
                 },
                 [&](const ast::Parameter*) {
                     return ctx.dst->Param(source, symbol, type, attributes);

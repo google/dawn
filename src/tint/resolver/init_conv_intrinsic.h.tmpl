@@ -1,0 +1,76 @@
+{{- /*
+--------------------------------------------------------------------------------
+Template file for use with tools/src/cmd/gen to generate init_conv_intrinsic.h
+
+To update the generated file, run:
+    ./tools/run gen
+
+See:
+* tools/src/cmd/gen for structures used by this template
+* https://golang.org/pkg/text/template/ for documentation on the template syntax
+--------------------------------------------------------------------------------
+*/ -}}
+
+#ifndef SRC_TINT_RESOLVER_INIT_CONV_INTRINSIC_H_
+#define SRC_TINT_RESOLVER_INIT_CONV_INTRINSIC_H_
+
+#include <cstdint>
+
+namespace tint::resolver {
+
+/// InitConvIntrinsic is an enumerator of types that have a initializer or converter overload
+/// declared in the intrinsic table.
+enum class InitConvIntrinsic {
+    kNone = -1,
+{{- range Sem.InitializersAndConverters }}
+    k{{Title .Name}},
+{{- end }}
+};
+
+/// @returns the name of the type.
+const char* str(InitConvIntrinsic i);
+
+/// @param n the width of the vector
+/// @return the InitConvIntrinsic for a vector of width `n`
+inline InitConvIntrinsic VectorInitConvIntrinsic(uint32_t n) {
+    switch (n) {
+        case 2:
+            return InitConvIntrinsic::kVec2;
+        case 3:
+            return InitConvIntrinsic::kVec3;
+        case 4:
+            return InitConvIntrinsic::kVec4;
+    }
+    return InitConvIntrinsic::kNone;
+}
+
+/// @param c the number of columns in the matrix
+/// @param r the number of rows in the matrix
+/// @return the InitConvIntrinsic for a matrix with `c` columns and `r` rows
+inline InitConvIntrinsic MatrixInitConvIntrinsic(uint32_t c, uint32_t r) {
+    switch ((c - 2) * 3 + (r - 2)) {
+        case 0:
+            return InitConvIntrinsic::kMat2x2;
+        case 1:
+            return InitConvIntrinsic::kMat2x3;
+        case 2:
+            return InitConvIntrinsic::kMat2x4;
+        case 3:
+            return InitConvIntrinsic::kMat3x2;
+        case 4:
+            return InitConvIntrinsic::kMat3x3;
+        case 5:
+            return InitConvIntrinsic::kMat3x4;
+        case 6:
+            return InitConvIntrinsic::kMat4x2;
+        case 7:
+            return InitConvIntrinsic::kMat4x3;
+        case 8:
+            return InitConvIntrinsic::kMat4x4;
+    }
+    return InitConvIntrinsic::kNone;
+}
+
+}  // namespace tint::resolver
+
+#endif  // SRC_TINT_RESOLVER_INIT_CONV_INTRINSIC_H_

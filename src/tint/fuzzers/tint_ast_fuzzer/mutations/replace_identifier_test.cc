@@ -62,7 +62,7 @@ TEST(ReplaceIdentifierTest, NotApplicable_Simple) {
     auto b_var_id = node_id_map.GetId(b_var);
     ASSERT_NE(b_var_id, 0);
 
-    const auto* sum_expr = b_var->constructor->As<ast::BinaryExpression>();
+    const auto* sum_expr = b_var->initializer->As<ast::BinaryExpression>();
     ASSERT_NE(sum_expr, nullptr);
 
     auto a_ident_id = node_id_map.GetId(sum_expr->lhs);
@@ -75,7 +75,7 @@ TEST(ReplaceIdentifierTest, NotApplicable_Simple) {
     ASSERT_NE(e_var_id, 0);
 
     auto vec_member_access_id =
-        node_id_map.GetId(e_var->constructor->As<ast::MemberAccessorExpression>()->member);
+        node_id_map.GetId(e_var->initializer->As<ast::MemberAccessorExpression>()->member);
     ASSERT_NE(vec_member_access_id, 0);
 
     // use_id is invalid.
@@ -596,7 +596,7 @@ fn f() {
                                         .Functions()[0]
                                         ->body->statements[1]
                                         ->As<ast::VariableDeclStatement>()
-                                        ->variable->constructor->As<ast::IndexAccessorExpression>()
+                                        ->variable->initializer->As<ast::IndexAccessorExpression>()
                                         ->object->As<ast::UnaryOpExpression>()
                                         ->expr->As<ast::UnaryOpExpression>()
                                         ->expr);
@@ -631,7 +631,7 @@ fn f() {
                                         .Functions()[0]
                                         ->body->statements[3]
                                         ->As<ast::VariableDeclStatement>()
-                                        ->variable->constructor->As<ast::IndexAccessorExpression>()
+                                        ->variable->initializer->As<ast::IndexAccessorExpression>()
                                         ->object->As<ast::UnaryOpExpression>()
                                         ->expr);
     ASSERT_NE(use_id, 0);

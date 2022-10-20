@@ -94,7 +94,7 @@ class WgslMutator {
     bool ReplaceFunctionCallWithBuiltin(std::string& wgsl_code);
 
     /// Given a WGSL-like string, adds a swizzle operation to either (a) an identifier, (b) a vector
-    /// constructor, or (c) an existing swizzle.
+    /// initializer, or (c) an existing swizzle.
     /// @param wgsl_code - the initial WGSL-like string that will be mutated.
     /// @return true if a swizzle operation is added or false otherwise.
     bool AddSwizzle(std::string& wgsl_code);
@@ -212,10 +212,10 @@ class WgslMutator {
     /// @return a vector with the positions and lengths of all the swizzles in wgsl_code.
     std::vector<std::pair<size_t, size_t>> GetSwizzles(const std::string& wgsl_code);
 
-    /// Finds all the vector constructors in a WGSL-like string.
-    /// @param wgsl_code - the WGSL-like string where the vector constructors will be found.
-    /// @return a vector with the positions and lengths of all the vector constructors in wgsl_code.
-    std::vector<std::pair<size_t, size_t>> GetVectorConstructors(const std::string& wgsl_code);
+    /// Finds all the vector initializers in a WGSL-like string.
+    /// @param wgsl_code - the WGSL-like string where the vector initializers will be found.
+    /// @return a vector with the positions and lengths of all the vector initializers in wgsl_code.
+    std::vector<std::pair<size_t, size_t>> GetVectorInitializers(const std::string& wgsl_code);
 
   private:
     /// A function that given a delimiter, returns a vector that contains

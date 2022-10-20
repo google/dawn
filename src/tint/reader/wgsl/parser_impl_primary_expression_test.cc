@@ -65,7 +65,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl) {
               ast::IntLiteralExpression::Suffix::kNone);
 }
 
-TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_ZeroConstructor) {
+TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_ZeroInitializer) {
     auto p = parser("vec4<i32>()");
     auto e = p->primary_expression();
     EXPECT_TRUE(e.matched);
@@ -96,7 +96,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingLeftParen) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:11: expected '(' for type constructor");
+    EXPECT_EQ(p->error(), "1:11: expected '(' for type initializer");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingRightParen) {
@@ -106,7 +106,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_MissingRightParen) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:25: expected ')' for type constructor");
+    EXPECT_EQ(p->error(), "1:25: expected ')' for type initializer");
 }
 
 TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidValue) {
@@ -116,10 +116,10 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_InvalidValue) {
     EXPECT_TRUE(e.errored);
     EXPECT_EQ(e.value, nullptr);
     ASSERT_TRUE(p->has_error());
-    EXPECT_EQ(p->error(), "1:5: expected ')' for type constructor");
+    EXPECT_EQ(p->error(), "1:5: expected ')' for type initializer");
 }
 
-TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_Empty) {
+TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructInitializer_Empty) {
     auto p = parser(R"(
   struct S { a : i32, b : f32, }
   S()
@@ -143,7 +143,7 @@ TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_Empty) {
     ASSERT_EQ(call->args.Length(), 0u);
 }
 
-TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructConstructor_NotEmpty) {
+TEST_F(ParserImplTest, PrimaryExpression_TypeDecl_StructInitializer_NotEmpty) {
     auto p = parser(R"(
   struct S { a : i32, b : f32, }
   S(1u, 2.0)

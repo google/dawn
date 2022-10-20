@@ -17,7 +17,7 @@
 namespace tint::reader::wgsl {
 namespace {
 
-TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
+TEST_F(ParserImplTest, GlobalVariableDecl_WithoutInitializer) {
     auto p = parser("var<private> a : f32");
     auto attrs = p->attribute_list();
     EXPECT_FALSE(attrs.errored);
@@ -38,10 +38,10 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithoutConstructor) {
     EXPECT_EQ(var->source.range.end.line, 1u);
     EXPECT_EQ(var->source.range.end.column, 15u);
 
-    ASSERT_EQ(var->constructor, nullptr);
+    ASSERT_EQ(var->initializer, nullptr);
 }
 
-TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
+TEST_F(ParserImplTest, GlobalVariableDecl_WithInitializer) {
     auto p = parser("var<private> a : f32 = 1.");
     auto attrs = p->attribute_list();
     EXPECT_FALSE(attrs.errored);
@@ -62,8 +62,8 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithConstructor) {
     EXPECT_EQ(var->source.range.end.line, 1u);
     EXPECT_EQ(var->source.range.end.column, 15u);
 
-    ASSERT_NE(var->constructor, nullptr);
-    ASSERT_TRUE(var->constructor->Is<ast::FloatLiteralExpression>());
+    ASSERT_NE(var->initializer, nullptr);
+    ASSERT_TRUE(var->initializer->Is<ast::FloatLiteralExpression>());
 }
 
 TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute) {
@@ -88,7 +88,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute) {
     EXPECT_EQ(var->source.range.end.line, 1u);
     EXPECT_EQ(var->source.range.end.column, 37u);
 
-    ASSERT_EQ(var->constructor, nullptr);
+    ASSERT_EQ(var->initializer, nullptr);
 
     auto& attributes = var->attributes;
     ASSERT_EQ(attributes.Length(), 2u);
@@ -119,7 +119,7 @@ TEST_F(ParserImplTest, GlobalVariableDecl_WithAttribute_MulitpleGroups) {
     EXPECT_EQ(var->source.range.end.line, 1u);
     EXPECT_EQ(var->source.range.end.column, 37u);
 
-    ASSERT_EQ(var->constructor, nullptr);
+    ASSERT_EQ(var->initializer, nullptr);
 
     auto& attributes = var->attributes;
     ASSERT_EQ(attributes.Length(), 2u);

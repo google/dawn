@@ -31,7 +31,7 @@ type Sem struct {
 	Builtins                  []*Intrinsic
 	UnaryOperators            []*Intrinsic
 	BinaryOperators           []*Intrinsic
-	ConstructorsAndConverters []*Intrinsic
+	InitializersAndConverters []*Intrinsic
 	// Maximum number of template types used across all builtins
 	MaxTemplateTypes int
 	// Maximum number of template numbers used across all builtins

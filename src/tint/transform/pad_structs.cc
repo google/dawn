@@ -22,7 +22,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/module.h"
-#include "src/tint/sem/type_constructor.h"
+#include "src/tint/sem/type_initializer.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -112,7 +112,7 @@ void PadStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
         if (!call) {
             return nullptr;
         }
-        auto* cons = call->Target()->As<sem::TypeConstructor>();
+        auto* cons = call->Target()->As<sem::TypeInitializer>();
         if (!cons) {
             return nullptr;
         }

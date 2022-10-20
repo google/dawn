@@ -2555,7 +2555,7 @@ Maybe<const ast::Expression*> ParserImpl::primary_expression() {
         return Failure::kErrored;
     }
     if (call.matched) {
-        auto params = expect_argument_expression_list("type constructor");
+        auto params = expect_argument_expression_list("type initializer");
         if (params.errored) {
             return Failure::kErrored;
         }

@@ -40,8 +40,8 @@
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
-#include "src/tint/sem/type_constructor.h"
 #include "src/tint/sem/type_conversion.h"
+#include "src/tint/sem/type_initializer.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/vector.h"
 #include "src/tint/transform/add_block_attribute.h"
@@ -672,8 +672,8 @@ bool Builder::GenerateFunctionVariable(const ast::Variable* v) {
     }
 
     uint32_t init_id = 0;
-    if (v->constructor) {
-        init_id = GenerateExpressionWithLoadIfNeeded(v->constructor);
+    if (v->initializer) {
+        init_id = GenerateExpressionWithLoadIfNeeded(v->initializer);
         if (init_id == 0) {
             return false;
         }
@@ -682,8 +682,8 @@ bool Builder::GenerateFunctionVariable(const ast::Variable* v) {
     auto* sem = builder_.Sem().Get(v);
 
     if (v->Is<ast::Let>()) {
-        if (!v->constructor) {
-            error_ = "missing constructor for let";
+        if (!v->initializer) {
+            error_ = "missing initializer for let";
             return false;
         }
         RegisterVariable(sem, init_id);
@@ -701,7 +701,7 @@ bool Builder::GenerateFunctionVariable(const ast::Variable* v) {
 
     push_debug(spv::Op::OpName, {Operand(var_id), Operand(builder_.Symbols().NameFor(v->symbol))});
 
-    // TODO(dsinclair) We could detect if the constructor is fully const and emit
+    // TODO(dsinclair) We could detect if the initializer is fully const and emit
     // an initializer value for the variable instead of doing the OpLoad.
     auto null_id = GenerateConstantNullIfNeeded(type->UnwrapRef());
     if (null_id == 0) {
@@ -710,7 +710,7 @@ bool Builder::GenerateFunctionVariable(const ast::Variable* v) {
     push_function_var(
         {Operand(type_id), result, U32Operand(ConvertAddressSpace(sc)), Operand(null_id)});
 
-    if (v->constructor) {
+    if (v->initializer) {
         if (!GenerateStore(var_id, init_id)) {
             return false;
         }
@@ -741,8 +741,8 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
     auto* type = sem->Type()->UnwrapRef();
 
     uint32_t init_id = 0;
-    if (auto* ctor = v->constructor) {
-        init_id = GenerateConstructorExpression(v, ctor);
+    if (auto* ctor = v->initializer) {
+        init_id = GenerateInitializerExpression(v, ctor);
         if (init_id == 0) {
             return false;
         }
@@ -763,7 +763,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
 
     OperandList ops = {Operand(type_id), result, U32Operand(ConvertAddressSpace(sc))};
 
-    if (v->constructor) {
+    if (v->initializer) {
         ops.push_back(Operand(init_id));
     } else {
         auto* st = type->As<sem::StorageTexture>();
@@ -785,7 +785,7 @@ bool Builder::GenerateGlobalVariable(const ast::Variable* v) {
             }
         }
         if (!type->Is<sem::Sampler>()) {
-            // If we don't have a constructor and we're an Output or Private
+            // If we don't have a initializer and we're an Output or Private
             // variable, then WGSL requires that we zero-initialize.
             // If we're a Workgroup variable, and the
             // VK_KHR_zero_initialize_workgroup_memory extension is enabled, we should
@@ -1221,7 +1221,7 @@ uint32_t Builder::GetGLSLstd450Import() {
     return id;
 }
 
-uint32_t Builder::GenerateConstructorExpression(const ast::Variable* var,
+uint32_t Builder::GenerateInitializerExpression(const ast::Variable* var,
                                                 const ast::Expression* expr) {
     if (auto* sem = builder_.Sem().Get(expr)) {
         if (auto constant = sem->ConstantValue()) {
@@ -1229,15 +1229,15 @@ uint32_t Builder::GenerateConstructorExpression(const ast::Variable* var,
         }
     }
     if (auto* call = builder_.Sem().Get<sem::Call>(expr)) {
-        if (call->Target()->IsAnyOf<sem::TypeConstructor, sem::TypeConversion>()) {
-            return GenerateTypeConstructorOrConversion(call, var);
+        if (call->Target()->IsAnyOf<sem::TypeInitializer, sem::TypeConversion>()) {
+            return GenerateTypeInitializerOrConversion(call, var);
         }
     }
-    error_ = "unknown constructor expression";
+    error_ = "unknown initializer expression";
     return 0;
 }
 
-bool Builder::IsConstructorConst(const ast::Expression* expr) {
+bool Builder::IsInitializerConst(const ast::Expression* expr) {
     bool is_const = true;
     ast::TraverseExpressions(expr, builder_.Diagnostics(), [&](const ast::Expression* e) {
         if (e->Is<ast::LiteralExpression>()) {
@@ -1251,7 +1251,7 @@ bool Builder::IsConstructorConst(const ast::Expression* expr) {
                 return ast::TraverseAction::Skip;
             }
             auto* call = sem->As<sem::Call>();
-            if (call->Target()->Is<sem::TypeConstructor>()) {
+            if (call->Target()->Is<sem::TypeInitializer>()) {
                 return ast::TraverseAction::Descend;
             }
         }
@@ -1262,7 +1262,7 @@ bool Builder::IsConstructorConst(const ast::Expression* expr) {
     return is_const;
 }
 
-uint32_t Builder::GenerateTypeConstructorOrConversion(const sem::Call* call,
+uint32_t Builder::GenerateTypeInitializerOrConversion(const sem::Call* call,
                                                       const ast::Variable* var) {
     auto& args = call->Arguments();
     auto* global_var = builder_.Sem().Get<sem::GlobalVariable>(var);
@@ -1274,7 +1274,7 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(const sem::Call* call,
     }
 
     result_type = result_type->UnwrapRef();
-    bool constructor_is_const = IsConstructorConst(call->Declaration());
+    bool initializer_is_const = IsInitializerConst(call->Declaration());
     if (has_error()) {
         return 0;
     }
@@ -1309,7 +1309,7 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(const sem::Call* call,
         return 0;
     }
 
-    bool result_is_constant_composite = constructor_is_const;
+    bool result_is_constant_composite = initializer_is_const;
     bool result_is_spec_composite = false;
 
     if (auto* vec = result_type->As<sem::Vector>()) {
@@ -1415,7 +1415,7 @@ uint32_t Builder::GenerateTypeConstructorOrConversion(const sem::Call* call,
                       ? scope_stack_[0]       // Global scope
                       : scope_stack_.back();  // Lexical scope
 
-    return utils::GetOrCreate(stack.type_ctor_to_id_, OperandListKey{ops}, [&]() -> uint32_t {
+    return utils::GetOrCreate(stack.type_init_to_id_, OperandListKey{ops}, [&]() -> uint32_t {
         auto result = result_op();
         ops[kOpsResultIdx] = result;
 
@@ -1486,7 +1486,7 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
     } else if (from_type
                    ->IsAnyOf<sem::Bool, sem::F32, sem::I32, sem::U32, sem::F16, sem::Vector>() &&
                from_type == to_type) {
-        // Identity constructor for scalar and vector types
+        // Identity initializer for scalar and vector types
         return val_id;
     } else if ((from_type->is_float_scalar() && to_type->is_float_scalar()) ||
                (from_type->is_float_vector() && to_type->is_float_vector() &&
@@ -1494,7 +1494,7 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
         // Convert between f32 and f16 types.
         // OpFConvert requires the scalar component types to be different, and the case of from_type
         // and to_type being the same floating point scalar or vector type, i.e. identity
-        // constructor, is already handled in the previous else-if clause.
+        // initializer, is already handled in the previous else-if clause.
         op = spv::Op::OpFConvert;
     } else if ((from_type->Is<sem::I32>() && to_type->Is<sem::U32>()) ||
                (from_type->Is<sem::U32>() && to_type->Is<sem::I32>()) ||
@@ -1557,7 +1557,7 @@ uint32_t Builder::GenerateCastOrCopyOrPassthrough(const sem::Type* to_type,
         return result_id;
     } else if (from_type->Is<sem::Matrix>() && to_type->Is<sem::Matrix>()) {
         // SPIRV does not support matrix conversion, the only valid case is matrix identity
-        // constructor. Matrix conversion between f32 and f16 should be transformed into vector
+        // initializer. Matrix conversion between f32 and f16 should be transformed into vector
         // conversions for each column vectors by VectorizeMatrixConversions.
         auto* from_mat = from_type->As<sem::Matrix>();
         auto* to_mat = to_type->As<sem::Matrix>();
@@ -1656,7 +1656,7 @@ uint32_t Builder::GenerateConstantIfNeeded(const sem::Constant* constant) {
         }
 
         auto& global_scope = scope_stack_[0];
-        return utils::GetOrCreate(global_scope.type_ctor_to_id_, OperandListKey{ops},
+        return utils::GetOrCreate(global_scope.type_init_to_id_, OperandListKey{ops},
                                   [&]() -> uint32_t {
                                       auto result = result_op();
                                       ops[kOpsResultIdx] = result;
@@ -2220,10 +2220,10 @@ uint32_t Builder::GenerateCallExpression(const ast::CallExpression* expr) {
         target, [&](const sem::Function* func) { return GenerateFunctionCall(call, func); },
         [&](const sem::Builtin* builtin) { return GenerateBuiltinCall(call, builtin); },
         [&](const sem::TypeConversion*) {
-            return GenerateTypeConstructorOrConversion(call, nullptr);
+            return GenerateTypeInitializerOrConversion(call, nullptr);
         },
-        [&](const sem::TypeConstructor*) {
-            return GenerateTypeConstructorOrConversion(call, nullptr);
+        [&](const sem::TypeInitializer*) {
+            return GenerateTypeInitializerOrConversion(call, nullptr);
         },
         [&](Default) {
             TINT_ICE(Writer, builder_.Diagnostics())

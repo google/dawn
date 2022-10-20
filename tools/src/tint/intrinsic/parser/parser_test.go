@@ -440,20 +440,20 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			"ctor F()",
+			"init F()",
 			ast.AST{
-				Constructors: []ast.IntrinsicDecl{{
-					Kind:       ast.Constructor,
+				Initializers: []ast.IntrinsicDecl{{
+					Kind:       ast.Initializer,
 					Name:       "F",
 					Parameters: ast.Parameters{},
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			"@attr ctor F()",
+			"@attr init F()",
 			ast.AST{
-				Constructors: []ast.IntrinsicDecl{{
-					Kind: ast.Constructor,
+				Initializers: []ast.IntrinsicDecl{{
+					Kind: ast.Initializer,
 					Name: "F",
 					Attributes: ast.Attributes{
 						{Name: "attr", Values: []string{}},
@@ -463,10 +463,10 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			"ctor F(a)",
+			"init F(a)",
 			ast.AST{
-				Constructors: []ast.IntrinsicDecl{{
-					Kind: ast.Constructor,
+				Initializers: []ast.IntrinsicDecl{{
+					Kind: ast.Initializer,
 					Name: "F",
 					Parameters: ast.Parameters{
 						{Type: ast.TemplatedName{Name: "a"}},
@@ -475,10 +475,10 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			"ctor F(a: T)",
+			"init F(a: T)",
 			ast.AST{
-				Constructors: []ast.IntrinsicDecl{{
-					Kind: ast.Constructor,
+				Initializers: []ast.IntrinsicDecl{{
+					Kind: ast.Initializer,
 					Name: "F",
 					Parameters: ast.Parameters{
 						{Name: "a", Type: ast.TemplatedName{Name: "T"}},
@@ -487,10 +487,10 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			"ctor F(a, b)",
+			"init F(a, b)",
 			ast.AST{
-				Constructors: []ast.IntrinsicDecl{{
-					Kind: ast.Constructor,
+				Initializers: []ast.IntrinsicDecl{{
+					Kind: ast.Initializer,
 					Name: "F",
 					Parameters: ast.Parameters{
 						{Type: ast.TemplatedName{Name: "a"}},
@@ -500,10 +500,10 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			"ctor F<A : B<C> >()",
+			"init F<A : B<C> >()",
 			ast.AST{
-				Constructors: []ast.IntrinsicDecl{{
-					Kind: ast.Constructor,
+				Initializers: []ast.IntrinsicDecl{{
+					Kind: ast.Initializer,
 					Name: "F",
 					TemplateParams: ast.TemplateParams{
 						{
@@ -520,10 +520,10 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			"ctor F<T>(a: X, b: Y<T>)",
+			"init F<T>(a: X, b: Y<T>)",
 			ast.AST{
-				Constructors: []ast.IntrinsicDecl{{
-					Kind: ast.Constructor,
+				Initializers: []ast.IntrinsicDecl{{
+					Kind: ast.Initializer,
 					Name: "F",
 					TemplateParams: ast.TemplateParams{
 						{Name: "T"},
@@ -539,10 +539,10 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			"ctor F() -> X",
+			"init F() -> X",
 			ast.AST{
-				Constructors: []ast.IntrinsicDecl{{
-					Kind:       ast.Constructor,
+				Initializers: []ast.IntrinsicDecl{{
+					Kind:       ast.Initializer,
 					Name:       "F",
 					ReturnType: &ast.TemplatedName{Name: "X"},
 					Parameters: ast.Parameters{},
@@ -550,10 +550,10 @@ func TestParser(t *testing.T) {
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			"ctor F() -> X<T>",
+			"init F() -> X<T>",
 			ast.AST{
-				Constructors: []ast.IntrinsicDecl{{
-					Kind: ast.Constructor,
+				Initializers: []ast.IntrinsicDecl{{
+					Kind: ast.Initializer,
 					Name: "F",
 					ReturnType: &ast.TemplatedName{
 						Name:         "X",

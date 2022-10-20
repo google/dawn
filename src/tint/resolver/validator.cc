@@ -69,8 +69,8 @@
 #include "src/tint/sem/storage_texture.h"
 #include "src/tint/sem/struct.h"
 #include "src/tint/sem/switch_statement.h"
-#include "src/tint/sem/type_constructor.h"
 #include "src/tint/sem/type_conversion.h"
+#include "src/tint/sem/type_initializer.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/while_statement.h"
 #include "src/tint/utils/defer.h"
@@ -551,7 +551,7 @@ bool Validator::LocalVariable(const sem::Variable* local) const {
     auto* decl = local->Declaration();
     if (IsArrayWithOverrideCount(local->Type())) {
         RaiseArrayWithOverrideCountError(decl->type ? decl->type->source
-                                                    : decl->constructor->source);
+                                                    : decl->initializer->source);
         return false;
     }
     return Switch(
@@ -585,13 +585,13 @@ bool Validator::GlobalVariable(
     if (global->AddressSpace() != ast::AddressSpace::kWorkgroup &&
         IsArrayWithOverrideCount(global->Type())) {
         RaiseArrayWithOverrideCountError(decl->type ? decl->type->source
-                                                    : decl->constructor->source);
+                                                    : decl->initializer->source);
         return false;
     }
     bool ok = Switch(
         decl,  //
         [&](const ast::Var* var) {
-            if (auto* init = global->Constructor();
+            if (auto* init = global->Initializer();
                 init && init->Stage() > sem::EvaluationStage::kOverride) {
                 AddError("module-scope 'var' initializer must be a constant or override-expression",
                          init->Declaration()->source);
@@ -794,7 +794,7 @@ bool Validator::Override(
     auto* decl = v->Declaration();
     auto* storage_ty = v->Type()->UnwrapRef();
 
-    if (auto* init = v->Constructor(); init && init->Stage() > sem::EvaluationStage::kOverride) {
+    if (auto* init = v->Initializer(); init && init->Stage() > sem::EvaluationStage::kOverride) {
         AddError("'override' initializer must be an override-expression",
                  init->Declaration()->source);
         return false;
@@ -1549,8 +1549,8 @@ bool Validator::Call(const sem::Call* call, sem::Statement* current_statement) c
                 AddError("type conversion evaluated but not used", call->Declaration()->source);
                 return false;
             },
-            [&](const sem::TypeConstructor*) {
-                AddError("type constructor evaluated but not used", call->Declaration()->source);
+            [&](const sem::TypeInitializer*) {
+                AddError("type initializer evaluated but not used", call->Declaration()->source);
                 return false;
             },
             [&](Default) { return true; });
@@ -1852,17 +1852,17 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
     return true;
 }
 
-bool Validator::StructureConstructor(const ast::CallExpression* ctor,
+bool Validator::StructureInitializer(const ast::CallExpression* ctor,
                                      const sem::Struct* struct_type) const {
     if (!struct_type->IsConstructible()) {
-        AddError("struct constructor has non-constructible type", ctor->source);
+        AddError("struct initializer has non-constructible type", ctor->source);
         return false;
     }
 
     if (ctor->args.Length() > 0) {
         if (ctor->args.Length() != struct_type->Members().size()) {
             std::string fm = ctor->args.Length() < struct_type->Members().size() ? "few" : "many";
-            AddError("struct constructor has too " + fm + " inputs: expected " +
+            AddError("struct initializer has too " + fm + " inputs: expected " +
                          std::to_string(struct_type->Members().size()) + ", found " +
                          std::to_string(ctor->args.Length()),
                      ctor->source);
@@ -1873,7 +1873,7 @@ bool Validator::StructureConstructor(const ast::CallExpression* ctor,
             auto* value_ty = sem_.TypeOf(value);
             if (member->Type() != value_ty->UnwrapRef()) {
                 AddError(
-                    "type in struct constructor does not match struct member type: expected '" +
+                    "type in struct initializer does not match struct member type: expected '" +
                         sem_.TypeNameOf(member->Type()) + "', found '" + sem_.TypeNameOf(value_ty) +
                         "'",
                     value->source);
@@ -1884,7 +1884,7 @@ bool Validator::StructureConstructor(const ast::CallExpression* ctor,
     return true;
 }
 
-bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
+bool Validator::ArrayInitializer(const ast::CallExpression* ctor,
                                  const sem::Array* array_type) const {
     auto& values = ctor->args;
     auto* elem_ty = array_type->ElemType();
@@ -1910,14 +1910,14 @@ bool Validator::ArrayConstructor(const ast::CallExpression* ctor,
     }
 
     if (!elem_ty->IsConstructible()) {
-        AddError("array constructor has non-constructible element type", ctor->source);
+        AddError("array initializer has non-constructible element type", ctor->source);
         return false;
     }
 
     const auto count = std::get<sem::ConstantArrayCount>(array_type->Count()).value;
     if (!values.IsEmpty() && (values.Length() != count)) {
         std::string fm = values.Length() < count ? "few" : "many";
-        AddError("array constructor has too " + fm + " elements: expected " +
+        AddError("array initializer has too " + fm + " elements: expected " +
                      std::to_string(count) + ", found " + std::to_string(values.Length()),
                  ctor->source);
         return false;

@@ -75,7 +75,7 @@ TEST_F(WgslGeneratorImplTest, EmitVariable_Decorated) {
     EXPECT_EQ(out.str(), R"(@group(1) @binding(2) var a : sampler;)");
 }
 
-TEST_F(WgslGeneratorImplTest, EmitVariable_Constructor) {
+TEST_F(WgslGeneratorImplTest, EmitVariable_Initializer) {
     auto* v = GlobalVar("a", ty.f32(), ast::AddressSpace::kPrivate, Expr(1_f));
 
     GeneratorImpl& gen = Build();

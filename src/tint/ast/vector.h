@@ -29,8 +29,8 @@ class Vector final : public Castable<Vector, Type> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param subtype the declared type of the vector components. May be null
-    ///        for vector constructors, where the element type will be inferred
-    ///        from the constructor arguments
+    ///        for vector initializers, where the element type will be inferred
+    ///        from the initializer arguments
     /// @param width the number of elements in the vector
     Vector(ProgramID pid, NodeID nid, Source const& src, const Type* subtype, uint32_t width);
     /// Move constructor
@@ -48,7 +48,7 @@ class Vector final : public Castable<Vector, Type> {
     const Vector* Clone(CloneContext* ctx) const override;
 
     /// The declared type of the vector components. May be null for vector
-    /// constructors, where the element type will be inferred from the constructor
+    /// initializers, where the element type will be inferred from the initializer
     /// arguments
     const Type* const type;
 

@@ -45,7 +45,7 @@ namespace tint::sem {
 class Call;
 class Constant;
 class Reference;
-class TypeConstructor;
+class TypeInitializer;
 class TypeConversion;
 }  // namespace tint::sem
 
@@ -327,11 +327,11 @@ class Builder {
     /// instruction set, if one doesn't exist yet, and returns the import ID.
     /// @returns the import ID, or 0 on error.
     uint32_t GetGLSLstd450Import();
-    /// Generates a constructor expression
+    /// Generates a initializer expression
     /// @param var the variable generated for, nullptr if no variable associated.
     /// @param expr the expression to generate
     /// @returns the ID of the expression or 0 on failure.
-    uint32_t GenerateConstructorExpression(const ast::Variable* var, const ast::Expression* expr);
+    uint32_t GenerateInitializerExpression(const ast::Variable* var, const ast::Expression* expr);
     /// Generates a literal constant if needed
     /// @param lit the literal to generate
     /// @returns the ID on success or 0 on failure
@@ -362,11 +362,11 @@ class Builder {
     /// @param builtin the builtin being called
     /// @returns the expression ID on success or 0 otherwise
     uint32_t GenerateBuiltinCall(const sem::Call* call, const sem::Builtin* builtin);
-    /// Handles generating a type constructor or type conversion expression
+    /// Handles generating a type initializer or type conversion expression
     /// @param call the call expression
     /// @param var the variable that is being initialized. May be null.
     /// @returns the expression ID on success or 0 otherwise
-    uint32_t GenerateTypeConstructorOrConversion(const sem::Call* call, const ast::Variable* var);
+    uint32_t GenerateTypeInitializerOrConversion(const sem::Call* call, const ast::Variable* var);
     /// Generates a texture builtin call. Emits an error and returns false if
     /// we're currently outside a function.
     /// @param call the call expression
@@ -536,10 +536,10 @@ class Builder {
     /// @returns SPIR-V image format type
     SpvImageFormat convert_texel_format_to_spv(const ast::TexelFormat format);
 
-    /// Determines if the given type constructor is created from constant values
+    /// Determines if the given type initializer is created from constant values
     /// @param expr the expression to check
-    /// @returns true if the constructor is constant
-    bool IsConstructorConst(const ast::Expression* expr);
+    /// @returns true if the initializer is constant
+    bool IsInitializerConst(const ast::Expression* expr);
 
   private:
     /// @returns an Operand with a new result ID in it. Increments the next_id_
@@ -607,7 +607,7 @@ class Builder {
         Scope();
         Scope(const Scope&);
         ~Scope();
-        std::unordered_map<OperandListKey, uint32_t> type_ctor_to_id_;
+        std::unordered_map<OperandListKey, uint32_t> type_init_to_id_;
     };
 
     std::unordered_map<const sem::Variable*, uint32_t> var_to_id_;

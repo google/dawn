@@ -257,7 +257,7 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, Immediate) {
     auto*& arg_to_replace = (param.position == Position::kFirst) ? args.Front() : args.Back();
 
     // BuildTextureVariable() uses a Literal for scalars, and a CallExpression for
-    // a vector constructor.
+    // a vector initializer.
     bool is_vector = arg_to_replace->Is<ast::CallExpression>();
 
     // Make the expression to be replaced, reachable. This keeps the resolver happy.
@@ -310,7 +310,7 @@ TEST_P(BuiltinTextureConstExprArgValidationTest, GlobalConst) {
     auto*& arg_to_replace = (param.position == Position::kFirst) ? args.Front() : args.Back();
 
     // BuildTextureVariable() uses a Literal for scalars, and a CallExpression for
-    // a vector constructor.
+    // a vector initializer.
     bool is_vector = arg_to_replace->Is<ast::CallExpression>();
 
     // Make the expression to be replaced, reachable. This keeps the resolver happy.

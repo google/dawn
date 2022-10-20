@@ -186,17 +186,17 @@ fn f() { f() }
 )");
 }
 
-TEST_F(ParserImplErrorTest, ConstructorExprMissingLParen) {
+TEST_F(ParserImplErrorTest, InitializerExprMissingLParen) {
     EXPECT("fn f() { x = vec2<u32>1,2); }",
-           R"(test.wgsl:1:23 error: expected '(' for type constructor
+           R"(test.wgsl:1:23 error: expected '(' for type initializer
 fn f() { x = vec2<u32>1,2); }
                       ^
 )");
 }
 
-TEST_F(ParserImplErrorTest, ConstructorExprMissingRParen) {
+TEST_F(ParserImplErrorTest, InitializerExprMissingRParen) {
     EXPECT("fn f() { x = vec2<u32>(1,2; }",
-           R"(test.wgsl:1:27 error: expected ')' for type constructor
+           R"(test.wgsl:1:27 error: expected ')' for type initializer
 fn f() { x = vec2<u32>(1,2; }
                           ^
 )");
@@ -218,7 +218,7 @@ fn f() { let a : i32; }
 )");
 }
 
-TEST_F(ParserImplErrorTest, ConstVarStmtMissingConstructor) {
+TEST_F(ParserImplErrorTest, ConstVarStmtMissingInitializer) {
     EXPECT("fn f() { let a : i32 = >; }",
            R"(test.wgsl:1:24 error: missing initializer for 'let' declaration
 fn f() { let a : i32 = >; }
@@ -530,7 +530,7 @@ const i : i32 = 1
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstMissingLParen) {
     EXPECT("const i : vec2<i32> = vec2<i32>;",
-           R"(test.wgsl:1:32 error: expected '(' for type constructor
+           R"(test.wgsl:1:32 error: expected '(' for type initializer
 const i : vec2<i32> = vec2<i32>;
                                ^
 )");
@@ -538,7 +538,7 @@ const i : vec2<i32> = vec2<i32>;
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstMissingRParen) {
     EXPECT("const i : vec2<i32> = vec2<i32>(1., 2.;",
-           R"(test.wgsl:1:39 error: expected ')' for type constructor
+           R"(test.wgsl:1:39 error: expected ')' for type initializer
 const i : vec2<i32> = vec2<i32>(1., 2.;
                                       ^
 )");
@@ -581,7 +581,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclConstExprMaxDepth) {
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstExprMissingLParen) {
     EXPECT("const i : vec2<i32> = vec2<i32> 1, 2);",
-           R"(test.wgsl:1:33 error: expected '(' for type constructor
+           R"(test.wgsl:1:33 error: expected '(' for type initializer
 const i : vec2<i32> = vec2<i32> 1, 2);
                                 ^
 )");
@@ -589,7 +589,7 @@ const i : vec2<i32> = vec2<i32> 1, 2);
 
 TEST_F(ParserImplErrorTest, GlobalDeclConstExprMissingRParen) {
     EXPECT("const i : vec2<i32> = vec2<i32>(1, 2;",
-           R"(test.wgsl:1:37 error: expected ')' for type constructor
+           R"(test.wgsl:1:37 error: expected ')' for type initializer
 const i : vec2<i32> = vec2<i32>(1, 2;
                                     ^
 )");
@@ -628,7 +628,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclLetMissingLParen) {
 let i : vec2<i32> = vec2<i32>;
 ^^^
 
-test.wgsl:1:30 error: expected '(' for type constructor
+test.wgsl:1:30 error: expected '(' for type initializer
 let i : vec2<i32> = vec2<i32>;
                              ^
 )");
@@ -641,7 +641,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclLetMissingRParen) {
 let i : vec2<i32> = vec2<i32>(1., 2.;
 ^^^
 
-test.wgsl:1:37 error: expected ')' for type constructor
+test.wgsl:1:37 error: expected ')' for type initializer
 let i : vec2<i32> = vec2<i32>(1., 2.;
                                     ^
 )");
@@ -667,7 +667,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclLetExprMissingLParen) {
 let i : vec2<i32> = vec2<i32> 1, 2);
 ^^^
 
-test.wgsl:1:31 error: expected '(' for type constructor
+test.wgsl:1:31 error: expected '(' for type initializer
 let i : vec2<i32> = vec2<i32> 1, 2);
                               ^
 )");
@@ -680,7 +680,7 @@ TEST_F(ParserImplErrorTest, GlobalDeclLetExprMissingRParen) {
 let i : vec2<i32> = vec2<i32>(1, 2;
 ^^^
 
-test.wgsl:1:35 error: expected ')' for type constructor
+test.wgsl:1:35 error: expected ')' for type initializer
 let i : vec2<i32> = vec2<i32>(1, 2;
                                   ^
 )");

@@ -331,8 +331,8 @@ fn convert_${mat_shape}_f32_f16(value : ${f32_mat_type}) -> ${f16_mat_type} {
     EXPECT_EQ(expect, str(got));
 }
 
-// Test that VectorizeMatrixConversions transform will not run for matrix constructor.
-TEST_P(VectorizeMatrixConversionsTest, NonConversion_ConstructorFromVectors) {
+// Test that VectorizeMatrixConversions transform will not run for matrix initializer.
+TEST_P(VectorizeMatrixConversionsTest, NonConversion_InitializerFromVectors) {
     uint32_t cols = GetParam().first;
     uint32_t rows = GetParam().second;
     std::string mat_type = "mat" + std::to_string(cols) + "x" + std::to_string(rows) + "<f32>";
@@ -362,9 +362,9 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
-// Test that VectorizeMatrixConversions transform will not run for identity matrix constructor,
+// Test that VectorizeMatrixConversions transform will not run for identity matrix initializer,
 // which also take a single matrix as input.
-TEST_P(VectorizeMatrixConversionsTest, NonConversion_IdentityConstructor) {
+TEST_P(VectorizeMatrixConversionsTest, NonConversion_IdentityInitializer) {
     uint32_t cols = GetParam().first;
     uint32_t rows = GetParam().second;
     std::string mat_type = "mat" + std::to_string(cols) + "x" + std::to_string(rows) + "<f32>";

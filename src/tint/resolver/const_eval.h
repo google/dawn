@@ -68,10 +68,10 @@ class ConstEval {
     // Constant value evaluation methods, to be called directly from Resolver
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /// @param ty the target type - must be an array or constructor
+    /// @param ty the target type - must be an array or initializer
     /// @param args the input arguments
     /// @return the constructed value, or null if the value cannot be calculated
-    Result ArrayOrStructCtor(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
+    Result ArrayOrStructInit(const sem::Type* ty, utils::VectorRef<const sem::Expression*> args);
 
     /// @param ty the target type
     /// @param expr the input expression
@@ -122,7 +122,7 @@ class ConstEval {
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
-    /// Zero value type constructor
+    /// Zero value type initializer
     /// @param ty the result type
     /// @param args the input arguments (no arguments provided)
     /// @param source the source location of the conversion
@@ -131,7 +131,7 @@ class ConstEval {
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
-    /// Identity value type constructor
+    /// Identity value type initializer
     /// @param ty the result type
     /// @param args the input arguments
     /// @param source the source location of the conversion
@@ -140,7 +140,7 @@ class ConstEval {
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 
-    /// Vector splat constructor
+    /// Vector splat initializer
     /// @param ty the vector type
     /// @param args the input arguments
     /// @param source the source location of the conversion
@@ -149,39 +149,39 @@ class ConstEval {
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 
-    /// Vector constructor using scalars
+    /// Vector initializer using scalars
     /// @param ty the vector type
     /// @param args the input arguments
     /// @param source the source location of the conversion
     /// @return the constructed value, or null if the value cannot be calculated
-    Result VecCtorS(const sem::Type* ty,
+    Result VecInitS(const sem::Type* ty,
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 
-    /// Vector constructor using a mix of scalars and smaller vectors
+    /// Vector initializer using a mix of scalars and smaller vectors
     /// @param ty the vector type
     /// @param args the input arguments
     /// @param source the source location of the conversion
     /// @return the constructed value, or null if the value cannot be calculated
-    Result VecCtorM(const sem::Type* ty,
+    Result VecInitM(const sem::Type* ty,
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 
-    /// Matrix constructor using scalar values
+    /// Matrix initializer using scalar values
     /// @param ty the matrix type
     /// @param args the input arguments
     /// @param source the source location of the conversion
     /// @return the constructed value, or null if the value cannot be calculated
-    Result MatCtorS(const sem::Type* ty,
+    Result MatInitS(const sem::Type* ty,
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 
-    /// Matrix constructor using column vectors
+    /// Matrix initializer using column vectors
     /// @param ty the matrix type
     /// @param args the input arguments
     /// @param source the source location of the conversion
     /// @return the constructed value, or null if the value cannot be calculated
-    Result MatCtorV(const sem::Type* ty,
+    Result MatInitV(const sem::Type* ty,
                     utils::VectorRef<const sem::Constant*> args,
                     const Source& source);
 

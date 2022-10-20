@@ -67,7 +67,7 @@ void Initialize(Napi::Env env);
 class {{$.Name}} {{- if $.Inherits }} : public {{$.Inherits}}{{end}} {
 public:
 {{   range $m := $.Members}}
-{{-    if      IsConstructor $m}}  {{$.Name}}();
+{{-    if      IsInitializer $m}}  {{$.Name}}();
 {{     else if IsMember      $m}}  {{template "DictionaryMember" $m}}
 {{     end}}
 {{-  end -}}

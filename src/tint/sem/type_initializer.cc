@@ -12,19 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/sem/type_constructor.h"
+#include "src/tint/sem/type_initializer.h"
 
 #include <utility>
 
-TINT_INSTANTIATE_TYPEINFO(tint::sem::TypeConstructor);
+TINT_INSTANTIATE_TYPEINFO(tint::sem::TypeInitializer);
 
 namespace tint::sem {
 
-TypeConstructor::TypeConstructor(const sem::Type* type,
+TypeInitializer::TypeInitializer(const sem::Type* type,
                                  utils::VectorRef<const Parameter*> parameters,
                                  EvaluationStage stage)
     : Base(type, std::move(parameters), stage) {}
 
-TypeConstructor::~TypeConstructor() = default;
+TypeInitializer::~TypeInitializer() = default;
 
 }  // namespace tint::sem

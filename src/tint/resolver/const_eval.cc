@@ -33,7 +33,7 @@
 #include "src/tint/sem/i32.h"
 #include "src/tint/sem/matrix.h"
 #include "src/tint/sem/member_accessor_expression.h"
-#include "src/tint/sem/type_constructor.h"
+#include "src/tint/sem/type_initializer.h"
 #include "src/tint/sem/u32.h"
 #include "src/tint/sem/vector.h"
 #include "src/tint/utils/compiler_macros.h"
@@ -286,7 +286,7 @@ struct Element : ImplConstant {
 };
 
 /// Splat holds a single Constant value, duplicated as all children.
-/// Splat is used for zero-initializers, 'splat' constructors, or constructors where each element is
+/// Splat is used for zero-initializers, 'splat' initializers, or initializers where each element is
 /// identical. Splat may be of a vector, matrix or array type.
 /// Splat implements the Constant interface.
 struct Splat : ImplConstant {
@@ -815,18 +815,18 @@ ConstEval::Result ConstEval::Literal(const sem::Type* ty, const ast::LiteralExpr
         });
 }
 
-ConstEval::Result ConstEval::ArrayOrStructCtor(const sem::Type* ty,
+ConstEval::Result ConstEval::ArrayOrStructInit(const sem::Type* ty,
                                                utils::VectorRef<const sem::Expression*> args) {
     if (args.IsEmpty()) {
         return ZeroValue(builder, ty);
     }
 
     if (args.Length() == 1 && args[0]->Type() == ty) {
-        // Identity constructor.
+        // Identity initializer.
         return args[0]->ConstantValue();
     }
 
-    // Multiple arguments. Must be a type constructor.
+    // Multiple arguments. Must be a type initializer.
     utils::Vector<const sem::Constant*, 4> els;
     els.Reserve(args.Length());
     for (auto* arg : args) {
@@ -872,13 +872,13 @@ ConstEval::Result ConstEval::VecSplat(const sem::Type* ty,
     return nullptr;
 }
 
-ConstEval::Result ConstEval::VecCtorS(const sem::Type* ty,
+ConstEval::Result ConstEval::VecInitS(const sem::Type* ty,
                                       utils::VectorRef<const sem::Constant*> args,
                                       const Source&) {
     return CreateComposite(builder, ty, args);
 }
 
-ConstEval::Result ConstEval::VecCtorM(const sem::Type* ty,
+ConstEval::Result ConstEval::VecInitM(const sem::Type* ty,
                                       utils::VectorRef<const sem::Constant*> args,
                                       const Source&) {
     utils::Vector<const sem::Constant*, 4> els;
@@ -904,7 +904,7 @@ ConstEval::Result ConstEval::VecCtorM(const sem::Type* ty,
     return CreateComposite(builder, ty, std::move(els));
 }
 
-ConstEval::Result ConstEval::MatCtorS(const sem::Type* ty,
+ConstEval::Result ConstEval::MatInitS(const sem::Type* ty,
                                       utils::VectorRef<const sem::Constant*> args,
                                       const Source&) {
     auto* m = static_cast<const sem::Matrix*>(ty);
@@ -921,7 +921,7 @@ ConstEval::Result ConstEval::MatCtorS(const sem::Type* ty,
     return CreateComposite(builder, ty, std::move(els));
 }
 
-ConstEval::Result ConstEval::MatCtorV(const sem::Type* ty,
+ConstEval::Result ConstEval::MatInitV(const sem::Type* ty,
                                       utils::VectorRef<const sem::Constant*> args,
                                       const Source&) {
     return CreateComposite(builder, ty, args);

@@ -295,10 +295,10 @@ class State {
             },
             [&](const ast::VariableDeclStatement* s) -> const ast::Statement* {
                 auto* var = s->variable;
-                if (!var->constructor) {
+                if (!var->initializer) {
                     return nullptr;
                 }
-                auto* sem_expr = sem.Get(var->constructor);
+                auto* sem_expr = sem.Get(var->initializer);
                 if (!MayDiscard(sem_expr)) {
                     return nullptr;
                 }

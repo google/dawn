@@ -138,11 +138,11 @@ struct MultiplanarExternalTexture::State {
 
             // Replace the original texture_external binding with a texture_2d<f32> binding.
             auto cloned_attributes = ctx.Clone(global->attributes);
-            const ast::Expression* cloned_constructor = ctx.Clone(global->constructor);
+            const ast::Expression* cloned_initializer = ctx.Clone(global->initializer);
 
             auto* replacement =
                 b.Var(syms.plane_0, b.ty.sampled_texture(ast::TextureDimension::k2d, b.ty.f32()),
-                      cloned_constructor, cloned_attributes);
+                      cloned_initializer, cloned_attributes);
             ctx.Replace(global, replacement);
         }
 

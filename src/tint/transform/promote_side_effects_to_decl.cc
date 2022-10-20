@@ -396,7 +396,7 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
                 },
                 [&](const ast::SwitchStatement* s) { ProcessStatement(s->condition); },
                 [&](const ast::VariableDeclStatement* s) {
-                    ProcessStatement(s->variable->constructor);
+                    ProcessStatement(s->variable->initializer);
                 });
         }
 
@@ -625,11 +625,11 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
             },
             [&](const ast::VariableDeclStatement* s) -> const ast::Statement* {
                 auto* var = s->variable;
-                if (!var->constructor || !sem.Get(var->constructor)->HasSideEffects()) {
+                if (!var->initializer || !sem.Get(var->initializer)->HasSideEffects()) {
                     return nullptr;
                 }
                 tint::utils::Vector<const ast::Statement*, 8> stmts;
-                ctx.Replace(var->constructor, Decompose(var->constructor, &stmts));
+                ctx.Replace(var->initializer, Decompose(var->initializer, &stmts));
                 InsertBefore(stmts, s);
                 return b.Decl(ctx.CloneWithoutTransform(var));
             },

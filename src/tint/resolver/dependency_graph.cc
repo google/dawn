@@ -199,8 +199,8 @@ class DependencyScanner {
                 Declare(var->symbol, var);
                 TraverseType(var->type);
                 TraverseAttributes(var->attributes);
-                if (var->constructor) {
-                    TraverseExpression(var->constructor);
+                if (var->initializer) {
+                    TraverseExpression(var->initializer);
                 }
             },
             [&](const ast::Enable*) {
@@ -309,7 +309,7 @@ class DependencyScanner {
                     graph_.shadows.emplace(v->variable, shadows);
                 }
                 TraverseType(v->variable->type);
-                TraverseExpression(v->variable->constructor);
+                TraverseExpression(v->variable->initializer);
                 Declare(v->variable->symbol, v->variable);
             },
             [&](const ast::WhileStatement* w) {

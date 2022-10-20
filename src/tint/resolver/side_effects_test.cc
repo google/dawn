@@ -383,7 +383,7 @@ TEST_F(SideEffectsTest, Call_TypeConversion_SE) {
     EXPECT_TRUE(sem->HasSideEffects());
 }
 
-TEST_F(SideEffectsTest, Call_TypeConstructor_NoSE) {
+TEST_F(SideEffectsTest, Call_TypeInitializer_NoSE) {
     auto* var = Decl(Var("a", ty.f32()));
     auto* expr = Construct(ty.f32(), "a");
     WrapInFunction(var, expr);
@@ -395,7 +395,7 @@ TEST_F(SideEffectsTest, Call_TypeConstructor_NoSE) {
     EXPECT_FALSE(sem->HasSideEffects());
 }
 
-TEST_F(SideEffectsTest, Call_TypeConstructor_SE) {
+TEST_F(SideEffectsTest, Call_TypeInitializer_SE) {
     MakeSideEffectFunc<f32>("se");
     auto* expr = Construct(ty.f32(), Call("se"));
     WrapInFunction(expr);

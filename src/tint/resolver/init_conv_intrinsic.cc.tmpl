@@ -1,6 +1,6 @@
 {{- /*
 --------------------------------------------------------------------------------
-Template file for use with tools/src/cmd/gen to generate ctor_conv_intrinsic.cc
+Template file for use with tools/src/cmd/gen to generate init_conv_intrinsic.cc
 
 To update the generated file, run:
     ./tools/run gen
@@ -11,16 +11,16 @@ See:
 --------------------------------------------------------------------------------
 */ -}}
 
-#include "src/tint/resolver/ctor_conv_intrinsic.h"
+#include "src/tint/resolver/init_conv_intrinsic.h"
 
 namespace tint::resolver {
 
-const char* str(CtorConvIntrinsic i) {
+const char* str(InitConvIntrinsic i) {
     switch (i) {
-        case CtorConvIntrinsic::kNone:
+        case InitConvIntrinsic::kNone:
             return "<none>";
-{{- range Sem.ConstructorsAndConverters  }}
-        case CtorConvIntrinsic::k{{Title .Name}}:
+{{- range Sem.InitializersAndConverters  }}
+        case InitConvIntrinsic::k{{Title .Name}}:
             return "{{.Name}}";
 {{- end  }}
     }

@@ -20,7 +20,7 @@
 namespace tint::ast {
 
 /// A "const" declaration is a name for a module-scoped or function-scoped creation-time value.
-/// const must have a constructor expression.
+/// const must have a initializer expression.
 ///
 /// Examples:
 ///
@@ -38,14 +38,14 @@ class Const final : public Castable<Const, Variable> {
     /// @param source the variable source
     /// @param sym the variable symbol
     /// @param type the declared variable type
-    /// @param constructor the constructor expression. Must not be nullptr.
+    /// @param initializer the initializer expression. Must not be nullptr.
     /// @param attributes the variable attributes
     Const(ProgramID pid,
           NodeID nid,
           const Source& source,
           const Symbol& sym,
           const ast::Type* type,
-          const Expression* constructor,
+          const Expression* initializer,
           utils::VectorRef<const Attribute*> attributes);
 
     /// Move constructor

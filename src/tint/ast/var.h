@@ -49,7 +49,7 @@ class Var final : public Castable<Var, Variable> {
     /// @param type the declared variable type
     /// @param declared_address_space the declared address space
     /// @param declared_access the declared access control
-    /// @param constructor the constructor expression
+    /// @param initializer the initializer expression
     /// @param attributes the variable attributes
     Var(ProgramID pid,
         NodeID nid,
@@ -58,7 +58,7 @@ class Var final : public Castable<Var, Variable> {
         const ast::Type* type,
         AddressSpace declared_address_space,
         Access declared_access,
-        const Expression* constructor,
+        const Expression* initializer,
         utils::VectorRef<const Attribute*> attributes);
 
     /// Move constructor

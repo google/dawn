@@ -710,7 +710,7 @@ TEST(Castable, SwitchNullNoDefault) {
     EXPECT_TRUE(default_called);
 }
 
-TEST(Castable, SwitchReturnNoDefaultConstructor) {
+TEST(Castable, SwitchReturnNoDefaultInitializer) {
     struct Object {
         explicit Object(int v) : value(v) {}
         int value;

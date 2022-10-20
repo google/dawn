@@ -1485,16 +1485,16 @@ bool ParserImpl::EmitModuleScopeVariables() {
 
         auto* ast_store_type = ast_type->As<Pointer>()->type;
         auto ast_address_space = ast_type->As<Pointer>()->address_space;
-        const ast::Expression* ast_constructor = nullptr;
+        const ast::Expression* ast_initializer = nullptr;
         if (var.NumInOperands() > 1) {
             // SPIR-V initializers are always constants.
             // (OpenCL also allows the ID of an OpVariable, but we don't handle that
             // here.)
-            ast_constructor = MakeConstantExpression(var.GetSingleWordInOperand(1)).expr;
+            ast_initializer = MakeConstantExpression(var.GetSingleWordInOperand(1)).expr;
         }
-        auto* ast_var = MakeVar(var.result_id(), ast_address_space, ast_store_type, ast_constructor,
+        auto* ast_var = MakeVar(var.result_id(), ast_address_space, ast_store_type, ast_initializer,
                                 utils::Empty);
-        // TODO(dneto): initializers (a.k.a. constructor expression)
+        // TODO(dneto): initializers (a.k.a. initializer expression)
         if (ast_var) {
             builder_.AST().AddGlobalVariable(ast_var);
             module_variable_.GetOrCreate(var.result_id(), [ast_var] { return ast_var; });
@@ -1505,14 +1505,14 @@ bool ParserImpl::EmitModuleScopeVariables() {
     if (builtin_position_.per_vertex_var_id) {
         // Make sure the variable has a name.
         namer_.SuggestSanitizedName(builtin_position_.per_vertex_var_id, "gl_Position");
-        const ast::Expression* ast_constructor = nullptr;
+        const ast::Expression* ast_initializer = nullptr;
         if (builtin_position_.per_vertex_var_init_id) {
             // The initializer is complex.
             const auto* init = def_use_mgr_->GetDef(builtin_position_.per_vertex_var_init_id);
             switch (init->opcode()) {
                 case SpvOpConstantComposite:
                 case SpvOpSpecConstantComposite:
-                    ast_constructor =
+                    ast_initializer =
                         MakeConstantExpression(
                             init->GetSingleWordInOperand(builtin_position_.position_member_index))
                             .expr;
@@ -1527,7 +1527,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
         auto* ast_var =
             MakeVar(builtin_position_.per_vertex_var_id,
                     enum_converter_.ToAddressSpace(builtin_position_.storage_class),
-                    ConvertType(builtin_position_.position_member_type_id), ast_constructor, {});
+                    ConvertType(builtin_position_.position_member_type_id), ast_initializer, {});
 
         builder_.AST().AddGlobalVariable(ast_var);
         module_variable_.GetOrCreate(builtin_position_.per_vertex_var_id,
@@ -1562,7 +1562,7 @@ const spvtools::opt::analysis::IntConstant* ParserImpl::GetArraySize(uint32_t va
 ast::Var* ParserImpl::MakeVar(uint32_t id,
                               ast::AddressSpace address_space,
                               const Type* storage_type,
-                              const ast::Expression* constructor,
+                              const ast::Expression* initializer,
                               AttributeList decorations) {
     if (storage_type == nullptr) {
         Fail() << "internal error: can't make ast::Variable for null type";
@@ -1593,23 +1593,23 @@ ast::Var* ParserImpl::MakeVar(uint32_t id,
 
     auto sym = builder_.Symbols().Register(namer_.Name(id));
     return create<ast::Var>(Source{}, sym, storage_type->Build(builder_), address_space, access,
-                            constructor, decorations);
+                            initializer, decorations);
 }
 
-ast::Let* ParserImpl::MakeLet(uint32_t id, const Type* type, const ast::Expression* constructor) {
+ast::Let* ParserImpl::MakeLet(uint32_t id, const Type* type, const ast::Expression* initializer) {
     auto sym = builder_.Symbols().Register(namer_.Name(id));
-    return create<ast::Let>(Source{}, sym, type->Build(builder_), constructor, utils::Empty);
+    return create<ast::Let>(Source{}, sym, type->Build(builder_), initializer, utils::Empty);
 }
 
 ast::Override* ParserImpl::MakeOverride(uint32_t id,
                                         const Type* type,
-                                        const ast::Expression* constructor,
+                                        const ast::Expression* initializer,
                                         AttributeList decorations) {
     if (!ConvertDecorationsForVariable(id, &type, &decorations, false)) {
         return nullptr;
     }
     auto sym = builder_.Symbols().Register(namer_.Name(id));
-    return create<ast::Override>(Source{}, sym, type->Build(builder_), constructor, decorations);
+    return create<ast::Override>(Source{}, sym, type->Build(builder_), initializer, decorations);
 }
 
 ast::Parameter* ParserImpl::MakeParameter(uint32_t id,
@@ -1965,7 +1965,7 @@ TypedExpression ParserImpl::MakeConstantExpressionForScalarSpirvConstant(
 }
 
 const ast::Expression* ParserImpl::MakeNullValue(const Type* type) {
-    // TODO(dneto): Use the no-operands constructor syntax when it becomes
+    // TODO(dneto): Use the no-operands initializer syntax when it becomes
     // available in Tint.
     // https://github.com/gpuweb/gpuweb/issues/685
     // https://bugs.chromium.org/p/tint/issues/detail?id=34

@@ -427,32 +427,32 @@ class ParserImpl : Reader {
     /// @param id the SPIR-V result ID
     /// @param address_space the address space, which cannot be ast::AddressSpace::kNone
     /// @param storage_type the storage type of the variable
-    /// @param constructor the variable constructor
+    /// @param initializer the variable initializer
     /// @param decorations the variable decorations
     /// @returns a new Variable node, or null in the ignorable variable case and
     /// in the error case
     ast::Var* MakeVar(uint32_t id,
                       ast::AddressSpace address_space,
                       const Type* storage_type,
-                      const ast::Expression* constructor,
+                      const ast::Expression* initializer,
                       AttributeList decorations);
 
     /// Creates an AST 'let' node for a SPIR-V ID, including any attached decorations,.
     /// @param id the SPIR-V result ID
     /// @param type the type of the variable
-    /// @param constructor the variable constructor
+    /// @param initializer the variable initializer
     /// @returns the AST 'let' node
-    ast::Let* MakeLet(uint32_t id, const Type* type, const ast::Expression* constructor);
+    ast::Let* MakeLet(uint32_t id, const Type* type, const ast::Expression* initializer);
 
     /// Creates an AST 'override' node for a SPIR-V ID, including any attached decorations.
     /// @param id the SPIR-V result ID
     /// @param type the type of the variable
-    /// @param constructor the variable constructor
+    /// @param initializer the variable initializer
     /// @param decorations the variable decorations
     /// @returns the AST 'override' node
     ast::Override* MakeOverride(uint32_t id,
                                 const Type* type,
-                                const ast::Expression* constructor,
+                                const ast::Expression* initializer,
                                 AttributeList decorations);
 
     /// Creates an AST parameter node for a SPIR-V ID, including any attached decorations, unless
@@ -780,7 +780,7 @@ class ParserImpl : Reader {
                                uint32_t* array_stride);
 
     /// Creates a new `ast::Node` owned by the ProgramBuilder.
-    /// @param args the arguments to pass to the type constructor
+    /// @param args the arguments to pass to the type initializer
     /// @returns the node pointer
     template <typename T, typename... ARGS>
     T* create(ARGS&&... args) {

@@ -47,14 +47,14 @@ class Variable : public Castable<Variable, Node> {
     /// @param source the variable source
     /// @param sym the variable symbol
     /// @param type the declared variable type
-    /// @param constructor the constructor expression
+    /// @param initializer the initializer expression
     /// @param attributes the variable attributes
     Variable(ProgramID pid,
              NodeID nid,
              const Source& source,
              const Symbol& sym,
              const ast::Type* type,
-             const Expression* constructor,
+             const Expression* initializer,
              utils::VectorRef<const Attribute*> attributes);
 
     /// Move constructor
@@ -81,8 +81,8 @@ class Variable : public Castable<Variable, Node> {
     ///   var i = 1;
     const ast::Type* const type;
 
-    /// The constructor expression or nullptr if none set
-    const Expression* const constructor;
+    /// The initializer expression or nullptr if none set
+    const Expression* const initializer;
 
     /// The attributes attached to this variable
     const utils::Vector<const Attribute*, 2> attributes;

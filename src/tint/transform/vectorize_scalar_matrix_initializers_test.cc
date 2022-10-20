@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/transform/vectorize_scalar_matrix_constructors.h"
+#include "src/tint/transform/vectorize_scalar_matrix_initializers.h"
 
 #include <string>
 #include <utility>
@@ -23,15 +23,15 @@
 namespace tint::transform {
 namespace {
 
-using VectorizeScalarMatrixConstructorsTest = TransformTestWithParam<std::pair<uint32_t, uint32_t>>;
+using VectorizeScalarMatrixInitializersTest = TransformTestWithParam<std::pair<uint32_t, uint32_t>>;
 
-TEST_F(VectorizeScalarMatrixConstructorsTest, ShouldRunEmptyModule) {
+TEST_F(VectorizeScalarMatrixInitializersTest, ShouldRunEmptyModule) {
     auto* src = R"()";
 
-    EXPECT_FALSE(ShouldRun<VectorizeScalarMatrixConstructors>(src));
+    EXPECT_FALSE(ShouldRun<VectorizeScalarMatrixInitializers>(src));
 }
 
-TEST_P(VectorizeScalarMatrixConstructorsTest, MultipleScalars) {
+TEST_P(VectorizeScalarMatrixInitializersTest, MultipleScalars) {
     uint32_t cols = GetParam().first;
     uint32_t rows = GetParam().second;
     std::string mat_type = "mat" + std::to_string(cols) + "x" + std::to_string(rows) + "<f32>";
@@ -66,14 +66,14 @@ fn main() {
     auto src = utils::ReplaceAll(tmpl, "${values}", scalar_values);
     auto expect = utils::ReplaceAll(tmpl, "${values}", vector_values);
 
-    EXPECT_TRUE(ShouldRun<VectorizeScalarMatrixConstructors>(src));
+    EXPECT_TRUE(ShouldRun<VectorizeScalarMatrixInitializers>(src));
 
-    auto got = Run<VectorizeScalarMatrixConstructors>(src);
+    auto got = Run<VectorizeScalarMatrixInitializers>(src);
 
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_P(VectorizeScalarMatrixConstructorsTest, MultipleScalarsReference) {
+TEST_P(VectorizeScalarMatrixInitializersTest, MultipleScalarsReference) {
     uint32_t cols = GetParam().first;
     uint32_t rows = GetParam().second;
     std::string mat_type = "mat" + std::to_string(cols) + "x" + std::to_string(rows) + "<f32>";
@@ -109,14 +109,14 @@ fn main() {
     auto src = utils::ReplaceAll(tmpl, "${values}", scalar_values);
     auto expect = utils::ReplaceAll(tmpl, "${values}", vector_values);
 
-    EXPECT_TRUE(ShouldRun<VectorizeScalarMatrixConstructors>(src));
+    EXPECT_TRUE(ShouldRun<VectorizeScalarMatrixInitializers>(src));
 
-    auto got = Run<VectorizeScalarMatrixConstructors>(src);
+    auto got = Run<VectorizeScalarMatrixInitializers>(src);
 
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_P(VectorizeScalarMatrixConstructorsTest, NonScalarConstructors) {
+TEST_P(VectorizeScalarMatrixInitializersTest, NonScalarInitializers) {
     uint32_t cols = GetParam().first;
     uint32_t rows = GetParam().second;
     std::string mat_type = "mat" + std::to_string(cols) + "x" + std::to_string(rows) + "<f32>";
@@ -139,15 +139,15 @@ fn main() {
     auto src = utils::ReplaceAll(tmpl, "${columns}", columns);
     auto expect = src;
 
-    EXPECT_FALSE(ShouldRun<VectorizeScalarMatrixConstructors>(src));
+    EXPECT_FALSE(ShouldRun<VectorizeScalarMatrixInitializers>(src));
 
-    auto got = Run<VectorizeScalarMatrixConstructors>(src);
+    auto got = Run<VectorizeScalarMatrixInitializers>(src);
 
     EXPECT_EQ(expect, str(got));
 }
 
-INSTANTIATE_TEST_SUITE_P(VectorizeScalarMatrixConstructorsTest,
-                         VectorizeScalarMatrixConstructorsTest,
+INSTANTIATE_TEST_SUITE_P(VectorizeScalarMatrixInitializersTest,
+                         VectorizeScalarMatrixInitializersTest,
                          testing::Values(std::make_pair(2, 2),
                                          std::make_pair(2, 3),
                                          std::make_pair(2, 4),

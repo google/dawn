@@ -977,7 +977,7 @@ TEST_F(SpvParserTest, DISABLED_WorkgroupSize_Overridable) {
     none
     __u32
     {
-      ScalarConstructor[not set]{2}
+      ScalarInitializer[not set]{2}
     }
   }
   VariableConst{
@@ -988,7 +988,7 @@ TEST_F(SpvParserTest, DISABLED_WorkgroupSize_Overridable) {
     none
     __u32
     {
-      ScalarConstructor[not set]{4}
+      ScalarInitializer[not set]{4}
     }
   }
   VariableConst{
@@ -999,7 +999,7 @@ TEST_F(SpvParserTest, DISABLED_WorkgroupSize_Overridable) {
     none
     __u32
     {
-      ScalarConstructor[not set]{8}
+      ScalarInitializer[not set]{8}
     }
   }
 )")) << got;
@@ -1010,11 +1010,11 @@ TEST_F(SpvParserTest, DISABLED_WorkgroupSize_Overridable) {
         none
         __vec_3__u32
         {
-          TypeConstructor[not set]{
+          TypeInitializer[not set]{
             __vec_3__u32
-            ScalarConstructor[not set]{2}
-            ScalarConstructor[not set]{4}
-            ScalarConstructor[not set]{8}
+            ScalarInitializer[not set]{2}
+            ScalarInitializer[not set]{4}
+            ScalarInitializer[not set]{8}
           }
         }
       }

@@ -81,7 +81,7 @@ TEST_F(VariableTest, Assert_DifferentProgramID_Symbol) {
         "internal compiler error");
 }
 
-TEST_F(VariableTest, Assert_DifferentProgramID_Constructor) {
+TEST_F(VariableTest, Assert_DifferentProgramID_Initializer) {
     EXPECT_FATAL_FAILURE(
         {
             ProgramBuilder b1;

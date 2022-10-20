@@ -187,8 +187,8 @@ struct ModuleScopeVarToEntryPointParam::State {
                 // scope. Disable address space validation on this variable.
                 auto* disable_validation =
                     ctx.dst->Disable(ast::DisabledValidation::kIgnoreAddressSpace);
-                auto* constructor = ctx.Clone(var->Declaration()->constructor);
-                auto* local_var = ctx.dst->Var(new_var_symbol, store_type(), sc, constructor,
+                auto* initializer = ctx.Clone(var->Declaration()->initializer);
+                auto* local_var = ctx.dst->Var(new_var_symbol, store_type(), sc, initializer,
                                                utils::Vector{disable_validation});
                 ctx.InsertFront(func->body->statements, ctx.dst->Decl(local_var));
 
@@ -400,10 +400,10 @@ struct ModuleScopeVarToEntryPointParam::State {
                     // Redeclare the variable at function scope.
                     auto* disable_validation =
                         ctx.dst->Disable(ast::DisabledValidation::kIgnoreAddressSpace);
-                    auto* constructor = ctx.Clone(var->Declaration()->constructor);
+                    auto* initializer = ctx.Clone(var->Declaration()->initializer);
                     auto* local_var = ctx.dst->Var(new_var_symbol,
                                                    CreateASTTypeFor(ctx, var->Type()->UnwrapRef()),
-                                                   ast::AddressSpace::kPrivate, constructor,
+                                                   ast::AddressSpace::kPrivate, initializer,
                                                    utils::Vector{disable_validation});
                     ctx.InsertFront(func_ast->body->statements, ctx.dst->Decl(local_var));
                     local_private_vars_.insert(var);

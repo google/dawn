@@ -25,12 +25,12 @@ Variable::Variable(ProgramID pid,
                    const Source& src,
                    const Symbol& sym,
                    const ast::Type* ty,
-                   const Expression* ctor,
+                   const Expression* init,
                    utils::VectorRef<const Attribute*> attrs)
-    : Base(pid, nid, src), symbol(sym), type(ty), constructor(ctor), attributes(std::move(attrs)) {
+    : Base(pid, nid, src), symbol(sym), type(ty), initializer(init), attributes(std::move(attrs)) {
     TINT_ASSERT(AST, symbol.IsValid());
     TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, symbol, program_id);
-    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, constructor, program_id);
+    TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(AST, initializer, program_id);
 }
 
 Variable::Variable(Variable&&) = default;

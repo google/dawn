@@ -30,7 +30,7 @@ namespace tint::writer {
 
 /// A helper function used to append a vector with an additional scalar.
 /// If the scalar's type does not match the target vector element type,
-/// then it is value-converted (via TypeConstructor) before being added.
+/// then it is value-converted (via TypeInitializer) before being added.
 /// All types must have been assigned to the expressions and their child nodes
 /// before calling.
 /// @param builder the program builder.

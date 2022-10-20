@@ -48,7 +48,7 @@ namespace tint::sem {
 class Call;
 class Constant;
 class Builtin;
-class TypeConstructor;
+class TypeInitializer;
 class TypeConversion;
 }  // namespace tint::sem
 
@@ -148,14 +148,14 @@ class GeneratorImpl : public TextGenerator {
     bool EmitTypeConversion(std::ostream& out,
                             const sem::Call* call,
                             const sem::TypeConversion* conv);
-    /// Handles generating a type constructor
+    /// Handles generating a type initializer
     /// @param out the output of the expression stream
     /// @param call the call expression
-    /// @param ctor the type constructor
-    /// @returns true if the constructor is emitted
-    bool EmitTypeConstructor(std::ostream& out,
+    /// @param ctor the type initializer
+    /// @returns true if the initializer is emitted
+    bool EmitTypeInitializer(std::ostream& out,
                              const sem::Call* call,
-                             const sem::TypeConstructor* ctor);
+                             const sem::TypeInitializer* ctor);
     /// Handles generating a function call
     /// @param out the output of the expression stream
     /// @param call the call expression

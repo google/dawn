@@ -396,7 +396,7 @@ struct ZeroInitWorkgroupMemory::State {
     }
 
     /// @returns true if a variable with store type `ty` can be efficiently zeroed
-    /// by assignment of a type constructor without operands. If
+    /// by assignment of a type initializer without operands. If
     /// CanTriviallyZero() returns false, then the type needs to be
     /// initialized by decomposing the initialization into multiple
     /// sub-initializations.

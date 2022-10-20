@@ -45,7 +45,7 @@ namespace tint::sem {
 class Call;
 class Constant;
 class Builtin;
-class TypeConstructor;
+class TypeInitializer;
 class TypeConversion;
 }  // namespace tint::sem
 
@@ -150,14 +150,14 @@ class GeneratorImpl : public TextGenerator {
     bool EmitTypeConversion(std::ostream& out,
                             const sem::Call* call,
                             const sem::TypeConversion* conv);
-    /// Handles generating a type constructor expression
+    /// Handles generating a type initializer expression
     /// @param out the output of the expression stream
     /// @param call the call expression
-    /// @param ctor the type constructor
+    /// @param ctor the type initializer
     /// @returns true if the expression is emitted
-    bool EmitTypeConstructor(std::ostream& out,
+    bool EmitTypeInitializer(std::ostream& out,
                              const sem::Call* call,
-                             const sem::TypeConstructor* ctor);
+                             const sem::TypeInitializer* ctor);
     /// Handles generating a call expression to a
     /// transform::DecomposeMemoryAccess::Intrinsic for a uniform buffer
     /// @param out the output of the expression stream
@@ -537,7 +537,7 @@ class GeneratorImpl : public TextGenerator {
 
     TextBuffer helpers_;  // Helper functions emitted at the top of the output
     std::function<bool()> emit_continuing_;
-    std::unordered_map<const sem::Matrix*, std::string> matrix_scalar_ctors_;
+    std::unordered_map<const sem::Matrix*, std::string> matrix_scalar_inits_;
     std::unordered_map<const sem::Builtin*, std::string> builtins_;
     std::unordered_map<const sem::Vector*, std::string> dynamic_vector_write_;
     std::unordered_map<const sem::Matrix*, std::string> dynamic_matrix_vector_write_;

@@ -513,7 +513,7 @@ struct Std140::State {
                         // Found a pointer. As the source variable is a uniform buffer variable,
                         // this must be a pointer-let. Continue traversing from the let
                         // initializer.
-                        expr = user->Variable()->Constructor();
+                        expr = user->Variable()->Initializer();
                         return Action::kContinue;
                     }
                     TINT_ICE(Transform, b.Diagnostics())

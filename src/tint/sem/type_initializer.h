@@ -12,29 +12,29 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_SEM_TYPE_CONSTRUCTOR_H_
-#define SRC_TINT_SEM_TYPE_CONSTRUCTOR_H_
+#ifndef SRC_TINT_SEM_TYPE_INITIALIZER_H_
+#define SRC_TINT_SEM_TYPE_INITIALIZER_H_
 
 #include "src/tint/sem/call_target.h"
 #include "src/tint/utils/vector.h"
 
 namespace tint::sem {
 
-/// TypeConstructor is the CallTarget for a type constructor.
-class TypeConstructor final : public Castable<TypeConstructor, CallTarget> {
+/// TypeInitializer is the CallTarget for a type initializer.
+class TypeInitializer final : public Castable<TypeInitializer, CallTarget> {
   public:
     /// Constructor
     /// @param type the type that's being constructed
-    /// @param parameters the type constructor parameters
+    /// @param parameters the type initializer parameters
     /// @param stage the earliest evaluation stage for the expression
-    TypeConstructor(const sem::Type* type,
+    TypeInitializer(const sem::Type* type,
                     utils::VectorRef<const Parameter*> parameters,
                     EvaluationStage stage);
 
     /// Destructor
-    ~TypeConstructor() override;
+    ~TypeInitializer() override;
 };
 
 }  // namespace tint::sem
 
-#endif  // SRC_TINT_SEM_TYPE_CONSTRUCTOR_H_
+#endif  // SRC_TINT_SEM_TYPE_INITIALIZER_H_

@@ -19,7 +19,7 @@
 
 namespace tint::transform {
 
-/// A transform that hoists array and structure constructors, and identifiers resolving to a
+/// A transform that hoists array and structure initializers, and identifiers resolving to a
 /// 'const' array to a 'let' variable, declared just before the statement of usage.
 /// This transform is used by backends that do not support expressions that operate on an immediate
 /// array or structure. For example, the following is not immediately expressable for HLSL:

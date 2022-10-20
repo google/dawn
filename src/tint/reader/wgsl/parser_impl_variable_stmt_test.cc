@@ -33,7 +33,7 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl) {
     ASSERT_EQ(e->source.range.end.line, 1u);
     ASSERT_EQ(e->source.range.end.column, 6u);
 
-    EXPECT_EQ(e->variable->constructor, nullptr);
+    EXPECT_EQ(e->variable->initializer, nullptr);
 }
 
 TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
@@ -52,11 +52,11 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
     ASSERT_EQ(e->source.range.end.line, 1u);
     ASSERT_EQ(e->source.range.end.column, 6u);
 
-    ASSERT_NE(e->variable->constructor, nullptr);
-    EXPECT_TRUE(e->variable->constructor->Is<ast::LiteralExpression>());
+    ASSERT_NE(e->variable->initializer, nullptr);
+    EXPECT_TRUE(e->variable->initializer->Is<ast::LiteralExpression>());
 }
 
-TEST_F(ParserImplTest, VariableStmt_VariableDecl_ConstructorInvalid) {
+TEST_F(ParserImplTest, VariableStmt_VariableDecl_InitializerInvalid) {
     auto p = parser("var a : i32 = if(a) {}");
     auto e = p->variable_statement();
     EXPECT_FALSE(e.matched);
@@ -77,8 +77,8 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit) {
     ASSERT_NE(e->variable, nullptr);
     EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-    ASSERT_NE(e->variable->constructor, nullptr);
-    auto* call = e->variable->constructor->As<ast::CallExpression>();
+    ASSERT_NE(e->variable->initializer, nullptr);
+    auto* call = e->variable->initializer->As<ast::CallExpression>();
     ASSERT_NE(call, nullptr);
     EXPECT_EQ(call->target.name, nullptr);
     EXPECT_NE(call->target.type, nullptr);
@@ -95,8 +95,8 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_ArrayInit_NoSpace) {
     ASSERT_NE(e->variable, nullptr);
     EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-    ASSERT_NE(e->variable->constructor, nullptr);
-    auto* call = e->variable->constructor->As<ast::CallExpression>();
+    ASSERT_NE(e->variable->initializer, nullptr);
+    auto* call = e->variable->initializer->As<ast::CallExpression>();
     ASSERT_NE(call, nullptr);
     EXPECT_EQ(call->target.name, nullptr);
     EXPECT_NE(call->target.type, nullptr);
@@ -113,8 +113,8 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit) {
     ASSERT_NE(e->variable, nullptr);
     EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-    ASSERT_NE(e->variable->constructor, nullptr);
-    auto* call = e->variable->constructor->As<ast::CallExpression>();
+    ASSERT_NE(e->variable->initializer, nullptr);
+    auto* call = e->variable->initializer->As<ast::CallExpression>();
     ASSERT_NE(call, nullptr);
     EXPECT_EQ(call->target.name, nullptr);
     EXPECT_NE(call->target.type, nullptr);
@@ -131,8 +131,8 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_VecInit_NoSpace) {
     ASSERT_NE(e->variable, nullptr);
     EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-    ASSERT_NE(e->variable->constructor, nullptr);
-    auto* call = e->variable->constructor->As<ast::CallExpression>();
+    ASSERT_NE(e->variable->initializer, nullptr);
+    auto* call = e->variable->initializer->As<ast::CallExpression>();
     ASSERT_NE(call, nullptr);
     EXPECT_EQ(call->target.name, nullptr);
     EXPECT_NE(call->target.type, nullptr);
@@ -164,10 +164,10 @@ TEST_F(ParserImplTest, VariableStmt_Let_ComplexExpression) {
     ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
 
     auto* decl = e->As<ast::VariableDeclStatement>();
-    ASSERT_NE(decl->variable->constructor, nullptr);
+    ASSERT_NE(decl->variable->initializer, nullptr);
 
-    ASSERT_TRUE(decl->variable->constructor->Is<ast::BinaryExpression>());
-    auto* expr = decl->variable->constructor->As<ast::BinaryExpression>();
+    ASSERT_TRUE(decl->variable->initializer->Is<ast::BinaryExpression>());
+    auto* expr = decl->variable->initializer->As<ast::BinaryExpression>();
     EXPECT_EQ(expr->op, ast::BinaryOp::kAdd);
 
     ASSERT_TRUE(expr->lhs->Is<ast::IdentifierExpression>());
@@ -189,7 +189,7 @@ TEST_F(ParserImplTest, VariableStmt_Let_MissingEqual) {
     EXPECT_EQ(p->error(), "1:13: expected '=' for 'let' declaration");
 }
 
-TEST_F(ParserImplTest, VariableStmt_Let_MissingConstructor) {
+TEST_F(ParserImplTest, VariableStmt_Let_MissingInitializer) {
     auto p = parser("let a : i32 =");
     auto e = p->variable_statement();
     EXPECT_FALSE(e.matched);
@@ -199,7 +199,7 @@ TEST_F(ParserImplTest, VariableStmt_Let_MissingConstructor) {
     EXPECT_EQ(p->error(), "1:14: missing initializer for 'let' declaration");
 }
 
-TEST_F(ParserImplTest, VariableStmt_Let_InvalidConstructor) {
+TEST_F(ParserImplTest, VariableStmt_Let_InvalidInitializer) {
     auto p = parser("let a : i32 = if (a) {}");
     auto e = p->variable_statement();
     EXPECT_FALSE(e.matched);

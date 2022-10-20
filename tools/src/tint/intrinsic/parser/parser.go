@@ -71,8 +71,8 @@ func (p *parser) parse() (*ast.AST, error) {
 		case tok.Operator:
 			out.Operators = append(out.Operators, p.operatorDecl(attributes))
 			attributes = nil
-		case tok.Constructor:
-			out.Constructors = append(out.Constructors, p.constructorDecl(attributes))
+		case tok.Initializer:
+			out.Initializers = append(out.Initializers, p.initializerDecl(attributes))
 			attributes = nil
 		case tok.Converter:
 			out.Converters = append(out.Converters, p.converterDecl(attributes))
@@ -204,12 +204,12 @@ func (p *parser) operatorDecl(decos ast.Attributes) ast.IntrinsicDecl {
 	return f
 }
 
-func (p *parser) constructorDecl(decos ast.Attributes) ast.IntrinsicDecl {
-	p.expect(tok.Constructor, "constructor declaration")
+func (p *parser) initializerDecl(decos ast.Attributes) ast.IntrinsicDecl {
+	p.expect(tok.Initializer, "initializer declaration")
 	name := p.next()
 	f := ast.IntrinsicDecl{
 		Source:     name.Source,
-		Kind:       ast.Constructor,
+		Kind:       ast.Initializer,
 		Attributes: decos,
 		Name:       string(name.Runes),
 	}

@@ -252,7 +252,7 @@ EntryPoint Inspector::GetEntryPoint(const tint::ast::Function* func) {
                 TINT_UNREACHABLE(Inspector, diagnostics_);
             }
 
-            override.is_initialized = global->Declaration()->constructor;
+            override.is_initialized = global->Declaration()->initializer;
             override.is_id_specified =
                 ast::HasAttribute<ast::IdAttribute>(global->Declaration()->attributes);
 
@@ -302,8 +302,8 @@ std::map<OverrideId, Scalar> Inspector::GetOverrideDefaultValues() {
             continue;
         }
 
-        if (global->Constructor()) {
-            if (auto* value = global->Constructor()->ConstantValue()) {
+        if (global->Initializer()) {
+            if (auto* value = global->Initializer()->ConstantValue()) {
                 result[override_id] = Switch(
                     value->Type(),  //
                     [&](const sem::I32*) { return Scalar(value->As<i32>()); },

@@ -7194,7 +7194,7 @@ fn main() {
     RunTest(src, true);
 }
 
-TEST_F(UniformityAnalysisTest, TypeConstructor) {
+TEST_F(UniformityAnalysisTest, TypeInitializer) {
     std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
 

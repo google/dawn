@@ -60,7 +60,7 @@ class LoopStatement;
 class Materialize;
 class Statement;
 class SwitchStatement;
-class TypeConstructor;
+class TypeInitializer;
 class WhileStatement;
 }  // namespace tint::sem
 
@@ -363,11 +363,11 @@ class Validator {
     /// @returns true on success, false otherwise.
     bool Structure(const sem::Struct* str, ast::PipelineStage stage) const;
 
-    /// Validates a structure constructor
+    /// Validates a structure initializer
     /// @param ctor the call expression to validate
     /// @param struct_type the type of the structure
     /// @returns true on success, false otherwise
-    bool StructureConstructor(const ast::CallExpression* ctor,
+    bool StructureInitializer(const ast::CallExpression* ctor,
                               const sem::Struct* struct_type) const;
 
     /// Validates a switch statement
@@ -414,11 +414,11 @@ class Validator {
     /// @returns true on success, false otherwise
     bool Vector(const sem::Vector* ty, const Source& source) const;
 
-    /// Validates an array constructor
+    /// Validates an array initializer
     /// @param ctor the call expresion to validate
     /// @param arr_type the type of the array
     /// @returns true on success, false otherwise
-    bool ArrayConstructor(const ast::CallExpression* ctor, const sem::Array* arr_type) const;
+    bool ArrayInitializer(const ast::CallExpression* ctor, const sem::Array* arr_type) const;
 
     /// Validates a texture builtin function
     /// @param call the builtin call to validate

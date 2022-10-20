@@ -84,7 +84,7 @@ TEST(WrapUnaryOperatorTest, Applicable2) {
 
     const auto* expr = main_fn_statements[0]
                            ->As<ast::VariableDeclStatement>()
-                           ->variable->constructor->As<ast::Expression>();
+                           ->variable->initializer->As<ast::Expression>();
 
     const auto expression_id = node_id_map.GetId(expr);
     ASSERT_NE(expression_id, 0);
@@ -162,7 +162,7 @@ TEST(WrapUnaryOperatorTest, Applicable4) {
 
     const auto* expr = main_fn_statements[0]
                            ->As<ast::VariableDeclStatement>()
-                           ->variable->constructor->As<ast::BinaryExpression>()
+                           ->variable->initializer->As<ast::BinaryExpression>()
                            ->lhs;
 
     const auto expression_id = node_id_map.GetId(expr);
@@ -203,7 +203,7 @@ TEST(WrapUnaryOperatorTest, Applicable5) {
 
     const auto* expr = main_fn_statements[0]
                            ->As<ast::VariableDeclStatement>()
-                           ->variable->constructor->As<ast::UnaryOpExpression>()
+                           ->variable->initializer->As<ast::UnaryOpExpression>()
                            ->expr;
 
     const auto expression_id = node_id_map.GetId(expr);
@@ -243,7 +243,7 @@ TEST(WrapUnaryOperatorTest, Applicable6) {
 
     const auto* expr = main_fn_statements[0]
                            ->As<ast::VariableDeclStatement>()
-                           ->variable->constructor->As<ast::Expression>();
+                           ->variable->initializer->As<ast::Expression>();
 
     const auto expression_id = node_id_map.GetId(expr);
     ASSERT_NE(expression_id, 0);
@@ -286,7 +286,7 @@ TEST(WrapUnaryOperatorTest, Applicable7) {
     const auto* expr = main_fn_statements[1]
                            ->As<ast::ForLoopStatement>()
                            ->initializer->As<ast::VariableDeclStatement>()
-                           ->variable->constructor->As<ast::Expression>();
+                           ->variable->initializer->As<ast::Expression>();
 
     const auto expression_id = node_id_map.GetId(expr);
     ASSERT_NE(expression_id, 0);
@@ -328,7 +328,7 @@ TEST(WrapUnaryOperatorTest, Applicable8) {
 
     const auto* expr = main_fn_statements[0]
                            ->As<ast::VariableDeclStatement>()
-                           ->variable->constructor->As<ast::Expression>();
+                           ->variable->initializer->As<ast::Expression>();
 
     const auto expression_id = node_id_map.GetId(expr);
     ASSERT_NE(expression_id, 0);
@@ -367,7 +367,7 @@ TEST(WrapUnaryOperatorTest, NotApplicable1) {
 
     const auto* expr = main_fn_statements[0]
                            ->As<ast::VariableDeclStatement>()
-                           ->variable->constructor->As<ast::Expression>();
+                           ->variable->initializer->As<ast::Expression>();
 
     const auto expression_id = node_id_map.GetId(expr);
     ASSERT_NE(expression_id, 0);
@@ -396,7 +396,7 @@ TEST(WrapUnaryOperatorTest, NotApplicable2) {
 
     const auto* expr = main_fn_statements[0]
                            ->As<ast::VariableDeclStatement>()
-                           ->variable->constructor->As<ast::Expression>();
+                           ->variable->initializer->As<ast::Expression>();
 
     const auto expression_id = node_id_map.GetId(expr);
     ASSERT_NE(expression_id, 0);
@@ -424,7 +424,7 @@ TEST(WrapUnaryOperatorTest, NotApplicable3) {
 
     const auto* expr = main_fn_statements[0]
                            ->As<ast::VariableDeclStatement>()
-                           ->variable->constructor->As<ast::Expression>();
+                           ->variable->initializer->As<ast::Expression>();
 
     const auto expression_id = node_id_map.GetId(expr);
     ASSERT_NE(expression_id, 0);
@@ -453,7 +453,7 @@ TEST(WrapUnaryOperatorTest, NotApplicable4) {
 
     const auto* expr = main_fn_statements[0]
                            ->As<ast::VariableDeclStatement>()
-                           ->variable->constructor->As<ast::Expression>();
+                           ->variable->initializer->As<ast::Expression>();
 
     const auto expression_id = node_id_map.GetId(expr);
     ASSERT_NE(expression_id, 0);
@@ -482,7 +482,7 @@ TEST(WrapUnaryOperatorTest, NotApplicable5) {
 
     const auto* expr = main_fn_statements[0]
                            ->As<ast::VariableDeclStatement>()
-                           ->variable->constructor->As<ast::Expression>();
+                           ->variable->initializer->As<ast::Expression>();
 
     const auto expression_id = node_id_map.GetId(expr);
     ASSERT_NE(expression_id, 0);

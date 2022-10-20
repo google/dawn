@@ -16,7 +16,7 @@
 
 namespace tint::fuzzers::spvtools_fuzzer {
 
-// We need to define constructor here so that vtable is produced in this
+// We need to define destructor here so that vtable is produced in this
 // translation unit (see -Wweak-vtables clang flag).
 Mutator::~Mutator() = default;
 

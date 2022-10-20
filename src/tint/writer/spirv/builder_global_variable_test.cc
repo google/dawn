@@ -39,7 +39,7 @@ TEST_F(BuilderTest, GlobalVar_WithAddressSpace) {
 )");
 }
 
-TEST_F(BuilderTest, GlobalVar_WithConstructor) {
+TEST_F(BuilderTest, GlobalVar_WithInitializer) {
     auto* init = vec3<f32>(1_f, 1_f, 3_f);
 
     auto* v = GlobalVar("var", ty.vec3<f32>(), ast::AddressSpace::kPrivate, init);
@@ -86,7 +86,7 @@ TEST_F(BuilderTest, GlobalConst) {
     Validate(b);
 }
 
-TEST_F(BuilderTest, GlobalConst_Vec_Constructor) {
+TEST_F(BuilderTest, GlobalConst_Vec_Initializer) {
     // const c = vec3<f32>(1f, 2f, 3f);
     // var v = c;
 
@@ -115,7 +115,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_Constructor) {
     Validate(b);
 }
 
-TEST_F(BuilderTest, GlobalConst_Vec_F16_Constructor) {
+TEST_F(BuilderTest, GlobalConst_Vec_F16_Initializer) {
     // const c = vec3<f16>(1h, 2h, 3h);
     // var v = c;
     Enable(ast::Extension::kF16);
@@ -145,7 +145,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_F16_Constructor) {
     Validate(b);
 }
 
-TEST_F(BuilderTest, GlobalConst_Vec_AInt_Constructor) {
+TEST_F(BuilderTest, GlobalConst_Vec_AInt_Initializer) {
     // const c = vec3(1, 2, 3);
     // var v = c;
 
@@ -174,7 +174,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_AInt_Constructor) {
     Validate(b);
 }
 
-TEST_F(BuilderTest, GlobalConst_Vec_AFloat_Constructor) {
+TEST_F(BuilderTest, GlobalConst_Vec_AFloat_Initializer) {
     // const c = vec3(1.0, 2.0, 3.0);
     // var v = c;
 
@@ -203,7 +203,7 @@ TEST_F(BuilderTest, GlobalConst_Vec_AFloat_Constructor) {
     Validate(b);
 }
 
-TEST_F(BuilderTest, GlobalConst_Nested_Vec_Constructor) {
+TEST_F(BuilderTest, GlobalConst_Nested_Vec_Initializer) {
     // const c = vec3<f32>(vec2<f32>(1f, 2f), 3f));
     // var v = c;
 

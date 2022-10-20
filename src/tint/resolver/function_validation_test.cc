@@ -805,7 +805,7 @@ TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_Zero) {
     EXPECT_EQ(r()->error(), "12:34 error: workgroup_size argument must be at least 1");
 }
 
-TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_NestedZeroValueConstructor) {
+TEST_F(ResolverFunctionValidationTest, WorkgroupSize_Const_NestedZeroValueInitializer) {
     // const x = i32(i32(i32()));
     // @compute @workgroup_size(x)
     // fn main() {}

@@ -43,7 +43,7 @@ TEST_F(BuilderTest, FunctionVar_NoAddressSpace) {
 )");
 }
 
-TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
+TEST_F(BuilderTest, FunctionVar_WithConstantInitializer) {
     auto* init = vec3<f32>(1_f, 1_f, 3_f);
     auto* v = Var("var", ty.vec3<f32>(), ast::AddressSpace::kFunction, init);
     WrapInFunction(v);
@@ -72,7 +72,7 @@ TEST_F(BuilderTest, FunctionVar_WithConstantConstructor) {
 )");
 }
 
-TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructor) {
+TEST_F(BuilderTest, FunctionVar_WithNonConstantInitializer) {
     auto* a = Let("a", Expr(3_f));
     auto* init = vec2<f32>(1_f, Add(Expr("a"), 3_f));
 
@@ -105,7 +105,7 @@ OpStore %7 %6
 )");
 }
 
-TEST_F(BuilderTest, FunctionVar_WithNonConstantConstructorLoadedFromVar) {
+TEST_F(BuilderTest, FunctionVar_WithNonConstantInitializerLoadedFromVar) {
     // var v : f32 = 1.0;
     // var v2 : f32 = v; // Should generate the load and store automatically.
 

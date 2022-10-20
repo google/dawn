@@ -20,15 +20,15 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::writer::spirv {
 namespace {
 
-using SpvBuilderConstructorTest = TestHelper;
+using SpvBuilderInitializerTest = TestHelper;
 
-TEST_F(SpvBuilderConstructorTest, Const) {
+TEST_F(SpvBuilderInitializerTest, Const) {
     auto* c = Expr(42.2_f);
     auto* g = GlobalVar("g", ty.f32(), c, ast::AddressSpace::kPrivate);
 
     spirv::Builder& b = Build();
 
-    EXPECT_EQ(b.GenerateConstructorExpression(g, c), 2u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, c), 2u);
     ASSERT_FALSE(b.has_error()) << b.error();
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%1 = OpTypeFloat 32
@@ -36,13 +36,13 @@ TEST_F(SpvBuilderConstructorTest, Const) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type) {
+TEST_F(SpvBuilderInitializerTest, Type) {
     auto* t = vec3<f32>(1_f, 1_f, 3_f);
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
 
-    EXPECT_EQ(b.GenerateConstructorExpression(nullptr, t), 5u);
+    EXPECT_EQ(b.GenerateInitializerExpression(nullptr, t), 5u);
     ASSERT_FALSE(b.has_error()) << b.error();
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
@@ -53,7 +53,7 @@ TEST_F(SpvBuilderConstructorTest, Type) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_WithCasts) {
+TEST_F(SpvBuilderInitializerTest, Type_WithCasts) {
     auto* t = vec2<f32>(Construct<f32>(1_i), Construct<f32>(1_i));
     WrapInFunction(t);
 
@@ -72,7 +72,7 @@ TEST_F(SpvBuilderConstructorTest, Type_WithCasts) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
+TEST_F(SpvBuilderInitializerTest, Type_WithAlias) {
     // type Int = i32
     // cast<Int>(2.3f)
 
@@ -91,7 +91,7 @@ TEST_F(SpvBuilderConstructorTest, Type_WithAlias) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_IdentifierExpression_Param) {
+TEST_F(SpvBuilderInitializerTest, Type_IdentifierExpression_Param) {
     auto* var = Var("ident", ty.f32());
 
     auto* t = vec2<f32>(1_f, "ident");
@@ -121,7 +121,7 @@ TEST_F(SpvBuilderConstructorTest, Type_IdentifierExpression_Param) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Vector_Bitcast_Params) {
+TEST_F(SpvBuilderInitializerTest, Vector_Bitcast_Params) {
     auto* var = Var("v", vec3<f32>(1_f, 2_f, 3_f));
     auto* cast = Bitcast(ty.vec3<u32>(), var);
     WrapInFunction(var, cast);
@@ -150,7 +150,7 @@ TEST_F(SpvBuilderConstructorTest, Vector_Bitcast_Params) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Bool_With_Bool) {
+TEST_F(SpvBuilderInitializerTest, Type_Bool_With_Bool) {
     auto* cast = Construct<bool>(true);
     WrapInFunction(cast);
 
@@ -167,7 +167,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Bool_With_Bool) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_I32_With_I32) {
+TEST_F(SpvBuilderInitializerTest, Type_I32_With_I32) {
     auto* cast = Construct<i32>(2_i);
     WrapInFunction(cast);
 
@@ -182,7 +182,7 @@ TEST_F(SpvBuilderConstructorTest, Type_I32_With_I32) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_U32_With_U32) {
+TEST_F(SpvBuilderInitializerTest, Type_U32_With_U32) {
     auto* cast = Construct<u32>(2_u);
     WrapInFunction(cast);
 
@@ -197,7 +197,7 @@ TEST_F(SpvBuilderConstructorTest, Type_U32_With_U32) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_F32_With_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_F32_With_F32) {
     auto* cast = Construct<f32>(2_f);
     WrapInFunction(cast);
 
@@ -212,7 +212,7 @@ TEST_F(SpvBuilderConstructorTest, Type_F32_With_F32) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_F16_With_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_F16_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = Construct<f16>(2_h);
@@ -229,7 +229,7 @@ TEST_F(SpvBuilderConstructorTest, Type_F16_With_F16) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_Bool_Literal) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec2_With_Bool_Literal) {
     auto* cast = vec2<bool>(true);
     WrapInFunction(cast);
 
@@ -246,7 +246,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_Bool_Literal) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_Bool_Var) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec2_With_Bool_Var) {
     auto* var = Var("v", Expr(true));
     auto* cast = vec2<bool>(var);
     WrapInFunction(var, cast);
@@ -270,7 +270,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_Bool_Var) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_Literal) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec2_With_F32_Literal) {
     auto* cast = vec2<f32>(2_f);
     WrapInFunction(cast);
 
@@ -287,7 +287,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_Literal) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F16_Literal) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec2_With_F16_Literal) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec2<f16>(2_h);
@@ -306,7 +306,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F16_Literal) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec2_With_F32_F32) {
     auto* var = Decl(Var("x", ty.f32(), Expr(2_f)));
     auto* cast = vec2<f32>("x", "x");
     WrapInFunction(var, cast);
@@ -331,7 +331,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F16_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec2_With_F16_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2_h)));
@@ -358,7 +358,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F16_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_F32_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec2_With_F32_F32_Const) {
     auto* cast = vec2<f32>(1_f, 2_f);
     WrapInFunction(cast);
 
@@ -376,7 +376,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F32_F32_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F16_F16_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec2_With_F16_F16_Const) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec2<f16>(1_h, 2_h);
@@ -396,7 +396,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_With_F16_F16_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec2_F32_With_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec2_F32_With_Vec2) {
     auto* var = Decl(Var("x", ty.vec2<f32>(), vec2<f32>(1_f, 2_f)));
     auto* cast = vec2<f32>("x");
     WrapInFunction(var, cast);
@@ -421,7 +421,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_F32_With_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec2_F16_With_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec2_F16_With_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec2<f16>(), vec2<f16>(1_h, 2_h)));
@@ -448,7 +448,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_F16_With_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec2_F32_With_Vec2_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec2_F32_With_Vec2_Const) {
     auto* cast = vec2<f32>(vec2<f32>(1_f, 2_f));
     WrapInFunction(cast);
 
@@ -466,7 +466,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_F32_With_Vec2_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec2_F16_With_Vec2_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec2_F16_With_Vec2_Const) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec2<f16>(vec2<f16>(1_h, 2_h));
@@ -486,7 +486,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec2_F16_With_Vec2_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_F32) {
     auto* var = Decl(Var("x", ty.f32(), Expr(2_f)));
     auto* cast = vec3<f32>("x", "x", "x");
     WrapInFunction(var, cast);
@@ -512,7 +512,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2_h)));
@@ -540,7 +540,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_F32_Const) {
     auto* cast = vec3<f32>(1_f, 2_f, 3_f);
     WrapInFunction(cast);
 
@@ -559,7 +559,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_F16_Const) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(1_h, 2_h, 3_h);
@@ -580,7 +580,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Bool) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_Bool) {
     auto* var = Decl(Var("x", ty.bool_(), Expr(true)));
     auto* cast = vec3<bool>("x", "x", "x");
     WrapInFunction(var, cast);
@@ -606,7 +606,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Bool) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Bool_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_Bool_Const) {
     auto* cast = vec3<bool>(true, false, true);
     WrapInFunction(cast);
 
@@ -624,7 +624,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Bool_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_F32_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_F32_F32_F32) {
     auto* var = Decl(Var("x", ty.f32(), Expr(2_f)));
     auto* cast = vec3<f32>("x", "x", "x");
     WrapInFunction(var, cast);
@@ -650,7 +650,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_F32_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16_F16_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_F16_F16_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2_h)));
@@ -678,7 +678,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16_F16_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_F32_F32_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_F32_F32_F32_Const) {
     auto* cast = vec3<f32>(1_f, 2_f, 3_f);
     WrapInFunction(cast);
 
@@ -697,7 +697,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_F32_F32_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16_F16_F16_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_F16_F16_F16_Const) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(1_h, 2_h, 3_h);
@@ -718,7 +718,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16_F16_F16_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_F32_Vec2) {
     auto* var = Decl(Var("x", ty.vec2<f32>(), vec2<f32>(2_f, 3_f)));
     auto* cast = vec3<f32>(1_f, "x");
     WrapInFunction(var, cast);
@@ -748,7 +748,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_F16_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec2<f16>(), vec2<f16>(2_h, 3_h)));
@@ -780,7 +780,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_Vec2_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_F32_Vec2_Const) {
     auto* cast = vec3<f32>(1_f, vec2<f32>(2_f, 3_f));
     WrapInFunction(cast);
 
@@ -799,7 +799,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F32_Vec2_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16_Vec2_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_F16_Vec2_Const) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(1_h, vec2<f16>(2_h, 3_h));
@@ -820,7 +820,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_F16_Vec2_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec2_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_Vec2_F32) {
     auto* var = Decl(Var("x", ty.vec2<f32>(), vec2<f32>(1_f, 2_f)));
     auto* cast = vec3<f32>("x", 3_f);
     WrapInFunction(var, cast);
@@ -850,7 +850,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec2_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec2_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_Vec2_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec2<f16>(), vec2<f16>(1_h, 2_h)));
@@ -882,7 +882,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec2_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec2_F32_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_Vec2_F32_Const) {
     auto* cast = vec3<f32>(vec2<f32>(1_f, 2_f), 3_f);
     WrapInFunction(cast);
 
@@ -901,7 +901,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec2_F32_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec2_F16_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_With_Vec2_F16_Const) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(vec2<f16>(1_h, 2_h), 3_h);
@@ -922,7 +922,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_With_Vec2_F16_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_F32_With_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_F32_With_Vec3) {
     auto* var = Decl(Var("x", ty.vec3<f32>(), vec3<f32>(1_f, 2_f, 3_f)));
     auto* cast = vec3<f32>("x");
     WrapInFunction(var, cast);
@@ -948,7 +948,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_F32_With_Vec3) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_F16_With_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_F16_With_Vec3) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec3<f16>(), vec3<f16>(1_h, 2_h, 3_h)));
@@ -976,7 +976,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_F16_With_Vec3) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_F32_With_Vec3_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_F32_With_Vec3_Const) {
     auto* cast = vec3<f32>(vec3<f32>(1_f, 2_f, 3_f));
     WrapInFunction(cast);
 
@@ -995,7 +995,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_F32_With_Vec3_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec3_F16_With_Vec3_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec3_F16_With_Vec3_Const) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(vec3<f16>(1_h, 2_h, 3_h));
@@ -1016,7 +1016,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec3_F16_With_Vec3_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Bool) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_Bool) {
     auto* var = Decl(Var("x", ty.bool_(), Expr(true)));
     auto* cast = vec4<bool>("x");
     WrapInFunction(var, cast);
@@ -1040,7 +1040,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Bool) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Bool_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_Bool_Const) {
     auto* cast = vec4<bool>(true);
     WrapInFunction(cast);
 
@@ -1057,7 +1057,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Bool_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F32) {
     auto* var = Decl(Var("x", ty.f32(), Expr(2_f)));
     auto* cast = vec4<f32>("x");
     WrapInFunction(var, cast);
@@ -1081,7 +1081,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2_h)));
@@ -1107,7 +1107,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F32_Const) {
     auto* cast = vec4<f32>(2_f);
     WrapInFunction(cast);
 
@@ -1124,7 +1124,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F16_Const) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(2_h);
@@ -1143,7 +1143,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_F32_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F32_F32_F32_F32) {
     auto* var = Decl(Var("x", ty.f32(), Expr(2_f)));
     auto* cast = vec4<f32>("x", "x", "x", "x");
     WrapInFunction(var, cast);
@@ -1170,7 +1170,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_F32_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_F16_F16_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F16_F16_F16_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2_h)));
@@ -1199,7 +1199,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_F16_F16_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_F32_F32_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F32_F32_F32_F32_Const) {
     auto* cast = vec4<f32>(1_f, 2_f, 3_f, 4_f);
     WrapInFunction(cast);
 
@@ -1219,7 +1219,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_F32_F32_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_F16_F16_F16_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F16_F16_F16_F16_Const) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(1_h, 2_h, 3_h, 4_h);
@@ -1241,7 +1241,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_F16_F16_F16_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F32_F32_Vec2) {
     auto* var = Decl(Var("x", ty.vec2<f32>(), vec2<f32>(1_f, 2_f)));
     auto* cast = vec4<f32>(1_f, 2_f, "x");
     WrapInFunction(var, cast);
@@ -1270,7 +1270,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_F16_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F16_F16_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec2<f16>(), vec2<f16>(1_h, 2_h)));
@@ -1301,7 +1301,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_F16_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_Vec2_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F32_F32_Vec2_Const) {
     auto* cast = vec4<f32>(1_f, 2_f, vec2<f32>(3_f, 4_f));
     WrapInFunction(cast);
 
@@ -1321,7 +1321,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_F32_Vec2_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_F16_Vec2_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F16_F16_Vec2_Const) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(1_h, 2_h, vec2<f16>(3_h, 4_h));
@@ -1343,7 +1343,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_F16_Vec2_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec2_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F32_Vec2_F32) {
     auto* var = Decl(Var("x", ty.vec2<f32>(), vec2<f32>(2_f, 3_f)));
     auto* cast = vec4<f32>(1_f, "x", 4_f);
     WrapInFunction(var, cast);
@@ -1374,7 +1374,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec2_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_Vec2_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F16_Vec2_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec2<f16>(), vec2<f16>(2_h, 3_h)));
@@ -1407,7 +1407,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_Vec2_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec2_F32_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F32_Vec2_F32_Const) {
     auto* cast = vec4<f32>(1_f, vec2<f32>(2_f, 3_f), 4_f);
     WrapInFunction(cast);
 
@@ -1427,7 +1427,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec2_F32_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_Vec2_F16_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F16_Vec2_F16_Const) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(1_h, vec2<f16>(2_h, 3_h), 4_h);
@@ -1449,7 +1449,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_Vec2_F16_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_F32_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_Vec2_F32_F32) {
     auto* var = Decl(Var("x", ty.vec2<f32>(), vec2<f32>(1_f, 2_f)));
     auto* cast = vec4<f32>("x", 3_f, 4_f);
     WrapInFunction(var, cast);
@@ -1480,7 +1480,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_F32_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_F16_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_Vec2_F16_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec2<f16>(), vec2<f16>(1_h, 2_h)));
@@ -1513,7 +1513,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_F16_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_F32_F32_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_Vec2_F32_F32_Const) {
     auto* cast = vec4<f32>(vec2<f32>(1_f, 2_f), 3_f, 4_f);
     WrapInFunction(cast);
 
@@ -1533,7 +1533,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_F32_F32_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_F16_F16_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_Vec2_F16_F16_Const) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(vec2<f16>(1_h, 2_h), 3_h, 4_h);
@@ -1555,7 +1555,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec2_F16_F16_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_F32_With_Vec2_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_F32_With_Vec2_Vec2) {
     auto* var = Decl(Var("x", ty.vec2<f32>(), vec2<f32>(1_f, 2_f)));
     auto* cast = vec4<f32>("x", "x");
     WrapInFunction(var, cast);
@@ -1587,7 +1587,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_F32_With_Vec2_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_F16_With_Vec2_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_F16_With_Vec2_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec2<f16>(), vec2<f16>(1_h, 2_h)));
@@ -1621,7 +1621,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_F16_With_Vec2_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_F32_With_Vec2_Vec2_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_F32_With_Vec2_Vec2_Const) {
     auto* cast = vec4<f32>(vec2<f32>(1_f, 2_f), vec2<f32>(1_f, 2_f));
     WrapInFunction(cast);
 
@@ -1639,7 +1639,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_F32_With_Vec2_Vec2_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_F16_With_Vec2_Vec2_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_F16_With_Vec2_Vec2_Const) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(vec2<f16>(1_h, 2_h), vec2<f16>(1_h, 2_h));
@@ -1659,7 +1659,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_F16_With_Vec2_Vec2_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F32_Vec3) {
     auto* var = Decl(Var("x", ty.vec3<f32>(), vec3<f32>(2_f, 2_f, 2_f)));
     auto* cast = vec4<f32>(2_f, "x");
     WrapInFunction(var, cast);
@@ -1688,7 +1688,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec3) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F16_Vec3) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec3<f16>(), vec3<f16>(2_h, 2_h, 2_h)));
@@ -1719,7 +1719,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_Vec3) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec3_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F32_Vec3_Const) {
     auto* cast = vec4<f32>(2_f, vec3<f32>(2_f, 2_f, 2_f));
     WrapInFunction(cast);
 
@@ -1736,7 +1736,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F32_Vec3_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_Vec3_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_F16_Vec3_Const) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(2_h, vec3<f16>(2_h, 2_h, 2_h));
@@ -1755,7 +1755,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_F16_Vec3_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec3_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_Vec3_F32) {
     auto* var = Decl(Var("x", ty.vec3<f32>(), vec3<f32>(2_f, 2_f, 2_f)));
     auto* cast = vec4<f32>("x", 2_f);
     WrapInFunction(var, cast);
@@ -1784,7 +1784,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec3_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec3_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_Vec3_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.vec3<f16>(), vec3<f16>(2_h, 2_h, 2_h)));
@@ -1815,7 +1815,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec3_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec3_F32_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_Vec3_F32_Const) {
     auto* cast = vec4<f32>(vec3<f32>(2_f, 2_f, 2_f), 2_f);
     WrapInFunction(cast);
 
@@ -1832,7 +1832,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec3_F32_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec3_F16_Const) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_With_Vec3_F16_Const) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(vec3<f16>(2_h, 2_h, 2_h), 2_h);
@@ -1851,7 +1851,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_With_Vec3_F16_Const) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_F32_With_Vec4) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_F32_With_Vec4) {
     auto* value = vec4<f32>(2_f, 2_f, 2_f, 2_f);
     auto* cast = vec4<f32>(value);
     WrapInFunction(cast);
@@ -1869,7 +1869,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_F32_With_Vec4) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Vec4_F16_With_Vec4) {
+TEST_F(SpvBuilderInitializerTest, Type_Vec4_F16_With_Vec4) {
     Enable(ast::Extension::kF16);
 
     auto* value = vec4<f16>(2_h, 2_h, 2_h, 2_h);
@@ -1889,7 +1889,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Vec4_F16_With_Vec4) {
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()), R"()");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_F32_With_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_F32_With_F32) {
     auto* ctor = Construct<f32>(2_f);
     GlobalConst("g", ty.f32(), ctor);
     WrapInFunction(Decl(Var("l", Expr("g"))));
@@ -1910,7 +1910,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_F16_With_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_F16_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* ctor = Construct<f16>(2_h);
@@ -1933,7 +1933,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_F32_With_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_F32_With_F32) {
     auto* ctor = Construct<f32>(2_f);
     GlobalVar("g", ty.f32(), ast::AddressSpace::kPrivate, ctor);
 
@@ -1950,7 +1950,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_F32_With_F32) {
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_F16_With_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_F16_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* ctor = Construct<f16>(2_h);
@@ -1969,7 +1969,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_F16_With_F16) {
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_U32_With_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_U32_With_F32) {
     auto* ctor = Construct<u32>(1.5_f);
     GlobalConst("g", ty.u32(), ctor);
     WrapInFunction(Decl(Var("l", Expr("g"))));
@@ -1990,7 +1990,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_U32_With_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_U32_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* ctor = Construct<u32>(1.5_h);
@@ -2013,7 +2013,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_U32_With_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_U32_With_F32) {
     auto* ctor = Construct<u32>(1.5_f);
     GlobalVar("g", ty.u32(), ast::AddressSpace::kPrivate, ctor);
 
@@ -2030,7 +2030,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_U32_With_F32) {
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_U32_With_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_U32_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* ctor = Construct<u32>(1.5_h);
@@ -2049,7 +2049,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_U32_With_F16) {
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec2_With_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec2_With_F32) {
     auto* cast = vec2<f32>(2_f);
     GlobalConst("g", ty.vec2<f32>(), cast);
     WrapInFunction(Decl(Var("l", Expr("g"))));
@@ -2072,7 +2072,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec2_With_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec2_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec2<f16>(2_h);
@@ -2097,14 +2097,14 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec2_With_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec2_With_F32) {
     auto* cast = vec2<f32>(2_f);
     auto* g = GlobalVar("g", ty.vec2<f32>(), ast::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 2
@@ -2113,7 +2113,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec2_With_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec2_With_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec2_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec2<f16>(2_h);
@@ -2122,7 +2122,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec2_With_F16) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 16
 %1 = OpTypeVector %2 2
@@ -2131,7 +2131,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec2_With_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec2_F32_With_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec2_F32_With_Vec2) {
     auto* cast = vec2<f32>(vec2<f32>(2_f, 2_f));
     GlobalConst("g", ty.vec2<f32>(), cast);
     WrapInFunction(Decl(Var("l", Expr("g"))));
@@ -2154,7 +2154,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec2_F16_With_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec2_F16_With_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec2<f16>(vec2<f16>(2_h, 2_h));
@@ -2179,7 +2179,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec2_F32_With_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec2_F32_With_Vec2) {
     auto* cast = vec2<f32>(vec2<f32>(2_f, 2_f));
     GlobalVar("a", ty.vec2<f32>(), ast::AddressSpace::kPrivate, cast);
 
@@ -2199,7 +2199,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec2_F32_With_Vec2) {
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec2_F16_With_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec2_F16_With_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec2<f16>(vec2<f16>(2_h, 2_h));
@@ -2221,7 +2221,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec2_F16_With_Vec2) {
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec3_F32_With_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec3_F32_With_Vec3) {
     auto* cast = vec3<f32>(vec3<f32>(2_f, 2_f, 2_f));
     GlobalConst("g", ty.vec3<f32>(), cast);
     WrapInFunction(Decl(Var("l", Expr("g"))));
@@ -2244,7 +2244,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec3_F16_With_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec3_F16_With_Vec3) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(vec3<f16>(2_h, 2_h, 2_h));
@@ -2269,7 +2269,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_F32_With_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec3_F32_With_Vec3) {
     auto* cast = vec3<f32>(vec3<f32>(2_f, 2_f, 2_f));
     GlobalVar("a", ty.vec3<f32>(), ast::AddressSpace::kPrivate, cast);
 
@@ -2289,7 +2289,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_F32_With_Vec3) {
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_F16_With_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec3_F16_With_Vec3) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(vec3<f16>(2_h, 2_h, 2_h));
@@ -2311,7 +2311,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_F16_With_Vec3) {
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_F32_With_Vec4) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec4_F32_With_Vec4) {
     auto* cast = vec4<f32>(vec4<f32>(2_f, 2_f, 2_f, 2_f));
     GlobalConst("g", ty.vec4<f32>(), cast);
     WrapInFunction(Decl(Var("l", Expr("g"))));
@@ -2334,7 +2334,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_F16_With_Vec4) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec4_F16_With_Vec4) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(vec4<f16>(2_h, 2_h, 2_h, 2_h));
@@ -2359,7 +2359,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_F32_With_Vec4) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_F32_With_Vec4) {
     auto* cast = vec4<f32>(vec4<f32>(2_f, 2_f, 2_f, 2_f));
     GlobalVar("a", ty.vec4<f32>(), ast::AddressSpace::kPrivate, cast);
 
@@ -2379,7 +2379,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_F32_With_Vec4) {
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_F16_With_Vec4) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_F16_With_Vec4) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(vec4<f16>(2_h, 2_h, 2_h, 2_h));
@@ -2401,7 +2401,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_F16_With_Vec4) {
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec3_With_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec3_With_F32) {
     auto* cast = vec3<f32>(2_f);
     GlobalConst("g", ty.vec3<f32>(), cast);
     WrapInFunction(Decl(Var("l", Expr("g"))));
@@ -2424,7 +2424,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec3_With_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec3_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(2_h);
@@ -2449,14 +2449,14 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec3_With_F32) {
     auto* cast = vec3<f32>(2_f);
     auto* g = GlobalVar("g", ty.vec3<f32>(), ast::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -2465,7 +2465,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec3_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(2_h);
@@ -2474,7 +2474,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_F16) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 16
 %1 = OpTypeVector %2 3
@@ -2483,7 +2483,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec3_With_F32_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec3_With_F32_Vec2) {
     auto* cast = vec3<f32>(2_f, vec2<f32>(2_f, 2_f));
     GlobalConst("g", ty.vec3<f32>(), cast);
     WrapInFunction(Decl(Var("l", Expr("g"))));
@@ -2506,7 +2506,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec3_With_F16_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec3_With_F16_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(2_h, vec2<f16>(2_h, 2_h));
@@ -2531,14 +2531,14 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_F32_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec3_With_F32_Vec2) {
     auto* cast = vec3<f32>(2_f, vec2<f32>(2_f, 2_f));
     auto* g = GlobalVar("g", ty.vec3<f32>(), ast::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -2547,7 +2547,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_F32_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_F16_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec3_With_F16_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(2_h, vec2<f16>(2_h, 2_h));
@@ -2556,7 +2556,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_F16_Vec2) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 16
 %1 = OpTypeVector %2 3
@@ -2565,7 +2565,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_F16_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec3_With_Vec2_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec3_With_Vec2_F32) {
     auto* cast = vec3<f32>(vec2<f32>(2_f, 2_f), 2_f);
     GlobalConst("g", ty.vec3<f32>(), cast);
     WrapInFunction(Decl(Var("l", Expr("g"))));
@@ -2588,7 +2588,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec3_With_Vec2_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec3_With_Vec2_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(vec2<f16>(2_h, 2_h), 2_h);
@@ -2613,14 +2613,14 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_Vec2_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec3_With_Vec2_F32) {
     auto* cast = vec3<f32>(vec2<f32>(2_f, 2_f), 2_f);
     auto* g = GlobalVar("g", ty.vec3<f32>(), ast::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 3
@@ -2629,7 +2629,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_Vec2_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_Vec2_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec3_With_Vec2_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec3<f16>(vec2<f16>(2_h, 2_h), 2_h);
@@ -2638,7 +2638,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_Vec2_F16) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 16
 %1 = OpTypeVector %2 3
@@ -2647,7 +2647,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec3_With_Vec2_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec4_With_F32) {
     auto* cast = vec4<f32>(2_f);
     GlobalConst("g", ty.vec4<f32>(), cast);
     WrapInFunction(Decl(Var("l", Expr("g"))));
@@ -2670,7 +2670,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec4_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(2_h);
@@ -2695,14 +2695,14 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_F32) {
     auto* cast = vec4<f32>(2_f);
     auto* g = GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -2711,7 +2711,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(2_h);
@@ -2720,7 +2720,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F16) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 16
 %1 = OpTypeVector %2 4
@@ -2729,7 +2729,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_F32_F32_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec4_With_F32_F32_Vec2) {
     auto* cast = vec4<f32>(2_f, 2_f, vec2<f32>(2_f, 2_f));
     GlobalConst("g", ty.vec4<f32>(), cast);
     WrapInFunction(Decl(Var("l", Expr("g"))));
@@ -2752,7 +2752,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_F16_F16_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec4_With_F16_F16_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(2_h, 2_h, vec2<f16>(2_h, 2_h));
@@ -2777,14 +2777,14 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F32_F32_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_F32_F32_Vec2) {
     auto* cast = vec4<f32>(2_f, 2_f, vec2<f32>(2_f, 2_f));
     auto* g = GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -2793,7 +2793,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F32_F32_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F16_F16_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_F16_F16_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(2_h, 2_h, vec2<f16>(2_h, 2_h));
@@ -2802,7 +2802,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F16_F16_Vec2) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 16
 %1 = OpTypeVector %2 4
@@ -2811,7 +2811,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F16_F16_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_F32_Vec2_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec4_With_F32_Vec2_F32) {
     auto* cast = vec4<f32>(2_f, vec2<f32>(2_f, 2_f), 2_f);
     GlobalConst("g", ty.vec4<f32>(), cast);
     WrapInFunction(Decl(Var("l", Expr("g"))));
@@ -2834,7 +2834,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_F16_Vec2_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec4_With_F16_Vec2_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(2_h, vec2<f16>(2_h, 2_h), 2_h);
@@ -2859,14 +2859,14 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F32_Vec2_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_F32_Vec2_F32) {
     auto* cast = vec4<f32>(2_f, vec2<f32>(2_f, 2_f), 2_f);
     auto* g = GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -2875,7 +2875,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F32_Vec2_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F16_Vec2_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_F16_Vec2_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(2_h, vec2<f16>(2_h, 2_h), 2_h);
@@ -2884,7 +2884,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F16_Vec2_F16) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 16
 %1 = OpTypeVector %2 4
@@ -2893,7 +2893,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F16_Vec2_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_Vec2_F32_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec4_With_Vec2_F32_F32) {
     auto* cast = vec4<f32>(vec2<f32>(2_f, 2_f), 2_f, 2_f);
     GlobalConst("g", ty.vec4<f32>(), cast);
     WrapInFunction(Decl(Var("l", Expr("g"))));
@@ -2916,7 +2916,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_Vec2_F16_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec4_With_Vec2_F16_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(vec2<f16>(2_h, 2_h), 2_h, 2_h);
@@ -2941,14 +2941,14 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec2_F32_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_Vec2_F32_F32) {
     auto* cast = vec4<f32>(vec2<f32>(2_f, 2_f), 2_f, 2_f);
     auto* g = GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -2957,7 +2957,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec2_F32_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec2_F16_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_Vec2_F16_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(vec2<f16>(2_h, 2_h), 2_h, 2_h);
@@ -2966,7 +2966,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec2_F16_F16) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 16
 %1 = OpTypeVector %2 4
@@ -2975,7 +2975,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec2_F16_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_F32_With_Vec2_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec4_F32_With_Vec2_Vec2) {
     auto* cast = vec4<f32>(vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f));
     GlobalConst("g", ty.vec4<f32>(), cast);
     WrapInFunction(Decl(Var("l", Expr("g"))));
@@ -2998,7 +2998,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_F16_With_Vec2_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec4_F16_With_Vec2_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(vec2<f16>(2_h, 2_h), vec2<f16>(2_h, 2_h));
@@ -3023,14 +3023,14 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_F32_With_Vec2_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_F32_With_Vec2_Vec2) {
     auto* cast = vec4<f32>(vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f));
     auto* g = GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -3039,7 +3039,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_F32_With_Vec2_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_F16_With_Vec2_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_F16_With_Vec2_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(vec2<f16>(2_h, 2_h), vec2<f16>(2_h, 2_h));
@@ -3048,7 +3048,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_F16_With_Vec2_Vec2) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 16
 %1 = OpTypeVector %2 4
@@ -3057,7 +3057,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_F16_With_Vec2_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_F32_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec4_With_F32_Vec3) {
     auto* cast = vec4<f32>(2_f, vec3<f32>(2_f, 2_f, 2_f));
     GlobalConst("g", ty.vec4<f32>(), cast);
     WrapInFunction(Decl(Var("l", Expr("g"))));
@@ -3080,14 +3080,14 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F32_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_F32_Vec3) {
     auto* cast = vec4<f32>(2_f, vec3<f32>(2_f, 2_f, 2_f));
     auto* g = GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -3096,7 +3096,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F32_Vec3) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F16_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_F16_Vec3) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(2_h, vec3<f16>(2_h, 2_h, 2_h));
@@ -3105,7 +3105,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F16_Vec3) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 16
 %1 = OpTypeVector %2 4
@@ -3114,7 +3114,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_F16_Vec3) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_Vec3_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec4_With_Vec3_F32) {
     auto* cast = vec4<f32>(vec3<f32>(2_f, 2_f, 2_f), 2_f);
     GlobalConst("g", ty.vec4<f32>(), cast);
     WrapInFunction(Decl(Var("l", Expr("g"))));
@@ -3137,7 +3137,7 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalConst_Vec4_With_Vec3_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalConst_Vec4_With_Vec3_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(vec3<f16>(2_h, 2_h, 2_h), 2_h);
@@ -3162,14 +3162,14 @@ OpReturn
     Validate(b);
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec3_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_Vec3_F32) {
     auto* cast = vec4<f32>(vec3<f32>(2_f, 2_f, 2_f), 2_f);
     auto* g = GlobalVar("g", ty.vec4<f32>(), ast::AddressSpace::kPrivate, cast);
 
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 32
 %1 = OpTypeVector %2 4
@@ -3178,7 +3178,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec3_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec3_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_GlobalVar_Vec4_With_Vec3_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = vec4<f16>(vec3<f16>(2_h, 2_h, 2_h), 2_h);
@@ -3187,7 +3187,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec3_F16) {
     spirv::Builder& b = Build();
 
     b.push_function(Function{});
-    EXPECT_EQ(b.GenerateConstructorExpression(g, cast), 4u);
+    EXPECT_EQ(b.GenerateInitializerExpression(g, cast), 4u);
 
     EXPECT_EQ(DumpInstructions(b.types()), R"(%2 = OpTypeFloat 16
 %1 = OpTypeVector %2 4
@@ -3196,7 +3196,7 @@ TEST_F(SpvBuilderConstructorTest, Type_GlobalVar_Vec4_With_Vec3_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat2x2_F32_With_Vec2_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat2x2_F32_With_Vec2_Vec2) {
     auto* cast = mat2x2<f32>(vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f));
     WrapInFunction(cast);
 
@@ -3214,7 +3214,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat2x2_F32_With_Vec2_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat2x2_F16_With_Vec2_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat2x2_F16_With_Vec2_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* cast = mat2x2<f16>(vec2<f16>(2_h, 2_h), vec2<f16>(2_h, 2_h));
@@ -3234,7 +3234,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat2x2_F16_With_Vec2_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat3x2_F32_With_Vec2_Vec2_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat3x2_F32_With_Vec2_Vec2_Vec2) {
     auto* cast = mat3x2<f32>(vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f));
     WrapInFunction(cast);
 
@@ -3252,7 +3252,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat3x2_F32_With_Vec2_Vec2_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat3x2_F16_With_Vec2_Vec2_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat3x2_F16_With_Vec2_Vec2_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* cast = mat3x2<f16>(vec2<f16>(2_h, 2_h), vec2<f16>(2_h, 2_h), vec2<f16>(2_h, 2_h));
@@ -3272,7 +3272,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat3x2_F16_With_Vec2_Vec2_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat4x2_F32_With_Vec2_Vec2_Vec2_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat4x2_F32_With_Vec2_Vec2_Vec2_Vec2) {
     auto* cast = mat4x2<f32>(vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f), vec2<f32>(2_f, 2_f),
                              vec2<f32>(2_f, 2_f));
     WrapInFunction(cast);
@@ -3291,7 +3291,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat4x2_F32_With_Vec2_Vec2_Vec2_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat4x2_F16_With_Vec2_Vec2_Vec2_Vec2) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat4x2_F16_With_Vec2_Vec2_Vec2_Vec2) {
     Enable(ast::Extension::kF16);
 
     auto* cast = mat4x2<f16>(vec2<f16>(2_h, 2_h), vec2<f16>(2_h, 2_h), vec2<f16>(2_h, 2_h),
@@ -3312,7 +3312,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat4x2_F16_With_Vec2_Vec2_Vec2_Vec2) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat2x3_F32_With_Vec3_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat2x3_F32_With_Vec3_Vec3) {
     auto* cast = mat2x3<f32>(vec3<f32>(2_f, 2_f, 2_f), vec3<f32>(2_f, 2_f, 2_f));
     WrapInFunction(cast);
 
@@ -3330,7 +3330,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat2x3_F32_With_Vec3_Vec3) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat2x3_F16_With_Vec3_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat2x3_F16_With_Vec3_Vec3) {
     Enable(ast::Extension::kF16);
 
     auto* cast = mat2x3<f16>(vec3<f16>(2_h, 2_h, 2_h), vec3<f16>(2_h, 2_h, 2_h));
@@ -3350,7 +3350,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat2x3_F16_With_Vec3_Vec3) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat3x3_F32_With_Vec3_Vec3_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat3x3_F32_With_Vec3_Vec3_Vec3) {
     auto* cast =
         mat3x3<f32>(vec3<f32>(2_f, 2_f, 2_f), vec3<f32>(2_f, 2_f, 2_f), vec3<f32>(2_f, 2_f, 2_f));
     WrapInFunction(cast);
@@ -3369,7 +3369,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat3x3_F32_With_Vec3_Vec3_Vec3) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat3x3_F16_With_Vec3_Vec3_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat3x3_F16_With_Vec3_Vec3_Vec3) {
     Enable(ast::Extension::kF16);
 
     auto* cast =
@@ -3390,7 +3390,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat3x3_F16_With_Vec3_Vec3_Vec3) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat4x3_F32_With_Vec3_Vec3_Vec3_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat4x3_F32_With_Vec3_Vec3_Vec3_Vec3) {
     auto* cast = mat4x3<f32>(vec3<f32>(2_f, 2_f, 2_f), vec3<f32>(2_f, 2_f, 2_f),
                              vec3<f32>(2_f, 2_f, 2_f), vec3<f32>(2_f, 2_f, 2_f));
     WrapInFunction(cast);
@@ -3409,7 +3409,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat4x3_F32_With_Vec3_Vec3_Vec3_Vec3) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat4x3_F16_With_Vec3_Vec3_Vec3_Vec3) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat4x3_F16_With_Vec3_Vec3_Vec3_Vec3) {
     Enable(ast::Extension::kF16);
 
     auto* cast = mat4x3<f16>(vec3<f16>(2_h, 2_h, 2_h), vec3<f16>(2_h, 2_h, 2_h),
@@ -3430,7 +3430,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat4x3_F16_With_Vec3_Vec3_Vec3_Vec3) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat2x4_F32_With_Vec4_Vec4) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat2x4_F32_With_Vec4_Vec4) {
     auto* cast = mat2x4<f32>(vec4<f32>(2_f, 2_f, 2_f, 2_f), vec4<f32>(2_f, 2_f, 2_f, 2_f));
     WrapInFunction(cast);
 
@@ -3448,7 +3448,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat2x4_F32_With_Vec4_Vec4) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat2x4_F16_With_Vec4_Vec4) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat2x4_F16_With_Vec4_Vec4) {
     Enable(ast::Extension::kF16);
 
     auto* cast = mat2x4<f16>(vec4<f16>(2_h, 2_h, 2_h, 2_h), vec4<f16>(2_h, 2_h, 2_h, 2_h));
@@ -3468,7 +3468,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat2x4_F16_With_Vec4_Vec4) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat3x4_F32_With_Vec4_Vec4_Vec4) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat3x4_F32_With_Vec4_Vec4_Vec4) {
     auto* cast = mat3x4<f32>(vec4<f32>(2_f, 2_f, 2_f, 2_f), vec4<f32>(2_f, 2_f, 2_f, 2_f),
                              vec4<f32>(2_f, 2_f, 2_f, 2_f));
     WrapInFunction(cast);
@@ -3487,7 +3487,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat3x4_F32_With_Vec4_Vec4_Vec4) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat3x4_F16_With_Vec4_Vec4_Vec4) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat3x4_F16_With_Vec4_Vec4_Vec4) {
     Enable(ast::Extension::kF16);
 
     auto* cast = mat3x4<f16>(vec4<f16>(2_h, 2_h, 2_h, 2_h), vec4<f16>(2_h, 2_h, 2_h, 2_h),
@@ -3508,7 +3508,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat3x4_F16_With_Vec4_Vec4_Vec4) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat4x4_F32_With_Vec4_Vec4_Vec4_Vec4) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat4x4_F32_With_Vec4_Vec4_Vec4_Vec4) {
     auto* cast = mat4x4<f32>(vec4<f32>(2_f, 2_f, 2_f, 2_f), vec4<f32>(2_f, 2_f, 2_f, 2_f),
                              vec4<f32>(2_f, 2_f, 2_f, 2_f), vec4<f32>(2_f, 2_f, 2_f, 2_f));
     WrapInFunction(cast);
@@ -3527,7 +3527,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat4x4_F32_With_Vec4_Vec4_Vec4_Vec4) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Mat4x4_F16_With_Vec4_Vec4_Vec4_Vec4) {
+TEST_F(SpvBuilderInitializerTest, Type_Mat4x4_F16_With_Vec4_Vec4_Vec4_Vec4) {
     Enable(ast::Extension::kF16);
 
     auto* cast = mat4x4<f16>(vec4<f16>(2_h, 2_h, 2_h, 2_h), vec4<f16>(2_h, 2_h, 2_h, 2_h),
@@ -3548,7 +3548,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Mat4x4_F16_With_Vec4_Vec4_Vec4_Vec4) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Array_5_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Array_5_F32) {
     auto* cast = array<f32, 5>(2_f, 2_f, 2_f, 2_f, 2_f);
     WrapInFunction(cast);
 
@@ -3566,7 +3566,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_5_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Array_5_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Array_5_F16) {
     Enable(ast::Extension::kF16);
 
     auto* cast = array<f16, 5>(2_h, 2_h, 2_h, 2_h, 2_h);
@@ -3586,7 +3586,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_5_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Array_2_Vec3_F32) {
     auto* first = vec3<f32>(1_f, 2_f, 3_f);
     auto* second = vec3<f32>(1_f, 2_f, 3_f);
     auto* t = Construct(ty.array(ty.vec3<f32>(), 2_u), first, second);
@@ -3608,7 +3608,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Array_2_Vec3_F16) {
     Enable(ast::Extension::kF16);
 
     auto* first = vec3<f16>(1_h, 2_h, 3_h);
@@ -3632,7 +3632,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Array_2_Vec3_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, CommonInitializer_TwoVectors) {
+TEST_F(SpvBuilderInitializerTest, CommonInitializer_TwoVectors) {
     auto* v1 = vec3<f32>(2_f, 2_f, 2_f);
     auto* v2 = vec3<f32>(2_f, 2_f, 2_f);
     WrapInFunction(WrapInStatement(v1), WrapInStatement(v2));
@@ -3650,7 +3650,7 @@ TEST_F(SpvBuilderConstructorTest, CommonInitializer_TwoVectors) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, CommonInitializer_TwoArrays) {
+TEST_F(SpvBuilderInitializerTest, CommonInitializer_TwoArrays) {
     auto* a1 = array<f32, 3>(2_f, 2_f, 2_f);
     auto* a2 = array<f32, 3>(2_f, 2_f, 2_f);
     WrapInFunction(WrapInStatement(a1), WrapInStatement(a2));
@@ -3670,7 +3670,7 @@ TEST_F(SpvBuilderConstructorTest, CommonInitializer_TwoArrays) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, CommonInitializer_Array_VecArray) {
+TEST_F(SpvBuilderInitializerTest, CommonInitializer_Array_VecArray) {
     // Test that initializers of different types with the same values produce
     // different OpConstantComposite instructions.
     // crbug.com/tint/777
@@ -3695,7 +3695,7 @@ TEST_F(SpvBuilderConstructorTest, CommonInitializer_Array_VecArray) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Struct) {
+TEST_F(SpvBuilderInitializerTest, Type_Struct) {
     auto* s = Structure("my_struct", utils::Vector{
                                          Member("a", ty.f32()),
                                          Member("b", ty.vec3<f32>()),
@@ -3720,7 +3720,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Struct) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_F32) {
     auto* t = Construct<f32>();
 
     WrapInFunction(t);
@@ -3737,7 +3737,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_F16) {
     Enable(ast::Extension::kF16);
 
     auto* t = Construct<f16>();
@@ -3756,7 +3756,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_I32) {
+TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_I32) {
     auto* t = Construct<i32>();
 
     WrapInFunction(t);
@@ -3773,7 +3773,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_I32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_U32) {
+TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_U32) {
     auto* t = Construct<u32>();
 
     WrapInFunction(t);
@@ -3790,7 +3790,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_U32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Bool) {
+TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_Bool) {
     auto* t = Construct<bool>();
 
     WrapInFunction(t);
@@ -3807,7 +3807,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Bool) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Vector) {
+TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_Vector) {
     auto* t = vec2<i32>();
 
     WrapInFunction(t);
@@ -3825,7 +3825,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Vector) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Matrix_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_Matrix_F32) {
     auto* t = mat4x2<f32>();
 
     WrapInFunction(t);
@@ -3844,7 +3844,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Matrix_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Matrix_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_Matrix_F16) {
     Enable(ast::Extension::kF16);
 
     auto* t = mat4x2<f16>();
@@ -3865,7 +3865,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Matrix_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Array) {
+TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_Array) {
     auto* t = array<i32, 2>();
 
     WrapInFunction(t);
@@ -3885,7 +3885,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Array) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
+TEST_F(SpvBuilderInitializerTest, Type_ZeroInit_Struct) {
     auto* s = Structure("my_struct", utils::Vector{Member("a", ty.f32())});
     auto* t = Construct(ty.Of(s));
     WrapInFunction(t);
@@ -3903,7 +3903,7 @@ TEST_F(SpvBuilderConstructorTest, Type_ZeroInit_Struct) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_I32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_U32_To_I32) {
     auto* var = Decl(Var("x", ty.u32(), Expr(2_u)));
     auto* cast = Construct<i32>("x");
     WrapInFunction(var, cast);
@@ -3927,7 +3927,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_I32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_I32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_F32_To_I32) {
     auto* var = Decl(Var("x", ty.f32(), Expr(2.4_f)));
     auto* cast = Construct<i32>("x");
     WrapInFunction(var, cast);
@@ -3951,7 +3951,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_I32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_F16_To_I32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_F16_To_I32) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2.4_h)));
@@ -3977,7 +3977,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F16_To_I32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_U32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_I32_To_U32) {
     auto* var = Decl(Var("x", ty.i32(), Expr(2_i)));
     auto* cast = Construct<u32>("x");
     WrapInFunction(var, cast);
@@ -4001,7 +4001,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_U32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_U32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_F32_To_U32) {
     auto* var = Decl(Var("x", ty.f32(), Expr(2.4_f)));
     auto* cast = Construct<u32>("x");
     WrapInFunction(var, cast);
@@ -4025,7 +4025,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_U32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_F16_To_U32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_F16_To_U32) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2.4_h)));
@@ -4051,7 +4051,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F16_To_U32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_I32_To_F32) {
     auto* var = Decl(Var("x", ty.i32(), Expr(2_i)));
     auto* cast = Construct<f32>("x");
     WrapInFunction(var, cast);
@@ -4075,7 +4075,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_U32_To_F32) {
     auto* var = Decl(Var("x", ty.u32(), Expr(2_u)));
     auto* cast = Construct<f32>("x");
     WrapInFunction(var, cast);
@@ -4099,7 +4099,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_F16_To_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_F16_To_F32) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f16(), Expr(2_h)));
@@ -4125,7 +4125,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F16_To_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_I32_To_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.i32(), Expr(2_i)));
@@ -4151,7 +4151,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_I32_To_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_U32_To_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.u32(), Expr(2_u)));
@@ -4177,7 +4177,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_U32_To_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_F32_To_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = Decl(Var("x", ty.f32(), Expr(2_f)));
@@ -4203,7 +4203,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_F32_To_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_I32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_U32_to_I32) {
     auto* var = GlobalVar("i", ty.vec3<u32>(), ast::AddressSpace::kPrivate);
 
     auto* cast = vec3<i32>("i");
@@ -4229,7 +4229,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_I32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_I32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F32_to_I32) {
     auto* var = GlobalVar("i", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
 
     auto* cast = vec3<i32>("i");
@@ -4255,7 +4255,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_I32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F16_to_I32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F16_to_I32) {
     Enable(ast::Extension::kF16);
 
     auto* var = GlobalVar("i", ty.vec3<f16>(), ast::AddressSpace::kPrivate);
@@ -4283,7 +4283,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F16_to_I32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_U32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_I32_to_U32) {
     auto* var = GlobalVar("i", ty.vec3<i32>(), ast::AddressSpace::kPrivate);
 
     auto* cast = vec3<u32>("i");
@@ -4309,7 +4309,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_U32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_U32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F32_to_U32) {
     auto* var = GlobalVar("i", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
 
     auto* cast = vec3<u32>("i");
@@ -4335,7 +4335,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_U32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F16_to_U32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F16_to_U32) {
     Enable(ast::Extension::kF16);
 
     auto* var = GlobalVar("i", ty.vec3<f16>(), ast::AddressSpace::kPrivate);
@@ -4363,7 +4363,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F16_to_U32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_I32_to_F32) {
     auto* var = GlobalVar("i", ty.vec3<i32>(), ast::AddressSpace::kPrivate);
 
     auto* cast = vec3<f32>("i");
@@ -4389,7 +4389,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_U32_to_F32) {
     auto* var = GlobalVar("i", ty.vec3<u32>(), ast::AddressSpace::kPrivate);
 
     auto* cast = vec3<f32>("i");
@@ -4415,7 +4415,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F16_to_F32) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F16_to_F32) {
     Enable(ast::Extension::kF16);
 
     auto* var = GlobalVar("i", ty.vec3<f16>(), ast::AddressSpace::kPrivate);
@@ -4443,7 +4443,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F16_to_F32) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_I32_to_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = GlobalVar("i", ty.vec3<i32>(), ast::AddressSpace::kPrivate);
@@ -4471,7 +4471,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_I32_to_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_U32_to_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = GlobalVar("i", ty.vec3<u32>(), ast::AddressSpace::kPrivate);
@@ -4499,7 +4499,7 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_U32_to_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_F16) {
+TEST_F(SpvBuilderInitializerTest, Type_Convert_Vectors_F32_to_F16) {
     Enable(ast::Extension::kF16);
 
     auto* var = GlobalVar("i", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
@@ -4527,18 +4527,18 @@ TEST_F(SpvBuilderConstructorTest, Type_Convert_Vectors_F32_to_F16) {
 )");
 }
 
-TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalVectorWithAllConstConstructors) {
+TEST_F(SpvBuilderInitializerTest, IsInitializerConst_GlobalVectorWithAllConstInitializers) {
     // vec3<f32>(1.0, 2.0, 3.0)  -> true
     auto* t = vec3<f32>(1_f, 2_f, 3_f);
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.IsConstructorConst(t));
+    EXPECT_TRUE(b.IsInitializerConst(t));
     EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalArrayWithAllConstConstructors) {
+TEST_F(SpvBuilderInitializerTest, IsInitializerConst_GlobalArrayWithAllConstInitializers) {
     // array<vec3<f32>, 2u>(vec3<f32>(1.0, 2.0, 3.0), vec3<f32>(1.0, 2.0, 3.0))
     //   -> true
     auto* t = Construct(ty.array(ty.vec3<f32>(), 2_u), vec3<f32>(1_f, 2_f, 3_f),
@@ -4547,11 +4547,11 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalArrayWithAllConstCons
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.IsConstructorConst(t));
+    EXPECT_TRUE(b.IsInitializerConst(t));
     EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalVectorWithMatchingTypeConstructors) {
+TEST_F(SpvBuilderInitializerTest, IsInitializerConst_GlobalVectorWithMatchingTypeInitializers) {
     // vec2<f32>(f32(1.0), f32(2.0))  -> false
 
     auto* t = vec2<f32>(Construct<f32>(1_f), Construct<f32>(2_f));
@@ -4559,11 +4559,11 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalVectorWithMatchingTyp
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.IsConstructorConst(t));
+    EXPECT_TRUE(b.IsInitializerConst(t));
     EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalWithTypeConversionConstructor) {
+TEST_F(SpvBuilderInitializerTest, IsInitializerConst_GlobalWithTypeConversionInitializer) {
     // vec2<f32>(f32(1), f32(2)) -> false
 
     auto* t = vec2<f32>(Construct<f32>(1_i), Construct<f32>(2_i));
@@ -4571,11 +4571,11 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_GlobalWithTypeConversionCon
 
     spirv::Builder& b = Build();
 
-    EXPECT_FALSE(b.IsConstructorConst(t));
+    EXPECT_FALSE(b.IsInitializerConst(t));
     EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(SpvBuilderConstructorTest, IsConstructorConst_VectorWithAllConstConstructors) {
+TEST_F(SpvBuilderInitializerTest, IsInitializerConst_VectorWithAllConstInitializers) {
     // vec3<f32>(1.0, 2.0, 3.0)  -> true
 
     auto* t = vec3<f32>(1_f, 2_f, 3_f);
@@ -4583,11 +4583,11 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_VectorWithAllConstConstruct
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.IsConstructorConst(t));
+    EXPECT_TRUE(b.IsInitializerConst(t));
     EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Vector_WithIdent) {
+TEST_F(SpvBuilderInitializerTest, IsInitializerConst_Vector_WithIdent) {
     // vec3<f32>(a, b, c)  -> false
 
     GlobalVar("a", ty.f32(), ast::AddressSpace::kPrivate);
@@ -4599,11 +4599,11 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Vector_WithIdent) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_FALSE(b.IsConstructorConst(t));
+    EXPECT_FALSE(b.IsInitializerConst(t));
     EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(SpvBuilderConstructorTest, IsConstructorConst_ArrayWithAllConstConstructors) {
+TEST_F(SpvBuilderInitializerTest, IsInitializerConst_ArrayWithAllConstInitializers) {
     // array<vec3<f32>, 2u>(vec3<f32>(1.0, 2.0, 3.0), vec3<f32>(1.0, 2.0, 3.0))
     //   -> true
 
@@ -4615,11 +4615,11 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_ArrayWithAllConstConstructo
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.IsConstructorConst(t));
+    EXPECT_TRUE(b.IsInitializerConst(t));
     EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(SpvBuilderConstructorTest, IsConstructorConst_VectorWithTypeConversionConstConstructors) {
+TEST_F(SpvBuilderInitializerTest, IsInitializerConst_VectorWithTypeConversionConstInitializers) {
     // vec2<f32>(f32(1), f32(2))  -> false
 
     auto* t = vec2<f32>(Construct<f32>(1_i), Construct<f32>(2_i));
@@ -4627,21 +4627,21 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_VectorWithTypeConversionCon
 
     spirv::Builder& b = Build();
 
-    EXPECT_FALSE(b.IsConstructorConst(t));
+    EXPECT_FALSE(b.IsInitializerConst(t));
     EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(SpvBuilderConstructorTest, IsConstructorConst_BitCastScalars) {
+TEST_F(SpvBuilderInitializerTest, IsInitializerConst_BitCastScalars) {
     auto* t = vec2<u32>(Construct<u32>(1_i), Construct<u32>(1_i));
     WrapInFunction(t);
 
     spirv::Builder& b = Build();
 
-    EXPECT_FALSE(b.IsConstructorConst(t));
+    EXPECT_FALSE(b.IsInitializerConst(t));
     EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
+TEST_F(SpvBuilderInitializerTest, IsInitializerConst_Struct) {
     auto* s = Structure("my_struct", utils::Vector{
                                          Member("a", ty.f32()),
                                          Member("b", ty.vec3<f32>()),
@@ -4652,11 +4652,11 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct) {
 
     spirv::Builder& b = Build();
 
-    EXPECT_TRUE(b.IsConstructorConst(t));
+    EXPECT_TRUE(b.IsInitializerConst(t));
     EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct_WithIdentSubExpression) {
+TEST_F(SpvBuilderInitializerTest, IsInitializerConst_Struct_WithIdentSubExpression) {
     auto* s = Structure("my_struct", utils::Vector{
                                          Member("a", ty.f32()),
                                          Member("b", ty.vec3<f32>()),
@@ -4670,11 +4670,11 @@ TEST_F(SpvBuilderConstructorTest, IsConstructorConst_Struct_WithIdentSubExpressi
 
     spirv::Builder& b = Build();
 
-    EXPECT_FALSE(b.IsConstructorConst(t));
+    EXPECT_FALSE(b.IsInitializerConst(t));
     EXPECT_FALSE(b.has_error());
 }
 
-TEST_F(SpvBuilderConstructorTest, ConstantCompositeScoping) {
+TEST_F(SpvBuilderInitializerTest, ConstantCompositeScoping) {
     // if (true) {
     //    let x = vec3<f32>(1.0, 2.0, 3.0);
     // }
@@ -4715,9 +4715,9 @@ OpFunctionEnd
 }
 
 // TODO(crbug.com/tint/1155) Implement when overrides are fully implemented.
-// TEST_F(SpvBuilderConstructorTest, SpecConstantCompositeScoping)
+// TEST_F(SpvBuilderInitializerTest, SpecConstantCompositeScoping)
 
-TEST_F(SpvBuilderConstructorTest, CompositeConstructScoping) {
+TEST_F(SpvBuilderInitializerTest, CompositeConstructScoping) {
     // var one = 1.0;
     // if (true) {
     //    let x = vec3<f32>(one, 2.0, 3.0);

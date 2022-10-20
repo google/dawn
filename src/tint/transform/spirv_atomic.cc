@@ -163,7 +163,7 @@ struct SpirvAtomic::State {
                     if (v->type && atomic_variables.emplace(user->Variable()).second) {
                         ctx.Replace(v->type, AtomicTypeFor(user->Variable()->Type()));
                     }
-                    if (auto* ctor = user->Variable()->Constructor()) {
+                    if (auto* ctor = user->Variable()->Initializer()) {
                         atomic_expressions.Add(ctor);
                     }
                 },
@@ -266,10 +266,10 @@ struct SpirvAtomic::State {
                     },
                     [&](const ast::VariableDeclStatement* decl) {
                         auto* var = decl->variable;
-                        if (auto* sem_ctor = ctx.src->Sem().Get(var->constructor)) {
-                            if (is_ref_to_atomic_var(sem_ctor)) {
-                                ctx.Replace(var->constructor, [=] {
-                                    auto* rhs = ctx.CloneWithoutTransform(var->constructor);
+                        if (auto* sem_init = ctx.src->Sem().Get(var->initializer)) {
+                            if (is_ref_to_atomic_var(sem_init)) {
+                                ctx.Replace(var->initializer, [=] {
+                                    auto* rhs = ctx.CloneWithoutTransform(var->initializer);
                                     return b.Call(sem::str(sem::BuiltinType::kAtomicLoad),
                                                   b.AddressOf(rhs));
                                 });

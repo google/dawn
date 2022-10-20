@@ -41,7 +41,7 @@ class Manager final : public Castable<Manager, Transform> {
 
     /// Add pass to the manager of type `T`, constructed with the provided
     /// arguments.
-    /// @param args the arguments to forward to the `T` constructor
+    /// @param args the arguments to forward to the `T` initializer
     template <typename T, typename... ARGS>
     void Add(ARGS&&... args) {
         transforms_.emplace_back(std::make_unique<T>(std::forward<ARGS>(args)...));

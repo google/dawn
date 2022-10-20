@@ -177,7 +177,7 @@ TEST_F(ResolverValidationTest, Expr_DontCall_Type) {
     WrapInFunction(Expr(Source{{{3, 3}, {3, 8}}}, "T"));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "3:8 error: missing '(' for type constructor or cast");
+    EXPECT_EQ(r()->error(), "3:8 error: missing '(' for type initializer or cast");
 }
 
 TEST_F(ResolverValidationTest, AssignmentStmt_InvalidLHS_BuiltinFunctionName) {
@@ -1303,7 +1303,7 @@ TEST_F(ResolverValidationTest, OffsetAndAlignAndSizeAttribute) {
     EXPECT_EQ(r()->error(), "12:34 error: @offset cannot be used with @align or @size");
 }
 
-TEST_F(ResolverTest, Expr_Constructor_Cast_Pointer) {
+TEST_F(ResolverTest, Expr_Initializer_Cast_Pointer) {
     auto* vf = Var("vf", ty.f32());
     auto* c =
         Construct(Source{{12, 34}}, ty.pointer<i32>(ast::AddressSpace::kFunction), ExprList(vf));

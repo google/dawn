@@ -62,7 +62,7 @@
 	<!--=================================================================-->
 	<!-- ast -->
 	<!--=================================================================-->
-	
+
 	<Type Name="tint::ast::AssignmentStatement">
 		<DisplayString>{*lhs} = {*rhs};</DisplayString>
 		<Expand>
@@ -126,15 +126,15 @@
 	</Type>
 
 	<Type Name="tint::ast::Let">
-		<DisplayString Condition="!!type">let {symbol} : {*type} = {*constructor}</DisplayString>
-		<DisplayString Condition=" !type">let {symbol} = {*constructor}</DisplayString>
+		<DisplayString Condition="!!type">let {symbol} : {*type} = {*initializer}</DisplayString>
+		<DisplayString Condition=" !type">let {symbol} = {*initializer}</DisplayString>
 	</Type>
 
 	<Type Name="tint::ast::Variable">
-		<DisplayString Condition="!!type &amp; !!constructor">var {symbol} : {*type} = {*constructor}</DisplayString>
-		<DisplayString Condition="!!type &amp;  !constructor">var {symbol} : {*type}</DisplayString>
-		<DisplayString Condition=" !type &amp; !!constructor">var {symbol} = {*constructor}</DisplayString>
-		<DisplayString Condition=" !type &amp;  !constructor">var {symbol}</DisplayString>
+		<DisplayString Condition="!!type &amp; !!initializer">var {symbol} : {*type} = {*initializer}</DisplayString>
+		<DisplayString Condition="!!type &amp;  !initializer">var {symbol} : {*type}</DisplayString>
+		<DisplayString Condition=" !type &amp; !!initializer">var {symbol} = {*initializer}</DisplayString>
+		<DisplayString Condition=" !type &amp;  !initializer">var {symbol}</DisplayString>
 	</Type>
 
 	<Type Name="tint::ast::VariableDeclStatement">

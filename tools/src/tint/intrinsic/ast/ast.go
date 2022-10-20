@@ -29,7 +29,7 @@ type AST struct {
 	Types        []TypeDecl
 	Matchers     []MatcherDecl
 	Builtins     []IntrinsicDecl
-	Constructors []IntrinsicDecl
+	Initializers []IntrinsicDecl
 	Converters   []IntrinsicDecl
 	Operators    []IntrinsicDecl
 }
@@ -52,7 +52,7 @@ func (a AST) String() string {
 		fmt.Fprintf(&sb, "%v", b)
 		fmt.Fprintln(&sb)
 	}
-	for _, o := range a.Constructors {
+	for _, o := range a.Initializers {
 		fmt.Fprintf(&sb, "%v", o)
 		fmt.Fprintln(&sb)
 	}
@@ -113,7 +113,7 @@ func (m MatcherDecl) Format(w fmt.State, verb rune) {
 	m.Options.Format(w, verb)
 }
 
-// IntrinsicKind is either a Builtin, Operator, Constructor or Converter
+// IntrinsicKind is either a Builtin, Operator, Initializer or Converter
 type IntrinsicKind string
 
 const (
@@ -123,9 +123,9 @@ const (
 	// Operator is a unary or binary operator.
 	// Declared with 'op'.
 	Operator IntrinsicKind = "operator"
-	// Constructor is a type constructor function.
-	// Declared with 'ctor'.
-	Constructor IntrinsicKind = "constructor"
+	// Initializer is a type initializer function.
+	// Declared with 'init'.
+	Initializer IntrinsicKind = "initializer"
 	// Converter is a type conversion function.
 	// Declared with 'conv'.
 	Converter IntrinsicKind = "converter"
@@ -149,8 +149,8 @@ func (i IntrinsicDecl) Format(w fmt.State, verb rune) {
 		fmt.Fprintf(w, "fn ")
 	case Operator:
 		fmt.Fprintf(w, "op ")
-	case Constructor:
-		fmt.Fprintf(w, "ctor ")
+	case Initializer:
+		fmt.Fprintf(w, "init ")
 	case Converter:
 		fmt.Fprintf(w, "conv ")
 	}

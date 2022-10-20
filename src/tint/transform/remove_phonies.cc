@@ -70,7 +70,7 @@ void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
                             stmt->rhs, ctx.dst->Diagnostics(),
                             [&](const ast::CallExpression* expr) {
                                 // ast::CallExpression may map to a function or builtin call
-                                // (both may have side-effects), or a type constructor or
+                                // (both may have side-effects), or a type initializer or
                                 // type conversion (both do not have side effects).
                                 auto* call = sem.Get<sem::Call>(expr);
                                 if (!call) {

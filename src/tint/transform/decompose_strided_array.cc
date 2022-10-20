@@ -22,7 +22,7 @@
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/expression.h"
 #include "src/tint/sem/member_accessor_expression.h"
-#include "src/tint/sem/type_constructor.h"
+#include "src/tint/sem/type_initializer.h"
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"
@@ -107,9 +107,9 @@ void DecomposeStridedArray::Run(CloneContext& ctx, const DataMap&, DataMap&) con
         return nullptr;
     });
 
-    // Find all array type constructor expressions for array types that have had
-    // their element changed to a single field structure. These constructors are
-    // adjusted to wrap each of the arguments with an additional constructor for
+    // Find all array type initializer expressions for array types that have had
+    // their element changed to a single field structure. These initializers are
+    // adjusted to wrap each of the arguments with an additional initializer for
     // the new element structure type.
     // Example:
     //   `@stride(32) array<i32, 3>(1, 2, 3)`
@@ -118,9 +118,9 @@ void DecomposeStridedArray::Run(CloneContext& ctx, const DataMap&, DataMap&) con
     ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::Expression* {
         if (!expr->args.IsEmpty()) {
             if (auto* call = sem.Get(expr)->UnwrapMaterialize()->As<sem::Call>()) {
-                if (auto* ctor = call->Target()->As<sem::TypeConstructor>()) {
+                if (auto* ctor = call->Target()->As<sem::TypeInitializer>()) {
                     if (auto* arr = ctor->ReturnType()->As<sem::Array>()) {
-                        // Begin by cloning the array constructor type or name
+                        // Begin by cloning the array initializer type or name
                         // If this is an unaliased array, this may add a new entry to
                         // decomposed.
                         // If this is an aliased array, decomposed should already be

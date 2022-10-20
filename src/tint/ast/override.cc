@@ -27,9 +27,9 @@ Override::Override(ProgramID pid,
                    const Source& src,
                    const Symbol& sym,
                    const ast::Type* ty,
-                   const Expression* ctor,
+                   const Expression* init,
                    utils::VectorRef<const Attribute*> attrs)
-    : Base(pid, nid, src, sym, ty, ctor, std::move(attrs)) {}
+    : Base(pid, nid, src, sym, ty, init, std::move(attrs)) {}
 
 Override::Override(Override&&) = default;
 
@@ -43,9 +43,9 @@ const Override* Override::Clone(CloneContext* ctx) const {
     auto src = ctx->Clone(source);
     auto sym = ctx->Clone(symbol);
     auto* ty = ctx->Clone(type);
-    auto* ctor = ctx->Clone(constructor);
+    auto* init = ctx->Clone(initializer);
     auto attrs = ctx->Clone(attributes);
-    return ctx->dst->create<Override>(src, sym, ty, ctor, std::move(attrs));
+    return ctx->dst->create<Override>(src, sym, ty, init, std::move(attrs));
 }
 
 }  // namespace tint::ast

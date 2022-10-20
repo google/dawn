@@ -33,8 +33,8 @@
 #include "src/tint/sem/pipeline_stage_set.h"
 #include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/storage_texture.h"
-#include "src/tint/sem/type_constructor.h"
 #include "src/tint/sem/type_conversion.h"
+#include "src/tint/sem/type_initializer.h"
 #include "src/tint/utils/hash.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/math.h"
@@ -338,7 +338,7 @@ using PipelineStage = ast::PipelineStage;
 enum class OverloadFlag {
     kIsBuiltin,                 // The overload is a builtin ('fn')
     kIsOperator,                // The overload is an operator ('op')
-    kIsConstructor,             // The overload is a type constructor ('ctor')
+    kIsInitializer,             // The overload is a type initializer ('ctor')
     kIsConverter,               // The overload is a type converter ('conv')
     kSupportsVertexPipeline,    // The overload can be used in vertex shaders
     kSupportsFragmentPipeline,  // The overload can be used in fragment shaders
@@ -1003,7 +1003,7 @@ class Impl : public IntrinsicTable {
                           const Source& source,
                           bool is_compound) override;
 
-    CtorOrConv Lookup(CtorConvIntrinsic type,
+    InitOrConv Lookup(InitConvIntrinsic type,
                       const sem::Type* template_arg,
                       utils::VectorRef<const sem::Type*> args,
                       const Source& source) override;
@@ -1110,8 +1110,8 @@ class Impl : public IntrinsicTable {
     ProgramBuilder& builder;
     Matchers matchers;
     std::unordered_map<IntrinsicPrototype, sem::Builtin*, IntrinsicPrototype::Hasher> builtins;
-    std::unordered_map<IntrinsicPrototype, sem::TypeConstructor*, IntrinsicPrototype::Hasher>
-        constructors;
+    std::unordered_map<IntrinsicPrototype, sem::TypeInitializer*, IntrinsicPrototype::Hasher>
+        initializers;
     std::unordered_map<IntrinsicPrototype, sem::TypeConversion*, IntrinsicPrototype::Hasher>
         converters;
 };
@@ -1330,7 +1330,7 @@ IntrinsicTable::BinaryOperator Impl::Lookup(ast::BinaryOp op,
     };
 }
 
-IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
+IntrinsicTable::InitOrConv Impl::Lookup(InitConvIntrinsic type,
                                         const sem::Type* template_arg,
                                         utils::VectorRef<const sem::Type*> args,
                                         const Source& source) {
@@ -1339,11 +1339,11 @@ IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
     // Generates an error when no overloads match the provided arguments
     auto on_no_match = [&](utils::VectorRef<Candidate> candidates) {
         std::stringstream ss;
-        ss << "no matching constructor for " << CallSignature(builder, name, args, template_arg)
+        ss << "no matching initializer for " << CallSignature(builder, name, args, template_arg)
            << std::endl;
         Candidates ctor, conv;
         for (auto candidate : candidates) {
-            if (candidate.overload->flags.Contains(OverloadFlag::kIsConstructor)) {
+            if (candidate.overload->flags.Contains(OverloadFlag::kIsInitializer)) {
                 ctor.Push(candidate);
             } else {
                 conv.Push(candidate);
@@ -1351,7 +1351,7 @@ IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
         }
         if (!ctor.IsEmpty()) {
             ss << std::endl
-               << ctor.Length() << " candidate constructor" << (ctor.Length() > 1 ? "s:" : ":")
+               << ctor.Length() << " candidate initializer" << (ctor.Length() > 1 ? "s:" : ":")
                << std::endl;
             PrintCandidates(ss, ctor, name);
         }
@@ -1371,14 +1371,14 @@ IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
     }
 
     // Resolve the intrinsic overload
-    auto match = MatchIntrinsic(kConstructorsAndConverters[static_cast<size_t>(type)], name, args,
+    auto match = MatchIntrinsic(kInitializersAndConverters[static_cast<size_t>(type)], name, args,
                                 sem::EvaluationStage::kConstant, templates, on_no_match);
     if (!match.overload) {
         return {};
     }
 
-    // Was this overload a constructor or conversion?
-    if (match.overload->flags.Contains(OverloadFlag::kIsConstructor)) {
+    // Was this overload a initializer or conversion?
+    if (match.overload->flags.Contains(OverloadFlag::kIsInitializer)) {
         utils::Vector<const sem::Parameter*, 8> params;
         params.Reserve(match.parameters.Length());
         for (auto& p : match.parameters) {
@@ -1388,11 +1388,11 @@ IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
         }
         auto eval_stage = match.overload->const_eval_fn ? sem::EvaluationStage::kConstant
                                                         : sem::EvaluationStage::kRuntime;
-        auto* target = utils::GetOrCreate(constructors, match, [&]() {
-            return builder.create<sem::TypeConstructor>(match.return_type, std::move(params),
+        auto* target = utils::GetOrCreate(initializers, match, [&]() {
+            return builder.create<sem::TypeInitializer>(match.return_type, std::move(params),
                                                         eval_stage);
         });
-        return CtorOrConv{target, match.overload->const_eval_fn};
+        return InitOrConv{target, match.overload->const_eval_fn};
     }
 
     // Conversion.
@@ -1404,7 +1404,7 @@ IntrinsicTable::CtorOrConv Impl::Lookup(CtorConvIntrinsic type,
                                                         : sem::EvaluationStage::kRuntime;
         return builder.create<sem::TypeConversion>(match.return_type, param, eval_stage);
     });
-    return CtorOrConv{target, match.overload->const_eval_fn};
+    return InitOrConv{target, match.overload->const_eval_fn};
 }
 
 IntrinsicPrototype Impl::MatchIntrinsic(const IntrinsicInfo& intrinsic,

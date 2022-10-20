@@ -12,22 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#ifndef SRC_TINT_TRANSFORM_VECTORIZE_SCALAR_MATRIX_CONSTRUCTORS_H_
-#define SRC_TINT_TRANSFORM_VECTORIZE_SCALAR_MATRIX_CONSTRUCTORS_H_
+#ifndef SRC_TINT_TRANSFORM_VECTORIZE_SCALAR_MATRIX_INITIALIZERS_H_
+#define SRC_TINT_TRANSFORM_VECTORIZE_SCALAR_MATRIX_INITIALIZERS_H_
 
 #include "src/tint/transform/transform.h"
 
 namespace tint::transform {
 
-/// A transform that converts scalar matrix constructors to the vector form.
-class VectorizeScalarMatrixConstructors final
-    : public Castable<VectorizeScalarMatrixConstructors, Transform> {
+/// A transform that converts scalar matrix initializers to the vector form.
+class VectorizeScalarMatrixInitializers final
+    : public Castable<VectorizeScalarMatrixInitializers, Transform> {
   public:
     /// Constructor
-    VectorizeScalarMatrixConstructors();
+    VectorizeScalarMatrixInitializers();
 
     /// Destructor
-    ~VectorizeScalarMatrixConstructors() override;
+    ~VectorizeScalarMatrixInitializers() override;
 
     /// @param program the program to inspect
     /// @param data optional extra transform-specific input data
@@ -46,4 +46,4 @@ class VectorizeScalarMatrixConstructors final
 
 }  // namespace tint::transform
 
-#endif  // SRC_TINT_TRANSFORM_VECTORIZE_SCALAR_MATRIX_CONSTRUCTORS_H_
+#endif  // SRC_TINT_TRANSFORM_VECTORIZE_SCALAR_MATRIX_INITIALIZERS_H_

@@ -82,7 +82,7 @@ TEST_P(ResolverInferredTypeParamTest, GlobalConst_Pass) {
 
     auto* expected_type = params.create_expected_type(*this);
 
-    // const a = <type constructor>;
+    // const a = <type initializer>;
     auto* ctor_expr = params.create_value(*this, 0);
     auto* a = GlobalConst("a", ctor_expr);
 
@@ -95,7 +95,7 @@ TEST_P(ResolverInferredTypeParamTest, GlobalVar_Pass) {
 
     auto* expected_type = params.create_expected_type(*this);
 
-    // var a = <type constructor>;
+    // var a = <type initializer>;
     auto* ctor_expr = params.create_value(*this, 0);
     auto* var = GlobalVar("a", ast::AddressSpace::kPrivate, ctor_expr);
 
@@ -108,7 +108,7 @@ TEST_P(ResolverInferredTypeParamTest, LocalLet_Pass) {
 
     auto* expected_type = params.create_expected_type(*this);
 
-    // let a = <type constructor>;
+    // let a = <type initializer>;
     auto* ctor_expr = params.create_value(*this, 0);
     auto* var = Let("a", ctor_expr);
     WrapInFunction(var);
@@ -122,7 +122,7 @@ TEST_P(ResolverInferredTypeParamTest, LocalVar_Pass) {
 
     auto* expected_type = params.create_expected_type(*this);
 
-    // var a = <type constructor>;
+    // var a = <type initializer>;
     auto* ctor_expr = params.create_value(*this, 0);
     auto* var = Var("a", ast::AddressSpace::kFunction, ctor_expr);
     WrapInFunction(var);

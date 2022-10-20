@@ -57,13 +57,13 @@ void SubstituteOverride::Run(CloneContext& ctx, const DataMap& config, DataMap&)
         // No replacement provided, just clone the override node as a const.
         auto iter = data->map.find(sem->OverrideId());
         if (iter == data->map.end()) {
-            if (!w->constructor) {
+            if (!w->initializer) {
                 ctx.dst->Diagnostics().add_error(
                     diag::System::Transform,
                     "Initializer not provided for override, and override not overridden.");
                 return nullptr;
             }
-            return ctx.dst->Const(src, sym, ty, ctx.Clone(w->constructor));
+            return ctx.dst->Const(src, sym, ty, ctx.Clone(w->initializer));
         }
 
         auto value = iter->second;

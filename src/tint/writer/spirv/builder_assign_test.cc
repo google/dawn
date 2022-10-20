@@ -69,7 +69,7 @@ TEST_F(BuilderTest, Assign_Var_OutsideFunction_IsError) {
               "function");
 }
 
-TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
+TEST_F(BuilderTest, Assign_Var_ZeroInitializer) {
     auto* v = GlobalVar("var", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
 
     auto* val = vec3<f32>();
@@ -98,7 +98,7 @@ TEST_F(BuilderTest, Assign_Var_ZeroConstructor) {
 )");
 }
 
-TEST_F(BuilderTest, Assign_Var_Complex_ConstructorNestedVector) {
+TEST_F(BuilderTest, Assign_Var_Complex_InitializerNestedVector) {
     auto* init = vec3<f32>(vec2<f32>(1_f, 2_f), 3_f);
 
     auto* v = GlobalVar("var", ty.vec3<f32>(), ast::AddressSpace::kPrivate);
@@ -131,7 +131,7 @@ TEST_F(BuilderTest, Assign_Var_Complex_ConstructorNestedVector) {
 )");
 }
 
-TEST_F(BuilderTest, Assign_Var_Complex_Constructor) {
+TEST_F(BuilderTest, Assign_Var_Complex_Initializer) {
     auto* init = vec3<f32>(1_f, 2_f, 3_f);
 
     auto* v = GlobalVar("var", ty.vec3<f32>(), ast::AddressSpace::kPrivate);

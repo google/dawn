@@ -112,7 +112,7 @@ struct SimplifyPointers::State {
                 if (var->Is<sem::LocalVariable>() &&       //
                     var->Declaration()->Is<ast::Let>() &&  //
                     var->Type()->Is<sem::Pointer>()) {
-                    op.expr = var->Declaration()->constructor;
+                    op.expr = var->Declaration()->initializer;
                     continue;
                 }
             }
@@ -176,7 +176,7 @@ struct SimplifyPointers::State {
                 // to be hoist to temporary "saved" variables.
                 std::vector<const ast::VariableDeclStatement*> saved;
                 CollectSavedArrayIndices(
-                    var->Declaration()->constructor, [&](const ast::Expression* idx_expr) {
+                    var->Declaration()->initializer, [&](const ast::Expression* idx_expr) {
                         // We have a sub-expression that needs to be saved.
                         // Create a new variable
                         auto saved_name = ctx.dst->Symbols().New(

@@ -59,18 +59,18 @@ func TestFixSubstr(t *testing.T) {
 		}, { ///////////////////////////////////////////////////////////////////
 			body: `Return{
   {
-    ScalarConstructor[not set]{42u}
+    ScalarInitializer[not set]{42u}
   }
 }
 `,
 			substr: `Return{
   {
-    ScalarConstructor[not set]{42}
+    ScalarInitializer[not set]{42}
   }
 }`,
 			expect: `Return{
   {
-    ScalarConstructor[not set]{42u}
+    ScalarInitializer[not set]{42u}
   }
 }`,
 		}, { ///////////////////////////////////////////////////////////////////
@@ -83,29 +83,29 @@ func TestFixSubstr(t *testing.T) {
 }
 Assignment{
   Identifier[not set]{x_1}
-  ScalarConstructor[not set]{42u}
+  ScalarInitializer[not set]{42u}
 }
 Assignment{
   Identifier[not set]{x_1}
-  ScalarConstructor[not set]{0u}
+  ScalarInitializer[not set]{0u}
 }
 Return{}
 `,
 			substr: `Assignment{
   Identifier[not set]{x_1}
-  ScalarConstructor[not set]{42}
+  ScalarInitializer[not set]{42}
 }
 Assignment{
   Identifier[not set]{x_1}
-  ScalarConstructor[not set]{0}
+  ScalarInitializer[not set]{0}
 }`,
 			expect: `Assignment{
   Identifier[not set]{x_1}
-  ScalarConstructor[not set]{42u}
+  ScalarInitializer[not set]{42u}
 }
 Assignment{
   Identifier[not set]{x_1}
-  ScalarConstructor[not set]{0u}
+  ScalarInitializer[not set]{0u}
 }`,
 		}, { ///////////////////////////////////////////////////////////////////
 			body: `VariableDeclStatement{
@@ -114,7 +114,7 @@ Assignment{
     function
     __bool
     {
-      ScalarConstructor[not set]{true}
+      ScalarInitializer[not set]{true}
     }
   }
 }
@@ -124,7 +124,7 @@ VariableDeclStatement{
     function
     __bool
     {
-      ScalarConstructor[not set]{false}
+      ScalarInitializer[not set]{false}
     }
   }
 }
@@ -134,7 +134,7 @@ VariableDeclStatement{
     function
     __i32
     {
-      ScalarConstructor[not set]{-1}
+      ScalarInitializer[not set]{-1}
     }
   }
 }
@@ -144,7 +144,7 @@ VariableDeclStatement{
     function
     __u32
     {
-      ScalarConstructor[not set]{1u}
+      ScalarInitializer[not set]{1u}
     }
   }
 }
@@ -154,7 +154,7 @@ VariableDeclStatement{
     function
     __f32
     {
-      ScalarConstructor[not set]{1.500000}
+      ScalarInitializer[not set]{1.500000}
     }
   }
 }
@@ -165,7 +165,7 @@ VariableDeclStatement{
     function
     __bool
     {
-      ScalarConstructor[not set]{true}
+      ScalarInitializer[not set]{true}
     }
   }
 }
@@ -175,7 +175,7 @@ VariableDeclStatement{
     function
     __bool
     {
-      ScalarConstructor[not set]{false}
+      ScalarInitializer[not set]{false}
     }
   }
 }
@@ -185,7 +185,7 @@ VariableDeclStatement{
     function
     __i32
     {
-      ScalarConstructor[not set]{-1}
+      ScalarInitializer[not set]{-1}
     }
   }
 }
@@ -195,7 +195,7 @@ VariableDeclStatement{
     function
     __u32
     {
-      ScalarConstructor[not set]{1}
+      ScalarInitializer[not set]{1}
     }
   }
 }
@@ -205,7 +205,7 @@ VariableDeclStatement{
     function
     __f32
     {
-      ScalarConstructor[not set]{1.500000}
+      ScalarInitializer[not set]{1.500000}
     }
   }
 }
@@ -216,7 +216,7 @@ VariableDeclStatement{
     function
     __bool
     {
-      ScalarConstructor[not set]{true}
+      ScalarInitializer[not set]{true}
     }
   }
 }
@@ -226,7 +226,7 @@ VariableDeclStatement{
     function
     __bool
     {
-      ScalarConstructor[not set]{false}
+      ScalarInitializer[not set]{false}
     }
   }
 }
@@ -236,7 +236,7 @@ VariableDeclStatement{
     function
     __i32
     {
-      ScalarConstructor[not set]{-1}
+      ScalarInitializer[not set]{-1}
     }
   }
 }
@@ -246,7 +246,7 @@ VariableDeclStatement{
     function
     __u32
     {
-      ScalarConstructor[not set]{1u}
+      ScalarInitializer[not set]{1u}
     }
   }
 }
@@ -256,7 +256,7 @@ VariableDeclStatement{
     function
     __f32
     {
-      ScalarConstructor[not set]{1.500000}
+      ScalarInitializer[not set]{1.500000}
     }
   }
 }

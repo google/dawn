@@ -711,124 +711,124 @@ fn textureLoad(texture: texture_external, coords: vec2<i32>) -> vec4<f32>
 @stage("fragment", "compute") fn atomicCompareExchangeWeak<T: iu32, S: workgroup_or_storage>(ptr<S, atomic<T>, read_write>, T, T) -> __atomic_compare_exchange_result<T>
 
 ////////////////////////////////////////////////////////////////////////////////
-// Type constructors                                                          //
+// Type initializers                                                          //
 ////////////////////////////////////////////////////////////////////////////////
 
-// Zero value constructors
-@const("Zero") ctor i32() -> i32
-@const("Zero") ctor u32() -> u32
-@const("Zero") ctor f32() -> f32
-@const("Zero") ctor f16() -> f16
-@const("Zero") ctor bool() -> bool
-@const("Zero") ctor vec2<T: concrete_scalar>() -> vec2<T>
-@const("Zero") ctor vec3<T: concrete_scalar>() -> vec3<T>
-@const("Zero") ctor vec4<T: concrete_scalar>() -> vec4<T>
-@const("Zero") ctor mat2x2<T: f32_f16>() -> mat2x2<T>
-@const("Zero") ctor mat2x3<T: f32_f16>() -> mat2x3<T>
-@const("Zero") ctor mat2x4<T: f32_f16>() -> mat2x4<T>
-@const("Zero") ctor mat3x2<T: f32_f16>() -> mat3x2<T>
-@const("Zero") ctor mat3x3<T: f32_f16>() -> mat3x3<T>
-@const("Zero") ctor mat3x4<T: f32_f16>() -> mat3x4<T>
-@const("Zero") ctor mat4x2<T: f32_f16>() -> mat4x2<T>
-@const("Zero") ctor mat4x3<T: f32_f16>() -> mat4x3<T>
-@const("Zero") ctor mat4x4<T: f32_f16>() -> mat4x4<T>
+// Zero value initializers
+@const("Zero") init i32() -> i32
+@const("Zero") init u32() -> u32
+@const("Zero") init f32() -> f32
+@const("Zero") init f16() -> f16
+@const("Zero") init bool() -> bool
+@const("Zero") init vec2<T: concrete_scalar>() -> vec2<T>
+@const("Zero") init vec3<T: concrete_scalar>() -> vec3<T>
+@const("Zero") init vec4<T: concrete_scalar>() -> vec4<T>
+@const("Zero") init mat2x2<T: f32_f16>() -> mat2x2<T>
+@const("Zero") init mat2x3<T: f32_f16>() -> mat2x3<T>
+@const("Zero") init mat2x4<T: f32_f16>() -> mat2x4<T>
+@const("Zero") init mat3x2<T: f32_f16>() -> mat3x2<T>
+@const("Zero") init mat3x3<T: f32_f16>() -> mat3x3<T>
+@const("Zero") init mat3x4<T: f32_f16>() -> mat3x4<T>
+@const("Zero") init mat4x2<T: f32_f16>() -> mat4x2<T>
+@const("Zero") init mat4x3<T: f32_f16>() -> mat4x3<T>
+@const("Zero") init mat4x4<T: f32_f16>() -> mat4x4<T>
 
-// Identity constructors
-@const("Identity") ctor i32(i32) -> i32
-@const("Identity") ctor u32(u32) -> u32
-@const("Identity") ctor f32(f32) -> f32
-@const("Identity") ctor f16(f16) -> f16
-@const("Identity") ctor bool(bool) -> bool
-@const("Identity") ctor vec2<T: concrete_scalar>(vec2<T>) -> vec2<T>
-@const("Identity") ctor vec3<T: concrete_scalar>(vec3<T>) -> vec3<T>
-@const("Identity") ctor vec4<T: concrete_scalar>(vec4<T>) -> vec4<T>
-@const("Identity") ctor mat2x2<T: f32_f16>(mat2x2<T>) -> mat2x2<T>
-@const("Identity") ctor mat2x3<T: f32_f16>(mat2x3<T>) -> mat2x3<T>
-@const("Identity") ctor mat2x4<T: f32_f16>(mat2x4<T>) -> mat2x4<T>
-@const("Identity") ctor mat3x2<T: f32_f16>(mat3x2<T>) -> mat3x2<T>
-@const("Identity") ctor mat3x3<T: f32_f16>(mat3x3<T>) -> mat3x3<T>
-@const("Identity") ctor mat3x4<T: f32_f16>(mat3x4<T>) -> mat3x4<T>
-@const("Identity") ctor mat4x2<T: f32_f16>(mat4x2<T>) -> mat4x2<T>
-@const("Identity") ctor mat4x3<T: f32_f16>(mat4x3<T>) -> mat4x3<T>
-@const("Identity") ctor mat4x4<T: f32_f16>(mat4x4<T>) -> mat4x4<T>
+// Identity initializers
+@const("Identity") init i32(i32) -> i32
+@const("Identity") init u32(u32) -> u32
+@const("Identity") init f32(f32) -> f32
+@const("Identity") init f16(f16) -> f16
+@const("Identity") init bool(bool) -> bool
+@const("Identity") init vec2<T: concrete_scalar>(vec2<T>) -> vec2<T>
+@const("Identity") init vec3<T: concrete_scalar>(vec3<T>) -> vec3<T>
+@const("Identity") init vec4<T: concrete_scalar>(vec4<T>) -> vec4<T>
+@const("Identity") init mat2x2<T: f32_f16>(mat2x2<T>) -> mat2x2<T>
+@const("Identity") init mat2x3<T: f32_f16>(mat2x3<T>) -> mat2x3<T>
+@const("Identity") init mat2x4<T: f32_f16>(mat2x4<T>) -> mat2x4<T>
+@const("Identity") init mat3x2<T: f32_f16>(mat3x2<T>) -> mat3x2<T>
+@const("Identity") init mat3x3<T: f32_f16>(mat3x3<T>) -> mat3x3<T>
+@const("Identity") init mat3x4<T: f32_f16>(mat3x4<T>) -> mat3x4<T>
+@const("Identity") init mat4x2<T: f32_f16>(mat4x2<T>) -> mat4x2<T>
+@const("Identity") init mat4x3<T: f32_f16>(mat4x3<T>) -> mat4x3<T>
+@const("Identity") init mat4x4<T: f32_f16>(mat4x4<T>) -> mat4x4<T>
 
-// Vector constructors (splat)
-@const("VecSplat") ctor vec2<T: scalar>(T) -> vec2<T>
-@const("VecSplat") ctor vec3<T: scalar>(T) -> vec3<T>
-@const("VecSplat") ctor vec4<T: scalar>(T) -> vec4<T>
+// Vector initializers (splat)
+@const("VecSplat") init vec2<T: scalar>(T) -> vec2<T>
+@const("VecSplat") init vec3<T: scalar>(T) -> vec3<T>
+@const("VecSplat") init vec4<T: scalar>(T) -> vec4<T>
 
-// Vector constructors (scalar)
-@const("VecCtorS") ctor vec2<T: scalar>(x: T, y: T) -> vec2<T>
-@const("VecCtorS") ctor vec3<T: scalar>(x: T, y: T, z: T) -> vec3<T>
-@const("VecCtorS") ctor vec4<T: scalar>(x: T, y: T, z: T, w: T) -> vec4<T>
+// Vector initializers (scalar)
+@const("VecInitS") init vec2<T: scalar>(x: T, y: T) -> vec2<T>
+@const("VecInitS") init vec3<T: scalar>(x: T, y: T, z: T) -> vec3<T>
+@const("VecInitS") init vec4<T: scalar>(x: T, y: T, z: T, w: T) -> vec4<T>
 
-// Vector constructors (mixed)
-@const("VecCtorM") ctor vec3<T: scalar>(xy: vec2<T>, z: T) -> vec3<T>
-@const("VecCtorM") ctor vec3<T: scalar>(x: T, yz: vec2<T>) -> vec3<T>
-@const("VecCtorM") ctor vec4<T: scalar>(xy: vec2<T>, z: T, w: T) -> vec4<T>
-@const("VecCtorM") ctor vec4<T: scalar>(x: T, yz: vec2<T>, w: T) -> vec4<T>
-@const("VecCtorM") ctor vec4<T: scalar>(x: T, y: T, zw: vec2<T>) -> vec4<T>
-@const("VecCtorM") ctor vec4<T: scalar>(xy: vec2<T>, zw: vec2<T>) -> vec4<T>
-@const("VecCtorM") ctor vec4<T: scalar>(xyz: vec3<T>, w: T) -> vec4<T>
-@const("VecCtorM") ctor vec4<T: scalar>(x: T, zyw: vec3<T>) -> vec4<T>
+// Vector initializers (mixed)
+@const("VecInitM") init vec3<T: scalar>(xy: vec2<T>, z: T) -> vec3<T>
+@const("VecInitM") init vec3<T: scalar>(x: T, yz: vec2<T>) -> vec3<T>
+@const("VecInitM") init vec4<T: scalar>(xy: vec2<T>, z: T, w: T) -> vec4<T>
+@const("VecInitM") init vec4<T: scalar>(x: T, yz: vec2<T>, w: T) -> vec4<T>
+@const("VecInitM") init vec4<T: scalar>(x: T, y: T, zw: vec2<T>) -> vec4<T>
+@const("VecInitM") init vec4<T: scalar>(xy: vec2<T>, zw: vec2<T>) -> vec4<T>
+@const("VecInitM") init vec4<T: scalar>(xyz: vec3<T>, w: T) -> vec4<T>
+@const("VecInitM") init vec4<T: scalar>(x: T, zyw: vec3<T>) -> vec4<T>
 
-// Matrix constructors (scalar)
-@const("MatCtorS")
-ctor mat2x2<T: fa_f32_f16>(T, T,
+// Matrix initializers (scalar)
+@const("MatInitS")
+init mat2x2<T: fa_f32_f16>(T, T,
                            T, T) -> mat2x2<T>
-@const("MatCtorS")
-ctor mat2x3<T: fa_f32_f16>(T, T, T,
+@const("MatInitS")
+init mat2x3<T: fa_f32_f16>(T, T, T,
                            T, T, T) -> mat2x3<T>
-@const("MatCtorS")
-ctor mat2x4<T: fa_f32_f16>(T, T, T, T,
+@const("MatInitS")
+init mat2x4<T: fa_f32_f16>(T, T, T, T,
                            T, T, T, T) -> mat2x4<T>
-@const("MatCtorS")
-ctor mat3x2<T: fa_f32_f16>(T, T,
+@const("MatInitS")
+init mat3x2<T: fa_f32_f16>(T, T,
                            T, T,
                            T, T) -> mat3x2<T>
-@const("MatCtorS")
-ctor mat3x3<T: fa_f32_f16>(T, T, T,
+@const("MatInitS")
+init mat3x3<T: fa_f32_f16>(T, T, T,
                            T, T, T,
                            T, T, T) -> mat3x3<T>
-@const("MatCtorS")
-ctor mat3x4<T: fa_f32_f16>(T, T, T, T,
+@const("MatInitS")
+init mat3x4<T: fa_f32_f16>(T, T, T, T,
                            T, T, T, T,
                            T, T, T, T) -> mat3x4<T>
-@const("MatCtorS")
-ctor mat4x2<T: fa_f32_f16>(T, T,
+@const("MatInitS")
+init mat4x2<T: fa_f32_f16>(T, T,
                            T, T,
                            T, T,
                            T, T) -> mat4x2<T>
-@const("MatCtorS")
-ctor mat4x3<T: fa_f32_f16>(T, T, T,
+@const("MatInitS")
+init mat4x3<T: fa_f32_f16>(T, T, T,
                            T, T, T,
                            T, T, T,
                            T, T, T) -> mat4x3<T>
-@const("MatCtorS")
-ctor mat4x4<T: fa_f32_f16>(T, T, T, T,
+@const("MatInitS")
+init mat4x4<T: fa_f32_f16>(T, T, T, T,
                            T, T, T, T,
                            T, T, T, T,
                            T, T, T, T) -> mat4x4<T>
 
-// Matrix constructors (column vectors)
-@const("MatCtorV")
-ctor mat2x2<T: fa_f32_f16>(vec2<T>, vec2<T>) -> mat2x2<T>
-@const("MatCtorV")
-ctor mat2x3<T: fa_f32_f16>(vec3<T>, vec3<T>) -> mat2x3<T>
-@const("MatCtorV")
-ctor mat2x4<T: fa_f32_f16>(vec4<T>, vec4<T>) -> mat2x4<T>
-@const("MatCtorV")
-ctor mat3x2<T: fa_f32_f16>(vec2<T>, vec2<T>, vec2<T>) -> mat3x2<T>
-@const("MatCtorV")
-ctor mat3x3<T: fa_f32_f16>(vec3<T>, vec3<T>, vec3<T>) -> mat3x3<T>
-@const("MatCtorV")
-ctor mat3x4<T: fa_f32_f16>(vec4<T>, vec4<T>, vec4<T>) -> mat3x4<T>
-@const("MatCtorV")
-ctor mat4x2<T: fa_f32_f16>(vec2<T>, vec2<T>, vec2<T>, vec2<T>) -> mat4x2<T>
-@const("MatCtorV")
-ctor mat4x3<T: fa_f32_f16>(vec3<T>, vec3<T>, vec3<T>, vec3<T>) -> mat4x3<T>
-@const("MatCtorV")
-ctor mat4x4<T: fa_f32_f16>(vec4<T>, vec4<T>, vec4<T>, vec4<T>) -> mat4x4<T>
+// Matrix initializers (column vectors)
+@const("MatInitV")
+init mat2x2<T: fa_f32_f16>(vec2<T>, vec2<T>) -> mat2x2<T>
+@const("MatInitV")
+init mat2x3<T: fa_f32_f16>(vec3<T>, vec3<T>) -> mat2x3<T>
+@const("MatInitV")
+init mat2x4<T: fa_f32_f16>(vec4<T>, vec4<T>) -> mat2x4<T>
+@const("MatInitV")
+init mat3x2<T: fa_f32_f16>(vec2<T>, vec2<T>, vec2<T>) -> mat3x2<T>
+@const("MatInitV")
+init mat3x3<T: fa_f32_f16>(vec3<T>, vec3<T>, vec3<T>) -> mat3x3<T>
+@const("MatInitV")
+init mat3x4<T: fa_f32_f16>(vec4<T>, vec4<T>, vec4<T>) -> mat3x4<T>
+@const("MatInitV")
+init mat4x2<T: fa_f32_f16>(vec2<T>, vec2<T>, vec2<T>, vec2<T>) -> mat4x2<T>
+@const("MatInitV")
+init mat4x3<T: fa_f32_f16>(vec3<T>, vec3<T>, vec3<T>, vec3<T>) -> mat4x3<T>
+@const("MatInitV")
+init mat4x4<T: fa_f32_f16>(vec4<T>, vec4<T>, vec4<T>, vec4<T>) -> mat4x4<T>
 
 ////////////////////////////////////////////////////////////////////////////////
 // Type conversions                                                           //

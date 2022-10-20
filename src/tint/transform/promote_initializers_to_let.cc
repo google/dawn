@@ -16,7 +16,7 @@
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/statement.h"
-#include "src/tint/sem/type_constructor.h"
+#include "src/tint/sem/type_initializer.h"
 #include "src/tint/transform/utils/hoist_to_decl_before.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::PromoteInitializersToLet);
@@ -45,9 +45,9 @@ void PromoteInitializersToLet::Run(CloneContext& ctx, const DataMap&, DataMap&) 
         auto* stmt = sem_stmt->Declaration();
 
         if (auto* src_var_decl = stmt->As<ast::VariableDeclStatement>()) {
-            if (src_var_decl->variable->constructor == expr->Declaration()) {
+            if (src_var_decl->variable->initializer == expr->Declaration()) {
                 // This statement is just a variable declaration with the
-                // initializer as the constructor value. This is what we're
+                // initializer as the initializer value. This is what we're
                 // attempting to transform to, and so ignore.
                 return true;
             }
@@ -68,7 +68,7 @@ void PromoteInitializersToLet::Run(CloneContext& ctx, const DataMap&, DataMap&) 
             [&](const ast::CallExpression* expr) {
                 if (auto* sem = ctx.src->Sem().Get(expr)) {
                     auto* ctor = sem->UnwrapMaterialize()->As<sem::Call>();
-                    if (ctor->Target()->Is<sem::TypeConstructor>()) {
+                    if (ctor->Target()->Is<sem::TypeInitializer>()) {
                         return promote(sem);
                     }
                 }

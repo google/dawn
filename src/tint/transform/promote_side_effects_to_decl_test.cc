@@ -614,7 +614,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(PromoteSideEffectsToDeclTest, Binary_Arith_InTypeCtor) {
+TEST_F(PromoteSideEffectsToDeclTest, Binary_Arith_InTypeInit) {
     auto* src = R"(
 
 fn a(i : i32) -> i32 {
@@ -1860,7 +1860,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(PromoteSideEffectsToDeclTest, Binary_Logical_InTypeCtor) {
+TEST_F(PromoteSideEffectsToDeclTest, Binary_Logical_InTypeInit) {
     auto* src = R"(
 
 fn a(i : i32) -> bool {
@@ -3030,7 +3030,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(PromoteSideEffectsToDeclTest, TypeConstructor_Struct) {
+TEST_F(PromoteSideEffectsToDeclTest, TypeInitializer_Struct) {
     auto* src = R"(
 fn a(i : i32) -> i32 {
   return 1;
@@ -3072,7 +3072,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(PromoteSideEffectsToDeclTest, TypeConstructor_Array1D) {
+TEST_F(PromoteSideEffectsToDeclTest, TypeInitializer_Array1D) {
     auto* src = R"(
 fn a(i : i32) -> i32 {
   return 1;
@@ -3102,7 +3102,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(PromoteSideEffectsToDeclTest, TypeConstructor_Array2D) {
+TEST_F(PromoteSideEffectsToDeclTest, TypeInitializer_Array2D) {
     auto* src = R"(
 fn a(i : i32) -> i32 {
   return 1;
@@ -3809,7 +3809,7 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(PromoteSideEffectsToDeclTest, TypeCtor_VarPlusI32CtorPlusVar) {
+TEST_F(PromoteSideEffectsToDeclTest, TypeInit_VarPlusI32InitPlusVar) {
     auto* src = R"(
 fn f() {
   var b = 0;

@@ -702,9 +702,9 @@ bool GeneratorImpl::EmitVariable(std::ostream& out, const ast::Variable* v) {
         }
     }
 
-    if (v->constructor != nullptr) {
+    if (v->initializer != nullptr) {
         out << " = ";
-        if (!EmitExpression(out, v->constructor)) {
+        if (!EmitExpression(out, v->initializer)) {
             return false;
         }
     }

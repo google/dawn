@@ -92,7 +92,7 @@ TEST(ChangeBinaryOperatorTest, NotApplicable_Simple) {
 
     auto a_var_id = node_id_map.GetId(a_var);
 
-    const auto* sum_expr = a_var->constructor->As<ast::BinaryExpression>();
+    const auto* sum_expr = a_var->initializer->As<ast::BinaryExpression>();
     ASSERT_NE(sum_expr, nullptr);
 
     auto sum_expr_id = node_id_map.GetId(sum_expr);
@@ -131,7 +131,7 @@ TEST(ChangeBinaryOperatorTest, Applicable_Simple) {
     const auto* a_var = main_fn_stmts[0]->As<ast::VariableDeclStatement>()->variable;
     ASSERT_NE(a_var, nullptr);
 
-    const auto* sum_expr = a_var->constructor->As<ast::BinaryExpression>();
+    const auto* sum_expr = a_var->initializer->As<ast::BinaryExpression>();
     ASSERT_NE(sum_expr, nullptr);
 
     auto sum_expr_id = node_id_map.GetId(sum_expr);
@@ -194,7 +194,7 @@ void CheckMutations(const std::string& lhs_type,
         const auto* r_var = stmts[0]->As<ast::VariableDeclStatement>()->variable;
         ASSERT_NE(r_var, nullptr);
 
-        const auto* binary_expr = r_var->constructor->As<ast::BinaryExpression>();
+        const auto* binary_expr = r_var->initializer->As<ast::BinaryExpression>();
         ASSERT_NE(binary_expr, nullptr);
 
         auto binary_expr_id = node_id_map.GetId(binary_expr);

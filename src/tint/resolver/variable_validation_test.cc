@@ -148,7 +148,7 @@ TEST_F(ResolverVariableValidationTest, OverrideInferedTypeNotScalar) {
     EXPECT_EQ(r()->error(), "56:78 error: vec3<f32> cannot be used as the type of a 'override'");
 }
 
-TEST_F(ResolverVariableValidationTest, ConstConstructorWrongType) {
+TEST_F(ResolverVariableValidationTest, ConstInitializerWrongType) {
     // const c : i32 = 2u
     WrapInFunction(Const(Source{{3, 3}}, "c", ty.i32(), Expr(2_u)));
 
@@ -157,7 +157,7 @@ TEST_F(ResolverVariableValidationTest, ConstConstructorWrongType) {
               R"(3:3 error: cannot initialize const of type 'i32' with value of type 'u32')");
 }
 
-TEST_F(ResolverVariableValidationTest, LetConstructorWrongType) {
+TEST_F(ResolverVariableValidationTest, LetInitializerWrongType) {
     // var v : i32 = 2u
     WrapInFunction(Let(Source{{3, 3}}, "v", ty.i32(), Expr(2_u)));
 
@@ -166,7 +166,7 @@ TEST_F(ResolverVariableValidationTest, LetConstructorWrongType) {
               R"(3:3 error: cannot initialize let of type 'i32' with value of type 'u32')");
 }
 
-TEST_F(ResolverVariableValidationTest, VarConstructorWrongType) {
+TEST_F(ResolverVariableValidationTest, VarInitializerWrongType) {
     // var v : i32 = 2u
     WrapInFunction(Var(Source{{3, 3}}, "v", ty.i32(), Expr(2_u)));
 
@@ -175,7 +175,7 @@ TEST_F(ResolverVariableValidationTest, VarConstructorWrongType) {
               R"(3:3 error: cannot initialize var of type 'i32' with value of type 'u32')");
 }
 
-TEST_F(ResolverVariableValidationTest, ConstConstructorWrongTypeViaAlias) {
+TEST_F(ResolverVariableValidationTest, ConstInitializerWrongTypeViaAlias) {
     auto* a = Alias("I32", ty.i32());
     WrapInFunction(Const(Source{{3, 3}}, "v", ty.Of(a), Expr(2_u)));
 
@@ -184,7 +184,7 @@ TEST_F(ResolverVariableValidationTest, ConstConstructorWrongTypeViaAlias) {
               R"(3:3 error: cannot initialize const of type 'i32' with value of type 'u32')");
 }
 
-TEST_F(ResolverVariableValidationTest, LetConstructorWrongTypeViaAlias) {
+TEST_F(ResolverVariableValidationTest, LetInitializerWrongTypeViaAlias) {
     auto* a = Alias("I32", ty.i32());
     WrapInFunction(Let(Source{{3, 3}}, "v", ty.Of(a), Expr(2_u)));
 
@@ -193,7 +193,7 @@ TEST_F(ResolverVariableValidationTest, LetConstructorWrongTypeViaAlias) {
               R"(3:3 error: cannot initialize let of type 'i32' with value of type 'u32')");
 }
 
-TEST_F(ResolverVariableValidationTest, VarConstructorWrongTypeViaAlias) {
+TEST_F(ResolverVariableValidationTest, VarInitializerWrongTypeViaAlias) {
     auto* a = Alias("I32", ty.i32());
     WrapInFunction(Var(Source{{3, 3}}, "v", ty.Of(a), Expr(2_u)));
 

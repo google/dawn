@@ -32,8 +32,8 @@
 #include "src/tint/sem/loop_statement.h"
 #include "src/tint/sem/statement.h"
 #include "src/tint/sem/switch_statement.h"
-#include "src/tint/sem/type_constructor.h"
 #include "src/tint/sem/type_conversion.h"
+#include "src/tint/sem/type_initializer.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/while_statement.h"
 #include "src/tint/utils/block_allocator.h"
@@ -965,14 +965,14 @@ class UniformityGraph {
             [&](const ast::VariableDeclStatement* decl) {
                 Node* node;
                 auto* sem_var = sem_.Get(decl->variable);
-                if (decl->variable->constructor) {
-                    auto [cf1, v] = ProcessExpression(cf, decl->variable->constructor);
+                if (decl->variable->initializer) {
+                    auto [cf1, v] = ProcessExpression(cf, decl->variable->initializer);
                     cf = cf1;
                     node = v;
 
                     // Store if lhs is a partial pointer
                     if (sem_var->Type()->Is<sem::Pointer>()) {
-                        auto* init = sem_.Get(decl->variable->constructor);
+                        auto* init = sem_.Get(decl->variable->initializer);
                         if (auto* unary_init = init->Declaration()->As<ast::UnaryOpExpression>()) {
                             auto* e = UnwrapIndirectAndAddressOfChain(unary_init);
                             if (e->IsAnyOf<ast::IndexAccessorExpression,
@@ -1333,7 +1333,7 @@ class UniformityGraph {
                 function_tag = info.function_tag;
                 func_info = &info;
             },
-            [&](const sem::TypeConstructor*) {
+            [&](const sem::TypeInitializer*) {
                 callsite_tag = CallSiteNoRestriction;
                 function_tag = NoRestriction;
             },
@@ -1404,7 +1404,7 @@ class UniformityGraph {
                 }
             } else {
                 // All builtin function parameters are RequiredToBeUniformForReturnValue, as are
-                // parameters for type constructors and type conversions.
+                // parameters for type initializers and type conversions.
                 // The arrayLength() builtin is a special case, as there is currently no way for it
                 // to have a non-uniform return value.
                 auto* builtin = sem->Target()->As<sem::Builtin>();

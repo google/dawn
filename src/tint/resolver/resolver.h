@@ -69,7 +69,7 @@ class LoopStatement;
 class Statement;
 class StructMember;
 class SwitchStatement;
-class TypeConstructor;
+class TypeInitializer;
 class WhileStatement;
 }  // namespace tint::sem
 
@@ -400,15 +400,15 @@ class Resolver {
     /// @returns true if the symbol is the name of a builtin function.
     bool IsBuiltin(Symbol) const;
 
-    // ArrayConstructorSig represents a unique array constructor signature.
+    // ArrayInitializerSig represents a unique array initializer signature.
     // It is a tuple of the array type, number of arguments provided and earliest evaluation stage.
-    using ArrayConstructorSig =
+    using ArrayInitializerSig =
         utils::UnorderedKeyWrapper<std::tuple<const sem::Array*, size_t, sem::EvaluationStage>>;
 
-    // StructConstructorSig represents a unique structure constructor signature.
+    // StructInitializerSig represents a unique structure initializer signature.
     // It is a tuple of the structure type, number of arguments provided and earliest evaluation
     // stage.
-    using StructConstructorSig =
+    using StructInitializerSig =
         utils::UnorderedKeyWrapper<std::tuple<const sem::Struct*, size_t, sem::EvaluationStage>>;
 
     /// ExprEvalStageConstraint describes a constraint on when expressions can be evaluated.
@@ -433,8 +433,8 @@ class Resolver {
     utils::Bitset<0> marked_;
     ExprEvalStageConstraint expr_eval_stage_constraint_;
     std::unordered_map<OverrideId, const sem::Variable*> override_ids_;
-    std::unordered_map<ArrayConstructorSig, sem::CallTarget*> array_ctors_;
-    std::unordered_map<StructConstructorSig, sem::CallTarget*> struct_ctors_;
+    std::unordered_map<ArrayInitializerSig, sem::CallTarget*> array_inits_;
+    std::unordered_map<StructInitializerSig, sem::CallTarget*> struct_inits_;
     sem::Function* current_function_ = nullptr;
     sem::Statement* current_statement_ = nullptr;
     sem::CompoundStatement* current_compound_statement_ = nullptr;

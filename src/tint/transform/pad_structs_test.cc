@@ -521,8 +521,8 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(PadStructsTest, Constructor) {
-    // Calls to a constructor of a padded struct must be modified to initialize the padding.
+TEST_F(PadStructsTest, Initializer) {
+    // Calls to a initializer of a padded struct must be modified to initialize the padding.
     auto* src = R"(
 struct S {
   a : f32,
@@ -557,8 +557,8 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(PadStructsTest, ConstructorZeroArgs) {
-    // Calls to a zero-argument constructor of a padded struct should not be modified.
+TEST_F(PadStructsTest, InitializerZeroArgs) {
+    // Calls to a zero-argument initializer of a padded struct should not be modified.
     auto* src = R"(
 struct S {
   a : f32,

@@ -287,7 +287,7 @@ TEST_F(ResolverTest, Stmt_Call) {
 
 TEST_F(ResolverTest, Stmt_VariableDecl) {
     auto* var = Var("my_var", ty.i32(), Expr(2_i));
-    auto* init = var->constructor;
+    auto* init = var->initializer;
 
     auto* decl = Decl(var);
     WrapInFunction(decl);
@@ -301,7 +301,7 @@ TEST_F(ResolverTest, Stmt_VariableDecl) {
 TEST_F(ResolverTest, Stmt_VariableDecl_Alias) {
     auto* my_int = Alias("MyInt", ty.i32());
     auto* var = Var("my_var", ty.Of(my_int), Expr(2_i));
-    auto* init = var->constructor;
+    auto* init = var->initializer;
 
     auto* decl = Decl(var);
     WrapInFunction(decl);
@@ -335,24 +335,24 @@ TEST_F(ResolverTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
 
     // Declare i32 "foo" inside a block
     auto* foo_i32 = Var("foo", ty.i32(), Expr(2_i));
-    auto* foo_i32_init = foo_i32->constructor;
+    auto* foo_i32_init = foo_i32->initializer;
     auto* foo_i32_decl = Decl(foo_i32);
 
     // Reference "foo" inside the block
     auto* bar_i32 = Var("bar", ty.i32(), Expr("foo"));
-    auto* bar_i32_init = bar_i32->constructor;
+    auto* bar_i32_init = bar_i32->initializer;
     auto* bar_i32_decl = Decl(bar_i32);
 
     auto* inner = Block(foo_i32_decl, bar_i32_decl);
 
     // Declare f32 "foo" at function scope
     auto* foo_f32 = Var("foo", ty.f32(), Expr(2_f));
-    auto* foo_f32_init = foo_f32->constructor;
+    auto* foo_f32_init = foo_f32->initializer;
     auto* foo_f32_decl = Decl(foo_f32);
 
     // Reference "foo" at function scope
     auto* bar_f32 = Var("bar", ty.f32(), Expr("foo"));
-    auto* bar_f32_init = bar_f32->constructor;
+    auto* bar_f32_init = bar_f32->initializer;
     auto* bar_f32_decl = Decl(bar_f32);
 
     Func("func", utils::Empty, ty.void_(), utils::Vector{inner, foo_f32_decl, bar_f32_decl});
@@ -370,12 +370,12 @@ TEST_F(ResolverTest, Stmt_VariableDecl_OuterScopeAfterInnerScope) {
     EXPECT_EQ(StmtOf(bar_i32_init), bar_i32_decl);
     EXPECT_EQ(StmtOf(foo_f32_init), foo_f32_decl);
     EXPECT_EQ(StmtOf(bar_f32_init), bar_f32_decl);
-    EXPECT_TRUE(CheckVarUsers(foo_i32, utils::Vector{bar_i32->constructor}));
-    EXPECT_TRUE(CheckVarUsers(foo_f32, utils::Vector{bar_f32->constructor}));
-    ASSERT_NE(VarOf(bar_i32->constructor), nullptr);
-    EXPECT_EQ(VarOf(bar_i32->constructor)->Declaration(), foo_i32);
-    ASSERT_NE(VarOf(bar_f32->constructor), nullptr);
-    EXPECT_EQ(VarOf(bar_f32->constructor)->Declaration(), foo_f32);
+    EXPECT_TRUE(CheckVarUsers(foo_i32, utils::Vector{bar_i32->initializer}));
+    EXPECT_TRUE(CheckVarUsers(foo_f32, utils::Vector{bar_f32->initializer}));
+    ASSERT_NE(VarOf(bar_i32->initializer), nullptr);
+    EXPECT_EQ(VarOf(bar_i32->initializer)->Declaration(), foo_i32);
+    ASSERT_NE(VarOf(bar_f32->initializer), nullptr);
+    EXPECT_EQ(VarOf(bar_f32->initializer)->Declaration(), foo_f32);
 }
 
 TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
@@ -389,18 +389,18 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
 
     // Declare i32 "foo" inside a function
     auto* fn_i32 = Var("foo", ty.i32(), Expr(2_i));
-    auto* fn_i32_init = fn_i32->constructor;
+    auto* fn_i32_init = fn_i32->initializer;
     auto* fn_i32_decl = Decl(fn_i32);
     Func("func_i32", utils::Empty, ty.void_(), utils::Vector{fn_i32_decl});
 
     // Declare f32 "foo" at module scope
     auto* mod_f32 = Var("foo", ty.f32(), ast::AddressSpace::kPrivate, Expr(2_f));
-    auto* mod_init = mod_f32->constructor;
+    auto* mod_init = mod_f32->initializer;
     AST().AddGlobalVariable(mod_f32);
 
     // Reference "foo" in another function
     auto* fn_f32 = Var("bar", ty.f32(), Expr("foo"));
-    auto* fn_f32_init = fn_f32->constructor;
+    auto* fn_f32_init = fn_f32->initializer;
     auto* fn_f32_decl = Decl(fn_f32);
     Func("func_f32", utils::Empty, ty.void_(), utils::Vector{fn_f32_decl});
 
@@ -415,9 +415,9 @@ TEST_F(ResolverTest, Stmt_VariableDecl_ModuleScopeAfterFunctionScope) {
     EXPECT_EQ(StmtOf(mod_init), nullptr);
     EXPECT_EQ(StmtOf(fn_f32_init), fn_f32_decl);
     EXPECT_TRUE(CheckVarUsers(fn_i32, utils::Empty));
-    EXPECT_TRUE(CheckVarUsers(mod_f32, utils::Vector{fn_f32->constructor}));
-    ASSERT_NE(VarOf(fn_f32->constructor), nullptr);
-    EXPECT_EQ(VarOf(fn_f32->constructor)->Declaration(), mod_f32);
+    EXPECT_TRUE(CheckVarUsers(mod_f32, utils::Vector{fn_f32->initializer}));
+    ASSERT_NE(VarOf(fn_f32->initializer), nullptr);
+    EXPECT_EQ(VarOf(fn_f32->initializer)->Declaration(), mod_f32);
 }
 
 TEST_F(ResolverTest, ArraySize_UnsignedLiteral) {
@@ -595,7 +595,7 @@ TEST_F(ResolverTest, Expr_Cast) {
     EXPECT_TRUE(TypeOf(cast)->Is<sem::F32>());
 }
 
-TEST_F(ResolverTest, Expr_Constructor_Scalar) {
+TEST_F(ResolverTest, Expr_Initializer_Scalar) {
     auto* s = Expr(1_f);
     WrapInFunction(s);
 
@@ -605,7 +605,7 @@ TEST_F(ResolverTest, Expr_Constructor_Scalar) {
     EXPECT_TRUE(TypeOf(s)->Is<sem::F32>());
 }
 
-TEST_F(ResolverTest, Expr_Constructor_Type_Vec2) {
+TEST_F(ResolverTest, Expr_Initializer_Type_Vec2) {
     auto* tc = vec2<f32>(1_f, 1_f);
     WrapInFunction(tc);
 
@@ -617,7 +617,7 @@ TEST_F(ResolverTest, Expr_Constructor_Type_Vec2) {
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 2u);
 }
 
-TEST_F(ResolverTest, Expr_Constructor_Type_Vec3) {
+TEST_F(ResolverTest, Expr_Initializer_Type_Vec3) {
     auto* tc = vec3<f32>(1_f, 1_f, 1_f);
     WrapInFunction(tc);
 
@@ -629,7 +629,7 @@ TEST_F(ResolverTest, Expr_Constructor_Type_Vec3) {
     EXPECT_EQ(TypeOf(tc)->As<sem::Vector>()->Width(), 3u);
 }
 
-TEST_F(ResolverTest, Expr_Constructor_Type_Vec4) {
+TEST_F(ResolverTest, Expr_Initializer_Type_Vec4) {
     auto* tc = vec4<f32>(1_f, 1_f, 1_f, 1_f);
     WrapInFunction(tc);
 

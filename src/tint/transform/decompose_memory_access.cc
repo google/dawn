@@ -832,7 +832,7 @@ void DecomposeMemoryAccess::Run(CloneContext& ctx, const DataMap&, DataMap&) con
     //
     // Inner-most expression nodes are guaranteed to be visited first because AST
     // nodes are fully immutable and require their children to be constructed
-    // first so their pointer can be passed to the parent's constructor.
+    // first so their pointer can be passed to the parent's initializer.
     for (auto* node : ctx.src->ASTNodes().Objects()) {
         if (auto* ident = node->As<ast::IdentifierExpression>()) {
             // X

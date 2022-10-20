@@ -2492,18 +2492,18 @@ bool FunctionEmitter::EmitFunctionVariables() {
         if (failed()) {
             return false;
         }
-        const ast::Expression* constructor = nullptr;
+        const ast::Expression* initializer = nullptr;
         if (inst.NumInOperands() > 1) {
             // SPIR-V initializers are always constants.
             // (OpenCL also allows the ID of an OpVariable, but we don't handle that
             // here.)
-            constructor = parser_impl_.MakeConstantExpression(inst.GetSingleWordInOperand(1)).expr;
-            if (!constructor) {
+            initializer = parser_impl_.MakeConstantExpression(inst.GetSingleWordInOperand(1)).expr;
+            if (!initializer) {
                 return false;
             }
         }
         auto* var = parser_impl_.MakeVar(inst.result_id(), ast::AddressSpace::kNone, var_store_type,
-                                         constructor, AttributeList{});
+                                         initializer, AttributeList{});
         auto* var_decl_stmt = create<ast::VariableDeclStatement>(Source{}, var);
         AddStatement(var_decl_stmt);
         auto* var_type = ty_.Reference(var_store_type, ast::AddressSpace::kNone);
@@ -3967,7 +3967,7 @@ TypedExpression FunctionEmitter::EmitGlslStd450ExtInst(const spvtools::opt::Inst
 
     if (ext_opcode == GLSLstd450Ldexp) {
         // WGSL requires the second argument to be signed.
-        // Use a type constructor to convert it, which is the same as a bitcast.
+        // Use a type initializer to convert it, which is the same as a bitcast.
         // If the value would go from very large positive to negative, then the
         // original result would have been infinity.  And since WGSL
         // implementations may assume that infinities are not present, then we
@@ -4705,7 +4705,7 @@ TypedExpression FunctionEmitter::MakeVectorShuffle(const spvtools::opt::Instruct
 
     // Idiomatic vector accessors.
 
-    // Generate an ast::TypeConstructor expression.
+    // Generate an ast::TypeInitializer expression.
     // Assume the literal indices are valid, and there is a valid number of them.
     auto source = GetSourceForInst(inst);
     const Vector* result_type = As<Vector>(parser_impl_.ConvertType(inst.type_id()));

@@ -29,8 +29,8 @@ class Matrix final : public Castable<Matrix, Type> {
     /// @param nid the unique node identifier
     /// @param src the source of this node
     /// @param subtype the declared type of the matrix components. May be null for
-    ///        matrix constructors, where the element type will be inferred from
-    ///        the constructor arguments
+    ///        matrix initializers, where the element type will be inferred from
+    ///        the initializer arguments
     /// @param rows the number of rows in the matrix
     /// @param columns the number of columns in the matrix
     Matrix(ProgramID pid,
@@ -54,7 +54,7 @@ class Matrix final : public Castable<Matrix, Type> {
     const Matrix* Clone(CloneContext* ctx) const override;
 
     /// The declared type of the matrix components. May be null for matrix
-    /// constructors, where the element type will be inferred from the constructor
+    /// initializers, where the element type will be inferred from the initializer
     /// arguments
     const Type* const type;
 

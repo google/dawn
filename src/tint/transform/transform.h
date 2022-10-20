@@ -77,7 +77,7 @@ class DataMap {
 
     /// Creates the data of type `T` with the provided arguments and adds it into
     /// DataMap keyed by the ClassID of type T.
-    /// @param args the arguments forwarded to the constructor for type T
+    /// @param args the arguments forwarded to the initializer for type T
     template <typename T, typename... ARGS>
     void Add(ARGS&&... args) {
         Put(std::make_unique<T>(std::forward<ARGS>(args)...));

@@ -55,7 +55,7 @@ using alias3 = builder::alias3<T>;
 
 class ResolverTypeValidationTest : public resolver::TestHelper, public testing::Test {};
 
-TEST_F(ResolverTypeValidationTest, VariableDeclNoConstructor_Pass) {
+TEST_F(ResolverTypeValidationTest, VariableDeclNoInitializer_Pass) {
     // {
     // var a :i32;
     // a = 2;
@@ -73,7 +73,7 @@ TEST_F(ResolverTypeValidationTest, VariableDeclNoConstructor_Pass) {
     ASSERT_NE(TypeOf(rhs), nullptr);
 }
 
-TEST_F(ResolverTypeValidationTest, GlobalOverrideNoConstructor_Pass) {
+TEST_F(ResolverTypeValidationTest, GlobalOverrideNoInitializer_Pass) {
     // @id(0) override a :i32;
     Override(Source{{12, 34}}, "a", ty.i32(), Id(0_u));
 

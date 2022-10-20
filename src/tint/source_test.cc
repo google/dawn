@@ -28,7 +28,7 @@ line three)";
 
 using SourceFileContentTest = testing::Test;
 
-TEST_F(SourceFileContentTest, Ctor) {
+TEST_F(SourceFileContentTest, Init) {
     Source::FileContent fc(kSource);
     EXPECT_EQ(fc.data, kSource);
     EXPECT_EQ(fc.data_view, kSource);
@@ -38,7 +38,7 @@ TEST_F(SourceFileContentTest, Ctor) {
     EXPECT_EQ(fc.lines[2], "line three");
 }
 
-TEST_F(SourceFileContentTest, CopyCtor) {
+TEST_F(SourceFileContentTest, CopyInit) {
     auto src = std::make_unique<Source::FileContent>(kSource);
     Source::FileContent fc{*src};
     src.reset();
@@ -50,7 +50,7 @@ TEST_F(SourceFileContentTest, CopyCtor) {
     EXPECT_EQ(fc.lines[2], "line three");
 }
 
-TEST_F(SourceFileContentTest, MoveCtor) {
+TEST_F(SourceFileContentTest, MoveInit) {
     auto src = std::make_unique<Source::FileContent>(kSource);
     Source::FileContent fc{std::move(*src)};
     src.reset();
