@@ -1260,7 +1260,7 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
                    Block(                               //
                        Assign(V, V))),                  //
              Loop(Block(Assign(V, V)),                  //
-                  Block(Assign(V, V))),                 //
+                  Block(Assign(V, V), BreakIf(V))),     //
              Switch(V,                                  //
                     Case(CaseSelector(1_i),             //
                          Block(Assign(V, V))),          //

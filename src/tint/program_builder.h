@@ -30,6 +30,7 @@
 #include "src/tint/ast/bitcast_expression.h"
 #include "src/tint/ast/bool.h"
 #include "src/tint/ast/bool_literal_expression.h"
+#include "src/tint/ast/break_if_statement.h"
 #include "src/tint/ast/break_statement.h"
 #include "src/tint/ast/call_expression.h"
 #include "src/tint/ast/call_statement.h"
@@ -2415,6 +2416,23 @@ class ProgramBuilder {
     /// Creates an ast::BreakStatement
     /// @returns the break statement pointer
     const ast::BreakStatement* Break() { return create<ast::BreakStatement>(); }
+
+    /// Creates a ast::BreakIfStatement with input condition
+    /// @param source the source information for the if statement
+    /// @param condition the if statement condition expression
+    /// @returns the break-if statement pointer
+    template <typename CONDITION>
+    const ast::BreakIfStatement* BreakIf(const Source& source, CONDITION&& condition) {
+        return create<ast::BreakIfStatement>(source, Expr(std::forward<CONDITION>(condition)));
+    }
+
+    /// Creates a ast::BreakIfStatement with input condition
+    /// @param condition the if statement condition expression
+    /// @returns the break-if statement pointer
+    template <typename CONDITION>
+    const ast::BreakIfStatement* BreakIf(CONDITION&& condition) {
+        return create<ast::BreakIfStatement>(Expr(std::forward<CONDITION>(condition)));
+    }
 
     /// Creates an ast::ContinueStatement
     /// @param source the source information

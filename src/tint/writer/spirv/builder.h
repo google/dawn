@@ -248,6 +248,10 @@ class Builder {
     /// @param stmt the statement to generate
     /// @returns true if the statement was successfully generated
     bool GenerateBreakStatement(const ast::BreakStatement* stmt);
+    /// Generates a break-if statement
+    /// @param stmt the statement to generate
+    /// @returns true if the statement was successfully generated
+    bool GenerateBreakIfStatement(const ast::BreakIfStatement* stmt);
     /// Generates a continue statement
     /// @param stmt the statement to generate
     /// @returns true if the statement was successfully generated

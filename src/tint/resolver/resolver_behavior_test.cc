@@ -569,6 +569,16 @@ TEST_F(ResolverBehaviorTest, StmtLoopEmpty_ContIfTrueBreak) {
     EXPECT_EQ(sem->Behaviors(), sem::Behavior::kNext);
 }
 
+TEST_F(ResolverBehaviorTest, StmtLoopEmpty_BreakIf) {
+    auto* stmt = Loop(Block(), Block(BreakIf(true)));
+    WrapInFunction(stmt);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem = Sem().Get(stmt);
+    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kNext);
+}
+
 TEST_F(ResolverBehaviorTest, StmtReturn) {
     auto* stmt = Return();
     WrapInFunction(stmt);

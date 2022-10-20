@@ -20,6 +20,7 @@
 #include "src/tint/ast/assignment_statement.h"
 #include "src/tint/ast/binary_expression.h"
 #include "src/tint/ast/bitcast_expression.h"
+#include "src/tint/ast/break_if_statement.h"
 #include "src/tint/ast/break_statement.h"
 #include "src/tint/ast/compound_assignment_statement.h"
 #include "src/tint/ast/continue_statement.h"
@@ -92,6 +93,10 @@ class GeneratorImpl : public TextGenerator {
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted successfully
     bool EmitBreak(const ast::BreakStatement* stmt);
+    /// Handles a break-if statement
+    /// @param stmt the statement to emit
+    /// @returns true if the statement was emitted successfully
+    bool EmitBreakIf(const ast::BreakIfStatement* stmt);
     /// Handles generating a call expression
     /// @param out the output of the expression stream
     /// @param expr the call expression

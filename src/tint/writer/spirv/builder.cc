@@ -455,6 +455,19 @@ bool Builder::GenerateBreakStatement(const ast::BreakStatement*) {
     return true;
 }
 
+bool Builder::GenerateBreakIfStatement(const ast::BreakIfStatement* stmt) {
+    TINT_ASSERT(Writer, !backedge_stack_.empty());
+    const auto cond_id = GenerateExpressionWithLoadIfNeeded(stmt->condition);
+    if (!cond_id) {
+        return false;
+    }
+    const ContinuingInfo& ci = continuing_stack_.back();
+    backedge_stack_.back() =
+        Backedge(spv::Op::OpBranchConditional,
+                 {Operand(cond_id), Operand(ci.break_target_id), Operand(ci.loop_header_id)});
+    return true;
+}
+
 bool Builder::GenerateContinueStatement(const ast::ContinueStatement*) {
     if (continue_stack_.empty()) {
         error_ = "Attempted to continue without a continue block";
@@ -3400,6 +3413,8 @@ bool Builder::GenerateIfStatement(const ast::IfStatement* stmt) {
         //  continuing { ...
         //    if (cond) {} else {break;}
         //  }
+        //
+        // TODO(crbug.com/tint/1451): Remove this when the if break construct is made an error.
         auto is_just_a_break = [](const ast::BlockStatement* block) {
             return block && (block->statements.Length() == 1) &&
                    block->Last()->Is<ast::BreakStatement>();
@@ -3643,6 +3658,7 @@ bool Builder::GenerateStatement(const ast::Statement* stmt) {
         stmt, [&](const ast::AssignmentStatement* a) { return GenerateAssignStatement(a); },
         [&](const ast::BlockStatement* b) { return GenerateBlockStatement(b); },
         [&](const ast::BreakStatement* b) { return GenerateBreakStatement(b); },
+        [&](const ast::BreakIfStatement* b) { return GenerateBreakIfStatement(b); },
         [&](const ast::CallStatement* c) { return GenerateCallExpression(c->expr) != 0; },
         [&](const ast::ContinueStatement* c) { return GenerateContinueStatement(c); },
         [&](const ast::DiscardStatement* d) { return GenerateDiscardStatement(d); },
@@ -3659,7 +3675,7 @@ bool Builder::GenerateStatement(const ast::Statement* stmt) {
             return true;  // Not emitted
         },
         [&](Default) {
-            error_ = "Unknown statement: " + std::string(stmt->TypeInfo().name);
+            error_ = "unknown statement type: " + std::string(stmt->TypeInfo().name);
             return false;
         });
 }

@@ -139,6 +139,10 @@ class GeneratorImpl : public TextGenerator {
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted successfully
     bool EmitBreak(const ast::BreakStatement* stmt);
+    /// Handles a break-if statement
+    /// @param stmt the statement to emit
+    /// @returns true if the statement was emitted successfully
+    bool EmitBreakIf(const ast::BreakIfStatement* stmt);
     /// Handles generating a call expression
     /// @param out the output of the expression stream
     /// @param expr the call expression

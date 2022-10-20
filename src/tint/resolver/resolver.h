@@ -208,6 +208,7 @@ class Resolver {
     sem::Statement* AssignmentStatement(const ast::AssignmentStatement*);
     sem::BlockStatement* BlockStatement(const ast::BlockStatement*);
     sem::Statement* BreakStatement(const ast::BreakStatement*);
+    sem::Statement* BreakIfStatement(const ast::BreakIfStatement*);
     sem::Statement* CallStatement(const ast::CallStatement*);
     sem::CaseStatement* CaseStatement(const ast::CaseStatement*, const sem::Type*);
     sem::Statement* CompoundAssignmentStatement(const ast::CompoundAssignmentStatement*);

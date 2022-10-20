@@ -1125,9 +1125,7 @@ fn foo() {
     workgroupBarrier();
     continuing {
       i = i + 1;
-      if (i == n) {
-        break;
-      }
+      break if (i == n);
     }
   }
 }
@@ -1146,9 +1144,7 @@ fn foo() {
     workgroupBarrier();
     continuing {
       i = i + 1;
-      if (i == n) {
-        break;
-      }
+      break if (i == n);
     }
   }
 }
@@ -1161,12 +1157,12 @@ fn foo() {
     ^^^^^^^^^^^^^^^^
 
 test:10:7 note: control flow depends on non-uniform value
-      if (i == n) {
-      ^^
+      break if (i == n);
+      ^^^^^
 
-test:10:16 note: reading from read_write storage buffer 'n' may result in a non-uniform value
-      if (i == n) {
-               ^
+test:10:22 note: reading from read_write storage buffer 'n' may result in a non-uniform value
+      break if (i == n);
+                     ^
 )");
 }
 
@@ -1180,9 +1176,7 @@ fn foo() {
     continuing {
       workgroupBarrier();
       i = i + 1;
-      if (i == n) {
-        break;
-      }
+      break if (i == n);
     }
   }
 }
@@ -1201,9 +1195,7 @@ fn foo() {
     continuing {
       workgroupBarrier();
       i = i + 1;
-      if (i == n) {
-        break;
-      }
+      break if (i == n);
     }
   }
 }
@@ -1216,12 +1208,12 @@ fn foo() {
       ^^^^^^^^^^^^^^^^
 
 test:10:7 note: control flow depends on non-uniform value
-      if (i == n) {
-      ^^
+      break if (i == n);
+      ^^^^^
 
-test:10:16 note: reading from read_write storage buffer 'n' may result in a non-uniform value
-      if (i == n) {
-               ^
+test:10:22 note: reading from read_write storage buffer 'n' may result in a non-uniform value
+      break if (i == n);
+                     ^
 )");
 }
 
@@ -1249,9 +1241,7 @@ fn foo() {
     continuing {
       // Pretend that this isn't an infinite loop, in case the interrupt is a
       // continue statement.
-      if (false) {
-        break;
-      }
+      break if (false);
     }
   }
 }
@@ -1597,9 +1587,7 @@ fn foo() {
       if (v == 0) {
         workgroupBarrier();
       }
-      if (true) {
-        break;
-      }
+      break if (true);
     }
   }
 }

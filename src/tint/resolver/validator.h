@@ -51,6 +51,7 @@ namespace tint::sem {
 class Array;
 class Atomic;
 class BlockStatement;
+class BreakIfStatement;
 class Builtin;
 class Call;
 class CaseStatement;
@@ -255,6 +256,13 @@ class Validator {
         const sem::GlobalVariable* var,
         const std::unordered_map<OverrideId, const sem::Variable*>& override_id,
         const std::unordered_map<const sem::Type*, const Source&>& atomic_composite_info) const;
+
+    /// Validates a break-if statement
+    /// @param stmt the statement to validate
+    /// @param current_statement the current statement being resolved
+    /// @returns true on success, false otherwise
+    bool BreakIfStatement(const sem::BreakIfStatement* stmt,
+                          sem::Statement* current_statement) const;
 
     /// Validates an if statement
     /// @param stmt the statement to validate

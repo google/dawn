@@ -25,6 +25,7 @@
 #include "src/tint/ast/atomic.h"
 #include "src/tint/ast/block_statement.h"
 #include "src/tint/ast/bool.h"
+#include "src/tint/ast/break_if_statement.h"
 #include "src/tint/ast/break_statement.h"
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/compound_assignment_statement.h"
@@ -263,9 +264,8 @@ class DependencyScanner {
                 TINT_DEFER(scope_stack_.Pop());
                 TraverseStatements(b->statements);
             },
-            [&](const ast::CallStatement* r) {  //
-                TraverseExpression(r->expr);
-            },
+            [&](const ast::BreakIfStatement* b) { TraverseExpression(b->condition); },
+            [&](const ast::CallStatement* r) { TraverseExpression(r->expr); },
             [&](const ast::CompoundAssignmentStatement* a) {
                 TraverseExpression(a->lhs);
                 TraverseExpression(a->rhs);
@@ -292,9 +292,7 @@ class DependencyScanner {
                     TraverseStatement(i->else_statement);
                 }
             },
-            [&](const ast::ReturnStatement* r) {  //
-                TraverseExpression(r->value);
-            },
+            [&](const ast::ReturnStatement* r) { TraverseExpression(r->value); },
             [&](const ast::SwitchStatement* s) {
                 TraverseExpression(s->condition);
                 for (auto* c : s->body) {

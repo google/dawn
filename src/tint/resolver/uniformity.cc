@@ -537,6 +537,51 @@ class UniformityGraph {
                 return cf;
             },
 
+            [&](const ast::BreakIfStatement* b) {
+                // This works very similar to the IfStatement uniformity below, execpt instead of
+                // processing the body, we directly inline the BreakStatement uniformity from
+                // above.
+
+                auto [_, v_cond] = ProcessExpression(cf, b->condition);
+
+                // Add a diagnostic node to capture the control flow change.
+                auto* v = current_function_->CreateNode("break_if_stmt", b);
+                v->affects_control_flow = true;
+                v->AddEdge(v_cond);
+
+                {
+                    auto* parent = sem_.Get(b)->FindFirstParent<sem::LoopStatement>();
+                    TINT_ASSERT(Resolver, current_function_->loop_switch_infos.count(parent));
+                    auto& info = current_function_->loop_switch_infos.at(parent);
+
+                    // Propagate variable values to the loop exit nodes.
+                    for (auto* var : current_function_->local_var_decls) {
+                        // Skip variables that were declared inside this loop.
+                        if (auto* lv = var->As<sem::LocalVariable>();
+                            lv && lv->Statement()->FindFirstParent(
+                                      [&](auto* s) { return s == parent; })) {
+                            continue;
+                        }
+
+                        // Add an edge from the variable exit node to its value at this point.
+                        auto* exit_node = utils::GetOrCreate(info.var_exit_nodes, var, [&]() {
+                            auto name = builder_->Symbols().NameFor(var->Declaration()->symbol);
+                            return CreateNode(name + "_value_" + info.type + "_exit");
+                        });
+
+                        exit_node->AddEdge(current_function_->variables.Get(var));
+                    }
+                }
+
+                auto* sem_break_if = sem_.Get(b);
+                if (sem_break_if->Behaviors() != sem::Behaviors{sem::Behavior::kNext}) {
+                    auto* cf_end = CreateNode("break_if_CFend");
+                    cf_end->AddEdge(v);
+                    return cf_end;
+                }
+                return cf;
+            },
+
             [&](const ast::CallStatement* c) {
                 auto [cf1, _] = ProcessCall(cf, c->expr);
                 return cf1;

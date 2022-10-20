@@ -110,5 +110,57 @@ TEST_F(ParserImplTest, LoopStmt_InvalidContinuing) {
     EXPECT_EQ(p->error(), "1:29: expected ';' for discard statement");
 }
 
+TEST_F(ParserImplTest, LoopStmt_Continuing_BreakIf) {
+    auto p = parser("loop { continuing { break if 1 + 2 < 5; }}");
+    auto e = p->loop_statement();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_EQ(e->body->statements.Length(), 0u);
+    ASSERT_EQ(e->continuing->statements.Length(), 1u);
+    EXPECT_TRUE(e->continuing->statements[0]->Is<ast::BreakIfStatement>());
+}
+
+TEST_F(ParserImplTest, LoopStmt_Continuing_BreakIf_MissingExpr) {
+    auto p = parser("loop { continuing { break if; }}");
+    auto e = p->loop_statement();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:21: expected expression for `break if`");
+}
+
+TEST_F(ParserImplTest, LoopStmt_Continuing_BreakIf_InvalidExpr) {
+    auto p = parser("loop { continuing { break if switch; }}");
+    auto e = p->loop_statement();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:21: expected expression for `break if`");
+}
+
+TEST_F(ParserImplTest, LoopStmt_NoContinuing_BreakIf) {
+    auto p = parser("loop { break if true; }");
+    auto e = p->loop_statement();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:14: expected ';' for break statement");
+}
+
+TEST_F(ParserImplTest, LoopStmt_Continuing_BreakIf_MissingSemicolon) {
+    auto p = parser("loop { continuing { break if 1 + 2 < 5 }}");
+    auto e = p->loop_statement();
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_TRUE(p->has_error());
+    EXPECT_EQ(e.value, nullptr);
+    EXPECT_EQ(p->error(), "1:40: expected ';' for `break if` statement");
+}
+
 }  // namespace
 }  // namespace tint::reader::wgsl

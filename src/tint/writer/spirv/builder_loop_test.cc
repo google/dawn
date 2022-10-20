@@ -234,12 +234,11 @@ OpBranch %1
 TEST_F(BuilderTest, Loop_WithContinuing_BreakIf) {
     // loop {
     //   continuing {
-    //     if (true) { break; }
+    //     break if (true);
     //   }
     // }
 
-    auto* if_stmt = If(Expr(true), Block(Break()));
-    auto* continuing = Block(if_stmt);
+    auto* continuing = Block(BreakIf(true));
     auto* loop = Loop(Block(), continuing);
     WrapInFunction(loop);
 
@@ -267,11 +266,10 @@ OpBranchConditional %6 %2 %1
 TEST_F(BuilderTest, Loop_WithContinuing_BreakUnless) {
     // loop {
     //   continuing {
-    //     if (true) {} else { break; }
+    //     break if (false);
     //   }
     // }
-    auto* if_stmt = If(Expr(true), Block(), Else(Block(Break())));
-    auto* continuing = Block(if_stmt);
+    auto* continuing = Block(BreakIf(false));
     auto* loop = Loop(Block(), continuing);
     WrapInFunction(loop);
 
@@ -281,7 +279,7 @@ TEST_F(BuilderTest, Loop_WithContinuing_BreakUnless) {
 
     EXPECT_TRUE(b.GenerateLoopStatement(loop)) << b.error();
     EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeBool
-%6 = OpConstantTrue %5
+%6 = OpConstantNull %5
 )");
     EXPECT_EQ(DumpInstructions(b.functions()[0].instructions()),
               R"(OpBranch %1
@@ -291,7 +289,7 @@ OpBranch %4
 %4 = OpLabel
 OpBranch %3
 %3 = OpLabel
-OpBranchConditional %6 %1 %2
+OpBranchConditional %6 %2 %1
 %2 = OpLabel
 )");
 }
@@ -300,13 +298,12 @@ TEST_F(BuilderTest, Loop_WithContinuing_BreakIf_ConditionIsVar) {
     // loop {
     //   continuing {
     //     var cond = true;
-    //     if (cond) { break; }
+    //     break if (cond);
     //   }
     // }
 
     auto* cond_var = Decl(Var("cond", Expr(true)));
-    auto* if_stmt = If(Expr("cond"), Block(Break()));
-    auto* continuing = Block(cond_var, if_stmt);
+    auto* continuing = Block(cond_var, BreakIf("cond"));
     auto* loop = Loop(Block(), continuing);
     WrapInFunction(loop);
 
@@ -379,19 +376,17 @@ TEST_F(BuilderTest, Loop_WithContinuing_BreakIf_Nested) {
     //   continuing {
     //     loop {
     //       continuing {
-    //         if (true) { break; }
+    //         break if (true);
     //       }
     //     }
-    //     if (true) { break; }
+    //     break if (true);
     //   }
     // }
 
-    auto* inner_if_stmt = If(Expr(true), Block(Break()));
-    auto* inner_continuing = Block(inner_if_stmt);
+    auto* inner_continuing = Block(BreakIf(true));
     auto* inner_loop = Loop(Block(), inner_continuing);
 
-    auto* outer_if_stmt = If(Expr(true), Block(Break()));
-    auto* outer_continuing = Block(inner_loop, outer_if_stmt);
+    auto* outer_continuing = Block(inner_loop, BreakIf(true));
     auto* outer_loop = Loop(Block(), outer_continuing);
 
     WrapInFunction(outer_loop);

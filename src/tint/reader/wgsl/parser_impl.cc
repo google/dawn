@@ -19,6 +19,7 @@
 #include "src/tint/ast/array.h"
 #include "src/tint/ast/assignment_statement.h"
 #include "src/tint/ast/bitcast_expression.h"
+#include "src/tint/ast/break_if_statement.h"
 #include "src/tint/ast/break_statement.h"
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/continue_statement.h"
@@ -2265,8 +2266,7 @@ ForHeader::ForHeader(const ast::Statement* init,
 
 ForHeader::~ForHeader() = default;
 
-// (variable_statement | variable_updating_statement |
-// func_call_statement)?
+// (variable_statement | variable_updating_statement | func_call_statement)?
 Maybe<const ast::Statement*> ParserImpl::for_header_initializer() {
     auto call = func_call_statement();
     if (call.errored) {
@@ -2317,10 +2317,7 @@ Maybe<const ast::Statement*> ParserImpl::for_header_continuing() {
 }
 
 // for_header
-//   : (variable_statement | variable_updating_statement | func_call_statement)?
-//   SEMICOLON
-//      expression? SEMICOLON
-//      (variable_updating_statement | func_call_statement)?
+//   : for_header_initializer? SEMICOLON expression? SEMICOLON for_header_continuing?
 Expect<std::unique_ptr<ForHeader>> ParserImpl::expect_for_header() {
     auto initializer = for_header_initializer();
     if (initializer.errored) {
@@ -2444,28 +2441,58 @@ Maybe<const ast::ContinueStatement*> ParserImpl::continue_statement() {
 // break_if_statement:
 //    'break' 'if' expression semicolon
 Maybe<const ast::Statement*> ParserImpl::break_if_statement() {
-    // TODO(crbug.com/tint/1451): Add support for break-if
-    return Failure::kNoMatch;
+    auto& t1 = peek();
+    auto& t2 = peek(1);
+
+    // Match both the `break` and `if` at the same time.
+    if (!t1.Is(Token::Type::kBreak) || !t2.Is(Token::Type::kIf)) {
+        return Failure::kNoMatch;
+    }
+    next();  // Consume the peek
+    next();  // Consume the peek
+
+    auto expr = expression();
+    if (expr.errored) {
+        return Failure::kErrored;
+    }
+    if (!expr.matched) {
+        return add_error(t1, "expected expression for `break if`");
+    }
+    if (!match(Token::Type::kSemicolon)) {
+        return add_error(peek(), "expected ';' for `break if` statement");
+    }
+
+    return create<ast::BreakIfStatement>(t1.source(), expr.value);
 }
 
 // continuing_compound_statement:
 //   brace_left statement* break_if_statement? brace_right
 Maybe<const ast::BlockStatement*> ParserImpl::continuing_compound_statement() {
     return expect_brace_block("", [&]() -> Expect<ast::BlockStatement*> {
-        auto stmts = expect_statements();
-        if (stmts.errored) {
-            return Failure::kErrored;
+        StatementList stmts;
+
+        while (continue_parsing()) {
+            // Note, break-if has to parse before statements because statements includes `break`
+            auto break_if = break_if_statement();
+            if (break_if.errored) {
+                return Failure::kErrored;
+            }
+            if (break_if.matched) {
+                stmts.Push(break_if.value);
+                continue;
+            }
+
+            auto stmt = statement();
+            if (stmt.errored) {
+                return Failure::kErrored;
+            }
+            if (!stmt.matched) {
+                break;
+            }
+            stmts.Push(stmt.value);
         }
 
-        auto break_if = break_if_statement();
-        if (break_if.errored) {
-            return Failure::kErrored;
-        }
-        if (break_if.matched) {
-            stmts.value.Push(break_if.value);
-        }
-
-        return create<ast::BlockStatement>(Source{}, stmts.value);
+        return create<ast::BlockStatement>(Source{}, stmts);
     });
 }
 

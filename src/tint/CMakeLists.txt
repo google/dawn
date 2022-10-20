@@ -73,6 +73,8 @@ set(TINT_LIB_SRCS
   ast/bool_literal_expression.h
   ast/bool.cc
   ast/bool.h
+  ast/break_if_statement.cc
+  ast/break_if_statement.h
   ast/break_statement.cc
   ast/break_statement.h
   ast/builtin_attribute.cc
@@ -292,6 +294,8 @@ set(TINT_LIB_SRCS
   sem/block_statement.h
   sem/bool.cc
   sem/bool.h
+  sem/break_if_statement.cc
+  sem/break_if_statement.h
   sem/builtin_type.cc
   sem/builtin_type.h
   sem/builtin.cc
@@ -708,6 +712,7 @@ if(TINT_BUILD_TESTS)
     ast/block_statement_test.cc
     ast/bool_literal_expression_test.cc
     ast/bool_test.cc
+    ast/break_if_statement_test.cc
     ast/break_statement_test.cc
     ast/builtin_attribute_test.cc
     ast/builtin_texture_helper_test.cc

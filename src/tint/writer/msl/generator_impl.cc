@@ -660,6 +660,16 @@ bool GeneratorImpl::EmitBreak(const ast::BreakStatement*) {
     return true;
 }
 
+bool GeneratorImpl::EmitBreakIf(const ast::BreakIfStatement* b) {
+    auto out = line();
+    out << "if (";
+    if (!EmitExpression(out, b->condition)) {
+        return false;
+    }
+    out << ") { break; }";
+    return true;
+}
+
 bool GeneratorImpl::EmitCall(std::ostream& out, const ast::CallExpression* expr) {
     auto* call = program_->Sem().Get<sem::Call>(expr);
     auto* target = call->Target();
@@ -2432,6 +2442,9 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
         },
         [&](const ast::BreakStatement* b) {  //
             return EmitBreak(b);
+        },
+        [&](const ast::BreakIfStatement* b) {  //
+            return EmitBreakIf(b);
         },
         [&](const ast::CallStatement* c) {  //
             auto out = line();

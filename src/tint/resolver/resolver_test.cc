@@ -215,7 +215,8 @@ TEST_F(ResolverTest, Stmt_Loop) {
     auto* continuing_lhs = Expr("v");
     auto* continuing_rhs = Expr(2.3_f);
 
-    auto* continuing = Block(Assign(continuing_lhs, continuing_rhs));
+    auto* break_if = BreakIf(false);
+    auto* continuing = Block(Assign(continuing_lhs, continuing_rhs), break_if);
     auto* stmt = Loop(body, continuing);
     WrapInFunction(v, stmt);
 
@@ -233,6 +234,7 @@ TEST_F(ResolverTest, Stmt_Loop) {
     EXPECT_EQ(BlockOf(body_rhs), body);
     EXPECT_EQ(BlockOf(continuing_lhs), continuing);
     EXPECT_EQ(BlockOf(continuing_rhs), continuing);
+    EXPECT_EQ(BlockOf(break_if), continuing);
 }
 
 TEST_F(ResolverTest, Stmt_Return) {
