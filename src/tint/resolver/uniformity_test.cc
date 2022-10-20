@@ -7962,6 +7962,99 @@ test:13:7 note: reading from read_write storage buffer 'non_uniform_value' may r
 )");
 }
 
+TEST_F(UniformityAnalysisTest,
+       Error_ParameterRequiredToBeUniformForSubsequentControlFlow_ViaPointer) {
+    // Make sure we correctly identify the function call as the source of non-uniform control flow
+    // and not the if statement with the uniform condition.
+    std::string src = R"(
+@group(0) @binding(1) var<storage, read_write> non_uniform_value : vec4<f32>;
+
+fn foo(limit : ptr<function, f32>) -> f32 {
+  var i : i32;
+  if (f32(i) > *limit) {
+      return 0.0;
+  }
+  return 1.0f;
+}
+
+fn main() {
+  var param : f32 = non_uniform_value.y;
+  let i = foo(&param);
+  let y = dpdx(vec3<f32>());
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:15:11 error: 'dpdx' must only be called from uniform control flow
+  let y = dpdx(vec3<f32>());
+          ^^^^
+
+test:14:15 note: non-uniform function call argument causes subsequent control flow to be non-uniform
+  let i = foo(&param);
+              ^
+
+test:6:3 note: control flow depends on non-uniform value
+  if (f32(i) > *limit) {
+  ^^
+
+test:6:14 note: result of expression may be non-uniform
+  if (f32(i) > *limit) {
+             ^
+
+test:13:21 note: reading from read_write storage buffer 'non_uniform_value' may result in a non-uniform value
+  var param : f32 = non_uniform_value.y;
+                    ^^^^^^^^^^^^^^^^^
+)");
+}
+
+TEST_F(UniformityAnalysisTest,
+       Error_ParameterRequiredToBeUniformForSubsequentControlFlow_ViaPointer_InLoop) {
+    // Make sure we correctly identify the function call as the source of non-uniform control flow
+    // and not the if statement with the uniform condition.
+    std::string src = R"(
+@group(0) @binding(1) var<storage, read_write> non_uniform_value : vec4<f32>;
+
+fn foo(limit : ptr<function, f32>) -> f32 {
+  var i : i32;
+  loop {
+    if (f32(i) > *limit) {
+      return 0.0;
+    }
+  }
+}
+
+fn main() {
+  var param : f32 = non_uniform_value.y;
+  let i = foo(&param);
+  let y = dpdx(vec3<f32>());
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:16:11 error: 'dpdx' must only be called from uniform control flow
+  let y = dpdx(vec3<f32>());
+          ^^^^
+
+test:15:15 note: non-uniform function call argument causes subsequent control flow to be non-uniform
+  let i = foo(&param);
+              ^
+
+test:7:5 note: control flow depends on non-uniform value
+    if (f32(i) > *limit) {
+    ^^
+
+test:4:8 note: reading from 'limit' may result in a non-uniform value
+fn foo(limit : ptr<function, f32>) -> f32 {
+       ^^^^^
+
+test:14:21 note: reading from read_write storage buffer 'non_uniform_value' may result in a non-uniform value
+  var param : f32 = non_uniform_value.y;
+                    ^^^^^^^^^^^^^^^^^
+)");
+}
+
 TEST_F(UniformityAnalysisTest, Error_ShortCircuitingExprCausesNonUniformControlFlow) {
     // Make sure we correctly identify the short-circuit as the source of non-uniform control flow
     // and not the if statement with the uniform condition.

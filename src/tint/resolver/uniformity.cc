@@ -831,7 +831,7 @@ class UniformityGraph {
                 // Create input nodes for any variables declared before this loop.
                 for (auto* v : current_function_->local_var_decls) {
                     auto name = builder_->Symbols().NameFor(v->Declaration()->symbol);
-                    auto* in_node = CreateNode(name + "_value_loop_in");
+                    auto* in_node = CreateNode(name + "_value_loop_in", v->Declaration());
                     in_node->AddEdge(current_function_->variables.Get(v));
                     info.var_in_nodes[v] = in_node;
                     current_function_->variables.Set(v, in_node);
@@ -1111,7 +1111,7 @@ class UniformityGraph {
                 } else {
                     auto [cf1, v1] = ProcessExpression(cf, b->lhs);
                     auto [cf2, v2] = ProcessExpression(cf1, b->rhs);
-                    auto* result = CreateNode("binary_expr_result");
+                    auto* result = CreateNode("binary_expr_result", b);
                     result->AddEdge(v1);
                     result->AddEdge(v2);
                     return std::pair<Node*, Node*>(cf2, result);
@@ -1527,39 +1527,48 @@ class UniformityGraph {
             // the actual cause of divergence.
         }
 
+        auto get_var_type = [&](const sem::Variable* var) {
+            switch (var->AddressSpace()) {
+                case ast::AddressSpace::kStorage:
+                    return "read_write storage buffer ";
+                case ast::AddressSpace::kWorkgroup:
+                    return "workgroup storage variable ";
+                case ast::AddressSpace::kPrivate:
+                    return "module-scope private variable ";
+                default:
+                    if (ast::HasAttribute<ast::BuiltinAttribute>(var->Declaration()->attributes)) {
+                        return "builtin ";
+                    } else if (ast::HasAttribute<ast::LocationAttribute>(
+                                   var->Declaration()->attributes)) {
+                        return "user-defined input ";
+                    } else {
+                        // TODO(jrprice): Provide more info for this case.
+                    }
+                    break;
+            }
+            return "";
+        };
+
         // Show the source of the non-uniform value.
         Switch(
             non_uniform_source->ast,
             [&](const ast::IdentifierExpression* ident) {
-                std::string var_type = "";
                 auto* var = sem_.Get<sem::VariableUser>(ident)->Variable();
-                switch (var->AddressSpace()) {
-                    case ast::AddressSpace::kStorage:
-                        var_type = "read_write storage buffer ";
-                        break;
-                    case ast::AddressSpace::kWorkgroup:
-                        var_type = "workgroup storage variable ";
-                        break;
-                    case ast::AddressSpace::kPrivate:
-                        var_type = "module-scope private variable ";
-                        break;
-                    default:
-                        if (ast::HasAttribute<ast::BuiltinAttribute>(
-                                var->Declaration()->attributes)) {
-                            var_type = "builtin ";
-                        } else if (ast::HasAttribute<ast::LocationAttribute>(
-                                       var->Declaration()->attributes)) {
-                            var_type = "user-defined input ";
-                        } else {
-                            // TODO(jrprice): Provide more info for this case.
-                        }
-                        break;
-                }
+                std::string var_type = get_var_type(var);
                 diagnostics_.add_note(diag::System::Resolver,
                                       "reading from " + var_type + "'" +
                                           builder_->Symbols().NameFor(ident->symbol) +
                                           "' may result in a non-uniform value",
                                       ident->source);
+            },
+            [&](const ast::Variable* v) {
+                auto* var = sem_.Get(v);
+                std::string var_type = get_var_type(var);
+                diagnostics_.add_note(diag::System::Resolver,
+                                      "reading from " + var_type + "'" +
+                                          builder_->Symbols().NameFor(v->symbol) +
+                                          "' may result in a non-uniform value",
+                                      v->source);
             },
             [&](const ast::CallExpression* c) {
                 auto target_name = builder_->Symbols().NameFor(
@@ -1599,6 +1608,10 @@ class UniformityGraph {
                         break;
                     }
                 }
+            },
+            [&](const ast::Expression* e) {
+                diagnostics_.add_note(diag::System::Resolver,
+                                      "result of expression may be non-uniform", e->source);
             },
             [&](Default) {
                 TINT_ICE(Resolver, diagnostics_) << "unhandled source of non-uniformity";
