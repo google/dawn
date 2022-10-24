@@ -25,6 +25,7 @@
 #include "dawn/native/CommandEncoder.h"
 #include "dawn/native/CommandValidation.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/ExternalTexture.h"
 #include "dawn/native/InternalPipelineStore.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/RenderPassEncoder.h"
@@ -36,9 +37,8 @@
 
 namespace dawn::native {
 namespace {
-
-static const char sCopyTextureForBrowserShader[] = R"(
-            struct GammaTransferParams {
+static const char sCopyForBrowserShader[] = R"(
+                struct GammaTransferParamsInternal {
                 G: f32,
                 A: f32,
                 B: f32,
@@ -49,15 +49,15 @@ static const char sCopyTextureForBrowserShader[] = R"(
                 padding: u32,
             };
 
-            struct Uniforms {                                            // offset   align   size
-                scale: vec2<f32>,                                        // 0        8       8
-                offset: vec2<f32>,                                       // 8        8       8
-                steps_mask: u32,                                         // 16       4       4
-                // implicit padding;                                     // 20               12
-                conversion_matrix: mat3x3<f32>,                          // 32       16      48
-                gamma_decoding_params: GammaTransferParams,              // 80       4       32
-                gamma_encoding_params: GammaTransferParams,              // 112      4       32
-                gamma_decoding_for_dst_srgb_params: GammaTransferParams, // 144      4       32
+            struct Uniforms {                                                    // offset   align   size
+                scale: vec2<f32>,                                                // 0        8       8
+                offset: vec2<f32>,                                               // 8        8       8
+                steps_mask: u32,                                                 // 16       4       4
+                // implicit padding;                                             // 20               12
+                conversion_matrix: mat3x3<f32>,                                  // 32       16      48
+                gamma_decoding_params: GammaTransferParamsInternal,              // 80       4       32
+                gamma_encoding_params: GammaTransferParamsInternal,              // 112      4       32
+                gamma_decoding_for_dst_srgb_params: GammaTransferParamsInternal, // 144      4       32
             };
 
             @binding(0) @group(0) var<uniform> uniforms : Uniforms;
@@ -75,7 +75,7 @@ static const char sCopyTextureForBrowserShader[] = R"(
             //  nonlinear = pow(A * x + B, G) + E
             // (https://source.chromium.org/chromium/chromium/src/+/main:ui/gfx/color_transform.cc;l=541)
             // Expand the equation with sign() to make it handle all gamma conversions.
-            fn gamma_conversion(v: f32, params: GammaTransferParams) -> f32 {
+            fn gamma_conversion(v: f32, params: GammaTransferParamsInternal) -> f32 {
                 // Linear part: C * x + F
                 if (abs(v) < params.D) {
                     return sign(v) * (params.C * abs(v) + params.F);
@@ -121,24 +121,23 @@ static const char sCopyTextureForBrowserShader[] = R"(
             }
 
             @binding(1) @group(0) var mySampler: sampler;
-            @binding(2) @group(0) var myTexture: texture_2d<f32>;
 
-            @fragment
-            fn fs_main(
-                @location(0) texcoord : vec2<f32>
-            ) -> @location(0) vec4<f32> {
-                // Clamp the texcoord and discard the out-of-bound pixels.
+            // Resource used in copyTexture entry point only.
+            @binding(2) @group(0) var mySourceTexture: texture_2d<f32>;
+
+            // Resource used in copyExternalTexture entry point only.
+            @binding(2) @group(0) var mySourceExternalTexture: texture_external;
+
+            fn discardIfOutsideOfCopy(texcoord : vec2<f32>) {
                 var clampedTexcoord =
                     clamp(texcoord, vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 1.0));
-
-                // Swizzling of texture formats when sampling / rendering is handled by the
-                // hardware so we don't need special logic in this shader. This is covered by tests.
-                var color = textureSample(myTexture, mySampler, texcoord);
-
                 if (!all(clampedTexcoord == texcoord)) {
                     discard;
                 }
+            }
 
+            fn transform(srcColor : vec4<f32>) -> vec4<f32> {
+                var color = srcColor;
                 let kUnpremultiplyStep = 0x01u;
                 let kDecodeToLinearStep = 0x02u;
                 let kConvertToDstGamutStep = 0x04u;
@@ -203,11 +202,33 @@ static const char sCopyTextureForBrowserShader[] = R"(
 
                 return color;
             }
+
+            @fragment
+            fn copyTexture(@location(0) texcoord : vec2<f32>
+            ) -> @location(0) vec4<f32> {
+                var color = textureSample(mySourceTexture, mySampler, texcoord);
+
+                // TODO(crbug.com/tint/1723): Discard before sampling should be valid.
+                discardIfOutsideOfCopy(texcoord);
+
+                return transform(color);
+            }
+
+            @fragment
+            fn copyExternalTexture(@location(0) texcoord : vec2<f32>
+            ) -> @location(0) vec4<f32> {
+                var color = textureSampleBaseClampToEdge(mySourceExternalTexture, mySampler, texcoord);
+
+                // TODO(crbug.com/tint/1723): Discard before sampling should be valid.
+                discardIfOutsideOfCopy(texcoord);
+
+                return transform(color);
+            }
         )";
 
 // Follow the same order of skcms_TransferFunction
 // https://source.chromium.org/chromium/chromium/src/+/main:third_party/skia/include/third_party/skcms/skcms.h;l=46;
-struct GammaTransferParams {
+struct GammaTransferParamsInternal {
     float G = 0.0;
     float A = 0.0;
     float B = 0.0;
@@ -226,16 +247,22 @@ struct Uniform {
     uint32_t stepsMask = 0;
     const std::array<uint32_t, 3> padding = {};  // 12 bytes padding
     std::array<float, 12> conversionMatrix = {};
-    GammaTransferParams gammaDecodingParams = {};
-    GammaTransferParams gammaEncodingParams = {};
-    GammaTransferParams gammaDecodingForDstSrgbParams = {};
+    GammaTransferParamsInternal gammaDecodingParams = {};
+    GammaTransferParamsInternal gammaEncodingParams = {};
+    GammaTransferParamsInternal gammaDecodingForDstSrgbParams = {};
 };
 static_assert(sizeof(Uniform) == 176);
 
+enum class SourceTextureType { Texture2D, ExternalTexture };
+
+struct TextureInfo {
+    Origin3D origin;
+    Extent3D size;
+};
+
 // TODO(crbug.com/dawn/856): Expand copyTextureForBrowser to support any
 // non-depth, non-stencil, non-compressed texture format pair copy.
-MaybeError ValidateCopyTextureFormatConversion(const wgpu::TextureFormat srcFormat,
-                                               const wgpu::TextureFormat dstFormat) {
+MaybeError ValidateCopyTextureSourceFormat(const wgpu::TextureFormat srcFormat) {
     switch (srcFormat) {
         case wgpu::TextureFormat::BGRA8Unorm:
         case wgpu::TextureFormat::RGBA8Unorm:
@@ -245,6 +272,10 @@ MaybeError ValidateCopyTextureFormatConversion(const wgpu::TextureFormat srcForm
             return DAWN_VALIDATION_ERROR("Source texture format (%s) is not supported.", srcFormat);
     }
 
+    return {};
+}
+
+MaybeError ValidateCopyForBrowserDestinationFormat(const wgpu::TextureFormat dstFormat) {
     switch (dstFormat) {
         case wgpu::TextureFormat::R8Unorm:
         case wgpu::TextureFormat::R16Float:
@@ -268,7 +299,8 @@ MaybeError ValidateCopyTextureFormatConversion(const wgpu::TextureFormat srcForm
     return {};
 }
 
-RenderPipelineBase* GetCachedPipeline(InternalPipelineStore* store, wgpu::TextureFormat dstFormat) {
+RenderPipelineBase* GetCachedCopyTexturePipeline(InternalPipelineStore* store,
+                                                 wgpu::TextureFormat dstFormat) {
     auto pipeline = store->copyTextureForBrowserPipelines.find(dstFormat);
     if (pipeline != store->copyTextureForBrowserPipelines.end()) {
         return pipeline->second.Get();
@@ -276,120 +308,92 @@ RenderPipelineBase* GetCachedPipeline(InternalPipelineStore* store, wgpu::Textur
     return nullptr;
 }
 
+RenderPipelineBase* GetCachedCopyExternalTexturePipeline(InternalPipelineStore* store,
+                                                         wgpu::TextureFormat dstFormat) {
+    auto pipeline = store->copyExternalTextureForBrowserPipelines.find(dstFormat);
+    if (pipeline != store->copyExternalTextureForBrowserPipelines.end()) {
+        return pipeline->second.Get();
+    }
+    return nullptr;
+}
+
+ResultOrError<Ref<RenderPipelineBase>> CreateCopyForBrowserPipeline(
+    DeviceBase* device,
+    wgpu::TextureFormat dstFormat,
+    ShaderModuleBase* shaderModule,
+    const char* fragmentEntryPoint) {
+    // Prepare vertex stage.
+    VertexState vertex = {};
+    vertex.module = shaderModule;
+    vertex.entryPoint = "vs_main";
+
+    // Prepare frgament stage.
+    FragmentState fragment = {};
+    fragment.module = shaderModule;
+    fragment.entryPoint = fragmentEntryPoint;
+
+    // Prepare color state.
+    ColorTargetState target = {};
+    target.format = dstFormat;
+
+    // Create RenderPipeline.
+    RenderPipelineDescriptor renderPipelineDesc = {};
+
+    // Generate the layout based on shader modules.
+    renderPipelineDesc.layout = nullptr;
+
+    renderPipelineDesc.vertex = vertex;
+    renderPipelineDesc.fragment = &fragment;
+
+    renderPipelineDesc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
+
+    fragment.targetCount = 1;
+    fragment.targets = &target;
+
+    return device->CreateRenderPipeline(&renderPipelineDesc);
+}
+
+ResultOrError<ShaderModuleBase*> GetOrCreateCopyForBrowserShaderModule(
+    DeviceBase* device,
+    InternalPipelineStore* store) {
+    if (store->copyForBrowser == nullptr) {
+        DAWN_TRY_ASSIGN(store->copyForBrowser,
+                        utils::CreateShaderModule(device, sCopyForBrowserShader));
+    }
+
+    return store->copyForBrowser.Get();
+}
+
 ResultOrError<RenderPipelineBase*> GetOrCreateCopyTextureForBrowserPipeline(
     DeviceBase* device,
     wgpu::TextureFormat dstFormat) {
     InternalPipelineStore* store = device->GetInternalPipelineStore();
-
-    if (GetCachedPipeline(store, dstFormat) == nullptr) {
-        // Create vertex shader module if not cached before.
-        if (store->copyTextureForBrowser == nullptr) {
-            DAWN_TRY_ASSIGN(store->copyTextureForBrowser,
-                            utils::CreateShaderModule(device, sCopyTextureForBrowserShader));
-        }
-
-        ShaderModuleBase* shaderModule = store->copyTextureForBrowser.Get();
-
-        // Prepare vertex stage.
-        VertexState vertex = {};
-        vertex.module = shaderModule;
-        vertex.entryPoint = "vs_main";
-
-        // Prepare frgament stage.
-        FragmentState fragment = {};
-        fragment.module = shaderModule;
-        fragment.entryPoint = "fs_main";
-
-        // Prepare color state.
-        ColorTargetState target = {};
-        target.format = dstFormat;
-
-        // Create RenderPipeline.
-        RenderPipelineDescriptor renderPipelineDesc = {};
-
-        // Generate the layout based on shader modules.
-        renderPipelineDesc.layout = nullptr;
-
-        renderPipelineDesc.vertex = vertex;
-        renderPipelineDesc.fragment = &fragment;
-
-        renderPipelineDesc.primitive.topology = wgpu::PrimitiveTopology::TriangleList;
-
-        fragment.targetCount = 1;
-        fragment.targets = &target;
-
+    if (GetCachedCopyTexturePipeline(store, dstFormat) == nullptr) {
+        ShaderModuleBase* shaderModule;
+        DAWN_TRY_ASSIGN(shaderModule, GetOrCreateCopyForBrowserShaderModule(device, store));
         Ref<RenderPipelineBase> pipeline;
-        DAWN_TRY_ASSIGN(pipeline, device->CreateRenderPipeline(&renderPipelineDesc));
+        DAWN_TRY_ASSIGN(
+            pipeline, CreateCopyForBrowserPipeline(device, dstFormat, shaderModule, "copyTexture"));
         store->copyTextureForBrowserPipelines.insert({dstFormat, std::move(pipeline)});
     }
 
-    return GetCachedPipeline(store, dstFormat);
+    return GetCachedCopyTexturePipeline(store, dstFormat);
 }
-}  // anonymous namespace
 
-MaybeError ValidateCopyTextureForBrowser(DeviceBase* device,
-                                         const ImageCopyTexture* source,
-                                         const ImageCopyTexture* destination,
-                                         const Extent3D* copySize,
-                                         const CopyTextureForBrowserOptions* options) {
-    DAWN_TRY(device->ValidateObject(source->texture));
-    DAWN_TRY(device->ValidateObject(destination->texture));
-
-    DAWN_INVALID_IF(source->texture->GetTextureState() == TextureBase::TextureState::Destroyed,
-                    "Source texture %s is destroyed.", source->texture);
-
-    DAWN_INVALID_IF(destination->texture->GetTextureState() == TextureBase::TextureState::Destroyed,
-                    "Destination texture %s is destroyed.", destination->texture);
-
-    DAWN_TRY_CONTEXT(ValidateImageCopyTexture(device, *source, *copySize),
-                     "validating the ImageCopyTexture for the source");
-    DAWN_TRY_CONTEXT(ValidateImageCopyTexture(device, *destination, *copySize),
-                     "validating the ImageCopyTexture for the destination");
-
-    DAWN_TRY_CONTEXT(ValidateTextureCopyRange(device, *source, *copySize),
-                     "validating that the copy fits in the source");
-    DAWN_TRY_CONTEXT(ValidateTextureCopyRange(device, *destination, *copySize),
-                     "validating that the copy fits in the destination");
-
-    DAWN_TRY(ValidateTextureToTextureCopyCommonRestrictions(*source, *destination, *copySize));
-
-    DAWN_INVALID_IF(source->origin.z > 0, "Source has a non-zero z origin (%u).", source->origin.z);
-    DAWN_INVALID_IF(copySize->depthOrArrayLayers > 1, "Copy is for more than one array layer (%u)",
-                    copySize->depthOrArrayLayers);
-
-    DAWN_INVALID_IF(
-        source->texture->GetSampleCount() > 1 || destination->texture->GetSampleCount() > 1,
-        "The source texture sample count (%u) or the destination texture sample count (%u) is "
-        "not 1.",
-        source->texture->GetSampleCount(), destination->texture->GetSampleCount());
-
-    DAWN_INVALID_IF(
-        options->internalUsage && !device->HasFeature(Feature::DawnInternalUsages),
-        "The internalUsage is true while the dawn-internal-usages feature is not enabled.");
-    UsageValidationMode mode =
-        options->internalUsage ? UsageValidationMode::Internal : UsageValidationMode::Default;
-    DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc, mode));
-    DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::TextureBinding, mode));
-    DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::CopyDst, mode));
-    DAWN_TRY(ValidateCanUseAs(destination->texture, wgpu::TextureUsage::RenderAttachment, mode));
-
-    DAWN_TRY(ValidateCopyTextureFormatConversion(source->texture->GetFormat().format,
-                                                 destination->texture->GetFormat().format));
-
-    DAWN_INVALID_IF(options->nextInChain != nullptr, "nextInChain must be nullptr");
-
-    DAWN_TRY(ValidateAlphaMode(options->srcAlphaMode));
-    DAWN_TRY(ValidateAlphaMode(options->dstAlphaMode));
-
-    if (options->needsColorSpaceConversion) {
-        DAWN_INVALID_IF(options->srcTransferFunctionParameters == nullptr,
-                        "srcTransferFunctionParameters is nullptr when doing color conversion");
-        DAWN_INVALID_IF(options->conversionMatrix == nullptr,
-                        "conversionMatrix is nullptr when doing color conversion");
-        DAWN_INVALID_IF(options->dstTransferFunctionParameters == nullptr,
-                        "dstTransferFunctionParameters is nullptr when doing color conversion");
+ResultOrError<RenderPipelineBase*> GetOrCreateCopyExternalTextureForBrowserPipeline(
+    DeviceBase* device,
+    wgpu::TextureFormat dstFormat) {
+    InternalPipelineStore* store = device->GetInternalPipelineStore();
+    if (GetCachedCopyExternalTexturePipeline(store, dstFormat) == nullptr) {
+        ShaderModuleBase* shaderModule;
+        DAWN_TRY_ASSIGN(shaderModule, GetOrCreateCopyForBrowserShaderModule(device, store));
+        Ref<RenderPipelineBase> pipeline;
+        DAWN_TRY_ASSIGN(pipeline, CreateCopyForBrowserPipeline(device, dstFormat, shaderModule,
+                                                               "copyExternalTexture"));
+        store->copyExternalTextureForBrowserPipelines.insert({dstFormat, std::move(pipeline)});
     }
-    return {};
+
+    return GetCachedCopyExternalTexturePipeline(store, dstFormat);
 }
 
 // Whether the format of dst texture of CopyTextureForBrowser() is srgb or non-srgb.
@@ -403,11 +407,14 @@ bool IsSrgbDstFormat(wgpu::TextureFormat format) {
     }
 }
 
-MaybeError DoCopyTextureForBrowser(DeviceBase* device,
-                                   const ImageCopyTexture* source,
-                                   const ImageCopyTexture* destination,
-                                   const Extent3D* copySize,
-                                   const CopyTextureForBrowserOptions* options) {
+template <typename T>
+MaybeError DoCopyForBrowser(DeviceBase* device,
+                            const TextureInfo* sourceInfo,
+                            T* sourceResource,
+                            const ImageCopyTexture* destination,
+                            const Extent3D* copySize,
+                            const CopyTextureForBrowserOptions* options,
+                            RenderPipelineBase* pipeline) {
     // TODO(crbug.com/dawn/856): In D3D12 and Vulkan, compatible texture format can directly
     // copy to each other. This can be a potential fast path.
 
@@ -416,23 +423,16 @@ MaybeError DoCopyTextureForBrowser(DeviceBase* device,
         return {};
     }
 
-    bool isSrgbDstFormat = IsSrgbDstFormat(destination->texture->GetFormat().format);
-    RenderPipelineBase* pipeline;
-    DAWN_TRY_ASSIGN(pipeline, GetOrCreateCopyTextureForBrowserPipeline(
-                                  device, destination->texture->GetFormat().format));
-
     // Prepare bind group layout.
     Ref<BindGroupLayoutBase> layout;
     DAWN_TRY_ASSIGN(layout, pipeline->GetBindGroupLayout(0));
 
-    Extent3D srcTextureSize = source->texture->GetSize();
-
     // Prepare binding 0 resource: uniform buffer.
     Uniform uniformData = {
-        copySize->width / static_cast<float>(srcTextureSize.width),
-        copySize->height / static_cast<float>(srcTextureSize.height),  // scale
-        source->origin.x / static_cast<float>(srcTextureSize.width),
-        source->origin.y / static_cast<float>(srcTextureSize.height)  // offset
+        copySize->width / static_cast<float>(sourceInfo->size.width),
+        copySize->height / static_cast<float>(sourceInfo->size.height),  // scale
+        sourceInfo->origin.x / static_cast<float>(sourceInfo->size.width),
+        sourceInfo->origin.y / static_cast<float>(sourceInfo->size.height)  // offset
     };
 
     // Handle flipY. FlipY here means we flip the source texture firstly and then
@@ -440,7 +440,7 @@ MaybeError DoCopyTextureForBrowser(DeviceBase* device,
     // need to unpack the flip.
     if (options->flipY) {
         uniformData.scaleY *= -1.0;
-        uniformData.offsetY += copySize->height / static_cast<float>(srcTextureSize.height);
+        uniformData.offsetY += copySize->height / static_cast<float>(sourceInfo->size.height);
     }
 
     uint32_t stepsMask = 0u;
@@ -528,6 +528,7 @@ MaybeError DoCopyTextureForBrowser(DeviceBase* device,
     // and use it as render attachment when possible.
     // TODO(crbug.com/dawn/1195): Opt the condition for this extra step. It is possible to
     // bypass this extra step in some cases.
+    bool isSrgbDstFormat = IsSrgbDstFormat(destination->texture->GetFormat().format);
     if (isSrgbDstFormat) {
         stepsMask |= kDecodeForSrgbDstFormat;
         // Get gamma-linear conversion params from https://en.wikipedia.org/wiki/SRGB with some
@@ -536,6 +537,7 @@ MaybeError DoCopyTextureForBrowser(DeviceBase* device,
             2.4, 1.0 / 1.055, 0.055 / 1.055, 1.0 / 12.92, 4.045e-02, 0.0, 0.0};
     }
 
+    // Upload uniform data
     uniformData.stepsMask = stepsMask;
 
     Ref<BufferBase> uniformBuffer;
@@ -550,23 +552,13 @@ MaybeError DoCopyTextureForBrowser(DeviceBase* device,
     Ref<SamplerBase> sampler;
     DAWN_TRY_ASSIGN(sampler, device->CreateSampler(&samplerDesc));
 
-    // Prepare binding 2 resource: sampled texture
-    TextureViewDescriptor srcTextureViewDesc = {};
-    srcTextureViewDesc.dimension = wgpu::TextureViewDimension::e2D;
-    srcTextureViewDesc.baseMipLevel = source->mipLevel;
-    srcTextureViewDesc.mipLevelCount = 1;
-    srcTextureViewDesc.arrayLayerCount = 1;
-    Ref<TextureViewBase> srcTextureView;
-    DAWN_TRY_ASSIGN(srcTextureView,
-                    device->CreateTextureView(source->texture, &srcTextureViewDesc));
-
     // Create bind group after all binding entries are set.
     UsageValidationMode mode =
         options->internalUsage ? UsageValidationMode::Internal : UsageValidationMode::Default;
     Ref<BindGroupBase> bindGroup;
     DAWN_TRY_ASSIGN(bindGroup, utils::MakeBindGroup(
                                    device, layout,
-                                   {{0, uniformBuffer}, {1, sampler}, {2, srcTextureView}}, mode));
+                                   {{0, uniformBuffer}, {1, sampler}, {2, sourceResource}}, mode));
 
     // Create command encoder.
     CommandEncoderDescriptor commandEncoderDesc;
@@ -621,4 +613,166 @@ MaybeError DoCopyTextureForBrowser(DeviceBase* device,
     return {};
 }
 
+MaybeError ValidateCopyForBrowserCommonRestrictions(DeviceBase* device,
+                                                    const ImageCopyTexture& destination,
+                                                    const Extent3D& copySize,
+                                                    const CopyTextureForBrowserOptions& options) {
+    DAWN_TRY(device->ValidateObject(destination.texture));
+    DAWN_INVALID_IF(destination.texture->GetTextureState() == TextureBase::TextureState::Destroyed,
+                    "Destination texture %s is destroyed.", destination.texture);
+    DAWN_TRY_CONTEXT(ValidateImageCopyTexture(device, destination, copySize),
+                     "validating the ImageCopyTexture for the destination");
+    DAWN_TRY_CONTEXT(ValidateTextureCopyRange(device, destination, copySize),
+                     "validating that the copy fits in the destination");
+
+    UsageValidationMode mode =
+        options.internalUsage ? UsageValidationMode::Internal : UsageValidationMode::Default;
+    DAWN_TRY(ValidateCanUseAs(destination.texture, wgpu::TextureUsage::CopyDst, mode));
+    DAWN_TRY(ValidateCanUseAs(destination.texture, wgpu::TextureUsage::RenderAttachment, mode));
+
+    DAWN_INVALID_IF(copySize.depthOrArrayLayers > 1, "Copy is for more than one array layer (%u)",
+                    copySize.depthOrArrayLayers);
+
+    DAWN_INVALID_IF(destination.texture->GetSampleCount() > 1,
+                    "The destination texture sample count (%u) is not 1.",
+                    destination.texture->GetSampleCount());
+
+    DAWN_TRY(ValidateCopyForBrowserDestinationFormat(destination.texture->GetFormat().format));
+
+    // The valid destination formats are all color formats.
+    DAWN_INVALID_IF(
+        destination.aspect != wgpu::TextureAspect::All,
+        "Destination %s aspect (%s) doesn't select all the aspects of the destination format.",
+        destination.texture, destination.aspect);
+
+    DAWN_INVALID_IF(options.nextInChain != nullptr, "nextInChain must be nullptr");
+
+    DAWN_TRY(ValidateAlphaMode(options.srcAlphaMode));
+    DAWN_TRY(ValidateAlphaMode(options.dstAlphaMode));
+
+    if (options.needsColorSpaceConversion) {
+        DAWN_INVALID_IF(options.srcTransferFunctionParameters == nullptr,
+                        "srcTransferFunctionParameters is nullptr when doing color conversion");
+        DAWN_INVALID_IF(options.conversionMatrix == nullptr,
+                        "conversionMatrix is nullptr when doing color conversion");
+        DAWN_INVALID_IF(options.dstTransferFunctionParameters == nullptr,
+                        "dstTransferFunctionParameters is nullptr when doing color conversion");
+    }
+    return {};
+}
+}  // anonymous namespace
+
+MaybeError ValidateCopyTextureForBrowser(DeviceBase* device,
+                                         const ImageCopyTexture* source,
+                                         const ImageCopyTexture* destination,
+                                         const Extent3D* copySize,
+                                         const CopyTextureForBrowserOptions* options) {
+    DAWN_TRY(device->ValidateObject(source->texture));
+
+    DAWN_INVALID_IF(source->texture->GetTextureState() == TextureBase::TextureState::Destroyed,
+                    "Source texture %s is destroyed.", source->texture);
+
+    DAWN_TRY_CONTEXT(ValidateImageCopyTexture(device, *source, *copySize),
+                     "validating the ImageCopyTexture for the source");
+
+    DAWN_TRY_CONTEXT(ValidateTextureCopyRange(device, *source, *copySize),
+                     "validating that the copy fits in the source");
+
+    DAWN_TRY(ValidateTextureToTextureCopyCommonRestrictions(*source, *destination, *copySize));
+
+    DAWN_INVALID_IF(source->origin.z > 0, "Source has a non-zero z origin (%u).", source->origin.z);
+
+    DAWN_INVALID_IF(source->texture->GetSampleCount() > 1,
+                    "The source texture sample count (%u) is not 1. ",
+                    source->texture->GetSampleCount());
+
+    DAWN_INVALID_IF(
+        options->internalUsage && !device->HasFeature(Feature::DawnInternalUsages),
+        "The internalUsage is true while the dawn-internal-usages feature is not enabled.");
+    UsageValidationMode mode =
+        options->internalUsage ? UsageValidationMode::Internal : UsageValidationMode::Default;
+    DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc, mode));
+    DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::TextureBinding, mode));
+
+    DAWN_TRY(ValidateCopyTextureSourceFormat(source->texture->GetFormat().format));
+
+    DAWN_TRY(ValidateCopyForBrowserCommonRestrictions(device, *destination, *copySize, *options));
+    return {};
+}
+
+MaybeError ValidateCopyExternalTextureForBrowser(DeviceBase* device,
+                                                 const ImageCopyExternalTexture* source,
+                                                 const ImageCopyTexture* destination,
+                                                 const Extent3D* copySize,
+                                                 const CopyTextureForBrowserOptions* options) {
+    DAWN_TRY(device->ValidateObject(source->externalTexture));
+
+    DAWN_TRY(source->externalTexture->ValidateCanUseInSubmitNow());
+
+    const Extent2D& sourceVisibleRect = source->externalTexture->GetVisibleRect();
+
+    // All texture dimensions are in uint32_t so by doing checks in uint64_t we avoid
+    // overflows.
+    DAWN_INVALID_IF(
+        static_cast<uint64_t>(source->origin.x) + static_cast<uint64_t>(copySize->width) >
+                static_cast<uint64_t>(sourceVisibleRect.width) ||
+            static_cast<uint64_t>(source->origin.y) + static_cast<uint64_t>(copySize->height) >
+                static_cast<uint64_t>(sourceVisibleRect.height) ||
+            static_cast<uint64_t>(source->origin.z) > 0,
+        "Texture copy range (origin: %s, copySize: %s) touches outside of %s visible size (%s).",
+        &source->origin, copySize, source->externalTexture, &sourceVisibleRect);
+
+    DAWN_INVALID_IF(source->origin.z > 0, "Source has a non-zero z origin (%u).", source->origin.z);
+
+    DAWN_INVALID_IF(
+        options->internalUsage && !device->HasFeature(Feature::DawnInternalUsages),
+        "The internalUsage is true while the dawn-internal-usages feature is not enabled.");
+
+    DAWN_TRY(ValidateCopyForBrowserCommonRestrictions(device, *destination, *copySize, *options));
+
+    return {};
+}
+
+MaybeError DoCopyExternalTextureForBrowser(DeviceBase* device,
+                                           const ImageCopyExternalTexture* source,
+                                           const ImageCopyTexture* destination,
+                                           const Extent3D* copySize,
+                                           const CopyTextureForBrowserOptions* options) {
+    TextureInfo info;
+    info.origin = source->origin;
+    const Extent2D& visibleRect = source->externalTexture->GetVisibleRect();
+    info.size = {visibleRect.width, visibleRect.height, 1};
+
+    RenderPipelineBase* pipeline;
+    DAWN_TRY_ASSIGN(pipeline, GetOrCreateCopyExternalTextureForBrowserPipeline(
+                                  device, destination->texture->GetFormat().format));
+    return DoCopyForBrowser<ExternalTextureBase>(device, &info, source->externalTexture,
+                                                 destination, copySize, options, pipeline);
+}
+
+MaybeError DoCopyTextureForBrowser(DeviceBase* device,
+                                   const ImageCopyTexture* source,
+                                   const ImageCopyTexture* destination,
+                                   const Extent3D* copySize,
+                                   const CopyTextureForBrowserOptions* options) {
+    TextureInfo info;
+    info.origin = source->origin;
+    info.size = source->texture->GetSize();
+
+    Ref<TextureViewBase> srcTextureView = nullptr;
+    TextureViewDescriptor srcTextureViewDesc = {};
+    srcTextureViewDesc.dimension = wgpu::TextureViewDimension::e2D;
+    srcTextureViewDesc.baseMipLevel = source->mipLevel;
+    srcTextureViewDesc.mipLevelCount = 1;
+    srcTextureViewDesc.arrayLayerCount = 1;
+    DAWN_TRY_ASSIGN(srcTextureView,
+                    device->CreateTextureView(source->texture, &srcTextureViewDesc));
+
+    RenderPipelineBase* pipeline;
+    DAWN_TRY_ASSIGN(pipeline, GetOrCreateCopyTextureForBrowserPipeline(
+                                  device, destination->texture->GetFormat().format));
+
+    return DoCopyForBrowser<TextureViewBase>(device, &info, srcTextureView.Get(), destination,
+                                             copySize, options, pipeline);
+}
 }  // namespace dawn::native

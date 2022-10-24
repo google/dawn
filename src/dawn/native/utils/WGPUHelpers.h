@@ -95,6 +95,7 @@ ResultOrError<Ref<BindGroupLayoutBase>> MakeBindGroupLayout(
 struct BindingInitializationHelper {
     BindingInitializationHelper(uint32_t binding, const Ref<SamplerBase>& sampler);
     BindingInitializationHelper(uint32_t binding, const Ref<TextureViewBase>& textureView);
+    BindingInitializationHelper(uint32_t binding, const Ref<ExternalTextureBase>& externalTexture);
     BindingInitializationHelper(uint32_t binding,
                                 const Ref<BufferBase>& buffer,
                                 uint64_t offset = 0,
@@ -107,6 +108,8 @@ struct BindingInitializationHelper {
     Ref<SamplerBase> sampler;
     Ref<TextureViewBase> textureView;
     Ref<BufferBase> buffer;
+    Ref<ExternalTextureBase> externalTexture;
+    ExternalTextureBindingEntry externalBindingEntry;
     uint64_t offset = 0;
     uint64_t size = 0;
 };

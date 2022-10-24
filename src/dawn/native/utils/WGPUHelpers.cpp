@@ -26,6 +26,7 @@
 #include "dawn/native/BindGroupLayout.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/ExternalTexture.h"
 #include "dawn/native/PipelineLayout.h"
 #include "dawn/native/Queue.h"
 #include "dawn/native/Sampler.h"
@@ -140,6 +141,12 @@ BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
 BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
                                                          const Ref<TextureViewBase>& textureView)
     : binding(binding), textureView(textureView) {}
+BindingInitializationHelper::BindingInitializationHelper(
+    uint32_t binding,
+    const Ref<ExternalTextureBase>& externalTexture)
+    : binding(binding), externalTexture(externalTexture) {
+    externalBindingEntry.externalTexture = externalTexture.Get();
+}
 
 BindingInitializationHelper::BindingInitializationHelper(uint32_t binding,
                                                          const Ref<BufferBase>& buffer,
@@ -158,6 +165,10 @@ BindGroupEntry BindingInitializationHelper::GetAsBinding() const {
     result.buffer = buffer.Get();
     result.offset = offset;
     result.size = size;
+
+    if (externalTexture != nullptr) {
+        result.nextInChain = &externalBindingEntry;
+    }
 
     return result;
 }

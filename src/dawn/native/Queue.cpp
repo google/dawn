@@ -370,6 +370,14 @@ void QueueBase::APICopyTextureForBrowser(const ImageCopyTexture* source,
         CopyTextureForBrowserInternal(source, destination, copySize, options));
 }
 
+void QueueBase::APICopyExternalTextureForBrowser(const ImageCopyExternalTexture* source,
+                                                 const ImageCopyTexture* destination,
+                                                 const Extent3D* copySize,
+                                                 const CopyTextureForBrowserOptions* options) {
+    GetDevice()->ConsumedError(
+        CopyExternalTextureForBrowserInternal(source, destination, copySize, options));
+}
+
 MaybeError QueueBase::CopyTextureForBrowserInternal(const ImageCopyTexture* source,
                                                     const ImageCopyTexture* destination,
                                                     const Extent3D* copySize,
@@ -382,6 +390,21 @@ MaybeError QueueBase::CopyTextureForBrowserInternal(const ImageCopyTexture* sour
     }
 
     return DoCopyTextureForBrowser(GetDevice(), source, destination, copySize, options);
+}
+
+MaybeError QueueBase::CopyExternalTextureForBrowserInternal(
+    const ImageCopyExternalTexture* source,
+    const ImageCopyTexture* destination,
+    const Extent3D* copySize,
+    const CopyTextureForBrowserOptions* options) {
+    if (GetDevice()->IsValidationEnabled()) {
+        DAWN_TRY_CONTEXT(ValidateCopyExternalTextureForBrowser(GetDevice(), source, destination,
+                                                               copySize, options),
+                         "validating CopyExternalTextureForBrowser from %s to %s",
+                         source->externalTexture, destination->texture);
+    }
+
+    return DoCopyExternalTextureForBrowser(GetDevice(), source, destination, copySize, options);
 }
 
 MaybeError QueueBase::ValidateSubmit(uint32_t commandCount,
