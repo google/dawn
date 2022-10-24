@@ -1527,6 +1527,18 @@ ConstEval::Result ConstEval::OpShiftLeft(const sem::Type* ty,
     return r;
 }
 
+ConstEval::Result ConstEval::atan(const sem::Type* ty,
+                                  utils::VectorRef<const sem::Constant*> args,
+                                  const Source&) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto i) {
+            return CreateElement(builder, c0->Type(), decltype(i)(std::atan(i.value)));
+        };
+        return Dispatch_fa_f32_f16(create, c0);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
 ConstEval::Result ConstEval::atan2(const sem::Type* ty,
                                    utils::VectorRef<const sem::Constant*> args,
                                    const Source&) {

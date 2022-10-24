@@ -220,6 +220,46 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               Atan2Cases<f32, false>(),
                                               Atan2Cases<f16, false>()))));
 
+template <typename T, bool finite_only>
+std::vector<Case> AtanCases() {
+    std::vector<Case> cases = {
+        C({T(1.0)}, kPiOver4<T>).FloatComp(),
+        C({-T(1.0)}, -kPiOver4<T>).FloatComp(),
+
+        // If i is +/-0, +/-0 is returned
+        C({T(0.0)}, T(0.0)).PosOrNeg(),
+
+        // Vector tests
+        C({Vec(T(0.0), T(1.0), -T(1.0))}, Vec(T(0.0), kPiOver4<T>, -kPiOver4<T>)).FloatComp(),
+    };
+
+    if constexpr (!finite_only) {
+        std::vector<Case> non_finite_cases = {
+            // If i is +/-INF, +/-PI/2 is returned
+            C({T::Inf()}, kPiOver2<T>).PosOrNeg().FloatComp(),
+            C({-T::Inf()}, -kPiOver2<T>).FloatComp(),
+
+            // If i is NaN, NaN is returned
+            C({T::NaN()}, T::NaN()),
+
+            // Vector tests
+            C({Vec(T::Inf(), -T::Inf(), T::Inf(), -T::Inf())},  //
+              Vec(kPiOver2<T>, -kPiOver2<T>, kPiOver2<T>, -kPiOver2<T>))
+                .FloatComp(),
+        };
+        cases = Concat(cases, non_finite_cases);
+    }
+
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Atan,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kAtan),
+                     testing::ValuesIn(Concat(AtanCases<AFloat, true>(),  //
+                                              AtanCases<f32, false>(),
+                                              AtanCases<f16, false>()))));
+
 template <typename T>
 std::vector<Case> ClampCases() {
     return {

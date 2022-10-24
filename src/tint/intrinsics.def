@@ -419,8 +419,8 @@ fn asin<T: f32_f16>(T) -> T
 fn asin<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn asinh<T: f32_f16>(T) -> T
 fn asinh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
-fn atan<T: f32_f16>(T) -> T
-fn atan<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn atan<T: fa_f32_f16>(T) -> T
+@const fn atan<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
 @const fn atan2<T: fa_f32_f16>(T, T) -> T
 @const fn atan2<T: fa_f32_f16, N: num>(vec<N, T>, vec<N, T>) -> vec<N, T>
 fn atanh<T: f32_f16>(T) -> T

@@ -1,5 +1,5 @@
 void atan_a8b696() {
-  float4 res = atan((1.0f).xxxx);
+  float4 res = (0.785398185f).xxxx;
 }
 
 struct tint_symbol {
