@@ -194,6 +194,7 @@ class DependencyScanner {
             [&](const ast::Function* func) {
                 Declare(func->symbol, func);
                 TraverseAttributes(func->attributes);
+                TraverseAttributes(func->return_type_attributes);
                 TraverseFunction(func);
             },
             [&](const ast::Variable* var) {
