@@ -138,6 +138,9 @@ Wrappers* Wrappers::instance = nullptr;
 */ -}}
 {{- define "Wrapper"}}
   struct W{{$.Name}} : public Napi::ObjectWrap<W{{$.Name}}> {
+{{-  $attributes := FlattenedAttributesOf $ }}
+{{-  $constants  := FlattenedConstantsOf  $ }}
+{{-  $methods    := FlattenedMethodsOf    $ }}
 {{-  if IsInterface $}}
     std::unique_ptr<{{$.Name}}> impl;
 {{-  end}}
@@ -147,17 +150,17 @@ Wrappers* Wrappers::instance = nullptr;
         InstanceMethod("has", &W{{$.Name}}::has),
         InstanceMethod("keys", &W{{$.Name}}::keys),
 {{-  end}}
-{{-  range $m := MethodsOf $}}
+{{-  range $m := $methods}}
         InstanceMethod("{{$m.Name}}", &W{{$.Name}}::{{$m.Name}}),
 {{-  end}}
-{{-  range $a := AttributesOf $}}
+{{-  range $a := $attributes}}
 {{-   if not (HasAnnotation $a "SameObject")}}
         InstanceAccessor("{{$a.Name}}", &W{{$.Name}}::get{{Title $a.Name}},
 {{-    if $a.Readonly}} nullptr{{else}} &W{{$.Name}}::set{{Title $a.Name}}{{end -}}
         ),
 {{-   end}}
 {{-  end}}
-{{-  range $c := ConstantsOf $}}
+{{-  range $c := $constants}}
         StaticValue("{{$c.Name}}", ToJS(env, {{$.Name}}::{{$c.Name}}), napi_default_jsproperty),
 {{-  end}}
       });
@@ -165,7 +168,7 @@ Wrappers* Wrappers::instance = nullptr;
 
     W{{$.Name}}(const Napi::CallbackInfo& info) : ObjectWrap(info) {}
 
-{{   if $s := SetlikeOf $}}
+{{-  if $s := SetlikeOf $}}
     Napi::Value has(const Napi::CallbackInfo& info) {
       std::tuple<{{template "Type" $s.Elem}}> args;
       auto res = FromJS(info, args);
@@ -179,7 +182,7 @@ Wrappers* Wrappers::instance = nullptr;
       return ToJS(info.Env(), impl->keys(info.Env()));
     }
 {{-  end}}
-{{-  range $m := MethodsOf $}}
+{{-  range $m := $methods}}
     Napi::Value {{$m.Name}}(const Napi::CallbackInfo& info) {
       std::string error;
 {{-    range $overload_idx, $o := $m.Overloads}}
@@ -222,7 +225,7 @@ Wrappers* Wrappers::instance = nullptr;
     }
 {{-  end}}
 
-{{-  range $a := AttributesOf $}}
+{{-  range $a := $attributes}}
 {{-   if not (HasAnnotation $a "SameObject")}}
     Napi::Value get{{Title $a.Name}}(const Napi::CallbackInfo& info) {
       return ToJS(info.Env(), impl->get{{Title $a.Name}}(info.Env()));
