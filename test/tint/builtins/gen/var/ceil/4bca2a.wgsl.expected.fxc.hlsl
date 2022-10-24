@@ -31,7 +31,3 @@ void compute_main() {
   ceil_4bca2a();
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x0000024CF8246830(2,10-18): error X3000: syntax error: unexpected token 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x0000024CF8246830(3,10-18): error X3000: syntax error: unexpected token 'float16_t'
-

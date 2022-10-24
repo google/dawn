@@ -30,6 +30,3 @@ void compute_main() {
   sign_5d283a();
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x000002BE5E5FBCB0(2,10-18): error X3000: syntax error: unexpected token 'float16_t'
-

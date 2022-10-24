@@ -1,0 +1,14 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void textureSample_193203(texture2d_array<float, access::sample> tint_symbol, sampler tint_symbol_1) {
+  float2 arg_2 = float2(0.0f);
+  uint arg_3 = 1u;
+  float4 res = tint_symbol.sample(tint_symbol_1, arg_2, arg_3, int2(0));
+}
+
+fragment void fragment_main(texture2d_array<float, access::sample> tint_symbol_2 [[texture(0)]], sampler tint_symbol_3 [[sampler(0)]]) {
+  textureSample_193203(tint_symbol_2, tint_symbol_3);
+  return;
+}
+

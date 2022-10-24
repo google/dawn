@@ -443,20 +443,23 @@ INSTANTIATE_TEST_SUITE_P(
 INSTANTIATE_TEST_SUITE_P(
     Component,
     BuiltinTextureConstExprArgValidationTest,
-    testing::Combine(testing::ValuesIn(TextureCases({ValidTextureOverload::kGather2dF32,
-                                                     ValidTextureOverload::kGather2dOffsetF32,
-                                                     ValidTextureOverload::kGather2dArrayF32,
-                                                     ValidTextureOverload::kGather2dArrayOffsetF32,
-                                                     ValidTextureOverload::kGatherCubeF32,
-                                                     ValidTextureOverload::kGatherCubeArrayF32})),
-                     testing::Values(Parameter{"component", Position::kFirst, 0, 3}),
-                     testing::Values(Constexpr{Constexpr::kValid, Constexpr::Kind::kScalar, 0},
-                                     Constexpr{Constexpr::kValid, Constexpr::Kind::kScalar, 1},
-                                     Constexpr{Constexpr::kValid, Constexpr::Kind::kScalar, 2},
-                                     Constexpr{Constexpr::kValid, Constexpr::Kind::kScalar, 3},
-                                     Constexpr{0, Constexpr::Kind::kScalar, 4},
-                                     Constexpr{0, Constexpr::Kind::kScalar, 123},
-                                     Constexpr{0, Constexpr::Kind::kScalar, -1})));
+    testing::Combine(
+        testing::ValuesIn(TextureCases({
+            ValidTextureOverload::kGather2dF32, ValidTextureOverload::kGather2dOffsetF32,
+            ValidTextureOverload::kGather2dArrayF32, ValidTextureOverload::kGatherCubeF32,
+            // The below require mixed integer signedness.
+            // See https://github.com/gpuweb/gpuweb/issues/3536
+            // ValidTextureOverload::kGather2dArrayOffsetF32,
+            // ValidTextureOverload::kGatherCubeArrayF32,
+        })),
+        testing::Values(Parameter{"component", Position::kFirst, 0, 3}),
+        testing::Values(Constexpr{Constexpr::kValid, Constexpr::Kind::kScalar, 0},
+                        Constexpr{Constexpr::kValid, Constexpr::Kind::kScalar, 1},
+                        Constexpr{Constexpr::kValid, Constexpr::Kind::kScalar, 2},
+                        Constexpr{Constexpr::kValid, Constexpr::Kind::kScalar, 3},
+                        Constexpr{0, Constexpr::Kind::kScalar, 4},
+                        Constexpr{0, Constexpr::Kind::kScalar, 123},
+                        Constexpr{0, Constexpr::Kind::kScalar, -1})));
 
 }  // namespace texture_constexpr_args
 

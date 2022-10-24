@@ -35,6 +35,3 @@ void compute_main() {
   degrees_5e9805();
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x0000020047AF8DA0(1,1-9): error X3000: unrecognized identifier 'float16_t'
-

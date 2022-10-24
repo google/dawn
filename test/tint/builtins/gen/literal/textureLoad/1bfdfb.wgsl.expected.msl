@@ -1,0 +1,89 @@
+#include <metal_stdlib>
+
+using namespace metal;
+
+template<typename T, size_t N>
+struct tint_array {
+    const constant T& operator[](size_t i) const constant { return elements[i]; }
+    device T& operator[](size_t i) device { return elements[i]; }
+    const device T& operator[](size_t i) const device { return elements[i]; }
+    thread T& operator[](size_t i) thread { return elements[i]; }
+    const thread T& operator[](size_t i) const thread { return elements[i]; }
+    threadgroup T& operator[](size_t i) threadgroup { return elements[i]; }
+    const threadgroup T& operator[](size_t i) const threadgroup { return elements[i]; }
+    T elements[N];
+};
+
+struct GammaTransferParams {
+  /* 0x0000 */ float G;
+  /* 0x0004 */ float A;
+  /* 0x0008 */ float B;
+  /* 0x000c */ float C;
+  /* 0x0010 */ float D;
+  /* 0x0014 */ float E;
+  /* 0x0018 */ float F;
+  /* 0x001c */ uint padding;
+};
+
+struct ExternalTextureParams {
+  /* 0x0000 */ uint numPlanes;
+  /* 0x0004 */ uint doYuvToRgbConversionOnly;
+  /* 0x0008 */ tint_array<int8_t, 8> tint_pad;
+  /* 0x0010 */ float3x4 yuvToRgbConversionMatrix;
+  /* 0x0040 */ GammaTransferParams gammaDecodeParams;
+  /* 0x0060 */ GammaTransferParams gammaEncodeParams;
+  /* 0x0080 */ float3x3 gamutConversionMatrix;
+};
+
+float3 gammaCorrection(float3 v, GammaTransferParams params) {
+  bool3 const cond = (fabs(v) < float3(params.D));
+  float3 const t = (sign(v) * ((params.C * fabs(v)) + params.F));
+  float3 const f = (sign(v) * (pow(((params.A * fabs(v)) + params.B), float3(params.G)) + params.E));
+  return select(f, t, cond);
+}
+
+float4 textureLoadExternal(texture2d<float, access::sample> plane0, texture2d<float, access::sample> plane1, uint2 coord, ExternalTextureParams params) {
+  float3 color = 0.0f;
+  if ((params.numPlanes == 1u)) {
+    color = float4(plane0.read(uint2(coord), 0u)).rgb;
+  } else {
+    color = (float4(plane0.read(uint2(coord), 0u)[0], float4(plane1.read(uint2(coord), 0u)).rg, 1.0f) * params.yuvToRgbConversionMatrix);
+  }
+  if ((params.doYuvToRgbConversionOnly == 0u)) {
+    color = gammaCorrection(color, params.gammaDecodeParams);
+    color = (params.gamutConversionMatrix * color);
+    color = gammaCorrection(color, params.gammaEncodeParams);
+  }
+  return float4(color, 1.0f);
+}
+
+void textureLoad_1bfdfb(texture2d<float, access::sample> tint_symbol_1, texture2d<float, access::sample> tint_symbol_2, const constant ExternalTextureParams* const tint_symbol_3) {
+  float4 res = textureLoadExternal(tint_symbol_1, tint_symbol_2, uint2(0u), *(tint_symbol_3));
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner(texture2d<float, access::sample> tint_symbol_4, texture2d<float, access::sample> tint_symbol_5, const constant ExternalTextureParams* const tint_symbol_6) {
+  textureLoad_1bfdfb(tint_symbol_4, tint_symbol_5, tint_symbol_6);
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main(texture2d<float, access::sample> tint_symbol_7 [[texture(0)]], texture2d<float, access::sample> tint_symbol_8 [[texture(1)]], const constant ExternalTextureParams* tint_symbol_9 [[buffer(2)]]) {
+  float4 const inner_result = vertex_main_inner(tint_symbol_7, tint_symbol_8, tint_symbol_9);
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main(texture2d<float, access::sample> tint_symbol_10 [[texture(0)]], texture2d<float, access::sample> tint_symbol_11 [[texture(1)]], const constant ExternalTextureParams* tint_symbol_12 [[buffer(2)]]) {
+  textureLoad_1bfdfb(tint_symbol_10, tint_symbol_11, tint_symbol_12);
+  return;
+}
+
+kernel void compute_main(texture2d<float, access::sample> tint_symbol_13 [[texture(0)]], texture2d<float, access::sample> tint_symbol_14 [[texture(1)]], const constant ExternalTextureParams* tint_symbol_15 [[buffer(2)]]) {
+  textureLoad_1bfdfb(tint_symbol_13, tint_symbol_14, tint_symbol_15);
+  return;
+}
+

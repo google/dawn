@@ -31,7 +31,3 @@ void compute_main() {
   inverseSqrt_cbdc70();
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x0000024C10401C30(2,10-18): error X3000: syntax error: unexpected token 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x0000024C10401C30(3,10-18): error X3000: syntax error: unexpected token 'float16_t'
-

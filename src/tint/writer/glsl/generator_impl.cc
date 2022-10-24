@@ -1335,6 +1335,26 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 
     auto* texture_type = TypeOf(texture)->UnwrapRef()->As<sem::Texture>();
 
+    auto emit_signed_int_type = [&](const sem::Type* ty) {
+        uint32_t width = 0;
+        sem::Type::ElementOf(ty, &width);
+        if (width > 1) {
+            out << "ivec" << width;
+        } else {
+            out << "int";
+        }
+    };
+
+    auto emit_expr_as_signed = [&](const ast::Expression* e) {
+        auto* ty = TypeOf(e)->UnwrapRef();
+        if (!ty->is_unsigned_scalar_or_vector()) {
+            return EmitExpression(out, e);
+        }
+        emit_signed_int_type(ty);
+        ScopedParen sp(out);
+        return EmitExpression(out, e);
+    };
+
     switch (builtin->Type()) {
         case sem::BuiltinType::kTextureDimensions: {
             if (texture_type->Is<sem::StorageTexture>()) {
@@ -1353,7 +1373,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
                 !texture_type->Is<sem::DepthMultisampledTexture>()) {
                 out << ", ";
                 if (auto* level_arg = arg(Usage::kLevel)) {
-                    if (!EmitExpression(out, level_arg)) {
+                    if (!emit_expr_as_signed(level_arg)) {
                         return false;
                     }
                 } else {
@@ -1387,7 +1407,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
                 !texture_type->Is<sem::DepthMultisampledTexture>()) {
                 out << ", ";
                 if (auto* level_arg = arg(Usage::kLevel)) {
-                    if (!EmitExpression(out, level_arg)) {
+                    if (!emit_expr_as_signed(level_arg)) {
                         return false;
                     }
                 } else {
@@ -1501,12 +1521,11 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
         param_coords = AppendVector(&builder_, param_coords, depth_ref)->Declaration();
     }
 
-    if (!EmitExpression(out, param_coords)) {
+    if (!emit_expr_as_signed(param_coords)) {
         return false;
     }
 
-    for (auto usage :
-         {Usage::kLevel, Usage::kDdx, Usage::kDdy, Usage::kSampleIndex, Usage::kValue}) {
+    for (auto usage : {Usage::kLevel, Usage::kDdx, Usage::kDdy, Usage::kSampleIndex}) {
         if (auto* e = arg(usage)) {
             out << ", ";
             if (usage == Usage::kLevel && is_depth) {
@@ -1517,9 +1536,16 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
                     return false;
                 }
                 out << ")";
-            } else if (!EmitExpression(out, e)) {
+            } else if (!emit_expr_as_signed(e)) {
                 return false;
             }
+        }
+    }
+
+    if (auto* e = arg(Usage::kValue)) {
+        out << ", ";
+        if (!EmitExpression(out, e)) {
+            return false;
         }
     }
 
@@ -1543,7 +1569,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
     for (auto usage : {Usage::kOffset, Usage::kComponent, Usage::kBias}) {
         if (auto* e = arg(usage)) {
             out << ", ";
-            if (!EmitExpression(out, e)) {
+            if (!emit_expr_as_signed(e)) {
                 return false;
             }
         }

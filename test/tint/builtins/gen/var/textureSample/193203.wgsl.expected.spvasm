@@ -1,0 +1,69 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 43
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %fragment_main "fragment_main"
+               OpExecutionMode %fragment_main OriginUpperLeft
+               OpName %arg_0 "arg_0"
+               OpName %arg_1 "arg_1"
+               OpName %textureSample_193203 "textureSample_193203"
+               OpName %arg_2 "arg_2"
+               OpName %arg_3 "arg_3"
+               OpName %res "res"
+               OpName %fragment_main "fragment_main"
+               OpDecorate %arg_0 DescriptorSet 1
+               OpDecorate %arg_0 Binding 0
+               OpDecorate %arg_1 DescriptorSet 1
+               OpDecorate %arg_1 Binding 1
+      %float = OpTypeFloat 32
+          %3 = OpTypeImage %float 2D 0 1 0 1 Unknown
+%_ptr_UniformConstant_3 = OpTypePointer UniformConstant %3
+      %arg_0 = OpVariable %_ptr_UniformConstant_3 UniformConstant
+          %7 = OpTypeSampler
+%_ptr_UniformConstant_7 = OpTypePointer UniformConstant %7
+      %arg_1 = OpVariable %_ptr_UniformConstant_7 UniformConstant
+       %void = OpTypeVoid
+          %8 = OpTypeFunction %void
+    %v2float = OpTypeVector %float 2
+         %13 = OpConstantNull %v2float
+%_ptr_Function_v2float = OpTypePointer Function %v2float
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+%_ptr_Function_uint = OpTypePointer Function %uint
+         %20 = OpConstantNull %uint
+    %v4float = OpTypeVector %float 4
+         %25 = OpTypeSampledImage %3
+    %v3float = OpTypeVector %float 3
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+         %36 = OpConstantNull %v2int
+%_ptr_Function_v4float = OpTypePointer Function %v4float
+         %39 = OpConstantNull %v4float
+%textureSample_193203 = OpFunction %void None %8
+         %11 = OpLabel
+      %arg_2 = OpVariable %_ptr_Function_v2float Function %13
+      %arg_3 = OpVariable %_ptr_Function_uint Function %20
+        %res = OpVariable %_ptr_Function_v4float Function %39
+               OpStore %arg_2 %13
+               OpStore %arg_3 %uint_1
+         %23 = OpLoad %7 %arg_1
+         %24 = OpLoad %3 %arg_0
+         %26 = OpSampledImage %25 %24 %23
+         %28 = OpLoad %v2float %arg_2
+         %29 = OpCompositeExtract %float %28 0
+         %30 = OpCompositeExtract %float %28 1
+         %32 = OpLoad %uint %arg_3
+         %31 = OpConvertUToF %float %32
+         %33 = OpCompositeConstruct %v3float %29 %30 %31
+         %21 = OpImageSampleImplicitLod %v4float %26 %33 ConstOffset %36
+               OpStore %res %21
+               OpReturn
+               OpFunctionEnd
+%fragment_main = OpFunction %void None %8
+         %41 = OpLabel
+         %42 = OpFunctionCall %void %textureSample_193203
+               OpReturn
+               OpFunctionEnd

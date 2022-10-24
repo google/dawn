@@ -32,8 +32,3 @@ void compute_main() {
   max_34956e();
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x0000024F90CA9900(2,10-18): error X3000: syntax error: unexpected token 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x0000024F90CA9900(3,10-18): error X3000: syntax error: unexpected token 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x0000024F90CA9900(4,10-18): error X3000: syntax error: unexpected token 'float16_t'
-

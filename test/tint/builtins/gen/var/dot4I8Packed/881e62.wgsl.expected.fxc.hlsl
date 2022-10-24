@@ -37,6 +37,3 @@ void compute_main() {
   dot4I8Packed_881e62();
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x000001A416C12830(3,10-56): error X3004: undeclared identifier 'dot4add_i8packed'
-

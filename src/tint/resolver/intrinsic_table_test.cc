@@ -568,16 +568,16 @@ TEST_F(IntrinsicTableTest, OverloadOrderByNumberOfParameters) {
               R"(error: no matching call to textureDimensions(bool, bool)
 
 27 candidate functions:
-  textureDimensions(texture: texture_1d<T>, level: i32) -> i32  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_2d<T>, level: i32) -> vec2<i32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_2d_array<T>, level: i32) -> vec2<i32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_3d<T>, level: i32) -> vec3<i32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_cube<T>, level: i32) -> vec2<i32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_cube_array<T>, level: i32) -> vec2<i32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_depth_2d, level: i32) -> vec2<i32>
-  textureDimensions(texture: texture_depth_2d_array, level: i32) -> vec2<i32>
-  textureDimensions(texture: texture_depth_cube, level: i32) -> vec2<i32>
-  textureDimensions(texture: texture_depth_cube_array, level: i32) -> vec2<i32>
+  textureDimensions(texture: texture_1d<T>, level: C) -> i32  where: T is f32, i32 or u32, C is i32 or u32
+  textureDimensions(texture: texture_2d<T>, level: C) -> vec2<i32>  where: T is f32, i32 or u32, C is i32 or u32
+  textureDimensions(texture: texture_2d_array<T>, level: C) -> vec2<i32>  where: T is f32, i32 or u32, C is i32 or u32
+  textureDimensions(texture: texture_3d<T>, level: C) -> vec3<i32>  where: T is f32, i32 or u32, C is i32 or u32
+  textureDimensions(texture: texture_cube<T>, level: C) -> vec2<i32>  where: T is f32, i32 or u32, C is i32 or u32
+  textureDimensions(texture: texture_cube_array<T>, level: C) -> vec2<i32>  where: T is f32, i32 or u32, C is i32 or u32
+  textureDimensions(texture: texture_depth_2d, level: C) -> vec2<i32>  where: C is i32 or u32
+  textureDimensions(texture: texture_depth_2d_array, level: C) -> vec2<i32>  where: C is i32 or u32
+  textureDimensions(texture: texture_depth_cube, level: C) -> vec2<i32>  where: C is i32 or u32
+  textureDimensions(texture: texture_depth_cube_array, level: C) -> vec2<i32>  where: C is i32 or u32
   textureDimensions(texture: texture_1d<T>) -> i32  where: T is f32, i32 or u32
   textureDimensions(texture: texture_2d<T>) -> vec2<i32>  where: T is f32, i32 or u32
   textureDimensions(texture: texture_2d_array<T>) -> vec2<i32>  where: T is f32, i32 or u32
@@ -607,17 +607,17 @@ TEST_F(IntrinsicTableTest, OverloadOrderByMatchingParameter) {
               R"(error: no matching call to textureDimensions(texture_depth_2d, bool)
 
 27 candidate functions:
-  textureDimensions(texture: texture_depth_2d, level: i32) -> vec2<i32>
+  textureDimensions(texture: texture_depth_2d, level: C) -> vec2<i32>  where: C is i32 or u32
+  textureDimensions(texture: texture_1d<T>, level: C) -> i32  where: T is f32, i32 or u32, C is i32 or u32
+  textureDimensions(texture: texture_2d<T>, level: C) -> vec2<i32>  where: T is f32, i32 or u32, C is i32 or u32
+  textureDimensions(texture: texture_2d_array<T>, level: C) -> vec2<i32>  where: T is f32, i32 or u32, C is i32 or u32
+  textureDimensions(texture: texture_3d<T>, level: C) -> vec3<i32>  where: T is f32, i32 or u32, C is i32 or u32
+  textureDimensions(texture: texture_cube<T>, level: C) -> vec2<i32>  where: T is f32, i32 or u32, C is i32 or u32
+  textureDimensions(texture: texture_cube_array<T>, level: C) -> vec2<i32>  where: T is f32, i32 or u32, C is i32 or u32
+  textureDimensions(texture: texture_depth_2d_array, level: C) -> vec2<i32>  where: C is i32 or u32
+  textureDimensions(texture: texture_depth_cube, level: C) -> vec2<i32>  where: C is i32 or u32
+  textureDimensions(texture: texture_depth_cube_array, level: C) -> vec2<i32>  where: C is i32 or u32
   textureDimensions(texture: texture_depth_2d) -> vec2<i32>
-  textureDimensions(texture: texture_1d<T>, level: i32) -> i32  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_2d<T>, level: i32) -> vec2<i32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_2d_array<T>, level: i32) -> vec2<i32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_3d<T>, level: i32) -> vec3<i32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_cube<T>, level: i32) -> vec2<i32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_cube_array<T>, level: i32) -> vec2<i32>  where: T is f32, i32 or u32
-  textureDimensions(texture: texture_depth_2d_array, level: i32) -> vec2<i32>
-  textureDimensions(texture: texture_depth_cube, level: i32) -> vec2<i32>
-  textureDimensions(texture: texture_depth_cube_array, level: i32) -> vec2<i32>
   textureDimensions(texture: texture_1d<T>) -> i32  where: T is f32, i32 or u32
   textureDimensions(texture: texture_2d<T>) -> vec2<i32>  where: T is f32, i32 or u32
   textureDimensions(texture: texture_2d_array<T>) -> vec2<i32>  where: T is f32, i32 or u32

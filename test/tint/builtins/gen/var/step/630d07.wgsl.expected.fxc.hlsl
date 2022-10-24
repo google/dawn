@@ -32,7 +32,3 @@ void compute_main() {
   step_630d07();
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x0000024979951900(2,3-11): error X3000: unrecognized identifier 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x0000024979951900(2,13-17): error X3000: unrecognized identifier 'arg_0'
-

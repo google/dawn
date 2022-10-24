@@ -30,7 +30,3 @@ void compute_main() {
   saturate_e8df56();
   return;
 }
-FXC validation failure:
-C:\src\dawn\test\tint\Shader@0x0000020A83F5F990(2,3-11): error X3000: unrecognized identifier 'float16_t'
-C:\src\dawn\test\tint\Shader@0x0000020A83F5F990(2,13-15): error X3000: unrecognized identifier 'res'
-

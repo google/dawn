@@ -31,8 +31,3 @@ void compute_main() {
   length_5b1a9b();
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x000001EF153A9D90(2,10-18): error X3000: syntax error: unexpected token 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x000001EF153A9D90(3,3-11): error X3000: unrecognized identifier 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x000001EF153A9D90(3,13-15): error X3000: unrecognized identifier 'res'
-

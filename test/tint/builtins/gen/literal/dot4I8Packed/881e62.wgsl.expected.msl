@@ -23,4 +23,7 @@ fn compute_main() {
   dot4I8Packed_881e62();
 }
 
-Failed to generate: error: Unknown import method: dot4I8Packed
+Failed to generate: builtins/gen/literal/dot4I8Packed/881e62.wgsl:24:8 error: MSL backend does not support extension 'chromium_experimental_dp4a'
+enable chromium_experimental_dp4a;
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^
+

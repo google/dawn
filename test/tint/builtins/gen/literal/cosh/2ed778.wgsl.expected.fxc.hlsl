@@ -30,7 +30,3 @@ void compute_main() {
   cosh_2ed778();
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x0000021F3BD88850(2,3-11): error X3000: unrecognized identifier 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x0000021F3BD88850(2,13-15): error X3000: unrecognized identifier 'res'
-

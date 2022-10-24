@@ -30,7 +30,3 @@ void compute_main() {
   distance_7d201f();
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x000001D5BC336FD0(2,3-11): error X3000: unrecognized identifier 'float16_t'
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x000001D5BC336FD0(2,13-15): error X3000: unrecognized identifier 'res'
-

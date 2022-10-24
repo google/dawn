@@ -35,6 +35,3 @@ void compute_main() {
   degrees_3055d3();
   return;
 }
-FXC validation failure:
-D:\Projects\RampUp\dawn\test\tint\builtins\Shader@0x00000151C0FBF8C0(1,8-16): error X3000: syntax error: unexpected token 'float16_t'
-

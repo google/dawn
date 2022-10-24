@@ -166,6 +166,32 @@ struct Robustness::State {
         auto* coords_arg = expr->args[static_cast<size_t>(coords_idx)];
         auto* coords_ty = builtin->Parameters()[static_cast<size_t>(coords_idx)]->Type();
 
+        auto width_of = [&](const sem::Type* ty) {
+            if (auto* vec = ty->As<sem::Vector>()) {
+                return vec->Width();
+            }
+            return 1u;
+        };
+        auto scalar_or_vec_ty = [&](const ast::Type* scalar, uint32_t width) -> const ast::Type* {
+            if (width > 1) {
+                return b.ty.vec(scalar, width);
+            }
+            return scalar;
+        };
+        auto scalar_or_vec = [&](const ast::Expression* scalar,
+                                 uint32_t width) -> const ast::Expression* {
+            if (width > 1) {
+                return b.Construct(b.ty.vec(nullptr, width), scalar);
+            }
+            return scalar;
+        };
+        auto cast_to_signed = [&](const ast::Expression* val, uint32_t width) {
+            return b.Construct(scalar_or_vec_ty(b.ty.i32(), width), val);
+        };
+        auto cast_to_unsigned = [&](const ast::Expression* val, uint32_t width) {
+            return b.Construct(scalar_or_vec_ty(b.ty.u32(), width), val);
+        };
+
         // If the level is provided, then we need to clamp this. As the level is
         // used by textureDimensions() and the texture[Load|Store]() calls, we need
         // to clamp both usages.
@@ -174,41 +200,68 @@ struct Robustness::State {
         std::function<const ast::Expression*()> level_arg;
         if (level_idx >= 0) {
             level_arg = [&] {
-                auto* arg = expr->args[static_cast<size_t>(level_idx)];
-                auto* num_levels = b.Call("textureNumLevels", ctx.Clone(texture_arg));
-                auto* zero = b.Expr(0_i);
-                auto* max = ctx.dst->Sub(num_levels, 1_i);
-                auto* clamped = b.Call("clamp", ctx.Clone(arg), zero, max);
-                return clamped;
+                const auto* arg = expr->args[static_cast<size_t>(level_idx)];
+                const auto* target_ty =
+                    builtin->Parameters()[static_cast<size_t>(level_idx)]->Type();
+                const auto* num_levels = b.Call("textureNumLevels", ctx.Clone(texture_arg));
+
+                // TODO(crbug.com/tint/1526) remove when num_levels returns u32
+                num_levels = cast_to_unsigned(num_levels, 1u);
+
+                const auto* unsigned_max = b.Sub(num_levels, 1_a);
+                if (target_ty->is_signed_integer_scalar()) {
+                    const auto* signed_max = cast_to_signed(unsigned_max, 1u);
+                    return b.Call("clamp", ctx.Clone(arg), 0_a, signed_max);
+                } else {
+                    return b.Call("min", ctx.Clone(arg), unsigned_max);
+                }
             };
         }
 
         // Clamp the coordinates argument
         {
-            auto* texture_dims =
+            const auto* target_ty = coords_ty;
+            const auto width = width_of(target_ty);
+            const auto* texture_dims =
                 level_arg ? b.Call("textureDimensions", ctx.Clone(texture_arg), level_arg())
                           : b.Call("textureDimensions", ctx.Clone(texture_arg));
-            auto* zero = b.Construct(CreateASTTypeFor(ctx, coords_ty));
-            auto* max =
-                ctx.dst->Sub(texture_dims, b.Construct(CreateASTTypeFor(ctx, coords_ty), 1_i));
-            auto* clamped_coords = b.Call("clamp", ctx.Clone(coords_arg), zero, max);
-            ctx.Replace(coords_arg, clamped_coords);
+
+            // TODO(crbug.com/tint/1526) remove when texture_dims returns u32 or vecN<u32>
+            texture_dims = cast_to_unsigned(texture_dims, width);
+
+            // texture_dims is u32 or vecN<u32>
+            const auto* unsigned_max = b.Sub(texture_dims, scalar_or_vec(b.Expr(1_a), width));
+            if (target_ty->is_signed_scalar_or_vector()) {
+                const auto* zero = scalar_or_vec(b.Expr(0_a), width);
+                const auto* signed_max = cast_to_signed(unsigned_max, width);
+                ctx.Replace(coords_arg, b.Call("clamp", ctx.Clone(coords_arg), zero, signed_max));
+            } else {
+                ctx.Replace(coords_arg, b.Call("min", ctx.Clone(coords_arg), unsigned_max));
+            }
         }
 
         // Clamp the array_index argument, if provided
         if (array_idx >= 0) {
+            auto* target_ty = builtin->Parameters()[static_cast<size_t>(array_idx)]->Type();
             auto* arg = expr->args[static_cast<size_t>(array_idx)];
             auto* num_layers = b.Call("textureNumLayers", ctx.Clone(texture_arg));
-            auto* zero = b.Expr(0_i);
-            auto* max = ctx.dst->Sub(num_layers, 1_i);
-            auto* clamped = b.Call("clamp", ctx.Clone(arg), zero, max);
-            ctx.Replace(arg, clamped);
+
+            // TODO(crbug.com/tint/1526) remove when num_layers returns u32
+            num_layers = cast_to_unsigned(num_layers, 1u);
+
+            const auto* unsigned_max = b.Sub(num_layers, 1_a);
+            if (target_ty->is_signed_integer_scalar()) {
+                const auto* signed_max = cast_to_signed(unsigned_max, 1u);
+                ctx.Replace(arg, b.Call("clamp", ctx.Clone(arg), 0_a, signed_max));
+            } else {
+                ctx.Replace(arg, b.Call("min", ctx.Clone(arg), unsigned_max));
+            }
         }
 
         // Clamp the level argument, if provided
         if (level_idx >= 0) {
             auto* arg = expr->args[static_cast<size_t>(level_idx)];
-            ctx.Replace(arg, level_arg ? level_arg() : ctx.dst->Expr(0_i));
+            ctx.Replace(arg, level_arg ? level_arg() : ctx.dst->Expr(0_a));
         }
 
         return nullptr;  // Clone, which will use the argument replacements above.

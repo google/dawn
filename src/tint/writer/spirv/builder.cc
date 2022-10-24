@@ -2937,9 +2937,9 @@ bool Builder::GenerateTextureBuiltin(const sem::Call* call,
                 return false;
             }
             auto level = Operand(0u);
-            if (arg(Usage::kLevel)->Type()->UnwrapRef()->Is<sem::I32>()) {
-                // Depth textures have i32 parameters for the level, but SPIR-V expects
-                // F32. Cast.
+            if (arg(Usage::kLevel)->Type()->UnwrapRef()->IsAnyOf<sem::I32, sem::U32>()) {
+                // Depth textures have i32 or u32 parameters for the level, but SPIR-V expects f32.
+                // Cast.
                 auto f32_type_id = GenerateTypeIfNeeded(builder_.create<sem::F32>());
                 if (f32_type_id == 0) {
                     return 0;
