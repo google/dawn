@@ -40,4 +40,8 @@ LoopContinuingBlockStatement::LoopContinuingBlockStatement(const ast::BlockState
 }
 LoopContinuingBlockStatement::~LoopContinuingBlockStatement() = default;
 
+const ast::BlockStatement* LoopContinuingBlockStatement::Declaration() const {
+    return static_cast<const ast::BlockStatement*>(Base::Declaration());
+}
+
 }  // namespace tint::sem

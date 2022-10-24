@@ -1465,7 +1465,7 @@ bool Validator::BreakStatement(const sem::Statement* stmt,
     if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ true, current_statement)) {
         AddWarning(
             "use of deprecated language feature: `break` must not be used to exit from "
-            "a continuing block. Use break-if instead.",
+            "a continuing block. Use `break-if` instead.",
             stmt->Declaration()->source);
 
         auto fail = [&](const char* note_msg, const Source& note_src) {
@@ -1651,9 +1651,8 @@ bool Validator::BreakIfStatement(const sem::BreakIfStatement* stmt,
         if (s->Is<sem::LoopStatement>()) {
             break;
         }
-        if (s->Is<sem::LoopContinuingBlockStatement>()) {
-            if (s->Declaration()->As<ast::BlockStatement>()->statements.Back() !=
-                stmt->Declaration()) {
+        if (auto* continuing = s->As<sem::LoopContinuingBlockStatement>()) {
+            if (continuing->Declaration()->statements.Back() != stmt->Declaration()) {
                 AddError("break-if must be last statement in a continuing block",
                          stmt->Declaration()->source);
                 AddNote("see continuing block here", s->Declaration()->source);

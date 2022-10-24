@@ -22,7 +22,7 @@
 
 namespace tint::ast {
 
-/// A break if statement
+/// A break-if statement
 class BreakIfStatement final : public Castable<BreakIfStatement, Statement> {
   public:
     /// Constructor

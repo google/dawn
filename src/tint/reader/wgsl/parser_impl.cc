@@ -2456,10 +2456,10 @@ Maybe<const ast::Statement*> ParserImpl::break_if_statement() {
         return Failure::kErrored;
     }
     if (!expr.matched) {
-        return add_error(t1, "expected expression for `break if`");
+        return add_error(t1, "expected expression for `break-if`");
     }
-    if (!match(Token::Type::kSemicolon)) {
-        return add_error(peek(), "expected ';' for `break if` statement");
+    if (!expect("`break-if` statement", Token::Type::kSemicolon)) {
+        return Failure::kErrored;
     }
 
     return create<ast::BreakIfStatement>(t1.source(), expr.value);

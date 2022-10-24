@@ -129,7 +129,7 @@ TEST_F(ParserImplTest, LoopStmt_Continuing_BreakIf_MissingExpr) {
     EXPECT_TRUE(e.errored);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:21: expected expression for `break if`");
+    EXPECT_EQ(p->error(), "1:21: expected expression for `break-if`");
 }
 
 TEST_F(ParserImplTest, LoopStmt_Continuing_BreakIf_InvalidExpr) {
@@ -139,7 +139,7 @@ TEST_F(ParserImplTest, LoopStmt_Continuing_BreakIf_InvalidExpr) {
     EXPECT_TRUE(e.errored);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:21: expected expression for `break if`");
+    EXPECT_EQ(p->error(), "1:21: expected expression for `break-if`");
 }
 
 TEST_F(ParserImplTest, LoopStmt_NoContinuing_BreakIf) {
@@ -159,7 +159,7 @@ TEST_F(ParserImplTest, LoopStmt_Continuing_BreakIf_MissingSemicolon) {
     EXPECT_TRUE(e.errored);
     EXPECT_TRUE(p->has_error());
     EXPECT_EQ(e.value, nullptr);
-    EXPECT_EQ(p->error(), "1:40: expected ';' for `break if` statement");
+    EXPECT_EQ(p->error(), "1:40: expected ';' for `break-if` statement");
 }
 
 }  // namespace

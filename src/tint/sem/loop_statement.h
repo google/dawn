@@ -53,6 +53,9 @@ class LoopContinuingBlockStatement final
 
     /// Destructor
     ~LoopContinuingBlockStatement() override;
+
+    /// @returns the AST node
+    const ast::BlockStatement* Declaration() const;
 };
 
 }  // namespace tint::sem
