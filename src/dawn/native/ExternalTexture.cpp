@@ -99,6 +99,22 @@ MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
         }
     }
 
+    // TODO(crbug.com/1316671): visibleRect must have valid value after chromium side changes
+    // landed.
+    if (descriptor->visibleRect.width > 0) {
+        DAWN_INVALID_IF(descriptor->visibleRect.width == 0 || descriptor->visibleRect.height == 0,
+                        "VisibleRect(%u, %u) have 0 on width or height.",
+                        descriptor->visibleRect.width, descriptor->visibleRect.height);
+
+        Extent3D maxVisibleRectSize = descriptor->plane0->GetTexture()->GetSize();
+        DAWN_INVALID_IF(descriptor->visibleRect.width > maxVisibleRectSize.width ||
+                            descriptor->visibleRect.height > maxVisibleRectSize.height,
+                        "VisibleRect(%u, %u) is exceed the max visible rect size, defined by "
+                        "Plane0 size (%u, %u).",
+                        descriptor->visibleRect.width, descriptor->visibleRect.height,
+                        maxVisibleRectSize.width, maxVisibleRectSize.height);
+    }
+
     return {};
 }
 
@@ -114,7 +130,9 @@ ResultOrError<Ref<ExternalTextureBase>> ExternalTextureBase::Create(
 
 ExternalTextureBase::ExternalTextureBase(DeviceBase* device,
                                          const ExternalTextureDescriptor* descriptor)
-    : ApiObjectBase(device, descriptor->label), mState(ExternalTextureState::Alive) {
+    : ApiObjectBase(device, descriptor->label),
+      mVisibleRect(descriptor->visibleRect),
+      mState(ExternalTextureState::Alive) {
     GetObjectTrackingList()->Track(this);
 }
 
@@ -200,6 +218,13 @@ MaybeError ExternalTextureBase::ValidateCanUseInSubmitNow() const {
     ASSERT(!IsError());
     DAWN_INVALID_IF(mState == ExternalTextureState::Destroyed,
                     "Destroyed external texture %s is used in a submit.", this);
+
+    for (uint32_t i = 0; i < kMaxPlanesPerFormat; ++i) {
+        if (mTextureViews[i] != nullptr) {
+            DAWN_TRY_CONTEXT(mTextureViews[i]->GetTexture()->ValidateCanUseInSubmitNow(),
+                             "Validate plane %u of %s can be used in a submit.", i, this);
+        }
+    }
     return {};
 }
 
@@ -225,6 +250,11 @@ BufferBase* ExternalTextureBase::GetParamsBuffer() const {
 
 ObjectType ExternalTextureBase::GetType() const {
     return ObjectType::ExternalTexture;
+}
+
+const Extent2D& ExternalTextureBase::GetVisibleRect() const {
+    ASSERT(!IsError());
+    return mVisibleRect;
 }
 
 }  // namespace dawn::native

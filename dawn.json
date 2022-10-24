@@ -1330,6 +1330,14 @@
             {"value": 3, "name": "error"}
         ]
     },
+    "extent 2D": {
+        "category": "structure",
+        "_TODO": "crbug.com/1316671: Remove default value of 'width' after chromium side chagnes landed",
+        "members": [
+            {"name": "width", "type": "uint32_t", "default": 0},
+            {"name": "height", "type": "uint32_t", "default": 1}
+        ]
+    },
     "extent 3D": {
         "category": "structure",
         "members": [
@@ -1359,10 +1367,12 @@
         "category": "structure",
         "extensible": "in",
         "tags": ["dawn"],
+        "_TODO": "crbug.com/1316671: Mark 'visible rect' as must have after chromium side changes landed",
         "members": [
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "plane 0", "type": "texture view"},
             {"name": "plane 1", "type": "texture view", "optional": true},
+            {"name": "visible rect", "type": "extent 2D"},
             {"name": "do yuv to rgb conversion only", "type": "bool", "default": "false"},
             {"name": "yuv to rgb conversion matrix", "type": "float", "annotation": "const*",
                 "length": 12, "optional": true},
