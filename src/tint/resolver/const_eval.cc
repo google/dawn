@@ -54,7 +54,7 @@ T First(T&& first, ...) {
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
-/// Calls `f` with all constants cast to the type of the first `cs` argument.
+/// Assumes all `cs` are of the same type.
 template <typename F, typename... CONSTANTS>
 auto Dispatch_ia_iu32(F&& f, CONSTANTS&&... cs) {
     return Switch(
@@ -65,7 +65,7 @@ auto Dispatch_ia_iu32(F&& f, CONSTANTS&&... cs) {
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
-/// Calls `f` with all constants cast to the type of the first `cs` argument.
+/// Assumes all `cs` are of the same type.
 template <typename F, typename... CONSTANTS>
 auto Dispatch_ia_iu32_bool(F&& f, CONSTANTS&&... cs) {
     return Switch(
@@ -77,7 +77,7 @@ auto Dispatch_ia_iu32_bool(F&& f, CONSTANTS&&... cs) {
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
-/// Calls `f` with all constants cast to the type of the first `cs` argument.
+/// Assumes all `cs` are of the same type.
 template <typename F, typename... CONSTANTS>
 auto Dispatch_fia_fi32_f16(F&& f, CONSTANTS&&... cs) {
     return Switch(
@@ -90,7 +90,7 @@ auto Dispatch_fia_fi32_f16(F&& f, CONSTANTS&&... cs) {
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
-/// Calls `f` with all constants cast to the type of the first `cs` argument.
+/// Assumes all `cs` are of the same type.
 template <typename F, typename... CONSTANTS>
 auto Dispatch_fia_fiu32_f16(F&& f, CONSTANTS&&... cs) {
     return Switch(
@@ -104,7 +104,7 @@ auto Dispatch_fia_fiu32_f16(F&& f, CONSTANTS&&... cs) {
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
-/// Calls `f` with all constants cast to the type of the first `cs` argument.
+/// Assumes all `cs` are of the same type.
 template <typename F, typename... CONSTANTS>
 auto Dispatch_fia_fiu32_f16_bool(F&& f, CONSTANTS&&... cs) {
     return Switch(
@@ -119,7 +119,7 @@ auto Dispatch_fia_fiu32_f16_bool(F&& f, CONSTANTS&&... cs) {
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
-/// Calls `f` with all constants cast to the type of the first `cs` argument.
+/// Assumes all `cs` are of the same type.
 template <typename F, typename... CONSTANTS>
 auto Dispatch_fa_f32_f16(F&& f, CONSTANTS&&... cs) {
     return Switch(
@@ -130,7 +130,7 @@ auto Dispatch_fa_f32_f16(F&& f, CONSTANTS&&... cs) {
 }
 
 /// Helper that calls `f` passing in the value of all `cs`.
-/// Calls `f` with all constants cast to the type of the first `cs` argument.
+/// Assumes all `cs` are of the same type.
 template <typename F, typename... CONSTANTS>
 auto Dispatch_bool(F&& f, CONSTANTS&&... cs) {
     return f(cs->template As<bool>()...);
@@ -1450,6 +1450,13 @@ ConstEval::Result ConstEval::OpShiftLeft(const sem::Type* ty,
             UT e2u = static_cast<UT>(e2);
 
             if constexpr (IsAbstract<NumberT>) {
+                // NOTE: Concrete shift left requires an unsigned rhs, so this check only applies
+                // for abstracts.
+                if (e2 < 0) {
+                    AddError("cannot shift left by a negative value", source);
+                    return nullptr;
+                }
+
                 // The e2 + 1 most significant bits of e1 must have the same bit value, otherwise
                 // sign change (overflow) would occur.
                 // Check sign change only if e2 is less than bit width of e1. If e1 is larger
@@ -1512,12 +1519,6 @@ ConstEval::Result ConstEval::OpShiftLeft(const sem::Type* ty,
         };
         return Dispatch_ia_iu32(create, c0, c1);
     };
-
-    if (!sem::Type::DeepestElementOf(args[1]->Type())->Is<sem::U32>()) {
-        TINT_ICE(Resolver, builder.Diagnostics())
-            << "Element type of rhs of ShiftLeft must be a u32";
-        return nullptr;
-    }
 
     auto r = TransformElements(builder, ty, transform, args[0], args[1]);
     if (builder.Diagnostics().contains_errors()) {
