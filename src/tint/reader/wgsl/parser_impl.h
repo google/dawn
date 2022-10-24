@@ -614,10 +614,10 @@ class ParserImpl {
     /// @param use a description of what was being parsed if an error was raised
     /// @returns the list of arguments
     Expect<ExpressionList> expect_argument_expression_list(std::string_view use);
-    /// Parses the recursive portion of the postfix_expression
+    /// Parses the recursive portion of the component_or_swizzle_specifier
     /// @param prefix the left side of the expression
     /// @returns the parsed expression or nullptr
-    Maybe<const ast::Expression*> postfix_expression(const ast::Expression* prefix);
+    Maybe<const ast::Expression*> component_or_swizzle_specifier(const ast::Expression* prefix);
     /// Parses a `singular_expression` grammar elment
     /// @returns the parsed expression or nullptr
     Maybe<const ast::Expression*> singular_expression();

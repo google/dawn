@@ -2629,12 +2629,13 @@ Maybe<const ast::Expression*> ParserImpl::primary_expression() {
     return Failure::kNoMatch;
 }
 
-// postfix_expression
+// component_or_swizzle_specifier
 //   :
-//   | BRACE_LEFT expression BRACE_RIGHT postfix_expression?
-//   | PERIOD member_ident postfix_expression?
-//   | PERIOD swizzle_name postfix_expression?
-Maybe<const ast::Expression*> ParserImpl::postfix_expression(const ast::Expression* prefix) {
+//   | BRACE_LEFT expression BRACE_RIGHT component_or_swizzle_specifier?
+//   | PERIOD member_ident component_or_swizzle_specifier?
+//   | PERIOD swizzle_name component_or_swizzle_specifier?
+Maybe<const ast::Expression*> ParserImpl::component_or_swizzle_specifier(
+    const ast::Expression* prefix) {
     Source source;
 
     while (continue_parsing()) {
@@ -3116,7 +3117,7 @@ Maybe<const ast::Expression*> ParserImpl::singular_expression() {
         return Failure::kNoMatch;
     }
 
-    return postfix_expression(prefix.value);
+    return component_or_swizzle_specifier(prefix.value);
 }
 
 // unary_expression
@@ -3127,7 +3128,8 @@ Maybe<const ast::Expression*> ParserImpl::singular_expression() {
 //   | STAR unary_expression
 //   | AND unary_expression
 //
-// The `primary_expression postfix_expression ?` is moved out into a `singular_expression`
+// The `primary_expression component_or_swizzle_specifier ?` is moved out into a
+// `singular_expression`
 Maybe<const ast::Expression*> ParserImpl::unary_expression() {
     auto& t = peek();
 
@@ -3246,7 +3248,7 @@ Maybe<const ast::Expression*> ParserImpl::core_lhs_expression() {
 }
 
 // lhs_expression
-//   : ( STAR | AND )* core_lhs_expression postfix_expression?
+//   : ( STAR | AND )* core_lhs_expression component_or_swizzle_specifier?
 Maybe<const ast::Expression*> ParserImpl::lhs_expression() {
     std::vector<const Token*> prefixes;
     while (peek_is(Token::Type::kStar) || peek_is(Token::Type::kAnd) ||
@@ -3282,7 +3284,7 @@ Maybe<const ast::Expression*> ParserImpl::lhs_expression() {
         expr = create<ast::UnaryOpExpression>(t.source(), op, expr);
     }
 
-    auto e = postfix_expression(expr);
+    auto e = component_or_swizzle_specifier(expr);
     if (e.errored) {
         return Failure::kErrored;
     }
