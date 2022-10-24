@@ -35,10 +35,8 @@ struct InternalPipelineStore {
     ~InternalPipelineStore();
 
     std::unordered_map<wgpu::TextureFormat, Ref<RenderPipelineBase>> copyTextureForBrowserPipelines;
-    std::unordered_map<wgpu::TextureFormat, Ref<RenderPipelineBase>>
-        copyExternalTextureForBrowserPipelines;
 
-    Ref<ShaderModuleBase> copyForBrowser;
+    Ref<ShaderModuleBase> copyTextureForBrowser;
 
     Ref<ComputePipelineBase> timestampComputePipeline;
     Ref<ShaderModuleBase> timestampCS;
