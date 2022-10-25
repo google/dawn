@@ -217,7 +217,7 @@ MaybeError ValidateSamplerBinding(const DeviceBase* device,
             break;
         case wgpu::SamplerBindingType::Comparison:
             DAWN_INVALID_IF(!entry.sampler->IsComparison(),
-                            "Non-comparison sampler %s is imcompatible with comparison sampler "
+                            "Non-comparison sampler %s is incompatible with comparison sampler "
                             "binding.",
                             entry.sampler);
             break;
