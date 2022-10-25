@@ -1,5 +1,5 @@
 fn firstTrailingBit_3a2acc() {
-  var res : i32 = firstTrailingBit(1);
+  var res : i32 = firstTrailingBit(1i);
 }
 
 @vertex

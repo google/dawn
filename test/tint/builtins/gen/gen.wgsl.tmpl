@@ -269,8 +269,8 @@ enable f16;
 {{- /* If the parameter has the name 'level', then use '0' as the value.  */ -}}
 {{- /* Some texture arguments require the level parameter to be 0, and    */ -}}
 {{- /* constraint is not described in the definition file.                */ -}}
-{{-     if   eq .Name "level"            -}}0
-{{-     else                             -}}1
+{{-     if   eq .Name "level"            -}}0i
+{{-     else                             -}}1i
 {{-     end                              -}}
 {{-   else if eq $ty.Target.Name "u32"   -}}1u
 {{-   else if eq $ty.Target.Name "f32"   -}}1.f

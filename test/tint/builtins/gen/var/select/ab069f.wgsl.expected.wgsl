@@ -1,6 +1,6 @@
 fn select_ab069f() {
-  var arg_0 = vec4<i32>(1);
-  var arg_1 = vec4<i32>(1);
+  var arg_0 = vec4<i32>(1i);
+  var arg_1 = vec4<i32>(1i);
   var arg_2 = true;
   var res : vec4<i32> = select(arg_0, arg_1, arg_2);
 }

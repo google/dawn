@@ -4,7 +4,7 @@
 
 fn textureSampleLevel_02be59() {
   var arg_2 = vec2<f32>();
-  var arg_3 = 0;
+  var arg_3 = 0i;
   var res : f32 = textureSampleLevel(arg_0, arg_1, arg_2, arg_3);
 }
 

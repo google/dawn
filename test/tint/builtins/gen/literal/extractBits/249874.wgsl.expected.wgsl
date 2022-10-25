@@ -1,5 +1,5 @@
 fn extractBits_249874() {
-  var res : i32 = extractBits(1, 1u, 1u);
+  var res : i32 = extractBits(1i, 1u, 1u);
 }
 
 @vertex

@@ -24,7 +24,7 @@ var<workgroup> arg_0: atomic<i32>;
 
 // fn atomicExchange(ptr<workgroup, atomic<i32>, read_write>, i32) -> i32
 fn atomicExchange_e114ba() {
-  var res: i32 = atomicExchange(&arg_0, 1);
+  var res: i32 = atomicExchange(&arg_0, 1i);
 }
 
 @compute @workgroup_size(1)

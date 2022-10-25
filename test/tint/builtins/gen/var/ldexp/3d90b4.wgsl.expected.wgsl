@@ -2,7 +2,7 @@ enable f16;
 
 fn ldexp_3d90b4() {
   var arg_0 = vec2<f16>(f16());
-  var arg_1 = vec2<i32>(1);
+  var arg_1 = vec2<i32>(1i);
   var res : vec2<f16> = ldexp(arg_0, arg_1);
 }
 

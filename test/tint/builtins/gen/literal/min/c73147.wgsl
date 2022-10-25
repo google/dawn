@@ -23,7 +23,7 @@
 
 // fn min(i32, i32) -> i32
 fn min_c73147() {
-  var res: i32 = min(1, 1);
+  var res: i32 = min(1i, 1i);
 }
 
 @vertex

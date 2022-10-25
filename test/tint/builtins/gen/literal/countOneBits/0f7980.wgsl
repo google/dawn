@@ -23,7 +23,7 @@
 
 // fn countOneBits(vec<4, i32>) -> vec<4, i32>
 fn countOneBits_0f7980() {
-  var res: vec4<i32> = countOneBits(vec4<i32>(1));
+  var res: vec4<i32> = countOneBits(vec4<i32>(1i));
 }
 
 @vertex

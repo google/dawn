@@ -23,7 +23,7 @@
 
 // fn clamp(i32, i32, i32) -> i32
 fn clamp_b07c65() {
-  var res: i32 = clamp(1, 1, 1);
+  var res: i32 = clamp(1i, 1i, 1i);
 }
 
 @vertex

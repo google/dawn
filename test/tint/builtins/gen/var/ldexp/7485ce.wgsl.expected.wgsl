@@ -2,7 +2,7 @@ enable f16;
 
 fn ldexp_7485ce() {
   var arg_0 = vec3<f16>(f16());
-  var arg_1 = vec3<i32>(1);
+  var arg_1 = vec3<i32>(1i);
   var res : vec3<f16> = ldexp(arg_0, arg_1);
 }
 

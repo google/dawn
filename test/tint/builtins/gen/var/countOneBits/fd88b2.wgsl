@@ -23,7 +23,7 @@
 
 // fn countOneBits(i32) -> i32
 fn countOneBits_fd88b2() {
-  var arg_0 = 1;
+  var arg_0 = 1i;
   var res: i32 = countOneBits(arg_0);
 }
 

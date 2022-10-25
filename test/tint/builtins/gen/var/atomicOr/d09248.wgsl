@@ -24,7 +24,7 @@ var<workgroup> arg_0: atomic<i32>;
 
 // fn atomicOr(ptr<workgroup, atomic<i32>, read_write>, i32) -> i32
 fn atomicOr_d09248() {
-  var arg_1 = 1;
+  var arg_1 = 1i;
   var res: i32 = atomicOr(&arg_0, arg_1);
 }
 

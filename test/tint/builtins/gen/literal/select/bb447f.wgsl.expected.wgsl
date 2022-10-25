@@ -1,5 +1,5 @@
 fn select_bb447f() {
-  var res : vec2<i32> = select(vec2<i32>(1), vec2<i32>(1), true);
+  var res : vec2<i32> = select(vec2<i32>(1i), vec2<i32>(1i), true);
 }
 
 @vertex

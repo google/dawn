@@ -23,7 +23,7 @@
 
 // fn reverseBits(i32) -> i32
 fn reverseBits_7c4269() {
-  var res: i32 = reverseBits(1);
+  var res: i32 = reverseBits(1i);
 }
 
 @vertex

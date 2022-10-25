@@ -23,7 +23,7 @@
 
 // fn firstLeadingBit(i32) -> i32
 fn firstLeadingBit_57a1a3() {
-  var res: i32 = firstLeadingBit(1);
+  var res: i32 = firstLeadingBit(1i);
 }
 
 @vertex

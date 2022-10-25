@@ -1,5 +1,5 @@
 fn insertBits_fe6ba6() {
-  var res : vec2<i32> = insertBits(vec2<i32>(1), vec2<i32>(1), 1u, 1u);
+  var res : vec2<i32> = insertBits(vec2<i32>(1i), vec2<i32>(1i), 1u, 1u);
 }
 
 @vertex

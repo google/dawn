@@ -27,7 +27,7 @@ struct SB_RW {
 
 // fn atomicAnd(ptr<storage, atomic<i32>, read_write>, i32) -> i32
 fn atomicAnd_152966() {
-  var res: i32 = atomicAnd(&sb_rw.arg_0, 1);
+  var res: i32 = atomicAnd(&sb_rw.arg_0, 1i);
 }
 
 @fragment

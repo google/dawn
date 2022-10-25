@@ -23,7 +23,7 @@
 
 // fn abs(i32) -> i32
 fn abs_4ad288() {
-  var arg_0 = 1;
+  var arg_0 = 1i;
   var res: i32 = abs(arg_0);
 }
 

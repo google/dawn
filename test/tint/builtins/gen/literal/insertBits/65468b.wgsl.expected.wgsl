@@ -1,5 +1,5 @@
 fn insertBits_65468b() {
-  var res : i32 = insertBits(1, 1, 1u, 1u);
+  var res : i32 = insertBits(1i, 1i, 1u, 1u);
 }
 
 @vertex

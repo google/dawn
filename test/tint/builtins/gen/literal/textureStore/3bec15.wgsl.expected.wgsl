@@ -1,7 +1,7 @@
 @group(1) @binding(0) var arg_0 : texture_storage_1d<rgba8uint, write>;
 
 fn textureStore_3bec15() {
-  textureStore(arg_0, 1, vec4<u32>());
+  textureStore(arg_0, 1i, vec4<u32>());
 }
 
 @vertex

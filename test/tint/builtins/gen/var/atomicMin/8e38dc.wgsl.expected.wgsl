@@ -5,7 +5,7 @@ struct SB_RW {
 @group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW;
 
 fn atomicMin_8e38dc() {
-  var arg_1 = 1;
+  var arg_1 = 1i;
   var res : i32 = atomicMin(&(sb_rw.arg_0), arg_1);
 }
 

@@ -23,7 +23,7 @@
 
 // fn firstLeadingBit(i32) -> i32
 fn firstLeadingBit_57a1a3() {
-  var arg_0 = 1;
+  var arg_0 = 1i;
   var res: i32 = firstLeadingBit(arg_0);
 }
 

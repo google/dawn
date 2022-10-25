@@ -23,7 +23,7 @@
 
 // fn dot(vec<3, i32>, vec<3, i32>) -> i32
 fn dot_f1312c() {
-  var res: i32 = dot(vec3<i32>(1), vec3<i32>(1));
+  var res: i32 = dot(vec3<i32>(1i), vec3<i32>(1i));
 }
 
 @vertex

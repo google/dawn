@@ -23,8 +23,8 @@
 
 // fn max(i32, i32) -> i32
 fn max_ce7c30() {
-  var arg_0 = 1;
-  var arg_1 = 1;
+  var arg_0 = 1i;
+  var arg_1 = 1i;
   var res: i32 = max(arg_0, arg_1);
 }
 

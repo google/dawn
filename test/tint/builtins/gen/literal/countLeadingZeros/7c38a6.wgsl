@@ -23,7 +23,7 @@
 
 // fn countLeadingZeros(vec<3, i32>) -> vec<3, i32>
 fn countLeadingZeros_7c38a6() {
-  var res: vec3<i32> = countLeadingZeros(vec3<i32>(1));
+  var res: vec3<i32> = countLeadingZeros(vec3<i32>(1i));
 }
 
 @vertex

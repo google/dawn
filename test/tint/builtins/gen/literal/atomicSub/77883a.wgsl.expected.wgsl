@@ -1,7 +1,7 @@
 var<workgroup> arg_0 : atomic<i32>;
 
 fn atomicSub_77883a() {
-  var res : i32 = atomicSub(&(arg_0), 1);
+  var res : i32 = atomicSub(&(arg_0), 1i);
 }
 
 @compute @workgroup_size(1)

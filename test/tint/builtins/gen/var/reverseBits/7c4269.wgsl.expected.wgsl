@@ -1,5 +1,5 @@
 fn reverseBits_7c4269() {
-  var arg_0 = 1;
+  var arg_0 = 1i;
   var res : i32 = reverseBits(arg_0);
 }
 

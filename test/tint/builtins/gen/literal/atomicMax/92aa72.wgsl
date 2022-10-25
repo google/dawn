@@ -27,7 +27,7 @@ struct SB_RW {
 
 // fn atomicMax(ptr<storage, atomic<i32>, read_write>, i32) -> i32
 fn atomicMax_92aa72() {
-  var res: i32 = atomicMax(&sb_rw.arg_0, 1);
+  var res: i32 = atomicMax(&sb_rw.arg_0, 1i);
 }
 
 @fragment

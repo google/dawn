@@ -1,5 +1,5 @@
 fn firstTrailingBit_7496d6() {
-  var res : vec3<i32> = firstTrailingBit(vec3<i32>(1));
+  var res : vec3<i32> = firstTrailingBit(vec3<i32>(1i));
 }
 
 @vertex

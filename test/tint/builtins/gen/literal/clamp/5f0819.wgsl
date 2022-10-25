@@ -23,7 +23,7 @@
 
 // fn clamp(vec<3, i32>, vec<3, i32>, vec<3, i32>) -> vec<3, i32>
 fn clamp_5f0819() {
-  var res: vec3<i32> = clamp(vec3<i32>(1), vec3<i32>(1), vec3<i32>(1));
+  var res: vec3<i32> = clamp(vec3<i32>(1i), vec3<i32>(1i), vec3<i32>(1i));
 }
 
 @vertex

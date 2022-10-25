@@ -23,7 +23,7 @@
 
 // fn reverseBits(vec<4, i32>) -> vec<4, i32>
 fn reverseBits_4dbd6f() {
-  var res: vec4<i32> = reverseBits(vec4<i32>(1));
+  var res: vec4<i32> = reverseBits(vec4<i32>(1i));
 }
 
 @vertex

@@ -1,8 +1,8 @@
 @group(1) @binding(0) var arg_0 : texture_1d<u32>;
 
 fn textureLoad_1b8588() {
-  var arg_1 = 1;
-  var arg_2 = 0;
+  var arg_1 = 1i;
+  var arg_2 = 0i;
   var res : vec4<u32> = textureLoad(arg_0, arg_1, arg_2);
 }
 

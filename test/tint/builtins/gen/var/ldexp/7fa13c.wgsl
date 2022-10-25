@@ -26,7 +26,7 @@ enable f16;
 // fn ldexp(vec<4, f16>, vec<4, i32>) -> vec<4, f16>
 fn ldexp_7fa13c() {
   var arg_0 = vec4<f16>(f16());
-  var arg_1 = vec4<i32>(1);
+  var arg_1 = vec4<i32>(1i);
   var res: vec4<f16> = ldexp(arg_0, arg_1);
 }
 

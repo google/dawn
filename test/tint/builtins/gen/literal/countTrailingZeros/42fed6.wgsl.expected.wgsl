@@ -1,5 +1,5 @@
 fn countTrailingZeros_42fed6() {
-  var res : i32 = countTrailingZeros(1);
+  var res : i32 = countTrailingZeros(1i);
 }
 
 @vertex

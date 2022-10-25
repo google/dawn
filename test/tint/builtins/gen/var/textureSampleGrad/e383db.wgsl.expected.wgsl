@@ -4,7 +4,7 @@
 
 fn textureSampleGrad_e383db() {
   var arg_2 = vec3<f32>();
-  var arg_3 = 1;
+  var arg_3 = 1i;
   var arg_4 = vec3<f32>();
   var arg_5 = vec3<f32>();
   var res : vec4<f32> = textureSampleGrad(arg_0, arg_1, arg_2, arg_3, arg_4, arg_5);

@@ -5,7 +5,7 @@ struct SB_RW {
 @group(0) @binding(0) var<storage, read_write> sb_rw : SB_RW;
 
 fn atomicExchange_f2e22f() {
-  var res : i32 = atomicExchange(&(sb_rw.arg_0), 1);
+  var res : i32 = atomicExchange(&(sb_rw.arg_0), 1i);
 }
 
 @fragment

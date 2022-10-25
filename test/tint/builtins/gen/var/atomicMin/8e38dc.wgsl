@@ -27,7 +27,7 @@ struct SB_RW {
 
 // fn atomicMin(ptr<storage, atomic<i32>, read_write>, i32) -> i32
 fn atomicMin_8e38dc() {
-  var arg_1 = 1;
+  var arg_1 = 1i;
   var res: i32 = atomicMin(&sb_rw.arg_0, arg_1);
 }
 

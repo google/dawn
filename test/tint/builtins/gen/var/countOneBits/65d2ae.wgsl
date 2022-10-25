@@ -23,7 +23,7 @@
 
 // fn countOneBits(vec<3, i32>) -> vec<3, i32>
 fn countOneBits_65d2ae() {
-  var arg_0 = vec3<i32>(1);
+  var arg_0 = vec3<i32>(1i);
   var res: vec3<i32> = countOneBits(arg_0);
 }
 

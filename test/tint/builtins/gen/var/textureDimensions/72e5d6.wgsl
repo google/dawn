@@ -24,7 +24,7 @@
 
 // fn textureDimensions(texture: texture_depth_2d_array, level: i32) -> vec2<i32>
 fn textureDimensions_72e5d6() {
-  var arg_1 = 0;
+  var arg_1 = 0i;
   var res: vec2<i32> = textureDimensions(arg_0, arg_1);
 }
 

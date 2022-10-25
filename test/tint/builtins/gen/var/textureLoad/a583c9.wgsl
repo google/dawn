@@ -25,7 +25,7 @@
 // fn textureLoad(texture: texture_multisampled_2d<f32>, coords: vec2<i32>, sample_index: i32) -> vec4<f32>
 fn textureLoad_a583c9() {
   var arg_1 = vec2<i32>();
-  var arg_2 = 1;
+  var arg_2 = 1i;
   var res: vec4<f32> = textureLoad(arg_0, arg_1, arg_2);
 }
 

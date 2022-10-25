@@ -24,7 +24,7 @@ var<workgroup> arg_0: atomic<i32>;
 
 // fn atomicCompareExchangeWeak(ptr<workgroup, atomic<i32>, read_write>, i32, i32) -> __atomic_compare_exchange_result<i32>
 fn atomicCompareExchangeWeak_e88938() {
-  var res = atomicCompareExchangeWeak(&arg_0, 1, 1);
+  var res = atomicCompareExchangeWeak(&arg_0, 1i, 1i);
 }
 
 @compute @workgroup_size(1)

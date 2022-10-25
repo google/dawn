@@ -2,7 +2,7 @@
 
 fn textureLoad_e3d2cc() {
   var arg_1 = vec2<i32>();
-  var arg_2 = 1;
+  var arg_2 = 1i;
   var res : vec4<i32> = textureLoad(arg_0, arg_1, arg_2);
 }
 

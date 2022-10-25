@@ -26,7 +26,7 @@
 // fn textureSample(texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: i32) -> f32
 fn textureSample_c2f4e8() {
   var arg_2 = vec3<f32>();
-  var arg_3 = 1;
+  var arg_3 = 1i;
   var res: f32 = textureSample(arg_0, arg_1, arg_2, arg_3);
 }
 

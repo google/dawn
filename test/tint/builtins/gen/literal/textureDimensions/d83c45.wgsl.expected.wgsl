@@ -1,7 +1,7 @@
 @group(1) @binding(0) var arg_0 : texture_cube_array<u32>;
 
 fn textureDimensions_d83c45() {
-  var res : vec2<i32> = textureDimensions(arg_0, 0);
+  var res : vec2<i32> = textureDimensions(arg_0, 0i);
 }
 
 @vertex

@@ -24,7 +24,7 @@ var<workgroup> arg_0: atomic<i32>;
 
 // fn atomicStore(ptr<workgroup, atomic<i32>, read_write>, i32)
 fn atomicStore_8bea94() {
-  var arg_1 = 1;
+  var arg_1 = 1i;
   atomicStore(&arg_0, arg_1);
 }
 

@@ -23,9 +23,9 @@
 
 // fn clamp(i32, i32, i32) -> i32
 fn clamp_b07c65() {
-  var arg_0 = 1;
-  var arg_1 = 1;
-  var arg_2 = 1;
+  var arg_0 = 1i;
+  var arg_1 = 1i;
+  var arg_2 = 1i;
   var res: i32 = clamp(arg_0, arg_1, arg_2);
 }
 

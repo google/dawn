@@ -23,7 +23,7 @@
 
 // fn firstTrailingBit(vec<4, i32>) -> vec<4, i32>
 fn firstTrailingBit_86551b() {
-  var res: vec4<i32> = firstTrailingBit(vec4<i32>(1));
+  var res: vec4<i32> = firstTrailingBit(vec4<i32>(1i));
 }
 
 @vertex

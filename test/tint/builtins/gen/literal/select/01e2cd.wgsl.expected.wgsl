@@ -1,5 +1,5 @@
 fn select_01e2cd() {
-  var res : vec3<i32> = select(vec3<i32>(1), vec3<i32>(1), vec3<bool>(true));
+  var res : vec3<i32> = select(vec3<i32>(1i), vec3<i32>(1i), vec3<bool>(true));
 }
 
 @vertex

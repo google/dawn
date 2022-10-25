@@ -27,7 +27,7 @@ struct SB_RW {
 
 // fn atomicExchange(ptr<storage, atomic<i32>, read_write>, i32) -> i32
 fn atomicExchange_f2e22f() {
-  var res: i32 = atomicExchange(&sb_rw.arg_0, 1);
+  var res: i32 = atomicExchange(&sb_rw.arg_0, 1i);
 }
 
 @fragment

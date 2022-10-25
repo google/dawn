@@ -24,7 +24,7 @@ var<workgroup> arg_0: atomic<i32>;
 
 // fn atomicXor(ptr<workgroup, atomic<i32>, read_write>, i32) -> i32
 fn atomicXor_75dc95() {
-  var res: i32 = atomicXor(&arg_0, 1);
+  var res: i32 = atomicXor(&arg_0, 1i);
 }
 
 @compute @workgroup_size(1)

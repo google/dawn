@@ -24,7 +24,7 @@
 
 // fn textureDimensions(texture: texture_cube<u32>, level: i32) -> vec2<i32>
 fn textureDimensions_88ad17() {
-  var arg_1 = 0;
+  var arg_1 = 0i;
   var res: vec2<i32> = textureDimensions(arg_0, arg_1);
 }
 

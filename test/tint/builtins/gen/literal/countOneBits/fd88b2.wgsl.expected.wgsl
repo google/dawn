@@ -1,5 +1,5 @@
 fn countOneBits_fd88b2() {
-  var res : i32 = countOneBits(1);
+  var res : i32 = countOneBits(1i);
 }
 
 @vertex

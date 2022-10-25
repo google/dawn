@@ -23,7 +23,7 @@
 
 // fn firstLeadingBit(vec<4, i32>) -> vec<4, i32>
 fn firstLeadingBit_c1f940() {
-  var res: vec4<i32> = firstLeadingBit(vec4<i32>(1));
+  var res: vec4<i32> = firstLeadingBit(vec4<i32>(1i));
 }
 
 @vertex

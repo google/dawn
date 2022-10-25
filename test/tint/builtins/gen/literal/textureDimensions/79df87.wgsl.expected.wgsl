@@ -1,7 +1,7 @@
 @group(1) @binding(0) var arg_0 : texture_1d<u32>;
 
 fn textureDimensions_79df87() {
-  var res : i32 = textureDimensions(arg_0, 0);
+  var res : i32 = textureDimensions(arg_0, 0i);
 }
 
 @vertex

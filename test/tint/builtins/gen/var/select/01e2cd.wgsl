@@ -23,8 +23,8 @@
 
 // fn select(vec<3, i32>, vec<3, i32>, vec<3, bool>) -> vec<3, i32>
 fn select_01e2cd() {
-  var arg_0 = vec3<i32>(1);
-  var arg_1 = vec3<i32>(1);
+  var arg_0 = vec3<i32>(1i);
+  var arg_1 = vec3<i32>(1i);
   var arg_2 = vec3<bool>(true);
   var res: vec3<i32> = select(arg_0, arg_1, arg_2);
 }

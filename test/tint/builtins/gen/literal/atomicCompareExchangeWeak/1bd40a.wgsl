@@ -27,7 +27,7 @@ struct SB_RW {
 
 // fn atomicCompareExchangeWeak(ptr<storage, atomic<i32>, read_write>, i32, i32) -> __atomic_compare_exchange_result<i32>
 fn atomicCompareExchangeWeak_1bd40a() {
-  var res = atomicCompareExchangeWeak(&sb_rw.arg_0, 1, 1);
+  var res = atomicCompareExchangeWeak(&sb_rw.arg_0, 1i, 1i);
 }
 
 @fragment

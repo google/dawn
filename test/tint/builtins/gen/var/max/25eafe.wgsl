@@ -23,8 +23,8 @@
 
 // fn max(vec<3, i32>, vec<3, i32>) -> vec<3, i32>
 fn max_25eafe() {
-  var arg_0 = vec3<i32>(1);
-  var arg_1 = vec3<i32>(1);
+  var arg_0 = vec3<i32>(1i);
+  var arg_1 = vec3<i32>(1i);
   var res: vec3<i32> = max(arg_0, arg_1);
 }
 

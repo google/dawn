@@ -27,7 +27,7 @@ struct SB_RW {
 
 // fn atomicAdd(ptr<storage, atomic<i32>, read_write>, i32) -> i32
 fn atomicAdd_d32fe4() {
-  var res: i32 = atomicAdd(&sb_rw.arg_0, 1);
+  var res: i32 = atomicAdd(&sb_rw.arg_0, 1i);
 }
 
 @fragment

@@ -23,7 +23,7 @@
 
 // fn countLeadingZeros(vec<2, i32>) -> vec<2, i32>
 fn countLeadingZeros_858d40() {
-  var arg_0 = vec2<i32>(1);
+  var arg_0 = vec2<i32>(1i);
   var res: vec2<i32> = countLeadingZeros(arg_0);
 }
 

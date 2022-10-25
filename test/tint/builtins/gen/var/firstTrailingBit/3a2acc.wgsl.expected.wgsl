@@ -1,5 +1,5 @@
 fn firstTrailingBit_3a2acc() {
-  var arg_0 = 1;
+  var arg_0 = 1i;
   var res : i32 = firstTrailingBit(arg_0);
 }
 

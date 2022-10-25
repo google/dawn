@@ -23,8 +23,8 @@
 
 // fn min(i32, i32) -> i32
 fn min_c73147() {
-  var arg_0 = 1;
-  var arg_1 = 1;
+  var arg_0 = 1i;
+  var arg_1 = 1i;
   var res: i32 = min(arg_0, arg_1);
 }
 

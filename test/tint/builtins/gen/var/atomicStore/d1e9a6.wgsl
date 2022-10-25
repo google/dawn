@@ -27,7 +27,7 @@ struct SB_RW {
 
 // fn atomicStore(ptr<storage, atomic<i32>, read_write>, i32)
 fn atomicStore_d1e9a6() {
-  var arg_1 = 1;
+  var arg_1 = 1i;
   atomicStore(&sb_rw.arg_0, arg_1);
 }
 

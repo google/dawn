@@ -23,7 +23,7 @@
 
 // fn countLeadingZeros(i32) -> i32
 fn countLeadingZeros_6d4656() {
-  var res: i32 = countLeadingZeros(1);
+  var res: i32 = countLeadingZeros(1i);
 }
 
 @vertex

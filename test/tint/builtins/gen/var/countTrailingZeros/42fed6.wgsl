@@ -23,7 +23,7 @@
 
 // fn countTrailingZeros(i32) -> i32
 fn countTrailingZeros_42fed6() {
-  var arg_0 = 1;
+  var arg_0 = 1i;
   var res: i32 = countTrailingZeros(arg_0);
 }
 

@@ -23,7 +23,7 @@
 
 // fn extractBits(i32, u32, u32) -> i32
 fn extractBits_249874() {
-  var arg_0 = 1;
+  var arg_0 = 1i;
   var arg_1 = 1u;
   var arg_2 = 1u;
   var res: i32 = extractBits(arg_0, arg_1, arg_2);

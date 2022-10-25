@@ -23,8 +23,8 @@
 
 // fn insertBits(i32, i32, u32, u32) -> i32
 fn insertBits_65468b() {
-  var arg_0 = 1;
-  var arg_1 = 1;
+  var arg_0 = 1i;
+  var arg_1 = 1i;
   var arg_2 = 1u;
   var arg_3 = 1u;
   var res: i32 = insertBits(arg_0, arg_1, arg_2, arg_3);

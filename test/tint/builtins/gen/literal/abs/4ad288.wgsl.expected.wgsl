@@ -1,5 +1,5 @@
 fn abs_4ad288() {
-  var res : i32 = abs(1);
+  var res : i32 = abs(1i);
 }
 
 @vertex

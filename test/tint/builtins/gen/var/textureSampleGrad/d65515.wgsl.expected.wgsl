@@ -4,7 +4,7 @@
 
 fn textureSampleGrad_d65515() {
   var arg_2 = vec2<f32>();
-  var arg_3 = 1;
+  var arg_3 = 1i;
   var arg_4 = vec2<f32>();
   var arg_5 = vec2<f32>();
   const arg_6 = vec2<i32>();

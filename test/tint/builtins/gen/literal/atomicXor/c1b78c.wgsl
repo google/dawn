@@ -27,7 +27,7 @@ struct SB_RW {
 
 // fn atomicXor(ptr<storage, atomic<i32>, read_write>, i32) -> i32
 fn atomicXor_c1b78c() {
-  var res: i32 = atomicXor(&sb_rw.arg_0, 1);
+  var res: i32 = atomicXor(&sb_rw.arg_0, 1i);
 }
 
 @fragment

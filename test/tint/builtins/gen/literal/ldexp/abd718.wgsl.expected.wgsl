@@ -1,5 +1,5 @@
 fn ldexp_abd718() {
-  var res : vec2<f32> = ldexp(vec2<f32>(1.0f), vec2<i32>(1));
+  var res : vec2<f32> = ldexp(vec2<f32>(1.0f), vec2<i32>(1i));
 }
 
 @vertex

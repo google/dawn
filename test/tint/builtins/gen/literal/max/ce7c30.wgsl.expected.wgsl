@@ -1,5 +1,5 @@
 fn max_ce7c30() {
-  var res : i32 = max(1, 1);
+  var res : i32 = max(1i, 1i);
 }
 
 @vertex
