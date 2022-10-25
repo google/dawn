@@ -124,5 +124,38 @@ TEST_F(StructTest, Location) {
     EXPECT_FALSE(sem->Members()[1]->Location().has_value());
 }
 
+TEST_F(StructTest, IsConstructable) {
+    auto* inner =  //
+        Structure("Inner", utils::Vector{
+                               Member("a", ty.i32()),
+                               Member("b", ty.u32()),
+                               Member("c", ty.f32()),
+                               Member("d", ty.vec3<f32>()),
+                               Member("e", ty.mat4x2<f32>()),
+                           });
+
+    auto* outer = Structure("Outer", utils::Vector{
+                                         Member("inner", ty.type_name("Inner")),
+                                         Member("a", ty.i32()),
+                                     });
+
+    auto* outer_runtime_sized_array =
+        Structure("OuterRuntimeSizedArray", utils::Vector{
+                                                Member("inner", ty.type_name("Inner")),
+                                                Member("a", ty.i32()),
+                                                Member("runtime_sized_array", ty.array<i32>()),
+                                            });
+    auto p = Build();
+    ASSERT_TRUE(p.IsValid()) << p.Diagnostics().str();
+
+    auto* sem_inner = p.Sem().Get(inner);
+    auto* sem_outer = p.Sem().Get(outer);
+    auto* sem_outer_runtime_sized_array = p.Sem().Get(outer_runtime_sized_array);
+
+    EXPECT_TRUE(sem_inner->IsConstructible());
+    EXPECT_TRUE(sem_outer->IsConstructible());
+    EXPECT_FALSE(sem_outer_runtime_sized_array->IsConstructible());
+}
+
 }  // namespace
 }  // namespace tint::sem
