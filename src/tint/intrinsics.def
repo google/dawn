@@ -423,8 +423,8 @@ fn asinh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 @const fn atan<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
 @const fn atan2<T: fa_f32_f16>(T, T) -> T
 @const fn atan2<T: fa_f32_f16, N: num>(vec<N, T>, vec<N, T>) -> vec<N, T>
-fn atanh<T: f32_f16>(T) -> T
-fn atanh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+fn atanh<T: f32_f16>(@test_value(0.5) T) -> T
+fn atanh<N: num, T: f32_f16>(@test_value(0.5) vec<N, T>) -> vec<N, T>
 fn ceil<T: f32_f16>(T) -> T
 fn ceil<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 @const fn clamp<T: fia_fiu32_f16>(T, T, T) -> T

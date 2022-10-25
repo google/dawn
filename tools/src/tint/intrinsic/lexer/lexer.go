@@ -104,7 +104,23 @@ func (l *lexer) lex() error {
 			case unicode.IsLetter(l.peek(0)) || l.peek(0) == '_':
 				l.tok(l.count(alphaNumericOrUnderscore), tok.Identifier)
 			case unicode.IsNumber(l.peek(0)):
-				l.tok(l.count(unicode.IsNumber), tok.Integer)
+				isFloat := false
+				pred := func(r rune) bool {
+					if unicode.IsNumber(r) {
+						return true
+					}
+					if !isFloat && r == '.' {
+						isFloat = true
+						return true
+					}
+					return false
+				}
+				n := l.count(pred)
+				if isFloat {
+					l.tok(n, tok.Float)
+				} else {
+					l.tok(n, tok.Integer)
+				}
 			case l.match("&&", tok.AndAnd):
 			case l.match("&", tok.And):
 			case l.match("||", tok.OrOr):

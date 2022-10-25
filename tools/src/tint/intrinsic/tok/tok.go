@@ -26,6 +26,7 @@ const (
 	InvalidToken Kind = "<invalid>"
 	Identifier   Kind = "ident"
 	Integer      Kind = "integer"
+	Float        Kind = "float"
 	String       Kind = "string"
 	Match        Kind = "match"
 	Function     Kind = "fn"

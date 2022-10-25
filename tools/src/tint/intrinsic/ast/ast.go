@@ -367,7 +367,7 @@ func (l *Attributes) Take(name string) *Attribute {
 type Attribute struct {
 	Source tok.Source
 	Name   string
-	Values []string
+	Values []any
 }
 
 // Format implements the fmt.Formatter interface

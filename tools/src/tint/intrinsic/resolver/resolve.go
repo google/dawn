@@ -17,7 +17,6 @@ package resolver
 import (
 	"fmt"
 	"sort"
-	"strconv"
 
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/ast"
@@ -184,15 +183,15 @@ func (r *resolver) ty(a ast.TypeDecl) error {
 		if len(d.Values) != 1 {
 			return fmt.Errorf("%v expected a single value for 'display' attribute", d.Source)
 		}
-		t.DisplayName = d.Values[0]
+		t.DisplayName = fmt.Sprint(d.Values[0])
 	}
 	if d := a.Attributes.Take("precedence"); d != nil {
 		if len(d.Values) != 1 {
 			return fmt.Errorf("%v expected a single integer value for 'precedence' attribute", d.Source)
 		}
-		n, err := strconv.Atoi(d.Values[0])
-		if err != nil {
-			return fmt.Errorf("%v %v", d.Source, err)
+		n, ok := d.Values[0].(int)
+		if !ok {
+			return fmt.Errorf("%v @precedence value must be an integer", d.Source)
 		}
 		t.Precedence = n
 	}
@@ -358,7 +357,11 @@ func (r *resolver) intrinsic(
 				overload.ConstEvalFunction = "Conv"
 			}
 		case 1:
-			overload.ConstEvalFunction = constEvalFn.Values[0]
+			fn, ok := constEvalFn.Values[0].(string)
+			if !ok {
+				return fmt.Errorf("%v optional @const value must be a string", constEvalFn.Source)
+			}
+			overload.ConstEvalFunction = fn
 		default:
 			return fmt.Errorf("%v too many values for @const attribute", constEvalFn.Source)
 		}
@@ -405,13 +408,25 @@ func (r *resolver) intrinsic(
 		if attribute := p.Attributes.Take("const"); attribute != nil {
 			isConst = true
 		}
+		testValue := 1.0
+		if attribute := p.Attributes.Take("test_value"); attribute != nil {
+			switch v := attribute.Values[0].(type) {
+			case int:
+				testValue = float64(v)
+			case float64:
+				testValue = v
+			default:
+				return fmt.Errorf("%v @test_value must be an integer or float", p.Attributes[0].Source)
+			}
+		}
 		if len(p.Attributes) != 0 {
 			return fmt.Errorf("%v unknown attribute", p.Attributes[0].Source)
 		}
 		overload.Parameters[i] = sem.Parameter{
-			Name:    p.Name,
-			Type:    usage,
-			IsConst: isConst,
+			Name:      p.Name,
+			Type:      usage,
+			IsConst:   isConst,
+			TestValue: testValue,
 		}
 	}
 

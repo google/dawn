@@ -5,7 +5,7 @@ float tint_atanh(float x) {
 }
 
 void atanh_7997d8() {
-  float arg_0 = 1.0f;
+  float arg_0 = 0.5f;
   float res = tint_atanh(arg_0);
 }
 
@@ -30,7 +30,7 @@ float tint_atanh(float x) {
 }
 
 void atanh_7997d8() {
-  float arg_0 = 1.0f;
+  float arg_0 = 0.5f;
   float res = tint_atanh(arg_0);
 }
 
@@ -49,7 +49,7 @@ float tint_atanh(float x) {
 }
 
 void atanh_7997d8() {
-  float arg_0 = 1.0f;
+  float arg_0 = 0.5f;
   float res = tint_atanh(arg_0);
 }
 

@@ -23,7 +23,7 @@
 
 // fn atanh(vec<3, f32>) -> vec<3, f32>
 fn atanh_440cca() {
-  var res: vec3<f32> = atanh(vec3<f32>(1.f));
+  var res: vec3<f32> = atanh(vec3<f32>(0.5f));
 }
 
 @vertex

@@ -242,9 +242,10 @@ func (o Overload) Format(w fmt.State, verb rune) {
 
 // Parameter describes a single parameter of a function overload
 type Parameter struct {
-	Name    string
-	Type    FullyQualifiedName
-	IsConst bool // Did this parameter have a @const attribute?
+	Name      string
+	Type      FullyQualifiedName
+	IsConst   bool    // Did this parameter have a @const attribute?
+	TestValue float64 // Value to use for end-to-end tests
 }
 
 // Format implements the fmt.Formatter interface

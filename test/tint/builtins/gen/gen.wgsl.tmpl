@@ -265,17 +265,22 @@ enable f16;
 {{- /* Returns a value that can be used for the parameter argument        */ -}}
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-   $ty := .Type -}}
-{{-   if      eq $ty.Target.Name "i32"  -}}1i
-{{-   else if eq $ty.Target.Name "u32"  -}}1u
-{{-   else if eq $ty.Target.Name "f32"  -}}1.f
-{{-   else if eq $ty.Target.Name "fa"   -}}1
-{{-   else if eq $ty.Target.Name "ia"   -}}1.0
+{{-   $value := printf "%v" .TestValue }}
+{{- /* $float_value is $value with a '.' suffix (if it wasn't a float already) */ -}}
+{{-   $float_value := $value }}
+{{-   if not (Contains $value ".") }}{{$float_value = printf "%v." $value}}{{end}}
+{{- /* emit the value with any necessary suffixes */ -}}
+{{-   if      eq $ty.Target.Name "i32"  -}}{{$value}}i
+{{-   else if eq $ty.Target.Name "u32"  -}}{{$value}}u
+{{-   else if eq $ty.Target.Name "f32"  -}}{{$float_value}}f
+{{-   else if eq $ty.Target.Name "fa"   -}}{{$value}}
+{{-   else if eq $ty.Target.Name "ia"   -}}{{$float_value}}0
 {{-   else if eq $ty.Target.Name "bool" -}}true
 {{-   else if eq $ty.Target.Name "vec"  -}}
-{{-     $el := Eval "ArgumentValue" "Type" (ElementType .Type) "Name" ""}}
+{{-     $el := Eval "ArgumentValue" "Type" (ElementType .Type) "Name" "" "TestValue" .TestValue }}
 {{-     template "Type" $ty}}({{$el}})
 {{-   else if eq $ty.Target.Name "mat"   -}}{{template "Type" $ty}}(
-{{-     $el := Eval "ArgumentValue" "Type" (ElementType .Type) "Name" ""}}
+{{-     $el := Eval "ArgumentValue" "Type" (ElementType .Type) "Name" "" "TestValue" .TestValue }}
 {{-     range $col := Iterate (index $ty.TemplateArguments 0)     }}
 {{-       range $row := Iterate (index $ty.TemplateArguments 1)   }}
 {{-         if or $col $row -}}, {{end}}{{$el}}

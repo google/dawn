@@ -83,9 +83,10 @@ func (p *Permuter) Permute(overload *sem.Overload) ([]Permutation, error) {
 				return nil
 			}
 			o.Parameters = append(o.Parameters, sem.Parameter{
-				Name:    p.Name,
-				Type:    ty,
-				IsConst: p.IsConst,
+				Name:      p.Name,
+				Type:      ty,
+				IsConst:   p.IsConst,
+				TestValue: p.TestValue,
 			})
 		}
 		if overload.ReturnType != nil {

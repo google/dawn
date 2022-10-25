@@ -52,7 +52,7 @@ func TestParser(t *testing.T) {
 						{
 							Attributes: ast.Attributes{{
 								Name:   "attr",
-								Values: []string{},
+								Values: nil,
 							}},
 							Name: "B",
 						},
@@ -85,7 +85,7 @@ func TestParser(t *testing.T) {
 			ast.AST{
 				Types: []ast.TypeDecl{{
 					Attributes: ast.Attributes{
-						{Name: "attr", Values: []string{}},
+						{Name: "attr", Values: nil},
 					},
 					Name: "T",
 				}},
@@ -96,8 +96,8 @@ func TestParser(t *testing.T) {
 			ast.AST{
 				Types: []ast.TypeDecl{{
 					Attributes: ast.Attributes{
-						{Name: "attr_a", Values: []string{}},
-						{Name: "attr_b", Values: []string{}},
+						{Name: "attr_a", Values: nil},
+						{Name: "attr_b", Values: nil},
 					},
 					Name: "T",
 				}},
@@ -107,17 +107,17 @@ func TestParser(t *testing.T) {
 			`@attr("a", "b") type T`, ast.AST{
 				Types: []ast.TypeDecl{{
 					Attributes: ast.Attributes{
-						{Name: "attr", Values: []string{"a", "b"}},
+						{Name: "attr", Values: []any{"a", "b"}},
 					},
 					Name: "T",
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
 			utils.ThisLine(),
-			`@attr(1, "x") type T`, ast.AST{
+			`@attr(1, "x", 2.0) type T`, ast.AST{
 				Types: []ast.TypeDecl{{
 					Attributes: ast.Attributes{
-						{Name: "attr", Values: []string{"1", "x"}},
+						{Name: "attr", Values: []any{1, "x", 2.0}},
 					},
 					Name: "T",
 				}},
@@ -194,7 +194,7 @@ func TestParser(t *testing.T) {
 					Kind: ast.Builtin,
 					Name: "F",
 					Attributes: ast.Attributes{
-						{Name: "attr", Values: []string{}},
+						{Name: "attr", Values: nil},
 					},
 					Parameters: ast.Parameters{},
 				}},
@@ -318,7 +318,7 @@ func TestParser(t *testing.T) {
 					Kind: ast.Operator,
 					Name: "F",
 					Attributes: ast.Attributes{
-						{Name: "attr", Values: []string{}},
+						{Name: "attr", Values: nil},
 					},
 					Parameters: ast.Parameters{},
 				}},
@@ -344,7 +344,7 @@ func TestParser(t *testing.T) {
 					Name: "F",
 					Parameters: ast.Parameters{
 						{
-							Attributes: ast.Attributes{{Name: "blah", Values: []string{}}},
+							Attributes: ast.Attributes{{Name: "blah", Values: nil}},
 							Type:       ast.TemplatedName{Name: "a"}},
 					},
 				}},
@@ -456,7 +456,7 @@ func TestParser(t *testing.T) {
 					Kind: ast.Initializer,
 					Name: "F",
 					Attributes: ast.Attributes{
-						{Name: "attr", Values: []string{}},
+						{Name: "attr", Values: nil},
 					},
 					Parameters: ast.Parameters{},
 				}},
@@ -580,7 +580,7 @@ func TestParser(t *testing.T) {
 					Kind: ast.Converter,
 					Name: "F",
 					Attributes: ast.Attributes{
-						{Name: "attr", Values: []string{}},
+						{Name: "attr", Values: nil},
 					},
 					Parameters: ast.Parameters{},
 				}},

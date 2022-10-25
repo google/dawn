@@ -1,5 +1,5 @@
 fn atanh_c0e634() {
-  var res : vec2<f32> = atanh(vec2<f32>(1.0f));
+  var res : vec2<f32> = atanh(vec2<f32>(0.5f));
 }
 
 @vertex

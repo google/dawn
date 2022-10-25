@@ -303,6 +303,7 @@ func (g *generator) bindAndParse(t *template.Template, text string) error {
 		"Title":                 strings.Title,
 		"PascalCase":            pascalCase,
 		"SplitDisplayName":      gen.SplitDisplayName,
+		"Contains":              strings.Contains,
 		"HasPrefix":             strings.HasPrefix,
 		"HasSuffix":             strings.HasSuffix,
 		"TrimPrefix":            strings.TrimPrefix,

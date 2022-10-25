@@ -1,5 +1,5 @@
 fn atanh_f3e01b() {
-  var arg_0 = vec4<f32>(1.0f);
+  var arg_0 = vec4<f32>(0.5f);
   var res : vec4<f32> = atanh(arg_0);
 }
 
