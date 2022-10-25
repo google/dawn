@@ -636,21 +636,21 @@ std::vector<Case> ShiftLeftCases() {
           Vec(T{0b0010'1000'0000}, T{0b0101'0000'0000}, T{0b1010'0000'0000})),  //
     };
 
-    // Only abstract 0 can be shifted left as much as we like. For concrete 0 (and any number), it
-    // cannot be shifted equal or more than the number of bits of the lhs (see
-    // ResolverConstEvalShiftLeftConcreteGeqBitWidthError for negative tests)
+    // Abstract 0 can be shifted by any u32 value (0 to 2^32), whereas concrete 0 (or any number)
+    // can only by shifted by a value less than the number of bits of the lhs.
+    // (see ResolverConstEvalShiftLeftConcreteGeqBitWidthError for negative tests)
     ConcatIntoIf<IsAbstract<T>>(  //
         r, std::vector<Case>{
-               C(T{0}, ST{64}, T{0}),
-               C(T{0}, ST{65}, T{0}),
-               C(T{0}, ST{65}, T{0}),
-               C(T{0}, ST{10000}, T{0}),
-               C(T{0}, T::Highest(), T{0}),
-               C(Negate(T{0}), ST{64}, Negate(T{0})),
-               C(Negate(T{0}), ST{65}, Negate(T{0})),
-               C(Negate(T{0}), ST{65}, Negate(T{0})),
-               C(Negate(T{0}), ST{10000}, Negate(T{0})),
-               C(Negate(T{0}), T::Highest(), Negate(T{0})),
+               C(T{0}, ST{64}, T{0}),                              //
+               C(T{0}, ST{65}, T{0}),                              //
+               C(T{0}, ST{65}, T{0}),                              //
+               C(T{0}, ST{10000}, T{0}),                           //
+               C(T{0}, ST{u32::Highest()}, T{0}),                  //
+               C(Negate(T{0}), ST{64}, Negate(T{0})),              //
+               C(Negate(T{0}), ST{65}, Negate(T{0})),              //
+               C(Negate(T{0}), ST{65}, Negate(T{0})),              //
+               C(Negate(T{0}), ST{10000}, Negate(T{0})),           //
+               C(Negate(T{0}), ST{u32::Highest()}, Negate(T{0})),  //
            });
 
     // Cases that are fine for signed values (no sign change), but would overflow unsigned values.
@@ -898,9 +898,29 @@ INSTANTIATE_TEST_SUITE_P(
 
 // AInt left shift negative value -> error
 TEST_F(ResolverConstEvalTest, BinaryAbstractShiftLeftByNegativeValue_Error) {
-    GlobalConst("c", Shl(Source{{1, 1}}, Expr(1_a), Expr(-1_a)));
+    GlobalConst("c", Shl(Expr(1_a), Expr(Source{{1, 1}}, -1_a)));
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "1:1 error: cannot shift left by a negative value");
+    EXPECT_EQ(r()->error(), "1:1 error: value -1 cannot be represented as 'u32'");
+}
+
+// AInt left shift by AInt or u32 always results in an AInt
+TEST_F(ResolverConstEvalTest, BinaryAbstractShiftLeftRemainsAbstract) {
+    auto* expr1 = Shl(Expr(1_a), Expr(1_u));
+    GlobalConst("c1", expr1);
+
+    auto* expr2 = Shl(Expr(1_a), Expr(1_a));
+    GlobalConst("c2", expr2);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    auto* sem1 = Sem().Get(expr1);
+    ASSERT_NE(sem1, nullptr);
+    auto* sem2 = Sem().Get(expr2);
+    ASSERT_NE(sem2, nullptr);
+
+    auto aint_ty = create<sem::AbstractInt>();
+    EXPECT_EQ(sem1->Type(), aint_ty);
+    EXPECT_EQ(sem2->Type(), aint_ty);
 }
 
 // i32/u32 left shift by >= 32 -> error
