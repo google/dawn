@@ -93,6 +93,7 @@ namespace tint::resolver {
 namespace {
 
 constexpr int64_t kMaxArrayElementCount = 65536;
+constexpr uint32_t kMaxStatementDepth = 127;
 
 }  // namespace
 
@@ -3400,6 +3401,14 @@ SEM* Resolver::StatementScope(const ast::Statement* ast, SEM* sem, F&& callback)
     TINT_SCOPED_ASSIGNMENT(current_statement_, sem);
     TINT_SCOPED_ASSIGNMENT(current_compound_statement_,
                            as_compound ? as_compound : current_compound_statement_);
+    TINT_SCOPED_ASSIGNMENT(current_scoping_depth_, current_scoping_depth_ + 1);
+
+    if (current_scoping_depth_ > kMaxStatementDepth) {
+        AddError("statement nesting depth / chaining length exceeds limit of " +
+                     std::to_string(kMaxStatementDepth),
+                 ast->source);
+        return nullptr;
+    }
 
     if (!callback()) {
         return nullptr;
