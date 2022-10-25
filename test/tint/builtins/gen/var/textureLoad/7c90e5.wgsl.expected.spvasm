@@ -61,7 +61,7 @@
         %res = OpVariable %_ptr_Function_v4uint Function %39
                OpStore %arg_1 %19
                OpStore %arg_2 %int_1
-               OpStore %arg_3 %25
+               OpStore %arg_3 %int_1
          %29 = OpLoad %11 %arg_0
          %31 = OpLoad %v2int %arg_1
          %32 = OpCompositeExtract %int %31 0

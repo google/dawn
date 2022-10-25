@@ -265,19 +265,13 @@ enable f16;
 {{- /* Returns a value that can be used for the parameter argument        */ -}}
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-   $ty := .Type -}}
-{{-   if      eq $ty.Target.Name "i32" -}}
-{{- /* If the parameter has the name 'level', then use '0' as the value.  */ -}}
-{{- /* Some texture arguments require the level parameter to be 0, and    */ -}}
-{{- /* constraint is not described in the definition file.                */ -}}
-{{-     if   eq .Name "level"            -}}0i
-{{-     else                             -}}1i
-{{-     end                              -}}
-{{-   else if eq $ty.Target.Name "u32"   -}}1u
-{{-   else if eq $ty.Target.Name "f32"   -}}1.f
-{{-   else if eq $ty.Target.Name "fa"    -}}1
-{{-   else if eq $ty.Target.Name "ia"    -}}1.0
-{{-   else if eq $ty.Target.Name "bool"  -}}true
-{{-   else if eq $ty.Target.Name "vec"   -}}
+{{-   if      eq $ty.Target.Name "i32"  -}}1i
+{{-   else if eq $ty.Target.Name "u32"  -}}1u
+{{-   else if eq $ty.Target.Name "f32"  -}}1.f
+{{-   else if eq $ty.Target.Name "fa"   -}}1
+{{-   else if eq $ty.Target.Name "ia"   -}}1.0
+{{-   else if eq $ty.Target.Name "bool" -}}true
+{{-   else if eq $ty.Target.Name "vec"  -}}
 {{-     $el := Eval "ArgumentValue" "Type" (ElementType .Type) "Name" ""}}
 {{-     template "Type" $ty}}({{$el}})
 {{-   else if eq $ty.Target.Name "mat"   -}}{{template "Type" $ty}}(

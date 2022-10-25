@@ -55,7 +55,7 @@
       %arg_2 = OpVariable %_ptr_Function_int Function %21
         %res = OpVariable %_ptr_Function_v4uint Function %30
                OpStore %arg_1 %int_1
-               OpStore %arg_2 %21
+               OpStore %arg_2 %int_1
          %25 = OpLoad %11 %arg_0
          %26 = OpLoad %int %arg_1
          %27 = OpLoad %int %arg_2

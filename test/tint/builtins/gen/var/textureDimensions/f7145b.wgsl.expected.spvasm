@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 42
+; Bound: 43
 ; Schema: 0
                OpCapability Shader
                OpCapability ImageQuery
@@ -40,43 +40,44 @@
        %void = OpTypeVoid
          %13 = OpTypeFunction %void
         %int = OpTypeInt 32 1
-         %18 = OpConstantNull %int
+      %int_1 = OpConstant %int 1
 %_ptr_Function_int = OpTypePointer Function %int
+         %21 = OpConstantNull %int
       %v2int = OpTypeVector %int 2
 %_ptr_Function_v2int = OpTypePointer Function %v2int
-         %27 = OpConstantNull %v2int
-         %28 = OpTypeFunction %v4float
+         %28 = OpConstantNull %v2int
+         %29 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %textureDimensions_f7145b = OpFunction %void None %13
          %16 = OpLabel
-      %arg_1 = OpVariable %_ptr_Function_int Function %18
-        %res = OpVariable %_ptr_Function_v2int Function %27
-               OpStore %arg_1 %18
-         %23 = OpLoad %11 %arg_0
-         %24 = OpLoad %int %arg_1
-         %21 = OpImageQuerySizeLod %v2int %23 %24
-               OpStore %res %21
+      %arg_1 = OpVariable %_ptr_Function_int Function %21
+        %res = OpVariable %_ptr_Function_v2int Function %28
+               OpStore %arg_1 %int_1
+         %24 = OpLoad %11 %arg_0
+         %25 = OpLoad %int %arg_1
+         %22 = OpImageQuerySizeLod %v2int %24 %25
+               OpStore %res %22
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %28
-         %30 = OpLabel
-         %31 = OpFunctionCall %void %textureDimensions_f7145b
+%vertex_main_inner = OpFunction %v4float None %29
+         %31 = OpLabel
+         %32 = OpFunctionCall %void %textureDimensions_f7145b
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %13
-         %33 = OpLabel
-         %34 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %34
+         %34 = OpLabel
+         %35 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %35
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %13
-         %37 = OpLabel
-         %38 = OpFunctionCall %void %textureDimensions_f7145b
+         %38 = OpLabel
+         %39 = OpFunctionCall %void %textureDimensions_f7145b
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %13
-         %40 = OpLabel
-         %41 = OpFunctionCall %void %textureDimensions_f7145b
+         %41 = OpLabel
+         %42 = OpFunctionCall %void %textureDimensions_f7145b
                OpReturn
                OpFunctionEnd

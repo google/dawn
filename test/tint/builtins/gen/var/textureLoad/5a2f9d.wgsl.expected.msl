@@ -3,7 +3,7 @@
 using namespace metal;
 void textureLoad_5a2f9d(texture1d<int, access::sample> tint_symbol_1) {
   int arg_1 = 1;
-  int arg_2 = 0;
+  int arg_2 = 1;
   int4 res = tint_symbol_1.read(uint(arg_1), 0);
 }
 

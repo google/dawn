@@ -4,7 +4,7 @@ uniform highp sampler2DShadow arg_0_arg_1;
 
 void textureSampleLevel_02be59() {
   vec2 arg_2 = vec2(0.0f);
-  int arg_3 = 0;
+  int arg_3 = 1;
   float res = textureLod(arg_0_arg_1, vec3(arg_2, 0.0f), float(arg_3));
 }
 
@@ -28,7 +28,7 @@ uniform highp sampler2DShadow arg_0_arg_1;
 
 void textureSampleLevel_02be59() {
   vec2 arg_2 = vec2(0.0f);
-  int arg_3 = 0;
+  int arg_3 = 1;
   float res = textureLod(arg_0_arg_1, vec3(arg_2, 0.0f), float(arg_3));
 }
 
@@ -46,7 +46,7 @@ uniform highp sampler2DShadow arg_0_arg_1;
 
 void textureSampleLevel_02be59() {
   vec2 arg_2 = vec2(0.0f);
-  int arg_3 = 0;
+  int arg_3 = 1;
   float res = textureLod(arg_0_arg_1, vec3(arg_2, 0.0f), float(arg_3));
 }
 

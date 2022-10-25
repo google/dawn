@@ -2,7 +2,7 @@
 
 uniform highp usampler3D arg_0_1;
 void textureDimensions_2efa05() {
-  int arg_1 = 0;
+  int arg_1 = 1;
   ivec3 res = textureSize(arg_0_1, arg_1);
 }
 
@@ -24,7 +24,7 @@ precision mediump float;
 
 uniform highp usampler3D arg_0_1;
 void textureDimensions_2efa05() {
-  int arg_1 = 0;
+  int arg_1 = 1;
   ivec3 res = textureSize(arg_0_1, arg_1);
 }
 
@@ -40,7 +40,7 @@ void main() {
 
 uniform highp usampler3D arg_0_1;
 void textureDimensions_2efa05() {
-  int arg_1 = 0;
+  int arg_1 = 1;
   ivec3 res = textureSize(arg_0_1, arg_1);
 }
 

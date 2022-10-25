@@ -1,7 +1,7 @@
 TextureCube<int4> arg_0 : register(t0, space1);
 
 void textureDimensions_686ef2() {
-  int arg_1 = 0;
+  int arg_1 = 1;
   int3 tint_tmp;
   arg_0.GetDimensions(arg_1, tint_tmp.x, tint_tmp.y, tint_tmp.z);
   int2 res = tint_tmp.xy;

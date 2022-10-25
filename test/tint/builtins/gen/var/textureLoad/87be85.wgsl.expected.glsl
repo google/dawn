@@ -4,7 +4,7 @@ uniform highp sampler2DArray arg_0_1;
 void textureLoad_87be85() {
   ivec2 arg_1 = ivec2(0);
   int arg_2 = 1;
-  int arg_3 = 0;
+  int arg_3 = 1;
   vec4 res = texelFetch(arg_0_1, ivec3(arg_1, arg_2), arg_3);
 }
 
@@ -28,7 +28,7 @@ uniform highp sampler2DArray arg_0_1;
 void textureLoad_87be85() {
   ivec2 arg_1 = ivec2(0);
   int arg_2 = 1;
-  int arg_3 = 0;
+  int arg_3 = 1;
   vec4 res = texelFetch(arg_0_1, ivec3(arg_1, arg_2), arg_3);
 }
 
@@ -46,7 +46,7 @@ uniform highp sampler2DArray arg_0_1;
 void textureLoad_87be85() {
   ivec2 arg_1 = ivec2(0);
   int arg_2 = 1;
-  int arg_3 = 0;
+  int arg_3 = 1;
   vec4 res = texelFetch(arg_0_1, ivec3(arg_1, arg_2), arg_3);
 }
 

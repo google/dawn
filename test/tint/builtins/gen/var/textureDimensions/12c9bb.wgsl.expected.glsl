@@ -2,7 +2,7 @@
 
 uniform highp sampler2D arg_0_1;
 void textureDimensions_12c9bb() {
-  int arg_1 = 0;
+  int arg_1 = 1;
   ivec2 res = textureSize(arg_0_1, arg_1);
 }
 
@@ -24,7 +24,7 @@ precision mediump float;
 
 uniform highp sampler2D arg_0_1;
 void textureDimensions_12c9bb() {
-  int arg_1 = 0;
+  int arg_1 = 1;
   ivec2 res = textureSize(arg_0_1, arg_1);
 }
 
@@ -40,7 +40,7 @@ void main() {
 
 uniform highp sampler2D arg_0_1;
 void textureDimensions_12c9bb() {
-  int arg_1 = 0;
+  int arg_1 = 1;
   ivec2 res = textureSize(arg_0_1, arg_1);
 }
 

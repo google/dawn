@@ -2,7 +2,7 @@ Texture2DArray arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 
 void textureSampleLevel_36780e() {
-  float res = arg_0.SampleLevel(arg_1, float3(0.0f, 0.0f, float(1)), 0, (0).xx).x;
+  float res = arg_0.SampleLevel(arg_1, float3(0.0f, 0.0f, float(1)), 1, (0).xx).x;
 }
 
 struct tint_symbol {

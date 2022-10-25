@@ -4,7 +4,7 @@ using namespace metal;
 void textureSampleLevel_ae5e39(depthcube_array<float, access::sample> tint_symbol_1, sampler tint_symbol_2) {
   float3 arg_2 = float3(0.0f);
   int arg_3 = 1;
-  int arg_4 = 0;
+  int arg_4 = 1;
   float res = tint_symbol_1.sample(tint_symbol_2, arg_2, arg_3, level(arg_4));
 }
 

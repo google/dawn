@@ -2,7 +2,7 @@
 
 uniform highp samplerCube arg_0_1;
 void textureDimensions_9393b0() {
-  ivec2 res = textureSize(arg_0_1, 0);
+  ivec2 res = textureSize(arg_0_1, 1);
 }
 
 vec4 vertex_main() {
@@ -23,7 +23,7 @@ precision mediump float;
 
 uniform highp samplerCube arg_0_1;
 void textureDimensions_9393b0() {
-  ivec2 res = textureSize(arg_0_1, 0);
+  ivec2 res = textureSize(arg_0_1, 1);
 }
 
 void fragment_main() {
@@ -38,7 +38,7 @@ void main() {
 
 uniform highp samplerCube arg_0_1;
 void textureDimensions_9393b0() {
-  ivec2 res = textureSize(arg_0_1, 0);
+  ivec2 res = textureSize(arg_0_1, 1);
 }
 
 void compute_main() {

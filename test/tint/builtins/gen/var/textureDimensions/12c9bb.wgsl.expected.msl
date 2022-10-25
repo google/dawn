@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureDimensions_12c9bb(depth2d<float, access::sample> tint_symbol_1) {
-  int arg_1 = 0;
+  int arg_1 = 1;
   int2 res = int2(tint_symbol_1.get_width(arg_1), tint_symbol_1.get_height(arg_1));
 }
 

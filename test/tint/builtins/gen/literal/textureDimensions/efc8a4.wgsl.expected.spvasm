@@ -39,7 +39,7 @@
        %void = OpTypeVoid
          %13 = OpTypeFunction %void
       %v3int = OpTypeVector %int 3
-         %20 = OpConstantNull %int
+      %int_1 = OpConstant %int 1
 %_ptr_Function_v3int = OpTypePointer Function %v3int
          %23 = OpConstantNull %v3int
          %24 = OpTypeFunction %v4float
@@ -48,7 +48,7 @@
          %16 = OpLabel
         %res = OpVariable %_ptr_Function_v3int Function %23
          %19 = OpLoad %11 %arg_0
-         %17 = OpImageQuerySizeLod %v3int %19 %20
+         %17 = OpImageQuerySizeLod %v3int %19 %int_1
                OpStore %res %17
                OpReturn
                OpFunctionEnd

@@ -2,7 +2,7 @@ Texture1D<int4> arg_0 : register(t0, space1);
 
 void textureDimensions_52045c() {
   int2 tint_tmp;
-  arg_0.GetDimensions(0, tint_tmp.x, tint_tmp.y);
+  arg_0.GetDimensions(1, tint_tmp.x, tint_tmp.y);
   int res = tint_tmp.x;
 }
 

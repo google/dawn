@@ -2,7 +2,7 @@ TextureCubeArray arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 
 void textureSampleLevel_ae5e39() {
-  float res = arg_0.SampleLevel(arg_1, float4(0.0f, 0.0f, 0.0f, float(1)), 0).x;
+  float res = arg_0.SampleLevel(arg_1, float4(0.0f, 0.0f, 0.0f, float(1)), 1).x;
 }
 
 struct tint_symbol {

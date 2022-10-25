@@ -2,7 +2,7 @@ Texture3D<float4> arg_0 : register(t0, space1);
 
 void textureLoad_1f2016() {
   int3 arg_1 = (0).xxx;
-  int arg_2 = 0;
+  int arg_2 = 1;
   float4 res = arg_0.Load(int4(arg_1, arg_2));
 }
 

@@ -3,7 +3,7 @@ SamplerState arg_1 : register(s1, space1);
 
 void textureSampleLevel_749baf() {
   float2 arg_2 = (0.0f).xx;
-  int arg_3 = 0;
+  int arg_3 = 1;
   float res = arg_0.SampleLevel(arg_1, arg_2, arg_3, (0).xx).x;
 }
 

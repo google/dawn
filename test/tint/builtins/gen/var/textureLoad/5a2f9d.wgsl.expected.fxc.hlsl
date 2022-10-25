@@ -2,7 +2,7 @@ Texture1D<int4> arg_0 : register(t0, space1);
 
 void textureLoad_5a2f9d() {
   int arg_1 = 1;
-  int arg_2 = 0;
+  int arg_2 = 1;
   int4 res = arg_0.Load(int2(arg_1, arg_2));
 }
 

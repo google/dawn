@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureDimensions_50a9ee(texturecube_array<float, access::sample> tint_symbol_1) {
-  int2 res = int2(tint_symbol_1.get_width(0), tint_symbol_1.get_height(0));
+  int2 res = int2(tint_symbol_1.get_width(1), tint_symbol_1.get_height(1));
 }
 
 struct tint_symbol {

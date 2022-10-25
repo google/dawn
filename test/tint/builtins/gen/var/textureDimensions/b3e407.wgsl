@@ -24,7 +24,7 @@
 
 // fn textureDimensions(texture: texture_1d<f32>, level: i32) -> i32
 fn textureDimensions_b3e407() {
-  var arg_1 = 0i;
+  var arg_1 = 1i;
   var res: i32 = textureDimensions(arg_0, arg_1);
 }
 

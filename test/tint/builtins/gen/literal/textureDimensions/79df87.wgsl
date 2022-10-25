@@ -24,7 +24,7 @@
 
 // fn textureDimensions(texture: texture_1d<u32>, level: i32) -> i32
 fn textureDimensions_79df87() {
-  var res: i32 = textureDimensions(arg_0, 0i);
+  var res: i32 = textureDimensions(arg_0, 1i);
 }
 
 @vertex

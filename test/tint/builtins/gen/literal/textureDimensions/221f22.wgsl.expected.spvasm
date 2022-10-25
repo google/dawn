@@ -41,7 +41,7 @@
          %13 = OpTypeFunction %void
       %v2int = OpTypeVector %int 2
       %v3int = OpTypeVector %int 3
-         %22 = OpConstantNull %int
+      %int_1 = OpConstant %int 1
 %_ptr_Function_v2int = OpTypePointer Function %v2int
          %25 = OpConstantNull %v2int
          %26 = OpTypeFunction %v4float
@@ -50,7 +50,7 @@
          %16 = OpLabel
         %res = OpVariable %_ptr_Function_v2int Function %25
          %21 = OpLoad %11 %arg_0
-         %19 = OpImageQuerySizeLod %v3int %21 %22
+         %19 = OpImageQuerySizeLod %v3int %21 %int_1
          %17 = OpVectorShuffle %v2int %19 %19 0 1
                OpStore %res %17
                OpReturn

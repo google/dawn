@@ -1,7 +1,7 @@
 @group(1) @binding(0) var arg_0 : texture_3d<f32>;
 
 fn textureDimensions_26bdfa() {
-  var arg_1 = 0i;
+  var arg_1 = 1i;
   var res : vec3<i32> = textureDimensions(arg_0, arg_1);
 }
 

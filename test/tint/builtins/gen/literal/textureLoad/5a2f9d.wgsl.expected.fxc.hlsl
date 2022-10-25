@@ -1,7 +1,7 @@
 Texture1D<int4> arg_0 : register(t0, space1);
 
 void textureLoad_5a2f9d() {
-  int4 res = arg_0.Load(int2(1, 0));
+  int4 res = arg_0.Load(int2(1, 1));
 }
 
 struct tint_symbol {

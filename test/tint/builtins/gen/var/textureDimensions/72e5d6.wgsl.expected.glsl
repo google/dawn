@@ -2,7 +2,7 @@
 
 uniform highp sampler2DArray arg_0_1;
 void textureDimensions_72e5d6() {
-  int arg_1 = 0;
+  int arg_1 = 1;
   ivec2 res = textureSize(arg_0_1, arg_1).xy;
 }
 
@@ -24,7 +24,7 @@ precision mediump float;
 
 uniform highp sampler2DArray arg_0_1;
 void textureDimensions_72e5d6() {
-  int arg_1 = 0;
+  int arg_1 = 1;
   ivec2 res = textureSize(arg_0_1, arg_1).xy;
 }
 
@@ -40,7 +40,7 @@ void main() {
 
 uniform highp sampler2DArray arg_0_1;
 void textureDimensions_72e5d6() {
-  int arg_1 = 0;
+  int arg_1 = 1;
   ivec2 res = textureSize(arg_0_1, arg_1).xy;
 }
 

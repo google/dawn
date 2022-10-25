@@ -3,7 +3,7 @@
 fn textureLoad_9b2667() {
   var arg_1 = vec2<i32>();
   var arg_2 = 1i;
-  var arg_3 = 0i;
+  var arg_3 = 1i;
   var res : f32 = textureLoad(arg_0, arg_1, arg_2, arg_3);
 }
 

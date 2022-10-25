@@ -1,7 +1,7 @@
 @group(1) @binding(0) var arg_0 : texture_depth_cube_array;
 
 fn textureDimensions_a01845() {
-  var res : vec2<i32> = textureDimensions(arg_0, 0i);
+  var res : vec2<i32> = textureDimensions(arg_0, 1i);
 }
 
 @vertex

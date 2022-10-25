@@ -1,7 +1,7 @@
 @group(1) @binding(0) var arg_0 : texture_depth_2d;
 
 fn textureDimensions_12c9bb() {
-  var arg_1 = 0i;
+  var arg_1 = 1i;
   var res : vec2<i32> = textureDimensions(arg_0, arg_1);
 }
 

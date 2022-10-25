@@ -2,7 +2,7 @@
 
 uniform highp usampler2DArray arg_0_1;
 void textureDimensions_267788() {
-  ivec2 res = textureSize(arg_0_1, 0).xy;
+  ivec2 res = textureSize(arg_0_1, 1).xy;
 }
 
 vec4 vertex_main() {
@@ -23,7 +23,7 @@ precision mediump float;
 
 uniform highp usampler2DArray arg_0_1;
 void textureDimensions_267788() {
-  ivec2 res = textureSize(arg_0_1, 0).xy;
+  ivec2 res = textureSize(arg_0_1, 1).xy;
 }
 
 void fragment_main() {
@@ -38,7 +38,7 @@ void main() {
 
 uniform highp usampler2DArray arg_0_1;
 void textureDimensions_267788() {
-  ivec2 res = textureSize(arg_0_1, 0).xy;
+  ivec2 res = textureSize(arg_0_1, 1).xy;
 }
 
 void compute_main() {
