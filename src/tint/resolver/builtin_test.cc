@@ -278,7 +278,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, Error_NoParams) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Scalar_f32) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, 1_f);
+    auto* call = Call(param.name, 0.5_f);
     WrapInFunction(call);
 
     if (param.args_number == 1u) {
@@ -299,7 +299,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Scalar_f32) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Vector_f32) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, vec3<f32>(1_f, 1_f, 3_f));
+    auto* call = Call(param.name, vec3<f32>(0.5_f, 0.5_f, 0.8_f));
     WrapInFunction(call);
 
     if (param.args_number == 1u) {
@@ -464,7 +464,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Scalar_f16) {
 
     Enable(ast::Extension::kF16);
 
-    auto* call = Call(param.name, 1_h);
+    auto* call = Call(param.name, 0.5_h);
     WrapInFunction(call);
 
     if (param.args_number == 1u) {
@@ -487,7 +487,7 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Vector_f16) {
 
     Enable(ast::Extension::kF16);
 
-    auto* call = Call(param.name, vec3<f16>(1_h, 1_h, 3_h));
+    auto* call = Call(param.name, vec3<f16>(0.5_h, 0.5_h, 0.8_h));
     WrapInFunction(call);
 
     if (param.args_number == 1u) {

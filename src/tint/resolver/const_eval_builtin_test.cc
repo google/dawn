@@ -90,9 +90,10 @@ TEST_P(ResolverConstEvalBuiltinTest, Test) {
     auto* expected_expr = expected->Expr(*this);
     GlobalConst("E", expected_expr);
 
-    EXPECT_TRUE(r()->Resolve()) << r()->error();
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(expr);
+    ASSERT_NE(sem, nullptr);
     const sem::Constant* value = sem->ConstantValue();
     ASSERT_NE(value, nullptr);
     EXPECT_TYPE(value->Type(), sem->Type());
@@ -255,6 +256,68 @@ INSTANTIATE_TEST_SUITE_P(  //
                      testing::ValuesIn(Concat(AtanCases<AFloat, true>(),  //
                                               AtanCases<f32, false>(),
                                               AtanCases<f16, false>()))));
+template <typename T, bool finite_only>
+std::vector<Case> AtanhCases() {
+    std::vector<Case> cases = {
+        // If i is +/-0, +/-0 is returned
+        C({T(0.0)}, T(0.0)).PosOrNeg(),
+
+        C({T(0.9)}, T(1.4722193)).FloatComp(),
+
+        // Vector tests
+        C({Vec(T(0.0), T(0.9), -T(0.9))}, Vec(T(0.0), T(1.4722193), -T(1.4722193))).FloatComp(),
+    };
+
+    ConcatIntoIf<!finite_only>(  //
+        cases, std::vector<Case>{
+                   // If i is NaN, NaN is returned
+                   C({T::NaN()}, T::NaN()),
+
+                   // Vector tests
+                   C({Vec(T::NaN(), T::NaN())}, Vec(T::NaN(), T::NaN())).FloatComp(),
+               });
+
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Atanh,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kAtanh),
+                     testing::ValuesIn(Concat(AtanhCases<AFloat, true>(),  //
+                                              AtanhCases<f32, false>(),
+                                              AtanhCases<f16, false>()))));
+
+TEST_F(ResolverConstEvalBuiltinTest, Atanh_OutsideRange_Positive) {
+    auto* expr = Call(Source{{12, 24}}, "atanh", Expr(1.0_a));
+
+    GlobalConst("C", expr);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:24 error: atanh must be called with a value in the range (-1, 1)");
+}
+
+TEST_F(ResolverConstEvalBuiltinTest, Atanh_OutsideRange_Negative) {
+    auto* expr = Call(Source{{12, 24}}, "atanh", Expr(-1.0_a));
+
+    GlobalConst("C", expr);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:24 error: atanh must be called with a value in the range (-1, 1)");
+}
+
+TEST_F(ResolverConstEvalBuiltinTest, Atanh_OutsideRange_Positive_INF) {
+    auto* expr = Call(Source{{12, 24}}, "atanh", Expr(f32::Inf()));
+
+    GlobalConst("C", expr);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:24 error: atanh must be called with a value in the range (-1, 1)");
+}
+
+TEST_F(ResolverConstEvalBuiltinTest, Atanh_OutsideRange_Negative_INF) {
+    auto* expr = Call(Source{{12, 24}}, "atanh", Expr(-f32::Inf()));
+
+    GlobalConst("C", expr);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:24 error: atanh must be called with a value in the range (-1, 1)");
+}
 
 template <typename T>
 std::vector<Case> ClampCases() {
