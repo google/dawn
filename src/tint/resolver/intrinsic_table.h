@@ -87,7 +87,7 @@ class IntrinsicTable {
     /// @param earliest_eval_stage the the earliest evaluation stage that a call to
     ///        the builtin can be made. This can alter the overloads considered.
     ///        For example, if the earliest evaluation stage is
-    ///        `sem::EvaluationStage::kRuntime`, then only concrete argument types
+    ///        `sem::EvaluationStage::kRuntime`, then only overloads with concrete argument types
     ///        will be considered, as all abstract-numerics will have been materialized
     ///        after shader creation time (sem::EvaluationStage::kConstant).
     /// @param source the source of the builtin call
@@ -101,10 +101,19 @@ class IntrinsicTable {
     /// diagnostic if the operator was not found.
     /// @param op the unary operator
     /// @param arg the type of the expression passed to the operator
+    /// @param earliest_eval_stage the the earliest evaluation stage that a call to
+    ///        the unary operator can be made. This can alter the overloads considered.
+    ///        For example, if the earliest evaluation stage is
+    ///        `sem::EvaluationStage::kRuntime`, then only overloads with concrete argument types
+    ///        will be considered, as all abstract-numerics will have been materialized
+    ///        after shader creation time (sem::EvaluationStage::kConstant).
     /// @param source the source of the operator call
     /// @return the operator call target signature. If the operator was not found
     ///         UnaryOperator::result will be nullptr.
-    virtual UnaryOperator Lookup(ast::UnaryOp op, const sem::Type* arg, const Source& source) = 0;
+    virtual UnaryOperator Lookup(ast::UnaryOp op,
+                                 const sem::Type* arg,
+                                 sem::EvaluationStage earliest_eval_stage,
+                                 const Source& source) = 0;
 
     /// Lookup looks for the binary op overload with the given signature, raising an error
     /// diagnostic if the operator was not found.
@@ -112,12 +121,19 @@ class IntrinsicTable {
     /// @param lhs the LHS value type passed to the operator
     /// @param rhs the RHS value type passed to the operator
     /// @param source the source of the operator call
+    /// @param earliest_eval_stage the the earliest evaluation stage that a call to
+    ///        the binary operator can be made. This can alter the overloads considered.
+    ///        For example, if the earliest evaluation stage is
+    ///        `sem::EvaluationStage::kRuntime`, then only overloads with concrete argument types
+    ///        will be considered, as all abstract-numerics will have been materialized
+    ///        after shader creation time (sem::EvaluationStage::kConstant).
     /// @param is_compound true if the binary operator is being used as a compound assignment
     /// @return the operator call target signature. If the operator was not found
     ///         BinaryOperator::result will be nullptr.
     virtual BinaryOperator Lookup(ast::BinaryOp op,
                                   const sem::Type* lhs,
                                   const sem::Type* rhs,
+                                  sem::EvaluationStage earliest_eval_stage,
                                   const Source& source,
                                   bool is_compound) = 0;
 
@@ -126,11 +142,19 @@ class IntrinsicTable {
     /// @param type the type being constructed or converted
     /// @param template_arg the optional template argument
     /// @param args the argument types passed to the initializer / conversion call
+    /// @param earliest_eval_stage the the earliest evaluation stage that a call to
+    ///        the initializer or conversion can be made. This can alter the overloads considered.
+    ///        For example, if the earliest evaluation stage is
+    ///        `sem::EvaluationStage::kRuntime`, then only overloads with concrete argument types
+    ///        will be considered, as all abstract-numerics will have been materialized
+    ///        after shader creation time (sem::EvaluationStage::kConstant).
+
     /// @param source the source of the call
     /// @return a sem::TypeInitializer, sem::TypeConversion or nullptr if nothing matched
     virtual InitOrConv Lookup(InitConvIntrinsic type,
                               const sem::Type* template_arg,
                               utils::VectorRef<const sem::Type*> args,
+                              sem::EvaluationStage earliest_eval_stage,
                               const Source& source) = 0;
 };
 
