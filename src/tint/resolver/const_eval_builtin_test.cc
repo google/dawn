@@ -169,46 +169,44 @@ std::vector<Case> Atan2Cases() {
         C({Vec(T(1.0), T(1.0)), Vec(T(0.0), -T(0.0))}, Vec(kPiOver2<T>, kPiOver2<T>)).FloatComp(),
     };
 
-    if constexpr (!finite_only) {
-        std::vector<Case> non_finite_cases = {
-            // If y is +/-INF and x is finite, +/-PI/2 is returned
-            C({T::Inf(), T(0.0)}, kPiOver2<T>).PosOrNeg().FloatComp(),
-            C({-T::Inf(), T(0.0)}, kPiOver2<T>).PosOrNeg().FloatComp(),
+    ConcatIntoIf<!finite_only>(  //
+        cases, std::vector<Case>{
+                   // If y is +/-INF and x is finite, +/-PI/2 is returned
+                   C({T::Inf(), T(0.0)}, kPiOver2<T>).PosOrNeg().FloatComp(),
+                   C({-T::Inf(), T(0.0)}, kPiOver2<T>).PosOrNeg().FloatComp(),
 
-            // If y is +/-INF and x is -INF, +/-3PI/4 is returned
-            C({T::Inf(), -T::Inf()}, k3PiOver4<T>).PosOrNeg().FloatComp(),
-            C({-T::Inf(), -T::Inf()}, k3PiOver4<T>).PosOrNeg().FloatComp(),
+                   // If y is +/-INF and x is -INF, +/-3PI/4 is returned
+                   C({T::Inf(), -T::Inf()}, k3PiOver4<T>).PosOrNeg().FloatComp(),
+                   C({-T::Inf(), -T::Inf()}, k3PiOver4<T>).PosOrNeg().FloatComp(),
 
-            // If y is +/-INF and x is +INF, +/-PI/4 is returned
-            C({T::Inf(), T::Inf()}, kPiOver4<T>).PosOrNeg().FloatComp(),
-            C({-T::Inf(), T::Inf()}, kPiOver4<T>).PosOrNeg().FloatComp(),
+                   // If y is +/-INF and x is +INF, +/-PI/4 is returned
+                   C({T::Inf(), T::Inf()}, kPiOver4<T>).PosOrNeg().FloatComp(),
+                   C({-T::Inf(), T::Inf()}, kPiOver4<T>).PosOrNeg().FloatComp(),
 
-            // If x is -INF and y is finite and positive, +PI is returned
-            C({T(0.0), -T::Inf()}, kPi<T>).FloatComp(),
+                   // If x is -INF and y is finite and positive, +PI is returned
+                   C({T(0.0), -T::Inf()}, kPi<T>).FloatComp(),
 
-            // If x is -INF and y is finite and negative, -PI is returned
-            C({-T(0.0), -T::Inf()}, -kPi<T>).FloatComp(),
+                   // If x is -INF and y is finite and negative, -PI is returned
+                   C({-T(0.0), -T::Inf()}, -kPi<T>).FloatComp(),
 
-            // If x is +INF and y is finite and positive, +0 is returned
-            C({T(0.0), T::Inf()}, T(0.0)),
+                   // If x is +INF and y is finite and positive, +0 is returned
+                   C({T(0.0), T::Inf()}, T(0.0)),
 
-            // If x is +INF and y is finite and negative, -0 is returned
-            C({-T(0.0), T::Inf()}, -T(0.0)),
+                   // If x is +INF and y is finite and negative, -0 is returned
+                   C({-T(0.0), T::Inf()}, -T(0.0)),
 
-            // If either x is NaN or y is NaN, NaN is returned
-            C({T::NaN(), T(0.0)}, T::NaN()),
-            C({T(0.0), T::NaN()}, T::NaN()),
-            C({T::NaN(), T::NaN()}, T::NaN()),
+                   // If either x is NaN or y is NaN, NaN is returned
+                   C({T::NaN(), T(0.0)}, T::NaN()),
+                   C({T(0.0), T::NaN()}, T::NaN()),
+                   C({T::NaN(), T::NaN()}, T::NaN()),
 
-            // Vector tests
-            C({Vec(T::Inf(), -T::Inf(), T::Inf(), -T::Inf()),  //
-               Vec(T(0.0), T(0.0), -T::Inf(), -T::Inf())},     //
-              Vec(kPiOver2<T>, kPiOver2<T>, k3PiOver4<T>, k3PiOver4<T>))
-                .PosOrNeg()
-                .FloatComp(),
-        };
-        cases = Concat(cases, non_finite_cases);
-    }
+                   // Vector tests
+                   C({Vec(T::Inf(), -T::Inf(), T::Inf(), -T::Inf()),  //
+                      Vec(T(0.0), T(0.0), -T::Inf(), -T::Inf())},     //
+                     Vec(kPiOver2<T>, kPiOver2<T>, k3PiOver4<T>, k3PiOver4<T>))
+                       .PosOrNeg()
+                       .FloatComp(),
+               });
 
     return cases;
 }
@@ -233,22 +231,20 @@ std::vector<Case> AtanCases() {
         C({Vec(T(0.0), T(1.0), -T(1.0))}, Vec(T(0.0), kPiOver4<T>, -kPiOver4<T>)).FloatComp(),
     };
 
-    if constexpr (!finite_only) {
-        std::vector<Case> non_finite_cases = {
-            // If i is +/-INF, +/-PI/2 is returned
-            C({T::Inf()}, kPiOver2<T>).PosOrNeg().FloatComp(),
-            C({-T::Inf()}, -kPiOver2<T>).FloatComp(),
+    ConcatIntoIf<!finite_only>(  //
+        cases, std::vector<Case>{
+                   // If i is +/-INF, +/-PI/2 is returned
+                   C({T::Inf()}, kPiOver2<T>).PosOrNeg().FloatComp(),
+                   C({-T::Inf()}, -kPiOver2<T>).FloatComp(),
 
-            // If i is NaN, NaN is returned
-            C({T::NaN()}, T::NaN()),
+                   // If i is NaN, NaN is returned
+                   C({T::NaN()}, T::NaN()),
 
-            // Vector tests
-            C({Vec(T::Inf(), -T::Inf(), T::Inf(), -T::Inf())},  //
-              Vec(kPiOver2<T>, -kPiOver2<T>, kPiOver2<T>, -kPiOver2<T>))
-                .FloatComp(),
-        };
-        cases = Concat(cases, non_finite_cases);
-    }
+                   // Vector tests
+                   C({Vec(T::Inf(), -T::Inf(), T::Inf(), -T::Inf())},  //
+                     Vec(kPiOver2<T>, -kPiOver2<T>, kPiOver2<T>, -kPiOver2<T>))
+                       .FloatComp(),
+               });
 
     return cases;
 }
