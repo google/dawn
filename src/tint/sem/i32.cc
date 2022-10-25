@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::I32);
 
 namespace tint::sem {
 
-I32::I32() = default;
+I32::I32() : Base(TypeFlags{Flag::kConstructable}) {}
 
 I32::I32(I32&&) = default;
 
@@ -36,10 +36,6 @@ bool I32::Equals(const Type& other) const {
 
 std::string I32::FriendlyName(const SymbolTable&) const {
     return "i32";
-}
-
-bool I32::IsConstructible() const {
-    return true;
 }
 
 uint32_t I32::Size() const {

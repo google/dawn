@@ -184,10 +184,6 @@ class Array final : public Castable<Array, Type> {
     /// @returns true if this array is runtime sized
     bool IsRuntimeSized() const { return std::holds_alternative<RuntimeArrayCount>(count_); }
 
-    /// @returns true if constructible as per
-    /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
-    bool IsConstructible() const override;
-
     /// @param symbols the program's symbol table
     /// @returns the name for this type that closely resembles how it would be
     /// declared in WGSL.
@@ -200,7 +196,6 @@ class Array final : public Castable<Array, Type> {
     const uint32_t size_;
     const uint32_t stride_;
     const uint32_t implicit_stride_;
-    const bool constructible_;
 };
 
 }  // namespace tint::sem

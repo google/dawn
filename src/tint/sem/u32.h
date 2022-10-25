@@ -42,10 +42,6 @@ class U32 final : public Castable<U32, Type> {
     /// declared in WGSL.
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
-    /// @returns true if constructible as per
-    /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
-    bool IsConstructible() const override;
-
     /// @returns the size in bytes of the type.
     uint32_t Size() const override;
 

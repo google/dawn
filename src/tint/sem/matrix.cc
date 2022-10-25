@@ -23,7 +23,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Matrix);
 namespace tint::sem {
 
 Matrix::Matrix(const Vector* column_type, uint32_t columns)
-    : subtype_(column_type->type()),
+    : Base(TypeFlags{Flag::kConstructable}),
+      subtype_(column_type->type()),
       column_type_(column_type),
       rows_(column_type->Width()),
       columns_(columns) {
@@ -52,10 +53,6 @@ std::string Matrix::FriendlyName(const SymbolTable& symbols) const {
     std::ostringstream out;
     out << "mat" << columns_ << "x" << rows_ << "<" << subtype_->FriendlyName(symbols) << ">";
     return out.str();
-}
-
-bool Matrix::IsConstructible() const {
-    return true;
 }
 
 uint32_t Matrix::Size() const {

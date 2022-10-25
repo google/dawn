@@ -27,6 +27,20 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Struct);
 TINT_INSTANTIATE_TYPEINFO(tint::sem::StructMember);
 
 namespace tint::sem {
+namespace {
+
+TypeFlags FlagsFrom(const StructMemberList& members) {
+    TypeFlags flags{TypeFlag::kConstructable};
+    for (auto* member : members) {
+        if (!member->Type()->IsConstructible()) {
+            flags.Remove(TypeFlag::kConstructable);
+            break;
+        }
+    }
+    return flags;
+}
+
+}  // namespace
 
 Struct::Struct(const ast::Struct* declaration,
                Symbol name,
@@ -34,20 +48,13 @@ Struct::Struct(const ast::Struct* declaration,
                uint32_t align,
                uint32_t size,
                uint32_t size_no_padding)
-    : declaration_(declaration),
+    : Base(FlagsFrom(members)),
+      declaration_(declaration),
       name_(name),
       members_(std::move(members)),
       align_(align),
       size_(size),
-      size_no_padding_(size_no_padding) {
-    constructible_ = true;
-    for (auto* member : members_) {
-        if (!member->Type()->IsConstructible()) {
-            constructible_ = false;
-            break;
-        }
-    }
-}
+      size_no_padding_(size_no_padding) {}
 
 Struct::~Struct() = default;
 
@@ -149,10 +156,6 @@ std::string Struct::Layout(const tint::SymbolTable& symbols) const {
     print_struct_end_line();
 
     return ss.str();
-}
-
-bool Struct::IsConstructible() const {
-    return constructible_;
 }
 
 StructMember::StructMember(const ast::StructMember* declaration,

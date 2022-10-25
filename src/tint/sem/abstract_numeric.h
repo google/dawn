@@ -37,9 +37,6 @@ class AbstractNumeric : public Castable<AbstractNumeric, Type> {
 
     /// @returns 0, as the type is abstract.
     uint32_t Align() const override;
-
-    /// @returns true.
-    bool IsConstructible() const override;
 };
 
 }  // namespace tint::sem

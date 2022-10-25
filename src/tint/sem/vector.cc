@@ -21,7 +21,8 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Vector);
 
 namespace tint::sem {
 
-Vector::Vector(Type const* subtype, uint32_t width) : subtype_(subtype), width_(width) {
+Vector::Vector(Type const* subtype, uint32_t width)
+    : Base(TypeFlags{Flag::kConstructable}), subtype_(subtype), width_(width) {
     TINT_ASSERT(Semantic, width_ > 1);
     TINT_ASSERT(Semantic, width_ < 5);
 }
@@ -45,10 +46,6 @@ std::string Vector::FriendlyName(const SymbolTable& symbols) const {
     std::ostringstream out;
     out << "vec" << width_ << "<" << subtype_->FriendlyName(symbols) << ">";
     return out.str();
-}
-
-bool Vector::IsConstructible() const {
-    return true;
 }
 
 uint32_t Vector::Size() const {

@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::U32);
 
 namespace tint::sem {
 
-U32::U32() = default;
+U32::U32() : Base(TypeFlags{Flag::kConstructable}) {}
 
 U32::~U32() = default;
 
@@ -36,10 +36,6 @@ bool U32::Equals(const Type& other) const {
 
 std::string U32::FriendlyName(const SymbolTable&) const {
     return "u32";
-}
-
-bool U32::IsConstructible() const {
-    return true;
 }
 
 uint32_t U32::Size() const {

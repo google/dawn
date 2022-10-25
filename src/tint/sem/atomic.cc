@@ -22,7 +22,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Atomic);
 
 namespace tint::sem {
 
-Atomic::Atomic(const sem::Type* subtype) : subtype_(subtype) {
+Atomic::Atomic(const sem::Type* subtype) : Base(TypeFlags{}), subtype_(subtype) {
     TINT_ASSERT(AST, !subtype->Is<Reference>());
 }
 
@@ -49,10 +49,6 @@ uint32_t Atomic::Size() const {
 
 uint32_t Atomic::Align() const {
     return subtype_->Align();
-}
-
-bool Atomic::IsConstructible() const {
-    return false;
 }
 
 Atomic::Atomic(Atomic&&) = default;

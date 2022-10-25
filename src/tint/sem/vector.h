@@ -47,10 +47,6 @@ class Vector final : public Castable<Vector, Type> {
     /// declared in WGSL.
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
-    /// @returns true if constructible as per
-    /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
-    bool IsConstructible() const override;
-
     /// @returns the number of elements in the vector
     uint32_t Width() const { return width_; }
 

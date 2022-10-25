@@ -26,6 +26,21 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Array);
 
 namespace tint::sem {
 
+namespace {
+
+TypeFlags FlagsFrom(const Type* element, ArrayCount count) {
+    TypeFlags flags;
+    // Only constant-expression sized arrays are constructible
+    if (std::holds_alternative<ConstantArrayCount>(count)) {
+        if (element->IsConstructible()) {
+            flags.Add(TypeFlag::kConstructable);
+        }
+    }
+    return flags;
+}
+
+}  // namespace
+
 const char* const Array::kErrExpectedConstantCount =
     "array size is an override-expression, when expected a constant-expression.\n"
     "Was the SubstituteOverride transform run?";
@@ -36,15 +51,13 @@ Array::Array(const Type* element,
              uint32_t size,
              uint32_t stride,
              uint32_t implicit_stride)
-    : element_(element),
+    : Base(FlagsFrom(element, count)),
+      element_(element),
       count_(count),
       align_(align),
       size_(size),
       stride_(stride),
-      implicit_stride_(implicit_stride),
-      // Only constant-expression sized arrays are constructible
-      constructible_(std::holds_alternative<ConstantArrayCount>(count) &&
-                     element->IsConstructible()) {
+      implicit_stride_(implicit_stride) {
     TINT_ASSERT(Semantic, element_);
 }
 
@@ -60,10 +73,6 @@ bool Array::Equals(const sem::Type& other) const {
                o->size_ == size_ && o->stride_ == stride_;
     }
     return false;
-}
-
-bool Array::IsConstructible() const {
-    return constructible_;
 }
 
 std::string Array::FriendlyName(const SymbolTable& symbols) const {

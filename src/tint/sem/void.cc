@@ -20,7 +20,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Void);
 
 namespace tint::sem {
 
-Void::Void() = default;
+Void::Void() : Base(TypeFlags{}) {}
 
 Void::Void(Void&&) = default;
 

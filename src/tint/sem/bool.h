@@ -48,10 +48,6 @@ class Bool final : public Castable<Bool, Type> {
     /// declared in WGSL.
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
-    /// @returns true if constructible as per
-    /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
-    bool IsConstructible() const override;
-
     /// @returns the size in bytes of the type.
     /// @note: booleans are not host-sharable, but still may exist in workgroup
     /// storage.

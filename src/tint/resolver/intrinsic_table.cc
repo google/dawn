@@ -58,7 +58,7 @@ constexpr static const size_t kNumFixedCandidates = 8;
 /// A special type that matches all TypeMatchers
 class Any final : public Castable<Any, sem::Type> {
   public:
-    Any() = default;
+    Any() : Base(sem::TypeFlags{}) {}
     ~Any() override = default;
 
     // Stub implementations for sem::Type conformance.

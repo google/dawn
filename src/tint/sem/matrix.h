@@ -59,10 +59,6 @@ class Matrix final : public Castable<Matrix, Type> {
     /// declared in WGSL.
     std::string FriendlyName(const SymbolTable& symbols) const override;
 
-    /// @returns true if constructible as per
-    /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
-    bool IsConstructible() const override;
-
     /// @returns the size in bytes of the type. This may include tail padding.
     uint32_t Size() const override;
 

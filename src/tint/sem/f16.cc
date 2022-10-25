@@ -21,7 +21,7 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::F16);
 namespace tint {
 namespace sem {
 
-F16::F16() = default;
+F16::F16() : Base(TypeFlags{Flag::kConstructable}) {}
 
 F16::F16(F16&&) = default;
 
@@ -37,10 +37,6 @@ bool F16::Equals(const Type& other) const {
 
 std::string F16::FriendlyName(const SymbolTable&) const {
     return "f16";
-}
-
-bool F16::IsConstructible() const {
-    return true;
 }
 
 uint32_t F16::Size() const {
