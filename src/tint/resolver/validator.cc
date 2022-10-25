@@ -2186,45 +2186,68 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
         const ast::InvariantAttribute* invariant_attribute = nullptr;
         const ast::InterpolateAttribute* interpolate_attribute = nullptr;
         for (auto* attr : member->Declaration()->attributes) {
-            if (!attr->IsAnyOf<ast::BuiltinAttribute,             //
-                               ast::InternalAttribute,            //
-                               ast::InterpolateAttribute,         //
-                               ast::InvariantAttribute,           //
-                               ast::LocationAttribute,            //
-                               ast::StructMemberOffsetAttribute,  //
-                               ast::StructMemberSizeAttribute,    //
-                               ast::StructMemberAlignAttribute>()) {
-                if (attr->Is<ast::StrideAttribute>() &&
-                    IsValidationDisabled(member->Declaration()->attributes,
-                                         ast::DisabledValidation::kIgnoreStrideAttribute)) {
-                    continue;
-                }
-                AddError("attribute is not valid for structure members", attr->source);
+            bool ok = Switch(
+                attr,  //
+                [&](const ast::InvariantAttribute* invariant) {
+                    invariant_attribute = invariant;
+                    return true;
+                },
+                [&](const ast::LocationAttribute* location) {
+                    has_location = true;
+                    TINT_ASSERT(Resolver, member->Location().has_value());
+                    if (!LocationAttribute(location, member->Location().value(), member->Type(),
+                                           locations, stage, member->Declaration()->source)) {
+                        return false;
+                    }
+                    return true;
+                },
+                [&](const ast::BuiltinAttribute* builtin) {
+                    if (!BuiltinAttribute(builtin, member->Type(), stage,
+                                          /* is_input */ false)) {
+                        return false;
+                    }
+                    if (builtin->builtin == ast::BuiltinValue::kPosition) {
+                        has_position = true;
+                    }
+                    return true;
+                },
+                [&](const ast::InterpolateAttribute* interpolate) {
+                    interpolate_attribute = interpolate;
+                    if (!InterpolateAttribute(interpolate, member->Type())) {
+                        return false;
+                    }
+                    return true;
+                },
+                [&](const ast::StructMemberSizeAttribute*) {
+                    if (!member->Type()->HasCreationFixedFootprint()) {
+                        AddError(
+                            "@size can only be applied to members where the member's type size "
+                            "can be fully determined at shader creation time",
+                            attr->source);
+                        return false;
+                    }
+                    return true;
+                },
+                [&](Default) {
+                    if (!attr->IsAnyOf<ast::BuiltinAttribute,             //
+                                       ast::InternalAttribute,            //
+                                       ast::InterpolateAttribute,         //
+                                       ast::InvariantAttribute,           //
+                                       ast::LocationAttribute,            //
+                                       ast::StructMemberOffsetAttribute,  //
+                                       ast::StructMemberAlignAttribute>()) {
+                        if (attr->Is<ast::StrideAttribute>() &&
+                            IsValidationDisabled(member->Declaration()->attributes,
+                                                 ast::DisabledValidation::kIgnoreStrideAttribute)) {
+                            return true;
+                        }
+                        AddError("attribute is not valid for structure members", attr->source);
+                        return false;
+                    }
+                    return true;
+                });
+            if (!ok) {
                 return false;
-            }
-
-            if (auto* invariant = attr->As<ast::InvariantAttribute>()) {
-                invariant_attribute = invariant;
-            } else if (auto* location = attr->As<ast::LocationAttribute>()) {
-                has_location = true;
-                TINT_ASSERT(Resolver, member->Location().has_value());
-                if (!LocationAttribute(location, member->Location().value(), member->Type(),
-                                       locations, stage, member->Declaration()->source)) {
-                    return false;
-                }
-            } else if (auto* builtin = attr->As<ast::BuiltinAttribute>()) {
-                if (!BuiltinAttribute(builtin, member->Type(), stage,
-                                      /* is_input */ false)) {
-                    return false;
-                }
-                if (builtin->builtin == ast::BuiltinValue::kPosition) {
-                    has_position = true;
-                }
-            } else if (auto* interpolate = attr->As<ast::InterpolateAttribute>()) {
-                interpolate_attribute = interpolate;
-                if (!InterpolateAttribute(interpolate, member->Type())) {
-                    return false;
-                }
             }
         }
 

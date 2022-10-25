@@ -22,7 +22,13 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Vector);
 namespace tint::sem {
 
 Vector::Vector(Type const* subtype, uint32_t width)
-    : Base(TypeFlags{Flag::kConstructable}), subtype_(subtype), width_(width) {
+    : Base(TypeFlags{
+          Flag::kConstructable,
+          Flag::kCreationFixedFootprint,
+          Flag::kFixedFootprint,
+      }),
+      subtype_(subtype),
+      width_(width) {
     TINT_ASSERT(Semantic, width_ > 1);
     TINT_ASSERT(Semantic, width_ < 5);
 }

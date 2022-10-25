@@ -30,11 +30,20 @@ namespace tint::sem {
 namespace {
 
 TypeFlags FlagsFrom(const StructMemberList& members) {
-    TypeFlags flags{TypeFlag::kConstructable};
+    TypeFlags flags{
+        TypeFlag::kConstructable,
+        TypeFlag::kCreationFixedFootprint,
+        TypeFlag::kFixedFootprint,
+    };
     for (auto* member : members) {
         if (!member->Type()->IsConstructible()) {
             flags.Remove(TypeFlag::kConstructable);
-            break;
+        }
+        if (!member->Type()->HasFixedFootprint()) {
+            flags.Remove(TypeFlag::kFixedFootprint);
+        }
+        if (!member->Type()->HasCreationFixedFootprint()) {
+            flags.Remove(TypeFlag::kCreationFixedFootprint);
         }
     }
     return flags;

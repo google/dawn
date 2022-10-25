@@ -21,7 +21,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::F16);
 namespace tint {
 namespace sem {
 
-F16::F16() : Base(TypeFlags{Flag::kConstructable}) {}
+F16::F16()
+    : Base(TypeFlags{
+          Flag::kConstructable,
+          Flag::kCreationFixedFootprint,
+          Flag::kFixedFootprint,
+      }) {}
 
 F16::F16(F16&&) = default;
 

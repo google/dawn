@@ -809,11 +809,25 @@ TEST_F(StructMemberAttributeTest, Size_Attribute_Var) {
 TEST_F(StructMemberAttributeTest, Size_Attribute_Override) {
     Override("val", ty.f32(), Expr(1.23_f));
 
-    Structure("mystruct", utils::Vector{Member("a", ty.f32(), utils::Vector{MemberSize("val")})});
+    Structure("mystruct",
+              utils::Vector{
+                  Member("a", ty.f32(), utils::Vector{MemberSize(Expr(Source{{12, 34}}, "val"))}),
+              });
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        R"(error: @size requires a const-expression, but expression is an override-expression)");
+        R"(12:34 error: @size requires a const-expression, but expression is an override-expression)");
+}
+
+TEST_F(StructMemberAttributeTest, Size_On_RuntimeSizedArray) {
+    Structure("mystruct",
+              utils::Vector{
+                  Member("a", ty.array<i32>(), utils::Vector{MemberSize(Source{{12, 34}}, 8_a)}),
+              });
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: @size can only be applied to members where the member's type size can be fully determined at shader creation time)");
 }
 
 }  // namespace StructAndStructMemberTests

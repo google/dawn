@@ -22,7 +22,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Atomic);
 
 namespace tint::sem {
 
-Atomic::Atomic(const sem::Type* subtype) : Base(TypeFlags{}), subtype_(subtype) {
+Atomic::Atomic(const sem::Type* subtype)
+    : Base(TypeFlags{
+          Flag::kCreationFixedFootprint,
+          Flag::kFixedFootprint,
+      }),
+      subtype_(subtype) {
     TINT_ASSERT(AST, !subtype->Is<Reference>());
 }
 

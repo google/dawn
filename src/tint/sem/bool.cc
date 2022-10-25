@@ -20,7 +20,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Bool);
 
 namespace tint::sem {
 
-Bool::Bool() : Base(TypeFlags{Flag::kConstructable}) {}
+Bool::Bool()
+    : Base(TypeFlags{
+          Flag::kConstructable,
+          Flag::kCreationFixedFootprint,
+          Flag::kFixedFootprint,
+      }) {}
 
 Bool::Bool(Bool&&) = default;
 

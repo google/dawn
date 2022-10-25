@@ -35,6 +35,15 @@ TypeFlags FlagsFrom(const Type* element, ArrayCount count) {
         if (element->IsConstructible()) {
             flags.Add(TypeFlag::kConstructable);
         }
+        if (element->HasCreationFixedFootprint()) {
+            flags.Add(TypeFlag::kCreationFixedFootprint);
+        }
+    }
+    if (std::holds_alternative<ConstantArrayCount>(count) ||
+        std::holds_alternative<OverrideArrayCount>(count)) {
+        if (element->HasFixedFootprint()) {
+            flags.Add(TypeFlag::kFixedFootprint);
+        }
     }
     return flags;
 }

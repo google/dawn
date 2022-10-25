@@ -23,7 +23,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Matrix);
 namespace tint::sem {
 
 Matrix::Matrix(const Vector* column_type, uint32_t columns)
-    : Base(TypeFlags{Flag::kConstructable}),
+    : Base(TypeFlags{
+          Flag::kConstructable,
+          Flag::kCreationFixedFootprint,
+          Flag::kFixedFootprint,
+      }),
       subtype_(column_type->type()),
       column_type_(column_type),
       rows_(column_type->Width()),

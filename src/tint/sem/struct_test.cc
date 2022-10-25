@@ -157,5 +157,71 @@ TEST_F(StructTest, IsConstructable) {
     EXPECT_FALSE(sem_outer_runtime_sized_array->IsConstructible());
 }
 
+TEST_F(StructTest, HasCreationFixedFootprint) {
+    auto* inner =  //
+        Structure("Inner", utils::Vector{
+                               Member("a", ty.i32()),
+                               Member("b", ty.u32()),
+                               Member("c", ty.f32()),
+                               Member("d", ty.vec3<f32>()),
+                               Member("e", ty.mat4x2<f32>()),
+                               Member("f", ty.array<f32, 32>()),
+                           });
+
+    auto* outer = Structure("Outer", utils::Vector{
+                                         Member("inner", ty.type_name("Inner")),
+                                     });
+
+    auto* outer_with_runtime_sized_array =
+        Structure("OuterRuntimeSizedArray", utils::Vector{
+                                                Member("inner", ty.type_name("Inner")),
+                                                Member("runtime_sized_array", ty.array<i32>()),
+                                            });
+
+    auto p = Build();
+    ASSERT_TRUE(p.IsValid()) << p.Diagnostics().str();
+
+    auto* sem_inner = p.Sem().Get(inner);
+    auto* sem_outer = p.Sem().Get(outer);
+    auto* sem_outer_with_runtime_sized_array = p.Sem().Get(outer_with_runtime_sized_array);
+
+    EXPECT_TRUE(sem_inner->HasCreationFixedFootprint());
+    EXPECT_TRUE(sem_outer->HasCreationFixedFootprint());
+    EXPECT_FALSE(sem_outer_with_runtime_sized_array->HasCreationFixedFootprint());
+}
+
+TEST_F(StructTest, HasFixedFootprint) {
+    auto* inner =  //
+        Structure("Inner", utils::Vector{
+                               Member("a", ty.i32()),
+                               Member("b", ty.u32()),
+                               Member("c", ty.f32()),
+                               Member("d", ty.vec3<f32>()),
+                               Member("e", ty.mat4x2<f32>()),
+                               Member("f", ty.array<f32, 32>()),
+                           });
+
+    auto* outer = Structure("Outer", utils::Vector{
+                                         Member("inner", ty.type_name("Inner")),
+                                     });
+
+    auto* outer_with_runtime_sized_array =
+        Structure("OuterRuntimeSizedArray", utils::Vector{
+                                                Member("inner", ty.type_name("Inner")),
+                                                Member("runtime_sized_array", ty.array<i32>()),
+                                            });
+
+    auto p = Build();
+    ASSERT_TRUE(p.IsValid()) << p.Diagnostics().str();
+
+    auto* sem_inner = p.Sem().Get(inner);
+    auto* sem_outer = p.Sem().Get(outer);
+    auto* sem_outer_with_runtime_sized_array = p.Sem().Get(outer_with_runtime_sized_array);
+
+    EXPECT_TRUE(sem_inner->HasFixedFootprint());
+    EXPECT_TRUE(sem_outer->HasFixedFootprint());
+    EXPECT_FALSE(sem_outer_with_runtime_sized_array->HasFixedFootprint());
+}
+
 }  // namespace
 }  // namespace tint::sem

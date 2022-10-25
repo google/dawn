@@ -135,5 +135,25 @@ TEST_F(ArrayTest, IsConstructable) {
     EXPECT_FALSE(runtime_sized->IsConstructible());
 }
 
+TEST_F(ArrayTest, HasCreationFixedFootprint) {
+    auto* fixed_sized = create<Array>(create<U32>(), ConstantArrayCount{2u}, 4u, 8u, 32u, 16u);
+    auto* override_sized = create<Array>(create<U32>(), OverrideArrayCount{}, 4u, 8u, 32u, 16u);
+    auto* runtime_sized = create<Array>(create<U32>(), RuntimeArrayCount{}, 4u, 8u, 32u, 16u);
+
+    EXPECT_TRUE(fixed_sized->HasCreationFixedFootprint());
+    EXPECT_FALSE(override_sized->HasCreationFixedFootprint());
+    EXPECT_FALSE(runtime_sized->HasCreationFixedFootprint());
+}
+
+TEST_F(ArrayTest, HasFixedFootprint) {
+    auto* fixed_sized = create<Array>(create<U32>(), ConstantArrayCount{2u}, 4u, 8u, 32u, 16u);
+    auto* override_sized = create<Array>(create<U32>(), OverrideArrayCount{}, 4u, 8u, 32u, 16u);
+    auto* runtime_sized = create<Array>(create<U32>(), RuntimeArrayCount{}, 4u, 8u, 32u, 16u);
+
+    EXPECT_TRUE(fixed_sized->HasFixedFootprint());
+    EXPECT_TRUE(override_sized->HasFixedFootprint());
+    EXPECT_FALSE(runtime_sized->HasFixedFootprint());
+}
+
 }  // namespace
 }  // namespace tint::sem

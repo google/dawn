@@ -34,7 +34,11 @@ TINT_INSTANTIATE_TYPEINFO(tint::sem::Type);
 
 namespace tint::sem {
 
-Type::Type(TypeFlags flags) : flags_(flags) {}
+Type::Type(TypeFlags flags) : flags_(flags) {
+    if (IsConstructible()) {
+        TINT_ASSERT(Semantic, HasCreationFixedFootprint());
+    }
+}
 
 Type::Type(Type&&) = default;
 

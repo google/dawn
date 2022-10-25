@@ -34,6 +34,12 @@ enum TypeFlag {
     /// Type is constructable.
     /// @see https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
     kConstructable,
+    /// Type has a creation-fixed footprint.
+    /// @see https://www.w3.org/TR/WGSL/#fixed-footprint-types
+    kCreationFixedFootprint,
+    /// Type has a fixed footprint.
+    /// @see https://www.w3.org/TR/WGSL/#fixed-footprint-types
+    kFixedFootprint,
 };
 
 /// An alias to utils::EnumSet<TypeFlag>
@@ -82,6 +88,16 @@ class Type : public Castable<Type, Node> {
     /// @returns true if type is constructable
     /// https://gpuweb.github.io/gpuweb/wgsl/#constructible-types
     inline bool IsConstructible() const { return flags_.Contains(Flag::kConstructable); }
+
+    /// @returns true has a creation-fixed footprint.
+    /// @see https://www.w3.org/TR/WGSL/#fixed-footprint-types
+    inline bool HasCreationFixedFootprint() const {
+        return flags_.Contains(Flag::kCreationFixedFootprint);
+    }
+
+    /// @returns true has a fixed footprint.
+    /// @see https://www.w3.org/TR/WGSL/#fixed-footprint-types
+    inline bool HasFixedFootprint() const { return flags_.Contains(Flag::kFixedFootprint); }
 
     /// @returns true if this type is a scalar
     bool is_scalar() const;
