@@ -19,10 +19,6 @@
 
 #include "dawn/native/opengl/UtilsEGL.h"
 
-#ifndef EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT
-#define EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT 0x30BF
-#endif
-
 namespace dawn::native::opengl {
 
 ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions& egl,
@@ -76,11 +72,11 @@ ResultOrError<std::unique_ptr<ContextEGL>> ContextEGL::Create(const EGLFunctions
         major,
         EGL_CONTEXT_MINOR_VERSION,
         minor,
-        EGL_CONTEXT_OPENGL_ROBUST_ACCESS_EXT,
+        EGL_CONTEXT_OPENGL_ROBUST_ACCESS,  // Core in EGL 1.5
         EGL_TRUE,
         EGL_NONE,
-        EGL_NONE,
     };
+
     EGLContext context = egl.CreateContext(display, config, EGL_NO_CONTEXT, attrib_list);
     DAWN_TRY(CheckEGL(egl, context != EGL_NO_CONTEXT, "eglCreateContext"));
 
