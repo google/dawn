@@ -198,7 +198,9 @@ src/webgpu/api/validation/createPipelineLayout.spec.ts
 src/webgpu/api/validation/createSampler.spec.ts
 src/webgpu/api/validation/createTexture.spec.ts
 src/webgpu/api/validation/createView.spec.ts
+src/webgpu/api/validation/debugMarker.spec.ts
 src/webgpu/api/validation/error_scope.spec.ts
+src/webgpu/api/validation/getBindGroupLayout.spec.ts
 src/webgpu/api/validation/layout_shader_compat.spec.ts
 src/webgpu/api/validation/buffer/create.spec.ts
 src/webgpu/api/validation/buffer/destroy.spec.ts
@@ -283,6 +285,7 @@ src/webgpu/util/compare.ts
 src/webgpu/shader/execution/expression/expression.ts
 src/webgpu/shader/execution/expression/binary/binary.ts
 src/webgpu/shader/execution/expression/binary/bitwise.spec.ts
+src/webgpu/shader/execution/expression/binary/bool_logical.spec.ts
 src/webgpu/shader/execution/expression/binary/f32_arithmetic.spec.ts
 src/webgpu/shader/execution/expression/binary/f32_logical.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/builtin.ts
@@ -397,6 +400,7 @@ src/webgpu/shader/execution/expression/call/builtin/unpack4x8snorm.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/unpack4x8unorm.spec.ts
 src/webgpu/shader/execution/expression/call/builtin/workgroupBarrier.spec.ts
 src/webgpu/shader/execution/expression/unary/unary.ts
+src/webgpu/shader/execution/expression/unary/bool_logical.spec.ts
 src/webgpu/shader/execution/expression/unary/f32_arithmetic.spec.ts
 src/webgpu/shader/execution/memory_model/memory_model_setup.ts
 src/webgpu/shader/execution/memory_model/atomicity.spec.ts
