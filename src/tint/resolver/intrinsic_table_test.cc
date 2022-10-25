@@ -560,8 +560,7 @@ TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Builtin_RuntimeEval) {
     EXPECT_TRUE(result.sem->Parameters()[2]->Type()->Is<sem::Bool>());
 }
 
-// TODO(amaiorano): Enable once const eval of left shift lands
-TEST_F(IntrinsicTableTest, DISABLED_MatchDifferentArgsElementType_Binary_ConstantEval) {
+TEST_F(IntrinsicTableTest, MatchDifferentArgsElementType_Binary_ConstantEval) {
     auto* ai = create<sem::AbstractInt>();
     auto* u32 = create<sem::U32>();
     auto result = table->Lookup(ast::BinaryOp::kShiftLeft, ai, u32, sem::EvaluationStage::kConstant,
