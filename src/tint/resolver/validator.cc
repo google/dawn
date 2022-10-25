@@ -642,14 +642,6 @@ bool Validator::GlobalVariable(
                 return false;
             }
 
-            auto name = symbols_.NameFor(var->symbol);
-            if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
-                AddError(
-                    "'" + name + "' is a builtin and cannot be redeclared as a module-scope 'var'",
-                    var->source);
-                return false;
-            }
-
             return Var(global);
         },
         [&](const ast::Override*) { return Override(global, override_ids); },
@@ -818,13 +810,6 @@ bool Validator::Override(
         }
     }
 
-    auto name = symbols_.NameFor(decl->symbol);
-    if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
-        AddError("'" + name + "' is a builtin and cannot be redeclared as a 'override'",
-                 decl->source);
-        return false;
-    }
-
     if (!storage_ty->is_scalar()) {
         AddError(sem_.TypeNameOf(storage_ty) + " cannot be used as the type of a 'override'",
                  decl->source);
@@ -839,15 +824,7 @@ bool Validator::Override(
     return true;
 }
 
-bool Validator::Const(const sem::Variable* v) const {
-    auto* decl = v->Declaration();
-
-    auto name = symbols_.NameFor(decl->symbol);
-    if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
-        AddError("'" + name + "' is a builtin and cannot be redeclared as a 'const'", decl->source);
-        return false;
-    }
-
+bool Validator::Const(const sem::Variable*) const {
     return true;
 }
 
@@ -1033,13 +1010,6 @@ bool Validator::InterpolateAttribute(const ast::InterpolateAttribute* attr,
 bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) const {
     auto* decl = func->Declaration();
 
-    auto name = symbols_.NameFor(decl->symbol);
-    if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
-        AddError("'" + name + "' is a builtin and cannot be redeclared as a function",
-                 decl->source);
-        return false;
-    }
-
     for (auto* attr : decl->attributes) {
         if (attr->Is<ast::WorkgroupAttribute>()) {
             if (decl->PipelineStage() != ast::PipelineStage::kCompute) {
@@ -1112,6 +1082,7 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
         func->Behaviors() != sem::Behavior::kNext && func->Behaviors() != sem::Behavior::kDiscard &&
         func->Behaviors() != sem::Behaviors{sem::Behavior::kNext,  //
                                             sem::Behavior::kDiscard}) {
+        auto name = symbols_.NameFor(decl->symbol);
         TINT_ICE(Resolver, diagnostics_)
             << "function '" << name << "' behaviors are: " << func->Behaviors();
     }
@@ -2178,24 +2149,11 @@ bool Validator::ArrayStrideAttribute(const ast::StrideAttribute* attr,
     return true;
 }
 
-bool Validator::Alias(const ast::Alias* alias) const {
-    auto name = symbols_.NameFor(alias->name);
-    if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
-        AddError("'" + name + "' is a builtin and cannot be redeclared as an alias", alias->source);
-        return false;
-    }
-
+bool Validator::Alias(const ast::Alias*) const {
     return true;
 }
 
 bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) const {
-    auto name = symbols_.NameFor(str->Declaration()->name);
-    if (sem::ParseBuiltinType(name) != sem::BuiltinType::kNone) {
-        AddError("'" + name + "' is a builtin and cannot be redeclared as a struct",
-                 str->Declaration()->source);
-        return false;
-    }
-
     if (str->Members().empty()) {
         AddError("structures must have at least one member", str->Declaration()->source);
         return false;

@@ -14,6 +14,7 @@
 
 #include "src/tint/ast/builtin_texture_helper_test.h"
 #include "src/tint/resolver/resolver_test_helper.h"
+#include "src/tint/sem/type_initializer.h"
 
 using namespace tint::number_suffixes;  // NOLINT
 
@@ -96,48 +97,169 @@ TEST_F(ResolverBuiltinValidationTest, InvalidPipelineStageIndirect) {
 7:8 note: called by entry point 'main')");
 }
 
-TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsFunction) {
-    Func(Source{{12, 34}}, "mix", utils::Empty, ty.i32(), {});
+TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsFunctionUsedAsFunction) {
+    auto* mix = Func(Source{{12, 34}}, "mix", utils::Empty, ty.i32(),
+                     utils::Vector{
+                         Return(1_i),
+                     });
+    auto* use = Call("mix");
+    WrapInFunction(use);
 
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a function)");
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    auto* sem = Sem().Get<sem::Call>(use);
+    ASSERT_NE(sem, nullptr);
+    EXPECT_EQ(sem->Target(), Sem().Get(mix));
 }
 
-TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConst) {
+TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsFunctionUsedAsVariable) {
+    Func(Source{{12, 34}}, "mix", utils::Empty, ty.i32(),
+         utils::Vector{
+             Return(1_i),
+         });
+    WrapInFunction(Decl(Var("v", Expr(Source{{56, 78}}, "mix"))));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(56:78 error: missing '(' for function call)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsFunctionUsedAsType) {
+    Func(Source{{12, 34}}, "mix", utils::Empty, ty.i32(),
+         utils::Vector{
+             Return(1_i),
+         });
+    WrapInFunction(Construct(ty.type_name(Source{{56, 78}}, "mix")));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(56:78 error: cannot use function 'mix' as type
+12:34 note: 'mix' declared here)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConstUsedAsFunction) {
     GlobalConst(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i));
+    WrapInFunction(Call(Expr(Source{{56, 78}}, "mix"), 1_f, 2_f, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a 'const')");
+    EXPECT_EQ(r()->error(), R"(56:78 error: cannot call variable 'mix'
+12:34 note: 'mix' declared here)");
 }
 
-TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVar) {
+TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConstUsedAsVariable) {
+    auto* mix = GlobalConst(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i));
+    auto* use = Expr("mix");
+    WrapInFunction(Decl(Var("v", use)));
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    auto* sem = Sem().Get<sem::VariableUser>(use);
+    ASSERT_NE(sem, nullptr);
+    EXPECT_EQ(sem->Variable(), Sem().Get(mix));
+}
+
+TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalConstUsedAsType) {
+    GlobalConst(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i));
+    WrapInFunction(Construct(ty.type_name(Source{{56, 78}}, "mix")));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(56:78 error: cannot use variable 'mix' as type
+12:34 note: 'mix' declared here)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsFunction) {
     GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), ast::AddressSpace::kPrivate);
+    WrapInFunction(Call(Expr(Source{{56, 78}}, "mix"), 1_f, 2_f, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(
-        r()->error(),
-        R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a module-scope 'var')");
+    EXPECT_EQ(r()->error(), R"(56:78 error: cannot call variable 'mix'
+12:34 note: 'mix' declared here)");
 }
 
-TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAlias) {
+TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsVariable) {
+    auto* mix =
+        GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), ast::AddressSpace::kPrivate);
+    auto* use = Expr("mix");
+    WrapInFunction(Decl(Var("v", use)));
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    auto* sem = Sem().Get<sem::VariableUser>(use);
+    ASSERT_NE(sem, nullptr);
+    EXPECT_EQ(sem->Variable(), Sem().Get(mix));
+}
+
+TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsGlobalVarUsedAsType) {
+    GlobalVar(Source{{12, 34}}, "mix", ty.i32(), Expr(1_i), ast::AddressSpace::kPrivate);
+    WrapInFunction(Construct(ty.type_name(Source{{56, 78}}, "mix")));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(56:78 error: cannot use variable 'mix' as type
+12:34 note: 'mix' declared here)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsFunction) {
     Alias(Source{{12, 34}}, "mix", ty.i32());
+    WrapInFunction(Call(Source{{56, 78}}, "mix", 1_f, 2_f, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: 'mix' is a builtin and cannot be redeclared as an alias)");
+    EXPECT_EQ(r()->error(), R"(56:78 error: no matching initializer for i32(f32, f32, f32)
+
+2 candidate initializers:
+  i32(i32) -> i32
+  i32() -> i32
+
+1 candidate conversion:
+  i32<T>(T) -> i32  where: T is abstract-int, abstract-float, f32, f16, u32 or bool
+)");
 }
 
-TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsStruct) {
-    Structure(Source{{12, 34}}, "mix",
-              utils::Vector{
-                  Member("m", ty.i32()),
-              });
+TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsVariable) {
+    Alias(Source{{12, 34}}, "mix", ty.i32());
+    WrapInFunction(Decl(Var("v", Expr(Source{{56, 78}}, "mix"))));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(56:78 error: missing '(' for builtin call)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsAliasUsedAsType) {
+    auto* mix = Alias(Source{{12, 34}}, "mix", ty.i32());
+    auto* use = Construct(ty.type_name("mix"));
+    WrapInFunction(use);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    auto* sem = Sem().Get<sem::Call>(use);
+    ASSERT_NE(sem, nullptr);
+    EXPECT_EQ(sem->Type(), Sem().Get(mix));
+}
+
+TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsStructUsedAsFunction) {
+    Structure("mix", utils::Vector{
+                         Member("m", ty.i32()),
+                     });
+    WrapInFunction(Call(Source{{12, 34}}, "mix", 1_f, 2_f, 3_f));
 
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              R"(12:34 error: 'mix' is a builtin and cannot be redeclared as a struct)");
+              R"(12:34 error: struct initializer has too many inputs: expected 1, found 3)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsStructUsedAsVariable) {
+    Structure("mix", utils::Vector{
+                         Member("m", ty.i32()),
+                     });
+    WrapInFunction(Decl(Var("v", Expr(Source{{12, 34}}, "mix"))));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: missing '(' for builtin call)");
+}
+
+TEST_F(ResolverBuiltinValidationTest, BuiltinRedeclaredAsStructUsedAsType) {
+    auto* mix = Structure("mix", utils::Vector{
+                                     Member("m", ty.i32()),
+                                 });
+    auto* use = Construct(ty.type_name("mix"));
+    WrapInFunction(use);
+
+    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    auto* sem = Sem().Get<sem::Call>(use);
+    ASSERT_NE(sem, nullptr);
+    EXPECT_EQ(sem->Type(), Sem().Get(mix));
 }
 
 namespace texture_constexpr_args {
