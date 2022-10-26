@@ -178,7 +178,6 @@ class TransformBuilder {
         /// @param tb - TransformBuilder to add transform to
         static void impl(TransformBuilder* tb) {
             transform::VertexPulling::Config cfg;
-            cfg.entry_point_name = tb->builder()->build<std::string>();
             cfg.vertex_state = tb->builder()->vector<transform::VertexBufferLayoutDescriptor>(
                 GenerateVertexBufferLayoutDescriptor);
             cfg.pulling_group = tb->builder()->build<uint32_t>();
