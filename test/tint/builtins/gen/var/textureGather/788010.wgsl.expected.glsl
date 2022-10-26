@@ -7,7 +7,7 @@ uniform highp isamplerCubeArray arg_1_arg_2;
 void textureGather_788010() {
   vec3 arg_3 = vec3(0.0f);
   uint arg_4 = 1u;
-  ivec4 res = textureGather(arg_1_arg_2, vec4(arg_3, float(arg_4)), int(1u));
+  ivec4 res = textureGather(arg_1_arg_2, vec4(arg_3, float(arg_4)), 1);
 }
 
 vec4 vertex_main() {
@@ -38,7 +38,7 @@ uniform highp isamplerCubeArray arg_1_arg_2;
 void textureGather_788010() {
   vec3 arg_3 = vec3(0.0f);
   uint arg_4 = 1u;
-  ivec4 res = textureGather(arg_1_arg_2, vec4(arg_3, float(arg_4)), int(1u));
+  ivec4 res = textureGather(arg_1_arg_2, vec4(arg_3, float(arg_4)), 1);
 }
 
 void fragment_main() {
@@ -63,7 +63,7 @@ uniform highp isamplerCubeArray arg_1_arg_2;
 void textureGather_788010() {
   vec3 arg_3 = vec3(0.0f);
   uint arg_4 = 1u;
-  ivec4 res = textureGather(arg_1_arg_2, vec4(arg_3, float(arg_4)), int(1u));
+  ivec4 res = textureGather(arg_1_arg_2, vec4(arg_3, float(arg_4)), 1);
 }
 
 void compute_main() {

@@ -9,6 +9,7 @@
 ### New features
 
 * Uniformity analysis failures are warnings again [tint:1728](crbug.com/tint/1728)
+* You can now call texture builtins with a mix of signed and unsigned integer arguments. [tint:1733](crbug.com/tint/1733)
 
 ## Changes for M108
 

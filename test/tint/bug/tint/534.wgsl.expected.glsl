@@ -24,8 +24,8 @@ void tint_symbol_1(uvec3 GlobalInvocationID) {
   if ((uniforms.dstTextureFlipY == 1u)) {
     srcTexCoord.y = ((size.y - dstTexCoord.y) - 1u);
   }
-  vec4 srcColor = texelFetch(src_1, ivec2(srcTexCoord), int(0u));
-  vec4 dstColor = texelFetch(dst_1, ivec2(dstTexCoord), int(0u));
+  vec4 srcColor = texelFetch(src_1, ivec2(srcTexCoord), 0);
+  vec4 dstColor = texelFetch(dst_1, ivec2(dstTexCoord), 0);
   bool success = true;
   uvec4 srcColorBits = uvec4(0u, 0u, 0u, 0u);
   uvec4 dstColorBits = uvec4(dstColor);

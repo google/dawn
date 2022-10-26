@@ -34,9 +34,9 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
 vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, uvec2 coord, ExternalTextureParams params) {
   vec3 color = vec3(0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {
-    color = texelFetch(plane0_1, ivec2(coord), int(0u)).rgb;
+    color = texelFetch(plane0_1, ivec2(coord), 0).rgb;
   } else {
-    color = (vec4(texelFetch(plane0_1, ivec2(coord), int(0u)).r, texelFetch(plane1_1, ivec2(coord), int(0u)).rg, 1.0f) * params.yuvToRgbConversionMatrix);
+    color = (vec4(texelFetch(plane0_1, ivec2(coord), 0).r, texelFetch(plane1_1, ivec2(coord), 0).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
     color = gammaCorrection(color, params.gammaDecodeParams);
@@ -103,9 +103,9 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
 vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, uvec2 coord, ExternalTextureParams params) {
   vec3 color = vec3(0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {
-    color = texelFetch(plane0_1, ivec2(coord), int(0u)).rgb;
+    color = texelFetch(plane0_1, ivec2(coord), 0).rgb;
   } else {
-    color = (vec4(texelFetch(plane0_1, ivec2(coord), int(0u)).r, texelFetch(plane1_1, ivec2(coord), int(0u)).rg, 1.0f) * params.yuvToRgbConversionMatrix);
+    color = (vec4(texelFetch(plane0_1, ivec2(coord), 0).r, texelFetch(plane1_1, ivec2(coord), 0).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
     color = gammaCorrection(color, params.gammaDecodeParams);
@@ -166,9 +166,9 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
 vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, uvec2 coord, ExternalTextureParams params) {
   vec3 color = vec3(0.0f, 0.0f, 0.0f);
   if ((params.numPlanes == 1u)) {
-    color = texelFetch(plane0_1, ivec2(coord), int(0u)).rgb;
+    color = texelFetch(plane0_1, ivec2(coord), 0).rgb;
   } else {
-    color = (vec4(texelFetch(plane0_1, ivec2(coord), int(0u)).r, texelFetch(plane1_1, ivec2(coord), int(0u)).rg, 1.0f) * params.yuvToRgbConversionMatrix);
+    color = (vec4(texelFetch(plane0_1, ivec2(coord), 0).r, texelFetch(plane1_1, ivec2(coord), 0).rg, 1.0f) * params.yuvToRgbConversionMatrix);
   }
   if ((params.doYuvToRgbConversionOnly == 0u)) {
     color = gammaCorrection(color, params.gammaDecodeParams);

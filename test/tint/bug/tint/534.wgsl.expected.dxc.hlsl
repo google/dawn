@@ -26,8 +26,8 @@ void main_inner(uint3 GlobalInvocationID) {
   if ((uniforms[0].x == 1u)) {
     srcTexCoord.y = ((size.y - dstTexCoord.y) - 1u);
   }
-  float4 srcColor = src.Load(uint3(srcTexCoord, 0u));
-  float4 dstColor = tint_symbol.Load(uint3(dstTexCoord, 0u));
+  float4 srcColor = src.Load(uint3(srcTexCoord, uint(0)));
+  float4 dstColor = tint_symbol.Load(uint3(dstTexCoord, uint(0)));
   bool success = true;
   uint4 srcColorBits = uint4(0u, 0u, 0u, 0u);
   uint4 dstColorBits = uint4(dstColor);

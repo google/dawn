@@ -36,8 +36,8 @@ void tint_symbol_inner(uint3 GlobalInvocationID, texture2d<float, access::sample
   if (((*(tint_symbol_3)).dstTextureFlipY == 1u)) {
     srcTexCoord[1] = ((size[1] - dstTexCoord[1]) - 1u);
   }
-  float4 srcColor = tint_symbol_2.read(uint2(srcTexCoord), 0u);
-  float4 dstColor = tint_symbol_4.read(uint2(dstTexCoord), 0u);
+  float4 srcColor = tint_symbol_2.read(uint2(srcTexCoord), 0);
+  float4 dstColor = tint_symbol_4.read(uint2(dstTexCoord), 0);
   bool success = true;
   uint4 srcColorBits = 0u;
   uint4 dstColorBits = uint4(dstColor);

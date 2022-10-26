@@ -3,7 +3,7 @@
 @group(1) @binding(2) var arg_2 : sampler;
 
 fn textureGather_788010() {
-  const arg_0 = 1;
+  const arg_0 = 1i;
   var arg_3 = vec3<f32>();
   var arg_4 = 1u;
   var res : vec4<i32> = textureGather(arg_0, arg_1, arg_2, arg_3, arg_4);

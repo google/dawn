@@ -191,7 +191,7 @@ void simulate(uvec3 GlobalInvocationID) {
     }
     vec2 uv = (vec2(coord) / vec2(uvec2(textureSize(tint_symbol_6, 0))));
     particle.position = vec3((((uv - 0.5f) * 3.0f) * vec2(1.0f, -1.0f)), 0.0f);
-    particle.color = texelFetch(tint_symbol_6, ivec2(coord), int(0u));
+    particle.color = texelFetch(tint_symbol_6, ivec2(coord), 0);
     float tint_symbol_1 = rand();
     particle.velocity.x = ((tint_symbol_1 - 0.5f) * 0.100000001f);
     float tint_symbol_2 = rand();
