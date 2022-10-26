@@ -35,18 +35,21 @@ TEST_F(VertexPullingTest, Error_NoEntryPoint) {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(VertexPullingTest, Error_InvalidEntryPoint) {
+TEST_F(VertexPullingTest, Error_MultipleEntryPoint) {
     auto* src = R"(
 @vertex
 fn main() -> @builtin(position) vec4<f32> {
   return vec4<f32>();
 }
+@vertex
+fn main2() -> @builtin(position) vec4<f32> {
+  return vec4<f32>();
+}
 )";
 
-    auto* expect = "error: Vertex stage entry point not found";
+    auto* expect = "error: VertexPulling found more than one vertex entry point";
 
     VertexPulling::Config cfg;
-    cfg.entry_point_name = "_";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -64,7 +67,6 @@ fn main() {}
     auto* expect = "error: Vertex stage entry point not found";
 
     VertexPulling::Config cfg;
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -87,7 +89,6 @@ fn main(@location(0) var_a : f32) -> @builtin(position) vec4<f32> {
 
     VertexPulling::Config cfg;
     cfg.vertex_state = {{{15, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -116,7 +117,6 @@ fn main() -> @builtin(position) vec4<f32> {
 )";
 
     VertexPulling::Config cfg;
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -153,7 +153,6 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 
     VertexPulling::Config cfg;
     cfg.vertex_state = {{{4, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -190,7 +189,6 @@ fn main(@builtin(instance_index) tint_pulling_instance_index : u32) -> @builtin(
 
     VertexPulling::Config cfg;
     cfg.vertex_state = {{{4, VertexStepMode::kInstance, {{VertexFormat::kFloat32, 0, 0}}}}};
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -228,7 +226,6 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
     VertexPulling::Config cfg;
     cfg.vertex_state = {{{4, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
     cfg.pulling_group = 5;
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -274,7 +271,6 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
 
     VertexPulling::Config cfg;
     cfg.vertex_state = {{{4, VertexStepMode::kVertex, {{VertexFormat::kFloat32, 0, 0}}}}};
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -332,7 +328,6 @@ fn main(@builtin(vertex_index) custom_vertex_index : u32, @builtin(instance_inde
             {{VertexFormat::kFloat32, 0, 1}},
         },
     }};
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -411,7 +406,6 @@ fn main(tint_symbol_1 : tint_symbol) -> @builtin(position) vec4<f32> {
             {{VertexFormat::kFloat32, 0, 1}},
         },
     }};
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -490,7 +484,6 @@ struct Inputs {
             {{VertexFormat::kFloat32, 0, 1}},
         },
     }};
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -566,7 +559,6 @@ fn main(indices : Indices) -> @builtin(position) vec4<f32> {
             {{VertexFormat::kFloat32, 0, 1}},
         },
     }};
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -642,7 +634,6 @@ struct Indices {
             {{VertexFormat::kFloat32, 0, 1}},
         },
     }};
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -684,7 +675,6 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
     cfg.vertex_state = {{{16,
                           VertexStepMode::kVertex,
                           {{VertexFormat::kFloat32, 0, 0}, {VertexFormat::kFloat32x4, 0, 1}}}}};
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -738,7 +728,6 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
         {12, VertexStepMode::kVertex, {{VertexFormat::kFloat32x3, 0, 1}}},
         {16, VertexStepMode::kVertex, {{VertexFormat::kFloat32x4, 0, 2}}},
     }};
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -788,7 +777,6 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index_1 : u32) -> @builtin(po
     cfg.vertex_state = {{{16,
                           VertexStepMode::kVertex,
                           {{VertexFormat::kFloat32, 0, 0}, {VertexFormat::kFloat32x4, 0, 1}}}}};
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -933,7 +921,6 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
               {VertexFormat::kSint32, 64, 26},    {VertexFormat::kSint32x2, 64, 27},
               {VertexFormat::kSint32x3, 64, 28},  {VertexFormat::kSint32x4, 64, 29},
           }}}};
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -1079,7 +1066,6 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
               {VertexFormat::kSint32, 63, 26},    {VertexFormat::kSint32x2, 63, 27},
               {VertexFormat::kSint32x3, 63, 28},  {VertexFormat::kSint32x4, 63, 29},
           }}}};
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);
@@ -1224,7 +1210,6 @@ fn main(@builtin(vertex_index) tint_pulling_vertex_index : u32) -> @builtin(posi
               {VertexFormat::kSint32, 64, 26},    {VertexFormat::kSint32x2, 64, 27},
               {VertexFormat::kSint32x3, 64, 28},  {VertexFormat::kSint32x4, 64, 29},
           }}}};
-    cfg.entry_point_name = "main";
 
     DataMap data;
     data.Add<VertexPulling::Config>(cfg);

@@ -882,8 +882,18 @@ void VertexPulling::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) cons
     }
 
     // Find entry point
-    auto* func = ctx.src->AST().Functions().Find(ctx.src->Symbols().Get(cfg.entry_point_name),
-                                                 ast::PipelineStage::kVertex);
+    const ast::Function* func = nullptr;
+    for (auto* fn : ctx.src->AST().Functions()) {
+        if (fn->PipelineStage() == ast::PipelineStage::kVertex) {
+            if (func != nullptr) {
+                ctx.dst->Diagnostics().add_error(
+                    diag::System::Transform,
+                    "VertexPulling found more than one vertex entry point");
+                return;
+            }
+            func = fn;
+        }
+    }
     if (func == nullptr) {
         ctx.dst->Diagnostics().add_error(diag::System::Transform,
                                          "Vertex stage entry point not found");

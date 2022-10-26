@@ -141,8 +141,8 @@ ResultOrError<CacheResult<MslCompilation>> TranslateToMSL(
     std::optional<tint::transform::VertexPulling::Config> vertexPullingTransformConfig;
     if (stage == SingleShaderStage::Vertex &&
         device->IsToggleEnabled(Toggle::MetalEnableVertexPulling)) {
-        vertexPullingTransformConfig = BuildVertexPullingTransformConfig(
-            *renderPipeline, programmableStage.entryPoint.c_str(), kPullingBufferBindingSet);
+        vertexPullingTransformConfig =
+            BuildVertexPullingTransformConfig(*renderPipeline, kPullingBufferBindingSet);
 
         for (VertexBufferSlot slot : IterateBitSet(renderPipeline->GetVertexBufferSlotsUsed())) {
             uint32_t metalIndex = renderPipeline->GetMtlVertexBufferIndex(slot);

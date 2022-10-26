@@ -154,10 +154,8 @@ tint::transform::MultiplanarExternalTexture::BindingsMap BuildExternalTextureTra
 
 tint::transform::VertexPulling::Config BuildVertexPullingTransformConfig(
     const RenderPipelineBase& renderPipeline,
-    const std::string_view& entryPoint,
     BindGroupIndex pullingBufferBindingSet) {
     tint::transform::VertexPulling::Config cfg;
-    cfg.entry_point_name = entryPoint;
     cfg.pulling_group = static_cast<uint32_t>(pullingBufferBindingSet);
 
     cfg.vertex_state.resize(renderPipeline.GetVertexBufferCount());
