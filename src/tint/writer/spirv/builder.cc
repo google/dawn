@@ -3238,13 +3238,19 @@ bool Builder::GenerateAtomicBuiltin(const sem::Call* call,
                 return false;
             }
 
-            // values_equal := original_value == value
+            // https://registry.khronos.org/SPIR-V/specs/unified1/SPIRV.html#OpAtomicCompareExchange
+            // According to SPIR-V spec, during the atomic steps of OpAtomicCompareExchange, the new
+            // value will be stored only if original value equals to comparator, and the result of
+            // OpAtomicCompareExchange is the original value. Therefore to check if the exchanging
+            // has been executed, we should compare the result original_value to comparator.
+
+            // values_equal := original_value == comparator
             auto values_equal = result_op();
             if (!push_function_inst(spv::Op::OpIEqual, {
                                                            Operand(bool_type),
                                                            values_equal,
                                                            original_value,
-                                                           value,
+                                                           Operand(comparator),
                                                        })) {
                 return false;
             }

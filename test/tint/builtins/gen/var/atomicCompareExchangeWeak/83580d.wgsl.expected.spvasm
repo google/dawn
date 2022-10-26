@@ -50,7 +50,7 @@
          %21 = OpLoad %uint %arg_2
          %22 = OpLoad %uint %arg_1
          %23 = OpAtomicCompareExchange %uint %arg_0 %uint_2 %uint_0 %uint_0 %21 %22
-         %24 = OpIEqual %bool %23 %21
+         %24 = OpIEqual %bool %23 %22
          %15 = OpCompositeConstruct %__atomic_compare_exchange_resultu32 %23 %24
                OpStore %res %15
                OpReturn

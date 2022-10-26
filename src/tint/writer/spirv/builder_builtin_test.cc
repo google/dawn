@@ -3622,11 +3622,11 @@ TEST_F(BuiltinBuilderTest, Call_AtomicCompareExchangeWeak) {
 
     auto* expected_instructions = R"(%17 = OpAccessChain %16 %1 %14
 %20 = OpAtomicCompareExchange %4 %17 %13 %14 %14 %18 %19
-%21 = OpIEqual %12 %20 %18
+%21 = OpIEqual %12 %20 %19
 %10 = OpCompositeConstruct %11 %20 %21
 %26 = OpAccessChain %25 %1 %13
 %29 = OpAtomicCompareExchange %5 %26 %13 %14 %14 %27 %28
-%30 = OpIEqual %12 %29 %27
+%30 = OpIEqual %12 %29 %28
 %22 = OpCompositeConstruct %23 %29 %30
 OpReturn
 )";

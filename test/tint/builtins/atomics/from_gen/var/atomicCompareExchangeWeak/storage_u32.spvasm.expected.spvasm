@@ -64,7 +64,7 @@
          %20 = OpLoad %uint %arg_1
          %26 = OpAccessChain %_ptr_StorageBuffer_uint %sb_rw %uint_0
          %27 = OpAtomicCompareExchange %uint %26 %uint_1 %uint_0 %uint_0 %19 %20
-         %28 = OpIEqual %bool %27 %19
+         %28 = OpIEqual %bool %27 %20
          %21 = OpCompositeConstruct %__atomic_compare_exchange_resultu32 %27 %28
          %29 = OpCompositeExtract %uint %21 0
          %30 = OpIEqual %bool %29 %19
