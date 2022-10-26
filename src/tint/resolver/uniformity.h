@@ -25,6 +25,9 @@ class ProgramBuilder;
 
 namespace tint::resolver {
 
+/// If true, uniformity analysis failures will be treated as an error, else as a warning.
+constexpr bool kUniformityFailuresAsError = false;
+
 /// Analyze the uniformity of a program.
 /// @param builder the program to analyze
 /// @param dependency_graph the dependency-ordered module-scope declarations

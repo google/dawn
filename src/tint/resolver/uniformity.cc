@@ -1672,7 +1672,9 @@ class UniformityGraph {
         // the `MakeError` function.
         auto report = [&](Source source, std::string msg) {
             diag::Diagnostic error{};
-            error.severity = note ? diag::Severity::Note : diag::Severity::Error;
+            auto failureSeverity =
+                kUniformityFailuresAsError ? diag::Severity::Error : diag::Severity::Warning;
+            error.severity = note ? diag::Severity::Note : failureSeverity;
             error.system = diag::System::Resolver;
             error.source = source;
             error.message = msg;

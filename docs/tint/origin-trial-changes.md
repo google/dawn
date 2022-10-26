@@ -1,5 +1,11 @@
 # Tint changes during Origin Trial
 
+## Changes for M109
+
+### New features
+
+* Uniformity analysis failures are warnings again [tint:1728](crbug.com/tint/1728)
+
 ## Changes for M108
 
 ### New features
