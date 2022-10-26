@@ -178,6 +178,15 @@ wgpu::BindGroup MakeBindGroup(
     const wgpu::BindGroupLayout& layout,
     std::initializer_list<BindingInitializationHelper> entriesInitializer);
 
+struct ColorSpaceConversionInfo {
+    std::array<float, 12> yuvToRgbConversionMatrix;
+    std::array<float, 9> gamutConversionMatrix;
+    std::array<float, 7> srcTransferFunctionParameters;
+    std::array<float, 7> dstTransferFunctionParameters;
+};
+
+ColorSpaceConversionInfo GetYUVBT709ToRGBSRGBColorSpaceConversionInfo();
+
 }  // namespace utils
 
 #endif  // SRC_DAWN_UTILS_WGPUHELPERS_H_

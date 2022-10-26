@@ -39,10 +39,10 @@ class ExternalTextureTests : public DawnTest {
   protected:
     wgpu::ExternalTextureDescriptor CreateDefaultExternalTextureDescriptor() {
         wgpu::ExternalTextureDescriptor desc;
-        desc.yuvToRgbConversionMatrix = kYuvToRGBMatrixBT709.data();
-        desc.gamutConversionMatrix = kGamutConversionMatrixBT709ToSrgb.data();
-        desc.srcTransferFunctionParameters = kGammaDecodeBT709.data();
-        desc.dstTransferFunctionParameters = kGammaEncodeSrgb.data();
+        desc.yuvToRgbConversionMatrix = yuvBT709ToRGBSRGB.yuvToRgbConversionMatrix.data();
+        desc.gamutConversionMatrix = yuvBT709ToRGBSRGB.gamutConversionMatrix.data();
+        desc.srcTransferFunctionParameters = yuvBT709ToRGBSRGB.srcTransferFunctionParameters.data();
+        desc.dstTransferFunctionParameters = yuvBT709ToRGBSRGB.dstTransferFunctionParameters.data();
 
         return desc;
     }
@@ -51,14 +51,8 @@ class ExternalTextureTests : public DawnTest {
     static constexpr uint32_t kHeight = 4;
     static constexpr wgpu::TextureFormat kFormat = wgpu::TextureFormat::RGBA8Unorm;
     static constexpr wgpu::TextureUsage kSampledUsage = wgpu::TextureUsage::TextureBinding;
-    std::array<float, 12> kYuvToRGBMatrixBT709 = {1.164384f, 0.0f,       1.792741f,  -0.972945f,
-                                                  1.164384f, -0.213249f, -0.532909f, 0.301483f,
-                                                  1.164384f, 2.112402f,  0.0f,       -1.133402f};
-    std::array<float, 9> kGamutConversionMatrixBT709ToSrgb = {1.0f, 0.0f, 0.0f, 0.0f, 1.0f,
-                                                              0.0f, 0.0f, 0.0f, 1.0f};
-    std::array<float, 7> kGammaDecodeBT709 = {2.2, 1.0 / 1.099, 0.099 / 1.099, 1 / 4.5, 0.081,
-                                              0.0, 0.0};
-    std::array<float, 7> kGammaEncodeSrgb = {1 / 2.4, 1.137119, 0.0, 12.92, 0.0031308, -0.055, 0.0};
+    utils::ColorSpaceConversionInfo yuvBT709ToRGBSRGB =
+        utils::GetYUVBT709ToRGBSRGBColorSpaceConversionInfo();
 };
 }  // anonymous namespace
 
@@ -99,7 +93,7 @@ TEST_P(ExternalTextureTests, SampleExternalTexture) {
 
         @fragment fn main(@builtin(position) FragCoord : vec4<f32>)
                                  -> @location(0) vec4<f32> {
-            return textureSampleLevel(t, s, FragCoord.xy / vec2<f32>(4.0, 4.0));
+            return textureSampleBaseClampToEdge(t, s, FragCoord.xy / vec2<f32>(4.0, 4.0));
         })");
 
     wgpu::Texture sampledTexture =
@@ -184,7 +178,7 @@ TEST_P(ExternalTextureTests, SampleMultiplanarExternalTexture) {
 
         @fragment fn main(@builtin(position) FragCoord : vec4<f32>)
                                  -> @location(0) vec4<f32> {
-            return textureSampleLevel(t, s, FragCoord.xy / vec2<f32>(4.0, 4.0));
+            return textureSampleBaseClampToEdge(t, s, FragCoord.xy / vec2<f32>(4.0, 4.0));
         })");
 
     wgpu::Texture sampledTexturePlane0 =

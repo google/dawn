@@ -46,6 +46,18 @@ AbslFormatConvert(const Color* value, const absl::FormatConversionSpec& spec, ab
 }
 
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const Extent2D* value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s) {
+    if (value == nullptr) {
+        s->Append("[null]");
+        return {true};
+    }
+    s->Append(absl::StrFormat("[Extent2D width:%u, height:%u]", value->width, value->height));
+    return {true};
+}
+
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
     const Extent3D* value,
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s) {

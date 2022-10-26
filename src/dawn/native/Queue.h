@@ -58,6 +58,10 @@ class QueueBase : public ApiObjectBase {
                                   const ImageCopyTexture* destination,
                                   const Extent3D* copySize,
                                   const CopyTextureForBrowserOptions* options);
+    void APICopyExternalTextureForBrowser(const ImageCopyExternalTexture* source,
+                                          const ImageCopyTexture* destination,
+                                          const Extent3D* copySize,
+                                          const CopyTextureForBrowserOptions* options);
 
     MaybeError WriteBuffer(BufferBase* buffer,
                            uint64_t bufferOffset,
@@ -82,6 +86,10 @@ class QueueBase : public ApiObjectBase {
                                              const ImageCopyTexture* destination,
                                              const Extent3D* copySize,
                                              const CopyTextureForBrowserOptions* options);
+    MaybeError CopyExternalTextureForBrowserInternal(const ImageCopyExternalTexture* source,
+                                                     const ImageCopyTexture* destination,
+                                                     const Extent3D* copySize,
+                                                     const CopyTextureForBrowserOptions* options);
 
     virtual MaybeError SubmitImpl(uint32_t commandCount, CommandBufferBase* const* commands) = 0;
     virtual MaybeError WriteBufferImpl(BufferBase* buffer,
