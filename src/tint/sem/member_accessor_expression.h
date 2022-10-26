@@ -33,6 +33,13 @@ namespace tint::sem {
 /// ast::MemberAccessorExpression node.
 class MemberAccessorExpression : public Castable<MemberAccessorExpression, Expression> {
   public:
+    /// Destructor
+    ~MemberAccessorExpression() override;
+
+    /// @returns the object that holds the member being accessed
+    const Expression* Object() const { return object_; }
+
+  protected:
     /// Constructor
     /// @param declaration the AST node
     /// @param type the resolved type of the expression
@@ -50,12 +57,6 @@ class MemberAccessorExpression : public Castable<MemberAccessorExpression, Expre
                              const Expression* object,
                              bool has_side_effects,
                              const Variable* source_var = nullptr);
-
-    /// Destructor
-    ~MemberAccessorExpression() override;
-
-    /// @returns the object that holds the member being accessed
-    const Expression* Object() const { return object_; }
 
   private:
     Expression const* const object_;
