@@ -45,6 +45,7 @@ tint::transform::MultiplanarExternalTexture::BindingsMap BuildExternalTextureTra
 
 tint::transform::VertexPulling::Config BuildVertexPullingTransformConfig(
     const RenderPipelineBase& renderPipeline,
+    const std::string_view& entryPoint,
     BindGroupIndex pullingBufferBindingSet);
 
 tint::transform::SubstituteOverride::Config BuildSubstituteOverridesTransformConfig(
