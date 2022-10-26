@@ -126,7 +126,7 @@ fn main_create_lut(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>
     return;
   }
   var numTriangles = atomicLoad(&(counters.values[voxelIndex]));
-  var offset = -1;
+  var offset = -(1);
   if ((numTriangles > 0u)) {
     offset = i32(atomicAdd(&(dbg.offsetCounter), numTriangles));
   }

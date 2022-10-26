@@ -305,7 +305,7 @@ fn main_1() {
   let x_362 : vec3<f32> = output5;
   let x_365 : mat3x3<f32> = invTBN;
   let x_366 : vec4<f32> = v_output2;
-  numSamples = (15.0 + (dot((x_361 * -(x_362)), (x_365 * vec3<f32>(x_366.x, x_366.y, x_366.z))) * -11.0));
+  numSamples = (15.0 + (dot((x_361 * -(x_362)), (x_365 * vec3<f32>(x_366.x, x_366.y, x_366.z))) * -(11.0)));
   let x_374 : f32 = numSamples;
   stepSize = (1.0 / x_374);
   currRayHeight = 1.0;

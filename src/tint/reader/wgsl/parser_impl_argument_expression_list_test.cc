@@ -37,7 +37,7 @@ TEST_F(ParserImplTest, ArgumentExpressionList_ParsesEmptyList) {
 }
 
 TEST_F(ParserImplTest, ArgumentExpressionList_ParsesMultiple) {
-    auto p = parser("(a, -33, 1+2)");
+    auto p = parser("(a, 33, 1+2)");
     auto e = p->expect_argument_expression_list("argument list");
     ASSERT_FALSE(p->has_error()) << p->error();
     ASSERT_FALSE(e.errored);

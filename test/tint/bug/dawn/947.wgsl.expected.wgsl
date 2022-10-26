@@ -14,14 +14,14 @@ struct VertexOutputs {
 
 @vertex
 fn vs_main(@builtin(vertex_index) VertexIndex : u32) -> VertexOutputs {
-  var texcoord = array<vec2<f32>, 3>(vec2<f32>(-0.5, 0.0), vec2<f32>(1.5, 0.0), vec2<f32>(0.5, 2.0));
+  var texcoord = array<vec2<f32>, 3>(vec2<f32>(-(0.5), 0.0), vec2<f32>(1.5, 0.0), vec2<f32>(0.5, 2.0));
   var output : VertexOutputs;
   output.position = vec4<f32>(((texcoord[VertexIndex] * 2.0) - vec2<f32>(1.0, 1.0)), 0.0, 1.0);
   var flipY = (uniforms.u_scale.y < 0.0);
   if (flipY) {
-    output.texcoords = ((((texcoord[VertexIndex] * uniforms.u_scale) + uniforms.u_offset) * vec2<f32>(1.0, -1.0)) + vec2<f32>(0.0, 1.0));
+    output.texcoords = ((((texcoord[VertexIndex] * uniforms.u_scale) + uniforms.u_offset) * vec2<f32>(1.0, -(1.0))) + vec2<f32>(0.0, 1.0));
   } else {
-    output.texcoords = ((((texcoord[VertexIndex] * vec2<f32>(1.0, -1.0)) + vec2<f32>(0.0, 1.0)) * uniforms.u_scale) + uniforms.u_offset);
+    output.texcoords = ((((texcoord[VertexIndex] * vec2<f32>(1.0, -(1.0))) + vec2<f32>(0.0, 1.0)) * uniforms.u_scale) + uniforms.u_offset);
   }
   return output;
 }

@@ -269,6 +269,124 @@ TEST_F(ParserImplTest, Expression_InvalidAssociativity) {
     EXPECT_EQ(p->error(), R"(1:7: mixing '&&' and '||' requires parenthesis)");
 }
 
+TEST_F(ParserImplTest, Expression_SubtractionNoSpace) {
+    auto p = parser("(2-1)");
+    auto e = p->expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+    ASSERT_TRUE(e->Is<ast::BinaryExpression>());
+    auto* b = e->As<ast::BinaryExpression>();
+    EXPECT_TRUE(b->IsSubtract());
+
+    ASSERT_TRUE(b->lhs->Is<ast::IntLiteralExpression>());
+    ASSERT_TRUE(b->rhs->Is<ast::IntLiteralExpression>());
+
+    EXPECT_EQ(b->lhs->As<ast::IntLiteralExpression>()->value, 2);
+    EXPECT_EQ(b->rhs->As<ast::IntLiteralExpression>()->value, 1);
+}
+
+TEST_F(ParserImplTest, Expression_NegatedNumber) {
+    auto p = parser("-1");
+    auto e = p->expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+
+    ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
+    auto* b = e->As<ast::UnaryOpExpression>();
+    EXPECT_EQ(b->op, ast::UnaryOp::kNegation);
+
+    ASSERT_TRUE(b->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(b->expr->As<ast::IntLiteralExpression>()->value, 1);
+}
+
+TEST_F(ParserImplTest, Expression_MaxI32) {
+    auto p = parser("2147483647");
+    auto e = p->expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+
+    ASSERT_TRUE(e->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(e->As<ast::IntLiteralExpression>()->value, 2147483647);
+}
+
+TEST_F(ParserImplTest, Expression_MinI32) {
+    auto p = parser("-2147483648");
+    auto e = p->expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+
+    ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
+    auto* b = e->As<ast::UnaryOpExpression>();
+    EXPECT_EQ(b->op, ast::UnaryOp::kNegation);
+
+    ASSERT_TRUE(b->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(b->expr->As<ast::IntLiteralExpression>()->value, 2147483648);
+}
+
+TEST_F(ParserImplTest, Expression_MaxU32) {
+    auto p = parser("4294967295");
+    auto e = p->expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+
+    ASSERT_TRUE(e->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(e->As<ast::IntLiteralExpression>()->value, 4294967295);
+}
+
+TEST_F(ParserImplTest, Expression_MaxF32) {
+    const auto highest = std::numeric_limits<float>::max();
+    const auto expected_highest = 340282346638528859811704183484516925440.0f;
+    if (highest < expected_highest || highest > expected_highest) {
+        GTEST_SKIP() << "std::numeric_limits<float>::max() is not as expected for "
+                        "this target";
+    }
+
+    auto p = parser("340282346638528859811704183484516925440.0f");
+    auto e = p->expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+
+    ASSERT_TRUE(e->Is<ast::FloatLiteralExpression>());
+    EXPECT_EQ(e->As<ast::FloatLiteralExpression>()->value,
+              340282346638528859811704183484516925440.0f);
+}
+
+TEST_F(ParserImplTest, Expression_MinF32) {
+    const auto lowest = std::numeric_limits<float>::lowest();
+    const auto expected_lowest = -340282346638528859811704183484516925440.0f;
+    if (lowest < expected_lowest || lowest > expected_lowest) {
+        GTEST_SKIP() << "std::numeric_limits<float>::lowest() is not as expected for "
+                        "this target";
+    }
+
+    auto p = parser("-340282346638528859811704183484516925440.0f");
+    auto e = p->expression();
+    EXPECT_TRUE(e.matched);
+    EXPECT_FALSE(e.errored);
+    EXPECT_FALSE(p->has_error()) << p->error();
+    ASSERT_NE(e.value, nullptr);
+
+    ASSERT_TRUE(e->Is<ast::UnaryOpExpression>());
+    auto* b = e->As<ast::UnaryOpExpression>();
+    EXPECT_EQ(b->op, ast::UnaryOp::kNegation);
+
+    ASSERT_TRUE(b->expr->Is<ast::FloatLiteralExpression>());
+    EXPECT_EQ(b->expr->As<ast::FloatLiteralExpression>()->value,
+              340282346638528859811704183484516925440.0f);
+}
+
 namespace mixing_binary_ops {
 
 struct BinaryOperatorInfo {

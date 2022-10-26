@@ -16,7 +16,7 @@ fn main(@builtin(vertex_index) gl_VertexIndex : u32) -> @builtin(position) vec4<
   let x_23 : mat2x2<f32> = x_20.transform1;
   let x_28 : mat2x2<f32> = x_26.transform2;
   let x_46 : u32 = gl_VertexIndex;
-  indexable = array<vec2<f32>, 3>(vec2<f32>(-1.0, 1.0), vec2<f32>(1.0, 1.0), vec2<f32>(-1.0, -1.0));
+  indexable = array<vec2<f32>, 3>(vec2<f32>(-(1.0), 1.0), vec2<f32>(1.0, 1.0), vec2<f32>(-(1.0), -(1.0)));
   let x_51 : vec2<f32> = indexable[x_46];
   let x_52 : vec2<f32> = (mat2x2<f32>((x_23[0u] + x_28[0u]), (x_23[1u] + x_28[1u])) * x_51);
   return vec4<f32>(x_52.x, x_52.y, 0.0, 1.0);

@@ -53,7 +53,7 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
     lightsBuffer.lights[index].position.y = uniforms.max.y;
   }
   var M : mat4x4<f32> = uniforms.projectionMatrix;
-  var viewNear : f32 = (-(M[3][2]) / (-1.0 + M[2][2]));
+  var viewNear : f32 = (-(M[3][2]) / (-(1.0) + M[2][2]));
   var viewFar : f32 = (-(M[3][2]) / (1.0 + M[2][2]));
   var lightPos = lightsBuffer.lights[index].position;
   lightPos = (uniforms.viewMatrix * lightPos);
@@ -62,7 +62,7 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
   var boxMin : vec4<f32> = (lightPos - vec4<f32>(vec3<f32>(lightRadius), 0.0));
   var boxMax : vec4<f32> = (lightPos + vec4<f32>(vec3<f32>(lightRadius), 0.0));
   var frustumPlanes : array<vec4<f32>, 6>;
-  frustumPlanes[4] = vec4<f32>(0.0, 0.0, -1.0, viewNear);
+  frustumPlanes[4] = vec4<f32>(0.0, 0.0, -(1.0), viewNear);
   frustumPlanes[5] = vec4<f32>(0.0, 0.0, 1.0, -(viewFar));
   let TILE_SIZE : i32 = 16;
   let TILE_COUNT_X : i32 = 2;
@@ -75,9 +75,9 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
       var viewFloorCoord : vec2<f32> = vec2<f32>((((-(viewNear) * floorCoord.x) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * floorCoord.y) - (M[2][1] * viewNear)) / M[1][1]));
       var viewCeilCoord : vec2<f32> = vec2<f32>((((-(viewNear) * ceilCoord.x) - (M[2][0] * viewNear)) / M[0][0]), (((-(viewNear) * ceilCoord.y) - (M[2][1] * viewNear)) / M[1][1]));
       frustumPlanes[0] = vec4<f32>(1.0, 0.0, (-(viewFloorCoord.x) / viewNear), 0.0);
-      frustumPlanes[1] = vec4<f32>(-1.0, 0.0, (viewCeilCoord.x / viewNear), 0.0);
+      frustumPlanes[1] = vec4<f32>(-(1.0), 0.0, (viewCeilCoord.x / viewNear), 0.0);
       frustumPlanes[2] = vec4<f32>(0.0, 1.0, (-(viewFloorCoord.y) / viewNear), 0.0);
-      frustumPlanes[3] = vec4<f32>(0.0, -1.0, (viewCeilCoord.y / viewNear), 0.0);
+      frustumPlanes[3] = vec4<f32>(0.0, -(1.0), (viewCeilCoord.y / viewNear), 0.0);
       var dp : f32 = 0.0;
       for(var i : u32 = 0u; (i < 6u); i = (i + 1u)) {
         var p : vec4<f32>;

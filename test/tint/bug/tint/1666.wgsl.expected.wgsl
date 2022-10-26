@@ -17,7 +17,7 @@ fn fixed_size_array() {
 @group(0) @binding(0) var<storage> rarr : array<f32>;
 
 fn runtime_size_array() {
-  let idx = -1;
+  let idx = -(1);
   let x = rarr[idx];
 }
 

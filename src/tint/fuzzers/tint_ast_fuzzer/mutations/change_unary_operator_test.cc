@@ -203,7 +203,7 @@ TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable2) {
     ASSERT_TRUE(result.success) << result.error;
 
     std::string expected_shader = R"(fn main() {
-  let b : vec3<i32> = vec3<i32>(1, 3, -1);
+  let b : vec3<i32> = vec3<i32>(1, 3, -(1));
   var comp_b : vec3<i32> = -(b);
 }
 )";
@@ -246,7 +246,7 @@ TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable3) {
     ASSERT_TRUE(result.success) << result.error;
 
     std::string expected_shader = R"(fn main() {
-  var a = -5;
+  var a = -(5);
   var neg_a = ~(a);
 }
 )";
@@ -288,7 +288,7 @@ TEST(ChangeUnaryOperatorTest, Signed_Integer_Types_Applicable4) {
     ASSERT_TRUE(result.success) << result.error;
 
     std::string expected_shader = R"(fn main() {
-  var b : vec3<i32> = vec3<i32>(1, 3, -1);
+  var b : vec3<i32> = vec3<i32>(1, 3, -(1));
   let neg_b : vec3<i32> = ~(b);
 }
 )";

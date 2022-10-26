@@ -426,57 +426,35 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                              // No decimal, with 'f' suffix
                              FloatData{"0f", 0.0},
                              FloatData{"1f", 1.0},
-                             FloatData{"-0f", 0.0},
-                             FloatData{"-1f", -1.0},
                              // No decimal, with 'h' suffix
                              FloatData{"0h", 0.0},
                              FloatData{"1h", 1.0},
-                             FloatData{"-0h", 0.0},
-                             FloatData{"-1h", -1.0},
 
                              // Zero, with decimal.
                              FloatData{"0.0", 0.0},
                              FloatData{"0.", 0.0},
                              FloatData{".0", 0.0},
-                             FloatData{"-0.0", 0.0},
-                             FloatData{"-0.", 0.0},
-                             FloatData{"-.0", 0.0},
                              // Zero, with decimal and 'f' suffix
                              FloatData{"0.0f", 0.0},
                              FloatData{"0.f", 0.0},
                              FloatData{".0f", 0.0},
-                             FloatData{"-0.0f", 0.0},
-                             FloatData{"-0.f", 0.0},
-                             FloatData{"-.0f", 0.0},
                              // Zero, with decimal and 'h' suffix
                              FloatData{"0.0h", 0.0},
                              FloatData{"0.h", 0.0},
                              FloatData{".0h", 0.0},
-                             FloatData{"-0.0h", 0.0},
-                             FloatData{"-0.h", 0.0},
-                             FloatData{"-.0h", 0.0},
 
                              // Non-zero with decimal
                              FloatData{"5.7", 5.7},
                              FloatData{"5.", 5.},
                              FloatData{".7", .7},
-                             FloatData{"-5.7", -5.7},
-                             FloatData{"-5.", -5.},
-                             FloatData{"-.7", -.7},
                              // Non-zero with decimal and 'f' suffix
                              FloatData{"5.7f", static_cast<double>(5.7f)},
                              FloatData{"5.f", static_cast<double>(5.f)},
                              FloatData{".7f", static_cast<double>(.7f)},
-                             FloatData{"-5.7f", static_cast<double>(-5.7f)},
-                             FloatData{"-5.f", static_cast<double>(-5.f)},
-                             FloatData{"-.7f", static_cast<double>(-.7f)},
                              // Non-zero with decimal and 'h' suffix
                              FloatData{"5.7h", static_cast<double>(f16::Quantize(5.7f))},
                              FloatData{"5.h", static_cast<double>(f16::Quantize(5.f))},
                              FloatData{".7h", static_cast<double>(f16::Quantize(.7f))},
-                             FloatData{"-5.7h", static_cast<double>(f16::Quantize(-5.7f))},
-                             FloatData{"-5.h", static_cast<double>(f16::Quantize(-5.f))},
-                             FloatData{"-.7h", static_cast<double>(f16::Quantize(-.7f))},
 
                              // No decimal, with exponent
                              FloatData{"1e5", 1e5},
@@ -532,7 +510,6 @@ TEST_P(FloatTest_Invalid, Handles) {
 INSTANTIATE_TEST_SUITE_P(LexerTest,
                          FloatTest_Invalid,
                          testing::Values(".",
-                                         "-.",
                                          // Need a mantissa digit
                                          ".e5",
                                          ".E5",
@@ -545,9 +522,7 @@ INSTANTIATE_TEST_SUITE_P(LexerTest,
                                          ".e-",
                                          // Overflow
                                          "2.5e+256f",
-                                         "-2.5e+127f",
                                          "6.5520e+4h",
-                                         "-6.5e+12h",
                                          // Decimal exponent must immediately
                                          // follow the 'e'.
                                          "2.5e 12",
@@ -791,12 +766,9 @@ INSTANTIATE_TEST_SUITE_P(Dec_AInt,
                          testing::Combine(testing::Values('\0'),  // No suffix
                                           testing::ValuesIn(std::vector<ParseIntegerCase>{
                                               {"0", 0},
-                                              {"-2", -2},
                                               {"2", 2},
                                               {"123", 123},
                                               {"2147483647", 2147483647},
-                                              {"-2147483648", -2147483648LL},
-                                              {"-9223372036854775808", -9223372036854775807LL - 1},
                                           })));
 
 INSTANTIATE_TEST_SUITE_P(Dec_u32,
@@ -813,11 +785,8 @@ INSTANTIATE_TEST_SUITE_P(Dec_i32,
                          testing::Combine(testing::Values('i'),  // Suffix
                                           testing::ValuesIn(std::vector<ParseIntegerCase>{
                                               {"0i", 0u},
-                                              {"-0i", 0u},
                                               {"123i", 123},
-                                              {"-123i", -123},
                                               {"2147483647i", 2147483647},
-                                              {"-2147483647i", -2147483647ll},
                                           })));
 
 INSTANTIATE_TEST_SUITE_P(Hex_AInt,
@@ -828,16 +797,10 @@ INSTANTIATE_TEST_SUITE_P(Hex_AInt,
                                               {"0X0", 0},
                                               {"0x42", 66},
                                               {"0X42", 66},
-                                              {"-0x42", -66},
-                                              {"-0X42", -66},
                                               {"0xeF1Abc9", 0xeF1Abc9},
                                               {"0XeF1Abc9", 0xeF1Abc9},
-                                              {"-0xeF1Abc9", -0xeF1Abc9},
-                                              {"-0XeF1Abc9", -0xeF1Abc9},
                                               {"0x80000000", 0x80000000},
                                               {"0X80000000", 0X80000000},
-                                              {"-0x80000000", -0x80000000ll},
-                                              {"-0X80000000", -0X80000000ll},
                                               {"0x7FFFFFFF", 0x7fffffff},
                                               {"0X7FFFFFFF", 0x7fffffff},
                                               {"0x7fffffff", 0x7fffffff},
@@ -845,7 +808,6 @@ INSTANTIATE_TEST_SUITE_P(Hex_AInt,
                                               {"0x7FfFfFfF", 0x7fffffff},
                                               {"0X7FfFfFfF", 0x7fffffff},
                                               {"0x7fffffffffffffff", 0x7fffffffffffffffll},
-                                              {"-0x7fffffffffffffff", -0x7fffffffffffffffll},
                                           })));
 
 INSTANTIATE_TEST_SUITE_P(Hex_u32,
@@ -869,22 +831,13 @@ INSTANTIATE_TEST_SUITE_P(Hex_i32,
                                           testing::ValuesIn(std::vector<ParseIntegerCase>{
                                               {"0x0i", 0},
                                               {"0x42i", 66},
-                                              {"-0x0i", 0},
-                                              {"-0x42i", -66},
                                               {"0xeF1Abc9i", 250719177},
-                                              {"-0xeF1Abc9i", -250719177},
                                               {"0x7FFFFFFFi", 0x7fffffff},
-                                              {"-0x7FFFFFFFi", -0x7fffffff},
                                               {"0X7FFFFFFFi", 0x7fffffff},
-                                              {"-0X7FFFFFFFi", -0x7fffffff},
                                               {"0x7fffffffi", 0x7fffffff},
-                                              {"-0x7fffffffi", -0x7fffffff},
                                               {"0X7fffffffi", 0x7fffffff},
-                                              {"-0X7fffffffi", -0x7fffffff},
                                               {"0x7FfFfFfFi", 0x7fffffff},
-                                              {"-0x7FfFfFfFi", -0x7fffffff},
                                               {"0X7FfFfFfFi", 0x7fffffff},
-                                              {"-0X7FfFfFfFi", -0x7fffffff},
                                           })));
 ////////////////////////////////////////////////////////////////////////////////
 // ParseIntegerTest_CannotBeRepresented
@@ -920,9 +873,8 @@ INSTANTIATE_TEST_SUITE_P(i32,
 
 INSTANTIATE_TEST_SUITE_P(u32,
                          ParseIntegerTest_CannotBeRepresented,
-                         testing::Combine(testing::Values("u32"),         // type
-                                          testing::Values("4294967296u",  //
-                                                          "-1u")));
+                         testing::Combine(testing::Values("u32"),  // type
+                                          testing::Values("4294967296u")));
 
 ////////////////////////////////////////////////////////////////////////////////
 // ParseIntegerTest_LeadingZeros
@@ -942,7 +894,7 @@ TEST_P(ParseIntegerTest_LeadingZeros, Parse) {
 
 INSTANTIATE_TEST_SUITE_P(LeadingZero,
                          ParseIntegerTest_LeadingZeros,
-                         testing::Values("01234", "0000", "-00", "00u"));
+                         testing::Values("01234", "0000", "00u"));
 
 ////////////////////////////////////////////////////////////////////////////////
 // ParseIntegerTest_NoSignificantDigits
@@ -962,18 +914,7 @@ TEST_P(ParseIntegerTest_NoSignificantDigits, Parse) {
 
 INSTANTIATE_TEST_SUITE_P(LeadingZero,
                          ParseIntegerTest_NoSignificantDigits,
-                         testing::Values("0x",
-                                         "0X",
-                                         "-0x",
-                                         "-0X",
-                                         "0xu",
-                                         "0Xu",
-                                         "-0xu",
-                                         "-0Xu",
-                                         "0xi",
-                                         "0Xi",
-                                         "-0xi",
-                                         "-0Xi"));
+                         testing::Values("0x", "0X", "0xu", "0Xu", "0xi", "0Xi"));
 
 struct TokenData {
     const char* input;

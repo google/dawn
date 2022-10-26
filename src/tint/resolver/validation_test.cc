@@ -1405,6 +1405,27 @@ TEST_F(ResolverTest, Expr_Initializer_Cast_Pointer) {
     EXPECT_EQ(r()->error(), "12:34 error: type is not constructible");
 }
 
+TEST_F(ResolverTest, I32_Overflow) {
+    GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate, Expr(Source{{12, 24}}, 2147483648_a));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:24 error: value 2147483648 cannot be represented as 'i32'");
+}
+
+TEST_F(ResolverTest, I32_Underflow) {
+    GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate, Expr(Source{{12, 24}}, -2147483649_a));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:24 error: value -2147483649 cannot be represented as 'i32'");
+}
+
+TEST_F(ResolverTest, U32_Overflow) {
+    GlobalVar("v", ty.u32(), ast::AddressSpace::kPrivate, Expr(Source{{12, 24}}, 4294967296_a));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:24 error: value 4294967296 cannot be represented as 'u32'");
+}
+
 }  // namespace
 }  // namespace tint::resolver
 

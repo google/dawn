@@ -328,9 +328,6 @@ Token Lexer::try_float() {
     auto source = begin_source();
     bool has_mantissa_digits = false;
 
-    if (matches(end, '-')) {
-        end++;
-    }
     while (end < length() && is_digit(at(end))) {
         has_mantissa_digits = true;
         end++;
@@ -426,7 +423,6 @@ Token Lexer::try_hex_float() {
     constexpr uint64_t kExponentMask = (1 << kExponentBits) - 1;
     constexpr int64_t kExponentMax = kExponentMask;  // Including NaN / inf
     constexpr uint64_t kExponentLeftShift = kMantissaBits;
-    constexpr uint64_t kSignBit = kTotalBits - 1;
     constexpr uint64_t kOne = 1;
 
     auto start = pos();
@@ -434,16 +430,8 @@ Token Lexer::try_hex_float() {
 
     auto source = begin_source();
 
-    // clang-format off
-  // -?0[xX]([0-9a-fA-F]*.?[0-9a-fA-F]+ | [0-9a-fA-F]+.[0-9a-fA-F]*)(p|P)(+|-)?[0-9]+  // NOLINT
-    // clang-format on
+    // 0[xX]([0-9a-fA-F]*.?[0-9a-fA-F]+ | [0-9a-fA-F]+.[0-9a-fA-F]*)(p|P)(+|-)?[0-9]+  // NOLINT
 
-    // -?
-    uint64_t sign_bit = 0;
-    if (matches(end, '-')) {
-        sign_bit = 1;
-        end++;
-    }
     // 0[xX]
     if (matches(end, '0') && (matches(end + 1, 'x') || matches(end + 1, 'X'))) {
         end += 2;
@@ -696,7 +684,7 @@ Token Lexer::try_hex_float() {
     }
 
     // Combine sign, mantissa, and exponent
-    uint64_t result_u64 = sign_bit << kSignBit;
+    uint64_t result_u64 = 0;
     result_u64 |= mantissa;
     result_u64 |= (static_cast<uint64_t>(signed_exponent) & kExponentMask) << kExponentLeftShift;
 
@@ -856,10 +844,6 @@ Token Lexer::try_hex_integer() {
 
     auto source = begin_source();
 
-    if (matches(curr, '-')) {
-        curr++;
-    }
-
     if (matches(curr, '0') && (matches(curr + 1, 'x') || matches(curr + 1, 'X'))) {
         curr += 2;
     } else {
@@ -879,10 +863,6 @@ Token Lexer::try_integer() {
     auto curr = start;
 
     auto source = begin_source();
-
-    if (matches(curr, '-')) {
-        curr++;
-    }
 
     if (curr >= length() || !is_digit(at(curr))) {
         return {};

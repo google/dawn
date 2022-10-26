@@ -260,7 +260,7 @@ TEST(WrapUnaryOperatorTest, Applicable6) {
     ASSERT_TRUE(result.success) << result.error;
 
     std::string expected_shader = R"(fn main() {
-  var a : vec4<f32> = -(vec4<f32>(-1.0, -1.0, -1.0, -1.0));
+  var a : vec4<f32> = -(vec4<f32>(-(1.0), -(1.0), -(1.0), -(1.0)));
 }
 )";
     ASSERT_EQ(expected_shader, result.wgsl);
@@ -345,7 +345,7 @@ TEST(WrapUnaryOperatorTest, Applicable8) {
     ASSERT_TRUE(result.success) << result.error;
 
     std::string expected_shader = R"(fn main() {
-  var a : vec4<i32> = ~(vec4<i32>(1, 0, -1, 0));
+  var a : vec4<i32> = ~(vec4<i32>(1, 0, -(1), 0));
 }
 )";
     ASSERT_EQ(expected_shader, result.wgsl);

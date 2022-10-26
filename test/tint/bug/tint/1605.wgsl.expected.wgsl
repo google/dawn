@@ -2,7 +2,7 @@
 
 fn func_3() -> bool {
   for(var i = 0; (i < b); i++) {
-    for(var j = -1; (j == 1); j++) {
+    for(var j = -(1); (j == 1); j++) {
       return false;
     }
   }

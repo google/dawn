@@ -77,17 +77,17 @@ fn comp_main(@builtin(global_invocation_id) gl_GlobalInvocationID : vec3<u32>) {
   vVel = (((vVel + (cMass * params.rule1Scale)) + (colVel * params.rule2Scale)) + (cVel * params.rule3Scale));
   vVel = (normalize(vVel) * clamp(length(vVel), 0.0, 0.1));
   vPos = (vPos + (vVel * params.deltaT));
-  if ((vPos.x < -1.0)) {
+  if ((vPos.x < -(1.0))) {
     vPos.x = 1.0;
   }
   if ((vPos.x > 1.0)) {
-    vPos.x = -1.0;
+    vPos.x = -(1.0);
   }
-  if ((vPos.y < -1.0)) {
+  if ((vPos.y < -(1.0))) {
     vPos.y = 1.0;
   }
   if ((vPos.y > 1.0)) {
-    vPos.y = -1.0;
+    vPos.y = -(1.0);
   }
   particlesB.particles[index].pos = vPos;
   particlesB.particles[index].vel = vVel;
