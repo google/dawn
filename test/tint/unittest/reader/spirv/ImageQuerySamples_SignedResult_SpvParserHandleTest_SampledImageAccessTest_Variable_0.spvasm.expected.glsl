@@ -22,7 +22,7 @@ void main_1() {
   vec2 coords12 = vf12;
   vec3 coords123 = vf123;
   vec4 coords1234 = vf1234;
-  int x_99 = textureSamples(x_20_1);
+  int x_99 = int(uint(textureSamples(x_20_1)));
   return;
 }
 
@@ -36,9 +36,8 @@ void main() {
 }
 Error parsing GLSL shader:
 ERROR: 0:23: 'textureSamples' : no matching overloaded function found 
-ERROR: 0:23: '=' :  cannot convert from ' const float' to ' temp mediump int'
 ERROR: 0:23: '' : compilation terminated 
-ERROR: 3 compilation errors.  No code generated.
+ERROR: 2 compilation errors.  No code generated.
 
 
 

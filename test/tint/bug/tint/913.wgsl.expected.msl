@@ -31,8 +31,8 @@ bool aboutEqual(float value, float expect) {
 }
 
 void tint_symbol_inner(uint3 GlobalInvocationID, texture2d<float, access::sample> tint_symbol_7, texture2d<float, access::sample> tint_symbol_8, const constant Uniforms* const tint_symbol_9, device OutputBuf* const tint_symbol_10) {
-  int2 const srcSize = int2(tint_symbol_7.get_width(), tint_symbol_7.get_height());
-  int2 const dstSize = int2(tint_symbol_8.get_width(), tint_symbol_8.get_height());
+  uint2 const srcSize = uint2(tint_symbol_7.get_width(), tint_symbol_7.get_height());
+  uint2 const dstSize = uint2(tint_symbol_8.get_width(), tint_symbol_8.get_height());
   uint2 const dstTexCoord = uint2(uint3(GlobalInvocationID).xy);
   float4 const nonCoveredColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
   bool success = true;
@@ -41,7 +41,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, texture2d<float, access::sample
   } else {
     uint2 srcTexCoord = ((dstTexCoord - (*(tint_symbol_9)).dstCopyOrigin) + (*(tint_symbol_9)).srcCopyOrigin);
     if (((*(tint_symbol_9)).dstTextureFlipY == 1u)) {
-      srcTexCoord[1] = ((uint(srcSize[1]) - srcTexCoord[1]) - 1u);
+      srcTexCoord[1] = ((srcSize[1] - srcTexCoord[1]) - 1u);
     }
     float4 const srcColor = tint_symbol_7.read(uint2(int2(srcTexCoord)), 0);
     float4 const dstColor = tint_symbol_8.read(uint2(int2(dstTexCoord)), 0);
@@ -75,7 +75,7 @@ void tint_symbol_inner(uint3 GlobalInvocationID, texture2d<float, access::sample
       success = tint_symbol_3;
     }
   }
-  uint const outputIndex = ((GlobalInvocationID[1] * uint(dstSize[0])) + GlobalInvocationID[0]);
+  uint const outputIndex = ((GlobalInvocationID[1] * dstSize[0]) + GlobalInvocationID[0]);
   if (success) {
     (*(tint_symbol_10)).result[outputIndex] = 1u;
   } else {

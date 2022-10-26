@@ -18,8 +18,8 @@ fn aboutEqual(value : f32, expect : f32) -> bool {
 }
 @compute @workgroup_size(1, 1, 1)
 fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
-    let srcSize : vec2<i32> = textureDimensions(src);
-    let dstSize : vec2<i32> = textureDimensions(dst);
+    let srcSize = textureDimensions(src);
+    let dstSize = textureDimensions(dst);
     let dstTexCoord : vec2<u32> = vec2<u32>(GlobalInvocationID.xy);
     let nonCoveredColor : vec4<f32> =
         vec4<f32>(0.0, 1.0, 0.0, 1.0); // should be green
@@ -40,7 +40,7 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
         // which is flipped and need to unpack flip during the copy.
         // We need to calculate the expect y coord based on this rule.
         if (uniforms.dstTextureFlipY == 1u) {
-            srcTexCoord.y = u32(srcSize.y) - srcTexCoord.y - 1u;
+            srcTexCoord.y = srcSize.y - srcTexCoord.y - 1u;
         }
 
         let srcColor : vec4<f32> = textureLoad(src, vec2<i32>(srcTexCoord), 0);
@@ -60,7 +60,7 @@ fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
                         aboutEqual(dstColor.a, srcColor.a);
         }
     }
-    let outputIndex : u32 = GlobalInvocationID.y * u32(dstSize.x) +
+    let outputIndex : u32 = GlobalInvocationID.y * dstSize.x +
                             GlobalInvocationID.x;
     if (success) {
         output.result[outputIndex] = 1u;

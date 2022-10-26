@@ -18,14 +18,14 @@ uint ConvertToFp16FloatValue(float fp32) {
 uniform highp sampler2D src_1;
 uniform highp sampler2D dst_1;
 void tint_symbol_1(uvec3 GlobalInvocationID) {
-  ivec2 size = textureSize(src_1, 0);
-  ivec2 dstTexCoord = ivec2(GlobalInvocationID.xy);
-  ivec2 srcTexCoord = dstTexCoord;
+  uvec2 size = uvec2(textureSize(src_1, 0));
+  uvec2 dstTexCoord = GlobalInvocationID.xy;
+  uvec2 srcTexCoord = dstTexCoord;
   if ((uniforms.dstTextureFlipY == 1u)) {
-    srcTexCoord.y = ((size.y - dstTexCoord.y) - 1);
+    srcTexCoord.y = ((size.y - dstTexCoord.y) - 1u);
   }
-  vec4 srcColor = texelFetch(src_1, srcTexCoord, 0);
-  vec4 dstColor = texelFetch(dst_1, dstTexCoord, 0);
+  vec4 srcColor = texelFetch(src_1, ivec2(srcTexCoord), int(0u));
+  vec4 dstColor = texelFetch(dst_1, ivec2(dstTexCoord), int(0u));
   bool success = true;
   uvec4 srcColorBits = uvec4(0u, 0u, 0u, 0u);
   uvec4 dstColorBits = uvec4(dstColor);

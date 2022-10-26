@@ -219,15 +219,15 @@ ExpectedResult expected_texture_overload(ast::builtin::test::ValidTextureOverloa
         case ValidTextureOverload::kSampleCompareDepthCubeArrayF32:
             return R"(texture(tint_symbol_sampler, vec4(1.0f, 2.0f, 3.0f, float(4)), 5.0f);)";
         case ValidTextureOverload::kSampleCompareLevelDepth2dF32:
-            return R"(yyytexture(tint_symbol_sampler, vec2(1.0f, 2.0f), 3.0f);)";
+            return R"(texture(tint_symbol_sampler, vec3(1.0f, 2.0f, 3.0f));)";
         case ValidTextureOverload::kSampleCompareLevelDepth2dOffsetF32:
-            return R"(yyytextureOffset(tint_symbol_sampler, vec2(1.0f, 2.0f), 3.0f, ivec2(4, 5));)";
+            return R"(textureOffset(tint_symbol_sampler, vec3(1.0f, 2.0f, 3.0f), ivec2(4, 5));)";
         case ValidTextureOverload::kSampleCompareLevelDepth2dArrayF32:
-            return R"(texture(tint_symbol_sampler, vec4(1.0f, 2.0f, float(4)), 3.0f);)";
+            return R"(texture(tint_symbol_sampler, vec4(1.0f, 2.0f, float(3), 4.0f));)";
         case ValidTextureOverload::kSampleCompareLevelDepth2dArrayOffsetF32:
-            return R"(textureOffset(tint_symbol_sampler, vec3(1.0f, 2.0f, float(4)), 3.0f, ivec2(5, 6));)";
+            return R"(textureOffset(tint_symbol_sampler, vec4(1.0f, 2.0f, float(3), 4.0f), ivec2(5, 6));)";
         case ValidTextureOverload::kSampleCompareLevelDepthCubeF32:
-            return R"(texture(tint_symbol_sampler, vec3(1.0f, 2.0f, 3.0f), 4.0f);)";
+            return R"(texture(tint_symbol_sampler, vec4(1.0f, 2.0f, 3.0f, 4.0f));)";
         case ValidTextureOverload::kSampleCompareLevelDepthCubeArrayF32:
             return R"(texture(tint_symbol_sampler, vec4(1.0f, 2.0f, 3.0f, float(4)), 5.0f);)";
         case ValidTextureOverload::kLoad1dLevelF32:
@@ -248,7 +248,6 @@ ExpectedResult expected_texture_overload(ast::builtin::test::ValidTextureOverloa
         case ValidTextureOverload::kLoad2dArrayLevelI32:
         case ValidTextureOverload::kLoad3dLevelI32:
             return R"(texelFetch(tint_symbol_2, ivec3(uvec3(1u, 2u, 3u)), int(4u));)";
-        case ValidTextureOverload::kLoadDepthMultisampled2dF32:
         case ValidTextureOverload::kLoadMultisampled2dF32:
         case ValidTextureOverload::kLoadMultisampled2dU32:
             return R"(texelFetch(tint_symbol_2, ivec2(1, 2), 3);)";
@@ -258,6 +257,8 @@ ExpectedResult expected_texture_overload(ast::builtin::test::ValidTextureOverloa
             return R"(texelFetch(tint_symbol_2, ivec2(1, 2), 3);)";
         case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
             return R"(texelFetch(tint_symbol_2, ivec3(uvec3(1u, 2u, 3u)), int(4u));)";
+        case ValidTextureOverload::kLoadDepthMultisampled2dF32:
+            return R"(texelFetch(tint_symbol_2, ivec2(uvec2(1u, 2u)), int(3u)).x;)";
         case ValidTextureOverload::kStoreWO1dRgba32float:
             return R"(imageStore(tint_symbol, 1, vec4(2.0f, 3.0f, 4.0f, 5.0f));)";
         case ValidTextureOverload::kStoreWO2dRgba32float:

@@ -177,21 +177,21 @@ void simulate(uvec3 GlobalInvocationID) {
   particle.lifetime = (particle.lifetime - sim_params.deltaTime);
   particle.color.a = smoothstep(0.0f, 0.5f, particle.lifetime);
   if ((particle.lifetime < 0.0f)) {
-    ivec2 coord = ivec2(0);
+    uvec2 coord = uvec2(0u);
     {
-      for(int level = (textureQueryLevels(tint_symbol_6) - 1); (level > 0); level = (level - 1)) {
-        vec4 probabilites = texelFetch(tint_symbol_6, coord, level);
+      for(uint level = (uint(textureQueryLevels(tint_symbol_6)) - 1u); (level > 0u); level = (level - 1u)) {
+        vec4 probabilites = texelFetch(tint_symbol_6, ivec2(coord), int(level));
         float tint_symbol_5 = rand();
         vec4 value = vec4(tint_symbol_5);
         bvec4 mask = bvec4(uvec4(greaterThanEqual(value, vec4(0.0f, probabilites.xyz))) & uvec4(lessThan(value, probabilites)));
-        coord = (coord * 2);
-        coord.x = (coord.x + (any(mask.yw) ? 1 : 0));
-        coord.y = (coord.y + (any(mask.zw) ? 1 : 0));
+        coord = (coord * 2u);
+        coord.x = (coord.x + (any(mask.yw) ? 1u : 0u));
+        coord.y = (coord.y + (any(mask.zw) ? 1u : 0u));
       }
     }
-    vec2 uv = (vec2(coord) / vec2(textureSize(tint_symbol_6, 0)));
+    vec2 uv = (vec2(coord) / vec2(uvec2(textureSize(tint_symbol_6, 0))));
     particle.position = vec3((((uv - 0.5f) * 3.0f) * vec2(1.0f, -1.0f)), 0.0f);
-    particle.color = texelFetch(tint_symbol_6, coord, 0);
+    particle.color = texelFetch(tint_symbol_6, ivec2(coord), int(0u));
     float tint_symbol_1 = rand();
     particle.velocity.x = ((tint_symbol_1 - 0.5f) * 0.100000001f);
     float tint_symbol_2 = rand();
@@ -210,8 +210,8 @@ void main() {
   return;
 }
 Error parsing GLSL shader:
-ERROR: 0:64: 'textureQueryLevels' : no matching overloaded function found
-ERROR: 0:64: '' : compilation terminated
+ERROR: 0:64: 'textureQueryLevels' : no matching overloaded function found 
+ERROR: 0:64: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 
@@ -323,7 +323,7 @@ layout(binding = 5, std430) buffer Buffer_ssbo_1 {
 
 layout(rgba8) uniform highp writeonly image2D tex_out;
 void export_level(uvec3 coord) {
-  if (all(lessThan(coord.xy, uvec2(imageSize(tex_out))))) {
+  if (all(lessThan(coord.xy, uvec2(uvec2(imageSize(tex_out)))))) {
     uint dst_offset = (coord.x + (coord.y * ubo.width));
     uint src_offset = ((coord.x * 2u) + ((coord.y * 2u) * ubo.width));
     float a = buf_in.weights[(src_offset + 0u)];

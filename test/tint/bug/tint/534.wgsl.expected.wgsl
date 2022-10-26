@@ -23,9 +23,9 @@ fn ConvertToFp16FloatValue(fp32 : f32) -> u32 {
 
 @compute @workgroup_size(1, 1, 1)
 fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
-  var size : vec2<i32> = textureDimensions(src);
-  var dstTexCoord : vec2<i32> = vec2<i32>(GlobalInvocationID.xy);
-  var srcTexCoord : vec2<i32> = dstTexCoord;
+  var size = textureDimensions(src);
+  var dstTexCoord = GlobalInvocationID.xy;
+  var srcTexCoord = dstTexCoord;
   if ((uniforms.dstTextureFlipY == 1u)) {
     srcTexCoord.y = ((size.y - dstTexCoord.y) - 1);
   }

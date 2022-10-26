@@ -138,7 +138,7 @@ TEST_F(MultiplanarExternalTextureTest, Dimensions) {
 
 @fragment
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
-  var dim : vec2<i32>;
+  var dim : vec2<u32>;
   dim = textureDimensions(ext_tex);
   return vec4<f32>(0.0, 0.0, 0.0, 0.0);
 }
@@ -173,7 +173,7 @@ struct ExternalTextureParams {
 
 @fragment
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
-  var dim : vec2<i32>;
+  var dim : vec2<u32>;
   dim = textureDimensions(ext_tex);
   return vec4<f32>(0.0, 0.0, 0.0, 0.0);
 }
@@ -191,7 +191,7 @@ TEST_F(MultiplanarExternalTextureTest, Dimensions_OutOfOrder) {
     auto* src = R"(
 @fragment
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
-  var dim : vec2<i32>;
+  var dim : vec2<u32>;
   dim = textureDimensions(ext_tex);
   return vec4<f32>(0.0, 0.0, 0.0, 0.0);
 }
@@ -226,7 +226,7 @@ struct ExternalTextureParams {
 
 @fragment
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
-  var dim : vec2<i32>;
+  var dim : vec2<u32>;
   dim = textureDimensions(ext_tex);
   return vec4<f32>(0.0, 0.0, 0.0, 0.0);
 }
@@ -2006,7 +2006,7 @@ fn main() {
 // even if there's no external texture declared at module scope.
 TEST_F(MultiplanarExternalTextureTest, ExternalTexturePassedAsParamWithoutGlobalDecl) {
     auto* src = R"(
-fn f(ext_tex : texture_external) -> vec2<i32> {
+fn f(ext_tex : texture_external) -> vec2<u32> {
   return textureDimensions(ext_tex);
 }
 )";
@@ -2032,7 +2032,7 @@ struct ExternalTextureParams {
   gamutConversionMatrix : mat3x3<f32>,
 }
 
-fn f(ext_tex : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams) -> vec2<i32> {
+fn f(ext_tex : texture_2d<f32>, ext_tex_plane_1 : texture_2d<f32>, ext_tex_params : ExternalTextureParams) -> vec2<u32> {
   return textureDimensions(ext_tex);
 }
 )";

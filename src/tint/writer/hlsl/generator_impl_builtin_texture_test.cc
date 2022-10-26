@@ -315,9 +315,9 @@ ExpectedResult expected_texture_overload(ast::builtin::test::ValidTextureOverloa
         case ValidTextureOverload::kSampleCompareLevelDepth2dOffsetF32:
             return R"(tint_symbol.SampleCmpLevelZero(tint_symbol_1, float2(1.0f, 2.0f), 3.0f, int2(4, 5));)";
         case ValidTextureOverload::kSampleCompareLevelDepth2dArrayF32:
-            return R"(tint_symbol.SampleCmpLevelZero(tint_symbol_1, float3(1.0f, 2.0f, float(4)), 3.0f);)";
+            return R"(tint_symbol.SampleCmpLevelZero(tint_symbol_1, float3(1.0f, 2.0f, float(3)), 4.0f);)";
         case ValidTextureOverload::kSampleCompareLevelDepth2dArrayOffsetF32:
-            return R"(tint_symbol.SampleCmpLevelZero(tint_symbol_1, float3(1.0f, 2.0f, float(4)), 3.0f, int2(5, 6));)";
+            return R"(tint_symbol.SampleCmpLevelZero(tint_symbol_1, float3(1.0f, 2.0f, float(3)), 4.0f, int2(5, 6));)";
         case ValidTextureOverload::kSampleCompareLevelDepthCubeF32:
             return R"(tint_symbol.SampleCmpLevelZero(tint_symbol_1, float3(1.0f, 2.0f, 3.0f), 4.0f);)";
         case ValidTextureOverload::kSampleCompareLevelDepthCubeArrayF32:
@@ -340,7 +340,6 @@ ExpectedResult expected_texture_overload(ast::builtin::test::ValidTextureOverloa
         case ValidTextureOverload::kLoad2dArrayLevelI32:
         case ValidTextureOverload::kLoad3dLevelI32:
             return R"(tint_symbol.Load(uint4(1u, 2u, 3u, 4u));)";
-        case ValidTextureOverload::kLoadDepthMultisampled2dF32:
         case ValidTextureOverload::kLoadMultisampled2dF32:
         case ValidTextureOverload::kLoadMultisampled2dU32:
             return R"(tint_symbol.Load(int2(1, 2), 3);)";
@@ -350,6 +349,8 @@ ExpectedResult expected_texture_overload(ast::builtin::test::ValidTextureOverloa
             return R"(tint_symbol.Load(int3(1, 2, 3)).x;)";
         case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
             return R"(tint_symbol.Load(uint4(1u, 2u, 3u, 4u)).x;)";
+        case ValidTextureOverload::kLoadDepthMultisampled2dF32:
+            return R"(tint_symbol.Load(uint3(1u, 2u, uint(0)), 3u).x;)";
         case ValidTextureOverload::kStoreWO1dRgba32float:
             return R"(tint_symbol[1] = float4(2.0f, 3.0f, 4.0f, 5.0f);)";
         case ValidTextureOverload::kStoreWO2dRgba32float:

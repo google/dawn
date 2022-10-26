@@ -30,14 +30,14 @@ uint ConvertToFp16FloatValue(float fp32) {
 }
 
 void tint_symbol_inner(uint3 GlobalInvocationID, texture2d<float, access::sample> tint_symbol_2, const constant Uniforms* const tint_symbol_3, texture2d<float, access::sample> tint_symbol_4, device OutputBuf* const tint_symbol_5) {
-  int2 size = int2(tint_symbol_2.get_width(), tint_symbol_2.get_height());
-  int2 dstTexCoord = int2(uint3(GlobalInvocationID).xy);
-  int2 srcTexCoord = dstTexCoord;
+  uint2 size = uint2(tint_symbol_2.get_width(), tint_symbol_2.get_height());
+  uint2 dstTexCoord = uint3(GlobalInvocationID).xy;
+  uint2 srcTexCoord = dstTexCoord;
   if (((*(tint_symbol_3)).dstTextureFlipY == 1u)) {
-    srcTexCoord[1] = as_type<int>((as_type<uint>(as_type<int>((as_type<uint>(size[1]) - as_type<uint>(dstTexCoord[1])))) - as_type<uint>(1)));
+    srcTexCoord[1] = ((size[1] - dstTexCoord[1]) - 1u);
   }
-  float4 srcColor = tint_symbol_2.read(uint2(srcTexCoord), 0);
-  float4 dstColor = tint_symbol_4.read(uint2(dstTexCoord), 0);
+  float4 srcColor = tint_symbol_2.read(uint2(srcTexCoord), 0u);
+  float4 dstColor = tint_symbol_4.read(uint2(dstTexCoord), 0u);
   bool success = true;
   uint4 srcColorBits = 0u;
   uint4 dstColorBits = uint4(dstColor);

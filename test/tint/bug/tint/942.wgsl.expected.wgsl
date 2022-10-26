@@ -22,11 +22,11 @@ var<workgroup> tile : array<array<vec3<f32>, 256>, 4>;
 @compute @workgroup_size(64, 1, 1)
 fn main(@builtin(workgroup_id) WorkGroupID : vec3<u32>, @builtin(local_invocation_id) LocalInvocationID : vec3<u32>) {
   let filterOffset : u32 = ((params.filterDim - 1u) / 2u);
-  let dims : vec2<i32> = textureDimensions(inputTex, 0);
-  let baseIndex = (vec2<i32>(((WorkGroupID.xy * vec2<u32>(params.blockDim, 4u)) + (LocalInvocationID.xy * vec2<u32>(4u, 1u)))) - vec2<i32>(i32(filterOffset), 0));
+  let dims = textureDimensions(inputTex, 0);
+  let baseIndex = (((WorkGroupID.xy * vec2(params.blockDim, 4)) + (LocalInvocationID.xy * vec2(4u, 1u))) - vec2(filterOffset, 0));
   for(var r : u32 = 0u; (r < 4u); r = (r + 1u)) {
     for(var c : u32 = 0u; (c < 4u); c = (c + 1u)) {
-      var loadIndex = (baseIndex + vec2<i32>(i32(c), i32(r)));
+      var loadIndex = (baseIndex + vec2(c, r));
       if ((flip.value != 0u)) {
         loadIndex = loadIndex.yx;
       }
@@ -36,7 +36,7 @@ fn main(@builtin(workgroup_id) WorkGroupID : vec3<u32>, @builtin(local_invocatio
   workgroupBarrier();
   for(var r : u32 = 0u; (r < 4u); r = (r + 1u)) {
     for(var c : u32 = 0u; (c < 4u); c = (c + 1u)) {
-      var writeIndex = (baseIndex + vec2<i32>(i32(c), i32(r)));
+      var writeIndex = (baseIndex + vec2(c, r));
       if ((flip.value != 0u)) {
         writeIndex = writeIndex.yx;
       }

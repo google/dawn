@@ -19,8 +19,8 @@ bool aboutEqual(float value, float expect) {
 uniform highp sampler2D src_1;
 uniform highp sampler2D dst_1;
 void tint_symbol_1(uvec3 GlobalInvocationID) {
-  ivec2 srcSize = textureSize(src_1, 0);
-  ivec2 dstSize = textureSize(dst_1, 0);
+  uvec2 srcSize = uvec2(textureSize(src_1, 0));
+  uvec2 dstSize = uvec2(textureSize(dst_1, 0));
   uvec2 dstTexCoord = uvec2(GlobalInvocationID.xy);
   vec4 nonCoveredColor = vec4(0.0f, 1.0f, 0.0f, 1.0f);
   bool success = true;
@@ -45,7 +45,7 @@ void tint_symbol_1(uvec3 GlobalInvocationID) {
   } else {
     uvec2 srcTexCoord = ((dstTexCoord - uniforms.dstCopyOrigin) + uniforms.srcCopyOrigin);
     if ((uniforms.dstTextureFlipY == 1u)) {
-      srcTexCoord.y = ((uint(srcSize.y) - srcTexCoord.y) - 1u);
+      srcTexCoord.y = ((srcSize.y - srcTexCoord.y) - 1u);
     }
     vec4 srcColor = texelFetch(src_1, ivec2(srcTexCoord), 0);
     vec4 dstColor = texelFetch(dst_1, ivec2(dstTexCoord), 0);
@@ -79,7 +79,7 @@ void tint_symbol_1(uvec3 GlobalInvocationID) {
       success = tint_symbol_4;
     }
   }
-  uint outputIndex = ((GlobalInvocationID.y * uint(dstSize.x)) + GlobalInvocationID.x);
+  uint outputIndex = ((GlobalInvocationID.y * dstSize.x) + GlobalInvocationID.x);
   if (success) {
     tint_symbol.result[outputIndex] = 1u;
   } else {

@@ -1618,7 +1618,7 @@ TEST_F(InspectorGetResourceBindingsTest, Simple) {
 
     auto* st_type = MakeStorageTextureTypes(ast::TextureDimension::k2d, ast::TexelFormat::kR32Uint);
     AddStorageTexture("st_var", st_type, 4, 0);
-    MakeStorageTextureBodyFunction("st_func", "st_var", ty.vec2<i32>(), utils::Empty);
+    MakeStorageTextureBodyFunction("st_func", "st_var", ty.vec2<u32>(), utils::Empty);
 
     MakeCallerBodyFunction("ep_func",
                            utils::Vector{
@@ -2789,14 +2789,14 @@ TEST_P(InspectorGetStorageTextureResourceBindingsTestWithParam, Simple) {
     const ast::Type* dim_type = nullptr;
     switch (dim) {
         case ast::TextureDimension::k1d:
-            dim_type = ty.i32();
+            dim_type = ty.u32();
             break;
         case ast::TextureDimension::k2d:
         case ast::TextureDimension::k2dArray:
-            dim_type = ty.vec2<i32>();
+            dim_type = ty.vec2<u32>();
             break;
         case ast::TextureDimension::k3d:
-            dim_type = ty.vec3<i32>();
+            dim_type = ty.vec3<u32>();
             break;
         default:
             break;

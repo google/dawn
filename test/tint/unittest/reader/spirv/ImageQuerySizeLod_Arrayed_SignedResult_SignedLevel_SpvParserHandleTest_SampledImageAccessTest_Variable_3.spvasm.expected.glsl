@@ -22,7 +22,7 @@ void main_1() {
   vec2 coords12 = vf12;
   vec3 coords123 = vf123;
   vec4 coords1234 = vf1234;
-  ivec3 x_99 = ivec3(textureSize(x_20_1, i1).xy.xy, textureSize(x_20_1, 0).z);
+  ivec3 x_99 = ivec3(uvec3(uvec2(textureSize(x_20_1, i1).xy).xy, uint(textureSize(x_20_1, 0).z)));
   return;
 }
 

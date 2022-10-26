@@ -16,10 +16,10 @@ struct tint_symbol_2 {
 void main_inner(uint3 GlobalInvocationID) {
   int2 tint_tmp;
   src.GetDimensions(tint_tmp.x, tint_tmp.y);
-  const int2 srcSize = tint_tmp;
+  const uint2 srcSize = tint_tmp;
   int2 tint_tmp_1;
   tint_symbol.GetDimensions(tint_tmp_1.x, tint_tmp_1.y);
-  const int2 dstSize = tint_tmp_1;
+  const uint2 dstSize = tint_tmp_1;
   const uint2 dstTexCoord = uint2(GlobalInvocationID.xy);
   const float4 nonCoveredColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
   bool success = true;
@@ -44,7 +44,7 @@ void main_inner(uint3 GlobalInvocationID) {
   } else {
     uint2 srcTexCoord = ((dstTexCoord - uniforms[1].xy) + uniforms[0].zw);
     if ((uniforms[0].x == 1u)) {
-      srcTexCoord.y = ((uint(srcSize.y) - srcTexCoord.y) - 1u);
+      srcTexCoord.y = ((srcSize.y - srcTexCoord.y) - 1u);
     }
     const float4 srcColor = src.Load(int3(int2(srcTexCoord), 0));
     const float4 dstColor = tint_symbol.Load(int3(int2(dstTexCoord), 0));
@@ -78,7 +78,7 @@ void main_inner(uint3 GlobalInvocationID) {
       success = tint_symbol_5;
     }
   }
-  const uint outputIndex = ((GlobalInvocationID.y * uint(dstSize.x)) + GlobalInvocationID.x);
+  const uint outputIndex = ((GlobalInvocationID.y * dstSize.x) + GlobalInvocationID.x);
   if (success) {
     output.Store((4u * outputIndex), asuint(1u));
   } else {

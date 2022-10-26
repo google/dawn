@@ -33,10 +33,10 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
 
 
 vec4 textureSampleExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, highp sampler2D plane0_smp, highp sampler2D plane1_smp, vec2 coord, ExternalTextureParams params) {
-  vec2 plane0_dims = vec2(textureSize(plane0_1, 0));
+  vec2 plane0_dims = vec2(uvec2(textureSize(plane0_1, 0)));
   vec2 plane0_half_texel = (vec2(0.5f) / plane0_dims);
   vec2 plane0_clamped = clamp(coord, plane0_half_texel, (1.0f - plane0_half_texel));
-  vec2 plane1_dims = vec2(textureSize(plane1_1, 0));
+  vec2 plane1_dims = vec2(uvec2(textureSize(plane1_1, 0)));
   vec2 plane1_half_texel = (vec2(0.5f) / plane1_dims);
   vec2 plane1_clamped = clamp(coord, plane1_half_texel, (1.0f - plane1_half_texel));
   vec3 color = vec3(0.0f, 0.0f, 0.0f);
@@ -110,10 +110,10 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
 
 
 vec4 textureSampleExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, highp sampler2D plane0_smp, highp sampler2D plane1_smp, vec2 coord, ExternalTextureParams params) {
-  vec2 plane0_dims = vec2(textureSize(plane0_1, 0));
+  vec2 plane0_dims = vec2(uvec2(textureSize(plane0_1, 0)));
   vec2 plane0_half_texel = (vec2(0.5f) / plane0_dims);
   vec2 plane0_clamped = clamp(coord, plane0_half_texel, (1.0f - plane0_half_texel));
-  vec2 plane1_dims = vec2(textureSize(plane1_1, 0));
+  vec2 plane1_dims = vec2(uvec2(textureSize(plane1_1, 0)));
   vec2 plane1_half_texel = (vec2(0.5f) / plane1_dims);
   vec2 plane1_clamped = clamp(coord, plane1_half_texel, (1.0f - plane1_half_texel));
   vec3 color = vec3(0.0f, 0.0f, 0.0f);
@@ -181,10 +181,10 @@ vec3 gammaCorrection(vec3 v, GammaTransferParams params) {
 
 
 vec4 textureSampleExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, highp sampler2D plane0_smp, highp sampler2D plane1_smp, vec2 coord, ExternalTextureParams params) {
-  vec2 plane0_dims = vec2(textureSize(plane0_1, 0));
+  vec2 plane0_dims = vec2(uvec2(textureSize(plane0_1, 0)));
   vec2 plane0_half_texel = (vec2(0.5f) / plane0_dims);
   vec2 plane0_clamped = clamp(coord, plane0_half_texel, (1.0f - plane0_half_texel));
-  vec2 plane1_dims = vec2(textureSize(plane1_1, 0));
+  vec2 plane1_dims = vec2(uvec2(textureSize(plane1_1, 0)));
   vec2 plane1_half_texel = (vec2(0.5f) / plane1_dims);
   vec2 plane1_clamped = clamp(coord, plane1_half_texel, (1.0f - plane1_half_texel));
   vec3 color = vec3(0.0f, 0.0f, 0.0f);

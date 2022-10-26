@@ -1,0 +1,21 @@
+@group(1) @binding(0) var arg_0 : texture_depth_cube_array;
+
+fn textureDimensions_9fcc3b() {
+  var res : vec2<u32> = textureDimensions(arg_0);
+}
+
+@vertex
+fn vertex_main() -> @builtin(position) vec4<f32> {
+  textureDimensions_9fcc3b();
+  return vec4<f32>();
+}
+
+@fragment
+fn fragment_main() {
+  textureDimensions_9fcc3b();
+}
+
+@compute @workgroup_size(1)
+fn compute_main() {
+  textureDimensions_9fcc3b();
+}

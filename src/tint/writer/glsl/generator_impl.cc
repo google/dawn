@@ -1345,6 +1345,16 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
         }
     };
 
+    auto emit_unsigned_int_type = [&](const sem::Type* ty) {
+        uint32_t width = 0;
+        sem::Type::ElementOf(ty, &width);
+        if (width > 1) {
+            out << "uvec" << width;
+        } else {
+            out << "uint";
+        }
+    };
+
     auto emit_expr_as_signed = [&](const ast::Expression* e) {
         auto* ty = TypeOf(e)->UnwrapRef();
         if (!ty->is_unsigned_scalar_or_vector()) {
@@ -1357,6 +1367,12 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
 
     switch (builtin->Type()) {
         case sem::BuiltinType::kTextureDimensions: {
+            // textureDimensions() returns an unsigned scalar / vector in WGSL.
+            // textureSize() / imageSize() returns a signed scalar / vector in GLSL.
+            // Cast.
+            emit_unsigned_int_type(call->Type());
+            ScopedParen sp(out);
+
             if (texture_type->Is<sem::StorageTexture>()) {
                 out << "imageSize(";
             } else {
@@ -1390,6 +1406,12 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
             return true;
         }
         case sem::BuiltinType::kTextureNumLayers: {
+            // textureNumLayers() returns an unsigned scalar in WGSL.
+            // textureSize() / imageSize() returns a signed scalar / vector in GLSL.
+            // Cast.
+            out << "uint";
+            ScopedParen sp(out);
+
             if (texture_type->Is<sem::StorageTexture>()) {
                 out << "imageSize(";
             } else {
@@ -1418,6 +1440,12 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
             return true;
         }
         case sem::BuiltinType::kTextureNumLevels: {
+            // textureNumLevels() returns an unsigned scalar in WGSL.
+            // textureQueryLevels() returns a signed scalar in GLSL.
+            // Cast.
+            out << "uint";
+            ScopedParen sp(out);
+
             out << "textureQueryLevels(";
             if (!EmitExpression(out, texture)) {
                 return false;
@@ -1426,6 +1454,12 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
             return true;
         }
         case sem::BuiltinType::kTextureNumSamples: {
+            // textureNumSamples() returns an unsigned scalar in WGSL.
+            // textureSamples() returns a signed scalar in GLSL.
+            // Cast.
+            out << "uint";
+            ScopedParen sp(out);
+
             out << "textureSamples(";
             if (!EmitExpression(out, texture)) {
                 return false;

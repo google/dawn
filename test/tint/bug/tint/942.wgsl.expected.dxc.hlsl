@@ -28,13 +28,13 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_invocatio
   const uint filterOffset = ((params[0].x - 1u) / 2u);
   int3 tint_tmp;
   inputTex.GetDimensions(0, tint_tmp.x, tint_tmp.y, tint_tmp.z);
-  const int2 dims = tint_tmp.xy;
-  const int2 baseIndex = (int2(((WorkGroupID.xy * uint2(params[0].y, 4u)) + (LocalInvocationID.xy * uint2(4u, 1u)))) - int2(int(filterOffset), 0));
+  const uint2 dims = tint_tmp.xy;
+  const uint2 baseIndex = (((WorkGroupID.xy * uint2(params[0].y, 4u)) + (LocalInvocationID.xy * uint2(4u, 1u))) - uint2(filterOffset, 0u));
   {
     for(uint r = 0u; (r < 4u); r = (r + 1u)) {
       {
         for(uint c = 0u; (c < 4u); c = (c + 1u)) {
-          int2 loadIndex = (baseIndex + int2(int(c), int(r)));
+          uint2 loadIndex = (baseIndex + uint2(c, r));
           if ((flip[0].x != 0u)) {
             loadIndex = loadIndex.yx;
           }
@@ -48,7 +48,7 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_invocatio
     for(uint r = 0u; (r < 4u); r = (r + 1u)) {
       {
         for(uint c = 0u; (c < 4u); c = (c + 1u)) {
-          int2 writeIndex = (baseIndex + int2(int(c), int(r)));
+          uint2 writeIndex = (baseIndex + uint2(c, r));
           if ((flip[0].x != 0u)) {
             writeIndex = writeIndex.yx;
           }

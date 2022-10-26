@@ -1,0 +1,21 @@
+@group(1) @binding(0) var arg_0 : texture_1d<f32>;
+
+fn textureDimensions_aac604() {
+  var res : u32 = textureDimensions(arg_0, 1u);
+}
+
+@vertex
+fn vertex_main() -> @builtin(position) vec4<f32> {
+  textureDimensions_aac604();
+  return vec4<f32>();
+}
+
+@fragment
+fn fragment_main() {
+  textureDimensions_aac604();
+}
+
+@compute @workgroup_size(1)
+fn compute_main() {
+  textureDimensions_aac604();
+}

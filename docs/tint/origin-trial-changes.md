@@ -2,6 +2,10 @@
 
 ## Changes for M109
 
+### Breaking changes
+
+* `textureDimensions()`, `textureNumLayers()` and `textureNumLevels()` now return unsigned integers / vectors. [tint:1526](crbug.com/tint/1526)
+
 ### New features
 
 * Uniformity analysis failures are warnings again [tint:1728](crbug.com/tint/1728)

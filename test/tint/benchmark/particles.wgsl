@@ -98,7 +98,7 @@ fn simulate(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
   if (particle.lifetime < 0.0) {
     // Use the probability map to find where the particle should be spawned.
     // Starting with the 1x1 mip level.
-    var coord = vec2<i32>(0, 0);
+    var coord = vec2<u32>(0, 0);
     for (var level = textureNumLevels(texture) - 1; level > 0; level = level - 1) {
       // Load the probability value from the mip-level
       // Generate a random number and using the probabilty values, pick the
@@ -112,8 +112,8 @@ fn simulate(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {
       let value = vec4<f32>(rand());
       let mask = (value >= vec4<f32>(0.0, probabilites.xyz)) & (value < probabilites);
       coord = coord * 2;
-      coord.x = coord.x + select(0, 1, any(mask.yw)); // x  y
-      coord.y = coord.y + select(0, 1, any(mask.zw)); // z  w
+      coord.x += select(0u, 1u, any(mask.yw)); // x  y
+      coord.y += select(0u, 1u, any(mask.zw)); // z  w
     }
     let uv = vec2<f32>(coord) / vec2<f32>(textureDimensions(texture));
     particle.position = vec3<f32>((uv - 0.5) * 3.0 * vec2<f32>(1.0, -1.0), 0.0);

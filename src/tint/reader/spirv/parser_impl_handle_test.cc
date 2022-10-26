@@ -2842,7 +2842,7 @@ INSTANTIATE_TEST_SUITE_P(
          "%99 = OpImageQuerySize %v3int %im \n"
          "%98 = OpImageRead %v4float %im %vi123\n",
          R"(@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
-         R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20), textureNumLayers(x_20));)"}
+         R"(let x_99 : vec3<i32> = vec3<i32>(vec3<u32>(textureDimensions(x_20), textureNumLayers(x_20)));)"}
         // 3D array storage image doesn't exist.
 
         // Multisampled array
@@ -2898,7 +2898,7 @@ INSTANTIATE_TEST_SUITE_P(
         // 2D array
         {"%float 2D 0 1 0 1 Unknown", "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
          R"(@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
-         R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20, i1), textureNumLayers(x_20));)"},
+         R"(let x_99 : vec3<i32> = vec3<i32>(vec3<u32>(textureDimensions(x_20, i1), textureNumLayers(x_20)));)"},
 
         // There is no 3D array
 
@@ -2909,12 +2909,12 @@ INSTANTIATE_TEST_SUITE_P(
         // https://github.com/gpuweb/gpuweb/issues/1345
         {"%float Cube 0 1 0 1 Unknown", "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
          R"(@group(2) @binding(1) var x_20 : texture_cube_array<f32>;)",
-         R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20, i1).xy, textureNumLayers(x_20));)"},
+         R"(let x_99 : vec3<i32> = vec3<i32>(vec3<u32>(textureDimensions(x_20, i1).xy, textureNumLayers(x_20)));)"},
 
         // Depth 2D array
         {"%float 2D 1 1 0 1 Unknown", "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
          R"(@group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
-         R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20, i1), textureNumLayers(x_20));)"},
+         R"(let x_99 : vec3<i32> = vec3<i32>(vec3<u32>(textureDimensions(x_20, i1), textureNumLayers(x_20)));)"},
 
         // Depth Cube Array
         //
@@ -2923,19 +2923,17 @@ INSTANTIATE_TEST_SUITE_P(
         // https://github.com/gpuweb/gpuweb/issues/1345
         {"%float Cube 1 1 0 1 Unknown", "%99 = OpImageQuerySizeLod %v3int %im %i1\n",
          R"(@group(2) @binding(1) var x_20 : texture_depth_cube_array;)",
-         R"(let x_99 : vec3<i32> = vec3<i32>(textureDimensions(x_20, i1).xy, textureNumLayers(x_20));)"}}));
+         R"(let x_99 : vec3<i32> = vec3<i32>(vec3<u32>(textureDimensions(x_20, i1).xy, textureNumLayers(x_20)));)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
-    // When the level-of-detail value is given as an unsigned
-    // integer, we must convert it before using it as an argument
-    // to textureDimensions.
+    // textureDimensions accepts both signed and unsigned the level-of-detail values.
     ImageQuerySizeLod_NonArrayed_SignedResult_UnsignedLevel,
     SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
 
         {"%float 1D 0 0 0 1 Unknown", "%99 = OpImageQuerySizeLod %int %im %u1\n",
          R"(@group(2) @binding(1) var x_20 : texture_1d<f32>;)",
-         R"(let x_99 : i32 = i32(textureDimensions(x_20, i32(u1)));)"}}));
+         R"(let x_99 : i32 = i32(textureDimensions(x_20, u1));)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     // When SPIR-V wants the result type to be unsigned, we have to
@@ -2948,7 +2946,7 @@ INSTANTIATE_TEST_SUITE_P(
 
         {"%float 1D 0 0 0 1 Unknown", "%99 = OpImageQuerySizeLod %uint %im %i1\n",
          R"(@group(2) @binding(1) var x_20 : texture_1d<f32>;)",
-         R"(let x_99 : u32 = u32(textureDimensions(x_20, i1));)"}}));
+         R"(let x_99 : i32 = i32(textureDimensions(x_20, i1));)"}}));
 
 INSTANTIATE_TEST_SUITE_P(ImageQueryLevels_SignedResult,
                          SpvParserHandleTest_SampledImageAccessTest,
@@ -2961,47 +2959,47 @@ INSTANTIATE_TEST_SUITE_P(ImageQueryLevels_SignedResult,
                              // 2D
                              {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
                               R"(@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
-                              R"(let x_99 : i32 = textureNumLevels(x_20);)"},
+                              R"(let x_99 : i32 = i32(textureNumLevels(x_20));)"},
 
                              // 2D array
                              {"%float 2D 0 1 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
                               R"(@group(2) @binding(1) var x_20 : texture_2d_array<f32>;)",
-                              R"(let x_99 : i32 = textureNumLevels(x_20);)"},
+                              R"(let x_99 : i32 = i32(textureNumLevels(x_20));)"},
 
                              // 3D
                              {"%float 3D 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
                               R"(@group(2) @binding(1) var x_20 : texture_3d<f32>;)",
-                              R"(let x_99 : i32 = textureNumLevels(x_20);)"},
+                              R"(let x_99 : i32 = i32(textureNumLevels(x_20));)"},
 
                              // Cube
                              {"%float Cube 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
                               R"(@group(2) @binding(1) var x_20 : texture_cube<f32>;)",
-                              R"(let x_99 : i32 = textureNumLevels(x_20);)"},
+                              R"(let x_99 : i32 = i32(textureNumLevels(x_20));)"},
 
                              // Cube array
                              {"%float Cube 0 1 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
                               R"(@group(2) @binding(1) var x_20 : texture_cube_array<f32>;)",
-                              R"(let x_99 : i32 = textureNumLevels(x_20);)"},
+                              R"(let x_99 : i32 = i32(textureNumLevels(x_20));)"},
 
                              // depth 2d
                              {"%float 2D 1 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
                               R"(@group(2) @binding(1) var x_20 : texture_depth_2d;)",
-                              R"(let x_99 : i32 = textureNumLevels(x_20);)"},
+                              R"(let x_99 : i32 = i32(textureNumLevels(x_20));)"},
 
                              // depth 2d array
                              {"%float 2D 1 1 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
                               R"(@group(2) @binding(1) var x_20 : texture_depth_2d_array;)",
-                              R"(let x_99 : i32 = textureNumLevels(x_20);)"},
+                              R"(let x_99 : i32 = i32(textureNumLevels(x_20));)"},
 
                              // depth cube
                              {"%float Cube 1 0 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
                               R"(@group(2) @binding(1) var x_20 : texture_depth_cube;)",
-                              R"(let x_99 : i32 = textureNumLevels(x_20);)"},
+                              R"(let x_99 : i32 = i32(textureNumLevels(x_20));)"},
 
                              // depth cube array
                              {"%float Cube 1 1 0 1 Unknown", "%99 = OpImageQueryLevels %int %im\n",
                               R"(@group(2) @binding(1) var x_20 : texture_depth_cube_array;)",
-                              R"(let x_99 : i32 = textureNumLevels(x_20);)"}}));
+                              R"(let x_99 : i32 = i32(textureNumLevels(x_20));)"}}));
 
 INSTANTIATE_TEST_SUITE_P(
     // Spot check that a type conversion is inserted when SPIR-V asks for
@@ -3011,7 +3009,7 @@ INSTANTIATE_TEST_SUITE_P(
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
         {"%float 2D 0 0 0 1 Unknown", "%99 = OpImageQueryLevels %uint %im\n",
          R"(@group(2) @binding(1) var x_20 : texture_2d<f32>;)",
-         R"(let x_99 : u32 = u32(textureNumLevels(x_20));)"}}));
+         R"(let x_99 : u32 = textureNumLevels(x_20);)"}}));
 
 INSTANTIATE_TEST_SUITE_P(ImageQuerySamples_SignedResult,
                          SpvParserHandleTest_SampledImageAccessTest,
@@ -3019,21 +3017,21 @@ INSTANTIATE_TEST_SUITE_P(ImageQuerySamples_SignedResult,
                              // Multsample 2D
                              {"%float 2D 0 0 1 1 Unknown", "%99 = OpImageQuerySamples %int %im\n",
                               R"(@group(2) @binding(1) var x_20 : texture_multisampled_2d<f32>;)",
-                              R"(let x_99 : i32 = textureNumSamples(x_20);)"}  // namespace
+                              R"(let x_99 : i32 = i32(textureNumSamples(x_20));)"}
 
                              // Multisample 2D array
                              // Not in WebGPU
                          }));
 
 INSTANTIATE_TEST_SUITE_P(
-    // Translation must inject a type coersion from signed to unsigned.
+    // Translation must inject a type coersion from unsigned to signed.
     ImageQuerySamples_UnsignedResult,
     SpvParserHandleTest_SampledImageAccessTest,
     ::testing::ValuesIn(std::vector<ImageAccessCase>{
-        // Multsample 2D
+        // Multisample 2D
         {"%float 2D 0 0 1 1 Unknown", "%99 = OpImageQuerySamples %uint %im\n",
          R"(@group(2) @binding(1) var x_20 : texture_multisampled_2d<f32>;)",
-         R"(let x_99 : u32 = u32(textureNumSamples(x_20));)"}
+         R"(let x_99 : u32 = textureNumSamples(x_20);)"}
 
         // Multisample 2D array
         // Not in WebGPU

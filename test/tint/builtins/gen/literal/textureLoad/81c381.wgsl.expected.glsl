@@ -4,7 +4,7 @@ SKIP: FAILED
 
 uniform highp sampler1D arg_0_1;
 void textureLoad_81c381() {
-  vec4 res = texelFetch(arg_0_1, 1, 0);
+  vec4 res = texelFetch(arg_0_1, 1, 1);
 }
 
 vec4 vertex_main() {
@@ -32,7 +32,7 @@ precision mediump float;
 
 uniform highp sampler1D arg_0_1;
 void textureLoad_81c381() {
-  vec4 res = texelFetch(arg_0_1, 1, 0);
+  vec4 res = texelFetch(arg_0_1, 1, 1);
 }
 
 void fragment_main() {
@@ -54,7 +54,7 @@ ERROR: 2 compilation errors.  No code generated.
 
 uniform highp sampler1D arg_0_1;
 void textureLoad_81c381() {
-  vec4 res = texelFetch(arg_0_1, 1, 0);
+  vec4 res = texelFetch(arg_0_1, 1, 1);
 }
 
 void compute_main() {

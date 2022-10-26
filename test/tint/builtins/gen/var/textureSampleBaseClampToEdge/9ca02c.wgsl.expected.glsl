@@ -2,7 +2,7 @@
 
 
 vec4 tint_textureSampleBaseClampToEdge(highp sampler2D t_1, highp sampler2D t_s, vec2 coord) {
-  vec2 dims = vec2(textureSize(t_1, 0));
+  vec2 dims = vec2(uvec2(textureSize(t_1, 0)));
   vec2 half_texel = (vec2(0.5f) / dims);
   vec2 clamped = clamp(coord, half_texel, (1.0f - half_texel));
   return textureLod(t_s, clamped, 0.0f);
@@ -33,7 +33,7 @@ precision mediump float;
 
 
 vec4 tint_textureSampleBaseClampToEdge(highp sampler2D t_1, highp sampler2D t_s, vec2 coord) {
-  vec2 dims = vec2(textureSize(t_1, 0));
+  vec2 dims = vec2(uvec2(textureSize(t_1, 0)));
   vec2 half_texel = (vec2(0.5f) / dims);
   vec2 clamped = clamp(coord, half_texel, (1.0f - half_texel));
   return textureLod(t_s, clamped, 0.0f);
@@ -58,7 +58,7 @@ void main() {
 
 
 vec4 tint_textureSampleBaseClampToEdge(highp sampler2D t_1, highp sampler2D t_s, vec2 coord) {
-  vec2 dims = vec2(textureSize(t_1, 0));
+  vec2 dims = vec2(uvec2(textureSize(t_1, 0)));
   vec2 half_texel = (vec2(0.5f) / dims);
   vec2 clamped = clamp(coord, half_texel, (1.0f - half_texel));
   return textureLod(t_s, clamped, 0.0f);

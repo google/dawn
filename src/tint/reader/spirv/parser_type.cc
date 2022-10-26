@@ -444,6 +444,20 @@ const spirv::I32* TypeManager::I32() {
     return state->i32_;
 }
 
+const Type* TypeManager::AsUnsigned(const Type* ty) {
+    return Switch(
+        ty,                                        //
+        [&](const spirv::I32*) { return U32(); },  //
+        [&](const spirv::U32*) { return ty; },     //
+        [&](const spirv::Vector* vec) {
+            return Switch(
+                vec->type,                                                    //
+                [&](const spirv::I32*) { return Vector(U32(), vec->size); },  //
+                [&](const spirv::U32*) { return ty; }                         //
+            );
+        });
+}
+
 const spirv::Pointer* TypeManager::Pointer(const Type* el,
                                            ast::AddressSpace address_space,
                                            ast::Access access) {

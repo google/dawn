@@ -2416,17 +2416,17 @@ static const char* expected_texture_overload(ast::builtin::test::ValidTextureOve
         case ValidTextureOverload::kSampleCompareDepthCubeArrayF32:
             return R"(textureSampleCompare(texture, sampler, coords, array_index, depth_ref))";
         case ValidTextureOverload::kSampleCompareLevelDepth2dF32:
-            return R"(textureSampleCompare(texture, sampler, coords, depth_ref))";
+            return R"(textureSampleCompareLevel(texture, sampler, coords, depth_ref))";
         case ValidTextureOverload::kSampleCompareLevelDepth2dOffsetF32:
-            return R"(textureSampleCompare(texture, sampler, coords, depth_ref, offset))";
+            return R"(textureSampleCompareLevel(texture, sampler, coords, depth_ref, offset))";
         case ValidTextureOverload::kSampleCompareLevelDepth2dArrayF32:
-            return R"(textureSampleCompare(texture, sampler, coords, array_index, depth_ref))";
+            return R"(textureSampleCompareLevel(texture, sampler, coords, array_index, depth_ref))";
         case ValidTextureOverload::kSampleCompareLevelDepth2dArrayOffsetF32:
-            return R"(textureSampleCompare(texture, sampler, coords, array_index, depth_ref, offset))";
+            return R"(textureSampleCompareLevel(texture, sampler, coords, array_index, depth_ref, offset))";
         case ValidTextureOverload::kSampleCompareLevelDepthCubeF32:
-            return R"(textureSampleCompare(texture, sampler, coords, depth_ref))";
+            return R"(textureSampleCompareLevel(texture, sampler, coords, depth_ref))";
         case ValidTextureOverload::kSampleCompareLevelDepthCubeArrayF32:
-            return R"(textureSampleCompare(texture, sampler, coords, array_index, depth_ref))";
+            return R"(textureSampleCompareLevel(texture, sampler, coords, array_index, depth_ref))";
         case ValidTextureOverload::kLoad1dLevelF32:
         case ValidTextureOverload::kLoad1dLevelU32:
         case ValidTextureOverload::kLoad1dLevelI32:
@@ -2478,7 +2478,7 @@ TEST_P(ResolverBuiltinTest_Texture, Call) {
             default:
                 FAIL() << "invalid texture dimensions: " << param.texture_dimension;
             case ast::TextureDimension::k1d:
-                EXPECT_TRUE(TypeOf(call)->Is<sem::I32>());
+                EXPECT_TRUE(TypeOf(call)->Is<sem::U32>());
                 break;
             case ast::TextureDimension::k2d:
             case ast::TextureDimension::k2dArray:
@@ -2487,23 +2487,23 @@ TEST_P(ResolverBuiltinTest_Texture, Call) {
                 auto* vec = As<sem::Vector>(TypeOf(call));
                 ASSERT_NE(vec, nullptr);
                 EXPECT_EQ(vec->Width(), 2u);
-                EXPECT_TRUE(vec->type()->Is<sem::I32>());
+                EXPECT_TRUE(vec->type()->Is<sem::U32>());
                 break;
             }
             case ast::TextureDimension::k3d: {
                 auto* vec = As<sem::Vector>(TypeOf(call));
                 ASSERT_NE(vec, nullptr);
                 EXPECT_EQ(vec->Width(), 3u);
-                EXPECT_TRUE(vec->type()->Is<sem::I32>());
+                EXPECT_TRUE(vec->type()->Is<sem::U32>());
                 break;
             }
         }
     } else if (std::string(param.function) == "textureNumLayers") {
-        EXPECT_TRUE(TypeOf(call)->Is<sem::I32>());
+        EXPECT_TRUE(TypeOf(call)->Is<sem::U32>());
     } else if (std::string(param.function) == "textureNumLevels") {
-        EXPECT_TRUE(TypeOf(call)->Is<sem::I32>());
+        EXPECT_TRUE(TypeOf(call)->Is<sem::U32>());
     } else if (std::string(param.function) == "textureNumSamples") {
-        EXPECT_TRUE(TypeOf(call)->Is<sem::I32>());
+        EXPECT_TRUE(TypeOf(call)->Is<sem::U32>());
     } else if (std::string(param.function) == "textureStore") {
         EXPECT_TRUE(TypeOf(call)->Is<sem::Void>());
     } else if (std::string(param.function) == "textureGather") {

@@ -5,7 +5,7 @@ void textureNumSamples_a3c8a0() {
   int res = 0;
   int3 tint_tmp;
   arg_0.GetDimensions(tint_tmp.x, tint_tmp.y, tint_tmp.z);
-  const int x_16 = tint_tmp.z;
+  const int x_16 = int(tint_tmp.z);
   res = x_16;
   return;
 }

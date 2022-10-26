@@ -1092,9 +1092,7 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
             };
 
             if (dims.size() == 1) {
-                out << "int(";
                 get_dim(dims[0]);
-                out << ")";
             } else {
                 EmitType(out, TypeOf(expr)->UnwrapRef(), "");
                 out << "(";
@@ -1109,27 +1107,24 @@ bool GeneratorImpl::EmitTextureCall(std::ostream& out,
             return true;
         }
         case sem::BuiltinType::kTextureNumLayers: {
-            out << "int(";
             if (!texture_expr()) {
                 return false;
             }
-            out << ".get_array_size())";
+            out << ".get_array_size()";
             return true;
         }
         case sem::BuiltinType::kTextureNumLevels: {
-            out << "int(";
             if (!texture_expr()) {
                 return false;
             }
-            out << ".get_num_mip_levels())";
+            out << ".get_num_mip_levels()";
             return true;
         }
         case sem::BuiltinType::kTextureNumSamples: {
-            out << "int(";
             if (!texture_expr()) {
                 return false;
             }
-            out << ".get_num_samples())";
+            out << ".get_num_samples()";
             return true;
         }
         default:

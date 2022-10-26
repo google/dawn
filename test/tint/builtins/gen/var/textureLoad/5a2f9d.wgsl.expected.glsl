@@ -5,7 +5,7 @@ SKIP: FAILED
 uniform highp isampler1D arg_0_1;
 void textureLoad_5a2f9d() {
   int arg_1 = 1;
-  int arg_2 = 0;
+  int arg_2 = 1;
   ivec4 res = texelFetch(arg_0_1, arg_1, arg_2);
 }
 
@@ -35,7 +35,7 @@ precision mediump float;
 uniform highp isampler1D arg_0_1;
 void textureLoad_5a2f9d() {
   int arg_1 = 1;
-  int arg_2 = 0;
+  int arg_2 = 1;
   ivec4 res = texelFetch(arg_0_1, arg_1, arg_2);
 }
 
@@ -59,7 +59,7 @@ ERROR: 2 compilation errors.  No code generated.
 uniform highp isampler1D arg_0_1;
 void textureLoad_5a2f9d() {
   int arg_1 = 1;
-  int arg_2 = 0;
+  int arg_2 = 1;
   ivec4 res = texelFetch(arg_0_1, arg_1, arg_2);
 }
 

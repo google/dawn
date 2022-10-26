@@ -310,23 +310,23 @@ fn IsEqualTo(pixel : vec4<f32>, expected : vec4<f32>) -> bool {
         auto texelType = "vec4<" + componentFmt + ">";
         std::string sliceCount;
         std::string textureStore;
-        std::string textureSize = "textureDimensions(storageImage0).xy";
+        std::string textureSize = "vec2<i32>(textureDimensions(storageImage0).xy)";
         switch (dimension) {
             case wgpu::TextureViewDimension::e1D:
                 sliceCount = "1";
                 textureStore = "textureStore(storageImage0, x, expected)";
-                textureSize = "vec2<i32>(textureDimensions(storageImage0), 1)";
+                textureSize = "vec2<i32>(i32(textureDimensions(storageImage0)), 1)";
                 break;
             case wgpu::TextureViewDimension::e2D:
                 sliceCount = "1";
                 textureStore = "textureStore(storageImage0, vec2<i32>(x, y), expected)";
                 break;
             case wgpu::TextureViewDimension::e2DArray:
-                sliceCount = "textureNumLayers(storageImage0)";
+                sliceCount = "i32(textureNumLayers(storageImage0))";
                 textureStore = "textureStore(storageImage0, vec2<i32>(x, y), slice, expected)";
                 break;
             case wgpu::TextureViewDimension::e3D:
-                sliceCount = "textureDimensions(storageImage0).z";
+                sliceCount = "i32(textureDimensions(storageImage0).z)";
                 textureStore = "textureStore(storageImage0, vec3<i32>(x, y, slice), expected)";
                 break;
             default:

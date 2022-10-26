@@ -29,13 +29,13 @@ void tint_symbol(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocati
   }
   barrier();
   uint filterOffset = ((params.filterDim - 1u) / 2u);
-  ivec2 dims = textureSize(inputTex_1, 0);
-  ivec2 baseIndex = (ivec2(((WorkGroupID.xy * uvec2(params.blockDim, 4u)) + (LocalInvocationID.xy * uvec2(4u, 1u)))) - ivec2(int(filterOffset), 0));
+  uvec2 dims = uvec2(textureSize(inputTex_1, 0));
+  uvec2 baseIndex = (((WorkGroupID.xy * uvec2(params.blockDim, 4u)) + (LocalInvocationID.xy * uvec2(4u, 1u))) - uvec2(filterOffset, 0u));
   {
     for(uint r = 0u; (r < 4u); r = (r + 1u)) {
       {
         for(uint c = 0u; (c < 4u); c = (c + 1u)) {
-          ivec2 loadIndex = (baseIndex + ivec2(int(c), int(r)));
+          uvec2 loadIndex = (baseIndex + uvec2(c, r));
           if ((flip.value != 0u)) {
             loadIndex = loadIndex.yx;
           }
@@ -49,7 +49,7 @@ void tint_symbol(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocati
     for(uint r = 0u; (r < 4u); r = (r + 1u)) {
       {
         for(uint c = 0u; (c < 4u); c = (c + 1u)) {
-          ivec2 writeIndex = (baseIndex + ivec2(int(c), int(r)));
+          uvec2 writeIndex = (baseIndex + uvec2(c, r));
           if ((flip.value != 0u)) {
             writeIndex = writeIndex.yx;
           }
@@ -70,7 +70,7 @@ void tint_symbol(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocati
                 acc = (acc + ((1.0f / float(params.filterDim)) * tile[r][i]));
               }
             }
-            imageStore(outputTex, writeIndex, vec4(acc, 1.0f));
+            imageStore(outputTex, ivec2(writeIndex), vec4(acc, 1.0f));
           }
         }
       }

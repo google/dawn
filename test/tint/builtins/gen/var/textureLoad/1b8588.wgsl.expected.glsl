@@ -5,7 +5,7 @@ SKIP: FAILED
 uniform highp usampler1D arg_0_1;
 void textureLoad_1b8588() {
   int arg_1 = 1;
-  int arg_2 = 0;
+  int arg_2 = 1;
   uvec4 res = texelFetch(arg_0_1, arg_1, arg_2);
 }
 
@@ -35,7 +35,7 @@ precision mediump float;
 uniform highp usampler1D arg_0_1;
 void textureLoad_1b8588() {
   int arg_1 = 1;
-  int arg_2 = 0;
+  int arg_2 = 1;
   uvec4 res = texelFetch(arg_0_1, arg_1, arg_2);
 }
 
@@ -59,7 +59,7 @@ ERROR: 2 compilation errors.  No code generated.
 uniform highp usampler1D arg_0_1;
 void textureLoad_1b8588() {
   int arg_1 = 1;
-  int arg_2 = 0;
+  int arg_2 = 1;
   uvec4 res = texelFetch(arg_0_1, arg_1, arg_2);
 }
 

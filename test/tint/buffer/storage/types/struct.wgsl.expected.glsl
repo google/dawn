@@ -25,7 +25,7 @@ void main() {
 }
 Error parsing GLSL shader:
 ERROR: 0:16: 'assign' :  cannot convert from 'layout( binding=0 column_major std430) buffer block{layout( column_major std430 offset=0) buffer structure{ global highp float f} inner}' to 'layout( binding=1 column_major std430) buffer block{layout( column_major std430 offset=0) buffer structure{ global highp float f} inner}'
-ERROR: 0:16: '' : compilation terminated
+ERROR: 0:16: '' : compilation terminated 
 ERROR: 2 compilation errors.  No code generated.
 
 

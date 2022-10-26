@@ -24,7 +24,7 @@ std::string expected_texture_overload(ast::builtin::test::ValidTextureOverload o
     switch (overload) {
         case ValidTextureOverload::kDimensions1d:
         case ValidTextureOverload::kDimensionsStorageWO1d:
-            return R"(int(texture.get_width(0)))";
+            return R"(texture.get_width(0))";
         case ValidTextureOverload::kDimensions2d:
         case ValidTextureOverload::kDimensions2dArray:
         case ValidTextureOverload::kDimensionsCube:
@@ -37,10 +37,10 @@ std::string expected_texture_overload(ast::builtin::test::ValidTextureOverload o
         case ValidTextureOverload::kDimensionsDepthMultisampled2d:
         case ValidTextureOverload::kDimensionsStorageWO2d:
         case ValidTextureOverload::kDimensionsStorageWO2dArray:
-            return R"(int2(texture.get_width(), texture.get_height()))";
+            return R"(uint2(texture.get_width(), texture.get_height()))";
         case ValidTextureOverload::kDimensions3d:
         case ValidTextureOverload::kDimensionsStorageWO3d:
-            return R"(int3(texture.get_width(), texture.get_height(), texture.get_depth()))";
+            return R"(uint3(texture.get_width(), texture.get_height(), texture.get_depth()))";
         case ValidTextureOverload::kDimensions2dLevel:
         case ValidTextureOverload::kDimensionsCubeLevel:
         case ValidTextureOverload::kDimensionsCubeArrayLevel:
@@ -49,9 +49,9 @@ std::string expected_texture_overload(ast::builtin::test::ValidTextureOverload o
         case ValidTextureOverload::kDimensionsDepth2dArrayLevel:
         case ValidTextureOverload::kDimensionsDepthCubeLevel:
         case ValidTextureOverload::kDimensionsDepthCubeArrayLevel:
-            return R"(int2(texture.get_width(1), texture.get_height(1)))";
+            return R"(uint2(texture.get_width(1), texture.get_height(1)))";
         case ValidTextureOverload::kDimensions3dLevel:
-            return R"(int3(texture.get_width(1), texture.get_height(1), texture.get_depth(1)))";
+            return R"(uint3(texture.get_width(1), texture.get_height(1), texture.get_depth(1)))";
         case ValidTextureOverload::kGather2dF32:
             return R"(texture.gather(sampler, float2(1.0f, 2.0f), int2(0), component::x))";
         case ValidTextureOverload::kGather2dOffsetF32:
@@ -93,7 +93,7 @@ std::string expected_texture_overload(ast::builtin::test::ValidTextureOverload o
         case ValidTextureOverload::kNumLayersDepth2dArray:
         case ValidTextureOverload::kNumLayersDepthCubeArray:
         case ValidTextureOverload::kNumLayersStorageWO2dArray:
-            return R"(int(texture.get_array_size()))";
+            return R"(texture.get_array_size())";
         case ValidTextureOverload::kNumLevels2d:
         case ValidTextureOverload::kNumLevels2dArray:
         case ValidTextureOverload::kNumLevels3d:
@@ -103,10 +103,10 @@ std::string expected_texture_overload(ast::builtin::test::ValidTextureOverload o
         case ValidTextureOverload::kNumLevelsDepth2dArray:
         case ValidTextureOverload::kNumLevelsDepthCube:
         case ValidTextureOverload::kNumLevelsDepthCubeArray:
-            return R"(int(texture.get_num_mip_levels()))";
+            return R"(texture.get_num_mip_levels())";
         case ValidTextureOverload::kNumSamplesDepthMultisampled2d:
         case ValidTextureOverload::kNumSamplesMultisampled2d:
-            return R"(int(texture.get_num_samples()))";
+            return R"(texture.get_num_samples())";
         case ValidTextureOverload::kSample1dF32:
             return R"(texture.sample(sampler, 1.0f))";
         case ValidTextureOverload::kSample2dF32:
@@ -210,17 +210,17 @@ std::string expected_texture_overload(ast::builtin::test::ValidTextureOverload o
         case ValidTextureOverload::kSampleCompareDepthCubeArrayF32:
             return R"(texture.sample_compare(sampler, float3(1.0f, 2.0f, 3.0f), 4, 5.0f))";
         case ValidTextureOverload::kSampleCompareLevelDepth2dF32:
-            return R"(texture.sample_compare(sampler, float2(1.0f, 2.0f), 3.0f))";
+            return R"(texture.sample_compare(sampler, float2(1.0f, 2.0f), 3.0f, level(0)))";
         case ValidTextureOverload::kSampleCompareLevelDepth2dOffsetF32:
-            return R"(texture.sample_compare(sampler, float2(1.0f, 2.0f), 3.0f, int2(4, 5)))";
+            return R"(texture.sample_compare(sampler, float2(1.0f, 2.0f), 3.0f, level(0), int2(4, 5)))";
         case ValidTextureOverload::kSampleCompareLevelDepth2dArrayF32:
-            return R"(texture.sample_compare(sampler, float2(1.0f, 2.0f), 4, 3.0f))";
+            return R"(texture.sample_compare(sampler, float2(1.0f, 2.0f), 3, 4.0f, level(0)))";
         case ValidTextureOverload::kSampleCompareLevelDepth2dArrayOffsetF32:
-            return R"(texture.sample_compare(sampler, float2(1.0f, 2.0f), 4, 3.0f, int2(5, 6)))";
+            return R"(texture.sample_compare(sampler, float2(1.0f, 2.0f), 3, 4.0f, level(0), int2(5, 6)))";
         case ValidTextureOverload::kSampleCompareLevelDepthCubeF32:
-            return R"(texture.sample_compare(sampler, float3(1.0f, 2.0f, 3.0f), 4.0f))";
+            return R"(texture.sample_compare(sampler, float3(1.0f, 2.0f, 3.0f), 4.0f, level(0)))";
         case ValidTextureOverload::kSampleCompareLevelDepthCubeArrayF32:
-            return R"(texture.sample_compare(sampler, float3(1.0f, 2.0f, 3.0f), 4, 5.0f))";
+            return R"(texture.sample_compare(sampler, float3(1.0f, 2.0f, 3.0f), 4, 5.0f, level(0)))";
         case ValidTextureOverload::kLoad1dLevelF32:
             return R"(texture.read(uint(1u), 0))";
         case ValidTextureOverload::kLoad1dLevelU32:
@@ -250,10 +250,11 @@ std::string expected_texture_overload(ast::builtin::test::ValidTextureOverload o
         case ValidTextureOverload::kLoadMultisampled2dI32:
             return R"(texture.read(uint2(uint2(1u, 2u)), 3u))";
         case ValidTextureOverload::kLoadDepth2dLevelF32:
-        case ValidTextureOverload::kLoadDepthMultisampled2dF32:
             return R"(texture.read(uint2(int2(1, 2)), 3))";
         case ValidTextureOverload::kLoadDepth2dArrayLevelF32:
             return R"(texture.read(uint2(uint2(1u, 2u)), 3u, 4u))";
+        case ValidTextureOverload::kLoadDepthMultisampled2dF32:
+            return R"(texture.read(uint2(uint2(1u, 2u)), 3u))";
         case ValidTextureOverload::kStoreWO1dRgba32float:
             return R"(texture.write(float4(2.0f, 3.0f, 4.0f, 5.0f), uint(1)))";
         case ValidTextureOverload::kStoreWO2dRgba32float:
