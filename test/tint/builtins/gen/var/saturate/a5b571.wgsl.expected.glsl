@@ -5,7 +5,7 @@ vec4 tint_saturate(vec4 v) {
 }
 
 void saturate_a5b571() {
-  vec4 arg_0 = vec4(1.0f);
+  vec4 arg_0 = vec4(2.0f);
   vec4 res = tint_saturate(arg_0);
 }
 
@@ -30,7 +30,7 @@ vec4 tint_saturate(vec4 v) {
 }
 
 void saturate_a5b571() {
-  vec4 arg_0 = vec4(1.0f);
+  vec4 arg_0 = vec4(2.0f);
   vec4 res = tint_saturate(arg_0);
 }
 
@@ -49,7 +49,7 @@ vec4 tint_saturate(vec4 v) {
 }
 
 void saturate_a5b571() {
-  vec4 arg_0 = vec4(1.0f);
+  vec4 arg_0 = vec4(2.0f);
   vec4 res = tint_saturate(arg_0);
 }
 

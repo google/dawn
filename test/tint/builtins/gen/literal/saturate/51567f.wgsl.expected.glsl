@@ -5,7 +5,7 @@ vec2 tint_saturate(vec2 v) {
 }
 
 void saturate_51567f() {
-  vec2 res = tint_saturate(vec2(1.0f));
+  vec2 res = tint_saturate(vec2(2.0f));
 }
 
 vec4 vertex_main() {
@@ -29,7 +29,7 @@ vec2 tint_saturate(vec2 v) {
 }
 
 void saturate_51567f() {
-  vec2 res = tint_saturate(vec2(1.0f));
+  vec2 res = tint_saturate(vec2(2.0f));
 }
 
 void fragment_main() {
@@ -47,7 +47,7 @@ vec2 tint_saturate(vec2 v) {
 }
 
 void saturate_51567f() {
-  vec2 res = tint_saturate(vec2(1.0f));
+  vec2 res = tint_saturate(vec2(2.0f));
 }
 
 void compute_main() {

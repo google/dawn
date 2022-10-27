@@ -2,7 +2,7 @@
 
 using namespace metal;
 void saturate_6bcddf() {
-  float3 res = saturate(float3(1.0f));
+  float3 res = float3(1.0f);
 }
 
 struct tint_symbol {

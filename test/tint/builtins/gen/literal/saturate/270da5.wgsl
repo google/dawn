@@ -23,7 +23,7 @@
 
 // fn saturate(f32) -> f32
 fn saturate_270da5() {
-  var res: f32 = saturate(1.f);
+  var res: f32 = saturate(2.f);
 }
 
 @vertex

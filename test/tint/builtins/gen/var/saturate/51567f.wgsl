@@ -23,7 +23,7 @@
 
 // fn saturate(vec<2, f32>) -> vec<2, f32>
 fn saturate_51567f() {
-  var arg_0 = vec2<f32>(1.f);
+  var arg_0 = vec2<f32>(2.f);
   var res: vec2<f32> = saturate(arg_0);
 }
 

@@ -1,5 +1,5 @@
 fn saturate_a5b571() {
-  var res : vec4<f32> = saturate(vec4<f32>(1.0f));
+  var res : vec4<f32> = saturate(vec4<f32>(2.0f));
 }
 
 @vertex

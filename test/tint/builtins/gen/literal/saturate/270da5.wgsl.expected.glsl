@@ -5,7 +5,7 @@ float tint_saturate(float v) {
 }
 
 void saturate_270da5() {
-  float res = tint_saturate(1.0f);
+  float res = tint_saturate(2.0f);
 }
 
 vec4 vertex_main() {
@@ -29,7 +29,7 @@ float tint_saturate(float v) {
 }
 
 void saturate_270da5() {
-  float res = tint_saturate(1.0f);
+  float res = tint_saturate(2.0f);
 }
 
 void fragment_main() {
@@ -47,7 +47,7 @@ float tint_saturate(float v) {
 }
 
 void saturate_270da5() {
-  float res = tint_saturate(1.0f);
+  float res = tint_saturate(2.0f);
 }
 
 void compute_main() {

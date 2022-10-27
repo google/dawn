@@ -1,5 +1,5 @@
 fn saturate_6bcddf() {
-  var res : vec3<f32> = saturate(vec3<f32>(1.0f));
+  var res : vec3<f32> = saturate(vec3<f32>(2.0f));
 }
 
 @vertex

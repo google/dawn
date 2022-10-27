@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 36
+; Bound: 37
 ; Schema: 0
                OpCapability Shader
          %14 = OpExtInstImport "GLSL.std.450"
@@ -35,8 +35,9 @@
     %float_1 = OpConstant %float 1
        %void = OpTypeVoid
          %16 = OpTypeFunction %void
+    %float_2 = OpConstant %float 2
 %_ptr_Function_float = OpTypePointer Function %float
-         %23 = OpTypeFunction %v4float
+         %24 = OpTypeFunction %v4float
 %tint_saturate = OpFunction %float None %9
           %v = OpFunctionParameter %float
          %12 = OpLabel
@@ -46,29 +47,29 @@
 %saturate_270da5 = OpFunction %void None %16
          %19 = OpLabel
         %res = OpVariable %_ptr_Function_float Function %8
-         %20 = OpFunctionCall %float %tint_saturate %float_1
+         %20 = OpFunctionCall %float %tint_saturate %float_2
                OpStore %res %20
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %23
-         %25 = OpLabel
-         %26 = OpFunctionCall %void %saturate_270da5
+%vertex_main_inner = OpFunction %v4float None %24
+         %26 = OpLabel
+         %27 = OpFunctionCall %void %saturate_270da5
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %16
-         %28 = OpLabel
-         %29 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %29
+         %29 = OpLabel
+         %30 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %30
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %16
-         %31 = OpLabel
-         %32 = OpFunctionCall %void %saturate_270da5
+         %32 = OpLabel
+         %33 = OpFunctionCall %void %saturate_270da5
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %16
-         %34 = OpLabel
-         %35 = OpFunctionCall %void %saturate_270da5
+         %35 = OpLabel
+         %36 = OpFunctionCall %void %saturate_270da5
                OpReturn
                OpFunctionEnd

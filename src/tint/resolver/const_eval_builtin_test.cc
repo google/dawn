@@ -461,6 +461,31 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               ClampCases<f16>()))));
 
 template <typename T>
+std::vector<Case> SaturateCases() {
+    return {
+        C({T(0)}, T(0)),
+        C({T(1)}, T(1)),
+        C({T::Lowest()}, T(0)),
+        C({T::Highest()}, T(1)),
+
+        // Vector tests
+        C({Vec(T(0), T(0))},                       //
+          Vec(T(0), T(0))),                        //
+        C({Vec(T(1), T(1))},                       //
+          Vec(T(1), T(1))),                        //
+        C({Vec(T::Lowest(), T(0), T::Highest())},  //
+          Vec(T(0), T(0), T(1))),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Saturate,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kSaturate),
+                     testing::ValuesIn(Concat(SaturateCases<AFloat>(),  //
+                                              SaturateCases<f32>(),
+                                              SaturateCases<f16>()))));
+
+template <typename T>
 std::vector<Case> SelectCases() {
     return {
         C({Val(T{1}), Val(T{2}), Val(false)}, Val(T{1})),

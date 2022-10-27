@@ -23,7 +23,7 @@
 
 // fn saturate(vec<3, f32>) -> vec<3, f32>
 fn saturate_6bcddf() {
-  var res: vec3<f32> = saturate(vec3<f32>(1.f));
+  var res: vec3<f32> = saturate(vec3<f32>(2.f));
 }
 
 @vertex

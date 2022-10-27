@@ -2,7 +2,7 @@
 
 using namespace metal;
 void saturate_dcde71() {
-  half4 res = saturate(half4(0.0h));
+  half4 res = half4(0.0h);
 }
 
 struct tint_symbol {

@@ -5,7 +5,7 @@ vec3 tint_saturate(vec3 v) {
 }
 
 void saturate_6bcddf() {
-  vec3 arg_0 = vec3(1.0f);
+  vec3 arg_0 = vec3(2.0f);
   vec3 res = tint_saturate(arg_0);
 }
 
@@ -30,7 +30,7 @@ vec3 tint_saturate(vec3 v) {
 }
 
 void saturate_6bcddf() {
-  vec3 arg_0 = vec3(1.0f);
+  vec3 arg_0 = vec3(2.0f);
   vec3 res = tint_saturate(arg_0);
 }
 
@@ -49,7 +49,7 @@ vec3 tint_saturate(vec3 v) {
 }
 
 void saturate_6bcddf() {
-  vec3 arg_0 = vec3(1.0f);
+  vec3 arg_0 = vec3(2.0f);
   vec3 res = tint_saturate(arg_0);
 }
 

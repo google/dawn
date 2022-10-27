@@ -1,5 +1,5 @@
 fn saturate_270da5() {
-  var arg_0 = 1.0f;
+  var arg_0 = 2.0f;
   var res : f32 = saturate(arg_0);
 }
 

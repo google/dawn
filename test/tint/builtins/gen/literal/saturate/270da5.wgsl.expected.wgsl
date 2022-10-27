@@ -1,5 +1,5 @@
 fn saturate_270da5() {
-  var res : f32 = saturate(1.0f);
+  var res : f32 = saturate(2.0f);
 }
 
 @vertex

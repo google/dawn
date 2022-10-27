@@ -1,5 +1,5 @@
 void saturate_51567f() {
-  float2 arg_0 = (1.0f).xx;
+  float2 arg_0 = (2.0f).xx;
   float2 res = saturate(arg_0);
 }
 

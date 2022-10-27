@@ -23,7 +23,7 @@
 
 // fn saturate(vec<4, f32>) -> vec<4, f32>
 fn saturate_a5b571() {
-  var res: vec4<f32> = saturate(vec4<f32>(1.f));
+  var res: vec4<f32> = saturate(vec4<f32>(2.f));
 }
 
 @vertex

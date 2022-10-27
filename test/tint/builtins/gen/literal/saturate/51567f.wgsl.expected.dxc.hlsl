@@ -1,5 +1,5 @@
 void saturate_51567f() {
-  float2 res = saturate((1.0f).xx);
+  float2 res = (1.0f).xx;
 }
 
 struct tint_symbol {
