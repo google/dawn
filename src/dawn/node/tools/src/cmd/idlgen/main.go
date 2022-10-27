@@ -405,9 +405,12 @@ type generator struct {
 // eval executes the sub-template with the given name and arguments, returning
 // the generated output
 // args can be a single argument:
-//   arg[0]
+//
+//	arg[0]
+//
 // or a list of name-value pairs:
-//   (args[0]: name, args[1]: value), (args[2]: name, args[3]: value)...
+//
+//	(args[0]: name, args[1]: value), (args[2]: name, args[3]: value)...
 func (g *generator) eval(template string, args ...interface{}) (string, error) {
 	target := g.t.Lookup(template)
 	if target == nil {

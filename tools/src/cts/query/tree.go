@@ -414,12 +414,12 @@ func (t *Tree[Data]) List() []QueryData[Data] {
 // Glob returns a list of QueryData's for every node that is under the given
 // query, which holds data.
 // Glob handles wildcards as well as non-wildcard queries:
-//  * A non-wildcard query will match the node itself, along with every node
-//    under the query. For example: 'a:b' will match every File and Test
-//    node under 'a:b', including 'a:b' itself.
-//  * A wildcard Query will include every node under the parent node with the
-//    matching Query target. For example: 'a:b:*' will match every Test
-//    node (excluding File nodes) under 'a:b', 'a:b' will not be included.
+//   - A non-wildcard query will match the node itself, along with every node
+//     under the query. For example: 'a:b' will match every File and Test
+//     node under 'a:b', including 'a:b' itself.
+//   - A wildcard Query will include every node under the parent node with the
+//     matching Query target. For example: 'a:b:*' will match every Test
+//     node (excluding File nodes) under 'a:b', 'a:b' will not be included.
 func (t *Tree[Data]) Glob(q Query) ([]QueryData[Data], error) {
 	out := []QueryData[Data]{}
 	err := t.glob(q, func(n *TreeNode[Data]) error {

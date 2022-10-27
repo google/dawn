@@ -47,8 +47,14 @@ func TestLexTokens(t *testing.T) {
 		{"123456789", []tok.Token{{Kind: tok.Integer, Runes: []rune("123456789"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 10, 9),
 		}}}},
+		{"-123456789", []tok.Token{{Kind: tok.Integer, Runes: []rune("-123456789"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 11, 10),
+		}}}},
 		{"1234.56789", []tok.Token{{Kind: tok.Float, Runes: []rune("1234.56789"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 11, 10),
+		}}}},
+		{"-1234.56789", []tok.Token{{Kind: tok.Float, Runes: []rune("-1234.56789"), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 12, 11),
 		}}}},
 		{"123.456.789", []tok.Token{
 			{Kind: tok.Float, Runes: []rune("123.456"), Source: tok.Source{
@@ -59,6 +65,14 @@ func TestLexTokens(t *testing.T) {
 			}},
 			{Kind: tok.Integer, Runes: []rune("789"), Source: tok.Source{
 				S: loc(1, 9, 8), E: loc(1, 12, 11),
+			}},
+		}},
+		{"-123.456-789", []tok.Token{
+			{Kind: tok.Float, Runes: []rune("-123.456"), Source: tok.Source{
+				S: loc(1, 1, 0), E: loc(1, 9, 8),
+			}},
+			{Kind: tok.Integer, Runes: []rune("-789"), Source: tok.Source{
+				S: loc(1, 9, 8), E: loc(1, 13, 12),
 			}},
 		}},
 		{"match", []tok.Token{{Kind: tok.Match, Runes: []rune("match"), Source: tok.Source{
@@ -86,6 +100,9 @@ func TestLexTokens(t *testing.T) {
 			S: loc(1, 1, 0), E: loc(1, 2, 1),
 		}}}},
 		{",", []tok.Token{{Kind: tok.Comma, Runes: []rune(","), Source: tok.Source{
+			S: loc(1, 1, 0), E: loc(1, 2, 1),
+		}}}},
+		{"-", []tok.Token{{Kind: tok.Minus, Runes: []rune("-"), Source: tok.Source{
 			S: loc(1, 1, 0), E: loc(1, 2, 1),
 		}}}},
 		{"<", []tok.Token{{Kind: tok.Lt, Runes: []rune("<"), Source: tok.Source{

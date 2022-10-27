@@ -30,9 +30,10 @@ type Test func(path string) bool
 //
 // pattern uses forward-slashes for directory separators '/', and may use the
 // following wildcards:
-//  ?  - matches any single non-separator character
-//  *  - matches any sequence of non-separator characters
-//  ** - matches any sequence of characters including separators
+//
+//	?  - matches any single non-separator character
+//	*  - matches any sequence of non-separator characters
+//	** - matches any sequence of characters including separators
 func New(pattern string) (Test, error) {
 	// Transform pattern into a regex by replacing the uses of `?`, `*`, `**`
 	// with corresponding regex patterns.

@@ -43,7 +43,9 @@ type Result struct {
 
 // Format writes the Result to the fmt.State
 // The Result is printed as a single line, in the form:
-//   <query> <tags> <status>
+//
+//	<query> <tags> <status>
+//
 // This matches the order in which results are sorted.
 func (r Result) Format(f fmt.State, verb rune) {
 	if len(r.Tags) > 0 {
@@ -61,9 +63,11 @@ func (r Result) String() string {
 }
 
 // Compare compares the relative order of r and o, returning:
-//  -1 if r should come before o
-//   1 if r should come after o
-//   0 if r and o are identical
+//
+//	-1 if r should come before o
+//	 1 if r should come after o
+//	 0 if r and o are identical
+//
 // Note: Result.Duration is not considered in comparison.
 func (r Result) Compare(o Result) int {
 	a, b := r, o
@@ -89,7 +93,9 @@ func (r Result) Compare(o Result) int {
 }
 
 // Parse parses the result from a string of the form:
-//    <query> <tags> <status>
+//
+//	<query> <tags> <status>
+//
 // <tags> may be omitted if there were no tags.
 func Parse(in string) (Result, error) {
 	line := in
@@ -302,7 +308,7 @@ func (l List) FilterByVariant(tags Tags) List {
 	})
 }
 
-/// FilterByQuery returns the results that match the given query
+// / FilterByQuery returns the results that match the given query
 func (l List) FilterByQuery(q query.Query) List {
 	return l.Filter(func(r Result) bool {
 		return q.Contains(r.Query)

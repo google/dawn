@@ -20,8 +20,9 @@
 // and 'global-scope' or 'function-scope' HTML class types.
 //
 // To run:
-//   go get golang.org/x/net/html # Only required once
-//   go run tools/check-spec-examples/main.go --compiler=<path-to-tint>
+//
+//	go get golang.org/x/net/html # Only required once
+//	go run tools/check-spec-examples/main.go --compiler=<path-to-tint>
 package main
 
 import (

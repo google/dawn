@@ -219,7 +219,8 @@ func (o MatcherOptions) Format(w fmt.State, verb rune) {
 
 // TemplatedNames is a list of TemplatedName
 // Example:
-//   a<b>, c<d, e>
+//
+//	a<b>, c<d, e>
 type TemplatedNames []TemplatedName
 
 // Format implements the fmt.Formatter interface
@@ -234,7 +235,8 @@ func (l TemplatedNames) Format(w fmt.State, verb rune) {
 
 // TemplatedName is an identifier with optional templated arguments
 // Example:
-//  vec<N, T>
+//
+//	vec<N, T>
 type TemplatedName struct {
 	Source       tok.Source
 	Name         string
@@ -253,7 +255,8 @@ func (t TemplatedName) Format(w fmt.State, verb rune) {
 
 // MemberNames is a list of MemberName
 // Example:
-//   a.b, c.d
+//
+//	a.b, c.d
 type MemberNames []MemberName
 
 // Format implements the fmt.Formatter interface
@@ -298,7 +301,8 @@ func (p TypeDecl) Format(w fmt.State, verb rune) {
 
 // TemplateParams is a list of TemplateParam
 // Example:
-//   <A, B : TyB>
+//
+//	<A, B : TyB>
 type TemplateParams []TemplateParam
 
 // Format implements the fmt.Formatter interface
@@ -317,8 +321,9 @@ func (p TemplateParams) Format(w fmt.State, verb rune) {
 
 // TemplateParam describes a template parameter with optional type
 // Example:
-//   <Name>
-//   <Name: Type>
+//
+//	<Name>
+//	<Name: Type>
 type TemplateParam struct {
 	Source tok.Source
 	Name   string
@@ -336,7 +341,8 @@ func (t TemplateParam) Format(w fmt.State, verb rune) {
 
 // Attributes is a list of Attribute
 // Example:
-//   [[a(x), b(y)]]
+//
+//	[[a(x), b(y)]]
 type Attributes []Attribute
 
 // Format implements the fmt.Formatter interface
@@ -363,7 +369,8 @@ func (l *Attributes) Take(name string) *Attribute {
 
 // Attribute describes a single attribute
 // Example:
-//   @a(x)
+//
+//	@a(x)
 type Attribute struct {
 	Source tok.Source
 	Name   string

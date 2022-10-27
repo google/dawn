@@ -37,15 +37,16 @@ import (
 
 // Query represents a WebGPU test query
 // Example queries:
-//    'suite'
-//    'suite:*'
-//    'suite:file'
-//    'suite:file,*'
-//    'suite:file,file'
-//    'suite:file,file,*'
-//    'suite:file,file,file:test'
-//    'suite:file,file,file:test:*'
-//    'suite:file,file,file:test,test:case;*'
+//
+//	'suite'
+//	'suite:*'
+//	'suite:file'
+//	'suite:file,*'
+//	'suite:file,file'
+//	'suite:file,file,*'
+//	'suite:file,file,file:test'
+//	'suite:file,file,file:test:*'
+//	'suite:file,file,file:test,test:case;*'
 type Query struct {
 	Suite string
 	Files string
@@ -269,9 +270,10 @@ func (q Query) String() string {
 }
 
 // Compare compares the relative order of q and o, returning:
-//  -1 if q should come before o
-//   1 if q should come after o
-//   0 if q and o are identical
+//
+//	-1 if q should come before o
+//	 1 if q should come after o
+//	 0 if q and o are identical
 func (q Query) Compare(o Query) int {
 	for _, cmp := range []struct{ a, b string }{
 		{q.Suite, o.Suite},
@@ -335,9 +337,10 @@ func (q Query) Contains(o Query) bool {
 }
 
 // Callback function for Query.Walk()
-//   q is the query for the current segment.
-//   t is the target of the query q.
-//   n is the name of the new segment.
+//
+//	q is the query for the current segment.
+//	t is the target of the query q.
+//	n is the name of the new segment.
 type WalkCallback func(q Query, t Target, n string) error
 
 // Walk calls 'f' for each suite, file, test segment, and calls f once for all

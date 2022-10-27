@@ -246,8 +246,10 @@ func parseSection(in string) ([]int, error) {
 }
 
 // concatRules concatenate rules slice to make two string outputs;
-//   txt, a human-readable string
-//   tsv, a tab separated string
+//
+//	txt, a human-readable string
+//	tsv, a tab separated string
+//
 // If testNameFilter is a non-empty string, then only rules whose TestName
 // contains the string are included
 func concatRules(rules []rule, testNameFilter string) (string, string) {
@@ -679,9 +681,10 @@ var (
 // example in:
 // ` float abs:
 // T is f32 or vecN<f32>
-// 		abs(e: T ) -> 	T
-// 	  Returns the absolute value of e (e.g. e  with a positive sign bit). Component-wise when T is a vector.
-//   (GLSLstd450Fabs)`
+//
+//			abs(e: T ) -> 	T
+//		  Returns the absolute value of e (e.g. e  with a positive sign bit). Component-wise when T is a vector.
+//	  (GLSLstd450Fabs)`
 //
 // example out:
 // `float abs:
@@ -703,10 +706,11 @@ var (
 // cleanUpStartEnd creates a string by removing all extra spaces,
 // newlines and tabs form the start and end of the input string.
 // Example:
-//	input: "\s\t\nHello\s\n\t\Bye\s\s\s\t\n\n\n"
-//  output: "Hello\s\n\tBye"
-//  input2: "\nbye\n\n"
-//  output2: "\nbye"
+//
+//		input: "\s\t\nHello\s\n\t\Bye\s\s\s\t\n\n\n"
+//	 output: "Hello\s\n\tBye"
+//	 input2: "\nbye\n\n"
+//	 output2: "\nbye"
 func cleanUpStartEnd(in string) string {
 	out := reCleanUpStartEnd.ReplaceAllString(in, "")
 	return out
@@ -721,13 +725,17 @@ var (
 
 // testName creates a test name given a rule id (ie. section name), description and section
 // returns for a builtin rule:
-// 		testName:${section name} + "," + ${builtin name}
-// 		builtinName: ${builtin name}
-//		err: nil
+//
+//	testName:${section name} + "," + ${builtin name}
+//	builtinName: ${builtin name}
+//	err: nil
+//
 // returns for a other rules:
-//		testName: ${section name} + "_rule_ + " + ${string(counter)}
-//		builtinName: ""
-//		err: nil
+//
+//	testName: ${section name} + "_rule_ + " + ${string(counter)}
+//	builtinName: ""
+//	err: nil
+//
 // if it cannot create a unique name it returns "", "", err.
 func testName(id string, desc string, section string) (testName, builtinName string, err error) {
 	// regex for every thing other than letters and numbers
@@ -838,9 +846,10 @@ func getUnimplementedTestPlan(p Parser, path string) error {
 
 // getTestPlanFilePath returns a sort friendly path
 // example: if we have 10 sections, and generate filenames naively, this will be the sorted result:
-// 		section1.spec.ts -> section10.spec.ts -> section2.spec.ts -> ...
+//
+//		section1.spec.ts -> section10.spec.ts -> section2.spec.ts -> ...
 //	    if we make all the section numbers have the same number of digits, we will get:
-// 		section01.spec.ts -> section02.spec.ts -> ... -> section10.spec.ts
+//		section01.spec.ts -> section02.spec.ts -> ... -> section10.spec.ts
 func getTestPlanFilePath(path string, x, y, digits int) (string, error) {
 	fileName := ""
 	if y != -1 {

@@ -39,8 +39,8 @@ type Content struct {
 // A chunk ends at the first blank line, or at the transition from an
 // expectation to a line-comment.
 type Chunk struct {
-	Comments     []string      // Line comments at the top of the chunk
-	Expectations Expectations  // Expectations for the chunk
+	Comments     []string     // Line comments at the top of the chunk
+	Expectations Expectations // Expectations for the chunk
 }
 
 // Tags holds the tag information parsed in the comments between the
@@ -234,9 +234,11 @@ func (e Expectation) Clone() Expectation {
 }
 
 // Compare compares the relative order of a and b, returning:
-//  -1 if a should come before b
-//   1 if a should come after b
-//   0 if a and b are identical
+//
+//	-1 if a should come before b
+//	 1 if a should come after b
+//	 0 if a and b are identical
+//
 // Note: Only comparing bug, query, and tags (in that order).
 func (a Expectation) Compare(b Expectation) int {
 	switch strings.Compare(a.Bug, b.Bug) {

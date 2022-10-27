@@ -37,8 +37,9 @@ func reEscape(s string) string {
 
 // UpdateCTSHashInDeps replaces the CTS hashes in 'deps' with 'newCTSHash'.
 // Returns:
-//  newDEPS    - the new DEPS content
-//  oldCTSHash - the old CTS hash in the 'deps'
+//
+//	newDEPS    - the new DEPS content
+//	oldCTSHash - the old CTS hash in the 'deps'
 func UpdateCTSHashInDeps(deps, newCTSHash string) (newDEPS, oldCTSHash string, err error) {
 	// Collect old CTS hashes, and replace these with newCTSHash
 	b := strings.Builder{}
