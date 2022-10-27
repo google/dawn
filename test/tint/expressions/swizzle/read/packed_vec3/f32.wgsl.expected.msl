@@ -2,16 +2,6 @@
 
 using namespace metal;
 
-template<typename T, int N, int M>
-inline vec<T, M> operator*(matrix<T, N, M> lhs, packed_vec<T, N> rhs) {
-  return lhs * vec<T, N>(rhs);
-}
-
-template<typename T, int N, int M>
-inline vec<T, N> operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
-  return vec<T, M>(lhs) * rhs;
-}
-
 template<typename T, size_t N>
 struct tint_array {
     const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -30,7 +20,7 @@ struct S {
 };
 
 void f(const constant S* const tint_symbol) {
-  float3 v = (*(tint_symbol)).v;
+  float3 v = float3((*(tint_symbol)).v);
   float x = (*(tint_symbol)).v[0];
   float y = (*(tint_symbol)).v[1];
   float z = (*(tint_symbol)).v[2];

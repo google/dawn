@@ -66,6 +66,7 @@
 #include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/manager.h"
 #include "src/tint/transform/module_scope_var_to_entry_point_param.h"
+#include "src/tint/transform/packed_vec3.h"
 #include "src/tint/transform/promote_initializers_to_let.h"
 #include "src/tint/transform/promote_side_effects_to_decl.h"
 #include "src/tint/transform/remove_phonies.h"
@@ -154,32 +155,6 @@ class ScopedBitCast {
     std::ostream& s;
 };
 
-class ScopedCast {
-  public:
-    ScopedCast(GeneratorImpl* generator,
-               std::ostream& stream,
-               const sem::Type* curr_type,
-               const sem::Type* target_type)
-        : s(stream) {
-        auto* target_vec_type = target_type->As<sem::Vector>();
-
-        // If we need to promote from scalar to vector, cast the scalar to the
-        // vector element type.
-        if (curr_type->is_scalar() && target_vec_type) {
-            target_type = target_vec_type->type();
-        }
-
-        // Cast
-        generator->EmitType(s, target_type, "");
-        s << "(";
-    }
-
-    ~ScopedCast() { s << ")"; }
-
-  private:
-    std::ostream& s;
-};
-
 }  // namespace
 
 SanitizedResult::SanitizedResult() = default;
@@ -259,6 +234,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     // it assumes that the form of the array length argument is &var.array.
     manager.Add<transform::ArrayLengthFromUniform>();
     manager.Add<transform::ModuleScopeVarToEntryPointParam>();
+    manager.Add<transform::PackedVec3>();
     data.Add<transform::ArrayLengthFromUniform::Config>(std::move(array_length_from_uniform_cfg));
     data.Add<transform::CanonicalizeEntryPointIO::Config>(std::move(entry_point_io_cfg));
     auto out = manager.Run(in, data);
@@ -554,18 +530,8 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
         ScopedParen sp(out);
         {
             ScopedBitCast lhs_uint_cast(this, out, lhs_type, unsigned_type_of(target_type));
-
-            // In case the type is packed, cast to our own type in order to remove the packing.
-            // Otherwise, this just casts to itself.
-            if (lhs_type->is_signed_integer_vector()) {
-                ScopedCast lhs_self_cast(this, out, lhs_type, lhs_type);
-                if (!EmitExpression(out, expr->lhs)) {
-                    return false;
-                }
-            } else {
-                if (!EmitExpression(out, expr->lhs)) {
-                    return false;
-                }
+            if (!EmitExpression(out, expr->lhs)) {
+                return false;
             }
         }
         if (!emit_op()) {
@@ -573,18 +539,8 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
         }
         {
             ScopedBitCast rhs_uint_cast(this, out, rhs_type, unsigned_type_of(target_type));
-
-            // In case the type is packed, cast to our own type in order to remove the packing.
-            // Otherwise, this just casts to itself.
-            if (rhs_type->is_signed_integer_vector()) {
-                ScopedCast rhs_self_cast(this, out, rhs_type, rhs_type);
-                if (!EmitExpression(out, expr->rhs)) {
-                    return false;
-                }
-            } else {
-                if (!EmitExpression(out, expr->rhs)) {
-                    return false;
-                }
+            if (!EmitExpression(out, expr->rhs)) {
+                return false;
             }
         }
         return true;
@@ -601,18 +557,8 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
         ScopedParen sp(out);
         {
             ScopedBitCast lhs_uint_cast(this, out, lhs_type, unsigned_type_of(lhs_type));
-
-            // In case the type is packed, cast to our own type in order to remove the packing.
-            // Otherwise, this just casts to itself.
-            if (lhs_type->is_signed_integer_vector()) {
-                ScopedCast lhs_self_cast(this, out, lhs_type, lhs_type);
-                if (!EmitExpression(out, expr->lhs)) {
-                    return false;
-                }
-            } else {
-                if (!EmitExpression(out, expr->lhs)) {
-                    return false;
-                }
+            if (!EmitExpression(out, expr->lhs)) {
+                return false;
             }
         }
         if (!emit_op()) {
@@ -2780,41 +2726,6 @@ bool GeneratorImpl::EmitAddressSpace(std::ostream& out, ast::AddressSpace sc) {
     return false;
 }
 
-bool GeneratorImpl::EmitPackedType(std::ostream& out,
-                                   const sem::Type* type,
-                                   const std::string& name) {
-    auto* vec = type->As<sem::Vector>();
-    if (vec && vec->Width() == 3) {
-        out << "packed_";
-        if (!EmitType(out, vec, "")) {
-            return false;
-        }
-
-        if (vec->is_float_vector() && !matrix_packed_vector_overloads_) {
-            // Overload operators for matrix-vector arithmetic where the vector
-            // operand is packed, as these overloads to not exist in the metal
-            // namespace.
-            TextBuffer b;
-            TINT_DEFER(helpers_.Append(b));
-            line(&b) << R"(template<typename T, int N, int M>
-inline vec<T, M> operator*(matrix<T, N, M> lhs, packed_vec<T, N> rhs) {
-  return lhs * vec<T, N>(rhs);
-}
-
-template<typename T, int N, int M>
-inline vec<T, N> operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
-  return vec<T, M>(lhs) * rhs;
-}
-)";
-            matrix_packed_vector_overloads_ = true;
-        }
-
-        return true;
-    }
-
-    return EmitType(out, type, name);
-}
-
 bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
     line(b) << "struct " << StructName(str) << " {";
 
@@ -2861,14 +2772,15 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
             }
 
             add_byte_offset_comment(out, msl_offset);
+        }
 
-            if (!EmitPackedType(out, mem->Type(), mem_name)) {
-                return false;
+        if (auto* decl = mem->Declaration()) {
+            if (ast::HasAttribute<transform::PackedVec3::Attribute>(decl->attributes)) {
+                out << "packed_";
             }
-        } else {
-            if (!EmitType(out, mem->Type(), mem_name)) {
-                return false;
-            }
+        }
+        if (!EmitType(out, mem->Type(), mem_name)) {
+            return false;
         }
 
         auto* ty = mem->Type();
@@ -2934,6 +2846,7 @@ bool GeneratorImpl::EmitStructType(TextBuffer* b, const sem::Struct* str) {
                     [&](const ast::StructMemberOffsetAttribute*) { return true; },
                     [&](const ast::StructMemberAlignAttribute*) { return true; },
                     [&](const ast::StructMemberSizeAttribute*) { return true; },
+                    [&](const transform::PackedVec3::Attribute*) { return true; },
                     [&](Default) {
                         TINT_ICE(Writer, diagnostics_)
                             << "unhandled struct member attribute: " << attr->Name();

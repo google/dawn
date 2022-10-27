@@ -60,7 +60,7 @@ void FormatMSLField(std::stringstream& out,
 // Size and alignments taken from the MSL spec:
 // https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
 DECLARE_TYPE(float2, 8, 8);
-DECLARE_TYPE(packed_float3, 12, 4);
+DECLARE_TYPE(float3, 12, 4);
 DECLARE_TYPE(float4, 16, 16);
 DECLARE_TYPE(float2x2, 16, 8);
 DECLARE_TYPE(float2x3, 32, 16);
@@ -301,7 +301,7 @@ TEST_F(MslGeneratorImplTest, EmitType_Struct_Layout_NonComposites) {
     FIELD(0x0100, float2, 0, c)            \
     FIELD(0x0108, uint, 0, d)              \
     FIELD(0x010c, int8_t, 4, tint_pad_2)   \
-    FIELD(0x0110, packed_float3, 0, e)     \
+    FIELD(0x0110, float3, 0, e)            \
     FIELD(0x011c, uint, 0, f)              \
     FIELD(0x0120, float4, 0, g)            \
     FIELD(0x0130, uint, 0, h)              \
@@ -641,7 +641,7 @@ TEST_F(MslGeneratorImplTest, AttemptTintPadSymbolCollision) {
   /* 0x0100 */ float2 tint_pad_33;
   /* 0x0108 */ uint tint_pad_1;
   /* 0x010c */ tint_array<int8_t, 4> tint_pad_12;
-  /* 0x0110 */ packed_float3 tint_pad_3;
+  /* 0x0110 */ float3 tint_pad_3;
   /* 0x011c */ uint tint_pad_7;
   /* 0x0120 */ float4 tint_pad_25;
   /* 0x0130 */ uint tint_pad_5;

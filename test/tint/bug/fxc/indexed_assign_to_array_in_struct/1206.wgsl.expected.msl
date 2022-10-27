@@ -14,16 +14,6 @@ struct tint_array {
     T elements[N];
 };
 
-template<typename T, int N, int M>
-inline vec<T, M> operator*(matrix<T, N, M> lhs, packed_vec<T, N> rhs) {
-  return lhs * vec<T, N>(rhs);
-}
-
-template<typename T, int N, int M>
-inline vec<T, N> operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
-  return vec<T, M>(lhs) * rhs;
-}
-
 struct Simulation {
   /* 0x0000 */ uint i;
 };

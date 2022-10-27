@@ -14,16 +14,6 @@ struct tint_array {
     T elements[N];
 };
 
-template<typename T, int N, int M>
-inline vec<T, M> operator*(matrix<T, N, M> lhs, packed_vec<T, N> rhs) {
-  return lhs * vec<T, N>(rhs);
-}
-
-template<typename T, int N, int M>
-inline vec<T, N> operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
-  return vec<T, M>(lhs) * rhs;
-}
-
 struct lightingInfo {
   float3 diffuse;
   float3 specular;
@@ -248,7 +238,7 @@ void main_1(thread float2* const tint_symbol_7, texture2d<float, access::sample>
   float4 const x_264 = tempTextureRead;
   float const x_273 = (*(tint_symbol_10)).textureInfoName;
   rgb = (float3(x_264[0], x_264[1], x_264[2]) * x_273);
-  float3 const x_279 = (*(tint_symbol_10)).u_cameraPosition;
+  float3 const x_279 = float3((*(tint_symbol_10)).u_cameraPosition);
   float4 const x_282 = *(tint_symbol_11);
   output5 = normalize((x_279 - float3(x_282[0], x_282[1], x_282[2])));
   output4 = float4(0.0f);
@@ -380,7 +370,7 @@ void main_1(thread float2* const tint_symbol_7, texture2d<float, access::sample>
   tempTextureRead1 = x_475;
   float4 const x_477 = tempTextureRead1;
   rgb1 = float3(x_477[0], x_477[1], x_477[2]);
-  float3 const x_481 = (*(tint_symbol_10)).u_cameraPosition;
+  float3 const x_481 = float3((*(tint_symbol_10)).u_cameraPosition);
   float4 const x_482 = *(tint_symbol_11);
   viewDirectionW_1 = normalize((x_481 - float3(x_482[0], x_482[1], x_482[2])));
   shadow = 1.0f;
@@ -400,7 +390,7 @@ void main_1(thread float2* const tint_symbol_7, texture2d<float, access::sample>
   param_14 = float3(x_510[0], x_510[1], x_510[2]);
   float4 const x_514 = (*(tint_symbol_17)).vLightSpecular;
   param_15 = float3(x_514[0], x_514[1], x_514[2]);
-  float3 const x_518 = (*(tint_symbol_17)).vLightGround;
+  float3 const x_518 = float3((*(tint_symbol_17)).vLightGround);
   param_16 = x_518;
   float const x_520 = glossiness_1;
   param_17 = x_520;

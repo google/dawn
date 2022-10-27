@@ -430,6 +430,8 @@ set(TINT_LIB_SRCS
   transform/multiplanar_external_texture.h
   transform/num_workgroups_from_uniform.cc
   transform/num_workgroups_from_uniform.h
+  transform/packed_vec3.cc
+  transform/packed_vec3.h
   transform/pad_structs.cc
   transform/pad_structs.h
   transform/promote_initializers_to_let.cc
@@ -1141,6 +1143,7 @@ if(TINT_BUILD_TESTS)
       transform/module_scope_var_to_entry_point_param_test.cc
       transform/multiplanar_external_texture_test.cc
       transform/num_workgroups_from_uniform_test.cc
+      transform/packed_vec3_test.cc
       transform/pad_structs_test.cc
       transform/promote_initializers_to_let_test.cc
       transform/promote_side_effects_to_decl_test.cc

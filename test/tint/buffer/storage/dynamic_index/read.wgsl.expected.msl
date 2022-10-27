@@ -2,16 +2,6 @@
 
 using namespace metal;
 
-template<typename T, int N, int M>
-inline vec<T, M> operator*(matrix<T, N, M> lhs, packed_vec<T, N> rhs) {
-  return lhs * vec<T, N>(rhs);
-}
-
-template<typename T, int N, int M>
-inline vec<T, N> operator*(packed_vec<T, M> lhs, matrix<T, N, M> rhs) {
-  return vec<T, M>(lhs) * rhs;
-}
-
 template<typename T, size_t N>
 struct tint_array {
     const constant T& operator[](size_t i) const constant { return elements[i]; }
@@ -42,11 +32,11 @@ struct S {
 };
 
 void tint_symbol_inner(uint idx, const device S* const tint_symbol_1) {
-  int3 const a = (*(tint_symbol_1)).arr[idx].a;
+  int3 const a = int3((*(tint_symbol_1)).arr[idx].a);
   int const b = (*(tint_symbol_1)).arr[idx].b;
-  uint3 const c = (*(tint_symbol_1)).arr[idx].c;
+  uint3 const c = uint3((*(tint_symbol_1)).arr[idx].c);
   uint const d = (*(tint_symbol_1)).arr[idx].d;
-  float3 const e = (*(tint_symbol_1)).arr[idx].e;
+  float3 const e = float3((*(tint_symbol_1)).arr[idx].e);
   float const f = (*(tint_symbol_1)).arr[idx].f;
   float2x3 const g = (*(tint_symbol_1)).arr[idx].g;
   float3x2 const h = (*(tint_symbol_1)).arr[idx].h;
