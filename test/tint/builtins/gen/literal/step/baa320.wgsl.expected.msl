@@ -2,7 +2,7 @@
 
 using namespace metal;
 void step_baa320() {
-  half4 res = step(half4(0.0h), half4(0.0h));
+  half4 res = half4(1.0h);
 }
 
 struct tint_symbol {

@@ -537,8 +537,8 @@ fn smoothstep<T: f32_f16>(T, T, T) -> T
 fn smoothstep<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
 fn sqrt<T: f32_f16>(T) -> T
 fn sqrt<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
-fn step<T: f32_f16>(T, T) -> T
-fn step<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
+@const fn step<T: fa_f32_f16>(T, T) -> T
+@const fn step<N: num, T: fa_f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
 @stage("compute") fn storageBarrier()
 fn tan<T: f32_f16>(T) -> T
 fn tan<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>

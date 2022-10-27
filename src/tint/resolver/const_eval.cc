@@ -1645,6 +1645,20 @@ ConstEval::Result ConstEval::select_boolvec(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0], args[1]);
 }
 
+ConstEval::Result ConstEval::step(const sem::Type* ty,
+                                  utils::VectorRef<const sem::Constant*> args,
+                                  const Source&) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        auto create = [&](auto edge, auto x) -> ImplResult {
+            using NumberT = decltype(edge);
+            NumberT result = x.value < edge.value ? NumberT(0.0) : NumberT(1.0);
+            return CreateElement(builder, c0->Type(), result);
+        };
+        return Dispatch_fia_fiu32_f16(create, c0, c1);
+    };
+    return TransformElements(builder, ty, transform, args[0], args[1]);
+}
+
 ConstEval::Result ConstEval::Convert(const sem::Type* target_ty,
                                      const sem::Constant* value,
                                      const Source& source) {

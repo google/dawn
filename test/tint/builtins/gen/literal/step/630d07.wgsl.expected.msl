@@ -2,7 +2,7 @@
 
 using namespace metal;
 void step_630d07() {
-  half res = step(0.0h, 0.0h);
+  half res = 1.0h;
 }
 
 struct tint_symbol {
