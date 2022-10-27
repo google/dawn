@@ -167,7 +167,7 @@ DataMap polyfillSinh() {
 TEST_F(BuiltinPolyfillTest, ShouldRunAsinh) {
     auto* src = R"(
 fn f() {
-  asinh(1.0);
+  asinh(1.0f);
 }
 )";
 
@@ -178,7 +178,7 @@ fn f() {
 TEST_F(BuiltinPolyfillTest, Asinh_f32) {
     auto* src = R"(
 fn f() {
-  let r : f32 = asinh(1234);
+  let r : f32 = asinh(1234f);
 }
 )";
 
@@ -188,7 +188,7 @@ fn tint_sinh(x : f32) -> f32 {
 }
 
 fn f() {
-  let r : f32 = tint_sinh(1234);
+  let r : f32 = tint_sinh(1234.0f);
 }
 )";
 
@@ -200,7 +200,7 @@ fn f() {
 TEST_F(BuiltinPolyfillTest, Asinh_vec3_f32) {
     auto* src = R"(
 fn f() {
-  let r : vec3<f32> = asinh(vec3<f32>(1234));
+  let r : vec3<f32> = asinh(vec3<f32>(1234f));
 }
 )";
 
@@ -210,7 +210,7 @@ fn tint_sinh(x : vec3<f32>) -> vec3<f32> {
 }
 
 fn f() {
-  let r : vec3<f32> = tint_sinh(vec3<f32>(1234));
+  let r : vec3<f32> = tint_sinh(vec3<f32>(1234.0f));
 }
 )";
 

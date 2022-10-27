@@ -2,7 +2,7 @@
 
 using namespace metal;
 void asin_b4aced() {
-  half2 res = asin(half2(0.0h));
+  half2 res = half2(0.0h);
 }
 
 struct tint_symbol {

@@ -415,10 +415,10 @@ fn all<N: num>(vec<N, bool>) -> bool
 fn any(bool) -> bool
 fn any<N: num>(vec<N, bool>) -> bool
 fn arrayLength<T, A: access>(ptr<storage, array<T>, A>) -> u32
-fn asin<T: f32_f16>(T) -> T
-fn asin<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
-fn asinh<T: f32_f16>(T) -> T
-fn asinh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn asin<T: fa_f32_f16>(T) -> T
+@const fn asin<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn asinh<T: fa_f32_f16>(T) -> T
+@const fn asinh<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
 @const fn atan<T: fa_f32_f16>(T) -> T
 @const fn atan<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
 @const fn atan2<T: fa_f32_f16>(T, T) -> T

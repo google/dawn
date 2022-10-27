@@ -92,14 +92,15 @@ TEST_P(HlslImportData_SingleVectorParamTest, FloatVector) {
     auto param = GetParam();
 
     auto* ident = Expr(param.name);
-    auto* expr = Call(ident, vec3<f32>(1_f, 2_f, 3_f));
+    auto* expr = Call(ident, vec3<f32>(0.1_f, 0.2_f, 0.3_f));
     WrapInFunction(expr);
 
     GeneratorImpl& gen = Build();
 
     std::stringstream out;
     ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
-    EXPECT_EQ(out.str(), std::string(param.hlsl_name) + "(float3(1.0f, 2.0f, 3.0f))");
+    EXPECT_EQ(out.str(),
+              std::string(param.hlsl_name) + "(float3(0.100000001f, 0.200000003f, 0.300000012f))");
 }
 INSTANTIATE_TEST_SUITE_P(HlslGeneratorImplTest_Import,
                          HlslImportData_SingleVectorParamTest,
