@@ -839,7 +839,7 @@ TEST_F(IntrinsicTableTest, MismatchTypeInitializerImplicit) {
   vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
-  vec3(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
+  vec3(vec3<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3<T>() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
 
 5 candidate conversions:
@@ -865,7 +865,7 @@ TEST_F(IntrinsicTableTest, MismatchTypeInitializerExplicit) {
   vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
-  vec3(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
+  vec3(vec3<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3<T>() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
 
 5 candidate conversions:
@@ -875,6 +875,19 @@ TEST_F(IntrinsicTableTest, MismatchTypeInitializerExplicit) {
   vec3<T>(vec3<U>) -> vec3<u32>  where: T is u32, U is abstract-int, abstract-float, f32, f16, i32 or bool
   vec3<T>(vec3<U>) -> vec3<bool>  where: T is bool, U is abstract-int, abstract-float, f32, f16, i32 or u32
 )");
+}
+
+TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitVecFromVecAbstract) {
+    auto* ai = create<sem::AbstractInt>();
+    auto* vec3_ai = create<sem::Vector>(ai, 3u);
+    auto result = table->Lookup(InitConvIntrinsic::kVec3, nullptr, utils::Vector{vec3_ai},
+                                sem::EvaluationStage::kConstant, Source{{12, 34}});
+    ASSERT_NE(result.target, nullptr);
+    EXPECT_EQ(result.target->ReturnType(), vec3_ai);
+    EXPECT_TRUE(result.target->Is<sem::TypeInitializer>());
+    ASSERT_EQ(result.target->Parameters().Length(), 1u);
+    EXPECT_EQ(result.target->Parameters()[0]->Type(), vec3_ai);
+    EXPECT_NE(result.const_eval_fn, nullptr);
 }
 
 TEST_F(IntrinsicTableTest, MatchTypeInitializerImplicitMatFromVec) {
@@ -951,7 +964,7 @@ TEST_F(IntrinsicTableTest, MismatchTypeConversion) {
               R"(12:34 error: no matching initializer for vec3<f32>(array<u32>)
 
 6 candidate initializers:
-  vec3(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
+  vec3(vec3<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3<T>() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
   vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool

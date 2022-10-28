@@ -739,9 +739,9 @@ fn textureLoad<C: iu32>(texture: texture_external, coords: vec2<C>) -> vec4<f32>
 @const("Identity") init f32(f32) -> f32
 @const("Identity") init f16(f16) -> f16
 @const("Identity") init bool(bool) -> bool
-@const("Identity") init vec2<T: concrete_scalar>(vec2<T>) -> vec2<T>
-@const("Identity") init vec3<T: concrete_scalar>(vec3<T>) -> vec3<T>
-@const("Identity") init vec4<T: concrete_scalar>(vec4<T>) -> vec4<T>
+@const("Identity") init vec2<T: scalar>(vec2<T>) -> vec2<T>
+@const("Identity") init vec3<T: scalar>(vec3<T>) -> vec3<T>
+@const("Identity") init vec4<T: scalar>(vec4<T>) -> vec4<T>
 @const("Identity") init mat2x2<T: f32_f16>(mat2x2<T>) -> mat2x2<T>
 @const("Identity") init mat2x3<T: f32_f16>(mat2x3<T>) -> mat2x3<T>
 @const("Identity") init mat2x4<T: f32_f16>(mat2x4<T>) -> mat2x4<T>
