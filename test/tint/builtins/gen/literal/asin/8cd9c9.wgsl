@@ -23,7 +23,7 @@
 
 // fn asin(vec<3, f32>) -> vec<3, f32>
 fn asin_8cd9c9() {
-  var res: vec3<f32> = asin(vec3<f32>(1.f));
+  var res: vec3<f32> = asin(vec3<f32>(0.479425538604f));
 }
 
 @vertex

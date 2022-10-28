@@ -23,7 +23,7 @@
 
 // fn asin(fa) -> fa
 fn asin_a6d73a() {
-  const arg_0 = 1;
+  const arg_0 = 0.479425538604;
   var res = asin(arg_0);
 }
 

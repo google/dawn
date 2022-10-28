@@ -2,7 +2,7 @@
 
 using namespace metal;
 void asin_a6d73a() {
-  float res = 1.570796371f;
+  float res = 0.5f;
 }
 
 struct tint_symbol {

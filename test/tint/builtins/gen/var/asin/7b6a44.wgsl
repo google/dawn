@@ -23,7 +23,7 @@
 
 // fn asin(vec<2, f32>) -> vec<2, f32>
 fn asin_7b6a44() {
-  var arg_0 = vec2<f32>(1.f);
+  var arg_0 = vec2<f32>(0.479425538604f);
   var res: vec2<f32> = asin(arg_0);
 }
 

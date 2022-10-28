@@ -23,7 +23,7 @@
 
 // fn asin(vec<2, fa>) -> vec<2, fa>
 fn asin_a5dd88() {
-  const arg_0 = vec2(1);
+  const arg_0 = vec2(0.479425538604);
   var res = asin(arg_0);
 }
 

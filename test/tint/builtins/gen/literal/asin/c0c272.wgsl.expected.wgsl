@@ -1,5 +1,5 @@
 fn asin_c0c272() {
-  var res : f32 = asin(1.0f);
+  var res : f32 = asin(0.47942555f);
 }
 
 @vertex

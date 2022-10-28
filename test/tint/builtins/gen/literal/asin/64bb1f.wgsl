@@ -23,7 +23,7 @@
 
 // fn asin(vec<4, fa>) -> vec<4, fa>
 fn asin_64bb1f() {
-  var res = asin(vec4(1));
+  var res = asin(vec4(0.479425538604));
 }
 
 @vertex

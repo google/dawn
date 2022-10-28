@@ -23,7 +23,7 @@
 
 // fn asin(f32) -> f32
 fn asin_c0c272() {
-  var arg_0 = 1.f;
+  var arg_0 = 0.479425538604f;
   var res: f32 = asin(arg_0);
 }
 

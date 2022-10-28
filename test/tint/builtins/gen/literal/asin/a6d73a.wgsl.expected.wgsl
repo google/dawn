@@ -1,5 +1,5 @@
 fn asin_a6d73a() {
-  var res = asin(1);
+  var res = asin(0.479425538604);
 }
 
 @vertex

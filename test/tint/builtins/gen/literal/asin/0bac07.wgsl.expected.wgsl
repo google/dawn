@@ -1,5 +1,5 @@
 fn asin_0bac07() {
-  var res = asin(vec3(1));
+  var res = asin(vec3(0.479425538604));
 }
 
 @vertex

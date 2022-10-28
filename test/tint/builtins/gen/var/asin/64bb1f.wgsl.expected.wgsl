@@ -1,5 +1,5 @@
 fn asin_64bb1f() {
-  const arg_0 = vec4(1);
+  const arg_0 = vec4(0.479425538604);
   var res = asin(arg_0);
 }
 

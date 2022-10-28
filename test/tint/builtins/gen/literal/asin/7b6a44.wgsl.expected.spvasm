@@ -31,8 +31,8 @@
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
     %v2float = OpTypeVector %float 2
-%float_1_57079637 = OpConstant %float 1.57079637
-         %15 = OpConstantComposite %v2float %float_1_57079637 %float_1_57079637
+  %float_0_5 = OpConstant %float 0.5
+         %15 = OpConstantComposite %v2float %float_0_5 %float_0_5
 %_ptr_Function_v2float = OpTypePointer Function %v2float
          %18 = OpConstantNull %v2float
          %19 = OpTypeFunction %v4float
