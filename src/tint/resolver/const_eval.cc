@@ -1625,7 +1625,7 @@ ConstEval::Result ConstEval::saturate(const sem::Type* ty,
             return CreateElement(builder, c0->Type(),
                                  NumberT(std::min(std::max(e, NumberT(0.0)), NumberT(1.0))));
         };
-        return Dispatch_fia_fiu32_f16(create, c0);
+        return Dispatch_fa_f32_f16(create, c0);
     };
     return TransformElements(builder, ty, transform, args[0]);
 }
@@ -1668,7 +1668,7 @@ ConstEval::Result ConstEval::step(const sem::Type* ty,
             NumberT result = x.value < edge.value ? NumberT(0.0) : NumberT(1.0);
             return CreateElement(builder, c0->Type(), result);
         };
-        return Dispatch_fia_fiu32_f16(create, c0, c1);
+        return Dispatch_fa_f32_f16(create, c0, c1);
     };
     return TransformElements(builder, ty, transform, args[0], args[1]);
 }
