@@ -2,7 +2,7 @@
 
 using namespace metal;
 void sign_7c85ea() {
-  half res = sign(0.0h);
+  half res = 0.0h;
 }
 
 struct tint_symbol {

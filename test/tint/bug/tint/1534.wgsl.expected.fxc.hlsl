@@ -1,0 +1,11 @@
+cbuffer cbuffer_i : register(b0, space0) {
+  uint4 i[1];
+};
+RWByteAddressBuffer j : register(u1, space0);
+
+[numthreads(1, 1, 1)]
+void main() {
+  const uint l = dot(i[0].xyz, i[0].xyz);
+  j.Store(0u, asuint(i[0].x));
+  return;
+}

@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void sign_0799fd() {
+  float2 res = float2(1.0f);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  sign_0799fd();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  sign_0799fd();
+  return;
+}
+
+kernel void compute_main() {
+  sign_0799fd();
+  return;
+}
+

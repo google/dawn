@@ -532,6 +532,32 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               SelectBoolCases()))));
 
 template <typename T>
+std::vector<Case> SignCases() {
+    return {
+        C({-T(1)}, -T(1)),
+        C({-T(0.5)}, -T(1)),
+        C({T(0)}, T(0)),
+        C({-T(0)}, T(0)),
+        C({T(0.5)}, T(1)),
+        C({T(1)}, T(1)),
+
+        C({T::Highest()}, T(1.0)),
+        C({T::Lowest()}, -T(1.0)),
+
+        // Vector tests
+        C({Vec(-T(0.5), T(0), T(0.5))}, Vec(-T(1.0), T(0.0), T(1.0))),
+        C({Vec(T::Highest(), T::Lowest())}, Vec(T(1.0), -T(1.0))),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Sign,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kSign),
+                     testing::ValuesIn(Concat(SignCases<AFloat>(),  //
+                                              SignCases<f32>(),
+                                              SignCases<f16>()))));
+
+template <typename T>
 std::vector<Case> StepCases() {
     return {
         C({T(0), T(0)}, T(1.0)),
