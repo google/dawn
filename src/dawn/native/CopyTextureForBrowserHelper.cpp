@@ -613,10 +613,10 @@ MaybeError DoCopyForBrowser(DeviceBase* device,
     return {};
 }
 
-MaybeError ValidateCopyForBrowserCommonRestrictions(DeviceBase* device,
-                                                    const ImageCopyTexture& destination,
-                                                    const Extent3D& copySize,
-                                                    const CopyTextureForBrowserOptions& options) {
+MaybeError ValidateCopyForBrowserDestination(DeviceBase* device,
+                                             const ImageCopyTexture& destination,
+                                             const Extent3D& copySize,
+                                             const CopyTextureForBrowserOptions& options) {
     DAWN_TRY(device->ValidateObject(destination.texture));
     DAWN_INVALID_IF(destination.texture->GetTextureState() == TextureBase::TextureState::Destroyed,
                     "Destination texture %s is destroyed.", destination.texture);
@@ -630,9 +630,6 @@ MaybeError ValidateCopyForBrowserCommonRestrictions(DeviceBase* device,
     DAWN_TRY(ValidateCanUseAs(destination.texture, wgpu::TextureUsage::CopyDst, mode));
     DAWN_TRY(ValidateCanUseAs(destination.texture, wgpu::TextureUsage::RenderAttachment, mode));
 
-    DAWN_INVALID_IF(copySize.depthOrArrayLayers > 1, "Copy is for more than one array layer (%u)",
-                    copySize.depthOrArrayLayers);
-
     DAWN_INVALID_IF(destination.texture->GetSampleCount() > 1,
                     "The destination texture sample count (%u) is not 1.",
                     destination.texture->GetSampleCount());
@@ -645,6 +642,10 @@ MaybeError ValidateCopyForBrowserCommonRestrictions(DeviceBase* device,
         "Destination %s aspect (%s) doesn't select all the aspects of the destination format.",
         destination.texture, destination.aspect);
 
+    return {};
+}
+
+MaybeError ValidateCopyForBrowserOptions(const CopyTextureForBrowserOptions& options) {
     DAWN_INVALID_IF(options.nextInChain != nullptr, "nextInChain must be nullptr");
 
     DAWN_TRY(ValidateAlphaMode(options.srcAlphaMode));
@@ -667,25 +668,18 @@ MaybeError ValidateCopyTextureForBrowser(DeviceBase* device,
                                          const ImageCopyTexture* destination,
                                          const Extent3D* copySize,
                                          const CopyTextureForBrowserOptions* options) {
+    // Validate source
     DAWN_TRY(device->ValidateObject(source->texture));
-
     DAWN_INVALID_IF(source->texture->GetTextureState() == TextureBase::TextureState::Destroyed,
                     "Source texture %s is destroyed.", source->texture);
-
     DAWN_TRY_CONTEXT(ValidateImageCopyTexture(device, *source, *copySize),
                      "validating the ImageCopyTexture for the source");
-
     DAWN_TRY_CONTEXT(ValidateTextureCopyRange(device, *source, *copySize),
                      "validating that the copy fits in the source");
-
-    DAWN_TRY(ValidateTextureToTextureCopyCommonRestrictions(*source, *destination, *copySize));
-
     DAWN_INVALID_IF(source->origin.z > 0, "Source has a non-zero z origin (%u).", source->origin.z);
-
     DAWN_INVALID_IF(source->texture->GetSampleCount() > 1,
                     "The source texture sample count (%u) is not 1. ",
                     source->texture->GetSampleCount());
-
     DAWN_INVALID_IF(
         options->internalUsage && !device->HasFeature(Feature::DawnInternalUsages),
         "The internalUsage is true while the dawn-internal-usages feature is not enabled.");
@@ -693,10 +687,19 @@ MaybeError ValidateCopyTextureForBrowser(DeviceBase* device,
         options->internalUsage ? UsageValidationMode::Internal : UsageValidationMode::Default;
     DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::CopySrc, mode));
     DAWN_TRY(ValidateCanUseAs(source->texture, wgpu::TextureUsage::TextureBinding, mode));
-
     DAWN_TRY(ValidateCopyTextureSourceFormat(source->texture->GetFormat().format));
 
-    DAWN_TRY(ValidateCopyForBrowserCommonRestrictions(device, *destination, *copySize, *options));
+    // Validate destination
+    DAWN_TRY(ValidateCopyForBrowserDestination(device, *destination, *copySize, *options));
+
+    // Validate copy common rules and copySize.
+    DAWN_INVALID_IF(copySize->depthOrArrayLayers > 1, "Copy is for more than one array layer (%u)",
+                    copySize->depthOrArrayLayers);
+    DAWN_TRY(ValidateTextureToTextureCopyCommonRestrictions(*source, *destination, *copySize));
+
+    // Validate options
+    DAWN_TRY(ValidateCopyForBrowserOptions(*options));
+
     return {};
 }
 
@@ -705,12 +708,10 @@ MaybeError ValidateCopyExternalTextureForBrowser(DeviceBase* device,
                                                  const ImageCopyTexture* destination,
                                                  const Extent3D* copySize,
                                                  const CopyTextureForBrowserOptions* options) {
+    // Validate source
     DAWN_TRY(device->ValidateObject(source->externalTexture));
-
     DAWN_TRY(source->externalTexture->ValidateCanUseInSubmitNow());
-
     const Extent2D& sourceVisibleRect = source->externalTexture->GetVisibleRect();
-
     // All texture dimensions are in uint32_t so by doing checks in uint64_t we avoid
     // overflows.
     DAWN_INVALID_IF(
@@ -721,14 +722,20 @@ MaybeError ValidateCopyExternalTextureForBrowser(DeviceBase* device,
             static_cast<uint64_t>(source->origin.z) > 0,
         "Texture copy range (origin: %s, copySize: %s) touches outside of %s visible size (%s).",
         &source->origin, copySize, source->externalTexture, &sourceVisibleRect);
-
     DAWN_INVALID_IF(source->origin.z > 0, "Source has a non-zero z origin (%u).", source->origin.z);
-
     DAWN_INVALID_IF(
         options->internalUsage && !device->HasFeature(Feature::DawnInternalUsages),
         "The internalUsage is true while the dawn-internal-usages feature is not enabled.");
 
-    DAWN_TRY(ValidateCopyForBrowserCommonRestrictions(device, *destination, *copySize, *options));
+    // Validate destination
+    DAWN_TRY(ValidateCopyForBrowserDestination(device, *destination, *copySize, *options));
+
+    // Validate copySize
+    DAWN_INVALID_IF(copySize->depthOrArrayLayers > 1, "Copy is for more than one array layer (%u)",
+                    copySize->depthOrArrayLayers);
+
+    // Validate options
+    DAWN_TRY(ValidateCopyForBrowserOptions(*options));
 
     return {};
 }
