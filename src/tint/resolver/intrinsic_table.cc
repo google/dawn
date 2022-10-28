@@ -1653,7 +1653,21 @@ void Impl::PrintOverload(std::ostream& ss,
     auto earliest_eval_stage = sem::EvaluationStage::kConstant;
 
     ss << intrinsic_name;
-    if (overload->flags.Contains(OverloadFlag::kIsConverter) && overload->template_types) {
+
+    bool print_template_type = false;
+    if (overload->num_template_types > 0) {
+        if (overload->flags.Contains(OverloadFlag::kIsConverter)) {
+            // Print for conversions
+            // e.g. vec3<T>(vec3<U>) -> vec3<f32>
+            print_template_type = true;
+        } else if ((overload->num_parameters == 0) &&
+                   overload->flags.Contains(OverloadFlag::kIsInitializer)) {
+            // Print for initializers with no params
+            // e.g. vec2<T>() -> vec2<T>
+            print_template_type = true;
+        }
+    }
+    if (print_template_type) {
         ss << "<";
         ss << overload->template_types[0].name;
         ss << ">";

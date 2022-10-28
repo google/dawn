@@ -840,7 +840,7 @@ TEST_F(IntrinsicTableTest, MismatchTypeInitializerImplicit) {
   vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
+  vec3<T>() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
 
 5 candidate conversions:
   vec3<T>(vec3<U>) -> vec3<f32>  where: T is f32, U is abstract-int, abstract-float, i32, f16, u32 or bool
@@ -866,7 +866,7 @@ TEST_F(IntrinsicTableTest, MismatchTypeInitializerExplicit) {
   vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
-  vec3() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
+  vec3<T>() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
 
 5 candidate conversions:
   vec3<T>(vec3<U>) -> vec3<f32>  where: T is f32, U is abstract-int, abstract-float, i32, f16, u32 or bool
@@ -953,7 +953,7 @@ TEST_F(IntrinsicTableTest, MismatchTypeConversion) {
 6 candidate initializers:
   vec3(vec3<T>) -> vec3<T>  where: T is f32, f16, i32, u32 or bool
   vec3(T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
-  vec3() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
+  vec3<T>() -> vec3<T>  where: T is f32, f16, i32, u32 or bool
   vec3(xy: vec2<T>, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(x: T, yz: vec2<T>) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
   vec3(x: T, y: T, z: T) -> vec3<T>  where: T is abstract-int, abstract-float, f32, f16, i32, u32 or bool
