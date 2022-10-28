@@ -562,8 +562,30 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnCommandEncoder) {
     }
 }
 
+class TimestampQueryInsidePassesValidationTest : public QuerySetValidationTest {
+  protected:
+    WGPUDevice CreateTestDevice(dawn::native::Adapter dawnAdapter) override {
+        wgpu::DeviceDescriptor descriptor;
+        // The timestamp query feature must be supported if the timestamp query inside passes
+        // feature is supported. Enable timestamp query for validating queries overwrite inside and
+        // outside of the passes.
+        wgpu::FeatureName requiredFeatures[2] = {wgpu::FeatureName::TimestampQuery,
+                                                 wgpu::FeatureName::TimestampQueryInsidePasses};
+        descriptor.requiredFeatures = requiredFeatures;
+        descriptor.requiredFeaturesCount = 2;
+
+        wgpu::DawnTogglesDeviceDescriptor togglesDesc;
+        descriptor.nextInChain = &togglesDesc;
+        const char* forceDisabledToggles[1] = {"disallow_unsafe_apis"};
+        togglesDesc.forceDisabledToggles = forceDisabledToggles;
+        togglesDesc.forceDisabledTogglesCount = 1;
+
+        return dawnAdapter.CreateDevice(&descriptor);
+    }
+};
+
 // Test write timestamp on compute pass encoder
-TEST_F(TimestampQueryValidationTest, WriteTimestampOnComputePassEncoder) {
+TEST_F(TimestampQueryInsidePassesValidationTest, WriteTimestampOnComputePassEncoder) {
     wgpu::QuerySet timestampQuerySet = CreateQuerySet(device, wgpu::QueryType::Timestamp, 2);
     wgpu::QuerySet occlusionQuerySet = CreateQuerySet(device, wgpu::QueryType::Occlusion, 2);
 
@@ -609,7 +631,7 @@ TEST_F(TimestampQueryValidationTest, WriteTimestampOnComputePassEncoder) {
 }
 
 // Test write timestamp on render pass encoder
-TEST_F(TimestampQueryValidationTest, WriteTimestampOnRenderPassEncoder) {
+TEST_F(TimestampQueryInsidePassesValidationTest, WriteTimestampOnRenderPassEncoder) {
     PlaceholderRenderPass renderPass(device);
 
     wgpu::QuerySet timestampQuerySet = CreateQuerySet(device, wgpu::QueryType::Timestamp, 2);

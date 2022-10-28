@@ -19,11 +19,13 @@
 #include <utility>
 
 #include "dawn/common/BitSetIterator.h"
+#include "dawn/native/Adapter.h"
 #include "dawn/native/BindGroup.h"
 #include "dawn/native/Buffer.h"
 #include "dawn/native/CommandBufferStateTracker.h"
 #include "dawn/native/Commands.h"
 #include "dawn/native/Device.h"
+#include "dawn/native/Instance.h"
 #include "dawn/native/PassResourceUsage.h"
 #include "dawn/native/QuerySet.h"
 #include "dawn/native/RenderBundle.h"
@@ -68,8 +70,16 @@ MaybeError ValidateSyncScopeResourceUsage(const SyncScopeResourceUsage& scope) {
 
 MaybeError ValidateTimestampQuery(const DeviceBase* device,
                                   const QuerySetBase* querySet,
-                                  uint32_t queryIndex) {
+                                  uint32_t queryIndex,
+                                  Feature requiredFeature) {
     DAWN_TRY(device->ValidateObject(querySet));
+
+    DAWN_INVALID_IF(!device->HasFeature(requiredFeature),
+                    "Timestamp queries used without the %s feature enabled.",
+                    device->GetAdapter()
+                        ->GetInstance()
+                        ->GetFeatureInfo(FeatureEnumToAPIFeature(requiredFeature))
+                        ->name);
 
     DAWN_INVALID_IF(querySet->GetQueryType() != wgpu::QueryType::Timestamp,
                     "The type of %s is not %s.", querySet, wgpu::QueryType::Timestamp);

@@ -339,6 +339,12 @@ class Adapter : public AdapterBase {
             if (IsGPUCounterSupported(*mDevice, MTLCommonCounterSetTimestamp,
                                       {MTLCommonCounterTimestamp})) {
                 bool enableTimestampQuery = true;
+                bool enableTimestampQueryInsidePasses = true;
+
+                if (@available(macOS 11.0, iOS 14.0, *)) {
+                    enableTimestampQueryInsidePasses =
+                        SupportCounterSamplingAtCommandBoundary(*mDevice);
+                }
 
 #if DAWN_PLATFORM_IS(MACOS)
                 // Disable timestamp query on < macOS 11.0 on AMD GPU because WriteTimestamp
@@ -346,11 +352,16 @@ class Adapter : public AdapterBase {
                 // has been fixed on macOS 11.0. See crbug.com/dawn/545.
                 if (gpu_info::IsAMD(mVendorId) && !IsMacOSVersionAtLeast(11)) {
                     enableTimestampQuery = false;
+                    enableTimestampQueryInsidePasses = false;
                 }
 #endif
 
                 if (enableTimestampQuery) {
                     mSupportedFeatures.EnableFeature(Feature::TimestampQuery);
+                }
+
+                if (enableTimestampQueryInsidePasses) {
+                    mSupportedFeatures.EnableFeature(Feature::TimestampQueryInsidePasses);
                 }
             }
         }

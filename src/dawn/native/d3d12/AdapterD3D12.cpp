@@ -131,6 +131,7 @@ bool Adapter::AreTimestampQueriesSupported() const {
 MaybeError Adapter::InitializeSupportedFeaturesImpl() {
     if (AreTimestampQueriesSupported()) {
         mSupportedFeatures.EnableFeature(Feature::TimestampQuery);
+        mSupportedFeatures.EnableFeature(Feature::TimestampQueryInsidePasses);
     }
     mSupportedFeatures.EnableFeature(Feature::TextureCompressionBC);
     mSupportedFeatures.EnableFeature(Feature::PipelineStatisticsQuery);

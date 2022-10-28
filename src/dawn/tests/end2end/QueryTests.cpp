@@ -445,8 +445,6 @@ TEST_P(OcclusionQueryTests, ResolveToBufferWithOffset) {
     }
 }
 
-DAWN_INSTANTIATE_TEST(OcclusionQueryTests, D3D12Backend(), MetalBackend(), VulkanBackend());
-
 class PipelineStatisticsQueryTests : public QueryTests {
   protected:
     void SetUp() override {
@@ -489,13 +487,6 @@ TEST_P(PipelineStatisticsQueryTests, QuerySetCreation) {
     CreateQuerySetForPipelineStatistics(1, {wgpu::PipelineStatisticName::ClipperInvocations,
                                             wgpu::PipelineStatisticName::VertexShaderInvocations});
 }
-
-DAWN_INSTANTIATE_TEST(PipelineStatisticsQueryTests,
-                      D3D12Backend(),
-                      MetalBackend(),
-                      OpenGLBackend(),
-                      OpenGLESBackend(),
-                      VulkanBackend());
 
 class TimestampExpectation : public detail::Expectation {
   public:
@@ -736,122 +727,6 @@ TEST_P(TimestampQueryTests, TimestampOnCommandEncoder) {
         encoder.WriteTimestamp(querySet, 1);
         encoder.WriteTimestamp(querySet, 0);
         encoder.WriteTimestamp(querySet, 1);
-        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
-        wgpu::CommandBuffer commands = encoder.Finish();
-        queue.Submit(1, &commands);
-
-        EXPECT_BUFFER(destination, 0, kQueryCount * sizeof(uint64_t), new TimestampExpectation);
-    }
-}
-
-// Test calling timestamp query from render pass encoder
-TEST_P(TimestampQueryTests, TimestampOnRenderPass) {
-    // TODO (dawn:1250): Split writeTimestamp() to another extension which is not supported on Apple
-    // devices
-    DAWN_TEST_UNSUPPORTED_IF(IsMacOS() && IsMetal() && IsApple());
-
-    constexpr uint32_t kQueryCount = 2;
-
-    // Write timestamp with different query indexes
-    {
-        wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
-        wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
-
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
-        pass.WriteTimestamp(querySet, 0);
-        pass.WriteTimestamp(querySet, 1);
-        pass.End();
-        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
-        wgpu::CommandBuffer commands = encoder.Finish();
-        queue.Submit(1, &commands);
-
-        EXPECT_BUFFER(destination, 0, kQueryCount * sizeof(uint64_t), new TimestampExpectation);
-    }
-
-    // Write timestamp with same query index, not need test rewrite inside render pass due to it's
-    // not allowed
-    {
-        wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
-        wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
-
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.WriteTimestamp(querySet, 0);
-        encoder.WriteTimestamp(querySet, 1);
-
-        utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
-        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
-        pass.WriteTimestamp(querySet, 0);
-        pass.WriteTimestamp(querySet, 1);
-        pass.End();
-        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
-        wgpu::CommandBuffer commands = encoder.Finish();
-        queue.Submit(1, &commands);
-
-        EXPECT_BUFFER(destination, 0, kQueryCount * sizeof(uint64_t), new TimestampExpectation);
-    }
-}
-
-// Test calling timestamp query from compute pass encoder
-TEST_P(TimestampQueryTests, TimestampOnComputePass) {
-    // TODO (dawn:1250): Split writeTimestamp() to another extension which is not supported on Apple
-    // devices
-    DAWN_TEST_UNSUPPORTED_IF(IsMacOS() && IsMetal() && IsApple());
-
-    constexpr uint32_t kQueryCount = 2;
-
-    // Write timestamp with different query indexes
-    {
-        wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
-        wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
-
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-        pass.WriteTimestamp(querySet, 0);
-        pass.WriteTimestamp(querySet, 1);
-        pass.End();
-        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
-        wgpu::CommandBuffer commands = encoder.Finish();
-        queue.Submit(1, &commands);
-
-        EXPECT_BUFFER(destination, 0, kQueryCount * sizeof(uint64_t), new TimestampExpectation);
-    }
-
-    // Write timestamp with same query index on both the outside and the inside of the compute pass
-    {
-        wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
-        wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
-
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        encoder.WriteTimestamp(querySet, 0);
-        encoder.WriteTimestamp(querySet, 1);
-
-        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-        pass.WriteTimestamp(querySet, 0);
-        pass.WriteTimestamp(querySet, 1);
-        pass.End();
-
-        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
-        wgpu::CommandBuffer commands = encoder.Finish();
-        queue.Submit(1, &commands);
-
-        EXPECT_BUFFER(destination, 0, kQueryCount * sizeof(uint64_t), new TimestampExpectation);
-    }
-
-    // Write timestamp with same query index inside compute pass
-    {
-        wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
-        wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
-
-        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
-        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
-        pass.WriteTimestamp(querySet, 0);
-        pass.WriteTimestamp(querySet, 1);
-        pass.WriteTimestamp(querySet, 0);
-        pass.WriteTimestamp(querySet, 1);
-        pass.End();
-
         encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
         wgpu::CommandBuffer commands = encoder.Finish();
         queue.Submit(1, &commands);
@@ -1203,7 +1078,151 @@ TEST_P(TimestampQueryTests, ResolveTwiceToSameBuffer) {
     EXPECT_BUFFER(destination, 0, kQueryCount * sizeof(uint64_t), new TimestampExpectation);
 }
 
+class TimestampQueryInsidePassesTests : public TimestampQueryTests {
+  protected:
+    void SetUp() override {
+        DawnTest::SetUp();
+
+        // Skip all tests if timestamp feature is not supported
+        DAWN_TEST_UNSUPPORTED_IF(
+            !SupportsFeatures({wgpu::FeatureName::TimestampQueryInsidePasses}));
+    }
+
+    std::vector<wgpu::FeatureName> GetRequiredFeatures() override {
+        std::vector<wgpu::FeatureName> requiredFeatures = {};
+        if (SupportsFeatures({wgpu::FeatureName::TimestampQueryInsidePasses})) {
+            requiredFeatures.push_back(wgpu::FeatureName::TimestampQueryInsidePasses);
+            // The timestamp query feature must be supported if the timestamp query inside passes
+            // feature is supported. Enable timestamp query for testing queries overwrite inside and
+            // outside of the passes.
+            requiredFeatures.push_back(wgpu::FeatureName::TimestampQuery);
+        }
+        return requiredFeatures;
+    }
+};
+
+// Test calling timestamp query from render pass encoder
+TEST_P(TimestampQueryInsidePassesTests, FromOnRenderPass) {
+    constexpr uint32_t kQueryCount = 2;
+
+    // Write timestamp with different query indexes
+    {
+        wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
+        wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.WriteTimestamp(querySet, 0);
+        pass.WriteTimestamp(querySet, 1);
+        pass.End();
+        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_BUFFER(destination, 0, kQueryCount * sizeof(uint64_t), new TimestampExpectation);
+    }
+
+    // Write timestamp with same query index, not need test rewrite inside render pass due to it's
+    // not allowed
+    {
+        wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
+        wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.WriteTimestamp(querySet, 0);
+        encoder.WriteTimestamp(querySet, 1);
+
+        utils::BasicRenderPass renderPass = utils::CreateBasicRenderPass(device, 1, 1);
+        wgpu::RenderPassEncoder pass = encoder.BeginRenderPass(&renderPass.renderPassInfo);
+        pass.WriteTimestamp(querySet, 0);
+        pass.WriteTimestamp(querySet, 1);
+        pass.End();
+        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_BUFFER(destination, 0, kQueryCount * sizeof(uint64_t), new TimestampExpectation);
+    }
+}
+
+// Test calling timestamp query from compute pass encoder
+TEST_P(TimestampQueryInsidePassesTests, FromComputePass) {
+    constexpr uint32_t kQueryCount = 2;
+
+    // Write timestamp with different query indexes
+    {
+        wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
+        wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.WriteTimestamp(querySet, 0);
+        pass.WriteTimestamp(querySet, 1);
+        pass.End();
+        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_BUFFER(destination, 0, kQueryCount * sizeof(uint64_t), new TimestampExpectation);
+    }
+
+    // Write timestamp with same query index on both the outside and the inside of the compute pass
+    {
+        wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
+        wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        encoder.WriteTimestamp(querySet, 0);
+        encoder.WriteTimestamp(querySet, 1);
+
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.WriteTimestamp(querySet, 0);
+        pass.WriteTimestamp(querySet, 1);
+        pass.End();
+
+        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_BUFFER(destination, 0, kQueryCount * sizeof(uint64_t), new TimestampExpectation);
+    }
+
+    // Write timestamp with same query index inside compute pass
+    {
+        wgpu::QuerySet querySet = CreateQuerySetForTimestamp(kQueryCount);
+        wgpu::Buffer destination = CreateResolveBuffer(kQueryCount * sizeof(uint64_t));
+
+        wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+        wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+        pass.WriteTimestamp(querySet, 0);
+        pass.WriteTimestamp(querySet, 1);
+        pass.WriteTimestamp(querySet, 0);
+        pass.WriteTimestamp(querySet, 1);
+        pass.End();
+
+        encoder.ResolveQuerySet(querySet, 0, kQueryCount, destination, 0);
+        wgpu::CommandBuffer commands = encoder.Finish();
+        queue.Submit(1, &commands);
+
+        EXPECT_BUFFER(destination, 0, kQueryCount * sizeof(uint64_t), new TimestampExpectation);
+    }
+}
+
+DAWN_INSTANTIATE_TEST(OcclusionQueryTests, D3D12Backend(), MetalBackend(), VulkanBackend());
+DAWN_INSTANTIATE_TEST(PipelineStatisticsQueryTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());
 DAWN_INSTANTIATE_TEST(TimestampQueryTests,
+                      D3D12Backend(),
+                      MetalBackend(),
+                      OpenGLBackend(),
+                      OpenGLESBackend(),
+                      VulkanBackend());
+DAWN_INSTANTIATE_TEST(TimestampQueryInsidePassesTests,
                       D3D12Backend(),
                       MetalBackend(),
                       OpenGLBackend(),

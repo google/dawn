@@ -32,6 +32,7 @@ enum class Feature {
     TextureCompressionASTC,
     PipelineStatisticsQuery,
     TimestampQuery,
+    TimestampQueryInsidePasses,
     DepthClipControl,
     Depth32FloatStencil8,
     ChromiumExperimentalDp4a,

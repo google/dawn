@@ -152,6 +152,7 @@ MaybeError Adapter::InitializeSupportedFeaturesImpl() {
     if (mDeviceInfo.properties.limits.timestampComputeAndGraphics == VK_TRUE &&
         !IsAndroidQualcomm()) {
         mSupportedFeatures.EnableFeature(Feature::TimestampQuery);
+        mSupportedFeatures.EnableFeature(Feature::TimestampQueryInsidePasses);
     }
 
     if (IsDepthStencilFormatSupported(VK_FORMAT_D32_SFLOAT_S8_UINT)) {

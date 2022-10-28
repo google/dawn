@@ -433,7 +433,8 @@ void ComputePassEncoder::APIWriteTimestamp(QuerySetBase* querySet, uint32_t quer
         this,
         [&](CommandAllocator* allocator) -> MaybeError {
             if (IsValidationEnabled()) {
-                DAWN_TRY(ValidateTimestampQuery(GetDevice(), querySet, queryIndex));
+                DAWN_TRY(ValidateTimestampQuery(GetDevice(), querySet, queryIndex,
+                                                Feature::TimestampQueryInsidePasses));
             }
 
             mCommandEncoder->TrackQueryAvailability(querySet, queryIndex);

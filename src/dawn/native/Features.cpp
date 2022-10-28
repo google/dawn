@@ -51,6 +51,10 @@ static constexpr FeatureEnumAndInfoList kFeatureNameAndInfoList = {{
     {Feature::TimestampQuery,
      {"timestamp-query", "Support Timestamp Query",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=434", FeatureInfo::FeatureState::Stable}},
+    {Feature::TimestampQueryInsidePasses,
+     {"timestamp-query-inside-passes", "Support Timestamp Query inside render/compute pass",
+      "https://bugs.chromium.org/p/dawn/issues/detail?id=434",
+      FeatureInfo::FeatureState::Experimental}},
     {Feature::DepthClipControl,
      {"depth-clip-control", "Disable depth clipping of primitives to the clip volume",
       "https://bugs.chromium.org/p/dawn/issues/detail?id=1178", FeatureInfo::FeatureState::Stable}},
@@ -100,6 +104,8 @@ Feature FromAPIFeature(wgpu::FeatureName feature) {
 
         case wgpu::FeatureName::TimestampQuery:
             return Feature::TimestampQuery;
+        case wgpu::FeatureName::TimestampQueryInsidePasses:
+            return Feature::TimestampQueryInsidePasses;
         case wgpu::FeatureName::PipelineStatisticsQuery:
             return Feature::PipelineStatisticsQuery;
         case wgpu::FeatureName::TextureCompressionBC:
@@ -142,6 +148,8 @@ wgpu::FeatureName ToAPIFeature(Feature feature) {
             return wgpu::FeatureName::PipelineStatisticsQuery;
         case Feature::TimestampQuery:
             return wgpu::FeatureName::TimestampQuery;
+        case Feature::TimestampQueryInsidePasses:
+            return wgpu::FeatureName::TimestampQueryInsidePasses;
         case Feature::DepthClipControl:
             return wgpu::FeatureName::DepthClipControl;
         case Feature::Depth32FloatStencil8:
