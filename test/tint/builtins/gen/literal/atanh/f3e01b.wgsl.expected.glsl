@@ -1,11 +1,7 @@
 #version 310 es
 
-vec4 tint_atanh(vec4 x) {
-  return mix(atanh(x), vec4(0.0f), greaterThanEqual(x, vec4(1.0f)));
-}
-
 void atanh_f3e01b() {
-  vec4 res = tint_atanh(vec4(0.5f));
+  vec4 res = vec4(0.549306154f);
 }
 
 vec4 vertex_main() {
@@ -24,12 +20,8 @@ void main() {
 #version 310 es
 precision mediump float;
 
-vec4 tint_atanh(vec4 x) {
-  return mix(atanh(x), vec4(0.0f), greaterThanEqual(x, vec4(1.0f)));
-}
-
 void atanh_f3e01b() {
-  vec4 res = tint_atanh(vec4(0.5f));
+  vec4 res = vec4(0.549306154f);
 }
 
 void fragment_main() {
@@ -42,12 +34,8 @@ void main() {
 }
 #version 310 es
 
-vec4 tint_atanh(vec4 x) {
-  return mix(atanh(x), vec4(0.0f), greaterThanEqual(x, vec4(1.0f)));
-}
-
 void atanh_f3e01b() {
-  vec4 res = tint_atanh(vec4(0.5f));
+  vec4 res = vec4(0.549306154f);
 }
 
 void compute_main() {

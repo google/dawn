@@ -1,11 +1,7 @@
 #version 310 es
 
-vec4 tint_saturate(vec4 v) {
-  return clamp(v, vec4(0.0f), vec4(1.0f));
-}
-
 void saturate_a5b571() {
-  vec4 res = tint_saturate(vec4(2.0f));
+  vec4 res = vec4(1.0f);
 }
 
 vec4 vertex_main() {
@@ -24,12 +20,8 @@ void main() {
 #version 310 es
 precision mediump float;
 
-vec4 tint_saturate(vec4 v) {
-  return clamp(v, vec4(0.0f), vec4(1.0f));
-}
-
 void saturate_a5b571() {
-  vec4 res = tint_saturate(vec4(2.0f));
+  vec4 res = vec4(1.0f);
 }
 
 void fragment_main() {
@@ -42,12 +34,8 @@ void main() {
 }
 #version 310 es
 
-vec4 tint_saturate(vec4 v) {
-  return clamp(v, vec4(0.0f), vec4(1.0f));
-}
-
 void saturate_a5b571() {
-  vec4 res = tint_saturate(vec4(2.0f));
+  vec4 res = vec4(1.0f);
 }
 
 void compute_main() {

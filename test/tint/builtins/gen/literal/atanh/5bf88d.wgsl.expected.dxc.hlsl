@@ -1,9 +1,5 @@
-vector<float16_t, 2> tint_atanh(vector<float16_t, 2> x) {
-  return (log(((float16_t(1.0h) + x) / (float16_t(1.0h) - x))) * float16_t(0.5h));
-}
-
 void atanh_5bf88d() {
-  vector<float16_t, 2> res = tint_atanh((float16_t(0.0h)).xx);
+  vector<float16_t, 2> res = (float16_t(0.0h)).xx;
 }
 
 struct tint_symbol {

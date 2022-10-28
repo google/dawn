@@ -1,12 +1,8 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
-f16vec3 tint_atanh(f16vec3 x) {
-  return mix(atanh(x), f16vec3(0.0hf), greaterThanEqual(x, f16vec3(1.0hf)));
-}
-
 void atanh_ec4b06() {
-  f16vec3 res = tint_atanh(f16vec3(0.0hf));
+  f16vec3 res = f16vec3(0.0hf);
 }
 
 vec4 vertex_main() {
@@ -26,12 +22,8 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 precision mediump float;
 
-f16vec3 tint_atanh(f16vec3 x) {
-  return mix(atanh(x), f16vec3(0.0hf), greaterThanEqual(x, f16vec3(1.0hf)));
-}
-
 void atanh_ec4b06() {
-  f16vec3 res = tint_atanh(f16vec3(0.0hf));
+  f16vec3 res = f16vec3(0.0hf);
 }
 
 void fragment_main() {
@@ -45,12 +37,8 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
-f16vec3 tint_atanh(f16vec3 x) {
-  return mix(atanh(x), f16vec3(0.0hf), greaterThanEqual(x, f16vec3(1.0hf)));
-}
-
 void atanh_ec4b06() {
-  f16vec3 res = tint_atanh(f16vec3(0.0hf));
+  f16vec3 res = f16vec3(0.0hf);
 }
 
 void compute_main() {

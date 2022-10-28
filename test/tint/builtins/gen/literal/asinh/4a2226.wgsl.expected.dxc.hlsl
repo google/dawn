@@ -1,9 +1,5 @@
-float2 tint_sinh(float2 x) {
-  return log((x + sqrt(((x * x) + 1.0f))));
-}
-
 void asinh_4a2226() {
-  float2 res = tint_sinh((1.0f).xx);
+  float2 res = (0.881373584f).xx;
 }
 
 struct tint_symbol {

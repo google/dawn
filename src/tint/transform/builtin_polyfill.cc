@@ -569,6 +569,9 @@ bool BuiltinPolyfill::ShouldRun(const Program* program, const DataMap& data) con
         for (auto* node : program->ASTNodes().Objects()) {
             if (auto* call = sem.Get<sem::Call>(node)) {
                 if (auto* builtin = call->Target()->As<sem::Builtin>()) {
+                    if (call->Stage() == sem::EvaluationStage::kConstant) {
+                        continue;  // Don't polyfill @const expressions
+                    }
                     switch (builtin->Type()) {
                         case sem::BuiltinType::kAcosh:
                             if (builtins.acosh != Level::kNone) {
@@ -653,6 +656,9 @@ void BuiltinPolyfill::Run(CloneContext& ctx, const DataMap& data, DataMap&) cons
         State s{ctx, builtins};
         if (auto* call = s.sem.Get<sem::Call>(expr)) {
             if (auto* builtin = call->Target()->As<sem::Builtin>()) {
+                if (call->Stage() == sem::EvaluationStage::kConstant) {
+                    return nullptr;  // Don't polyfill @const expressions
+                }
                 Symbol polyfill;
                 switch (builtin->Type()) {
                     case sem::BuiltinType::kAcosh:

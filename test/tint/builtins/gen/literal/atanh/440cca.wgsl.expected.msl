@@ -1,12 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-float3 tint_atanh(float3 x) {
-  return select(atanh(x), float3(0.0f), (x >= float3(1.0f)));
-}
-
 void atanh_440cca() {
-  float3 res = tint_atanh(float3(0.5f));
+  float3 res = float3(0.549306154f);
 }
 
 struct tint_symbol {

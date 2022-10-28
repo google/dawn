@@ -1,9 +1,5 @@
-vector<float16_t, 2> tint_sinh(vector<float16_t, 2> x) {
-  return log((x + sqrt(((x * x) + float16_t(1.0h)))));
-}
-
 void asinh_ad8f8b() {
-  vector<float16_t, 2> res = tint_sinh((float16_t(0.0h)).xx);
+  vector<float16_t, 2> res = (float16_t(0.0h)).xx;
 }
 
 struct tint_symbol {

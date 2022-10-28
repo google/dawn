@@ -1,9 +1,5 @@
-float4 tint_atanh(float4 x) {
-  return (log(((1.0f + x) / (1.0f - x))) * 0.5f);
-}
-
 void atanh_f3e01b() {
-  float4 res = tint_atanh((0.5f).xxxx);
+  float4 res = (0.549306154f).xxxx;
 }
 
 struct tint_symbol {

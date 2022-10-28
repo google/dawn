@@ -1,12 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-half2 tint_atanh(half2 x) {
-  return select(atanh(x), half2(0.0h), (x >= half2(1.0h)));
-}
-
 void atanh_5bf88d() {
-  half2 res = tint_atanh(half2(0.0h));
+  half2 res = half2(0.0h);
 }
 
 struct tint_symbol {
