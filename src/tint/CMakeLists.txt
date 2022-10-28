@@ -248,6 +248,26 @@ set(TINT_LIB_SRCS
   inspector/resource_binding.h
   inspector/scalar.cc
   inspector/scalar.h
+  ir/block.cc
+  ir/block.h
+  ir/builder.cc
+  ir/builder.h
+  ir/builder_impl.cc
+  ir/builder_impl.h
+  ir/flow_node.cc
+  ir/flow_node.h
+  ir/function.cc
+  ir/function.h
+  ir/if.cc
+  ir/if.h
+  ir/loop.cc
+  ir/loop.h
+  ir/module.cc
+  ir/module.h
+  ir/switch.cc
+  ir/switch.h
+  ir/terminator.cc
+  ir/terminator.h
   number.cc
   number.h
   program_builder.cc
@@ -789,6 +809,8 @@ if(TINT_BUILD_TESTS)
     diagnostic/diagnostic_test.cc
     diagnostic/formatter_test.cc
     diagnostic/printer_test.cc
+    ir/builder_impl_test.cc
+    ir/test_helper.h
     number_test.cc
     program_builder_test.cc
     program_test.cc

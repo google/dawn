@@ -16,6 +16,7 @@
 #define SRC_TINT_UTILS_RESULT_H_
 
 #include <ostream>
+#include <utility>
 #include <variant>
 
 #include "src/tint/debug.h"
@@ -47,9 +48,19 @@ struct [[nodiscard]] Result {
         : value{success} {}
 
     /// Constructor
+    /// @param success the success result
+    Result(SUCCESS_TYPE&& success)  // NOLINT(runtime/explicit):
+        : value(std::move(SUCCESS_TYPE(std::move(success)))) {}
+
+    /// Constructor
     /// @param failure the failure result
     Result(const FAILURE_TYPE& failure)  // NOLINT(runtime/explicit):
         : value{failure} {}
+
+    /// Constructor
+    /// @param failure the failure result
+    Result(FAILURE_TYPE&& failure)  // NOLINT(runtime/explicit):
+        : value{std::move(failure)} {}
 
     /// Copy constructor with success / failure casting
     /// @param other the Result to copy
@@ -89,6 +100,13 @@ struct [[nodiscard]] Result {
     const SUCCESS_TYPE& Get() const {
         Validate();
         return std::get<SUCCESS_TYPE>(value);
+    }
+
+    /// @returns the success value
+    /// @warning attempting to call this when the Result holds an failure value will result in UB.
+    SUCCESS_TYPE&& Move() {
+        Validate();
+        return std::get<SUCCESS_TYPE>(std::move(value));
     }
 
     /// @returns the failure value
