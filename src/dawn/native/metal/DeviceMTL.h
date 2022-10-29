@@ -127,6 +127,7 @@ class Device final : public DeviceBase {
     void InitTogglesFromDriver();
     void DestroyImpl() override;
     MaybeError WaitForIdleForDestruction() override;
+    bool HasPendingCommands() const override;
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
 
     NSPRef<id<MTLDevice>> mMtlDevice;

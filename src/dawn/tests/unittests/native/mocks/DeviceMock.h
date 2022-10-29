@@ -116,6 +116,7 @@ class DeviceMock : public DeviceBase {
     MOCK_METHOD(ResultOrError<ExecutionSerial>, CheckAndUpdateCompletedSerials, (), (override));
     MOCK_METHOD(void, DestroyImpl, (), (override));
     MOCK_METHOD(MaybeError, WaitForIdleForDestruction, (), (override));
+    MOCK_METHOD(bool, HasPendingCommands, (), (const, override));
 };
 
 }  // namespace dawn::native

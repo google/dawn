@@ -18,6 +18,7 @@
 #include <memory>
 
 #include "dawn/common/SerialQueue.h"
+#include "dawn/native/CallbackTaskManager.h"
 #include "dawn/native/Error.h"
 #include "dawn/native/Forward.h"
 #include "dawn/native/IntegerTypes.h"
@@ -29,14 +30,23 @@
 
 namespace dawn::native {
 
+// For the commands with async callback like 'MapAsync' and 'OnSubmittedWorkDone', we track the
+// execution serials of completion in the queue for them. This implements 'CallbackTask' so that the
+// aysnc callback can be fired by 'CallbackTaskManager' in a unified way. This also caches the
+// finished serial, as the callback needs to use it in the trace event.
+struct TrackTaskCallback : CallbackTask {
+    explicit TrackTaskCallback(dawn::platform::Platform* platform) : mPlatform(platform) {}
+    void SetFinishedSerial(ExecutionSerial serial);
+    ~TrackTaskCallback() override = default;
+
+  protected:
+    dawn::platform::Platform* mPlatform = nullptr;
+    // The serial by which time the callback can be fired.
+    ExecutionSerial mSerial = kMaxExecutionSerial;
+};
+
 class QueueBase : public ApiObjectBase {
   public:
-    struct TaskInFlight {
-        virtual ~TaskInFlight();
-        virtual void Finish(dawn::platform::Platform* platform, ExecutionSerial serial) = 0;
-        virtual void HandleDeviceLoss() = 0;
-    };
-
     ~QueueBase() override;
 
     static QueueBase* MakeError(DeviceBase* device);
@@ -67,7 +77,7 @@ class QueueBase : public ApiObjectBase {
                            uint64_t bufferOffset,
                            const void* data,
                            size_t size);
-    void TrackTask(std::unique_ptr<TaskInFlight> task, ExecutionSerial serial);
+    void TrackTask(std::unique_ptr<TrackTaskCallback> task);
     void Tick(ExecutionSerial finishedSerial);
     void HandleDeviceLoss();
 
@@ -111,7 +121,7 @@ class QueueBase : public ApiObjectBase {
 
     void SubmitInternal(uint32_t commandCount, CommandBufferBase* const* commands);
 
-    SerialQueue<ExecutionSerial, std::unique_ptr<TaskInFlight>> mTasksInFlight;
+    SerialQueue<ExecutionSerial, std::unique_ptr<TrackTaskCallback>> mTasksInFlight;
 };
 
 }  // namespace dawn::native

@@ -171,6 +171,7 @@ class Device final : public DeviceBase {
 
     void DestroyImpl() override;
     MaybeError WaitForIdleForDestruction() override;
+    bool HasPendingCommands() const override;
 
     // To make it easier to use fn it is a public const member. However
     // the Device is allowed to mutate them through these private methods.

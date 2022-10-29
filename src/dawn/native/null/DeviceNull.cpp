@@ -213,6 +213,10 @@ MaybeError Device::WaitForIdleForDestruction() {
     return {};
 }
 
+bool Device::HasPendingCommands() const {
+    return false;
+}
+
 MaybeError Device::CopyFromStagingToBuffer(StagingBufferBase* source,
                                            uint64_t sourceOffset,
                                            BufferBase* destination,

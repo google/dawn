@@ -132,6 +132,7 @@ class Device final : public DeviceBase {
     ResultOrError<ExecutionSerial> CheckAndUpdateCompletedSerials() override;
     void DestroyImpl() override;
     MaybeError WaitForIdleForDestruction() override;
+    bool HasPendingCommands() const override;
 
     const OpenGLFunctions mGL;
 

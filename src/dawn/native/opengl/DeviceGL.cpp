@@ -446,6 +446,12 @@ MaybeError Device::WaitForIdleForDestruction() {
     return {};
 }
 
+bool Device::HasPendingCommands() const {
+    // Technically we could have scheduled commands inside the GL driver that are waiting for a
+    // glFlush but we can't know for sure so we might as well pretend there are no commands.
+    return false;
+}
+
 uint32_t Device::GetOptimalBytesPerRowAlignment() const {
     return 1;
 }

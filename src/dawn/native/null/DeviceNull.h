@@ -161,6 +161,7 @@ class Device final : public DeviceBase {
 
     void DestroyImpl() override;
     MaybeError WaitForIdleForDestruction() override;
+    bool HasPendingCommands() const override;
 
     std::vector<std::unique_ptr<PendingOperation>> mPendingOperations;
 

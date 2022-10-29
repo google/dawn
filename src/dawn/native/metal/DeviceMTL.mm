@@ -369,6 +369,10 @@ CommandRecordingContext* Device::GetPendingCommandContext() {
     return &mCommandContext;
 }
 
+bool Device::HasPendingCommands() const {
+    return mCommandContext.WasUsed();
+}
+
 MaybeError Device::SubmitPendingCommandBuffer() {
     if (!mCommandContext.WasUsed()) {
         return {};

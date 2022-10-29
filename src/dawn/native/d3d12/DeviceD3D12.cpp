@@ -400,6 +400,10 @@ void Device::ReferenceUntilUnused(ComPtr<IUnknown> object) {
     mUsedComObjectRefs.Enqueue(object, GetPendingCommandSerial());
 }
 
+bool Device::HasPendingCommands() const {
+    return mPendingCommands.IsOpen();
+}
+
 MaybeError Device::ExecutePendingCommandContext() {
     return mPendingCommands.ExecuteCommandList(this);
 }

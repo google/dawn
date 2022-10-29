@@ -202,6 +202,12 @@ TEST_P(D3D12ResourceResidencyTests, AsyncMappedBufferRead) {
     // The mappable buffer should be resident.
     EXPECT_TRUE(CheckIfBufferIsResident(buffer));
 
+    // Make an empty submit to ensure the buffer's execution serial will not be same as the below
+    // large buffers.
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
     // Create and touch enough buffers to use the entire budget.
     std::vector<wgpu::Buffer> bufferSet = AllocateBuffers(
         kDirectlyAllocatedResourceSize, kRestrictedBudgetSize / kDirectlyAllocatedResourceSize,
