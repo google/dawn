@@ -236,6 +236,8 @@ template <typename NumberT>
 struct BitValues {
     /// The unwrapped number type
     using T = UnwrapNumber<NumberT>;
+    /// The unsigned unwrapped number type
+    using UT = std::make_unsigned_t<T>;
     /// Details
     struct detail {
         /// Unsigned type of `T`
@@ -281,7 +283,7 @@ struct BitValues {
     /// @returns the shifted value
     template <typename U, typename V>
     static constexpr NumberT Lsh(U val, V shiftBy) {
-        return NumberT{static_cast<T>(val) << static_cast<T>(shiftBy)};
+        return NumberT{static_cast<T>(static_cast<UT>(val) << static_cast<UT>(shiftBy))};
     }
 };
 

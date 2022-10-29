@@ -1,22 +1,7 @@
 #version 310 es
 
-uint tint_count_leading_zeros(uint v) {
-  uint x = uint(v);
-  uint b16 = ((x <= 65535u) ? 16u : 0u);
-  x = (x << b16);
-  uint b8 = ((x <= 16777215u) ? 8u : 0u);
-  x = (x << b8);
-  uint b4 = ((x <= 268435455u) ? 4u : 0u);
-  x = (x << b4);
-  uint b2 = ((x <= 1073741823u) ? 2u : 0u);
-  x = (x << b2);
-  uint b1 = ((x <= 2147483647u) ? 1u : 0u);
-  uint is_zero = ((x == 0u) ? 1u : 0u);
-  return uint((((((b16 | b8) | b4) | b2) | b1) + is_zero));
-}
-
 void countLeadingZeros_208d46() {
-  uint res = tint_count_leading_zeros(1u);
+  uint res = 31u;
 }
 
 vec4 vertex_main() {
@@ -35,23 +20,8 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uint tint_count_leading_zeros(uint v) {
-  uint x = uint(v);
-  uint b16 = ((x <= 65535u) ? 16u : 0u);
-  x = (x << b16);
-  uint b8 = ((x <= 16777215u) ? 8u : 0u);
-  x = (x << b8);
-  uint b4 = ((x <= 268435455u) ? 4u : 0u);
-  x = (x << b4);
-  uint b2 = ((x <= 1073741823u) ? 2u : 0u);
-  x = (x << b2);
-  uint b1 = ((x <= 2147483647u) ? 1u : 0u);
-  uint is_zero = ((x == 0u) ? 1u : 0u);
-  return uint((((((b16 | b8) | b4) | b2) | b1) + is_zero));
-}
-
 void countLeadingZeros_208d46() {
-  uint res = tint_count_leading_zeros(1u);
+  uint res = 31u;
 }
 
 void fragment_main() {
@@ -64,23 +34,8 @@ void main() {
 }
 #version 310 es
 
-uint tint_count_leading_zeros(uint v) {
-  uint x = uint(v);
-  uint b16 = ((x <= 65535u) ? 16u : 0u);
-  x = (x << b16);
-  uint b8 = ((x <= 16777215u) ? 8u : 0u);
-  x = (x << b8);
-  uint b4 = ((x <= 268435455u) ? 4u : 0u);
-  x = (x << b4);
-  uint b2 = ((x <= 1073741823u) ? 2u : 0u);
-  x = (x << b2);
-  uint b1 = ((x <= 2147483647u) ? 1u : 0u);
-  uint is_zero = ((x == 0u) ? 1u : 0u);
-  return uint((((((b16 | b8) | b4) | b2) | b1) + is_zero));
-}
-
 void countLeadingZeros_208d46() {
-  uint res = tint_count_leading_zeros(1u);
+  uint res = 31u;
 }
 
 void compute_main() {

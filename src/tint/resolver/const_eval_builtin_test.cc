@@ -461,6 +461,52 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               ClampCases<f16>()))));
 
 template <typename T>
+std::vector<Case> CountLeadingZerosCases() {
+    using B = BitValues<T>;
+    return {
+        C({B::Lsh(1, 31)}, T(0)),  //
+        C({B::Lsh(1, 30)}, T(1)),  //
+        C({B::Lsh(1, 29)}, T(2)),  //
+        C({B::Lsh(1, 28)}, T(3)),
+        //...
+        C({B::Lsh(1, 3)}, T(28)),  //
+        C({B::Lsh(1, 2)}, T(29)),  //
+        C({B::Lsh(1, 1)}, T(30)),  //
+        C({B::Lsh(1, 0)}, T(31)),
+
+        C({T(0b1111'0000'1111'0000'1111'0000'1111'0000)}, T(0)),
+        C({T(0b0111'1000'0111'1000'0111'1000'0111'1000)}, T(1)),
+        C({T(0b0011'1100'0011'1100'0011'1100'0011'1100)}, T(2)),
+        C({T(0b0001'1110'0001'1110'0001'1110'0001'1110)}, T(3)),
+        //...
+        C({T(0b0000'0000'0000'0000'0000'0000'0000'0111)}, T(29)),
+        C({T(0b0000'0000'0000'0000'0000'0000'0000'0011)}, T(30)),
+        C({T(0b0000'0000'0000'0000'0000'0000'0000'0001)}, T(31)),
+        C({T(0b0000'0000'0000'0000'0000'0000'0000'0000)}, T(32)),
+
+        // Same as above, but remove leading 0
+        C({T(0b1111'1000'0111'1000'0111'1000'0111'1000)}, T(0)),
+        C({T(0b1011'1100'0011'1100'0011'1100'0011'1100)}, T(0)),
+        C({T(0b1001'1110'0001'1110'0001'1110'0001'1110)}, T(0)),
+        //...
+        C({T(0b1000'0000'0000'0000'0000'0000'0000'0111)}, T(0)),
+        C({T(0b1000'0000'0000'0000'0000'0000'0000'0011)}, T(0)),
+        C({T(0b1000'0000'0000'0000'0000'0000'0000'0001)}, T(0)),
+        C({T(0b1000'0000'0000'0000'0000'0000'0000'0000)}, T(0)),
+
+        // Vector tests
+        C({Vec(B::Lsh(1, 31), B::Lsh(1, 30), B::Lsh(1, 29))}, Vec(T(0), T(1), T(2))),
+        C({Vec(B::Lsh(1, 2), B::Lsh(1, 1), B::Lsh(1, 0))}, Vec(T(29), T(30), T(31))),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    CountLeadingZeros,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kCountLeadingZeros),
+                     testing::ValuesIn(Concat(CountLeadingZerosCases<i32>(),  //
+                                              CountLeadingZerosCases<u32>()))));
+
+template <typename T>
 std::vector<Case> SaturateCases() {
     return {
         C({T(0)}, T(0)),

@@ -56,6 +56,16 @@ T First(T&& first, ...) {
 /// Helper that calls `f` passing in the value of all `cs`.
 /// Calls `f` with all constants cast to the type of the first `cs` argument.
 template <typename F, typename... CONSTANTS>
+auto Dispatch_iu32(F&& f, CONSTANTS&&... cs) {
+    return Switch(
+        First(cs...)->Type(),  //
+        [&](const sem::I32*) { return f(cs->template As<i32>()...); },
+        [&](const sem::U32*) { return f(cs->template As<u32>()...); });
+}
+
+/// Helper that calls `f` passing in the value of all `cs`.
+/// Calls `f` with all constants cast to the type of the first `cs` argument.
+template <typename F, typename... CONSTANTS>
 auto Dispatch_ia_iu32(F&& f, CONSTANTS&&... cs) {
     return Switch(
         First(cs...)->Type(),  //
@@ -1614,6 +1624,31 @@ ConstEval::Result ConstEval::clamp(const sem::Type* ty,
         return Dispatch_fia_fiu32_f16(create, c0, c1, c2);
     };
     return TransformElements(builder, ty, transform, args[0], args[1], args[2]);
+}
+
+ConstEval::Result ConstEval::countLeadingZeros(const sem::Type* ty,
+                                               utils::VectorRef<const sem::Constant*> args,
+                                               const Source&) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto e) {
+            using NumberT = decltype(e);
+            using T = UnwrapNumber<NumberT>;
+            using UT = std::make_unsigned_t<T>;
+            constexpr UT kNumBits = sizeof(UT) * 8;
+            constexpr UT kLeftMost = UT{1} << (kNumBits - 1);
+
+            auto v = static_cast<UT>(e);
+            auto count = UT{0};
+            while ((count < kNumBits) && ((v & kLeftMost) == 0)) {
+                ++count;
+                v <<= 1;
+            }
+
+            return CreateElement(builder, c0->Type(), NumberT(count));
+        };
+        return Dispatch_iu32(create, c0);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
 }
 
 ConstEval::Result ConstEval::saturate(const sem::Type* ty,

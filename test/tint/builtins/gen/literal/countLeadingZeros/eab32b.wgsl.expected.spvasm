@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 99
+; Bound: 34
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -12,9 +12,6 @@
                OpExecutionMode %compute_main LocalSize 1 1 1
                OpName %value "value"
                OpName %vertex_point_size "vertex_point_size"
-               OpName %tint_count_leading_zeros "tint_count_leading_zeros"
-               OpName %v "v"
-               OpName %x "x"
                OpName %countLeadingZeros_eab32b "countLeadingZeros_eab32b"
                OpName %res "res"
                OpName %vertex_main_inner "vertex_main_inner"
@@ -31,113 +28,41 @@
 %_ptr_Output_float = OpTypePointer Output %float
           %8 = OpConstantNull %float
 %vertex_point_size = OpVariable %_ptr_Output_float Output %8
+       %void = OpTypeVoid
+          %9 = OpTypeFunction %void
         %int = OpTypeInt 32 1
       %v4int = OpTypeVector %int 4
-          %9 = OpTypeFunction %v4int %v4int
-       %uint = OpTypeInt 32 0
-     %v4uint = OpTypeVector %uint 4
-%_ptr_Function_v4uint = OpTypePointer Function %v4uint
-         %20 = OpConstantNull %v4uint
- %uint_65535 = OpConstant %uint 65535
-         %24 = OpConstantComposite %v4uint %uint_65535 %uint_65535 %uint_65535 %uint_65535
-       %bool = OpTypeBool
-     %v4bool = OpTypeVector %bool 4
-    %uint_16 = OpConstant %uint 16
-         %29 = OpConstantComposite %v4uint %uint_16 %uint_16 %uint_16 %uint_16
-%uint_16777215 = OpConstant %uint 16777215
-         %35 = OpConstantComposite %v4uint %uint_16777215 %uint_16777215 %uint_16777215 %uint_16777215
-     %uint_8 = OpConstant %uint 8
-         %38 = OpConstantComposite %v4uint %uint_8 %uint_8 %uint_8 %uint_8
-%uint_268435455 = OpConstant %uint 268435455
-         %44 = OpConstantComposite %v4uint %uint_268435455 %uint_268435455 %uint_268435455 %uint_268435455
-     %uint_4 = OpConstant %uint 4
-         %47 = OpConstantComposite %v4uint %uint_4 %uint_4 %uint_4 %uint_4
-%uint_1073741823 = OpConstant %uint 1073741823
-         %53 = OpConstantComposite %v4uint %uint_1073741823 %uint_1073741823 %uint_1073741823 %uint_1073741823
-     %uint_2 = OpConstant %uint 2
-         %56 = OpConstantComposite %v4uint %uint_2 %uint_2 %uint_2 %uint_2
-%uint_2147483647 = OpConstant %uint 2147483647
-         %62 = OpConstantComposite %v4uint %uint_2147483647 %uint_2147483647 %uint_2147483647 %uint_2147483647
-     %uint_1 = OpConstant %uint 1
-         %65 = OpConstantComposite %v4uint %uint_1 %uint_1 %uint_1 %uint_1
-       %void = OpTypeVoid
-         %75 = OpTypeFunction %void
-      %int_1 = OpConstant %int 1
-         %81 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
+     %int_31 = OpConstant %int 31
+         %16 = OpConstantComposite %v4int %int_31 %int_31 %int_31 %int_31
 %_ptr_Function_v4int = OpTypePointer Function %v4int
-         %84 = OpConstantNull %v4int
-         %85 = OpTypeFunction %v4float
+         %19 = OpConstantNull %v4int
+         %20 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
-%tint_count_leading_zeros = OpFunction %v4int None %9
-          %v = OpFunctionParameter %v4int
-         %14 = OpLabel
-          %x = OpVariable %_ptr_Function_v4uint Function %20
-         %15 = OpBitcast %v4uint %v
-               OpStore %x %15
-         %22 = OpLoad %v4uint %x
-         %25 = OpULessThanEqual %v4bool %22 %24
-         %21 = OpSelect %v4uint %25 %29 %20
-         %30 = OpLoad %v4uint %x
-         %31 = OpShiftLeftLogical %v4uint %30 %21
-               OpStore %x %31
-         %33 = OpLoad %v4uint %x
-         %36 = OpULessThanEqual %v4bool %33 %35
-         %32 = OpSelect %v4uint %36 %38 %20
-         %39 = OpLoad %v4uint %x
-         %40 = OpShiftLeftLogical %v4uint %39 %32
-               OpStore %x %40
-         %42 = OpLoad %v4uint %x
-         %45 = OpULessThanEqual %v4bool %42 %44
-         %41 = OpSelect %v4uint %45 %47 %20
-         %48 = OpLoad %v4uint %x
-         %49 = OpShiftLeftLogical %v4uint %48 %41
-               OpStore %x %49
-         %51 = OpLoad %v4uint %x
-         %54 = OpULessThanEqual %v4bool %51 %53
-         %50 = OpSelect %v4uint %54 %56 %20
-         %57 = OpLoad %v4uint %x
-         %58 = OpShiftLeftLogical %v4uint %57 %50
-               OpStore %x %58
-         %60 = OpLoad %v4uint %x
-         %63 = OpULessThanEqual %v4bool %60 %62
-         %59 = OpSelect %v4uint %63 %65 %20
-         %67 = OpLoad %v4uint %x
-         %68 = OpIEqual %v4bool %67 %20
-         %66 = OpSelect %v4uint %68 %65 %20
-         %70 = OpBitwiseOr %v4uint %21 %32
-         %71 = OpBitwiseOr %v4uint %70 %41
-         %72 = OpBitwiseOr %v4uint %71 %50
-         %73 = OpBitwiseOr %v4uint %72 %59
-         %74 = OpIAdd %v4uint %73 %66
-         %69 = OpBitcast %v4int %74
-               OpReturnValue %69
-               OpFunctionEnd
-%countLeadingZeros_eab32b = OpFunction %void None %75
-         %78 = OpLabel
-        %res = OpVariable %_ptr_Function_v4int Function %84
-         %79 = OpFunctionCall %v4int %tint_count_leading_zeros %81
-               OpStore %res %79
+%countLeadingZeros_eab32b = OpFunction %void None %9
+         %12 = OpLabel
+        %res = OpVariable %_ptr_Function_v4int Function %19
+               OpStore %res %16
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %85
-         %87 = OpLabel
-         %88 = OpFunctionCall %void %countLeadingZeros_eab32b
+%vertex_main_inner = OpFunction %v4float None %20
+         %22 = OpLabel
+         %23 = OpFunctionCall %void %countLeadingZeros_eab32b
                OpReturnValue %5
                OpFunctionEnd
-%vertex_main = OpFunction %void None %75
-         %90 = OpLabel
-         %91 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %91
+%vertex_main = OpFunction %void None %9
+         %25 = OpLabel
+         %26 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %26
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
-%fragment_main = OpFunction %void None %75
-         %94 = OpLabel
-         %95 = OpFunctionCall %void %countLeadingZeros_eab32b
+%fragment_main = OpFunction %void None %9
+         %29 = OpLabel
+         %30 = OpFunctionCall %void %countLeadingZeros_eab32b
                OpReturn
                OpFunctionEnd
-%compute_main = OpFunction %void None %75
-         %97 = OpLabel
-         %98 = OpFunctionCall %void %countLeadingZeros_eab32b
+%compute_main = OpFunction %void None %9
+         %32 = OpLabel
+         %33 = OpFunctionCall %void %countLeadingZeros_eab32b
                OpReturn
                OpFunctionEnd

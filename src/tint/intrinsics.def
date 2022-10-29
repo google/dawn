@@ -433,8 +433,8 @@ fn cos<T: f32_f16>(T) -> T
 fn cos<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn cosh<T: f32_f16>(T) -> T
 fn cosh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
-fn countLeadingZeros<T: iu32>(T) -> T
-fn countLeadingZeros<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
+@const fn countLeadingZeros<T: iu32>(T) -> T
+@const fn countLeadingZeros<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
 fn countOneBits<T: iu32>(T) -> T
 fn countOneBits<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
 fn countTrailingZeros<T: iu32>(T) -> T

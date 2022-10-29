@@ -1,20 +1,5 @@
-int tint_count_leading_zeros(int v) {
-  uint x = uint(v);
-  const uint b16 = ((x <= 65535u) ? 16u : 0u);
-  x = (x << b16);
-  const uint b8 = ((x <= 16777215u) ? 8u : 0u);
-  x = (x << b8);
-  const uint b4 = ((x <= 268435455u) ? 4u : 0u);
-  x = (x << b4);
-  const uint b2 = ((x <= 1073741823u) ? 2u : 0u);
-  x = (x << b2);
-  const uint b1 = ((x <= 2147483647u) ? 1u : 0u);
-  const uint is_zero = ((x == 0u) ? 1u : 0u);
-  return int((((((b16 | b8) | b4) | b2) | b1) + is_zero));
-}
-
 void countLeadingZeros_6d4656() {
-  int res = tint_count_leading_zeros(1);
+  int res = 31;
 }
 
 struct tint_symbol {

@@ -1,22 +1,7 @@
 #version 310 es
 
-uvec3 tint_count_leading_zeros(uvec3 v) {
-  uvec3 x = uvec3(v);
-  uvec3 b16 = mix(uvec3(0u), uvec3(16u), lessThanEqual(x, uvec3(65535u)));
-  x = (x << b16);
-  uvec3 b8 = mix(uvec3(0u), uvec3(8u), lessThanEqual(x, uvec3(16777215u)));
-  x = (x << b8);
-  uvec3 b4 = mix(uvec3(0u), uvec3(4u), lessThanEqual(x, uvec3(268435455u)));
-  x = (x << b4);
-  uvec3 b2 = mix(uvec3(0u), uvec3(2u), lessThanEqual(x, uvec3(1073741823u)));
-  x = (x << b2);
-  uvec3 b1 = mix(uvec3(0u), uvec3(1u), lessThanEqual(x, uvec3(2147483647u)));
-  uvec3 is_zero = mix(uvec3(0u), uvec3(1u), equal(x, uvec3(0u)));
-  return uvec3((((((b16 | b8) | b4) | b2) | b1) + is_zero));
-}
-
 void countLeadingZeros_ab6345() {
-  uvec3 res = tint_count_leading_zeros(uvec3(1u));
+  uvec3 res = uvec3(31u);
 }
 
 vec4 vertex_main() {
@@ -35,23 +20,8 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uvec3 tint_count_leading_zeros(uvec3 v) {
-  uvec3 x = uvec3(v);
-  uvec3 b16 = mix(uvec3(0u), uvec3(16u), lessThanEqual(x, uvec3(65535u)));
-  x = (x << b16);
-  uvec3 b8 = mix(uvec3(0u), uvec3(8u), lessThanEqual(x, uvec3(16777215u)));
-  x = (x << b8);
-  uvec3 b4 = mix(uvec3(0u), uvec3(4u), lessThanEqual(x, uvec3(268435455u)));
-  x = (x << b4);
-  uvec3 b2 = mix(uvec3(0u), uvec3(2u), lessThanEqual(x, uvec3(1073741823u)));
-  x = (x << b2);
-  uvec3 b1 = mix(uvec3(0u), uvec3(1u), lessThanEqual(x, uvec3(2147483647u)));
-  uvec3 is_zero = mix(uvec3(0u), uvec3(1u), equal(x, uvec3(0u)));
-  return uvec3((((((b16 | b8) | b4) | b2) | b1) + is_zero));
-}
-
 void countLeadingZeros_ab6345() {
-  uvec3 res = tint_count_leading_zeros(uvec3(1u));
+  uvec3 res = uvec3(31u);
 }
 
 void fragment_main() {
@@ -64,23 +34,8 @@ void main() {
 }
 #version 310 es
 
-uvec3 tint_count_leading_zeros(uvec3 v) {
-  uvec3 x = uvec3(v);
-  uvec3 b16 = mix(uvec3(0u), uvec3(16u), lessThanEqual(x, uvec3(65535u)));
-  x = (x << b16);
-  uvec3 b8 = mix(uvec3(0u), uvec3(8u), lessThanEqual(x, uvec3(16777215u)));
-  x = (x << b8);
-  uvec3 b4 = mix(uvec3(0u), uvec3(4u), lessThanEqual(x, uvec3(268435455u)));
-  x = (x << b4);
-  uvec3 b2 = mix(uvec3(0u), uvec3(2u), lessThanEqual(x, uvec3(1073741823u)));
-  x = (x << b2);
-  uvec3 b1 = mix(uvec3(0u), uvec3(1u), lessThanEqual(x, uvec3(2147483647u)));
-  uvec3 is_zero = mix(uvec3(0u), uvec3(1u), equal(x, uvec3(0u)));
-  return uvec3((((((b16 | b8) | b4) | b2) | b1) + is_zero));
-}
-
 void countLeadingZeros_ab6345() {
-  uvec3 res = tint_count_leading_zeros(uvec3(1u));
+  uvec3 res = uvec3(31u);
 }
 
 void compute_main() {

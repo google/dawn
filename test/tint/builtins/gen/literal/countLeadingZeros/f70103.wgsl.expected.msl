@@ -2,7 +2,7 @@
 
 using namespace metal;
 void countLeadingZeros_f70103() {
-  uint4 res = clz(uint4(1u));
+  uint4 res = uint4(31u);
 }
 
 struct tint_symbol {
