@@ -377,6 +377,15 @@ class ConstEval {
     // Builtins
     ////////////////////////////////////////////////////////////////////////////
 
+    /// any builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result any(const sem::Type* ty,
+               utils::VectorRef<const sem::Constant*> args,
+               const Source& source);
+
     /// asin builtin
     /// @param ty the expression type
     /// @param args the input arguments
