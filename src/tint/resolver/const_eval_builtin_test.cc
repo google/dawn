@@ -507,6 +507,52 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               CountLeadingZerosCases<u32>()))));
 
 template <typename T>
+std::vector<Case> CountTrailingZerosCases() {
+    using B = BitValues<T>;
+    return {
+        C({B::Lsh(1, 31)}, T(31)),  //
+        C({B::Lsh(1, 30)}, T(30)),  //
+        C({B::Lsh(1, 29)}, T(29)),  //
+        C({B::Lsh(1, 28)}, T(28)),
+        //...
+        C({B::Lsh(1, 3)}, T(3)),  //
+        C({B::Lsh(1, 2)}, T(2)),  //
+        C({B::Lsh(1, 1)}, T(1)),  //
+        C({B::Lsh(1, 0)}, T(0)),
+
+        C({T(0b0000'1111'0000'1111'0000'1111'0000'1111)}, T(0)),
+        C({T(0b0001'1110'0001'1110'0001'1110'0001'1110)}, T(1)),
+        C({T(0b0011'1100'0011'1100'0011'1100'0011'1100)}, T(2)),
+        C({T(0b0111'1000'0111'1000'0111'1000'0111'1000)}, T(3)),
+        //...
+        C({T(0b1110'0000'0000'0000'0000'0000'0000'0000)}, T(29)),
+        C({T(0b1100'0000'0000'0000'0000'0000'0000'0000)}, T(30)),
+        C({T(0b1000'0000'0000'0000'0000'0000'0000'0000)}, T(31)),
+        C({T(0b0000'0000'0000'0000'0000'0000'0000'0000)}, T(32)),
+
+        //// Same as above, but remove trailing 0
+        C({T(0b0001'1110'0001'1110'0001'1110'0001'1111)}, T(0)),
+        C({T(0b0011'1100'0011'1100'0011'1100'0011'1101)}, T(0)),
+        C({T(0b0111'1000'0111'1000'0111'1000'0111'1001)}, T(0)),
+        //...
+        C({T(0b1110'0000'0000'0000'0000'0000'0000'0001)}, T(0)),
+        C({T(0b1100'0000'0000'0000'0000'0000'0000'0001)}, T(0)),
+        C({T(0b1000'0000'0000'0000'0000'0000'0000'0001)}, T(0)),
+        C({T(0b0000'0000'0000'0000'0000'0000'0000'0001)}, T(0)),
+
+        // Vector tests
+        C({Vec(B::Lsh(1, 31), B::Lsh(1, 30), B::Lsh(1, 29))}, Vec(T(31), T(30), T(29))),
+        C({Vec(B::Lsh(1, 2), B::Lsh(1, 1), B::Lsh(1, 0))}, Vec(T(2), T(1), T(0))),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    CountTrailingZeros,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kCountTrailingZeros),
+                     testing::ValuesIn(Concat(CountTrailingZerosCases<i32>(),  //
+                                              CountTrailingZerosCases<u32>()))));
+
+template <typename T>
 std::vector<Case> SaturateCases() {
     return {
         C({T(0)}, T(0)),

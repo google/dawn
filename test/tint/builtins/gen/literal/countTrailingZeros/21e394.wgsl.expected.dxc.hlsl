@@ -1,20 +1,5 @@
-uint tint_count_trailing_zeros(uint v) {
-  uint x = uint(v);
-  const uint b16 = (bool((x & 65535u)) ? 0u : 16u);
-  x = (x >> b16);
-  const uint b8 = (bool((x & 255u)) ? 0u : 8u);
-  x = (x >> b8);
-  const uint b4 = (bool((x & 15u)) ? 0u : 4u);
-  x = (x >> b4);
-  const uint b2 = (bool((x & 3u)) ? 0u : 2u);
-  x = (x >> b2);
-  const uint b1 = (bool((x & 1u)) ? 0u : 1u);
-  const uint is_zero = ((x == 0u) ? 1u : 0u);
-  return uint((((((b16 | b8) | b4) | b2) | b1) + is_zero));
-}
-
 void countTrailingZeros_21e394() {
-  uint res = tint_count_trailing_zeros(1u);
+  uint res = 0u;
 }
 
 struct tint_symbol {

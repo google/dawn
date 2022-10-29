@@ -1,20 +1,5 @@
-int3 tint_count_trailing_zeros(int3 v) {
-  uint3 x = uint3(v);
-  const uint3 b16 = (bool3((x & (65535u).xxx)) ? (0u).xxx : (16u).xxx);
-  x = (x >> b16);
-  const uint3 b8 = (bool3((x & (255u).xxx)) ? (0u).xxx : (8u).xxx);
-  x = (x >> b8);
-  const uint3 b4 = (bool3((x & (15u).xxx)) ? (0u).xxx : (4u).xxx);
-  x = (x >> b4);
-  const uint3 b2 = (bool3((x & (3u).xxx)) ? (0u).xxx : (2u).xxx);
-  x = (x >> b2);
-  const uint3 b1 = (bool3((x & (1u).xxx)) ? (0u).xxx : (1u).xxx);
-  const uint3 is_zero = ((x == (0u).xxx) ? (1u).xxx : (0u).xxx);
-  return int3((((((b16 | b8) | b4) | b2) | b1) + is_zero));
-}
-
 void countTrailingZeros_acfacb() {
-  int3 res = tint_count_trailing_zeros((1).xxx);
+  int3 res = (0).xxx;
 }
 
 struct tint_symbol {

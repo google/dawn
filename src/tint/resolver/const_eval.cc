@@ -1651,6 +1651,31 @@ ConstEval::Result ConstEval::countLeadingZeros(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0]);
 }
 
+ConstEval::Result ConstEval::countTrailingZeros(const sem::Type* ty,
+                                                utils::VectorRef<const sem::Constant*> args,
+                                                const Source&) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto e) {
+            using NumberT = decltype(e);
+            using T = UnwrapNumber<NumberT>;
+            using UT = std::make_unsigned_t<T>;
+            constexpr UT kNumBits = sizeof(UT) * 8;
+            constexpr UT kRightMost = UT{1};
+
+            auto v = static_cast<UT>(e);
+            auto count = UT{0};
+            while ((count < kNumBits) && ((v & kRightMost) == 0)) {
+                ++count;
+                v >>= 1;
+            }
+
+            return CreateElement(builder, c0->Type(), NumberT(count));
+        };
+        return Dispatch_iu32(create, c0);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
 ConstEval::Result ConstEval::saturate(const sem::Type* ty,
                                       utils::VectorRef<const sem::Constant*> args,
                                       const Source&) {
