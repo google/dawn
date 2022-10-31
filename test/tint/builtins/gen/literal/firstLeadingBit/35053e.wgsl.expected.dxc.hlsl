@@ -1,20 +1,5 @@
-int3 tint_first_leading_bit(int3 v) {
-  uint3 x = ((v < (0).xxx) ? uint3(~(v)) : uint3(v));
-  const uint3 b16 = (bool3((x & (4294901760u).xxx)) ? (16u).xxx : (0u).xxx);
-  x = (x >> b16);
-  const uint3 b8 = (bool3((x & (65280u).xxx)) ? (8u).xxx : (0u).xxx);
-  x = (x >> b8);
-  const uint3 b4 = (bool3((x & (240u).xxx)) ? (4u).xxx : (0u).xxx);
-  x = (x >> b4);
-  const uint3 b2 = (bool3((x & (12u).xxx)) ? (2u).xxx : (0u).xxx);
-  x = (x >> b2);
-  const uint3 b1 = (bool3((x & (2u).xxx)) ? (1u).xxx : (0u).xxx);
-  const uint3 is_zero = ((x == (0u).xxx) ? (4294967295u).xxx : (0u).xxx);
-  return int3((((((b16 | b8) | b4) | b2) | b1) | is_zero));
-}
-
 void firstLeadingBit_35053e() {
-  int3 res = tint_first_leading_bit((1).xxx);
+  int3 res = (0).xxx;
 }
 
 struct tint_symbol {

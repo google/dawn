@@ -1,22 +1,7 @@
 #version 310 es
 
-ivec4 tint_first_leading_bit(ivec4 v) {
-  uvec4 x = mix(uvec4(v), uvec4(~(v)), lessThan(v, ivec4(0)));
-  uvec4 b16 = mix(uvec4(0u), uvec4(16u), bvec4((x & uvec4(4294901760u))));
-  x = (x >> b16);
-  uvec4 b8 = mix(uvec4(0u), uvec4(8u), bvec4((x & uvec4(65280u))));
-  x = (x >> b8);
-  uvec4 b4 = mix(uvec4(0u), uvec4(4u), bvec4((x & uvec4(240u))));
-  x = (x >> b4);
-  uvec4 b2 = mix(uvec4(0u), uvec4(2u), bvec4((x & uvec4(12u))));
-  x = (x >> b2);
-  uvec4 b1 = mix(uvec4(0u), uvec4(1u), bvec4((x & uvec4(2u))));
-  uvec4 is_zero = mix(uvec4(0u), uvec4(4294967295u), equal(x, uvec4(0u)));
-  return ivec4((((((b16 | b8) | b4) | b2) | b1) | is_zero));
-}
-
 void firstLeadingBit_c1f940() {
-  ivec4 res = tint_first_leading_bit(ivec4(1));
+  ivec4 res = ivec4(0);
 }
 
 vec4 vertex_main() {
@@ -35,23 +20,8 @@ void main() {
 #version 310 es
 precision mediump float;
 
-ivec4 tint_first_leading_bit(ivec4 v) {
-  uvec4 x = mix(uvec4(v), uvec4(~(v)), lessThan(v, ivec4(0)));
-  uvec4 b16 = mix(uvec4(0u), uvec4(16u), bvec4((x & uvec4(4294901760u))));
-  x = (x >> b16);
-  uvec4 b8 = mix(uvec4(0u), uvec4(8u), bvec4((x & uvec4(65280u))));
-  x = (x >> b8);
-  uvec4 b4 = mix(uvec4(0u), uvec4(4u), bvec4((x & uvec4(240u))));
-  x = (x >> b4);
-  uvec4 b2 = mix(uvec4(0u), uvec4(2u), bvec4((x & uvec4(12u))));
-  x = (x >> b2);
-  uvec4 b1 = mix(uvec4(0u), uvec4(1u), bvec4((x & uvec4(2u))));
-  uvec4 is_zero = mix(uvec4(0u), uvec4(4294967295u), equal(x, uvec4(0u)));
-  return ivec4((((((b16 | b8) | b4) | b2) | b1) | is_zero));
-}
-
 void firstLeadingBit_c1f940() {
-  ivec4 res = tint_first_leading_bit(ivec4(1));
+  ivec4 res = ivec4(0);
 }
 
 void fragment_main() {
@@ -64,23 +34,8 @@ void main() {
 }
 #version 310 es
 
-ivec4 tint_first_leading_bit(ivec4 v) {
-  uvec4 x = mix(uvec4(v), uvec4(~(v)), lessThan(v, ivec4(0)));
-  uvec4 b16 = mix(uvec4(0u), uvec4(16u), bvec4((x & uvec4(4294901760u))));
-  x = (x >> b16);
-  uvec4 b8 = mix(uvec4(0u), uvec4(8u), bvec4((x & uvec4(65280u))));
-  x = (x >> b8);
-  uvec4 b4 = mix(uvec4(0u), uvec4(4u), bvec4((x & uvec4(240u))));
-  x = (x >> b4);
-  uvec4 b2 = mix(uvec4(0u), uvec4(2u), bvec4((x & uvec4(12u))));
-  x = (x >> b2);
-  uvec4 b1 = mix(uvec4(0u), uvec4(1u), bvec4((x & uvec4(2u))));
-  uvec4 is_zero = mix(uvec4(0u), uvec4(4294967295u), equal(x, uvec4(0u)));
-  return ivec4((((((b16 | b8) | b4) | b2) | b1) | is_zero));
-}
-
 void firstLeadingBit_c1f940() {
-  ivec4 res = tint_first_leading_bit(ivec4(1));
+  ivec4 res = ivec4(0);
 }
 
 void compute_main() {

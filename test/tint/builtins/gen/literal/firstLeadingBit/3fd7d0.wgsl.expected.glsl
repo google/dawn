@@ -1,22 +1,7 @@
 #version 310 es
 
-uvec3 tint_first_leading_bit(uvec3 v) {
-  uvec3 x = v;
-  uvec3 b16 = mix(uvec3(0u), uvec3(16u), bvec3((x & uvec3(4294901760u))));
-  x = (x >> b16);
-  uvec3 b8 = mix(uvec3(0u), uvec3(8u), bvec3((x & uvec3(65280u))));
-  x = (x >> b8);
-  uvec3 b4 = mix(uvec3(0u), uvec3(4u), bvec3((x & uvec3(240u))));
-  x = (x >> b4);
-  uvec3 b2 = mix(uvec3(0u), uvec3(2u), bvec3((x & uvec3(12u))));
-  x = (x >> b2);
-  uvec3 b1 = mix(uvec3(0u), uvec3(1u), bvec3((x & uvec3(2u))));
-  uvec3 is_zero = mix(uvec3(0u), uvec3(4294967295u), equal(x, uvec3(0u)));
-  return uvec3((((((b16 | b8) | b4) | b2) | b1) | is_zero));
-}
-
 void firstLeadingBit_3fd7d0() {
-  uvec3 res = tint_first_leading_bit(uvec3(1u));
+  uvec3 res = uvec3(0u);
 }
 
 vec4 vertex_main() {
@@ -35,23 +20,8 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uvec3 tint_first_leading_bit(uvec3 v) {
-  uvec3 x = v;
-  uvec3 b16 = mix(uvec3(0u), uvec3(16u), bvec3((x & uvec3(4294901760u))));
-  x = (x >> b16);
-  uvec3 b8 = mix(uvec3(0u), uvec3(8u), bvec3((x & uvec3(65280u))));
-  x = (x >> b8);
-  uvec3 b4 = mix(uvec3(0u), uvec3(4u), bvec3((x & uvec3(240u))));
-  x = (x >> b4);
-  uvec3 b2 = mix(uvec3(0u), uvec3(2u), bvec3((x & uvec3(12u))));
-  x = (x >> b2);
-  uvec3 b1 = mix(uvec3(0u), uvec3(1u), bvec3((x & uvec3(2u))));
-  uvec3 is_zero = mix(uvec3(0u), uvec3(4294967295u), equal(x, uvec3(0u)));
-  return uvec3((((((b16 | b8) | b4) | b2) | b1) | is_zero));
-}
-
 void firstLeadingBit_3fd7d0() {
-  uvec3 res = tint_first_leading_bit(uvec3(1u));
+  uvec3 res = uvec3(0u);
 }
 
 void fragment_main() {
@@ -64,23 +34,8 @@ void main() {
 }
 #version 310 es
 
-uvec3 tint_first_leading_bit(uvec3 v) {
-  uvec3 x = v;
-  uvec3 b16 = mix(uvec3(0u), uvec3(16u), bvec3((x & uvec3(4294901760u))));
-  x = (x >> b16);
-  uvec3 b8 = mix(uvec3(0u), uvec3(8u), bvec3((x & uvec3(65280u))));
-  x = (x >> b8);
-  uvec3 b4 = mix(uvec3(0u), uvec3(4u), bvec3((x & uvec3(240u))));
-  x = (x >> b4);
-  uvec3 b2 = mix(uvec3(0u), uvec3(2u), bvec3((x & uvec3(12u))));
-  x = (x >> b2);
-  uvec3 b1 = mix(uvec3(0u), uvec3(1u), bvec3((x & uvec3(2u))));
-  uvec3 is_zero = mix(uvec3(0u), uvec3(4294967295u), equal(x, uvec3(0u)));
-  return uvec3((((((b16 | b8) | b4) | b2) | b1) | is_zero));
-}
-
 void firstLeadingBit_3fd7d0() {
-  uvec3 res = tint_first_leading_bit(uvec3(1u));
+  uvec3 res = uvec3(0u);
 }
 
 void compute_main() {

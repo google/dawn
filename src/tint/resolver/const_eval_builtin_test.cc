@@ -619,6 +619,68 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               CountOneBitsCases<u32>()))));
 
 template <typename T>
+std::vector<Case> FirstLeadingBitCases() {
+    using B = BitValues<T>;
+    auto r = std::vector<Case>{
+        // Both signed and unsigned return T(-1) for input 0
+        C({T(0)}, T(-1)),
+
+        C({B::Lsh(1, 30)}, T(30)),  //
+        C({B::Lsh(1, 29)}, T(29)),  //
+        C({B::Lsh(1, 28)}, T(28)),
+        //...
+        C({B::Lsh(1, 3)}, T(3)),  //
+        C({B::Lsh(1, 2)}, T(2)),  //
+        C({B::Lsh(1, 1)}, T(1)),  //
+        C({B::Lsh(1, 0)}, T(0)),
+
+        C({T(0b0000'0000'0100'1000'1000'1000'0000'0000)}, T(22)),
+        C({T(0b0000'0000'0000'0100'1000'1000'0000'0000)}, T(18)),
+
+        // Vector tests
+        C({Vec(B::Lsh(1, 30), B::Lsh(1, 29), B::Lsh(1, 28))}, Vec(T(30), T(29), T(28))),
+        C({Vec(B::Lsh(1, 2), B::Lsh(1, 1), B::Lsh(1, 0))}, Vec(T(2), T(1), T(0))),
+    };
+
+    ConcatIntoIf<IsUnsignedIntegral<T>>(  //
+        r, std::vector<Case>{
+               C({B::Lsh(1, 31)}, T(31)),
+
+               C({T(0b1111'1111'1111'1111'1111'1111'1111'1110)}, T(31)),
+               C({T(0b1111'1111'1111'1111'1111'1111'1111'1100)}, T(31)),
+               C({T(0b1111'1111'1111'1111'1111'1111'1111'1000)}, T(31)),
+               //...
+               C({T(0b1110'0000'0000'0000'0000'0000'0000'0000)}, T(31)),
+               C({T(0b1100'0000'0000'0000'0000'0000'0000'0000)}, T(31)),
+               C({T(0b1000'0000'0000'0000'0000'0000'0000'0000)}, T(31)),
+           });
+
+    ConcatIntoIf<IsSignedIntegral<T>>(  //
+        r, std::vector<Case>{
+               // Signed returns -1 for input -1
+               C({T(-1)}, T(-1)),
+
+               C({B::Lsh(1, 31)}, T(30)),
+
+               C({T(0b1111'1111'1111'1111'1111'1111'1111'1110)}, T(0)),
+               C({T(0b1111'1111'1111'1111'1111'1111'1111'1100)}, T(1)),
+               C({T(0b1111'1111'1111'1111'1111'1111'1111'1000)}, T(2)),
+               //...
+               C({T(0b1110'0000'0000'0000'0000'0000'0000'0000)}, T(28)),
+               C({T(0b1100'0000'0000'0000'0000'0000'0000'0000)}, T(29)),
+               C({T(0b1000'0000'0000'0000'0000'0000'0000'0000)}, T(30)),
+           });
+
+    return r;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    FirstLeadingBit,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kFirstLeadingBit),
+                     testing::ValuesIn(Concat(FirstLeadingBitCases<i32>(),  //
+                                              FirstLeadingBitCases<u32>()))));
+
+template <typename T>
 std::vector<Case> SaturateCases() {
     return {
         C({T(0)}, T(0)),

@@ -192,6 +192,23 @@ std::string OverflowErrorMessage(NumberT lhs, const char* op, NumberT rhs) {
     return ss.str();
 }
 
+/// @returns the number of consecutive leading bits in `@p e` set to `@p bit_value_to_count`.
+template <typename T>
+auto CountLeadingBits(T e, T bit_value_to_count) -> std::make_unsigned_t<T> {
+    using UT = std::make_unsigned_t<T>;
+    constexpr UT kNumBits = sizeof(UT) * 8;
+    constexpr UT kLeftMost = UT{1} << (kNumBits - 1);
+    const UT b = bit_value_to_count == 0 ? UT{0} : kLeftMost;
+
+    auto v = static_cast<UT>(e);
+    auto count = UT{0};
+    while ((count < kNumBits) && ((v & kLeftMost) == b)) {
+        ++count;
+        v <<= 1;
+    }
+    return count;
+}
+
 /// ImplConstant inherits from sem::Constant to add an private implementation method for conversion.
 struct ImplConstant : public sem::Constant {
     /// Convert attempts to convert the constant value to the given type. On error, Convert()
@@ -1639,17 +1656,7 @@ ConstEval::Result ConstEval::countLeadingZeros(const sem::Type* ty,
         auto create = [&](auto e) {
             using NumberT = decltype(e);
             using T = UnwrapNumber<NumberT>;
-            using UT = std::make_unsigned_t<T>;
-            constexpr UT kNumBits = sizeof(UT) * 8;
-            constexpr UT kLeftMost = UT{1} << (kNumBits - 1);
-
-            auto v = static_cast<UT>(e);
-            auto count = UT{0};
-            while ((count < kNumBits) && ((v & kLeftMost) == 0)) {
-                ++count;
-                v <<= 1;
-            }
-
+            auto count = CountLeadingBits(T{e}, T{0});
             return CreateElement(builder, c0->Type(), NumberT(count));
         };
         return Dispatch_iu32(create, c0);
@@ -1700,6 +1707,50 @@ ConstEval::Result ConstEval::countTrailingZeros(const sem::Type* ty,
             }
 
             return CreateElement(builder, c0->Type(), NumberT(count));
+        };
+        return Dispatch_iu32(create, c0);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
+ConstEval::Result ConstEval::firstLeadingBit(const sem::Type* ty,
+                                             utils::VectorRef<const sem::Constant*> args,
+                                             const Source&) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto e) {
+            using NumberT = decltype(e);
+            using T = UnwrapNumber<NumberT>;
+            using UT = std::make_unsigned_t<T>;
+            constexpr UT kNumBits = sizeof(UT) * 8;
+
+            NumberT result;
+            if constexpr (IsUnsignedIntegral<T>) {
+                if (e == T{0}) {
+                    // T(-1) if e is zero.
+                    result = NumberT(static_cast<T>(-1));
+                } else {
+                    // Otherwise the position of the most significant 1 bit in e.
+                    static_assert(std::is_same_v<T, UT>);
+                    UT count = CountLeadingBits(UT{e}, UT{0});
+                    UT pos = kNumBits - count - 1;
+                    result = NumberT(pos);
+                }
+            } else {
+                if (e == T{0} || e == T{-1}) {
+                    // -1 if e is 0 or -1.
+                    result = NumberT(-1);
+                } else {
+                    // Otherwise the position of the most significant bit in e that is different
+                    // from e's sign bit.
+                    UT eu = static_cast<UT>(e);
+                    UT sign_bit = eu >> (kNumBits - 1);
+                    UT count = CountLeadingBits(eu, sign_bit);
+                    UT pos = kNumBits - count - 1;
+                    result = NumberT(pos);
+                }
+            }
+
+            return CreateElement(builder, c0->Type(), result);
         };
         return Dispatch_iu32(create, c0);
     };

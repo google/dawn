@@ -1,23 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-int3 tint_first_leading_bit(int3 v) {
-  uint3 x = select(uint3(v), uint3(~(v)), (v < int3(0)));
-  uint3 const b16 = select(uint3(0u), uint3(16u), bool3((x & uint3(4294901760u))));
-  x = (x >> b16);
-  uint3 const b8 = select(uint3(0u), uint3(8u), bool3((x & uint3(65280u))));
-  x = (x >> b8);
-  uint3 const b4 = select(uint3(0u), uint3(4u), bool3((x & uint3(240u))));
-  x = (x >> b4);
-  uint3 const b2 = select(uint3(0u), uint3(2u), bool3((x & uint3(12u))));
-  x = (x >> b2);
-  uint3 const b1 = select(uint3(0u), uint3(1u), bool3((x & uint3(2u))));
-  uint3 const is_zero = select(uint3(0u), uint3(4294967295u), (x == uint3(0u)));
-  return int3((((((b16 | b8) | b4) | b2) | b1) | is_zero));
-}
-
 void firstLeadingBit_35053e() {
-  int3 res = tint_first_leading_bit(int3(1));
+  int3 res = int3(0);
 }
 
 struct tint_symbol {
