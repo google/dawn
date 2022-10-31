@@ -28,9 +28,9 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/git"
 	"dawn.googlesource.com/dawn/tools/src/gitiles"
-	"dawn.googlesource.com/dawn/tools/src/utils"
 	"go.chromium.org/luci/auth/client/authcli"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -70,7 +70,7 @@ func (c *cmd) Run(ctx context.Context, cfg common.Config) error {
 	}
 
 	// Load the credentials used for accessing the sheets document
-	authdir := utils.ExpandHome(os.ExpandEnv(auth.SecretsDir))
+	authdir := fileutils.ExpandHome(os.ExpandEnv(auth.SecretsDir))
 	credentialsPath := filepath.Join(authdir, "credentials.json")
 	b, err := ioutil.ReadFile(credentialsPath)
 	if err != nil {

@@ -15,7 +15,7 @@
 package common
 
 import (
-	"dawn.googlesource.com/dawn/tools/src/utils"
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"go.chromium.org/luci/auth"
 	"go.chromium.org/luci/hardcoded/chromeinfra"
 )
@@ -32,6 +32,6 @@ const (
 // command line arguments.
 func DefaultAuthOptions() auth.Options {
 	def := chromeinfra.DefaultAuthOptions()
-	def.SecretsDir = utils.ExpandHome("~/.config/dawn-cts")
+	def.SecretsDir = fileutils.ExpandHome("~/.config/dawn-cts")
 	return def
 }

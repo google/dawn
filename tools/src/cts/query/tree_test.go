@@ -6,7 +6,7 @@ import (
 
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
-	"dawn.googlesource.com/dawn/tools/src/utils"
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -735,7 +735,7 @@ func TestReduceUnder(t *testing.T) {
 	}
 	for _, test := range []Test{
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			to:       Q(`suite:a,b,*`),
 			in: []QueryData{
 				{Query: Q(`suite:a,b,*`), Data: failure},
@@ -745,7 +745,7 @@ func TestReduceUnder(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			to:       Q(`suite:a,*`),
 			in: []QueryData{
 				{Query: Q(`suite:a,b,*`), Data: failure},
@@ -755,7 +755,7 @@ func TestReduceUnder(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			to:       Q(`suite:*`),
 			in: []QueryData{
 				{Query: Q(`suite:a,b:*`), Data: failure},
@@ -765,7 +765,7 @@ func TestReduceUnder(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			to:       Q(`suite:a,*`),
 			in: []QueryData{
 				{Query: Q(`suite:a,b,*`), Data: failure},
@@ -777,7 +777,7 @@ func TestReduceUnder(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			to:       Q(`suite:a,*`),
 			in: []QueryData{
 				{Query: Q(`suite:a,b,*`), Data: pass},
@@ -788,7 +788,7 @@ func TestReduceUnder(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			to:       Q(`suite:a`),
 			in: []QueryData{
 				{Query: Q(`suite:a,b,*`), Data: pass},
@@ -799,7 +799,7 @@ func TestReduceUnder(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			to:       Q(`suite:x`),
 			in: []QueryData{
 				{Query: Q(`suite:a,b,*`), Data: pass},
@@ -814,7 +814,7 @@ func TestReduceUnder(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			to:       Q(`suite:a,b,c,*`),
 			in: []QueryData{
 				{Query: Q(`suite:a,b,*`), Data: pass},

@@ -99,7 +99,7 @@ func run() error {
 	}
 
 	fmt.Println("Scanning for files...")
-	paths, err := glob.Scan(fileutils.ProjectRoot(), cfg)
+	paths, err := glob.Scan(fileutils.DawnRoot(), cfg)
 	if err != nil {
 		return err
 	}
@@ -230,7 +230,7 @@ func (f *file) format() error {
 
 // Runs git add on the file
 func (f *file) stage() error {
-	err := exec.Command("git", "-C", fileutils.ProjectRoot(), "add", f.path).Run()
+	err := exec.Command("git", "-C", fileutils.DawnRoot(), "add", f.path).Run()
 	if err != nil {
 		return fmt.Errorf("Couldn't stage file '%v': %w", f.path, err)
 	}
@@ -245,7 +245,7 @@ func loadFiles(paths []string) ([]file, error) {
 	files := make([]file, len(paths))
 	errs := make([]error, len(paths))
 	for i, path := range paths {
-		i, path := i, filepath.Join(fileutils.ProjectRoot(), path)
+		i, path := i, filepath.Join(fileutils.DawnRoot(), path)
 		go func() {
 			defer wg.Done()
 			body, err := ioutil.ReadFile(path)

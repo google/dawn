@@ -19,7 +19,7 @@ import (
 	"testing"
 
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
-	"dawn.googlesource.com/dawn/tools/src/utils"
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -31,12 +31,12 @@ func TestMinimalVariantTags(t *testing.T) {
 	}
 	for _, test := range []Test{
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			results:  result.List{},
 			expect:   []result.Variant{},
 		}, { ///////////////////////////////////////////////////////////////////
 			// Single variant, that can be entirely optimized away
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			results: result.List{
 				{Query: Q("a:b,c:d,*"), Tags: T("a0", "b1", "c2"), Status: result.Pass},
 			},
@@ -44,7 +44,7 @@ func TestMinimalVariantTags(t *testing.T) {
 		}, { ///////////////////////////////////////////////////////////////////
 			// Multiple variants on the same query.
 			// Can also be entirely optimized away.
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			results: result.List{
 				{Query: Q("a:b,c:d,*"), Tags: T("a0", "b1", "c2"), Status: result.Pass},
 				{Query: Q("a:b,c:d,*"), Tags: T("a1", "b2", "c0"), Status: result.Pass},
@@ -53,7 +53,7 @@ func TestMinimalVariantTags(t *testing.T) {
 			expect: []result.Variant{T()},
 		}, { ///////////////////////////////////////////////////////////////////
 			// Two variants where the 1st and 2nd tag-sets are redundant.
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			results: result.List{
 				{Query: Q("a:b,c:d,*"), Tags: T("a0", "b0", "c0"), Status: result.Pass},
 				{Query: Q("a:b,c:d,*"), Tags: T("a1", "b1", "c1"), Status: result.Failure},
@@ -61,7 +61,7 @@ func TestMinimalVariantTags(t *testing.T) {
 			expect: []result.Variant{T("c0"), T("c1")},
 		}, { ///////////////////////////////////////////////////////////////////
 			// Two variants where the 1st and 3rd tag-sets are redundant.
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			results: result.List{
 				{Query: Q("a:b,c:d,*"), Tags: T("a0", "b0", "c0"), Status: result.Pass},
 				{Query: Q("a:b,c:d,*"), Tags: T("a1", "b1", "c1"), Status: result.Failure},
@@ -71,7 +71,7 @@ func TestMinimalVariantTags(t *testing.T) {
 			expect: []result.Variant{T("b0"), T("b1")},
 		}, { ///////////////////////////////////////////////////////////////////
 			// Two variants where the 2nd and 3rd tag-sets are redundant.
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			results: result.List{
 				{Query: Q("a:b,c:d,*"), Tags: T("a0", "b0", "c0"), Status: result.Pass},
 				{Query: Q("a:b,c:d,*"), Tags: T("a1", "b1", "c1"), Status: result.Failure},
@@ -82,7 +82,7 @@ func TestMinimalVariantTags(t *testing.T) {
 		}, { ///////////////////////////////////////////////////////////////////
 			// Check that variants aren't optimized to expand the set of results
 			// they target, even if results are uniform
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			results: result.List{
 				{Query: Q("a:b,c:d0,*"), Tags: T("a0", "b0", "c0"), Status: result.Pass},
 				{Query: Q("a:b,c:d1,*"), Tags: T("a1", "b1", "c1"), Status: result.Pass},
@@ -91,7 +91,7 @@ func TestMinimalVariantTags(t *testing.T) {
 		}, { ///////////////////////////////////////////////////////////////////
 			// Exercise the optimizations to skip checks on tag removals that
 			// aren't found in all variants
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			results: result.List{
 				{Query: Q("a:b,c:d0,*"), Tags: T("a0"), Status: result.Pass},
 				{Query: Q("a:b,c:d1,*"), Tags: T("b0"), Status: result.Pass},

@@ -17,9 +17,9 @@ package parser_test
 import (
 	"testing"
 
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/ast"
 	"dawn.googlesource.com/dawn/tools/src/tint/intrinsic/parser"
-	"dawn.googlesource.com/dawn/tools/src/utils"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -36,13 +36,13 @@ func TestParser(t *testing.T) {
 
 	for _, test := range []test{
 		{
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"enum E {}",
 			ast.AST{
 				Enums: []ast.EnumDecl{{Name: "E"}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"enum E { A @attr B C }",
 			ast.AST{
 				Enums: []ast.EnumDecl{{
@@ -61,13 +61,13 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"type T",
 			ast.AST{
 				Types: []ast.TypeDecl{{Name: "T"}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"type T<A, B, C>",
 			ast.AST{
 				Types: []ast.TypeDecl{{
@@ -80,7 +80,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"@attr type T",
 			ast.AST{
 				Types: []ast.TypeDecl{{
@@ -91,7 +91,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"@attr_a @attr_b type T",
 			ast.AST{
 				Types: []ast.TypeDecl{{
@@ -103,7 +103,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			`@attr("a", "b") type T`, ast.AST{
 				Types: []ast.TypeDecl{{
 					Attributes: ast.Attributes{
@@ -113,7 +113,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			`@attr(1, "x", 2.0) type T`, ast.AST{
 				Types: []ast.TypeDecl{{
 					Attributes: ast.Attributes{
@@ -123,7 +123,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"match M : A",
 			ast.AST{
 				Matchers: []ast.MatcherDecl{{
@@ -136,7 +136,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"match M : A | B",
 			ast.AST{
 				Matchers: []ast.MatcherDecl{{
@@ -150,7 +150,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"match M : A.B",
 			ast.AST{
 				Matchers: []ast.MatcherDecl{{
@@ -163,7 +163,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"match M : A.B | B.C",
 			ast.AST{
 				Matchers: []ast.MatcherDecl{{
@@ -177,7 +177,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"fn F()",
 			ast.AST{
 				Builtins: []ast.IntrinsicDecl{{
@@ -187,7 +187,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"@attr fn F()",
 			ast.AST{
 				Builtins: []ast.IntrinsicDecl{{
@@ -200,7 +200,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"fn F(a)",
 			ast.AST{
 				Builtins: []ast.IntrinsicDecl{{
@@ -212,7 +212,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"fn F(a: T)",
 			ast.AST{
 				Builtins: []ast.IntrinsicDecl{{
@@ -224,7 +224,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"fn F(a, b)",
 			ast.AST{
 				Builtins: []ast.IntrinsicDecl{{
@@ -237,7 +237,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"fn F<A : B<C> >()",
 			ast.AST{
 				Builtins: []ast.IntrinsicDecl{{
@@ -257,7 +257,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"fn F<T>(a: X, b: Y<T>)",
 			ast.AST{
 				Builtins: []ast.IntrinsicDecl{{
@@ -276,7 +276,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"fn F() -> X",
 			ast.AST{
 				Builtins: []ast.IntrinsicDecl{{
@@ -287,7 +287,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"fn F() -> X<T>",
 			ast.AST{
 				Builtins: []ast.IntrinsicDecl{{
@@ -301,7 +301,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"op F()",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{
@@ -311,7 +311,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"@attr op F()",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{
@@ -324,7 +324,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"op F(a)",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{
@@ -336,7 +336,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"op F(@blah a)",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{
@@ -350,7 +350,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"op F(a: T)",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{
@@ -362,7 +362,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"op F(a, b)",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{
@@ -375,7 +375,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"op F<A : B<C> >()",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{
@@ -395,7 +395,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"op F<T>(a: X, b: Y<T>)",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{
@@ -414,7 +414,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"op F() -> X",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{
@@ -425,7 +425,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"op F() -> X<T>",
 			ast.AST{
 				Operators: []ast.IntrinsicDecl{{
@@ -439,7 +439,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"init F()",
 			ast.AST{
 				Initializers: []ast.IntrinsicDecl{{
@@ -449,7 +449,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"@attr init F()",
 			ast.AST{
 				Initializers: []ast.IntrinsicDecl{{
@@ -462,7 +462,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"init F(a)",
 			ast.AST{
 				Initializers: []ast.IntrinsicDecl{{
@@ -474,7 +474,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"init F(a: T)",
 			ast.AST{
 				Initializers: []ast.IntrinsicDecl{{
@@ -486,7 +486,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"init F(a, b)",
 			ast.AST{
 				Initializers: []ast.IntrinsicDecl{{
@@ -499,7 +499,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"init F<A : B<C> >()",
 			ast.AST{
 				Initializers: []ast.IntrinsicDecl{{
@@ -519,7 +519,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"init F<T>(a: X, b: Y<T>)",
 			ast.AST{
 				Initializers: []ast.IntrinsicDecl{{
@@ -538,7 +538,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"init F() -> X",
 			ast.AST{
 				Initializers: []ast.IntrinsicDecl{{
@@ -549,7 +549,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"init F() -> X<T>",
 			ast.AST{
 				Initializers: []ast.IntrinsicDecl{{
@@ -563,7 +563,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"conv F()",
 			ast.AST{
 				Converters: []ast.IntrinsicDecl{{
@@ -573,7 +573,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"@attr conv F()",
 			ast.AST{
 				Converters: []ast.IntrinsicDecl{{
@@ -586,7 +586,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"conv F(a)",
 			ast.AST{
 				Converters: []ast.IntrinsicDecl{{
@@ -598,7 +598,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"conv F(a: T)",
 			ast.AST{
 				Converters: []ast.IntrinsicDecl{{
@@ -610,7 +610,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"conv F(a, b)",
 			ast.AST{
 				Converters: []ast.IntrinsicDecl{{
@@ -623,7 +623,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"conv F<A : B<C> >()",
 			ast.AST{
 				Converters: []ast.IntrinsicDecl{{
@@ -643,7 +643,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"conv F<T>(a: X, b: Y<T>)",
 			ast.AST{
 				Converters: []ast.IntrinsicDecl{{
@@ -662,7 +662,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"conv F() -> X",
 			ast.AST{
 				Converters: []ast.IntrinsicDecl{{
@@ -673,7 +673,7 @@ func TestParser(t *testing.T) {
 				}},
 			},
 		}, { ///////////////////////////////////////////////////////////////////
-			utils.ThisLine(),
+			fileutils.ThisLine(),
 			"conv F() -> X<T>",
 			ast.AST{
 				Converters: []ast.IntrinsicDecl{{

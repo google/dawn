@@ -112,7 +112,7 @@ func (p *Permuter) Permute(overload *sem.Overload) ([]Permutation, error) {
 		// Check for hash collisions
 		if existing, collision := hashes[shortHash]; collision {
 			return fmt.Errorf("hash '%v' collision between %v and %v\nIncrease hashLength in %v",
-				shortHash, existing, desc, fileutils.GoSourcePath())
+				shortHash, existing, desc, fileutils.ThisLine())
 		}
 		hashes[shortHash] = desc
 		return nil

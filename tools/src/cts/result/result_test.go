@@ -22,7 +22,7 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/container"
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
-	"dawn.googlesource.com/dawn/tools/src/utils"
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -325,7 +325,7 @@ func TestReplaceDuplicates(t *testing.T) {
 	}
 	for _, test := range []Test{
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			results: result.List{
 				result.Result{Query: Q(`a`), Status: result.Pass, Duration: 1},
 			},
@@ -337,7 +337,7 @@ func TestReplaceDuplicates(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			results: result.List{
 				result.Result{Query: Q(`a`), Status: result.Pass, Duration: 1},
 				result.Result{Query: Q(`a`), Status: result.Pass, Duration: 3},
@@ -350,7 +350,7 @@ func TestReplaceDuplicates(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			results: result.List{
 				result.Result{Query: Q(`a`), Status: result.Pass},
 				result.Result{Query: Q(`b`), Status: result.Pass},
@@ -364,7 +364,7 @@ func TestReplaceDuplicates(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			results: result.List{
 				result.Result{Query: Q(`a`), Status: result.Pass},
 				result.Result{Query: Q(`b`), Status: result.Pass},
@@ -383,7 +383,7 @@ func TestReplaceDuplicates(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			results: result.List{
 				result.Result{Query: Q(`a`), Status: result.Failure, Duration: 1, MayExonerate: true},
 				result.Result{Query: Q(`a`), Status: result.Failure, Duration: 3, MayExonerate: true},
@@ -1070,13 +1070,13 @@ func TestMerge(t *testing.T) {
 	}
 	for _, test := range []Test{
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			a:        result.List{},
 			b:        result.List{},
 			expect:   result.List{},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			a: result.List{
 				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
 			},
@@ -1086,7 +1086,7 @@ func TestMerge(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			a:        result.List{},
 			b: result.List{
 				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
@@ -1096,7 +1096,7 @@ func TestMerge(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			a: result.List{
 				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
 			},
@@ -1109,7 +1109,7 @@ func TestMerge(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			a: result.List{
 				{Query: Q(`suite:b:*`), Tags: T(`x`), Status: result.Pass},
 			},
@@ -1122,7 +1122,7 @@ func TestMerge(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			a: result.List{
 				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
 			},
@@ -1135,7 +1135,7 @@ func TestMerge(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			a: result.List{
 				{Query: Q(`suite:a:*`), Status: result.Pass},
 			},
@@ -1147,7 +1147,7 @@ func TestMerge(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			a: result.List{
 				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
 			},
@@ -1159,7 +1159,7 @@ func TestMerge(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			a: result.List{
 				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Crash},
 			},
@@ -1171,7 +1171,7 @@ func TestMerge(t *testing.T) {
 			},
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			a: result.List{
 				{Query: Q(`suite:a:*`), Tags: T(`x`), Status: result.Pass},
 				{Query: Q(`suite:b:*`), Tags: T(`x`), Status: result.Pass},
@@ -1211,82 +1211,82 @@ func TestDeduplicate(t *testing.T) {
 	}
 	for _, test := range []Test{
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			statuses: result.NewStatuses(result.Pass),
 			expect:   result.Pass,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			statuses: result.NewStatuses(result.Abort),
 			expect:   result.Abort,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			statuses: result.NewStatuses(result.Failure),
 			expect:   result.Failure,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			statuses: result.NewStatuses(result.Skip),
 			expect:   result.Skip,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			statuses: result.NewStatuses(result.Crash),
 			expect:   result.Crash,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			statuses: result.NewStatuses(result.Slow),
 			expect:   result.Slow,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			statuses: result.NewStatuses(result.Unknown),
 			expect:   result.Unknown,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			statuses: result.NewStatuses(result.RetryOnFailure),
 			expect:   result.RetryOnFailure,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			statuses: result.NewStatuses(result.Pass, result.Failure),
 			expect:   result.RetryOnFailure,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			statuses: result.NewStatuses(result.Pass, result.Abort),
 			expect:   result.Abort,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			statuses: result.NewStatuses(result.Pass, result.Skip),
 			expect:   result.RetryOnFailure,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			statuses: result.NewStatuses(result.Pass, result.Crash),
 			expect:   result.Crash,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			statuses: result.NewStatuses(result.Pass, result.Slow),
 			expect:   result.RetryOnFailure,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			statuses: result.NewStatuses(result.Pass, result.Unknown),
 			expect:   result.Unknown,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			statuses: result.NewStatuses(result.Pass, result.RetryOnFailure),
 			expect:   result.RetryOnFailure,
 		},
 		{ //////////////////////////////////////////////////////////////////////
-			location: utils.ThisLine(),
+			location: fileutils.ThisLine(),
 			statuses: result.NewStatuses(result.Status("??"), result.Status("?!")),
 			expect:   result.Unknown,
 		},

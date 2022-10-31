@@ -56,14 +56,15 @@ func showUsage() {
 	fmt.Println(`
 gen generates the templated code for the Tint compiler
 
-gen scans the project directory for '<file>.tmpl' files, to produce source code
-files.
+gen accepts a list of file paths to the templates to generate. If no templates
+are explicitly specified, then gen scans the '<dawn>/src/tint' and
+'<dawn>/test/tint' directories for '<file>.tmpl' files.
 
 If the templates use the 'IntrinsicTable' function then gen will parse and
 resolve the <tint>/src/tint/intrinsics.def file.
 
 usage:
-  gen
+  gen [flags] [template files]
 
 optional flags:`)
 	flag.PrintDefaults()
@@ -72,7 +73,13 @@ optional flags:`)
 }
 
 func run() error {
-	projectRoot := fileutils.ProjectRoot()
+	outputDir := ""
+	verbose := false
+	flag.StringVar(&outputDir, "o", "", "custom output directory (optional)")
+	flag.BoolVar(&verbose, "verbose", false, "print verbose output")
+	flag.Parse()
+
+	projectRoot := fileutils.DawnRoot()
 
 	// Find clang-format
 	clangFormatPath := findClangFormat(projectRoot)
@@ -80,23 +87,48 @@ func run() error {
 		return fmt.Errorf("cannot find clang-format in <dawn>/buildtools nor PATH")
 	}
 
-	// Recursively find all the template files in the <tint>/src directory
-	files, err := glob.Scan(projectRoot, glob.MustParseConfig(`{
-		"paths": [{"include": [
-			"src/tint/**.tmpl",
-			"test/tint/**.tmpl"
-		]}]
-	}`))
-	if err != nil {
-		return err
+	files := flag.Args()
+	if len(files) == 0 {
+		// Recursively find all the template files in the <dawn>/src/tint and
+		// <dawn>/test/tint and directories
+		var err error
+		files, err = glob.Scan(projectRoot, glob.MustParseConfig(`{
+			"paths": [{"include": [
+				"src/tint/**.tmpl",
+				"test/tint/**.tmpl"
+			]}]
+		}`))
+		if err != nil {
+			return err
+		}
+	} else {
+		// Make all template file paths project-relative
+		for i, f := range files {
+			abs, err := filepath.Abs(f)
+			if err != nil {
+				return fmt.Errorf("failed to get absolute file path for '%v': %w", f, err)
+			}
+			if !strings.HasPrefix(abs, projectRoot) {
+				return fmt.Errorf("template '%v' is not under project root '%v'", abs, projectRoot)
+			}
+			rel, err := filepath.Rel(projectRoot, abs)
+			if err != nil {
+				return fmt.Errorf("failed to get project relative file path for '%v': %w", f, err)
+			}
+			files[i] = rel
+		}
 	}
 
 	cache := &genCache{}
 
 	// For each template file...
-	for _, relTmplPath := range files {
+	for _, relTmplPath := range files { // relative to project root
+		if verbose {
+			fmt.Println("processing", relTmplPath)
+		}
 		// Make tmplPath absolute
 		tmplPath := filepath.Join(projectRoot, relTmplPath)
+		tmplDir := filepath.Dir(tmplPath)
 
 		// Read the template file
 		tmpl, err := ioutil.ReadFile(tmplPath)
@@ -104,16 +136,22 @@ func run() error {
 			return fmt.Errorf("failed to open '%v': %w", tmplPath, err)
 		}
 
-		// Create or update the file at relpath if the file content has changed,
+		// Create or update the file at relPath if the file content has changed,
 		// preserving the copyright year in the header.
-		// relpath is a path relative to the template
-		writeFile := func(relpath, body string) error {
-			abspath := filepath.Join(filepath.Dir(tmplPath), relpath)
+		// relPath is a path relative to the template
+		writeFile := func(relPath, body string) error {
+			var outPath string
+			if outputDir != "" {
+				relTmplDir := filepath.Dir(relTmplPath)
+				outPath = filepath.Join(outputDir, relTmplDir, relPath)
+			} else {
+				outPath = filepath.Join(tmplDir, relPath)
+			}
 
 			copyrightYear := time.Now().Year()
 
 			// Load the old file
-			existing, err := ioutil.ReadFile(abspath)
+			existing, err := ioutil.ReadFile(outPath)
 			if err == nil {
 				// Look for the existing copyright year
 				if match := copyrightRegex.FindStringSubmatch(string(existing)); len(match) == 2 {
@@ -124,11 +162,14 @@ func run() error {
 			}
 
 			// Write the common file header
+			if verbose {
+				fmt.Println("  writing", outPath)
+			}
 			sb := strings.Builder{}
 			sb.WriteString(fmt.Sprintf(header, copyrightYear, filepath.ToSlash(relTmplPath)))
 			sb.WriteString(body)
 			content := sb.String()
-			return writeFileIfChanged(abspath, content, string(existing))
+			return writeFileIfChanged(outPath, content, string(existing))
 		}
 
 		// Write the content generated using the template and semantic info
@@ -171,7 +212,7 @@ type genCache struct {
 func (g *genCache) sem() (*sem.Sem, error) {
 	if g.cached.sem == nil {
 		// Load the builtins definition file
-		defPath := filepath.Join(fileutils.ProjectRoot(), defProjectRelPath)
+		defPath := filepath.Join(fileutils.DawnRoot(), defProjectRelPath)
 
 		defSource, err := ioutil.ReadFile(defPath)
 		if err != nil {
@@ -276,9 +317,9 @@ type generator struct {
 
 // WriteFile is a function that Generate() may call to emit a new file from a
 // template.
-// relpath is the relative path from the currently executing template.
+// relPath is the relative path from the currently executing template.
 // content is the file content to write.
-type WriteFile func(relpath, content string) error
+type WriteFile func(relPath, content string) error
 
 // generate executes the template tmpl, writing the output to w.
 // See https://golang.org/pkg/text/template/ for documentation on the template
@@ -332,7 +373,7 @@ func (g *generator) bindAndParse(t *template.Template, text string) error {
 		"Permute":               g.cache.permute,
 		"Eval":                  g.eval,
 		"Import":                g.importTmpl,
-		"WriteFile":             func(relpath, content string) (string, error) { return "", g.writeFile(relpath, content) },
+		"WriteFile":             func(relPath, content string) (string, error) { return "", g.writeFile(relPath, content) },
 	}).Option("missingkey=error").Parse(text)
 	return err
 }
@@ -377,7 +418,7 @@ func (g *generator) importTmpl(path string) (string, error) {
 	if strings.Contains(path, "..") {
 		return "", fmt.Errorf("import path must not contain '..'")
 	}
-	path = filepath.Join(fileutils.ProjectRoot(), path)
+	path = filepath.Join(fileutils.DawnRoot(), path)
 	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", fmt.Errorf("failed to open '%v': %w", path, err)

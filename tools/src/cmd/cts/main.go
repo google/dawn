@@ -24,8 +24,8 @@ import (
 	"path/filepath"
 
 	"dawn.googlesource.com/dawn/tools/src/cmd/cts/common"
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/subcmd"
-	"dawn.googlesource.com/dawn/tools/src/utils"
 
 	// Register sub-commands
 	_ "dawn.googlesource.com/dawn/tools/src/cmd/cts/export"
@@ -41,7 +41,7 @@ import (
 func main() {
 	ctx := context.Background()
 
-	cfg, err := common.LoadConfig(filepath.Join(utils.ThisDir(), "config.json"))
+	cfg, err := common.LoadConfig(filepath.Join(fileutils.ThisDir(), "config.json"))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

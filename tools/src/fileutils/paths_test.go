@@ -12,39 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package utils_test
+package fileutils_test
 
 import (
 	"path/filepath"
 	"strings"
 	"testing"
 
-	"dawn.googlesource.com/dawn/tools/src/utils"
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"github.com/google/go-cmp/cmp"
 )
 
 func TestThisLine(t *testing.T) {
-	td := utils.ThisLine()
+	td := fileutils.ThisLine()
 	if !strings.HasSuffix(td, "paths_test.go:27") {
 		t.Errorf("TestThisLine() returned %v", td)
 	}
 }
 
 func TestThisDir(t *testing.T) {
-	td := utils.ThisDir()
+	td := fileutils.ThisDir()
 	if !strings.HasSuffix(td, "utils") {
 		t.Errorf("ThisDir() returned %v", td)
 	}
 }
 
 func TestDawnRoot(t *testing.T) {
-	dr := utils.DawnRoot()
-	rel, err := filepath.Rel(dr, utils.ThisDir())
+	dr := fileutils.DawnRoot()
+	rel, err := filepath.Rel(dr, fileutils.ThisDir())
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
 	got := filepath.ToSlash(rel)
-	expect := `tools/src/utils`
+	expect := `tools/src/fileutils`
 	if diff := cmp.Diff(got, expect); diff != "" {
 		t.Errorf("DawnRoot() returned %v.\n%v", dr, diff)
 	}

@@ -29,10 +29,10 @@ import (
 	"dawn.googlesource.com/dawn/tools/src/buildbucket"
 	"dawn.googlesource.com/dawn/tools/src/cts/query"
 	"dawn.googlesource.com/dawn/tools/src/cts/result"
+	"dawn.googlesource.com/dawn/tools/src/fileutils"
 	"dawn.googlesource.com/dawn/tools/src/gerrit"
 	"dawn.googlesource.com/dawn/tools/src/resultsdb"
 	"dawn.googlesource.com/dawn/tools/src/subcmd"
-	"dawn.googlesource.com/dawn/tools/src/utils"
 	"go.chromium.org/luci/auth"
 	rdbpb "go.chromium.org/luci/resultdb/proto/v1"
 )
@@ -154,7 +154,7 @@ func CacheResults(
 
 	var cachePath string
 	if cacheDir != "" {
-		dir := utils.ExpandHome(cacheDir)
+		dir := fileutils.ExpandHome(cacheDir)
 		path := filepath.Join(dir, strconv.Itoa(ps.Change), fmt.Sprintf("ps-%v.txt", ps.Patchset))
 		if _, err := os.Stat(path); err == nil {
 			return result.Load(path)
