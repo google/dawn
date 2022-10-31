@@ -1069,6 +1069,55 @@ int main(int argc, const char** argv) {
              m.Add<tint::transform::SubstituteOverride>();
              return true;
          }},
+        {"multiplaner_external_texture",
+         [](tint::inspector::Inspector& inspector, tint::transform::Manager& m,
+            tint::transform::DataMap& i) {
+             using MET = tint::transform::MultiplanarExternalTexture;
+
+             // Generate the MultiplanarExternalTexture::NewBindingPoints by finding two free
+             // binding points. We may wish to expose these binding points via a command line flag
+             // in the future.
+
+             // Set of all the group-0 bindings in use.
+             std::unordered_set<uint32_t> group0_bindings_in_use;
+             auto allocate_binding = [&] {
+                 for (uint32_t i = 0;; i++) {
+                     auto binding = tint::transform::BindingPoint{0u, i};
+                     if (group0_bindings_in_use.emplace(i).second) {
+                         return binding;
+                     }
+                 }
+             };
+             // Populate group0_bindings_in_use with the existing bindings across all entry points.
+             for (auto ep : inspector.GetEntryPoints()) {
+                 for (auto binding : inspector.GetResourceBindings(ep.name)) {
+                     if (binding.bind_group == 0) {
+                         group0_bindings_in_use.emplace(binding.binding);
+                     }
+                 }
+             }
+             // Allocate new binding points for the external texture's planes and parameters.
+             MET::BindingsMap met_bindings;
+             for (auto ep : inspector.GetEntryPoints()) {
+                 for (auto ext_tex : inspector.GetExternalTextureResourceBindings(ep.name)) {
+                     auto binding = tint::transform::BindingPoint{
+                         ext_tex.bind_group,
+                         ext_tex.binding,
+                     };
+                     if (met_bindings.count(binding)) {
+                         continue;
+                     }
+                     met_bindings.emplace(binding, MET::BindingPoints{
+                                                       /* plane_1 */ allocate_binding(),
+                                                       /* params */ allocate_binding(),
+                                                   });
+                 }
+             }
+
+             i.Add<MET::NewBindingPoints>(std::move(met_bindings));
+             m.Add<MET>();
+             return true;
+         }},
     };
     auto transform_names = [&] {
         std::stringstream names;
