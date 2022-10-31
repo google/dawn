@@ -681,6 +681,39 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               FirstLeadingBitCases<u32>()))));
 
 template <typename T>
+std::vector<Case> FirstTrailingBitCases() {
+    using B = BitValues<T>;
+    auto r = std::vector<Case>{
+        C({T(0)}, T(-1)),
+
+        C({B::Lsh(1, 31)}, T(31)),  //
+        C({B::Lsh(1, 30)}, T(30)),  //
+        C({B::Lsh(1, 29)}, T(29)),  //
+        C({B::Lsh(1, 28)}, T(28)),
+        //...
+        C({B::Lsh(1, 3)}, T(3)),  //
+        C({B::Lsh(1, 2)}, T(2)),  //
+        C({B::Lsh(1, 1)}, T(1)),  //
+        C({B::Lsh(1, 0)}, T(0)),
+
+        C({T(0b0000'0000'0100'1000'1000'1000'0000'0000)}, T(11)),
+        C({T(0b0000'0100'1000'1000'1000'0000'0000'0000)}, T(15)),
+
+        // Vector tests
+        C({Vec(B::Lsh(1, 31), B::Lsh(1, 30), B::Lsh(1, 29))}, Vec(T(31), T(30), T(29))),
+        C({Vec(B::Lsh(1, 2), B::Lsh(1, 1), B::Lsh(1, 0))}, Vec(T(2), T(1), T(0))),
+    };
+
+    return r;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    FirstTrailingBit,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kFirstTrailingBit),
+                     testing::ValuesIn(Concat(FirstTrailingBitCases<i32>(),  //
+                                              FirstTrailingBitCases<u32>()))));
+
+template <typename T>
 std::vector<Case> SaturateCases() {
     return {
         C({T(0)}, T(0)),

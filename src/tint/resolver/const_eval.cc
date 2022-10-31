@@ -209,6 +209,23 @@ auto CountLeadingBits(T e, T bit_value_to_count) -> std::make_unsigned_t<T> {
     return count;
 }
 
+/// @returns the number of consecutive trailing bits set to `@p bit_value_to_count` in `@p e`
+template <typename T>
+auto CountTrailingBits(T e, T bit_value_to_count) -> std::make_unsigned_t<T> {
+    using UT = std::make_unsigned_t<T>;
+    constexpr UT kNumBits = sizeof(UT) * 8;
+    constexpr UT kRightMost = UT{1};
+    const UT b = static_cast<UT>(bit_value_to_count);
+
+    auto v = static_cast<UT>(e);
+    auto count = UT{0};
+    while ((count < kNumBits) && ((v & kRightMost) == b)) {
+        ++count;
+        v >>= 1;
+    }
+    return count;
+}
+
 /// ImplConstant inherits from sem::Constant to add an private implementation method for conversion.
 struct ImplConstant : public sem::Constant {
     /// Convert attempts to convert the constant value to the given type. On error, Convert()
@@ -1695,17 +1712,7 @@ ConstEval::Result ConstEval::countTrailingZeros(const sem::Type* ty,
         auto create = [&](auto e) {
             using NumberT = decltype(e);
             using T = UnwrapNumber<NumberT>;
-            using UT = std::make_unsigned_t<T>;
-            constexpr UT kNumBits = sizeof(UT) * 8;
-            constexpr UT kRightMost = UT{1};
-
-            auto v = static_cast<UT>(e);
-            auto count = UT{0};
-            while ((count < kNumBits) && ((v & kRightMost) == 0)) {
-                ++count;
-                v >>= 1;
-            }
-
+            auto count = CountTrailingBits(T{e}, T{0});
             return CreateElement(builder, c0->Type(), NumberT(count));
         };
         return Dispatch_iu32(create, c0);
@@ -1748,6 +1755,32 @@ ConstEval::Result ConstEval::firstLeadingBit(const sem::Type* ty,
                     UT pos = kNumBits - count - 1;
                     result = NumberT(pos);
                 }
+            }
+
+            return CreateElement(builder, c0->Type(), result);
+        };
+        return Dispatch_iu32(create, c0);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
+ConstEval::Result ConstEval::firstTrailingBit(const sem::Type* ty,
+                                              utils::VectorRef<const sem::Constant*> args,
+                                              const Source&) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto e) {
+            using NumberT = decltype(e);
+            using T = UnwrapNumber<NumberT>;
+            using UT = std::make_unsigned_t<T>;
+
+            NumberT result;
+            if (e == T{0}) {
+                // T(-1) if e is zero.
+                result = NumberT(static_cast<T>(-1));
+            } else {
+                // Otherwise the position of the least significant 1 bit in e.
+                UT pos = CountTrailingBits(T{e}, T{0});
+                result = NumberT(pos);
             }
 
             return CreateElement(builder, c0->Type(), result);

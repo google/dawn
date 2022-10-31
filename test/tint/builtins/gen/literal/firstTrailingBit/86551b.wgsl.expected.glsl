@@ -1,22 +1,7 @@
 #version 310 es
 
-ivec4 tint_first_trailing_bit(ivec4 v) {
-  uvec4 x = uvec4(v);
-  uvec4 b16 = mix(uvec4(16u), uvec4(0u), bvec4((x & uvec4(65535u))));
-  x = (x >> b16);
-  uvec4 b8 = mix(uvec4(8u), uvec4(0u), bvec4((x & uvec4(255u))));
-  x = (x >> b8);
-  uvec4 b4 = mix(uvec4(4u), uvec4(0u), bvec4((x & uvec4(15u))));
-  x = (x >> b4);
-  uvec4 b2 = mix(uvec4(2u), uvec4(0u), bvec4((x & uvec4(3u))));
-  x = (x >> b2);
-  uvec4 b1 = mix(uvec4(1u), uvec4(0u), bvec4((x & uvec4(1u))));
-  uvec4 is_zero = mix(uvec4(0u), uvec4(4294967295u), equal(x, uvec4(0u)));
-  return ivec4((((((b16 | b8) | b4) | b2) | b1) | is_zero));
-}
-
 void firstTrailingBit_86551b() {
-  ivec4 res = tint_first_trailing_bit(ivec4(1));
+  ivec4 res = ivec4(0);
 }
 
 vec4 vertex_main() {
@@ -35,23 +20,8 @@ void main() {
 #version 310 es
 precision mediump float;
 
-ivec4 tint_first_trailing_bit(ivec4 v) {
-  uvec4 x = uvec4(v);
-  uvec4 b16 = mix(uvec4(16u), uvec4(0u), bvec4((x & uvec4(65535u))));
-  x = (x >> b16);
-  uvec4 b8 = mix(uvec4(8u), uvec4(0u), bvec4((x & uvec4(255u))));
-  x = (x >> b8);
-  uvec4 b4 = mix(uvec4(4u), uvec4(0u), bvec4((x & uvec4(15u))));
-  x = (x >> b4);
-  uvec4 b2 = mix(uvec4(2u), uvec4(0u), bvec4((x & uvec4(3u))));
-  x = (x >> b2);
-  uvec4 b1 = mix(uvec4(1u), uvec4(0u), bvec4((x & uvec4(1u))));
-  uvec4 is_zero = mix(uvec4(0u), uvec4(4294967295u), equal(x, uvec4(0u)));
-  return ivec4((((((b16 | b8) | b4) | b2) | b1) | is_zero));
-}
-
 void firstTrailingBit_86551b() {
-  ivec4 res = tint_first_trailing_bit(ivec4(1));
+  ivec4 res = ivec4(0);
 }
 
 void fragment_main() {
@@ -64,23 +34,8 @@ void main() {
 }
 #version 310 es
 
-ivec4 tint_first_trailing_bit(ivec4 v) {
-  uvec4 x = uvec4(v);
-  uvec4 b16 = mix(uvec4(16u), uvec4(0u), bvec4((x & uvec4(65535u))));
-  x = (x >> b16);
-  uvec4 b8 = mix(uvec4(8u), uvec4(0u), bvec4((x & uvec4(255u))));
-  x = (x >> b8);
-  uvec4 b4 = mix(uvec4(4u), uvec4(0u), bvec4((x & uvec4(15u))));
-  x = (x >> b4);
-  uvec4 b2 = mix(uvec4(2u), uvec4(0u), bvec4((x & uvec4(3u))));
-  x = (x >> b2);
-  uvec4 b1 = mix(uvec4(1u), uvec4(0u), bvec4((x & uvec4(1u))));
-  uvec4 is_zero = mix(uvec4(0u), uvec4(4294967295u), equal(x, uvec4(0u)));
-  return ivec4((((((b16 | b8) | b4) | b2) | b1) | is_zero));
-}
-
 void firstTrailingBit_86551b() {
-  ivec4 res = tint_first_trailing_bit(ivec4(1));
+  ivec4 res = ivec4(0);
 }
 
 void compute_main() {

@@ -1,23 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-uint3 tint_first_trailing_bit(uint3 v) {
-  uint3 x = uint3(v);
-  uint3 const b16 = select(uint3(16u), uint3(0u), bool3((x & uint3(65535u))));
-  x = (x >> b16);
-  uint3 const b8 = select(uint3(8u), uint3(0u), bool3((x & uint3(255u))));
-  x = (x >> b8);
-  uint3 const b4 = select(uint3(4u), uint3(0u), bool3((x & uint3(15u))));
-  x = (x >> b4);
-  uint3 const b2 = select(uint3(2u), uint3(0u), bool3((x & uint3(3u))));
-  x = (x >> b2);
-  uint3 const b1 = select(uint3(1u), uint3(0u), bool3((x & uint3(1u))));
-  uint3 const is_zero = select(uint3(0u), uint3(4294967295u), (x == uint3(0u)));
-  return uint3((((((b16 | b8) | b4) | b2) | b1) | is_zero));
-}
-
 void firstTrailingBit_cb51ce() {
-  uint3 res = tint_first_trailing_bit(uint3(1u));
+  uint3 res = uint3(0u);
 }
 
 struct tint_symbol {
