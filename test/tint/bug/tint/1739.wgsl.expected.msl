@@ -57,11 +57,19 @@ float4 textureLoadExternal(texture2d<float, access::sample> plane0, texture2d<fl
   return float4(color, 1.0f);
 }
 
-kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_1 [[texture(0)]], texture2d<float, access::sample> tint_symbol_2 [[texture(1)]], const constant ExternalTextureParams* tint_symbol_3 [[buffer(0)]], texture2d<float, access::write> tint_symbol_4 [[texture(2)]]) {
-  float4 red = textureLoadExternal(tint_symbol_1, tint_symbol_2, clamp(int2(10), int2(0), int2((uint2(uint2(tint_symbol_1.get_width(), tint_symbol_1.get_height())) - uint2(1u)))), *(tint_symbol_3));
-  tint_symbol_4.write(red, uint2(clamp(int2(0), int2(0), int2((uint2(uint2(tint_symbol_4.get_width(), tint_symbol_4.get_height())) - uint2(1u))))));
-  float4 green = textureLoadExternal(tint_symbol_1, tint_symbol_2, clamp(int2(70, 118), int2(0), int2((uint2(uint2(tint_symbol_1.get_width(), tint_symbol_1.get_height())) - uint2(1u)))), *(tint_symbol_3));
-  tint_symbol_4.write(green, uint2(clamp(int2(1, 0), int2(0), int2((uint2(uint2(tint_symbol_4.get_width(), tint_symbol_4.get_height())) - uint2(1u))))));
+int2 tint_clamp(int2 e, int2 low, int2 high) {
+  return min(max(e, low), high);
+}
+
+kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_5 [[texture(0)]], texture2d<float, access::sample> tint_symbol_6 [[texture(1)]], const constant ExternalTextureParams* tint_symbol_7 [[buffer(0)]], texture2d<float, access::write> tint_symbol_8 [[texture(2)]]) {
+  int2 const tint_symbol_1 = tint_clamp(int2(10), int2(0), int2((uint2(uint2(tint_symbol_5.get_width(), tint_symbol_5.get_height())) - uint2(1u))));
+  float4 red = textureLoadExternal(tint_symbol_5, tint_symbol_6, tint_symbol_1, *(tint_symbol_7));
+  int2 const tint_symbol_2 = tint_clamp(int2(0), int2(0), int2((uint2(uint2(tint_symbol_8.get_width(), tint_symbol_8.get_height())) - uint2(1u))));
+  tint_symbol_8.write(red, uint2(tint_symbol_2));
+  int2 const tint_symbol_3 = tint_clamp(int2(70, 118), int2(0), int2((uint2(uint2(tint_symbol_5.get_width(), tint_symbol_5.get_height())) - uint2(1u))));
+  float4 green = textureLoadExternal(tint_symbol_5, tint_symbol_6, tint_symbol_3, *(tint_symbol_7));
+  int2 const tint_symbol_4 = tint_clamp(int2(1, 0), int2(0), int2((uint2(uint2(tint_symbol_8.get_width(), tint_symbol_8.get_height())) - uint2(1u))));
+  tint_symbol_8.write(green, uint2(tint_symbol_4));
   return;
 }
 

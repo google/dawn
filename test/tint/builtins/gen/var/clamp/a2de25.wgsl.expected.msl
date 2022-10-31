@@ -1,11 +1,15 @@
 #include <metal_stdlib>
 
 using namespace metal;
+uint tint_clamp(uint e, uint low, uint high) {
+  return min(max(e, low), high);
+}
+
 void clamp_a2de25() {
   uint arg_0 = 1u;
   uint arg_1 = 1u;
   uint arg_2 = 1u;
-  uint res = clamp(arg_0, arg_1, arg_2);
+  uint res = tint_clamp(arg_0, arg_1, arg_2);
 }
 
 struct tint_symbol {

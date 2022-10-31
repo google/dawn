@@ -1,8 +1,12 @@
+uint4 tint_clamp(uint4 e, uint4 low, uint4 high) {
+  return min(max(e, low), high);
+}
+
 void clamp_bd43ce() {
   uint4 arg_0 = (1u).xxxx;
   uint4 arg_1 = (1u).xxxx;
   uint4 arg_2 = (1u).xxxx;
-  uint4 res = clamp(arg_0, arg_1, arg_2);
+  uint4 res = tint_clamp(arg_0, arg_1, arg_2);
 }
 
 struct tint_symbol {

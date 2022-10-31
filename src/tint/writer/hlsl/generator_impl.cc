@@ -162,6 +162,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         polyfills.acosh = transform::BuiltinPolyfill::Level::kFull;
         polyfills.asinh = true;
         polyfills.atanh = transform::BuiltinPolyfill::Level::kFull;
+        polyfills.clamp_int = true;
         // TODO(crbug.com/tint/1449): Some of these can map to HLSL's `firstbitlow`
         // and `firstbithigh`.
         polyfills.count_leading_zeros = true;

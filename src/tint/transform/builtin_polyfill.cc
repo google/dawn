@@ -137,6 +137,27 @@ struct BuiltinPolyfill::State {
         return name;
     }
 
+    /// Builds the polyfill function for the `clamp` builtin when called with integer arguments
+    /// (scalar or vector)
+    /// @param ty the parameter and return type for the function
+    /// @return the polyfill function name
+    Symbol clampInteger(const sem::Type* ty) {
+        auto name = b.Symbols().New("tint_clamp");
+
+        b.Func(name,
+               utils::Vector{
+                   b.Param("e", T(ty)),
+                   b.Param("low", T(ty)),
+                   b.Param("high", T(ty)),
+               },
+               T(ty),
+               utils::Vector{
+                   // return min(max(e, low), high);
+                   b.Return(b.Call("min", b.Call("max", "e", "low"), "high")),
+               });
+        return name;
+    }
+
     /// Builds the polyfill function for the `countLeadingZeros` builtin
     /// @param ty the parameter and return type for the function
     /// @return the polyfill function name
@@ -588,6 +609,12 @@ bool BuiltinPolyfill::ShouldRun(const Program* program, const DataMap& data) con
                                 return true;
                             }
                             break;
+                        case sem::BuiltinType::kClamp:
+                            if (builtins.clamp_int) {
+                                auto& sig = builtin->Signature();
+                                return sig.parameters[0]->Type()->is_integer_scalar_or_vector();
+                            }
+                            break;
                         case sem::BuiltinType::kCountLeadingZeros:
                             if (builtins.count_leading_zeros) {
                                 return true;
@@ -677,6 +704,16 @@ void BuiltinPolyfill::Run(CloneContext& ctx, const DataMap& data, DataMap&) cons
                         if (builtins.atanh != Level::kNone) {
                             polyfill = utils::GetOrCreate(
                                 polyfills, builtin, [&] { return s.atanh(builtin->ReturnType()); });
+                        }
+                        break;
+                    case sem::BuiltinType::kClamp:
+                        if (builtins.clamp_int) {
+                            auto& sig = builtin->Signature();
+                            if (sig.parameters[0]->Type()->is_integer_scalar_or_vector()) {
+                                polyfill = utils::GetOrCreate(polyfills, builtin, [&] {
+                                    return s.clampInteger(builtin->ReturnType());
+                                });
+                            }
                         }
                         break;
                     case sem::BuiltinType::kCountLeadingZeros:

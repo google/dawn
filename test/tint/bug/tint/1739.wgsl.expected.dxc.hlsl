@@ -46,14 +46,18 @@ float4 textureLoadExternal(Texture2D<float4> plane0, Texture2D<float4> plane1, i
   return float4(color, 1.0f);
 }
 
-float3x4 tint_symbol_2(uint4 buffer[11], uint offset) {
+int2 tint_clamp(int2 e, int2 low, int2 high) {
+  return min(max(e, low), high);
+}
+
+float3x4 tint_symbol_6(uint4 buffer[11], uint offset) {
   const uint scalar_offset = ((offset + 0u)) / 4;
   const uint scalar_offset_1 = ((offset + 16u)) / 4;
   const uint scalar_offset_2 = ((offset + 32u)) / 4;
   return float3x4(asfloat(buffer[scalar_offset / 4]), asfloat(buffer[scalar_offset_1 / 4]), asfloat(buffer[scalar_offset_2 / 4]));
 }
 
-GammaTransferParams tint_symbol_4(uint4 buffer[11], uint offset) {
+GammaTransferParams tint_symbol_8(uint4 buffer[11], uint offset) {
   const uint scalar_offset_3 = ((offset + 0u)) / 4;
   const uint scalar_offset_4 = ((offset + 4u)) / 4;
   const uint scalar_offset_5 = ((offset + 8u)) / 4;
@@ -62,37 +66,41 @@ GammaTransferParams tint_symbol_4(uint4 buffer[11], uint offset) {
   const uint scalar_offset_8 = ((offset + 20u)) / 4;
   const uint scalar_offset_9 = ((offset + 24u)) / 4;
   const uint scalar_offset_10 = ((offset + 28u)) / 4;
-  const GammaTransferParams tint_symbol_8 = {asfloat(buffer[scalar_offset_3 / 4][scalar_offset_3 % 4]), asfloat(buffer[scalar_offset_4 / 4][scalar_offset_4 % 4]), asfloat(buffer[scalar_offset_5 / 4][scalar_offset_5 % 4]), asfloat(buffer[scalar_offset_6 / 4][scalar_offset_6 % 4]), asfloat(buffer[scalar_offset_7 / 4][scalar_offset_7 % 4]), asfloat(buffer[scalar_offset_8 / 4][scalar_offset_8 % 4]), asfloat(buffer[scalar_offset_9 / 4][scalar_offset_9 % 4]), buffer[scalar_offset_10 / 4][scalar_offset_10 % 4]};
-  return tint_symbol_8;
+  const GammaTransferParams tint_symbol_12 = {asfloat(buffer[scalar_offset_3 / 4][scalar_offset_3 % 4]), asfloat(buffer[scalar_offset_4 / 4][scalar_offset_4 % 4]), asfloat(buffer[scalar_offset_5 / 4][scalar_offset_5 % 4]), asfloat(buffer[scalar_offset_6 / 4][scalar_offset_6 % 4]), asfloat(buffer[scalar_offset_7 / 4][scalar_offset_7 % 4]), asfloat(buffer[scalar_offset_8 / 4][scalar_offset_8 % 4]), asfloat(buffer[scalar_offset_9 / 4][scalar_offset_9 % 4]), buffer[scalar_offset_10 / 4][scalar_offset_10 % 4]};
+  return tint_symbol_12;
 }
 
-float3x3 tint_symbol_6(uint4 buffer[11], uint offset) {
+float3x3 tint_symbol_10(uint4 buffer[11], uint offset) {
   const uint scalar_offset_11 = ((offset + 0u)) / 4;
   const uint scalar_offset_12 = ((offset + 16u)) / 4;
   const uint scalar_offset_13 = ((offset + 32u)) / 4;
   return float3x3(asfloat(buffer[scalar_offset_11 / 4].xyz), asfloat(buffer[scalar_offset_12 / 4].xyz), asfloat(buffer[scalar_offset_13 / 4].xyz));
 }
 
-ExternalTextureParams tint_symbol(uint4 buffer[11], uint offset) {
+ExternalTextureParams tint_symbol_4(uint4 buffer[11], uint offset) {
   const uint scalar_offset_14 = ((offset + 0u)) / 4;
   const uint scalar_offset_15 = ((offset + 4u)) / 4;
-  const ExternalTextureParams tint_symbol_9 = {buffer[scalar_offset_14 / 4][scalar_offset_14 % 4], buffer[scalar_offset_15 / 4][scalar_offset_15 % 4], tint_symbol_2(buffer, (offset + 16u)), tint_symbol_4(buffer, (offset + 64u)), tint_symbol_4(buffer, (offset + 96u)), tint_symbol_6(buffer, (offset + 128u))};
-  return tint_symbol_9;
+  const ExternalTextureParams tint_symbol_13 = {buffer[scalar_offset_14 / 4][scalar_offset_14 % 4], buffer[scalar_offset_15 / 4][scalar_offset_15 % 4], tint_symbol_6(buffer, (offset + 16u)), tint_symbol_8(buffer, (offset + 64u)), tint_symbol_8(buffer, (offset + 96u)), tint_symbol_10(buffer, (offset + 128u))};
+  return tint_symbol_13;
 }
 
 [numthreads(1, 1, 1)]
 void main() {
   int2 tint_tmp;
   t.GetDimensions(tint_tmp.x, tint_tmp.y);
-  float4 red = textureLoadExternal(t, ext_tex_plane_1, clamp((10).xx, (0).xx, int2((uint2(tint_tmp) - (1u).xx))), tint_symbol(ext_tex_params, 0u));
+  const int2 tint_symbol = tint_clamp((10).xx, (0).xx, int2((uint2(tint_tmp) - (1u).xx)));
+  float4 red = textureLoadExternal(t, ext_tex_plane_1, tint_symbol, tint_symbol_4(ext_tex_params, 0u));
   int2 tint_tmp_1;
   outImage.GetDimensions(tint_tmp_1.x, tint_tmp_1.y);
-  outImage[clamp((0).xx, (0).xx, int2((uint2(tint_tmp_1) - (1u).xx)))] = red;
+  const int2 tint_symbol_1 = tint_clamp((0).xx, (0).xx, int2((uint2(tint_tmp_1) - (1u).xx)));
+  outImage[tint_symbol_1] = red;
   int2 tint_tmp_2;
   t.GetDimensions(tint_tmp_2.x, tint_tmp_2.y);
-  float4 green = textureLoadExternal(t, ext_tex_plane_1, clamp(int2(70, 118), (0).xx, int2((uint2(tint_tmp_2) - (1u).xx))), tint_symbol(ext_tex_params, 0u));
+  const int2 tint_symbol_2 = tint_clamp(int2(70, 118), (0).xx, int2((uint2(tint_tmp_2) - (1u).xx)));
+  float4 green = textureLoadExternal(t, ext_tex_plane_1, tint_symbol_2, tint_symbol_4(ext_tex_params, 0u));
   int2 tint_tmp_3;
   outImage.GetDimensions(tint_tmp_3.x, tint_tmp_3.y);
-  outImage[clamp(int2(1, 0), (0).xx, int2((uint2(tint_tmp_3) - (1u).xx)))] = green;
+  const int2 tint_symbol_3 = tint_clamp(int2(1, 0), (0).xx, int2((uint2(tint_tmp_3) - (1u).xx)));
+  outImage[tint_symbol_3] = green;
   return;
 }

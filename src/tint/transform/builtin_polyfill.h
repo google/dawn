@@ -47,6 +47,8 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
         bool asinh = false;
         /// What level should `atanh` be polyfilled?
         Level atanh = Level::kNone;
+        /// Should `clamp()` be polyfilled for integer values (scalar or vector)?
+        bool clamp_int = false;
         /// Should `countLeadingZeros()` be polyfilled?
         bool count_leading_zeros = false;
         /// Should `countTrailingZeros()` be polyfilled?

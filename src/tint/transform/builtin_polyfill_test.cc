@@ -399,6 +399,173 @@ fn f() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// clampInteger
+////////////////////////////////////////////////////////////////////////////////
+DataMap polyfillClampInteger() {
+    BuiltinPolyfill::Builtins builtins;
+    builtins.clamp_int = true;
+    DataMap data;
+    data.Add<BuiltinPolyfill::Config>(builtins);
+    return data;
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunClampInteger_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 1i;
+  clamp(v, 2i, 3i);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillClampInteger()));
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunClampInteger_u32) {
+    auto* src = R"(
+fn f() {
+  let v = 1u;
+  clamp(v, 2u, 3u);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillClampInteger()));
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunClampInteger_f32) {
+    auto* src = R"(
+fn f() {
+  let v = 1f;
+  clamp(v, 2f, 3f);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillClampInteger()));
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunClampInteger_f16) {
+    auto* src = R"(
+enable f16;
+
+fn f() {
+  let v = 1h;
+  clamp(v, 2h, 3h);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillClampInteger()));
+}
+
+TEST_F(BuiltinPolyfillTest, ClampInteger_ConstantExpression) {
+    auto* src = R"(
+fn f() {
+  let r : i32 = clamp(1i, 2i, 3i);
+}
+)";
+
+    auto* expect = src;
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillClampInteger());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, ClampInteger_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 1i;
+  let r : i32 = clamp(v, 2i, 3i);
+}
+)";
+
+    auto* expect = R"(
+fn tint_clamp(e : i32, low : i32, high : i32) -> i32 {
+  return min(max(e, low), high);
+}
+
+fn f() {
+  let v = 1i;
+  let r : i32 = tint_clamp(v, 2i, 3i);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillClampInteger());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, ClampInteger_vec3_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 1i;
+  let r : vec3<i32> = clamp(vec3(v), vec3(2i), vec3(3i));
+}
+)";
+
+    auto* expect =
+        R"(
+fn tint_clamp(e : vec3<i32>, low : vec3<i32>, high : vec3<i32>) -> vec3<i32> {
+  return min(max(e, low), high);
+}
+
+fn f() {
+  let v = 1i;
+  let r : vec3<i32> = tint_clamp(vec3(v), vec3(2i), vec3(3i));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillClampInteger());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, ClampInteger_u32) {
+    auto* src = R"(
+fn f() {
+  let r : u32 = clamp(1u, 2u, 3u);
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  let r : u32 = clamp(1u, 2u, 3u);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillClampInteger());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, ClampInteger_vec3_u32) {
+    auto* src = R"(
+fn f() {
+  let v = 1u;
+  let r : vec3<u32> = clamp(vec3(v), vec3(2u), vec3(3u));
+}
+)";
+
+    auto* expect =
+        R"(
+fn tint_clamp(e : vec3<u32>, low : vec3<u32>, high : vec3<u32>) -> vec3<u32> {
+  return min(max(e, low), high);
+}
+
+fn f() {
+  let v = 1u;
+  let r : vec3<u32> = tint_clamp(vec3(v), vec3(2u), vec3(3u));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillClampInteger());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // countLeadingZeros
 ////////////////////////////////////////////////////////////////////////////////
 DataMap polyfillCountLeadingZeros() {

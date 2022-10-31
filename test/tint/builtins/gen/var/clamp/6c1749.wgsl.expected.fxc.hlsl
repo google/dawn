@@ -1,8 +1,12 @@
+int2 tint_clamp(int2 e, int2 low, int2 high) {
+  return min(max(e, low), high);
+}
+
 void clamp_6c1749() {
   int2 arg_0 = (1).xx;
   int2 arg_1 = (1).xx;
   int2 arg_2 = (1).xx;
-  int2 res = clamp(arg_0, arg_1, arg_2);
+  int2 res = tint_clamp(arg_0, arg_1, arg_2);
 }
 
 struct tint_symbol {
