@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 50
+; Bound: 58
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -12,6 +12,8 @@
                OpName %tint_discard "tint_discard"
                OpName %f "f"
                OpName %x "x"
+               OpName %tint_return_flag "tint_return_flag"
+               OpName %tint_return_value "tint_return_value"
                OpName %tint_discard_func "tint_discard_func"
                OpName %main_inner "main_inner"
                OpName %x_0 "x"
@@ -32,65 +34,80 @@
 %_ptr_Private_bool = OpTypePointer Private %bool
 %tint_discard = OpVariable %_ptr_Private_bool Private %9
          %12 = OpTypeFunction %int %int
+%_ptr_Function_bool = OpTypePointer Function %bool
+%_ptr_Function_int = OpTypePointer Function %int
      %int_10 = OpConstant %int 10
        %true = OpConstantTrue %bool
        %void = OpTypeVoid
-         %21 = OpTypeFunction %void
-         %25 = OpTypeFunction %int %v3int
-%_ptr_Function_int = OpTypePointer Function %int
+         %30 = OpTypeFunction %void
+         %34 = OpTypeFunction %int %v3int
           %f = OpFunction %int None %12
           %x = OpFunctionParameter %int
          %15 = OpLabel
-         %17 = OpIEqual %bool %x %int_10
-               OpSelectionMerge %18 None
-               OpBranchConditional %17 %19 %18
-         %19 = OpLabel
+%tint_return_flag = OpVariable %_ptr_Function_bool Function %9
+%tint_return_value = OpVariable %_ptr_Function_int Function %7
+         %21 = OpIEqual %bool %x %int_10
+               OpSelectionMerge %22 None
+               OpBranchConditional %21 %23 %22
+         %23 = OpLabel
                OpStore %tint_discard %true
-               OpReturnValue %7
-         %18 = OpLabel
-               OpReturnValue %x
+               OpStore %tint_return_flag %true
+               OpStore %tint_return_value %7
+               OpBranch %22
+         %22 = OpLabel
+         %26 = OpLoad %bool %tint_return_flag
+         %25 = OpLogicalNot %bool %26
+               OpSelectionMerge %27 None
+               OpBranchConditional %25 %28 %27
+         %28 = OpLabel
+               OpStore %tint_return_flag %true
+               OpStore %tint_return_value %x
+               OpBranch %27
+         %27 = OpLabel
+         %29 = OpLoad %int %tint_return_value
+               OpReturnValue %29
                OpFunctionEnd
-%tint_discard_func = OpFunction %void None %21
-         %24 = OpLabel
+%tint_discard_func = OpFunction %void None %30
+         %33 = OpLabel
                OpKill
                OpFunctionEnd
- %main_inner = OpFunction %int None %25
+ %main_inner = OpFunction %int None %34
         %x_0 = OpFunctionParameter %v3int
-         %28 = OpLabel
+         %37 = OpLabel
           %y = OpVariable %_ptr_Function_int Function %7
-         %29 = OpCompositeExtract %int %x_0 0
-               OpStore %y %29
-               OpBranch %32
-         %32 = OpLabel
-               OpLoopMerge %33 %34 None
-               OpBranch %35
-         %35 = OpLabel
-         %37 = OpLoad %int %y
-         %36 = OpFunctionCall %int %f %37
-         %38 = OpLoad %bool %tint_discard
-               OpSelectionMerge %39 None
-               OpBranchConditional %38 %40 %39
+         %38 = OpCompositeExtract %int %x_0 0
+               OpStore %y %38
+               OpBranch %40
          %40 = OpLabel
-         %41 = OpFunctionCall %void %tint_discard_func
-               OpReturnValue %7
-         %39 = OpLabel
-         %42 = OpIEqual %bool %36 %7
-               OpSelectionMerge %43 None
-               OpBranchConditional %42 %44 %43
-         %44 = OpLabel
-               OpBranch %33
+               OpLoopMerge %41 %42 None
+               OpBranch %43
          %43 = OpLabel
-               OpBranch %34
-         %34 = OpLabel
-               OpBranch %32
-         %33 = OpLabel
          %45 = OpLoad %int %y
-               OpReturnValue %45
-               OpFunctionEnd
-       %main = OpFunction %void None %21
+         %44 = OpFunctionCall %int %f %45
+         %46 = OpLoad %bool %tint_discard
+               OpSelectionMerge %47 None
+               OpBranchConditional %46 %48 %47
+         %48 = OpLabel
+         %49 = OpFunctionCall %void %tint_discard_func
+               OpReturnValue %7
          %47 = OpLabel
-         %49 = OpLoad %v3int %x_1
-         %48 = OpFunctionCall %int %main_inner %49
-               OpStore %value %48
+         %50 = OpIEqual %bool %44 %7
+               OpSelectionMerge %51 None
+               OpBranchConditional %50 %52 %51
+         %52 = OpLabel
+               OpBranch %41
+         %51 = OpLabel
+               OpBranch %42
+         %42 = OpLabel
+               OpBranch %40
+         %41 = OpLabel
+         %53 = OpLoad %int %y
+               OpReturnValue %53
+               OpFunctionEnd
+       %main = OpFunction %void None %30
+         %55 = OpLabel
+         %57 = OpLoad %v3int %x_1
+         %56 = OpFunctionCall %int %main_inner %57
+               OpStore %value %56
                OpReturn
                OpFunctionEnd
