@@ -444,6 +444,8 @@ set(TINT_LIB_SRCS
   transform/localize_struct_array_assignment.h
   transform/manager.cc
   transform/manager.h
+  transform/merge_return.cc
+  transform/merge_return.h
   transform/module_scope_var_to_entry_point_param.cc
   transform/module_scope_var_to_entry_point_param.h
   transform/multiplanar_external_texture.cc
@@ -1162,6 +1164,7 @@ if(TINT_BUILD_TESTS)
       transform/for_loop_to_loop_test.cc
       transform/expand_compound_assignment.cc
       transform/localize_struct_array_assignment_test.cc
+      transform/merge_return.cc
       transform/module_scope_var_to_entry_point_param_test.cc
       transform/multiplanar_external_texture_test.cc
       transform/num_workgroups_from_uniform_test.cc
