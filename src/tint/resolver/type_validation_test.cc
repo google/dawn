@@ -371,7 +371,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_TooBig_ExplicitStride) {
               "12:34 error: array byte size (0x7a1185ee00) must not exceed 0xffffffff bytes");
 }
 
-TEST_F(ResolverTypeValidationTest, ArraySize_Override_PrivateVar) {
+TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_PrivateVar) {
     // override size = 10i;
     // var<private> a : array<f32, size>;
     Override("size", Expr(10_i));
@@ -382,19 +382,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_Override_PrivateVar) {
               "type of a 'var<workgroup>'");
 }
 
-TEST_F(ResolverTypeValidationTest, ArraySize_Override_ComplexExpr) {
-    // override size = 10i;
-    // var<workgroup> a : array<f32, size + 1>;
-    Override("size", Expr(10_i));
-    GlobalVar("a", ty.array(ty.f32(), Add(Source{{12, 34}}, "size", 1_i)),
-              ast::AddressSpace::kWorkgroup);
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: array count must evaluate to a constant integer expression or override "
-              "variable");
-}
-
-TEST_F(ResolverTypeValidationTest, ArraySize_Override_InArray) {
+TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_InArray) {
     // override size = 10i;
     // var<workgroup> a : array<array<f32, size>, 4>;
     Override("size", Expr(10_i));
@@ -406,7 +394,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_Override_InArray) {
               "type of a 'var<workgroup>'");
 }
 
-TEST_F(ResolverTypeValidationTest, ArraySize_Override_InStruct) {
+TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_InStruct) {
     // override size = 10i;
     // struct S {
     //   a : array<f32, size>
@@ -419,7 +407,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_Override_InStruct) {
               "type of a 'var<workgroup>'");
 }
 
-TEST_F(ResolverTypeValidationTest, ArraySize_Override_FunctionVar_Explicit) {
+TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_FunctionVar_Explicit) {
     // override size = 10i;
     // fn f() {
     //   var a : array<f32, size>;
@@ -435,7 +423,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_Override_FunctionVar_Explicit) {
               "type of a 'var<workgroup>'");
 }
 
-TEST_F(ResolverTypeValidationTest, ArraySize_Override_FunctionLet_Explicit) {
+TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_FunctionLet_Explicit) {
     // override size = 10i;
     // fn f() {
     //   var a : array<f32, size>;
@@ -451,7 +439,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_Override_FunctionLet_Explicit) {
               "type of a 'var<workgroup>'");
 }
 
-TEST_F(ResolverTypeValidationTest, ArraySize_Override_FunctionVar_Implicit) {
+TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_FunctionVar_Implicit) {
     // override size = 10i;
     // var<workgroup> w : array<f32, size>;
     // fn f() {
@@ -469,7 +457,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_Override_FunctionVar_Implicit) {
               "type of a 'var<workgroup>'");
 }
 
-TEST_F(ResolverTypeValidationTest, ArraySize_Override_FunctionLet_Implicit) {
+TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_FunctionLet_Implicit) {
     // override size = 10i;
     // var<workgroup> w : array<f32, size>;
     // fn f() {
@@ -487,7 +475,24 @@ TEST_F(ResolverTypeValidationTest, ArraySize_Override_FunctionLet_Implicit) {
               "type of a 'var<workgroup>'");
 }
 
-TEST_F(ResolverTypeValidationTest, ArraySize_Override_Param) {
+TEST_F(ResolverTypeValidationTest, ArraySize_UnnamedOverride_Equivalence) {
+    // override size = 10i;
+    // var<workgroup> a : array<f32, size + 1>;
+    // var<workgroup> b : array<f32, size + 1>;
+    // fn f() {
+    //   a = b;
+    // }
+    Override("size", Expr(10_i));
+    GlobalVar("a", ty.array(ty.f32(), Add("size", 1_i)), ast::AddressSpace::kWorkgroup);
+    GlobalVar("b", ty.array(ty.f32(), Add("size", 1_i)), ast::AddressSpace::kWorkgroup);
+    WrapInFunction(Assign(Source{{12, 34}}, "a", "b"));
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:34 error: cannot assign 'array<f32, [unnamed override-expression]>' to "
+              "'array<f32, [unnamed override-expression]>'");
+}
+
+TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_Param) {
     // override size = 10i;
     // fn f(a : array<f32, size>) {
     // }
@@ -498,7 +503,7 @@ TEST_F(ResolverTypeValidationTest, ArraySize_Override_Param) {
     EXPECT_EQ(r()->error(), "12:34 error: type of function parameter must be constructible");
 }
 
-TEST_F(ResolverTypeValidationTest, ArraySize_Override_ReturnType) {
+TEST_F(ResolverTypeValidationTest, ArraySize_NamedOverride_ReturnType) {
     // override size = 10i;
     // fn f() -> array<f32, size> {
     // }

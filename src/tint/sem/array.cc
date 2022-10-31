@@ -40,7 +40,8 @@ TypeFlags FlagsFrom(const Type* element, ArrayCount count) {
         }
     }
     if (std::holds_alternative<ConstantArrayCount>(count) ||
-        std::holds_alternative<OverrideArrayCount>(count)) {
+        std::holds_alternative<NamedOverrideArrayCount>(count) ||
+        std::holds_alternative<UnnamedOverrideArrayCount>(count)) {
         if (element->HasFixedFootprint()) {
             flags.Add(TypeFlag::kFixedFootprint);
         }
@@ -92,8 +93,10 @@ std::string Array::FriendlyName(const SymbolTable& symbols) const {
     out << "array<" << element_->FriendlyName(symbols);
     if (auto* const_count = std::get_if<ConstantArrayCount>(&count_)) {
         out << ", " << const_count->value;
-    } else if (auto* override_count = std::get_if<OverrideArrayCount>(&count_)) {
-        out << ", " << symbols.NameFor(override_count->variable->Declaration()->symbol);
+    } else if (auto* named_override_count = std::get_if<NamedOverrideArrayCount>(&count_)) {
+        out << ", " << symbols.NameFor(named_override_count->variable->Declaration()->symbol);
+    } else if (std::holds_alternative<UnnamedOverrideArrayCount>(count_)) {
+        out << ", [unnamed override-expression]";
     }
     out << ">";
     return out.str();

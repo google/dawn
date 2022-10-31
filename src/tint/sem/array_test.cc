@@ -127,31 +127,43 @@ TEST_F(ArrayTest, FriendlyNameStaticSizedNonImplicitStride) {
 
 TEST_F(ArrayTest, IsConstructable) {
     auto* fixed_sized = create<Array>(create<U32>(), ConstantArrayCount{2u}, 4u, 8u, 32u, 16u);
-    auto* override_sized = create<Array>(create<U32>(), OverrideArrayCount{}, 4u, 8u, 32u, 16u);
+    auto* named_override_sized =
+        create<Array>(create<U32>(), NamedOverrideArrayCount{}, 4u, 8u, 32u, 16u);
+    auto* unnamed_override_sized =
+        create<Array>(create<U32>(), UnnamedOverrideArrayCount{}, 4u, 8u, 32u, 16u);
     auto* runtime_sized = create<Array>(create<U32>(), RuntimeArrayCount{}, 4u, 8u, 32u, 16u);
 
     EXPECT_TRUE(fixed_sized->IsConstructible());
-    EXPECT_FALSE(override_sized->IsConstructible());
+    EXPECT_FALSE(named_override_sized->IsConstructible());
+    EXPECT_FALSE(unnamed_override_sized->IsConstructible());
     EXPECT_FALSE(runtime_sized->IsConstructible());
 }
 
 TEST_F(ArrayTest, HasCreationFixedFootprint) {
     auto* fixed_sized = create<Array>(create<U32>(), ConstantArrayCount{2u}, 4u, 8u, 32u, 16u);
-    auto* override_sized = create<Array>(create<U32>(), OverrideArrayCount{}, 4u, 8u, 32u, 16u);
+    auto* named_override_sized =
+        create<Array>(create<U32>(), NamedOverrideArrayCount{}, 4u, 8u, 32u, 16u);
+    auto* unnamed_override_sized =
+        create<Array>(create<U32>(), UnnamedOverrideArrayCount{}, 4u, 8u, 32u, 16u);
     auto* runtime_sized = create<Array>(create<U32>(), RuntimeArrayCount{}, 4u, 8u, 32u, 16u);
 
     EXPECT_TRUE(fixed_sized->HasCreationFixedFootprint());
-    EXPECT_FALSE(override_sized->HasCreationFixedFootprint());
+    EXPECT_FALSE(named_override_sized->HasCreationFixedFootprint());
+    EXPECT_FALSE(unnamed_override_sized->HasCreationFixedFootprint());
     EXPECT_FALSE(runtime_sized->HasCreationFixedFootprint());
 }
 
 TEST_F(ArrayTest, HasFixedFootprint) {
     auto* fixed_sized = create<Array>(create<U32>(), ConstantArrayCount{2u}, 4u, 8u, 32u, 16u);
-    auto* override_sized = create<Array>(create<U32>(), OverrideArrayCount{}, 4u, 8u, 32u, 16u);
+    auto* named_override_sized =
+        create<Array>(create<U32>(), NamedOverrideArrayCount{}, 4u, 8u, 32u, 16u);
+    auto* unnamed_override_sized =
+        create<Array>(create<U32>(), UnnamedOverrideArrayCount{}, 4u, 8u, 32u, 16u);
     auto* runtime_sized = create<Array>(create<U32>(), RuntimeArrayCount{}, 4u, 8u, 32u, 16u);
 
     EXPECT_TRUE(fixed_sized->HasFixedFootprint());
-    EXPECT_TRUE(override_sized->HasFixedFootprint());
+    EXPECT_TRUE(named_override_sized->HasFixedFootprint());
+    EXPECT_TRUE(unnamed_override_sized->HasFixedFootprint());
     EXPECT_FALSE(runtime_sized->HasFixedFootprint());
 }
 

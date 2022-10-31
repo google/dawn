@@ -2710,14 +2710,15 @@ utils::Result<sem::ArrayCount> Resolver::ArrayCount(const ast::Expression* count
         return utils::Failure;
     }
 
-    // Note: If the array count is an 'override', but not a identifier expression, we do not return
-    // here, but instead continue to the ConstantValue() check below.
-    if (auto* user = count_sem->UnwrapMaterialize()->As<sem::VariableUser>()) {
-        if (auto* global = user->Variable()->As<sem::GlobalVariable>()) {
-            if (global->Declaration()->Is<ast::Override>()) {
-                return sem::ArrayCount{sem::OverrideArrayCount{global}};
+    if (count_sem->Stage() == sem::EvaluationStage::kOverride) {
+        // array count is an override expression.
+        // Is the count a named 'override'?
+        if (auto* user = count_sem->UnwrapMaterialize()->As<sem::VariableUser>()) {
+            if (auto* global = user->Variable()->As<sem::GlobalVariable>()) {
+                return sem::ArrayCount{sem::NamedOverrideArrayCount{global}};
             }
         }
+        return sem::ArrayCount{sem::UnnamedOverrideArrayCount{count_sem}};
     }
 
     auto* count_val = count_sem->ConstantValue();

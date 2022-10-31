@@ -26,6 +26,7 @@
 
 // Forward declarations
 namespace tint::sem {
+class Expression;
 class GlobalVariable;
 }  // namespace tint::sem
 
@@ -48,9 +49,31 @@ struct ConstantArrayCount {
 /// override N : i32;
 /// type arr = array<i32, N>
 /// ```
-struct OverrideArrayCount {
+struct NamedOverrideArrayCount {
     /// The `override` variable.
     const GlobalVariable* variable;
+};
+
+/// The variant of an ArrayCount when the count is an unnamed override variable.
+/// Example:
+/// ```
+/// override N : i32;
+/// type arr = array<i32, N*2>
+/// ```
+struct UnnamedOverrideArrayCount {
+    /// The unnamed override expression.
+    /// Note: Each AST expression gets a unique semantic expression node, so two equivalent AST
+    /// expressions will not result in the same `expr` pointer. This property is important to ensure
+    /// that two array declarations with equivalent AST expressions do not compare equal.
+    /// For example, consider:
+    /// ```
+    /// override size : u32;
+    /// var<workgroup> a : array<f32, size * 2>;
+    /// var<workgroup> b : array<f32, size * 2>;
+    /// ```
+    // The array count for `a` and `b` have equivalent AST expressions, but the types for `a` and
+    // `b` must not compare equal.
+    const Expression* expr;
 };
 
 /// The variant of an ArrayCount when the array is is runtime-sized.
@@ -60,8 +83,12 @@ struct OverrideArrayCount {
 /// ```
 struct RuntimeArrayCount {};
 
-/// An array count is either a constant-expression value, an override identifier, or runtime-sized.
-using ArrayCount = std::variant<ConstantArrayCount, OverrideArrayCount, RuntimeArrayCount>;
+/// An array count is either a constant-expression value, a named override identifier, an unnamed
+/// override identifier, or runtime-sized.
+using ArrayCount = std::variant<ConstantArrayCount,
+                                NamedOverrideArrayCount,
+                                UnnamedOverrideArrayCount,
+                                RuntimeArrayCount>;
 
 /// Equality operator
 /// @param a the LHS ConstantArrayCount
@@ -75,8 +102,16 @@ inline bool operator==(const ConstantArrayCount& a, const ConstantArrayCount& b)
 /// @param a the LHS OverrideArrayCount
 /// @param b the RHS OverrideArrayCount
 /// @returns true if @p a is equal to @p b
-inline bool operator==(const OverrideArrayCount& a, const OverrideArrayCount& b) {
+inline bool operator==(const NamedOverrideArrayCount& a, const NamedOverrideArrayCount& b) {
     return a.variable == b.variable;
+}
+
+/// Equality operator
+/// @param a the LHS OverrideArrayCount
+/// @param b the RHS OverrideArrayCount
+/// @returns true if @p a is equal to @p b
+inline bool operator==(const UnnamedOverrideArrayCount& a, const UnnamedOverrideArrayCount& b) {
+    return a.expr == b.expr;
 }
 
 /// Equality operator
@@ -90,9 +125,9 @@ inline bool operator==(const RuntimeArrayCount&, const RuntimeArrayCount&) {
 /// @param b the RHS count
 /// @returns true if @p a is equal to @p b
 template <typename T,
-          typename = std::enable_if_t<std::is_same_v<T, ConstantArrayCount> ||
-                                      std::is_same_v<T, OverrideArrayCount> ||
-                                      std::is_same_v<T, RuntimeArrayCount>>>
+          typename = std::enable_if_t<
+              std::is_same_v<T, ConstantArrayCount> || std::is_same_v<T, NamedOverrideArrayCount> ||
+              std::is_same_v<T, UnnamedOverrideArrayCount> || std::is_same_v<T, RuntimeArrayCount>>>
 inline bool operator==(const ArrayCount& a, const T& b) {
     TINT_BEGIN_DISABLE_WARNING(UNREACHABLE_CODE);
     return std::visit(
@@ -178,8 +213,18 @@ class Array final : public Castable<Array, Type> {
     /// @returns true if this array is sized using an const-expression
     bool IsConstantSized() const { return std::holds_alternative<ConstantArrayCount>(count_); }
 
-    /// @returns true if this array is sized using an override variable
-    bool IsOverrideSized() const { return std::holds_alternative<OverrideArrayCount>(count_); }
+    /// @returns true if this array is sized using a named override variable
+    bool IsNamedOverrideSized() const {
+        return std::holds_alternative<NamedOverrideArrayCount>(count_);
+    }
+
+    /// @returns true if this array is sized using an unnamed override variable
+    bool IsUnnamedOverrideSized() const {
+        return std::holds_alternative<UnnamedOverrideArrayCount>(count_);
+    }
+
+    /// @returns true if this array is sized using a named or unnamed override variable
+    bool IsOverrideSized() const { return IsNamedOverrideSized() || IsUnnamedOverrideSized(); }
 
     /// @returns true if this array is runtime sized
     bool IsRuntimeSized() const { return std::holds_alternative<RuntimeArrayCount>(count_); }
@@ -213,14 +258,25 @@ class hash<tint::sem::ConstantArrayCount> {
     }
 };
 
-/// Custom std::hash specialization for tint::sem::OverrideArrayCount.
+/// Custom std::hash specialization for tint::sem::NamedOverrideArrayCount.
 template <>
-class hash<tint::sem::OverrideArrayCount> {
+class hash<tint::sem::NamedOverrideArrayCount> {
   public:
     /// @param count the count to hash
     /// @return the hash value
-    inline std::size_t operator()(const tint::sem::OverrideArrayCount& count) const {
+    inline std::size_t operator()(const tint::sem::NamedOverrideArrayCount& count) const {
         return std::hash<decltype(count.variable)>()(count.variable);
+    }
+};
+
+/// Custom std::hash specialization for tint::sem::UnnamedOverrideArrayCount.
+template <>
+class hash<tint::sem::UnnamedOverrideArrayCount> {
+  public:
+    /// @param count the count to hash
+    /// @return the hash value
+    inline std::size_t operator()(const tint::sem::UnnamedOverrideArrayCount& count) const {
+        return std::hash<decltype(count.expr)>()(count.expr);
     }
 };
 

@@ -114,8 +114,12 @@ const ast::Type* Transform::CreateASTTypeFor(CloneContext& ctx, const sem::Type*
         if (a->IsRuntimeSized()) {
             return ctx.dst->ty.array(el, nullptr, std::move(attrs));
         }
-        if (auto* override = std::get_if<sem::OverrideArrayCount>(&a->Count())) {
+        if (auto* override = std::get_if<sem::NamedOverrideArrayCount>(&a->Count())) {
             auto* count = ctx.Clone(override->variable->Declaration());
+            return ctx.dst->ty.array(el, count, std::move(attrs));
+        }
+        if (auto* override = std::get_if<sem::UnnamedOverrideArrayCount>(&a->Count())) {
+            auto* count = ctx.Clone(override->expr->Declaration());
             return ctx.dst->ty.array(el, count, std::move(attrs));
         }
         if (auto count = a->ConstantCount()) {
