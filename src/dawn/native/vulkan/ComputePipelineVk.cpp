@@ -64,7 +64,7 @@ MaybeError ComputePipeline::Initialize() {
                     module->GetHandleAndSpirv(SingleShaderStage::Compute, computeStage, layout));
 
     createInfo.stage.module = moduleAndSpirv.module;
-    createInfo.stage.pName = computeStage.entryPoint.c_str();
+    createInfo.stage.pName = moduleAndSpirv.remappedEntryPoint;
 
     createInfo.stage.pSpecializationInfo = nullptr;
 

@@ -297,6 +297,18 @@ ResultOrError<std::string> TranslateToHLSL(
     tint::transform::Manager transformManager;
     tint::transform::DataMap transformInputs;
 
+    // Run before the renamer so that the entry point name matches `entryPointName` still.
+    transformManager.Add<tint::transform::SingleEntryPoint>();
+    transformInputs.Add<tint::transform::SingleEntryPoint::Config>(r.entryPointName.data());
+
+    // Needs to run before all other transforms so that they can use builtin names safely.
+    transformManager.Add<tint::transform::Renamer>();
+    if (r.disableSymbolRenaming) {
+        // We still need to rename HLSL reserved keywords
+        transformInputs.Add<tint::transform::Renamer::Config>(
+            tint::transform::Renamer::Target::kHlslKeywords);
+    }
+
     if (!r.newBindingsMap.empty()) {
         transformManager.Add<tint::transform::MultiplanarExternalTexture>();
         transformInputs.Add<tint::transform::MultiplanarExternalTexture::NewBindingPoints>(
@@ -314,17 +326,6 @@ ResultOrError<std::string> TranslateToHLSL(
     }
 
     transformManager.Add<tint::transform::BindingRemapper>();
-
-    transformManager.Add<tint::transform::SingleEntryPoint>();
-    transformInputs.Add<tint::transform::SingleEntryPoint::Config>(r.entryPointName.data());
-
-    transformManager.Add<tint::transform::Renamer>();
-
-    if (r.disableSymbolRenaming) {
-        // We still need to rename HLSL reserved keywords
-        transformInputs.Add<tint::transform::Renamer::Config>(
-            tint::transform::Renamer::Target::kHlslKeywords);
-    }
 
     if (r.substituteOverrideConfig) {
         // This needs to run after SingleEntryPoint transform which removes unused overrides for

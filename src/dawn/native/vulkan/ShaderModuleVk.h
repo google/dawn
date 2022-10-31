@@ -50,11 +50,11 @@ class PipelineLayout;
 
 class ShaderModule final : public ShaderModuleBase {
   public:
-    class Spirv;
     struct ModuleAndSpirv {
         VkShaderModule module;
         const uint32_t* spirv;
         size_t wordCount;
+        const char* remappedEntryPoint;
     };
 
     static ResultOrError<Ref<ShaderModule>> Create(Device* device,

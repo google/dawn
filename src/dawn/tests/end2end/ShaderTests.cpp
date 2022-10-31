@@ -896,6 +896,59 @@ TEST_P(ShaderTests, DISABLED_CheckUsageOf_chromium_disable_uniformity_analysis) 
     )"));
 }
 
+// Test that it is not possible to override the builtins in a way that breaks the robustness
+// transform.
+TEST_P(ShaderTests, ShaderOverridingRobustnessBuiltins) {
+    // TODO(dawn:1585): The OpenGL backend doesn't use the Renamer tint transform yet.
+    DAWN_SUPPRESS_TEST_IF(IsOpenGL() || IsOpenGLES());
+
+    // Make the test compute pipeline.
+    wgpu::ComputePipelineDescriptor cDesc;
+    cDesc.compute.module = utils::CreateShaderModule(device, R"(
+        // A fake min() function that always returns 0.
+        fn min(a : u32, b : u32) -> u32 {
+            return 0;
+        }
+
+        @group(0) @binding(0) var<storage, read_write> result : u32;
+        @compute @workgroup_size(1) fn little_bobby_tables() {
+            // Prevent the SingleEntryPoint transform from removing our min().
+            let forceUseOfMin = min(0, 1);
+
+            let values = array<u32, 2>(1, 2);
+            let index = 1u;
+            // Robustness adds transforms values[index] into values[min(index, 1u)].
+            //  - If our min() is called, the this will be values[0] which is 1.
+            //  - If the correct min() is called, the this will be values[1] which is 2.
+            result = values[index];
+        }
+    )");
+    cDesc.compute.entryPoint = "little_bobby_tables";
+    wgpu::ComputePipeline pipeline = device.CreateComputePipeline(&cDesc);
+
+    // Test 4-byte buffer that will receive the result.
+    wgpu::BufferDescriptor bufDesc;
+    bufDesc.size = 4;
+    bufDesc.usage = wgpu::BufferUsage::Storage | wgpu::BufferUsage::CopySrc;
+    wgpu::Buffer buf = device.CreateBuffer(&bufDesc);
+
+    wgpu::BindGroup bg = utils::MakeBindGroup(device, pipeline.GetBindGroupLayout(0), {{0, buf}});
+
+    // Run the compute pipeline.
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    wgpu::ComputePassEncoder pass = encoder.BeginComputePass();
+    pass.SetPipeline(pipeline);
+    pass.SetBindGroup(0, bg);
+    pass.DispatchWorkgroups(1);
+    pass.End();
+
+    wgpu::CommandBuffer commands = encoder.Finish();
+    queue.Submit(1, &commands);
+
+    // See the comment in the shader for why we expect a 2 here.
+    EXPECT_BUFFER_U32_EQ(2, buf, 0);
+}
+
 DAWN_INSTANTIATE_TEST(ShaderTests,
                       D3D12Backend(),
                       MetalBackend(),

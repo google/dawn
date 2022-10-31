@@ -358,7 +358,7 @@ MaybeError RenderPipeline::Initialize() {
         shaderStage.pNext = nullptr;
         shaderStage.flags = 0;
         shaderStage.pSpecializationInfo = nullptr;
-        shaderStage.pName = programmableStage.entryPoint.c_str();
+        shaderStage.pName = moduleAndSpirv.remappedEntryPoint;
 
         switch (stage) {
             case dawn::native::SingleShaderStage::Vertex: {

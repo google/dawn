@@ -175,6 +175,12 @@ webgpu:api,validation,error_scope:current_scope:errorFilter="out-of-memory";stac
 webgpu:api,validation,error_scope:current_scope:errorFilter="validation";stackDepth=100000 [ Slow ]
 
 ################################################################################
+# Likely Intel Linux compiler slowness causing timeouts.
+################################################################################
+crbug.com/dawn/1587 webgpu:shader,execution,zero_init:compute,zero_init:storageClass="function";workgroupSize=[1,1,1];batch__=9 [ Slow ]
+crbug.com/dawn/1587 webgpu:shader,execution,zero_init:compute,zero_init:storageClass="private";workgroupSize=[1,1,1];batch__=9 [ Slow ]
+
+################################################################################
 # entry_point_name_must_match failures
 ################################################################################
 crbug.com/dawn/1345 webgpu:api,validation,shader_module,entry_point:fragment:isAsync=false;shaderModuleEntryPoint="main";stageEntryPoint="main%5Cu0000" [ Failure ]
