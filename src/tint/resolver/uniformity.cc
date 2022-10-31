@@ -72,7 +72,6 @@ enum CallSiteTag {
 
 /// FunctionTag describes a functions effects on uniformity.
 enum FunctionTag {
-    SubsequentControlFlowMayBeNonUniform,
     ReturnValueMayBeNonUniform,
     NoRestriction,
 };
@@ -80,7 +79,6 @@ enum FunctionTag {
 /// ParameterTag describes the uniformity requirements of values passed to a function parameter.
 enum ParameterTag {
     ParameterRequiredToBeUniform,
-    ParameterRequiredToBeUniformForSubsequentControlFlow,
     ParameterRequiredToBeUniformForReturnValue,
     ParameterNoRestriction,
 };
@@ -163,7 +161,6 @@ struct FunctionInfo {
         required_to_be_uniform = CreateNode("RequiredToBeUniform");
         may_be_non_uniform = CreateNode("MayBeNonUniform");
         cf_start = CreateNode("CF_start");
-        cf_return = CreateNode("CF_return");
         if (func->return_type) {
             value_return = CreateNode("Value_return");
         }
@@ -208,8 +205,6 @@ struct FunctionInfo {
     Node* may_be_non_uniform;
     /// Special `CF_start` node.
     Node* cf_start;
-    /// Special `CF_return` node.
-    Node* cf_return;
     /// Special `Value_return` node.
     Node* value_return;
 
@@ -339,8 +334,7 @@ class UniformityGraph {
 
         // Process function body.
         if (func->body) {
-            auto* cf = ProcessStatement(current_function_->cf_start, func->body);
-            current_function_->cf_return->AddEdge(cf);
+            ProcessStatement(current_function_->cf_start, func->body);
         }
 
 #if TINT_DUMP_UNIFORMITY_GRAPH
@@ -374,25 +368,6 @@ class UniformityGraph {
                 auto* param = func->params[i];
                 if (reachable.Contains(current_function_->variables.Get(sem_.Get(param)))) {
                     current_function_->parameters[i].tag = ParameterRequiredToBeUniform;
-                }
-            }
-        }
-
-        // Look at which nodes are reachable from "CF_return"
-        {
-            utils::UniqueVector<Node*, 4> reachable;
-            Traverse(current_function_->cf_return, &reachable);
-            if (reachable.Contains(current_function_->may_be_non_uniform)) {
-                current_function_->function_tag = SubsequentControlFlowMayBeNonUniform;
-            }
-
-            // Set the parameter tag to ParameterRequiredToBeUniformForSubsequentControlFlow for
-            // each parameter node that was reachable.
-            for (size_t i = 0; i < func->params.Length(); i++) {
-                auto* param = func->params[i];
-                if (reachable.Contains(current_function_->variables.Get(sem_.Get(param)))) {
-                    current_function_->parameters[i].tag =
-                        ParameterRequiredToBeUniformForSubsequentControlFlow;
                 }
             }
         }
@@ -918,12 +893,10 @@ class UniformityGraph {
                 Node* cf_ret;
                 if (r->value) {
                     auto [cf1, v] = ProcessExpression(cf, r->value);
-                    current_function_->cf_return->AddEdge(cf1);
                     current_function_->value_return->AddEdge(v);
                     cf_ret = cf1;
                 } else {
                     TINT_ASSERT(Resolver, cf != nullptr);
-                    current_function_->cf_return->AddEdge(cf);
                     cf_ret = cf;
                 }
 
@@ -1395,10 +1368,7 @@ class UniformityGraph {
         }
         cf_after->AddEdge(call_node);
 
-        if (function_tag == SubsequentControlFlowMayBeNonUniform) {
-            cf_after->AddEdge(current_function_->may_be_non_uniform);
-            cf_after->affects_control_flow = true;
-        } else if (function_tag == ReturnValueMayBeNonUniform) {
+        if (function_tag == ReturnValueMayBeNonUniform) {
             result->AddEdge(current_function_->may_be_non_uniform);
         }
 
@@ -1410,10 +1380,6 @@ class UniformityGraph {
                 switch (func_info->parameters[i].tag) {
                     case ParameterRequiredToBeUniform:
                         current_function_->required_to_be_uniform->AddEdge(args[i]);
-                        break;
-                    case ParameterRequiredToBeUniformForSubsequentControlFlow:
-                        cf_after->AddEdge(args[i]);
-                        args[i]->affects_control_flow = true;
                         break;
                     case ParameterRequiredToBeUniformForReturnValue:
                         result->AddEdge(args[i]);
@@ -1544,26 +1510,9 @@ class UniformityGraph {
         auto* control_flow = TraceBackAlongPathUntil(
             non_uniform_source, [](Node* node) { return node->affects_control_flow; });
         if (control_flow) {
-            if (auto* call = control_flow->ast->As<ast::CallExpression>()) {
-                if (control_flow->type == Node::kFunctionCallArgument) {
-                    auto idx = control_flow->arg_index;
-                    diagnostics_.add_note(diag::System::Resolver,
-                                          "non-uniform function call argument causes subsequent "
-                                          "control flow to be non-uniform",
-                                          call->args[idx]->source);
-
-                    // Recurse into the target function.
-                    if (auto* user = SemCall(call)->Target()->As<sem::Function>()) {
-                        auto& callee = functions_.at(user->Declaration());
-                        ShowCauseOfNonUniformity(callee, callee.cf_return,
-                                                 callee.parameters[idx].init_value);
-                    }
-                }
-            } else {
-                diagnostics_.add_note(diag::System::Resolver,
-                                      "control flow depends on non-uniform value",
-                                      control_flow->ast->source);
-            }
+            diagnostics_.add_note(diag::System::Resolver,
+                                  "control flow depends on non-uniform value",
+                                  control_flow->ast->source);
             // TODO(jrprice): There are cases where the function with uniformity requirements is not
             // actually inside this control flow construct, for example:
             // - A conditional interrupt (e.g. break), with a barrier elsewhere in the loop
@@ -1619,21 +1568,6 @@ class UniformityGraph {
                 auto target_name = builder_->Symbols().NameFor(
                     c->target.name->As<ast::IdentifierExpression>()->symbol);
                 switch (non_uniform_source->type) {
-                    case Node::kRegular: {
-                        diagnostics_.add_note(
-                            diag::System::Resolver,
-                            "calling '" + target_name +
-                                "' may cause subsequent control flow to be non-uniform",
-                            c->source);
-
-                        // Recurse into the target function.
-                        if (auto* user = SemCall(c)->Target()->As<sem::Function>()) {
-                            auto& callee = functions_.at(user->Declaration());
-                            ShowCauseOfNonUniformity(callee, callee.cf_return,
-                                                     callee.may_be_non_uniform);
-                        }
-                        break;
-                    }
                     case Node::kFunctionCallReturnValue: {
                         diagnostics_.add_note(
                             diag::System::Resolver,
