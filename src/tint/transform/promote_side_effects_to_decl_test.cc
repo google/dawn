@@ -4081,5 +4081,54 @@ fn f() {
 
     EXPECT_EQ(expect, str(got));
 }
+
+TEST_F(PromoteSideEffectsToDeclTest, TextureSamplerParameter) {
+    auto* src = R"(
+@group(0) @binding(0) var T : texture_2d<f32>;
+@group(0) @binding(1) var S : sampler;
+
+var<private> P : vec2<f32>;
+fn side_effects() -> vec2<f32> {
+  P += vec2(1.0);
+  return P;
+}
+
+fn f(t : texture_2d<f32>, s : sampler) -> vec4<f32> {
+  return textureSample(t, s, side_effects());
+}
+
+fn m() -> vec4<f32>{
+  return f(T, S);
+}
+)";
+
+    auto* expect = R"(
+@group(0) @binding(0) var T : texture_2d<f32>;
+
+@group(0) @binding(1) var S : sampler;
+
+var<private> P : vec2<f32>;
+
+fn side_effects() -> vec2<f32> {
+  P += vec2(1.0);
+  return P;
+}
+
+fn f(t : texture_2d<f32>, s : sampler) -> vec4<f32> {
+  let tint_symbol = side_effects();
+  return textureSample(t, s, tint_symbol);
+}
+
+fn m() -> vec4<f32> {
+  return f(T, S);
+}
+)";
+
+    DataMap data;
+    auto got = Run<PromoteSideEffectsToDecl>(src, data);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::transform

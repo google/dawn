@@ -281,9 +281,13 @@ class DecomposeSideEffects::CollectHoistsState : public StateBase {
                         if (var_user->ConstantValue()) {
                             return false;
                         }
-                        // Don't hoist read-only variables as they cannot receive
-                        // side-effects.
+                        // Don't hoist read-only variables as they cannot receive side-effects.
                         if (var_user->Variable()->Access() == ast::Access::kRead) {
+                            return false;
+                        }
+                        // Don't hoist textures / samplers as they can't be placed into a let, nor
+                        // can they have side effects.
+                        if (var_user->Variable()->Type()->IsAnyOf<sem::Texture, sem::Sampler>()) {
                             return false;
                         }
                         return true;
