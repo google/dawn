@@ -1,7 +1,7 @@
 #version 310 es
 
 void countOneBits_ae44f9() {
-  uint res = uint(bitCount(1u));
+  uint res = 1u;
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void countOneBits_ae44f9() {
-  uint res = uint(bitCount(1u));
+  uint res = 1u;
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void countOneBits_ae44f9() {
-  uint res = uint(bitCount(1u));
+  uint res = 1u;
 }
 
 void compute_main() {

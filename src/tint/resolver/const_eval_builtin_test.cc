@@ -582,6 +582,43 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               CountTrailingZerosCases<u32>()))));
 
 template <typename T>
+std::vector<Case> CountOneBitsCases() {
+    using B = BitValues<T>;
+    return {
+        C({T(0)}, T(0)),  //
+
+        C({B::Lsh(1, 31)}, T(1)),  //
+        C({B::Lsh(1, 30)}, T(1)),  //
+        C({B::Lsh(1, 29)}, T(1)),  //
+        C({B::Lsh(1, 28)}, T(1)),
+        //...
+        C({B::Lsh(1, 3)}, T(1)),  //
+        C({B::Lsh(1, 2)}, T(1)),  //
+        C({B::Lsh(1, 1)}, T(1)),  //
+        C({B::Lsh(1, 0)}, T(1)),
+
+        C({T(0b1010'1010'1010'1010'1010'1010'1010'1010)}, T(16)),
+        C({T(0b0000'1111'0000'1111'0000'1111'0000'1111)}, T(16)),
+        C({T(0b0101'0000'0000'0000'0000'0000'0000'0101)}, T(4)),
+
+        // Vector tests
+        C({Vec(B::Lsh(1, 31), B::Lsh(1, 30), B::Lsh(1, 29))}, Vec(T(1), T(1), T(1))),
+        C({Vec(B::Lsh(1, 2), B::Lsh(1, 1), B::Lsh(1, 0))}, Vec(T(1), T(1), T(1))),
+
+        C({Vec(T(0b1010'1010'1010'1010'1010'1010'1010'1010),
+               T(0b0000'1111'0000'1111'0000'1111'0000'1111),
+               T(0b0101'0000'0000'0000'0000'0000'0000'0101))},
+          Vec(T(16), T(16), T(4))),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    CountOneBits,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kCountOneBits),
+                     testing::ValuesIn(Concat(CountOneBitsCases<i32>(),  //
+                                              CountOneBitsCases<u32>()))));
+
+template <typename T>
 std::vector<Case> SaturateCases() {
     return {
         C({T(0)}, T(0)),
