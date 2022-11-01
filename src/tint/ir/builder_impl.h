@@ -104,23 +104,27 @@ class BuilderImpl {
 
     /// Emits a switch statement
     /// @param stmt the switch statement
-    /// @returns true if successfull, false otherwise.
+    /// @returns true if successful, false otherwise.
     bool EmitSwitch(const ast::SwitchStatement* stmt);
 
     /// Emits a break statement
     /// @param stmt the break statement
-    /// @returns true if successfull, false otherwise.
+    /// @returns true if successful, false otherwise.
     bool EmitBreak(const ast::BreakStatement* stmt);
 
     /// Emits a continue statement
     /// @param stmt the continue statement
-    /// @returns true if successfull, false otherwise.
+    /// @returns true if successful, false otherwise.
     bool EmitContinue(const ast::ContinueStatement* stmt);
 
     /// Emits a break-if statement
     /// @param stmt the break-if statement
-    /// @returns true if successfull, false otherwise.
+    /// @returns true if successful, false otherwise.
     bool EmitBreakIf(const ast::BreakIfStatement* stmt);
+
+    /// Emits a fallthrough statement
+    /// @returns true if successful, false otherwise
+    bool EmitFallthrough();
 
     /// Retrieve the IR Flow node for a given AST node.
     /// @param n the node to lookup
@@ -149,6 +153,9 @@ class BuilderImpl {
 
     Block* current_flow_block_ = nullptr;
     Function* current_function_ = nullptr;
+
+    // TODO(crbug.com/tint/1644): Remove this when fallthrough is removed.
+    Block* fallthrough_target_ = nullptr;
 
     /// Map from ast nodes to flow nodes, used to retrieve the flow node for a given AST node.
     /// Used for testing purposes.
