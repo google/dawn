@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import("//build_overrides/build.gni")
-
 import("../../tint_overrides_with_defaults.gni")
 
 if (tint_build_unittests) {
@@ -846,6 +845,140 @@ libtint_source_set("libtint_glsl_writer_src") {
   ]
 
   public_deps = [ ":libtint_core_src" ]
+}
+
+# Template to help invoke code generator for tint template files.
+#
+# Variables:
+#   input: The prefix for the template to generate, does not include the .tmpl extension
+template("tint_intrinsic_generator") {
+  _sources = [
+    "${invoker.input}.tmpl",
+    "${tint_root_dir}/src/tint/intrinsics.def",
+  ]
+
+  _outputs = [ "${target_gen_dir}/${invoker.input}" ]
+
+  _script = "${tint_root_dir}/generator/tint_gen_template.py"
+  _args = [
+    "--output",
+    rebase_path(root_gen_dir),
+    "--template",
+    "src/tint/" + invoker.input + ".tmpl",
+  ]
+
+  action("${target_name}") {
+    script = _script
+    outputs = _outputs
+    sources = _sources
+    args = _args
+  }
+}
+
+# Template to help invoke code generator for tint template files for source files. By default this
+# will generate a `h` and `cc` build rule for the provided `input`
+#
+# Variables:
+#   input: The prefix for the template, minus the file extension and .tmpl
+#
+#   bench: set true to generate a bench template
+#
+#   test: set true to generate a test template
+template("tint_intrinsic_src_generator") {
+  tint_intrinsic_generator("${target_name}_h") {
+    input = "${invoker.input}.h"
+  }
+  tint_intrinsic_generator("${target_name}_cc") {
+    input = "${invoker.input}.cc"
+  }
+
+  if (defined(invoker.bench) && invoker.bench) {
+    tint_intrinsic_generator("${target_name}_bench") {
+      input = "${invoker.input}_bench.cc"
+    }
+  }
+  if (defined(invoker.test) && invoker.test) {
+    tint_intrinsic_generator("${target_name}_test") {
+      input = "${invoker.input}_test.cc"
+    }
+  }
+
+  source_set(target_name) {
+    deps = [
+      ":${target_name}_cc",
+      ":${target_name}_h",
+    ]
+
+    if (defined(invoker.bench) && invoker.bench) {
+      deps += [ ":${target_name}_bench" ]
+    }
+    if (defined(invoker.test) && invoker.test) {
+      deps += [ ":${target_name}_test" ]
+    }
+  }
+}
+
+tint_intrinsic_generator("tint_intrinsics_inl") {
+  input = "resolver/intrinsic_table.inl"
+}
+
+tint_intrinsic_src_generator("tint_init_conv_intrinsic") {
+  input = "resolver/init_conv_intrinsic"
+}
+
+tint_intrinsic_src_generator("tint_sem_builtin_type") {
+  input = "sem/builtin_type"
+}
+
+tint_intrinsic_src_generator("tint_sem_parameter_usage") {
+  input = "sem/parameter_usage"
+}
+
+tint_intrinsic_src_generator("tint_ast_extension") {
+  input = "ast/extension"
+  bench = true
+  test = true
+}
+
+tint_intrinsic_src_generator("tint_ast_access") {
+  input = "ast/access"
+}
+
+tint_intrinsic_src_generator("tint_ast_builtin_value") {
+  input = "ast/builtin_value"
+  bench = true
+  test = true
+}
+
+tint_intrinsic_src_generator("tint_ast_texel_format") {
+  input = "ast/texel_format"
+  bench = true
+  test = true
+}
+
+tint_intrinsic_src_generator("tint_ast_address_space") {
+  input = "ast/address_space"
+  bench = true
+  test = true
+}
+
+tint_intrinsic_src_generator("tint_ast_interpolate_attribute") {
+  input = "ast/interpolate_attribute"
+}
+
+libtint_source_set("tint_gen_deps") {
+  deps = [
+    ":tint_ast_access",
+    ":tint_ast_address_space",
+    ":tint_ast_builtin_value",
+    ":tint_ast_extension",
+    ":tint_ast_interpolate_attribute",
+    ":tint_ast_texel_format",
+    ":tint_init_conv_intrinsic",
+    ":tint_intrinsics_inl",
+    ":tint_sem_builtin_type",
+    ":tint_sem_parameter_usage",
+  ]
 }
 
 source_set("libtint") {
