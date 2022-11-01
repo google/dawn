@@ -34,6 +34,7 @@ class BlockStatement;
 class BreakIfStatement;
 class BreakStatement;
 class ContinueStatement;
+class ForLoopStatement;
 class Function;
 class IfStatement;
 class LoopStatement;
@@ -107,6 +108,11 @@ class BuilderImpl {
     /// @param stmt the while statement
     /// @returns true if successful, false otherwise.
     bool EmitWhile(const ast::WhileStatement* stmt);
+
+    /// Emits a loop control node to the IR.
+    /// @param stmt the for loop statement
+    /// @returns true if successful, false otherwise.
+    bool EmitForLoop(const ast::ForLoopStatement* stmt);
 
     /// Emits a switch statement
     /// @param stmt the switch statement

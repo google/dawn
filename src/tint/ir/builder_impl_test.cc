@@ -942,6 +942,103 @@ TEST_F(IRBuilderImplTest, While_Return) {
     EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
 }
 
+// TODO(dsinclair): Enable when variable declarations and increment are supported
+TEST_F(IRBuilderImplTest, DISABLED_For) {
+    // for(var i: 0; i < 10; i++) {
+    // }
+    //
+    // func -> loop -> loop start -> if true
+    //                            -> if false
+    //
+    //   [if true] -> if merge
+    //   [if false] -> loop merge
+    //   [if merge] -> loop continuing
+    //   [loop continuing] -> loop start
+    //   [loop merge] -> func end
+    //
+    auto* ast_for = For(Decl(Var("i", ty.i32())), LessThan("i", 10_a), Increment("i"), Block());
+    WrapInFunction(ast_for);
+    auto& b = Build();
+
+    auto r = b.Build();
+    ASSERT_TRUE(r) << b.error();
+    auto m = r.Move();
+
+    auto* ir_for = b.FlowNodeForAstNode(ast_for);
+    ASSERT_NE(ir_for, nullptr);
+    ASSERT_TRUE(ir_for->Is<ir::Loop>());
+
+    auto* flow = ir_for->As<ir::Loop>();
+    ASSERT_NE(flow->start_target, nullptr);
+    ASSERT_NE(flow->continuing_target, nullptr);
+    ASSERT_NE(flow->merge_target, nullptr);
+
+    ASSERT_NE(flow->start_target->branch_target, nullptr);
+    ASSERT_TRUE(flow->start_target->branch_target->Is<ir::If>());
+    auto* if_flow = flow->start_target->branch_target->As<ir::If>();
+    ASSERT_NE(if_flow->true_target, nullptr);
+    ASSERT_NE(if_flow->false_target, nullptr);
+    ASSERT_NE(if_flow->merge_target, nullptr);
+
+    ASSERT_EQ(1u, m.functions.Length());
+    auto* func = m.functions[0];
+
+    EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
+    EXPECT_EQ(1u, flow->inbound_branches.Length());
+    EXPECT_EQ(2u, flow->start_target->inbound_branches.Length());
+    EXPECT_EQ(1u, flow->continuing_target->inbound_branches.Length());
+    EXPECT_EQ(1u, flow->merge_target->inbound_branches.Length());
+    EXPECT_EQ(1u, if_flow->true_target->inbound_branches.Length());
+    EXPECT_EQ(1u, if_flow->false_target->inbound_branches.Length());
+    EXPECT_EQ(1u, if_flow->merge_target->inbound_branches.Length());
+
+    EXPECT_EQ(func->start_target->branch_target, flow);
+    EXPECT_EQ(flow->start_target->branch_target, if_flow);
+    EXPECT_EQ(if_flow->true_target->branch_target, if_flow->merge_target);
+    EXPECT_EQ(if_flow->false_target->branch_target, flow->merge_target);
+    EXPECT_EQ(if_flow->merge_target->branch_target, flow->continuing_target);
+    EXPECT_EQ(flow->continuing_target->branch_target, flow->start_target);
+    EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
+}
+
+TEST_F(IRBuilderImplTest, For_NoInitCondOrContinuing) {
+    // for (;;) {
+    //   break;
+    // }
+    //
+    // func -> loop -> loop start -> loop merge -> func end
+    //
+    auto* ast_for = For(nullptr, nullptr, nullptr, Block(Break()));
+    WrapInFunction(ast_for);
+    auto& b = Build();
+
+    auto r = b.Build();
+    ASSERT_TRUE(r) << b.error();
+    auto m = r.Move();
+
+    auto* ir_for = b.FlowNodeForAstNode(ast_for);
+    ASSERT_NE(ir_for, nullptr);
+    ASSERT_TRUE(ir_for->Is<ir::Loop>());
+
+    auto* flow = ir_for->As<ir::Loop>();
+    ASSERT_NE(flow->start_target, nullptr);
+    ASSERT_NE(flow->continuing_target, nullptr);
+    ASSERT_NE(flow->merge_target, nullptr);
+
+    ASSERT_EQ(1u, m.functions.Length());
+    auto* func = m.functions[0];
+
+    EXPECT_EQ(1u, flow->inbound_branches.Length());
+    EXPECT_EQ(2u, flow->start_target->inbound_branches.Length());
+    EXPECT_EQ(0u, flow->continuing_target->inbound_branches.Length());
+    EXPECT_EQ(1u, flow->merge_target->inbound_branches.Length());
+    EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
+
+    EXPECT_EQ(flow->start_target->branch_target, flow->merge_target);
+    EXPECT_EQ(flow->continuing_target->branch_target, flow->start_target);
+    EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
+}
+
 TEST_F(IRBuilderImplTest, Switch) {
     // func -> switch -> case 1
     //                -> case 2
