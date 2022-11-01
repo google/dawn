@@ -1081,9 +1081,9 @@ int main(int argc, const char** argv) {
              // Set of all the group-0 bindings in use.
              std::unordered_set<uint32_t> group0_bindings_in_use;
              auto allocate_binding = [&] {
-                 for (uint32_t i = 0;; i++) {
-                     auto binding = tint::transform::BindingPoint{0u, i};
-                     if (group0_bindings_in_use.emplace(i).second) {
+                 for (uint32_t idx = 0;; idx++) {
+                     auto binding = tint::transform::BindingPoint{0u, idx};
+                     if (group0_bindings_in_use.emplace(idx).second) {
                          return binding;
                      }
                  }
