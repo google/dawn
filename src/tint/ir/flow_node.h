@@ -16,6 +16,7 @@
 #define SRC_TINT_IR_FLOW_NODE_H_
 
 #include "src/tint/castable.h"
+#include "src/tint/utils/vector.h"
 
 namespace tint::ir {
 
@@ -23,6 +24,13 @@ namespace tint::ir {
 class FlowNode : public Castable<FlowNode> {
   public:
     ~FlowNode() override;
+
+    /// The list of flow nodes which branch into this node. This list maybe empty for several
+    /// reasons:
+    ///   - Node is a start node
+    ///   - Node is a merge target outside control flow (if that returns in both branches)
+    ///   - Node is a continue target outside control flow (loop that returns)
+    utils::Vector<FlowNode*, 2> inbound_branches;
 
   protected:
     /// Constructor

@@ -50,23 +50,41 @@ class FlowStackScope {
     BuilderImpl* impl_;
 };
 
+bool IsBranched(const Block* b) {
+    return b->branch_target != nullptr;
+}
+
+bool IsConnected(const FlowNode* b) {
+    // Function is always connected as it's the start.
+    if (b->Is<ir::Function>()) {
+        return true;
+    }
+
+    for (auto* parent : b->inbound_branches) {
+        if (IsConnected(parent)) {
+            return true;
+        }
+    }
+    // Getting here means all the incoming branches are disconnected.
+    return false;
+}
+
 }  // namespace
 
 BuilderImpl::BuilderImpl(const Program* program) : builder_(program) {}
 
 BuilderImpl::~BuilderImpl() = default;
 
-void BuilderImpl::BranchTo(const FlowNode* node) {
+void BuilderImpl::BranchTo(FlowNode* node) {
     TINT_ASSERT(IR, current_flow_block_);
-    TINT_ASSERT(IR, !current_flow_block_->branch_target);
+    TINT_ASSERT(IR, !IsBranched(current_flow_block_));
 
     builder_.Branch(current_flow_block_, node);
-    current_flow_block_->branch_target = node;
     current_flow_block_ = nullptr;
 }
 
-void BuilderImpl::BranchToIfNeeded(const FlowNode* node) {
-    if (!current_flow_block_ || current_flow_block_->branch_target) {
+void BuilderImpl::BranchToIfNeeded(FlowNode* node) {
+    if (!current_flow_block_ || IsBranched(current_flow_block_)) {
         return;
     }
     BranchTo(node);
@@ -168,7 +186,7 @@ bool BuilderImpl::EmitStatements(utils::VectorRef<const ast::Statement*> stmts) 
 
         // If the current flow block has a branch target then the rest of the statements in this
         // block are dead code. Skip them.
-        if (!current_flow_block_ || current_flow_block_->branch_target) {
+        if (!current_flow_block_ || IsBranched(current_flow_block_)) {
             break;
         }
     }
@@ -239,20 +257,19 @@ bool BuilderImpl::EmitIf(const ast::IfStatement* stmt) {
     // If both branches went somewhere, then they both returned, continued or broke. So,
     // there is no need for the if merge-block and there is nothing to branch to the merge
     // block anyway.
-    if (if_node->true_target->branch_target && if_node->false_target->branch_target) {
+    if (IsBranched(if_node->true_target) && IsBranched(if_node->false_target)) {
         return true;
     }
 
-    if_node->merge_target = builder_.CreateBlock();
     current_flow_block_ = if_node->merge_target;
 
     // If the true branch did not execute control flow, then go to the merge target
-    if (!if_node->true_target->branch_target) {
-        if_node->true_target->branch_target = if_node->merge_target;
+    if (!IsBranched(if_node->true_target)) {
+        builder_.Branch(if_node->true_target, if_node->merge_target);
     }
     // If the false branch did not execute control flow, then go to the merge target
-    if (!if_node->false_target->branch_target) {
-        if_node->false_target->branch_target = if_node->merge_target;
+    if (!IsBranched(if_node->false_target)) {
+        builder_.Branch(if_node->false_target, if_node->merge_target);
     }
 
     return true;
@@ -287,7 +304,12 @@ bool BuilderImpl::EmitLoop(const ast::LoopStatement* stmt) {
         BranchToIfNeeded(loop_node->start_target);
     }
 
+    // The loop merge can get disconnected if the loop returns directly, or the continuing target
+    // branches, eventually, to the merge, but nothing branched to the continuing target.
     current_flow_block_ = loop_node->merge_target;
+    if (!IsConnected(loop_node->merge_target)) {
+        current_flow_block_ = nullptr;
+    }
     return true;
 }
 
@@ -337,7 +359,7 @@ bool BuilderImpl::EmitContinue(const ast::ContinueStatement*) {
 }
 
 bool BuilderImpl::EmitBreakIf(const ast::BreakIfStatement* stmt) {
-    auto* if_node = builder_.CreateIf(stmt, Builder::IfFlags::kCreateMerge);
+    auto* if_node = builder_.CreateIf(stmt);
 
     // TODO(dsinclair): Emit the condition expression into the current block
 

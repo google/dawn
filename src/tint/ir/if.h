@@ -25,8 +25,7 @@ class Block;
 
 namespace tint::ir {
 
-/// A flow node representing an if statement. The node always contains a true and a false block. It
-/// may contain a merge block where the true/false blocks will merge too unless they return.
+/// A flow node representing an if statement.
 class If : public Castable<If, FlowNode> {
   public:
     /// Constructor
@@ -41,7 +40,8 @@ class If : public Castable<If, FlowNode> {
     Block* true_target = nullptr;
     /// The false branch block
     Block* false_target = nullptr;
-    /// An optional block where the true/false blocks will branch too if needed.
+    /// An block to reconvert the true/false barnches. The block always exists, but there maybe no
+    /// branches into it. (e.g. if both branches `return`)
     Block* merge_target = nullptr;
 };
 
