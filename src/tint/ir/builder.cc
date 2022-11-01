@@ -59,7 +59,7 @@ If* Builder::CreateIf(const ast::Statement* stmt) {
     return ir_if;
 }
 
-Loop* Builder::CreateLoop(const ast::LoopStatement* stmt) {
+Loop* Builder::CreateLoop(const ast::Statement* stmt) {
     auto* ir_loop = ir.flow_nodes.Create<Loop>(stmt);
     ir_loop->start_target = CreateBlock();
     ir_loop->continuing_target = CreateBlock();

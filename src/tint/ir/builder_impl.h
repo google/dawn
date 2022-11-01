@@ -39,6 +39,7 @@ class IfStatement;
 class LoopStatement;
 class ReturnStatement;
 class Statement;
+class WhileStatement;
 }  // namespace tint::ast
 namespace tint::ir {
 class Block;
@@ -101,6 +102,11 @@ class BuilderImpl {
     /// @param stmt the loop statement
     /// @returns true if successful, false otherwise.
     bool EmitLoop(const ast::LoopStatement* stmt);
+
+    /// Emits a loop control node to the IR.
+    /// @param stmt the while statement
+    /// @returns true if successful, false otherwise.
+    bool EmitWhile(const ast::WhileStatement* stmt);
 
     /// Emits a switch statement
     /// @param stmt the switch statement

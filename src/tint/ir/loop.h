@@ -15,7 +15,7 @@
 #ifndef SRC_TINT_IR_LOOP_H_
 #define SRC_TINT_IR_LOOP_H_
 
-#include "src/tint/ast/loop_statement.h"
+#include "src/tint/ast/statement.h"
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/flow_node.h"
 
@@ -25,12 +25,12 @@ namespace tint::ir {
 class Loop : public Castable<Loop, FlowNode> {
   public:
     /// Constructor
-    /// @param stmt the ast::LoopStatement
-    explicit Loop(const ast::LoopStatement* stmt);
+    /// @param stmt the loop, while or for statement.
+    explicit Loop(const ast::Statement* stmt);
     ~Loop() override;
 
-    /// The ast loop statement this ir loop is created from.
-    const ast::LoopStatement* source;
+    /// The ast loop, while or for statement this ir loop is created from.
+    const ast::Statement* source;
 
     /// The start block is the first block in a loop.
     Block* start_target = nullptr;

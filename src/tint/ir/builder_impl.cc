@@ -22,10 +22,12 @@
 #include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/function.h"
 #include "src/tint/ast/if_statement.h"
+#include "src/tint/ast/loop_statement.h"
 #include "src/tint/ast/return_statement.h"
 #include "src/tint/ast/statement.h"
 #include "src/tint/ast/static_assert.h"
 #include "src/tint/ast/switch_statement.h"
+#include "src/tint/ast/while_statement.h"
 #include "src/tint/ir/function.h"
 #include "src/tint/ir/if.h"
 #include "src/tint/ir/loop.h"
@@ -209,7 +211,7 @@ bool BuilderImpl::EmitStatement(const ast::Statement* stmt) {
         [&](const ast::IfStatement* i) { return EmitIf(i); },
         [&](const ast::LoopStatement* l) { return EmitLoop(l); },
         //        [&](const ast::ForLoopStatement* l) { },
-        //        [&](const ast::WhileStatement* l) { },
+        [&](const ast::WhileStatement* l) { return EmitWhile(l); },
         [&](const ast::ReturnStatement* r) { return EmitReturn(r); },
         [&](const ast::SwitchStatement* s) { return EmitSwitch(s); },
         //        [&](const ast::VariableDeclStatement* v) { },
@@ -310,6 +312,43 @@ bool BuilderImpl::EmitLoop(const ast::LoopStatement* stmt) {
     if (!IsConnected(loop_node->merge_target)) {
         current_flow_block_ = nullptr;
     }
+    return true;
+}
+
+bool BuilderImpl::EmitWhile(const ast::WhileStatement* stmt) {
+    auto* loop_node = builder_.CreateLoop(stmt);
+    // Continue is always empty, just go back to the start
+    builder_.Branch(loop_node->continuing_target, loop_node->start_target);
+
+    BranchTo(loop_node);
+
+    ast_to_flow_[stmt] = loop_node;
+
+    {
+        FlowStackScope scope(this, loop_node);
+
+        current_flow_block_ = loop_node->start_target;
+
+        // TODO(dsinclair): Emit the instructions for the condition
+
+        // Create an if (cond) {} else {break;} control flow
+        auto* if_node = builder_.CreateIf(nullptr);
+        builder_.Branch(if_node->true_target, if_node->merge_target);
+        builder_.Branch(if_node->false_target, loop_node->merge_target);
+        // TODO(dsinclair): set if condition register into if flow node
+
+        BranchTo(if_node);
+
+        current_flow_block_ = if_node->merge_target;
+        if (!EmitStatement(stmt->body)) {
+            return false;
+        }
+
+        BranchToIfNeeded(loop_node->continuing_target);
+    }
+    // The while loop always has a path to the merge target as the break statement comes before
+    // anything inside the loop.
+    current_flow_block_ = loop_node->merge_target;
     return true;
 }
 

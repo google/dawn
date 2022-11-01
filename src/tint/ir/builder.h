@@ -60,10 +60,10 @@ class Builder {
     /// @returns the flow node
     If* CreateIf(const ast::Statement* stmt);
 
-    /// Creates a loop flow node for the given ast::LoopStatement
-    /// @param stmt the ast::LoopStatement
+    /// Creates a loop flow node for the given ast loop, while or for statement
+    /// @param stmt the ast loop, while or for statement
     /// @returns the flow node
-    Loop* CreateLoop(const ast::LoopStatement* stmt);
+    Loop* CreateLoop(const ast::Statement* stmt);
 
     /// Creates a switch flow node for the given ast::SwitchStatement
     /// @param stmt the ast::SwitchStatment
