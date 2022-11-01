@@ -138,8 +138,10 @@ ResultType BuilderImpl::Build() {
                 return true;
             },
             [&](Default) {
-                TINT_ICE(IR, diagnostics_) << "unhandled type: " << decl->TypeInfo().name;
-                return false;
+                diagnostics_.add_warning(tint::diag::System::IR,
+                                         "unknown type: " + std::string(decl->TypeInfo().name),
+                                         decl->source);
+                return true;
             });
         if (!ok) {
             return utils::Failure;
@@ -220,9 +222,10 @@ bool BuilderImpl::EmitStatement(const ast::Statement* stmt) {
             return true;  // Not emitted
         },
         [&](Default) {
-            TINT_ICE(IR, diagnostics_)
-                << "unknown statement type: " << std::string(stmt->TypeInfo().name);
-            return false;
+            diagnostics_.add_warning(
+                tint::diag::System::IR,
+                "unknown statement type: " + std::string(stmt->TypeInfo().name), stmt->source);
+            return true;
         });
 }
 

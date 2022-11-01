@@ -238,26 +238,6 @@ set(TINT_LIB_SRCS
   inspector/resource_binding.h
   inspector/scalar.cc
   inspector/scalar.h
-  ir/block.cc
-  ir/block.h
-  ir/builder.cc
-  ir/builder.h
-  ir/builder_impl.cc
-  ir/builder_impl.h
-  ir/flow_node.cc
-  ir/flow_node.h
-  ir/function.cc
-  ir/function.h
-  ir/if.cc
-  ir/if.h
-  ir/loop.cc
-  ir/loop.h
-  ir/module.cc
-  ir/module.h
-  ir/switch.cc
-  ir/switch.h
-  ir/terminator.cc
-  ir/terminator.h
   number.cc
   number.h
   program_builder.cc
@@ -701,6 +681,33 @@ if(${TINT_BUILD_HLSL_WRITER})
   )
 endif()
 
+if(${TINT_BUILD_IR})
+  list(APPEND TINT_LIB_SRCS
+    ir/block.cc
+    ir/block.h
+    ir/builder.cc
+    ir/builder.h
+    ir/builder_impl.cc
+    ir/builder_impl.h
+    ir/debug.cc
+    ir/debug.h
+    ir/flow_node.cc
+    ir/flow_node.h
+    ir/function.cc
+    ir/function.h
+    ir/if.cc
+    ir/if.h
+    ir/loop.cc
+    ir/loop.h
+    ir/module.cc
+    ir/module.h
+    ir/switch.cc
+    ir/switch.h
+    ir/terminator.cc
+    ir/terminator.h
+  )
+endif()
+
 if(MSVC)
   list(APPEND TINT_LIB_SRCS
     tint.natvis
@@ -864,8 +871,6 @@ if(TINT_BUILD_TESTS)
     diagnostic/diagnostic_test.cc
     diagnostic/formatter_test.cc
     diagnostic/printer_test.cc
-    ir/builder_impl_test.cc
-    ir/test_helper.h
     number_test.cc
     program_builder_test.cc
     program_test.cc
@@ -1365,6 +1370,13 @@ if(TINT_BUILD_TESTS)
       writer/hlsl/generator_impl_variable_decl_statement_test.cc
       writer/hlsl/generator_impl_workgroup_var_test.cc
       writer/hlsl/test_helper.h
+    )
+  endif()
+
+  if (${TINT_BUILD_IR})
+    list(APPEND TINT_TEST_SRCS
+      ir/builder_impl_test.cc
+      ir/test_helper.h
     )
   endif()
 

@@ -155,6 +155,7 @@ option_if_not_defined(TINT_BUILD_SPV_WRITER "Build the SPIR-V output writer" ${D
 option_if_not_defined(TINT_BUILD_WGSL_WRITER "Build the WGSL output writer" ON)
 
 option_if_not_defined(TINT_BUILD_RUN_GENERATOR "Run the intrinsic generator" OFF)
+option_if_not_defined(TINT_BUILD_IR "Build the IR" ON)
 
 option_if_not_defined(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
 option_if_not_defined(TINT_BUILD_SPIRV_TOOLS_FUZZER "Build SPIRV-Tools fuzzer" OFF)
@@ -290,6 +291,7 @@ message(STATUS "Tint build MSL writer: ${TINT_BUILD_MSL_WRITER}")
 message(STATUS "Tint build SPIR-V writer: ${TINT_BUILD_SPV_WRITER}")
 message(STATUS "Tint build WGSL writer: ${TINT_BUILD_WGSL_WRITER}")
 message(STATUS "Tint build run generator: ${TINT_BUILD_RUN_GENERATOR}")
+message(STATUS "Tint build IR: ${TINT_BUILD_IR}")
 message(STATUS "Tint build fuzzers: ${TINT_BUILD_FUZZERS}")
 message(STATUS "Tint build SPIRV-Tools fuzzer: ${TINT_BUILD_SPIRV_TOOLS_FUZZER}")
 message(STATUS "Tint build AST fuzzer: ${TINT_BUILD_AST_FUZZER}")
@@ -495,6 +497,7 @@ function(tint_core_compile_options TARGET)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_MSL_WRITER=$<BOOL:${TINT_BUILD_MSL_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_SPV_WRITER=$<BOOL:${TINT_BUILD_SPV_WRITER}>)
   target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_WGSL_WRITER=$<BOOL:${TINT_BUILD_WGSL_WRITER}>)
+  target_compile_definitions(${TARGET} PUBLIC -DTINT_BUILD_IR=$<BOOL:${TINT_BUILD_IR}>)
 
   common_compile_options(${TARGET})
 

@@ -128,3 +128,4 @@ lcov.info
 ### Clang-Tidy files
 all_findings.json
 
+tint.dot
