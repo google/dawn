@@ -303,6 +303,11 @@ void CommonFuzzer::RunInspector(Program* program) {
     inspector::Inspector inspector(program);
     diagnostics_ = program->Diagnostics();
 
+    if (!program->IsValid()) {
+        // It's not safe to use the inspector on invalid programs.
+        return;
+    }
+
     auto entry_points = inspector.GetEntryPoints();
     CHECK_INSPECTOR(program, inspector);
 
