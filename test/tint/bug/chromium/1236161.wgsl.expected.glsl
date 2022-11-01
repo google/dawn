@@ -16,7 +16,7 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void unused_entry_point() {
   return;
 }
-void tint_symbol() {
-  float tint_symbol_1 = tint_modf(1.0f).whole;
+void i() {
+  float s = tint_modf(1.0f).whole;
 }
 

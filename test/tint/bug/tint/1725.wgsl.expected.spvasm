@@ -1,0 +1,55 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 29
+; Schema: 0
+               OpCapability Shader
+         %17 = OpExtInstImport "GLSL.std.450"
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint GLCompute %tint_symbol_1 "tint_symbol_1" %tint_symbol_2_1
+               OpExecutionMode %tint_symbol_1 LocalSize 1 1 1
+               OpName %tint_symbol_2_1 "tint_symbol_2_1"
+               OpName %tint_symbol_block "tint_symbol_block"
+               OpMemberName %tint_symbol_block 0 "inner"
+               OpName %tint_symbol "tint_symbol"
+               OpName %tint_symbol_1_inner "tint_symbol_1_inner"
+               OpName %tint_symbol_2 "tint_symbol_2"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpDecorate %tint_symbol_2_1 BuiltIn LocalInvocationIndex
+               OpDecorate %tint_symbol_block Block
+               OpMemberDecorate %tint_symbol_block 0 Offset 0
+               OpDecorate %_runtimearr_uint ArrayStride 4
+               OpDecorate %tint_symbol NonWritable
+               OpDecorate %tint_symbol DescriptorSet 0
+               OpDecorate %tint_symbol Binding 0
+       %uint = OpTypeInt 32 0
+%_ptr_Input_uint = OpTypePointer Input %uint
+%tint_symbol_2_1 = OpVariable %_ptr_Input_uint Input
+%_runtimearr_uint = OpTypeRuntimeArray %uint
+%tint_symbol_block = OpTypeStruct %_runtimearr_uint
+%_ptr_StorageBuffer_tint_symbol_block = OpTypePointer StorageBuffer %tint_symbol_block
+%tint_symbol = OpVariable %_ptr_StorageBuffer_tint_symbol_block StorageBuffer
+       %void = OpTypeVoid
+          %8 = OpTypeFunction %void %uint
+        %int = OpTypeInt 32 1
+         %14 = OpConstantNull %int
+     %uint_0 = OpConstant %uint 0
+     %uint_1 = OpConstant %uint 1
+%_ptr_StorageBuffer_uint = OpTypePointer StorageBuffer %uint
+         %24 = OpTypeFunction %void
+%tint_symbol_1_inner = OpFunction %void None %8
+%tint_symbol_2 = OpFunctionParameter %uint
+         %12 = OpLabel
+         %18 = OpArrayLength %uint %tint_symbol 0
+         %20 = OpISub %uint %18 %uint_1
+         %16 = OpExtInst %uint %17 UMin %tint_symbol_2 %20
+         %22 = OpAccessChain %_ptr_StorageBuffer_uint %tint_symbol %uint_0 %16
+         %23 = OpLoad %uint %22
+               OpReturn
+               OpFunctionEnd
+%tint_symbol_1 = OpFunction %void None %24
+         %26 = OpLabel
+         %28 = OpLoad %uint %tint_symbol_2_1
+         %27 = OpFunctionCall %void %tint_symbol_1_inner %28
+               OpReturn
+               OpFunctionEnd

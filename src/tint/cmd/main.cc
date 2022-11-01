@@ -85,6 +85,8 @@ struct Options {
     bool emit_single_entry_point = false;
     std::string ep_name;
 
+    bool rename_all = false;
+
     std::vector<std::string> transforms;
 
     std::string fxc_path;
@@ -131,6 +133,7 @@ ${transforms}
   --xcrun                   -- Path to xcrun executable, used to validate MSL output.
                                When specified, automatically enables MSL validation
   --overrides               -- Override values as IDENTIFIER=VALUE, comma-separated.
+  --rename-all              -- Renames all symbols.
 )";
 
 Format parse_format(const std::string& fmt) {
@@ -451,6 +454,9 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
                 auto parts = split_on_equal(o);
                 opts->overrides.insert({parts[0], std::stod(parts[1])});
             }
+        } else if (arg == "--rename-all") {
+            ++i;
+            opts->rename_all = true;
         } else if (arg == "--hlsl-root-constant-binding-point") {
             ++i;
             if (i >= args.size()) {
@@ -1284,50 +1290,13 @@ int main(int argc, const char** argv) {
     tint::transform::Manager transform_manager;
     tint::transform::DataMap transform_inputs;
 
-    // If overrides are provided, add the SubstituteOverride transform.
-    if (!options.overrides.empty()) {
-        for (auto& t : transforms) {
-            if (t.name == std::string("substitute_override")) {
-                if (!t.make(inspector, transform_manager, transform_inputs)) {
-                    return 1;
-                }
-                break;
-            }
-        }
-    }
-
-    for (const auto& name : options.transforms) {
-        // TODO(dsinclair): The vertex pulling transform requires setup code to
-        // be run that needs user input. Should we find a way to support that here
-        // maybe through a provided file?
-
-        bool found = false;
-        for (auto& t : transforms) {
-            if (t.name == name) {
-                if (!t.make(inspector, transform_manager, transform_inputs)) {
-                    return 1;
-                }
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            std::cerr << "Unknown transform: " << name << std::endl;
-            std::cerr << "Available transforms: " << std::endl << transform_names();
-            return 1;
-        }
-    }
-
-    if (options.emit_single_entry_point) {
-        transform_manager.append(std::make_unique<tint::transform::SingleEntryPoint>());
-        transform_inputs.Add<tint::transform::SingleEntryPoint::Config>(options.ep_name);
-    }
-
+    // Renaming must always come first
     switch (options.format) {
         case Format::kMsl: {
 #if TINT_BUILD_MSL_WRITER
             transform_inputs.Add<tint::transform::Renamer::Config>(
-                tint::transform::Renamer::Target::kMslKeywords,
+                options.rename_all ? tint::transform::Renamer::Target::kAll
+                                   : tint::transform::Renamer::Target::kMslKeywords,
                 /* preserve_unicode */ false);
             transform_manager.Add<tint::transform::Renamer>();
 #endif  // TINT_BUILD_MSL_WRITER
@@ -1335,20 +1304,63 @@ int main(int argc, const char** argv) {
         }
 #if TINT_BUILD_GLSL_WRITER
         case Format::kGlsl: {
+            transform_inputs.Add<tint::transform::Renamer::Config>(
+                options.rename_all ? tint::transform::Renamer::Target::kAll
+                                   : tint::transform::Renamer::Target::kGlslKeywords,
+                /* preserve_unicode */ false);
+            transform_manager.Add<tint::transform::Renamer>();
             break;
         }
 #endif  // TINT_BUILD_GLSL_WRITER
         case Format::kHlsl: {
 #if TINT_BUILD_HLSL_WRITER
             transform_inputs.Add<tint::transform::Renamer::Config>(
-                tint::transform::Renamer::Target::kHlslKeywords,
+                options.rename_all ? tint::transform::Renamer::Target::kAll
+                                   : tint::transform::Renamer::Target::kHlslKeywords,
                 /* preserve_unicode */ false);
             transform_manager.Add<tint::transform::Renamer>();
 #endif  // TINT_BUILD_HLSL_WRITER
             break;
         }
-        default:
+        default: {
+            if (options.rename_all) {
+                transform_manager.Add<tint::transform::Renamer>();
+            }
             break;
+        }
+    }
+
+    auto enable_transform = [&](std::string_view name) {
+        for (auto& t : transforms) {
+            if (t.name == name) {
+                return t.make(inspector, transform_manager, transform_inputs);
+            }
+        }
+
+        std::cerr << "Unknown transform: " << name << std::endl;
+        std::cerr << "Available transforms: " << std::endl << transform_names();
+        return false;
+    };
+
+    // If overrides are provided, add the SubstituteOverride transform.
+    if (!options.overrides.empty()) {
+        if (!enable_transform("substitute_override")) {
+            return 1;
+        }
+    }
+
+    for (const auto& name : options.transforms) {
+        // TODO(dsinclair): The vertex pulling transform requires setup code to
+        // be run that needs user input. Should we find a way to support that here
+        // maybe through a provided file?
+        if (!enable_transform(name)) {
+            return 1;
+        }
+    }
+
+    if (options.emit_single_entry_point) {
+        transform_manager.append(std::make_unique<tint::transform::SingleEntryPoint>());
+        transform_inputs.Add<tint::transform::SingleEntryPoint::Config>(options.ep_name);
     }
 
     auto out = transform_manager.Run(program.get(), std::move(transform_inputs));
