@@ -26,6 +26,9 @@
 namespace tint {
 class Program;
 }  // namespace tint
+namespace tint::ast {
+class CaseSelector;
+}  // namespace tint::ast
 
 namespace tint::ir {
 
@@ -61,6 +64,17 @@ class Builder {
     /// @param stmt the ast::LoopStatement
     /// @returns the flow node
     Loop* CreateLoop(const ast::LoopStatement* stmt);
+
+    /// Creates a switch flow node for the given ast::SwitchStatement
+    /// @param stmt the ast::SwitchStatment
+    /// @returns the flow node
+    Switch* CreateSwitch(const ast::SwitchStatement* stmt);
+
+    /// Creates a case flow node for the given case branch.
+    /// @param s the switch to create the case into
+    /// @param selectors the case selectors for the case statement
+    /// @returns the start block for the case flow node
+    Block* CreateCase(Switch* s, const utils::VectorRef<const ast::CaseSelector*> selectors);
 
     /// Branches the given block to the given flow node.
     /// @param from the block to branch from

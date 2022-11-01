@@ -102,6 +102,11 @@ class BuilderImpl {
     /// @returns true if successful, false otherwise.
     bool EmitLoop(const ast::LoopStatement* stmt);
 
+    /// Emits a switch statement
+    /// @param stmt the switch statement
+    /// @returns true if successfull, false otherwise.
+    bool EmitSwitch(const ast::SwitchStatement* stmt);
+
     /// Emits a break statement
     /// @param stmt the break statement
     /// @returns true if successfull, false otherwise.

@@ -71,6 +71,21 @@ Loop* Builder::CreateLoop(const ast::LoopStatement* stmt) {
     return ir_loop;
 }
 
+Switch* Builder::CreateSwitch(const ast::SwitchStatement* stmt) {
+    auto* ir_switch = ir.flow_nodes.Create<Switch>(stmt);
+    ir_switch->merge_target = CreateBlock();
+    return ir_switch;
+}
+
+Block* Builder::CreateCase(Switch* s, const utils::VectorRef<const ast::CaseSelector*> selectors) {
+    s->cases.Push(Switch::Case{selectors, CreateBlock()});
+
+    Block* b = s->cases.Back().start_target;
+    // Switch branches into the case block
+    b->inbound_branches.Push(s);
+    return b;
+}
+
 void Builder::Branch(Block* from, FlowNode* to) {
     TINT_ASSERT(IR, from);
     TINT_ASSERT(IR, to);

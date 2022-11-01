@@ -18,17 +18,38 @@
 #include "src/tint/ir/block.h"
 #include "src/tint/ir/flow_node.h"
 
+// Forward declarations
+namespace tint::ast {
+class CaseSelector;
+class SwitchStatement;
+}  // namespace tint::ast
+
 namespace tint::ir {
 
 /// Flow node representing a switch statement
 class Switch : public Castable<Switch, FlowNode> {
   public:
+    /// A case label in the struct
+    struct Case {
+        /// The case selector for this node
+        const utils::VectorRef<const ast::CaseSelector*> selectors;
+        /// The start block for the case block.
+        Block* start_target;
+    };
+
     /// Constructor
-    Switch();
+    /// @param stmt the originating ast switch statement
+    explicit Switch(const ast::SwitchStatement* stmt);
     ~Switch() override;
+
+    /// The originating switch statment in the AST
+    const ast::SwitchStatement* source;
 
     /// The switch merge target
     Block* merge_target;
+
+    /// The switch case statements
+    utils::Vector<Case, 4> cases;
 };
 
 }  // namespace tint::ir

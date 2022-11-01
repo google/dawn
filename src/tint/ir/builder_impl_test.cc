@@ -14,8 +14,13 @@
 
 #include "src/tint/ir/test_helper.h"
 
+#include "src/tint/ast/case_selector.h"
+#include "src/tint/ast/int_literal_expression.h"
+
 namespace tint::ir {
 namespace {
+
+using namespace tint::number_suffixes;  // NOLINT
 
 using IRBuilderImplTest = TestHelper;
 
@@ -815,6 +820,223 @@ TEST_F(IRBuilderImplTest, Loop_Nested) {
     EXPECT_EQ(if_flow_d->merge_target->branch_target, loop_flow_a->continuing_target);
     EXPECT_EQ(loop_flow_a->continuing_target->branch_target, loop_flow_a->start_target);
     EXPECT_EQ(loop_flow_a->merge_target->branch_target, func->end_target);
+}
+
+TEST_F(IRBuilderImplTest, Switch) {
+    // func -> switch -> case 1
+    //                -> case 2
+    //                -> default
+    //
+    //   [case 1] -> switch merge
+    //   [case 2] -> switch merge
+    //   [default] -> switch merge
+    //   [switch merge] -> func end
+    //
+    auto* ast_switch = Switch(
+        1_i, utils::Vector{Case(utils::Vector{CaseSelector(0_i)}, Block()),
+                           Case(utils::Vector{CaseSelector(1_i)}, Block()), DefaultCase(Block())});
+
+    WrapInFunction(ast_switch);
+    auto& b = Build();
+
+    auto r = b.Build();
+    ASSERT_TRUE(r) << b.error();
+    auto m = r.Move();
+
+    auto* ir_switch = b.FlowNodeForAstNode(ast_switch);
+    ASSERT_NE(ir_switch, nullptr);
+    ASSERT_TRUE(ir_switch->Is<ir::Switch>());
+
+    auto* flow = ir_switch->As<ir::Switch>();
+    ASSERT_NE(flow->merge_target, nullptr);
+    ASSERT_EQ(3u, flow->cases.Length());
+
+    ASSERT_EQ(1u, m.functions.Length());
+    auto* func = m.functions[0];
+
+    ASSERT_EQ(1u, flow->cases[0].selectors.Length());
+    ASSERT_TRUE(flow->cases[0].selectors[0]->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(0_i, flow->cases[0].selectors[0]->expr->As<ast::IntLiteralExpression>()->value);
+
+    ASSERT_EQ(1u, flow->cases[1].selectors.Length());
+    ASSERT_TRUE(flow->cases[1].selectors[0]->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(1_i, flow->cases[1].selectors[0]->expr->As<ast::IntLiteralExpression>()->value);
+
+    ASSERT_EQ(1u, flow->cases[2].selectors.Length());
+    EXPECT_TRUE(flow->cases[2].selectors[0]->IsDefault());
+
+    EXPECT_EQ(1u, flow->inbound_branches.Length());
+    EXPECT_EQ(1u, flow->cases[0].start_target->inbound_branches.Length());
+    EXPECT_EQ(1u, flow->cases[1].start_target->inbound_branches.Length());
+    EXPECT_EQ(1u, flow->cases[2].start_target->inbound_branches.Length());
+    EXPECT_EQ(3u, flow->merge_target->inbound_branches.Length());
+    EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
+
+    EXPECT_EQ(func->start_target->branch_target, ir_switch);
+    EXPECT_EQ(flow->cases[0].start_target->branch_target, flow->merge_target);
+    EXPECT_EQ(flow->cases[1].start_target->branch_target, flow->merge_target);
+    EXPECT_EQ(flow->cases[2].start_target->branch_target, flow->merge_target);
+    EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
+}
+
+TEST_F(IRBuilderImplTest, Switch_OnlyDefault) {
+    // func -> switch -> default -> switch merge -> func end
+    //
+    auto* ast_switch = Switch(1_i, utils::Vector{DefaultCase(Block())});
+
+    WrapInFunction(ast_switch);
+    auto& b = Build();
+
+    auto r = b.Build();
+    ASSERT_TRUE(r) << b.error();
+    auto m = r.Move();
+
+    auto* ir_switch = b.FlowNodeForAstNode(ast_switch);
+    ASSERT_NE(ir_switch, nullptr);
+    ASSERT_TRUE(ir_switch->Is<ir::Switch>());
+
+    auto* flow = ir_switch->As<ir::Switch>();
+    ASSERT_NE(flow->merge_target, nullptr);
+    ASSERT_EQ(1u, flow->cases.Length());
+
+    ASSERT_EQ(1u, m.functions.Length());
+    auto* func = m.functions[0];
+
+    ASSERT_EQ(1u, flow->cases[0].selectors.Length());
+    EXPECT_TRUE(flow->cases[0].selectors[0]->IsDefault());
+
+    EXPECT_EQ(1u, flow->inbound_branches.Length());
+    EXPECT_EQ(1u, flow->cases[0].start_target->inbound_branches.Length());
+    EXPECT_EQ(1u, flow->merge_target->inbound_branches.Length());
+    EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
+
+    EXPECT_EQ(func->start_target->branch_target, ir_switch);
+    EXPECT_EQ(flow->cases[0].start_target->branch_target, flow->merge_target);
+    EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
+}
+
+TEST_F(IRBuilderImplTest, Switch_WithBreak) {
+    // {
+    //   switch(1) {
+    //     case 0: {
+    //       break;
+    //       if true { return;}   // Dead code
+    //     }
+    //     default: {}
+    //   }
+    // }
+    //
+    // func -> switch -> case 1
+    //                -> default
+    //
+    //   [case 1] -> switch merge
+    //   [default] -> switch merge
+    //   [switch merge] -> func end
+    auto* ast_switch = Switch(1_i, utils::Vector{Case(utils::Vector{CaseSelector(0_i)},
+                                                      Block(Break(), If(true, Block(Return())))),
+                                                 DefaultCase(Block())});
+
+    WrapInFunction(ast_switch);
+    auto& b = Build();
+
+    auto r = b.Build();
+    ASSERT_TRUE(r) << b.error();
+    auto m = r.Move();
+
+    auto* ir_switch = b.FlowNodeForAstNode(ast_switch);
+    ASSERT_NE(ir_switch, nullptr);
+    ASSERT_TRUE(ir_switch->Is<ir::Switch>());
+
+    auto* flow = ir_switch->As<ir::Switch>();
+    ASSERT_NE(flow->merge_target, nullptr);
+    ASSERT_EQ(2u, flow->cases.Length());
+
+    ASSERT_EQ(1u, m.functions.Length());
+    auto* func = m.functions[0];
+
+    ASSERT_EQ(1u, flow->cases[0].selectors.Length());
+    ASSERT_TRUE(flow->cases[0].selectors[0]->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(0_i, flow->cases[0].selectors[0]->expr->As<ast::IntLiteralExpression>()->value);
+
+    ASSERT_EQ(1u, flow->cases[1].selectors.Length());
+    EXPECT_TRUE(flow->cases[1].selectors[0]->IsDefault());
+
+    EXPECT_EQ(1u, flow->inbound_branches.Length());
+    EXPECT_EQ(1u, flow->cases[0].start_target->inbound_branches.Length());
+    EXPECT_EQ(1u, flow->cases[1].start_target->inbound_branches.Length());
+    EXPECT_EQ(2u, flow->merge_target->inbound_branches.Length());
+    // This is 1 because the if is dead-code eliminated and the return doesn't happen.
+    EXPECT_EQ(1u, func->end_target->inbound_branches.Length());
+
+    EXPECT_EQ(func->start_target->branch_target, ir_switch);
+    EXPECT_EQ(flow->cases[0].start_target->branch_target, flow->merge_target);
+    EXPECT_EQ(flow->cases[1].start_target->branch_target, flow->merge_target);
+    EXPECT_EQ(flow->merge_target->branch_target, func->end_target);
+}
+
+TEST_F(IRBuilderImplTest, Switch_AllReturn) {
+    // {
+    //   switch(1) {
+    //     case 0: {
+    //       return;
+    //     }
+    //     default: {
+    //       return;
+    //     }
+    //   }
+    //   if true { return; }  // Dead code
+    // }
+    //
+    // func -> switch -> case 1
+    //                -> default
+    //
+    //   [case 1] -> func end
+    //   [default] -> func end
+    //   [switch merge] -> nullptr
+    //
+    auto* ast_switch =
+        Switch(1_i, utils::Vector{Case(utils::Vector{CaseSelector(0_i)}, Block(Return())),
+                                  DefaultCase(Block(Return()))});
+
+    auto* ast_if = If(true, Block(Return()));
+
+    WrapInFunction(ast_switch, ast_if);
+    auto& b = Build();
+
+    auto r = b.Build();
+    ASSERT_TRUE(r) << b.error();
+    auto m = r.Move();
+
+    ASSERT_EQ(b.FlowNodeForAstNode(ast_if), nullptr);
+
+    auto* ir_switch = b.FlowNodeForAstNode(ast_switch);
+    ASSERT_NE(ir_switch, nullptr);
+    ASSERT_TRUE(ir_switch->Is<ir::Switch>());
+
+    auto* flow = ir_switch->As<ir::Switch>();
+    ASSERT_NE(flow->merge_target, nullptr);
+    ASSERT_EQ(2u, flow->cases.Length());
+
+    ASSERT_EQ(1u, m.functions.Length());
+    auto* func = m.functions[0];
+
+    ASSERT_EQ(1u, flow->cases[0].selectors.Length());
+    ASSERT_TRUE(flow->cases[0].selectors[0]->expr->Is<ast::IntLiteralExpression>());
+    EXPECT_EQ(0_i, flow->cases[0].selectors[0]->expr->As<ast::IntLiteralExpression>()->value);
+
+    ASSERT_EQ(1u, flow->cases[1].selectors.Length());
+    EXPECT_TRUE(flow->cases[1].selectors[0]->IsDefault());
+
+    EXPECT_EQ(1u, flow->inbound_branches.Length());
+    EXPECT_EQ(1u, flow->cases[0].start_target->inbound_branches.Length());
+    EXPECT_EQ(1u, flow->cases[1].start_target->inbound_branches.Length());
+    EXPECT_EQ(0u, flow->merge_target->inbound_branches.Length());
+    EXPECT_EQ(2u, func->end_target->inbound_branches.Length());
+
+    EXPECT_EQ(func->start_target->branch_target, ir_switch);
+    EXPECT_EQ(flow->cases[0].start_target->branch_target, func->end_target);
+    EXPECT_EQ(flow->cases[1].start_target->branch_target, func->end_target);
+    EXPECT_EQ(flow->merge_target->branch_target, nullptr);
 }
 
 }  // namespace
