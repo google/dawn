@@ -345,8 +345,10 @@ ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
 MaybeError Device::TickImpl() {
     DAWN_TRY(SubmitPendingCommandBuffer());
 
-    // Just run timestamp period calculation when timestamp feature is enabled.
-    if (HasFeature(Feature::TimestampQuery)) {
+    // Just run timestamp period calculation when timestamp feature is enabled and timestamp
+    // conversion is not disabled.
+    if ((HasFeature(Feature::TimestampQuery) || HasFeature(Feature::TimestampQueryInsidePasses)) &&
+        !IsToggleEnabled(Toggle::DisableTimestampQueryConversion)) {
         if (@available(macos 10.15, iOS 14.0, *)) {
             UpdateTimestampPeriod(GetMTLDevice(), mKalmanInfo.get(), &mCpuTimestamp, &mGpuTimestamp,
                                   &mTimestampPeriod);
