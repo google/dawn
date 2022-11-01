@@ -225,6 +225,63 @@ TEST_F(IRBuilderImplTest, IfStatement_BothReturn) {
     EXPECT_EQ(flow->false_target->branch_target, func->end_target);
 }
 
+TEST_F(IRBuilderImplTest, IfStatement_JumpChainToMerge) {
+    // if (true) {
+    //   loop {
+    //     break;
+    //   }
+    // }
+    //
+    // func -> start -> if true
+    //               -> if false
+    //
+    //   [if true] -> loop
+    //   [if false] -> if merge
+    //   [if merge] -> func end
+    //   [loop] ->  loop start
+    //   [loop start] -> loop merge
+    //   [loop continuing] -> loop start
+    //   [loop merge] -> if merge
+    //
+    auto* ast_loop = Loop(Block(Break()));
+    auto* ast_if = If(true, Block(ast_loop));
+    WrapInFunction(ast_if);
+    auto& b = Build();
+
+    auto r = b.Build();
+    ASSERT_TRUE(r) << b.error();
+    auto m = r.Move();
+
+    auto* ir_if = b.FlowNodeForAstNode(ast_if);
+    ASSERT_NE(ir_if, nullptr);
+    EXPECT_TRUE(ir_if->Is<ir::If>());
+
+    auto* if_flow = ir_if->As<ir::If>();
+    ASSERT_NE(if_flow->true_target, nullptr);
+    ASSERT_NE(if_flow->false_target, nullptr);
+    ASSERT_NE(if_flow->merge_target, nullptr);
+
+    auto* ir_loop = b.FlowNodeForAstNode(ast_loop);
+    ASSERT_NE(ir_loop, nullptr);
+    EXPECT_TRUE(ir_loop->Is<ir::Loop>());
+
+    auto* loop_flow = ir_loop->As<ir::Loop>();
+    ASSERT_NE(loop_flow->start_target, nullptr);
+    ASSERT_NE(loop_flow->continuing_target, nullptr);
+    ASSERT_NE(loop_flow->merge_target, nullptr);
+
+    ASSERT_EQ(1u, m.functions.Length());
+    auto* func = m.functions[0];
+
+    EXPECT_EQ(func->start_target->branch_target, if_flow);
+    EXPECT_EQ(if_flow->true_target->branch_target, loop_flow);
+    EXPECT_EQ(loop_flow->start_target->branch_target, loop_flow->merge_target);
+    EXPECT_EQ(loop_flow->merge_target->branch_target, if_flow->merge_target);
+    EXPECT_EQ(loop_flow->continuing_target->branch_target, loop_flow->start_target);
+    EXPECT_EQ(if_flow->false_target->branch_target, if_flow->merge_target);
+    EXPECT_EQ(if_flow->merge_target->branch_target, func->end_target);
+}
+
 TEST_F(IRBuilderImplTest, Loop_WithBreak) {
     // func -> start -> loop -> loop start -> loop merge -> func end
     //

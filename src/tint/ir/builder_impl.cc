@@ -254,22 +254,17 @@ bool BuilderImpl::EmitIf(const ast::IfStatement* stmt) {
         if (!EmitStatement(stmt->body)) {
             return false;
         }
+        // If the true branch did not execute control flow, then go to the merge target
+        BranchToIfNeeded(if_node->merge_target);
 
         current_flow_block_ = if_node->false_target;
         if (stmt->else_statement && !EmitStatement(stmt->else_statement)) {
             return false;
         }
+        // If the false branch did not execute control flow, then go to the merge target
+        BranchToIfNeeded(if_node->merge_target);
     }
     current_flow_block_ = nullptr;
-
-    // If the true branch did not execute control flow, then go to the merge target
-    if (!IsBranched(if_node->true_target)) {
-        builder_.Branch(if_node->true_target, if_node->merge_target);
-    }
-    // If the false branch did not execute control flow, then go to the merge target
-    if (!IsBranched(if_node->false_target)) {
-        builder_.Branch(if_node->false_target, if_node->merge_target);
-    }
 
     // If both branches went somewhere, then they both returned, continued or broke. So,
     // there is no need for the if merge-block and there is nothing to branch to the merge
@@ -454,10 +449,6 @@ bool BuilderImpl::EmitReturn(const ast::ReturnStatement*) {
     // TODO(dsinclair): Emit the return value ....
 
     BranchTo(current_function_->end_target);
-
-    // TODO(dsinclair): The BranchTo will reset the current block. What happens with dead code
-    // after the return?
-
     return true;
 }
 
@@ -474,8 +465,6 @@ bool BuilderImpl::EmitBreak(const ast::BreakStatement*) {
         return false;
     }
 
-    // TODO(dsinclair): The BranchTo will reset the current block. What happens with dead code
-    // after the break?
     return true;
 }
 
@@ -488,9 +477,6 @@ bool BuilderImpl::EmitContinue(const ast::ContinueStatement*) {
     } else {
         TINT_UNREACHABLE(IR, diagnostics_);
     }
-
-    // TODO(dsinclair): The BranchTo will reset the current block. What happens with dead code
-    // after the continue?
 
     return true;
 }
