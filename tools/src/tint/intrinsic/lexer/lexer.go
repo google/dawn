@@ -50,7 +50,7 @@ func (l *lexer) lex() error {
 			return nil
 		case ' ', '\t':
 			l.next()
-		case '\n':
+		case '\r', '\n':
 			l.next()
 		case '@':
 			l.tok(1, tok.Attr)
