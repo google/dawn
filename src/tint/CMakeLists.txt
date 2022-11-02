@@ -509,8 +509,9 @@ function(tint_generate TARGET)
         ${PROJECT_SOURCE_DIR}/src/tint/intrinsics.def
         ${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}.tmpl
     )
+    set(GEN_CMD ${PROJECT_SOURCE_DIR}/tools/golang/bin/go run ./tools/src/cmd/gen)
     add_custom_command(
-        COMMAND ./tools/run gen -o ${DAWN_BUILD_GEN_DIR} ${PROJECT_SOURCE_DIR}/src/tint/${TARGET}.tmpl
+        COMMAND ${GEN_CMD} -o ${DAWN_BUILD_GEN_DIR} ${PROJECT_SOURCE_DIR}/src/tint/${TARGET}.tmpl
         DEPENDS ${IN}
         OUTPUT ${DAWN_BUILD_GEN_DIR}/src/tint/${TARGET}
         COMMENT "Tint: Generating files for ${TARGET}"
