@@ -1996,5 +1996,112 @@ fn f() {
     EXPECT_EQ(expect, str(got));
 }
 
+////////////////////////////////////////////////////////////////////////////////
+// quantizeToF16
+////////////////////////////////////////////////////////////////////////////////
+DataMap polyfillQuantizeToF16_2d_f32() {
+    BuiltinPolyfill::Builtins builtins;
+    builtins.quantize_to_vec_f16 = true;
+    DataMap data;
+    data.Add<BuiltinPolyfill::Config>(builtins);
+    return data;
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunQuantizeToF16_Scalar) {
+    auto* src = R"(
+fn f() {
+  let v = 0.5;
+  quantizeToF16(0.5);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src, polyfillQuantizeToF16_2d_f32()));
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunQuantizeToF16_Vector) {
+    auto* src = R"(
+fn f() {
+  let v = 0.5;
+  quantizeToF16(vec2(v));
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillQuantizeToF16_2d_f32()));
+}
+
+TEST_F(BuiltinPolyfillTest, QuantizeToF16_Vec2) {
+    auto* src = R"(
+fn f() {
+  let v = 0.5;
+  quantizeToF16(vec2(v));
+}
+)";
+
+    auto* expect = R"(
+fn tint_quantizeToF16(v : vec2<f32>) -> vec2<f32> {
+  return vec2<f32>(quantizeToF16(v[0u]), quantizeToF16(v[1u]));
+}
+
+fn f() {
+  let v = 0.5;
+  tint_quantizeToF16(vec2(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillQuantizeToF16_2d_f32());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, QuantizeToF16_Vec3) {
+    auto* src = R"(
+fn f() {
+  let v = 0.5;
+  quantizeToF16(vec3(v));
+}
+)";
+
+    auto* expect = R"(
+fn tint_quantizeToF16(v : vec3<f32>) -> vec3<f32> {
+  return vec3<f32>(quantizeToF16(v[0u]), quantizeToF16(v[1u]), quantizeToF16(v[2u]));
+}
+
+fn f() {
+  let v = 0.5;
+  tint_quantizeToF16(vec3(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillQuantizeToF16_2d_f32());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, QuantizeToF16_Vec4) {
+    auto* src = R"(
+fn f() {
+  let v = 0.5;
+  quantizeToF16(vec4(v));
+}
+)";
+
+    auto* expect = R"(
+fn tint_quantizeToF16(v : vec4<f32>) -> vec4<f32> {
+  return vec4<f32>(quantizeToF16(v[0u]), quantizeToF16(v[1u]), quantizeToF16(v[2u]), quantizeToF16(v[3u]));
+}
+
+fn f() {
+  let v = 0.5;
+  tint_quantizeToF16(vec4(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillQuantizeToF16_2d_f32());
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::transform

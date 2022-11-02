@@ -1047,6 +1047,9 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
     if (type == sem::BuiltinType::kRadians) {
         return EmitRadiansCall(out, expr, builtin);
     }
+    if (type == sem::BuiltinType::kQuantizeToF16) {
+        return EmitQuantizeToF16Call(out, expr, builtin);
+    }
     if (builtin->IsDataPacking()) {
         return EmitDataPackingCall(out, expr, builtin);
     }
@@ -1938,6 +1941,22 @@ bool GeneratorImpl::EmitRadiansCall(std::ostream& out,
                                          << sem::kDegToRad << ";";
                                  return true;
                              });
+}
+
+bool GeneratorImpl::EmitQuantizeToF16Call(std::ostream& out,
+                                          const ast::CallExpression* expr,
+                                          const sem::Builtin* builtin) {
+    // Emulate by casting to min16float and back again.
+    std::string width;
+    if (auto* vec = builtin->ReturnType()->As<sem::Vector>()) {
+        width = std::to_string(vec->Width());
+    }
+    out << "float" << width << "(min16float" << width << "(";
+    if (!EmitExpression(out, expr->args[0])) {
+        return false;
+    }
+    out << "))";
+    return true;
 }
 
 bool GeneratorImpl::EmitDataPackingCall(std::ostream& out,

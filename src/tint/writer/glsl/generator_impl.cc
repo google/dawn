@@ -796,6 +796,9 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
     if (builtin->Type() == sem::BuiltinType::kRadians) {
         return EmitRadiansCall(out, expr, builtin);
     }
+    if (builtin->Type() == sem::BuiltinType::kQuantizeToF16) {
+        return EmitQuantizeToF16Call(out, expr, builtin);
+    }
     if (builtin->Type() == sem::BuiltinType::kArrayLength) {
         return EmitArrayLength(out, expr);
     }
@@ -1285,6 +1288,38 @@ bool GeneratorImpl::EmitRadiansCall(std::ostream& out,
                                          << sem::kDegToRad << suffix << ";";
                                  return true;
                              });
+}
+
+bool GeneratorImpl::EmitQuantizeToF16Call(std::ostream& out,
+                                          const ast::CallExpression* expr,
+                                          const sem::Builtin* builtin) {
+    // Emulate by casting to f16 and back again.
+    return CallBuiltinHelper(
+        out, expr, builtin, [&](TextBuffer* b, const std::vector<std::string>& params) {
+            const auto v = params[0];
+            if (auto* vec = builtin->ReturnType()->As<sem::Vector>()) {
+                switch (vec->Width()) {
+                    case 2: {
+                        line(b) << "return unpackHalf2x16(packHalf2x16(" << v << "));";
+                        return true;
+                    }
+                    case 3: {
+                        line(b) << "return vec3(";
+                        line(b) << "  unpackHalf2x16(packHalf2x16(" << v << ".xy)),";
+                        line(b) << "  unpackHalf2x16(packHalf2x16(" << v << ".zz)).x);";
+                        return true;
+                    }
+                    default: {
+                        line(b) << "return vec4(";
+                        line(b) << "  unpackHalf2x16(packHalf2x16(" << v << ".xy)),";
+                        line(b) << "  unpackHalf2x16(packHalf2x16(" << v << ".zw)));";
+                        return true;
+                    }
+                }
+            }
+            line(b) << "return unpackHalf2x16(packHalf2x16(vec2(" << v << "))).x;";
+            return true;
+        });
 }
 
 bool GeneratorImpl::EmitBarrierCall(std::ostream& out, const sem::Builtin* builtin) {

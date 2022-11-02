@@ -210,6 +210,9 @@ BuiltinType ParseBuiltinType(const std::string& name) {
     if (name == "pow") {
         return BuiltinType::kPow;
     }
+    if (name == "quantizeToF16") {
+        return BuiltinType::kQuantizeToF16;
+    }
     if (name == "radians") {
         return BuiltinType::kRadians;
     }
@@ -492,6 +495,8 @@ const char* str(BuiltinType i) {
             return "pack4x8unorm";
         case BuiltinType::kPow:
             return "pow";
+        case BuiltinType::kQuantizeToF16:
+            return "quantizeToF16";
         case BuiltinType::kRadians:
             return "radians";
         case BuiltinType::kReflect:

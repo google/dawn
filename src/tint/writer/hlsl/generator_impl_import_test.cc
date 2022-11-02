@@ -268,5 +268,31 @@ TEST_F(HlslGeneratorImplTest_Import, HlslImportData_Determinant) {
     EXPECT_EQ(out.str(), std::string("determinant(var)"));
 }
 
+TEST_F(HlslGeneratorImplTest_Import, HlslImportData_QuantizeToF16_Scalar) {
+    GlobalVar("v", Expr(2_f), ast::AddressSpace::kPrivate);
+
+    auto* expr = Call("quantizeToF16", "v");
+    WrapInFunction(expr);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), std::string("float(min16float(v))"));
+}
+
+TEST_F(HlslGeneratorImplTest_Import, HlslImportData_QuantizeToF16_Vector) {
+    GlobalVar("v", vec3<f32>(2_f), ast::AddressSpace::kPrivate);
+
+    auto* expr = Call("quantizeToF16", "v");
+    WrapInFunction(expr);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), std::string("float3(min16float3(v))"));
+}
+
 }  // namespace
 }  // namespace tint::writer::hlsl

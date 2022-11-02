@@ -1266,5 +1266,118 @@ void main() {
 )");
 }
 
+TEST_F(GlslGeneratorImplTest_Builtin, QuantizeToF16_Scalar) {
+    GlobalVar("v", Expr(2_f), ast::AddressSpace::kPrivate);
+    WrapInFunction(Call("quantizeToF16", "v"));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+
+float tint_quantizeToF16(float param_0) {
+  return unpackHalf2x16(packHalf2x16(vec2(param_0))).x;
+}
+
+
+float v = 2.0f;
+void test_function() {
+  float tint_symbol = tint_quantizeToF16(v);
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
+}
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_Builtin, QuantizeToF16_Vec2) {
+    GlobalVar("v", vec2<f32>(2_f), ast::AddressSpace::kPrivate);
+    WrapInFunction(Call("quantizeToF16", "v"));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+
+vec2 tint_quantizeToF16(vec2 param_0) {
+  return unpackHalf2x16(packHalf2x16(param_0));
+}
+
+
+vec2 v = vec2(2.0f);
+void test_function() {
+  vec2 tint_symbol = tint_quantizeToF16(v);
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
+}
+)");
+}
+
+TEST_F(GlslGeneratorImplTest_Builtin, QuantizeToF16_Vec3) {
+    GlobalVar("v", vec3<f32>(2_f), ast::AddressSpace::kPrivate);
+    WrapInFunction(Call("quantizeToF16", "v"));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+
+vec3 tint_quantizeToF16(vec3 param_0) {
+  return vec3(
+    unpackHalf2x16(packHalf2x16(param_0.xy)),
+    unpackHalf2x16(packHalf2x16(param_0.zz)).x);
+}
+
+
+vec3 v = vec3(2.0f);
+void test_function() {
+  vec3 tint_symbol = tint_quantizeToF16(v);
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
+}
+)");
+}
+
+
+TEST_F(GlslGeneratorImplTest_Builtin, QuantizeToF16_Vec4) {
+    GlobalVar("v", vec4<f32>(2_f), ast::AddressSpace::kPrivate);
+    WrapInFunction(Call("quantizeToF16", "v"));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+
+vec4 tint_quantizeToF16(vec4 param_0) {
+  return vec4(
+    unpackHalf2x16(packHalf2x16(param_0.xy)),
+    unpackHalf2x16(packHalf2x16(param_0.zw)));
+}
+
+
+vec4 v = vec4(2.0f);
+void test_function() {
+  vec4 tint_symbol = tint_quantizeToF16(v);
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
+}
+)");
+}
+
 }  // namespace
 }  // namespace tint::writer::glsl

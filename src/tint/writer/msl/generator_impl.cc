@@ -691,6 +691,18 @@ bool GeneratorImpl::EmitBuiltinCall(std::ostream& out,
             out << "))";
             return true;
         }
+        case sem::BuiltinType::kQuantizeToF16: {
+            std::string width = "";
+            if (auto* vec = builtin->ReturnType()->As<sem::Vector>()) {
+                width = std::to_string(vec->Width());
+            }
+            out << "float" << width << "(half" << width << "(";
+            if (!EmitExpression(out, expr->args[0])) {
+                return false;
+            }
+            out << "))";
+            return true;
+        }
         // TODO(crbug.com/tint/661): Combine sequential barriers to a single
         // instruction.
         case sem::BuiltinType::kStorageBarrier: {

@@ -556,6 +556,27 @@ struct BuiltinPolyfill::State {
         return name;
     }
 
+    /// Builds the polyfill function for the `quantizeToF16` builtin, by replacing the vector form
+    /// with scalar calls.
+    /// @param vec the vector type
+    /// @return the polyfill function name
+    Symbol quantizeToF16(const sem::Vector* vec) {
+        auto name = b.Symbols().New("tint_quantizeToF16");
+        utils::Vector<const ast::Expression*, 4> args;
+        for (uint32_t i = 0; i < vec->Width(); i++) {
+            args.Push(b.Call("quantizeToF16", b.IndexAccessor("v", u32(i))));
+        }
+        b.Func(name,
+               utils::Vector{
+                   b.Param("v", T(vec)),
+               },
+               T(vec),
+               utils::Vector{
+                   b.Return(b.Construct(T(vec), std::move(args))),
+               });
+        return name;
+    }
+
   private:
     /// @returns the AST type for the given sem type
     const ast::Type* T(const sem::Type* ty) const { return CreateASTTypeFor(ctx, ty); }
@@ -656,6 +677,13 @@ bool BuiltinPolyfill::ShouldRun(const Program* program, const DataMap& data) con
                                 auto* tex = sig.Parameter(sem::ParameterUsage::kTexture);
                                 if (auto* stex = tex->Type()->As<sem::SampledTexture>()) {
                                     return stex->type()->Is<sem::F32>();
+                                }
+                            }
+                            break;
+                        case sem::BuiltinType::kQuantizeToF16:
+                            if (builtins.quantize_to_vec_f16) {
+                                if (builtin->ReturnType()->Is<sem::Vector>()) {
+                                    return true;
                                 }
                             }
                             break;
@@ -778,6 +806,15 @@ void BuiltinPolyfill::Run(CloneContext& ctx, const DataMap& data, DataMap&) cons
                             }
                         }
                         break;
+                    case sem::BuiltinType::kQuantizeToF16:
+                        if (builtins.quantize_to_vec_f16) {
+                            if (auto* vec = builtin->ReturnType()->As<sem::Vector>()) {
+                                polyfill = utils::GetOrCreate(polyfills, builtin,
+                                                              [&] { return s.quantizeToF16(vec); });
+                            }
+                        }
+                        break;
+
                     default:
                         break;
                 }

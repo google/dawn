@@ -615,7 +615,6 @@ OpFunctionEnd
 // TODO(dneto): OpSConvert // only if multiple widths
 // TODO(dneto): OpUConvert // only if multiple widths
 // TODO(dneto): OpFConvert // only if multiple widths
-// TODO(dneto): OpQuantizeToF16 // only if f16 supported
 // TODO(dneto): OpSatConvertSToU // Kernel (OpenCL), not in WebGPU
 // TODO(dneto): OpSatConvertUToS // Kernel (OpenCL), not in WebGPU
 

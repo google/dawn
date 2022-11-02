@@ -247,5 +247,31 @@ TEST_F(MslGeneratorImplTest, MslImportData_Determinant) {
     EXPECT_EQ(out.str(), std::string("determinant(var)"));
 }
 
+TEST_F(MslGeneratorImplTest, MslImportData_QuantizeToF16_Scalar) {
+    GlobalVar("v", Expr(2_f), ast::AddressSpace::kPrivate);
+
+    auto* expr = Call("quantizeToF16", "v");
+    WrapInFunction(expr);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "float(half(v))");
+}
+
+TEST_F(MslGeneratorImplTest, MslImportData_QuantizeToF16_Vector) {
+    GlobalVar("v", vec3<f32>(2_f), ast::AddressSpace::kPrivate);
+
+    auto* expr = Call("quantizeToF16", "v");
+    WrapInFunction(expr);
+
+    GeneratorImpl& gen = Build();
+
+    std::stringstream out;
+    ASSERT_TRUE(gen.EmitCall(out, expr)) << gen.error();
+    EXPECT_EQ(out.str(), "float3(half3(v))");
+}
+
 }  // namespace
 }  // namespace tint::writer::msl

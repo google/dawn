@@ -2505,6 +2505,9 @@ uint32_t Builder::GenerateBuiltinCall(const sem::Call* call, const sem::Builtin*
             }
             return result_id;
         }
+        case BuiltinType::kQuantizeToF16:
+            op = spv::Op::OpQuantizeToF16;
+            break;
         case BuiltinType::kReverseBits:
             op = spv::Op::OpBitReverse;
             break;

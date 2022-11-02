@@ -92,6 +92,7 @@ enum class BuiltinType {
     kPack4X8Snorm,
     kPack4X8Unorm,
     kPow,
+    kQuantizeToF16,
     kRadians,
     kReflect,
     kRefract,

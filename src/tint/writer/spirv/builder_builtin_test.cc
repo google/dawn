@@ -1854,6 +1854,105 @@ OpFunctionEnd
     Validate(b);
 }
 
+TEST_F(BuiltinBuilderTest, Call_QuantizeToF16_Scalar) {
+    GlobalVar("v", Expr(2_f), ast::AddressSpace::kPrivate);
+
+    Func("a_func", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(Let("l", Call("quantizeToF16", "v"))),
+         },
+         utils::Vector{
+             Stage(ast::PipelineStage::kFragment),
+         });
+
+    spirv::Builder& b = SanitizeAndBuild();
+
+    ASSERT_TRUE(b.Build()) << b.error();
+    auto got = DumpBuilder(b);
+    auto* expect = R"(OpCapability Shader
+OpMemoryModel Logical GLSL450
+OpEntryPoint Fragment %7 "a_func"
+OpExecutionMode %7 OriginUpperLeft
+OpName %3 "v"
+OpName %7 "a_func"
+%1 = OpTypeFloat 32
+%2 = OpConstant %1 2
+%4 = OpTypePointer Private %1
+%3 = OpVariable %4 Private %2
+%6 = OpTypeVoid
+%5 = OpTypeFunction %6
+%7 = OpFunction %6 None %5
+%8 = OpLabel
+%10 = OpLoad %1 %3
+%9 = OpQuantizeToF16 %1 %10
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(expect, got);
+
+    Validate(b);
+}
+
+TEST_F(BuiltinBuilderTest, Call_QuantizeToF16_Vector) {
+    GlobalVar("v", vec3<f32>(2_f), ast::AddressSpace::kPrivate);
+
+    Func("a_func", utils::Empty, ty.void_(),
+         utils::Vector{
+             Decl(Let("l", Call("quantizeToF16", "v"))),
+         },
+         utils::Vector{
+             Stage(ast::PipelineStage::kFragment),
+         });
+
+    spirv::Builder& b = SanitizeAndBuild();
+
+    ASSERT_TRUE(b.Build()) << b.error();
+    auto got = DumpBuilder(b);
+    auto* expect = R"(OpCapability Shader
+OpMemoryModel Logical GLSL450
+OpEntryPoint Fragment %24 "a_func"
+OpExecutionMode %24 OriginUpperLeft
+OpName %5 "v"
+OpName %8 "tint_quantizeToF16"
+OpName %9 "v_1"
+OpName %24 "a_func"
+%2 = OpTypeFloat 32
+%1 = OpTypeVector %2 3
+%3 = OpConstant %2 2
+%4 = OpConstantComposite %1 %3 %3 %3
+%6 = OpTypePointer Private %1
+%5 = OpVariable %6 Private %4
+%7 = OpTypeFunction %1 %1
+%12 = OpTypeInt 32 0
+%13 = OpConstantNull %12
+%16 = OpConstant %12 1
+%19 = OpConstant %12 2
+%23 = OpTypeVoid
+%22 = OpTypeFunction %23
+%8 = OpFunction %1 None %7
+%9 = OpFunctionParameter %1
+%10 = OpLabel
+%14 = OpCompositeExtract %2 %9 0
+%11 = OpQuantizeToF16 %2 %14
+%17 = OpCompositeExtract %2 %9 1
+%15 = OpQuantizeToF16 %2 %17
+%20 = OpCompositeExtract %2 %9 2
+%18 = OpQuantizeToF16 %2 %20
+%21 = OpCompositeConstruct %1 %11 %15 %18
+OpReturnValue %21
+OpFunctionEnd
+%24 = OpFunction %23 None %22
+%25 = OpLabel
+%27 = OpLoad %1 %5
+%26 = OpFunctionCall %1 %8 %27
+OpReturn
+OpFunctionEnd
+)";
+    EXPECT_EQ(expect, got);
+
+    Validate(b);
+}
+
 }  // namespace float_builtin_tests
 
 // Tests for Numeric builtins with all integer parameter
