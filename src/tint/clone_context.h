@@ -203,26 +203,26 @@ class CloneContext {
         auto transforms = list_transforms_.Find(&from);
 
         if (transforms) {
-            for (auto* o : transforms->insert_front_) {
-                to.Push(CheckedCast<T>(o));
+            for (auto& builder : transforms->insert_front_) {
+                to.Push(CheckedCast<T>(builder()));
             }
             for (auto& el : from) {
                 if (auto* insert_before = transforms->insert_before_.Find(el)) {
-                    for (auto insert : *insert_before) {
-                        to.Push(CheckedCast<T>(insert));
+                    for (auto& builder : *insert_before) {
+                        to.Push(CheckedCast<T>(builder()));
                     }
                 }
                 if (!transforms->remove_.Contains(el)) {
                     to.Push(Clone(el));
                 }
                 if (auto* insert_after = transforms->insert_after_.Find(el)) {
-                    for (auto insert : *insert_after) {
-                        to.Push(CheckedCast<T>(insert));
+                    for (auto& builder : *insert_after) {
+                        to.Push(CheckedCast<T>(builder()));
                     }
                 }
             }
-            for (auto* o : transforms->insert_back_) {
-                to.Push(CheckedCast<T>(o));
+            for (auto& builder : transforms->insert_back_) {
+                to.Push(CheckedCast<T>(builder()));
             }
         } else {
             for (auto& el : from) {
@@ -232,8 +232,8 @@ class CloneContext {
                 // transform for `from`.
                 if (transforms) {
                     if (auto* insert_after = transforms->insert_after_.Find(el)) {
-                        for (auto insert : *insert_after) {
-                            to.Push(CheckedCast<T>(insert));
+                        for (auto& builder : *insert_after) {
+                            to.Push(CheckedCast<T>(builder()));
                         }
                     }
                 }
@@ -242,8 +242,8 @@ class CloneContext {
             // Clone(el) may have updated the transformation list, adding an `insert_back_`
             // transform for `from`.
             if (transforms) {
-                for (auto* o : transforms->insert_back_) {
-                    to.Push(CheckedCast<T>(o));
+                for (auto& builder : transforms->insert_back_) {
+                    to.Push(CheckedCast<T>(builder()));
                 }
             }
         }
@@ -374,7 +374,7 @@ class CloneContext {
         return *this;
     }
 
-    /// Removes `object` from the cloned copy of `vector`.
+    /// Removes @p object from the cloned copy of @p vector.
     /// @param vector the vector in #src
     /// @param object a pointer to the object in #src that will be omitted from
     /// the cloned vector.
@@ -392,7 +392,7 @@ class CloneContext {
         return *this;
     }
 
-    /// Inserts `object` before any other objects of `vector`, when it is cloned.
+    /// Inserts @p object before any other objects of @p vector, when the vector is cloned.
     /// @param vector the vector in #src
     /// @param object a pointer to the object in #dst that will be inserted at the
     /// front of the vector
@@ -400,11 +400,21 @@ class CloneContext {
     template <typename T, size_t N, typename OBJECT>
     CloneContext& InsertFront(const utils::Vector<T, N>& vector, OBJECT* object) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, object);
-        list_transforms_.Edit(&vector).insert_front_.Push(object);
+        return InsertFront(vector, [object] { return object; });
+    }
+
+    /// Inserts a lazily built object before any other objects of @p vector, when the vector is
+    /// cloned.
+    /// @param vector the vector in #src
+    /// @param builder a builder of the object that will be inserted at the front of the vector.
+    /// @returns this CloneContext so calls can be chained
+    template <typename T, size_t N, typename BUILDER>
+    CloneContext& InsertFront(const utils::Vector<T, N>& vector, BUILDER&& builder) {
+        list_transforms_.Edit(&vector).insert_front_.Push(std::forward<BUILDER>(builder));
         return *this;
     }
 
-    /// Inserts `object` after any other objects of `vector`, when it is cloned.
+    /// Inserts @p object after any other objects of @p vector, when the vector is cloned.
     /// @param vector the vector in #src
     /// @param object a pointer to the object in #dst that will be inserted at the
     /// end of the vector
@@ -412,15 +422,26 @@ class CloneContext {
     template <typename T, size_t N, typename OBJECT>
     CloneContext& InsertBack(const utils::Vector<T, N>& vector, OBJECT* object) {
         TINT_ASSERT_PROGRAM_IDS_EQUAL_IF_VALID(Clone, dst, object);
-        list_transforms_.Edit(&vector).insert_back_.Push(object);
+        return InsertBack(vector, [object] { return object; });
+    }
+
+    /// Inserts a lazily built object after any other objects of @p vector, when the vector is
+    /// cloned.
+    /// @param vector the vector in #src
+    /// @param builder the builder of the object in #dst that will be inserted at the end of the
+    /// vector.
+    /// @returns this CloneContext so calls can be chained
+    template <typename T, size_t N, typename BUILDER>
+    CloneContext& InsertBack(const utils::Vector<T, N>& vector, BUILDER&& builder) {
+        list_transforms_.Edit(&vector).insert_back_.Push(std::forward<BUILDER>(builder));
         return *this;
     }
 
-    /// Inserts `object` before `before` whenever `vector` is cloned.
+    /// Inserts @p object before @p before whenever @p vector is cloned.
     /// @param vector the vector in #src
     /// @param before a pointer to the object in #src
     /// @param object a pointer to the object in #dst that will be inserted before
-    /// any occurrence of the clone of `before`
+    /// any occurrence of the clone of @p before
     /// @returns this CloneContext so calls can be chained
     template <typename T, size_t N, typename BEFORE, typename OBJECT>
     CloneContext& InsertBefore(const utils::Vector<T, N>& vector,
@@ -434,15 +455,35 @@ class CloneContext {
             return *this;
         }
 
-        list_transforms_.Edit(&vector).insert_before_.GetOrZero(before).Push(object);
+        list_transforms_.Edit(&vector).insert_before_.GetOrZero(before).Push(
+            [object] { return object; });
         return *this;
     }
 
-    /// Inserts `object` after `after` whenever `vector` is cloned.
+    /// Inserts a lazily created object before @p before whenever @p vector is cloned.
+    /// @param vector the vector in #src
+    /// @param before a pointer to the object in #src
+    /// @param builder the builder of the object in #dst that will be inserted before any occurrence
+    /// of the clone of @p before
+    /// @returns this CloneContext so calls can be chained
+    template <typename T,
+              size_t N,
+              typename BEFORE,
+              typename BUILDER,
+              typename _ = std::enable_if_t<!std::is_pointer_v<std::decay_t<BUILDER>>>>
+    CloneContext& InsertBefore(const utils::Vector<T, N>& vector,
+                               const BEFORE* before,
+                               BUILDER&& builder) {
+        list_transforms_.Edit(&vector).insert_before_.GetOrZero(before).Push(
+            std::forward<BUILDER>(builder));
+        return *this;
+    }
+
+    /// Inserts @p object after @p after whenever @p vector is cloned.
     /// @param vector the vector in #src
     /// @param after a pointer to the object in #src
     /// @param object a pointer to the object in #dst that will be inserted after
-    /// any occurrence of the clone of `after`
+    /// any occurrence of the clone of @p after
     /// @returns this CloneContext so calls can be chained
     template <typename T, size_t N, typename AFTER, typename OBJECT>
     CloneContext& InsertAfter(const utils::Vector<T, N>& vector,
@@ -456,7 +497,27 @@ class CloneContext {
             return *this;
         }
 
-        list_transforms_.Edit(&vector).insert_after_.GetOrZero(after).Push(object);
+        list_transforms_.Edit(&vector).insert_after_.GetOrZero(after).Push(
+            [object] { return object; });
+        return *this;
+    }
+
+    /// Inserts a lazily created object after @p after whenever @p vector is cloned.
+    /// @param vector the vector in #src
+    /// @param after a pointer to the object in #src
+    /// @param builder the builder of the object in #dst that will be inserted after any occurrence
+    /// of the clone of @p after
+    /// @returns this CloneContext so calls can be chained
+    template <typename T,
+              size_t N,
+              typename AFTER,
+              typename BUILDER,
+              typename _ = std::enable_if_t<!std::is_pointer_v<std::decay_t<BUILDER>>>>
+    CloneContext& InsertAfter(const utils::Vector<T, N>& vector,
+                              const AFTER* after,
+                              BUILDER&& builder) {
+        list_transforms_.Edit(&vector).insert_after_.GetOrZero(after).Push(
+            std::forward<BUILDER>(builder));
         return *this;
     }
 
@@ -487,7 +548,7 @@ class CloneContext {
     };
 
     /// A vector of const Cloneable*
-    using CloneableList = utils::Vector<const Cloneable*, 4>;
+    using CloneableBuilderList = utils::Vector<std::function<const Cloneable*()>, 4>;
 
     /// Transformations to be applied to a list (vector)
     struct ListTransforms {
@@ -495,20 +556,20 @@ class CloneContext {
         utils::Hashset<const Cloneable*, 4> remove_;
 
         /// A list of objects in #dst to insert before any others when the vector is cloned.
-        CloneableList insert_front_;
+        CloneableBuilderList insert_front_;
 
         /// A list of objects in #dst to insert after all others when the vector is cloned.
-        CloneableList insert_back_;
+        CloneableBuilderList insert_back_;
 
         /// A map of object in #src to the list of cloned objects in #dst.
         /// Clone(const utils::Vector<T*>& v) will use this to insert the map-value
         /// list into the target vector before cloning and inserting the map-key.
-        utils::Hashmap<const Cloneable*, CloneableList, 4> insert_before_;
+        utils::Hashmap<const Cloneable*, CloneableBuilderList, 4> insert_before_;
 
         /// A map of object in #src to the list of cloned objects in #dst.
         /// Clone(const utils::Vector<T*>& v) will use this to insert the map-value
         /// list into the target vector after cloning and inserting the map-key.
-        utils::Hashmap<const Cloneable*, CloneableList, 4> insert_after_;
+        utils::Hashmap<const Cloneable*, CloneableBuilderList, 4> insert_after_;
     };
 
     CloneContext(const CloneContext&) = delete;
