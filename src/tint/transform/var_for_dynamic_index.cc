@@ -57,7 +57,6 @@ void VarForDynamicIndex::Run(CloneContext& ctx, const DataMap&, DataMap&) const 
         }
     }
 
-    hoist_to_decl_before.Apply();
     ctx.Clone();
 }
 

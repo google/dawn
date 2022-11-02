@@ -102,7 +102,6 @@ void PromoteInitializersToLet::Run(CloneContext& ctx, const DataMap&, DataMap&) 
         }
     }
 
-    hoist_to_decl_before.Apply();
     ctx.Clone();
 }
 

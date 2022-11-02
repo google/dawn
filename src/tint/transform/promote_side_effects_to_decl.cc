@@ -74,8 +74,6 @@ class SimplifySideEffectStatements::State : public StateBase {
                 hoist_to_decl_before.Prepare(sem_expr);
             }
         }
-
-        hoist_to_decl_before.Apply();
         ctx.Clone();
     }
 };

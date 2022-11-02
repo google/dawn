@@ -14,7 +14,7 @@
 
 #include "src/tint/transform/utils/hoist_to_decl_before.h"
 
-#include <unordered_map>
+#include <utility>
 
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/block_statement.h"
@@ -23,7 +23,9 @@
 #include "src/tint/sem/reference.h"
 #include "src/tint/sem/variable.h"
 #include "src/tint/sem/while_statement.h"
+#include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/reverse.h"
+#include "src/tint/utils/transform.h"
 
 namespace tint::transform {
 
@@ -36,46 +38,78 @@ class HoistToDeclBefore::State {
     /// loop, so that declaration statements can be inserted before the
     /// condition expression or continuing statement.
     struct LoopInfo {
-        utils::Vector<const ast::Statement*, 8> cond_decls;
-        utils::Vector<const ast::Statement*, 8> cont_decls;
+        utils::Vector<StmtBuilder, 8> cond_decls;
+        utils::Vector<StmtBuilder, 8> cont_decls;
     };
 
     /// Info for each else-if that needs decomposing
     struct ElseIfInfo {
         /// Decls to insert before condition
-        utils::Vector<const ast::Statement*, 8> cond_decls;
+        utils::Vector<StmtBuilder, 8> cond_decls;
     };
 
     /// For-loops that need to be decomposed to loops.
-    std::unordered_map<const sem::ForLoopStatement*, LoopInfo> for_loops;
+    utils::Hashmap<const sem::ForLoopStatement*, LoopInfo, 4> for_loops;
 
     /// Whiles that need to be decomposed to loops.
-    std::unordered_map<const sem::WhileStatement*, LoopInfo> while_loops;
+    utils::Hashmap<const sem::WhileStatement*, LoopInfo, 4> while_loops;
 
     /// 'else if' statements that need to be decomposed to 'else {if}'
-    std::unordered_map<const ast::IfStatement*, ElseIfInfo> else_ifs;
+    utils::Hashmap<const ast::IfStatement*, ElseIfInfo, 4> else_ifs;
 
-    // Converts any for-loops marked for conversion to loops, inserting
-    // registered declaration statements before the condition or continuing
-    // statement.
-    void ForLoopsToLoops() {
-        if (for_loops.empty()) {
-            return;
+    template <size_t N>
+    static auto Build(const utils::Vector<StmtBuilder, N>& builders) {
+        return utils::Transform(builders, [&](auto& builder) { return builder(); });
+    }
+
+    /// @returns a new LoopInfo reference for the given @p for_loop.
+    /// @note if this is the first call to this method, then RegisterForLoopTransform() is
+    /// automatically called.
+    /// @warning the returned reference is invalid if this is called a second time, or the
+    /// #for_loops map is mutated.
+    LoopInfo& ForLoop(const sem::ForLoopStatement* for_loop) {
+        if (for_loops.IsEmpty()) {
+            RegisterForLoopTransform();
         }
+        return for_loops.GetOrZero(for_loop);
+    }
 
-        // At least one for-loop needs to be transformed into a loop.
+    /// @returns a new LoopInfo reference for the given @p while_loop.
+    /// @note if this is the first call to this method, then RegisterWhileLoopTransform() is
+    /// automatically called.
+    /// @warning the returned reference is invalid if this is called a second time, or the
+    /// #for_loops map is mutated.
+    LoopInfo& WhileLoop(const sem::WhileStatement* while_loop) {
+        if (while_loops.IsEmpty()) {
+            RegisterWhileLoopTransform();
+        }
+        return while_loops.GetOrZero(while_loop);
+    }
+
+    /// @returns a new ElseIfInfo reference for the given @p else_if.
+    /// @note if this is the first call to this method, then RegisterElseIfTransform() is
+    /// automatically called.
+    /// @warning the returned reference is invalid if this is called a second time, or the
+    /// #else_ifs map is mutated.
+    ElseIfInfo& ElseIf(const ast::IfStatement* else_if) {
+        if (else_ifs.IsEmpty()) {
+            RegisterElseIfTransform();
+        }
+        return else_ifs.GetOrZero(else_if);
+    }
+
+    /// Registers the handler for transforming for-loops based on the content of the #for_loops map.
+    void RegisterForLoopTransform() const {
         ctx.ReplaceAll([&](const ast::ForLoopStatement* stmt) -> const ast::Statement* {
             auto& sem = ctx.src->Sem();
 
             if (auto* fl = sem.Get(stmt)) {
-                if (auto it = for_loops.find(fl); it != for_loops.end()) {
-                    auto& info = it->second;
+                if (auto* info = for_loops.Find(fl)) {
                     auto* for_loop = fl->Declaration();
                     // For-loop needs to be decomposed to a loop.
                     // Build the loop body's statements.
-                    // Start with any let declarations for the conditional
-                    // expression.
-                    auto body_stmts = info.cond_decls;
+                    // Start with any let declarations for the conditional expression.
+                    auto body_stmts = Build(info->cond_decls);
                     // If the for-loop has a condition, emit this next as:
                     //   if (!cond) { break; }
                     if (auto* cond = for_loop->condition) {
@@ -95,7 +129,7 @@ class HoistToDeclBefore::State {
                     if (auto* cont = for_loop->continuing) {
                         // Continuing block starts with any let declarations used by
                         // the continuing.
-                        auto cont_stmts = info.cont_decls;
+                        auto cont_stmts = Build(info->cont_decls);
                         cont_stmts.Push(ctx.Clone(cont));
                         continuing = b.Block(cont_stmts);
                     }
@@ -112,34 +146,29 @@ class HoistToDeclBefore::State {
         });
     }
 
-    // Converts any while-loops marked for conversion to loops, inserting
-    // registered declaration statements before the condition.
-    void WhilesToLoops() {
-        if (while_loops.empty()) {
-            return;
-        }
-
+    /// Registers the handler for transforming while-loops based on the content of the #while_loops
+    /// map.
+    void RegisterWhileLoopTransform() const {
         // At least one while needs to be transformed into a loop.
         ctx.ReplaceAll([&](const ast::WhileStatement* stmt) -> const ast::Statement* {
             auto& sem = ctx.src->Sem();
 
             if (auto* w = sem.Get(stmt)) {
-                if (auto it = while_loops.find(w); it != while_loops.end()) {
-                    auto& info = it->second;
+                if (auto* info = while_loops.Find(w)) {
                     auto* while_loop = w->Declaration();
                     // While needs to be decomposed to a loop.
                     // Build the loop body's statements.
                     // Start with any let declarations for the conditional
                     // expression.
-                    auto body_stmts = info.cond_decls;
+                    auto body_stmts = utils::Transform(info->cond_decls,
+                                                       [&](auto& builder) { return builder(); });
                     // Emit the condition as:
                     //   if (!cond) { break; }
                     auto* cond = while_loop->condition;
                     // !condition
-                    auto* not_cond =
-                        b.create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, ctx.Clone(cond));
+                    auto* not_cond = b.Not(ctx.Clone(cond));
                     // { break; }
-                    auto* break_body = b.Block(b.create<ast::BreakStatement>());
+                    auto* break_body = b.Block(b.Break());
                     // if (!condition) { break; }
                     body_stmts.Push(b.If(not_cond, break_body));
 
@@ -157,81 +186,47 @@ class HoistToDeclBefore::State {
         });
     }
 
-    void ElseIfsToElseWithNestedIfs() {
+    /// Registers the handler for transforming if-statements based on the content of the #else_ifs
+    /// map.
+    void RegisterElseIfTransform() const {
         // Decompose 'else-if' statements into 'else { if }' blocks.
-        ctx.ReplaceAll([&](const ast::IfStatement* else_if) -> const ast::Statement* {
-            if (!else_ifs.count(else_if)) {
-                return nullptr;
+        ctx.ReplaceAll([&](const ast::IfStatement* stmt) -> const ast::Statement* {
+            if (auto* info = else_ifs.Find(stmt)) {
+                // Build the else block's body statements, starting with let decls for the
+                // conditional expression.
+                auto body_stmts = Build(info->cond_decls);
+
+                // Move the 'else-if' into the new `else` block as a plain 'if'.
+                auto* cond = ctx.Clone(stmt->condition);
+                auto* body = ctx.Clone(stmt->body);
+                auto* new_if = b.If(cond, body, b.Else(ctx.Clone(stmt->else_statement)));
+                body_stmts.Push(new_if);
+
+                // Replace the 'else-if' with the new 'else' block.
+                return b.Block(body_stmts);
             }
-            auto& else_if_info = else_ifs[else_if];
-
-            // Build the else block's body statements, starting with let decls for
-            // the conditional expression.
-            auto& body_stmts = else_if_info.cond_decls;
-
-            // Move the 'else-if' into the new `else` block as a plain 'if'.
-            auto* cond = ctx.Clone(else_if->condition);
-            auto* body = ctx.Clone(else_if->body);
-            auto* new_if = b.If(cond, body, b.Else(ctx.Clone(else_if->else_statement)));
-            body_stmts.Push(new_if);
-
-            // Replace the 'else-if' with the new 'else' block.
-            return b.Block(body_stmts);
+            return nullptr;
         });
     }
 
-  public:
-    /// Constructor
-    /// @param ctx_in the clone context
-    explicit State(CloneContext& ctx_in) : ctx(ctx_in), b(*ctx_in.dst) {}
+    /// A type used to signal to InsertBeforeImpl that no insertion should take place - instead flow
+    /// control statements should just be decomposed.
+    struct Decompose {};
 
-    /// Hoists `expr` to a `let` or `var` with optional `decl_name`, inserting it
-    /// before `before_expr`.
-    /// @param before_expr expression to insert `expr` before
-    /// @param expr expression to hoist
-    /// @param as_let hoist to `let` if true, otherwise to `var`
-    /// @param decl_name optional name to use for the variable/constant name
-    /// @return true on success
-    bool Add(const sem::Expression* before_expr,
-             const ast::Expression* expr,
-             bool as_let,
-             const char* decl_name) {
-        auto name = b.Symbols().New(decl_name);
-
-        // Construct the let/var that holds the hoisted expr
-        auto* v = as_let ? static_cast<const ast::Variable*>(b.Let(name, ctx.Clone(expr)))
-                         : static_cast<const ast::Variable*>(b.Var(name, ctx.Clone(expr)));
-        auto* decl = b.Decl(v);
-
-        if (!InsertBefore(before_expr->Stmt(), decl)) {
-            return false;
-        }
-
-        // Replace the initializer expression with a reference to the let
-        ctx.Replace(expr, b.Expr(name));
-        return true;
-    }
-
-    /// Inserts `stmt` before `before_stmt`, possibly marking a for-loop to be
-    /// converted to a loop, or an else-if to an else { if }. If `decl` is
-    /// nullptr, for-loop and else-if conversions are marked, but no hoisting
-    /// takes place.
-    /// @param before_stmt statement to insert `stmt` before
-    /// @param stmt statement to insert
-    /// @return true on success
-    bool InsertBefore(const sem::Statement* before_stmt, const ast::Statement* stmt) {
+    template <typename BUILDER>
+    bool InsertBeforeImpl(const sem::Statement* before_stmt, BUILDER&& builder) {
         auto* ip = before_stmt->Declaration();
 
         auto* else_if = before_stmt->As<sem::IfStatement>();
         if (else_if && else_if->Parent()->Is<sem::IfStatement>()) {
             // Insertion point is an 'else if' condition.
             // Need to convert 'else if' to 'else { if }'.
-            auto& else_if_info = else_ifs[else_if->Declaration()];
+            auto& else_if_info = ElseIf(else_if->Declaration());
 
             // Index the map to convert this else if, even if `stmt` is nullptr.
             auto& decls = else_if_info.cond_decls;
-            if (stmt) {
-                decls.Push(stmt);
+            if constexpr (!std::is_same_v<BUILDER, Decompose>) {
+                decls.Push(std::forward<BUILDER>(builder));
             }
             return true;
         }
@@ -241,9 +236,9 @@ class HoistToDeclBefore::State {
             // For-loop needs to be decomposed to a loop.
 
             // Index the map to convert this for-loop, even if `stmt` is nullptr.
-            auto& decls = for_loops[fl].cond_decls;
-            if (stmt) {
-                decls.Push(stmt);
+            auto& decls = ForLoop(fl).cond_decls;
+            if constexpr (!std::is_same_v<BUILDER, Decompose>) {
+                decls.Push(std::forward<BUILDER>(builder));
             }
             return true;
         }
@@ -253,9 +248,9 @@ class HoistToDeclBefore::State {
             // While needs to be decomposed to a loop.
 
             // Index the map to convert this while, even if `stmt` is nullptr.
-            auto& decls = while_loops[w].cond_decls;
-            if (stmt) {
-                decls.Push(stmt);
+            auto& decls = WhileLoop(w).cond_decls;
+            if constexpr (!std::is_same_v<BUILDER, Decompose>) {
+                decls.Push(std::forward<BUILDER>(builder));
             }
             return true;
         }
@@ -264,8 +259,9 @@ class HoistToDeclBefore::State {
         if (auto* block = parent->As<sem::BlockStatement>()) {
             // Insert point sits in a block. Simple case.
             // Insert the stmt before the parent statement.
-            if (stmt) {
-                ctx.InsertBefore(block->Declaration()->statements, ip, stmt);
+            if constexpr (!std::is_same_v<BUILDER, Decompose>) {
+                ctx.InsertBefore(block->Declaration()->statements, ip,
+                                 std::forward<BUILDER>(builder));
             }
             return true;
         }
@@ -276,9 +272,9 @@ class HoistToDeclBefore::State {
             if (fl->Declaration()->initializer == ip) {
                 // Insertion point is a for-loop initializer.
                 // Insert the new statement above the for-loop.
-                if (stmt) {
+                if constexpr (!std::is_same_v<BUILDER, Decompose>) {
                     ctx.InsertBefore(fl->Block()->Declaration()->statements, fl->Declaration(),
-                                     stmt);
+                                     std::forward<BUILDER>(builder));
                 }
                 return true;
             }
@@ -288,9 +284,9 @@ class HoistToDeclBefore::State {
                 // For-loop needs to be decomposed to a loop.
 
                 // Index the map to convert this for-loop, even if `stmt` is nullptr.
-                auto& decls = for_loops[fl].cont_decls;
-                if (stmt) {
-                    decls.Push(stmt);
+                auto& decls = ForLoop(fl).cont_decls;
+                if constexpr (!std::is_same_v<BUILDER, Decompose>) {
+                    decls.Push(std::forward<BUILDER>(builder));
                 }
                 return true;
             }
@@ -304,23 +300,56 @@ class HoistToDeclBefore::State {
         return false;
     }
 
-    /// Use to signal that we plan on hoisting a decl before `before_expr`. This
-    /// will convert 'for-loop's to 'loop's and 'else-if's to 'else {if}'s if
-    /// needed.
-    /// @param before_expr expression we would hoist a decl before
-    /// @return true on success
-    bool Prepare(const sem::Expression* before_expr) {
-        return InsertBefore(before_expr->Stmt(), nullptr);
+  public:
+    /// Constructor
+    /// @param ctx_in the clone context
+    explicit State(CloneContext& ctx_in) : ctx(ctx_in), b(*ctx_in.dst) {}
+
+    /// @copydoc HoistToDeclBefore::Add()
+    bool Add(const sem::Expression* before_expr,
+             const ast::Expression* expr,
+             bool as_let,
+             const char* decl_name) {
+        auto name = b.Symbols().New(decl_name);
+
+        if (as_let) {
+            auto builder = [this, expr, name] {
+                return b.Decl(b.Let(name, ctx.CloneWithoutTransform(expr)));
+            };
+            if (!InsertBeforeImpl(before_expr->Stmt(), std::move(builder))) {
+                return false;
+            }
+        } else {
+            auto builder = [this, expr, name] {
+                return b.Decl(b.Var(name, ctx.CloneWithoutTransform(expr)));
+            };
+            if (!InsertBeforeImpl(before_expr->Stmt(), std::move(builder))) {
+                return false;
+            }
+        }
+
+        // Replace the initializer expression with a reference to the let
+        ctx.Replace(expr, b.Expr(name));
+        return true;
     }
 
-    /// Applies any scheduled insertions from previous calls to Add() to
-    /// CloneContext. Call this once before ctx.Clone().
-    /// @return true on success
-    bool Apply() {
-        ForLoopsToLoops();
-        WhilesToLoops();
-        ElseIfsToElseWithNestedIfs();
-        return true;
+    /// @copydoc HoistToDeclBefore::InsertBefore(const sem::Statement*, const ast::Statement*)
+    bool InsertBefore(const sem::Statement* before_stmt, const ast::Statement* stmt) {
+        if (stmt) {
+            auto builder = [stmt] { return stmt; };
+            return InsertBeforeImpl(before_stmt, std::move(builder));
+        }
+        return InsertBeforeImpl(before_stmt, Decompose{});
+    }
+
+    /// @copydoc HoistToDeclBefore::InsertBefore(const sem::Statement*, const StmtBuilder&)
+    bool InsertBefore(const sem::Statement* before_stmt, const StmtBuilder& builder) {
+        return InsertBeforeImpl(before_stmt, std::move(builder));
+    }
+
+    /// @copydoc HoistToDeclBefore::Prepare()
+    bool Prepare(const sem::Expression* before_expr) {
+        return InsertBefore(before_expr->Stmt(), nullptr);
     }
 };
 
@@ -340,12 +369,13 @@ bool HoistToDeclBefore::InsertBefore(const sem::Statement* before_stmt,
     return state_->InsertBefore(before_stmt, stmt);
 }
 
-bool HoistToDeclBefore::Prepare(const sem::Expression* before_expr) {
-    return state_->Prepare(before_expr);
+bool HoistToDeclBefore::InsertBefore(const sem::Statement* before_stmt,
+                                     const StmtBuilder& builder) {
+    return state_->InsertBefore(before_stmt, builder);
 }
 
-bool HoistToDeclBefore::Apply() {
-    return state_->Apply();
+bool HoistToDeclBefore::Prepare(const sem::Expression* before_expr) {
+    return state_->Prepare(before_expr);
 }
 
 }  // namespace tint::transform

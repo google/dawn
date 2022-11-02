@@ -15,6 +15,7 @@
 #ifndef SRC_TINT_TRANSFORM_UTILS_HOIST_TO_DECL_BEFORE_H_
 #define SRC_TINT_TRANSFORM_UTILS_HOIST_TO_DECL_BEFORE_H_
 
+#include <functional>
 #include <memory>
 
 #include "src/tint/sem/expression.h"
@@ -34,24 +35,39 @@ class HoistToDeclBefore {
     /// Destructor
     ~HoistToDeclBefore();
 
-    /// Hoists `expr` to a `let` or `var` with optional `decl_name`, inserting it
-    /// before `before_expr`.
+    /// StmtBuilder is a builder of an AST statement
+    using StmtBuilder = std::function<const ast::Statement*()>;
+
+    /// Hoists @p expr to a `let` or `var` with optional `decl_name`, inserting it
+    /// before @p before_expr.
     /// @param before_expr expression to insert `expr` before
     /// @param expr expression to hoist
-    /// @param as_const hoist to `let` if true, otherwise to `var`
+    /// @param as_let hoist to `let` if true, otherwise to `var`
     /// @param decl_name optional name to use for the variable/constant name
     /// @return true on success
     bool Add(const sem::Expression* before_expr,
              const ast::Expression* expr,
-             bool as_const,
+             bool as_let,
              const char* decl_name = "");
 
-    /// Inserts `stmt` before `before_stmt`, possibly converting 'for-loop's to
-    /// 'loop's if necessary.
-    /// @param before_stmt statement to insert `stmt` before
+    /// Inserts @p stmt before @p before_stmt, possibly converting 'for-loop's to 'loop's if
+    /// necessary.
+    /// @warning If the container of @p before_stmt is cloned multiple times, then the resolver will
+    /// ICE as the same statement cannot be shared.
+    /// @param before_stmt statement to insert @p stmt before
     /// @param stmt statement to insert
     /// @return true on success
     bool InsertBefore(const sem::Statement* before_stmt, const ast::Statement* stmt);
+
+    /// Inserts the returned statement of @p builder before @p before_stmt, possibly converting
+    /// 'for-loop's to 'loop's if necessary.
+    /// @note If the container of @p before_stmt is cloned multiple times, then @p builder will be
+    /// called for each clone.
+    /// @param before_stmt the preceding statement that the statement of @p builder will be inserted
+    /// before
+    /// @param builder the statement builder used to create the new statement
+    /// @return true on success
+    bool InsertBefore(const sem::Statement* before_stmt, const StmtBuilder& builder);
 
     /// Use to signal that we plan on hoisting a decl before `before_expr`. This
     /// will convert 'for-loop's to 'loop's and 'else-if's to 'else {if}'s if
@@ -59,11 +75,6 @@ class HoistToDeclBefore {
     /// @param before_expr expression we would hoist a decl before
     /// @return true on success
     bool Prepare(const sem::Expression* before_expr);
-
-    /// Applies any scheduled insertions from previous calls to Add() to
-    /// CloneContext. Call this once before ctx.Clone().
-    /// @return true on success
-    bool Apply();
 
   private:
     class State;

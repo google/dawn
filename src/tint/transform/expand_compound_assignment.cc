@@ -159,10 +159,7 @@ class State {
     }
 
     /// Finalize the transformation and clone the module.
-    void Finalize() {
-        hoist_to_decl_before.Apply();
-        ctx.Clone();
-    }
+    void Finalize() { ctx.Clone(); }
 };
 
 }  // namespace
