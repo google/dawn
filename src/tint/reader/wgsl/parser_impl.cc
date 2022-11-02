@@ -154,21 +154,26 @@ class ParserImpl::MultiTokenSource {
     /// Constructor that starts with the input `start` Source
     /// @param parser the parser
     /// @param start the start source of the range
-    MultiTokenSource(ParserImpl* parser, const Source& start) : parser_(parser), start_(start) {}
+    MultiTokenSource(ParserImpl* parser, const tint::Source& start)
+        : parser_(parser), start_(start) {}
 
-    /// Implicit conversion to Source that returns the combined source from start
-    /// to the current last token's source.
-    operator Source() const {
-        Source end = parser_->last_source().End();
+    /// @returns the Source that returns the combined source from start to the current last token's
+    /// source.
+    tint::Source Source() const {
+        auto end = parser_->last_source().End();
         if (end < start_) {
             end = start_;
         }
         return Source::Combine(start_, end);
     }
 
+    /// Implicit conversion to Source that returns the combined source from start to the current
+    /// last token's source.
+    operator tint::Source() const { return Source(); }
+
   private:
     ParserImpl* parser_;
-    Source start_;
+    tint::Source start_;
 };
 
 ParserImpl::TypedIdentifier::TypedIdentifier() = default;
@@ -1901,11 +1906,14 @@ Maybe<const ast::ReturnStatement*> ParserImpl::return_statement() {
 //   | LET optionally_typed_ident EQUAL expression
 //   | CONST optionally_typed_ident EQUAL expression
 Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_statement() {
+    auto decl_source_range = make_source_range();
     if (match(Token::Type::kConst)) {
-        auto decl = expect_optionally_typed_ident("'const' declaration");
-        if (decl.errored) {
+        auto typed_ident = expect_optionally_typed_ident("'const' declaration");
+        if (typed_ident.errored) {
             return Failure::kErrored;
         }
+
+        auto decl_source = decl_source_range.Source();
 
         if (!expect("'const' declaration", Token::Type::kEqual)) {
             return Failure::kErrored;
@@ -1919,20 +1927,22 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_statement() {
             return add_error(peek(), "missing initializer for 'const' declaration");
         }
 
-        auto* const_ = create<ast::Const>(decl->source,                             // source
-                                          builder_.Symbols().Register(decl->name),  // symbol
-                                          decl->type,                               // type
-                                          initializer.value,                        // initializer
-                                          utils::Empty);                            // attributes
+        auto* const_ = create<ast::Const>(typed_ident->source,                             // source
+                                          builder_.Symbols().Register(typed_ident->name),  // symbol
+                                          typed_ident->type,                               // type
+                                          initializer.value,  // initializer
+                                          utils::Empty);      // attributes
 
-        return create<ast::VariableDeclStatement>(decl->source, const_);
+        return create<ast::VariableDeclStatement>(decl_source, const_);
     }
 
     if (match(Token::Type::kLet)) {
-        auto decl = expect_optionally_typed_ident("'let' declaration");
-        if (decl.errored) {
+        auto typed_ident = expect_optionally_typed_ident("'let' declaration");
+        if (typed_ident.errored) {
             return Failure::kErrored;
         }
+
+        auto decl_source = decl_source_range.Source();
 
         if (!expect("'let' declaration", Token::Type::kEqual)) {
             return Failure::kErrored;
@@ -1946,13 +1956,13 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_statement() {
             return add_error(peek(), "missing initializer for 'let' declaration");
         }
 
-        auto* let = create<ast::Let>(decl->source,                             // source
-                                     builder_.Symbols().Register(decl->name),  // symbol
-                                     decl->type,                               // type
-                                     initializer.value,                        // initializer
-                                     utils::Empty);                            // attributes
+        auto* let = create<ast::Let>(typed_ident->source,                             // source
+                                     builder_.Symbols().Register(typed_ident->name),  // symbol
+                                     typed_ident->type,                               // type
+                                     initializer.value,                               // initializer
+                                     utils::Empty);                                   // attributes
 
-        return create<ast::VariableDeclStatement>(decl->source, let);
+        return create<ast::VariableDeclStatement>(decl_source, let);
     }
 
     auto decl = variable_decl();
@@ -1962,6 +1972,8 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_statement() {
     if (!decl.matched) {
         return Failure::kNoMatch;
     }
+
+    auto decl_source = decl_source_range.Source();
 
     const ast::Expression* initializer = nullptr;
     if (match(Token::Type::kEqual)) {
@@ -1976,7 +1988,7 @@ Maybe<const ast::VariableDeclStatement*> ParserImpl::variable_statement() {
         initializer = initializer_expr.value;
     }
 
-    auto* var = create<ast::Var>(decl->source,                             // source
+    auto* var = create<ast::Var>(decl_source,                              // source
                                  builder_.Symbols().Register(decl->name),  // symbol
                                  decl->type,                               // type
                                  decl->address_space,                      // address space

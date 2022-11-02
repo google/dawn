@@ -28,10 +28,10 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl) {
     ASSERT_NE(e->variable, nullptr);
     EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-    ASSERT_EQ(e->source.range.begin.line, 1u);
-    ASSERT_EQ(e->source.range.begin.column, 5u);
-    ASSERT_EQ(e->source.range.end.line, 1u);
-    ASSERT_EQ(e->source.range.end.column, 6u);
+    EXPECT_EQ(e->source.range.begin.line, 1u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
+    EXPECT_EQ(e->source.range.end.line, 1u);
+    EXPECT_EQ(e->source.range.end.column, 12u);
 
     EXPECT_EQ(e->variable->initializer, nullptr);
 }
@@ -47,10 +47,10 @@ TEST_F(ParserImplTest, VariableStmt_VariableDecl_WithInit) {
     ASSERT_NE(e->variable, nullptr);
     EXPECT_EQ(e->variable->symbol, p->builder().Symbols().Get("a"));
 
-    ASSERT_EQ(e->source.range.begin.line, 1u);
-    ASSERT_EQ(e->source.range.begin.column, 5u);
-    ASSERT_EQ(e->source.range.end.line, 1u);
-    ASSERT_EQ(e->source.range.end.column, 6u);
+    EXPECT_EQ(e->source.range.begin.line, 1u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
+    EXPECT_EQ(e->source.range.end.line, 1u);
+    EXPECT_EQ(e->source.range.end.column, 12u);
 
     ASSERT_NE(e->variable->initializer, nullptr);
     EXPECT_TRUE(e->variable->initializer->Is<ast::LiteralExpression>());
@@ -147,10 +147,10 @@ TEST_F(ParserImplTest, VariableStmt_Let) {
     ASSERT_NE(e.value, nullptr);
     ASSERT_TRUE(e->Is<ast::VariableDeclStatement>());
 
-    ASSERT_EQ(e->source.range.begin.line, 1u);
-    ASSERT_EQ(e->source.range.begin.column, 5u);
-    ASSERT_EQ(e->source.range.end.line, 1u);
-    ASSERT_EQ(e->source.range.end.column, 6u);
+    EXPECT_EQ(e->source.range.begin.line, 1u);
+    EXPECT_EQ(e->source.range.begin.column, 1u);
+    EXPECT_EQ(e->source.range.end.line, 1u);
+    EXPECT_EQ(e->source.range.end.column, 12u);
 }
 
 TEST_F(ParserImplTest, VariableStmt_Let_ComplexExpression) {
