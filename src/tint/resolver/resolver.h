@@ -349,6 +349,10 @@ class Resolver {
     /// @param index the index of the parameter
     sem::Parameter* Parameter(const ast::Parameter* param, uint32_t index);
 
+    /// @returns the location value for a `@location` attribute, validating the value's range and
+    /// type.
+    utils::Result<uint32_t> LocationAttribute(const ast::LocationAttribute* attr);
+
     /// Records the address space usage for the given type, and any transient
     /// dependencies of the type. Validates that the type can be used for the
     /// given address space, erroring if it cannot.

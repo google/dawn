@@ -797,7 +797,7 @@ bool Validator::Override(
         if (attr->Is<ast::IdAttribute>()) {
             auto id = v->OverrideId();
             if (auto it = override_ids.find(id); it != override_ids.end() && it->second != v) {
-                AddError("override IDs must be unique", attr->source);
+                AddError("@id values must be unique", attr->source);
                 AddNote("a override with an ID of " + std::to_string(id.value) +
                             " was previously declared here:",
                         ast::GetAttribute<ast::IdAttribute>(it->second->Declaration()->attributes)

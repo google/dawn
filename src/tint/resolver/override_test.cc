@@ -91,7 +91,7 @@ TEST_F(ResolverOverrideTest, DuplicateIds) {
 
     EXPECT_FALSE(r()->Resolve());
 
-    EXPECT_EQ(r()->error(), R"(56:78 error: override IDs must be unique
+    EXPECT_EQ(r()->error(), R"(56:78 error: @id values must be unique
 12:34 note: a override with an ID of 7 was previously declared here:)");
 }
 
@@ -100,7 +100,7 @@ TEST_F(ResolverOverrideTest, IdTooLarge) {
 
     EXPECT_FALSE(r()->Resolve());
 
-    EXPECT_EQ(r()->error(), "12:34 error: override IDs must be between 0 and 65535");
+    EXPECT_EQ(r()->error(), "12:34 error: @id value must be between 0 and 65535");
 }
 
 TEST_F(ResolverOverrideTest, F16_TemporallyBan) {

@@ -461,18 +461,18 @@ sem::Variable* Resolver::Override(const ast::Override* v) {
             return nullptr;
         }
         if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
-            AddError("'id' must be an i32 or u32 value", id_attr->source);
+            AddError("@id must be an i32 or u32 value", id_attr->source);
             return nullptr;
         }
 
         auto const_value = materialized->ConstantValue();
         auto value = const_value->As<AInt>();
         if (value < 0) {
-            AddError("'id' value must be non-negative", id_attr->source);
+            AddError("@id value must be non-negative", id_attr->source);
             return nullptr;
         }
         if (value > std::numeric_limits<decltype(OverrideId::value)>::max()) {
-            AddError("override IDs must be between 0 and " +
+            AddError("@id value must be between 0 and " +
                          std::to_string(std::numeric_limits<decltype(OverrideId::value)>::max()),
                      id_attr->source);
             return nullptr;
@@ -638,14 +638,14 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                     return nullptr;
                 }
                 if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
-                    AddError("'binding' must be an i32 or u32 value", attr->source);
+                    AddError("@binding must be an i32 or u32 value", attr->source);
                     return nullptr;
                 }
 
                 auto const_value = materialized->ConstantValue();
                 auto value = const_value->As<AInt>();
                 if (value < 0) {
-                    AddError("'binding' value must be non-negative", attr->source);
+                    AddError("@binding value must be non-negative", attr->source);
                     return nullptr;
                 }
                 binding = u32(value);
@@ -662,14 +662,14 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
                     return nullptr;
                 }
                 if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
-                    AddError("'group' must be an i32 or u32 value", attr->source);
+                    AddError("@group must be an i32 or u32 value", attr->source);
                     return nullptr;
                 }
 
                 auto const_value = materialized->ConstantValue();
                 auto value = const_value->As<AInt>();
                 if (value < 0) {
-                    AddError("'group' value must be non-negative", attr->source);
+                    AddError("@group value must be non-negative", attr->source);
                     return nullptr;
                 }
                 group = u32(value);
@@ -679,22 +679,11 @@ sem::Variable* Resolver::Var(const ast::Var* var, bool is_global) {
 
         std::optional<uint32_t> location;
         if (auto* attr = ast::GetAttribute<ast::LocationAttribute>(var->attributes)) {
-            auto* materialized = Materialize(Expression(attr->expr));
-            if (!materialized) {
+            auto value = LocationAttribute(attr);
+            if (!value) {
                 return nullptr;
             }
-            if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
-                AddError("'location' must be an i32 or u32 value", attr->source);
-                return nullptr;
-            }
-
-            auto const_value = materialized->ConstantValue();
-            auto value = const_value->As<AInt>();
-            if (value < 0) {
-                AddError("'location' value must be non-negative", attr->source);
-                return nullptr;
-            }
-            location = u32(value);
+            location = value.Get();
         }
 
         sem = builder_->create<sem::GlobalVariable>(
@@ -748,48 +737,36 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
     sem::BindingPoint binding_point;
     if (param->HasBindingPoint()) {
         {
+            ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@binding value"};
+            TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+
             auto* attr = ast::GetAttribute<ast::BindingAttribute>(param->attributes);
-            auto* materialize = Materialize(Expression(attr->expr));
-            if (!materialize) {
+            auto* materialized = Materialize(Expression(attr->expr));
+            if (!materialized) {
                 return nullptr;
             }
-            auto* c = materialize->ConstantValue();
-            if (!c) {
-                // TODO(crbug.com/tint/1633): Add error message about invalid materialization when
-                // binding can be an expression.
-                return nullptr;
-            }
-            binding_point.binding = c->As<uint32_t>();
+            binding_point.binding = materialized->ConstantValue()->As<uint32_t>();
         }
         {
+            ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@group value"};
+            TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+
             auto* attr = ast::GetAttribute<ast::GroupAttribute>(param->attributes);
-            auto* materialize = Materialize(Expression(attr->expr));
-            if (!materialize) {
+            auto* materialized = Materialize(Expression(attr->expr));
+            if (!materialized) {
                 return nullptr;
             }
-            auto* c = materialize->ConstantValue();
-            if (!c) {
-                // TODO(crbug.com/tint/1633): Add error message about invalid materialization when
-                // binding can be an expression.
-                return nullptr;
-            }
-            binding_point.group = c->As<uint32_t>();
+            binding_point.group = materialized->ConstantValue()->As<uint32_t>();
         }
     }
 
     std::optional<uint32_t> location;
-    if (auto* l = ast::GetAttribute<ast::LocationAttribute>(param->attributes)) {
-        auto* materialize = Materialize(Expression(l->expr));
-        if (!materialize) {
+    if (auto* attr = ast::GetAttribute<ast::LocationAttribute>(param->attributes)) {
+        auto value = LocationAttribute(attr);
+        if (!value) {
             return nullptr;
         }
-        auto* c = materialize->ConstantValue();
-        if (!c) {
-            // TODO(crbug.com/tint/1633): Add error message about invalid materialization when
-            // location can be an expression.
-            return nullptr;
-        }
-        location = c->As<uint32_t>();
+        location = value.Get();
     }
 
     auto* sem = builder_->create<sem::Parameter>(
@@ -797,6 +774,30 @@ sem::Parameter* Resolver::Parameter(const ast::Parameter* param, uint32_t index)
         sem::ParameterUsage::kNone, binding_point, location);
     builder_->Sem().Add(param, sem);
     return sem;
+}
+
+utils::Result<uint32_t> Resolver::LocationAttribute(const ast::LocationAttribute* attr) {
+    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant, "@location value"};
+    TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
+
+    auto* materialized = Materialize(Expression(attr->expr));
+    if (!materialized) {
+        return utils::Failure;
+    }
+
+    if (!materialized->Type()->IsAnyOf<sem::I32, sem::U32>()) {
+        AddError("@location must be an i32 or u32 value", attr->source);
+        return utils::Failure;
+    }
+
+    auto const_value = materialized->ConstantValue();
+    auto value = const_value->As<AInt>();
+    if (value < 0) {
+        AddError("@location value must be non-negative", attr->source);
+        return utils::Failure;
+    }
+
+    return static_cast<uint32_t>(value);
 }
 
 ast::Access Resolver::DefaultAccessForAddressSpace(ast::AddressSpace address_space) {
@@ -984,18 +985,12 @@ sem::Function* Resolver::Function(const ast::Function* decl) {
     for (auto* attr : decl->return_type_attributes) {
         Mark(attr);
 
-        if (auto* a = attr->As<ast::LocationAttribute>()) {
-            auto* materialize = Materialize(Expression(a->expr));
-            if (!materialize) {
+        if (auto* loc_attr = attr->As<ast::LocationAttribute>()) {
+            auto value = LocationAttribute(loc_attr);
+            if (!value) {
                 return nullptr;
             }
-            auto* c = materialize->ConstantValue();
-            if (!c) {
-                // TODO(crbug.com/tint/1633): Add error message about invalid materialization when
-                // location can be an expression.
-                return nullptr;
-            }
-            return_location = c->As<uint32_t>();
+            return_location = value.Get();
         }
     }
     if (!validator_.NoDuplicateAttributes(decl->attributes)) {
@@ -2969,22 +2964,12 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
                     has_size_attr = true;
                     return true;
                 },
-                [&](const ast::LocationAttribute* l) {
-                    ExprEvalStageConstraint constraint{sem::EvaluationStage::kConstant,
-                                                       "@location"};
-                    TINT_SCOPED_ASSIGNMENT(expr_eval_stage_constraint_, constraint);
-
-                    auto* materialize = Materialize(Expression(l->expr));
-                    if (!materialize) {
+                [&](const ast::LocationAttribute* loc_attr) {
+                    auto value = LocationAttribute(loc_attr);
+                    if (!value) {
                         return false;
                     }
-                    auto* c = materialize->ConstantValue();
-                    if (!c) {
-                        // TODO(crbug.com/tint/1633): Add error message about invalid
-                        // materialization when location can be an expression.
-                        return false;
-                    }
-                    location = c->As<uint32_t>();
+                    location = value.Get();
                     return true;
                 },
                 [&](Default) {

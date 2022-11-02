@@ -1606,12 +1606,22 @@ TEST_F(GroupAndBindingTest, Const_AInt) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(GroupAndBindingTest, Binding_NonConstant) {
+    GlobalVar("val", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
+              Binding(Construct(ty.u32(), Call(Source{{12, 34}}, "dpdx", 1_a))), Group(1_i));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: @binding requires a const-expression, but expression is a runtime-expression)");
+}
+
 TEST_F(GroupAndBindingTest, Binding_Negative) {
     GlobalVar("val", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
               Binding(Source{{12, 34}}, -2_i), Group(1_i));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'binding' value must be non-negative)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: @binding value must be non-negative)");
 }
 
 TEST_F(GroupAndBindingTest, Binding_F32) {
@@ -1619,7 +1629,7 @@ TEST_F(GroupAndBindingTest, Binding_F32) {
               Binding(Source{{12, 34}}, 2.0_f), Group(1_u));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'binding' must be an i32 or u32 value)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: @binding must be an i32 or u32 value)");
 }
 
 TEST_F(GroupAndBindingTest, Binding_AFloat) {
@@ -1627,7 +1637,17 @@ TEST_F(GroupAndBindingTest, Binding_AFloat) {
               Binding(Source{{12, 34}}, 2.0_a), Group(1_u));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'binding' must be an i32 or u32 value)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: @binding must be an i32 or u32 value)");
+}
+
+TEST_F(GroupAndBindingTest, Group_NonConstant) {
+    GlobalVar("val", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()), Binding(2_u),
+              Group(Construct(ty.u32(), Call(Source{{12, 34}}, "dpdx", 1_a))));
+
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: @group requires a const-expression, but expression is a runtime-expression)");
 }
 
 TEST_F(GroupAndBindingTest, Group_Negative) {
@@ -1635,7 +1655,7 @@ TEST_F(GroupAndBindingTest, Group_Negative) {
               Group(Source{{12, 34}}, -1_i));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'group' value must be non-negative)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: @group value must be non-negative)");
 }
 
 TEST_F(GroupAndBindingTest, Group_F32) {
@@ -1643,7 +1663,7 @@ TEST_F(GroupAndBindingTest, Group_F32) {
               Group(Source{{12, 34}}, 1.0_f));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'group' must be an i32 or u32 value)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: @group must be an i32 or u32 value)");
 }
 
 TEST_F(GroupAndBindingTest, Group_AFloat) {
@@ -1651,7 +1671,7 @@ TEST_F(GroupAndBindingTest, Group_AFloat) {
               Group(Source{{12, 34}}, 1.0_a));
 
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'group' must be an i32 or u32 value)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: @group must be an i32 or u32 value)");
 }
 
 using IdTest = ResolverTest;
@@ -1671,23 +1691,124 @@ TEST_F(IdTest, Const_AInt) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
+TEST_F(IdTest, NonConstant) {
+    Override("val", ty.f32(),
+             utils::Vector{Id(Construct(ty.u32(), Call(Source{{12, 34}}, "dpdx", 1_a)))});
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: @id requires a const-expression, but expression is a runtime-expression)");
+}
+
 TEST_F(IdTest, Negative) {
     Override("val", ty.f32(), utils::Vector{Id(Source{{12, 34}}, -1_i)});
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'id' value must be non-negative)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: @id value must be non-negative)");
 }
 
 TEST_F(IdTest, F32) {
     Override("val", ty.f32(), utils::Vector{Id(Source{{12, 34}}, 1_f)});
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'id' must be an i32 or u32 value)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: @id must be an i32 or u32 value)");
 }
 
 TEST_F(IdTest, AFloat) {
     Override("val", ty.f32(), utils::Vector{Id(Source{{12, 34}}, 1.0_a)});
     EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), R"(12:34 error: 'id' must be an i32 or u32 value)");
+    EXPECT_EQ(r()->error(), R"(12:34 error: @id must be an i32 or u32 value)");
 }
+
+enum class LocationAttributeType {
+    kEntryPointParameter,
+    kEntryPointReturnType,
+    kStructureMember,
+};
+
+struct LocationTest : ResolverTestWithParam<LocationAttributeType> {
+    void Build(const ast::Expression* location_value) {
+        switch (GetParam()) {
+            case LocationAttributeType::kEntryPointParameter:
+                Func("main",
+                     utils::Vector{Param(Source{{12, 34}}, "a", ty.i32(),
+                                         utils::Vector{
+                                             Location(Source{{12, 34}}, location_value),
+                                             Flat(),
+                                         })},
+                     ty.void_(), utils::Empty,
+                     utils::Vector{
+                         Stage(ast::PipelineStage::kFragment),
+                     });
+                return;
+            case LocationAttributeType::kEntryPointReturnType:
+                Func("main", utils::Empty, ty.f32(),
+                     utils::Vector{
+                         Return(1_a),
+                     },
+                     utils::Vector{
+                         Stage(ast::PipelineStage::kFragment),
+                     },
+                     utils::Vector{
+                         Location(Source{{12, 34}}, location_value),
+                     });
+                return;
+            case LocationAttributeType::kStructureMember:
+                Structure("S", utils::Vector{
+                                   Member("m", ty.f32(),
+                                          utils::Vector{
+                                              Location(Source{{12, 34}}, location_value),
+                                          }),
+                               });
+                return;
+        }
+    }
+};
+
+TEST_P(LocationTest, Const_I32) {
+    Build(Expr(0_i));
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_P(LocationTest, Const_U32) {
+    Build(Expr(0_u));
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_P(LocationTest, Const_AInt) {
+    Build(Expr(0_a));
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+}
+
+TEST_P(LocationTest, NonConstant) {
+    Build(Construct(ty.u32(), Call(Source{{12, 34}}, "dpdx", 1_a)));
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(
+        r()->error(),
+        R"(12:34 error: @location value requires a const-expression, but expression is a runtime-expression)");
+}
+
+TEST_P(LocationTest, Negative) {
+    Build(Expr(-1_a));
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: @location value must be non-negative)");
+}
+
+TEST_P(LocationTest, F32) {
+    Build(Expr(1_f));
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: @location must be an i32 or u32 value)");
+}
+
+TEST_P(LocationTest, AFloat) {
+    Build(Expr(1.0_a));
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), R"(12:34 error: @location must be an i32 or u32 value)");
+}
+
+INSTANTIATE_TEST_SUITE_P(LocationTest,
+                         LocationTest,
+                         testing::Values(LocationAttributeType::kEntryPointParameter,
+                                         LocationAttributeType::kEntryPointReturnType,
+                                         LocationAttributeType::kStructureMember));
 
 }  // namespace
 }  // namespace InterpolateTests
