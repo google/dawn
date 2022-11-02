@@ -474,6 +474,7 @@ set(TINT_LIB_SRCS
   utils/enum_set.h
   utils/foreach_macro.h
   utils/hash.h
+  utils/hashmap_base.h
   utils/hashmap.h
   utils/hashset.h
   utils/map.h

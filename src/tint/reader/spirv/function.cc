@@ -3419,7 +3419,7 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
         utils::Hashmap<uint32_t, Symbol, 8> copied_phis;
         for (const auto assignment : worklist) {
             const auto phi_id = assignment.phi_id;
-            if (read_set.Find(phi_id)) {
+            if (read_set.Contains(phi_id)) {
                 auto copy_name = namer_.MakeDerivedName(namer_.Name(phi_id) + "_c" +
                                                         std::to_string(block_info.id));
                 auto copy_sym = builder_.Symbols().Register(copy_name);

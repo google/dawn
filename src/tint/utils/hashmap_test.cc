@@ -92,14 +92,14 @@ TEST(Hashmap, Generation) {
 
 TEST(Hashmap, Iterator) {
     using Map = Hashmap<int, std::string, 8>;
-    using KV = typename Map::KeyValue;
+    using Entry = typename Map::Entry;
     Map map;
     map.Add(1, "one");
     map.Add(4, "four");
     map.Add(3, "three");
     map.Add(2, "two");
-    EXPECT_THAT(map, testing::UnorderedElementsAre(KV{1, "one"}, KV{2, "two"}, KV{3, "three"},
-                                                   KV{4, "four"}));
+    EXPECT_THAT(map, testing::UnorderedElementsAre(Entry{1, "one"}, Entry{2, "two"},
+                                                   Entry{3, "three"}, Entry{4, "four"}));
 }
 
 TEST(Hashmap, AddMany) {

@@ -27,6 +27,7 @@
 #include "src/tint/symbol.h"
 #include "src/tint/traits.h"
 #include "src/tint/utils/hashmap.h"
+#include "src/tint/utils/hashset.h"
 #include "src/tint/utils/vector.h"
 
 // Forward declarations
