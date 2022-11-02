@@ -1869,6 +1869,27 @@ ConstEval::Result ConstEval::step(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0], args[1]);
 }
 
+ConstEval::Result ConstEval::quantizeToF16(const sem::Type* ty,
+                                           utils::VectorRef<const sem::Constant*> args,
+                                           const Source&) {
+    auto transform = [&](const sem::Constant* c) {
+        auto conv = CheckedConvert<f32>(f16(c->As<f32>()));
+        if (!conv) {
+            // https://www.w3.org/TR/WGSL/#quantizeToF16-builtin
+            // If e is outside the finite range of binary16, then the result is any value of type
+            // f32
+            switch (conv.Failure()) {
+                case ConversionFailure::kExceedsNegativeLimit:
+                    return CreateElement(builder, c->Type(), f16(f16::kLowestValue));
+                case ConversionFailure::kExceedsPositiveLimit:
+                    return CreateElement(builder, c->Type(), f16(f16::kHighestValue));
+            }
+        }
+        return CreateElement(builder, c->Type(), conv.Get());
+    };
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
 ConstEval::Result ConstEval::Convert(const sem::Type* target_ty,
                                      const sem::Constant* value,
                                      const Source& source) {

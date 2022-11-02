@@ -12302,7 +12302,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[880],
     /* return matcher indices */ &kMatcherIndices[62],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::quantizeToF16,
   },
   {
     /* [331] */
@@ -12314,7 +12314,7 @@ constexpr OverloadInfo kOverloads[] = {
     /* parameters */ &kParameters[879],
     /* return matcher indices */ &kMatcherIndices[60],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::quantizeToF16,
   },
   {
     /* [332] */

@@ -530,6 +530,15 @@ class ConstEval {
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
+    /// quantizeToF16 builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result quantizeToF16(const sem::Type* ty,
+                         utils::VectorRef<const sem::Constant*> args,
+                         const Source& source);
+
   private:
     /// Adds the given error message to the diagnostics
     void AddError(const std::string& msg, const Source& source) const;

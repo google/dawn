@@ -514,8 +514,8 @@ fn pack4x8snorm(vec4<f32>) -> u32
 fn pack4x8unorm(vec4<f32>) -> u32
 fn pow<T: f32_f16>(T, T) -> T
 fn pow<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
-fn quantizeToF16(f32) -> f32
-fn quantizeToF16<N: num>(vec<N, f32>) -> vec<N, f32>
+@const fn quantizeToF16(f32) -> f32
+@const fn quantizeToF16<N: num>(vec<N, f32>) -> vec<N, f32>
 fn radians<T: f32_f16>(T) -> T
 fn radians<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn reflect<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>

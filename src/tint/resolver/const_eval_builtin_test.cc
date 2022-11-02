@@ -842,5 +842,62 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               StepCases<f32>(),
                                               StepCases<f16>()))));
 
+std::vector<Case> QuantizeToF16Cases() {
+    return {
+        C({0_f}, 0_f),    //
+        C({-0_f}, -0_f),  //
+        C({1_f}, 1_f),    //
+        C({-1_f}, -1_f),  //
+
+        //   0.00006106496 quantized to 0.000061035156 = 0x1p-14
+        C({0.00006106496_f}, 0.000061035156_f),    //
+        C({-0.00006106496_f}, -0.000061035156_f),  //
+
+        //   1.0004883 quantized to 1.0 = 0x1p0
+        C({1.0004883_f}, 1.0_f),    //
+        C({-1.0004883_f}, -1.0_f),  //
+
+        //   8196.0 quantized to 8192.0 = 0x1p13
+        C({8196_f}, 8192_f),    //
+        C({-8196_f}, -8192_f),  //
+
+        // Value in subnormal f16 range
+        C({0x0.034p-14_f}, 0x0.034p-14_f),    //
+        C({-0x0.034p-14_f}, -0x0.034p-14_f),  //
+        C({0x0.068p-14_f}, 0x0.068p-14_f),    //
+        C({-0x0.068p-14_f}, -0x0.068p-14_f),  //
+
+        //   0x0.06b7p-14 quantized to 0x0.068p-14
+        C({0x0.06b7p-14_f}, 0x0.068p-14_f),    //
+        C({-0x0.06b7p-14_f}, -0x0.068p-14_f),  //
+
+        // Value out of f16 range
+        C({65504.003_f}, 65504_f),     //
+        C({-65504.003_f}, -65504_f),   //
+        C({0x1.234p56_f}, 65504_f),    //
+        C({-0x4.321p65_f}, -65504_f),  //
+
+        // Vector tests
+        C({Vec(0_f, -0_f)}, Vec(0_f, -0_f)),  //
+        C({Vec(1_f, -1_f)}, Vec(1_f, -1_f)),  //
+
+        C({Vec(0.00006106496_f, -0.00006106496_f, 1.0004883_f, -1.0004883_f)},
+          Vec(0.000061035156_f, -0.000061035156_f, 1.0_f, -1.0_f)),
+
+        C({Vec(8196_f, 8192_f, 0x0.034p-14_f)}, Vec(8192_f, 8192_f, 0x0.034p-14_f)),
+
+        C({Vec(0x0.034p-14_f, -0x0.034p-14_f, 0x0.068p-14_f, -0x0.068p-14_f)},
+          Vec(0x0.034p-14_f, -0x0.034p-14_f, 0x0.068p-14_f, -0x0.068p-14_f)),
+
+        C({Vec(65504.003_f, 0x1.234p56_f)}, Vec(65504_f, 65504_f)),
+        C({Vec(-0x1.234p56_f, -65504.003_f)}, Vec(-65504_f, -65504_f)),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    QuantizeToF16,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kQuantizeToF16),
+                     testing::ValuesIn(QuantizeToF16Cases())));
+
 }  // namespace
 }  // namespace tint::resolver

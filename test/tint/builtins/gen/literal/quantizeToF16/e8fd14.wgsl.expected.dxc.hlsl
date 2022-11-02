@@ -1,5 +1,5 @@
 void quantizeToF16_e8fd14() {
-  float3 res = float3(min16float3((1.0f).xxx));
+  float3 res = (1.0f).xxx;
 }
 
 struct tint_symbol {

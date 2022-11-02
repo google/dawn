@@ -1,12 +1,7 @@
 #version 310 es
 
-float tint_quantizeToF16(float param_0) {
-  return unpackHalf2x16(packHalf2x16(vec2(param_0))).x;
-}
-
-
 void quantizeToF16_12e50e() {
-  float res = tint_quantizeToF16(1.0f);
+  float res = 1.0f;
 }
 
 vec4 vertex_main() {
@@ -25,13 +20,8 @@ void main() {
 #version 310 es
 precision mediump float;
 
-float tint_quantizeToF16(float param_0) {
-  return unpackHalf2x16(packHalf2x16(vec2(param_0))).x;
-}
-
-
 void quantizeToF16_12e50e() {
-  float res = tint_quantizeToF16(1.0f);
+  float res = 1.0f;
 }
 
 void fragment_main() {
@@ -44,13 +34,8 @@ void main() {
 }
 #version 310 es
 
-float tint_quantizeToF16(float param_0) {
-  return unpackHalf2x16(packHalf2x16(vec2(param_0))).x;
-}
-
-
 void quantizeToF16_12e50e() {
-  float res = tint_quantizeToF16(1.0f);
+  float res = 1.0f;
 }
 
 void compute_main() {

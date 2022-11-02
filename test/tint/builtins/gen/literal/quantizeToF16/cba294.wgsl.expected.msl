@@ -2,7 +2,7 @@
 
 using namespace metal;
 void quantizeToF16_cba294() {
-  float4 res = float4(half4(float4(1.0f)));
+  float4 res = float4(1.0f);
 }
 
 struct tint_symbol {
