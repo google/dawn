@@ -6939,6 +6939,43 @@ test:5:11 note: reading from read_write storage buffer 'rw' may result in a non-
 )");
 }
 
+TEST_F(UniformityAnalysisTest, ShortCircuiting_UniformLHS) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read> uniform_global : i32;
+
+fn main() {
+  let b = (uniform_global == 0) && (dpdx(1.0) == 0.0);
+}
+)";
+
+    RunTest(src, true);
+}
+
+TEST_F(UniformityAnalysisTest, ShortCircuiting_NonUniformLHS) {
+    std::string src = R"(
+@group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;
+
+fn main() {
+  let b = (non_uniform_global == 0) && (dpdx(1.0) == 0.0);
+}
+)";
+
+    RunTest(src, false);
+    EXPECT_EQ(error_,
+              R"(test:5:41 warning: 'dpdx' must only be called from uniform control flow
+  let b = (non_uniform_global == 0) && (dpdx(1.0) == 0.0);
+                                        ^^^^
+
+test:5:37 note: control flow depends on non-uniform value
+  let b = (non_uniform_global == 0) && (dpdx(1.0) == 0.0);
+                                    ^^
+
+test:5:12 note: reading from read_write storage buffer 'non_uniform_global' may result in a non-uniform value
+  let b = (non_uniform_global == 0) && (dpdx(1.0) == 0.0);
+           ^^^^^^^^^^^^^^^^^^
+)");
+}
+
 TEST_F(UniformityAnalysisTest, ShortCircuiting_ReconvergeLHS) {
     std::string src = R"(
 @group(0) @binding(0) var<storage, read_write> non_uniform_global : i32;

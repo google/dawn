@@ -1121,11 +1121,7 @@ class UniformityGraph {
                     v1_cf->AddEdge(v1);
 
                     auto [cf2, v2] = ProcessExpression(v1_cf, b->rhs);
-
-                    if (sem_.Get(b)->Behaviors() == sem::Behaviors{sem::Behavior::kNext}) {
-                        return std::pair<Node*, Node*>(cf, v2);
-                    }
-                    return std::pair<Node*, Node*>(cf2, v2);
+                    return std::pair<Node*, Node*>(cf, v2);
                 } else {
                     auto [cf1, v1] = ProcessExpression(cf, b->lhs);
                     auto [cf2, v2] = ProcessExpression(cf1, b->rhs);
