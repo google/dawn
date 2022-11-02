@@ -1,13 +1,7 @@
 #version 310 es
 
-int tint_insert_bits(int v, int n, uint offset, uint count) {
-  uint s = min(offset, 32u);
-  uint e = min(32u, (s + count));
-  return bitfieldInsert(v, n, int(s), int((e - s)));
-}
-
 void insertBits_65468b() {
-  int res = tint_insert_bits(1, 1, 1u, 1u);
+  int res = 3;
 }
 
 vec4 vertex_main() {
@@ -26,14 +20,8 @@ void main() {
 #version 310 es
 precision mediump float;
 
-int tint_insert_bits(int v, int n, uint offset, uint count) {
-  uint s = min(offset, 32u);
-  uint e = min(32u, (s + count));
-  return bitfieldInsert(v, n, int(s), int((e - s)));
-}
-
 void insertBits_65468b() {
-  int res = tint_insert_bits(1, 1, 1u, 1u);
+  int res = 3;
 }
 
 void fragment_main() {
@@ -46,14 +34,8 @@ void main() {
 }
 #version 310 es
 
-int tint_insert_bits(int v, int n, uint offset, uint count) {
-  uint s = min(offset, 32u);
-  uint e = min(32u, (s + count));
-  return bitfieldInsert(v, n, int(s), int((e - s)));
-}
-
 void insertBits_65468b() {
-  int res = tint_insert_bits(1, 1, 1u, 1u);
+  int res = 3;
 }
 
 void compute_main() {

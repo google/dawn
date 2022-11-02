@@ -1,14 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-int4 tint_insert_bits(int4 v, int4 n, uint offset, uint count) {
-  uint const s = min(offset, 32u);
-  uint const e = min(32u, (s + count));
-  return insert_bits(v, n, s, (e - s));
-}
-
 void insertBits_d86978() {
-  int4 res = tint_insert_bits(int4(1), int4(1), 1u, 1u);
+  int4 res = int4(3);
 }
 
 struct tint_symbol {

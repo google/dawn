@@ -1,13 +1,7 @@
 #version 310 es
 
-uvec3 tint_insert_bits(uvec3 v, uvec3 n, uint offset, uint count) {
-  uint s = min(offset, 32u);
-  uint e = min(32u, (s + count));
-  return bitfieldInsert(v, n, int(s), int((e - s)));
-}
-
 void insertBits_87826b() {
-  uvec3 res = tint_insert_bits(uvec3(1u), uvec3(1u), 1u, 1u);
+  uvec3 res = uvec3(3u);
 }
 
 vec4 vertex_main() {
@@ -26,14 +20,8 @@ void main() {
 #version 310 es
 precision mediump float;
 
-uvec3 tint_insert_bits(uvec3 v, uvec3 n, uint offset, uint count) {
-  uint s = min(offset, 32u);
-  uint e = min(32u, (s + count));
-  return bitfieldInsert(v, n, int(s), int((e - s)));
-}
-
 void insertBits_87826b() {
-  uvec3 res = tint_insert_bits(uvec3(1u), uvec3(1u), 1u, 1u);
+  uvec3 res = uvec3(3u);
 }
 
 void fragment_main() {
@@ -46,14 +34,8 @@ void main() {
 }
 #version 310 es
 
-uvec3 tint_insert_bits(uvec3 v, uvec3 n, uint offset, uint count) {
-  uint s = min(offset, 32u);
-  uint e = min(32u, (s + count));
-  return bitfieldInsert(v, n, int(s), int((e - s)));
-}
-
 void insertBits_87826b() {
-  uvec3 res = tint_insert_bits(uvec3(1u), uvec3(1u), 1u, 1u);
+  uvec3 res = uvec3(3u);
 }
 
 void compute_main() {

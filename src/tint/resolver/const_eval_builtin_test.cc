@@ -714,6 +714,94 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               FirstTrailingBitCases<u32>()))));
 
 template <typename T>
+std::vector<Case> InsertBitsCases() {
+    using UT = Number<std::make_unsigned_t<UnwrapNumber<T>>>;
+
+    auto e = /* */ T(0b0101'1100'0011'1010'0101'1100'0011'1010);
+    auto newbits = T{0b1010'0011'1100'0101'1010'0011'1100'0101};
+
+    auto r = std::vector<Case>{
+        // args: e, newbits, offset, count
+
+        // If count is 0, result is e
+        C({e, newbits, UT(0), UT(0)}, e),  //
+        C({e, newbits, UT(1), UT(0)}, e),  //
+        C({e, newbits, UT(2), UT(0)}, e),  //
+        C({e, newbits, UT(3), UT(0)}, e),  //
+        // ...
+        C({e, newbits, UT(29), UT(0)}, e),  //
+        C({e, newbits, UT(30), UT(0)}, e),  //
+        C({e, newbits, UT(31), UT(0)}, e),
+
+        // Copy 1 to 32 bits of newbits to e at offset 0
+        C({e, newbits, UT(0), UT(1)}, T(0b0101'1100'0011'1010'0101'1100'0011'1011)),
+        C({e, newbits, UT(0), UT(2)}, T(0b0101'1100'0011'1010'0101'1100'0011'1001)),
+        C({e, newbits, UT(0), UT(3)}, T(0b0101'1100'0011'1010'0101'1100'0011'1101)),
+        C({e, newbits, UT(0), UT(4)}, T(0b0101'1100'0011'1010'0101'1100'0011'0101)),
+        C({e, newbits, UT(0), UT(5)}, T(0b0101'1100'0011'1010'0101'1100'0010'0101)),
+        C({e, newbits, UT(0), UT(6)}, T(0b0101'1100'0011'1010'0101'1100'0000'0101)),
+        // ...
+        C({e, newbits, UT(0), UT(29)}, T(0b0100'0011'1100'0101'1010'0011'1100'0101)),
+        C({e, newbits, UT(0), UT(30)}, T(0b0110'0011'1100'0101'1010'0011'1100'0101)),
+        C({e, newbits, UT(0), UT(31)}, T(0b0010'0011'1100'0101'1010'0011'1100'0101)),
+        C({e, newbits, UT(0), UT(32)}, T(0b1010'0011'1100'0101'1010'0011'1100'0101)),
+
+        // Copy at varying offsets and counts
+        C({e, newbits, UT(3), UT(8)}, T(0b0101'1100'0011'1010'0101'1110'0010'1010)),
+        C({e, newbits, UT(8), UT(8)}, T(0b0101'1100'0011'1010'1100'0101'0011'1010)),
+        C({e, newbits, UT(15), UT(1)}, T(0b0101'1100'0011'1010'1101'1100'0011'1010)),
+        C({e, newbits, UT(16), UT(16)}, T(0b1010'0011'1100'0101'0101'1100'0011'1010)),
+
+        // Vector tests
+        C({Vec(T(0b1111'0000'1111'0000'1111'0000'1111'0000),  //
+               T(0b0000'1111'0000'1111'0000'1111'0000'1111),  //
+               T(0b1010'0101'1010'0101'1010'0101'1010'0101)),
+           Vec(T(0b1111'1111'1111'1111'1111'1111'1111'1111),  //
+               T(0b1111'1111'1111'1111'1111'1111'1111'1111),  //
+               T(0b1111'1111'1111'1111'1111'1111'1111'1111)),
+           Val(UT(3)), Val(UT(8))},
+          Vec(T(0b1111'0000'1111'0000'1111'0111'1111'1000),  //
+              T(0b0000'1111'0000'1111'0000'1111'1111'1111),  //
+              T(0b1010'0101'1010'0101'1010'0111'1111'1101))),
+    };
+
+    return r;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    InsertBits,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kInsertBits),
+                     testing::ValuesIn(Concat(InsertBitsCases<i32>(),  //
+                                              InsertBitsCases<u32>()))));
+
+using ResolverConstEvalBuiltinTest_InsertBits_InvalidOffsetAndCount =
+    ResolverTestWithParam<std::tuple<size_t, size_t>>;
+TEST_P(ResolverConstEvalBuiltinTest_InsertBits_InvalidOffsetAndCount, Test) {
+    auto& p = GetParam();
+    auto* expr = Call(Source{{12, 24}}, sem::str(sem::BuiltinType::kInsertBits), Expr(1_u),
+                      Expr(1_u), Expr(u32(std::get<0>(p))), Expr(u32(std::get<1>(p))));
+    GlobalConst("C", expr);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:24 error: 'offset + 'count' must be less than or equal to the bit width of 'e'");
+}
+INSTANTIATE_TEST_SUITE_P(InsertBits,
+                         ResolverConstEvalBuiltinTest_InsertBits_InvalidOffsetAndCount,
+                         testing::Values(                         //
+                             std::make_tuple(33, 0),              //
+                             std::make_tuple(34, 0),              //
+                             std::make_tuple(1000, 0),            //
+                             std::make_tuple(u32::Highest(), 0),  //
+                             std::make_tuple(0, 33),              //
+                             std::make_tuple(0, 34),              //
+                             std::make_tuple(0, 1000),            //
+                             std::make_tuple(0, u32::Highest()),  //
+                             std::make_tuple(33, 33),             //
+                             std::make_tuple(34, 34),             //
+                             std::make_tuple(1000, 1000),         //
+                             std::make_tuple(u32::Highest(), u32::Highest())));
+
+template <typename T>
 std::vector<Case> SaturateCases() {
     return {
         C({T(0)}, T(0)),

@@ -1,12 +1,5 @@
-int2 tint_insert_bits(int2 v, int2 n, uint offset, uint count) {
-  const uint s = min(offset, 32u);
-  const uint e = min(32u, (s + count));
-  const uint mask = (((1u << s) - 1u) ^ ((1u << e) - 1u));
-  return (((n << uint2((s).xx)) & int2((int(mask)).xx)) | (v & int2((int(~(mask))).xx)));
-}
-
 void insertBits_fe6ba6() {
-  int2 res = tint_insert_bits((1).xx, (1).xx, 1u, 1u);
+  int2 res = (3).xx;
 }
 
 struct tint_symbol {
