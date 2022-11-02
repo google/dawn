@@ -228,46 +228,50 @@ TEST_F(BuilderTest, Emit_Multiple_EntryPoint_With_Same_ModuleVar) {
     ASSERT_TRUE(b.Build());
     EXPECT_EQ(DumpBuilder(b), R"(OpCapability Shader
 OpMemoryModel Logical GLSL450
-OpEntryPoint GLCompute %7 "a"
-OpEntryPoint GLCompute %17 "b"
-OpExecutionMode %7 LocalSize 1 1 1
-OpExecutionMode %17 LocalSize 1 1 1
-OpName %3 "Data"
-OpMemberName %3 0 "d"
+OpEntryPoint GLCompute %8 "a"
+OpEntryPoint GLCompute %18 "b"
+OpExecutionMode %8 LocalSize 1 1 1
+OpExecutionMode %18 LocalSize 1 1 1
+OpName %3 "data_block"
+OpMemberName %3 0 "inner"
+OpName %4 "Data"
+OpMemberName %4 0 "d"
 OpName %1 "data"
-OpName %7 "a"
-OpName %14 "v"
-OpName %17 "b"
-OpName %21 "v"
+OpName %8 "a"
+OpName %15 "v"
+OpName %18 "b"
+OpName %22 "v"
 OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
+OpMemberDecorate %4 0 Offset 0
 OpDecorate %1 Binding 0
 OpDecorate %1 DescriptorSet 0
-%4 = OpTypeFloat 32
+%5 = OpTypeFloat 32
+%4 = OpTypeStruct %5
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
 %1 = OpVariable %2 StorageBuffer
-%6 = OpTypeVoid
-%5 = OpTypeFunction %6
-%9 = OpTypeInt 32 0
-%10 = OpConstant %9 0
-%11 = OpTypePointer StorageBuffer %4
-%15 = OpTypePointer Function %4
-%16 = OpConstantNull %4
-%7 = OpFunction %6 None %5
-%8 = OpLabel
-%14 = OpVariable %15 Function %16
-%12 = OpAccessChain %11 %1 %10
-%13 = OpLoad %4 %12
-OpStore %14 %13
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
+%10 = OpTypeInt 32 0
+%11 = OpConstant %10 0
+%12 = OpTypePointer StorageBuffer %5
+%16 = OpTypePointer Function %5
+%17 = OpConstantNull %5
+%8 = OpFunction %7 None %6
+%9 = OpLabel
+%15 = OpVariable %16 Function %17
+%13 = OpAccessChain %12 %1 %11 %11
+%14 = OpLoad %5 %13
+OpStore %15 %14
 OpReturn
 OpFunctionEnd
-%17 = OpFunction %6 None %5
-%18 = OpLabel
-%21 = OpVariable %15 Function %16
-%19 = OpAccessChain %11 %1 %10
-%20 = OpLoad %4 %19
-OpStore %21 %20
+%18 = OpFunction %7 None %6
+%19 = OpLabel
+%22 = OpVariable %16 Function %17
+%20 = OpAccessChain %12 %1 %11 %11
+%21 = OpLoad %5 %20
+OpStore %22 %21
 OpReturn
 OpFunctionEnd
 )");

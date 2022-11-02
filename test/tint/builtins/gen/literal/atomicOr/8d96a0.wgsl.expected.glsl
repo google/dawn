@@ -1,12 +1,16 @@
 #version 310 es
 precision mediump float;
 
-layout(binding = 0, std430) buffer SB_RW_ssbo {
+struct SB_RW {
   int arg_0;
+};
+
+layout(binding = 0, std430) buffer sb_rw_block_ssbo {
+  SB_RW inner;
 } sb_rw;
 
 void atomicOr_8d96a0() {
-  int res = atomicOr(sb_rw.arg_0, 1);
+  int res = atomicOr(sb_rw.inner.arg_0, 1);
 }
 
 void fragment_main() {
@@ -19,12 +23,16 @@ void main() {
 }
 #version 310 es
 
-layout(binding = 0, std430) buffer SB_RW_ssbo {
+struct SB_RW {
   int arg_0;
+};
+
+layout(binding = 0, std430) buffer sb_rw_block_ssbo {
+  SB_RW inner;
 } sb_rw;
 
 void atomicOr_8d96a0() {
-  int res = atomicOr(sb_rw.arg_0, 1);
+  int res = atomicOr(sb_rw.inner.arg_0, 1);
 }
 
 void compute_main() {

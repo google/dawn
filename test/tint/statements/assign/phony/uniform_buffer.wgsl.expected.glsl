@@ -1,10 +1,14 @@
 #version 310 es
 
-layout(binding = 0, std140) uniform S_ubo {
+struct S {
   int i;
   uint pad;
   uint pad_1;
   uint pad_2;
+};
+
+layout(binding = 0, std140) uniform u_block_ubo {
+  S inner;
 } u;
 
 void tint_symbol() {

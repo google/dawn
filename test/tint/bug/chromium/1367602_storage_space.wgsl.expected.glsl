@@ -8,7 +8,11 @@ layout(binding = 0, std430) buffer v_block_ssbo {
   int inner[1000000];
 } v;
 
-layout(binding = 1, std430) buffer A_ssbo {
+struct A {
   float a[1000000];
+};
+
+layout(binding = 1, std430) buffer b_block_ssbo {
+  A inner;
 } b;
 

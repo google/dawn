@@ -2,8 +2,12 @@
 precision mediump float;
 
 layout(location = 0) out vec4 x_GLF_color_1_1;
-layout(binding = 0, std140) uniform buf0_ubo {
+struct buf0 {
   vec4 ref;
+};
+
+layout(binding = 0, std140) uniform x_7_block_ubo {
+  buf0 inner;
 } x_7;
 
 vec4 x_GLF_color = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -17,7 +21,7 @@ void main_1() {
   float x_39 = f;
   v = vec4(sin(x_33), cos(x_35), exp2(x_37), log(x_39));
   vec4 x_42 = v;
-  vec4 x_44 = x_7.ref;
+  vec4 x_44 = x_7.inner.ref;
   if ((distance(x_42, x_44) < 0.100000001f)) {
     x_GLF_color = vec4(1.0f, 0.0f, 0.0f, 1.0f);
   } else {

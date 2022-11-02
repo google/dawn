@@ -1,13 +1,17 @@
 #version 310 es
 precision mediump float;
 
-layout(binding = 0, std430) buffer SB_RW_ssbo {
+struct SB_RW {
   uint arg_0;
+};
+
+layout(binding = 0, std430) buffer sb_rw_block_ssbo {
+  SB_RW inner;
 } sb_rw;
 
 void atomicAdd_8a199a() {
   uint arg_1 = 1u;
-  uint res = atomicAdd(sb_rw.arg_0, arg_1);
+  uint res = atomicAdd(sb_rw.inner.arg_0, arg_1);
 }
 
 void fragment_main() {
@@ -20,13 +24,17 @@ void main() {
 }
 #version 310 es
 
-layout(binding = 0, std430) buffer SB_RW_ssbo {
+struct SB_RW {
   uint arg_0;
+};
+
+layout(binding = 0, std430) buffer sb_rw_block_ssbo {
+  SB_RW inner;
 } sb_rw;
 
 void atomicAdd_8a199a() {
   uint arg_1 = 1u;
-  uint res = atomicAdd(sb_rw.arg_0, arg_1);
+  uint res = atomicAdd(sb_rw.inner.arg_0, arg_1);
 }
 
 void compute_main() {

@@ -316,23 +316,27 @@ TEST_F(BuilderTest, GlobalVar_DeclReadOnly) {
 
     EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
-OpMemberDecorate %3 1 Offset 4
+OpMemberDecorate %4 0 Offset 0
+OpMemberDecorate %4 1 Offset 4
 OpDecorate %1 NonWritable
 OpDecorate %1 Binding 0
 OpDecorate %1 DescriptorSet 0
 )");
-    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
-OpMemberName %3 0 "a"
-OpMemberName %3 1 "b"
+    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "b_block"
+OpMemberName %3 0 "inner"
+OpName %4 "A"
+OpMemberName %4 0 "a"
+OpMemberName %4 1 "b"
 OpName %1 "b"
-OpName %7 "unused_entry_point"
+OpName %8 "unused_entry_point"
 )");
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
-%3 = OpTypeStruct %4 %4
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeInt 32 1
+%4 = OpTypeStruct %5 %5
+%3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
 %1 = OpVariable %2 StorageBuffer
-%6 = OpTypeVoid
-%5 = OpTypeFunction %6
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
 )");
 }
 
@@ -354,21 +358,25 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasDeclReadOnly) {
 
     EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
+OpMemberDecorate %4 0 Offset 0
 OpDecorate %1 NonWritable
 OpDecorate %1 Binding 0
 OpDecorate %1 DescriptorSet 0
 )");
-    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
-OpMemberName %3 0 "a"
+    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "b_block"
+OpMemberName %3 0 "inner"
+OpName %4 "A"
+OpMemberName %4 0 "a"
 OpName %1 "b"
-OpName %7 "unused_entry_point"
+OpName %8 "unused_entry_point"
 )");
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeInt 32 1
+%4 = OpTypeStruct %5
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
 %1 = OpVariable %2 StorageBuffer
-%6 = OpTypeVoid
-%5 = OpTypeFunction %6
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
 )");
 }
 
@@ -390,21 +398,25 @@ TEST_F(BuilderTest, GlobalVar_TypeAliasAssignReadOnly) {
 
     EXPECT_EQ(DumpInstructions(b.annots()), R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
+OpMemberDecorate %4 0 Offset 0
 OpDecorate %1 NonWritable
 OpDecorate %1 Binding 0
 OpDecorate %1 DescriptorSet 0
 )");
-    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
-OpMemberName %3 0 "a"
+    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "b_block"
+OpMemberName %3 0 "inner"
+OpName %4 "A"
+OpMemberName %4 0 "a"
 OpName %1 "b"
-OpName %7 "unused_entry_point"
+OpName %8 "unused_entry_point"
 )");
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeInt 32 1
+%4 = OpTypeStruct %5
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
 %1 = OpVariable %2 StorageBuffer
-%6 = OpTypeVoid
-%5 = OpTypeFunction %6
+%7 = OpTypeVoid
+%6 = OpTypeFunction %7
 )");
 }
 
@@ -428,25 +440,29 @@ TEST_F(BuilderTest, GlobalVar_TwoVarDeclReadOnly) {
     EXPECT_EQ(DumpInstructions(b.annots()),
               R"(OpDecorate %3 Block
 OpMemberDecorate %3 0 Offset 0
+OpMemberDecorate %4 0 Offset 0
 OpDecorate %1 NonWritable
 OpDecorate %1 DescriptorSet 0
 OpDecorate %1 Binding 0
-OpDecorate %5 DescriptorSet 1
-OpDecorate %5 Binding 0
+OpDecorate %6 DescriptorSet 1
+OpDecorate %6 Binding 0
 )");
-    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "A"
-OpMemberName %3 0 "a"
+    EXPECT_EQ(DumpInstructions(b.debug()), R"(OpName %3 "b_block"
+OpMemberName %3 0 "inner"
+OpName %4 "A"
+OpMemberName %4 0 "a"
 OpName %1 "b"
-OpName %5 "c"
-OpName %8 "unused_entry_point"
+OpName %6 "c"
+OpName %9 "unused_entry_point"
 )");
-    EXPECT_EQ(DumpInstructions(b.types()), R"(%4 = OpTypeInt 32 1
+    EXPECT_EQ(DumpInstructions(b.types()), R"(%5 = OpTypeInt 32 1
+%4 = OpTypeStruct %5
 %3 = OpTypeStruct %4
 %2 = OpTypePointer StorageBuffer %3
 %1 = OpVariable %2 StorageBuffer
-%5 = OpVariable %2 StorageBuffer
-%7 = OpTypeVoid
-%6 = OpTypeFunction %7
+%6 = OpVariable %2 StorageBuffer
+%8 = OpTypeVoid
+%7 = OpTypeFunction %8
 )");
 }
 

@@ -462,13 +462,17 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_RW_Storage
     EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
-layout(binding = 0, std430) buffer Data_ssbo {
+struct Data {
   int a;
   float b;
+};
+
+layout(binding = 0, std430) buffer coord_block_ssbo {
+  Data inner;
 } coord;
 
 void frag_main() {
-  float v = coord.b;
+  float v = coord.inner.b;
   return;
 }
 
@@ -506,13 +510,17 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_RO_Storage
               R"(#version 310 es
 precision mediump float;
 
-layout(binding = 0, std430) buffer Data_ssbo {
+struct Data {
   int a;
   float b;
+};
+
+layout(binding = 0, std430) buffer coord_block_ssbo {
+  Data inner;
 } coord;
 
 void frag_main() {
-  float v = coord.b;
+  float v = coord.inner.b;
   return;
 }
 
@@ -547,13 +555,17 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_WO_Storage
     EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
-layout(binding = 0, std430) buffer Data_ssbo {
+struct Data {
   int a;
   float b;
+};
+
+layout(binding = 0, std430) buffer coord_block_ssbo {
+  Data inner;
 } coord;
 
 void frag_main() {
-  coord.b = 2.0f;
+  coord.inner.b = 2.0f;
   return;
 }
 
@@ -588,13 +600,17 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_EntryPoint_With_StorageBuf
     EXPECT_EQ(gen.result(), R"(#version 310 es
 precision mediump float;
 
-layout(binding = 0, std430) buffer Data_ssbo {
+struct Data {
   int a;
   float b;
+};
+
+layout(binding = 0, std430) buffer coord_block_ssbo {
+  Data inner;
 } coord;
 
 void frag_main() {
-  coord.b = 2.0f;
+  coord.inner.b = 2.0f;
   return;
 }
 
@@ -678,12 +694,16 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Attribute_Called_By_EntryPoint_With_
               R"(#version 310 es
 precision mediump float;
 
-layout(binding = 0, std430) buffer S_ssbo {
+struct S {
   float x;
+};
+
+layout(binding = 0, std430) buffer coord_block_ssbo {
+  S inner;
 } coord;
 
 float sub_func(float param) {
-  return coord.x;
+  return coord.inner.x;
 }
 
 void frag_main() {
@@ -895,12 +915,16 @@ TEST_F(GlslGeneratorImplTest_Function, Emit_Multiple_EntryPoint_With_Same_Module
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(#version 310 es
 
-layout(binding = 0, std430) buffer Data_ssbo {
+struct Data {
   float d;
+};
+
+layout(binding = 0, std430) buffer data_block_ssbo {
+  Data inner;
 } data;
 
 void a() {
-  float v = data.d;
+  float v = data.inner.d;
   return;
 }
 
@@ -910,7 +934,7 @@ void main() {
   return;
 }
 void b() {
-  float v = data.d;
+  float v = data.inner.d;
   return;
 }
 

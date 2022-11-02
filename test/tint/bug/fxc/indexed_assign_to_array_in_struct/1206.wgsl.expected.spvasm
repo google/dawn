@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 37
+; Bound: 38
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -15,6 +15,8 @@
                OpMemberName %Particle 2 "color"
                OpMemberName %Particle 3 "velocity"
                OpName %particles "particles"
+               OpName %sim_block "sim_block"
+               OpMemberName %sim_block 0 "inner"
                OpName %Simulation "Simulation"
                OpMemberName %Simulation 0 "i"
                OpName %sim "sim"
@@ -31,7 +33,8 @@
                OpDecorate %particles NonWritable
                OpDecorate %particles DescriptorSet 1
                OpDecorate %particles Binding 3
-               OpDecorate %Simulation Block
+               OpDecorate %sim_block Block
+               OpMemberDecorate %sim_block 0 Offset 0
                OpMemberDecorate %Simulation 0 Offset 0
                OpDecorate %sim NonWritable
                OpDecorate %sim DescriptorSet 1
@@ -48,31 +51,32 @@
 %_ptr_StorageBuffer_Particles = OpTypePointer StorageBuffer %Particles
   %particles = OpVariable %_ptr_StorageBuffer_Particles StorageBuffer
  %Simulation = OpTypeStruct %uint
-%_ptr_Uniform_Simulation = OpTypePointer Uniform %Simulation
-        %sim = OpVariable %_ptr_Uniform_Simulation Uniform
+  %sim_block = OpTypeStruct %Simulation
+%_ptr_Uniform_sim_block = OpTypePointer Uniform %sim_block
+        %sim = OpVariable %_ptr_Uniform_sim_block Uniform
        %void = OpTypeVoid
-         %15 = OpTypeFunction %void
+         %16 = OpTypeFunction %void
      %uint_0 = OpConstant %uint 0
         %int = OpTypeInt 32 1
-         %21 = OpConstantNull %int
+         %22 = OpConstantNull %int
 %_ptr_StorageBuffer_Particle = OpTypePointer StorageBuffer %Particle
 %_ptr_Function_Particle = OpTypePointer Function %Particle
-         %27 = OpConstantNull %Particle
+         %28 = OpConstantNull %Particle
 %_ptr_Uniform_uint = OpTypePointer Uniform %uint
 %_ptr_Function_v3float = OpTypePointer Function %v3float
-       %main = OpFunction %void None %15
-         %18 = OpLabel
-   %particle = OpVariable %_ptr_Function_Particle Function %27
-         %23 = OpAccessChain %_ptr_StorageBuffer_Particle %particles %uint_0 %21
-         %24 = OpLoad %Particle %23
-               OpStore %particle %24
-         %29 = OpAccessChain %_ptr_Uniform_uint %sim %uint_0
-         %30 = OpLoad %uint %29
-         %32 = OpAccessChain %_ptr_Function_v3float %particle %uint_0 %30
-         %33 = OpAccessChain %_ptr_Uniform_uint %sim %uint_0
-         %34 = OpLoad %uint %33
-         %35 = OpAccessChain %_ptr_Function_v3float %particle %uint_0 %34
-         %36 = OpLoad %v3float %35
-               OpStore %32 %36
+       %main = OpFunction %void None %16
+         %19 = OpLabel
+   %particle = OpVariable %_ptr_Function_Particle Function %28
+         %24 = OpAccessChain %_ptr_StorageBuffer_Particle %particles %uint_0 %22
+         %25 = OpLoad %Particle %24
+               OpStore %particle %25
+         %30 = OpAccessChain %_ptr_Uniform_uint %sim %uint_0 %uint_0
+         %31 = OpLoad %uint %30
+         %33 = OpAccessChain %_ptr_Function_v3float %particle %uint_0 %31
+         %34 = OpAccessChain %_ptr_Uniform_uint %sim %uint_0 %uint_0
+         %35 = OpLoad %uint %34
+         %36 = OpAccessChain %_ptr_Function_v3float %particle %uint_0 %35
+         %37 = OpLoad %v3float %36
+               OpStore %33 %37
                OpReturn
                OpFunctionEnd

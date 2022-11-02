@@ -1,27 +1,31 @@
 #version 310 es
 
-layout(binding = 0, std430) buffer Buf_ssbo {
+struct Buf {
   uint count;
   uint data[50];
+};
+
+layout(binding = 0, std430) buffer b_block_ssbo {
+  Buf inner;
 } b;
 
 void tint_symbol() {
   uint i = 0u;
   while (true) {
-    if ((i >= b.count)) {
+    if ((i >= b.inner.count)) {
       break;
     }
     uint p_save = i;
     if (((i % 2u) == 0u)) {
       {
-        b.data[p_save] = (b.data[p_save] * 2u);
+        b.inner.data[p_save] = (b.inner.data[p_save] * 2u);
         i = (i + 1u);
       }
       continue;
     }
-    b.data[p_save] = 0u;
+    b.inner.data[p_save] = 0u;
     {
-      b.data[p_save] = (b.data[p_save] * 2u);
+      b.inner.data[p_save] = (b.inner.data[p_save] * 2u);
       i = (i + 1u);
     }
   }

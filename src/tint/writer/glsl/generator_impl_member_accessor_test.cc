@@ -179,27 +179,27 @@ TEST_P(GlslGeneratorImplTest_MemberAccessor_StorageBufferLoad, Test) {
 
 INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_MemberAccessor,
                          GlslGeneratorImplTest_MemberAccessor_StorageBufferLoad,
-                         testing::Values(TypeCase{ty_u32, "data.b"},
-                                         TypeCase{ty_f32, "data.b"},
-                                         TypeCase{ty_i32, "data.b"},
-                                         TypeCase{ty_vec2<u32>, "data.b"},
-                                         TypeCase{ty_vec2<f32>, "data.b"},
-                                         TypeCase{ty_vec2<i32>, "data.b"},
-                                         TypeCase{ty_vec3<u32>, "data.b"},
-                                         TypeCase{ty_vec3<f32>, "data.b"},
-                                         TypeCase{ty_vec3<i32>, "data.b"},
-                                         TypeCase{ty_vec4<u32>, "data.b"},
-                                         TypeCase{ty_vec4<f32>, "data.b"},
-                                         TypeCase{ty_vec4<i32>, "data.b"},
-                                         TypeCase{ty_mat2x2<f32>, "data.b"},
-                                         TypeCase{ty_mat2x3<f32>, "data.b"},
-                                         TypeCase{ty_mat2x4<f32>, "data.b"},
-                                         TypeCase{ty_mat3x2<f32>, "data.b"},
-                                         TypeCase{ty_mat3x3<f32>, "data.b"},
-                                         TypeCase{ty_mat3x4<f32>, "data.b"},
-                                         TypeCase{ty_mat4x2<f32>, "data.b"},
-                                         TypeCase{ty_mat4x3<f32>, "data.b"},
-                                         TypeCase{ty_mat4x4<f32>, "data.b"}));
+                         testing::Values(TypeCase{ty_u32, "data.inner.b"},
+                                         TypeCase{ty_f32, "data.inner.b"},
+                                         TypeCase{ty_i32, "data.inner.b"},
+                                         TypeCase{ty_vec2<u32>, "data.inner.b"},
+                                         TypeCase{ty_vec2<f32>, "data.inner.b"},
+                                         TypeCase{ty_vec2<i32>, "data.inner.b"},
+                                         TypeCase{ty_vec3<u32>, "data.inner.b"},
+                                         TypeCase{ty_vec3<f32>, "data.inner.b"},
+                                         TypeCase{ty_vec3<i32>, "data.inner.b"},
+                                         TypeCase{ty_vec4<u32>, "data.inner.b"},
+                                         TypeCase{ty_vec4<f32>, "data.inner.b"},
+                                         TypeCase{ty_vec4<i32>, "data.inner.b"},
+                                         TypeCase{ty_mat2x2<f32>, "data.inner.b"},
+                                         TypeCase{ty_mat2x3<f32>, "data.inner.b"},
+                                         TypeCase{ty_mat2x4<f32>, "data.inner.b"},
+                                         TypeCase{ty_mat3x2<f32>, "data.inner.b"},
+                                         TypeCase{ty_mat3x3<f32>, "data.inner.b"},
+                                         TypeCase{ty_mat3x4<f32>, "data.inner.b"},
+                                         TypeCase{ty_mat4x2<f32>, "data.inner.b"},
+                                         TypeCase{ty_mat4x3<f32>, "data.inner.b"},
+                                         TypeCase{ty_mat4x4<f32>, "data.inner.b"}));
 
 using GlslGeneratorImplTest_MemberAccessor_StorageBufferStore =
     GlslGeneratorImplTest_MemberAccessorWithParam<TypeCase>;
@@ -231,27 +231,27 @@ TEST_P(GlslGeneratorImplTest_MemberAccessor_StorageBufferStore, Test) {
 
 INSTANTIATE_TEST_SUITE_P(GlslGeneratorImplTest_MemberAccessor,
                          GlslGeneratorImplTest_MemberAccessor_StorageBufferStore,
-                         testing::Values(TypeCase{ty_u32, "data.b = value"},
-                                         TypeCase{ty_f32, "data.b = value"},
-                                         TypeCase{ty_i32, "data.b = value"},
-                                         TypeCase{ty_vec2<u32>, "data.b = value"},
-                                         TypeCase{ty_vec2<f32>, "data.b = value"},
-                                         TypeCase{ty_vec2<i32>, "data.b = value"},
-                                         TypeCase{ty_vec3<u32>, "data.b = value"},
-                                         TypeCase{ty_vec3<f32>, "data.b = value"},
-                                         TypeCase{ty_vec3<i32>, "data.b = value"},
-                                         TypeCase{ty_vec4<u32>, "data.b = value"},
-                                         TypeCase{ty_vec4<f32>, "data.b = value"},
-                                         TypeCase{ty_vec4<i32>, "data.b = value"},
-                                         TypeCase{ty_mat2x2<f32>, "data.b = value"},
-                                         TypeCase{ty_mat2x3<f32>, "data.b = value"},
-                                         TypeCase{ty_mat2x4<f32>, "data.b = value"},
-                                         TypeCase{ty_mat3x2<f32>, "data.b = value"},
-                                         TypeCase{ty_mat3x3<f32>, "data.b = value"},
-                                         TypeCase{ty_mat3x4<f32>, "data.b = value"},
-                                         TypeCase{ty_mat4x2<f32>, "data.b = value"},
-                                         TypeCase{ty_mat4x3<f32>, "data.b = value"},
-                                         TypeCase{ty_mat4x4<f32>, "data.b = value"}));
+                         testing::Values(TypeCase{ty_u32, "data.inner.b = value"},
+                                         TypeCase{ty_f32, "data.inner.b = value"},
+                                         TypeCase{ty_i32, "data.inner.b = value"},
+                                         TypeCase{ty_vec2<u32>, "data.inner.b = value"},
+                                         TypeCase{ty_vec2<f32>, "data.inner.b = value"},
+                                         TypeCase{ty_vec2<i32>, "data.inner.b = value"},
+                                         TypeCase{ty_vec3<u32>, "data.inner.b = value"},
+                                         TypeCase{ty_vec3<f32>, "data.inner.b = value"},
+                                         TypeCase{ty_vec3<i32>, "data.inner.b = value"},
+                                         TypeCase{ty_vec4<u32>, "data.inner.b = value"},
+                                         TypeCase{ty_vec4<f32>, "data.inner.b = value"},
+                                         TypeCase{ty_vec4<i32>, "data.inner.b = value"},
+                                         TypeCase{ty_mat2x2<f32>, "data.inner.b = value"},
+                                         TypeCase{ty_mat2x3<f32>, "data.inner.b = value"},
+                                         TypeCase{ty_mat2x4<f32>, "data.inner.b = value"},
+                                         TypeCase{ty_mat3x2<f32>, "data.inner.b = value"},
+                                         TypeCase{ty_mat3x3<f32>, "data.inner.b = value"},
+                                         TypeCase{ty_mat3x4<f32>, "data.inner.b = value"},
+                                         TypeCase{ty_mat4x2<f32>, "data.inner.b = value"},
+                                         TypeCase{ty_mat4x3<f32>, "data.inner.b = value"},
+                                         TypeCase{ty_mat4x4<f32>, "data.inner.b = value"}));
 
 TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Matrix_Empty) {
     // struct Data {
@@ -277,16 +277,20 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_Matrix_Empty) {
         R"(#version 310 es
 precision mediump float;
 
-layout(binding = 0, std430) buffer Data_ssbo {
+struct Data {
   int a;
   uint pad;
   uint pad_1;
   uint pad_2;
   mat2x3 b;
+};
+
+layout(binding = 0, std430) buffer data_block_ssbo {
+  Data inner;
 } data;
 
 void tint_symbol() {
-  data.b = mat2x3(vec3(0.0f), vec3(0.0f));
+  data.inner.b = mat2x3(vec3(0.0f), vec3(0.0f));
 }
 
 void main() {
@@ -321,16 +325,20 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Load_Matrix_Single_El
         R"(#version 310 es
 precision mediump float;
 
-layout(binding = 0, std430) buffer Data_ssbo {
+struct Data {
   float z;
   uint pad;
   uint pad_1;
   uint pad_2;
   mat4x3 a;
+};
+
+layout(binding = 0, std430) buffer data_block_ssbo {
+  Data inner;
 } data;
 
 void tint_symbol() {
-  float x = data.a[2][1];
+  float x = data.inner.a[2][1];
 }
 
 void main() {
@@ -365,13 +373,17 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
         R"(#version 310 es
 precision mediump float;
 
-layout(binding = 0, std430) buffer Data_ssbo {
+struct Data {
   float z;
   int a[5];
+};
+
+layout(binding = 0, std430) buffer data_block_ssbo {
+  Data inner;
 } data;
 
 void tint_symbol() {
-  int x = data.a[2];
+  int x = data.inner.a[2];
 }
 
 void main() {
@@ -409,16 +421,20 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor,
         R"(#version 310 es
 precision mediump float;
 
-layout(binding = 0, std430) buffer Data_ssbo {
+struct Data {
   float z;
   int a[5];
+};
+
+layout(binding = 0, std430) buffer data_block_ssbo {
+  Data inner;
 } data;
 
 void tint_symbol() {
   int a = 2;
   int b = 4;
   int c = 3;
-  int x = data.a[((a + b) - c)];
+  int x = data.inner.a[((a + b) - c)];
 }
 
 void main() {
@@ -452,13 +468,17 @@ TEST_F(GlslGeneratorImplTest_MemberAccessor, StorageBuffer_Store_ToArray) {
         R"(#version 310 es
 precision mediump float;
 
-layout(binding = 0, std430) buffer Data_ssbo {
+struct Data {
   float z;
   int a[5];
+};
+
+layout(binding = 0, std430) buffer data_block_ssbo {
+  Data inner;
 } data;
 
 void tint_symbol() {
-  data.a[2] = 2;
+  data.inner.a[2] = 2;
 }
 
 void main() {
@@ -508,12 +528,16 @@ struct Inner {
   uint pad_1;
 };
 
-layout(binding = 0, std430) buffer Data_ssbo {
+struct Data {
   Inner c[4];
+};
+
+layout(binding = 0, std430) buffer data_block_ssbo {
+  Data inner;
 } data;
 
 void tint_symbol() {
-  vec3 x = data.c[2].b;
+  vec3 x = data.inner.c[2].b;
 }
 
 void main() {
@@ -565,12 +589,16 @@ struct Inner {
   uint pad_1;
 };
 
-layout(binding = 0, std430) buffer Data_ssbo {
+struct Data {
   Inner c[4];
+};
+
+layout(binding = 0, std430) buffer data_block_ssbo {
+  Data inner;
 } data;
 
 void tint_symbol() {
-  vec2 x = data.c[2].b.xy;
+  vec2 x = data.inner.c[2].b.xy;
 }
 
 void main() {
@@ -623,12 +651,16 @@ struct Inner {
   uint pad_1;
 };
 
-layout(binding = 0, std430) buffer Data_ssbo {
+struct Data {
   Inner c[4];
+};
+
+layout(binding = 0, std430) buffer data_block_ssbo {
+  Data inner;
 } data;
 
 void tint_symbol() {
-  float x = data.c[2].b.g;
+  float x = data.inner.c[2].b.g;
 }
 
 void main() {
@@ -680,12 +712,16 @@ struct Inner {
   uint pad_1;
 };
 
-layout(binding = 0, std430) buffer Data_ssbo {
+struct Data {
   Inner c[4];
+};
+
+layout(binding = 0, std430) buffer data_block_ssbo {
+  Data inner;
 } data;
 
 void tint_symbol() {
-  float x = data.c[2].b[1];
+  float x = data.inner.c[2].b[1];
 }
 
 void main() {
@@ -736,12 +772,16 @@ struct Inner {
   uint pad_1;
 };
 
-layout(binding = 0, std430) buffer Data_ssbo {
+struct Data {
   Inner c[4];
+};
+
+layout(binding = 0, std430) buffer data_block_ssbo {
+  Data inner;
 } data;
 
 void tint_symbol() {
-  data.c[2].b = vec3(1.0f, 2.0f, 3.0f);
+  data.inner.c[2].b = vec3(1.0f, 2.0f, 3.0f);
 }
 
 void main() {
@@ -793,12 +833,16 @@ struct Inner {
   uint pad_1;
 };
 
-layout(binding = 0, std430) buffer Data_ssbo {
+struct Data {
   Inner c[4];
+};
+
+layout(binding = 0, std430) buffer data_block_ssbo {
+  Data inner;
 } data;
 
 void tint_symbol() {
-  data.c[2].b.y = 1.0f;
+  data.inner.c[2].b.y = 1.0f;
 }
 
 void main() {

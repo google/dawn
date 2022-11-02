@@ -1,19 +1,23 @@
 #version 310 es
 precision mediump float;
 
+struct SB_RW_atomic {
+  uint arg_0;
+};
+
 struct SB_RW {
   uint arg_0;
 };
 
-layout(binding = 0, std430) buffer SB_RW_atomic_ssbo {
-  uint arg_0;
+layout(binding = 0, std430) buffer sb_rw_block_ssbo {
+  SB_RW_atomic inner;
 } sb_rw;
 
 void atomicStore_cdc29e() {
   uint arg_1 = 0u;
   arg_1 = 1u;
   uint x_18 = arg_1;
-  atomicExchange(sb_rw.arg_0, x_18);
+  atomicExchange(sb_rw.inner.arg_0, x_18);
   return;
 }
 
@@ -32,19 +36,23 @@ void main() {
 }
 #version 310 es
 
+struct SB_RW_atomic {
+  uint arg_0;
+};
+
 struct SB_RW {
   uint arg_0;
 };
 
-layout(binding = 0, std430) buffer SB_RW_atomic_ssbo {
-  uint arg_0;
+layout(binding = 0, std430) buffer sb_rw_block_ssbo {
+  SB_RW_atomic inner;
 } sb_rw;
 
 void atomicStore_cdc29e() {
   uint arg_1 = 0u;
   arg_1 = 1u;
   uint x_18 = arg_1;
-  atomicExchange(sb_rw.arg_0, x_18);
+  atomicExchange(sb_rw.inner.arg_0, x_18);
   return;
 }
 

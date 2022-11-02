@@ -1,10 +1,14 @@
 #version 310 es
 
-layout(binding = 0, std140) uniform Constants_ubo {
+struct Constants {
   uint zero;
   uint pad;
   uint pad_1;
   uint pad_2;
+};
+
+layout(binding = 0, std140) uniform constants_block_ubo {
+  Constants inner;
 } constants;
 
 struct Result {
@@ -17,7 +21,7 @@ struct S {
 
 S s = S(uint[3](0u, 0u, 0u));
 void tint_symbol() {
-  s.data[constants.zero] = 0u;
+  s.data[constants.inner.zero] = 0u;
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

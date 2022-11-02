@@ -1,12 +1,14 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 59
+; Bound: 60
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
+               OpName %s_block "s_block"
+               OpMemberName %s_block 0 "inner"
                OpName %S "S"
                OpMemberName %S 0 "a"
                OpMemberName %S 1 "b"
@@ -22,7 +24,8 @@
                OpMemberName %S 9 "j"
                OpName %s "s"
                OpName %main "main"
-               OpDecorate %S Block
+               OpDecorate %s_block Block
+               OpMemberDecorate %s_block 0 Offset 0
                OpMemberDecorate %S 0 Offset 0
                OpMemberDecorate %S 1 Offset 12
                OpMemberDecorate %S 2 Offset 16
@@ -55,10 +58,11 @@
      %uint_4 = OpConstant %uint 4
 %_arr_Inner_uint_4 = OpTypeArray %Inner %uint_4
           %S = OpTypeStruct %v3int %int %v3uint %uint %v3float %float %mat2v3float %mat3v2float %Inner %_arr_Inner_uint_4
-%_ptr_StorageBuffer_S = OpTypePointer StorageBuffer %S
-          %s = OpVariable %_ptr_StorageBuffer_S StorageBuffer
+    %s_block = OpTypeStruct %S
+%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
+          %s = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
        %void = OpTypeVoid
-         %16 = OpTypeFunction %void
+         %17 = OpTypeFunction %void
      %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer_v3int = OpTypePointer StorageBuffer %v3int
      %uint_1 = OpConstant %uint 1
@@ -78,27 +82,27 @@
 %_ptr_StorageBuffer_Inner = OpTypePointer StorageBuffer %Inner
      %uint_9 = OpConstant %uint 9
 %_ptr_StorageBuffer__arr_Inner_uint_4 = OpTypePointer StorageBuffer %_arr_Inner_uint_4
-       %main = OpFunction %void None %16
-         %19 = OpLabel
-         %22 = OpAccessChain %_ptr_StorageBuffer_v3int %s %uint_0
-         %23 = OpLoad %v3int %22
-         %26 = OpAccessChain %_ptr_StorageBuffer_int %s %uint_1
-         %27 = OpLoad %int %26
-         %30 = OpAccessChain %_ptr_StorageBuffer_v3uint %s %uint_2
-         %31 = OpLoad %v3uint %30
-         %34 = OpAccessChain %_ptr_StorageBuffer_uint %s %uint_3
-         %35 = OpLoad %uint %34
-         %37 = OpAccessChain %_ptr_StorageBuffer_v3float %s %uint_4
-         %38 = OpLoad %v3float %37
-         %41 = OpAccessChain %_ptr_StorageBuffer_float %s %uint_5
-         %42 = OpLoad %float %41
-         %45 = OpAccessChain %_ptr_StorageBuffer_mat2v3float %s %uint_6
-         %46 = OpLoad %mat2v3float %45
-         %49 = OpAccessChain %_ptr_StorageBuffer_mat3v2float %s %uint_7
-         %50 = OpLoad %mat3v2float %49
-         %53 = OpAccessChain %_ptr_StorageBuffer_Inner %s %uint_8
-         %54 = OpLoad %Inner %53
-         %57 = OpAccessChain %_ptr_StorageBuffer__arr_Inner_uint_4 %s %uint_9
-         %58 = OpLoad %_arr_Inner_uint_4 %57
+       %main = OpFunction %void None %17
+         %20 = OpLabel
+         %23 = OpAccessChain %_ptr_StorageBuffer_v3int %s %uint_0 %uint_0
+         %24 = OpLoad %v3int %23
+         %27 = OpAccessChain %_ptr_StorageBuffer_int %s %uint_0 %uint_1
+         %28 = OpLoad %int %27
+         %31 = OpAccessChain %_ptr_StorageBuffer_v3uint %s %uint_0 %uint_2
+         %32 = OpLoad %v3uint %31
+         %35 = OpAccessChain %_ptr_StorageBuffer_uint %s %uint_0 %uint_3
+         %36 = OpLoad %uint %35
+         %38 = OpAccessChain %_ptr_StorageBuffer_v3float %s %uint_0 %uint_4
+         %39 = OpLoad %v3float %38
+         %42 = OpAccessChain %_ptr_StorageBuffer_float %s %uint_0 %uint_5
+         %43 = OpLoad %float %42
+         %46 = OpAccessChain %_ptr_StorageBuffer_mat2v3float %s %uint_0 %uint_6
+         %47 = OpLoad %mat2v3float %46
+         %50 = OpAccessChain %_ptr_StorageBuffer_mat3v2float %s %uint_0 %uint_7
+         %51 = OpLoad %mat3v2float %50
+         %54 = OpAccessChain %_ptr_StorageBuffer_Inner %s %uint_0 %uint_8
+         %55 = OpLoad %Inner %54
+         %58 = OpAccessChain %_ptr_StorageBuffer__arr_Inner_uint_4 %s %uint_0 %uint_9
+         %59 = OpLoad %_arr_Inner_uint_4 %58
                OpReturn
                OpFunctionEnd

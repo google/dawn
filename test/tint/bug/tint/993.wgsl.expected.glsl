@@ -1,28 +1,40 @@
 #version 310 es
 
-layout(binding = 0, std140) uniform Constants_ubo {
+struct Constants {
   uint zero;
   uint pad;
   uint pad_1;
   uint pad_2;
+};
+
+layout(binding = 0, std140) uniform constants_block_ubo {
+  Constants inner;
 } constants;
 
-layout(binding = 1, std430) buffer Result_ssbo {
+struct Result {
   uint value;
+};
+
+layout(binding = 1, std430) buffer result_block_ssbo {
+  Result inner;
 } result;
 
-layout(binding = 0, std430) buffer TestData_ssbo {
+struct TestData {
   int data[3];
+};
+
+layout(binding = 0, std430) buffer s_block_ssbo {
+  TestData inner;
 } s;
 
 int runTest() {
-  return atomicOr(s.data[(0u + uint(constants.zero))], 0);
+  return atomicOr(s.inner.data[(0u + uint(constants.inner.zero))], 0);
 }
 
 void tint_symbol() {
   int tint_symbol_1 = runTest();
   uint tint_symbol_2 = uint(tint_symbol_1);
-  result.value = tint_symbol_2;
+  result.inner.value = tint_symbol_2;
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

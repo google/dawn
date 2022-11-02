@@ -4,25 +4,37 @@ precision mediump float;
 layout(location = 2) in float fClipDistance3_param_1;
 layout(location = 3) in float fClipDistance4_param_1;
 layout(location = 0) out vec4 glFragColor_1_1;
-float fClipDistance3 = 0.0f;
-float fClipDistance4 = 0.0f;
-layout(binding = 0, std140) uniform Scene_ubo {
+struct Scene {
   vec4 vEyePosition;
-} x_29;
+};
 
-layout(binding = 1, std140) uniform Material_ubo {
+struct Material {
   vec4 vDiffuseColor;
   vec3 vAmbientColor;
   float placeholder;
   vec3 vEmissiveColor;
   float placeholder2;
-} x_49;
+};
 
-layout(binding = 2, std140) uniform Mesh_ubo {
+struct Mesh {
   float visibility;
   uint pad;
   uint pad_1;
   uint pad_2;
+};
+
+float fClipDistance3 = 0.0f;
+float fClipDistance4 = 0.0f;
+layout(binding = 0, std140) uniform x_29_block_ubo {
+  Scene inner;
+} x_29;
+
+layout(binding = 1, std140) uniform x_49_block_ubo {
+  Material inner;
+} x_49;
+
+layout(binding = 2, std140) uniform x_137_block_ubo {
+  Mesh inner;
 } x_137;
 
 vec4 glFragColor = vec4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -54,13 +66,13 @@ void main_1() {
     tint_discard = true;
     return;
   }
-  vec4 x_34 = x_29.vEyePosition;
+  vec4 x_34 = x_29.inner.vEyePosition;
   vec3 x_38 = vec3(0.0f);
   viewDirectionW = normalize((vec3(x_34.x, x_34.y, x_34.z) - x_38));
   baseColor = vec4(1.0f);
-  vec4 x_52 = x_49.vDiffuseColor;
+  vec4 x_52 = x_49.inner.vDiffuseColor;
   diffuseColor = vec3(x_52.x, x_52.y, x_52.z);
-  float x_60 = x_49.vDiffuseColor.w;
+  float x_60 = x_49.inner.vDiffuseColor.w;
   alpha = x_60;
   vec3 x_62 = vec3(0.0f);
   vec3 x_64 = vec3(0.0f);
@@ -76,12 +88,12 @@ void main_1() {
   shadow = 1.0f;
   refractionColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
   reflectionColor = vec4(0.0f, 0.0f, 0.0f, 1.0f);
-  vec3 x_94 = x_49.vEmissiveColor;
+  vec3 x_94 = x_49.inner.vEmissiveColor;
   emissiveColor = x_94;
   vec3 x_96 = diffuseBase;
   vec3 x_97 = diffuseColor;
   vec3 x_99 = emissiveColor;
-  vec3 x_103 = x_49.vAmbientColor;
+  vec3 x_103 = x_49.inner.vAmbientColor;
   vec4 x_108 = baseColor;
   finalDiffuse = (clamp((((x_96 * x_97) + x_99) + x_103), vec3(0.0f), vec3(1.0f)) * vec3(x_108.x, x_108.y, x_108.z));
   finalSpecular = vec3(0.0f);
@@ -97,7 +109,7 @@ void main_1() {
   vec3 x_132 = max(vec3(x_129.x, x_129.y, x_129.z), vec3(0.0f));
   vec4 x_133 = color;
   color = vec4(x_132.x, x_132.y, x_132.z, x_133.w);
-  float x_140 = x_137.visibility;
+  float x_140 = x_137.inner.visibility;
   float x_142 = color.w;
   color.w = (x_142 * x_140);
   vec4 x_147 = color;

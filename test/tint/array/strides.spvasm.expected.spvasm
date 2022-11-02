@@ -1,12 +1,14 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 42
+; Bound: 43
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %f "f"
                OpExecutionMode %f LocalSize 1 1 1
+               OpName %s_block "s_block"
+               OpMemberName %s_block 0 "inner"
                OpName %S "S"
                OpMemberName %S 0 "a"
                OpName %strided_arr_1 "strided_arr_1"
@@ -16,7 +18,8 @@
                OpName %s "s"
                OpName %f_1 "f_1"
                OpName %f "f"
-               OpDecorate %S Block
+               OpDecorate %s_block Block
+               OpMemberDecorate %s_block 0 Offset 0
                OpMemberDecorate %S 0 Offset 0
                OpMemberDecorate %strided_arr_1 0 Offset 0
                OpMemberDecorate %strided_arr 0 Offset 0
@@ -36,10 +39,11 @@
      %uint_4 = OpConstant %uint 4
 %_arr_strided_arr_1_uint_4 = OpTypeArray %strided_arr_1 %uint_4
           %S = OpTypeStruct %_arr_strided_arr_1_uint_4
-%_ptr_StorageBuffer_S = OpTypePointer StorageBuffer %S
-          %s = OpVariable %_ptr_StorageBuffer_S StorageBuffer
+    %s_block = OpTypeStruct %S
+%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
+          %s = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
        %void = OpTypeVoid
-         %14 = OpTypeFunction %void
+         %15 = OpTypeFunction %void
      %uint_0 = OpConstant %uint 0
 %_ptr_StorageBuffer__arr_strided_arr_1_uint_4 = OpTypePointer StorageBuffer %_arr_strided_arr_1_uint_4
         %int = OpTypeInt 32 1
@@ -49,26 +53,26 @@
 %_ptr_StorageBuffer__arr_strided_arr_uint_2 = OpTypePointer StorageBuffer %_arr_strided_arr_uint_2
       %int_1 = OpConstant %int 1
 %_ptr_StorageBuffer_float = OpTypePointer StorageBuffer %float
-         %36 = OpConstantNull %_arr_strided_arr_1_uint_4
+         %37 = OpConstantNull %_arr_strided_arr_1_uint_4
     %float_5 = OpConstant %float 5
-        %f_1 = OpFunction %void None %14
-         %17 = OpLabel
-         %20 = OpAccessChain %_ptr_StorageBuffer__arr_strided_arr_1_uint_4 %s %uint_0
-         %21 = OpLoad %_arr_strided_arr_1_uint_4 %20
-         %25 = OpAccessChain %_ptr_StorageBuffer__arr__arr_strided_arr_uint_2_uint_3 %s %uint_0 %int_3 %uint_0
-         %26 = OpLoad %_arr__arr_strided_arr_uint_2_uint_3 %25
-         %29 = OpAccessChain %_ptr_StorageBuffer__arr_strided_arr_uint_2 %s %uint_0 %int_3 %uint_0 %int_2
-         %30 = OpLoad %_arr_strided_arr_uint_2 %29
-         %33 = OpAccessChain %_ptr_StorageBuffer_float %s %uint_0 %int_3 %uint_0 %int_2 %int_1 %uint_0
-         %34 = OpLoad %float %33
-         %35 = OpAccessChain %_ptr_StorageBuffer__arr_strided_arr_1_uint_4 %s %uint_0
-               OpStore %35 %36
-         %37 = OpAccessChain %_ptr_StorageBuffer_float %s %uint_0 %int_3 %uint_0 %int_2 %int_1 %uint_0
-               OpStore %37 %float_5
+        %f_1 = OpFunction %void None %15
+         %18 = OpLabel
+         %21 = OpAccessChain %_ptr_StorageBuffer__arr_strided_arr_1_uint_4 %s %uint_0 %uint_0
+         %22 = OpLoad %_arr_strided_arr_1_uint_4 %21
+         %26 = OpAccessChain %_ptr_StorageBuffer__arr__arr_strided_arr_uint_2_uint_3 %s %uint_0 %uint_0 %int_3 %uint_0
+         %27 = OpLoad %_arr__arr_strided_arr_uint_2_uint_3 %26
+         %30 = OpAccessChain %_ptr_StorageBuffer__arr_strided_arr_uint_2 %s %uint_0 %uint_0 %int_3 %uint_0 %int_2
+         %31 = OpLoad %_arr_strided_arr_uint_2 %30
+         %34 = OpAccessChain %_ptr_StorageBuffer_float %s %uint_0 %uint_0 %int_3 %uint_0 %int_2 %int_1 %uint_0
+         %35 = OpLoad %float %34
+         %36 = OpAccessChain %_ptr_StorageBuffer__arr_strided_arr_1_uint_4 %s %uint_0 %uint_0
+               OpStore %36 %37
+         %38 = OpAccessChain %_ptr_StorageBuffer_float %s %uint_0 %uint_0 %int_3 %uint_0 %int_2 %int_1 %uint_0
+               OpStore %38 %float_5
                OpReturn
                OpFunctionEnd
-          %f = OpFunction %void None %14
-         %40 = OpLabel
-         %41 = OpFunctionCall %void %f_1
+          %f = OpFunction %void None %15
+         %41 = OpLabel
+         %42 = OpFunctionCall %void %f_1
                OpReturn
                OpFunctionEnd

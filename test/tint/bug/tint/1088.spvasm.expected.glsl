@@ -11,8 +11,7 @@ struct strided_arr {
   uint pad_2;
 };
 
-vec3 position = vec3(0.0f, 0.0f, 0.0f);
-layout(binding = 2, std140) uniform LeftOver_ubo {
+struct LeftOver {
   mat4 worldViewProjection;
   float time;
   uint pad_3;
@@ -20,6 +19,11 @@ layout(binding = 2, std140) uniform LeftOver_ubo {
   uint pad_5;
   mat4 test2[2];
   strided_arr test[4];
+};
+
+vec3 position = vec3(0.0f, 0.0f, 0.0f);
+layout(binding = 2, std140) uniform x_14_block_ubo {
+  LeftOver inner;
 } x_14;
 
 vec2 vUV = vec2(0.0f, 0.0f);
@@ -34,14 +38,14 @@ void main_1() {
   vec4 x_21 = q;
   p = vec3(x_21.x, x_21.y, x_21.z);
   float x_27 = p.x;
-  float x_41 = x_14.test[0].el;
+  float x_41 = x_14.inner.test[0].el;
   float x_45 = position.y;
-  float x_49 = x_14.time;
+  float x_49 = x_14.inner.time;
   p.x = (x_27 + sin(((x_41 * x_45) + x_49)));
   float x_55 = p.y;
-  float x_57 = x_14.time;
+  float x_57 = x_14.inner.time;
   p.y = (x_55 + sin((x_57 + 4.0f)));
-  mat4 x_69 = x_14.worldViewProjection;
+  mat4 x_69 = x_14.inner.worldViewProjection;
   vec3 x_70 = p;
   tint_symbol = (x_69 * vec4(x_70.x, x_70.y, x_70.z, 1.0f));
   vec2 x_83 = uv;

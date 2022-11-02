@@ -1,27 +1,31 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 9
+; Bound: 10
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
+               OpName %s_block "s_block"
+               OpMemberName %s_block 0 "inner"
                OpName %S "S"
                OpMemberName %S 0 "i"
                OpName %s "s"
                OpName %main "main"
-               OpDecorate %S Block
+               OpDecorate %s_block Block
+               OpMemberDecorate %s_block 0 Offset 0
                OpMemberDecorate %S 0 Offset 0
                OpDecorate %s Binding 0
                OpDecorate %s DescriptorSet 0
         %int = OpTypeInt 32 1
           %S = OpTypeStruct %int
-%_ptr_StorageBuffer_S = OpTypePointer StorageBuffer %S
-          %s = OpVariable %_ptr_StorageBuffer_S StorageBuffer
+    %s_block = OpTypeStruct %S
+%_ptr_StorageBuffer_s_block = OpTypePointer StorageBuffer %s_block
+          %s = OpVariable %_ptr_StorageBuffer_s_block StorageBuffer
        %void = OpTypeVoid
-          %5 = OpTypeFunction %void
-       %main = OpFunction %void None %5
-          %8 = OpLabel
+          %6 = OpTypeFunction %void
+       %main = OpFunction %void None %6
+          %9 = OpLabel
                OpReturn
                OpFunctionEnd

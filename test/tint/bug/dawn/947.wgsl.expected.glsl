@@ -1,9 +1,13 @@
 #version 310 es
 
 layout(location = 0) out vec2 texcoords_1;
-layout(binding = 0, std140) uniform Uniforms_ubo {
+struct Uniforms {
   vec2 u_scale;
   vec2 u_offset;
+};
+
+layout(binding = 0, std140) uniform uniforms_block_ubo {
+  Uniforms inner;
 } uniforms;
 
 struct VertexOutputs {
@@ -15,11 +19,11 @@ VertexOutputs vs_main(uint VertexIndex) {
   vec2 texcoord[3] = vec2[3](vec2(-0.5f, 0.0f), vec2(1.5f, 0.0f), vec2(0.5f, 2.0f));
   VertexOutputs tint_symbol = VertexOutputs(vec2(0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
   tint_symbol.position = vec4(((texcoord[VertexIndex] * 2.0f) - vec2(1.0f)), 0.0f, 1.0f);
-  bool flipY = (uniforms.u_scale.y < 0.0f);
+  bool flipY = (uniforms.inner.u_scale.y < 0.0f);
   if (flipY) {
-    tint_symbol.texcoords = ((((texcoord[VertexIndex] * uniforms.u_scale) + uniforms.u_offset) * vec2(1.0f, -1.0f)) + vec2(0.0f, 1.0f));
+    tint_symbol.texcoords = ((((texcoord[VertexIndex] * uniforms.inner.u_scale) + uniforms.inner.u_offset) * vec2(1.0f, -1.0f)) + vec2(0.0f, 1.0f));
   } else {
-    tint_symbol.texcoords = ((((texcoord[VertexIndex] * vec2(1.0f, -1.0f)) + vec2(0.0f, 1.0f)) * uniforms.u_scale) + uniforms.u_offset);
+    tint_symbol.texcoords = ((((texcoord[VertexIndex] * vec2(1.0f, -1.0f)) + vec2(0.0f, 1.0f)) * uniforms.inner.u_scale) + uniforms.inner.u_offset);
   }
   return tint_symbol;
 }

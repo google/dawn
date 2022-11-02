@@ -1,5 +1,12 @@
 #version 310 es
 
+struct Uniforms {
+  uint dimAOuter;
+  uint dimInner;
+  uint dimBOuter;
+  uint pad;
+};
+
 layout(binding = 0, std430) buffer Matrix_ssbo {
   float numbers[];
 } firstMatrix;
@@ -12,44 +19,41 @@ layout(binding = 2, std430) buffer Matrix_ssbo_2 {
   float numbers[];
 } resultMatrix;
 
-layout(binding = 3, std140) uniform Uniforms_ubo {
-  uint dimAOuter;
-  uint dimInner;
-  uint dimBOuter;
-  uint pad;
+layout(binding = 3, std140) uniform uniforms_block_ubo {
+  Uniforms inner;
 } uniforms;
 
 float mm_readA(uint row, uint col) {
-  bool tint_tmp = (row < uniforms.dimAOuter);
+  bool tint_tmp = (row < uniforms.inner.dimAOuter);
   if (tint_tmp) {
-    tint_tmp = (col < uniforms.dimInner);
+    tint_tmp = (col < uniforms.inner.dimInner);
   }
   if ((tint_tmp)) {
-    float result = firstMatrix.numbers[((row * uniforms.dimInner) + col)];
+    float result = firstMatrix.numbers[((row * uniforms.inner.dimInner) + col)];
     return result;
   }
   return 0.0f;
 }
 
 float mm_readB(uint row, uint col) {
-  bool tint_tmp_1 = (row < uniforms.dimInner);
+  bool tint_tmp_1 = (row < uniforms.inner.dimInner);
   if (tint_tmp_1) {
-    tint_tmp_1 = (col < uniforms.dimBOuter);
+    tint_tmp_1 = (col < uniforms.inner.dimBOuter);
   }
   if ((tint_tmp_1)) {
-    float result = secondMatrix.numbers[((row * uniforms.dimBOuter) + col)];
+    float result = secondMatrix.numbers[((row * uniforms.inner.dimBOuter) + col)];
     return result;
   }
   return 0.0f;
 }
 
 void mm_write(uint row, uint col, float value) {
-  bool tint_tmp_2 = (row < uniforms.dimAOuter);
+  bool tint_tmp_2 = (row < uniforms.inner.dimAOuter);
   if (tint_tmp_2) {
-    tint_tmp_2 = (col < uniforms.dimBOuter);
+    tint_tmp_2 = (col < uniforms.inner.dimBOuter);
   }
   if ((tint_tmp_2)) {
-    uint index = (col + (row * uniforms.dimBOuter));
+    uint index = (col + (row * uniforms.inner.dimBOuter));
     resultMatrix.numbers[index] = value;
   }
 }
@@ -70,7 +74,7 @@ void tint_symbol(uvec3 local_id, uvec3 global_id, uint local_invocation_index) {
   uint tileCol = (local_id.x * 4u);
   uint globalRow = (global_id.y * 4u);
   uint globalCol = (global_id.x * 4u);
-  uint numTiles = (((uniforms.dimInner - 1u) / 64u) + 1u);
+  uint numTiles = (((uniforms.inner.dimInner - 1u) / 64u) + 1u);
   float acc[16] = float[16](0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
   float ACached = 0.0f;
   float BCached[4] = float[4](0.0f, 0.0f, 0.0f, 0.0f);

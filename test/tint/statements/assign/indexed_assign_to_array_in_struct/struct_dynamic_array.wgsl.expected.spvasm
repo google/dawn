@@ -1,12 +1,14 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 25
+; Bound: 26
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
                OpEntryPoint GLCompute %main "main"
                OpExecutionMode %main LocalSize 1 1 1
+               OpName %uniforms_block "uniforms_block"
+               OpMemberName %uniforms_block 0 "inner"
                OpName %Uniforms "Uniforms"
                OpMemberName %Uniforms 0 "i"
                OpName %uniforms "uniforms"
@@ -17,7 +19,8 @@
                OpName %s1 "s1"
                OpName %main "main"
                OpName %v "v"
-               OpDecorate %Uniforms Block
+               OpDecorate %uniforms_block Block
+               OpMemberDecorate %uniforms_block 0 Offset 0
                OpMemberDecorate %Uniforms 0 Offset 0
                OpDecorate %uniforms NonWritable
                OpDecorate %uniforms DescriptorSet 1
@@ -30,8 +33,9 @@
                OpDecorate %s1 DescriptorSet 0
        %uint = OpTypeInt 32 0
    %Uniforms = OpTypeStruct %uint
-%_ptr_Uniform_Uniforms = OpTypePointer Uniform %Uniforms
-   %uniforms = OpVariable %_ptr_Uniform_Uniforms Uniform
+%uniforms_block = OpTypeStruct %Uniforms
+%_ptr_Uniform_uniforms_block = OpTypePointer Uniform %uniforms_block
+   %uniforms = OpVariable %_ptr_Uniform_uniforms_block Uniform
         %int = OpTypeInt 32 1
      %InnerS = OpTypeStruct %int
 %_runtimearr_InnerS = OpTypeRuntimeArray %InnerS
@@ -39,19 +43,19 @@
 %_ptr_StorageBuffer_OuterS = OpTypePointer StorageBuffer %OuterS
          %s1 = OpVariable %_ptr_StorageBuffer_OuterS StorageBuffer
        %void = OpTypeVoid
-         %11 = OpTypeFunction %void
+         %12 = OpTypeFunction %void
 %_ptr_Function_InnerS = OpTypePointer Function %InnerS
-         %17 = OpConstantNull %InnerS
+         %18 = OpConstantNull %InnerS
      %uint_0 = OpConstant %uint 0
 %_ptr_Uniform_uint = OpTypePointer Uniform %uint
 %_ptr_StorageBuffer_InnerS = OpTypePointer StorageBuffer %InnerS
-       %main = OpFunction %void None %11
-         %14 = OpLabel
-          %v = OpVariable %_ptr_Function_InnerS Function %17
-         %20 = OpAccessChain %_ptr_Uniform_uint %uniforms %uint_0
-         %21 = OpLoad %uint %20
-         %23 = OpAccessChain %_ptr_StorageBuffer_InnerS %s1 %uint_0 %21
-         %24 = OpLoad %InnerS %v
-               OpStore %23 %24
+       %main = OpFunction %void None %12
+         %15 = OpLabel
+          %v = OpVariable %_ptr_Function_InnerS Function %18
+         %21 = OpAccessChain %_ptr_Uniform_uint %uniforms %uint_0 %uint_0
+         %22 = OpLoad %uint %21
+         %24 = OpAccessChain %_ptr_StorageBuffer_InnerS %s1 %uint_0 %22
+         %25 = OpLoad %InnerS %v
+               OpStore %24 %25
                OpReturn
                OpFunctionEnd

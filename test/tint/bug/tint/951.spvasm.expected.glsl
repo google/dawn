@@ -1,5 +1,16 @@
 #version 310 es
 
+struct Uniforms {
+  float NAN;
+  int aShape;
+  int outShape;
+  int outShapeStrides;
+  int size;
+  uint pad;
+  uint pad_1;
+  uint pad_2;
+};
+
 layout(binding = 0, std430) buffer ssbOut_ssbo {
   float result[];
 } x_16;
@@ -9,15 +20,8 @@ layout(binding = 1, std430) buffer ssbA_ssbo {
 } x_20;
 
 uvec3 tint_symbol = uvec3(0u, 0u, 0u);
-layout(binding = 2, std140) uniform Uniforms_ubo {
-  float NAN;
-  int aShape;
-  int outShape;
-  int outShapeStrides;
-  int size;
-  uint pad;
-  uint pad_1;
-  uint pad_2;
+layout(binding = 2, std140) uniform x_24_block_ubo {
+  Uniforms inner;
 } x_24;
 
 float getAAtOutCoords_() {
@@ -51,7 +55,7 @@ void main_1() {
   uint x_61 = tint_symbol.x;
   index = int(x_61);
   int x_63 = index;
-  int x_70 = x_24.size;
+  int x_70 = x_24.inner.size;
   if ((x_63 < x_70)) {
     float x_75 = getAAtOutCoords_();
     a_1 = x_75;

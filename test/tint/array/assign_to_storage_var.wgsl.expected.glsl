@@ -8,6 +8,10 @@ struct S {
   ivec4 arr[4];
 };
 
+struct S_nested {
+  int arr[4][3][2];
+};
+
 ivec4 src_private[4] = ivec4[4](ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0), ivec4(0, 0, 0, 0));
 shared ivec4 src_workgroup[4];
 layout(binding = 0, std140) uniform src_uniform_block_ubo {
@@ -22,8 +26,8 @@ layout(binding = 2, std430) buffer src_uniform_block_ssbo_1 {
   S inner;
 } dst;
 
-layout(binding = 3, std430) buffer S_nested_ssbo {
-  int arr[4][3][2];
+layout(binding = 3, std430) buffer dst_nested_block_ssbo {
+  S_nested inner;
 } dst_nested;
 
 ivec4[4] ret_arr() {
@@ -53,6 +57,6 @@ void foo(ivec4 src_param[4]) {
   dst.inner.arr = src_uniform.inner.arr;
   dst.inner.arr = src_storage.inner.arr;
   int src_nested[4][3][2] = int[4][3][2](int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)), int[3][2](int[2](0, 0), int[2](0, 0), int[2](0, 0)));
-  dst_nested.arr = src_nested;
+  dst_nested.inner.arr = src_nested;
 }
 

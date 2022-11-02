@@ -3,8 +3,12 @@
 layout(location = 0) in vec4 cur_position_1;
 layout(location = 1) in vec4 color_1;
 layout(location = 0) out vec4 vtxFragColor_1;
-layout(binding = 0, std140) uniform Uniforms_ubo {
+struct Uniforms {
   mat4 modelViewProjectionMatrix;
+};
+
+layout(binding = 0, std140) uniform uniforms_block_ubo {
+  Uniforms inner;
 } uniforms;
 
 struct VertexInput {
@@ -19,7 +23,7 @@ struct VertexOutput {
 
 VertexOutput vtx_main(VertexInput tint_symbol) {
   VertexOutput tint_symbol_1 = VertexOutput(vec4(0.0f, 0.0f, 0.0f, 0.0f), vec4(0.0f, 0.0f, 0.0f, 0.0f));
-  tint_symbol_1.Position = (uniforms.modelViewProjectionMatrix * tint_symbol.cur_position);
+  tint_symbol_1.Position = (uniforms.inner.modelViewProjectionMatrix * tint_symbol.cur_position);
   tint_symbol_1.vtxFragColor = tint_symbol.color;
   return tint_symbol_1;
 }

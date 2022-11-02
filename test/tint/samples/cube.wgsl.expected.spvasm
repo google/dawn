@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 60
+; Bound: 61
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -15,6 +15,8 @@
                OpName %vertex_point_size "vertex_point_size"
                OpName %fragColor_1 "fragColor_1"
                OpName %value "value"
+               OpName %uniforms_block "uniforms_block"
+               OpMemberName %uniforms_block 0 "inner"
                OpName %Uniforms "Uniforms"
                OpMemberName %Uniforms 0 "modelViewProjectionMatrix"
                OpName %uniforms "uniforms"
@@ -38,7 +40,8 @@
                OpDecorate %vertex_point_size BuiltIn PointSize
                OpDecorate %fragColor_1 Location 0
                OpDecorate %value Location 0
-               OpDecorate %Uniforms Block
+               OpDecorate %uniforms_block Block
+               OpMemberDecorate %uniforms_block 0 Offset 0
                OpMemberDecorate %Uniforms 0 Offset 0
                OpMemberDecorate %Uniforms 0 ColMajor
                OpMemberDecorate %Uniforms 0 MatrixStride 16
@@ -65,60 +68,61 @@
       %value = OpVariable %_ptr_Output_v4float Output %8
 %mat4v4float = OpTypeMatrix %v4float 4
    %Uniforms = OpTypeStruct %mat4v4float
-%_ptr_Uniform_Uniforms = OpTypePointer Uniform %Uniforms
-   %uniforms = OpVariable %_ptr_Uniform_Uniforms Uniform
+%uniforms_block = OpTypeStruct %Uniforms
+%_ptr_Uniform_uniforms_block = OpTypePointer Uniform %uniforms_block
+   %uniforms = OpVariable %_ptr_Uniform_uniforms_block Uniform
 %VertexOutput = OpTypeStruct %v4float %v4float
 %VertexInput = OpTypeStruct %v4float %v4float
-         %19 = OpTypeFunction %VertexOutput %VertexInput
+         %20 = OpTypeFunction %VertexOutput %VertexInput
 %_ptr_Function_VertexOutput = OpTypePointer Function %VertexOutput
-         %27 = OpConstantNull %VertexOutput
+         %28 = OpConstantNull %VertexOutput
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
      %uint_0 = OpConstant %uint 0
 %_ptr_Uniform_mat4v4float = OpTypePointer Uniform %mat4v4float
        %void = OpTypeVoid
-         %41 = OpTypeFunction %void
+         %42 = OpTypeFunction %void
     %float_1 = OpConstant %float 1
-         %52 = OpTypeFunction %v4float %v4float
-%vtx_main_inner = OpFunction %VertexOutput None %19
+         %53 = OpTypeFunction %v4float %v4float
+%vtx_main_inner = OpFunction %VertexOutput None %20
       %input = OpFunctionParameter %VertexInput
-         %24 = OpLabel
-     %output = OpVariable %_ptr_Function_VertexOutput Function %27
-         %31 = OpAccessChain %_ptr_Function_v4float %output %uint_1
-         %34 = OpAccessChain %_ptr_Uniform_mat4v4float %uniforms %uint_0
-         %35 = OpLoad %mat4v4float %34
-         %36 = OpCompositeExtract %v4float %input 0
-         %37 = OpMatrixTimesVector %v4float %35 %36
-               OpStore %31 %37
-         %38 = OpAccessChain %_ptr_Function_v4float %output %uint_0
-         %39 = OpCompositeExtract %v4float %input 1
-               OpStore %38 %39
-         %40 = OpLoad %VertexOutput %output
-               OpReturnValue %40
+         %25 = OpLabel
+     %output = OpVariable %_ptr_Function_VertexOutput Function %28
+         %32 = OpAccessChain %_ptr_Function_v4float %output %uint_1
+         %35 = OpAccessChain %_ptr_Uniform_mat4v4float %uniforms %uint_0 %uint_0
+         %36 = OpLoad %mat4v4float %35
+         %37 = OpCompositeExtract %v4float %input 0
+         %38 = OpMatrixTimesVector %v4float %36 %37
+               OpStore %32 %38
+         %39 = OpAccessChain %_ptr_Function_v4float %output %uint_0
+         %40 = OpCompositeExtract %v4float %input 1
+               OpStore %39 %40
+         %41 = OpLoad %VertexOutput %output
+               OpReturnValue %41
                OpFunctionEnd
-   %vtx_main = OpFunction %void None %41
-         %44 = OpLabel
-         %46 = OpLoad %v4float %cur_position_1
-         %47 = OpLoad %v4float %color_1
-         %48 = OpCompositeConstruct %VertexInput %46 %47
-         %45 = OpFunctionCall %VertexOutput %vtx_main_inner %48
-         %49 = OpCompositeExtract %v4float %45 0
-               OpStore %vtxFragColor_1 %49
-         %50 = OpCompositeExtract %v4float %45 1
-               OpStore %Position_1 %50
+   %vtx_main = OpFunction %void None %42
+         %45 = OpLabel
+         %47 = OpLoad %v4float %cur_position_1
+         %48 = OpLoad %v4float %color_1
+         %49 = OpCompositeConstruct %VertexInput %47 %48
+         %46 = OpFunctionCall %VertexOutput %vtx_main_inner %49
+         %50 = OpCompositeExtract %v4float %46 0
+               OpStore %vtxFragColor_1 %50
+         %51 = OpCompositeExtract %v4float %46 1
+               OpStore %Position_1 %51
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
-%frag_main_inner = OpFunction %v4float None %52
+%frag_main_inner = OpFunction %v4float None %53
   %fragColor = OpFunctionParameter %v4float
-         %55 = OpLabel
+         %56 = OpLabel
                OpReturnValue %fragColor
                OpFunctionEnd
-  %frag_main = OpFunction %void None %41
-         %57 = OpLabel
-         %59 = OpLoad %v4float %fragColor_1
-         %58 = OpFunctionCall %v4float %frag_main_inner %59
-               OpStore %value %58
+  %frag_main = OpFunction %void None %42
+         %58 = OpLabel
+         %60 = OpLoad %v4float %fragColor_1
+         %59 = OpFunctionCall %v4float %frag_main_inner %60
+               OpStore %value %59
                OpReturn
                OpFunctionEnd

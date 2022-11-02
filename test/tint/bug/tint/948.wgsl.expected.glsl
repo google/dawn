@@ -13,7 +13,7 @@ layout(location = 3) in vec2 stageUnits_1_param_1;
 layout(location = 0) in vec3 vPosition_param_1;
 layout(location = 1) in vec2 vUV_param_1;
 layout(location = 0) out vec4 glFragColor_1_1;
-layout(binding = 9, std140) uniform LeftOver_ubo {
+struct LeftOver {
   float time;
   uint padding;
   uint pad;
@@ -26,6 +26,10 @@ layout(binding = 9, std140) uniform LeftOver_ubo {
   float spriteCount;
   vec3 colorMul;
   uint pad_2;
+};
+
+layout(binding = 9, std140) uniform x_20_block_ubo {
+  LeftOver inner;
 } x_20;
 
 vec2 tUV = vec2(0.0f, 0.0f);
@@ -41,7 +45,7 @@ uniform highp sampler2D frameMapTexture_frameMapSampler;
 mat4 getFrameData_f1_(inout float frameID) {
   float fX = 0.0f;
   float x_15 = frameID;
-  float x_25 = x_20.spriteCount;
+  float x_25 = x_20.inner.spriteCount;
   fX = (x_15 / x_25);
   float x_37 = fX;
   vec4 x_40 = texture(frameMapTexture_frameMapSampler, vec2(x_37, 0.0f), 0.0f);
@@ -82,11 +86,11 @@ void main_1() {
   tileUV.y = (1.0f - x_91);
   vec2 x_95 = tUV;
   tileID = floor(x_95);
-  vec2 x_101 = x_20.spriteMapSize;
+  vec2 x_101 = x_20.inner.spriteMapSize;
   sheetUnits = (vec2(1.0f) / x_101);
-  float x_106 = x_20.spriteCount;
+  float x_106 = x_20.inner.spriteCount;
   spriteUnits = (1.0f / x_106);
-  vec2 x_111 = x_20.stageSize;
+  vec2 x_111 = x_20.inner.stageSize;
   stageUnits = (vec2(1.0f) / x_111);
   i = 0;
   while (true) {
@@ -99,14 +103,14 @@ void main_1() {
     switch(x_126) {
       case 1: {
         vec2 x_150 = tileID;
-        vec2 x_154 = x_20.stageSize;
+        vec2 x_154 = x_20.inner.stageSize;
         vec4 x_156 = texture(tileMapsTexture1_tileMapsSampler, ((x_150 + vec2(0.5f)) / x_154), 0.0f);
         frameID_1 = x_156.x;
         break;
       }
       case 0: {
         vec2 x_136 = tileID;
-        vec2 x_140 = x_20.stageSize;
+        vec2 x_140 = x_20.inner.stageSize;
         vec4 x_142 = texture(tileMapsTexture0_tileMapsSampler, ((x_136 + vec2(0.5f)) / x_140), 0.0f);
         frameID_1 = x_142.x;
         break;
@@ -116,12 +120,12 @@ void main_1() {
       }
     }
     float x_166 = frameID_1;
-    float x_169 = x_20.spriteCount;
+    float x_169 = x_20.inner.spriteCount;
     vec4 x_172 = texture(animationMapTexture_animationMapSampler, vec2(((x_166 + 0.5f) / x_169), 0.0f), 0.0f);
     animationData = x_172;
     float x_174 = animationData.y;
     if ((x_174 > 0.0f)) {
-      float x_181 = x_20.time;
+      float x_181 = x_20.inner.time;
       float x_184 = animationData.z;
       mt = tint_float_modulo((x_181 * x_184), 1.0f);
       f = 0.0f;
@@ -139,7 +143,7 @@ void main_1() {
           break;
         }
         float x_208 = frameID_1;
-        float x_211 = x_20.spriteCount;
+        float x_211 = x_20.inner.spriteCount;
         float x_214 = f;
         vec4 x_217 = vec4(0.0f);
         animationData = x_217;
@@ -154,7 +158,7 @@ void main_1() {
     mat4 x_225 = getFrameData_f1_(param);
     frameData = x_225;
     vec4 x_228 = frameData[0];
-    vec2 x_231 = x_20.spriteMapSize;
+    vec2 x_231 = x_20.inner.spriteMapSize;
     frameSize = (vec2(x_228.w, x_228.z) / x_231);
     vec4 x_235 = frameData[0];
     vec2 x_237 = sheetUnits;
@@ -196,7 +200,7 @@ void main_1() {
       i = (x_304 + 1);
     }
   }
-  vec3 x_310 = x_20.colorMul;
+  vec3 x_310 = x_20.inner.colorMul;
   vec4 x_311 = color;
   vec3 x_313 = (vec3(x_311.x, x_311.y, x_311.z) * x_310);
   vec4 x_314 = color;

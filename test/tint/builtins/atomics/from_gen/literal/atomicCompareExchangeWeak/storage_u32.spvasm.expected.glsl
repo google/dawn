@@ -7,6 +7,10 @@ struct atomic_compare_exchange_resultu32 {
 };
 
 
+struct SB_RW_atomic {
+  uint arg_0;
+};
+
 struct SB_RW {
   uint arg_0;
 };
@@ -16,14 +20,14 @@ struct x__atomic_compare_exchange_resultu32 {
   bool exchanged;
 };
 
-layout(binding = 0, std430) buffer SB_RW_atomic_ssbo {
-  uint arg_0;
+layout(binding = 0, std430) buffer sb_rw_block_ssbo {
+  SB_RW_atomic inner;
 } sb_rw;
 
 void atomicCompareExchangeWeak_63d8e6() {
   x__atomic_compare_exchange_resultu32 res = x__atomic_compare_exchange_resultu32(0u, false);
   atomic_compare_exchange_resultu32 atomic_compare_result;
-  atomic_compare_result.old_value = atomicCompSwap(sb_rw.arg_0, 1u, 1u);
+  atomic_compare_result.old_value = atomicCompSwap(sb_rw.inner.arg_0, 1u, 1u);
   atomic_compare_result.exchanged = atomic_compare_result.old_value == 1u;
   atomic_compare_exchange_resultu32 tint_symbol = atomic_compare_result;
   uint old_value_1 = tint_symbol.old_value;
@@ -54,6 +58,10 @@ struct atomic_compare_exchange_resultu32 {
 };
 
 
+struct SB_RW_atomic {
+  uint arg_0;
+};
+
 struct SB_RW {
   uint arg_0;
 };
@@ -63,14 +71,14 @@ struct x__atomic_compare_exchange_resultu32 {
   bool exchanged;
 };
 
-layout(binding = 0, std430) buffer SB_RW_atomic_ssbo {
-  uint arg_0;
+layout(binding = 0, std430) buffer sb_rw_block_ssbo {
+  SB_RW_atomic inner;
 } sb_rw;
 
 void atomicCompareExchangeWeak_63d8e6() {
   x__atomic_compare_exchange_resultu32 res = x__atomic_compare_exchange_resultu32(0u, false);
   atomic_compare_exchange_resultu32 atomic_compare_result;
-  atomic_compare_result.old_value = atomicCompSwap(sb_rw.arg_0, 1u, 1u);
+  atomic_compare_result.old_value = atomicCompSwap(sb_rw.inner.arg_0, 1u, 1u);
   atomic_compare_result.exchanged = atomic_compare_result.old_value == 1u;
   atomic_compare_exchange_resultu32 tint_symbol = atomic_compare_result;
   uint old_value_1 = tint_symbol.old_value;

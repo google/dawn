@@ -27,44 +27,12 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::AddBlockAttribute::BlockAttribute);
 
 namespace tint::transform {
 
-namespace {
-
-bool IsUsedAsNonBuffer(const std::unordered_set<tint::ast::AddressSpace>& uses) {
-    for (auto use : uses) {
-        if (!ast::IsHostShareable(use)) {
-            return true;
-        }
-    }
-    return false;
-}
-
-}  // namespace
-
 AddBlockAttribute::AddBlockAttribute() = default;
 
 AddBlockAttribute::~AddBlockAttribute() = default;
 
 void AddBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
     auto& sem = ctx.src->Sem();
-
-    // Collect the set of structs that are nested in other types.
-    utils::Hashset<const sem::Struct*, 8> nested_structs;
-    for (auto* ty : ctx.src->Types()) {
-        Switch(
-            ty,
-            [&](const sem::Array* arr) {
-                if (auto* nested_str = arr->ElemType()->As<sem::Struct>()) {
-                    nested_structs.Add(nested_str);
-                }
-            },
-            [&](const sem::Struct* str) {
-                for (auto* member : str->Members()) {
-                    if (auto* nested_str = member->Type()->As<sem::Struct>()) {
-                        nested_structs.Add(nested_str);
-                    }
-                }
-            });
-    }
 
     // A map from a type in the source program to a block-decorated wrapper that contains it in the
     // destination program.
@@ -80,16 +48,18 @@ void AddBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
 
         auto* ty = var->Type()->UnwrapRef();
         auto* str = ty->As<sem::Struct>();
-        bool needs_wrapping =
-            !str ||                                       // Type is not a structure
-            nested_structs.Contains(str) ||               // Structure is nested by another type
-            IsUsedAsNonBuffer(str->AddressSpaceUsage());  // Structure is used as a non-buffer usage
+
+        // Always try to wrap the buffer type into a struct. We can not do so only if it is a struct
+        // but without a fixed footprint, i.e. contains a runtime-sized array as its member. Note
+        // that such struct type can be only used as storage buffer variables' type. Also note that
+        // any buffer struct type that may be nested by another type must have a fixed footprint,
+        // therefore will be wrapped.
+        bool needs_wrapping = !str ||                    // Type is not a structure
+                              str->HasFixedFootprint();  // Struct has a fixed footprint
 
         if (needs_wrapping) {
             const char* kMemberName = "inner";
 
-            // This is a non-struct or a struct that is nested somewhere else, so we
-            // need to wrap it first.
             auto* wrapper = wrapper_structs.GetOrCreate(ty, [&] {
                 auto* block = ctx.dst->ASTNodes().Create<BlockAttribute>(ctx.dst->ID(),
                                                                          ctx.dst->AllocateNodeID());

@@ -1,17 +1,21 @@
 #version 310 es
 precision mediump float;
 
+struct SB_RW_atomic {
+  int arg_0;
+};
+
 struct SB_RW {
   int arg_0;
 };
 
-layout(binding = 0, std430) buffer SB_RW_atomic_ssbo {
-  int arg_0;
+layout(binding = 0, std430) buffer sb_rw_block_ssbo {
+  SB_RW_atomic inner;
 } sb_rw;
 
 void atomicLoad_0806ad() {
   int res = 0;
-  int x_9 = atomicOr(sb_rw.arg_0, 0);
+  int x_9 = atomicOr(sb_rw.inner.arg_0, 0);
   res = x_9;
   return;
 }
@@ -31,17 +35,21 @@ void main() {
 }
 #version 310 es
 
+struct SB_RW_atomic {
+  int arg_0;
+};
+
 struct SB_RW {
   int arg_0;
 };
 
-layout(binding = 0, std430) buffer SB_RW_atomic_ssbo {
-  int arg_0;
+layout(binding = 0, std430) buffer sb_rw_block_ssbo {
+  SB_RW_atomic inner;
 } sb_rw;
 
 void atomicLoad_0806ad() {
   int res = 0;
-  int x_9 = atomicOr(sb_rw.arg_0, 0);
+  int x_9 = atomicOr(sb_rw.inner.arg_0, 0);
   res = x_9;
   return;
 }

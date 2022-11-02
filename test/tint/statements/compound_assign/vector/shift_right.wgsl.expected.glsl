@@ -4,11 +4,15 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void unused_entry_point() {
   return;
 }
-layout(binding = 0, std430) buffer S_ssbo {
+struct S {
   ivec4 a;
+};
+
+layout(binding = 0, std430) buffer v_block_ssbo {
+  S inner;
 } v;
 
 void foo() {
-  v.a = (v.a >> uvec4(2u));
+  v.inner.a = (v.inner.a >> uvec4(2u));
 }
 
