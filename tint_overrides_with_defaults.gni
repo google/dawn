@@ -76,9 +76,4 @@ declare_args() {
   if (!defined(tint_build_unittests)) {
     tint_build_unittests = true
   }
-
-  # Build with generated files
-  if (!defined(tint_build_use_generator)) {
-    tint_build_use_generator = false
-  }
 }

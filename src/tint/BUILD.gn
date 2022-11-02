@@ -177,6 +177,10 @@ template("libtint_source_set") {
 
 libtint_source_set("libtint_core_all_src") {
   sources = [
+    "ast/access.cc",
+    "ast/access.h",
+    "ast/address_space.cc",
+    "ast/address_space.h",
     "ast/alias.cc",
     "ast/alias.h",
     "ast/array.cc",
@@ -206,6 +210,8 @@ libtint_source_set("libtint_core_all_src") {
     "ast/break_statement.h",
     "ast/builtin_attribute.cc",
     "ast/builtin_attribute.h",
+    "ast/builtin_value.cc",
+    "ast/builtin_value.h",
     "ast/call_expression.cc",
     "ast/call_expression.h",
     "ast/call_statement.cc",
@@ -232,6 +238,8 @@ libtint_source_set("libtint_core_all_src") {
     "ast/enable.h",
     "ast/expression.cc",
     "ast/expression.h",
+    "ast/extension.cc",
+    "ast/extension.h",
     "ast/external_texture.cc",
     "ast/external_texture.h",
     "ast/f16.cc",
@@ -264,6 +272,8 @@ libtint_source_set("libtint_core_all_src") {
     "ast/int_literal_expression.h",
     "ast/internal_attribute.cc",
     "ast/internal_attribute.h",
+    "ast/interpolate_attribute.cc",
+    "ast/interpolate_attribute.h",
     "ast/invariant_attribute.cc",
     "ast/invariant_attribute.h",
     "ast/let.cc",
@@ -323,6 +333,8 @@ libtint_source_set("libtint_core_all_src") {
     "ast/struct_member_size_attribute.h",
     "ast/switch_statement.cc",
     "ast/switch_statement.h",
+    "ast/texel_format.cc",
+    "ast/texel_format.h",
     "ast/texture.cc",
     "ast/texture.h",
     "ast/traverse_expressions.h",
@@ -388,8 +400,11 @@ libtint_source_set("libtint_core_all_src") {
     "resolver/const_eval.h",
     "resolver/dependency_graph.cc",
     "resolver/dependency_graph.h",
+    "resolver/init_conv_intrinsic.cc",
+    "resolver/init_conv_intrinsic.h",
     "resolver/intrinsic_table.cc",
     "resolver/intrinsic_table.h",
+    "resolver/intrinsic_table.inl",
     "resolver/resolver.cc",
     "resolver/resolver.h",
     "resolver/sem_helper.cc",
@@ -409,6 +424,7 @@ libtint_source_set("libtint_core_all_src") {
     "sem/bool.h",
     "sem/break_if_statement.h",
     "sem/builtin.h",
+    "sem/builtin_type.h",
     "sem/call.h",
     "sem/call_target.h",
     "sem/constant.h",
@@ -430,6 +446,7 @@ libtint_source_set("libtint_core_all_src") {
     "sem/module.h",
     "sem/multisampled_texture.h",
     "sem/node.h",
+    "sem/parameter_usage.h",
     "sem/pipeline_stage_set.h",
     "sem/pointer.h",
     "sem/reference.h",
@@ -592,51 +609,6 @@ libtint_source_set("libtint_core_all_src") {
     "writer/writer.h",
   ]
 
-  deps = []
-
-  if (!tint_build_use_generator) {
-    sources += [
-      "ast/access.cc",
-      "ast/access.h",
-      "ast/address_space.cc",
-      "ast/address_space.h",
-      "ast/builtin_value.cc",
-      "ast/builtin_value.h",
-      "ast/extension.cc",
-      "ast/extension.h",
-      "ast/interpolate_attribute.cc",
-      "ast/interpolate_attribute.h",
-      "ast/texel_format.cc",
-      "ast/texel_format.h",
-      "resolver/init_conv_intrinsic.cc",
-      "resolver/init_conv_intrinsic.h",
-      "resolver/intrinsic_table.inl",
-      "sem/builtin_type.h",
-      "sem/parameter_usage.h",
-    ]
-  } else {
-    sources += [
-      "${target_gen_dir}/ast/access.cc",
-      "${target_gen_dir}/ast/access.h",
-      "${target_gen_dir}/ast/address_space.cc",
-      "${target_gen_dir}/ast/address_space.h",
-      "${target_gen_dir}/ast/builtin_value.cc",
-      "${target_gen_dir}/ast/builtin_value.h",
-      "${target_gen_dir}/ast/extension.cc",
-      "${target_gen_dir}/ast/extension.h",
-      "${target_gen_dir}/ast/interpolate_attribute.cc",
-      "${target_gen_dir}/ast/interpolate_attribute.h",
-      "${target_gen_dir}/ast/texel_format.cc",
-      "${target_gen_dir}/ast/texel_format.h",
-      "${target_gen_dir}/resolver/init_conv_intrinsic.cc",
-      "${target_gen_dir}/resolver/init_conv_intrinsic.h",
-      "${target_gen_dir}/resolver/intrinsic_table.inl",
-      "${target_gen_dir}/sem/builtin_type.h",
-      "${target_gen_dir}/sem/parameter_usage.h",
-    ]
-    deps += [ ":tint_gen_deps" ]
-  }
-
   if (is_linux) {
     sources += [ "diagnostic/printer_linux.cc" ]
   } else if (is_win) {
@@ -668,6 +640,8 @@ libtint_source_set("libtint_sem_src") {
     "sem/break_if_statement.h",
     "sem/builtin.cc",
     "sem/builtin.h",
+    "sem/builtin_type.cc",
+    "sem/builtin_type.h",
     "sem/call.cc",
     "sem/call.h",
     "sem/call_target.cc",
@@ -711,6 +685,8 @@ libtint_source_set("libtint_sem_src") {
     "sem/multisampled_texture.h",
     "sem/node.cc",
     "sem/node.h",
+    "sem/parameter_usage.cc",
+    "sem/parameter_usage.h",
     "sem/pipeline_stage_set.h",
     "sem/pointer.cc",
     "sem/pointer.h",
@@ -748,23 +724,6 @@ libtint_source_set("libtint_sem_src") {
     "sem/while_statement.h",
   ]
 
-  deps = []
-  if (!tint_build_use_generator) {
-    sources += [
-      "sem/builtin_type.cc",
-      "sem/builtin_type.h",
-      "sem/parameter_usage.cc",
-      "sem/parameter_usage.h",
-    ]
-  } else {
-    sources += [
-      "${target_gen_dir}/sem/builtin_type.cc",
-      "${target_gen_dir}/sem/builtin_type.h",
-      "${target_gen_dir}/sem/parameter_usage.cc",
-      "${target_gen_dir}/sem/parameter_usage.h",
-    ]
-    deps += [ ":tint_gen_deps" ]
-  }
   public_deps = [ ":libtint_core_all_src" ]
 }
 
@@ -945,16 +904,16 @@ template("tint_intrinsic_src_generator") {
   }
 
   source_set(target_name) {
-    public_deps = [
+    deps = [
       ":${target_name}_cc",
       ":${target_name}_h",
     ]
 
     if (defined(invoker.bench) && invoker.bench) {
-      public_deps += [ ":${target_name}_bench" ]
+      deps += [ ":${target_name}_bench" ]
     }
     if (defined(invoker.test) && invoker.test) {
-      public_deps += [ ":${target_name}_test" ]
+      deps += [ ":${target_name}_test" ]
     }
   }
 }
@@ -1008,7 +967,7 @@ tint_intrinsic_src_generator("tint_ast_interpolate_attribute") {
 }
 
 libtint_source_set("tint_gen_deps") {
-  public_deps = [
+  deps = [
     ":tint_ast_access",
     ":tint_ast_address_space",
     ":tint_ast_builtin_value",
@@ -1188,6 +1147,7 @@ if (tint_build_unittests) {
 
   tint_unittests_source_set("tint_unittests_ast_src") {
     sources = [
+      "ast/address_space_test.cc",
       "ast/alias_test.cc",
       "ast/array_test.cc",
       "ast/assignment_statement_test.cc",
@@ -1203,6 +1163,7 @@ if (tint_build_unittests) {
       "ast/builtin_attribute_test.cc",
       "ast/builtin_texture_helper_test.cc",
       "ast/builtin_texture_helper_test.h",
+      "ast/builtin_value_test.cc",
       "ast/call_expression_test.cc",
       "ast/call_statement_test.cc",
       "ast/case_selector_test.cc",
@@ -1213,6 +1174,7 @@ if (tint_build_unittests) {
       "ast/depth_texture_test.cc",
       "ast/discard_statement_test.cc",
       "ast/enable_test.cc",
+      "ast/extension_test.cc",
       "ast/external_texture_test.cc",
       "ast/f16_test.cc",
       "ast/f32_test.cc",
@@ -1253,6 +1215,7 @@ if (tint_build_unittests) {
       "ast/struct_test.cc",
       "ast/switch_statement_test.cc",
       "ast/test_helper.h",
+      "ast/texel_format_test.cc",
       "ast/texture_test.cc",
       "ast/traverse_expressions_test.cc",
       "ast/u32_test.cc",
@@ -1263,23 +1226,6 @@ if (tint_build_unittests) {
       "ast/while_statement_test.cc",
       "ast/workgroup_attribute_test.cc",
     ]
-
-    deps = []
-    if (!tint_build_use_generator) {
-      sources += [
-        "ast/address_space_test.cc",
-        "ast/builtin_value_test.cc",
-        "ast/extension_test.cc",
-        "ast/texel_format_test.cc",
-      ]
-    } else {
-      sources += [
-        "${target_gen_dir}/ast/address_space_test.cc",
-        "${target_gen_dir}/ast/builtin_value_test.cc",
-        "${target_gen_dir}/ast/extension_test.cc",
-      ]
-      deps += [ ":tint_gen_deps" ]
-    }
   }
 
   tint_unittests_source_set("tint_unittests_diagnostic_src") {
