@@ -61,7 +61,7 @@
 # results: [ Failure RetryOnFailure Skip Slow ]
 # END TAG HEADER
 
-# Last rolled: 2022-11-01 10:03:20PM
+# Last rolled: 2022-11-03 08:48:43AM
 
 ################################################################################
 # webgpu:api,operation,resource_init,texture_zero:uninitialized_texture_is_zero
@@ -533,7 +533,6 @@ crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,sqrt:f32:inp
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,sqrt:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,sqrt:f32:inputSource="const";vectorize=4 [ Failure ]
 crbug.com/tint/1613 [ dawn-backend-validation monterey ] webgpu:shader,execution,expression,call,builtin,step:f32:inputSource="const";vectorize=3 [ Slow ]
-crbug.com/tint/1613 [ dawn-no-backend-validation monterey ] webgpu:shader,execution,expression,call,builtin,step:f32:inputSource="const";vectorize=3 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,tan:f32:inputSource="const";vectorize="_undef_" [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,tan:f32:inputSource="const";vectorize=2 [ Failure ]
 crbug.com/tint/1613 webgpu:shader,execution,expression,call,builtin,tan:f32:inputSource="const";vectorize=3 [ Failure ]
@@ -635,6 +634,7 @@ crbug.com/dawn/0000 webgpu:api,validation,buffer,mapping:unmap,state,unmapped: [
 crbug.com/dawn/0000 webgpu:api,validation,compute_pipeline:overrides,workgroup_size,limits,* [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,createBindGroupLayout:multisampled_validation:viewDimension="2d" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,createBindGroupLayout:multisampled_validation:viewDimension="_undef_" [ Failure ]
+crbug.com/dawn/0000 webgpu:api,validation,encoding,encoder_state:pass_end_twice: [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,error_scope:current_scope:errorFilter="internal";stackDepth=1 [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,error_scope:current_scope:errorFilter="internal";stackDepth=10 [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,error_scope:current_scope:errorFilter="internal";stackDepth=100 [ Failure ]
@@ -647,6 +647,8 @@ crbug.com/dawn/0000 webgpu:api,validation,error_scope:parent_scope:errorFilter="
 crbug.com/dawn/0000 webgpu:api,validation,error_scope:simple:errorType="internal";errorFilter="internal" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,error_scope:simple:errorType="internal";errorFilter="out-of-memory" [ Failure ]
 crbug.com/dawn/0000 webgpu:api,validation,error_scope:simple:errorType="internal";errorFilter="validation" [ Failure ]
+crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,binary,bitwise:bitwise_and:type="u32";inputSource="const";vectorize=3 [ Slow ]
+crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,binary,bitwise:bitwise_or:type="u32";inputSource="const";vectorize=3 [ Slow ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,binary,bool_logical:and_short_circuit:inputSource="const" [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 target-cpu-64 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,binary,bool_logical:and_short_circuit:inputSource="const" [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,expression,binary,bool_logical:and_short_circuit:inputSource="const" [ Failure ]
@@ -997,6 +999,7 @@ crbug.com/dawn/0000 [ dawn-no-backend-validation intel-gen-9 target-cpu-64 webgp
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,expression,call,builtin,unpack4x8unorm:unpack:inputSource="const" [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 ubuntu webgpu-adapter-default ] webgpu:shader,execution,expression,call,builtin,unpack4x8unorm:unpack:inputSource="const" [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 webgpu-adapter-default win10 ] webgpu:shader,execution,expression,call,builtin,unpack4x8unorm:unpack:inputSource="const" [ Failure ]
+crbug.com/dawn/0000 [ dawn-backend-validation intel-gen-9 monterey target-cpu-64 webgpu-adapter-default ] webgpu:shader,execution,expression,unary,f32_arithmetic:negation:inputSource="const";vectorize=3 [ Slow ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":1,"y":1,"z":1} [ Failure ]
 crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":1,"y":1,"z":1} [ Failure ]
 crbug.com/dawn/0000 [ dawn-backend-validation nvidia-0x2184 target-cpu-32 webgpu-adapter-default win10 ] webgpu:shader,execution,shader_io,compute_builtins:inputs:method="mixed";dispatch="indirect";groupSize={"x":1,"y":1,"z":1};numGroups={"x":8,"y":4,"z":2} [ Failure ]
@@ -1030,6 +1033,5 @@ crbug.com/dawn/0000 [ monterey webgpu-adapter-default ] webgpu:web_platform,canv
 crbug.com/dawn/0000 [ monterey webgpu-adapter-swiftshader ] webgpu:web_platform,canvas,configure:usage:* [ Failure ]
 crbug.com/dawn/0000 [ ubuntu webgpu-adapter-default ] webgpu:web_platform,canvas,configure:usage:* [ Failure ]
 crbug.com/dawn/0000 [ monterey ] webgpu:web_platform,canvas,getCurrentTexture:* [ Failure ]
-crbug.com/dawn/0000 [ dawn-no-backend-validation nvidia-0x2184 target-cpu-64 win10 ] worker_webgpu:api,validation,buffer,mapping:mapAsync,offsetAndSizeOOB: [ Failure ]
 crbug.com/dawn/0000 worker_webgpu:api,validation,buffer,mapping:unmap,state,destroyed: [ Failure ]
 crbug.com/dawn/0000 worker_webgpu:api,validation,buffer,mapping:unmap,state,unmapped: [ Failure ]
