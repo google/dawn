@@ -109,7 +109,7 @@
 #include "src/tint/sem/vector.h"
 #include "src/tint/sem/void.h"
 
-#ifdef INCLUDE_TINT_TINT_H_
+#ifdef CURRENTLY_IN_TINT_PUBLIC_HEADER
 #error "internal tint header being #included from tint.h"
 #endif
 

@@ -474,6 +474,7 @@ libtint_source_set("libtint_core_all_src") {
     "symbol_table.h",
     "text/unicode.cc",
     "text/unicode.h",
+    "tint.cc",
     "traits.h",
     "transform/add_block_attribute.cc",
     "transform/add_block_attribute.h",

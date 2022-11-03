@@ -385,6 +385,7 @@ set(TINT_LIB_SRCS
   symbol_table.h
   symbol.cc
   symbol.h
+  tint.cc
   text/unicode.cc
   text/unicode.h
   traits.h

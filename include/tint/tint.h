@@ -15,6 +15,9 @@
 #ifndef INCLUDE_TINT_TINT_H_
 #define INCLUDE_TINT_TINT_H_
 
+// Guard for accidental includes to private headers
+#define CURRENTLY_IN_TINT_PUBLIC_HEADER
+
 // TODO(tint:88): When implementing support for an install target, all of these
 //                headers will need to be moved to include/tint/.
 
@@ -63,5 +66,17 @@
 #if TINT_BUILD_GLSL_WRITER
 #include "src/tint/writer/glsl/generator.h"
 #endif  // TINT_BUILD_GLSL_WRITER
+
+namespace tint {
+
+/// Initialize initializes the Tint library. Call before using the Tint API.
+void Initialize();
+
+/// Shutdown uninitializes the Tint library. Call after using the Tint API.
+void Shutdown();
+
+}  // namespace tint
+
+#undef CURRENTLY_IN_TINT_PUBLIC_HEADER
 
 #endif  // INCLUDE_TINT_TINT_H_

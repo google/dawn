@@ -14,13 +14,10 @@
 
 #include "gmock/gmock.h"
 #include "src/tint/program.h"
+#include "tint/tint.h"
 
 #if TINT_BUILD_SPV_READER
 #include "src/tint/reader/spirv/parser_impl_test_helper.h"
-#endif
-
-#if TINT_BUILD_WGSL_WRITER
-#include "src/tint/writer/wgsl/generator.h"
 #endif
 
 namespace {
@@ -54,15 +51,7 @@ struct Flags {
 int main(int argc, char** argv) {
     testing::InitGoogleMock(&argc, argv);
 
-#if TINT_BUILD_WGSL_WRITER
-    tint::Program::printer = [](const tint::Program* program) {
-        auto result = tint::writer::wgsl::Generate(program, {});
-        if (!result.error.empty()) {
-            return "error: " + result.error;
-        }
-        return result.wgsl;
-    };
-#endif  // TINT_BUILD_WGSL_WRITER
+    tint::Initialize();
 
     Flags flags;
     if (!flags.parse(argc, argv)) {
@@ -78,6 +67,8 @@ int main(int argc, char** argv) {
     tint::SetInternalCompilerErrorReporter(&TintInternalCompilerErrorReporter);
 
     auto res = RUN_ALL_TESTS();
+
+    tint::Shutdown();
 
     return res;
 }

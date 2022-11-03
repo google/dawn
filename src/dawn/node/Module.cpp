@@ -20,6 +20,7 @@
 #include "dawn/dawn_proc.h"
 #include "src/dawn/node/binding/Flags.h"
 #include "src/dawn/node/binding/GPU.h"
+#include "tint/tint.h"
 
 namespace {
 Napi::Value CreateGPU(const Napi::CallbackInfo& info) {
@@ -55,7 +56,10 @@ Napi::Value CreateGPU(const Napi::CallbackInfo& info) {
 // types into the global object, and adding the 'create' function on the exported
 // object.
 Napi::Object Initialize(Napi::Env env, Napi::Object exports) {
-    // Begin by setting the Dawn procedure function pointers.
+    // Initialize Tint
+    tint::Initialize();
+
+    // Set all the Dawn procedure function pointers.
     dawnProcSetProcs(&dawn::native::GetProcs());
 
     // Register all the interop types
