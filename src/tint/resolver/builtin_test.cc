@@ -61,12 +61,10 @@ inline std::ostream& operator<<(std::ostream& out, BuiltinData data) {
 }
 
 TEST_F(ResolverBuiltinTest, ModuleScopeUsage) {
-    GlobalConst("c", ty.f32(), Call(Source{{12, 34}}, "abs", 1._f));
+    GlobalConst("c", ty.f32(), Call(Source{{12, 34}}, "dpdy", 1._f));
 
     EXPECT_FALSE(r()->Resolve());
 
-    // TODO(crbug.com/tint/1581): Once 'abs' is implemented as @const, this will no longer be an
-    // error.
     EXPECT_EQ(
         r()->error(),
         R"(12:34 error: const initializer requires a const-expression, but expression is a runtime-expression)");

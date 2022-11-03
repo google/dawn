@@ -1,5 +1,5 @@
 void abs_b96037() {
-  float res = abs(1.0f);
+  float res = 1.0f;
 }
 
 struct tint_symbol {

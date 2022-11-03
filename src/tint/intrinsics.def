@@ -404,8 +404,8 @@ match storage
 ////////////////////////////////////////////////////////////////////////////////
 
 // https://gpuweb.github.io/gpuweb/wgsl/#builtin-functions
-fn abs<T: fiu32_f16>(T) -> T
-fn abs<N: num, T: fiu32_f16>(vec<N, T>) -> vec<N, T>
+@const fn abs<T: fia_fiu32_f16>(T) -> T
+@const fn abs<N: num, T: fia_fiu32_f16>(vec<N, T>) -> vec<N, T>
 fn acos<T: f32_f16>(T) -> T
 fn acos<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn acosh<T: f32_f16>(T) -> T

@@ -146,6 +146,53 @@ INSTANTIATE_TEST_SUITE_P(  //
                          C({1.0_a, 0_a}, kPiOver2<AFloat>),
                      })));
 
+template <typename T, bool finite_only>
+std::vector<Case> AbsCases() {
+    std::vector<Case> cases = {
+        C({T(0)}, T(0)),
+        C({T(2.0)}, T(2.0)),
+        C({T::Highest()}, T::Highest()),
+
+        // Vector tests
+        C({Vec(T(2.0), T::Highest())}, Vec(T(2.0), T::Highest())),
+    };
+
+    ConcatIntoIf<IsSignedIntegral<T>>(
+        cases,
+        std::vector<Case>{
+            C({Negate(T(0))}, T(0)),
+            C({Negate(T(2.0))}, T(2.0)),
+            // If e is signed and is the largest negative, the result is e
+            C({T::Lowest()}, T::Lowest()),
+
+            // 1 more then min i32
+            C({Negate(T(2147483647))}, T(2147483647)),
+
+            C({Vec(T(0), Negate(T(0)))}, Vec(T(0), T(0))),
+            C({Vec(Negate(T(2.0)), T(2.0), T::Highest())}, Vec(T(2.0), T(2.0), T::Highest())),
+        });
+
+    ConcatIntoIf<!finite_only>(cases, std::vector<Case>{
+                                          C({Negate(T::Inf())}, T::Inf()),
+                                          C({T::Inf()}, T::Inf()),
+                                          C({T::NaN()}, T::NaN()),
+                                          C({Vec(Negate(T::Inf()), T::Inf(), T::NaN())},
+                                            Vec(T::Inf(), T::Inf(), T::NaN())),
+                                      });
+
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Abs,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kAbs),
+                     testing::ValuesIn(Concat(AbsCases<AInt, false>(),  //
+                                              AbsCases<i32, false>(),
+                                              AbsCases<u32, false>(),
+                                              AbsCases<AFloat, true>(),
+                                              AbsCases<f32, false>(),
+                                              AbsCases<f16, false>()))));
+
 static std::vector<Case> AllCases() {
     return {
         C({Val(true)}, Val(true)),

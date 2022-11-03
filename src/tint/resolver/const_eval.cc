@@ -1570,6 +1570,31 @@ ConstEval::Result ConstEval::OpShiftLeft(const sem::Type* ty,
     return r;
 }
 
+ConstEval::Result ConstEval::abs(const sem::Type* ty,
+                                 utils::VectorRef<const sem::Constant*> args,
+                                 const Source&) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto e) {
+            using NumberT = decltype(e);
+            NumberT result;
+            if constexpr (IsUnsignedIntegral<NumberT>) {
+                result = e;
+            } else if constexpr (IsSignedIntegral<NumberT>) {
+                if (e == NumberT::Lowest()) {
+                    result = e;
+                } else {
+                    result = NumberT{std::abs(e)};
+                }
+            } else {
+                result = NumberT{std::abs(e)};
+            }
+            return CreateElement(builder, c0->Type(), result);
+        };
+        return Dispatch_fia_fiu32_f16(create, c0);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
 ConstEval::Result ConstEval::all(const sem::Type* ty,
                                  utils::VectorRef<const sem::Constant*> args,
                                  const Source&) {
