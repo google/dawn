@@ -1,5 +1,5 @@
 void floor_3bccc4() {
-  float4 arg_0 = (1.0f).xxxx;
+  float4 arg_0 = (1.5f).xxxx;
   float4 res = floor(arg_0);
 }
 

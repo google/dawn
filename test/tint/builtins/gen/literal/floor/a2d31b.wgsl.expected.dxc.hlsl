@@ -1,5 +1,5 @@
 void floor_a2d31b() {
-  vector<float16_t, 4> res = floor((float16_t(0.0h)).xxxx);
+  vector<float16_t, 4> res = (float16_t(0.0h)).xxxx;
 }
 
 struct tint_symbol {

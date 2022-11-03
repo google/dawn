@@ -1,5 +1,5 @@
 void floor_66f154() {
-  float res = floor(1.0f);
+  float res = 1.0f;
 }
 
 struct tint_symbol {

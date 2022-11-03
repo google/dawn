@@ -1,5 +1,5 @@
 fn floor_66f154() {
-  var arg_0 = 1.0f;
+  var arg_0 = 1.5f;
   var res : f32 = floor(arg_0);
 }
 
