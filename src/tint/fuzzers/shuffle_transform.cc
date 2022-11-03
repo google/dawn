@@ -15,6 +15,7 @@
 #include "src/tint/fuzzers/shuffle_transform.h"
 
 #include <random>
+#include <utility>
 
 #include "src/tint/program_builder.h"
 
@@ -22,15 +23,21 @@ namespace tint::fuzzers {
 
 ShuffleTransform::ShuffleTransform(size_t seed) : seed_(seed) {}
 
-void ShuffleTransform::Run(CloneContext& ctx,
-                           const tint::transform::DataMap&,
-                           tint::transform::DataMap&) const {
-    auto decls = ctx.src->AST().GlobalDeclarations();
+transform::Transform::ApplyResult ShuffleTransform::Apply(const Program* src,
+                                                          const transform::DataMap&,
+                                                          transform::DataMap&) const {
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+
+    auto decls = src->AST().GlobalDeclarations();
     auto rng = std::mt19937_64{seed_};
     std::shuffle(std::begin(decls), std::end(decls), rng);
     for (auto* decl : decls) {
-        ctx.dst->AST().AddGlobalDeclaration(ctx.Clone(decl));
+        b.AST().AddGlobalDeclaration(ctx.Clone(decl));
     }
+
+    ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::fuzzers

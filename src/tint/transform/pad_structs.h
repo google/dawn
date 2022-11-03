@@ -30,14 +30,10 @@ class PadStructs final : public Castable<PadStructs, Transform> {
     /// Destructor
     ~PadStructs() override;
 
-  protected:
-    /// Runs the transform using the CloneContext built for transforming a
-    /// program. Run() is responsible for calling Clone() on the CloneContext.
-    /// @param ctx the CloneContext primed with the input program and
-    /// ProgramBuilder
-    /// @param inputs optional extra transform-specific input data
-    /// @param outputs optional extra transform-specific output data
-    void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const override;
+    /// @copydoc Transform::Apply
+    ApplyResult Apply(const Program* program,
+                      const DataMap& inputs,
+                      DataMap& outputs) const override;
 };
 
 }  // namespace tint::transform

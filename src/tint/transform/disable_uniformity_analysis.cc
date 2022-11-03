@@ -27,14 +27,20 @@ DisableUniformityAnalysis::DisableUniformityAnalysis() = default;
 
 DisableUniformityAnalysis::~DisableUniformityAnalysis() = default;
 
-bool DisableUniformityAnalysis::ShouldRun(const Program* program, const DataMap&) const {
-    return !program->Sem().Module()->Extensions().Contains(
-        ast::Extension::kChromiumDisableUniformityAnalysis);
-}
+Transform::ApplyResult DisableUniformityAnalysis::Apply(const Program* src,
+                                                        const DataMap&,
+                                                        DataMap&) const {
+    if (src->Sem().Module()->Extensions().Contains(
+            ast::Extension::kChromiumDisableUniformityAnalysis)) {
+        return SkipTransform;
+    }
 
-void DisableUniformityAnalysis::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    ctx.dst->Enable(ast::Extension::kChromiumDisableUniformityAnalysis);
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    b.Enable(ast::Extension::kChromiumDisableUniformityAnalysis);
+
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::transform

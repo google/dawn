@@ -45,14 +45,18 @@ struct PointerOp {
 
 }  // namespace
 
-/// The PIMPL state for the SimplifyPointers transform
+/// PIMPL state for the transform
 struct SimplifyPointers::State {
+    /// The source program
+    const Program* const src;
+    /// The target program builder
+    ProgramBuilder b;
     /// The clone context
-    CloneContext& ctx;
+    CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
 
     /// Constructor
-    /// @param context the clone context
-    explicit State(CloneContext& context) : ctx(context) {}
+    /// @param program the source program
+    explicit State(const Program* program) : src(program) {}
 
     /// Traverses the expression `expr` looking for non-literal array indexing
     /// expressions that would affect the computed address of a pointer
@@ -120,10 +124,11 @@ struct SimplifyPointers::State {
         }
     }
 
-    /// Performs the transformation
-    void Run() {
+    /// Runs the transform
+    /// @returns the new program or SkipTransform if the transform is not required
+    ApplyResult Run() {
         // A map of saved expressions to their saved variable name
-        std::unordered_map<const ast::Expression*, Symbol> saved_vars;
+        utils::Hashmap<const ast::Expression*, Symbol, 8> saved_vars;
 
         // Register the ast::Expression transform handler.
         // This performs two different transformations:
@@ -135,9 +140,8 @@ struct SimplifyPointers::State {
         // variable identifier.
         ctx.ReplaceAll([&](const ast::Expression* expr) -> const ast::Expression* {
             // Look to see if we need to swap this Expression with a saved variable.
-            auto it = saved_vars.find(expr);
-            if (it != saved_vars.end()) {
-                return ctx.dst->Expr(it->second);
+            if (auto* saved_var = saved_vars.Find(expr)) {
+                return ctx.dst->Expr(*saved_var);
             }
 
             // Reduce the expression, folding away chains of address-of / indirections
@@ -174,7 +178,7 @@ struct SimplifyPointers::State {
 
                 // Scan the initializer expression for array index expressions that need
                 // to be hoist to temporary "saved" variables.
-                std::vector<const ast::VariableDeclStatement*> saved;
+                utils::Vector<const ast::VariableDeclStatement*, 8> saved;
                 CollectSavedArrayIndices(
                     var->Declaration()->initializer, [&](const ast::Expression* idx_expr) {
                         // We have a sub-expression that needs to be saved.
@@ -182,18 +186,18 @@ struct SimplifyPointers::State {
                         auto saved_name = ctx.dst->Symbols().New(
                             ctx.src->Symbols().NameFor(var->Declaration()->symbol) + "_save");
                         auto* decl = ctx.dst->Decl(ctx.dst->Let(saved_name, ctx.Clone(idx_expr)));
-                        saved.emplace_back(decl);
+                        saved.Push(decl);
                         // Record the substitution of `idx_expr` to the saved variable
                         // with the symbol `saved_name`. This will be used by the
                         // ReplaceAll() handler above.
-                        saved_vars.emplace(idx_expr, saved_name);
+                        saved_vars.Add(idx_expr, saved_name);
                     });
 
                 // Find the place to insert the saved declarations.
                 // Special care needs to be made for lets declared as the initializer
                 // part of for-loops. In this case the block will hold the for-loop
                 // statement, not the let.
-                if (!saved.empty()) {
+                if (!saved.IsEmpty()) {
                     auto* stmt = ctx.src->Sem().Get(let);
                     auto* block = stmt->Block();
                     // Find the statement owned by the block (either the let decl or a
@@ -219,7 +223,9 @@ struct SimplifyPointers::State {
                 RemoveStatement(ctx, let);
             }
         }
+
         ctx.Clone();
+        return Program(std::move(b));
     }
 };
 
@@ -227,8 +233,8 @@ SimplifyPointers::SimplifyPointers() = default;
 
 SimplifyPointers::~SimplifyPointers() = default;
 
-void SimplifyPointers::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    State(ctx).Run();
+Transform::ApplyResult SimplifyPointers::Apply(const Program* src, const DataMap&, DataMap&) const {
+    return State(src).Run();
 }
 
 }  // namespace tint::transform

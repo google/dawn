@@ -123,7 +123,7 @@ bool HasSampleMask(utils::VectorRef<const ast::Attribute*> attrs) {
 
 }  // namespace
 
-/// State holds the current transform state for a single entry point.
+/// PIMPL state for the transform
 struct CanonicalizeEntryPointIO::State {
     /// OutputValue represents a shader result that the wrapper function produces.
     struct OutputValue {
@@ -770,17 +770,22 @@ struct CanonicalizeEntryPointIO::State {
     }
 };
 
-void CanonicalizeEntryPointIO::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) const {
+Transform::ApplyResult CanonicalizeEntryPointIO::Apply(const Program* src,
+                                                       const DataMap& inputs,
+                                                       DataMap&) const {
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+
     auto* cfg = inputs.Get<Config>();
     if (cfg == nullptr) {
-        ctx.dst->Diagnostics().add_error(
-            diag::System::Transform, "missing transform data for " + std::string(TypeInfo().name));
-        return;
+        b.Diagnostics().add_error(diag::System::Transform,
+                                  "missing transform data for " + std::string(TypeInfo().name));
+        return Program(std::move(b));
     }
 
     // Remove entry point IO attributes from struct declarations.
     // New structures will be created for each entry point, as necessary.
-    for (auto* ty : ctx.src->AST().TypeDecls()) {
+    for (auto* ty : src->AST().TypeDecls()) {
         if (auto* struct_ty = ty->As<ast::Struct>()) {
             for (auto* member : struct_ty->members) {
                 for (auto* attr : member->attributes) {
@@ -792,7 +797,7 @@ void CanonicalizeEntryPointIO::Run(CloneContext& ctx, const DataMap& inputs, Dat
         }
     }
 
-    for (auto* func_ast : ctx.src->AST().Functions()) {
+    for (auto* func_ast : src->AST().Functions()) {
         if (!func_ast->IsEntryPoint()) {
             continue;
         }
@@ -802,6 +807,7 @@ void CanonicalizeEntryPointIO::Run(CloneContext& ctx, const DataMap& inputs, Dat
     }
 
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 CanonicalizeEntryPointIO::Config::Config(ShaderStyle style,

@@ -14,7 +14,7 @@
 
 #include "src/tint/transform/clamp_frag_depth.h"
 
- #include <utility>
+#include <utility>
 
 #include "src/tint/ast/attribute.h"
 #include "src/tint/ast/builtin_attribute.h"
@@ -64,12 +64,7 @@ bool ReturnsFragDepthInStruct(const sem::Info& sem, const ast::Function* fn) {
     return false;
 }
 
-}  // anonymous namespace
-
-ClampFragDepth::ClampFragDepth() = default;
-ClampFragDepth::~ClampFragDepth() = default;
-
-bool ClampFragDepth::ShouldRun(const Program* program, const DataMap&) const {
+bool ShouldRun(const Program* program) {
     auto& sem = program->Sem();
 
     for (auto* fn : program->AST().Functions()) {
@@ -82,22 +77,33 @@ bool ClampFragDepth::ShouldRun(const Program* program, const DataMap&) const {
     return false;
 }
 
-void ClampFragDepth::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
+}  // anonymous namespace
+
+ClampFragDepth::ClampFragDepth() = default;
+ClampFragDepth::~ClampFragDepth() = default;
+
+Transform::ApplyResult ClampFragDepth::Apply(const Program* src, const DataMap&, DataMap&) const {
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+
     // Abort on any use of push constants in the module.
-    for (auto* global : ctx.src->AST().GlobalVariables()) {
+    for (auto* global : src->AST().GlobalVariables()) {
         if (auto* var = global->As<ast::Var>()) {
             if (var->declared_address_space == ast::AddressSpace::kPushConstant) {
-                TINT_ICE(Transform, ctx.dst->Diagnostics())
+                TINT_ICE(Transform, b.Diagnostics())
                     << "ClampFragDepth doesn't know how to handle module that already use push "
                        "constants.";
-                return;
+                return Program(std::move(b));
             }
         }
     }
 
-    auto& b = *ctx.dst;
-    auto& sem = ctx.src->Sem();
-    auto& sym = ctx.src->Symbols();
+    if (!ShouldRun(src)) {
+        return SkipTransform;
+    }
+
+    auto& sem = src->Sem();
+    auto& sym = src->Symbols();
 
     // At least one entry-point needs clamping. Add the following to the module:
     //
@@ -197,6 +203,7 @@ void ClampFragDepth::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
     });
 
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::transform

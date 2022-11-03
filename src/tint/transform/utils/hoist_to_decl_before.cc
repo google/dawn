@@ -30,7 +30,59 @@
 namespace tint::transform {
 
 /// Private implementation of HoistToDeclBefore transform
-class HoistToDeclBefore::State {
+struct HoistToDeclBefore::State {
+    /// Constructor
+    /// @param ctx_in the clone context
+    explicit State(CloneContext& ctx_in) : ctx(ctx_in), b(*ctx_in.dst) {}
+
+    /// @copydoc HoistToDeclBefore::Add()
+    bool Add(const sem::Expression* before_expr,
+             const ast::Expression* expr,
+             bool as_let,
+             const char* decl_name) {
+        auto name = b.Symbols().New(decl_name);
+
+        if (as_let) {
+            auto builder = [this, expr, name] {
+                return b.Decl(b.Let(name, ctx.CloneWithoutTransform(expr)));
+            };
+            if (!InsertBeforeImpl(before_expr->Stmt(), std::move(builder))) {
+                return false;
+            }
+        } else {
+            auto builder = [this, expr, name] {
+                return b.Decl(b.Var(name, ctx.CloneWithoutTransform(expr)));
+            };
+            if (!InsertBeforeImpl(before_expr->Stmt(), std::move(builder))) {
+                return false;
+            }
+        }
+
+        // Replace the initializer expression with a reference to the let
+        ctx.Replace(expr, b.Expr(name));
+        return true;
+    }
+
+    /// @copydoc HoistToDeclBefore::InsertBefore(const sem::Statement*, const ast::Statement*)
+    bool InsertBefore(const sem::Statement* before_stmt, const ast::Statement* stmt) {
+        if (stmt) {
+            auto builder = [stmt] { return stmt; };
+            return InsertBeforeImpl(before_stmt, std::move(builder));
+        }
+        return InsertBeforeImpl(before_stmt, Decompose{});
+    }
+
+    /// @copydoc HoistToDeclBefore::InsertBefore(const sem::Statement*, const StmtBuilder&)
+    bool InsertBefore(const sem::Statement* before_stmt, const StmtBuilder& builder) {
+        return InsertBeforeImpl(before_stmt, std::move(builder));
+    }
+
+    /// @copydoc HoistToDeclBefore::Prepare()
+    bool Prepare(const sem::Expression* before_expr) {
+        return InsertBefore(before_expr->Stmt(), nullptr);
+    }
+
+  private:
     CloneContext& ctx;
     ProgramBuilder& b;
 
@@ -215,6 +267,8 @@ class HoistToDeclBefore::State {
 
     template <typename BUILDER>
     bool InsertBeforeImpl(const sem::Statement* before_stmt, BUILDER&& builder) {
+        (void)builder;  // Avoid 'unused parameter' warning due to 'if constexpr'
+
         auto* ip = before_stmt->Declaration();
 
         auto* else_if = before_stmt->As<sem::IfStatement>();
@@ -298,58 +352,6 @@ class HoistToDeclBefore::State {
         TINT_ICE(Transform, b.Diagnostics())
             << "unhandled expression parent statement type: " << parent->TypeInfo().name;
         return false;
-    }
-
-  public:
-    /// Constructor
-    /// @param ctx_in the clone context
-    explicit State(CloneContext& ctx_in) : ctx(ctx_in), b(*ctx_in.dst) {}
-
-    /// @copydoc HoistToDeclBefore::Add()
-    bool Add(const sem::Expression* before_expr,
-             const ast::Expression* expr,
-             bool as_let,
-             const char* decl_name) {
-        auto name = b.Symbols().New(decl_name);
-
-        if (as_let) {
-            auto builder = [this, expr, name] {
-                return b.Decl(b.Let(name, ctx.CloneWithoutTransform(expr)));
-            };
-            if (!InsertBeforeImpl(before_expr->Stmt(), std::move(builder))) {
-                return false;
-            }
-        } else {
-            auto builder = [this, expr, name] {
-                return b.Decl(b.Var(name, ctx.CloneWithoutTransform(expr)));
-            };
-            if (!InsertBeforeImpl(before_expr->Stmt(), std::move(builder))) {
-                return false;
-            }
-        }
-
-        // Replace the initializer expression with a reference to the let
-        ctx.Replace(expr, b.Expr(name));
-        return true;
-    }
-
-    /// @copydoc HoistToDeclBefore::InsertBefore(const sem::Statement*, const ast::Statement*)
-    bool InsertBefore(const sem::Statement* before_stmt, const ast::Statement* stmt) {
-        if (stmt) {
-            auto builder = [stmt] { return stmt; };
-            return InsertBeforeImpl(before_stmt, std::move(builder));
-        }
-        return InsertBeforeImpl(before_stmt, Decompose{});
-    }
-
-    /// @copydoc HoistToDeclBefore::InsertBefore(const sem::Statement*, const StmtBuilder&)
-    bool InsertBefore(const sem::Statement* before_stmt, const StmtBuilder& builder) {
-        return InsertBeforeImpl(before_stmt, std::move(builder));
-    }
-
-    /// @copydoc HoistToDeclBefore::Prepare()
-    bool Prepare(const sem::Expression* before_expr) {
-        return InsertBefore(before_expr->Stmt(), nullptr);
     }
 };
 

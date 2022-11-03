@@ -28,7 +28,13 @@ using ArrayLengthFromUniformTest = TransformTest;
 TEST_F(ArrayLengthFromUniformTest, ShouldRunEmptyModule) {
     auto* src = R"()";
 
-    EXPECT_FALSE(ShouldRun<ArrayLengthFromUniform>(src));
+    ArrayLengthFromUniform::Config cfg({0, 30u});
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 0}, 0);
+
+    DataMap data;
+    data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
+
+    EXPECT_FALSE(ShouldRun<ArrayLengthFromUniform>(src, data));
 }
 
 TEST_F(ArrayLengthFromUniformTest, ShouldRunNoArrayLength) {
@@ -45,7 +51,13 @@ fn main() {
 }
 )";
 
-    EXPECT_FALSE(ShouldRun<ArrayLengthFromUniform>(src));
+    ArrayLengthFromUniform::Config cfg({0, 30u});
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 0}, 0);
+
+    DataMap data;
+    data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
+
+    EXPECT_FALSE(ShouldRun<ArrayLengthFromUniform>(src, data));
 }
 
 TEST_F(ArrayLengthFromUniformTest, ShouldRunWithArrayLength) {
@@ -63,7 +75,13 @@ fn main() {
 }
 )";
 
-    EXPECT_TRUE(ShouldRun<ArrayLengthFromUniform>(src));
+    ArrayLengthFromUniform::Config cfg({0, 30u});
+    cfg.bindpoint_to_size_index.emplace(sem::BindingPoint{0, 0}, 0);
+
+    DataMap data;
+    data.Add<ArrayLengthFromUniform::Config>(std::move(cfg));
+
+    EXPECT_TRUE(ShouldRun<ArrayLengthFromUniform>(src, data));
 }
 
 TEST_F(ArrayLengthFromUniformTest, Error_MissingTransformData) {

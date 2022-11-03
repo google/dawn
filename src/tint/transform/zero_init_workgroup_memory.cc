@@ -31,10 +31,24 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ZeroInitWorkgroupMemory);
 
 namespace tint::transform {
+namespace {
+
+bool ShouldRun(const Program* program) {
+    for (auto* global : program->AST().GlobalVariables()) {
+        if (auto* var = global->As<ast::Var>()) {
+            if (var->declared_address_space == ast::AddressSpace::kWorkgroup) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+}  // namespace
 
 using StatementList = utils::Vector<const ast::Statement*, 8>;
 
-/// PIMPL state for the ZeroInitWorkgroupMemory transform
+/// PIMPL state for the transform
 struct ZeroInitWorkgroupMemory::State {
     /// The clone context
     CloneContext& ctx;
@@ -424,24 +438,24 @@ ZeroInitWorkgroupMemory::ZeroInitWorkgroupMemory() = default;
 
 ZeroInitWorkgroupMemory::~ZeroInitWorkgroupMemory() = default;
 
-bool ZeroInitWorkgroupMemory::ShouldRun(const Program* program, const DataMap&) const {
-    for (auto* global : program->AST().GlobalVariables()) {
-        if (auto* var = global->As<ast::Var>()) {
-            if (var->declared_address_space == ast::AddressSpace::kWorkgroup) {
-                return true;
-            }
-        }
+Transform::ApplyResult ZeroInitWorkgroupMemory::Apply(const Program* src,
+                                                      const DataMap&,
+                                                      DataMap&) const {
+    if (!ShouldRun(src)) {
+        return SkipTransform;
     }
-    return false;
-}
 
-void ZeroInitWorkgroupMemory::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    for (auto* fn : ctx.src->AST().Functions()) {
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+
+    for (auto* fn : src->AST().Functions()) {
         if (fn->PipelineStage() == ast::PipelineStage::kCompute) {
             State{ctx}.Run(fn);
         }
     }
+
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::transform

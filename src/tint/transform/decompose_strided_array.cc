@@ -34,13 +34,7 @@ namespace {
 
 using DecomposedArrays = std::unordered_map<const sem::Array*, Symbol>;
 
-}  // namespace
-
-DecomposeStridedArray::DecomposeStridedArray() = default;
-
-DecomposeStridedArray::~DecomposeStridedArray() = default;
-
-bool DecomposeStridedArray::ShouldRun(const Program* program, const DataMap&) const {
+bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
         if (auto* ast = node->As<ast::Array>()) {
             if (ast::GetAttribute<ast::StrideAttribute>(ast->attributes)) {
@@ -51,8 +45,22 @@ bool DecomposeStridedArray::ShouldRun(const Program* program, const DataMap&) co
     return false;
 }
 
-void DecomposeStridedArray::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    const auto& sem = ctx.src->Sem();
+}  // namespace
+
+DecomposeStridedArray::DecomposeStridedArray() = default;
+
+DecomposeStridedArray::~DecomposeStridedArray() = default;
+
+Transform::ApplyResult DecomposeStridedArray::Apply(const Program* src,
+                                                    const DataMap&,
+                                                    DataMap&) const {
+    if (!ShouldRun(src)) {
+        return SkipTransform;
+    }
+
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    const auto& sem = src->Sem();
 
     static constexpr const char* kMemberName = "el";
 
@@ -69,23 +77,23 @@ void DecomposeStridedArray::Run(CloneContext& ctx, const DataMap&, DataMap&) con
         if (auto* arr = sem.Get(ast)) {
             if (!arr->IsStrideImplicit()) {
                 auto el_ty = utils::GetOrCreate(decomposed, arr, [&] {
-                    auto name = ctx.dst->Symbols().New("strided_arr");
+                    auto name = b.Symbols().New("strided_arr");
                     auto* member_ty = ctx.Clone(ast->type);
-                    auto* member = ctx.dst->Member(kMemberName, member_ty,
-                                                   utils::Vector{
-                                                       ctx.dst->MemberSize(AInt(arr->Stride())),
-                                                   });
-                    ctx.dst->Structure(name, utils::Vector{member});
+                    auto* member = b.Member(kMemberName, member_ty,
+                                            utils::Vector{
+                                                b.MemberSize(AInt(arr->Stride())),
+                                            });
+                    b.Structure(name, utils::Vector{member});
                     return name;
                 });
                 auto* count = ctx.Clone(ast->count);
-                return ctx.dst->ty.array(ctx.dst->ty.type_name(el_ty), count);
+                return b.ty.array(b.ty.type_name(el_ty), count);
             }
             if (ast::GetAttribute<ast::StrideAttribute>(ast->attributes)) {
                 // Strip the @stride attribute
                 auto* ty = ctx.Clone(ast->type);
                 auto* count = ctx.Clone(ast->count);
-                return ctx.dst->ty.array(ty, count);
+                return b.ty.array(ty, count);
             }
         }
         return nullptr;
@@ -96,11 +104,11 @@ void DecomposeStridedArray::Run(CloneContext& ctx, const DataMap&, DataMap&) con
     // to insert an additional member accessor for the single structure field.
     // Example: `arr[i]` -> `arr[i].el`
     ctx.ReplaceAll([&](const ast::IndexAccessorExpression* idx) -> const ast::Expression* {
-        if (auto* ty = ctx.src->TypeOf(idx->object)) {
+        if (auto* ty = src->TypeOf(idx->object)) {
             if (auto* arr = ty->UnwrapRef()->As<sem::Array>()) {
                 if (!arr->IsStrideImplicit()) {
                     auto* expr = ctx.CloneWithoutTransform(idx);
-                    return ctx.dst->MemberAccessor(expr, kMemberName);
+                    return b.MemberAccessor(expr, kMemberName);
                 }
             }
         }
@@ -136,21 +144,23 @@ void DecomposeStridedArray::Run(CloneContext& ctx, const DataMap&, DataMap&) con
                         if (auto it = decomposed.find(arr); it != decomposed.end()) {
                             args.Reserve(expr->args.Length());
                             for (auto* arg : expr->args) {
-                                args.Push(ctx.dst->Call(it->second, ctx.Clone(arg)));
+                                args.Push(b.Call(it->second, ctx.Clone(arg)));
                             }
                         } else {
                             args = ctx.Clone(expr->args);
                         }
 
-                        return target.type ? ctx.dst->Construct(target.type, std::move(args))
-                                           : ctx.dst->Call(target.name, std::move(args));
+                        return target.type ? b.Construct(target.type, std::move(args))
+                                           : b.Call(target.name, std::move(args));
                     }
                 }
             }
         }
         return nullptr;
     });
+
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::transform

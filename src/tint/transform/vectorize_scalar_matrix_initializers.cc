@@ -27,12 +27,9 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::VectorizeScalarMatrixInitializers);
 
 namespace tint::transform {
+namespace {
 
-VectorizeScalarMatrixInitializers::VectorizeScalarMatrixInitializers() = default;
-
-VectorizeScalarMatrixInitializers::~VectorizeScalarMatrixInitializers() = default;
-
-bool VectorizeScalarMatrixInitializers::ShouldRun(const Program* program, const DataMap&) const {
+bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
         if (auto* call = program->Sem().Get<sem::Call>(node)) {
             if (call->Target()->Is<sem::TypeInitializer>() && call->Type()->Is<sem::Matrix>()) {
@@ -46,11 +43,26 @@ bool VectorizeScalarMatrixInitializers::ShouldRun(const Program* program, const 
     return false;
 }
 
-void VectorizeScalarMatrixInitializers::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
+}  // namespace
+
+VectorizeScalarMatrixInitializers::VectorizeScalarMatrixInitializers() = default;
+
+VectorizeScalarMatrixInitializers::~VectorizeScalarMatrixInitializers() = default;
+
+Transform::ApplyResult VectorizeScalarMatrixInitializers::Apply(const Program* src,
+                                                                const DataMap&,
+                                                                DataMap&) const {
+    if (!ShouldRun(src)) {
+        return SkipTransform;
+    }
+
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+
     std::unordered_map<const sem::Matrix*, Symbol> scalar_inits;
 
     ctx.ReplaceAll([&](const ast::CallExpression* expr) -> const ast::CallExpression* {
-        auto* call = ctx.src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
+        auto* call = src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
         auto* ty_init = call->Target()->As<sem::TypeInitializer>();
         if (!ty_init) {
             return nullptr;
@@ -87,10 +99,10 @@ void VectorizeScalarMatrixInitializers::Run(CloneContext& ctx, const DataMap&, D
                 }
 
                 // Construct the column vector.
-                columns.Push(ctx.dst->vec(CreateASTTypeFor(ctx, mat_type->type()), mat_type->rows(),
-                                          std::move(row_values)));
+                columns.Push(b.vec(CreateASTTypeFor(ctx, mat_type->type()), mat_type->rows(),
+                                   std::move(row_values)));
             }
-            return ctx.dst->Construct(CreateASTTypeFor(ctx, mat_type), columns);
+            return b.Construct(CreateASTTypeFor(ctx, mat_type), columns);
         };
 
         if (args.Length() == 1) {
@@ -98,23 +110,22 @@ void VectorizeScalarMatrixInitializers::Run(CloneContext& ctx, const DataMap&, D
             // This is done to ensure that the single argument value is only evaluated once, and
             // with the correct expression evaluation order.
             auto fn = utils::GetOrCreate(scalar_inits, mat_type, [&] {
-                auto name =
-                    ctx.dst->Symbols().New("build_mat" + std::to_string(mat_type->columns()) + "x" +
-                                           std::to_string(mat_type->rows()));
-                ctx.dst->Func(name,
-                              utils::Vector{
-                                  // Single scalar parameter
-                                  ctx.dst->Param("value", CreateASTTypeFor(ctx, mat_type->type())),
-                              },
-                              CreateASTTypeFor(ctx, mat_type),
-                              utils::Vector{
-                                  ctx.dst->Return(build_mat([&](uint32_t, uint32_t) {  //
-                                      return ctx.dst->Expr("value");
-                                  })),
-                              });
+                auto name = b.Symbols().New("build_mat" + std::to_string(mat_type->columns()) +
+                                            "x" + std::to_string(mat_type->rows()));
+                b.Func(name,
+                       utils::Vector{
+                           // Single scalar parameter
+                           b.Param("value", CreateASTTypeFor(ctx, mat_type->type())),
+                       },
+                       CreateASTTypeFor(ctx, mat_type),
+                       utils::Vector{
+                           b.Return(build_mat([&](uint32_t, uint32_t) {  //
+                               return b.Expr("value");
+                           })),
+                       });
                 return name;
             });
-            return ctx.dst->Call(fn, ctx.Clone(args[0]->Declaration()));
+            return b.Call(fn, ctx.Clone(args[0]->Declaration()));
         }
 
         if (args.Length() == mat_type->columns() * mat_type->rows()) {
@@ -123,12 +134,13 @@ void VectorizeScalarMatrixInitializers::Run(CloneContext& ctx, const DataMap&, D
             });
         }
 
-        TINT_ICE(Transform, ctx.dst->Diagnostics())
+        TINT_ICE(Transform, b.Diagnostics())
             << "matrix initializer has unexpected number of arguments";
         return nullptr;
     });
 
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::transform

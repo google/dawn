@@ -122,7 +122,18 @@ class TransformTestBase : public BASE {
         }
 
         const Transform& t = TRANSFORM();
-        return t.ShouldRun(&program, data);
+
+        DataMap outputs;
+        auto result = t.Apply(&program, data, outputs);
+        if (!result) {
+            return false;
+        }
+        if (!result->IsValid()) {
+            ADD_FAILURE() << "Apply() called by ShouldRun() returned errors: "
+                          << result->Diagnostics().str();
+            return true;
+        }
+        return result.has_value();
     }
 
     /// @param in the input WGSL source

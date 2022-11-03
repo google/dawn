@@ -33,14 +33,15 @@ using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::transform {
 
-/// The PIMPL state for the PackedVec3 transform
+/// PIMPL state for the transform
 struct PackedVec3::State {
     /// Constructor
-    /// @param c the CloneContext
-    explicit State(CloneContext& c) : ctx(c) {}
+    /// @param program the source program
+    explicit State(const Program* program) : src(program) {}
 
     /// Runs the transform
-    void Run() {
+    /// @returns the new program or SkipTransform if the transform is not required
+    ApplyResult Run() {
         // Packed vec3<T> struct members
         utils::Hashset<const sem::StructMember*, 8> members;
 
@@ -70,6 +71,10 @@ struct PackedVec3::State {
                     }
                 }
             }
+        }
+
+        if (members.IsEmpty()) {
+            return SkipTransform;
         }
 
         // Walk the nodes, starting with the most deeply nested, finding all the AST expressions
@@ -137,36 +142,20 @@ struct PackedVec3::State {
         }
 
         ctx.Clone();
-    }
-
-    /// @returns true if this transform should be run for the given program
-    /// @param program the program to inspect
-    static bool ShouldRun(const Program* program) {
-        for (auto* decl : program->AST().GlobalDeclarations()) {
-            if (auto* str = program->Sem().Get<sem::Struct>(decl)) {
-                if (str->IsHostShareable()) {
-                    for (auto* member : str->Members()) {
-                        if (auto* vec = member->Type()->As<sem::Vector>()) {
-                            if (vec->Width() == 3) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return false;
+        return Program(std::move(b));
     }
 
   private:
+    /// The source program
+    const Program* const src;
+    /// The target program builder
+    ProgramBuilder b;
     /// The clone context
-    CloneContext& ctx;
+    CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
     /// Alias to the semantic info in ctx.src
     const sem::Info& sem = ctx.src->Sem();
     /// Alias to the symbols in ctx.src
     const SymbolTable& sym = ctx.src->Symbols();
-    /// Alias to the ctx.dst program builder
-    ProgramBuilder& b = *ctx.dst;
 };
 
 PackedVec3::Attribute::Attribute(ProgramID pid, ast::NodeID nid) : Base(pid, nid) {}
@@ -183,12 +172,8 @@ std::string PackedVec3::Attribute::InternalName() const {
 PackedVec3::PackedVec3() = default;
 PackedVec3::~PackedVec3() = default;
 
-bool PackedVec3::ShouldRun(const Program* program, const DataMap&) const {
-    return State::ShouldRun(program);
-}
-
-void PackedVec3::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    State(ctx).Run();
+Transform::ApplyResult PackedVec3::Apply(const Program* src, const DataMap&, DataMap&) const {
+    return State{src}.Run();
 }
 
 }  // namespace tint::transform

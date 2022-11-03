@@ -38,6 +38,15 @@ using WorkgroupParameterMemberList = utils::Vector<const ast::StructMember*, 8>;
 // The name of the struct member for arrays that are wrapped in structures.
 const char* kWrappedArrayMemberName = "arr";
 
+bool ShouldRun(const Program* program) {
+    for (auto* decl : program->AST().GlobalDeclarations()) {
+        if (decl->Is<ast::Variable>()) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // Returns `true` if `type` is or contains a matrix type.
 bool ContainsMatrix(const sem::Type* type) {
     type = type->UnwrapRef();
@@ -56,7 +65,7 @@ bool ContainsMatrix(const sem::Type* type) {
 }
 }  // namespace
 
-/// State holds the current transform state.
+/// PIMPL state for the transform
 struct ModuleScopeVarToEntryPointParam::State {
     /// The clone context.
     CloneContext& ctx;
@@ -501,19 +510,20 @@ ModuleScopeVarToEntryPointParam::ModuleScopeVarToEntryPointParam() = default;
 
 ModuleScopeVarToEntryPointParam::~ModuleScopeVarToEntryPointParam() = default;
 
-bool ModuleScopeVarToEntryPointParam::ShouldRun(const Program* program, const DataMap&) const {
-    for (auto* decl : program->AST().GlobalDeclarations()) {
-        if (decl->Is<ast::Variable>()) {
-            return true;
-        }
+Transform::ApplyResult ModuleScopeVarToEntryPointParam::Apply(const Program* src,
+                                                              const DataMap&,
+                                                              DataMap&) const {
+    if (!ShouldRun(src)) {
+        return SkipTransform;
     }
-    return false;
-}
 
-void ModuleScopeVarToEntryPointParam::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
     State state{ctx};
     state.Process();
+
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::transform

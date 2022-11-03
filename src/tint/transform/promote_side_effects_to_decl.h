@@ -31,12 +31,10 @@ class PromoteSideEffectsToDecl final : public Castable<PromoteSideEffectsToDecl,
     /// Destructor
     ~PromoteSideEffectsToDecl() override;
 
-  protected:
-    /// Runs the transform on `program`, returning the transformation result.
-    /// @param program the source program to transform
-    /// @param data optional extra transform-specific data
-    /// @returns the transformation result
-    Output Run(const Program* program, const DataMap& data = {}) const override;
+    /// @copydoc Transform::Apply
+    ApplyResult Apply(const Program* program,
+                      const DataMap& inputs,
+                      DataMap& outputs) const override;
 };
 
 }  // namespace tint::transform

@@ -31,9 +31,9 @@ namespace tint::transform {
 Manager::Manager() = default;
 Manager::~Manager() = default;
 
-Output Manager::Run(const Program* program, const DataMap& data) const {
-    const Program* in = program;
-
+Transform::ApplyResult Manager::Apply(const Program* program,
+                                      const DataMap& inputs,
+                                      DataMap& outputs) const {
 #if TINT_PRINT_PROGRAM_FOR_EACH_TRANSFORM
     auto print_program = [&](const char* msg, const Transform* transform) {
         auto wgsl = Program::printer(in);
@@ -46,34 +46,30 @@ Output Manager::Run(const Program* program, const DataMap& data) const {
     };
 #endif
 
-    Output out;
+    std::optional<Program> output;
+
     for (const auto& transform : transforms_) {
-        if (!transform->ShouldRun(in, data)) {
-            TINT_IF_PRINT_PROGRAM(std::cout << "Skipping " << transform->TypeInfo().name
-                                            << std::endl);
-            continue;
-        }
         TINT_IF_PRINT_PROGRAM(print_program("Input to", transform.get()));
 
-        auto res = transform->Run(in, data);
-        out.program = std::move(res.program);
-        out.data.Add(std::move(res.data));
-        in = &out.program;
-        if (!in->IsValid()) {
-            TINT_IF_PRINT_PROGRAM(print_program("Invalid output of", transform.get()));
-            return out;
-        }
+        if (auto result = transform->Apply(program, inputs, outputs)) {
+            output.emplace(std::move(result.value()));
+            program = &output.value();
 
-        if (transform == transforms_.back()) {
-            TINT_IF_PRINT_PROGRAM(print_program("Output of", transform.get()));
+            if (!program->IsValid()) {
+                TINT_IF_PRINT_PROGRAM(print_program("Invalid output of", transform.get()));
+                break;
+            }
+
+            if (transform == transforms_.back()) {
+                TINT_IF_PRINT_PROGRAM(print_program("Output of", transform.get()));
+            }
+        } else {
+            TINT_IF_PRINT_PROGRAM(std::cout << "Skipped " << transform->TypeInfo().name
+                                            << std::endl);
         }
     }
 
-    if (program == in) {
-        out.program = program->Clone();
-    }
-
-    return out;
+    return output;
 }
 
 }  // namespace tint::transform

@@ -28,27 +28,32 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::Unshadow);
 
 namespace tint::transform {
 
-/// The PIMPL state for the Unshadow transform
+/// PIMPL state for the transform
 struct Unshadow::State {
+    /// The source program
+    const Program* const src;
+    /// The target program builder
+    ProgramBuilder b;
     /// The clone context
-    CloneContext& ctx;
+    CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
 
     /// Constructor
-    /// @param context the clone context
-    explicit State(CloneContext& context) : ctx(context) {}
+    /// @param program the source program
+    explicit State(const Program* program) : src(program) {}
 
-    /// Performs the transformation
-    void Run() {
-        auto& sem = ctx.src->Sem();
+    /// Runs the transform
+    /// @returns the new program or SkipTransform if the transform is not required
+    Transform::ApplyResult Run() {
+        auto& sem = src->Sem();
 
         // Maps a variable to its new name.
-        std::unordered_map<const sem::Variable*, Symbol> renamed_to;
+        utils::Hashmap<const sem::Variable*, Symbol, 8> renamed_to;
 
         auto rename = [&](const sem::Variable* v) -> const ast::Variable* {
             auto* decl = v->Declaration();
-            auto name = ctx.src->Symbols().NameFor(decl->symbol);
-            auto symbol = ctx.dst->Symbols().New(name);
-            renamed_to.emplace(v, symbol);
+            auto name = src->Symbols().NameFor(decl->symbol);
+            auto symbol = b.Symbols().New(name);
+            renamed_to.Add(v, symbol);
 
             auto source = ctx.Clone(decl->source);
             auto* type = ctx.Clone(decl->type);
@@ -57,20 +62,20 @@ struct Unshadow::State {
             return Switch(
                 decl,  //
                 [&](const ast::Var* var) {
-                    return ctx.dst->Var(source, symbol, type, var->declared_address_space,
-                                        var->declared_access, initializer, attributes);
+                    return b.Var(source, symbol, type, var->declared_address_space,
+                                 var->declared_access, initializer, attributes);
                 },
                 [&](const ast::Let*) {
-                    return ctx.dst->Let(source, symbol, type, initializer, attributes);
+                    return b.Let(source, symbol, type, initializer, attributes);
                 },
                 [&](const ast::Const*) {
-                    return ctx.dst->Const(source, symbol, type, initializer, attributes);
+                    return b.Const(source, symbol, type, initializer, attributes);
                 },
-                [&](const ast::Parameter*) {
-                    return ctx.dst->Param(source, symbol, type, attributes);
+                [&](const ast::Parameter*) {  //
+                    return b.Param(source, symbol, type, attributes);
                 },
                 [&](Default) {
-                    TINT_ICE(Transform, ctx.dst->Diagnostics())
+                    TINT_ICE(Transform, b.Diagnostics())
                         << "unexpected variable type: " << decl->TypeInfo().name;
                     return nullptr;
                 });
@@ -92,14 +97,15 @@ struct Unshadow::State {
         ctx.ReplaceAll(
             [&](const ast::IdentifierExpression* ident) -> const tint::ast::IdentifierExpression* {
                 if (auto* user = sem.Get<sem::VariableUser>(ident)) {
-                    auto it = renamed_to.find(user->Variable());
-                    if (it != renamed_to.end()) {
-                        return ctx.dst->Expr(it->second);
+                    if (auto* renamed = renamed_to.Find(user->Variable())) {
+                        return b.Expr(*renamed);
                     }
                 }
                 return nullptr;
             });
+
         ctx.Clone();
+        return Program(std::move(b));
     }
 };
 
@@ -107,8 +113,8 @@ Unshadow::Unshadow() = default;
 
 Unshadow::~Unshadow() = default;
 
-void Unshadow::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    State(ctx).Run();
+Transform::ApplyResult Unshadow::Apply(const Program* src, const DataMap&, DataMap&) const {
+    return State(src).Run();
 }
 
 }  // namespace tint::transform

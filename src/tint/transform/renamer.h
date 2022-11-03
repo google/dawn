@@ -85,11 +85,10 @@ class Renamer final : public Castable<Renamer, Transform> {
     /// Destructor
     ~Renamer() override;
 
-    /// Runs the transform on `program`, returning the transformation result.
-    /// @param program the source program to transform
-    /// @param data optional extra transform-specific input data
-    /// @returns the transformation result
-    Output Run(const Program* program, const DataMap& data = {}) const override;
+    /// @copydoc Transform::Apply
+    ApplyResult Apply(const Program* program,
+                      const DataMap& inputs,
+                      DataMap& outputs) const override;
 };
 
 }  // namespace tint::transform

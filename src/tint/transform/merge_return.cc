@@ -65,15 +65,6 @@ MergeReturn::MergeReturn() = default;
 
 MergeReturn::~MergeReturn() = default;
 
-bool MergeReturn::ShouldRun(const Program* program, const DataMap&) const {
-    for (auto* func : program->AST().Functions()) {
-        if (NeedsTransform(program, func)) {
-            return true;
-        }
-    }
-    return false;
-}
-
 namespace {
 
 /// Internal class used to during the transform.
@@ -223,7 +214,12 @@ class State {
 
 }  // namespace
 
-void MergeReturn::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
+Transform::ApplyResult MergeReturn::Apply(const Program* src, const DataMap&, DataMap&) const {
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+
+    bool made_changes = false;
+
     for (auto* func : ctx.src->AST().Functions()) {
         if (!NeedsTransform(ctx.src, func)) {
             continue;
@@ -231,9 +227,15 @@ void MergeReturn::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
 
         State state(ctx, func);
         state.ProcessStatement(func->body);
+        made_changes = true;
+    }
+
+    if (!made_changes) {
+        return SkipTransform;
     }
 
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::transform

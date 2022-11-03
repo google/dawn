@@ -1561,7 +1561,8 @@ fn f() {
 TEST_F(BuiltinPolyfillTest, DISABLED_InsertBits_ConstantExpression) {
     auto* src = R"(
 fn f() {
-  let r : i32 = insertBits(1234, 5678, 5u, 6u);
+  let v = 1234i;
+  let r : i32 = insertBits(v, 5678, 5u, 6u);
 }
 )";
 
@@ -1975,16 +1976,16 @@ fn f() {
 )";
 
     auto* expect = R"(
-@group(0) @binding(0) var t : texture_2d<f32>;
-
-@group(0) @binding(1) var s : sampler;
-
 fn tint_textureSampleBaseClampToEdge(t : texture_2d<f32>, s : sampler, coord : vec2<f32>) -> vec4<f32> {
   let dims = vec2<f32>(textureDimensions(t, 0));
   let half_texel = (vec2<f32>(0.5) / dims);
   let clamped = clamp(coord, half_texel, (1 - half_texel));
   return textureSampleLevel(t, s, clamped, 0);
 }
+
+@group(0) @binding(0) var t : texture_2d<f32>;
+
+@group(0) @binding(1) var s : sampler;
 
 fn f() {
   let r = tint_textureSampleBaseClampToEdge(t, s, vec2<f32>(0.5));

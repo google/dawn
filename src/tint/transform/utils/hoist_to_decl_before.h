@@ -77,7 +77,7 @@ class HoistToDeclBefore {
     bool Prepare(const sem::Expression* before_expr);
 
   private:
-    class State;
+    struct State;
     std::unique_ptr<State> state_;
 };
 

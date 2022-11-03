@@ -28,7 +28,9 @@ using NumWorkgroupsFromUniformTest = TransformTest;
 TEST_F(NumWorkgroupsFromUniformTest, ShouldRunEmptyModule) {
     auto* src = R"()";
 
-    EXPECT_FALSE(ShouldRun<NumWorkgroupsFromUniform>(src));
+    DataMap data;
+    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    EXPECT_FALSE(ShouldRun<NumWorkgroupsFromUniform>(src, data));
 }
 
 TEST_F(NumWorkgroupsFromUniformTest, ShouldRunHasNumWorkgroups) {
@@ -38,7 +40,9 @@ fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
 }
 )";
 
-    EXPECT_TRUE(ShouldRun<NumWorkgroupsFromUniform>(src));
+    DataMap data;
+    data.Add<NumWorkgroupsFromUniform::Config>(sem::BindingPoint{0, 30u});
+    EXPECT_TRUE(ShouldRun<NumWorkgroupsFromUniform>(src, data));
 }
 
 TEST_F(NumWorkgroupsFromUniformTest, Error_MissingTransformData) {
@@ -55,7 +59,6 @@ fn main(@builtin(num_workgroups) num_wgs : vec3<u32>) {
     DataMap data;
     data.Add<CanonicalizeEntryPointIO::Config>(CanonicalizeEntryPointIO::ShaderStyle::kHlsl);
     auto got = Run<Unshadow, CanonicalizeEntryPointIO, NumWorkgroupsFromUniform>(src, data);
-
     EXPECT_EQ(expect, str(got));
 }
 

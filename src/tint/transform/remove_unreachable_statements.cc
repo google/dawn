@@ -36,27 +36,28 @@ RemoveUnreachableStatements::RemoveUnreachableStatements() = default;
 
 RemoveUnreachableStatements::~RemoveUnreachableStatements() = default;
 
-bool RemoveUnreachableStatements::ShouldRun(const Program* program, const DataMap&) const {
-    for (auto* node : program->ASTNodes().Objects()) {
-        if (auto* stmt = program->Sem().Get<sem::Statement>(node)) {
+Transform::ApplyResult RemoveUnreachableStatements::Apply(const Program* src,
+                                                          const DataMap&,
+                                                          DataMap&) const {
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+
+    bool made_changes = false;
+    for (auto* node : src->ASTNodes().Objects()) {
+        if (auto* stmt = src->Sem().Get<sem::Statement>(node)) {
             if (!stmt->IsReachable()) {
-                return true;
+                RemoveStatement(ctx, stmt->Declaration());
+                made_changes = true;
             }
         }
     }
-    return false;
-}
 
-void RemoveUnreachableStatements::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    for (auto* node : ctx.src->ASTNodes().Objects()) {
-        if (auto* stmt = ctx.src->Sem().Get<sem::Statement>(node)) {
-            if (!stmt->IsReachable()) {
-                RemoveStatement(ctx, stmt->Declaration());
-            }
-        }
+    if (!made_changes) {
+        return SkipTransform;
     }
 
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::transform

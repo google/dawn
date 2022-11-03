@@ -31,19 +31,13 @@ class RemoveContinueInSwitch final : public Castable<RemoveContinueInSwitch, Tra
     /// Destructor
     ~RemoveContinueInSwitch() override;
 
-  protected:
-    /// @param program the program to inspect
-    /// @param data optional extra transform-specific input data
-    /// @returns true if this transform should be run for the given program
-    bool ShouldRun(const Program* program, const DataMap& data = {}) const override;
+    /// @copydoc Transform::Apply
+    ApplyResult Apply(const Program* program,
+                      const DataMap& inputs,
+                      DataMap& outputs) const override;
 
-    /// Runs the transform using the CloneContext built for transforming a
-    /// program. Run() is responsible for calling Clone() on the CloneContext.
-    /// @param ctx the CloneContext primed with the input program and
-    /// ProgramBuilder
-    /// @param inputs optional extra transform-specific input data
-    /// @param outputs optional extra transform-specific output data
-    void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const override;
+  private:
+    struct State;
 };
 
 }  // namespace tint::transform

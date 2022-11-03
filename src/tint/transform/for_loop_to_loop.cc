@@ -14,17 +14,17 @@
 
 #include "src/tint/transform/for_loop_to_loop.h"
 
+#include <utility>
+
 #include "src/tint/ast/break_statement.h"
 #include "src/tint/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::ForLoopToLoop);
 
 namespace tint::transform {
-ForLoopToLoop::ForLoopToLoop() = default;
+namespace {
 
-ForLoopToLoop::~ForLoopToLoop() = default;
-
-bool ForLoopToLoop::ShouldRun(const Program* program, const DataMap&) const {
+bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
         if (node->Is<ast::ForLoopStatement>()) {
             return true;
@@ -33,19 +33,31 @@ bool ForLoopToLoop::ShouldRun(const Program* program, const DataMap&) const {
     return false;
 }
 
-void ForLoopToLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
+}  // namespace
+
+ForLoopToLoop::ForLoopToLoop() = default;
+
+ForLoopToLoop::~ForLoopToLoop() = default;
+
+Transform::ApplyResult ForLoopToLoop::Apply(const Program* src, const DataMap&, DataMap&) const {
+    if (!ShouldRun(src)) {
+        return SkipTransform;
+    }
+
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+
     ctx.ReplaceAll([&](const ast::ForLoopStatement* for_loop) -> const ast::Statement* {
         utils::Vector<const ast::Statement*, 8> stmts;
         if (auto* cond = for_loop->condition) {
             // !condition
-            auto* not_cond =
-                ctx.dst->create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, ctx.Clone(cond));
+            auto* not_cond = b.Not(ctx.Clone(cond));
 
             // { break; }
-            auto* break_body = ctx.dst->Block(ctx.dst->create<ast::BreakStatement>());
+            auto* break_body = b.Block(b.Break());
 
             // if (!condition) { break; }
-            stmts.Push(ctx.dst->If(not_cond, break_body));
+            stmts.Push(b.If(not_cond, break_body));
         }
         for (auto* stmt : for_loop->body->statements) {
             stmts.Push(ctx.Clone(stmt));
@@ -53,20 +65,21 @@ void ForLoopToLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
 
         const ast::BlockStatement* continuing = nullptr;
         if (auto* cont = for_loop->continuing) {
-            continuing = ctx.dst->Block(ctx.Clone(cont));
+            continuing = b.Block(ctx.Clone(cont));
         }
 
-        auto* body = ctx.dst->Block(stmts);
-        auto* loop = ctx.dst->create<ast::LoopStatement>(body, continuing);
+        auto* body = b.Block(stmts);
+        auto* loop = b.Loop(body, continuing);
 
         if (auto* init = for_loop->initializer) {
-            return ctx.dst->Block(ctx.Clone(init), loop);
+            return b.Block(ctx.Clone(init), loop);
         }
 
         return loop;
     });
 
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::transform

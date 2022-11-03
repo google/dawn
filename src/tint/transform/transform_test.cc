@@ -23,7 +23,9 @@ namespace {
 
 // Inherit from Transform so we have access to protected methods
 struct CreateASTTypeForTest : public testing::Test, public Transform {
-    Output Run(const Program*, const DataMap&) const override { return {}; }
+    ApplyResult Apply(const Program*, const DataMap&, DataMap&) const override {
+        return SkipTransform;
+    }
 
     const ast::Type* create(std::function<sem::Type*(ProgramBuilder&)> create_sem_type) {
         ProgramBuilder sem_type_builder;

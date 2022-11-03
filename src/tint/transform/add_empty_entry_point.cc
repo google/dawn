@@ -23,12 +23,9 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::AddEmptyEntryPoint);
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::transform {
+namespace {
 
-AddEmptyEntryPoint::AddEmptyEntryPoint() = default;
-
-AddEmptyEntryPoint::~AddEmptyEntryPoint() = default;
-
-bool AddEmptyEntryPoint::ShouldRun(const Program* program, const DataMap&) const {
+bool ShouldRun(const Program* program) {
     for (auto* func : program->AST().Functions()) {
         if (func->IsEntryPoint()) {
             return false;
@@ -37,13 +34,30 @@ bool AddEmptyEntryPoint::ShouldRun(const Program* program, const DataMap&) const
     return true;
 }
 
-void AddEmptyEntryPoint::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    ctx.dst->Func(ctx.dst->Symbols().New("unused_entry_point"), {}, ctx.dst->ty.void_(), {},
-                  utils::Vector{
-                      ctx.dst->Stage(ast::PipelineStage::kCompute),
-                      ctx.dst->WorkgroupSize(1_i),
-                  });
+}  // namespace
+
+AddEmptyEntryPoint::AddEmptyEntryPoint() = default;
+
+AddEmptyEntryPoint::~AddEmptyEntryPoint() = default;
+
+Transform::ApplyResult AddEmptyEntryPoint::Apply(const Program* src,
+                                                 const DataMap&,
+                                                 DataMap&) const {
+    if (!ShouldRun(src)) {
+        return SkipTransform;
+    }
+
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+
+    b.Func(b.Symbols().New("unused_entry_point"), {}, b.ty.void_(), {},
+           utils::Vector{
+               b.Stage(ast::PipelineStage::kCompute),
+               b.WorkgroupSize(1_i),
+           });
+
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::transform

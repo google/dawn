@@ -31,6 +31,17 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::transform {
 namespace {
 
+bool ShouldRun(const Program* program) {
+    for (auto* node : program->ASTNodes().Objects()) {
+        if (auto* ty = node->As<ast::Type>()) {
+            if (program->Sem().Get<sem::ExternalTexture>(ty)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 /// This struct stores symbols for new bindings created as a result of transforming a
 /// texture_external instance.
 struct NewBindingSymbols {
@@ -40,7 +51,7 @@ struct NewBindingSymbols {
 };
 }  // namespace
 
-/// State holds the current transform state
+/// PIMPL state for the transform
 struct MultiplanarExternalTexture::State {
     /// The clone context.
     CloneContext& ctx;
@@ -537,30 +548,26 @@ MultiplanarExternalTexture::NewBindingPoints::~NewBindingPoints() = default;
 MultiplanarExternalTexture::MultiplanarExternalTexture() = default;
 MultiplanarExternalTexture::~MultiplanarExternalTexture() = default;
 
-bool MultiplanarExternalTexture::ShouldRun(const Program* program, const DataMap&) const {
-    for (auto* node : program->ASTNodes().Objects()) {
-        if (auto* ty = node->As<ast::Type>()) {
-            if (program->Sem().Get<sem::ExternalTexture>(ty)) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 // Within this transform, an instance of a texture_external binding is unpacked into two
 // texture_2d<f32> bindings representing two possible planes of a single texture and a uniform
 // buffer binding representing a struct of parameters. Calls to texture builtins that contain a
 // texture_external parameter will be transformed into a newly generated version of the function,
 // which can perform the desired operation on a single RGBA plane or on separate Y and UV planes.
-void MultiplanarExternalTexture::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) const {
+Transform::ApplyResult MultiplanarExternalTexture::Apply(const Program* src,
+                                                         const DataMap& inputs,
+                                                         DataMap&) const {
     auto* new_binding_points = inputs.Get<NewBindingPoints>();
 
+    if (!ShouldRun(src)) {
+        return SkipTransform;
+    }
+
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
     if (!new_binding_points) {
-        ctx.dst->Diagnostics().add_error(
-            diag::System::Transform,
-            "missing new binding point data for " + std::string(TypeInfo().name));
-        return;
+        b.Diagnostics().add_error(diag::System::Transform, "missing new binding point data for " +
+                                                               std::string(TypeInfo().name));
+        return Program(std::move(b));
     }
 
     State state(ctx, new_binding_points);
@@ -568,6 +575,7 @@ void MultiplanarExternalTexture::Run(CloneContext& ctx, const DataMap& inputs, D
     state.Process();
 
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::transform

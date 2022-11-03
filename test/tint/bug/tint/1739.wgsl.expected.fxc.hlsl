@@ -1,3 +1,7 @@
+int2 tint_clamp(int2 e, int2 low, int2 high) {
+  return min(max(e, low), high);
+}
+
 struct GammaTransferParams {
   float G;
   float A;
@@ -44,10 +48,6 @@ float4 textureLoadExternal(Texture2D<float4> plane0, Texture2D<float4> plane1, i
     color = gammaCorrection(color, params.gammaEncodeParams);
   }
   return float4(color, 1.0f);
-}
-
-int2 tint_clamp(int2 e, int2 low, int2 high) {
-  return min(max(e, low), high);
 }
 
 float3x4 tint_symbol_6(uint4 buffer[11], uint offset) {

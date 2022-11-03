@@ -33,35 +33,47 @@ using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::transform {
 
-/// State holds the current transform state
+/// PIMPL state for the transform
 struct Robustness::State {
-    /// The clone context
-    CloneContext& ctx;
+    /// Constructor
+    /// @param program the source program
+    /// @param omitted the omitted address spaces
+    State(const Program* program, std::unordered_set<ast::AddressSpace>&& omitted)
+        : src(program), omitted_address_spaces(std::move(omitted)) {}
 
-    /// Set of address spacees to not apply the transform to
-    std::unordered_set<ast::AddressSpace> omitted_classes;
-
-    /// Applies the transformation state to `ctx`.
-    void Transform() {
+    /// Runs the transform
+    /// @returns the new program or SkipTransform if the transform is not required
+    ApplyResult Run() {
         ctx.ReplaceAll([&](const ast::IndexAccessorExpression* expr) { return Transform(expr); });
         ctx.ReplaceAll([&](const ast::CallExpression* expr) { return Transform(expr); });
+
+        ctx.Clone();
+        return Program(std::move(b));
     }
+
+  private:
+    /// The source program
+    const Program* const src;
+    /// The target program builder
+    ProgramBuilder b;
+    /// The clone context
+    CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+
+    /// Set of address spaces to not apply the transform to
+    std::unordered_set<ast::AddressSpace> omitted_address_spaces;
 
     /// Apply bounds clamping to array, vector and matrix indexing
     /// @param expr the array, vector or matrix index expression
     /// @return the clamped replacement expression, or nullptr if `expr` should be cloned without
     /// changes.
     const ast::IndexAccessorExpression* Transform(const ast::IndexAccessorExpression* expr) {
-        auto* sem =
-            ctx.src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::IndexAccessorExpression>();
+        auto* sem = src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::IndexAccessorExpression>();
         auto* ret_type = sem->Type();
 
         auto* ref = ret_type->As<sem::Reference>();
-        if (ref && omitted_classes.count(ref->AddressSpace()) != 0) {
+        if (ref && omitted_address_spaces.count(ref->AddressSpace()) != 0) {
             return nullptr;
         }
-
-        ProgramBuilder& b = *ctx.dst;
 
         // idx return the cloned index expression, as a u32.
         auto idx = [&]() -> const ast::Expression* {
@@ -109,8 +121,8 @@ struct Robustness::State {
                 } else {
                     // Note: Don't be tempted to use the array override variable as an expression
                     // here, the name might be shadowed!
-                    ctx.dst->Diagnostics().add_error(diag::System::Transform,
-                                                     sem::Array::kErrExpectedConstantCount);
+                    b.Diagnostics().add_error(diag::System::Transform,
+                                              sem::Array::kErrExpectedConstantCount);
                     return nullptr;
                 }
 
@@ -119,7 +131,7 @@ struct Robustness::State {
             [&](Default) {
                 TINT_ICE(Transform, b.Diagnostics())
                     << "unhandled object type in robustness of array index: "
-                    << ctx.src->FriendlyName(ret_type->UnwrapRef());
+                    << src->FriendlyName(ret_type->UnwrapRef());
                 return nullptr;
             });
 
@@ -127,9 +139,9 @@ struct Robustness::State {
             return nullptr;  // Clamping not needed
         }
 
-        auto src = ctx.Clone(expr->source);
-        auto* obj = ctx.Clone(expr->object);
-        return b.IndexAccessor(src, obj, clamped_idx);
+        auto idx_src = ctx.Clone(expr->source);
+        auto* idx_obj = ctx.Clone(expr->object);
+        return b.IndexAccessor(idx_src, idx_obj, clamped_idx);
     }
 
     /// @param type builtin type
@@ -145,14 +157,12 @@ struct Robustness::State {
     /// @return the clamped replacement call expression, or nullptr if `expr`
     /// should be cloned without changes.
     const ast::CallExpression* Transform(const ast::CallExpression* expr) {
-        auto* call = ctx.src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
+        auto* call = src->Sem().Get(expr)->UnwrapMaterialize()->As<sem::Call>();
         auto* call_target = call->Target();
         auto* builtin = call_target->As<sem::Builtin>();
         if (!builtin || !TextureBuiltinNeedsClamping(builtin->Type())) {
             return nullptr;  // No transform, just clone.
         }
-
-        ProgramBuilder& b = *ctx.dst;
 
         // Indices of the mandatory texture and coords parameters, and the optional
         // array and level parameters.
@@ -261,7 +271,7 @@ struct Robustness::State {
         // Clamp the level argument, if provided
         if (level_idx >= 0) {
             auto* arg = expr->args[static_cast<size_t>(level_idx)];
-            ctx.Replace(arg, level_arg ? level_arg() : ctx.dst->Expr(0_a));
+            ctx.Replace(arg, level_arg ? level_arg() : b.Expr(0_a));
         }
 
         return nullptr;  // Clone, which will use the argument replacements above.
@@ -276,28 +286,27 @@ Robustness::Config& Robustness::Config::operator=(const Config&) = default;
 Robustness::Robustness() = default;
 Robustness::~Robustness() = default;
 
-void Robustness::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) const {
+Transform::ApplyResult Robustness::Apply(const Program* src,
+                                         const DataMap& inputs,
+                                         DataMap&) const {
     Config cfg;
     if (auto* cfg_data = inputs.Get<Config>()) {
         cfg = *cfg_data;
     }
 
-    std::unordered_set<ast::AddressSpace> omitted_classes;
-    for (auto sc : cfg.omitted_classes) {
+    std::unordered_set<ast::AddressSpace> omitted_address_spaces;
+    for (auto sc : cfg.omitted_address_spaces) {
         switch (sc) {
             case AddressSpace::kUniform:
-                omitted_classes.insert(ast::AddressSpace::kUniform);
+                omitted_address_spaces.insert(ast::AddressSpace::kUniform);
                 break;
             case AddressSpace::kStorage:
-                omitted_classes.insert(ast::AddressSpace::kStorage);
+                omitted_address_spaces.insert(ast::AddressSpace::kStorage);
                 break;
         }
     }
 
-    State state{ctx, std::move(omitted_classes)};
-
-    state.Transform();
-    ctx.Clone();
+    return State{src, std::move(omitted_address_spaces)}.Run();
 }
 
 }  // namespace tint::transform

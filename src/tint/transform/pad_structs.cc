@@ -50,8 +50,10 @@ PadStructs::PadStructs() = default;
 
 PadStructs::~PadStructs() = default;
 
-void PadStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    auto& sem = ctx.src->Sem();
+Transform::ApplyResult PadStructs::Apply(const Program* src, const DataMap&, DataMap&) const {
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+    auto& sem = src->Sem();
 
     std::unordered_map<const ast::Struct*, const ast::Struct*> replaced_structs;
     utils::Hashset<const ast::StructMember*, 8> padding_members;
@@ -65,7 +67,7 @@ void PadStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
         bool has_runtime_sized_array = false;
         utils::Vector<const ast::StructMember*, 8> new_members;
         for (auto* mem : str->Members()) {
-            auto name = ctx.src->Symbols().NameFor(mem->Name());
+            auto name = src->Symbols().NameFor(mem->Name());
 
             if (offset < mem->Offset()) {
                 CreatePadding(&new_members, &padding_members, ctx.dst, mem->Offset() - offset);
@@ -75,7 +77,7 @@ void PadStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
             auto* ty = mem->Type();
             const ast::Type* type = CreateASTTypeFor(ctx, ty);
 
-            new_members.Push(ctx.dst->Member(name, type));
+            new_members.Push(b.Member(name, type));
 
             uint32_t size = ty->Size();
             if (ty->Is<sem::Struct>() && str->UsedAs(ast::AddressSpace::kUniform)) {
@@ -97,8 +99,8 @@ void PadStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
         if (offset < struct_size && !has_runtime_sized_array) {
             CreatePadding(&new_members, &padding_members, ctx.dst, struct_size - offset);
         }
-        auto* new_struct = ctx.dst->create<ast::Struct>(ctx.Clone(ast_str->name),
-                                                        std::move(new_members), utils::Empty);
+        auto* new_struct =
+            b.create<ast::Struct>(ctx.Clone(ast_str->name), std::move(new_members), utils::Empty);
         replaced_structs[ast_str] = new_struct;
         return new_struct;
     });
@@ -131,16 +133,17 @@ void PadStructs::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
         auto* arg = ast_call->args.begin();
         for (auto* member : new_struct->members) {
             if (padding_members.Contains(member)) {
-                new_args.Push(ctx.dst->Expr(0_u));
+                new_args.Push(b.Expr(0_u));
             } else {
                 new_args.Push(ctx.Clone(*arg));
                 arg++;
             }
         }
-        return ctx.dst->Construct(CreateASTTypeFor(ctx, str), new_args);
+        return b.Construct(CreateASTTypeFor(ctx, str), new_args);
     });
 
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::transform

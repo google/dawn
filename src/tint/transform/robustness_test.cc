@@ -1274,7 +1274,7 @@ fn f() {
 )";
 
     Robustness::Config cfg;
-    cfg.omitted_classes.insert(Robustness::AddressSpace::kStorage);
+    cfg.omitted_address_spaces.insert(Robustness::AddressSpace::kStorage);
 
     DataMap data;
     data.Add<Robustness::Config>(cfg);
@@ -1325,7 +1325,7 @@ fn f() {
 )";
 
     Robustness::Config cfg;
-    cfg.omitted_classes.insert(Robustness::AddressSpace::kUniform);
+    cfg.omitted_address_spaces.insert(Robustness::AddressSpace::kUniform);
 
     DataMap data;
     data.Add<Robustness::Config>(cfg);
@@ -1376,8 +1376,8 @@ fn f() {
 )";
 
     Robustness::Config cfg;
-    cfg.omitted_classes.insert(Robustness::AddressSpace::kStorage);
-    cfg.omitted_classes.insert(Robustness::AddressSpace::kUniform);
+    cfg.omitted_address_spaces.insert(Robustness::AddressSpace::kStorage);
+    cfg.omitted_address_spaces.insert(Robustness::AddressSpace::kUniform);
 
     DataMap data;
     data.Add<Robustness::Config>(cfg);

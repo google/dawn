@@ -32,53 +32,19 @@
 TINT_INSTANTIATE_TYPEINFO(tint::transform::RemoveContinueInSwitch);
 
 namespace tint::transform {
-namespace {
 
-class State {
-  private:
-    CloneContext& ctx;
-    ProgramBuilder& b;
-    const sem::Info& sem;
-
-    // Map of switch statement to 'tint_continue' variable.
-    std::unordered_map<const ast::SwitchStatement*, Symbol> switch_to_cont_var_name;
-
-    // If `cont` is within a switch statement within a loop, returns a pointer to
-    // that switch statement.
-    static const ast::SwitchStatement* GetParentSwitchInLoop(const sem::Info& sem,
-                                                             const ast::ContinueStatement* cont) {
-        // Find whether first parent is a switch or a loop
-        auto* sem_stmt = sem.Get(cont);
-        auto* sem_parent = sem_stmt->FindFirstParent<sem::SwitchStatement, sem::LoopBlockStatement,
-                                                     sem::ForLoopStatement, sem::WhileStatement>();
-        if (!sem_parent) {
-            return nullptr;
-        }
-        return sem_parent->Declaration()->As<ast::SwitchStatement>();
-    }
-
-  public:
+/// PIMPL state for the transform
+struct RemoveContinueInSwitch::State {
     /// Constructor
-    /// @param ctx_in the context
-    explicit State(CloneContext& ctx_in) : ctx(ctx_in), b(*ctx_in.dst), sem(ctx_in.src->Sem()) {}
-
-    /// Returns true if this transform should be run for the given program
-    static bool ShouldRun(const Program* program) {
-        for (auto* node : program->ASTNodes().Objects()) {
-            auto* stmt = node->As<ast::ContinueStatement>();
-            if (!stmt) {
-                continue;
-            }
-            if (GetParentSwitchInLoop(program->Sem(), stmt)) {
-                return true;
-            }
-        }
-        return false;
-    }
+    /// @param program the source program
+    explicit State(const Program* program) : src(program) {}
 
     /// Runs the transform
-    void Run() {
-        for (auto* node : ctx.src->ASTNodes().Objects()) {
+    /// @returns the new program or SkipTransform if the transform is not required
+    ApplyResult Run() {
+        bool made_changes = false;
+
+        for (auto* node : src->ASTNodes().Objects()) {
             auto* cont = node->As<ast::ContinueStatement>();
             if (!cont) {
                 continue;
@@ -89,6 +55,8 @@ class State {
             if (!switch_stmt) {
                 continue;
             }
+
+            made_changes = true;
 
             auto cont_var_name =
                 tint::utils::GetOrCreate(switch_to_cont_var_name, switch_stmt, [&]() {
@@ -116,22 +84,50 @@ class State {
             ctx.Replace(cont, new_stmt);
         }
 
+        if (!made_changes) {
+            return SkipTransform;
+        }
+
         ctx.Clone();
+        return Program(std::move(b));
+    }
+
+  private:
+    /// The source program
+    const Program* const src;
+    /// The target program builder
+    ProgramBuilder b;
+    /// The clone context
+    CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    /// Alias to src->sem
+    const sem::Info& sem = src->Sem();
+
+    // Map of switch statement to 'tint_continue' variable.
+    std::unordered_map<const ast::SwitchStatement*, Symbol> switch_to_cont_var_name;
+
+    // If `cont` is within a switch statement within a loop, returns a pointer to
+    // that switch statement.
+    static const ast::SwitchStatement* GetParentSwitchInLoop(const sem::Info& sem,
+                                                             const ast::ContinueStatement* cont) {
+        // Find whether first parent is a switch or a loop
+        auto* sem_stmt = sem.Get(cont);
+        auto* sem_parent = sem_stmt->FindFirstParent<sem::SwitchStatement, sem::LoopBlockStatement,
+                                                     sem::ForLoopStatement, sem::WhileStatement>();
+        if (!sem_parent) {
+            return nullptr;
+        }
+        return sem_parent->Declaration()->As<ast::SwitchStatement>();
     }
 };
-
-}  // namespace
 
 RemoveContinueInSwitch::RemoveContinueInSwitch() = default;
 RemoveContinueInSwitch::~RemoveContinueInSwitch() = default;
 
-bool RemoveContinueInSwitch::ShouldRun(const Program* program, const DataMap& /*data*/) const {
-    return State::ShouldRun(program);
-}
-
-void RemoveContinueInSwitch::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    State state(ctx);
-    state.Run();
+Transform::ApplyResult RemoveContinueInSwitch::Apply(const Program* src,
+                                                     const DataMap&,
+                                                     DataMap&) const {
+    State state(src);
+    return state.Run();
 }
 
 }  // namespace tint::transform

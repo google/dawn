@@ -13,6 +13,9 @@
 // limitations under the License.
 
 #include "src/tint/transform/promote_initializers_to_let.h"
+
+#include <utility>
+
 #include "src/tint/program_builder.h"
 #include "src/tint/sem/call.h"
 #include "src/tint/sem/statement.h"
@@ -27,8 +30,15 @@ PromoteInitializersToLet::PromoteInitializersToLet() = default;
 
 PromoteInitializersToLet::~PromoteInitializersToLet() = default;
 
-void PromoteInitializersToLet::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
+Transform::ApplyResult PromoteInitializersToLet::Apply(const Program* src,
+                                                       const DataMap&,
+                                                       DataMap&) const {
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+
     HoistToDeclBefore hoist_to_decl_before(ctx);
+
+    bool any_promoted = false;
 
     // Hoists array and structure initializers to a constant variable, declared
     // just before the statement of usage.
@@ -59,14 +69,15 @@ void PromoteInitializersToLet::Run(CloneContext& ctx, const DataMap&, DataMap&) 
             return true;
         }
 
+        any_promoted = true;
         return hoist_to_decl_before.Add(expr, expr->Declaration(), true);
     };
 
-    for (auto* node : ctx.src->ASTNodes().Objects()) {
+    for (auto* node : src->ASTNodes().Objects()) {
         bool ok = Switch(
             node,  //
             [&](const ast::CallExpression* expr) {
-                if (auto* sem = ctx.src->Sem().Get(expr)) {
+                if (auto* sem = src->Sem().Get(expr)) {
                     auto* ctor = sem->UnwrapMaterialize()->As<sem::Call>();
                     if (ctor->Target()->Is<sem::TypeInitializer>()) {
                         return promote(sem);
@@ -75,7 +86,7 @@ void PromoteInitializersToLet::Run(CloneContext& ctx, const DataMap&, DataMap&) 
                 return true;
             },
             [&](const ast::IdentifierExpression* expr) {
-                if (auto* sem = ctx.src->Sem().Get(expr)) {
+                if (auto* sem = src->Sem().Get(expr)) {
                     if (auto* user = sem->UnwrapMaterialize()->As<sem::VariableUser>()) {
                         // Identifier resolves to a variable
                         if (auto* stmt = user->Stmt()) {
@@ -96,13 +107,17 @@ void PromoteInitializersToLet::Run(CloneContext& ctx, const DataMap&, DataMap&) 
                 return true;
             },
             [&](Default) { return true; });
-
         if (!ok) {
-            return;
+            return Program(std::move(b));
         }
     }
 
+    if (!any_promoted) {
+        return SkipTransform;
+    }
+
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::transform

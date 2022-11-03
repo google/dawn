@@ -77,14 +77,20 @@ struct Hasher<DynamicIndex> {
 
 namespace tint::transform {
 
-/// The PIMPL state for the Std140 transform
+/// PIMPL state for the transform
 struct Std140::State {
     /// Constructor
-    /// @param c the CloneContext
-    explicit State(CloneContext& c) : ctx(c) {}
+    /// @param program the source program
+    explicit State(const Program* program) : src(program) {}
 
     /// Runs the transform
-    void Run() {
+    /// @returns the new program or SkipTransform if the transform is not required
+    ApplyResult Run() {
+        if (!ShouldRun()) {
+            // Transform is not required
+            return SkipTransform;
+        }
+
         // Begin by creating forked types for any type that is used as a uniform buffer, that
         // either directly or transitively contains a matrix that needs splitting for std140 layout.
         ForkTypes();
@@ -116,11 +122,11 @@ struct Std140::State {
         });
 
         ctx.Clone();
+        return Program(std::move(b));
     }
 
     /// @returns true if this transform should be run for the given program
-    /// @param program the program to inspect
-    static bool ShouldRun(const Program* program) {
+    bool ShouldRun() const {
         // Returns true if the type needs to be forked for std140 usage.
         auto needs_fork = [&](const sem::Type* ty) {
             while (auto* arr = ty->As<sem::Array>()) {
@@ -135,7 +141,7 @@ struct Std140::State {
         };
 
         // Scan structures for members that need forking
-        for (auto* ty : program->Types()) {
+        for (auto* ty : src->Types()) {
             if (auto* str = ty->As<sem::Struct>()) {
                 if (str->UsedAs(ast::AddressSpace::kUniform)) {
                     for (auto* member : str->Members()) {
@@ -148,8 +154,8 @@ struct Std140::State {
         }
 
         // Scan uniform variables that have types that need forking
-        for (auto* decl : program->AST().GlobalVariables()) {
-            auto* global = program->Sem().Get(decl);
+        for (auto* decl : src->AST().GlobalVariables()) {
+            auto* global = src->Sem().Get(decl);
             if (global->AddressSpace() == ast::AddressSpace::kUniform) {
                 if (needs_fork(global->Type()->UnwrapRef())) {
                     return true;
@@ -197,14 +203,16 @@ struct Std140::State {
         }
     };
 
+    /// The source program
+    const Program* const src;
+    /// The target program builder
+    ProgramBuilder b;
     /// The clone context
-    CloneContext& ctx;
-    /// Alias to the semantic info in ctx.src
-    const sem::Info& sem = ctx.src->Sem();
-    /// Alias to the symbols in ctx.src
-    const SymbolTable& sym = ctx.src->Symbols();
-    /// Alias to the ctx.dst program builder
-    ProgramBuilder& b = *ctx.dst;
+    CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+    /// Alias to the semantic info in src
+    const sem::Info& sem = src->Sem();
+    /// Alias to the symbols in src
+    const SymbolTable& sym = src->Symbols();
 
     /// Map of load function signature, to the generated function
     utils::Hashmap<LoadFnKey, Symbol, 8, LoadFnKey::Hasher> load_fns;
@@ -218,7 +226,7 @@ struct Std140::State {
     // Map of original structure to 'std140' forked structure
     utils::Hashmap<const sem::Struct*, Symbol, 8> std140_structs;
 
-    // Map of structure member in ctx.src of a matrix type, to list of decomposed column
+    // Map of structure member in src of a matrix type, to list of decomposed column
     // members in ctx.dst.
     utils::Hashmap<const sem::StructMember*, utils::Vector<const ast::StructMember*, 4>, 8>
         std140_mat_members;
@@ -232,7 +240,7 @@ struct Std140::State {
         utils::Vector<Symbol, 4> columns;
     };
 
-    // Map of matrix type in ctx.src, to decomposed column structure in ctx.dst.
+    // Map of matrix type in src, to decomposed column structure in ctx.dst.
     utils::Hashmap<const sem::Matrix*, Std140Matrix, 8> std140_mats;
 
     /// AccessChain describes a chain of access expressions to uniform buffer variable.
@@ -266,7 +274,7 @@ struct Std140::State {
     /// map (via Std140Type()).
     void ForkTypes() {
         // For each module scope declaration...
-        for (auto* global : ctx.src->Sem().Module()->DependencyOrderedDeclarations()) {
+        for (auto* global : src->Sem().Module()->DependencyOrderedDeclarations()) {
             // Check to see if this is a structure used by a uniform buffer...
             auto* str = sem.Get<sem::Struct>(global);
             if (str && str->UsedAs(ast::AddressSpace::kUniform)) {
@@ -317,7 +325,7 @@ struct Std140::State {
                 if (fork_std140) {
                     // Clone any members that have not already been cloned.
                     for (auto& member : members) {
-                        if (member->program_id == ctx.src->ID()) {
+                        if (member->program_id == src->ID()) {
                             member = ctx.Clone(member);
                         }
                     }
@@ -326,7 +334,7 @@ struct Std140::State {
                     auto name = b.Symbols().New(sym.NameFor(str->Name()) + "_std140");
                     auto* std140 = b.create<ast::Struct>(name, std::move(members),
                                                          ctx.Clone(str->Declaration()->attributes));
-                    ctx.InsertAfter(ctx.src->AST().GlobalDeclarations(), global, std140);
+                    ctx.InsertAfter(src->AST().GlobalDeclarations(), global, std140);
                     std140_structs.Add(str, name);
                 }
             }
@@ -337,14 +345,13 @@ struct Std140::State {
     /// type that has been forked for std140-layout.
     /// Populates the #std140_uniforms set.
     void ReplaceUniformVarTypes() {
-        for (auto* global : ctx.src->AST().GlobalVariables()) {
+        for (auto* global : src->AST().GlobalVariables()) {
             if (auto* var = global->As<ast::Var>()) {
                 if (var->declared_address_space == ast::AddressSpace::kUniform) {
                     auto* v = sem.Get(var);
                     if (auto* std140_ty = Std140Type(v->Type()->UnwrapRef())) {
                         ctx.Replace(global->type, std140_ty);
                         std140_uniforms.Add(v);
-                        continue;
                     }
                 }
             }
@@ -404,7 +411,7 @@ struct Std140::State {
                     auto std140_mat = std140_mats.GetOrCreate(mat, [&] {
                         auto name = b.Symbols().New("mat" + std::to_string(mat->columns()) + "x" +
                                                     std::to_string(mat->rows()) + "_" +
-                                                    ctx.src->FriendlyName(mat->type()));
+                                                    src->FriendlyName(mat->type()));
                         auto members =
                             DecomposedMatrixStructMembers(mat, "col", mat->Align(), mat->Size());
                         b.Structure(name, members);
@@ -421,7 +428,7 @@ struct Std140::State {
                 if (auto* std140 = Std140Type(arr->ElemType())) {
                     utils::Vector<const ast::Attribute*, 1> attrs;
                     if (!arr->IsStrideImplicit()) {
-                        attrs.Push(ctx.dst->create<ast::StrideAttribute>(arr->Stride()));
+                        attrs.Push(b.create<ast::StrideAttribute>(arr->Stride()));
                     }
                     auto count = arr->ConstantCount();
                     if (!count) {
@@ -429,7 +436,7 @@ struct Std140::State {
                         // * Override-expression counts can only be applied to workgroup arrays, and
                         //   this method only handles types transitively used as uniform buffers.
                         // * Runtime-sized arrays cannot be used in uniform buffers.
-                        TINT_ICE(Transform, ctx.dst->Diagnostics())
+                        TINT_ICE(Transform, b.Diagnostics())
                             << "unexpected non-constant array count";
                         count = 1;
                     }
@@ -440,7 +447,7 @@ struct Std140::State {
             });
     }
 
-    /// @param mat the matrix to decompose (in ctx.src)
+    /// @param mat the matrix to decompose (in src)
     /// @param name_prefix the name prefix to apply to each of the returned column vector members.
     /// @param align the alignment in bytes of the matrix.
     /// @param size the size in bytes of the matrix.
@@ -473,7 +480,7 @@ struct Std140::State {
             // Build the member
             const auto col_name = name_prefix + std::to_string(i);
             const auto* col_ty = CreateASTTypeFor(ctx, mat->ColumnType());
-            const auto* col_member = ctx.dst->Member(col_name, col_ty, std::move(attributes));
+            const auto* col_member = b.Member(col_name, col_ty, std::move(attributes));
             // Record the member for std140_mat_members
             out.Push(col_member);
         }
@@ -618,7 +625,7 @@ struct Std140::State {
 
     /// @returns a name suffix for a std140 -> non-std140 conversion function based on the type
     ///          being converted.
-    const std::string ConvertSuffix(const sem::Type* ty) const {
+    const std::string ConvertSuffix(const sem::Type* ty) {
         return Switch(
             ty,  //
             [&](const sem::Struct* str) { return sym.NameFor(str->Name()); },
@@ -629,8 +636,7 @@ struct Std140::State {
                     // * Override-expression counts can only be applied to workgroup arrays, and
                     //   this method only handles types transitively used as uniform buffers.
                     // * Runtime-sized arrays cannot be used in uniform buffers.
-                    TINT_ICE(Transform, ctx.dst->Diagnostics())
-                        << "unexpected non-constant array count";
+                    TINT_ICE(Transform, b.Diagnostics()) << "unexpected non-constant array count";
                     count = 1;
                 }
                 return "arr" + std::to_string(count.value()) + "_" + ConvertSuffix(arr->ElemType());
@@ -642,7 +648,7 @@ struct Std140::State {
             [&](const sem::F32*) { return "f32"; },
             [&](Default) {
                 TINT_ICE(Transform, b.Diagnostics())
-                    << "unhandled type for conversion name: " << ctx.src->FriendlyName(ty);
+                    << "unhandled type for conversion name: " << src->FriendlyName(ty);
                 return "";
             });
     }
@@ -718,8 +724,7 @@ struct Std140::State {
                         stmts.Push(b.Return(b.Construct(mat_ty, std::move(mat_args))));
                     } else {
                         TINT_ICE(Transform, b.Diagnostics())
-                            << "failed to find std140 matrix info for: "
-                            << ctx.src->FriendlyName(ty);
+                            << "failed to find std140 matrix info for: " << src->FriendlyName(ty);
                     }
                 },  //
                 [&](const sem::Array* arr) {
@@ -736,7 +741,7 @@ struct Std140::State {
                         // * Override-expression counts can only be applied to workgroup arrays, and
                         //   this method only handles types transitively used as uniform buffers.
                         // * Runtime-sized arrays cannot be used in uniform buffers.
-                        TINT_ICE(Transform, ctx.dst->Diagnostics())
+                        TINT_ICE(Transform, b.Diagnostics())
                             << "unexpected non-constant array count";
                         count = 1;
                     }
@@ -749,7 +754,7 @@ struct Std140::State {
                 },
                 [&](Default) {
                     TINT_ICE(Transform, b.Diagnostics())
-                        << "unhandled type for conversion: " << ctx.src->FriendlyName(ty);
+                        << "unhandled type for conversion: " << src->FriendlyName(ty);
                 });
 
             // Generate the function
@@ -1063,7 +1068,7 @@ struct Std140::State {
 
         if (std::get_if<UniformVariable>(&access)) {
             const auto* expr = b.Expr(ctx.Clone(chain.var->Declaration()->symbol));
-            const auto name = ctx.src->Symbols().NameFor(chain.var->Declaration()->symbol);
+            const auto name = src->Symbols().NameFor(chain.var->Declaration()->symbol);
             ty = chain.var->Type()->UnwrapRef();
             return {expr, ty, name};
         }
@@ -1090,7 +1095,7 @@ struct Std140::State {
                 },  //
                 [&](Default) -> ExprTypeName {
                     TINT_ICE(Transform, b.Diagnostics())
-                        << "unhandled type for access chain: " << ctx.src->FriendlyName(ty);
+                        << "unhandled type for access chain: " << src->FriendlyName(ty);
                     return {};
                 });
         }
@@ -1104,14 +1109,14 @@ struct Std140::State {
                     for (auto el : *swizzle) {
                         rhs += xyzw[el];
                     }
-                    auto swizzle_ty = ctx.src->Types().Find<sem::Vector>(
+                    auto swizzle_ty = src->Types().Find<sem::Vector>(
                         vec->type(), static_cast<uint32_t>(swizzle->Length()));
                     auto* expr = b.MemberAccessor(lhs, rhs);
                     return {expr, swizzle_ty, rhs};
                 },  //
                 [&](Default) -> ExprTypeName {
                     TINT_ICE(Transform, b.Diagnostics())
-                        << "unhandled type for access chain: " << ctx.src->FriendlyName(ty);
+                        << "unhandled type for access chain: " << src->FriendlyName(ty);
                     return {};
                 });
         }
@@ -1140,7 +1145,7 @@ struct Std140::State {
             },  //
             [&](Default) -> ExprTypeName {
                 TINT_ICE(Transform, b.Diagnostics())
-                    << "unhandled type for access chain: " << ctx.src->FriendlyName(ty);
+                    << "unhandled type for access chain: " << src->FriendlyName(ty);
                 return {};
             });
     }
@@ -1150,12 +1155,8 @@ Std140::Std140() = default;
 
 Std140::~Std140() = default;
 
-bool Std140::ShouldRun(const Program* program, const DataMap&) const {
-    return State::ShouldRun(program);
-}
-
-void Std140::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    State(ctx).Run();
+Transform::ApplyResult Std140::Apply(const Program* src, const DataMap&, DataMap&) const {
+    return State(src).Run();
 }
 
 }  // namespace tint::transform

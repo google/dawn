@@ -30,33 +30,37 @@ SingleEntryPoint::SingleEntryPoint() = default;
 
 SingleEntryPoint::~SingleEntryPoint() = default;
 
-void SingleEntryPoint::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) const {
+Transform::ApplyResult SingleEntryPoint::Apply(const Program* src,
+                                               const DataMap& inputs,
+                                               DataMap&) const {
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+
     auto* cfg = inputs.Get<Config>();
     if (cfg == nullptr) {
-        ctx.dst->Diagnostics().add_error(
-            diag::System::Transform, "missing transform data for " + std::string(TypeInfo().name));
-
-        return;
+        b.Diagnostics().add_error(diag::System::Transform,
+                                  "missing transform data for " + std::string(TypeInfo().name));
+        return Program(std::move(b));
     }
 
     // Find the target entry point.
     const ast::Function* entry_point = nullptr;
-    for (auto* f : ctx.src->AST().Functions()) {
+    for (auto* f : src->AST().Functions()) {
         if (!f->IsEntryPoint()) {
             continue;
         }
-        if (ctx.src->Symbols().NameFor(f->symbol) == cfg->entry_point_name) {
+        if (src->Symbols().NameFor(f->symbol) == cfg->entry_point_name) {
             entry_point = f;
             break;
         }
     }
     if (entry_point == nullptr) {
-        ctx.dst->Diagnostics().add_error(diag::System::Transform,
-                                         "entry point '" + cfg->entry_point_name + "' not found");
-        return;
+        b.Diagnostics().add_error(diag::System::Transform,
+                                  "entry point '" + cfg->entry_point_name + "' not found");
+        return Program(std::move(b));
     }
 
-    auto& sem = ctx.src->Sem();
+    auto& sem = src->Sem();
 
     // Build set of referenced module-scope variables for faster lookups later.
     std::unordered_set<const ast::Variable*> referenced_vars;
@@ -66,12 +70,12 @@ void SingleEntryPoint::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) c
 
     // Clone any module-scope variables, types, and functions that are statically referenced by the
     // target entry point.
-    for (auto* decl : ctx.src->AST().GlobalDeclarations()) {
+    for (auto* decl : src->AST().GlobalDeclarations()) {
         Switch(
             decl,  //
             [&](const ast::TypeDecl* ty) {
                 // TODO(jrprice): Strip unused types.
-                ctx.dst->AST().AddTypeDecl(ctx.Clone(ty));
+                b.AST().AddTypeDecl(ctx.Clone(ty));
             },
             [&](const ast::Override* override) {
                 if (referenced_vars.count(override)) {
@@ -80,37 +84,39 @@ void SingleEntryPoint::Run(CloneContext& ctx, const DataMap& inputs, DataMap&) c
                         // so that its allocated ID so that it won't be affected by other
                         // stripped away overrides
                         auto* global = sem.Get(override);
-                        const auto* id = ctx.dst->Id(global->OverrideId());
+                        const auto* id = b.Id(global->OverrideId());
                         ctx.InsertFront(override->attributes, id);
                     }
-                    ctx.dst->AST().AddGlobalVariable(ctx.Clone(override));
+                    b.AST().AddGlobalVariable(ctx.Clone(override));
                 }
             },
             [&](const ast::Var* var) {
                 if (referenced_vars.count(var)) {
-                    ctx.dst->AST().AddGlobalVariable(ctx.Clone(var));
+                    b.AST().AddGlobalVariable(ctx.Clone(var));
                 }
             },
             [&](const ast::Const* c) {
                 // Always keep 'const' declarations, as these can be used by attributes and array
                 // sizes, which are not tracked as transitively used by functions. They also don't
                 // typically get emitted by the backend unless they're actually used.
-                ctx.dst->AST().AddGlobalVariable(ctx.Clone(c));
+                b.AST().AddGlobalVariable(ctx.Clone(c));
             },
             [&](const ast::Function* func) {
                 if (sem.Get(func)->HasAncestorEntryPoint(entry_point->symbol)) {
-                    ctx.dst->AST().AddFunction(ctx.Clone(func));
+                    b.AST().AddFunction(ctx.Clone(func));
                 }
             },
-            [&](const ast::Enable* ext) { ctx.dst->AST().AddEnable(ctx.Clone(ext)); },
+            [&](const ast::Enable* ext) { b.AST().AddEnable(ctx.Clone(ext)); },
             [&](Default) {
-                TINT_UNREACHABLE(Transform, ctx.dst->Diagnostics())
+                TINT_UNREACHABLE(Transform, b.Diagnostics())
                     << "unhandled global declaration: " << decl->TypeInfo().name;
             });
     }
 
     // Clone the entry point.
-    ctx.dst->AST().AddFunction(ctx.Clone(entry_point));
+    b.AST().AddFunction(ctx.Clone(entry_point));
+
+    return Program(std::move(b));
 }
 
 SingleEntryPoint::Config::Config(std::string entry_point) : entry_point_name(entry_point) {}

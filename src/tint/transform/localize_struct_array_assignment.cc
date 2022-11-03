@@ -32,70 +32,15 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::LocalizeStructArrayAssignment);
 
 namespace tint::transform {
 
-/// Private implementation of LocalizeStructArrayAssignment transform
-class LocalizeStructArrayAssignment::State {
-  private:
-    CloneContext& ctx;
-    ProgramBuilder& b;
-
-    /// Returns true if `expr` contains an index accessor expression to a
-    /// structure member of array type.
-    bool ContainsStructArrayIndex(const ast::Expression* expr) {
-        bool result = false;
-        ast::TraverseExpressions(
-            expr, b.Diagnostics(), [&](const ast::IndexAccessorExpression* ia) {
-                // Indexing using a runtime value?
-                auto* idx_sem = ctx.src->Sem().Get(ia->index);
-                if (!idx_sem->ConstantValue()) {
-                    // Indexing a member access expr?
-                    if (auto* ma = ia->object->As<ast::MemberAccessorExpression>()) {
-                        // That accesses an array?
-                        if (ctx.src->TypeOf(ma)->UnwrapRef()->Is<sem::Array>()) {
-                            result = true;
-                            return ast::TraverseAction::Stop;
-                        }
-                    }
-                }
-                return ast::TraverseAction::Descend;
-            });
-
-        return result;
-    }
-
-    // Returns the type and address space of the originating variable of the lhs
-    // of the assignment statement.
-    // See https://www.w3.org/TR/WGSL/#originating-variable-section
-    std::pair<const sem::Type*, ast::AddressSpace> GetOriginatingTypeAndAddressSpace(
-        const ast::AssignmentStatement* assign_stmt) {
-        auto* source_var = ctx.src->Sem().Get(assign_stmt->lhs)->SourceVariable();
-        if (!source_var) {
-            TINT_ICE(Transform, b.Diagnostics())
-                << "Unable to determine originating variable for lhs of assignment "
-                   "statement";
-            return {};
-        }
-
-        auto* type = source_var->Type();
-        if (auto* ref = type->As<sem::Reference>()) {
-            return {ref->StoreType(), ref->AddressSpace()};
-        } else if (auto* ptr = type->As<sem::Pointer>()) {
-            return {ptr->StoreType(), ptr->AddressSpace()};
-        }
-
-        TINT_ICE(Transform, b.Diagnostics())
-            << "Expecting to find variable of type pointer or reference on lhs "
-               "of assignment statement";
-        return {};
-    }
-
-  public:
+/// PIMPL state for the transform
+struct LocalizeStructArrayAssignment::State {
     /// Constructor
-    /// @param ctx_in the CloneContext primed with the input program and
-    /// ProgramBuilder
-    explicit State(CloneContext& ctx_in) : ctx(ctx_in), b(*ctx_in.dst) {}
+    /// @param program the source program
+    explicit State(const Program* program) : src(program) {}
 
     /// Runs the transform
-    void Run() {
+    /// @returns the new program or SkipTransform if the transform is not required
+    ApplyResult Run() {
         struct Shared {
             bool process_nested_nodes = false;
             utils::Vector<const ast::Statement*, 4> insert_before_stmts;
@@ -189,6 +134,65 @@ class LocalizeStructArrayAssignment::State {
             });
 
         ctx.Clone();
+        return Program(std::move(b));
+    }
+
+  private:
+    /// The source program
+    const Program* const src;
+    /// The target program builder
+    ProgramBuilder b;
+    /// The clone context
+    CloneContext ctx = {&b, src, /* auto_clone_symbols */ true};
+
+    /// Returns true if `expr` contains an index accessor expression to a
+    /// structure member of array type.
+    bool ContainsStructArrayIndex(const ast::Expression* expr) {
+        bool result = false;
+        ast::TraverseExpressions(
+            expr, b.Diagnostics(), [&](const ast::IndexAccessorExpression* ia) {
+                // Indexing using a runtime value?
+                auto* idx_sem = src->Sem().Get(ia->index);
+                if (!idx_sem->ConstantValue()) {
+                    // Indexing a member access expr?
+                    if (auto* ma = ia->object->As<ast::MemberAccessorExpression>()) {
+                        // That accesses an array?
+                        if (src->TypeOf(ma)->UnwrapRef()->Is<sem::Array>()) {
+                            result = true;
+                            return ast::TraverseAction::Stop;
+                        }
+                    }
+                }
+                return ast::TraverseAction::Descend;
+            });
+
+        return result;
+    }
+
+    // Returns the type and address space of the originating variable of the lhs
+    // of the assignment statement.
+    // See https://www.w3.org/TR/WGSL/#originating-variable-section
+    std::pair<const sem::Type*, ast::AddressSpace> GetOriginatingTypeAndAddressSpace(
+        const ast::AssignmentStatement* assign_stmt) {
+        auto* source_var = src->Sem().Get(assign_stmt->lhs)->SourceVariable();
+        if (!source_var) {
+            TINT_ICE(Transform, b.Diagnostics())
+                << "Unable to determine originating variable for lhs of assignment "
+                   "statement";
+            return {};
+        }
+
+        auto* type = source_var->Type();
+        if (auto* ref = type->As<sem::Reference>()) {
+            return {ref->StoreType(), ref->AddressSpace()};
+        } else if (auto* ptr = type->As<sem::Pointer>()) {
+            return {ptr->StoreType(), ptr->AddressSpace()};
+        }
+
+        TINT_ICE(Transform, b.Diagnostics())
+            << "Expecting to find variable of type pointer or reference on lhs "
+               "of assignment statement";
+        return {};
     }
 };
 
@@ -196,9 +200,10 @@ LocalizeStructArrayAssignment::LocalizeStructArrayAssignment() = default;
 
 LocalizeStructArrayAssignment::~LocalizeStructArrayAssignment() = default;
 
-void LocalizeStructArrayAssignment::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    State state(ctx);
-    state.Run();
+Transform::ApplyResult LocalizeStructArrayAssignment::Apply(const Program* src,
+                                                            const DataMap&,
+                                                            DataMap&) const {
+    return State{src}.Run();
 }
 
 }  // namespace tint::transform

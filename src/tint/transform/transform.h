@@ -158,26 +158,30 @@ class Transform : public Castable<Transform> {
     /// Destructor
     ~Transform() override;
 
-    /// Runs the transform on `program`, returning the transformation result.
+    /// Runs the transform on @p program, returning the transformation result or a clone of
+    /// @p program.
     /// @param program the source program to transform
     /// @param data optional extra transform-specific input data
     /// @returns the transformation result
-    virtual Output Run(const Program* program, const DataMap& data = {}) const;
+    Output Run(const Program* program, const DataMap& data = {}) const;
 
-    /// @param program the program to inspect
-    /// @param data optional extra transform-specific input data
-    /// @returns true if this transform should be run for the given program
-    virtual bool ShouldRun(const Program* program, const DataMap& data = {}) const;
+    /// The return value of Apply().
+    /// If SkipTransform (std::nullopt), then the transform is not needed to be run.
+    using ApplyResult = std::optional<Program>;
 
-  protected:
-    /// Runs the transform using the CloneContext built for transforming a
-    /// program. Run() is responsible for calling Clone() on the CloneContext.
-    /// @param ctx the CloneContext primed with the input program and
-    /// ProgramBuilder
+    /// Value returned from Apply() to indicate that the transform does not need to be run
+    static inline constexpr std::nullopt_t SkipTransform = std::nullopt;
+
+    /// Runs the transform on `program`, return.
+    /// @param program the input program
     /// @param inputs optional extra transform-specific input data
     /// @param outputs optional extra transform-specific output data
-    virtual void Run(CloneContext& ctx, const DataMap& inputs, DataMap& outputs) const;
+    /// @returns a transformed program, or std::nullopt if the transform didn't need to run.
+    virtual ApplyResult Apply(const Program* program,
+                              const DataMap& inputs,
+                              DataMap& outputs) const = 0;
 
+  protected:
     /// Removes the statement `stmt` from the transformed program.
     /// RemoveStatement handles edge cases, like statements in the initializer and
     /// continuing of for-loops.

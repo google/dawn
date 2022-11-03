@@ -46,22 +46,17 @@ Output::Output(Program&& p) : program(std::move(p)) {}
 Transform::Transform() = default;
 Transform::~Transform() = default;
 
-Output Transform::Run(const Program* program, const DataMap& data /* = {} */) const {
-    ProgramBuilder builder;
-    CloneContext ctx(&builder, program);
+Output Transform::Run(const Program* src, const DataMap& data /* = {} */) const {
     Output output;
-    Run(ctx, data, output.data);
-    output.program = Program(std::move(builder));
+    if (auto program = Apply(src, data, output.data)) {
+        output.program = std::move(program.value());
+    } else {
+        ProgramBuilder b;
+        CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+        ctx.Clone();
+        output.program = Program(std::move(b));
+    }
     return output;
-}
-
-void Transform::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    TINT_UNIMPLEMENTED(Transform, ctx.dst->Diagnostics())
-        << "Transform::Run() unimplemented for " << TypeInfo().name;
-}
-
-bool Transform::ShouldRun(const Program*, const DataMap&) const {
-    return true;
 }
 
 void Transform::RemoveStatement(CloneContext& ctx, const ast::Statement* stmt) {

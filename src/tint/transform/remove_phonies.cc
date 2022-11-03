@@ -41,34 +41,25 @@ RemovePhonies::RemovePhonies() = default;
 
 RemovePhonies::~RemovePhonies() = default;
 
-bool RemovePhonies::ShouldRun(const Program* program, const DataMap&) const {
-    for (auto* node : program->ASTNodes().Objects()) {
-        if (node->Is<ast::PhonyExpression>()) {
-            return true;
-        }
-        if (auto* stmt = node->As<ast::CallStatement>()) {
-            if (program->Sem().Get(stmt->expr)->ConstantValue() != nullptr) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
+Transform::ApplyResult RemovePhonies::Apply(const Program* src, const DataMap&, DataMap&) const {
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
-void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    auto& sem = ctx.src->Sem();
+    auto& sem = src->Sem();
 
-    std::unordered_map<SinkSignature, Symbol, utils::Hasher<SinkSignature>> sinks;
+    utils::Hashmap<SinkSignature, Symbol, 8, utils::Hasher<SinkSignature>> sinks;
 
-    for (auto* node : ctx.src->ASTNodes().Objects()) {
+    bool made_changes = false;
+    for (auto* node : src->ASTNodes().Objects()) {
         Switch(
             node,
             [&](const ast::AssignmentStatement* stmt) {
                 if (stmt->lhs->Is<ast::PhonyExpression>()) {
+                    made_changes = true;
+
                     std::vector<const ast::Expression*> side_effects;
                     if (!ast::TraverseExpressions(
-                            stmt->rhs, ctx.dst->Diagnostics(),
-                            [&](const ast::CallExpression* expr) {
+                            stmt->rhs, b.Diagnostics(), [&](const ast::CallExpression* expr) {
                                 // ast::CallExpression may map to a function or builtin call
                                 // (both may have side-effects), or a type initializer or
                                 // type conversion (both do not have side effects).
@@ -100,8 +91,7 @@ void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
                         if (auto* call = side_effects[0]->As<ast::CallExpression>()) {
                             // Phony assignment with single call side effect.
                             // Replace phony assignment with call.
-                            ctx.Replace(stmt,
-                                        [&, call] { return ctx.dst->CallStmt(ctx.Clone(call)); });
+                            ctx.Replace(stmt, [&, call] { return b.CallStmt(ctx.Clone(call)); });
                             return;
                         }
                     }
@@ -114,22 +104,21 @@ void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
                         for (auto* arg : side_effects) {
                             sig.push_back(sem.Get(arg)->Type()->UnwrapRef());
                         }
-                        auto sink = utils::GetOrCreate(sinks, sig, [&] {
-                            auto name = ctx.dst->Symbols().New("phony_sink");
+                        auto sink = sinks.GetOrCreate(sig, [&] {
+                            auto name = b.Symbols().New("phony_sink");
                             utils::Vector<const ast::Parameter*, 8> params;
                             for (auto* ty : sig) {
                                 auto* ast_ty = CreateASTTypeFor(ctx, ty);
-                                params.Push(
-                                    ctx.dst->Param("p" + std::to_string(params.Length()), ast_ty));
+                                params.Push(b.Param("p" + std::to_string(params.Length()), ast_ty));
                             }
-                            ctx.dst->Func(name, params, ctx.dst->ty.void_(), {});
+                            b.Func(name, params, b.ty.void_(), {});
                             return name;
                         });
                         utils::Vector<const ast::Expression*, 8> args;
                         for (auto* arg : side_effects) {
                             args.Push(ctx.Clone(arg));
                         }
-                        return ctx.dst->CallStmt(ctx.dst->Call(sink, args));
+                        return b.CallStmt(b.Call(sink, args));
                     });
                 }
             },
@@ -138,12 +127,18 @@ void RemovePhonies::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
                 // TODO(crbug.com/tint/1637): Remove if `stmt->expr` has no side-effects.
                 auto* sem_expr = sem.Get(stmt->expr);
                 if ((sem_expr->ConstantValue() != nullptr) && !sem_expr->HasSideEffects()) {
+                    made_changes = true;
                     ctx.Remove(sem.Get(stmt)->Block()->Declaration()->statements, stmt);
                 }
             });
     }
 
+    if (!made_changes) {
+        return SkipTransform;
+    }
+
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::transform

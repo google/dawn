@@ -35,7 +35,51 @@ TINT_INSTANTIATE_TYPEINFO(tint::transform::UnwindDiscardFunctions);
 namespace tint::transform {
 namespace {
 
-class State {
+bool ShouldRun(const Program* program) {
+    auto& sem = program->Sem();
+    for (auto* f : program->AST().Functions()) {
+        if (sem.Get(f)->Behaviors().Contains(sem::Behavior::kDiscard)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+}  // namespace
+
+/// PIMPL state for the transform
+struct UnwindDiscardFunctions::State {
+    /// Constructor
+    /// @param ctx_in the context
+    explicit State(CloneContext& ctx_in) : ctx(ctx_in), b(*ctx_in.dst), sem(ctx_in.src->Sem()) {}
+
+    /// Runs the transform
+    void Run() {
+        ctx.ReplaceAll([&](const ast::BlockStatement* block) -> const ast::Statement* {
+            // Iterate block statements and replace them as needed.
+            for (auto* stmt : block->statements) {
+                if (auto* new_stmt = Statement(stmt)) {
+                    ctx.Replace(stmt, new_stmt);
+                }
+
+                // Handle for loops, as they are the only other AST node that
+                // contains statements outside of BlockStatements.
+                if (auto* fl = stmt->As<ast::ForLoopStatement>()) {
+                    if (auto* new_stmt = Statement(fl->initializer)) {
+                        ctx.Replace(fl->initializer, new_stmt);
+                    }
+                    if (auto* new_stmt = Statement(fl->continuing)) {
+                        // NOTE: Should never reach here as we cannot discard in a
+                        // continuing block.
+                        ctx.Replace(fl->continuing, new_stmt);
+                    }
+                }
+            }
+
+            return nullptr;
+        });
+    }
+
   private:
     CloneContext& ctx;
     ProgramBuilder& b;
@@ -163,7 +207,7 @@ class State {
     // Returns true if `stmt` is a for-loop initializer statement.
     bool IsForLoopInitStatement(const ast::Statement* stmt) {
         if (auto* sem_stmt = sem.Get(stmt)) {
-            if (auto* sem_fl = As<sem::ForLoopStatement>(sem_stmt->Parent())) {
+            if (auto* sem_fl = tint::As<sem::ForLoopStatement>(sem_stmt->Parent())) {
                 return sem_fl->Declaration()->initializer == stmt;
             }
         }
@@ -305,60 +349,26 @@ class State {
                 return TryInsertAfter(s, sem_expr);
             });
     }
-
-  public:
-    /// Constructor
-    /// @param ctx_in the context
-    explicit State(CloneContext& ctx_in) : ctx(ctx_in), b(*ctx_in.dst), sem(ctx_in.src->Sem()) {}
-
-    /// Runs the transform
-    void Run() {
-        ctx.ReplaceAll([&](const ast::BlockStatement* block) -> const ast::Statement* {
-            // Iterate block statements and replace them as needed.
-            for (auto* stmt : block->statements) {
-                if (auto* new_stmt = Statement(stmt)) {
-                    ctx.Replace(stmt, new_stmt);
-                }
-
-                // Handle for loops, as they are the only other AST node that
-                // contains statements outside of BlockStatements.
-                if (auto* fl = stmt->As<ast::ForLoopStatement>()) {
-                    if (auto* new_stmt = Statement(fl->initializer)) {
-                        ctx.Replace(fl->initializer, new_stmt);
-                    }
-                    if (auto* new_stmt = Statement(fl->continuing)) {
-                        // NOTE: Should never reach here as we cannot discard in a
-                        // continuing block.
-                        ctx.Replace(fl->continuing, new_stmt);
-                    }
-                }
-            }
-
-            return nullptr;
-        });
-
-        ctx.Clone();
-    }
 };
-
-}  // namespace
 
 UnwindDiscardFunctions::UnwindDiscardFunctions() = default;
 UnwindDiscardFunctions::~UnwindDiscardFunctions() = default;
 
-void UnwindDiscardFunctions::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
+Transform::ApplyResult UnwindDiscardFunctions::Apply(const Program* src,
+                                                     const DataMap&,
+                                                     DataMap&) const {
+    if (!ShouldRun(src)) {
+        return SkipTransform;
+    }
+
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+
     State state(ctx);
     state.Run();
-}
 
-bool UnwindDiscardFunctions::ShouldRun(const Program* program, const DataMap& /*data*/) const {
-    auto& sem = program->Sem();
-    for (auto* f : program->AST().Functions()) {
-        if (sem.Get(f)->Behaviors().Contains(sem::Behavior::kDiscard)) {
-            return true;
-        }
-    }
-    return false;
+    ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::transform

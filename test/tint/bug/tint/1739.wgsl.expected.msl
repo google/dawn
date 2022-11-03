@@ -14,6 +14,10 @@ struct tint_array {
     T elements[N];
 };
 
+int2 tint_clamp(int2 e, int2 low, int2 high) {
+  return min(max(e, low), high);
+}
+
 struct GammaTransferParams {
   /* 0x0000 */ float G;
   /* 0x0004 */ float A;
@@ -55,10 +59,6 @@ float4 textureLoadExternal(texture2d<float, access::sample> plane0, texture2d<fl
     color = gammaCorrection(color, params.gammaEncodeParams);
   }
   return float4(color, 1.0f);
-}
-
-int2 tint_clamp(int2 e, int2 low, int2 high) {
-  return min(max(e, low), high);
 }
 
 kernel void tint_symbol(texture2d<float, access::sample> tint_symbol_5 [[texture(0)]], texture2d<float, access::sample> tint_symbol_6 [[texture(1)]], const constant ExternalTextureParams* tint_symbol_7 [[buffer(0)]], texture2d<float, access::write> tint_symbol_8 [[texture(2)]]) {

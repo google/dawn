@@ -31,20 +31,28 @@ AddBlockAttribute::AddBlockAttribute() = default;
 
 AddBlockAttribute::~AddBlockAttribute() = default;
 
-void AddBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    auto& sem = ctx.src->Sem();
+Transform::ApplyResult AddBlockAttribute::Apply(const Program* src,
+                                                const DataMap&,
+                                                DataMap&) const {
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+
+    auto& sem = src->Sem();
 
     // A map from a type in the source program to a block-decorated wrapper that contains it in the
     // destination program.
     utils::Hashmap<const sem::Type*, const ast::Struct*, 8> wrapper_structs;
 
     // Process global 'var' declarations that are buffers.
-    for (auto* global : ctx.src->AST().GlobalVariables()) {
+    bool made_changes = false;
+    for (auto* global : src->AST().GlobalVariables()) {
         auto* var = sem.Get(global);
         if (!ast::IsHostShareable(var->AddressSpace())) {
             // Not declared in a host-sharable address space
             continue;
         }
+
+        made_changes = true;
 
         auto* ty = var->Type()->UnwrapRef();
         auto* str = ty->As<sem::Struct>();
@@ -61,33 +69,36 @@ void AddBlockAttribute::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
             const char* kMemberName = "inner";
 
             auto* wrapper = wrapper_structs.GetOrCreate(ty, [&] {
-                auto* block = ctx.dst->ASTNodes().Create<BlockAttribute>(ctx.dst->ID(),
-                                                                         ctx.dst->AllocateNodeID());
-                auto wrapper_name = ctx.src->Symbols().NameFor(global->symbol) + "_block";
-                auto* ret = ctx.dst->create<ast::Struct>(
-                    ctx.dst->Symbols().New(wrapper_name),
-                    utils::Vector{ctx.dst->Member(kMemberName, CreateASTTypeFor(ctx, ty))},
+                auto* block = b.ASTNodes().Create<BlockAttribute>(b.ID(), b.AllocateNodeID());
+                auto wrapper_name = src->Symbols().NameFor(global->symbol) + "_block";
+                auto* ret = b.create<ast::Struct>(
+                    b.Symbols().New(wrapper_name),
+                    utils::Vector{b.Member(kMemberName, CreateASTTypeFor(ctx, ty))},
                     utils::Vector{block});
-                ctx.InsertBefore(ctx.src->AST().GlobalDeclarations(), global, ret);
+                ctx.InsertBefore(src->AST().GlobalDeclarations(), global, ret);
                 return ret;
             });
-            ctx.Replace(global->type, ctx.dst->ty.Of(wrapper));
+            ctx.Replace(global->type, b.ty.Of(wrapper));
 
             // Insert a member accessor to get the original type from the wrapper at
             // any usage of the original variable.
             for (auto* user : var->Users()) {
                 ctx.Replace(user->Declaration(),
-                            ctx.dst->MemberAccessor(ctx.Clone(global->symbol), kMemberName));
+                            b.MemberAccessor(ctx.Clone(global->symbol), kMemberName));
             }
         } else {
             // Add a block attribute to this struct directly.
-            auto* block = ctx.dst->ASTNodes().Create<BlockAttribute>(ctx.dst->ID(),
-                                                                     ctx.dst->AllocateNodeID());
+            auto* block = b.ASTNodes().Create<BlockAttribute>(b.ID(), b.AllocateNodeID());
             ctx.InsertFront(str->Declaration()->attributes, block);
         }
     }
 
+    if (!made_changes) {
+        return SkipTransform;
+    }
+
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 AddBlockAttribute::BlockAttribute::BlockAttribute(ProgramID pid, ast::NodeID nid)

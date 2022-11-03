@@ -14,18 +14,17 @@
 
 #include "src/tint/transform/while_to_loop.h"
 
+#include <utility>
+
 #include "src/tint/ast/break_statement.h"
 #include "src/tint/program_builder.h"
 
 TINT_INSTANTIATE_TYPEINFO(tint::transform::WhileToLoop);
 
 namespace tint::transform {
+namespace {
 
-WhileToLoop::WhileToLoop() = default;
-
-WhileToLoop::~WhileToLoop() = default;
-
-bool WhileToLoop::ShouldRun(const Program* program, const DataMap&) const {
+bool ShouldRun(const Program* program) {
     for (auto* node : program->ASTNodes().Objects()) {
         if (node->Is<ast::WhileStatement>()) {
             return true;
@@ -34,20 +33,32 @@ bool WhileToLoop::ShouldRun(const Program* program, const DataMap&) const {
     return false;
 }
 
-void WhileToLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
+}  // namespace
+
+WhileToLoop::WhileToLoop() = default;
+
+WhileToLoop::~WhileToLoop() = default;
+
+Transform::ApplyResult WhileToLoop::Apply(const Program* src, const DataMap&, DataMap&) const {
+    if (!ShouldRun(src)) {
+        return SkipTransform;
+    }
+
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+
     ctx.ReplaceAll([&](const ast::WhileStatement* w) -> const ast::Statement* {
         utils::Vector<const ast::Statement*, 16> stmts;
         auto* cond = w->condition;
 
         // !condition
-        auto* not_cond =
-            ctx.dst->create<ast::UnaryOpExpression>(ast::UnaryOp::kNot, ctx.Clone(cond));
+        auto* not_cond = b.Not(ctx.Clone(cond));
 
         // { break; }
-        auto* break_body = ctx.dst->Block(ctx.dst->create<ast::BreakStatement>());
+        auto* break_body = b.Block(b.Break());
 
         // if (!condition) { break; }
-        stmts.Push(ctx.dst->If(not_cond, break_body));
+        stmts.Push(b.If(not_cond, break_body));
 
         for (auto* stmt : w->body->statements) {
             stmts.Push(ctx.Clone(stmt));
@@ -55,13 +66,14 @@ void WhileToLoop::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
 
         const ast::BlockStatement* continuing = nullptr;
 
-        auto* body = ctx.dst->Block(stmts);
-        auto* loop = ctx.dst->create<ast::LoopStatement>(body, continuing);
+        auto* body = b.Block(stmts);
+        auto* loop = b.Loop(body, continuing);
 
         return loop;
     });
 
     ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace tint::transform

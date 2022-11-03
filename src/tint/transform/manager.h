@@ -47,11 +47,10 @@ class Manager final : public Castable<Manager, Transform> {
         transforms_.emplace_back(std::make_unique<T>(std::forward<ARGS>(args)...));
     }
 
-    /// Runs the transforms on `program`, returning the transformation result.
-    /// @param program the source program to transform
-    /// @param data optional extra transform-specific input data
-    /// @returns the transformed program and diagnostics
-    Output Run(const Program* program, const DataMap& data = {}) const override;
+    /// @copydoc Transform::Apply
+    ApplyResult Apply(const Program* program,
+                      const DataMap& inputs,
+                      DataMap& outputs) const override;
 
   private:
     std::vector<std::unique_ptr<Transform>> transforms_;

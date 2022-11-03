@@ -23,7 +23,11 @@ using MultiplanarExternalTextureTest = TransformTest;
 TEST_F(MultiplanarExternalTextureTest, ShouldRunEmptyModule) {
     auto* src = R"()";
 
-    EXPECT_FALSE(ShouldRun<MultiplanarExternalTexture>(src));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+
+    EXPECT_FALSE(ShouldRun<MultiplanarExternalTexture>(src, data));
 }
 
 TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureAlias) {
@@ -31,14 +35,22 @@ TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureAlias) {
 type ET = texture_external;
 )";
 
-    EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+
+    EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src, data));
 }
 TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureGlobal) {
     auto* src = R"(
 @group(0) @binding(0) var ext_tex : texture_external;
 )";
 
-    EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+
+    EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src, data));
 }
 
 TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureParam) {
@@ -46,7 +58,11 @@ TEST_F(MultiplanarExternalTextureTest, ShouldRunHasExternalTextureParam) {
 fn f(ext_tex : texture_external) {}
 )";
 
-    EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src));
+    DataMap data;
+    data.Add<MultiplanarExternalTexture::NewBindingPoints>(
+        MultiplanarExternalTexture::BindingsMap{{{0, 0}, {{0, 1}, {0, 2}}}});
+
+    EXPECT_TRUE(ShouldRun<MultiplanarExternalTexture>(src, data));
 }
 
 // Running the transform without passing in data for the new bindings should result in an error.

@@ -23,12 +23,6 @@ namespace {
 
 using BindingRemapperTest = TransformTest;
 
-TEST_F(BindingRemapperTest, ShouldRunNoRemappings) {
-    auto* src = R"()";
-
-    EXPECT_FALSE(ShouldRun<BindingRemapper>(src));
-}
-
 TEST_F(BindingRemapperTest, ShouldRunEmptyRemappings) {
     auto* src = R"()";
 
@@ -350,7 +344,7 @@ fn f() {
 }
 )";
 
-    auto* expect = src;
+    auto* expect = R"(error: missing transform data for tint::transform::BindingRemapper)";
 
     auto got = Run<BindingRemapper>(src);
 

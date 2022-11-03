@@ -53,34 +53,36 @@ class StateBase {
 // to else {if}s so that the next transform, DecomposeSideEffects, can insert
 // hoisted expressions above their current location.
 struct SimplifySideEffectStatements : Castable<PromoteSideEffectsToDecl, Transform> {
-    class State;
-    void Run(CloneContext& ctx, const DataMap& inputs, DataMap&) const override;
+    ApplyResult Apply(const Program* src, const DataMap& inputs, DataMap& outputs) const override;
 };
 
-class SimplifySideEffectStatements::State : public StateBase {
-    HoistToDeclBefore hoist_to_decl_before;
+Transform::ApplyResult SimplifySideEffectStatements::Apply(const Program* src,
+                                                           const DataMap&,
+                                                           DataMap&) const {
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
 
-  public:
-    explicit State(CloneContext& ctx_in) : StateBase(ctx_in), hoist_to_decl_before(ctx_in) {}
+    bool made_changes = false;
 
-    void Run() {
-        for (auto* node : ctx.src->ASTNodes().Objects()) {
-            if (auto* expr = node->As<ast::Expression>()) {
-                auto* sem_expr = sem.Get(expr);
-                if (!sem_expr || !sem_expr->HasSideEffects()) {
-                    continue;
-                }
-
-                hoist_to_decl_before.Prepare(sem_expr);
+    HoistToDeclBefore hoist_to_decl_before(ctx);
+    for (auto* node : ctx.src->ASTNodes().Objects()) {
+        if (auto* expr = node->As<ast::Expression>()) {
+            auto* sem_expr = src->Sem().Get(expr);
+            if (!sem_expr || !sem_expr->HasSideEffects()) {
+                continue;
             }
-        }
-        ctx.Clone();
-    }
-};
 
-void SimplifySideEffectStatements::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
-    State state(ctx);
-    state.Run();
+            hoist_to_decl_before.Prepare(sem_expr);
+            made_changes = true;
+        }
+    }
+
+    if (!made_changes) {
+        return SkipTransform;
+    }
+
+    ctx.Clone();
+    return Program(std::move(b));
 }
 
 // Decomposes side-effecting expressions to ensure order of evaluation. This
@@ -89,7 +91,7 @@ void SimplifySideEffectStatements::Run(CloneContext& ctx, const DataMap&, DataMa
 struct DecomposeSideEffects : Castable<PromoteSideEffectsToDecl, Transform> {
     class CollectHoistsState;
     class DecomposeState;
-    void Run(CloneContext& ctx, const DataMap& inputs, DataMap&) const override;
+    ApplyResult Apply(const Program* src, const DataMap& inputs, DataMap& outputs) const override;
 };
 
 // CollectHoistsState traverses the AST top-down, identifying which expressions
@@ -667,12 +669,15 @@ class DecomposeSideEffects::DecomposeState : public StateBase {
             }
             return nullptr;
         });
-
-        ctx.Clone();
     }
 };
 
-void DecomposeSideEffects::Run(CloneContext& ctx, const DataMap&, DataMap&) const {
+Transform::ApplyResult DecomposeSideEffects::Apply(const Program* src,
+                                                   const DataMap&,
+                                                   DataMap&) const {
+    ProgramBuilder b;
+    CloneContext ctx{&b, src, /* auto_clone_symbols */ true};
+
     // First collect side-effecting expressions to hoist
     CollectHoistsState collect_hoists_state{ctx};
     auto to_hoist = collect_hoists_state.Run();
@@ -680,6 +685,9 @@ void DecomposeSideEffects::Run(CloneContext& ctx, const DataMap&, DataMap&) cons
     // Now decompose these expressions
     DecomposeState decompose_state{ctx, std::move(to_hoist)};
     decompose_state.Run();
+
+    ctx.Clone();
+    return Program(std::move(b));
 }
 
 }  // namespace
@@ -687,13 +695,13 @@ void DecomposeSideEffects::Run(CloneContext& ctx, const DataMap&, DataMap&) cons
 PromoteSideEffectsToDecl::PromoteSideEffectsToDecl() = default;
 PromoteSideEffectsToDecl::~PromoteSideEffectsToDecl() = default;
 
-Output PromoteSideEffectsToDecl::Run(const Program* program, const DataMap& data) const {
+Transform::ApplyResult PromoteSideEffectsToDecl::Apply(const Program* src,
+                                                       const DataMap& inputs,
+                                                       DataMap& outputs) const {
     transform::Manager manager;
     manager.Add<SimplifySideEffectStatements>();
     manager.Add<DecomposeSideEffects>();
-
-    auto output = manager.Run(program, data);
-    return output;
+    return manager.Apply(src, inputs, outputs);
 }
 
 }  // namespace tint::transform
