@@ -23,7 +23,7 @@
 
 // fn ceil(f32) -> f32
 fn ceil_678655() {
-  var res: f32 = ceil(1.f);
+  var res: f32 = ceil(1.5f);
 }
 
 @vertex

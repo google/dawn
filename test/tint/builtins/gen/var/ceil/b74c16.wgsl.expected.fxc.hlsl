@@ -1,5 +1,5 @@
 void ceil_b74c16() {
-  float4 arg_0 = (1.0f).xxxx;
+  float4 arg_0 = (1.5f).xxxx;
   float4 res = ceil(arg_0);
 }
 

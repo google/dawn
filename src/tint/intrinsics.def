@@ -425,8 +425,8 @@ fn arrayLength<T, A: access>(ptr<storage, array<T>, A>) -> u32
 @const fn atan2<T: fa_f32_f16, N: num>(vec<N, T>, vec<N, T>) -> vec<N, T>
 @const fn atanh<T: fa_f32_f16>(@test_value(0.5) T) -> T
 @const fn atanh<N: num, T: fa_f32_f16>(@test_value(0.5) vec<N, T>) -> vec<N, T>
-fn ceil<T: f32_f16>(T) -> T
-fn ceil<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn ceil<T: fa_f32_f16>(@test_value(1.5) T) -> T
+@const fn ceil<N: num, T: fa_f32_f16>(@test_value(1.5) vec<N, T>) -> vec<N, T>
 @const fn clamp<T: fia_fiu32_f16>(T, T, T) -> T
 @const fn clamp<T: fia_fiu32_f16, N: num>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
 fn cos<T: f32_f16>(T) -> T

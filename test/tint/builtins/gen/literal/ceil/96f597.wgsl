@@ -23,7 +23,7 @@
 
 // fn ceil(vec<2, f32>) -> vec<2, f32>
 fn ceil_96f597() {
-  var res: vec2<f32> = ceil(vec2<f32>(1.f));
+  var res: vec2<f32> = ceil(vec2<f32>(1.5f));
 }
 
 @vertex

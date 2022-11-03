@@ -1700,6 +1700,18 @@ ConstEval::Result ConstEval::atan2(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0], args[1]);
 }
 
+ConstEval::Result ConstEval::ceil(const sem::Type* ty,
+                                  utils::VectorRef<const sem::Constant*> args,
+                                  const Source&) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto e) {
+            return CreateElement(builder, c0->Type(), decltype(e)(std::ceil(e)));
+        };
+        return Dispatch_fa_f32_f16(create, c0);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
 ConstEval::Result ConstEval::clamp(const sem::Type* ty,
                                    utils::VectorRef<const sem::Constant*> args,
                                    const Source&) {

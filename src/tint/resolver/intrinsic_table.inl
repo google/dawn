@@ -13161,24 +13161,24 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 0,
-    /* template types */ &kTemplateTypes[22],
+    /* template types */ &kTemplateTypes[23],
     /* template numbers */ &kTemplateNumbers[10],
     /* parameters */ &kParameters[978],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::ceil,
   },
   {
     /* [403] */
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 1,
-    /* template types */ &kTemplateTypes[22],
+    /* template types */ &kTemplateTypes[23],
     /* template numbers */ &kTemplateNumbers[6],
     /* parameters */ &kParameters[977],
     /* return matcher indices */ &kMatcherIndices[30],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::ceil,
   },
   {
     /* [404] */
@@ -14089,8 +14089,8 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [11] */
-    /* fn ceil<T : f32_f16>(T) -> T */
-    /* fn ceil<N : num, T : f32_f16>(vec<N, T>) -> vec<N, T> */
+    /* fn ceil<T : fa_f32_f16>(@test_value(1.5) T) -> T */
+    /* fn ceil<N : num, T : fa_f32_f16>(@test_value(1.5) vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[402],
   },

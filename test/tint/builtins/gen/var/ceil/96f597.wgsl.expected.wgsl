@@ -1,5 +1,5 @@
 fn ceil_96f597() {
-  var arg_0 = vec2<f32>(1.0f);
+  var arg_0 = vec2<f32>(1.5f);
   var res : vec2<f32> = ceil(arg_0);
 }
 

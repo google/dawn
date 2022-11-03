@@ -23,7 +23,7 @@
 
 // fn ceil(f32) -> f32
 fn ceil_678655() {
-  var arg_0 = 1.f;
+  var arg_0 = 1.5f;
   var res: f32 = ceil(arg_0);
 }
 

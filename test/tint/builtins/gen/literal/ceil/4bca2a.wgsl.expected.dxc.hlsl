@@ -1,5 +1,5 @@
 void ceil_4bca2a() {
-  vector<float16_t, 4> res = ceil((float16_t(0.0h)).xxxx);
+  vector<float16_t, 4> res = (float16_t(0.0h)).xxxx;
 }
 
 struct tint_symbol {

@@ -594,6 +594,37 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               AsinhCases<f32, false>(),
                                               AsinhCases<f16, false>()))));
 
+template <typename T, bool finite_only>
+std::vector<Case> CeilCases() {
+    std::vector<Case> cases = {
+        C({T(0)}, T(0)),
+        C({-T(0)}, -T(0)),
+        C({-T(1.5)}, -T(1.0)),
+        C({T(1.5)}, T(2.0)),
+        C({T::Lowest()}, T::Lowest()),
+        C({T::Highest()}, T::Highest()),
+
+        C({Vec(T(0), T(1.5), -T(1.5))}, Vec(T(0), T(2.0), -T(1.0))),
+    };
+
+    ConcatIntoIf<!finite_only>(
+        cases, std::vector<Case>{
+                   C({-T::Inf()}, -T::Inf()),
+                   C({T::Inf()}, T::Inf()),
+                   C({T::NaN()}, T::NaN()),
+                   C({Vec(-T::Inf(), T::Inf(), T::NaN())}, Vec(-T::Inf(), T::Inf(), T::NaN())),
+               });
+
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Ceil,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kCeil),
+                     testing::ValuesIn(Concat(CeilCases<AFloat, true>(),
+                                              CeilCases<f32, false>(),
+                                              CeilCases<f16, false>()))));
+
 template <typename T>
 std::vector<Case> ClampCases() {
     return {

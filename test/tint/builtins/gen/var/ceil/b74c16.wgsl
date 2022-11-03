@@ -23,7 +23,7 @@
 
 // fn ceil(vec<4, f32>) -> vec<4, f32>
 fn ceil_b74c16() {
-  var arg_0 = vec4<f32>(1.f);
+  var arg_0 = vec4<f32>(1.5f);
   var res: vec4<f32> = ceil(arg_0);
 }
 
