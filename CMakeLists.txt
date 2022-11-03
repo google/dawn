@@ -154,7 +154,6 @@ option_if_not_defined(TINT_BUILD_MSL_WRITER "Build the MSL output writer" ${DAWN
 option_if_not_defined(TINT_BUILD_SPV_WRITER "Build the SPIR-V output writer" ${DAWN_ENABLE_VULKAN})
 option_if_not_defined(TINT_BUILD_WGSL_WRITER "Build the WGSL output writer" ON)
 
-option_if_not_defined(TINT_BUILD_RUN_GENERATOR "Run the intrinsic generator" OFF)
 option_if_not_defined(TINT_BUILD_IR "Build the IR" ON)
 
 option_if_not_defined(TINT_BUILD_FUZZERS "Build fuzzers" OFF)
@@ -290,7 +289,6 @@ message(STATUS "Tint build HLSL writer: ${TINT_BUILD_HLSL_WRITER}")
 message(STATUS "Tint build MSL writer: ${TINT_BUILD_MSL_WRITER}")
 message(STATUS "Tint build SPIR-V writer: ${TINT_BUILD_SPV_WRITER}")
 message(STATUS "Tint build WGSL writer: ${TINT_BUILD_WGSL_WRITER}")
-message(STATUS "Tint build run generator: ${TINT_BUILD_RUN_GENERATOR}")
 message(STATUS "Tint build IR: ${TINT_BUILD_IR}")
 message(STATUS "Tint build fuzzers: ${TINT_BUILD_FUZZERS}")
 message(STATUS "Tint build SPIRV-Tools fuzzer: ${TINT_BUILD_SPIRV_TOOLS_FUZZER}")
@@ -483,7 +481,6 @@ endif()
 function(tint_core_compile_options TARGET)
   target_include_directories(${TARGET} PUBLIC "${TINT_ROOT_SOURCE_DIR}")
   target_include_directories(${TARGET} PUBLIC "${TINT_ROOT_SOURCE_DIR}/include")
-  target_include_directories(${TARGET} PUBLIC "${DAWN_BUILD_GEN_DIR}")
 
   if (${TINT_BUILD_SPV_READER} OR ${TINT_BUILD_SPV_WRITER})
     target_include_directories(${TARGET} PUBLIC
