@@ -24,6 +24,36 @@ function(tint_spvtools_compile_options TARGET)
   )
 endfunction()
 
+set(TINT_LIB_SRCS)
+set(TINT_BENCHMARK_SRCS)
+set(TINT_TEST_SRCS)
+
+# Add a generated file set into the build.
+#
+# Params:
+#  TARGET - the target name to add (without extension)
+#  BENCH  - set if the target has a benchmark file
+#  TEST   - set if the target has a test file
+#
+function(tint_generated TARGET)
+  cmake_parse_arguments(PARSE_ARGV 0 TINT_GEN "BENCH;TEST" "" "")
+
+   list(APPEND TINT_LIB_SRCS
+      ${TARGET}.cc
+      ${TARGET}.h
+    )
+    set(TINT_LIB_SRCS ${TINT_LIB_SRCS} PARENT_SCOPE)
+
+    if(${TINT_GEN_BENCH})
+        list(APPEND TINT_BENCHMARK_SRCS ${TARGET}_bench.cc)
+        set(TINT_BENCHMARK_SRCS ${TINT_BENCHMARK_SRCS} PARENT_SCOPE)
+    endif()
+    if(${TINT_GEN_TEST})
+        list(APPEND TINT_TEST_SRCS ${TARGET}_test.cc)
+        set(TINT_TEST_SRCS ${TINT_TEST_SRCS} PARENT_SCOPE)
+    endif()
+endfunction()
+
 ## Tint diagnostic utilities. Used by libtint and tint_utils_io.
 add_library(tint_diagnostic_utils
   debug.cc
@@ -46,10 +76,8 @@ if (TINT_ENABLE_BREAK_IN_DEBUGGER)
     PROPERTIES COMPILE_DEFINITIONS "TINT_ENABLE_BREAK_IN_DEBUGGER=1" )
 endif()
 
-set(TINT_LIB_SRCS
+list(APPEND TINT_LIB_SRCS
   ../../include/tint/tint.h
-  ast/access.cc
-  ast/access.h
   ast/alias.cc
   ast/alias.h
   ast/array.cc
@@ -79,8 +107,6 @@ set(TINT_LIB_SRCS
   ast/break_statement.h
   ast/builtin_attribute.cc
   ast/builtin_attribute.h
-  ast/builtin_value.cc
-  ast/builtin_value.h
   ast/call_expression.cc
   ast/call_expression.h
   ast/call_statement.cc
@@ -107,8 +133,6 @@ set(TINT_LIB_SRCS
   ast/enable.h
   ast/expression.cc
   ast/expression.h
-  ast/extension.cc
-  ast/extension.h
   ast/external_texture.cc
   ast/external_texture.h
   ast/f16.cc
@@ -141,8 +165,6 @@ set(TINT_LIB_SRCS
   ast/int_literal_expression.h
   ast/internal_attribute.cc
   ast/internal_attribute.h
-  ast/interpolate_attribute.cc
-  ast/interpolate_attribute.h
   ast/invariant_attribute.cc
   ast/invariant_attribute.h
   ast/let.cc
@@ -186,8 +208,6 @@ set(TINT_LIB_SRCS
   ast/statement.h
   ast/static_assert.cc
   ast/static_assert.h
-  ast/address_space.cc
-  ast/address_space.h
   ast/storage_texture.cc
   ast/storage_texture.h
   ast/stride_attribute.cc
@@ -204,8 +224,6 @@ set(TINT_LIB_SRCS
   ast/struct.h
   ast/switch_statement.cc
   ast/switch_statement.h
-  ast/texel_format.cc
-  ast/texel_format.h
   ast/texture.cc
   ast/texture.h
   ast/traverse_expressions.h
@@ -263,8 +281,6 @@ set(TINT_LIB_SRCS
   resolver/const_eval.h
   resolver/dependency_graph.cc
   resolver/dependency_graph.h
-  resolver/init_conv_intrinsic.cc
-  resolver/init_conv_intrinsic.h
   resolver/intrinsic_table.cc
   resolver/intrinsic_table.h
   resolver/intrinsic_table.inl
@@ -296,8 +312,6 @@ set(TINT_LIB_SRCS
   sem/bool.h
   sem/break_if_statement.cc
   sem/break_if_statement.h
-  sem/builtin_type.cc
-  sem/builtin_type.h
   sem/builtin.cc
   sem/builtin.h
   sem/call_target.cc
@@ -343,8 +357,6 @@ set(TINT_LIB_SRCS
   sem/multisampled_texture.h
   sem/node.cc
   sem/node.h
-  sem/parameter_usage.cc
-  sem/parameter_usage.h
   sem/pipeline_stage_set.h
   sem/pointer.cc
   sem/pointer.h
@@ -522,6 +534,16 @@ set(TINT_LIB_SRCS
   writer/writer.cc
   writer/writer.h
 )
+
+tint_generated(ast/access)
+tint_generated(ast/address_space BENCH TEST)
+tint_generated(ast/builtin_value BENCH TEST)
+tint_generated(ast/extension BENCH TEST)
+tint_generated(ast/interpolate_attribute)
+tint_generated(ast/texel_format BENCH TEST)
+tint_generated(resolver/init_conv_intrinsic)
+tint_generated(sem/builtin_type)
+tint_generated(sem/parameter_usage)
 
 if(UNIX)
   list(APPEND TINT_LIB_SRCS diagnostic/printer_linux.cc)
@@ -734,7 +756,7 @@ endif()
 # Tests
 ################################################################################
 if(TINT_BUILD_TESTS)
-  set(TINT_TEST_SRCS
+  list(APPEND TINT_TEST_SRCS
     ast/alias_test.cc
     ast/array_test.cc
     ast/assignment_statement_test.cc
@@ -750,7 +772,6 @@ if(TINT_BUILD_TESTS)
     ast/builtin_attribute_test.cc
     ast/builtin_texture_helper_test.cc
     ast/builtin_texture_helper_test.h
-    ast/builtin_value_test.cc
     ast/call_expression_test.cc
     ast/call_statement_test.cc
     ast/case_selector_test.cc
@@ -761,7 +782,6 @@ if(TINT_BUILD_TESTS)
     ast/depth_texture_test.cc
     ast/discard_statement_test.cc
     ast/enable_test.cc
-    ast/extension_test.cc
     ast/external_texture_test.cc
     ast/f16_test.cc
     ast/f32_test.cc
@@ -793,7 +813,6 @@ if(TINT_BUILD_TESTS)
     ast/sampler_test.cc
     ast/stage_attribute_test.cc
     ast/static_assert_test.cc
-    ast/address_space_test.cc
     ast/storage_texture_test.cc
     ast/stride_attribute_test.cc
     ast/struct_member_align_attribute_test.cc
@@ -803,7 +822,6 @@ if(TINT_BUILD_TESTS)
     ast/struct_test.cc
     ast/switch_statement_test.cc
     ast/test_helper.h
-    ast/texel_format_test.cc
     ast/texture_test.cc
     ast/traverse_expressions_test.cc
     ast/u32_test.cc
@@ -1362,33 +1380,29 @@ if(TINT_BUILD_BENCHMARKS)
     message(FATAL_ERROR "TINT_BUILD_BENCHMARKS requires TINT_BUILD_WGSL_READER")
   endif()
 
-  set(TINT_BENCHMARK_SRC
+  list(APPEND TINT_BENCHMARK_SRCS
     "castable_bench.cc"
-    "ast/builtin_value_bench.cc"
-    "ast/extension_bench.cc"
-    "ast/address_space_bench.cc"
-    "ast/texel_format_bench.cc"
     "bench/benchmark.cc"
     "reader/wgsl/parser_bench.cc"
   )
 
   if (${TINT_BUILD_GLSL_WRITER})
-    list(APPEND TINT_BENCHMARK_SRC writer/glsl/generator_bench.cc)
+    list(APPEND TINT_BENCHMARK_SRCS writer/glsl/generator_bench.cc)
   endif()
   if (${TINT_BUILD_HLSL_WRITER})
-    list(APPEND TINT_BENCHMARK_SRC writer/hlsl/generator_bench.cc)
+    list(APPEND TINT_BENCHMARK_SRCS writer/hlsl/generator_bench.cc)
   endif()
   if (${TINT_BUILD_MSL_WRITER})
-    list(APPEND TINT_BENCHMARK_SRC writer/msl/generator_bench.cc)
+    list(APPEND TINT_BENCHMARK_SRCS writer/msl/generator_bench.cc)
   endif()
   if (${TINT_BUILD_SPV_WRITER})
-    list(APPEND TINT_BENCHMARK_SRC writer/spirv/generator_bench.cc)
+    list(APPEND TINT_BENCHMARK_SRCS writer/spirv/generator_bench.cc)
   endif()
   if (${TINT_BUILD_WGSL_WRITER})
-    list(APPEND TINT_BENCHMARK_SRC writer/wgsl/generator_bench.cc)
+    list(APPEND TINT_BENCHMARK_SRCS writer/wgsl/generator_bench.cc)
   endif()
 
-  add_executable(tint-benchmark ${TINT_BENCHMARK_SRC})
+  add_executable(tint-benchmark ${TINT_BENCHMARK_SRCS})
   set_target_properties(${target} PROPERTIES FOLDER "Benchmarks")
 
   tint_core_compile_options(tint-benchmark)
