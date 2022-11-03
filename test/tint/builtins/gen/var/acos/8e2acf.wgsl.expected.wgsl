@@ -1,5 +1,5 @@
 fn acos_8e2acf() {
-  var arg_0 = vec4<f32>(1.0f);
+  var arg_0 = vec4<f32>(0.87758255f);
   var res : vec4<f32> = acos(arg_0);
 }
 

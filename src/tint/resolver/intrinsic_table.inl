@@ -13473,24 +13473,24 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 0,
-    /* template types */ &kTemplateTypes[22],
+    /* template types */ &kTemplateTypes[23],
     /* template numbers */ &kTemplateNumbers[10],
     /* parameters */ &kParameters[934],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::acos,
   },
   {
     /* [429] */
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 1,
-    /* template types */ &kTemplateTypes[22],
+    /* template types */ &kTemplateTypes[23],
     /* template numbers */ &kTemplateNumbers[6],
     /* parameters */ &kParameters[946],
     /* return matcher indices */ &kMatcherIndices[30],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::acos,
   },
   {
     /* [430] */
@@ -14020,8 +14020,8 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [1] */
-    /* fn acos<T : f32_f16>(T) -> T */
-    /* fn acos<N : num, T : f32_f16>(vec<N, T>) -> vec<N, T> */
+    /* fn acos<T : fa_f32_f16>(@test_value(0.87758256189) T) -> T */
+    /* fn acos<N : num, T : fa_f32_f16>(@test_value(0.87758256189) vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[428],
   },

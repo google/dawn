@@ -23,7 +23,7 @@
 
 // fn acos(f32) -> f32
 fn acos_489247() {
-  var res: f32 = acos(1.f);
+  var res: f32 = acos(0.87758256189f);
 }
 
 @vertex

@@ -1,5 +1,5 @@
 fn acos_dfc915() {
-  var arg_0 = vec2<f32>(1.0f);
+  var arg_0 = vec2<f32>(0.87758255f);
   var res : vec2<f32> = acos(arg_0);
 }
 

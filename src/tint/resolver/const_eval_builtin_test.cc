@@ -426,6 +426,70 @@ TEST_F(ResolverConstEvalBuiltinTest, Atanh_OutsideRange_Negative_INF) {
 }
 
 template <typename T, bool finite_only>
+std::vector<Case> AcosCases() {
+    std::vector<Case> cases = {
+        // If i is +/-0, +/-0 is returned
+        C({T(0.87758256189)}, T(0.5)).FloatComp(),
+
+        C({T(1.0)}, T(0.0)),
+        C({-T(1.0)}, kPi<T>).FloatComp(),
+
+        // Vector tests
+        C({Vec(T(1.0), -T(1.0))}, Vec(T(0), kPi<T>)).FloatComp(),
+    };
+
+    ConcatIntoIf<!finite_only>(  //
+        cases, std::vector<Case>{
+                   // If i is NaN, NaN is returned
+                   C({T::NaN()}, T::NaN()),
+
+                   // Vector tests
+                   C({Vec(T::NaN(), T::NaN())}, Vec(T::NaN(), T::NaN())),
+               });
+
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Acos,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kAcos),
+                     testing::ValuesIn(Concat(AcosCases<AFloat, true>(),  //
+                                              AcosCases<f32, false>(),
+                                              AcosCases<f16, false>()))));
+
+TEST_F(ResolverConstEvalBuiltinTest, Acos_OutsideRange_Positive) {
+    auto* expr = Call(Source{{12, 24}}, "acos", Expr(1.1_a));
+
+    GlobalConst("C", expr);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:24 error: acos must be called with a value in the range [-1, 1]");
+}
+
+TEST_F(ResolverConstEvalBuiltinTest, Acos_OutsideRange_Negative) {
+    auto* expr = Call(Source{{12, 24}}, "acos", Negation(1.1_a));
+
+    GlobalConst("C", expr);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:24 error: acos must be called with a value in the range [-1, 1]");
+}
+
+TEST_F(ResolverConstEvalBuiltinTest, Acos_OutsideRange_Positive_INF) {
+    auto* expr = Call(Source{{12, 24}}, "acos", Expr(f32::Inf()));
+
+    GlobalConst("C", expr);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:24 error: acos must be called with a value in the range [-1, 1]");
+}
+
+TEST_F(ResolverConstEvalBuiltinTest, Acos_OutsideRange_Negative_INF) {
+    auto* expr = Call(Source{{12, 24}}, "acos", Negation(f32::Inf()));
+
+    GlobalConst("C", expr);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(), "12:24 error: acos must be called with a value in the range [-1, 1]");
+}
+
+template <typename T, bool finite_only>
 std::vector<Case> AsinCases() {
     std::vector<Case> cases = {
         // If i is +/-0, +/-0 is returned

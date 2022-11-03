@@ -8,7 +8,6 @@
                OpCapability UniformAndStorageBuffer16BitAccess
                OpCapability StorageBuffer16BitAccess
                OpCapability StorageInputOutput16
-         %16 = OpExtInstImport "GLSL.std.450"
                OpMemoryModel Logical GLSL450
                OpEntryPoint Vertex %vertex_main "vertex_main" %value %vertex_point_size
                OpEntryPoint Fragment %fragment_main "fragment_main"
@@ -37,15 +36,16 @@
           %9 = OpTypeFunction %void
        %half = OpTypeFloat 16
      %v3half = OpTypeVector %half 3
-         %17 = OpConstantNull %v3half
+%half_0x1_92p_0 = OpConstant %half 0x1.92p+0
+         %16 = OpConstantComposite %v3half %half_0x1_92p_0 %half_0x1_92p_0 %half_0x1_92p_0
 %_ptr_Function_v3half = OpTypePointer Function %v3half
+         %19 = OpConstantNull %v3half
          %20 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %acos_f47057 = OpFunction %void None %9
          %12 = OpLabel
-        %res = OpVariable %_ptr_Function_v3half Function %17
-         %13 = OpExtInst %v3half %16 Acos %17
-               OpStore %res %13
+        %res = OpVariable %_ptr_Function_v3half Function %19
+               OpStore %res %16
                OpReturn
                OpFunctionEnd
 %vertex_main_inner = OpFunction %v4float None %20
