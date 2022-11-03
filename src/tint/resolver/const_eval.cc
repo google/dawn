@@ -1570,6 +1570,12 @@ ConstEval::Result ConstEval::OpShiftLeft(const sem::Type* ty,
     return r;
 }
 
+ConstEval::Result ConstEval::all(const sem::Type* ty,
+                                 utils::VectorRef<const sem::Constant*> args,
+                                 const Source&) {
+    return CreateElement(builder, ty, !args[0]->AnyZero());
+}
+
 ConstEval::Result ConstEval::any(const sem::Type* ty,
                                  utils::VectorRef<const sem::Constant*> args,
                                  const Source&) {

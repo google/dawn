@@ -410,8 +410,8 @@ fn acos<T: f32_f16>(T) -> T
 fn acos<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn acosh<T: f32_f16>(T) -> T
 fn acosh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
-fn all(bool) -> bool
-fn all<N: num>(vec<N, bool>) -> bool
+@const fn all(bool) -> bool
+@const fn all<N: num>(vec<N, bool>) -> bool
 @const fn any(bool) -> bool
 @const fn any<N: num>(vec<N, bool>) -> bool
 fn arrayLength<T, A: access>(ptr<storage, array<T>, A>) -> u32
