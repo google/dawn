@@ -63,7 +63,8 @@ wgpu::ExternalTexture CreateExternalTexture(wgpu::Device device, uint32_t width,
 
     externalDesc.plane0 = view;
 
-    externalDesc.visibleRect = {width, height};
+    externalDesc.visibleOrigin = {0, 0};
+    externalDesc.visibleSize = {width, height};
 
     // Import the external texture
     return device.CreateExternalTexture(&externalDesc);

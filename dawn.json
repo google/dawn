@@ -1331,6 +1331,7 @@
     },
     "extent 2D": {
         "category": "structure",
+        "tags": ["dawn"],
         "_TODO": "crbug.com/1316671: Remove default value of 'width' after chromium side chagnes landed",
         "members": [
             {"name": "width", "type": "uint32_t", "default": 0},
@@ -1370,7 +1371,8 @@
             {"name": "label", "type": "char", "annotation": "const*", "length": "strlen", "optional": true},
             {"name": "plane 0", "type": "texture view"},
             {"name": "plane 1", "type": "texture view", "optional": true},
-            {"name": "visible rect", "type": "extent 2D"},
+            {"name": "visible origin", "type": "origin 2D"},
+            {"name": "visible size", "type": "extent 2D"},
             {"name": "do yuv to rgb conversion only", "type": "bool", "default": "false"},
             {"name": "yuv to rgb conversion matrix", "type": "float", "annotation": "const*",
                 "length": 12, "optional": true},
@@ -1560,6 +1562,14 @@
             {"name": "x", "type": "uint32_t", "default": "0"},
             {"name": "y", "type": "uint32_t", "default": "0"},
             {"name": "z", "type": "uint32_t", "default": "0"}
+        ]
+    },
+    "origin 2D": {
+        "category": "structure",
+        "tags": ["dawn"],
+        "members": [
+            {"name": "x", "type": "uint32_t", "default": "0"},
+            {"name": "y", "type": "uint32_t", "default": "0"}
         ]
     },
     "pipeline layout": {

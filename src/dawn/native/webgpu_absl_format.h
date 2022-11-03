@@ -41,6 +41,12 @@ absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConv
     const absl::FormatConversionSpec& spec,
     absl::FormatSink* s);
 
+struct Origin2D;
+absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
+    const Origin2D* value,
+    const absl::FormatConversionSpec& spec,
+    absl::FormatSink* s);
+
 struct Origin3D;
 absl::FormatConvertResult<absl::FormatConversionCharSet::kString> AbslFormatConvert(
     const Origin3D* value,

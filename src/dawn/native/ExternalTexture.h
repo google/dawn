@@ -49,7 +49,9 @@ class ExternalTextureBase : public ApiObjectBase {
     BufferBase* GetParamsBuffer() const;
     const std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat>& GetTextureViews() const;
     ObjectType GetType() const override;
-    const Extent2D& GetVisibleRect() const;
+
+    const Extent2D& GetVisibleSize() const;
+    const Origin2D& GetVisibleOrigin() const;
 
     MaybeError ValidateCanUseInSubmitNow() const;
     static ExternalTextureBase* MakeError(DeviceBase* device);
@@ -74,9 +76,10 @@ class ExternalTextureBase : public ApiObjectBase {
     Ref<BufferBase> mParamsBuffer;
     std::array<Ref<TextureViewBase>, kMaxPlanesPerFormat> mTextureViews;
 
-    // TODO(dawn:1082) Use the visible rect in the external texture shader code to sample
-    // video content.
-    Extent2D mVisibleRect;
+    // TODO(dawn:1082) Use the visible size and origin in the external texture shader
+    // code to sample video content.
+    Origin2D mVisibleOrigin;
+    Extent2D mVisibleSize;
 
     ExternalTextureState mState;
 };

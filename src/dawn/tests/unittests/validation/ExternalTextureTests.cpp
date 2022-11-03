@@ -582,7 +582,7 @@ TEST_F(ExternalTextureTest, UseErrorExternalTextureInBindGroup) {
 }
 
 // Test create external texture with too large visible rect results in error.
-TEST_F(ExternalTextureTest, CreateExternalTextureWithErrorVisibleRect) {
+TEST_F(ExternalTextureTest, CreateExternalTextureWithErrorVisibleOriginOrSize) {
     // Control case should succeed.
     {
         wgpu::TextureDescriptor textureDescriptor = CreateTextureDescriptor();
@@ -590,29 +590,56 @@ TEST_F(ExternalTextureTest, CreateExternalTextureWithErrorVisibleRect) {
 
         wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
         externalDesc.plane0 = texture.CreateView();
-        externalDesc.visibleRect = {texture.GetWidth(), texture.GetHeight()};
+        externalDesc.visibleOrigin = {0, 0};
+        externalDesc.visibleSize = {texture.GetWidth(), texture.GetHeight()};
         device.CreateExternalTexture(&externalDesc);
     }
 
-    // VisibleRect is OOB on width
+    // VisibleOrigin is OOB on x
     {
         wgpu::TextureDescriptor textureDescriptor = CreateTextureDescriptor();
         wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
 
         wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
         externalDesc.plane0 = texture.CreateView();
-        externalDesc.visibleRect = {texture.GetWidth() + 1, texture.GetHeight()};
+        externalDesc.visibleOrigin = {1, 0};
+        externalDesc.visibleSize = {texture.GetWidth(), texture.GetHeight()};
         ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
     }
 
-    // VisibleRect is OOB on height
+    // VisibleOrigin is OOB on y
     {
         wgpu::TextureDescriptor textureDescriptor = CreateTextureDescriptor();
         wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
 
         wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
         externalDesc.plane0 = texture.CreateView();
-        externalDesc.visibleRect = {texture.GetWidth(), texture.GetHeight() + 1};
+        externalDesc.visibleOrigin = {0, 1};
+        externalDesc.visibleSize = {texture.GetWidth(), texture.GetHeight()};
+        ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
+    }
+
+    // VisibleSize is OOB on width
+    {
+        wgpu::TextureDescriptor textureDescriptor = CreateTextureDescriptor();
+        wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
+
+        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
+        externalDesc.plane0 = texture.CreateView();
+        externalDesc.visibleOrigin = {0, 0};
+        externalDesc.visibleSize = {texture.GetWidth() + 1, texture.GetHeight()};
+        ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
+    }
+
+    // VisibleSize is OOB on height
+    {
+        wgpu::TextureDescriptor textureDescriptor = CreateTextureDescriptor();
+        wgpu::Texture texture = device.CreateTexture(&textureDescriptor);
+
+        wgpu::ExternalTextureDescriptor externalDesc = CreateDefaultExternalTextureDescriptor();
+        externalDesc.plane0 = texture.CreateView();
+        externalDesc.visibleOrigin = {0, 0};
+        externalDesc.visibleSize = {texture.GetWidth(), texture.GetHeight() + 1};
         ASSERT_DEVICE_ERROR(device.CreateExternalTexture(&externalDesc));
     }
 }

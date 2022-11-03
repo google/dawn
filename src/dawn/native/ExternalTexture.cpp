@@ -99,20 +99,25 @@ MaybeError ValidateExternalTextureDescriptor(const DeviceBase* device,
         }
     }
 
-    // TODO(crbug.com/1316671): visibleRect must have valid value after chromium side changes
+    // TODO(crbug.com/1316671): visible size width must have valid value after chromium side changes
     // landed.
-    if (descriptor->visibleRect.width > 0) {
-        DAWN_INVALID_IF(descriptor->visibleRect.width == 0 || descriptor->visibleRect.height == 0,
-                        "VisibleRect(%u, %u) have 0 on width or height.",
-                        descriptor->visibleRect.width, descriptor->visibleRect.height);
+    if (descriptor->visibleSize.width > 0) {
+        DAWN_INVALID_IF(descriptor->visibleSize.width == 0 || descriptor->visibleSize.height == 0,
+                        "VisibleSize %s have 0 on width or height.", &descriptor->visibleSize);
 
-        Extent3D maxVisibleRectSize = descriptor->plane0->GetTexture()->GetSize();
-        DAWN_INVALID_IF(descriptor->visibleRect.width > maxVisibleRectSize.width ||
-                            descriptor->visibleRect.height > maxVisibleRectSize.height,
-                        "VisibleRect(%u, %u) is exceed the max visible rect size, defined by "
-                        "Plane0 size (%u, %u).",
-                        descriptor->visibleRect.width, descriptor->visibleRect.height,
-                        maxVisibleRectSize.width, maxVisibleRectSize.height);
+        const Extent3D textureSize = descriptor->plane0->GetTexture()->GetSize();
+        DAWN_INVALID_IF(
+            descriptor->visibleSize.width > textureSize.width ||
+                descriptor->visibleSize.height > textureSize.height,
+            "VisibleSize %s is exceed the texture size, defined by Plane0 size (%u, %u).",
+            &descriptor->visibleSize, textureSize.width, textureSize.height);
+        DAWN_INVALID_IF(
+            descriptor->visibleOrigin.x > textureSize.width - descriptor->visibleSize.width ||
+                descriptor->visibleOrigin.y > textureSize.height - descriptor->visibleSize.height,
+            "VisibleRect[Origin: %s, Size: %s] is exceed the texture size, defined by "
+            "Plane0 size (%u, %u).",
+            &descriptor->visibleOrigin, &descriptor->visibleSize, textureSize.width,
+            textureSize.height);
     }
 
     return {};
@@ -131,7 +136,8 @@ ResultOrError<Ref<ExternalTextureBase>> ExternalTextureBase::Create(
 ExternalTextureBase::ExternalTextureBase(DeviceBase* device,
                                          const ExternalTextureDescriptor* descriptor)
     : ApiObjectBase(device, descriptor->label),
-      mVisibleRect(descriptor->visibleRect),
+      mVisibleOrigin(descriptor->visibleOrigin),
+      mVisibleSize(descriptor->visibleSize),
       mState(ExternalTextureState::Alive) {
     GetObjectTrackingList()->Track(this);
 }
@@ -252,9 +258,14 @@ ObjectType ExternalTextureBase::GetType() const {
     return ObjectType::ExternalTexture;
 }
 
-const Extent2D& ExternalTextureBase::GetVisibleRect() const {
+const Extent2D& ExternalTextureBase::GetVisibleSize() const {
     ASSERT(!IsError());
-    return mVisibleRect;
+    return mVisibleSize;
+}
+
+const Origin2D& ExternalTextureBase::GetVisibleOrigin() const {
+    ASSERT(!IsError());
+    return mVisibleOrigin;
 }
 
 }  // namespace dawn::native
