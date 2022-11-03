@@ -298,15 +298,15 @@ class DeviceBase : public RefCountedWithExternalCount {
     void StoreCachedBlob(const CacheKey& key, const Blob& blob);
 
     virtual ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) = 0;
-    virtual MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
-                                               uint64_t sourceOffset,
-                                               BufferBase* destination,
-                                               uint64_t destinationOffset,
-                                               uint64_t size) = 0;
-    virtual MaybeError CopyFromStagingToTexture(const StagingBufferBase* source,
-                                                const TextureDataLayout& src,
-                                                TextureCopy* dst,
-                                                const Extent3D& copySizePixels) = 0;
+    MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
+                                       uint64_t sourceOffset,
+                                       BufferBase* destination,
+                                       uint64_t destinationOffset,
+                                       uint64_t size);
+    MaybeError CopyFromStagingToTexture(const StagingBufferBase* source,
+                                        const TextureDataLayout& src,
+                                        TextureCopy* dst,
+                                        const Extent3D& copySizePixels);
 
     DynamicUploader* GetDynamicUploader() const;
 
@@ -404,6 +404,15 @@ class DeviceBase : public RefCountedWithExternalCount {
     bool HasScheduledCommands() const;
     // The serial by which time all currently submitted or pending operations will be completed.
     ExecutionSerial GetScheduledWorkDoneSerial() const;
+
+    // For the commands being internally recorded in backend, that were not urgent to submit, this
+    // method makes them to be submitted as soon as possbile in next ticks.
+    virtual void ForceEventualFlushOfCommands() = 0;
+
+    // In the 'Normal' mode, currently recorded commands in the backend normally will be actually
+    // submitted in the next Tick. However in the 'Passive' mode, the submission will be postponed
+    // as late as possible, for example, until the client has explictly issued a submission.
+    enum class SubmitMode { Normal, Passive };
 
   protected:
     // Constructor used only for mocking and testing.
@@ -514,6 +523,16 @@ class DeviceBase : public RefCountedWithExternalCount {
 
     // Indicates whether the backend has pending commands to be submitted as soon as possible.
     virtual bool HasPendingCommands() const = 0;
+
+    virtual MaybeError CopyFromStagingToBufferImpl(StagingBufferBase* source,
+                                                   uint64_t sourceOffset,
+                                                   BufferBase* destination,
+                                                   uint64_t destinationOffset,
+                                                   uint64_t size) = 0;
+    virtual MaybeError CopyFromStagingToTextureImpl(const StagingBufferBase* source,
+                                                    const TextureDataLayout& src,
+                                                    TextureCopy* dst,
+                                                    const Extent3D& copySizePixels) = 0;
 
     wgpu::ErrorCallback mUncapturedErrorCallback = nullptr;
     void* mUncapturedErrorUserdata = nullptr;

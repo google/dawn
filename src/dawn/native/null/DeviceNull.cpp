@@ -217,11 +217,11 @@ bool Device::HasPendingCommands() const {
     return false;
 }
 
-MaybeError Device::CopyFromStagingToBuffer(StagingBufferBase* source,
-                                           uint64_t sourceOffset,
-                                           BufferBase* destination,
-                                           uint64_t destinationOffset,
-                                           uint64_t size) {
+MaybeError Device::CopyFromStagingToBufferImpl(StagingBufferBase* source,
+                                               uint64_t sourceOffset,
+                                               BufferBase* destination,
+                                               uint64_t destinationOffset,
+                                               uint64_t size) {
     if (IsToggleEnabled(Toggle::LazyClearResourceOnFirstUse)) {
         destination->SetIsDataInitialized();
     }
@@ -238,10 +238,10 @@ MaybeError Device::CopyFromStagingToBuffer(StagingBufferBase* source,
     return {};
 }
 
-MaybeError Device::CopyFromStagingToTexture(const StagingBufferBase* source,
-                                            const TextureDataLayout& src,
-                                            TextureCopy* dst,
-                                            const Extent3D& copySizePixels) {
+MaybeError Device::CopyFromStagingToTextureImpl(const StagingBufferBase* source,
+                                                const TextureDataLayout& src,
+                                                TextureCopy* dst,
+                                                const Extent3D& copySizePixels) {
     return {};
 }
 
@@ -555,6 +555,8 @@ uint64_t Device::GetOptimalBufferToTextureCopyOffsetAlignment() const {
 float Device::GetTimestampPeriodInNS() const {
     return 1.0f;
 }
+
+void Device::ForceEventualFlushOfCommands() {}
 
 Texture::Texture(DeviceBase* device, const TextureDescriptor* descriptor, TextureState state)
     : TextureBase(device, descriptor, state) {}

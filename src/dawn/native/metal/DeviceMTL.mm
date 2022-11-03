@@ -343,7 +343,9 @@ ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
 }
 
 MaybeError Device::TickImpl() {
-    DAWN_TRY(SubmitPendingCommandBuffer());
+    if (mCommandContext.NeedsSubmit()) {
+        DAWN_TRY(SubmitPendingCommandBuffer());
+    }
 
     // Just run timestamp period calculation when timestamp feature is enabled and timestamp
     // conversion is not disabled.
@@ -366,17 +368,26 @@ id<MTLCommandQueue> Device::GetMTLQueue() {
     return mCommandQueue.Get();
 }
 
-CommandRecordingContext* Device::GetPendingCommandContext() {
+CommandRecordingContext* Device::GetPendingCommandContext(Device::SubmitMode submitMode) {
+    if (submitMode == DeviceBase::SubmitMode::Normal) {
+        mCommandContext.SetNeedsSubmit();
+    }
     mCommandContext.MarkUsed();
     return &mCommandContext;
 }
 
 bool Device::HasPendingCommands() const {
-    return mCommandContext.WasUsed();
+    return mCommandContext.NeedsSubmit();
+}
+
+void Device::ForceEventualFlushOfCommands() {
+    if (mCommandContext.WasUsed()) {
+        mCommandContext.SetNeedsSubmit();
+    }
 }
 
 MaybeError Device::SubmitPendingCommandBuffer() {
-    if (!mCommandContext.WasUsed()) {
+    if (!mCommandContext.NeedsSubmit()) {
         return {};
     }
 
@@ -428,42 +439,45 @@ ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(si
     return std::move(stagingBuffer);
 }
 
-MaybeError Device::CopyFromStagingToBuffer(StagingBufferBase* source,
-                                           uint64_t sourceOffset,
-                                           BufferBase* destination,
-                                           uint64_t destinationOffset,
-                                           uint64_t size) {
+MaybeError Device::CopyFromStagingToBufferImpl(StagingBufferBase* source,
+                                               uint64_t sourceOffset,
+                                               BufferBase* destination,
+                                               uint64_t destinationOffset,
+                                               uint64_t size) {
     // Metal validation layers forbid  0-sized copies, assert it is skipped prior to calling
     // this function.
     ASSERT(size != 0);
 
     ToBackend(destination)
-        ->EnsureDataInitializedAsDestination(GetPendingCommandContext(), destinationOffset, size);
+        ->EnsureDataInitializedAsDestination(
+            GetPendingCommandContext(DeviceBase::SubmitMode::Passive), destinationOffset, size);
 
     id<MTLBuffer> uploadBuffer = ToBackend(source)->GetBufferHandle();
     id<MTLBuffer> buffer = ToBackend(destination)->GetMTLBuffer();
-    [GetPendingCommandContext()->EnsureBlit() copyFromBuffer:uploadBuffer
-                                                sourceOffset:sourceOffset
-                                                    toBuffer:buffer
-                                           destinationOffset:destinationOffset
-                                                        size:size];
+    [GetPendingCommandContext(DeviceBase::SubmitMode::Passive)->EnsureBlit()
+           copyFromBuffer:uploadBuffer
+             sourceOffset:sourceOffset
+                 toBuffer:buffer
+        destinationOffset:destinationOffset
+                     size:size];
     return {};
 }
 
 // In Metal we don't write from the CPU to the texture directly which can be done using the
 // replaceRegion function, because the function requires a non-private storage mode and Dawn
 // sets the private storage mode by default for all textures except IOSurfaces on macOS.
-MaybeError Device::CopyFromStagingToTexture(const StagingBufferBase* source,
-                                            const TextureDataLayout& dataLayout,
-                                            TextureCopy* dst,
-                                            const Extent3D& copySizePixels) {
+MaybeError Device::CopyFromStagingToTextureImpl(const StagingBufferBase* source,
+                                                const TextureDataLayout& dataLayout,
+                                                TextureCopy* dst,
+                                                const Extent3D& copySizePixels) {
     Texture* texture = ToBackend(dst->texture.Get());
-    EnsureDestinationTextureInitialized(GetPendingCommandContext(), texture, *dst, copySizePixels);
+    EnsureDestinationTextureInitialized(GetPendingCommandContext(DeviceBase::SubmitMode::Passive),
+                                        texture, *dst, copySizePixels);
 
-    RecordCopyBufferToTexture(GetPendingCommandContext(), ToBackend(source)->GetBufferHandle(),
-                              source->GetSize(), dataLayout.offset, dataLayout.bytesPerRow,
-                              dataLayout.rowsPerImage, texture, dst->mipLevel, dst->origin,
-                              dst->aspect, copySizePixels);
+    RecordCopyBufferToTexture(GetPendingCommandContext(DeviceBase::SubmitMode::Passive),
+                              ToBackend(source)->GetBufferHandle(), source->GetSize(),
+                              dataLayout.offset, dataLayout.bytesPerRow, dataLayout.rowsPerImage,
+                              texture, dst->mipLevel, dst->origin, dst->aspect, copySizePixels);
     return {};
 }
 

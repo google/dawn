@@ -37,6 +37,8 @@ class CommandRecordingContext {
     ID3D12GraphicsCommandList4* GetCommandList4() const;
     void Release();
     bool IsOpen() const;
+    bool NeedsSubmit() const;
+    void SetNeedsSubmit();
 
     MaybeError ExecuteCommandList(Device* device);
 
@@ -48,6 +50,7 @@ class CommandRecordingContext {
     ComPtr<ID3D12GraphicsCommandList> mD3d12CommandList;
     ComPtr<ID3D12GraphicsCommandList4> mD3d12CommandList4;
     bool mIsOpen = false;
+    bool mNeedsSubmit = false;
     std::set<Texture*> mSharedTextures;
     std::vector<Heap*> mHeapsPendingUsage;
 

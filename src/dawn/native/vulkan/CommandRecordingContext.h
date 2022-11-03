@@ -40,6 +40,7 @@ struct CommandRecordingContext {
 
     // For Device state tracking only.
     VkCommandPool commandPool = VK_NULL_HANDLE;
+    bool needsSubmit = false;
     bool used = false;
 
     // In some cases command buffer will need to be split to accomodate driver bug workarounds.

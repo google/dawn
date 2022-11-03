@@ -49,7 +49,8 @@ class Device final : public DeviceBase {
     id<MTLDevice> GetMTLDevice();
     id<MTLCommandQueue> GetMTLQueue();
 
-    CommandRecordingContext* GetPendingCommandContext();
+    CommandRecordingContext* GetPendingCommandContext(
+        Device::SubmitMode submitMode = Device::SubmitMode::Normal);
     MaybeError SubmitPendingCommandBuffer();
 
     Ref<Texture> CreateTextureWrappingIOSurface(const ExternalImageDescriptor* descriptor,
@@ -57,15 +58,15 @@ class Device final : public DeviceBase {
     void WaitForCommandsToBeScheduled();
 
     ResultOrError<std::unique_ptr<StagingBufferBase>> CreateStagingBuffer(size_t size) override;
-    MaybeError CopyFromStagingToBuffer(StagingBufferBase* source,
-                                       uint64_t sourceOffset,
-                                       BufferBase* destination,
-                                       uint64_t destinationOffset,
-                                       uint64_t size) override;
-    MaybeError CopyFromStagingToTexture(const StagingBufferBase* source,
-                                        const TextureDataLayout& dataLayout,
-                                        TextureCopy* dst,
-                                        const Extent3D& copySizePixels) override;
+    MaybeError CopyFromStagingToBufferImpl(StagingBufferBase* source,
+                                           uint64_t sourceOffset,
+                                           BufferBase* destination,
+                                           uint64_t destinationOffset,
+                                           uint64_t size) override;
+    MaybeError CopyFromStagingToTextureImpl(const StagingBufferBase* source,
+                                            const TextureDataLayout& dataLayout,
+                                            TextureCopy* dst,
+                                            const Extent3D& copySizePixels) override;
 
     uint32_t GetOptimalBytesPerRowAlignment() const override;
     uint64_t GetOptimalBufferToTextureCopyOffsetAlignment() const override;
@@ -78,6 +79,8 @@ class Device final : public DeviceBase {
     // Get a MTLBuffer that can be used as a dummy in a no-op blit encoder based on filling this
     // single-byte buffer
     id<MTLBuffer> GetDummyBlitMtlBuffer();
+
+    void ForceEventualFlushOfCommands() override;
 
   private:
     Device(AdapterBase* adapter,

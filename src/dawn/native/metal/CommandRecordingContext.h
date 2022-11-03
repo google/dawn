@@ -30,6 +30,8 @@ class CommandRecordingContext : NonMovable {
     ~CommandRecordingContext();
 
     id<MTLCommandBuffer> GetCommands();
+    void SetNeedsSubmit();
+    bool NeedsSubmit() const;
     void MarkUsed();
     bool WasUsed() const;
 
@@ -59,6 +61,7 @@ class CommandRecordingContext : NonMovable {
     NSPRef<id<MTLComputeCommandEncoder>> mCompute;
     NSPRef<id<MTLRenderCommandEncoder>> mRender;
     bool mInEncoder = false;
+    bool mNeedsSubmit = false;
     bool mUsed = false;
 };
 

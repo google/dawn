@@ -29,6 +29,13 @@ id<MTLCommandBuffer> CommandRecordingContext::GetCommands() {
     return mCommands.Get();
 }
 
+void CommandRecordingContext::SetNeedsSubmit() {
+    mNeedsSubmit = true;
+}
+bool CommandRecordingContext::NeedsSubmit() const {
+    return mNeedsSubmit;
+}
+
 void CommandRecordingContext::MarkUsed() {
     mUsed = true;
 }
@@ -38,6 +45,7 @@ bool CommandRecordingContext::WasUsed() const {
 
 MaybeError CommandRecordingContext::PrepareNextCommandBuffer(id<MTLCommandQueue> queue) {
     ASSERT(mCommands == nil);
+    ASSERT(!mNeedsSubmit);
     ASSERT(!mUsed);
 
     // The MTLCommandBuffer will be autoreleased by default.
@@ -58,6 +66,7 @@ NSPRef<id<MTLCommandBuffer>> CommandRecordingContext::AcquireCommands() {
     }
 
     ASSERT(!mInEncoder);
+    mNeedsSubmit = false;
     mUsed = false;
     return std::move(mCommands);
 }

@@ -39,11 +39,11 @@ class DeviceMock : public DeviceBase {
                 (size_t),
                 (override));
     MOCK_METHOD(MaybeError,
-                CopyFromStagingToBuffer,
+                CopyFromStagingToBufferImpl,
                 (StagingBufferBase*, uint64_t, BufferBase*, uint64_t, uint64_t),
                 (override));
     MOCK_METHOD(MaybeError,
-                CopyFromStagingToTexture,
+                CopyFromStagingToTextureImpl,
                 (const StagingBufferBase*, const TextureDataLayout&, TextureCopy*, const Extent3D&),
                 (override));
 
@@ -51,6 +51,7 @@ class DeviceMock : public DeviceBase {
     MOCK_METHOD(uint64_t, GetOptimalBufferToTextureCopyOffsetAlignment, (), (const, override));
 
     MOCK_METHOD(float, GetTimestampPeriodInNS, (), (const, override));
+    MOCK_METHOD(void, ForceEventualFlushOfCommands, (), (override));
 
     MOCK_METHOD(ResultOrError<Ref<BindGroupBase>>,
                 CreateBindGroupImpl,

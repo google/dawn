@@ -225,6 +225,7 @@ void QueueBase::APIOnSubmittedWorkDone(uint64_t signalValue,
 }
 
 void QueueBase::TrackTask(std::unique_ptr<TrackTaskCallback> task) {
+    GetDevice()->ForceEventualFlushOfCommands();
     // we can move the task to the callback task manager, as it's ready to be called if there are no
     // scheduled commands.
     if (!GetDevice()->HasScheduledCommands()) {

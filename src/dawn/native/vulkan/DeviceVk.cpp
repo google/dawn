@@ -230,7 +230,7 @@ MaybeError Device::TickImpl() {
     mDeleter->Tick(completedSerial);
     mDescriptorAllocatorsPendingDeallocation.ClearUpTo(completedSerial);
 
-    if (mRecordingContext.used) {
+    if (mRecordingContext.needsSubmit) {
         DAWN_TRY(SubmitPendingCommands());
     }
 
@@ -282,18 +282,23 @@ void Device::EnqueueDeferredDeallocation(DescriptorSetAllocator* allocator) {
     mDescriptorAllocatorsPendingDeallocation.Enqueue(allocator, GetPendingCommandSerial());
 }
 
-CommandRecordingContext* Device::GetPendingRecordingContext() {
+CommandRecordingContext* Device::GetPendingRecordingContext(Device::SubmitMode submitMode) {
     ASSERT(mRecordingContext.commandBuffer != VK_NULL_HANDLE);
+    mRecordingContext.needsSubmit |= (submitMode == DeviceBase::SubmitMode::Normal);
     mRecordingContext.used = true;
     return &mRecordingContext;
 }
 
 bool Device::HasPendingCommands() const {
-    return mRecordingContext.used;
+    return mRecordingContext.needsSubmit;
+}
+
+void Device::ForceEventualFlushOfCommands() {
+    mRecordingContext.needsSubmit |= mRecordingContext.used;
 }
 
 MaybeError Device::SubmitPendingCommands() {
-    if (!mRecordingContext.used) {
+    if (!mRecordingContext.needsSubmit) {
         return {};
     }
 
@@ -705,7 +710,7 @@ ResultOrError<ExecutionSerial> Device::CheckAndUpdateCompletedSerials() {
 }
 
 MaybeError Device::PrepareRecordingContext() {
-    ASSERT(!mRecordingContext.used);
+    ASSERT(!mRecordingContext.needsSubmit);
     ASSERT(mRecordingContext.commandBuffer == VK_NULL_HANDLE);
     ASSERT(mRecordingContext.commandPool == VK_NULL_HANDLE);
 
@@ -812,16 +817,17 @@ ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(si
     return std::move(stagingBuffer);
 }
 
-MaybeError Device::CopyFromStagingToBuffer(StagingBufferBase* source,
-                                           uint64_t sourceOffset,
-                                           BufferBase* destination,
-                                           uint64_t destinationOffset,
-                                           uint64_t size) {
+MaybeError Device::CopyFromStagingToBufferImpl(StagingBufferBase* source,
+                                               uint64_t sourceOffset,
+                                               BufferBase* destination,
+                                               uint64_t destinationOffset,
+                                               uint64_t size) {
     // It is a validation error to do a 0-sized copy in Vulkan, check it is skipped prior to
     // calling this function.
     ASSERT(size != 0);
 
-    CommandRecordingContext* recordingContext = GetPendingRecordingContext();
+    CommandRecordingContext* recordingContext =
+        GetPendingRecordingContext(DeviceBase::SubmitMode::Passive);
 
     ToBackend(destination)
         ->EnsureDataInitializedAsDestination(recordingContext, destinationOffset, size);
@@ -845,15 +851,16 @@ MaybeError Device::CopyFromStagingToBuffer(StagingBufferBase* source,
     return {};
 }
 
-MaybeError Device::CopyFromStagingToTexture(const StagingBufferBase* source,
-                                            const TextureDataLayout& src,
-                                            TextureCopy* dst,
-                                            const Extent3D& copySizePixels) {
+MaybeError Device::CopyFromStagingToTextureImpl(const StagingBufferBase* source,
+                                                const TextureDataLayout& src,
+                                                TextureCopy* dst,
+                                                const Extent3D& copySizePixels) {
     // There is no need of a barrier to make host writes available and visible to the copy
     // operation for HOST_COHERENT memory. The Vulkan spec for vkQueueSubmit describes that it
     // does an implicit availability, visibility and domain operation.
 
-    CommandRecordingContext* recordingContext = GetPendingRecordingContext();
+    CommandRecordingContext* recordingContext =
+        GetPendingRecordingContext(DeviceBase::SubmitMode::Passive);
 
     VkBufferImageCopy region = ComputeBufferImageCopyRegion(src, *dst, copySizePixels);
     VkImageSubresourceLayers subresource = region.imageSubresource;
@@ -1118,7 +1125,7 @@ void Device::DestroyImpl() {
     ToBackend(GetAdapter())->GetVulkanInstance()->StopListeningForDeviceMessages(this);
 
     // Immediately tag the recording context as unused so we don't try to submit it in Tick.
-    mRecordingContext.used = false;
+    mRecordingContext.needsSubmit = false;
     if (mRecordingContext.commandPool != VK_NULL_HANDLE) {
         // The VkCommandBuffer memory should be wholly owned by the pool and freed when it is
         // destroyed, but that's not the case in some drivers and the leak memory.

@@ -488,8 +488,8 @@ MaybeError Buffer::ClearBuffer(CommandRecordingContext* commandContext,
 
         memset(uploadHandle.mappedBuffer, clearValue, size);
 
-        device->CopyFromStagingToBufferImpl(commandContext, uploadHandle.stagingBuffer,
-                                            uploadHandle.startOffset, this, offset, size);
+        device->CopyFromStagingToBufferHelper(commandContext, uploadHandle.stagingBuffer,
+                                              uploadHandle.startOffset, this, offset, size);
     }
 
     return {};
