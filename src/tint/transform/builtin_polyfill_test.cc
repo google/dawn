@@ -399,6 +399,145 @@ fn f() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// bitshiftModulo
+////////////////////////////////////////////////////////////////////////////////
+DataMap polyfillBitshiftModulo() {
+    BuiltinPolyfill::Builtins builtins;
+    builtins.bitshift_modulo = true;
+    DataMap data;
+    data.Add<BuiltinPolyfill::Config>(builtins);
+    return data;
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunBitshiftModulo_shl_scalar) {
+    auto* src = R"(
+fn f() {
+  let v = 15u;
+  let r = 1i << v;
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillBitshiftModulo()));
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunBitshiftModulo_shl_vector) {
+    auto* src = R"(
+fn f() {
+  let v = 15u;
+  let r = vec3(1i) << vec3(v);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillBitshiftModulo()));
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunBitshiftModulo_shr_scalar) {
+    auto* src = R"(
+fn f() {
+  let v = 15u;
+  let r = 1i >> v;
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillBitshiftModulo()));
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunBitshiftModulo_shr_vector) {
+    auto* src = R"(
+fn f() {
+  let v = 15u;
+  let r = vec3(1i) >> vec3(v);
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillBitshiftModulo()));
+}
+
+TEST_F(BuiltinPolyfillTest, BitshiftModulo_shl_scalar) {
+    auto* src = R"(
+fn f() {
+  let v = 15u;
+  let r = 1i << v;
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  let v = 15u;
+  let r = (1i << (v & 31));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillBitshiftModulo());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, BitshiftModulo_shl_vector) {
+    auto* src = R"(
+fn f() {
+  let v = 15u;
+  let r = vec3(1i) << vec3(v);
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  let v = 15u;
+  let r = (vec3(1i) << (vec3(v) & vec3<u32>(31)));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillBitshiftModulo());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, BitshiftModulo_shr_scalar) {
+    auto* src = R"(
+fn f() {
+  let v = 15u;
+  let r = 1i >> v;
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  let v = 15u;
+  let r = (1i >> (v & 31));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillBitshiftModulo());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, BitshiftModulo_shr_vector) {
+    auto* src = R"(
+fn f() {
+  let v = 15u;
+  let r = vec3(1i) >> vec3(v);
+}
+)";
+
+    auto* expect = R"(
+fn f() {
+  let v = 15u;
+  let r = (vec3(1i) >> (vec3(v) & vec3<u32>(31)));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillBitshiftModulo());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // clampInteger
 ////////////////////////////////////////////////////////////////////////////////
 DataMap polyfillClampInteger() {

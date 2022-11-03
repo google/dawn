@@ -47,6 +47,8 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
         bool asinh = false;
         /// What level should `atanh` be polyfilled?
         Level atanh = Level::kNone;
+        /// Should the RHS of `<<` and `>>` be wrapped in a modulo bit-width of LHS?
+        bool bitshift_modulo = false;
         /// Should `clamp()` be polyfilled for integer values (scalar or vector)?
         bool clamp_int = false;
         /// Should `countLeadingZeros()` be polyfilled?
@@ -66,7 +68,7 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
         /// Should `textureSampleBaseClampToEdge()` be polyfilled for texture_2d<f32> textures?
         bool texture_sample_base_clamp_to_edge_2d_f32 = false;
         /// Should the vector form of `quantizeToF16()` be polyfilled with a scalar implementation?
-         /// See crbug.com/tint/1741
+        /// See crbug.com/tint/1741
         bool quantize_to_vec_f16 = false;
     };
 

@@ -4,7 +4,7 @@ using namespace metal;
 kernel void f() {
   int const a = 1;
   uint const b = 2u;
-  int const r = as_type<int>((as_type<uint>(a) << b));
+  int const r = as_type<int>((as_type<uint>(a) << (b & 31u)));
   return;
 }
 

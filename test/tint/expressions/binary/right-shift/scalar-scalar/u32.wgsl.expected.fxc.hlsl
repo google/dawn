@@ -2,6 +2,6 @@
 void f() {
   const uint a = 1u;
   const uint b = 2u;
-  const uint r = (a >> b);
+  const uint r = (a >> (b & 31u));
   return;
 }
