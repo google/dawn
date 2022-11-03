@@ -453,12 +453,18 @@ class HashmapBase {
     /// * must return Action::kStop within one whole cycle of the slots.
     template <typename F>
     void Scan(size_t start, F&& f) const {
-        size_t index = start;
-        for (size_t distance = 0; distance < slots_.Length(); distance++) {
+        size_t distance = 0;
+        for (size_t index = start; index < slots_.Length(); index++) {
             if (f(distance, index) == Action::kStop) {
                 return;
             }
-            index = Wrap(index + 1);
+            distance++;
+        }
+        for (size_t index = 0; index < start; index++) {
+            if (f(distance, index) == Action::kStop) {
+                return;
+            }
+            distance++;
         }
         tint::diag::List diags;
         TINT_ICE(Utils, diags) << "HashmapBase::Scan() looped entire map without finding a slot";
