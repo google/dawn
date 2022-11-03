@@ -1,14 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-uint4 tint_extract_bits(uint4 v, uint offset, uint count) {
-  uint const s = min(offset, 32u);
-  uint const e = min(32u, (s + count));
-  return extract_bits(v, s, (e - s));
-}
-
 void extractBits_631377() {
-  uint4 res = tint_extract_bits(uint4(1u), 1u, 1u);
+  uint4 res = uint4(0u);
 }
 
 struct tint_symbol {

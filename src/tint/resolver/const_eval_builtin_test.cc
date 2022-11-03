@@ -831,6 +831,109 @@ INSTANTIATE_TEST_SUITE_P(InsertBits,
                              std::make_tuple(u32::Highest(), u32::Highest())));
 
 template <typename T>
+std::vector<Case> ExtractBitsCases() {
+    using UT = Number<std::make_unsigned_t<UnwrapNumber<T>>>;
+
+    // If T is signed, fills most significant bits of `val` with 1s
+    auto set_msbs_if_signed = [](T val) {
+        if constexpr (IsSignedIntegral<T>) {
+            T result = T(~0);
+            for (size_t b = 0; val; ++b) {
+                if ((val & 1) == 0) {
+                    result = result & ~(1 << b);  // Clear bit b
+                }
+                val = val >> 1;
+            }
+            return result;
+        } else {
+            return val;
+        }
+    };
+
+    auto e = T(0b10100011110001011010001111000101);
+    auto f = T(0b01010101010101010101010101010101);
+    auto g = T(0b11111010001111000101101000111100);
+
+    auto r = std::vector<Case>{
+        // args: e, offset, count
+
+        // If count is 0, result is 0
+        C({e, UT(0), UT(0)}, T(0)),  //
+        C({e, UT(1), UT(0)}, T(0)),  //
+        C({e, UT(2), UT(0)}, T(0)),  //
+        C({e, UT(3), UT(0)}, T(0)),
+        // ...
+        C({e, UT(29), UT(0)}, T(0)),  //
+        C({e, UT(30), UT(0)}, T(0)),  //
+        C({e, UT(31), UT(0)}, T(0)),
+
+        // Extract at offset 0, varying counts
+        C({e, UT(0), UT(1)}, set_msbs_if_signed(T(0b1))),    //
+        C({e, UT(0), UT(2)}, T(0b01)),                       //
+        C({e, UT(0), UT(3)}, set_msbs_if_signed(T(0b101))),  //
+        C({e, UT(0), UT(4)}, T(0b0101)),                     //
+        C({e, UT(0), UT(5)}, T(0b00101)),                    //
+        C({e, UT(0), UT(6)}, T(0b000101)),                   //
+        // ...
+        C({e, UT(0), UT(28)}, T(0b0011110001011010001111000101)),                        //
+        C({e, UT(0), UT(29)}, T(0b00011110001011010001111000101)),                       //
+        C({e, UT(0), UT(30)}, set_msbs_if_signed(T(0b100011110001011010001111000101))),  //
+        C({e, UT(0), UT(31)}, T(0b0100011110001011010001111000101)),                     //
+        C({e, UT(0), UT(32)}, T(0b10100011110001011010001111000101)),                    //
+
+        // Extract at varying offsets and counts
+        C({e, UT(0), UT(1)}, set_msbs_if_signed(T(0b1))),                   //
+        C({e, UT(31), UT(1)}, set_msbs_if_signed(T(0b1))),                  //
+        C({e, UT(3), UT(5)}, set_msbs_if_signed(T(0b11000))),               //
+        C({e, UT(4), UT(7)}, T(0b0111100)),                                 //
+        C({e, UT(10), UT(16)}, set_msbs_if_signed(T(0b1111000101101000))),  //
+        C({e, UT(10), UT(22)}, set_msbs_if_signed(T(0b1010001111000101101000))),
+
+        // Vector tests
+        C({Vec(e, f, g),                          //
+           Val(UT(5)), Val(UT(8))},               //
+          Vec(T(0b00011110),                      //
+              set_msbs_if_signed(T(0b10101010)),  //
+              set_msbs_if_signed(T(0b11010001)))),
+    };
+
+    return r;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    ExtractBits,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kExtractBits),
+                     testing::ValuesIn(Concat(ExtractBitsCases<i32>(),  //
+                                              ExtractBitsCases<u32>()))));
+
+using ResolverConstEvalBuiltinTest_ExtractBits_InvalidOffsetAndCount =
+    ResolverTestWithParam<std::tuple<size_t, size_t>>;
+TEST_P(ResolverConstEvalBuiltinTest_ExtractBits_InvalidOffsetAndCount, Test) {
+    auto& p = GetParam();
+    auto* expr = Call(Source{{12, 24}}, sem::str(sem::BuiltinType::kExtractBits), Expr(1_u),
+                      Expr(u32(std::get<0>(p))), Expr(u32(std::get<1>(p))));
+    GlobalConst("C", expr);
+    EXPECT_FALSE(r()->Resolve());
+    EXPECT_EQ(r()->error(),
+              "12:24 error: 'offset + 'count' must be less than or equal to the bit width of 'e'");
+}
+INSTANTIATE_TEST_SUITE_P(ExtractBits,
+                         ResolverConstEvalBuiltinTest_ExtractBits_InvalidOffsetAndCount,
+                         testing::Values(                         //
+                             std::make_tuple(33, 0),              //
+                             std::make_tuple(34, 0),              //
+                             std::make_tuple(1000, 0),            //
+                             std::make_tuple(u32::Highest(), 0),  //
+                             std::make_tuple(0, 33),              //
+                             std::make_tuple(0, 34),              //
+                             std::make_tuple(0, 1000),            //
+                             std::make_tuple(0, u32::Highest()),  //
+                             std::make_tuple(33, 33),             //
+                             std::make_tuple(34, 34),             //
+                             std::make_tuple(1000, 1000),         //
+                             std::make_tuple(u32::Highest(), u32::Highest())));
+
+template <typename T>
 std::vector<Case> SaturateCases() {
     return {
         C({T(0)}, T(0)),

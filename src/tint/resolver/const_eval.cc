@@ -1726,6 +1726,61 @@ ConstEval::Result ConstEval::countTrailingZeros(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0]);
 }
 
+ConstEval::Result ConstEval::extractBits(const sem::Type* ty,
+                                         utils::VectorRef<const sem::Constant*> args,
+                                         const Source& source) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto in_e) -> ImplResult {
+            using NumberT = decltype(in_e);
+            using T = UnwrapNumber<NumberT>;
+            using UT = std::make_unsigned_t<T>;
+            using NumberUT = Number<UT>;
+
+            // Read args that are always scalar
+            NumberUT in_offset = args[1]->As<NumberUT>();
+            NumberUT in_count = args[2]->As<NumberUT>();
+
+            constexpr UT w = sizeof(UT) * 8;
+            if ((in_offset + in_count) > w) {
+                AddError("'offset + 'count' must be less than or equal to the bit width of 'e'",
+                         source);
+                return utils::Failure;
+            }
+
+            // Cast all to unsigned
+            UT e = static_cast<UT>(in_e);
+            UT o = static_cast<UT>(in_offset);
+            UT c = static_cast<UT>(in_count);
+
+            NumberT result;
+            if (c == UT{0}) {
+                // The result is 0 if c is 0
+                result = NumberT{0};
+            } else if (c == w) {
+                // The result is e if c is w
+                result = NumberT{e};
+            } else {
+                // Otherwise, bits 0..c - 1 of the result are copied from bits o..o + c - 1 of e.
+                UT src_mask = ((UT{1} << c) - UT{1}) << o;
+                UT r = (e & src_mask) >> o;
+                if constexpr (IsSignedIntegral<NumberT>) {
+                    // Other bits of the result are the same as bit c - 1 of the result.
+                    // Only need to set other bits if bit at c - 1 of result is 1
+                    if ((r & (UT{1} << (c - UT{1}))) != UT{0}) {
+                        UT dst_mask = src_mask >> o;
+                        r = r | (~UT{0} & ~dst_mask);
+                    }
+                }
+
+                result = NumberT{r};
+            }
+            return CreateElement(builder, c0->Type(), result);
+        };
+        return Dispatch_iu32(create, c0);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
 ConstEval::Result ConstEval::firstLeadingBit(const sem::Type* ty,
                                              utils::VectorRef<const sem::Constant*> args,
                                              const Source&) {
