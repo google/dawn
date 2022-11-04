@@ -1,7 +1,7 @@
 @group(1) @binding(0) var arg_0 : texture_depth_multisampled_2d;
 
 fn textureLoad_fcd23d() {
-  var res : f32 = textureLoad(arg_0, vec2<u32>(), 1i);
+  var res : f32 = textureLoad(arg_0, vec2<u32>(1u), 1i);
 }
 
 @vertex

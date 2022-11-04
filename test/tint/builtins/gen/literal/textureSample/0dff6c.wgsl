@@ -25,7 +25,7 @@
 
 // fn textureSample(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, @const offset: vec2<i32>) -> f32
 fn textureSample_0dff6c() {
-  var res: f32 = textureSample(arg_0, arg_1, vec2<f32>(), vec2<i32>());
+  var res: f32 = textureSample(arg_0, arg_1, vec2<f32>(1.f), vec2<i32>(1i));
 }
 
 @fragment

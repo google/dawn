@@ -44,33 +44,33 @@
          %15 = OpTypeFunction %void
          %22 = OpTypeSampledImage %11
     %v2float = OpTypeVector %float 2
-         %25 = OpConstantNull %v2float
+    %float_1 = OpConstant %float 1
+         %26 = OpConstantComposite %v2float %float_1 %float_1
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
       %v2int = OpTypeVector %int 2
-         %29 = OpConstantNull %v2int
+         %30 = OpConstantComposite %v2int %int_1 %int_1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
-         %32 = OpTypeFunction %v4float
-    %float_1 = OpConstant %float 1
+         %33 = OpTypeFunction %v4float
 %textureGather_af55b3 = OpFunction %void None %15
          %18 = OpLabel
         %res = OpVariable %_ptr_Function_v4float Function %5
          %20 = OpLoad %14 %arg_2
          %21 = OpLoad %11 %arg_1
          %23 = OpSampledImage %22 %21 %20
-         %19 = OpImageGather %v4float %23 %25 %int_1 ConstOffset %29
+         %19 = OpImageGather %v4float %23 %26 %int_1 ConstOffset %30
                OpStore %res %19
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %32
-         %34 = OpLabel
-         %35 = OpFunctionCall %void %textureGather_af55b3
+%vertex_main_inner = OpFunction %v4float None %33
+         %35 = OpLabel
+         %36 = OpFunctionCall %void %textureGather_af55b3
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %15
-         %37 = OpLabel
-         %38 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %38
+         %38 = OpLabel
+         %39 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %39
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd

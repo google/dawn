@@ -25,11 +25,11 @@
 
 // fn textureSampleGrad(texture: texture_2d_array<f32>, sampler: sampler, coords: vec2<f32>, array_index: i32, ddx: vec2<f32>, ddy: vec2<f32>, @const offset: vec2<i32>) -> vec4<f32>
 fn textureSampleGrad_d65515() {
-  var arg_2 = vec2<f32>();
+  var arg_2 = vec2<f32>(1.f);
   var arg_3 = 1i;
-  var arg_4 = vec2<f32>();
-  var arg_5 = vec2<f32>();
-  const arg_6 = vec2<i32>();
+  var arg_4 = vec2<f32>(1.f);
+  var arg_5 = vec2<f32>(1.f);
+  const arg_6 = vec2<i32>(1i);
   var res: vec4<f32> = textureSampleGrad(arg_0, arg_1, arg_2, arg_3, arg_4, arg_5, arg_6);
 }
 

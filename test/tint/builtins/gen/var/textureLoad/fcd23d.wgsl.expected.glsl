@@ -2,7 +2,7 @@
 
 uniform highp sampler2DMS arg_0_1;
 void textureLoad_fcd23d() {
-  uvec2 arg_1 = uvec2(0u);
+  uvec2 arg_1 = uvec2(1u);
   int arg_2 = 1;
   float res = texelFetch(arg_0_1, ivec2(arg_1), arg_2).x;
 }
@@ -25,7 +25,7 @@ precision mediump float;
 
 uniform highp sampler2DMS arg_0_1;
 void textureLoad_fcd23d() {
-  uvec2 arg_1 = uvec2(0u);
+  uvec2 arg_1 = uvec2(1u);
   int arg_2 = 1;
   float res = texelFetch(arg_0_1, ivec2(arg_1), arg_2).x;
 }
@@ -42,7 +42,7 @@ void main() {
 
 uniform highp sampler2DMS arg_0_1;
 void textureLoad_fcd23d() {
-  uvec2 arg_1 = uvec2(0u);
+  uvec2 arg_1 = uvec2(1u);
   int arg_2 = 1;
   float res = texelFetch(arg_0_1, ivec2(arg_1), arg_2).x;
 }

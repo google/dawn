@@ -3,7 +3,7 @@
 @group(1) @binding(1) var arg_1 : sampler_comparison;
 
 fn textureSampleCompare_a3ca7e() {
-  var res : f32 = textureSampleCompare(arg_0, arg_1, vec3<f32>(), 1i, 1.0f);
+  var res : f32 = textureSampleCompare(arg_0, arg_1, vec3<f32>(1.0f), 1i, 1.0f);
 }
 
 @fragment

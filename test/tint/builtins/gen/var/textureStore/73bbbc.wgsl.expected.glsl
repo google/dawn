@@ -2,8 +2,8 @@
 
 layout(rgba8) uniform highp writeonly image2D arg_0;
 void textureStore_73bbbc() {
-  uvec2 arg_1 = uvec2(0u);
-  vec4 arg_2 = vec4(0.0f);
+  uvec2 arg_1 = uvec2(1u);
+  vec4 arg_2 = vec4(1.0f);
   imageStore(arg_0, ivec2(arg_1), arg_2);
 }
 
@@ -25,8 +25,8 @@ precision mediump float;
 
 layout(rgba8) uniform highp writeonly image2D arg_0;
 void textureStore_73bbbc() {
-  uvec2 arg_1 = uvec2(0u);
-  vec4 arg_2 = vec4(0.0f);
+  uvec2 arg_1 = uvec2(1u);
+  vec4 arg_2 = vec4(1.0f);
   imageStore(arg_0, ivec2(arg_1), arg_2);
 }
 
@@ -42,8 +42,8 @@ void main() {
 
 layout(rgba8) uniform highp writeonly image2D arg_0;
 void textureStore_73bbbc() {
-  uvec2 arg_1 = uvec2(0u);
-  vec4 arg_2 = vec4(0.0f);
+  uvec2 arg_1 = uvec2(1u);
+  vec4 arg_2 = vec4(1.0f);
   imageStore(arg_0, ivec2(arg_1), arg_2);
 }
 

@@ -24,7 +24,7 @@
 
 // fn textureStore(texture: texture_storage_2d_array<rg32uint, write>, coords: vec2<i32>, array_index: i32, value: vec4<u32>)
 fn textureStore_dde364() {
-  textureStore(arg_0, vec2<i32>(), 1i, vec4<u32>());
+  textureStore(arg_0, vec2<i32>(1i), 1i, vec4<u32>(1u));
 }
 
 @vertex

@@ -3,7 +3,7 @@
 @group(1) @binding(1) var arg_1 : sampler;
 
 fn textureSampleBaseClampToEdge_9ca02c() {
-  var arg_2 = vec2<f32>();
+  var arg_2 = vec2<f32>(1.0f);
   var res : vec4<f32> = textureSampleBaseClampToEdge(arg_0, arg_1, arg_2);
 }
 

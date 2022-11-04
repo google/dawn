@@ -40,8 +40,8 @@
      %v4uint = OpTypeVector %uint 4
         %int = OpTypeInt 32 1
       %v3int = OpTypeVector %int 3
-         %22 = OpConstantNull %v3int
       %int_1 = OpConstant %int 1
+         %23 = OpConstantComposite %v3int %int_1 %int_1 %int_1
 %_ptr_Function_v4uint = OpTypePointer Function %v4uint
          %26 = OpConstantNull %v4uint
          %27 = OpTypeFunction %v4float
@@ -50,7 +50,7 @@
          %16 = OpLabel
         %res = OpVariable %_ptr_Function_v4uint Function %26
          %19 = OpLoad %11 %arg_0
-         %17 = OpImageFetch %v4uint %19 %22 Lod %int_1
+         %17 = OpImageFetch %v4uint %19 %23 Lod %int_1
                OpStore %res %17
                OpReturn
                OpFunctionEnd

@@ -4,7 +4,7 @@
 
 fn textureGather_aaf6bd() {
   const arg_0 = 1u;
-  var arg_3 = vec3<f32>();
+  var arg_3 = vec3<f32>(1.0f);
   var arg_4 = 1i;
   var res : vec4<i32> = textureGather(arg_0, arg_1, arg_2, arg_3, arg_4);
 }

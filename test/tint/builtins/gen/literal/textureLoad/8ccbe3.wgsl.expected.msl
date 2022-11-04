@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureLoad_8ccbe3(depth2d<float, access::sample> tint_symbol_1) {
-  float res = tint_symbol_1.read(uint2(int2(0)), 1u);
+  float res = tint_symbol_1.read(uint2(int2(1)), 1u);
 }
 
 struct tint_symbol {

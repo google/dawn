@@ -3,7 +3,7 @@
 uniform highp samplerCubeShadow arg_0_arg_1;
 
 void textureSampleCompareLevel_1568e3() {
-  float res = texture(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, 1.0f));
+  float res = texture(arg_0_arg_1, vec4(vec3(1.0f), 1.0f));
 }
 
 vec4 vertex_main() {
@@ -25,7 +25,7 @@ precision mediump float;
 uniform highp samplerCubeShadow arg_0_arg_1;
 
 void textureSampleCompareLevel_1568e3() {
-  float res = texture(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, 1.0f));
+  float res = texture(arg_0_arg_1, vec4(vec3(1.0f), 1.0f));
 }
 
 void fragment_main() {
@@ -41,7 +41,7 @@ void main() {
 uniform highp samplerCubeShadow arg_0_arg_1;
 
 void textureSampleCompareLevel_1568e3() {
-  float res = texture(arg_0_arg_1, vec4(0.0f, 0.0f, 0.0f, 1.0f));
+  float res = texture(arg_0_arg_1, vec4(vec3(1.0f), 1.0f));
 }
 
 void compute_main() {

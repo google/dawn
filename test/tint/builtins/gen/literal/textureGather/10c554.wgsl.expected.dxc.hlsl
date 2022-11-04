@@ -2,7 +2,7 @@ TextureCube arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 
 void textureGather_10c554() {
-  float4 res = arg_0.Gather(arg_1, (0.0f).xxx);
+  float4 res = arg_0.Gather(arg_1, (1.0f).xxx);
 }
 
 struct tint_symbol {

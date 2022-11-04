@@ -2,10 +2,10 @@
 
 using namespace metal;
 void textureSampleGrad_d4e3c5(texture2d<float, access::sample> tint_symbol_1, sampler tint_symbol_2) {
-  float2 arg_2 = float2(0.0f);
-  float2 arg_3 = float2(0.0f);
-  float2 arg_4 = float2(0.0f);
-  float4 res = tint_symbol_1.sample(tint_symbol_2, arg_2, gradient2d(arg_3, arg_4), int2(0));
+  float2 arg_2 = float2(1.0f);
+  float2 arg_3 = float2(1.0f);
+  float2 arg_4 = float2(1.0f);
+  float4 res = tint_symbol_1.sample(tint_symbol_2, arg_2, gradient2d(arg_3, arg_4), int2(1));
 }
 
 struct tint_symbol {

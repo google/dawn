@@ -1,5 +1,5 @@
 builtins/gen/literal/textureSampleLevel/979816.wgsl:28:24 warning: use of deprecated builtin
-  var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, vec2<f32>());
+  var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, vec2<f32>(1.f));
                        ^^^^^^^^^^^^^^^^^^
 
 ; SPIR-V
@@ -123,7 +123,7 @@ builtins/gen/literal/textureSampleLevel/979816.wgsl:28:24 warning: use of deprec
          %98 = OpConstantNull %uint
        %void = OpTypeVoid
         %116 = OpTypeFunction %void
-        %124 = OpConstantNull %v2float
+        %124 = OpConstantComposite %v2float %float_1 %float_1
      %uint_0 = OpConstant %uint 0
 %_ptr_Uniform_ExternalTextureParams = OpTypePointer Uniform %ExternalTextureParams
 %_ptr_Function_v4float = OpTypePointer Function %v4float

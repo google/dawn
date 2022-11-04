@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureGatherCompare_182fd4(depthcube<float, access::sample> tint_symbol_1, sampler tint_symbol_2) {
-  float4 res = tint_symbol_1.gather_compare(tint_symbol_2, float3(0.0f), 1.0f);
+  float4 res = tint_symbol_1.gather_compare(tint_symbol_2, float3(1.0f), 1.0f);
 }
 
 struct tint_symbol {

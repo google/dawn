@@ -1,5 +1,5 @@
 fn pack2x16float_0e97b3() {
-  var arg_0 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.0f);
   var res : u32 = pack2x16float(arg_0);
 }
 

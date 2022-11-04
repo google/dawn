@@ -1,8 +1,8 @@
 @group(1) @binding(0) var arg_0 : texture_storage_3d<rgba16sint, write>;
 
 fn textureStore_8f71a1() {
-  var arg_1 = vec3<i32>();
-  var arg_2 = vec4<i32>();
+  var arg_1 = vec3<i32>(1i);
+  var arg_2 = vec4<i32>(1i);
   textureStore(arg_0, arg_1, arg_2);
 }
 

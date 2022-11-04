@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 60
+; Bound: 61
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -46,61 +46,62 @@
        %void = OpTypeVoid
          %15 = OpTypeFunction %void
     %v2float = OpTypeVector %float 2
-         %20 = OpConstantNull %v2float
+    %float_1 = OpConstant %float 1
+         %21 = OpConstantComposite %v2float %float_1 %float_1
 %_ptr_Function_v2float = OpTypePointer Function %v2float
+         %24 = OpConstantNull %v2float
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
 %_ptr_Function_int = OpTypePointer Function %int
-         %27 = OpConstantNull %int
-         %33 = OpTypeSampledImage %11
+         %29 = OpConstantNull %int
+         %35 = OpTypeSampledImage %11
     %v3float = OpTypeVector %float 3
 %_ptr_Function_float = OpTypePointer Function %float
-         %46 = OpTypeFunction %v4float
-    %float_1 = OpConstant %float 1
+         %48 = OpTypeFunction %v4float
 %textureSampleLevel_1bf73e = OpFunction %void None %15
          %18 = OpLabel
-      %arg_2 = OpVariable %_ptr_Function_v2float Function %20
-      %arg_3 = OpVariable %_ptr_Function_int Function %27
-      %arg_4 = OpVariable %_ptr_Function_int Function %27
+      %arg_2 = OpVariable %_ptr_Function_v2float Function %24
+      %arg_3 = OpVariable %_ptr_Function_int Function %29
+      %arg_4 = OpVariable %_ptr_Function_int Function %29
         %res = OpVariable %_ptr_Function_float Function %8
-               OpStore %arg_2 %20
+               OpStore %arg_2 %21
                OpStore %arg_3 %int_1
                OpStore %arg_4 %int_1
-         %31 = OpLoad %14 %arg_1
-         %32 = OpLoad %11 %arg_0
-         %34 = OpSampledImage %33 %32 %31
-         %36 = OpLoad %v2float %arg_2
-         %37 = OpCompositeExtract %float %36 0
-         %38 = OpCompositeExtract %float %36 1
-         %40 = OpLoad %int %arg_3
-         %39 = OpConvertSToF %float %40
-         %41 = OpCompositeConstruct %v3float %37 %38 %39
-         %43 = OpLoad %int %arg_4
-         %42 = OpConvertSToF %float %43
-         %30 = OpImageSampleExplicitLod %v4float %34 %41 Lod %42
-         %29 = OpCompositeExtract %float %30 0
-               OpStore %res %29
+         %33 = OpLoad %14 %arg_1
+         %34 = OpLoad %11 %arg_0
+         %36 = OpSampledImage %35 %34 %33
+         %38 = OpLoad %v2float %arg_2
+         %39 = OpCompositeExtract %float %38 0
+         %40 = OpCompositeExtract %float %38 1
+         %42 = OpLoad %int %arg_3
+         %41 = OpConvertSToF %float %42
+         %43 = OpCompositeConstruct %v3float %39 %40 %41
+         %45 = OpLoad %int %arg_4
+         %44 = OpConvertSToF %float %45
+         %32 = OpImageSampleExplicitLod %v4float %36 %43 Lod %44
+         %31 = OpCompositeExtract %float %32 0
+               OpStore %res %31
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %46
-         %48 = OpLabel
-         %49 = OpFunctionCall %void %textureSampleLevel_1bf73e
+%vertex_main_inner = OpFunction %v4float None %48
+         %50 = OpLabel
+         %51 = OpFunctionCall %void %textureSampleLevel_1bf73e
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %15
-         %51 = OpLabel
-         %52 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %52
+         %53 = OpLabel
+         %54 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %54
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %15
-         %55 = OpLabel
-         %56 = OpFunctionCall %void %textureSampleLevel_1bf73e
+         %56 = OpLabel
+         %57 = OpFunctionCall %void %textureSampleLevel_1bf73e
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %15
-         %58 = OpLabel
-         %59 = OpFunctionCall %void %textureSampleLevel_1bf73e
+         %59 = OpLabel
+         %60 = OpFunctionCall %void %textureSampleLevel_1bf73e
                OpReturn
                OpFunctionEnd

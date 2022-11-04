@@ -62,7 +62,7 @@ float4 textureSampleExternal(texture2d<float, access::sample> plane0, texture2d<
 }
 
 void textureSampleLevel_979816(texture2d<float, access::sample> tint_symbol_1, texture2d<float, access::sample> tint_symbol_2, sampler tint_symbol_3, const constant ExternalTextureParams* const tint_symbol_4) {
-  float2 arg_2 = float2(0.0f);
+  float2 arg_2 = float2(1.0f);
   float4 res = textureSampleExternal(tint_symbol_1, tint_symbol_2, tint_symbol_3, arg_2, *(tint_symbol_4));
 }
 

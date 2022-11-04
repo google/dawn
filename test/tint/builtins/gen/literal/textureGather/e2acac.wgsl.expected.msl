@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureGather_e2acac(texturecube_array<uint, access::sample> tint_symbol_1, sampler tint_symbol_2) {
-  uint4 res = tint_symbol_1.gather(tint_symbol_2, float3(0.0f), 1u, component::y);
+  uint4 res = tint_symbol_1.gather(tint_symbol_2, float3(1.0f), 1u, component::y);
 }
 
 struct tint_symbol {

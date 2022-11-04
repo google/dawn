@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 37
+; Bound: 38
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -38,36 +38,37 @@
        %void = OpTypeVoid
          %13 = OpTypeFunction %void
      %v2uint = OpTypeVector %uint 2
-         %20 = OpConstantNull %v2uint
+     %uint_1 = OpConstant %uint 1
+         %21 = OpConstantComposite %v2uint %uint_1 %uint_1
      %v4uint = OpTypeVector %uint 4
-         %22 = OpConstantNull %v4uint
-         %23 = OpTypeFunction %v4float
+         %23 = OpConstantComposite %v4uint %uint_1 %uint_1 %uint_1 %uint_1
+         %24 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %textureStore_8dc54f = OpFunction %void None %13
          %16 = OpLabel
          %18 = OpLoad %11 %arg_0
-               OpImageWrite %18 %20 %22
+               OpImageWrite %18 %21 %23
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %23
-         %25 = OpLabel
-         %26 = OpFunctionCall %void %textureStore_8dc54f
+%vertex_main_inner = OpFunction %v4float None %24
+         %26 = OpLabel
+         %27 = OpFunctionCall %void %textureStore_8dc54f
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %13
-         %28 = OpLabel
-         %29 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %29
+         %29 = OpLabel
+         %30 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %30
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %13
-         %32 = OpLabel
-         %33 = OpFunctionCall %void %textureStore_8dc54f
+         %33 = OpLabel
+         %34 = OpFunctionCall %void %textureStore_8dc54f
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %13
-         %35 = OpLabel
-         %36 = OpFunctionCall %void %textureStore_8dc54f
+         %36 = OpLabel
+         %37 = OpFunctionCall %void %textureStore_8dc54f
                OpReturn
                OpFunctionEnd

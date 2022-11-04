@@ -2,7 +2,7 @@
 
 using namespace metal;
 void pack2x16snorm_6c169b() {
-  float2 arg_0 = float2(0.0f);
+  float2 arg_0 = float2(1.0f);
   uint res = pack_float_to_snorm2x16(arg_0);
 }
 

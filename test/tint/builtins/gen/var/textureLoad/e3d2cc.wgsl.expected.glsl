@@ -2,7 +2,7 @@
 
 uniform highp isampler2DMS arg_0_1;
 void textureLoad_e3d2cc() {
-  ivec2 arg_1 = ivec2(0);
+  ivec2 arg_1 = ivec2(1);
   int arg_2 = 1;
   ivec4 res = texelFetch(arg_0_1, arg_1, arg_2);
 }
@@ -25,7 +25,7 @@ precision mediump float;
 
 uniform highp isampler2DMS arg_0_1;
 void textureLoad_e3d2cc() {
-  ivec2 arg_1 = ivec2(0);
+  ivec2 arg_1 = ivec2(1);
   int arg_2 = 1;
   ivec4 res = texelFetch(arg_0_1, arg_1, arg_2);
 }
@@ -42,7 +42,7 @@ void main() {
 
 uniform highp isampler2DMS arg_0_1;
 void textureLoad_e3d2cc() {
-  ivec2 arg_1 = ivec2(0);
+  ivec2 arg_1 = ivec2(1);
   int arg_2 = 1;
   ivec4 res = texelFetch(arg_0_1, arg_1, arg_2);
 }

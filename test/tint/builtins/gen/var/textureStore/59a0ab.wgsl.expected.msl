@@ -2,9 +2,9 @@
 
 using namespace metal;
 void textureStore_59a0ab(texture2d_array<float, access::write> tint_symbol_1) {
-  uint2 arg_1 = uint2(0u);
+  uint2 arg_1 = uint2(1u);
   int arg_2 = 1;
-  float4 arg_3 = float4(0.0f);
+  float4 arg_3 = float4(1.0f);
   tint_symbol_1.write(arg_3, uint2(arg_1), arg_2);
 }
 

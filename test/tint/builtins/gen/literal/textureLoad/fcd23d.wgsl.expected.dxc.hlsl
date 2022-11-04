@@ -1,7 +1,7 @@
 Texture2DMS<float4> arg_0 : register(t0, space1);
 
 void textureLoad_fcd23d() {
-  float res = arg_0.Load(uint3(0u, 0u, uint(0)), 1).x;
+  float res = arg_0.Load(uint3((1u).xx, uint(0)), 1).x;
 }
 
 struct tint_symbol {

@@ -11,7 +11,7 @@ vec4 tint_textureSampleBaseClampToEdge(highp sampler2D t_1, highp sampler2D t_s,
 uniform highp sampler2D arg_0_1;
 uniform highp sampler2D arg_0_arg_1;
 void textureSampleBaseClampToEdge_9ca02c() {
-  vec4 res = tint_textureSampleBaseClampToEdge(arg_0_1, arg_0_arg_1, vec2(0.0f));
+  vec4 res = tint_textureSampleBaseClampToEdge(arg_0_1, arg_0_arg_1, vec2(1.0f));
 }
 
 vec4 vertex_main() {
@@ -41,7 +41,7 @@ vec4 tint_textureSampleBaseClampToEdge(highp sampler2D t_1, highp sampler2D t_s,
 uniform highp sampler2D arg_0_1;
 uniform highp sampler2D arg_0_arg_1;
 void textureSampleBaseClampToEdge_9ca02c() {
-  vec4 res = tint_textureSampleBaseClampToEdge(arg_0_1, arg_0_arg_1, vec2(0.0f));
+  vec4 res = tint_textureSampleBaseClampToEdge(arg_0_1, arg_0_arg_1, vec2(1.0f));
 }
 
 void fragment_main() {
@@ -65,7 +65,7 @@ vec4 tint_textureSampleBaseClampToEdge(highp sampler2D t_1, highp sampler2D t_s,
 uniform highp sampler2D arg_0_1;
 uniform highp sampler2D arg_0_arg_1;
 void textureSampleBaseClampToEdge_9ca02c() {
-  vec4 res = tint_textureSampleBaseClampToEdge(arg_0_1, arg_0_arg_1, vec2(0.0f));
+  vec4 res = tint_textureSampleBaseClampToEdge(arg_0_1, arg_0_arg_1, vec2(1.0f));
 }
 
 void compute_main() {

@@ -44,8 +44,8 @@
          %15 = OpTypeFunction %void
          %22 = OpTypeSampledImage %11
     %v2float = OpTypeVector %float 2
-         %25 = OpConstantNull %v2float
     %float_1 = OpConstant %float 1
+         %26 = OpConstantComposite %v2float %float_1 %float_1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
          %29 = OpTypeFunction %v4float
 %textureGatherCompare_6d9352 = OpFunction %void None %15
@@ -54,7 +54,7 @@
          %20 = OpLoad %14 %arg_1
          %21 = OpLoad %11 %arg_0
          %23 = OpSampledImage %22 %21 %20
-         %19 = OpImageDrefGather %v4float %23 %25 %float_1
+         %19 = OpImageDrefGather %v4float %23 %26 %float_1
                OpStore %res %19
                OpReturn
                OpFunctionEnd

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureGather_32c4e8(texturecube<float, access::sample> tint_symbol_1, sampler tint_symbol_2) {
-  float3 arg_3 = float3(0.0f);
+  float3 arg_3 = float3(1.0f);
   float4 res = tint_symbol_1.gather(tint_symbol_2, arg_3, component::y);
 }
 

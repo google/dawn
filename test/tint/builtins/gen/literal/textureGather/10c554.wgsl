@@ -25,7 +25,7 @@
 
 // fn textureGather(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>) -> vec4<f32>
 fn textureGather_10c554() {
-  var res: vec4<f32> = textureGather(arg_0, arg_1, vec3<f32>());
+  var res: vec4<f32> = textureGather(arg_0, arg_1, vec3<f32>(1.f));
 }
 
 @vertex

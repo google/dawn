@@ -2,7 +2,7 @@
 
 fn textureStore_8c76e9() {
   var arg_1 = 1u;
-  var arg_2 = vec4<i32>();
+  var arg_2 = vec4<i32>(1i);
   textureStore(arg_0, arg_1, arg_2);
 }
 

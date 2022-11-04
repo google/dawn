@@ -2,7 +2,7 @@ TextureCubeArray<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 
 void textureSampleLevel_0bdd9a() {
-  float3 arg_2 = (0.0f).xxx;
+  float3 arg_2 = (1.0f).xxx;
   int arg_3 = 1;
   float arg_4 = 1.0f;
   float4 res = arg_0.SampleLevel(arg_1, float4(arg_2, float(arg_3)), arg_4);

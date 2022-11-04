@@ -1,7 +1,7 @@
 Texture2D<uint4> arg_0 : register(t0, space1);
 
 void textureLoad_897cf3() {
-  uint2 arg_1 = (0u).xx;
+  uint2 arg_1 = (1u).xx;
   uint arg_2 = 1u;
   uint4 res = arg_0.Load(uint3(arg_1, arg_2));
 }

@@ -25,7 +25,7 @@
 
 // fn textureSampleLevel(texture: texture_external, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
 fn textureSampleLevel_979816() {
-  var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, vec2<f32>());
+  var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, vec2<f32>(1.f));
 }
 
 @vertex

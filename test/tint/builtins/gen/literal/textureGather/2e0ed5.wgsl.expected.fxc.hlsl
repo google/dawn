@@ -2,7 +2,7 @@ Texture2D arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 
 void textureGather_2e0ed5() {
-  float4 res = arg_0.Gather(arg_1, (0.0f).xx);
+  float4 res = arg_0.Gather(arg_1, (1.0f).xx);
 }
 
 struct tint_symbol {

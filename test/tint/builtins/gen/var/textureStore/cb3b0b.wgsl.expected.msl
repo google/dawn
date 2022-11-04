@@ -2,8 +2,8 @@
 
 using namespace metal;
 void textureStore_cb3b0b(texture3d<int, access::write> tint_symbol_1) {
-  uint3 arg_1 = uint3(0u);
-  int4 arg_2 = int4(0);
+  uint3 arg_1 = uint3(1u);
+  int4 arg_2 = int4(1);
   tint_symbol_1.write(arg_2, uint3(arg_1));
 }
 

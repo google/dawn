@@ -1,7 +1,7 @@
 #version 310 es
 
 void pack4x8unorm_95c456() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   uint res = packUnorm4x8(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void pack4x8unorm_95c456() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   uint res = packUnorm4x8(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void pack4x8unorm_95c456() {
-  vec4 arg_0 = vec4(0.0f);
+  vec4 arg_0 = vec4(1.0f);
   uint res = packUnorm4x8(arg_0);
 }
 

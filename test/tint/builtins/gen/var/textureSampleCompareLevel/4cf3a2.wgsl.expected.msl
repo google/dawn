@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureSampleCompareLevel_4cf3a2(depthcube_array<float, access::sample> tint_symbol_1, sampler tint_symbol_2) {
-  float3 arg_2 = float3(0.0f);
+  float3 arg_2 = float3(1.0f);
   int arg_3 = 1;
   float arg_4 = 1.0f;
   float res = tint_symbol_1.sample_compare(tint_symbol_2, arg_2, arg_3, arg_4, level(0));

@@ -25,9 +25,9 @@
 
 // fn textureSampleLevel(texture: texture_depth_2d, sampler: sampler, coords: vec2<f32>, level: u32, @const offset: vec2<i32>) -> f32
 fn textureSampleLevel_f3b2c8() {
-  var arg_2 = vec2<f32>();
+  var arg_2 = vec2<f32>(1.f);
   var arg_3 = 1u;
-  const arg_4 = vec2<i32>();
+  const arg_4 = vec2<i32>(1i);
   var res: f32 = textureSampleLevel(arg_0, arg_1, arg_2, arg_3, arg_4);
 }
 

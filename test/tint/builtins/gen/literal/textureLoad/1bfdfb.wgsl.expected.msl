@@ -58,7 +58,7 @@ float4 textureLoadExternal(texture2d<float, access::sample> plane0, texture2d<fl
 }
 
 void textureLoad_1bfdfb(texture2d<float, access::sample> tint_symbol_1, texture2d<float, access::sample> tint_symbol_2, const constant ExternalTextureParams* const tint_symbol_3) {
-  float4 res = textureLoadExternal(tint_symbol_1, tint_symbol_2, uint2(0u), *(tint_symbol_3));
+  float4 res = textureLoadExternal(tint_symbol_1, tint_symbol_2, uint2(1u), *(tint_symbol_3));
 }
 
 struct tint_symbol {

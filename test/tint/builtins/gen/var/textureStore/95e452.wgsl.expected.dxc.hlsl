@@ -1,8 +1,8 @@
 RWTexture2D<int4> arg_0 : register(u0, space1);
 
 void textureStore_95e452() {
-  uint2 arg_1 = (0u).xx;
-  int4 arg_2 = (0).xxxx;
+  uint2 arg_1 = (1u).xx;
+  int4 arg_2 = (1).xxxx;
   arg_0[arg_1] = arg_2;
 }
 

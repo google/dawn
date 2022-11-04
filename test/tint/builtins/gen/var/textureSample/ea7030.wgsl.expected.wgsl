@@ -3,7 +3,7 @@
 @group(1) @binding(1) var arg_1 : sampler;
 
 fn textureSample_ea7030() {
-  var arg_2 = vec3<f32>();
+  var arg_2 = vec3<f32>(1.0f);
   var res : f32 = textureSample(arg_0, arg_1, arg_2);
 }
 

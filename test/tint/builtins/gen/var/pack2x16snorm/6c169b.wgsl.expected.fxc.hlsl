@@ -4,7 +4,7 @@ uint tint_pack2x16snorm(float2 param_0) {
 }
 
 void pack2x16snorm_6c169b() {
-  float2 arg_0 = (0.0f).xx;
+  float2 arg_0 = (1.0f).xx;
   uint res = tint_pack2x16snorm(arg_0);
 }
 

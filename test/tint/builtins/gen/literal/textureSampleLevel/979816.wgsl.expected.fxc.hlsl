@@ -1,5 +1,5 @@
 builtins/gen/literal/textureSampleLevel/979816.wgsl:28:24 warning: use of deprecated builtin
-  var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, vec2<f32>());
+  var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, vec2<f32>(1.f));
                        ^^^^^^^^^^^^^^^^^^
 
 struct GammaTransferParams {
@@ -85,7 +85,7 @@ ExternalTextureParams tint_symbol_1(uint4 buffer[11], uint offset) {
 }
 
 void textureSampleLevel_979816() {
-  float4 res = textureSampleExternal(arg_0, ext_tex_plane_1, arg_1, (0.0f).xx, tint_symbol_1(ext_tex_params, 0u));
+  float4 res = textureSampleExternal(arg_0, ext_tex_plane_1, arg_1, (1.0f).xx, tint_symbol_1(ext_tex_params, 0u));
 }
 
 struct tint_symbol {

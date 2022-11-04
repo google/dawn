@@ -1,7 +1,7 @@
 RWTexture2D<float4> arg_0 : register(u0, space1);
 
 void textureStore_40c455() {
-  arg_0[(0u).xx] = (0.0f).xxxx;
+  arg_0[(1u).xx] = (1.0f).xxxx;
 }
 
 struct tint_symbol {

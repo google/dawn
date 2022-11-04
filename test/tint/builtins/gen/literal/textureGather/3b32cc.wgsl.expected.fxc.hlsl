@@ -2,7 +2,7 @@ TextureCube<uint4> arg_1 : register(t1, space1);
 SamplerState arg_2 : register(s2, space1);
 
 void textureGather_3b32cc() {
-  uint4 res = arg_1.GatherGreen(arg_2, (0.0f).xxx);
+  uint4 res = arg_1.GatherGreen(arg_2, (1.0f).xxx);
 }
 
 struct tint_symbol {

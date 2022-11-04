@@ -3,7 +3,7 @@
 @group(1) @binding(1) var arg_1 : sampler;
 
 fn textureSampleLevel_ae5e39() {
-  var res : f32 = textureSampleLevel(arg_0, arg_1, vec3<f32>(), 1i, 1i);
+  var res : f32 = textureSampleLevel(arg_0, arg_1, vec3<f32>(1.0f), 1i, 1i);
 }
 
 @vertex

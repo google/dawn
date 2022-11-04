@@ -2,8 +2,8 @@
 
 using namespace metal;
 void textureSample_0dff6c(depth2d<float, access::sample> tint_symbol, sampler tint_symbol_1) {
-  float2 arg_2 = float2(0.0f);
-  float res = tint_symbol.sample(tint_symbol_1, arg_2, int2(0));
+  float2 arg_2 = float2(1.0f);
+  float res = tint_symbol.sample(tint_symbol_1, arg_2, int2(1));
 }
 
 fragment void fragment_main(depth2d<float, access::sample> tint_symbol_2 [[texture(0)]], sampler tint_symbol_3 [[sampler(0)]]) {

@@ -1,9 +1,9 @@
 RWTexture2DArray<float4> arg_0 : register(u0, space1);
 
 void textureStore_5841f8() {
-  uint2 arg_1 = (0u).xx;
+  uint2 arg_1 = (1u).xx;
   uint arg_2 = 1u;
-  float4 arg_3 = (0.0f).xxxx;
+  float4 arg_3 = (1.0f).xxxx;
   arg_0[uint3(arg_1, arg_2)] = arg_3;
 }
 

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureSample_e53267(texturecube<float, access::sample> tint_symbol, sampler tint_symbol_1) {
-  float4 res = tint_symbol.sample(tint_symbol_1, float3(0.0f));
+  float4 res = tint_symbol.sample(tint_symbol_1, float3(1.0f));
 }
 
 fragment void fragment_main(texturecube<float, access::sample> tint_symbol_2 [[texture(0)]], sampler tint_symbol_3 [[sampler(0)]]) {

@@ -2,7 +2,7 @@ TextureCube<uint4> arg_1 : register(t1, space1);
 SamplerState arg_2 : register(s2, space1);
 
 void textureGather_3b32cc() {
-  float3 arg_3 = (0.0f).xxx;
+  float3 arg_3 = (1.0f).xxx;
   uint4 res = arg_1.GatherGreen(arg_2, arg_3);
 }
 

@@ -24,7 +24,7 @@
 
 // fn textureLoad(texture: texture_3d<f32>, coords: vec3<u32>, level: i32) -> vec4<f32>
 fn textureLoad_bcbb3c() {
-  var res: vec4<f32> = textureLoad(arg_0, vec3<u32>(), 1i);
+  var res: vec4<f32> = textureLoad(arg_0, vec3<u32>(1u), 1i);
 }
 
 @vertex

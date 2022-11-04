@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 47
+; Bound: 48
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -29,47 +29,48 @@
        %void = OpTypeVoid
           %8 = OpTypeFunction %void
     %v2float = OpTypeVector %float 2
-         %13 = OpConstantNull %v2float
+    %float_1 = OpConstant %float 1
+         %14 = OpConstantComposite %v2float %float_1 %float_1
 %_ptr_Function_v2float = OpTypePointer Function %v2float
+         %17 = OpConstantNull %v2float
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
 %_ptr_Function_int = OpTypePointer Function %int
-         %20 = OpConstantNull %int
-    %float_1 = OpConstant %float 1
+         %22 = OpConstantNull %int
 %_ptr_Function_float = OpTypePointer Function %float
-         %24 = OpConstantNull %float
+         %25 = OpConstantNull %float
     %v4float = OpTypeVector %float 4
-         %29 = OpTypeSampledImage %3
+         %30 = OpTypeSampledImage %3
     %v3float = OpTypeVector %float 3
       %v2int = OpTypeVector %int 2
-         %40 = OpConstantNull %v2int
+         %41 = OpConstantComposite %v2int %int_1 %int_1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
-         %43 = OpConstantNull %v4float
+         %44 = OpConstantNull %v4float
 %textureSampleBias_9dbb51 = OpFunction %void None %8
          %11 = OpLabel
-      %arg_2 = OpVariable %_ptr_Function_v2float Function %13
-      %arg_3 = OpVariable %_ptr_Function_int Function %20
-      %arg_4 = OpVariable %_ptr_Function_float Function %24
-        %res = OpVariable %_ptr_Function_v4float Function %43
-               OpStore %arg_2 %13
+      %arg_2 = OpVariable %_ptr_Function_v2float Function %17
+      %arg_3 = OpVariable %_ptr_Function_int Function %22
+      %arg_4 = OpVariable %_ptr_Function_float Function %25
+        %res = OpVariable %_ptr_Function_v4float Function %44
+               OpStore %arg_2 %14
                OpStore %arg_3 %int_1
                OpStore %arg_4 %float_1
-         %27 = OpLoad %7 %arg_1
-         %28 = OpLoad %3 %arg_0
-         %30 = OpSampledImage %29 %28 %27
-         %32 = OpLoad %v2float %arg_2
-         %33 = OpCompositeExtract %float %32 0
-         %34 = OpCompositeExtract %float %32 1
-         %36 = OpLoad %int %arg_3
-         %35 = OpConvertSToF %float %36
-         %37 = OpCompositeConstruct %v3float %33 %34 %35
-         %38 = OpLoad %float %arg_4
-         %25 = OpImageSampleImplicitLod %v4float %30 %37 Bias|ConstOffset %38 %40
-               OpStore %res %25
+         %28 = OpLoad %7 %arg_1
+         %29 = OpLoad %3 %arg_0
+         %31 = OpSampledImage %30 %29 %28
+         %33 = OpLoad %v2float %arg_2
+         %34 = OpCompositeExtract %float %33 0
+         %35 = OpCompositeExtract %float %33 1
+         %37 = OpLoad %int %arg_3
+         %36 = OpConvertSToF %float %37
+         %38 = OpCompositeConstruct %v3float %34 %35 %36
+         %39 = OpLoad %float %arg_4
+         %26 = OpImageSampleImplicitLod %v4float %31 %38 Bias|ConstOffset %39 %41
+               OpStore %res %26
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %8
-         %45 = OpLabel
-         %46 = OpFunctionCall %void %textureSampleBias_9dbb51
+         %46 = OpLabel
+         %47 = OpFunctionCall %void %textureSampleBias_9dbb51
                OpReturn
                OpFunctionEnd

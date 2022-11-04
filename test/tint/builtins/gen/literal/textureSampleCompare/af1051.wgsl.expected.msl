@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureSampleCompare_af1051(depth2d_array<float, access::sample> tint_symbol, sampler tint_symbol_1) {
-  float res = tint_symbol.sample_compare(tint_symbol_1, float2(0.0f), 1, 1.0f, int2(0));
+  float res = tint_symbol.sample_compare(tint_symbol_1, float2(1.0f), 1, 1.0f, int2(1));
 }
 
 fragment void fragment_main(depth2d_array<float, access::sample> tint_symbol_2 [[texture(0)]], sampler tint_symbol_3 [[sampler(0)]]) {

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void cross_041cb0() {
-  float3 res = cross(float3(0.0f), float3(0.0f));
+  float3 res = cross(float3(1.0f), float3(1.0f));
 }
 
 struct tint_symbol {

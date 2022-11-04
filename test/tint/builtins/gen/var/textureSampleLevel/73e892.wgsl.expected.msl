@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureSampleLevel_73e892(depth2d<float, access::sample> tint_symbol_1, sampler tint_symbol_2) {
-  float2 arg_2 = float2(0.0f);
+  float2 arg_2 = float2(1.0f);
   uint arg_3 = 1u;
   float res = tint_symbol_1.sample(tint_symbol_2, arg_2, level(arg_3));
 }

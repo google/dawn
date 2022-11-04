@@ -2,9 +2,9 @@ Texture3D<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 
 void textureSampleLevel_dcbecb() {
-  float3 arg_2 = (0.0f).xxx;
+  float3 arg_2 = (1.0f).xxx;
   float arg_3 = 1.0f;
-  float4 res = arg_0.SampleLevel(arg_1, arg_2, arg_3, (0).xxx);
+  float4 res = arg_0.SampleLevel(arg_1, arg_2, arg_3, (1).xxx);
 }
 
 struct tint_symbol {

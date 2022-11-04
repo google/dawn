@@ -25,7 +25,7 @@
 
 // fn textureSample(texture: texture_depth_cube, sampler: sampler, coords: vec3<f32>) -> f32
 fn textureSample_ea7030() {
-  var arg_2 = vec3<f32>();
+  var arg_2 = vec3<f32>(1.f);
   var res: f32 = textureSample(arg_0, arg_1, arg_2);
 }
 

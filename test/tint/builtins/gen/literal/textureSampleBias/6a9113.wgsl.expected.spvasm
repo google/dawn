@@ -28,8 +28,8 @@
     %v4float = OpTypeVector %float 4
          %16 = OpTypeSampledImage %3
     %v2float = OpTypeVector %float 2
-         %19 = OpConstantNull %v2float
     %float_1 = OpConstant %float 1
+         %20 = OpConstantComposite %v2float %float_1 %float_1
 %_ptr_Function_v4float = OpTypePointer Function %v4float
          %23 = OpConstantNull %v4float
 %textureSampleBias_6a9113 = OpFunction %void None %8
@@ -38,7 +38,7 @@
          %14 = OpLoad %7 %arg_1
          %15 = OpLoad %3 %arg_0
          %17 = OpSampledImage %16 %15 %14
-         %12 = OpImageSampleImplicitLod %v4float %17 %19 Bias %float_1
+         %12 = OpImageSampleImplicitLod %v4float %17 %20 Bias %float_1
                OpStore %res %12
                OpReturn
                OpFunctionEnd

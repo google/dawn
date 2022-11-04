@@ -25,7 +25,7 @@
 
 // fn textureSampleCompareLevel(texture: texture_depth_2d_array, sampler: sampler_comparison, coords: vec2<f32>, array_index: u32, depth_ref: f32) -> f32
 fn textureSampleCompareLevel_7dc3c0() {
-  var arg_2 = vec2<f32>();
+  var arg_2 = vec2<f32>(1.f);
   var arg_3 = 1u;
   var arg_4 = 1.f;
   var res: f32 = textureSampleCompareLevel(arg_0, arg_1, arg_2, arg_3, arg_4);

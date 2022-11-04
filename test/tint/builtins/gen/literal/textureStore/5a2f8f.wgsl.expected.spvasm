@@ -40,7 +40,7 @@
          %13 = OpTypeFunction %void
       %int_1 = OpConstant %int 1
       %v4int = OpTypeVector %int 4
-         %21 = OpConstantNull %v4int
+         %21 = OpConstantComposite %v4int %int_1 %int_1 %int_1 %int_1
          %22 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %textureStore_5a2f8f = OpFunction %void None %13

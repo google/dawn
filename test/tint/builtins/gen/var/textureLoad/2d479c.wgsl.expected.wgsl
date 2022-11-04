@@ -1,7 +1,7 @@
 @group(1) @binding(0) var arg_0 : texture_2d<f32>;
 
 fn textureLoad_2d479c() {
-  var arg_1 = vec2<i32>();
+  var arg_1 = vec2<i32>(1i);
   var arg_2 = 1u;
   var res : vec4<f32> = textureLoad(arg_0, arg_1, arg_2);
 }

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureSampleGrad_21402b(texture3d<float, access::sample> tint_symbol_1, sampler tint_symbol_2) {
-  float4 res = tint_symbol_1.sample(tint_symbol_2, float3(0.0f), gradient3d(float3(0.0f), float3(0.0f)));
+  float4 res = tint_symbol_1.sample(tint_symbol_2, float3(1.0f), gradient3d(float3(1.0f), float3(1.0f)));
 }
 
 struct tint_symbol {

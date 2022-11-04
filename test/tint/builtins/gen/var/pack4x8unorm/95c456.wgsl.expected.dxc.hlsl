@@ -4,7 +4,7 @@ uint tint_pack4x8unorm(float4 param_0) {
 }
 
 void pack4x8unorm_95c456() {
-  float4 arg_0 = (0.0f).xxxx;
+  float4 arg_0 = (1.0f).xxxx;
   uint res = tint_pack4x8unorm(arg_0);
 }
 

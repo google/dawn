@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 41
+; Bound: 44
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -39,40 +39,43 @@
          %13 = OpTypeFunction %void
      %v4uint = OpTypeVector %uint 4
      %v3uint = OpTypeVector %uint 3
-     %uint_0 = OpConstant %uint 0
+     %v2uint = OpTypeVector %uint 2
      %uint_1 = OpConstant %uint 1
-         %23 = OpConstantComposite %v3uint %uint_0 %uint_0 %uint_1
+         %23 = OpConstantComposite %v2uint %uint_1 %uint_1
 %_ptr_Function_v4uint = OpTypePointer Function %v4uint
-         %26 = OpConstantNull %v4uint
-         %27 = OpTypeFunction %v4float
+         %29 = OpConstantNull %v4uint
+         %30 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %textureLoad_8527b1 = OpFunction %void None %13
          %16 = OpLabel
-        %res = OpVariable %_ptr_Function_v4uint Function %26
+        %res = OpVariable %_ptr_Function_v4uint Function %29
          %19 = OpLoad %11 %arg_0
-         %17 = OpImageFetch %v4uint %19 %23 Lod %uint_1
+         %24 = OpCompositeExtract %uint %23 0
+         %25 = OpCompositeExtract %uint %23 1
+         %26 = OpCompositeConstruct %v3uint %24 %25 %uint_1
+         %17 = OpImageFetch %v4uint %19 %26 Lod %uint_1
                OpStore %res %17
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %27
-         %29 = OpLabel
-         %30 = OpFunctionCall %void %textureLoad_8527b1
+%vertex_main_inner = OpFunction %v4float None %30
+         %32 = OpLabel
+         %33 = OpFunctionCall %void %textureLoad_8527b1
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %13
-         %32 = OpLabel
-         %33 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %33
+         %35 = OpLabel
+         %36 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %36
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %13
-         %36 = OpLabel
-         %37 = OpFunctionCall %void %textureLoad_8527b1
+         %39 = OpLabel
+         %40 = OpFunctionCall %void %textureLoad_8527b1
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %13
-         %39 = OpLabel
-         %40 = OpFunctionCall %void %textureLoad_8527b1
+         %42 = OpLabel
+         %43 = OpFunctionCall %void %textureLoad_8527b1
                OpReturn
                OpFunctionEnd

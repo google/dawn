@@ -3,7 +3,7 @@
 uniform highp sampler2DArray arg_1_arg_2;
 
 void textureGather_22e930() {
-  vec2 arg_3 = vec2(0.0f);
+  vec2 arg_3 = vec2(1.0f);
   int arg_4 = 1;
   vec4 res = textureGather(arg_1_arg_2, vec3(arg_3, float(arg_4)), 1);
 }
@@ -27,7 +27,7 @@ precision mediump float;
 uniform highp sampler2DArray arg_1_arg_2;
 
 void textureGather_22e930() {
-  vec2 arg_3 = vec2(0.0f);
+  vec2 arg_3 = vec2(1.0f);
   int arg_4 = 1;
   vec4 res = textureGather(arg_1_arg_2, vec3(arg_3, float(arg_4)), 1);
 }
@@ -45,7 +45,7 @@ void main() {
 uniform highp sampler2DArray arg_1_arg_2;
 
 void textureGather_22e930() {
-  vec2 arg_3 = vec2(0.0f);
+  vec2 arg_3 = vec2(1.0f);
   int arg_4 = 1;
   vec4 res = textureGather(arg_1_arg_2, vec3(arg_3, float(arg_4)), 1);
 }

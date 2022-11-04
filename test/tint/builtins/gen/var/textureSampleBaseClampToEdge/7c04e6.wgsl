@@ -25,7 +25,7 @@
 
 // fn textureSampleBaseClampToEdge(texture: texture_external, sampler: sampler, coords: vec2<f32>) -> vec4<f32>
 fn textureSampleBaseClampToEdge_7c04e6() {
-  var arg_2 = vec2<f32>();
+  var arg_2 = vec2<f32>(1.f);
   var res: vec4<f32> = textureSampleBaseClampToEdge(arg_0, arg_1, arg_2);
 }
 

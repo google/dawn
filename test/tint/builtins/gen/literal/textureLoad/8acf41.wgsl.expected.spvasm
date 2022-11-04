@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 138
+; Bound: 139
 ; Schema: 0
                OpCapability Shader
          %28 = OpExtInstImport "GLSL.std.450"
@@ -114,11 +114,12 @@
          %93 = OpConstantNull %uint
        %void = OpTypeVoid
         %111 = OpTypeFunction %void
-        %118 = OpConstantNull %v2int
+      %int_1 = OpConstant %int 1
+        %119 = OpConstantComposite %v2int %int_1 %int_1
      %uint_0 = OpConstant %uint 0
 %_ptr_Uniform_ExternalTextureParams = OpTypePointer Uniform %ExternalTextureParams
 %_ptr_Function_v4float = OpTypePointer Function %v4float
-        %125 = OpTypeFunction %v4float
+        %126 = OpTypeFunction %v4float
 %gammaCorrection = OpFunction %v3float None %22
           %v = OpFunctionParameter %v3float
      %params = OpFunctionParameter %GammaTransferParams
@@ -215,31 +216,31 @@
         %res = OpVariable %_ptr_Function_v4float Function %5
         %116 = OpLoad %11 %arg_0
         %117 = OpLoad %11 %ext_tex_plane_1
-        %121 = OpAccessChain %_ptr_Uniform_ExternalTextureParams %ext_tex_params %uint_0
-        %122 = OpLoad %ExternalTextureParams %121
-        %115 = OpFunctionCall %v4float %textureLoadExternal %116 %117 %118 %122
+        %122 = OpAccessChain %_ptr_Uniform_ExternalTextureParams %ext_tex_params %uint_0
+        %123 = OpLoad %ExternalTextureParams %122
+        %115 = OpFunctionCall %v4float %textureLoadExternal %116 %117 %119 %123
                OpStore %res %115
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %125
-        %127 = OpLabel
-        %128 = OpFunctionCall %void %textureLoad_8acf41
+%vertex_main_inner = OpFunction %v4float None %126
+        %128 = OpLabel
+        %129 = OpFunctionCall %void %textureLoad_8acf41
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %111
-        %130 = OpLabel
-        %131 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %131
+        %131 = OpLabel
+        %132 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %132
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %111
-        %133 = OpLabel
-        %134 = OpFunctionCall %void %textureLoad_8acf41
+        %134 = OpLabel
+        %135 = OpFunctionCall %void %textureLoad_8acf41
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %111
-        %136 = OpLabel
-        %137 = OpFunctionCall %void %textureLoad_8acf41
+        %137 = OpLabel
+        %138 = OpFunctionCall %void %textureLoad_8acf41
                OpReturn
                OpFunctionEnd

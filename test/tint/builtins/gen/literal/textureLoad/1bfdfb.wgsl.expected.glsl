@@ -49,7 +49,7 @@ vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, uve
 uniform highp sampler2D arg_0_1;
 uniform highp sampler2D ext_tex_plane_1_1;
 void textureLoad_1bfdfb() {
-  vec4 res = textureLoadExternal(arg_0_1, ext_tex_plane_1_1, uvec2(0u), ext_tex_params.inner);
+  vec4 res = textureLoadExternal(arg_0_1, ext_tex_plane_1_1, uvec2(1u), ext_tex_params.inner);
 }
 
 vec4 vertex_main() {
@@ -117,7 +117,7 @@ vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, uve
 uniform highp sampler2D arg_0_1;
 uniform highp sampler2D ext_tex_plane_1_1;
 void textureLoad_1bfdfb() {
-  vec4 res = textureLoadExternal(arg_0_1, ext_tex_plane_1_1, uvec2(0u), ext_tex_params.inner);
+  vec4 res = textureLoadExternal(arg_0_1, ext_tex_plane_1_1, uvec2(1u), ext_tex_params.inner);
 }
 
 void fragment_main() {
@@ -179,7 +179,7 @@ vec4 textureLoadExternal(highp sampler2D plane0_1, highp sampler2D plane1_1, uve
 uniform highp sampler2D arg_0_1;
 uniform highp sampler2D ext_tex_plane_1_1;
 void textureLoad_1bfdfb() {
-  vec4 res = textureLoadExternal(arg_0_1, ext_tex_plane_1_1, uvec2(0u), ext_tex_params.inner);
+  vec4 res = textureLoadExternal(arg_0_1, ext_tex_plane_1_1, uvec2(1u), ext_tex_params.inner);
 }
 
 void compute_main() {

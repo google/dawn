@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 52
+; Bound: 53
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -45,50 +45,51 @@
        %void = OpTypeVoid
          %16 = OpTypeFunction %void
     %v2float = OpTypeVector %float 2
-         %21 = OpConstantNull %v2float
+    %float_1 = OpConstant %float 1
+         %22 = OpConstantComposite %v2float %float_1 %float_1
 %_ptr_Function_v2float = OpTypePointer Function %v2float
+         %25 = OpConstantNull %v2float
      %v4uint = OpTypeVector %uint 4
-         %28 = OpTypeSampledImage %11
+         %30 = OpTypeSampledImage %11
         %int = OpTypeInt 32 1
       %int_1 = OpConstant %int 1
       %v2int = OpTypeVector %int 2
-         %34 = OpConstantNull %v2int
+         %36 = OpConstantComposite %v2int %int_1 %int_1
 %_ptr_Function_v4uint = OpTypePointer Function %v4uint
-         %37 = OpConstantNull %v4uint
-         %38 = OpTypeFunction %v4float
-    %float_1 = OpConstant %float 1
+         %39 = OpConstantNull %v4uint
+         %40 = OpTypeFunction %v4float
 %textureGather_49b07f = OpFunction %void None %16
          %19 = OpLabel
-      %arg_3 = OpVariable %_ptr_Function_v2float Function %21
-        %res = OpVariable %_ptr_Function_v4uint Function %37
-               OpStore %arg_3 %21
-         %26 = OpLoad %15 %arg_2
-         %27 = OpLoad %11 %arg_1
-         %29 = OpSampledImage %28 %27 %26
-         %30 = OpLoad %v2float %arg_3
-         %24 = OpImageGather %v4uint %29 %30 %int_1 ConstOffset %34
-               OpStore %res %24
+      %arg_3 = OpVariable %_ptr_Function_v2float Function %25
+        %res = OpVariable %_ptr_Function_v4uint Function %39
+               OpStore %arg_3 %22
+         %28 = OpLoad %15 %arg_2
+         %29 = OpLoad %11 %arg_1
+         %31 = OpSampledImage %30 %29 %28
+         %32 = OpLoad %v2float %arg_3
+         %26 = OpImageGather %v4uint %31 %32 %int_1 ConstOffset %36
+               OpStore %res %26
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %38
-         %40 = OpLabel
-         %41 = OpFunctionCall %void %textureGather_49b07f
+%vertex_main_inner = OpFunction %v4float None %40
+         %42 = OpLabel
+         %43 = OpFunctionCall %void %textureGather_49b07f
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %16
-         %43 = OpLabel
-         %44 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %44
+         %45 = OpLabel
+         %46 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %46
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %16
-         %47 = OpLabel
-         %48 = OpFunctionCall %void %textureGather_49b07f
+         %48 = OpLabel
+         %49 = OpFunctionCall %void %textureGather_49b07f
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %16
-         %50 = OpLabel
-         %51 = OpFunctionCall %void %textureGather_49b07f
+         %51 = OpLabel
+         %52 = OpFunctionCall %void %textureGather_49b07f
                OpReturn
                OpFunctionEnd

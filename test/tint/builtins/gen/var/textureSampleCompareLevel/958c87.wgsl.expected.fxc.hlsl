@@ -2,7 +2,7 @@ TextureCubeArray arg_0 : register(t0, space1);
 SamplerComparisonState arg_1 : register(s1, space1);
 
 void textureSampleCompareLevel_958c87() {
-  float3 arg_2 = (0.0f).xxx;
+  float3 arg_2 = (1.0f).xxx;
   uint arg_3 = 1u;
   float arg_4 = 1.0f;
   float res = arg_0.SampleCmpLevelZero(arg_1, float4(arg_2, float(arg_3)), arg_4);

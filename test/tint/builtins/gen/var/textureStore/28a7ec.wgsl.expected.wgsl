@@ -1,9 +1,9 @@
 @group(1) @binding(0) var arg_0 : texture_storage_2d_array<r32sint, write>;
 
 fn textureStore_28a7ec() {
-  var arg_1 = vec2<u32>();
+  var arg_1 = vec2<u32>(1u);
   var arg_2 = 1i;
-  var arg_3 = vec4<i32>();
+  var arg_3 = vec4<i32>(1i);
   textureStore(arg_0, arg_1, arg_2, arg_3);
 }
 

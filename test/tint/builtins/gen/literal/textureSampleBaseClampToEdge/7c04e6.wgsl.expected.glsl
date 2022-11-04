@@ -58,7 +58,7 @@ uniform highp sampler2D ext_tex_plane_1_1;
 uniform highp sampler2D arg_0_arg_1;
 uniform highp sampler2D ext_tex_plane_1_arg_1;
 void textureSampleBaseClampToEdge_7c04e6() {
-  vec4 res = textureSampleExternal(arg_0_1, ext_tex_plane_1_1, arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(0.0f), ext_tex_params.inner);
+  vec4 res = textureSampleExternal(arg_0_1, ext_tex_plane_1_1, arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(1.0f), ext_tex_params.inner);
 }
 
 vec4 vertex_main() {
@@ -135,7 +135,7 @@ uniform highp sampler2D ext_tex_plane_1_1;
 uniform highp sampler2D arg_0_arg_1;
 uniform highp sampler2D ext_tex_plane_1_arg_1;
 void textureSampleBaseClampToEdge_7c04e6() {
-  vec4 res = textureSampleExternal(arg_0_1, ext_tex_plane_1_1, arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(0.0f), ext_tex_params.inner);
+  vec4 res = textureSampleExternal(arg_0_1, ext_tex_plane_1_1, arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(1.0f), ext_tex_params.inner);
 }
 
 void fragment_main() {
@@ -206,7 +206,7 @@ uniform highp sampler2D ext_tex_plane_1_1;
 uniform highp sampler2D arg_0_arg_1;
 uniform highp sampler2D ext_tex_plane_1_arg_1;
 void textureSampleBaseClampToEdge_7c04e6() {
-  vec4 res = textureSampleExternal(arg_0_1, ext_tex_plane_1_1, arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(0.0f), ext_tex_params.inner);
+  vec4 res = textureSampleExternal(arg_0_1, ext_tex_plane_1_1, arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(1.0f), ext_tex_params.inner);
 }
 
 void compute_main() {

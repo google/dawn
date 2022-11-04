@@ -1,7 +1,7 @@
 @group(1) @binding(0) var arg_0 : texture_storage_2d<rg32sint, write>;
 
 fn textureStore_9f5318() {
-  textureStore(arg_0, vec2<u32>(), vec4<i32>());
+  textureStore(arg_0, vec2<u32>(1u), vec4<i32>(1i));
 }
 
 @vertex

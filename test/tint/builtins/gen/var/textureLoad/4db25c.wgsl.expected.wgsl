@@ -1,7 +1,7 @@
 @group(1) @binding(0) var arg_0 : texture_depth_multisampled_2d;
 
 fn textureLoad_4db25c() {
-  var arg_1 = vec2<u32>();
+  var arg_1 = vec2<u32>(1u);
   var arg_2 = 1u;
   var res : f32 = textureLoad(arg_0, arg_1, arg_2);
 }

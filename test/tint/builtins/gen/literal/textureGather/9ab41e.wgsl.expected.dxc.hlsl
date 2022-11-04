@@ -2,7 +2,7 @@ Texture2DArray<int4> arg_1 : register(t1, space1);
 SamplerState arg_2 : register(s2, space1);
 
 void textureGather_9ab41e() {
-  int4 res = arg_1.GatherGreen(arg_2, float3(0.0f, 0.0f, float(1)), (0).xx);
+  int4 res = arg_1.GatherGreen(arg_2, float3((1.0f).xx, float(1)), (1).xx);
 }
 
 struct tint_symbol {

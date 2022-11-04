@@ -3,7 +3,7 @@
 uniform highp isampler2D arg_1_arg_2;
 
 void textureGather_bb3ac5() {
-  vec2 arg_3 = vec2(0.0f);
+  vec2 arg_3 = vec2(1.0f);
   ivec4 res = textureGather(arg_1_arg_2, arg_3, 1);
 }
 
@@ -26,7 +26,7 @@ precision mediump float;
 uniform highp isampler2D arg_1_arg_2;
 
 void textureGather_bb3ac5() {
-  vec2 arg_3 = vec2(0.0f);
+  vec2 arg_3 = vec2(1.0f);
   ivec4 res = textureGather(arg_1_arg_2, arg_3, 1);
 }
 
@@ -43,7 +43,7 @@ void main() {
 uniform highp isampler2D arg_1_arg_2;
 
 void textureGather_bb3ac5() {
-  vec2 arg_3 = vec2(0.0f);
+  vec2 arg_3 = vec2(1.0f);
   ivec4 res = textureGather(arg_1_arg_2, arg_3, 1);
 }
 

@@ -1,7 +1,7 @@
 Texture2DArray arg_0 : register(t0, space1);
 
 void textureLoad_ff1119() {
-  int2 arg_1 = (0).xx;
+  int2 arg_1 = (1).xx;
   int arg_2 = 1;
   uint arg_3 = 1u;
   float res = arg_0.Load(int4(int3(arg_1, arg_2), int(arg_3))).x;

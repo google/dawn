@@ -25,7 +25,7 @@
 
 // fn textureSampleLevel(texture: texture_depth_cube_array, sampler: sampler, coords: vec3<f32>, array_index: i32, level: i32) -> f32
 fn textureSampleLevel_ae5e39() {
-  var res: f32 = textureSampleLevel(arg_0, arg_1, vec3<f32>(), 1i, 1i);
+  var res: f32 = textureSampleLevel(arg_0, arg_1, vec3<f32>(1.f), 1i, 1i);
 }
 
 @vertex

@@ -25,7 +25,7 @@
 
 // fn textureGatherCompare(texture: texture_depth_cube_array, sampler: sampler_comparison, coords: vec3<f32>, array_index: u32, depth_ref: f32) -> vec4<f32>
 fn textureGatherCompare_2e409c() {
-  var res: vec4<f32> = textureGatherCompare(arg_0, arg_1, vec3<f32>(), 1u, 1.f);
+  var res: vec4<f32> = textureGatherCompare(arg_0, arg_1, vec3<f32>(1.f), 1u, 1.f);
 }
 
 @vertex

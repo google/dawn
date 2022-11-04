@@ -2,9 +2,9 @@
 
 using namespace metal;
 void textureSampleGrad_5312f4(texturecube<float, access::sample> tint_symbol_1, sampler tint_symbol_2) {
-  float3 arg_2 = float3(0.0f);
-  float3 arg_3 = float3(0.0f);
-  float3 arg_4 = float3(0.0f);
+  float3 arg_2 = float3(1.0f);
+  float3 arg_3 = float3(1.0f);
+  float3 arg_4 = float3(1.0f);
   float4 res = tint_symbol_1.sample(tint_symbol_2, arg_2, gradientcube(arg_3, arg_4));
 }
 

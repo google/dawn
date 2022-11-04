@@ -2,8 +2,8 @@
 
 using namespace metal;
 void textureStore_805dae(texture2d<float, access::write> tint_symbol_1) {
-  int2 arg_1 = int2(0);
-  float4 arg_2 = float4(0.0f);
+  int2 arg_1 = int2(1);
+  float4 arg_2 = float4(1.0f);
   tint_symbol_1.write(arg_2, uint2(arg_1));
 }
 

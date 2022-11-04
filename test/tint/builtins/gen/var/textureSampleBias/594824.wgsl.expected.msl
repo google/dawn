@@ -2,9 +2,9 @@
 
 using namespace metal;
 void textureSampleBias_594824(texture3d<float, access::sample> tint_symbol, sampler tint_symbol_1) {
-  float3 arg_2 = float3(0.0f);
+  float3 arg_2 = float3(1.0f);
   float arg_3 = 1.0f;
-  float4 res = tint_symbol.sample(tint_symbol_1, arg_2, bias(arg_3), int3(0));
+  float4 res = tint_symbol.sample(tint_symbol_1, arg_2, bias(arg_3), int3(1));
 }
 
 fragment void fragment_main(texture3d<float, access::sample> tint_symbol_2 [[texture(0)]], sampler tint_symbol_3 [[sampler(0)]]) {

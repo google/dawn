@@ -1,7 +1,7 @@
 Texture2D<float4> arg_0 : register(t0, space1);
 
 void textureLoad_2d479c() {
-  float4 res = arg_0.Load(int3(0, 0, int(1u)));
+  float4 res = arg_0.Load(int3((1).xx, int(1u)));
 }
 
 struct tint_symbol {

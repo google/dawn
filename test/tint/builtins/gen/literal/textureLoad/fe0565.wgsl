@@ -24,7 +24,7 @@
 
 // fn textureLoad(texture: texture_multisampled_2d<u32>, coords: vec2<u32>, sample_index: i32) -> vec4<u32>
 fn textureLoad_fe0565() {
-  var res: vec4<u32> = textureLoad(arg_0, vec2<u32>(), 1i);
+  var res: vec4<u32> = textureLoad(arg_0, vec2<u32>(1u), 1i);
 }
 
 @vertex

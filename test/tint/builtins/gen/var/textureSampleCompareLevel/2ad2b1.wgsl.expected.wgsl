@@ -3,7 +3,7 @@
 @group(1) @binding(1) var arg_1 : sampler_comparison;
 
 fn textureSampleCompareLevel_2ad2b1() {
-  var arg_2 = vec2<f32>();
+  var arg_2 = vec2<f32>(1.0f);
   var arg_3 = 1.0f;
   var res : f32 = textureSampleCompareLevel(arg_0, arg_1, arg_2, arg_3);
 }

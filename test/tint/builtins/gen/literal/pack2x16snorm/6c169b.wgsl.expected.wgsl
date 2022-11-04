@@ -1,5 +1,5 @@
 fn pack2x16snorm_6c169b() {
-  var res : u32 = pack2x16snorm(vec2<f32>());
+  var res : u32 = pack2x16snorm(vec2<f32>(1.0f));
 }
 
 @vertex

@@ -25,7 +25,7 @@
 
 // fn textureSampleCompare(texture: texture_depth_2d, sampler: sampler_comparison, coords: vec2<f32>, depth_ref: f32, @const offset: vec2<i32>) -> f32
 fn textureSampleCompare_dec064() {
-  var res: f32 = textureSampleCompare(arg_0, arg_1, vec2<f32>(), 1.f, vec2<i32>());
+  var res: f32 = textureSampleCompare(arg_0, arg_1, vec2<f32>(1.f), 1.f, vec2<i32>(1i));
 }
 
 @fragment

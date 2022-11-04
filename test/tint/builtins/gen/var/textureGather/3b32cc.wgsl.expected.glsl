@@ -3,7 +3,7 @@
 uniform highp usamplerCube arg_1_arg_2;
 
 void textureGather_3b32cc() {
-  vec3 arg_3 = vec3(0.0f);
+  vec3 arg_3 = vec3(1.0f);
   uvec4 res = textureGather(arg_1_arg_2, arg_3, 1);
 }
 
@@ -26,7 +26,7 @@ precision mediump float;
 uniform highp usamplerCube arg_1_arg_2;
 
 void textureGather_3b32cc() {
-  vec3 arg_3 = vec3(0.0f);
+  vec3 arg_3 = vec3(1.0f);
   uvec4 res = textureGather(arg_1_arg_2, arg_3, 1);
 }
 
@@ -43,7 +43,7 @@ void main() {
 uniform highp usamplerCube arg_1_arg_2;
 
 void textureGather_3b32cc() {
-  vec3 arg_3 = vec3(0.0f);
+  vec3 arg_3 = vec3(1.0f);
   uvec4 res = textureGather(arg_1_arg_2, arg_3, 1);
 }
 

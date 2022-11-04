@@ -44,33 +44,33 @@
          %15 = OpTypeFunction %void
          %23 = OpTypeSampledImage %11
     %v2float = OpTypeVector %float 2
-         %26 = OpConstantNull %v2float
+    %float_1 = OpConstant %float 1
+         %27 = OpConstantComposite %v2float %float_1 %float_1
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
 %_ptr_Function_float = OpTypePointer Function %float
-         %32 = OpTypeFunction %v4float
-    %float_1 = OpConstant %float 1
+         %33 = OpTypeFunction %v4float
 %textureSampleLevel_73e892 = OpFunction %void None %15
          %18 = OpLabel
         %res = OpVariable %_ptr_Function_float Function %8
          %21 = OpLoad %14 %arg_1
          %22 = OpLoad %11 %arg_0
          %24 = OpSampledImage %23 %22 %21
-         %27 = OpConvertSToF %float %uint_1
-         %20 = OpImageSampleExplicitLod %v4float %24 %26 Lod %27
+         %28 = OpConvertSToF %float %uint_1
+         %20 = OpImageSampleExplicitLod %v4float %24 %27 Lod %28
          %19 = OpCompositeExtract %float %20 0
                OpStore %res %19
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %32
-         %34 = OpLabel
-         %35 = OpFunctionCall %void %textureSampleLevel_73e892
+%vertex_main_inner = OpFunction %v4float None %33
+         %35 = OpLabel
+         %36 = OpFunctionCall %void %textureSampleLevel_73e892
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %15
-         %37 = OpLabel
-         %38 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %38
+         %38 = OpLabel
+         %39 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %39
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd

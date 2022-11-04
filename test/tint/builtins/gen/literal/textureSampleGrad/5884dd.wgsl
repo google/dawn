@@ -25,7 +25,7 @@
 
 // fn textureSampleGrad(texture: texture_3d<f32>, sampler: sampler, coords: vec3<f32>, ddx: vec3<f32>, ddy: vec3<f32>, @const offset: vec3<i32>) -> vec4<f32>
 fn textureSampleGrad_5884dd() {
-  var res: vec4<f32> = textureSampleGrad(arg_0, arg_1, vec3<f32>(), vec3<f32>(), vec3<f32>(), vec3<i32>());
+  var res: vec4<f32> = textureSampleGrad(arg_0, arg_1, vec3<f32>(1.f), vec3<f32>(1.f), vec3<f32>(1.f), vec3<i32>(1i));
 }
 
 @vertex

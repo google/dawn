@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureLoad_ff1119(depth2d_array<float, access::sample> tint_symbol_1) {
-  int2 arg_1 = int2(0);
+  int2 arg_1 = int2(1);
   int arg_2 = 1;
   uint arg_3 = 1u;
   float res = tint_symbol_1.read(uint2(arg_1), arg_2, arg_3);

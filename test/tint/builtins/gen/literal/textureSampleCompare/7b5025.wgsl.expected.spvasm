@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 33
+; Bound: 37
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -27,29 +27,33 @@
           %8 = OpTypeFunction %void
          %15 = OpTypeSampledImage %3
     %v3float = OpTypeVector %float 3
-    %float_0 = OpConstant %float 0
+    %v2float = OpTypeVector %float 2
+    %float_1 = OpConstant %float 1
+         %20 = OpConstantComposite %v2float %float_1 %float_1
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
-    %float_1 = OpConstant %float 1
         %int = OpTypeInt 32 1
       %v2int = OpTypeVector %int 2
-         %26 = OpConstantNull %v2int
+      %int_1 = OpConstant %int 1
+         %30 = OpConstantComposite %v2int %int_1 %int_1
 %_ptr_Function_float = OpTypePointer Function %float
-         %29 = OpConstantNull %float
+         %33 = OpConstantNull %float
 %textureSampleCompare_7b5025 = OpFunction %void None %8
          %11 = OpLabel
-        %res = OpVariable %_ptr_Function_float Function %29
+        %res = OpVariable %_ptr_Function_float Function %33
          %13 = OpLoad %7 %arg_1
          %14 = OpLoad %3 %arg_0
          %16 = OpSampledImage %15 %14 %13
-         %19 = OpConvertUToF %float %uint_1
-         %22 = OpCompositeConstruct %v3float %float_0 %float_0 %19
-         %12 = OpImageSampleDrefImplicitLod %float %16 %22 %float_1 ConstOffset %26
+         %21 = OpCompositeExtract %float %20 0
+         %22 = OpCompositeExtract %float %20 1
+         %23 = OpConvertUToF %float %uint_1
+         %26 = OpCompositeConstruct %v3float %21 %22 %23
+         %12 = OpImageSampleDrefImplicitLod %float %16 %26 %float_1 ConstOffset %30
                OpStore %res %12
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %8
-         %31 = OpLabel
-         %32 = OpFunctionCall %void %textureSampleCompare_7b5025
+         %35 = OpLabel
+         %36 = OpFunctionCall %void %textureSampleCompare_7b5025
                OpReturn
                OpFunctionEnd

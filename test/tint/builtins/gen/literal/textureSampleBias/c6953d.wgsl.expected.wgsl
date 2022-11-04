@@ -3,7 +3,7 @@
 @group(1) @binding(1) var arg_1 : sampler;
 
 fn textureSampleBias_c6953d() {
-  var res : vec4<f32> = textureSampleBias(arg_0, arg_1, vec3<f32>(), 1u, 1.0f);
+  var res : vec4<f32> = textureSampleBias(arg_0, arg_1, vec3<f32>(1.0f), 1u, 1.0f);
 }
 
 @fragment

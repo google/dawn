@@ -44,8 +44,8 @@
          %15 = OpTypeFunction %void
          %22 = OpTypeSampledImage %11
     %v2float = OpTypeVector %float 2
-         %25 = OpConstantNull %v2float
     %float_1 = OpConstant %float 1
+         %26 = OpConstantComposite %v2float %float_1 %float_1
     %float_0 = OpConstant %float 0
 %_ptr_Function_float = OpTypePointer Function %float
          %30 = OpTypeFunction %v4float
@@ -55,7 +55,7 @@
          %20 = OpLoad %14 %arg_1
          %21 = OpLoad %11 %arg_0
          %23 = OpSampledImage %22 %21 %20
-         %19 = OpImageSampleDrefExplicitLod %float %23 %25 %float_1 Lod %float_0
+         %19 = OpImageSampleDrefExplicitLod %float %23 %26 %float_1 Lod %float_0
                OpStore %res %19
                OpReturn
                OpFunctionEnd

@@ -1,7 +1,7 @@
 @group(1) @binding(0) var arg_0 : texture_depth_2d_array;
 
 fn textureLoad_ff1119() {
-  var res : f32 = textureLoad(arg_0, vec2<i32>(), 1i, 1u);
+  var res : f32 = textureLoad(arg_0, vec2<i32>(1i), 1i, 1u);
 }
 
 @vertex

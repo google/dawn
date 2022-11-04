@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureLoad_6273b1(depth2d_ms<float, access::read> tint_symbol_1) {
-  int2 arg_1 = int2(0);
+  int2 arg_1 = int2(1);
   int arg_2 = 1;
   float res = tint_symbol_1.read(uint2(arg_1), arg_2);
 }

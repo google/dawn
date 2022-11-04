@@ -39,8 +39,8 @@
          %13 = OpTypeFunction %void
       %v4int = OpTypeVector %int 4
       %v2int = OpTypeVector %int 2
-         %21 = OpConstantNull %v2int
       %int_1 = OpConstant %int 1
+         %22 = OpConstantComposite %v2int %int_1 %int_1
 %_ptr_Function_v4int = OpTypePointer Function %v4int
          %25 = OpConstantNull %v4int
          %26 = OpTypeFunction %v4float
@@ -49,7 +49,7 @@
          %16 = OpLabel
         %res = OpVariable %_ptr_Function_v4int Function %25
          %19 = OpLoad %11 %arg_0
-         %17 = OpImageFetch %v4int %19 %21 Sample %int_1
+         %17 = OpImageFetch %v4int %19 %22 Sample %int_1
                OpStore %res %17
                OpReturn
                OpFunctionEnd

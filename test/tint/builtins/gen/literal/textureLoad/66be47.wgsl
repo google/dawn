@@ -24,7 +24,7 @@
 
 // fn textureLoad(texture: texture_depth_2d_array, coords: vec2<i32>, array_index: u32, level: u32) -> f32
 fn textureLoad_66be47() {
-  var res: f32 = textureLoad(arg_0, vec2<i32>(), 1u, 1u);
+  var res: f32 = textureLoad(arg_0, vec2<i32>(1i), 1u, 1u);
 }
 
 @vertex

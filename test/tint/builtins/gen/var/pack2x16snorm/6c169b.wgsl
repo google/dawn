@@ -23,7 +23,7 @@
 
 // fn pack2x16snorm(vec2<f32>) -> u32
 fn pack2x16snorm_6c169b() {
-  var arg_0 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.f);
   var res: u32 = pack2x16snorm(arg_0);
 }
 

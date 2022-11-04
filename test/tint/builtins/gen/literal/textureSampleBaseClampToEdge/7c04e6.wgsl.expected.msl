@@ -64,7 +64,7 @@ float4 textureSampleExternal(texture2d<float, access::sample> plane0, texture2d<
 }
 
 void textureSampleBaseClampToEdge_7c04e6(texture2d<float, access::sample> tint_symbol_1, texture2d<float, access::sample> tint_symbol_2, sampler tint_symbol_3, const constant ExternalTextureParams* const tint_symbol_4) {
-  float4 res = textureSampleExternal(tint_symbol_1, tint_symbol_2, tint_symbol_3, float2(0.0f), *(tint_symbol_4));
+  float4 res = textureSampleExternal(tint_symbol_1, tint_symbol_2, tint_symbol_3, float2(1.0f), *(tint_symbol_4));
 }
 
 struct tint_symbol {

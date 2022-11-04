@@ -2,7 +2,7 @@ Texture2D<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 
 void textureSampleGrad_d4e3c5() {
-  float4 res = arg_0.SampleGrad(arg_1, (0.0f).xx, (0.0f).xx, (0.0f).xx, (0).xx);
+  float4 res = arg_0.SampleGrad(arg_1, (1.0f).xx, (1.0f).xx, (1.0f).xx, (1).xx);
 }
 
 struct tint_symbol {

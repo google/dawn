@@ -1,7 +1,7 @@
 #version 310 es
 
 void pack2x16float_0e97b3() {
-  uint res = packHalf2x16(vec2(0.0f));
+  uint res = packHalf2x16(vec2(1.0f));
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void pack2x16float_0e97b3() {
-  uint res = packHalf2x16(vec2(0.0f));
+  uint res = packHalf2x16(vec2(1.0f));
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void pack2x16float_0e97b3() {
-  uint res = packHalf2x16(vec2(0.0f));
+  uint res = packHalf2x16(vec2(1.0f));
 }
 
 void compute_main() {

@@ -3,7 +3,7 @@
 @group(1) @binding(1) var arg_1 : sampler;
 
 fn textureSampleGrad_d4e3c5() {
-  var res : vec4<f32> = textureSampleGrad(arg_0, arg_1, vec2<f32>(), vec2<f32>(), vec2<f32>(), vec2<i32>());
+  var res : vec4<f32> = textureSampleGrad(arg_0, arg_1, vec2<f32>(1.0f), vec2<f32>(1.0f), vec2<f32>(1.0f), vec2<i32>(1i));
 }
 
 @vertex

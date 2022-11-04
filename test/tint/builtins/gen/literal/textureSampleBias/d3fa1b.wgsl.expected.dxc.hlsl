@@ -2,7 +2,7 @@ Texture3D<float4> arg_0 : register(t0, space1);
 SamplerState arg_1 : register(s1, space1);
 
 void textureSampleBias_d3fa1b() {
-  float4 res = arg_0.SampleBias(arg_1, (0.0f).xxx, 1.0f);
+  float4 res = arg_0.SampleBias(arg_1, (1.0f).xxx, 1.0f);
 }
 
 void fragment_main() {

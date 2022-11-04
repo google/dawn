@@ -3,7 +3,7 @@
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
 void textureGatherCompare_783e65() {
-  vec2 arg_2 = vec2(0.0f);
+  vec2 arg_2 = vec2(1.0f);
   int arg_3 = 1;
   float arg_4 = 1.0f;
   vec4 res = textureGather(arg_0_arg_1, vec3(arg_2, float(arg_3)), arg_4);
@@ -28,7 +28,7 @@ precision mediump float;
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
 void textureGatherCompare_783e65() {
-  vec2 arg_2 = vec2(0.0f);
+  vec2 arg_2 = vec2(1.0f);
   int arg_3 = 1;
   float arg_4 = 1.0f;
   vec4 res = textureGather(arg_0_arg_1, vec3(arg_2, float(arg_3)), arg_4);
@@ -47,7 +47,7 @@ void main() {
 uniform highp sampler2DArrayShadow arg_0_arg_1;
 
 void textureGatherCompare_783e65() {
-  vec2 arg_2 = vec2(0.0f);
+  vec2 arg_2 = vec2(1.0f);
   int arg_3 = 1;
   float arg_4 = 1.0f;
   vec4 res = textureGather(arg_0_arg_1, vec3(arg_2, float(arg_3)), arg_4);

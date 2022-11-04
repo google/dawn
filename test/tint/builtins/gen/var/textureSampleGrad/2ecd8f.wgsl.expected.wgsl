@@ -3,10 +3,10 @@
 @group(1) @binding(1) var arg_1 : sampler;
 
 fn textureSampleGrad_2ecd8f() {
-  var arg_2 = vec2<f32>();
+  var arg_2 = vec2<f32>(1.0f);
   var arg_3 = 1i;
-  var arg_4 = vec2<f32>();
-  var arg_5 = vec2<f32>();
+  var arg_4 = vec2<f32>(1.0f);
+  var arg_5 = vec2<f32>(1.0f);
   var res : vec4<f32> = textureSampleGrad(arg_0, arg_1, arg_2, arg_3, arg_4, arg_5);
 }
 

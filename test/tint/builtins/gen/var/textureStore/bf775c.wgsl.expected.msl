@@ -3,7 +3,7 @@
 using namespace metal;
 void textureStore_bf775c(texture1d<int, access::write> tint_symbol_1) {
   int arg_1 = 1;
-  int4 arg_2 = int4(0);
+  int4 arg_2 = int4(1);
   tint_symbol_1.write(arg_2, uint(arg_1));
 }
 

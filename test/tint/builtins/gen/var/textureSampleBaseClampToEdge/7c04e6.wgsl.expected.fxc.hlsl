@@ -91,7 +91,7 @@ ExternalTextureParams tint_symbol_1(uint4 buffer[11], uint offset) {
 }
 
 void textureSampleBaseClampToEdge_7c04e6() {
-  float2 arg_2 = (0.0f).xx;
+  float2 arg_2 = (1.0f).xx;
   float4 res = textureSampleExternal(arg_0, ext_tex_plane_1, arg_1, arg_2, tint_symbol_1(ext_tex_params, 0u));
 }
 

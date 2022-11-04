@@ -1,7 +1,7 @@
 @group(1) @binding(0) var arg_0 : texture_multisampled_2d<f32>;
 
 fn textureLoad_2e09aa() {
-  var res : vec4<f32> = textureLoad(arg_0, vec2<u32>(), 1u);
+  var res : vec4<f32> = textureLoad(arg_0, vec2<u32>(1u), 1u);
 }
 
 @vertex

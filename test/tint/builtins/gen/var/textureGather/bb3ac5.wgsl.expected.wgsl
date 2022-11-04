@@ -4,7 +4,7 @@
 
 fn textureGather_bb3ac5() {
   const arg_0 = 1i;
-  var arg_3 = vec2<f32>();
+  var arg_3 = vec2<f32>(1.0f);
   var res : vec4<i32> = textureGather(arg_0, arg_1, arg_2, arg_3);
 }
 

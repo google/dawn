@@ -1,8 +1,8 @@
 RWTexture3D<float4> arg_0 : register(u0, space1);
 
 void textureStore_8ed9f8() {
-  uint3 arg_1 = (0u).xxx;
-  float4 arg_2 = (0.0f).xxxx;
+  uint3 arg_1 = (1u).xxx;
+  float4 arg_2 = (1.0f).xxxx;
   arg_0[arg_1] = arg_2;
 }
 

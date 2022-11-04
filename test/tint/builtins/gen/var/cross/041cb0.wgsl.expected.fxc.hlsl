@@ -1,6 +1,6 @@
 void cross_041cb0() {
-  float3 arg_0 = (0.0f).xxx;
-  float3 arg_1 = (0.0f).xxx;
+  float3 arg_0 = (1.0f).xxx;
+  float3 arg_1 = (1.0f).xxx;
   float3 res = cross(arg_0, arg_1);
 }
 

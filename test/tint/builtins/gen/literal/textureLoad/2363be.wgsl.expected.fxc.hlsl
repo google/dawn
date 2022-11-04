@@ -1,7 +1,7 @@
 Texture2DArray<int4> arg_0 : register(t0, space1);
 
 void textureLoad_2363be() {
-  int4 res = arg_0.Load(uint4(0u, 0u, uint(1), 1u));
+  int4 res = arg_0.Load(uint4(uint3((1u).xx, uint(1)), 1u));
 }
 
 struct tint_symbol {

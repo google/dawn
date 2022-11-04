@@ -23,8 +23,8 @@
 
 // fn cross(vec3<f32>, vec3<f32>) -> vec3<f32>
 fn cross_041cb0() {
-  var arg_0 = vec3<f32>();
-  var arg_1 = vec3<f32>();
+  var arg_0 = vec3<f32>(1.f);
+  var arg_1 = vec3<f32>(1.f);
   var res: vec3<f32> = cross(arg_0, arg_1);
 }
 

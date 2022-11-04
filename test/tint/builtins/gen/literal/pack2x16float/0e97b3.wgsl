@@ -23,7 +23,7 @@
 
 // fn pack2x16float(vec2<f32>) -> u32
 fn pack2x16float_0e97b3() {
-  var res: u32 = pack2x16float(vec2<f32>());
+  var res: u32 = pack2x16float(vec2<f32>(1.f));
 }
 
 @vertex

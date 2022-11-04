@@ -1,5 +1,5 @@
 builtins/gen/literal/textureSampleLevel/979816.wgsl:28:24 warning: use of deprecated builtin
-  var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, vec2<f32>());
+  var res: vec4<f32> = textureSampleLevel(arg_0, arg_1, vec2<f32>(1.f));
                        ^^^^^^^^^^^^^^^^^^
 
 #version 310 es
@@ -54,7 +54,7 @@ vec4 textureSampleExternal(highp sampler2D plane0_smp, highp sampler2D plane1_sm
 uniform highp sampler2D arg_0_arg_1;
 uniform highp sampler2D ext_tex_plane_1_arg_1;
 void textureSampleLevel_979816() {
-  vec4 res = textureSampleExternal(arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(0.0f), ext_tex_params.inner);
+  vec4 res = textureSampleExternal(arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(1.0f), ext_tex_params.inner);
 }
 
 vec4 vertex_main() {
@@ -123,7 +123,7 @@ vec4 textureSampleExternal(highp sampler2D plane0_smp, highp sampler2D plane1_sm
 uniform highp sampler2D arg_0_arg_1;
 uniform highp sampler2D ext_tex_plane_1_arg_1;
 void textureSampleLevel_979816() {
-  vec4 res = textureSampleExternal(arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(0.0f), ext_tex_params.inner);
+  vec4 res = textureSampleExternal(arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(1.0f), ext_tex_params.inner);
 }
 
 void fragment_main() {
@@ -186,7 +186,7 @@ vec4 textureSampleExternal(highp sampler2D plane0_smp, highp sampler2D plane1_sm
 uniform highp sampler2D arg_0_arg_1;
 uniform highp sampler2D ext_tex_plane_1_arg_1;
 void textureSampleLevel_979816() {
-  vec4 res = textureSampleExternal(arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(0.0f), ext_tex_params.inner);
+  vec4 res = textureSampleExternal(arg_0_arg_1, ext_tex_plane_1_arg_1, vec2(1.0f), ext_tex_params.inner);
 }
 
 void compute_main() {

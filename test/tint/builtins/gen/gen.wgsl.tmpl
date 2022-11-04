@@ -270,17 +270,17 @@ enable f16;
 {{-   $float_value := $value }}
 {{-   if not (Contains $value ".") }}{{$float_value = printf "%v." $value}}{{end}}
 {{- /* emit the value with any necessary suffixes */ -}}
-{{-   if      eq $ty.Target.Name "i32"  -}}{{$value}}i
-{{-   else if eq $ty.Target.Name "u32"  -}}{{$value}}u
-{{-   else if eq $ty.Target.Name "f32"  -}}{{$float_value}}f
-{{-   else if eq $ty.Target.Name "fa"   -}}{{$float_value}}
-{{-   else if eq $ty.Target.Name "ia"   -}}{{$value}}
-{{-   else if eq $ty.Target.Name "bool" -}}true
-{{-   else if eq $ty.Target.Name "vec"  -}}
-{{-     $el := Eval "ArgumentValue" "Type" (ElementType .Type) "Name" "" "TestValue" .TestValue }}
+{{-        if eq        $ty.Target.Name "i32"  -}}{{$value}}i
+{{-   else if eq        $ty.Target.Name "u32"  -}}{{$value}}u
+{{-   else if eq        $ty.Target.Name "f32"  -}}{{$float_value}}f
+{{-   else if eq        $ty.Target.Name "fa"   -}}{{$float_value}}
+{{-   else if eq        $ty.Target.Name "ia"   -}}{{$value}}
+{{-   else if eq        $ty.Target.Name "bool" -}}true
+{{-   else if HasPrefix $ty.Target.Name "vec"  -}}
+{{-     $el := Eval "ArgumentValue" "Type" (ElementType .Type) "TestValue" .TestValue }}
 {{-     template "Type" $ty}}({{$el}})
-{{-   else if eq $ty.Target.Name "mat"   -}}{{template "Type" $ty}}(
-{{-     $el := Eval "ArgumentValue" "Type" (ElementType .Type) "Name" "" "TestValue" .TestValue }}
+{{-   else if HasPrefix $ty.Target.Name "mat"  -}}{{template "Type" $ty}}(
+{{-     $el := Eval "ArgumentValue" "Type" (ElementType .Type) "TestValue" .TestValue }}
 {{-     range $col := Iterate (index $ty.TemplateArguments 0)     }}
 {{-       range $row := Iterate (index $ty.TemplateArguments 1)   }}
 {{-         if or $col $row -}}, {{end}}{{$el}}
@@ -297,18 +297,27 @@ enable f16;
 {{- /* ------------------------------------------------------------------ */ -}}
 {{-   if IsType .Target -}}
 {{-     if DeepestElementType . | IsAbstract -}}
-{{-              if eq .Target.Name "vec" -}}vec{{index .TemplateArguments 0}}
-{{-         else if eq .Target.Name "mat" -}}mat{{index .TemplateArguments 0}}x{{index .TemplateArguments 1}}
-{{-         else                          -}}
-{{-         end                           -}}
-{{-     else if eq .Target.Name "vec" -}}vec{{index .TemplateArguments 0}}<{{template "Type" (ElementType .)}}>
-{{-     else if eq .Target.Name "mat" -}}mat{{index .TemplateArguments 0}}x{{index .TemplateArguments 1}}<{{template "Type" (ElementType .)}}>
-{{-     else                          -}}{{.Target.Name}}{{template "TemplateArguments" .TemplateArguments}}
-{{-     end                           -}}
-{{-   else if IsEnumEntry   .Target   -}}{{.Target.Name}}
-{{-   else if IsEnumMatcher .Target   -}}{{(index .Target.Options 0).Name}}
-{{-   else                            -}}<unhandled-fully-qualified-name-target={{- printf "%T" .Target -}}>
-{{-   end                             -}}
+{{-              if eq        .Target.Name "vec"  -}}vec{{index .TemplateArguments 0}}
+{{-         else if eq        .Target.Name "vec2" -}}vec2
+{{-         else if eq        .Target.Name "vec3" -}}vec3
+{{-         else if eq        .Target.Name "vec4" -}}vec4
+{{-         else if eq        .Target.Name "mat"  -}}mat{{index .TemplateArguments 0}}x{{index .TemplateArguments 1}}
+{{-         else if HasPrefix .Target.Name "mat"  -}}mat{{.Target.Name}}
+{{-         else                                  -}}
+{{-         end                                   -}}
+{{- /* note: intrinsics.def has different type definitions for 'vec<N: num, T>',
+       'vec2<T>', 'vec3<T>'. Because of this we need to check whether the type
+       name is exactly 'vec' and 'mat' and if not, then look for the prefix. */ -}}
+{{-     else if eq .Target.Name "vec"        -}}vec{{index .TemplateArguments 0}}<{{template "Type" (ElementType .)}}>
+{{-     else if eq .Target.Name "mat"        -}}mat{{index .TemplateArguments 0}}x{{index .TemplateArguments 1}}<{{template "Type" (ElementType .)}}>
+{{-     else if HasPrefix .Target.Name "vec" -}}{{.Target.Name}}<{{template "Type" (ElementType .)}}>
+{{-     else if HasPrefix .Target.Name "mat" -}}{{.Target.Name}}<{{template "Type" (ElementType .)}}>
+{{-     else                             -}}{{.Target.Name}}{{template "TemplateArguments" .TemplateArguments}}
+{{-     end                              -}}
+{{-   else if IsEnumEntry   .Target -}}{{.Target.Name}}
+{{-   else if IsEnumMatcher .Target -}}{{(index .Target.Options 0).Name}}
+{{-   else                          -}}<unhandled-fully-qualified-name-target={{- printf "%T" .Target -}}>
+{{-   end                           -}}
 {{- end -}}
 
 

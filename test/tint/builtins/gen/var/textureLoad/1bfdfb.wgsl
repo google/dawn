@@ -24,7 +24,7 @@
 
 // fn textureLoad(texture: texture_external, coords: vec2<u32>) -> vec4<f32>
 fn textureLoad_1bfdfb() {
-  var arg_1 = vec2<u32>();
+  var arg_1 = vec2<u32>(1u);
   var res: vec4<f32> = textureLoad(arg_0, arg_1);
 }
 

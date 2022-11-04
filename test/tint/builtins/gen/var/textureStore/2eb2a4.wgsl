@@ -25,7 +25,7 @@
 // fn textureStore(texture: texture_storage_1d<rgba16uint, write>, coords: i32, value: vec4<u32>)
 fn textureStore_2eb2a4() {
   var arg_1 = 1i;
-  var arg_2 = vec4<u32>();
+  var arg_2 = vec4<u32>(1u);
   textureStore(arg_0, arg_1, arg_2);
 }
 

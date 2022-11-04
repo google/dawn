@@ -1,5 +1,5 @@
 fn pack2x16unorm_0f08e4() {
-  var arg_0 = vec2<f32>();
+  var arg_0 = vec2<f32>(1.0f);
   var res : u32 = pack2x16unorm(arg_0);
 }
 

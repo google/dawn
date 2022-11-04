@@ -4,7 +4,7 @@ uint tint_pack4x8unorm(float4 param_0) {
 }
 
 void pack4x8unorm_95c456() {
-  uint res = tint_pack4x8unorm((0.0f).xxxx);
+  uint res = tint_pack4x8unorm((1.0f).xxxx);
 }
 
 struct tint_symbol {

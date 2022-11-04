@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureStore_e7c6d8(texture1d<float, access::write> tint_symbol_1) {
-  tint_symbol_1.write(float4(0.0f), uint(1u));
+  tint_symbol_1.write(float4(1.0f), uint(1u));
 }
 
 struct tint_symbol {

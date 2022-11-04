@@ -4,7 +4,7 @@ precision mediump float;
 uniform highp sampler3D arg_0_arg_1;
 
 void textureSampleBias_594824() {
-  vec4 res = textureOffset(arg_0_arg_1, vec3(0.0f), ivec3(0), 1.0f);
+  vec4 res = textureOffset(arg_0_arg_1, vec3(1.0f), ivec3(1), 1.0f);
 }
 
 void fragment_main() {

@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 62
+; Bound: 63
 ; Schema: 0
                OpCapability Shader
                OpMemoryModel Logical GLSL450
@@ -46,61 +46,62 @@
        %void = OpTypeVoid
          %16 = OpTypeFunction %void
     %v2float = OpTypeVector %float 2
-         %21 = OpConstantNull %v2float
+    %float_1 = OpConstant %float 1
+         %22 = OpConstantComposite %v2float %float_1 %float_1
 %_ptr_Function_v2float = OpTypePointer Function %v2float
+         %25 = OpConstantNull %v2float
        %uint = OpTypeInt 32 0
      %uint_1 = OpConstant %uint 1
 %_ptr_Function_uint = OpTypePointer Function %uint
-         %28 = OpConstantNull %uint
+         %30 = OpConstantNull %uint
       %v4int = OpTypeVector %int 4
-         %33 = OpTypeSampledImage %11
+         %35 = OpTypeSampledImage %11
     %v3float = OpTypeVector %float 3
       %int_1 = OpConstant %int 1
       %v2int = OpTypeVector %int 2
-         %44 = OpConstantNull %v2int
+         %46 = OpConstantComposite %v2int %int_1 %int_1
 %_ptr_Function_v4int = OpTypePointer Function %v4int
-         %47 = OpConstantNull %v4int
-         %48 = OpTypeFunction %v4float
-    %float_1 = OpConstant %float 1
+         %49 = OpConstantNull %v4int
+         %50 = OpTypeFunction %v4float
 %textureGather_bd33b6 = OpFunction %void None %16
          %19 = OpLabel
-      %arg_3 = OpVariable %_ptr_Function_v2float Function %21
-      %arg_4 = OpVariable %_ptr_Function_uint Function %28
-        %res = OpVariable %_ptr_Function_v4int Function %47
-               OpStore %arg_3 %21
+      %arg_3 = OpVariable %_ptr_Function_v2float Function %25
+      %arg_4 = OpVariable %_ptr_Function_uint Function %30
+        %res = OpVariable %_ptr_Function_v4int Function %49
+               OpStore %arg_3 %22
                OpStore %arg_4 %uint_1
-         %31 = OpLoad %15 %arg_2
-         %32 = OpLoad %11 %arg_1
-         %34 = OpSampledImage %33 %32 %31
-         %36 = OpLoad %v2float %arg_3
-         %37 = OpCompositeExtract %float %36 0
-         %38 = OpCompositeExtract %float %36 1
-         %40 = OpLoad %uint %arg_4
-         %39 = OpConvertUToF %float %40
-         %41 = OpCompositeConstruct %v3float %37 %38 %39
-         %29 = OpImageGather %v4int %34 %41 %int_1 ConstOffset %44
-               OpStore %res %29
+         %33 = OpLoad %15 %arg_2
+         %34 = OpLoad %11 %arg_1
+         %36 = OpSampledImage %35 %34 %33
+         %38 = OpLoad %v2float %arg_3
+         %39 = OpCompositeExtract %float %38 0
+         %40 = OpCompositeExtract %float %38 1
+         %42 = OpLoad %uint %arg_4
+         %41 = OpConvertUToF %float %42
+         %43 = OpCompositeConstruct %v3float %39 %40 %41
+         %31 = OpImageGather %v4int %36 %43 %int_1 ConstOffset %46
+               OpStore %res %31
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %48
-         %50 = OpLabel
-         %51 = OpFunctionCall %void %textureGather_bd33b6
+%vertex_main_inner = OpFunction %v4float None %50
+         %52 = OpLabel
+         %53 = OpFunctionCall %void %textureGather_bd33b6
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %16
-         %53 = OpLabel
-         %54 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %54
+         %55 = OpLabel
+         %56 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %56
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %16
-         %57 = OpLabel
-         %58 = OpFunctionCall %void %textureGather_bd33b6
+         %58 = OpLabel
+         %59 = OpFunctionCall %void %textureGather_bd33b6
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %16
-         %60 = OpLabel
-         %61 = OpFunctionCall %void %textureGather_bd33b6
+         %61 = OpLabel
+         %62 = OpFunctionCall %void %textureGather_bd33b6
                OpReturn
                OpFunctionEnd

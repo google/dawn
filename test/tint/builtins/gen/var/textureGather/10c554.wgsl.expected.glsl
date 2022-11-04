@@ -3,7 +3,7 @@
 uniform highp samplerCubeShadow arg_0_arg_1;
 
 void textureGather_10c554() {
-  vec3 arg_2 = vec3(0.0f);
+  vec3 arg_2 = vec3(1.0f);
   vec4 res = textureGather(arg_0_arg_1, arg_2, 0.0);
 }
 
@@ -26,7 +26,7 @@ precision mediump float;
 uniform highp samplerCubeShadow arg_0_arg_1;
 
 void textureGather_10c554() {
-  vec3 arg_2 = vec3(0.0f);
+  vec3 arg_2 = vec3(1.0f);
   vec4 res = textureGather(arg_0_arg_1, arg_2, 0.0);
 }
 
@@ -43,7 +43,7 @@ void main() {
 uniform highp samplerCubeShadow arg_0_arg_1;
 
 void textureGather_10c554() {
-  vec3 arg_2 = vec3(0.0f);
+  vec3 arg_2 = vec3(1.0f);
   vec4 res = textureGather(arg_0_arg_1, arg_2, 0.0);
 }
 

@@ -25,7 +25,7 @@
 
 // fn textureSample(texture: texture_cube_array<f32>, sampler: sampler, coords: vec3<f32>, array_index: i32) -> vec4<f32>
 fn textureSample_4dd1bf() {
-  var res: vec4<f32> = textureSample(arg_0, arg_1, vec3<f32>(), 1i);
+  var res: vec4<f32> = textureSample(arg_0, arg_1, vec3<f32>(1.f), 1i);
 }
 
 @fragment

@@ -2,7 +2,7 @@
 
 layout(rgba8ui) uniform highp writeonly uimage2DArray arg_0;
 void textureStore_9f7cea() {
-  imageStore(arg_0, ivec3(0, 0, int(1u)), uvec4(0u));
+  imageStore(arg_0, ivec3(ivec2(1), int(1u)), uvec4(1u));
 }
 
 vec4 vertex_main() {
@@ -23,7 +23,7 @@ precision mediump float;
 
 layout(rgba8ui) uniform highp writeonly uimage2DArray arg_0;
 void textureStore_9f7cea() {
-  imageStore(arg_0, ivec3(0, 0, int(1u)), uvec4(0u));
+  imageStore(arg_0, ivec3(ivec2(1), int(1u)), uvec4(1u));
 }
 
 void fragment_main() {
@@ -38,7 +38,7 @@ void main() {
 
 layout(rgba8ui) uniform highp writeonly uimage2DArray arg_0;
 void textureStore_9f7cea() {
-  imageStore(arg_0, ivec3(0, 0, int(1u)), uvec4(0u));
+  imageStore(arg_0, ivec3(ivec2(1), int(1u)), uvec4(1u));
 }
 
 void compute_main() {

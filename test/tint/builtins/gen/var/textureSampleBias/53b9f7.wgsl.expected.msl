@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureSampleBias_53b9f7(texturecube<float, access::sample> tint_symbol, sampler tint_symbol_1) {
-  float3 arg_2 = float3(0.0f);
+  float3 arg_2 = float3(1.0f);
   float arg_3 = 1.0f;
   float4 res = tint_symbol.sample(tint_symbol_1, arg_2, bias(arg_3));
 }

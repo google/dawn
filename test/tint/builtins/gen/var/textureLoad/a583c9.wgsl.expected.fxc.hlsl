@@ -1,7 +1,7 @@
 Texture2DMS<float4> arg_0 : register(t0, space1);
 
 void textureLoad_a583c9() {
-  int2 arg_1 = (0).xx;
+  int2 arg_1 = (1).xx;
   int arg_2 = 1;
   float4 res = arg_0.Load(arg_1, arg_2);
 }

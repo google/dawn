@@ -1,7 +1,7 @@
 @group(1) @binding(0) var arg_0 : texture_2d_array<u32>;
 
 fn textureLoad_1b051f() {
-  var res : vec4<u32> = textureLoad(arg_0, vec2<i32>(), 1u, 1u);
+  var res : vec4<u32> = textureLoad(arg_0, vec2<i32>(1i), 1u, 1u);
 }
 
 @vertex

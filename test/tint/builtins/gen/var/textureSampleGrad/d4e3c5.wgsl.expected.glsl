@@ -3,10 +3,10 @@
 uniform highp sampler2D arg_0_arg_1;
 
 void textureSampleGrad_d4e3c5() {
-  vec2 arg_2 = vec2(0.0f);
-  vec2 arg_3 = vec2(0.0f);
-  vec2 arg_4 = vec2(0.0f);
-  vec4 res = textureGradOffset(arg_0_arg_1, arg_2, arg_3, arg_4, ivec2(0));
+  vec2 arg_2 = vec2(1.0f);
+  vec2 arg_3 = vec2(1.0f);
+  vec2 arg_4 = vec2(1.0f);
+  vec4 res = textureGradOffset(arg_0_arg_1, arg_2, arg_3, arg_4, ivec2(1));
 }
 
 vec4 vertex_main() {
@@ -28,10 +28,10 @@ precision mediump float;
 uniform highp sampler2D arg_0_arg_1;
 
 void textureSampleGrad_d4e3c5() {
-  vec2 arg_2 = vec2(0.0f);
-  vec2 arg_3 = vec2(0.0f);
-  vec2 arg_4 = vec2(0.0f);
-  vec4 res = textureGradOffset(arg_0_arg_1, arg_2, arg_3, arg_4, ivec2(0));
+  vec2 arg_2 = vec2(1.0f);
+  vec2 arg_3 = vec2(1.0f);
+  vec2 arg_4 = vec2(1.0f);
+  vec4 res = textureGradOffset(arg_0_arg_1, arg_2, arg_3, arg_4, ivec2(1));
 }
 
 void fragment_main() {
@@ -47,10 +47,10 @@ void main() {
 uniform highp sampler2D arg_0_arg_1;
 
 void textureSampleGrad_d4e3c5() {
-  vec2 arg_2 = vec2(0.0f);
-  vec2 arg_3 = vec2(0.0f);
-  vec2 arg_4 = vec2(0.0f);
-  vec4 res = textureGradOffset(arg_0_arg_1, arg_2, arg_3, arg_4, ivec2(0));
+  vec2 arg_2 = vec2(1.0f);
+  vec2 arg_3 = vec2(1.0f);
+  vec2 arg_4 = vec2(1.0f);
+  vec4 res = textureGradOffset(arg_0_arg_1, arg_2, arg_3, arg_4, ivec2(1));
 }
 
 void compute_main() {

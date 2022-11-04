@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureGather_cf9112(texture2d_array<int, access::sample> tint_symbol_1, sampler tint_symbol_2) {
-  int4 res = tint_symbol_1.gather(tint_symbol_2, float2(0.0f), 1u, int2(0), component::y);
+  int4 res = tint_symbol_1.gather(tint_symbol_2, float2(1.0f), 1u, int2(1), component::y);
 }
 
 struct tint_symbol {

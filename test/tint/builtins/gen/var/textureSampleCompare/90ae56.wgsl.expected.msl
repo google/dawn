@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureSampleCompare_90ae56(depth2d_array<float, access::sample> tint_symbol, sampler tint_symbol_1) {
-  float2 arg_2 = float2(0.0f);
+  float2 arg_2 = float2(1.0f);
   uint arg_3 = 1u;
   float arg_4 = 1.0f;
   float res = tint_symbol.sample_compare(tint_symbol_1, arg_2, arg_3, arg_4);

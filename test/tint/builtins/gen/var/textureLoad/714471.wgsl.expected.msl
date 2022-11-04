@@ -2,7 +2,7 @@
 
 using namespace metal;
 void textureLoad_714471(texture2d<int, access::sample> tint_symbol_1) {
-  uint2 arg_1 = uint2(0u);
+  uint2 arg_1 = uint2(1u);
   uint arg_2 = 1u;
   int4 res = tint_symbol_1.read(uint2(arg_1), arg_2);
 }

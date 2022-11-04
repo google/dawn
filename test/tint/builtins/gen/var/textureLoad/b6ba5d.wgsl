@@ -24,7 +24,7 @@
 
 // fn textureLoad(texture: texture_depth_2d_array, coords: vec2<u32>, array_index: i32, level: i32) -> f32
 fn textureLoad_b6ba5d() {
-  var arg_1 = vec2<u32>();
+  var arg_1 = vec2<u32>(1u);
   var arg_2 = 1i;
   var arg_3 = 1i;
   var res: f32 = textureLoad(arg_0, arg_1, arg_2, arg_3);

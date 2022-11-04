@@ -2,7 +2,7 @@ TextureCube arg_0 : register(t0, space1);
 SamplerComparisonState arg_1 : register(s1, space1);
 
 void textureSampleCompareLevel_1568e3() {
-  float res = arg_0.SampleCmpLevelZero(arg_1, (0.0f).xxx, 1.0f);
+  float res = arg_0.SampleCmpLevelZero(arg_1, (1.0f).xxx, 1.0f);
 }
 
 struct tint_symbol {

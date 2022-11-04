@@ -1,5 +1,5 @@
 fn pack4x8snorm_4d22e7() {
-  var arg_0 = vec4<f32>();
+  var arg_0 = vec4<f32>(1.0f);
   var res : u32 = pack4x8snorm(arg_0);
 }
 
