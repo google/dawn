@@ -1,5 +1,5 @@
 void reverseBits_e1f4c1() {
-  uint2 res = reversebits((1u).xx);
+  uint2 res = (2147483648u).xx;
 }
 
 struct tint_symbol {

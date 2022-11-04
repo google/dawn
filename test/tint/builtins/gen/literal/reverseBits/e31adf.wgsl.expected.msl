@@ -2,7 +2,7 @@
 
 using namespace metal;
 void reverseBits_e31adf() {
-  uint res = reverse_bits(1u);
+  uint res = 2147483648u;
 }
 
 struct tint_symbol {

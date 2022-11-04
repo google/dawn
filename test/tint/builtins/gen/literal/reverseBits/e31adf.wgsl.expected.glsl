@@ -1,7 +1,7 @@
 #version 310 es
 
 void reverseBits_e31adf() {
-  uint res = bitfieldReverse(1u);
+  uint res = 2147483648u;
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void reverseBits_e31adf() {
-  uint res = bitfieldReverse(1u);
+  uint res = 2147483648u;
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void reverseBits_e31adf() {
-  uint res = bitfieldReverse(1u);
+  uint res = 2147483648u;
 }
 
 void compute_main() {

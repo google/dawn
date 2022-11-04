@@ -1,7 +1,7 @@
 #version 310 es
 
 void reverseBits_7c4269() {
-  int res = bitfieldReverse(1);
+  int res = -2147483648;
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void reverseBits_7c4269() {
-  int res = bitfieldReverse(1);
+  int res = -2147483648;
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void reverseBits_7c4269() {
-  int res = bitfieldReverse(1);
+  int res = -2147483648;
 }
 
 void compute_main() {

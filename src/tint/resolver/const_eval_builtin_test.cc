@@ -1107,6 +1107,52 @@ INSTANTIATE_TEST_SUITE_P(ExtractBits,
                              std::make_tuple(u32::Highest(), u32::Highest())));
 
 template <typename T>
+std::vector<Case> ReverseBitsCases() {
+    using B = BitValues<T>;
+    return {
+        C({T(0)}, T(0)),
+
+        C({B::Lsh(1, 0)}, B::Lsh(1, 31)),  //
+        C({B::Lsh(1, 1)}, B::Lsh(1, 30)),  //
+        C({B::Lsh(1, 2)}, B::Lsh(1, 29)),  //
+        C({B::Lsh(1, 3)}, B::Lsh(1, 28)),  //
+        C({B::Lsh(1, 4)}, B::Lsh(1, 27)),  //
+        //...
+        C({B::Lsh(1, 27)}, B::Lsh(1, 4)),  //
+        C({B::Lsh(1, 28)}, B::Lsh(1, 3)),  //
+        C({B::Lsh(1, 29)}, B::Lsh(1, 2)),  //
+        C({B::Lsh(1, 30)}, B::Lsh(1, 1)),  //
+        C({B::Lsh(1, 31)}, B::Lsh(1, 0)),  //
+
+        C({/**/ T(0b00010001000100010000000000000000)},
+          /* */ T(0b00000000000000001000100010001000)),
+
+        C({/**/ T(0b00011000000110000000000000000000)},
+          /* */ T(0b00000000000000000001100000011000)),
+
+        C({/**/ T(0b00000100000000001111111111111111)},
+          /* */ T(0b11111111111111110000000000100000)),
+
+        C({/**/ T(0b10010101111000110000011111101010)},
+          /* */ T(0b01010111111000001100011110101001)),
+
+        // Vector tests
+        C({/**/ Vec(T(0b00010001000100010000000000000000),  //
+                    T(0b00011000000110000000000000000000),  //
+                    T(0b00000000000000001111111111111111))},
+          /* */ Vec(T(0b00000000000000001000100010001000),  //
+                    T(0b00000000000000000001100000011000),  //
+                    T(0b11111111111111110000000000000000))),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    ReverseBits,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kReverseBits),
+                     testing::ValuesIn(Concat(ReverseBitsCases<i32>(),  //
+                                              ReverseBitsCases<u32>()))));
+
+template <typename T>
 std::vector<Case> SaturateCases() {
     return {
         C({T(0)}, T(0)),

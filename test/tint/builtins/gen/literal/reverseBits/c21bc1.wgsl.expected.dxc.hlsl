@@ -1,5 +1,5 @@
 void reverseBits_c21bc1() {
-  int3 res = asint(reversebits(asuint((1).xxx)));
+  int3 res = (-2147483648).xxx;
 }
 
 struct tint_symbol {
