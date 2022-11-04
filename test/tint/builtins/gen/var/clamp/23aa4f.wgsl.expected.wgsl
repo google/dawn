@@ -1,7 +1,7 @@
 fn clamp_23aa4f() {
-  const arg_0 = 1;
-  const arg_1 = 1;
-  const arg_2 = 1;
+  const arg_0 = 1.0;
+  const arg_1 = 1.0;
+  const arg_2 = 1.0;
   var res = clamp(arg_0, arg_1, arg_2);
 }
 

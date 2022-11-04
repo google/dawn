@@ -1,5 +1,5 @@
 void select_431dfb() {
-  float2 res = (1.0f).xx;
+  int2 res = (1).xx;
 }
 
 struct tint_symbol {

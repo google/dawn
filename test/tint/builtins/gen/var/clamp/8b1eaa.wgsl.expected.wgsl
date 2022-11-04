@@ -1,7 +1,7 @@
 fn clamp_8b1eaa() {
-  const arg_0 = vec3(1.0);
-  const arg_1 = vec3(1.0);
-  const arg_2 = vec3(1.0);
+  const arg_0 = vec3(1);
+  const arg_1 = vec3(1);
+  const arg_2 = vec3(1);
   var res = clamp(arg_0, arg_1, arg_2);
 }
 

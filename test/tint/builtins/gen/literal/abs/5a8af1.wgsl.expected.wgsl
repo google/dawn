@@ -1,5 +1,5 @@
 fn abs_5a8af1() {
-  var res = abs(1.0);
+  var res = abs(1);
 }
 
 @vertex

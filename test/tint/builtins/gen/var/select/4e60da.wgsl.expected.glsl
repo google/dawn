@@ -2,7 +2,7 @@
 
 void select_4e60da() {
   bool arg_2 = true;
-  ivec2 res = (arg_2 ? ivec2(1) : ivec2(1));
+  vec2 res = (arg_2 ? vec2(1.0f) : vec2(1.0f));
 }
 
 vec4 vertex_main() {
@@ -23,7 +23,7 @@ precision mediump float;
 
 void select_4e60da() {
   bool arg_2 = true;
-  ivec2 res = (arg_2 ? ivec2(1) : ivec2(1));
+  vec2 res = (arg_2 ? vec2(1.0f) : vec2(1.0f));
 }
 
 void fragment_main() {
@@ -38,7 +38,7 @@ void main() {
 
 void select_4e60da() {
   bool arg_2 = true;
-  ivec2 res = (arg_2 ? ivec2(1) : ivec2(1));
+  vec2 res = (arg_2 ? vec2(1.0f) : vec2(1.0f));
 }
 
 void compute_main() {

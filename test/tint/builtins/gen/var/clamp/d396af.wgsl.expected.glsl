@@ -1,7 +1,7 @@
 #version 310 es
 
 void clamp_d396af() {
-  vec4 res = vec4(1.0f);
+  ivec4 res = ivec4(1);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void clamp_d396af() {
-  vec4 res = vec4(1.0f);
+  ivec4 res = ivec4(1);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void clamp_d396af() {
-  vec4 res = vec4(1.0f);
+  ivec4 res = ivec4(1);
 }
 
 void compute_main() {

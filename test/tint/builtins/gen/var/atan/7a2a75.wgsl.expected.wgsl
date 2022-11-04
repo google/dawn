@@ -1,5 +1,5 @@
 fn atan_7a2a75() {
-  const arg_0 = 1;
+  const arg_0 = 1.0;
   var res = atan(arg_0);
 }
 

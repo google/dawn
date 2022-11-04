@@ -1,5 +1,5 @@
 fn atan2_034ace() {
-  var res = atan2(1, 1);
+  var res = atan2(1.0, 1.0);
 }
 
 @vertex

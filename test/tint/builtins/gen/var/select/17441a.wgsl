@@ -23,8 +23,8 @@
 
 // fn select(vec<4, fa>, vec<4, fa>, bool) -> vec<4, fa>
 fn select_17441a() {
-  const arg_0 = vec4(1);
-  const arg_1 = vec4(1);
+  const arg_0 = vec4(1.);
+  const arg_1 = vec4(1.);
   var arg_2 = true;
   var res = select(arg_0, arg_1, arg_2);
 }

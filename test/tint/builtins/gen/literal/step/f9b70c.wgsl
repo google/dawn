@@ -23,7 +23,7 @@
 
 // fn step(fa, fa) -> fa
 fn step_f9b70c() {
-  var res = step(1, 1);
+  var res = step(1., 1.);
 }
 
 @vertex

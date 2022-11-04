@@ -23,8 +23,8 @@
 
 // fn step(vec<2, fa>, vec<2, fa>) -> vec<2, fa>
 fn step_7c7e5c() {
-  const arg_0 = vec2(1);
-  const arg_1 = vec2(1);
+  const arg_0 = vec2(1.);
+  const arg_1 = vec2(1.);
   var res = step(arg_0, arg_1);
 }
 

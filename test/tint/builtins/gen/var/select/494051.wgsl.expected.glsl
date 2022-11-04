@@ -2,7 +2,7 @@
 
 void select_494051() {
   bool arg_2 = true;
-  int res = (arg_2 ? 1 : 1);
+  float res = (arg_2 ? 1.0f : 1.0f);
 }
 
 vec4 vertex_main() {
@@ -23,7 +23,7 @@ precision mediump float;
 
 void select_494051() {
   bool arg_2 = true;
-  int res = (arg_2 ? 1 : 1);
+  float res = (arg_2 ? 1.0f : 1.0f);
 }
 
 void fragment_main() {
@@ -38,7 +38,7 @@ void main() {
 
 void select_494051() {
   bool arg_2 = true;
-  int res = (arg_2 ? 1 : 1);
+  float res = (arg_2 ? 1.0f : 1.0f);
 }
 
 void compute_main() {

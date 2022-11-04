@@ -1,5 +1,5 @@
 fn saturate_4ed8d7() {
-  const arg_0 = vec4(2);
+  const arg_0 = vec4(2.0);
   var res = saturate(arg_0);
 }
 

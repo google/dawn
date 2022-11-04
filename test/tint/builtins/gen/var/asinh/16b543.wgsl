@@ -23,7 +23,7 @@
 
 // fn asinh(vec<2, fa>) -> vec<2, fa>
 fn asinh_16b543() {
-  const arg_0 = vec2(1);
+  const arg_0 = vec2(1.);
   var res = asinh(arg_0);
 }
 

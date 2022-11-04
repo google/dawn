@@ -1,5 +1,5 @@
 void select_9b478d() {
-  float res = 1.0f;
+  int res = 1;
 }
 
 struct tint_symbol {

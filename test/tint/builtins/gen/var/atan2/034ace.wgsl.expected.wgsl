@@ -1,6 +1,6 @@
 fn atan2_034ace() {
-  const arg_0 = 1;
-  const arg_1 = 1;
+  const arg_0 = 1.0;
+  const arg_1 = 1.0;
   var res = atan2(arg_0, arg_1);
 }
 

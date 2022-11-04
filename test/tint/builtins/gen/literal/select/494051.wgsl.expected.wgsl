@@ -1,5 +1,5 @@
 fn select_494051() {
-  var res = select(1, 1, true);
+  var res = select(1.0, 1.0, true);
 }
 
 @vertex

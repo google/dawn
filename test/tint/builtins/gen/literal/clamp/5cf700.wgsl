@@ -23,7 +23,7 @@
 
 // fn clamp(vec<3, fa>, vec<3, fa>, vec<3, fa>) -> vec<3, fa>
 fn clamp_5cf700() {
-  var res = clamp(vec3(1), vec3(1), vec3(1));
+  var res = clamp(vec3(1.), vec3(1.), vec3(1.));
 }
 
 @vertex

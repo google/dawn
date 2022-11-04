@@ -23,7 +23,7 @@
 
 // fn saturate(fa) -> fa
 fn saturate_78b37c() {
-  const arg_0 = 2;
+  const arg_0 = 2.;
   var res = saturate(arg_0);
 }
 

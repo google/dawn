@@ -1,5 +1,5 @@
 void abs_c3321c() {
-  float3 res = (1.0f).xxx;
+  int3 res = (1).xxx;
 }
 
 struct tint_symbol {

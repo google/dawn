@@ -1,5 +1,5 @@
 fn saturate_d55822() {
-  var res = saturate(vec3(2));
+  var res = saturate(vec3(2.0));
 }
 
 @vertex

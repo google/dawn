@@ -1,5 +1,5 @@
 fn saturate_78b37c() {
-  const arg_0 = 2;
+  const arg_0 = 2.0;
   var res = saturate(arg_0);
 }
 

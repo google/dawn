@@ -1,5 +1,5 @@
 fn select_b93806() {
-  var res = select(vec3(1.0), vec3(1.0), vec3<bool>(true));
+  var res = select(vec3(1), vec3(1), vec3<bool>(true));
 }
 
 @vertex

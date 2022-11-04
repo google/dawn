@@ -23,7 +23,7 @@
 
 // fn atan(vec<4, fa>) -> vec<4, fa>
 fn atan_d17fb2() {
-  var res = atan(vec4(1));
+  var res = atan(vec4(1.));
 }
 
 @vertex

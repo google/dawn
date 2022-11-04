@@ -23,7 +23,7 @@
 
 // fn select(fa, fa, bool) -> fa
 fn select_494051() {
-  var res = select(1, 1, true);
+  var res = select(1., 1., true);
 }
 
 @vertex

@@ -23,7 +23,7 @@
 
 // fn abs(ia) -> ia
 fn abs_5a8af1() {
-  const arg_0 = 1.0;
+  const arg_0 = 1;
   var res = abs(arg_0);
 }
 

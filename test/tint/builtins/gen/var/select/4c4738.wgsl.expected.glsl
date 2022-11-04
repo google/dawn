@@ -2,7 +2,7 @@
 
 void select_4c4738() {
   bvec4 arg_2 = bvec4(true);
-  vec4 res = mix(vec4(1.0f), vec4(1.0f), arg_2);
+  ivec4 res = mix(ivec4(1), ivec4(1), arg_2);
 }
 
 vec4 vertex_main() {
@@ -23,7 +23,7 @@ precision mediump float;
 
 void select_4c4738() {
   bvec4 arg_2 = bvec4(true);
-  vec4 res = mix(vec4(1.0f), vec4(1.0f), arg_2);
+  ivec4 res = mix(ivec4(1), ivec4(1), arg_2);
 }
 
 void fragment_main() {
@@ -38,7 +38,7 @@ void main() {
 
 void select_4c4738() {
   bvec4 arg_2 = bvec4(true);
-  vec4 res = mix(vec4(1.0f), vec4(1.0f), arg_2);
+  ivec4 res = mix(ivec4(1), ivec4(1), arg_2);
 }
 
 void compute_main() {

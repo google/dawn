@@ -23,7 +23,7 @@
 
 // fn atan2(fa, fa) -> fa
 fn atan2_034ace() {
-  var res = atan2(1, 1);
+  var res = atan2(1., 1.);
 }
 
 @vertex

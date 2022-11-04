@@ -23,8 +23,8 @@
 
 // fn step(vec<3, fa>, vec<3, fa>) -> vec<3, fa>
 fn step_415879() {
-  const arg_0 = vec3(1);
-  const arg_1 = vec3(1);
+  const arg_0 = vec3(1.);
+  const arg_1 = vec3(1.);
   var res = step(arg_0, arg_1);
 }
 

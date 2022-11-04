@@ -23,8 +23,8 @@
 
 // fn select(vec<3, fa>, vec<3, fa>, bool) -> vec<3, fa>
 fn select_089657() {
-  const arg_0 = vec3(1);
-  const arg_1 = vec3(1);
+  const arg_0 = vec3(1.);
+  const arg_1 = vec3(1.);
   var arg_2 = true;
   var res = select(arg_0, arg_1, arg_2);
 }

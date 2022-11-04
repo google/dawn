@@ -1,5 +1,5 @@
 fn sign_0799fd() {
-  var res = sign(vec2(1));
+  var res = sign(vec2(1.0));
 }
 
 @vertex

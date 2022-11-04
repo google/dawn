@@ -23,7 +23,7 @@
 
 // fn abs(vec<3, ia>) -> vec<3, ia>
 fn abs_c3321c() {
-  var res = abs(vec3(1.0));
+  var res = abs(vec3(1));
 }
 
 @vertex

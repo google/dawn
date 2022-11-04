@@ -1,5 +1,5 @@
 fn sign_0799fd() {
-  const arg_0 = vec2(1);
+  const arg_0 = vec2(1.0);
   var res = sign(arg_0);
 }
 

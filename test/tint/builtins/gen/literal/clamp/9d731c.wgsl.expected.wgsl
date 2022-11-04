@@ -1,5 +1,5 @@
 fn clamp_9d731c() {
-  var res = clamp(vec2(1), vec2(1), vec2(1));
+  var res = clamp(vec2(1.0), vec2(1.0), vec2(1.0));
 }
 
 @vertex

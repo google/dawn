@@ -23,7 +23,7 @@
 
 // fn select(vec<4, ia>, vec<4, ia>, bool) -> vec<4, ia>
 fn select_e381c3() {
-  var res = select(vec4(1.0), vec4(1.0), true);
+  var res = select(vec4(1), vec4(1), true);
 }
 
 @vertex

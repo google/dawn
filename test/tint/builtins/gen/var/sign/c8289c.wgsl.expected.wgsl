@@ -1,5 +1,5 @@
 fn sign_c8289c() {
-  const arg_0 = 1;
+  const arg_0 = 1.0;
   var res = sign(arg_0);
 }
 

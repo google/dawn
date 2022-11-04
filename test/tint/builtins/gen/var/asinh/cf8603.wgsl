@@ -23,7 +23,7 @@
 
 // fn asinh(vec<4, fa>) -> vec<4, fa>
 fn asinh_cf8603() {
-  const arg_0 = vec4(1);
+  const arg_0 = vec4(1.);
   var res = asinh(arg_0);
 }
 

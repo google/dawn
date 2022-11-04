@@ -23,7 +23,7 @@
 
 // fn abs(vec<2, fa>) -> vec<2, fa>
 fn abs_82ff9d() {
-  var res = abs(vec2(1));
+  var res = abs(vec2(1.));
 }
 
 @vertex

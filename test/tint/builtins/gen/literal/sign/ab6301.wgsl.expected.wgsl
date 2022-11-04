@@ -1,5 +1,5 @@
 fn sign_ab6301() {
-  var res = sign(vec3(1));
+  var res = sign(vec3(1.0));
 }
 
 @vertex

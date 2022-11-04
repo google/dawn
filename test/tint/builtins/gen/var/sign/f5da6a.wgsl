@@ -23,7 +23,7 @@
 
 // fn sign(vec<4, fa>) -> vec<4, fa>
 fn sign_f5da6a() {
-  const arg_0 = vec4(1);
+  const arg_0 = vec4(1.);
   var res = sign(arg_0);
 }
 

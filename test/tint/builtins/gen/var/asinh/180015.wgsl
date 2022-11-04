@@ -23,7 +23,7 @@
 
 // fn asinh(fa) -> fa
 fn asinh_180015() {
-  const arg_0 = 1;
+  const arg_0 = 1.;
   var res = asinh(arg_0);
 }
 

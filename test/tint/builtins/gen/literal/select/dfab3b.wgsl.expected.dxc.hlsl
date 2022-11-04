@@ -1,5 +1,5 @@
 void select_dfab3b() {
-  float3 res = (1.0f).xxx;
+  int3 res = (1).xxx;
 }
 
 struct tint_symbol {

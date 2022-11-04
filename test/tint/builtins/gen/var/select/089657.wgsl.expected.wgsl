@@ -1,6 +1,6 @@
 fn select_089657() {
-  const arg_0 = vec3(1);
-  const arg_1 = vec3(1);
+  const arg_0 = vec3(1.0);
+  const arg_1 = vec3(1.0);
   var arg_2 = true;
   var res = select(arg_0, arg_1, arg_2);
 }

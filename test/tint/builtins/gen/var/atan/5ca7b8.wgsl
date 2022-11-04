@@ -23,7 +23,7 @@
 
 // fn atan(vec<2, fa>) -> vec<2, fa>
 fn atan_5ca7b8() {
-  const arg_0 = vec2(1);
+  const arg_0 = vec2(1.);
   var res = atan(arg_0);
 }
 

@@ -23,7 +23,7 @@
 
 // fn asinh(fa) -> fa
 fn asinh_180015() {
-  var res = asinh(1);
+  var res = asinh(1.);
 }
 
 @vertex

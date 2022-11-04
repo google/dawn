@@ -1,5 +1,5 @@
 fn asinh_16b543() {
-  const arg_0 = vec2(1);
+  const arg_0 = vec2(1.0);
   var res = asinh(arg_0);
 }
 

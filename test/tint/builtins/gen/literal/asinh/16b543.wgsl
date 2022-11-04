@@ -23,7 +23,7 @@
 
 // fn asinh(vec<2, fa>) -> vec<2, fa>
 fn asinh_16b543() {
-  var res = asinh(vec2(1));
+  var res = asinh(vec2(1.));
 }
 
 @vertex

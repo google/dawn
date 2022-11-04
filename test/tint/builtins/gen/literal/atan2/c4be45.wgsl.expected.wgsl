@@ -1,5 +1,5 @@
 fn atan2_c4be45() {
-  var res = atan2(vec4(1), vec4(1));
+  var res = atan2(vec4(1.0), vec4(1.0));
 }
 
 @vertex

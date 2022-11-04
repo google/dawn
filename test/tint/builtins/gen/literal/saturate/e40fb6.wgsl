@@ -23,7 +23,7 @@
 
 // fn saturate(vec<2, fa>) -> vec<2, fa>
 fn saturate_e40fb6() {
-  var res = saturate(vec2(2));
+  var res = saturate(vec2(2.));
 }
 
 @vertex

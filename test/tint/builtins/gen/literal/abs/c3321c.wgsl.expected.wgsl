@@ -1,5 +1,5 @@
 fn abs_c3321c() {
-  var res = abs(vec3(1.0));
+  var res = abs(vec3(1));
 }
 
 @vertex

@@ -23,9 +23,9 @@
 
 // fn clamp(ia, ia, ia) -> ia
 fn clamp_96e56a() {
-  const arg_0 = 1.0;
-  const arg_1 = 1.0;
-  const arg_2 = 1.0;
+  const arg_0 = 1;
+  const arg_1 = 1;
+  const arg_2 = 1;
   var res = clamp(arg_0, arg_1, arg_2);
 }
 

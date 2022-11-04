@@ -1,5 +1,5 @@
 fn saturate_78b37c() {
-  var res = saturate(2);
+  var res = saturate(2.0);
 }
 
 @vertex

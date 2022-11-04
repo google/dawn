@@ -2,7 +2,7 @@
 
 void select_431dfb() {
   bvec2 arg_2 = bvec2(true);
-  vec2 res = mix(vec2(1.0f), vec2(1.0f), arg_2);
+  ivec2 res = mix(ivec2(1), ivec2(1), arg_2);
 }
 
 vec4 vertex_main() {
@@ -23,7 +23,7 @@ precision mediump float;
 
 void select_431dfb() {
   bvec2 arg_2 = bvec2(true);
-  vec2 res = mix(vec2(1.0f), vec2(1.0f), arg_2);
+  ivec2 res = mix(ivec2(1), ivec2(1), arg_2);
 }
 
 void fragment_main() {
@@ -38,7 +38,7 @@ void main() {
 
 void select_431dfb() {
   bvec2 arg_2 = bvec2(true);
-  vec2 res = mix(vec2(1.0f), vec2(1.0f), arg_2);
+  ivec2 res = mix(ivec2(1), ivec2(1), arg_2);
 }
 
 void compute_main() {

@@ -23,8 +23,8 @@
 
 // fn select(ia, ia, bool) -> ia
 fn select_9b478d() {
-  const arg_0 = 1.0;
-  const arg_1 = 1.0;
+  const arg_0 = 1;
+  const arg_1 = 1;
   var arg_2 = true;
   var res = select(arg_0, arg_1, arg_2);
 }

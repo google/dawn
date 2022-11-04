@@ -1,5 +1,5 @@
 fn saturate_e40fb6() {
-  var res = saturate(vec2(2));
+  var res = saturate(vec2(2.0));
 }
 
 @vertex

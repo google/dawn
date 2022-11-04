@@ -23,7 +23,7 @@
 
 // fn saturate(vec<2, fa>) -> vec<2, fa>
 fn saturate_e40fb6() {
-  const arg_0 = vec2(2);
+  const arg_0 = vec2(2.);
   var res = saturate(arg_0);
 }
 

@@ -1,6 +1,6 @@
 fn select_4c4738() {
-  const arg_0 = vec4(1.0);
-  const arg_1 = vec4(1.0);
+  const arg_0 = vec4(1);
+  const arg_1 = vec4(1);
   var arg_2 = vec4<bool>(true);
   var res = select(arg_0, arg_1, arg_2);
 }

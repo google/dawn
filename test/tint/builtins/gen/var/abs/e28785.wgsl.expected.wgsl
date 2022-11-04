@@ -1,5 +1,5 @@
 fn abs_e28785() {
-  const arg_0 = vec4(1);
+  const arg_0 = vec4(1.0);
   var res = abs(arg_0);
 }
 

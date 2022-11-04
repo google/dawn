@@ -1,5 +1,5 @@
 fn select_17441a() {
-  var res = select(vec4(1), vec4(1), true);
+  var res = select(vec4(1.0), vec4(1.0), true);
 }
 
 @vertex

@@ -23,9 +23,9 @@
 
 // fn clamp(vec<2, ia>, vec<2, ia>, vec<2, ia>) -> vec<2, ia>
 fn clamp_177548() {
-  const arg_0 = vec2(1.0);
-  const arg_1 = vec2(1.0);
-  const arg_2 = vec2(1.0);
+  const arg_0 = vec2(1);
+  const arg_1 = vec2(1);
+  const arg_2 = vec2(1);
   var res = clamp(arg_0, arg_1, arg_2);
 }
 

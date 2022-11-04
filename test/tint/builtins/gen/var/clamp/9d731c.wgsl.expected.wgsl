@@ -1,7 +1,7 @@
 fn clamp_9d731c() {
-  const arg_0 = vec2(1);
-  const arg_1 = vec2(1);
-  const arg_2 = vec2(1);
+  const arg_0 = vec2(1.0);
+  const arg_1 = vec2(1.0);
+  const arg_2 = vec2(1.0);
   var res = clamp(arg_0, arg_1, arg_2);
 }
 

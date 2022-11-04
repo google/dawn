@@ -23,7 +23,7 @@
 
 // fn atan2(vec<3, fa>, vec<3, fa>) -> vec<3, fa>
 fn atan2_3c2865() {
-  var res = atan2(vec3(1), vec3(1));
+  var res = atan2(vec3(1.), vec3(1.));
 }
 
 @vertex

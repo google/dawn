@@ -23,7 +23,7 @@
 
 // fn abs(vec<3, ia>) -> vec<3, ia>
 fn abs_c3321c() {
-  const arg_0 = vec3(1.0);
+  const arg_0 = vec3(1);
   var res = abs(arg_0);
 }
 

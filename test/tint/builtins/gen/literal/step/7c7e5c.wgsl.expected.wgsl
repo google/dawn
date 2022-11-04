@@ -1,5 +1,5 @@
 fn step_7c7e5c() {
-  var res = step(vec2(1), vec2(1));
+  var res = step(vec2(1.0), vec2(1.0));
 }
 
 @vertex

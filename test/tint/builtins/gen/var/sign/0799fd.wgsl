@@ -23,7 +23,7 @@
 
 // fn sign(vec<2, fa>) -> vec<2, fa>
 fn sign_0799fd() {
-  const arg_0 = vec2(1);
+  const arg_0 = vec2(1.);
   var res = sign(arg_0);
 }
 

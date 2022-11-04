@@ -1,6 +1,6 @@
 fn step_38cd79() {
-  const arg_0 = vec4(1);
-  const arg_1 = vec4(1);
+  const arg_0 = vec4(1.0);
+  const arg_1 = vec4(1.0);
   var res = step(arg_0, arg_1);
 }
 

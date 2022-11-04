@@ -23,8 +23,8 @@
 
 // fn step(fa, fa) -> fa
 fn step_f9b70c() {
-  const arg_0 = 1;
-  const arg_1 = 1;
+  const arg_0 = 1.;
+  const arg_1 = 1.;
   var res = step(arg_0, arg_1);
 }
 

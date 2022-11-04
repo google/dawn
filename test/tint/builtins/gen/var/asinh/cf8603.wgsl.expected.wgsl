@@ -1,5 +1,5 @@
 fn asinh_cf8603() {
-  const arg_0 = vec4(1);
+  const arg_0 = vec4(1.0);
   var res = asinh(arg_0);
 }
 

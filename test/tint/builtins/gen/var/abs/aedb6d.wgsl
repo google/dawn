@@ -23,7 +23,7 @@
 
 // fn abs(fa) -> fa
 fn abs_aedb6d() {
-  const arg_0 = 1;
+  const arg_0 = 1.;
   var res = abs(arg_0);
 }
 

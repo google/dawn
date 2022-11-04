@@ -1,5 +1,5 @@
 fn asinh_16b543() {
-  var res = asinh(vec2(1));
+  var res = asinh(vec2(1.0));
 }
 
 @vertex

@@ -23,7 +23,7 @@
 
 // fn clamp(vec<4, fa>, vec<4, fa>, vec<4, fa>) -> vec<4, fa>
 fn clamp_87df46() {
-  var res = clamp(vec4(1), vec4(1), vec4(1));
+  var res = clamp(vec4(1.), vec4(1.), vec4(1.));
 }
 
 @vertex

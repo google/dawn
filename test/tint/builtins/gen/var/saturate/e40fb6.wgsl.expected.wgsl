@@ -1,5 +1,5 @@
 fn saturate_e40fb6() {
-  const arg_0 = vec2(2);
+  const arg_0 = vec2(2.0);
   var res = saturate(arg_0);
 }
 

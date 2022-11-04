@@ -1,5 +1,5 @@
 fn saturate_d55822() {
-  const arg_0 = vec3(2);
+  const arg_0 = vec3(2.0);
   var res = saturate(arg_0);
 }
 

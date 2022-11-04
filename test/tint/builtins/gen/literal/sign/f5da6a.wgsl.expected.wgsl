@@ -1,5 +1,5 @@
 fn sign_f5da6a() {
-  var res = sign(vec4(1));
+  var res = sign(vec4(1.0));
 }
 
 @vertex

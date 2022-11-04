@@ -1,6 +1,6 @@
 fn atan2_c19683() {
-  const arg_0 = vec2(1);
-  const arg_1 = vec2(1);
+  const arg_0 = vec2(1.0);
+  const arg_1 = vec2(1.0);
   var res = atan2(arg_0, arg_1);
 }
 

@@ -23,7 +23,7 @@
 
 // fn saturate(vec<3, fa>) -> vec<3, fa>
 fn saturate_d55822() {
-  var res = saturate(vec3(2));
+  var res = saturate(vec3(2.));
 }
 
 @vertex

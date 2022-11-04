@@ -23,8 +23,8 @@
 
 // fn atan2(fa, fa) -> fa
 fn atan2_034ace() {
-  const arg_0 = 1;
-  const arg_1 = 1;
+  const arg_0 = 1.;
+  const arg_1 = 1.;
   var res = atan2(arg_0, arg_1);
 }
 

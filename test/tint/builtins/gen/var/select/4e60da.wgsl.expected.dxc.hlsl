@@ -1,6 +1,6 @@
 void select_4e60da() {
   bool arg_2 = true;
-  int2 res = (arg_2 ? (1).xx : (1).xx);
+  float2 res = (arg_2 ? (1.0f).xx : (1.0f).xx);
 }
 
 struct tint_symbol {

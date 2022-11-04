@@ -1,5 +1,5 @@
 fn asinh_180015() {
-  var res = asinh(1);
+  var res = asinh(1.0);
 }
 
 @vertex

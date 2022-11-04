@@ -1,5 +1,5 @@
 fn clamp_96e56a() {
-  var res = clamp(1.0, 1.0, 1.0);
+  var res = clamp(1, 1, 1);
 }
 
 @vertex

@@ -23,7 +23,7 @@
 
 // fn sign(vec<3, fa>) -> vec<3, fa>
 fn sign_ab6301() {
-  var res = sign(vec3(1));
+  var res = sign(vec3(1.));
 }
 
 @vertex

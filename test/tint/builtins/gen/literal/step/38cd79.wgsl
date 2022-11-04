@@ -23,7 +23,7 @@
 
 // fn step(vec<4, fa>, vec<4, fa>) -> vec<4, fa>
 fn step_38cd79() {
-  var res = step(vec4(1), vec4(1));
+  var res = step(vec4(1.), vec4(1.));
 }
 
 @vertex

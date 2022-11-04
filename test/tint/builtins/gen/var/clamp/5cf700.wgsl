@@ -23,9 +23,9 @@
 
 // fn clamp(vec<3, fa>, vec<3, fa>, vec<3, fa>) -> vec<3, fa>
 fn clamp_5cf700() {
-  const arg_0 = vec3(1);
-  const arg_1 = vec3(1);
-  const arg_2 = vec3(1);
+  const arg_0 = vec3(1.);
+  const arg_1 = vec3(1.);
+  const arg_2 = vec3(1.);
   var res = clamp(arg_0, arg_1, arg_2);
 }
 

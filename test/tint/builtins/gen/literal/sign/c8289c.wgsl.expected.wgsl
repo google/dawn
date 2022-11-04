@@ -1,5 +1,5 @@
 fn sign_c8289c() {
-  var res = sign(1);
+  var res = sign(1.0);
 }
 
 @vertex
