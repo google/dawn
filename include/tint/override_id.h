@@ -16,6 +16,7 @@
 #define SRC_TINT_OVERRIDE_ID_H_
 
 #include <stdint.h>
+#include <functional>
 
 namespace tint {
 

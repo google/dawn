@@ -17,6 +17,8 @@
 
 #include <cstddef>
 
+#include "dawn/native/Error.h"
+
 namespace dawn::native::stream {
 
 // Interface for a deserialization source.

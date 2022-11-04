@@ -15,6 +15,8 @@
 #ifndef SRC_DAWN_UTILS_TESTUTILS_H_
 #define SRC_DAWN_UTILS_TESTUTILS_H_
 
+#include <ostream>
+
 #include "dawn/webgpu_cpp.h"
 
 namespace utils {
