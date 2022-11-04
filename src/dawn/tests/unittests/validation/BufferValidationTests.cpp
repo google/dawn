@@ -503,7 +503,7 @@ TEST_F(BufferValidationTest, DestroyDestroyedBuffer) {
     buf.Destroy();
 }
 
-// Test that it is invalid to Unmap an error buffer
+// Test that it is valid to Unmap an error buffer
 TEST_F(BufferValidationTest, UnmapErrorBuffer) {
     wgpu::BufferDescriptor desc;
     desc.size = 4;
@@ -511,20 +511,20 @@ TEST_F(BufferValidationTest, UnmapErrorBuffer) {
     wgpu::Buffer buf;
     ASSERT_DEVICE_ERROR(buf = device.CreateBuffer(&desc));
 
-    ASSERT_DEVICE_ERROR(buf.Unmap());
+    buf.Unmap();
 }
 
-// Test that it is invalid to Unmap a destroyed buffer
+// Test that it is valid to Unmap a destroyed buffer
 TEST_F(BufferValidationTest, UnmapDestroyedBuffer) {
     {
         wgpu::Buffer buf = CreateMapReadBuffer(4);
         buf.Destroy();
-        ASSERT_DEVICE_ERROR(buf.Unmap());
+        buf.Unmap();
     }
     {
         wgpu::Buffer buf = CreateMapWriteBuffer(4);
         buf.Destroy();
-        ASSERT_DEVICE_ERROR(buf.Unmap());
+        buf.Unmap();
     }
 }
 
@@ -626,35 +626,35 @@ TEST_F(BufferValidationTest, SubmitDestroyedBuffer) {
     ASSERT_DEVICE_ERROR(queue.Submit(1, &commands));
 }
 
-// Test that a map usage is required to call Unmap
+// Test that a map usage is not required to call Unmap
 TEST_F(BufferValidationTest, UnmapWithoutMapUsage) {
     wgpu::BufferDescriptor descriptor;
     descriptor.size = 4;
     descriptor.usage = wgpu::BufferUsage::CopyDst;
     wgpu::Buffer buf = device.CreateBuffer(&descriptor);
 
-    ASSERT_DEVICE_ERROR(buf.Unmap());
+    buf.Unmap();
 }
 
 // Test that it is valid to call Unmap on a buffer that is not mapped
 TEST_F(BufferValidationTest, UnmapUnmappedBuffer) {
     {
         wgpu::Buffer buf = CreateMapReadBuffer(4);
-        // Buffer starts unmapped. Unmap should fail.
-        ASSERT_DEVICE_ERROR(buf.Unmap());
+        // Buffer starts unmapped. Unmap shouldn't fail.
+        buf.Unmap();
         buf.MapAsync(wgpu::MapMode::Read, 0, 4, nullptr, nullptr);
         buf.Unmap();
-        // Unmapping a second time should fail.
-        ASSERT_DEVICE_ERROR(buf.Unmap());
+        // Unmapping a second time shouldn't fail.
+        buf.Unmap();
     }
     {
         wgpu::Buffer buf = CreateMapWriteBuffer(4);
-        // Buffer starts unmapped. Unmap should fail.
-        ASSERT_DEVICE_ERROR(buf.Unmap());
+        // Buffer starts unmapped. Unmap shouldn't fail.
+        buf.Unmap();
         buf.MapAsync(wgpu::MapMode::Write, 0, 4, nullptr, nullptr);
         buf.Unmap();
-        // Unmapping a second time should fail.
-        ASSERT_DEVICE_ERROR(buf.Unmap());
+        // Unmapping a second time shouldn't fail.
+        buf.Unmap();
     }
 }
 

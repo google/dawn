@@ -539,19 +539,7 @@ bool BufferBase::CanGetMappedRange(bool writable, size_t offset, size_t size) co
 
 MaybeError BufferBase::ValidateUnmap() const {
     DAWN_TRY(GetDevice()->ValidateIsAlive());
-
-    switch (mState) {
-        case BufferState::Mapped:
-        case BufferState::MappedAtCreation:
-            // A buffer may be in the Mapped state if it was created with mappedAtCreation
-            // even if it did not have a mappable usage.
-            return {};
-        case BufferState::Unmapped:
-            return DAWN_VALIDATION_ERROR("%s is unmapped.", this);
-        case BufferState::Destroyed:
-            return DAWN_VALIDATION_ERROR("%s is destroyed.", this);
-    }
-    UNREACHABLE();
+    return {};
 }
 
 void BufferBase::OnMapRequestCompleted(MapRequestID mapID, WGPUBufferMapAsyncStatus status) {
