@@ -853,7 +853,7 @@ TEST_F(ResolverConstEvalTest, BinaryAbstractAddOverflow_AFloat) {
     GlobalConst("c", Add(Source{{1, 1}}, Expr(AFloat::Highest()), AFloat::Highest()));
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "1:1 error: '1.79769e+308 + 1.79769e+308' cannot be represented as 'abstract-float'");
+              "1:1 error: '1.7976931348623157081e+308 + 1.7976931348623157081e+308' cannot be represented as 'abstract-float'");
 }
 
 TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AFloat) {
@@ -861,7 +861,7 @@ TEST_F(ResolverConstEvalTest, BinaryAbstractAddUnderflow_AFloat) {
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(
         r()->error(),
-        "1:1 error: '-1.79769e+308 + -1.79769e+308' cannot be represented as 'abstract-float'");
+        "1:1 error: '-1.7976931348623157081e+308 + -1.7976931348623157081e+308' cannot be represented as 'abstract-float'");
 }
 
 // Mixed AInt and AFloat args to test implicit conversion to AFloat

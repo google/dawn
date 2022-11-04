@@ -14,6 +14,8 @@
 
 #include "src/tint/resolver/const_eval_test.h"
 
+#include "src/tint/utils/result.h"
+
 using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::resolver {
@@ -23,25 +25,39 @@ namespace {
 using resolver::operator<<;
 
 struct Case {
-    Case(utils::VectorRef<Types> in_args, Types in_expected)
-        : args(std::move(in_args)), expected(std::move(in_expected)) {}
+    Case(utils::VectorRef<Types> in_args, Types expected_value)
+        : args(std::move(in_args)), expected(Success{std::move(expected_value), false, false}) {}
+
+    Case(utils::VectorRef<Types> in_args, const char* expected_err)
+        : args(std::move(in_args)), expected(Failure{expected_err}) {}
 
     /// Expected value may be positive or negative
     Case& PosOrNeg() {
-        expected_pos_or_neg = true;
+        Success s = expected.Get();
+        s.pos_or_neg = true;
+        expected = s;
         return *this;
     }
 
     /// Expected value should be compared using FLOAT_EQ instead of EQ
     Case& FloatComp() {
-        float_compare = true;
+        Success s = expected.Get();
+        s.float_compare = true;
+        expected = s;
         return *this;
     }
 
+    struct Success {
+        Types value;
+        bool pos_or_neg = false;
+        bool float_compare = false;
+    };
+    struct Failure {
+        const char* error = nullptr;
+    };
+
     utils::Vector<Types, 8> args;
-    Types expected;
-    bool expected_pos_or_neg = false;
-    bool float_compare = false;
+    utils::Result<Success, Failure> expected;
 };
 
 static std::ostream& operator<<(std::ostream& o, const Case& c) {
@@ -49,9 +65,17 @@ static std::ostream& operator<<(std::ostream& o, const Case& c) {
     for (auto& a : c.args) {
         o << a << ", ";
     }
-    o << "expected: " << c.expected << ", expected_pos_or_neg: " << c.expected_pos_or_neg;
+    o << "expected: ";
+    if (c.expected) {
+        auto s = c.expected.Get();
+        o << s.value << ", pos_or_neg: " << s.pos_or_neg;
+    } else {
+        o << "[ERROR: " << c.expected.Failure().error << "]";
+    }
     return o;
 }
+
+using ScalarTypes = std::variant<AInt, AFloat, u32, i32, f32, f16>;
 
 /// Creates a Case with Values for args and result
 static Case C(std::initializer_list<Types> args, Types result) {
@@ -59,7 +83,6 @@ static Case C(std::initializer_list<Types> args, Types result) {
 }
 
 /// Convenience overload that creates a Case with just scalars
-using ScalarTypes = std::variant<AInt, AFloat, u32, i32, f32, f16>;
 static Case C(std::initializer_list<ScalarTypes> sargs, ScalarTypes sresult) {
     utils::Vector<Types, 8> args;
     for (auto& sa : sargs) {
@@ -68,6 +91,20 @@ static Case C(std::initializer_list<ScalarTypes> sargs, ScalarTypes sresult) {
     Types result = Val(0_a);
     std::visit([&](auto&& v) { result = Val(v); }, sresult);
     return Case{std::move(args), std::move(result)};
+}
+
+/// Creates a Case with Values for args and expected error
+static Case E(std::initializer_list<Types> args, const char* err) {
+    return Case{utils::Vector<Types, 8>{args}, err};
+}
+
+/// Convenience overload that creates an expected-error Case with just scalars
+static Case E(std::initializer_list<ScalarTypes> sargs, const char* err) {
+    utils::Vector<Types, 8> args;
+    for (auto& sa : sargs) {
+        std::visit([&](auto&& v) { return args.Push(Val(v)); }, sa);
+    }
+    return Case{std::move(args), err};
 }
 
 using ResolverConstEvalBuiltinTest = ResolverTestWithParam<std::tuple<sem::BuiltinType, Case>>;
@@ -83,58 +120,65 @@ TEST_P(ResolverConstEvalBuiltinTest, Test) {
         std::visit([&](auto&& v) { args.Push(v.Expr(*this)); }, a);
     }
 
-    auto* expected = ToValueBase(c.expected);
-    auto* expr = Call(sem::str(builtin), std::move(args));
+    auto* expr = Call(Source{{12, 34}}, sem::str(builtin), std::move(args));
 
     GlobalConst("C", expr);
-    auto* expected_expr = expected->Expr(*this);
-    GlobalConst("E", expected_expr);
 
-    ASSERT_TRUE(r()->Resolve()) << r()->error();
+    if (c.expected) {
+        auto expected = c.expected.Get();
 
-    auto* sem = Sem().Get(expr);
-    ASSERT_NE(sem, nullptr);
-    const sem::Constant* value = sem->ConstantValue();
-    ASSERT_NE(value, nullptr);
-    EXPECT_TYPE(value->Type(), sem->Type());
+        auto* expected_expr = ToValueBase(expected.value)->Expr(*this);
+        GlobalConst("E", expected_expr);
 
-    auto* expected_sem = Sem().Get(expected_expr);
-    const sem::Constant* expected_value = expected_sem->ConstantValue();
-    ASSERT_NE(expected_value, nullptr);
-    EXPECT_TYPE(expected_value->Type(), expected_sem->Type());
+        ASSERT_TRUE(r()->Resolve()) << r()->error();
 
-    // @TODO(amaiorano): Rewrite using ScalarArgsFrom()
-    ForEachElemPair(value, expected_value, [&](const sem::Constant* a, const sem::Constant* b) {
-        std::visit(
-            [&](auto&& ct_expected) {
-                using T = typename std::decay_t<decltype(ct_expected)>::ElementType;
+        auto* sem = Sem().Get(expr);
+        ASSERT_NE(sem, nullptr);
+        const sem::Constant* value = sem->ConstantValue();
+        ASSERT_NE(value, nullptr);
+        EXPECT_TYPE(value->Type(), sem->Type());
 
-                auto v = a->As<T>();
-                auto e = b->As<T>();
-                if constexpr (std::is_same_v<bool, T>) {
-                    EXPECT_EQ(v, e);
-                } else if constexpr (IsFloatingPoint<T>) {
-                    if (std::isnan(e)) {
-                        EXPECT_TRUE(std::isnan(v));
-                    } else {
-                        auto vf = (c.expected_pos_or_neg ? Abs(v) : v);
-                        if (c.float_compare) {
-                            EXPECT_FLOAT_EQ(vf, e);
+        auto* expected_sem = Sem().Get(expected_expr);
+        const sem::Constant* expected_value = expected_sem->ConstantValue();
+        ASSERT_NE(expected_value, nullptr);
+        EXPECT_TYPE(expected_value->Type(), expected_sem->Type());
+
+        // @TODO(amaiorano): Rewrite using ScalarArgsFrom()
+        ForEachElemPair(value, expected_value, [&](const sem::Constant* a, const sem::Constant* b) {
+            std::visit(
+                [&](auto&& ct_expected) {
+                    using T = typename std::decay_t<decltype(ct_expected)>::ElementType;
+
+                    auto v = a->As<T>();
+                    auto e = b->As<T>();
+                    if constexpr (std::is_same_v<bool, T>) {
+                        EXPECT_EQ(v, e);
+                    } else if constexpr (IsFloatingPoint<T>) {
+                        if (std::isnan(e)) {
+                            EXPECT_TRUE(std::isnan(v));
                         } else {
-                            EXPECT_EQ(vf, e);
+                            auto vf = (expected.pos_or_neg ? Abs(v) : v);
+                            if (expected.float_compare) {
+                                EXPECT_FLOAT_EQ(vf, e);
+                            } else {
+                                EXPECT_EQ(vf, e);
+                            }
                         }
+                    } else {
+                        EXPECT_EQ((expected.pos_or_neg ? Abs(v) : v), e);
+                        // Check that the constant's integer doesn't contain unexpected
+                        // data in the MSBs that are outside of the bit-width of T.
+                        EXPECT_EQ(a->As<AInt>(), b->As<AInt>());
                     }
-                } else {
-                    EXPECT_EQ((c.expected_pos_or_neg ? Abs(v) : v), e);
-                    // Check that the constant's integer doesn't contain unexpected
-                    // data in the MSBs that are outside of the bit-width of T.
-                    EXPECT_EQ(a->As<AInt>(), b->As<AInt>());
-                }
-            },
-            c.expected);
+                },
+                expected.value);
 
-        return HasFailure() ? Action::kStop : Action::kContinue;
-    });
+            return HasFailure() ? Action::kStop : Action::kContinue;
+        });
+    } else {
+        EXPECT_FALSE(r()->Resolve());
+        EXPECT_EQ(r()->error(), c.expected.Failure().error);
+    }
 }
 
 INSTANTIATE_TEST_SUITE_P(  //
@@ -374,6 +418,19 @@ std::vector<Case> AtanhCases() {
         C({Vec(T(0.0), T(0.9), -T(0.9))}, Vec(T(0.0), T(1.4722193), -T(1.4722193))).FloatComp(),
     };
 
+    ConcatIntoIf<finite_only>(  //
+        cases,
+        std::vector<Case>{
+            E({1.1_a},
+              "12:34 error: atanh must be called with a value in the range (-1 .. 1) (exclusive)"),
+            E({-1.1_a},
+              "12:34 error: atanh must be called with a value in the range (-1 .. 1) (exclusive)"),
+            E({T::Inf()},
+              "12:34 error: atanh must be called with a value in the range (-1 .. 1) (exclusive)"),
+            E({-T::Inf()},
+              "12:34 error: atanh must be called with a value in the range (-1 .. 1) (exclusive)"),
+        });
+
     ConcatIntoIf<!finite_only>(  //
         cases, std::vector<Case>{
                    // If i is NaN, NaN is returned
@@ -393,38 +450,6 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               AtanhCases<f32, false>(),
                                               AtanhCases<f16, false>()))));
 
-TEST_F(ResolverConstEvalBuiltinTest, Atanh_OutsideRange_Positive) {
-    auto* expr = Call(Source{{12, 24}}, "atanh", Expr(1.0_a));
-
-    GlobalConst("C", expr);
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:24 error: atanh must be called with a value in the range (-1, 1)");
-}
-
-TEST_F(ResolverConstEvalBuiltinTest, Atanh_OutsideRange_Negative) {
-    auto* expr = Call(Source{{12, 24}}, "atanh", Negation(1.0_a));
-
-    GlobalConst("C", expr);
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:24 error: atanh must be called with a value in the range (-1, 1)");
-}
-
-TEST_F(ResolverConstEvalBuiltinTest, Atanh_OutsideRange_Positive_INF) {
-    auto* expr = Call(Source{{12, 24}}, "atanh", Expr(f32::Inf()));
-
-    GlobalConst("C", expr);
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:24 error: atanh must be called with a value in the range (-1, 1)");
-}
-
-TEST_F(ResolverConstEvalBuiltinTest, Atanh_OutsideRange_Negative_INF) {
-    auto* expr = Call(Source{{12, 24}}, "atanh", Negation(f32::Inf()));
-
-    GlobalConst("C", expr);
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:24 error: atanh must be called with a value in the range (-1, 1)");
-}
-
 template <typename T, bool finite_only>
 std::vector<Case> AcosCases() {
     std::vector<Case> cases = {
@@ -437,6 +462,19 @@ std::vector<Case> AcosCases() {
         // Vector tests
         C({Vec(T(1.0), -T(1.0))}, Vec(T(0), kPi<T>)).FloatComp(),
     };
+
+    ConcatIntoIf<finite_only>(  //
+        cases,
+        std::vector<Case>{
+            E({1.1_a},
+              "12:34 error: acos must be called with a value in the range [-1 .. 1] (inclusive)"),
+            E({-1.1_a},
+              "12:34 error: acos must be called with a value in the range [-1 .. 1] (inclusive)"),
+            E({T::Inf()},
+              "12:34 error: acos must be called with a value in the range [-1 .. 1] (inclusive)"),
+            E({-T::Inf()},
+              "12:34 error: acos must be called with a value in the range [-1 .. 1] (inclusive)"),
+        });
 
     ConcatIntoIf<!finite_only>(  //
         cases, std::vector<Case>{
@@ -457,38 +495,6 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               AcosCases<f32, false>(),
                                               AcosCases<f16, false>()))));
 
-TEST_F(ResolverConstEvalBuiltinTest, Acos_OutsideRange_Positive) {
-    auto* expr = Call(Source{{12, 24}}, "acos", Expr(1.1_a));
-
-    GlobalConst("C", expr);
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:24 error: acos must be called with a value in the range [-1, 1]");
-}
-
-TEST_F(ResolverConstEvalBuiltinTest, Acos_OutsideRange_Negative) {
-    auto* expr = Call(Source{{12, 24}}, "acos", Negation(1.1_a));
-
-    GlobalConst("C", expr);
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:24 error: acos must be called with a value in the range [-1, 1]");
-}
-
-TEST_F(ResolverConstEvalBuiltinTest, Acos_OutsideRange_Positive_INF) {
-    auto* expr = Call(Source{{12, 24}}, "acos", Expr(f32::Inf()));
-
-    GlobalConst("C", expr);
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:24 error: acos must be called with a value in the range [-1, 1]");
-}
-
-TEST_F(ResolverConstEvalBuiltinTest, Acos_OutsideRange_Negative_INF) {
-    auto* expr = Call(Source{{12, 24}}, "acos", Negation(f32::Inf()));
-
-    GlobalConst("C", expr);
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:24 error: acos must be called with a value in the range [-1, 1]");
-}
-
 template <typename T, bool finite_only>
 std::vector<Case> AsinCases() {
     std::vector<Case> cases = {
@@ -502,6 +508,19 @@ std::vector<Case> AsinCases() {
         // Vector tests
         C({Vec(T(0.0), T(1.0), -T(1.0))}, Vec(T(0.0), kPiOver2<T>, -kPiOver2<T>)).FloatComp(),
     };
+
+    ConcatIntoIf<finite_only>(  //
+        cases,
+        std::vector<Case>{
+            E({1.1_a},
+              "12:34 error: asin must be called with a value in the range [-1 .. 1] (inclusive)"),
+            E({-1.1_a},
+              "12:34 error: asin must be called with a value in the range [-1 .. 1] (inclusive)"),
+            E({T::Inf()},
+              "12:34 error: asin must be called with a value in the range [-1 .. 1] (inclusive)"),
+            E({-T::Inf()},
+              "12:34 error: asin must be called with a value in the range [-1 .. 1] (inclusive)"),
+        });
 
     ConcatIntoIf<!finite_only>(  //
         cases, std::vector<Case>{
@@ -521,38 +540,6 @@ INSTANTIATE_TEST_SUITE_P(  //
                      testing::ValuesIn(Concat(AsinCases<AFloat, true>(),  //
                                               AsinCases<f32, false>(),
                                               AsinCases<f16, false>()))));
-
-TEST_F(ResolverConstEvalBuiltinTest, Asin_OutsideRange_Positive) {
-    auto* expr = Call(Source{{12, 24}}, "asin", Expr(1.1_a));
-
-    GlobalConst("C", expr);
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:24 error: asin must be called with a value in the range [-1, 1]");
-}
-
-TEST_F(ResolverConstEvalBuiltinTest, Asin_OutsideRange_Negative) {
-    auto* expr = Call(Source{{12, 24}}, "asin", Negation(1.1_a));
-
-    GlobalConst("C", expr);
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:24 error: asin must be called with a value in the range [-1, 1]");
-}
-
-TEST_F(ResolverConstEvalBuiltinTest, Asin_OutsideRange_Positive_INF) {
-    auto* expr = Call(Source{{12, 24}}, "asin", Expr(f32::Inf()));
-
-    GlobalConst("C", expr);
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:24 error: asin must be called with a value in the range [-1, 1]");
-}
-
-TEST_F(ResolverConstEvalBuiltinTest, Asin_OutsideRange_Negative_INF) {
-    auto* expr = Call(Source{{12, 24}}, "asin", Negation(f32::Inf()));
-
-    GlobalConst("C", expr);
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:24 error: asin must be called with a value in the range [-1, 1]");
-}
 
 template <typename T, bool finite_only>
 std::vector<Case> AsinhCases() {
@@ -980,12 +967,12 @@ using ResolverConstEvalBuiltinTest_InsertBits_InvalidOffsetAndCount =
     ResolverTestWithParam<std::tuple<size_t, size_t>>;
 TEST_P(ResolverConstEvalBuiltinTest_InsertBits_InvalidOffsetAndCount, Test) {
     auto& p = GetParam();
-    auto* expr = Call(Source{{12, 24}}, sem::str(sem::BuiltinType::kInsertBits), Expr(1_u),
+    auto* expr = Call(Source{{12, 34}}, sem::str(sem::BuiltinType::kInsertBits), Expr(1_u),
                       Expr(1_u), Expr(u32(std::get<0>(p))), Expr(u32(std::get<1>(p))));
     GlobalConst("C", expr);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:24 error: 'offset + 'count' must be less than or equal to the bit width of 'e'");
+              "12:34 error: 'offset + 'count' must be less than or equal to the bit width of 'e'");
 }
 INSTANTIATE_TEST_SUITE_P(InsertBits,
                          ResolverConstEvalBuiltinTest_InsertBits_InvalidOffsetAndCount,
@@ -1083,12 +1070,12 @@ using ResolverConstEvalBuiltinTest_ExtractBits_InvalidOffsetAndCount =
     ResolverTestWithParam<std::tuple<size_t, size_t>>;
 TEST_P(ResolverConstEvalBuiltinTest_ExtractBits_InvalidOffsetAndCount, Test) {
     auto& p = GetParam();
-    auto* expr = Call(Source{{12, 24}}, sem::str(sem::BuiltinType::kExtractBits), Expr(1_u),
+    auto* expr = Call(Source{{12, 34}}, sem::str(sem::BuiltinType::kExtractBits), Expr(1_u),
                       Expr(u32(std::get<0>(p))), Expr(u32(std::get<1>(p))));
     GlobalConst("C", expr);
     EXPECT_FALSE(r()->Resolve());
     EXPECT_EQ(r()->error(),
-              "12:24 error: 'offset + 'count' must be less than or equal to the bit width of 'e'");
+              "12:34 error: 'offset + 'count' must be less than or equal to the bit width of 'e'");
 }
 INSTANTIATE_TEST_SUITE_P(ExtractBits,
                          ResolverConstEvalBuiltinTest_ExtractBits_InvalidOffsetAndCount,
@@ -1282,6 +1269,7 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               StepCases<f16>()))));
 
 std::vector<Case> QuantizeToF16Cases() {
+    (void)E({Vec(0_f, 0_f)}, "");  // Currently unused, but will be soon.
     return {
         C({0_f}, 0_f),    //
         C({-0_f}, -0_f),  //
