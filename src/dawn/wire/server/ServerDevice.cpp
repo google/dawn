@@ -99,7 +99,7 @@ bool Server::DoDeviceCreateComputePipelineAsync(ObjectId deviceId,
     }
 
     auto* resultData =
-        ComputePipelineObjects().Allocate(pipelineObjectHandle.id, AllocationState::Reserved);
+        ComputePipelineObjects().Allocate(pipelineObjectHandle, AllocationState::Reserved);
     if (resultData == nullptr) {
         return false;
     }
@@ -143,7 +143,7 @@ bool Server::DoDeviceCreateRenderPipelineAsync(ObjectId deviceId,
     }
 
     auto* resultData =
-        RenderPipelineObjects().Allocate(pipelineObjectHandle.id, AllocationState::Reserved);
+        RenderPipelineObjects().Allocate(pipelineObjectHandle, AllocationState::Reserved);
     if (resultData == nullptr) {
         return false;
     }

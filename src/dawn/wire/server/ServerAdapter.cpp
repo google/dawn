@@ -28,7 +28,7 @@ bool Server::DoAdapterRequestDevice(ObjectId adapterId,
         return false;
     }
 
-    auto* resultData = DeviceObjects().Allocate(deviceHandle.id, AllocationState::Reserved);
+    auto* resultData = DeviceObjects().Allocate(deviceHandle, AllocationState::Reserved);
     if (resultData == nullptr) {
         return false;
     }

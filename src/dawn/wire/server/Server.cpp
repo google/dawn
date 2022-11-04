@@ -54,7 +54,7 @@ bool Server::InjectTexture(WGPUTexture texture,
         return false;
     }
 
-    ObjectData<WGPUTexture>* data = TextureObjects().Allocate(id);
+    ObjectData<WGPUTexture>* data = TextureObjects().Allocate(ObjectHandle{id, generation});
     if (data == nullptr) {
         return false;
     }
@@ -81,7 +81,7 @@ bool Server::InjectSwapChain(WGPUSwapChain swapchain,
         return false;
     }
 
-    ObjectData<WGPUSwapChain>* data = SwapChainObjects().Allocate(id);
+    ObjectData<WGPUSwapChain>* data = SwapChainObjects().Allocate(ObjectHandle{id, generation});
     if (data == nullptr) {
         return false;
     }
@@ -99,7 +99,7 @@ bool Server::InjectSwapChain(WGPUSwapChain swapchain,
 
 bool Server::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation) {
     ASSERT(device != nullptr);
-    ObjectData<WGPUDevice>* data = DeviceObjects().Allocate(id);
+    ObjectData<WGPUDevice>* data = DeviceObjects().Allocate(ObjectHandle{id, generation});
     if (data == nullptr) {
         return false;
     }
@@ -121,7 +121,7 @@ bool Server::InjectDevice(WGPUDevice device, uint32_t id, uint32_t generation) {
 
 bool Server::InjectInstance(WGPUInstance instance, uint32_t id, uint32_t generation) {
     ASSERT(instance != nullptr);
-    ObjectData<WGPUInstance>* data = InstanceObjects().Allocate(id);
+    ObjectData<WGPUInstance>* data = InstanceObjects().Allocate(ObjectHandle{id, generation});
     if (data == nullptr) {
         return false;
     }

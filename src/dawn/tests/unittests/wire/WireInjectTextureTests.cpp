@@ -72,6 +72,47 @@ TEST_F(WireInjectTextureTests, InjectExistingID) {
                                                 reservation.deviceGeneration));
 }
 
+// Test that injecting the same id without a destroy first fails.
+TEST_F(WireInjectTextureTests, ReuseIDAndGeneration) {
+    // Do this loop multiple times since the first time, we can't test `generation - 1` since
+    // generation == 0.
+    ReservedTexture reservation;
+    WGPUTexture apiTexture = nullptr;
+    for (int i = 0; i < 2; ++i) {
+        reservation = GetWireClient()->ReserveTexture(device, &placeholderDesc);
+
+        apiTexture = api.GetNewTexture();
+        EXPECT_CALL(api, TextureReference(apiTexture));
+        ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reservation.id,
+                                                   reservation.generation, reservation.deviceId,
+                                                   reservation.deviceGeneration));
+
+        // Release the texture. It should be possible to reuse the ID now, but not the generation
+        wgpuTextureRelease(reservation.texture);
+        EXPECT_CALL(api, TextureRelease(apiTexture));
+        FlushClient();
+
+        // Invalid to inject with the same ID and generation.
+        ASSERT_FALSE(GetWireServer()->InjectTexture(apiTexture, reservation.id,
+                                                    reservation.generation, reservation.deviceId,
+                                                    reservation.deviceGeneration));
+        if (i > 0) {
+            EXPECT_GE(reservation.generation, 1u);
+
+            // Invalid to inject with the same ID and lesser generation.
+            ASSERT_FALSE(GetWireServer()->InjectTexture(
+                apiTexture, reservation.id, reservation.generation - 1, reservation.deviceId,
+                reservation.deviceGeneration));
+        }
+    }
+
+    // Valid to inject with the same ID and greater generation.
+    EXPECT_CALL(api, TextureReference(apiTexture));
+    ASSERT_TRUE(GetWireServer()->InjectTexture(apiTexture, reservation.id,
+                                               reservation.generation + 1, reservation.deviceId,
+                                               reservation.deviceGeneration));
+}
+
 // Test that the server only borrows the texture and does a single reference-release
 TEST_F(WireInjectTextureTests, InjectedTextureLifetime) {
     ReservedTexture reservation = GetWireClient()->ReserveTexture(device, &placeholderDesc);

@@ -47,7 +47,7 @@ namespace dawn::wire::server {
                 {% set Type = member.handle_type.name.CamelCase() %}
                 {% set name = as_varName(member.name) %}
 
-                auto* {{name}}Data = {{Type}}Objects().Allocate(cmd.{{name}}.id);
+                auto* {{name}}Data = {{Type}}Objects().Allocate(cmd.{{name}});
                 if ({{name}}Data == nullptr) {
                     return false;
                 }

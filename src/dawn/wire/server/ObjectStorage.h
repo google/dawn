@@ -126,8 +126,8 @@ class KnownObjectsBase {
     // Allocates the data for a given ID and returns it.
     // Returns nullptr if the ID is already allocated, or too far ahead, or if ID is 0 (ID 0 is
     // reserved for nullptr). Invalidates all the Data*
-    Data* Allocate(uint32_t id, AllocationState state = AllocationState::Allocated) {
-        if (id == 0 || id > mKnown.size()) {
+    Data* Allocate(ObjectHandle handle, AllocationState state = AllocationState::Allocated) {
+        if (handle.id == 0 || handle.id > mKnown.size()) {
             return nullptr;
         }
 
@@ -135,17 +135,24 @@ class KnownObjectsBase {
         data.state = state;
         data.handle = nullptr;
 
-        if (id >= mKnown.size()) {
+        if (handle.id >= mKnown.size()) {
             mKnown.push_back(std::move(data));
             return &mKnown.back();
         }
 
-        if (mKnown[id].state != AllocationState::Free) {
+        if (mKnown[handle.id].state != AllocationState::Free) {
             return nullptr;
         }
 
-        mKnown[id] = std::move(data);
-        return &mKnown[id];
+        // The generation should be strictly increasing.
+        if (handle.generation <= mKnown[handle.id].generation) {
+            return nullptr;
+        }
+        // update the generation in the slot
+        data.generation = handle.generation;
+
+        mKnown[handle.id] = std::move(data);
+        return &mKnown[handle.id];
     }
 
     // Marks an ID as deallocated
@@ -193,8 +200,8 @@ class KnownObjects<WGPUDevice> : public KnownObjectsBase<WGPUDevice> {
   public:
     KnownObjects() = default;
 
-    Data* Allocate(uint32_t id, AllocationState state = AllocationState::Allocated) {
-        Data* data = KnownObjectsBase<WGPUDevice>::Allocate(id, state);
+    Data* Allocate(ObjectHandle handle, AllocationState state = AllocationState::Allocated) {
+        Data* data = KnownObjectsBase<WGPUDevice>::Allocate(handle, state);
         AddToKnownSet(data);
         return data;
     }

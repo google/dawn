@@ -110,7 +110,7 @@ bool Server::DoDeviceCreateBuffer(ObjectId deviceId,
     }
 
     // Create and register the buffer object.
-    auto* resultData = BufferObjects().Allocate(bufferResult.id);
+    auto* resultData = BufferObjects().Allocate(bufferResult);
     if (resultData == nullptr) {
         return false;
     }

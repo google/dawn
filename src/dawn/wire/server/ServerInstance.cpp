@@ -29,7 +29,7 @@ bool Server::DoInstanceRequestAdapter(ObjectId instanceId,
         return false;
     }
 
-    auto* resultData = AdapterObjects().Allocate(adapterHandle.id, AllocationState::Reserved);
+    auto* resultData = AdapterObjects().Allocate(adapterHandle, AllocationState::Reserved);
     if (resultData == nullptr) {
         return false;
     }
