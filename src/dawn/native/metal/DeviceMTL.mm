@@ -146,6 +146,10 @@ MaybeError Device::Initialize(const DeviceDescriptor* descriptor) {
         return DAWN_INTERNAL_ERROR("Failed to allocate MTLCommandQueue.");
     }
 
+    if (@available(macOS 10.14, *)) {
+        mMtlSharedEvent.Acquire([*mMtlDevice newSharedEvent]);
+    }
+
     DAWN_TRY(mCommandContext.PrepareNextCommandBuffer(*mCommandQueue));
 
     if (HasFeature(Feature::TimestampQuery) &&
@@ -428,9 +432,19 @@ MaybeError Device::SubmitPendingCommandBuffer() {
 
     TRACE_EVENT_ASYNC_BEGIN0(GetPlatform(), GPUWork, "DeviceMTL::SubmitPendingCommandBuffer",
                              uint64_t(pendingSerial));
+    if (@available(macOS 10.14, *)) {
+        id rawEvent = *mMtlSharedEvent;
+        id<MTLSharedEvent> sharedEvent = static_cast<id<MTLSharedEvent>>(rawEvent);
+        [*pendingCommands encodeSignalEvent:sharedEvent value:static_cast<uint64_t>(pendingSerial)];
+    }
     [*pendingCommands commit];
 
     return mCommandContext.PrepareNextCommandBuffer(*mCommandQueue);
+}
+
+void Device::ExportLastSignaledEvent(ExternalImageMTLSharedEventDescriptor* desc) {
+    desc->sharedEvent = *mMtlSharedEvent;
+    desc->signaledValue = static_cast<uint64_t>(GetLastSubmittedCommandSerial());
 }
 
 ResultOrError<std::unique_ptr<StagingBufferBase>> Device::CreateStagingBuffer(size_t size) {
@@ -471,6 +485,7 @@ MaybeError Device::CopyFromStagingToTextureImpl(const StagingBufferBase* source,
                                                 TextureCopy* dst,
                                                 const Extent3D& copySizePixels) {
     Texture* texture = ToBackend(dst->texture.Get());
+    texture->SynchronizeTextureBeforeUse(GetPendingCommandContext());
     EnsureDestinationTextureInitialized(GetPendingCommandContext(DeviceBase::SubmitMode::Passive),
                                         texture, *dst, copySizePixels);
 
@@ -481,8 +496,10 @@ MaybeError Device::CopyFromStagingToTextureImpl(const StagingBufferBase* source,
     return {};
 }
 
-Ref<Texture> Device::CreateTextureWrappingIOSurface(const ExternalImageDescriptor* descriptor,
-                                                    IOSurfaceRef ioSurface) {
+Ref<Texture> Device::CreateTextureWrappingIOSurface(
+    const ExternalImageDescriptor* descriptor,
+    IOSurfaceRef ioSurface,
+    std::vector<MTLSharedEventAndSignalValue> waitEvents) {
     const TextureDescriptor* textureDescriptor = FromAPI(descriptor->cTextureDescriptor);
     if (ConsumedError(ValidateIsAlive())) {
         return nullptr;
@@ -495,7 +512,9 @@ Ref<Texture> Device::CreateTextureWrappingIOSurface(const ExternalImageDescripto
     }
 
     Ref<Texture> result;
-    if (ConsumedError(Texture::CreateFromIOSurface(this, descriptor, ioSurface), &result)) {
+    if (ConsumedError(
+            Texture::CreateFromIOSurface(this, descriptor, ioSurface, std::move(waitEvents)),
+            &result)) {
         return nullptr;
     }
     return result;

@@ -17,17 +17,20 @@
 
 #include <IOSurface/IOSurfaceRef.h>
 #import <Metal/Metal.h>
+#include <vector>
 
 #include "dawn/native/Texture.h"
 
 #include "dawn/common/CoreFoundationRef.h"
 #include "dawn/common/NSRef.h"
 #include "dawn/native/DawnNative.h"
+#include "dawn/native/MetalBackend.h"
 
 namespace dawn::native::metal {
 
 class CommandRecordingContext;
 class Device;
+struct MTLSharedEventAndSignalValue;
 
 MTLPixelFormat MetalPixelFormat(wgpu::TextureFormat format);
 MaybeError ValidateIOSurfaceCanBeWrapped(const DeviceBase* device,
@@ -40,7 +43,8 @@ class Texture final : public TextureBase {
     static ResultOrError<Ref<Texture>> CreateFromIOSurface(
         Device* device,
         const ExternalImageDescriptor* descriptor,
-        IOSurfaceRef ioSurface);
+        IOSurfaceRef ioSurface,
+        std::vector<MTLSharedEventAndSignalValue> waitEvents);
     static Ref<Texture> CreateWrapping(Device* device,
                                        const TextureDescriptor* descriptor,
                                        NSPRef<id<MTLTexture>> wrapped);
@@ -54,6 +58,9 @@ class Texture final : public TextureBase {
     void EnsureSubresourceContentInitialized(CommandRecordingContext* commandContext,
                                              const SubresourceRange& range);
 
+    void SynchronizeTextureBeforeUse(CommandRecordingContext* commandContext);
+    void IOSurfaceEndAccess(ExternalImageIOSurfaceEndAccessDescriptor* descriptor);
+
   private:
     using TextureBase::TextureBase;
     ~Texture() override;
@@ -63,7 +70,8 @@ class Texture final : public TextureBase {
     MaybeError InitializeAsInternalTexture(const TextureDescriptor* descriptor);
     MaybeError InitializeFromIOSurface(const ExternalImageDescriptor* descriptor,
                                        const TextureDescriptor* textureDescriptor,
-                                       IOSurfaceRef ioSurface);
+                                       IOSurfaceRef ioSurface,
+                                       std::vector<MTLSharedEventAndSignalValue> waitEvents);
     void InitializeAsWrapping(const TextureDescriptor* descriptor, NSPRef<id<MTLTexture>> wrapped);
 
     void DestroyImpl() override;
@@ -76,6 +84,7 @@ class Texture final : public TextureBase {
 
     MTLTextureUsage mMtlUsage;
     CFRef<IOSurfaceRef> mIOSurface = nullptr;
+    std::vector<MTLSharedEventAndSignalValue> mWaitEvents;
 };
 
 class TextureView final : public TextureViewBase {

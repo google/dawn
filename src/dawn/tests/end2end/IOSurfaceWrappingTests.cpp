@@ -449,6 +449,143 @@ TEST_P(IOSurfaceUsageTests, UninitializedTextureIsCleared) {
     // wrap ioSurface and ensure color is not visible when isInitialized set to false
     wgpu::Texture ioSurfaceTexture = WrapIOSurface(&textureDescriptor, ioSurface.get(), false);
     EXPECT_PIXEL_RGBA8_EQ(utils::RGBA8(0, 0, 0, 0), ioSurfaceTexture, 0, 0);
+
+    dawn::native::metal::ExternalImageIOSurfaceEndAccessDescriptor endAccessDesc;
+    dawn::native::metal::IOSurfaceEndAccess(ioSurfaceTexture.Get(), &endAccessDesc);
+    EXPECT_TRUE(endAccessDesc.isInitialized);
+}
+
+// Test that exporting a texture wrapping an IOSurface sets the isInitialized bit to
+// false if the contents are discard.
+TEST_P(IOSurfaceUsageTests, UninitializedOnEndAccess) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+
+    ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_32RGBA, 4);
+    uint32_t data = 0x04030201;
+
+    IOSurfaceLock(ioSurface.get(), 0, nullptr);
+    memcpy(IOSurfaceGetBaseAddress(ioSurface.get()), &data, sizeof(data));
+    IOSurfaceUnlock(ioSurface.get(), 0, nullptr);
+
+    wgpu::TextureDescriptor textureDescriptor;
+    textureDescriptor.dimension = wgpu::TextureDimension::e2D;
+    textureDescriptor.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDescriptor.size = {1, 1, 1};
+    textureDescriptor.sampleCount = 1;
+    textureDescriptor.mipLevelCount = 1;
+    textureDescriptor.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+
+    // Wrap ioSurface
+    wgpu::Texture ioSurfaceTexture = WrapIOSurface(&textureDescriptor, ioSurface.get(), true);
+
+    // Uninitialize the teuxture with a render pass.
+    utils::ComboRenderPassDescriptor renderPassDescriptor({ioSurfaceTexture.CreateView()});
+    renderPassDescriptor.cColorAttachments[0].storeOp = wgpu::StoreOp::Discard;
+    wgpu::CommandEncoder encoder = device.CreateCommandEncoder();
+    encoder.BeginRenderPass(&renderPassDescriptor).End();
+    wgpu::CommandBuffer commandBuffer = encoder.Finish();
+    queue.Submit(1, &commandBuffer);
+
+    dawn::native::metal::ExternalImageIOSurfaceEndAccessDescriptor endAccessDesc;
+    dawn::native::metal::IOSurfaceEndAccess(ioSurfaceTexture.Get(), &endAccessDesc);
+    EXPECT_FALSE(endAccessDesc.isInitialized);
+}
+
+// Test that an IOSurface may be imported across multiple devices.
+TEST_P(IOSurfaceUsageTests, WriteThenConcurrentReadThenWrite) {
+    DAWN_TEST_UNSUPPORTED_IF(UsesWire());
+
+    ScopedIOSurfaceRef ioSurface = CreateSinglePlaneIOSurface(1, 1, kCVPixelFormatType_32RGBA, 4);
+    uint32_t data = 0x04030201;
+
+    IOSurfaceLock(ioSurface.get(), 0, nullptr);
+    memcpy(IOSurfaceGetBaseAddress(ioSurface.get()), &data, sizeof(data));
+    IOSurfaceUnlock(ioSurface.get(), 0, nullptr);
+
+    // Make additional devices. We will import with the writeDevice, then read it concurrently with
+    // both readDevices.
+    wgpu::Device writeDevice = device;
+    wgpu::Device readDevice1 = CreateDevice();
+    wgpu::Device readDevice2 = CreateDevice();
+
+    wgpu::TextureDescriptor textureDesc;
+    textureDesc.dimension = wgpu::TextureDimension::e2D;
+    textureDesc.format = wgpu::TextureFormat::RGBA8Unorm;
+    textureDesc.size = {1, 1, 1};
+    textureDesc.sampleCount = 1;
+    textureDesc.mipLevelCount = 1;
+    textureDesc.usage = wgpu::TextureUsage::RenderAttachment | wgpu::TextureUsage::CopySrc;
+
+    // Wrap ioSurface
+    dawn::native::metal::ExternalImageDescriptorIOSurface writeExternDesc;
+    writeExternDesc.cTextureDescriptor =
+        reinterpret_cast<const WGPUTextureDescriptor*>(&textureDesc);
+    writeExternDesc.ioSurface = ioSurface.get();
+    writeExternDesc.isInitialized = true;
+
+    wgpu::Texture writeTexture = wgpu::Texture::Acquire(
+        dawn::native::metal::WrapIOSurface(writeDevice.Get(), &writeExternDesc));
+
+    // Clear the texture to green.
+    {
+        utils::ComboRenderPassDescriptor renderPassDescriptor({writeTexture.CreateView()});
+        renderPassDescriptor.cColorAttachments[0].clearValue = {0.0, 1.0, 0.0, 1.0};
+        wgpu::CommandEncoder encoder = writeDevice.CreateCommandEncoder();
+        encoder.BeginRenderPass(&renderPassDescriptor).End();
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        writeDevice.GetQueue().Submit(1, &commandBuffer);
+    }
+
+    // End access.
+    dawn::native::metal::ExternalImageIOSurfaceEndAccessDescriptor endWriteAccessDesc;
+    dawn::native::metal::IOSurfaceEndAccess(writeTexture.Get(), &endWriteAccessDesc);
+    EXPECT_TRUE(endWriteAccessDesc.isInitialized);
+
+    dawn::native::metal::ExternalImageDescriptorIOSurface externDesc;
+    externDesc.cTextureDescriptor = reinterpret_cast<const WGPUTextureDescriptor*>(&textureDesc);
+    externDesc.ioSurface = ioSurface.get();
+    externDesc.isInitialized = true;
+    externDesc.waitEvents.push_back(
+        {endWriteAccessDesc.sharedEvent, endWriteAccessDesc.signaledValue});
+
+    // Wrap on two separate devices to read it.
+    wgpu::Texture readTexture1 =
+        wgpu::Texture::Acquire(dawn::native::metal::WrapIOSurface(readDevice1.Get(), &externDesc));
+    wgpu::Texture readTexture2 =
+        wgpu::Texture::Acquire(dawn::native::metal::WrapIOSurface(readDevice2.Get(), &externDesc));
+
+    // Expect the texture to be green
+    EXPECT_TEXTURE_EQ(readDevice1, utils::RGBA8(0, 255, 0, 255), readTexture1, {0, 0});
+    EXPECT_TEXTURE_EQ(readDevice2, utils::RGBA8(0, 255, 0, 255), readTexture2, {0, 0});
+
+    // End access on both read textures.
+    dawn::native::metal::ExternalImageIOSurfaceEndAccessDescriptor endReadAccessDesc1;
+    dawn::native::metal::IOSurfaceEndAccess(readTexture1.Get(), &endReadAccessDesc1);
+    EXPECT_TRUE(endReadAccessDesc1.isInitialized);
+
+    dawn::native::metal::ExternalImageIOSurfaceEndAccessDescriptor endReadAccessDesc2;
+    dawn::native::metal::IOSurfaceEndAccess(readTexture2.Get(), &endReadAccessDesc2);
+    EXPECT_TRUE(endReadAccessDesc2.isInitialized);
+
+    // Import again for writing. It should not race with the previous reads.
+    writeExternDesc.waitEvents = {endReadAccessDesc1, endReadAccessDesc2};
+    writeExternDesc.isInitialized = true;
+    writeTexture = wgpu::Texture::Acquire(
+        dawn::native::metal::WrapIOSurface(writeDevice.Get(), &writeExternDesc));
+
+    // Clear the texture to blue.
+    {
+        utils::ComboRenderPassDescriptor renderPassDescriptor({writeTexture.CreateView()});
+        renderPassDescriptor.cColorAttachments[0].clearValue = {0.0, 0.0, 1.0, 1.0};
+        wgpu::CommandEncoder encoder = writeDevice.CreateCommandEncoder();
+        encoder.BeginRenderPass(&renderPassDescriptor).End();
+        wgpu::CommandBuffer commandBuffer = encoder.Finish();
+        writeDevice.GetQueue().Submit(1, &commandBuffer);
+    }
+    // Finally, expect the contents to be blue now.
+    EXPECT_TEXTURE_EQ(writeDevice, utils::RGBA8(0, 0, 255, 255), writeTexture, {0, 0});
+    dawn::native::metal::IOSurfaceEndAccess(writeTexture.Get(), &endWriteAccessDesc);
+    EXPECT_TRUE(endWriteAccessDesc.isInitialized);
 }
 
 DAWN_INSTANTIATE_TEST(IOSurfaceValidationTests, MetalBackend());

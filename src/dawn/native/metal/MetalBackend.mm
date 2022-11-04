@@ -17,6 +17,7 @@
 
 #include "dawn/native/MetalBackend.h"
 
+#include "dawn/native/metal/CommandRecordingContext.h"
 #include "dawn/native/metal/DeviceMTL.h"
 #include "dawn/native/metal/TextureMTL.h"
 
@@ -28,11 +29,24 @@ AdapterDiscoveryOptions::AdapterDiscoveryOptions()
 ExternalImageDescriptorIOSurface::ExternalImageDescriptorIOSurface()
     : ExternalImageDescriptor(ExternalImageType::IOSurface) {}
 
+ExternalImageDescriptorIOSurface::~ExternalImageDescriptorIOSurface() = default;
+
 WGPUTexture WrapIOSurface(WGPUDevice device, const ExternalImageDescriptorIOSurface* cDescriptor) {
     Device* backendDevice = ToBackend(FromAPI(device));
-    Ref<TextureBase> texture =
-        backendDevice->CreateTextureWrappingIOSurface(cDescriptor, cDescriptor->ioSurface);
+    std::vector<MTLSharedEventAndSignalValue> waitEvents;
+    for (const auto& waitEvent : cDescriptor->waitEvents) {
+        waitEvents.push_back(
+            {static_cast<id<MTLSharedEvent>>(waitEvent.sharedEvent), waitEvent.signaledValue});
+    }
+    Ref<TextureBase> texture = backendDevice->CreateTextureWrappingIOSurface(
+        cDescriptor, cDescriptor->ioSurface, std::move(waitEvents));
     return ToAPI(texture.Detach());
+}
+
+void IOSurfaceEndAccess(WGPUTexture cTexture,
+                        ExternalImageIOSurfaceEndAccessDescriptor* descriptor) {
+    Texture* texture = ToBackend(FromAPI(cTexture));
+    texture->IOSurfaceEndAccess(descriptor);
 }
 
 void WaitForCommandsToBeScheduled(WGPUDevice device) {
