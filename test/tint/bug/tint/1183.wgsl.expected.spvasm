@@ -1,0 +1,55 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 32
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %f "f" %value
+               OpExecutionMode %f OriginUpperLeft
+               OpName %value "value"
+               OpName %t "t"
+               OpName %s "s"
+               OpName %f_inner "f_inner"
+               OpName %f "f"
+               OpDecorate %value Location 0
+               OpDecorate %t Binding 0
+               OpDecorate %t DescriptorSet 0
+               OpDecorate %s Binding 0
+               OpDecorate %s DescriptorSet 1
+      %float = OpTypeFloat 32
+    %v4float = OpTypeVector %float 4
+%_ptr_Output_v4float = OpTypePointer Output %v4float
+          %5 = OpConstantNull %v4float
+      %value = OpVariable %_ptr_Output_v4float Output %5
+          %8 = OpTypeImage %float 2D 0 0 0 1 Unknown
+%_ptr_UniformConstant_8 = OpTypePointer UniformConstant %8
+          %t = OpVariable %_ptr_UniformConstant_8 UniformConstant
+         %11 = OpTypeSampler
+%_ptr_UniformConstant_11 = OpTypePointer UniformConstant %11
+          %s = OpVariable %_ptr_UniformConstant_11 UniformConstant
+         %12 = OpTypeFunction %v4float
+         %18 = OpTypeSampledImage %8
+    %v2float = OpTypeVector %float 2
+         %21 = OpConstantNull %v2float
+        %int = OpTypeInt 32 1
+      %v2int = OpTypeVector %int 2
+      %int_4 = OpConstant %int 4
+      %int_6 = OpConstant %int 6
+         %26 = OpConstantComposite %v2int %int_4 %int_6
+       %void = OpTypeVoid
+         %27 = OpTypeFunction %void
+    %f_inner = OpFunction %v4float None %12
+         %14 = OpLabel
+         %16 = OpLoad %11 %s
+         %17 = OpLoad %8 %t
+         %19 = OpSampledImage %18 %17 %16
+         %15 = OpImageSampleImplicitLod %v4float %19 %21 ConstOffset %26
+               OpReturnValue %15
+               OpFunctionEnd
+          %f = OpFunction %void None %27
+         %30 = OpLabel
+         %31 = OpFunctionCall %v4float %f_inner
+               OpStore %value %31
+               OpReturn
+               OpFunctionEnd
