@@ -351,48 +351,6 @@ fn f() { static_assert true }
 )");
 }
 
-// TODO(crbug.com/tint/1503): Remove this when @stage is removed
-TEST_F(ParserImplErrorTest, FunctionDeclStageMissingLParen) {
-    EXPECT("@stage vertex) fn f() {}",
-           R"(test.wgsl:1:8 error: expected '(' for stage attribute
-@stage vertex) fn f() {}
-       ^^^^^^
-)");
-}
-
-TEST_F(ParserImplErrorTest, FunctionDeclStageMissingRParen) {
-    EXPECT(
-        "@stage(vertex fn f() {}",
-        R"(test.wgsl:1:2 warning: use of deprecated language feature: remove stage and use @vertex
-@stage(vertex fn f() {}
- ^^^^^
-
-test.wgsl:1:15 error: expected ')' for stage attribute
-@stage(vertex fn f() {}
-              ^^
-)");
-}
-
-TEST_F(ParserImplErrorTest, FunctionDeclStageInvalid) {
-    EXPECT("@stage(x) fn f() {}",
-           R"(test.wgsl:1:8 error: invalid value for stage attribute
-@stage(x) fn f() {}
-       ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, FunctionDeclStageTypeInvalid) {
-    EXPECT("@shader(vertex) fn main() {}",
-           R"(test.wgsl:1:2 error: expected attribute
-@shader(vertex) fn main() {}
- ^^^^^^
-
-test.wgsl:1:8 error: unexpected token
-@shader(vertex) fn main() {}
-       ^
-)");
-}
-
 TEST_F(ParserImplErrorTest, FunctionDeclWorkgroupSizeXInvalid) {
     EXPECT("@workgroup_size() fn f() {}",
            R"(test.wgsl:1:17 error: expected workgroup_size x parameter

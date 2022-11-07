@@ -1613,29 +1613,6 @@ Expect<ast::Parameter*> ParserImpl::expect_param() {
                                   std::move(attrs.value));                  // attributes
 }
 
-// pipeline_stage
-//   : VERTEX
-//   | FRAGMENT
-//   | COMPUTE
-//
-// TODO(crbug.com/tint/1503): Remove when deprecation period is over.
-Expect<ast::PipelineStage> ParserImpl::expect_pipeline_stage() {
-    auto& t = peek();
-    if (t == "vertex") {
-        next();  // Consume the peek
-        return {ast::PipelineStage::kVertex, t.source()};
-    }
-    if (t == "fragment") {
-        next();  // Consume the peek
-        return {ast::PipelineStage::kFragment, t.source()};
-    }
-    if (t == "compute") {
-        next();  // Consume the peek
-        return {ast::PipelineStage::kCompute, t.source()};
-    }
-    return add_error(peek(), "invalid value for stage attribute");
-}
-
 // interpolation_sample_name
 //   : 'center'
 //   | 'centroid'
@@ -3634,34 +3611,6 @@ Maybe<const ast::Attribute*> ParserImpl::attribute() {
             match(Token::Type::kComma);
 
             return builder_.MemberSize(t.source(), expr.value);
-        });
-    }
-
-    // TODO(crbug.com/tint/1503): Remove when deprecation period is over.
-    if (t == "stage") {
-        return expect_paren_block("stage attribute", [&]() -> Result {
-            auto stage = expect_pipeline_stage();
-            if (stage.errored) {
-                return Failure::kErrored;
-            }
-
-            std::string warning = "remove stage and use @";
-            switch (stage.value) {
-                case ast::PipelineStage::kVertex:
-                    warning += "vertex";
-                    break;
-                case ast::PipelineStage::kFragment:
-                    warning += "fragment";
-                    break;
-                case ast::PipelineStage::kCompute:
-                    warning += "compute";
-                    break;
-                case ast::PipelineStage::kNone:
-                    break;
-            }
-            deprecated(t.source(), warning);
-
-            return create<ast::StageAttribute>(t.source(), stage.value);
         });
     }
 

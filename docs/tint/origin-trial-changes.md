@@ -5,6 +5,8 @@
 ### Breaking changes
 
 * `textureDimensions()`, `textureNumLayers()` and `textureNumLevels()` now return unsigned integers / vectors. [tint:1526](crbug.com/tint/1526)
+* The `@stage` attribute has been removed. The short forms should be used
+  instead (`@vertex`, `@fragment`, or `@compute`). [tint:1503](crbug.com/tint/1503)
 
 ### New features
 
