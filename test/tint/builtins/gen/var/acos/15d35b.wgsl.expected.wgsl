@@ -1,5 +1,5 @@
 fn acos_15d35b() {
-  const arg_0 = vec2(0.87758256188999995);
+  const arg_0 = vec2(0.96891242171000003);
   var res = acos(arg_0);
 }
 

@@ -1,5 +1,5 @@
 fn acos_a610c4() {
-  var res : vec3<f32> = acos(vec3<f32>(0.87758255f));
+  var res : vec3<f32> = acos(vec3<f32>(0.968912423f));
 }
 
 @vertex

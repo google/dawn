@@ -1,7 +1,7 @@
 #version 310 es
 
 void acos_8e2acf() {
-  vec4 res = vec4(0.5f);
+  vec4 res = vec4(0.25f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void acos_8e2acf() {
-  vec4 res = vec4(0.5f);
+  vec4 res = vec4(0.25f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void acos_8e2acf() {
-  vec4 res = vec4(0.5f);
+  vec4 res = vec4(0.25f);
 }
 
 void compute_main() {

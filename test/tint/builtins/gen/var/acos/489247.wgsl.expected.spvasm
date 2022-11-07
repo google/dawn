@@ -32,7 +32,7 @@
 %vertex_point_size = OpVariable %_ptr_Output_float Output %8
        %void = OpTypeVoid
           %9 = OpTypeFunction %void
-%float_0_87758255 = OpConstant %float 0.87758255
+%float_0_968912423 = OpConstant %float 0.968912423
 %_ptr_Function_float = OpTypePointer Function %float
          %20 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
@@ -40,7 +40,7 @@
          %12 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_float Function %8
         %res = OpVariable %_ptr_Function_float Function %8
-               OpStore %arg_0 %float_0_87758255
+               OpStore %arg_0 %float_0_968912423
          %18 = OpLoad %float %arg_0
          %16 = OpExtInst %float %17 Acos %18
                OpStore %res %16

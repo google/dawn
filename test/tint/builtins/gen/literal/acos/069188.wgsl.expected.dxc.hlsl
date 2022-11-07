@@ -1,5 +1,5 @@
 void acos_069188() {
-  float3 res = (0.5f).xxx;
+  float3 res = (0.25f).xxx;
 }
 
 struct tint_symbol {

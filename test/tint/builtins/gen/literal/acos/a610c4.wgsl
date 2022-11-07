@@ -23,7 +23,7 @@
 
 // fn acos(vec<3, f32>) -> vec<3, f32>
 fn acos_a610c4() {
-  var res: vec3<f32> = acos(vec3<f32>(0.87758256189f));
+  var res: vec3<f32> = acos(vec3<f32>(0.96891242171f));
 }
 
 @vertex

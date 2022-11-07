@@ -23,7 +23,7 @@
 
 // fn acos(fa) -> fa
 fn acos_5e9ad2() {
-  const arg_0 = 0.87758256189;
+  const arg_0 = 0.96891242171;
   var res = acos(arg_0);
 }
 

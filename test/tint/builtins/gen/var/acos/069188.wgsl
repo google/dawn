@@ -23,7 +23,7 @@
 
 // fn acos(vec<3, fa>) -> vec<3, fa>
 fn acos_069188() {
-  const arg_0 = vec3(0.87758256189);
+  const arg_0 = vec3(0.96891242171);
   var res = acos(arg_0);
 }
 

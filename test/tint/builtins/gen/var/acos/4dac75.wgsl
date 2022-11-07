@@ -23,7 +23,7 @@
 
 // fn acos(vec<4, fa>) -> vec<4, fa>
 fn acos_4dac75() {
-  const arg_0 = vec4(0.87758256189);
+  const arg_0 = vec4(0.96891242171);
   var res = acos(arg_0);
 }
 

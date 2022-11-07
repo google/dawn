@@ -23,7 +23,7 @@
 
 // fn acos(vec<3, fa>) -> vec<3, fa>
 fn acos_069188() {
-  var res = acos(vec3(0.87758256189));
+  var res = acos(vec3(0.96891242171));
 }
 
 @vertex

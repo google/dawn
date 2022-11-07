@@ -1,5 +1,5 @@
 void acos_489247() {
-  float arg_0 = 0.87758255f;
+  float arg_0 = 0.968912423f;
   float res = acos(arg_0);
 }
 

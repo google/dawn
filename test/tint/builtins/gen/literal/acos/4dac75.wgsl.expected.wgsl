@@ -1,5 +1,5 @@
 fn acos_4dac75() {
-  var res = acos(vec4(0.87758256188999995));
+  var res = acos(vec4(0.96891242171000003));
 }
 
 @vertex

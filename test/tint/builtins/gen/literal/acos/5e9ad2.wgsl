@@ -23,7 +23,7 @@
 
 // fn acos(fa) -> fa
 fn acos_5e9ad2() {
-  var res = acos(0.87758256189);
+  var res = acos(0.96891242171);
 }
 
 @vertex

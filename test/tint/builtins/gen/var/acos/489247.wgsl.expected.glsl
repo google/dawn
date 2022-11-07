@@ -1,7 +1,7 @@
 #version 310 es
 
 void acos_489247() {
-  float arg_0 = 0.87758255f;
+  float arg_0 = 0.968912423f;
   float res = acos(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void acos_489247() {
-  float arg_0 = 0.87758255f;
+  float arg_0 = 0.968912423f;
   float res = acos(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void acos_489247() {
-  float arg_0 = 0.87758255f;
+  float arg_0 = 0.968912423f;
   float res = acos(arg_0);
 }
 

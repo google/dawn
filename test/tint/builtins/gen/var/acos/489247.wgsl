@@ -23,7 +23,7 @@
 
 // fn acos(f32) -> f32
 fn acos_489247() {
-  var arg_0 = 0.87758256189f;
+  var arg_0 = 0.96891242171f;
   var res: f32 = acos(arg_0);
 }
 
