@@ -1,0 +1,15 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_2 {
+  float none [[user(locn2)]];
+};
+
+void tint_symbol_inner(float none) {
+}
+
+fragment void tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
+  tint_symbol_inner(tint_symbol_1.none);
+  return;
+}
+

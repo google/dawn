@@ -1237,9 +1237,14 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
                                    })});
     GlobalVar(Sym(), T, V);
     GlobalConst(Sym(), T, V);
-    Func(Sym(),                           //
-         utils::Vector{Param(Sym(), T)},  //
-         T,                               // Return type
+    Func(Sym(),
+         utils::Vector{
+             Param(Sym(), T,
+                   utils::Vector{
+                       Location(V),  // Parameter attributes
+                   }),
+         },
+         T,  // Return type
          utils::Vector{
              Decl(Var(Sym(), T, V)),                    //
              Decl(Let(Sym(), T, V)),                    //

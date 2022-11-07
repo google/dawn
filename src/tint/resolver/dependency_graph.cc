@@ -193,8 +193,6 @@ class DependencyScanner {
             },
             [&](const ast::Function* func) {
                 Declare(func->symbol, func);
-                TraverseAttributes(func->attributes);
-                TraverseAttributes(func->return_type_attributes);
                 TraverseFunction(func);
             },
             [&](const ast::Variable* var) {
@@ -216,10 +214,13 @@ class DependencyScanner {
     /// Traverses the function, performing symbol resolution and determining
     /// global dependencies.
     void TraverseFunction(const ast::Function* func) {
+        TraverseAttributes(func->attributes);
+        TraverseAttributes(func->return_type_attributes);
         // Perform symbol resolution on all the parameter types before registering
         // the parameters themselves. This allows the case of declaring a parameter
         // with the same identifier as its type.
         for (auto* param : func->params) {
+            TraverseAttributes(param->attributes);
             TraverseType(param->type);
         }
         // Resolve the return type
