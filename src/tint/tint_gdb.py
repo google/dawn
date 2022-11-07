@@ -165,11 +165,11 @@ pp_set.add_printer(
     'UtilsVector', '^tint::utils::VectorRef<.*>$', UtilsVectorRefPrinter)
 
 
-class UtilsHashsetPrinter(Printer):
-    '''Printer for Hashset<T, N, HASH, EQUAL>'''
+class UtilsHashmapBasePrinter(Printer):
+    '''Base Printer for HashmapBase-derived types'''
 
     def __init__(self, val):
-        super(UtilsHashsetPrinter, self).__init__(val)
+        super(UtilsHashmapBasePrinter, self).__init__(val)
         self.slice = UtilsVectorPrinter(self.val['slots_']).slice_printer()
         self.try_read_std_optional_func = self.try_read_std_optional
 
@@ -185,26 +185,32 @@ class UtilsHashsetPrinter(Printer):
         for slot in range(0, self.slice.length()):
             v = self.slice.value_at(slot)
             if v['hash'] != 0:
-                value = v['value']
+                entry = v['entry']
 
-                # value is a std::optional, let's try to extract its value for display
-                kvp = self.try_read_std_optional_func(slot, value)
+                # entry is a std::optional, let's try to extract its value for display
+                kvp = self.try_read_std_optional_func(slot, entry)
                 if kvp is None:
-                    # If we failed, just output the slot and value as is, which will use
+                    # If we failed, just output the slot and entry as is, which will use
                     # the default visualizer for each.
-                    kvp = slot, value
+                    kvp = slot, entry
 
                 yield str(kvp[0]), kvp[1]
 
     def display_hint(self):
         return 'array'
 
-    def try_read_std_optional(self, slot, value):
+    def try_read_std_optional(self, slot, entry):
+        return None
+
+
+class UtilsHashsetPrinter(UtilsHashmapBasePrinter):
+    '''Printer for Hashset<T, N, HASH, EQUAL>'''
+
+    def try_read_std_optional(self, slot, entry):
         try:
             # libstdc++
-            v = value['_M_payload']['_M_payload']['_M_value']
+            v = entry['_M_payload']['_M_payload']['_M_value']
             return slot, v
-            # return str(kvp['key']), kvp['value']
         except:
             return None
 
@@ -213,33 +219,16 @@ pp_set.add_printer(
     'UtilsHashset', '^tint::utils::Hashset<.*>$', UtilsHashsetPrinter)
 
 
-class UtilsHashmapPrinter(Printer):
+class UtilsHashmapPrinter(UtilsHashmapBasePrinter):
     '''Printer for Hashmap<K, V, N, HASH, EQUAL>'''
 
-    def __init__(self, val):
-        super(UtilsHashmapPrinter, self).__init__(val)
-        self.hash_set = UtilsHashsetPrinter(self.val['set_'])
-        # Replace the lookup function so we can extract the key and value out of the std::optionals in the Hashset
-        self.hash_set.try_read_std_optional_func = self.try_read_std_optional
-
-    def to_string(self):
-        return self.hash_set.to_string()
-
-    def children(self):
-        return self.hash_set.children()
-
-    def display_hint(self):
-        return 'array'
-
-    def try_read_std_optional(self, slot, value):
+    def try_read_std_optional(self, slot, entry):
         try:
             # libstdc++
-            kvp = value['_M_payload']['_M_payload']['_M_value']
+            kvp = entry['_M_payload']['_M_payload']['_M_value']
             return str(kvp['key']), kvp['value']
         except:
-            pass
-        # Failed, fall back on hash_set
-        return self.hash_set.try_read_std_optional(slot, value)
+            return None
 
 
 pp_set.add_printer(

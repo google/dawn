@@ -297,8 +297,8 @@ class UtilsVectorRefPrinter(Printer):
         return self.slice_printer.get_child_at_index(index)
 
 
-class UtilsHashsetPrinter(Printer):
-    '''Printer for Hashset<T, N, HASH, EQUAL>'''
+class UtilsHashmapBasePrinter(Printer):
+    '''Base Printer for HashmapBase-derived types'''
 
     def initialize(self):
         self.slice = UtilsVectorPrinter(
@@ -326,26 +326,33 @@ class UtilsHashsetPrinter(Printer):
     def get_child_at_index(self, index):
         slot = self.valid_slots[index]
         v = self.slice.value_at(slot)
-        value = member(v, 'value')
+        entry = member(v, 'entry')
 
-        # value is a std::optional, let's try to extract its value for display
-        kvp = self.try_read_std_optional_func(slot, value)
+        # entry is a std::optional, let's try to extract its value for display
+        kvp = self.try_read_std_optional_func(slot, entry)
         if kvp is None:
-            # If we failed, just output the slot and value as is, which will use
+            # If we failed, just output the slot and entry as is, which will use
             # the default printer for std::optional.
-            kvp = slot, value
+            kvp = slot, entry
 
         return kvp[1].CreateChildAtOffset('[{}]'.format(kvp[0]), 0, kvp[1].GetType())
 
-    def try_read_std_optional(self, slot, value):
+    def try_read_std_optional(self, slot, entry):
+        return None
+
+
+class UtilsHashsetPrinter(UtilsHashmapBasePrinter):
+    '''Printer for Hashset<T, N, HASH, EQUAL>'''
+
+    def try_read_std_optional(self, slot, entry):
         try:
             # libc++
-            v = value.EvaluateExpression('__val_')
+            v = entry.EvaluateExpression('__val_')
             if v.name is not None:
                 return slot, v
 
             # libstdc++
-            v = value.EvaluateExpression('_M_payload._M_payload._M_value')
+            v = entry.EvaluateExpression('_M_payload._M_payload._M_value')
             if v.name is not None:
                 return slot, v
             return None
@@ -353,45 +360,24 @@ class UtilsHashsetPrinter(Printer):
             return None
 
 
-class UtilsHashmapPrinter(Printer):
+class UtilsHashmapPrinter(UtilsHashsetPrinter):
     '''Printer for Hashmap<K, V, N, HASH, EQUAL>'''
 
-    def initialize(self):
-        self.hash_set = UtilsHashsetPrinter(self.member('set_'))
-        # Replace the lookup function so we can extract the key and value out of the std::optionals in the Hashset
-        self.hash_set.try_read_std_optional_func = self.try_read_std_optional
-
-    def update(self):
-        self.hash_set.update()
-
-    def get_summary(self):
-        return self.hash_set.get_summary()
-
-    def num_children(self):
-        return self.hash_set.num_children()
-
-    def has_children(self):
-        return self.hash_set.has_children()
-
-    def get_child_at_index(self, index):
-        return self.hash_set.get_child_at_index(index)
-
-    def try_read_std_optional(self, slot, value):
+    def try_read_std_optional(self, slot, entry):
         try:
             # libc++
-            val = value.EvaluateExpression('__val_')
+            val = entry.EvaluateExpression('__val_')
             k = val.EvaluateExpression('key')
             v = val.EvaluateExpression('value')
             if k.name is not None and v.name is not None:
                 return k.GetValue(), v
 
             # libstdc++
-            val = value.EvaluateExpression('_M_payload._M_payload._M_value')
+            val = entry.EvaluateExpression('_M_payload._M_payload._M_value')
             k = val.EvaluateExpression('key')
             v = val.EvaluateExpression('value')
             if k.name is not None and v.name is not None:
                 return k.GetValue(), v
+            return None
         except:
-            pass
-        # Failed, fall back on hash_set
-        return self.hash_set.try_read_std_optional(slot, value)
+            return None
