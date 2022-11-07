@@ -1,7 +1,7 @@
 #version 310 es
 
 void unpack2x16unorm_7699c0() {
-  vec2 res = unpackUnorm2x16(1u);
+  vec2 res = vec2(1.52590219e-05f, 0.0f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void unpack2x16unorm_7699c0() {
-  vec2 res = unpackUnorm2x16(1u);
+  vec2 res = vec2(1.52590219e-05f, 0.0f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void unpack2x16unorm_7699c0() {
-  vec2 res = unpackUnorm2x16(1u);
+  vec2 res = vec2(1.52590219e-05f, 0.0f);
 }
 
 void compute_main() {

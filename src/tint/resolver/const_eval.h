@@ -638,6 +638,42 @@ class ConstEval {
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
 
+    /// unpack2x16snorm builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result unpack2x16snorm(const sem::Type* ty,
+                           utils::VectorRef<const sem::Constant*> args,
+                           const Source& source);
+
+    /// unpack2x16unorm builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result unpack2x16unorm(const sem::Type* ty,
+                           utils::VectorRef<const sem::Constant*> args,
+                           const Source& source);
+
+    /// unpack4x8snorm builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result unpack4x8snorm(const sem::Type* ty,
+                          utils::VectorRef<const sem::Constant*> args,
+                          const Source& source);
+
+    /// unpack4x8unorm builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result unpack4x8unorm(const sem::Type* ty,
+                          utils::VectorRef<const sem::Constant*> args,
+                          const Source& source);
+
     /// quantizeToF16 builtin
     /// @param ty the expression type
     /// @param args the input arguments

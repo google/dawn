@@ -550,10 +550,10 @@ fn transpose<M: num, N: num, T: f32_f16>(mat<M, N, T>) -> mat<N, M, T>
 fn trunc<T: f32_f16>(T) -> T
 fn trunc<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn unpack2x16float(u32) -> vec2<f32>
-fn unpack2x16snorm(u32) -> vec2<f32>
-fn unpack2x16unorm(u32) -> vec2<f32>
-fn unpack4x8snorm(u32) -> vec4<f32>
-fn unpack4x8unorm(u32) -> vec4<f32>
+@const fn unpack2x16snorm(u32) -> vec2<f32>
+@const fn unpack2x16unorm(u32) -> vec2<f32>
+@const fn unpack4x8snorm(u32) -> vec4<f32>
+@const fn unpack4x8unorm(u32) -> vec4<f32>
 @stage("compute") fn workgroupBarrier()
 
 fn textureDimensions<T: fiu32>(texture: texture_1d<T>) -> u32

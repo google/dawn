@@ -1,11 +1,5 @@
-float4 tint_unpack4x8snorm(uint param_0) {
-  int j = int(param_0);
-  int4 i = int4(j << 24, j << 16, j << 8, j) >> 24;
-  return clamp(float4(i) / 127.0, -1.0, 1.0);
-}
-
 void unpack4x8snorm_523fb3() {
-  float4 res = tint_unpack4x8snorm(1u);
+  float4 res = float4(0.007874016f, 0.0f, 0.0f, 0.0f);
 }
 
 struct tint_symbol {

@@ -2168,6 +2168,68 @@ ConstEval::Result ConstEval::step(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0], args[1]);
 }
 
+ConstEval::Result ConstEval::unpack2x16snorm(const sem::Type* ty,
+                                             utils::VectorRef<const sem::Constant*> args,
+                                             const Source&) {
+    auto* inner_ty = sem::Type::DeepestElementOf(ty);
+    auto e = args[0]->As<u32>().value;
+
+    utils::Vector<const sem::Constant*, 2> els;
+    els.Reserve(2);
+    for (size_t i = 0; i < 2; ++i) {
+        auto val = f32(
+            std::max(static_cast<float>(int16_t((e >> (16 * i)) & 0x0000'ffff)) / 32767.f, -1.f));
+        els.Push(CreateElement(builder, inner_ty, val));
+    }
+    return CreateComposite(builder, ty, std::move(els));
+}
+
+ConstEval::Result ConstEval::unpack2x16unorm(const sem::Type* ty,
+                                             utils::VectorRef<const sem::Constant*> args,
+                                             const Source&) {
+    auto* inner_ty = sem::Type::DeepestElementOf(ty);
+    auto e = args[0]->As<u32>().value;
+
+    utils::Vector<const sem::Constant*, 2> els;
+    els.Reserve(2);
+    for (size_t i = 0; i < 2; ++i) {
+        auto val = f32(static_cast<float>(uint16_t((e >> (16 * i)) & 0x0000'ffff)) / 65535.f);
+        els.Push(CreateElement(builder, inner_ty, val));
+    }
+    return CreateComposite(builder, ty, std::move(els));
+}
+
+ConstEval::Result ConstEval::unpack4x8snorm(const sem::Type* ty,
+                                            utils::VectorRef<const sem::Constant*> args,
+                                            const Source&) {
+    auto* inner_ty = sem::Type::DeepestElementOf(ty);
+    auto e = args[0]->As<u32>().value;
+
+    utils::Vector<const sem::Constant*, 4> els;
+    els.Reserve(4);
+    for (size_t i = 0; i < 4; ++i) {
+        auto val =
+            f32(std::max(static_cast<float>(int8_t((e >> (8 * i)) & 0x0000'00ff)) / 127.f, -1.f));
+        els.Push(CreateElement(builder, inner_ty, val));
+    }
+    return CreateComposite(builder, ty, std::move(els));
+}
+
+ConstEval::Result ConstEval::unpack4x8unorm(const sem::Type* ty,
+                                            utils::VectorRef<const sem::Constant*> args,
+                                            const Source&) {
+    auto* inner_ty = sem::Type::DeepestElementOf(ty);
+    auto e = args[0]->As<u32>().value;
+
+    utils::Vector<const sem::Constant*, 4> els;
+    els.Reserve(4);
+    for (size_t i = 0; i < 4; ++i) {
+        auto val = f32(static_cast<float>(uint8_t((e >> (8 * i)) & 0x0000'00ff)) / 255.f);
+        els.Push(CreateElement(builder, inner_ty, val));
+    }
+    return CreateComposite(builder, ty, std::move(els));
+}
+
 ConstEval::Result ConstEval::quantizeToF16(const sem::Type* ty,
                                            utils::VectorRef<const sem::Constant*> args,
                                            const Source&) {
