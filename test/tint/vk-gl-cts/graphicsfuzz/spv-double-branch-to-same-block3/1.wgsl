@@ -18,14 +18,14 @@ var<private> x_GLF_color : vec4<f32>;
 
 @group(0) @binding(1) var<uniform> x_32 : buf1;
 
-fn merge_i1_i1_i1_(from : ptr<function, i32>, mid : ptr<function, i32>, to : ptr<function, i32>) {
+fn merge_i1_i1_i1_(f : ptr<function, i32>, mid : ptr<function, i32>, to : ptr<function, i32>) {
   var k : i32;
   var i : i32;
   var j : i32;
   var i_1 : i32;
-  let x_256 : i32 = *(from);
+  let x_256 : i32 = *(f);
   k = x_256;
-  let x_257 : i32 = *(from);
+  let x_257 : i32 = *(f);
   i = x_257;
   let x_258 : i32 = *(mid);
   j = (x_258 + 1);
@@ -77,7 +77,7 @@ fn merge_i1_i1_i1_(from : ptr<function, i32>, mid : ptr<function, i32>, to : ptr
     let x_314 : i32 = data[x_311];
     temp[x_309] = x_314;
   }
-  let x_316 : i32 = *(from);
+  let x_316 : i32 = *(f);
   i_1 = x_316;
   loop {
     let x_321 : i32 = i_1;
@@ -104,7 +104,7 @@ fn mergeSort_() {
   var high : i32;
   var m : i32;
   var i_2 : i32;
-  var from_1 : i32;
+  var f_1 : i32;
   var mid_1 : i32;
   var to_1 : i32;
   var param : i32;
@@ -130,7 +130,7 @@ fn mergeSort_() {
         break;
       }
       let x_350 : i32 = i_2;
-      from_1 = x_350;
+      f_1 = x_350;
       let x_351 : i32 = i_2;
       let x_352 : i32 = m;
       mid_1 = ((x_351 + x_352) - 1);
@@ -138,7 +138,7 @@ fn mergeSort_() {
       let x_356 : i32 = m;
       let x_360 : i32 = high;
       to_1 = min(((x_355 + (2 * x_356)) - 1), x_360);
-      let x_362 : i32 = from_1;
+      let x_362 : i32 = f_1;
       param = x_362;
       let x_363 : i32 = mid_1;
       param_1 = x_363;

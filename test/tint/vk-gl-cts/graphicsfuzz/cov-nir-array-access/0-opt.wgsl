@@ -15,7 +15,7 @@ var<private> x_GLF_color : vec4<f32>;
 
 fn main_1() {
   var A : array<i32, 17u>;
-  var ref : array<i32, 17u>;
+  var r : array<i32, 17u>;
   var a : i32;
   var i : i32;
   var ok : bool;
@@ -55,7 +55,7 @@ fn main_1() {
   let x_115 : i32 = x_6.x_GLF_uniform_int_values[17].el;
   let x_117 : i32 = x_6.x_GLF_uniform_int_values[18].el;
   let x_119 : i32 = x_6.x_GLF_uniform_int_values[1].el;
-  ref = array<i32, 17u>(x_87, x_89, x_91, x_93, x_95, x_97, x_99, x_101, x_103, x_105, x_107, x_109, x_111, x_113, x_115, x_117, x_119);
+  r = array<i32, 17u>(x_87, x_89, x_91, x_93, x_95, x_97, x_99, x_101, x_103, x_105, x_107, x_109, x_111, x_113, x_115, x_117, x_119);
   let x_122 : i32 = x_6.x_GLF_uniform_int_values[2].el;
   a = x_122;
   let x_124 : i32 = x_6.x_GLF_uniform_int_values[2].el;
@@ -96,7 +96,7 @@ fn main_1() {
     let x_162 : i32 = i_1;
     let x_164 : i32 = A[x_162];
     let x_165 : i32 = i_1;
-    let x_167 : i32 = ref[x_165];
+    let x_167 : i32 = r[x_165];
     if ((x_164 != x_167)) {
       ok = false;
     }

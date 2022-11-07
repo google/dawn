@@ -14,7 +14,7 @@
                OpMemberName %buf1 0 "_GLF_uniform_float_values"
                OpName %__0 ""
                OpName %R "R"
-               OpName %ref "ref"
+               OpName %r "r"
                OpName %_GLF_color "_GLF_color"
                OpDecorate %_arr_int_uint_5 ArrayStride 16
                OpMemberDecorate %buf0 0 Offset 0
@@ -63,7 +63,7 @@
           %I = OpVariable %_ptr_Function_v4float Function
           %N = OpVariable %_ptr_Function_v4float Function
           %R = OpVariable %_ptr_Function_v4float Function
-        %ref = OpVariable %_ptr_Function_v4float Function
+        %r = OpVariable %_ptr_Function_v4float Function
          %39 = OpAccessChain %_ptr_Uniform_int %_ %int_0 %int_2
          %40 = OpLoad %int %39
          %41 = OpBitcast %uint %40
@@ -93,9 +93,9 @@
          %62 = OpLoad %v4float %N
          %63 = OpVectorTimesScalar %v4float %62 %61
          %64 = OpFSub %v4float %55 %63
-               OpStore %ref %64
+               OpStore %r %64
          %65 = OpLoad %v4float %R
-         %66 = OpLoad %v4float %ref
+         %66 = OpLoad %v4float %r
          %67 = OpExtInst %float %1 Distance %65 %66
          %68 = OpAccessChain %_ptr_Uniform_float %__0 %int_0 %int_0
          %69 = OpLoad %float %68

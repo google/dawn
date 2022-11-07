@@ -7,7 +7,7 @@
                OpName %main "main"
                OpName %a "a"
                OpName %values "values"
-               OpName %ref "ref"
+               OpName %r "r"
                OpName %buf0 "buf0"
                OpMemberName %buf0 0 "_GLF_uniform_float_values"
                OpName %_ ""
@@ -60,7 +60,7 @@
          %36 = OpLabel
           %a = OpVariable %_ptr_Function_uint Function
      %values = OpVariable %_ptr_Function_v4float Function
-        %ref = OpVariable %_ptr_Function_v4float Function
+        %r = OpVariable %_ptr_Function_v4float Function
          %37 = OpExtInst %uint %1 PackHalf2x16 %20
                OpStore %a %37
          %38 = OpLoad %uint %a
@@ -84,14 +84,14 @@
          %55 = OpLoad %float %54
          %56 = OpFDiv %float %53 %55
          %57 = OpCompositeConstruct %v4float %41 %46 %51 %56
-               OpStore %ref %57
+               OpStore %r %57
          %58 = OpAccessChain %_ptr_Uniform_int %__0 %int_0 %int_0
          %59 = OpLoad %int %58
          %60 = OpAccessChain %_ptr_Function_float %values %59
          %61 = OpLoad %float %60
          %62 = OpAccessChain %_ptr_Uniform_int %__0 %int_0 %int_0
          %63 = OpLoad %int %62
-         %64 = OpAccessChain %_ptr_Function_float %ref %63
+         %64 = OpAccessChain %_ptr_Function_float %r %63
          %65 = OpLoad %float %64
          %66 = OpFSub %float %61 %65
          %67 = OpExtInst %float %1 FAbs %66
@@ -107,7 +107,7 @@
          %76 = OpLoad %float %75
          %77 = OpAccessChain %_ptr_Uniform_int %__0 %int_0 %int_1
          %78 = OpLoad %int %77
-         %79 = OpAccessChain %_ptr_Function_float %ref %78
+         %79 = OpAccessChain %_ptr_Function_float %r %78
          %80 = OpLoad %float %79
          %81 = OpFSub %float %76 %80
          %82 = OpExtInst %float %1 FAbs %81
@@ -126,7 +126,7 @@
          %92 = OpLoad %float %91
          %93 = OpAccessChain %_ptr_Uniform_int %__0 %int_0 %int_3
          %94 = OpLoad %int %93
-         %95 = OpAccessChain %_ptr_Function_float %ref %94
+         %95 = OpAccessChain %_ptr_Function_float %r %94
          %96 = OpLoad %float %95
          %97 = OpFSub %float %92 %96
          %98 = OpExtInst %float %1 FAbs %97
@@ -145,7 +145,7 @@
         %108 = OpLoad %float %107
         %109 = OpAccessChain %_ptr_Uniform_int %__0 %int_0 %int_2
         %110 = OpLoad %int %109
-        %111 = OpAccessChain %_ptr_Function_float %ref %110
+        %111 = OpAccessChain %_ptr_Function_float %r %110
         %112 = OpLoad %float %111
         %113 = OpFSub %float %108 %112
         %114 = OpExtInst %float %1 FAbs %113

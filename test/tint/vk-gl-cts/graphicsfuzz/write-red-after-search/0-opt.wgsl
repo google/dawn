@@ -116,7 +116,7 @@ fn insert_i1_i1_(treeIndex : ptr<function, i32>, data_1 : ptr<function, i32>) {
   return;
 }
 
-fn search_i1_(target : ptr<function, i32>) -> i32 {
+fn search_i1_(t : ptr<function, i32>) -> i32 {
   var index : i32;
   var currentNode : BST;
   var x_387 : i32;
@@ -131,12 +131,12 @@ fn search_i1_(target : ptr<function, i32>) -> i32 {
     let x_395 : BST = tree_1[x_100];
     currentNode = x_395;
     let x_101 : i32 = currentNode.data;
-    let x_102 : i32 = *(target);
+    let x_102 : i32 = *(t);
     if ((x_101 == x_102)) {
-      let x_103 : i32 = *(target);
+      let x_103 : i32 = *(t);
       return x_103;
     }
-    let x_104 : i32 = *(target);
+    let x_104 : i32 = *(t);
     let x_105 : i32 = currentNode.data;
     if ((x_104 > x_105)) {
       let x_106 : i32 = currentNode.rightIndex;
@@ -223,7 +223,7 @@ fn main_1() {
   var y : f32;
   var param_29 : f32;
   var sum : i32;
-  var target_1 : i32;
+  var t_1 : i32;
   var result : i32;
   var param_30 : i32;
   var a : f32;
@@ -354,14 +354,14 @@ fn main_1() {
   let x_293 : f32 = makeFrame_f1_(&(param_29));
   y = x_293;
   sum = -100;
-  target_1 = 0;
+  t_1 = 0;
   loop {
-    let x_156 : i32 = target_1;
+    let x_156 : i32 = t_1;
     if ((x_156 < 20)) {
     } else {
       break;
     }
-    let x_157 : i32 = target_1;
+    let x_157 : i32 = t_1;
     param_30 = x_157;
     let x_158 : i32 = search_i1_(&(param_30));
     result = x_158;
@@ -383,8 +383,8 @@ fn main_1() {
     }
 
     continuing {
-      let x_163 : i32 = target_1;
-      target_1 = (x_163 + 1);
+      let x_163 : i32 = t_1;
+      t_1 = (x_163 + 1);
     }
   }
   let x_307 : f32 = x;

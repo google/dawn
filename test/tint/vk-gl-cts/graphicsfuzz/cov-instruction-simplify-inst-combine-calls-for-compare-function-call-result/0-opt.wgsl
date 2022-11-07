@@ -41,7 +41,7 @@ fn f_i1_(a : ptr<function, i32>) -> i32 {
 }
 
 fn main_1() {
-  var ref : array<i32, 10u>;
+  var r : array<i32, 10u>;
   var i_1 : i32;
   var a_1 : array<i32, 10u>;
   var param : i32;
@@ -49,34 +49,34 @@ fn main_1() {
   var i_2 : i32;
   let x_25 : i32 = x_8.x_GLF_uniform_int_values[0].el;
   let x_26 : i32 = x_8.x_GLF_uniform_int_values[1].el;
-  ref[x_25] = x_26;
+  r[x_25] = x_26;
   let x_27 : i32 = x_8.x_GLF_uniform_int_values[11].el;
   let x_28 : i32 = x_8.x_GLF_uniform_int_values[2].el;
-  ref[x_27] = x_28;
+  r[x_27] = x_28;
   let x_29 : i32 = x_8.x_GLF_uniform_int_values[1].el;
   let x_30 : i32 = x_8.x_GLF_uniform_int_values[3].el;
-  ref[x_29] = x_30;
+  r[x_29] = x_30;
   let x_31 : i32 = x_8.x_GLF_uniform_int_values[2].el;
   let x_32 : i32 = x_8.x_GLF_uniform_int_values[4].el;
-  ref[x_31] = x_32;
+  r[x_31] = x_32;
   let x_33 : i32 = x_8.x_GLF_uniform_int_values[3].el;
   let x_34 : i32 = x_8.x_GLF_uniform_int_values[5].el;
-  ref[x_33] = x_34;
+  r[x_33] = x_34;
   let x_35 : i32 = x_8.x_GLF_uniform_int_values[4].el;
   let x_36 : i32 = x_8.x_GLF_uniform_int_values[6].el;
-  ref[x_35] = x_36;
+  r[x_35] = x_36;
   let x_37 : i32 = x_8.x_GLF_uniform_int_values[5].el;
   let x_38 : i32 = x_8.x_GLF_uniform_int_values[7].el;
-  ref[x_37] = x_38;
+  r[x_37] = x_38;
   let x_39 : i32 = x_8.x_GLF_uniform_int_values[8].el;
   let x_40 : i32 = x_8.x_GLF_uniform_int_values[8].el;
-  ref[x_39] = x_40;
+  r[x_39] = x_40;
   let x_41 : i32 = x_8.x_GLF_uniform_int_values[9].el;
   let x_42 : i32 = x_8.x_GLF_uniform_int_values[9].el;
-  ref[x_41] = x_42;
+  r[x_41] = x_42;
   let x_43 : i32 = x_8.x_GLF_uniform_int_values[10].el;
   let x_44 : i32 = x_8.x_GLF_uniform_int_values[10].el;
-  ref[x_43] = x_44;
+  r[x_43] = x_44;
   let x_45 : i32 = x_8.x_GLF_uniform_int_values[0].el;
   i_1 = x_45;
   loop {
@@ -148,7 +148,7 @@ fn main_1() {
     let x_84 : i32 = i_2;
     let x_85 : i32 = a_1[x_84];
     let x_86 : i32 = i_2;
-    let x_87 : i32 = ref[x_86];
+    let x_87 : i32 = r[x_86];
     if ((x_85 != x_87)) {
       let x_88 : i32 = x_8.x_GLF_uniform_int_values[0].el;
       let x_205 : f32 = f32(x_88);

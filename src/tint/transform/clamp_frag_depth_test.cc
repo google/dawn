@@ -169,7 +169,7 @@ TEST_F(ClampFragDepthTest, OtherFunctionWithoutFragDepth) {
         @fragment fn main() -> @builtin(frag_depth) f32 {
             return 0.0;
         }
-        @fragment fn friend() -> @location(0) f32 {
+        @fragment fn other() -> @location(0) f32 {
             return 0.0;
         }
     )";
@@ -194,7 +194,7 @@ fn main() -> @builtin(frag_depth) f32 {
 }
 
 @fragment
-fn friend() -> @location(0) f32 {
+fn other() -> @location(0) f32 {
   return 0.0;
 }
 )";

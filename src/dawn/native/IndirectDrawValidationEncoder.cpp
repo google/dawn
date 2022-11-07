@@ -109,7 +109,7 @@ static const char sRenderValidationShaderSource[] = R"(
                 }
             }
 
-            fn pass(drawIndex: u32) {
+            fn set_pass(drawIndex: u32) {
                 let numInputParams = numIndirectParamsPerDrawCallInput();
                 var outIndex = drawIndex * numIndirectParamsPerDrawCallOutput();
                 let inIndex = batch.indirectOffsets[drawIndex];
@@ -137,7 +137,7 @@ static const char sRenderValidationShaderSource[] = R"(
                 }
 
                 if(!bool(batch.flags & kValidationEnabled)) {
-                    pass(id.x);
+                    set_pass(id.x);
                     return;
                 }
 
@@ -152,14 +152,14 @@ static const char sRenderValidationShaderSource[] = R"(
                 }
 
                 if (!bool(batch.flags & kIndexedDraw)) {
-                    pass(id.x);
+                    set_pass(id.x);
                     return;
                 }
 
                 if (batch.numIndexBufferElementsHigh >= 2u) {
                     // firstIndex and indexCount are both u32. The maximum possible sum of these
                     // values is 0x1fffffffe, which is less than 0x200000000. Nothing to validate.
-                    pass(id.x);
+                    set_pass(id.x);
                     return;
                 }
 
@@ -178,7 +178,7 @@ static const char sRenderValidationShaderSource[] = R"(
                     fail(id.x);
                     return;
                 }
-                pass(id.x);
+                set_pass(id.x);
             }
         )";
 

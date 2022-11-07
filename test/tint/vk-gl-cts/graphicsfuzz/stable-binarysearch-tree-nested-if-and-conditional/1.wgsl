@@ -112,7 +112,7 @@ fn insert_i1_i1_(treeIndex : ptr<function, i32>, data_1 : ptr<function, i32>) {
   return;
 }
 
-fn search_i1_(target : ptr<function, i32>) -> i32 {
+fn search_i1_(t : ptr<function, i32>) -> i32 {
   var index : i32;
   var currentNode : BST;
   var x_261 : i32;
@@ -127,12 +127,12 @@ fn search_i1_(target : ptr<function, i32>) -> i32 {
     let x_271 : BST = tree_1[x_269];
     currentNode = x_271;
     let x_273 : i32 = currentNode.data;
-    let x_274 : i32 = *(target);
+    let x_274 : i32 = *(t);
     if ((x_273 == x_274)) {
-      let x_278 : i32 = *(target);
+      let x_278 : i32 = *(t);
       return x_278;
     }
-    let x_279 : i32 = *(target);
+    let x_279 : i32 = *(t);
     let x_281 : i32 = currentNode.data;
     if ((x_279 > x_281)) {
       let x_287 : i32 = currentNode.rightIndex;

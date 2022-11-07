@@ -71,10 +71,10 @@ fn getClusterIndex(fragCoord : vec4<f32>) -> u32 {
   return ((tile.x + (tile.y * tileCount.x)) + ((tile.z * tileCount.x) * tileCount.y));
 }
 
-fn sqDistPointAABB(point : vec3<f32>, minAABB : vec3<f32>, maxAABB : vec3<f32>) -> f32 {
+fn sqDistPointAABB(p: vec3<f32>, minAABB : vec3<f32>, maxAABB : vec3<f32>) -> f32 {
   var sqDist = 0.0;
   for(var i : i32 = 0; (i < 3); i = (i + 1)) {
-    let v = point[i];
+    let v = p[i];
     if ((v < minAABB[i])) {
       sqDist = (sqDist + ((minAABB[i] - v) * (minAABB[i] - v)));
     }

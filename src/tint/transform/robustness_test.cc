@@ -787,7 +787,7 @@ TEST_F(RobustnessTest, TextureLoad_Clamp) {
 @group(0) @binding(0) var tex_depth_2d_arr : texture_depth_2d_array;
 @group(0) @binding(0) var tex_external : texture_external;
 
-fn signed() {
+fn idx_signed() {
   var array_idx : i32;
   var level_idx : i32;
   var sample_idx : i32;
@@ -802,7 +802,7 @@ fn signed() {
   textureLoad(tex_external, vec2<i32>(1, 2));
 }
 
-fn unsigned() {
+fn idx_unsigned() {
   var array_idx : u32;
   var level_idx : u32;
   var sample_idx : u32;
@@ -836,7 +836,7 @@ fn unsigned() {
 
 @group(0) @binding(0) var tex_external : texture_external;
 
-fn signed() {
+fn idx_signed() {
   var array_idx : i32;
   var level_idx : i32;
   var sample_idx : i32;
@@ -850,7 +850,7 @@ fn signed() {
   textureLoad(tex_external, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_external)) - vec2(1)))));
 }
 
-fn unsigned() {
+fn idx_unsigned() {
   var array_idx : u32;
   var level_idx : u32;
   var sample_idx : u32;
@@ -873,7 +873,7 @@ fn unsigned() {
 // Clamp textureLoad() coord, array_index and level values
 TEST_F(RobustnessTest, TextureLoad_Clamp_OutOfOrder) {
     auto* src = R"(
-fn signed() {
+fn idx_signed() {
   var array_idx : i32;
   var level_idx : i32;
   var sample_idx : i32;
@@ -888,7 +888,7 @@ fn signed() {
   textureLoad(tex_external, vec2<i32>(1, 2));
 }
 
-fn unsigned() {
+fn idx_unsigned() {
   var array_idx : u32;
   var level_idx : u32;
   var sample_idx : u32;
@@ -915,7 +915,7 @@ fn unsigned() {
 
     auto* expect =
         R"(
-fn signed() {
+fn idx_signed() {
   var array_idx : i32;
   var level_idx : i32;
   var sample_idx : i32;
@@ -929,7 +929,7 @@ fn signed() {
   textureLoad(tex_external, clamp(vec2<i32>(1, 2), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex_external)) - vec2(1)))));
 }
 
-fn unsigned() {
+fn idx_unsigned() {
   var array_idx : u32;
   var level_idx : u32;
   var sample_idx : u32;
@@ -976,14 +976,14 @@ TEST_F(RobustnessTest, TextureStore_Clamp) {
 
 @group(0) @binding(3) var tex3d : texture_storage_3d<rgba8sint, write>;
 
-fn signed() {
+fn idx_signed() {
   textureStore(tex1d, 10i, vec4<i32>());
   textureStore(tex2d, vec2<i32>(10, 20), vec4<i32>());
   textureStore(tex2d_arr, vec2<i32>(10, 20), 50i, vec4<i32>());
   textureStore(tex3d, vec3<i32>(10, 20, 30), vec4<i32>());
 }
 
-fn unsigned() {
+fn idx_unsigned() {
   textureStore(tex1d, 10u, vec4<i32>());
   textureStore(tex2d, vec2<u32>(10, 20), vec4<i32>());
   textureStore(tex2d_arr, vec2<u32>(10, 20), 50u, vec4<i32>());
@@ -1000,14 +1000,14 @@ fn unsigned() {
 
 @group(0) @binding(3) var tex3d : texture_storage_3d<rgba8sint, write>;
 
-fn signed() {
+fn idx_signed() {
   textureStore(tex1d, clamp(10i, 0, i32((u32(textureDimensions(tex1d)) - 1))), vec4<i32>());
   textureStore(tex2d, clamp(vec2<i32>(10, 20), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex2d)) - vec2(1)))), vec4<i32>());
   textureStore(tex2d_arr, clamp(vec2<i32>(10, 20), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex2d_arr)) - vec2(1)))), clamp(50i, 0, i32((u32(textureNumLayers(tex2d_arr)) - 1))), vec4<i32>());
   textureStore(tex3d, clamp(vec3<i32>(10, 20, 30), vec3(0), vec3<i32>((vec3<u32>(textureDimensions(tex3d)) - vec3(1)))), vec4<i32>());
 }
 
-fn unsigned() {
+fn idx_unsigned() {
   textureStore(tex1d, min(10u, (u32(textureDimensions(tex1d)) - 1)), vec4<i32>());
   textureStore(tex2d, min(vec2<u32>(10, 20), (vec2<u32>(textureDimensions(tex2d)) - vec2(1))), vec4<i32>());
   textureStore(tex2d_arr, min(vec2<u32>(10, 20), (vec2<u32>(textureDimensions(tex2d_arr)) - vec2(1))), min(50u, (u32(textureNumLayers(tex2d_arr)) - 1)), vec4<i32>());
@@ -1023,14 +1023,14 @@ fn unsigned() {
 // Clamp textureStore() coord, array_index and level values
 TEST_F(RobustnessTest, TextureStore_Clamp_OutOfOrder) {
     auto* src = R"(
-fn signed() {
+fn idx_signed() {
   textureStore(tex1d, 10i, vec4<i32>());
   textureStore(tex2d, vec2<i32>(10, 20), vec4<i32>());
   textureStore(tex2d_arr, vec2<i32>(10, 20), 50i, vec4<i32>());
   textureStore(tex3d, vec3<i32>(10, 20, 30), vec4<i32>());
 }
 
-fn unsigned() {
+fn idx_unsigned() {
   textureStore(tex1d, 10u, vec4<i32>());
   textureStore(tex2d, vec2<u32>(10, 20), vec4<i32>());
   textureStore(tex2d_arr, vec2<u32>(10, 20), 50u, vec4<i32>());
@@ -1048,14 +1048,14 @@ fn unsigned() {
 )";
 
     auto* expect = R"(
-fn signed() {
+fn idx_signed() {
   textureStore(tex1d, clamp(10i, 0, i32((u32(textureDimensions(tex1d)) - 1))), vec4<i32>());
   textureStore(tex2d, clamp(vec2<i32>(10, 20), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex2d)) - vec2(1)))), vec4<i32>());
   textureStore(tex2d_arr, clamp(vec2<i32>(10, 20), vec2(0), vec2<i32>((vec2<u32>(textureDimensions(tex2d_arr)) - vec2(1)))), clamp(50i, 0, i32((u32(textureNumLayers(tex2d_arr)) - 1))), vec4<i32>());
   textureStore(tex3d, clamp(vec3<i32>(10, 20, 30), vec3(0), vec3<i32>((vec3<u32>(textureDimensions(tex3d)) - vec3(1)))), vec4<i32>());
 }
 
-fn unsigned() {
+fn idx_unsigned() {
   textureStore(tex1d, min(10u, (u32(textureDimensions(tex1d)) - 1)), vec4<i32>());
   textureStore(tex2d, min(vec2<u32>(10, 20), (vec2<u32>(textureDimensions(tex2d)) - vec2(1))), vec4<i32>());
   textureStore(tex2d_arr, min(vec2<u32>(10, 20), (vec2<u32>(textureDimensions(tex2d_arr)) - vec2(1))), min(50u, (u32(textureNumLayers(tex2d_arr)) - 1)), vec4<i32>());

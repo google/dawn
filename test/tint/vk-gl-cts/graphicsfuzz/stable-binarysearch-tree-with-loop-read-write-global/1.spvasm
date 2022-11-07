@@ -18,7 +18,7 @@
                OpName %treeIndex "treeIndex"
                OpName %data_0 "data"
                OpName %search_i1_ "search(i1;"
-               OpName %target "target"
+               OpName %t "t"
                OpName %QuicksortObject "QuicksortObject"
                OpMemberName %QuicksortObject 0 "numbers"
                OpName %obj "obj"
@@ -452,7 +452,7 @@
                OpReturn
                OpFunctionEnd
  %search_i1_ = OpFunction %int None %60
-     %target = OpFunctionParameter %_ptr_Function_int
+     %t = OpFunctionParameter %_ptr_Function_int
         %269 = OpLabel
       %index = OpVariable %_ptr_Function_int Function
 %currentNode = OpVariable %_ptr_Function_BST Function
@@ -473,15 +473,15 @@
                OpStore %currentNode %280
         %281 = OpAccessChain %_ptr_Function_int %currentNode %int_0
         %282 = OpLoad %int %281
-        %283 = OpLoad %int %target
+        %283 = OpLoad %int %t
         %284 = OpIEqual %bool %282 %283
                OpSelectionMerge %285 None
                OpBranchConditional %284 %286 %285
         %286 = OpLabel
-        %287 = OpLoad %int %target
+        %287 = OpLoad %int %t
                OpReturnValue %287
         %285 = OpLabel
-        %288 = OpLoad %int %target
+        %288 = OpLoad %int %t
         %289 = OpAccessChain %_ptr_Function_int %currentNode %int_0
         %290 = OpLoad %int %289
         %291 = OpSGreaterThan %bool %288 %290

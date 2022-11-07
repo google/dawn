@@ -580,9 +580,9 @@ TEST_F(MultiplanarExternalTextureTest, BasicTextureLoad) {
 
 @fragment
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
-  var signed = textureLoad(ext_tex, vec2<i32>(1));
-  var unsigned = textureLoad(ext_tex, vec2<u32>(1));
-  return signed + unsigned;
+  var val_signed = textureLoad(ext_tex, vec2<i32>(1));
+  var val_unsigned = textureLoad(ext_tex, vec2<u32>(1));
+  return val_signed + val_unsigned;
 }
 )";
 
@@ -652,9 +652,9 @@ fn textureLoadExternal_1(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coo
 
 @fragment
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
-  var signed = textureLoadExternal(ext_tex, ext_tex_plane_1, vec2<i32>(1), ext_tex_params);
-  var unsigned = textureLoadExternal_1(ext_tex, ext_tex_plane_1, vec2<u32>(1), ext_tex_params);
-  return (signed + unsigned);
+  var val_signed = textureLoadExternal(ext_tex, ext_tex_plane_1, vec2<i32>(1), ext_tex_params);
+  var val_unsigned = textureLoadExternal_1(ext_tex, ext_tex_plane_1, vec2<u32>(1), ext_tex_params);
+  return (val_signed + val_unsigned);
 }
 )";
 
@@ -670,9 +670,9 @@ TEST_F(MultiplanarExternalTextureTest, BasicTextureLoad_OutOfOrder) {
     auto* src = R"(
 @fragment
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
-  var signed = textureLoad(ext_tex, vec2<i32>(1));
-  var unsigned = textureLoad(ext_tex, vec2<u32>(1));
-  return signed + unsigned;
+  var val_signed = textureLoad(ext_tex, vec2<i32>(1));
+  var val_unsigned = textureLoad(ext_tex, vec2<u32>(1));
+  return val_signed + val_unsigned;
 }
 
 @group(0) @binding(0) var ext_tex : texture_external;
@@ -742,9 +742,9 @@ fn textureLoadExternal_1(plane0 : texture_2d<f32>, plane1 : texture_2d<f32>, coo
 
 @fragment
 fn main(@builtin(position) coord : vec4<f32>) -> @location(0) vec4<f32> {
-  var signed = textureLoadExternal(ext_tex, ext_tex_plane_1, vec2<i32>(1), ext_tex_params);
-  var unsigned = textureLoadExternal_1(ext_tex, ext_tex_plane_1, vec2<u32>(1), ext_tex_params);
-  return (signed + unsigned);
+  var val_signed = textureLoadExternal(ext_tex, ext_tex_plane_1, vec2<i32>(1), ext_tex_params);
+  var val_unsigned = textureLoadExternal_1(ext_tex, ext_tex_plane_1, vec2<u32>(1), ext_tex_params);
+  return (val_signed + val_unsigned);
 }
 
 @group(0) @binding(0) var ext_tex : texture_2d<f32>;

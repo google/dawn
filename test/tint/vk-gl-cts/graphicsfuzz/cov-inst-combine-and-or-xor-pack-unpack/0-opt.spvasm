@@ -10,7 +10,7 @@
                OpMemberName %buf0 0 "_GLF_uniform_float_values"
                OpName %_ ""
                OpName %v1 "v1"
-               OpName %ref "ref"
+               OpName %r "r"
                OpName %buf1 "buf1"
                OpMemberName %buf1 0 "_GLF_uniform_int_values"
                OpName %__0 ""
@@ -58,7 +58,7 @@
          %34 = OpLabel
           %a = OpVariable %_ptr_Function_uint Function
          %v1 = OpVariable %_ptr_Function_v4float Function
-        %ref = OpVariable %_ptr_Function_v4float Function
+        %r = OpVariable %_ptr_Function_v4float Function
          %35 = OpAccessChain %_ptr_Uniform_float %_ %int_0 %int_0
          %36 = OpLoad %float %35
          %37 = OpCompositeConstruct %v4float %36 %36 %36 %36
@@ -92,14 +92,14 @@
          %63 = OpLoad %float %62
          %64 = OpFDiv %float %61 %63
          %65 = OpCompositeConstruct %v4float %46 %52 %58 %64
-               OpStore %ref %65
+               OpStore %r %65
          %66 = OpAccessChain %_ptr_Uniform_int %__0 %int_0 %int_1
          %67 = OpLoad %int %66
          %68 = OpAccessChain %_ptr_Function_float %v1 %67
          %69 = OpLoad %float %68
          %70 = OpAccessChain %_ptr_Uniform_int %__0 %int_0 %int_0
          %71 = OpLoad %int %70
-         %72 = OpAccessChain %_ptr_Function_float %ref %71
+         %72 = OpAccessChain %_ptr_Function_float %r %71
          %73 = OpLoad %float %72
          %74 = OpFOrdEqual %bool %69 %73
                OpSelectionMerge %75 None
@@ -111,7 +111,7 @@
          %80 = OpLoad %float %79
          %81 = OpAccessChain %_ptr_Uniform_int %__0 %int_0 %int_2
          %82 = OpLoad %int %81
-         %83 = OpAccessChain %_ptr_Function_float %ref %82
+         %83 = OpAccessChain %_ptr_Function_float %r %82
          %84 = OpLoad %float %83
          %85 = OpFOrdEqual %bool %80 %84
                OpBranch %75
@@ -126,7 +126,7 @@
          %92 = OpLoad %float %91
          %93 = OpAccessChain %_ptr_Uniform_int %__0 %int_0 %int_3
          %94 = OpLoad %int %93
-         %95 = OpAccessChain %_ptr_Function_float %ref %94
+         %95 = OpAccessChain %_ptr_Function_float %r %94
          %96 = OpLoad %float %95
          %97 = OpFOrdEqual %bool %92 %96
                OpBranch %87
@@ -141,7 +141,7 @@
         %104 = OpLoad %float %103
         %105 = OpAccessChain %_ptr_Uniform_int %__0 %int_0 %int_1
         %106 = OpLoad %int %105
-        %107 = OpAccessChain %_ptr_Function_float %ref %106
+        %107 = OpAccessChain %_ptr_Function_float %r %106
         %108 = OpLoad %float %107
         %109 = OpFOrdEqual %bool %104 %108
                OpBranch %99

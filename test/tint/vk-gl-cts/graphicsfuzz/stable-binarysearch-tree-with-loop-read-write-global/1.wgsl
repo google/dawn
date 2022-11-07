@@ -102,7 +102,7 @@ fn identity_i1_(a : ptr<function, i32>) -> i32 {
   return x_206;
 }
 
-fn search_i1_(target : ptr<function, i32>) -> i32 {
+fn search_i1_(t : ptr<function, i32>) -> i32 {
   var index : i32;
   var currentNode : BST;
   var x_270 : i32;
@@ -117,12 +117,12 @@ fn search_i1_(target : ptr<function, i32>) -> i32 {
     let x_280 : BST = tree[x_278];
     currentNode = x_280;
     let x_282 : i32 = currentNode.data;
-    let x_283 : i32 = *(target);
+    let x_283 : i32 = *(t);
     if ((x_282 == x_283)) {
-      let x_287 : i32 = *(target);
+      let x_287 : i32 = *(t);
       return x_287;
     }
-    let x_288 : i32 = *(target);
+    let x_288 : i32 = *(t);
     let x_290 : i32 = currentNode.data;
     if ((x_288 > x_290)) {
       let x_296 : i32 = currentNode.rightIndex;

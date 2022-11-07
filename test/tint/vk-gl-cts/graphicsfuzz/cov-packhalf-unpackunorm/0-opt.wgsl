@@ -29,7 +29,7 @@ var<private> x_GLF_color : vec4<f32>;
 fn main_1() {
   var a : u32;
   var values : vec4<f32>;
-  var ref : vec4<f32>;
+  var r : vec4<f32>;
   var x_85 : bool;
   var x_101 : bool;
   var x_117 : bool;
@@ -46,11 +46,11 @@ fn main_1() {
   let x_50 : f32 = x_8.x_GLF_uniform_float_values[0].el;
   let x_53 : f32 = x_8.x_GLF_uniform_float_values[1].el;
   let x_55 : f32 = x_8.x_GLF_uniform_float_values[0].el;
-  ref = vec4<f32>(x_41, (x_43 / x_45), (x_48 / x_50), (x_53 / x_55));
+  r = vec4<f32>(x_41, (x_43 / x_45), (x_48 / x_50), (x_53 / x_55));
   let x_59 : i32 = x_10.x_GLF_uniform_int_values[0].el;
   let x_61 : f32 = values[x_59];
   let x_63 : i32 = x_10.x_GLF_uniform_int_values[0].el;
-  let x_65 : f32 = ref[x_63];
+  let x_65 : f32 = r[x_63];
   let x_69 : f32 = x_8.x_GLF_uniform_float_values[2].el;
   let x_70 : bool = (abs((x_61 - x_65)) < x_69);
   x_86_phi = x_70;
@@ -58,7 +58,7 @@ fn main_1() {
     let x_74 : i32 = x_10.x_GLF_uniform_int_values[1].el;
     let x_76 : f32 = values[x_74];
     let x_78 : i32 = x_10.x_GLF_uniform_int_values[1].el;
-    let x_80 : f32 = ref[x_78];
+    let x_80 : f32 = r[x_78];
     let x_84 : f32 = x_8.x_GLF_uniform_float_values[2].el;
     x_85 = (abs((x_76 - x_80)) < x_84);
     x_86_phi = x_85;
@@ -69,7 +69,7 @@ fn main_1() {
     let x_90 : i32 = x_10.x_GLF_uniform_int_values[3].el;
     let x_92 : f32 = values[x_90];
     let x_94 : i32 = x_10.x_GLF_uniform_int_values[3].el;
-    let x_96 : f32 = ref[x_94];
+    let x_96 : f32 = r[x_94];
     let x_100 : f32 = x_8.x_GLF_uniform_float_values[2].el;
     x_101 = (abs((x_92 - x_96)) < x_100);
     x_102_phi = x_101;
@@ -80,7 +80,7 @@ fn main_1() {
     let x_106 : i32 = x_10.x_GLF_uniform_int_values[2].el;
     let x_108 : f32 = values[x_106];
     let x_110 : i32 = x_10.x_GLF_uniform_int_values[2].el;
-    let x_112 : f32 = ref[x_110];
+    let x_112 : f32 = r[x_110];
     let x_116 : f32 = x_8.x_GLF_uniform_float_values[2].el;
     x_117 = (abs((x_108 - x_112)) < x_116);
     x_118_phi = x_117;

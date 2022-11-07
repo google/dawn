@@ -6,7 +6,7 @@
                OpSource ESSL 320
                OpName %main "main"
                OpName %merge_i1_i1_i1_ "merge(i1;i1;i1;"
-               OpName %from "from"
+               OpName %f "f"
                OpName %mid "mid"
                OpName %to "to"
                OpName %mergeSort_ "mergeSort("
@@ -20,7 +20,7 @@
                OpName %high "high"
                OpName %m "m"
                OpName %i_1 "i"
-               OpName %from_0 "from"
+               OpName %f_0 "f"
                OpName %mid_0 "mid"
                OpName %to_0 "to"
                OpName %param "param"
@@ -431,7 +431,7 @@
                OpReturn
                OpFunctionEnd
 %merge_i1_i1_i1_ = OpFunction %void None %35
-       %from = OpFunctionParameter %_ptr_Function_int
+       %f = OpFunctionParameter %_ptr_Function_int
         %mid = OpFunctionParameter %_ptr_Function_int
          %to = OpFunctionParameter %_ptr_Function_int
         %301 = OpLabel
@@ -439,9 +439,9 @@
           %i = OpVariable %_ptr_Function_int Function
           %j = OpVariable %_ptr_Function_int Function
         %i_0 = OpVariable %_ptr_Function_int Function
-        %302 = OpLoad %int %from
+        %302 = OpLoad %int %f
                OpStore %k %302
-        %303 = OpLoad %int %from
+        %303 = OpLoad %int %f
                OpStore %i %303
         %304 = OpLoad %int %mid
         %305 = OpIAdd %int %304 %int_1
@@ -525,7 +525,7 @@
         %344 = OpLabel
                OpBranch %342
         %343 = OpLabel
-        %360 = OpLoad %int %from
+        %360 = OpLoad %int %f
                OpStore %i_0 %360
                OpBranch %361
         %361 = OpLabel
@@ -558,7 +558,7 @@
        %high = OpVariable %_ptr_Function_int Function
           %m = OpVariable %_ptr_Function_int Function
         %i_1 = OpVariable %_ptr_Function_int Function
-     %from_0 = OpVariable %_ptr_Function_int Function
+     %f_0 = OpVariable %_ptr_Function_int Function
       %mid_0 = OpVariable %_ptr_Function_int Function
        %to_0 = OpVariable %_ptr_Function_int Function
       %param = OpVariable %_ptr_Function_int Function
@@ -590,7 +590,7 @@
                OpBranchConditional %392 %393 %387
         %393 = OpLabel
         %394 = OpLoad %int %i_1
-               OpStore %from_0 %394
+               OpStore %f_0 %394
         %395 = OpLoad %int %i_1
         %396 = OpLoad %int %m
         %397 = OpIAdd %int %395 %396
@@ -604,7 +604,7 @@
         %404 = OpLoad %int %high
         %405 = OpExtInst %int %1 SMin %403 %404
                OpStore %to_0 %405
-        %406 = OpLoad %int %from_0
+        %406 = OpLoad %int %f_0
                OpStore %param %406
         %407 = OpLoad %int %mid_0
                OpStore %param_0 %407

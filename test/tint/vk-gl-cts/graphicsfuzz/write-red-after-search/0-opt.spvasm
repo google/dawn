@@ -16,7 +16,7 @@
                OpName %treeIndex "treeIndex"
                OpName %data_0 "data"
                OpName %search_i1_ "search(i1;"
-               OpName %target "target"
+               OpName %t "t"
                OpName %hueColor_f1_ "hueColor(f1;"
                OpName %angle "angle"
                OpName %makeFrame_f1_ "makeFrame(f1;"
@@ -76,7 +76,7 @@
                OpName %y "y"
                OpName %param_28 "param"
                OpName %sum "sum"
-               OpName %target_0 "target"
+               OpName %t_0 "t"
                OpName %result "result"
                OpName %param_29 "param"
                OpName %a "a"
@@ -89,7 +89,7 @@
                OpDecorate %treeIndex RelaxedPrecision
                OpDecorate %data_0 RelaxedPrecision
                OpDecorate %search_i1_ RelaxedPrecision
-               OpDecorate %target RelaxedPrecision
+               OpDecorate %t RelaxedPrecision
                OpDecorate %74 RelaxedPrecision
                OpDecorate %baseIndex RelaxedPrecision
                OpDecorate %75 RelaxedPrecision
@@ -187,7 +187,7 @@
                OpDecorate %155 RelaxedPrecision
                OpDecorate %gl_FragCoord BuiltIn FragCoord
                OpDecorate %sum RelaxedPrecision
-               OpDecorate %target_0 RelaxedPrecision
+               OpDecorate %t_0 RelaxedPrecision
                OpDecorate %156 RelaxedPrecision
                OpDecorate %result RelaxedPrecision
                OpDecorate %157 RelaxedPrecision
@@ -310,7 +310,7 @@
           %y = OpVariable %_ptr_Function_float Function
    %param_28 = OpVariable %_ptr_Function_float Function
         %sum = OpVariable %_ptr_Function_int Function
-   %target_0 = OpVariable %_ptr_Function_int Function
+   %t_0 = OpVariable %_ptr_Function_int Function
      %result = OpVariable %_ptr_Function_int Function
    %param_29 = OpVariable %_ptr_Function_int Function
           %a = OpVariable %_ptr_Function_float Function
@@ -486,17 +486,17 @@
         %293 = OpFunctionCall %float %makeFrame_f1_ %param_28
                OpStore %y %293
                OpStore %sum %int_n100
-               OpStore %target_0 %int_0
+               OpStore %t_0 %int_0
                OpBranch %294
         %294 = OpLabel
                OpLoopMerge %295 %296 None
                OpBranch %297
         %297 = OpLabel
-        %156 = OpLoad %int %target_0
+        %156 = OpLoad %int %t_0
         %298 = OpSLessThan %bool %156 %int_20
                OpBranchConditional %298 %299 %295
         %299 = OpLabel
-        %157 = OpLoad %int %target_0
+        %157 = OpLoad %int %t_0
                OpStore %param_29 %157
         %158 = OpFunctionCall %int %search_i1_ %param_29
                OpStore %result %158
@@ -522,9 +522,9 @@
         %301 = OpLabel
                OpBranch %296
         %296 = OpLabel
-        %163 = OpLoad %int %target_0
+        %163 = OpLoad %int %t_0
         %164 = OpIAdd %int %163 %int_1
-               OpStore %target_0 %164
+               OpStore %t_0 %164
                OpBranch %294
         %295 = OpLabel
         %307 = OpLoad %float %x
@@ -700,7 +700,7 @@
                OpReturn
                OpFunctionEnd
  %search_i1_ = OpFunction %int None %173
-     %target = OpFunctionParameter %_ptr_Function_int
+     %t = OpFunctionParameter %_ptr_Function_int
         %386 = OpLabel
       %index = OpVariable %_ptr_Function_int Function
 %currentNode = OpVariable %_ptr_Function_BST Function
@@ -721,15 +721,15 @@
                OpStore %currentNode %395
         %396 = OpAccessChain %_ptr_Function_int %currentNode %int_0
         %101 = OpLoad %int %396
-        %102 = OpLoad %int %target
+        %102 = OpLoad %int %t
         %397 = OpIEqual %bool %101 %102
                OpSelectionMerge %398 None
                OpBranchConditional %397 %399 %398
         %399 = OpLabel
-        %103 = OpLoad %int %target
+        %103 = OpLoad %int %t
                OpReturnValue %103
         %398 = OpLabel
-        %104 = OpLoad %int %target
+        %104 = OpLoad %int %t
         %400 = OpAccessChain %_ptr_Function_int %currentNode %int_0
         %105 = OpLoad %int %400
         %401 = OpSGreaterThan %bool %104 %105
