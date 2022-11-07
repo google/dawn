@@ -137,7 +137,7 @@ if [ "$BUILD_SYSTEM" == "cmake" ]; then
         COMMON_CMAKE_FLAGS+=" -DTINT_BUILD_AST_FUZZER=1"
         COMMON_CMAKE_FLAGS+=" -DTINT_BUILD_REGEX_FUZZER=1"
     elif [ "$BUILD_TOOLCHAIN" == "gcc" ]; then
-        using gcc-9
+        using gcc-10
     fi
 
     if [ "$BUILD_SANITIZER" == "asan" ]; then
