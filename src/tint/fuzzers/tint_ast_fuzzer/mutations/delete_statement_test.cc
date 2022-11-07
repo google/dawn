@@ -22,7 +22,6 @@
 #include "src/tint/ast/assignment_statement.h"
 #include "src/tint/ast/block_statement.h"
 #include "src/tint/ast/case_statement.h"
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/switch_statement.h"
@@ -151,10 +150,7 @@ fn main() {
   switch(1) {
     case 0, 1: {
     }
-    default: {
-      fallthrough;
-    }
-    case 2: {
+    case 2, default: {
     }
   }
 })";
@@ -171,20 +167,14 @@ fn main() {
   switch(1) {
     case 0, 1: {
     }
-    default: {
-      fallthrough;
-    }
-    case 2: {
+    case 2, default: {
     }
   }
 })";
     auto expected = R"(
 fn main() {
   switch(1) {
-    default: {
-      fallthrough;
-    }
-    case 2: {
+    case 2, default: {
     }
   }
 })";
@@ -195,43 +185,6 @@ fn main() {
             ->As<ast::SwitchStatement>()
             ->body[0]
             ->As<ast::CaseStatement>();
-    };
-    CheckStatementDeletionWorks(original, expected, statement_finder);
-}
-
-TEST(DeleteStatementTest, DeleteFallthroughStatement) {
-    auto original = R"(
-fn main() {
-  switch(1) {
-    case 0, 1: {
-    }
-    default: {
-      fallthrough;
-    }
-    case 2: {
-    }
-  }
-})";
-    auto expected = R"(
-fn main() {
-  switch(1) {
-    case 0, 1: {
-    }
-    default: {
-    }
-    case 2: {
-    }
-  }
-})";
-    auto statement_finder = [](const Program& program) -> const ast::Statement* {
-        return program.AST()
-            .Functions()[0]
-            ->body->statements[0]
-            ->As<ast::SwitchStatement>()
-            ->body[1]
-            ->As<ast::CaseStatement>()
-            ->body->statements[0]
-            ->As<ast::FallthroughStatement>();
     };
     CheckStatementDeletionWorks(original, expected, statement_finder);
 }
@@ -570,14 +523,11 @@ fn main() {
     CheckStatementDeletionNotAllowed(original, statement_finder);
 }
 
-TEST(DeleteStatementTest, DoNotDeleteCaseDueToFallthrough) {
+TEST(DeleteStatementTest, DoNotDeleteCaseDueToDefault) {
     auto original = R"(
 fn main() {
   switch(1) {
-    default: {
-      fallthrough;
-    }
-    case 2: {
+    case 2, default: {
     }
   }
 })";
@@ -586,7 +536,7 @@ fn main() {
             .Functions()[0]
             ->body->statements[0]
             ->As<ast::SwitchStatement>()
-            ->body[1]
+            ->body[0]
             ->As<ast::CaseStatement>();
     };
     CheckStatementDeletionNotAllowed(original, statement_finder);

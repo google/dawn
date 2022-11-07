@@ -19,7 +19,6 @@
 #include <vector>
 
 #include "src/tint/ast/block_statement.h"
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/loop_statement.h"
@@ -151,24 +150,9 @@ bool MutationDeleteStatement::CanBeDeleted(const ast::Statement& statement_node,
     }
 
     if (auto* case_statement = statement_node.As<ast::CaseStatement>()) {
-        // It is not OK to delete the final case statement in a switch statement if the penultimate
-        // case statement falls through to the final case statement.
-        auto* switch_statement =
-            program.Sem().Get(case_statement)->Parent()->Declaration()->As<ast::SwitchStatement>();
-
-        if (switch_statement->body.Length() > 1 &&
-            switch_statement->body[switch_statement->body.Length() - 1] == case_statement) {
-            // There are at least two case statements, and this is the final case statement.
-            auto& penultimate_case_statement_body_statements =
-                switch_statement->body[switch_statement->body.Length() - 2]->body->statements;
-            if (penultimate_case_statement_body_statements.Length() > 0 &&
-                penultimate_case_statement_body_statements
-                    [penultimate_case_statement_body_statements.Length() - 1]
-                        ->Is<ast::FallthroughStatement>()) {
-                // The penultimate case statement falls through to the final case statement, thus
-                // the final case statement cannot be removed.
-                return false;
-            }
+        // It is not OK to delete the case statement which contains the default selector.
+        if (case_statement->ContainsDefault()) {
+            return false;
         }
     }
 
