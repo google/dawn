@@ -58,44 +58,11 @@ TEST_F(ParserImplTest, GlobalDecl_GlobalVariable_MissingSemicolon) {
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalLet) {
     auto p = parser("let a : i32 = 2;");
-    p->global_decl();
-    ASSERT_FALSE(p->has_error()) << p->error();
-
-    auto program = p->program();
-    ASSERT_EQ(program.AST().GlobalVariables().Length(), 1u);
-
-    auto* v = program.AST().GlobalVariables()[0];
-    EXPECT_EQ(v->symbol, program.Symbols().Get("a"));
-}
-
-TEST_F(ParserImplTest, GlobalDecl_GlobalLet_MissingInitializer) {
-    auto p = parser("let a : vec2<i32>;");
-    p->global_decl();
-    ASSERT_TRUE(p->has_error());
-    EXPECT_EQ(
-        p->error(),
-        R"(1:1: use of deprecated language feature: module-scope 'let' has been replaced with 'const'
-1:18: expected '=' for 'let' declaration)");
-}
-
-TEST_F(ParserImplTest, GlobalDecl_GlobalLet_Invalid) {
-    auto p = parser("let a : vec2<i32> 1.0;");
-    p->global_decl();
-    ASSERT_TRUE(p->has_error());
-    EXPECT_EQ(
-        p->error(),
-        R"(1:1: use of deprecated language feature: module-scope 'let' has been replaced with 'const'
-1:19: expected '=' for 'let' declaration)");
-}
-
-TEST_F(ParserImplTest, GlobalDecl_GlobalLet_MissingSemicolon) {
-    auto p = parser("let a : vec2<i32> = vec2<i32>(1, 2)");
-    p->global_decl();
-    ASSERT_TRUE(p->has_error());
-    EXPECT_EQ(
-        p->error(),
-        R"(1:1: use of deprecated language feature: module-scope 'let' has been replaced with 'const'
-1:36: expected ';' for 'const' declaration)");
+    auto e = p->global_decl();
+    EXPECT_TRUE(p->has_error());
+    EXPECT_FALSE(e.matched);
+    EXPECT_TRUE(e.errored);
+    EXPECT_EQ(p->error(), "1:1: module-scope 'let' is invalid, use 'const'");
 }
 
 TEST_F(ParserImplTest, GlobalDecl_GlobalConst) {

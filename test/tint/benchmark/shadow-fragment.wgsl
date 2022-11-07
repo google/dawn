@@ -1,4 +1,4 @@
-let shadowDepthTextureSize : f32 = 1024.0;
+const shadowDepthTextureSize : f32 = 1024.0;
 
 struct Scene {
   lightViewProjMatrix : mat4x4<f32>,

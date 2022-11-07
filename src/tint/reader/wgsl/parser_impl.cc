@@ -615,12 +615,11 @@ Maybe<const ast::Variable*> ParserImpl::global_constant_decl(AttributeList& attr
     Source source;
     if (match(Token::Type::kConst)) {
         use = "'const' declaration";
-    } else if (match(Token::Type::kLet, &source)) {
-        use = "'let' declaration";
-        deprecated(source, "module-scope 'let' has been replaced with 'const'");
     } else if (match(Token::Type::kOverride)) {
         use = "'override' declaration";
         is_overridable = true;
+    } else if (match(Token::Type::kLet, &source)) {
+        return add_error(source, "module-scope 'let' is invalid, use 'const'");
     } else {
         return Failure::kNoMatch;
     }

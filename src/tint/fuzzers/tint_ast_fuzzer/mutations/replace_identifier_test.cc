@@ -386,7 +386,7 @@ struct S {
 }
 
 var<private> a: S;
-let e = 3;
+const e = 3;
 @group(1) @binding(1) var<uniform> b: S;
 fn f() {
   *&a = *&b;

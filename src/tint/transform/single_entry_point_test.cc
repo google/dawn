@@ -240,32 +240,6 @@ fn comp_main1() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(SingleEntryPointTest, WorkgroupSizeLetPreserved) {
-    auto* src = R"(
-let size : i32 = 1;
-
-@compute @workgroup_size(size)
-fn main() {
-}
-)";
-
-    auto* expect = R"(
-const size : i32 = 1;
-
-@compute @workgroup_size(size)
-fn main() {
-}
-)";
-
-    SingleEntryPoint::Config cfg("main");
-
-    DataMap data;
-    data.Add<SingleEntryPoint::Config>(cfg);
-    auto got = Run<SingleEntryPoint>(src, data);
-
-    EXPECT_EQ(expect, str(got));
-}
-
 TEST_F(SingleEntryPointTest, WorkgroupSizeConstPreserved) {
     auto* src = R"(
 const size : i32 = 1;

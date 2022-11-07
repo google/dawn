@@ -64,7 +64,7 @@ static const char sConvertTimestampsToNanoseconds[] = R"(
             @group(0) @binding(1) var<storage, read> availability : AvailabilityArr;
             @group(0) @binding(2) var<uniform> params : TimestampParams;
 
-            let sizeofTimestamp : u32 = 8u;
+            const sizeofTimestamp : u32 = 8u;
 
             @compute @workgroup_size(8, 1, 1)
             fn main(@builtin(global_invocation_id) GlobalInvocationID : vec3<u32>) {

@@ -56,16 +56,16 @@ struct BatchInfo {
 // various failure modes.
 static const char sRenderValidationShaderSource[] = R"(
 
-            let kNumDrawIndirectParams = 4u;
+            const kNumDrawIndirectParams = 4u;
 
-            let kIndexCountEntry = 0u;
-            let kFirstIndexEntry = 2u;
+            const kIndexCountEntry = 0u;
+            const kFirstIndexEntry = 2u;
 
             // Bitmasks for BatchInfo::flags
-            let kDuplicateBaseVertexInstance = 1u;
-            let kIndexedDraw = 2u;
-            let kValidationEnabled = 4u;
-            let kIndirectFirstInstanceEnabled = 8u;
+            const kDuplicateBaseVertexInstance = 1u;
+            const kIndexedDraw = 2u;
+            const kValidationEnabled = 4u;
+            const kIndirectFirstInstanceEnabled = 8u;
 
             struct BatchInfo {
                 numIndexBufferElementsLow: u32,

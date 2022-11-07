@@ -553,94 +553,11 @@ const i : vec2<i32> = vec2<i32>(1, 2;
 )");
 }
 
-TEST_F(ParserImplErrorTest, GlobalDeclLetInvalidIdentifier) {
-    EXPECT(
-        "let ^ : i32 = 1;",
-        R"(test.wgsl:1:1 warning: use of deprecated language feature: module-scope 'let' has been replaced with 'const'
-let ^ : i32 = 1;
+TEST_F(ParserImplErrorTest, GlobalDeclLet) {
+    EXPECT("let a : i32 = 1;",
+           R"(test.wgsl:1:1 error: module-scope 'let' is invalid, use 'const'
+let a : i32 = 1;
 ^^^
-
-test.wgsl:1:5 error: expected identifier for 'let' declaration
-let ^ : i32 = 1;
-    ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclLetMissingSemicolon) {
-    EXPECT(
-        "let i : i32 = 1",
-        R"(test.wgsl:1:1 warning: use of deprecated language feature: module-scope 'let' has been replaced with 'const'
-let i : i32 = 1
-^^^
-
-test.wgsl:1:16 error: expected ';' for 'const' declaration
-let i : i32 = 1
-               ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclLetMissingLParen) {
-    EXPECT(
-        "let i : vec2<i32> = vec2<i32>;",
-        R"(test.wgsl:1:1 warning: use of deprecated language feature: module-scope 'let' has been replaced with 'const'
-let i : vec2<i32> = vec2<i32>;
-^^^
-
-test.wgsl:1:30 error: expected '(' for type initializer
-let i : vec2<i32> = vec2<i32>;
-                             ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclLetMissingRParen) {
-    EXPECT(
-        "let i : vec2<i32> = vec2<i32>(1., 2.;",
-        R"(test.wgsl:1:1 warning: use of deprecated language feature: module-scope 'let' has been replaced with 'const'
-let i : vec2<i32> = vec2<i32>(1., 2.;
-^^^
-
-test.wgsl:1:37 error: expected ')' for type initializer
-let i : vec2<i32> = vec2<i32>(1., 2.;
-                                    ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclLetBadConstLiteral) {
-    EXPECT(
-        "let i : vec2<i32> = vec2<i32>(!);",
-        R"(test.wgsl:1:1 warning: use of deprecated language feature: module-scope 'let' has been replaced with 'const'
-let i : vec2<i32> = vec2<i32>(!);
-^^^
-
-test.wgsl:1:32 error: unable to parse right side of ! expression
-let i : vec2<i32> = vec2<i32>(!);
-                               ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclLetExprMissingLParen) {
-    EXPECT(
-        "let i : vec2<i32> = vec2<i32> 1, 2);",
-        R"(test.wgsl:1:1 warning: use of deprecated language feature: module-scope 'let' has been replaced with 'const'
-let i : vec2<i32> = vec2<i32> 1, 2);
-^^^
-
-test.wgsl:1:31 error: expected '(' for type initializer
-let i : vec2<i32> = vec2<i32> 1, 2);
-                              ^
-)");
-}
-
-TEST_F(ParserImplErrorTest, GlobalDeclLetExprMissingRParen) {
-    EXPECT(
-        "let i : vec2<i32> = vec2<i32>(1, 2;",
-        R"(test.wgsl:1:1 warning: use of deprecated language feature: module-scope 'let' has been replaced with 'const'
-let i : vec2<i32> = vec2<i32>(1, 2;
-^^^
-
-test.wgsl:1:35 error: expected ')' for type initializer
-let i : vec2<i32> = vec2<i32>(1, 2;
-                                  ^
 )");
 }
 
