@@ -548,6 +548,42 @@ class ConstEval {
                       utils::VectorRef<const sem::Constant*> args,
                       const Source& source);
 
+    /// pack2x16snorm builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result pack2x16snorm(const sem::Type* ty,
+                         utils::VectorRef<const sem::Constant*> args,
+                         const Source& source);
+
+    /// pack2x16unorm builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result pack2x16unorm(const sem::Type* ty,
+                         utils::VectorRef<const sem::Constant*> args,
+                         const Source& source);
+
+    /// pack4x8snorm builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result pack4x8snorm(const sem::Type* ty,
+                        utils::VectorRef<const sem::Constant*> args,
+                        const Source& source);
+
+    /// pack4x8unorm builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result pack4x8unorm(const sem::Type* ty,
+                        utils::VectorRef<const sem::Constant*> args,
+                        const Source& source);
+
     /// reverseBits builtin
     /// @param ty the expression type
     /// @param args the input arguments
@@ -677,6 +713,14 @@ class ConstEval {
                                 NumberT b3,
                                 NumberT b4);
 
+    /// Clamps e between low and high
+    /// @param e the number to clamp
+    /// @param low the lower bound
+    /// @param high the upper bound
+    /// @returns the result number on success, or logs an error and returns Failure
+    template <typename NumberT>
+    utils::Result<NumberT> Clamp(NumberT e, NumberT low, NumberT high);
+
     /// Returns a callable that calls Add, and creates a Constant with its result of type `elem_ty`
     /// if successful, or returns Failure otherwise.
     /// @param elem_ty the element type of the Constant to create on success
@@ -706,6 +750,12 @@ class ConstEval {
     /// @param elem_ty the element type of the Constant to create on success
     /// @returns the callable function
     auto Dot4Func(const sem::Type* elem_ty);
+
+    /// Returns a callable that calls Clamp, and creates a Constant with its result of type
+    /// `elem_ty` if successful, or returns Failure otherwise.
+    /// @param elem_ty the element type of the Constant to create on success
+    /// @returns the callable function
+    auto ClampFunc(const sem::Type* elem_ty);
 
     ProgramBuilder& builder;
     const Source* current_source = nullptr;

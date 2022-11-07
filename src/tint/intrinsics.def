@@ -508,10 +508,10 @@ fn modf<T: f32_f16>(T) -> __modf_result<T>
 fn modf<N: num, T: f32_f16>(vec<N, T>) -> __modf_result_vec<N, T>
 fn normalize<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn pack2x16float(vec2<f32>) -> u32
-fn pack2x16snorm(vec2<f32>) -> u32
-fn pack2x16unorm(vec2<f32>) -> u32
-fn pack4x8snorm(vec4<f32>) -> u32
-fn pack4x8unorm(vec4<f32>) -> u32
+@const fn pack2x16snorm(vec2<f32>) -> u32
+@const fn pack2x16unorm(vec2<f32>) -> u32
+@const fn pack4x8snorm(vec4<f32>) -> u32
+@const fn pack4x8unorm(vec4<f32>) -> u32
 fn pow<T: f32_f16>(T, T) -> T
 fn pow<N: num, T: f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
 @const fn quantizeToF16(f32) -> f32

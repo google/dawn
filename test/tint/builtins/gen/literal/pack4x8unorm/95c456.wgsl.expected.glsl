@@ -1,7 +1,7 @@
 #version 310 es
 
 void pack4x8unorm_95c456() {
-  uint res = packUnorm4x8(vec4(1.0f));
+  uint res = 4294967295u;
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void pack4x8unorm_95c456() {
-  uint res = packUnorm4x8(vec4(1.0f));
+  uint res = 4294967295u;
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void pack4x8unorm_95c456() {
-  uint res = packUnorm4x8(vec4(1.0f));
+  uint res = 4294967295u;
 }
 
 void compute_main() {

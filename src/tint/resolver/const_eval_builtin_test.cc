@@ -1093,6 +1093,73 @@ INSTANTIATE_TEST_SUITE_P(ExtractBits,
                              std::make_tuple(1000, 1000),         //
                              std::make_tuple(u32::Highest(), u32::Highest())));
 
+std::vector<Case> Pack4x8snormCases() {
+    return {
+        C({Vec(f32(0), f32(0), f32(0), f32(0))}, Val(u32(0x0000'0000))),
+        C({Vec(f32(0), f32(0), f32(0), f32(-1))}, Val(u32(0x8100'0000))),
+        C({Vec(f32(0), f32(0), f32(0), f32(1))}, Val(u32(0x7f00'0000))),
+        C({Vec(f32(0), f32(0), f32(-1), f32(0))}, Val(u32(0x0081'0000))),
+        C({Vec(f32(0), f32(1), f32(0), f32(0))}, Val(u32(0x0000'7f00))),
+        C({Vec(f32(-1), f32(0), f32(0), f32(0))}, Val(u32(0x0000'0081))),
+        C({Vec(f32(1), f32(-1), f32(1), f32(-1))}, Val(u32(0x817f'817f))),
+        C({Vec(f32::Highest(), f32(-0.5), f32(0.5), f32::Lowest())}, Val(u32(0x8140'c17f))),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Pack4x8snorm,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kPack4X8Snorm),
+                     testing::ValuesIn(Pack4x8snormCases())));
+
+std::vector<Case> Pack4x8unormCases() {
+    return {
+        C({Vec(f32(0), f32(0), f32(0), f32(0))}, Val(u32(0x0000'0000))),
+        C({Vec(f32(0), f32(0), f32(0), f32(1))}, Val(u32(0xff00'0000))),
+        C({Vec(f32(0), f32(0), f32(1), f32(0))}, Val(u32(0x00ff'0000))),
+        C({Vec(f32(0), f32(1), f32(0), f32(0))}, Val(u32(0x0000'ff00))),
+        C({Vec(f32(1), f32(0), f32(0), f32(0))}, Val(u32(0x0000'00ff))),
+        C({Vec(f32(1), f32(0), f32(1), f32(0))}, Val(u32(0x00ff'00ff))),
+        C({Vec(f32::Highest(), f32(0), f32(0.5), f32::Lowest())}, Val(u32(0x0080'00ff))),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Pack4x8unorm,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kPack4X8Unorm),
+                     testing::ValuesIn(Pack4x8unormCases())));
+
+std::vector<Case> Pack2x16snormCases() {
+    return {
+        C({Vec(f32(0), f32(0))}, Val(u32(0x0000'0000))),
+        C({Vec(f32(0), f32(-1))}, Val(u32(0x8001'0000))),
+        C({Vec(f32(0), f32(1))}, Val(u32(0x7fff'0000))),
+        C({Vec(f32(-1), f32(0))}, Val(u32(0x0000'8001))),
+        C({Vec(f32(1), f32(0))}, Val(u32(0x0000'7fff))),
+        C({Vec(f32(1), f32(-1))}, Val(u32(0x8001'7fff))),
+        C({Vec(f32::Highest(), f32::Lowest())}, Val(u32(0x8001'7fff))),
+        C({Vec(f32(-0.5), f32(0.5))}, Val(u32(0x4000'c001))),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Pack2x16snorm,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kPack2X16Snorm),
+                     testing::ValuesIn(Pack2x16snormCases())));
+
+std::vector<Case> Pack2x16unormCases() {
+    return {
+        C({Vec(f32(0), f32(1))}, Val(u32(0xffff'0000))),
+        C({Vec(f32(1), f32(0))}, Val(u32(0x0000'ffff))),
+        C({Vec(f32(0.5), f32(0))}, Val(u32(0x0000'8000))),
+        C({Vec(f32::Highest(), f32::Lowest())}, Val(u32(0x0000'ffff))),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Pack2x16unorm,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kPack2X16Unorm),
+                     testing::ValuesIn(Pack2x16unormCases())));
+
 template <typename T>
 std::vector<Case> ReverseBitsCases() {
     using B = BitValues<T>;

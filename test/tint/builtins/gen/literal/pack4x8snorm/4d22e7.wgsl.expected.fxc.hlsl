@@ -1,10 +1,5 @@
-uint tint_pack4x8snorm(float4 param_0) {
-  int4 i = int4(round(clamp(param_0, -1.0, 1.0) * 127.0)) & 0xff;
-  return asuint(i.x | i.y << 8 | i.z << 16 | i.w << 24);
-}
-
 void pack4x8snorm_4d22e7() {
-  uint res = tint_pack4x8snorm((1.0f).xxxx);
+  uint res = 2139062143u;
 }
 
 struct tint_symbol {

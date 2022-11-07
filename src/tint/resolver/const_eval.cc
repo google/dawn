@@ -37,6 +37,7 @@
 #include "src/tint/sem/type_initializer.h"
 #include "src/tint/sem/u32.h"
 #include "src/tint/sem/vector.h"
+#include "src/tint/utils/bitcast.h"
 #include "src/tint/utils/compiler_macros.h"
 #include "src/tint/utils/map.h"
 #include "src/tint/utils/scoped_assignment.h"
@@ -791,6 +792,20 @@ utils::Result<NumberT> ConstEval::Dot4(NumberT a1,
         return utils::Failure;
     }
     return r;
+}
+
+template <typename NumberT>
+utils::Result<NumberT> ConstEval::Clamp(NumberT e, NumberT low, NumberT high) {
+    return NumberT{std::min(std::max(e, low), high)};
+}
+
+auto ConstEval::ClampFunc(const sem::Type* elem_ty) {
+    return [=](auto e, auto low, auto high) -> ImplResult {
+        if (auto r = Clamp(e, low, high)) {
+            return CreateElement(builder, elem_ty, r.Get());
+        }
+        return utils::Failure;
+    };
 }
 
 auto ConstEval::AddFunc(const sem::Type* elem_ty) {
@@ -1727,11 +1742,7 @@ ConstEval::Result ConstEval::clamp(const sem::Type* ty,
                                    const Source&) {
     auto transform = [&](const sem::Constant* c0, const sem::Constant* c1,
                          const sem::Constant* c2) {
-        auto create = [&](auto e, auto low, auto high) {
-            return CreateElement(builder, c0->Type(),
-                                 decltype(e)(std::min(std::max(e, low), high)));
-        };
-        return Dispatch_fia_fiu32_f16(create, c0, c1, c2);
+        return Dispatch_fia_fiu32_f16(ClampFunc(c0->Type()), c0, c1, c2);
     };
     return TransformElements(builder, ty, transform, args[0], args[1], args[2]);
 }
@@ -1977,6 +1988,78 @@ ConstEval::Result ConstEval::insertBits(const sem::Type* ty,
         return Dispatch_iu32(create, c0, c1);
     };
     return TransformElements(builder, ty, transform, args[0], args[1]);
+}
+
+ConstEval::Result ConstEval::pack2x16snorm(const sem::Type* ty,
+                                           utils::VectorRef<const sem::Constant*> args,
+                                           const Source&) {
+    auto calc = [&](f32 val) -> u32 {
+        auto clamped = Clamp(val, f32(-1.0f), f32(1.0f)).Get();
+        return u32(utils::Bitcast<uint16_t>(
+            static_cast<int16_t>(std::floor(0.5f + (32767.0f * clamped)))));
+    };
+
+    auto* e = args[0];
+    auto e0 = calc(e->Index(0)->As<f32>());
+    auto e1 = calc(e->Index(1)->As<f32>());
+
+    u32 ret = u32((e0 & 0x0000'ffff) | (e1 << 16));
+    return CreateElement(builder, ty, ret);
+}
+
+ConstEval::Result ConstEval::pack2x16unorm(const sem::Type* ty,
+                                           utils::VectorRef<const sem::Constant*> args,
+                                           const Source&) {
+    auto calc = [&](f32 val) -> u32 {
+        auto clamped = Clamp(val, f32(0.0f), f32(1.0f)).Get();
+        return u32{std::floor(0.5f + (65535.0f * clamped))};
+    };
+
+    auto* e = args[0];
+    auto e0 = calc(e->Index(0)->As<f32>());
+    auto e1 = calc(e->Index(1)->As<f32>());
+
+    u32 ret = u32((e0 & 0x0000'ffff) | (e1 << 16));
+    return CreateElement(builder, ty, ret);
+}
+
+ConstEval::Result ConstEval::pack4x8snorm(const sem::Type* ty,
+                                          utils::VectorRef<const sem::Constant*> args,
+                                          const Source&) {
+    auto calc = [&](f32 val) -> u32 {
+        auto clamped = Clamp(val, f32(-1.0f), f32(1.0f)).Get();
+        return u32(
+            utils::Bitcast<uint8_t>(static_cast<int8_t>(std::floor(0.5f + (127.0f * clamped)))));
+    };
+
+    auto* e = args[0];
+    auto e0 = calc(e->Index(0)->As<f32>());
+    auto e1 = calc(e->Index(1)->As<f32>());
+    auto e2 = calc(e->Index(2)->As<f32>());
+    auto e3 = calc(e->Index(3)->As<f32>());
+
+    uint32_t mask = 0x0000'00ff;
+    u32 ret = u32((e0 & mask) | ((e1 & mask) << 8) | ((e2 & mask) << 16) | ((e3 & mask) << 24));
+    return CreateElement(builder, ty, ret);
+}
+
+ConstEval::Result ConstEval::pack4x8unorm(const sem::Type* ty,
+                                          utils::VectorRef<const sem::Constant*> args,
+                                          const Source&) {
+    auto calc = [&](f32 val) -> u32 {
+        auto clamped = Clamp(val, f32(0.0f), f32(1.0f)).Get();
+        return u32{std::floor(0.5f + (255.0f * clamped))};
+    };
+
+    auto* e = args[0];
+    auto e0 = calc(e->Index(0)->As<f32>());
+    auto e1 = calc(e->Index(1)->As<f32>());
+    auto e2 = calc(e->Index(2)->As<f32>());
+    auto e3 = calc(e->Index(3)->As<f32>());
+
+    uint32_t mask = 0x0000'00ff;
+    u32 ret = u32((e0 & mask) | ((e1 & mask) << 8) | ((e2 & mask) << 16) | ((e3 & mask) << 24));
+    return CreateElement(builder, ty, ret);
 }
 
 ConstEval::Result ConstEval::reverseBits(const sem::Type* ty,

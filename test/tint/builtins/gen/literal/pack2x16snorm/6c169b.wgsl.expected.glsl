@@ -1,7 +1,7 @@
 #version 310 es
 
 void pack2x16snorm_6c169b() {
-  uint res = packSnorm2x16(vec2(1.0f));
+  uint res = 2147450879u;
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void pack2x16snorm_6c169b() {
-  uint res = packSnorm2x16(vec2(1.0f));
+  uint res = 2147450879u;
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void pack2x16snorm_6c169b() {
-  uint res = packSnorm2x16(vec2(1.0f));
+  uint res = 2147450879u;
 }
 
 void compute_main() {
