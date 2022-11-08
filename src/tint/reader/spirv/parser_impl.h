@@ -66,8 +66,8 @@ namespace tint::reader::spirv {
 
 /// The binary representation of a SPIR-V decoration enum followed by its
 /// operands, if any.
-/// Example:   { SpvDecorationBlock }
-/// Example:   { SpvDecorationArrayStride, 16 }
+/// Example:   { spv::Decoration::Block }
+/// Example:   { spv::Decoration::ArrayStride, 16 }
 using Decoration = std::vector<uint32_t>;
 
 /// DecorationList is a list of decorations
@@ -338,13 +338,13 @@ class ParserImpl : Reader {
     /// Returns true when the given instruction is an extended instruction
     /// for GLSL.std.450.
     /// @param inst a SPIR-V instruction
-    /// @returns true if its an SpvOpExtInst for GLSL.std.450
+    /// @returns true if its an spv::Op::ExtInst for GLSL.std.450
     bool IsGlslExtendedInstruction(const spvtools::opt::Instruction& inst) const;
 
     /// Returns true when the given instruction is an extended instruction
     /// from an ignored extended instruction set.
     /// @param inst a SPIR-V instruction
-    /// @returns true if its an SpvOpExtInst for an ignored extended instruction
+    /// @returns true if its an spv::Op::ExtInst for an ignored extended instruction
     bool IsIgnoredExtendedInstruction(const spvtools::opt::Instruction& inst) const;
 
     /// Registers user names for SPIR-V objects, from OpName, and OpMemberName.
@@ -585,7 +585,7 @@ class ParserImpl : Reader {
         /// class class.
         uint32_t pointer_type_id = 0;
         /// The SPIR-V address space.
-        SpvStorageClass storage_class = SpvStorageClassOutput;
+        spv::StorageClass storage_class = spv::StorageClass::Output;
         /// The ID of the type of a pointer to the Position member.
         uint32_t position_member_pointer_type_id = 0;
         /// The ID of the gl_PerVertex variable, if it was declared.
@@ -690,7 +690,7 @@ class ParserImpl : Reader {
     const spvtools::opt::Instruction* GetInstructionForTest(uint32_t id) const;
 
     /// A map of SPIR-V identifiers to builtins
-    using BuiltInsMap = std::unordered_map<uint32_t, SpvBuiltIn>;
+    using BuiltInsMap = std::unordered_map<uint32_t, spv::BuiltIn>;
 
     /// @returns a map of builtins that should be handled specially by code
     /// generation. Either the builtin does not exist in WGSL, or a type
@@ -699,7 +699,7 @@ class ParserImpl : Reader {
 
     /// @param builtin the SPIR-V builtin variable kind
     /// @returns the SPIR-V ID for the variable defining the given builtin, or 0
-    uint32_t IdForSpecialBuiltIn(SpvBuiltIn builtin) const {
+    uint32_t IdForSpecialBuiltIn(spv::BuiltIn builtin) const {
         // Do a linear search.
         for (const auto& entry : special_builtins_) {
             if (entry.second == builtin) {

@@ -20,13 +20,13 @@ EnumConverter::EnumConverter(const FailStream& fs) : fail_stream_(fs) {}
 
 EnumConverter::~EnumConverter() = default;
 
-ast::PipelineStage EnumConverter::ToPipelineStage(SpvExecutionModel model) {
+ast::PipelineStage EnumConverter::ToPipelineStage(spv::ExecutionModel model) {
     switch (model) {
-        case SpvExecutionModelVertex:
+        case spv::ExecutionModel::Vertex:
             return ast::PipelineStage::kVertex;
-        case SpvExecutionModelFragment:
+        case spv::ExecutionModel::Fragment:
             return ast::PipelineStage::kFragment;
-        case SpvExecutionModelGLCompute:
+        case spv::ExecutionModel::GLCompute:
             return ast::PipelineStage::kCompute;
         default:
             break;
@@ -36,23 +36,23 @@ ast::PipelineStage EnumConverter::ToPipelineStage(SpvExecutionModel model) {
     return ast::PipelineStage::kNone;
 }
 
-ast::AddressSpace EnumConverter::ToAddressSpace(const SpvStorageClass sc) {
+ast::AddressSpace EnumConverter::ToAddressSpace(const spv::StorageClass sc) {
     switch (sc) {
-        case SpvStorageClassInput:
+        case spv::StorageClass::Input:
             return ast::AddressSpace::kIn;
-        case SpvStorageClassOutput:
+        case spv::StorageClass::Output:
             return ast::AddressSpace::kOut;
-        case SpvStorageClassUniform:
+        case spv::StorageClass::Uniform:
             return ast::AddressSpace::kUniform;
-        case SpvStorageClassWorkgroup:
+        case spv::StorageClass::Workgroup:
             return ast::AddressSpace::kWorkgroup;
-        case SpvStorageClassUniformConstant:
+        case spv::StorageClass::UniformConstant:
             return ast::AddressSpace::kNone;
-        case SpvStorageClassStorageBuffer:
+        case spv::StorageClass::StorageBuffer:
             return ast::AddressSpace::kStorage;
-        case SpvStorageClassPrivate:
+        case spv::StorageClass::Private:
             return ast::AddressSpace::kPrivate;
-        case SpvStorageClassFunction:
+        case spv::StorageClass::Function:
             return ast::AddressSpace::kFunction;
         default:
             break;
@@ -62,31 +62,31 @@ ast::AddressSpace EnumConverter::ToAddressSpace(const SpvStorageClass sc) {
     return ast::AddressSpace::kUndefined;
 }
 
-ast::BuiltinValue EnumConverter::ToBuiltin(SpvBuiltIn b) {
+ast::BuiltinValue EnumConverter::ToBuiltin(spv::BuiltIn b) {
     switch (b) {
-        case SpvBuiltInPosition:
+        case spv::BuiltIn::Position:
             return ast::BuiltinValue::kPosition;
-        case SpvBuiltInVertexIndex:
+        case spv::BuiltIn::VertexIndex:
             return ast::BuiltinValue::kVertexIndex;
-        case SpvBuiltInInstanceIndex:
+        case spv::BuiltIn::InstanceIndex:
             return ast::BuiltinValue::kInstanceIndex;
-        case SpvBuiltInFrontFacing:
+        case spv::BuiltIn::FrontFacing:
             return ast::BuiltinValue::kFrontFacing;
-        case SpvBuiltInFragCoord:
+        case spv::BuiltIn::FragCoord:
             return ast::BuiltinValue::kPosition;
-        case SpvBuiltInFragDepth:
+        case spv::BuiltIn::FragDepth:
             return ast::BuiltinValue::kFragDepth;
-        case SpvBuiltInLocalInvocationId:
+        case spv::BuiltIn::LocalInvocationId:
             return ast::BuiltinValue::kLocalInvocationId;
-        case SpvBuiltInLocalInvocationIndex:
+        case spv::BuiltIn::LocalInvocationIndex:
             return ast::BuiltinValue::kLocalInvocationIndex;
-        case SpvBuiltInGlobalInvocationId:
+        case spv::BuiltIn::GlobalInvocationId:
             return ast::BuiltinValue::kGlobalInvocationId;
-        case SpvBuiltInWorkgroupId:
+        case spv::BuiltIn::WorkgroupId:
             return ast::BuiltinValue::kWorkgroupId;
-        case SpvBuiltInSampleId:
+        case spv::BuiltIn::SampleId:
             return ast::BuiltinValue::kSampleIndex;
-        case SpvBuiltInSampleMask:
+        case spv::BuiltIn::SampleMask:
             return ast::BuiltinValue::kSampleMask;
         default:
             break;
@@ -96,12 +96,12 @@ ast::BuiltinValue EnumConverter::ToBuiltin(SpvBuiltIn b) {
     return ast::BuiltinValue::kUndefined;
 }
 
-ast::TextureDimension EnumConverter::ToDim(SpvDim dim, bool arrayed) {
+ast::TextureDimension EnumConverter::ToDim(spv::Dim dim, bool arrayed) {
     if (arrayed) {
         switch (dim) {
-            case SpvDim2D:
+            case spv::Dim::Dim2D:
                 return ast::TextureDimension::k2dArray;
-            case SpvDimCube:
+            case spv::Dim::Cube:
                 return ast::TextureDimension::kCubeArray;
             default:
                 break;
@@ -111,13 +111,13 @@ ast::TextureDimension EnumConverter::ToDim(SpvDim dim, bool arrayed) {
     }
     // Assume non-arrayed
     switch (dim) {
-        case SpvDim1D:
+        case spv::Dim::Dim1D:
             return ast::TextureDimension::k1d;
-        case SpvDim2D:
+        case spv::Dim::Dim2D:
             return ast::TextureDimension::k2d;
-        case SpvDim3D:
+        case spv::Dim::Dim3D:
             return ast::TextureDimension::k3d;
-        case SpvDimCube:
+        case spv::Dim::Cube:
             return ast::TextureDimension::kCube;
         default:
             break;
@@ -126,47 +126,47 @@ ast::TextureDimension EnumConverter::ToDim(SpvDim dim, bool arrayed) {
     return ast::TextureDimension::kNone;
 }
 
-ast::TexelFormat EnumConverter::ToTexelFormat(SpvImageFormat fmt) {
+ast::TexelFormat EnumConverter::ToTexelFormat(spv::ImageFormat fmt) {
     switch (fmt) {
-        case SpvImageFormatUnknown:
+        case spv::ImageFormat::Unknown:
             return ast::TexelFormat::kUndefined;
 
         // 8 bit channels
-        case SpvImageFormatRgba8:
+        case spv::ImageFormat::Rgba8:
             return ast::TexelFormat::kRgba8Unorm;
-        case SpvImageFormatRgba8Snorm:
+        case spv::ImageFormat::Rgba8Snorm:
             return ast::TexelFormat::kRgba8Snorm;
-        case SpvImageFormatRgba8ui:
+        case spv::ImageFormat::Rgba8ui:
             return ast::TexelFormat::kRgba8Uint;
-        case SpvImageFormatRgba8i:
+        case spv::ImageFormat::Rgba8i:
             return ast::TexelFormat::kRgba8Sint;
 
         // 16 bit channels
-        case SpvImageFormatRgba16ui:
+        case spv::ImageFormat::Rgba16ui:
             return ast::TexelFormat::kRgba16Uint;
-        case SpvImageFormatRgba16i:
+        case spv::ImageFormat::Rgba16i:
             return ast::TexelFormat::kRgba16Sint;
-        case SpvImageFormatRgba16f:
+        case spv::ImageFormat::Rgba16f:
             return ast::TexelFormat::kRgba16Float;
 
         // 32 bit channels
-        case SpvImageFormatR32ui:
+        case spv::ImageFormat::R32ui:
             return ast::TexelFormat::kR32Uint;
-        case SpvImageFormatR32i:
+        case spv::ImageFormat::R32i:
             return ast::TexelFormat::kR32Sint;
-        case SpvImageFormatR32f:
+        case spv::ImageFormat::R32f:
             return ast::TexelFormat::kR32Float;
-        case SpvImageFormatRg32ui:
+        case spv::ImageFormat::Rg32ui:
             return ast::TexelFormat::kRg32Uint;
-        case SpvImageFormatRg32i:
+        case spv::ImageFormat::Rg32i:
             return ast::TexelFormat::kRg32Sint;
-        case SpvImageFormatRg32f:
+        case spv::ImageFormat::Rg32f:
             return ast::TexelFormat::kRg32Float;
-        case SpvImageFormatRgba32ui:
+        case spv::ImageFormat::Rgba32ui:
             return ast::TexelFormat::kRgba32Uint;
-        case SpvImageFormatRgba32i:
+        case spv::ImageFormat::Rgba32i:
             return ast::TexelFormat::kRgba32Sint;
-        case SpvImageFormatRgba32f:
+        case spv::ImageFormat::Rgba32f:
             return ast::TexelFormat::kRgba32Float;
         default:
             break;

@@ -52,7 +52,7 @@ TEST_F(SpvParserGetDecorationsTest, GetDecorationsFor_OneDecoration) {
   )"));
     EXPECT_TRUE(p->BuildAndParseInternalModule());
     auto decorations = p->GetDecorationsFor(10);
-    EXPECT_THAT(decorations, UnorderedElementsAre(Decoration{SpvDecorationBlock}));
+    EXPECT_THAT(decorations, UnorderedElementsAre(Decoration{uint32_t(spv::Decoration::Block)}));
     EXPECT_TRUE(p->error().empty());
     p->SkipDumpingPending(kSkipReason);
 }
@@ -66,7 +66,7 @@ TEST_F(SpvParserGetDecorationsTest, GetDecorationsFor_Duplicate) {
   )"));
     EXPECT_TRUE(p->BuildAndParseInternalModule());
     auto decorations = p->GetDecorationsFor(10);
-    EXPECT_THAT(decorations, UnorderedElementsAre(Decoration{SpvDecorationBlock}));
+    EXPECT_THAT(decorations, UnorderedElementsAre(Decoration{uint32_t(spv::Decoration::Block)}));
     EXPECT_TRUE(p->error().empty());
     p->SkipDumpingPending(kSkipReason);
 }
@@ -80,8 +80,9 @@ TEST_F(SpvParserGetDecorationsTest, GetDecorationsFor_MultiDecoration) {
   )"));
     EXPECT_TRUE(p->BuildAndParseInternalModule());
     auto decorations = p->GetDecorationsFor(5);
-    EXPECT_THAT(decorations, UnorderedElementsAre(Decoration{SpvDecorationRelaxedPrecision},
-                                                  Decoration{SpvDecorationLocation, 7}));
+    EXPECT_THAT(decorations,
+                UnorderedElementsAre(Decoration{uint32_t(spv::Decoration::RelaxedPrecision)},
+                                     Decoration{uint32_t(spv::Decoration::Location), 7}));
     EXPECT_TRUE(p->error().empty());
     p->SkipDumpingPending(kSkipReason);
 }
@@ -124,7 +125,8 @@ TEST_F(SpvParserGetDecorationsTest, GetDecorationsForMember_RelaxedPrecision) {
   )"));
     EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
     auto decorations = p->GetDecorationsForMember(10, 0);
-    EXPECT_THAT(decorations, UnorderedElementsAre(Decoration{SpvDecorationRelaxedPrecision}));
+    EXPECT_THAT(decorations,
+                UnorderedElementsAre(Decoration{uint32_t(spv::Decoration::RelaxedPrecision)}));
     EXPECT_TRUE(p->error().empty());
     p->SkipDumpingPending(kSkipReason);
 }
@@ -138,7 +140,8 @@ TEST_F(SpvParserGetDecorationsTest, GetDecorationsForMember_Duplicate) {
   )"));
     EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
     auto decorations = p->GetDecorationsForMember(10, 0);
-    EXPECT_THAT(decorations, UnorderedElementsAre(Decoration{SpvDecorationRelaxedPrecision}));
+    EXPECT_THAT(decorations,
+                UnorderedElementsAre(Decoration{uint32_t(spv::Decoration::RelaxedPrecision)}));
     EXPECT_TRUE(p->error().empty());
     p->SkipDumpingPending(kSkipReason);
 }
@@ -154,7 +157,8 @@ TEST_F(SpvParserGetDecorationsTest, DISABLED_GetDecorationsForMember_OneDecorati
   )"));
     EXPECT_TRUE(p->BuildAndParseInternalModule()) << p->error();
     auto decorations = p->GetDecorationsForMember(10, 1);
-    EXPECT_THAT(decorations, UnorderedElementsAre(Decoration{SpvDecorationArrayStride, 12}));
+    EXPECT_THAT(decorations,
+                UnorderedElementsAre(Decoration{uint32_t(spv::Decoration::ArrayStride), 12}));
     EXPECT_TRUE(p->error().empty());
 }
 
@@ -179,11 +183,11 @@ TEST_F(SpvParserGetDecorationsTest, DISABLED_GetDecorationsForMember_MultiDecora
 
     EXPECT_TRUE(p->GetDecorationsForMember(50, 0).empty());
     EXPECT_THAT(p->GetDecorationsForMember(50, 1),
-                UnorderedElementsAre(Decoration{SpvDecorationRelaxedPrecision}));
+                UnorderedElementsAre(Decoration{uint32_t(spv::Decoration::RelaxedPrecision)}));
     EXPECT_THAT(p->GetDecorationsForMember(50, 2),
-                UnorderedElementsAre(Decoration{SpvDecorationColMajor},
-                                     Decoration{SpvDecorationMatrixStride, 8},
-                                     Decoration{SpvDecorationArrayStride, 16}));
+                UnorderedElementsAre(Decoration{uint32_t(spv::Decoration::ColMajor)},
+                                     Decoration{uint32_t(spv::Decoration::MatrixStride), 8},
+                                     Decoration{uint32_t(spv::Decoration::ArrayStride), 16}));
     EXPECT_TRUE(p->error().empty());
 }
 

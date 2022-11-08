@@ -31,7 +31,7 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_IsEmpty) {
 TEST_F(SpvParserTest, ConvertMemberDecoration_OffsetWithoutOperand) {
     auto p = parser(std::vector<uint32_t>{});
 
-    auto result = p->ConvertMemberDecoration(12, 13, nullptr, {SpvDecorationOffset});
+    auto result = p->ConvertMemberDecoration(12, 13, nullptr, {uint32_t(spv::Decoration::Offset)});
     EXPECT_TRUE(result.IsEmpty());
     EXPECT_THAT(p->error(), Eq("malformed Offset decoration: expected 1 literal "
                                "operand, has 0: member 13 of SPIR-V type 12"));
@@ -40,7 +40,8 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_OffsetWithoutOperand) {
 TEST_F(SpvParserTest, ConvertMemberDecoration_OffsetWithTooManyOperands) {
     auto p = parser(std::vector<uint32_t>{});
 
-    auto result = p->ConvertMemberDecoration(12, 13, nullptr, {SpvDecorationOffset, 3, 4});
+    auto result =
+        p->ConvertMemberDecoration(12, 13, nullptr, {uint32_t(spv::Decoration::Offset), 3, 4});
     EXPECT_TRUE(result.IsEmpty());
     EXPECT_THAT(p->error(), Eq("malformed Offset decoration: expected 1 literal "
                                "operand, has 2: member 13 of SPIR-V type 12"));
@@ -49,7 +50,7 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_OffsetWithTooManyOperands) {
 TEST_F(SpvParserTest, ConvertMemberDecoration_Offset) {
     auto p = parser(std::vector<uint32_t>{});
 
-    auto result = p->ConvertMemberDecoration(1, 1, nullptr, {SpvDecorationOffset, 8});
+    auto result = p->ConvertMemberDecoration(1, 1, nullptr, {uint32_t(spv::Decoration::Offset), 8});
     ASSERT_FALSE(result.IsEmpty());
     EXPECT_TRUE(result[0]->Is<ast::StructMemberOffsetAttribute>());
     auto* offset_deco = result[0]->As<ast::StructMemberOffsetAttribute>();
@@ -64,7 +65,8 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Matrix2x2_Stride_Natural) {
 
     spirv::F32 f32;
     spirv::Matrix matrix(&f32, 2, 2);
-    auto result = p->ConvertMemberDecoration(1, 1, &matrix, {SpvDecorationMatrixStride, 8});
+    auto result =
+        p->ConvertMemberDecoration(1, 1, &matrix, {uint32_t(spv::Decoration::MatrixStride), 8});
     EXPECT_TRUE(result.IsEmpty());
     EXPECT_TRUE(p->error().empty());
 }
@@ -74,7 +76,8 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Matrix2x2_Stride_Custom) {
 
     spirv::F32 f32;
     spirv::Matrix matrix(&f32, 2, 2);
-    auto result = p->ConvertMemberDecoration(1, 1, &matrix, {SpvDecorationMatrixStride, 16});
+    auto result =
+        p->ConvertMemberDecoration(1, 1, &matrix, {uint32_t(spv::Decoration::MatrixStride), 16});
     ASSERT_FALSE(result.IsEmpty());
     EXPECT_TRUE(result[0]->Is<ast::StrideAttribute>());
     auto* stride_deco = result[0]->As<ast::StrideAttribute>();
@@ -88,7 +91,8 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Matrix2x4_Stride_Natural) {
 
     spirv::F32 f32;
     spirv::Matrix matrix(&f32, 2, 4);
-    auto result = p->ConvertMemberDecoration(1, 1, &matrix, {SpvDecorationMatrixStride, 16});
+    auto result =
+        p->ConvertMemberDecoration(1, 1, &matrix, {uint32_t(spv::Decoration::MatrixStride), 16});
     EXPECT_TRUE(result.IsEmpty());
     EXPECT_TRUE(p->error().empty());
 }
@@ -98,7 +102,8 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Matrix2x4_Stride_Custom) {
 
     spirv::F32 f32;
     spirv::Matrix matrix(&f32, 2, 4);
-    auto result = p->ConvertMemberDecoration(1, 1, &matrix, {SpvDecorationMatrixStride, 64});
+    auto result =
+        p->ConvertMemberDecoration(1, 1, &matrix, {uint32_t(spv::Decoration::MatrixStride), 64});
     ASSERT_FALSE(result.IsEmpty());
     EXPECT_TRUE(result[0]->Is<ast::StrideAttribute>());
     auto* stride_deco = result[0]->As<ast::StrideAttribute>();
@@ -112,7 +117,8 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_Matrix2x3_Stride_Custom) {
 
     spirv::F32 f32;
     spirv::Matrix matrix(&f32, 2, 3);
-    auto result = p->ConvertMemberDecoration(1, 1, &matrix, {SpvDecorationMatrixStride, 32});
+    auto result =
+        p->ConvertMemberDecoration(1, 1, &matrix, {uint32_t(spv::Decoration::MatrixStride), 32});
     ASSERT_FALSE(result.IsEmpty());
     EXPECT_TRUE(result[0]->Is<ast::StrideAttribute>());
     auto* stride_deco = result[0]->As<ast::StrideAttribute>();
@@ -127,7 +133,8 @@ TEST_F(SpvParserTest, ConvertMemberDecoration_RelaxedPrecision) {
     // relaxed precision f32.
     auto p = parser(std::vector<uint32_t>{});
 
-    auto result = p->ConvertMemberDecoration(1, 1, nullptr, {SpvDecorationRelaxedPrecision});
+    auto result =
+        p->ConvertMemberDecoration(1, 1, nullptr, {uint32_t(spv::Decoration::RelaxedPrecision)});
     EXPECT_TRUE(result.IsEmpty());
     EXPECT_TRUE(p->error().empty());
 }

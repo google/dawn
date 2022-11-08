@@ -144,24 +144,99 @@ using namespace tint::number_suffixes;  // NOLINT
 
 namespace tint::reader::spirv {
 
+namespace three_sided_patch_function_cc {
+// This machinery is only used while SPIRV-Tools is in transition before it fully
+// uses the C++11 header spirv.hpp11
+
+/// Typedef for pointer to member function while the API call uses
+/// SpvStorageClass for its second argument.
+typedef uint32_t (
+    spvtools::opt::analysis::TypeManager::*PointerFinderSpvStorageClass)(uint32_t, SpvStorageClass);
+/// Typedef for pointer to member function while the API call uses
+/// spv::StorageClass for its second argument.
+typedef uint32_t (spvtools::opt::analysis::TypeManager::*PointerFinderSpvStorageClassCpp11)(
+    uint32_t,
+    spv::StorageClass);
+
+/// @param type_manager the SPIRV-Tools optimizer's type manager
+/// @param finder a pointer to member function in the type manager that does the
+/// actual lookup
+/// @param pointee_type_id the ID of the pointee type
+/// @param sc the storage class.  SC can be SpvStorageClass or spv::StorageClass
+/// @returns the ID for a SPIR-V pointer to pointee_type_id in storage class sc
+template <typename FinderType, typename SC>
+uint32_t FindPointerToType(spvtools::opt::analysis::TypeManager* type_manager,
+                           FinderType finder,
+                           uint32_t pointee_type_id,
+                           SC sc);
+
+template <>
+uint32_t FindPointerToType(spvtools::opt::analysis::TypeManager* type_mgr,
+                           PointerFinderSpvStorageClass finder,
+                           uint32_t pointee_type_id,
+                           SpvStorageClass sc) {
+    return (type_mgr->*finder)(pointee_type_id, sc);
+}
+
+template <>
+uint32_t FindPointerToType(spvtools::opt::analysis::TypeManager* type_mgr,
+                           PointerFinderSpvStorageClass finder,
+                           uint32_t pointee_type_id,
+                           spv::StorageClass sc) {
+    return (type_mgr->*finder)(pointee_type_id, static_cast<SpvStorageClass>(sc));
+}
+
+template <>
+uint32_t FindPointerToType(spvtools::opt::analysis::TypeManager* type_mgr,
+                           PointerFinderSpvStorageClassCpp11 finder,
+                           uint32_t pointee_type_id,
+                           SpvStorageClass sc) {
+    return (type_mgr->*finder)(pointee_type_id, static_cast<spv::StorageClass>(sc));
+}
+
+template <>
+uint32_t FindPointerToType(spvtools::opt::analysis::TypeManager* type_mgr,
+                           PointerFinderSpvStorageClassCpp11 finder,
+                           uint32_t pointee_type_id,
+                           spv::StorageClass sc) {
+    return (type_mgr->*finder)(pointee_type_id, sc);
+}
+}  // namespace three_sided_patch_function_cc
+
 namespace {
 
 constexpr uint32_t kMaxVectorLen = 4;
+
+template <typename FromOpcodeType>
+spv::Op ToOpcode(FromOpcodeType oc) {
+    return static_cast<spv::Op>(oc);
+}
+
+/// @param inst a SPIR-V instruction
+/// @returns Returns the opcode for an instruciton
+inline spv::Op opcode(const spvtools::opt::Instruction& inst) {
+    return ToOpcode(inst.opcode());
+}
+/// @param inst a SPIR-V instruction pointer
+/// @returns Returns the opcode for an instruciton
+inline spv::Op opcode(const spvtools::opt::Instruction* inst) {
+    return ToOpcode(inst->opcode());
+}
 
 // Gets the AST unary opcode for the given SPIR-V opcode, if any
 // @param opcode SPIR-V opcode
 // @param ast_unary_op return parameter
 // @returns true if it was a unary operation
-bool GetUnaryOp(SpvOp opcode, ast::UnaryOp* ast_unary_op) {
+bool GetUnaryOp(spv::Op opcode, ast::UnaryOp* ast_unary_op) {
     switch (opcode) {
-        case SpvOpSNegate:
-        case SpvOpFNegate:
+        case spv::Op::OpSNegate:
+        case spv::Op::OpFNegate:
             *ast_unary_op = ast::UnaryOp::kNegation;
             return true;
-        case SpvOpLogicalNot:
+        case spv::Op::OpLogicalNot:
             *ast_unary_op = ast::UnaryOp::kNot;
             return true;
-        case SpvOpNot:
+        case spv::Op::OpNot:
             *ast_unary_op = ast::UnaryOp::kComplement;
             return true;
         default:
@@ -173,17 +248,17 @@ bool GetUnaryOp(SpvOp opcode, ast::UnaryOp* ast_unary_op) {
 /// Converts a SPIR-V opcode for a WGSL builtin function, if there is a
 /// direct translation. Returns nullptr otherwise.
 /// @returns the WGSL builtin function name for the given opcode, or nullptr.
-const char* GetUnaryBuiltInFunctionName(SpvOp opcode) {
+const char* GetUnaryBuiltInFunctionName(spv::Op opcode) {
     switch (opcode) {
-        case SpvOpAny:
+        case spv::Op::OpAny:
             return "any";
-        case SpvOpAll:
+        case spv::Op::OpAll:
             return "all";
-        case SpvOpIsNan:
+        case spv::Op::OpIsNan:
             return "isNan";
-        case SpvOpIsInf:
+        case spv::Op::OpIsInf:
             return "isInf";
-        case SpvOpTranspose:
+        case spv::Op::OpTranspose:
             return "transpose";
         default:
             break;
@@ -194,63 +269,63 @@ const char* GetUnaryBuiltInFunctionName(SpvOp opcode) {
 // Converts a SPIR-V opcode to its corresponding AST binary opcode, if any
 // @param opcode SPIR-V opcode
 // @returns the AST binary op for the given opcode, or kNone
-ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
+ast::BinaryOp ConvertBinaryOp(spv::Op opcode) {
     switch (opcode) {
-        case SpvOpIAdd:
-        case SpvOpFAdd:
+        case spv::Op::OpIAdd:
+        case spv::Op::OpFAdd:
             return ast::BinaryOp::kAdd;
-        case SpvOpISub:
-        case SpvOpFSub:
+        case spv::Op::OpISub:
+        case spv::Op::OpFSub:
             return ast::BinaryOp::kSubtract;
-        case SpvOpIMul:
-        case SpvOpFMul:
-        case SpvOpVectorTimesScalar:
-        case SpvOpMatrixTimesScalar:
-        case SpvOpVectorTimesMatrix:
-        case SpvOpMatrixTimesVector:
-        case SpvOpMatrixTimesMatrix:
+        case spv::Op::OpIMul:
+        case spv::Op::OpFMul:
+        case spv::Op::OpVectorTimesScalar:
+        case spv::Op::OpMatrixTimesScalar:
+        case spv::Op::OpVectorTimesMatrix:
+        case spv::Op::OpMatrixTimesVector:
+        case spv::Op::OpMatrixTimesMatrix:
             return ast::BinaryOp::kMultiply;
-        case SpvOpUDiv:
-        case SpvOpSDiv:
-        case SpvOpFDiv:
+        case spv::Op::OpUDiv:
+        case spv::Op::OpSDiv:
+        case spv::Op::OpFDiv:
             return ast::BinaryOp::kDivide;
-        case SpvOpUMod:
-        case SpvOpSMod:
-        case SpvOpFRem:
+        case spv::Op::OpUMod:
+        case spv::Op::OpSMod:
+        case spv::Op::OpFRem:
             return ast::BinaryOp::kModulo;
-        case SpvOpLogicalEqual:
-        case SpvOpIEqual:
-        case SpvOpFOrdEqual:
+        case spv::Op::OpLogicalEqual:
+        case spv::Op::OpIEqual:
+        case spv::Op::OpFOrdEqual:
             return ast::BinaryOp::kEqual;
-        case SpvOpLogicalNotEqual:
-        case SpvOpINotEqual:
-        case SpvOpFOrdNotEqual:
+        case spv::Op::OpLogicalNotEqual:
+        case spv::Op::OpINotEqual:
+        case spv::Op::OpFOrdNotEqual:
             return ast::BinaryOp::kNotEqual;
-        case SpvOpBitwiseAnd:
+        case spv::Op::OpBitwiseAnd:
             return ast::BinaryOp::kAnd;
-        case SpvOpBitwiseOr:
+        case spv::Op::OpBitwiseOr:
             return ast::BinaryOp::kOr;
-        case SpvOpBitwiseXor:
+        case spv::Op::OpBitwiseXor:
             return ast::BinaryOp::kXor;
-        case SpvOpLogicalAnd:
+        case spv::Op::OpLogicalAnd:
             return ast::BinaryOp::kAnd;
-        case SpvOpLogicalOr:
+        case spv::Op::OpLogicalOr:
             return ast::BinaryOp::kOr;
-        case SpvOpUGreaterThan:
-        case SpvOpSGreaterThan:
-        case SpvOpFOrdGreaterThan:
+        case spv::Op::OpUGreaterThan:
+        case spv::Op::OpSGreaterThan:
+        case spv::Op::OpFOrdGreaterThan:
             return ast::BinaryOp::kGreaterThan;
-        case SpvOpUGreaterThanEqual:
-        case SpvOpSGreaterThanEqual:
-        case SpvOpFOrdGreaterThanEqual:
+        case spv::Op::OpUGreaterThanEqual:
+        case spv::Op::OpSGreaterThanEqual:
+        case spv::Op::OpFOrdGreaterThanEqual:
             return ast::BinaryOp::kGreaterThanEqual;
-        case SpvOpULessThan:
-        case SpvOpSLessThan:
-        case SpvOpFOrdLessThan:
+        case spv::Op::OpULessThan:
+        case spv::Op::OpSLessThan:
+        case spv::Op::OpFOrdLessThan:
             return ast::BinaryOp::kLessThan;
-        case SpvOpULessThanEqual:
-        case SpvOpSLessThanEqual:
-        case SpvOpFOrdLessThanEqual:
+        case spv::Op::OpULessThanEqual:
+        case spv::Op::OpSLessThanEqual:
+        case spv::Op::OpFOrdLessThanEqual:
             return ast::BinaryOp::kLessThanEqual;
         default:
             break;
@@ -265,19 +340,19 @@ ast::BinaryOp ConvertBinaryOp(SpvOp opcode) {
 // Othewrise returns BinaryOp::kNone.
 // @param opcode SPIR-V opcode
 // @returns operation corresponding to negated version of the SPIR-V opcode
-ast::BinaryOp NegatedFloatCompare(SpvOp opcode) {
+ast::BinaryOp NegatedFloatCompare(spv::Op opcode) {
     switch (opcode) {
-        case SpvOpFUnordEqual:
+        case spv::Op::OpFUnordEqual:
             return ast::BinaryOp::kNotEqual;
-        case SpvOpFUnordNotEqual:
+        case spv::Op::OpFUnordNotEqual:
             return ast::BinaryOp::kEqual;
-        case SpvOpFUnordLessThan:
+        case spv::Op::OpFUnordLessThan:
             return ast::BinaryOp::kGreaterThanEqual;
-        case SpvOpFUnordLessThanEqual:
+        case spv::Op::OpFUnordLessThanEqual:
             return ast::BinaryOp::kGreaterThan;
-        case SpvOpFUnordGreaterThan:
+        case spv::Op::OpFUnordGreaterThan:
             return ast::BinaryOp::kLessThanEqual;
-        case SpvOpFUnordGreaterThanEqual:
+        case spv::Op::OpFUnordGreaterThanEqual:
             return ast::BinaryOp::kLessThan;
         default:
             break;
@@ -443,36 +518,36 @@ std::string GetGlslStd450FuncName(uint32_t ext_opcode) {
 
 // Returns the WGSL standard library function builtin for the
 // given instruction, or sem::BuiltinType::kNone
-sem::BuiltinType GetBuiltin(SpvOp opcode) {
+sem::BuiltinType GetBuiltin(spv::Op opcode) {
     switch (opcode) {
-        case SpvOpBitCount:
+        case spv::Op::OpBitCount:
             return sem::BuiltinType::kCountOneBits;
-        case SpvOpBitFieldInsert:
+        case spv::Op::OpBitFieldInsert:
             return sem::BuiltinType::kInsertBits;
-        case SpvOpBitFieldSExtract:
-        case SpvOpBitFieldUExtract:
+        case spv::Op::OpBitFieldSExtract:
+        case spv::Op::OpBitFieldUExtract:
             return sem::BuiltinType::kExtractBits;
-        case SpvOpBitReverse:
+        case spv::Op::OpBitReverse:
             return sem::BuiltinType::kReverseBits;
-        case SpvOpDot:
+        case spv::Op::OpDot:
             return sem::BuiltinType::kDot;
-        case SpvOpDPdx:
+        case spv::Op::OpDPdx:
             return sem::BuiltinType::kDpdx;
-        case SpvOpDPdy:
+        case spv::Op::OpDPdy:
             return sem::BuiltinType::kDpdy;
-        case SpvOpFwidth:
+        case spv::Op::OpFwidth:
             return sem::BuiltinType::kFwidth;
-        case SpvOpDPdxFine:
+        case spv::Op::OpDPdxFine:
             return sem::BuiltinType::kDpdxFine;
-        case SpvOpDPdyFine:
+        case spv::Op::OpDPdyFine:
             return sem::BuiltinType::kDpdyFine;
-        case SpvOpFwidthFine:
+        case spv::Op::OpFwidthFine:
             return sem::BuiltinType::kFwidthFine;
-        case SpvOpDPdxCoarse:
+        case spv::Op::OpDPdxCoarse:
             return sem::BuiltinType::kDpdxCoarse;
-        case SpvOpDPdyCoarse:
+        case spv::Op::OpDPdyCoarse:
             return sem::BuiltinType::kDpdyCoarse;
-        case SpvOpFwidthCoarse:
+        case spv::Op::OpFwidthCoarse:
             return sem::BuiltinType::kFwidthCoarse;
         default:
             break;
@@ -483,20 +558,20 @@ sem::BuiltinType GetBuiltin(SpvOp opcode) {
 // @param opcode a SPIR-V opcode
 // @returns true if the given instruction is an image access instruction
 // whose first input operand is an OpSampledImage value.
-bool IsSampledImageAccess(SpvOp opcode) {
+bool IsSampledImageAccess(spv::Op opcode) {
     switch (opcode) {
-        case SpvOpImageSampleImplicitLod:
-        case SpvOpImageSampleExplicitLod:
-        case SpvOpImageSampleDrefImplicitLod:
-        case SpvOpImageSampleDrefExplicitLod:
+        case spv::Op::OpImageSampleImplicitLod:
+        case spv::Op::OpImageSampleExplicitLod:
+        case spv::Op::OpImageSampleDrefImplicitLod:
+        case spv::Op::OpImageSampleDrefExplicitLod:
         // WGSL doesn't have *Proj* texturing; spirv reader emulates it.
-        case SpvOpImageSampleProjImplicitLod:
-        case SpvOpImageSampleProjExplicitLod:
-        case SpvOpImageSampleProjDrefImplicitLod:
-        case SpvOpImageSampleProjDrefExplicitLod:
-        case SpvOpImageGather:
-        case SpvOpImageDrefGather:
-        case SpvOpImageQueryLod:
+        case spv::Op::OpImageSampleProjImplicitLod:
+        case spv::Op::OpImageSampleProjExplicitLod:
+        case spv::Op::OpImageSampleProjDrefImplicitLod:
+        case spv::Op::OpImageSampleProjDrefExplicitLod:
+        case spv::Op::OpImageGather:
+        case spv::Op::OpImageDrefGather:
+        case spv::Op::OpImageQueryLod:
             return true;
         default:
             break;
@@ -506,29 +581,29 @@ bool IsSampledImageAccess(SpvOp opcode) {
 
 // @param opcode a SPIR-V opcode
 // @returns true if the given instruction is an atomic operation.
-bool IsAtomicOp(SpvOp opcode) {
+bool IsAtomicOp(spv::Op opcode) {
     switch (opcode) {
-        case SpvOpAtomicLoad:
-        case SpvOpAtomicStore:
-        case SpvOpAtomicExchange:
-        case SpvOpAtomicCompareExchange:
-        case SpvOpAtomicCompareExchangeWeak:
-        case SpvOpAtomicIIncrement:
-        case SpvOpAtomicIDecrement:
-        case SpvOpAtomicIAdd:
-        case SpvOpAtomicISub:
-        case SpvOpAtomicSMin:
-        case SpvOpAtomicUMin:
-        case SpvOpAtomicSMax:
-        case SpvOpAtomicUMax:
-        case SpvOpAtomicAnd:
-        case SpvOpAtomicOr:
-        case SpvOpAtomicXor:
-        case SpvOpAtomicFlagTestAndSet:
-        case SpvOpAtomicFlagClear:
-        case SpvOpAtomicFMinEXT:
-        case SpvOpAtomicFMaxEXT:
-        case SpvOpAtomicFAddEXT:
+        case spv::Op::OpAtomicLoad:
+        case spv::Op::OpAtomicStore:
+        case spv::Op::OpAtomicExchange:
+        case spv::Op::OpAtomicCompareExchange:
+        case spv::Op::OpAtomicCompareExchangeWeak:
+        case spv::Op::OpAtomicIIncrement:
+        case spv::Op::OpAtomicIDecrement:
+        case spv::Op::OpAtomicIAdd:
+        case spv::Op::OpAtomicISub:
+        case spv::Op::OpAtomicSMin:
+        case spv::Op::OpAtomicUMin:
+        case spv::Op::OpAtomicSMax:
+        case spv::Op::OpAtomicUMax:
+        case spv::Op::OpAtomicAnd:
+        case spv::Op::OpAtomicOr:
+        case spv::Op::OpAtomicXor:
+        case spv::Op::OpAtomicFlagTestAndSet:
+        case spv::Op::OpAtomicFlagClear:
+        case spv::Op::OpAtomicFMinEXT:
+        case spv::Op::OpAtomicFMaxEXT:
+        case spv::Op::OpAtomicFAddEXT:
             return true;
         default:
             break;
@@ -539,19 +614,19 @@ bool IsAtomicOp(SpvOp opcode) {
 // @param opcode a SPIR-V opcode
 // @returns true if the given instruction is an image sampling, gather,
 // or gather-compare operation.
-bool IsImageSamplingOrGatherOrDrefGather(SpvOp opcode) {
+bool IsImageSamplingOrGatherOrDrefGather(spv::Op opcode) {
     switch (opcode) {
-        case SpvOpImageSampleImplicitLod:
-        case SpvOpImageSampleExplicitLod:
-        case SpvOpImageSampleDrefImplicitLod:
-        case SpvOpImageSampleDrefExplicitLod:
+        case spv::Op::OpImageSampleImplicitLod:
+        case spv::Op::OpImageSampleExplicitLod:
+        case spv::Op::OpImageSampleDrefImplicitLod:
+        case spv::Op::OpImageSampleDrefExplicitLod:
             // WGSL doesn't have *Proj* texturing; spirv reader emulates it.
-        case SpvOpImageSampleProjImplicitLod:
-        case SpvOpImageSampleProjExplicitLod:
-        case SpvOpImageSampleProjDrefImplicitLod:
-        case SpvOpImageSampleProjDrefExplicitLod:
-        case SpvOpImageGather:
-        case SpvOpImageDrefGather:
+        case spv::Op::OpImageSampleProjImplicitLod:
+        case spv::Op::OpImageSampleProjExplicitLod:
+        case spv::Op::OpImageSampleProjDrefImplicitLod:
+        case spv::Op::OpImageSampleProjDrefExplicitLod:
+        case spv::Op::OpImageGather:
+        case spv::Op::OpImageDrefGather:
             return true;
         default:
             break;
@@ -562,11 +637,11 @@ bool IsImageSamplingOrGatherOrDrefGather(SpvOp opcode) {
 // @param opcode a SPIR-V opcode
 // @returns true if the given instruction is an image access instruction
 // whose first input operand is an OpImage value.
-bool IsRawImageAccess(SpvOp opcode) {
+bool IsRawImageAccess(spv::Op opcode) {
     switch (opcode) {
-        case SpvOpImageRead:
-        case SpvOpImageWrite:
-        case SpvOpImageFetch:
+        case spv::Op::OpImageRead:
+        case spv::Op::OpImageWrite:
+        case spv::Op::OpImageFetch:
             return true;
         default:
             break;
@@ -576,13 +651,13 @@ bool IsRawImageAccess(SpvOp opcode) {
 
 // @param opcode a SPIR-V opcode
 // @returns true if the given instruction is an image query instruction
-bool IsImageQuery(SpvOp opcode) {
+bool IsImageQuery(spv::Op opcode) {
     switch (opcode) {
-        case SpvOpImageQuerySize:
-        case SpvOpImageQuerySizeLod:
-        case SpvOpImageQueryLevels:
-        case SpvOpImageQuerySamples:
-        case SpvOpImageQueryLod:
+        case spv::Op::OpImageQuerySize:
+        case spv::Op::OpImageQuerySizeLod:
+        case spv::Op::OpImageQueryLevels:
+        case spv::Op::OpImageQuerySamples:
+        case spv::Op::OpImageQueryLod:
             return true;
         default:
             break;
@@ -653,15 +728,15 @@ class StructuredTraverser {
         // Visit successors. We will naturally skip the continue target and merge
         // blocks.
         auto* terminator = bb->terminator();
-        auto opcode = terminator->opcode();
-        if (opcode == SpvOpBranchConditional) {
+        auto opcode = ToOpcode(terminator->opcode());
+        if (opcode == spv::Op::OpBranchConditional) {
             // Visit the false branch, then the true branch, to make them come
             // out in the natural order for an "if".
             VisitBackward(terminator->GetSingleWordInOperand(2));
             VisitBackward(terminator->GetSingleWordInOperand(1));
-        } else if (opcode == SpvOpBranch) {
+        } else if (opcode == spv::Op::OpBranch) {
             VisitBackward(terminator->GetSingleWordInOperand(0));
-        } else if (opcode == SpvOpSwitch) {
+        } else if (opcode == spv::Op::OpSwitch) {
             // TODO(dneto): Consider visiting the labels in literal-value order.
             utils::Vector<uint32_t, 32> successors;
             bb->ForEachSuccessorLabel(
@@ -1265,7 +1340,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
     for (uint32_t var_id : ep_info_->inputs) {
         const auto* var = def_use_mgr_->GetDef(var_id);
         TINT_ASSERT(Reader, var != nullptr);
-        TINT_ASSERT(Reader, var->opcode() == SpvOpVariable);
+        TINT_ASSERT(Reader, opcode(var) == spv::Op::OpVariable);
         auto* store_type = GetVariableStoreType(*var);
         auto* forced_param_type = store_type;
         AttributeList param_decos;
@@ -1344,7 +1419,7 @@ bool FunctionEmitter::EmitEntryPointAsWrapper() {
             } else {
                 const auto* var = def_use_mgr_->GetDef(var_id);
                 TINT_ASSERT(Reader, var != nullptr);
-                TINT_ASSERT(Reader, var->opcode() == SpvOpVariable);
+                TINT_ASSERT(Reader, opcode(var) == spv::Op::OpVariable);
                 const Type* store_type = GetVariableStoreType(*var);
                 const Type* forced_member_type = store_type;
                 AttributeList out_decos;
@@ -1570,19 +1645,19 @@ bool FunctionEmitter::RegisterMerges() {
         }
 
         if (const auto* inst = block.GetMergeInst()) {
-            auto terminator_opcode = block.terminator()->opcode();
-            switch (inst->opcode()) {
-                case SpvOpSelectionMerge:
-                    if ((terminator_opcode != SpvOpBranchConditional) &&
-                        (terminator_opcode != SpvOpSwitch)) {
+            auto terminator_opcode = opcode(block.terminator());
+            switch (opcode(inst)) {
+                case spv::Op::OpSelectionMerge:
+                    if ((terminator_opcode != spv::Op::OpBranchConditional) &&
+                        (terminator_opcode != spv::Op::OpSwitch)) {
                         return Fail() << "Selection header " << block_id
                                       << " does not end in an OpBranchConditional or "
                                          "OpSwitch instruction";
                     }
                     break;
-                case SpvOpLoopMerge:
-                    if ((terminator_opcode != SpvOpBranchConditional) &&
-                        (terminator_opcode != SpvOpBranch)) {
+                case spv::Op::OpLoopMerge:
+                    if ((terminator_opcode != spv::Op::OpBranchConditional) &&
+                        (terminator_opcode != spv::Op::OpBranch)) {
                         return Fail() << "Loop header " << block_id
                                       << " does not end in an OpBranch or "
                                          "OpBranchConditional instruction";
@@ -1612,7 +1687,7 @@ bool FunctionEmitter::RegisterMerges() {
             merge_info->header_for_merge = header;
             header_info->merge_for_header = merge;
 
-            if (inst->opcode() == SpvOpLoopMerge) {
+            if (opcode(inst) == spv::Op::OpLoopMerge) {
                 if (header == entry_id) {
                     return Fail() << "Function entry block " << entry_id
                                   << " cannot be a loop header";
@@ -1867,8 +1942,8 @@ bool FunctionEmitter::LabelControlFlowConstructs() {
                 // From the interval rule, the selection construct consists of blocks
                 // in the block order, starting at the header, until just before the
                 // merge block.
-                const auto branch_opcode = header_info->basic_block->terminator()->opcode();
-                const auto kind = (branch_opcode == SpvOpBranchConditional)
+                const auto branch_opcode = opcode(header_info->basic_block->terminator());
+                const auto kind = (branch_opcode == spv::Op::OpBranchConditional)
                                       ? Construct::kIfSelection
                                       : Construct::kSwitchSelection;
                 top = push_construct(depth, kind, header, merge);
@@ -2485,7 +2560,7 @@ bool FunctionEmitter::EmitFunctionVariables() {
         return false;
     }
     for (auto& inst : *function_.entry()) {
-        if (inst.opcode() != SpvOpVariable) {
+        if (opcode(inst) != spv::Op::OpVariable) {
             continue;
         }
         auto* var_store_type = GetVariableStoreType(inst);
@@ -2586,8 +2661,8 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
         Fail() << "ID " << id << " does not have a defining SPIR-V instruction";
         return {};
     }
-    switch (inst->opcode()) {
-        case SpvOpVariable: {
+    switch (opcode(inst)) {
+        case spv::Op::OpVariable: {
             // This occurs for module-scope variables.
             auto name = namer_.Name(id);
             // Construct the reference type, mapping storage class correctly.
@@ -2596,7 +2671,7 @@ TypedExpression FunctionEmitter::MakeExpression(uint32_t id) {
             return TypedExpression{type, create<ast::IdentifierExpression>(
                                              Source{}, builder_.Symbols().Register(name))};
         }
-        case SpvOpUndef:
+        case spv::Op::OpUndef:
             // Substitute a null value for undef.
             // This case occurs when OpUndef appears at module scope, as if it were
             // a constant.
@@ -3102,11 +3177,11 @@ bool FunctionEmitter::EmitContinuingStart(const Construct* construct) {
 
 bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
     const auto& terminator = *(block_info.basic_block->terminator());
-    switch (terminator.opcode()) {
-        case SpvOpReturn:
+    switch (opcode(terminator)) {
+        case spv::Op::OpReturn:
             AddStatement(create<ast::ReturnStatement>(Source{}));
             return true;
-        case SpvOpReturnValue: {
+        case spv::Op::OpReturnValue: {
             auto value = MakeExpression(terminator.GetSingleWordInOperand(0));
             if (!value) {
                 return false;
@@ -3114,12 +3189,12 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
             AddStatement(create<ast::ReturnStatement>(Source{}, value.expr));
         }
             return true;
-        case SpvOpKill:
+        case spv::Op::OpKill:
             // For now, assume SPIR-V OpKill has same semantics as WGSL discard.
             // TODO(dneto): https://github.com/gpuweb/gpuweb/issues/676
             AddStatement(create<ast::DiscardStatement>(Source{}));
             return true;
-        case SpvOpUnreachable:
+        case spv::Op::OpUnreachable:
             // Translate as if it's a return. This avoids the problem where WGSL
             // requires a return statement at the end of the function body.
             {
@@ -3133,12 +3208,12 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
                 }
             }
             return true;
-        case SpvOpBranch: {
+        case spv::Op::OpBranch: {
             const auto dest_id = terminator.GetSingleWordInOperand(0);
             AddStatement(MakeBranch(block_info, *GetBlockInfo(dest_id)));
             return true;
         }
-        case SpvOpBranchConditional: {
+        case spv::Op::OpBranchConditional: {
             // If both destinations are the same, then do the same as we would
             // for an unconditional branch (OpBranch).
             const auto true_dest = terminator.GetSingleWordInOperand(1);
@@ -3191,7 +3266,7 @@ bool FunctionEmitter::EmitNormalTerminator(const BlockInfo& block_info) {
             }
             return true;
         }
-        case SpvOpSwitch:
+        case spv::Op::OpSwitch:
             // An OpSelectionMerge must precede an OpSwitch.  That is clarified
             // in the resolution to Khronos-internal SPIR-V issue 115.
             // A new enough version of the SPIR-V validator checks this case.
@@ -3377,8 +3452,8 @@ bool FunctionEmitter::EmitStatementsInBasicBlock(const BlockInfo& block_info,
     const auto* terminator = bb.terminator();
     const auto* merge = bb.GetMergeInst();  // Might be nullptr
     for (auto& inst : bb) {
-        if (&inst == terminator || &inst == merge || inst.opcode() == SpvOpLabel ||
-            inst.opcode() == SpvOpVariable) {
+        if (&inst == terminator || &inst == merge || opcode(inst) == spv::Op::OpLabel ||
+            opcode(inst) == spv::Op::OpVariable) {
             continue;
         }
         if (!EmitStatement(inst)) {
@@ -3546,23 +3621,23 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
         return false;
     }
 
-    if (IsImageQuery(inst.opcode())) {
+    if (IsImageQuery(opcode(inst))) {
         return EmitImageQuery(inst);
     }
 
-    if (IsSampledImageAccess(inst.opcode()) || IsRawImageAccess(inst.opcode())) {
+    if (IsSampledImageAccess(opcode(inst)) || IsRawImageAccess(opcode(inst))) {
         return EmitImageAccess(inst);
     }
 
-    if (IsAtomicOp(inst.opcode())) {
+    if (IsAtomicOp(opcode(inst))) {
         return EmitAtomicOp(inst);
     }
 
-    switch (inst.opcode()) {
-        case SpvOpNop:
+    switch (opcode(inst)) {
+        case spv::Op::OpNop:
             return true;
 
-        case SpvOpStore: {
+        case spv::Op::OpStore: {
             auto ptr_id = inst.GetSingleWordInOperand(0);
             const auto value_id = inst.GetSingleWordInOperand(1);
 
@@ -3633,7 +3708,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
             return success();
         }
 
-        case SpvOpLoad: {
+        case spv::Op::OpLoad: {
             // Memory accesses must be issued in SPIR-V program order.
             // So represent a load by a new const definition.
             const auto ptr_id = inst.GetSingleWordInOperand(0);
@@ -3684,7 +3759,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
             return EmitConstDefOrWriteToHoistedVar(inst, expr);
         }
 
-        case SpvOpCopyMemory: {
+        case spv::Op::OpCopyMemory: {
             // Generate an assignment.
             auto lhs = MakeOperand(inst, 0);
             auto rhs = MakeOperand(inst, 1);
@@ -3713,7 +3788,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
             return success();
         }
 
-        case SpvOpCopyObject: {
+        case spv::Op::OpCopyObject: {
             // Arguably, OpCopyObject is purely combinatorial. On the other hand,
             // it exists to make a new name for something. So we choose to make
             // a new named constant definition.
@@ -3732,39 +3807,39 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
             return EmitConstDefOrWriteToHoistedVar(inst, expr);
         }
 
-        case SpvOpPhi: {
+        case spv::Op::OpPhi: {
             // The value will be in scope, available for reading from the phi ID.
             return true;
         }
 
-        case SpvOpOuterProduct:
+        case spv::Op::OpOuterProduct:
             // Synthesize an outer product expression in its own statement.
             return EmitConstDefOrWriteToHoistedVar(inst, MakeOuterProduct(inst));
 
-        case SpvOpVectorInsertDynamic:
+        case spv::Op::OpVectorInsertDynamic:
             // Synthesize a vector insertion in its own statements.
             return MakeVectorInsertDynamic(inst);
 
-        case SpvOpCompositeInsert:
+        case spv::Op::OpCompositeInsert:
             // Synthesize a composite insertion in its own statements.
             return MakeCompositeInsert(inst);
 
-        case SpvOpFunctionCall:
+        case spv::Op::OpFunctionCall:
             return EmitFunctionCall(inst);
 
-        case SpvOpControlBarrier:
+        case spv::Op::OpControlBarrier:
             return EmitControlBarrier(inst);
 
-        case SpvOpExtInst:
+        case spv::Op::OpExtInst:
             if (parser_impl_.IsIgnoredExtendedInstruction(inst)) {
                 return true;
             }
             break;
 
-        case SpvOpIAddCarry:
-        case SpvOpISubBorrow:
-        case SpvOpUMulExtended:
-        case SpvOpSMulExtended:
+        case spv::Op::OpIAddCarry:
+        case spv::Op::OpISubBorrow:
+        case spv::Op::OpUMulExtended:
+        case spv::Op::OpSMulExtended:
             return Fail() << "extended arithmetic is not finalized for WGSL: "
                              "https://github.com/gpuweb/gpuweb/issues/1565: "
                           << inst.PrettyPrint();
@@ -3772,7 +3847,7 @@ bool FunctionEmitter::EmitStatement(const spvtools::opt::Instruction& inst) {
         default:
             break;
     }
-    return Fail() << "unhandled instruction with opcode " << inst.opcode() << ": "
+    return Fail() << "unhandled instruction with opcode " << uint32_t(opcode(inst)) << ": "
                   << inst.PrettyPrint();
 }
 
@@ -3791,7 +3866,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
         return {};
     }
 
-    const auto opcode = inst.opcode();
+    const auto op = opcode(inst);
 
     const Type* ast_type = nullptr;
     if (inst.type_id()) {
@@ -3802,7 +3877,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
         }
     }
 
-    auto binary_op = ConvertBinaryOp(opcode);
+    auto binary_op = ConvertBinaryOp(op);
     if (binary_op != ast::BinaryOp::kNone) {
         auto arg0 = MakeOperand(inst, 0);
         auto arg1 =
@@ -3817,14 +3892,14 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
     }
 
     auto unary_op = ast::UnaryOp::kNegation;
-    if (GetUnaryOp(opcode, &unary_op)) {
+    if (GetUnaryOp(op, &unary_op)) {
         auto arg0 = MakeOperand(inst, 0);
         auto* unary_expr = create<ast::UnaryOpExpression>(Source{}, unary_op, arg0.expr);
         TypedExpression result{ast_type, unary_expr};
         return parser_impl_.RectifyForcedResultType(result, inst, arg0.type);
     }
 
-    const char* unary_builtin_name = GetUnaryBuiltInFunctionName(opcode);
+    const char* unary_builtin_name = GetUnaryBuiltInFunctionName(op);
     if (unary_builtin_name != nullptr) {
         ExpressionList params;
         params.Push(MakeOperand(inst, 0).expr);
@@ -3835,40 +3910,40 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
                               std::move(params))};
     }
 
-    const auto builtin = GetBuiltin(opcode);
+    const auto builtin = GetBuiltin(op);
     if (builtin != sem::BuiltinType::kNone) {
         return MakeBuiltinCall(inst);
     }
 
-    if (opcode == SpvOpFMod) {
+    if (op == spv::Op::OpFMod) {
         return MakeFMod(inst);
     }
 
-    if (opcode == SpvOpAccessChain || opcode == SpvOpInBoundsAccessChain) {
+    if (op == spv::Op::OpAccessChain || op == spv::Op::OpInBoundsAccessChain) {
         return MakeAccessChain(inst);
     }
 
-    if (opcode == SpvOpBitcast) {
+    if (op == spv::Op::OpBitcast) {
         return {ast_type, create<ast::BitcastExpression>(Source{}, ast_type->Build(builder_),
                                                          MakeOperand(inst, 0).expr)};
     }
 
-    if (opcode == SpvOpShiftLeftLogical || opcode == SpvOpShiftRightLogical ||
-        opcode == SpvOpShiftRightArithmetic) {
+    if (op == spv::Op::OpShiftLeftLogical || op == spv::Op::OpShiftRightLogical ||
+        op == spv::Op::OpShiftRightArithmetic) {
         auto arg0 = MakeOperand(inst, 0);
         // The second operand must be unsigned. It's ok to wrap the shift amount
         // since the shift is modulo the bit width of the first operand.
         auto arg1 = parser_impl_.AsUnsigned(MakeOperand(inst, 1));
 
-        switch (opcode) {
-            case SpvOpShiftLeftLogical:
+        switch (op) {
+            case spv::Op::OpShiftLeftLogical:
                 binary_op = ast::BinaryOp::kShiftLeft;
                 break;
-            case SpvOpShiftRightLogical:
+            case spv::Op::OpShiftRightLogical:
                 arg0 = parser_impl_.AsUnsigned(arg0);
                 binary_op = ast::BinaryOp::kShiftRight;
                 break;
-            case SpvOpShiftRightArithmetic:
+            case spv::Op::OpShiftRightArithmetic:
                 arg0 = parser_impl_.AsSigned(arg0);
                 binary_op = ast::BinaryOp::kShiftRight;
                 break;
@@ -3880,7 +3955,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
         return parser_impl_.RectifyForcedResultType(result, inst, arg0.type);
     }
 
-    auto negated_op = NegatedFloatCompare(opcode);
+    auto negated_op = NegatedFloatCompare(op);
     if (negated_op != ast::BinaryOp::kNone) {
         auto arg0 = MakeOperand(inst, 0);
         auto arg1 = MakeOperand(inst, 1);
@@ -3891,7 +3966,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
         return {ast_type, negated_expr};
     }
 
-    if (opcode == SpvOpExtInst) {
+    if (op == spv::Op::OpExtInst) {
         if (parser_impl_.IsIgnoredExtendedInstruction(inst)) {
             // Ignore it but don't error out.
             return {};
@@ -3904,7 +3979,7 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
         return EmitGlslStd450ExtInst(inst);
     }
 
-    if (opcode == SpvOpCompositeConstruct) {
+    if (op == spv::Op::OpCompositeConstruct) {
         ExpressionList operands;
         for (uint32_t iarg = 0; iarg < inst.NumInOperands(); ++iarg) {
             operands.Push(MakeOperand(inst, iarg).expr);
@@ -3913,34 +3988,34 @@ TypedExpression FunctionEmitter::MaybeEmitCombinatorialValue(
                 builder_.Construct(Source{}, ast_type->Build(builder_), std::move(operands))};
     }
 
-    if (opcode == SpvOpCompositeExtract) {
+    if (op == spv::Op::OpCompositeExtract) {
         return MakeCompositeExtract(inst);
     }
 
-    if (opcode == SpvOpVectorShuffle) {
+    if (op == spv::Op::OpVectorShuffle) {
         return MakeVectorShuffle(inst);
     }
 
-    if (opcode == SpvOpVectorExtractDynamic) {
+    if (op == spv::Op::OpVectorExtractDynamic) {
         return {ast_type, create<ast::IndexAccessorExpression>(Source{}, MakeOperand(inst, 0).expr,
                                                                MakeOperand(inst, 1).expr)};
     }
 
-    if (opcode == SpvOpConvertSToF || opcode == SpvOpConvertUToF || opcode == SpvOpConvertFToS ||
-        opcode == SpvOpConvertFToU) {
+    if (op == spv::Op::OpConvertSToF || op == spv::Op::OpConvertUToF ||
+        op == spv::Op::OpConvertFToS || op == spv::Op::OpConvertFToU) {
         return MakeNumericConversion(inst);
     }
 
-    if (opcode == SpvOpUndef) {
+    if (op == spv::Op::OpUndef) {
         // Replace undef with the null value.
         return parser_impl_.MakeNullExpression(ast_type);
     }
 
-    if (opcode == SpvOpSelect) {
+    if (op == spv::Op::OpSelect) {
         return MakeSimpleSelect(inst);
     }
 
-    if (opcode == SpvOpArrayLength) {
+    if (op == spv::Op::OpArrayLength) {
         return MakeArrayLength(inst);
     }
 
@@ -4424,12 +4499,12 @@ TypedExpression FunctionEmitter::MakeAccessChain(const spvtools::opt::Instructio
     const auto constants = constant_mgr_->GetOperandConstants(&inst);
 
     const auto* ptr_type_inst = def_use_mgr_->GetDef(ptr_ty_id);
-    if (!ptr_type_inst || (ptr_type_inst->opcode() != SpvOpTypePointer)) {
+    if (!ptr_type_inst || (opcode(ptr_type_inst) != spv::Op::OpTypePointer)) {
         Fail() << "Access chain %" << inst.result_id() << " base pointer is not of pointer type";
         return {};
     }
-    SpvStorageClass address_space =
-        static_cast<SpvStorageClass>(ptr_type_inst->GetSingleWordInOperand(0));
+    spv::StorageClass address_space =
+        static_cast<spv::StorageClass>(ptr_type_inst->GetSingleWordInOperand(0));
     uint32_t pointee_type_id = ptr_type_inst->GetSingleWordInOperand(1);
 
     // Build up a nested expression for the access chain by walking down the type
@@ -4446,8 +4521,8 @@ TypedExpression FunctionEmitter::MakeAccessChain(const spvtools::opt::Instructio
                    << (index - first_index) << " indices: " << inst.PrettyPrint();
             return {};
         }
-        switch (pointee_type_inst->opcode()) {
-            case SpvOpTypeVector:
+        switch (opcode(pointee_type_inst)) {
+            case spv::Op::OpTypeVector:
                 if (index_const) {
                     // Try generating a MemberAccessor expression
                     const auto num_elems = pointee_type_inst->GetSingleWordInOperand(1);
@@ -4473,24 +4548,24 @@ TypedExpression FunctionEmitter::MakeAccessChain(const spvtools::opt::Instructio
                 // Sink pointers to vector components.
                 sink_pointer = true;
                 break;
-            case SpvOpTypeMatrix:
+            case spv::Op::OpTypeMatrix:
                 // Use array syntax.
                 next_expr = create<ast::IndexAccessorExpression>(Source{}, current_expr.expr,
                                                                  MakeOperand(inst, index).expr);
                 // All matrix components are the same type.
                 pointee_type_id = pointee_type_inst->GetSingleWordInOperand(0);
                 break;
-            case SpvOpTypeArray:
+            case spv::Op::OpTypeArray:
                 next_expr = create<ast::IndexAccessorExpression>(Source{}, current_expr.expr,
                                                                  MakeOperand(inst, index).expr);
                 pointee_type_id = pointee_type_inst->GetSingleWordInOperand(0);
                 break;
-            case SpvOpTypeRuntimeArray:
+            case spv::Op::OpTypeRuntimeArray:
                 next_expr = create<ast::IndexAccessorExpression>(Source{}, current_expr.expr,
                                                                  MakeOperand(inst, index).expr);
                 pointee_type_id = pointee_type_inst->GetSingleWordInOperand(0);
                 break;
-            case SpvOpTypeStruct: {
+            case spv::Op::OpTypeStruct: {
                 if (!index_const) {
                     Fail() << "Access chain %" << inst.result_id() << " index %"
                            << inst.GetSingleWordInOperand(index)
@@ -4519,7 +4594,9 @@ TypedExpression FunctionEmitter::MakeAccessChain(const spvtools::opt::Instructio
                        << ": " << pointee_type_inst->PrettyPrint();
                 return {};
         }
-        const auto pointer_type_id = type_mgr_->FindPointerToType(pointee_type_id, address_space);
+        const auto pointer_type_id = three_sided_patch_function_cc::FindPointerToType(
+            type_mgr_, &spvtools::opt::analysis::TypeManager::FindPointerToType, pointee_type_id,
+            address_space);
         auto* type = parser_impl_.ConvertType(pointer_type_id, PtrAs::Ref);
         TINT_ASSERT(Reader, type && type->Is<Reference>());
         current_expr = TypedExpression{type, next_expr};
@@ -4594,11 +4671,11 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
             return {};
         }
         const char* operation_name = nullptr;
-        switch (inst.opcode()) {
-            case SpvOpCompositeExtract:
+        switch (opcode(inst)) {
+            case spv::Op::OpCompositeExtract:
                 operation_name = "OpCompositeExtract";
                 break;
-            case SpvOpCompositeInsert:
+            case spv::Op::OpCompositeInsert:
                 operation_name = "OpCompositeInsert";
                 break;
             default:
@@ -4606,8 +4683,8 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
                 return {};
         }
         const ast::Expression* next_expr = nullptr;
-        switch (current_type_inst->opcode()) {
-            case SpvOpTypeVector: {
+        switch (opcode(current_type_inst)) {
+            case spv::Op::OpTypeVector: {
                 // Try generating a MemberAccessor expression. That result in something
                 // like  "foo.z", which is more idiomatic than "foo[2]".
                 const auto num_elems = current_type_inst->GetSingleWordInOperand(1);
@@ -4628,7 +4705,7 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
                 current_type_id = current_type_inst->GetSingleWordInOperand(0);
                 break;
             }
-            case SpvOpTypeMatrix: {
+            case spv::Op::OpTypeMatrix: {
                 // Check bounds
                 const auto num_elems = current_type_inst->GetSingleWordInOperand(1);
                 if (num_elems <= index_val) {
@@ -4648,7 +4725,7 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
                 current_type_id = current_type_inst->GetSingleWordInOperand(0);
                 break;
             }
-            case SpvOpTypeArray:
+            case spv::Op::OpTypeArray:
                 // The array size could be a spec constant, and so it's not always
                 // statically checkable.  Instead, rely on a runtime index clamp
                 // or runtime check to keep this safe.
@@ -4656,11 +4733,11 @@ TypedExpression FunctionEmitter::MakeCompositeValueDecomposition(
                                                                  make_index(index_val));
                 current_type_id = current_type_inst->GetSingleWordInOperand(0);
                 break;
-            case SpvOpTypeRuntimeArray:
+            case spv::Op::OpTypeRuntimeArray:
                 Fail() << "can't do " << operation_name
                        << " on a runtime array: " << inst.PrettyPrint();
                 return {};
-            case SpvOpTypeStruct: {
+            case spv::Op::OpTypeStruct: {
                 const auto num_members = current_type_inst->NumInOperands();
                 if (num_members <= index_val) {
                     Fail() << operation_name << " %" << inst.result_id() << " index value "
@@ -4751,14 +4828,14 @@ bool FunctionEmitter::RegisterSpecialBuiltInVariables() {
         auto& def = def_info_[id];
         // Builtins are always defined outside the function.
         switch (builtin) {
-            case SpvBuiltInPointSize:
+            case spv::BuiltIn::PointSize:
                 def->skip = SkipReason::kPointSizeBuiltinPointer;
                 break;
-            case SpvBuiltInSampleMask: {
+            case spv::BuiltIn::SampleMask: {
                 // Distinguish between input and output variable.
                 const auto storage_class =
-                    static_cast<SpvStorageClass>(var->GetSingleWordInOperand(0));
-                if (storage_class == SpvStorageClassInput) {
+                    static_cast<spv::StorageClass>(var->GetSingleWordInOperand(0));
+                if (storage_class == spv::StorageClass::Input) {
                     sample_mask_in_id = id;
                     def->skip = SkipReason::kSampleMaskInBuiltinPointer;
                 } else {
@@ -4767,14 +4844,14 @@ bool FunctionEmitter::RegisterSpecialBuiltInVariables() {
                 }
                 break;
             }
-            case SpvBuiltInSampleId:
-            case SpvBuiltInInstanceIndex:
-            case SpvBuiltInVertexIndex:
-            case SpvBuiltInLocalInvocationIndex:
-            case SpvBuiltInLocalInvocationId:
-            case SpvBuiltInGlobalInvocationId:
-            case SpvBuiltInWorkgroupId:
-            case SpvBuiltInNumWorkgroups:
+            case spv::BuiltIn::SampleId:
+            case spv::BuiltIn::InstanceIndex:
+            case spv::BuiltIn::VertexIndex:
+            case spv::BuiltIn::LocalInvocationIndex:
+            case spv::BuiltIn::LocalInvocationId:
+            case spv::BuiltIn::GlobalInvocationId:
+            case spv::BuiltIn::WorkgroupId:
+            case spv::BuiltIn::NumWorkgroups:
                 break;
             default:
                 return Fail() << "unrecognized special builtin: " << int(builtin);
@@ -4791,7 +4868,7 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
         const auto block_pos = block_info->pos;
         for (const auto& inst : *(block_info->basic_block)) {
             const auto result_id = inst.result_id();
-            if ((result_id == 0) || inst.opcode() == SpvOpLabel) {
+            if ((result_id == 0) || opcode(inst) == spv::Op::OpLabel) {
                 continue;
             }
             def_info_[result_id] = std::make_unique<DefInfo>(index, inst, block_pos);
@@ -4807,15 +4884,15 @@ bool FunctionEmitter::RegisterLocallyDefinedValues() {
                 // pointer definitions are SSA values, and their definitions must be
                 // visited before their uses.
                 if (type->AsPointer()) {
-                    switch (inst.opcode()) {
-                        case SpvOpUndef:
+                    switch (opcode(inst)) {
+                        case spv::Op::OpUndef:
                             return Fail() << "undef pointer is not valid: " << inst.PrettyPrint();
-                        case SpvOpVariable:
+                        case spv::Op::OpVariable:
                             info->pointer = GetPointerInfo(result_id);
                             break;
-                        case SpvOpAccessChain:
-                        case SpvOpInBoundsAccessChain:
-                        case SpvOpCopyObject:
+                        case spv::Op::OpAccessChain:
+                        case spv::Op::OpInBoundsAccessChain:
+                        case spv::Op::OpCopyObject:
                             // Inherit from the first operand. We need this so we can pick up
                             // a remapped storage buffer.
                             info->pointer = GetPointerInfo(inst.GetSingleWordInOperand(0));
@@ -4846,8 +4923,8 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
         [&](const spvtools::opt::Instruction& inst) -> DefInfo::Pointer {
         // WGSL root identifiers (or SPIR-V "memory object declarations") are
         // either variables or function parameters.
-        switch (inst.opcode()) {
-            case SpvOpVariable: {
+        switch (opcode(inst)) {
+            case spv::Op::OpVariable: {
                 if (const auto* module_var = parser_impl_.GetModuleVariable(id)) {
                     return DefInfo::Pointer{module_var->declared_address_space,
                                             module_var->declared_access};
@@ -4856,7 +4933,7 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
                 // access mode.
                 return DefInfo::Pointer{ast::AddressSpace::kFunction, ast::Access::kUndefined};
             }
-            case SpvOpFunctionParameter: {
+            case spv::Op::OpFunctionParameter: {
                 const auto* type = As<Pointer>(parser_impl_.ConvertType(inst.type_id()));
                 // For access mode, kUndefined is ok for now, since the
                 // only non-default access mode on a pointer would be for a storage
@@ -4879,7 +4956,7 @@ DefInfo::Pointer FunctionEmitter::GetPointerInfo(uint32_t id) {
     auto where = def_info_.find(id);
     if (where != def_info_.end()) {
         const auto& info = where->second;
-        if (info->inst.opcode() == SpvOpVariable) {
+        if (opcode(info->inst) == spv::Op::OpVariable) {
             // Ignore the cache in this case and compute it from scratch.
             // That's because for a function-scope OpVariable is a
             // locally-defined value.  So its cache entry has been created
@@ -4925,8 +5002,8 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
     };
     for (auto& id_def_info_pair : def_info_) {
         const auto& inst = id_def_info_pair.second->inst;
-        const auto opcode = inst.opcode();
-        if ((opcode == SpvOpVectorShuffle) || (opcode == SpvOpOuterProduct)) {
+        const auto op = opcode(inst);
+        if ((op == spv::Op::OpVectorShuffle) || (op == spv::Op::OpOuterProduct)) {
             // We might access the vector operands multiple times. Make sure they
             // are evaluated only once.
             require_named_const_def(inst, 0);
@@ -4979,7 +5056,7 @@ void FunctionEmitter::FindValuesNeedingNamedOrHoistedDefinition() {
         const auto* block_info = GetBlockInfo(block_id);
         for (const auto& inst : *(block_info->basic_block)) {
             // Update bookkeeping for locally-defined IDs used by this instruction.
-            if (inst.opcode() == SpvOpPhi) {
+            if (opcode(inst) == spv::Op::OpPhi) {
                 // For an OpPhi defining value P, an incoming value V from parent block B is
                 // counted as being "used" at block B, not at the block containing the Phi.
                 // That's because we will create a variable PHI_P to hold the phi value, and
@@ -5128,7 +5205,7 @@ const Construct* FunctionEmitter::GetEnclosingScope(uint32_t first_pos, uint32_t
 }
 
 TypedExpression FunctionEmitter::MakeNumericConversion(const spvtools::opt::Instruction& inst) {
-    const auto opcode = inst.opcode();
+    const auto op = opcode(inst);
     auto* requested_type = parser_impl_.ConvertType(inst.type_id());
     auto arg_expr = MakeOperand(inst, 0);
     if (!arg_expr) {
@@ -5137,7 +5214,7 @@ TypedExpression FunctionEmitter::MakeNumericConversion(const spvtools::opt::Inst
     arg_expr.type = arg_expr.type->UnwrapRef();
 
     const Type* expr_type = nullptr;
-    if ((opcode == SpvOpConvertSToF) || (opcode == SpvOpConvertUToF)) {
+    if ((op == spv::Op::OpConvertSToF) || (op == spv::Op::OpConvertUToF)) {
         if (arg_expr.type->IsIntegerScalarOrVector()) {
             expr_type = requested_type;
         } else {
@@ -5145,7 +5222,7 @@ TypedExpression FunctionEmitter::MakeNumericConversion(const spvtools::opt::Inst
                       "scalar or vector: "
                    << inst.PrettyPrint();
         }
-    } else if (inst.opcode() == SpvOpConvertFToU) {
+    } else if (op == spv::Op::OpConvertFToU) {
         if (arg_expr.type->IsFloatScalarOrVector()) {
             expr_type = parser_impl_.GetUnsignedIntMatchingShape(arg_expr.type);
         } else {
@@ -5153,7 +5230,7 @@ TypedExpression FunctionEmitter::MakeNumericConversion(const spvtools::opt::Inst
                       "point scalar or vector: "
                    << inst.PrettyPrint();
         }
-    } else if (inst.opcode() == SpvOpConvertFToS) {
+    } else if (op == spv::Op::OpConvertFToS) {
         if (arg_expr.type->IsFloatScalarOrVector()) {
             expr_type = parser_impl_.GetSignedIntMatchingShape(arg_expr.type);
         } else {
@@ -5228,28 +5305,28 @@ bool FunctionEmitter::EmitControlBarrier(const spvtools::opt::Instruction& inst)
     uint32_t memory = operands[1];
     uint32_t semantics = operands[2];
 
-    if (execution != SpvScopeWorkgroup) {
+    if (execution != uint32_t(spv::Scope::Workgroup)) {
         return Fail() << "unsupported control barrier execution scope: "
                       << "expected Workgroup (2), got: " << execution;
     }
-    if (semantics & SpvMemorySemanticsAcquireReleaseMask) {
-        semantics &= ~static_cast<uint32_t>(SpvMemorySemanticsAcquireReleaseMask);
+    if (semantics & uint32_t(spv::MemorySemanticsMask::AcquireRelease)) {
+        semantics &= ~static_cast<uint32_t>(spv::MemorySemanticsMask::AcquireRelease);
     } else {
         return Fail() << "control barrier semantics requires acquire and release";
     }
-    if (semantics & SpvMemorySemanticsWorkgroupMemoryMask) {
-        if (memory != SpvScopeWorkgroup) {
+    if (semantics & uint32_t(spv::MemorySemanticsMask::WorkgroupMemory)) {
+        if (memory != uint32_t(spv::Scope::Workgroup)) {
             return Fail() << "workgroupBarrier requires workgroup memory scope";
         }
         AddStatement(create<ast::CallStatement>(builder_.Call("workgroupBarrier")));
-        semantics &= ~static_cast<uint32_t>(SpvMemorySemanticsWorkgroupMemoryMask);
+        semantics &= ~static_cast<uint32_t>(spv::MemorySemanticsMask::WorkgroupMemory);
     }
-    if (semantics & SpvMemorySemanticsUniformMemoryMask) {
-        if (memory != SpvScopeDevice) {
+    if (semantics & uint32_t(spv::MemorySemanticsMask::UniformMemory)) {
+        if (memory != uint32_t(spv::Scope::Device)) {
             return Fail() << "storageBarrier requires device memory scope";
         }
         AddStatement(create<ast::CallStatement>(builder_.Call("storageBarrier")));
-        semantics &= ~static_cast<uint32_t>(SpvMemorySemanticsUniformMemoryMask);
+        semantics &= ~static_cast<uint32_t>(spv::MemorySemanticsMask::UniformMemory);
     }
     if (semantics) {
         return Fail() << "unsupported control barrier semantics: " << semantics;
@@ -5258,7 +5335,7 @@ bool FunctionEmitter::EmitControlBarrier(const spvtools::opt::Instruction& inst)
 }
 
 TypedExpression FunctionEmitter::MakeBuiltinCall(const spvtools::opt::Instruction& inst) {
-    const auto builtin = GetBuiltin(inst.opcode());
+    const auto builtin = GetBuiltin(opcode(inst));
     auto* name = sem::str(builtin);
     auto* ident = create<ast::IdentifierExpression>(Source{}, builder_.Symbols().Register(name));
 
@@ -5374,7 +5451,7 @@ const ast::Expression* FunctionEmitter::GetSamplerExpression(
 
 bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     ExpressionList args;
-    const auto opcode = inst.opcode();
+    const auto op = opcode(inst);
 
     // Form the texture operand.
     const spvtools::opt::Instruction* image = GetImage(inst);
@@ -5384,7 +5461,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     args.Push(GetImageExpression(inst));
 
     // Form the sampler operand, if needed.
-    if (IsSampledImageAccess(opcode)) {
+    if (IsSampledImageAccess(op)) {
         // Form the sampler operand.
         if (auto* sampler = GetSamplerExpression(inst)) {
             args.Push(sampler);
@@ -5438,25 +5515,25 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     bool is_dref_sample = false;
     bool is_gather_or_dref_gather = false;
     bool is_non_dref_sample = false;
-    switch (opcode) {
-        case SpvOpImageSampleImplicitLod:
-        case SpvOpImageSampleExplicitLod:
-        case SpvOpImageSampleProjImplicitLod:
-        case SpvOpImageSampleProjExplicitLod:
+    switch (op) {
+        case spv::Op::OpImageSampleImplicitLod:
+        case spv::Op::OpImageSampleExplicitLod:
+        case spv::Op::OpImageSampleProjImplicitLod:
+        case spv::Op::OpImageSampleProjExplicitLod:
             is_non_dref_sample = true;
             builtin_name = "textureSample";
             break;
-        case SpvOpImageSampleDrefImplicitLod:
-        case SpvOpImageSampleDrefExplicitLod:
-        case SpvOpImageSampleProjDrefImplicitLod:
-        case SpvOpImageSampleProjDrefExplicitLod:
+        case spv::Op::OpImageSampleDrefImplicitLod:
+        case spv::Op::OpImageSampleDrefExplicitLod:
+        case spv::Op::OpImageSampleProjDrefImplicitLod:
+        case spv::Op::OpImageSampleProjDrefExplicitLod:
             is_dref_sample = true;
             builtin_name = "textureSampleCompare";
             if (!consume_dref()) {
                 return false;
             }
             break;
-        case SpvOpImageGather:
+        case spv::Op::OpImageGather:
             is_gather_or_dref_gather = true;
             builtin_name = "textureGather";
             if (!texture_type->Is<DepthTexture>()) {
@@ -5471,20 +5548,20 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
             // Skip over the component operand, even for depth textures.
             arg_index++;
             break;
-        case SpvOpImageDrefGather:
+        case spv::Op::OpImageDrefGather:
             is_gather_or_dref_gather = true;
             builtin_name = "textureGatherCompare";
             if (!consume_dref()) {
                 return false;
             }
             break;
-        case SpvOpImageFetch:
-        case SpvOpImageRead:
+        case spv::Op::OpImageFetch:
+        case spv::Op::OpImageRead:
             // Read a single texel from a sampled or storage image.
             builtin_name = "textureLoad";
             use_level_of_detail_suffix = false;
             break;
-        case SpvOpImageWrite:
+        case spv::Op::OpImageWrite:
             builtin_name = "textureStore";
             use_level_of_detail_suffix = false;
             if (arg_index < num_args) {
@@ -5511,7 +5588,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
         image_operands_mask = inst.GetSingleWordInOperand(arg_index);
         arg_index++;
     }
-    if (arg_index < num_args && (image_operands_mask & SpvImageOperandsBiasMask)) {
+    if (arg_index < num_args && (image_operands_mask & uint32_t(spv::ImageOperandsMask::Bias))) {
         if (is_dref_sample) {
             return Fail() << "WGSL does not support depth-reference sampling with "
                              "level-of-detail bias: "
@@ -5524,10 +5601,10 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
         }
         builtin_name += "Bias";
         args.Push(MakeOperand(inst, arg_index).expr);
-        image_operands_mask ^= SpvImageOperandsBiasMask;
+        image_operands_mask ^= uint32_t(spv::ImageOperandsMask::Bias);
         arg_index++;
     }
-    if (arg_index < num_args && (image_operands_mask & SpvImageOperandsLodMask)) {
+    if (arg_index < num_args && (image_operands_mask & uint32_t(spv::ImageOperandsMask::Lod))) {
         if (use_level_of_detail_suffix) {
             builtin_name += "Level";
         }
@@ -5553,15 +5630,16 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
             args.Push(lod.expr);
         }
 
-        image_operands_mask ^= SpvImageOperandsLodMask;
+        image_operands_mask ^= uint32_t(spv::ImageOperandsMask::Lod);
         arg_index++;
-    } else if ((opcode == SpvOpImageFetch || opcode == SpvOpImageRead) &&
+    } else if ((op == spv::Op::OpImageFetch || op == spv::Op::OpImageRead) &&
                !texture_type->IsAnyOf<DepthMultisampledTexture, MultisampledTexture>()) {
         // textureLoad requires an explicit level-of-detail parameter for
         // non-multisampled texture types.
         args.Push(parser_impl_.MakeNullValue(ty_.I32()));
     }
-    if (arg_index + 1 < num_args && (image_operands_mask & SpvImageOperandsGradMask)) {
+    if (arg_index + 1 < num_args &&
+        (image_operands_mask & uint32_t(spv::ImageOperandsMask::Grad))) {
         if (is_dref_sample) {
             return Fail() << "WGSL does not support depth-reference sampling with "
                              "explicit gradient: "
@@ -5575,11 +5653,12 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
         builtin_name += "Grad";
         args.Push(MakeOperand(inst, arg_index).expr);
         args.Push(MakeOperand(inst, arg_index + 1).expr);
-        image_operands_mask ^= SpvImageOperandsGradMask;
+        image_operands_mask ^= uint32_t(spv::ImageOperandsMask::Grad);
         arg_index += 2;
     }
-    if (arg_index < num_args && (image_operands_mask & SpvImageOperandsConstOffsetMask)) {
-        if (!IsImageSamplingOrGatherOrDrefGather(opcode)) {
+    if (arg_index < num_args &&
+        (image_operands_mask & uint32_t(spv::ImageOperandsMask::ConstOffset))) {
+        if (!IsImageSamplingOrGatherOrDrefGather(op)) {
             return Fail() << "ConstOffset is only permitted for sampling, gather, or "
                              "depth-reference gather operations: "
                           << inst.PrettyPrint();
@@ -5596,13 +5675,13 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
         }
 
         args.Push(ToSignedIfUnsigned(MakeOperand(inst, arg_index)).expr);
-        image_operands_mask ^= SpvImageOperandsConstOffsetMask;
+        image_operands_mask ^= uint32_t(spv::ImageOperandsMask::ConstOffset);
         arg_index++;
     }
-    if (arg_index < num_args && (image_operands_mask & SpvImageOperandsSampleMask)) {
+    if (arg_index < num_args && (image_operands_mask & uint32_t(spv::ImageOperandsMask::Sample))) {
         // TODO(dneto): only permitted with ImageFetch
         args.Push(ToI32(MakeOperand(inst, arg_index)).expr);
-        image_operands_mask ^= SpvImageOperandsSampleMask;
+        image_operands_mask ^= uint32_t(spv::ImageOperandsMask::Sample);
         arg_index++;
     }
     if (image_operands_mask) {
@@ -5642,7 +5721,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
         // Construct a 4-element vector with the result from the builtin in the
         // first component.
         if (texture_type->IsAnyOf<DepthTexture, DepthMultisampledTexture>()) {
-            if (is_non_dref_sample || (opcode == SpvOpImageFetch)) {
+            if (is_non_dref_sample || (op == spv::Op::OpImageFetch)) {
                 value = builder_.Construct(Source{},
                                            result_type->Build(builder_),  // a vec4
                                            utils::Vector{
@@ -5658,7 +5737,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
         // result type. Compare the SPIR-V image's sampled component type with the
         // component of the result type of the SPIR-V instruction.
         auto* spirv_image_type = parser_impl_.GetSpirvTypeForHandleMemoryObjectDeclaration(*image);
-        if (!spirv_image_type || (spirv_image_type->opcode() != SpvOpTypeImage)) {
+        if (!spirv_image_type || (opcode(spirv_image_type) != spv::Op::OpTypeImage)) {
             return Fail() << "invalid image type for image memory object declaration "
                           << image->PrettyPrint();
         }
@@ -5670,7 +5749,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
             value =
                 create<ast::BitcastExpression>(Source{}, result_type->Build(builder_), call_expr);
         }
-        if (!expected_component_type->Is<F32>() && IsSampledImageAccess(opcode)) {
+        if (!expected_component_type->Is<F32>() && IsSampledImageAccess(op)) {
             // WGSL permits sampled image access only on float textures.
             // Reject this case in the SPIR-V reader, at least until SPIR-V validation
             // catches up with this rule and can reject it earlier in the workflow.
@@ -5697,10 +5776,10 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
         return false;
     }
 
-    const auto opcode = inst.opcode();
-    switch (opcode) {
-        case SpvOpImageQuerySize:
-        case SpvOpImageQuerySizeLod: {
+    const auto op = opcode(inst);
+    switch (op) {
+        case spv::Op::OpImageQuerySize:
+        case spv::Op::OpImageQuerySizeLod: {
             ExpressionList exprs;
             // Invoke textureDimensions.
             // If the texture is arrayed, combine with the result from
@@ -5708,7 +5787,7 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
             auto* dims_ident = create<ast::IdentifierExpression>(
                 Source{}, builder_.Symbols().Register("textureDimensions"));
             ExpressionList dims_args{GetImageExpression(inst)};
-            if (opcode == SpvOpImageQuerySizeLod) {
+            if (op == spv::Op::OpImageQuerySizeLod) {
                 dims_args.Push(MakeOperand(inst, 1).expr);
             }
             const ast::Expression* dims_call =
@@ -5745,13 +5824,13 @@ bool FunctionEmitter::EmitImageQuery(const spvtools::opt::Instruction& inst) {
 
             return EmitConstDefOrWriteToHoistedVar(inst, expr);
         }
-        case SpvOpImageQueryLod:
+        case spv::Op::OpImageQueryLod:
             return Fail() << "WGSL does not support querying the level of detail of an image: "
                           << inst.PrettyPrint();
-        case SpvOpImageQueryLevels:
-        case SpvOpImageQuerySamples: {
+        case spv::Op::OpImageQueryLevels:
+        case spv::Op::OpImageQuerySamples: {
             const auto* name =
-                (opcode == SpvOpImageQueryLevels) ? "textureNumLevels" : "textureNumSamples";
+                (op == spv::Op::OpImageQueryLevels) ? "textureNumLevels" : "textureNumSamples";
             auto* levels_ident =
                 create<ast::IdentifierExpression>(Source{}, builder_.Symbols().Register(name));
             const ast::Expression* ast_expr = create<ast::CallExpression>(
@@ -5834,46 +5913,46 @@ bool FunctionEmitter::EmitAtomicOp(const spvtools::opt::Instruction& inst) {
         return {};
     };
 
-    switch (inst.opcode()) {
-        case SpvOpAtomicLoad:
+    switch (opcode(inst)) {
+        case spv::Op::OpAtomicLoad:
             return emit_atomic(sem::BuiltinType::kAtomicLoad, {oper(/*ptr*/ 0)});
-        case SpvOpAtomicStore:
+        case spv::Op::OpAtomicStore:
             return emit_atomic(sem::BuiltinType::kAtomicStore,
                                {oper(/*ptr*/ 0), oper(/*value*/ 3)});
-        case SpvOpAtomicExchange:
+        case spv::Op::OpAtomicExchange:
             return emit_atomic(sem::BuiltinType::kAtomicExchange,
                                {oper(/*ptr*/ 0), oper(/*value*/ 3)});
-        case SpvOpAtomicCompareExchange:
-        case SpvOpAtomicCompareExchangeWeak:
+        case spv::Op::OpAtomicCompareExchange:
+        case spv::Op::OpAtomicCompareExchangeWeak:
             return emit_atomic(sem::BuiltinType::kAtomicCompareExchangeWeak,
                                {oper(/*ptr*/ 0), /*value*/ oper(5), /*comparator*/ oper(4)});
-        case SpvOpAtomicIIncrement:
+        case spv::Op::OpAtomicIIncrement:
             return emit_atomic(sem::BuiltinType::kAtomicAdd, {oper(/*ptr*/ 0), lit(1)});
-        case SpvOpAtomicIDecrement:
+        case spv::Op::OpAtomicIDecrement:
             return emit_atomic(sem::BuiltinType::kAtomicSub, {oper(/*ptr*/ 0), lit(1)});
-        case SpvOpAtomicIAdd:
+        case spv::Op::OpAtomicIAdd:
             return emit_atomic(sem::BuiltinType::kAtomicAdd, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
-        case SpvOpAtomicISub:
+        case spv::Op::OpAtomicISub:
             return emit_atomic(sem::BuiltinType::kAtomicSub, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
-        case SpvOpAtomicSMin:
+        case spv::Op::OpAtomicSMin:
             return emit_atomic(sem::BuiltinType::kAtomicMin, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
-        case SpvOpAtomicUMin:
+        case spv::Op::OpAtomicUMin:
             return emit_atomic(sem::BuiltinType::kAtomicMin, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
-        case SpvOpAtomicSMax:
+        case spv::Op::OpAtomicSMax:
             return emit_atomic(sem::BuiltinType::kAtomicMax, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
-        case SpvOpAtomicUMax:
+        case spv::Op::OpAtomicUMax:
             return emit_atomic(sem::BuiltinType::kAtomicMax, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
-        case SpvOpAtomicAnd:
+        case spv::Op::OpAtomicAnd:
             return emit_atomic(sem::BuiltinType::kAtomicAnd, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
-        case SpvOpAtomicOr:
+        case spv::Op::OpAtomicOr:
             return emit_atomic(sem::BuiltinType::kAtomicOr, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
-        case SpvOpAtomicXor:
+        case spv::Op::OpAtomicXor:
             return emit_atomic(sem::BuiltinType::kAtomicXor, {oper(/*ptr*/ 0), oper(/*value*/ 3)});
-        case SpvOpAtomicFlagTestAndSet:
-        case SpvOpAtomicFlagClear:
-        case SpvOpAtomicFMinEXT:
-        case SpvOpAtomicFMaxEXT:
-        case SpvOpAtomicFAddEXT:
+        case spv::Op::OpAtomicFlagTestAndSet:
+        case spv::Op::OpAtomicFlagClear:
+        case spv::Op::OpAtomicFMinEXT:
+        case spv::Op::OpAtomicFMaxEXT:
+        case spv::Op::OpAtomicFAddEXT:
             return Fail() << "unsupported atomic op: " << inst.PrettyPrint();
 
         default:
@@ -5926,11 +6005,11 @@ FunctionEmitter::ExpressionList FunctionEmitter::MakeCoordinateOperandsForImageA
                << " prompted by " << inst.PrettyPrint();
     }
     bool is_proj = false;
-    switch (inst.opcode()) {
-        case SpvOpImageSampleProjImplicitLod:
-        case SpvOpImageSampleProjExplicitLod:
-        case SpvOpImageSampleProjDrefImplicitLod:
-        case SpvOpImageSampleProjDrefExplicitLod:
+    switch (opcode(inst)) {
+        case spv::Op::OpImageSampleProjImplicitLod:
+        case spv::Op::OpImageSampleProjExplicitLod:
+        case spv::Op::OpImageSampleProjDrefImplicitLod:
+        case spv::Op::OpImageSampleProjDrefExplicitLod:
             is_proj = true;
             break;
         default:

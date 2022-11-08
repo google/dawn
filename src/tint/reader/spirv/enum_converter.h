@@ -16,6 +16,7 @@
 #define SRC_TINT_READER_SPIRV_ENUM_CONVERTER_H_
 
 #include "spirv/unified1/spirv.h"
+#include "spirv/unified1/spirv.hpp11"
 #include "src/tint/ast/address_space.h"
 #include "src/tint/ast/builtin_value.h"
 #include "src/tint/ast/pipeline_stage.h"
@@ -37,32 +38,49 @@ class EnumConverter {
     /// On failure, logs an error and returns kNone
     /// @param model the SPIR-V entry point execution model
     /// @returns a Tint AST pipeline stage
-    ast::PipelineStage ToPipelineStage(SpvExecutionModel model);
+    ast::PipelineStage ToPipelineStage(spv::ExecutionModel model);
 
     /// Converts a SPIR-V storage class to a Tint address space.
     /// On failure, logs an error and returns kNone
     /// @param sc the SPIR-V storage class
     /// @returns a Tint AST address space
-    ast::AddressSpace ToAddressSpace(const SpvStorageClass sc);
+    ast::AddressSpace ToAddressSpace(const spv::StorageClass sc);
 
     /// Converts a SPIR-V Builtin value a Tint Builtin.
     /// On failure, logs an error and returns kNone
     /// @param b the SPIR-V builtin
     /// @returns a Tint AST builtin
-    ast::BuiltinValue ToBuiltin(SpvBuiltIn b);
+    ast::BuiltinValue ToBuiltin(spv::BuiltIn b);
 
     /// Converts a possibly arrayed SPIR-V Dim to a Tint texture dimension.
     /// On failure, logs an error and returns kNone
     /// @param dim the SPIR-V Dim value
     /// @param arrayed true if the texture is arrayed
     /// @returns a Tint AST texture dimension
-    ast::TextureDimension ToDim(SpvDim dim, bool arrayed);
+    ast::TextureDimension ToDim(spv::Dim dim, bool arrayed);
+
+    /// Converts a possibly arrayed SPIR-V Dim to a Tint texture dimension.
+    /// On failure, logs an error and returns kNone
+    /// @param dim the SPIR-V Dim value
+    /// @param arrayed true if the texture is arrayed
+    /// @returns a Tint AST texture dimension
+    ast::TextureDimension ToDim(SpvDim dim, bool arrayed) {
+        return ToDim(static_cast<spv::Dim>(dim), arrayed);
+    }
 
     /// Converts a SPIR-V Image Format to a TexelFormat
     /// On failure, logs an error and returns kNone
     /// @param fmt the SPIR-V format
     /// @returns a Tint AST format
-    ast::TexelFormat ToTexelFormat(SpvImageFormat fmt);
+    ast::TexelFormat ToTexelFormat(spv::ImageFormat fmt);
+
+    /// Converts a SPIR-V Image Format to a TexelFormat
+    /// On failure, logs an error and returns kNone
+    /// @param fmt the SPIR-V format
+    /// @returns a Tint AST format
+    ast::TexelFormat ToTexelFormat(SpvImageFormat fmt) {
+        return ToTexelFormat(static_cast<spv::ImageFormat>(fmt));
+    }
 
   private:
     /// Registers a failure and returns a stream for log diagnostics.
