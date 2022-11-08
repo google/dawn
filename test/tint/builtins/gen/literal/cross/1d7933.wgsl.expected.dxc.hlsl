@@ -1,4 +1,4 @@
-void cross_041cb0() {
+void cross_1d7933() {
   float3 res = (0.0f).xxx;
 }
 
@@ -7,7 +7,7 @@ struct tint_symbol {
 };
 
 float4 vertex_main_inner() {
-  cross_041cb0();
+  cross_1d7933();
   return (0.0f).xxxx;
 }
 
@@ -19,12 +19,12 @@ tint_symbol vertex_main() {
 }
 
 void fragment_main() {
-  cross_041cb0();
+  cross_1d7933();
   return;
 }
 
 [numthreads(1, 1, 1)]
 void compute_main() {
-  cross_041cb0();
+  cross_1d7933();
   return;
 }

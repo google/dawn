@@ -1,5 +1,5 @@
 void cross_9857cb() {
-  vector<float16_t, 3> res = cross((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx);
+  vector<float16_t, 3> res = (float16_t(0.0h)).xxx;
 }
 
 struct tint_symbol {

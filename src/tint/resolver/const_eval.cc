@@ -681,6 +681,33 @@ utils::Result<NumberT> ConstEval::Add(NumberT a, NumberT b) {
 }
 
 template <typename NumberT>
+utils::Result<NumberT> ConstEval::Sub(NumberT a, NumberT b) {
+    NumberT result;
+    if constexpr (IsAbstract<NumberT>) {
+        // Check for over/underflow for abstract values
+        if (auto r = CheckedSub(a, b)) {
+            result = r->value;
+        } else {
+            AddError(OverflowErrorMessage(a, "-", b), *current_source);
+            return utils::Failure;
+        }
+    } else {
+        using T = UnwrapNumber<NumberT>;
+        auto sub_values = [](T lhs, T rhs) {
+            if constexpr (std::is_integral_v<T> && std::is_signed_v<T>) {
+                // Ensure no UB for signed overflow
+                using UT = std::make_unsigned_t<T>;
+                return static_cast<T>(static_cast<UT>(lhs) - static_cast<UT>(rhs));
+            } else {
+                return lhs - rhs;
+            }
+        };
+        result = sub_values(a.value, b.value);
+    }
+    return result;
+}
+
+template <typename NumberT>
 utils::Result<NumberT> ConstEval::Mul(NumberT a, NumberT b) {
     using T = UnwrapNumber<NumberT>;
     NumberT result;
@@ -795,6 +822,23 @@ utils::Result<NumberT> ConstEval::Dot4(NumberT a1,
 }
 
 template <typename NumberT>
+utils::Result<NumberT> ConstEval::Det2(NumberT a1, NumberT a2, NumberT b1, NumberT b2) {
+    auto r1 = Mul(a1, b2);
+    if (!r1) {
+        return utils::Failure;
+    }
+    auto r2 = Mul(b1, a2);
+    if (!r2) {
+        return utils::Failure;
+    }
+    auto r = Sub(r1.Get(), r2.Get());
+    if (!r) {
+        return utils::Failure;
+    }
+    return r;
+}
+
+template <typename NumberT>
 utils::Result<NumberT> ConstEval::Clamp(NumberT e, NumberT low, NumberT high) {
     return NumberT{std::min(std::max(e, low), high)};
 }
@@ -811,6 +855,15 @@ auto ConstEval::ClampFunc(const sem::Type* elem_ty) {
 auto ConstEval::AddFunc(const sem::Type* elem_ty) {
     return [=](auto a1, auto a2) -> ImplResult {
         if (auto r = Add(a1, a2)) {
+            return CreateElement(builder, elem_ty, r.Get());
+        }
+        return utils::Failure;
+    };
+}
+
+auto ConstEval::SubFunc(const sem::Type* elem_ty) {
+    return [=](auto a1, auto a2) -> ImplResult {
+        if (auto r = Sub(a1, a2)) {
             return CreateElement(builder, elem_ty, r.Get());
         }
         return utils::Failure;
@@ -852,6 +905,15 @@ auto ConstEval::Dot4Func(const sem::Type* elem_ty) {
             }
             return utils::Failure;
         };
+}
+
+auto ConstEval::Det2Func(const sem::Type* elem_ty) {
+    return [=](auto a, auto b, auto c, auto d) -> ImplResult {
+        if (auto r = Det2(a, b, c, d)) {
+            return CreateElement(builder, elem_ty, r.Get());
+        }
+        return utils::Failure;
+    };
 }
 
 ConstEval::Result ConstEval::Literal(const sem::Type* ty, const ast::LiteralExpression* literal) {
@@ -1115,34 +1177,9 @@ ConstEval::Result ConstEval::OpPlus(const sem::Type* ty,
 ConstEval::Result ConstEval::OpMinus(const sem::Type* ty,
                                      utils::VectorRef<const sem::Constant*> args,
                                      const Source& source) {
+    TINT_SCOPED_ASSIGNMENT(current_source, &source);
     auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
-        auto create = [&](auto i, auto j) -> ImplResult {
-            using NumberT = decltype(i);
-            NumberT result;
-            if constexpr (IsAbstract<NumberT>) {
-                // Check for over/underflow for abstract values
-                if (auto r = CheckedSub(i, j)) {
-                    result = r->value;
-                } else {
-                    AddError(OverflowErrorMessage(i, "-", j), source);
-                    return utils::Failure;
-                }
-            } else {
-                using T = UnwrapNumber<NumberT>;
-                auto subtract_values = [](T lhs, T rhs) {
-                    if constexpr (std::is_integral_v<T> && std::is_signed_v<T>) {
-                        // Ensure no UB for signed underflow
-                        using UT = std::make_unsigned_t<T>;
-                        return static_cast<T>(static_cast<UT>(lhs) - static_cast<UT>(rhs));
-                    } else {
-                        return lhs - rhs;
-                    }
-                };
-                result = subtract_values(i.value, j.value);
-            }
-            return CreateElement(builder, c0->Type(), result);
-        };
-        return Dispatch_fia_fiu32_f16(create, c0, c1);
+        return Dispatch_fia_fiu32_f16(SubFunc(c0->Type()), c0, c1);
     };
 
     return TransformBinaryElements(builder, ty, transform, args[0], args[1]);
@@ -1627,7 +1664,8 @@ ConstEval::Result ConstEval::acos(const sem::Type* ty,
         auto create = [&](auto i) -> ImplResult {
             using NumberT = decltype(i);
             if (i < NumberT(-1.0) || i > NumberT(1.0)) {
-                AddError("acos must be called with a value in the range [-1 .. 1] (inclusive)", source);
+                AddError("acos must be called with a value in the range [-1 .. 1] (inclusive)",
+                         source);
                 return utils::Failure;
             }
             return CreateElement(builder, c0->Type(), NumberT(std::acos(i.value)));
@@ -1656,7 +1694,8 @@ ConstEval::Result ConstEval::asin(const sem::Type* ty,
         auto create = [&](auto i) -> ImplResult {
             using NumberT = decltype(i);
             if (i < NumberT(-1.0) || i > NumberT(1.0)) {
-                AddError("asin must be called with a value in the range [-1 .. 1] (inclusive)", source);
+                AddError("asin must be called with a value in the range [-1 .. 1] (inclusive)",
+                         source);
                 return utils::Failure;
             }
             return CreateElement(builder, c0->Type(), NumberT(std::asin(i.value)));
@@ -1702,7 +1741,8 @@ ConstEval::Result ConstEval::atanh(const sem::Type* ty,
         auto create = [&](auto i) -> ImplResult {
             using NumberT = decltype(i);
             if (i <= NumberT(-1.0) || i >= NumberT(1.0)) {
-                AddError("atanh must be called with a value in the range (-1 .. 1) (exclusive)", source);
+                AddError("atanh must be called with a value in the range (-1 .. 1) (exclusive)",
+                         source);
                 return utils::Failure;
             }
             return CreateElement(builder, c0->Type(), NumberT(std::atanh(i.value)));
@@ -1799,6 +1839,52 @@ ConstEval::Result ConstEval::countTrailingZeros(const sem::Type* ty,
         return Dispatch_iu32(create, c0);
     };
     return TransformElements(builder, ty, transform, args[0]);
+}
+
+ConstEval::Result ConstEval::cross(const sem::Type* ty,
+                                   utils::VectorRef<const sem::Constant*> args,
+                                   const Source& source) {
+    TINT_SCOPED_ASSIGNMENT(current_source, &source);
+    auto* u = args[0];
+    auto* v = args[1];
+    auto* elem_ty = u->Type()->As<sem::Vector>()->type();
+
+    // cross product of a v3 is the determinant of the 3x3 matrix:
+    //
+    // |i   j   k |
+    // |u0  u1  u2|
+    // |v0  v1  v2|
+    //
+    // |u1 u2|i  - |u0 u2|j + |u0 u1|k
+    // |v1 v2|     |v0 v2|    |v0 v1|
+    //
+    // |u1 u2|i  + |v0 v2|j + |u0 u1|k
+    // |v1 v2|     |u0 u2|    |v0 v1|
+
+    auto* u0 = u->Index(0);
+    auto* u1 = u->Index(1);
+    auto* u2 = u->Index(2);
+    auto* v0 = v->Index(0);
+    auto* v1 = v->Index(1);
+    auto* v2 = v->Index(2);
+
+    // auto x = Dispatch_fa_f32_f16(ab_minus_cd_func(elem_ty), u->Index(1), v->Index(2),
+    //                              v->Index(1), u->Index(2));
+    auto x = Dispatch_fa_f32_f16(Det2Func(elem_ty), u1, u2, v1, v2);
+    if (!x) {
+        return utils::Failure;
+    }
+    auto y = Dispatch_fa_f32_f16(Det2Func(elem_ty), v0, v2, u0, u2);
+    if (!y) {
+        return utils::Failure;
+    }
+    auto z = Dispatch_fa_f32_f16(Det2Func(elem_ty), u0, u1, v0, v1);
+    if (!z) {
+        return utils::Failure;
+    }
+
+    return CreateComposite(builder, ty,
+                           utils::Vector<const sem::Constant*, 3>{x.Get(), y.Get(), z.Get()});
 }
 
 ConstEval::Result ConstEval::extractBits(const sem::Type* ty,

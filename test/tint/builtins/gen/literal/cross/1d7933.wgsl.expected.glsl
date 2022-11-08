@@ -1,11 +1,11 @@
 #version 310 es
 
-void cross_041cb0() {
+void cross_1d7933() {
   vec3 res = vec3(0.0f);
 }
 
 vec4 vertex_main() {
-  cross_041cb0();
+  cross_1d7933();
   return vec4(0.0f);
 }
 
@@ -20,12 +20,12 @@ void main() {
 #version 310 es
 precision mediump float;
 
-void cross_041cb0() {
+void cross_1d7933() {
   vec3 res = vec3(0.0f);
 }
 
 void fragment_main() {
-  cross_041cb0();
+  cross_1d7933();
 }
 
 void main() {
@@ -34,12 +34,12 @@ void main() {
 }
 #version 310 es
 
-void cross_041cb0() {
+void cross_1d7933() {
   vec3 res = vec3(0.0f);
 }
 
 void compute_main() {
-  cross_041cb0();
+  cross_1d7933();
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;

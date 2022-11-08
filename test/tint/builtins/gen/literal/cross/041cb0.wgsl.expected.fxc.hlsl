@@ -1,5 +1,5 @@
 void cross_041cb0() {
-  float3 res = cross((1.0f).xxx, (1.0f).xxx);
+  float3 res = (0.0f).xxx;
 }
 
 struct tint_symbol {
