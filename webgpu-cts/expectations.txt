@@ -573,6 +573,13 @@ crbug.com/1357206 [ nvidia-0x2184 win10 ] worker_webgpu:api,validation,buffer,ma
 crbug.com/1357206 [ nvidia-0x2184 win10 ] worker_webgpu:api,validation,buffer,mapping:mapAsync,offsetAndSizeAlignment: [ Failure ]
 
 ################################################################################
+# Const-eval version of bitwise XOR failing on Windows
+# KEEP
+################################################################################
+crbug.com/tint/1753 [ win10 ] webgpu:shader,execution,expression,binary,bitwise:bitwise_exclusive_or:type="i32";inputSource="const";* [ Failure ]
+crbug.com/tint/1753 [ win10 ] webgpu:shader,execution,expression,binary,bitwise:bitwise_exclusive_or:type="u32";inputSource="const";* [ Failure ]
+
+################################################################################
 # untriaged failures
 # KEEP
 ################################################################################
