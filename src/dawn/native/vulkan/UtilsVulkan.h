@@ -124,8 +124,13 @@ void SetDebugName(Device* device,
                   detail::VkHandle<Tag, HandleType> objectHandle,
                   const char* prefix,
                   std::string label = "") {
-    SetDebugNameInternal(device, GetVkObjectType(objectHandle),
-                         reinterpret_cast<uint64_t>(objectHandle.GetHandle()), prefix, label);
+    uint64_t handle;
+    if constexpr (std::is_same_v<HandleType, uint64_t>) {
+        handle = objectHandle.GetHandle();
+    } else {
+        handle = reinterpret_cast<uint64_t>(objectHandle.GetHandle());
+    }
+    SetDebugNameInternal(device, GetVkObjectType(objectHandle), handle, prefix, label);
 }
 
 // Handles like VkQueue and VKDevice require a special path because they are dispatchable, so
