@@ -1226,6 +1226,8 @@ INSTANTIATE_TEST_SUITE_P(ExtractBits,
                              std::make_tuple(33, 33),             //
                              std::make_tuple(34, 34),             //
                              std::make_tuple(1000, 1000),         //
+                             std::make_tuple(u32::Highest(), 1),  //
+                             std::make_tuple(1, u32::Highest()),  //
                              std::make_tuple(u32::Highest(), u32::Highest())));
 
 std::vector<Case> Pack4x8snormCases() {
