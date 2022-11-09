@@ -48,7 +48,7 @@ class MemberAccessorExpression : public Castable<MemberAccessorExpression, Expre
     /// @param constant the constant value of the expression. May be null.
     /// @param object the object that holds the member being accessed
     /// @param has_side_effects whether this expression may have side effects
-    /// @param source_var the (optional) source variable for this expression
+    /// @param root_ident the (optional) root identifier for this expression
     MemberAccessorExpression(const ast::MemberAccessorExpression* declaration,
                              const sem::Type* type,
                              EvaluationStage stage,
@@ -56,7 +56,7 @@ class MemberAccessorExpression : public Castable<MemberAccessorExpression, Expre
                              const Constant* constant,
                              const Expression* object,
                              bool has_side_effects,
-                             const Variable* source_var = nullptr);
+                             const Variable* root_ident = nullptr);
 
   private:
     Expression const* const object_;
@@ -75,7 +75,7 @@ class StructMemberAccess final : public Castable<StructMemberAccess, MemberAcces
     /// @param object the object that holds the member being accessed
     /// @param member the structure member
     /// @param has_side_effects whether this expression may have side effects
-    /// @param source_var the (optional) source variable for this expression
+    /// @param root_ident the (optional) root identifier for this expression
     StructMemberAccess(const ast::MemberAccessorExpression* declaration,
                        const sem::Type* type,
                        const Statement* statement,
@@ -83,7 +83,7 @@ class StructMemberAccess final : public Castable<StructMemberAccess, MemberAcces
                        const Expression* object,
                        const StructMember* member,
                        bool has_side_effects,
-                       const Variable* source_var = nullptr);
+                       const Variable* root_ident = nullptr);
 
     /// Destructor
     ~StructMemberAccess() override;
@@ -107,7 +107,7 @@ class Swizzle final : public Castable<Swizzle, MemberAccessorExpression> {
     /// @param object the object that holds the member being accessed
     /// @param indices the swizzle indices
     /// @param has_side_effects whether this expression may have side effects
-    /// @param source_var the (optional) source variable for this expression
+    /// @param root_ident the (optional) root identifier for this expression
     Swizzle(const ast::MemberAccessorExpression* declaration,
             const sem::Type* type,
             const Statement* statement,
@@ -115,7 +115,7 @@ class Swizzle final : public Castable<Swizzle, MemberAccessorExpression> {
             const Expression* object,
             utils::VectorRef<uint32_t> indices,
             bool has_side_effects,
-            const Variable* source_var = nullptr);
+            const Variable* root_ident = nullptr);
 
     /// Destructor
     ~Swizzle() override;

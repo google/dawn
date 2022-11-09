@@ -498,26 +498,26 @@ struct Std140::State {
 
         AccessChain access;
 
-        // Start by looking at the source variable. This must be a std140-forked uniform buffer.
-        access.var = tint::As<sem::GlobalVariable>(expr->SourceVariable());
+        // Start by looking at the root identifier. This must be a std140-forked uniform buffer.
+        access.var = tint::As<sem::GlobalVariable>(expr->RootIdentifier());
         if (!access.var || !std140_uniforms.Contains(access.var)) {
             // Not at std140-forked uniform buffer access chain.
             return std::nullopt;
         }
 
-        // Walk from the outer-most expression, inwards towards the source variable.
+        // Walk from the outer-most expression, inwards towards the root identifier.
         while (true) {
             enum class Action { kStop, kContinue, kError };
             Action action = Switch(
                 expr,  //
                 [&](const sem::VariableUser* user) {
                     if (user->Variable() == access.var) {
-                        // Walked all the way to the source variable. We're done traversing.
+                        // Walked all the way to the root identifier. We're done traversing.
                         access.indices.Push(UniformVariable{});
                         return Action::kStop;
                     }
                     if (user->Variable()->Type()->Is<sem::Pointer>()) {
-                        // Found a pointer. As the source variable is a uniform buffer variable,
+                        // Found a pointer. As the root identifier is a uniform buffer variable,
                         // this must be a pointer-let. Continue traversing from the let
                         // initializer.
                         expr = user->Variable()->Initializer();

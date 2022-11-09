@@ -26,7 +26,7 @@ Materialize::Materialize(const Expression* expr,
            /* statement */ statement,
            /* constant */ constant,
            /* has_side_effects */ false,
-           /* source_var */ expr->SourceVariable()),
+           /* root_ident */ expr->RootIdentifier()),
       expr_(expr) {}
 
 Materialize::~Materialize() = default;

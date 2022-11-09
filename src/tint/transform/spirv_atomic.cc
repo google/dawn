@@ -97,7 +97,7 @@ struct SpirvAtomic::State {
                                     b.Call(sem::str(stub->builtin), std::move(out_args)));
                     }
 
-                    // Keep track of this expression. We'll need to modify the source variable /
+                    // Keep track of this expression. We'll need to modify the root identifier /
                     // structure to be atomic.
                     atomic_expressions.Add(ctx.src->Sem().Get(args[0]));
                 }
@@ -230,8 +230,8 @@ struct SpirvAtomic::State {
     void ReplaceLoadsAndStores() {
         // Returns true if 'e' is a reference to an atomic variable or struct member
         auto is_ref_to_atomic_var = [&](const sem::Expression* e) {
-            if (tint::Is<sem::Reference>(e->Type()) && e->SourceVariable() &&
-                (atomic_variables.count(e->SourceVariable()) != 0)) {
+            if (tint::Is<sem::Reference>(e->Type()) && e->RootIdentifier() &&
+                (atomic_variables.count(e->RootIdentifier()) != 0)) {
                 // If it's a struct member, make sure it's one we marked as atomic
                 if (auto* ma = e->As<sem::StructMemberAccess>()) {
                     auto it = forked_structs.find(ma->Member()->Struct()->Declaration());

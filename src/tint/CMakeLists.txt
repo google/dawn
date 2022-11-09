@@ -885,7 +885,7 @@ if(TINT_BUILD_TESTS)
     resolver/resolver_test.cc
     resolver/side_effects_test.cc
     resolver/static_assert_test.cc
-    resolver/source_variable_test.cc
+    resolver/root_identifier_test.cc
     resolver/address_space_layout_validation_test.cc
     resolver/address_space_validation_test.cc
     resolver/struct_layout_test.cc

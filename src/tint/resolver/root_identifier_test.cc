@@ -23,9 +23,9 @@ using namespace tint::number_suffixes;  // NOLINT
 namespace tint::resolver {
 namespace {
 
-class ResolverSourceVariableTest : public ResolverTest {};
+class ResolverRootIdentifierTest : public ResolverTest {};
 
-TEST_F(ResolverSourceVariableTest, GlobalPrivateVar) {
+TEST_F(ResolverRootIdentifierTest, GlobalPrivateVar) {
     auto* a = GlobalVar("a", ty.f32(), ast::AddressSpace::kPrivate);
     auto* expr = Expr(a);
     WrapInFunction(expr);
@@ -33,10 +33,10 @@ TEST_F(ResolverSourceVariableTest, GlobalPrivateVar) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), sem_a);
+    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
 }
 
-TEST_F(ResolverSourceVariableTest, GlobalWorkgroupVar) {
+TEST_F(ResolverRootIdentifierTest, GlobalWorkgroupVar) {
     auto* a = GlobalVar("a", ty.f32(), ast::AddressSpace::kWorkgroup);
     auto* expr = Expr(a);
     WrapInFunction(expr);
@@ -44,10 +44,10 @@ TEST_F(ResolverSourceVariableTest, GlobalWorkgroupVar) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), sem_a);
+    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
 }
 
-TEST_F(ResolverSourceVariableTest, GlobalStorageVar) {
+TEST_F(ResolverRootIdentifierTest, GlobalStorageVar) {
     auto* a = GlobalVar("a", ty.f32(), ast::AddressSpace::kStorage, Group(0_a), Binding(0_a));
     auto* expr = Expr(a);
     WrapInFunction(expr);
@@ -55,10 +55,10 @@ TEST_F(ResolverSourceVariableTest, GlobalStorageVar) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), sem_a);
+    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
 }
 
-TEST_F(ResolverSourceVariableTest, GlobalUniformVar) {
+TEST_F(ResolverRootIdentifierTest, GlobalUniformVar) {
     auto* a = GlobalVar("a", ty.f32(), ast::AddressSpace::kUniform, Group(0_a), Binding(0_a));
     auto* expr = Expr(a);
     WrapInFunction(expr);
@@ -66,10 +66,10 @@ TEST_F(ResolverSourceVariableTest, GlobalUniformVar) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), sem_a);
+    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
 }
 
-TEST_F(ResolverSourceVariableTest, GlobalTextureVar) {
+TEST_F(ResolverRootIdentifierTest, GlobalTextureVar) {
     auto* a = GlobalVar("a", ty.sampled_texture(ast::TextureDimension::k2d, ty.f32()),
                         ast::AddressSpace::kNone, Group(0_a), Binding(0_a));
     auto* expr = Expr(a);
@@ -78,10 +78,10 @@ TEST_F(ResolverSourceVariableTest, GlobalTextureVar) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), sem_a);
+    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
 }
 
-TEST_F(ResolverSourceVariableTest, GlobalOverride) {
+TEST_F(ResolverRootIdentifierTest, GlobalOverride) {
     auto* a = Override("a", ty.f32(), Expr(1_f));
     auto* expr = Expr(a);
     WrapInFunction(expr);
@@ -89,10 +89,10 @@ TEST_F(ResolverSourceVariableTest, GlobalOverride) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), sem_a);
+    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
 }
 
-TEST_F(ResolverSourceVariableTest, GlobalConst) {
+TEST_F(ResolverRootIdentifierTest, GlobalConst) {
     auto* a = GlobalConst("a", ty.f32(), Expr(1_f));
     auto* expr = Expr(a);
     WrapInFunction(expr);
@@ -100,10 +100,10 @@ TEST_F(ResolverSourceVariableTest, GlobalConst) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), sem_a);
+    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
 }
 
-TEST_F(ResolverSourceVariableTest, FunctionVar) {
+TEST_F(ResolverRootIdentifierTest, FunctionVar) {
     auto* a = Var("a", ty.f32());
     auto* expr = Expr(a);
     WrapInFunction(a, expr);
@@ -111,10 +111,10 @@ TEST_F(ResolverSourceVariableTest, FunctionVar) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), sem_a);
+    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
 }
 
-TEST_F(ResolverSourceVariableTest, FunctionLet) {
+TEST_F(ResolverRootIdentifierTest, FunctionLet) {
     auto* a = Let("a", ty.f32(), Expr(1_f));
     auto* expr = Expr(a);
     WrapInFunction(a, expr);
@@ -122,10 +122,10 @@ TEST_F(ResolverSourceVariableTest, FunctionLet) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), sem_a);
+    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
 }
 
-TEST_F(ResolverSourceVariableTest, Parameter) {
+TEST_F(ResolverRootIdentifierTest, Parameter) {
     auto* a = Param("a", ty.f32());
     auto* expr = Expr(a);
     Func("foo", utils::Vector{a}, ty.void_(), utils::Vector{WrapInStatement(expr)});
@@ -133,10 +133,10 @@ TEST_F(ResolverSourceVariableTest, Parameter) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), sem_a);
+    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
 }
 
-TEST_F(ResolverSourceVariableTest, PointerParameter) {
+TEST_F(ResolverRootIdentifierTest, PointerParameter) {
     // fn foo(a : ptr<function, f32>)
     // {
     //   let b = a;
@@ -151,11 +151,11 @@ TEST_F(ResolverSourceVariableTest, PointerParameter) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_param = Sem().Get(param);
-    EXPECT_EQ(Sem().Get(expr_param)->SourceVariable(), sem_param);
-    EXPECT_EQ(Sem().Get(expr_let)->SourceVariable(), sem_param);
+    EXPECT_EQ(Sem().Get(expr_param)->RootIdentifier(), sem_param);
+    EXPECT_EQ(Sem().Get(expr_let)->RootIdentifier(), sem_param);
 }
 
-TEST_F(ResolverSourceVariableTest, VarCopyVar) {
+TEST_F(ResolverRootIdentifierTest, VarCopyVar) {
     // {
     //   var a : f32;
     //   var b = a;
@@ -170,11 +170,11 @@ TEST_F(ResolverSourceVariableTest, VarCopyVar) {
 
     auto* sem_a = Sem().Get(a);
     auto* sem_b = Sem().Get(b);
-    EXPECT_EQ(Sem().Get(expr_a)->SourceVariable(), sem_a);
-    EXPECT_EQ(Sem().Get(expr_b)->SourceVariable(), sem_b);
+    EXPECT_EQ(Sem().Get(expr_a)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().Get(expr_b)->RootIdentifier(), sem_b);
 }
 
-TEST_F(ResolverSourceVariableTest, LetCopyVar) {
+TEST_F(ResolverRootIdentifierTest, LetCopyVar) {
     // {
     //   var a : f32;
     //   let b = a;
@@ -189,11 +189,11 @@ TEST_F(ResolverSourceVariableTest, LetCopyVar) {
 
     auto* sem_a = Sem().Get(a);
     auto* sem_b = Sem().Get(b);
-    EXPECT_EQ(Sem().Get(expr_a)->SourceVariable(), sem_a);
-    EXPECT_EQ(Sem().Get(expr_b)->SourceVariable(), sem_b);
+    EXPECT_EQ(Sem().Get(expr_a)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().Get(expr_b)->RootIdentifier(), sem_b);
 }
 
-TEST_F(ResolverSourceVariableTest, ThroughIndexAccessor) {
+TEST_F(ResolverRootIdentifierTest, ThroughIndexAccessor) {
     // var<private> a : array<f32, 4u>;
     // {
     //   a[2i]
@@ -205,10 +205,10 @@ TEST_F(ResolverSourceVariableTest, ThroughIndexAccessor) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), sem_a);
+    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
 }
 
-TEST_F(ResolverSourceVariableTest, ThroughMemberAccessor) {
+TEST_F(ResolverRootIdentifierTest, ThroughMemberAccessor) {
     // struct S { f : f32 }
     // var<private> a : S;
     // {
@@ -222,10 +222,10 @@ TEST_F(ResolverSourceVariableTest, ThroughMemberAccessor) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), sem_a);
+    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), sem_a);
 }
 
-TEST_F(ResolverSourceVariableTest, ThroughPointers) {
+TEST_F(ResolverRootIdentifierTest, ThroughPointers) {
     // var<private> a : f32;
     // {
     //   let a_ptr1 = &*&a;
@@ -244,49 +244,49 @@ TEST_F(ResolverSourceVariableTest, ThroughPointers) {
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem_a = Sem().Get(a);
-    EXPECT_EQ(Sem().Get(address_of_1)->SourceVariable(), sem_a);
-    EXPECT_EQ(Sem().Get(address_of_2)->SourceVariable(), sem_a);
-    EXPECT_EQ(Sem().Get(address_of_3)->SourceVariable(), sem_a);
-    EXPECT_EQ(Sem().Get(deref_1)->SourceVariable(), sem_a);
-    EXPECT_EQ(Sem().Get(deref_2)->SourceVariable(), sem_a);
+    EXPECT_EQ(Sem().Get(address_of_1)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().Get(address_of_2)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().Get(address_of_3)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().Get(deref_1)->RootIdentifier(), sem_a);
+    EXPECT_EQ(Sem().Get(deref_2)->RootIdentifier(), sem_a);
 }
 
-TEST_F(ResolverSourceVariableTest, Literal) {
+TEST_F(ResolverRootIdentifierTest, Literal) {
     auto* expr = Expr(1_f);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), nullptr);
+    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), nullptr);
 }
 
-TEST_F(ResolverSourceVariableTest, FunctionReturnValue) {
+TEST_F(ResolverRootIdentifierTest, FunctionReturnValue) {
     auto* expr = Call("min", 1_f, 2_f);
     WrapInFunction(expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), nullptr);
+    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), nullptr);
 }
 
-TEST_F(ResolverSourceVariableTest, BinaryExpression) {
+TEST_F(ResolverRootIdentifierTest, BinaryExpression) {
     auto* a = Var("a", ty.f32());
     auto* expr = Add(a, Expr(1_f));
     WrapInFunction(a, expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), nullptr);
+    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), nullptr);
 }
 
-TEST_F(ResolverSourceVariableTest, UnaryExpression) {
+TEST_F(ResolverRootIdentifierTest, UnaryExpression) {
     auto* a = Var("a", ty.f32());
     auto* expr = create<ast::UnaryOpExpression>(ast::UnaryOp::kNegation, Expr(a));
     WrapInFunction(a, expr);
 
     EXPECT_TRUE(r()->Resolve()) << r()->error();
 
-    EXPECT_EQ(Sem().Get(expr)->SourceVariable(), nullptr);
+    EXPECT_EQ(Sem().Get(expr)->RootIdentifier(), nullptr);
 }
 
 }  // namespace

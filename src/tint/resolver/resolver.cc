@@ -1712,7 +1712,7 @@ sem::Expression* Resolver::IndexAccessor(const ast::IndexAccessorExpression* exp
     bool has_side_effects = idx->HasSideEffects() || obj->HasSideEffects();
     auto* sem = builder_->create<sem::IndexAccessorExpression>(
         expr, ty, stage, obj, idx, current_statement_, std::move(val), has_side_effects,
-        obj->SourceVariable());
+        obj->RootIdentifier());
     sem->Behaviors() = idx->Behaviors() + obj->Behaviors();
     return sem;
 }
@@ -2365,7 +2365,7 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
     auto* structure = sem_.TypeOf(expr->structure);
     auto* storage_ty = structure->UnwrapRef();
     auto* object = sem_.Get(expr->structure);
-    auto* source_var = object->SourceVariable();
+    auto* root_ident = object->RootIdentifier();
 
     const sem::Type* ty = nullptr;
 
@@ -2404,7 +2404,7 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
             }
             return builder_->create<sem::StructMemberAccess>(expr, ty, current_statement_,
                                                              val.Get(), object, member,
-                                                             has_side_effects, source_var);
+                                                             has_side_effects, root_ident);
         },
 
         [&](const sem::Vector* vec) -> sem::Expression* {
@@ -2476,7 +2476,7 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
                 return nullptr;
             }
             return builder_->create<sem::Swizzle>(expr, ty, current_statement_, val.Get(), object,
-                                                  std::move(swizzle), has_side_effects, source_var);
+                                                  std::move(swizzle), has_side_effects, root_ident);
         },
 
         [&](Default) {
@@ -2549,7 +2549,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
     }
 
     const sem::Type* ty = nullptr;
-    const sem::Variable* source_var = nullptr;
+    const sem::Variable* root_ident = nullptr;
     const sem::Constant* value = nullptr;
     auto stage = sem::EvaluationStage::kRuntime;
 
@@ -2573,7 +2573,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
                 ty = builder_->create<sem::Pointer>(ref->StoreType(), ref->AddressSpace(),
                                                     ref->Access());
 
-                source_var = expr->SourceVariable();
+                root_ident = expr->RootIdentifier();
             } else {
                 AddError("cannot take the address of expression", unary->expr->source);
                 return nullptr;
@@ -2584,7 +2584,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
             if (auto* ptr = expr_ty->As<sem::Pointer>()) {
                 ty = builder_->create<sem::Reference>(ptr->StoreType(), ptr->AddressSpace(),
                                                       ptr->Access());
-                source_var = expr->SourceVariable();
+                root_ident = expr->RootIdentifier();
             } else {
                 AddError("cannot dereference expression of type '" + sem_.TypeNameOf(expr_ty) + "'",
                          unary->expr->source);
@@ -2623,7 +2623,7 @@ sem::Expression* Resolver::UnaryOp(const ast::UnaryOpExpression* unary) {
     }
 
     auto* sem = builder_->create<sem::Expression>(unary, ty, stage, current_statement_, value,
-                                                  expr->HasSideEffects(), source_var);
+                                                  expr->HasSideEffects(), root_ident);
     sem->Behaviors() = expr->Behaviors();
     return sem;
 }

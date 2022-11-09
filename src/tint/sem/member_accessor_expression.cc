@@ -30,8 +30,8 @@ MemberAccessorExpression::MemberAccessorExpression(const ast::MemberAccessorExpr
                                                    const Constant* constant,
                                                    const Expression* object,
                                                    bool has_side_effects,
-                                                   const Variable* source_var /* = nullptr */)
-    : Base(declaration, type, stage, statement, constant, has_side_effects, source_var),
+                                                   const Variable* root_ident /* = nullptr */)
+    : Base(declaration, type, stage, statement, constant, has_side_effects, root_ident),
       object_(object) {}
 
 MemberAccessorExpression::~MemberAccessorExpression() = default;
@@ -43,7 +43,7 @@ StructMemberAccess::StructMemberAccess(const ast::MemberAccessorExpression* decl
                                        const Expression* object,
                                        const StructMember* member,
                                        bool has_side_effects,
-                                       const Variable* source_var /* = nullptr */)
+                                       const Variable* root_ident /* = nullptr */)
     : Base(declaration,
            type,
            object->Stage(),
@@ -51,7 +51,7 @@ StructMemberAccess::StructMemberAccess(const ast::MemberAccessorExpression* decl
            constant,
            object,
            has_side_effects,
-           source_var),
+           root_ident),
       member_(member) {}
 
 StructMemberAccess::~StructMemberAccess() = default;
@@ -63,7 +63,7 @@ Swizzle::Swizzle(const ast::MemberAccessorExpression* declaration,
                  const Expression* object,
                  utils::VectorRef<uint32_t> indices,
                  bool has_side_effects,
-                 const Variable* source_var /* = nullptr */)
+                 const Variable* root_ident /* = nullptr */)
     : Base(declaration,
            type,
            object->Stage(),
@@ -71,7 +71,7 @@ Swizzle::Swizzle(const ast::MemberAccessorExpression* declaration,
            constant,
            object,
            has_side_effects,
-           source_var),
+           root_ident),
       indices_(std::move(indices)) {}
 
 Swizzle::~Swizzle() = default;

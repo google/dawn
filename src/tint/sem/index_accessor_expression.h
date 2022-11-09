@@ -38,7 +38,7 @@ class IndexAccessorExpression final : public Castable<IndexAccessorExpression, E
     /// @param statement the statement that owns this expression
     /// @param constant the constant value of the expression. May be null
     /// @param has_side_effects whether this expression may have side effects
-    /// @param source_var the (optional) source variable for this expression
+    /// @param root_ident the (optional) root identifier for this expression
     IndexAccessorExpression(const ast::IndexAccessorExpression* declaration,
                             const sem::Type* type,
                             EvaluationStage stage,
@@ -47,7 +47,7 @@ class IndexAccessorExpression final : public Castable<IndexAccessorExpression, E
                             const Statement* statement,
                             const Constant* constant,
                             bool has_side_effects,
-                            const Variable* source_var = nullptr);
+                            const Variable* root_ident = nullptr);
 
     /// Destructor
     ~IndexAccessorExpression() override;

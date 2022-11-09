@@ -1157,8 +1157,8 @@ class UniformityGraph {
                 if (u->op == ast::UnaryOp::kIndirection) {
                     // Cut the analysis short, since we only need to know the originating variable
                     // which is being accessed.
-                    auto* source_var = sem_.Get(u)->SourceVariable();
-                    auto* value = current_function_->variables.Get(source_var);
+                    auto* root_ident = sem_.Get(u)->RootIdentifier();
+                    auto* value = current_function_->variables.Get(root_ident);
                     if (!value) {
                         value = cf;
                     }
@@ -1251,10 +1251,10 @@ class UniformityGraph {
                 if (u->op == ast::UnaryOp::kIndirection) {
                     // Cut the analysis short, since we only need to know the originating variable
                     // that is being written to.
-                    auto* source_var = sem_.Get(u)->SourceVariable();
-                    auto name = builder_->Symbols().NameFor(source_var->Declaration()->symbol);
+                    auto* root_ident = sem_.Get(u)->RootIdentifier();
+                    auto name = builder_->Symbols().NameFor(root_ident->Declaration()->symbol);
                     auto* deref = CreateNode(name + "_deref");
-                    auto* old_value = current_function_->variables.Set(source_var, deref);
+                    auto* old_value = current_function_->variables.Set(root_ident, deref);
 
                     if (old_value) {
                         // If derefercing a partial reference or partial pointer, we link back to
@@ -1405,9 +1405,9 @@ class UniformityGraph {
                     }
 
                     // Update the current stored value for this pointer argument.
-                    auto* source_var = sem_arg->SourceVariable();
-                    TINT_ASSERT(Resolver, source_var);
-                    current_function_->variables.Set(source_var, ptr_result);
+                    auto* root_ident = sem_arg->RootIdentifier();
+                    TINT_ASSERT(Resolver, root_ident);
+                    current_function_->variables.Set(root_ident, ptr_result);
                 }
             } else {
                 // All builtin function parameters are RequiredToBeUniformForReturnValue, as are

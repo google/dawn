@@ -1160,7 +1160,7 @@ if (tint_build_unittests) {
       "resolver/resolver_test_helper.cc",
       "resolver/resolver_test_helper.h",
       "resolver/side_effects_test.cc",
-      "resolver/source_variable_test.cc",
+      "resolver/root_identifier_test.cc",
       "resolver/static_assert_test.cc",
       "resolver/struct_address_space_use_test.cc",
       "resolver/struct_layout_test.cc",

@@ -30,8 +30,8 @@ IndexAccessorExpression::IndexAccessorExpression(const ast::IndexAccessorExpress
                                                  const Statement* statement,
                                                  const Constant* constant,
                                                  bool has_side_effects,
-                                                 const Variable* source_var /* = nullptr */)
-    : Base(declaration, type, stage, statement, constant, has_side_effects, source_var),
+                                                 const Variable* root_ident /* = nullptr */)
+    : Base(declaration, type, stage, statement, constant, has_side_effects, root_ident),
       object_(object),
       index_(index) {}
 

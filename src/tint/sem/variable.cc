@@ -97,9 +97,9 @@ VariableUser::VariableUser(const ast::IdentifierExpression* declaration,
       variable_(variable) {
     auto* type = variable->Type();
     if (type->Is<sem::Pointer>() && variable->Initializer()) {
-        source_variable_ = variable->Initializer()->SourceVariable();
+        root_identifier_ = variable->Initializer()->RootIdentifier();
     } else {
-        source_variable_ = variable;
+        root_identifier_ = variable;
     }
 }
 

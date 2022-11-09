@@ -174,15 +174,15 @@ struct LocalizeStructArrayAssignment::State {
     // See https://www.w3.org/TR/WGSL/#originating-variable-section
     std::pair<const sem::Type*, ast::AddressSpace> GetOriginatingTypeAndAddressSpace(
         const ast::AssignmentStatement* assign_stmt) {
-        auto* source_var = src->Sem().Get(assign_stmt->lhs)->SourceVariable();
-        if (!source_var) {
+        auto* root_ident = src->Sem().Get(assign_stmt->lhs)->RootIdentifier();
+        if (!root_ident) {
             TINT_ICE(Transform, b.Diagnostics())
                 << "Unable to determine originating variable for lhs of assignment "
                    "statement";
             return {};
         }
 
-        auto* type = source_var->Type();
+        auto* type = root_ident->Type();
         if (auto* ref = type->As<sem::Reference>()) {
             return {ref->StoreType(), ref->AddressSpace()};
         } else if (auto* ptr = type->As<sem::Pointer>()) {

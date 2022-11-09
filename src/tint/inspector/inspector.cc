@@ -892,10 +892,10 @@ void Inspector::GetOriginatingResources(std::array<const ast::Expression*, N> ex
     utils::UniqueVector<const ast::CallExpression*, 8> callsites;
 
     for (size_t i = 0; i < N; i++) {
-        const sem::Variable* source_var = sem.Get(exprs[i])->SourceVariable();
-        if (auto* global = source_var->As<sem::GlobalVariable>()) {
+        const sem::Variable* root_ident = sem.Get(exprs[i])->RootIdentifier();
+        if (auto* global = root_ident->As<sem::GlobalVariable>()) {
             globals[i] = global;
-        } else if (auto* param = source_var->As<sem::Parameter>()) {
+        } else if (auto* param = root_ident->As<sem::Parameter>()) {
             auto* func = tint::As<sem::Function>(param->Owner());
             if (func->CallSites().empty()) {
                 // One or more of the expressions is a parameter, but this function

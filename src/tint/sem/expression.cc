@@ -28,9 +28,9 @@ Expression::Expression(const ast::Expression* declaration,
                        const Statement* statement,
                        const Constant* constant,
                        bool has_side_effects,
-                       const Variable* source_var /* = nullptr */)
+                       const Variable* root_ident /* = nullptr */)
     : declaration_(declaration),
-      source_variable_(source_var),
+      root_identifier_(root_ident),
       type_(type),
       stage_(stage),
       statement_(statement),
