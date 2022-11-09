@@ -114,6 +114,11 @@ Transform::ApplyResult DemoteToHelper::Apply(const Program* src, const DataMap&,
                     return;
                 }
 
+                // Skip phony assignments.
+                if (assign->lhs->Is<ast::PhonyExpression>()) {
+                    return;
+                }
+
                 // Skip writes to invocation-private address spaces.
                 auto* ref = sem.Get(assign->lhs)->Type()->As<sem::Reference>();
                 switch (ref->AddressSpace()) {

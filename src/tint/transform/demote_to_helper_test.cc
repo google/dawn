@@ -1096,5 +1096,36 @@ fn foo(@location(0) in : f32, @location(1) coord : vec2<f32>) -> @location(0) i3
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(DemoteToHelperTest, PhonyAssignment) {
+    auto* src = R"(
+@fragment
+fn foo(@location(0) in : f32) {
+  if (in == 0.0) {
+    discard;
+  }
+  _ = in;
+}
+)";
+
+    auto* expect = R"(
+var<private> tint_discarded = false;
+
+@fragment
+fn foo(@location(0) in : f32) {
+  if ((in == 0.0)) {
+    tint_discarded = true;
+  }
+  _ = in;
+  if (tint_discarded) {
+    discard;
+  }
+}
+)";
+
+    auto got = Run<DemoteToHelper>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 }  // namespace
 }  // namespace tint::transform
