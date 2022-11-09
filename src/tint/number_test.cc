@@ -268,6 +268,22 @@ TEST_P(NumberF16Test, BitsRepresentation) {
     EXPECT_EQ(f16(input_value).BitsRepresentation(), representation);
 }
 
+TEST_P(NumberF16Test, FromBits) {
+    float input_value = GetParam().quantized_value;
+    uint16_t representation = GetParam().f16_bit_pattern;
+
+    std::stringstream ss;
+    ss << "binary16 bits representation = " << std::hex << std::showbase << representation
+       << " expected value = " << input_value;
+    SCOPED_TRACE(ss.str());
+
+    if (std::isnan(input_value)) {
+        EXPECT_TRUE(std::isnan(f16::FromBits(representation)));
+    } else {
+        EXPECT_EQ(f16::FromBits(representation), f16(input_value));
+    }
+}
+
 INSTANTIATE_TEST_SUITE_P(
     NumberF16Test,
     NumberF16Test,
