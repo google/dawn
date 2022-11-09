@@ -3,8 +3,13 @@ void unused_entry_point() {
   return;
 }
 
+int tint_mod(int lhs, int rhs) {
+  return (lhs % (((rhs == 0) | ((lhs == -2147483648) & (rhs == -1))) ? 1 : rhs));
+}
+
 RWByteAddressBuffer v : register(u0, space0);
 
 void foo() {
-  v.Store(0u, asuint((asint(v.Load(0u)) % 2)));
+  const int tint_symbol = tint_mod(asint(v.Load(0u)), 2);
+  v.Store(0u, asuint(tint_symbol));
 }

@@ -1,13 +1,21 @@
 #include <metal_stdlib>
 
 using namespace metal;
+int tint_div(int lhs, int rhs) {
+  return (lhs / select(rhs, 1, bool((rhs == 0) | bool((lhs == (-2147483647 - 1)) & (rhs == -1)))));
+}
+
+int tint_mod(int lhs, int rhs) {
+  return (lhs % select(rhs, 1, bool((rhs == 0) | bool((lhs == (-2147483647 - 1)) & (rhs == -1)))));
+}
+
 void foo(int maybe_zero) {
   thread int tint_symbol = 0;
   thread float tint_symbol_1 = 0.0f;
-  tint_symbol = (tint_symbol / 0);
-  tint_symbol = (tint_symbol % 0);
-  tint_symbol = (tint_symbol / maybe_zero);
-  tint_symbol = (tint_symbol % maybe_zero);
+  tint_symbol = tint_div(tint_symbol, 0);
+  tint_symbol = tint_mod(tint_symbol, 0);
+  tint_symbol = tint_div(tint_symbol, maybe_zero);
+  tint_symbol = tint_mod(tint_symbol, maybe_zero);
   tint_symbol_1 = (tint_symbol_1 / 0.0f);
   tint_symbol_1 = fmod(tint_symbol_1, 0.0f);
   tint_symbol_1 = (tint_symbol_1 / float(maybe_zero));

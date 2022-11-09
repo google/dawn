@@ -1,5 +1,5 @@
-int4 value_or_one_if_zero_int4(int4 value) {
-  return value == int4(0, 0, 0, 0) ? int4(1, 1, 1, 1) : value;
+int4 tint_div(int4 lhs, int4 rhs) {
+  return (lhs / (((rhs == (0).xxxx) | ((lhs == (-2147483648).xxxx) & (rhs == (-1).xxxx))) ? (1).xxxx : rhs));
 }
 
 cbuffer cbuffer_x_4 : register(b0, space0) {
@@ -25,7 +25,8 @@ bool test_int_S1_c0_b() {
   ok = true;
   x_41 = false;
   if (true) {
-    x_40 = all((((0).xxxx / value_or_one_if_zero_int4(int4(x_27, x_27, x_27, x_27))) == (0).xxxx));
+    const int4 tint_symbol_3 = tint_div((0).xxxx, int4(x_27, x_27, x_27, x_27));
+    x_40 = all((tint_symbol_3 == (0).xxxx));
     x_41 = x_40;
   }
   ok = x_41;
@@ -47,11 +48,11 @@ bool test_int_S1_c0_b() {
   ok = x_55;
   const int4 x_58 = (x_50 * (2).xxxx);
   val = x_58;
-  const int4 x_59 = (x_58 / (2).xxxx);
+  const int4 x_59 = tint_div(x_58, (2).xxxx);
   val = x_59;
   const int4 x_60 = (x_59 * (2).xxxx);
   val = x_60;
-  const int4 x_61 = (x_60 / (2).xxxx);
+  const int4 x_61 = tint_div(x_60, (2).xxxx);
   val = x_61;
   x_66 = false;
   if (x_55) {
@@ -151,8 +152,8 @@ main_out main_inner(bool sk_Clockwise_param, float4 vcolor_S0_param) {
   sk_Clockwise = sk_Clockwise_param;
   vcolor_S0 = vcolor_S0_param;
   main_1();
-  const main_out tint_symbol_5 = {sk_FragColor};
-  return tint_symbol_5;
+  const main_out tint_symbol_6 = {sk_FragColor};
+  return tint_symbol_6;
 }
 
 tint_symbol_2 main(tint_symbol_1 tint_symbol) {

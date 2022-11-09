@@ -63,6 +63,9 @@ class BuiltinPolyfill final : public Castable<BuiltinPolyfill, Transform> {
         bool first_trailing_bit = false;
         /// Should `insertBits()` be polyfilled?
         Level insert_bits = Level::kNone;
+        /// Should integer scalar / vector divides and modulos be polyfilled to avoid DBZ and
+        /// integer overflows?
+        bool int_div_mod = false;
         /// Should `saturate()` be polyfilled?
         bool saturate = false;
         /// Should `textureSampleBaseClampToEdge()` be polyfilled for texture_2d<f32> textures?

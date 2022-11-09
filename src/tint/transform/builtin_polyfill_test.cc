@@ -1921,6 +1921,775 @@ fn f() {
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+// int_div_mod
+////////////////////////////////////////////////////////////////////////////////
+DataMap polyfillIntDivMod() {
+    BuiltinPolyfill::Builtins builtins;
+    builtins.int_div_mod = true;
+    DataMap data;
+    data.Add<BuiltinPolyfill::Config>(builtins);
+    return data;
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunIntDiv) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = 20i / v;
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillIntDivMod()));
+}
+
+TEST_F(BuiltinPolyfillTest, ShouldRunIntMod) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = 20i % v;
+}
+)";
+
+    EXPECT_FALSE(ShouldRun<BuiltinPolyfill>(src));
+    EXPECT_TRUE(ShouldRun<BuiltinPolyfill>(src, polyfillIntDivMod()));
+}
+
+TEST_F(BuiltinPolyfillTest, IntDiv_ai_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = 20 / v;
+}
+)";
+
+    auto* expect = R"(
+fn tint_div(lhs : i32, rhs : i32) -> i32 {
+  return (lhs / select(rhs, 1, ((rhs == 0) | ((lhs == -2147483648) & (rhs == -1)))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_div(20, v);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntMod_ai_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = 20 % v;
+}
+)";
+
+    auto* expect = R"(
+fn tint_mod(lhs : i32, rhs : i32) -> i32 {
+  return (lhs % select(rhs, 1, ((rhs == 0) | ((lhs == -2147483648) & (rhs == -1)))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_mod(20, v);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntDiv_i32_ai) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = v / 20;
+}
+)";
+
+    auto* expect = R"(
+fn tint_div(lhs : i32, rhs : i32) -> i32 {
+  return (lhs / select(rhs, 1, ((rhs == 0) | ((lhs == -2147483648) & (rhs == -1)))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_div(v, 20);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntMod_i32_ai) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = v % 20;
+}
+)";
+
+    auto* expect = R"(
+fn tint_mod(lhs : i32, rhs : i32) -> i32 {
+  return (lhs % select(rhs, 1, ((rhs == 0) | ((lhs == -2147483648) & (rhs == -1)))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_mod(v, 20);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntDiv_i32_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = 20i / v;
+}
+)";
+
+    auto* expect = R"(
+fn tint_div(lhs : i32, rhs : i32) -> i32 {
+  return (lhs / select(rhs, 1, ((rhs == 0) | ((lhs == -2147483648) & (rhs == -1)))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_div(20i, v);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntMod_i32_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = 20i % v;
+}
+)";
+
+    auto* expect = R"(
+fn tint_mod(lhs : i32, rhs : i32) -> i32 {
+  return (lhs % select(rhs, 1, ((rhs == 0) | ((lhs == -2147483648) & (rhs == -1)))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_mod(20i, v);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntDiv_ai_u32) {
+    auto* src = R"(
+fn f() {
+  let v = 10u;
+  let x = 20 / v;
+}
+)";
+
+    auto* expect = R"(
+fn tint_div(lhs : u32, rhs : u32) -> u32 {
+  return (lhs / select(rhs, 1, (rhs == 0)));
+}
+
+fn f() {
+  let v = 10u;
+  let x = tint_div(20, v);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntMod_ai_u32) {
+    auto* src = R"(
+fn f() {
+  let v = 10u;
+  let x = 20 % v;
+}
+)";
+
+    auto* expect = R"(
+fn tint_mod(lhs : u32, rhs : u32) -> u32 {
+  return (lhs % select(rhs, 1, (rhs == 0)));
+}
+
+fn f() {
+  let v = 10u;
+  let x = tint_mod(20, v);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntDiv_u32_ai) {
+    auto* src = R"(
+fn f() {
+  let v = 10u;
+  let x = v / 20;
+}
+)";
+
+    auto* expect = R"(
+fn tint_div(lhs : u32, rhs : u32) -> u32 {
+  return (lhs / select(rhs, 1, (rhs == 0)));
+}
+
+fn f() {
+  let v = 10u;
+  let x = tint_div(v, 20);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntMod_u32_ai) {
+    auto* src = R"(
+fn f() {
+  let v = 10u;
+  let x = v % 20;
+}
+)";
+
+    auto* expect = R"(
+fn tint_mod(lhs : u32, rhs : u32) -> u32 {
+  return (lhs % select(rhs, 1, (rhs == 0)));
+}
+
+fn f() {
+  let v = 10u;
+  let x = tint_mod(v, 20);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntDiv_u32_u32) {
+    auto* src = R"(
+fn f() {
+  let v = 10u;
+  let x = 20u / v;
+}
+)";
+
+    auto* expect = R"(
+fn tint_div(lhs : u32, rhs : u32) -> u32 {
+  return (lhs / select(rhs, 1, (rhs == 0)));
+}
+
+fn f() {
+  let v = 10u;
+  let x = tint_div(20u, v);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntMod_u32_u32) {
+    auto* src = R"(
+fn f() {
+  let v = 10u;
+  let x = 20u % v;
+}
+)";
+
+    auto* expect = R"(
+fn tint_mod(lhs : u32, rhs : u32) -> u32 {
+  return (lhs % select(rhs, 1, (rhs == 0)));
+}
+
+fn f() {
+  let v = 10u;
+  let x = tint_mod(20u, v);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntDiv_vec3_ai_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = vec3(20) / v;
+}
+)";
+
+    auto* expect = R"(
+fn tint_div(lhs : vec3<i32>, rhs : i32) -> vec3<i32> {
+  let r = vec3<i32>(rhs);
+  return (lhs / select(r, vec3(1), ((r == vec3(0)) | ((lhs == vec3(-2147483648)) & (r == vec3(-1))))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_div(vec3(20), v);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntMod_vec3_ai_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = vec3(20) % v;
+}
+)";
+
+    auto* expect = R"(
+fn tint_mod(lhs : vec3<i32>, rhs : i32) -> vec3<i32> {
+  let r = vec3<i32>(rhs);
+  return (lhs % select(r, vec3(1), ((r == vec3(0)) | ((lhs == vec3(-2147483648)) & (r == vec3(-1))))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_mod(vec3(20), v);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntDiv_vec3_i32_ai) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = vec3(v) / 20;
+}
+)";
+
+    auto* expect = R"(
+fn tint_div(lhs : vec3<i32>, rhs : i32) -> vec3<i32> {
+  let r = vec3<i32>(rhs);
+  return (lhs / select(r, vec3(1), ((r == vec3(0)) | ((lhs == vec3(-2147483648)) & (r == vec3(-1))))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_div(vec3(v), 20);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntMod_vec3_i32_ai) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = vec3(v) % 20;
+}
+)";
+
+    auto* expect = R"(
+fn tint_mod(lhs : vec3<i32>, rhs : i32) -> vec3<i32> {
+  let r = vec3<i32>(rhs);
+  return (lhs % select(r, vec3(1), ((r == vec3(0)) | ((lhs == vec3(-2147483648)) & (r == vec3(-1))))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_mod(vec3(v), 20);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntDiv_vec3_i32_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = vec3<i32>(20i) / v;
+}
+)";
+
+    auto* expect = R"(
+fn tint_div(lhs : vec3<i32>, rhs : i32) -> vec3<i32> {
+  let r = vec3<i32>(rhs);
+  return (lhs / select(r, vec3(1), ((r == vec3(0)) | ((lhs == vec3(-2147483648)) & (r == vec3(-1))))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_div(vec3<i32>(20i), v);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntMod_vec3_i32_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = vec3<i32>(20i) % v;
+}
+)";
+
+    auto* expect = R"(
+fn tint_mod(lhs : vec3<i32>, rhs : i32) -> vec3<i32> {
+  let r = vec3<i32>(rhs);
+  return (lhs % select(r, vec3(1), ((r == vec3(0)) | ((lhs == vec3(-2147483648)) & (r == vec3(-1))))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_mod(vec3<i32>(20i), v);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntDiv_vec3_u32_u32) {
+    auto* src = R"(
+fn f() {
+  let v = 10u;
+  let x = vec3<u32>(20u) / v;
+}
+)";
+
+    auto* expect = R"(
+fn tint_div(lhs : vec3<u32>, rhs : u32) -> vec3<u32> {
+  let r = vec3<u32>(rhs);
+  return (lhs / select(r, vec3(1), (r == vec3(0))));
+}
+
+fn f() {
+  let v = 10u;
+  let x = tint_div(vec3<u32>(20u), v);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntMod_vec3_u32_u32) {
+    auto* src = R"(
+fn f() {
+  let v = 10u;
+  let x = vec3<u32>(20u) % v;
+}
+)";
+
+    auto* expect = R"(
+fn tint_mod(lhs : vec3<u32>, rhs : u32) -> vec3<u32> {
+  let r = vec3<u32>(rhs);
+  return (lhs % select(r, vec3(1), (r == vec3(0))));
+}
+
+fn f() {
+  let v = 10u;
+  let x = tint_mod(vec3<u32>(20u), v);
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntDiv_ai_vec3_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = 20 / vec3(v);
+}
+)";
+
+    auto* expect = R"(
+fn tint_div(lhs : i32, rhs : vec3<i32>) -> vec3<i32> {
+  let l = vec3<i32>(lhs);
+  return (l / select(rhs, vec3(1), ((rhs == vec3(0)) | ((l == vec3(-2147483648)) & (rhs == vec3(-1))))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_div(20, vec3(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntMod_ai_vec3_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = 20 % vec3(v);
+}
+)";
+
+    auto* expect = R"(
+fn tint_mod(lhs : i32, rhs : vec3<i32>) -> vec3<i32> {
+  let l = vec3<i32>(lhs);
+  return (l % select(rhs, vec3(1), ((rhs == vec3(0)) | ((l == vec3(-2147483648)) & (rhs == vec3(-1))))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_mod(20, vec3(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntDiv_i32_vec3_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = 20i / vec3<i32>(v);
+}
+)";
+
+    auto* expect = R"(
+fn tint_div(lhs : i32, rhs : vec3<i32>) -> vec3<i32> {
+  let l = vec3<i32>(lhs);
+  return (l / select(rhs, vec3(1), ((rhs == vec3(0)) | ((l == vec3(-2147483648)) & (rhs == vec3(-1))))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_div(20i, vec3<i32>(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntMod_i32_vec3_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = 20i % vec3<i32>(v);
+}
+)";
+
+    auto* expect = R"(
+fn tint_mod(lhs : i32, rhs : vec3<i32>) -> vec3<i32> {
+  let l = vec3<i32>(lhs);
+  return (l % select(rhs, vec3(1), ((rhs == vec3(0)) | ((l == vec3(-2147483648)) & (rhs == vec3(-1))))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_mod(20i, vec3<i32>(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntDiv_u32_vec3_u32) {
+    auto* src = R"(
+fn f() {
+  let v = 10u;
+  let x = 20u / vec3<u32>(v);
+}
+)";
+
+    auto* expect = R"(
+fn tint_div(lhs : u32, rhs : vec3<u32>) -> vec3<u32> {
+  let l = vec3<u32>(lhs);
+  return (l / select(rhs, vec3(1), (rhs == vec3(0))));
+}
+
+fn f() {
+  let v = 10u;
+  let x = tint_div(20u, vec3<u32>(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntMod_u32_vec3_u32) {
+    auto* src = R"(
+fn f() {
+  let v = 10u;
+  let x = 20u % vec3<u32>(v);
+}
+)";
+
+    auto* expect = R"(
+fn tint_mod(lhs : u32, rhs : vec3<u32>) -> vec3<u32> {
+  let l = vec3<u32>(lhs);
+  return (l % select(rhs, vec3(1), (rhs == vec3(0))));
+}
+
+fn f() {
+  let v = 10u;
+  let x = tint_mod(20u, vec3<u32>(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntDiv_vec3_i32_vec3_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = vec3<i32>(20i) / vec3<i32>(v);
+}
+)";
+
+    auto* expect = R"(
+fn tint_div(lhs : vec3<i32>, rhs : vec3<i32>) -> vec3<i32> {
+  return (lhs / select(rhs, vec3(1), ((rhs == vec3(0)) | ((lhs == vec3(-2147483648)) & (rhs == vec3(-1))))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_div(vec3<i32>(20i), vec3<i32>(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntMod_vec3_i32_vec3_i32) {
+    auto* src = R"(
+fn f() {
+  let v = 10i;
+  let x = vec3<i32>(20i) % vec3<i32>(v);
+}
+)";
+
+    auto* expect = R"(
+fn tint_mod(lhs : vec3<i32>, rhs : vec3<i32>) -> vec3<i32> {
+  return (lhs % select(rhs, vec3(1), ((rhs == vec3(0)) | ((lhs == vec3(-2147483648)) & (rhs == vec3(-1))))));
+}
+
+fn f() {
+  let v = 10i;
+  let x = tint_mod(vec3<i32>(20i), vec3<i32>(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntDiv_vec3_u32_vec3_u32) {
+    auto* src = R"(
+fn f() {
+  let v = 10u;
+  let x = vec3<u32>(20u) / vec3<u32>(v);
+}
+)";
+
+    auto* expect = R"(
+fn tint_div(lhs : vec3<u32>, rhs : vec3<u32>) -> vec3<u32> {
+  return (lhs / select(rhs, vec3(1), (rhs == vec3(0))));
+}
+
+fn f() {
+  let v = 10u;
+  let x = tint_div(vec3<u32>(20u), vec3<u32>(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+TEST_F(BuiltinPolyfillTest, IntMod_vec3_u32_vec3_u32) {
+    auto* src = R"(
+fn f() {
+  let v = 10u;
+  let x = vec3<u32>(20u) % vec3<u32>(v);
+}
+)";
+
+    auto* expect = R"(
+fn tint_mod(lhs : vec3<u32>, rhs : vec3<u32>) -> vec3<u32> {
+  return (lhs % select(rhs, vec3(1), (rhs == vec3(0))));
+}
+
+fn f() {
+  let v = 10u;
+  let x = tint_mod(vec3<u32>(20u), vec3<u32>(v));
+}
+)";
+
+    auto got = Run<BuiltinPolyfill>(src, polyfillIntDivMod());
+
+    EXPECT_EQ(expect, str(got));
+}
+
+////////////////////////////////////////////////////////////////////////////////
 // saturate
 ////////////////////////////////////////////////////////////////////////////////
 DataMap polyfillSaturate() {

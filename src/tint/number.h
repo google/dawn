@@ -124,6 +124,9 @@ struct Number : NumberBase<Number<T>> {
     /// type is the underlying type of the Number
     using type = T;
 
+    /// Number of bits in the number.
+    static constexpr size_t kNumBits = sizeof(T) * 8;
+
     /// Highest finite representable value of this type.
     static constexpr type kHighestValue = std::numeric_limits<type>::max();
 
@@ -186,6 +189,9 @@ template <>
 struct Number<detail::NumberKindF16> : NumberBase<Number<detail::NumberKindF16>> {
     /// C++ does not have a native float16 type, so we use a 32-bit float instead.
     using type = float;
+
+    /// Number of bits in the number.
+    static constexpr size_t kNumBits = 16;
 
     /// Highest finite representable value of this type.
     static constexpr type kHighestValue = 65504.0f;  // 2¹⁵ × (1 + 1023/1024)

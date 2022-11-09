@@ -3,6 +3,10 @@ precision mediump float;
 
 layout(location = 0) in vec4 vcolor_S0_param_1;
 layout(location = 0) out vec4 sk_FragColor_1_1;
+ivec4 tint_div(ivec4 lhs, ivec4 rhs) {
+  return (lhs / mix(rhs, ivec4(1), bvec4(uvec4(equal(rhs, ivec4(0))) | uvec4(bvec4(uvec4(equal(lhs, ivec4(-2147483648))) & uvec4(equal(rhs, ivec4(-1))))))));
+}
+
 struct UniformBuffer {
   uint pad;
   uint pad_1;
@@ -40,7 +44,8 @@ bool test_int_S1_c0_b() {
   ok = true;
   x_41 = false;
   if (true) {
-    x_40 = all(equal((ivec4(0) / ivec4(x_27, x_27, x_27, x_27)), ivec4(0)));
+    ivec4 tint_symbol_1 = tint_div(ivec4(0), ivec4(x_27, x_27, x_27, x_27));
+    x_40 = all(equal(tint_symbol_1, ivec4(0)));
     x_41 = x_40;
   }
   ok = x_41;
@@ -62,11 +67,11 @@ bool test_int_S1_c0_b() {
   ok = x_55;
   ivec4 x_58 = (x_50 * ivec4(2));
   val = x_58;
-  ivec4 x_59 = (x_58 / ivec4(2));
+  ivec4 x_59 = tint_div(x_58, ivec4(2));
   val = x_59;
   ivec4 x_60 = (x_59 * ivec4(2));
   val = x_60;
-  ivec4 x_61 = (x_60 / ivec4(2));
+  ivec4 x_61 = tint_div(x_60, ivec4(2));
   val = x_61;
   x_66 = false;
   if (x_55) {
@@ -159,8 +164,8 @@ main_out tint_symbol(bool sk_Clockwise_param, vec4 vcolor_S0_param) {
   sk_Clockwise = sk_Clockwise_param;
   vcolor_S0 = vcolor_S0_param;
   main_1();
-  main_out tint_symbol_1 = main_out(sk_FragColor);
-  return tint_symbol_1;
+  main_out tint_symbol_2 = main_out(sk_FragColor);
+  return tint_symbol_2;
 }
 
 void main() {

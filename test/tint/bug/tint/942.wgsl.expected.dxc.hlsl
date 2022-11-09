@@ -1,3 +1,7 @@
+uint tint_div(uint lhs, uint rhs) {
+  return (lhs / ((rhs == 0u) ? 1u : rhs));
+}
+
 SamplerState samp : register(s0, space0);
 cbuffer cbuffer_params : register(b1, space0) {
   uint4 params[1];
@@ -25,7 +29,7 @@ void main_inner(uint3 WorkGroupID, uint3 LocalInvocationID, uint local_invocatio
     }
   }
   GroupMemoryBarrierWithGroupSync();
-  const uint filterOffset = ((params[0].x - 1u) / 2u);
+  const uint filterOffset = tint_div((params[0].x - 1u), 2u);
   int3 tint_tmp;
   inputTex.GetDimensions(0, tint_tmp.x, tint_tmp.y, tint_tmp.z);
   const uint2 dims = tint_tmp.xy;

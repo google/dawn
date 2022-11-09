@@ -1,3 +1,7 @@
+uint tint_div(uint lhs, uint rhs) {
+  return (lhs / ((rhs == 0u) ? 1u : rhs));
+}
+
 ByteAddressBuffer firstMatrix : register(t0, space0);
 ByteAddressBuffer secondMatrix : register(t1, space0);
 RWByteAddressBuffer resultMatrix : register(u2, space0);
@@ -63,7 +67,8 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
   const uint tileCol = (local_id.x * 4u);
   const uint globalRow = (global_id.y * 4u);
   const uint globalCol = (global_id.x * 4u);
-  const uint numTiles = (((uniforms[0].y - 1u) / 64u) + 1u);
+  const uint tint_symbol_2 = tint_div((uniforms[0].y - 1u), 64u);
+  const uint numTiles = (tint_symbol_2 + 1u);
   float acc[16] = (float[16])0;
   float ACached = 0.0f;
   float BCached[4] = (float[4])0;
@@ -84,8 +89,8 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
             for(uint innerCol = 0u; (innerCol < ColPerThreadA); innerCol = (innerCol + 1u)) {
               const uint inputRow = (tileRow + innerRow);
               const uint inputCol = (tileColA + innerCol);
-              const float tint_symbol_2 = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol));
-              mm_Asub[inputRow][inputCol] = tint_symbol_2;
+              const float tint_symbol_3 = mm_readA((globalRow + innerRow), ((t * 64u) + inputCol));
+              mm_Asub[inputRow][inputCol] = tint_symbol_3;
             }
           }
         }
@@ -96,8 +101,8 @@ void main_inner(uint3 local_id, uint3 global_id, uint local_invocation_index) {
             for(uint innerCol = 0u; (innerCol < 4u); innerCol = (innerCol + 1u)) {
               const uint inputRow = (tileRowB + innerRow);
               const uint inputCol = (tileCol + innerCol);
-              const float tint_symbol_3 = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
-              mm_Bsub[innerCol][inputCol] = tint_symbol_3;
+              const float tint_symbol_4 = mm_readB(((t * 64u) + inputRow), (globalCol + innerCol));
+              mm_Bsub[innerCol][inputCol] = tint_symbol_4;
             }
           }
         }

@@ -3,14 +3,22 @@ void unused_entry_point() {
   return;
 }
 
+int tint_div(int lhs, int rhs) {
+  return (lhs / (((rhs == 0) | ((lhs == -2147483648) & (rhs == -1))) ? 1 : rhs));
+}
+
+int tint_mod(int lhs, int rhs) {
+  return (lhs % (((rhs == 0) | ((lhs == -2147483648) & (rhs == -1))) ? 1 : rhs));
+}
+
 static int a = 0;
 static float b = 0.0f;
 
 void foo(int maybe_zero) {
-  a = (a / 1);
-  a = (a % 1);
-  a = (a / (maybe_zero == 0 ? 1 : maybe_zero));
-  a = (a % (maybe_zero == 0 ? 1 : maybe_zero));
+  a = tint_div(a, 0);
+  a = tint_mod(a, 0);
+  a = tint_div(a, maybe_zero);
+  a = tint_mod(a, maybe_zero);
   b = (b / 0.0f);
   b = (b % 0.0f);
   b = (b / float(maybe_zero));

@@ -1,11 +1,11 @@
-uint3 value_or_one_if_zero_uint3(uint3 value) {
-  return value == uint3(0u, 0u, 0u) ? uint3(1u, 1u, 1u) : value;
+uint3 tint_mod(uint3 lhs, uint3 rhs) {
+  return (lhs % ((rhs == (0u).xxx) ? (1u).xxx : rhs));
 }
 
 [numthreads(1, 1, 1)]
 void f() {
   uint3 a = uint3(1u, 2u, 3u);
   uint3 b = uint3(0u, 5u, 0u);
-  const uint3 r = (a % value_or_one_if_zero_uint3((b + b)));
+  const uint3 r = tint_mod(a, (b + b));
   return;
 }

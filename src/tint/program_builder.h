@@ -3267,6 +3267,14 @@ class ProgramBuilder {
 //! @cond Doxygen_Suppress
 // Various template specializations for ProgramBuilder::TypesBuilder::CToAST.
 template <>
+struct ProgramBuilder::TypesBuilder::CToAST<AInt> {
+    static const ast::Type* get(const ProgramBuilder::TypesBuilder*) { return nullptr; }
+};
+template <>
+struct ProgramBuilder::TypesBuilder::CToAST<AFloat> {
+    static const ast::Type* get(const ProgramBuilder::TypesBuilder*) { return nullptr; }
+};
+template <>
 struct ProgramBuilder::TypesBuilder::CToAST<i32> {
     static const ast::Type* get(const ProgramBuilder::TypesBuilder* t) { return t->i32(); }
 };

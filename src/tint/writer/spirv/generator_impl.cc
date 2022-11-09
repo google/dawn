@@ -48,6 +48,9 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
 
     manager.Add<transform::DisableUniformityAnalysis>();
 
+    // ExpandCompoundAssignment must come before BuiltinPolyfill
+    manager.Add<transform::ExpandCompoundAssignment>();
+
     {  // Builtin polyfills
         transform::BuiltinPolyfill::Builtins polyfills;
         polyfills.acosh = transform::BuiltinPolyfill::Level::kRangeCheck;
@@ -60,6 +63,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         polyfills.first_leading_bit = true;
         polyfills.first_trailing_bit = true;
         polyfills.insert_bits = transform::BuiltinPolyfill::Level::kClampParameters;
+        polyfills.int_div_mod = true;
         polyfills.saturate = true;
         polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         polyfills.quantize_to_vec_f16 = true;  // crbug.com/tint/1741
@@ -80,7 +84,6 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         manager.Add<transform::ZeroInitWorkgroupMemory>();
     }
     manager.Add<transform::RemoveUnreachableStatements>();
-    manager.Add<transform::ExpandCompoundAssignment>();
     manager.Add<transform::PromoteSideEffectsToDecl>();
     manager.Add<transform::SimplifyPointers>();  // Required for arrayLength()
     manager.Add<transform::RemovePhonies>();

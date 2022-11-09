@@ -93,12 +93,6 @@ class GeneratorImpl : public TextGenerator {
     /// @param stmt the statement to emit
     /// @returns true if the statement was emitted successfully
     bool EmitAssign(const ast::AssignmentStatement* stmt);
-    /// Emits code such that if `expr` is zero, it emits one, else `expr`.
-    /// Used to avoid divide-by-zeros by substituting constant zeros with ones.
-    /// @param out the output of the expression stream
-    /// @param expr the expression
-    /// @returns true if the expression was emitted, false otherwise
-    bool EmitExpressionOrOneIfZero(std::ostream& out, const ast::Expression* expr);
     /// Handles generating a binary expression
     /// @param out the output of the expression stream
     /// @param expr the binary expression

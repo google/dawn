@@ -1,5 +1,9 @@
 #version 310 es
 
+uint tint_div(uint lhs, uint rhs) {
+  return (lhs / ((rhs == 0u) ? 1u : rhs));
+}
+
 struct Params {
   uint filterDim;
   uint blockDim;
@@ -36,7 +40,7 @@ void tint_symbol(uvec3 WorkGroupID, uvec3 LocalInvocationID, uint local_invocati
     }
   }
   barrier();
-  uint filterOffset = ((params.inner.filterDim - 1u) / 2u);
+  uint filterOffset = tint_div((params.inner.filterDim - 1u), 2u);
   uvec2 dims = uvec2(textureSize(inputTex_1, 0));
   uvec2 baseIndex = (((WorkGroupID.xy * uvec2(params.inner.blockDim, 4u)) + (LocalInvocationID.xy * uvec2(4u, 1u))) - uvec2(filterOffset, 0u));
   {

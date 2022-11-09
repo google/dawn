@@ -1,5 +1,13 @@
 #version 310 es
 
+uint tint_div(uint lhs, uint rhs) {
+  return (lhs / ((rhs == 0u) ? 1u : rhs));
+}
+
+uint tint_mod(uint lhs, uint rhs) {
+  return (lhs % ((rhs == 0u) ? 1u : rhs));
+}
+
 uint local_invocation_index_1 = 0u;
 shared uint wg[3][2][1];
 void compute_main_inner(uint local_invocation_index) {
@@ -13,7 +21,10 @@ void compute_main_inner(uint local_invocation_index) {
     uint x_31 = idx;
     uint x_33 = idx;
     uint x_35 = idx;
-    atomicExchange(wg[(x_31 / 2u)][(x_33 % 2u)][(x_35 % 1u)], 0u);
+    uint tint_symbol = tint_div(x_31, 2u);
+    uint tint_symbol_1 = tint_mod(x_33, 2u);
+    uint tint_symbol_2 = tint_mod(x_35, 1u);
+    atomicExchange(wg[tint_symbol][tint_symbol_1][tint_symbol_2], 0u);
     {
       uint x_42 = idx;
       idx = (x_42 + 1u);

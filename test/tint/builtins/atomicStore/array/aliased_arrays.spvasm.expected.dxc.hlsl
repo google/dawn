@@ -1,3 +1,11 @@
+uint tint_div(uint lhs, uint rhs) {
+  return (lhs / ((rhs == 0u) ? 1u : rhs));
+}
+
+uint tint_mod(uint lhs, uint rhs) {
+  return (lhs % ((rhs == 0u) ? 1u : rhs));
+}
+
 static uint local_invocation_index_1 = 0u;
 groupshared uint wg[3][2][1];
 
@@ -12,8 +20,11 @@ void compute_main_inner(uint local_invocation_index) {
     const uint x_31 = idx;
     const uint x_33 = idx;
     const uint x_35 = idx;
+    const uint tint_symbol_2 = tint_div(x_31, 2u);
+    const uint tint_symbol_3 = tint_mod(x_33, 2u);
+    const uint tint_symbol_4 = tint_mod(x_35, 1u);
     uint atomic_result = 0u;
-    InterlockedExchange(wg[(x_31 / 2u)][(x_33 % 2u)][(x_35 % 1u)], 0u, atomic_result);
+    InterlockedExchange(wg[tint_symbol_2][tint_symbol_3][tint_symbol_4], 0u, atomic_result);
     {
       const uint x_42 = idx;
       idx = (x_42 + 1u);

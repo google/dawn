@@ -157,6 +157,9 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
 
     manager.Add<transform::DisableUniformityAnalysis>();
 
+    // ExpandCompoundAssignment must come before BuiltinPolyfill
+    manager.Add<transform::ExpandCompoundAssignment>();
+
     {  // Builtin polyfills
         transform::BuiltinPolyfill::Builtins polyfills;
         polyfills.acosh = transform::BuiltinPolyfill::Level::kFull;
@@ -172,6 +175,7 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
         polyfills.first_leading_bit = true;
         polyfills.first_trailing_bit = true;
         polyfills.insert_bits = transform::BuiltinPolyfill::Level::kFull;
+        polyfills.int_div_mod = true;
         polyfills.texture_sample_base_clamp_to_edge_2d_f32 = true;
         data.Add<transform::BuiltinPolyfill::Config>(polyfills);
         manager.Add<transform::BuiltinPolyfill>();
@@ -211,7 +215,6 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     // assumes that num_workgroups builtins only appear as struct members and are
     // only accessed directly via member accessors.
     manager.Add<transform::NumWorkgroupsFromUniform>();
-    manager.Add<transform::ExpandCompoundAssignment>();
     manager.Add<transform::PromoteSideEffectsToDecl>();
     manager.Add<transform::VectorizeScalarMatrixInitializers>();
     manager.Add<transform::SimplifyPointers>();
@@ -661,117 +664,6 @@ bool GeneratorImpl::EmitAssign(const ast::AssignmentStatement* stmt) {
     return true;
 }
 
-bool GeneratorImpl::EmitExpressionOrOneIfZero(std::ostream& out, const ast::Expression* expr) {
-    // For constants, replace literal 0 with 1.
-    if (const auto* val = builder_.Sem().Get(expr)->ConstantValue()) {
-        if (!val->AnyZero()) {
-            return EmitExpression(out, expr);
-        }
-
-        auto* ty = val->Type();
-
-        if (ty->IsAnyOf<sem::I32, sem::U32>()) {
-            return EmitValue(out, ty, 1);
-        }
-
-        if (auto* vec = ty->As<sem::Vector>()) {
-            auto* elem_ty = vec->type();
-
-            if (!EmitType(out, ty, ast::AddressSpace::kNone, ast::Access::kUndefined, "")) {
-                return false;
-            }
-
-            out << "(";
-            for (size_t i = 0; i < vec->Width(); ++i) {
-                if (i != 0) {
-                    out << ", ";
-                }
-                auto s = val->Index(i)->As<AInt>();
-                if (!EmitValue(out, elem_ty, (s == 0) ? 1 : static_cast<int>(s))) {
-                    return false;
-                }
-            }
-            out << ")";
-            return true;
-        }
-
-        TINT_ICE(Writer, diagnostics_)
-            << "EmitExpressionOrOneIfZero expects integer scalar or vector";
-        return false;
-    }
-
-    auto* ty = TypeOf(expr)->UnwrapRef();
-
-    // For non-constants, we need to emit runtime code to check if the value is 0,
-    // and return 1 in that case.
-    std::string zero;
-    {
-        std::ostringstream ss;
-        EmitValue(ss, ty, 0);
-        zero = ss.str();
-    }
-    std::string one;
-    {
-        std::ostringstream ss;
-        EmitValue(ss, ty, 1);
-        one = ss.str();
-    }
-
-    // For identifiers, no need for a function call as it's fine to evaluate
-    // `expr` more than once.
-    if (expr->Is<ast::IdentifierExpression>()) {
-        out << "(";
-        if (!EmitExpression(out, expr)) {
-            return false;
-        }
-        out << " == " << zero << " ? " << one << " : ";
-        if (!EmitExpression(out, expr)) {
-            return false;
-        }
-        out << ")";
-        return true;
-    }
-
-    // For non-identifier expressions, call a function to make sure `expr` is only
-    // evaluated once.
-    auto name = utils::GetOrCreate(value_or_one_if_zero_, ty, [&]() -> std::string {
-        // Example:
-        // int4 tint_value_or_one_if_zero_int4(int4 value) {
-        //   return value == 0 ? 0 : value;
-        // }
-        std::string ty_name;
-        {
-            std::ostringstream ss;
-            if (!EmitType(ss, ty, tint::ast::AddressSpace::kUndefined, ast::Access::kUndefined,
-                          "")) {
-                return "";
-            }
-            ty_name = ss.str();
-        }
-
-        std::string fn = UniqueIdentifier("value_or_one_if_zero_" + ty_name);
-        line(&helpers_) << ty_name << " " << fn << "(" << ty_name << " value) {";
-        {
-            ScopedIndent si(&helpers_);
-            line(&helpers_) << "return value == " << zero << " ? " << one << " : value;";
-        }
-        line(&helpers_) << "}";
-        line(&helpers_);
-        return fn;
-    });
-
-    if (name.empty()) {
-        return false;
-    }
-
-    out << name << "(";
-    if (!EmitExpression(out, expr)) {
-        return false;
-    }
-    out << ")";
-    return true;
-}
-
 bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* expr) {
     if (expr->op == ast::BinaryOp::kLogicalAnd || expr->op == ast::BinaryOp::kLogicalOr) {
         auto name = UniqueIdentifier(kTempNamePrefix);
@@ -892,21 +784,9 @@ bool GeneratorImpl::EmitBinary(std::ostream& out, const ast::BinaryExpression* e
             break;
         case ast::BinaryOp::kDivide:
             out << "/";
-            // BUG(crbug.com/tint/1083): Integer divide/modulo by zero is a FXC
-            // compile error, and undefined behavior in WGSL.
-            if (TypeOf(expr->rhs)->UnwrapRef()->is_integer_scalar_or_vector()) {
-                out << " ";
-                return EmitExpressionOrOneIfZero(out, expr->rhs);
-            }
             break;
         case ast::BinaryOp::kModulo:
             out << "%";
-            // BUG(crbug.com/tint/1083): Integer divide/modulo by zero is a FXC
-            // compile error, and undefined behavior in WGSL.
-            if (TypeOf(expr->rhs)->UnwrapRef()->is_integer_scalar_or_vector()) {
-                out << " ";
-                return EmitExpressionOrOneIfZero(out, expr->rhs);
-            }
             break;
         case ast::BinaryOp::kNone:
             diagnostics_.add_error(diag::System::Writer, "missing binary operation type");
