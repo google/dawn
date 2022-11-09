@@ -1799,35 +1799,28 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
         }
 
         if (param_type->Is<sem::Pointer>()) {
-            auto is_valid = false;
-            if (auto* ident_expr = arg_expr->As<ast::IdentifierExpression>()) {
-                auto* var = sem_.ResolvedSymbol<sem::Variable>(ident_expr);
-                if (!var) {
-                    TINT_ICE(Resolver, diagnostics_) << "failed to resolve identifier";
-                    return false;
-                }
-                if (var->Is<sem::Parameter>()) {
-                    is_valid = true;
-                }
-            } else if (auto* unary = arg_expr->As<ast::UnaryOpExpression>()) {
-                if (unary->op == ast::UnaryOp::kAddressOf) {
-                    if (auto* ident_unary = unary->expr->As<ast::IdentifierExpression>()) {
-                        auto* var = sem_.ResolvedSymbol<sem::Variable>(ident_unary);
-                        if (!var) {
-                            TINT_ICE(Resolver, diagnostics_) << "failed to resolve identifier";
-                            return false;
-                        }
-                        is_valid = true;
-                    }
-                }
+            // https://gpuweb.github.io/gpuweb/wgsl/#function-restriction
+            // Each argument of pointer type to a user-defined function must have the same memory
+            // view as its root identifier.
+            // We can validate this by just comparing the store type of the argument with that of
+            // its root identifier, as these will match iff the memory view is the same.
+            auto* arg_store_type = arg_type->As<sem::Pointer>()->StoreType();
+            auto* root = call->Arguments()[i]->RootIdentifier();
+            auto* root_ptr_ty = root->Type()->As<sem::Pointer>();
+            auto* root_ref_ty = root->Type()->As<sem::Reference>();
+            TINT_ASSERT(Resolver, root_ptr_ty || root_ref_ty);
+            const sem::Type* root_store_type;
+            if (root_ptr_ty) {
+                root_store_type = root_ptr_ty->StoreType();
+            } else {
+                root_store_type = root_ref_ty->StoreType();
             }
-
-            if (!is_valid &&
+            if (root_store_type != arg_store_type &&
                 IsValidationEnabled(param->Declaration()->attributes,
                                     ast::DisabledValidation::kIgnoreInvalidPointerArgument)) {
                 AddError(
-                    "expected an address-of expression of a variable identifier expression or a "
-                    "function parameter",
+                    "arguments of pointer type must not point to a subset of the originating "
+                    "variable",
                     arg_expr->source);
                 return false;
             }
