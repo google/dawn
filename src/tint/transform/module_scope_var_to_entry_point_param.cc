@@ -441,10 +441,12 @@ struct ModuleScopeVarToEntryPointParam::State {
                     ctx.dst->Structure(ctx.dst->Sym(), std::move(workgroup_parameter_members));
                 auto* param_type =
                     ctx.dst->ty.pointer(ctx.dst->ty.Of(str), ast::AddressSpace::kWorkgroup);
-                auto* disable_validation =
-                    ctx.dst->Disable(ast::DisabledValidation::kEntryPointParameter);
-                auto* param = ctx.dst->Param(workgroup_param(), param_type,
-                                             utils::Vector{disable_validation});
+                auto* param = ctx.dst->Param(
+                    workgroup_param(), param_type,
+                    utils::Vector{
+                        ctx.dst->Disable(ast::DisabledValidation::kEntryPointParameter),
+                        ctx.dst->Disable(ast::DisabledValidation::kIgnoreAddressSpace),
+                    });
                 ctx.InsertFront(func_ast->params, param);
             }
 

@@ -325,7 +325,9 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ModuleScopeVarToEntryPointParamTest, FoldAddressOfDeref) {
+// TODO(crbug.com/tint/1758): Requires support for workgroup pointer parameters, which is 
+// unsupported until WGSL 1.1
+TEST_F(ModuleScopeVarToEntryPointParamTest, DISABLED_FoldAddressOfDeref) {
     auto* src = R"(
 var<workgroup> v : f32;
 
@@ -364,7 +366,9 @@ fn main() {
     EXPECT_EQ(expect, str(got));
 }
 
-TEST_F(ModuleScopeVarToEntryPointParamTest, FoldAddressOfDeref_OutOfOrder) {
+// TODO(crbug.com/tint/1758): Requires support for workgroup pointer parameters, which is 
+// unsupported until WGSL 1.1
+TEST_F(ModuleScopeVarToEntryPointParamTest, DISABLED_FoldAddressOfDeref_OutOfOrder) {
     auto* src = R"(
 @compute @workgroup_size(1)
 fn main() {
@@ -998,7 +1002,7 @@ struct tint_symbol_2 {
 }
 
 @compute @workgroup_size(1)
-fn main(@internal(disable_validation__entry_point_parameter) tint_symbol_1 : ptr<workgroup, tint_symbol_2>) {
+fn main(@internal(disable_validation__entry_point_parameter) @internal(disable_validation__ignore_address_space) tint_symbol_1 : ptr<workgroup, tint_symbol_2>) {
   let tint_symbol : ptr<workgroup, mat2x2<f32>> = &((*(tint_symbol_1)).m);
   let x = *(tint_symbol);
 }
@@ -1039,7 +1043,7 @@ struct tint_symbol_2 {
 }
 
 @compute @workgroup_size(1)
-fn main(@internal(disable_validation__entry_point_parameter) tint_symbol_1 : ptr<workgroup, tint_symbol_2>) {
+fn main(@internal(disable_validation__entry_point_parameter) @internal(disable_validation__ignore_address_space) tint_symbol_1 : ptr<workgroup, tint_symbol_2>) {
   let tint_symbol : ptr<workgroup, array<S2, 4u>> = &((*(tint_symbol_1)).m);
   let x = *(tint_symbol);
 }
@@ -1080,7 +1084,7 @@ struct tint_symbol_3 {
 }
 
 @compute @workgroup_size(1)
-fn main(@internal(disable_validation__entry_point_parameter) tint_symbol_1 : ptr<workgroup, tint_symbol_3>) {
+fn main(@internal(disable_validation__entry_point_parameter) @internal(disable_validation__ignore_address_space) tint_symbol_1 : ptr<workgroup, tint_symbol_3>) {
   let tint_symbol : ptr<workgroup, S> = &((*(tint_symbol_1)).a);
   let tint_symbol_2 : ptr<workgroup, S> = &((*(tint_symbol_1)).b);
   let x = *(tint_symbol);
@@ -1122,7 +1126,7 @@ struct tint_symbol_3 {
 }
 
 @compute @workgroup_size(1)
-fn main(@internal(disable_validation__entry_point_parameter) tint_symbol_1 : ptr<workgroup, tint_symbol_3>) {
+fn main(@internal(disable_validation__entry_point_parameter) @internal(disable_validation__ignore_address_space) tint_symbol_1 : ptr<workgroup, tint_symbol_3>) {
   let tint_symbol : ptr<workgroup, S> = &((*(tint_symbol_1)).a);
   let tint_symbol_2 : ptr<workgroup, S> = &((*(tint_symbol_1)).b);
   let x = *(tint_symbol);

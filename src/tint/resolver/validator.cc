@@ -853,8 +853,7 @@ bool Validator::Parameter(const ast::Function* func, const sem::Variable* var) c
     if (auto* ref = var->Type()->As<sem::Pointer>()) {
         auto address_space = ref->AddressSpace();
         if (!(address_space == ast::AddressSpace::kFunction ||
-              address_space == ast::AddressSpace::kPrivate ||
-              address_space == ast::AddressSpace::kWorkgroup) &&
+              address_space == ast::AddressSpace::kPrivate) &&
             IsValidationEnabled(decl->attributes, ast::DisabledValidation::kIgnoreAddressSpace)) {
             std::stringstream ss;
             ss << "function parameter of pointer type cannot be in '" << address_space
