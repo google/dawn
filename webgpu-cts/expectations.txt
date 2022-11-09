@@ -554,6 +554,10 @@ crbug.com/1357206 [ nvidia-0x2184 win10 ] worker_webgpu:api,validation,buffer,ma
 ################################################################################
 crbug.com/tint/1753 [ win10 ] webgpu:shader,execution,expression,binary,bitwise:bitwise_exclusive_or:type="i32";inputSource="const";* [ Failure ]
 crbug.com/tint/1753 [ win10 ] webgpu:shader,execution,expression,binary,bitwise:bitwise_exclusive_or:type="u32";inputSource="const";* [ Failure ]
+crbug.com/tint/1755 [ win10 ] webgpu:shader,execution,expression,call,builtin,pack2x16snorm:pack:inputSource="const" [ Failure ]
+crbug.com/tint/1755 [ win10 ] webgpu:shader,execution,expression,call,builtin,pack2x16unorm:pack:inputSource="const" [ Failure ]
+crbug.com/tint/1755 [ win10 ] webgpu:shader,execution,expression,call,builtin,pack4x8snorm:pack:inputSource="const" [ Failure ]
+crbug.com/tint/1755 [ win10 ] webgpu:shader,execution,expression,call,builtin,pack4x8unorm:pack:inputSource="const" [ Failure ]
 
 ################################################################################
 # untriaged failures
