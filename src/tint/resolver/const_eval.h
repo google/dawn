@@ -557,6 +557,15 @@ class ConstEval {
                       utils::VectorRef<const sem::Constant*> args,
                       const Source& source);
 
+    /// pack2x16float builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result pack2x16float(const sem::Type* ty,
+                         utils::VectorRef<const sem::Constant*> args,
+                         const Source& source);
+
     /// pack2x16snorm builtin
     /// @param ty the expression type
     /// @param args the input arguments
@@ -646,6 +655,15 @@ class ConstEval {
     Result step(const sem::Type* ty,
                 utils::VectorRef<const sem::Constant*> args,
                 const Source& source);
+
+    /// unpack2x16float builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result unpack2x16float(const sem::Type* ty,
+                           utils::VectorRef<const sem::Constant*> args,
+                           const Source& source);
 
     /// unpack2x16snorm builtin
     /// @param ty the expression type

@@ -507,7 +507,7 @@ fn mix<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, T) -> vec<N, T>
 fn modf<T: f32_f16>(T) -> __modf_result<T>
 fn modf<N: num, T: f32_f16>(vec<N, T>) -> __modf_result_vec<N, T>
 fn normalize<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
-fn pack2x16float(vec2<f32>) -> u32
+@const fn pack2x16float(vec2<f32>) -> u32
 @const fn pack2x16snorm(vec2<f32>) -> u32
 @const fn pack2x16unorm(vec2<f32>) -> u32
 @const fn pack4x8snorm(vec4<f32>) -> u32
@@ -549,7 +549,7 @@ fn tanh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 fn transpose<M: num, N: num, T: f32_f16>(mat<M, N, T>) -> mat<N, M, T>
 fn trunc<T: f32_f16>(T) -> T
 fn trunc<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
-fn unpack2x16float(u32) -> vec2<f32>
+@const fn unpack2x16float(u32) -> vec2<f32>
 @const fn unpack2x16snorm(u32) -> vec2<f32>
 @const fn unpack2x16unorm(u32) -> vec2<f32>
 @const fn unpack4x8snorm(u32) -> vec4<f32>

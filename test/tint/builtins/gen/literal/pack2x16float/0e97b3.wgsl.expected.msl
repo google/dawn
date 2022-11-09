@@ -2,7 +2,7 @@
 
 using namespace metal;
 void pack2x16float_0e97b3() {
-  uint res = as_type<uint>(half2(float2(1.0f)));
+  uint res = 1006648320u;
 }
 
 struct tint_symbol {

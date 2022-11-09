@@ -2076,6 +2076,34 @@ ConstEval::Result ConstEval::insertBits(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0], args[1]);
 }
 
+ConstEval::Result ConstEval::pack2x16float(const sem::Type* ty,
+                                           utils::VectorRef<const sem::Constant*> args,
+                                           const Source& source) {
+    auto convert = [&](f32 val) -> utils::Result<uint32_t> {
+        auto conv = CheckedConvert<f16>(val);
+        if (!conv) {
+            AddError(OverflowErrorMessage(val, "f16"), source);
+            return utils::Failure;
+        }
+        uint16_t v = conv.Get().BitsRepresentation();
+        return utils::Result<uint32_t>{v};
+    };
+
+    auto* e = args[0];
+    auto e0 = convert(e->Index(0)->As<f32>());
+    if (!e0) {
+        return utils::Failure;
+    }
+
+    auto e1 = convert(e->Index(1)->As<f32>());
+    if (!e1) {
+        return utils::Failure;
+    }
+
+    u32 ret = u32((e0.Get() & 0x0000'ffff) | (e1.Get() << 16));
+    return CreateElement(builder, ty, ret);
+}
+
 ConstEval::Result ConstEval::pack2x16snorm(const sem::Type* ty,
                                            utils::VectorRef<const sem::Constant*> args,
                                            const Source&) {
@@ -2252,6 +2280,26 @@ ConstEval::Result ConstEval::step(const sem::Type* ty,
         return Dispatch_fa_f32_f16(create, c0, c1);
     };
     return TransformElements(builder, ty, transform, args[0], args[1]);
+}
+
+ConstEval::Result ConstEval::unpack2x16float(const sem::Type* ty,
+                                             utils::VectorRef<const sem::Constant*> args,
+                                             const Source& source) {
+    auto* inner_ty = sem::Type::DeepestElementOf(ty);
+    auto e = args[0]->As<u32>().value;
+
+    utils::Vector<const sem::Constant*, 2> els;
+    els.Reserve(2);
+    for (size_t i = 0; i < 2; ++i) {
+        auto in = f16::FromBits(uint16_t((e >> (16 * i)) & 0x0000'ffff));
+        auto val = CheckedConvert<f32>(in);
+        if (!val) {
+            AddError(OverflowErrorMessage(in, "f32"), source);
+            return utils::Failure;
+        }
+        els.Push(CreateElement(builder, inner_ty, val.Get()));
+    }
+    return CreateComposite(builder, ty, std::move(els));
 }
 
 ConstEval::Result ConstEval::unpack2x16snorm(const sem::Type* ty,

@@ -1,10 +1,5 @@
-uint tint_pack2x16float(float2 param_0) {
-  uint2 i = f32tof16(param_0);
-  return i.x | (i.y << 16);
-}
-
 void pack2x16float_0e97b3() {
-  uint res = tint_pack2x16float((1.0f).xx);
+  uint res = 1006648320u;
 }
 
 struct tint_symbol {
