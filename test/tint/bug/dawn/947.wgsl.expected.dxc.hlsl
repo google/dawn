@@ -1,3 +1,5 @@
+static bool tint_discarded = false;
+
 cbuffer cbuffer_uniforms : register(b0, space0) {
   uint4 uniforms[1];
 };
@@ -45,30 +47,21 @@ struct tint_symbol_5 {
   float4 value : SV_Target0;
 };
 
-static bool tint_discard = false;
-
 float4 fs_main_inner(float2 texcoord) {
   float2 clampedTexcoord = clamp(texcoord, (0.0f).xx, (1.0f).xx);
   if (!(all((clampedTexcoord == texcoord)))) {
-    tint_discard = true;
-    return (0.0f).xxxx;
+    tint_discarded = true;
   }
   float4 srcColor = (0.0f).xxxx;
   return srcColor;
 }
 
-void tint_discard_func() {
-  discard;
-}
-
 tint_symbol_5 fs_main(tint_symbol_4 tint_symbol_3) {
   const float4 inner_result_1 = fs_main_inner(tint_symbol_3.texcoord);
-  if (tint_discard) {
-    tint_discard_func();
-    const tint_symbol_5 tint_symbol_8 = (tint_symbol_5)0;
-    return tint_symbol_8;
-  }
   tint_symbol_5 wrapper_result_1 = (tint_symbol_5)0;
   wrapper_result_1.value = inner_result_1;
+  if (tint_discarded) {
+    discard;
+  }
   return wrapper_result_1;
 }

@@ -1,0 +1,25 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void foo(device int* const tint_symbol_1, thread bool* const tint_symbol_2) {
+  if ((*(tint_symbol_1) < 0)) {
+    *(tint_symbol_2) = true;
+  }
+}
+
+void bar(thread bool* const tint_symbol_3, device float* const tint_symbol_4) {
+  if (!(*(tint_symbol_3))) {
+    *(tint_symbol_4) = dfdx(1.0f);
+  }
+}
+
+fragment void tint_symbol(device int* tint_symbol_5 [[buffer(0)]], device float* tint_symbol_7 [[buffer(1)]]) {
+  thread bool tint_symbol_6 = false;
+  foo(tint_symbol_5, &(tint_symbol_6));
+  bar(&(tint_symbol_6), tint_symbol_7);
+  if (tint_symbol_6) {
+    discard_fragment();
+  }
+  return;
+}
+

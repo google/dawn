@@ -479,8 +479,6 @@ list(APPEND TINT_LIB_SRCS
   transform/transform.h
   transform/unshadow.cc
   transform/unshadow.h
-  transform/unwind_discard_functions.cc
-  transform/unwind_discard_functions.h
   transform/utils/get_insertion_point.cc
   transform/utils/get_insertion_point.h
   transform/utils/hoist_to_decl_before.cc
@@ -1213,7 +1211,6 @@ if(TINT_BUILD_TESTS)
       transform/substitute_override_test.cc
       transform/test_helper.h
       transform/unshadow_test.cc
-      transform/unwind_discard_functions_test.cc
       transform/var_for_dynamic_index_test.cc
       transform/vectorize_matrix_conversions_test.cc
       transform/vectorize_scalar_matrix_initializers_test.cc

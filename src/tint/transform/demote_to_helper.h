@@ -25,6 +25,10 @@ namespace tint::transform {
 /// program to ensure that discarding the fragment does not affect uniformity with respect to
 /// derivative operations. We do this by setting a global flag and masking all writes to storage
 /// buffers and textures.
+///
+/// @note Depends on the following transforms to have been run first:
+/// * PromoteSideEffectsToDecl
+/// * ExpandCompoundAssignment
 class DemoteToHelper final : public Castable<DemoteToHelper, Transform> {
   public:
     /// Constructor

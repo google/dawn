@@ -30,10 +30,11 @@ namespace {
 class ResolverBehaviorTest : public ResolverTest {
   protected:
     void SetUp() override {
-        // Create a function called 'DiscardOrNext' which returns an i32, and has
-        // the behavior of {Discard, Return}, which when called, will have the
-        // behavior {Discard, Next}.
-        Func("DiscardOrNext", utils::Empty, ty.i32(),
+        // Create a function called 'Next' which returns an i32, and has the behavior of {Return},
+        // which when called, will have the behavior {Next}.
+        // It contains a discard statement, which should not affect the behavior analysis or any
+        // related validation.
+        Func("Next", utils::Empty, ty.i32(),
              utils::Vector{
                  If(true, Block(Discard())),
                  Return(1_i),
@@ -42,7 +43,7 @@ class ResolverBehaviorTest : public ResolverTest {
 };
 
 TEST_F(ResolverBehaviorTest, ExprBinaryOp_LHS) {
-    auto* stmt = Decl(Var("lhs", ty.i32(), Add(Call("DiscardOrNext"), 1_i)));
+    auto* stmt = Decl(Var("lhs", ty.i32(), Add(Call("Next"), 1_i)));
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -50,11 +51,11 @@ TEST_F(ResolverBehaviorTest, ExprBinaryOp_LHS) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, ExprBinaryOp_RHS) {
-    auto* stmt = Decl(Var("lhs", ty.i32(), Add(1_i, Call("DiscardOrNext"))));
+    auto* stmt = Decl(Var("lhs", ty.i32(), Add(1_i, Call("Next"))));
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -62,11 +63,11 @@ TEST_F(ResolverBehaviorTest, ExprBinaryOp_RHS) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, ExprBitcastOp) {
-    auto* stmt = Decl(Var("lhs", ty.u32(), Bitcast<u32>(Call("DiscardOrNext"))));
+    auto* stmt = Decl(Var("lhs", ty.u32(), Bitcast<u32>(Call("Next"))));
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -74,7 +75,7 @@ TEST_F(ResolverBehaviorTest, ExprBitcastOp) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, ExprIndex_Arr) {
@@ -92,11 +93,11 @@ TEST_F(ResolverBehaviorTest, ExprIndex_Arr) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, ExprIndex_Idx) {
-    auto* stmt = Decl(Var("lhs", ty.i32(), IndexAccessor("arr", Call("DiscardOrNext"))));
+    auto* stmt = Decl(Var("lhs", ty.i32(), IndexAccessor("arr", Call("Next"))));
 
     Func("F", utils::Empty, ty.void_(),
          utils::Vector{
@@ -108,13 +109,12 @@ TEST_F(ResolverBehaviorTest, ExprIndex_Idx) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, ExprUnaryOp) {
-    auto* stmt =
-        Decl(Var("lhs", ty.i32(),
-                 create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement, Call("DiscardOrNext"))));
+    auto* stmt = Decl(Var("lhs", ty.i32(),
+                          create<ast::UnaryOpExpression>(ast::UnaryOp::kComplement, Call("Next"))));
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -122,7 +122,7 @@ TEST_F(ResolverBehaviorTest, ExprUnaryOp) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtAssign) {
@@ -138,7 +138,7 @@ TEST_F(ResolverBehaviorTest, StmtAssign) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtAssign_LHSDiscardOrNext) {
-    auto* stmt = Assign(IndexAccessor("lhs", Call("DiscardOrNext")), 1_i);
+    auto* stmt = Assign(IndexAccessor("lhs", Call("Next")), 1_i);
 
     Func("F", utils::Empty, ty.void_(),
          utils::Vector{
@@ -150,11 +150,11 @@ TEST_F(ResolverBehaviorTest, StmtAssign_LHSDiscardOrNext) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtAssign_RHSDiscardOrNext) {
-    auto* stmt = Assign("lhs", Call("DiscardOrNext"));
+    auto* stmt = Assign("lhs", Call("Next"));
 
     Func("F", utils::Empty, ty.void_(),
          utils::Vector{
@@ -166,7 +166,7 @@ TEST_F(ResolverBehaviorTest, StmtAssign_RHSDiscardOrNext) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtBlockEmpty) {
@@ -180,7 +180,7 @@ TEST_F(ResolverBehaviorTest, StmtBlockEmpty) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtBlockSingleStmt) {
-    auto* stmt = Block(Discard());
+    auto* stmt = Block(Return());
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -188,7 +188,7 @@ TEST_F(ResolverBehaviorTest, StmtBlockSingleStmt) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kDiscard);
+    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kReturn);
 }
 
 TEST_F(ResolverBehaviorTest, StmtCallReturn) {
@@ -212,12 +212,11 @@ TEST_F(ResolverBehaviorTest, StmtCallFuncDiscard) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kDiscard);
+    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kNext);
 }
 
 TEST_F(ResolverBehaviorTest, StmtCallFuncMayDiscard) {
-    auto* stmt =
-        For(Decl(Var("v", ty.i32(), Call("DiscardOrNext"))), nullptr, nullptr, Block(Break()));
+    auto* stmt = For(Decl(Var("v", ty.i32(), Call("Next"))), nullptr, nullptr, Block(Break()));
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -225,7 +224,7 @@ TEST_F(ResolverBehaviorTest, StmtCallFuncMayDiscard) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtBreak) {
@@ -258,7 +257,7 @@ TEST_F(ResolverBehaviorTest, StmtDiscard) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kDiscard);
+    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kNext);
 }
 
 TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_NoExit) {
@@ -288,7 +287,7 @@ TEST_F(ResolverBehaviorTest, StmtForLoopContinue_NoExit) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtForLoopDiscard) {
-    auto* stmt = For(nullptr, nullptr, nullptr, Block(Discard()));
+    auto* stmt = For(nullptr, nullptr, nullptr, Block(Discard(), Break()));
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -296,7 +295,7 @@ TEST_F(ResolverBehaviorTest, StmtForLoopDiscard) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kDiscard);
+    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kNext);
 }
 
 TEST_F(ResolverBehaviorTest, StmtForLoopReturn) {
@@ -310,8 +309,7 @@ TEST_F(ResolverBehaviorTest, StmtForLoopReturn) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtForLoopBreak_InitCallFuncMayDiscard) {
-    auto* stmt =
-        For(Decl(Var("v", ty.i32(), Call("DiscardOrNext"))), nullptr, nullptr, Block(Break()));
+    auto* stmt = For(Decl(Var("v", ty.i32(), Call("Next"))), nullptr, nullptr, Block(Break()));
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -319,11 +317,11 @@ TEST_F(ResolverBehaviorTest, StmtForLoopBreak_InitCallFuncMayDiscard) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_InitCallFuncMayDiscard) {
-    auto* stmt = For(Decl(Var("v", ty.i32(), Call("DiscardOrNext"))), nullptr, nullptr, Block());
+    auto* stmt = For(Decl(Var("v", ty.i32(), Call("Next"))), nullptr, nullptr, Block(Break()));
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -331,7 +329,7 @@ TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_InitCallFuncMayDiscard) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kDiscard);
+    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kNext);
 }
 
 TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_CondTrue) {
@@ -345,7 +343,7 @@ TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_CondTrue) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_CondCallFuncMayDiscard) {
-    auto* stmt = For(nullptr, Equal(Call("DiscardOrNext"), 1_i), nullptr, Block());
+    auto* stmt = For(nullptr, Equal(Call("Next"), 1_i), nullptr, Block());
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -353,7 +351,7 @@ TEST_F(ResolverBehaviorTest, StmtForLoopEmpty_CondCallFuncMayDiscard) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtWhileBreak) {
@@ -375,7 +373,7 @@ TEST_F(ResolverBehaviorTest, StmtWhileDiscard) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtWhileReturn) {
@@ -399,7 +397,7 @@ TEST_F(ResolverBehaviorTest, StmtWhileEmpty_CondTrue) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtWhileEmpty_CondCallFuncMayDiscard) {
-    auto* stmt = While(Equal(Call("DiscardOrNext"), 1_i), Block());
+    auto* stmt = While(Equal(Call("Next"), 1_i), Block());
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -407,7 +405,7 @@ TEST_F(ResolverBehaviorTest, StmtWhileEmpty_CondCallFuncMayDiscard) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenEmptyBlock) {
@@ -429,7 +427,7 @@ TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenDiscard) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenEmptyBlock_ElseDiscard) {
@@ -441,7 +439,7 @@ TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenEmptyBlock_ElseDiscard) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenDiscard_ElseDiscard) {
@@ -453,11 +451,11 @@ TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenDiscard_ElseDiscard) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kDiscard);
+    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kNext);
 }
 
 TEST_F(ResolverBehaviorTest, StmtIfCallFuncMayDiscard_ThenEmptyBlock) {
-    auto* stmt = If(Equal(Call("DiscardOrNext"), 1_i), Block());
+    auto* stmt = If(Equal(Call("Next"), 1_i), Block());
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -465,12 +463,12 @@ TEST_F(ResolverBehaviorTest, StmtIfCallFuncMayDiscard_ThenEmptyBlock) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenEmptyBlock_ElseCallFuncMayDiscard) {
     auto* stmt = If(true, Block(),  //
-                    Else(If(Equal(Call("DiscardOrNext"), 1_i), Block())));
+                    Else(If(Equal(Call("Next"), 1_i), Block())));
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -478,7 +476,7 @@ TEST_F(ResolverBehaviorTest, StmtIfTrue_ThenEmptyBlock_ElseCallFuncMayDiscard) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtLetDecl) {
@@ -492,7 +490,7 @@ TEST_F(ResolverBehaviorTest, StmtLetDecl) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtLetDecl_RHSDiscardOrNext) {
-    auto* stmt = Decl(Let("lhs", ty.i32(), Call("DiscardOrNext")));
+    auto* stmt = Decl(Let("lhs", ty.i32(), Call("Next")));
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -500,7 +498,7 @@ TEST_F(ResolverBehaviorTest, StmtLetDecl_RHSDiscardOrNext) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtLoopEmpty_NoExit) {
@@ -530,7 +528,7 @@ TEST_F(ResolverBehaviorTest, StmtLoopContinue_NoExit) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtLoopDiscard) {
-    auto* stmt = Loop(Block(Discard()));
+    auto* stmt = Loop(Block(Discard(), Break()));
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -538,7 +536,7 @@ TEST_F(ResolverBehaviorTest, StmtLoopDiscard) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kDiscard);
+    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kNext);
 }
 
 TEST_F(ResolverBehaviorTest, StmtLoopReturn) {
@@ -590,14 +588,14 @@ TEST_F(ResolverBehaviorTest, StmtReturn) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtReturn_DiscardOrNext) {
-    auto* stmt = Return(Call("DiscardOrNext"));
+    auto* stmt = Return(Call("Next"));
 
     Func("F", utils::Empty, ty.i32(), utils::Vector{stmt});
 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kReturn, sem::Behavior::kDiscard));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kReturn));
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondTrue_DefaultEmpty) {
@@ -629,7 +627,7 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_DefaultDiscard) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kDiscard);
+    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kNext);
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_DefaultReturn) {
@@ -661,7 +659,7 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Empty_DefaultDiscard) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext, sem::Behavior::kDiscard));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Empty_DefaultReturn) {
@@ -683,7 +681,7 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_DefaultEmpty) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_DefaultDiscard) {
@@ -696,7 +694,7 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_DefaultDiscard)
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kDiscard);
+    EXPECT_EQ(sem->Behaviors(), sem::Behavior::kNext);
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_DefaultReturn) {
@@ -709,7 +707,7 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_DefaultReturn) 
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kReturn));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kReturn, sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_Case1Return_DefaultEmpty) {
@@ -724,12 +722,11 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondLiteral_Case0Discard_Case1Return_Def
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext,
-                                               sem::Behavior::kReturn));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext, sem::Behavior::kReturn));
 }
 
 TEST_F(ResolverBehaviorTest, StmtSwitch_CondCallFuncMayDiscard_DefaultEmpty) {
-    auto* stmt = Switch(Call("DiscardOrNext"), DefaultCase(Block()));
+    auto* stmt = Switch(Call("Next"), DefaultCase(Block()));
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -737,7 +734,7 @@ TEST_F(ResolverBehaviorTest, StmtSwitch_CondCallFuncMayDiscard_DefaultEmpty) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 TEST_F(ResolverBehaviorTest, StmtVarDecl) {
@@ -751,7 +748,7 @@ TEST_F(ResolverBehaviorTest, StmtVarDecl) {
 }
 
 TEST_F(ResolverBehaviorTest, StmtVarDecl_RHSDiscardOrNext) {
-    auto* stmt = Decl(Var("lhs", ty.i32(), Call("DiscardOrNext")));
+    auto* stmt = Decl(Var("lhs", ty.i32(), Call("Next")));
 
     Func("F", utils::Empty, ty.void_(), utils::Vector{stmt},
          utils::Vector{Stage(ast::PipelineStage::kFragment)});
@@ -759,7 +756,7 @@ TEST_F(ResolverBehaviorTest, StmtVarDecl_RHSDiscardOrNext) {
     ASSERT_TRUE(r()->Resolve()) << r()->error();
 
     auto* sem = Sem().Get(stmt);
-    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kDiscard, sem::Behavior::kNext));
+    EXPECT_EQ(sem->Behaviors(), sem::Behaviors(sem::Behavior::kNext));
 }
 
 }  // namespace

@@ -3295,10 +3295,8 @@ sem::Statement* Resolver::DiscardStatement(const ast::DiscardStatement* stmt) {
     auto* sem =
         builder_->create<sem::Statement>(stmt, current_compound_statement_, current_function_);
     return StatementScope(stmt, sem, [&] {
-        sem->Behaviors() = sem::Behavior::kDiscard;
         current_function_->SetDiscardStatement(sem);
-
-        return validator_.DiscardStatement(sem, current_statement_);
+        return true;
     });
 }
 

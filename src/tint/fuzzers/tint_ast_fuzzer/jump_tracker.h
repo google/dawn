@@ -22,7 +22,7 @@
 
 namespace tint::fuzzers::ast_fuzzer {
 
-/// This class computes information on which statements contain loop breaks, returns and discards.
+/// This class computes information on which statements contain loop breaks and returns.
 /// It could be extended to handle other jumps, such as switch breaks and loop continues, should
 /// such information prove useful.
 class JumpTracker {
@@ -47,20 +47,9 @@ class JumpTracker {
         return contains_return_.count(&statement) > 0;
     }
 
-    /// Indicates whether a statement contains a discard statement.
-    /// @param statement - the statement of interest.
-    /// @return true if and only if the statement is, or contains, a discard statement. This is
-    ///    determined in an intraprocedural fashion: the answer will be "false" if no discard occurs
-    ///    inside the statement, even if the statement calls a function that may lead to a discard
-    ///    being performed.
-    bool ContainsIntraproceduralDiscard(const ast::Statement& statement) const {
-        return contains_intraprocedural_discard_.count(&statement) > 0;
-    }
-
   private:
     std::unordered_set<const ast::Statement*> contains_break_for_innermost_loop_;
     std::unordered_set<const ast::Statement*> contains_return_;
-    std::unordered_set<const ast::Statement*> contains_intraprocedural_discard_;
 };
 
 }  // namespace tint::fuzzers::ast_fuzzer

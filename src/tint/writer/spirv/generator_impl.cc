@@ -21,6 +21,7 @@
 #include "src/tint/transform/add_empty_entry_point.h"
 #include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
+#include "src/tint/transform/demote_to_helper.h"
 #include "src/tint/transform/disable_uniformity_analysis.h"
 #include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/for_loop_to_loop.h"
@@ -32,7 +33,6 @@
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/transform/std140.h"
 #include "src/tint/transform/unshadow.h"
-#include "src/tint/transform/unwind_discard_functions.h"
 #include "src/tint/transform/var_for_dynamic_index.h"
 #include "src/tint/transform/vectorize_matrix_conversions.h"
 #include "src/tint/transform/vectorize_scalar_matrix_initializers.h"
@@ -82,7 +82,6 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     manager.Add<transform::RemoveUnreachableStatements>();
     manager.Add<transform::ExpandCompoundAssignment>();
     manager.Add<transform::PromoteSideEffectsToDecl>();
-    manager.Add<transform::UnwindDiscardFunctions>();
     manager.Add<transform::SimplifyPointers>();  // Required for arrayLength()
     manager.Add<transform::RemovePhonies>();
     manager.Add<transform::VectorizeScalarMatrixInitializers>();
@@ -92,6 +91,11 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     manager.Add<transform::CanonicalizeEntryPointIO>();
     manager.Add<transform::AddEmptyEntryPoint>();
     manager.Add<transform::AddBlockAttribute>();
+
+    // DemoteToHelper must come after CanonicalizeEntryPointIO, PromoteSideEffectsToDecl, and
+    // ExpandCompoundAssignment.
+    // TODO(crbug.com/tint/1752): Use SPV_EXT_demote_to_helper_invocation if available.
+    manager.Add<transform::DemoteToHelper>();
 
     // Std140 must come after PromoteSideEffectsToDecl.
     // Std140 must come before VarForDynamicIndex and ForLoopToLoop.

@@ -76,7 +76,7 @@ TEST_F(ForLoopToLoopTest, Body) {
     auto* src = R"(
 fn f() {
   for (;;) {
-    discard;
+    return;
   }
 }
 )";
@@ -84,7 +84,7 @@ fn f() {
     auto* expect = R"(
 fn f() {
   loop {
-    discard;
+    return;
   }
 }
 )";

@@ -1,32 +1,18 @@
-bug/tint/1369.wgsl:3:3 warning: code is unreachable
-  return true;
-  ^^^^^^
-
-bug/tint/1369.wgsl:9:5 warning: code is unreachable
-    var also_unreachable : bool;
-    ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
 #include <metal_stdlib>
 
 using namespace metal;
 bool call_discard(thread bool* const tint_symbol) {
   *(tint_symbol) = true;
-  return false;
   return true;
-}
-
-void tint_discard_func() {
-  discard_fragment();
 }
 
 fragment void f() {
   thread bool tint_symbol_1 = false;
   bool v = call_discard(&(tint_symbol_1));
-  if (tint_symbol_1) {
-    tint_discard_func();
-    return;
-  }
   bool also_unreachable = false;
+  if (tint_symbol_1) {
+    discard_fragment();
+  }
   return;
 }
 

@@ -1076,12 +1076,8 @@ bool Validator::Function(const sem::Function* func, ast::PipelineStage stage) co
     }
 
     // https://www.w3.org/TR/WGSL/#behaviors-rules
-    // a function behavior is always one of {}, {Next}, {Discard}, or
-    // {Next, Discard}.
-    if (func->Behaviors() != sem::Behaviors{} &&  // NOLINT: bad warning
-        func->Behaviors() != sem::Behavior::kNext && func->Behaviors() != sem::Behavior::kDiscard &&
-        func->Behaviors() != sem::Behaviors{sem::Behavior::kNext,  //
-                                            sem::Behavior::kDiscard}) {
+    // a function behavior is always one of {}, or {Next}.
+    if (func->Behaviors() != sem::Behaviors{} && func->Behaviors() != sem::Behavior::kNext) {
         auto name = symbols_.NameFor(decl->symbol);
         TINT_ICE(Resolver, diagnostics_)
             << "function '" << name << "' behaviors are: " << func->Behaviors();
@@ -1544,19 +1540,6 @@ bool Validator::Call(const sem::Call* call, sem::Statement* current_statement) c
     return true;
 }
 
-bool Validator::DiscardStatement(const sem::Statement* stmt,
-                                 sem::Statement* current_statement) const {
-    if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ false, current_statement)) {
-        AddError("continuing blocks must not contain a discard statement",
-                 stmt->Declaration()->source);
-        if (continuing != stmt->Declaration() && continuing != stmt->Parent()->Declaration()) {
-            AddNote("see continuing block here", continuing->source);
-        }
-        return false;
-    }
-    return true;
-}
-
 bool Validator::FallthroughStatement(const sem::Statement* stmt) const {
     if (auto* block = As<sem::BlockStatement>(stmt->Parent())) {
         if (auto* c = As<sem::CaseStatement>(block->Parent())) {
@@ -1839,18 +1822,6 @@ bool Validator::FunctionCall(const sem::Call* call, sem::Statement* current_stat
             // If the called function does not return a value, a function call
             // statement should be used instead.
             AddError("function '" + name + "' does not return a value", decl->source);
-            return false;
-        }
-    }
-
-    if (call->Behaviors().Contains(sem::Behavior::kDiscard)) {
-        if (auto* continuing = ClosestContinuing(/*stop_at_loop*/ false, current_statement)) {
-            AddError("cannot call a function that may discard inside a continuing block",
-                     call->Declaration()->source);
-            if (continuing != call->Stmt()->Declaration() &&
-                continuing != call->Stmt()->Parent()->Declaration()) {
-                AddNote("see continuing block here", continuing->source);
-            }
             return false;
         }
     }

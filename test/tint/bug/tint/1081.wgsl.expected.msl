@@ -1,10 +1,9 @@
 #include <metal_stdlib>
 
 using namespace metal;
-int f(int x, thread bool* const tint_symbol_5) {
+int f(int x, thread bool* const tint_symbol_4) {
   if ((x == 10)) {
-    *(tint_symbol_5) = true;
-    return 0;
+    *(tint_symbol_4) = true;
   }
   return x;
 }
@@ -17,13 +16,10 @@ struct tint_symbol_3 {
   int value [[color(2)]];
 };
 
-int tint_symbol_inner(int3 x, thread bool* const tint_symbol_6) {
+int tint_symbol_inner(int3 x, thread bool* const tint_symbol_5) {
   int y = x[0];
   while (true) {
-    int const r = f(y, tint_symbol_6);
-    if (*(tint_symbol_6)) {
-      return 0;
-    }
+    int const r = f(y, tint_symbol_5);
     if ((r == 0)) {
       break;
     }
@@ -31,20 +27,14 @@ int tint_symbol_inner(int3 x, thread bool* const tint_symbol_6) {
   return y;
 }
 
-void tint_discard_func() {
-  discard_fragment();
-}
-
 fragment tint_symbol_3 tint_symbol(tint_symbol_2 tint_symbol_1 [[stage_in]]) {
-  thread bool tint_symbol_7 = false;
-  int const inner_result = tint_symbol_inner(tint_symbol_1.x, &(tint_symbol_7));
-  if (tint_symbol_7) {
-    tint_discard_func();
-    tint_symbol_3 const tint_symbol_4 = tint_symbol_3{};
-    return tint_symbol_4;
-  }
+  thread bool tint_symbol_6 = false;
+  int const inner_result = tint_symbol_inner(tint_symbol_1.x, &(tint_symbol_6));
   tint_symbol_3 wrapper_result = {};
   wrapper_result.value = inner_result;
+  if (tint_symbol_6) {
+    discard_fragment();
+  }
   return wrapper_result;
 }
 

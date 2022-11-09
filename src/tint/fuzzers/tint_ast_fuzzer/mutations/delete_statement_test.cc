@@ -606,48 +606,6 @@ fn foo() -> i32 {
     CheckStatementDeletionNotAllowed(original, statement_finder);
 }
 
-TEST(DeleteStatementTest, DoNotRemoveDiscard) {
-    auto original = R"(
-fn main() {
-  discard;
-})";
-    auto statement_finder = [](const Program& program) -> const ast::Statement* {
-        return program.AST().Functions()[0]->body->statements[0]->As<ast::DiscardStatement>();
-    };
-    CheckStatementDeletionNotAllowed(original, statement_finder);
-}
-
-TEST(DeleteStatementTest, DoNotRemoveStatementContainingDiscard) {
-    auto original = R"(
-fn foo() -> i32 {
-  if (true) {
-    discard;
-  } else {
-    discard;
-  }
-})";
-    auto statement_finder = [](const Program& program) -> const ast::Statement* {
-        return program.AST().Functions()[0]->body->statements[0]->As<ast::IfStatement>();
-    };
-    CheckStatementDeletionNotAllowed(original, statement_finder);
-}
-
-TEST(DeleteStatementTest, DoNotRemoveLoopBody) {
-    auto original = R"(
-fn foo() {
-  discard;
-}
-fn main() {
-  loop {
-    foo();
-  }
-})";
-    auto statement_finder = [](const Program& program) -> const ast::Statement* {
-        return program.AST().Functions()[1]->body->statements[0]->As<ast::LoopStatement>()->body;
-    };
-    CheckStatementDeletionNotAllowed(original, statement_finder);
-}
-
 TEST(DeleteStatementTest, DoNotRemoveForLoopBody) {
     auto original = R"(
 fn main() {

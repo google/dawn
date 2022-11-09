@@ -161,7 +161,7 @@ TEST_F(ResolverFunctionValidationTest, UnreachableCode_return_InBlocks) {
     EXPECT_FALSE(Sem().Get(assign_a)->IsReachable());
 }
 
-TEST_F(ResolverFunctionValidationTest, UnreachableCode_discard) {
+TEST_F(ResolverFunctionValidationTest, UnreachableCode_discard_nowarning) {
     // fn func() -> {
     //  var a : i32;
     //  discard;
@@ -175,38 +175,17 @@ TEST_F(ResolverFunctionValidationTest, UnreachableCode_discard) {
     Func("func", utils::Empty, ty.void_(), utils::Vector{decl_a, discard, assign_a});
 
     ASSERT_TRUE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 warning: code is unreachable");
     EXPECT_TRUE(Sem().Get(decl_a)->IsReachable());
     EXPECT_TRUE(Sem().Get(discard)->IsReachable());
-    EXPECT_FALSE(Sem().Get(assign_a)->IsReachable());
-}
-
-TEST_F(ResolverFunctionValidationTest, UnreachableCode_discard_InBlocks) {
-    // fn func() -> {
-    //  var a : i32;
-    //  {{{discard;}}}
-    //  a = 2i;
-    //}
-
-    auto* decl_a = Decl(Var("a", ty.i32()));
-    auto* discard = Discard();
-    auto* assign_a = Assign(Source{{12, 34}}, "a", 2_i);
-
-    Func("func", utils::Empty, ty.void_(),
-         utils::Vector{decl_a, Block(Block(Block(discard))), assign_a});
-
-    ASSERT_TRUE(r()->Resolve());
-    EXPECT_EQ(r()->error(), "12:34 warning: code is unreachable");
-    EXPECT_TRUE(Sem().Get(decl_a)->IsReachable());
-    EXPECT_TRUE(Sem().Get(discard)->IsReachable());
-    EXPECT_FALSE(Sem().Get(assign_a)->IsReachable());
+    EXPECT_TRUE(Sem().Get(assign_a)->IsReachable());
 }
 
 TEST_F(ResolverFunctionValidationTest, DiscardCalledDirectlyFromVertexEntryPoint) {
-    // @vertex() fn func() -> @position(0) vec4<f32> { discard; }
+    // @vertex() fn func() -> @position(0) vec4<f32> { discard; return; }
     Func(Source{{1, 2}}, "func", utils::Empty, ty.vec4<f32>(),
          utils::Vector{
              Discard(Source{{12, 34}}),
+             Return(Construct(ty.vec4<f32>())),
          },
          utils::Vector{Stage(ast::PipelineStage::kVertex)},
          utils::Vector{Builtin(ast::BuiltinValue::kPosition)});

@@ -199,12 +199,6 @@ class Validator {
     /// @returns true on success, false otherwise
     bool Call(const sem::Call* call, sem::Statement* current_statement) const;
 
-    /// Validates a discard statement
-    /// @param stmt the statement to validate
-    /// @param current_statement the current statement being resolved
-    /// @returns true on success, false otherwise
-    bool DiscardStatement(const sem::Statement* stmt, sem::Statement* current_statement) const;
-
     /// Validates an entry point
     /// @param func the entry point function to validate
     /// @param stage the pipeline stage for the entry point

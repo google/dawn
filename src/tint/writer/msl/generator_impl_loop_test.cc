@@ -23,7 +23,7 @@ namespace {
 using MslGeneratorImplTest = TestHelper;
 
 TEST_F(MslGeneratorImplTest, Emit_Loop) {
-    auto* body = Block(create<ast::DiscardStatement>());
+    auto* body = Block(Break());
     auto* continuing = Block();
     auto* l = Loop(body, continuing);
 
@@ -36,7 +36,7 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
 
     ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
     EXPECT_EQ(gen.result(), R"(  while (true) {
-    discard_fragment();
+    break;
   }
 )");
 }
@@ -44,7 +44,7 @@ TEST_F(MslGeneratorImplTest, Emit_Loop) {
 TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
     Func("a_statement", {}, ty.void_(), utils::Empty);
 
-    auto* body = Block(create<ast::DiscardStatement>());
+    auto* body = Block(Break());
     auto* continuing = Block(CallStmt(Call("a_statement")));
     auto* l = Loop(body, continuing);
 
@@ -57,7 +57,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
 
     ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
     EXPECT_EQ(gen.result(), R"(  while (true) {
-    discard_fragment();
+    break;
     {
       a_statement();
     }
@@ -68,7 +68,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing) {
 TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing_BreakIf) {
     Func("a_statement", {}, ty.void_(), {});
 
-    auto* body = Block(create<ast::DiscardStatement>());
+    auto* body = Block(Break());
     auto* continuing = Block(CallStmt(Call("a_statement")), BreakIf(true));
     auto* l = Loop(body, continuing);
 
@@ -81,7 +81,7 @@ TEST_F(MslGeneratorImplTest, Emit_LoopWithContinuing_BreakIf) {
 
     ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
     EXPECT_EQ(gen.result(), R"(  while (true) {
-    discard_fragment();
+    break;
     {
       a_statement();
       if (true) { break; }
@@ -96,13 +96,13 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
     GlobalVar("lhs", ty.f32(), ast::AddressSpace::kPrivate);
     GlobalVar("rhs", ty.f32(), ast::AddressSpace::kPrivate);
 
-    auto* body = Block(create<ast::DiscardStatement>());
+    auto* body = Block(Break());
     auto* continuing = Block(CallStmt(Call("a_statement")));
     auto* inner = Loop(body, continuing);
 
     body = Block(inner);
 
-    continuing = Block(Assign("lhs", "rhs"));
+    continuing = Block(Assign("lhs", "rhs"), BreakIf(true));
 
     auto* outer = Loop(body, continuing);
 
@@ -116,13 +116,14 @@ TEST_F(MslGeneratorImplTest, Emit_LoopNestedWithContinuing) {
     ASSERT_TRUE(gen.EmitStatement(outer)) << gen.error();
     EXPECT_EQ(gen.result(), R"(  while (true) {
     while (true) {
-      discard_fragment();
+      break;
       {
         a_statement();
       }
     }
     {
       lhs = rhs;
+      if (true) { break; }
     }
   }
 )");

@@ -62,6 +62,7 @@
 #include "src/tint/transform/array_length_from_uniform.h"
 #include "src/tint/transform/builtin_polyfill.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
+#include "src/tint/transform/demote_to_helper.h"
 #include "src/tint/transform/disable_uniformity_analysis.h"
 #include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/manager.h"
@@ -72,7 +73,6 @@
 #include "src/tint/transform/remove_phonies.h"
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/transform/unshadow.h"
-#include "src/tint/transform/unwind_discard_functions.h"
 #include "src/tint/transform/vectorize_scalar_matrix_initializers.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
 #include "src/tint/utils/defer.h"
@@ -226,8 +226,11 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     manager.Add<transform::CanonicalizeEntryPointIO>();
     manager.Add<transform::ExpandCompoundAssignment>();
     manager.Add<transform::PromoteSideEffectsToDecl>();
-    manager.Add<transform::UnwindDiscardFunctions>();
     manager.Add<transform::PromoteInitializersToLet>();
+
+    // DemoteToHelper must come after PromoteSideEffectsToDecl and ExpandCompoundAssignment.
+    // TODO(crbug.com/tint/1752): This is only necessary for Metal versions older than 2.3.
+    manager.Add<transform::DemoteToHelper>();
 
     manager.Add<transform::VectorizeScalarMatrixInitializers>();
     manager.Add<transform::RemovePhonies>();

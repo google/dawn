@@ -1,0 +1,39 @@
+#include <metal_stdlib>
+
+using namespace metal;
+fragment void tint_symbol(device int* tint_symbol_1 [[buffer(0)]], device float* tint_symbol_3 [[buffer(1)]]) {
+  thread bool tint_symbol_2 = false;
+  if ((*(tint_symbol_1) < 0)) {
+    tint_symbol_2 = true;
+  }
+  if (!(tint_symbol_2)) {
+    *(tint_symbol_3) = dfdx(1.0f);
+  }
+  if ((*(tint_symbol_3) < 0.0f)) {
+    int i = 0;
+    while (true) {
+      if ((*(tint_symbol_3) > float(i))) {
+        if (!(tint_symbol_2)) {
+          *(tint_symbol_3) = float(i);
+        }
+        if (tint_symbol_2) {
+          discard_fragment();
+        }
+        return;
+      }
+      {
+        i = as_type<int>((as_type<uint>(i) + as_type<uint>(1)));
+        if ((i == 5)) { break; }
+      }
+    }
+    if (tint_symbol_2) {
+      discard_fragment();
+    }
+    return;
+  }
+  if (tint_symbol_2) {
+    discard_fragment();
+  }
+  return;
+}
+

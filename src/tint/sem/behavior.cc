@@ -20,8 +20,6 @@ std::ostream& operator<<(std::ostream& out, Behavior behavior) {
     switch (behavior) {
         case Behavior::kReturn:
             return out << "Return";
-        case Behavior::kDiscard:
-            return out << "Discard";
         case Behavior::kBreak:
             return out << "Break";
         case Behavior::kContinue:

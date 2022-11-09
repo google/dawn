@@ -54,6 +54,7 @@
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/combine_samplers.h"
 #include "src/tint/transform/decompose_memory_access.h"
+#include "src/tint/transform/demote_to_helper.h"
 #include "src/tint/transform/disable_uniformity_analysis.h"
 #include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/manager.h"
@@ -66,7 +67,6 @@
 #include "src/tint/transform/single_entry_point.h"
 #include "src/tint/transform/std140.h"
 #include "src/tint/transform/unshadow.h"
-#include "src/tint/transform/unwind_discard_functions.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
 #include "src/tint/utils/defer.h"
 #include "src/tint/utils/map.h"
@@ -217,7 +217,9 @@ SanitizedResult Sanitize(const Program* in,
     manager.Add<transform::ExpandCompoundAssignment>();
     manager.Add<transform::PromoteSideEffectsToDecl>();
     manager.Add<transform::PadStructs>();
-    manager.Add<transform::UnwindDiscardFunctions>();
+
+    // DemoteToHelper must come after PromoteSideEffectsToDecl and ExpandCompoundAssignment.
+    manager.Add<transform::DemoteToHelper>();
 
     manager.Add<transform::RemovePhonies>();
 

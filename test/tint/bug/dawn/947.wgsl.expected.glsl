@@ -40,6 +40,7 @@ void main() {
 #version 310 es
 precision mediump float;
 
+bool tint_discarded = false;
 layout(location = 0) in vec2 texcoord_1;
 layout(location = 0) out vec4 value;
 struct Uniforms {
@@ -52,27 +53,20 @@ struct VertexOutputs {
   vec4 position;
 };
 
-bool tint_discard = false;
 vec4 fs_main(vec2 texcoord) {
   vec2 clampedTexcoord = clamp(texcoord, vec2(0.0f), vec2(1.0f));
   if (!(all(equal(clampedTexcoord, texcoord)))) {
-    tint_discard = true;
-    return vec4(0.0f);
+    tint_discarded = true;
   }
   vec4 srcColor = vec4(0.0f);
   return srcColor;
 }
 
-void tint_discard_func() {
-  discard;
-}
-
 void main() {
   vec4 inner_result = fs_main(texcoord_1);
-  if (tint_discard) {
-    tint_discard_func();
-    return;
-  }
   value = inner_result;
+  if (tint_discarded) {
+    discard;
+  }
   return;
 }

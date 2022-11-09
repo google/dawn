@@ -766,69 +766,17 @@ TEST_F(ResolverTest, Stmt_Loop_DiscardInContinuing_Direct) {
     // loop  {
     //   continuing {
     //     discard;
+    //     breakif true;
     //   }
     // }
 
-    WrapInFunction(Loop(  // loop
-        Block(),          //   loop block
-        Block(            //   loop continuing block
-            Discard(Source{{12, 34}}))));
+    Func("my_func", utils::Empty, ty.void_(),
+         utils::Vector{Loop(  // loop
+             Block(),         //   loop block
+             Block(           //   loop continuing block
+                 Discard(Source{{12, 34}}), BreakIf(true)))});
 
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: continuing blocks must not contain a discard statement)");
-}
-
-TEST_F(ResolverTest, Stmt_Loop_DiscardInContinuing_Indirect) {
-    // loop {
-    //   if (false) { break; }
-    //   continuing {
-    //     loop { discard; }
-    //   }
-    // }
-
-    WrapInFunction(Loop(                   // outer loop
-        Block(If(false, Block(Break()))),  //   outer loop block
-        Block(Source{{56, 78}},            //   outer loop continuing block
-              Loop(                        //     inner loop
-                  Block(                   //       inner loop block
-                      Discard(Source{{12, 34}}))))));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: continuing blocks must not contain a discard statement
-56:78 note: see continuing block here)");
-}
-
-TEST_F(ResolverTest, Stmt_Loop_DiscardInContinuing_Indirect_ViaCall) {
-    // fn MayDiscard() { if (true) { discard; } }
-    // fn F() { MayDiscard(); }
-    // loop {
-    //   continuing {
-    //     loop { F(); }
-    //   }
-    // }
-
-    Func("MayDiscard", utils::Empty, ty.void_(),
-         utils::Vector{
-             If(true, Block(Discard())),
-         });
-    Func("SomeFunc", utils::Empty, ty.void_(),
-         utils::Vector{
-             CallStmt(Call("MayDiscard")),
-         });
-
-    WrapInFunction(Loop(         // outer loop
-        Block(),                 //   outer loop block
-        Block(Source{{56, 78}},  //   outer loop continuing block
-              Loop(              //     inner loop
-                  Block(         //       inner loop block
-                      CallStmt(Call(Source{{12, 34}}, "SomeFunc")))))));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot call a function that may discard inside a continuing block
-56:78 note: see continuing block here)");
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTest, Stmt_Loop_ContinueInContinuing_Direct) {
@@ -973,55 +921,11 @@ TEST_F(ResolverTest, Stmt_ForLoop_DiscardInContinuing_Direct) {
     //   break;
     // }
 
-    WrapInFunction(For(nullptr, nullptr, Discard(Source{{12, 34}}),  //
-                       Block(Break())));
+    Func("my_func", utils::Empty, ty.void_(),
+         utils::Vector{For(nullptr, nullptr, Discard(Source{{12, 34}}),  //
+                           Block(Break()))});
 
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: continuing blocks must not contain a discard statement)");
-}
-
-TEST_F(ResolverTest, Stmt_ForLoop_DiscardInContinuing_Indirect) {
-    // for(;; loop { discard }) {
-    //   break;
-    // }
-
-    WrapInFunction(For(nullptr, nullptr,
-                       Loop(Source{{56, 78}},                   //
-                            Block(Discard(Source{{12, 34}}))),  //
-                       Block(Break())));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: continuing blocks must not contain a discard statement
-56:78 note: see continuing block here)");
-}
-
-TEST_F(ResolverTest, Stmt_ForLoop_DiscardInContinuing_Indirect_ViaCall) {
-    // fn MayDiscard() { if (true) { discard; } }
-    // fn F() { MayDiscard(); }
-    // for(;; loop { F() }) {
-    //   break;
-    // }
-
-    Func("MayDiscard", utils::Empty, ty.void_(),
-         utils::Vector{
-             If(true, Block(Discard())),
-         });
-    Func("F", utils::Empty, ty.void_(),
-         utils::Vector{
-             CallStmt(Call("MayDiscard")),
-         });
-
-    WrapInFunction(For(nullptr, nullptr,
-                       Loop(Source{{56, 78}},                               //
-                            Block(CallStmt(Call(Source{{12, 34}}, "F")))),  //
-                       Block(Break())));
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              R"(12:34 error: cannot call a function that may discard inside a continuing block
-56:78 note: see continuing block here)");
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
 }
 
 TEST_F(ResolverTest, Stmt_ForLoop_ContinueInContinuing_Direct) {

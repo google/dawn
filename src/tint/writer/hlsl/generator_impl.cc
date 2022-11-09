@@ -54,6 +54,7 @@
 #include "src/tint/transform/calculate_array_length.h"
 #include "src/tint/transform/canonicalize_entry_point_io.h"
 #include "src/tint/transform/decompose_memory_access.h"
+#include "src/tint/transform/demote_to_helper.h"
 #include "src/tint/transform/disable_uniformity_analysis.h"
 #include "src/tint/transform/expand_compound_assignment.h"
 #include "src/tint/transform/localize_struct_array_assignment.h"
@@ -65,7 +66,6 @@
 #include "src/tint/transform/remove_phonies.h"
 #include "src/tint/transform/simplify_pointers.h"
 #include "src/tint/transform/unshadow.h"
-#include "src/tint/transform/unwind_discard_functions.h"
 #include "src/tint/transform/vectorize_scalar_matrix_initializers.h"
 #include "src/tint/transform/zero_init_workgroup_memory.h"
 #include "src/tint/utils/defer.h"
@@ -213,10 +213,15 @@ SanitizedResult Sanitize(const Program* in, const Options& options) {
     manager.Add<transform::NumWorkgroupsFromUniform>();
     manager.Add<transform::ExpandCompoundAssignment>();
     manager.Add<transform::PromoteSideEffectsToDecl>();
-    manager.Add<transform::UnwindDiscardFunctions>();
     manager.Add<transform::VectorizeScalarMatrixInitializers>();
     manager.Add<transform::SimplifyPointers>();
     manager.Add<transform::RemovePhonies>();
+
+    // DemoteToHelper must come after CanonicalizeEntryPointIO, PromoteSideEffectsToDecl, and
+    // ExpandCompoundAssignment.
+    // TODO(crbug.com/tint/1752): This is only necessary when FXC is being used.
+    manager.Add<transform::DemoteToHelper>();
+
     // ArrayLengthFromUniform must come after InlinePointerLets and Simplify, as
     // it assumes that the form of the array length argument is &var.array.
     manager.Add<transform::ArrayLengthFromUniform>();

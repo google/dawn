@@ -1,0 +1,49 @@
+#include <metal_stdlib>
+
+using namespace metal;
+struct tint_symbol_1 {
+  float in [[user(locn0)]];
+  float2 coord [[user(locn1)]];
+};
+
+struct tint_symbol_2 {
+  int value [[color(0)]];
+};
+
+int foo_inner(float in, float2 coord, thread bool* const tint_symbol_4, texture2d<float, access::sample> tint_symbol_5, sampler tint_symbol_6, device atomic_int* const tint_symbol_7) {
+  if ((in == 0.0f)) {
+    *(tint_symbol_4) = true;
+  }
+  int result = int(tint_symbol_5.sample(tint_symbol_6, coord)[0]);
+  {
+    int i = 0;
+    while (true) {
+      if (!((i < 10))) {
+        break;
+      }
+      {
+        result = as_type<int>((as_type<uint>(result) + as_type<uint>(i)));
+      }
+      {
+        int tint_symbol_3 = 0;
+        if (!(*(tint_symbol_4))) {
+          tint_symbol_3 = atomic_fetch_add_explicit(tint_symbol_7, 1, memory_order_relaxed);
+        }
+        i = tint_symbol_3;
+      }
+    }
+  }
+  return result;
+}
+
+fragment tint_symbol_2 foo(texture2d<float, access::sample> tint_symbol_9 [[texture(0)]], sampler tint_symbol_10 [[sampler(0)]], device atomic_int* tint_symbol_11 [[buffer(0)]], tint_symbol_1 tint_symbol [[stage_in]]) {
+  thread bool tint_symbol_8 = false;
+  int const inner_result = foo_inner(tint_symbol.in, tint_symbol.coord, &(tint_symbol_8), tint_symbol_9, tint_symbol_10, tint_symbol_11);
+  tint_symbol_2 wrapper_result = {};
+  wrapper_result.value = inner_result;
+  if (tint_symbol_8) {
+    discard_fragment();
+  }
+  return wrapper_result;
+}
+

@@ -135,10 +135,9 @@ bool MutationDeleteStatement::CanBeDeleted(const ast::Statement& statement_node,
         return false;
     }
 
-    if (jump_tracker.ContainsReturn(statement_node) ||
-        jump_tracker.ContainsIntraproceduralDiscard(statement_node)) {
-        // This is conservative. It would be possible to delete a return/discard statement as long
-        // as there is still a return/discard on every control flow path.
+    if (jump_tracker.ContainsReturn(statement_node)) {
+        // This is conservative. It would be possible to delete a return statement as long as there
+        // is still a return on every control flow path.
         return false;
     }
 

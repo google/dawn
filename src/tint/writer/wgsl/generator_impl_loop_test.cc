@@ -22,7 +22,7 @@ namespace {
 using WgslGeneratorImplTest = TestHelper;
 
 TEST_F(WgslGeneratorImplTest, Emit_Loop) {
-    auto* body = Block(create<ast::DiscardStatement>());
+    auto* body = Block(Break());
     auto* continuing = Block();
     auto* l = Loop(body, continuing);
 
@@ -35,7 +35,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Loop) {
 
     ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
     EXPECT_EQ(gen.result(), R"(  loop {
-    discard;
+    break;
   }
 )");
 }
@@ -43,7 +43,7 @@ TEST_F(WgslGeneratorImplTest, Emit_Loop) {
 TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
     Func("a_statement", {}, ty.void_(), {});
 
-    auto* body = Block(create<ast::DiscardStatement>());
+    auto* body = Block(Break());
     auto* continuing = Block(CallStmt(Call("a_statement")));
     auto* l = Loop(body, continuing);
 
@@ -56,7 +56,7 @@ TEST_F(WgslGeneratorImplTest, Emit_LoopWithContinuing) {
 
     ASSERT_TRUE(gen.EmitStatement(l)) << gen.error();
     EXPECT_EQ(gen.result(), R"(  loop {
-    discard;
+    break;
 
     continuing {
       a_statement();
