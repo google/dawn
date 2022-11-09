@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <unordered_set>
+
 #include "src/tint/ast/builtin_texture_helper_test.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 #include "src/tint/sem/type_initializer.h"

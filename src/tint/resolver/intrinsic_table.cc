@@ -16,7 +16,6 @@
 
 #include <algorithm>
 #include <limits>
-#include <unordered_map>
 #include <utility>
 
 #include "src/tint/ast/binary_expression.h"
@@ -36,7 +35,7 @@
 #include "src/tint/sem/type_conversion.h"
 #include "src/tint/sem/type_initializer.h"
 #include "src/tint/utils/hash.h"
-#include "src/tint/utils/map.h"
+#include "src/tint/utils/hashmap.h"
 #include "src/tint/utils/math.h"
 #include "src/tint/utils/scoped_assignment.h"
 
@@ -1114,10 +1113,10 @@ class Impl : public IntrinsicTable {
 
     ProgramBuilder& builder;
     Matchers matchers;
-    std::unordered_map<IntrinsicPrototype, sem::Builtin*, IntrinsicPrototype::Hasher> builtins;
-    std::unordered_map<IntrinsicPrototype, sem::TypeInitializer*, IntrinsicPrototype::Hasher>
+    utils::Hashmap<IntrinsicPrototype, sem::Builtin*, 64, IntrinsicPrototype::Hasher> builtins;
+    utils::Hashmap<IntrinsicPrototype, sem::TypeInitializer*, 16, IntrinsicPrototype::Hasher>
         initializers;
-    std::unordered_map<IntrinsicPrototype, sem::TypeConversion*, IntrinsicPrototype::Hasher>
+    utils::Hashmap<IntrinsicPrototype, sem::TypeConversion*, 16, IntrinsicPrototype::Hasher>
         converters;
 };
 
@@ -1185,7 +1184,7 @@ Impl::Builtin Impl::Lookup(sem::BuiltinType builtin_type,
     }
 
     // De-duplicate builtins that are identical.
-    auto* sem = utils::GetOrCreate(builtins, match, [&] {
+    auto* sem = builtins.GetOrCreate(match, [&] {
         utils::Vector<sem::Parameter*, kNumFixedParams> params;
         params.Reserve(match.parameters.Length());
         for (auto& p : match.parameters) {
@@ -1396,7 +1395,7 @@ IntrinsicTable::InitOrConv Impl::Lookup(InitConvIntrinsic type,
         }
         auto eval_stage = match.overload->const_eval_fn ? sem::EvaluationStage::kConstant
                                                         : sem::EvaluationStage::kRuntime;
-        auto* target = utils::GetOrCreate(initializers, match, [&]() {
+        auto* target = initializers.GetOrCreate(match, [&]() {
             return builder.create<sem::TypeInitializer>(match.return_type, std::move(params),
                                                         eval_stage);
         });
@@ -1404,7 +1403,7 @@ IntrinsicTable::InitOrConv Impl::Lookup(InitConvIntrinsic type,
     }
 
     // Conversion.
-    auto* target = utils::GetOrCreate(converters, match, [&]() {
+    auto* target = converters.GetOrCreate(match, [&]() {
         auto param = builder.create<sem::Parameter>(
             nullptr, 0u, match.parameters[0].type, ast::AddressSpace::kNone,
             ast::Access::kUndefined, match.parameters[0].usage);

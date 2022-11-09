@@ -14,11 +14,11 @@
 #ifndef SRC_TINT_SCOPE_STACK_H_
 #define SRC_TINT_SCOPE_STACK_H_
 
-#include <unordered_map>
 #include <utility>
-#include <vector>
 
 #include "src/tint/symbol.h"
+#include "src/tint/utils/hashmap.h"
+#include "src/tint/utils/vector.h"
 
 namespace tint {
 
@@ -27,22 +27,13 @@ namespace tint {
 template <class K, class V>
 class ScopeStack {
   public:
-    /// Constructor
-    ScopeStack() {
-        // Push global bucket
-        stack_.push_back({});
-    }
-    /// Copy Constructor
-    ScopeStack(const ScopeStack&) = default;
-    ~ScopeStack() = default;
-
     /// Push a new scope on to the stack
-    void Push() { stack_.push_back({}); }
+    void Push() { stack_.Push({}); }
 
     /// Pop the scope off the top of the stack
     void Pop() {
-        if (stack_.size() > 1) {
-            stack_.pop_back();
+        if (stack_.Length() > 1) {
+            stack_.Pop();
         }
     }
 
@@ -52,8 +43,13 @@ class ScopeStack {
     /// @returns the old value if there was an existing key at the top of the
     /// stack, otherwise the zero initializer for type T.
     V Set(const K& key, V val) {
-        std::swap(val, stack_.back()[key]);
-        return val;
+        auto& back = stack_.Back();
+        if (auto* el = back.Find(key)) {
+            std::swap(val, *el);
+            return val;
+        }
+        back.Add(key, val);
+        return {};
     }
 
     /// Retrieves a value from the stack
@@ -61,10 +57,8 @@ class ScopeStack {
     /// @returns the value, or the zero initializer if the value was not found
     V Get(const K& key) const {
         for (auto iter = stack_.rbegin(); iter != stack_.rend(); ++iter) {
-            auto& map = *iter;
-            auto val = map.find(key);
-            if (val != map.end()) {
-                return val->second;
+            if (auto* val = iter->Find(key)) {
+                return *val;
             }
         }
 
@@ -73,16 +67,16 @@ class ScopeStack {
 
     /// Return the top scope of the stack.
     /// @returns the top scope of the stack
-    const std::unordered_map<K, V>& Top() const { return stack_.back(); }
+    const utils::Hashmap<K, V, 8>& Top() const { return stack_.Back(); }
 
     /// Clear the scope stack.
     void Clear() {
-        stack_.clear();
-        stack_.push_back({});
+        stack_.Clear();
+        stack_.Push({});
     }
 
   private:
-    std::vector<std::unordered_map<K, V>> stack_;
+    utils::Vector<utils::Hashmap<K, V, 8>, 8> stack_ = {{}};
 };
 
 }  // namespace tint

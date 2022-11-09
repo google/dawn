@@ -18,8 +18,6 @@
 #include <memory>
 #include <string>
 #include <tuple>
-#include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -434,13 +432,13 @@ class Resolver {
     SemHelper sem_;
     Validator validator_;
     ast::Extensions enabled_extensions_;
-    std::vector<sem::Function*> entry_points_;
-    std::unordered_map<const sem::Type*, const Source&> atomic_composite_info_;
+    utils::Vector<sem::Function*, 8> entry_points_;
+    utils::Hashmap<const sem::Type*, const Source*, 8> atomic_composite_info_;
     utils::Bitset<0> marked_;
     ExprEvalStageConstraint expr_eval_stage_constraint_;
-    std::unordered_map<OverrideId, const sem::Variable*> override_ids_;
-    std::unordered_map<ArrayInitializerSig, sem::CallTarget*> array_inits_;
-    std::unordered_map<StructInitializerSig, sem::CallTarget*> struct_inits_;
+    utils::Hashmap<OverrideId, const sem::Variable*, 8> override_ids_;
+    utils::Hashmap<ArrayInitializerSig, sem::CallTarget*, 8> array_inits_;
+    utils::Hashmap<StructInitializerSig, sem::CallTarget*, 8> struct_inits_;
     sem::Function* current_function_ = nullptr;
     sem::Statement* current_statement_ = nullptr;
     sem::CompoundStatement* current_compound_statement_ = nullptr;

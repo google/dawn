@@ -157,9 +157,9 @@ size_t HashCombine(size_t hash, const ARGS&... values) {
 template <typename T>
 struct UnorderedKeyWrapper {
     /// The wrapped value
-    const T value;
+    T value;
     /// The hash of value
-    const size_t hash;
+    size_t hash;
 
     /// Constructor
     /// @param v the value to wrap

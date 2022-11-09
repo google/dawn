@@ -15,7 +15,6 @@
 #include "src/tint/resolver/dependency_graph.h"
 
 #include <string>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -117,7 +116,7 @@ struct DependencyEdgeCmp {
 
 /// A map of DependencyEdge to DependencyInfo
 using DependencyEdges =
-    std::unordered_map<DependencyEdge, DependencyInfo, DependencyEdgeCmp, DependencyEdgeCmp>;
+    utils::Hashmap<DependencyEdge, DependencyInfo, 64, DependencyEdgeCmp, DependencyEdgeCmp>;
 
 /// Global describes a module-scope variable, type or function.
 struct Global {
@@ -126,11 +125,11 @@ struct Global {
     /// The declaration ast::Node
     const ast::Node* node;
     /// A list of dependencies that this global depends on
-    std::vector<Global*> deps;
+    utils::Vector<Global*, 8> deps;
 };
 
 /// A map of global name to Global
-using GlobalMap = std::unordered_map<Symbol, Global*>;
+using GlobalMap = utils::Hashmap<Symbol, Global*, 16>;
 
 /// Raises an ICE that a global ast::Node type was not handled by this system.
 void UnhandledNode(diag::List& diagnostics, const ast::Node* node) {
@@ -170,7 +169,7 @@ class DependencyScanner {
           dependency_edges_(edges) {
         // Register all the globals at global-scope
         for (auto it : globals_by_name) {
-            scope_stack_.Set(it.first, it.second->node);
+            scope_stack_.Set(it.key, it.value->node);
         }
     }
 
@@ -232,7 +231,7 @@ class DependencyScanner {
 
         for (auto* param : func->params) {
             if (auto* shadows = scope_stack_.Get(param->symbol)) {
-                graph_.shadows.emplace(param, shadows);
+                graph_.shadows.Add(param, shadows);
             }
             Declare(param->symbol, param);
         }
@@ -306,7 +305,7 @@ class DependencyScanner {
             },
             [&](const ast::VariableDeclStatement* v) {
                 if (auto* shadows = scope_stack_.Get(v->variable->symbol)) {
-                    graph_.shadows.emplace(v->variable, shadows);
+                    graph_.shadows.Add(v->variable, shadows);
                 }
                 TraverseType(v->variable->type);
                 TraverseExpression(v->variable->initializer);
@@ -473,16 +472,14 @@ class DependencyScanner {
             }
         }
 
-        if (auto* global = utils::Lookup(globals_, to); global && global->node == resolved) {
-            if (dependency_edges_
-                    .emplace(DependencyEdge{current_global_, global},
-                             DependencyInfo{from->source, action})
-                    .second) {
-                current_global_->deps.emplace_back(global);
+        if (auto* global = globals_.Find(to); global && (*global)->node == resolved) {
+            if (dependency_edges_.Add(DependencyEdge{current_global_, *global},
+                                      DependencyInfo{from->source, action})) {
+                current_global_->deps.Push(*global);
             }
         }
 
-        graph_.resolved_symbols.emplace(from, resolved);
+        graph_.resolved_symbols.Add(from, resolved);
     }
 
     /// @returns true if `name` is the name of a builtin function
@@ -497,7 +494,7 @@ class DependencyScanner {
                  source);
     }
 
-    using VariableMap = std::unordered_map<Symbol, const ast::Variable*>;
+    using VariableMap = utils::Hashmap<Symbol, const ast::Variable*, 32>;
     const SymbolTable& symbols_;
     const GlobalMap& globals_;
     diag::List& diagnostics_;
@@ -520,7 +517,7 @@ struct DependencyAnalysis {
     /// @returns true if analysis found no errors, otherwise false.
     bool Run(const ast::Module& module) {
         // Reserve container memory
-        graph_.resolved_symbols.reserve(module.GlobalDeclarations().Length());
+        graph_.resolved_symbols.Reserve(module.GlobalDeclarations().Length());
         sorted_.Reserve(module.GlobalDeclarations().Length());
 
         // Collect all the named globals from the AST module
@@ -589,9 +586,9 @@ struct DependencyAnalysis {
         for (auto* node : module.GlobalDeclarations()) {
             auto* global = allocator_.Create(node);
             if (auto symbol = SymbolOf(node); symbol.IsValid()) {
-                globals_.emplace(symbol, global);
+                globals_.Add(symbol, global);
             }
-            declaration_order_.emplace_back(global);
+            declaration_order_.Push(global);
         }
     }
 
@@ -625,16 +622,16 @@ struct DependencyAnalysis {
             return;
         }
 
-        std::vector<Entry> stack{Entry{root, 0}};
+        utils::Vector<Entry, 16> stack{Entry{root, 0}};
         while (true) {
-            auto& entry = stack.back();
+            auto& entry = stack.Back();
             // Have we exhausted the dependencies of entry.global?
-            if (entry.dep_idx < entry.global->deps.size()) {
+            if (entry.dep_idx < entry.global->deps.Length()) {
                 // No, there's more dependencies to traverse.
                 auto& dep = entry.global->deps[entry.dep_idx];
                 // Does the caller want to enter this dependency?
-                if (enter(dep)) {                    // Yes.
-                    stack.push_back(Entry{dep, 0});  // Enter the dependency.
+                if (enter(dep)) {               // Yes.
+                    stack.Push(Entry{dep, 0});  // Enter the dependency.
                 } else {
                     entry.dep_idx++;  // No. Skip this node.
                 }
@@ -643,11 +640,11 @@ struct DependencyAnalysis {
                 // Exit this global, pop the stack, and if there's another parent node,
                 // increment its dependency index, and loop again.
                 exit(entry.global);
-                stack.pop_back();
-                if (stack.empty()) {
+                stack.Pop();
+                if (stack.IsEmpty()) {
                     return;  // All done.
                 }
-                stack.back().dep_idx++;
+                stack.Back().dep_idx++;
             }
         }
     }
@@ -707,9 +704,8 @@ struct DependencyAnalysis {
     /// of global `from` depending on `to`.
     /// @note will raise an ICE if the edge is not found.
     DependencyInfo DepInfoFor(const Global* from, const Global* to) const {
-        auto it = dependency_edges_.find(DependencyEdge{from, to});
-        if (it != dependency_edges_.end()) {
-            return it->second;
+        if (auto info = dependency_edges_.Find(DependencyEdge{from, to})) {
+            return *info;
         }
         TINT_ICE(Resolver, diagnostics_)
             << "failed to find dependency info for edge: '" << NameOf(from->node) << "' -> '"
@@ -762,7 +758,7 @@ struct DependencyAnalysis {
         printf("------ dependencies ------ \n");
         for (auto* node : sorted_) {
             auto symbol = SymbolOf(node);
-            auto* global = globals_.at(symbol);
+            auto* global = *globals_.Find(symbol);
             printf("%s depends on:\n", symbols_.NameFor(symbol).c_str());
             for (auto* dep : global->deps) {
                 printf("  %s\n", NameOf(dep->node).c_str());
@@ -791,7 +787,7 @@ struct DependencyAnalysis {
     DependencyEdges dependency_edges_;
 
     /// Globals in declaration order. Populated by GatherGlobals().
-    std::vector<Global*> declaration_order_;
+    utils::Vector<Global*, 64> declaration_order_;
 
     /// Globals in sorted dependency order. Populated by SortGlobals().
     utils::UniqueVector<const ast::Node*, 64> sorted_;

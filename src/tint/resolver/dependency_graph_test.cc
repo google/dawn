@@ -1128,9 +1128,10 @@ TEST_P(ResolverDependencyGraphResolvedSymbolTest, Test) {
 
     if (expect_pass) {
         // Check that the use resolves to the declaration
-        auto* resolved_symbol = graph.resolved_symbols[use];
-        EXPECT_EQ(resolved_symbol, decl)
-            << "resolved: " << (resolved_symbol ? resolved_symbol->TypeInfo().name : "<null>")
+        auto* resolved_symbol = graph.resolved_symbols.Find(use);
+        ASSERT_NE(resolved_symbol, nullptr);
+        EXPECT_EQ(*resolved_symbol, decl)
+            << "resolved: " << (*resolved_symbol ? (*resolved_symbol)->TypeInfo().name : "<null>")
             << "\n"
             << "decl:     " << decl->TypeInfo().name;
     }
@@ -1177,7 +1178,10 @@ TEST_P(ResolverDependencyShadowTest, Test) {
                           : helper.parameters[0];
     helper.Build();
 
-    EXPECT_EQ(Build().shadows[inner_var], outer);
+    auto shadows = Build().shadows;
+    auto* shadow = shadows.Find(inner_var);
+    ASSERT_NE(shadow, nullptr);
+    EXPECT_EQ(*shadow, outer);
 }
 
 INSTANTIATE_TEST_SUITE_P(LocalShadowGlobal,
@@ -1308,8 +1312,9 @@ TEST_F(ResolverDependencyGraphTraversalTest, SymbolsReached) {
 
     auto graph = Build();
     for (auto use : symbol_uses) {
-        auto* resolved_symbol = graph.resolved_symbols[use.use];
-        EXPECT_EQ(resolved_symbol, use.decl) << use.where;
+        auto* resolved_symbol = graph.resolved_symbols.Find(use.use);
+        ASSERT_NE(resolved_symbol, nullptr) << use.where;
+        EXPECT_EQ(*resolved_symbol, use.decl) << use.where;
     }
 }
 

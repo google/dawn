@@ -54,8 +54,8 @@ class SemHelper {
     /// @param node the node to retrieve
     template <typename SEM = sem::Node>
     SEM* ResolvedSymbol(const ast::Node* node) const {
-        auto* resolved = utils::Lookup(dependencies_.resolved_symbols, node);
-        return resolved ? const_cast<SEM*>(builder_->Sem().Get<SEM>(resolved)) : nullptr;
+        auto* resolved = dependencies_.resolved_symbols.Find(node);
+        return resolved ? const_cast<SEM*>(builder_->Sem().Get<SEM>(*resolved)) : nullptr;
     }
 
     /// @returns the resolved type of the ast::Expression `expr`

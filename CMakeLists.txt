@@ -306,7 +306,6 @@ endif()
 message(STATUS "Using python3")
 find_package(PythonInterp 3 REQUIRED)
 
-
 ################################################################################
 # common_compile_options - sets compiler and linker options common for dawn and
 # tint on the given target
@@ -347,6 +346,12 @@ endif()
 # Dawn's public and internal "configs"
 ################################################################################
 
+set(IS_DEBUG_BUILD 0)
+string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type)
+if ((NOT ${build_type} STREQUAL "RELEASE") AND (NOT ${build_type} STREQUAL "RELWITHDEBINFO"))
+  set(IS_DEBUG_BUILD 1)
+endif()
+
 # The public config contains only the include paths for the Dawn headers.
 add_library(dawn_public_config INTERFACE)
 target_include_directories(dawn_public_config INTERFACE
@@ -363,7 +368,7 @@ target_include_directories(dawn_internal_config INTERFACE
 target_link_libraries(dawn_internal_config INTERFACE dawn_public_config)
 
 # Compile definitions for the internal config
-if (DAWN_ALWAYS_ASSERT OR $<CONFIG:Debug>)
+if (DAWN_ALWAYS_ASSERT OR IS_DEBUG_BUILD)
     target_compile_definitions(dawn_internal_config INTERFACE "DAWN_ENABLE_ASSERTS")
 endif()
 if (DAWN_ENABLE_D3D12)

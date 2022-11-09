@@ -580,8 +580,8 @@ bool Validator::LocalVariable(const sem::Variable* local) const {
 
 bool Validator::GlobalVariable(
     const sem::GlobalVariable* global,
-    const std::unordered_map<OverrideId, const sem::Variable*>& override_ids,
-    const std::unordered_map<const sem::Type*, const Source&>& atomic_composite_info) const {
+    const utils::Hashmap<OverrideId, const sem::Variable*, 8>& override_ids,
+    const utils::Hashmap<const sem::Type*, const Source*, 8>& atomic_composite_info) const {
     auto* decl = global->Declaration();
     if (global->AddressSpace() != ast::AddressSpace::kWorkgroup &&
         IsArrayWithOverrideCount(global->Type())) {
@@ -702,7 +702,7 @@ bool Validator::GlobalVariable(
 // buffer variables with a read_write access mode.
 bool Validator::AtomicVariable(
     const sem::Variable* var,
-    std::unordered_map<const sem::Type*, const Source&> atomic_composite_info) const {
+    const utils::Hashmap<const sem::Type*, const Source*, 8>& atomic_composite_info) const {
     auto address_space = var->AddressSpace();
     auto* decl = var->Declaration();
     auto access = var->Access();
@@ -716,14 +716,13 @@ bool Validator::AtomicVariable(
             return false;
         }
     } else if (type->IsAnyOf<sem::Struct, sem::Array>()) {
-        auto found = atomic_composite_info.find(type);
-        if (found != atomic_composite_info.end()) {
+        if (auto* found = atomic_composite_info.Find(type)) {
             if (address_space != ast::AddressSpace::kStorage &&
                 address_space != ast::AddressSpace::kWorkgroup) {
                 AddError("atomic variables must have <storage> or <workgroup> address space",
                          source);
                 AddNote("atomic sub-type of '" + sem_.TypeNameOf(type) + "' is declared here",
-                        found->second);
+                        **found);
                 return false;
             } else if (address_space == ast::AddressSpace::kStorage &&
                        access != ast::Access::kReadWrite) {
@@ -732,7 +731,7 @@ bool Validator::AtomicVariable(
                     "access mode",
                     source);
                 AddNote("atomic sub-type of '" + sem_.TypeNameOf(type) + "' is declared here",
-                        found->second);
+                        **found);
                 return false;
             }
         }
@@ -783,7 +782,7 @@ bool Validator::Let(const sem::Variable* v) const {
 
 bool Validator::Override(
     const sem::GlobalVariable* v,
-    const std::unordered_map<OverrideId, const sem::Variable*>& override_ids) const {
+    const utils::Hashmap<OverrideId, const sem::Variable*, 8>& override_ids) const {
     auto* decl = v->Declaration();
     auto* storage_ty = v->Type()->UnwrapRef();
 
@@ -796,12 +795,12 @@ bool Validator::Override(
     for (auto* attr : decl->attributes) {
         if (attr->Is<ast::IdAttribute>()) {
             auto id = v->OverrideId();
-            if (auto it = override_ids.find(id); it != override_ids.end() && it->second != v) {
+            if (auto* var = override_ids.Find(id); var && *var != v) {
                 AddError("@id values must be unique", attr->source);
-                AddNote("a override with an ID of " + std::to_string(id.value) +
-                            " was previously declared here:",
-                        ast::GetAttribute<ast::IdAttribute>(it->second->Declaration()->attributes)
-                            ->source);
+                AddNote(
+                    "a override with an ID of " + std::to_string(id.value) +
+                        " was previously declared here:",
+                    ast::GetAttribute<ast::IdAttribute>((*var)->Declaration()->attributes)->source);
                 return false;
             }
         } else {
@@ -1093,8 +1092,8 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     // order to catch conflicts.
     // TODO(jrprice): This state could be stored in sem::Function instead, and then passed to
     // sem::Function since it would be useful there too.
-    std::unordered_set<ast::BuiltinValue> builtins;
-    std::unordered_set<uint32_t> locations;
+    utils::Hashset<ast::BuiltinValue, 4> builtins;
+    utils::Hashset<uint32_t, 8> locations;
     enum class ParamOrRetType {
         kParameter,
         kReturnType,
@@ -1130,7 +1129,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                 }
                 pipeline_io_attribute = attr;
 
-                if (builtins.count(builtin->builtin)) {
+                if (builtins.Contains(builtin->builtin)) {
                     AddError(attr_to_str(builtin) +
                                  " attribute appears multiple times as pipeline " +
                                  (param_or_ret == ParamOrRetType::kParameter ? "input" : "output"),
@@ -1142,7 +1141,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                                       /* is_input */ param_or_ret == ParamOrRetType::kParameter)) {
                     return false;
                 }
-                builtins.emplace(builtin->builtin);
+                builtins.Add(builtin->builtin);
             } else if (auto* loc_attr = attr->As<ast::LocationAttribute>()) {
                 if (pipeline_io_attribute) {
                     AddError("multiple entry point IO attributes", attr->source);
@@ -1287,8 +1286,8 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
 
     // Clear IO sets after parameter validation. Builtin and location attributes in return types
     // should be validated independently from those used in parameters.
-    builtins.clear();
-    locations.clear();
+    builtins.Clear();
+    locations.Clear();
 
     if (!func->ReturnType()->Is<sem::Void>()) {
         if (!validate_entry_point_attributes(decl->return_type_attributes, func->ReturnType(),
@@ -1299,7 +1298,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     }
 
     if (decl->PipelineStage() == ast::PipelineStage::kVertex &&
-        builtins.count(ast::BuiltinValue::kPosition) == 0) {
+        !builtins.Contains(ast::BuiltinValue::kPosition)) {
         // Check module-scope variables, as the SPIR-V sanitizer generates these.
         bool found = false;
         for (auto* global : func->TransitivelyReferencedGlobals()) {
@@ -1327,18 +1326,18 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
     }
 
     // Validate there are no resource variable binding collisions
-    std::unordered_map<sem::BindingPoint, const ast::Variable*> binding_points;
+    utils::Hashmap<sem::BindingPoint, const ast::Variable*, 8> binding_points;
     for (auto* global : func->TransitivelyReferencedGlobals()) {
         auto* var_decl = global->Declaration()->As<ast::Var>();
         if (!var_decl || !var_decl->HasBindingPoint()) {
             continue;
         }
         auto bp = global->BindingPoint();
-        auto res = binding_points.emplace(bp, var_decl);
-        if (!res.second &&
+        if (auto added = binding_points.Add(bp, var_decl);
+            !added &&
             IsValidationEnabled(decl->attributes,
                                 ast::DisabledValidation::kBindingPointCollision) &&
-            IsValidationEnabled(res.first->second->attributes,
+            IsValidationEnabled((*added.value)->attributes,
                                 ast::DisabledValidation::kBindingPointCollision)) {
             // https://gpuweb.github.io/gpuweb/wgsl/#resource-interface
             // Bindings must not alias within a shader stage: two different variables in the
@@ -1350,7 +1349,7 @@ bool Validator::EntryPoint(const sem::Function* func, ast::PipelineStage stage) 
                     "' references multiple variables that use the same resource binding @group(" +
                     std::to_string(bp.group) + "), @binding(" + std::to_string(bp.binding) + ")",
                 var_decl->source);
-            AddNote("first resource binding usage declared here", res.first->second->source);
+            AddNote("first resource binding usage declared here", (*added.value)->source);
             return false;
         }
     }
@@ -1917,7 +1916,7 @@ bool Validator::Matrix(const sem::Matrix* ty, const Source& source) const {
     return true;
 }
 
-bool Validator::PipelineStages(const std::vector<sem::Function*>& entry_points) const {
+bool Validator::PipelineStages(const utils::VectorRef<sem::Function*> entry_points) const {
     auto backtrace = [&](const sem::Function* func, const sem::Function* entry_point) {
         if (func != entry_point) {
             TraverseCallChain(diagnostics_, entry_point, func, [&](const sem::Function* f) {
@@ -2012,7 +2011,7 @@ bool Validator::PipelineStages(const std::vector<sem::Function*>& entry_points) 
     return true;
 }
 
-bool Validator::PushConstants(const std::vector<sem::Function*>& entry_points) const {
+bool Validator::PushConstants(const utils::VectorRef<sem::Function*> entry_points) const {
     for (auto* entry_point : entry_points) {
         // State checked and modified by check_push_constant so that it remembers previously seen
         // push_constant variables for an entry-point.
@@ -2130,7 +2129,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
         return false;
     }
 
-    std::unordered_set<uint32_t> locations;
+    utils::Hashset<uint32_t, 8> locations;
     for (auto* member : str->Members()) {
         if (auto* r = member->Type()->As<sem::Array>()) {
             if (r->IsRuntimeSized()) {
@@ -2248,7 +2247,7 @@ bool Validator::Structure(const sem::Struct* str, ast::PipelineStage stage) cons
 bool Validator::LocationAttribute(const ast::LocationAttribute* loc_attr,
                                   uint32_t location,
                                   const sem::Type* type,
-                                  std::unordered_set<uint32_t>& locations,
+                                  utils::Hashset<uint32_t, 8>& locations,
                                   ast::PipelineStage stage,
                                   const Source& source,
                                   const bool is_input) const {
@@ -2269,12 +2268,11 @@ bool Validator::LocationAttribute(const ast::LocationAttribute* loc_attr,
         return false;
     }
 
-    if (locations.count(location)) {
+    if (!locations.Add(location)) {
         AddError(attr_to_str(loc_attr, location) + " attribute appears multiple times",
                  loc_attr->source);
         return false;
     }
-    locations.emplace(location);
 
     return true;
 }
@@ -2311,7 +2309,7 @@ bool Validator::SwitchStatement(const ast::SwitchStatement* s) {
     }
 
     const sem::CaseSelector* default_selector = nullptr;
-    std::unordered_map<int64_t, Source> selectors;
+    utils::Hashmap<int64_t, Source, 4> selectors;
 
     for (auto* case_stmt : s->body) {
         auto* case_sem = sem_.Get<sem::CaseStatement>(case_stmt);
@@ -2338,18 +2336,16 @@ bool Validator::SwitchStatement(const ast::SwitchStatement* s) {
             }
 
             auto value = selector->Value()->As<uint32_t>();
-            auto it = selectors.find(value);
-            if (it != selectors.end()) {
+            if (auto added = selectors.Add(value, selector->Declaration()->source); !added) {
                 AddError("duplicate switch case '" +
                              (decl_ty->IsAnyOf<sem::I32, sem::AbstractNumeric>()
                                   ? std::to_string(i32(value))
                                   : std::to_string(value)) +
                              "'",
                          selector->Declaration()->source);
-                AddNote("previous case declared here", it->second);
+                AddNote("previous case declared here", *added.value);
                 return false;
             }
-            selectors.emplace(value, selector->Declaration()->source);
         }
     }
 
@@ -2477,12 +2473,12 @@ bool Validator::IncrementDecrementStatement(const ast::IncrementDecrementStateme
 }
 
 bool Validator::NoDuplicateAttributes(utils::VectorRef<const ast::Attribute*> attributes) const {
-    std::unordered_map<const TypeInfo*, Source> seen;
+    utils::Hashmap<const TypeInfo*, Source, 8> seen;
     for (auto* d : attributes) {
-        auto res = seen.emplace(&d->TypeInfo(), d->source);
-        if (!res.second && !d->Is<ast::InternalAttribute>()) {
+        auto added = seen.Add(&d->TypeInfo(), d->source);
+        if (!added && !d->Is<ast::InternalAttribute>()) {
             AddError("duplicate " + d->Name() + " attribute", d->source);
-            AddNote("first attribute declared here", res.first->second);
+            AddNote("first attribute declared here", *added.value);
             return false;
         }
     }

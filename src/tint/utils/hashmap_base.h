@@ -524,7 +524,7 @@ class HashmapBase {
     /// Shuffles slots for an insertion that has been placed one slot before `start`.
     /// @param start the index of the first slot to start shuffling.
     /// @param evicted the slot content that was evicted for the insertion.
-    void InsertShuffle(size_t start, Slot evicted) {
+    void InsertShuffle(size_t start, Slot&& evicted) {
         Scan(start, [&](size_t, size_t index) {
             auto& slot = slots_[index];
 
