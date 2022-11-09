@@ -1722,10 +1722,9 @@ fn f() {
 
     auto* expect = R"(
 fn tint_insert_bits(v : i32, n : i32, offset : u32, count : u32) -> i32 {
-  let s = min(offset, 32u);
-  let e = min(32u, (s + count));
-  let mask = (((1u << s) - 1u) ^ ((1u << e) - 1u));
-  return (((n << s) & i32(mask)) | (v & i32(~(mask))));
+  let e = (offset + count);
+  let mask = ((select(0u, (1u << offset), (offset < 32u)) - 1u) ^ (select(0u, (1u << e), (e < 32u)) - 1u));
+  return ((select(i32(), (n << offset), (offset < 32u)) & i32(mask)) | (v & i32(~(mask))));
 }
 
 fn f() {
@@ -1749,10 +1748,9 @@ fn f() {
 
     auto* expect = R"(
 fn tint_insert_bits(v : u32, n : u32, offset : u32, count : u32) -> u32 {
-  let s = min(offset, 32u);
-  let e = min(32u, (s + count));
-  let mask = (((1u << s) - 1u) ^ ((1u << e) - 1u));
-  return (((n << s) & mask) | (v & ~(mask)));
+  let e = (offset + count);
+  let mask = ((select(0u, (1u << offset), (offset < 32u)) - 1u) ^ (select(0u, (1u << e), (e < 32u)) - 1u));
+  return ((select(u32(), (n << offset), (offset < 32u)) & mask) | (v & ~(mask)));
 }
 
 fn f() {
@@ -1776,10 +1774,9 @@ fn f() {
 
     auto* expect = R"(
 fn tint_insert_bits(v : vec3<i32>, n : vec3<i32>, offset : u32, count : u32) -> vec3<i32> {
-  let s = min(offset, 32u);
-  let e = min(32u, (s + count));
-  let mask = (((1u << s) - 1u) ^ ((1u << e) - 1u));
-  return (((n << vec3<u32>(s)) & vec3<i32>(i32(mask))) | (v & vec3<i32>(i32(~(mask)))));
+  let e = (offset + count);
+  let mask = ((select(0u, (1u << offset), (offset < 32u)) - 1u) ^ (select(0u, (1u << e), (e < 32u)) - 1u));
+  return ((select(vec3<i32>(), (n << vec3<u32>(offset)), (offset < 32u)) & vec3<i32>(i32(mask))) | (v & vec3<i32>(i32(~(mask)))));
 }
 
 fn f() {
@@ -1803,10 +1800,9 @@ fn f() {
 
     auto* expect = R"(
 fn tint_insert_bits(v : vec3<u32>, n : vec3<u32>, offset : u32, count : u32) -> vec3<u32> {
-  let s = min(offset, 32u);
-  let e = min(32u, (s + count));
-  let mask = (((1u << s) - 1u) ^ ((1u << e) - 1u));
-  return (((n << vec3<u32>(s)) & vec3<u32>(mask)) | (v & vec3<u32>(~(mask))));
+  let e = (offset + count);
+  let mask = ((select(0u, (1u << offset), (offset < 32u)) - 1u) ^ (select(0u, (1u << e), (e < 32u)) - 1u));
+  return ((select(vec3<u32>(), (n << vec3<u32>(offset)), (offset < 32u)) & vec3<u32>(mask)) | (v & vec3<u32>(~(mask))));
 }
 
 fn f() {

@@ -462,6 +462,14 @@ struct BuiltinPolyfill::State {
         auto name = b.Symbols().New("tint_insert_bits");
         uint32_t width = WidthOf(ty);
 
+        // Currently in WGSL parameters of insertBits must be i32, u32, vecN<i32> or vecN<u32>
+        if (!sem::Type::DeepestElementOf(ty)->IsAnyOf<sem::I32, sem::U32>()) {
+            TINT_ICE(Transform, b.Diagnostics())
+                << "insertBits polyfill only support i32, u32, and vector of i32 or u32, got "
+                << b.FriendlyName(ty);
+            return {};
+        }
+
         constexpr uint32_t W = 32u;  // 32-bit
 
         auto V = [&](auto value) -> const ast::Expression* {
@@ -481,21 +489,60 @@ struct BuiltinPolyfill::State {
             return b.vec(b.ty.u32(), width, value);
         };
 
-        utils::Vector<const ast::Statement*, 8> body = {
-            b.Decl(b.Let("s", b.Call("min", "offset", u32(W)))),
-            b.Decl(b.Let("e", b.Call("min", u32(W), b.Add("s", "count")))),
-        };
+        // Polyfill algorithm:
+        //      s = min(offset, 32u);
+        //      e = min(32u, (s + count));
+        //      mask = (((1u << s) - 1u) ^ ((1u << e) - 1u));
+        //      return (((n << s) & mask) | (v & ~(mask)));
+        // Note that the algorithm above use the left-shifting in C++ manner, but in WGSL, HLSL, MSL
+        // the rhs are modulo to bit-width of lhs (that is 32u in this case), and in GLSL the result
+        // is undefined if rhs is greater than or equal to bit-width of lhs. The results of `x << y`
+        // in C++ and HLSL are different when `y >= 32u`, and the `s` and `e` defined above can be
+        // 32u, which are cases we must handle specially. Replace all `(x << y)` to
+        // `select(Tx(), x << y, y < 32u)`, in which `Tx` is the type of x, where y can be greater
+        // than or equal to 32u.
+        // WGSL polyfill function:
+        //      fn tint_insert_bits(v : T, n : T, offset : u32, count : u32) -> T {
+        //          let e = offset + count;
+        //          let mask = (
+        //                        (select(0u, 1u << offset, offset < 32u) - 1u) ^
+        //                        (select(0u, 1u << e, e < 32u) - 1u)
+        //                     );
+        //          return ((select(T(), n << offset, offset < 32u) & mask) | (v & ~(mask)));
+        //      }
+
+        utils::Vector<const ast::Statement*, 8> body;
 
         switch (polyfill.insert_bits) {
             case Level::kFull:
-                // let mask = ((1 << s) - 1) ^ ((1 << e) - 1)
+                // let e = offset + count;
+                body.Push(b.Decl(b.Let("e", b.Add("offset", "count"))));
+
+                // let mask = (
+                //              (select(0u, 1u << offset, offset < 32u) - 1u) ^
+                //              (select(0u, 1u << e, e < 32u) - 1u)
+                //            );
                 body.Push(b.Decl(b.Let(
-                    "mask", b.Xor(b.Sub(b.Shl(1_u, "s"), 1_u), b.Sub(b.Shl(1_u, "e"), 1_u)))));
-                // return ((n << s) & mask) | (v & ~mask)
-                body.Push(b.Return(b.Or(b.And(b.Shl("n", U("s")), V("mask")),
-                                        b.And("v", V(b.Complement("mask"))))));
+                    "mask",
+                    b.Xor(  //
+                        b.Sub(
+                            b.Call("select", 0_u, b.Shl(1_u, "offset"), b.LessThan("offset", 32_u)),
+                            1_u),
+                        b.Sub(b.Call("select", 0_u, b.Shl(1_u, "e"), b.LessThan("e", 32_u)),
+                              1_u)  //
+                        ))));
+
+                // return ((select(T(), n << offset, offset < 32u) & mask) | (v & ~(mask)));
+                body.Push(
+                    b.Return(b.Or(b.And(b.Call("select", b.Construct(T(ty)),
+                                               b.Shl("n", U("offset")), b.LessThan("offset", 32_u)),
+                                        V("mask")),
+                                  b.And("v", V(b.Complement("mask"))))));
+
                 break;
             case Level::kClampParameters:
+                body.Push(b.Decl(b.Let("s", b.Call("min", "offset", u32(W)))));
+                body.Push(b.Decl(b.Let("e", b.Call("min", u32(W), b.Add("s", "count")))));
                 body.Push(b.Return(b.Call("insertBits", "v", "n", "s", b.Sub("e", "s"))));
                 break;
             default:
