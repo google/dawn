@@ -1607,6 +1607,49 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               StepCases<f32>(),
                                               StepCases<f16>()))));
 
+template <typename T>
+std::vector<Case> TanCases() {
+    std::vector<Case> cases = {
+        C({-T(0)}, -T(0)),
+        C({T(0)}, T(0)),
+        C({T(.75)}, T(0.9315964599)).FloatComp(),
+
+        // Vector test
+        C({Vec(T(0), -T(0), T(.75))}, Vec(T(0), -T(0), T(0.9315964599))).FloatComp(),
+    };
+
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Tan,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kTan),
+                     testing::ValuesIn(Concat(TanCases<AFloat>(),  //
+                                              TanCases<f32>(),
+                                              TanCases<f16>()))));
+
+template <typename T>
+std::vector<Case> TanhCases() {
+    std::vector<Case> cases = {
+        C({T(0)}, T(0)),
+        C({-T(0)}, -T(0)),
+        C({T(1)}, T(0.761594156)).FloatComp(),
+        C({T(-1)}, -T(0.761594156)).FloatComp(),
+
+        // Vector tests
+        C({Vec(T(0), -T(0), T(1))}, Vec(T(0), -T(0), T(0.761594156))).FloatComp(),
+    };
+
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Tanh,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kTanh),
+                     testing::ValuesIn(Concat(TanhCases<AFloat>(),  //
+                                              TanhCases<f32>(),
+                                              TanhCases<f16>()))));
+
 std::vector<Case> Unpack4x8snormCases() {
     return {
         C({Val(u32(0x0000'0000))}, Vec(f32(0), f32(0), f32(0), f32(0))),

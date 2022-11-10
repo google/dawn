@@ -542,10 +542,10 @@ fn sqrt<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 @const fn step<T: fa_f32_f16>(T, T) -> T
 @const fn step<N: num, T: fa_f32_f16>(vec<N, T>, vec<N, T>) -> vec<N, T>
 @stage("compute") fn storageBarrier()
-fn tan<T: f32_f16>(T) -> T
-fn tan<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
-fn tanh<T: f32_f16>(T) -> T
-fn tanh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn tan<T: fa_f32_f16>(T) -> T
+@const fn tan<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn tanh<T: fa_f32_f16>(T) -> T
+@const fn tanh<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
 fn transpose<M: num, N: num, T: f32_f16>(mat<M, N, T>) -> mat<N, M, T>
 fn trunc<T: f32_f16>(T) -> T
 fn trunc<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>

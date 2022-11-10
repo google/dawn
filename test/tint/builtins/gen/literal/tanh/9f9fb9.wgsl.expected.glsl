@@ -1,7 +1,7 @@
 #version 310 es
 
 void tanh_9f9fb9() {
-  vec3 res = tanh(vec3(1.0f));
+  vec3 res = vec3(0.761594176f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void tanh_9f9fb9() {
-  vec3 res = tanh(vec3(1.0f));
+  vec3 res = vec3(0.761594176f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void tanh_9f9fb9() {
-  vec3 res = tanh(vec3(1.0f));
+  vec3 res = vec3(0.761594176f);
 }
 
 void compute_main() {

@@ -2351,6 +2351,32 @@ ConstEval::Result ConstEval::step(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0], args[1]);
 }
 
+ConstEval::Result ConstEval::tan(const sem::Type* ty,
+                                 utils::VectorRef<const sem::Constant*> args,
+                                 const Source&) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto i) -> ImplResult {
+            using NumberT = decltype(i);
+            return CreateElement(builder, c0->Type(), NumberT(std::tan(i.value)));
+        };
+        return Dispatch_fa_f32_f16(create, c0);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
+ConstEval::Result ConstEval::tanh(const sem::Type* ty,
+                                  utils::VectorRef<const sem::Constant*> args,
+                                  const Source&) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto i) -> ImplResult {
+            using NumberT = decltype(i);
+            return CreateElement(builder, c0->Type(), NumberT(std::tanh(i.value)));
+        };
+        return Dispatch_fa_f32_f16(create, c0);
+    };
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
 ConstEval::Result ConstEval::unpack2x16float(const sem::Type* ty,
                                              utils::VectorRef<const sem::Constant*> args,
                                              const Source& source) {

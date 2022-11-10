@@ -1,5 +1,5 @@
 void tanh_5724b3() {
-  float2 res = tanh((1.0f).xx);
+  float2 res = (0.761594176f).xx;
 }
 
 struct tint_symbol {

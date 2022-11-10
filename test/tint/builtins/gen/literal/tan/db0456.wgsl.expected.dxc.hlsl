@@ -1,5 +1,5 @@
 void tan_db0456() {
-  vector<float16_t, 3> res = tan((float16_t(1.0h)).xxx);
+  vector<float16_t, 3> res = (float16_t(1.556640625h)).xxx;
 }
 
 struct tint_symbol {

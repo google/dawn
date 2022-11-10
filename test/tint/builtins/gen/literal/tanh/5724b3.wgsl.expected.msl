@@ -2,7 +2,7 @@
 
 using namespace metal;
 void tanh_5724b3() {
-  float2 res = tanh(float2(1.0f));
+  float2 res = float2(0.761594176f);
 }
 
 struct tint_symbol {
