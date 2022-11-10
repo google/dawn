@@ -1674,6 +1674,24 @@ ConstEval::Result ConstEval::acos(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0]);
 }
 
+ConstEval::Result ConstEval::acosh(const sem::Type* ty,
+                                   utils::VectorRef<const sem::Constant*> args,
+                                   const Source& source) {
+    auto transform = [&](const sem::Constant* c0) {
+        auto create = [&](auto i) -> ImplResult {
+            using NumberT = decltype(i);
+            if (i < NumberT(1.0)) {
+                AddError("acosh must be called with a value >= 1.0", source);
+                return utils::Failure;
+            }
+            return CreateElement(builder, c0->Type(), NumberT(std::acosh(i.value)));
+        };
+        return Dispatch_fa_f32_f16(create, c0);
+    };
+
+    return TransformElements(builder, ty, transform, args[0]);
+}
+
 ConstEval::Result ConstEval::all(const sem::Type* ty,
                                  utils::VectorRef<const sem::Constant*> args,
                                  const Source&) {

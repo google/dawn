@@ -1,5 +1,5 @@
 fn acosh_d51ccb() {
-  var res : vec4<f32> = acosh(vec4<f32>(1.0f));
+  var res : vec4<f32> = acosh(vec4<f32>(2.0f));
 }
 
 @vertex

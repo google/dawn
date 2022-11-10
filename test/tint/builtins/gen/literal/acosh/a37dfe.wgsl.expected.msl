@@ -1,12 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-half tint_acosh(half x) {
-  return select(acosh(x), 0.0h, (x < 1.0h));
-}
-
 void acosh_a37dfe() {
-  half res = tint_acosh(1.0h);
+  half res = 1.31640625h;
 }
 
 struct tint_symbol {

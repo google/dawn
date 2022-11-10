@@ -1,7 +1,7 @@
 enable f16;
 
 fn acosh_f56574() {
-  var arg_0 = vec3<f16>(1.0h);
+  var arg_0 = vec3<f16>(2.0h);
   var res : vec3<f16> = acosh(arg_0);
 }
 

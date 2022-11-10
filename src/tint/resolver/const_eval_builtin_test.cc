@@ -507,6 +507,33 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               AcosCases<f16, false>()))));
 
 template <typename T, bool finite_only>
+std::vector<Case> AcoshCases() {
+    std::vector<Case> cases = {
+        C({T(1.0)}, T(0.0)),
+        C({T(11.5919532755)}, kPi<T>).FloatComp(),
+
+        // Vector tests
+        C({Vec(T(1.0), T(11.5919532755))}, Vec(T(0), kPi<T>)).FloatComp(),
+    };
+
+    ConcatIntoIf<finite_only>(  //
+        cases, std::vector<Case>{
+                   E({T::Smallest()}, "12:34 error: acosh must be called with a value >= 1.0"),
+                   E({-1.1_a}, "12:34 error: acosh must be called with a value >= 1.0"),
+                   E({0_a}, "12:34 error: acosh must be called with a value >= 1.0"),
+               });
+
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Acosh,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kAcosh),
+                     testing::ValuesIn(Concat(AcoshCases<AFloat, true>(),  //
+                                              AcoshCases<f32, false>(),
+                                              AcoshCases<f16, false>()))));
+
+template <typename T, bool finite_only>
 std::vector<Case> AsinCases() {
     std::vector<Case> cases = {
         // If i is +/-0, +/-0 is returned

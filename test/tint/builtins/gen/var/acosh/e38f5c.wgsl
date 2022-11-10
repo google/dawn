@@ -1,4 +1,4 @@
-// Copyright 2021 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
 
 // fn acosh(vec<3, f32>) -> vec<3, f32>
 fn acosh_e38f5c() {
-  var arg_0 = vec3<f32>(1.f);
+  var arg_0 = vec3<f32>(2.f);
   var res: vec3<f32> = acosh(arg_0);
 }
 

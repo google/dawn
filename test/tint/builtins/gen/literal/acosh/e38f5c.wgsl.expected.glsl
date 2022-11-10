@@ -1,11 +1,7 @@
 #version 310 es
 
-vec3 tint_acosh(vec3 x) {
-  return mix(acosh(x), vec3(0.0f), lessThan(x, vec3(1.0f)));
-}
-
 void acosh_e38f5c() {
-  vec3 res = tint_acosh(vec3(1.0f));
+  vec3 res = vec3(1.316957951f);
 }
 
 vec4 vertex_main() {
@@ -24,12 +20,8 @@ void main() {
 #version 310 es
 precision mediump float;
 
-vec3 tint_acosh(vec3 x) {
-  return mix(acosh(x), vec3(0.0f), lessThan(x, vec3(1.0f)));
-}
-
 void acosh_e38f5c() {
-  vec3 res = tint_acosh(vec3(1.0f));
+  vec3 res = vec3(1.316957951f);
 }
 
 void fragment_main() {
@@ -42,12 +34,8 @@ void main() {
 }
 #version 310 es
 
-vec3 tint_acosh(vec3 x) {
-  return mix(acosh(x), vec3(0.0f), lessThan(x, vec3(1.0f)));
-}
-
 void acosh_e38f5c() {
-  vec3 res = tint_acosh(vec3(1.0f));
+  vec3 res = vec3(1.316957951f);
 }
 
 void compute_main() {

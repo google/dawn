@@ -1,5 +1,5 @@
 fn acosh_ecf2d1() {
-  var res : f32 = acosh(1.0f);
+  var res : f32 = acosh(2.0f);
 }
 
 @vertex

@@ -1,5 +1,5 @@
 fn acosh_ecf2d1() {
-  var arg_0 = 1.0f;
+  var arg_0 = 2.0f;
   var res : f32 = acosh(arg_0);
 }
 

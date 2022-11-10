@@ -1,4 +1,4 @@
-// Copyright 2021 The Tint Authors.
+// Copyright 2022 The Tint Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@
 
 // fn acosh(f32) -> f32
 fn acosh_ecf2d1() {
-  var arg_0 = 1.f;
+  var arg_0 = 2.f;
   var res: f32 = acosh(arg_0);
 }
 

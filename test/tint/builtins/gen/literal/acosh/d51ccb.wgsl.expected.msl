@@ -1,12 +1,8 @@
 #include <metal_stdlib>
 
 using namespace metal;
-float4 tint_acosh(float4 x) {
-  return select(acosh(x), float4(0.0f), (x < float4(1.0f)));
-}
-
 void acosh_d51ccb() {
-  float4 res = tint_acosh(float4(1.0f));
+  float4 res = float4(1.316957951f);
 }
 
 struct tint_symbol {

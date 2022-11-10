@@ -12153,24 +12153,24 @@ constexpr OverloadInfo kOverloads[] = {
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 0,
-    /* template types */ &kTemplateTypes[25],
+    /* template types */ &kTemplateTypes[24],
     /* template numbers */ &kTemplateNumbers[10],
     /* parameters */ &kParameters[958],
     /* return matcher indices */ &kMatcherIndices[1],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::acosh,
   },
   {
     /* [319] */
     /* num parameters */ 1,
     /* num template types */ 1,
     /* num template numbers */ 1,
-    /* template types */ &kTemplateTypes[25],
+    /* template types */ &kTemplateTypes[24],
     /* template numbers */ &kTemplateNumbers[5],
     /* parameters */ &kParameters[996],
     /* return matcher indices */ &kMatcherIndices[30],
     /* flags */ OverloadFlags(OverloadFlag::kIsBuiltin, OverloadFlag::kSupportsVertexPipeline, OverloadFlag::kSupportsFragmentPipeline, OverloadFlag::kSupportsComputePipeline),
-    /* const eval */ nullptr,
+    /* const eval */ &ConstEval::acosh,
   },
   {
     /* [320] */
@@ -14027,8 +14027,8 @@ constexpr IntrinsicInfo kBuiltins[] = {
   },
   {
     /* [2] */
-    /* fn acosh<T : f32_f16>(T) -> T */
-    /* fn acosh<N : num, T : f32_f16>(vec<N, T>) -> vec<N, T> */
+    /* fn acosh<T : fa_f32_f16>(@test_value(2) T) -> T */
+    /* fn acosh<N : num, T : fa_f32_f16>(@test_value(2) vec<N, T>) -> vec<N, T> */
     /* num overloads */ 2,
     /* overloads */ &kOverloads[318],
   },

@@ -408,8 +408,8 @@ match storage
 @const fn abs<N: num, T: fia_fiu32_f16>(vec<N, T>) -> vec<N, T>
 @const fn acos<T: fa_f32_f16>(@test_value(0.96891242171) T) -> T
 @const fn acos<N: num, T: fa_f32_f16>(@test_value(0.96891242171) vec<N, T>) -> vec<N, T>
-fn acosh<T: f32_f16>(T) -> T
-fn acosh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn acosh<T: fa_f32_f16>(@test_value(2.0) T) -> T
+@const fn acosh<N: num, T: fa_f32_f16>(@test_value(2.0) vec<N, T>) -> vec<N, T>
 @const fn all(bool) -> bool
 @const fn all<N: num>(vec<N, bool>) -> bool
 @const fn any(bool) -> bool

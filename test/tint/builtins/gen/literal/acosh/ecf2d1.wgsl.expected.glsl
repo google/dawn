@@ -1,11 +1,7 @@
 #version 310 es
 
-float tint_acosh(float x) {
-  return ((x < 1.0f) ? 0.0f : acosh(x));
-}
-
 void acosh_ecf2d1() {
-  float res = tint_acosh(1.0f);
+  float res = 1.316957951f;
 }
 
 vec4 vertex_main() {
@@ -24,12 +20,8 @@ void main() {
 #version 310 es
 precision mediump float;
 
-float tint_acosh(float x) {
-  return ((x < 1.0f) ? 0.0f : acosh(x));
-}
-
 void acosh_ecf2d1() {
-  float res = tint_acosh(1.0f);
+  float res = 1.316957951f;
 }
 
 void fragment_main() {
@@ -42,12 +34,8 @@ void main() {
 }
 #version 310 es
 
-float tint_acosh(float x) {
-  return ((x < 1.0f) ? 0.0f : acosh(x));
-}
-
 void acosh_ecf2d1() {
-  float res = tint_acosh(1.0f);
+  float res = 1.316957951f;
 }
 
 void compute_main() {

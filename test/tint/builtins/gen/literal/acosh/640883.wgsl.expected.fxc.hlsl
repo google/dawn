@@ -1,9 +1,5 @@
-float2 tint_acosh(float2 x) {
-  return log((x + sqrt(((x * x) - 1.0f))));
-}
-
 void acosh_640883() {
-  float2 res = tint_acosh((1.0f).xx);
+  float2 res = (1.316957951f).xx;
 }
 
 struct tint_symbol {

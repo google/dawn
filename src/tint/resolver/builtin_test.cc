@@ -276,7 +276,12 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, Error_NoParams) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Scalar_f32) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, 0.5_f);
+    auto val = 0.5_f;
+    if (param.name == std::string("acosh")) {
+        val = 1.0_f;
+    }
+
+    auto* call = Call(param.name, val);
     WrapInFunction(call);
 
     if (param.args_number == 1u) {
@@ -297,7 +302,10 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Scalar_f32) {
 TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Vector_f32) {
     auto param = GetParam();
 
-    auto* call = Call(param.name, vec3<f32>(0.5_f, 0.5_f, 0.8_f));
+    auto val = param.name == std::string("acosh") ? vec3<f32>(1.0_f, 2.0_f, 3.0_f)
+                                                  : vec3<f32>(0.5_f, 0.5_f, 0.8_f);
+
+    auto* call = Call(param.name, val);
     WrapInFunction(call);
 
     if (param.args_number == 1u) {
@@ -462,7 +470,12 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Scalar_f16) {
 
     Enable(ast::Extension::kF16);
 
-    auto* call = Call(param.name, 0.5_h);
+    auto val = 0.5_h;
+    if (param.name == std::string("acosh")) {
+        val = 1.0_h;
+    }
+
+    auto* call = Call(param.name, val);
     WrapInFunction(call);
 
     if (param.args_number == 1u) {
@@ -485,7 +498,10 @@ TEST_P(ResolverBuiltinTest_FloatBuiltin_IdenticalType, OneParam_Vector_f16) {
 
     Enable(ast::Extension::kF16);
 
-    auto* call = Call(param.name, vec3<f16>(0.5_h, 0.5_h, 0.8_h));
+    auto val = param.name == std::string("acosh") ? vec3<f16>(1.0_h, 2.0_h, 3.0_h)
+                                                  : vec3<f16>(0.5_h, 0.5_h, 0.8_h);
+
+    auto* call = Call(param.name, val);
     WrapInFunction(call);
 
     if (param.args_number == 1u) {

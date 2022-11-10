@@ -1,12 +1,8 @@
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
-float16_t tint_acosh(float16_t x) {
-  return ((x < 1.0hf) ? 0.0hf : acosh(x));
-}
-
 void acosh_a37dfe() {
-  float16_t res = tint_acosh(1.0hf);
+  float16_t res = 1.31640625hf;
 }
 
 vec4 vertex_main() {
@@ -26,12 +22,8 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 precision mediump float;
 
-float16_t tint_acosh(float16_t x) {
-  return ((x < 1.0hf) ? 0.0hf : acosh(x));
-}
-
 void acosh_a37dfe() {
-  float16_t res = tint_acosh(1.0hf);
+  float16_t res = 1.31640625hf;
 }
 
 void fragment_main() {
@@ -45,12 +37,8 @@ void main() {
 #version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
-float16_t tint_acosh(float16_t x) {
-  return ((x < 1.0hf) ? 0.0hf : acosh(x));
-}
-
 void acosh_a37dfe() {
-  float16_t res = tint_acosh(1.0hf);
+  float16_t res = 1.31640625hf;
 }
 
 void compute_main() {
