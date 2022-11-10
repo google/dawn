@@ -1514,7 +1514,24 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
 
     ParameterList ast_params;
     function_.ForEachParam([this, &ast_params](const spvtools::opt::Instruction* param) {
-        auto* type = parser_impl_.ConvertType(param->type_id());
+        const Type* type = nullptr;
+        auto* spirv_type = type_mgr_->GetType(param->type_id());
+        TINT_ASSERT(Reader, spirv_type);
+        if (spirv_type->AsImage() || spirv_type->AsSampler() ||
+            (spirv_type->AsPointer() &&
+             (static_cast<spv::StorageClass>(spirv_type->AsPointer()->storage_class()) ==
+              spv::StorageClass::UniformConstant))) {
+            // When we see image, sampler, pointer-to-image, or pointer-to-sampler, use the
+            // handle type deduced according to usage.  Handle types are automatically generated as
+            // pointer-to-handle.  Extract the handle type itself.
+            const auto* ptr_type = parser_impl_.GetTypeForHandleMemObjDecl(*param);
+            TINT_ASSERT(Reader, ptr_type);
+            // In WGSL, pass handles instead of pointers to them.
+            type = ptr_type->type;
+        } else {
+            type = parser_impl_.ConvertType(param->type_id());
+        }
+
         if (type != nullptr) {
             auto* ast_param = parser_impl_.MakeParameter(param->result_id(), type, AttributeList{});
             // Parameters are treated as const declarations.
@@ -5407,7 +5424,7 @@ const spvtools::opt::Instruction* FunctionEmitter::GetImage(
 }
 
 const Texture* FunctionEmitter::GetImageType(const spvtools::opt::Instruction& image) {
-    const Pointer* ptr_type = parser_impl_.GetTypeForHandleVar(image);
+    const Pointer* ptr_type = parser_impl_.GetTypeForHandleMemObjDecl(image);
     if (!parser_impl_.success()) {
         Fail();
         return {};
@@ -5471,7 +5488,7 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
     }
 
     // Find the texture type.
-    const Pointer* texture_ptr_type = parser_impl_.GetTypeForHandleVar(*image);
+    const Pointer* texture_ptr_type = parser_impl_.GetTypeForHandleMemObjDecl(*image);
     if (!texture_ptr_type) {
         return Fail();
     }
@@ -5736,7 +5753,8 @@ bool FunctionEmitter::EmitImageAccess(const spvtools::opt::Instruction& inst) {
         // If necessary, convert the result to the signedness of the instruction
         // result type. Compare the SPIR-V image's sampled component type with the
         // component of the result type of the SPIR-V instruction.
-        auto* spirv_image_type = parser_impl_.GetSpirvTypeForHandleMemoryObjectDeclaration(*image);
+        auto* spirv_image_type =
+            parser_impl_.GetSpirvTypeForHandleOrHandleMemoryObjectDeclaration(*image);
         if (!spirv_image_type || (opcode(spirv_image_type) != spv::Op::OpTypeImage)) {
             return Fail() << "invalid image type for image memory object declaration "
                           << image->PrettyPrint();

@@ -1538,7 +1538,7 @@ bool ParserImpl::EmitModuleScopeVariables() {
         const Type* ast_type = nullptr;
         if (spirv_storage_class == spv::StorageClass::UniformConstant) {
             // These are opaque handles: samplers or textures
-            ast_type = GetTypeForHandleVar(var);
+            ast_type = GetTypeForHandleMemObjDecl(var);
             if (!ast_type) {
                 return false;
             }
@@ -2355,8 +2355,8 @@ const spvtools::opt::Instruction* ParserImpl::GetMemoryObjectDeclarationForHandl
     }
 }
 
-const spvtools::opt::Instruction* ParserImpl::GetSpirvTypeForHandleMemoryObjectDeclaration(
-    const spvtools::opt::Instruction& var) {
+const spvtools::opt::Instruction* ParserImpl::GetSpirvTypeForHandleOrHandleMemoryObjectDeclaration(
+    const spvtools::opt::Instruction& mem_obj_decl) {
     if (!success()) {
         return nullptr;
     }
@@ -2371,14 +2371,29 @@ const spvtools::opt::Instruction* ParserImpl::GetSpirvTypeForHandleMemoryObjectD
     // are the only SPIR-V handles supported by WGSL.
 
     // Get the SPIR-V handle type.
-    const auto* ptr_type = def_use_mgr_->GetDef(var.type_id());
-    if (!ptr_type || (opcode(ptr_type) != spv::Op::OpTypePointer)) {
-        Fail() << "Invalid type for variable or function parameter " << var.PrettyPrint();
+    const auto* type = def_use_mgr_->GetDef(mem_obj_decl.type_id());
+    if (!type) {
+        Fail() << "Invalid type for variable or function parameter " << mem_obj_decl.PrettyPrint();
         return nullptr;
     }
-    const auto* raw_handle_type = def_use_mgr_->GetDef(ptr_type->GetSingleWordInOperand(1));
+    switch (opcode(type)) {
+        case spv::Op::OpTypeSampler:
+        case spv::Op::OpTypeImage:
+            return type;
+        case spv::Op::OpTypePointer:
+            // The remaining cases.
+            break;
+        default:
+            Fail() << "Invalid type for variable or function parameter "
+                   << mem_obj_decl.PrettyPrint();
+            return nullptr;
+    }
+
+    // Look at the pointee type instead.
+    const auto* raw_handle_type = def_use_mgr_->GetDef(type->GetSingleWordInOperand(1));
     if (!raw_handle_type) {
-        Fail() << "Invalid pointer type for variable or function parameter " << var.PrettyPrint();
+        Fail() << "Invalid pointer type for variable or function parameter "
+               << mem_obj_decl.PrettyPrint();
         return nullptr;
     }
     switch (opcode(raw_handle_type)) {
@@ -2390,38 +2405,41 @@ const spvtools::opt::Instruction* ParserImpl::GetSpirvTypeForHandleMemoryObjectD
         case spv::Op::OpTypeRuntimeArray:
             Fail() << "arrays of textures or samplers are not supported in WGSL; can't "
                       "translate variable or function parameter: "
-                   << var.PrettyPrint();
+                   << mem_obj_decl.PrettyPrint();
             return nullptr;
         case spv::Op::OpTypeSampledImage:
-            Fail() << "WGSL does not support combined image-samplers: " << var.PrettyPrint();
+            Fail() << "WGSL does not support combined image-samplers: "
+                   << mem_obj_decl.PrettyPrint();
             return nullptr;
         default:
             Fail() << "invalid type for image or sampler variable or function "
                       "parameter: "
-                   << var.PrettyPrint();
+                   << mem_obj_decl.PrettyPrint();
             return nullptr;
     }
     return raw_handle_type;
 }
 
-const Pointer* ParserImpl::GetTypeForHandleVar(const spvtools::opt::Instruction& var) {
-    auto where = handle_type_.find(&var);
+const Pointer* ParserImpl::GetTypeForHandleMemObjDecl(
+    const spvtools::opt::Instruction& mem_obj_decl) {
+    auto where = handle_type_.find(&mem_obj_decl);
     if (where != handle_type_.end()) {
         return where->second;
     }
 
     const spvtools::opt::Instruction* raw_handle_type =
-        GetSpirvTypeForHandleMemoryObjectDeclaration(var);
+        GetSpirvTypeForHandleOrHandleMemoryObjectDeclaration(mem_obj_decl);
     if (!raw_handle_type) {
         return nullptr;
     }
 
-    // The variable could be a sampler or image.
+    // The memory object declaration could be a sampler or image.
     // Where possible, determine which one it is from the usage inferred
     // for the variable.
-    Usage usage = handle_usage_[&var];
+    Usage usage = handle_usage_[&mem_obj_decl];
     if (!usage.IsValid()) {
-        Fail() << "Invalid sampler or texture usage for variable " << var.PrettyPrint() << "\n"
+        Fail() << "Invalid sampler or texture usage for variable or function parameter "
+               << mem_obj_decl.PrettyPrint() << "\n"
                << usage;
         return nullptr;
     }
@@ -2447,7 +2465,7 @@ const Pointer* ParserImpl::GetTypeForHandleVar(const spvtools::opt::Instruction&
                 // Get NonWritable and NonReadable attributes of the variable.
                 bool is_nonwritable = false;
                 bool is_nonreadable = false;
-                for (const auto& deco : GetDecorationsFor(var.result_id())) {
+                for (const auto& deco : GetDecorationsFor(mem_obj_decl.result_id())) {
                     if (deco.size() != 1) {
                         continue;
                     }
@@ -2460,11 +2478,11 @@ const Pointer* ParserImpl::GetTypeForHandleVar(const spvtools::opt::Instruction&
                 }
                 if (is_nonwritable && is_nonreadable) {
                     Fail() << "storage image variable is both NonWritable and NonReadable"
-                           << var.PrettyPrint();
+                           << mem_obj_decl.PrettyPrint();
                 }
                 if (!is_nonwritable && !is_nonreadable) {
                     Fail() << "storage image variable is neither NonWritable nor NonReadable"
-                           << var.PrettyPrint();
+                           << mem_obj_decl.PrettyPrint();
                 }
                 // Let's make it one of the storage textures.
                 if (is_nonwritable) {
@@ -2507,8 +2525,9 @@ const Pointer* ParserImpl::GetTypeForHandleVar(const spvtools::opt::Instruction&
                     break;
                 default:
                     Fail() << "WGSL arrayed textures must be 2d_array or cube_array: "
-                              "invalid multisampled texture variable "
-                           << namer_.Name(var.result_id()) << ": " << var.PrettyPrint();
+                              "invalid multisampled texture variable or function parameter "
+                           << namer_.Name(mem_obj_decl.result_id()) << ": "
+                           << mem_obj_decl.PrettyPrint();
                     return nullptr;
             }
         }
@@ -2540,8 +2559,9 @@ const Pointer* ParserImpl::GetTypeForHandleVar(const spvtools::opt::Instruction&
             } else if (image_type->is_multisampled()) {
                 if (dim != ast::TextureDimension::k2d) {
                     Fail() << "WGSL multisampled textures must be 2d and non-arrayed: "
-                              "invalid multisampled texture variable "
-                           << namer_.Name(var.result_id()) << ": " << var.PrettyPrint();
+                              "invalid multisampled texture variable or function parameter "
+                           << namer_.Name(mem_obj_decl.result_id()) << ": "
+                           << mem_obj_decl.PrettyPrint();
                 }
                 // Multisampled textures are never depth textures.
                 ast_store_type = ty_.MultisampledTexture(dim, ast_sampled_component_type);
@@ -2557,16 +2577,16 @@ const Pointer* ParserImpl::GetTypeForHandleVar(const spvtools::opt::Instruction&
             ast_store_type = ty_.StorageTexture(dim, format, access);
         }
     } else {
-        Fail() << "unsupported: UniformConstant variable is not a recognized "
-                  "sampler or texture"
-               << var.PrettyPrint();
+        Fail() << "unsupported: UniformConstant variable or function parameter is not a recognized "
+                  "sampler or texture "
+               << mem_obj_decl.PrettyPrint();
         return nullptr;
     }
 
     // Form the pointer type.
     auto* result = ty_.Pointer(ast_store_type, ast::AddressSpace::kHandle);
     // Remember it for later.
-    handle_type_[&var] = result;
+    handle_type_[&mem_obj_decl] = result;
     return result;
 }
 

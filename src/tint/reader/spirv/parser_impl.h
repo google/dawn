@@ -642,20 +642,21 @@ class ParserImpl : Reader {
 
     /// Returns the SPIR-V type for the sampler or image type for the given
     /// variable in UniformConstant address space, or function parameter pointing
-    /// into the UniformConstant address space .  Returns null and emits an
-    /// error on failure.
-    /// @param var the OpVariable instruction or OpFunctionParameter
+    /// into the UniformConstant address space, or image or sampler type.
+    /// Returns null and emits an error on failure.
+    /// @param mem_obj_decl the OpVariable instruction or OpFunctionParameter
     /// @returns the Tint AST type for the sampler or texture, or null on error
-    const spvtools::opt::Instruction* GetSpirvTypeForHandleMemoryObjectDeclaration(
-        const spvtools::opt::Instruction& var);
+    const spvtools::opt::Instruction* GetSpirvTypeForHandleOrHandleMemoryObjectDeclaration(
+        const spvtools::opt::Instruction& mem_obj_decl);
 
     /// Returns the AST type for the pointer-to-sampler or pointer-to-texture type
-    /// for the given variable in UniformConstant address space.  Returns null and
+    /// for the given variable in UniformConstant address space or function
+    /// parameter of type pointer-to-UniformConstant.  Returns null and
     /// emits an error on failure.
-    /// @param var the OpVariable instruction
+    /// @param mem_obj_decl the OpVariable instruction
     /// @returns the Tint AST type for the poiner-to-{sampler|texture} or null on
     /// error
-    const Pointer* GetTypeForHandleVar(const spvtools::opt::Instruction& var);
+    const Pointer* GetTypeForHandleMemObjDecl(const spvtools::opt::Instruction& mem_obj_decl);
 
     /// Returns the AST variable for the SPIR-V ID of a module-scope variable,
     /// or null if there isn't one.
