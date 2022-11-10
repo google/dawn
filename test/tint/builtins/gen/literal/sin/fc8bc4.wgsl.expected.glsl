@@ -1,7 +1,7 @@
 #version 310 es
 
 void sin_fc8bc4() {
-  vec2 res = sin(vec2(1.0f));
+  vec2 res = vec2(0.841470957f);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void sin_fc8bc4() {
-  vec2 res = sin(vec2(1.0f));
+  vec2 res = vec2(0.841470957f);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void sin_fc8bc4() {
-  vec2 res = sin(vec2(1.0f));
+  vec2 res = vec2(0.841470957f);
 }
 
 void compute_main() {

@@ -1,0 +1,33 @@
+#include <metal_stdlib>
+
+using namespace metal;
+void sinh_a3da7c() {
+  float4 res = float4(1.175201178f);
+}
+
+struct tint_symbol {
+  float4 value [[position]];
+};
+
+float4 vertex_main_inner() {
+  sinh_a3da7c();
+  return float4(0.0f);
+}
+
+vertex tint_symbol vertex_main() {
+  float4 const inner_result = vertex_main_inner();
+  tint_symbol wrapper_result = {};
+  wrapper_result.value = inner_result;
+  return wrapper_result;
+}
+
+fragment void fragment_main() {
+  sinh_a3da7c();
+  return;
+}
+
+kernel void compute_main() {
+  sinh_a3da7c();
+  return;
+}
+

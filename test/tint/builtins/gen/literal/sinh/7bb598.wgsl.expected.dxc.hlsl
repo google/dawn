@@ -1,5 +1,5 @@
 void sinh_7bb598() {
-  float res = sinh(1.0f);
+  float res = 1.175201178f;
 }
 
 struct tint_symbol {

@@ -1487,6 +1487,50 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               SignCases<f16>()))));
 
 template <typename T>
+std::vector<Case> SinCases() {
+    std::vector<Case> cases = {
+        C({-T(0)}, -T(0)),
+        C({T(0)}, T(0)),
+        C({T(0.75)}, T(0.68163876)).FloatComp(),
+        C({-T(0.75)}, -T(0.68163876)).FloatComp(),
+
+        // Vector test
+        C({Vec(T(0), -T(0), T(0.75))}, Vec(T(0), -T(0), T(0.68163876))).FloatComp(),
+    };
+
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Sin,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kSin),
+                     testing::ValuesIn(Concat(SinCases<AFloat>(),  //
+                                              SinCases<f32>(),
+                                              SinCases<f16>()))));
+
+template <typename T>
+std::vector<Case> SinhCases() {
+    std::vector<Case> cases = {
+        C({T(0)}, T(0)),
+        C({-T(0)}, -T(0)),
+        C({T(1)}, T(1.1752012)).FloatComp(),
+        C({T(-1)}, -T(1.1752012)).FloatComp(),
+
+        // Vector tests
+        C({Vec(T(0), -T(0), T(1))}, Vec(T(0), -T(0), T(1.1752012))).FloatComp(),
+    };
+
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Sinh,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kSinh),
+                     testing::ValuesIn(Concat(SinhCases<AFloat>(),  //
+                                              SinhCases<f32>(),
+                                              SinhCases<f16>()))));
+
+template <typename T>
 std::vector<Case> StepCases() {
     return {
         C({T(0), T(0)}, T(1.0)),

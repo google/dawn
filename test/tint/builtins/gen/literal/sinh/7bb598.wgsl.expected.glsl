@@ -1,7 +1,7 @@
 #version 310 es
 
 void sinh_7bb598() {
-  float res = sinh(1.0f);
+  float res = 1.175201178f;
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void sinh_7bb598() {
-  float res = sinh(1.0f);
+  float res = 1.175201178f;
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void sinh_7bb598() {
-  float res = sinh(1.0f);
+  float res = 1.175201178f;
 }
 
 void compute_main() {

@@ -531,10 +531,10 @@ fn round<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
 @const("select_boolvec") fn select<N: num, T: scalar>(vec<N, T>, vec<N, T>, vec<N, bool>) -> vec<N, T>
 @const fn sign<T: fa_f32_f16>(T) -> T
 @const fn sign<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
-fn sin<T: f32_f16>(T) -> T
-fn sin<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
-fn sinh<T: f32_f16>(T) -> T
-fn sinh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn sin<T: fa_f32_f16>(T) -> T
+@const fn sin<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn sinh<T: fa_f32_f16>(T) -> T
+@const fn sinh<N: num, T: fa_f32_f16>(vec<N, T>) -> vec<N, T>
 fn smoothstep<T: f32_f16>(T, T, T) -> T
 fn smoothstep<N: num, T: f32_f16>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
 fn sqrt<T: f32_f16>(T) -> T

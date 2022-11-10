@@ -1,5 +1,5 @@
 void sin_5c0712() {
-  vector<float16_t, 4> res = sin((float16_t(1.0h)).xxxx);
+  vector<float16_t, 4> res = (float16_t(0.841308594h)).xxxx;
 }
 
 struct tint_symbol {
