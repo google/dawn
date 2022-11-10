@@ -131,10 +131,17 @@ def _DoCommonChecks(input_api, output_api):
     results = []
     results.extend(
         input_api.canned_checks.CheckChangedLUCIConfigs(input_api, output_api))
+
+    result_factory = output_api.PresubmitPromptWarning
+    if input_api.is_committing:
+        result_factory = output_api.PresubmitError
+
     results.extend(
-        input_api.canned_checks.CheckPatchFormatted(input_api,
-                                                    output_api,
-                                                    check_python=True))
+        input_api.canned_checks.CheckPatchFormatted(
+            input_api,
+            output_api,
+            check_python=True,
+            result_factory=result_factory))
     results.extend(
         input_api.canned_checks.CheckChangeHasDescription(
             input_api, output_api))
