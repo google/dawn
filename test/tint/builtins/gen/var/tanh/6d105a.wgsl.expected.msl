@@ -2,7 +2,7 @@
 
 using namespace metal;
 void tanh_6d105a() {
-  half2 arg_0 = half2(0.0h);
+  half2 arg_0 = half2(1.0h);
   half2 res = tanh(arg_0);
 }
 

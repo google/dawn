@@ -1,7 +1,7 @@
 enable f16;
 
 fn saturate_462535() {
-  var res : vec3<f16> = saturate(vec3<f16>(f16()));
+  var res : vec3<f16> = saturate(vec3<f16>(2.0h));
 }
 
 @vertex

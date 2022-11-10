@@ -1,5 +1,5 @@
 void mix_f1a543() {
-  vector<float16_t, 4> res = lerp((float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, float16_t(0.0h));
+  vector<float16_t, 4> res = lerp((float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx, float16_t(1.0h));
 }
 
 struct tint_symbol {

@@ -25,8 +25,8 @@ enable f16;
 
 // fn cross(vec3<f16>, vec3<f16>) -> vec3<f16>
 fn cross_9857cb() {
-  var arg_0 = vec3<f16>(f16());
-  var arg_1 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(1.h);
+  var arg_1 = vec3<f16>(1.h);
   var res: vec3<f16> = cross(arg_0, arg_1);
 }
 

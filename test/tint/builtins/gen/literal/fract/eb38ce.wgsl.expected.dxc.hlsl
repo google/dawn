@@ -1,5 +1,5 @@
 void fract_eb38ce() {
-  float16_t res = frac(float16_t(0.0h));
+  float16_t res = frac(float16_t(1.0h));
 }
 
 struct tint_symbol {

@@ -25,8 +25,8 @@ enable f16;
 
 // fn atan2(vec<3, f16>, vec<3, f16>) -> vec<3, f16>
 fn atan2_21dfea() {
-  var arg_0 = vec3<f16>(f16());
-  var arg_1 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(1.h);
+  var arg_1 = vec3<f16>(1.h);
   var res: vec3<f16> = atan2(arg_0, arg_1);
 }
 

@@ -1,7 +1,7 @@
 enable f16;
 
 fn refract_570cb3() {
-  var res : vec2<f16> = refract(vec2<f16>(f16()), vec2<f16>(f16()), f16());
+  var res : vec2<f16> = refract(vec2<f16>(1.0h), vec2<f16>(1.0h), 1.0h);
 }
 
 @vertex

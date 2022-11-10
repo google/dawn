@@ -1,7 +1,7 @@
 void fma_bf21b6() {
-  vector<float16_t, 2> arg_0 = (float16_t(0.0h)).xx;
-  vector<float16_t, 2> arg_1 = (float16_t(0.0h)).xx;
-  vector<float16_t, 2> arg_2 = (float16_t(0.0h)).xx;
+  vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
+  vector<float16_t, 2> arg_1 = (float16_t(1.0h)).xx;
+  vector<float16_t, 2> arg_2 = (float16_t(1.0h)).xx;
   vector<float16_t, 2> res = mad(arg_0, arg_1, arg_2);
 }
 

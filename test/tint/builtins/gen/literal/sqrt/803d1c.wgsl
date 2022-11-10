@@ -25,7 +25,7 @@ enable f16;
 
 // fn sqrt(vec<4, f16>) -> vec<4, f16>
 fn sqrt_803d1c() {
-  var res: vec4<f16> = sqrt(vec4<f16>(f16()));
+  var res: vec4<f16> = sqrt(vec4<f16>(1.h));
 }
 
 @vertex

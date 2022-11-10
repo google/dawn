@@ -25,7 +25,7 @@ enable f16;
 
 // fn clamp(f16, f16, f16) -> f16
 fn clamp_553ffb() {
-  var res: f16 = clamp(f16(), f16(), f16());
+  var res: f16 = clamp(1.h, 1.h, 1.h);
 }
 
 @vertex

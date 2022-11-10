@@ -2,7 +2,7 @@
 
 using namespace metal;
 void tan_d4d491() {
-  half arg_0 = 0.0h;
+  half arg_0 = 1.0h;
   half res = tan(arg_0);
 }
 

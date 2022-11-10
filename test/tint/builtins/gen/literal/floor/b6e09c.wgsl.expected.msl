@@ -2,7 +2,7 @@
 
 using namespace metal;
 void floor_b6e09c() {
-  half res = 0.0h;
+  half res = 1.0h;
 }
 
 struct tint_symbol {

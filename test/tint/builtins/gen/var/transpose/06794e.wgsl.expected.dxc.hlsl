@@ -1,5 +1,5 @@
 void transpose_06794e() {
-  matrix<float16_t, 3, 3> arg_0 = matrix<float16_t, 3, 3>((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx);
+  matrix<float16_t, 3, 3> arg_0 = matrix<float16_t, 3, 3>((float16_t(1.0h)).xxx, (float16_t(1.0h)).xxx, (float16_t(1.0h)).xxx);
   matrix<float16_t, 3, 3> res = transpose(arg_0);
 }
 

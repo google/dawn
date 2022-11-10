@@ -2,9 +2,9 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void faceForward_fb0f2e() {
-  f16vec2 arg_0 = f16vec2(0.0hf);
-  f16vec2 arg_1 = f16vec2(0.0hf);
-  f16vec2 arg_2 = f16vec2(0.0hf);
+  f16vec2 arg_0 = f16vec2(1.0hf);
+  f16vec2 arg_1 = f16vec2(1.0hf);
+  f16vec2 arg_2 = f16vec2(1.0hf);
   f16vec2 res = faceforward(arg_0, arg_1, arg_2);
 }
 
@@ -26,9 +26,9 @@ void main() {
 precision mediump float;
 
 void faceForward_fb0f2e() {
-  f16vec2 arg_0 = f16vec2(0.0hf);
-  f16vec2 arg_1 = f16vec2(0.0hf);
-  f16vec2 arg_2 = f16vec2(0.0hf);
+  f16vec2 arg_0 = f16vec2(1.0hf);
+  f16vec2 arg_1 = f16vec2(1.0hf);
+  f16vec2 arg_2 = f16vec2(1.0hf);
   f16vec2 res = faceforward(arg_0, arg_1, arg_2);
 }
 
@@ -44,9 +44,9 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void faceForward_fb0f2e() {
-  f16vec2 arg_0 = f16vec2(0.0hf);
-  f16vec2 arg_1 = f16vec2(0.0hf);
-  f16vec2 arg_2 = f16vec2(0.0hf);
+  f16vec2 arg_0 = f16vec2(1.0hf);
+  f16vec2 arg_1 = f16vec2(1.0hf);
+  f16vec2 arg_2 = f16vec2(1.0hf);
   f16vec2 res = faceforward(arg_0, arg_1, arg_2);
 }
 

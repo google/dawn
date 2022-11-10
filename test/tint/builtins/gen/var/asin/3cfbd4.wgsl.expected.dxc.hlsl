@@ -1,5 +1,5 @@
 void asin_3cfbd4() {
-  vector<float16_t, 4> arg_0 = (float16_t(0.0h)).xxxx;
+  vector<float16_t, 4> arg_0 = (float16_t(0.479248047h)).xxxx;
   vector<float16_t, 4> res = asin(arg_0);
 }
 

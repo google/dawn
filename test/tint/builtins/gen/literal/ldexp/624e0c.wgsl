@@ -25,7 +25,7 @@ enable f16;
 
 // fn ldexp(f16, i32) -> f16
 fn ldexp_624e0c() {
-  var res: f16 = ldexp(f16(), 1i);
+  var res: f16 = ldexp(1.h, 1i);
 }
 
 @vertex

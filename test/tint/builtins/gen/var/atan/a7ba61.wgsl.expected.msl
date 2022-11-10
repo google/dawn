@@ -2,7 +2,7 @@
 
 using namespace metal;
 void atan_a7ba61() {
-  half arg_0 = 0.0h;
+  half arg_0 = 1.0h;
   half res = atan(arg_0);
 }
 

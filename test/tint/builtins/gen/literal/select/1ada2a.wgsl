@@ -25,7 +25,7 @@ enable f16;
 
 // fn select(vec<3, f16>, vec<3, f16>, bool) -> vec<3, f16>
 fn select_1ada2a() {
-  var res: vec3<f16> = select(vec3<f16>(f16()), vec3<f16>(f16()), true);
+  var res: vec3<f16> = select(vec3<f16>(1.h), vec3<f16>(1.h), true);
 }
 
 @vertex

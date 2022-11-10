@@ -1,7 +1,7 @@
 enable f16;
 
 fn atan_a5f421() {
-  var res : vec3<f16> = atan(vec3<f16>(f16()));
+  var res : vec3<f16> = atan(vec3<f16>(1.0h));
 }
 
 @vertex

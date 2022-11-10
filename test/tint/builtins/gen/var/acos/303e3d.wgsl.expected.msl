@@ -2,7 +2,7 @@
 
 using namespace metal;
 void acos_303e3d() {
-  half arg_0 = 0.0h;
+  half arg_0 = 0.96875h;
   half res = acos(arg_0);
 }
 

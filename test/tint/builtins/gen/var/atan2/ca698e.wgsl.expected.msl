@@ -2,8 +2,8 @@
 
 using namespace metal;
 void atan2_ca698e() {
-  half arg_0 = 0.0h;
-  half arg_1 = 0.0h;
+  half arg_0 = 1.0h;
+  half arg_1 = 1.0h;
   half res = atan2(arg_0, arg_1);
 }
 

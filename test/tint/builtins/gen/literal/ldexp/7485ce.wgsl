@@ -25,7 +25,7 @@ enable f16;
 
 // fn ldexp(vec<3, f16>, vec<3, i32>) -> vec<3, f16>
 fn ldexp_7485ce() {
-  var res: vec3<f16> = ldexp(vec3<f16>(f16()), vec3<i32>(1i));
+  var res: vec3<f16> = ldexp(vec3<f16>(1.h), vec3<i32>(1i));
 }
 
 @vertex

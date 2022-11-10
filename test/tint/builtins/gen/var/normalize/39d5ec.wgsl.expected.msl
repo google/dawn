@@ -2,7 +2,7 @@
 
 using namespace metal;
 void normalize_39d5ec() {
-  half3 arg_0 = half3(0.0h);
+  half3 arg_0 = half3(1.0h);
   half3 res = normalize(arg_0);
 }
 

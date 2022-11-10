@@ -25,9 +25,9 @@ enable f16;
 
 // fn clamp(vec<3, f16>, vec<3, f16>, vec<3, f16>) -> vec<3, f16>
 fn clamp_b195eb() {
-  var arg_0 = vec3<f16>(f16());
-  var arg_1 = vec3<f16>(f16());
-  var arg_2 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(1.h);
+  var arg_1 = vec3<f16>(1.h);
+  var arg_2 = vec3<f16>(1.h);
   var res: vec3<f16> = clamp(arg_0, arg_1, arg_2);
 }
 

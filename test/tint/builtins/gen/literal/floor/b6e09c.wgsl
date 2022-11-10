@@ -25,7 +25,7 @@ enable f16;
 
 // fn floor(f16) -> f16
 fn floor_b6e09c() {
-  var res: f16 = floor(f16());
+  var res: f16 = floor(1.5h);
 }
 
 @vertex

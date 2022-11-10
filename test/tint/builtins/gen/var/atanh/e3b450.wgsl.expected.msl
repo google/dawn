@@ -6,7 +6,7 @@ half4 tint_atanh(half4 x) {
 }
 
 void atanh_e3b450() {
-  half4 arg_0 = half4(0.0h);
+  half4 arg_0 = half4(0.5h);
   half4 res = tint_atanh(arg_0);
 }
 

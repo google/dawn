@@ -25,7 +25,7 @@ enable f16;
 
 // fn saturate(vec<2, f16>) -> vec<2, f16>
 fn saturate_cd2028() {
-  var res: vec2<f16> = saturate(vec2<f16>(f16()));
+  var res: vec2<f16> = saturate(vec2<f16>(2.h));
 }
 
 @vertex

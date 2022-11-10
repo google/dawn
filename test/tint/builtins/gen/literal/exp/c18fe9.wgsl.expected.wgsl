@@ -1,7 +1,7 @@
 enable f16;
 
 fn exp_c18fe9() {
-  var res : f16 = exp(f16());
+  var res : f16 = exp(1.0h);
 }
 
 @vertex

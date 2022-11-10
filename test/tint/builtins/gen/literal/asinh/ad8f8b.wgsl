@@ -25,7 +25,7 @@ enable f16;
 
 // fn asinh(vec<2, f16>) -> vec<2, f16>
 fn asinh_ad8f8b() {
-  var res: vec2<f16> = asinh(vec2<f16>(f16()));
+  var res: vec2<f16> = asinh(vec2<f16>(1.h));
 }
 
 @vertex

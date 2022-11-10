@@ -1,7 +1,7 @@
 enable f16;
 
 fn asin_b4aced() {
-  var arg_0 = vec2<f16>(f16());
+  var arg_0 = vec2<f16>(0.479248047h);
   var res : vec2<f16> = asin(arg_0);
 }
 

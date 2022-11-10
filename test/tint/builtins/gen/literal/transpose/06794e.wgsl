@@ -25,7 +25,7 @@ enable f16;
 
 // fn transpose(mat<3, 3, f16>) -> mat<3, 3, f16>
 fn transpose_06794e() {
-  var res: mat3x3<f16> = transpose(mat3x3<f16>(f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16()));
+  var res: mat3x3<f16> = transpose(mat3x3<f16>(1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h));
 }
 
 @vertex

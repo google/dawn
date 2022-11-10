@@ -2,7 +2,7 @@
 
 using namespace metal;
 void refract_8984af() {
-  half3 res = refract(half3(0.0h), half3(0.0h), 0.0h);
+  half3 res = refract(half3(1.0h), half3(1.0h), 1.0h);
 }
 
 struct tint_symbol {

@@ -1,7 +1,7 @@
 enable f16;
 
 fn saturate_cd2028() {
-  var arg_0 = vec2<f16>(f16());
+  var arg_0 = vec2<f16>(2.0h);
   var res : vec2<f16> = saturate(arg_0);
 }
 

@@ -1,5 +1,5 @@
 void saturate_e8df56() {
-  float16_t arg_0 = float16_t(0.0h);
+  float16_t arg_0 = float16_t(2.0h);
   float16_t res = saturate(arg_0);
 }
 

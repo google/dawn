@@ -25,7 +25,7 @@ enable f16;
 
 // fn asin(vec<3, f16>) -> vec<3, f16>
 fn asin_2d8e29() {
-  var arg_0 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(0.479425538604h);
   var res: vec3<f16> = asin(arg_0);
 }
 

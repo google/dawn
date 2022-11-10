@@ -1,7 +1,7 @@
 enable f16;
 
 fn pow_fa5429() {
-  var res : vec3<f16> = pow(vec3<f16>(f16()), vec3<f16>(f16()));
+  var res : vec3<f16> = pow(vec3<f16>(1.0h), vec3<f16>(1.0h));
 }
 
 @vertex

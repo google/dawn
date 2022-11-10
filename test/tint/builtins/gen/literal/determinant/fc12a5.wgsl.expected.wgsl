@@ -1,7 +1,7 @@
 enable f16;
 
 fn determinant_fc12a5() {
-  var res : f16 = determinant(mat2x2<f16>(f16(), f16(), f16(), f16()));
+  var res : f16 = determinant(mat2x2<f16>(1.0h, 1.0h, 1.0h, 1.0h));
 }
 
 @vertex

@@ -25,7 +25,7 @@ enable f16;
 
 // fn log2(vec<3, f16>) -> vec<3, f16>
 fn log2_38b478() {
-  var arg_0 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(1.h);
   var res: vec3<f16> = log2(arg_0);
 }
 

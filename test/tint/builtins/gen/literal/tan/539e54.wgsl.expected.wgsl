@@ -1,7 +1,7 @@
 enable f16;
 
 fn tan_539e54() {
-  var res : vec4<f16> = tan(vec4<f16>(f16()));
+  var res : vec4<f16> = tan(vec4<f16>(1.0h));
 }
 
 @vertex

@@ -1,8 +1,8 @@
 enable f16;
 
 fn select_10e73b() {
-  var arg_0 = f16();
-  var arg_1 = f16();
+  var arg_0 = 1.0h;
+  var arg_1 = 1.0h;
   var arg_2 = true;
   var res : f16 = select(arg_0, arg_1, arg_2);
 }

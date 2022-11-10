@@ -25,7 +25,7 @@ enable f16;
 
 // fn saturate(f16) -> f16
 fn saturate_e8df56() {
-  var res: f16 = saturate(f16());
+  var res: f16 = saturate(2.h);
 }
 
 @vertex

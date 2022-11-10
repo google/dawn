@@ -25,7 +25,7 @@ enable f16;
 
 // fn select(f16, f16, bool) -> f16
 fn select_10e73b() {
-  var res: f16 = select(f16(), f16(), true);
+  var res: f16 = select(1.h, 1.h, true);
 }
 
 @vertex

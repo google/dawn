@@ -1,7 +1,7 @@
 enable f16;
 
 fn ceil_18c240() {
-  var arg_0 = vec2<f16>(f16());
+  var arg_0 = vec2<f16>(1.5h);
   var res : vec2<f16> = ceil(arg_0);
 }
 

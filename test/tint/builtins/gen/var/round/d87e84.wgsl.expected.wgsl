@@ -1,7 +1,7 @@
 enable f16;
 
 fn round_d87e84() {
-  var arg_0 = vec2<f16>(f16());
+  var arg_0 = vec2<f16>(1.0h);
   var res : vec2<f16> = round(arg_0);
 }
 

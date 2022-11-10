@@ -25,7 +25,7 @@ enable f16;
 
 // fn abs(vec<4, f16>) -> vec<4, f16>
 fn abs_538d29() {
-  var res: vec4<f16> = abs(vec4<f16>(f16()));
+  var res: vec4<f16> = abs(vec4<f16>(1.h));
 }
 
 @vertex

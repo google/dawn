@@ -1,5 +1,5 @@
 void smoothstep_6e7a74() {
-  vector<float16_t, 3> res = smoothstep((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx);
+  vector<float16_t, 3> res = smoothstep((float16_t(1.0h)).xxx, (float16_t(1.0h)).xxx, (float16_t(1.0h)).xxx);
 }
 
 struct tint_symbol {

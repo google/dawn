@@ -25,7 +25,7 @@ enable f16;
 
 // fn tan(f16) -> f16
 fn tan_d4d491() {
-  var arg_0 = f16();
+  var arg_0 = 1.h;
   var res: f16 = tan(arg_0);
 }
 

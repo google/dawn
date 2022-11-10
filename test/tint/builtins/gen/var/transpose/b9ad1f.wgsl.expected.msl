@@ -2,7 +2,7 @@
 
 using namespace metal;
 void transpose_b9ad1f() {
-  half3x2 arg_0 = half3x2(half2(0.0h), half2(0.0h), half2(0.0h));
+  half3x2 arg_0 = half3x2(half2(1.0h), half2(1.0h), half2(1.0h));
   half2x3 res = transpose(arg_0);
 }
 

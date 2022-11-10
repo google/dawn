@@ -25,7 +25,7 @@ enable f16;
 
 // fn determinant(mat<3, 3, f16>) -> f16
 fn determinant_d7c86f() {
-  var arg_0 = mat3x3<f16>(f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16());
+  var arg_0 = mat3x3<f16>(1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h);
   var res: f16 = determinant(arg_0);
 }
 

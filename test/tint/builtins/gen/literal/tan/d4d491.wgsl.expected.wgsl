@@ -1,7 +1,7 @@
 enable f16;
 
 fn tan_d4d491() {
-  var res : f16 = tan(f16());
+  var res : f16 = tan(1.0h);
 }
 
 @vertex

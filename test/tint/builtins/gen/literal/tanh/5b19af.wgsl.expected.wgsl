@@ -1,7 +1,7 @@
 enable f16;
 
 fn tanh_5b19af() {
-  var res : f16 = tanh(f16());
+  var res : f16 = tanh(1.0h);
 }
 
 @vertex

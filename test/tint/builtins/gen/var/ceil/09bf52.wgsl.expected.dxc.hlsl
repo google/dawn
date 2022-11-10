@@ -1,5 +1,5 @@
 void ceil_09bf52() {
-  vector<float16_t, 3> arg_0 = (float16_t(0.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(1.5h)).xxx;
   vector<float16_t, 3> res = ceil(arg_0);
 }
 

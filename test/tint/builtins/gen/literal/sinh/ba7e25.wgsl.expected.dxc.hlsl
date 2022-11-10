@@ -1,5 +1,5 @@
 void sinh_ba7e25() {
-  vector<float16_t, 4> res = sinh((float16_t(0.0h)).xxxx);
+  vector<float16_t, 4> res = sinh((float16_t(1.0h)).xxxx);
 }
 
 struct tint_symbol {

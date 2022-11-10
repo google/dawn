@@ -1,7 +1,7 @@
 enable f16;
 
 fn sinh_924f19() {
-  var res : vec2<f16> = sinh(vec2<f16>(f16()));
+  var res : vec2<f16> = sinh(vec2<f16>(1.0h));
 }
 
 @vertex

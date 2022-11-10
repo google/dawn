@@ -1,5 +1,5 @@
 void atan_1e1764() {
-  vector<float16_t, 2> res = (float16_t(0.0h)).xx;
+  vector<float16_t, 2> res = (float16_t(0.78515625h)).xx;
 }
 
 struct tint_symbol {

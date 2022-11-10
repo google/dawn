@@ -6,7 +6,7 @@ f16vec2 tint_acosh(f16vec2 x) {
 }
 
 void acosh_5f49d8() {
-  f16vec2 res = tint_acosh(f16vec2(0.0hf));
+  f16vec2 res = tint_acosh(f16vec2(1.0hf));
 }
 
 vec4 vertex_main() {
@@ -31,7 +31,7 @@ f16vec2 tint_acosh(f16vec2 x) {
 }
 
 void acosh_5f49d8() {
-  f16vec2 res = tint_acosh(f16vec2(0.0hf));
+  f16vec2 res = tint_acosh(f16vec2(1.0hf));
 }
 
 void fragment_main() {
@@ -50,7 +50,7 @@ f16vec2 tint_acosh(f16vec2 x) {
 }
 
 void acosh_5f49d8() {
-  f16vec2 res = tint_acosh(f16vec2(0.0hf));
+  f16vec2 res = tint_acosh(f16vec2(1.0hf));
 }
 
 void compute_main() {

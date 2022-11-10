@@ -2,9 +2,9 @@
 
 using namespace metal;
 void clamp_235b29() {
-  half2 arg_0 = half2(0.0h);
-  half2 arg_1 = half2(0.0h);
-  half2 arg_2 = half2(0.0h);
+  half2 arg_0 = half2(1.0h);
+  half2 arg_1 = half2(1.0h);
+  half2 arg_2 = half2(1.0h);
   half2 res = clamp(arg_0, arg_1, arg_2);
 }
 

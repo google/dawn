@@ -1,7 +1,7 @@
 enable f16;
 
 fn asinh_95ab2b() {
-  var res : vec4<f16> = asinh(vec4<f16>(f16()));
+  var res : vec4<f16> = asinh(vec4<f16>(1.0h));
 }
 
 @vertex

@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void ldexp_624e0c() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
   int arg_1 = 1;
   float16_t res = ldexp(arg_0, arg_1);
 }
@@ -25,7 +25,7 @@ void main() {
 precision mediump float;
 
 void ldexp_624e0c() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
   int arg_1 = 1;
   float16_t res = ldexp(arg_0, arg_1);
 }
@@ -42,7 +42,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void ldexp_624e0c() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
   int arg_1 = 1;
   float16_t res = ldexp(arg_0, arg_1);
 }

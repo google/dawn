@@ -1,8 +1,8 @@
 enable f16;
 
 fn atan2_ca698e() {
-  var arg_0 = f16();
-  var arg_1 = f16();
+  var arg_0 = 1.0h;
+  var arg_1 = 1.0h;
   var res : f16 = atan2(arg_0, arg_1);
 }
 

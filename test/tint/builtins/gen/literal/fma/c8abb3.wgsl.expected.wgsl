@@ -1,7 +1,7 @@
 enable f16;
 
 fn fma_c8abb3() {
-  var res : f16 = fma(f16(), f16(), f16());
+  var res : f16 = fma(1.0h, 1.0h, 1.0h);
 }
 
 @vertex

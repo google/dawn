@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void acos_f47057() {
-  f16vec3 arg_0 = f16vec3(0.0hf);
+  f16vec3 arg_0 = f16vec3(0.96875hf);
   f16vec3 res = acos(arg_0);
 }
 
@@ -24,7 +24,7 @@ void main() {
 precision mediump float;
 
 void acos_f47057() {
-  f16vec3 arg_0 = f16vec3(0.0hf);
+  f16vec3 arg_0 = f16vec3(0.96875hf);
   f16vec3 res = acos(arg_0);
 }
 
@@ -40,7 +40,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void acos_f47057() {
-  f16vec3 arg_0 = f16vec3(0.0hf);
+  f16vec3 arg_0 = f16vec3(0.96875hf);
   f16vec3 res = acos(arg_0);
 }
 

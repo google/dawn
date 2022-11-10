@@ -25,8 +25,8 @@ enable f16;
 
 // fn dot(vec<2, f16>, vec<2, f16>) -> f16
 fn dot_cd5a04() {
-  var arg_0 = vec2<f16>(f16());
-  var arg_1 = vec2<f16>(f16());
+  var arg_0 = vec2<f16>(1.h);
+  var arg_1 = vec2<f16>(1.h);
   var res: f16 = dot(arg_0, arg_1);
 }
 

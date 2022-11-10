@@ -1,7 +1,7 @@
 enable f16;
 
 fn acos_303e3d() {
-  var arg_0 = f16();
+  var arg_0 = 0.96875h;
   var res : f16 = acos(arg_0);
 }
 

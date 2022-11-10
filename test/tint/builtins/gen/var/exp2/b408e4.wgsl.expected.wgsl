@@ -1,7 +1,7 @@
 enable f16;
 
 fn exp2_b408e4() {
-  var arg_0 = f16();
+  var arg_0 = 1.0h;
   var res : f16 = exp2(arg_0);
 }
 

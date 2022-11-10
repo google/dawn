@@ -1,7 +1,7 @@
 enable f16;
 
 fn max_34956e() {
-  var res : vec2<f16> = max(vec2<f16>(f16()), vec2<f16>(f16()));
+  var res : vec2<f16> = max(vec2<f16>(1.0h), vec2<f16>(1.0h));
 }
 
 @vertex

@@ -1,7 +1,7 @@
 enable f16;
 
 fn atanh_ec4b06() {
-  var arg_0 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(0.5h);
   var res : vec3<f16> = atanh(arg_0);
 }
 

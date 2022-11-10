@@ -1,7 +1,7 @@
 enable f16;
 
 fn atan2_d983ab() {
-  var res : vec4<f16> = atan2(vec4<f16>(f16()), vec4<f16>(f16()));
+  var res : vec4<f16> = atan2(vec4<f16>(1.0h), vec4<f16>(1.0h));
 }
 
 @vertex

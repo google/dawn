@@ -25,9 +25,9 @@ enable f16;
 
 // fn refract(vec<4, f16>, vec<4, f16>, f16) -> vec<4, f16>
 fn refract_0594ba() {
-  var arg_0 = vec4<f16>(f16());
-  var arg_1 = vec4<f16>(f16());
-  var arg_2 = f16();
+  var arg_0 = vec4<f16>(1.h);
+  var arg_1 = vec4<f16>(1.h);
+  var arg_2 = 1.h;
   var res: vec4<f16> = refract(arg_0, arg_1, arg_2);
 }
 

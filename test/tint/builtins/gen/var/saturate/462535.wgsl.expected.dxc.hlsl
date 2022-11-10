@@ -1,5 +1,5 @@
 void saturate_462535() {
-  vector<float16_t, 3> arg_0 = (float16_t(0.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(2.0h)).xxx;
   vector<float16_t, 3> res = saturate(arg_0);
 }
 

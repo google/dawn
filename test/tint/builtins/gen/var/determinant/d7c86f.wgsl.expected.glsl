@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void determinant_d7c86f() {
-  f16mat3 arg_0 = f16mat3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf));
+  f16mat3 arg_0 = f16mat3(f16vec3(1.0hf), f16vec3(1.0hf), f16vec3(1.0hf));
   float16_t res = determinant(arg_0);
 }
 
@@ -24,7 +24,7 @@ void main() {
 precision mediump float;
 
 void determinant_d7c86f() {
-  f16mat3 arg_0 = f16mat3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf));
+  f16mat3 arg_0 = f16mat3(f16vec3(1.0hf), f16vec3(1.0hf), f16vec3(1.0hf));
   float16_t res = determinant(arg_0);
 }
 
@@ -40,7 +40,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void determinant_d7c86f() {
-  f16mat3 arg_0 = f16mat3(f16vec3(0.0hf), f16vec3(0.0hf), f16vec3(0.0hf));
+  f16mat3 arg_0 = f16mat3(f16vec3(1.0hf), f16vec3(1.0hf), f16vec3(1.0hf));
   float16_t res = determinant(arg_0);
 }
 

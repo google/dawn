@@ -25,7 +25,7 @@ enable f16;
 
 // fn max(f16, f16) -> f16
 fn max_111ac0() {
-  var res: f16 = max(f16(), f16());
+  var res: f16 = max(1.h, 1.h);
 }
 
 @vertex

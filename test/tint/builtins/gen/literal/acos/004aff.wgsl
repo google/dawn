@@ -25,7 +25,7 @@ enable f16;
 
 // fn acos(vec<2, f16>) -> vec<2, f16>
 fn acos_004aff() {
-  var res: vec2<f16> = acos(vec2<f16>(f16()));
+  var res: vec2<f16> = acos(vec2<f16>(0.96891242171h));
 }
 
 @vertex

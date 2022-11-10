@@ -1,9 +1,9 @@
 enable f16;
 
 fn faceForward_cc63dc() {
-  var arg_0 = vec4<f16>(f16());
-  var arg_1 = vec4<f16>(f16());
-  var arg_2 = vec4<f16>(f16());
+  var arg_0 = vec4<f16>(1.0h);
+  var arg_1 = vec4<f16>(1.0h);
+  var arg_2 = vec4<f16>(1.0h);
   var res : vec4<f16> = faceForward(arg_0, arg_1, arg_2);
 }
 

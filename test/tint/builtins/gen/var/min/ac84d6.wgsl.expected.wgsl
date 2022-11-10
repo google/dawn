@@ -1,8 +1,8 @@
 enable f16;
 
 fn min_ac84d6() {
-  var arg_0 = f16();
-  var arg_1 = f16();
+  var arg_0 = 1.0h;
+  var arg_1 = 1.0h;
   var res : f16 = min(arg_0, arg_1);
 }
 

@@ -1,5 +1,5 @@
 void dot_8e40f1() {
-  float16_t res = dot((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx);
+  float16_t res = dot((float16_t(1.0h)).xxx, (float16_t(1.0h)).xxx);
 }
 
 struct tint_symbol {

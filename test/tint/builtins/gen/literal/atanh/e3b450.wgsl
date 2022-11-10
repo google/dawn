@@ -25,7 +25,7 @@ enable f16;
 
 // fn atanh(vec<4, f16>) -> vec<4, f16>
 fn atanh_e3b450() {
-  var res: vec4<f16> = atanh(vec4<f16>(f16()));
+  var res: vec4<f16> = atanh(vec4<f16>(0.5h));
 }
 
 @vertex

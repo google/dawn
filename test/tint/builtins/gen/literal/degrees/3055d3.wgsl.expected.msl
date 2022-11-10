@@ -7,7 +7,7 @@ half4 tint_degrees(half4 param_0) {
 }
 
 void degrees_3055d3() {
-  half4 res = tint_degrees(half4(0.0h));
+  half4 res = tint_degrees(half4(1.0h));
 }
 
 struct tint_symbol {

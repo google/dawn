@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void log2_8c10b3() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
   float16_t res = log2(arg_0);
 }
 
@@ -24,7 +24,7 @@ void main() {
 precision mediump float;
 
 void log2_8c10b3() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
   float16_t res = log2(arg_0);
 }
 
@@ -40,7 +40,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void log2_8c10b3() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
   float16_t res = log2(arg_0);
 }
 

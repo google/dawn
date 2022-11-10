@@ -2,8 +2,8 @@
 
 using namespace metal;
 void atan2_d983ab() {
-  half4 arg_0 = half4(0.0h);
-  half4 arg_1 = half4(0.0h);
+  half4 arg_0 = half4(1.0h);
+  half4 arg_1 = half4(1.0h);
   half4 res = atan2(arg_0, arg_1);
 }
 

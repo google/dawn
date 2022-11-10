@@ -1,7 +1,7 @@
 enable f16;
 
 fn asinh_468a48() {
-  var arg_0 = f16();
+  var arg_0 = 1.0h;
   var res : f16 = asinh(arg_0);
 }
 

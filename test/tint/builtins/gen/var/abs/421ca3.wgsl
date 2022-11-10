@@ -25,7 +25,7 @@ enable f16;
 
 // fn abs(vec<3, f16>) -> vec<3, f16>
 fn abs_421ca3() {
-  var arg_0 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(1.h);
   var res: vec3<f16> = abs(arg_0);
 }
 

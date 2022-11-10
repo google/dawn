@@ -1,7 +1,7 @@
 enable f16;
 
 fn abs_fd247f() {
-  var res : f16 = abs(f16());
+  var res : f16 = abs(1.0h);
 }
 
 @vertex

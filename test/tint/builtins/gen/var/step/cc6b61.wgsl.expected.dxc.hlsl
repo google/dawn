@@ -1,6 +1,6 @@
 void step_cc6b61() {
-  vector<float16_t, 3> arg_0 = (float16_t(0.0h)).xxx;
-  vector<float16_t, 3> arg_1 = (float16_t(0.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
+  vector<float16_t, 3> arg_1 = (float16_t(1.0h)).xxx;
   vector<float16_t, 3> res = step(arg_0, arg_1);
 }
 

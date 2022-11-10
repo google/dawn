@@ -25,7 +25,7 @@ enable f16;
 
 // fn cosh(vec<2, f16>) -> vec<2, f16>
 fn cosh_43b672() {
-  var arg_0 = vec2<f16>(f16());
+  var arg_0 = vec2<f16>(1.h);
   var res: vec2<f16> = cosh(arg_0);
 }
 

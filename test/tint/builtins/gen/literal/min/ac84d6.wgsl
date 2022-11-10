@@ -25,7 +25,7 @@ enable f16;
 
 // fn min(f16, f16) -> f16
 fn min_ac84d6() {
-  var res: f16 = min(f16(), f16());
+  var res: f16 = min(1.h, 1.h);
 }
 
 @vertex

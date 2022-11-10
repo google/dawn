@@ -2,7 +2,7 @@
 
 using namespace metal;
 void sinh_ba7e25() {
-  half4 arg_0 = half4(0.0h);
+  half4 arg_0 = half4(1.0h);
   half4 res = sinh(arg_0);
 }
 

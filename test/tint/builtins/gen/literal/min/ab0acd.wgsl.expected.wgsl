@@ -1,7 +1,7 @@
 enable f16;
 
 fn min_ab0acd() {
-  var res : vec3<f16> = min(vec3<f16>(f16()), vec3<f16>(f16()));
+  var res : vec3<f16> = min(vec3<f16>(1.0h), vec3<f16>(1.0h));
 }
 
 @vertex

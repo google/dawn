@@ -1,7 +1,7 @@
 enable f16;
 
 fn sqrt_d9ab4d() {
-  var res : vec2<f16> = sqrt(vec2<f16>(f16()));
+  var res : vec2<f16> = sqrt(vec2<f16>(1.0h));
 }
 
 @vertex

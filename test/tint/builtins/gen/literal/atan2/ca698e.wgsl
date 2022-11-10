@@ -25,7 +25,7 @@ enable f16;
 
 // fn atan2(f16, f16) -> f16
 fn atan2_ca698e() {
-  var res: f16 = atan2(f16(), f16());
+  var res: f16 = atan2(1.h, 1.h);
 }
 
 @vertex

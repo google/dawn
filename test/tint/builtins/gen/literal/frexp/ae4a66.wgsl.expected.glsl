@@ -14,7 +14,7 @@ frexp_result_vec3_f16 tint_frexp(f16vec3 param_0) {
 
 
 void frexp_ae4a66() {
-  frexp_result_vec3_f16 res = tint_frexp(f16vec3(0.0hf));
+  frexp_result_vec3_f16 res = tint_frexp(f16vec3(1.0hf));
 }
 
 vec4 vertex_main() {
@@ -47,7 +47,7 @@ frexp_result_vec3_f16 tint_frexp(f16vec3 param_0) {
 
 
 void frexp_ae4a66() {
-  frexp_result_vec3_f16 res = tint_frexp(f16vec3(0.0hf));
+  frexp_result_vec3_f16 res = tint_frexp(f16vec3(1.0hf));
 }
 
 void fragment_main() {
@@ -74,7 +74,7 @@ frexp_result_vec3_f16 tint_frexp(f16vec3 param_0) {
 
 
 void frexp_ae4a66() {
-  frexp_result_vec3_f16 res = tint_frexp(f16vec3(0.0hf));
+  frexp_result_vec3_f16 res = tint_frexp(f16vec3(1.0hf));
 }
 
 void compute_main() {

@@ -6,7 +6,7 @@ half tint_acosh(half x) {
 }
 
 void acosh_a37dfe() {
-  half arg_0 = 0.0h;
+  half arg_0 = 1.0h;
   half res = tint_acosh(arg_0);
 }
 

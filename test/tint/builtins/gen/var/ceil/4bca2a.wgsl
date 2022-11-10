@@ -25,7 +25,7 @@ enable f16;
 
 // fn ceil(vec<4, f16>) -> vec<4, f16>
 fn ceil_4bca2a() {
-  var arg_0 = vec4<f16>(f16());
+  var arg_0 = vec4<f16>(1.5h);
   var res: vec4<f16> = ceil(arg_0);
 }
 

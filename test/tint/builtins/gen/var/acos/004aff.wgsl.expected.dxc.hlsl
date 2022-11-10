@@ -1,5 +1,5 @@
 void acos_004aff() {
-  vector<float16_t, 2> arg_0 = (float16_t(0.0h)).xx;
+  vector<float16_t, 2> arg_0 = (float16_t(0.96875h)).xx;
   vector<float16_t, 2> res = acos(arg_0);
 }
 

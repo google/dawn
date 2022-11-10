@@ -1,7 +1,7 @@
 enable f16;
 
 fn ldexp_7fa13c() {
-  var res : vec4<f16> = ldexp(vec4<f16>(f16()), vec4<i32>(1i));
+  var res : vec4<f16> = ldexp(vec4<f16>(1.0h), vec4<i32>(1i));
 }
 
 @vertex

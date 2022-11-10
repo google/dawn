@@ -2,7 +2,7 @@
 
 using namespace metal;
 void ldexp_3d90b4() {
-  half2 arg_0 = half2(0.0h);
+  half2 arg_0 = half2(1.0h);
   int2 arg_1 = int2(1);
   half2 res = ldexp(arg_0, arg_1);
 }

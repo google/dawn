@@ -1,5 +1,5 @@
 void tanh_e8efb3() {
-  vector<float16_t, 4> arg_0 = (float16_t(0.0h)).xxxx;
+  vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
   vector<float16_t, 4> res = tanh(arg_0);
 }
 

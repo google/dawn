@@ -1,7 +1,7 @@
 enable f16;
 
 fn atan_a5f421() {
-  var arg_0 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(1.0h);
   var res : vec3<f16> = atan(arg_0);
 }
 

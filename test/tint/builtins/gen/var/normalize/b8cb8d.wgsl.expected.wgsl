@@ -1,7 +1,7 @@
 enable f16;
 
 fn normalize_b8cb8d() {
-  var arg_0 = vec4<f16>(f16());
+  var arg_0 = vec4<f16>(1.0h);
   var res : vec4<f16> = normalize(arg_0);
 }
 

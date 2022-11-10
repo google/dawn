@@ -1,7 +1,7 @@
 enable f16;
 
 fn abs_5ae4fe() {
-  var res : vec2<f16> = abs(vec2<f16>(f16()));
+  var res : vec2<f16> = abs(vec2<f16>(1.0h));
 }
 
 @vertex

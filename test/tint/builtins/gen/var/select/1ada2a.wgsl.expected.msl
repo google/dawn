@@ -2,8 +2,8 @@
 
 using namespace metal;
 void select_1ada2a() {
-  half3 arg_0 = half3(0.0h);
-  half3 arg_1 = half3(0.0h);
+  half3 arg_0 = half3(1.0h);
+  half3 arg_1 = half3(1.0h);
   bool arg_2 = true;
   half3 res = select(arg_0, arg_1, arg_2);
 }

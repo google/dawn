@@ -2,7 +2,7 @@
 
 using namespace metal;
 void log_8f0e32() {
-  half2 arg_0 = half2(0.0h);
+  half2 arg_0 = half2(1.0h);
   half2 res = log(arg_0);
 }
 

@@ -1,7 +1,7 @@
 enable f16;
 
 fn atanh_d2d8cd() {
-  var arg_0 = f16();
+  var arg_0 = 0.5h;
   var res : f16 = atanh(arg_0);
 }
 

@@ -1,7 +1,7 @@
 enable f16;
 
 fn frexp_5257dd() {
-  var arg_0 = f16();
+  var arg_0 = 1.0h;
   var res = frexp(arg_0);
 }
 

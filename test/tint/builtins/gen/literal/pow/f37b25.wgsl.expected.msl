@@ -2,7 +2,7 @@
 
 using namespace metal;
 void pow_f37b25() {
-  half2 res = pow(half2(0.0h), half2(0.0h));
+  half2 res = pow(half2(1.0h), half2(1.0h));
 }
 
 struct tint_symbol {

@@ -1,7 +1,7 @@
 enable f16;
 
 fn sinh_ba7e25() {
-  var res : vec4<f16> = sinh(vec4<f16>(f16()));
+  var res : vec4<f16> = sinh(vec4<f16>(1.0h));
 }
 
 @vertex

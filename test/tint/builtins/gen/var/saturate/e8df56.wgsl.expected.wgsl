@@ -1,7 +1,7 @@
 enable f16;
 
 fn saturate_e8df56() {
-  var arg_0 = f16();
+  var arg_0 = 2.0h;
   var res : f16 = saturate(arg_0);
 }
 

@@ -13,7 +13,7 @@ frexp_result_f16 tint_frexp(half param_0) {
 }
 
 void frexp_5257dd() {
-  frexp_result_f16 res = tint_frexp(0.0h);
+  frexp_result_f16 res = tint_frexp(1.0h);
 }
 
 struct tint_symbol {

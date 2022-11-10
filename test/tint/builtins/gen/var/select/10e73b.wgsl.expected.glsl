@@ -2,8 +2,8 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void select_10e73b() {
-  float16_t arg_0 = 0.0hf;
-  float16_t arg_1 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
+  float16_t arg_1 = 1.0hf;
   bool arg_2 = true;
   float16_t res = (arg_2 ? arg_1 : arg_0);
 }
@@ -26,8 +26,8 @@ void main() {
 precision mediump float;
 
 void select_10e73b() {
-  float16_t arg_0 = 0.0hf;
-  float16_t arg_1 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
+  float16_t arg_1 = 1.0hf;
   bool arg_2 = true;
   float16_t res = (arg_2 ? arg_1 : arg_0);
 }
@@ -44,8 +44,8 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void select_10e73b() {
-  float16_t arg_0 = 0.0hf;
-  float16_t arg_1 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
+  float16_t arg_1 = 1.0hf;
   bool arg_2 = true;
   float16_t res = (arg_2 ? arg_1 : arg_0);
 }

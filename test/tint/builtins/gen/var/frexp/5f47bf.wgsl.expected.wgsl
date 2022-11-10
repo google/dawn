@@ -1,7 +1,7 @@
 enable f16;
 
 fn frexp_5f47bf() {
-  var arg_0 = vec2<f16>(f16());
+  var arg_0 = vec2<f16>(1.0h);
   var res = frexp(arg_0);
 }
 

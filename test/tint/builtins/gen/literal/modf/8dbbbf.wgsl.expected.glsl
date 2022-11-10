@@ -14,7 +14,7 @@ modf_result_f16 tint_modf(float16_t param_0) {
 
 
 void modf_8dbbbf() {
-  modf_result_f16 res = tint_modf(0.0hf);
+  modf_result_f16 res = tint_modf(1.0hf);
 }
 
 vec4 vertex_main() {
@@ -47,7 +47,7 @@ modf_result_f16 tint_modf(float16_t param_0) {
 
 
 void modf_8dbbbf() {
-  modf_result_f16 res = tint_modf(0.0hf);
+  modf_result_f16 res = tint_modf(1.0hf);
 }
 
 void fragment_main() {
@@ -74,7 +74,7 @@ modf_result_f16 tint_modf(float16_t param_0) {
 
 
 void modf_8dbbbf() {
-  modf_result_f16 res = tint_modf(0.0hf);
+  modf_result_f16 res = tint_modf(1.0hf);
 }
 
 void compute_main() {

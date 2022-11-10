@@ -1,7 +1,7 @@
 enable f16;
 
 fn transpose_5f36bf() {
-  var res : mat3x4<f16> = transpose(mat4x3<f16>(f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16()));
+  var res : mat3x4<f16> = transpose(mat4x3<f16>(1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h));
 }
 
 @vertex

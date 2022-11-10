@@ -25,7 +25,7 @@ enable f16;
 
 // fn floor(vec<3, f16>) -> vec<3, f16>
 fn floor_3802c0() {
-  var arg_0 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(1.5h);
   var res: vec3<f16> = floor(arg_0);
 }
 

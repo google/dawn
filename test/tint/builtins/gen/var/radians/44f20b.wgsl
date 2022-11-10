@@ -25,7 +25,7 @@ enable f16;
 
 // fn radians(vec<4, f16>) -> vec<4, f16>
 fn radians_44f20b() {
-  var arg_0 = vec4<f16>(f16());
+  var arg_0 = vec4<f16>(1.h);
   var res: vec4<f16> = radians(arg_0);
 }
 

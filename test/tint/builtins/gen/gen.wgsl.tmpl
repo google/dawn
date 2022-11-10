@@ -273,6 +273,7 @@ enable f16;
 {{-        if eq        $ty.Target.Name "i32"  -}}{{$value}}i
 {{-   else if eq        $ty.Target.Name "u32"  -}}{{$value}}u
 {{-   else if eq        $ty.Target.Name "f32"  -}}{{$float_value}}f
+{{-   else if eq        $ty.Target.Name "f16"  -}}{{$float_value}}h
 {{-   else if eq        $ty.Target.Name "fa"   -}}{{$float_value}}
 {{-   else if eq        $ty.Target.Name "ia"   -}}{{$value}}
 {{-   else if eq        $ty.Target.Name "bool" -}}true

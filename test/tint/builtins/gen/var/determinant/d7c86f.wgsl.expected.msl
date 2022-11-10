@@ -2,7 +2,7 @@
 
 using namespace metal;
 void determinant_d7c86f() {
-  half3x3 arg_0 = half3x3(half3(0.0h), half3(0.0h), half3(0.0h));
+  half3x3 arg_0 = half3x3(half3(1.0h), half3(1.0h), half3(1.0h));
   half res = determinant(arg_0);
 }
 

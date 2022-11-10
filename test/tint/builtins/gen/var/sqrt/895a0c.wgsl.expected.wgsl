@@ -1,7 +1,7 @@
 enable f16;
 
 fn sqrt_895a0c() {
-  var arg_0 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(1.0h);
   var res : vec3<f16> = sqrt(arg_0);
 }
 

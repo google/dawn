@@ -25,7 +25,7 @@ enable f16;
 
 // fn clamp(vec<3, f16>, vec<3, f16>, vec<3, f16>) -> vec<3, f16>
 fn clamp_b195eb() {
-  var res: vec3<f16> = clamp(vec3<f16>(f16()), vec3<f16>(f16()), vec3<f16>(f16()));
+  var res: vec3<f16> = clamp(vec3<f16>(1.h), vec3<f16>(1.h), vec3<f16>(1.h));
 }
 
 @vertex

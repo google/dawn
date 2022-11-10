@@ -7,7 +7,7 @@ f16vec3 tint_radians(f16vec3 param_0) {
 
 
 void radians_7ea4c7() {
-  f16vec3 res = tint_radians(f16vec3(0.0hf));
+  f16vec3 res = tint_radians(f16vec3(1.0hf));
 }
 
 vec4 vertex_main() {
@@ -33,7 +33,7 @@ f16vec3 tint_radians(f16vec3 param_0) {
 
 
 void radians_7ea4c7() {
-  f16vec3 res = tint_radians(f16vec3(0.0hf));
+  f16vec3 res = tint_radians(f16vec3(1.0hf));
 }
 
 void fragment_main() {
@@ -53,7 +53,7 @@ f16vec3 tint_radians(f16vec3 param_0) {
 
 
 void radians_7ea4c7() {
-  f16vec3 res = tint_radians(f16vec3(0.0hf));
+  f16vec3 res = tint_radians(f16vec3(1.0hf));
 }
 
 void compute_main() {

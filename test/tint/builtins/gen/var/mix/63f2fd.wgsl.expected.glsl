@@ -2,9 +2,9 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void mix_63f2fd() {
-  f16vec3 arg_0 = f16vec3(0.0hf);
-  f16vec3 arg_1 = f16vec3(0.0hf);
-  f16vec3 arg_2 = f16vec3(0.0hf);
+  f16vec3 arg_0 = f16vec3(1.0hf);
+  f16vec3 arg_1 = f16vec3(1.0hf);
+  f16vec3 arg_2 = f16vec3(1.0hf);
   f16vec3 res = mix(arg_0, arg_1, arg_2);
 }
 
@@ -26,9 +26,9 @@ void main() {
 precision mediump float;
 
 void mix_63f2fd() {
-  f16vec3 arg_0 = f16vec3(0.0hf);
-  f16vec3 arg_1 = f16vec3(0.0hf);
-  f16vec3 arg_2 = f16vec3(0.0hf);
+  f16vec3 arg_0 = f16vec3(1.0hf);
+  f16vec3 arg_1 = f16vec3(1.0hf);
+  f16vec3 arg_2 = f16vec3(1.0hf);
   f16vec3 res = mix(arg_0, arg_1, arg_2);
 }
 
@@ -44,9 +44,9 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void mix_63f2fd() {
-  f16vec3 arg_0 = f16vec3(0.0hf);
-  f16vec3 arg_1 = f16vec3(0.0hf);
-  f16vec3 arg_2 = f16vec3(0.0hf);
+  f16vec3 arg_0 = f16vec3(1.0hf);
+  f16vec3 arg_1 = f16vec3(1.0hf);
+  f16vec3 arg_2 = f16vec3(1.0hf);
   f16vec3 res = mix(arg_0, arg_1, arg_2);
 }
 

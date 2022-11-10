@@ -25,7 +25,7 @@ enable f16;
 
 // fn degrees(vec<3, f16>) -> vec<3, f16>
 fn degrees_dfe8f4() {
-  var arg_0 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(1.h);
   var res: vec3<f16> = degrees(arg_0);
 }
 

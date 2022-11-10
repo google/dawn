@@ -1,5 +1,5 @@
 void transpose_d6faec() {
-  matrix<float16_t, 2, 3> arg_0 = matrix<float16_t, 2, 3>((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx);
+  matrix<float16_t, 2, 3> arg_0 = matrix<float16_t, 2, 3>((float16_t(1.0h)).xxx, (float16_t(1.0h)).xxx);
   matrix<float16_t, 3, 2> res = transpose(arg_0);
 }
 

@@ -1,7 +1,7 @@
 enable f16;
 
 fn pow_ce9ef5() {
-  var res : f16 = pow(f16(), f16());
+  var res : f16 = pow(1.0h, 1.0h);
 }
 
 @vertex

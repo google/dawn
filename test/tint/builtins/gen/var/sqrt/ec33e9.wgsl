@@ -25,7 +25,7 @@ enable f16;
 
 // fn sqrt(f16) -> f16
 fn sqrt_ec33e9() {
-  var arg_0 = f16();
+  var arg_0 = 1.h;
   var res: f16 = sqrt(arg_0);
 }
 

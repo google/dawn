@@ -25,7 +25,7 @@ enable f16;
 
 // fn degrees(vec<2, f16>) -> vec<2, f16>
 fn degrees_f59715() {
-  var res: vec2<f16> = degrees(vec2<f16>(f16()));
+  var res: vec2<f16> = degrees(vec2<f16>(1.h));
 }
 
 @vertex

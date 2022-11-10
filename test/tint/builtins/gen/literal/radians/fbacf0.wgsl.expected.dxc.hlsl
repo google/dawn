@@ -3,7 +3,7 @@ vector<float16_t, 2> tint_radians(vector<float16_t, 2> param_0) {
 }
 
 void radians_fbacf0() {
-  vector<float16_t, 2> res = tint_radians((float16_t(0.0h)).xx);
+  vector<float16_t, 2> res = tint_radians((float16_t(1.0h)).xx);
 }
 
 struct tint_symbol {

@@ -1,7 +1,7 @@
 enable f16;
 
 fn normalize_39d5ec() {
-  var res : vec3<f16> = normalize(vec3<f16>(f16()));
+  var res : vec3<f16> = normalize(vec3<f16>(1.0h));
 }
 
 @vertex

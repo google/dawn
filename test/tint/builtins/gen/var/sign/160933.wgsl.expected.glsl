@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void sign_160933() {
-  f16vec4 arg_0 = f16vec4(0.0hf);
+  f16vec4 arg_0 = f16vec4(1.0hf);
   f16vec4 res = sign(arg_0);
 }
 
@@ -24,7 +24,7 @@ void main() {
 precision mediump float;
 
 void sign_160933() {
-  f16vec4 arg_0 = f16vec4(0.0hf);
+  f16vec4 arg_0 = f16vec4(1.0hf);
   f16vec4 res = sign(arg_0);
 }
 
@@ -40,7 +40,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void sign_160933() {
-  f16vec4 arg_0 = f16vec4(0.0hf);
+  f16vec4 arg_0 = f16vec4(1.0hf);
   f16vec4 res = sign(arg_0);
 }
 

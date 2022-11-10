@@ -1,7 +1,7 @@
 enable f16;
 
 fn transpose_faeb05() {
-  var res : mat4x2<f16> = transpose(mat2x4<f16>(f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16()));
+  var res : mat4x2<f16> = transpose(mat2x4<f16>(1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h));
 }
 
 @vertex

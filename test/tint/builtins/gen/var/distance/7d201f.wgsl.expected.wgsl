@@ -1,8 +1,8 @@
 enable f16;
 
 fn distance_7d201f() {
-  var arg_0 = f16();
-  var arg_1 = f16();
+  var arg_0 = 1.0h;
+  var arg_1 = 1.0h;
   var res : f16 = distance(arg_0, arg_1);
 }
 

@@ -7,7 +7,7 @@ f16vec4 tint_degrees(f16vec4 param_0) {
 
 
 void degrees_3055d3() {
-  f16vec4 arg_0 = f16vec4(0.0hf);
+  f16vec4 arg_0 = f16vec4(1.0hf);
   f16vec4 res = tint_degrees(arg_0);
 }
 
@@ -34,7 +34,7 @@ f16vec4 tint_degrees(f16vec4 param_0) {
 
 
 void degrees_3055d3() {
-  f16vec4 arg_0 = f16vec4(0.0hf);
+  f16vec4 arg_0 = f16vec4(1.0hf);
   f16vec4 res = tint_degrees(arg_0);
 }
 
@@ -55,7 +55,7 @@ f16vec4 tint_degrees(f16vec4 param_0) {
 
 
 void degrees_3055d3() {
-  f16vec4 arg_0 = f16vec4(0.0hf);
+  f16vec4 arg_0 = f16vec4(1.0hf);
   f16vec4 res = tint_degrees(arg_0);
 }
 

@@ -43,7 +43,7 @@
        %half = OpTypeFloat 16
         %int = OpTypeInt 32 1
 %__frexp_result_f16 = OpTypeStruct %half %int
-         %18 = OpConstantNull %half
+%half_0x1p_0 = OpConstant %half 0x1p+0
 %_ptr_Function___frexp_result_f16 = OpTypePointer Function %__frexp_result_f16
          %21 = OpConstantNull %__frexp_result_f16
          %22 = OpTypeFunction %v4float
@@ -51,7 +51,7 @@
 %frexp_5257dd = OpFunction %void None %9
          %12 = OpLabel
         %res = OpVariable %_ptr_Function___frexp_result_f16 Function %21
-         %13 = OpExtInst %__frexp_result_f16 %17 FrexpStruct %18
+         %13 = OpExtInst %__frexp_result_f16 %17 FrexpStruct %half_0x1p_0
                OpStore %res %13
                OpReturn
                OpFunctionEnd

@@ -1,7 +1,7 @@
 enable f16;
 
 fn asinh_468a48() {
-  var res : f16 = asinh(f16());
+  var res : f16 = asinh(1.0h);
 }
 
 @vertex

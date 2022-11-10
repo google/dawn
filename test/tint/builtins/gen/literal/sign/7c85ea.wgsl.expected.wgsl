@@ -1,7 +1,7 @@
 enable f16;
 
 fn sign_7c85ea() {
-  var res : f16 = sign(f16());
+  var res : f16 = sign(1.0h);
 }
 
 @vertex

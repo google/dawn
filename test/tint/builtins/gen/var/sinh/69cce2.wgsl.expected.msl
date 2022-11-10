@@ -2,7 +2,7 @@
 
 using namespace metal;
 void sinh_69cce2() {
-  half arg_0 = 0.0h;
+  half arg_0 = 1.0h;
   half res = sinh(arg_0);
 }
 

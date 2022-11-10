@@ -2,7 +2,7 @@
 
 using namespace metal;
 void asin_11dfda() {
-  half res = 0.0h;
+  half res = 0.499755859h;
 }
 
 struct tint_symbol {

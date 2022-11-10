@@ -25,7 +25,7 @@ enable f16;
 
 // fn radians(f16) -> f16
 fn radians_208fd9() {
-  var arg_0 = f16();
+  var arg_0 = 1.h;
   var res: f16 = radians(arg_0);
 }
 

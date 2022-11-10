@@ -25,7 +25,7 @@ enable f16;
 
 // fn log(vec<4, f16>) -> vec<4, f16>
 fn log_cdbdc1() {
-  var res: vec4<f16> = log(vec4<f16>(f16()));
+  var res: vec4<f16> = log(vec4<f16>(1.h));
 }
 
 @vertex

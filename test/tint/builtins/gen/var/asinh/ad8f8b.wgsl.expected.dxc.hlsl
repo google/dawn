@@ -3,7 +3,7 @@ vector<float16_t, 2> tint_sinh(vector<float16_t, 2> x) {
 }
 
 void asinh_ad8f8b() {
-  vector<float16_t, 2> arg_0 = (float16_t(0.0h)).xx;
+  vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
   vector<float16_t, 2> res = tint_sinh(arg_0);
 }
 

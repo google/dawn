@@ -25,7 +25,7 @@ enable f16;
 
 // fn dot(vec<3, f16>, vec<3, f16>) -> f16
 fn dot_8e40f1() {
-  var res: f16 = dot(vec3<f16>(f16()), vec3<f16>(f16()));
+  var res: f16 = dot(vec3<f16>(1.h), vec3<f16>(1.h));
 }
 
 @vertex

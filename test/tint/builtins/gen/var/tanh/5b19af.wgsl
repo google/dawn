@@ -25,7 +25,7 @@ enable f16;
 
 // fn tanh(f16) -> f16
 fn tanh_5b19af() {
-  var arg_0 = f16();
+  var arg_0 = 1.h;
   var res: f16 = tanh(arg_0);
 }
 

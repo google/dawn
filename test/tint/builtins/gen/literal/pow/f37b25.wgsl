@@ -25,7 +25,7 @@ enable f16;
 
 // fn pow(vec<2, f16>, vec<2, f16>) -> vec<2, f16>
 fn pow_f37b25() {
-  var res: vec2<f16> = pow(vec2<f16>(f16()), vec2<f16>(f16()));
+  var res: vec2<f16> = pow(vec2<f16>(1.h), vec2<f16>(1.h));
 }
 
 @vertex

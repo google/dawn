@@ -25,7 +25,7 @@ enable f16;
 
 // fn asin(f16) -> f16
 fn asin_11dfda() {
-  var arg_0 = f16();
+  var arg_0 = 0.479425538604h;
   var res: f16 = asin(arg_0);
 }
 

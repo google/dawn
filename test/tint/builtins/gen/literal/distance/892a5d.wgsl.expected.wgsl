@@ -1,7 +1,7 @@
 enable f16;
 
 fn distance_892a5d() {
-  var res : f16 = distance(vec2<f16>(f16()), vec2<f16>(f16()));
+  var res : f16 = distance(vec2<f16>(1.0h), vec2<f16>(1.0h));
 }
 
 @vertex

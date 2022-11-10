@@ -1,7 +1,7 @@
 enable f16;
 
 fn asin_2d8e29() {
-  var res : vec3<f16> = asin(vec3<f16>(f16()));
+  var res : vec3<f16> = asin(vec3<f16>(0.479248047h));
 }
 
 @vertex

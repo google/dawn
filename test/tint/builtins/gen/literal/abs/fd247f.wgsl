@@ -25,7 +25,7 @@ enable f16;
 
 // fn abs(f16) -> f16
 fn abs_fd247f() {
-  var res: f16 = abs(f16());
+  var res: f16 = abs(1.h);
 }
 
 @vertex

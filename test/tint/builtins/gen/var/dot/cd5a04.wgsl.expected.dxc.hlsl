@@ -1,6 +1,6 @@
 void dot_cd5a04() {
-  vector<float16_t, 2> arg_0 = (float16_t(0.0h)).xx;
-  vector<float16_t, 2> arg_1 = (float16_t(0.0h)).xx;
+  vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
+  vector<float16_t, 2> arg_1 = (float16_t(1.0h)).xx;
   float16_t res = dot(arg_0, arg_1);
 }
 

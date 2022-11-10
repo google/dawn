@@ -1,9 +1,9 @@
 enable f16;
 
 fn mix_38cbbb() {
-  var arg_0 = f16();
-  var arg_1 = f16();
-  var arg_2 = f16();
+  var arg_0 = 1.0h;
+  var arg_1 = 1.0h;
+  var arg_2 = 1.0h;
   var res : f16 = mix(arg_0, arg_1, arg_2);
 }
 

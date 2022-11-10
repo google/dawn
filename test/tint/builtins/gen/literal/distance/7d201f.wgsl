@@ -25,7 +25,7 @@ enable f16;
 
 // fn distance(f16, f16) -> f16
 fn distance_7d201f() {
-  var res: f16 = distance(f16(), f16());
+  var res: f16 = distance(1.h, 1.h);
 }
 
 @vertex

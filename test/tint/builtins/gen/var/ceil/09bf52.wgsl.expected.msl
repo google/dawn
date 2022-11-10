@@ -2,7 +2,7 @@
 
 using namespace metal;
 void ceil_09bf52() {
-  half3 arg_0 = half3(0.0h);
+  half3 arg_0 = half3(1.5h);
   half3 res = ceil(arg_0);
 }
 

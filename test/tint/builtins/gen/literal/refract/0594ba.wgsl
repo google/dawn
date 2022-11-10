@@ -25,7 +25,7 @@ enable f16;
 
 // fn refract(vec<4, f16>, vec<4, f16>, f16) -> vec<4, f16>
 fn refract_0594ba() {
-  var res: vec4<f16> = refract(vec4<f16>(f16()), vec4<f16>(f16()), f16());
+  var res: vec4<f16> = refract(vec4<f16>(1.h), vec4<f16>(1.h), 1.h);
 }
 
 @vertex

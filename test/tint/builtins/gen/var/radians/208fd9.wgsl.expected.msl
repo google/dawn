@@ -7,7 +7,7 @@ half tint_radians(half param_0) {
 }
 
 void radians_208fd9() {
-  half arg_0 = 0.0h;
+  half arg_0 = 1.0h;
   half res = tint_radians(arg_0);
 }
 

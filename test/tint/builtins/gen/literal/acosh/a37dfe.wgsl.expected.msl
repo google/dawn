@@ -6,7 +6,7 @@ half tint_acosh(half x) {
 }
 
 void acosh_a37dfe() {
-  half res = tint_acosh(0.0h);
+  half res = tint_acosh(1.0h);
 }
 
 struct tint_symbol {

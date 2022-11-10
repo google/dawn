@@ -1,7 +1,7 @@
 enable f16;
 
 fn exp_2e08e2() {
-  var arg_0 = vec2<f16>(f16());
+  var arg_0 = vec2<f16>(1.0h);
   var res : vec2<f16> = exp(arg_0);
 }
 

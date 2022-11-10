@@ -6,7 +6,7 @@ half3 tint_atanh(half3 x) {
 }
 
 void atanh_ec4b06() {
-  half3 arg_0 = half3(0.0h);
+  half3 arg_0 = half3(0.5h);
   half3 res = tint_atanh(arg_0);
 }
 

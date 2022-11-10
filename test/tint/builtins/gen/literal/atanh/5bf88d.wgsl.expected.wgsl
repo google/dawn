@@ -1,7 +1,7 @@
 enable f16;
 
 fn atanh_5bf88d() {
-  var res : vec2<f16> = atanh(vec2<f16>(f16()));
+  var res : vec2<f16> = atanh(vec2<f16>(0.5h));
 }
 
 @vertex

@@ -1,6 +1,6 @@
 void pow_ce9ef5() {
-  float16_t arg_0 = float16_t(0.0h);
-  float16_t arg_1 = float16_t(0.0h);
+  float16_t arg_0 = float16_t(1.0h);
+  float16_t arg_1 = float16_t(1.0h);
   float16_t res = pow(arg_0, arg_1);
 }
 

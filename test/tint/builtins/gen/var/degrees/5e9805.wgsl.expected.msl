@@ -7,7 +7,7 @@ half tint_degrees(half param_0) {
 }
 
 void degrees_5e9805() {
-  half arg_0 = 0.0h;
+  half arg_0 = 1.0h;
   half res = tint_degrees(arg_0);
 }
 

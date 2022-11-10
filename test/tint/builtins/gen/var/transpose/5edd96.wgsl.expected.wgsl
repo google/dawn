@@ -1,7 +1,7 @@
 enable f16;
 
 fn transpose_5edd96() {
-  var arg_0 = mat4x2<f16>(f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16());
+  var arg_0 = mat4x2<f16>(1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h, 1.0h);
   var res : mat2x4<f16> = transpose(arg_0);
 }
 

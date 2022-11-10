@@ -1,5 +1,5 @@
 void normalize_b8cb8d() {
-  vector<float16_t, 4> arg_0 = (float16_t(0.0h)).xxxx;
+  vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
   vector<float16_t, 4> res = normalize(arg_0);
 }
 

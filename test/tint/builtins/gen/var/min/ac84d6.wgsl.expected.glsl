@@ -2,8 +2,8 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void min_ac84d6() {
-  float16_t arg_0 = 0.0hf;
-  float16_t arg_1 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
+  float16_t arg_1 = 1.0hf;
   float16_t res = min(arg_0, arg_1);
 }
 
@@ -25,8 +25,8 @@ void main() {
 precision mediump float;
 
 void min_ac84d6() {
-  float16_t arg_0 = 0.0hf;
-  float16_t arg_1 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
+  float16_t arg_1 = 1.0hf;
   float16_t res = min(arg_0, arg_1);
 }
 
@@ -42,8 +42,8 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void min_ac84d6() {
-  float16_t arg_0 = 0.0hf;
-  float16_t arg_1 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
+  float16_t arg_1 = 1.0hf;
   float16_t res = min(arg_0, arg_1);
 }
 

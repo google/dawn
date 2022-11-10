@@ -1,7 +1,7 @@
 enable f16;
 
 fn step_cc6b61() {
-  var res : vec3<f16> = step(vec3<f16>(f16()), vec3<f16>(f16()));
+  var res : vec3<f16> = step(vec3<f16>(1.0h), vec3<f16>(1.0h));
 }
 
 @vertex

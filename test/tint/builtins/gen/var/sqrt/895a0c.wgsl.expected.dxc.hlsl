@@ -1,5 +1,5 @@
 void sqrt_895a0c() {
-  vector<float16_t, 3> arg_0 = (float16_t(0.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
   vector<float16_t, 3> res = sqrt(arg_0);
 }
 

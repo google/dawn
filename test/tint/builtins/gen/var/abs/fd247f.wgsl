@@ -25,7 +25,7 @@ enable f16;
 
 // fn abs(f16) -> f16
 fn abs_fd247f() {
-  var arg_0 = f16();
+  var arg_0 = 1.h;
   var res: f16 = abs(arg_0);
 }
 

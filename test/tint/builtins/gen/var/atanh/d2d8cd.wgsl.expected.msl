@@ -6,7 +6,7 @@ half tint_atanh(half x) {
 }
 
 void atanh_d2d8cd() {
-  half arg_0 = 0.0h;
+  half arg_0 = 0.5h;
   half res = tint_atanh(arg_0);
 }
 

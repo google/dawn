@@ -9,7 +9,7 @@ modf_result_vec4_f16 tint_modf(vector<float16_t, 4> param_0) {
 }
 
 void modf_995934() {
-  modf_result_vec4_f16 res = tint_modf((float16_t(0.0h)).xxxx);
+  modf_result_vec4_f16 res = tint_modf((float16_t(1.0h)).xxxx);
 }
 
 struct tint_symbol {

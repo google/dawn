@@ -14,7 +14,7 @@ frexp_result_f16 tint_frexp(float16_t param_0) {
 
 
 void frexp_5257dd() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
   frexp_result_f16 res = tint_frexp(arg_0);
 }
 
@@ -48,7 +48,7 @@ frexp_result_f16 tint_frexp(float16_t param_0) {
 
 
 void frexp_5257dd() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
   frexp_result_f16 res = tint_frexp(arg_0);
 }
 
@@ -76,7 +76,7 @@ frexp_result_f16 tint_frexp(float16_t param_0) {
 
 
 void frexp_5257dd() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
   frexp_result_f16 res = tint_frexp(arg_0);
 }
 

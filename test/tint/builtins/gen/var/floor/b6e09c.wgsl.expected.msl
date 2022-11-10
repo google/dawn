@@ -2,7 +2,7 @@
 
 using namespace metal;
 void floor_b6e09c() {
-  half arg_0 = 0.0h;
+  half arg_0 = 1.5h;
   half res = floor(arg_0);
 }
 

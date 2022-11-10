@@ -25,7 +25,7 @@ enable f16;
 
 // fn mix(vec<3, f16>, vec<3, f16>, vec<3, f16>) -> vec<3, f16>
 fn mix_63f2fd() {
-  var res: vec3<f16> = mix(vec3<f16>(f16()), vec3<f16>(f16()), vec3<f16>(f16()));
+  var res: vec3<f16> = mix(vec3<f16>(1.h), vec3<f16>(1.h), vec3<f16>(1.h));
 }
 
 @vertex

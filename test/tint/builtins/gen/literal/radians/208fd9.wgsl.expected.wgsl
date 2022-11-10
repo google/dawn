@@ -1,7 +1,7 @@
 enable f16;
 
 fn radians_208fd9() {
-  var res : f16 = radians(f16());
+  var res : f16 = radians(1.0h);
 }
 
 @vertex

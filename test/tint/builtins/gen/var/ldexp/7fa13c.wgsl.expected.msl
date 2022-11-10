@@ -2,7 +2,7 @@
 
 using namespace metal;
 void ldexp_7fa13c() {
-  half4 arg_0 = half4(0.0h);
+  half4 arg_0 = half4(1.0h);
   int4 arg_1 = int4(1);
   half4 res = ldexp(arg_0, arg_1);
 }

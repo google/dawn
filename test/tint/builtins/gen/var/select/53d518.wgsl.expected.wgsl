@@ -1,8 +1,8 @@
 enable f16;
 
 fn select_53d518() {
-  var arg_0 = vec3<f16>(f16());
-  var arg_1 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(1.0h);
+  var arg_1 = vec3<f16>(1.0h);
   var arg_2 = vec3<bool>(true);
   var res : vec3<f16> = select(arg_0, arg_1, arg_2);
 }

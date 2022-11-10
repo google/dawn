@@ -1,7 +1,7 @@
 enable f16;
 
 fn log_8f0e32() {
-  var res : vec2<f16> = log(vec2<f16>(f16()));
+  var res : vec2<f16> = log(vec2<f16>(1.0h));
 }
 
 @vertex

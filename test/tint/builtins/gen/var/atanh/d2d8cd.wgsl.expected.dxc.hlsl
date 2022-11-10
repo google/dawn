@@ -3,7 +3,7 @@ float16_t tint_atanh(float16_t x) {
 }
 
 void atanh_d2d8cd() {
-  float16_t arg_0 = float16_t(0.0h);
+  float16_t arg_0 = float16_t(0.5h);
   float16_t res = tint_atanh(arg_0);
 }
 

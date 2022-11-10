@@ -1,7 +1,7 @@
 enable f16;
 
 fn modf_45005f() {
-  var arg_0 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(1.0h);
   var res = modf(arg_0);
 }
 

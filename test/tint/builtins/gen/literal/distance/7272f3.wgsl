@@ -25,7 +25,7 @@ enable f16;
 
 // fn distance(vec<4, f16>, vec<4, f16>) -> f16
 fn distance_7272f3() {
-  var res: f16 = distance(vec4<f16>(f16()), vec4<f16>(f16()));
+  var res: f16 = distance(vec4<f16>(1.h), vec4<f16>(1.h));
 }
 
 @vertex

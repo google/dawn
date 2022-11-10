@@ -1,7 +1,7 @@
 enable f16;
 
 fn sinh_69cce2() {
-  var arg_0 = f16();
+  var arg_0 = 1.0h;
   var res : f16 = sinh(arg_0);
 }
 

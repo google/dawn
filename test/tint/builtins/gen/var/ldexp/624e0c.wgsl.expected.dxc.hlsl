@@ -1,5 +1,5 @@
 void ldexp_624e0c() {
-  float16_t arg_0 = float16_t(0.0h);
+  float16_t arg_0 = float16_t(1.0h);
   int arg_1 = 1;
   float16_t res = ldexp(arg_0, arg_1);
 }

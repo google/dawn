@@ -25,7 +25,7 @@ enable f16;
 
 // fn sinh(f16) -> f16
 fn sinh_69cce2() {
-  var res: f16 = sinh(f16());
+  var res: f16 = sinh(1.h);
 }
 
 @vertex

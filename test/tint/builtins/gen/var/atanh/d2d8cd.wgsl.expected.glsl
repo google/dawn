@@ -6,7 +6,7 @@ float16_t tint_atanh(float16_t x) {
 }
 
 void atanh_d2d8cd() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 0.5hf;
   float16_t res = tint_atanh(arg_0);
 }
 
@@ -32,7 +32,7 @@ float16_t tint_atanh(float16_t x) {
 }
 
 void atanh_d2d8cd() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 0.5hf;
   float16_t res = tint_atanh(arg_0);
 }
 
@@ -52,7 +52,7 @@ float16_t tint_atanh(float16_t x) {
 }
 
 void atanh_d2d8cd() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 0.5hf;
   float16_t res = tint_atanh(arg_0);
 }
 

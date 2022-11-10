@@ -25,7 +25,7 @@ enable f16;
 
 // fn normalize(vec<4, f16>) -> vec<4, f16>
 fn normalize_b8cb8d() {
-  var res: vec4<f16> = normalize(vec4<f16>(f16()));
+  var res: vec4<f16> = normalize(vec4<f16>(1.h));
 }
 
 @vertex

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void saturate_e8df56() {
-  half res = 0.0h;
+  half res = 1.0h;
 }
 
 struct tint_symbol {

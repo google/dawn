@@ -10,7 +10,7 @@ frexp_result_f16 tint_frexp(float16_t param_0) {
 }
 
 void frexp_5257dd() {
-  float16_t arg_0 = float16_t(0.0h);
+  float16_t arg_0 = float16_t(1.0h);
   frexp_result_f16 res = tint_frexp(arg_0);
 }
 

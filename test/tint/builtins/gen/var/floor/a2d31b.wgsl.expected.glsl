@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void floor_a2d31b() {
-  f16vec4 arg_0 = f16vec4(0.0hf);
+  f16vec4 arg_0 = f16vec4(1.5hf);
   f16vec4 res = floor(arg_0);
 }
 
@@ -24,7 +24,7 @@ void main() {
 precision mediump float;
 
 void floor_a2d31b() {
-  f16vec4 arg_0 = f16vec4(0.0hf);
+  f16vec4 arg_0 = f16vec4(1.5hf);
   f16vec4 res = floor(arg_0);
 }
 
@@ -40,7 +40,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void floor_a2d31b() {
-  f16vec4 arg_0 = f16vec4(0.0hf);
+  f16vec4 arg_0 = f16vec4(1.5hf);
   f16vec4 res = floor(arg_0);
 }
 

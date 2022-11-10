@@ -1,7 +1,7 @@
 enable f16;
 
 fn sign_ccdb3c() {
-  var res : vec2<f16> = sign(vec2<f16>(f16()));
+  var res : vec2<f16> = sign(vec2<f16>(1.0h));
 }
 
 @vertex

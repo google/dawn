@@ -6,7 +6,7 @@ f16vec3 tint_atanh(f16vec3 x) {
 }
 
 void atanh_ec4b06() {
-  f16vec3 arg_0 = f16vec3(0.0hf);
+  f16vec3 arg_0 = f16vec3(0.5hf);
   f16vec3 res = tint_atanh(arg_0);
 }
 
@@ -32,7 +32,7 @@ f16vec3 tint_atanh(f16vec3 x) {
 }
 
 void atanh_ec4b06() {
-  f16vec3 arg_0 = f16vec3(0.0hf);
+  f16vec3 arg_0 = f16vec3(0.5hf);
   f16vec3 res = tint_atanh(arg_0);
 }
 
@@ -52,7 +52,7 @@ f16vec3 tint_atanh(f16vec3 x) {
 }
 
 void atanh_ec4b06() {
-  f16vec3 arg_0 = f16vec3(0.0hf);
+  f16vec3 arg_0 = f16vec3(0.5hf);
   f16vec3 res = tint_atanh(arg_0);
 }
 

@@ -1,5 +1,5 @@
 void abs_538d29() {
-  vector<float16_t, 4> arg_0 = (float16_t(0.0h)).xxxx;
+  vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
   vector<float16_t, 4> res = abs(arg_0);
 }
 

@@ -10,7 +10,7 @@ frexp_result_vec3_f16 tint_frexp(vector<float16_t, 3> param_0) {
 }
 
 void frexp_ae4a66() {
-  vector<float16_t, 3> arg_0 = (float16_t(0.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
   frexp_result_vec3_f16 res = tint_frexp(arg_0);
 }
 

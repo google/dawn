@@ -58,7 +58,7 @@
          %24 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_half Function %18
         %res = OpVariable %_ptr_Function_half Function %18
-               OpStore %arg_0 %18
+               OpStore %arg_0 %half_0x1p_0
          %28 = OpLoad %half %arg_0
          %27 = OpFunctionCall %half %tint_acosh %28
                OpStore %res %27

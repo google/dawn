@@ -13,7 +13,7 @@ frexp_result_vec2_f16 tint_frexp(half2 param_0) {
 }
 
 void frexp_5f47bf() {
-  half2 arg_0 = half2(0.0h);
+  half2 arg_0 = half2(1.0h);
   frexp_result_vec2_f16 res = tint_frexp(arg_0);
 }
 

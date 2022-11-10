@@ -1,5 +1,5 @@
 void reflect_61ca21() {
-  vector<float16_t, 3> res = reflect((float16_t(0.0h)).xxx, (float16_t(0.0h)).xxx);
+  vector<float16_t, 3> res = reflect((float16_t(1.0h)).xxx, (float16_t(1.0h)).xxx);
 }
 
 struct tint_symbol {

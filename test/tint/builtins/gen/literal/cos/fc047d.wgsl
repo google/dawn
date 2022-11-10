@@ -25,7 +25,7 @@ enable f16;
 
 // fn cos(f16) -> f16
 fn cos_fc047d() {
-  var res: f16 = cos(f16());
+  var res: f16 = cos(1.h);
 }
 
 @vertex

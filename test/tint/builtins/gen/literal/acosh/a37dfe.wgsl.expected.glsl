@@ -6,7 +6,7 @@ float16_t tint_acosh(float16_t x) {
 }
 
 void acosh_a37dfe() {
-  float16_t res = tint_acosh(0.0hf);
+  float16_t res = tint_acosh(1.0hf);
 }
 
 vec4 vertex_main() {
@@ -31,7 +31,7 @@ float16_t tint_acosh(float16_t x) {
 }
 
 void acosh_a37dfe() {
-  float16_t res = tint_acosh(0.0hf);
+  float16_t res = tint_acosh(1.0hf);
 }
 
 void fragment_main() {
@@ -50,7 +50,7 @@ float16_t tint_acosh(float16_t x) {
 }
 
 void acosh_a37dfe() {
-  float16_t res = tint_acosh(0.0hf);
+  float16_t res = tint_acosh(1.0hf);
 }
 
 void compute_main() {

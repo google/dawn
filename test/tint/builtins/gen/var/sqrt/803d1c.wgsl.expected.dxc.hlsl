@@ -1,5 +1,5 @@
 void sqrt_803d1c() {
-  vector<float16_t, 4> arg_0 = (float16_t(0.0h)).xxxx;
+  vector<float16_t, 4> arg_0 = (float16_t(1.0h)).xxxx;
   vector<float16_t, 4> res = sqrt(arg_0);
 }
 

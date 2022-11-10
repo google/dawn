@@ -25,7 +25,7 @@ enable f16;
 
 // fn inverseSqrt(f16) -> f16
 fn inverseSqrt_440300() {
-  var arg_0 = f16();
+  var arg_0 = 1.h;
   var res: f16 = inverseSqrt(arg_0);
 }
 

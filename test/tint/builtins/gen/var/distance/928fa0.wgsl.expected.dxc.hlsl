@@ -1,6 +1,6 @@
 void distance_928fa0() {
-  vector<float16_t, 3> arg_0 = (float16_t(0.0h)).xxx;
-  vector<float16_t, 3> arg_1 = (float16_t(0.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
+  vector<float16_t, 3> arg_1 = (float16_t(1.0h)).xxx;
   float16_t res = distance(arg_0, arg_1);
 }
 

@@ -1,7 +1,7 @@
 enable f16;
 
 fn degrees_5e9805() {
-  var res : f16 = degrees(f16());
+  var res : f16 = degrees(1.0h);
 }
 
 @vertex

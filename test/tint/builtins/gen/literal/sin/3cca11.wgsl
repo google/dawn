@@ -25,7 +25,7 @@ enable f16;
 
 // fn sin(vec<2, f16>) -> vec<2, f16>
 fn sin_3cca11() {
-  var res: vec2<f16> = sin(vec2<f16>(f16()));
+  var res: vec2<f16> = sin(vec2<f16>(1.h));
 }
 
 @vertex

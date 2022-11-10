@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 36
+; Bound: 37
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -43,37 +43,38 @@
        %half = OpTypeFloat 16
      %v4half = OpTypeVector %half 4
 %__modf_result_vec4_f16 = OpTypeStruct %v4half %v4half
-         %18 = OpConstantNull %v4half
+%half_0x1p_0 = OpConstant %half 0x1p+0
+         %19 = OpConstantComposite %v4half %half_0x1p_0 %half_0x1p_0 %half_0x1p_0 %half_0x1p_0
 %_ptr_Function___modf_result_vec4_f16 = OpTypePointer Function %__modf_result_vec4_f16
-         %21 = OpConstantNull %__modf_result_vec4_f16
-         %22 = OpTypeFunction %v4float
+         %22 = OpConstantNull %__modf_result_vec4_f16
+         %23 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
 %modf_995934 = OpFunction %void None %9
          %12 = OpLabel
-        %res = OpVariable %_ptr_Function___modf_result_vec4_f16 Function %21
-         %13 = OpExtInst %__modf_result_vec4_f16 %17 ModfStruct %18
+        %res = OpVariable %_ptr_Function___modf_result_vec4_f16 Function %22
+         %13 = OpExtInst %__modf_result_vec4_f16 %17 ModfStruct %19
                OpStore %res %13
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %22
-         %24 = OpLabel
-         %25 = OpFunctionCall %void %modf_995934
+%vertex_main_inner = OpFunction %v4float None %23
+         %25 = OpLabel
+         %26 = OpFunctionCall %void %modf_995934
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %27 = OpLabel
-         %28 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %28
+         %28 = OpLabel
+         %29 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %29
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
-         %31 = OpLabel
-         %32 = OpFunctionCall %void %modf_995934
+         %32 = OpLabel
+         %33 = OpFunctionCall %void %modf_995934
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
-         %34 = OpLabel
-         %35 = OpFunctionCall %void %modf_995934
+         %35 = OpLabel
+         %36 = OpFunctionCall %void %modf_995934
                OpReturn
                OpFunctionEnd

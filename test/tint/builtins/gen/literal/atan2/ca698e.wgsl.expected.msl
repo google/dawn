@@ -2,7 +2,7 @@
 
 using namespace metal;
 void atan2_ca698e() {
-  half res = 0.0h;
+  half res = 0.78515625h;
 }
 
 struct tint_symbol {

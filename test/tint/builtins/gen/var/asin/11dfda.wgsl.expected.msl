@@ -2,7 +2,7 @@
 
 using namespace metal;
 void asin_11dfda() {
-  half arg_0 = 0.0h;
+  half arg_0 = 0.479248047h;
   half res = asin(arg_0);
 }
 

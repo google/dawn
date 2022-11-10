@@ -2,8 +2,8 @@
 
 using namespace metal;
 void step_cc6b61() {
-  half3 arg_0 = half3(0.0h);
-  half3 arg_1 = half3(0.0h);
+  half3 arg_0 = half3(1.0h);
+  half3 arg_1 = half3(1.0h);
   half3 res = step(arg_0, arg_1);
 }
 

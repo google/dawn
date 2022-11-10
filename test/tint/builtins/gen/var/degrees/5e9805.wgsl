@@ -25,7 +25,7 @@ enable f16;
 
 // fn degrees(f16) -> f16
 fn degrees_5e9805() {
-  var arg_0 = f16();
+  var arg_0 = 1.h;
   var res: f16 = degrees(arg_0);
 }
 

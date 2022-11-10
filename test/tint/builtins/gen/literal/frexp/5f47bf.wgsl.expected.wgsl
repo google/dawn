@@ -1,7 +1,7 @@
 enable f16;
 
 fn frexp_5f47bf() {
-  var res = frexp(vec2<f16>(f16()));
+  var res = frexp(vec2<f16>(1.0h));
 }
 
 @vertex

@@ -1,5 +1,5 @@
 void atan2_ca698e() {
-  float16_t res = float16_t(0.0h);
+  float16_t res = float16_t(0.78515625h);
 }
 
 struct tint_symbol {

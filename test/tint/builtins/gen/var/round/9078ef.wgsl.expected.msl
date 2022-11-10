@@ -2,7 +2,7 @@
 
 using namespace metal;
 void round_9078ef() {
-  half arg_0 = 0.0h;
+  half arg_0 = 1.0h;
   half res = rint(arg_0);
 }
 

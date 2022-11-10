@@ -1,5 +1,5 @@
 void atan_a5f421() {
-  vector<float16_t, 3> arg_0 = (float16_t(0.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
   vector<float16_t, 3> res = atan(arg_0);
 }
 

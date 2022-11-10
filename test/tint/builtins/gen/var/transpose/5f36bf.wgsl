@@ -25,7 +25,7 @@ enable f16;
 
 // fn transpose(mat<4, 3, f16>) -> mat<3, 4, f16>
 fn transpose_5f36bf() {
-  var arg_0 = mat4x3<f16>(f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16());
+  var arg_0 = mat4x3<f16>(1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h);
   var res: mat3x4<f16> = transpose(arg_0);
 }
 

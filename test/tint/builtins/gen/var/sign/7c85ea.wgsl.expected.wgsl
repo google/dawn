@@ -1,7 +1,7 @@
 enable f16;
 
 fn sign_7c85ea() {
-  var arg_0 = f16();
+  var arg_0 = 1.0h;
   var res : f16 = sign(arg_0);
 }
 

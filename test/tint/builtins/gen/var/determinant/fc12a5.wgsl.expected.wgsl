@@ -1,7 +1,7 @@
 enable f16;
 
 fn determinant_fc12a5() {
-  var arg_0 = mat2x2<f16>(f16(), f16(), f16(), f16());
+  var arg_0 = mat2x2<f16>(1.0h, 1.0h, 1.0h, 1.0h);
   var res : f16 = determinant(arg_0);
 }
 

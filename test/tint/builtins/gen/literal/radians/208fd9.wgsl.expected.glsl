@@ -7,7 +7,7 @@ float16_t tint_radians(float16_t param_0) {
 
 
 void radians_208fd9() {
-  float16_t res = tint_radians(0.0hf);
+  float16_t res = tint_radians(1.0hf);
 }
 
 vec4 vertex_main() {
@@ -33,7 +33,7 @@ float16_t tint_radians(float16_t param_0) {
 
 
 void radians_208fd9() {
-  float16_t res = tint_radians(0.0hf);
+  float16_t res = tint_radians(1.0hf);
 }
 
 void fragment_main() {
@@ -53,7 +53,7 @@ float16_t tint_radians(float16_t param_0) {
 
 
 void radians_208fd9() {
-  float16_t res = tint_radians(0.0hf);
+  float16_t res = tint_radians(1.0hf);
 }
 
 void compute_main() {

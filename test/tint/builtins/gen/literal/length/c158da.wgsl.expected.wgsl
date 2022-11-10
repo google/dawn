@@ -1,7 +1,7 @@
 enable f16;
 
 fn length_c158da() {
-  var res : f16 = length(f16());
+  var res : f16 = length(1.0h);
 }
 
 @vertex

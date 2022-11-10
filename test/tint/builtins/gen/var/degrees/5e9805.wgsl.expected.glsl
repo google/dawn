@@ -7,7 +7,7 @@ float16_t tint_degrees(float16_t param_0) {
 
 
 void degrees_5e9805() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
   float16_t res = tint_degrees(arg_0);
 }
 
@@ -34,7 +34,7 @@ float16_t tint_degrees(float16_t param_0) {
 
 
 void degrees_5e9805() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
   float16_t res = tint_degrees(arg_0);
 }
 
@@ -55,7 +55,7 @@ float16_t tint_degrees(float16_t param_0) {
 
 
 void degrees_5e9805() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
   float16_t res = tint_degrees(arg_0);
 }
 

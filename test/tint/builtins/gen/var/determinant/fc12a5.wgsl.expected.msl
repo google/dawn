@@ -2,7 +2,7 @@
 
 using namespace metal;
 void determinant_fc12a5() {
-  half2x2 arg_0 = half2x2(half2(0.0h), half2(0.0h));
+  half2x2 arg_0 = half2x2(half2(1.0h), half2(1.0h));
   half res = determinant(arg_0);
 }
 

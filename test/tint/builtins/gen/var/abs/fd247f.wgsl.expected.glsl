@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void abs_fd247f() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
   float16_t res = abs(arg_0);
 }
 
@@ -24,7 +24,7 @@ void main() {
 precision mediump float;
 
 void abs_fd247f() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
   float16_t res = abs(arg_0);
 }
 
@@ -40,7 +40,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void abs_fd247f() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 1.0hf;
   float16_t res = abs(arg_0);
 }
 

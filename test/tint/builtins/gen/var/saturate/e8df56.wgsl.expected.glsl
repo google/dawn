@@ -6,7 +6,7 @@ float16_t tint_saturate(float16_t v) {
 }
 
 void saturate_e8df56() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 2.0hf;
   float16_t res = tint_saturate(arg_0);
 }
 
@@ -32,7 +32,7 @@ float16_t tint_saturate(float16_t v) {
 }
 
 void saturate_e8df56() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 2.0hf;
   float16_t res = tint_saturate(arg_0);
 }
 
@@ -52,7 +52,7 @@ float16_t tint_saturate(float16_t v) {
 }
 
 void saturate_e8df56() {
-  float16_t arg_0 = 0.0hf;
+  float16_t arg_0 = 2.0hf;
   float16_t res = tint_saturate(arg_0);
 }
 

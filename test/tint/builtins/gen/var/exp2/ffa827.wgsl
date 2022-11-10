@@ -25,7 +25,7 @@ enable f16;
 
 // fn exp2(vec<4, f16>) -> vec<4, f16>
 fn exp2_ffa827() {
-  var arg_0 = vec4<f16>(f16());
+  var arg_0 = vec4<f16>(1.h);
   var res: vec4<f16> = exp2(arg_0);
 }
 

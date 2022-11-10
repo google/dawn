@@ -25,7 +25,7 @@ enable f16;
 
 // fn frexp(vec<4, f16>) -> __frexp_result_vec<4, f16>
 fn frexp_3dd21e() {
-  var arg_0 = vec4<f16>(f16());
+  var arg_0 = vec4<f16>(1.h);
   var res = frexp(arg_0);
 }
 

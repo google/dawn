@@ -25,7 +25,7 @@ enable f16;
 
 // fn acos(f16) -> f16
 fn acos_303e3d() {
-  var arg_0 = f16();
+  var arg_0 = 0.96891242171h;
   var res: f16 = acos(arg_0);
 }
 

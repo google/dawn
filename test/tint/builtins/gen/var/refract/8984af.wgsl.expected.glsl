@@ -2,9 +2,9 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void refract_8984af() {
-  f16vec3 arg_0 = f16vec3(0.0hf);
-  f16vec3 arg_1 = f16vec3(0.0hf);
-  float16_t arg_2 = 0.0hf;
+  f16vec3 arg_0 = f16vec3(1.0hf);
+  f16vec3 arg_1 = f16vec3(1.0hf);
+  float16_t arg_2 = 1.0hf;
   f16vec3 res = refract(arg_0, arg_1, arg_2);
 }
 
@@ -26,9 +26,9 @@ void main() {
 precision mediump float;
 
 void refract_8984af() {
-  f16vec3 arg_0 = f16vec3(0.0hf);
-  f16vec3 arg_1 = f16vec3(0.0hf);
-  float16_t arg_2 = 0.0hf;
+  f16vec3 arg_0 = f16vec3(1.0hf);
+  f16vec3 arg_1 = f16vec3(1.0hf);
+  float16_t arg_2 = 1.0hf;
   f16vec3 res = refract(arg_0, arg_1, arg_2);
 }
 
@@ -44,9 +44,9 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void refract_8984af() {
-  f16vec3 arg_0 = f16vec3(0.0hf);
-  f16vec3 arg_1 = f16vec3(0.0hf);
-  float16_t arg_2 = 0.0hf;
+  f16vec3 arg_0 = f16vec3(1.0hf);
+  f16vec3 arg_1 = f16vec3(1.0hf);
+  float16_t arg_2 = 1.0hf;
   f16vec3 res = refract(arg_0, arg_1, arg_2);
 }
 

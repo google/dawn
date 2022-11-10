@@ -25,7 +25,7 @@ enable f16;
 
 // fn acos(vec<3, f16>) -> vec<3, f16>
 fn acos_f47057() {
-  var arg_0 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(0.96891242171h);
   var res: vec3<f16> = acos(arg_0);
 }
 

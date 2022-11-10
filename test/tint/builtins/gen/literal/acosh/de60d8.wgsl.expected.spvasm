@@ -59,7 +59,7 @@
 %acosh_de60d8 = OpFunction %void None %24
          %27 = OpLabel
         %res = OpVariable %_ptr_Function_v4half Function %21
-         %28 = OpFunctionCall %v4half %tint_acosh %21
+         %28 = OpFunctionCall %v4half %tint_acosh %17
                OpStore %res %28
                OpReturn
                OpFunctionEnd

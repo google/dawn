@@ -1,7 +1,7 @@
 enable f16;
 
 fn atanh_d2d8cd() {
-  var res : f16 = atanh(f16());
+  var res : f16 = atanh(0.5h);
 }
 
 @vertex

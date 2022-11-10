@@ -1,7 +1,7 @@
 enable f16;
 
 fn log_c9f489() {
-  var res : f16 = log(f16());
+  var res : f16 = log(1.0h);
 }
 
 @vertex

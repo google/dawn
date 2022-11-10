@@ -1,7 +1,7 @@
 enable f16;
 
 fn ceil_09bf52() {
-  var res : vec3<f16> = ceil(vec3<f16>(f16()));
+  var res : vec3<f16> = ceil(vec3<f16>(1.5h));
 }
 
 @vertex

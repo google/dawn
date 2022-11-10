@@ -1,5 +1,5 @@
 void faceForward_cc63dc() {
-  vector<float16_t, 4> res = faceforward((float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx, (float16_t(0.0h)).xxxx);
+  vector<float16_t, 4> res = faceforward((float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx);
 }
 
 struct tint_symbol {

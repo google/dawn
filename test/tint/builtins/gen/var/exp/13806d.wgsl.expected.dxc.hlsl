@@ -1,5 +1,5 @@
 void exp_13806d() {
-  vector<float16_t, 3> arg_0 = (float16_t(0.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
   vector<float16_t, 3> res = exp(arg_0);
 }
 

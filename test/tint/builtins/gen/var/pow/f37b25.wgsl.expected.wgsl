@@ -1,8 +1,8 @@
 enable f16;
 
 fn pow_f37b25() {
-  var arg_0 = vec2<f16>(f16());
-  var arg_1 = vec2<f16>(f16());
+  var arg_0 = vec2<f16>(1.0h);
+  var arg_1 = vec2<f16>(1.0h);
   var res : vec2<f16> = pow(arg_0, arg_1);
 }
 

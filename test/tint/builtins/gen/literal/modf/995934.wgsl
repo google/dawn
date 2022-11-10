@@ -25,7 +25,7 @@ enable f16;
 
 // fn modf(vec<4, f16>) -> __modf_result_vec<4, f16>
 fn modf_995934() {
-  var res = modf(vec4<f16>(f16()));
+  var res = modf(vec4<f16>(1.h));
 }
 
 @vertex

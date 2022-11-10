@@ -25,8 +25,8 @@ enable f16;
 
 // fn max(vec<2, f16>, vec<2, f16>) -> vec<2, f16>
 fn max_34956e() {
-  var arg_0 = vec2<f16>(f16());
-  var arg_1 = vec2<f16>(f16());
+  var arg_0 = vec2<f16>(1.h);
+  var arg_1 = vec2<f16>(1.h);
   var res: vec2<f16> = max(arg_0, arg_1);
 }
 

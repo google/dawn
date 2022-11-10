@@ -2,8 +2,8 @@
 
 using namespace metal;
 void select_10e73b() {
-  half arg_0 = 0.0h;
-  half arg_1 = 0.0h;
+  half arg_0 = 1.0h;
+  half arg_1 = 1.0h;
   bool arg_2 = true;
   half res = select(arg_0, arg_1, arg_2);
 }

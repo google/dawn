@@ -25,7 +25,7 @@ enable f16;
 
 // fn exp2(f16) -> f16
 fn exp2_b408e4() {
-  var res: f16 = exp2(f16());
+  var res: f16 = exp2(1.h);
 }
 
 @vertex

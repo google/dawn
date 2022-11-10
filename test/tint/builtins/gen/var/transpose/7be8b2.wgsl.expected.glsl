@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void transpose_7be8b2() {
-  f16mat2 arg_0 = f16mat2(f16vec2(0.0hf), f16vec2(0.0hf));
+  f16mat2 arg_0 = f16mat2(f16vec2(1.0hf), f16vec2(1.0hf));
   f16mat2 res = transpose(arg_0);
 }
 
@@ -24,7 +24,7 @@ void main() {
 precision mediump float;
 
 void transpose_7be8b2() {
-  f16mat2 arg_0 = f16mat2(f16vec2(0.0hf), f16vec2(0.0hf));
+  f16mat2 arg_0 = f16mat2(f16vec2(1.0hf), f16vec2(1.0hf));
   f16mat2 res = transpose(arg_0);
 }
 
@@ -40,7 +40,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void transpose_7be8b2() {
-  f16mat2 arg_0 = f16mat2(f16vec2(0.0hf), f16vec2(0.0hf));
+  f16mat2 arg_0 = f16mat2(f16vec2(1.0hf), f16vec2(1.0hf));
   f16mat2 res = transpose(arg_0);
 }
 

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void saturate_e8df56() {
-  half arg_0 = 0.0h;
+  half arg_0 = 2.0h;
   half res = saturate(arg_0);
 }
 

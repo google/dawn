@@ -2,8 +2,8 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void reflect_310de5() {
-  f16vec4 arg_0 = f16vec4(0.0hf);
-  f16vec4 arg_1 = f16vec4(0.0hf);
+  f16vec4 arg_0 = f16vec4(1.0hf);
+  f16vec4 arg_1 = f16vec4(1.0hf);
   f16vec4 res = reflect(arg_0, arg_1);
 }
 
@@ -25,8 +25,8 @@ void main() {
 precision mediump float;
 
 void reflect_310de5() {
-  f16vec4 arg_0 = f16vec4(0.0hf);
-  f16vec4 arg_1 = f16vec4(0.0hf);
+  f16vec4 arg_0 = f16vec4(1.0hf);
+  f16vec4 arg_1 = f16vec4(1.0hf);
   f16vec4 res = reflect(arg_0, arg_1);
 }
 
@@ -42,8 +42,8 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void reflect_310de5() {
-  f16vec4 arg_0 = f16vec4(0.0hf);
-  f16vec4 arg_1 = f16vec4(0.0hf);
+  f16vec4 arg_0 = f16vec4(1.0hf);
+  f16vec4 arg_1 = f16vec4(1.0hf);
   f16vec4 res = reflect(arg_0, arg_1);
 }
 

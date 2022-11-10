@@ -1,7 +1,7 @@
 enable f16;
 
 fn acos_f47057() {
-  var res : vec3<f16> = acos(vec3<f16>(f16()));
+  var res : vec3<f16> = acos(vec3<f16>(0.96875h));
 }
 
 @vertex

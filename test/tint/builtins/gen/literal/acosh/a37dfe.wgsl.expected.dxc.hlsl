@@ -3,7 +3,7 @@ float16_t tint_acosh(float16_t x) {
 }
 
 void acosh_a37dfe() {
-  float16_t res = tint_acosh(float16_t(0.0h));
+  float16_t res = tint_acosh(float16_t(1.0h));
 }
 
 struct tint_symbol {

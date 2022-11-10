@@ -61,7 +61,7 @@
          %27 = OpLabel
       %arg_0 = OpVariable %_ptr_Function_v4half Function %21
         %res = OpVariable %_ptr_Function_v4half Function %21
-               OpStore %arg_0 %21
+               OpStore %arg_0 %17
          %31 = OpLoad %v4half %arg_0
          %30 = OpFunctionCall %v4half %tint_acosh %31
                OpStore %res %30

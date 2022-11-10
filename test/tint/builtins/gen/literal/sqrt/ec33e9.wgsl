@@ -25,7 +25,7 @@ enable f16;
 
 // fn sqrt(f16) -> f16
 fn sqrt_ec33e9() {
-  var res: f16 = sqrt(f16());
+  var res: f16 = sqrt(1.h);
 }
 
 @vertex

@@ -1,7 +1,7 @@
 enable f16;
 
 fn cosh_b1b8a0() {
-  var arg_0 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(1.0h);
   var res : vec3<f16> = cosh(arg_0);
 }
 

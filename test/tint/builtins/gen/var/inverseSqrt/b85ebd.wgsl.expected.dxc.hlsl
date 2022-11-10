@@ -1,5 +1,5 @@
 void inverseSqrt_b85ebd() {
-  vector<float16_t, 3> arg_0 = (float16_t(0.0h)).xxx;
+  vector<float16_t, 3> arg_0 = (float16_t(1.0h)).xxx;
   vector<float16_t, 3> res = rsqrt(arg_0);
 }
 

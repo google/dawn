@@ -2,7 +2,7 @@
 
 using namespace metal;
 void saturate_dcde71() {
-  half4 arg_0 = half4(0.0h);
+  half4 arg_0 = half4(2.0h);
   half4 res = saturate(arg_0);
 }
 

@@ -25,7 +25,7 @@ enable f16;
 
 // fn determinant(mat<4, 4, f16>) -> f16
 fn determinant_32bfde() {
-  var arg_0 = mat4x4<f16>(f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16(), f16());
+  var arg_0 = mat4x4<f16>(1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h, 1.h);
   var res: f16 = determinant(arg_0);
 }
 

@@ -25,7 +25,7 @@ enable f16;
 
 // fn tan(f16) -> f16
 fn tan_d4d491() {
-  var res: f16 = tan(f16());
+  var res: f16 = tan(1.h);
 }
 
 @vertex

@@ -25,7 +25,7 @@ enable f16;
 
 // fn inverseSqrt(vec<3, f16>) -> vec<3, f16>
 fn inverseSqrt_b85ebd() {
-  var res: vec3<f16> = inverseSqrt(vec3<f16>(f16()));
+  var res: vec3<f16> = inverseSqrt(vec3<f16>(1.h));
 }
 
 @vertex

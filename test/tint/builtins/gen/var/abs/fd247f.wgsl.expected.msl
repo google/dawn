@@ -2,7 +2,7 @@
 
 using namespace metal;
 void abs_fd247f() {
-  half arg_0 = 0.0h;
+  half arg_0 = 1.0h;
   half res = fabs(arg_0);
 }
 

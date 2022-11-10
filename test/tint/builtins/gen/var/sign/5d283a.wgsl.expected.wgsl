@@ -1,7 +1,7 @@
 enable f16;
 
 fn sign_5d283a() {
-  var arg_0 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(1.0h);
   var res : vec3<f16> = sign(arg_0);
 }
 

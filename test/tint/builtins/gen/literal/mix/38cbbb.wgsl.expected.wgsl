@@ -1,7 +1,7 @@
 enable f16;
 
 fn mix_38cbbb() {
-  var res : f16 = mix(f16(), f16(), f16());
+  var res : f16 = mix(1.0h, 1.0h, 1.0h);
 }
 
 @vertex

@@ -1,7 +1,7 @@
 enable f16;
 
 fn min_7c710a() {
-  var res : vec4<f16> = min(vec4<f16>(f16()), vec4<f16>(f16()));
+  var res : vec4<f16> = min(vec4<f16>(1.0h), vec4<f16>(1.0h));
 }
 
 @vertex

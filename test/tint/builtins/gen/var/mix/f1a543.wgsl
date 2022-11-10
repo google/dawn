@@ -25,9 +25,9 @@ enable f16;
 
 // fn mix(vec<4, f16>, vec<4, f16>, f16) -> vec<4, f16>
 fn mix_f1a543() {
-  var arg_0 = vec4<f16>(f16());
-  var arg_1 = vec4<f16>(f16());
-  var arg_2 = f16();
+  var arg_0 = vec4<f16>(1.h);
+  var arg_1 = vec4<f16>(1.h);
+  var arg_2 = 1.h;
   var res: vec4<f16> = mix(arg_0, arg_1, arg_2);
 }
 

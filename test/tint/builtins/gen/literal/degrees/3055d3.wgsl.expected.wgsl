@@ -1,7 +1,7 @@
 enable f16;
 
 fn degrees_3055d3() {
-  var res : vec4<f16> = degrees(vec4<f16>(f16()));
+  var res : vec4<f16> = degrees(vec4<f16>(1.0h));
 }
 
 @vertex

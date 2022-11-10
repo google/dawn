@@ -1,7 +1,7 @@
 enable f16;
 
 fn faceForward_524986() {
-  var res : vec3<f16> = faceForward(vec3<f16>(f16()), vec3<f16>(f16()), vec3<f16>(f16()));
+  var res : vec3<f16> = faceForward(vec3<f16>(1.0h), vec3<f16>(1.0h), vec3<f16>(1.0h));
 }
 
 @vertex

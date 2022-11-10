@@ -25,7 +25,7 @@ enable f16;
 
 // fn tan(vec<2, f16>) -> vec<2, f16>
 fn tan_9f7c9c() {
-  var arg_0 = vec2<f16>(f16());
+  var arg_0 = vec2<f16>(1.h);
   var res: vec2<f16> = tan(arg_0);
 }
 

@@ -25,7 +25,7 @@ enable f16;
 
 // fn log(f16) -> f16
 fn log_c9f489() {
-  var arg_0 = f16();
+  var arg_0 = 1.h;
   var res: f16 = log(arg_0);
 }
 

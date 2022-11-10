@@ -1,7 +1,7 @@
 enable f16;
 
 fn dot_d0d179() {
-  var res : f16 = dot(vec4<f16>(f16()), vec4<f16>(f16()));
+  var res : f16 = dot(vec4<f16>(1.0h), vec4<f16>(1.0h));
 }
 
 @vertex

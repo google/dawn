@@ -1,5 +1,5 @@
 void log_c9f489() {
-  float16_t arg_0 = float16_t(0.0h);
+  float16_t arg_0 = float16_t(1.0h);
   float16_t res = log(arg_0);
 }
 

@@ -25,7 +25,7 @@ enable f16;
 
 // fn modf(f16) -> __modf_result<f16>
 fn modf_8dbbbf() {
-  var res = modf(f16());
+  var res = modf(1.h);
 }
 
 @vertex

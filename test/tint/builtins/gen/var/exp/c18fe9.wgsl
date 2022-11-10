@@ -25,7 +25,7 @@ enable f16;
 
 // fn exp(f16) -> f16
 fn exp_c18fe9() {
-  var arg_0 = f16();
+  var arg_0 = 1.h;
   var res: f16 = exp(arg_0);
 }
 

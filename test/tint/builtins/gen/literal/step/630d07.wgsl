@@ -25,7 +25,7 @@ enable f16;
 
 // fn step(f16, f16) -> f16
 fn step_630d07() {
-  var res: f16 = step(f16(), f16());
+  var res: f16 = step(1.h, 1.h);
 }
 
 @vertex

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void abs_5ae4fe() {
-  half2 arg_0 = half2(0.0h);
+  half2 arg_0 = half2(1.0h);
   half2 res = fabs(arg_0);
 }
 

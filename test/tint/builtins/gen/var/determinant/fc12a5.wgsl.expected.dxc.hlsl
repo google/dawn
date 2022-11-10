@@ -1,5 +1,5 @@
 void determinant_fc12a5() {
-  matrix<float16_t, 2, 2> arg_0 = matrix<float16_t, 2, 2>((float16_t(0.0h)).xx, (float16_t(0.0h)).xx);
+  matrix<float16_t, 2, 2> arg_0 = matrix<float16_t, 2, 2>((float16_t(1.0h)).xx, (float16_t(1.0h)).xx);
   float16_t res = determinant(arg_0);
 }
 

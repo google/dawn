@@ -25,7 +25,7 @@ enable f16;
 
 // fn cosh(f16) -> f16
 fn cosh_2ed778() {
-  var res: f16 = cosh(f16());
+  var res: f16 = cosh(1.h);
 }
 
 @vertex

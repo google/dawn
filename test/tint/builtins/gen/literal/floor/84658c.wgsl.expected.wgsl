@@ -1,7 +1,7 @@
 enable f16;
 
 fn floor_84658c() {
-  var res : vec2<f16> = floor(vec2<f16>(f16()));
+  var res : vec2<f16> = floor(vec2<f16>(1.5h));
 }
 
 @vertex

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void reflect_310de5() {
-  half4 res = reflect(half4(0.0h), half4(0.0h));
+  half4 res = reflect(half4(1.0h), half4(1.0h));
 }
 
 struct tint_symbol {

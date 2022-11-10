@@ -1,5 +1,5 @@
 void acos_004aff() {
-  vector<float16_t, 2> res = (float16_t(1.5703125h)).xx;
+  vector<float16_t, 2> res = (float16_t(0.250488281h)).xx;
 }
 
 struct tint_symbol {

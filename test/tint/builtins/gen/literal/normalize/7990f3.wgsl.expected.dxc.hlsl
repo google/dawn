@@ -1,5 +1,5 @@
 void normalize_7990f3() {
-  vector<float16_t, 2> res = normalize((float16_t(0.0h)).xx);
+  vector<float16_t, 2> res = normalize((float16_t(1.0h)).xx);
 }
 
 struct tint_symbol {

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void ceil_f3f889() {
-  half res = 0.0h;
+  half res = 2.0h;
 }
 
 struct tint_symbol {

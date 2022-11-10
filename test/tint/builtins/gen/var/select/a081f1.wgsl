@@ -25,8 +25,8 @@ enable f16;
 
 // fn select(vec<4, f16>, vec<4, f16>, vec<4, bool>) -> vec<4, f16>
 fn select_a081f1() {
-  var arg_0 = vec4<f16>(f16());
-  var arg_1 = vec4<f16>(f16());
+  var arg_0 = vec4<f16>(1.h);
+  var arg_1 = vec4<f16>(1.h);
   var arg_2 = vec4<bool>(true);
   var res: vec4<f16> = select(arg_0, arg_1, arg_2);
 }

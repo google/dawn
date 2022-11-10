@@ -25,7 +25,7 @@ enable f16;
 
 // fn exp2(vec<2, f16>) -> vec<2, f16>
 fn exp2_151a4c() {
-  var res: vec2<f16> = exp2(vec2<f16>(f16()));
+  var res: vec2<f16> = exp2(vec2<f16>(1.h));
 }
 
 @vertex

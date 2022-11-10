@@ -2,9 +2,9 @@
 
 using namespace metal;
 void refract_8984af() {
-  half3 arg_0 = half3(0.0h);
-  half3 arg_1 = half3(0.0h);
-  half arg_2 = 0.0h;
+  half3 arg_0 = half3(1.0h);
+  half3 arg_1 = half3(1.0h);
+  half arg_2 = 1.0h;
   half3 res = refract(arg_0, arg_1, arg_2);
 }
 

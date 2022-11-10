@@ -25,7 +25,7 @@ enable f16;
 
 // fn atan(vec<4, f16>) -> vec<4, f16>
 fn atan_19faea() {
-  var res: vec4<f16> = atan(vec4<f16>(f16()));
+  var res: vec4<f16> = atan(vec4<f16>(1.h));
 }
 
 @vertex

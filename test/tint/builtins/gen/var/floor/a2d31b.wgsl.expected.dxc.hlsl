@@ -1,5 +1,5 @@
 void floor_a2d31b() {
-  vector<float16_t, 4> arg_0 = (float16_t(0.0h)).xxxx;
+  vector<float16_t, 4> arg_0 = (float16_t(1.5h)).xxxx;
   vector<float16_t, 4> res = floor(arg_0);
 }
 

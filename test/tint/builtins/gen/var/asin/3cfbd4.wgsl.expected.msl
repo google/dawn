@@ -2,7 +2,7 @@
 
 using namespace metal;
 void asin_3cfbd4() {
-  half4 arg_0 = half4(0.0h);
+  half4 arg_0 = half4(0.479248047h);
   half4 res = asin(arg_0);
 }
 

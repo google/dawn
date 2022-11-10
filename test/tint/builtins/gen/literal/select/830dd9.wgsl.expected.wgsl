@@ -1,7 +1,7 @@
 enable f16;
 
 fn select_830dd9() {
-  var res : vec4<f16> = select(vec4<f16>(f16()), vec4<f16>(f16()), true);
+  var res : vec4<f16> = select(vec4<f16>(1.0h), vec4<f16>(1.0h), true);
 }
 
 @vertex

@@ -13,7 +13,7 @@ frexp_result_vec3_f16 tint_frexp(half3 param_0) {
 }
 
 void frexp_ae4a66() {
-  frexp_result_vec3_f16 res = tint_frexp(half3(0.0h));
+  frexp_result_vec3_f16 res = tint_frexp(half3(1.0h));
 }
 
 struct tint_symbol {

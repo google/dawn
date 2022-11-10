@@ -1,7 +1,7 @@
 enable f16;
 
 fn saturate_462535() {
-  var arg_0 = vec3<f16>(f16());
+  var arg_0 = vec3<f16>(2.0h);
   var res : vec3<f16> = saturate(arg_0);
 }
 

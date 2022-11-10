@@ -25,7 +25,7 @@ enable f16;
 
 // fn atan(f16) -> f16
 fn atan_a7ba61() {
-  var arg_0 = f16();
+  var arg_0 = 1.h;
   var res: f16 = atan(arg_0);
 }
 

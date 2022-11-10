@@ -1,7 +1,7 @@
 enable f16;
 
 fn floor_b6e09c() {
-  var arg_0 = f16();
+  var arg_0 = 1.5h;
   var res : f16 = floor(arg_0);
 }
 

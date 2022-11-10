@@ -25,7 +25,7 @@ enable f16;
 
 // fn atan(f16) -> f16
 fn atan_a7ba61() {
-  var res: f16 = atan(f16());
+  var res: f16 = atan(1.h);
 }
 
 @vertex

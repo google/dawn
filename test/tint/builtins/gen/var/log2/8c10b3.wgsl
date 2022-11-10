@@ -25,7 +25,7 @@ enable f16;
 
 // fn log2(f16) -> f16
 fn log2_8c10b3() {
-  var arg_0 = f16();
+  var arg_0 = 1.h;
   var res: f16 = log2(arg_0);
 }
 

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void inverseSqrt_440300() {
-  half arg_0 = 0.0h;
+  half arg_0 = 1.0h;
   half res = rsqrt(arg_0);
 }
 

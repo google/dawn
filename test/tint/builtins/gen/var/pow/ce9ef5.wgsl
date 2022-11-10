@@ -25,8 +25,8 @@ enable f16;
 
 // fn pow(f16, f16) -> f16
 fn pow_ce9ef5() {
-  var arg_0 = f16();
-  var arg_1 = f16();
+  var arg_0 = 1.h;
+  var arg_1 = 1.h;
   var res: f16 = pow(arg_0, arg_1);
 }
 

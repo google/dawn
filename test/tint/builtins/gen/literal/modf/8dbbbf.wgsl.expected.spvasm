@@ -42,7 +42,7 @@
           %9 = OpTypeFunction %void
        %half = OpTypeFloat 16
 %__modf_result_f16 = OpTypeStruct %half %half
-         %17 = OpConstantNull %half
+%half_0x1p_0 = OpConstant %half 0x1p+0
 %_ptr_Function___modf_result_f16 = OpTypePointer Function %__modf_result_f16
          %20 = OpConstantNull %__modf_result_f16
          %21 = OpTypeFunction %v4float
@@ -50,7 +50,7 @@
 %modf_8dbbbf = OpFunction %void None %9
          %12 = OpLabel
         %res = OpVariable %_ptr_Function___modf_result_f16 Function %20
-         %13 = OpExtInst %__modf_result_f16 %16 ModfStruct %17
+         %13 = OpExtInst %__modf_result_f16 %16 ModfStruct %half_0x1p_0
                OpStore %res %13
                OpReturn
                OpFunctionEnd

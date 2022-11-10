@@ -25,7 +25,7 @@ enable f16;
 
 // fn inverseSqrt(f16) -> f16
 fn inverseSqrt_440300() {
-  var res: f16 = inverseSqrt(f16());
+  var res: f16 = inverseSqrt(1.h);
 }
 
 @vertex

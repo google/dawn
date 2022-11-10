@@ -2,7 +2,7 @@
 
 using namespace metal;
 void cos_fc047d() {
-  half arg_0 = 0.0h;
+  half arg_0 = 1.0h;
   half res = cos(arg_0);
 }
 

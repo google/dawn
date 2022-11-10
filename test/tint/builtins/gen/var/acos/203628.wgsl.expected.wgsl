@@ -1,7 +1,7 @@
 enable f16;
 
 fn acos_203628() {
-  var arg_0 = vec4<f16>(f16());
+  var arg_0 = vec4<f16>(0.96875h);
   var res : vec4<f16> = acos(arg_0);
 }
 

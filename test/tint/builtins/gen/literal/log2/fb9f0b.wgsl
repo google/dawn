@@ -25,7 +25,7 @@ enable f16;
 
 // fn log2(vec<2, f16>) -> vec<2, f16>
 fn log2_fb9f0b() {
-  var res: vec2<f16> = log2(vec2<f16>(f16()));
+  var res: vec2<f16> = log2(vec2<f16>(1.h));
 }
 
 @vertex

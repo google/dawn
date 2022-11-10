@@ -1,5 +1,5 @@
 void cos_0a89f7() {
-  vector<float16_t, 4> res = cos((float16_t(0.0h)).xxxx);
+  vector<float16_t, 4> res = cos((float16_t(1.0h)).xxxx);
 }
 
 struct tint_symbol {

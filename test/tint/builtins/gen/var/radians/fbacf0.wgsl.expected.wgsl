@@ -1,7 +1,7 @@
 enable f16;
 
 fn radians_fbacf0() {
-  var arg_0 = vec2<f16>(f16());
+  var arg_0 = vec2<f16>(1.0h);
   var res : vec2<f16> = radians(arg_0);
 }
 

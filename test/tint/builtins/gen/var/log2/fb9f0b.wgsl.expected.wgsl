@@ -1,7 +1,7 @@
 enable f16;
 
 fn log2_fb9f0b() {
-  var arg_0 = vec2<f16>(f16());
+  var arg_0 = vec2<f16>(1.0h);
   var res : vec2<f16> = log2(arg_0);
 }
 

@@ -1,7 +1,7 @@
 enable f16;
 
 fn tanh_e8efb3() {
-  var res : vec4<f16> = tanh(vec4<f16>(f16()));
+  var res : vec4<f16> = tanh(vec4<f16>(1.0h));
 }
 
 @vertex

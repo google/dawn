@@ -25,7 +25,7 @@ enable f16;
 
 // fn tanh(vec<2, f16>) -> vec<2, f16>
 fn tanh_6d105a() {
-  var res: vec2<f16> = tanh(vec2<f16>(f16()));
+  var res: vec2<f16> = tanh(vec2<f16>(1.h));
 }
 
 @vertex

@@ -9,7 +9,7 @@ modf_result_f16 tint_modf(float16_t param_0) {
 }
 
 void modf_8dbbbf() {
-  modf_result_f16 res = tint_modf(float16_t(0.0h));
+  modf_result_f16 res = tint_modf(float16_t(1.0h));
 }
 
 struct tint_symbol {

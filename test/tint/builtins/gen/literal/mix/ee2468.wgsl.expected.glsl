@@ -2,7 +2,7 @@
 #extension GL_AMD_gpu_shader_half_float : require
 
 void mix_ee2468() {
-  f16vec4 res = mix(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf));
+  f16vec4 res = mix(f16vec4(1.0hf), f16vec4(1.0hf), f16vec4(1.0hf));
 }
 
 vec4 vertex_main() {
@@ -23,7 +23,7 @@ void main() {
 precision mediump float;
 
 void mix_ee2468() {
-  f16vec4 res = mix(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf));
+  f16vec4 res = mix(f16vec4(1.0hf), f16vec4(1.0hf), f16vec4(1.0hf));
 }
 
 void fragment_main() {
@@ -38,7 +38,7 @@ void main() {
 #extension GL_AMD_gpu_shader_half_float : require
 
 void mix_ee2468() {
-  f16vec4 res = mix(f16vec4(0.0hf), f16vec4(0.0hf), f16vec4(0.0hf));
+  f16vec4 res = mix(f16vec4(1.0hf), f16vec4(1.0hf), f16vec4(1.0hf));
 }
 
 void compute_main() {

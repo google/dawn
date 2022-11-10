@@ -25,7 +25,7 @@ enable f16;
 
 // fn asin(vec<4, f16>) -> vec<4, f16>
 fn asin_3cfbd4() {
-  var res: vec4<f16> = asin(vec4<f16>(f16()));
+  var res: vec4<f16> = asin(vec4<f16>(0.479425538604h));
 }
 
 @vertex

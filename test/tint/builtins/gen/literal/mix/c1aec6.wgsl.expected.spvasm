@@ -1,7 +1,7 @@
 ; SPIR-V
 ; Version: 1.3
 ; Generator: Google Tint Compiler; 0
-; Bound: 37
+; Bound: 38
 ; Schema: 0
                OpCapability Shader
                OpCapability Float16
@@ -37,39 +37,40 @@
           %9 = OpTypeFunction %void
        %half = OpTypeFloat 16
      %v3half = OpTypeVector %half 3
-         %17 = OpConstantNull %v3half
-         %18 = OpConstantNull %half
+%half_0x1p_0 = OpConstant %half 0x1p+0
+         %18 = OpConstantComposite %v3half %half_0x1p_0 %half_0x1p_0 %half_0x1p_0
 %_ptr_Function_v3half = OpTypePointer Function %v3half
-         %23 = OpTypeFunction %v4float
+         %21 = OpConstantNull %v3half
+         %24 = OpTypeFunction %v4float
     %float_1 = OpConstant %float 1
  %mix_c1aec6 = OpFunction %void None %9
          %12 = OpLabel
-         %19 = OpVariable %_ptr_Function_v3half Function %17
-        %res = OpVariable %_ptr_Function_v3half Function %17
-         %21 = OpCompositeConstruct %v3half %18 %18 %18
-         %13 = OpExtInst %v3half %16 FMix %17 %17 %21
+         %19 = OpVariable %_ptr_Function_v3half Function %21
+        %res = OpVariable %_ptr_Function_v3half Function %21
+         %22 = OpCompositeConstruct %v3half %half_0x1p_0 %half_0x1p_0 %half_0x1p_0
+         %13 = OpExtInst %v3half %16 FMix %18 %18 %22
                OpStore %res %13
                OpReturn
                OpFunctionEnd
-%vertex_main_inner = OpFunction %v4float None %23
-         %25 = OpLabel
-         %26 = OpFunctionCall %void %mix_c1aec6
+%vertex_main_inner = OpFunction %v4float None %24
+         %26 = OpLabel
+         %27 = OpFunctionCall %void %mix_c1aec6
                OpReturnValue %5
                OpFunctionEnd
 %vertex_main = OpFunction %void None %9
-         %28 = OpLabel
-         %29 = OpFunctionCall %v4float %vertex_main_inner
-               OpStore %value %29
+         %29 = OpLabel
+         %30 = OpFunctionCall %v4float %vertex_main_inner
+               OpStore %value %30
                OpStore %vertex_point_size %float_1
                OpReturn
                OpFunctionEnd
 %fragment_main = OpFunction %void None %9
-         %32 = OpLabel
-         %33 = OpFunctionCall %void %mix_c1aec6
+         %33 = OpLabel
+         %34 = OpFunctionCall %void %mix_c1aec6
                OpReturn
                OpFunctionEnd
 %compute_main = OpFunction %void None %9
-         %35 = OpLabel
-         %36 = OpFunctionCall %void %mix_c1aec6
+         %36 = OpLabel
+         %37 = OpFunctionCall %void %mix_c1aec6
                OpReturn
                OpFunctionEnd

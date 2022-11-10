@@ -10,7 +10,7 @@ frexp_result_vec4_f16 tint_frexp(vector<float16_t, 4> param_0) {
 }
 
 void frexp_3dd21e() {
-  frexp_result_vec4_f16 res = tint_frexp((float16_t(0.0h)).xxxx);
+  frexp_result_vec4_f16 res = tint_frexp((float16_t(1.0h)).xxxx);
 }
 
 struct tint_symbol {

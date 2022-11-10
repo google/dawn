@@ -6,7 +6,7 @@ f16vec2 tint_saturate(f16vec2 v) {
 }
 
 void saturate_cd2028() {
-  f16vec2 arg_0 = f16vec2(0.0hf);
+  f16vec2 arg_0 = f16vec2(2.0hf);
   f16vec2 res = tint_saturate(arg_0);
 }
 
@@ -32,7 +32,7 @@ f16vec2 tint_saturate(f16vec2 v) {
 }
 
 void saturate_cd2028() {
-  f16vec2 arg_0 = f16vec2(0.0hf);
+  f16vec2 arg_0 = f16vec2(2.0hf);
   f16vec2 res = tint_saturate(arg_0);
 }
 
@@ -52,7 +52,7 @@ f16vec2 tint_saturate(f16vec2 v) {
 }
 
 void saturate_cd2028() {
-  f16vec2 arg_0 = f16vec2(0.0hf);
+  f16vec2 arg_0 = f16vec2(2.0hf);
   f16vec2 res = tint_saturate(arg_0);
 }
 

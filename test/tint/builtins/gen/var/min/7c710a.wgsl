@@ -25,8 +25,8 @@ enable f16;
 
 // fn min(vec<4, f16>, vec<4, f16>) -> vec<4, f16>
 fn min_7c710a() {
-  var arg_0 = vec4<f16>(f16());
-  var arg_1 = vec4<f16>(f16());
+  var arg_0 = vec4<f16>(1.h);
+  var arg_1 = vec4<f16>(1.h);
   var res: vec4<f16> = min(arg_0, arg_1);
 }
 

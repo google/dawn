@@ -2,7 +2,7 @@
 
 using namespace metal;
 void atan2_21dfea() {
-  half3 res = half3(0.0h);
+  half3 res = half3(0.78515625h);
 }
 
 struct tint_symbol {

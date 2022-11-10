@@ -1,7 +1,7 @@
 enable f16;
 
 fn trunc_cc2b0d() {
-  var res : f16 = trunc(f16());
+  var res : f16 = trunc(1.0h);
 }
 
 @vertex

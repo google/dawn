@@ -1,5 +1,5 @@
 void cos_5bc2c6() {
-  vector<float16_t, 2> arg_0 = (float16_t(0.0h)).xx;
+  vector<float16_t, 2> arg_0 = (float16_t(1.0h)).xx;
   vector<float16_t, 2> res = cos(arg_0);
 }
 

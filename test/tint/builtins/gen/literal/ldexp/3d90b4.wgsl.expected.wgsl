@@ -1,7 +1,7 @@
 enable f16;
 
 fn ldexp_3d90b4() {
-  var res : vec2<f16> = ldexp(vec2<f16>(f16()), vec2<i32>(1i));
+  var res : vec2<f16> = ldexp(vec2<f16>(1.0h), vec2<i32>(1i));
 }
 
 @vertex

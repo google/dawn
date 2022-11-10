@@ -25,7 +25,7 @@ enable f16;
 
 // fn reflect(vec<2, f16>, vec<2, f16>) -> vec<2, f16>
 fn reflect_bb15ac() {
-  var res: vec2<f16> = reflect(vec2<f16>(f16()), vec2<f16>(f16()));
+  var res: vec2<f16> = reflect(vec2<f16>(1.h), vec2<f16>(1.h));
 }
 
 @vertex

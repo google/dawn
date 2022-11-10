@@ -1,5 +1,5 @@
 void ceil_f3f889() {
-  float16_t arg_0 = float16_t(0.0h);
+  float16_t arg_0 = float16_t(1.5h);
   float16_t res = ceil(arg_0);
 }
 
