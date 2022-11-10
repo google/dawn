@@ -2,7 +2,7 @@
 
 using namespace metal;
 void cosh_3b7bbf() {
-  half4 arg_0 = half4(1.0h);
+  half4 arg_0 = half4(0.0h);
   half4 res = cosh(arg_0);
 }
 

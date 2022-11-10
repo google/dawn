@@ -1,5 +1,5 @@
 void cos_c5c28e() {
-  float arg_0 = 1.0f;
+  float arg_0 = 0.0f;
   float res = cos(arg_0);
 }
 

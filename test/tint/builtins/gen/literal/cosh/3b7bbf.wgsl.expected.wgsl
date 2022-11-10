@@ -1,7 +1,7 @@
 enable f16;
 
 fn cosh_3b7bbf() {
-  var res : vec4<f16> = cosh(vec4<f16>(1.0h));
+  var res : vec4<f16> = cosh(vec4<f16>(0.0h));
 }
 
 @vertex

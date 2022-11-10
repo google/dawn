@@ -1,5 +1,5 @@
 fn cosh_da92dd() {
-  var res : f32 = cosh(1.0f);
+  var res : f32 = cosh(0.0f);
 }
 
 @vertex

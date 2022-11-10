@@ -1,5 +1,5 @@
 void cos_fc047d() {
-  float16_t arg_0 = float16_t(1.0h);
+  float16_t arg_0 = float16_t(0.0h);
   float16_t res = cos(arg_0);
 }
 

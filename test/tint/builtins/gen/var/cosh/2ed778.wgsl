@@ -25,7 +25,7 @@ enable f16;
 
 // fn cosh(f16) -> f16
 fn cosh_2ed778() {
-  var arg_0 = 1.h;
+  var arg_0 = 0.h;
   var res: f16 = cosh(arg_0);
 }
 

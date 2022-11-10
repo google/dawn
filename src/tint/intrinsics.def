@@ -429,10 +429,10 @@ fn arrayLength<T, A: access>(ptr<storage, array<T>, A>) -> u32
 @const fn ceil<N: num, T: fa_f32_f16>(@test_value(1.5) vec<N, T>) -> vec<N, T>
 @const fn clamp<T: fia_fiu32_f16>(T, T, T) -> T
 @const fn clamp<T: fia_fiu32_f16, N: num>(vec<N, T>, vec<N, T>, vec<N, T>) -> vec<N, T>
-fn cos<T: f32_f16>(T) -> T
-fn cos<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
-fn cosh<T: f32_f16>(T) -> T
-fn cosh<N: num, T: f32_f16>(vec<N, T>) -> vec<N, T>
+@const fn cos<T: fa_f32_f16>(@test_value(0) T) -> T
+@const fn cos<N: num, T: fa_f32_f16>(@test_value(0) vec<N, T>) -> vec<N, T>
+@const fn cosh<T: fa_f32_f16>(@test_value(0) T) -> T
+@const fn cosh<N: num, T: fa_f32_f16>(@test_value(0) vec<N, T>) -> vec<N, T>
 @const fn countLeadingZeros<T: iu32>(T) -> T
 @const fn countLeadingZeros<N: num, T: iu32>(vec<N, T>) -> vec<N, T>
 @const fn countOneBits<T: iu32>(T) -> T

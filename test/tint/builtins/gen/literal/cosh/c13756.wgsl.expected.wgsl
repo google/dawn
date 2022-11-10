@@ -1,5 +1,5 @@
 fn cosh_c13756() {
-  var res : vec2<f32> = cosh(vec2<f32>(1.0f));
+  var res : vec2<f32> = cosh(vec2<f32>(0.0f));
 }
 
 @vertex

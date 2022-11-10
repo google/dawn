@@ -25,7 +25,7 @@ enable f16;
 
 // fn cos(vec<2, f16>) -> vec<2, f16>
 fn cos_5bc2c6() {
-  var res: vec2<f16> = cos(vec2<f16>(1.h));
+  var res: vec2<f16> = cos(vec2<f16>(0.h));
 }
 
 @vertex

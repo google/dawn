@@ -1,7 +1,7 @@
 #version 310 es
 
 void cosh_da92dd() {
-  float arg_0 = 1.0f;
+  float arg_0 = 0.0f;
   float res = cosh(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void cosh_da92dd() {
-  float arg_0 = 1.0f;
+  float arg_0 = 0.0f;
   float res = cosh(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void cosh_da92dd() {
-  float arg_0 = 1.0f;
+  float arg_0 = 0.0f;
   float res = cosh(arg_0);
 }
 

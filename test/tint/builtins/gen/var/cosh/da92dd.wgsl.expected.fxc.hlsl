@@ -1,5 +1,5 @@
 void cosh_da92dd() {
-  float arg_0 = 1.0f;
+  float arg_0 = 0.0f;
   float res = cosh(arg_0);
 }
 

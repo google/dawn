@@ -2,7 +2,7 @@
 
 using namespace metal;
 void cosh_3b7bbf() {
-  half4 res = cosh(half4(1.0h));
+  half4 res = half4(1.0h);
 }
 
 struct tint_symbol {

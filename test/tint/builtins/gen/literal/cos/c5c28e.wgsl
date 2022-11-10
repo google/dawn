@@ -23,7 +23,7 @@
 
 // fn cos(f32) -> f32
 fn cos_c5c28e() {
-  var res: f32 = cos(1.f);
+  var res: f32 = cos(0.f);
 }
 
 @vertex

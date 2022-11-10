@@ -25,7 +25,7 @@ enable f16;
 
 // fn cos(vec<4, f16>) -> vec<4, f16>
 fn cos_0a89f7() {
-  var arg_0 = vec4<f16>(1.h);
+  var arg_0 = vec4<f16>(0.h);
   var res: vec4<f16> = cos(arg_0);
 }
 

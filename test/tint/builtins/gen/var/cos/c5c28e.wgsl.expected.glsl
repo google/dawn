@@ -1,7 +1,7 @@
 #version 310 es
 
 void cos_c5c28e() {
-  float arg_0 = 1.0f;
+  float arg_0 = 0.0f;
   float res = cos(arg_0);
 }
 
@@ -22,7 +22,7 @@ void main() {
 precision mediump float;
 
 void cos_c5c28e() {
-  float arg_0 = 1.0f;
+  float arg_0 = 0.0f;
   float res = cos(arg_0);
 }
 
@@ -37,7 +37,7 @@ void main() {
 #version 310 es
 
 void cos_c5c28e() {
-  float arg_0 = 1.0f;
+  float arg_0 = 0.0f;
   float res = cos(arg_0);
 }
 

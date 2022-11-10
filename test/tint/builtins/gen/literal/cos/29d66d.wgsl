@@ -23,7 +23,7 @@
 
 // fn cos(vec<4, f32>) -> vec<4, f32>
 fn cos_29d66d() {
-  var res: vec4<f32> = cos(vec4<f32>(1.f));
+  var res: vec4<f32> = cos(vec4<f32>(0.f));
 }
 
 @vertex

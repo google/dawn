@@ -25,7 +25,7 @@ enable f16;
 
 // fn cos(f16) -> f16
 fn cos_fc047d() {
-  var arg_0 = 1.h;
+  var arg_0 = 0.h;
   var res: f16 = cos(arg_0);
 }
 

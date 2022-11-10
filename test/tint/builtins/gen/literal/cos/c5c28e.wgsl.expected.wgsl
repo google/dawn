@@ -1,5 +1,5 @@
 fn cos_c5c28e() {
-  var res : f32 = cos(1.0f);
+  var res : f32 = cos(0.0f);
 }
 
 @vertex

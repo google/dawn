@@ -1,5 +1,5 @@
 void cosh_3b7bbf() {
-  vector<float16_t, 4> res = cosh((float16_t(1.0h)).xxxx);
+  vector<float16_t, 4> res = (float16_t(1.0h)).xxxx;
 }
 
 struct tint_symbol {

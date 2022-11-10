@@ -23,7 +23,7 @@
 
 // fn cosh(f32) -> f32
 fn cosh_da92dd() {
-  var res: f32 = cosh(1.f);
+  var res: f32 = cosh(0.f);
 }
 
 @vertex

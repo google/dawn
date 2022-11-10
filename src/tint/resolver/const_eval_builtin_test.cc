@@ -686,6 +686,51 @@ INSTANTIATE_TEST_SUITE_P(  //
                                               ClampCases<f16>()))));
 
 template <typename T>
+std::vector<Case> CosCases() {
+    std::vector<Case> cases = {
+        C({-T(0)}, T(1)),
+        C({T(0)}, T(1)),
+
+        C({T(0.75)}, T(0.7316888689)).FloatComp(),
+
+        // Vector test
+        C({Vec(T(0), -T(0), T(0.75))}, Vec(T(1), T(1), T(0.7316888689))).FloatComp(),
+    };
+
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Cos,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kCos),
+                     testing::ValuesIn(Concat(CosCases<AFloat>(),  //
+                                              CosCases<f32>(),
+                                              CosCases<f16>()))));
+
+template <typename T>
+std::vector<Case> CoshCases() {
+    std::vector<Case> cases = {
+        C({T(0)}, T(1)),
+        C({-T(0)}, T(1)),
+        C({T(1)}, T(1.5430806348)).FloatComp(),
+
+        C({T(.75)}, T(1.2946832847)).FloatComp(),
+
+        // Vector tests
+        C({Vec(T(0), -T(0), T(1))}, Vec(T(1), T(1), T(1.5430806348))).FloatComp(),
+    };
+
+    return cases;
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Cosh,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kCosh),
+                     testing::ValuesIn(Concat(CoshCases<AFloat>(),  //
+                                              CoshCases<f32>(),
+                                              CoshCases<f16>()))));
+
+template <typename T>
 std::vector<Case> CountLeadingZerosCases() {
     using B = BitValues<T>;
     return {

@@ -1,7 +1,7 @@
 enable f16;
 
 fn cos_0a89f7() {
-  var arg_0 = vec4<f16>(1.0h);
+  var arg_0 = vec4<f16>(0.0h);
   var res : vec4<f16> = cos(arg_0);
 }
 
