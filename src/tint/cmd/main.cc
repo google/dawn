@@ -24,7 +24,7 @@
 #include <vector>
 
 #if TINT_BUILD_GLSL_WRITER
-#include "StandAlone/ResourceLimits.h"
+#include "glslang/Public/ResourceLimits.h"
 #include "glslang/Public/ShaderLang.h"
 #endif  // TINT_BUILD_GLSL_WRITER
 
@@ -967,8 +967,8 @@ bool GenerateGlsl(const tint::Program* program, const Options& options) {
                 int lengths[1] = {static_cast<int>(result.glsl.length())};
                 shader.setStringsWithLengths(strings, lengths, 1);
                 shader.setEntryPoint("main");
-                bool glslang_result = shader.parse(&glslang::DefaultTBuiltInResource, 310,
-                                                   EEsProfile, false, false, EShMsgDefault);
+                bool glslang_result = shader.parse(GetDefaultResources(), 310, EEsProfile, false,
+                                                   false, EShMsgDefault);
                 if (!glslang_result) {
                     std::cerr << "Error parsing GLSL shader:\n"
                               << shader.getInfoLog() << "\n"
