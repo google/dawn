@@ -618,8 +618,12 @@ ResultOrError<CompiledShader> ShaderModule::Compile(const ProgrammableStage& pro
             dumpedMsg << "/* Dumped disassembled DXBC */" << std::endl;
             ComPtr<ID3DBlob> disassembly;
             D3D12_SHADER_BYTECODE code = compiledShader->GetD3D12ShaderBytecode();
+            UINT flags =
+                // Some literals are printed as floats with precision(6) which is not enough
+                // precision for values very close to 0, so always print literals as hex values.
+                D3D_DISASM_PRINT_HEX_LITERALS;
             if (FAILED(device->GetFunctions()->d3dDisassemble(
-                    code.pShaderBytecode, code.BytecodeLength, 0, nullptr, &disassembly))) {
+                    code.pShaderBytecode, code.BytecodeLength, flags, nullptr, &disassembly))) {
                 dumpedMsg << "D3D disassemble failed" << std::endl;
             } else {
                 dumpedMsg << std::string_view(
