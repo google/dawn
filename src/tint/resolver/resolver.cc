@@ -2688,7 +2688,7 @@ sem::Array* Resolver::Array(const ast::Array* arr) {
     if (el_ty->Is<sem::Atomic>()) {
         atomic_composite_info_.Add(out, &arr->type->source);
     } else {
-        if (auto* found = atomic_composite_info_.Find(el_ty)) {
+        if (auto found = atomic_composite_info_.Get(el_ty)) {
             atomic_composite_info_.Add(out, *found);
         }
     }
@@ -3027,7 +3027,7 @@ sem::Struct* Resolver::Structure(const ast::Struct* str) {
             atomic_composite_info_.Add(out, &sem_members[i]->Declaration()->source);
             break;
         } else {
-            if (auto* found = atomic_composite_info_.Find(mem_type)) {
+            if (auto found = atomic_composite_info_.Get(mem_type)) {
                 atomic_composite_info_.Add(out, *found);
                 break;
             }
