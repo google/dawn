@@ -1044,6 +1044,76 @@ fn foo(@location(0) in : f32, @location(1) coord : vec2<f32>) -> @location(0) i3
     EXPECT_EQ(expect, str(got));
 }
 
+TEST_F(DemoteToHelperTest, AtomicCompareExchangeWeak) {
+    auto* src = R"(
+@group(0) @binding(0) var t : texture_2d<f32>;
+
+@group(0) @binding(1) var s : sampler;
+
+@group(0) @binding(2) var<storage, read_write> a : atomic<i32>;
+
+@fragment
+fn foo(@location(0) in : f32, @location(1) coord : vec2<f32>) -> @location(0) i32 {
+  if (in == 0.0) {
+    discard;
+  }
+  var result = 0;
+  if (!atomicCompareExchangeWeak(&a, i32(in), 42).exchanged) {
+    let xchg = atomicCompareExchangeWeak(&a, i32(in), 42);
+    result = i32(textureSample(t, s, coord).x) * xchg.old_value;
+  }
+  return result;
+}
+)";
+
+    auto* expect = R"(
+var<private> tint_discarded = false;
+
+struct tint_symbol_1 {
+  old_value : i32,
+  exchanged : bool,
+}
+
+@group(0) @binding(0) var t : texture_2d<f32>;
+
+@group(0) @binding(1) var s : sampler;
+
+@group(0) @binding(2) var<storage, read_write> a : atomic<i32>;
+
+@fragment
+fn foo(@location(0) in : f32, @location(1) coord : vec2<f32>) -> @location(0) i32 {
+  if ((in == 0.0)) {
+    tint_discarded = true;
+  }
+  var result = 0;
+  var tint_symbol : tint_symbol_1;
+  if (!(tint_discarded)) {
+    let tint_symbol_2 = atomicCompareExchangeWeak(&(a), i32(in), 42);
+    tint_symbol.old_value = tint_symbol_2.old_value;
+    tint_symbol.exchanged = tint_symbol_2.exchanged;
+  }
+  if (!(tint_symbol.exchanged)) {
+    var tint_symbol_3 : tint_symbol_1;
+    if (!(tint_discarded)) {
+      let tint_symbol_4 = atomicCompareExchangeWeak(&(a), i32(in), 42);
+      tint_symbol_3.old_value = tint_symbol_4.old_value;
+      tint_symbol_3.exchanged = tint_symbol_4.exchanged;
+    }
+    let xchg = tint_symbol_3;
+    result = (i32(textureSample(t, s, coord).x) * xchg.old_value);
+  }
+  if (tint_discarded) {
+    discard;
+  }
+  return result;
+}
+)";
+
+    auto got = Run<DemoteToHelper>(src);
+
+    EXPECT_EQ(expect, str(got));
+}
+
 // Test that no masking is generated for calls to `atomicLoad()`.
 TEST_F(DemoteToHelperTest, AtomicLoad) {
     auto* src = R"(

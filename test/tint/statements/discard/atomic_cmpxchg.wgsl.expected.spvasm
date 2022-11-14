@@ -1,0 +1,106 @@
+; SPIR-V
+; Version: 1.3
+; Generator: Google Tint Compiler; 0
+; Bound: 56
+; Schema: 0
+               OpCapability Shader
+               OpMemoryModel Logical GLSL450
+               OpEntryPoint Fragment %foo "foo" %value
+               OpExecutionMode %foo OriginUpperLeft
+               OpName %tint_discarded "tint_discarded"
+               OpName %value "value"
+               OpName %a_block "a_block"
+               OpMemberName %a_block 0 "inner"
+               OpName %a "a"
+               OpName %foo_inner "foo_inner"
+               OpName %x "x"
+               OpName %tint_symbol_1 "tint_symbol_1"
+               OpMemberName %tint_symbol_1 0 "old_value"
+               OpMemberName %tint_symbol_1 1 "exchanged"
+               OpName %tint_symbol "tint_symbol"
+               OpName %__atomic_compare_exchange_resulti32 "__atomic_compare_exchange_resulti32"
+               OpMemberName %__atomic_compare_exchange_resulti32 0 "old_value"
+               OpMemberName %__atomic_compare_exchange_resulti32 1 "exchanged"
+               OpName %foo "foo"
+               OpDecorate %value Location 0
+               OpDecorate %a_block Block
+               OpMemberDecorate %a_block 0 Offset 0
+               OpDecorate %a DescriptorSet 0
+               OpDecorate %a Binding 0
+               OpMemberDecorate %tint_symbol_1 0 Offset 0
+               OpMemberDecorate %tint_symbol_1 1 Offset 4
+               OpMemberDecorate %__atomic_compare_exchange_resulti32 0 Offset 0
+               OpMemberDecorate %__atomic_compare_exchange_resulti32 1 Offset 4
+       %bool = OpTypeBool
+          %2 = OpConstantNull %bool
+%_ptr_Private_bool = OpTypePointer Private %bool
+%tint_discarded = OpVariable %_ptr_Private_bool Private %2
+        %int = OpTypeInt 32 1
+%_ptr_Output_int = OpTypePointer Output %int
+          %8 = OpConstantNull %int
+      %value = OpVariable %_ptr_Output_int Output %8
+    %a_block = OpTypeStruct %int
+%_ptr_StorageBuffer_a_block = OpTypePointer StorageBuffer %a_block
+          %a = OpVariable %_ptr_StorageBuffer_a_block StorageBuffer
+         %12 = OpTypeFunction %int
+       %true = OpConstantTrue %bool
+%_ptr_Function_int = OpTypePointer Function %int
+%tint_symbol_1 = OpTypeStruct %int %bool
+%_ptr_Function_tint_symbol_1 = OpTypePointer Function %tint_symbol_1
+         %21 = OpConstantNull %tint_symbol_1
+%__atomic_compare_exchange_resulti32 = OpTypeStruct %int %bool
+       %uint = OpTypeInt 32 0
+     %uint_1 = OpConstant %uint 1
+     %uint_0 = OpConstant %uint 0
+%_ptr_StorageBuffer_int = OpTypePointer StorageBuffer %int
+      %int_1 = OpConstant %int 1
+%_ptr_Function_bool = OpTypePointer Function %bool
+       %void = OpTypeVoid
+         %48 = OpTypeFunction %void
+  %foo_inner = OpFunction %int None %12
+         %14 = OpLabel
+          %x = OpVariable %_ptr_Function_int Function %8
+%tint_symbol = OpVariable %_ptr_Function_tint_symbol_1 Function %21
+               OpStore %tint_discarded %true
+               OpStore %x %8
+         %23 = OpLoad %bool %tint_discarded
+         %22 = OpLogicalNot %bool %23
+               OpSelectionMerge %24 None
+               OpBranchConditional %22 %25 %24
+         %25 = OpLabel
+         %33 = OpAccessChain %_ptr_StorageBuffer_int %a %uint_0
+         %35 = OpAtomicCompareExchange %int %33 %uint_1 %uint_0 %uint_0 %int_1 %8
+         %36 = OpIEqual %bool %35 %8
+         %26 = OpCompositeConstruct %__atomic_compare_exchange_resulti32 %35 %36
+         %37 = OpAccessChain %_ptr_Function_int %tint_symbol %uint_0
+         %38 = OpCompositeExtract %int %26 0
+               OpStore %37 %38
+         %40 = OpAccessChain %_ptr_Function_bool %tint_symbol %uint_1
+         %41 = OpCompositeExtract %bool %26 1
+               OpStore %40 %41
+               OpBranch %24
+         %24 = OpLabel
+         %42 = OpLoad %tint_symbol_1 %tint_symbol
+         %43 = OpCompositeExtract %bool %42 1
+               OpSelectionMerge %44 None
+               OpBranchConditional %43 %45 %44
+         %45 = OpLabel
+         %46 = OpCompositeExtract %int %42 0
+               OpStore %x %46
+               OpBranch %44
+         %44 = OpLabel
+         %47 = OpLoad %int %x
+               OpReturnValue %47
+               OpFunctionEnd
+        %foo = OpFunction %void None %48
+         %51 = OpLabel
+         %52 = OpFunctionCall %int %foo_inner
+               OpStore %value %52
+         %53 = OpLoad %bool %tint_discarded
+               OpSelectionMerge %54 None
+               OpBranchConditional %53 %55 %54
+         %55 = OpLabel
+               OpKill
+         %54 = OpLabel
+               OpReturn
+               OpFunctionEnd
