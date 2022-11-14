@@ -32,6 +32,42 @@ std::string Preamble() {
 )";
 }
 
+std::string CommonTypes() {
+    return R"(
+    %void = OpTypeVoid
+    %voidfn = OpTypeFunction %void
+    %float = OpTypeFloat 32
+    %uint = OpTypeInt 32 0
+    %int = OpTypeInt 32 1
+    %float_0 = OpConstant %float 0.0
+  )";
+}
+
+std::string CommonHandleTypes() {
+    return R"(
+    OpName %t "t"
+    OpName %s "s"
+    OpDecorate %t DescriptorSet 0
+    OpDecorate %t Binding 0
+    OpDecorate %s DescriptorSet 0
+    OpDecorate %s Binding 1
+    )" + CommonTypes() +
+           R"(
+
+    %v2float = OpTypeVector %float 2
+    %v4float = OpTypeVector %float 4
+    %v2_0 = OpConstantNull %v2float
+    %sampler = OpTypeSampler
+    %tex2d_f32 = OpTypeImage %float 2D 0 0 0 1 Unknown
+    %sampled_image_2d_f32 = OpTypeSampledImage %tex2d_f32
+    %ptr_sampler = OpTypePointer UniformConstant %sampler
+    %ptr_tex2d_f32 = OpTypePointer UniformConstant %tex2d_f32
+
+    %t = OpVariable %ptr_tex2d_f32 UniformConstant
+    %s = OpVariable %ptr_sampler UniformConstant
+  )";
+}
+
 TEST_F(SpvParserTest, EmitStatement_VoidCallNoParams) {
     auto p = parser(test::Assemble(Preamble() + R"(
      %void = OpTypeVoid
@@ -191,6 +227,143 @@ fn x_100() {
 }
 )";
     EXPECT_EQ(program_ast_str, expected);
+}
+
+std::string HelperFunctionPtrHandle() {
+    return R"(
+     ; This is how Glslang generates functions that take texture and sampler arguments.
+     ; It passes them by pointer.
+     %fn_ty = OpTypeFunction %void %ptr_tex2d_f32 %ptr_sampler
+
+     %200 = OpFunction %void None %fn_ty
+     %14 = OpFunctionParameter %ptr_tex2d_f32
+     %15 = OpFunctionParameter %ptr_sampler
+     %helper_entry = OpLabel
+     ; access the texture, to give the handles usages.
+     %helper_im = OpLoad %tex2d_f32 %14
+     %helper_sam = OpLoad %sampler %15
+     %helper_imsam = OpSampledImage %sampled_image_2d_f32 %helper_im %helper_sam
+     %20 = OpImageSampleImplicitLod %v4float %helper_imsam %v2_0
+     OpReturn
+     OpFunctionEnd
+     )";
+}
+
+std::string HelperFunctionHandle() {
+    return R"(
+     ; It is valid in SPIR-V to pass textures and samplers by value.
+     %fn_ty = OpTypeFunction %void %tex2d_f32 %sampler
+
+     %200 = OpFunction %void None %fn_ty
+     %14 = OpFunctionParameter %tex2d_f32
+     %15 = OpFunctionParameter %sampler
+     %helper_entry = OpLabel
+     ; access the texture, to give the handles usages.
+     %helper_imsam = OpSampledImage %sampled_image_2d_f32 %14 %15
+     %20 = OpImageSampleImplicitLod %v4float %helper_imsam %v2_0
+     OpReturn
+     OpFunctionEnd
+     )";
+}
+
+TEST_F(SpvParserTest, Emit_FunctionCall_HandlePtrParams_Direct) {
+    auto assembly = Preamble() + CommonHandleTypes() + HelperFunctionPtrHandle() + R"(
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %1 = OpFunctionCall %void %200 %t %s
+     OpReturn
+     OpFunctionEnd
+  )";
+
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    const auto got = test::ToString(p->program(), fe.ast_body());
+
+    const std::string expect = R"(x_200(t, s);
+return;
+)";
+    EXPECT_EQ(got, expect);
+}
+
+TEST_F(SpvParserTest, Emit_FunctionCall_HandlePtrParams_CopyObject) {
+    auto assembly = Preamble() + CommonHandleTypes() + HelperFunctionPtrHandle() + R"(
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+
+     %copy_t = OpCopyObject %ptr_tex2d_f32 %t
+     %copy_s = OpCopyObject %ptr_sampler %s
+     %1 = OpFunctionCall %void %200 %copy_t %copy_s
+     OpReturn
+     OpFunctionEnd
+  )";
+
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions());
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    const auto got = test::ToString(p->program(), fe.ast_body());
+
+    const std::string expect = R"(x_200(t, s);
+return;
+)";
+    EXPECT_EQ(got, expect);
+}
+
+TEST_F(SpvParserTest, Emit_FunctionCall_HandleParams_Load) {
+    auto assembly = Preamble() + CommonHandleTypes() + HelperFunctionHandle() + R"(
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+     %im = OpLoad %tex2d_f32 %t
+     %sam = OpLoad %sampler %s
+     %1 = OpFunctionCall %void %200 %im %sam
+     OpReturn
+     OpFunctionEnd
+  )";
+
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    const auto got = test::ToString(p->program(), fe.ast_body());
+
+    const std::string expect = R"(x_200(t, s);
+return;
+)";
+    EXPECT_EQ(got, expect);
+}
+
+TEST_F(SpvParserTest, Emit_FunctionCall_HandleParams_LoadsAndCopyObject) {
+    auto assembly = Preamble() + CommonHandleTypes() + HelperFunctionHandle() + R"(
+
+     %100 = OpFunction %void None %voidfn
+     %entry = OpLabel
+
+     %copy_t = OpCopyObject %ptr_tex2d_f32 %t
+     %copy_s = OpCopyObject %ptr_sampler %s
+     %im = OpLoad %tex2d_f32 %copy_t
+     %sam = OpLoad %sampler %copy_s
+     %copy_im = OpCopyObject %tex2d_f32 %im
+     %copy_sam = OpCopyObject %sampler %sam
+     %1 = OpFunctionCall %void %200 %copy_im %copy_sam
+     OpReturn
+     OpFunctionEnd
+  )";
+
+    auto p = parser(test::Assemble(assembly));
+    ASSERT_TRUE(p->BuildAndParseInternalModuleExceptFunctions()) << assembly;
+    auto fe = p->function_emitter(100);
+    EXPECT_TRUE(fe.EmitBody()) << p->error();
+    const auto got = test::ToString(p->program(), fe.ast_body());
+
+    const std::string expect = R"(x_200(t, s);
+return;
+)";
+    EXPECT_EQ(got, expect);
 }
 
 }  // namespace

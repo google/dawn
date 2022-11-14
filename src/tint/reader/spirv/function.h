@@ -1002,6 +1002,16 @@ class FunctionEmitter {
     /// @returns true if emission has not yet failed.
     bool ParseFunctionDeclaration(FunctionDeclaration* decl);
 
+    /// @param obj a SPIR-V instruction with a result ID and a type ID
+    /// @returns true if the object is an image, a sampler, or a pointer to
+    /// an image or a sampler
+    bool IsHandleObj(const spvtools::opt::Instruction& obj);
+
+    /// @param obj a SPIR-V instruction with a result ID and a type ID
+    /// @returns true if the object is an image, a sampler, or a pointer to
+    /// an image or a sampler
+    bool IsHandleObj(const spvtools::opt::Instruction* obj);
+
     /// @returns the store type for the OpVariable instruction, or
     /// null on failure.
     const Type* GetVariableStoreType(const spvtools::opt::Instruction& var_decl_inst);

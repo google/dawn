@@ -160,9 +160,6 @@ TEST_F(SpvParserTest, Emit_GenerateParamNames) {
     EXPECT_THAT(got, HasSubstr(expect));
 }
 
-//     ;%s = OpVariable %ptr_sampler UniformConstant
-//     ;%t = OpVariable %ptr_tex2d_f32 UniformConstant
-
 TEST_F(SpvParserTest, Emit_FunctionDecl_ParamPtrTexture_ParamPtrSampler) {
     auto p = parser(test::Assemble(Preamble() + CommonHandleTypes() + R"(
 

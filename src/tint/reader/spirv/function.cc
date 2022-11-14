@@ -1514,19 +1514,12 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
 
     ParameterList ast_params;
     function_.ForEachParam([this, &ast_params](const spvtools::opt::Instruction* param) {
-        const Type* type = nullptr;
-        auto* spirv_type = type_mgr_->GetType(param->type_id());
-        TINT_ASSERT(Reader, spirv_type);
-        if (spirv_type->AsImage() || spirv_type->AsSampler() ||
-            (spirv_type->AsPointer() &&
-             (static_cast<spv::StorageClass>(spirv_type->AsPointer()->storage_class()) ==
-              spv::StorageClass::UniformConstant))) {
-            // When we see image, sampler, pointer-to-image, or pointer-to-sampler, use the
-            // handle type deduced according to usage.
-            type = parser_impl_.GetHandleTypeForSpirvHandle(*param);
-        } else {
-            type = parser_impl_.ConvertType(param->type_id());
-        }
+        // Valid SPIR-V requires function call parameters to be non-null
+        // instructions.
+        TINT_ASSERT(Reader, param != nullptr);
+        const Type* const type = IsHandleObj(*param)
+                                     ? parser_impl_.GetHandleTypeForSpirvHandle(*param)
+                                     : parser_impl_.ConvertType(param->type_id());
 
         if (type != nullptr) {
             auto* ast_param = parser_impl_.MakeParameter(param->result_id(), type, AttributeList{});
@@ -1548,6 +1541,20 @@ bool FunctionEmitter::ParseFunctionDeclaration(FunctionDeclaration* decl) {
     decl->attributes.Clear();
 
     return success();
+}
+
+bool FunctionEmitter::IsHandleObj(const spvtools::opt::Instruction& obj) {
+    TINT_ASSERT(Reader, obj.type_id() != 0u);
+    auto* spirv_type = type_mgr_->GetType(obj.type_id());
+    TINT_ASSERT(Reader, spirv_type);
+    return spirv_type->AsImage() || spirv_type->AsSampler() ||
+           (spirv_type->AsPointer() &&
+            (static_cast<spv::StorageClass>(spirv_type->AsPointer()->storage_class()) ==
+             spv::StorageClass::UniformConstant));
+}
+
+bool FunctionEmitter::IsHandleObj(const spvtools::opt::Instruction* obj) {
+    return (obj != nullptr) && IsHandleObj(*obj);
 }
 
 const Type* FunctionEmitter::GetVariableStoreType(const spvtools::opt::Instruction& var_decl_inst) {
@@ -5278,7 +5285,21 @@ bool FunctionEmitter::EmitFunctionCall(const spvtools::opt::Instruction& inst) {
 
     ExpressionList args;
     for (uint32_t iarg = 1; iarg < inst.NumInOperands(); ++iarg) {
-        auto expr = MakeOperand(inst, iarg);
+        uint32_t arg_id = inst.GetSingleWordInOperand(iarg);
+        TypedExpression expr;
+
+        if (IsHandleObj(def_use_mgr_->GetDef(arg_id))) {
+            // For textures and samplers, use the memory object declaration
+            // instead.
+            const auto usage = parser_impl_.GetHandleUsage(arg_id);
+            const auto* mem_obj_decl =
+                parser_impl_.GetMemoryObjectDeclarationForHandle(arg_id, usage.IsTexture());
+            expr = MakeExpression(mem_obj_decl->result_id());
+            // Pass the handle through instead of a pointer to the handle.
+            expr.type = parser_impl_.GetHandleTypeForSpirvHandle(*mem_obj_decl);
+        } else {
+            expr = MakeOperand(inst, iarg);
+        }
         if (!expr) {
             return false;
         }
