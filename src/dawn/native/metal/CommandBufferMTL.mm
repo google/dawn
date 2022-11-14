@@ -342,8 +342,8 @@ void EncodeEmptyBlitEncoderForWriteTimestamp(Device* device,
         descriptor.sampleBufferAttachments[0].endOfEncoderSampleIndex = NSUInteger(cmd->queryIndex);
 
         id<MTLBlitCommandEncoder> blit = commandContext->BeginBlit(descriptor);
-        if (device->IsToggleEnabled(Toggle::MetalUseDummyBlitEncoderForWriteTimestamp)) {
-            [blit fillBuffer:device->GetDummyBlitMtlBuffer() range:NSMakeRange(0, 1) value:0];
+        if (device->IsToggleEnabled(Toggle::MetalUseMockBlitEncoderForWriteTimestamp)) {
+            [blit fillBuffer:device->GetMockBlitMtlBuffer() range:NSMakeRange(0, 1) value:0];
         }
         commandContext->EndBlit();
     }

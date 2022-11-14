@@ -82,9 +82,9 @@ class Device final : public DeviceBase {
     bool UseCounterSamplingAtCommandBoundary() const;
     bool UseCounterSamplingAtStageBoundary() const;
 
-    // Get a MTLBuffer that can be used as a dummy in a no-op blit encoder based on filling this
+    // Get a MTLBuffer that can be used as a mock in a no-op blit encoder based on filling this
     // single-byte buffer
-    id<MTLBuffer> GetDummyBlitMtlBuffer();
+    id<MTLBuffer> GetMockBlitMtlBuffer();
 
     void ForceEventualFlushOfCommands() override;
 
@@ -168,7 +168,7 @@ class Device final : public DeviceBase {
     // Support counter sampling at the begin and end of blit pass, compute pass and render pass's
     // vertex/fragement stage
     bool mCounterSamplingAtStageBoundary;
-    NSPRef<id<MTLBuffer>> mDummyBlitMtlBuffer;
+    NSPRef<id<MTLBuffer>> mMockBlitMtlBuffer;
 };
 
 }  // namespace dawn::native::metal

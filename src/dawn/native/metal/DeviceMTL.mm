@@ -251,11 +251,11 @@ void Device::InitTogglesFromDriver() {
     }
 
     // TODO(dawn:1473): Metal fails to store GPU counters to sampleBufferAttachments on empty
-    // encoders on macOS 11.0+, we need to add dummy blit command to blit encoder when encoding
+    // encoders on macOS 11.0+, we need to add mock blit command to blit encoder when encoding
     // writeTimestamp as workaround by enabling the toggle
-    // "metal_use_dummy_blit_encoder_for_write_timestamp".
+    // "metal_use_mock_blit_encoder_for_write_timestamp".
     if (@available(macos 11.0, iOS 14.0, *)) {
-        SetToggle(Toggle::MetalUseDummyBlitEncoderForWriteTimestamp, true);
+        SetToggle(Toggle::MetalUseMockBlitEncoderForWriteTimestamp, true);
     }
 }
 
@@ -558,7 +558,7 @@ void Device::DestroyImpl() {
 
     mCommandQueue = nullptr;
     mMtlDevice = nullptr;
-    mDummyBlitMtlBuffer = nullptr;
+    mMockBlitMtlBuffer = nullptr;
 }
 
 uint32_t Device::GetOptimalBytesPerRowAlignment() const {
@@ -581,13 +581,13 @@ bool Device::UseCounterSamplingAtStageBoundary() const {
     return mCounterSamplingAtStageBoundary;
 }
 
-id<MTLBuffer> Device::GetDummyBlitMtlBuffer() {
-    if (mDummyBlitMtlBuffer == nullptr) {
-        mDummyBlitMtlBuffer.Acquire(
+id<MTLBuffer> Device::GetMockBlitMtlBuffer() {
+    if (mMockBlitMtlBuffer == nullptr) {
+        mMockBlitMtlBuffer.Acquire(
             [GetMTLDevice() newBufferWithLength:1 options:MTLResourceStorageModePrivate]);
     }
 
-    return mDummyBlitMtlBuffer.Get();
+    return mMockBlitMtlBuffer.Get();
 }
 
 }  // namespace dawn::native::metal
