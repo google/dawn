@@ -86,6 +86,7 @@
 #include "src/tint/utils/math.h"
 #include "src/tint/utils/reverse.h"
 #include "src/tint/utils/scoped_assignment.h"
+#include "src/tint/utils/string.h"
 #include "src/tint/utils/transform.h"
 #include "src/tint/utils/vector.h"
 
@@ -2380,17 +2381,28 @@ sem::Expression* Resolver::MemberAccessor(const ast::MemberAccessorExpression* e
             const sem::StructMember* member = nullptr;
             for (auto* m : str->Members()) {
                 if (m->Name() == symbol) {
-                    ty = m->Type();
                     member = m;
                     break;
                 }
             }
 
-            if (ty == nullptr) {
+            // TODO(crbug.com/tint/1757): Remove
+            if (utils::HasPrefix(builder_->Symbols().NameFor(str->Name()), "__frexp_result")) {
+                if (builder_->Symbols().NameFor(symbol) == "sig") {
+                    AddWarning(
+                        "use of deprecated language feature: 'sig' has been renamed to 'fract'",
+                        expr->member->source);
+                    member = str->Members()[0];
+                }
+            }
+
+            if (member == nullptr) {
                 AddError("struct member " + builder_->Symbols().NameFor(symbol) + " not found",
                          expr->source);
                 return nullptr;
             }
+
+            ty = member->Type();
 
             // If we're extracting from a reference, we return a reference.
             if (auto* ref = structure->As<sem::Reference>()) {

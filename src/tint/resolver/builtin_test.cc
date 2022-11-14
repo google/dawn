@@ -34,6 +34,7 @@
 #include "src/tint/sem/member_accessor_expression.h"
 #include "src/tint/sem/sampled_texture.h"
 #include "src/tint/sem/statement.h"
+#include "src/tint/sem/test_helper.h"
 #include "src/tint/sem/variable.h"
 
 using ::testing::ElementsAre;
@@ -927,12 +928,12 @@ TEST_F(ResolverBuiltinFloatTest, FrexpScalar_f32) {
     ASSERT_NE(ty, nullptr);
     ASSERT_EQ(ty->Members().size(), 2u);
 
-    auto* sig = ty->Members()[0];
-    EXPECT_TRUE(sig->Type()->Is<sem::F32>());
-    EXPECT_EQ(sig->Offset(), 0u);
-    EXPECT_EQ(sig->Size(), 4u);
-    EXPECT_EQ(sig->Align(), 4u);
-    EXPECT_EQ(sig->Name(), Sym("sig"));
+    auto* fract = ty->Members()[0];
+    EXPECT_TRUE(fract->Type()->Is<sem::F32>());
+    EXPECT_EQ(fract->Offset(), 0u);
+    EXPECT_EQ(fract->Size(), 4u);
+    EXPECT_EQ(fract->Align(), 4u);
+    EXPECT_EQ(fract->Name(), Sym("fract"));
 
     auto* exp = ty->Members()[1];
     EXPECT_TRUE(exp->Type()->Is<sem::I32>());
@@ -958,12 +959,12 @@ TEST_F(ResolverBuiltinFloatTest, FrexpScalar_f16) {
     ASSERT_NE(ty, nullptr);
     ASSERT_EQ(ty->Members().size(), 2u);
 
-    auto* sig = ty->Members()[0];
-    EXPECT_TRUE(sig->Type()->Is<sem::F16>());
-    EXPECT_EQ(sig->Offset(), 0u);
-    EXPECT_EQ(sig->Size(), 2u);
-    EXPECT_EQ(sig->Align(), 2u);
-    EXPECT_EQ(sig->Name(), Sym("sig"));
+    auto* fract = ty->Members()[0];
+    EXPECT_TRUE(fract->Type()->Is<sem::F16>());
+    EXPECT_EQ(fract->Offset(), 0u);
+    EXPECT_EQ(fract->Size(), 2u);
+    EXPECT_EQ(fract->Align(), 2u);
+    EXPECT_EQ(fract->Name(), Sym("fract"));
 
     auto* exp = ty->Members()[1];
     EXPECT_TRUE(exp->Type()->Is<sem::I32>());
@@ -987,14 +988,14 @@ TEST_F(ResolverBuiltinFloatTest, FrexpVector_f32) {
     ASSERT_NE(ty, nullptr);
     ASSERT_EQ(ty->Members().size(), 2u);
 
-    auto* sig = ty->Members()[0];
-    ASSERT_TRUE(sig->Type()->Is<sem::Vector>());
-    EXPECT_EQ(sig->Type()->As<sem::Vector>()->Width(), 3u);
-    EXPECT_TRUE(sig->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
-    EXPECT_EQ(sig->Offset(), 0u);
-    EXPECT_EQ(sig->Size(), 12u);
-    EXPECT_EQ(sig->Align(), 16u);
-    EXPECT_EQ(sig->Name(), Sym("sig"));
+    auto* fract = ty->Members()[0];
+    ASSERT_TRUE(fract->Type()->Is<sem::Vector>());
+    EXPECT_EQ(fract->Type()->As<sem::Vector>()->Width(), 3u);
+    EXPECT_TRUE(fract->Type()->As<sem::Vector>()->type()->Is<sem::F32>());
+    EXPECT_EQ(fract->Offset(), 0u);
+    EXPECT_EQ(fract->Size(), 12u);
+    EXPECT_EQ(fract->Align(), 16u);
+    EXPECT_EQ(fract->Name(), Sym("fract"));
 
     auto* exp = ty->Members()[1];
     ASSERT_TRUE(exp->Type()->Is<sem::Vector>());
@@ -1022,14 +1023,14 @@ TEST_F(ResolverBuiltinFloatTest, FrexpVector_f16) {
     ASSERT_NE(ty, nullptr);
     ASSERT_EQ(ty->Members().size(), 2u);
 
-    auto* sig = ty->Members()[0];
-    ASSERT_TRUE(sig->Type()->Is<sem::Vector>());
-    EXPECT_EQ(sig->Type()->As<sem::Vector>()->Width(), 3u);
-    EXPECT_TRUE(sig->Type()->As<sem::Vector>()->type()->Is<sem::F16>());
-    EXPECT_EQ(sig->Offset(), 0u);
-    EXPECT_EQ(sig->Size(), 6u);
-    EXPECT_EQ(sig->Align(), 8u);
-    EXPECT_EQ(sig->Name(), Sym("sig"));
+    auto* fract = ty->Members()[0];
+    ASSERT_TRUE(fract->Type()->Is<sem::Vector>());
+    EXPECT_EQ(fract->Type()->As<sem::Vector>()->Width(), 3u);
+    EXPECT_TRUE(fract->Type()->As<sem::Vector>()->type()->Is<sem::F16>());
+    EXPECT_EQ(fract->Offset(), 0u);
+    EXPECT_EQ(fract->Size(), 6u);
+    EXPECT_EQ(fract->Align(), 8u);
+    EXPECT_EQ(fract->Name(), Sym("fract"));
 
     auto* exp = ty->Members()[1];
     ASSERT_TRUE(exp->Type()->Is<sem::Vector>());
@@ -1042,6 +1043,29 @@ TEST_F(ResolverBuiltinFloatTest, FrexpVector_f16) {
 
     EXPECT_EQ(ty->Size(), 32u);
     EXPECT_EQ(ty->SizeNoPadding(), 28u);
+}
+
+// TODO(crbug.com/tint/1757): Remove once deprecation period for `frexp().sig` is over
+TEST_F(ResolverBuiltinFloatTest, FrexpVector_sig) {
+    Enable(ast::Extension::kF16);
+
+    auto* call = Call("frexp", vec3<f16>());
+    auto* expr = MemberAccessor(call, "sig");
+    WrapInFunction(expr);
+
+    EXPECT_TRUE(r()->Resolve()) << r()->error();
+
+    ASSERT_NE(TypeOf(call), nullptr);
+    auto* ty = TypeOf(call)->As<sem::Struct>();
+    ASSERT_NE(ty, nullptr);
+    ASSERT_EQ(ty->Members().size(), 2u);
+
+    auto* sig = ty->Members()[0];
+    EXPECT_TYPE(sig->Type(), TypeOf(expr));
+
+    auto* access = Sem().Get<sem::StructMemberAccess>(expr);
+    ASSERT_NE(access, nullptr);
+    EXPECT_EQ(access->Member(), sig);
 }
 
 TEST_F(ResolverBuiltinFloatTest, Frexp_Error_FirstParamInt) {

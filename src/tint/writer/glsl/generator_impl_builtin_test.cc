@@ -561,14 +561,16 @@ TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Scalar_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr(R"(
-  float sig;
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+
+struct frexp_result {
+  float fract;
   int exp;
 };
 
 frexp_result tint_frexp(float param_0) {
   frexp_result result;
-  result.sig = frexp(param_0, result.exp);
+  result.fract = frexp(param_0, result.exp);
   return result;
 }
 
@@ -578,7 +580,11 @@ void test_function() {
 }
 
 layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
-)"));
+void main() {
+  test_function();
+  return;
+}
+)");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Scalar_f16) {
@@ -590,17 +596,17 @@ TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Scalar_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr(R"(#version 310 es
+    EXPECT_EQ(gen.result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 struct frexp_result_f16 {
-  float16_t sig;
+  float16_t fract;
   int exp;
 };
 
 frexp_result_f16 tint_frexp(float16_t param_0) {
   frexp_result_f16 result;
-  result.sig = frexp(param_0, result.exp);
+  result.fract = frexp(param_0, result.exp);
   return result;
 }
 
@@ -613,7 +619,8 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   test_function();
   return;
-)"));
+}
+)");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Vector_f32) {
@@ -623,16 +630,16 @@ TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Vector_f32) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr(R"(
+    EXPECT_EQ(gen.result(), R"(#version 310 es
 
 struct frexp_result_vec3 {
-  vec3 sig;
+  vec3 fract;
   ivec3 exp;
 };
 
 frexp_result_vec3 tint_frexp(vec3 param_0) {
   frexp_result_vec3 result;
-  result.sig = frexp(param_0, result.exp);
+  result.fract = frexp(param_0, result.exp);
   return result;
 }
 
@@ -645,7 +652,8 @@ layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
 void main() {
   test_function();
   return;
-)"));
+}
+)");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Vector_f16) {
@@ -657,17 +665,17 @@ TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Vector_f16) {
     GeneratorImpl& gen = SanitizeAndBuild();
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
-    EXPECT_THAT(gen.result(), HasSubstr(R"(#version 310 es
+    EXPECT_EQ(gen.result(), R"(#version 310 es
 #extension GL_AMD_gpu_shader_half_float : require
 
 struct frexp_result_vec3_f16 {
-  f16vec3 sig;
+  f16vec3 fract;
   ivec3 exp;
 };
 
 frexp_result_vec3_f16 tint_frexp(f16vec3 param_0) {
   frexp_result_vec3_f16 result;
-  result.sig = frexp(param_0, result.exp);
+  result.fract = frexp(param_0, result.exp);
   return result;
 }
 
@@ -681,7 +689,40 @@ void main() {
   test_function();
   return;
 }
-)"));
+)");
+}
+
+// TODO(crbug.com/tint/1757): Remove once deprecation period for `frexp().sig` is over
+TEST_F(GlslGeneratorImplTest_Builtin, Frexp_Sig_Deprecation) {
+    WrapInFunction(MemberAccessor(Call("frexp", 1_f), "sig"));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#version 310 es
+
+struct frexp_result {
+  float fract;
+  int exp;
+};
+
+frexp_result tint_frexp(float param_0) {
+  frexp_result result;
+  result.fract = frexp(param_0, result.exp);
+  return result;
+}
+
+
+void test_function() {
+  float tint_symbol = tint_frexp(1.0f).fract;
+}
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+void main() {
+  test_function();
+  return;
+}
+)");
 }
 
 TEST_F(GlslGeneratorImplTest_Builtin, Degrees_Scalar_f32) {
@@ -1348,7 +1389,6 @@ void main() {
 }
 )");
 }
-
 
 TEST_F(GlslGeneratorImplTest_Builtin, QuantizeToF16_Vec4) {
     GlobalVar("v", vec4<f32>(2_f), ast::AddressSpace::kPrivate);

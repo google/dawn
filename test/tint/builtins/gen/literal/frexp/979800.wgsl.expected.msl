@@ -3,12 +3,12 @@
 using namespace metal;
 
 struct frexp_result_vec3 {
-  float3 sig;
+  float3 fract;
   int3 exp;
 };
 frexp_result_vec3 tint_frexp(float3 param_0) {
   frexp_result_vec3 result;
-  result.sig = frexp(param_0, result.exp);
+  result.fract = frexp(param_0, result.exp);
   return result;
 }
 

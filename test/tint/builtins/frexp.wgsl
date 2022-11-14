@@ -2,5 +2,5 @@
 fn main() {
     let res = frexp(1.23);
     let exp : i32 = res.exp;
-    let sig : f32 = res.sig;
+    let fract : f32 = res.fract;
 }

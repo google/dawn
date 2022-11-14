@@ -25,10 +25,10 @@ namespace tint::utils {
 /// @param replacement the replacement string to use instead of `substr`
 /// @returns `str` with all occurrences of `substr` replaced with `replacement`
 [[nodiscard]] inline std::string ReplaceAll(std::string str,
-                                            const std::string& substr,
-                                            const std::string& replacement) {
+                                            std::string_view substr,
+                                            std::string_view replacement) {
     size_t pos = 0;
-    while ((pos = str.find(substr, pos)) != std::string::npos) {
+    while ((pos = str.find(substr, pos)) != std::string_view::npos) {
         str.replace(pos, substr.length(), replacement);
         pos += replacement.length();
     }
@@ -44,10 +44,17 @@ std::string ToString(const T& value) {
     return s.str();
 }
 
+/// @param str the input string
+/// @param prefix the prefix string
+/// @returns true iff @p str has the prefix @p prefix
+inline size_t HasPrefix(std::string_view str, std::string_view prefix) {
+    return str.compare(0, prefix.size(), prefix) == 0;
+}
+
 /// @param a the first string
 /// @param b the second string
 /// @returns the Levenshtein distance between @p a and @p b
-size_t Distance(const std::string& a, const std::string& b);
+size_t Distance(std::string_view a, std::string_view b);
 
 }  // namespace tint::utils
 

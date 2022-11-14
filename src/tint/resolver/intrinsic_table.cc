@@ -856,7 +856,7 @@ const sem::Struct* build_frexp_result(MatchState& state, const sem::Type* el) {
         display_name = "__frexp_result";
     }
     auto* i32 = state.builder.create<sem::I32>();
-    return build_struct(state, display_name, {{"sig", el}, {"exp", i32}});
+    return build_struct(state, display_name, {{"fract", el}, {"exp", i32}});
 }
 const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n, const sem::Type* el) {
     std::string display_name;
@@ -867,7 +867,7 @@ const sem::Struct* build_frexp_result_vec(MatchState& state, Number& n, const se
     }
     auto* vec = state.builder.create<sem::Vector>(el, n.Value());
     auto* vec_i32 = state.builder.create<sem::Vector>(state.builder.create<sem::I32>(), n.Value());
-    return build_struct(state, display_name, {{"sig", vec}, {"exp", vec_i32}});
+    return build_struct(state, display_name, {{"fract", vec}, {"exp", vec_i32}});
 }
 const sem::Struct* build_atomic_compare_exchange_result(MatchState& state, const sem::Type* ty) {
     return build_struct(

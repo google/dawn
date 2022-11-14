@@ -15,7 +15,7 @@
                OpName %vertex_point_size "vertex_point_size"
                OpName %frexp_eb2421 "frexp_eb2421"
                OpName %__frexp_result_vec2 "__frexp_result_vec2"
-               OpMemberName %__frexp_result_vec2 0 "sig"
+               OpMemberName %__frexp_result_vec2 0 "fract"
                OpMemberName %__frexp_result_vec2 1 "exp"
                OpName %res "res"
                OpName %vertex_main_inner "vertex_main_inner"

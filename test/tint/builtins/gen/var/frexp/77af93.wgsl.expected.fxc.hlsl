@@ -1,11 +1,11 @@
 struct frexp_result_vec4 {
-  float4 sig;
+  float4 fract;
   int4 exp;
 };
 frexp_result_vec4 tint_frexp(float4 param_0) {
   float4 exp;
-  float4 sig = frexp(param_0, exp);
-  frexp_result_vec4 result = {sig, int4(exp)};
+  float4 fract = frexp(param_0, exp);
+  frexp_result_vec4 result = {fract, int4(exp)};
   return result;
 }
 

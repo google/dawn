@@ -537,12 +537,12 @@ TEST_F(MslGeneratorImplTest, Frexp_Scalar_f32) {
 using namespace metal;
 
 struct frexp_result {
-  float sig;
+  float fract;
   int exp;
 };
 frexp_result tint_frexp(float param_0) {
   frexp_result result;
-  result.sig = frexp(param_0, result.exp);
+  result.fract = frexp(param_0, result.exp);
   return result;
 }
 
@@ -568,12 +568,12 @@ TEST_F(MslGeneratorImplTest, Frexp_Scalar_f16) {
 using namespace metal;
 
 struct frexp_result_f16 {
-  half sig;
+  half fract;
   int exp;
 };
 frexp_result_f16 tint_frexp(half param_0) {
   frexp_result_f16 result;
-  result.sig = frexp(param_0, result.exp);
+  result.fract = frexp(param_0, result.exp);
   return result;
 }
 
@@ -597,12 +597,12 @@ TEST_F(MslGeneratorImplTest, Frexp_Vector_f32) {
 using namespace metal;
 
 struct frexp_result_vec3 {
-  float3 sig;
+  float3 fract;
   int3 exp;
 };
 frexp_result_vec3 tint_frexp(float3 param_0) {
   frexp_result_vec3 result;
-  result.sig = frexp(param_0, result.exp);
+  result.fract = frexp(param_0, result.exp);
   return result;
 }
 
@@ -628,17 +628,46 @@ TEST_F(MslGeneratorImplTest, Frexp_Vector_f16) {
 using namespace metal;
 
 struct frexp_result_vec3_f16 {
-  half3 sig;
+  half3 fract;
   int3 exp;
 };
 frexp_result_vec3_f16 tint_frexp(half3 param_0) {
   frexp_result_vec3_f16 result;
-  result.sig = frexp(param_0, result.exp);
+  result.fract = frexp(param_0, result.exp);
   return result;
 }
 
 kernel void test_function() {
   tint_frexp(half3(0.0h));
+  return;
+}
+
+)");
+}
+
+// TODO(crbug.com/tint/1757): Remove once deprecation period for `frexp().sig` is over
+TEST_F(MslGeneratorImplTest, Frexp_Sig_Deprecation) {
+    WrapInFunction(MemberAccessor(Call("frexp", 1_f), "sig"));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(#include <metal_stdlib>
+
+using namespace metal;
+
+struct frexp_result {
+  float fract;
+  int exp;
+};
+frexp_result tint_frexp(float param_0) {
+  frexp_result result;
+  result.fract = frexp(param_0, result.exp);
+  return result;
+}
+
+kernel void test_function() {
+  float const tint_symbol = tint_frexp(1.0f).fract;
   return;
 }
 

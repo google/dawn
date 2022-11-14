@@ -493,13 +493,13 @@ TEST_F(HlslGeneratorImplTest_Builtin, Frexp_Scalar_f32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(struct frexp_result {
-  float sig;
+  float fract;
   int exp;
 };
 frexp_result tint_frexp(float param_0) {
   float exp;
-  float sig = frexp(param_0, exp);
-  frexp_result result = {sig, int(exp)};
+  float fract = frexp(param_0, exp);
+  frexp_result result = {fract, int(exp)};
   return result;
 }
 
@@ -521,13 +521,13 @@ TEST_F(HlslGeneratorImplTest_Builtin, Frexp_Scalar_f16) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(struct frexp_result_f16 {
-  float16_t sig;
+  float16_t fract;
   int exp;
 };
 frexp_result_f16 tint_frexp(float16_t param_0) {
   float16_t exp;
-  float16_t sig = frexp(param_0, exp);
-  frexp_result_f16 result = {sig, int(exp)};
+  float16_t fract = frexp(param_0, exp);
+  frexp_result_f16 result = {fract, int(exp)};
   return result;
 }
 
@@ -547,13 +547,13 @@ TEST_F(HlslGeneratorImplTest_Builtin, Frexp_Vector_f32) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(struct frexp_result_vec3 {
-  float3 sig;
+  float3 fract;
   int3 exp;
 };
 frexp_result_vec3 tint_frexp(float3 param_0) {
   float3 exp;
-  float3 sig = frexp(param_0, exp);
-  frexp_result_vec3 result = {sig, int3(exp)};
+  float3 fract = frexp(param_0, exp);
+  frexp_result_vec3 result = {fract, int3(exp)};
   return result;
 }
 
@@ -575,19 +575,45 @@ TEST_F(HlslGeneratorImplTest_Builtin, Frexp_Vector_f16) {
 
     ASSERT_TRUE(gen.Generate()) << gen.error();
     EXPECT_EQ(gen.result(), R"(struct frexp_result_vec3_f16 {
-  vector<float16_t, 3> sig;
+  vector<float16_t, 3> fract;
   int3 exp;
 };
 frexp_result_vec3_f16 tint_frexp(vector<float16_t, 3> param_0) {
   vector<float16_t, 3> exp;
-  vector<float16_t, 3> sig = frexp(param_0, exp);
-  frexp_result_vec3_f16 result = {sig, int3(exp)};
+  vector<float16_t, 3> fract = frexp(param_0, exp);
+  frexp_result_vec3_f16 result = {fract, int3(exp)};
   return result;
 }
 
 [numthreads(1, 1, 1)]
 void test_function() {
   tint_frexp((float16_t(0.0h)).xxx);
+  return;
+}
+)");
+}
+
+// TODO(crbug.com/tint/1757): Remove once deprecation period for `frexp().sig` is over
+TEST_F(HlslGeneratorImplTest_Builtin, Frexp_Sig_Deprecation) {
+    WrapInFunction(MemberAccessor(Call("frexp", 1_f), "sig"));
+
+    GeneratorImpl& gen = SanitizeAndBuild();
+
+    ASSERT_TRUE(gen.Generate()) << gen.error();
+    EXPECT_EQ(gen.result(), R"(struct frexp_result {
+  float fract;
+  int exp;
+};
+frexp_result tint_frexp(float param_0) {
+  float exp;
+  float fract = frexp(param_0, exp);
+  frexp_result result = {fract, int(exp)};
+  return result;
+}
+
+[numthreads(1, 1, 1)]
+void test_function() {
+  const float tint_symbol = tint_frexp(1.0f).fract;
   return;
 }
 )");

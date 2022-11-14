@@ -1,5 +1,11 @@
 # Tint changes during Origin Trial
 
+## Changes for M110
+
+### Deprecated Features
+
+* The `sig` member of the return type of `frexp()` has been renamed to `fract`. [tint:1757](crbug.com/tint/1757)
+
 ## Changes for M109
 
 ### Breaking changes

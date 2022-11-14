@@ -16,7 +16,7 @@
                OpName %frexp_4b2200 "frexp_4b2200"
                OpName %arg_0 "arg_0"
                OpName %__frexp_result "__frexp_result"
-               OpMemberName %__frexp_result 0 "sig"
+               OpMemberName %__frexp_result 0 "fract"
                OpMemberName %__frexp_result 1 "exp"
                OpName %res "res"
                OpName %vertex_main_inner "vertex_main_inner"

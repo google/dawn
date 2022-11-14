@@ -37,6 +37,15 @@ TEST(StringTest, ToString) {
     EXPECT_EQ("hello", ToString("hello"));
 }
 
+TEST(StringTest, HasPrefix) {
+    EXPECT_TRUE(HasPrefix("abc", "a"));
+    EXPECT_TRUE(HasPrefix("abc", "ab"));
+    EXPECT_TRUE(HasPrefix("abc", "abc"));
+    EXPECT_FALSE(HasPrefix("abc", "abc1"));
+    EXPECT_FALSE(HasPrefix("abc", "ac"));
+    EXPECT_FALSE(HasPrefix("abc", "b"));
+}
+
 TEST(StringTest, Distance) {
     EXPECT_EQ(Distance("hello world", "hello world"), 0u);
     EXPECT_EQ(Distance("hello world", "helloworld"), 1u);

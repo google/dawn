@@ -1,11 +1,11 @@
 struct frexp_result {
-  float sig;
+  float fract;
   int exp;
 };
 frexp_result tint_frexp(float param_0) {
   float exp;
-  float sig = frexp(param_0, exp);
-  frexp_result result = {sig, int(exp)};
+  float fract = frexp(param_0, exp);
+  frexp_result result = {fract, int(exp)};
   return result;
 }
 

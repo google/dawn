@@ -19,7 +19,7 @@
 
 namespace tint::utils {
 
-size_t Distance(const std::string& str_a, const std::string& str_b) {
+size_t Distance(std::string_view str_a, std::string_view str_b) {
     const auto len_a = str_a.size();
     const auto len_b = str_b.size();
 

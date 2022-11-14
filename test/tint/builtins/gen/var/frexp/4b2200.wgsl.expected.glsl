@@ -1,13 +1,13 @@
 #version 310 es
 
 struct frexp_result {
-  float sig;
+  float fract;
   int exp;
 };
 
 frexp_result tint_frexp(float param_0) {
   frexp_result result;
-  result.sig = frexp(param_0, result.exp);
+  result.fract = frexp(param_0, result.exp);
   return result;
 }
 
@@ -34,13 +34,13 @@ void main() {
 precision mediump float;
 
 struct frexp_result {
-  float sig;
+  float fract;
   int exp;
 };
 
 frexp_result tint_frexp(float param_0) {
   frexp_result result;
-  result.sig = frexp(param_0, result.exp);
+  result.fract = frexp(param_0, result.exp);
   return result;
 }
 
@@ -61,13 +61,13 @@ void main() {
 #version 310 es
 
 struct frexp_result {
-  float sig;
+  float fract;
   int exp;
 };
 
 frexp_result tint_frexp(float param_0) {
   frexp_result result;
-  result.sig = frexp(param_0, result.exp);
+  result.fract = frexp(param_0, result.exp);
   return result;
 }
 

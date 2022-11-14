@@ -1377,7 +1377,7 @@ bool GeneratorImpl::EmitFrexpCall(std::ostream& out,
             }
 
             line(b) << StructName(builtin->ReturnType()->As<sem::Struct>()) << " result;";
-            line(b) << "result.sig = frexp(" << in << ", result.exp);";
+            line(b) << "result.fract = frexp(" << in << ", result.exp);";
             line(b) << "return result;";
             return true;
         });
@@ -2331,40 +2331,45 @@ bool GeneratorImpl::EmitMemberAccessor(std::ostream& out,
         return true;
     };
 
-    auto& sem = program_->Sem();
+    auto* sem = builder_.Sem().Get(expr);
 
-    if (auto* swizzle = sem.Get(expr)->As<sem::Swizzle>()) {
-        // Metal 1.x does not support swizzling of packed vector types.
-        // For single element swizzles, we can use the index operator.
-        // For multi-element swizzles, we need to cast to a regular vector type
-        // first. Note that we do not currently allow assignments to swizzles, so
-        // the casting which will convert the l-value to r-value is fine.
-        if (swizzle->Indices().Length() == 1) {
+    return Switch(
+        sem,
+        [&](const sem::Swizzle* swizzle) {
+            // Metal 1.x does not support swizzling of packed vector types.
+            // For single element swizzles, we can use the index operator.
+            // For multi-element swizzles, we need to cast to a regular vector type
+            // first. Note that we do not currently allow assignments to swizzles, so
+            // the casting which will convert the l-value to r-value is fine.
+            if (swizzle->Indices().Length() == 1) {
+                if (!write_lhs()) {
+                    return false;
+                }
+                out << "[" << swizzle->Indices()[0] << "]";
+            } else {
+                if (!EmitType(out, swizzle->Object()->Type()->UnwrapRef(), "")) {
+                    return false;
+                }
+                out << "(";
+                if (!write_lhs()) {
+                    return false;
+                }
+                out << ")." << program_->Symbols().NameFor(expr->member->symbol);
+            }
+            return true;
+        },
+        [&](const sem::StructMemberAccess* member_access) {
             if (!write_lhs()) {
                 return false;
             }
-            out << "[" << swizzle->Indices()[0] << "]";
-        } else {
-            if (!EmitType(out, sem.Get(expr->structure)->Type()->UnwrapRef(), "")) {
-                return false;
-            }
-            out << "(";
-            if (!write_lhs()) {
-                return false;
-            }
-            out << ")." << program_->Symbols().NameFor(expr->member->symbol);
-        }
-    } else {
-        if (!write_lhs()) {
+            out << "." << program_->Symbols().NameFor(member_access->Member()->Name());
+            return true;
+        },
+        [&](Default) {
+            TINT_ICE(Writer, diagnostics_)
+                << "unknown member access type: " << sem->TypeInfo().name;
             return false;
-        }
-        out << ".";
-        if (!EmitExpression(out, expr->member)) {
-            return false;
-        }
-    }
-
-    return true;
+        });
 }
 
 bool GeneratorImpl::EmitReturn(const ast::ReturnStatement* stmt) {

@@ -19,7 +19,7 @@
                OpName %vertex_point_size "vertex_point_size"
                OpName %frexp_5257dd "frexp_5257dd"
                OpName %__frexp_result_f16 "__frexp_result_f16"
-               OpMemberName %__frexp_result_f16 0 "sig"
+               OpMemberName %__frexp_result_f16 0 "fract"
                OpMemberName %__frexp_result_f16 1 "exp"
                OpName %res "res"
                OpName %vertex_main_inner "vertex_main_inner"
