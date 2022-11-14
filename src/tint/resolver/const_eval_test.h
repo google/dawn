@@ -16,6 +16,7 @@
 #define SRC_TINT_RESOLVER_CONST_EVAL_TEST_H_
 
 #include <limits>
+#include <string>
 #include <utility>
 
 #include "gmock/gmock.h"
@@ -132,6 +133,16 @@ inline void ConcatIntoIf([[maybe_unused]] Vec& v1, [[maybe_unused]] Vecs&&... vs
     if constexpr (condition) {
         ConcatInto(v1, std::forward<Vecs>(vs)...);
     }
+}
+
+/// Returns the overflow error message for binary ops
+template <typename NumberT>
+inline std::string OverflowErrorMessage(NumberT lhs, const char* op, NumberT rhs) {
+    std::stringstream ss;
+    ss << std::setprecision(20);
+    ss << "'" << lhs.value << " " << op << " " << rhs.value << "' cannot be represented as '"
+       << FriendlyName<NumberT>() << "'";
+    return ss.str();
 }
 
 using builder::IsValue;

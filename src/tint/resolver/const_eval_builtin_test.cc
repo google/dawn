@@ -54,7 +54,7 @@ struct Case {
         bool float_compare = false;
     };
     struct Failure {
-        std::string error = nullptr;
+        std::string error;
     };
 
     utils::Vector<Types, 8> args;
@@ -108,16 +108,6 @@ static Case E(std::initializer_list<ScalarTypes> sargs, std::string err) {
     return Case{std::move(args), std::move(err)};
 }
 
-/// Returns the overflow error message for binary ops
-template <typename NumberT>
-std::string OverflowErrorMessage(NumberT lhs, const char* op, NumberT rhs) {
-    std::stringstream ss;
-    ss << std::setprecision(20);
-    ss << "'" << lhs.value << " " << op << " " << rhs.value << "' cannot be represented as '"
-       << FriendlyName<NumberT>() << "'";
-    return ss.str();
-}
-
 using ResolverConstEvalBuiltinTest = ResolverTestWithParam<std::tuple<sem::BuiltinType, Case>>;
 
 TEST_P(ResolverConstEvalBuiltinTest, Test) {
@@ -132,13 +122,12 @@ TEST_P(ResolverConstEvalBuiltinTest, Test) {
     }
 
     auto* expr = Call(Source{{12, 34}}, sem::str(builtin), std::move(args));
-
     GlobalConst("C", expr);
 
     if (c.expected) {
-        auto expected = c.expected.Get();
+        auto expected_case = c.expected.Get();
 
-        auto* expected_expr = ToValueBase(expected.value)->Expr(*this);
+        auto* expected_expr = ToValueBase(expected_case.value)->Expr(*this);
         GlobalConst("E", expected_expr);
 
         ASSERT_TRUE(r()->Resolve()) << r()->error();
@@ -168,21 +157,21 @@ TEST_P(ResolverConstEvalBuiltinTest, Test) {
                         if (std::isnan(e)) {
                             EXPECT_TRUE(std::isnan(v));
                         } else {
-                            auto vf = (expected.pos_or_neg ? Abs(v) : v);
-                            if (expected.float_compare) {
+                            auto vf = (expected_case.pos_or_neg ? Abs(v) : v);
+                            if (expected_case.float_compare) {
                                 EXPECT_FLOAT_EQ(vf, e);
                             } else {
                                 EXPECT_EQ(vf, e);
                             }
                         }
                     } else {
-                        EXPECT_EQ((expected.pos_or_neg ? Abs(v) : v), e);
+                        EXPECT_EQ((expected_case.pos_or_neg ? Abs(v) : v), e);
                         // Check that the constant's integer doesn't contain unexpected
                         // data in the MSBs that are outside of the bit-width of T.
                         EXPECT_EQ(a->As<AInt>(), b->As<AInt>());
                     }
                 },
-                expected.value);
+                expected_case.value);
 
             return HasFailure() ? Action::kStop : Action::kContinue;
         });
