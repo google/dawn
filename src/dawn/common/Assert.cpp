@@ -28,7 +28,7 @@ void BreakPoint() {
 #elif DAWN_PLATFORM_IS(ARM64)
     __asm__ __volatile__("brk 0");
 #elif DAWN_PLATFORM_IS(LOONGARCH)
-    __asm__ __volatile__("break");
+    __asm__ __volatile__("break 0");
 #elif DAWN_PLATFORM_IS(RISCV)
     __asm__ __volatile__("ebreak");
 #elif DAWN_PLATFORM_IS(MIPS)
