@@ -17,6 +17,8 @@ package main
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -190,6 +192,8 @@ func run() error {
 		defaultMSLExe = "metal.exe"
 	}
 
+	toolchainHash := sha256.New()
+
 	// If explicit verification compilers have been specified, check they exist.
 	// Otherwise, look on PATH for them, but don't error if they cannot be found.
 	for _, tool := range []struct {
@@ -222,8 +226,17 @@ func run() error {
 		}
 		color.Unset()
 		fmt.Println()
+
+		toolchainHash.Write([]byte(tool.name))
+		if s, err := os.Stat(*tool.path); err == nil {
+			toolchainHash.Write([]byte(s.ModTime().String()))
+			toolchainHash.Write([]byte(fmt.Sprint(s.Size())))
+		}
 	}
 	fmt.Println()
+
+	validationCache := loadValidationCache(fmt.Sprintf("%x", toolchainHash.Sum(nil)))
+	defer saveValidationCache(validationCache)
 
 	// Build the list of results.
 	// These hold the chans used to report the job results.
@@ -247,6 +260,7 @@ func run() error {
 		xcrunPath:        xcrunPath,
 		generateExpected: generateExpected,
 		generateSkip:     generateSkip,
+		validationCache:  validationCache,
 	}
 	for cpu := 0; cpu < numCPU; cpu++ {
 		go func() {
@@ -326,6 +340,8 @@ func run() error {
 	printFormatsHeader()
 	printHorizontalLine()
 
+	newKnownGood := knownGoodHashes{}
+
 	for i, file := range files {
 		results := results[i]
 
@@ -343,6 +359,11 @@ func run() error {
 		for _, format := range formats {
 			columnWidth := formatWidth(format)
 			result := <-results[format]
+
+			// Update the known-good hashes
+			newKnownGood[fileAndFormat{file, format}] = result.passHashes
+
+			// Update stats
 			stats := statsByFmt[format]
 			stats.numTests++
 			stats.timeTaken += result.timeTaken
@@ -351,6 +372,7 @@ func run() error {
 					file: file, format: format, err: err,
 				})
 			}
+
 			switch result.code {
 			case pass:
 				green.Fprintf(row, alignCenter("PASS", columnWidth))
@@ -372,6 +394,17 @@ func run() error {
 
 		if verbose || !rowAllPassed {
 			fmt.Fprintln(color.Output, row)
+		}
+	}
+
+	// Update the validation cache known-good hashes.
+	// This has to be done after all the results have been collected to avoid
+	// concurrent access on the map.
+	for ff, hashes := range newKnownGood {
+		if len(newKnownGood) > 0 {
+			validationCache.knownGood[ff] = hashes
+		} else {
+			delete(validationCache.knownGood, ff)
 		}
 	}
 
@@ -497,9 +530,10 @@ const (
 )
 
 type status struct {
-	code      statusCode
-	err       error
-	timeTaken time.Duration
+	code       statusCode
+	err        error
+	timeTaken  time.Duration
+	passHashes []string
 }
 
 type job struct {
@@ -517,6 +551,7 @@ type runConfig struct {
 	xcrunPath        string
 	generateExpected bool
 	generateSkip     bool
+	validationCache  validationCache
 }
 
 func (j job) run(cfg runConfig) {
@@ -558,6 +593,14 @@ func (j job) run(cfg runConfig) {
 		args := []string{
 			file,
 			"--format", strings.Split(string(j.format), "-")[0], // 'hlsl-fxc' -> 'hlsl', etc.
+			"--print-hash",
+		}
+
+		// Append any skip-hashes, if they're found.
+		if j.format != "wgsl" { // Don't skip 'wgsl' as this 'toolchain' is ever changing.
+			if skipHashes := cfg.validationCache.knownGood[fileAndFormat{file, j.format}]; len(skipHashes) > 0 {
+				args = append(args, "--skip-hash", strings.Join(skipHashes, ","))
+			}
 		}
 
 		// Can we validate?
@@ -597,6 +640,7 @@ func (j job) run(cfg runConfig) {
 		timeTaken := time.Since(start)
 
 		out = strings.ReplaceAll(out, "\r\n", "\n")
+		out, hashes := extractValidationHashes(out)
 		matched := expected == "" || expected == out
 
 		canEmitPassExpectationFile := true
@@ -627,7 +671,7 @@ func (j job) run(cfg runConfig) {
 		switch {
 		case ok && matched:
 			// Test passed
-			return status{code: pass, timeTaken: timeTaken}
+			return status{code: pass, timeTaken: timeTaken, passHashes: hashes}
 
 			//       --- Below this point the test has failed ---
 
@@ -674,6 +718,24 @@ func (j job) run(cfg runConfig) {
 			return status{code: fail, err: err, timeTaken: timeTaken}
 		}
 	}()
+}
+
+var reValidationHash = regexp.MustCompile(`<<HASH: ([^>]*)>>\n`)
+
+// Parses and returns the validation hashes emitted by tint, or an empty string
+// if the hash wasn't found, along with the input string with the validation
+// hashes removed.
+func extractValidationHashes(in string) (out string, hashes []string) {
+	matches := reValidationHash.FindAllStringSubmatch(in, -1)
+	if matches == nil {
+		return in, nil
+	}
+	out = in
+	for _, match := range matches {
+		out = strings.ReplaceAll(out, match[0], "")
+		hashes = append(hashes, match[1])
+	}
+	return out, hashes
 }
 
 // indent returns the string 's' indented with 'n' whitespace characters
@@ -802,4 +864,110 @@ func printDuration(d time.Duration) string {
 		fmt.Fprintf(sb, "%ds", sec)
 	}
 	return sb.String()
+}
+
+// fileAndFormat is a pair of test file path and output format.
+type fileAndFormat struct {
+	file   string
+	format outputFormat
+}
+
+// Used to optimize end-to-end testing of tint
+type validationCache struct {
+	// A hash of all the validation toolchains in use.
+	toolchainHash string
+	// A map of fileAndFormat to known-good (validated) output hashes.
+	knownGood knownGoodHashes
+}
+
+// A map of fileAndFormat to known-good (validated) output hashes.
+type knownGoodHashes map[fileAndFormat][]string
+
+// The serialized form of a known-good validation.cache file
+type ValidationCacheFile struct {
+	ToolchainHash string
+	KnownGood     []ValidationCacheFileKnownGood
+}
+
+type ValidationCacheFileKnownGood struct {
+	File   string
+	Format outputFormat
+	Hashes []string
+}
+
+func validationCachePath() string {
+	return filepath.Join(fileutils.DawnRoot(), "test", "tint", "validation.cache")
+}
+
+// loadValidationCache attempts to load the validation cache.
+// Returns an empty cache if the file could not be loaded, or if toolchains have changed.
+func loadValidationCache(toolchainHash string) validationCache {
+	out := validationCache{
+		toolchainHash: toolchainHash,
+		knownGood:     knownGoodHashes{},
+	}
+
+	file, err := os.Open(validationCachePath())
+	if err != nil {
+		return out
+	}
+	defer file.Close()
+
+	content := ValidationCacheFile{}
+	if err := json.NewDecoder(file).Decode(&content); err != nil {
+		return out
+	}
+
+	if content.ToolchainHash != toolchainHash {
+		color.Set(color.FgYellow)
+		fmt.Println("Toolchains have changed - clearing validation cache")
+		color.Unset()
+		return out
+	}
+
+	for _, knownGood := range content.KnownGood {
+		out.knownGood[fileAndFormat{knownGood.File, knownGood.Format}] = knownGood.Hashes
+	}
+
+	return out
+}
+
+// saveValidationCache saves the validation cache file.
+func saveValidationCache(vc validationCache) error {
+	out := ValidationCacheFile{
+		ToolchainHash: vc.toolchainHash,
+		KnownGood:     make([]ValidationCacheFileKnownGood, 0, len(vc.knownGood)),
+	}
+
+	for ff, hashes := range vc.knownGood {
+		out.KnownGood = append(out.KnownGood, ValidationCacheFileKnownGood{
+			File:   ff.file,
+			Format: ff.format,
+			Hashes: hashes,
+		})
+	}
+
+	sort.Slice(out.KnownGood, func(i, j int) bool {
+		switch {
+		case out.KnownGood[i].File < out.KnownGood[j].File:
+			return true
+		case out.KnownGood[i].File > out.KnownGood[j].File:
+			return false
+		case out.KnownGood[i].Format < out.KnownGood[j].Format:
+			return true
+		case out.KnownGood[i].Format > out.KnownGood[j].Format:
+			return false
+		}
+		return false
+	})
+
+	file, err := os.Create(validationCachePath())
+	if err != nil {
+		return fmt.Errorf("failed to save the validation cache file: %w", err)
+	}
+	defer file.Close()
+
+	enc := json.NewEncoder(file)
+	enc.SetIndent("", "  ")
+	return enc.Encode(&out)
 }

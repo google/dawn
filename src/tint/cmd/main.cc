@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <charconv>
 #include <cstdio>
 #include <fstream>
 #include <iostream>
@@ -62,6 +63,11 @@ namespace {
     exit(1);
 }
 
+/// Prints the given hash value in a format string that the end-to-end test runner can parse.
+void PrintHash(uint32_t hash) {
+    std::cout << "<<HASH: 0x" << std::hex << hash << ">>" << std::endl;
+}
+
 enum class Format {
     kNone = -1,
     kSpirv,
@@ -82,8 +88,11 @@ struct Options {
     bool parse_only = false;
     bool disable_workgroup_init = false;
     bool validate = false;
+    bool print_hash = false;
     bool demangle = false;
     bool dump_inspector_bindings = false;
+
+    std::unordered_set<uint32_t> skip_hash;
 
     Format format = Format::kNone;
 
@@ -122,8 +131,7 @@ const char kUsage[] = R"(Usage: tint [options] <input-file>
   -o <name>                 -- Output file name.  Use "-" for standard output
   --transform <name list>   -- Runs transforms, name list is comma separated
                                Available transforms:
-${transforms}
-  --parse-only              -- Stop after parsing the input
+${transforms} --parse-only              -- Stop after parsing the input
   --disable-workgroup-init  -- Disable workgroup memory zero initialization.
   --demangle                -- Preserve original source names. Demangle them.
                                Affects AST dumping, and text-based output languages.
@@ -135,6 +143,9 @@ ${transforms}
                                default to binding 0 of the largest used group plus 1,
                                or group 0 if no resource bound.
   --validate                -- Validates the generated shader with all available validators
+  --skip-hash <hash list>   -- Skips validation if the hash of the output is equal to any
+                               of the hash codes in the comma separated list of hashes
+  --print-hash              -- Emit the hash of the output program
   --fxc                     -- Path to FXC dll, used to validate HLSL output.
                                When specified, automatically enables HLSL validation with FXC
   --dxc                     -- Path to DXC executable, used to validate HLSL output.
@@ -431,6 +442,24 @@ bool ParseArgs(const std::vector<std::string>& args, Options* opts) {
             opts->dump_inspector_bindings = true;
         } else if (arg == "--validate") {
             opts->validate = true;
+        } else if (arg == "--skip-hash") {
+            ++i;
+            if (i >= args.size()) {
+                std::cerr << "Missing hash value for " << arg << std::endl;
+                return false;
+            }
+            for (auto hash : split_on_comma(args[i])) {
+                uint32_t value = 0;
+                int base = 10;
+                if (hash.size() > 2 && hash[0] == '0' && (hash[1] == 'x' || hash[1] == 'X')) {
+                    hash = hash.substr(2);
+                    base = 16;
+                }
+                std::from_chars(hash.data(), hash.data() + hash.size(), value, base);
+                opts->skip_hash.emplace(value);
+            }
+        } else if (arg == "--print-hash") {
+            opts->print_hash = true;
         } else if (arg == "--fxc") {
             ++i;
             if (i >= args.size()) {
@@ -682,7 +711,12 @@ bool GenerateSpirv(const tint::Program* program, const Options& options) {
         }
     }
 
-    if (options.validate) {
+    const auto hash = tint::utils::CRC32(result.spirv.data(), result.spirv.size());
+    if (options.print_hash) {
+        PrintHash(hash);
+    }
+
+    if (options.validate && options.skip_hash.count(hash) == 0) {
         // Use Vulkan 1.1, since this is what Tint, internally, uses.
         spvtools::SpirvTools tools(SPV_ENV_VULKAN_1_1);
         tools.SetMessageConsumer(
@@ -722,7 +756,12 @@ bool GenerateWgsl(const tint::Program* program, const Options& options) {
         return false;
     }
 
-    if (options.validate) {
+    const auto hash = tint::utils::CRC32(result.wgsl.data(), result.wgsl.size());
+    if (options.print_hash) {
+        PrintHash(hash);
+    }
+
+    if (options.validate && options.skip_hash.count(hash) == 0) {
         // Attempt to re-parse the output program with Tint's WGSL reader.
         auto source = std::make_unique<tint::Source::File>(options.input_filename, result.wgsl);
         auto reparsed_program = tint::reader::wgsl::Parse(source.get());
@@ -772,7 +811,12 @@ bool GenerateMsl(const tint::Program* program, const Options& options) {
         return false;
     }
 
-    if (options.validate) {
+    const auto hash = tint::utils::CRC32(result.msl.c_str());
+    if (options.print_hash) {
+        PrintHash(hash);
+    }
+
+    if (options.validate && options.skip_hash.count(hash) == 0) {
         tint::val::Result res;
 #ifdef TINT_ENABLE_MSL_VALIDATION_USING_METAL_API
         res = tint::val::MslUsingMetalAPI(result.msl);
@@ -828,11 +872,17 @@ bool GenerateHlsl(const tint::Program* program, const Options& options) {
         return false;
     }
 
+    const auto hash = tint::utils::CRC32(result.hlsl.c_str());
+    if (options.print_hash) {
+        PrintHash(hash);
+    }
+
     // If --fxc or --dxc was passed, then we must explicitly find and validate with that respective
     // compiler.
     const bool must_validate_dxc = !options.dxc_path.empty();
     const bool must_validate_fxc = !options.fxc_path.empty();
-    if (options.validate || must_validate_dxc || must_validate_fxc) {
+    if ((options.validate || must_validate_dxc || must_validate_fxc) &&
+        (options.skip_hash.count(hash) == 0)) {
         tint::val::Result dxc_res;
         bool dxc_found = false;
         if (options.validate || must_validate_dxc) {
@@ -959,7 +1009,12 @@ bool GenerateGlsl(const tint::Program* program, const Options& options) {
             return false;
         }
 
-        if (options.validate) {
+        const auto hash = tint::utils::CRC32(result.glsl.c_str());
+        if (options.print_hash) {
+            PrintHash(hash);
+        }
+
+        if (options.validate && options.skip_hash.count(hash) == 0) {
             for (auto entry_pt : result.entry_points) {
                 EShLanguage lang = pipeline_stage_to_esh_language(entry_pt.second);
                 glslang::TShader shader(lang);

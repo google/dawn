@@ -39,6 +39,9 @@
 /tools/memory
 /out
 
+# Tint test validation cache file
+/test/tint/validation.cache
+
 # Modified from https://www.gitignore.io/api/vim,macos,linux,emacs,windows,sublimetext,visualstudio,visualstudiocode,intellij
 
 ### Emacs ###
