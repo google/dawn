@@ -2,7 +2,7 @@
 
 using namespace metal;
 void min_ac84d6() {
-  half res = fmin(1.0h, 1.0h);
+  half res = 1.0h;
 }
 
 struct tint_symbol {

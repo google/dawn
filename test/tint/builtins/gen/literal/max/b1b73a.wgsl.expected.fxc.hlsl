@@ -1,5 +1,5 @@
 void max_b1b73a() {
-  uint3 res = max((1u).xxx, (1u).xxx);
+  uint3 res = (1u).xxx;
 }
 
 struct tint_symbol {

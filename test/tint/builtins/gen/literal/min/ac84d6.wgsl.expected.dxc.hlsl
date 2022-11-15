@@ -1,5 +1,5 @@
 void min_ac84d6() {
-  float16_t res = min(float16_t(1.0h), float16_t(1.0h));
+  float16_t res = float16_t(1.0h);
 }
 
 struct tint_symbol {

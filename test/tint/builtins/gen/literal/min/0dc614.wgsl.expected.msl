@@ -2,7 +2,7 @@
 
 using namespace metal;
 void min_0dc614() {
-  uint4 res = min(uint4(1u), uint4(1u));
+  uint4 res = uint4(1u);
 }
 
 struct tint_symbol {

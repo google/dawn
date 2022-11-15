@@ -1,5 +1,5 @@
 void min_c76fa6() {
-  float4 res = min((1.0f).xxxx, (1.0f).xxxx);
+  float4 res = (1.0f).xxxx;
 }
 
 struct tint_symbol {

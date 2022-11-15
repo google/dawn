@@ -2,7 +2,7 @@
 
 using namespace metal;
 void max_a93419() {
-  float4 res = fmax(float4(1.0f), float4(1.0f));
+  float4 res = float4(1.0f);
 }
 
 struct tint_symbol {

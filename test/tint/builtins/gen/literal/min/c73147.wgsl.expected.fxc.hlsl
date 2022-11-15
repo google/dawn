@@ -1,5 +1,5 @@
 void min_c73147() {
-  int res = min(1, 1);
+  int res = 1;
 }
 
 struct tint_symbol {

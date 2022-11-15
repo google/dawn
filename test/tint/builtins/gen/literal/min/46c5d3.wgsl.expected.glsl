@@ -1,7 +1,7 @@
 #version 310 es
 
 void min_46c5d3() {
-  uint res = min(1u, 1u);
+  uint res = 1u;
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void min_46c5d3() {
-  uint res = min(1u, 1u);
+  uint res = 1u;
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void min_46c5d3() {
-  uint res = min(1u, 1u);
+  uint res = 1u;
 }
 
 void compute_main() {

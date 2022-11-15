@@ -584,6 +584,24 @@ class ConstEval {
                       utils::VectorRef<const sem::Constant*> args,
                       const Source& source);
 
+    /// max builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result max(const sem::Type* ty,
+               utils::VectorRef<const sem::Constant*> args,
+               const Source& source);
+
+    /// min builtin
+    /// @param ty the expression type
+    /// @param args the input arguments
+    /// @param source the source location of the conversion
+    /// @return the result value, or null if the value cannot be calculated
+    Result min(const sem::Type* ty,  // NOLINT(build/include_what_you_use)  -- confused by min
+               utils::VectorRef<const sem::Constant*> args,
+               const Source& source);
+
     /// pack2x16float builtin
     /// @param ty the expression type
     /// @param args the input arguments

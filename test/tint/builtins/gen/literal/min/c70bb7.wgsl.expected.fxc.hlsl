@@ -1,5 +1,5 @@
 void min_c70bb7() {
-  uint3 res = min((1u).xxx, (1u).xxx);
+  uint3 res = (1u).xxx;
 }
 
 struct tint_symbol {

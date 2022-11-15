@@ -1,5 +1,5 @@
 void min_af326d() {
-  float res = min(1.0f, 1.0f);
+  float res = 1.0f;
 }
 
 struct tint_symbol {

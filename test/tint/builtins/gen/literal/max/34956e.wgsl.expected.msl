@@ -2,7 +2,7 @@
 
 using namespace metal;
 void max_34956e() {
-  half2 res = fmax(half2(1.0h), half2(1.0h));
+  half2 res = half2(1.0h);
 }
 
 struct tint_symbol {

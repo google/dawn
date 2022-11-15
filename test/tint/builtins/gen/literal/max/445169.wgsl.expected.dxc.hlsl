@@ -1,5 +1,5 @@
 void max_445169() {
-  vector<float16_t, 3> res = max((float16_t(1.0h)).xxx, (float16_t(1.0h)).xxx);
+  vector<float16_t, 3> res = (float16_t(1.0h)).xxx;
 }
 
 struct tint_symbol {

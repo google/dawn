@@ -1291,6 +1291,60 @@ INSTANTIATE_TEST_SUITE_P(ExtractBits,
                              std::make_tuple(1, u32::Highest()),  //
                              std::make_tuple(u32::Highest(), u32::Highest())));
 
+template <typename T>
+std::vector<Case> MaxCases() {
+    return {
+        C({T(0), T(0)}, T(0)),
+        C({T(0), T::Highest()}, T::Highest()),
+        C({T::Lowest(), T(0)}, T(0)),
+        C({T::Highest(), T::Lowest()}, T::Highest()),
+        C({T::Highest(), T::Highest()}, T::Highest()),
+        C({T::Lowest(), T::Lowest()}, T::Lowest()),
+
+        // Vector tests
+        C({Vec(T(0), T(0)), Vec(T(0), T(42))}, Vec(T(0), T(42))),
+        C({Vec(T::Lowest(), T(0)), Vec(T(0), T::Lowest())}, Vec(T(0), T(0))),
+        C({Vec(T::Lowest(), T::Highest()), Vec(T::Highest(), T::Lowest())},
+          Vec(T::Highest(), T::Highest())),
+    };
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Max,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kMax),
+                     testing::ValuesIn(Concat(MaxCases<AInt>(),  //
+                                              MaxCases<i32>(),
+                                              MaxCases<u32>(),
+                                              MaxCases<AFloat>(),
+                                              MaxCases<f32>(),
+                                              MaxCases<f16>()))));
+
+template <typename T>
+std::vector<Case> MinCases() {
+    return {C({T(0), T(0)}, T(0)),                //
+            C({T(0), T(42)}, T(0)),               //
+            C({T::Lowest(), T(0)}, T::Lowest()),  //
+            C({T(0), T::Highest()}, T(0)),        //
+            C({T::Highest(), T::Lowest()}, T::Lowest()),
+            C({T::Highest(), T::Highest()}, T::Highest()),
+            C({T::Lowest(), T::Lowest()}, T::Lowest()),
+
+            // Vector tests
+            C({Vec(T(0), T(0)), Vec(T(0), T(42))}, Vec(T(0), T(0))),
+            C({Vec(T::Lowest(), T(0), T(1)), Vec(T(0), T(42), T::Highest())},
+              Vec(T::Lowest(), T(0), T(1)))};
+}
+INSTANTIATE_TEST_SUITE_P(  //
+    Min,
+    ResolverConstEvalBuiltinTest,
+    testing::Combine(testing::Values(sem::BuiltinType::kMin),
+                     testing::ValuesIn(Concat(MinCases<AInt>(),  //
+                                              MinCases<i32>(),
+                                              MinCases<u32>(),
+                                              MinCases<AFloat>(),
+                                              MinCases<f32>(),
+                                              MinCases<f16>()))));
+
 std::vector<Case> Pack4x8snormCases() {
     return {
         C({Vec(f32(0), f32(0), f32(0), f32(0))}, Val(u32(0x0000'0000))),

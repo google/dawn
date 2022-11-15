@@ -1,5 +1,5 @@
 void min_7c710a() {
-  vector<float16_t, 4> res = min((float16_t(1.0h)).xxxx, (float16_t(1.0h)).xxxx);
+  vector<float16_t, 4> res = (float16_t(1.0h)).xxxx;
 }
 
 struct tint_symbol {

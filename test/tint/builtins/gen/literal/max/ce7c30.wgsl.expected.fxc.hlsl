@@ -1,5 +1,5 @@
 void max_ce7c30() {
-  int res = max(1, 1);
+  int res = 1;
 }
 
 struct tint_symbol {

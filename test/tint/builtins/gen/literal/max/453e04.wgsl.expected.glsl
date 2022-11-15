@@ -1,7 +1,7 @@
 #version 310 es
 
 void max_453e04() {
-  uvec4 res = max(uvec4(1u), uvec4(1u));
+  uvec4 res = uvec4(1u);
 }
 
 vec4 vertex_main() {
@@ -21,7 +21,7 @@ void main() {
 precision mediump float;
 
 void max_453e04() {
-  uvec4 res = max(uvec4(1u), uvec4(1u));
+  uvec4 res = uvec4(1u);
 }
 
 void fragment_main() {
@@ -35,7 +35,7 @@ void main() {
 #version 310 es
 
 void max_453e04() {
-  uvec4 res = max(uvec4(1u), uvec4(1u));
+  uvec4 res = uvec4(1u);
 }
 
 void compute_main() {

@@ -2,7 +2,7 @@
 
 using namespace metal;
 void min_93cfc4() {
-  float3 res = fmin(float3(1.0f), float3(1.0f));
+  float3 res = float3(1.0f);
 }
 
 struct tint_symbol {

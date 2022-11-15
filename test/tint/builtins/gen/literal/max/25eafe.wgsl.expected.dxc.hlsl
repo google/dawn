@@ -1,5 +1,5 @@
 void max_25eafe() {
-  int3 res = max((1).xxx, (1).xxx);
+  int3 res = (1).xxx;
 }
 
 struct tint_symbol {

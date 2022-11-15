@@ -1,5 +1,5 @@
 void max_85e6bc() {
-  int4 res = max((1).xxxx, (1).xxxx);
+  int4 res = (1).xxxx;
 }
 
 struct tint_symbol {

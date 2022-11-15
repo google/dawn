@@ -2119,6 +2119,30 @@ ConstEval::Result ConstEval::insertBits(const sem::Type* ty,
     return TransformElements(builder, ty, transform, args[0], args[1]);
 }
 
+ConstEval::Result ConstEval::max(const sem::Type* ty,
+                                 utils::VectorRef<const sem::Constant*> args,
+                                 const Source&) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        auto create = [&](auto e0, auto e1) {
+            return CreateElement(builder, c0->Type(), decltype(e0)(std::max(e0, e1)));
+        };
+        return Dispatch_fia_fiu32_f16(create, c0, c1);
+    };
+    return TransformElements(builder, ty, transform, args[0], args[1]);
+}
+
+ConstEval::Result ConstEval::min(const sem::Type* ty,
+                                 utils::VectorRef<const sem::Constant*> args,
+                                 const Source&) {
+    auto transform = [&](const sem::Constant* c0, const sem::Constant* c1) {
+        auto create = [&](auto e0, auto e1) {
+            return CreateElement(builder, c0->Type(), decltype(e0)(std::min(e0, e1)));
+        };
+        return Dispatch_fia_fiu32_f16(create, c0, c1);
+    };
+    return TransformElements(builder, ty, transform, args[0], args[1]);
+}
+
 ConstEval::Result ConstEval::pack2x16float(const sem::Type* ty,
                                            utils::VectorRef<const sem::Constant*> args,
                                            const Source& source) {

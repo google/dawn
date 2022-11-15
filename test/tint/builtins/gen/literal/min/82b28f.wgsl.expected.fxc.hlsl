@@ -1,5 +1,5 @@
 void min_82b28f() {
-  uint2 res = min((1u).xx, (1u).xx);
+  uint2 res = (1u).xx;
 }
 
 struct tint_symbol {

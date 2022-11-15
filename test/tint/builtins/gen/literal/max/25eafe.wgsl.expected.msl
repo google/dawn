@@ -2,7 +2,7 @@
 
 using namespace metal;
 void max_25eafe() {
-  int3 res = max(int3(1), int3(1));
+  int3 res = int3(1);
 }
 
 struct tint_symbol {

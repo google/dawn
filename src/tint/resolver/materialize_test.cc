@@ -472,8 +472,13 @@ constexpr Method kSwitchMethods[] = {
 constexpr Method kNoMaterializeMethods[] = {
     Method::kPhonyAssign,  //
     Method::kBinaryOp,
-    // TODO(crbug.com/tint/1504): Enable once "min" supports const evaluation
-    // Method::kBuiltinArg,
+};
+
+/// Methods that do not materialize
+constexpr Method kNoMaterializeScalarVectorMethods[] = {
+    Method::kPhonyAssign,  //
+    Method::kBinaryOp,
+    Method::kBuiltinArg,
 };
 INSTANTIATE_TEST_SUITE_P(
     MaterializeScalar,
@@ -697,6 +702,17 @@ INSTANTIATE_TEST_SUITE_P(NoMaterialize,
                                               Types<AFloatM, AFloatM>(1.0_a, 1.0_a),  //
                                           })));
 
+INSTANTIATE_TEST_SUITE_P(NoMaterializeScalarVector,
+                         MaterializeAbstractNumericToConcreteType,
+                         testing::Combine(testing::Values(Expectation::kNoMaterialize),
+                                          testing::ValuesIn(kNoMaterializeScalarVectorMethods),
+                                          testing::ValuesIn(std::vector<Data>{
+                                              Types<AInt, AInt>(1_a, 1_a),            //
+                                              Types<AIntV, AIntV>(1_a, 1_a),          //
+                                              Types<AFloat, AFloat>(1.0_a, 1.0_a),    //
+                                              Types<AFloatV, AFloatV>(1.0_a, 1.0_a),  //
+                                          })));
+
 INSTANTIATE_TEST_SUITE_P(InvalidConversion,
                          MaterializeAbstractNumericToConcreteType,
                          testing::Combine(testing::Values(Expectation::kInvalidConversion),
@@ -771,9 +787,6 @@ enum class Method {
     // let a = abstract_expr;
     kLet,
 
-    // min(abstract_expr, abstract_expr)
-    kBuiltinArg,
-
     // bitcast<f32>(abstract_expr)
     kBitcastF32Arg,
 
@@ -810,8 +823,6 @@ static std::ostream& operator<<(std::ostream& o, Method m) {
             return o << "var";
         case Method::kLet:
             return o << "let";
-        case Method::kBuiltinArg:
-            return o << "builtin-arg";
         case Method::kBitcastF32Arg:
             return o << "bitcast-f32-arg";
         case Method::kBitcastVec3F32Arg:
@@ -890,10 +901,6 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
             WrapInFunction(Decl(Let("a", abstract_expr())));
             break;
         }
-        case Method::kBuiltinArg: {
-            WrapInFunction(CallStmt(Call("min", abstract_expr(), abstract_expr())));
-            break;
-        }
         case Method::kBitcastF32Arg: {
             WrapInFunction(Bitcast<f32>(abstract_expr()));
             break;
@@ -949,17 +956,8 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
         }
         case Expectation::kInvalidConversion: {
             ASSERT_FALSE(r()->Resolve());
-            std::string expect;
-            switch (method) {
-                case Method::kBuiltinArg:
-                    expect = "error: no matching call to min(" + data.abstract_type_name + ", " +
-                             data.abstract_type_name + ")";
-                    break;
-                default:
-                    expect = "error: cannot convert value of type '" + data.abstract_type_name +
-                             "' to type '" + data.expected_type_name + "'";
-                    break;
-            }
+            std::string expect = "error: cannot convert value of type '" + data.abstract_type_name +
+                                 "' to type '" + data.expected_type_name + "'";
             EXPECT_THAT(r()->error(), testing::StartsWith(expect));
             break;
         }
@@ -977,16 +975,17 @@ TEST_P(MaterializeAbstractNumericToDefaultType, Test) {
 constexpr Method kScalarMethods[] = {
     Method::kLet,
     Method::kVar,
-    Method::kBuiltinArg,
     Method::kBitcastF32Arg,
     Method::kTintMaterializeBuiltin,
 };
 
 /// Methods that support vector materialization
 constexpr Method kVectorMethods[] = {
-    Method::kLet,          Method::kVar,
-    Method::kBuiltinArg,   Method::kBitcastVec3F32Arg,
-    Method::kRuntimeIndex, Method::kTintMaterializeBuiltin,
+    Method::kLet,
+    Method::kVar,
+    Method::kBitcastVec3F32Arg,
+    Method::kRuntimeIndex,
+    Method::kTintMaterializeBuiltin,
 };
 
 /// Methods that support matrix materialization

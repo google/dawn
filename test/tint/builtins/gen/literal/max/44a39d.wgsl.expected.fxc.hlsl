@@ -1,5 +1,5 @@
 void max_44a39d() {
-  float res = max(1.0f, 1.0f);
+  float res = 1.0f;
 }
 
 struct tint_symbol {
