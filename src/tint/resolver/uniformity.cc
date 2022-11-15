@@ -477,10 +477,9 @@ class UniformityGraph {
                 }
 
                 // Propagate all variables assignments to the containing scope if the behavior is
-                // either 'Next' or 'Fallthrough'.
+                // 'Next'.
                 auto& behaviors = sem_.Get(b)->Behaviors();
-                if (behaviors.Contains(sem::Behavior::kNext) ||
-                    behaviors.Contains(sem::Behavior::kFallthrough)) {
+                if (behaviors.Contains(sem::Behavior::kNext)) {
                     for (auto var : scoped_assignments) {
                         current_function_->variables.Set(var.key, var.value);
                     }
@@ -612,8 +611,6 @@ class UniformityGraph {
             },
 
             [&](const ast::DiscardStatement*) { return cf; },
-
-            [&](const ast::FallthroughStatement*) { return cf; },
 
             [&](const ast::ForLoopStatement* f) {
                 auto* sem_loop = sem_.Get(f);
@@ -937,46 +934,35 @@ class UniformityGraph {
                 info.type = "switch";
 
                 auto* cf_n = v;
-                bool previous_case_has_fallthrough = false;
                 for (auto* c : s->body) {
                     auto* sem_case = sem_.Get(c);
 
-                    if (previous_case_has_fallthrough) {
-                        cf_n = ProcessStatement(cf_n, c->body);
-                    } else {
-                        current_function_->variables.Push();
-                        cf_n = ProcessStatement(v, c->body);
-                    }
+                    current_function_->variables.Push();
+                    cf_n = ProcessStatement(v, c->body);
 
                     if (cf_end) {
                         cf_end->AddEdge(cf_n);
                     }
 
-                    bool has_fallthrough =
-                        sem_case->Behaviors().Contains(sem::Behavior::kFallthrough);
-                    if (!has_fallthrough) {
-                        if (sem_case->Behaviors().Contains(sem::Behavior::kNext)) {
-                            // Propagate variable values to the switch exit nodes.
-                            for (auto* var : current_function_->local_var_decls) {
-                                // Skip variables that were declared inside the switch.
-                                if (auto* lv = var->As<sem::LocalVariable>();
-                                    lv && lv->Statement()->FindFirstParent(
-                                              [&](auto* st) { return st == sem_switch; })) {
-                                    continue;
-                                }
-
-                                // Add an edge from the variable exit node to its new value.
-                                auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&]() {
-                                    auto name =
-                                        builder_->Symbols().NameFor(var->Declaration()->symbol);
-                                    return CreateNode(name + "_value_" + info.type + "_exit");
-                                });
-                                exit_node->AddEdge(current_function_->variables.Get(var));
+                    if (sem_case->Behaviors().Contains(sem::Behavior::kNext)) {
+                        // Propagate variable values to the switch exit nodes.
+                        for (auto* var : current_function_->local_var_decls) {
+                            // Skip variables that were declared inside the switch.
+                            if (auto* lv = var->As<sem::LocalVariable>();
+                                lv && lv->Statement()->FindFirstParent(
+                                          [&](auto* st) { return st == sem_switch; })) {
+                                continue;
                             }
+
+                            // Add an edge from the variable exit node to its new value.
+                            auto* exit_node = info.var_exit_nodes.GetOrCreate(var, [&]() {
+                                auto name = builder_->Symbols().NameFor(var->Declaration()->symbol);
+                                return CreateNode(name + "_value_" + info.type + "_exit");
+                            });
+                            exit_node->AddEdge(current_function_->variables.Get(var));
                         }
-                        current_function_->variables.Pop();
                     }
-                    previous_case_has_fallthrough = has_fallthrough;
+                    current_function_->variables.Pop();
                 }
 
                 // Update nodes for any variables assigned in the switch statement.

@@ -212,7 +212,6 @@ class Resolver {
     sem::Statement* CompoundAssignmentStatement(const ast::CompoundAssignmentStatement*);
     sem::Statement* ContinueStatement(const ast::ContinueStatement*);
     sem::Statement* DiscardStatement(const ast::DiscardStatement*);
-    sem::Statement* FallthroughStatement(const ast::FallthroughStatement*);
     sem::ForLoopStatement* ForLoopStatement(const ast::ForLoopStatement*);
     sem::WhileStatement* WhileStatement(const ast::WhileStatement*);
     sem::GlobalVariable* GlobalVariable(const ast::Variable*);

@@ -31,7 +31,6 @@
 #include "src/tint/ast/depth_texture.h"
 #include "src/tint/ast/disable_validation_attribute.h"
 #include "src/tint/ast/discard_statement.h"
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/if_statement.h"
@@ -1217,7 +1216,6 @@ sem::Statement* Resolver::Statement(const ast::Statement* stmt) {
         [&](const ast::CompoundAssignmentStatement* c) { return CompoundAssignmentStatement(c); },
         [&](const ast::ContinueStatement* c) { return ContinueStatement(c); },
         [&](const ast::DiscardStatement* d) { return DiscardStatement(d); },
-        [&](const ast::FallthroughStatement* f) { return FallthroughStatement(f); },
         [&](const ast::IncrementDecrementStatement* i) { return IncrementDecrementStatement(i); },
         [&](const ast::ReturnStatement* r) { return ReturnStatement(r); },
         [&](const ast::VariableDeclStatement* v) { return VariableDeclStatement(v); },
@@ -3146,7 +3144,7 @@ sem::SwitchStatement* Resolver::SwitchStatement(const ast::SwitchStatement* stmt
         if (behaviors.Contains(sem::Behavior::kBreak)) {
             behaviors.Add(sem::Behavior::kNext);
         }
-        behaviors.Remove(sem::Behavior::kBreak, sem::Behavior::kFallthrough);
+        behaviors.Remove(sem::Behavior::kBreak);
 
         return validator_.SwitchStatement(stmt);
     });
@@ -3305,16 +3303,6 @@ sem::Statement* Resolver::DiscardStatement(const ast::DiscardStatement* stmt) {
     return StatementScope(stmt, sem, [&] {
         current_function_->SetDiscardStatement(sem);
         return true;
-    });
-}
-
-sem::Statement* Resolver::FallthroughStatement(const ast::FallthroughStatement* stmt) {
-    auto* sem =
-        builder_->create<sem::Statement>(stmt, current_compound_statement_, current_function_);
-    return StatementScope(stmt, sem, [&] {
-        sem->Behaviors() = sem::Behavior::kFallthrough;
-
-        return validator_.FallthroughStatement(sem);
     });
 }
 

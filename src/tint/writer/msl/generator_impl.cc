@@ -25,7 +25,6 @@
 #include "src/tint/ast/bool_literal_expression.h"
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/disable_validation_attribute.h"
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/float_literal_expression.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/interpolate_attribute.h"
@@ -85,8 +84,8 @@
 namespace tint::writer::msl {
 namespace {
 
-bool last_is_break_or_fallthrough(const ast::BlockStatement* stmts) {
-    return IsAnyOf<ast::BreakStatement, ast::FallthroughStatement>(stmts->Last());
+bool last_is_break(const ast::BlockStatement* stmts) {
+    return IsAnyOf<ast::BreakStatement>(stmts->Last());
 }
 
 void PrintF32(std::ostream& out, float value) {
@@ -1587,7 +1586,7 @@ bool GeneratorImpl::EmitCase(const ast::CaseStatement* stmt) {
             }
         }
 
-        if (!last_is_break_or_fallthrough(stmt->body)) {
+        if (!last_is_break(stmt->body)) {
             line() << "break;";
         }
     }
@@ -2425,10 +2424,6 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
         },
         [&](const ast::DiscardStatement* d) {  //
             return EmitDiscard(d);
-        },
-        [&](const ast::FallthroughStatement*) {  //
-            line() << "/* fallthrough */";
-            return true;
         },
         [&](const ast::IfStatement* i) {  //
             return EmitIf(i);

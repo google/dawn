@@ -47,7 +47,6 @@
 #include "src/tint/ast/external_texture.h"
 #include "src/tint/ast/f16.h"
 #include "src/tint/ast/f32.h"
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/float_literal_expression.h"
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/i32.h"
@@ -2931,17 +2930,6 @@ class ProgramBuilder {
     /// Convenience function that creates a default case selector
     /// @returns the selector pointer
     const ast::CaseSelector* DefaultCaseSelector() { return create<ast::CaseSelector>(nullptr); }
-
-    /// Creates an ast::FallthroughStatement
-    /// @param source the source information
-    /// @returns the fallthrough statement pointer
-    const ast::FallthroughStatement* Fallthrough(const Source& source) {
-        return create<ast::FallthroughStatement>(source);
-    }
-
-    /// Creates an ast::FallthroughStatement
-    /// @returns the fallthrough statement pointer
-    const ast::FallthroughStatement* Fallthrough() { return create<ast::FallthroughStatement>(); }
 
     /// Creates an ast::BuiltinAttribute
     /// @param source the source information

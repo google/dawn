@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/writer/spirv/spv_dump.h"
 #include "src/tint/writer/spirv/test_helper.h"
 
@@ -328,69 +327,6 @@ OpFunctionEnd
 )");
 }
 
-TEST_F(BuilderTest, Switch_CaseWithFallthrough) {
-    // switch(a) {
-    //   case 1i:
-    //      v = 1i;
-    //      fallthrough;
-    //   case 2i:
-    //      v = 2i;
-    //   default: {}
-    //      v = 3i;
-    //  }
-
-    auto* v = GlobalVar("v", ty.i32(), ast::AddressSpace::kPrivate);
-    auto* a = GlobalVar("a", ty.i32(), ast::AddressSpace::kPrivate);
-
-    auto* func = Func("a_func", utils::Empty, ty.void_(),
-                      utils::Vector{
-                          Switch(Expr("a"),                                     //
-                                 Case(CaseSelector(1_i),                        //
-                                      Block(Assign("v", 1_i), Fallthrough())),  //
-                                 Case(CaseSelector(2_i),                        //
-                                      Block(Assign("v", 2_i))),                 //
-                                 DefaultCase(Block(Assign("v", 3_i)))),
-                      });
-
-    spirv::Builder& b = Build();
-
-    ASSERT_TRUE(b.GenerateGlobalVariable(v)) << b.error();
-    ASSERT_TRUE(b.GenerateGlobalVariable(a)) << b.error();
-    ASSERT_TRUE(b.GenerateFunction(func)) << b.error();
-
-    EXPECT_EQ(DumpBuilder(b), R"(OpName %1 "v"
-OpName %5 "a"
-OpName %8 "a_func"
-%3 = OpTypeInt 32 1
-%2 = OpTypePointer Private %3
-%4 = OpConstantNull %3
-%1 = OpVariable %2 Private %4
-%5 = OpVariable %2 Private %4
-%7 = OpTypeVoid
-%6 = OpTypeFunction %7
-%15 = OpConstant %3 1
-%16 = OpConstant %3 2
-%17 = OpConstant %3 3
-%8 = OpFunction %7 None %6
-%9 = OpLabel
-%11 = OpLoad %3 %5
-OpSelectionMerge %10 None
-OpSwitch %11 %12 1 %13 2 %14
-%13 = OpLabel
-OpStore %1 %15
-OpBranch %14
-%14 = OpLabel
-OpStore %1 %16
-OpBranch %10
-%12 = OpLabel
-OpStore %1 %17
-OpBranch %10
-%10 = OpLabel
-OpReturn
-OpFunctionEnd
-)");
-}
-
 TEST_F(BuilderTest, Switch_WithNestedBreak) {
     // switch (a) {
     //   case 1:
@@ -460,7 +396,7 @@ TEST_F(BuilderTest, Switch_AllReturn) {
     //     return 1i;
     //   }
     //   case 2i: {
-    //     fallthrough;
+    //     return 1i;
     //   }
     //   default: {
     //     return 3i;
@@ -469,9 +405,9 @@ TEST_F(BuilderTest, Switch_AllReturn) {
 
     auto* fn = Func("f", utils::Empty, ty.i32(),
                     utils::Vector{
-                        Switch(1_i,                                            //
-                               Case(CaseSelector(1_i), Block(Return(1_i))),    //
-                               Case(CaseSelector(2_i), Block(Fallthrough())),  //
+                        Switch(1_i,                                          //
+                               Case(CaseSelector(1_i), Block(Return(1_i))),  //
+                               Case(CaseSelector(2_i), Block(Return(1_i))),  //
                                DefaultCase(Block(Return(3_i)))),
                     });
 
@@ -491,7 +427,7 @@ OpSwitch %6 %7 1 %8 2 %9
 %8 = OpLabel
 OpReturnValue %6
 %9 = OpLabel
-OpBranch %7
+OpReturnValue %6
 %7 = OpLabel
 OpReturnValue %10
 %5 = OpLabel

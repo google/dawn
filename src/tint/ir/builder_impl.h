@@ -134,10 +134,6 @@ class BuilderImpl {
     /// @returns true if successful, false otherwise.
     bool EmitBreakIf(const ast::BreakIfStatement* stmt);
 
-    /// Emits a fallthrough statement
-    /// @returns true if successful, false otherwise
-    bool EmitFallthrough();
-
     /// Retrieve the IR Flow node for a given AST node.
     /// @param n the node to lookup
     /// @returns the FlowNode for the given ast::Node or nullptr if it doesn't exist.
@@ -165,9 +161,6 @@ class BuilderImpl {
 
     Block* current_flow_block_ = nullptr;
     Function* current_function_ = nullptr;
-
-    // TODO(crbug.com/tint/1644): Remove this when fallthrough is removed.
-    Block* fallthrough_target_ = nullptr;
 
     /// Map from ast nodes to flow nodes, used to retrieve the flow node for a given AST node.
     /// Used for testing purposes.

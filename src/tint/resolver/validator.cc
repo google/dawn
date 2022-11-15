@@ -28,7 +28,6 @@
 #include "src/tint/ast/depth_texture.h"
 #include "src/tint/ast/disable_validation_attribute.h"
 #include "src/tint/ast/discard_statement.h"
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/if_statement.h"
@@ -1536,26 +1535,6 @@ bool Validator::Call(const sem::Call* call, sem::Statement* current_statement) c
     }
 
     return true;
-}
-
-bool Validator::FallthroughStatement(const sem::Statement* stmt) const {
-    if (auto* block = As<sem::BlockStatement>(stmt->Parent())) {
-        if (auto* c = As<sem::CaseStatement>(block->Parent())) {
-            if (block->Declaration()->Last() == stmt->Declaration()) {
-                if (auto* s = As<sem::SwitchStatement>(c->Parent())) {
-                    if (c->Declaration() != s->Declaration()->body.Back()) {
-                        return true;
-                    }
-                    AddError("a fallthrough statement must not be used in the last switch case",
-                             stmt->Declaration()->source);
-                    return false;
-                }
-            }
-        }
-    }
-    AddError("fallthrough must only be used as the last statement of a case block",
-             stmt->Declaration()->source);
-    return false;
 }
 
 bool Validator::LoopStatement(const sem::LoopStatement* stmt) const {

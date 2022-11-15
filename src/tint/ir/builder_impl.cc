@@ -19,7 +19,6 @@
 #include "src/tint/ast/break_if_statement.h"
 #include "src/tint/ast/break_statement.h"
 #include "src/tint/ast/continue_statement.h"
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/function.h"
 #include "src/tint/ast/if_statement.h"
@@ -210,7 +209,6 @@ bool BuilderImpl::EmitStatement(const ast::Statement* stmt) {
         //        [&](const ast::CallStatement* c) { },
         [&](const ast::ContinueStatement* c) { return EmitContinue(c); },
         //        [&](const ast::DiscardStatement* d) { },
-        [&](const ast::FallthroughStatement*) { return EmitFallthrough(); },
         [&](const ast::IfStatement* i) { return EmitIf(i); },
         [&](const ast::LoopStatement* l) { return EmitLoop(l); },
         [&](const ast::ForLoopStatement* l) { return EmitForLoop(l); },
@@ -415,25 +413,12 @@ bool BuilderImpl::EmitSwitch(const ast::SwitchStatement* stmt) {
     {
         FlowStackScope scope(this, switch_node);
 
-        // TODO(crbug.com/tint/1644): This can be simplifed when fallthrough is removed, a single
-        // loop can be used to iterate each body statement and emit for the case. Two loops are
-        // needed in order to have the target for a fallthrough.
         for (const auto* c : stmt->body) {
-            builder_.CreateCase(switch_node, c->selectors);
-        }
-
-        for (size_t i = 0; i < stmt->body.Length(); ++i) {
-            current_flow_block_ = switch_node->cases[i].start_target;
-            if (i < (stmt->body.Length() - 1)) {
-                fallthrough_target_ = switch_node->cases[i + 1].start_target;
-            }
-
-            if (!EmitStatement(stmt->body[i]->body)) {
+            current_flow_block_ = builder_.CreateCase(switch_node, c->selectors);
+            if (!EmitStatement(c->body)) {
                 return false;
             }
             BranchToIfNeeded(switch_node->merge_target);
-
-            fallthrough_target_ = nullptr;
         }
     }
     current_flow_block_ = nullptr;
@@ -511,12 +496,6 @@ bool BuilderImpl::EmitBreakIf(const ast::BreakIfStatement* stmt) {
     // break then we go back to the start of the loop.
     BranchTo(loop->start_target);
 
-    return true;
-}
-
-bool BuilderImpl::EmitFallthrough() {
-    TINT_ASSERT(IR, fallthrough_target_ != nullptr);
-    BranchTo(fallthrough_target_);
     return true;
 }
 

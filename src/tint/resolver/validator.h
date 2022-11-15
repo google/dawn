@@ -223,11 +223,6 @@ class Validator {
     /// @returns true on success, false otherwise
     bool WhileStatement(const sem::WhileStatement* stmt) const;
 
-    /// Validates a fallthrough statement
-    /// @param stmt the fallthrough to validate
-    /// @returns true on success, false otherwise
-    bool FallthroughStatement(const sem::Statement* stmt) const;
-
     /// Validates a function
     /// @param func the function to validate
     /// @param stage the current pipeline stage

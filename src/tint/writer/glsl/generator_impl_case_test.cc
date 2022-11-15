@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/writer/glsl/test_helper.h"
 
 using namespace tint::number_suffixes;  // NOLINT
@@ -49,22 +48,6 @@ TEST_F(GlslGeneratorImplTest_Case, Emit_Case_BreaksByDefault) {
     ASSERT_TRUE(gen.EmitCase(s->body[0])) << gen.error();
     EXPECT_EQ(gen.result(), R"(  case 5: {
     break;
-  }
-)");
-}
-
-TEST_F(GlslGeneratorImplTest_Case, Emit_Case_WithFallthrough) {
-    auto* s = Switch(1_i, Case(CaseSelector(5_i), Block(create<ast::FallthroughStatement>())),
-                     DefaultCase());
-    WrapInFunction(s);
-
-    GeneratorImpl& gen = Build();
-
-    gen.increment_indent();
-
-    ASSERT_TRUE(gen.EmitCase(s->body[0])) << gen.error();
-    EXPECT_EQ(gen.result(), R"(  case 5: {
-    /* fallthrough */
   }
 )");
 }

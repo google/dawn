@@ -35,7 +35,6 @@
 #include "src/tint/ast/external_texture.h"
 #include "src/tint/ast/f16.h"
 #include "src/tint/ast/f32.h"
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/for_loop_statement.h"
 #include "src/tint/ast/i32.h"
 #include "src/tint/ast/id_attribute.h"
@@ -320,7 +319,7 @@ class DependencyScanner {
             [&](const ast::StaticAssert* assertion) { TraverseExpression(assertion->condition); },
             [&](Default) {
                 if (!stmt->IsAnyOf<ast::BreakStatement, ast::ContinueStatement,
-                                   ast::DiscardStatement, ast::FallthroughStatement>()) {
+                                   ast::DiscardStatement>()) {
                     UnhandledNode(diagnostics_, stmt);
                 }
             });

@@ -970,7 +970,6 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
         [&](const ast::CompoundAssignmentStatement* c) { return EmitCompoundAssign(c); },
         [&](const ast::ContinueStatement* c) { return EmitContinue(c); },
         [&](const ast::DiscardStatement* d) { return EmitDiscard(d); },
-        [&](const ast::FallthroughStatement* f) { return EmitFallthrough(f); },
         [&](const ast::IfStatement* i) { return EmitIf(i); },
         [&](const ast::IncrementDecrementStatement* l) { return EmitIncrementDecrement(l); },
         [&](const ast::LoopStatement* l) { return EmitLoop(l); },
@@ -1090,11 +1089,6 @@ bool GeneratorImpl::EmitCompoundAssign(const ast::CompoundAssignmentStatement* s
 
 bool GeneratorImpl::EmitContinue(const ast::ContinueStatement*) {
     line() << "continue;";
-    return true;
-}
-
-bool GeneratorImpl::EmitFallthrough(const ast::FallthroughStatement*) {
-    line() << "fallthrough;";
     return true;
 }
 

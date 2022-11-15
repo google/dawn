@@ -139,8 +139,6 @@ list(APPEND TINT_LIB_SRCS
   ast/f16.h
   ast/f32.cc
   ast/f32.h
-  ast/fallthrough_statement.cc
-  ast/fallthrough_statement.h
   ast/float_literal_expression.cc
   ast/float_literal_expression.h
   ast/for_loop_statement.cc
@@ -786,7 +784,6 @@ if(TINT_BUILD_TESTS)
     ast/external_texture_test.cc
     ast/f16_test.cc
     ast/f32_test.cc
-    ast/fallthrough_statement_test.cc
     ast/float_literal_expression_test.cc
     ast/for_loop_statement_test.cc
     ast/function_test.cc
@@ -1150,7 +1147,6 @@ if(TINT_BUILD_TESTS)
       writer/wgsl/generator_impl_continue_test.cc
       writer/wgsl/generator_impl_discard_test.cc
       writer/wgsl/generator_impl_enable_test.cc
-      writer/wgsl/generator_impl_fallthrough_test.cc
       writer/wgsl/generator_impl_function_test.cc
       writer/wgsl/generator_impl_global_decl_test.cc
       writer/wgsl/generator_impl_identifier_test.cc

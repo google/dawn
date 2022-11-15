@@ -19,7 +19,6 @@
 
 #include "spirv/unified1/GLSL.std.450.h"
 #include "src/tint/ast/call_statement.h"
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/internal_attribute.h"
 #include "src/tint/ast/traverse_expressions.h"
@@ -84,10 +83,6 @@ uint32_t pipeline_stage_to_execution_model(ast::PipelineStage stage) {
             break;
     }
     return model;
-}
-
-bool LastIsFallthrough(const ast::BlockStatement* stmts) {
-    return !stmts->Empty() && stmts->Last()->Is<ast::FallthroughStatement>();
 }
 
 /// Returns the matrix type that is `type` or that is wrapped by
@@ -3515,9 +3510,7 @@ bool Builder::GenerateSwitchStatement(const ast::SwitchStatement* stmt) {
     bool generated_default = false;
     auto& body = stmt->body;
     // We output the case statements in order they were entered in the original
-    // source. Each fallthrough goes to the next case entry, so is a forward
-    // branch, otherwise the branch is to the merge block which comes after
-    // the switch statement.
+    // source. The branch is to the merge block which comes after the switch statement.
     for (uint32_t i = 0; i < body.Length(); i++) {
         auto* item = body[i];
 
@@ -3531,17 +3524,7 @@ bool Builder::GenerateSwitchStatement(const ast::SwitchStatement* stmt) {
         if (!GenerateBlockStatement(item->body)) {
             return false;
         }
-
-        if (LastIsFallthrough(item->body)) {
-            if (i == (body.Length() - 1)) {
-                // This case is caught by Resolver validation
-                TINT_UNREACHABLE(Writer, builder_.Diagnostics());
-                return false;
-            }
-            if (!push_function_inst(spv::Op::OpBranch, {Operand(case_ids[i + 1])})) {
-                return false;
-            }
-        } else if (InsideBasicBlock()) {
+        if (InsideBasicBlock()) {
             if (!push_function_inst(spv::Op::OpBranch, {Operand(merge_block_id)})) {
                 return false;
             }
@@ -3671,10 +3654,6 @@ bool Builder::GenerateStatement(const ast::Statement* stmt) {
         [&](const ast::CallStatement* c) { return GenerateCallExpression(c->expr) != 0; },
         [&](const ast::ContinueStatement* c) { return GenerateContinueStatement(c); },
         [&](const ast::DiscardStatement* d) { return GenerateDiscardStatement(d); },
-        [&](const ast::FallthroughStatement*) {
-            // Do nothing here, the fallthrough gets handled by the switch code.
-            return true;
-        },
         [&](const ast::IfStatement* i) { return GenerateIfStatement(i); },
         [&](const ast::LoopStatement* l) { return GenerateLoopStatement(l); },
         [&](const ast::ReturnStatement* r) { return GenerateReturnStatement(r); },

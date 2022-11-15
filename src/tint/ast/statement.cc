@@ -19,7 +19,6 @@
 #include "src/tint/ast/call_statement.h"
 #include "src/tint/ast/continue_statement.h"
 #include "src/tint/ast/discard_statement.h"
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/if_statement.h"
 #include "src/tint/ast/loop_statement.h"
 #include "src/tint/ast/return_statement.h"
@@ -57,9 +56,6 @@ const char* Statement::Name() const {
     }
     if (Is<DiscardStatement>()) {
         return "discard statement";
-    }
-    if (Is<FallthroughStatement>()) {
-        return "fallthrough statement";
     }
     if (Is<IfStatement>()) {
         return "if statement";

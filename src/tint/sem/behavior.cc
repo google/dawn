@@ -24,8 +24,6 @@ std::ostream& operator<<(std::ostream& out, Behavior behavior) {
             return out << "Break";
         case Behavior::kContinue:
             return out << "Continue";
-        case Behavior::kFallthrough:
-            return out << "Fallthrough";
         case Behavior::kNext:
             return out << "Next";
     }

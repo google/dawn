@@ -23,7 +23,6 @@
 #include <vector>
 
 #include "src/tint/ast/call_statement.h"
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/id_attribute.h"
 #include "src/tint/ast/internal_attribute.h"
 #include "src/tint/ast/interpolate_attribute.h"
@@ -2506,18 +2505,7 @@ bool GeneratorImpl::EmitCase(const ast::SwitchStatement* s, size_t case_idx) {
         return false;
     }
 
-    // Inline all fallthrough case statements. FXC cannot handle fallthroughs.
-    while (tint::Is<ast::FallthroughStatement>(stmt->body->Last())) {
-        case_idx++;
-        stmt = s->body[case_idx];
-        // Generate each fallthrough case statement in a new block. This is done to
-        // prevent symbol collision of variables declared in these cases statements.
-        if (!EmitBlock(stmt->body)) {
-            return false;
-        }
-    }
-
-    if (!tint::IsAnyOf<ast::BreakStatement, ast::FallthroughStatement>(stmt->body->Last())) {
+    if (!tint::IsAnyOf<ast::BreakStatement>(stmt->body->Last())) {
         line() << "break;";
     }
 
@@ -3533,10 +3521,6 @@ bool GeneratorImpl::EmitStatement(const ast::Statement* stmt) {
         },
         [&](const ast::DiscardStatement* d) {  //
             return EmitDiscard(d);
-        },
-        [&](const ast::FallthroughStatement*) {  //
-            line() << "/* fallthrough */";
-            return true;
         },
         [&](const ast::IfStatement* i) {  //
             return EmitIf(i);

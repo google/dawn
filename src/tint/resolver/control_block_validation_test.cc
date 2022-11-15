@@ -14,7 +14,6 @@
 
 #include "src/tint/ast/break_statement.h"
 #include "src/tint/ast/continue_statement.h"
-#include "src/tint/ast/fallthrough_statement.h"
 #include "src/tint/ast/switch_statement.h"
 #include "src/tint/resolver/resolver_test_helper.h"
 
@@ -376,24 +375,6 @@ TEST_F(ResolverControlBlockValidationTest, NonUniqueCaseSelectorValueSint_Fail) 
     EXPECT_EQ(r()->error(),
               "56:78 error: duplicate switch case '-10'\n"
               "12:34 note: previous case declared here");
-}
-
-TEST_F(ResolverControlBlockValidationTest, LastClauseLastStatementIsFallthrough_Fail) {
-    // var a : i32 = 2;
-    // switch (a) {
-    //   default: { fallthrough; }
-    // }
-    auto* var = Var("a", ty.i32(), Expr(2_i));
-    auto* fallthrough = create<ast::FallthroughStatement>(Source{{12, 34}});
-    auto* block = Block(Decl(var),   //
-                        Switch("a",  //
-                               DefaultCase(Block(fallthrough))));
-    WrapInFunction(block);
-
-    EXPECT_FALSE(r()->Resolve());
-    EXPECT_EQ(r()->error(),
-              "12:34 error: a fallthrough statement must not be used in the last "
-              "switch case");
 }
 
 TEST_F(ResolverControlBlockValidationTest, SwitchCase_Pass) {
